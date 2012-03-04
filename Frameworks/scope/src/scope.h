@@ -6,6 +6,9 @@
 
 namespace scope
 {
+	namespace compile {
+		template<typename T> class compiled_t;
+	}
 	namespace types
 	{
 		struct path_t;
@@ -80,6 +83,7 @@ namespace scope
 		void setup (std::string const& str);
 
 		friend std::string to_s (selector_t const& s);
+		template<typename T> friend const compile::compiled_t<T> build (const std::vector<T> const& list); 
 		types::selector_ptr selector;
 	};
 
