@@ -1,0 +1,1677 @@
+{
+    author = "Thomas Aylott";
+    comment = "Thomas Aylott \U32b7 subtleGradient.com";
+    name = "Brilliance Black";
+    settings =     (
+                {
+            settings =             {
+                background = "#0D0D0DFA";
+                caret = "#3333FF";
+                foreground = "#EEEEEE";
+                invisibles = "#CCCCCC1A";
+                lineHighlight = "#00008033";
+                selection = "#0010B499";
+            };
+        },
+                {
+            name = "Thomas Aylott \U32b7";
+            scope = "meta.thomas_aylott";
+            settings =             {
+                background = "#FFFFFF";
+                fontStyle = bold;
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "subtleGradient.com";
+            scope = "meta.subtlegradient";
+            settings =             {
+                background = "#FFFFFF";
+                fontStyle = underline;
+                foreground = "#555555";
+            };
+        },
+                {
+            name = "~ String";
+            scope = "string -meta.tag -meta.doctype -string.regexp -string.literal -string.interpolated -string.quoted.literal -string.unquoted, variable.parameter.misc.css, text string source string, string.unquoted string, string.regexp string, string.interpolated string, meta.tag source string";
+            settings =             {
+                background = "#803D0033";
+                foreground = "#FFFC80";
+            };
+        },
+                {
+            name = "~ String Punctuation";
+            scope = "punctuation.definition.string -meta.tag";
+            settings =             {
+                foreground = "#803D00";
+            };
+        },
+                {
+            name = "~ String Punctuation II";
+            scope = "string.regexp punctuation.definition.string, string.quoted.literal punctuation.definition.string, string.quoted.double.ruby.mod punctuation.definition.string";
+            settings =             {
+                foreground = "#FFF80033";
+            };
+        },
+                {
+            name = "~ String Literal";
+            scope = "string.quoted.literal, string.quoted.double.ruby.mod";
+            settings =             {
+                background = "#43800033";
+                foreground = "#FFF800";
+            };
+        },
+                {
+            name = "~ String Unquoted";
+            scope = "string.unquoted -string.unquoted.embedded -(meta.tag string), string.quoted.double.multiline, meta.scope.heredoc";
+            settings =             {
+                foreground = "#FFBC80";
+            };
+        },
+                {
+            name = "~ String Interpolated";
+            scope = "string.interpolated";
+            settings =             {
+                background = "#1A1A1A";
+                foreground = "#FFFC80";
+            };
+        },
+                {
+            name = "~ String RegEx";
+            scope = "string.regexp";
+            settings =             {
+                background = "#43800033";
+                foreground = "#FFF800";
+            };
+        },
+                {
+            name = "~ String RegEx Group 1";
+            scope = "string.regexp.group";
+            settings =             {
+                background = "#43800033";
+            };
+        },
+                {
+            name = "~ String RegEx Group 2";
+            scope = "string.regexp.group string.regexp.group ";
+            settings =             {
+                background = "#43800033";
+                foreground = "#FFFFFF66";
+            };
+        },
+                {
+            name = "~ String RegEx Group 3";
+            scope = "string.regexp.group string.regexp.group string.regexp.group ";
+            settings =             {
+                background = "#43800033";
+                foreground = "#FFFFFF66";
+            };
+        },
+                {
+            name = "~ String RegEx Group 4";
+            scope = "string.regexp.group string.regexp.group string.regexp.group string.regexp.group ";
+            settings =             {
+                background = "#43800033";
+                foreground = "#FFFFFF66";
+            };
+        },
+                {
+            name = "~ String RegEx Character-Class";
+            scope = "string.regexp.character-class";
+            settings =             {
+                background = "#43800033";
+                foreground = "#86FF00";
+            };
+        },
+                {
+            name = "~ String RegEx Arbitrary-Repitition";
+            scope = "string.regexp.arbitrary-repitition";
+            settings =             {
+                background = "#43800033";
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "~ String RegEx Definition Keyword";
+            scope = "string.regexp punctuation.definition.string keyword.other";
+            settings =             {
+                fontStyle = "";
+                foreground = "#803D00";
+            };
+        },
+                {
+            name = "~ Meta Group Assertion Regexp ";
+            scope = "meta.group.assertion.regexp ";
+            settings =             {
+                background = "#0086FF33";
+            };
+        },
+                {
+            name = "~ Meta Assertion";
+            scope = "meta.assertion, meta.group.assertion keyword.control.group.regexp, meta.group.assertion punctuation.definition.group";
+            settings =             {
+                foreground = "#0086FF";
+            };
+        },
+                {
+            name = "~ Number";
+            scope = "constant.numeric";
+            settings =             {
+                foreground = "#C6FF00";
+            };
+        },
+                {
+            name = "~ Character constant";
+            scope = "constant.character";
+            settings =             {
+                foreground = "#86FF00";
+            };
+        },
+                {
+            name = "~ Built-in constant";
+            scope = "constant.language, keyword.other.unit, constant.other.java, constant.other.unit";
+            settings =             {
+                foreground = "#07FF00";
+            };
+        },
+                {
+            name = "~ Built-in constant+";
+            scope = "constant.language.pseudo-variable";
+            settings =             {
+                background = "#04800033";
+                foreground = "#07FF00";
+            };
+        },
+                {
+            name = "~ User-defined constant";
+            scope = "constant.other, constant.block";
+            settings =             {
+                foreground = "#00FF79";
+            };
+        },
+                {
+            name = "~ Library constant";
+            scope = "support.constant, constant.name";
+            settings =             {
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "\U221a pre-defined variable";
+            scope = "variable.other.readwrite.global.pre-defined, variable.language";
+            settings =             {
+                background = "#00807C33";
+                foreground = "#00FF79";
+            };
+        },
+                {
+            name = "\U221a Constant Variable";
+            scope = "variable.other.constant";
+            settings =             {
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "\U221a Library variable";
+            scope = "support.variable";
+            settings =             {
+                background = "#00807C33";
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "\U221a global Variable";
+            scope = "variable.other.readwrite.global";
+            settings =             {
+                background = "#00438033";
+                foreground = "#00807C";
+            };
+        },
+                {
+            name = "\U221a Variable";
+            scope = "variable.other, variable.js, punctuation.separator.variable";
+            settings =             {
+                foreground = "#31A6FF";
+            };
+        },
+                {
+            name = "\U221a class Variable";
+            scope = "variable.other.readwrite.class";
+            settings =             {
+                background = "#0008FF33";
+                foreground = "#0086FF";
+            };
+        },
+                {
+            name = "\U221a instance Variable";
+            scope = "variable.other.readwrite.instance";
+            settings =             {
+                foreground = "#406180";
+            };
+        },
+                {
+            name = "\U221a Normal Variables";
+            scope = "variable.other.php, variable.other.normal";
+            settings =             {
+                foreground = "#406180";
+            };
+        },
+                {
+            name = "\U221a Variable Punctuation";
+            scope = "punctuation.definition -meta.tag, punctuation.separator.variable";
+            settings =             {
+                foreground = "#00000080";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "\U00a2 Storage";
+            scope = "storage -storage.modifier";
+            settings =             {
+                foreground = "#7E0080";
+            };
+        },
+                {
+            name = "\U00a2 Entity Name Preprocessor";
+            scope = "other.preprocessor, entity.name.preprocessor";
+            settings =             {
+                background = "#803D0033";
+            };
+        },
+                {
+            name = "~ variable.language.this.js.prototype";
+            scope = "variable.language.this.js";
+            settings =             {
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "\U00a2 Storage Modifier";
+            scope = "storage.modifier";
+            settings =             {
+                foreground = "#803D00";
+            };
+        },
+                {
+            name = "\U00a2 Class name";
+            scope = "entity.name.class, entity.name.type.class, entity.name.type.module";
+            settings =             {
+                foreground = "#FF0000";
+            };
+        },
+                {
+            name = "\U00a2 Class";
+            scope = "meta.class -meta.class.instance -declaration.class -meta.definition.class -declaration.module meta.class.actionscript";
+            settings =             {
+                background = "#87000033";
+                foreground = "#870000";
+            };
+        },
+                {
+            name = "\U00a2 Library class/type";
+            scope = "support.type, support.class";
+            settings =             {
+                background = "#87000033";
+                foreground = "#FF0000";
+            };
+        },
+                {
+            name = "\U00a2 Instance";
+            scope = "entity.name.instance, entity.name.type.instance";
+            settings =             {
+                foreground = "#FF3D44";
+            };
+        },
+                {
+            name = "\U00a2 Instance.constructor";
+            scope = "meta.class.instance.constructor";
+            settings =             {
+                background = "#831E5133";
+            };
+        },
+                {
+            name = "\U00a2 Inherited class";
+            scope = "entity.other.inherited-class, entity.name.module";
+            settings =             {
+                background = "#80000433";
+                foreground = "#FF0086";
+            };
+        },
+                {
+            name = "\U00a2 Class Method";
+            scope = "meta.definition.method";
+            settings =             {
+                foreground = "#FF0086";
+            };
+        },
+                {
+            name = "\U00a2 Function Declaration";
+            scope = "meta.function, meta.property.function, declaration.function";
+            settings =             {
+            };
+        },
+                {
+            name = "\U00a2 Function Declaration Name";
+            scope = "entity.name.function, entity.name.preprocessor";
+            settings =             {
+                foreground = "#FF0086";
+            };
+        },
+                {
+            name = "\U00a2 Function Declaration Parameters";
+            scope = "variable.parameter.function";
+            settings =             {
+                foreground = "#9799FF";
+            };
+        },
+                {
+            name = "\U00a2 Function Declaration Parameters";
+            scope = "variable.parameter -variable.parameter.misc.css, meta.definition.method  meta.definition.param-list, meta.function.method.with-arguments variable.parameter.function";
+            settings =             {
+                foreground = "#9799FF";
+            };
+        },
+                {
+            name = "\U00a2 Function Declaration Parameters Punctuation";
+            scope = "punctuation.definition.parameters, variable.parameter.function punctuation.separator.object";
+            settings =             {
+                foreground = "#800004";
+            };
+        },
+                {
+            name = "\v\v\U2122 Function Call";
+            scope = "keyword.other.special-method, meta.function-call entity.name.function -(meta.function-call meta.function), support.function - variable";
+            settings =             {
+                foreground = "#782EC1";
+            };
+        },
+                {
+            name = "\v\v\U2122 Library Function Call";
+            scope = "meta.function-call support.function - variable";
+            settings =             {
+                fontStyle = "";
+                foreground = "#9D3EFF";
+            };
+        },
+                {
+            name = "\U2122 Library Function Name";
+            scope = "support.function";
+            settings =             {
+                background = "#603F8033";
+                foreground = "#603F80";
+            };
+        },
+                {
+            name = "\v\v\U2122 Function Call Arguments Punctuation";
+            scope = "punctuation.section.function, meta.brace.curly.function, meta.function-call punctuation.section.scope.ruby, meta.function-call punctuation.separator.object";
+            settings =             {
+                fontStyle = "";
+                foreground = "#BC80FF";
+            };
+        },
+                {
+            name = "\U2122 Function Punctuation";
+            scope = "meta.group.braces.round punctuation.section.scope, \nmeta.group.braces.round meta.delimiter.object.comma, \nmeta.group.braces.curly.function meta.delimiter.object.comma, \nmeta.brace.round";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#BC80FF";
+            };
+        },
+                {
+            name = "\U2122 Function Call Without Arguments";
+            scope = "meta.function-call.method.without-arguments, meta.function-call.method.without-arguments entity.name.function";
+            settings =             {
+                foreground = "#A88FC0";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "\v\v\U2122 Keyword Control";
+            scope = "keyword.control";
+            settings =             {
+                foreground = "#F800FF";
+            };
+        },
+                {
+            name = "\v\v\U2122 Keyword";
+            scope = keyword;
+            settings =             {
+            };
+        },
+                {
+            name = "\v\v\U2122 Keyword other";
+            scope = "keyword.other";
+            settings =             {
+                foreground = "#7900FF";
+            };
+        },
+                {
+            name = "\U2122 Regex Keyword";
+            scope = "source.regexp keyword.operator";
+            settings =             {
+            };
+        },
+                {
+            name = "\v\v\U2122 Keyword Operator";
+            scope = "keyword.operator, declaration.function.operator, meta.preprocessor.c.include, punctuation.separator.operator";
+            settings =             {
+                foreground = "#0000CE";
+            };
+        },
+                {
+            name = "\U2122 Keyword Operator Assignment";
+            scope = "keyword.operator.assignment";
+            settings =             {
+                background = "#00009A33";
+                foreground = "#0000CE";
+            };
+        },
+                {
+            name = "\U2122 Keyword Operator Arithmetic";
+            scope = "keyword.operator.arithmetic";
+            settings =             {
+                foreground = "#2136CE";
+            };
+        },
+                {
+            name = "\U2122 Keyword Operator Logical";
+            scope = "keyword.operator.logical";
+            settings =             {
+                background = "#00009A33";
+                foreground = "#3759FF";
+            };
+        },
+                {
+            name = "\U2122 Keyword Operator Comparison";
+            scope = "keyword.operator.comparison, keyword.operator.relational";
+            settings =             {
+                foreground = "#7C88FF";
+            };
+        },
+                {
+            name = "meta.class.instance.constructor keyword.operator.new";
+            scope = "meta.class.instance.constructor keyword.operator.new";
+            settings =             {
+                foreground = "#800043";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "\U2718 HTML";
+            settings =             {
+            };
+        },
+                {
+            name = "\U2718 Tag Doctype";
+            scope = "meta.doctype, meta.tag.sgml-declaration.doctype, meta.tag.sgml.doctype";
+            settings =             {
+                background = "#333333";
+                foreground = "#CCCCCC";
+            };
+        },
+                {
+            name = "\U2718 Tag";
+            scope = "meta.tag";
+            settings =             {
+                foreground = "#333333";
+            };
+        },
+                {
+            name = "\U2718 Tag Structure";
+            scope = "meta.tag.structure, meta.tag.segment";
+            settings =             {
+                background = "#333333BF";
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "\U2718 Tag Block";
+            scope = "meta.tag.block, meta.tag.xml, meta.tag.key";
+            settings =             {
+                background = "#4C4C4C33";
+                foreground = "#4C4C4C";
+            };
+        },
+                {
+            name = "\U2718 Tag Inline";
+            scope = "meta.tag.inline";
+            settings =             {
+                background = "#803D0033";
+                foreground = "#FF7900";
+            };
+        },
+                {
+            name = "meta.tag.inline source";
+            scope = "meta.tag.inline source";
+            settings =             {
+                background = "#803D0033";
+            };
+        },
+                {
+            name = "\U2718 Tag Other";
+            scope = "meta.tag.other, entity.name.tag.style, entity.name.tag.script, meta.tag.block.script, source.js.embedded punctuation.definition.tag.html, source.css.embedded punctuation.definition.tag.html";
+            settings =             {
+                background = "#80000433";
+                foreground = "#FF0007";
+            };
+        },
+                {
+            name = "\U2718 Tag Form";
+            scope = "meta.tag.form, meta.tag.block.form, meta.tag.inline.form";
+            settings =             {
+                background = "#00438033";
+                foreground = "#0086FF";
+            };
+        },
+                {
+            name = "\U2718 Tag Void";
+            scope = "meta.tag.inline.any.void, meta.tag.form.any.void";
+            settings =             {
+                background = "#3C008033";
+                foreground = "#F800FF";
+            };
+        },
+                {
+            name = "\U2718 Tag Block Head";
+            scope = "meta.section.html.head";
+            settings =             {
+                background = "#121212";
+            };
+        },
+                {
+            name = "\U2718 Tag Block Form";
+            scope = "meta.section.html.form";
+            settings =             {
+                background = "#0043801A";
+            };
+        },
+                {
+            name = "\U2718 XML Tag";
+            scope = "meta.tag.xml";
+            settings =             {
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "\U2718 Tag name";
+            scope = "entity.name.tag";
+            settings =             {
+                foreground = "#FFFFFF4D";
+            };
+        },
+                {
+            name = "\U2718 Tag attribute";
+            scope = "entity.other.attribute-name, meta.tag punctuation.definition.string";
+            settings =             {
+                foreground = "#FFFFFF33";
+            };
+        },
+                {
+            name = "\U2718 Tag value";
+            scope = "meta.tag string -source -punctuation, text source text meta.tag string -punctuation, meta.tag string.unquoted, text source text meta.tag string.unquoted";
+            settings =             {
+                foreground = "#FFFFFF66";
+            };
+        },
+                {
+            name = "\U2718 Tag \"Value\" value";
+            scope = "meta.property.value.html";
+            settings =             {
+                foreground = "#FFFFFFBF";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "text meta.paragraph";
+            scope = "text meta.paragraph";
+            settings =             {
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "M markup";
+            scope = "markup markup -(markup meta.paragraph.list)";
+            settings =             {
+                background = "#33333333";
+                foreground = "#FFF800";
+            };
+        },
+                {
+            name = "M HR";
+            scope = "markup.hr";
+            settings =             {
+                background = "#FFFFFF";
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "M heading";
+            scope = "markup.heading";
+            settings =             {
+                fontStyle = "";
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "M bold";
+            scope = "markup.bold";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#95D4FF80";
+            };
+        },
+                {
+            name = "M italic";
+            scope = "markup.italic";
+            settings =             {
+                fontStyle = italic;
+            };
+        },
+                {
+            name = "M strike";
+            settings =             {
+            };
+        },
+                {
+            name = "M add";
+            settings =             {
+            };
+        },
+                {
+            name = "M del";
+            settings =             {
+            };
+        },
+                {
+            name = "M underline";
+            scope = "markup.underline";
+            settings =             {
+                fontStyle = underline;
+            };
+        },
+                {
+            name = "M reference";
+            scope = "meta.reference, markup.underline.link";
+            settings =             {
+                fontStyle = "";
+                foreground = "#0086FF";
+            };
+        },
+                {
+            name = "M reference name";
+            scope = "entity.name.reference";
+            settings =             {
+                background = "#00438033";
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "M underline link";
+            scope = "meta.reference.list markup.underline.link, text.html.textile markup.underline.link";
+            settings =             {
+                fontStyle = underline;
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "M raw block";
+            scope = "markup.raw.block";
+            settings =             {
+                background = "#80808040";
+            };
+        },
+                {
+            name = "M quote block";
+            scope = "markup.quote";
+            settings =             {
+                background = "#FFFFFF1A";
+            };
+        },
+                {
+            name = "M list";
+            scope = "markup.list meta.paragraph";
+            settings =             {
+                fontStyle = "";
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = Markdown;
+            scope = "text.html.markdown";
+            settings =             {
+                background = "#FFFFFF";
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "text.html.markdown meta.paragraph";
+            scope = "text.html.markdown meta.paragraph";
+            settings =             {
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "text.html.markdown markup.list meta.paragraph";
+            scope = "text.html.markdown markup.list meta.paragraph";
+            settings =             {
+                foreground = "#555555";
+            };
+        },
+                {
+            name = "text.html.markdown markup.heading";
+            scope = "text.html.markdown markup.heading";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "text.html.markdown string";
+            scope = "text.html.markdown string";
+            settings =             {
+                foreground = "#8A5420";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "\U00a7 CSS";
+            scope = "source.css";
+            settings =             {
+            };
+        },
+                {
+            name = "\U00a7 Selector";
+            scope = "meta.selector";
+            settings =             {
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "Property Value Parens";
+            scope = "source.css meta.scope.property-list meta.property-value punctuation.definition.arguments,\nsource.css meta.scope.property-list meta.property-value punctuation.separator.arguments";
+            settings =             {
+                fontStyle = "";
+                foreground = "#006680";
+            };
+        },
+                {
+            name = "\U00a7 Pseudo-Element";
+            scope = "entity.other.attribute-name.pseudo-element";
+            settings =             {
+                foreground = "#4F00FF";
+            };
+        },
+                {
+            name = "\U00a7 Pseudo-Class";
+            scope = "entity.other.attribute-name.pseudo-class, entity.other.attribute-name.tag.pseudo-class";
+            settings =             {
+                foreground = "#7900FF";
+            };
+        },
+                {
+            name = "\U00a7 Class";
+            scope = "meta.selector entity.other.attribute-name.class";
+            settings =             {
+                foreground = "#F800FF";
+            };
+        },
+                {
+            name = "\U00a7 ID";
+            scope = "meta.selector entity.other.attribute-name.id";
+            settings =             {
+                foreground = "#FF0086";
+            };
+        },
+                {
+            name = "\U00a7 Tag";
+            scope = "meta.selector entity.name.tag";
+            settings =             {
+                fontStyle = "";
+                foreground = "#FF0007";
+            };
+        },
+                {
+            name = "\U00a7 Tag Wildcard";
+            scope = "entity.name.tag.wildcard, entity.other.attribute-name.universal";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#FF7900";
+            };
+        },
+                {
+            name = "\U00a7 Attribute";
+            scope = "source.css entity.other.attribute-name.attribute";
+            settings =             {
+                foreground = "#C25A00";
+            };
+        },
+                {
+            name = "\U00a7 Attribute-Match";
+            scope = "source.css meta.attribute-selector keyword.operator.comparison";
+            settings =             {
+                foreground = "#673000";
+            };
+        },
+                {
+            name = "\U00a7 meta.scope.property-list";
+            scope = "meta.scope.property-list";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#333333";
+            };
+        },
+                {
+            name = "\U00a7 meta.property-name";
+            scope = "meta.property-name";
+            settings =             {
+                fontStyle = "";
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "\U00a7 support.type.property-name";
+            scope = "support.type.property-name";
+            settings =             {
+                background = "#0D0D0D";
+                fontStyle = "";
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "\U00a7 meta.property-value";
+            scope = "meta.property-value";
+            settings =             {
+                background = "#19191980";
+                fontStyle = "";
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = LaTeX;
+            scope = "text.latex";
+            settings =             {
+            };
+        },
+                {
+            name = "L Markup Raw";
+            scope = "text.latex markup.raw";
+            settings =             {
+                background = "#000000";
+            };
+        },
+                {
+            name = "L support.function";
+            scope = "text.latex support.function -support.function.textit -support.function.emph";
+            settings =             {
+                foreground = "#BC80FF";
+            };
+        },
+                {
+            name = "L support.function.section";
+            scope = "text.latex support.function.section";
+            settings =             {
+                foreground = "#FFFFFFBF";
+            };
+        },
+                {
+            name = "L entity.name.section";
+            scope = "text.latex entity.name.section -meta.group -keyword.operator.braces";
+            settings =             {
+                background = "#FFFFFF";
+                fontStyle = "";
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "L constant.language.general";
+            scope = "text.latex constant.language.general";
+            settings =             {
+            };
+        },
+                {
+            name = "L keyword.operator.delimiter";
+            scope = "text.latex keyword.operator.delimiter";
+            settings =             {
+                background = "#00000080";
+            };
+        },
+                {
+            name = "L keyword.operator.brackets";
+            scope = "text.latex keyword.operator.brackets";
+            settings =             {
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "L keyword.operator.braces";
+            scope = "text.latex keyword.operator.braces";
+            settings =             {
+                fontStyle = "";
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "L meta.footnote";
+            scope = "meta.footnote";
+            settings =             {
+                background = "#00008033";
+                foreground = "#0008FF4D";
+            };
+        },
+                {
+            name = "L meta.label.reference";
+            scope = "text.latex meta.label.reference";
+            settings =             {
+                background = "#FFFFFF0D";
+                fontStyle = "";
+            };
+        },
+                {
+            name = "L keyword.control.ref";
+            scope = "text.latex keyword.control.ref";
+            settings =             {
+                background = "#260001";
+                foreground = "#FF0007";
+            };
+        },
+                {
+            name = "L variable.parameter.label.reference";
+            scope = "text.latex variable.parameter.label.reference";
+            settings =             {
+                background = "#400002";
+                foreground = "#FFBC80";
+            };
+        },
+                {
+            name = "L keyword.control.cite";
+            scope = "text.latex keyword.control.cite";
+            settings =             {
+                background = "#260014";
+                foreground = "#FF0086";
+            };
+        },
+                {
+            name = "L variable.parameter.cite";
+            scope = "variable.parameter.cite";
+            settings =             {
+                background = "#400022";
+                foreground = "#FFBFE1";
+            };
+        },
+                {
+            name = "L variable.parameter.label";
+            scope = "text.latex variable.parameter.label";
+            settings =             {
+                foreground = "#FFFFFF80";
+            };
+        },
+                {
+            name = "L markup";
+            scope = "meta.function markup";
+            settings =             {
+                foreground = "#CDCDCD";
+            };
+        },
+                {
+            name = "L meta.group.braces";
+            scope = "text.latex meta.group.braces";
+            settings =             {
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.environment.list";
+            scope = "text.latex meta.environment.list";
+            settings =             {
+                background = "#00000080";
+                fontStyle = "";
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.environment.list 2";
+            scope = "text.latex meta.environment.list meta.environment.list ";
+            settings =             {
+                background = "#00000080";
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.environment.list 3";
+            scope = "text.latex meta.environment.list meta.environment.list meta.environment.list ";
+            settings =             {
+                background = "#000000";
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.environment.list 4";
+            scope = "text.latex meta.environment.list meta.environment.list meta.environment.list meta.environment.list ";
+            settings =             {
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.environment.list 5";
+            scope = "text.latex meta.environment.list meta.environment.list meta.environment.list meta.environment.list meta.environment.list ";
+            settings =             {
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.environment.list 6";
+            scope = "text.latex meta.environment.list meta.environment.list meta.environment.list meta.environment.list meta.environment.list meta.environment.list ";
+            settings =             {
+                foreground = "#33333333";
+            };
+        },
+                {
+            name = "L meta.end-document";
+            scope = "text.latex meta.end-document, text.latex meta.begin-document, meta.end-document.latex support.function, meta.end-document.latex variable.parameter, meta.begin-document.latex support.function, meta.begin-document.latex variable.parameter";
+            settings =             {
+                background = "#CCCCCC";
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "meta.brace.erb.return-value";
+            scope = "meta.brace.erb.return-value";
+            settings =             {
+                background = "#00805533";
+                foreground = "#00FFAA";
+            };
+        },
+                {
+            name = "source.ruby.rails.embedded.return-value.one-line";
+            scope = "source.ruby.rails.embedded.return-value.one-line";
+            settings =             {
+                background = "#8080801A";
+            };
+        },
+                {
+            name = "meta.brace.erb";
+            scope = "punctuation.section.embedded -(source string source punctuation.section.embedded), meta.brace.erb.html";
+            settings =             {
+                background = "#00FFF81A";
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "source.ruby.rails.embedded.one-line";
+            scope = "source.ruby.rails.embedded.one-line";
+            settings =             {
+                background = "#00FFF81A";
+            };
+        },
+                {
+            name = "String Embedded Source";
+            scope = "source string source punctuation.section.embedded";
+            settings =             {
+                foreground = "#406180";
+            };
+        },
+                {
+            name = "source.js.embedded";
+            scope = "source.js.embedded";
+            settings =             {
+                background = "#0D0D0D";
+            };
+        },
+                {
+            name = "\U25ca Source";
+            scope = source;
+            settings =             {
+                fontStyle = "";
+            };
+        },
+                {
+            name = "\U25ca meta.brace.erb";
+            scope = "meta.brace.erb";
+            settings =             {
+                background = "#000000";
+            };
+        },
+                {
+            name = "\U25ca Source String Source";
+            scope = "source string source";
+            settings =             {
+                background = "#33333380";
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "\U25ca Source String Interpolated Source";
+            scope = "source string.interpolated source";
+            settings =             {
+                background = "#00000099";
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "\U25ca Source Embeded Source";
+            scope = "source source, source.java.embedded";
+            settings =             {
+                background = "#3333331A";
+            };
+        },
+                {
+            name = "\U25ca Text";
+            scope = "text -text.xml.strict";
+            settings =             {
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "\U25ca Text Source";
+            scope = "text source, meta.scope.django.template";
+            settings =             {
+                background = "#000000";
+                foreground = "#CCCCCC";
+            };
+        },
+                {
+            name = "\U25ca Text Source Text String";
+            settings =             {
+            };
+        },
+                {
+            name = "\U25ca Text String Source";
+            scope = "text string source";
+            settings =             {
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "\U25ca Text Source String Source";
+            settings =             {
+            };
+        },
+                {
+            name = "\U25ca Text String Source String Source";
+            scope = "text string source string source";
+            settings =             {
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = Invalid;
+            scope = "invalid -invalid.SOMETHING";
+            settings =             {
+                background = "#FF0007";
+                fontStyle = bold;
+                foreground = "#330004";
+            };
+        },
+                {
+            name = "Invalid Value";
+            scope = "invalid.SOMETHING";
+            settings =             {
+                fontStyle = underline;
+                foreground = "#FF3600";
+            };
+        },
+                {
+            name = Syntax;
+            scope = "meta.syntax";
+            settings =             {
+                foreground = "#333333";
+            };
+        },
+                {
+            name = comment;
+            scope = "comment -comment.line";
+            settings =             {
+                background = "#33333333";
+                foreground = "#4C4C4C";
+            };
+        },
+                {
+            name = "comment.line";
+            scope = "comment.line";
+            settings =             {
+                fontStyle = italic;
+                foreground = "#4C4C4C";
+            };
+        },
+                {
+            name = "Comment Punctuation";
+            scope = "comment punctuation";
+            settings =             {
+            };
+        },
+                {
+            name = "\U2718 HTML Comment";
+            scope = "text comment.block -source";
+            settings =             {
+                fontStyle = "";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "D Diff Add";
+            scope = "markup.inserted";
+            settings =             {
+                background = "#00401E";
+                foreground = "#40FF9A";
+            };
+        },
+                {
+            name = "D Diff Delete";
+            scope = "markup.deleted";
+            settings =             {
+                background = "#400022";
+                foreground = "#FF40A3";
+            };
+        },
+                {
+            name = "D Diff Changed";
+            scope = "markup.changed";
+            settings =             {
+                background = "#803D00";
+                foreground = "#FFFF55";
+            };
+        },
+                {
+            name = "text.subversion-commit meta.scope.changed-files";
+            scope = "text.subversion-commit meta.scope.changed-files, text.subversion-commit meta.scope.changed-files.svn meta.diff.separator";
+            settings =             {
+                background = "#000000";
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "text.subversion-commit";
+            scope = "text.subversion-commit";
+            settings =             {
+                background = "#FFFFFF";
+                foreground = "#000000";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "meta.delimiter";
+            scope = "punctuation.terminator, meta.delimiter, punctuation.separator.method";
+            settings =             {
+                background = "#FFFFFF03";
+                fontStyle = bold;
+                foreground = "#7F7F7F";
+            };
+        },
+                {
+            name = "meta.delimiter.statement.js";
+            scope = "punctuation.terminator.statement, meta.delimiter.statement.js";
+            settings =             {
+                background = "#00000080";
+            };
+        },
+                {
+            name = "meta.delimiter.object.js";
+            scope = "meta.delimiter.object.js";
+            settings =             {
+                background = "#00000040";
+            };
+        },
+                {
+            name = "Bold String Quotes";
+            scope = "string.quoted.single.brace, string.quoted.double.brace";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#803D00";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "\U00df Blog Post / Email Message";
+            scope = "text.blog, text.mail";
+            settings =             {
+                background = "#DCDCDC";
+                foreground = "#333333";
+            };
+        },
+                {
+            name = "\U00df Post Content";
+            scope = "text.blog text, text.mail text";
+            settings =             {
+                background = "#000000";
+                foreground = "#CCCCCC";
+            };
+        },
+                {
+            name = "\U00df Post Header Keys";
+            scope = "meta.header.blog keyword.other, meta.header.mail keyword.other";
+            settings =             {
+                background = "#00FFF81A";
+                fontStyle = "";
+                foreground = "#06403E";
+            };
+        },
+                {
+            name = "\U00df Post Header Values";
+            scope = "meta.header.blog string.unquoted.blog, meta.header.mail string.unquoted";
+            settings =             {
+                background = "#FFFF551A";
+                foreground = "#803D00";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = OCAML;
+            settings =             {
+            };
+        },
+                {
+            name = "entity.name.type.module";
+            scope = "source.ocaml entity.name.type.module";
+            settings =             {
+                foreground = "#FF0000";
+            };
+        },
+                {
+            name = "support.other.module";
+            scope = "source.ocaml support.other.module";
+            settings =             {
+                background = "#83000033";
+                foreground = "#FF0000";
+            };
+        },
+                {
+            name = "entity.name.type.variant";
+            scope = "entity.name.type.variant";
+            settings =             {
+                foreground = "#00FFF8";
+            };
+        },
+                {
+            name = "entity.name.tag, meta.record.definition";
+            scope = "source.ocaml entity.name.tag, source.ocaml meta.record.definition";
+            settings =             {
+                foreground = "#00FF79";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014 PUNCTUATION \U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = "punctuation.separator.parameters";
+            scope = "punctuation.separator.parameters";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#FFFFFF";
+            };
+        },
+                {
+            name = "meta.brace.pipe";
+            scope = "meta.brace.pipe";
+            settings =             {
+                background = "#33333333";
+                fontStyle = "";
+                foreground = "#4C4C4C";
+            };
+        },
+                {
+            name = "Misc Punctuation";
+            scope = "meta.brace.erb, source.ruby.embedded.source.brace, punctuation.section.dictionary, punctuation.terminator.dictionary, punctuation.separator.object, punctuation.separator.statement, punctuation.separator.key-value.css";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "Curly Punctuation";
+            scope = "punctuation.section.scope.curly, punctuation.section.scope";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#999999";
+            };
+        },
+                {
+            name = "Object Punctuation";
+            scope = "punctuation.separator.objects, \nmeta.group.braces.curly meta.delimiter.object.comma, \npunctuation.separator.key-value -meta.tag, \nsource.ocaml punctuation.separator.match-definition\n";
+            settings =             {
+                fontStyle = bold;
+                foreground = "#0C823B";
+            };
+        },
+                {
+            name = "Function Punctuation";
+            scope = "punctuation.separator.parameters.function.js,punctuation.definition.function, punctuation.separator.function-return, punctuation.separator.function-definition, punctuation.definition.arguments, punctuation.separator.arguments";
+            settings =             {
+                foreground = "#800043";
+            };
+        },
+                {
+            name = "Array Punctuation";
+            scope = "meta.group.braces.square punctuation.section.scope, meta.group.braces.square meta.delimiter.object.comma, meta.brace.square, punctuation.separator.array, punctuation.section.array, punctuation.definition.array, punctuation.definition.constant.range";
+            settings =             {
+                background = "#803D001A";
+                fontStyle = bold;
+                foreground = "#7F5E40";
+            };
+        },
+                {
+            name = "Array, Range";
+            scope = "meta.structure.array -punctuation.definition.array, meta.definition.range -punctuation.definition.constant.range";
+            settings =             {
+                background = "#803D001A";
+            };
+        },
+                {
+            name = "meta.brace.curly meta.group";
+            scope = "meta.brace.curly meta.group.css";
+            settings =             {
+                background = "#00000080";
+                fontStyle = "";
+            };
+        },
+                {
+            name = "\U00ba meta.source.embedded";
+            scope = "meta.source.embedded, entity.other.django.tagbraces";
+            settings =             {
+                background = "#00000080";
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "\U00ba meta.group.braces.round JS";
+            scope = "source.js meta.group.braces.round, meta.scope.heredoc";
+            settings =             {
+            };
+        },
+                {
+            name = "\U00ba Even";
+            scope = "source.ruby meta.even-tab, source.ruby meta.even-tab.group2, source.ruby meta.even-tab.group4, source.ruby meta.even-tab.group6, source.ruby meta.even-tab.group8, source.ruby meta.even-tab.group10, source.ruby meta.even-tab.group12\n";
+            settings =             {
+                background = "#00000080";
+            };
+        },
+                {
+            name = "\U00ba meta.block.slate ";
+            scope = "meta.block.slate";
+            settings =             {
+                foreground = "#666666";
+            };
+        },
+                {
+            name = "\U00ba meta.block.content.slate ";
+            scope = "meta.block.content.slate ";
+            settings =             {
+                foreground = "#CCCCCC";
+            };
+        },
+                {
+            name = "Function Group1";
+            scope = "meta.function meta.group.braces.curly.function -(meta.group meta.group), meta.function meta.odd-tab.group1";
+            settings =             {
+            };
+        },
+                {
+            name = Group1;
+            scope = "meta.bracketed, meta.odd-tab.group1, meta.group.braces, meta.block.slate, text.xml.strict meta.tag, meta.paren-group, meta.section, meta.block, meta.block, meta.scope";
+            settings =             {
+                background = "#0A0A0A";
+            };
+        },
+                {
+            name = Group2;
+            scope = "meta.bracketed meta.bracketed, meta.even-tab.group2, meta.group.braces meta.group.braces, meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag, meta.group.braces meta.group.braces, meta.paren-group meta.paren-group, meta.section meta.section, meta.block meta.block, meta.scope meta.scope, meta.scope meta.block";
+            settings =             {
+                background = "#0E0E0E";
+            };
+        },
+                {
+            name = Group3;
+            scope = "meta.bracketed meta.bracketed meta.bracketed, meta.odd-tab.group3, meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section, meta.block meta.block meta.block, meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#111111";
+            };
+        },
+                {
+            name = Group4;
+            scope = "meta.bracketed meta.bracketed meta.bracketed meta.bracketed, meta.even-tab.group4, meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section meta.section, meta.block meta.block meta.block meta.block, meta.scope meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#151515";
+            };
+        },
+                {
+            name = Group5;
+            scope = "meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed, meta.odd-tab.group5, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section meta.section meta.section, meta.block meta.block meta.block meta.block meta.block, meta.scope meta.scope meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#191919";
+            };
+        },
+                {
+            name = Group6;
+            scope = "meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed, meta.even-tab.group6, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section meta.section meta.section meta.section, meta.block meta.block meta.block meta.block meta.block meta.block, meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#1C1C1C";
+            };
+        },
+                {
+            name = Group7;
+            scope = "meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed, meta.odd-tab.group7, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section meta.section meta.section meta.section meta.section, meta.block meta.block meta.block meta.block meta.block meta.block meta.block, meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#1F1F1F";
+            };
+        },
+                {
+            name = Group8;
+            scope = "meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed, meta.even-tab.group8, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section meta.section meta.section meta.section meta.section meta.section, meta.block meta.block meta.block meta.block meta.block meta.block meta.block meta.block, meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#212121";
+            };
+        },
+                {
+            name = Group9;
+            scope = "meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed meta.bracketed, meta.odd-tab.group9, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces, meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group meta.paren-group, meta.section meta.section meta.section meta.section meta.section meta.section meta.section meta.section meta.section, meta.block meta.block meta.block meta.block meta.block meta.block meta.block meta.block meta.block, meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope meta.scope";
+            settings =             {
+                background = "#242424";
+            };
+        },
+                {
+            name = Group10;
+            scope = "meta.even-tab.group10";
+            settings =             {
+                background = "#1F1F1F";
+            };
+        },
+                {
+            name = Group11;
+            scope = "meta.odd-tab.group11";
+            settings =             {
+                background = "#151515";
+            };
+        },
+                {
+            name = "\U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014 END \U2014\U2014\U2014\U2014\U2014\U2014\U2014\U2014";
+            settings =             {
+            };
+        },
+                {
+            name = IE6;
+            scope = "meta.property.vendor.microsoft.trident.4, \nmeta.property.vendor.microsoft.trident.4 support.type.property-name,\nmeta.property.vendor.microsoft.trident.4 punctuation.terminator.rule";
+            settings =             {
+                fontStyle = "";
+                foreground = "#1B95E2";
+            };
+        },
+                {
+            name = IE7;
+            scope = "meta.property.vendor.microsoft.trident.5, \nmeta.property.vendor.microsoft.trident.5 support.type.property-name,\nmeta.property.vendor.microsoft.trident.5 punctuation.separator.key-value,\nmeta.property.vendor.microsoft.trident.5 punctuation.terminator.rule";
+            settings =             {
+                fontStyle = "";
+                foreground = "#F5C034";
+            };
+        },
+                {
+            name = "Invalid for IE6";
+            scope = "meta.invalid.vendor.microsoft.trident";
+            settings =             {
+                background = "#FF000040";
+                fontStyle = underline;
+            };
+        }
+    );
+    uuid = "24847CB3-23BC-4BF9-861B-E39661A6DA71";
+}

@@ -66,6 +66,8 @@ template<typename T>
 const scope::compile::compiled_t<T> build (const std::vector<T> const const& list)
 {
 	scope::compile::analyze_t root;
+	std::vector<scope::compile::Dag_Bit_t*> children;
+	std::vector<scope::compile::Dag_Bit_t*> parents;
 	typename std::vector<T>::const_iterator iter = list.begin();
 	while(iter != list.end())
 	{

@@ -1,0 +1,6 @@
+rules_t as vector
+1.5513 seconds to computed oldstyle:2.1
+0.1714 seconds to computed path_x:2.1 
+	--
+1.4812 seconds to computed oldstyle:2.1
+0.1695 seconds to computed path_x:2.1 
