@@ -6,8 +6,11 @@
 
 namespace scope
 {
+	struct selector_t;
 	namespace compile {
 		template<typename T> class compiled_t;
+		struct analyze_t;
+		void graph (analyze_t& root, selector_t& selector, int& rule_id, int& sub_rule_id);		
 	}
 	namespace types
 	{
@@ -83,7 +86,7 @@ namespace scope
 		void setup (std::string const& str);
 
 		friend std::string to_s (selector_t const& s);
-		template<typename T> friend const compile::compiled_t<T> build (const std::vector<T> const& list); 
+		friend void compile::graph (compile::analyze_t& root, selector_t& selector, int& rule_id, int& sub_rule_id);
 		types::selector_ptr selector;
 	};
 
