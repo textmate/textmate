@@ -1,0 +1,75 @@
+root:
+<simple=()
+ multi_part=()
+ "*"= <simple=()
+       multi_part=([10, 5], )
+      >
+ "markup"= <simple=()
+            multi_part=([6, 3], [8, 4], [10, 5], [12, 6], [14, 7], [15, 8], )
+            "bold"= <simple=()
+                     multi_part=([1, 0], [3, 1], [4, 2], )
+                    >
+           >
+ "meta"= <simple=()
+          multi_part=()
+          "*"= <simple=()
+                multi_part=([8, 4], )
+                "markdown"= <simple=()
+                             multi_part=([6, 3], )
+                            >
+               >
+         >
+ "text"= <simple=()
+          multi_part=([2, 1], [13, 7], [17, 10], )
+          "*"= <simple=()
+                multi_part=([0, 0], )
+               >
+          "html"= <simple=()
+                   multi_part=([5, 3], [7, 4], [9, 5], [11, 6], [16, 9], )
+                  >
+         >
+>
+root:
+<simple=()
+ multi_part=()
+ "*"= <simple=()
+       multi_part=([2, 5], )
+      >
+ "markup"= <simple=(6, 7, 8, )
+            multi_part=([0, 3], [1, 4], [2, 5], )
+            "bold"= <simple=(0, 1, 2, )
+                     multi_part=()
+                    >
+           >
+ "meta"= <simple=()
+          multi_part=([2, 5], )
+          "*"= <simple=()
+                multi_part=([1, 4], )
+                "markdown"= <simple=()
+                             multi_part=([0, 3], )
+                            >
+               >
+         >
+ "text"= <simple=(1, 7, 10, )
+          multi_part=([2, 5], )
+          "*"= <simple=(0, )
+                multi_part=()
+               >
+          "html"= <simple=(0, 3, 4, 5, 6, 9, )
+                   multi_part=()
+                  >
+         >
+>
+
+						
+"text.*, markup.bold", 0
+"text, markup.bold",
+"markup.bold",
+"text.html, meta.*.markdown markup",
+"text.html, meta.* markup",
+"text.html, * markup, meta.beta.markup", 5
+"text.html, markup",
+"text, markup",
+"markup",
+"text.html",
+"text" 10

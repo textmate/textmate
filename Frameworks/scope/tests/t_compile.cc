@@ -4,12 +4,11 @@ class CompileTests : public CxxTest::TestSuite
 {
 public:
 	
-	class selector_container_t
+	struct selector_container_t
 	{
-		scope::selector_t selector;
+		scope::selector_t scope_selector;
 	public:
-		selector_container_t(scope::selector_t s) : selector(s) {}
-		scope::selector_t scope_selector () const { return selector;}
+		selector_container_t(scope::selector_t s) : scope_selector(s) {}
 	};
 
 	void test_compile ()

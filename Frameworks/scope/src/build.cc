@@ -12,7 +12,6 @@
 // expression
 void build (scope::types::expression_t const& expression, scope::compile::analyze_t& root, bool negate)
 {
-	assert(expression.op == scope::types::expression_t::op_t::op_minus && expression.negate);
 	bool expr_neg = expression.op == scope::types::expression_t::op_t::op_minus || expression.negate;
 	negate = expr_neg ^ negate; // + + = +, - - = +, + - = -
 	
@@ -88,14 +87,17 @@ void compute_hash_sizes (scope::compile::analyze_t& root, std::map<int,int>& bit
 
 void compute_hashes (scope::compile::analyze_t& root, std::map<int,int>& bits_needed_for_level, int const level = 0, int shift = 0)
 {
-	assert(shift == std::accumulate(bits_needed_for_level.begin(), bits_needed_for_level.upper_bound(level), 0, map_acc));
 	int next_shift = shift + bits_needed_for_level[level];
-	scope::compile::bits_t base_hash = 0L;
+	int base_hash = 0;
+	int temp = floor( pow(2, bits_needed_for_level[level])) - 1; // create mask
+	int base_mask = (temp << shift) | root.mask;
+
 		// do atom_any first
 	if(root.has_any())
 	{
-		base_hash = 1L << shift;
-		shift++;
+		base_hash = 1 << shift;
+		root.path[scope::types::atom_any].mask = root.mask | ( 1 << shift) ;
+		shift++; // add one to offset
 	}
 
 	int order = 1;
@@ -106,14 +108,14 @@ void compute_hashes (scope::compile::analyze_t& root, std::map<int,int>& bits_ne
 		if(iter->first != scope::types::atom_any)
 		{
 			iter->second.hash |= order << shift;
+			iter->second.mask = base_mask;
 			order++;
 		}
 		compute_hashes(iter->second, bits_needed_for_level, level + 1, next_shift);
-		
 	}
 }
 
-void scope::compile::analyze_t::transform()
+void scope::compile::analyze_t::calculate_bit_fields()
 {
 	// räkna ut barn per nivå.
 	// räkna ut antal bitar som behövs
@@ -123,9 +125,8 @@ void scope::compile::analyze_t::transform()
 	std::map<int, int> bits_needed_for_level;
 	compute_hash_sizes(*this, bits_needed_for_level, 0);
 	const int sum = std::accumulate(bits_needed_for_level.begin(), bits_needed_for_level.end(), 0, map_acc);
-	iterate(i, bits_needed_for_level)
-	printf("\ntransform:%d %d", i->first, i->second);
-	hash = 0L;
+	hash = 0;
+	mask = 0;
 	compute_hashes(*this, bits_needed_for_level);
 }
 
@@ -144,6 +145,7 @@ std::string scope::compile::analyze_t::to_s (int indent) const {
 	std::string res = "<";
    std::stringstream ss;//create a stringstream
 	ss << "hash=" << std::hex << hash << std::endl; 
+	ss << std::string(indent, ' ') << " mask=" << std::hex << mask << std::endl;
 	ss << std::string(indent, ' ') + " simple=(";
    iterate(number, simple) {
 		ss << *number;//add number to the stream
@@ -196,10 +198,10 @@ void propagate(scope::compile::analyze_t& child, scope::compile::analyze_t& any)
 	
 }
 // expand scopes containing * into those that do not. e.g foo.* and foo.markdown, since foo.markdown is a subpart of foo.*, it too needs to behave like one
-void scope::compile::expand (analyze_t& root)
+void scope::compile::expand_wildcards (analyze_t& root)
 {
 	iterate(child, root.path)
-		expand(child->second);
+		expand_wildcards(child->second);
 	if(root.has_any())
 	{
 		iterate(child, root.path)
@@ -210,9 +212,15 @@ void scope::compile::expand (analyze_t& root)
 	}
 }
 
-void scope::compile::graph (scope::compile::analyze_t& root, scope::selector_t& selector, int& rule_id, int& sub_rule_id)
+void scope::compile::graph (scope::compile::analyze_t& root, const scope::selector_t& selector, int& rule_id, int& sub_rule_id, std::multimap<int,int>& rules)
 {
-
+	size_t index = 0;
+	if(!selector.selector)
+	{
+		// TODO how do we handle this?
+		//printf("No selector %d\n", rule_id);
+		return;
+	}
 	iterate(iter2, selector.selector->composites)
 	{
 		// for every composite we want to know if it is simple i.e. just one non-negative path
@@ -230,13 +238,16 @@ void scope::compile::graph (scope::compile::analyze_t& root, scope::selector_t& 
 				printf("%s.", d2->c_str());
 		}
 		*/
+		// multi part
 		if(root.or_paths.size() > 1 || root.not_paths.size() > 0)
 		{
 			set_sub_rule(root, root.or_paths, rule_id, sub_rule_id);
 			set_sub_rule(root, root.not_paths, rule_id, sub_rule_id);				
-			sub_rule_id++;				
+			rules.insert(std::make_pair(rule_id, index));
+			sub_rule_id++;
+		// simple case				
 		} else {
-			assert(root.or_paths == 1);
+			assert(root.or_paths.size() == 1);
 			scope::compile::analyze_t* wc = &root;
 			iterate(o, root.or_paths)
 			{
@@ -245,9 +256,9 @@ void scope::compile::graph (scope::compile::analyze_t& root, scope::selector_t& 
 			wc->simple.insert(rule_id);
 		}  
 		root.clear();
+		index++;
 	}
 }
-
 
 void scope::types::path_t::build (compile::analyze_t& root, bool negate) const           { ::build(*this, root, negate); }
 void scope::types::group_t::build (compile::analyze_t& root, bool negate) const          { ::build(*this, root, negate); }

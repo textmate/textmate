@@ -4,3 +4,30 @@ rules_t as vector
 	--
 1.4812 seconds to computed oldstyle:2.1
 0.1695 seconds to computed path_x:2.1 
+
+
+// Brilliance Black complete
+0.0002 seconds to computed oldstyle:2.1
+0.0000 seconds to computed path_x:2295660019712 
+0.3497 seconds to classic theme
+0.3277 seconds to new theme
+[15:10][joachimm@marin:~/Projects/avian(theme-matching)]$ /Users/joachimm/Projects/avian/build/TextMate/Frameworks/theme/test_theme
+0.0002 seconds to computed oldstyle:2.1
+0.0000 seconds to computed path_x:2295660019712 
+0.3519 seconds to classic theme
+0.3242 seconds to new theme
+[15:10][joachimm@marin:~/Projects/avian(theme-matching)]$ /Users/joachimm/Projects/avian/build/TextMate/Frameworks/theme/test_theme
+0.0002 seconds to computed oldstyle:2.1
+0.0000 seconds to computed path_x:2295660019712 
+0.3581 seconds to classic theme
+0.3177 seconds to new theme
+[15:10][joachimm@marin:~/Projects/avian(theme-matching)]$ /Users/joachimm/Projects/avian/build/TextMate/Frameworks/theme/test_theme
+0.0002 seconds to computed oldstyle:2.1
+0.0000 seconds to computed path_x:2295660019712 
+0.3418 seconds to classic theme
+0.3111 seconds to new theme
+[15:10][joachimm@marin:~/Projects/avian(theme-matching)]$ /Users/joachimm/Projects/avian/build/TextMate/Frameworks/theme/test_theme
+0.0003 seconds to computed oldstyle:2.1
+0.0000 seconds to computed path_x:2295660019712 
+0.3527 seconds to classic theme
+0.3180 seconds to new theme
