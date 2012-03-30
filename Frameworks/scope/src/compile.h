@@ -33,10 +33,7 @@ namespace scope
 			std::map<int, int> multi_part;
 			int hash;
 			int mask;
-			const analyze_t& operator[](std::string key) const
-			{
-				return path.at(key);
-			}
+
 			void calculate_bit_fields ();
 			bool has_any ();
 			void clear ();

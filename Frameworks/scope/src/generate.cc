@@ -49,7 +49,7 @@ scope::compressed::any_ptr generate (scope::types::path_t const& path, scope::co
 		int number = 0;
 		iterate(iter2, iter->atoms)
 		{
-			assert(wc->path.find(*iter2) != wc.path.end());
+			assert(wc->path.find(*iter2) != wc->path.end());
 			wc = &wc->path.at(*iter2);
 			number++;
 		}
