@@ -74,16 +74,13 @@ public:
 		for(int i = 0; i < repeat ; i++)
 		{
 			iterate(textScope, _scopes)
-			{
-				printf ("scope : %s\n", textScope->c_str());
-				
+			{				
 				std::multimap<double, theme_t::decomposed_style_t> ordered;
 				compiled.match(*textScope, ordered);
 			}
 		}
-	 	printf ("%.4f seconds to new theme\n", timer2.duration());
 		
-	
+	 	printf ("%.4f seconds to new theme\n", timer2.duration());
 	}
 	
 	
