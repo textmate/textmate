@@ -80,7 +80,8 @@ std::map<int, double> scope::compile::match (scope::context_t const& scope, cons
 			//printf("palette %zu %llu id= %d;", index, palette[index], expressions.at(real_index).rule_id);
 			
 			if(expressions[real_index].composite->does_match(xpath, xpath, &score)) {
-				double& rank = ruleToRank.at(expressions.at(real_index).rule_id);				
+				size_t r_id = expressions.at(real_index).rule_id;
+				double& rank = ruleToRank[r_id];				
 				rank = std::max(rank, score);
 			}
 			palette[index] &= ~(1<<sub_rule_id-1);
