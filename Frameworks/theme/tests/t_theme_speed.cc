@@ -2,6 +2,8 @@
 #include <oak/duration.h>
 #include <scope/compile.h>
 #import <test/bundle_index.h>
+#import <io/path.h>
+#import <text/parse.h>
 
 class ThemeSpeedTests : public CxxTest::TestSuite
 {
@@ -9,8 +11,7 @@ class ThemeSpeedTests : public CxxTest::TestSuite
 	std::string grammar()
 	{
 		std::string str;
-		if(FILE* fp = fopen("/Users/joachimm/Projects/avian/Frameworks/theme/tests/BrillianceBlack.plist", "r"))
-		{
+		if(FILE* fp = fopen(path::join(__FILE__, "../BrillianceBlack.plist").c_str(), "r"))		{
 			char buf[1024];
 			while(size_t len = fread(buf, 1, sizeof(buf), fp))
 				str.insert(str.end(), buf, buf + len);
@@ -19,10 +20,25 @@ class ThemeSpeedTests : public CxxTest::TestSuite
 		return str;
 		
 	}
+	
+	std::vector<std::string> scopes()
+	{
+		std::string str;
+		if(FILE* fp = fopen(path::join(__FILE__, "../pjax.scopes").c_str(), "r"))		{
+			char buf[1024];
+			while(size_t len = fread(buf, 1, sizeof(buf), fp))
+				str.insert(str.end(), buf, buf + len);
+			fclose(fp);
+		}
+		
+		std::vector<std::string> scopes = text::split(str, "\n");
+		return scopes;
+		
+	}
+	
 public:
 	void test_theme_speed1 ()
 	{
-		static scope::scope_t const textScope = "text.html.markdown meta.paragraph.markdown markup.bold.markdown";
 		test::bundle_index_t bundleIndex;
 		bundles::item_ptr TestGrammarItem;
 		//printf("grammar:%s", grammar().c_str());
@@ -30,18 +46,20 @@ public:
 		bundleIndex.commit();
 
 		theme_t theme(TestGrammarItem);
+		std::vector<std::string> _scopes = scopes();
 		oak::duration_t timer1;
 		
 		for(int i = 0; i < repeat ; i++)
-		theme.styles_for_scope(textScope, "", 1.0);
-	   
+			iterate(textScope, _scopes)
+			{				
+				theme.styles_for_scope(*textScope, "", 1.0);
+			}
 	 	printf ("%.4f seconds to classic theme\n", timer1.duration());
 		
 	}
 	
 	void test_theme_speed2 ()
 	{
-		static scope::context_t const textScope = "text.html.markdown meta.paragraph.markdown markup.bold.markdown";
 		test::bundle_index_t bundleIndex;
 		bundles::item_ptr TestGrammarItem;
 		//printf("grammar:%s", grammar().c_str());
@@ -51,12 +69,17 @@ public:
 		theme_t theme(TestGrammarItem);
 		std::vector<theme_t::decomposed_style_t> list = theme._styles; 
 		scope::compile::compiled_t<theme_t::decomposed_style_t> compiled = scope::compile::compile(list);
-		
+		std::vector<std::string> _scopes = scopes();
 		oak::duration_t timer2;
 		for(int i = 0; i < repeat ; i++)
 		{
-			std::multimap<double, theme_t::decomposed_style_t> ordered;
-			compiled.match(textScope, ordered);
+			iterate(textScope, _scopes)
+			{
+				printf ("scope : %s\n", textScope->c_str());
+				
+				std::multimap<double, theme_t::decomposed_style_t> ordered;
+				compiled.match(*textScope, ordered);
+			}
 		}
 	 	printf ("%.4f seconds to new theme\n", timer2.duration());
 		
