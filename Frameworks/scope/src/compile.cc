@@ -19,7 +19,7 @@ scope::compile::compressor_t& scope::compile::compressor_t::setup(analyze_t cons
 	return compressor;
 }
 
-const scope::compile::compressor_t* next(std::string& str, const scope::compile::compressor_t& path) {
+const scope::compile::compressor_t* next(std::string const& str, const scope::compile::compressor_t& path) {
 		typename std::map<std::string, scope::compile::compressor_t::compressor_t>::const_iterator it = path.path.find(str);
 		if(it != path.path.end()) 
 			return &it->second;

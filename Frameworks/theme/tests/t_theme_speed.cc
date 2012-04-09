@@ -7,7 +7,7 @@
 
 class ThemeSpeedTests : public CxxTest::TestSuite
 {
-	int repeat =  10;//000;
+	int repeat =  100;
 	std::string grammar()
 	{
 		std::string str;
@@ -47,13 +47,18 @@ public:
 
 		theme_t theme(TestGrammarItem);
 		std::vector<std::string> _scopes = scopes();
+		std::vector<scope::context_t::context_t> contexts;
+
+		iterate(textScope, _scopes)
+			contexts.push_back(scope::context_t::context_t(*textScope));
 		oak::duration_t timer1;
 		
 		for(int i = 0; i < repeat ; i++)
-			iterate(textScope, _scopes)
+			iterate(textScope, contexts)
 			{				
 				theme.styles_for_scope(*textScope, "", 1.0);
 			}
+
 	 	printf ("%.4f seconds to classic theme\n", timer1.duration());
 		
 	}
@@ -70,15 +75,18 @@ public:
 		std::vector<theme_t::decomposed_style_t> list = theme._styles; 
 		scope::compile::compiled_t<theme_t::decomposed_style_t> compiled = scope::compile::compile(list);
 		std::vector<std::string> _scopes = scopes();
+		std::vector<scope::context_t::context_t> contexts;
+
+		iterate(textScope, _scopes)
+			contexts.push_back(scope::context_t::context_t(*textScope));
+		
 		oak::duration_t timer2;
 		for(int i = 0; i < repeat ; i++)
-		{
-			iterate(textScope, _scopes)
+			iterate(textScope, contexts)
 			{				
-				std::multimap<double, theme_t::decomposed_style_t> ordered;
+				std::multimap<double, const theme_t::decomposed_style_t&> ordered;
 				compiled.match(*textScope, ordered);
 			}
-		}
 		
 	 	printf ("%.4f seconds to new theme\n", timer2.duration());
 	}

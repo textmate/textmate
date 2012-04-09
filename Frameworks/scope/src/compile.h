@@ -75,7 +75,7 @@ namespace scope
 				this->expressions = expressions;
 				compressor_t::setup(analyze, compressor);
 			}
-			bool match (context_t const& scope, std::multimap<double, T>& ordered) const
+			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
 			{
 				size_t before = ordered.size();
 				std::map<int, double> matched = ::scope::compile::match(scope, compressor, expressions, blocks_needed);
