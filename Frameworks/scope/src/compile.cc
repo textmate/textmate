@@ -20,14 +20,20 @@ scope::compile::compressor_t& scope::compile::compressor_t::setup(analyze_t cons
 }
 
 const scope::compile::compressor_t* next(std::string const& str, const scope::compile::compressor_t& path) {
-		typename std::map<std::string, scope::compile::compressor_t::compressor_t>::const_iterator it = path.path.find(str);
-		if(it != path.path.end()) 
-			return &it->second;
-		it = path.path.find("*");
-		if(it != path.path.end()) 
-			return &it->second;
-		
-		return NULL; 
+	typedef std::map<std::string, scope::compile::compressor_t::compressor_t>::const_iterator iterator;
+	iterator it = path.path.find(str);
+	iterator last = path.path.end();
+	if(it != last) 
+		return &it->second;
+	assert('*' == 42);
+	assert(*scope::types::atom_any.c_str() == 42);
+	assert(*scope::types::atom_any.c_str() < 'a');
+	
+	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str()) 
+	if(path.path.size() > 0 && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str())
+		return &path.path.begin()->second;
+	
+	return NULL; 
 }
 
 std::map<int, double> scope::compile::match (scope::context_t const& scope, const scope::compile::compressor_t& compressor, const std::vector<scope::compile::sub_rule_t>& expressions, size_t backing_size)
@@ -70,8 +76,6 @@ std::map<int, double> scope::compile::match (scope::context_t const& scope, cons
 		xpath.scopes.push_back(xscope);
 			
 	}
-
-
 
 	for(size_t index = 0; index < palette.size(); index++) {	
 		while(int sub_rule_id = ffs(palette.at(index))) {
