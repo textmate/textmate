@@ -64,15 +64,14 @@ namespace scope
 
 		template<typename T>
 		class PUBLIC compiled_t {
-			
 			compressor_t compressor;
 			std::vector<sub_rule_t> expressions;
-			size_t blocks_needed;
 			std::vector<T> rules;
+			size_t blocks_needed;
+
 		public:
-			compiled_t(const analyze_t& analyze, std::vector<T> const& rules, std::vector<sub_rule_t> expressions, size_t blocks_needed): compressor(blocks_needed), blocks_needed(blocks_needed){
-				this->rules = rules;
-				this->expressions = expressions;
+			compiled_t(const analyze_t& analyze, std::vector<T> const& rules, std::vector<sub_rule_t> expressions, size_t blocks_needed): compressor(blocks_needed), expressions(expressions), rules(rules), blocks_needed(blocks_needed)
+			{
 				compressor_t::setup(analyze, compressor);
 			}
 			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
@@ -80,7 +79,7 @@ namespace scope
 				size_t before = ordered.size();
 				std::map<int, double> matched = ::scope::compile::match(scope, compressor, expressions, blocks_needed);
 				iterate(it, matched)
-					ordered.insert(std::make_pair(it->first, rules[it->second]));
+					ordered.insert(std::make_pair<double, const T&>(it->first, rules[it->second]));
 				return ordered.size() - before != 0;
 			}
 		};
