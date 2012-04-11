@@ -15,9 +15,9 @@ namespace scope
 		struct analyze_t;
 		struct sub_rule_t;
 		class compressor_t;
+		class matcher_t;
 		void graph (analyze_t& root, const selector_t& selector, int& rule_id, int& sub_rule_id, std::multimap<int,int>& rules);
 		void compress (const analyze_t& root, const selector_t& selector, int rule_id, int index, std::vector<sub_rule_t>& expressions);
-		std::map<int, double> match (context_t const& scope, const compile::compressor_t& compressor, const std::vector<sub_rule_t>& expressions, size_t backing_size);
 	}
 	namespace types
 	{
@@ -50,7 +50,7 @@ namespace scope
 	private:
 		void setup (std::string const& str);
 
-		friend std::map<int, double> compile::match (context_t const& scope, const compile::compressor_t& compressor, const std::vector<compile::sub_rule_t>& expressions, size_t backing_size);
+		friend class compile::matcher_t;
 		friend struct selector_t;
 		friend scope::scope_t shared_prefix (scope_t const& a, scope_t const& b);
 		friend std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open, std::string const& close);

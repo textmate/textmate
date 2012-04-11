@@ -47,17 +47,26 @@ namespace scope
 			int rule_id;
 		};
 		
-		PUBLIC std::map<int, double> match (context_t const& scope, const compressor_t& compressor, const std::vector<sub_rule_t>& expressions, size_t backing_size);
-		
+		class PUBLIC matcher_t
+		{
+			std::vector<sub_rule_t> expressions;
+			size_t blocks_needed;
+			mutable std::vector<scope::compile::bits_t> palette;
+		public:
+			matcher_t(std::vector<sub_rule_t> expressions, size_t blocks_needed): expressions(expressions), blocks_needed(blocks_needed), palette(blocks_needed) {}
+			std::map<int, double> match (context_t const& scope, const compressor_t& compressor) const;			
+		};
+
 		class PUBLIC compressor_t
 		{
 			std::vector<int> simple;
 			std::vector<bits_t> possible;
 			bool match;
 			int hash;
-			friend std::map<int, double> match (context_t const& scope, const compressor_t& compressor, const std::vector<sub_rule_t>& expressions, size_t backing_size);
+			friend class matcher_t;
 		public:
 			std::map<std::string, compressor_t> path;
+			const compressor_t* next(std::string const& str) const;
 			static compressor_t& setup(analyze_t const& analyze, compressor_t& compressor);
 			compressor_t (size_t sz): possible(sz) {}
 		};
@@ -65,19 +74,18 @@ namespace scope
 		template<typename T>
 		class PUBLIC compiled_t {
 			compressor_t compressor;
-			std::vector<sub_rule_t> expressions;
+			matcher_t matcher;
 			std::vector<T> rules;
-			size_t blocks_needed;
 
 		public:
-			compiled_t(const analyze_t& analyze, std::vector<T> const& rules, std::vector<sub_rule_t> expressions, size_t blocks_needed): compressor(blocks_needed), expressions(expressions), rules(rules), blocks_needed(blocks_needed)
+			compiled_t(const analyze_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(blocks_needed), matcher(expressions, blocks_needed), rules(rules)
 			{
 				compressor_t::setup(analyze, compressor);
 			}
 			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
 			{
 				size_t before = ordered.size();
-				std::map<int, double> matched = ::scope::compile::match(scope, compressor, expressions, blocks_needed);
+				std::map<int, double> matched = matcher.match(scope, compressor);
 				iterate(it, matched)
 					ordered.insert(std::make_pair<double, const T&>(it->first, rules[it->second]));
 				return ordered.size() - before != 0;

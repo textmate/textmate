@@ -19,10 +19,10 @@ scope::compile::compressor_t& scope::compile::compressor_t::setup(analyze_t cons
 	return compressor;
 }
 
-const scope::compile::compressor_t* next(std::string const& str, const scope::compile::compressor_t& path) {
+const scope::compile::compressor_t* scope::compile::compressor_t::next(std::string const& str) const{
 	typedef std::map<std::string, scope::compile::compressor_t::compressor_t>::const_iterator iterator;
-	iterator it = path.path.find(str);
-	iterator last = path.path.end();
+	iterator it = this->path.find(str);
+	iterator last = this->path.end();
 	if(it != last) 
 		return &it->second;
 	assert('*' == 42);
@@ -30,17 +30,16 @@ const scope::compile::compressor_t* next(std::string const& str, const scope::co
 	assert(*scope::types::atom_any.c_str() < 'a');
 	
 	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str()) 
-	if(path.path.size() > 0 && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str())
-		return &path.path.begin()->second;
+	if(this->path.size() > 0 && *this->path.begin()->first.c_str() == *scope::types::atom_any.c_str())
+		return &this->path.begin()->second;
 	
 	return NULL; 
 }
 
-std::map<int, double> scope::compile::match (scope::context_t const& scope, const scope::compile::compressor_t& compressor, const std::vector<scope::compile::sub_rule_t>& expressions, size_t backing_size)
+std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& scope, const scope::compile::compressor_t& compressor) const
 {
 	// TODO can palette be cleared and reused?
-	static std::vector<scope::compile::bits_t> palette(backing_size);
-	palette.assign(backing_size, 0); // clear
+	palette.assign(blocks_needed, 0); // clear
 	std::vector<scope::types::scope_t>& path = scope.left.path->scopes;
 	scope::compressed::path_t xpath;
 	std::map<int, double> ruleToRank; // should this be a vector, and ignore zero values?
@@ -53,7 +52,7 @@ std::map<int, double> scope::compile::match (scope::context_t const& scope, cons
 		int sz = path[s].atoms.size();
 		power += sz;
 
-		while(const scope::compile::compressor_t* current = next(path[s].atoms[j], *comp))
+		while(const scope::compile::compressor_t* current = comp->next(path[s].atoms[j]))
 		{
 			j++;
 			comp = current;
