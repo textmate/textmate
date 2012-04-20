@@ -7,6 +7,7 @@
 
 class ThemeSpeedTests : public CxxTest::TestSuite
 {
+
 	int repeat =  100;
 	std::string grammar()
 	{
@@ -37,7 +38,7 @@ class ThemeSpeedTests : public CxxTest::TestSuite
 	}
 	
 public:
-	void test_theme_speed1 ()
+	void no_test_theme_speed1 ()
 	{
 		test::bundle_index_t bundleIndex;
 		bundles::item_ptr TestGrammarItem;
@@ -85,7 +86,7 @@ public:
 			iterate(textScope, contexts)
 			{				
 				std::multimap<double, const theme_t::decomposed_style_t&> ordered;
-				compiled.match(*textScope, ordered);
+				compiled.styles_for_scope(*textScope, "", 1.0);
 			}
 		
 	 	printf ("%.4f seconds to new theme\n", timer2.duration());
