@@ -16,8 +16,7 @@ namespace scope
 		struct sub_rule_t;
 		class compressor_t;
 		class matcher_t;
-		void graph (analyze_t& root, const selector_t& selector, int& rule_id, int& sub_rule_id, std::multimap<int,int>& rules);
-		void compress (const analyze_t& root, const selector_t& selector, int rule_id, int index, std::vector<sub_rule_t>& expressions);
+		class compiler_t;
 	}
 	namespace types
 	{
@@ -94,8 +93,7 @@ namespace scope
 		void setup (std::string const& str);
 
 		friend std::string to_s (selector_t const& s);
-		friend void compile::graph (compile::analyze_t& root, const selector_t& selector, int& rule_id, int& sub_rule_id, std::multimap<int,int>& rules);
-		friend void compile::compress (const compile::analyze_t& root, const selector_t& selector, int rule_id, int sub_id, std::vector<compile::sub_rule_t>& expressions);
+		friend class compile::compiler_t;
 
 		types::selector_ptr selector;
 	};

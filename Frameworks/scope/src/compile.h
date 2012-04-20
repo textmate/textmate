@@ -90,47 +90,68 @@ namespace scope
 					ordered.insert(std::make_pair<double, const T&>(it->first, rules[it->second]));
 				return ordered.size() - before != 0;
 			}
+
+			T styles_for_scope (context_t const& scope, std::string fontName, CGFloat fontSize) const
+			{
+				std::map<int, double> matched = matcher.match(scope, compressor);
+				T style(scope::selector_t(), fontName, fontSize);
+				iterate(it, matched)
+					style+= rules[it->second];
+				return style;
+			}
+
+		};
+		
+		class PUBLIC compiler_t
+		{
+			analyze_t root;
+			std::multimap<int, int> sub_rule_mapping;
+			std::vector<sub_rule_t> _expressions;
+		public:
+			void compress (const selector_t& selector, int rule_id, int composite_index);
+			void expand_wildcards () { expand_wildcards(root);}
+			void graph (const selector_t& selector, int& rule_id, int& sub_rule_id);
+			std::multimap<int, int>& sub_rule_mappings () { return sub_rule_mapping;}
+			std::vector<sub_rule_t> expressions () { return _expressions; }
+			analyze_t analyzer () { return root;}
+			void calculate_bit_fields () { root.calculate_bit_fields();}
+		private:
+			void expand_wildcards (analyze_t& analyzer);
+					
 		};
 
-		PUBLIC void compress (const compile::analyze_t& root, const selector_t& selector, int rule_id, int sub_id, std::vector<sub_rule_t>& expressions);
-		PUBLIC void expand_wildcards (analyze_t& root);
 		// T must support:
 		// +, scope::selector_t scope_selector
 
-		PUBLIC void graph (analyze_t& root, const selector_t& selector, int& rule_id, int& sub_rule_id,  std::multimap<int,int>& sub_rule_mapping);
 		template<typename T>
 		const compiled_t<T> compile (std::vector<T> const& rules)
 		{
-			analyze_t root;
+			compiler_t compiler;
 			int rule_id = 0;
 			int sub_rule_id=0;
-			std::multimap<int, int> sub_rule_mapping;
 			iterate(iter, rules)
 			{
-				auto selector = iter->scope_selector;
-				graph(root, selector, rule_id, sub_rule_id, sub_rule_mapping);
+				//auto selector = iter->scope_selector;
+				compiler.graph(iter->scope_selector, rule_id, sub_rule_id);
 				rule_id++;
 			}
 			// add * to all paths
-			expand_wildcards(root);
+			compiler.expand_wildcards();
 			// populate bit fields
-			root.calculate_bit_fields();
+			compiler.calculate_bit_fields();
 			
 			// break out all selectors into its compressed composites
-			std::vector<sub_rule_t> expressions;
-			iterate(r_id, sub_rule_mapping)
+			iterate(r_id, compiler.sub_rule_mappings())
 			{
 				//printf("rule :%d sub:%d\n", r_id->first, r_id->second);
-
-				auto selector = rules[r_id->first].scope_selector;
-				compress(root, selector, r_id->first, r_id->second, expressions);
+				//auto selector = rules[r_id->first].scope_selector;
+				compiler.compress(rules[r_id->first].scope_selector, r_id->first, r_id->second);
 			}
 
 			//printf("root:\n");
 			//printf("%s\n", root.to_s().c_str());
 			size_t sz = sizeof(bits_t)*CHAR_BIT;
-			auto r = rules;
-			return compiled_t<T>(root, r, expressions, sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
+			return compiled_t<T>(compiler.analyzer(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
 		}
 	}
 }

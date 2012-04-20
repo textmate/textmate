@@ -30,7 +30,12 @@ namespace scope
 			int data;
 			int mask;
 			int number;
+			
 			bool anchor_to_next;
+			bool operator== (scope_t const& rhs) const { return data == rhs.data && number == rhs.number; }
+			bool operator!= (scope_t const& rhs) const { return !(*this == rhs); }
+			bool operator< (scope_t const& rhs) const  { return data < rhs.data || data == rhs.data && number < rhs.number; }
+			
 		};
 
 		struct path_t : any_t

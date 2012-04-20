@@ -90,13 +90,13 @@ scope::compressed::any_ptr scope::types::group_t::generate (compile::analyze_t c
 scope::compressed::any_ptr scope::types::filter_t::generate (compile::analyze_t const& root) const
 { return ::generate(*this, root); }
 
-void scope::compile::compress (const scope::compile::analyze_t& root, const scope::selector_t& selector, int rule_id, int sub_rule, std::vector<scope::compile::sub_rule_t>& expressions)
+void scope::compile::compiler_t::compress (const scope::selector_t& selector, int rule_id, int composite_index)
 {
 	scope::compile::sub_rule_t sr;
-	auto ptr = generate(selector.selector->composites[sub_rule], root);
+	auto ptr = generate(selector.selector->composites[composite_index], root);
 	sr.composite = scope::compile::sub_rule_t::composite_ptr(new scope::compressed::composite_t(ptr));
 	sr.rule_id = rule_id;
-	expressions.push_back(sr);
+	_expressions.push_back(sr);
 }
 	/*
 	atom:         «string» | '*' // atom_any

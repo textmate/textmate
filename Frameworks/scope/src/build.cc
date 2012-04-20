@@ -198,7 +198,7 @@ void propagate(scope::compile::analyze_t& child, scope::compile::analyze_t& any)
 	
 }
 // expand scopes containing * into those that do not. e.g foo.* and foo.markdown, since foo.markdown is a subpart of foo.*, it too needs to behave like one
-void scope::compile::expand_wildcards (analyze_t& root)
+void scope::compile::compiler_t::expand_wildcards (analyze_t& root)
 {
 	iterate(child, root.path)
 		expand_wildcards(child->second);
@@ -212,7 +212,7 @@ void scope::compile::expand_wildcards (analyze_t& root)
 	}
 }
 
-void scope::compile::graph (scope::compile::analyze_t& root, const scope::selector_t& selector, int& rule_id, int& sub_rule_id, std::multimap<int,int>& rules)
+void scope::compile::compiler_t::graph ( const scope::selector_t& selector, int& rule_id, int& sub_rule_id)
 {
 	size_t index = 0;
 	if(!selector.selector)
@@ -243,7 +243,7 @@ void scope::compile::graph (scope::compile::analyze_t& root, const scope::select
 		{
 			set_sub_rule(root, root.or_paths, rule_id, sub_rule_id);
 			set_sub_rule(root, root.not_paths, rule_id, sub_rule_id);				
-			rules.insert(std::make_pair(rule_id, index));
+			sub_rule_mapping.insert(std::make_pair(rule_id, index));
 			sub_rule_id++;
 		// simple case				
 		} else {
