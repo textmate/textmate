@@ -38,7 +38,7 @@ class ThemeSpeedTests : public CxxTest::TestSuite
 	}
 	
 public:
-	void no_test_theme_speed1 ()
+	void test_theme_speed1 ()
 	{
 		test::bundle_index_t bundleIndex;
 		bundles::item_ptr TestGrammarItem;
@@ -84,7 +84,7 @@ public:
 		oak::duration_t timer2;
 		for(int i = 0; i < repeat ; i++)
 			iterate(textScope, contexts)
-			{				
+			{	
 				std::multimap<double, const theme_t::decomposed_style_t&> ordered;
 				compiled.styles_for_scope(*textScope, "", 1.0);
 			}
