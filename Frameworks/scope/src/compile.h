@@ -2,6 +2,7 @@
 #define COMPILE_H_5XWUY4P8
 #include "scope.h"
 #include <oak/oak.h>
+#include "immutable_map.h"
 
 namespace scope
 {
@@ -59,16 +60,24 @@ namespace scope
 
 		class PUBLIC compressor_t
 		{
+			struct converter
+			{
+				size_t sz;
+	         typedef std::pair<std::string, compressor_t> result_type;				
+				converter(size_t sz):sz(sz) {}
+				result_type operator()(std::pair<std::string, analyze_t> pair) const
+					{ return std::make_pair(pair.first, compressor_t(pair.second, sz));}
+			};
+			typedef immutable_map<std::string, scope::compile::compressor_t::compressor_t> map_type;			
 			std::vector<int> simple;
 			std::vector<bits_t> possible;
 			bool match;
 			int hash;
 			friend class matcher_t;
 		public:
-			std::map<std::string, compressor_t> path;
+			map_type path;
 			const compressor_t* next (std::string const& str) const;
-			static compressor_t& setup (analyze_t const& analyze, compressor_t& compressor);
-			compressor_t (size_t sz): possible(sz) {}
+			compressor_t (analyze_t const& analyze, size_t sz);
 		};
 
 		template<typename T>
@@ -78,10 +87,8 @@ namespace scope
 			std::vector<T> rules;
 
 		public:
-			compiled_t (const analyze_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
-			{
-				compressor_t::setup(analyze, compressor);
-			}
+			compiled_t (const analyze_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(analyze, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
+				{}
 
 			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
 			{

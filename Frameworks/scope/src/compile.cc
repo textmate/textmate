@@ -2,25 +2,23 @@
 #include "compressed.h"
 #include "types.h"
 
-scope::compile::compressor_t& scope::compile::compressor_t::setup(analyze_t const& analyze, compressor_t& compressor) {
-	size_t sz = sizeof(bits_t)*CHAR_BIT;
+scope::compile::compressor_t::compressor_t (analyze_t const& analyze, size_t sz): possible(sz), path(
+			boost::make_transform_iterator(analyze.path.begin(), converter(sz)),
+				boost::make_transform_iterator(analyze.path.end(), converter(sz))
+			) 
+{
+	size_t block_sz = sizeof(bits_t)*CHAR_BIT;
 	// set the bit for each sub_rule that is affected by this scope
 	iterate(o, analyze.multi_part)
-		compressor.possible[o->first/sz] = 1L << (o->first%sz);
+	possible[o->first/block_sz] = 1L << (o->first%block_sz);
 	iterate(o, analyze.simple)
-		compressor.simple.push_back(*o);
-	compressor.match = analyze.simple.size() > 0;
-	compressor.hash = analyze.hash;
-	iterate(a, analyze.path)
-	{
-		auto t = compressor.path.insert(std::make_pair(a->first,compressor_t(compressor.possible.size())));
-		setup(a->second, t.first->second);
-	}
-	return compressor;
+	simple.push_back(*o);
+	match = analyze.simple.size() > 0;
+	hash = analyze.hash;
 }
-
 const scope::compile::compressor_t* scope::compile::compressor_t::next(std::string const& str) const{
-	typedef std::map<std::string, scope::compile::compressor_t::compressor_t>::const_iterator iterator;
+	typedef map_type::const_iterator iterator;
+	
 	iterator it = this->path.find(str);
 	iterator last = this->path.end();
 	if(it != last) 
@@ -51,8 +49,8 @@ std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& 
 		int j = 0;
 		int sz = path[s].atoms.size();
 		power += sz;
-
-		while(const scope::compile::compressor_t* current = comp->next(path[s].atoms[j]))
+		const scope::compile::compressor_t* current;
+		while(j < sz && (current = comp->next(path[s].atoms[j])))
 		{
 			j++;
 			comp = current;
