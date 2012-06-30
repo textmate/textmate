@@ -37,23 +37,36 @@ struct PUBLIC theme_t
 	oak::uuid_t const& uuid () const;
 	styles_t const& styles_for_scope (scope::context_t const& scope, std::string fontName, CGFloat fontSize) const;
 
+	struct color_info_t
+	{
+		color_info_t () : red(-1), green(0), blue(0), alpha(1) { }
+		color_info_t (double red, double green, double blue, double alpha = 1.0) : red(red), green(green), blue(blue), alpha(alpha) { } 
+
+		bool is_blank () const  { return red < 0; }
+		bool is_opaque () const { return alpha == 1; };
+
+		operator cf::color_t () { return cf::color_t(text::format("#%02lX%02lX%02lX%02lX", lround(255 * red), lround(255 * green), lround(255 * blue), lround(255 * alpha))); }
+
+		double red, green, blue, alpha;
+	};
+
 private:
 	enum bool_t { bool_true, bool_false, bool_unset };
 
 	struct decomposed_style_t
 	{
-		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = 0) : scope_selector(scopeSelector), font_name(fontName), font_size(NULL_STR), foreground(NULL_STR), background(NULL_STR), caret(NULL_STR), selection(NULL_STR), invisibles(NULL_STR), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset), absolute_font_size(fontSize) { }
+		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = 0) : scope_selector(scopeSelector), font_name(fontName), font_size(NULL_STR), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset), absolute_font_size(fontSize) { }
 		decomposed_style_t& operator+= (decomposed_style_t const& rhs);
 
 		scope::selector_t scope_selector;
 
 		std::string font_name;
 		std::string font_size;
-		std::string foreground;
-		std::string background;
-		std::string caret;
-		std::string selection;
-		std::string invisibles;
+		color_info_t foreground;
+		color_info_t background;
+		color_info_t caret;
+		color_info_t selection;
+		color_info_t invisibles;
 		bool_t bold;
 		bool_t italic;
 		bool_t underlined;

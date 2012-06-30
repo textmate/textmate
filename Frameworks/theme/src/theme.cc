@@ -1,6 +1,15 @@
 #include "theme.h"
 #include <cf/cf.h>
 
+static theme_t::color_info_t read_color (std::string const& str_color);
+
+static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, theme_t::color_info_t& color)
+{
+	std::string temp_str;
+	plist::get_key_path(plist, setting, temp_str);
+	color = read_color(temp_str);
+}
+
 theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& plist)
 {
 	decomposed_style_t res;
@@ -11,11 +20,11 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 
 	plist::get_key_path(plist, "settings.fontName",   res.font_name);
 	plist::get_key_path(plist, "settings.fontSize",   res.font_size);
-	plist::get_key_path(plist, "settings.foreground", res.foreground);
-	plist::get_key_path(plist, "settings.background", res.background);
-	plist::get_key_path(plist, "settings.caret",      res.caret);
-	plist::get_key_path(plist, "settings.selection",  res.selection);
-	plist::get_key_path(plist, "settings.invisibles", res.invisibles);
+	get_key_path(plist, "settings.foreground",        res.foreground);
+	get_key_path(plist, "settings.background",        res.background);
+	get_key_path(plist, "settings.caret",             res.caret);
+	get_key_path(plist, "settings.selection",         res.selection);
+	get_key_path(plist, "settings.invisibles",        res.invisibles);
 
 	bool flag;
 	res.misspelled = plist::get_key_path(plist, "settings.misspelled", flag) ? (flag ? bool_true : bool_false) : bool_unset;
@@ -41,13 +50,17 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 
 std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_t const& scope)
 {
-	static struct { std::string name; std::string decomposed_style_t::*field; } const stringKeys[] =
+	static struct { std::string name; theme_t::color_info_t decomposed_style_t::*field; } const colorKeys[] =
 	{
 		{ "foreground", &decomposed_style_t::foreground },
 		{ "background", &decomposed_style_t::background },
 		{ "caret",      &decomposed_style_t::caret      },
 		{ "selection",  &decomposed_style_t::selection  },
 		{ "invisibles", &decomposed_style_t::invisibles },
+	};
+
+	static struct { std::string name; std::string decomposed_style_t::*field; } const stringKeys[] =
+	{
 		{ "fontName",   &decomposed_style_t::font_name  },
 		{ "fontSize",   &decomposed_style_t::font_size  },
 	};
@@ -61,6 +74,17 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_
 	};
 
 	std::vector<decomposed_style_t> res;
+
+	for(size_t i = 0; i < sizeofA(colorKeys); ++i)
+	{
+		bundles::item_ptr item;
+		plist::any_t const& value = bundles::value_for_setting(colorKeys[i].name, scope, &item);
+		if(item)
+		{
+			res.push_back(decomposed_style_t(item->scope_selector()));
+			res.back().*(colorKeys[i].field) = read_color(plist::get<std::string>(value));
+		}
+	}
 
 	for(size_t i = 0; i < sizeofA(stringKeys); ++i)
 	{
@@ -121,7 +145,7 @@ void theme_t::setup_styles ()
 			if(plist::dictionary_t const* styles = boost::get<plist::dictionary_t>(&*it))
 			{
 				_styles.push_back(parse_styles(*styles));
-				if(_styles.back().invisibles != NULL_STR)
+				if(!_styles.back().invisibles.is_blank())
 				{
 					decomposed_style_t invisbleStyle("deco.invisible");
 					invisbleStyle.foreground = _styles.back().invisibles;
@@ -171,39 +195,46 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 				font.reset(newFont, CFRelease);
 		}
 
-		base.foreground = base.foreground == NULL_STR ? "#000000"   : base.foreground;
-		base.background = base.background == NULL_STR ? "#FFFFFF"   : base.background;
-		base.caret      = base.caret      == NULL_STR ? "#000000"   : base.caret;
-		base.selection  = base.selection  == NULL_STR ? "#4D97FF54" : base.selection;
-		base.invisibles = base.invisibles == NULL_STR ? "#BFBFBF"   : base.invisibles;
+		cf::color_t foreground = base.foreground.is_blank() ? cf::color_t("#000000"  ) : base.foreground;
+		cf::color_t background = base.background.is_blank() ? cf::color_t("#FFFFFF"  ) : base.background;
+		cf::color_t selection  = base.selection.is_blank()  ? cf::color_t("#4D97FF54") : base.selection;
+		cf::color_t caret      = base.caret.is_blank()      ? cf::color_t("#000000"  ) : base.caret;
 
-		styles_t res(base.foreground, base.background, base.selection, base.caret, font, base.underlined == bool_true, base.misspelled == bool_true);
+		styles_t res(foreground, background, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
 		styles = _cache.insert(std::make_pair(key_t(scope, fontName, fontSize), res)).first;
 	}
 	return styles->second;
 }
 
-static std::string alpha_blend (std::string const& lhs, std::string const& rhs)
+static theme_t::color_info_t read_color (std::string const& str_color ) 
 {
-	if(lhs == NULL_STR || rhs.size() != 9 || lhs == rhs)
-		return rhs == NULL_STR ? lhs : rhs;
-
 	enum { R, G, B, A };
-	unsigned int col[2][4] = { { 0x00, 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } };
+	unsigned int col[4] = { 0x00, 0x00, 0x00, 0xFF } ;
+	
+	int res = sscanf(str_color.c_str(), "#%02x%02x%02x%02x", &col[R], &col[G], &col[B], &col[A]);
+	if(res < 3) // R G B was not parsed, or color is 100% transparent
+		return theme_t::color_info_t::color_info_t(); // color is not set
 
-	if(sscanf(lhs.c_str(), "#%02x%02x%02x%02x", &col[0][R], &col[0][G], &col[0][B], &col[0][A]) < 3)
-		return rhs == NULL_STR ? lhs : rhs;
-	if(sscanf(rhs.c_str(), "#%02x%02x%02x%02x", &col[1][R], &col[1][G], &col[1][B], &col[1][A]) < 4 || col[1][A] == 0xFF)
-		return rhs == NULL_STR ? lhs : rhs;
+	return theme_t::color_info_t::color_info_t(col[R]/255.0, col[G]/255.0, col[B]/255.0, col[A]/255.0);
+}
 
-	double alpha = col[1][A]/255.0;
-	double red   = (1.0 - alpha) * col[0][R]/255.0 + alpha * col[1][R]/255.0;
-	double green = (1.0 - alpha) * col[0][G]/255.0 + alpha * col[1][G]/255.0;
-	double blue  = (1.0 - alpha) * col[0][B]/255.0 + alpha * col[1][B]/255.0;
-	if(alpha != 1.0)
-		alpha = col[0][A]/255.0;
-
-	return text::format("#%02lX%02lX%02lX%02lX", lround(255 * red), lround(255 * green), lround(255 * blue), lround(255 * alpha));
+static void alpha_blend (theme_t::color_info_t& lhs, theme_t::color_info_t const& rhs)
+{
+	if(rhs.is_blank())
+	{
+		return;
+	}
+	else if(rhs.is_opaque() || lhs.is_blank())
+	{
+		lhs = rhs;
+	}
+	else
+	{
+		double alpha = rhs.alpha;
+		lhs.red   = (1.0 - alpha) * lhs.red + alpha * rhs.red;
+		lhs.green = (1.0 - alpha) * lhs.green + alpha * rhs.green;
+		lhs.blue  = (1.0 - alpha) * lhs.blue + alpha * rhs.blue;
+	}
 }
 
 static double my_strtod (char const* str, char const** last) // problem with strtod() is that it uses LC_NUMERIC for point separator.
@@ -247,11 +278,11 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 		}
 	}
 
-	foreground = alpha_blend(foreground, rhs.foreground);
-	background = alpha_blend(background, rhs.background);
-	caret      = alpha_blend(caret,      rhs.caret);
-	selection  = alpha_blend(selection,  rhs.selection);
-	invisibles = alpha_blend(invisibles, rhs.invisibles);
+	alpha_blend(foreground, rhs.foreground);
+	alpha_blend(background, rhs.background);
+	alpha_blend(caret,      rhs.caret);
+	alpha_blend(selection,  rhs.selection);
+	alpha_blend(invisibles, rhs.invisibles);
 
 	bold       = rhs.bold       == bool_unset ? bold       : rhs.bold;
 	italic     = rhs.italic     == bool_unset ? italic     : rhs.italic;
