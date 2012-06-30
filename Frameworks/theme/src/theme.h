@@ -73,7 +73,7 @@ struct PUBLIC theme_t
 		double red, green, blue, alpha;
 	};
 
-private:
+public:
 	enum bool_t { bool_true, bool_false, bool_unset };
 
 	struct decomposed_style_t
