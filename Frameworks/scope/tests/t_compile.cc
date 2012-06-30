@@ -1,5 +1,4 @@
 #include "scope/compile.h"
-#include <test/bundle_index.h>
 class CompileTests : public CxxTest::TestSuite
 {
 public:
