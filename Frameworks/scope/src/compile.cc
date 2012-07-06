@@ -36,7 +36,6 @@ const scope::compile::compressor_t* scope::compile::compressor_t::next(std::stri
 
 std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& scope, const scope::compile::compressor_t& compressor) const
 {
-	// TODO can palette be cleared and reused?
 	palette.assign(blocks_needed, 0); // clear
 	std::vector<scope::types::scope_t>& path = scope.left.path->scopes;
 	scope::compressed::path_t xpath;

@@ -218,6 +218,7 @@ void scope::compile::compiler_t::graph ( const scope::selector_t& selector, int&
 	if(!selector.selector)
 	{
 		// TODO how do we handle this?
+		// Answer, they always match and they get rank = 0
 		//printf("No selector %d\n", rule_id);
 		return;
 	}
