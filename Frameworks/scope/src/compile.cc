@@ -27,8 +27,9 @@ const scope::compile::compressor_t* scope::compile::compressor_t::next(std::stri
 	assert(*scope::types::atom_any.c_str() == 42);
 	assert(*scope::types::atom_any.c_str() < 'a');
 	
-	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str()) 
-	if(this->path.size() > 0 && *this->path.begin()->first.c_str() == *scope::types::atom_any.c_str())
+	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str())
+	// We use the fact that '*' is sorted before alphabetical letters 
+	if(this->path.size() > 0 && this->path.begin()->first == scope::types::atom_any)
 		return &this->path.begin()->second;
 	
 	return NULL; 
@@ -68,6 +69,7 @@ std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& 
 				}
 			}
 		}
+		
 		for(int i = 0; i < comp->possible.size();i++)
 			palette[i] |= comp->possible[i];
 		scope::compressed::scope_t xscope(comp->hash, 0, sz,false);
@@ -79,7 +81,6 @@ std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& 
 		while(int sub_rule_id = ffs(palette.at(index))) {
 			int real_index = sub_rule_id - 1 + index*(sizeof(scope::compile::bits_t)*CHAR_BIT);
 			double score;
-			//printf("palette %zu %llu id= %d;", index, palette[index], expressions.at(real_index).rule_id);
 			
 			if(expressions[real_index].composite->does_match(xpath, xpath, &score)) {
 				size_t r_id = expressions.at(real_index).rule_id;
