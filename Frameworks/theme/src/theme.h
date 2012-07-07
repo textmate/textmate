@@ -81,7 +81,7 @@ public:
 	{
 		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = -1) : scope_selector(scopeSelector), font_name(fontName), font_size(fontSize), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset) { }
 		decomposed_style_t& operator+= (decomposed_style_t const& rhs);
-
+		std::string to_s() const;
 		scope::selector_t scope_selector;
 
 		std::string font_name;

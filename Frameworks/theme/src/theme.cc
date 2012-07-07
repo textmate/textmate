@@ -390,6 +390,15 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	return *this;
 }
 
+std::string theme_t::decomposed_style_t::to_s () const{
+	return "decomposed! " +font_name +
+		     foreground.to_s() +
+		     background.to_s() +
+		     caret.to_s() +
+		     selection.to_s() +
+			  invisibles.to_s() + scope::to_s(scope_selector);		
+}
+
 // ==============
 // = Public API =
 // ==============
