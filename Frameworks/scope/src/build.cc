@@ -144,9 +144,9 @@ void scope::compile::analyze_t::clear()
 std::string scope::compile::analyze_t::to_s (int indent) const {
 	std::string res = "<";
    std::stringstream ss;//create a stringstream
-	ss << "hash=" << std::hex << hash << std::endl; 
+	ss << "hash=" << std::hex << hash << std::dec << std::endl; 
 	ss << std::string(indent, ' ') << " mask=" << std::hex << mask << std::endl;
-	ss << std::string(indent, ' ') + " simple=(";
+	ss << std::dec << std::string(indent, ' ') + " simple=(";
    iterate(number, simple) {
 		ss << *number;//add number to the stream
 		ss << ", ";
@@ -217,9 +217,7 @@ void scope::compile::compiler_t::graph ( const scope::selector_t& selector, int&
 	size_t index = 0;
 	if(!selector.selector)
 	{
-		// TODO how do we handle this?
-		// Answer, they always match and they get rank = 0
-		//printf("No selector %d\n", rule_id);
+		// rules without selectors always match and needs to be treated as having rank = 0
 		root.simple.insert(rule_id);
 		
 		return;
