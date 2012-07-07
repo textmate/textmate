@@ -69,7 +69,8 @@ namespace scope
 				result_type operator()(std::pair<std::string, analyze_t> pair) const
 					{ return std::make_pair(pair.first, compressor_t(pair.second, sz));}
 			};
-			typedef immutable_map<std::string, scope::compile::compressor_t::compressor_t> map_type;			
+			//typedef immutable_map<std::string, scope::compile::compressor_t::compressor_t> map_type;
+			typedef std::map<std::string, scope::compile::compressor_t::compressor_t> map_type; 			
 			std::vector<int> simple;
 			std::vector<bits_t> possible;
 			bool match;
@@ -98,17 +99,20 @@ namespace scope
 				size_t before = ordered.size();
 				std::map<int, double> matched = matcher.match(scope, compressor);
 				iterate(it, matched)
-					ordered.insert(std::make_pair<double, const T&>(it->first, rules[it->second]));
+					ordered.insert(std::make_pair<double, const T&>(it->second, rules[it->first]));
 				return ordered.size() - before != 0;
 			}
 
 			T styles_for_scope (context_t const& scope, std::string const& fontName, CGFloat fontSize) const
 			{
+				std::multimap<double, int> ordered;
 				std::map<int, double> matched = matcher.match(scope, compressor);
+				iterate(it, matched)
+					ordered.insert(std::make_pair(it->second, it->first));
 				T style(scope::selector_t(), fontName, fontSize);
-				iterate(it, matched) {
-					style+= rules.at(it->first);
-				}
+				iterate(it, ordered) 
+					style+= rules[it->second];
+				
 				return style;
 			}
 		};
@@ -126,9 +130,10 @@ namespace scope
 			std::vector<sub_rule_t> expressions () { return _expressions; }
 			analyze_t analyzer () { return root;}
 			void calculate_bit_fields () { root.calculate_bit_fields();}
+			std::string to_s () { return root.to_s(); }
+			
 		private:
 			void expand_wildcards (analyze_t& analyzer);
-					
 		};
 
 		// T must support:
@@ -160,7 +165,7 @@ namespace scope
 			}
 
 			//printf("root:\n");
-			//printf("%s\n", root.to_s().c_str());
+			//printf("%s\n", compiler.to_s().c_str());
 			size_t sz = sizeof(bits_t)*CHAR_BIT;
 			return compiled_t<T>(compiler.analyzer(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
 		}
