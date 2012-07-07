@@ -102,12 +102,13 @@ namespace scope
 				return ordered.size() - before != 0;
 			}
 
-			T styles_for_scope (context_t const& scope, std::string fontName, CGFloat fontSize) const
+			T styles_for_scope (context_t const& scope, std::string const& fontName, CGFloat fontSize) const
 			{
 				std::map<int, double> matched = matcher.match(scope, compressor);
 				T style(scope::selector_t(), fontName, fontSize);
-				iterate(it, matched)
-					style+= rules[it->second];
+				iterate(it, matched) {
+					style+= rules.at(it->first);
+				}
 				return style;
 			}
 		};
