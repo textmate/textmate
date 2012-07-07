@@ -54,6 +54,7 @@ namespace scope
 			size_t blocks_needed;
 			mutable std::vector<scope::compile::bits_t> palette;
 		public:
+			matcher_t () {}
 			matcher_t (std::vector<sub_rule_t> expressions, size_t blocks_needed): expressions(expressions), blocks_needed(blocks_needed), palette(blocks_needed) {}
 			std::map<int, double> match (context_t const& scope, const compressor_t& compressor) const;			
 		};
@@ -78,6 +79,7 @@ namespace scope
 			map_type path;
 			const compressor_t* next (std::string const& str) const;
 			compressor_t (analyze_t const& analyze, size_t sz);
+			compressor_t () {}
 		};
 
 		template<typename T>
@@ -87,6 +89,7 @@ namespace scope
 			std::vector<T> rules;
 
 		public:
+			compiled_t() {}
 			compiled_t (const analyze_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(analyze, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
 				{}
 

@@ -8,9 +8,9 @@ class immutable_map {
 	backing_type backing;
 	struct pair_less
 	{
-	   bool operator()( const std::pair<K, V>& lhs, const K& rhs ) const 
+	   bool operator() ( const std::pair<K, V>& lhs, const K& rhs ) const 
 	   { return lhs.first < rhs; }
-	   bool operator()( const K& lhs, const std::pair<K, V >& rhs ) const 
+	   bool operator() ( const K& lhs, const std::pair<K, V >& rhs ) const 
 		{ return (*this)(rhs, lhs); }
 	};
 	
@@ -38,7 +38,7 @@ private:
 	}
 
 	template<typename Comparator>
-	const_iterator binary_search(const K& key, Comparator comp) const
+	const_iterator binary_search (const K& key, Comparator comp) const
 	{
 
 		int imin = 0;
@@ -63,12 +63,12 @@ private:
 public:
 
  template<typename InputIterator>
-   immutable_map(InputIterator first, InputIterator last) : backing(first, last) {}
-
-	const_iterator begin() const { return backing.begin();}
-	const_iterator end() const { return backing.end();}
+   immutable_map (InputIterator first, InputIterator last) : backing(first, last) {}
+	immutable_map () {}
+	const_iterator begin () const { return backing.begin();}
+	const_iterator end () const { return backing.end();}
 	
-	size_t size() const { return backing.size();}
+	size_t size () const { return backing.size();}
 
 	const_iterator find ( const K& value ) const
 	{
