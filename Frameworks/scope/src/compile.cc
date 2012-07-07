@@ -40,6 +40,8 @@ std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& 
 	std::vector<scope::types::scope_t>& path = scope.left.path->scopes;
 	scope::compressed::path_t xpath;
 	std::map<int, double> ruleToRank; // should this be a vector, and ignore zero values?
+	iterate(sim, compressor.simple)
+		ruleToRank[*sim] = 0.0;
 	size_t s = path.size();
 	int power = 0;
 	while(s--)
