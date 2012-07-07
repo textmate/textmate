@@ -3,6 +3,7 @@
 
 #include <bundles/bundles.h>
 #include <scope/scope.h>
+#include <scope/compile.h>
 #include <cf/color.h>
 
 typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
@@ -117,6 +118,8 @@ public:
 	bool _is_dark;
 	bool _is_transparent;
 	callback_t _callback;
+
+	scope::compile::compiled_t<decomposed_style_t> compiled;
 
 	typedef std::tuple<scope::context_t, std::string, CGFloat> key_t; // scope, font name, font size
 	mutable std::map<key_t, styles_t> _cache;
