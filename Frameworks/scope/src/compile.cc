@@ -35,12 +35,10 @@ const scope::compile::compressor_t* scope::compile::compressor_t::next(std::stri
 	return NULL; 
 }
 
-std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& scope, const scope::compile::compressor_t& compressor) const
+scope::compressed::path_t scope::compile::matcher_t::lookup (scope::context_t const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank) const
 {
-	palette.assign(blocks_needed, 0); // clear
 	std::vector<scope::types::scope_t>& path = scope.left.path->scopes;
 	scope::compressed::path_t xpath;
-	std::map<int, double> ruleToRank; // should this be a vector, and ignore zero values?
 	iterate(sim, compressor.simple)
 		ruleToRank[*sim] = 0.0;
 	size_t s = path.size();
@@ -69,13 +67,19 @@ std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& 
 				}
 			}
 		}
-		
+
 		for(int i = 0; i < comp->possible.size();i++)
 			palette[i] |= comp->possible[i];
 		scope::compressed::scope_t xscope(comp->hash, 0, sz,false);
-		xpath.scopes.push_back(xscope);
-			
+		xpath.scopes.push_back(xscope);		
 	}
+	return xpath;
+}
+std::map<int, double> scope::compile::matcher_t::match (scope::context_t const& scope, const scope::compile::compressor_t& compressor) const
+{
+	palette.assign(blocks_needed, 0); // clear
+	std::map<int, double> ruleToRank; // should this be a vector, and ignore zero values?
+	scope::compressed::path_t xpath = lookup(scope, compressor, palette, ruleToRank);
 
 	for(size_t index = 0; index < palette.size(); index++) {	
 		while(int sub_rule_id = ffs(palette.at(index))) {

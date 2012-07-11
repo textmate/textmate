@@ -63,6 +63,7 @@ namespace scope
 		public:
 			matcher_t () {}
 			matcher_t (std::vector<sub_rule_t> expressions, size_t blocks_needed): expressions(expressions), blocks_needed(blocks_needed), palette(blocks_needed) {}
+			scope::compressed::path_t lookup (scope::context_t const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank) const;
 			std::map<int, double> match (context_t const& scope, const compressor_t& compressor) const;			
 		};
 
