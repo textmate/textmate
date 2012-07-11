@@ -27,9 +27,17 @@ namespace scope
 		typedef unsigned long long bits_t;
 		struct PUBLIC analyze_t
 		{	
-			std::map<std::string, analyze_t> path;
 			scopesx or_paths;
 			scopesx not_paths;
+			void clear()
+			{
+				or_paths.clear();
+				not_paths.clear();
+			}
+		};
+		struct PUBLIC interim_t {
+			std::map<std::string, interim_t> path;
+
 			std::set<int> simple;
 			std::map<int, int> multi_part;
 			int hash;
@@ -37,7 +45,6 @@ namespace scope
 
 			void calculate_bit_fields ();
 			bool has_any ();
-			void clear ();
 			std::string to_s (int indent=0) const;
 		};
 		
@@ -66,7 +73,7 @@ namespace scope
 				size_t sz;
 	         typedef std::pair<std::string, compressor_t> result_type;				
 				converter(size_t sz):sz(sz) {}
-				result_type operator()(std::pair<std::string, analyze_t> pair) const
+				result_type operator()(std::pair<std::string, interim_t> pair) const
 					{ return std::make_pair(pair.first, compressor_t(pair.second, sz));}
 			};
 			//typedef immutable_map<std::string, scope::compile::compressor_t::compressor_t> map_type;
@@ -79,7 +86,7 @@ namespace scope
 		public:
 			map_type path;
 			const compressor_t* next (std::string const& str) const;
-			compressor_t (analyze_t const& analyze, size_t sz);
+			compressor_t (interim_t const& analyze, size_t sz);
 			compressor_t () {}
 		};
 
@@ -91,7 +98,7 @@ namespace scope
 
 		public:
 			compiled_t() {}
-			compiled_t (const analyze_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(analyze, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
+			compiled_t (const interim_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(analyze, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
 				{}
 
 			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
@@ -119,7 +126,8 @@ namespace scope
 		
 		class PUBLIC compiler_t
 		{
-			analyze_t root;
+			analyze_t _analyzer;
+			interim_t root;
 			std::multimap<int, int> sub_rule_mapping;
 			std::vector<sub_rule_t> _expressions;
 		public:
@@ -128,12 +136,13 @@ namespace scope
 			void graph (const selector_t& selector, int& rule_id, int& sub_rule_id);
 			std::multimap<int, int>& sub_rule_mappings () { return sub_rule_mapping;}
 			std::vector<sub_rule_t> expressions () { return _expressions; }
-			analyze_t analyzer () { return root;}
+			analyze_t& analyzer () { return _analyzer;}
+			interim_t& interim () { return root;}
 			void calculate_bit_fields () { root.calculate_bit_fields();}
 			std::string to_s () { return root.to_s(); }
 			
 		private:
-			void expand_wildcards (analyze_t& analyzer);
+			void expand_wildcards (interim_t& analyzer);
 		};
 
 		// T must support:
@@ -167,7 +176,7 @@ namespace scope
 			//printf("root:\n");
 			//printf("%s\n", compiler.to_s().c_str());
 			size_t sz = sizeof(bits_t)*CHAR_BIT;
-			return compiled_t<T>(compiler.analyzer(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
+			return compiled_t<T>(compiler.interim(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
 		}
 	}
 }

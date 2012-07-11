@@ -9,6 +9,7 @@ namespace scope
 	namespace compile
 	{
 		struct analyze_t;
+		struct interim_t;
 	}
 	namespace compressed
 	{
@@ -24,7 +25,7 @@ namespace scope
 			virtual ~any_t () { }
 			virtual bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const = 0;
 			virtual void build (compile::analyze_t& root, bool negate) const = 0;
-			virtual compressed::any_ptr generate (const compile::analyze_t& root) const = 0;
+			virtual compressed::any_ptr generate (const compile::interim_t& root) const = 0;
 			virtual std::string to_s () const = 0;
 		};
 
@@ -55,7 +56,7 @@ namespace scope
 
 			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
 			void build (compile::analyze_t& root, bool negate) const;
-			compressed::any_ptr generate (const compile::analyze_t& root) const;
+			compressed::any_ptr generate (const compile::interim_t& root) const;
 			bool operator== (path_t const& rhs) const { return scopes == rhs.scopes; }
 			bool operator!= (path_t const& rhs) const { return scopes != rhs.scopes; }
 			bool operator< (path_t const& rhs) const  { return scopes < rhs.scopes; }
@@ -96,7 +97,7 @@ namespace scope
 
 			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
 			void build (compile::analyze_t& root, bool negate) const;
-			compressed::any_ptr generate (const compile::analyze_t& root) const;
+			compressed::any_ptr generate (const compile::interim_t& root) const;
 			std::string to_s () const;
 		};
 
@@ -110,7 +111,7 @@ namespace scope
 
 			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
 			void build (compile::analyze_t& root, bool negate) const;
-			compressed::any_ptr generate (const compile::analyze_t& root) const;
+			compressed::any_ptr generate (const compile::interim_t& root) const;
 			std::string to_s () const;
 		};
 

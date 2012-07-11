@@ -12,7 +12,7 @@ namespace scope
 	namespace compile
 	{
 		template<typename T> class compiled_t;
-		struct analyze_t;
+		struct interim_t;
 		struct sub_rule_t;
 		class compressor_t;
 		class matcher_t;

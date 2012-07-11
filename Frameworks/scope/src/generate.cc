@@ -4,7 +4,7 @@
 #include <oak/oak.h>
 
 // expression
-scope::compressed::expression_t generate (scope::types::expression_t const& expression, scope::compile::analyze_t const& root)
+scope::compressed::expression_t generate (scope::types::expression_t const& expression, scope::compile::interim_t const& root)
 {	
 	scope::compressed::expression_t xexpression(expression.op);
 	xexpression.negate = expression.negate;
@@ -13,7 +13,7 @@ scope::compressed::expression_t generate (scope::types::expression_t const& expr
 }
 
 //composite
-scope::compressed::composite_t generate (scope::types::composite_t const& composite, scope::compile::analyze_t const& root)
+scope::compressed::composite_t generate (scope::types::composite_t const& composite, scope::compile::interim_t const& root)
 {
 	
 	scope::compressed::composite_t xcomposite;
@@ -26,7 +26,7 @@ scope::compressed::composite_t generate (scope::types::composite_t const& compos
 }
 
 // selector
-scope::compressed::selector_t generate (scope::types::selector_t const& selector, scope::compile::analyze_t const& root)
+scope::compressed::selector_t generate (scope::types::selector_t const& selector, scope::compile::interim_t const& root)
 {
 	scope::compressed::selector_t xselector;
 	iterate(iter, selector.composites)
@@ -37,7 +37,7 @@ scope::compressed::selector_t generate (scope::types::selector_t const& selector
 }
 
 //path
-scope::compressed::any_ptr generate (scope::types::path_t const& path, scope::compile::analyze_t const& root)
+scope::compressed::any_ptr generate (scope::types::path_t const& path, scope::compile::interim_t const& root)
 {	
 	scope::compressed::path_t* ptr = new scope::compressed::path_t();
 	ptr->anchor_to_bol = path.anchor_to_bol;
@@ -45,7 +45,7 @@ scope::compressed::any_ptr generate (scope::types::path_t const& path, scope::co
 	
 	iterate(iter, path.scopes)
 	{
-		const scope::compile::analyze_t* wc = &root;
+		const scope::compile::interim_t* wc = &root;
 		int number = 0;
 		iterate(iter2, iter->atoms)
 		{
@@ -64,7 +64,7 @@ scope::compressed::any_ptr generate (scope::types::path_t const& path, scope::co
 	return xpath;
 }
 //group
-scope::compressed::any_ptr generate (scope::types::group_t const& group, scope::compile::analyze_t const& root)
+scope::compressed::any_ptr generate (scope::types::group_t const& group, scope::compile::interim_t const& root)
 {
 	scope::compressed::group_t* ptr = new scope::compressed::group_t();
 	ptr->selector = generate(group.selector, root);
@@ -73,7 +73,7 @@ scope::compressed::any_ptr generate (scope::types::group_t const& group, scope::
 	return xgroup;
 }
 //filter
-scope::compressed::any_ptr generate (scope::types::filter_t const& filter, scope::compile::analyze_t const& root)
+scope::compressed::any_ptr generate (scope::types::filter_t const& filter, scope::compile::interim_t const& root)
 {
 	scope::compressed::filter_t* ptr = new scope::compressed::filter_t();
 	ptr->filter = scope::compressed::filter_t::side_t((char)filter.filter);
@@ -83,11 +83,11 @@ scope::compressed::any_ptr generate (scope::types::filter_t const& filter, scope
 	return xfilter;
 }
 
-scope::compressed::any_ptr scope::types::path_t::generate (compile::analyze_t const& root) const
+scope::compressed::any_ptr scope::types::path_t::generate (compile::interim_t const& root) const
 { return ::generate(*this, root); }
-scope::compressed::any_ptr scope::types::group_t::generate (compile::analyze_t const& root) const         
+scope::compressed::any_ptr scope::types::group_t::generate (compile::interim_t const& root) const         
 { return ::generate(*this, root); }
-scope::compressed::any_ptr scope::types::filter_t::generate (compile::analyze_t const& root) const
+scope::compressed::any_ptr scope::types::filter_t::generate (compile::interim_t const& root) const
 { return ::generate(*this, root); }
 
 void scope::compile::compiler_t::compress (const scope::selector_t& selector, int rule_id, int composite_index)

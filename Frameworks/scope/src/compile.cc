@@ -2,19 +2,19 @@
 #include "compressed.h"
 #include "types.h"
 
-scope::compile::compressor_t::compressor_t (analyze_t const& analyze, size_t sz): possible(sz), path(
-			boost::make_transform_iterator(analyze.path.begin(), converter(sz)),
-				boost::make_transform_iterator(analyze.path.end(), converter(sz))
+scope::compile::compressor_t::compressor_t (interim_t const& interim, size_t sz): possible(sz), path(
+			boost::make_transform_iterator(interim.path.begin(), converter(sz)),
+				boost::make_transform_iterator(interim.path.end(), converter(sz))
 			) 
 {
 	size_t block_sz = sizeof(bits_t)*CHAR_BIT;
 	// set the bit for each sub_rule that is affected by this scope
-	iterate(o, analyze.multi_part)
+	iterate(o, interim.multi_part)
 	possible[o->first/block_sz] = 1L << (o->first%block_sz);
-	iterate(o, analyze.simple)
+	iterate(o, interim.simple)
 	simple.push_back(*o);
-	match = analyze.simple.size() > 0;
-	hash = analyze.hash;
+	match = interim.simple.size() > 0;
+	hash = interim.hash;
 }
 const scope::compile::compressor_t* scope::compile::compressor_t::next(std::string const& str) const{
 	typedef map_type::const_iterator iterator;
