@@ -19,12 +19,13 @@ namespace scope
 	namespace types
 	{
 		struct path_t;
+		enum side_t { unset, left = 'L', right = 'R', both = 'B' };
 
 		struct any_t
 		{
 			virtual ~any_t () { }
 			virtual bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const = 0;
-			virtual void build (compile::analyze_t& root, bool negate) const = 0;
+			virtual void build (compile::analyze_t& root, side_t right_side, bool negate) const = 0;
 			virtual compressed::any_ptr generate (const compile::interim_t& root) const = 0;
 			virtual std::string to_s () const = 0;
 		};
@@ -55,7 +56,7 @@ namespace scope
 			bool anchor_to_eol;
 
 			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
-			void build (compile::analyze_t& root, bool negate) const;
+			void build (compile::analyze_t& root, side_t right_side, bool negate) const;
 			compressed::any_ptr generate (const compile::interim_t& root) const;
 			bool operator== (path_t const& rhs) const { return scopes == rhs.scopes; }
 			bool operator!= (path_t const& rhs) const { return scopes != rhs.scopes; }
@@ -96,7 +97,7 @@ namespace scope
 			selector_t selector;
 
 			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
-			void build (compile::analyze_t& root, bool negate) const;
+			void build (compile::analyze_t& root, side_t right_side, bool negate) const;
 			compressed::any_ptr generate (const compile::interim_t& root) const;
 			std::string to_s () const;
 		};
@@ -104,13 +105,12 @@ namespace scope
 		struct filter_t : any_t
 		{
 			WATCH_LEAKS(filter_t);
-
+			side_t filter;
 			filter_t () : filter(unset) { }
-			enum side_t { unset, left = 'L', right = 'R', both = 'B' } filter;
 			any_ptr selector;
 
 			bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const;
-			void build (compile::analyze_t& root, bool negate) const;
+			void build (compile::analyze_t& root, side_t right_side, bool negate) const;
 			compressed::any_ptr generate (const compile::interim_t& root) const;
 			std::string to_s () const;
 		};

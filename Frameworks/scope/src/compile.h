@@ -27,12 +27,22 @@ namespace scope
 		typedef unsigned long long bits_t;
 		struct PUBLIC analyze_t
 		{	
-			scopesx or_paths;
-			scopesx not_paths;
+			struct paths_t
+			{
+				scopesx or_paths;
+				scopesx not_paths;
+				void clear()
+				{
+					or_paths.clear();
+					not_paths.clear();
+				}
+			} left, right;
+			bool needs_right;
 			void clear()
 			{
-				or_paths.clear();
-				not_paths.clear();
+				needs_right = false;
+				left.clear();
+				right.clear();
 			}
 		};
 		struct PUBLIC interim_t {
@@ -42,6 +52,7 @@ namespace scope
 			std::map<int, int> multi_part;
 			int hash;
 			int mask;
+			bool needs_right;
 
 			void calculate_bit_fields ();
 			bool has_any ();
@@ -63,8 +74,8 @@ namespace scope
 		public:
 			matcher_t () {}
 			matcher_t (std::vector<sub_rule_t> expressions, size_t blocks_needed): expressions(expressions), blocks_needed(blocks_needed), palette(blocks_needed) {}
-			scope::compressed::path_t lookup (scope::context_t const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank) const;
-			std::map<int, double> match (context_t const& scope, const compressor_t& compressor) const;			
+			scope::compressed::path_t lookup (scope::types::path_ptr const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank, bool& needs_right) const;
+			std::map<int, double> match (context_t const& scope, const compressor_t& compressor, const compressor_t& r_compressor) const;
 		};
 
 		class PUBLIC compressor_t
@@ -81,8 +92,9 @@ namespace scope
 			typedef std::map<std::string, scope::compile::compressor_t::compressor_t> map_type; 			
 			std::vector<int> simple;
 			std::vector<bits_t> possible;
-			bool match;
 			int hash;
+			bool match;
+			bool needs_right;
 			friend class matcher_t;
 		public:
 			map_type path;
@@ -93,19 +105,21 @@ namespace scope
 
 		template<typename T>
 		class PUBLIC compiled_t {
-			compressor_t compressor;
+			compressor_t l_compressor;
+			compressor_t r_compressor;
+
 			matcher_t matcher;
 			std::vector<T> rules;
 
 		public:
 			compiled_t() {}
-			compiled_t (const interim_t& analyze, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): compressor(analyze, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
+			compiled_t (const interim_t& interim, const interim_t& r_interim, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): l_compressor(interim, blocks_needed), r_compressor(r_interim, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
 				{}
 
 			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
 			{
 				size_t before = ordered.size();
-				std::map<int, double> matched = matcher.match(scope, compressor);
+				std::map<int, double> matched = matcher.match(scope, l_compressor, r_compressor);
 				iterate(it, matched)
 					ordered.insert(std::make_pair<double, const T&>(it->second, rules[it->first]));
 				return ordered.size() - before != 0;
@@ -114,7 +128,7 @@ namespace scope
 			T styles_for_scope (context_t const& scope, std::string const& fontName, CGFloat fontSize) const
 			{
 				std::multimap<double, int> ordered;
-				std::map<int, double> matched = matcher.match(scope, compressor);
+				std::map<int, double> matched = matcher.match(scope, l_compressor, r_compressor);
 				iterate(it, matched)
 					ordered.insert(std::make_pair(it->second, it->first));
 				T style(scope::selector_t(), fontName, fontSize);
@@ -129,6 +143,7 @@ namespace scope
 		{
 			analyze_t _analyzer;
 			interim_t root;
+			interim_t right_root;
 			std::multimap<int, int> sub_rule_mapping;
 			std::vector<sub_rule_t> _expressions;
 		public:
@@ -139,6 +154,7 @@ namespace scope
 			std::vector<sub_rule_t> expressions () { return _expressions; }
 			analyze_t& analyzer () { return _analyzer;}
 			interim_t& interim () { return root;}
+			interim_t& right_interim () { return right_root;}
 			void calculate_bit_fields () { root.calculate_bit_fields();}
 			std::string to_s () { return root.to_s(); }
 			
@@ -177,7 +193,7 @@ namespace scope
 			//printf("root:\n");
 			//printf("%s\n", compiler.to_s().c_str());
 			size_t sz = sizeof(bits_t)*CHAR_BIT;
-			return compiled_t<T>(compiler.interim(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
+			return compiled_t<T>(compiler.interim(), compiler.right_interim(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
 		}
 	}
 }

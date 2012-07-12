@@ -93,27 +93,6 @@ std::string scope::compile::interim_t::to_s (int indent) const {
 	return res;
 }
 
-
-scope::compile::interim_t* traverse (scope::compile::interim_t* wc, scope::compile::scopex& scope)
-{
-	iterate(atom, scope) {
-		wc = &wc->path[*atom];
-	}
-	return wc;
-}
-
-void set_sub_rule (scope::compile::interim_t& root, scope::compile::scopesx& scopes, int rule_id, int sub_rule_id)
-{
-	scope::compile::interim_t* wc = &root;	
-	iterate(o, scopes)
-	{		
-		wc = traverse(wc, *o);
-
-		wc->multi_part[sub_rule_id]=rule_id;				
-		wc = &root;
-	}
-}
-
 void propagate(scope::compile::interim_t& child, scope::compile::interim_t& any)
 {
 	iterate(c_any, any.path)
@@ -141,6 +120,33 @@ void scope::compile::compiler_t::expand_wildcards (interim_t& root)
 	}
 }
 
+
+scope::compile::interim_t* traverse (scope::compile::interim_t* wc, scope::compile::scopex& scope)
+{
+	iterate(atom, scope) {
+		wc = &wc->path[*atom];
+	}
+	return wc;
+}
+
+void set_sub_rule (scope::compile::interim_t& root, scope::compile::scopesx& scopes, int rule_id, int sub_rule_id)
+{
+	scope::compile::interim_t* wc = &root;	
+	iterate(o, scopes)
+	{
+		wc = &root;
+		wc = traverse(wc, *o);
+		if(sub_rule_id == -1)
+		{
+			wc->simple.insert(rule_id);
+		}
+		else
+		{
+			wc->multi_part[sub_rule_id]=rule_id;
+		}
+	}
+}
+
 void scope::compile::compiler_t::graph ( const scope::selector_t& selector, int& rule_id, int& sub_rule_id)
 {
 	size_t index = 0;
@@ -156,12 +162,12 @@ void scope::compile::compiler_t::graph ( const scope::selector_t& selector, int&
 		// for every composite we want to know if it is simple i.e. just one non-negative path
 		// or multi-part
 		// after we know this, we can traverse the tree again, this time setting rule_ids
-		build(*iter2, _analyzer, false);
+		build(*iter2, _analyzer);
 		/*
-		printf("or_path size=%d ", _analyzer.or_paths.size());
-		printf("not_path size=%d ", _analyzer.not_paths.size());
+		printf("or_path size=%d ", _analyzer.left.or_paths.size());
+		printf("not_path size=%d ", _analyzer.left.not_paths.size());
 		
-		iterate(d1, _analyzer.or_paths)
+		iterate(d1, _analyzer.left.or_paths)
 		{
 			printf("or_path");
 			iterate(d2, *d1)
@@ -169,21 +175,27 @@ void scope::compile::compiler_t::graph ( const scope::selector_t& selector, int&
 		}
 		*/
 		// multi part
-		if(_analyzer.or_paths.size() > 1 || _analyzer.not_paths.size() > 0)
+		if((_analyzer.left.or_paths.size() + _analyzer.right.or_paths.size()) > 1 || (_analyzer.left.not_paths.size() + _analyzer.left.not_paths.size()) > 0)
 		{
-			set_sub_rule(root, _analyzer.or_paths, rule_id, sub_rule_id);
-			set_sub_rule(root, _analyzer.not_paths, rule_id, sub_rule_id);				
+			set_sub_rule(root, _analyzer.left.or_paths, rule_id, sub_rule_id);
+			set_sub_rule(root, _analyzer.left.not_paths, rule_id, sub_rule_id);			
+			set_sub_rule(right_root, _analyzer.right.or_paths, rule_id, sub_rule_id);
+			set_sub_rule(right_root, _analyzer.right.not_paths, rule_id, sub_rule_id);				
+
+			// currently the analysis of the rules is so crude that we can not be more fine-grained than this.
+			// ideally root.needs_right should only be set if the rule has no part that is on the left side.
+			// e.g. 'r:source.c' would need to be set like this. But 'punctuation.something.open r:punctuation.something.close'
+			// would only need to set needs_right on the punctuation.something.open node,
+			root.needs_right = root.needs_right || (_analyzer.right.or_paths.size() + _analyzer.right.not_paths.size()) > 0;
+
 			sub_rule_mapping.insert(std::make_pair(rule_id, index));
 			sub_rule_id++;
 		// simple case				
 		} else {
-			assert(__analyzer.or_paths.size() == 1);
-			scope::compile::interim_t* wc = &root;
-			iterate(o, _analyzer.or_paths)
-			{
-				wc = traverse(wc, *o);
-			}
-			wc->simple.insert(rule_id);
+			set_sub_rule(root, _analyzer.left.or_paths, rule_id, -1);
+			set_sub_rule(right_root, _analyzer.right.or_paths, rule_id, -1);
+			root.needs_right = root.needs_right || _analyzer.right.or_paths.size() > 0;
+			
 		}  
 		_analyzer.clear();
 		index++;
