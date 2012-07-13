@@ -85,7 +85,7 @@ public:
 		for(int i = 0; i < repeat ; i++)
 			iterate(textScope, contexts)
 			{	
-				std::multimap<double, const theme_t::decomposed_style_t&> ordered;
+				//std::multimap<double, const theme_t::decomposed_style_t&> ordered;
 				compiled.styles_for_scope(*textScope, "", 1.0);
 			}
 		
