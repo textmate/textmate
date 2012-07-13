@@ -73,8 +73,7 @@ namespace scope
 					for(size_t k = 0; k < scopes[j-1].atoms.size(); ++k)
 						score += 1 / pow(2, power - k);
 					--j;
-					if(anchor_to_previous)
-					  check_next = true;
+					check_next = anchor_to_previous;
 				}
 				else if(check_next)
 				{
