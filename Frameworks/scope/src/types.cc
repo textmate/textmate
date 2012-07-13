@@ -22,7 +22,7 @@ namespace scope
 		std::string to_s (any_ptr const& v)         { return v ? v->to_s() : "(null)"; }
 
 		std::string to_s (atom_t const& v)          { return v.empty() ? "(empty)" : text::format("%s", v.c_str()); }
-		std::string to_s (scope_t const& v)         { return join(v.atoms, ".") + (v.anchor_to_next ? " >" : ""); }
+		std::string to_s (scope_t const& v)         { return (v.anchor_to_previous ? "> " : "") + join(v.atoms, "."); }
 
 		std::string to_s (path_t const& v)          { return (v.anchor_to_bol ? "^ " : "") + join(v.scopes, " ") + (v.anchor_to_eol ? " $" : ""); }
 
