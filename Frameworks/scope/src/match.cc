@@ -36,10 +36,19 @@ namespace scope
 		bool path_t::does_match (path_t const& lhs, path_t const& path, double* rank) const
 		{
 			ENTER;
-
+			//printf("scope selector:%s\n", this->to_s().c_str());
 			size_t i = path.scopes.size(); // “source.ruby string.quoted.double constant.character”
+			const size_t size_i = i;
 			size_t j = scopes.size();      // “string > constant $”
-
+			const size_t size_j = j;
+			
+			bool anchor_to_bol = this->anchor_to_bol;
+			bool anchor_to_eol = this->anchor_to_eol;
+			//printf("scope selector: anchor_to_bol:%s anchor_to_eol:%s\n", anchor_to_bol?"yes":"no", anchor_to_eol?"yes":"no");
+			
+			bool check_next = false;
+			size_t reset_i, reset_j;
+			double reset_score = 0;
 			double score = 0;
 			double power = 0;
 			while(j <= i && j)
@@ -48,19 +57,50 @@ namespace scope
 				assert(i-1 < path.scopes.size());
 				assert(j-1 < scopes.size());
 
-				// if(anchor_to_bol)
-				// if(anchor_to_next)
+				bool anchor_to_previous = scopes[j-1].anchor_to_previous;
+				//printf("scope selector:%s anchor_to_previous:%s check_next:%s\n", types::to_s(scopes[j-1]).c_str(), anchor_to_previous?"yes":"no", check_next?"yes":"no");
+				
+				if(anchor_to_previous && !check_next)
+				{
+					reset_score = score;
+					reset_i = i;
+					reset_j = j;
+				}
+
 				power += path.scopes[i-1].atoms.size();
 				if(prefix_match(scopes[j-1].atoms, path.scopes[i-1].atoms))
 				{
 					for(size_t k = 0; k < scopes[j-1].atoms.size(); ++k)
 						score += 1 / pow(2, power - k);
 					--j;
+					if(anchor_to_previous)
+					  check_next = true;
+				}
+				else if(check_next)
+				{
+					i = reset_i;
+					j = reset_j;
+					score = reset_score;
+					check_next = false;
 				}
 				--i;
+				// if the outer loop has run once but the inner one has not, it is not an anchor to eol
+				if(anchor_to_eol)
+				{
+					//printf("anchor_to_eol: i:%zd size_i:%zd j:%zd size_j:%zd\n",i,size_i,j,size_j);
+					if(i != size_i && j == size_j)
+						break;
+					else
+						anchor_to_eol = false;
+				}
+				
+				
+				if(anchor_to_bol && j == 0 && i != 0) {
+					//printf("anchor_to_bol: i:%zd size_i:%zd j:%zd size_j:%zd\n",i,size_i,j,size_j);					
+					return false;
+				}
+				
 			}
-
-			// if(anchor_to_eol)
 			if(j == 0 && rank)
 				*rank = score;
 			return j == 0;

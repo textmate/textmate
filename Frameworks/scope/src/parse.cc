@@ -60,7 +60,7 @@ namespace scope
 		{
 			ENTER;
 			bool rc = false;
-
+			res.anchor_to_previous = parse_char(">") && ws();
 			do {
 				res.atoms.push_back(atom_t());
 				if(!parse_atom(res.atoms.back()))
@@ -70,9 +70,6 @@ namespace scope
 				}
 				rc = true;
 			} while(parse_char("."));
-
-			if(rc)
-				res.anchor_to_next = ws() && parse_char(">");
 
 			return rc;
 		}

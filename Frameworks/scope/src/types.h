@@ -25,9 +25,9 @@ namespace scope
 
 		struct scope_t
 		{
-			scope_t () : anchor_to_next(false) { }
+			scope_t () : anchor_to_previous(false) { }
 			std::vector<atom_t> atoms;
-			bool anchor_to_next;
+			bool anchor_to_previous;
 
 			bool operator== (scope_t const& rhs) const { return atoms == rhs.atoms; }
 			bool operator!= (scope_t const& rhs) const { return atoms != rhs.atoms; }
