@@ -10,6 +10,9 @@ public:
 		TS_ASSERT_EQUALS(scope::selector_t("foo > fud").does_match("foo bar fud"), false);
 		TS_ASSERT_EQUALS(scope::selector_t("foo > foo > fud").does_match("foo foo fud"), true);
 		TS_ASSERT_EQUALS(scope::selector_t("foo > foo > fud").does_match("foo foo fud fud"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("foo > foo > fud").does_match("foo foo fud baz"), true);
+
+		TS_ASSERT_EQUALS(scope::selector_t("foo > foo fud > fud").does_match("foo foo bar fud fud"), true);
 
 	}
 
