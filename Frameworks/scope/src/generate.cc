@@ -57,6 +57,7 @@ scope::compressed::any_ptr generate (scope::types::path_t const& path, scope::co
 		xscope.data = wc->hash;
 		xscope.mask = wc->mask;
 		xscope.number = number;
+		xscope.anchor_to_previous = iter->anchor_to_previous;
 		ptr->scopes.push_back(xscope);
 		//generate
 	}

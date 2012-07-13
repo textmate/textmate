@@ -24,14 +24,14 @@ namespace scope
 
 		struct scope_t
 		{
-			scope_t () : anchor_to_next(false) { }
-			scope_t (int data, int mask, int number, bool anchor_to_next) : data(data), mask(mask), number(number), anchor_to_next(anchor_to_next) { }
+			scope_t () : anchor_to_previous(false) { }
+			scope_t (int data, int mask, int number, bool anchor_to_previous) : data(data), mask(mask), number(number), anchor_to_previous(anchor_to_previous) { }
 
 			int data;
 			int mask;
 			int number;
 			
-			bool anchor_to_next;
+			bool anchor_to_previous;
 			bool operator== (scope_t const& rhs) const { return data == rhs.data && number == rhs.number; }
 			bool operator!= (scope_t const& rhs) const { return !(*this == rhs); }
 			bool operator< (scope_t const& rhs) const  { return data < rhs.data || data == rhs.data && number < rhs.number; }
