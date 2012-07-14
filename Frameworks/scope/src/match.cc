@@ -60,7 +60,7 @@ namespace scope
 				bool anchor_to_previous = scopes[j-1].anchor_to_previous;
 				//printf("scope selector:%s anchor_to_previous:%s check_next:%s\n", types::to_s(scopes[j-1]).c_str(), anchor_to_previous?"yes":"no", check_next?"yes":"no");
 				
-				if(anchor_to_previous && !check_next)
+				if((anchor_to_previous || (anchor_to_bol && j == 1)) && !check_next)
 				{
 					reset_score = score;
 					reset_i = i;
@@ -95,8 +95,10 @@ namespace scope
 				
 				
 				if(anchor_to_bol && j == 0 && i != 0) {
-					//printf("anchor_to_bol: i:%zd size_i:%zd j:%zd size_j:%zd\n",i,size_i,j,size_j);					
-					return false;
+					i = reset_i - 1;
+					j = reset_j;
+					score = reset_score;
+					check_next = false;
 				}
 				
 			}
