@@ -16,15 +16,29 @@ public:
 
 	}
 
-	void no_test_anchor ()
+	void test_mixed ()
+	{
+		TS_ASSERT_EQUALS(scope::selector_t("^ foo > bar").does_match("foo bar foo"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("foo > bar $").does_match("foo bar foo"), false);
+		TS_ASSERT_EQUALS(scope::selector_t("bar > foo $").does_match("foo bar foo"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("foo > bar > foo $").does_match("foo bar foo"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("^ foo > bar > foo $").does_match("foo bar foo"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("bar > foo $").does_match("foo bar foo"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("^ foo > bar > baz").does_match("foo bar baz foo bar baz"), true);
+		TS_ASSERT_EQUALS(scope::selector_t("^ foo > bar > baz").does_match("foo foo bar baz foo bar baz"), false);
+				
+	}
+
+	void test_anchor ()
 	{
 		TS_ASSERT_EQUALS(scope::selector_t("^ foo").does_match("foo bar"), true);
 		TS_ASSERT_EQUALS(scope::selector_t("^ bar").does_match("foo bar"), false);
+		TS_ASSERT_EQUALS(scope::selector_t("^ foo").does_match("foo bar foo"), true);
 		TS_ASSERT_EQUALS(scope::selector_t("foo $").does_match("foo bar"), false);
 		TS_ASSERT_EQUALS(scope::selector_t("bar $").does_match("foo bar"), true);
 	}
 
-	void no_test_scope_selector ()
+	void test_scope_selector ()
 	{
 		static scope::scope_t const textScope = "text.html.markdown meta.paragraph.markdown markup.bold.markdown";
 		static scope::selector_t const matchingSelectors[] =
