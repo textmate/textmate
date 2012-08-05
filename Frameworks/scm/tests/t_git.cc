@@ -50,7 +50,7 @@ public:
 	{
 		setup_t wc("mkdir folder && touch folder/a");
 		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::unversioned);
-		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::none);
+		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::unversioned);
 	}
 
 	void test_folder_with_ignored_file ()
@@ -65,14 +65,14 @@ public:
 		setup_t wc("echo a > .git/info/exclude && mkdir folder && touch folder/{a,b}");
 		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::unversioned);
 		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::none);
-		TS_ASSERT_EQUALS(wc.status("folder/b"), scm::status::none);
+		TS_ASSERT_EQUALS(wc.status("folder/b"), scm::status::unversioned);
 	}
 
 	void test_folder_with_untracked_and_folder ()
 	{
 		setup_t wc("mkdir -p folder/b && touch folder/a");
 		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::unversioned);
-		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::none);
+		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::unversioned);
 		TS_ASSERT_EQUALS(wc.status("folder/b"), scm::status::none);
 	}
 
@@ -86,7 +86,7 @@ public:
 	void test_folder_with_added_and_untracked_file ()
 	{
 		setup_t wc("mkdir folder && touch folder/{a,b} && git add folder/a");
-		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::added);
+		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::mixed);
 		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::added);
 		TS_ASSERT_EQUALS(wc.status("folder/b"), scm::status::unversioned);
 	}
@@ -109,14 +109,14 @@ public:
 	void test_folder_with_modified_file ()
 	{
 		setup_t wc("mkdir folder && touch folder/a && git add folder/a && git commit -mInitial && echo update > folder/a");
-		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::modified);
 		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::modified);
 	}
 
 	void test_folder_with_tracked_and_untracked_file ()
 	{
 		setup_t wc("mkdir folder && touch folder/{a,b} && git add folder/a && git commit -mInitial");
-		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::mixed);
 		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::versioned);
 		TS_ASSERT_EQUALS(wc.status("folder/b"), scm::status::unversioned);
 	}

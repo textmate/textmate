@@ -23,6 +23,7 @@ namespace scm
 			deleted     = 16,
 			conflicted  = 32,
 			ignored     = 64,
+			mixed       = 128,
 		};
 		PUBLIC std::string to_s (type status);
 	};
