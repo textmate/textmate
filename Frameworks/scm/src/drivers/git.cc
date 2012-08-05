@@ -174,7 +174,7 @@ static scm::status::type status_for (entry_t const& root)
 	if(!root.is_dir())
 		return root.status();
 
-	size_t unknown = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0;
+	size_t unknown = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0;
 	citerate(entry, root.entries())
 	{
 		switch(status_for(*entry))
@@ -185,17 +185,23 @@ static scm::status::type status_for (entry_t const& root)
 			case scm::status::modified:     ++modified; break;
 			case scm::status::added:        ++added;    break;
 			case scm::status::deleted:      ++deleted;  break;
+			case scm::status::mixed:        ++mixed;    break;
 		}
 	}
-
-	if(modified || tracked || (deleted && (added || unknown)))
-		return scm::status::versioned;
-	if(added)
-		return scm::status::added;
-	if(deleted)
-		return scm::status::deleted;
-	if(unknown)
-		return scm::status::unversioned;
+	
+	if(mixed > 0) return scm::status::mixed;
+	
+	size_t	total=unknown + ignored + tracked + modified + added + deleted;
+	
+	if(total == unknown)  return scm::status::unversioned;
+	if(total == ignored)  return scm::status::none;
+	if(total == tracked)  return scm::status::versioned;
+	if(total == modified) return scm::status::modified;
+	if(total == added)    return scm::status::added;
+	if(total == deleted)  return scm::status::deleted;
+	
+	if(total > 0) return scm::status::mixed;
+	
 	return scm::status::none;
 }
 
@@ -205,7 +211,7 @@ static void filter (scm::status_map_t& statusMap, entry_t const& root, std::stri
 	{
 		scm::status::type status = status_for(*entry);
 		statusMap.insert(std::make_pair(path::join(base, entry->path()), status));
-		if(entry->is_dir() && status != scm::status::unversioned && status != scm::status::ignored)
+		if(entry->is_dir() && status != scm::status::ignored)
 			filter(statusMap, (*entry)[entry->path()], base);
 	}
 }
