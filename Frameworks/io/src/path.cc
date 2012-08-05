@@ -307,32 +307,15 @@ namespace path
 		return path != NULL_STR && path::info(path::resolve_head(path)) & path::flag::directory;
 	}
 
-	static bool check_volume_attribute (std::string const& path, SInt32 attribute)
-	{
-		FSCatalogInfo catInfo;
-		if(FSGetCatalogInfo(fsref_t(path), kFSCatInfoVolume, &catInfo, NULL, NULL, NULL) == noErr)
-		{
-			GetVolParmsInfoBuffer volParms;
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
-			if(FSGetVolumeParms(catInfo.volume, &volParms, sizeof(volParms)) != noErr)
-				return false;
-#else
-			HParamBlockRec pb;
-			pb.ioParam.ioNamePtr  = (StringPtr)NULL;
-			pb.ioParam.ioVRefNum  = catInfo.volume;
-			pb.ioParam.ioBuffer   = (Ptr)&volParms;
-			pb.ioParam.ioReqCount = sizeof(volParms);
-			if(PBHGetVolParmsSync(&pb) != noErr) // actual size: pb.ioParam.ioActCount
-				return false;
-#endif
-			return volParms.vMVersion > 2 && (volParms.vMExtendedAttributes & (1UL << attribute)) ? true : false;
-		}
-		return false;
-	}
-
 	bool is_local (std::string const& path)
 	{
-		return check_volume_attribute(path, bIsOnInternalBus);
+		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), is_directory(path));
+		if(!url) return false;
+		CFBooleanRef pathIsLocal;
+		bool ok = CFURLCopyResourcePropertyForKey(url, kCFURLVolumeIsLocalKey, &pathIsLocal, NULL);		
+		CFRelease(url);
+		if(!ok) return false;
+		return (pathIsLocal == kCFBooleanTrue);
 	}
 
 	bool is_trashed (std::string const& path)
