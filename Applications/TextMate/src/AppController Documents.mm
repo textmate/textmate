@@ -84,7 +84,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 			if([keyValue count] == 2)
 			{
 				std::string key = to_s([[keyValue firstObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
-				NSURL* fileURL = key == "url" ? [NSURL URLWithString:[[keyValue lastObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] : nil;
+				NSURL* fileURL = key == "url" ? [NSURL URLWithString:[keyValue lastObject]] : nil;
 				parameters[key] = to_s([fileURL isFileURL] ? [fileURL path] : [[keyValue lastObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
 			}
 		}
