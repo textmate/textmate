@@ -1160,6 +1160,11 @@ static std::string parent_or_home (std::string const& path)
 	return [NSString stringWithCxxString:documentTabs.empty() ? NULL_STR : parent_or_home([self selectedDocument]->path())];
 }
 
+- (NSString*)documentFilePath
+{
+	return [NSString stringWithCxxString:documentTabs.empty() ? NULL_STR : [self selectedDocument]->path()];
+}
+
 - (NSString*)projectPath
 {
 	settings_t const& settings = documentTabs.empty() || [self selectedDocument]->path() == NULL_STR ? settings_for_path(NULL_STR, "", to_s(self.fileBrowserPath)) : [self selectedDocument]->settings();

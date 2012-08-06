@@ -77,6 +77,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 	{
 		std::map<std::string, std::string> parameters;
 
+		BOOL hadURL = NO;
 		NSArray* components = [[aURL query] componentsSeparatedByString:@"&"];
 		for(NSString* part in components)
 		{
@@ -86,6 +87,19 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 				std::string key = to_s([[keyValue firstObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
 				NSURL* fileURL = key == "url" ? [NSURL URLWithString:[keyValue lastObject]] : nil;
 				parameters[key] = to_s([fileURL isFileURL] ? [fileURL path] : [[keyValue lastObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+				hadURL |= (key == "url");
+			}
+		}
+		
+		if(!hadURL && [[NSApp orderedWindows]count] > 0)
+		{
+			NSWindow* window=[[NSApp orderedWindows]objectAtIndex:0];
+			DocumentController* controller = (DocumentController*)[window delegate];
+			if([controller isKindOfClass:[DocumentController class]] && !controller->documentTabs.empty())
+			{
+				NSString* path=[controller documentFilePath];
+				
+				if(path && [path length] > 0) parameters["url"] = to_s(path);
 			}
 		}
 
