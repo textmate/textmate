@@ -49,7 +49,7 @@ To install using [MacPorts][]:
 
 ## Building from within TextMate
 
-You should install the [Ninja][] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
+You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
 
 After this you can press ⌘B to build from within TextMate.
 
@@ -121,7 +121,7 @@ TextMate is a trademark of Allan Odgaard.
 [proctools]:     http://proctools.sourceforge.net/
 [MacPorts]:      http://www.macports.org/
 [homebrew]:      http://mxcl.github.com/homebrew/
-[Ninja]:         https://github.com/avian/ninja.tmbundle
+[NinjaBundle]:   https://github.com/avian/ninja.tmbundle
 [CxxTest]:       https://github.com/sorbits/cxxtest.tmbundle
 [GPL 3]:         http://www.gnu.org/copyleft/gpl.html
 [textmate-dev]:  http://lists.macromates.com/listinfo/textmate-dev
