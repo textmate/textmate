@@ -2,7 +2,7 @@
 
 This repository contains the source code for TextMate 2, a text editor for OS X 10.7+.
 
-![textmate](https://github.com/jtmkrueger/textmate/blob/master/screenshot.png)
+![textmate](https://raw.github.com/jtmkrueger/textmate/master/screenshot.png)
 
 # Building
 
