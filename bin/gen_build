@@ -611,7 +611,7 @@ open("#{builddir}/build.ninja", "w") do |io|
 
   COMPILER_INFO.each do |key, value|
     io << "rule #{value[:rule]}\n"
-    io << "  command = #{value[:compiler]} $FLAGS $RAVE_FLAGS #{value[:flags]} -o $out -MMD -MF $out.d -I$builddir/include $in\n"
+    io << "  command = '#{value[:compiler]}' $FLAGS $RAVE_FLAGS #{value[:flags]} -o $out -MMD -MF $out.d -I$builddir/include $in\n"
     io << "  depfile = $depfile\n"
     io << "  description = Compile ‘$in’…\n\n"
   end
@@ -685,7 +685,7 @@ rule gen_test
   description = Generate test ‘$out’…
 
 rule link_test
-  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS
+  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS
   description = Link test ‘$out’…
 
 rule run_test
@@ -701,11 +701,11 @@ rule link_static
   description = Archive objects ‘$out’…
 
 rule link_dynamic
-  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS -dynamiclib -current_version 1.0.1 -compatibility_version 1.0.0
+  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS -dynamiclib -current_version 1.0.1 -compatibility_version 1.0.0
   description = Link dynamic library ‘$out’…
 
 rule link_executable
-  command = $CXX -o $out $in $LN_FLAGS $RAVE_FLAGS
+  command = '$CXX' -o $out $in $LN_FLAGS $RAVE_FLAGS
   description = Link executable ‘$out’…
 
 rule run_executable
