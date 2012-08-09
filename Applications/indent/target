@@ -1,0 +1,2 @@
+SOURCES      = src/*.cc
+LINK        += text io regexp plist

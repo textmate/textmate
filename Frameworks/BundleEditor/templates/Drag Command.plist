@@ -1,0 +1,4 @@
+{	draggedFileExtensions = ( txt );
+	command = '#!/usr/bin/env ruby -wKU\nputs "» #{ENV[\'TM_DROPPED_FILE\']}"\n';
+	output = insertAsSnippet;
+}

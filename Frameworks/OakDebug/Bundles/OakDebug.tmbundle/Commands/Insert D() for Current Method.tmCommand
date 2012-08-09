@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+
+previous_lines = STDIN.readlines[1..ENV['TM_LINE_NUMBER'].to_i - 1]
+
+var_name = previous_lines.reverse.find { |l| l =~ /OAK_DEBUG_VAR\((.*)\);/ } ? $1 : "$1"
+
+proto_re = /
+            ^\s*                # Start of the line and optional space
+            [+-]\s*             # a plus or minus for method specifier
+            \([^)]+\)           # the return type in brackets
+            ((?:\n|[^@{])*)     
+            (?m:[\s;]*)         
+            \{                  
+          /x
+
+invocation_line = previous_lines[-1]
+
+proto = previous_lines.join.scan(proto_re)[-1]
+
+exit if proto.nil? or proto.empty?
+
+last_proto_sel_with_types = proto[0].strip.sub(/^\s+/, '').sub(%r{\s*//.*$}, '').gsub(/\n\s*/, ' ')
+
+params = []
+params = last_proto_sel_with_types.scan(/(.+?)\s*:\s*\((.+?)\)\s*(\w+)/)
+
+def format_specifier_for_type(type)
+  type = type.gsub(/\s*const\s*/, '')
+  %w[int long NSInteger NSUInteger size_t].each { |t| return('%d') if type.include? t }
+  %w[float double CGFloat].each { |t| return('%f') if type.include? t }
+  return "%s" if %w[bool BOOL].include?(type)
+  return '%c' if type == 'char'
+  return '%C' if type == 'unichar'
+  return '%s' if %w[char* string].include?(type)
+  '%s'
+end
+
+def transformer_for(type, name)
+  case type
+  when 'NSRect':  "[NSStringFromRect(#{name}) description]"
+  when 'NSRange': "[NSStringFromRange(#{name}) description]"
+  when 'NSPoint': "[NSStringFromPoint(#{name}) description]"
+  when 'NSSize':  "[NSStringFromSize(#{name}) description]"
+  when 'SEL':     "[NSStringFromSelector(#{name}) description]"
+  when /^BOOL$/i: "BSTR(#{name})"
+  when /string/:  "#{name}.c_str()"
+  else "[[#{name} description] UTF8String]"
+  end
+end
+
+print "D(DBF_#{var_name}, bug(\""
+unless params.empty?
+  print params.map { |param, type, name| name + ': ' + format_specifier_for_type(type) }.join(', ')
+end
+print '\n"'
+print ', ' + params.map { |param, type, name| transformer_for(type, name) }.join(', ') unless params.empty?
+print "););"
+</string>
+	<key>input</key>
+	<string>document</string>
+	<key>name</key>
+	<string>Insert D() for Current Method</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>scope</key>
+	<string>source.objc meta.scope.implementation, source.objc++ meta.scope.implementation</string>
+	<key>tabTrigger</key>
+	<string>Dm</string>
+	<key>uuid</key>
+	<string>DE20927C-73A5-41ED-ADE0-265A3E2BBE92</string>
+</dict>
+</plist>

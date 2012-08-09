@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -wKU
+require "#{ENV['TM_SUPPORT_PATH']}/lib/osx/plist"
+data = STDIN.read
+
+begin
+  plist = OSX::PropertyList.load(data)
+
+  if plist['command'] =~ /(\A#!.*\n)/
+    shebang, body = $&amp;, $'
+    puts shebang
+    puts "#"
+    plist.keys.reject { |e| e == 'command' }.sort.each { |key| puts "#  %25.25s: #{plist[key]}" % key }
+    puts "#"
+    puts body
+  else
+    puts "#!/bin/bash"
+    puts "#"
+    plist.keys.reject { |e| e == 'command' }.sort.each { |key| puts "#  %25.25s: #{plist[key]}" % key }
+    puts "#"
+    puts "source \"$TM_SUPPORT_PATH/lib/bash_init.sh\" # might not be necessary"
+    puts plist['command']
+  end
+rescue Exception =&gt; e
+  if data.empty?
+    STDOUT &lt;&lt; &lt;&lt;-END_OF_TEMPLATE
+#!/usr/bin/env ruby -wKU
+#
+#           name: 
+#          input: selection
+#         output: showAsTooltip
+#          scope: 
+# eventSpecifier: 
+#  keyEquivalent: 
+#     tabTrigger: 
+#           uuid: #{%x{uuidgen}.chomp}
+#
+END_OF_TEMPLATE
+  else
+    STDOUT &lt;&lt; data
+  end
+end
+</string>
+	<key>contentMatch</key>
+	<string>.*</string>
+	<key>hideFromUser</key>
+	<string>1</string>
+	<key>input</key>
+	<string>document</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>name</key>
+	<string>Import TM Commands</string>
+	<key>outputCaret</key>
+	<string>interpolateByLine</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>replaceDocument</string>
+	<key>scope</key>
+	<string>attr.rev-path.tmCommand</string>
+	<key>semanticClass</key>
+	<string>callback.document.binary-import</string>
+	<key>uuid</key>
+	<string>306DEA02-3019-4968-A56B-E9E86D490B91</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

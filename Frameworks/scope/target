@@ -1,0 +1,4 @@
+TEST_SOURCES = tests/*.cc
+SOURCES      = src/*.cc
+LINK        += text
+EXPORT       = src/scope.h

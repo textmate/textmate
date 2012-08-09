@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -wKU
+require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
+require "shellwords"
+
+abort "Select one or more items in file browser" unless ENV.has_key? 'TM_SELECTED_FILES'
+
+def same_nth_element?(n, array)
+  return false if array.any? { |arr| arr.size &lt;= n }
+	array.map { |arr| arr[n] }.uniq.size == 1
+end
+
+def common_ancestor(paths)
+	paths = paths.map { |path| path.split('/') }
+  i = 0; i += 1 while same_nth_element?(i, paths)
+  paths.first[0...i].join('/')
+end
+
+def find_unique_path(head, tail)
+  i = 1
+  path = head + tail
+  while File.exists? path
+    path = format("%s %d%s", head, i += 1, tail)
+  end
+  path
+end
+
+paths = Shellwords.shellwords(ENV['TM_SELECTED_FILES'])
+dirs  = paths.map { |path| File.dirname(path) }
+
+dest_dir  = common_ancestor(dirs)
+dest_base = paths.size == 1 ? File.basename(paths.first) : 'Archive'
+dest_path = find_unique_path("#{dest_dir}/#{dest_base}", ".tbz")
+
+relative_paths = paths.map { |path| path.sub(/#{Regexp.escape dest_dir}\//, '') }
+
+%x{tar -cjf #{e_sh dest_path} -C #{e_sh dest_dir + '/'} #{relative_paths.map { |path| e_sh path }.join(' ')}}
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>name</key>
+	<string>Compress Selected Items</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>toolTip</string>
+	<key>semanticClass</key>
+	<string>callback.file-browser.action-menu</string>
+	<key>uuid</key>
+	<string>5B28B062-9E93-40C9-8F83-A7643634C22D</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

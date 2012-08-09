@@ -1,0 +1,20 @@
+{	CFBundleName                  = "${TARGET_NAME}";
+	CFBundleVersion               = "1.0";
+	CFBundleIdentifier            = "org.example.${TARGET_NAME}";
+
+	CFBundleExecutable            = "${TARGET_NAME}";
+	CFBundleIconFile              = "";
+
+	// CFBundleHelpBookName
+	// CFBundleHelpBookFolder
+	// LSMinimumSystemVersion
+	// NSContactsUsageDescription
+
+	CFBundleDevelopmentRegion     = "English";
+	CFBundleInfoDictionaryVersion = "6.0";
+	CFBundlePackageType           = "APPL";
+	CFBundleSignature             = "????";
+
+	NSMainNibFile                 = "MainMenu";
+	NSPrincipalClass              = "NSApplication";
+}

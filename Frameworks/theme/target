@@ -1,0 +1,3 @@
+SOURCES      = src/*.cc
+LINK        += text bundles cf plist scope
+EXPORT       = src/*.h

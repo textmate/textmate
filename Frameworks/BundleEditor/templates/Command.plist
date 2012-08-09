@@ -1,0 +1,2 @@
+{	command = '#!/usr/bin/env ruby -wKU\nputs "Hello world"\n';
+}

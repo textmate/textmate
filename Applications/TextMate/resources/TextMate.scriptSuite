@@ -1,0 +1,23 @@
+{
+    AppleEventCode = AviN; 
+    Classes = {
+        NSApplication = {
+            AppleEventCode = capp; 
+            Superclass = "NSCoreSuite.NSApplication"; 
+        }; 
+    }; 
+    Commands = {
+        GetURL = {
+            AppleEventClassCode = GURL; 
+            AppleEventCode = GURL; 
+            CommandClass = GetURLScriptCommand; 
+            Type = ""; 
+            UnnamedArgument = {
+                Type = NSString;
+                Optional = NO;
+            }; 
+        }; 
+    }; 
+    Name = TextMate;
+    UsedFeatures = (UnnamedArguments); 
+}

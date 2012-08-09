@@ -1,0 +1,2 @@
+SOURCES  = src/*.cc
+LINK    += scm io

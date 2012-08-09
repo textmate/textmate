@@ -1,0 +1,3 @@
+SOURCES       = src/*.cc
+LINK         += text cf io
+EXPORT        = src/*.h

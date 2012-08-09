@@ -1,0 +1,161 @@
+#include <test/jail.h>
+#include "../src/scan_path.h"
+using namespace find;
+
+class ScanPathTestSuite : public CxxTest::TestSuite
+{
+	static void run_scanner (scan_path_t& scanner)
+	{
+		scanner.start();
+		while(scanner.is_running()) sleep(0);
+	}
+
+public:
+	void test_simple ()
+	{
+		test::jail_t jail;
+		jail.set_content("matches", "text");
+		jail.touch("dummy");
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(folder_scan_settings_t(jail.path()));
+		run_scanner(scanner);
+
+		scan_path_matches_t matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 1);
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 2);
+		TS_ASSERT_EQUALS(matches.begin()->first->path(), jail.path("matches"));
+	}
+
+	void test_globs ()
+	{
+		test::jail_t jail;
+		jail.set_content("text.x", "text");
+		jail.set_content("text.y", "text");
+		jail.set_content("text.z", "dsalkdalsjas");
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(folder_scan_settings_t(jail.path(), "*.{x,z}"));
+		run_scanner(scanner);
+
+		scan_path_matches_t matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 1);
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 2);
+		TS_ASSERT_EQUALS(matches.begin()->first->path(), jail.path("text.x"));
+	}
+
+	void test_exclude_globs ()
+	{
+		test::jail_t jail;
+		jail.set_content("text.x", "text");
+		jail.set_content("text.y", "text");
+		jail.set_content("text.z", "text");
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(folder_scan_settings_t(jail.path(), "*", "*.y"));
+		run_scanner(scanner);
+
+		scan_path_matches_t matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 2);
+		TS_ASSERT_EQUALS(matches.size(), 2);
+		TS_ASSERT_EQUALS(matches[0].first->path(), jail.path("text.x"));
+		TS_ASSERT_EQUALS(matches[1].first->path(), jail.path("text.z"));
+	}
+
+	void test_ignore_hidden ()
+	{
+		test::jail_t jail;
+		jail.set_content("visible", "text");
+		jail.set_content(".hidden/hidden", "text");
+
+		scan_path_matches_t matches;
+		folder_scan_settings_t search(jail.path());
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(search);
+		run_scanner(scanner);
+
+		matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 1);
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 1);
+
+		scan_path_t hidden_scanner;
+		hidden_scanner.set_string("text");
+		search.skip_hidden_folders = false;
+		hidden_scanner.set_folder_options(search);
+		run_scanner(hidden_scanner);
+
+		matches = hidden_scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 2);
+		TS_ASSERT_EQUALS(hidden_scanner.get_scanned_file_count(), 2);
+	}
+
+	void test_follow_links ()
+	{
+		test::jail_t jail;
+		jail.touch("start/foo.txt");
+		jail.set_content("linked/match.txt", "text");
+		jail.ln("start/link", "linked");
+
+		scan_path_matches_t matches;
+		folder_scan_settings_t search(jail.path("start"));
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(search);
+		run_scanner(scanner);
+
+		matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 0);
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 1);
+
+		scan_path_t follow_scanner;
+		search.follow_links = true;
+		follow_scanner.set_string("text");
+		follow_scanner.set_folder_options(search);
+		run_scanner(follow_scanner);
+
+		matches = follow_scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 1);
+		TS_ASSERT_EQUALS(follow_scanner.get_scanned_file_count(), 2);
+	}
+
+	void test_file_links_are_skipped ()
+	{
+		test::jail_t jail;
+		jail.set_content("match", "text");
+		jail.ln("link", "match");
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(folder_scan_settings_t(jail.path()));
+		run_scanner(scanner);
+
+		scan_path_matches_t matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 1);
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 1);
+	}
+
+	void test_duplicate_links ()
+	{
+		test::jail_t jail;
+		jail.set_content("dir/match.txt", "text");
+		jail.ln("link", "dir");
+
+		folder_scan_settings_t search(jail.path());
+		search.follow_links = true;
+
+		scan_path_t scanner;
+		scanner.set_string("text");
+		scanner.set_folder_options(search);
+		run_scanner(scanner);
+
+		scan_path_matches_t matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 1);
+		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 1);
+	}
+};

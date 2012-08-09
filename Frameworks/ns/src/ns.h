@@ -1,0 +1,18 @@
+#ifndef NS_H_SEBJ2BBY
+#define NS_H_SEBJ2BBY
+
+#include <oak/misc.h>
+#include "event.h"
+#include "to_dictionary.h"
+
+PUBLIC std::string to_s (NSString* aString);
+PUBLIC std::string to_s (NSData* aString);
+PUBLIC std::string to_s (NSEvent* anEvent);
+
+namespace ns
+{
+	PUBLIC std::string create_event_string (NSString* key, NSUInteger flags);
+
+} /* ns */
+
+#endif /* end of include guard: NS_H_SEBJ2BBY */

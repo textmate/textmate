@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/ruby -KU
+require ENV['TM_SUPPORT_PATH'] + '/lib/textmate.rb'
+require ENV['TM_SUPPORT_PATH'] + '/lib/escape.rb'
+require ENV['TM_SUPPORT_PATH'] + '/lib/ui.rb'
+
+passwd = TextMate::UI.request_string :title =&gt; "Password", :prompt =&gt; "Enter password to decrypt file:"
+abort "No password." if passwd.nil?
+STDOUT &lt;&lt; %x{ /usr/bin/openssl enc -d -aes128 -pass pass:#{e_sh passwd} }
+</string>
+	<key>contentMatch</key>
+	<string>\ASalted__</string>
+	<key>hideFromUser</key>
+	<string>1</string>
+	<key>input</key>
+	<string>document</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>name</key>
+	<string>Decrypt (Auto-detect)</string>
+	<key>outputCaret</key>
+	<string>interpolateByLine</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>replaceDocument</string>
+	<key>semanticClass</key>
+	<string>callback.document.binary-import</string>
+	<key>uuid</key>
+	<string>BF448EEA-B23C-49EE-A2A6-E672AA736D70</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

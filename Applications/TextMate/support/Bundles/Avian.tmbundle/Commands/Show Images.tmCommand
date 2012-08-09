@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -wKU
+require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
+require "shellwords"
+
+abort "Select one or more items in file browser" unless ENV.has_key? 'TM_SELECTED_FILES'
+
+paths = Shellwords.shellwords(ENV['TM_SELECTED_FILES'])
+tags  = paths.map { |path| "&lt;img src='file://#{e_url path}'&gt;\n" }
+title = paths.size &gt; 1 ? "Selected Images" : File.basename(paths.first)
+
+puts "&lt;html&gt;\n&lt;head&gt;&lt;title&gt;#{title}&lt;/title&gt;&lt;/head&gt;\n&lt;body&gt;&lt;center&gt;\n#{tags.join("&lt;br&gt;\n")}&lt;/center&gt;&lt;/body&gt;\n&lt;/html&gt;"
+</string>
+	<key>hideFromUser</key>
+	<string>1</string>
+	<key>input</key>
+	<string>none</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>name</key>
+	<string>Show Images</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>html</string>
+	<key>outputLocation</key>
+	<string>newWindow</string>
+	<key>semanticClass</key>
+	<string>callback.file-browser.action-menu</string>
+	<key>uuid</key>
+	<string>8858B455-AD7C-44E9-BDDE-C5B110E13936</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

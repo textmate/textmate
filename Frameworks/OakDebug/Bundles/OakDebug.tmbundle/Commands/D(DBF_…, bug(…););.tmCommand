@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -wKU
+
+line = ENV['TM_LINE_NUMBER'].to_i - 1
+array = STDIN.to_a[0...line].reverse
+
+var = array.find { |l| l =~ /OAK_DEBUG_VAR\((.*)\);/ } ? $1 : "$1"
+print %Q&lt;D(DBF_#{var}, bug("$2\\n"${2/[^%]*(%)?.*/(?1:, :\\);\\);)/}$3${2/[^%]*(%)?.*/(?1:\\);\\);)/}&gt;
+</string>
+	<key>input</key>
+	<string>document</string>
+	<key>name</key>
+	<string>D(DBF_…, bug(…););</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>scope</key>
+	<string>source.c++, source.objc++</string>
+	<key>tabTrigger</key>
+	<string>D</string>
+	<key>uuid</key>
+	<string>7B199EAF-AC6E-415E-B2B6-25BEB950237D</string>
+</dict>
+</plist>

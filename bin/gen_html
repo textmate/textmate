@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby -wKU
+# == Synopsis
+#
+# gen_html: generates HTML file from markdown and optional template(s)
+#
+# == Usage
+#
+# gen_html [OPTION] ... [FILE]
+#
+# --help:
+#    show help
+#
+# -t/--title «title»
+#    make «title» available to template (as `page_name`)
+#
+# -h/--header «file»
+#    prepend «file» as header (erb)
+#
+# -f/--footer «file»
+#    append «file» as footer (erb)
+#
+# FILE: The markdown document to read (defaults to stdin)
+
+require 'getoptlong'
+require 'rdoc/usage'
+require 'erb'
+
+def expand_tpl(path, binding)
+  ERB.new(File.read(path), 0, '%-<>').result(binding)
+end
+
+def find_exe(cmd)
+  dir = ENV['PATH'].split(':').find { |dir| File.executable? File.join(dir, cmd) }
+  dir ? "#{dir}/#{cmd}" : nil
+end
+
+opts = GetoptLong.new(
+  [ '--title',  '-t', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--header', '-h', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--footer', '-f', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--help',         GetoptLong::NO_ARGUMENT       ]
+)
+
+title, header, footer = 'untitled', nil, nil
+
+opts.each do |opt, arg|
+  case opt
+    when '--help'
+      RDoc::usage
+    when '--header'
+      header = arg
+    when '--footer'
+      footer = arg
+  end
+end
+
+MARKDOWN_COMPILERS = %w[ multimarkdown maruku Markdown.pl ]
+
+filter = MARKDOWN_COMPILERS.find { |exe| find_exe exe }
+abort "Unable to find a markdown compiler" if filter.nil?
+
+filters    = "|#{filter}"
+
+document   = ARGF.read
+head, body = document.scan(/\A((?:^\w+:\s+.*$\n)*)\n?((?m:.*))\z/).flatten
+tmp        = head.scan(/^(\w+):\s+(.*)$/).collect { |pair| [pair[0].downcase, pair[1].strip] }
+headers    = Hash[*tmp.flatten]
+
+page_title = headers['title'] || title
+css_files  = headers['css'].to_s.split(/,\s*/)
+js_files   = headers['js'].to_s.split(/,\s*/)
+meta_data  = Hash[*headers['meta'].to_s.scan(/(.*?)="(.*?)"(?:,\s*)?/).flatten]
+
+STDOUT << expand_tpl(header, binding) unless header.nil?
+STDOUT << open(filters, 'r+') { |io| io << document; io.close_write; io.read }
+STDOUT << expand_tpl(footer, binding) unless footer.nil?

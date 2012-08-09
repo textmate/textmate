@@ -1,0 +1,3 @@
+tabSize      = 4
+softTabs     = true
+TM_C_POINTER = " *"

@@ -1,0 +1,97 @@
+#!/bin/sh
+set -u
+function error () { printf >&2 "%s\n\nPlease see README.md for build instructions.\n" "$1"; exit; }
+
+# =================================================
+# = Fallback build directory and signing identity =
+# =================================================
+
+: ${builddir:=$HOME/build/TextMate}
+: ${identity:=-}
+: ${rest_api:=https://api.textmate.org}
+
+# ========================================================
+# = Application name, version, revision, and required OS =
+# ========================================================
+
+name=TextMate
+ver=2.0
+rev=1
+min_os=10.7
+
+rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 )) || \
+	if test -d .git && which -s git; then
+		rev=$(git log --oneline master | wc -l)
+	fi
+
+# ===============================================================
+# = Prefer clang (3.2-trunk) from MacPorts over Apple’s version =
+# ===============================================================
+
+: "${CC:=/opt/local/bin/clang}"
+: "${CXX:=/opt/local/bin/clang++}"
+
+if ! [[ -x "$CC" && -x "$CXX" ]]; then
+	CC='/usr/bin/clang'
+	CXX='/usr/bin/clang++'
+fi
+
+"$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "clang is too old to build this project."
+
+# ===============================
+# = Check if boost is installed =
+# ===============================
+
+for dir in "${boostdir:-/usr/include/boost}" /{opt,usr}/local/include/boost; do
+	if [[ ! -L "${builddir}/include/boost" && -d "${dir}" ]]; then
+		mkdir -p "${builddir}/include" && ln -fs "${dir}" "${builddir}/include/boost"
+	fi
+done
+
+test -L "${builddir}/include/boost" || error "*** boost not installed."
+
+# ==================================
+# = Locate Xcode directory and SDK =
+# ==================================
+
+xcodedir=/Developer
+sdk="/Developer/SDKs/${sdk:-MacOSX10.7}.sdk"
+
+if which -s xcode-select; then
+	xcodedir=$(xcode-select -print-path)
+	if ! [[ -e "$sdk" ]]; then
+		sdk="$xcodedir/Platforms/MacOSX.platform$sdk"
+	fi
+fi
+
+# ===============================================
+# = Check if we can use pbzip2 instead of bzip2 =
+# ===============================================
+
+bzip2_flag="-j"
+if which -s pbzip2; then
+	bzip2_flag="--use-compress-prog=pbzip2"
+fi
+
+# ==============================
+# = Check various dependencies =
+# ==============================
+
+which -s multimarkdown || which -s maruku || which -s Markdown.pl || error "*** no markdown converter installed."
+
+for dep in ninja ragel pgrep pkill "$CC" "$CXX"; do
+	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
+done
+
+# =========================================================================
+# = Update/initialize submodules, generate build files and build fixtures =
+# =========================================================================
+
+test -d .git && git submodule update --init
+
+DST="$builddir/Frameworks/SoftwareUpdate/fixtures" make -C Frameworks/SoftwareUpdate/fixtures
+
+# # Necessary if you do distribution builds (which should include some default bundles)
+# builddir="$builddir" bin/create_default_bundles_tbz
+
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_REVISION="$rev" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dsdk="$sdk" -dbzip2_flag="$bzip2_flag" target

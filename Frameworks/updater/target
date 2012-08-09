@@ -1,0 +1,4 @@
+SOURCES      = src/*.cc
+FLAGS       += -DREST_API='"$rest_api"'
+LINK        += text io network plist
+EXPORT       = src/updater.h

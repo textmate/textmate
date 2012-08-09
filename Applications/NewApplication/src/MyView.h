@@ -1,0 +1,4 @@
+@interface MyView : NSView
+{
+}
+@end

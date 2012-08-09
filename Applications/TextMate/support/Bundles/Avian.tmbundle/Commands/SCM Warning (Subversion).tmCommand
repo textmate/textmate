@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/sh
+echo 'This is a Git repository, use ⌘Y.'
+</string>
+	<key>hideFromUser</key>
+	<string>1</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^A</string>
+	<key>name</key>
+	<string>SCM Warning (Subversion)</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>attr.scm.git</string>
+	<key>uuid</key>
+	<string>2DD9AAFF-72F4-4BF0-AE56-C4792B0EB5C5</string>
+</dict>
+</plist>

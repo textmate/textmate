@@ -1,0 +1,5 @@
+SOURCES      = src/*.mm
+EXPORT       = src/{Preferences,Keys}.h
+CP_Resources = resources/* icons/* ../../rmate/rmate
+LINK         = MASPreferences MGScopeBar BundlesManager OakAppKit OakFoundation plist ns file bundles SoftwareUpdate CrashReporter
+FRAMEWORKS   = Cocoa AddressBook

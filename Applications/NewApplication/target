@@ -1,0 +1,4 @@
+SOURCES       = src/*.{cc,mm}
+CP_Resources  = resources/*
+LINK         += OakFoundation OakAppKit OakSystem
+FRAMEWORKS    = Cocoa

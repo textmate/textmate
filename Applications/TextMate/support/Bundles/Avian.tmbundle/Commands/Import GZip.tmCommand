@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/bash
+/usr/bin/gunzip
+</string>
+	<key>contentMatch</key>
+	<string>\A\x{1F}\x{8B}\x{08}</string>
+	<key>hideFromUser</key>
+	<string>1</string>
+	<key>input</key>
+	<string>document</string>
+	<key>inputFormat</key>
+	<string>text</string>
+	<key>name</key>
+	<string>Import GZip</string>
+	<key>outputCaret</key>
+	<string>interpolateByLine</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>replaceDocument</string>
+	<key>semanticClass</key>
+	<string>callback.document.binary-import</string>
+	<key>uuid</key>
+	<string>632110BD-89A3-44BB-8437-C6A744A6271A</string>
+	<key>version</key>
+	<integer>2</integer>
+</dict>
+</plist>

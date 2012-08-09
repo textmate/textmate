@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>Avian</string>
+	<key>ordering</key>
+	<array>
+		<string>AD495D39-E4CE-4790-8263-92851356C2F2</string>
+		<string>1BD332E5-D97D-4D79-992C-758F003096AA</string>
+		<string>A694C541-51F1-4E7C-9286-D89B3BBC6B0C</string>
+		<string>DE84747E-90A6-4731-92A4-A9C6823D35DE</string>
+		<string>AC5F664E-86BA-4D81-B6CE-1B12F69FA490</string>
+		<string>73C7344A-CA0F-4BED-8438-0313767E79D7</string>
+		<string>B9B9EEC2-26C1-4475-9642-3EA551999169</string>
+		<string>D77CB8B6-C75D-4A59-9181-45D27BC82C45</string>
+		<string>5C7D926C-E9A4-424F-876A-D1D8DE8CE02F</string>
+		<string>7AEE4573-8C47-4923-A414-B5EA4BC91A82</string>
+		<string>1B531CC1-3085-4E53-83FC-41F347B6684A</string>
+		<string>E2C42B70-5823-49A7-A259-A1622EBD191C</string>
+		<string>306DEA02-3019-4968-A56B-E9E86D490B91</string>
+		<string>0D7C6CA2-5A3A-4FBE-9CE6-9C23BA87CCA0</string>
+		<string>AB0B0546-2007-4E5E-AE48-E3136821C560</string>
+		<string>DD542BA4-D16F-43E1-A4B4-BC66CFB26BC3</string>
+		<string>E9240402-203E-46FB-A99B-AF5C732B98FD</string>
+		<string>2DD9AAFF-72F4-4BF0-AE56-C4792B0EB5C5</string>
+		<string>D37FEB31-0A60-45DF-A07A-2FC830FBF93C</string>
+	</array>
+	<key>uuid</key>
+	<string>C5F9DCF7-13D1-446C-BCA4-BCAD44E573B8</string>
+</dict>
+</plist>

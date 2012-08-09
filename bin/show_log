@@ -1,0 +1,74 @@
+#!/usr/bin/env ruby -wKU
+require 'pathname'
+
+def pretty(txt, width, indent)
+  tmpdir = ENV['TMPDIR'].sub(/\/$/, '')
+  resolved_tmp = Pathname.new(tmpdir).realpath
+  txt = txt.gsub(/#{Regexp.quote tmpdir}|#{Regexp.quote resolved_tmp}/, '${TMPDIR}')
+  txt = txt.gsub(/(^|\W)#{Regexp.quote ENV['HOME']}/, '\\1~')
+  txt = txt.gsub(/\xEF\xBF\xBF/, '«NULL_STR»')
+  txt = txt.gsub(/(.{1,#{width}})( +|$)\n?|(.{#{width}})/, "\\1\\3\n")
+  txt = txt.gsub(/\n(?!\z)/, "\n" + ' ' * indent)
+  txt.chomp
+end
+
+def cols
+	ENV['TERM'] ? %x{tput cols}.to_i : 80
+end
+
+# io = File.open("/tmp/avian.log")
+# io = DATA
+io = STDIN
+
+line_no = 0
+while line = io.gets
+
+  stack_dump = false
+
+  if line =~ /^(.*?)\t(.*?)\t(.*?)\t(.*)$/
+    file, fn, ln, msg = $1, $2, $3, $4
+    file = $1 if file =~ /^.*\/(.*)$/
+    if fn =~ /^([-+])\[.*? (.*)\]$/
+      fn = $1 == '+' ? "+#$2" : $2
+    end
+    printf("%-20.20s | %-25.25s | %s\n", "#{file}:#{ln}", fn, pretty(msg, cols - 51, 51))
+  elsif line =~ /^(.*) \(in (.*?)\)(?: \+ \d+| \((.*)\))?$/
+    stack_dump = true
+    line_no += 1
+    file, fn, framework = $3, $1, $2
+    printf("%-30.30s |%3d | %s\n", file || framework, line_no, pretty(fn, cols - 38, 38))
+  else
+    puts(' '*51 + pretty(line, cols - 51, 51))
+  end
+
+  line_no = 0 unless stack_dump
+
+end
+
+__END__
+text::iterator_t::operator++() (in OakTextView) (storage.cc:56)
+std::iterator_traits<text::iterator_t>::difference_type std::__distance<text::iterator_t>(text::iterator_t, text::iterator_t, std::input_iterator_tag) (in OakTextView) (stl_iterator_base_funcs.h:84)
+std::iterator_traits<text::iterator_t>::difference_type std::distance<text::iterator_t>(text::iterator_t, text::iterator_t) (in OakTextView) (stl_iterator_base_funcs.h:118)
+char* std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_S_construct<text::iterator_t>(text::iterator_t, text::iterator_t, std::allocator<char> const&, std::forward_iterator_tag) (in OakTextView) (basic_string.tcc:148)
+char* std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_S_construct_aux<text::iterator_t>(text::iterator_t, text::iterator_t, std::allocator<char> const&, __false_type) (in OakTextView) (basic_string.h:1440)
+char* std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_S_construct<text::iterator_t>(text::iterator_t, text::iterator_t, std::allocator<char> const&) (in OakTextView) (basic_string.h:1455)
+std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<text::iterator_t>(text::iterator_t, text::iterator_t, std::allocator<char> const&) (in OakTextView) (basic_string.tcc:241)
+snippet::snippet_observer_t::update_mirrors(snippet::tab_stop_t const&) (in OakTextView) (snippet.cc:292)
+snippet::snippet_observer_t::cascade(snippet::tab_stop_t const&, text::iterator_t) (in OakTextView) (snippet.cc:318)
+snippet::snippet_observer_t::will_erase(text::storage_t*, text::iterator_t const&, text::iterator_t const&) (in OakTextView) (snippet.cc:425)
+text::storage_t::erase(text::iterator_t const&, text::iterator_t const&) (in OakTextView) (storage.cc:259)
+view_t::erase(text::pos_t, text::pos_t) (in OakTextView) (TextView Internal.mm:403)
+-[TextView(NSResponder) deleteBackward:] (in OakTextView) (TextView NSResponder.mm:399)
+-[NSResponder tryToPerform:with:] (in AppKit)
+-[TextView doCommandBySelector:] (in OakTextView) (TextView NSTextInput.mm:58)
+-[NSKeyBindingManager(NSKeyBindingManager_MultiClients) interpretEventAsCommand:forClient:] (in AppKit)
+-[NSTSMInputContext interpretKeyEvents:] (in AppKit)
+-[NSView interpretKeyEvents:] (in AppKit)
+-[TextView(NSResponder) keyDown:] (in OakTextView) (TextView NSResponder.mm:283)
+-[NSWindow sendEvent:] (in AppKit)
+-[NSApplication sendEvent:] (in AppKit)
+-[NSApplication run] (in AppKit)
+_NSApplicationMain (in AppKit)
+_main (in TestApp) (main.m:13)
+__start (in TestApp)
+start (in TestApp)

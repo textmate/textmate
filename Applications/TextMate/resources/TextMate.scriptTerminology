@@ -1,0 +1,18 @@
+{
+    Classes = {
+        NSApplication = {
+            Description = "TextMate's top-level object."; 
+            Name = application; 
+            PluralName = applications; 
+        }; 
+    }; 
+    Commands = {
+        GetURL = {
+            Description = "Open an URL";
+            Name = "get url";
+            UnnamedArgument = { Description = "url to open, should start with txmt://"; }; 
+        };
+    }; 
+    Description = "AppleScript commands and classes specific to TextMate."; 
+    Name = "TextMate suite"; 
+}

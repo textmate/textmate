@@ -1,0 +1,4 @@
+TEST_SOURCES = tests/*.cc
+SOURCES      = src/*.{cc,rl}
+EXPORT       = src/{settings,volume,track_paths}.h
+LINK        += io plist OakSystem regexp scope

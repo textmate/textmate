@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -wKU
+
+require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
+
+dir = ENV['TM_DIRECTORY']
+
+until File.exist?("#{dir}/target")
+  parent = File.expand_path("..", dir)
+  abort "No target file found." if dir == parent || parent.empty?
+  dir = parent
+end
+
+%x{ #{e_sh "#{ENV['TM_SUPPORT_PATH']}/bin/mate"} #{e_sh "#{dir}/target"} }
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>~@</string>
+	<key>name</key>
+	<string>Open Target File</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>source.c, source.c++, source.objc, source.objc++</string>
+	<key>uuid</key>
+	<string>DD542BA4-D16F-43E1-A4B4-BC66CFB26BC3</string>
+</dict>
+</plist>

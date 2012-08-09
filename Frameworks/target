@@ -1,0 +1,2 @@
+BUILD   = lib
+TARGETS = */target

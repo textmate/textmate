@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby -wKU
+require "rubygems"
+require "net/netrc"
+require "json"
+require 'base64'
+require 'openssl'
+require 'digest/sha1'
+
+KEYFILE = File.join(File.dirname(__FILE__), "../../TextMate/etc/sign_key.pem")
+PW_INFO = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
+
+def sign(path)
+  # %x{openssl dgst -dss1 -sign '#{KEYFILE}' -passin 'pass:#{PW_INFO.password}' '#{path}'|openssl enc -base64}.chomp
+
+  key       = OpenSSL::PKey::DSA.new(File.read(KEYFILE), PW_INFO.password) or abort "*** error reading keyfile: ‘#{KEYFILE}’."
+  digest    = Digest::SHA1.digest(File.read(path))
+  signature = key.syssign(digest)
+  Base64.encode64(signature).gsub("\n", '')
+end
+
+if path = ARGV.shift
+  if File.basename(path) =~ /(.+)_r(\d+)\.tbz$/
+    base, name, version = $&, $1, $2
+
+    cmd = "s3cmd >/dev/null put --acl-public -m 'application/x-bzip2' --add-header='x-amz-meta-x-signee:#{PW_INFO.login}' --add-header='x-amz-meta-x-signature:#{sign(path)}' '#{path}' 's3://s3.textmate.org/Application/#{base}'"
+    url = "http://dl.textmate.org/Application/#{base}"
+
+    system(cmd) or abort "*** upload failed: #{cmd}"
+
+    info = {
+      'url'       => url,
+      'version'   => version,
+      'signature' => sign(path),
+      'signee'    => PW_INFO.login
+    }
+
+    STDOUT << info.to_json
+  end
+end

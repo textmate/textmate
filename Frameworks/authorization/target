@@ -1,0 +1,4 @@
+SOURCES      = src/*.cc
+TEST_SOURCES = tests/t_*.cc
+EXPORT       = src/*.h
+LINK        += io text OakSystem

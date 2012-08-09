@@ -1,0 +1,4 @@
+SOURCES      = src/*.mm
+LINK        += updater network OakFoundation
+EXPORT       = src/BundlesManager.h
+FRAMEWORKS   = Foundation

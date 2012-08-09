@@ -1,0 +1,1 @@
+TM_NINJA_TARGET = '${TM_DIRECTORY/^.*\/Applications\/([^\/]+)(\/.*)?$/$1\/run/}'

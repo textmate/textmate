@@ -1,0 +1,3 @@
+SOURCES      = vendor/MGScopeBar.m vendor/MGRecessedPopUpButtonCell.m
+EXPORT       = vendor/MGScopeBar.h vendor/MGScopeBarDelegateProtocol.h
+FRAMEWORKS   = Carbon Cocoa
