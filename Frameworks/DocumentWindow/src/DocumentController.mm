@@ -216,10 +216,16 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 					bring_to_front([[DocumentController alloc] initWithDocuments:documents]);
 				}
 			}
+			else if(DocumentController* delegate = [DocumentController controllerForPath:browserPath])
+			{
+				if(!documents.empty())
+					[delegate addDocuments:documents andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
+				bring_to_front(delegate);
+			}
 			else // if(browserPath != NULL_STR)
 			{
 				close_scratch_project();
-				DocumentController* delegate = documents.empty() ? [[DocumentController alloc] init] : [[DocumentController alloc] initWithDocuments:documents];
+				delegate = documents.empty() ? [[DocumentController alloc] init] : [[DocumentController alloc] initWithDocuments:documents];
 				[delegate window];
 				delegate.fileBrowserHidden = NO;
 				[delegate->fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
@@ -417,6 +423,22 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 				if(*document == *aDocument)
 					return delegate;
 			}
+		}
+	}
+	return nil;
+}
+
++ (DocumentController*)controllerForPath:(std::string const&)aPath;
+{
+	NSURL *url = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(aPath)]];
+	NSString *path = [url isFileURL] ? [url path] : nil;
+	for(NSWindow* window in [NSApp orderedWindows])
+	{
+		DocumentController* delegate = (DocumentController*)[window delegate];
+		if([delegate isKindOfClass:self])
+		{
+			if(!delegate.fileBrowserHidden && [path isEqualToString:delegate.fileBrowserPath])
+				return delegate;
 		}
 	}
 	return nil;
