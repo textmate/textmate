@@ -1,0 +1,637 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2011-04-16  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Static checks with GCC 4.6.0 and non-default toolkits.
+
+	Modernize to C89, for better static checking.
+	* Activate.c (XMenuActivate): Callback's first arg is readonly.
+	* AddPane.c (XMenuAddPane): Label is readonly.  Rename local
+	to avoid shadowing.
+	* AddSel.c (XMenuAddSelection): Help arg is readonly.  Rename local.
+	* Create.c (atoi, atof): Remove decls; include <stdlib.h>.
+	(MAX_INACT_PNUM, TILE_BUF_SIZE): Remove; unused.
+	(x_get_resource_string): Args are readonly.
+	(XAllocDisplayColor): colorName is readonly.
+	(XMenuCreate): def_env is readonly.  Remove unused locals.  Avoid
+	"else;".
+	* Destroy.c (XMenuDestroy): Return void.
+	* Error.c (XMenuError): Remove const pointer.
+	* EvHand.c (XMenuEventHandler): Return void.
+	* FindPane.c, FindSel.c: Include <string.h>.
+	* InsPane.c (XMenuInsertPane): Rename local to avoid shadowing.
+	* InsSel.c (XMenuInsertSelection): Likewise.
+	* Internal.c (toggle_color, BUFFER_SIZE): Remove; unused.
+	(_XMErrorList): Now const.
+	(_XMWinQueInit, _XMRecomputeGlobals, _XMTransToOrigin, _XMRefreshPane):
+	(_XMRefreshSelection): Return void.
+	(_XMWinQueFlush, _XMRefreshSelection): Rename locals to avoid
+	shadowing.
+	(_XMWinQueFlush): Use stack, not heap.  Don't use uninitialized var.
+	* SetAEQ.c (XMenuSetAEQ): Now returns void.
+	* SetFrz.c (XMenuSetFreeze): Likewise.
+	* X10.h (XAssoc): Use void * for generic pointer.
+	* XDelAssoc.c: Include XMenuInt.h rather than duplicating part of it.
+	* XDestAssoc.c, XMakeAssoc.c: Likewise.
+	* XDestAssoc.c (XDestroyAssocTable): Return void.
+	* XMakeAssoc.c (XMakeAssoc): Use void * for generic pointer.
+	* XMenu.h, XMenuInt.h: Adjust to signature changes.  Use const
+	for pointers to readonly storage.
+	* insque.c: Include XMenuInt.h, to check our own signature.
+	(emacs_insque, emacs_remque): Use void * for generic pointers.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2010-11-09  Elias Pipping  <pipping.elias@googlemail.com>  (tiny change)
+
+	Make Emacs compile with clang (bug#7309).
+	* XMakeAssoc.c (XMakeAssoc):
+	* XDelAssoc.c (XDeleteAssoc): Declare the return type.
+
+2010-07-12  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* XMenu.h: Include <stdlib.h>.
+
+2010-07-12  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.in (C_WARNINGS_SWITCH, PROFILING_CFLAGS): Set from
+	substitution.
+	(ALL_CFLAGS): Add ${C_WARNINGS_SWITCH} and ${PROFILING_CFLAGS}.
+
+2010-07-04  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Activate.c: Convert function definitions to standard C.
+	* AddPane.c:
+	* AddSel.c:
+	* ChgPane.c:
+	* ChgSel.c:
+	* Create.c:
+	* DelPane.c:
+	* DelSel.c:
+	* Destroy.c:
+	* Error.c:
+	* EvHand.c:
+	* FindPane.c:
+	* FindSel.c:
+	* InsPane.c:
+	* InsSel.c:
+	* Internal.c:
+	* Locate.c:
+	* Post.c:
+	* Recomp.c:
+	* SetAEQ.c:
+	* SetFrz.c:
+	* SetPane.c:
+	* SetSel.c:
+	* X10.h:
+	* XCrAssoc.c:
+	* XDelAssoc.c:
+	* XDestAssoc.c:
+	* XLookAssoc.c:
+	* XMakeAssoc.c:
+	* XMenu.h:
+	* XMenuInt.h:
+	* insque.c: Likewise.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-05-06  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (RANLIB): Let configure set it.
+	(libXMenu11.a): Configure sets RANLIB = : on systems without it.
+
+	* Makefile.in (CPP, LN_S, AS, LD, MV, LS, LINTOPTS, LINTLIBFLAG, MAKE)
+	(STD_DEFINES, CDEBUGFLAGS, RM_CMD): Remove unused variables.
+
+2010-05-04  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (C_SWITCH_SYSTEM, C_SWITCH_MACHINE):
+	Use @C_SWITCH_SYSTEM@, @C_SWITCH_MACHINE@ rather than
+	@c_switch_system@, @c_switch_machine@.
+
+2010-04-27  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (C_SWITCH_X_SYSTEM): Define using autoconf.
+
+2010-04-23  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (ALL_CFLAGS): Remove C_SWITCH_X_MACHINE, unused.
+
+2010-04-11  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (C_SWITCH_SYSTEM, C_SWITCH_MACHINE)
+	(C_SWITCH_X_SITE): Define using autoconf.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2008-07-31  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* descrip.mms:
+	* compile.com: Remove file.
+	* Create.c: Remove VMS support.
+
+2008-07-23  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (ALL_CFLAGS): Remove reference to C_SWITCH_SITE.
+
+2007-07-25  Glenn Morris  <rgm@gnu.org>
+
+	* Relicense all FSF files to GPLv3 or later.
+
+2007-06-04  Ulrich Mueller  <ulm@gentoo.org>  (tiny change)
+
+	* ChgPane.c, ChgSel.c: Quiet --with-x-toolkit=no
+	compilation warnings: #include <config.h>.
+
+2007-06-02  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 22.1 released.
+
+2007-05-30  Ulrich Mueller  <ulm@gentoo.org>  (tiny change)
+
+	* XMakeAssoc.c (XMakeAssoc): Use malloc rather than xmalloc.
+
+2007-02-27  Glenn Morris  <rgm@gnu.org>
+
+	* Imakefile: Remove unused file with no explicit legal info.
+	* Makefile.in (distclean): Remove Makefile.
+
+2007-02-25  Glenn Morris  <rgm@gnu.org>
+
+	* XCrAssoc.c, XDelAssoc.c, XDestAssoc.c, XLookAssoc.c:
+	* XMakeAssoc.c: Remove license text in favor of including
+	copyright.h, as was done in original X11 source.
+
+2004-12-27  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* Activate.c (XMenuActivate): Return XM_NO_SELECT if Escape or C-g
+	was pressed.
+
+2004-11-12  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* XMenu.h (XMenuActivateSetWaitFunction): New function.
+
+	* Activate.c (XMenuActivateSetWaitFunction): New function.
+	(XMenuActivate): Call wait_func if set, before XNextEvent.
+
+2002-04-22  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* Activate.c: Add calls to GrabKeyboard to remove strange
+	interactions with window managers that steal keypresses.
+	Call ungrab_all instead of XtUngrabPointer.
+	(XMenuActivate): Add call to XGrabKeyboard.
+	(XMenuActivate): Add call to XUngrabKeyboard.
+
+2001-10-20  Gerd Moellmann  <gerd@gnu.org>
+
+	* (Version 21.1 released.)
+
+2001-10-05  Gerd Moellmann  <gerd@gnu.org>
+
+	* Branch for 21.1.
+
+2000-07-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Activate.c (XMenuActivate): Call help callback with two more
+	arguments: the pane number and selection number.
+
+2000-01-27  Gerd Moellmann  <gerd@gnu.org>
+
+	* Activate.c (XMenuActivate): Add parameter HELP_CALLBACK.
+	Call help callback.
+
+	* Post.c (XMenuPost): Pass null help callback to XMenuActivate.
+
+	* AddSel.c (XMenuAddSelection): Add parameter HELP.
+
+	* XMenu.h (XmSelect): Add member `help_string'.
+
+1999-07-12  Richard Stallman  <rms@gnu.org>
+
+	* Version 20.4 released.
+
+1998-08-19  Richard Stallman  <rms@psilocin.ai.mit.edu>
+
+	* Version 20.3 released.
+
+1997-09-19  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.2 released.
+
+1997-09-15  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.1 released.
+
+1996-08-11  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 19.33 released.
+
+1996-07-31  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 19.32 released.
+
+1996-06-12  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Internal.c (_XMRefreshSelection): Check for type SEPARATOR.
+	* InsSel.c (XMenuInsertSelection): Use SEPARATOR if nec.
+	* AddSel.c (XMenuAddSelection): Use SEPARATOR if nec.
+
+	* XMenu.h: New alternative SEPARATOR.
+
+1996-05-25  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* Version 19.31 released.
+
+1995-11-24  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.30 released.
+
+1995-11-13  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (ALL_CFLAGS): Add some -I options.
+
+	* Activate.c, AddPane.c, AddSel.c, Create.c, InsPane.c, InsSel.c:
+	* Internal.c, XCrAssoc.c, XMakeAssoc.c: Include config.h.
+
+1995-06-19  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.29 released.
+
+1995-02-07  Richard Stallman  <rms@pogo.gnu.ai.mit.edu>
+
+	* Makefile.in (maintainer-clean): Renamed from realclean.
+
+1994-10-25  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (ALL_CFLAGS): Reorder the switches more rationally.
+
+1994-10-24  Jim Wilson  (wilson@chestnut.cygnus.com)
+
+	* Makefile.in (ALL_CFLAGS): Add C_SWITCH_X_MACHINE.
+
+1994-09-11  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.27 released.
+
+1994-09-07  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.26 released.
+
+1994-07-23  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Error.c (XMenuError): Make `message' static.
+
+1994-06-28  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Create.c (XAllocDisplayColor): New function.
+	Use it throughout in place of XAllocNamedColor.
+
+1994-05-30  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.25 released.
+
+1994-05-23  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.24 released.
+
+1994-05-17  Karl Heuer  (kwzh@hal.gnu.ai.mit.edu)
+
+	* Create.c (XMenuCreate): Declare `data' as char*.
+
+1994-05-16  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.23 released.
+
+1994-04-12  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Create.c (XMenuCreate): Declare `data' as unsigned char*.
+
+1994-01-03  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* XMakeAssoc.c (XMakeAssoc): Use xmalloc.
+	(_XIOErrorFunction): Decl deleted.
+
+1993-11-27  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.22 released.
+
+1993-11-26  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Activate.c (XMenuActivate):
+	Call XSetWindowBackground and _XMRefreshPane.
+
+1993-11-16  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.21 released.
+
+1993-11-13  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in (libXMenu11.a): Tell make not to worry if ranlib fails.
+	Tell user too, in case make doesn't pay attention.
+
+1993-11-11  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.20 released.
+
+1993-10-25  Brian J. Fox  (bfox@albert.gnu.ai.mit.edu)
+
+	* Makefile.in (ALL_CFLAGS): Add C_SWITCH_X_SYSTEM.
+
+1993-09-27  Brian J. Fox  (bfox@valhalla)
+
+	* Makefile.in (CPP, LN_S, C_SWITCH_X_SITE, CC, CFLAGS): Allow
+	`configure' to supply the values for these variables.
+
+1993-09-26  Brian J. Fox  (bfox@ai.mit.edu)
+
+	* Makefile.in (VPATH, srcdir): Now that `configure' creates the
+	Makefiles, do not append the current directory to the value of
+	`srcdir' or `VPATH'.
+
+1993-08-14  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.19 released.
+
+1993-08-08  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.18 released.
+
+1993-07-30  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Internal.c (_XMWinQueInit): Use explicit loop, not bzero.
+
+1993-07-27  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile (ALL_CFLAGS): Use all 6 C_SWITCH_... vars.
+
+	Among them, put the ..._SITE vars last.
+
+1993-07-18  Jim Blandy  (jimb@wookumz.gnu.ai.mit.edu)
+
+	* Version 19.17 released.
+
+1993-07-07  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Makefile.in: Write out the dependencies for the object files;
+	otherwise, VPATH won't work.
+
+	* Makefile.in: Re-arrange, to put `all' target at the top.
+
+1993-07-06  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Version 19.16 released.
+
+1993-06-19  Jim Blandy  (jimb@wookumz.gnu.ai.mit.edu)
+
+	* version 19.15 released.
+
+1993-06-18  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Makefile.in (ALL_CFLAGS): Always #define EMACS_BITMAP_FILES.
+	This should make it work under any circumstances.
+
+	* Makefile.in (mostlyclean): Use rm -f.
+
+1993-06-17  Jim Blandy  (jimb@wookumz.gnu.ai.mit.edu)
+
+	* Version 19.14 released.
+
+1993-06-17  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in (ALL_CFLAGS): Include C_SWITCH_MACHINE, and CPPFLAGS.
+	Put CFLAGS last.
+
+1993-06-16  Jim Blandy  (jimb@wookumz.gnu.ai.mit.edu)
+
+	Bring mumbleclean targets into conformance with GNU coding standards.
+	* Makefile.in (mostlyclean, realclean): New targets.
+
+1993-06-08  Jim Blandy  (jimb@wookumz.gnu.ai.mit.edu)
+
+	* Version 19.13 released.
+
+1993-05-30  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.10 released.
+
+1993-05-29  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Create.c: Handle EMACS_BITMAP_FILES.
+	Use new names of renamed bitmap files.
+
+1993-05-28  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* AddPane.c, AddSel.c, DelPane.c, DelSel.c, InsPane.c, InsSel.c,
+	XDelAssoc.c, XMakeAssoc.c, XMenu.h, insque.c: Changed all uses of
+	insque and remque to emacs_insque and emacs_remque, so we can
+	safely include insque.c in the library on all systems.
+
+1993-05-27  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Makefile.in (.c.o): Use $< instead of ${srcdir}/$*.c; the latter
+	only works with GNU Make.
+
+1993-05-27  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Create.c (XMenuCreate): Use classes PaneFont and SelectionFont.
+
+1993-05-27  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Version 19.9 released.
+
+1993-05-27  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Create.c (XMenuCreate): Use x_get_resource_string, not XGetDefault.
+
+1993-05-24  Jim Blandy  (jimb@wookumz.gnu.ai.mit.edu)
+
+	* Version 19.8 released.
+
+1993-05-23  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Makefile.in (C_SWITCH_X_SITE): New variable, so that the
+	configuration process can correctly implement the --x-includes
+	option.
+
+1993-05-22  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Create.c (XMenuCreate): Initialize the menu's pixmaps to None,
+	not NULL.
+
+1993-05-22  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Version 19.7 released.
+
+1993-05-15  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Makefile.in: Renamed from Makefile, so that the top-level
+	makefile can edit it.
+
+1993-04-13  Jim Blandy  (jimb@totoro.cs.oberlin.edu)
+
+	* XLookAssoc.c, XMakeAssoc.c: VMS needs <X11/Xresource.h>, not
+	<X11/Xos.h>.
+
+	* XCrAssoc.c: #include <errno.h>, not "errno.h".
+	(XCreateAssocTable): Doc fix.
+
+1993-03-24  Jim Blandy  (jimb@geech.gnu.ai.mit.edu)
+
+	* Makefile (.c.o): Include C_SWITCH_SITE and C_SWITCH_SYSTEM in
+	the options to the C compiler.
+
+	* compile.com, descrip.mms: New files for VMS from Richard
+	Levitte.
+	* XCrAssoc.c, XLookAssoc.c, XDestAssoc.c, XDelAssoc.c: Use <angle
+	brackets> around the names of the X Windows #include files; VMS
+	needs this.
+	* XLookAssoc.c, XMakeAssoc.c: #include <X11/Xos.h>.  VMS needs
+	this.
+	* Create.c: On VMS, we have to look for the bitmap files in
+	`./src/bitmaps', not <X11/bitmaps>.
+
+1993-03-14  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile (.c.o): Don't rm the .o files.
+
+1993-03-13  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Activate.c (XMenuActivate): If `active' field is negative,
+	don't allow selecting a string.
+
+1993-03-09  Jim Blandy  (jimb@totoro.cs.oberlin.edu)
+
+	* Create.c (XMenuCreate): New variable `root', holding the
+	display's default root window, so we don't have to write out
+	"RootWindow (display, DefaultScreen (display))" a jillion times.
+
+	* Create.c (XMenuCreate): Don't assume that all the
+	<X11/bitmaps/foo> patterns are 16x16.  Instead of building a
+	bitmap and then converting it to a pixmap of the appropriate
+	depth if necessary, build a pixmap of the appropriate depth
+	directly, using XCreatePixmapFromBitmapData.
+
+	* Imakefile: Include XCrAssoc.c, XDelAssoc.c, XDestAssoc.c,
+	XLookAssoc.c, and XMakeAssoc.c in SRCS.  Similarly for OBJS.
+
+	* XMenuInt.h: #include <stdio.h> before <X11/Xlib.h>, to avoid
+	warnings about redefining NULL.
+
+	* XMakeAssoc.c, XLookAssoc.c, XDestAssoc.c, XDelAssoc.c,
+	XCrAssoc.c: #include X11/Xlib.h instead of X11/Xlibint.h.
+
+	* XMakeAssoc.c, XLookAssoc.c, XCrAssoc.c: If NULL isn't defined by
+	any of the `.h' files, define it.
+
+	* XMakeAssoc.c, XCrAssoc.c: #include <errno.h>.
+	Add an extern declaration for errno.
+
+	* XMakeAssoc.c: Add an extern declaration for _XIOErrorFunction.
+	(XMakeAssoc): Use malloc instead of Xmalloc to allocate new
+	parts of the assoc table.
+	* XCrAssoc.c (XCreateAssocTable): Same.
+
+	* XDestAssoc.c (XDestroyAssocTable): Use free instead of Xfree.
+	* XDelAssoc.c (XDeleteAssoc): Same.
+
+1992-10-18  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* XMakeAssoc.c (XMakeAssoc): Use malloc, not Xmalloc.
+	* XCrAssoc.c (XCreateAssocTable): Use malloc and calloc directly.
+	* XDelAssoc.c (XDeleteAssoc): Use free, not Xfree.
+	* XDestAssoc.c (XDestroyAssocTable): Likewise.
+
+1992-10-17  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* XDelAssoc.c, XLookAssoc.c, XCrAssoc.c, XDestAssoc.c, XMakeAssoc.c:
+	Use Xlib.h, not Xlibint.h.
+	* XLookAssoc.c, XMakeAssoc.c, XCrAssoc.c (NULL): Defined.
+	* XMakeAssoc.c, XCrAssoc.c: Include errno.h.  Declare errno.
+	* XMakeAssoc.c (_XIOErrorFunction): Declared.
+
+1992-09-19  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* XDelAssoc.c, XLookAssoc.c, XCrAssoc.c, XDestAssoc.c, XMakeAssoc.c:
+	Specify dir X11/ when including Xlibint.h.
+
+1992-09-17  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* XDelAssoc.c, XLookAssoc.c, XCrAssoc.c, XDestAssoc.c, XMakeAssoc.c:
+	New files.
+
+	* Makefile (SRCS, OBJS): Compile those files.
+
+1992-01-31  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile (clean): Delete object files and library.
+	(distclean): New target.
+
+1992-01-29  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile (libXMenu11.a): Put `-' on ranlib line.
+
+1992-01-27  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile (EXTRA): New variable.
+	(libXMenu11.a): Use that.
+
+	* insque.c: New file.
+
+1992-01-26  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile (CC): Assignment commented out.
+
+1991-11-16  Noah Friedman  (friedman@nutrimat)
+
+	* copyright.h: New file (copied from X11R4 distribution)
+	* All files: Replaced occurrences of #include <X11/copyright.h>
+	with #include "copyright.h"
+
+1991-10-25  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* XMenu.h (enum _xmmode): Remove spurious comma.
+
+	* X10.h: New file.
+	* XMenu.h, XMenuInt.h: Include X10.h from this dir.
+
+1990-11-13  Richard Stallman  (rms@mole.ai.mit.edu)
+
+	* XMenu.h (struct _xmenu): Use unsigned long for colors.
+
+1990-11-12  Richard Stallman  (rms@mole.ai.mit.edu)
+
+	* Internal.c: Declare argument `display' in some functions.
+
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+  Copyright (C) 1993-1999, 2001-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

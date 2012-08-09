@@ -1,0 +1,413 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in emacs-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+@node Emerge
+@section Merging Files with Emerge
+@cindex Emerge
+@cindex merging files
+
+  It's not unusual for programmers to get their signals crossed and
+modify the same program in two different directions.  To recover from
+this confusion, you need to merge the two versions.  Emerge makes this
+easier.  For other ways to compare files, see
+@iftex
+@ref{Comparing Files,,, emacs, the Emacs Manual},
+@end iftex
+@ifnottex
+@ref{Comparing Files},
+@end ifnottex
+and @ref{Top,, Ediff, ediff, The Ediff Manual}.
+
+@menu
+* Overview of Emerge::     How to start Emerge.  Basic concepts.
+* Submodes of Emerge::     Fast mode vs. Edit mode.
+                             Skip Prefers mode and Auto Advance mode.
+* State of Difference::    You do the merge by specifying state A or B
+                             for each difference.
+* Merge Commands::         Commands for selecting a difference,
+                             changing states of differences, etc.
+* Exiting Emerge::         What to do when you've finished the merge.
+* Combining in Emerge::    How to keep both alternatives for a difference.
+* Fine Points of Emerge::  Miscellaneous issues.
+@end menu
+
+@node Overview of Emerge
+@subsection Overview of Emerge
+
+  To start Emerge, run one of these four commands:
+
+@table @kbd
+@item M-x emerge-files
+@findex emerge-files
+Merge two specified files.
+
+@item M-x emerge-files-with-ancestor
+@findex emerge-files-with-ancestor
+Merge two specified files, with reference to a common ancestor.
+
+@item M-x emerge-buffers
+@findex emerge-buffers
+Merge two buffers.
+
+@item M-x emerge-buffers-with-ancestor
+@findex emerge-buffers-with-ancestor
+Merge two buffers with reference to a common ancestor in a third
+buffer.
+@end table
+
+@cindex merge buffer (Emerge)
+@cindex A and B buffers (Emerge)
+  The Emerge commands compare two files or buffers, and display the
+comparison in three buffers: one for each input text (the @dfn{A buffer}
+and the @dfn{B buffer}), and one (the @dfn{merge buffer}) where merging
+takes place.  The merge buffer shows the full merged text, not just the
+differences.  Wherever the two input texts differ, you can choose which
+one of them to include in the merge buffer.
+
+  The Emerge commands that take input from existing buffers use only
+the accessible portions of those buffers, if they are narrowed.
+@iftex
+@xref{Narrowing,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Narrowing}.
+@end ifnottex
+
+
+  If a common ancestor version is available, from which the two texts to
+be merged were both derived, Emerge can use it to guess which
+alternative is right.  Wherever one current version agrees with the
+ancestor, Emerge presumes that the other current version is a deliberate
+change which should be kept in the merged version.  Use the
+@samp{with-ancestor} commands if you want to specify a common ancestor
+text.  These commands read three file or buffer names---variant A,
+variant B, and the common ancestor.
+
+  After the comparison is done and the buffers are prepared, the
+interactive merging starts.  You control the merging by typing special
+@dfn{merge commands} in the merge buffer (@pxref{Merge Commands}).
+For each run of differences between the input texts, you can choose
+which one of them to keep, or edit them both together.
+
+  The merge buffer uses a special major mode, Emerge mode, with commands
+for making these choices.  But you can also edit the buffer with
+ordinary Emacs commands.
+
+  At any given time, the attention of Emerge is focused on one
+particular difference, called the @dfn{selected} difference.  This
+difference is marked off in the three buffers like this:
+
+@example
+vvvvvvvvvvvvvvvvvvvv
+@var{text that differs}
+^^^^^^^^^^^^^^^^^^^^
+@end example
+
+@noindent
+Emerge numbers all the differences sequentially and the mode
+line always shows the number of the selected difference.
+
+  Normally, the merge buffer starts out with the A version of the text.
+But when the A version of a difference agrees with the common ancestor,
+then the B version is initially preferred for that difference.
+
+  Emerge leaves the merged text in the merge buffer when you exit.  At
+that point, you can save it in a file with @kbd{C-x C-w}.  If you give a
+numeric argument to @code{emerge-files} or
+@code{emerge-files-with-ancestor}, it reads the name of the output file
+using the minibuffer.  (This is the last file name those commands read.)
+Then exiting from Emerge saves the merged text in the output file.
+
+  Normally, Emerge commands save the output buffer in its file when you
+exit.  If you abort Emerge with @kbd{C-]}, the Emerge command does not
+save the output buffer, but you can save it yourself if you wish.
+
+@node Submodes of Emerge
+@subsection Submodes of Emerge
+
+  You can choose between two modes for giving merge commands: Fast mode
+and Edit mode.  In Fast mode, basic merge commands are single
+characters, but ordinary Emacs commands are disabled.  This is
+convenient if you use only merge commands.  In Edit mode, all merge
+commands start with the prefix key @kbd{C-c C-c}, and the normal Emacs
+commands are also available.  This allows editing the merge buffer, but
+slows down Emerge operations.
+
+  Use @kbd{e} to switch to Edit mode, and @kbd{C-c C-c f} to switch to
+Fast mode.  The mode line indicates Edit and Fast modes with @samp{E}
+and @samp{F}.
+
+  Emerge has two additional submodes that affect how particular merge
+commands work: Auto Advance mode and Skip Prefers mode.
+
+  If Auto Advance mode is in effect, the @kbd{a} and @kbd{b} commands
+advance to the next difference.  This lets you go through the merge
+faster as long as you simply choose one of the alternatives from the
+input.  The mode line indicates Auto Advance mode with @samp{A}.
+
+  If Skip Prefers mode is in effect, the @kbd{n} and @kbd{p} commands
+skip over differences in states ``prefer-A'' and ``prefer-B''
+(@pxref{State of Difference}).  Thus you see only differences for
+which neither version is presumed ``correct''.  The mode line
+indicates Skip Prefers mode with @samp{S}.  This mode is only relevant
+when there is an ancestor.
+
+@findex emerge-auto-advance
+@findex emerge-skip-prefers
+  Use the command @kbd{s a} (@code{emerge-auto-advance}) to set or clear
+Auto Advance mode.  Use @kbd{s s} (@code{emerge-skip-prefers}) to set or
+clear Skip Prefers mode.  These commands turn on the mode with a
+positive argument, turn it off with a negative or zero argument, and
+toggle the mode with no argument.
+
+@node State of Difference
+@subsection State of a Difference
+
+  In the merge buffer, a difference is marked with lines of @samp{v} and
+@samp{^} characters.  Each difference has one of these seven states:
+
+@table @asis
+@item A
+The difference is showing the A version.  The @kbd{a} command always
+produces this state; the mode line indicates it with @samp{A}.
+
+@item B
+The difference is showing the B version.  The @kbd{b} command always
+produces this state; the mode line indicates it with @samp{B}.
+
+@item default-A
+@itemx default-B
+The difference is showing the A or the B state by default, because you
+haven't made a choice.  All differences start in the default-A state
+(and thus the merge buffer is a copy of the A buffer), except those for
+which one alternative is ``preferred'' (see below).
+
+When you select a difference, its state changes from default-A or
+default-B to plain A or B.  Thus, the selected difference never has
+state default-A or default-B, and these states are never displayed in
+the mode line.
+
+The command @kbd{d a} chooses default-A as the default state, and @kbd{d
+b} chooses default-B.  This chosen default applies to all differences
+that you have never selected and for which no alternative is preferred.
+If you are moving through the merge sequentially, the differences you
+haven't selected are those following the selected one.  Thus, while
+moving sequentially, you can effectively make the A version the default
+for some sections of the merge buffer and the B version the default for
+others by using @kbd{d a} and @kbd{d b} between sections.
+
+@item prefer-A
+@itemx prefer-B
+The difference is showing the A or B state because it is
+@dfn{preferred}.  This means that you haven't made an explicit choice,
+but one alternative seems likely to be right because the other
+alternative agrees with the common ancestor.  Thus, where the A buffer
+agrees with the common ancestor, the B version is preferred, because
+chances are it is the one that was actually changed.
+
+These two states are displayed in the mode line as @samp{A*} and @samp{B*}.
+
+@item combined
+The difference is showing a combination of the A and B states, as a
+result of the @kbd{x c} or @kbd{x C} commands.
+
+Once a difference is in this state, the @kbd{a} and @kbd{b} commands
+don't do anything to it unless you give them a numeric argument.
+
+The mode line displays this state as @samp{comb}.
+@end table
+
+@node Merge Commands
+@subsection Merge Commands
+
+  Here are the Merge commands for Fast mode; in Edit mode, precede them
+with @kbd{C-c C-c}:
+
+@table @kbd
+@item p
+Select the previous difference.
+
+@item n
+Select the next difference.
+
+@item a
+Choose the A version of this difference.
+
+@item b
+Choose the B version of this difference.
+
+@item C-u @var{n} j
+Select difference number @var{n}.
+
+@item .
+Select the difference containing point.
+@c [Does not work in the A or B buffer?]
+@c You can use this command in the merge buffer or in the A or B buffer.
+
+@item q
+Quit---finish the merge.
+
+@item C-]
+Abort---exit merging and do not save the output.
+
+@item f
+Go into Fast mode.  (In Edit mode, this is actually @kbd{C-c C-c f}.)
+
+@item e
+Go into Edit mode.
+
+@item l
+Recenter (like @kbd{C-l}) all three windows.  With an argument,
+reestablish the default three-window display.
+
+@item -
+Specify part of a prefix numeric argument.
+
+@item @var{digit}
+Also specify part of a prefix numeric argument.
+
+@item d a
+Choose the A version as the default from here down in
+the merge buffer.
+
+@item d b
+Choose the B version as the default from here down in
+the merge buffer.
+
+@item c a
+Copy the A version of this difference into the kill ring.
+
+@item c b
+Copy the B version of this difference into the kill ring.
+
+@item i a
+Insert the A version of this difference at point.
+
+@item i b
+Insert the B version of this difference at point.
+
+@item m
+Put point and mark around the difference.
+
+@item ^
+Scroll all three windows down (like @kbd{M-v}).
+
+@item v
+Scroll all three windows up (like @kbd{C-v}).
+
+@item <
+Scroll all three windows left (like @kbd{C-x <}).
+
+@item >
+Scroll all three windows right (like @kbd{C-x >}).
+
+@item |
+Reset horizontal scroll on all three windows.
+
+@item x 1
+Shrink the merge window to one line.  (Use @kbd{C-u l} to restore it
+to full size.)
+
+@item x c
+Combine the two versions of this difference (@pxref{Combining in
+Emerge}).
+
+@item x f
+Show the names of the files/buffers Emerge is operating on, in a Help
+window.  (Use @kbd{C-u l} to restore windows.)
+
+@item x j
+Join this difference with the following one.
+(@kbd{C-u x j} joins this difference with the previous one.)
+
+@item x s
+Split this difference into two differences.  Before you use this
+command, position point in each of the three buffers at the place where
+you want to split the difference.
+
+@item x t
+Trim identical lines off the top and bottom of the difference.
+Such lines occur when the A and B versions are
+identical but differ from the ancestor version.
+@end table
+
+@node Exiting Emerge
+@subsection Exiting Emerge
+
+  The @kbd{q} command (@code{emerge-quit}) finishes the merge, storing
+the results into the output file if you specified one.  It restores the
+A and B buffers to their proper contents, or kills them if they were
+created by Emerge and you haven't changed them.  It also disables the
+Emerge commands in the merge buffer, since executing them later could
+damage the contents of the various buffers.
+
+  @kbd{C-]} aborts the merge.  This means exiting without writing the
+output file.  If you didn't specify an output file, then there is no
+real difference between aborting and finishing the merge.
+
+  If the Emerge command was called from another Lisp program, then its
+return value is @code{t} for successful completion, or @code{nil} if you
+abort.
+
+@node Combining in Emerge
+@subsection Combining the Two Versions
+
+  Sometimes you want to keep @emph{both} alternatives for a particular
+difference.  To do this, use @kbd{x c}, which edits the merge buffer
+like this:
+
+@example
+@group
+#ifdef NEW
+@var{version from B buffer}
+#else /* not NEW */
+@var{version from A buffer}
+#endif /* not NEW */
+@end group
+@end example
+
+@noindent
+@vindex emerge-combine-versions-template
+While this example shows C preprocessor conditionals delimiting the two
+alternative versions, you can specify the strings to use by setting
+the variable @code{emerge-combine-versions-template} to a string of your
+choice.  In the string, @samp{%a} says where to put version A, and
+@samp{%b} says where to put version B.  The default setting, which
+produces the results shown above, looks like this:
+
+@example
+@group
+"#ifdef NEW\n%b#else /* not NEW */\n%a#endif /* not NEW */\n"
+@end group
+@end example
+
+@node Fine Points of Emerge
+@subsection Fine Points of Emerge
+
+  During the merge, you mustn't try to edit the A and B buffers yourself.
+Emerge modifies them temporarily, but ultimately puts them back the way
+they were.
+
+  You can have any number of merges going at once---just don't use any one
+buffer as input to more than one merge at once, since the temporary
+changes made in these buffers would get in each other's way.
+
+  Starting Emerge can take a long time because it needs to compare the
+files fully.  Emacs can't do anything else until @code{diff} finishes.
+Perhaps in the future someone will change Emerge to do the comparison in
+the background when the input files are large---then you could keep on
+doing other things with Emacs until Emerge is ready to accept
+commands.
+
+@vindex emerge-startup-hook
+  After setting up the merge, Emerge runs the hook
+@code{emerge-startup-hook}.
+@iftex
+@xref{Hooks,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Hooks}.
+@end ifnottex

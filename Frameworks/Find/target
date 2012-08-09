@@ -1,6 +1,0 @@
-SOURCES      = src/*.{cc,mm}
-TEST_SOURCES = tests/*.cc
-EXPORT       = src/Find.h
-CP_Resources = resources/*
-LINK        += text editor io ns OakAppKit OakFoundation regexp scope
-FRAMEWORKS   = Cocoa QuartzCore

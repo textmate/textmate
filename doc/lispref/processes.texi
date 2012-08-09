@@ -1,0 +1,3117 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/processes
+@node Processes, Display, Abbrevs, Top
+@chapter Processes
+@cindex child process
+@cindex parent process
+@cindex subprocess
+@cindex process
+
+  In the terminology of operating systems, a @dfn{process} is a space in
+which a program can execute.  Emacs runs in a process.  Emacs Lisp
+programs can invoke other programs in processes of their own.  These are
+called @dfn{subprocesses} or @dfn{child processes} of the Emacs process,
+which is their @dfn{parent process}.
+
+  A subprocess of Emacs may be @dfn{synchronous} or @dfn{asynchronous},
+depending on how it is created.  When you create a synchronous
+subprocess, the Lisp program waits for the subprocess to terminate
+before continuing execution.  When you create an asynchronous
+subprocess, it can run in parallel with the Lisp program.  This kind of
+subprocess is represented within Emacs by a Lisp object which is also
+called a ``process''.  Lisp programs can use this object to communicate
+with the subprocess or to control it.  For example, you can send
+signals, obtain status information, receive output from the process, or
+send input to it.
+
+@defun processp object
+This function returns @code{t} if @var{object} represents an Emacs
+subprocess, @code{nil} otherwise.
+@end defun
+
+  In addition to subprocesses of the current Emacs session, you can
+also access other processes running on your machine.  @xref{System
+Processes}.
+
+@menu
+* Subprocess Creation::      Functions that start subprocesses.
+* Shell Arguments::          Quoting an argument to pass it to a shell.
+* Synchronous Processes::    Details of using synchronous subprocesses.
+* Asynchronous Processes::   Starting up an asynchronous subprocess.
+* Deleting Processes::       Eliminating an asynchronous subprocess.
+* Process Information::      Accessing run-status and other attributes.
+* Input to Processes::       Sending input to an asynchronous subprocess.
+* Signals to Processes::     Stopping, continuing or interrupting
+                               an asynchronous subprocess.
+* Output from Processes::    Collecting output from an asynchronous subprocess.
+* Sentinels::                Sentinels run when process run-status changes.
+* Query Before Exit::        Whether to query if exiting will kill a process.
+* System Processes::         Accessing other processes running on your system.
+* Transaction Queues::       Transaction-based communication with subprocesses.
+* Network::                  Opening network connections.
+* Network Servers::          Network servers let Emacs accept net connections.
+* Datagrams::                UDP network connections.
+* Low-Level Network::        Lower-level but more general function
+                               to create connections and servers.
+* Misc Network::             Additional relevant functions for net connections.
+* Serial Ports::             Communicating with serial ports.
+* Byte Packing::             Using bindat to pack and unpack binary data.
+@end menu
+
+@node Subprocess Creation
+@section Functions that Create Subprocesses
+
+  There are three primitives that create a new subprocess in which to run
+a program.  One of them, @code{start-process}, creates an asynchronous
+process and returns a process object (@pxref{Asynchronous Processes}).
+The other two, @code{call-process} and @code{call-process-region},
+create a synchronous process and do not return a process object
+(@pxref{Synchronous Processes}).  There are various higher-level
+functions that make use of these primitives to run particular types of
+process.
+
+  Synchronous and asynchronous processes are explained in the following
+sections.  Since the three functions are all called in a similar
+fashion, their common arguments are described here.
+
+@cindex execute program
+@cindex @env{PATH} environment variable
+@cindex @env{HOME} environment variable
+  In all cases, the function's @var{program} argument specifies the
+program to be run.  An error is signaled if the file is not found or
+cannot be executed.  If the file name is relative, the variable
+@code{exec-path} contains a list of directories to search.  Emacs
+initializes @code{exec-path} when it starts up, based on the value of
+the environment variable @env{PATH}.  The standard file name
+constructs, @samp{~}, @samp{.}, and @samp{..}, are interpreted as
+usual in @code{exec-path}, but environment variable substitutions
+(@samp{$HOME}, etc.) are not recognized; use
+@code{substitute-in-file-name} to perform them (@pxref{File Name
+Expansion}).  @code{nil} in this list refers to
+@code{default-directory}.
+
+  Executing a program can also try adding suffixes to the specified
+name:
+
+@defvar exec-suffixes
+This variable is a list of suffixes (strings) to try adding to the
+specified program file name.  The list should include @code{""} if you
+want the name to be tried exactly as specified.  The default value is
+system-dependent.
+@end defvar
+
+  @strong{Please note:} The argument @var{program} contains only the
+name of the program; it may not contain any command-line arguments.  You
+must use a separate argument, @var{args}, to provide those, as
+described below.
+
+  Each of the subprocess-creating functions has a @var{buffer-or-name}
+argument that specifies where the standard output from the program will
+go.  It should be a buffer or a buffer name; if it is a buffer name,
+that will create the buffer if it does not already exist.  It can also
+be @code{nil}, which says to discard the output unless a filter function
+handles it.  (@xref{Filter Functions}, and @ref{Read and Print}.)
+Normally, you should avoid having multiple processes send output to the
+same buffer because their output would be intermixed randomly.
+For synchronous processes, you can send the output to a file instead
+of a buffer.
+
+@cindex program arguments
+  All three of the subprocess-creating functions have a @code{&rest}
+argument, @var{args}.  The @var{args} must all be strings, and they are
+supplied to @var{program} as separate command line arguments.  Wildcard
+characters and other shell constructs have no special meanings in these
+strings, since the strings are passed directly to the specified program.
+
+@cindex environment variables, subprocesses
+  The subprocess inherits its environment from Emacs, but you can
+specify overrides for it with @code{process-environment}.  @xref{System
+Environment}.  The subprocess gets its current directory from the
+value of @code{default-directory}.
+
+@defvar exec-directory
+@pindex movemail
+The value of this variable is a string, the name of a directory that
+contains programs that come with GNU Emacs and are intended for Emacs
+to invoke.  The program @code{movemail} is an example of such a program;
+Rmail uses it to fetch new mail from an inbox.
+@end defvar
+
+@defopt exec-path
+The value of this variable is a list of directories to search for
+programs to run in subprocesses.  Each element is either the name of a
+directory (i.e., a string), or @code{nil}, which stands for the default
+directory (which is the value of @code{default-directory}).
+@cindex program directories
+
+The value of @code{exec-path} is used by @code{call-process} and
+@code{start-process} when the @var{program} argument is not an absolute
+file name.
+
+Generally, you should not modify @code{exec-path} directly.  Instead,
+ensure that your @env{PATH} environment variable is set appropriately
+before starting Emacs.  Trying to modify @code{exec-path}
+independently of @env{PATH} can lead to confusing results.
+@end defopt
+
+@node Shell Arguments
+@section Shell Arguments
+@cindex arguments for shell commands
+@cindex shell command arguments
+
+  Lisp programs sometimes need to run a shell and give it a command
+that contains file names that were specified by the user.  These
+programs ought to be able to support any valid file name.  But the shell
+gives special treatment to certain characters, and if these characters
+occur in the file name, they will confuse the shell.  To handle these
+characters, use the function @code{shell-quote-argument}:
+
+@defun shell-quote-argument argument
+This function returns a string that represents, in shell syntax,
+an argument whose actual contents are @var{argument}.  It should
+work reliably to concatenate the return value into a shell command
+and then pass it to a shell for execution.
+
+Precisely what this function does depends on your operating system.  The
+function is designed to work with the syntax of your system's standard
+shell; if you use an unusual shell, you will need to redefine this
+function.
+
+@example
+;; @r{This example shows the behavior on GNU and Unix systems.}
+(shell-quote-argument "foo > bar")
+     @result{} "foo\\ \\>\\ bar"
+
+;; @r{This example shows the behavior on MS-DOS and MS-Windows.}
+(shell-quote-argument "foo > bar")
+     @result{} "\"foo > bar\""
+@end example
+
+Here's an example of using @code{shell-quote-argument} to construct
+a shell command:
+
+@example
+(concat "diff -c "
+        (shell-quote-argument oldfile)
+        " "
+        (shell-quote-argument newfile))
+@end example
+@end defun
+
+@cindex quoting and unquoting command-line arguments
+@cindex minibuffer input, and command-line arguments
+@cindex @code{call-process}, command-line arguments from minibuffer
+@cindex @code{start-process}, command-line arguments from minibuffer
+  The following two functions are useful for combining a list of
+individual command-line argument strings into a single string, and
+taking a string apart into a list of individual command-line
+arguments.  These functions are mainly intended for
+converting user input in the minibuffer, a Lisp string, into a list of
+string arguments to be passed to @code{call-process} or
+@code{start-process}, or for converting such lists of arguments into
+a single Lisp string to be presented in the minibuffer or echo area.
+
+@defun split-string-and-unquote string &optional separators
+This function splits @var{string} into substrings at matches for the
+regular expression @var{separators}, like @code{split-string} does
+(@pxref{Creating Strings}); in addition, it removes quoting from the
+substrings.  It then makes a list of the substrings and returns it.
+
+If @var{separators} is omitted or @code{nil}, it defaults to
+@code{"\\s-+"}, which is a regular expression that matches one or more
+characters with whitespace syntax (@pxref{Syntax Class Table}).
+
+This function supports two types of quoting: enclosing a whole string
+in double quotes @code{"@dots{}"}, and quoting individual characters
+with a backslash escape @samp{\}.  The latter is also used in Lisp
+strings, so this function can handle those as well.
+@end defun
+
+@defun combine-and-quote-strings list-of-strings &optional separator
+This function concatenates @var{list-of-strings} into a single string,
+quoting each string as necessary.  It also sticks the @var{separator}
+string between each pair of strings; if @var{separator} is omitted or
+@code{nil}, it defaults to @code{" "}.  The return value is the
+resulting string.
+
+The strings in @var{list-of-strings} that need quoting are those that
+include @var{separator} as their substring.  Quoting a string encloses
+it in double quotes @code{"@dots{}"}.  In the simplest case, if you
+are consing a command from the individual command-line arguments,
+every argument that includes embedded blanks will be quoted.
+@end defun
+
+@node Synchronous Processes
+@section Creating a Synchronous Process
+@cindex synchronous subprocess
+
+  After a @dfn{synchronous process} is created, Emacs waits for the
+process to terminate before continuing.  Starting Dired on GNU or
+Unix@footnote{On other systems, Emacs uses a Lisp emulation of
+@code{ls}; see @ref{Contents of Directories}.} is an example of this: it
+runs @code{ls} in a synchronous process, then modifies the output
+slightly.  Because the process is synchronous, the entire directory
+listing arrives in the buffer before Emacs tries to do anything with it.
+
+  While Emacs waits for the synchronous subprocess to terminate, the
+user can quit by typing @kbd{C-g}.  The first @kbd{C-g} tries to kill
+the subprocess with a @code{SIGINT} signal; but it waits until the
+subprocess actually terminates before quitting.  If during that time the
+user types another @kbd{C-g}, that kills the subprocess instantly with
+@code{SIGKILL} and quits immediately (except on MS-DOS, where killing
+other processes doesn't work).  @xref{Quitting}.
+
+  The synchronous subprocess functions return an indication of how the
+process terminated.
+
+  The output from a synchronous subprocess is generally decoded using a
+coding system, much like text read from a file.  The input sent to a
+subprocess by @code{call-process-region} is encoded using a coding
+system, much like text written into a file.  @xref{Coding Systems}.
+
+@defun call-process program &optional infile destination display &rest args
+This function calls @var{program} and waits for it to finish.
+
+The standard input for the new process comes from file @var{infile} if
+@var{infile} is not @code{nil}, and from the null device otherwise.
+The argument @var{destination} says where to put the process output.
+Here are the possibilities:
+
+@table @asis
+@item a buffer
+Insert the output in that buffer, before point.  This includes both the
+standard output stream and the standard error stream of the process.
+
+@item a string
+Insert the output in a buffer with that name, before point.
+
+@item @code{t}
+Insert the output in the current buffer, before point.
+
+@item @code{nil}
+Discard the output.
+
+@item 0
+Discard the output, and return @code{nil} immediately without waiting
+for the subprocess to finish.
+
+In this case, the process is not truly synchronous, since it can run in
+parallel with Emacs; but you can think of it as synchronous in that
+Emacs is essentially finished with the subprocess as soon as this
+function returns.
+
+MS-DOS doesn't support asynchronous subprocesses, so this option doesn't
+work there.
+
+@item @code{(:file @var{file-name})}
+Send the output to the file name specified, overwriting it if it
+already exists.
+
+@item @code{(@var{real-destination} @var{error-destination})}
+Keep the standard output stream separate from the standard error stream;
+deal with the ordinary output as specified by @var{real-destination},
+and dispose of the error output according to @var{error-destination}.
+If @var{error-destination} is @code{nil}, that means to discard the
+error output, @code{t} means mix it with the ordinary output, and a
+string specifies a file name to redirect error output into.
+
+You can't directly specify a buffer to put the error output in; that is
+too difficult to implement.  But you can achieve this result by sending
+the error output to a temporary file and then inserting the file into a
+buffer.
+@end table
+
+If @var{display} is non-@code{nil}, then @code{call-process} redisplays
+the buffer as output is inserted.  (However, if the coding system chosen
+for decoding output is @code{undecided}, meaning deduce the encoding
+from the actual data, then redisplay sometimes cannot continue once
+non-@acronym{ASCII} characters are encountered.  There are fundamental
+reasons why it is hard to fix this; see @ref{Output from Processes}.)
+
+Otherwise the function @code{call-process} does no redisplay, and the
+results become visible on the screen only when Emacs redisplays that
+buffer in the normal course of events.
+
+The remaining arguments, @var{args}, are strings that specify command
+line arguments for the program.
+
+The value returned by @code{call-process} (unless you told it not to
+wait) indicates the reason for process termination.  A number gives the
+exit status of the subprocess; 0 means success, and any other value
+means failure.  If the process terminated with a signal,
+@code{call-process} returns a string describing the signal.
+
+In the examples below, the buffer @samp{foo} is current.
+
+@smallexample
+@group
+(call-process "pwd" nil t)
+     @result{} 0
+
+---------- Buffer: foo ----------
+/home/lewis/manual
+---------- Buffer: foo ----------
+@end group
+
+@group
+(call-process "grep" nil "bar" nil "lewis" "/etc/passwd")
+     @result{} 0
+
+---------- Buffer: bar ----------
+lewis:x:1001:1001:Bil Lewis,,,,:/home/lewis:/bin/bash
+
+---------- Buffer: bar ----------
+@end group
+@end smallexample
+
+Here is an example of the use of @code{call-process}, as used to
+be found in the definition of the @code{insert-directory} function:
+
+@smallexample
+@group
+(call-process insert-directory-program nil t nil switches
+              (if full-directory-p
+                  (concat (file-name-as-directory file) ".")
+                file))
+@end group
+@end smallexample
+@end defun
+
+@defun process-file program &optional infile buffer display &rest args
+This function processes files synchronously in a separate process.  It
+is similar to @code{call-process}, but may invoke a file handler based
+on the value of the variable @code{default-directory}, which specifies
+the current working directory of the subprocess.
+
+The arguments are handled in almost the same way as for
+@code{call-process}, with the following differences:
+
+Some file handlers may not support all combinations and forms of the
+arguments @var{infile}, @var{buffer}, and @var{display}.  For example,
+some file handlers might behave as if @var{display} were @code{nil},
+regardless of the value actually passed.  As another example, some
+file handlers might not support separating standard output and error
+output by way of the @var{buffer} argument.
+
+If a file handler is invoked, it determines the program to run based
+on the first argument @var{program}.  For instance, suppose that a
+handler for remote files is invoked.  Then the path that is used for
+searching for the program might be different from @code{exec-path}.
+
+The second argument @var{infile} may invoke a file handler.  The file
+handler could be different from the handler chosen for the
+@code{process-file} function itself.  (For example,
+@code{default-directory} could be on one remote host, and
+@var{infile} on a different remote host.  Or @code{default-directory}
+could be non-special, whereas @var{infile} is on a remote host.)
+
+If @var{buffer} is a list of the form @code{(@var{real-destination}
+@var{error-destination})}, and @var{error-destination} names a file,
+then the same remarks as for @var{infile} apply.
+
+The remaining arguments (@var{args}) will be passed to the process
+verbatim.  Emacs is not involved in processing file names that are
+present in @var{args}.  To avoid confusion, it may be best to avoid
+absolute file names in @var{args}, but rather to specify all file
+names as relative to @code{default-directory}.  The function
+@code{file-relative-name} is useful for constructing such relative
+file names.
+@end defun
+
+@defvar process-file-side-effects
+This variable indicates whether a call of @code{process-file} changes
+remote files.
+
+By default, this variable is always set to @code{t}, meaning that a
+call of @code{process-file} could potentially change any file on a
+remote host.  When set to @code{nil}, a file handler could optimize
+its behavior with respect to remote file attribute caching.
+
+You should only ever change this variable with a let-binding; never
+with @code{setq}.
+@end defvar
+
+@defun call-process-region start end program &optional delete destination display &rest args
+This function sends the text from @var{start} to @var{end} as
+standard input to a process running @var{program}.  It deletes the text
+sent if @var{delete} is non-@code{nil}; this is useful when
+@var{destination} is @code{t}, to insert the output in the current
+buffer in place of the input.
+
+The arguments @var{destination} and @var{display} control what to do
+with the output from the subprocess, and whether to update the display
+as it comes in.  For details, see the description of
+@code{call-process}, above.  If @var{destination} is the integer 0,
+@code{call-process-region} discards the output and returns @code{nil}
+immediately, without waiting for the subprocess to finish (this only
+works if asynchronous subprocesses are supported; i.e. not on MS-DOS).
+
+The remaining arguments, @var{args}, are strings that specify command
+line arguments for the program.
+
+The return value of @code{call-process-region} is just like that of
+@code{call-process}: @code{nil} if you told it to return without
+waiting; otherwise, a number or string which indicates how the
+subprocess terminated.
+
+In the following example, we use @code{call-process-region} to run the
+@code{cat} utility, with standard input being the first five characters
+in buffer @samp{foo} (the word @samp{input}).  @code{cat} copies its
+standard input into its standard output.  Since the argument
+@var{destination} is @code{t}, this output is inserted in the current
+buffer.
+
+@smallexample
+@group
+---------- Buffer: foo ----------
+input@point{}
+---------- Buffer: foo ----------
+@end group
+
+@group
+(call-process-region 1 6 "cat" nil t)
+     @result{} 0
+
+---------- Buffer: foo ----------
+inputinput@point{}
+---------- Buffer: foo ----------
+@end group
+@end smallexample
+
+  For example, the @code{shell-command-on-region} command uses
+@code{call-process-region} in a manner similar to this:
+
+@smallexample
+@group
+(call-process-region
+ start end
+ shell-file-name      ; @r{name of program}
+ nil                  ; @r{do not delete region}
+ buffer               ; @r{send output to @code{buffer}}
+ nil                  ; @r{no redisplay during output}
+ "-c" command)        ; @r{arguments for the shell}
+@end group
+@end smallexample
+@c It actually uses shell-command-switch, but no need to mention that here.
+@end defun
+
+@defun call-process-shell-command command &optional infile destination display &rest args
+This function executes the shell command @var{command} synchronously.
+The final arguments @var{args} are additional arguments to add at the
+end of @var{command}.  The other arguments are handled as in
+@code{call-process}.
+@end defun
+
+@defun process-file-shell-command command &optional infile destination display &rest args
+This function is like @code{call-process-shell-command}, but uses
+@code{process-file} internally.  Depending on @code{default-directory},
+@var{command} can be executed also on remote hosts.
+@end defun
+
+@defun shell-command-to-string command
+This function executes @var{command} (a string) as a shell command,
+then returns the command's output as a string.
+@end defun
+
+@c There is also shell-command-on-region, but that is more of a user
+@c command, not something to use in programs.
+
+@defun process-lines program &rest args
+This function runs @var{program}, waits for it to finish, and returns
+its output as a list of strings.  Each string in the list holds a
+single line of text output by the program; the end-of-line characters
+are stripped from each line.  The arguments beyond @var{program},
+@var{args}, are strings that specify command-line arguments with which
+to run the program.
+
+If @var{program} exits with a non-zero exit status, this function
+signals an error.
+
+This function works by calling @code{call-process}, so program output
+is decoded in the same way as for @code{call-process}.
+@end defun
+
+@node Asynchronous Processes
+@section Creating an Asynchronous Process
+@cindex asynchronous subprocess
+
+  After an @dfn{asynchronous process} is created, Emacs and the subprocess
+both continue running immediately.  The process thereafter runs
+in parallel with Emacs, and the two can communicate with each other
+using the functions described in the following sections.  However,
+communication is only partially asynchronous: Emacs sends data to the
+process only when certain functions are called, and Emacs accepts data
+from the process only when Emacs is waiting for input or for a time
+delay.
+
+  Here we describe how to create an asynchronous process.
+
+@defun start-process name buffer-or-name program &rest args
+This function creates a new asynchronous subprocess and starts the
+program @var{program} running in it.  It returns a process object that
+stands for the new subprocess in Lisp.  The argument @var{name}
+specifies the name for the process object; if a process with this name
+already exists, then @var{name} is modified (by appending @samp{<1>},
+etc.) to be unique.  The buffer @var{buffer-or-name} is the buffer to
+associate with the process.
+
+If @var{program} is @code{nil}, Emacs opens a new pseudoterminal (pty)
+and associates its input and output with @var{buffer-or-name}, without
+creating a subprocess.  In that case, the remaining arguments
+@var{args} are ignored.
+
+The remaining arguments, @var{args}, are strings that specify command
+line arguments for the subprocess.
+
+In the example below, the first process is started and runs (rather,
+sleeps) for 100 seconds (the output buffer @samp{foo} is created
+immediately).  Meanwhile, the second process is started, and
+given the name @samp{my-process<1>} for the sake of uniqueness.  It
+inserts the directory listing at the end of the buffer @samp{foo},
+before the first process finishes.  Then it finishes, and a message to
+that effect is inserted in the buffer.  Much later, the first process
+finishes, and another message is inserted in the buffer for it.
+
+@smallexample
+@group
+(start-process "my-process" "foo" "sleep" "100")
+     @result{} #<process my-process>
+@end group
+
+@group
+(start-process "my-process" "foo" "ls" "-l" "/bin")
+     @result{} #<process my-process<1>>
+
+---------- Buffer: foo ----------
+total 8336
+-rwxr-xr-x 1 root root 971384 Mar 30 10:14 bash
+-rwxr-xr-x 1 root root 146920 Jul  5  2011 bsd-csh
+@dots{}
+-rwxr-xr-x 1 root root 696880 Feb 28 15:55 zsh4
+
+Process my-process<1> finished
+
+Process my-process finished
+---------- Buffer: foo ----------
+@end group
+@end smallexample
+@end defun
+
+@defun start-file-process name buffer-or-name program &rest args
+Like @code{start-process}, this function starts a new asynchronous
+subprocess running @var{program} in it, and returns its process
+object.
+
+The difference from @code{start-process} is that this function may
+invoked a file handler based on the value of @code{default-directory}.
+This handler ought to run @var{program}, perhaps on the local host,
+perhaps on a remote host that corresponds to @code{default-directory}.
+In the latter case, the local part of @code{default-directory} becomes
+the working directory of the process.
+
+This function does not try to invoke file name handlers for
+@var{program} or for the @var{program-args}.
+
+Depending on the implementation of the file handler, it might not be
+possible to apply @code{process-filter} or @code{process-sentinel} to
+the resulting process object.  @xref{Filter Functions}, and @ref{Sentinels}.
+
+@c FIXME  Can we find a better example (i.e. a more modern function
+@c that is actually documented).
+Some file handlers may not support @code{start-file-process} (for
+example the function @code{ange-ftp-hook-function}).  In such cases,
+this function does nothing and returns @code{nil}.
+@end defun
+
+@defun start-process-shell-command name buffer-or-name command
+This function is like @code{start-process}, except that it uses a shell
+to execute the specified command.  The argument @var{command} is a shell
+command name.  The variable @code{shell-file-name} specifies which shell to
+use.
+
+The point of running a program through the shell, rather than directly
+with @code{start-process}, is so that you can employ shell features such
+as wildcards in the arguments.  It follows that if you include any
+arbitrary user-specified arguments in the command, you should quote them
+with @code{shell-quote-argument} first, so that any special shell
+characters do @emph{not} have their special shell meanings.  @xref{Shell
+Arguments}.  Of course, when executing commands based on user input
+you should also consider the security implications.
+@end defun
+
+@defun start-file-process-shell-command name buffer-or-name command
+This function is like @code{start-process-shell-command}, but uses
+@code{start-file-process} internally.  Because of this, @var{command}
+can also be executed on remote hosts, depending on @code{default-directory}.
+@end defun
+
+@defvar process-connection-type
+@cindex pipes
+@cindex @acronym{PTY}s
+This variable controls the type of device used to communicate with
+asynchronous subprocesses.  If it is non-@code{nil}, then @acronym{PTY}s are
+used, when available.  Otherwise, pipes are used.
+
+@acronym{PTY}s are usually preferable for processes visible to the user, as
+in Shell mode, because they allow job control (@kbd{C-c}, @kbd{C-z},
+etc.) to work between the process and its children, whereas pipes do
+not.  For subprocesses used for internal purposes by programs, it is
+often better to use a pipe, because they are more efficient.  In
+addition, the total number of @acronym{PTY}s is limited on many systems and
+it is good not to waste them.
+
+The value of @code{process-connection-type} takes effect when
+@code{start-process} is called.  So you can specify how to communicate
+with one subprocess by binding the variable around the call to
+@code{start-process}.
+
+@smallexample
+@group
+(let ((process-connection-type nil))  ; @r{use a pipe}
+  (start-process @dots{}))
+@end group
+@end smallexample
+
+To determine whether a given subprocess actually got a pipe or a
+@acronym{PTY}, use the function @code{process-tty-name} (@pxref{Process
+Information}).
+@end defvar
+
+@node Deleting Processes
+@section Deleting Processes
+@cindex deleting processes
+
+  @dfn{Deleting a process} disconnects Emacs immediately from the
+subprocess.  Processes are deleted automatically after they terminate,
+but not necessarily right away.  You can delete a process explicitly
+at any time.  If you explicitly delete a terminated process before it
+is deleted automatically, no harm results.  Deleting a running
+process sends a signal to terminate it (and its child processes, if
+any), and calls the process sentinel if it has one.  @xref{Sentinels}.
+
+  When a process is deleted, the process object itself continues to
+exist as long as other Lisp objects point to it.  All the Lisp
+primitives that work on process objects accept deleted processes, but
+those that do I/O or send signals will report an error.  The process
+mark continues to point to the same place as before, usually into a
+buffer where output from the process was being inserted.
+
+@defopt delete-exited-processes
+This variable controls automatic deletion of processes that have
+terminated (due to calling @code{exit} or to a signal).  If it is
+@code{nil}, then they continue to exist until the user runs
+@code{list-processes}.  Otherwise, they are deleted immediately after
+they exit.
+@end defopt
+
+@defun delete-process process
+This function deletes a process, killing it with a @code{SIGKILL}
+signal.  The argument may be a process, the name of a process, a
+buffer, or the name of a buffer.  (A buffer or buffer-name stands for
+the process that @code{get-buffer-process} returns.)  Calling
+@code{delete-process} on a running process terminates it, updates the
+process status, and runs the sentinel (if any) immediately.  If the
+process has already terminated, calling @code{delete-process} has no
+effect on its status, or on the running of its sentinel (which will
+happen sooner or later).
+
+@smallexample
+@group
+(delete-process "*shell*")
+     @result{} nil
+@end group
+@end smallexample
+@end defun
+
+@node Process Information
+@section Process Information
+
+  Several functions return information about processes.
+
+@deffn Command list-processes &optional query-only buffer
+This command displays a listing of all living processes.  In addition,
+it finally deletes any process whose status was @samp{Exited} or
+@samp{Signaled}.  It returns @code{nil}.
+
+The processes are shown in a buffer named @file{*Process List*}
+(unless you specify otherwise using the optional argument @var{buffer}),
+whose major mode is Process Menu mode.
+
+If @var{query-only} is non-@code{nil}, it only lists processes
+whose query flag is non-@code{nil}.  @xref{Query Before Exit}.
+@end deffn
+
+@defun process-list
+This function returns a list of all processes that have not been deleted.
+
+@smallexample
+@group
+(process-list)
+     @result{} (#<process display-time> #<process shell>)
+@end group
+@end smallexample
+@end defun
+
+@defun get-process name
+This function returns the process named @var{name} (a string), or
+@code{nil} if there is none.
+
+@smallexample
+@group
+(get-process "shell")
+     @result{} #<process shell>
+@end group
+@end smallexample
+@end defun
+
+@defun process-command process
+This function returns the command that was executed to start
+@var{process}.  This is a list of strings, the first string being the
+program executed and the rest of the strings being the arguments that
+were given to the program.
+
+@smallexample
+@group
+(process-command (get-process "shell"))
+     @result{} ("bash" "-i")
+@end group
+@end smallexample
+@end defun
+
+@defun process-contact process &optional key
+
+This function returns information about how a network or serial
+process was set up.  When @var{key} is @code{nil}, it returns
+@code{(@var{hostname} @var{service})} for a network process, and
+@code{(@var{port} @var{speed})} for a serial process.
+For an ordinary child process, this function always returns @code{t}.
+
+If @var{key} is @code{t}, the value is the complete status information
+for the connection, server, or serial port; that is, the list of
+keywords and values specified in @code{make-network-process} or
+@code{make-serial-process}, except that some of the values represent
+the current status instead of what you specified.
+
+For a network process, the values include (see
+@code{make-network-process} for a complete list):
+
+@table @code
+@item :buffer
+The associated value is the process buffer.
+@item :filter
+The associated value is the process filter function.
+@item :sentinel
+The associated value is the process sentinel function.
+@item :remote
+In a connection, the address in internal format of the remote peer.
+@item :local
+The local address, in internal format.
+@item :service
+In a server, if you specified @code{t} for @var{service},
+this value is the actual port number.
+@end table
+
+@code{:local} and @code{:remote} are included even if they were not
+specified explicitly in @code{make-network-process}.
+
+For a serial process, see @code{make-serial-process} and
+@code{serial-process-configure} for a list of keys.
+
+If @var{key} is a keyword, the function returns the value corresponding
+to that keyword.
+@end defun
+
+@defun process-id process
+This function returns the @acronym{PID} of @var{process}.  This is an
+integer that distinguishes the process @var{process} from all other
+processes running on the same computer at the current time.  The
+@acronym{PID} of a process is chosen by the operating system kernel when the
+process is started and remains constant as long as the process exists.
+@end defun
+
+@defun process-name process
+This function returns the name of @var{process}, as a string.
+@end defun
+
+@defun process-status process-name
+This function returns the status of @var{process-name} as a symbol.
+The argument @var{process-name} must be a process, a buffer, or a
+process name (a string).
+
+The possible values for an actual subprocess are:
+
+@table @code
+@item run
+for a process that is running.
+@item stop
+for a process that is stopped but continuable.
+@item exit
+for a process that has exited.
+@item signal
+for a process that has received a fatal signal.
+@item open
+for a network connection that is open.
+@item closed
+for a network connection that is closed.  Once a connection
+is closed, you cannot reopen it, though you might be able to open
+a new connection to the same place.
+@item connect
+for a non-blocking connection that is waiting to complete.
+@item failed
+for a non-blocking connection that has failed to complete.
+@item listen
+for a network server that is listening.
+@item nil
+if @var{process-name} is not the name of an existing process.
+@end table
+
+@smallexample
+@group
+(process-status (get-buffer "*shell*"))
+     @result{} run
+@end group
+@end smallexample
+
+For a network connection, @code{process-status} returns one of the symbols
+@code{open} or @code{closed}.  The latter means that the other side
+closed the connection, or Emacs did @code{delete-process}.
+@end defun
+
+@defun process-live-p process
+This function returns non-@code{nil} if @var{process} is alive.  A
+process is considered alive if its status is @code{run}, @code{open},
+@code{listen}, @code{connect} or @code{stop}.
+@end defun
+
+@defun process-type process
+This function returns the symbol @code{network} for a network
+connection or server, @code{serial} for a serial port connection, or
+@code{real} for a real subprocess.
+@end defun
+
+@defun process-exit-status process
+This function returns the exit status of @var{process} or the signal
+number that killed it.  (Use the result of @code{process-status} to
+determine which of those it is.)  If @var{process} has not yet
+terminated, the value is 0.
+@end defun
+
+@defun process-tty-name process
+This function returns the terminal name that @var{process} is using for
+its communication with Emacs---or @code{nil} if it is using pipes
+instead of a terminal (see @code{process-connection-type} in
+@ref{Asynchronous Processes}).  If @var{process} represents a program
+running on a remote host, the terminal name used by that program on
+the remote host is provided as process property @code{remote-tty}.
+@end defun
+
+@defun process-coding-system process
+@anchor{Coding systems for a subprocess}
+This function returns a cons cell @code{(@var{decode} . @var{encode})},
+describing the coding systems in use for decoding output from, and
+encoding input to, @var{process} (@pxref{Coding Systems}).
+@end defun
+
+@defun set-process-coding-system process &optional decoding-system encoding-system
+This function specifies the coding systems to use for subsequent output
+from and input to @var{process}.  It will use @var{decoding-system} to
+decode subprocess output, and @var{encoding-system} to encode subprocess
+input.
+@end defun
+
+  Every process also has a property list that you can use to store
+miscellaneous values associated with the process.
+
+@defun process-get process propname
+This function returns the value of the @var{propname} property
+of @var{process}.
+@end defun
+
+@defun process-put process propname value
+This function sets the value of the @var{propname} property
+of @var{process} to @var{value}.
+@end defun
+
+@defun process-plist process
+This function returns the process plist of @var{process}.
+@end defun
+
+@defun set-process-plist process plist
+This function sets the process plist of @var{process} to @var{plist}.
+@end defun
+
+@node Input to Processes
+@section Sending Input to Processes
+@cindex process input
+
+  Asynchronous subprocesses receive input when it is sent to them by
+Emacs, which is done with the functions in this section.  You must
+specify the process to send input to, and the input data to send.  The
+data appears on the ``standard input'' of the subprocess.
+
+@c FIXME which?
+  Some operating systems have limited space for buffered input in a
+@acronym{PTY}.  On these systems, Emacs sends an @acronym{EOF}
+periodically amidst the other characters, to force them through.  For
+most programs, these @acronym{EOF}s do no harm.
+
+  Subprocess input is normally encoded using a coding system before the
+subprocess receives it, much like text written into a file.  You can use
+@code{set-process-coding-system} to specify which coding system to use
+(@pxref{Process Information}).  Otherwise, the coding system comes from
+@code{coding-system-for-write}, if that is non-@code{nil}; or else from
+the defaulting mechanism (@pxref{Default Coding Systems}).
+
+  Sometimes the system is unable to accept input for that process,
+because the input buffer is full.  When this happens, the send functions
+wait a short while, accepting output from subprocesses, and then try
+again.  This gives the subprocess a chance to read more of its pending
+input and make space in the buffer.  It also allows filters, sentinels
+and timers to run---so take account of that in writing your code.
+
+  In these functions, the @var{process} argument can be a process or
+the name of a process, or a buffer or buffer name (which stands
+for a process via @code{get-buffer-process}).  @code{nil} means
+the current buffer's process.
+
+@defun process-send-string process string
+This function sends @var{process} the contents of @var{string} as
+standard input.  It returns @code{nil}.  For example, to make a
+Shell buffer list files:
+
+@smallexample
+@group
+(process-send-string "shell<1>" "ls\n")
+     @result{} nil
+@end group
+@end smallexample
+@end defun
+
+@defun process-send-region process start end
+This function sends the text in the region defined by @var{start} and
+@var{end} as standard input to @var{process}.
+
+An error is signaled unless both @var{start} and @var{end} are
+integers or markers that indicate positions in the current buffer.  (It
+is unimportant which number is larger.)
+@end defun
+
+@defun process-send-eof &optional process
+This function makes @var{process} see an end-of-file in its
+input.  The @acronym{EOF} comes after any text already sent to it.
+The function returns @var{process}.
+
+@smallexample
+@group
+(process-send-eof "shell")
+     @result{} "shell"
+@end group
+@end smallexample
+@end defun
+
+@defun process-running-child-p &optional process
+This function will tell you whether a @var{process} has given control of
+its terminal to its own child process.  The value is @code{t} if this is
+true, or if Emacs cannot tell; it is @code{nil} if Emacs can be certain
+that this is not so.
+@end defun
+
+@node Signals to Processes
+@section Sending Signals to Processes
+@cindex process signals
+@cindex sending signals
+@cindex signals
+
+  @dfn{Sending a signal} to a subprocess is a way of interrupting its
+activities.  There are several different signals, each with its own
+meaning.  The set of signals and their names is defined by the operating
+system.  For example, the signal @code{SIGINT} means that the user has
+typed @kbd{C-c}, or that some analogous thing has happened.
+
+  Each signal has a standard effect on the subprocess.  Most signals
+kill the subprocess, but some stop (or resume) execution instead.  Most
+signals can optionally be handled by programs; if the program handles
+the signal, then we can say nothing in general about its effects.
+
+  You can send signals explicitly by calling the functions in this
+section.  Emacs also sends signals automatically at certain times:
+killing a buffer sends a @code{SIGHUP} signal to all its associated
+processes; killing Emacs sends a @code{SIGHUP} signal to all remaining
+processes.  (@code{SIGHUP} is a signal that usually indicates that the
+user ``hung up the phone'', i.e., disconnected.)
+
+  Each of the signal-sending functions takes two optional arguments:
+@var{process} and @var{current-group}.
+
+  The argument @var{process} must be either a process, a process
+name, a buffer, a buffer name, or @code{nil}.  A buffer or buffer name
+stands for a process through @code{get-buffer-process}.  @code{nil}
+stands for the process associated with the current buffer.  An error
+is signaled if @var{process} does not identify a process.
+
+  The argument @var{current-group} is a flag that makes a difference
+when you are running a job-control shell as an Emacs subprocess.  If it
+is non-@code{nil}, then the signal is sent to the current process-group
+of the terminal that Emacs uses to communicate with the subprocess.  If
+the process is a job-control shell, this means the shell's current
+subjob.  If it is @code{nil}, the signal is sent to the process group of
+the immediate subprocess of Emacs.  If the subprocess is a job-control
+shell, this is the shell itself.
+
+  The flag @var{current-group} has no effect when a pipe is used to
+communicate with the subprocess, because the operating system does not
+support the distinction in the case of pipes.  For the same reason,
+job-control shells won't work when a pipe is used.  See
+@code{process-connection-type} in @ref{Asynchronous Processes}.
+
+@defun interrupt-process &optional process current-group
+This function interrupts the process @var{process} by sending the
+signal @code{SIGINT}.  Outside of Emacs, typing the ``interrupt
+character'' (normally @kbd{C-c} on some systems, and @key{DEL} on
+others) sends this signal.  When the argument @var{current-group} is
+non-@code{nil}, you can think of this function as ``typing @kbd{C-c}''
+on the terminal by which Emacs talks to the subprocess.
+@end defun
+
+@defun kill-process &optional process current-group
+This function kills the process @var{process} by sending the
+signal @code{SIGKILL}.  This signal kills the subprocess immediately,
+and cannot be handled by the subprocess.
+@end defun
+
+@defun quit-process &optional process current-group
+This function sends the signal @code{SIGQUIT} to the process
+@var{process}.  This signal is the one sent by the ``quit
+@c FIXME?  Never heard of C-b being used for this.  In readline, eg
+@c bash, that is backward-word.
+character'' (usually @kbd{C-b} or @kbd{C-\}) when you are not inside
+Emacs.
+@end defun
+
+@defun stop-process &optional process current-group
+This function stops the process @var{process} by sending the
+signal @code{SIGTSTP}.  Use @code{continue-process} to resume its
+execution.
+
+Outside of Emacs, on systems with job control, the ``stop character''
+(usually @kbd{C-z}) normally sends this signal.  When
+@var{current-group} is non-@code{nil}, you can think of this function as
+``typing @kbd{C-z}'' on the terminal Emacs uses to communicate with the
+subprocess.
+@end defun
+
+@defun continue-process &optional process current-group
+This function resumes execution of the process @var{process} by sending
+it the signal @code{SIGCONT}.  This presumes that @var{process} was
+stopped previously.
+@end defun
+
+@deffn Command signal-process process signal
+This function sends a signal to process @var{process}.  The argument
+@var{signal} specifies which signal to send; it should be an integer,
+or a symbol whose name is a signal.
+
+The @var{process} argument can be a system process @acronym{ID} (an
+integer); that allows you to send signals to processes that are not
+children of Emacs.  @xref{System Processes}.
+@end deffn
+
+@node Output from Processes
+@section Receiving Output from Processes
+@cindex process output
+@cindex output from processes
+
+  There are two ways to receive the output that a subprocess writes to
+its standard output stream.  The output can be inserted in a buffer,
+which is called the associated buffer of the process (@pxref{Process
+Buffers}), or a function called the @dfn{filter function} can be
+called to act on the output.  If the process has no buffer and no
+filter function, its output is discarded.
+
+  When a subprocess terminates, Emacs reads any pending output,
+then stops reading output from that subprocess.  Therefore, if the
+subprocess has children that are still live and still producing
+output, Emacs won't receive that output.
+
+  Output from a subprocess can arrive only while Emacs is waiting: when
+reading terminal input (see the function @code{waiting-for-user-input-p}),
+in @code{sit-for} and @code{sleep-for} (@pxref{Waiting}), and in
+@code{accept-process-output} (@pxref{Accepting Output}).  This
+minimizes the problem of timing errors that usually plague parallel
+programming.  For example, you can safely create a process and only
+then specify its buffer or filter function; no output can arrive
+before you finish, if the code in between does not call any primitive
+that waits.
+
+@defvar process-adaptive-read-buffering
+On some systems, when Emacs reads the output from a subprocess, the
+output data is read in very small blocks, potentially resulting in
+very poor performance.  This behavior can be remedied to some extent
+by setting the variable @code{process-adaptive-read-buffering} to a
+non-@code{nil} value (the default), as it will automatically delay reading
+from such processes, thus allowing them to produce more output before
+Emacs tries to read it.
+@end defvar
+
+  It is impossible to separate the standard output and standard error
+streams of the subprocess, because Emacs normally spawns the subprocess
+inside a pseudo-TTY, and a pseudo-TTY has only one output channel.  If
+you want to keep the output to those streams separate, you should
+redirect one of them to a file---for example, by using an appropriate
+shell command.
+
+@menu
+* Process Buffers::         If no filter, output is put in a buffer.
+* Filter Functions::        Filter functions accept output from the process.
+* Decoding Output::         Filters can get unibyte or multibyte strings.
+* Accepting Output::        How to wait until process output arrives.
+@end menu
+
+@node Process Buffers
+@subsection Process Buffers
+
+  A process can (and usually does) have an @dfn{associated buffer},
+which is an ordinary Emacs buffer that is used for two purposes: storing
+the output from the process, and deciding when to kill the process.  You
+can also use the buffer to identify a process to operate on, since in
+normal practice only one process is associated with any given buffer.
+Many applications of processes also use the buffer for editing input to
+be sent to the process, but this is not built into Emacs Lisp.
+
+  Unless the process has a filter function (@pxref{Filter Functions}),
+its output is inserted in the associated buffer.  The position to insert
+the output is determined by the @code{process-mark}, which is then
+updated to point to the end of the text just inserted.  Usually, but not
+always, the @code{process-mark} is at the end of the buffer.
+
+@findex process-kill-buffer-query-function
+  Killing the associated buffer of a process also kills the process.
+Emacs asks for confirmation first, if the process's
+@code{process-query-on-exit-flag} is non-@code{nil} (@pxref{Query
+Before Exit}).  This confirmation is done by the function
+@code{process-kill-buffer-query-function}, which is run from
+@code{kill-buffer-query-functions} (@pxref{Killing Buffers}).
+
+@defun process-buffer process
+This function returns the associated buffer of the process
+@var{process}.
+
+@smallexample
+@group
+(process-buffer (get-process "shell"))
+     @result{} #<buffer *shell*>
+@end group
+@end smallexample
+@end defun
+
+@defun process-mark process
+This function returns the process marker for @var{process}, which is the
+marker that says where to insert output from the process.
+
+If @var{process} does not have a buffer, @code{process-mark} returns a
+marker that points nowhere.
+
+Insertion of process output in a buffer uses this marker to decide where
+to insert, and updates it to point after the inserted text.  That is why
+successive batches of output are inserted consecutively.
+
+Filter functions normally should use this marker in the same fashion
+as is done by direct insertion of output in the buffer.  For an
+example of a filter function that uses @code{process-mark},
+@pxref{Process Filter Example}.
+
+When the user is expected to enter input in the process buffer for
+transmission to the process, the process marker separates the new input
+from previous output.
+@end defun
+
+@defun set-process-buffer process buffer
+This function sets the buffer associated with @var{process} to
+@var{buffer}.  If @var{buffer} is @code{nil}, the process becomes
+associated with no buffer.
+@end defun
+
+@defun get-buffer-process buffer-or-name
+This function returns a nondeleted process associated with the buffer
+specified by @var{buffer-or-name}.  If there are several processes
+associated with it, this function chooses one (currently, the one most
+recently created, but don't count on that).  Deletion of a process
+(see @code{delete-process}) makes it ineligible for this function to
+return.
+
+It is usually a bad idea to have more than one process associated with
+the same buffer.
+
+@smallexample
+@group
+(get-buffer-process "*shell*")
+     @result{} #<process shell>
+@end group
+@end smallexample
+
+Killing the process's buffer deletes the process, which kills the
+subprocess with a @code{SIGHUP} signal (@pxref{Signals to Processes}).
+@end defun
+
+@node Filter Functions
+@subsection Process Filter Functions
+@cindex filter function
+@cindex process filter
+
+  A process @dfn{filter function} is a function that receives the
+standard output from the associated process.  If a process has a filter,
+then @emph{all} output from that process is passed to the filter.  The
+process buffer is used directly for output from the process only when
+there is no filter.
+
+  The filter function can only be called when Emacs is waiting for
+something, because process output arrives only at such times.  Emacs
+waits when reading terminal input (see the function
+@code{waiting-for-user-input-p}), in @code{sit-for} and
+@code{sleep-for} (@pxref{Waiting}), and in
+@code{accept-process-output} (@pxref{Accepting Output}).
+
+  A filter function must accept two arguments: the associated process
+and a string, which is output just received from it.  The function is
+then free to do whatever it chooses with the output.
+
+@c Note this text is duplicated in the sentinels section.
+  Quitting is normally inhibited within a filter function---otherwise,
+the effect of typing @kbd{C-g} at command level or to quit a user
+command would be unpredictable.  If you want to permit quitting inside
+a filter function, bind @code{inhibit-quit} to @code{nil}.  In most
+cases, the right way to do this is with the macro
+@code{with-local-quit}.  @xref{Quitting}.
+
+  If an error happens during execution of a filter function, it is
+caught automatically, so that it doesn't stop the execution of whatever
+program was running when the filter function was started.  However, if
+@code{debug-on-error} is non-@code{nil}, errors are not caught.
+This makes it possible to use the Lisp debugger to debug the
+filter function.  @xref{Debugger}.
+
+  Many filter functions sometimes (or always) insert the output in the
+process's buffer, mimicking the actions of Emacs when there is no
+filter.  Such filter functions need to make sure that they save the
+current buffer, select the correct buffer (if different) before
+inserting output, and then restore the original buffer.
+They should also check whether the buffer is still alive, update the
+process marker, and in some cases update the value of point.  Here is
+how to do these things:
+
+@anchor{Process Filter Example}
+@smallexample
+@group
+(defun ordinary-insertion-filter (proc string)
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((moving (= (point) (process-mark proc))))
+@end group
+@group
+        (save-excursion
+          ;; @r{Insert the text, advancing the process marker.}
+          (goto-char (process-mark proc))
+          (insert string)
+          (set-marker (process-mark proc) (point)))
+        (if moving (goto-char (process-mark proc)))))))
+@end group
+@end smallexample
+
+  To make the filter force the process buffer to be visible whenever new
+text arrives, you could insert a line like the following just before the
+@code{with-current-buffer} construct:
+
+@smallexample
+(display-buffer (process-buffer proc))
+@end smallexample
+
+  To force point to the end of the new output, no matter where it was
+previously, eliminate the variable @code{moving} and call
+@code{goto-char} unconditionally.
+
+@ignore
+  In earlier Emacs versions, every filter function that did regular
+expression searching or matching had to explicitly save and restore the
+match data.  Now Emacs does this automatically for filter functions;
+they never need to do it explicitly.
+@end ignore
+  Note that Emacs automatically saves and restores the match data
+while executing filter functions.  @xref{Match Data}.
+
+  The output to the filter may come in chunks of any size.  A program
+that produces the same output twice in a row may send it as one batch of
+200 characters one time, and five batches of 40 characters the next.  If
+the filter looks for certain text strings in the subprocess output, make
+sure to handle the case where one of these strings is split across two
+or more batches of output; one way to do this is to insert the
+received text into a temporary buffer, which can then be searched.
+
+@defun set-process-filter process filter
+This function gives @var{process} the filter function @var{filter}.  If
+@var{filter} is @code{nil}, it gives the process no filter.
+@end defun
+
+@defun process-filter process
+This function returns the filter function of @var{process}, or @code{nil}
+if it has none.
+@end defun
+
+  Here is an example of the use of a filter function:
+
+@smallexample
+@group
+(defun keep-output (process output)
+   (setq kept (cons output kept)))
+     @result{} keep-output
+@end group
+@group
+(setq kept nil)
+     @result{} nil
+@end group
+@group
+(set-process-filter (get-process "shell") 'keep-output)
+     @result{} keep-output
+@end group
+@group
+(process-send-string "shell" "ls ~/other\n")
+     @result{} nil
+kept
+     @result{} ("lewis@@slug:$ "
+@end group
+@group
+"FINAL-W87-SHORT.MSS    backup.otl              kolstad.mss~
+address.txt             backup.psf              kolstad.psf
+backup.bib~             david.mss               resume-Dec-86.mss~
+backup.err              david.psf               resume-Dec.psf
+backup.mss              dland                   syllabus.mss
+"
+"#backups.mss#          backup.mss~             kolstad.mss
+")
+@end group
+@end smallexample
+
+@ignore   @c The code in this example doesn't show the right way to do things.
+Here is another, more realistic example, which demonstrates how to use
+the process mark to do insertion in the same fashion as is done when
+there is no filter function:
+
+@smallexample
+@group
+;; @r{Insert input in the buffer specified by @code{my-shell-buffer}}
+;;   @r{and make sure that buffer is shown in some window.}
+(defun my-process-filter (proc str)
+  (let ((cur (selected-window))
+        (pop-up-windows t))
+    (pop-to-buffer my-shell-buffer)
+@end group
+@group
+    (goto-char (point-max))
+    (insert str)
+    (set-marker (process-mark proc) (point-max))
+    (select-window cur)))
+@end group
+@end smallexample
+@end ignore
+
+@node Decoding Output
+@subsection Decoding Process Output
+@cindex decode process output
+
+  When Emacs writes process output directly into a multibyte buffer,
+it decodes the output according to the process output coding system.
+If the coding system is @code{raw-text} or @code{no-conversion}, Emacs
+converts the unibyte output to multibyte using
+@code{string-to-multibyte}, and inserts the resulting multibyte text.
+
+  You can use @code{set-process-coding-system} to specify which coding
+system to use (@pxref{Process Information}).  Otherwise, the coding
+system comes from @code{coding-system-for-read}, if that is
+non-@code{nil}; or else from the defaulting mechanism (@pxref{Default
+Coding Systems}).  If the text output by a process contains null
+bytes, Emacs by default uses @code{no-conversion} for it; see
+@ref{Lisp and Coding Systems, inhibit-null-byte-detection}, for how to
+control this behavior.
+
+  @strong{Warning:} Coding systems such as @code{undecided}, which
+determine the coding system from the data, do not work entirely
+reliably with asynchronous subprocess output.  This is because Emacs
+has to process asynchronous subprocess output in batches, as it
+arrives.  Emacs must try to detect the proper coding system from one
+batch at a time, and this does not always work.  Therefore, if at all
+possible, specify a coding system that determines both the character
+code conversion and the end of line conversion---that is, one like
+@code{latin-1-unix}, rather than @code{undecided} or @code{latin-1}.
+
+@c Let's keep the index entries that were there for
+@c set-process-filter-multibyte and process-filter-multibyte-p,
+@cindex filter multibyte flag, of process
+@cindex process filter multibyte flag
+  When Emacs calls a process filter function, it provides the process
+output as a multibyte string or as a unibyte string according to the
+process's filter coding system.  Emacs
+decodes the output according to the process output coding system,
+which usually produces a multibyte string, except for coding systems
+such as @code{binary} and @code{raw-text}.
+
+@node Accepting Output
+@subsection Accepting Output from Processes
+@cindex accept input from processes
+
+  Output from asynchronous subprocesses normally arrives only while
+Emacs is waiting for some sort of external event, such as elapsed time
+or terminal input.  Occasionally it is useful in a Lisp program to
+explicitly permit output to arrive at a specific point, or even to wait
+until output arrives from a process.
+
+@defun accept-process-output &optional process seconds millisec just-this-one
+This function allows Emacs to read pending output from processes.  The
+output is inserted in the associated buffers or given to their filter
+functions.  If @var{process} is non-@code{nil} then this function does
+not return until some output has been received from @var{process}.
+
+The arguments @var{seconds} and @var{millisec} let you specify timeout
+periods.  The former specifies a period measured in seconds and the
+latter specifies one measured in milliseconds.  The two time periods
+thus specified are added together, and @code{accept-process-output}
+returns after that much time, whether or not there has been any
+subprocess output.
+
+The argument @var{millisec} is obsolete (and should not be used),
+because @var{seconds} can be a floating point number to specify
+waiting a fractional number of seconds.  If @var{seconds} is 0, the
+function accepts whatever output is pending but does not wait.
+
+@c Emacs 22.1 feature
+If @var{process} is a process, and the argument @var{just-this-one} is
+non-@code{nil}, only output from that process is handled, suspending output
+from other processes until some output has been received from that
+process or the timeout expires.  If @var{just-this-one} is an integer,
+also inhibit running timers.  This feature is generally not
+recommended, but may be necessary for specific applications, such as
+speech synthesis.
+
+The function @code{accept-process-output} returns non-@code{nil} if it
+did get some output, or @code{nil} if the timeout expired before output
+arrived.
+@end defun
+
+@node Sentinels
+@section Sentinels: Detecting Process Status Changes
+@cindex process sentinel
+@cindex sentinel (of process)
+
+  A @dfn{process sentinel} is a function that is called whenever the
+associated process changes status for any reason, including signals
+(whether sent by Emacs or caused by the process's own actions) that
+terminate, stop, or continue the process.  The process sentinel is
+also called if the process exits.  The sentinel receives two
+arguments: the process for which the event occurred, and a string
+describing the type of event.
+
+  The string describing the event looks like one of the following:
+
+@c FIXME?  Also "killed\n" - see example below?
+@itemize @bullet
+@item
+@code{"finished\n"}.
+
+@item
+@code{"exited abnormally with code @var{exitcode}\n"}.
+
+@item
+@code{"@var{name-of-signal}\n"}.
+
+@item
+@code{"@var{name-of-signal} (core dumped)\n"}.
+@end itemize
+
+  A sentinel runs only while Emacs is waiting (e.g., for terminal
+input, or for time to elapse, or for process output).  This avoids the
+timing errors that could result from running sentinels at random places in
+the middle of other Lisp programs.  A program can wait, so that
+sentinels will run, by calling @code{sit-for} or @code{sleep-for}
+(@pxref{Waiting}), or @code{accept-process-output} (@pxref{Accepting
+Output}).  Emacs also allows sentinels to run when the command loop is
+reading input.  @code{delete-process} calls the sentinel when it
+terminates a running process.
+
+  Emacs does not keep a queue of multiple reasons to call the sentinel
+of one process; it records just the current status and the fact that
+there has been a change.  Therefore two changes in status, coming in
+quick succession, can call the sentinel just once.  However, process
+termination will always run the sentinel exactly once.  This is
+because the process status can't change again after termination.
+
+  Emacs explicitly checks for output from the process before running
+the process sentinel.  Once the sentinel runs due to process
+termination, no further output can arrive from the process.
+
+  A sentinel that writes the output into the buffer of the process
+should check whether the buffer is still alive.  If it tries to insert
+into a dead buffer, it will get an error.  If the buffer is dead,
+@code{(buffer-name (process-buffer @var{process}))} returns @code{nil}.
+
+@c Note this text is duplicated in the filter functions section.
+  Quitting is normally inhibited within a sentinel---otherwise, the
+effect of typing @kbd{C-g} at command level or to quit a user command
+would be unpredictable.  If you want to permit quitting inside a
+sentinel, bind @code{inhibit-quit} to @code{nil}.  In most cases, the
+right way to do this is with the macro @code{with-local-quit}.
+@xref{Quitting}.
+
+  If an error happens during execution of a sentinel, it is caught
+automatically, so that it doesn't stop the execution of whatever
+programs was running when the sentinel was started.  However, if
+@code{debug-on-error} is non-@code{nil},  errors are not caught.
+This makes it possible to use the Lisp debugger to debug the
+sentinel.  @xref{Debugger}.
+
+  While a sentinel is running, the process sentinel is temporarily
+set to @code{nil} so that the sentinel won't run recursively.
+For this reason it is not possible for a sentinel to specify
+a new sentinel.
+
+@ignore
+  In earlier Emacs versions, every sentinel that did regular expression
+searching or matching had to explicitly save and restore the match data.
+Now Emacs does this automatically for sentinels; they never need to do
+it explicitly.
+@end ignore
+ Note that Emacs automatically saves and restores the match data
+while executing sentinels.  @xref{Match Data}.
+
+@defun set-process-sentinel process sentinel
+This function associates @var{sentinel} with @var{process}.  If
+@var{sentinel} is @code{nil}, then the process will have no sentinel.
+The default behavior when there is no sentinel is to insert a message in
+the process's buffer when the process status changes.
+
+Changes in process sentinels take effect immediately---if the sentinel
+is slated to be run but has not been called yet, and you specify a new
+sentinel, the eventual call to the sentinel will use the new one.
+
+@smallexample
+@group
+(defun msg-me (process event)
+   (princ
+     (format "Process: %s had the event `%s'" process event)))
+(set-process-sentinel (get-process "shell") 'msg-me)
+     @result{} msg-me
+@end group
+@group
+(kill-process (get-process "shell"))
+     @print{} Process: #<process shell> had the event `killed'
+     @result{} #<process shell>
+@end group
+@end smallexample
+@end defun
+
+@defun process-sentinel process
+This function returns the sentinel of @var{process}, or @code{nil} if it
+has none.
+@end defun
+
+@defun waiting-for-user-input-p
+While a sentinel or filter function is running, this function returns
+non-@code{nil} if Emacs was waiting for keyboard input from the user at
+the time the sentinel or filter function was called, or @code{nil} if it
+was not.
+@end defun
+
+@node Query Before Exit
+@section Querying Before Exit
+
+  When Emacs exits, it terminates all its subprocesses by sending them
+the @code{SIGHUP} signal.  Because subprocesses may be doing
+valuable work, Emacs normally asks the user to confirm that it is ok
+to terminate them.  Each process has a query flag, which, if
+non-@code{nil}, says that Emacs should ask for confirmation before
+exiting and thus killing that process.  The default for the query flag
+is @code{t}, meaning @emph{do} query.
+
+@defun process-query-on-exit-flag process
+This returns the query flag of @var{process}.
+@end defun
+
+@defun set-process-query-on-exit-flag process flag
+This function sets the query flag of @var{process} to @var{flag}.  It
+returns @var{flag}.
+
+Here is an example of using @code{set-process-query-on-exit-flag} on a
+shell process to avoid querying:
+
+@smallexample
+@group
+(set-process-query-on-exit-flag (get-process "shell") nil)
+     @result{} nil
+@end group
+@end smallexample
+@end defun
+
+@node System Processes
+@section Accessing Other Processes
+@cindex system processes
+
+  In addition to accessing and manipulating processes that are
+subprocesses of the current Emacs session, Emacs Lisp programs can
+also access other processes running on the same machine.  We call
+these @dfn{system processes}, to distinguish them from Emacs
+subprocesses.
+
+  Emacs provides several primitives for accessing system processes.
+Not all platforms support these primitives; on those which don't,
+these primitives return @code{nil}.
+
+@defun list-system-processes
+This function returns a list of all the processes running on the
+system.  Each process is identified by its @acronym{PID}, a numerical
+process ID that is assigned by the OS and distinguishes the process
+from all the other processes running on the same machine at the same
+time.
+@end defun
+
+@defun process-attributes pid
+This function returns an alist of attributes for the process specified
+by its process ID @var{pid}.  Each association in the alist is of the
+form @code{(@var{key} . @var{value})}, where @var{key} designates the
+attribute and @var{value} is the value of that attribute.  The various
+attribute @var{key}s that this function can return are listed below.
+Not all platforms support all of these attributes; if an attribute is
+not supported, its association will not appear in the returned alist.
+Values that are numbers can be either integer or floating-point,
+depending on the magnitude of the value.
+
+@table @code
+@item euid
+The effective user ID of the user who invoked the process.  The
+corresponding @var{value} is a number.  If the process was invoked by
+the same user who runs the current Emacs session, the value is
+identical to what @code{user-uid} returns (@pxref{User
+Identification}).
+
+@item user
+User name corresponding to the process's effective user ID, a string.
+
+@item egid
+The group ID of the effective user ID, a number.
+
+@item group
+Group name corresponding to the effective user's group ID, a string.
+
+@item comm
+The name of the command that runs in the process.  This is a string
+that usually specifies the name of the executable file of the process,
+without the leading directories.  However, some special system
+processes can report strings that do not correspond to an executable
+file of a program.
+
+@item state
+The state code of the process.  This is a short string that encodes
+the scheduling state of the process.  Here's a list of the most
+frequently seen codes:
+
+@table @code
+@item "D"
+uninterruptible sleep (usually I/O)
+@item "R"
+running
+@item "S"
+interruptible sleep (waiting for some event)
+@item "T"
+stopped, e.g., by a job control signal
+@item "Z"
+``zombie'': a process that terminated, but was not reaped by its parent
+@end table
+
+@noindent
+For the full list of the possible states, see the manual page of the
+@command{ps} command.
+
+@item ppid
+The process ID of the parent process, a number.
+
+@item pgrp
+The process group ID of the process, a number.
+
+@item sess
+The session ID of the process.  This is a number that is the process
+ID of the process's @dfn{session leader}.
+
+@item ttname
+A string that is the name of the process's controlling terminal.  On
+Unix and GNU systems, this is normally the file name of the
+corresponding terminal device, such as @file{/dev/pts65}.
+
+@item tpgid
+The numerical process group ID of the foreground process group that
+uses the process's terminal.
+
+@item minflt
+The number of minor page faults caused by the process since its
+beginning.  (Minor page faults are those that don't involve reading
+from disk.)
+
+@item majflt
+The number of major page faults caused by the process since its
+beginning.  (Major page faults require a disk to be read, and are thus
+more expensive than minor page faults.)
+
+@item cminflt
+@itemx cmajflt
+Like @code{minflt} and @code{majflt}, but include the number of page
+faults for all the child processes of the given process.
+
+@item utime
+Time spent by the process in the user context, for running the
+application's code.  The corresponding @var{value} is in the
+@w{@code{(@var{high} @var{low} @var{microsec})}} format, the same
+format used by functions @code{current-time} (@pxref{Time of Day,
+current-time}) and @code{file-attributes} (@pxref{File Attributes}).
+
+@item stime
+Time spent by the process in the system (kernel) context, for
+processing system calls.  The corresponding @var{value} is in the same
+format as for @code{utime}.
+
+@item time
+The sum of @code{utime} and @code{stime}.  The corresponding
+@var{value} is in the same format as for @code{utime}.
+
+@item cutime
+@itemx cstime
+@itemx ctime
+Like @code{utime}, @code{stime}, and @code{time}, but include the
+times of all the child processes of the given process.
+
+@item pri
+The numerical priority of the process.
+
+@item nice
+The @dfn{nice value} of the process, a number.  (Processes with smaller
+nice values get scheduled more favorably.)
+
+@item thcount
+The number of threads in the process.
+
+@item start
+The time when the process was started, in the same
+@w{@code{(@var{high} @var{low} @var{microsec})}} format used by
+@code{current-time} and @code{file-attributes}.
+
+@item etime
+The time elapsed since the process started, in the @w{@code{(@var{high}
+@var{low} @var{microsec})}} format.
+
+@item vsize
+The virtual memory size of the process, measured in kilobytes.
+
+@item rss
+The size of the process's @dfn{resident set}, the number of kilobytes
+occupied by the process in the machine's physical memory.
+
+@item pcpu
+The percentage of the CPU time used by the process since it started.
+The corresponding @var{value} is a floating-point number between 0 and
+100.
+
+@item pmem
+The percentage of the total physical memory installed on the machine
+used by the process's resident set.  The value is a floating-point
+number between 0 and 100.
+
+@item args
+The command-line with which the process was invoked.  This is a string
+in which individual command-line arguments are separated by blanks;
+whitespace characters that are embedded in the arguments are quoted as
+appropriate for the system's shell: escaped by backslash characters on
+GNU and Unix, and enclosed in double quote characters on Windows.
+Thus, this command-line string can be directly used in primitives such
+as @code{shell-command}.
+@end table
+
+@end defun
+
+
+@node Transaction Queues
+@section Transaction Queues
+@cindex transaction queue
+
+@c That's not very informative.  What is a transaction, and when might
+@c I want to use one?
+You can use a @dfn{transaction queue} to communicate with a subprocess
+using transactions.  First use @code{tq-create} to create a transaction
+queue communicating with a specified process.  Then you can call
+@code{tq-enqueue} to send a transaction.
+
+@defun tq-create process
+This function creates and returns a transaction queue communicating with
+@var{process}.  The argument @var{process} should be a subprocess
+capable of sending and receiving streams of bytes.  It may be a child
+process, or it may be a TCP connection to a server, possibly on another
+machine.
+@end defun
+
+@defun tq-enqueue queue question regexp closure fn &optional delay-question
+This function sends a transaction to queue @var{queue}.  Specifying the
+queue has the effect of specifying the subprocess to talk to.
+
+The argument @var{question} is the outgoing message that starts the
+transaction.  The argument @var{fn} is the function to call when the
+corresponding answer comes back; it is called with two arguments:
+@var{closure}, and the answer received.
+
+The argument @var{regexp} is a regular expression that should match
+text at the end of the entire answer, but nothing before; that's how
+@code{tq-enqueue} determines where the answer ends.
+
+If the argument @var{delay-question} is non-@code{nil}, delay sending
+this question until the process has finished replying to any previous
+questions.  This produces more reliable results with some processes.
+@ignore
+
+@c Let's not mention it then.
+The return value of @code{tq-enqueue} itself is not meaningful.
+@end ignore
+@end defun
+
+@defun tq-close queue
+Shut down transaction queue @var{queue}, waiting for all pending transactions
+to complete, and then terminate the connection or child process.
+@end defun
+
+Transaction queues are implemented by means of a filter function.
+@xref{Filter Functions}.
+
+@node Network
+@section Network Connections
+@cindex network connection
+@cindex TCP
+@cindex UDP
+
+  Emacs Lisp programs can open stream (TCP) and datagram (UDP) network
+connections (@pxref{Datagrams}) to other processes on the same machine
+or other machines.
+A network connection is handled by Lisp much like a subprocess, and is
+represented by a process object.  However, the process you are
+communicating with is not a child of the Emacs process, has no
+process @acronym{ID}, and you can't kill it or send it signals.  All you
+can do is send and receive data.  @code{delete-process} closes the
+connection, but does not kill the program at the other end; that
+program must decide what to do about closure of the connection.
+
+  Lisp programs can listen for connections by creating network
+servers.  A network server is also represented by a kind of process
+object, but unlike a network connection, the network server never
+transfers data itself.  When it receives a connection request, it
+creates a new network connection to represent the connection just
+made.  (The network connection inherits certain information, including
+the process plist, from the server.)  The network server then goes
+back to listening for more connection requests.
+
+  Network connections and servers are created by calling
+@code{make-network-process} with an argument list consisting of
+keyword/argument pairs, for example @code{:server t} to create a
+server process, or @code{:type 'datagram} to create a datagram
+connection.  @xref{Low-Level Network}, for details.  You can also use
+the @code{open-network-stream} function described below.
+
+  To distinguish the different types of processes, the
+@code{process-type} function returns the symbol @code{network} for a
+network connection or server, @code{serial} for a serial port
+connection, or @code{real} for a real subprocess.
+
+  The @code{process-status} function returns @code{open},
+@code{closed}, @code{connect}, or @code{failed} for network
+connections.  For a network server, the status is always
+@code{listen}.  None of those values is possible for a real
+subprocess.  @xref{Process Information}.
+
+  You can stop and resume operation of a network process by calling
+@code{stop-process} and @code{continue-process}.  For a server
+process, being stopped means not accepting new connections.  (Up to 5
+connection requests will be queued for when you resume the server; you
+can increase this limit, unless it is imposed by the operating
+system---see the @code{:server} keyword of @code{make-network-process},
+@ref{Network Processes}.)  For a network stream connection, being
+stopped means not processing input (any arriving input waits until you
+resume the connection).  For a datagram connection, some number of
+packets may be queued but input may be lost.  You can use the function
+@code{process-command} to determine whether a network connection or
+server is stopped; a non-@code{nil} value means yes.
+
+@cindex network connection, encrypted
+@cindex encrypted network connections
+@cindex @acronym{TLS} network connections
+@cindex @acronym{STARTTLS} network connections
+Emacs can create encrypted network connections, using either built-in
+or external support.  The built-in support uses the GnuTLS
+(``Transport Layer Security'') library; see
+@uref{http://www.gnu.org/software/gnutls/, the GnuTLS project page}.
+If your Emacs was compiled with GnuTLS support, the function
+@code{gnutls-available-p} is defined and returns non-@code{nil}.  For
+more details, @pxref{Top,, Overview, emacs-gnutls, The Emacs-GnuTLS manual}.
+The external support uses the @file{starttls.el} library, which
+requires a helper utility such as @command{gnutls-cli} to be installed
+on the system.  The @code{open-network-stream} function can
+transparently handle the details of creating encrypted connections for
+you, using whatever support is available.
+
+@defun open-network-stream name buffer host service &rest parameters
+This function opens a TCP connection, with optional encryption, and
+returns a process object that represents the connection.
+
+The @var{name} argument specifies the name for the process object.  It
+is modified as necessary to make it unique.
+
+The @var{buffer} argument is the buffer to associate with the
+connection.  Output from the connection is inserted in the buffer,
+unless you specify a filter function to handle the output.  If
+@var{buffer} is @code{nil}, it means that the connection is not
+associated with any buffer.
+
+The arguments @var{host} and @var{service} specify where to connect to;
+@var{host} is the host name (a string), and @var{service} is the name of
+a defined network service (a string) or a port number (an integer).
+
+The remaining arguments @var{parameters} are keyword/argument pairs
+that are mainly relevant to encrypted connections:
+
+@table @code
+
+@item :nowait @var{boolean}
+If non-@code{nil}, try to make an asynchronous connection.
+
+@item :type @var{type}
+The type of connection.  Options are:
+
+@table @code
+@item plain
+An ordinary, unencrypted connection.
+@item tls
+@itemx ssl
+A @acronym{TLS} (``Transport Layer Security'') connection.
+@item nil
+@itemx network
+Start with a plain connection, and if parameters @samp{:success}
+and @samp{:capability-command} are supplied, try to upgrade to an encrypted
+connection via @acronym{STARTTLS}.  If that fails, retain the
+unencrypted connection.
+@item starttls
+As for @code{nil}, but if @acronym{STARTTLS} fails drop the connection.
+@item shell
+A shell connection.
+@end table
+
+@item :always-query-capabilities @var{boolean}
+If non-@code{nil}, always ask for the server's capabilities, even when
+doing a @samp{plain} connection.
+
+@item :capability-command @var{capability-command}
+Command string to query the host capabilities.
+
+@item :end-of-command @var{regexp}
+@itemx :end-of-capability @var{regexp}
+Regular expression matching the end of a command, or the end of the
+command @var{capability-command}.  The latter defaults to the former.
+
+@item :starttls-function @var{function}
+Function of one argument (the response to @var{capability-command}),
+which returns either @code{nil}, or the command to activate @acronym{STARTTLS}
+if supported.
+
+@item :success @var{regexp}
+Regular expression matching a successful @acronym{STARTTLS} negotiation.
+
+@item :use-starttls-if-possible @var{boolean}
+If non-@code{nil}, do opportunistic @acronym{STARTTLS} upgrades even if Emacs
+doesn't have built-in @acronym{TLS} support.
+
+@item :client-certificate @var{list-or-t}
+Either a list of the form @code{(@var{key-file} @var{cert-file})},
+naming the certificate key file and certificate file itself, or
+@code{t}, meaning to query @code{auth-source} for this information
+(@pxref{Top,,Overview, auth, The Auth-Source Manual}).
+Only used for @acronym{TLS} or @acronym{STARTTLS}.
+
+@item :return-list @var{cons-or-nil}
+The return value of this function.  If omitted or @code{nil}, return a
+process object.  Otherwise, a cons of the form @code{(@var{process-object}
+. @var{plist})}, where @var{plist} has keywords:
+
+@table @code
+@item :greeting @var{string-or-nil}
+If non-@code{nil}, the greeting string returned by the host.
+@item :capabilities @var{string-or-nil}
+If non-@code{nil}, the host's capability string.
+@item :type @var{symbol}
+The connection type: @samp{plain} or @samp{tls}.
+@end table
+
+@end table
+
+@end defun
+
+@node Network Servers
+@section Network Servers
+@cindex network servers
+
+  You create a server by calling @code{make-network-process}
+(@pxref{Network Processes}) with @code{:server t}.  The server will
+listen for connection requests from clients.  When it accepts a client
+connection request, that creates a new network connection, itself a
+process object, with the following parameters:
+
+@itemize @bullet
+@item
+The connection's process name is constructed by concatenating the
+server process's @var{name} with a client identification string.  The
+@c FIXME?  What about IPv6?  Say briefly what the difference is?
+client identification string for an IPv4 connection looks like
+@samp{<@var{a}.@var{b}.@var{c}.@var{d}:@var{p}>}, which represents an
+address and port number.  Otherwise, it is a
+unique number in brackets, as in @samp{<@var{nnn}>}.  The number
+is unique for each connection in the Emacs session.
+
+@item
+If the server's filter is non-@code{nil}, the connection process does
+not get a separate process buffer; otherwise, Emacs creates a new
+buffer for the purpose.  The buffer name is the server's buffer name
+or process name, concatenated with the client identification string.
+
+The server's process buffer value is never used directly, but the log
+function can retrieve it and use it to log connections by inserting
+text there.
+
+@item
+The communication type and the process filter and sentinel are
+inherited from those of the server.  The server never directly
+uses its filter and sentinel; their sole purpose is to initialize
+connections made to the server.
+
+@item
+The connection's process contact information is set according to the client's
+addressing information (typically an IP address and a port number).
+This information is associated with the @code{process-contact}
+keywords @code{:host}, @code{:service}, @code{:remote}.
+
+@item
+The connection's local address is set up according to the port
+number used for the connection.
+
+@item
+The client process's plist is initialized from the server's plist.
+@end itemize
+
+@node Datagrams
+@section Datagrams
+@cindex datagrams
+
+  A @dfn{datagram} connection communicates with individual packets rather
+than streams of data.  Each call to @code{process-send} sends one
+datagram packet (@pxref{Input to Processes}), and each datagram
+received results in one call to the filter function.
+
+  The datagram connection doesn't have to talk with the same remote
+peer all the time.  It has a @dfn{remote peer address} which specifies
+where to send datagrams to.  Each time an incoming datagram is passed
+to the filter function, the peer address is set to the address that
+datagram came from; that way, if the filter function sends a datagram,
+it will go back to that place.  You can specify the remote peer
+address when you create the datagram connection using the
+@code{:remote} keyword.  You can change it later on by calling
+@code{set-process-datagram-address}.
+
+@defun process-datagram-address process
+If @var{process} is a datagram connection or server, this function
+returns its remote peer address.
+@end defun
+
+@defun set-process-datagram-address process address
+If @var{process} is a datagram connection or server, this function
+sets its remote peer address to @var{address}.
+@end defun
+
+@node Low-Level Network
+@section Low-Level Network Access
+
+  You can also create network connections by operating at a lower
+level than that of @code{open-network-stream}, using
+@code{make-network-process}.
+
+@menu
+* Proc: Network Processes.   Using @code{make-network-process}.
+* Options: Network Options.  Further control over network connections.
+* Features: Network Feature Testing.
+                             Determining which network features work on
+                               the machine you are using.
+@end menu
+
+@node Network Processes
+@subsection @code{make-network-process}
+
+   The basic function for creating network connections and network
+servers is @code{make-network-process}.  It can do either of those
+jobs, depending on the arguments you give it.
+
+@defun make-network-process &rest args
+This function creates a network connection or server and returns the
+process object that represents it.  The arguments @var{args} are a
+list of keyword/argument pairs.  Omitting a keyword is always
+equivalent to specifying it with value @code{nil}, except for
+@code{:coding}, @code{:filter-multibyte}, and @code{:reuseaddr}.  Here
+are the meaningful keywords (those corresponding to network options
+are listed in the following section):
+
+@table @asis
+@item :name @var{name}
+Use the string @var{name} as the process name.  It is modified if
+necessary to make it unique.
+
+@item :type @var{type}
+Specify the communication type.  A value of @code{nil} specifies a
+stream connection (the default); @code{datagram} specifies a datagram
+connection; @code{seqpacket} specifies a ``sequenced packet stream''
+connection.  Both connections and servers can be of these types.
+
+@item :server @var{server-flag}
+If @var{server-flag} is non-@code{nil}, create a server.  Otherwise,
+create a connection.  For a stream type server, @var{server-flag} may
+be an integer, which then specifies the length of the queue of pending
+connections to the server.  The default queue length is 5.
+
+@item :host @var{host}
+Specify the host to connect to.  @var{host} should be a host name or
+Internet address, as a string, or the symbol @code{local} to specify
+the local host.  If you specify @var{host} for a server, it must
+specify a valid address for the local host, and only clients
+connecting to that address will be accepted.
+
+@item :service @var{service}
+@var{service} specifies a port number to connect to; or, for a server,
+the port number to listen on.  It should be a service name that
+translates to a port number, or an integer specifying the port number
+directly.  For a server, it can also be @code{t}, which means to let
+the system select an unused port number.
+
+@item :family @var{family}
+@var{family} specifies the address (and protocol) family for
+communication.  @code{nil} means determine the proper address family
+automatically for the given @var{host} and @var{service}.
+@code{local} specifies a Unix socket, in which case @var{host} is
+ignored.  @code{ipv4} and @code{ipv6} specify to use IPv4 and IPv6,
+respectively.
+
+@item :local @var{local-address}
+For a server process, @var{local-address} is the address to listen on.
+It overrides @var{family}, @var{host} and @var{service}, so you
+might as well not specify them.
+
+@item :remote @var{remote-address}
+For a connection, @var{remote-address} is the address to connect to.
+It overrides @var{family}, @var{host} and @var{service}, so you
+might as well not specify them.
+
+For a datagram server, @var{remote-address} specifies the initial
+setting of the remote datagram address.
+
+The format of @var{local-address} or @var{remote-address} depends on
+the address family:
+
+@itemize -
+@item
+An IPv4 address is represented as a five-element vector of four 8-bit
+integers and one 16-bit integer
+@code{[@var{a} @var{b} @var{c} @var{d} @var{p}]} corresponding to
+numeric IPv4 address @var{a}.@var{b}.@var{c}.@var{d} and port number
+@var{p}.
+
+@item
+An IPv6 address is represented as a nine-element vector of 16-bit
+integers @code{[@var{a} @var{b} @var{c} @var{d} @var{e} @var{f}
+@var{g} @var{h} @var{p}]} corresponding to numeric IPv6 address
+@var{a}:@var{b}:@var{c}:@var{d}:@var{e}:@var{f}:@var{g}:@var{h} and
+port number @var{p}.
+
+@item
+A local address is represented as a string, which specifies the address
+in the local address space.
+
+@item
+An ``unsupported family'' address is represented by a cons
+@code{(@var{f} . @var{av})}, where @var{f} is the family number and
+@var{av} is a vector specifying the socket address using one element
+per address data byte.  Do not rely on this format in portable code,
+as it may depend on implementation defined constants, data sizes, and
+data structure alignment.
+@end itemize
+
+@item :nowait @var{bool}
+If @var{bool} is non-@code{nil} for a stream connection, return
+without waiting for the connection to complete.  When the connection
+succeeds or fails, Emacs will call the sentinel function, with a
+second argument matching @code{"open"} (if successful) or
+@code{"failed"}.  The default is to block, so that
+@code{make-network-process} does not return until the connection
+has succeeded or failed.
+
+@item :stop @var{stopped}
+If @var{stopped} is non-@code{nil}, start the network connection or
+server in the ``stopped'' state.
+
+@item :buffer @var{buffer}
+Use @var{buffer} as the process buffer.
+
+@item :coding @var{coding}
+Use @var{coding} as the coding system for this process.  To specify
+different coding systems for decoding data from the connection and for
+encoding data sent to it, specify @code{(@var{decoding} .
+@var{encoding})} for @var{coding}.
+
+If you don't specify this keyword at all, the default
+is to determine the coding systems from the data.
+
+@item :noquery @var{query-flag}
+Initialize the process query flag to @var{query-flag}.
+@xref{Query Before Exit}.
+
+@item :filter @var{filter}
+Initialize the process filter to @var{filter}.
+
+@item :filter-multibyte @var{multibyte}
+If @var{multibyte} is non-@code{nil}, strings given to the process
+filter are multibyte, otherwise they are unibyte.  The default is the
+default value of @code{enable-multibyte-characters}.
+
+@item :sentinel @var{sentinel}
+Initialize the process sentinel to @var{sentinel}.
+
+@item :log @var{log}
+Initialize the log function of a server process to @var{log}.  The log
+function is called each time the server accepts a network connection
+from a client.  The arguments passed to the log function are
+@var{server}, @var{connection}, and @var{message}; where @var{server}
+is the server process, @var{connection} is the new process for the
+connection, and @var{message} is a string describing what has
+happened.
+
+@item :plist @var{plist}
+Initialize the process plist to @var{plist}.
+@end table
+
+The original argument list, modified with the actual connection
+information, is available via the @code{process-contact} function.
+@end defun
+
+@node Network Options
+@subsection Network Options
+
+  The following network options can be specified when you create a
+network process.  Except for @code{:reuseaddr}, you can also set or
+modify these options later, using @code{set-network-process-option}.
+
+  For a server process, the options specified with
+@code{make-network-process} are not inherited by the client
+connections, so you will need to set the necessary options for each
+child connection as it is created.
+
+@table @asis
+@item :bindtodevice @var{device-name}
+If @var{device-name} is a non-empty string identifying a network
+interface name (see @code{network-interface-list}), only handle
+packets received on that interface.  If @var{device-name} is @code{nil}
+(the default), handle packets received on any interface.
+
+Using this option may require special privileges on some systems.
+
+@item :broadcast @var{broadcast-flag}
+If @var{broadcast-flag} is non-@code{nil} for a datagram process, the
+process will receive datagram packet sent to a broadcast address, and
+be able to send packets to a broadcast address.  This is ignored for a stream
+connection.
+
+@item :dontroute @var{dontroute-flag}
+If @var{dontroute-flag} is non-@code{nil}, the process can only send
+to hosts on the same network as the local host.
+
+@item :keepalive @var{keepalive-flag}
+If @var{keepalive-flag} is non-@code{nil} for a stream connection,
+enable exchange of low-level keep-alive messages.
+
+@item :linger @var{linger-arg}
+If @var{linger-arg} is non-@code{nil}, wait for successful
+transmission of all queued packets on the connection before it is
+deleted (see @code{delete-process}).  If @var{linger-arg} is an
+integer, it specifies the maximum time in seconds to wait for queued
+packets to be sent before closing the connection.  The default is
+@code{nil}, which means to discard unsent queued packets when the
+process is deleted.
+
+@c FIXME  Where out-of-band data is ...?
+@item :oobinline @var{oobinline-flag}
+If @var{oobinline-flag} is non-@code{nil} for a stream connection,
+receive out-of-band data in the normal data stream.  Otherwise, ignore
+out-of-band data.
+
+@item :priority @var{priority}
+Set the priority for packets sent on this connection to the integer
+@var{priority}.  The interpretation of this number is protocol
+specific; such as setting the TOS (type of service) field on IP
+packets sent on this connection.  It may also have system dependent
+effects, such as selecting a specific output queue on the network
+interface.
+
+@item :reuseaddr @var{reuseaddr-flag}
+If @var{reuseaddr-flag} is non-@code{nil} (the default) for a stream
+server process, allow this server to reuse a specific port number (see
+@code{:service}), unless another process on this host is already
+listening on that port.  If @var{reuseaddr-flag} is @code{nil}, there
+may be a period of time after the last use of that port (by any
+process on the host) where it is not possible to make a new server on
+that port.
+@end table
+
+@defun set-network-process-option process option value &optional no-error
+This function sets or modifies a network option for network process
+@var{process}.  The accepted options and values are as for
+@code{make-network-process}.  If @var{no-error} is non-@code{nil},
+this function returns @code{nil} instead of signaling an error if
+@var{option} is not a supported option.  If the function successfully
+completes, it returns @code{t}.
+
+The current setting of an option is available via the
+@code{process-contact} function.
+@end defun
+
+@node Network Feature Testing
+@subsection Testing Availability of Network Features
+
+  To test for the availability of a given network feature, use
+@code{featurep} like this:
+
+@example
+(featurep 'make-network-process '(@var{keyword} @var{value}))
+@end example
+
+@noindent
+The result of this form is @code{t} if it works to specify
+@var{keyword} with value @var{value} in @code{make-network-process}.
+Here are some of the @var{keyword}---@var{value} pairs you can test in
+this way.
+
+@table @code
+@item (:nowait t)
+Non-@code{nil} if non-blocking connect is supported.
+@item (:type datagram)
+Non-@code{nil} if datagrams are supported.
+@item (:family local)
+Non-@code{nil} if local (a.k.a.@: ``UNIX domain'') sockets are supported.
+@item (:family ipv6)
+Non-@code{nil} if IPv6 is supported.
+@item (:service t)
+Non-@code{nil} if the system can select the port for a server.
+@end table
+
+  To test for the availability of a given network option, use
+@code{featurep} like this:
+
+@example
+(featurep 'make-network-process '@var{keyword})
+@end example
+
+@noindent
+The accepted @var{keyword} values are @code{:bindtodevice}, etc.
+For the complete list, @pxref{Network Options}.  This form returns
+non-@code{nil} if that particular network option is supported by
+@code{make-network-process} (or @code{set-network-process-option}).
+
+@node Misc Network
+@section Misc Network Facilities
+
+  These additional functions are useful for creating and operating
+on network connections.  Note that they are supported only on some
+systems.
+
+@defun network-interface-list
+This function returns a list describing the network interfaces
+of the machine you are using.  The value is an alist whose
+elements have the form @code{(@var{name} . @var{address})}.
+@var{address} has the same form as the @var{local-address}
+and @var{remote-address} arguments to @code{make-network-process}.
+@end defun
+
+@defun network-interface-info ifname
+This function returns information about the network interface named
+@var{ifname}.  The value is a list of the form
+@code{(@var{addr} @var{bcast} @var{netmask} @var{hwaddr} @var{flags})}.
+
+@table @var
+@item addr
+The Internet protocol address.
+@item bcast
+The broadcast address.
+@item netmask
+The network mask.
+@item hwaddr
+The layer 2 address (Ethernet MAC address, for instance).
+@item flags
+The current flags of the interface.
+@end table
+@end defun
+
+@defun format-network-address address &optional omit-port
+This function converts the Lisp representation of a network address to
+a string.
+
+A five-element vector @code{[@var{a} @var{b} @var{c} @var{d} @var{p}]}
+represents an IPv4 address @var{a}.@var{b}.@var{c}.@var{d} and port
+number @var{p}.  @code{format-network-address} converts that to the
+string @code{"@var{a}.@var{b}.@var{c}.@var{d}:@var{p}"}.
+
+A nine-element vector @code{[@var{a} @var{b} @var{c} @var{d} @var{e}
+@var{f} @var{g} @var{h} @var{p}]} represents an IPv6 address along
+with a port number.  @code{format-network-address} converts that to
+the string
+@code{"[@var{a}:@var{b}:@var{c}:@var{d}:@var{e}:@var{f}:@var{g}:@var{h}]:@var{p}"}.
+
+If the vector does not include the port number, @var{p}, or if
+@var{omit-port} is non-@code{nil}, the result does not include the
+@code{:@var{p}} suffix.
+@end defun
+
+@node Serial Ports
+@section Communicating with Serial Ports
+@cindex @file{/dev/tty}
+@cindex @file{COM1}
+@cindex serial connections
+
+  Emacs can communicate with serial ports.  For interactive use,
+@kbd{M-x serial-term} opens a terminal window.  In a Lisp program,
+@code{make-serial-process} creates a process object.
+
+  The serial port can be configured at run-time, without having to
+close and re-open it.  The function @code{serial-process-configure}
+lets you change the speed, bytesize, and other parameters.  In a
+terminal window created by @code{serial-term}, you can click on the
+mode line for configuration.
+
+  A serial connection is represented by a process object, which can be
+used in a similar way to a subprocess or network process.  You can send and
+receive data, and configure the serial port.  A serial process object
+has no process ID, however, and you can't send signals to it, and the
+status codes are different from other types of processes.
+@code{delete-process} on the process object or @code{kill-buffer} on
+the process buffer close the connection, but this does not affect the
+device connected to the serial port.
+
+  The function @code{process-type} returns the symbol @code{serial}
+for a process object representing a serial port connection.
+
+  Serial ports are available on GNU/Linux, Unix, and MS Windows systems.
+
+@deffn Command serial-term port speed
+Start a terminal-emulator for a serial port in a new buffer.
+@var{port} is the name of the serial port to connect to.  For
+example, this could be @file{/dev/ttyS0} on Unix.  On MS Windows, this
+could be @file{COM1}, or @file{\\.\COM10} (double the backslashes in
+Lisp strings).
+
+@c FIXME is 9600 still the most common value, or is it 115200 now?
+@c (Same value, 9600, appears below as well.)
+@var{speed} is the speed of the serial port in bits per second.  9600
+is a common value.  The buffer is in Term mode; see @ref{Term Mode,,,
+emacs, The GNU Emacs Manual}, for the commands to use in that buffer.
+You can change the speed and the configuration in the mode line menu.
+@end deffn
+
+@defun make-serial-process &rest args
+This function creates a process and a buffer.  Arguments are specified
+as keyword/argument pairs.  Here's the list of the meaningful
+keywords, with the first two (@var{port} and @var{speed}) being mandatory:
+
+@table @code
+@item :port @var{port}
+This is the name of the serial port.  On Unix and GNU systems, this is
+a file name such as @file{/dev/ttyS0}.  On Windows, this could be
+@file{COM1}, or @file{\\.\COM10} for ports higher than @file{COM9}
+(double the backslashes in Lisp strings).
+
+@item :speed @var{speed}
+The speed of the serial port in bits per second.  This function calls
+@code{serial-process-configure} to handle the speed; see the
+following documentation of that function for more details.
+
+@item :name @var{name}
+The name of the process.  If @var{name} is not given, @var{port} will
+serve as the process name as well.
+
+@item :buffer @var{buffer}
+The buffer to associate with the process.  The value can be either a
+buffer or a string that names a buffer.  Process output goes at the
+end of that buffer, unless you specify an output stream or filter
+function to handle the output.  If @var{buffer} is not given, the
+process buffer's name is taken from the value of the @code{:name}
+keyword.
+
+@item :coding @var{coding}
+If @var{coding} is a symbol, it specifies the coding system used for
+both reading and writing for this process.  If @var{coding} is a cons
+@code{(@var{decoding} . @var{encoding})}, @var{decoding} is used for
+reading, and @var{encoding} is used for writing.  If not specified,
+the default is to determine the coding systems from the data itself.
+
+@item :noquery @var{query-flag}
+Initialize the process query flag to @var{query-flag}.  @xref{Query
+Before Exit}.  The flags defaults to @code{nil} if unspecified.
+
+@item :stop @var{bool}
+Start process in the ``stopped'' state if @var{bool} is
+non-@code{nil}.  In the stopped state, a serial process does not
+accept incoming data, but you can send outgoing data.  The stopped
+state is cleared by @code{continue-process} and set by
+@code{stop-process}.
+
+@item :filter @var{filter}
+Install @var{filter} as the process filter.
+
+@item :sentinel @var{sentinel}
+Install @var{sentinel} as the process sentinel.
+
+@item :plist @var{plist}
+Install @var{plist} as the initial plist of the process.
+
+@item :bytesize
+@itemx :parity
+@itemx :stopbits
+@itemx :flowcontrol
+These are handled by @code{serial-process-configure}, which is called
+by @code{make-serial-process}.
+@end table
+
+The original argument list, possibly modified by later configuration,
+is available via the function @code{process-contact}.
+
+Here is an example:
+
+@example
+(make-serial-process :port "/dev/ttyS0" :speed 9600)
+@end example
+@end defun
+
+@defun serial-process-configure &rest args
+@cindex baud, in serial connections
+@cindex bytesize, in serial connections
+@cindex parity, in serial connections
+@cindex stopbits, in serial connections
+@cindex flowcontrol, in serial connections
+
+This functions configures a serial port connection.  Arguments are
+specified as keyword/argument pairs.  Attributes that are not given
+are re-initialized from the process's current configuration (available
+via the function @code{process-contact}), or set to reasonable default
+values.  The following arguments are defined:
+
+@table @code
+@item :process @var{process}
+@itemx :name @var{name}
+@itemx :buffer @var{buffer}
+@itemx :port @var{port}
+Any of these arguments can be given to identify the process that is to
+be configured.  If none of these arguments is given, the current
+buffer's process is used.
+
+@item :speed @var{speed}
+The speed of the serial port in bits per second, a.k.a.@: @dfn{baud
+rate}.  The value can be any number, but most serial ports work only
+at a few defined values between 1200 and 115200, with 9600 being the
+most common value.  If @var{speed} is @code{nil}, the function ignores
+all other arguments and does not configure the port.  This may be
+useful for special serial ports such as Bluetooth-to-serial converters,
+which can only be configured through @samp{AT} commands sent through the
+connection.  The value of @code{nil} for @var{speed} is valid only for
+connections that were already opened by a previous call to
+@code{make-serial-process} or @code{serial-term}.
+
+@item :bytesize @var{bytesize}
+The number of bits per byte, which can be 7 or 8.  If @var{bytesize}
+is not given or @code{nil}, it defaults to 8.
+
+@item :parity @var{parity}
+The value can be @code{nil} (don't use parity), the symbol
+@code{odd} (use odd parity), or the symbol @code{even} (use even
+parity).  If @var{parity} is not given, it defaults to no parity.
+
+@item :stopbits @var{stopbits}
+The number of stopbits used to terminate a transmission
+of each byte.  @var{stopbits} can be 1 or 2.  If @var{stopbits} is not
+given or @code{nil}, it defaults to 1.
+
+@item :flowcontrol @var{flowcontrol}
+The type of flow control to use for this connection, which is either
+@code{nil} (don't use flow control), the symbol @code{hw} (use RTS/CTS
+hardware flow control), or the symbol @code{sw} (use XON/XOFF software
+flow control).  If @var{flowcontrol} is not given, it defaults to no
+flow control.
+@end table
+
+Internally, @code{make-serial-process} calls
+@code{serial-process-configure} for the initial configuration of the
+serial port.
+@end defun
+
+@node Byte Packing
+@section Packing and Unpacking Byte Arrays
+@cindex byte packing and unpacking
+
+  This section describes how to pack and unpack arrays of bytes,
+usually for binary network protocols.  These functions convert byte arrays
+to alists, and vice versa.  The byte array can be represented as a
+@c FIXME?  No multibyte?
+unibyte string or as a vector of integers, while the alist associates
+symbols either with fixed-size objects or with recursive sub-alists.
+To use the functions referred to in this section, load the
+@code{bindat} library.
+@c It doesn't have any autoloads.
+
+@cindex serializing
+@cindex deserializing
+@cindex packing
+@cindex unpacking
+  Conversion from byte arrays to nested alists is also known as
+@dfn{deserializing} or @dfn{unpacking}, while going in the opposite
+direction is also known as @dfn{serializing} or @dfn{packing}.
+
+@menu
+* Bindat Spec::         Describing data layout.
+* Bindat Functions::    Doing the unpacking and packing.
+* Bindat Examples::     Samples of what bindat.el can do for you!
+@end menu
+
+@node Bindat Spec
+@subsection Describing Data Layout
+
+  To control unpacking and packing, you write a @dfn{data layout
+specification}, a special nested list describing named and typed
+@dfn{fields}.  This specification controls the length of each field to be
+processed, and how to pack or unpack it.  We normally keep bindat specs
+in variables whose names end in @samp{-bindat-spec}; that kind of name
+is automatically recognized as ``risky''.
+
+@cindex endianness
+@cindex big endian
+@cindex little endian
+@cindex network byte ordering
+  A field's @dfn{type} describes the size (in bytes) of the object
+that the field represents and, in the case of multibyte fields, how
+the bytes are ordered within the field.  The two possible orderings
+are ``big endian'' (also known as ``network byte ordering'') and
+``little endian''.  For instance, the number @code{#x23cd} (decimal
+9165) in big endian would be the two bytes @code{#x23} @code{#xcd};
+and in little endian, @code{#xcd} @code{#x23}.  Here are the possible
+type values:
+
+@table @code
+@item u8
+@itemx byte
+Unsigned byte, with length 1.
+
+@item u16
+@itemx word
+@itemx short
+Unsigned integer in network byte order, with length 2.
+
+@item u24
+Unsigned integer in network byte order, with length 3.
+
+@item u32
+@itemx dword
+@itemx long
+Unsigned integer in network byte order, with length 4.
+Note: These values may be limited by Emacs's integer implementation limits.
+
+@item u16r
+@itemx u24r
+@itemx u32r
+Unsigned integer in little endian order, with length 2, 3 and 4, respectively.
+
+@item str @var{len}
+String of length @var{len}.
+
+@item strz @var{len}
+Zero-terminated string, in a fixed-size field with length @var{len}.
+
+@item vec @var{len} [@var{type}]
+Vector of @var{len} elements of type @var{type}, defaulting to bytes.
+The @var{type} is any of the simple types above, or another vector
+specified as a list of the form @code{(vec @var{len} [@var{type}])}.
+
+@item ip
+@c FIXME?  IPv6?
+Four-byte vector representing an Internet address.  For example:
+@code{[127 0 0 1]} for localhost.
+
+@item bits @var{len}
+List of set bits in @var{len} bytes.  The bytes are taken in big
+endian order and the bits are numbered starting with @code{8 *
+@var{len} @minus{} 1} and ending with zero.  For example: @code{bits
+2} unpacks @code{#x28} @code{#x1c} to @code{(2 3 4 11 13)} and
+@code{#x1c} @code{#x28} to @code{(3 5 10 11 12)}.
+
+@item (eval @var{form})
+@var{form} is a Lisp expression evaluated at the moment the field is
+unpacked or packed.  The result of the evaluation should be one of the
+above-listed type specifications.
+@end table
+
+For a fixed-size field, the length @var{len} is given as an integer
+specifying the number of bytes in the field.
+
+When the length of a field is not fixed, it typically depends on the
+value of a preceding field.  In this case, the length @var{len} can be
+given either as a list @code{(@var{name} ...)} identifying a
+@dfn{field name} in the format specified for @code{bindat-get-field}
+below, or by an expression @code{(eval @var{form})} where @var{form}
+should evaluate to an integer, specifying the field length.
+
+A field specification generally has the form @code{([@var{name}]
+@var{handler})}, where @var{name} is optional.  Don't use names that
+are symbols meaningful as type specifications (above) or handler
+specifications (below), since that would be ambiguous.  @var{name} can
+be a symbol or an expression @code{(eval @var{form})}, in which case
+@var{form} should evaluate to a symbol.
+
+@var{handler} describes how to unpack or pack the field and can be one
+of the following:
+
+@table @code
+@item @var{type}
+Unpack/pack this field according to the type specification @var{type}.
+
+@item eval @var{form}
+Evaluate @var{form}, a Lisp expression, for side-effect only.  If the
+field name is specified, the value is bound to that field name.
+
+@item fill @var{len}
+Skip @var{len} bytes.  In packing, this leaves them unchanged,
+which normally means they remain zero.  In unpacking, this means
+they are ignored.
+
+@item align @var{len}
+Skip to the next multiple of @var{len} bytes.
+
+@item struct @var{spec-name}
+Process @var{spec-name} as a sub-specification.  This describes a
+structure nested within another structure.
+
+@item union @var{form} (@var{tag} @var{spec})@dots{}
+@c ??? I don't see how one would actually  use this.
+@c ??? what kind of expression would be useful for @var{form}?
+Evaluate @var{form}, a Lisp expression, find the first @var{tag}
+that matches it, and process its associated data layout specification
+@var{spec}.  Matching can occur in one of three ways:
+
+@itemize
+@item
+If a @var{tag} has the form @code{(eval @var{expr})}, evaluate
+@var{expr} with the variable @code{tag} dynamically bound to the value
+of @var{form}.  A non-@code{nil} result indicates a match.
+
+@item
+@var{tag} matches if it is @code{equal} to the value of @var{form}.
+
+@item
+@var{tag} matches unconditionally if it is @code{t}.
+@end itemize
+
+@item repeat @var{count} @var{field-specs}@dots{}
+Process the @var{field-specs} recursively, in order, then repeat
+starting from the first one, processing all the specifications @var{count}
+times overall.  The @var{count} is given using the same formats as a
+field length---if an @code{eval} form is used, it is evaluated just once.
+For correct operation, each specification in @var{field-specs} must
+include a name.
+@end table
+
+For the @code{(eval @var{form})} forms used in a bindat specification,
+the @var{form} can access and update these dynamically bound variables
+during evaluation:
+
+@table @code
+@item last
+Value of the last field processed.
+
+@item bindat-raw
+The data as a byte array.
+
+@item bindat-idx
+Current index (within @code{bindat-raw}) for unpacking or packing.
+
+@item struct
+The alist containing the structured data that have been unpacked so
+far, or the entire structure being packed.  You can use
+@code{bindat-get-field} to access specific fields of this structure.
+
+@item count
+@itemx index
+Inside a @code{repeat} block, these contain the maximum number of
+repetitions (as specified by the @var{count} parameter), and the
+current repetition number (counting from 0).  Setting @code{count} to
+zero will terminate the inner-most repeat block after the current
+repetition has completed.
+@end table
+
+@node Bindat Functions
+@subsection Functions to Unpack and Pack Bytes
+
+  In the following documentation, @var{spec} refers to a data layout
+specification, @code{bindat-raw} to a byte array, and @var{struct} to an
+alist representing unpacked field data.
+
+@defun bindat-unpack spec bindat-raw &optional bindat-idx
+@c FIXME?  Again, no multibyte?
+This function unpacks data from the unibyte string or byte
+array @code{bindat-raw}
+according to @var{spec}.  Normally, this starts unpacking at the
+beginning of the byte array, but if @var{bindat-idx} is non-@code{nil}, it
+specifies a zero-based starting position to use instead.
+
+The value is an alist or nested alist in which each element describes
+one unpacked field.
+@end defun
+
+@defun bindat-get-field struct &rest name
+This function selects a field's data from the nested alist
+@var{struct}.  Usually @var{struct} was returned by
+@code{bindat-unpack}.  If @var{name} corresponds to just one argument,
+that means to extract a top-level field value.  Multiple @var{name}
+arguments specify repeated lookup of sub-structures.  An integer name
+acts as an array index.
+
+For example, if @var{name} is @code{(a b 2 c)}, that means to find
+field @code{c} in the third element of subfield @code{b} of field
+@code{a}.  (This corresponds to @code{struct.a.b[2].c} in C.)
+@end defun
+
+  Although packing and unpacking operations change the organization of
+data (in memory), they preserve the data's @dfn{total length}, which is
+the sum of all the fields' lengths, in bytes.  This value is not
+generally inherent in either the specification or alist alone; instead,
+both pieces of information contribute to its calculation.  Likewise, the
+length of a string or array being unpacked may be longer than the data's
+total length as described by the specification.
+
+@defun bindat-length spec struct
+This function returns the total length of the data in @var{struct},
+according to @var{spec}.
+@end defun
+
+@defun bindat-pack spec struct &optional bindat-raw bindat-idx
+This function returns a byte array packed according to @var{spec} from
+the data in the alist @var{struct}.  It normally creates and fills a
+new byte array starting at the beginning.  However, if @var{bindat-raw}
+is non-@code{nil}, it specifies a pre-allocated unibyte string or vector to
+pack into.  If @var{bindat-idx} is non-@code{nil}, it specifies the starting
+offset for packing into @code{bindat-raw}.
+
+When pre-allocating, you should make sure @code{(length @var{bindat-raw})}
+meets or exceeds the total length to avoid an out-of-range error.
+@end defun
+
+@defun bindat-ip-to-string ip
+Convert the Internet address vector @var{ip} to a string in the usual
+dotted notation.
+@c FIXME?  Does it do IPv6?
+
+@example
+(bindat-ip-to-string [127 0 0 1])
+     @result{} "127.0.0.1"
+@end example
+@end defun
+
+@node Bindat Examples
+@subsection Examples of Byte Unpacking and Packing
+@c FIXME?  This seems a very long example for something that is not used
+@c very often.  As of 24.1, gdb-mi.el is the only user of bindat.el in Emacs.
+@c Maybe one or both of these examples should just be moved to the
+@c commentary of bindat.el.
+
+  Here is a complete example of byte unpacking and packing:
+
+@lisp
+(require 'bindat)
+
+(defvar fcookie-index-spec
+  '((:version  u32)
+    (:count    u32)
+    (:longest  u32)
+    (:shortest u32)
+    (:flags    u32)
+    (:delim    u8)
+    (:ignored  fill 3)
+    (:offset   repeat (:count) (:foo u32)))
+  "Description of a fortune cookie index file's contents.")
+
+(defun fcookie (cookies &optional index)
+  "Display a random fortune cookie from file COOKIES.
+Optional second arg INDEX specifies the associated index
+filename, by default \"COOKIES.dat\".  Display cookie text
+in buffer \"*Fortune Cookie: BASENAME*\", where BASENAME
+is COOKIES without the directory part."
+  (interactive "fCookies file: ")
+  (let* ((info (with-temp-buffer
+                 (insert-file-contents-literally
+                  (or index (concat cookies ".dat")))
+                 (bindat-unpack fcookie-index-spec
+                                (buffer-string))))
+         (sel (random (bindat-get-field info :count)))
+         (beg (cdar (bindat-get-field info :offset sel)))
+         (end (or (cdar (bindat-get-field info
+                                          :offset (1+ sel)))
+                  (nth 7 (file-attributes cookies)))))
+    (switch-to-buffer
+     (get-buffer-create
+      (format "*Fortune Cookie: %s*"
+              (file-name-nondirectory cookies))))
+    (erase-buffer)
+    (insert-file-contents-literally
+     cookies nil beg (- end 3))))
+
+(defun fcookie-create-index (cookies &optional index delim)
+  "Scan file COOKIES, and write out its index file.
+Optional arg INDEX specifies the index filename, which by
+default is \"COOKIES.dat\".  Optional arg DELIM specifies the
+unibyte character that, when found on a line of its own in
+COOKIES, indicates the border between entries."
+  (interactive "fCookies file: ")
+  (setq delim (or delim ?%))
+  (let ((delim-line (format "\n%c\n" delim))
+        (count 0)
+        (max 0)
+        min p q len offsets)
+    (unless (= 3 (string-bytes delim-line))
+      (error "Delimiter cannot be represented in one byte"))
+    (with-temp-buffer
+      (insert-file-contents-literally cookies)
+      (while (and (setq p (point))
+                  (search-forward delim-line (point-max) t)
+                  (setq len (- (point) 3 p)))
+        (setq count (1+ count)
+              max (max max len)
+              min (min (or min max) len)
+              offsets (cons (1- p) offsets))))
+    (with-temp-buffer
+      (set-buffer-multibyte nil)
+      (insert
+       (bindat-pack
+        fcookie-index-spec
+        `((:version . 2)
+          (:count . ,count)
+          (:longest . ,max)
+          (:shortest . ,min)
+          (:flags . 0)
+          (:delim . ,delim)
+          (:offset . ,(mapcar (lambda (o)
+                                (list (cons :foo o)))
+                              (nreverse offsets))))))
+      (let ((coding-system-for-write 'raw-text-unix))
+        (write-file (or index (concat cookies ".dat")))))))
+@end lisp
+
+The following is an example of defining and unpacking a complex
+structure.  Consider the following C structures:
+
+@example
+struct header @{
+    unsigned long    dest_ip;
+    unsigned long    src_ip;
+    unsigned short   dest_port;
+    unsigned short   src_port;
+@};
+
+struct data @{
+    unsigned char    type;
+    unsigned char    opcode;
+    unsigned short   length;  /* in network byte order  */
+    unsigned char    id[8];   /* null-terminated string  */
+    unsigned char    data[/* (length + 3) & ~3 */];
+@};
+
+struct packet @{
+    struct header    header;
+    unsigned long    counters[2];  /* in little endian order  */
+    unsigned char    items;
+    unsigned char    filler[3];
+    struct data      item[/* items */];
+
+@};
+@end example
+
+The corresponding data layout specification is:
+
+@lisp
+(setq header-spec
+      '((dest-ip   ip)
+        (src-ip    ip)
+        (dest-port u16)
+        (src-port  u16)))
+
+(setq data-spec
+      '((type      u8)
+        (opcode    u8)
+        (length    u16)  ; network byte order
+        (id        strz 8)
+        (data      vec (length))
+        (align     4)))
+
+(setq packet-spec
+      '((header    struct header-spec)
+        (counters  vec 2 u32r)   ; little endian order
+        (items     u8)
+        (fill      3)
+        (item      repeat (items)
+                   (struct data-spec))))
+@end lisp
+
+A binary data representation is:
+
+@lisp
+(setq binary-data
+      [ 192 168 1 100 192 168 1 101 01 28 21 32
+        160 134 1 0 5 1 0 0 2 0 0 0
+        2 3 0 5 ?A ?B ?C ?D ?E ?F 0 0 1 2 3 4 5 0 0 0
+        1 4 0 7 ?B ?C ?D ?E ?F ?G 0 0 6 7 8 9 10 11 12 0 ])
+@end lisp
+
+The corresponding decoded structure is:
+
+@lisp
+(setq decoded (bindat-unpack packet-spec binary-data))
+     @result{}
+((header
+  (dest-ip   . [192 168 1 100])
+  (src-ip    . [192 168 1 101])
+  (dest-port . 284)
+  (src-port  . 5408))
+ (counters . [100000 261])
+ (items . 2)
+ (item ((data . [1 2 3 4 5])
+        (id . "ABCDEF")
+        (length . 5)
+        (opcode . 3)
+        (type . 2))
+       ((data . [6 7 8 9 10 11 12])
+        (id . "BCDEFG")
+        (length . 7)
+        (opcode . 4)
+        (type . 1))))
+@end lisp
+
+An example of fetching data from this structure:
+
+@lisp
+(bindat-get-field decoded 'item 1 'id)
+     @result{} "BCDEFG"
+@end lisp

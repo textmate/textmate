@@ -1,2 +1,0 @@
-{	content = "Hello \\${1|world,universe|}";
-}

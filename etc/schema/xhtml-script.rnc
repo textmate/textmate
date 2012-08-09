@@ -1,0 +1,15 @@
+# Script Module
+
+script = element script { script.attlist, text }
+script.attlist =
+  attribute charset { Charset.datatype }?,
+  attribute type { ContentType.datatype },
+  attribute src { URI.datatype }?,
+  attribute defer { "defer" }?,
+  attribute xml:space { "preserve" }?
+noscript = element noscript { noscript.attlist, Block.model }
+noscript.attlist = Common.attrib
+head.content &= script*
+Script.class = noscript | script
+Inline.class |= Script.class
+Block.class |= Script.class

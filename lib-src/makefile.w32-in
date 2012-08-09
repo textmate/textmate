@@ -1,0 +1,475 @@
+#  -*- Makefile -*- for GNU Emacs on the Microsoft W32 API.
+# Copyright (C) 2000-2012 Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+ALL = make-docfile hexl ctags etags movemail ebrowse emacsclient
+
+.PHONY: $(ALL)
+
+LOCAL_FLAGS	= -DWINDOWSNT -DDOS_NT -DNO_LDAV=1 \
+		  -DNO_ARCHIVES=1 -DHAVE_CONFIG_H=1 -I../lib \
+		  -I../nt/inc -I../src $(EMACS_EXTRA_C_FLAGS)
+
+LIBS 		= $(BASE_LIBS) $(ADVAPI32)
+
+$(BLD)/make-docfile.exe: 	$(BLD)/make-docfile.$(O) $(BLD)/ntlib.$(O)
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(BLD)/make-docfile.$(O) $(BLD)/ntlib.$(O) $(LIBS)
+$(BLD)/hexl.exe:		$(BLD)/hexl.$(O)
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(BLD)/hexl.$(O) $(LIBS)
+$(BLD)/test-distrib.exe: $(BLD)/test-distrib.$(O)
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(BLD)/test-distrib.$(O) $(LIBS)
+
+make-docfile:	stamp_BLD $(BLD)/make-docfile.exe
+ctags:		stamp_BLD $(BLD)/ctags.exe
+etags:		stamp_BLD $(BLD)/etags.exe
+ebrowse:        stamp_BLD $(BLD)/ebrowse.exe
+hexl:		stamp_BLD $(BLD)/hexl.exe
+movemail:	stamp_BLD $(BLD)/movemail.exe
+emacsclient:	stamp_BLD $(BLD)/emacsclient.exe $(BLD)/emacsclientw.exe
+
+test-distrib:	stamp_BLD $(BLD)/test-distrib.exe
+	"$(BLD)/test-distrib.exe" "$(SRC)/testfile"
+
+MOVEMAILOBJS =  $(BLD)/movemail.$(O) \
+		$(BLD)/pop.$(O) \
+		../lib/$(BLD)/libgnu.$(A) \
+		$(BLD)/ntlib.$(O)
+
+$(BLD)/movemail.exe:	$(MOVEMAILOBJS) ../lib/getopt.h
+# put wsock32.lib before $(LIBS) to ensure we don't link to ws2_32.lib
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(MOVEMAILOBJS) $(WSOCK32) $(LIBS)
+
+ECLIENT_CFLAGS = -DHAVE_GETCWD -DHAVE_STRERROR
+ECLIENTOBJS =	$(BLD)/emacsclient.$(O) \
+		$(BLD)/ntlib.$(O) \
+		../lib/$(BLD)/libgnu.$(A)
+CLIENTRES =	../nt/$(BLD)/emacsclient.res
+
+$(CLIENTRES):	../nt/emacsclient.rc
+	@echo Emacsclient resource file must be built from nt directory
+	@exit -1
+
+$(BLD)/emacsclient.exe:		$(ECLIENTOBJS)
+# put wsock32.lib before $(LIBS) to ensure we don't link to ws2_32.lib
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(ECLIENTOBJS) $(WSOCK32) $(USER32) $(COMCTL32) $(LIBS)
+
+$(BLD)/emacsclientw.exe:	$(ECLIENTOBJS) $(CLIENTRES)
+# put wsock32.lib before $(LIBS) to ensure we don't link to ws2_32.lib
+		$(LINK) $(LINK_OUT)$@ $(CLIENTRES) $(MWINDOWS) $(LINK_FLAGS) $(ECLIENTOBJS) $(WSOCK32) $(USER32) $(COMCTL32) $(LIBS)
+
+$(BLD)/emacsclient.$(O):	emacsclient.c
+		$(CC) $(CFLAGS) $(ECLIENT_CFLAGS) $(CC_OUT)$@ emacsclient.c
+
+ETAGSOBJ      = $(BLD)/etags.$(O) \
+		../lib/$(BLD)/libgnu.$(A) \
+		$(BLD)/ntlib.$(O) \
+		$(BLD)/regex.$(O)
+
+$(BLD)/etags.exe: 	$(ETAGSOBJ)
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(ETAGSOBJ) $(LIBS)
+
+
+EBROWSEOBJ    = $(BLD)/ebrowse.$(O) \
+		../lib/$(BLD)/libgnu.$(A) \
+		$(BLD)/ntlib.$(O)
+
+$(BLD)/ebrowse.exe:     $(EBROWSEOBJ)
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(EBROWSEOBJ) $(LIBS)
+
+$(BLD)/regex.$(O): ../src/regex.c ../src/regex.h ../src/config.h
+		$(CC)  $(CFLAGS) -DCONFIG_BROKETS -DINHIBIT_STRING_HEADER \
+		../src/regex.c $(CC_OUT)$@
+
+ETAGS_CFLAGS  = -DHAVE_GETCWD -DEMACS_NAME="\"GNU Emacs\""
+$(BLD)/etags.$(O): etags.c
+		$(CC) $(CFLAGS) $(ETAGS_CFLAGS) $(CC_OUT)$@ etags.c
+
+CTAGSOBJ      = $(BLD)/ctags.$(O) \
+		../lib/$(BLD)/libgnu.$(A) \
+		$(BLD)/ntlib.$(O) \
+		$(BLD)/regex.$(O)
+
+$(BLD)/ctags.exe:  $(CTAGSOBJ)
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $(CTAGSOBJ) $(LIBS)
+
+ctags.c:	etags.c
+		- $(DEL) ctags.c
+		$(CP) etags.c ctags.c
+
+CTAGS_CFLAGS  = -DCTAGS $(ETAGS_CFLAGS) -DEMACS_NAME="\"GNU Emacs\""
+$(BLD)/ctags.$(O): ctags.c
+		$(CC) $(CFLAGS) $(CTAGS_CFLAGS) $(CC_OUT)$@ ctags.c
+
+#
+# From ..\src\Makefile.in
+# It doesn't matter if the real name is *.obj for the files in this list,
+# make-docfile blindly replaces .o with .c anyway.  Keep .o in this list
+# as it is required by code in doc.c.
+#
+obj =   dosfns.o msdos.o \
+	xterm.o xfns.o xmenu.o xselect.o xrdb.o xsmfns.o fringe.o image.o \
+	fontset.o menu.o \
+	w32.o w32console.o w32fns.o w32heap.o w32inevt.o \
+	w32menu.o w32proc.o w32reg.o w32select.o w32term.o w32xfns.o \
+	font.o w32font.o w32uniscribe.o \
+	dispnew.o frame.o scroll.o xdisp.o window.o bidi.o \
+	charset.o coding.o category.o ccl.o character.o chartab.o \
+	cm.o term.o terminal.o xfaces.o \
+	emacs.o keyboard.o macros.o keymap.o sysdep.o \
+	buffer.o filelock.o insdel.o marker.o \
+	minibuf.o fileio.o dired.o \
+	cmds.o casetab.o casefiddle.o indent.o search.o regex.o undo.o \
+	alloc.o data.o doc.o editfns.o callint.o \
+	eval.o floatfns.o fns.o print.o lread.o \
+	syntax.o bytecode.o \
+	process.o callproc.o unexw32.o \
+	region-cache.o sound.o atimer.o \
+	doprnt.o intervals.o textprop.o composite.o \
+	gnutls.o
+
+#
+# These are the lisp files that are loaded up in loadup.el
+#
+lispsource = ../lisp/
+
+MOUSE_SUPPORT = \
+	$(lispsource)select.elc \
+	$(lispsource)scroll-bar.elc \
+	$(lispsource)mouse.elc
+WINNT_SUPPORT = \
+	$(lispsource)ls-lisp.elc \
+	$(lispsource)disp-table.elc \
+	$(lispsource)w32-fns.elc \
+	$(lispsource)dos-w32.elc \
+	$(lispsource)w32-vars.elc \
+	$(lispsource)term/common-win.elc \
+	$(lispsource)term/w32-win.elc
+TOOLTIP_SUPPORT = $(lispsource)tooltip.elc
+WINDOW_SUPPORT = \
+	$(lispsource)fringe.elc \
+	$(lispsource)image.elc \
+	$(lispsource)international/fontset.elc \
+	$(lispsource)dnd.elc \
+	$(lispsource)tool-bar.elc \
+	$(lispsource)mwheel.elc
+
+# lisp files that are loaded up on other platforms
+OTHER_PLATFORM_SUPPORT = \
+	$(lispsource)dos-fns.elc \
+	$(lispsource)dos-vars.elc \
+	$(lispsource)term/internal.elc \
+	$(lispsource)term/pc-win.elc \
+	$(lispsource)x-dnd.elc \
+	$(lispsource)term/x-win.elc \
+	$(lispsource)term/ns-win.elc
+
+
+lisp1= \
+	$(lispsource)abbrev.elc \
+	$(lispsource)buff-menu.elc \
+	$(lispsource)button.elc \
+	$(lispsource)emacs-lisp/byte-run.elc \
+	$(lispsource)composite.elc \
+	$(lispsource)cus-face.elc \
+	$(lispsource)cus-start.elc \
+	$(lispsource)custom.elc \
+	$(lispsource)emacs-lisp/backquote.elc \
+	$(lispsource)emacs-lisp/lisp-mode.elc \
+	$(lispsource)emacs-lisp/lisp.elc \
+	$(lispsource)env.elc \
+	$(lispsource)faces.elc \
+	$(lispsource)files.elc \
+	$(lispsource)format.elc \
+	$(lispsource)facemenu.elc \
+	$(MOUSE_SUPPORT) \
+	$(lispsource)emacs-lisp/float-sup.elc \
+	$(lispsource)frame.elc \
+	$(lispsource)help.elc \
+	$(lispsource)indent.elc \
+	$(lispsource)isearch.elc \
+	$(lispsource)rfn-eshadow.elc \
+	$(lispsource)loadup.el \
+	$(lispsource)loaddefs.el \
+	$(lispsource)bindings.elc \
+	$(lispsource)emacs-lisp/map-ynp.elc \
+	$(lispsource)menu-bar.elc \
+	$(lispsource)international/mule.elc \
+	$(lispsource)international/mule-conf.el \
+	$(lispsource)international/mule-cmds.elc \
+	$(lispsource)international/characters.elc \
+	$(lispsource)international/charprop.el \
+	$(lispsource)case-table.elc
+
+lisp2 = \
+	$(lispsource)language/chinese.el \
+	$(lispsource)language/cyrillic.el \
+	$(lispsource)language/indian.el \
+	$(lispsource)language/sinhala.el \
+	$(lispsource)language/english.el \
+	$(lispsource)language/ethiopic.elc \
+	$(lispsource)language/european.elc \
+	$(lispsource)language/czech.el \
+	$(lispsource)language/slovak.el \
+	$(lispsource)language/romanian.el \
+	$(lispsource)language/greek.el \
+	$(lispsource)language/hebrew.elc \
+	$(lispsource)language/japanese.el \
+	$(lispsource)language/korean.el \
+	$(lispsource)language/lao.el \
+	$(lispsource)language/cham.el \
+	$(lispsource)language/tai-viet.el \
+	$(lispsource)language/thai.el \
+	$(lispsource)language/tibetan.elc \
+	$(lispsource)language/vietnamese.el \
+	$(lispsource)language/misc-lang.el \
+	$(lispsource)language/utf-8-lang.el \
+	$(lispsource)language/georgian.el \
+	$(lispsource)language/khmer.el \
+	$(lispsource)language/burmese.el \
+	$(lispsource)paths.el \
+	$(lispsource)register.elc \
+	$(lispsource)replace.elc \
+	$(lispsource)simple.elc \
+	$(lispsource)minibuffer.elc \
+	$(lispsource)startup.elc \
+	$(lispsource)subr.elc \
+	$(lispsource)term/tty-colors.elc \
+	$(lispsource)font-core.elc \
+	$(lispsource)emacs-lisp/syntax.elc \
+	$(lispsource)font-lock.elc \
+	$(lispsource)jit-lock.elc \
+	$(lispsource)textmodes/fill.elc \
+	$(lispsource)textmodes/page.elc \
+	$(lispsource)textmodes/paragraphs.elc \
+	$(lispsource)textmodes/text-mode.elc \
+	$(lispsource)emacs-lisp/timer.elc \
+	$(lispsource)jka-cmpr-hook.elc \
+	$(lispsource)vc/vc-hooks.elc \
+	$(lispsource)vc/ediff-hook.elc \
+	$(lispsource)epa-hook.elc \
+	$(TOOLTIP_SUPPORT) \
+	$(WINNT_SUPPORT) \
+	$(WINDOW_SUPPORT) \
+	$(lispsource)widget.elc \
+	$(lispsource)window.elc \
+	$(lispsource)version.el
+
+# This is needed the first time we build the tree, since temacs.exe
+# does not exist yet, and the DOC rule needs it to rebuild DOC whenever
+# Emacs is rebuilt.
+../src/$(BLD)/temacs.exe:
+	- mkdir "../src/$(OBJDIR)"
+	- mkdir "../src/$(BLD)"
+	@echo temacs > temacs.exe
+	$(CP) temacs.exe ../src/$(BLD)
+	- $(DEL) temacs.exe
+
+DOC	      = DOC
+$(DOC):		stamp_BLD $(BLD)/make-docfile.exe ../src/$(BLD)/temacs.exe $(lisp1) $(lisp2) $(OTHER_PLATFORM_SUPPORT)
+		- $(DEL) $(DOC)
+		"$(THISDIR)/$(BLD)/make-docfile" -o $(DOC) -d ../src $(obj)
+		"$(THISDIR)/$(BLD)/make-docfile" -a $(DOC) -d ../src $(lisp1)
+		"$(THISDIR)/$(BLD)/make-docfile" -a $(DOC) -d ../src $(lisp2)
+		"$(THISDIR)/$(BLD)/make-docfile" -a $(DOC) -d ../src $(OTHER_PLATFORM_SUPPORT)
+		$(CP) $(DOC) ../etc/DOC-X
+		- mkdir "../src/$(OBJDIR)"
+		- mkdir "../src/$(OBJDIR)/etc"
+		$(CP) $(DOC) ../src/$(OBJDIR)/etc/DOC-X
+
+{$(BLD)}.$(O){$(BLD)}.exe:
+		$(LINK) $(LINK_OUT)$@ $(LINK_FLAGS) $*.$(O) $(LIBS)
+
+#
+# Build the executables
+#
+all:		stamp_BLD $(ALL) $(DOC)
+
+#
+# Assuming INSTALL_DIR is defined, build and install emacs in it.
+#
+INSTALL_FILES = $(ALL)
+install:	$(INSTALL_FILES)
+		- mkdir "$(INSTALL_DIR)/bin"
+		$(CP) $(BLD)/etags.exe $(INSTALL_DIR)/bin
+		$(CP) $(BLD)/ebrowse.exe $(INSTALL_DIR)/bin
+		$(CP) $(BLD)/ctags.exe $(INSTALL_DIR)/bin
+		$(CP) $(BLD)/hexl.exe $(INSTALL_DIR)/bin
+		$(CP) $(BLD)/movemail.exe $(INSTALL_DIR)/bin
+		$(CP) $(BLD)/emacsclient.exe $(INSTALL_DIR)/bin
+		$(CP) $(BLD)/emacsclientw.exe $(INSTALL_DIR)/bin
+		- mkdir "$(INSTALL_DIR)/etc"
+		$(CP) $(DOC) $(INSTALL_DIR)/etc
+
+#
+# Maintenance
+#
+# We used to delete *~ here, but that might inadvertently remove
+# precious files if it happens to match their short 8+3 aliases.
+clean:
+		- $(DEL) DOC* $(COMPILER_TEMP_FILES)
+		- $(DEL) ctags.c
+		- $(DEL_TREE) $(OBJDIR)
+		- $(DEL) stamp_BLD
+
+distclean: cleanall
+	- $(DEL) TAGS
+	- $(DEL) Makefile
+
+maintainer-clean: distclean
+
+cleanall:	clean
+		- $(DEL_TREE) obj
+		- $(DEL_TREE) obj-spd
+		- $(DEL_TREE) oo
+		- $(DEL_TREE) oo-spd
+
+#
+# Headers we would preprocess if we could.
+#
+../src/config.h:	../nt/$(CONFIG_H)
+			$(DEL) $@
+			echo $(CONFIG_H) has changed.  Re-run configure.bat.
+			exit -1
+
+### TAGS ###
+
+TAGS: $(BLD)/etags.exe *.c *.h
+	$(BLD)/etags.exe *.c *.h
+
+### DEPENDENCIES ###
+
+EMACS_ROOT	= ..
+SRC		= .
+
+$(BLD)/alloca.$(O) : \
+	$(SRC)/alloca.c \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h \
+	$(EMACS_ROOT)/src/blockinput.h
+
+$(BLD)/ctags.$(O) : \
+	$(SRC)/ctags.c \
+	$(EMACS_ROOT)/nt/inc/sys/param.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h \
+	$(SRC)/ntlib.h \
+	$(EMACS_ROOT)/lib/getopt.h
+
+$(BLD)/ebrowse.$(O) : \
+	$(SRC)/ebrowse.c \
+	$(EMACS_ROOT)/lib/min-max.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h
+
+$(BLD)/emacsclient.$(O) : \
+	$(SRC)/emacsclient.c \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h
+
+$(BLD)/etags.$(O) : \
+	$(SRC)/etags.c \
+	$(EMACS_ROOT)/nt/inc/sys/param.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h \
+	$(SRC)/ntlib.h \
+	$(EMACS_ROOT)/lib/getopt.h
+
+$(BLD)/getdate.$(O) : \
+	$(SRC)/getdate.c \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h \
+	$(MSTOOLS_SYS)/types.h
+
+$(BLD)/hexl.$(O) : \
+	$(SRC)/hexl.c
+
+$(BLD)/leditcfns.$(O) : \
+	$(SRC)/leditcfns.c
+
+$(BLD)/make-docfile.$(O) : \
+	$(SRC)/make-docfile.c \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/make-path.$(O) : \
+	$(SRC)/make-path.c
+
+$(BLD)/movemail.$(O) : \
+	$(SRC)/movemail.c \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h \
+	$(EMACS_ROOT)/nt/inc/sys/file.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/lib-src/../src/syswait.h \
+	$(EMACS_ROOT)/nt/inc/pwd.h \
+	$(SRC)/ntlib.h
+	$(CC) $(CFLAGS) -DUSG $(CC_OUT)$@ movemail.c
+
+$(BLD)/ntlib.$(O) : \
+	$(SRC)/ntlib.c \
+	$(SRC)/ntlib.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/nt/inc/pwd.h
+
+$(BLD)/pop.$(O) : \
+	$(SRC)/pop.c \
+	$(SRC)/pop.h \
+	$(EMACS_ROOT)/lib/min-max.h \
+	$(SRC)/ntlib.h
+
+$(BLD)/profile.$(O) : \
+	$(SRC)/profile.c \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h \
+	$(EMACS_ROOT)/lib-src/../src/systime.h
+
+$(BLD)/qsort.$(O) : \
+	$(SRC)/qsort.c
+
+$(BLD)/tcp.$(O) : \
+	$(SRC)/tcp.c
+
+$(BLD)/test-distrib.$(O) : \
+	$(SRC)/test-distrib.c
+
+$(BLD)/timer.$(O) : \
+	$(SRC)/timer.c \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/lib-src/../src/config.h
+
+# The following dependencies are for supporting parallel builds, where
+# we must make sure $(BLD) exists before any compilation starts.
+#
+$(BLD)/make-docfile.$(O) $(BLD)/hexl.$(O): stamp_BLD
+
+$(BLD)/test-distrib.$(O) $(MOVEMAILOBJS): stamp_BLD
+
+$(BLD)/emacsclient.$(O) $(BLD)/etags.$(O) $(BLD)/regex.$(O): stamp_BLD
+
+$(BLD)/ebrowse.$(O) $(BLD)/ctags.$(O): stamp_BLD

@@ -1,0 +1,66 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+Files: hicolor/16x16/apps/emacs.png hicolor/24x24/apps/emacs.png
+       hicolor/32x32/apps/emacs.png hicolor/48x48/apps/emacs.png
+       hicolor/128x128/apps/emacs.png hicolor/scalable/apps/emacs.svg
+
+Author: Kentaro Ohkouchi <nanasess@fsm.ne.jp>
+Copyright (C) 2007-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+
+
+Files: hicolor/16x16/apps/emacs22.png hicolor/24x24/apps/emacs22.png
+       hicolor/32x32/apps/emacs22.png hicolor/48x48/apps/emacs22.png
+
+Author: Andrew Zhilin <andrew_zhilin@yahoo.com>
+Copyright (C) 2005-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+
+Files: allout-widgets-dark-bg/closed.png
+       allout-widgets-dark-bg/closed.xpm
+       allout-widgets-dark-bg/empty.png
+       allout-widgets-dark-bg/empty.xpm
+       allout-widgets-dark-bg/encrypted-locked.png
+       allout-widgets-dark-bg/encrypted-locked.xpm
+       allout-widgets-dark-bg/encrypted-unlocked.png
+       allout-widgets-dark-bg/encrypted-unlocked.xpm
+       allout-widgets-dark-bg/end-connector.png
+       allout-widgets-dark-bg/end-connector.xpm
+       allout-widgets-dark-bg/extender-connector.png
+       allout-widgets-dark-bg/extender-connector.xpm
+       allout-widgets-dark-bg/leaf.png
+       allout-widgets-dark-bg/leaf.xpm
+       allout-widgets-dark-bg/mid-connector.png
+       allout-widgets-dark-bg/mid-connector.xpm
+       allout-widgets-dark-bg/opened.png
+       allout-widgets-dark-bg/opened.xpm
+       allout-widgets-dark-bg/skip-descender.png
+       allout-widgets-dark-bg/skip-descender.xpm
+       allout-widgets-dark-bg/through-descender.png
+       allout-widgets-dark-bg/through-descender.xpm
+       allout-widgets-light-bg/closed.png
+       allout-widgets-light-bg/closed.xpm
+       allout-widgets-light-bg/empty.png
+       allout-widgets-light-bg/empty.xpm
+       allout-widgets-light-bg/encrypted-locked.png
+       allout-widgets-light-bg/encrypted-locked.xpm
+       allout-widgets-light-bg/encrypted-unlocked.png
+       allout-widgets-light-bg/encrypted-unlocked.xpm
+       allout-widgets-light-bg/end-connector.png
+       allout-widgets-light-bg/end-connector.xpm
+       allout-widgets-light-bg/extender-connector.png
+       allout-widgets-light-bg/extender-connector.xpm
+       allout-widgets-light-bg/leaf.png
+       allout-widgets-light-bg/leaf.xpm
+       allout-widgets-light-bg/mid-connector.png
+       allout-widgets-light-bg/mid-connector.xpm
+       allout-widgets-light-bg/opened.png
+       allout-widgets-light-bg/opened.xpm
+       allout-widgets-light-bg/skip-descender.png
+       allout-widgets-light-bg/skip-descender.xpm
+       allout-widgets-light-bg/through-descender.png
+       allout-widgets-light-bg/through-descender.xpm
+
+Author: Ken Manheimer <ken.manheimer@gmail.com>
+Copyright (C) 2011-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)

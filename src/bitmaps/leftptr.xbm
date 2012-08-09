@@ -1,0 +1,8 @@
+#define left_ptr_width 16
+#define left_ptr_height 16
+#define left_ptr_x_hot 3
+#define left_ptr_y_hot 1
+static char left_ptr_bits[] = {
+  '\x00','\x00','\x08','\x00','\x18','\x00','\x38','\x00','\x78','\x00','\xf8','\x00',
+  '\xf8','\x01','\xf8','\x03','\xf8','\x07','\xf8','\x00','\xd8','\x00','\x88','\x01',
+  '\x80','\x01','\x00','\x03','\x00','\x03','\x00','\x00'};

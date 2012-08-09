@@ -1,3 +1,0 @@
-SOURCES    = src/*.cc
-LINK      += authorization
-FRAMEWORKS = ApplicationServices Security

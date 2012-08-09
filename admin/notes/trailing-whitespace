@@ -1,0 +1,7 @@
+ttn 2003-02-14
+
+apparently there was a big discussion on emacs-devel wrt trailing whitespace.
+there was a mass-change to remove such from various branches in cvs.  probably
+it's a good idea to avoid adding trailing whitespace in new code/docs and in
+changes.
+

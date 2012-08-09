@@ -1,0 +1,1477 @@
+This is ../../info/info, produced by makeinfo version 4.13 from
+info.texi.
+
+This file describes how to use Info, the on-line, menu-driven GNU
+documentation system.
+
+   Copyright (C) 1989, 1992, 1996-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+INFO-DIR-SECTION Texinfo documentation system
+START-INFO-DIR-ENTRY
+* Info: (info).                 How to use the documentation browsing system.
+END-INFO-DIR-ENTRY
+
+
+File: info,  Node: Top,  Next: Getting Started,  Up: (dir)
+
+Info: An Introduction
+*********************
+
+The GNU Project distributes most of its on-line manuals in the "Info
+format", which you read using an "Info reader".  You are probably using
+an Info reader to read this now.
+
+   There are two primary Info readers: `info', a stand-alone program
+designed just to read Info files (*note What is Info?:
+(info-stnd)Top.), and the `info' package in GNU Emacs, a
+general-purpose editor.  At present, only the Emacs reader supports
+using a mouse.
+
+   If you are new to the Info reader and want to learn how to use it,
+type the command `h' now.  It brings you to a programmed instruction
+sequence.
+
+   To read about advanced Info commands, type `n' twice.  This brings
+you to `Advanced Info Commands', skipping over the `Getting Started'
+chapter.
+
+   This file describes how to use Info, the on-line, menu-driven GNU
+documentation system.
+
+   Copyright (C) 1989, 1992, 1996-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+* Menu:
+
+* Getting Started::             Getting started using an Info reader.
+* Advanced::                    Advanced Info commands.
+* Expert Info::                 Info commands for experts.
+* Index::                       An index of topics, commands, and variables.
+
+
+File: info,  Node: Getting Started,  Next: Advanced,  Prev: Top,  Up: Top
+
+1 Getting Started
+*****************
+
+This first part of this Info manual describes how to get around inside
+of Info.  The second part of the manual describes various advanced Info
+commands.  The third part briefly explains how to generate Info files
+from Texinfo files, and describes how to write an Info file by hand.
+
+* Menu:
+
+* Help-Small-Screen::   Starting Info on a Small Screen.
+* Help::                How to use Info.
+* Help-P::              Returning to the Previous node.
+* Help-^L::             The Space, DEL, B and ^L commands.
+* Help-Inv::            Invisible text in Emacs Info.
+* Help-M::              Menus.
+* Help-Xref::           Following cross-references.
+* Help-Int::            Some intermediate Info commands.
+* Help-Q::              Quitting Info.
+
+
+File: info,  Node: Help-Small-Screen,  Next: Help,  Up: Getting Started
+
+1.1 Starting Info on a Small Screen
+===================================
+
+Since your terminal has a relatively small number of lines on its
+screen, it is necessary to give you special advice at the beginning.
+
+   If the entire text you are looking at fits on the screen, the text
+`All' will be displayed at the bottom of the screen.  In the
+stand-alone Info reader, it is displayed at the bottom right corner of
+the screen; in Emacs, it is displayed on the modeline.  If you see the
+text `Top' instead, it means that there is more text below that does
+not fit.  To move forward through the text and see another screen full,
+press <SPC>, the Space bar.  To move back up, press the key labeled
+`Backspace' or `DEL' (on some keyboards, this key might be labeled
+`Delete').
+
+   Here are 40 lines of junk, so you can try <SPC> and <DEL> and see
+what they do.  At the end are instructions of what you should do next.
+
+This is line 20
+This is line 21
+This is line 22
+This is line 23
+This is line 24
+This is line 25
+This is line 26
+This is line 27
+This is line 28
+This is line 29
+This is line 30
+This is line 31
+This is line 32
+This is line 33
+This is line 34
+This is line 35
+This is line 36
+This is line 37
+This is line 38
+This is line 39
+This is line 40
+This is line 41
+This is line 42
+This is line 43
+This is line 44
+This is line 45
+This is line 46
+This is line 47
+This is line 48
+This is line 49
+This is line 50
+This is line 51
+This is line 52
+This is line 53
+This is line 54
+This is line 55
+This is line 56
+This is line 57
+This is line 58
+This is line 59
+
+   If you have managed to get here, go back to the beginning with `DEL'
+(or <BACKSPACE>), and come back here again, then you understand the
+about the `Space' and `Backspace' keys.  So now type an `n'--just one
+character; don't type the quotes and don't type the Return key
+afterward--to get to the normal start of the course.
+
+
+File: info,  Node: Help,  Next: Help-P,  Prev: Help-Small-Screen,  Up: Getting Started
+
+1.2 How to use Info
+===================
+
+You are talking to the program Info, for reading documentation.
+
+   There are two ways to use Info: from within Emacs or as a
+stand-alone reader that you can invoke from a shell using the command
+`info'.
+
+   Right now you are looking at one "Node" of Information.  A node
+contains text describing a specific topic at a specific level of
+detail.  This node's topic is "how to use Info".  The mode line says
+that this is node `Help' in the file `info'.
+
+   The top line of a node is its "header".  This node's header (look at
+it now) says that the `Next' node after this one is the node called
+`Help-P'.  An advanced Info command lets you go to any node whose name
+you know.  In the stand-alone Info reader program, the header line
+shows the names of this node and the Info file as well.  In Emacs, the
+header line is displayed with a special typeface, and remains at the
+top of the window all the time even if you scroll through the node.
+
+   Besides a `Next', a node can have a `Previous' link, or an `Up'
+link, or both.  As you can see, this node has all of these links.
+
+   Now it is time to move on to the `Next' node, named `Help-P'.
+
+>> Type `n' to move there.  Type just one character;
+   do not type the quotes and do not type a <RET> afterward.
+
+`>>' in the margin means it is really time to try a command.
+
+>> If you are in Emacs and have a mouse, and if you already practiced
+   typing `n' to get to the next node, click now with the left
+   mouse button on the `Next' link to do the same "the mouse way".
+
+
+File: info,  Node: Help-P,  Next: Help-^L,  Prev: Help,  Up: Getting Started
+
+1.3 Returning to the Previous node
+==================================
+
+This node is called `Help-P'.  The `Previous' node, as you see, is
+`Help', which is the one you just came from using the `n' command.
+Another `n' command now would take you to the next node, `Help-^L'.
+
+>> But do not type `n' yet.  First, try the `p' command, or
+   (in Emacs) click on the `Prev' link.  That takes you to
+   the `Previous' node.  Then use `n' to return here.
+
+   If you read this in Emacs, you will see an `Info' item in the menu
+bar, close to its right edge.  Clicking the mouse on the `Info'
+menu-bar item opens a menu of commands which include `Next' and
+`Previous' (and also some others which you didn't yet learn about).
+
+   This all probably seems insultingly simple so far, but _please
+don't_ start skimming.  Things will get complicated soon enough!  Also,
+please do not try a new command until you are told it is time to.  You
+could make Info skip past an important warning that was coming up.
+
+>> Now do an `n', or (in Emacs) click the middle mouse button on
+   the `Next' link, to get to the node `Help-^L' and learn more.
+
+
+File: info,  Node: Help-^L,  Next: Help-Inv,  Prev: Help-P,  Up: Getting Started
+
+1.4 The Space, DEL, B and ^L commands
+=====================================
+
+This node's mode line tells you that you are now at node `Help-^L', and
+the header line tells you that `p' would get you back to `Help-P'.  The
+node's title is highlighted and may be underlined as well; it says what
+the node is about.
+
+   This is a big node and it does not all fit on your display screen.
+You can tell that there is more that is not visible because you can see
+the text `Top' rather than `All' near the bottom of the screen.
+
+   The <SPC>, <BACKSPACE> (or <DEL>)(1) and `b' commands exist to allow
+you to "move around" in a node that does not all fit on the screen at
+once.  <SPC> moves forward, to show what was below the bottom of the
+screen.  <DEL> or <BACKSPACE> moves backward, to show what was above
+the top of the screen (there is not anything above the top until you
+have typed some spaces).
+
+>> Now try typing a <SPC> (afterward, type a <BACKSPACE> to
+   return here).
+
+   When you type the <SPC>, the two lines that were at the bottom of
+the screen appear at the top, followed by more lines.  <DEL> or
+<BACKSPACE> takes the two lines from the top and moves them to the
+bottom, _usually_, but if there are not a full screen's worth of lines
+above them they may not make it all the way to the bottom.
+
+   If you are reading this in Emacs, note that the header line is
+always visible, never scrolling off the display.  That way, you can
+always see the `Next', `Prev', and `Up' links, and you can conveniently
+go to one of these links at any time by clicking the middle mouse
+button on the link.
+
+   <SPC> and <DEL> not only move forward and backward through the
+current node.  They also move between nodes.  <SPC> at the end of a
+node moves to the next node; <DEL> (or <BACKSPACE>) at the beginning of
+a node moves to the previous node.  In effect, these commands scroll
+through all the nodes in an Info file as a single logical sequence.
+You can read an entire manual top to bottom by just typing <SPC>, and
+move backward through the entire manual from bottom to top by typing
+<DEL> (or <BACKSPACE>).
+
+   In this sequence, a node's subnodes appear following their parent.
+If a node has a menu, <SPC> takes you into the subnodes listed in the
+menu, one by one.  Once you reach the end of a node, and have seen all
+of its subnodes, <SPC> takes you to the next node or to the parent's
+next node.
+
+   Many keyboards nowadays have two scroll keys labeled `PageUp' and
+`PageDown' (or maybe `Prior' and `Next').  If your keyboard has these
+keys, you can use them to move forward and backward through the text of
+one node, like <SPC> and <BACKSPACE> (or <DEL>).  However, <PAGEUP> and
+<PAGEDOWN> keys never scroll beyond the beginning or the end of the
+current node.
+
+   If your screen is ever garbaged, you can tell Info to display it
+again by typing `C-l' (`Control-L'--that is, hold down <CTRL> and type
+`L' or `l').
+
+>> Type `C-l' now.
+
+   To move back to the beginning of the node you are on, you can type
+the <BACKSPACE> key (or <DEL>) many times.  You can also type `b' just
+once.  `b' stands for "beginning."
+
+>> Try that now.  (We have put in enough verbiage to push this past
+   the first screenful, but screens are so big nowadays that perhaps it
+   isn't enough.  You may need to shrink your Emacs or Info window.)
+   Then come back, by typing <SPC> one or more times.
+
+   You have just learned a considerable number of commands.  If you
+want to use one but have trouble remembering which, you should type
+`?', which displays a brief list of commands.  When you are finished
+looking at the list, make it go away by typing <SPC> repeatedly.
+
+>> Type a <?> now.  Press <SPC> to see consecutive screenfuls of
+   the list until finished.  Then type <SPC> several times.  If
+   you are using Emacs, the help will then go away automatically.
+
+   (If you are using the stand-alone Info reader, type `C-x 0' to
+return here, that is--press and hold <CTRL>, type an `x', then release
+<CTRL> and `x', and press `0'; that's a zero, not the letter "o".)
+
+   From now on, you will encounter large nodes without warning, and
+will be expected to know how to use <SPC> and <BACKSPACE> to move
+around in them without being told.  Since not all terminals have the
+same size screen, it would be impossible to warn you anyway.
+
+>> Now type `n', or click the middle mouse button on the `Next' link,
+   to visit the next node.
+
+   ---------- Footnotes ----------
+
+   (1) The key which we call "Backspace or DEL" in this manual is
+labeled differently on different keyboards.  Look for a key which is a
+little ways above the <ENTER> or <RET> key and which you normally use
+outside Emacs to erase the character before the cursor, i.e. the
+character you typed last.  It might be labeled `Backspace' or `<-' or
+`DEL', or sometimes `Delete'.
+
+
+File: info,  Node: Help-Inv,  Next: Help-M,  Prev: Help-^L,  Up: Getting Started
+
+1.5 Invisible text in Emacs Info
+================================
+
+Before discussing menus, we need to make some remarks that are only
+relevant to users reading Info using Emacs.  Users of the stand-alone
+version can skip this node by typing `]' now.
+
+   In Emacs, certain text that appears in the stand-alone version is
+normally hidden, technically because it has the `invisibility'
+property.  Invisible text is really a part of the text.  It becomes
+visible (by default) after killing and yanking, it appears in printed
+output, it gets saved to file just like any other text, and so on.
+Thus it is useful to know it is there.
+
+   You can make invisible text visible by using the command `M-x
+visible-mode'.  Visible mode is a minor mode, so using the command a
+second time will make the text invisible again.  Watch the effects of
+the command on the "menu" below and the top line of this node.
+
+   If you prefer to _always_ see the invisible text, you can set
+`Info-hide-note-references' to `nil'.  Enabling Visible mode
+permanently is not a real alternative, because Emacs Info also uses
+(although less extensively) another text property that can change the
+text being displayed, the `display' property.  Only the invisibility
+property is affected by Visible mode.  When, in this tutorial, we refer
+to the `Emacs' behavior, we mean the _default_ Emacs behavior.
+
+   Now type `]', to learn about the `]' and `[' commands.
+
+* Menu:
+
+* ]:         Help-].               Node telling about ].
+* stuff:     Help-].               Same node.
+* Help-]::                         Yet again, same node.
+
+
+File: info,  Node: Help-],  Up: Help-Inv
+
+1.5.1 The `]' and `[' commands
+------------------------------
+
+If you type `n' now, you get an error message saying that this node has
+no next node.  Similarly, if you type `p', the error message tells you
+that there is no previous node.  (The exact message depends on the Info
+reader you use.)  This is because `n' and `p' carry you to the next and
+previous node _at the same level_.  The present node is contained in a
+menu (see next) of the node you came from, and hence is considered to
+be at a lower level.  It is the only node in the previous node's menu
+(even though it was listed three times). Hence it has no next or
+previous node that `n' or `p' could move to.
+
+   If you systematically move through a manual by typing `n', you run
+the risk of skipping many nodes.  You do not run this risk if you
+systematically use `<SPC>', because, when you scroll to the bottom of a
+node and type another `<SPC>', then this carries you to the following
+node in the manual _regardless of level_.  If you immediately want to
+go to that node, without having to scroll to the bottom of the screen
+first, you can type `]'.
+
+   Similarly, `<BACKSPACE>' carries you to the preceding node
+regardless of level, after you scrolled to the beginning of the present
+node.  If you want to go to the preceding node immediately, you can
+type `['.
+
+   For instance, typing this sequence will come back here in three
+steps: `[ n ['.  To do the same backward, type `] p ]'.
+
+   Now type `]' to go to the next node and learn about menus.
+
+
+File: info,  Node: Help-M,  Next: Help-Xref,  Prev: Help-Inv,  Up: Getting Started
+
+1.6 Menus and the `m' command
+=============================
+
+With only the `n' (next), `p' (previous), `<SPC>', `<BACKSPACE>', `]'
+and `[' commands for moving between nodes, nodes are restricted to a
+linear sequence.  Menus allow a branching structure.  A menu is a list
+of other nodes you can move to.  It is actually just part of the text
+of the node formatted specially so that Info can interpret it.  The
+beginning of a menu is always identified by a line which starts with
+`* Menu:'.  A node contains a menu if and only if it has a line in it
+which starts that way.  The only menu you can use at any moment is the
+one in the node you are in.  To use a menu in any other node, you must
+move to that node first.
+
+   After the start of the menu, each line that starts with a `*'
+identifies one subtopic.  The line usually contains a brief name for
+the subtopic (followed by a `:', normally hidden in Emacs), the name of
+the node that talks about that subtopic (again, normally hidden in
+Emacs), and optionally some further description of the subtopic.  Lines
+in the menu that do not start with a `*' have no special meaning--they
+are only for the human reader's benefit and do not define additional
+subtopics.  Here is an example:
+
+     * Foo:  Node about FOO.      This tells about FOO.
+
+   The subtopic name is Foo, and the node describing it is `Node about
+FOO'.  The rest of the line is just for the reader's Information.  [[
+But this line is not a real menu item, simply because there is no line
+above it which starts with `* Menu:'.  Also, in a real menu item, the
+`*' would appear at the very start of the line.  This is why the
+"normally hidden" text in Emacs, namely `: Node about FOO.', is
+actually visible in this example, even when Visible mode is off.]]
+
+   When you use a menu to go to another node (in a way that will be
+described soon), what you specify is the subtopic name, the first thing
+in the menu line.  Info uses it to find the menu line, extracts the
+node name from it, and goes to that node.  The reason that there is
+both a subtopic name and a node name is that the node name must be
+meaningful to the computer and may therefore have to be ugly looking.
+The subtopic name can be chosen just to be convenient for the user to
+specify.  Often the node name is convenient for the user to specify and
+so both it and the subtopic name are the same.  There is an
+abbreviation for this:
+
+     * Foo::   This tells about FOO.
+
+This means that the subtopic name and node name are the same; they are
+both `Foo'.  (The `::' is normally hidden in Emacs.)
+
+>> Now use <SPC> to find the menu in this node, then come back to
+   the front with a `b' and some <SPC>s.  As you see, a menu is
+   actually visible in its node.  If you cannot find a menu in a node
+   by looking at it, then the node does not have a menu and the
+   `m' command is not available.
+
+   If you keep typing <SPC> once the menu appears on the screen, it
+will move to another node (the first one in the menu).  If that
+happens, type <BACKSPACE> to come back.
+
+   The command to go to one of the subnodes is `m'.  This is very
+different from the commands you have used: it is a command that prompts
+you for more input.
+
+   The Info commands you know do not need additional input; when you
+type one of them, Info processes it instantly and then is ready for
+another command.  The `m' command is different: it needs to know the
+"name of the subtopic".  Once you have typed `m', Info tries to read
+the subtopic name.
+
+   Now, in the stand-alone Info, look for the line containing many
+dashes near the bottom of the screen.  (This is the stand-alone
+equivalent for the mode line in Emacs.)  There is one more line beneath
+that one, but usually it is blank.  (In Emacs, this is the echo area.)
+When it is blank, Info is ready for a command, such as `n' or `b' or
+<SPC> or `m'.  If that line contains text ending in a colon, it means
+Info is reading more input for the last command.  You can't type an
+Info command then, because Info is trying to read input, not commands.
+You must either give the input and finish the command you started, or
+type `Control-g' to cancel the command.  When you have done one of
+those things, the input entry line becomes blank again.  Then you can
+type Info commands again.
+
+   The command to go to a subnode via a menu is `m'.  After you type
+the `m', the line at the bottom of the screen says `Menu item: '.  You
+must then type the name of the subtopic you want, and end it with a
+<RET>.
+
+   You can abbreviate the subtopic name.  If the abbreviation is not
+unique, the first matching subtopic is chosen.  Some menus put the
+shortest possible abbreviation for each subtopic name in capital
+letters, so you can see how much you need to type.  It does not matter
+whether you use upper case or lower case when you type the subtopic.
+You should not put any spaces at the end, or inside of the item name,
+except for one space where a space appears in the item in the menu.
+
+   You can also use the "completion" feature to help enter the subtopic
+name.  If you type the <TAB> key after entering part of a name, it will
+fill in more of the name--as much as Info can deduce from the part you
+have entered.
+
+   If you move the cursor to one of the menu subtopic lines, then you do
+not need to type the argument: you just type a <RET>, and it stands for
+the subtopic of the line you are on.  You can also click the middle
+mouse button directly on the subtopic line to go there.
+
+   Here is a menu to give you a chance to practice.  This menu gives you
+three ways of going to one place, Help-FOO:
+
+* Menu:
+
+* Foo:  Help-FOO.       A node you can visit for fun.
+* Bar:  Help-FOO.       We have made two ways to get to the same place.
+* Help-FOO::            And yet another!
+
+   (Turn Visible mode on if you are using Emacs.)
+
+>>  Now type just an `m' and see what happens:
+
+   Now you are "inside" an `m' command.  Commands cannot be used now;
+the next thing you will type must be the name of a subtopic.
+
+   You can change your mind about doing the `m' by typing `Control-g'.
+
+>> Try that now;  notice the bottom line clear.
+
+>> Then type another `m'.
+
+>> Now type `BAR', the item name.  Do not type <RET> yet.
+
+   While you are typing the item name, you can use the <DEL> (or
+<BACKSPACE>) key to cancel one character at a time if you make a
+mistake.
+
+>> Press <DEL> to cancel the `R'.  You could type another `R'
+   to replace it.  But you do not have to, since `BA' is a valid
+   abbreviation.
+
+>> Now you are ready to go.  Type a <RET>.
+
+   After visiting `Help-FOO', you should return here.
+
+   Another way to move to the menu subtopic lines and between them is
+to type <TAB>.  Each time you type a <TAB>, you move to the next
+subtopic line.  To move to a previous subtopic line in the stand-alone
+reader, type `M-<TAB>'--that is, press and hold the <META> key and then
+press <TAB>.  (On some keyboards, the <META> key might be labeled
+`Alt'.)  In Emacs Info, type `S-<TAB>' to move to a previous subtopic
+line (press and hold the <Shift> key and then press <TAB>).
+
+   Once you move cursor to a subtopic line, press <RET> to go to that
+subtopic's node.
+
+   If your terminal supports a mouse, you have yet another way of going
+to a subtopic.  Move your mouse pointer to the subtopic line, somewhere
+between the beginning `*' and the colon `:' which ends the subtopic's
+brief name.  You will see the subtopic's name change its appearance
+(usually, its background color will change), and the shape of the mouse
+pointer will change if your platform supports that.  After a while, if
+you leave the mouse on that spot, a small window will pop up, saying
+"Mouse-2: go to that node," or the same message may appear at the
+bottom of the screen.
+
+   `Mouse-2' is the second button of your mouse counting from the
+left--the middle button on a 3-button mouse.  (On a 2-button mouse, you
+may have to press both buttons together to "press the middle button".)
+The message tells you pressing `Mouse-2' with the current position of
+the mouse pointer (on subtopic in the menu) will go to that subtopic.
+
+   More generally, `Mouse-2' in an Info buffer finds the nearest link
+to another node and goes there.  For example, near a cross reference it
+acts like `f', in a menu it acts like `m', on the node's header line it
+acts like `n', `p', or `u', etc.  At end of the node's text `Mouse-2'
+moves to the next node, or up if there's no next node.
+
+>> Type `n' to see more commands.
+
+
+File: info,  Node: Help-FOO,  Up: Help-M
+
+1.6.1 The `u' command
+---------------------
+
+Congratulations!  This is the node `Help-FOO'.  It has an `Up' pointer
+`Help-M', the node you just came from via the `m' command.  This is the
+usual convention--the nodes you reach from a menu have `Up' nodes that
+lead back to the menu.  Menus move Down in the tree, and `Up' moves Up.
+`Previous', on the other hand, is usually used to "stay on the same
+level but go backwards".
+
+   You can go back to the node `Help-M' by typing the command `u' for
+"Up".  This puts you at the menu subtopic line pointing to the subnode
+that the `u' command brought you from.  (Some Info readers may put you
+at the _front_ of the node instead--to get back to where you were
+reading, you have to type some <SPC>s.)
+
+   Another way to go Up is to click `Mouse-2' on the `Up' pointer shown
+in the header line (provided that you have a mouse).
+
+>> Now type `u' to move back up to `Help-M'.
+
+
+File: info,  Node: Help-Xref,  Next: Help-Int,  Prev: Help-M,  Up: Getting Started
+
+1.7 Following Cross-References
+==============================
+
+In Info documentation, you will see many "cross references".  Cross
+references look like this: *Note Cross: Help-Cross.  That text is a
+real, live cross reference, whose name is `Cross' and which points to
+the node named `Help-Cross'.  (The node name is hidden in Emacs.  Do
+`M-x visible-mode' to show or hide it.)
+
+   You can follow a cross reference by moving the cursor to it and
+press <RET>, just as in a menu.  In Emacs, you can also click `Mouse-1'
+on a cross reference to follow it; you can see that the cross reference
+is mouse-sensitive by moving the mouse pointer to the reference and
+watching how the underlying text and the mouse pointer change in
+response.
+
+   Another way to follow a cross reference is to type `f' and then
+specify the name of the cross reference (in this case, `Cross') as an
+argument.  For this command, it does not matter where the cursor was.
+If the cursor is on or near a cross reference, `f' suggests that
+reference name in parentheses as the default; typing <RET> will follow
+that reference.  However, if you type a different reference name, `f'
+will follow the other reference which has that name.
+
+>> Type `f', followed by `Cross', and then <RET>.
+
+   As you enter the reference name, you can use the <DEL> (or
+<BACKSPACE>) key to edit your input.  If you change your mind about
+following any reference, you can use `Control-g' to cancel the command.
+Completion is available in the `f' command; you can complete among all
+the cross reference names in the current node by typing a <TAB>.
+
+   To get a list of all the cross references in the current node, you
+can type `?' after an `f'.  The `f' continues to await a cross
+reference name even after displaying the list, so if you don't actually
+want to follow a reference, you should type a `Control-g' to cancel the
+`f'.
+
+>> Type `f?' to get a list of the cross references in this node.  Then
+   type a `Control-g' and see how the `f' gives up.
+
+   The <TAB>, `M-<TAB>' and `S-<TAB>' keys, which move between menu
+items in a menu, also move between cross references outside of menus.
+
+   Sometimes a cross reference (or a node) can lead to another file (in
+other words another "manual"), or, on occasion, even a file on a remote
+machine (although Info files distributed with Emacs or the stand-alone
+Info avoid using remote links).  Such a cross reference looks like
+this: *Note Overview of Texinfo: (texinfo)Top.  (After following this
+link, type `l' to get back to this node.)  Here the name `texinfo'
+between parentheses refers to the file name.  This file name appears in
+cross references and node names if it differs from the current file, so
+you can always know that you are going to be switching to another
+manual and which one.
+
+   However, Emacs normally hides some other text in cross-references.
+If you put your mouse over the cross reference, then the information
+appearing in a separate box (tool tip) or in the echo area will show
+the full cross-reference including the file name and the node name of
+the cross reference.  If you have a mouse, just leave it over the cross
+reference *Note Overview of Texinfo: (texinfo)Top, and watch what
+happens.  If you always like to have that information visible without
+having to move your mouse over the cross reference, use `M-x
+visible-mode', or set `Info-hide-note-references' to a value other than
+`t' (*note Emacs Info Variables::).
+
+>> Now type `n' to learn more commands.
+
+
+File: info,  Node: Help-Int,  Next: Help-Q,  Prev: Help-Xref,  Up: Getting Started
+
+1.8 Some intermediate Info commands
+===================================
+
+The introductory course is almost over; please continue a little longer
+to learn some intermediate-level commands.
+
+   Most Info files have an index, which is actually a large node
+containing little but a menu.  The menu has one menu item for each
+topic listed in the index.  (As a special feature, menus for indices
+may also include the line number within the node of the index entry.
+This allows Info readers to go to the exact line of an entry, not just
+the start of the containing node.)
+
+   You can get to the index from the main menu of the file with the `m'
+command and the name of the index node; then you can use the `m'
+command again in the index node to go to the node that describes the
+topic you want.
+
+   There is also a short-cut Info command, `i', which does all of that
+for you.  It searches the index for a given topic (a string) and goes
+to the node which is listed in the index for that topic.  *Note Search
+Index::, for a full explanation.
+
+   If you have been moving around to different nodes and wish to
+retrace your steps, the `l' command (`l' for "last") will do that, one
+node-step at a time.  As you move from node to node, Info records the
+nodes where you have been in a special history list.  The `l' command
+revisits nodes in the history list; each successive `l' command moves
+one step back through the history.
+
+>> Try typing `p p n' and then three `l''s, pausing in between
+to see what each `l' does.  You should wind up right back here.
+
+   Note the difference between `l' and `p': `l' moves to where _you_
+last were, whereas `p' always moves to the node which the header says
+is the `Previous' node (from this node, the `Prev' link leads to
+`Help-Xref').
+
+   You can use the `r' command (`Info-history-forward' in Emacs) to
+revisit nodes in the history list in the forward direction, so that `r'
+will return you to the node you came from by typing `l'.
+
+   The `L' command (`Info-history' in Emacs) creates a virtual node
+that contains a list of all nodes you visited.  You can select a
+previously visited node from this menu to revisit it.
+
+   The `d' command (`Info-directory' in Emacs) gets you instantly to
+the Directory node.  This node, which is the first one you saw when you
+entered Info, has a menu which leads (directly or indirectly, through
+other menus), to all the nodes that exist.  The Directory node lists
+all the manuals and other Info documents that are, or could be,
+installed on your system.
+
+>> Try doing a `d', then do an `l' to return here (yes,
+   _do_ return).
+
+   The `t' command moves to the `Top' node of the manual.  This is
+useful if you want to browse the manual's main menu, or select some
+specific top-level menu item.  The Emacs command run by `t' is
+`Info-top-node'.
+
+>> Now type `n' to see the last node of the course.
+
+   *Note Advanced::, for more advanced Info features.
+
+
+File: info,  Node: Help-Q,  Prev: Help-Int,  Up: Getting Started
+
+1.9 Quitting Info
+=================
+
+To get out of Info, back to what you were doing before, type `q' for
+"Quit".  This runs `Info-exit' in Emacs.
+
+   This is the end of the basic course on using Info.  You have learned
+how to move in an Info document, and how to follow menus and cross
+references.  This makes you ready for reading manuals top to bottom, as
+new users should do when they learn a new package.
+
+   Another set of Info commands is useful when you need to find
+something quickly in a manual--that is, when you need to use a manual
+as a reference rather than as a tutorial.  We urge you to learn these
+search commands as well.  If you want to do that now, follow this cross
+reference to *note Advanced::.
+
+   Yet another set of commands are meant for experienced users; you can
+find them by looking in the Directory node for documentation on Info.
+Finding them will be a good exercise in using Info in the usual manner.
+
+>> Type `d' to go to the Info directory node; then type
+   `mInfo' and Return, to get to the node about Info and
+   see what other help is available.
+
+
+File: info,  Node: Advanced,  Next: Expert Info,  Prev: Getting Started,  Up: Top
+
+2 Advanced Info Commands
+************************
+
+This chapter describes various advanced Info commands.  (If you are
+using a stand-alone Info reader, there are additional commands specific
+to it, which are documented in several chapters of *note GNU Info:
+(info-stnd)Top.)
+
+   One advanced command useful with most of the others described here
+is `C-q', which "quotes" the next character so that it is entered
+literally (*note Inserting Text: (emacs)Inserting Text.).  For example,
+pressing `?' ordinarily brings up a list of completion possibilities.
+If you want to (for example) search for an actual `?' character, the
+simplest way is to insert it using `C-q ?'.  This works the same in
+Emacs and stand-alone Info.
+
+* Menu:
+
+* Search Text::          How to search Info documents.
+* Search Index::         How to search the indices for specific subjects.
+* Go to node::           How to go to a node by name.
+* Choose menu subtopic:: How to choose a menu subtopic by its number.
+* Create Info buffer::   How to create a new Info buffer in Emacs.
+* Emacs Info Variables:: Variables modifying the behavior of Emacs Info.
+
+
+File: info,  Node: Search Text,  Next: Search Index,  Up: Advanced
+
+2.1 `s' searches Info documents
+===============================
+
+The commands which move between and inside nodes allow you to read the
+entire manual or its large portions.  But what if you need to find some
+information in the manual as fast as you can, and you don't know or
+don't remember in what node to look for it?  This need arises when you
+use a manual as a "reference", or when it is impractical to read the
+entire manual before you start using the programs it describes.
+
+   Info has powerful searching facilities that let you find things
+quickly.  You can search either the manual text or its indices.
+
+   The `s' command allows you to search a whole Info file for a string.
+It switches to the next node if and when that is necessary.  You type
+`s' followed by the string to search for, terminated by <RET>.  To
+search for the same string again, just `s' followed by <RET> will do.
+The file's nodes are scanned in the order they are in the file, which
+has no necessary relationship to the order that they may be in the tree
+structure of menus and `next' pointers.  But normally the two orders
+are not very different.  In any case, you can always look at the mode
+line to find out what node you have reached, if the header is not
+visible (this can happen, because `s' puts your cursor at the
+occurrence of the string, not at the beginning of the node).
+
+   Instead of using `s' in Emacs Info and in the stand-alone Info, you
+can use an incremental search started with `C-s' or `C-r'.  It can
+search through multiple Info nodes.  *Note Incremental Search:
+(emacs)Incremental Search.  In Emacs, you can disable this behavior by
+setting the variable `Info-isearch-search' to `nil' (*note Emacs Info
+Variables::).
+
+
+File: info,  Node: Search Index,  Next: Go to node,  Prev: Search Text,  Up: Advanced
+
+2.2 `i' searches the indices for specific subjects
+==================================================
+
+Since most topics in the manual should be indexed, you should try the
+index search first before the text search.  The `i' command prompts you
+for a subject and then looks up that subject in the indices.  If it
+finds an index entry with the subject you typed, it goes to the node to
+which that index entry points.  You should browse through that node to
+see whether the issue you are looking for is described there.  If it
+isn't, type `,' one or more times to go through additional index
+entries which match your subject.
+
+   The `i' command and subsequent `,' commands find all index entries
+which include the string you typed _as a substring_.  For each match,
+Info shows in the echo area the full index entry it found.  Often, the
+text of the full index entry already gives you enough information to
+decide whether it is relevant to what you are looking for, so we
+recommend that you read what Info shows in the echo area before looking
+at the node it displays.
+
+   Since `i' looks for a substring, you can search for subjects even if
+you are not sure how they are spelled in the index.  For example,
+suppose you want to find something that is pertinent to commands which
+complete partial input (e.g., when you type <TAB>).  If you want to
+catch index entries that refer to "complete," "completion," and
+"completing," you could type `icomplet<RET>'.
+
+   Info documents which describe programs should index the commands,
+options, and key sequences that the program provides.  If you are
+looking for a description of a command, an option, or a key, just type
+their names when `i' prompts you for a topic.  For example, if you want
+to read the description of what the `C-l' key does, type `iC-l<RET>'
+literally.
+
+   Emacs provides the command `Info-virtual-index', bound to the `I'
+key.  This behaves like `i', but constructs a virtual info node
+displaying the results of an index search, making it easier to select
+the one you want.
+
+   If you aren't sure which manual documents the topic you are looking
+for, try the `M-x info-apropos' command in Emacs, or the `M-x
+index-apropos' command in the stand-alone reader.  It prompts for a
+string and then looks up that string in all the indices of all the Info
+documents installed on your system.
+
+
+File: info,  Node: Go to node,  Next: Choose menu subtopic,  Prev: Search Index,  Up: Advanced
+
+2.3 `g' goes to a node by name
+==============================
+
+If you know a node's name, you can go there by typing `g', the name,
+and <RET>.  Thus, `gTop<RET>' would go to the node called `Top' in this
+file.  (This is equivalent to `t', see *note Help-Int::.)  `gGo to
+node<RET>' would come back here.
+
+   Unlike `m', `g' does not allow the use of abbreviations.  But it
+does allow completion, so you can type <TAB> to complete a partial node
+name.
+
+   To go to a node in another file, you can include the file name in the
+node name by putting it at the front, in parentheses.  Thus,
+`g(dir)Top<RET>' would go to the Info Directory node, which is the node
+`Top' in the Info file `dir'.  Likewise, `g(emacs)Top<RET>' goes to the
+top node of the Emacs manual.
+
+   The node name `*' specifies the whole file.  So you can look at all
+of the current file by typing `g*<RET>' or all of any other file with
+`g(FILENAME)*<RET>'.
+
+
+File: info,  Node: Choose menu subtopic,  Next: Create Info buffer,  Prev: Go to node,  Up: Advanced
+
+2.4 `1'-`9' choose a menu subtopic by its number
+================================================
+
+If you begrudge each character of type-in which your system requires,
+you might like to use the commands `1', `2', `3', `4', ..., `9'.  They
+are short for the `m' command together with a name of a menu subtopic.
+`1' goes through the first item in the current node's menu; `2' goes
+through the second item, etc.  In the stand-alone reader, `0' goes
+through the last menu item; this is so you need not count how many
+entries are there.
+
+   If your display supports multiple fonts, colors or underlining, and
+you are using Emacs's Info mode to read Info files, the third, sixth
+and ninth menu items have a `*' that stands out, either in color or in
+some other attribute, such as underline; this makes it easy to see at a
+glance which number to use for an item.
+
+   Some terminals don't support either multiple fonts, colors or
+underlining.  If you need to actually count items, it is better to use
+`m' instead, and specify the name, or use <TAB> to quickly move between
+menu items.
+
+
+File: info,  Node: Create Info buffer,  Next: Emacs Info Variables,  Prev: Choose menu subtopic,  Up: Advanced
+
+2.5 `M-n' creates a new independent Info buffer in Emacs
+========================================================
+
+If you are reading Info in Emacs, you can select a new independent Info
+buffer in a new Emacs window by typing `M-n'.  The new buffer starts
+out as an exact copy of the old one, but you will be able to move
+independently between nodes in the two buffers.  (In Info mode, `M-n'
+runs the Emacs command `clone-buffer'.)
+
+   In Emacs Info, you can also produce new Info buffers by giving a
+numeric prefix argument to the `m' and `g' commands.  `C-u m' and `C-u
+g' go to a new node in exactly the same way that `m' and `g' do, but
+they do so in a new Info buffer which they select in another window.
+
+   Another way to produce new Info buffers in Emacs is to use a numeric
+prefix argument for the `C-h i' command (`info') which switches to the
+Info buffer with that number.  Thus, `C-u 2 C-h i' switches to the
+buffer `*info*<2>', creating it if necessary.
+
+   If you have created many Info buffers in Emacs, you might find it
+difficult to remember which buffer is showing which manual.  You can
+use the command `M-x info-display-manual' to show an Info manual by
+name, reusing an existing buffer if there is one.
+
+
+File: info,  Node: Emacs Info Variables,  Prev: Create Info buffer,  Up: Advanced
+
+2.6 Emacs Info-mode Variables
+=============================
+
+The following variables may modify the behavior of Info-mode in Emacs;
+you may wish to set one or several of these variables interactively, or
+in your init file.  *Note Examining and Setting Variables:
+(emacs)Examining.  The stand-alone Info reader program has its own set
+of variables, described in *note Manipulating Variables:
+(info-stnd)Variables.
+
+`Info-directory-list'
+     The list of directories to search for Info files.  Each element is
+     a string (directory name) or `nil' (try default directory).  If not
+     initialized Info uses the environment variable `INFOPATH' to
+     initialize it, or `Info-default-directory-list' if there is no
+     `INFOPATH' variable in the environment.
+
+     If you wish to customize the Info directory search list for both
+     Emacs Info and stand-alone Info, it is best to set the `INFOPATH'
+     environment variable, since that applies to both programs.
+
+`Info-additional-directory-list'
+     A list of additional directories to search for Info documentation
+     files.  These directories are not searched for merging the `dir'
+     file.
+
+`Info-mode-hook'
+     Hooks run when `Info-mode' is called.  By default, it contains the
+     hook `turn-on-font-lock' which enables highlighting of Info files.
+     You can change how the highlighting looks by customizing the faces
+     `info-node', `info-xref', `info-xref-visited', `info-header-xref',
+     `info-header-node', `info-menu-header', `info-menu-star', and
+     `info-title-N' (where N is the level of the section, a number
+     between 1 and 4).  To customize a face, type `M-x customize-face
+     <RET> FACE <RET>', where FACE is one of the face names listed here.
+
+`Info-fontify-maximum-menu-size'
+     Maximum size of menu to fontify if `font-lock-mode' is non-`nil'.
+
+`Info-fontify-visited-nodes'
+     If non-`nil', menu items and cross-references pointing to visited
+     nodes are displayed in the `info-xref-visited' face.
+
+`Info-use-header-line'
+     If non-`nil', Emacs puts in the Info buffer a header line showing
+     the `Next', `Prev', and `Up' links.  A header line does not scroll
+     with the rest of the buffer, making these links always visible.
+
+`Info-hide-note-references'
+     As explained in earlier nodes, the Emacs version of Info normally
+     hides some text in menus and cross-references.  You can completely
+     disable this feature, by setting this option to `nil'.  Setting it
+     to a value that is neither `nil' nor `t' produces an intermediate
+     behavior, hiding a limited amount of text, but showing all text
+     that could potentially be useful.
+
+`Info-scroll-prefer-subnodes'
+     If set to a non-`nil' value, <SPC> and <BACKSPACE> (or <DEL>) keys
+     in a menu visit subnodes of the current node before scrolling to
+     its end or beginning, respectively.  For example, if the node's
+     menu appears on the screen, the next <SPC> moves to a subnode
+     indicated by the following menu item.  Setting this option to
+     `nil' results in behavior similar to the stand-alone Info reader
+     program, which visits the first subnode from the menu only when you
+     hit the end of the current node.  The default is `nil'.
+
+`Info-isearch-search'
+     If non-`nil', isearch in Info searches through multiple nodes.
+
+`Info-enable-active-nodes'
+     When set to a non-`nil' value, allows Info to execute Lisp code
+     associated with nodes.  The Lisp code is executed when the node is
+     selected.  The Lisp code to be executed should follow the node
+     delimiter (the `DEL' character) and an `execute: ' tag, like this:
+
+          ^_execute: (message "This is an active node!")
+
+
+File: info,  Node: Expert Info,  Next: Index,  Prev: Advanced,  Up: Top
+
+3 Info for Experts
+******************
+
+This chapter explains how to write an Info file by hand.  However, in
+most cases, writing a Texinfo file is better, since you can use it to
+make a printed manual or produce other formats, such as HTML and
+DocBook, as well as for generating Info files.
+
+   The `makeinfo' command converts a Texinfo file into an Info file;
+`texinfo-format-region' and `texinfo-format-buffer' are GNU Emacs
+functions that do the same.
+
+   *Note Overview of Texinfo: (texinfo)Top, for how to write a Texinfo
+file.
+
+   *Note Creating an Info File: (texinfo)Creating an Info File, for how
+to create an Info file from a Texinfo file.
+
+   *Note Installing an Info File: (texinfo)Installing an Info File, for
+how to install an Info file after you have created one.
+
+   However, if you want to edit an Info file manually and install it
+manually, here is how.
+
+* Menu:
+
+* Add::                   Describes how to add new nodes to the hierarchy.
+                            Also tells what nodes look like.
+* Menus::                 How to add to or create menus in Info nodes.
+* Cross-refs::            How to add cross-references to Info nodes.
+* Tags::                  How to make tags tables for Info files.
+* Checking::              Checking an Info File.
+
+
+File: info,  Node: Add,  Next: Menus,  Up: Expert Info
+
+3.1 Adding a new node to Info
+=============================
+
+To add a new topic to the list in the Info directory, you must:
+
+  1. Create some nodes, in some file, to document that topic.
+
+  2. Put that topic in the menu in the directory.  *Note Menu: Menus.
+
+   The new node can live in an existing documentation file, or in a new
+one.  It must have a `^_' character before it (invisible to the user;
+this node has one but you cannot see it), and it ends with either a
+`^_', a `^L' ("formfeed"), or the end of file.(1)
+
+   The `^_' starting a node must be followed by a newline or a `^L'
+newline, after which comes the node's header line.  The header line
+must give the node's name (by which Info finds it), and state the names
+of the `Next', `Previous', and `Up' nodes (if there are any).  As you
+can see, this node's `Up' node is the node `Expert Info'.  The `Next'
+node is `Menus'.
+
+   The keywords "Node", "Next", "Previous", and "Up" may appear in any
+order, anywhere in the header line, but the recommended order is the
+one in this sentence.  Each keyword must be followed by a colon, spaces
+and tabs, and then the appropriate name.  The name may be terminated
+with a tab, a comma, or a newline.  A space does not end it; node names
+may contain spaces.  The case of letters in the names is insignificant.
+
+   A node name has two forms.  A node in the current file is named by
+what appears after the `Node: ' in that node's first line.  For
+example, this node's name is `Add'.  A node in another file is named by
+`(FILENAME)NODE-WITHIN-FILE', as in `(info)Add' for this node.  If the
+file name starts with `./', then it is relative to the current
+directory; otherwise, it is relative starting from the standard
+directory for Info files of your site.  The name `(FILENAME)Top' can be
+abbreviated to just `(FILENAME)'.  By convention, the name `Top' is used
+for the "highest" node in any single file--the node whose `Up' points
+out of the file.  The `Directory' node is `(dir)', it points to a file
+`dir' which holds a large menu listing all the Info documents installed
+on your site.  The `Top' node of a document file listed in the
+`Directory' should have an `Up: (dir)' in it.
+
+   The node name `*' is special: it refers to the entire file.  Thus,
+`g*' shows you the whole current file.  The use of the node `*' is to
+make it possible to make old-fashioned, unstructured files into nodes
+of the tree.
+
+   The `Node:' name, in which a node states its own name, must not
+contain a file name, since when Info searches for a node, it does not
+expect a file name to be there.  The `Next', `Previous' and `Up' names
+may contain them.  In this node, since the `Up' node is in the same
+file, it was not necessary to use one.
+
+   Note that the nodes in this file have a file name in the header
+line.  The file names are ignored by Info, but they serve as comments
+to help identify the node for the user.
+
+   ---------- Footnotes ----------
+
+   (1) If you put in a `^L' to end a new node, be sure that there is a
+`^_' after it to start the next one, since `^L' cannot _start_ a node.
+Also, a nicer way to make a node boundary be a page boundary as well is
+to put a `^L' _right after_ the `^_'.
+
+
+File: info,  Node: Menus,  Next: Cross-refs,  Prev: Add,  Up: Expert Info
+
+3.2 How to Create Menus
+=======================
+
+Any node in the Info hierarchy may have a "menu"--a list of subnodes.
+The `m' command searches the current node's menu for the topic which it
+reads from the terminal.
+
+   A menu begins with a line starting with `* Menu:'.  The rest of the
+line is a comment.  After the starting line, every line that begins
+with a `* ' lists a single topic.  The name of the topic--what the user
+must type at the `m''s command prompt to select this topic--comes right
+after the star and space, and is followed by a colon, spaces and tabs,
+and the name of the node which discusses that topic.  The node name,
+like node names following `Next', `Previous' and `Up', may be
+terminated with a tab, comma, or newline; it may also be terminated
+with a period.
+
+   If the node name and topic name are the same, then rather than
+giving the name twice, the abbreviation `* NAME::' may be used (and
+should be used, whenever possible, as it reduces the visual clutter in
+the menu).
+
+   It is considerate to choose the topic names so that they differ from
+each other very near the beginning--this allows the user to type short
+abbreviations.  In a long menu, it is a good idea to capitalize the
+beginning of each item name which is the minimum acceptable
+abbreviation for it (a long menu is more than 5 or so entries).
+
+   The nodes listed in a node's menu are called its "subnodes," and it
+is their "superior".  They should each have an `Up:' pointing at the
+superior.  It is often useful to arrange all or most of the subnodes in
+a sequence of `Next' and `Previous' pointers so that someone who wants
+to see them all need not keep revisiting the Menu.
+
+   The Info Directory is simply the menu of the node `(dir)Top'--that
+is, node `Top' in file `.../info/dir'.  You can put new entries in that
+menu just like any other menu.  The Info Directory is _not_ the same as
+the file directory called `info'.  It happens that many of Info's files
+live in that file directory, but they do not have to; and files in that
+directory are not automatically listed in the Info Directory node.
+
+   Also, although the Info node graph is claimed to be a "hierarchy,"
+in fact it can be _any_ directed graph.  Shared structures and pointer
+cycles are perfectly possible, and can be used if they are appropriate
+to the meaning to be expressed.  There is no need for all the nodes in
+a file to form a connected structure.  In fact, this file has two
+connected components.  You are in one of them, which is under the node
+`Top'; the other contains the node `Help' which the `h' command goes
+to.  In fact, since there is no garbage collector on the node graph,
+nothing terrible happens if a substructure is not pointed to, but such
+a substructure is rather useless since nobody can ever find out that it
+exists.
+
+
+File: info,  Node: Cross-refs,  Next: Tags,  Prev: Menus,  Up: Expert Info
+
+3.3 Creating Cross References
+=============================
+
+A cross reference can be placed anywhere in the text, unlike a menu
+item which must go at the front of a line.  A cross reference looks
+like a menu item except that it has `*note' instead of `*'.  It
+_cannot_ be terminated by a `)', because `)''s are so often part of
+node names.  If you wish to enclose a cross reference in parentheses,
+terminate it with a period first.  Here are two examples of cross
+references pointers:
+
+     *Note details: commands.  (See *note 3: Full Proof.)
+
+_These are just examples._  The places they "lead to" do not really
+exist!
+
+* Menu:
+
+* Help-Cross::                  Target of a cross-reference.
+
+
+File: info,  Node: Help-Cross,  Up: Cross-refs
+
+3.3.1 The node reached by the cross reference in Info
+-----------------------------------------------------
+
+This is the node reached by the cross reference named `Cross'.
+
+   While this node is specifically intended to be reached by a cross
+reference, most cross references lead to nodes that "belong" someplace
+else far away in the structure of an Info document.  So you cannot
+expect this node to have a `Next', `Previous' or `Up' links pointing
+back to where you came from.  In general, the `l' (el) command is the
+only way to get back there.
+
+>> Type `l' to return to the node where the cross reference was.
+
+
+File: info,  Node: Tags,  Next: Checking,  Prev: Cross-refs,  Up: Expert Info
+
+3.4 Tags Tables for Info Files
+==============================
+
+You can speed up the access to nodes of a large Info file by giving it
+a tags table.  Unlike the tags table for a program, the tags table for
+an Info file lives inside the file itself and is used automatically
+whenever Info reads in the file.
+
+   To make a tags table, go to a node in the file using Emacs Info mode
+and type `M-x Info-tagify'.  Then you must use `C-x C-s' to save the
+file.  Info files produced by the `makeinfo' command that is part of
+the Texinfo package always have tags tables to begin with.
+
+   Once the Info file has a tags table, you must make certain it is up
+to date.  If you edit an Info file directly (as opposed to editing its
+Texinfo source), and, as a result of deletion of text, any node moves
+back more than a thousand characters in the file from the position
+recorded in the tags table, Info will no longer be able to find that
+node.  To update the tags table, use the `Info-tagify' command again.
+
+   An Info file tags table appears at the end of the file and looks like
+this:
+
+     ^_^L
+     Tag Table:
+     File: info, Node: Cross-refs^?21419
+     File: info,  Node: Tags^?22145
+     ^_
+     End Tag Table
+
+Note that it contains one line per node, and this line contains the
+beginning of the node's header (ending just after the node name), a
+`DEL' character, and the character position in the file of the
+beginning of the node.
+
+
+File: info,  Node: Checking,  Prev: Tags,  Up: Expert Info
+
+3.5 Checking an Info File
+=========================
+
+When creating an Info file, it is easy to forget the name of a node when
+you are making a pointer to it from another node.  If you put in the
+wrong name for a node, this is not detected until someone tries to go
+through the pointer using Info.  Verification of the Info file is an
+automatic process which checks all pointers to nodes and reports any
+pointers which are invalid.  Every `Next', `Previous', and `Up' is
+checked, as is every menu item and every cross reference.  In addition,
+any `Next' which does not have a `Previous' pointing back is reported.
+Only pointers within the file are checked, because checking pointers to
+other files would be terribly slow.  But those are usually few.
+
+   To check an Info file, do `M-x Info-validate' while looking at any
+node of the file with Emacs Info mode.
+
+
+File: info,  Node: Index,  Prev: Expert Info,  Up: Top
+
+Index
+*****
+
+This is an alphabetical listing of all the commands, variables, and
+topics discussed in this document.
+
+ [index ]
+* Menu:
+
+* 1 through 9 (Info mode):               Choose menu subtopic.
+                                                              (line   6)
+* ? (Info mode):                         Help-^L.             (line  74)
+* abbreviating Info subnodes:            Help-M.              (line  90)
+* b (Info mode):                         Help-^L.             (line  65)
+* BACKSPACE (Info mode):                 Help-^L.             (line  15)
+* C-l (Info mode):                       Help-^L.             (line  59)
+* C-q (Info mode):                       Advanced.            (line  11)
+* C-r (Info mode):                       Search Text.         (line  28)
+* C-s (Info mode):                       Search Text.         (line  28)
+* clone-buffer:                          Create Info buffer.  (line   6)
+* completion of Info node names:         Help-M.              (line  98)
+* cross reference format:                Cross-refs.          (line   6)
+* cross references in Info documents:    Help-Xref.           (line   6)
+* d (Info mode):                         Help-Int.            (line  49)
+* DEL (Info mode):                       Help-^L.             (line  15)
+* Directory node:                        Add.                 (line  31)
+* f (Info mode):                         Help-Xref.           (line  12)
+* format of node headers:                Add.                 (line  24)
+* g (Info mode):                         Go to node.          (line   6)
+* go to a node by name:                  Go to node.          (line   6)
+* go to another Info file:               Go to node.          (line  15)
+* go to Directory node:                  Help-Int.            (line  49)
+* go to Top node:                        Help-Int.            (line  59)
+* going back in Info history:            Help-Int.            (line  26)
+* going forward in Info history:         Help-Int.            (line  41)
+* header of Info node:                   Help.                (line  17)
+* history list of visited nodes:         Help-Int.            (line  45)
+* I (Info mode):                         Search Index.        (line  37)
+* i (Info mode):                         Search Index.        (line   6)
+* index-apropos:                         Search Index.        (line  42)
+* Info document as a reference:          Search Text.         (line   6)
+* Info documents as tutorials:           Help-^L.             (line  37)
+* Info menus:                            Help-M.              (line   6)
+* Info-additional-directory-list:        Emacs Info Variables.
+                                                              (line  24)
+* info-apropos:                          Search Index.        (line  42)
+* Info-directory:                        Help-Int.            (line  49)
+* Info-directory-list:                   Emacs Info Variables.
+                                                              (line  13)
+* info-display-manual:                   Create Info buffer.  (line  22)
+* Info-enable-active-nodes:              Emacs Info Variables.
+                                                              (line  72)
+* Info-exit:                             Help-Q.              (line   6)
+* Info-follow-reference:                 Help-Xref.           (line  12)
+* Info-fontify-maximum-menu-size:        Emacs Info Variables.
+                                                              (line  39)
+* Info-fontify-visited-nodes:            Emacs Info Variables.
+                                                              (line  42)
+* Info-goto-node:                        Go to node.          (line   6)
+* Info-hide-note-references:             Emacs Info Variables.
+                                                              (line  51)
+* Info-history:                          Help-Int.            (line  45)
+* Info-history-back:                     Help-Int.            (line  26)
+* Info-history-forward:                  Help-Int.            (line  41)
+* Info-index:                            Search Index.        (line   6)
+* Info-isearch-search:                   Emacs Info Variables.
+                                                              (line  69)
+* Info-menu:                             Help-M.              (line  85)
+* Info-mode-hook:                        Emacs Info Variables.
+                                                              (line  29)
+* Info-mouse-follow-nearest-node:        Help-M.              (line 171)
+* Info-nth-menu-item:                    Choose menu subtopic.
+                                                              (line   6)
+* Info-scroll-down:                      Help-^L.             (line  15)
+* Info-scroll-prefer-subnodes:           Emacs Info Variables.
+                                                              (line  59)
+* Info-scroll-up:                        Help-^L.             (line  15)
+* Info-search:                           Search Text.         (line  16)
+* Info-summary:                          Help-^L.             (line  74)
+* Info-tagify:                           Tags.                (line  11)
+* Info-top-node:                         Help-Int.            (line  59)
+* Info-up:                               Help-FOO.            (line  13)
+* Info-use-header-line:                  Emacs Info Variables.
+                                                              (line  46)
+* Info-validate:                         Checking.            (line  17)
+* Info-virtual-index:                    Search Index.        (line  37)
+* invisible text in Emacs:               Help-Inv.            (line  10)
+* isearch:                               Search Text.         (line  28)
+* L (Info mode):                         Help-Int.            (line  45)
+* l (Info mode):                         Help-Int.            (line  26)
+* m (Info mode):                         Help-M.              (line  62)
+* M-n (Info mode):                       Create Info buffer.  (line   6)
+* menu and menu entry format:            Menus.               (line  10)
+* menus in an Info document:             Help-M.              (line   6)
+* mouse support in Info mode:            Help-M.              (line 155)
+* Mouse-2 (Info mode):                   Help-M.              (line 155)
+* multiple Info buffers:                 Create Info buffer.  (line   6)
+* n (Info mode):                         Help.                (line  28)
+* node delimiters:                       Add.                 (line  12)
+* node header line format:               Add.                 (line  24)
+* node name format:                      Add.                 (line  31)
+* node, in Info documents:               Help.                (line  12)
+* p (Info mode):                         Help-P.              (line   6)
+* PAGEDOWN (Info mode):                  Help-^L.             (line  52)
+* PAGEUP (Info mode):                    Help-^L.             (line  52)
+* q (Info mode):                         Help-Q.              (line   6)
+* quitting Info mode:                    Help-Q.              (line   6)
+* r (Info mode):                         Help-Int.            (line  41)
+* reading Info documents top to bottom:  Help-^L.             (line  37)
+* s (Info mode):                         Search Text.         (line  16)
+* searching Info documents:              Search Text.         (line   6)
+* searching Info indices:                Search Index.        (line   6)
+* select N'th menu item:                 Choose menu subtopic.
+                                                              (line   6)
+* small screen, moving around:           Help-Small-Screen.   (line   6)
+* SPC (Info mode):                       Help-^L.             (line  15)
+* stale tags tables:                     Tags.                (line  16)
+* t (Info mode):                         Help-Int.            (line  59)
+* tags tables in Info files:             Tags.                (line   6)
+* Texinfo:                               Expert Info.         (line   6)
+* u (Info mode):                         Help-FOO.            (line  13)
+* unstructured documents:                Add.                 (line  45)
+* update Info tags table:                Tags.                (line  16)
+* visible-mode:                          Help-Inv.            (line  17)
+
+
+
+Tag Table:
+Node: Top1370
+Node: Getting Started3620
+Node: Help-Small-Screen4473
+Node: Help6427
+Node: Help-P8075
+Node: Help-^L9278
+Ref: Help-^L-Footnote-113809
+Node: Help-Inv14182
+Node: Help-]15861
+Node: Help-M17421
+Node: Help-FOO25974
+Node: Help-Xref26934
+Node: Help-Int30506
+Node: Help-Q33511
+Node: Advanced34664
+Node: Search Text35872
+Node: Search Index37662
+Node: Go to node40098
+Node: Choose menu subtopic41120
+Node: Create Info buffer42303
+Node: Emacs Info Variables43642
+Node: Expert Info47424
+Node: Add48773
+Ref: Add-Footnote-151770
+Node: Menus52023
+Node: Cross-refs54910
+Node: Help-Cross55681
+Node: Tags56345
+Node: Checking57856
+Node: Index58778
+
+End Tag Table

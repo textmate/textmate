@@ -1,0 +1,87 @@
+.\" See section COPYING for copyright and redistribution information.
+.TH rcs-checkin 1
+.SH NAME
+rcs-checkin \- check files into RCS
+.SH SYNOPSIS
+.B rcs-checkin
+.RI [ FILE .\|.\|.]
+.SH DESCRIPTION
+.B rcs-checkin
+is a helper script for checking files into RCS.  This program is
+distributed with
+.BR "GNU Emacs" .
+
+This program converts files with an old
+.BR Emacs -style
+version history for use with the
+.B "Emacs 19"
+version control interface
+.BR VC ,
+which likes to use RCS as its back end.
+
+For each file to be processed, the script looks for
+.B Emacs
+version files related to it. These files are checked in as deltas,
+oldest first, so that the contents of the file itself becomes the
+latest revision in the master.
+
+The first line of each file is used as its description.  The file
+itself is not deleted, as under
+.B VC
+with
+.B vc-keep-workfiles
+at its default of
+.BR t ,
+but all the version files are.
+
+If an argument file is already version-controlled under RCS, any
+version files are added to the list of deltas and deleted, and then
+the workfile is checked in again as the latest version.  This is
+probably not quite what was wanted, and is the main reason VC doesn't
+simply call this to do checkins.
+
+In order to make it easier to use
+.BR "rcs-checkin *" ,
+files which are detectably either RCS masters (with names ending in
+.BR ,v )
+or Emacs version files (with names containing
+.BR ~ )
+are ignored.
+.
+.PP
+.SH OPTIONS
+The program accepts no options.
+.
+.SH SEE ALSO
+The Emacs version control interface is documented in the GNU Emacs manual,
+which  you  can  read  using
+.BR Info ,
+either from Emacs or as a standalone program.
+.
+.SH AUTHORS
+.I rcs-checkin
+was originally written by Paul Eggert.  It was revised for use with
+.B "GNU Emacs"
+.B VC
+by Eric S. Raymond.
+.
+.SH COPYING
+Copyright
+.if t \(co
+.if n (C)
+2008-2012 Free Software Foundation, Inc.
+.PP
+Permission is granted to make and distribute verbatim copies of this
+document provided the copyright notice and this permission notice are
+preserved on all copies.
+.PP
+Permission is granted to copy and distribute modified versions of
+this document under the conditions for verbatim copying, provided that
+the entire resulting derived work is distributed under the terms of
+a permission notice identical to this one.
+.PP
+Permission is granted to copy and distribute translations of this
+document into another language, under the above conditions for
+modified versions, except that this permission notice may be stated
+in a translation approved by the Free Software Foundation.
+.

@@ -1,0 +1,400 @@
+#### -*- Makefile -*- for documentation other than the Emacs manual.
+
+# Copyright (C) 2003-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# Where to find the source code.  The source code for Emacs's C kernel is
+# expected to be in $(srcdir)/src, and the source code for Emacs's
+# utility programs is expected to be in $(srcdir)/lib-src.  This is
+# set by the configure script's `--srcdir' option.
+srcdir=.
+
+infodir = $(srcdir)/../../info
+
+## Directory with emacsver.texi.
+## Currently only used by efaq; could be added to MAKEINFO.
+emacsdir = $(srcdir)/../emacs
+
+# The makeinfo program is part of the Texinfo distribution.
+MAKEINFO = makeinfo
+MAKEINFO_OPTS = --force -I$(emacsdir)
+MULTI_INSTALL_INFO = $(srcdir)\..\..\nt\multi-install-info.bat
+INFO_TARGETS = $(infodir)/ccmode \
+		$(infodir)/cl $(infodir)/dbus $(infodir)/dired-x \
+		$(infodir)/ediff $(infodir)/forms $(infodir)/gnus \
+		$(infodir)/message $(infodir)/sieve $(infodir)/pgg \
+		$(infodir)/emacs-mime $(infodir)/info $(infodir)/mh-e \
+		$(infodir)/reftex $(infodir)/sc $(infodir)/vip \
+		$(infodir)/viper $(infodir)/widget $(infodir)/efaq \
+		$(infodir)/ada-mode $(infodir)/autotype $(infodir)/calc \
+		$(infodir)/idlwave $(infodir)/eudc $(infodir)/ebrowse \
+		$(infodir)/pcl-cvs $(infodir)/woman $(infodir)/eshell \
+		$(infodir)/org $(infodir)/url $(infodir)/speedbar \
+		$(infodir)/tramp $(infodir)/ses $(infodir)/smtpmail \
+		$(infodir)/flymake $(infodir)/newsticker $(infodir)/rcirc \
+		$(infodir)/erc $(infodir)/ert \
+		$(infodir)/remember $(infodir)/nxml-mode \
+		$(infodir)/epa $(infodir)/mairix-el $(infodir)/sasl \
+		$(infodir)/auth $(infodir)/eieio $(infodir)/ede \
+		$(infodir)/semantic $(infodir)/edt $(infodir)/emacs-gnutls
+DVI_TARGETS = calc.dvi cc-mode.dvi cl.dvi dbus.dvi dired-x.dvi \
+		ediff.dvi forms.dvi gnus.dvi message.dvi emacs-mime.dvi \
+		sieve.dvi pgg.dvi mh-e.dvi \
+		reftex.dvi sc.dvi vip.dvi viper.dvi widget.dvi faq.dvi \
+		ada-mode.dvi autotype.dvi idlwave.dvi eudc.dvi ebrowse.dvi \
+		pcl-cvs.dvi woman.dvi eshell.dvi org.dvi url.dvi \
+		speedbar.dvi tramp.dvi ses.dvi smtpmail.dvi flymake.dvi \
+		newsticker.dvi rcirc.dvi erc.dvi ert.dvi \
+		remember.dvi nxml-mode.dvi \
+		epa.dvi mairix-el.dvi sasl.dvi auth.dvi eieio.dvi ede.dvi \
+		semantic.dvi edt.dvi emacs-gnutls.dvi
+INFOSOURCES = info.texi
+
+# The following rule does not work with all versions of `make'.
+.SUFFIXES: .texi .dvi
+.texi.dvi:
+	texi2dvi $<
+
+TEXI2DVI = texi2dvi
+ENVADD = $(srcdir)\..\..\nt\envadd.bat "TEXINPUTS=$(srcdir);$(TEXINPUTS)" \
+	 "MAKEINFO=$(MAKEINFO) $(MAKEINFO_OPTS)" /C
+
+
+info: $(INFO_TARGETS)
+
+dvi: $(DVI_TARGETS)
+
+# Note that all the Info targets build the Info files
+# in srcdir.  There is no provision for Info files
+# to exist in the build directory.
+# In a distribution of Emacs, the Info files should be up to date.
+
+$(infodir)/dir:
+	$(MULTI_INSTALL_INFO) --info-dir=$(infodir) $(INFO_TARGETS)
+
+# The following target uses an explicit -o switch to work around
+# the @setfilename directive in info.texi, which is required for
+# the Texinfo distribution.
+# Some Windows ports of makeinfo seem to require -o to come before the
+# texi filename, contrary to GNU standards.
+
+$(infodir)/info: $(INFOSOURCES)
+	$(MAKEINFO) $(MAKEINFO_OPTS) --no-split -o $@ info.texi
+
+info.dvi: $(INFOSOURCES)
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/info.texi
+
+
+$(infodir)/ccmode: cc-mode.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) cc-mode.texi
+cc-mode.dvi: cc-mode.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/cc-mode.texi
+
+$(infodir)/ada-mode: ada-mode.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) ada-mode.texi
+ada-mode.dvi: ada-mode.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/ada-mode.texi
+
+$(infodir)/pcl-cvs: pcl-cvs.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) pcl-cvs.texi
+pcl-cvs.dvi: pcl-cvs.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/pcl-cvs.texi
+
+$(infodir)/eshell: eshell.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) eshell.texi
+eshell.dvi: eshell.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/eshell.texi
+
+$(infodir)/cl: cl.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) cl.texi
+cl.dvi: cl.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/cl.texi
+
+$(infodir)/dbus: dbus.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) dbus.texi
+dbus.dvi: dbus.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/dbus.texi
+
+$(infodir)/dired-x: dired-x.texi $(emacsdir)/emacsver.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) dired-x.texi
+dired-x.dvi: dired-x.texi $(emacsdir)/emacsver.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/dired-x.texi
+
+$(infodir)/ediff: ediff.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) ediff.texi
+ediff.dvi: ediff.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/ediff.texi
+
+$(infodir)/flymake: flymake.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) flymake.texi
+flymake.dvi: flymake.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/flymake.texi
+
+$(infodir)/forms: forms.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) forms.texi
+forms.dvi: forms.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/forms.texi
+
+# gnus/message/emacs-mime/sieve/pgg are part of Gnus:
+$(infodir)/gnus: gnus.texi gnus-overrides.texi message.texi emacs-mime.texi \
+		 sieve.texi pgg.texi sasl.texi gnus-news.texi gnus-faq.texi \
+		 doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) gnus.texi
+gnus.dvi: gnus.texi gnus-overrides.texi message.texi emacs-mime.texi \
+	  sieve.texi pgg.texi sasl.texi gnus-news.texi gnus-faq.texi \
+	  doclicense.texi
+	sed -e "/@iflatex/,/@end iflatex/d" $(srcdir)/gnus.texi > gnustmp.texi
+	$(ENVADD) $(TEXI2DVI) gnustmp.texi
+	cp gnustmp.dvi $*.dvi
+	rm gnustmp.*
+#
+$(infodir)/message: message.texi gnus-overrides.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) message.texi
+message.dvi: message.texi gnus-overrides.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/message.texi
+#
+$(infodir)/emacs-mime: emacs-mime.texi gnus-overrides.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) --enable-encoding emacs-mime.texi
+emacs-mime.dvi: emacs-mime.texi gnus-overrides.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/emacs-mime.texi
+#
+$(infodir)/sieve: sieve.texi gnus-overrides.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) sieve.texi
+sieve.dvi: sieve.texi gnus-overrides.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/sieve.texi
+#
+$(infodir)/pgg: pgg.texi gnus-overrides.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) pgg.texi
+pgg.dvi: pgg.texi gnus-overrides.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/pgg.texi
+
+$(infodir)/mh-e: mh-e.texi doclicense.texi gpl.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) mh-e.texi
+mh-e.dvi: mh-e.texi doclicense.texi gpl.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/mh-e.texi
+
+$(infodir)/reftex: reftex.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) reftex.texi
+reftex.dvi: reftex.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/reftex.texi
+
+$(infodir)/remember: remember.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) remember.texi
+remember.dvi: remember.texi doclicense.texix
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/remember.texi
+
+$(infodir)/sasl: sasl.texi gnus-overrides.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) sasl.texi
+sasl.dvi: sasl.texi gnus-overrides.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/sasl.texi
+
+$(infodir)/sc: sc.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) sc.texi
+sc.dvi: sc.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/sc.texi
+
+$(infodir)/vip: vip.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) vip.texi
+vip.dvi: vip.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/vip.texi
+
+$(infodir)/viper: viper.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) viper.texi
+viper.dvi: viper.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/viper.texi
+
+$(infodir)/widget: widget.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) widget.texi
+widget.dvi: widget.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/widget.texi
+
+$(infodir)/efaq: faq.texi $(emacsdir)/emacsver.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) faq.texi
+faq.dvi: faq.texi $(emacsdir)/emacsver.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/faq.texi
+
+$(infodir)/autotype: autotype.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) autotype.texi
+autotype.dvi: autotype.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/autotype.texi
+
+$(infodir)/calc: calc.texi $(emacsdir)/emacsver.texi gpl.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) calc.texi
+calc.dvi: calc.texi $(emacsdir)/emacsver.texi gpl.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/calc.texi
+
+# This is produced with --no-split to avoid making files whose
+# names clash on DOS 8+3 filesystems
+$(infodir)/idlwave: idlwave.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) --no-split idlwave.texi
+idlwave.dvi: idlwave.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/idlwave.texi
+
+$(infodir)/eudc: eudc.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) eudc.texi
+eudc.dvi: eudc.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/eudc.texi
+
+$(infodir)/ebrowse: ebrowse.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) ebrowse.texi
+ebrowse.dvi: ebrowse.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/ebrowse.texi
+
+$(infodir)/woman: woman.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) woman.texi
+woman.dvi: woman.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/woman.texi
+
+$(infodir)/speedbar: speedbar.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) speedbar.texi
+speedbar.dvi: speedbar.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/speedbar.texi
+
+$(infodir)/tramp: tramp.texi trampver.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) tramp.texi
+tramp.dvi: tramp.texi trampver.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/tramp.texi
+
+$(infodir)/ses: ses.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) ses.texi
+ses.dvi: ses.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/ses.texi
+
+$(infodir)/smtpmail: smtpmail.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) smtpmail.texi
+smtpmail.dvi: smtpmail.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/smtpmail.texi
+
+$(infodir)/org: org.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) org.texi
+org.dvi: org.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/org.texi
+
+$(infodir)/url: url.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) url.texi
+url.dvi: url.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/url.texi
+
+$(infodir)/newsticker: newsticker.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) newsticker.texi
+newsticker.dvi: newsticker.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/newsticker.texi
+
+$(infodir)/nxml-mode: nxml-mode.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) nxml-mode.texi
+nxml-mod.dvi: nxml-mode.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/nxml-mode.texi
+
+$(infodir)/rcirc: rcirc.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) rcirc.texi
+rcirc.dvi: rcirc.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/rcirc.texi
+
+$(infodir)/erc: erc.texi gpl.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) erc.texi
+erc.dvi: erc.texi gpl.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/erc.texi
+
+$(infodir)/ert: ert.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) ert.texi
+ert.dvi: ert.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/ert.texi
+
+$(infodir)/epa: epa.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) epa.texi
+epa.dvi: epa.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/epa.texi
+
+$(infodir)/mairix-el: mairix-el.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) mairix-el.texi
+mairix-el.dvi: mairix-el.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/mairix-el.texi
+
+$(infodir)/auth: auth.texi gnus-overrides.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) auth.texi
+auth.dvi: auth.texi gnus-overrides.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/auth.texi
+
+$(infodir)/eieio: eieio.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) eieio.texi
+eieio.dvi: eieio.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/eieio.texi
+
+$(infodir)/ede: ede.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) ede.texi
+ede.dvi: ede.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/ede.texi
+
+$(infodir)/semantic: semantic.texi sem-user.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) semantic.texi
+semantic.dvi: semantic.texi sem-user.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/semantic.texi
+
+$(infodir)/edt: edt.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) edt.texi
+edt.dvi: edt.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/edt.texi
+
+$(infodir)/emacs-gnutls: emacs-gnutls.texi doclicense.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) emacs-gnutls.texi
+emacs-gnutls.dvi: emacs-gnutls.texi doclicense.texi
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/emacs-gnutls.texi
+
+mostlyclean:
+	- $(DEL) *.log *.cp *.fn *.ky *.pg *.vr core *.tp *.core gnustmp.*
+
+clean: mostlyclean
+	- $(DEL) *.dvi
+	- $(DEL) $(infodir)/ccmode* $(infodir)/cl* \
+		 $(infodir)/dbus* $(infodir)/dired-x* \
+		 $(infodir)/ediff* $(infodir)/forms* \
+		 $(infodir)/gnus* $(infodir)/info* \
+		 $(infodir)/message* $(infodir)/mh-e* \
+		 $(infodir)/reftex* $(infodir)/sc* \
+		 $(infodir)/vip* $(infodir)/widget* \
+		 $(infodir)/efaq* $(infodir)/ada-mode* \
+		 $(infodir)/autotype* $(infodir)/calc* \
+		 $(infodir)/idlwave* $(infodir)/eudc* \
+		 $(infodir)/ebrowse* $(infodir)/pcl-cvs* \
+		 $(infodir)/woman* $(infodir)/eshell* \
+		 $(infodir)/speedbar* $(infodir)/tramp* \
+		 $(infodir)/ses* $(infodir)/smtpmail* \
+		 $(infodir)/url* $(infodir)/org* \
+		 $(infodir)/flymake* $(infodir)/newsticker* \
+		 $(infodir)/sieve* $(infodir)/pgg* \
+		 $(infodir)/erc* $(infodir)/ert* $(infodir)/rcirc* \
+		 $(infodir)/remember* $(infodir)/nxml-mode* \
+		 $(infodir)/epa* $(infodir)/sasl* \
+		 $(infodir)/mairix-el* $(infodir)/auth* \
+		 $(infodir)/eieio* $(infodir)/ede* \
+		 $(infodir)/semantic* $(infodir)edt* $(infodir)/emacs-gnutls*
+
+distclean: clean
+	- $(DEL) makefile
+
+maintainer-clean: distclean
+	- $(DEL) *.aux *.cps *.fns *.kys *.pgs *.vrs *.toc
+# Don't delete these, because they are outside the current directory.
+#	for file in $(INFO_TARGETS); do rm -f $${file}*; done
+
+
+# Formerly this directory had texindex.c and getopt.c in it
+# and this makefile built them to make texindex.
+# That caused trouble because this is run entirely in the source directory.
+# Since we expect to get texi2dvi from elsewhere,
+# it is ok to expect texindex from elsewhere also.

@@ -1,0 +1,8 @@
+# Target Module
+
+a.attlist &= target.attrib
+area.attlist &= target.attrib
+base.attlist &= target.attrib
+link.attrib &= target.attrib
+form.attlist &= target.attrib
+target.attrib = attribute target { text }?

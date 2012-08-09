@@ -1,0 +1,187 @@
+GNU Emacs Installation Guide for the DJGPP (a.k.a. MS-DOS) port
+
+Copyright (C) 1992, 1994, 1996-1997, 2000-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+The DJGPP port of GNU Emacs builds and runs on plain DOS and also on
+all versions of MS-Windows from version 3.X on, including Windows XP,
+Vista, and Windows 7 (however, see below for issues with Windows Vista
+and 7).
+
+To build and install the DJGPP port, you need to have the DJGPP ports
+of GCC (the GNU C compiler), GNU Make, rm, mv, and sed.  See the
+remarks in CONFIG.BAT for more information about locations and
+versions.  The Emacs FAQ (see info/efaq) includes pointers to Internet
+sites where you can find the necessary utilities; search for "MS-DOS".
+The configuration step (see below) will test for these utilities and
+will refuse to continue if any of them isn't found.
+
+Bootstrapping Emacs or recompiling Lisp files in the `lisp'
+subdirectory using the various targets in the lisp/Makefile file
+requires additional utilities: `find' (from Findutils), GNU `echo' and
+`test' (from Sh-utils or Coreutils), `ls' and `chmod' (from Fileutils
+or Coreutils), `grep' (from Grep), and a port of Bash.  However, you
+should not normally need to run lisp/Makefile, as all the Lisp files
+are distributed in byte-compiled form as well.  As for bootstrapping
+itself, you will only need that if you check-out development sources
+from the Emacs source repository.
+
+If you are building the DJGPP version of Emacs on a DOS-like system
+which supports long file names (e.g. Windows 9X or Windows XP), you
+need to make sure that long file names are handled consistently both
+when you unpack the distribution and compile it.  With DJGPP v2.0 or
+later, long file names support is by default, so you need to unpack
+Emacs distribution in a way that doesn't truncate the original long
+filenames to the DOS 8.3 namespace; the easiest way to do this is to
+use djtar program which comes with DJGPP, since it will behave
+consistently with the rest of DJGPP tools.  Alternatively, you can
+build Emacs with LFN=n, if some of your tools don't support long file
+names: just ensure that LFN is set to `n' during both unpacking and
+compiling.
+
+(By the time you read this, you have already unpacked the Emacs
+distribution, but if the explanations above imply that you should have
+done it differently, it's safer to delete the directory tree created
+by the unpacking program and unpack Emacs again, than to risk running
+into strange problems during the build process.)
+
+It is important to understand that the runtime support of long file
+names by the Emacs binary is NOT affected by the LFN setting during
+compilation; Emacs compiled with DJGPP v2.0 or later will always
+support long file names on Windows no matter what was the setting
+of LFN at compile time.  However, if you compiled with LFN disabled
+and want to enable LFN support after Emacs was already built, you need
+to make sure that the support files in the lisp, etc and info
+directories are called by their original long names as found in the
+distribution.  You can do this either by renaming the files manually,
+or by extracting them from the original distribution archive with
+djtar after you set LFN=y in the environment.
+
+To unpack Emacs with djtar, type this command:
+
+    djtar -x emacs.tgz
+
+(This assumes that the Emacs distribution is called `emacs.tgz' on
+your system.)
+
+When unpacking Emacs is done, a directory called `emacs-XX.YY' will be
+created, where XX.YY is the Emacs version.
+
+On plain DOS, unpacking can complain about several directories and
+files in the `nextstep' subdirectory of the `emacs-XX.YY' top-level
+directory.  This is because the names of these files overflow the
+67-character limit on the file-name length imposed by DOS filesystems.
+When prompted by `djtar' for a different name for these files, just
+press [Enter] to skip them: they are not needed for the DJGPP build.
+
+If you want to print international characters, install the intlfonts
+distribution.  For this, create a directory called `fonts' under the
+`emacs-XX.YY' top-level directory created by unpacking emacs.tgz,
+chdir into the directory `emacs-XX.YY/fonts', and type this:
+
+    djtar -x intlfonts.tgz
+
+To build and install Emacs, chdir to the `emacs-XX.YY' directory and
+type these commands:
+
+    config msdos
+    make install
+
+Running "config msdos" checks for several programs that are required
+to configure and build Emacs; if one of those programs is not found,
+CONFIG.BAT stops and prints an error message.  If you have DJGPP
+version 2.0 or 2.01, it will complain about a program called
+DJECHO.EXE.  These old versions of DJGPP shipped that program under
+the name ECHO.EXE, so you can simply copy ECHO.EXE to DJECHO.EXE and
+rerun CONFIG.BAT.  If you have neither ECHO.EXE nor DJECHO.EXE, you
+should be able to find them in your djdevNNN.zip archive (where NNN is
+the DJGPP version number).
+
+On Windows NT and Windows 2000/XP/Vista/7, running "config msdos"
+might print an error message like "VDM has been already loaded".  This
+is because those systems have a program called `redir.exe' which is
+incompatible with a program by the same name supplied with DJGPP,
+which is used by config.bat.  To resolve this, move the DJGPP's `bin'
+subdirectory to the front of your PATH environment variable.
+
+Windows Vista/7 has several bugs in its DPMI server related to memory
+allocation: it fails DPMI resize memory block function, and it
+arbitrarily limits the default amount of DPMI memory to 32MB.  To work
+around these bugs, first configure Emacs to use the `malloc' function
+from the DJGPP library.  To this end, run CONFIG.BAT with the
+"--with-system-malloc" option:
+
+    config --with-system-malloc msdos
+    make install
+
+In addition, for Windows Vista you'll need to install Service Pack 1
+(SP1) or later and enlarge its DPMI memory limit by setting the value
+of this Registry key:
+
+  HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Wow\DpmiLimit
+
+Create this key if it does not exist.  The value is a DWORD; setting
+it to 536870912 should let Emacs use up to 512MB of memory.
+
+If you have other problems, either building Emacs or running the
+produced binary, look in the file etc/PROBLEMS for some known problems
+related to the DJGPP port (search for "MS-DOS").
+
+To install the international fonts, chdir to the intlfonts-X.Y
+directory created when you unpacked the intlfonts distribution (X.Y is
+the version number of the fonts' distribution), and type the following
+command:
+
+    make bdf INSTALLDIR=..
+
+After Make finishes, you may remove the directory intlfonts-X.Y; the
+fonts are installed into the fonts/bdf subdirectory of the top-level
+Emacs directory, and that is where Emacs will look for them by
+default.
+
+Building Emacs creates executable files in the src and lib-src
+directories.  Installing the DJGPP port of Emacs moves these
+executables to a sibling directory called bin.  For example, if you
+build in directory C:/emacs, installing moves the executables from
+C:/emacs/src and C:/emacs/lib-src to the directory C:/emacs/bin, so
+you can then delete the subdirectories C:/emacs/src and
+C:/emacs/lib-src if you wish.  The only subdirectories you need to
+keep are bin, lisp, etc and info.  (If you installed intlfonts, keep
+the fonts directory and all its subdirectories as well.)  The bin
+subdirectory should be added to your PATH.  The msdos subdirectory
+includes a PIF and an icon file for Emacs which you might find useful
+if you run Emacs under MS Windows.
+
+Emacs on MSDOS finds the lisp, etc and info directories by looking in
+../lisp, ../etc and ../info, starting from the directory where the
+Emacs executable was run from.  You can override this by setting the
+environment variables EMACSDATA (for the location of `etc' directory),
+EMACSLOADPATH (for the location of `lisp' directory) and INFOPATH (for
+the location of the `info' directory).
+
+Emacs features which require asynchronous subprocesses that depend on
+multitasking do not work in the DJGPP port.  Synchronous subprocesses
+do work, so features such as compilation, grep, and Ispell run
+synchronously, unlike on other platforms.
+
+Version 2.0 of djgpp has two bugs that affect Emacs.  We've included
+corrected versions of two files from djgpp in the msdos subdirectory:
+is_exec.c and sigaction.c.  To work around the bugs, compile these
+files and link them into temacs.  Djgpp versions 2.01 and later have
+these bugs fixed, so upgrade if you can before building Emacs.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,285 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1993, 1998, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/hooks
+@node Standard Hooks, Index, Standard Keymaps, Top
+@appendix Standard Hooks
+@cindex standard hooks
+@cindex hook variables, list of
+
+The following is a list of some hook variables that let you provide
+functions to be called from within Emacs on suitable occasions.
+
+Most of these variables have names ending with @samp{-hook}.  They are
+@dfn{normal hooks}, run by means of @code{run-hooks}.  The value of such
+a hook is a list of functions; the functions are called with no
+arguments and their values are completely ignored.  The recommended way
+to put a new function on such a hook is to call @code{add-hook}.
+@xref{Hooks}, for more information about using hooks.
+
+The variables whose names end in @samp{-hooks} or @samp{-functions} are
+usually @dfn{abnormal hooks}; their values are lists of functions, but
+these functions are called in a special way (they are passed arguments,
+or their values are used). The variables whose names end in
+@samp{-function} have single functions as their values.
+
+This is not an exhaustive list, it only covers the more general hooks.
+For example, every major mode defines a hook named
+@samp{@var{modename}-mode-hook}.  The major mode command runs this
+normal hook with @code{run-mode-hooks} as the very last thing it does.
+@xref{Mode Hooks}.  Most minor modes have mode hooks too.
+
+A special feature allows you to specify expressions to evaluate if and
+when a file is loaded (@pxref{Hooks for Loading}).  That feature is
+not exactly a hook, but does a similar job.
+
+@c We need to xref to where each hook is documented or else document it here.
+@c Add vindex for anything not indexed elsewhere.
+@c This list is in alphabetical order, grouped by topic.
+@c TODO It should probably be more thoroughly ordered by topic.
+
+@table @code
+@item activate-mark-hook
+@itemx deactivate-mark-hook
+@xref{The Mark}.
+
+@item after-change-functions
+@itemx before-change-functions
+@itemx first-change-hook
+@xref{Change Hooks}.
+
+@item after-change-major-mode-hook
+@itemx change-major-mode-after-body-hook
+@xref{Mode Hooks}.
+
+@item after-init-hook
+@itemx before-init-hook
+@itemx emacs-startup-hook
+@xref{Init File}.
+
+@item after-insert-file-functions
+@itemx write-region-annotate-functions
+@itemx write-region-post-annotation-function
+@xref{Format Conversion}.
+
+@item after-make-frame-functions
+@itemx before-make-frame-hook
+@xref{Creating Frames}.
+
+@c Not general enough?
+@ignore
+@item after-revert-hook
+@itemx before-revert-hook
+@itemx buffer-stale-function
+@itemx revert-buffer-function
+@itemx revert-buffer-insert-file-contents-function
+@xref{Reverting}.
+@end ignore
+
+@item after-save-hook
+@itemx before-save-hook
+@itemx write-contents-functions
+@itemx write-file-functions
+@xref{Saving Buffers}.
+
+@item after-setting-font-hook
+@vindex after-setting-font-hook
+Hook run after a frame's font changes.
+
+@item auto-save-hook
+@xref{Auto-Saving}.
+
+@item before-hack-local-variables-hook
+@itemx hack-local-variables-hook
+@xref{File Local Variables}.
+
+@item buffer-access-fontify-functions
+@xref{Lazy Properties}.
+
+@item buffer-list-update-hook
+@vindex buffer-list-update-hook
+Hook run when the buffer list changes.
+
+@item buffer-quit-function
+@vindex buffer-quit-function
+Function to call to ``quit'' the current buffer.
+
+@item change-major-mode-hook
+@xref{Creating Buffer-Local}.
+
+@item command-line-functions
+@xref{Command-Line Arguments}.
+
+@item delayed-warnings-hook
+@vindex delayed-warnings-hook
+The command loop runs this soon after @code{post-command-hook} (q.v.).
+
+@item delete-frame-functions
+@xref{Deleting Frames}.
+
+@item delete-terminal-functions
+@xref{Multiple Terminals}.
+
+@ignore
+@item disabled-command-function
+@xref{Disabling Commands}.
+@end ignore
+
+@item display-buffer-function
+@itemx pop-up-frame-function
+@itemx special-display-function
+@itemx split-window-preferred-function
+@xref{Choosing Window Options}.
+
+@item echo-area-clear-hook
+@xref{Echo Area Customization}.
+
+@item find-file-hook
+@itemx find-file-not-found-functions
+@xref{Visiting Functions}.
+
+@item font-lock-extend-after-change-region-function
+@xref{Region to Refontify}.
+
+@item font-lock-extend-region-functions
+@xref{Multiline Font Lock}.
+
+@item font-lock-fontify-buffer-function
+@itemx font-lock-fontify-region-function
+@itemx font-lock-mark-block-function
+@itemx font-lock-unfontify-buffer-function
+@itemx font-lock-unfontify-region-function
+@xref{Other Font Lock Variables}.
+
+@item fontification-functions
+@xref{Auto Faces,, Automatic Face Assignment}.
+
+@item frame-auto-hide-function
+@xref{Quitting Windows}.
+
+@item kill-buffer-hook
+@itemx kill-buffer-query-functions
+@xref{Killing Buffers}.
+
+@item kill-emacs-hook
+@itemx kill-emacs-query-functions
+@xref{Killing Emacs}.
+
+@item menu-bar-update-hook
+@xref{Menu Bar}.
+
+@item minibuffer-setup-hook
+@itemx minibuffer-exit-hook
+@xref{Minibuffer Misc}.
+
+@item mouse-leave-buffer-hook
+@vindex mouse-leave-buffer-hook
+Hook run when about to switch windows with a mouse command.
+
+@item mouse-position-function
+@xref{Mouse Position}.
+
+@item post-command-hook
+@itemx pre-command-hook
+@xref{Command Overview}.
+
+@item post-gc-hook
+@xref{Garbage Collection}.
+
+@item post-self-insert-hook
+@xref{Keymaps and Minor Modes}.
+
+@ignore
+@item prog-mode-hook
+@itemx special-mode-hook
+@vindex special-mode-hook
+@xref{Basic Major Modes}.
+@end ignore
+
+@item suspend-hook
+@itemx suspend-resume-hook
+@itemx suspend-tty-functions
+@itemx resume-tty-functions
+@xref{Suspending Emacs}.
+
+@item syntax-begin-function
+@itemx syntax-propertize-extend-region-functions
+@itemx syntax-propertize-function
+@itemx font-lock-syntactic-face-function
+@xref{Syntactic Font Lock}.  @xref{Syntax Properties}.
+
+@item temp-buffer-setup-hook
+@itemx temp-buffer-show-function
+@itemx temp-buffer-show-hook
+@xref{Temporary Displays}.
+
+@item term-setup-hook
+@xref{Terminal-Specific}.
+
+@item window-configuration-change-hook
+@itemx window-scroll-functions
+@itemx window-size-change-functions
+@xref{Window Hooks}.
+
+@item window-setup-hook
+@xref{Window Systems}.
+
+@item window-text-change-functions
+@vindex window-text-change-functions
+Functions to call in redisplay when text in the window might change.
+
+@end table
+
+@ignore
+Some -hook, -function, -functions from preloaded Lisp or C files that
+I thought did not need to be mentioned here:
+
+Lisp:
+after-load-functions
+auto-coding-functions
+choose-completion-string-functions
+completing-read-function
+completion-annotate-function
+completion-at-point-functions
+completion-in-region-functions
+completion-list-insert-choice-function
+describe-current-input-method-function
+filter-buffer-substring-functions
+font-lock-function
+inactivate-current-input-method-function
+menu-bar-select-buffer-function
+read-file-name-function
+replace-re-search-function
+replace-search-function
+yank-undo-function
+
+C hooks:
+kbd-macro-termination-hook
+signal-hook-function
+
+C functions:
+redisplay-end-trigger-functions
+x-lost-selection-functions
+x-sent-selection-functions
+
+C function:
+auto-composition-function
+auto-fill-function
+command-error-function
+compose-chars-after-function
+composition-function-table
+deferred-action-function
+input-method-function
+load-read-function
+load-source-file-function
+macro-declaration-function
+read-buffer-function
+ring-bell-function
+select-safe-coding-system-function
+set-auto-coding-function
+show-help-function
+signal-hook-function
+undo-outer-limit-function
+
+@end ignore

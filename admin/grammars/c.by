@@ -1,0 +1,1202 @@
+;;; c.by -- LL grammar for C/C++ language specification
+
+;; Copyright (C) 1999-2012 Free Software Foundation, Inc.
+;;
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;;         David Ponce <david@dponce.com>
+;;         Klaus Berndl <klaus.berndl@sdm.de>
+;;
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;; TODO:  From Nate Schley
+;; >  * Can't parse signature element: "const char* const rmc_ClrTxt"
+;; >  * Can't parse signature element: "char* const dellog_ClrTxt"
+;; >  * Can't parse signature element: "const char* dellog_SetTxt"
+;; >  * Can't parse signature element: "const RmcCmdSSPADetailedStatus& status"
+;; >
+;; > And FWIW I have seen the following argument cases not handled, even
+;; > with no leading/trailing spaces in the split:
+;; >
+;; >  * Can't parse signature element: "const bool currentAlarmStatus"
+;; >  * Can't parse signature element: "unsigned char mode"
+;; >  * Can't parse signature element: "TskTimingTask* tsktimingtask"
+;; >  * Can't parse signature element: "unsigned char htrStatus"
+;; >  * Can't parse signature element: "char trackPower[]"
+;; >  * Can't parse signature element: "const RmcCmdMCDetailedStatus& status"
+;; >  * Can't parse signature element: "RmcBucStatus* rftBucStatus"
+
+%package semantic-c-by
+
+%languagemode  c-mode c++-mode
+%start         declaration
+%scopestart    codeblock
+
+%token <punctuation>   HASH       "\\`[#]\\'"
+%token <punctuation>   PERIOD     "\\`[.]\\'"
+%token <punctuation>   COLON      "\\`[:]\\'"
+%token <punctuation>   SEMICOLON  "\\`[;]\\'"
+%token <punctuation>   STAR       "\\`[*]\\'"
+%token <punctuation>   AMPERSAND  "\\`[&]\\'"
+%token <punctuation>   DIVIDE     "\\`[/]\\'"
+%token <punctuation>   PLUS       "\\`[+]\\'"
+%token <punctuation>   MINUS      "\\`[-]\\'"
+%token <punctuation>   BANG       "\\`[!]\\'"
+%token <punctuation>   EQUAL      "\\`[=]\\'"
+%token <punctuation>   LESS       "\\`[<]\\'"
+%token <punctuation>   GREATER    "\\`[>]\\'"
+%token <punctuation>   COMA       "\\`[,]\\'"
+%token <punctuation>   TILDE      "\\`[~]\\'"
+%token <punctuation>   MOD        "\\`[%]\\'"
+%token <punctuation>   HAT        "\\`\\^\\'"
+%token <punctuation>   OR         "\\`[|]\\'"
+%token <string>        C          "\"C\""
+%token <string>        CPP        "\"C\\+\\+\""
+%token <number>        ZERO       "^0$"
+%token <symbol>        RESTRICT   "\\<\\(__\\)?restrict\\>"
+%token <open-paren>    LPAREN     "("
+%token <close-paren>   RPAREN     ")"
+%token <open-paren>    LBRACE     "{"
+%token <close-paren>   RBRACE     "}"
+%token <semantic-list> BRACK_BLCK "\\[.*\\]$"
+%token <semantic-list> PAREN_BLCK "^("
+%token <semantic-list> BRACE_BLCK "^{"
+%token <semantic-list> VOID_BLCK  "^(void)$"
+%token <semantic-list> PARENS     "()"
+%token <semantic-list> BRACKETS   "\\[\\]"
+
+%token EXTERN "extern"
+%put EXTERN summary "Declaration Modifier: extern <type> <name> ..."
+%token STATIC "static"
+%put STATIC summary "Declaration Modifier: static <type> <name> ..."
+%token CONST "const"
+%put CONST summary "Declaration Modifier: const <type> <name> ..."
+%token VOLATILE "volatile"
+%put VOLATILE summary "Declaration Modifier: volatile <type> <name> ..."
+%token REGISTER "register"
+%put REGISTER summary "Declaration Modifier: register <type> <name> ..."
+%token SIGNED "signed"
+%put SIGNED summary "Numeric Type Modifier: signed <numeric type> <name> ..."
+%token UNSIGNED "unsigned"
+%put UNSIGNED summary "Numeric Type Modifier: unsigned <numeric type> <name> ..."
+
+%token INLINE "inline"
+%put INLINE summary "Function Modifier: inline <return  type> <name>(...) {...};"
+%token VIRTUAL "virtual"
+%put VIRTUAL summary "Method Modifier: virtual <type> <name>(...) ..."
+%token MUTABLE "mutable"
+%put MUTABLE summary "Member Declaration Modifier: mutable <type> <name> ..."
+
+%token STRUCT "struct"
+%put STRUCT summary "Structure Type Declaration: struct [name] { ... };"
+%token UNION "union"
+%put UNION summary "Union Type Declaration: union [name] { ... };"
+%token ENUM "enum"
+%put ENUM summary "Enumeration Type Declaration: enum [name] { ... };"
+%token TYPEDEF "typedef"
+%put TYPEDEF summary "Arbitrary Type Declaration: typedef <typedeclaration> <name>;"
+%token CLASS "class"
+%put CLASS summary "Class Declaration: class <name>[:parents] { ... };"
+%token TYPENAME "typename"
+%put TYPENAME summary "typename is used to handle a qualified name as a typename;"
+%token NAMESPACE "namespace"
+%put NAMESPACE summary "Namespace Declaration: namespace <name> { ... };"
+%token USING "using"
+%put USING summary "using <namespace>;"
+
+%token NEW "new"
+%put NEW summary "new <classname>();"
+%token DELETE "delete"
+%put DELETE summary "delete <object>;"
+
+;; Despite this, this parser can find templates by ignoring the TEMPLATE
+;; keyword, and finding the class/method being templatized.
+%token TEMPLATE "template"
+%put TEMPLATE summary "template <class TYPE ...> TYPE_OR_FUNCTION"
+
+%token THROW "throw"
+%put THROW summary "<type> <methoddef> (<method args>) throw (<exception>) ..."
+%token REENTRANT "reentrant"
+%put REENTRANT summary "<type> <methoddef> (<method args>) reentrant ..."
+%token TRY "try"
+%token CATCH "catch"
+%put { TRY CATCH } summary "try { <body> } catch { <catch code> }"
+
+;; Leave these alone for now.
+%token OPERATOR "operator"
+%token PUBLIC "public"
+%token PRIVATE "private"
+%token PROTECTED "protected"
+%token FRIEND "friend"
+%put FRIEND summary "friend class <CLASSNAME>"
+
+;; These aren't used for parsing, but is a useful place to describe the keywords.
+%token IF "if"
+%token ELSE "else"
+%put {IF ELSE} summary  "if (<condition>) { code } [ else { code } ]"
+
+%token DO "do"
+%token WHILE "while"
+%put DO summary " do { code } while (<condition>);"
+%put WHILE summary "do { code } while (<condition>); or while (<condition>) { code };"
+
+%token FOR "for"
+%put FOR summary "for(<init>; <condition>; <increment>) { code }"
+
+%token SWITCH "switch"
+%token CASE "case"
+%token DEFAULT "default"
+%put {SWITCH CASE DEFAULT} summary
+"switch (<variable>) { case <constvalue>: code; ... default: code; }"
+
+%token RETURN "return"
+%put RETURN summary "return <value>;"
+
+%token BREAK "break"
+%put BREAK summary "Non-local exit within a loop or switch (for, do/while, switch): break;"
+%token CONTINUE "continue"
+%put CONTINUE summary "Non-local continue within a loop (for, do/while): continue;"
+
+%token SIZEOF "sizeof"
+%put SIZEOF summary "Compile time macro: sizeof(<type or variable>) // size in bytes"
+
+;; Types
+%token VOID "void"
+%put VOID summary "Built in typeless type: void"
+%token CHAR "char"
+%put CHAR summary "Integral Character Type: (0 to 256)"
+%token WCHAR "wchar_t"
+%put WCHAR summary "Wide Character Type"
+%token SHORT "short"
+%put SHORT summary "Integral Primitive Type: (-32768 to 32767)"
+%token INT "int"
+%put INT summary "Integral Primitive Type: (-2147483648 to 2147483647)"
+%token LONG "long"
+%put LONG summary "Integral primitive type (-9223372036854775808 to 9223372036854775807)"
+%token FLOAT "float"
+%put FLOAT summary "Primitive floating-point type (single-precision 32-bit IEEE 754)"
+%token DOUBLE "double"
+%put DOUBLE summary "Primitive floating-point type (double-precision 64-bit IEEE 754)"
+%token BOOL "bool"
+%put BOOL summary "Primitive boolean type"
+
+%token UNDERP "_P"
+%token UNDERUNDERP "__P"
+%put UNDERP summary "Common macro to eliminate prototype compatibility on some compilers"
+%put UNDERUNDERP summary "Common macro to eliminate prototype compatibility on some compilers"
+
+%%
+
+declaration
+  : macro
+  | type
+ ;; TODO: Klaus Berndl: Is the define here necessary or even wrong?
+ ;; Is this part not already covered by macro??
+  | define
+  | var-or-fun
+  | extern-c
+  | template
+  | using
+  ;
+
+codeblock
+  : define
+  | codeblock-var-or-fun
+  | type ;; type is less likely to be used here.
+  | using
+  ;
+
+extern-c-contents
+  : open-paren
+    ( nil )
+  | declaration
+  | close-paren
+    ( nil )
+  ;
+
+extern-c
+  : EXTERN C semantic-list
+ ;; Extern C commands which contain a list need to have the
+ ;; entries of the list extracted, and spliced into the main
+ ;; list of entries.  This must be done via the function
+ ;; that expands singular nonterminals, such as int x,y;
+    (TAG "C" 'extern :members (EXPANDFULL $3 extern-c-contents) )
+  | EXTERN CPP semantic-list
+    (TAG "C" 'extern :members (EXPANDFULL $3 extern-c-contents) )
+  | EXTERN C
+ ;; A plain extern "C" call should add something to the token,
+ ;; but just strip it from the buffer here for now.
+    ( nil )
+  | EXTERN CPP
+    ( nil )
+  ;
+
+macro
+  : spp-macro-def
+    (VARIABLE-TAG $1 nil nil :constant-flag t )
+  | spp-system-include
+    (INCLUDE-TAG $1 t)
+  | spp-include
+    (INCLUDE-TAG $1 nil)
+  ;
+
+;; This is used in struct parts.
+define
+  : spp-macro-def
+    (VARIABLE-TAG $1 nil nil :constant-flag t)
+  | spp-macro-undef
+    ( nil )
+  ;
+
+;; In C++, structures can have the same things as classes.
+;; So delete this some day in the figure.
+;;
+;;structparts : semantic-list
+;;            (EXPANDFULL $1 structsubparts)
+;;          ;
+;;
+;;structsubparts : LBRACE
+;;               ( nil )
+;;             | RBRACE
+;;               ( nil )
+;;             | var-or-fun
+;;             | define
+;;             ;; sometimes there are defines in structs.
+;;             ;
+
+unionparts
+  : semantic-list
+    (EXPANDFULL $1 classsubparts)
+  ;
+
+opt-symbol
+  : symbol
+  | ;;EMPTY
+  ;
+
+;; @todo - support 'friend' construct.
+classsubparts
+  : LBRACE
+    ( nil )
+  | RBRACE
+    ( nil )
+  | class-protection opt-symbol COLON
+ ;; For QT, they may put a `slot' keyword between the protection
+ ;; and the COLON.  @todo - Have the QT stuff use macros.
+    (TAG (car $1) 'label)
+  | var-or-fun
+  | FRIEND func-decl
+    (TAG (car $2) 'friend)
+  | FRIEND CLASS symbol
+    (TAG $3 'friend)
+  | type
+  | define
+  | template
+  | ;;EMPTY
+  ;
+
+opt-class-parents
+  : COLON class-parents opt-template-specifier
+    ( $2 )
+  | ;;EMPTY
+    ( )
+  ;
+
+one-class-parent
+  : opt-class-protection opt-class-declmods namespace-symbol
+    (TYPE-TAG (car $3) "class" nil nil :protection (car $1))
+  | opt-class-declmods opt-class-protection namespace-symbol
+    (TYPE-TAG (car $3) "class" nil nil :protection (car $2))
+  ;
+
+class-parents
+  : one-class-parent COMA class-parents
+    ( ,(cons ,$1 $3 ) )
+  | one-class-parent
+    ( $1 )
+  ;
+
+opt-class-declmods
+  : class-declmods opt-class-declmods
+    ( nil )
+  | ;;EMPTY
+  ;
+
+class-declmods
+  : VIRTUAL
+  ;
+
+class-protection
+  : PUBLIC
+  | PRIVATE
+  | PROTECTED
+  ;
+
+opt-class-protection
+  : class-protection
+    ( ,$1 )
+  | ;;EMPTY - Same as private
+    ( "unspecified" )
+  ;
+
+namespaceparts
+  : semantic-list
+    (EXPANDFULL $1 namespacesubparts)
+  ;
+
+namespacesubparts
+  : LBRACE
+    ( nil )
+  | RBRACE
+    ( nil )
+  | type
+  | var-or-fun
+  | define
+  | class-protection COLON
+    (TAG (car $1) 'label)
+ ;; In C++, this label in a classsubpart represents
+ ;; PUBLIC or PRIVATE bits.  Ignore them for now.
+  | template
+  | using
+  | ;;EMPTY
+  ;
+
+enumparts
+  : semantic-list
+    (EXPANDFULL $1 enumsubparts)
+  ;
+
+enumsubparts
+  : symbol opt-assign
+    (VARIABLE-TAG $1 "int" (car $2) :constant-flag t )
+  | LBRACE
+    ( nil )
+  | RBRACE
+    ( nil )
+  | COMA
+    ( nil )
+  ;
+
+opt-name
+  : symbol
+  | ;;EMPTY
+    ( "" )
+  ;
+
+typesimple
+  : struct-or-class opt-class opt-name opt-template-specifier
+    opt-class-parents semantic-list
+    (TYPE-TAG (car $3) (car $1)
+          (let ((semantic-c-classname (cons (car ,$3) (car ,$1))))
+            (EXPANDFULL $6 classsubparts))
+          $5
+          :template-specifier $4
+          :parent (car ,$2))
+  | struct-or-class opt-class opt-name opt-template-specifier
+    opt-class-parents
+    (TYPE-TAG (car $3) (car $1) nil $5
+              :template-specifier $4
+	      :prototype t
+              :parent (car ,$2))
+  | UNION opt-class opt-name unionparts
+    (TYPE-TAG (car $3) $1 $4 nil
+              :parent (car ,$2))
+  | ENUM opt-class opt-name enumparts
+    (TYPE-TAG (car $3) $1 $4 nil
+              :parent (car ,$2))
+ ;; Klaus Berndl: a typedef can be a typeformbase with all this
+ ;; declmods stuff.
+  | TYPEDEF declmods typeformbase cv-declmods typedef-symbol-list
+ ;;;; We put the type this typedef renames into PARENT
+ ;;;; but will move it in the expand function.
+    (TYPE-TAG $5 $1 nil (list $3) )
+  ;
+
+typedef-symbol-list
+  : typedefname COMA typedef-symbol-list
+    ( ,(cons $1 $3) )
+  | typedefname
+    ( $1 )
+  ;
+
+;; TODO: Klaus Berndl: symbol -> namespace-symbol?!  Answer: Probably
+;; symbol is correct here!
+typedefname
+  : opt-stars symbol opt-bits opt-array
+    ( $1 $2 )
+  ;
+
+struct-or-class
+  : STRUCT
+  | CLASS
+  ;
+
+type
+  : typesimple SEMICOLON
+    ( ,$1 )
+ ;; named namespaces like "namespace XXX {"
+  | NAMESPACE symbol namespaceparts
+    (TYPE-TAG $2 $1 $3 nil )
+ ;; unnamed namespaces like "namespace {"
+  | NAMESPACE namespaceparts
+    (TYPE-TAG "unnamed" $1 $2 nil )
+ ;; David Engster: namespace alias like "namespace foo = bar;"
+  | NAMESPACE symbol EQUAL typeformbase SEMICOLON
+    (TYPE-TAG $2 $1 (list (TYPE-TAG (car $4) $1 nil nil)) nil :kind 'alias )
+  ;
+
+;; Klaus Berndl: We must parse "using namespace XXX" too
+
+;; Using is vaguely like an include statement in the named portions
+;; of the code.  We should probably specify a new token type for this.
+
+using
+  : USING usingname SEMICOLON
+    (TAG (car $2) 'using :type ,$2 )
+  ;
+
+;; Jan Moringen: Differentiate between 'using' and 'using namespace'
+;; Adapted to creating type tags by EML.
+usingname
+  : typeformbase
+    (TYPE-TAG (car $1) "class" nil nil :prototype t)
+  | NAMESPACE typeformbase
+    (TYPE-TAG (car $2) "namespace" nil nil :prototype t)
+  ;
+
+template
+  : TEMPLATE template-specifier opt-friend template-definition
+    ( ,(semantic-c-reconstitute-template $4 ,$2) )
+  ;
+
+opt-friend
+  : FRIEND
+  | ;;EMPTY
+  ;
+
+opt-template-specifier
+  : template-specifier
+    ( ,$1 )
+  | ;;EMPTY
+    ( )
+  ;
+
+template-specifier
+  : LESS template-specifier-types GREATER
+    ( ,$2 )
+  ;
+
+template-specifier-types
+  : template-var template-specifier-type-list
+    ( ,(cons ,$1 ,$2 ) )
+  | ;;EMPTY
+  ;
+
+template-specifier-type-list
+  : COMA template-specifier-types
+    ( ,$2 )
+  | ;;EMPTY
+    ( )
+  ;
+
+;; template-var
+;;   : template-type opt-stars opt-template-equal
+;;     ( ,(cons (concat (car $1) (make-string (car ,$2) ?*))
+;;              (cdr $1)))
+;;  ;; Klaus Berndl: for template-types the template-var can also be
+;;  ;; literals or constants.  Example: map<ClassX, ClassY, 10>
+;;  ;; map_size10_var; This parses also template<class T, 0> which is
+;;  ;; nonsense but who cares....
+;;   | string
+;;     ( $1 )
+;;   | number
+;;     ( $1 )
+;;   ;
+
+template-var
+  :
+ ;; Klaus Berndl: The following handles all template-vars of
+ ;; template-definitions
+    template-type opt-template-equal
+    ( ,(cons (car $1) (cdr $1)) )
+ ;; Klaus Berndl: for template-types the template-var can also be
+ ;; literals or constants.
+ ;; Example: map<ClassX, ClassY, 10> map_size10_var; This parses also
+ ;; template<class T, 0> which is nonsense but who cares....
+  | string
+    ( $1 )
+  | number
+    ( $1 )
+ ;; Klaus Berndl: In template-types arguments can be any symbols with
+ ;; optional address-operator (&) and optional dereferencing operator
+ ;; (*).  Example map<ClassX, ClassY, *size_var_ptr> sized_map_var.
+  | opt-stars opt-ref namespace-symbol
+    ( ,$3 )
+ ;; Some code can compile down into a number, but starts out as an
+ ;; expression, such as "sizeof(a)", or (sizeof(a)/sizeof(b))
+  | semantic-list
+    ( $1 )
+  | SIZEOF semantic-list
+    ( $2 )
+  ;
+
+opt-template-equal
+  : EQUAL symbol LESS template-specifier-types GREATER
+    ( $2 )
+  | EQUAL symbol
+    ( $2 )
+  | ;;EMPTY
+    ( )
+  ;
+
+template-type
+  : CLASS symbol
+    (TYPE-TAG $2 "class" nil nil )
+  | STRUCT symbol
+    (TYPE-TAG $2 "struct" nil nil )
+ ;; TODO: Klaus Berndl: For the moment it is ok, that we parse the C++
+ ;; keyword typename as a class....
+  | TYPENAME symbol
+    (TYPE-TAG $2 "class" nil nil)
+ ;; Klaus Berndl: template-types can be all flavors of variable-args
+ ;; but here the argument is ignored, only the type stuff is needed.
+  | declmods typeformbase cv-declmods opt-stars
+    opt-ref variablearg-opt-name
+    (TYPE-TAG (car $2) nil nil nil
+              :constant-flag (if (member "const" (append $1 $3)) t nil)
+              :typemodifiers (delete "const" (append $1 $3))
+              :reference (car ,$5)
+              :pointer (car $4)
+              )
+  ;
+
+template-definition
+  : type
+    ( ,$1 )
+  | var-or-fun
+    ( ,$1 )
+  ;
+
+opt-stars
+  : STAR opt-starmod opt-stars
+    ( (1+ (car $3)) )
+  | ;;EMPTY
+    ( 0 )
+  ;
+
+opt-starmod
+  : STARMOD opt-starmod
+    ( ,(cons (,car ,$1) $2) )
+  | ;;EMPTY
+    ()
+  ;
+
+STARMOD
+  : CONST
+  ;
+
+declmods
+  : DECLMOD declmods
+    ( ,(cons ,(car ,$1) $2 ) )
+  | DECLMOD
+    ( ,$1 )
+  | ;;EMPTY
+    ()
+  ;
+
+DECLMOD
+  : EXTERN
+  | STATIC
+  | CVDECLMOD
+ ;; Klaus Berndl: IMHO signed and unsigned are not decl-modes but
+ ;; these are only valid for some buildin-types like short, int
+ ;; etc... whereas "real" declmods are valid for all types, buildin
+ ;; and user-defined!  SIGNED UNSIGNED
+  | INLINE
+  | REGISTER
+  | FRIEND
+ ;; Klaus Berndl: There can be a few cases where TYPENAME is not
+ ;; allowed in C++-syntax but better than not recognizing the allowed
+ ;; situations.
+  | TYPENAME
+  | METADECLMOD
+ ;; This is a hack in case we are in a class.
+  | VIRTUAL
+  ;
+
+metadeclmod
+  : METADECLMOD
+    ()
+  | ;;EMPTY
+    ()
+  ;
+
+CVDECLMOD
+  : CONST
+  | VOLATILE
+  ;
+
+cv-declmods
+  : CVDECLMOD cv-declmods
+    ( ,(cons ,(car ,$1) $2 ) )
+  | CVDECLMOD
+    ( ,$1 )
+  | ;;EMPTY
+    ()
+  ;
+
+METADECLMOD
+  : VIRTUAL
+  | MUTABLE
+  ;
+
+;; C++: A type can be modified into a reference by "&"
+opt-ref
+  : AMPERSAND
+    ( 1 )
+  | ;;EMPTY
+    ( 0 )
+  ;
+
+typeformbase
+  : typesimple
+    ( ,$1 )
+  | STRUCT symbol
+    (TYPE-TAG $2 $1 nil nil )
+  | UNION symbol
+    (TYPE-TAG $2 $1 nil nil )
+  | ENUM symbol
+    (TYPE-TAG $2 $1 nil nil )
+  | builtintype
+    ( ,$1 )
+  | symbol template-specifier
+    (TYPE-TAG $1 "class" nil nil :template-specifier $2)
+ ;;| namespace-symbol opt-stars opt-template-specifier
+ ;;| namespace-symbol opt-template-specifier
+  | namespace-symbol-for-typeformbase opt-template-specifier
+    (TYPE-TAG (car $1) "class" nil nil
+	      :template-specifier $2)
+  | symbol
+    ( $1 )
+  ;
+
+signedmod
+  : UNSIGNED
+  | SIGNED
+  ;
+
+;; Klaus Berndl: builtintype-types was builtintype
+builtintype-types
+  : VOID
+  | CHAR
+ ;; Klaus Berndl: Added WCHAR
+  | WCHAR
+  | SHORT INT
+    ( (concat $1 " " $2) )
+  | SHORT
+  | INT
+  | LONG INT
+    ( (concat $1 " " $2) )
+  | FLOAT
+  | DOUBLE
+  | BOOL
+  | LONG DOUBLE
+    ( (concat $1 " " $2) )
+ ;; TODO: Klaus Berndl: Is there a long long, i think so?!
+  | LONG LONG
+    ( (concat $1 " " $2) )
+  | LONG
+  ;
+
+builtintype
+  : signedmod builtintype-types
+    ( (concat (car $1) " " (car $2)) )
+  | builtintype-types
+    ( ,$1 )
+ ;; Klaus Berndl: unsigned is synonym for unsigned int and signed for
+ ;; signed int. To make this confusing stuff clear we add here the
+ ;; int.
+  | signedmod
+    ( (concat (car $1) " int") )
+  ;
+
+;; Klaus Berndl: This parses also nonsense like "const volatile int
+;; const volatile const const volatile a ..." but IMHO nobody writes
+;; such code. Normally we should define a rule like typeformbase-mode
+;; which exactly defines the different allowed cases and combinations
+;; of declmods (minus the CVDECLMOD) typeformbase and cv-declmods so
+;; we could recognize more invalid code but IMHO this is not worth the
+;; effort...
+codeblock-var-or-fun
+  : declmods typeformbase declmods
+    opt-ref var-or-func-decl
+    ( ,(semantic-c-reconstitute-token ,$5 $1 $2 ) )
+  ;
+
+var-or-fun
+  : codeblock-var-or-fun
+    ( ,$1 )
+ ;; it is possible for a function to not have a type, and
+ ;; it is then assumed to be an int.  How annoying.
+ ;; In C++, this could be a constructor or a destructor.
+ ;; Even more annoying.  Only ever do this for regular
+ ;; top-level items.  Ignore this problem in code blocks
+ ;; so that we don't have to deal with regular code
+ ;; being erroneously converted into types.
+  | declmods var-or-func-decl
+    ( ,(semantic-c-reconstitute-token ,$2 $1 nil ) )
+  ;
+
+var-or-func-decl
+  : func-decl
+    ( ,$1 )
+  | var-decl
+    ( ,$1 )
+  ;
+
+func-decl
+  : opt-stars opt-class opt-destructor functionname
+    opt-template-specifier
+    opt-under-p
+    arg-list
+    opt-post-fcn-modifiers
+    opt-throw
+    opt-initializers
+    fun-or-proto-end
+    ( ,$4 'function
+          ;; Extra stuff goes in here.
+          ;; Continue with the stuff we found in
+          ;; this definition
+          $2 $3 $7 $9 $8 ,$1 ,$11 $5 ,$10)
+  | opt-stars opt-class opt-destructor functionname
+    opt-template-specifier
+    opt-under-p
+ ;; arg-list   - - ini this case, a try implies a fcn.
+    opt-post-fcn-modifiers
+    opt-throw
+    opt-initializers
+    fun-try-end
+    ( ,$4 'function
+          ;; Extra stuff goes in here.
+          ;; Continue with the stuff we found in
+          ;; this definition
+          $2 $3 nil $8 $7 ,$1 ,$10 $5 ,$9)
+  ;
+
+var-decl
+  : varnamelist SEMICOLON
+    ( $1 'variable )
+  ;
+
+opt-under-p
+  : UNDERP
+    ( nil )
+  | UNDERUNDERP
+    ( nil )
+  | ;;EMPTY
+  ;
+
+;; Klaus Berndl: symbol -> namespace-symbol
+opt-initializers
+  : COLON namespace-symbol semantic-list opt-initializers
+  | COMA namespace-symbol semantic-list opt-initializers
+  | ;;EMPTY
+  ;
+
+opt-post-fcn-modifiers
+  : post-fcn-modifiers opt-post-fcn-modifiers
+    ( ,(cons ,$1 $2) )
+  | ;;EMPTY
+    ( nil )
+  ;
+
+post-fcn-modifiers
+  : REENTRANT
+  | CONST
+  ;
+
+opt-throw
+  : THROW semantic-list
+    ( EXPAND $2 throw-exception-list )
+  | ;;EMPTY
+  ;
+
+;; Is this true?  I don't actually know.
+throw-exception-list
+  : namespace-symbol COMA throw-exception-list
+    ( ,(cons (car $1) $3) )
+  | namespace-symbol RPAREN
+    ( ,$1 )
+  | symbol RPAREN
+    ( $1 )
+  | LPAREN throw-exception-list
+    ( ,$2 )
+  | RPAREN
+    (  )
+  ;
+
+opt-bits
+  : COLON number
+    ( $2 )
+  | ;;EMPTY
+    ( nil )
+  ;
+
+opt-array
+  : BRACK_BLCK opt-array
+ ;; Eventually we want to replace the 1 below with a size
+ ;; (if available)
+    ( (cons 1 (car ,$2) ) )
+  | ;;EMPTY
+    ( nil )
+  ;
+
+opt-assign
+  : EQUAL expression
+    ( $2 )
+  | ;;EMPTY
+    ( nil )
+  ;
+
+opt-restrict
+  : RESTRICT
+  | ;;EMPTY
+  ;
+
+;; Klaus Berndl: symbol -> namespace-symbol?! I think so. Can be that
+;; then also some invalid C++-syntax is parsed but this is better than
+;; not parsing valid syntax.
+varname
+  : opt-stars opt-restrict namespace-symbol opt-bits opt-array
+    ( ,$3 ,$1 ,$4 ,$5 )
+  ;
+
+;; I should store more in this def, but leave it simple for now.
+;; Klaus Berndl: const and volatile can be written after the type!
+variablearg
+  : declmods typeformbase cv-declmods opt-ref variablearg-opt-name
+    ( VARIABLE-TAG (list $5) $2 nil
+                   :constant-flag (if (member "const" (append $1 $3)) t nil)
+                   :typemodifiers (delete "const" (append $1 $3))
+                   :reference (car ,$4)
+                   )
+  ;
+
+variablearg-opt-name
+  : varname
+    ( ,$1 )
+ ;; Klaus Berndl: This allows variableargs without a arg-name being
+ ;; parsed correct even if there several pointers (*)
+  | opt-stars
+    ( "" ,$1 nil nil nil )
+  ;
+
+varname-opt-initializer
+  : semantic-list
+  | opt-assign
+  | ;; EMPTY
+  ;
+
+varnamelist
+  : opt-ref varname varname-opt-initializer COMA varnamelist
+    ( ,(cons $2 $5) )
+  | opt-ref varname varname-opt-initializer
+    ( $2 )
+  ;
+
+;; Klaus Berndl: Is necessary to parse stuff like
+;;     class list_of_facts : public list<fact>, public entity
+;; and
+;;     list <shared_ptr<item> >::const_iterator l;
+;; Parses also invalid(?) and senseless(?) c++-syntax like
+;;     symbol<template-spec>::symbol1<template-spec1>::test_iterator
+;; but better parsing too much than to less
+namespace-symbol
+  : symbol opt-template-specifier COLON COLON namespace-symbol
+    ( (concat $1 "::" (car $5)) )
+  | symbol opt-template-specifier
+    ( $1 )
+  ;
+
+;; Don't pull an optional template specifier at the end of the
+;; namespace symbol so that it can be picked up by the type.
+namespace-symbol-for-typeformbase
+  : symbol opt-template-specifier COLON COLON namespace-symbol-for-typeformbase
+    ( (concat $1 "::" (car $5)) )
+  | symbol
+    ( $1 )
+  ;
+;; namespace-symbol
+;;   : symbol COLON COLON namespace-symbol
+;;     ( (concat $1 "::" (car $4)) )
+;;   | symbol
+;;     ( $1 )
+;;   ;
+
+namespace-opt-class
+  : symbol COLON COLON namespace-opt-class
+    ( (concat $1 "::" (car $4)) )
+ ;; Klaus Berndl: We must recognize template-specifiers here so we can
+ ;; parse correctly the method-implementations of template-classes
+ ;; outside the template-class-declaration Example:
+ ;; TemplateClass1<T>::method_1(...)
+  | symbol opt-template-specifier COLON COLON
+    ( $1 )
+  ;
+
+;; Klaus Berndl: The opt-class of a func-decl must be able to
+;; recognize opt-classes with namespaces, e.g.
+;; Test1::Test2::classname::
+opt-class
+  : namespace-opt-class
+    ( ,$1 )
+  | ;;EMPTY
+    ( nil )
+  ;
+
+opt-destructor
+  : TILDE
+    ( t )
+  | ;;EMPTY
+    ( nil )
+  ;
+
+arg-list
+  : PAREN_BLCK knr-arguments
+    ( ,$2 )
+  | PAREN_BLCK
+    (EXPANDFULL $1 arg-sub-list)
+  | VOID_BLCK
+    ( )
+  ;
+
+knr-varnamelist
+  : varname COMA knr-varnamelist
+    ( ,(cons $1 $3) )
+  | varname
+    ( $1 )
+  ;
+
+
+knr-one-variable-decl
+  : declmods typeformbase cv-declmods knr-varnamelist
+    ( VARIABLE-TAG (nreverse $4) $2 nil
+                   :constant-flag (if (member "const" (append $3)) t nil)
+                   :typemodifiers (delete "const" $3)
+                   )
+  ;
+
+knr-arguments
+  : knr-one-variable-decl SEMICOLON knr-arguments
+    ( ,(append (semantic-expand-c-tag ,$1) ,$3) )
+  | knr-one-variable-decl SEMICOLON
+    ( ,(semantic-expand-c-tag ,$1) )
+  ;
+
+arg-sub-list
+  : variablearg
+    ( ,$1 )
+  | PERIOD PERIOD PERIOD RPAREN
+    (VARIABLE-TAG "..." "vararg" nil)
+  | COMA
+    ( nil )
+  | LPAREN
+    ( nil )
+  | RPAREN
+    ( nil )
+  ;
+
+operatorsym
+  : LESS LESS EQUAL
+    ( "<<=" )
+  | GREATER GREATER EQUAL
+    ( ">>=" )
+  | LESS LESS
+    ( "<<" )
+  | GREATER GREATER
+    ( ">>" )
+  | EQUAL EQUAL
+    ( "==" )
+  | LESS EQUAL
+    ( "<=" )
+  | GREATER EQUAL
+    ( ">=" )
+  | BANG EQUAL
+    ( "!=" )
+  | PLUS EQUAL
+    ( "+=" )
+  | MINUS EQUAL
+    ( "-=" )
+  | STAR EQUAL
+    ( "*=" )
+  | DIVIDE EQUAL
+    ( "/=" )
+  | MOD EQUAL
+    ( "%=" )
+  | AMPERSAND EQUAL
+    ( "&=" )
+  | OR EQUAL
+    ( "|=" )
+  | MINUS GREATER STAR
+    ( "->*" )
+  | MINUS GREATER
+    ( "->" )
+  | PARENS
+    ( "()" )
+  | BRACKETS
+    ( "[]" )
+  | LESS
+  | GREATER
+  | STAR
+  | PLUS PLUS
+    ( "++" )
+  | PLUS
+  | MINUS MINUS
+    ( "--" )
+  | MINUS
+  | AMPERSAND AMPERSAND
+    ( "&&" )
+  | AMPERSAND
+  | OR OR
+    ( "||" )
+  | OR
+  | DIVIDE
+  | EQUAL
+  | BANG
+  | TILDE
+  | MOD
+  | COMA
+ ;; HAT EQUAL seems to have a really unpleasant result and
+ ;; breaks everything after it.  Leave it at the end, though it
+ ;; doesn't seem to work.
+  | HAT EQUAL
+    ( "^=" )
+  | HAT
+  ;
+
+functionname
+  : OPERATOR operatorsym
+    ( ,$2 )
+  | semantic-list
+    ( EXPAND $1 function-pointer )
+  | symbol
+    ( $1 )
+  ;
+
+function-pointer
+  : LPAREN STAR symbol RPAREN
+    ( (concat "*" $3) )
+  ;
+
+fun-or-proto-end
+  : SEMICOLON
+    ( t )
+  | semantic-list
+    ( nil )
+ ;; Here is an annoying feature of C++ pure virtual methods
+  | EQUAL ZERO SEMICOLON
+    ( :pure-virtual-flag )
+  | fun-try-end
+    ( nil )
+  ;
+
+fun-try-end
+  : TRY opt-initializers BRACE_BLCK fun-try-several-catches
+    ( nil )
+  ;
+
+fun-try-several-catches
+  : CATCH PAREN_BLCK BRACE_BLCK fun-try-several-catches
+    ( )
+  | CATCH BRACE_BLCK fun-try-several-catches
+    ( )
+  | ;; EMPTY
+    ( )
+  ;
+
+type-cast
+  : semantic-list
+    ( EXPAND $1 type-cast-list )
+  ;
+
+type-cast-list
+  : open-paren typeformbase close-paren
+  ;
+
+opt-stuff-after-symbol
+  : PAREN_BLCK
+  | BRACK_BLCK
+  | ;; EMPTY
+  ;
+
+multi-stage-dereference
+  : namespace-symbol opt-stuff-after-symbol PERIOD multi-stage-dereference ;; method call
+  | namespace-symbol opt-stuff-after-symbol MINUS GREATER multi-stage-dereference ;;method call
+  | namespace-symbol opt-stuff-after-symbol
+  ;
+
+string-seq
+  : string string-seq
+    ( (concat $1 (car $2)) )
+  | string
+    ( $1 )
+  ;
+
+expr-start
+  : MINUS
+  | PLUS
+  | STAR
+  | AMPERSAND
+  ;
+
+expr-binop
+  : MINUS
+  | PLUS
+  | STAR
+  | DIVIDE
+  | AMPERSAND AMPERSAND
+  | AMPERSAND
+  | OR OR
+  | OR
+ ;; There are more.
+  ;
+
+;; Use expression for parsing only.  Don't actually return anything
+;; for now.  Hopefully we can fix this later.
+expression
+  : unaryexpression expr-binop unaryexpression
+    ( (identity start) (identity end) )
+  | unaryexpression
+    ( (identity start) (identity end) )
+  ;
+
+unaryexpression
+  : number
+  | multi-stage-dereference
+  | NEW multi-stage-dereference
+  | NEW builtintype-types semantic-list
+ ;; Klaus Berndl: symbol -> namespace-symbol!
+  | namespace-symbol
+ ;; Klaus Berndl: C/C++ allows sequences of strings which are
+ ;; concatenated by the precompiler to one string
+  | string-seq
+  | type-cast expression  ;; A cast to some other type
+ ;; Casting the results of one expression to something else.
+  | semantic-list expression
+  | semantic-list
+  | expr-start expression
+  ;
+
+;;; c.by ends here

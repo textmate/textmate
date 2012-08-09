@@ -1,0 +1,690 @@
+% Reference Card for GNU Emacs
+
+% Copyright (C) 1987, 1993, 1996-1997, 2001-2012
+%   Free Software Foundation, Inc.
+
+% Author: Stephen Gildea <gildea@stop.mail-abuse.org>
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% This file is intended to be processed by plain TeX (TeX82).
+%
+% The final reference card has six columns, three on each side.
+% This file can be used to produce it in any of three ways:
+% 1 column per page
+%    produces six separate pages, each of which needs to be reduced to 80%.
+%    This gives the best resolution.
+% 2 columns per page
+%    produces three already-reduced pages.
+%    You will still need to cut and paste.
+% 3 columns per page
+%    produces two pages which must be printed sideways to make a
+%    ready-to-use 8.5 x 11 inch reference card.
+%    For this you need a dvi device driver that can print sideways.
+% Which mode to use is controlled by setting \columnsperpage.
+%
+% To compile and print this document:
+% tex refcard.tex
+% dvips -t landscape refcard.dvi
+%
+% Thanks to Paul Rubin, Bob Chassell, Len Tower, and Richard Mlynarik
+% for their many good ideas.
+
+%**start of header
+\newcount\columnsperpage
+\newcount\letterpaper
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.
+\columnsperpage=3
+
+% Set letterpaper to 0 for A4 paper, 1 for letter (US) paper.  Useful
+% only when columnsperpage is 2 or 3.
+\letterpaper=1
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(1l)
+
+% Nothing else needs to be changed below this line.
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % copyright year
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{For GNU Emacs version \versionemacs}
+\centerline{Designed by Stephen Gildea}
+
+Permission is granted to make and distribute modified or unmodified
+copies of this card provided the copyright notice and this permission
+notice are preserved on all copies.
+
+For copies of the GNU Emacs manual, see:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip	%horizontal space between columns
+\newbox\columna			%boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns			%one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else				%2 or 3 columns uses prereduced size
+  \hsize 3.2in
+  \if 1\the\letterpaper
+     \vsize 7.95in
+  \else
+     \vsize 7.65in
+  \fi
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eighttt=cmtt8
+  \font\eightmi=cmmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \if 1\the\letterpaper
+     \normalbaselineskip=.8\normalbaselineskip
+  \else
+     \normalbaselineskip=.7\normalbaselineskip
+  \fi
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm		%make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%			%see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+	\global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+	\global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}	%\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+%**end of header
+
+
+\title{GNU Emacs Reference Card}
+
+\centerline{(for version \versionemacs)}
+
+\section{Starting Emacs}
+
+To enter GNU Emacs \versionemacs, just type its name: \kbd{emacs}
+
+\section{Leaving Emacs}
+
+\key{suspend Emacs (or iconify it under X)}{C-z}
+\key{exit Emacs permanently}{C-x C-c}
+
+\section{Files}
+
+\key{{\bf read} a file into Emacs}{C-x C-f}
+\key{{\bf save} a file back to disk}{C-x C-s}
+\key{save {\bf all} files}{C-x s}
+\key{{\bf insert} contents of another file into this buffer}{C-x i}
+\key{replace this file with the file you really want}{C-x C-v}
+\key{write buffer to a specified file}{C-x C-w}
+\key{toggle read-only status of buffer}{C-x C-q}
+
+\section{Getting Help}
+
+The help system is simple.  Type \kbd{C-h} (or \kbd{F1}) and follow
+the directions.  If you are a first-time user, type \kbd{C-h t} for a
+{\bf tutorial}.
+
+\key{remove help window}{C-x 1}
+\key{scroll help window}{C-M-v}
+
+\key{apropos: show commands matching a string}{C-h a}
+\key{describe the function a key runs}{C-h k}
+\key{describe a function}{C-h f}
+\key{get mode-specific information}{C-h m}
+
+\section{Error Recovery}
+
+\key{{\bf abort} partially typed or executing command}{C-g}
+\metax{{\bf recover} files lost by a system crash}{M-x recover-session}
+\metax{{\bf undo} an unwanted change}{C-x u, C-_ {\rm or} C-/}
+\metax{restore a buffer to its original contents}{M-x revert-buffer}
+\key{redraw garbaged screen}{C-l}
+
+\section{Incremental Search}
+
+\key{search forward}{C-s}
+\key{search backward}{C-r}
+\key{regular expression search}{C-M-s}
+\key{reverse regular expression search}{C-M-r}
+
+\key{select previous search string}{M-p}
+\key{select next later search string}{M-n}
+\key{exit incremental search}{RET}
+\key{undo effect of last character}{DEL}
+\key{abort current search}{C-g}
+
+Use \kbd{C-s} or \kbd{C-r} again to repeat the search in either direction.
+If Emacs is still searching, \kbd{C-g} cancels only the part not matched.
+
+\shortcopyrightnotice
+
+\newcolumn
+\section{Motion}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf entity to move over}}{{\bf backward}}{{\bf forward}}
+\threecol{character}{C-b}{C-f}
+\threecol{word}{M-b}{M-f}
+\threecol{line}{C-p}{C-n}
+\threecol{go to line beginning (or end)}{C-a}{C-e}
+\threecol{sentence}{M-a}{M-e}
+\threecol{paragraph}{M-\{}{M-\}}
+\threecol{page}{C-x [}{C-x ]}
+\threecol{sexp}{C-M-b}{C-M-f}
+\threecol{function}{C-M-a}{C-M-e}
+\threecol{go to buffer beginning (or end)}{M-<}{M->}
+}
+
+\key{scroll to next screen}{C-v}
+\key{scroll to previous screen}{M-v}
+\key{scroll left}{C-x <}
+\key{scroll right}{C-x >}
+\key{scroll current line to center, top, bottom}{C-l}
+
+\key{goto line}{M-g g}
+\key{back to indentation}{M-m}
+
+\section{Killing and Deleting}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf entity to kill}}{{\bf backward}}{{\bf forward}}
+\threecol{character (delete, not kill)}{DEL}{C-d}
+\threecol{word}{M-DEL}{M-d}
+\threecol{line (to end of)}{M-0 C-k}{C-k}
+\threecol{sentence}{C-x DEL}{M-k}
+\threecol{sexp}{M-- C-M-k}{C-M-k}
+}
+
+\key{kill {\bf region}}{C-w}
+\key{copy region to kill ring}{M-w}
+\key{kill through next occurrence of {\it char}}{M-z {\it char}}
+
+\key{yank back last thing killed}{C-y}
+\key{replace last yank with previous kill}{M-y}
+
+\section{Marking}
+
+\key{set mark here}{C-@ {\rm or} C-SPC}
+\key{exchange point and mark}{C-x C-x}
+
+\key{set mark {\it arg\/} {\bf words} away}{M-@}
+\key{mark {\bf paragraph}}{M-h}
+\key{mark {\bf page}}{C-x C-p}
+\key{mark {\bf sexp}}{C-M-@}
+\key{mark {\bf function}}{C-M-h}
+\key{mark entire {\bf buffer}}{C-x h}
+
+\section{Query Replace}
+
+\key{interactively replace a text string}{M-\%}
+% query-replace-regexp is bound to C-M-% but that can't be typed on
+% consoles.
+\metax{using regular expressions}{M-x query-replace-regexp}
+
+Valid responses in query-replace mode are
+
+\key{{\bf replace} this one, go on to next}{SPC {\rm or} y}
+\key{replace this one, don't move}{,}
+\key{{\bf skip} to next without replacing}{DEL {\rm or} n}
+\key{replace all remaining matches}{!}
+\key{{\bf back up} to the previous match}{^}
+\key{{\bf exit} query-replace}{RET}
+\key{enter recursive edit (\kbd{C-M-c} to exit)}{C-r}
+
+\newcolumn
+\section{Multiple Windows}
+
+When two commands are shown, the second is a similar command for a
+frame instead of a window.
+
+{\setbox0=\hbox{\kbd{0}}\advance\hsize by 0\wd0
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{delete all other windows}{C-x 1\ \ \ \ }{C-x 5 1}
+\threecol{split window, above and below}{C-x 2\ \ \ \ }{C-x 5 2}
+\threecol{delete this window}{C-x 0\ \ \ \ }{C-x 5 0}
+}}
+\key{split window, side by side}{C-x 3}
+
+\key{scroll other window}{C-M-v}
+
+{\setbox0=\hbox{\kbd{0}}\advance\hsize by 2\wd0
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{switch cursor to another window}{C-x o}{C-x 5 o}
+
+\threecol{select buffer in other window}{C-x 4 b}{C-x 5 b}
+\threecol{display buffer in other window}{C-x 4 C-o}{C-x 5 C-o}
+\threecol{find file in other window}{C-x 4 f}{C-x 5 f}
+\threecol{find file read-only in other window}{C-x 4 r}{C-x 5 r}
+\threecol{run Dired in other window}{C-x 4 d}{C-x 5 d}
+\threecol{find tag in other window}{C-x 4 .}{C-x 5 .}
+}}
+
+\key{grow window taller}{C-x ^}
+\key{shrink window narrower}{C-x \{}
+\key{grow window wider}{C-x \}}
+
+\section{Formatting}
+
+\key{indent current {\bf line} (mode-dependent)}{TAB}
+\key{indent {\bf region} (mode-dependent)}{C-M-\\}
+\key{indent {\bf sexp} (mode-dependent)}{C-M-q}
+\key{indent region rigidly {\it arg\/} columns}{C-x TAB}
+\key{indent for comment}{M-;}
+
+\key{insert newline after point}{C-o}
+\key{move rest of line vertically down}{C-M-o}
+\key{delete blank lines around point}{C-x C-o}
+\key{join line with previous (with arg, next)}{M-^}
+\key{delete all white space around point}{M-\\}
+\key{put exactly one space at point}{M-SPC}
+
+\key{fill paragraph}{M-q}
+\key{set fill column to {\it arg}}{C-x f}
+\key{set prefix each line starts with}{C-x .}
+
+\key{set face}{M-o}
+
+\section{Case Change}
+
+\key{uppercase word}{M-u}
+\key{lowercase word}{M-l}
+\key{capitalize word}{M-c}
+
+\key{uppercase region}{C-x C-u}
+\key{lowercase region}{C-x C-l}
+
+\section{The Minibuffer}
+
+The following keys are defined in the minibuffer.
+
+\key{complete as much as possible}{TAB}
+\key{complete up to one word}{SPC}
+\key{complete and execute}{RET}
+\key{show possible completions}{?}
+\key{fetch previous minibuffer input}{M-p}
+\key{fetch later minibuffer input or default}{M-n}
+\key{regexp search backward through history}{M-r}
+\key{regexp search forward through history}{M-s}
+\key{abort command}{C-g}
+
+Type \kbd{C-x ESC ESC} to edit and repeat the last command that used the
+minibuffer.  Type \kbd{F10} to activate menu bar items on text terminals.
+
+\newcolumn
+\title{GNU Emacs Reference Card}
+
+\section{Buffers}
+
+\key{select another buffer}{C-x b}
+\key{list all buffers}{C-x C-b}
+\key{kill a buffer}{C-x k}
+
+\section{Transposing}
+
+\key{transpose {\bf characters}}{C-t}
+\key{transpose {\bf words}}{M-t}
+\key{transpose {\bf lines}}{C-x C-t}
+\key{transpose {\bf sexps}}{C-M-t}
+
+\section{Spelling Check}
+
+\key{check spelling of current word}{M-\$}
+\metax{check spelling of all words in region}{M-x ispell-region}
+\metax{check spelling of entire buffer}{M-x ispell-buffer}
+
+\section{Tags}
+
+\key{find a tag (a definition)}{M-.}
+\key{find next occurrence of tag}{C-u M-.}
+\metax{specify a new tags file}{M-x visit-tags-table}
+
+\metax{regexp search on all files in tags table}{M-x tags-search}
+\metax{run query-replace on all the files}{M-x tags-query-replace}
+\key{continue last tags search or query-replace}{M-,}
+
+\section{Shells}
+
+\key{execute a shell command}{M-!}
+\key{run a shell command on the region}{M-|}
+\key{filter region through a shell command}{C-u M-|}
+\key{start a shell in window \kbd{*shell*}}{M-x shell}
+
+\section{Rectangles}
+
+\key{copy rectangle to register}{C-x r r}
+\key{kill rectangle}{C-x r k}
+\key{yank rectangle}{C-x r y}
+\key{open rectangle, shifting text right}{C-x r o}
+\key{blank out rectangle}{C-x r c}
+\key{prefix each line with a string}{C-x r t}
+
+\section{Abbrevs}
+
+\key{add global abbrev}{C-x a g}
+\key{add mode-local abbrev}{C-x a l}
+\key{add global expansion for this abbrev}{C-x a i g}
+\key{add mode-local expansion for this abbrev}{C-x a i l}
+\key{explicitly expand abbrev}{C-x a e}
+
+\key{expand previous word dynamically}{M-/}
+
+\section{Miscellaneous}
+
+\key{numeric argument}{C-u {\it num}}
+\key{negative argument}{M--}
+\key{quoted insert}{C-q {\it char}}
+
+\newcolumn
+\section{Regular Expressions}
+
+\key{any single character except a newline}{. {\rm(dot)}}
+\key{zero or more repeats}{*}
+\key{one or more repeats}{+}
+\key{zero or one repeat}{?}
+\key{quote regular expression special character {\it c\/}}{\\{\it c}}
+\key{alternative (``or'')}{\\|}
+\key{grouping}{\\( {\rm$\ldots$} \\)}
+\key{same text as {\it n\/}th group}{\\{\it n}}
+\key{at word break}{\\b}
+\key{not at word break}{\\B}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf entity}}{{\bf match start}}{{\bf match end}}
+\threecol{line}{^}{\$}
+\threecol{word}{\\<}{\\>}
+\threecol{buffer}{\\`}{\\'}
+
+\threecol{{\bf class of characters}}{{\bf match these}}{{\bf match others}}
+\threecol{explicit set}{[ {\rm$\ldots$} ]}{[^ {\rm$\ldots$} ]}
+\threecol{word-syntax character}{\\w}{\\W}
+\threecol{character with syntax {\it c}}{\\s{\it c}}{\\S{\it c}}
+}
+
+\section{International Character Sets}
+
+\key{specify principal language}{C-x RET l}
+\metax{show all input methods}{M-x list-input-methods}
+\key{enable or disable input method}{C-\\}
+\key{set coding system for next command}{C-x RET c}
+\metax{show all coding systems}{M-x list-coding-systems}
+\metax{choose preferred coding system}{M-x prefer-coding-system}
+
+\section{Info}
+
+\key{enter the Info documentation reader}{C-h i}
+\key{find specified function or variable in Info}{C-h S}
+\beginindentedkeys
+
+Moving within a node:
+
+\key{scroll forward}{SPC}
+\key{scroll reverse}{DEL}
+\key{beginning of node}{. {\rm (dot)}}
+
+Moving between nodes:
+
+\key{{\bf next} node}{n}
+\key{{\bf previous} node}{p}
+\key{move {\bf up}}{u}
+\key{select menu item by name}{m}
+\key{select {\it n\/}th menu item by number (1--9)}{{\it n}}
+\key{follow cross reference  (return with \kbd{l})}{f}
+\key{return to last node you saw}{l}
+\key{return to directory node}{d}
+\key{go to top node of Info file}{t}
+\key{go to any node by name}{g}
+
+Other:
+
+\key{run Info {\bf tutorial}}{h}
+\key{look up a subject in the indices}{i}
+\key{search nodes for regexp}{s}
+\key{{\bf quit} Info}{q}
+
+\endindentedkeys
+
+\newcolumn
+\section{Registers}
+
+\key{save region in register}{C-x r s}
+\key{insert register contents into buffer}{C-x r i}
+
+\key{save value of point in register}{C-x r SPC}
+\key{jump to point saved in register}{C-x r j}
+
+\section{Keyboard Macros}
+
+\key{{\bf start} defining a keyboard macro}{C-x (}
+\key{{\bf end} keyboard macro definition}{C-x )}
+\key{{\bf execute} last-defined keyboard macro}{C-x e}
+\key{append to last keyboard macro}{C-u C-x (}
+\metax{name last keyboard macro}{M-x name-last-kbd-macro}
+\metax{insert Lisp definition in buffer}{M-x insert-kbd-macro}
+
+\section{Commands Dealing with Emacs Lisp}
+
+\key{eval {\bf sexp} before point}{C-x C-e}
+\key{eval current {\bf defun}}{C-M-x}
+\metax{eval {\bf region}}{M-x eval-region}
+\key{read and eval minibuffer}{M-:}
+\metax{load from standard system directory}{M-x load-library}
+
+\section{Simple Customization}
+
+\metax{customize variables and faces}{M-x customize}
+
+% The intended audience here is the person who wants to make simple
+% customizations and knows Lisp syntax.
+
+Making global key bindings in Emacs Lisp (example):
+
+\beginexample%
+(global-set-key (kbd "C-c g") 'search-forward)
+(global-set-key (kbd "M-\#") 'query-replace-regexp)
+\endexample
+
+\section{Writing Commands}
+
+\beginexample%
+(defun \<command-name> (\<args>)
+  "\<documentation>" (interactive "\<template>")
+  \<body>)
+\endexample
+
+An example:
+
+\beginexample%
+(defun this-line-to-top-of-window (line)
+  "Reposition current line to top of window.
+With ARG, put point on line ARG."
+  (interactive "P")
+  (recenter (if (null line)
+                0
+              (prefix-numeric-value line))))
+\endexample
+
+The \kbd{interactive} spec says how to read arguments interactively.
+Type \kbd{C-h f interactive} for more details.
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "pdftex refcard"
+% End:
+

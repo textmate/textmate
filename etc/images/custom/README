@@ -1,0 +1,10 @@
+This directory contains icons for the Customization user interface.
+Currently possible image file names that have no icons yet are
+radio0.xpm, radio1.xpm.
+
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+Files: down.xpm down-pushed.xpm right.xpm right-pushed.xpm
+Author: Juri Linkov
+Copyright (C) 2008-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)

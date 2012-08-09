@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Version=24.1
+Categories=GNUstep
+Name=Emacs
+Comment=GNU Emacs for NeXT/Open/GNUstep and OS X
+Icon=emacs.tiff
+Exec=openapp Emacs.app
+#TryExec=Emacs.app
+FilePattern=Emacs.app;Emacs

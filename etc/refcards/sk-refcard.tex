@@ -1,0 +1,667 @@
+% Reference Card for GNU Emacs
+
+% Copyright (C) 1987, 1993, 1996-1997, 2001-2012
+%   Free Software Foundation, Inc.
+
+% Author: Stephen Gildea <gildea@stop.mail-abuse.org>
+% Czech translation: Jan Buchal <buchal@brailcom.cz>, January 1999
+% 	Milan Zamazal <pdm@zamazal.org>, August 1999
+%	Pavel Janík <Pavel@Janik.cz>, November 2000 (Emacs 21)
+% Slozak translation: Miroslav Va¹ko <vasko@debian.cz>, March 2001
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% This file is intended to be processed by plain TeX (TeX82).
+%
+% The final reference card has six columns, three on each side.
+% This file can be used to produce it in any of three ways:
+% 1 column per page
+%    produces six separate pages, each of which needs to be reduced to 80%.
+%    This gives the best resolution.
+% 2 columns per page
+%    produces three already-reduced pages.
+%    You will still need to cut and paste.
+% 3 columns per page
+%    produces two pages which must be printed sideways to make a
+%    ready-to-use 8.5 x 11 inch reference card.
+%    For this you need a dvi device driver that can print sideways.
+% Which mode to use is controlled by setting \columnsperpage.
+
+% Process the file with `csplain' from the `CSTeX' distribution (included
+% e.g. in the TeX Live CD).
+
+
+%**start of header
+
+% Slovak hyphenation rules applied
+\shyph
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.
+\newcount\columnsperpage
+\columnsperpage=1
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+% Nothing else needs to be changed.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{For GNU Emacs version \versionemacs}
+\centerline{Designed by Stephen Gildea}
+\centerline{Translated by Miroslav Va¹ko}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+For copies of the GNU Emacs manual, see:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip	%horizontal space between columns
+\newbox\columna			%boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns			%one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else				%2 or 3 columns uses prereduced size
+  \hsize 3.2in
+  \vsize 7.95in
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=csbx10 \scaledmag2
+  \font\headingfont=csbx10 \scaledmag1
+  \font\smallfont=csr6
+  \font\smallsy=cmsy6
+  \font\eightrm=csr8
+  \font\eightbf=csbx8
+  \font\eightit=csti8
+  \font\eighttt=cstt8
+  \font\eightmi=cmmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm		%make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%			%see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+	\global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+	\global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}	%\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+%**end of header
+
+
+\title{GNU Emacs -- Referenèná karta}
+
+\centerline{(pre verziu \versionemacs)}
+
+\section{Spustenie Emacsu}
+
+Pre spustenie GNU~Emacsu~\versionemacs{} napí¹te jeho meno: \kbd{emacs}
+
+Ako naèíta» a editova» súbory sa dozviete ni¾¹ie v~oddiele Súbory.
+
+
+\section{Ukonèenie Emacsu}
+
+\key{pozastavenie (zmen¹enie do ikony v~X11)}{C-z}
+\key{definitívny odchod z~Emacsu}{C-x C-c}
+
+\section{Súbory}
+
+\key{{\bf naèíta»} súbor do Emacsu}{C-x C-f}
+\key{{\bf ulo¾i»} súbor spä» na disk}{C-x C-s}
+\key{ulo¾i» {\bf v¹etky} súbory}{C-x s}
+\key{{\bf vlo¾i»} obsah iného súboru do bufferu}{C-x i}
+\key{zameni» tento súbor iným súborom}{C-x C-v}
+\key{zapísa» buffer do zadaného súboru}{C-x C-w}
+\key{vlo¾i» do systému správy verzií}{C-x C-q}
+
+\section{Pou¾ívanie nápovedy}
+
+Systém nápovedy je jednoduchý. Stlaète \kbd{C-h} (alebo \kbd{F1}) a sledujte
+in¹trukcie. Úvodný {\bf tútorial} je mo¾né spusti» pomocou \kbd{C-h t}.
+
+\key{odstráni» okno s~nápovedou}{C-x 1}
+\key{rolova» okno s~nápovedou}{C-M-v}
+
+\key{apropos: príkazy zodpovedajúce re»azcu}{C-h a}
+\key{zobrazi» funkciu danej klávesy}{C-h c}
+\key{zobrazi» popis funkcie}{C-h f}
+\key{zobrazi» informácie o~aktuálnych módoch}{C-h m}
+
+\section{Opravy chýb}
+
+\key{{\bf preru¹i»} vkladaný alebo vykonávaný príkaz}{C-g}
+\metax{{\bf obnovi»} súbor stratený pádom systému}{M-x recover-file}
+\key{{\bf zru¹i»} nechcenú zmenu}{C-x u {\it n.} C-_}
+\metax{vráti» pôvodný obsah bufferu}{M-x revert-buffer}
+\key{prekresli» \uv{rozpadnutú} obrazovku}{C-l}
+
+\section{Inkrementálne vyhµadávanie}
+
+\key{vyhµada» vpred}{C-s}
+\key{vyhµada» vzad}{C-r}
+\key{vyhµada» regulárny výraz}{C-M-s}
+\key{vyhµada» regulárny výraz dozadu}{C-M-r}
+\key{predchádzajúci vyhµadávaný re»azec}{M-p}
+\key{nasledujúcí nov¹í vyhµadávaný re»azec}{M-n}
+\key{ukonèi» inkrementálne vyhµadávanie}{RET}
+\key{zru¹i» efekt posledného zadaného znaku}{DEL}
+\key{preru¹i» prebiehajúce vyhµadávanie}{C-g}
+
+Ïal¹ie \kbd{C-s} alebo \kbd{C-r} zopakuje vyhµadávanie v~danom smere. Ak
+Emacs vyhµadáva, \kbd{C-g} zru¹í iba nenájdenú èas» re»azca.
+
+
+\shortcopyrightnotice
+
+\section{Pohyb}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf posuv o }}{{\bf vzad}}{{\bf vpred}}
+\threecol{znak}{C-b}{C-f}
+\threecol{slovo}{M-b}{M-f}
+\threecol{riadok}{C-p}{C-n}
+\threecol{na zaèiatok alebo koniec riadku}{C-a}{C-e}
+\threecol{vetu}{M-a}{M-e}
+\threecol{odstavec}{M-\{}{M-\}}
+\threecol{stránku}{C-x [}{C-x ]}
+\threecol{symbolický výraz}{C-M-b}{C-M-f}
+\threecol{funkciu}{C-M-a}{C-M-e}
+\threecol{na zaèiatok alebo koniec bufferu}{M-<}{M->}
+}
+
+\key{rolova» na ïal¹iu obrazovku}{C-v}
+\key{rolova» na predchádzajúcu obrazovku}{M-v}
+\key{rolova» vµavo}{C-x <}
+\key{rolova» vpravo}{C-x >}
+\key{aktuálny riadok do stredu obrazovky}{C-u C-l}
+
+\section{Ru¹enie a mazanie}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf ru¹ený objekt }}{{\bf vzad}}{{\bf vpred}}
+\threecol{znak (mazanie, nie ru¹enie)}{DEL}{C-d}
+\threecol{slovo}{M-DEL}{M-d}
+\threecol{riadok (do konca)}{M-0 C-k}{C-k}
+\threecol{veta}{C-x DEL}{M-k}
+\threecol{symbolický výraz}{M-- C-M-k}{C-M-k}
+}
+
+\key{zru¹i» {\bf oblas»}}{C-w}
+\key{skopírova» oblas» do schránky}{M-w}
+\key{zru¹i» a¾ po najbli¾¹í výskyt znaku {\it znak}}{M-z {\it znak}}
+
+\key{vhodi» naposledy zru¹ený objekt}{C-y}
+\key{nahradi» vhodený objekt predchádzajúcim zru¹eným}{M-y}
+
+\section{Oznaèovanie}
+
+\key{vlo¾i» znaèku}{C-@ {\it n.} C-SPC}
+\key{prehodi» kurzor a znaèku}{C-x C-x}
+
+\key{oznaèi» zadaný poèet {\bf slov}}{M-@}
+\key{oznaèi» {\bf odstavec}}{M-h}
+\key{oznaèi» {\bf stránku}}{C-x C-p}
+\key{oznaèi» {\bf symbolický výraz}}{C-M-@}
+\key{oznaèi» {\bf funkciu}}{C-M-h}
+\key{oznaèi» celý {\bf buffer}}{C-x h}
+
+\section{Interaktívne nahradzovanie}
+
+\key{interaktívne nahradi» textový re»azec}{M-\%}
+\metax{s~pou¾itím regulárneho výrazu}{M-x query-replace-regexp}
+
+Platné odpovede v~móde query-replace sú
+
+\key{{\bf nahradi»} a ís» na ïal¹ie}{SPC}
+\key{nahradi» a zosta» na mieste}{,}
+\key{{\bf skoèi»} na ïal¹ie bez nahradenia}{DEL}
+\key{zameni» v¹etky zostávajúce výskyty}{!}
+\key{{\bf spä»} na predchádzajúci výskyt re»azca}{^}
+\key{{\bf koniec} nahradzovania}{RET}
+\key{rekurzívne editovanie (ukonèí sa \kbd{C-M-c})}{C-r}
+
+\section{Okná}
+
+Ak sú zobrazené dva príkazy, potom ten druhý platí pre Xové okno.
+
+\key{zru¹i» v¹etky ostatné okná}{C-x 1}
+
+{\setbox0=\hbox{\kbd{0}}\advance\hsize by 0\wd0
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{rozdeli» okno na horné a dolné}{C-x 2\ \ \ \ }{C-x 5 2}
+\threecol{zru¹i» toto okno}{C-x 0\ \ \ \ }{C-x 5 0}
+}}
+\key{rozdeli» okno na µavé a pravé}{C-x 3}
+
+\key{rolova» iné okno}{C-M-v}
+
+{\setbox0=\hbox{\kbd{0}}\advance\hsize by 2\wd0
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{prepnú» kurzor do iného okna}{C-x o}{C-x 5 o}
+
+\threecol{vybra» buffer v~inom okne}{C-x 4 b}{C-x 5 b}
+\threecol{zobrazi» buffer v~inom okne}{C-x 4 C-o}{C-x 5 C-o}
+\threecol{otvori» súbor v~inom okne}{C-x 4 f}{C-x 5 f}
+\threecol{otvori» súbor iba pre èítanie v~inom okne}{C-x 4 r}{C-x 5 r}
+\threecol{spusti» Dired v~inom okne}{C-x 4 d}{C-x 5 d}
+\threecol{nájs» tag v~inom okne}{C-x 4 .}{C-x 5 .}
+}}
+
+\key{zväè¹i» okno}{C-x ^}
+\key{zú¾i» okno}{C-x \{}
+\key{roz¹íri» okno}{C-x \}}
+
+\section{Formátovanie}
+
+\key{odsadi» aktuálny {\bf riadok} (podµa módu)}{TAB}
+\key{odsadi» {\bf oblas»} (podµa módu)}{C-M-\\}
+\key{odsadi» {\bf symbolický výraz} (podµa módu)}{C-M-q}
+\key{odsadi» oblas» napevno o~{\it argument\/} ståpcov}{C-x TAB}
+
+\key{vlo¾i» znak nového riadku za kurzor}{C-o}
+\key{posunú» zbytok riadku zvisle dole}{C-M-o}
+\key{zmaza» prázdne riadky okolo kurzoru}{C-x C-o}
+\key{spoji» riadok s~predchádzajúcim (s~arg.~s~nasl.)}{M-^}
+\key{zmaza» prázdne miesto okolo kurzoru}{M-\\}
+\key{necha» presne jednu medzeru okolo kurzoru}{M-SPC}
+
+\key{zalomi» odstavec}{M-q}
+\key{nastavi» ståpec pre zalamovanie}{C-x f}
+\key{nastavi» prefix, ktorým zaèínajú riadky}{C-x .}
+\key{nastavi» font}{M-g}
+
+\section{Zmena veµkosti písmen}
+
+\key{zmeni» písmená slova na veµké}{M-u}
+\key{zmeni» písmená slova na malé}{M-l}
+\key{zmeni» zaèiatoèné písmeno slova na veµké}{M-c}
+
+\key{zmeni» písmená oblasti na veµké}{C-x C-u}
+\key{zmeni» písmená oblasti na malé}{C-x C-l}
+
+\section{Minibuffer}
+
+Nasledujúce klávesy sú platné pre minibuffer.
+
+\key{doplni» z~ponuky}{TAB}
+\key{doplni» do najbli¾¹ieho slova}{SPC}
+\key{doplni» a vykona»}{RET}
+\key{zobrazi» mo¾né doplnenia}{?}
+\key{predchádzajúci príkaz z~minibufferu}{M-p}
+\key{nov¹í alebo implicitný príkaz z~minibufferu}{M-n}
+\key{vyhµada» regulárny výraz v~histórii vzad}{M-r}
+\key{vyhµada» regulárny výraz v~histórii vpred}{M-s}
+\key{zru¹i» príkaz}{C-g}
+
+Stlaète \kbd{C-x ESC ESC} pre editovanie a zopakovanie posledného príkazu
+z~minibufferu.  Stlaète \kbd{F10} pre aktiváciu menu v~minibufferi.
+
+\newcolumn
+\title{GNU Emacs -- Referenèná karta}
+
+\section{Buffery}
+
+\key{vybra» iný buffer}{C-x b}
+\key{zoznam v¹etkých bufferov}{C-x C-b}
+\key{zru¹i» buffer}{C-x k}
+
+\section{Výmeny}
+
+\key{prehodi» {\bf znaky}}{C-t}
+\key{prehodi» {\bf slová}}{M-t}
+\key{prehodi» {\bf riadky}}{C-x C-t}
+\key{prehodi» {\bf symbolické výrazy}}{C-M-t}
+
+\section{Kontrola pravopisu}
+
+\key{kontrola pravopisu aktuálneho slova}{M-\$}
+\metax{kontrola pravopisu v¹etkých slov v  oblasti}{M-x ispell-region}
+\metax{kontrola pravopisu celého bufferu}{M-x ispell-buffer}
+
+\section{Tagy}
+
+\key{nájs» tag (definíciu)}{M-.}
+\key{nájs» ïal¹í výskyt tagu}{C-u M-.}
+\metax{zada» súbor s novými tagmi}{M-x visit-tags-table}
+
+\metax{vyhµada» reg.\ výraz v~súboroch s~tagmi}{M-x tags-search}
+\metax{spusti» nahradzovanie pre dotyèné súbory}{M-x tags-query-replace}
+\key{pokraèova» v~prehµadávaní alebo nahradzovaní}{M-,}
+
+\section{Príkazový interprét}
+
+\key{vykona» shellovský príkaz}{M-!}
+\key{vykona» shellovský príkaz nad oblas»ou}{M-|}
+\key{prefiltrova» oblas» shellovským príkazom}{C-u M-|}
+\key{spusti» shell v okne \kbd{*shell*}}{M-x shell}
+
+\section{Obdå¾niky}
+
+\key{skopírova» obdå¾nik do registra}{C-x r r}
+\key{zru¹i» obdå¾nik}{C-x r k}
+\key{vhodi» obdå¾nik}{C-x r y}
+\key{vlo¾i» obdå¾nik medzier}{C-x r o}
+\key{nahradi» obdå¾nik obdå¾nikom medzier}{C-x r c}
+\key{nahradi» riadky obdå¾niku zadaným re»azcom}{C-x r t}
+
+\section{Skratky}
+
+\key{prida» globálnu skratku}{C-x a g}
+\key{prida» lokálnu skratku}{C-x a l}
+\key{prida» globálnu expanziu pre skratku }{C-x a i g}
+\key{prida» lokálnu expanziu pre skratku}{C-x a i l}
+\key{expandova» skratku}{C-x a e}
+
+\key{dynamická expanzia predchádzajúceho slova}{M-/}
+
+\section{Regulárne výrazy}
+
+\key{µubovoµný znak okrem nového riadku}{. {\rm(teèka)}}
+\key{¾iadne alebo niekoµko opakovaní}{*}
+\key{jedno alebo viac opakovaní}{+}
+\key{¾iadne alebo jedno opakovanie}{?}
+\key{zru¹i» zvlá¹tny význam znaku {\it c\/} vo výraze}{\\{\it c}}
+\key{alternatíva (\uv{alebo})}{\\|}
+\key{skupina}{\\( {\rm$\ldots$} \\)}
+\key{rovnaký text ako {\it n\/}-tá skupina}{\\{\it n}}
+\key{hranice slova}{\\b}
+\key{nie hranice slova}{\\B}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf element}}{{\bf zaèiatok}}{{\bf koniec}}
+\threecol{riadok}{^}{\$}
+\threecol{slovo}{\\<}{\\>}
+\threecol{buffer}{\\`}{\\'}
+
+\threecol{{\bf trieda znakov}}{{\bf zodpovedá}}{{\bf nezodpovedá}}
+\threecol{explicitná mno¾ina}{[ {\rm$\ldots$} ]}{[^ {\rm$\ldots$} ]}
+\threecol{slovotvorný znak}{\\w}{\\W}
+\threecol{znak so syntaxou {\it c}}{\\s{\it c}}{\\S{\it c}}
+}
+
+\section{Medzinárodné znakové sady}
+
+\metax{zada» hlavný jazyk}{M-x set-language-environment}
+\metax{zobrazi» v¹etky vstupné metódy}{M-x list-input-methods}
+\key{zapnú» alebo vypnú» vstupnú metódu}{C-\\}
+\key{zada» kódovanie pre nasledujúci príkaz}{C-x RET c}
+\metax{zobrazi» v¹etky kódovania}{M-x list-coding-systems}
+\metax{zmeni» preferované kódovanie}{M-x prefer-coding-system}
+
+\section{Info}
+
+\key{spusti» Info}{C-h i}
+\key{nájs» zadanú funkciu alebo premennú v~Info}{C-h C-i}
+\beginindentedkeys
+
+Pohyb vo vnútri uzlov:
+
+\key{rolovanie vpred}{SPC}
+\key{rolovanie vzad}{DEL}
+\key{na zaèiatok uzla}{. {\rm (teèka)}}
+
+Pohyb medzi uzlami:
+
+\key{{\bf ïal¹í} uzol}{n}
+\key{{\bf predchádzajúci} uzol}{p}
+\key{{\bf nadradený} uzol}{u}
+\key{vybra» z~menu podµa názvu}{m}
+\key{vybra» {\it n\/}-tú polo¾ku menu (1--9)}{{\it n}}
+\key{najbli¾¹í nasledujúci krí¾ový odkaz (návrat \kbd{l})}{f}
+\key{vráti» sa do naposledy prezeraného uzlu}{l}
+\key{vráti» sa do adresára uzlov}{d}
+\key{prejs» do ktoréhokoµvek uzlu podµa mena}{g}
+
+Ïal¹ie:
+
+\key{spusti» {\bf tútorial} k~Infu}{h}
+% \key{look up a subject in the indices}{i} % FIXME
+\key{vyhµada» re»azec v uzloch}{M-s}
+\key{{\bf skonèi»} Info}{q}
+
+\endindentedkeys
+
+\section{Registre}
+
+\key{ulo¾i» oblas» do registra}{C-x r s}
+\key{vlo¾i» obsah registra do buffera}{C-x r i}
+
+\key{ulo¾i» pozíciu kurzoru do registra}{C-x r SPC}
+\key{skoèi» na pozíciu ulo¾enú v~registri}{C-x r j}
+
+\section{Klávesové makrá}
+
+\key{{\bf zaèa»} definovanie klávesového makra}{C-x (}
+\key{{\bf skonèi»} definovanie klávesového makra}{C-x )}
+\key{{\bf vykona»} naposledy definované makro}{C-x e}
+\key{pripoji» k~poslednému klávesovému makru}{C-u C-x (}
+\metax{pomenova» posledné makro}{M-x name-last-kbd-macro}
+\metax{vlo¾i» do buffera lispovú definíciu}{M-x insert-kbd-macro}
+
+\section{Príkazy súvisiace s~Emacs Lispom}
+
+\key{vyhodnoti» {\bf výraz} pred kurzorom}{C-x C-e}
+\key{vyhodnoti» {\bf funkciu} pod kurzorom}{C-M-x}
+\metax{vyhodnoti» {\bf oblas»}}{M-x eval-region}
+\key{naèíta» a vyhodnoti» výraz v~minibufferi}{M-:}
+\metax{naèíta» súbor zo systémového adresára}{M-x load-library}
+
+\section{Jednoduché prispôsobenia}
+
+\metax{nastavi» premenné a faces}{M-x customize}
+
+% The intended audience here is the person who wants to make simple
+% customizations and knows Lisp syntax.
+
+Definícia v¹eobecnej klávesovej skratky v~Emacs Lispe (príklad):
+
+\beginexample%
+(global-set-key "\\C-cg" 'goto-line)
+(global-set-key "\\M-\#" 'query-replace-regexp)
+\endexample
+
+\section{Zápis príkazov}
+
+\beginexample%
+(defun \<command-name> (\<args>)
+  "\<documentation>" (interactive "\<template>")
+  \<body>)
+\endexample
+
+Príklad:
+
+\beginexample%
+(defun this-line-to-top-of-window (line)
+  "Reposition line point is on to top of window.
+With ARG, put point on line ARG."
+  (interactive "P")
+  (recenter (if (null line)
+                0
+              (prefix-numeric-value line))))
+\endexample
+
+©pecifikácia \kbd{interactive} vraví, ako interaktívne naèíta» ar\-gu\-men\-ty.
+Viac sa dozviete po vykonaní \kbd{C-h f interactive}.
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "csplain sk-refcard"
+% coding: iso-latin-2
+% End:
+

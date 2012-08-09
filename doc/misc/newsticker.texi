@@ -1,0 +1,314 @@
+\input texinfo   @c -*-texinfo-*-
+@comment %**start of header
+@setfilename ../../info/newsticker
+@set VERSION 1.99
+@set UPDATED June 2008
+@settitle Newsticker @value{VERSION}
+@syncodeindex vr cp
+@syncodeindex fn cp
+@syncodeindex pg cp
+@comment %**end of header
+
+@copying
+This manual is for Newsticker (version @value{VERSION}, @value{UPDATED}).
+
+@noindent
+Copyright @copyright{} 2004-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs network features
+@direntry
+* Newsticker: (newsticker).     A Newsticker for Emacs.
+@end direntry
+
+@titlepage
+@title Newsticker -- a Newsticker for Emacs
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author Ulf Jasper
+@author @email{ulf.jasper@@web.de}
+@author @uref{http://ulf.epplejasper.de/}
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Newsticker
+
+@insertcopying
+
+@end ifnottex
+
+@menu
+* Overview::        General description of newsticker.
+* Requirements::    Requirements for using newsticker.
+* Installation::    Installing newsticker on your system.
+* Usage::           Basic newsticker instructions.
+* Configuration::   Customizable newsticker settings.
+* Remarks::         Remarks about newsticker.
+* GNU Free Documentation License:: The license for this documentation.
+* Index::           Variable, function, and concept index.
+@end menu
+
+@node Overview
+@chapter Overview
+
+Newsticker provides a newsticker for Emacs. A newsticker is a thing
+that asynchronously retrieves headlines from a list of news sites,
+prepares these headlines for reading, and allows for loading the
+corresponding articles in a web browser.
+
+
+Headlines consist of a title and (possibly) a small description.  They
+are contained in "RSS" (RDF Site Summary) or "Atom" files.  Newsticker
+works with the following RSS formats:
+
+@itemize
+@item RSS 0.91 (see @uref{http://backend.userland.com/rss091} or
+@uref{http://my.netscape.com/publish/formats/rss-spec-0.91.html}),
+@item RSS 0.92 (see @uref{http://backend.userland.com/rss092}),
+@item RSS 1.0 (see @uref{http://purl.org/rss/1.0/spec}
+@item RSS 2.0 (see @uref{http://blogs.law.harvard.edu/tech/rss}),
+@end itemize
+@itemize
+as well as the following Atom formats:
+@item Atom 0.3
+@item Atom 1.0 (see
+@uref{http://www.ietf.org/internet-drafts/draft-ietf-atompub-format-11.txt}).
+@end itemize
+
+That makes Newsticker.el an ``Atom aggregator'', ``RSS reader'', ``Feed
+aggregator'', or ``Feed reader''.
+
+Newsticker provides several commands for reading headlines, navigating
+through them, marking them as read/unread, hiding old headlines etc.
+Headlines can be displayed as plain text or as rendered HTML.
+
+Headlines can be displayed in the echo area, either scrolling like
+messages in a stock-quote ticker, or just changing.
+
+Newsticker allows for automatic processing of headlines by providing
+hooks and (sample) functions for automatically downloading images and
+enclosed files (as delivered by podcasts, e.g.).
+
+@ifhtml
+Here are screen shots of the @uref{newsticker-1.7.png, version 1.7
+(current version)} and some older screen shots:
+@uref{newsticker-1.6.png, version 1.6},
+@uref{newsticker-1.5.png, version 1.5},
+@uref{newsticker-1.4.png, version 1.4}
+@uref{newsticker-1.3.png, version 1.3},
+@uref{newsticker-1.0.png, version 1.0}.
+@end ifhtml
+
+@node Requirements
+@chapter Requirements
+
+Newsticker can be used with
+@uref{http://www.gnu.org/software/emacs/emacs.html, GNU Emacs} version
+21.1 or later as well as @uref{http://www.xemacs.org, XEmacs}.  It
+requires an XML-parser (@file{xml.el}) which is part of GNU Emacs.  If
+you are using XEmacs you want to get the @file{net-utils} package
+which contains @file{xml.el} for XEmacs.
+
+Newsticker retrieves headlines either via Emacs's built-in retrieval
+functions, by an arbitrary external program that retrieves files via
+http and prints them to stdout (like
+@uref{http://www.gnu.org/software/wget/wget.html, wget}, or -- on a
+per feed basis -- via an arbitrary Lisp command.
+
+
+@node Installation
+@chapter Installation
+
+As Newsticker is part of GNU Emacs there is no need to perform any
+installation steps in order to use Newsticker.
+
+However, if you are using imenu, which allows for navigating with the
+help of a menu, you should add the following to your Emacs startup file
+(@file{~/.emacs}).
+
+@lisp
+(add-hook 'newsticker-mode-hook 'imenu-add-menubar-index)
+@end lisp
+
+That's it.
+
+@node Usage
+@chapter Usage
+
+@findex newsticker-show-news
+The command @code{newsticker-show-news} will display all available
+headlines.  It will also start the asynchronous download of headlines.
+
+You can choose between two different frontends for reading headlines:
+@itemize
+@item Newsticker's @emph{treeview} uses separate windows for the
+feeds (in tree form), a list of headlines for the current feed, and
+the content of the current headline. Feeds can be placed into groups
+which itself can be placed in groups and so on.
+@item Newsticker's @emph{plainview} displays all headlines in a
+single buffer, called @samp{*newsticker*}. The modeline in the
+@samp{*newsticker*} buffer informs whenever new headlines have
+arrived.
+@end itemize
+In both views clicking mouse-button 2 or pressing RET on a headline
+will call @code{browse-url} to load the corresponding news story in
+your favorite web browser.
+
+@findex newsticker-start-ticker
+@findex newsticker-stop-ticker
+The scrolling, or flashing of headlines in the echo area, can be
+started with the command @code{newsticker-start-ticker}. It can be
+stopped with @code{newsticker-stop-ticker}.
+
+@findex newsticker-start
+@findex newsticker-stop
+If you just want to start the periodic download of headlines use the
+command @code{newsticker-start}. Calling @code{newsticker-stop} will
+stop the periodic download, but will call
+@code{newsticker-stop-ticker} as well.
+
+@node Configuration
+@chapter Configuration
+
+All Newsticker options are customizable, i.e. they can be changed with
+Emacs customization methods: Call the command
+@code{customize-group} and enter @samp{newsticker} for the customization
+group.
+
+All Newsticker options have reasonable default values, so that in most
+cases it is not necessary to customize settings before starting Newsticker
+for the first time.
+
+The following list shows the available groups of newsticker options
+and some of the most important options.
+
+@itemize
+
+@item
+@code{newsticker-retrieval} contains options that define which news
+feeds are retrieved and how this is done.
+
+@itemize
+@item
+@vindex newsticker-url-list
+@code{newsticker-url-list} defines the list of headlines which are
+retrieved.
+@item
+@vindex newsticker-retrieval-method
+@code{newsticker-retrieval-method} defines how headlines are
+retrieved.  This is either done using Emacs's built-in download
+capabilities or using an external tool.
+@item
+@vindex newsticker-retrieval-interval
+@code{newsticker-retrieval-interval} defines how often headlines
+are retrieved.
+@end itemize
+
+@item
+@code{newsticker-headline-processing} contains options that define
+how the retrieved headlines are processed.
+
+@itemize
+@item
+@vindex newsticker-keep-obsolete-items
+@code{newsticker-keep-obsolete-items} decides whether unread
+headlines that have been removed from the feed are kept in the
+Newsticker cache.
+@item
+@vindex newsticker-auto-mark-filter-list
+@code{newsticker-auto-mark-filter-list} provides the possibility to
+automatically mark headlines as immortal or old.
+@end itemize
+
+@item
+@code{newsticker-hooks} contains options for hooking other Emacs
+commands to newsticker functions.
+@itemize
+@item
+@vindex newsticker-new-item-functions
+@code{newsticker-new-item-functions} allows for automatic
+processing of headlines. See `newsticker-download-images', and
+`newsticker-download-enclosures' for sample functions.
+@item
+@vindex newsticker-plainview-hooks
+The subgroup @code{newsticker-plainview-hooks} contains hook which
+apply to the plainview reader only.
+@end itemize
+
+@item
+@code{newsticker-miscellaneous} contains other Newsticker options.
+
+@item
+@code{newsticker-ticker} contains options that define how headlines
+are shown in the echo area, i.e. the ``ticker''.
+
+@itemize
+@item
+@vindex newsticker-display-interval
+@vindex newsticker-scroll-smoothly
+@code{newsticker-ticker-interval} and
+@code{newsticker-scroll-smoothly} define how headlines are shown in
+the echo area.
+@end itemize
+
+
+@item
+@code{newsticker-reader} contains options for adjusting the headline reader.
+
+@itemize
+@item
+@vindex newsticker-frontend
+@code{newsticker-frontend} determines the actual headline reader. The
+``plainview'' reader uses a single buffer, the ``treeview'' uses
+separate buffers and windows.
+@end itemize
+
+@itemize
+@item
+@vindex newsticker-plainview
+The subgroup @code{newsticker-plainview} contains options for the
+plainview reader.
+@item
+@vindex newsticker-treeview
+The subgroup @code{newsticker-treeview} contains options for the
+treeview reader.
+@end itemize
+
+@end itemize
+
+For the complete list of options please have a look at the
+customization buffers.
+
+@node Remarks
+@chapter Remarks
+
+Byte-compiling newsticker.el is recommended.
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@bye

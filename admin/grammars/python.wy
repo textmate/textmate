@@ -1,0 +1,1133 @@
+;;; python.wy -- LALR grammar for Python
+
+;; Copyright (C) 2002-2012 Free Software Foundation, Inc.
+;; Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+;; 2009, 2010 Python Software Foundation; All Rights Reserved
+
+;; Author: Richard Kim <ryk@dspwiz.com>
+;; Maintainer: Richard Kim <ryk@dspwiz.com>
+;; Created: June 2002
+;; Keywords: syntax
+;;
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+;;
+;; This is an LALR python parser that follows the official python
+;; grammar closely with very few exceptions.  The Python grammar is
+;; used and reproduced under the following license:
+;;
+;; PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
+;; --------------------------------------------
+;; 1. This LICENSE AGREEMENT is between the Python Software Foundation
+;; ("PSF"), and the Individual or Organization ("Licensee") accessing
+;; and otherwise using this software ("Python") in source or binary
+;; form and its associated documentation.
+;;
+;; 2. Subject to the terms and conditions of this License Agreement,
+;; PSF hereby grants Licensee a nonexclusive, royalty-free, world-wide
+;; license to reproduce, analyze, test, perform and/or display
+;; publicly, prepare derivative works, distribute, and otherwise use
+;; Python alone or in any derivative version, provided, however, that
+;; PSF's License Agreement and PSF's notice of copyright, i.e.,
+;; "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+;; 2009, 2010 Python Software Foundation; All Rights Reserved" are
+;; retained in Python alone or in any derivative version prepared by
+;; Licensee.
+;;
+;; 3. In the event Licensee prepares a derivative work that is based
+;; on or incorporates Python or any part thereof, and wants to make
+;; the derivative work available to others as provided herein, then
+;; Licensee hereby agrees to include in any such work a brief summary
+;; of the changes made to Python.
+;;
+;; 4. PSF is making Python available to Licensee on an "AS IS"
+;; basis.  PSF MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+;; IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PSF MAKES NO AND
+;; DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
+;; FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON WILL NOT
+;; INFRINGE ANY THIRD PARTY RIGHTS.
+;;
+;; 5. PSF SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON
+;; FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS A
+;; RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING PYTHON, OR
+;; ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+;;
+;; 6. This License Agreement will automatically terminate upon a
+;; material breach of its terms and conditions.
+;;
+;; 7. Nothing in this License Agreement shall be deemed to create any
+;; relationship of agency, partnership, or joint venture between PSF
+;; and Licensee.  This License Agreement does not grant permission to
+;; use PSF trademarks or trade name in a trademark sense to endorse or
+;; promote products or services of Licensee, or any third party.
+;;
+;; 8. By copying, installing or otherwise using Python, Licensee
+;; agrees to be bound by the terms and conditions of this License
+;; Agreement.
+
+;;; To do:
+;;
+;; * Verify that semantic-lex-python-number regexp is correct.
+
+;; --------
+;; Settings
+;; --------
+
+%package wisent-python-wy
+
+%languagemode python-mode
+
+;; The default start symbol
+%start goal
+;; Alternate entry points
+;;    - Needed by partial re-parse
+%start function_parameter
+%start paren_class
+%start indented_block
+;;    - Needed by EXPANDFULL clauses
+%start function_parameters
+%start paren_classes
+%start indented_block_body
+
+;; -------------------------------
+;; Misc. Python specific terminals
+;; -------------------------------
+;; The value of these tokens are for documentation only, they are not
+;; used by the lexer.
+%token <charquote>   BACKSLASH 	  "\\"
+%token <newline>     NEWLINE      "\n"
+%token <indentation> INDENT       "^\\s-+"
+%token <indentation> DEDENT       "[^:INDENT:]"
+%token <indentation> INDENT_BLOCK "(INDENT DEDENT)"
+
+;; -----------------------------
+;; Block & Parenthesis terminals
+;; -----------------------------
+%type  <block>       ;;syntax "\\s(\\|\\s)" matchdatatype block
+
+%token <block>       PAREN_BLOCK "(LPAREN RPAREN)"
+%token <block>       BRACE_BLOCK "(LBRACE RBRACE)"
+%token <block>       BRACK_BLOCK "(LBRACK RBRACK)"
+
+%token <open-paren>  LPAREN      "("
+%token <close-paren> RPAREN      ")"
+%token <open-paren>  LBRACE      "{"
+%token <close-paren> RBRACE      "}"
+%token <open-paren>  LBRACK      "["
+%token <close-paren> RBRACK      "]"
+
+;; ------------------
+;; Operator terminals
+;; ------------------
+%type  <punctuation> ;;syntax "\\(\\s.\\|\\s$\\|\\s'\\)+" matchdatatype string
+
+%token <punctuation> LTLTEQ 	"<<="
+%token <punctuation> GTGTEQ 	">>="
+%token <punctuation> EXPEQ	"**="
+%token <punctuation> DIVDIVEQ 	"//="
+%token <punctuation> DIVDIV 	"//"
+%token <punctuation> LTLT 	"<<"
+%token <punctuation> GTGT 	">>"
+%token <punctuation> EXPONENT 	"**"
+%token <punctuation> EQ 	"=="
+%token <punctuation> GE 	">="
+%token <punctuation> LE 	"<="
+%token <punctuation> PLUSEQ 	"+="
+%token <punctuation> MINUSEQ 	"-="
+%token <punctuation> MULTEQ 	"*="
+%token <punctuation> DIVEQ 	"/="
+%token <punctuation> MODEQ 	"%="
+%token <punctuation> AMPEQ 	"&="
+%token <punctuation> OREQ 	"|="
+%token <punctuation> HATEQ 	"^="
+%token <punctuation> LTGT 	"<>"
+%token <punctuation> NE 	"!="
+%token <punctuation> HAT 	"^"
+%token <punctuation> LT 	"<"
+%token <punctuation> GT 	">"
+%token <punctuation> AMP 	"&"
+%token <punctuation> MULT 	"*"
+%token <punctuation> DIV 	"/"
+%token <punctuation> MOD 	"%"
+%token <punctuation> PLUS 	"+"
+%token <punctuation> MINUS 	"-"
+%token <punctuation> PERIOD 	"."
+%token <punctuation> TILDE 	"~"
+%token <punctuation> BAR 	"|"
+%token <punctuation> COLON 	":"
+%token <punctuation> SEMICOLON	";"
+%token <punctuation> COMMA 	","
+%token <punctuation> ASSIGN 	"="
+%token <punctuation> BACKQUOTE	"`"
+
+
+;; -----------------
+;; Literal terminals
+;; -----------------
+%token <string>      STRING_LITERAL
+
+%type  <number>      ;;syntax semantic-lex-number-expression
+%token <number>      NUMBER_LITERAL
+
+%type  <symbol>      ;;syntax "\\(\\sw\\|\\s_\\)+"
+%token <symbol>      NAME
+
+;; -----------------
+;; Keyword terminals
+;; -----------------
+%type  <keyword> ;;syntax "\\(\\sw\\|\\s_\\)+" matchdatatype keyword
+
+%keyword AND	     "and"
+%put     AND summary
+"Logical AND binary operator ... "
+
+%keyword AS          "as"
+%put     AS summary
+"EXPR as NAME makes value of EXPR available as variable NAME"
+
+%keyword ASSERT	     "assert"
+%put     ASSERT summary
+"Raise AssertionError exception if <expr> is false"
+
+%keyword BREAK	     "break"
+%put     BREAK summary
+"Terminate 'for' or 'while' loop"
+
+%keyword CLASS	     "class"
+%put     CLASS summary
+"Define a new class"
+
+%keyword CONTINUE	     "continue"
+%put     CONTINUE summary
+"Skip to the next iteration of enclosing 'for' or 'while' loop"
+
+%keyword DEF	     "def"
+%put     DEF summary
+"Define a new function"
+
+%keyword DEL	     "del"
+%put     DEL summary
+"Delete specified objects, i.e., undo what assignment did"
+
+%keyword ELIF	     "elif"
+%put     ELIF summary
+"Shorthand for 'else if' following an 'if' statement"
+
+%keyword ELSE	     "else"
+%put     ELSE summary
+"Start the 'else' clause following an 'if' statement"
+
+%keyword EXCEPT	     "except"
+%put     EXCEPT summary
+"Specify exception handlers along with 'try' keyword"
+
+%keyword EXEC	     "exec"
+%put     EXEC summary
+"Dynamically execute Python code"
+
+%keyword FINALLY	     "finally"
+%put     FINALLY summary
+"Specify code to be executed after 'try' statements whether or not an exception occurred"
+
+%keyword FOR	     "for"
+%put     FOR summary
+"Start a 'for' loop"
+
+%keyword FROM	     "from"
+%put     FROM summary
+"Modify behavior of 'import' statement"
+
+%keyword GLOBAL	     "global"
+%put     GLOBAL summary
+"Declare one or more symbols as global symbols"
+
+%keyword IF	     "if"
+%put     IF summary
+"Start 'if' conditional statement"
+
+%keyword IMPORT	     "import"
+%put     IMPORT summary
+"Load specified modules"
+
+%keyword IN	     "in"
+%put     IN summary
+"Part of 'for' statement "
+
+%keyword IS	     "is"
+%put     IS summary
+"Binary operator that tests for object equality"
+
+%keyword LAMBDA	     "lambda"
+%put     LAMBDA summary
+"Create anonymous function"
+
+%keyword NOT	     "not"
+%put     NOT summary
+"Unary boolean negation operator"
+
+%keyword OR	     "or"
+%put     OR summary
+"Binary logical 'or' operator"
+
+%keyword PASS	     "pass"
+%put     PASS summary
+"Statement that does nothing"
+
+%keyword PRINT	     "print"
+%put     PRINT summary
+"Print each argument to standard output"
+
+%keyword RAISE	     "raise"
+%put     RAISE summary
+"Raise an exception"
+
+%keyword RETURN	     "return"
+%put     RETURN summary
+"Return from a function"
+
+%keyword TRY	     "try"
+%put     TRY summary
+"Start of statements protected by exception handlers"
+
+%keyword WHILE	     "while"
+%put     WHILE summary
+"Start a 'while' loop"
+
+%keyword YIELD	     "yield"
+%put     YIELD summary
+"Create a generator function"
+
+%%
+
+;;;****************************************************************************
+;;;@ goal
+;;;****************************************************************************
+
+;; simple_stmt are statements that do not involve INDENT tokens
+;; compound_stmt are statements that involve INDENT tokens
+goal
+  : NEWLINE
+  | simple_stmt
+  | compound_stmt
+  ;
+
+;;;****************************************************************************
+;;;@ simple_stmt
+;;;****************************************************************************
+
+;; simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
+simple_stmt
+  : small_stmt_list semicolon_opt NEWLINE
+  ;
+
+;; small_stmt (';' small_stmt)*
+small_stmt_list
+  : small_stmt
+  | small_stmt_list SEMICOLON small_stmt
+  ;
+
+small_stmt
+  : expr_stmt
+  | print_stmt
+  | del_stmt
+  | pass_stmt
+  | flow_stmt
+  | import_stmt
+  | global_stmt
+  | exec_stmt
+  | assert_stmt
+  ;
+
+;;;============================================================================
+;;;@@ print_stmt
+;;;============================================================================
+
+;; print_stmt: 'print' [ test (',' test)* [','] ]
+;;           | '>>' test [ (',' test)+ [','] ]
+print_stmt
+  : PRINT print_stmt_trailer
+    (CODE-TAG $1 nil)
+  ;
+
+;; [ test (',' test)* [','] ] | '>>' test [ (',' test)+ [','] ]
+print_stmt_trailer
+  : test_list_opt
+    ()
+  | GTGT test trailing_test_list_with_opt_comma_opt
+    ()
+  ;
+
+;; [ (',' test)+ [','] ]
+trailing_test_list_with_opt_comma_opt
+  : ;;EMPTY
+  | trailing_test_list comma_opt
+    ()
+  ;
+
+;; (',' test)+
+trailing_test_list
+  : COMMA test
+    ()
+  | trailing_test_list COMMA test
+    ()
+  ;
+
+;;;============================================================================
+;;;@@ expr_stmt
+;;;============================================================================
+
+;; expr_stmt: testlist (augassign testlist | ('=' testlist)*)
+expr_stmt
+  : testlist expr_stmt_trailer
+    (if (and $2 (stringp $1) (string-match "^\\(\\sw\\|\\s_\\)+$" $1))
+	;; If this is an assignment statement and left side is a symbol,
+	;; then generate a 'variable token, else return 'code token.
+	(VARIABLE-TAG $1 nil nil)
+      (CODE-TAG $1 nil))
+  ;
+
+;; Could be EMPTY because of eq_testlist_zom.
+;; (augassign testlist | ('=' testlist)*)
+expr_stmt_trailer
+  : augassign testlist
+  | eq_testlist_zom
+  ;
+
+;; Could be EMPTY!
+;; ('=' testlist)*
+eq_testlist_zom
+  : ;;EMPTY
+  | eq_testlist_zom ASSIGN testlist
+    (identity $3)
+  ;
+
+;; augassign: '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^='
+;;          | '<<=' | '>>=' | '**=' | '//='
+augassign
+  : PLUSEQ | MINUSEQ | MULTEQ | DIVEQ | MODEQ
+  | AMPEQ  | OREQ    | HATEQ  | LTLTEQ
+  | GTGTEQ | EXPEQ   | DIVDIVEQ
+  ;
+
+;;;============================================================================
+;;;@@ del_stmt
+;;;============================================================================
+
+;; del_stmt: 'del' exprlist
+del_stmt
+  : DEL exprlist
+    (CODE-TAG $1 nil)
+  ;
+
+;; exprlist: expr (',' expr)* [',']
+exprlist
+  : expr_list comma_opt
+    ()
+  ;
+
+;; expr (',' expr)*
+expr_list
+  : expr
+    ()
+  | expr_list COMMA expr
+    ()
+  ;
+
+;;;============================================================================
+;;;@@ pass_stmt
+;;;============================================================================
+
+;; pass_stmt: 'pass'
+pass_stmt
+  : PASS
+    (CODE-TAG $1 nil)
+  ;
+
+;;;============================================================================
+;;;@@ flow_stmt
+;;;============================================================================
+
+flow_stmt
+  : break_stmt
+  | continue_stmt
+  | return_stmt
+  | raise_stmt
+  | yield_stmt
+  ;
+
+;; break_stmt: 'break'
+break_stmt
+  : BREAK
+    (CODE-TAG $1 nil)
+  ;
+
+;; continue_stmt: 'continue'
+continue_stmt
+  : CONTINUE
+    (CODE-TAG $1 nil)
+  ;
+
+;; return_stmt: 'return' [testlist]
+return_stmt
+  : RETURN testlist_opt
+    (CODE-TAG $1 nil)
+  ;
+
+;; [testlist]
+testlist_opt
+  : ;;EMPTY
+  | testlist
+    ()
+  ;
+
+;; yield_stmt: 'yield' testlist
+yield_stmt
+  : YIELD
+    (CODE-TAG $1 nil)
+  | YIELD testlist
+    (CODE-TAG $1 nil)
+  ;
+
+;; raise_stmt: 'raise' [test [',' test [',' test]]]
+raise_stmt
+  : RAISE zero_one_two_or_three_tests
+    (CODE-TAG $1 nil)
+  ;
+
+;; [test [',' test [',' test]]]
+zero_one_two_or_three_tests
+  : ;;EMPTY
+  | test zero_one_or_two_tests
+    ()
+  ;
+
+;; [',' test [',' test]]
+zero_one_or_two_tests
+  : ;;EMPTY
+  | COMMA test zero_or_one_comma_test
+    ()
+  ;
+
+;; [',' test]
+zero_or_one_comma_test
+  : ;;EMPTY
+  | COMMA test
+    ()
+  ;
+
+;;;============================================================================
+;;;@@ import_stmt
+;;;============================================================================
+
+;; import_stmt : 'import' dotted_as_name (',' dotted_as_name)*
+;;             | 'from' dotted_name 'import'
+;;               ('*' | import_as_name (',' import_as_name)*)
+import_stmt
+  : IMPORT dotted_as_name_list
+    (INCLUDE-TAG $2 nil)
+  | FROM dotted_name IMPORT star_or_import_as_name_list
+    (INCLUDE-TAG $2 nil)
+  ;
+
+;; dotted_as_name (',' dotted_as_name)*
+dotted_as_name_list
+  : dotted_as_name
+  | dotted_as_name_list COMMA dotted_as_name
+  ;
+
+;; ('*' | import_as_name (',' import_as_name)*)
+star_or_import_as_name_list
+  : MULT
+    ()
+  | import_as_name_list
+    ()
+  ;
+
+;; import_as_name (',' import_as_name)*
+import_as_name_list
+  : import_as_name
+    ()
+  | import_as_name_list COMMA import_as_name
+    ()
+  ;
+
+;; import_as_name: NAME [NAME NAME]
+import_as_name
+  : NAME as_name_opt
+    ()
+  ;
+
+;; dotted_as_name: dotted_name [AS NAME]
+dotted_as_name
+  : dotted_name as_name_opt
+  ;
+
+;; [AS NAME]
+as_name_opt
+  : ;;EMPTY
+  | AS NAME
+    (identity $2)
+  ;
+
+;; dotted_name: NAME ('.' NAME)*
+dotted_name
+  : NAME
+  | dotted_name PERIOD NAME
+    (format "%s.%s" $1 $3)
+  ;
+
+;;;============================================================================
+;;;@@ global_stmt
+;;;============================================================================
+
+;; global_stmt: 'global' NAME (',' NAME)*
+global_stmt
+  : GLOBAL comma_sep_name_list
+    (CODE-TAG $1 nil)
+  ;
+
+;; NAME (',' NAME)*
+comma_sep_name_list
+  : NAME
+  | comma_sep_name_list COMMA NAME
+  ;
+
+;;;============================================================================
+;;;@@ exec_stmt
+;;;============================================================================
+
+;; exec_stmt: 'exec' expr ['in' test [',' test]]
+exec_stmt
+  : EXEC expr exec_trailer
+    (CODE-TAG $1 nil)
+  ;
+
+;; ['in' test [',' test]]
+exec_trailer
+  : ;;EMPTY
+  | IN test comma_test_opt
+    ()
+  ;
+
+;; [',' test]
+comma_test_opt
+  : ;;EMPTY
+  | COMMA test
+    ()
+  ;
+
+;;;============================================================================
+;;;@@ assert_stmt
+;;;============================================================================
+
+;; assert_stmt: 'assert' test [',' test]
+assert_stmt
+  : ASSERT test comma_test_opt
+    (CODE-TAG $1 nil)
+  ;
+
+;;;****************************************************************************
+;;;@ compound_stmt
+;;;****************************************************************************
+
+compound_stmt
+  : if_stmt
+  | while_stmt
+  | for_stmt
+  | try_stmt
+  | funcdef
+  | class_declaration
+  ;
+
+;;;============================================================================
+;;;@@ if_stmt
+;;;============================================================================
+
+;; if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
+if_stmt
+  : IF test COLON suite elif_suite_pair_list else_suite_pair_opt
+    (CODE-TAG $1 nil)
+  ;
+
+;; ('elif' test ':' suite)*
+elif_suite_pair_list
+  : ;;EMPTY
+  | elif_suite_pair_list ELIF test COLON suite
+    ()
+  ;
+
+;; ['else' ':' suite]
+else_suite_pair_opt
+  : ;;EMPTY
+  | ELSE COLON suite
+    ()
+  ;
+
+;; This NT follows the COLON token for most compound statements.
+;; suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
+suite
+  : simple_stmt
+    (list $1)
+  | NEWLINE indented_block
+    (progn $2)
+  ;
+
+indented_block
+  : INDENT_BLOCK
+    (EXPANDFULL $1 indented_block_body)
+  ;
+
+indented_block_body
+  : INDENT
+    ()
+  | DEDENT
+    ()
+  | simple_stmt
+  | compound_stmt
+  ;
+
+;;;============================================================================
+;;;@@ while_stmt
+;;;============================================================================
+
+;; while_stmt: 'while' test ':' suite ['else' ':' suite]
+while_stmt
+  : WHILE test COLON suite else_suite_pair_opt
+    (CODE-TAG $1 nil)
+  ;
+
+;;;============================================================================
+;;;@@ for_stmt
+;;;============================================================================
+
+;; for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
+for_stmt
+  : FOR exprlist IN testlist COLON suite else_suite_pair_opt
+    (CODE-TAG $1 nil)
+  ;
+
+;;;============================================================================
+;;;@@ try_stmt
+;;;============================================================================
+
+;; try_stmt: ('try' ':' suite (except_clause ':' suite)+ #diagram:break
+;;            ['else' ':' suite] | 'try' ':' suite 'finally' ':' suite)
+try_stmt
+  : TRY COLON suite except_clause_suite_pair_list else_suite_pair_opt
+    (CODE-TAG $1 nil)
+  | TRY COLON suite FINALLY COLON suite
+    (CODE-TAG $1 nil)
+  ;
+
+;; (except_clause ':' suite)+
+except_clause_suite_pair_list
+  : except_clause COLON suite
+    ()
+  | except_clause_suite_pair_list except_clause COLON suite
+    ()
+  ;
+
+;; # NB compile.c makes sure that the default except clause is last
+;; except_clause: 'except' [test [',' test]]
+except_clause
+  : EXCEPT zero_one_or_two_test
+    ()
+  ;
+
+;; [test [',' test]]
+zero_one_or_two_test
+  : ;;EMPTY
+  | test zero_or_one_comma_test
+    ()
+  ;
+
+;;;============================================================================
+;;;@@ funcdef
+;;;============================================================================
+
+;; funcdef: 'def' NAME parameters ':' suite
+funcdef
+  : DEF NAME function_parameter_list COLON suite
+    (FUNCTION-TAG $2 nil $3)
+  ;
+
+function_parameter_list
+  : PAREN_BLOCK
+    (let ((wisent-python-EXPANDING-block t))
+      (EXPANDFULL $1 function_parameters))
+  ;
+
+;; parameters: '(' [varargslist] ')'
+function_parameters
+  : LPAREN
+    ()
+  | RPAREN
+    ()
+  | function_parameter COMMA
+  | function_parameter RPAREN
+  ;
+
+function_parameter
+  : fpdef_opt_test
+ ;;  : NAME
+ ;;    (VARIABLE-TAG $1 nil nil)
+  | MULT NAME
+    (VARIABLE-TAG $2 nil nil)
+  | EXPONENT NAME
+    (VARIABLE-TAG $2 nil nil)
+  ;
+
+;;;============================================================================
+;;;@@ class_declaration
+;;;============================================================================
+
+;; classdef: 'class' NAME ['(' testlist ')'] ':' suite
+class_declaration
+  : CLASS NAME paren_class_list_opt COLON suite
+    (TYPE-TAG $2 $1             ;; Name "class"
+              $5                ;; Members
+              (cons $3 nil)     ;; (SUPERCLASSES . INTERFACES)
+              )
+  ;
+
+;; ['(' testlist ')']
+paren_class_list_opt
+  : ;;EMPTY
+  | paren_class_list
+  ;
+
+paren_class_list
+  : PAREN_BLOCK
+    (let ((wisent-python-EXPANDING-block t))
+      (mapcar 'semantic-tag-name (EXPANDFULL $1 paren_classes)))
+  ;
+
+;; parameters: '(' [varargslist] ')'
+paren_classes
+  : LPAREN
+    ()
+  | RPAREN
+    ()
+  | paren_class COMMA
+    (VARIABLE-TAG $1 nil nil)
+  | paren_class RPAREN
+    (VARIABLE-TAG $1 nil nil)
+  ;
+
+;; In general, the base class can be specified by a general expression
+;; which evaluates to a class object, i.e., base classes are not just names!
+;; However base classes are names in most cases.  Thus the
+;; non-terminals below work only with simple names.  Even if the
+;; parser can parse general expressions, I don't see much benefit in
+;; generating a string of expression as base class "name".
+paren_class
+  : dotted_name
+  ;
+
+;;;****************************************************************************
+;;;@ test
+;;;****************************************************************************
+
+;; test: and_test ('or' and_test)* | lambdef
+test
+  : test_test
+  | lambdef
+  ;
+
+;; and_test ('or' and_test)*
+test_test
+  : and_test
+  | test_test OR and_test
+    ()
+  ;
+
+;; and_test: not_test ('and' not_test)*
+and_test
+  : not_test
+  | and_test AND not_test
+    ()
+  ;
+
+;; not_test: 'not' not_test | comparison
+not_test
+  : NOT not_test
+    ()
+  | comparison
+  ;
+
+;; comparison: expr (comp_op expr)*
+comparison
+  : expr
+  | comparison comp_op expr
+    ()
+  ;
+
+;; comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
+comp_op
+  : LT | GT | EQ | GE | LE | LTGT | NE | IN | NOT IN | IS | IS NOT
+  ;
+
+;; expr: xor_expr ('|' xor_expr)*
+expr
+  : xor_expr
+  | expr BAR xor_expr
+    ()
+  ;
+
+;; xor_expr: and_expr ('^' and_expr)*
+xor_expr
+  : and_expr
+  | xor_expr HAT and_expr
+    ()
+  ;
+
+;; and_expr: shift_expr ('&' shift_expr)*
+and_expr
+  : shift_expr
+  | and_expr AMP shift_expr
+    ()
+  ;
+
+;; shift_expr: arith_expr (('<<'|'>>') arith_expr)*
+shift_expr
+  : arith_expr
+  | shift_expr shift_expr_operators arith_expr
+    ()
+  ;
+
+;; ('<<'|'>>')
+shift_expr_operators
+  : LTLT
+  | GTGT
+  ;
+
+;; arith_expr: term (('+'|'-') term)*
+arith_expr
+  : term
+  | arith_expr plus_or_minus term
+    ()
+  ;
+
+;; ('+'|'-')
+plus_or_minus
+  : PLUS
+  | MINUS
+  ;
+
+;; term: factor (('*'|'/'|'%'|'//') factor)*
+term
+  : factor
+  | term term_operator factor
+    ()
+  ;
+
+term_operator
+  : MULT
+  | DIV
+  | MOD
+  | DIVDIV
+  ;
+
+;; factor: ('+'|'-'|'~') factor | power
+factor
+  : prefix_operators factor
+    ()
+  | power
+  ;
+
+;; ('+'|'-'|'~')
+prefix_operators
+  : PLUS
+  | MINUS
+  | TILDE
+  ;
+
+;; power: atom trailer* ('**' factor)*
+power
+  : atom trailer_zom exponent_zom
+    (concat $1
+	    (if $2 (concat " " $2 " ") "")
+	    (if $3 (concat " " $3) "")
+	    )
+  ;
+
+trailer_zom
+  : ;;EMPTY
+  | trailer_zom trailer
+    ()
+  ;
+
+exponent_zom
+  : ;;EMPTY
+  | exponent_zom EXPONENT factor
+    ()
+  ;
+
+;; trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
+trailer
+  : PAREN_BLOCK
+    ()
+  | BRACK_BLOCK
+    ()
+  | PERIOD NAME
+    ()
+  ;
+
+;; atom: '(' [testlist] ')' | '[' [listmaker] ']' | '{' [dictmaker] '}'
+;;     | '`' testlist '`'   | NAME | NUMBER | STRING+
+atom
+  : PAREN_BLOCK
+    ()
+  | BRACK_BLOCK
+    ()
+  | BRACE_BLOCK
+    ()
+  | BACKQUOTE testlist BACKQUOTE
+    ()
+  | NAME
+  | NUMBER_LITERAL
+  | one_or_more_string
+  ;
+
+test_list_opt
+  : ;;EMPTY
+  | testlist
+    ()
+  ;
+
+;; testlist: test (',' test)* [',']
+testlist
+  : comma_sep_test_list comma_opt
+  ;
+
+;; test (',' test)*
+comma_sep_test_list
+  : test
+  | comma_sep_test_list COMMA test
+    (format "%s, %s" $1 $3)
+  ;
+
+;; (read $1) and (read $2) were done before to peel away the double quotes.
+;; However that does not work for single quotes, so it was taken out.
+one_or_more_string
+  : STRING_LITERAL
+  | one_or_more_string STRING_LITERAL
+    (concat $1 $2)
+  ;
+
+;;;****************************************************************************
+;;;@ lambdef
+;;;****************************************************************************
+
+;; lambdef: 'lambda' [varargslist] ':' test
+lambdef
+  : LAMBDA varargslist_opt COLON test
+    (format "%s %s" $1 (or $2 ""))
+  ;
+
+;; [varargslist]
+varargslist_opt
+  : ;;EMPTY
+  | varargslist
+  ;
+
+;; varargslist: (fpdef ['=' test] ',')* ('*' NAME [',' '**' NAME] | '**' NAME)
+;;             | fpdef ['=' test] (',' fpdef ['=' test])* [',']
+varargslist
+  : fpdef_opt_test_list_comma_zom rest_args
+    (nconc $2 $1)
+  | fpdef_opt_test_list comma_opt
+  ;
+
+;; ('*' NAME [',' '**' NAME] | '**' NAME)
+rest_args
+  : MULT NAME multmult_name_opt
+    () ;;(VARIABLE-TAG $2 nil nil)
+  | EXPONENT NAME
+    () ;;(VARIABLE-TAG $2 nil nil)
+  ;
+
+;; [',' '**' NAME]
+multmult_name_opt
+  : ;;EMPTY
+  | COMMA EXPONENT NAME
+    (VARIABLE-TAG $3 nil nil)
+  ;
+
+fpdef_opt_test_list_comma_zom
+  : ;;EMPTY
+  | fpdef_opt_test_list_comma_zom fpdef_opt_test COMMA
+    (nconc $2 $1)
+  ;
+
+;; fpdef ['=' test] (',' fpdef ['=' test])*
+fpdef_opt_test_list
+  : fpdef_opt_test
+  | fpdef_opt_test_list COMMA fpdef_opt_test
+    (nconc $3 $1)
+  ;
+
+;; fpdef ['=' test]
+fpdef_opt_test
+  : fpdef eq_test_opt
+  ;
+
+;; fpdef: NAME | '(' fplist ')'
+fpdef
+  : NAME
+    (VARIABLE-TAG $1 nil nil)
+ ;; Below breaks the parser.  Don't know why, but my guess is that
+ ;; LPAREN/RPAREN clashes with the ones in function_parameters.
+ ;;  | LPAREN fplist RPAREN
+ ;;    (identity $2)
+  ;
+
+;; fplist: fpdef (',' fpdef)* [',']
+fplist
+  : fpdef_list comma_opt
+  ;
+
+;; fpdef (',' fpdef)*
+fpdef_list
+  : fpdef
+  | fpdef_list COMMA fpdef
+  ;
+
+;; ['=' test]
+eq_test_opt
+  : ;;EMPTY
+  | ASSIGN test
+    ()
+  ;
+
+;;;****************************************************************************
+;;;@ Misc
+;;;****************************************************************************
+
+;; [',']
+comma_opt
+  : ;;EMPTY
+  | COMMA
+  ;
+
+;; [';']
+semicolon_opt
+  : ;;EMPTY
+  | SEMICOLON
+  ;
+
+;;; python.wy ends here

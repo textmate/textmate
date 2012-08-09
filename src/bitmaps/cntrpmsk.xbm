@@ -1,0 +1,6 @@
+#define cntr_ptrmsk_width 16
+#define cntr_ptrmsk_height 16
+static char cntr_ptrmsk_bits[] = {
+  '\xc0','\x03','\xc0','\x03','\xe0','\x07','\xe0','\x07','\xf0','\x0f','\xf0','\x0f',
+  '\xf8','\x1f','\xf8','\x1f','\xfc','\x3f','\xfc','\x3f','\xfc','\x3f','\xdc','\x3b',
+  '\xc0','\x03','\xc0','\x03','\xc0','\x03','\xc0','\x03'};

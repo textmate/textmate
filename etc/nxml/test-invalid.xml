@@ -1,0 +1,8 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>An invalid document</title>
+  </head>
+  <body>
+    <p>This XHTML document is <span class="#foo">invalid</span>.</p>
+  </body>
+</html>

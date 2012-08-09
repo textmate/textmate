@@ -1,0 +1,30 @@
+# -sed1x.inp------------------------------------------------------------
+# Extra configuration script for src/makefile for DesqView/X
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1994-1997, 1999-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+s!^	cd \${oldXMenudir}; \${MAKE}.*$!	${MAKE} -C ${oldXMenudir}.!
+s!^	@true *$!	@rem!
+s/DOC/DOC-X/g
+/^OLDXMENU *=/s!=.*!= ${oldXMenudir}libXMenu11.a!
+/^LIBXMENU *=/s!= *!= ${OLDXMENU}!
+/^LIBX_OTHER *=/s!= *!= ${LIBXT} ${LIBX_EXTRA}!
+/^OLDXMENU_TARGET *=/s!= *!= really-oldxmenu!
+/^OLDXMENU_DEPS *=/s!= *!= ${OLDXMENU} ../src/${OLDXMENU}!
+/^LIBS_SYSTEM *=/s!= *!= -lxext -lsys!
+/^MSDOS_X_OBJ *=/s!= *!= w16select.o termcap.o!
+/^FONT_OBJ *=/s!= *!= xfont.o!
+/^temacs *:/s!OLDXMENU!LIBXMENU!
+

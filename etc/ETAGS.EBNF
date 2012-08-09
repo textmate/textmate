@@ -1,0 +1,112 @@
+-*- indented-text -*-
+
+See the end of this file for copyright information.
+
+This file contains two sections:
+
+1) An EBNF (Extended Backus-Naur Form) description of the format of
+    the tags file created by etags.c and interpreted by etags.el;
+2) A discussion of tag names and implicit tag names.
+
+====================== 1) EBNF tag file description =====================
+
+Productions created from current behavior to aid extensions
+Francesco Potorti` <pot@gnu.org> 2002
+----------------
+
+FF ::= #x0c				   /* tag section starter */
+
+LF ::= #x0a				   /* line terminator */
+
+DEL ::= #x7f				   /* pattern terminator */
+
+SOH ::= #x01				   /* name terminator */
+
+regchar ::= [^#x0a#x0c#x7f]		   /* regular character */
+
+regstring ::= { regchar }		   /* regular string */
+
+unsint ::= [0-9] { [0-9] }		   /* non-negative integer */
+
+
+
+tagfile ::= { tagsection }		   /* a tags file */
+
+tagsection ::= FF LF ( includesec | regularsec ) LF
+
+includesec ::= filename ",include" [ LF fileprop ]
+
+regularsec ::= filename "," [ unsint ] [ LF fileprop ] { LF tag }
+
+filename ::= regchar regstring		   /* a file name */
+
+fileprop ::= "(" regstring ")"		   /* an elisp alist */
+
+tag ::= directtag | patterntag
+
+directtag ::= DEL realposition		   /* no pattern */
+
+patterntag ::= pattern DEL [ tagname SOH ] position
+
+pattern ::= regstring			   /* a tag pattern */
+
+tagname ::= regchar regstring		   /* a tag name */
+
+position ::= realposition | "," 	   /* charpos,linepos */
+
+realposition ::= "," unsint | unsint "," | unsint "," unsint
+
+==================== end of EBNF tag file description ====================
+
+
+
+======================= 2) discussion of tag names =======================
+
+- WHAT ARE TAG NAMES
+Tag lines in a tags file are usually made from the above defined pattern
+and by an optional tag name.  The pattern is a string that is searched
+in the source file to find the tagged line.
+
+- WHY TAG NAMES ARE GOOD
+When a user looks for a tag, Emacs first compares the tag with the tag
+names contained in the tags file.  If no match is found, Emacs compares
+the tag with the patterns.  The tag name is then the preferred way to
+look for tags in the tags file, because when the tag name is present
+Emacs can find a tag faster and more accurately.  These tag names are
+part of tag lines in the tags file, so we call them "explicit".
+
+- WHY IMPLICIT TAG NAMES ARE EVEN BETTER
+When a tag line has no name, but a name can be deduced from the pattern,
+we say that the tag line has an implicit tag name.  Often tag names are
+redundant; this happens when the name of a tag is an easily guessable
+substring of the tag pattern.  We define a set of rules to decide
+whether it is possible to deduce the tag name from the pattern, and make
+an unnamed tag in those cases.  The name deduced from the pattern of an
+unnamed tag is the implicit name of that tag.
+  When the user looks for a tag, and Emacs finds no explicit tag names
+that match it, Emacs then looks for an tag whose implicit tag name
+matches the request.  etags.c uses implicit tag names when possible, in
+order to reduce the size of the tags file.
+  An implicit tag name is deduced from the pattern by discarding the
+last character if it is one of ` \f\t\n\r()=,;', then taking all the
+rightmost consecutive characters in the pattern which are not one of
+those.
+
+===================== end of discussion of tag names =====================
+
+Copyright (C) 2002-2012  Free Software Foundation, Inc.
+
+COPYING PERMISSIONS:
+
+    This document is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.

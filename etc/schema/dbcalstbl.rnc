@@ -1,0 +1,25 @@
+# Definitions specific to the CALS Table Model.
+
+# Reference CALS Table Model
+include "calstbl.rnc" {
+  # Override definition of start
+  start |= notAllowed
+  # Add label and role attributes to table and informaltable
+  bodyatt = label.attrib
+  # Add common attributes to Table, TGroup, TBody, THead, TFoot, Row,
+  # EntryTbl, and Entry (and InformalTable element).
+  secur = common.attrib, tables.role.attrib
+  # Content model for Table.
+  tbl.table.mdl =
+    blockinfo?,
+    formalobject.title.content,
+    ndxterm.class*,
+    textobject*,
+    (graphic+ | mediaobject+ | tgroup+)
+  # Allow either objects or inlines; beware of REs between elements.
+  tbl.entry.mdl = para.char.mix | tabentry.mix
+}
+
+common.table.attribs = bodyatt, secur
+
+# end of table.module

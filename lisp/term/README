@@ -1,0 +1,263 @@
+Copyright (C) 1993, 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+   This directory contains files of elisp that customize Emacs for certain
+terminal types.
+
+   When Emacs opens a new terminal, it checks the TERM environment variable to
+see what type of terminal the user is running on, searches for an elisp file
+named "term/${TERM}.el", and if one exists, loads it.  If Emacs finds no
+suitable file, then it strips the last hyphen and what follows it from TERM,
+and tries again.  If that still doesn't yield a file, then the previous hyphen
+is stripped, and so on until all hyphens are gone.  For example, if the
+terminal type is `aaa-48-foo', Emacs will try first `term/aaa-48-foo.el', then
+`term/aaa-48.el' and finally `term/aaa.el'.  Emacs stops searching at the
+first file found, and will not load more than one file for any terminal.  Note
+that it is not an error if Emacs is unable to find a terminal initialization
+file; in that case, it will simply proceed with the next step without loading
+any files.
+
+   Once the file has been loaded (or the search failed), Emacs tries to call a
+function named `terminal-init-TERMINALNAME' (eg `terminal-init-aaa-48' for the
+`aaa-48' terminal) in order to initialize the terminal.  Once again, if the
+function is not found, Emacs strips the last component of the name and tries
+again using the shorter name.  This search is independent of the previous file
+search, so that you can have terminal initialization functions for a family of
+terminals collected in a single file named after the family name, and users
+may put terminal initialization functions directly in their .emacs files.
+
+   Note that an individual terminal file is loaded only once in an Emacs
+session; if the same terminal type is opened again, Emacs will simply call the
+initialization function without reloading the file.  Therefore, all the actual
+initialization actions should be collected in terminal-init-* functions; the
+file should not contain any top-level form that is not a function or variable
+declaration.  Simply loading the file should not have any side effect.
+
+   Similarly, the terminal initialization function is called only once on any
+given terminal, when the first frame is created on it.  The function is not
+called for subsequent frames on the same terminal.  Therefore, terminal-init-*
+functions should only modify terminal-local variables (such as
+`local-function-key-map') and terminal parameters.  For example, it is not
+correct to modify frame parameters, since the modifications will only be
+applied for the first frame opened on the terminal.
+
+
+   When writing terminal packages, there are some things it is good to keep in
+mind.
+
+   First, about keycap names.  Your terminal package can create any keycap
+cookies it likes, but there are good reasons to stick to the set recognized by
+the X-windows code whenever possible.  The key symbols recognized by Emacs
+are listed in src/term.c; look for the string `keys' in that file.
+
+   For one thing, it means that you'll have the same Emacs key bindings on in
+terminal mode as on an X console.  If there are differences, you can bet
+they'll frustrate you after you've forgotten about them.
+
+   For another, the X keysms provide a standard set of names that Emacs knows
+about.  It tries to bind many of them to useful things at startup, before your
+.emacs is read (so you can override them).  In some ways, the X keysym standard
+is a admittedly poor one; it's incomplete, and not well matched to the set of
+`virtual keys' that UNIX terminfo(3) provides.  But, trust us, the alternatives
+were worse.
+
+   This doesn't mean that if your terminal has a "Cokebottle" key you shouldn't
+define a [cokebottle] keycap.  But if you must define cookies that aren't in
+that set, try to pattern them on the standard terminfo variable names for
+clarity; also, for a fighting chance that your binding may be useful to someone
+else someday.
+
+   For example, if your terminal has a `find' key, observe that terminfo
+supports a key_find capability and call your cookie [find].
+
+Here is a complete list, with corresponding X keysyms.
+
+-----------------------------------------------------------------------------
+Variable name	cap	X Keysym	Description
+--------------	---	------------	-------------------------------------
+key_down	kd	down		Sent by terminal down arrow key
+key_up		ku	up		Sent by terminal up arrow key
+key_left	kl	left		Sent by terminal left arrow key
+key_right	kr	right		Sent by terminal right arrow key
+key_home	kh	home		Sent by home key.
+key_backspace	kb			Sent by backspace key
+key_dl		kd	deleteline	Sent by delete line key.
+key_il		kA	insertline	Sent by insert line.
+key_dc		kD			Sent by delete character key.
+key_ic		kI	insertchar (1)	Sent by ins char/enter ins mode key.
+key_eic		KM			Sent by rmir or smir in insert mode.
+key_clear	kC			Sent by clear screen or erase key.
+key_eos		kS			Sent by clear-to-end-of-screen key.
+key_eol		kE			Sent by clear-to-end-of-line key.
+key_sf		kF			Sent by scroll-forward/down key
+key_sr		kR			Sent by scroll-backward/up key
+key_npage	kN	next (2)	Sent by next-page key
+key_ppage	kP	prior (2)	Sent by previous-page key
+key_stab	kT			Sent by set-tab key
+key_ctab	kt			Sent by clear-tab key
+key_catab	ka			Sent by clear-all-tabs key.
+key_enter	@8	kp-enter	Enter/send (unreliable)
+key_print	%9	print		print or copy
+key_ll		kH			Sent by home-down key
+key_a1		K1	kp-1		Upper left of keypad
+key_a3		K3	kp-3		Upper right of keypad
+key_b2		K2	kp-5		Center of keypad
+key_c1		K4	kp-7		Lower left of keypad
+key_c3		K5	kp-9		Lower right of keypad
+key_btab	kB	backtab		Back tab key
+key_beg		@1	begin		beg(inning) key
+key_cancel	@2	cancel		cancel key
+key_close	@3			close key
+key_command	@4	execute (3)	cmd (command) key
+key_copy	@5			copy key
+key_create	@6			create key
+key_end		@7	end		end key
+key_exit	@9			exit key
+key_find	@0			find key
+key_help	%1			help key
+key_mark	%2			mark key
+key_message	%3			message key
+key_move	%4			move key
+key_next	%5	next (2)	next object key
+key_open	%6			open key
+key_options	%7	menu (3)	options key
+key_previous	%8	previous (2)	previous object key
+key_redo	%0	redo		redo key
+key_reference	&1			ref(erence) key
+key_refresh	&2			refresh key
+key_replace	&3			replace key
+key_restart	&4	reset (3)	restart key
+key_resume	&5			resume key
+key_save	&6			save key
+key_sbeg	&9			shifted beginning key
+key_select	*6	select		select key
+key_suspend	&7			suspend key
+key_undo	&8	undo		undo key
+
+key_scancel	&0			shifted cancel key
+key_scommand	*1			shifted command key
+key_scopy	*2			shifted copy key
+key_screate	*3			shifted create key
+key_sdc		*4			shifted delete char key
+key_sdl		*5			shifted delete line key
+key_send	*7			shifted end key
+key_seol	*8			shifted clear line key
+key_sexit	*9			shifted exit key
+key_sf		kF			shifted find key
+key_shelp	#1			shifted help key
+key_shome	#2			shifted home key
+key_sic		#3			shifted input key
+key_sleft	#4			shifted left arrow key
+key_smessage	%a			shifted message key
+key_smove	%b			shifted move key
+key_snext	%c			shifted next key
+key_soptions	%d			shifted options key
+key_sprevious	%e			shifted prev key
+key_sprint	%f			shifted print key
+key_sredo	%g			shifted redo key
+key_sreplace	%h			shifted replace key
+key_sright	%i			shifted right arrow
+key_sresume	%j			shifted resume key
+key_ssave	!1			shifted save key
+key_suspend	!2			shifted suspend key
+key_sundo	!3			shifted undo key
+
+key_f0		k0	f0 (4)		function key 0
+key_f1		k1	f1		function key 1
+key_f2		k2	f2		function key 2
+key_f3		k3	f3		function key 3
+key_f4		k4	f4		function key 4
+key_f5		k5	f5		function key 5
+key_f6		k6	f6		function key 6
+key_f7		k7	f7		function key 7
+key_f8		k8	f8		function key 8
+key_f9		k9	f9		function key 9
+key_f10		k;	f10 (4)		function key 10
+key_f11		F1	f11		function key 11
+  :		:	   :			:
+key_f35		FP	f35		function key 35
+key_f36		FQ			function key 36
+  :		:	   :			:
+key_f64		k1			function key 64
+
+(1) The terminfo documentation says this may be the 'insert character' or
+    `enter insert mode' key.  Accordingly, key_ic is mapped to the `insertchar'
+    keysym if there is also a key_dc key; otherwise it's mapped to `insert'.
+    The presumption is that keyboards with `insert character' keys usually
+    have `delete character' keys paired with them.
+
+(2) If there is no key_next key but there is a key_npage key, key_npage
+    will be bound to the `next' keysym.  If there is no key_previous key but
+    there is a key_ppage key, key_ppage will be bound to the `previous' keysym.
+
+(3) Sorry, these are not exact but they're the best we can do.
+
+(4) The uses of the "k0" capability are inconsistent; sometimes it
+    describes F10, whereas othertimes it describes F0 and "k;" describes F10.
+    Emacs attempts to politely accommodate both systems by testing for
+    "k;", and if it is present, assuming that "k0" denotes F0, otherwise F10.
+-----------------------------------------------------------------------------
+
+   The following X keysyms do *not* have terminfo equivalents.   These are
+the cookies your terminal package will have to set up itself, if you want them:
+
+	break
+	system
+	user
+	kp-backtab
+	kp-space
+	kp-tab
+	kp-f1
+	kp-f2
+	kp-f3
+	kp-f4
+	kp-multiply
+	kp-add
+	kp-separator
+	kp-subtract
+	kp-decimal
+	kp-divide
+	kp-0
+	kp-2
+	kp-4
+	kp-6
+	kp-8
+	kp-equal
+
+   In general, you should not bind any of the standard keysym names to
+functions in a terminal package.  There's code in loaddefs.el that does that;
+the less people make exceptions to that, the more consistent an interface Emacs
+will have across different keyboards.  Those exceptions should go in your
+.emacs file.
+
+   Finally, if you're using a USL UNIX or a Sun box or anything else with the
+USL version of curses(3) on it, bear in mind that the original curses(3) had
+(and still has) a very much smaller set of keycaps.  In fact, the reliable
+ones were just the arrow keys and the first ten function keys.  If you care
+about making your package portable to older Berkeley machines, don't count on
+the setup code to bind anything else.
+
+   If your terminal's arrow key sequences are so funky that they conflict with
+normal Emacs key bindings, the package should set up a function called
+(enable-foo-arrow-keys), where `foo' becomes the terminal name, and leave
+it up to the user's .emacs file whether to call it.
+
+   Before writing a terminal-support package, it's a good idea to read the
+existing ones and learn the common conventions.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,124 @@
+Some lisp/emacs-lisp/ Features and Where They Are Documented
+
+Copyright (C) 2007-2012 Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+* Status Key
+  -      -- as yet unknown
+  n/a    -- not applicable (internal, uninteresting, etc)
+  obsolete -- an obsolete feature, to be removed in future
+  todo   -- not documented but should be
+  NODE   -- documented in or under info node NODE
+
+
+* Features
+  advice                  (elisp) Advising Functions
+  advice-preload          n/a
+  assoc                   -
+  authors                 -
+  autoload                (elisp) Autoload
+  avl-tree                -
+  backquote               n/a
+  benchmark               n/a
+  bindat                  (elisp) Byte Packing
+  byte-compile            (elisp) Byte Compilation
+  byte-opt                -
+  bytecomp                (elisp) Compilation Functions
+  checkdoc                (elisp) Documentation Tips
+  cl                      (cl)
+  cl-compat               n/a
+  cl-specs                n/a
+  copyright               -
+  crm                     -
+  cust-print              (elisp) Printing in Edebug
+  debug                   (elisp) Debugger
+  derived                 (elisp) Derived Modes
+  disass                  (elisp) Disassembly
+  easy-mmode              (elisp) Defining Minor Modes
+  easymenu                -
+  edebug                  (elisp) Edebug
+  eldoc                   -
+  elint                   -
+  elp                     n/a
+  ewoc                    (elisp) Separated Rendering
+  find-func               -
+  find-gc                 -
+  generic                 (elisp) Generic Modes
+  gulp                    n/a
+  helper                  -
+  levents                 obsolete
+  lisp-float-type         -
+  lisp-mnt                -
+  lisp-mode               n/a
+  lmenu                   obsolete
+  lucid                   obsolete
+  macroexp                (elisp) Expansion
+  pp                      (emacs) Program Indent
+  re-builder              -
+  regexp-opt              (elisp) Regexp Functions
+  regi                    -
+  ring                    (elisp) Rings
+  rx                      -
+  shadow                  -
+  sregex                  obsolete
+  syntax                  (elisp) Position Parse
+  testcover               -
+  timer                   (elisp) Timers
+  tq                      (elisp) Transaction Queues
+  trace                   -
+  unsafep                 (elisp) Function Safety
+  warnings                (elisp) Warnings
+
+
+* Above list created using default directory lisp/emacs-lisp/ with
+  (shell-command
+    "sed '/^(provide '\\''/!d;s//  /;s/).*//' *.el | sort | uniq")
+
+
+* How to use this file to improve Emacs
+  (loop
+   (let* ((feature (choose-one Features))
+          (status (feature-status feature)))
+     (if (or (eq '- status) (not (verify status)))
+         (update feature (current-docs feature))
+       (case status
+         (todo (let (doc patch feedback)
+                 (while (not (grok feature))
+                   (or (play-with feature)
+                       (grep feature Internet)
+                       (grep feature (wisdom-maybe "emacs-devel"))))
+                 (setq doc (write-documentation feature)
+                       patch (diff (current-docs) doc))
+                 (while (not (and (correct doc)
+                                  (well-placed doc)
+                                  (well-formed patch)))
+                   (setq doc (revise doc)
+                         patch (diff (current-docs) doc))
+                         feedback (wisdom-maybe "emacs-devel" patch))
+                 (when (install patch)
+                   (when (update feature (current-docs feature))
+                     (job-well-done user-login-name)))))
+         (n/a (job-well-done user-login-name))))))
+
+
+* Etc
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+  Local variables:
+  mode: outline
+  End:

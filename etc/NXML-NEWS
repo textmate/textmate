@@ -1,0 +1,199 @@
+20041004
+--------
+
+Support for outlining has been added. See the manual for more details.
+
+C-u C-c C-n goes to the first error.
+
+20040910
+--------
+
+C-c RET splits the current element as in PSGML.
+
+20040908
+--------
+
+Indentation has been rewritten.  Indentation of attribute names and
+values should work better.  The default value of
+`nxml-attribute-indent' has been changed to 4.
+
+Syntax highlighting with a dark background should now work.
+
+20040726
+--------
+
+The attribute pathSuffix on the uri element in schema locating files
+has been replaced by a more general pattern attribute. The
+transformURI element now has required fromPattern and toPattern
+attributes.
+
+The schema related bindings have been changed to use C-c C-s as a prefix
+as follows:
+
+  C-c C-s => C-c C-s C-f (f for file)
+  C-c C-a => C-c C-s C-a
+  C-c C-t => C-c C-s C-t
+  C-c C-l => C-c C-s C-l
+  C-c C-w => C-c C-s C-w
+
+There's now an XML menu on the menu-bar.
+
+20031031
+--------
+
+C-c C-d "dynamically" chooses a tag to put around the word before
+point, rather like M-/.
+
+The mechanism for locating the schema has changed completely.  The new
+mechanism is described in the manual.  Any existing customizations of
+`rng-auto-element-alist' or `rng-auto-file-name-alist' will no longer
+be effective.
+
+C-c C-a is now bound to rng-auto-set-schema.
+
+20031018
+--------
+
+Unicode names can be used to insert characters with the new command
+C-c C-u.  Normally, this inserts a character reference.  With a prefix
+arg (i.e. C-u C-c C-u), it inserts the character directly.  You can
+customize `nxml-enabled-unicode-blocks' to control what Unicode blocks
+are used for completing names.
+
+Extra information is displayed for character references.  The Unicode
+name is displayed in a tooltip. A glyph for the referenced character
+is displayed in a distinguished face following the character
+reference; this can be disabled by customizing
+`nxml-char-ref-display-glyph-flag'.  The command
+`nxml-toggle-char-ref-extra-display' dynamically toggles the display
+of extra information for character references for a particular buffer.
+This can be used if the display of extra information is causing
+performance problems. nXML mode tries to figure out which glyphs can
+be displayed. Unfortunately Emacs doesn't provide the primitives
+necessary to do this properly, so nXML mode has to guess and will
+sometimes guess wrong.  The hook `nxml-glyph-set-hook' can be used to
+change nXML mode's guess.
+
+New command C-c C-w says what schema is being used.
+
+C-c C-s now turns on validation if it is not already on.
+
+20030928
+--------
+
+M-q has been implemented so that it works reasonably with XML.  Other
+paragraph-related commands (M-{, M-}, M-h) have also been implemented.
+
+New command M-x rng-auto-set-schema to set the schema based on the
+buffer's current contents and file-name. This is called automatically
+when rng-validate-mode is first enabled.
+
+There's now a C-M-d to go with C-M-u.  C-M-d moves forward down into
+the content of an element.  C-M-n and C-M-p move to the next or
+previous element.
+
+By default, the sexp commands (C-M-f, C-M-b, C-M-k, C-M-SPC) operate
+on tags rather than elements.  To restore the old behavior,
+customize nxml-sexp-element-flag.
+
+The file TUTORIAL has been replaced by nxml-mode.info; this is in info
+format and can be read using Emacs.  The source is maintained in a
+simple, ad-hoc XML format.
+
+20030915
+--------
+
+XML encodings should now work properly.  When saving a buffer,
+nxml-mode arranges to use the encoding declared in the XML
+declaration.  If there is no encoding declared, then nxml-mode will
+use utf-8 or utf-16 according to the user options
+`nxml-prefer-utf-16-to-utf-8-flag' and
+`nxml-prefer-utf-16-little-to-big-endian-flag'. If the chosen encoding
+cannot encode all the characters in the buffer, nxml-mode will
+complain and give the user an opportunity to use an encoding that can.
+
+A new command C-c C-x inserts an XML declaration.
+
+The option `nxml-auto-insert-xml-declaration-flag' automatically
+inserts an XML declaration in new files.
+
+The `nxml-default-buffer-file-coding-system' option allows a different
+default buffer-file-coding-system for nXML mode buffers.  This affects
+what XML declaration is inserted.
+
+Encoding names in XML declarations are now validated by
+rng-validate-mode.
+
+RDF/XML schema was updated to version in 05 September 2003 WD.
+
+20030912
+--------
+
+The tutorial has a new section on inserting end-tags.
+
+By default </ no longer automatically inserts the rest of the end-tag.
+You can do
+
+  M-x customize-variable RET nxml-slash-auto-complete-flag RET
+
+and then follow the instructions displayed in the buffer to get the
+old behavior.
+
+Completion after </ will complete the rest of the end-tag. Completion
+after < will include the end-tag in the possibilities if allowed by
+the schema.
+
+You can use C-c C-i instead of > to close the start-tag of an
+inline-level element.  After inserting the >, it will insert the
+end-tag and leave point before the end-tag. The `i' is supposed to be
+mnemonic for `inline'. C-c C-b is similar, but for block elements: the
+start-tag, point and the end-tag will all be on separate lines.
+
+The binding for inserting an end-tag has changed from C-c / to C-c C-f
+to comply with Emacs guidelines about what keys major modes should
+bind.  The `f' is supposed to be mnemonic for `finish'.
+
+Completion always puts point after all the characters it inserts. It
+doesn't insert a `>' after completing a start-tag name.
+
+Completion no longer completes CDATA section and comment delimiters.
+
+The nxml-start-auto-coding command enables auto-detection of a file's
+encoding as specified in the XML Recommendation for files that use
+nxml-mode; rng-auto.el calls this.
+
+20030906
+--------
+
+Validation messages applicable to point are displayed automatically.
+
+Completion can deal with prefixes that haven't yet been declared.
+
+rng-preferred-prefix-alist variable added.
+
+Namespace URIs can be completed.
+
+xmlns and xmlns:* attributes can be completed.
+
+CDATA section and comment delimiters can be completed.
+
+Each kind of completion has its own history.
+
+Completion function moved to nxml-mode; uses a hook to allow
+schema-sensitive completion.  Completion function bound to C-return.
+Also bound to M-TAB as before, unless
+nxml-bind-meta-tab-to-complete-flag is nil.  When there is a window
+system, nxml-bind-meta-tab-to-complete-flag is nil by default, This
+avoid problems with M-TAB, which is not passed through by several
+window systems/managers.
+
+TUTORIAL file added.
+
+NEWS file added.
+
+Bug fixes.
+
+20030901
+--------
+
+Initial release.

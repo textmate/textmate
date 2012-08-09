@@ -1,0 +1,1426 @@
+\documentclass{article}
+
+% Previously we had five input LaTeX files (booklet.tex bk-lt.tex bk-a4.tex
+% refcard.tex gnusref.tex) and two logo files (gnuslogo-refcard.eps and
+% gnuslogo-booklet.eps).
+%
+% From this LaTeX file (gnus-refcard.tex) plus a single logo (gnus-logo.eps),
+% we can generate the refcard and the booklet version.  This simplifies to
+% distribute the refcard with Emacs.  Appropriate Makefile rules were added in
+% gnus/texi/Makefile.
+
+% For Emacs, we may use the following commands (w/o) using Gnus' Makefile:
+%
+%   latex gnus-refcard.tex &&
+%   dvips -t letter -f gnus-refcard.dvi > gnus-refcard.ps
+%
+%   latex '\def\booklettrue{}\def\letterpapertrue{}\input{gnus-refcard}' &&
+%   mv gnus-refcard.dvi gnus-booklet.dvi &&
+%   dvips -t letter -f gnus-booklet.dvi > gnus-booklet.ps
+
+\usepackage{ifthen}
+\ifthenelse{\isundefined{\booklettrue}}{
+  \typeout{Creating reference card...}
+}{
+  \typeout{Creating reference booklet...}}
+
+\usepackage{supertabular}
+
+\newlength{\logowidth}  \setlength{\logowidth} {6.861in}
+\newlength{\logoheight} \setlength{\logoheight}{7.013in}
+
+\usepackage{graphicx}
+
+\usepackage{geometry}
+
+\ifthenelse{\isundefined{\booklettrue}}{% ifcard %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Reference Card
+
+  \def\Guide{Card}\def\guide{card}
+  \def\logoscale{0.25}
+
+  % Page setup for the refcard:
+
+  % \setlength{\textwidth}{7.26in} \setlength{\textheight}{10in}
+  % \setlength{\topmargin}{-1.0in}
+  % % the same settings work for A4, although there is a bit of space at the
+  % % top and bottom of the page.
+  % \setlength{\oddsidemargin}{-0.5in} \setlength{\evensidemargin}{-0.5in}
+
+  \ifthenelse{\isundefined{\letterpapertrue}}{
+    \geometry{a4paper,hmargin=10mm,tmargin=10mm,bmargin=35mm}
+  }{
+    \geometry{hmargin=20mm,tmargin=10mm,bmargin=12mm}
+  }
+
+}{ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Reference Booklet
+
+  \def\Guide{Booklet}\def\guide{booklet}
+  \def\logoscale{0.5}% FIXME: too large for 2up printing?  --rsteib
+
+  \ifthenelse{\isundefined{\letterpapertrue}}{
+    \geometry{a5paper,hmargin=10mm,tmargin=10mm,bmargin=4mm}
+  }{
+    \geometry{a5paper,hmargin=20mm,tmargin=10mm,bmargin=4mm}
+  }
+
+  \def\sec{\section}
+  \def\subsec{\subsection}
+  \def\subsubsec{\subsubsection}
+  \def\blankpage{\vspace*{\fill}\par
+  %\centerline{(This page intentionally left blank.)}
+  \par\vspace*{\fill}\pagebreak}
+}%ifbooklet% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \input{gnusref} % % % % % % % % % % % % % % % % % % % % % % % % % %
+%% include file for the Gnus refcard and booklet
+
+\def\progver{5.11} % program version
+% \def\refver{5.10-2} % refcard version (not used)
+\def\date{April, 2006}
+\def\author{Gnus Bugfixing Girls + Boys $<$bugs@gnus.org$>$}
+
+%%
+\newlength{\keycolwidth}
+\newenvironment{keys}[1]% #1 is the widest key
+{\nopagebreak%\noindent%
+  \settowidth{\keycolwidth}{#1}%
+  \addtolength{\keycolwidth}{\tabcolsep}%
+  \addtolength{\keycolwidth}{-\columnwidth}%
+  \begin{supertabular}{@{}l@{\hspace{\tabcolsep}}p{-\keycolwidth}@{}}}%
+  {\end{supertabular}\\}
+
+%% uncomment the first definition if you do not want pagebreaks in maps
+%%\newcommand{\esamepage}{\samepage}
+\newcommand{\esamepage}{}
+
+\newcommand*{\B}[1]{{\bf#1})}    % bold l)etter
+
+\newcommand{\Title}{%
+  \begin{center}
+    {\bf\LARGE Gnus \progver\ Reference \Guide\\}
+                                %{\normalsize \Guide\ version \refver}
+  \end{center}
+  }
+
+% \newcommand*{\LogoOLD}[1]{\centerline{%
+%     \makebox[\logoscale\logowidth][l]{\vbox to \logoscale\logoheight
+%       {\vfill\epsfig{figure=gnuslogo-#1}}\vspace{-\baselineskip}}}}
+
+\newcommand*{\Logo}[1]{\centerline{%
+    \includegraphics[width=\logoscale\logowidth]{gnus-logo}}}
+
+%%  Contributions by:
+%% 1995 Vladimir Alexiev <vladimir@cs.ualberta.ca>
+%% 2000 Felix Natter <fnatter@gmx.net>
+%% 2001, 2002, 2003, 2005 \author.
+%% Original Gnus manual 1994 Lars Magne Ingebrigtsen
+%% Some material from Emacs Help Bindings feature (C-h b).
+%% Gnus logo by Luis Fernandes.
+\newcommand{\Copyright}{%
+  \begin{center}
+    Copyright \copyright\ 1995, 2000, 2002-2012  Free Software Foundation, Inc.\\*
+  \end{center}
+
+  Permission is granted to make and distribute copies of this reference
+  \guide{} provided the copyright notice and this permission are preserved on
+  all copies.  Please send corrections, additions and suggestions to the
+  current maintainer's email address. \Guide{} last edited on \date.
+  }
+
+\newcommand{\Notes}{%
+  \subsection*{Notes}
+  {\esamepage
+    Gnus is complex. Currently it has some 876 interactive (user-callable)
+    functions. Of these 618 are in the two major modes (Group and
+    Summary/Article). Many of these functions have more than one binding, some
+    have 3 or even 4 bindings. The total number of keybindings is 677. So in
+    order to save 40\% space, every function is listed only once on this
+    \guide, under the ``more logical'' binding. Alternative bindings are given
+    in parentheses in the beginning of the description.
+
+    Many Gnus commands are affected by the numeric prefix. Normally you enter a
+    prefix by holding the Meta key and typing a number, but in most Gnus modes
+    you don't need to use Meta since the digits are not self-inserting. The
+    prefixed behavior of commands is given in [brackets]. Often the prefix is
+    used to specify:
+
+    \quad [distance] How many objects to move the point over.
+
+    \quad [scope] How many objects to operate on (including current one).
+
+    \quad [p/p] The ``Process/Prefix Convention'': If a prefix is given then it
+    determines how many objects to operate on. Else if there are some objects
+    marked with the process mark \#, these are operated on. Else only the
+    current object is affected.
+
+    \quad [level] A group subscribedness level. Only groups with a lower or
+    equal level will be affected by the operation. If no prefix is given,
+    `gnus-group-default-list-level' is used.  If
+    `gnus-group-use-permanent-levels', then a prefix to the `g' and `l'
+    commands will also set the default level.
+
+    \quad [score] An article score. If no prefix is given,
+    `gnus-summary-default-score' is used. \\*[\baselineskip]
+                                % some keys
+    Gnus startup-commands:\\*
+    \begin{keys}{M-x gnus-unplugged}
+      M-x gnus           & start Gnus. \\
+      M-x gnus-no-server & start Gnus without connecting to server
+      (i.e. to read mail). \\
+    \end{keys}
+    Additionally, there are two commands \texttt{gnus-plugged} and
+    \texttt{gnus-unplugged}, which are only used if you want to download
+    news and/or read previously downloaded news offline (see C-c C-i g Gnus
+    Unplugged RET). Note: \texttt{gnus-no-server} ignores the stuff in
+    \texttt{gnus-agent-directory}, and thus does not allow you to use Gnus
+    Unplugged.\\
+                                %
+    \begin{keys}{C-c C-i}
+      C-c C-i & Go to the Gnus online {\bf info}.\\
+      C-c C-b & Send a Gnus {\bf bug} report.\\
+    \end{keys}
+    }}
+
+\newcommand{\GroupLevels}{%
+  The table below assumes that you use the default Gnus levels.
+  Fill your user-specific levels in the blank cells.\\[1\baselineskip]
+  \begin{tabular}{|c|l|l|}
+    \hline
+    Level & Groups & Status \\
+    \hline
+    1 & draft/mail groups   &              \\
+    2 & mail groups         &              \\
+    3 &                     & subscribed   \\
+    4 &                     &              \\
+    5 & default list level  &              \\
+    \hline
+    6 &                     & unsubscribed \\
+    7 &                     &              \\
+    \hline
+    8 &                     & zombies      \\
+    \hline
+    9 &                     & killed       \\
+    \hline
+  \end{tabular}}
+
+\newcommand{\MarkCharacters}{%
+  {\esamepage If a command directly sets a mark, it is shown in parentheses.\\*
+    \newlength{\markcolwidth}
+    \settowidth{\markcolwidth}{` '}% widest character
+    \addtolength{\markcolwidth}{4\tabcolsep}
+    \addtolength{\markcolwidth}{-\columnwidth}
+    \newlength{\markdblcolwidth}
+    \setlength{\markdblcolwidth}{\columnwidth}
+    \addtolength{\markdblcolwidth}{-2\tabcolsep}
+    \begin{tabular}{|c|p{-\markcolwidth}|}
+      \hline
+      \multicolumn{2}{|p{\markdblcolwidth}|}{{\bf ``Read'' Marks.}
+        All these marks appear in the first column of the summary line, and so
+        are mutually exclusive.}\\
+      \hline
+      ` ' & (M-u, M SPC, M c) Not read.\\
+      !   & (!, M !, M t) Ticked (interesting).\\
+      ?   & (?, M ?) Dormant (only followups are interesting).\\
+      E   & (E, M e, M x) {\bf Expirable}. Only has effect in mail groups.\\
+      G   & (C, B DEL) Canceled article (or deleted in mailgroups).\\
+      \$  & (M-d, M s x, S x).  Marked as spam.\\
+      \hline\hline
+      \multicolumn{2}{|p{\markdblcolwidth}|}
+      {The marks below mean that the article
+        is read (killed, uninteresting), and have more or less the same effect.
+        Some commands however explicitly differentiate between them (e.g.\ M
+        M-C-r, adaptive scoring).}\\
+      \hline
+      r   & (d, M d, M r) Deleted (marked as {\bf read}).\\
+      C   & (M C; M C-c; M H; c, Z c; Z n; Z C) Killed by {\bf catch-up}.\\
+      F   & SOUPed article. See the manual.\\
+      O   & {\bf Old} (read in a previous session).\\
+      K   & (k, M k; C-k, M K) {\bf Killed}.\\
+      M   & Article marked as read by duplicate suppression.\\
+      Q   & Article is part of a sparse thread (see ``Threading''
+      in manual).\\
+      R   & {\bf Read} (viewed in actuality).\\
+      X   & Killed by a kill file.\\
+      Y   & Killed due to low score.\\
+      \hline\multicolumn{2}{c}{\vspace{1ex}}\\\hline
+      \multicolumn{2}{|p{\markdblcolwidth}|}
+      {{\bf Marks not affecting visibility}}\\
+      \hline
+      \#  & (\#, M \#, M P p) Processable (affected by next operation).
+      [2]\\
+      A   & {\bf Answered} (followed-up or replied). [2]\\
+      F   & Forwarded. [2]\\
+      $\ast$  & Cached. [2]\\
+      S   & Saved. [2]\\
+      N   & Recently arrived. [2]\\
+      .   & Unseen. [2]\\
+      +   & Over default score. [3]\\
+      $-$ & Under default score. [3]\\
+      $=$ & Has children (thread underneath it). Add `\%e' to
+      `gnus-summary-line-format'. [3]\\
+      \hline
+    \end{tabular}
+    }}
+
+\newcommand{\GroupModeGeneral}{%
+  \begin{keys}{C-c M-C-x}
+    RET     & (=) Enter this group. [Prefix: how many (read) articles to fetch.
+    Positive: newest articles, negative: oldest ones; non-numerical:
+    view all articles, not just unread]\\
+    M-RET   & Enter group quickly.\\
+    M-SPC   & Same as RET but does not expunge and hide dormants.\\
+    M-C-RET & Enter group without any processing, changes will not be permanent.\\
+    SPC     & Select this group and display the first (unread) article. [Same
+    prefix as above.]\\
+    ?       & Give a very short help message.\\
+    $<$     & Go to the beginning of the Group buffer.\\
+    $>$     & Go to the end of the Group buffer.\\
+    ,       & Jump to the lowest-level group with unread articles.\\
+    .       & Jump to the first group with unread articles.\\
+    \^{}      & Enter the Server buffer mode.\\
+    a       & Post an {\bf article} to a group
+              [Prefix: use group under point to find posting-style].\\
+    b       & Find {\bf bogus} groups and delete them.\\
+    c       & Mark all unticked articles in group as read ({\bf catch-up}).
+    [p/p]\\
+    g       & Check the server for new articles ({\bf get}). [level]\\
+    M-g     & Check the server for new articles in this group ({\bf get}). [p/p]\\
+    j       & {\bf Jump} to a group.\\
+    m       & {\bf Mail} a message to someone
+              [Prefix: use group under point to find posting-style].\\
+    n       & Go to the {\bf next} group with unread articles. [distance]\\
+    M-n     & Go to the {\bf next} group on the same or lower level.
+    [distance]\\
+    p       & (DEL) Go to the {\bf previous} group with unread articles.
+    [distance]\\
+    M-p     & Go to the {\bf previous} group on the same or lower level. [distance]\\
+    q       & {\bf Quit} Gnus.\\
+    r       & Re-read the init file ({\bf reset}).\\
+    s       & {\bf Save} `.newsrc.eld' file (and `.newsrc' if
+    `gnus-save-newsrc-file').\\
+    z       & Suspend (kill all buffers of) Gnus.\\
+    B       & {\bf Browse} a foreign server.\\
+    C       & Mark all articles in this group as read ({\bf Catch-up}). [p/p]\\
+    F       & {\bf Find} new groups and process them.\\
+    N       & Go to the {\bf next} group. [distance]\\
+    P       & Go to the {\bf previous} group. [distance]\\
+    Q       & {\bf Quit} Gnus without saving any startup (.newsrc) files.\\
+    R       & {\bf Restart} Gnus.\\
+    Z       & Clear the dribble buffer.\\
+    M-c     & Clear data from group (marks and list of read articles). \\
+    C-c C-s & {\bf Sort} the groups by name, number of unread articles, or level
+    (depending on `gnus-group-sort-function').\\
+    C-c C-x & Run all expirable articles in group through the {\bf expiry}
+    process.\\
+    C-c M-C-x & Run all articles in all groups through the {\bf expiry} process.\\
+    C-c M-g & Activate all {\bf groups}.\\
+    C-c C-i & Gnus online-manual ({\bf info}).\\
+    C-x C-t & {\bf Transpose} two groups.\\
+    H f     & Fetch this group's {\bf FAQ} (using ange-ftp).\\
+    H c     & Display this group's {\bf charter}. [Prefix: query for group]\\
+    H C     & Display this group's {\bf control message} (using
+    ange-ftp). [Prefix: query for group]\\
+    H v     & (V) Display the Gnus {\bf version} number.\\
+    H d     & (C-c C-d) Show the {\bf description} of this group
+    [Prefix: re-read from server].\\
+    M-d     & {\bf Describe} all groups. [Prefix: re-read from server]\\
+    D g     & Regenerate a Sieve script from group parameters.\\
+    D u     & Regenerate Sieve script and {\bf upload} to server.\\
+  \end{keys}
+  }
+
+\newcommand{\ListGroups}{%
+  {\esamepage
+    \begin{keys}{A M}
+      A d     & (C-c C-M-a) List all groups whose names or {\bf descriptions} match a regexp.\\
+      A k     & (C-c C-l) List all {\bf killed} groups.
+      [Prefix: look at active-file from server]\\
+      A l     & List all groups on a specific level.
+      [Prefix: also list groups with no unread articles]\\
+      A a     & (C-c C-a) List all groups whose names match a regexp
+      ({\bf apropos}).\\
+      A A     & List the server's active-file.\\
+      A M     & List groups that {\bf match} a regexp.\\
+      A m     & List groups that {\bf match} a regexp and have unread articles.
+      [level]\\
+      A s     & (l) List all {\bf subscribed} groups with unread articles.
+      [level; 5 and lower is the default]\\
+      A u     & (L) List all groups (including read and {\bf unsubscribed}).
+      [level; 7 and lower is the default]\\
+      A z     & List all {\bf zombie} groups.\\
+      A c     & List all groups with cached articles. [level]\\
+      A ?     & List all groups with dormant articles. [level]\\
+    \end{keys}
+  }
+
+  \newcommand{\CreateEditGroups}{%
+    {\esamepage
+      The select methods are indicated in parentheses.\\*
+      \begin{keys}{G DEL}
+        G a     & Make the Gnus list {\bf archive} group. (nndir over ange-ftp)\\
+        G c     & {\bf Customize} this group's parameters.\\
+        G d     & Make a {\bf directory} group (every file must be a posting and files
+        must have numeric names). (nndir)\\
+        G D     & Enter a {\bf directory} as a (temporary) group.
+        (nneething without recording articles read)\\
+        G e     & (M-e) {\bf Edit} this group's select method.\\
+        G E     & {\bf Edit} this group's info (select method, articles read, etc).\\
+        G f     & Make a group based on a {\bf file}. (nndoc)\\
+        G h     & Make the Gnus {\bf help} (documentation) group. (nndoc)\\
+        G k     & Make a {\bf kiboze} group. (nnkiboze)\\
+        G m     & {\bf Make} a new group.\\
+        G p     & Edit this group's {\bf parameters}.\\
+        G r     & Rename this group (does not work with read-only groups!).\\
+        G u     & Create one of the groups mentioned in gnus-{\bf useful}-groups.\\
+        G v     & Add this group to a {\bf virtual} group. [p/p]\\
+        G V     & Make a new empty {\bf virtual} group. (nnvirtual)\\
+        G w     & Create ephemeral group based on web-search. [Prefix: make solid group
+        instead]\\
+        G R     & Make an {\bf RSS} group.\\
+        G DEL   & {\bf Delete} group [Prefix: delete all articles as well].\\
+        G x     & Expunge all deleted articles in an nnimap mailbox.\\
+        G l     & Edit ACL (Access Control {\bf List}) for an nnimap mailbox.\\
+      \end{keys}
+      You can also create mail-groups and read your mail with Gnus (very useful
+      if you are subscribed to mailing lists), using one of the methods
+      nnmbox, nnbabyl, nnml, nnmh, or nnfolder. Read about it in the online info
+      (C-c C-i g Reading Mail RET).
+      }}
+
+                                % TODO:
+  \newcommand{\SoupCommands}{%
+    \begin{keys}{G s w}
+      G s b   & gnus-group-brew-soup: not documented.\\
+      G s p   & gnus-soup-pack-packet: not documented.\\
+      G s r   & nnsoup-pack-replies: not documented.\\
+      G s s   & gnus-soup-send-replies: not documented.\\
+      G s w   & gnus-soup-save-areas: not documented.\\
+    \end{keys}}
+
+  \newcommand{\MarkGroups}{%
+    \begin{keys}{M m}
+      M m     & (\#) Set the process {\bf mark} on this group. [scope]\\
+      M r     & Mark all groups matching regular expression.\\
+      M u     & (M-\#) Remove process mark from this group ({\bf unmark}).
+      [scope]\\
+      M U     & Remove the process mark from all groups (\textbf{unmark all}).\\
+      M w     & Mark all groups in the current region. [prefix: unmark]\\
+      M b     & Mark all groups in the {\bf buffer}. [prefix: unmark]\\
+    \end{keys}}
+
+  \newcommand{\GroupTopicsGeneral}{%
+    {\esamepage
+      Topics are ``categories'' for groups. Press t in the group-buffer to
+      toggle gnus-topic-mode (C-c C-i g Group Topics RET).\\*
+      \begin{keys}{C-c C-x}
+        T n     & Prompt for topic {\bf name} and create it.\\
+        T m     & {\bf Move} the current group to some other topic [p/p].\\
+        T j     & {\bf Jump} to a topic.\\
+        T c     & {\bf Copy} the current group to some other topic [p/p].\\
+        T D     & Remove (not delete) the current group [p/p].\\
+        T M     & {\bf Move} all groups matching a regexp to a topic.\\
+        T C     & {\bf Copy} all groups matching a regexp to a topic.\\
+        T H     & Toggle {\bf hiding} of empty topics.\\
+        T r     & {\bf Rename} a topic.\\
+        T DEL   & Delete an empty topic.\\
+        T \#    & Mark all groups in the current topic with the process-mark.\\
+        T M-\#  & Remove the process-mark from all groups in the current topic.\\
+        T TAB   & (TAB) Indent current topic [Prefix: unindent].\\
+        M-TAB   & Unindent the current topic.\\
+        RET     & (SPC) Either unfold topic or enter group [level].\\
+        T s     & {\bf Show} the current topic. [Prefix: show permanently]\\
+        T h     & {\bf Hide} the current topic. [Prefix: hide permanently]\\
+        C-c C-x & Expire all articles in current group or topic.\\
+        C-k     & {\bf Kill} a group or topic.\\
+        C-y     & {\bf Yank} a group or topic.\\
+        A T     & List active-file using {\bf topics}.\\
+        G p     & Edit topic-{\bf parameters}.\\
+        T M-n   & Go to {\bf next} topic. [distance]\\
+        T M-p   & Go to {\bf previous} topic. [distance]\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\TopicSorting}{%
+    {\esamepage
+      \begin{keys}{T S m}
+        T S a  & Sort {\bf alphabetically}.\\
+        T S u  & Sort by number of {\bf unread} articles.\\
+        T S l  & Sort by group {\bf level}.\\
+        T S v  & Sort by group score ({\bf value}).\\
+        T S r  & Sort by group {\bf rank}.\\
+        T S m  & Sort by {\bf method}.\\
+        T S e  & Sort by {\bf server} name.\\
+        T S s  & Sort according to `gnus-group-sort-function'.\\
+      \end{keys}
+      With a prefix these commands will sort in reverse order.
+      }
+    }
+
+  \newcommand{\SubscribeKillYankGroups}{%
+    {\esamepage
+      \begin{keys}{S C-k}
+        S k     & (C-k) {\bf Kill} this group.\\
+        S l     & Set the {\bf level} of this group. [p/p]\\
+        S s     & (U) Prompt for a group and toggle its {\bf subscription}.\\
+        S t     & (u) {\bf Toggle} subscription to this group. [p/p]\\
+        S w     & (C-w) Kill all groups in the region.\\
+        S y     & (C-y) {\bf Yank} the last killed group.\\
+        S z     & Kill all {\bf zombie} groups.\\
+        S C-k   & Kill all groups on a certain level.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\SummaryModeGeneral}{%
+    {\esamepage
+      \begin{keys}{M-RET}
+        SPC     & (A SPC, A n) Select an article, scroll it one page, move to the
+        next one.\\
+        DEL     & (A DEL, A p, b) Scroll this article one page back. [distance]\\
+        RET     & (A RET) Scroll this article one line forward. [distance]\\
+        M-RET   & (A M-RET) Scroll this article one line backward. [distance]\\
+        =       & Expand the Summary window (fullsize).
+        [Prefix: shrink to display article window]\\
+                                %
+        \&      & Execute a command on all articles whose header matches a regexp.
+        [Prefix: move backwards]\\
+        M-\&    & Execute a command on all articles having the process mark.\\
+                                %
+        M-n     & (G M-n) Go to {\bf next} summary line of unread article.
+        [distance]\\
+        M-p     & (G M-p) Go to {\bf previous} summary line of an unread article.
+        [distance]\\
+        M-s     & {\bf Search} through all subsequent articles for a regexp.\\
+        M-r     & Search through all previous articles for a regexp.\\
+                                %
+        A P     & {\bf Postscript}-print current buffer.\\
+                                %
+        M-k     & Edit this group's {\bf kill} file.\\
+        M-K     & Edit the general {\bf kill} file.\\
+                                %
+        C-t     & Toggle {\bf truncation} of summary lines.\\
+        Y g     & Regenerate the summary-buffer.\\
+        Y c     & Insert all cached articles into the summary-buffer.\\
+                                %
+        M-C-e   & {\bf Edit} the group-parameters.\\
+        M-C-a   & Customize the group-parameters.\\
+                                %
+                                % article handling
+                                %
+        A $<$   & ($<$, A b) Scroll to the beginning of this article.\\
+        A $>$   & ($>$, A e) Scroll to the end of this article.\\
+        A s     & (s) Perform an i{\bf search} in the article buffer.\\
+                                %
+        A D     & (C-d) Un{\bf digestify} this article into a separate group.
+        [Prefix: force digest]\\
+        M-C-d   & Like C-d, but open several documents in nndoc-groups, wrapped
+        in an nnvirtual group [p/p]\\
+                                %
+        A g     & (g) (Re)fetch this article ({\bf get}). [Prefix: get raw version]\\
+        A r     & (\^{}, A \^{}) Fetch the parent(s) of this article.
+        [Prefix: if positive fetch \textit{n} ancestors;
+        negative: fetch only the \textit{n}th ancestor]\\
+        A t     & {\bf Translate} this article.\\
+        A R     & Fetch all articles mentioned in the {\bf References}-header.\\
+        A T     & Fetch full \textbf{thread} in which the current article appears.\\
+        M-\^{}  & Fetch the article with a given Message-ID.\\
+        S y     & {\bf Yank} the current article into an existing message-buffer.
+        [p/p]\\
+        A M     & Setup group parameters for {\bf mailing} lists from
+        headers. [Prefix: replace old settings]\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\MIMESummary}{%
+    {\esamepage
+      For the commands operating on one MIME part (a subset of gnus-article-*), a
+      prefix selects which part to operate on. If the point is placed over a
+      MIME button in the article buffer, use the corresponding bindings for the
+      article buffer instead.
+
+      \begin{keys}{W M w}
+        K v      & (b, W M b) {\bf View} the MIME-part.\\
+        K o      & {\bf Save} the MIME part.\\
+        K c      & {\bf Copy} the MIME part.\\
+        K e      & View the MIME part {\bf externally}.\\
+        K i      & View the MIME part {\bf internally}.\\
+        K $\mid$ & Pipe the MIME part to an external command.\\
+        K b      & Make all the MIME parts have buttons in front of them.\\
+        K m      & Try to repair {\bf multipart-headers}.\\
+        K C      & View the MIME part using a different {\bf charset}.\\
+        X m      & Save all parts matching a MIME type to a directory. [p/p]\\
+        M-t      & Toggle the buttonized display of the article buffer.\\
+        W M w    & Decode RFC2047-encoded words in the article headers.\\
+        W M c    & Decode encoded article bodies. [Prefix: prompt for charset]\\
+        W M v    & View all MIME parts in the current article.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\SortSummary}{%
+    {\esamepage
+      \begin{keys}{C-c C-s C-a}
+        C-c C-s C-a & Sort the summary-buffer by {\bf author}.\\
+        C-c C-s C-t & Sort the summary-buffer by {\bf recipient}.\\
+        C-c C-s C-d & Sort the summary-buffer by {\bf date}.\\
+        C-c C-s C-i & Sort the summary-buffer by article score.\\
+        C-c C-s C-l & Sort the summary-buffer by amount of {\bf lines}.\\
+        C-c C-s C-c & Sort the summary-buffer by length.\\
+        C-c C-s C-n & Sort the summary-buffer by article {\bf number}.\\
+        C-c C-s C-s & Sort the summary-buffer by {\bf subject}.\\
+        C-c C-s C-r & Sort the summary-buffer {\bf randomly}.\\
+        C-c C-s C-o & Sort the summary-buffer using the default method.\\
+      \end{keys}
+      With a prefix these functions sort in reverse order.
+      }
+    }
+
+  \newcommand{\MailGroups}{% formerly \Bsubmap
+    {\esamepage
+      These commands (except `B c') are only valid in a mail group.\\*
+      \begin{keys}{B M-C-e}
+        B DEL   & (B backspace, B delete) {\bf Delete} the mail article from disk (!).
+        [p/p]\\
+        B B     & Crosspost this article to another group.\\
+        B c     & {\bf Copy} this article from any group to a mail group. [p/p]\\
+        B e     & {\bf Expire} all expirable articles in this group. [p/p]\\
+        B i     & {\bf Import} a random file into this group.\\
+        B I     & Create an empty article in this group.\\
+        B m     & {\bf Move} the article from one mail group to another. [p/p]\\
+        B p     & Query whether the article was {\bf posted} as well.\\
+        B q     & {\bf Query} where the article will end up after fancy splitting\\
+        B r     & {\bf Respool} this mail article. [p/p]\\
+        B t     & {\bf Trace} the fancy splitting patterns applied to this article.\\
+        B w     & (e) Edit this article.\\
+        B M-C-e & {\bf Expunge} (delete from disk) all expirable articles in this group
+        (!). [p/p]\\
+        K E     & {\bf Encrypt} article body. [p/p]\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\DraftGroup}{% formerly \Dsubmap
+    {\esamepage
+      The ``drafts''-group contains messages that have been saved but not sent
+      and rejected articles. \\*
+      \begin{keys}{B DEL}
+        D e      & \textbf{edit} message.\\
+        D s      & \textbf{Send} message. [p/p]\\
+        D S      & \textbf{Send} all messages.\\
+        D t      & \textbf{Toggle} sending (mark as unsendable).\\
+        B DEL    & \textbf{Delete} message (like in mailgroup).\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\SelectArticles}{% formerly \Gsubmap
+    {\esamepage
+      These commands select the target article. They do not use the prefix.\\*
+      \begin{keys}{G C-n}
+        h       & Enter article-buffer.\\
+        G b     & (,) Go to the {\bf best} article (the one with highest score).\\
+        G f     & (.) Go to the {\bf first} unread article.\\
+        G n     & (n) Go to the {\bf next} unread article.\\
+        G p     & (p) Go to the {\bf previous} unread article.\\
+                                %
+        G N     & (N) Go to {\bf the} next article.\\
+        G P     & (P) Go to the {\bf previous} article.\\
+                                %
+        G C-n   & (M-C-n) Go to the {\bf next} article with the same subject.\\
+        G C-p   & (M-C-p) Go to the {\bf previous} article with the same subject.\\
+                                %
+        G l     & (l) Go to the previously read article ({\bf last-read-article}).\\
+        G o     & Pop an article off the summary history and go to it.\\
+                                %
+        G g     & Search an article via subject.\\
+        G j     & (j) Search an article via Message-Id or subject.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\ArticleModeGeneral}{%
+    {\esamepage
+      The normal navigation keys work in Article mode. Some additional keys are:\\
+      \begin{keys}{C-c RET}
+        C-c \^{} & Get the article with the Message-ID near point.\\
+        C-c RET & Send reply to address near point.\\
+        h       & Go to the \textbf{header}-line of the article in the
+        summary-buffer.\\
+        s       & Go to \textbf{summary}-buffer.\\
+        RET     & (middle mouse button) Activate the button at point to follow
+        an URL or Message-ID.\\
+        TAB     & Move the point to the next button.\\
+        M-TAB   & Move point to previous button.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\WashArticle}{% formerly \Wsubmap
+    {\esamepage
+      \begin{keys}{W W H}
+        W 6     & Translate a base64 article.\\
+        W a     & Strip certain {\bf headers} from body.\\
+        W b     & Make Message-IDs and URLs in the article mouse-clickable
+        {\bf buttons}.\\
+        W c     & Translate CRLF-pairs to LF and then remaining CR's to LF's.\\
+        W d     & Treat {\bf dumbquotes}.\\
+        W e     & Treat {\bf emphasized} text.\\
+        W h     & Treat {\bf HTML}.\\
+        W l     & (w) Remove page breaks ({\bf\^{}L}) from the article.\\
+        W m     & {\bf Morse} decode article.\\
+        W o     & Treat {\bf overstrike} or underline (\^{}H\_) in the article.\\
+        W p     & Verify X-{\bf PGP}-Sig header.\\
+        W q     & Treat {\bf quoted}-printable in the article.\\
+        W r     & (C-c C-r) Do a Caesar {\bf rotate} (rot13) on the article.\\
+        W s     & Verify (and decrypt) a {\bf signed} message.\\
+        W t     & (t) {\bf Toggle} display of all headers.\\
+        W u     & {\bf Unsplit} broken URLs.\\
+        W v     & (v) Toggle permanent {\bf verbose} displaying of all headers.\\
+        W w     & Do word {\bf wrap} in the article.\\
+        W B     & Add clickable {\bf buttons} to the article headers.\\
+        W C     & {\bf Capitalize} first word in each sentence.\\
+        W Q     & Fill long lines.\\
+        W Z     & Translate a HZ-encoded article.\\
+                                %
+        W G u   & {\bf Unfold} folded header lines.\\
+        W G f   & {\bf Fold} all header lines.\\
+        W G n   & Unfold {\bf Newsgroups:} and Follow-Up-To:.\\
+                                %
+        W Y c   & Repair broken {\bf citations}.\\
+        W Y a   & Repair broken {\bf attribution} lines.\\
+        W Y u   & {\bf Unwrap} broken citation lines.\\
+        W Y f   & Do a {\bf full} deuglification (W Y c, W Y a, W Y u).\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\BlankAndWhitespace}{%
+    {\esamepage
+      \begin{keys}{W E w}
+        W E l   & Strip blank {\bf lines} from the beginning of the article.\\
+        W E m   & Replace blank lines with empty lines and remove {\bf multiple}
+        blank lines.\\
+        W E t   & Remove {\bf trailing} blank lines.\\
+        W E a   & Strip blank lines at start and end
+        (W E l, W E m and W E t).\\
+        W E A   & Strip {\bf all} blank lines.\\
+        W E s   & Strip leading blank lines from the article body.\\
+        W E e   & Strip trailing blank lines from the article body.\\
+        W E w   & Remove leading {\bf whitespace} from all headers.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\Picons}{%
+    {\esamepage
+      \begin{keys}{W D D}
+        W D s   & (W g) Display {\bf smilies}.\\
+        W D x   & (W f) Look for and display any X-{\bf Face} headers.\\
+        W D d   & Display any Face headers.\\
+        W D n   & Toggle picons in {\bf Newsgroups} and Followup-To.\\
+        W D m   & Toggle picons in {\bf mail} headers (To and Cc).\\
+        W D f   & Toggle picons in {\bf From}.\\
+        W D D   & Remove all images from the article buffer.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\TimeAndDate}{%
+    {\esamepage
+      \begin{keys}{W T u}
+        W T u   & (W T z) Display the article timestamp in GMT ({\bf UT, ZULU}).\\
+        W T i   & Display the article timestamp in {\bf ISO} 8601.\\
+        W T l   & Display the article timestamp in the {\bf local} timezone.\\
+        W T s   & Display according to `gnus-article-time-format'.\\
+        W T e   & Display the time {\bf elapsed} since it was sent.\\
+        W T o   & Display the {\bf original} timestamp.\\
+        W T p   & Display the date in format that's {\bf
+          pronounceable} in English.\\
+      \end{keys}
+      }
+    }
+
+  \newcommand{\HideHighlightArticle}{%
+    {\esamepage
+      \begin{keys}{W W C-c}
+        W W a   & Hide {\bf all} unwanted parts. Calls W W h, W W s, W W C-c.\\
+        W W h   & Hide article {\bf headers}.\\
+        W W b   & Hide {\bf boring} headers.\\
+        W W s   & Hide {\bf signature}.\\
+        W W l   & Hide {\bf list} identifiers in subject-header.\\
+        W W P   & Hide {\bf PEM} (privacy enhanced messages).\\
+        W W B   & Hide banner specified by group parameter.\\
+        W W c   & Hide {\bf citation}.\\
+        W W C-c & Hide {\bf citation} using a more intelligent algorithm.\\
+        W W C   & Hide cited text in articles that aren't roots.\\
+        W H a   & Highlight {\bf all} parts. Calls W b, W H c, W H h, W H s.\\
+        W H c   & Highlight article {\bf citations}.\\
+        W H h   & Highlight article {\bf headers}.\\
+        W H s   & Highlight article {\bf signature}.\\
+      \end{keys}
+      For all hiding-commands: A positive prefix always hides, and a negative
+      prefix will show what was previously hidden.
+      }}
+
+  \newcommand{\MIMEArticleMode}{%
+    {\esamepage
+      \begin{keys}{RET}
+        RET     & (BUTTON-2) Toggle display of the MIME object.\\
+        v       & Prompt for a method and then view object using this method.\\
+        o       & Prompt for a filename and save the MIME object.\\
+        C-o     & Prompt for a filename to save the MIME object to and remove it.\\
+        d       & {\bf Delete} the MIME object.\\
+        c       & {\bf Copy} the MIME object to a new buffer and display this buffer.\\
+        i       & Display the MIME object in this buffer.\\
+        C       & Copy the MIME object to a new buffer and display this buffer using {\bf Charset} \\
+        E       & View internally. \\
+        e       & View {\bf externally}. \\
+        t       & View the MIME object as a different {\bf type}.\\
+        p       & {\bf Print} the MIME object.\\
+        $\mid$  & Pipe the MIME object to a process.\\
+        .       & Take action on the MIME object.\\
+      \end{keys}
+      }
+    }
+
+  %% end of article mode for reading ..........................................
+
+  \newcommand{\MarkArticlesGeneral}{% formerly \Msubmap
+    {\esamepage
+      \begin{keys}{M M-C-r}
+        d       & (M d, M r) Mark this article as read and move to the next one.
+        [scope]\\
+        D       & Mark this article as read and move to previous one. [scope]\\
+        !       & (u, M !, M t) Tick this article (mark it as interesting) and move
+        to the next one. [scope]\\
+        U       & Tick this article and move to the previous one. [scope]\\
+        M ?     & (?) Mark this article as dormant (only followups are
+        interesting). [scope]\\
+        M D     & Show all {\bf dormant} articles (normally they are hidden unless they
+        have any followups).\\
+        M M-D   & Hide all {\bf dormant} articles.\\
+        C-w     & Mark all articles between point and mark as read.\\
+        M-u     & (M SPC, M c) Clear all marks from this article and move to the next
+        one. [scope]\\
+        M-U     & Clear all marks from this article and move to the previous one.
+        [scope]\\
+                                %
+        M e     & (E, M x) Mark this article as {\bf expirable}. [scope]\\
+                                %
+        M k     & (k) {\bf Kill} all articles with same subject, select
+        next unread one.\\
+        M K     & (C-k) {\bf Kill} all articles with the same subject as this one.\\
+                                %
+        M C     & {\bf Catch-up} the articles that are not ticked and not dormant.\\
+        M C-c   & {\bf Catch-up} all articles in this group.\\
+        M H     & {\bf Catch-up} (mark read) this group to point (to-{\bf here}).\\
+                                %
+        M b     & Set a {\bf bookmark} in this article.\\
+        M B     & Remove the {\bf bookmark} from this article.\\
+                                %
+        M M-r   & (x) Expunge all {\bf read} articles from this group.\\
+        M M-C-r & Expunge all articles having a given mark.\\
+        M S     & (C-c M-C-s) {\bf Show} all expunged articles.\\
+        M M C-h & Displays some more keys doing ticking slightly differently.\\
+      \end{keys}
+      The variable `gnus-summary-goto-unread' controls what happens after a mark
+      has been set (C-x C-i g Setting Marks RET)
+      }}
+
+  \newcommand{\MarkByScore}{%
+    \begin{keys}{M V m}
+      M V c   & {\bf Clear} all marks from all high-scored articles. [score]\\
+      M V k   & {\bf Kill} all low-scored articles. [score]\\
+      M V m   & Mark all high-scored articles with a given {\bf mark}. [score]\\
+      M V u   & Mark all high-scored articles as interesting (tick them). [score]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\ProcessMark}{%
+  {\esamepage
+    These commands set and remove the process mark (\#). You only need to use
+    it if the set of articles you want to operate on is non-contiguous. Else
+    use a numeric prefix.\\*
+    \begin{keys}{M P R}
+      M P p   & (\#, M \#) Mark this article.\\
+      M P u   & (M-\#, M M-\#) \textbf{unmark} this article.\\
+      M P b   & Mark all articles in {\bf buffer}.\\
+      M P r   & Mark all articles in the {\bf region}.\\
+      M P g   & Unmark all articles in the region.\\
+      M P R   & Mark all articles matching a {\bf regexp}.\\
+      M P G   & Unmark all articles matching a regexp.\\
+      M P t   & Mark all articles in this (sub){\bf thread}.\\
+      M P T   & Unmark all articles in this (sub){\bf thread}.\\
+      M P s   & Mark all articles in the current {\bf series}.\\
+      M P S   & Mark all {\bf series} that already contain a marked article.\\
+      M P a   & Mark {\bf all} articles (in series order).\\
+      M P U   & \textbf{unmark} all articles.\\
+      M P i   & {\bf Invert} the list of process-marked articles.\\
+      M P k   & Push process-mark set onto stack and unmark
+      all articles.\\
+      M P y   & Pop process-mark set from stack and restore it.\\
+      M P w   & Push process-mark set on the stack.\\
+      M P v   & Mark all articles with score over default score. [Prefix: score]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\Limiting}{%
+  {\esamepage
+    \begin{keys}{/M}
+      //   & (/s) Limit the summary-buffer to articles matching {\bf subject}.\\
+      /a   & Limit the summary-buffer to articles matching {\bf author}.\\
+      /R   & Limit the summary-buffer to articles matching {\bf recipient}.\\
+      /x   & Limit depending on ``extra'' headers.\\
+      /u   & (x) Limit to {\bf unread} articles.
+      [Prefix: also exclude ticked and dormant articles]\\
+      /.   & Limit to unseen articles.\\
+      /m   & Limit to articles marked with specified {\bf mark}.\\
+      /t   & Ask for a number and exclude articles younger than that many days.
+      [Prefix: exclude older articles]\\
+      /n   & Limit to current article. [p/p]\\
+      /w   & Pop previous limit off stack and restore it.
+      [Prefix: pop all limits]\\
+      /v   & Limit to score. [score]\\
+      /E   & (M S) Include all expunged articles in the limit.\\
+      /D   & Include all dormant articles in the limit.\\
+      /*   & Limit to cached articles.\\
+      Y C  & Include all cached articles in the limit.\\
+      /d   & Exclude all dormant articles from the limit.\\
+      /M   & Exclude all marked articles.\\
+      /T   & Include all articles from the current thread in the limit.\\
+      /c   & Exclude all dormant articles that have no children from the limit.\\
+      /C   & Mark all excluded unread articles as read.
+      [Prefix: also mark ticked and dormant articles]\\
+      /o   & Insert all {\bf old} articles. [Prefix: how many]\\
+      /N   & Insert all {\bf new} articles.\\
+      /p   & Limit to articles {\bf predicated} in the `display' group parameter.\\
+      /r   & Limit to {\bf replied} articles. [Prefix: unreplied]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\OutputArticles}{% formerly \Osubmap
+  {\esamepage
+    \begin{keys}{O m}
+      O o     & (o, C-o) Save this article using the default article saver. [p/p]\\
+      O b     & Save this article's {\bf body} in plain file format [p/p]\\
+      O f     & Save this article in plain {\bf file} format. [p/p]\\
+      O F     & like O f, but overwrite file's contents. [p/p]\\
+      O h     & Save this article in {\bf mh} folder format. [p/p]\\
+      O m     & Save this article in {\bf mail} format. [p/p]\\
+      O r     & Save this article in {\bf rmail} format. [p/p]\\
+      O v     & Save this article in {\bf vm} format. [p/p]\\
+      O p     & ($\mid$) {\bf Pipe} this article to a shell command. [p/p]\\
+      O P     & \textbf{Print} this article using Muttprint. [p/p]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\PostReplyetc}{% formerly \Ssubmap
+  {\esamepage
+    These commands put you in a separate news or mail buffer. See the section
+    about composing messages for more information.\\*
+                                %After
+                                %editing the article, send it by pressing C-c C-c.  If you are in a
+                                %foreign group and want to post the article using the foreign server, give
+                                %a prefix to C-c C-c.\\*
+    \begin{keys}{S O m}
+      S p     & (a) {\bf Post} an article to this group.\\
+      S f     & (f) Post a {\bf followup} to this article.\\
+      S F     & (F) Post a {\bf followup} and include the original. [p/p]\\
+      S o p   & Forward this article as a {\bf post} to a newsgroup.\\
+      S M-c   & Complain about excessive crossposting to
+      article's author. [p/p]\\
+                                %
+      S m     & (m) Send a {\bf mail} to some other person.\\
+      S r     & (r) Mail a {\bf reply} to the author of this article.\\
+      S R     & (R) Mail a {\bf reply} and include the original. [p/p]\\
+      S B r   & Like S r but ignore the Reply-To: header.\\
+      S B R   & Like S R but ignore the Reply-To: header.\\
+      S w     & Mail a {\bf wide} reply to this article.\\
+      S W     & Mail a {\bf wide} reply to this article and include
+      the original.\\
+      S v     & Mail a {\bf very} wide reply to this article.\\
+      S V     & Mail a {\bf very} wide reply to this article and include the original.\\
+      S o m   & (C-c C-f) Forward this article by {\bf mail} to a person.\\
+      S D b   & Resend {\bf bounced} mail.\\
+      S D r   & {\bf Resend} mail to a different person.\\
+      S D e   & {\bf Edit} and resend.\\
+                                %
+      S n     & Post a followup via {\bf news} even if you got the message
+      through mail.\\
+      S N     & Post a followup via {\bf news} and include the original mail.
+      [p/p]\\
+                                %
+      S c     & (C) {\bf Cancel} this article (only works if it is
+      your own). [p/p]\\
+      S s     & {\bf Supersede} this article with a new one (only for own
+      articles).\\
+                                %
+      S O m   & Digest these series and forward by {\bf mail}. [p/p]\\
+      S O p   & Digest these series and forward as a {\bf post} to a newsgroup.
+      [p/p]\\
+                                %
+      S u     & {\bf Uuencode} a file and post it as a series.\\
+    \end{keys}
+    If you want to cancel or supersede an article you just posted (before it
+    has appeared on the server), go to the *post-news* buffer, change
+    `Message-ID' to `Cancel' or `Supersedes' and send again with C-c C-c.
+    }}
+
+\newcommand{\Threading}{% formerly \Tsubmap
+  {\esamepage
+    \begin{keys}{T M-\#}
+      T \#    & Mark this thread with the process mark.\\
+      T M-\#  & Remove process-marks from this thread.\\
+                                %
+      T t     & Re-{\bf thread} the current article's thread.\\
+      T \^{}  & Make the current article child of the marked (or previous) one.\\
+                                % movement
+      T n     & (M-C-f, M-down) Go to the {\bf next} thread. [distance]\\
+      T p     & (M-C-b, M-up) Go to the {\bf previous} thread. [distance]\\
+      T d     & {\bf Descend} this thread. [distance]\\
+      T u     & Ascend this thread ({\bf up}-thread). [distance]\\
+      T o     & Go to the top of this thread.\\
+                                %
+      T s     & {\bf Show} the thread hidden under this article.\\
+      T h     & {\bf Hide} this (sub)thread.\\
+                                %
+      T i     & {\bf Increase} the score of this thread.\\
+      T l     & (M-C-l) {\bf Lower} the score of this thread.\\
+                                %
+      T k     & (M-C-k) {\bf Kill} the current (sub)thread. [Negative prefix:
+      tick it, positive prefix: unmark it.]\\
+                                %
+      T H     & {\bf Hide} all threads.\\
+      T S     & {\bf Show} all hidden threads.\\
+      T T     & (M-C-t) {\bf Toggle} threading.\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\Scoring}{% formerly \Vsubmap
+  {\esamepage
+    Read about Adaptive Scoring in the online info.\\*
+    \begin{keys}{\bf A p m l}
+      V a     & {\bf Add} a new score entry, specifying all elements.\\
+      V c     & Specify a new score file as {\bf current}.\\
+      V e     & {\bf Edit} the current score alist.\\
+      V f     & Edit a score {\bf file} and make it the current one.\\
+      V m     & {\bf Mark} all articles below a given score as read.\\
+      V s     & Set the {\bf score} of this article.\\
+      V t     & Display all score rules applied to this article ({\bf track}).\\
+      W w     & List {\bf words} used in scoring.\\
+      V x     & {\bf Expunge} all low-scored articles. [score]\\
+      V C     & {\bf Customize} current score file with a user-friendly
+      interface.\\
+      V F     & {\bf Flush} the cache of score files.\\
+      V R     & {\bf Re-score} the summary buffer.\\
+      V S     & Display the {\bf score} of this article.\\
+      \bf A p m l& Make a scoring entry based on this article.\\
+    \end{keys}
+    The four letters stand for:\\*
+    \quad \B{A}ction: I)ncrease, L)ower;\\*
+    \quad \B{p}art: a)uthor (from), s)ubject, x)refs (cross-post), d)ate, l)ines,
+    message-i)d, t)references (parent), f)ollowup, b)ody, h)ead (all headers);\\*
+    \quad \B{m}atch type:\\*
+    \qquad string: s)ubstring, e)xact, r)egexp, f)uzzy,\\*
+    \qquad date: b)efore, a)t, n)this,\\*
+    \qquad number: $<$, =, $>$;\\*
+    \quad \B{l}ifetime: t)emporary, p)ermanent, i)mmediate.
+
+    If you type the second letter in uppercase, the remaining two are assumed
+    to be s)ubstring and t)emporary.
+    If you type the third letter in uppercase, the last one is assumed to be
+    t)emporary.
+
+    \quad Extra keys for manual editing of a score file:\\*
+    \begin{keys}{C-c C-c}
+      C-c C-c & Finish editing the score file.\\
+      C-c C-d & Insert the current {\bf date} as number of days.\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\ExtractSeries}{% formerly \Xsubmap
+  {\esamepage
+    Gnus recognizes if the current article is part of a series (multipart
+    posting whose parts are identified by numbers in their subjects, e.g.{}
+    1/10\dots10/10) and processes the series accordingly. You can mark and
+    process more than one series at a time. If the posting contains any
+    archives, they are expanded and gathered in a new group.\\*
+    \begin{keys}{X p}
+      X b     & Un-{\bf binhex} these series. [p/p]\\
+      X o     & Simply {\bf output} these series (no decoding). [p/p]\\
+      X p     & Unpack these {\bf postscript} series. [p/p]\\
+      X s     & Un-{\bf shar} these series. [p/p]\\
+      X u     & {\bf Uudecode} these series. [p/p]\\
+    \end{keys}
+
+    Each one of these commands has four variants:\\*
+    \begin{keys}{X v \bf Z}
+      X   \bf z & Decode these series. [p/p]\\
+      X   \bf Z & Decode and save these series. [p/p]\\
+      X v \bf z & Decode and view these series. [p/p]\\
+      X v \bf Z & Decode, save and view these series. [p/p]\\
+    \end{keys}
+    where {\bf z} or {\bf Z} identifies the decoding method (b, o, p, s, u).
+
+    An alternative binding for the most-often used of these commands is\\*
+    \begin{keys}{C-c C-v C-v}
+      C-c C-v C-v & (X v u) Uudecode and view these series. [p/p]\\
+    \end{keys}
+    }}
+
+\newcommand{\ExitSummary}{% formerly \Zsubmap
+  {\esamepage
+    \begin{keys}{Z G}
+      Z Z     & (q, Z Q) Exit this group.\\
+      Z E     & (Q) {\bf Exit} without updating the group information.\\
+                                %
+      Z c     & (c) Mark all unticked articles as read ({\bf catch-up}) and exit.\\
+      Z C     & Mark all articles as read ({\bf catch-up}) and exit.\\
+                                %
+      Z n     & Mark all articles as read and go to the {\bf next} group.\\
+      Z N     & Exit and go to {\bf the} next group.\\
+      Z P     & Exit and go to the {\bf previous} group.\\
+                                %
+      Z G     & (M-g) Check for new articles in this group ({\bf get}).\\
+      Z R     & (C-x C-s) Exit this group, and then enter it again ({\bf reenter}).
+      [Prefix: select all articles, read and unread.]\\
+      Z s     & Update and save the dribble buffer. [Prefix: save .newsrc* as well]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\MsgCompositionGeneral}{%
+  Press C-c ? in the composition-buffer to get this information.\\*
+  {\esamepage
+    \begin{keys}{C-c C-m}
+                                % sending
+      C-c C-c & Send message and exit. [Prefix: send via foreign server]\\
+      C-c C-s & Send message. [Prefix: send via foreign server]\\
+      C-c C-d & Don't send message (save as \textbf{draft}).\\
+      C-c C-k & \textbf{Kill} message-buffer.\\
+      C-c C-m & {\bf Mail} reply to the address near point.
+      [Prefix: include the original]\\
+                                % modify headers/body
+      C-c C-o & Sort headers.\\
+      C-c C-e & \textbf{Elide} region.\\
+      C-c C-v & Kill everything outside region.\\
+      C-c C-r & Do a \textbf{Rot-13} on the body.\\
+      C-c C-w & Insert signature (from `message-signature-file').\\
+      C-c C-z & Kill everything up to signature.\\
+      C-c C-y & \textbf{Yank} original message.\\
+      C-c C-q & Fill the yanked message.\\
+      C-c M-C-y & \textbf{Yank} a buffer and quote it.\\
+      M-RET   & Insert four newlines and format quoted text. [Prefix:
+      justify as well]\\
+      C-c M-r & \textbf{Rename} message buffer. [Prefix: ask for new name]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\MsgCompositionMovementArticle}{%
+  The following functions create the header-field if necessary.\\*
+  {\esamepage
+    \begin{keys}{C-c C-f C-u}
+      C-c TAB & Move to \textbf{signature}.\\
+      C-c C-b & Move to \textbf{body}.\\
+      C-c C-f C-t & (C-c C-t) Move to \textbf{To:}.\\
+      C-c C-f C-c & Move to \textbf{Cc:}.\\
+      C-c C-f C-b & Move to \textbf{Bcc:}.\\
+      C-c C-f C-w & Move to \textbf{Fcc:}.\\
+      C-c C-f C-s & Move to \textbf{Subject:}.\\
+      C-c C-f C-r & Move to \textbf{Reply-To:}.\\
+      C-c C-f C-f & Move to \textbf{Followup-To:}.\\
+      C-c C-f C-n & (C-c C-n) Move to \textbf{Newsgroups:}.\\
+      C-c C-f C-u & Move to \textbf{Summary:}.\\
+      C-c C-f C-k & Move to \textbf{Keywords:}.\\
+      C-c C-f C-d & Move to \textbf{Distribution:}.\\
+      C-c C-f C-m & Move to \textbf{Mail-Followup-To:}.\\
+      C-c C-f C-o & Move to \textbf{From:}.\\
+      C-c C-f C-a & Insert a reasonable \textbf{Mail-Followup-To:} for
+      an unsubscribed list. [Prefix: include addresses in \textbf{Cc:}]\\
+      C-c C-f TAB & (C-c C-u) Move to \textbf{Importance:}.\\
+      C-c M-n     & Insert \textbf{Disposition-Notification-To:}
+      (request receipt).\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\MsgCompositionMML}{%
+  {\esamepage
+    \begin{keys}{C-c C-m P}
+      C-c C-m f   & (C-c C-a) Attach \textbf{file}.\\
+      C-c C-m b   & Attach contents of \textbf{buffer}.\\
+      C-c C-m e   & Attach \textbf{external} file (ftp..).\\
+      C-c C-m P   & Create MIME-\textbf{preview} (new
+      buffer). [Prefix: show raw MIME preview]\\
+      C-c C-m v   & \textbf{Validate} article.\\
+      C-c C-m p   & Insert \textbf{part}.\\
+      C-c C-m m   & Insert \textbf{multi}-part.\\
+      C-c C-m q   & \textbf{Quote} region.\\
+      C-c C-m c s & Encrypt message using \textbf{S/MIME}.\\
+      C-c C-m c o & Encrypt message using PGP.\\
+      C-c C-m c p & Encrypt message using \textbf{PGP/MIME}.\\
+      C-c C-m s s & Sign message using \textbf{S/MIME}.\\
+      C-c C-m s o & Sign message using PGP.\\
+      C-c C-m s p & Sign message using \textbf{PGP/MIME}.\\
+      C-c C-m C-n & Remove security related MML tags from message.\\
+                                % TODO: narrow headers (C-c C-m n) ?
+    \end{keys}
+    }
+  }
+
+%% TODO:
+\newcommand{\ServerMode}{%
+  {\esamepage
+    To enter this mode, press \^{} while in Group mode.\\*
+    \begin{keys}{SPC}
+      SPC     & (RET) Browse this server.\\
+      a       & {\bf Add} a new server.\\
+      c       & {\bf Copy} this server.\\
+      e       & {\bf Edit} a server.\\
+      k       & {\bf Kill} this server. [scope]\\
+      l       & {\bf List} all servers.\\
+      q       & Return to the group buffer ({\bf quit}).\\
+      s       & Request that the server scan its sources for new articles.\\
+      g       & Request that the server regenerate its data.\\
+      y       & {\bf Yank} the previously killed server.\\
+      O       & Try to {\bf open} a connection to this server.\\
+      C       & {\bf Close} connection to this server.\\
+      D       & Mark this server as unreachable ({\bf deny}).\\
+      M-o     & {\bf Open} the connection to all servers.\\
+      M-c     & {\bf Close} the connection to all servers.\\
+      R       & Make all denied servers into closed servers.\\
+      L       & Set server status to offline.\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\BrowseServer}{%
+  {\esamepage
+    To enter this mode, press `B' while in Group mode.\\*
+    \begin{keys}{RET}
+      RET     & Enter the current group.\\
+      SPC     & Enter the current group and display the first article.\\
+      ?       & Give a very short help message.\\
+      n       & Go to the {\bf next} group. [distance]\\
+      p       & Go to the {\bf previous} group. [distance]\\
+      q       & (l) {\bf Quit} browse mode.\\
+      u       & Subscribe to the current group. [scope]\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\GroupUnplugged}{%
+  {\esamepage
+    \begin{keys}{J S}
+      J j & Toggle plugged-state.\\
+      J s & Fetch articles from all groups for offline-reading.\\
+      J u & Fetch all eligible articles from this group.\\
+      J S & \textbf{Send} all sendable messages in the drafts group.\\
+                                %
+      J c & Enter \textbf{category} buffer.\\
+      J a & \textbf{Add} this group to an Agent category [p/p].\\
+      J r & \textbf{Remove} this group from its Agent category [p/p].\\
+      J Y & Synchronize flags changed while unplugged with remote server.\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\SummaryUnplugged}{%
+  {\esamepage
+    \begin{keys}{J M-\#}
+      J \#   & \textbf{Mark} the article for downloading.\\
+      J M-\# & \textbf{Unmark} the article for downloading.\\
+      @      & \textbf{Toggle} whether to download the article.\\
+      J c    & Mark all undownloaded articles as read (\textbf{catch-up}).\\
+      J u    & Download all downloadable articles from group.\\
+    \end{keys}
+    }
+  }
+
+\newcommand{\ServerUnplugged}{%
+  {\esamepage
+    \begin{keys}{J a}
+      J a & \textbf{Add} the current server to the list of servers covered
+      by the agent.\\
+      J r & \textbf{Remove} the current server from the list of servers covered
+      by the agent.\\
+    \end{keys}
+    }
+  }
+
+% end   {gnusref} % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+
+% o some things might not be updated: scoring and server modes, maybe more
+% o Gnus Unplugged category-buffer commands need to be written
+
+\begin{document}
+
+\ifthenelse{\isundefined{\booklettrue}}{ % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \raggedbottom\raggedright
+  \twocolumn
+  % use \tiny to shrink it to 4 pages (needs a high-resolution printer though)
+  % \tiny
+  \scriptsize
+  \pagestyle{plain}
+  \Title
+  \par
+  \Logo{refcard}
+}{
+  \setcounter{page}{0}
+  \thispagestyle{empty}
+  \vspace*{\fill}
+  \Title
+  \vspace{0.4in}
+  \Logo{booklet}
+  \vspace*{\fill}
+  \pagebreak
+}%ifbooklet% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% TODO: how does this work ?
+%\tableofcontents
+
+\Notes
+%
+
+\section*{Group-Mode}
+\GroupModeGeneral
+    \subsection*{Group Subscribedness-Levels}
+    \GroupLevels
+    \subsection*{List Groups}
+    \ListGroups
+    \subsection*{Create/Edit Foreign Groups}
+    \CreateEditGroups
+    \ifthenelse{\isundefined{\booklettrue}}{}{\pagebreak}
+    \subsection*{Unsubscribe, Kill and Yank Groups}
+    \SubscribeKillYankGroups
+    \subsection*{Mark Groups}
+    \MarkGroups
+    \subsection*{Group-Unplugged}
+    \GroupUnplugged
+% topics in group-mode
+    \subsection*{Group Topics}
+    \GroupTopicsGeneral
+    \subsubsection*{Topic Sorting}
+    \TopicSorting
+
+% \ifthenelse{\isundefined{\booklettrue}}{}{\pagebreak}
+
+% summary-mode
+\section*{Summary Mode}
+\SummaryModeGeneral
+    \subsection*{Select Articles}
+    \SelectArticles
+%
+    \ifthenelse{\isundefined{\booklettrue}}{}{\pagebreak}
+    \subsection*{Threading}
+    \Threading
+%
+    \subsection*{Limiting}
+    \Limiting
+    \subsection*{Sort the Summary-Buffer}
+    \SortSummary
+    \subsection*{Score (Value) Commands}
+    \Scoring
+
+\ifthenelse{\isundefined{\booklettrue}}{% ifcard %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \subsection*{Output Articles}
+  \OutputArticles
+  \subsection*{Extract Series (Uudecode etc)}
+  \ExtractSeries
+}{}%ifcard% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    \subsection*{MIME operations from the Summary-Buffer}
+    \MIMESummary
+
+\ifthenelse{\isundefined{\booklettrue}}{}{% ifbooklet %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \subsection*{Extract Series (Uudecode etc)}
+  \ExtractSeries
+  \subsection*{Output Articles}
+  \OutputArticles
+}%ifbooklet% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%
+    \subsection*{Post, Followup, Reply, Forward, Cancel}
+    \PostReplyetc
+
+\ifthenelse{\isundefined{\booklettrue}}{\newpage}{}% newpage ifcard
+
+      \subsection*{Message Composition}
+
+    \MsgCompositionGeneral
+        \subsubsection*{Jumping in message-buffer}
+        \MsgCompositionMovementArticle
+        \subsubsection*{Attachments/MML}
+        \MsgCompositionMML
+% marking articles
+    \subsection*{Mark Articles}
+    \MarkArticlesGeneral
+        \subsubsection*{Mark Based on Score}
+        \MarkByScore
+        \subsubsection*{The Process Mark}
+        \ProcessMark
+        \subsubsection*{Mark Indication-Characters}
+        \MarkCharacters
+%
+%\ifthenelse{\isundefined{\booklettrue}}{\newpage}{}%
+    \newpage
+    \subsection*{Summary-Unplugged}
+    \SummaryUnplugged
+    \subsection*{Mail-Group Commands}
+    \MailGroups
+    \subsection*{Draft-Group Commands}
+    \DraftGroup
+% exiting
+    \subsection*{Exit the Summary-Buffer}
+    \ExitSummary
+%
+%
+\section*{Article Mode (reading)}
+\ArticleModeGeneral
+    \subsection*{Wash the Article-Buffer}
+    \WashArticle
+    \subsubsection*{Blank Lines and Whitespace}
+    \BlankAndWhitespace
+    \subsubsection*{Picons, X-faces, Smileys}
+    \Picons
+    \subsubsection*{Time and Date}
+    \TimeAndDate
+    \ifthenelse{\isundefined{\booklettrue}}{}{\pagebreak}
+    \subsection*{Hide/Highlight Parts of the Article}
+    \HideHighlightArticle
+    \subsection*{MIME operations from the Article-Buffer (reading)}
+    \MIMEArticleMode
+%
+%
+\ifthenelse{\isundefined{\booklettrue}}{\pagebreak}{}%
+\section*{Server Mode}
+\ServerMode
+    \subsection*{Unplugged-Server}
+    \ServerUnplugged
+%
+%
+\section*{Browse Server Mode}
+\BrowseServer
+
+%\pagebreak
+\vspace*{\fill}
+\Copyright
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

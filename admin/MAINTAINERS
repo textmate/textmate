@@ -1,0 +1,223 @@
+			  Emacs Maintainers
+
+This file contains a description of who is responsible for maintaining
+what parts of the Emacs distribution.  The areas can be defined
+"arbitrarily", but should provide fairly well-defined boundaries so
+that there are not too many ambiguities.
+
+The list below consists of 3 parts.  First, the list of areas that
+someone wants to be maintaining (i.e. has a particularly keen interest
+for it); then the list of areas that someone is willing to maintain,
+although he would not necessarily mind if someone else was the
+official maintainer; and finally the list of areas for which no
+maintainer has been found so far.
+
+==============================================================================
+1.
+==============================================================================
+
+Richard Stallman
+	???
+
+Jason Rumney
+	W32
+
+Eli Zaretskii
+
+	src/bidi.c
+	bidirectional editing support in xdisp.c and elsewhere
+	lisp/term/tty-colors.el
+
+	The MS-DOS (a.k.a. DJGPP) port:
+	    config.bat
+	    msdos/*
+	    src/msdos.[ch]
+	    src/dosfns.[ch]
+	    src/w16select.c
+	    src/s/msdos.h
+	    lisp/term/internal.el
+	    lisp/term/pc-win.el
+	    lisp/dos-fns.el
+	    lisp/dos-w32.el
+	    lisp/dos-vars.el
+	    doc/emacs/msdog.texi
+
+Kenichi Handa
+	Mule
+
+Stefan Monnier
+	src/regex.c
+	src/syntax.c
+	src/keymap.c
+	font-lock/jit-lock/syntax
+	minor-mode/major-mode infrastructure
+	text filling
+	minibuffer completion
+	lisp/textmodes/outline.el
+
+Miles Bader
+	src/xfaces.c
+	field-property related stuff
+	lisp/comint.el
+	lisp/shell.el
+	[other comint-related packages]
+	lisp/button.el
+	lisp/image-file.el
+	lisp/minibuf-eldef.el
+	lisp/rfn-eshadow.el
+
+Jay Belanger
+        Calc
+            lisp/calc/*
+            etc/calccard.tex
+            doc/misc/calc.texi
+
+Michael Olson
+        ERC
+            lisp/erc/*
+            etc/ERC-NEWS
+            doc/misc/erc.texi
+        lisp/emacs-lisp/tq.el
+
+Bastien Guerry
+        Org
+            lisp/org/*
+	    doc/misc/org.texi
+
+==============================================================================
+2.
+==============================================================================
+
+Steven Tamm
+	MacOS
+
+Eli Zaretskii
+    	doc/*
+	lispref/*
+	info/dir
+
+	src/xfaces.c
+	src/xdisp.c
+	src/term.c
+	src/dispnew.c
+	src/frame.c
+	src/dired.c
+
+	lisp/arc-mode.el
+	lisp/menu-bar.el
+	lisp/hexl.el
+	lisp/info.el
+	lisp/ls-lisp.el
+	lisp/startup.el
+	lisp/w32*.el
+
+Stefan Monnier
+	src/intervals.c
+	src/keyboard.c
+	lisp/textmodes/tex-mode.el
+	lisp/progmodes/perl-mode.el
+	lisp/progmodes/tcl.el
+	lisp/emacs-lisp/easymenu.el
+
+Miles Bader
+	src/eval.c
+	src/bytecode.c
+	src/editfns.c
+	lisp/textmodes/refill.el
+
+==============================================================================
+3.
+==============================================================================
+
+src/Makefile.in
+src/abbrev.c
+src/alloc.c
+src/alloca.c
+src/alloca.s
+src/atimer.c
+src/bitmaps/
+src/buffer.c
+src/callint.c
+src/callproc.c
+src/casefiddle.c
+src/casetab.c
+src/category.c
+src/ccl.c
+src/charset.c
+src/cm.c
+src/cmds.c
+src/coding.c
+src/composite.c
+src/config.in
+src/data.c
+src/doc.c
+src/doprnt.c
+src/ecrt0.c
+src/emacs.c
+src/epaths.in
+src/fileio.c
+src/filelock.c
+src/filemode.c
+src/firstfile.c
+src/floatfns.c
+src/fringe.c
+src/fns.c
+src/fontset.c
+src/getloadavg.c
+src/gmalloc.c
+src/gtkutil.c
+src/indent.c
+src/insdel.c
+src/image.c
+src/lastfile.c
+src/lread.c
+src/m/
+src/macros.c
+src/makefile.w32-in
+src/marker.c
+src/md5.c
+src/minibuf.c
+src/mktime.c
+src/pre-crt0.c
+src/prefix-args.c
+src/print.c
+src/process.c
+src/ralloc.c
+src/region-cache.c
+src/s/
+src/scroll.c
+src/search.c
+src/sound.c
+src/strftime.c
+src/sysdep.c
+src/termcap.c
+src/terminfo.c
+src/textprop.c
+src/tparam.c
+src/undo.c
+src/unexaix.c
+src/unexalpha.c
+src/unexcoff.c
+src/unexelf.c
+src/unexhp9k800.c
+src/unexw32.c
+src/vm-limit.c
+src/w32.c
+src/w32console.c
+src/w32fns.c
+src/w32heap.c
+src/w32inevt.c
+src/w32menu.c
+src/w32proc.c
+src/w32reg.c
+src/w32select.c
+src/w32term.c
+src/w32xfns.c
+src/widget.c
+src/window.c
+src/xfns.c
+src/xmenu.c
+src/xrdb.c
+src/xselect.c
+src/xterm.c
+

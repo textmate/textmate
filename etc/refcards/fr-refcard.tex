@@ -1,0 +1,678 @@
+% Reference Card for GNU Emacs
+
+% Copyright (C) 1987, 1993, 1996-1997, 2001-2012
+%   Free Software Foundation, Inc.
+
+% Author: Stephen Gildea <gildea@stop.mail-abuse.org>
+% French translation: Eric Jacoboni
+%	Micha\"el Cadilhac
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% This file is intended to be processed by plain TeX (TeX82).
+%
+% The final reference card has six columns, three on each side.
+% This file can be used to produce it in any of three ways:
+% 1 column per page
+%    produces six separate pages, each of which needs to be reduced to 80%.
+%    This gives the best resolution.
+% 2 columns per page
+%    produces three already-reduced pages.
+%    You will still need to cut and paste.
+% 3 columns per page
+%    produces two pages which must be printed sideways to make a
+%    ready-to-use 8.5 x 11 inch reference card.
+%    For this you need a dvi device driver that can print sideways.
+% Which mode to use is controlled by setting \columnsperpage.
+%
+% To compile and print this document:
+% tex fr-refcard.tex
+% dvips -t landscape fr-refcard.dvi
+
+
+%**start of header
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.
+\newcount\columnsperpage
+\columnsperpage=3
+
+% PDF output layout.  0 for A4, 1 for Letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0l)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+% Nothing else needs to be changed below this line.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions au dos.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{Pour GNU Emacs version \versionemacs}
+\centerline{Conception de Stephen Gildea}
+\centerline{Traduction fran\c{c}aise de Micha\"el Cadilhac}
+% previously: Eric Jacoboni
+
+Vous pouvez faire et distribuer des copies de cette carte, modifiée ou
+non, pourvu que la note de copyright et cette note de permission
+soient conserv\'ees sur toutes les copies.
+
+Pour des copies du manuel GNU Emacs:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip       %horizontal space between columns
+\newbox\columna                 %boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns                  %one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else                           %2 or 3 columns uses prereduced size
+  \hsize 3.2in
+  \vsize 7.95in
+%  \hoffset -.75in
+  \hoffset -.49in
+%  \voffset -.745in
+  \voffset -.84in
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eighttt=cmtt8
+  \font\eightmi=cmmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm           %make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%                    %see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+        \global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+        \global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-tam-pon}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 2ex plus 1.5ex minus 2.5ex {\headingfont #1}\mark{#1}%
+  \vskip 1.5ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}        %\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt\tolerance=10000}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+% Note: was \hsize=.74, but changed to avoid overflow in some places.
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+%**end of header
+
+
+\title{Carte de r\'ef\'erence de GNU Emacs}
+
+\centerline{(pour la version \versionemacs)}
+
+\section{Lancer Emacs}
+
+Pour lancer GNU Emacs \versionemacs, tapez juste son nom : \kbd{emacs}.
+
+\section{Quitter Emacs}
+
+\key{Suspendre Emacs (ou l'iconifier sous X)}{C-z}
+\key{Quitter d\'efinitivement Emacs}{C-x C-c}
+
+\section{Fichiers}
+
+\key{{\bf Lire} un fichier}{C-x C-f}
+\key{{\bf Sauvegarder} un fichier}{C-x C-s}
+\key{Sauvegarder {\bf tous} les fichiers}{C-x s}
+\key{{\bf Ins\'erer} un fichier sous le point (curseur)}{C-x i}
+\key{Remplacer le fichier par un autre fichier}{C-x C-v}
+\key{Sauvegarder sous un autre nom de fichier}{C-x C-w}
+\key{Basculer en mode lecture seule}{C-x C-q}
+
+\section{Obtenir de l'aide}
+
+Le syst\`eme d'aide est simple. Faites \kbd{C-h} (ou \kbd{F1}) et
+suivez les instructions. Si vous d\'ebutez, faites \kbd{C-h t} pour un
+{\bf didacticiel}.
+
+\key{Supprimer la fen\^etre d'aide}{C-x 1}
+\key{Faire d\'efiler la fen\^etre d'aide}{C-M-v}
+
+\key{Rechercher des commandes selon une cha\^\i{}ne}{C-h a}
+\key{D\'ecrire la fonction associ\'ee \`a une touche}{C-h k}
+\key{D\'ecrire une fonction}{C-h f}
+\key{Obtenir des informations relatives au mode}{C-h m}
+
+\section{R\'ecup\'eration sur erreur}
+
+\key{{\bf Abandonner} une commande}{C-g}
+\metax{{\bf R\'ecup\'erer} les fichiers apr\`es un crash}{M-x recover-session}
+\metax{{\bf Annuler} une modification}{C-x u, C-_ {\rm ou} C-/}
+\metax{Annuler toutes les modifications}{M-x revert-buffer}
+\key{R\'eafficher un \'ecran perturb\'e}{C-l}
+
+\section{Recherche incr\'ementale}
+
+\key{Rechercher en avant}{C-s}
+\key{Rechercher en arri\`ere}{C-r}
+\key{Rechercher en avant (expression rationnelle)}{C-M-s}
+\key{Rechercher en arri\`ere (expression rationnelle)}{C-M-r}
+
+\key{Utiliser la cha\^\i{}ne de recherche pr\'ec\'edente}{M-p}
+\key{Utiliser la cha\^\i{}ne de recherche suivante}{M-n}
+\key{Quitter la recherche incr\'ementale}{RET}
+\key{Annuler l'effet du dernier caract\`ere}{DEL}
+\key{Annuler la recherche en cours}{C-g}
+
+Refaites \kbd{C-s} ou \kbd{C-r} pour r\'ep\'eter la recherche dans une
+des directions.
+En cours de recherche, \kbd{C-g} efface les derniers caract\`eres et
+ne conserve que le pr\'efixe d\'ej\`a trouv\'e.
+
+\shortcopyrightnotice
+
+\section{D\'eplacements}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf Objet sur lequel se d\'eplacer}}{{\bf En
+    arri\`ere}}{{\bf En avant}}
+\threecol{Caract\`ere}{C-b}{C-f}
+\threecol{Mot}{M-b}{M-f}
+\threecol{Ligne}{C-p}{C-n}
+\threecol{Aller en d\'ebut/fin de la ligne}{C-a}{C-e}
+\threecol{Phrase}{M-a}{M-e}
+\threecol{Paragraphe}{M-\{}{M-\}}
+\threecol{Page}{C-x [}{C-x ]}
+\threecol{S-expression}{C-M-b}{C-M-f}
+\threecol{Fonction}{C-M-a}{C-M-e}
+\threecol{Aller en d\'ebut/fin du tampon}{M-<}{M->}
+}
+
+\key{Passer \`a l'\'ecran suivant}{C-v}
+\key{Passer \`a l'\'ecran pr\'ec\'edent}{M-v}
+\key{Faire d\'efiler l'\'ecran vers la gauche}{C-x <}
+\key{Faire d\'efiler l'\'ecran vers la droite}{C-x >}
+\key{Placer la ligne courante au centre de l'\'ecran}{C-u C-l}
+
+\section{D\'etruire et supprimer}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf Objet \`a supprimer}}{{\bf En arri\`ere}}{{\bf En avant}}
+\threecol{Caract\`ere (suppression)}{DEL}{C-d}
+\threecol{Mot}{M-DEL}{M-d}
+\threecol{Ligne (jusqu'au d\'ebut/fin)}{M-0 C-k}{C-k}
+\threecol{Phrase}{C-x DEL}{M-k}
+\threecol{S-expression}{M-- C-M-k}{C-M-k}
+}
+
+\key{D\'etruire une {\bf r\'egion}}{C-w}
+\key{Copier une r\'egion dans le {\it kill ring}}{M-w}
+\key{D\'etruire jusqu'\`a l'occurrence suivante de {\it car}}{M-z {\it car}}
+
+\key{R\'ecup\'erer la derni\`ere r\'egion d\'etruite}{C-y}
+\key{R\'ecup\'erer la r\'egion d\'etruite pr\'ec\'edente}{M-y}
+
+\section{Marquer}
+
+\key{Placer la marque au point}{C-@ {\rm ou} C-SPC}
+\key{\'Echanger le point et la marque}{C-x C-x}
+
+\key{Placer la marque un {\bf mot} plus loin}{M-@}
+\key{Marquer le {\bf paragraphe}}{M-h}
+\key{Marquer la {\bf page}}{C-x C-p}
+\key{Marquer la {\bf s-expression}}{C-M-@}
+\key{Marquer la {\bf fonction}}{C-M-h}
+\key{Marquer tout le {\bf tampon}}{C-x h}
+
+\section{Remplacement interactif}
+
+\key{Remplacer une cha\^\i{}ne de texte}{M-\%}
+% query-replace-regexp est liee a C-M-% mais on ne peut pas le
+% taper dans une console.
+\metax{\hskip 10pt \`a l'aide d'expr. rationnelles}{M-x query-replace-regexp}
+
+R\'eponses possibles pour chaque occurrence dans le mode de
+remplacement interactif :
+
+\key{{\bf Remplacer} celle-l\`a, passer \`a la suivante}{SPC}
+\key{Remplacer celle-l\`a, rester l\`a}{,}
+\key{{\bf Passer} \`a la suivante sans remplacer}{DEL}
+\key{Remplacer toutes les occurrences suivantes}{!}
+\key{{\bf Revenir} \`a l'occurrence pr\'ec\'edente}{^}
+\key{{\bf Quitter} le remplacement interactif}{RET}
+\key{{\bf \'Editer} avant de reprendre (\kbd{C-M-c} : sortir)}{C-r}
+
+\section{Fen\^etres multiples}
+
+Lorsqu'il y a deux commandes, la seconde est celle qui concerne non
+pas les fen\^etres mais les cadres.
+
+{\setbox0=\hbox{\kbd{0}}\advance\hsize by 0\wd0
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{Supprimer toutes les autres fen\^etres}{C-x 1\ \ \ \ }{C-x 5 1}
+\threecol{Supprimer cette fen\^etre}{C-x 0\ \ \ \ }{C-x 5 0}
+\threecol{Diviser la fen\^etre horizontalement}{C-x 2\ \ \ \ }{C-x 5 2}
+}}
+\key{Diviser la fen\^etre verticalement}{C-x 3}
+
+\key{Faire d\'efiler l'autre fen\^etre}{C-M-v}
+
+%% tabskip reduced from 10 to 3pt to fit on letterpaper.
+{\setbox0=\hbox{\kbd{0}}\advance\hsize by 2\wd0
+\paralign to \hsize{#\tabskip=3pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{S\'electionner une autre fen\^etre}{C-x o}{C-x 5 o}
+
+\threecol{Choisir un tampon (autre fen\^etre)}{C-x 4 b}{C-x 5 b}
+\threecol{Afficher un tampon (autre fen\^etre)}{C-x 4 C-o}{C-x 5 C-o}
+\threecol{Lire un fichier (autre fen\^etre)}{C-x 4 f}{C-x 5 f}
+\threecol{\hskip 10pt en lecture seule}{C-x 4 r}{C-x 5 r}
+\threecol{Lancer Dired (autre fen\^etre)}{C-x 4 d}{C-x 5 d}
+\threecol{Trouver un tag (autre fen\^etre)}{C-x 4 .}{C-x 5 .}
+}}
+
+\key{Agrandir la fen\^etre verticalement}{C-x ^}
+\key{R\'eduire la fen\^etre horizontalement}{C-x \{}
+\key{Agrandir la fen\^etre horizontalement}{C-x \}}
+
+\section{Formater}
+
+\key{Indenter la {\bf ligne} courante (selon le mode)}{TAB}
+\key{Indenter la {\bf r\'egion} courante (selon le mode)}{C-M-\\}
+\key{Indenter la {\bf s-expr.} courante (selon le mode)}{C-M-q}
+\key{Indenter la r\'egion sur une colonne}{C-x TAB}
+\key{Ins\'erer un retour \`a la ligne apr\`es le point}{C-o}
+\key{D\'eplacer le reste de la ligne vers le bas}{C-M-o}
+\key{Supprimer les lignes vierges autour du point}{C-x C-o}
+\key{Joindre \`a la ligne pr\'ec\'edente (suiv. avec {\it arg\/})}{M-^}
+\key{Supprimer tous les espaces autour du point}{M-\\}
+\key{Mettre exactement une espace au point}{M-SPC}
+
+\key{Formater le paragraphe}{M-q}
+\key{Placer la marge droite \`a {\it arg\/} colonnes}{C-u {\it arg\/} C-x f}
+\key{D\'efinir le pr\'efixe des lignes}{C-x .}
+
+\key{D\'efinir la fonte}{M-o}
+
+\section{Modifier la casse}
+
+\key{Mettre le mot en capitales}{M-u}
+\key{Mettre le mot en minuscules}{M-l}
+\key{Mettre une majuscule au mot}{M-c}
+
+\key{Mettre la r\'egion en capitales}{C-x C-u}
+\key{Mettre la r\'egion en minuscules}{C-x C-l}
+
+\section{Le mini-tampon}
+
+Dans le mini-tampon :
+
+\key{Compl\'eter autant que possible}{TAB}
+\key{Compl\'eter un mot}{SPC}
+\key{Compl\'eter et ex\'ecuter}{RET}
+\key{Montrer les compl\`etements possibles}{?}
+\key{Utiliser l'entr\'ee pr\'ec\'edente du mini-tampon}{M-p}
+\key{Utiliser l'entr\'ee suivante du mini-tampon}{M-n}
+\key{Rechercher en arri\`ere dans l'historique}{M-r}
+\key{Rechercher en avant  dans l'historique}{M-s}
+\key{Quitter en annulant la commande}{C-g}
+
+Faites \kbd{C-x ESC ESC} pour \'editer et r\'ep\'eter la derni\`ere
+commande ayant utilis\'e le mini-tampon. Faites \kbd{F10} pour
+utiliser la barre de menu sur un terminal en utilisant le mini-tampon.
+
+\newcolumn
+\title{Carte de r\'ef\'erence de GNU Emacs}
+
+\section{Tampons}
+
+\key{Choisir un autre tampon}{C-x b}
+\key{Lister tous les tampons}{C-x C-b}
+\key{Supprimer un tampon}{C-x k}
+
+\section{Transposer}
+
+\key{Transposer des {\bf caract\`eres}}{C-t}
+\key{Transposer des {\bf mots}}{M-t}
+\key{Transposer des {\bf lignes}}{C-x C-t}
+\key{Transposer des {\bf s-expressions}}{C-M-t}
+
+\section{V\'erifier l'orthographe}
+
+\key{V\'erifier l'orthographe du mot courant}{M-\$}
+\metax{V\'erifier l'orthographe d'une r\'egion}{M-x ispell-region}
+\metax{V\'erifier l'orthographe de tout le tampon}{M-x ispell-buffer}
+
+\section{Tags}
+
+\key{Trouver un tag (une d\'efinition)}{M-.}
+\key{Passer \`a l'occurrence suivante du tag}{C-u M-.}
+\metax{Sp\'ecifier un autre fichier de tags}{M-x visit-tags-table}
+
+\metax{Rechercher dans tous les fichiers des tags}{M-x tags-search}
+
+\metax{Remplacer dans tous les fichiers}{M-x tags-query-replace}
+\key{Continuer la recherche ou le remplacement}{M-,}
+
+\section{Shell}
+
+\key{Ex\'ecuter une commande shell}{M-!}
+\key{Lancer une commande shell sur la r\'egion}{M-|}
+\key{Filtrer la r\'egion avec une commande shell}{C-u M-|}
+\key{Lancer un shell dans la fen\^etre {\tt *shell*}}{M-x shell}
+
+\section{Rectangles}
+
+\key{Copier le rectangle dans un registre}{C-x r r}
+\key{D\'etruire le rectangle}{C-x r k}
+\key{R\'ecup\'erer le rectangle}{C-x r y}
+\key{D\'ecaler le rectangle \`a droite}{C-x r o}
+\key{Vider le rectangle}{C-x r c}
+\key{Pr\'efixer chaque ligne du rectangle}{C-x r t}
+
+\section{Abr\'eviations}
+
+\key{Ajouter une abr\'eviation globale}{C-x a g}
+\key{Ajouter une abr\'eviation locale au mode}{C-x a l}
+\key{Ajouter une expansion globale}{C-x a i g}
+\key{Ajouter une expansion locale au mode}{C-x a i l}
+\key{Faire une expansion explicite de l'abr\'eviation}{C-x a e}
+
+\key{Faire une expansion du mot pr\'ec\'edent}{M-/}
+
+\section{Expressions rationnelles}
+
+\key{Un caract\`ere quelconque, sauf fin de ligne}{. {\rm(point)}}
+\key{Z\'ero r\'ep\'etition ou plus}{*}
+\key{Une r\'ep\'etition ou plus}{+}
+\key{Z\'ero ou une r\'ep\'etition}{?}
+\key{\'Echapper le caract\`ere sp\'ecial {\it c\/}}{\\{\it c}}
+\key{Alternative (``ou'' non exclusif)}{\\|}
+\key{Regroupement}{\\( {\rm$\ldots$} \\)}
+\key{Reprendre le texte du {\it n\/}-i\`eme groupement}{\\{\it n}}
+\key{Limite de mot}{\\b}
+\key{Non limite de mot}{\\B}
+
+%% tabskip reduced from 10 to 5pt for letterpaper.
+\paralign to \hsize{#\tabskip=5pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{{\bf Objet}}{{\bf D\'ebut}}{{\bf Fin}}
+\threecol{Ligne}{^}{\$}
+\threecol{Mot}{\\<}{\\>}
+\threecol{Tampon}{\\`}{\\'}
+
+\threecol{{\bf Classe de caract\`ere}}{{\bf Correspond}}%
+{{\bf Compl\'ement}}
+\threecol{Ensemble explicite}{[ {\rm$\ldots$} ]}{[^ {\rm$\ldots$} ]}
+\threecol{Caract\`ere de mot}{\\w}{\\W}
+\threecol{Caract\`ere avec la syntaxe {\it c}}{\\s{\it c}}{\\S{\it c}}
+}
+
+\section{Jeux de caract\`eres internationaux}
+
+\key{Pr\'eciser la langue principale}{C-x RET l}
+\metax{Lister les m\'ethodes de saisie}{M-x list-input-methods}
+\key{Activer/d\'esactiver la m\'ethode de saisie}{C-\\}
+\key{Choisir le codage pour la commande suivante}{C-x RET c}
+\metax{Lister les codages}{M-x list-coding-systems}
+\metax{Choisir le codage pr\'ef\'er\'e}{M-x prefer-coding-system}
+
+\section{Info}
+
+\key{Lire une documentation Info}{C-h i}
+\key{Rechercher une fonction/variable dans Info}{C-h S}
+\beginindentedkeys
+
+Se d\'eplacer dans un n\oe{}ud :
+
+\key{Page suivante}{SPC}
+\key{Page pr\'ec\'edente}{DEL}
+\key{D\'ebut du n\oe{}ud}{. {\rm (point)}}
+
+Navigation entre n\oe{}uds :
+
+\key{N\oe{}ud {\bf suivant}}{n}
+\key{N\oe{}ud {\bf pr\'ec\'edent}}{p}
+\key{{\bf Remonter} d'un niveau}{u}
+\key{Choisir un sujet du menu par son nom}{m}
+\key{Choisir le {\it n\/}-i\`eme sujet (1--9)}{{\it n}}
+\key{Suivre une r\'ef\'erence crois\'ee (retour avec \kbd{l})}{f}
+\key{Revenir au dernier n\oe{}ud visit\'e}{l}
+\key{Aller au sommaire Info}{d}
+\key{Aller au n\oe{}ud le plus haut du manuel}{t}
+\key{Aller sur un n\oe{}ud par son nom}{g}
+
+Autres :
+
+\key{Aller au {\bf didacticiel} Info}{h}
+\key{Rechercher un sujet dans l'index}{i}
+\key{Rechercher un n\oe{}ud par expr. rationnelle}{s}
+\key{{\bf Quitter} Info}{q}
+
+\endindentedkeys
+
+\section{Registres}
+
+\key{Sauver la r\'egion dans un registre}{C-x r s}
+\key{Ins\'erer le contenu d'un registre}{C-x r i}
+
+\key{Sauver la valeur du point dans un registre}{C-x r SPC}
+\key{Aller au point sauv\'e dans un registre}{C-x r j}
+
+\section{Macros clavier}
+
+\key{{\bf Lancer} la d\'efinition d'une macro clavier}{C-x (}
+\key{{\bf Terminer} la d\'efinition d'une macro clavier}{C-x )}
+\key{{\bf Ex\'ecuter} la derni\`ere macro clavier d\'efinie}{C-x e}
+\key{Faire un ajout \`a la derni\`ere macro clavier}{C-u C-x (}
+\metax{Nommer la derni\`ere macro clavier}{M-x name-last-kbd-macro}
+\metax{En ins\'erer une d\'efinition Lisp}{M-x insert-kbd-macro}
+
+\section{Commandes de gestion d'Emacs Lisp}
+
+\key{\'Evaluer la {\bf s-expression} avant le point}{C-x C-e}
+\key{\'Evaluer la {\bf defun} courante}{C-M-x}
+\metax{\'Evaluer la {\bf r\'egion}}{M-x eval-region}
+\key{Lire et \'evaluer dans le mini-tampon}{M-:}
+\metax{Charger depuis un r\'epertoire standard}{M-x load-library}
+
+\section{Personnalisation simple}
+
+\metax{Personnaliser les variables et les fontes}{M-x customize}
+
+% The intended audience here is the person who wants to make simple
+% customizations and knows Lisp syntax.
+
+Exemples de d\'efinition globale de touches en Emacs Lisp :
+
+\beginexample%
+(global-set-key (kbd "C-c g") 'search-forward)
+(global-set-key (kbd "M-\#") 'query-replace-regexp)
+\endexample
+
+\section{\'Ecriture de commandes}
+
+\beginexample%
+(defun \<nom-commande> (\<args>)
+  "\<documentation>"
+  (interactive "\<template>")
+  \<body>)
+\endexample
+
+Exemple :
+
+\beginexample%
+(defun cette-ligne-en-haut-de-la-fenetre (line)
+  "Positionne la ligne courante en haut de la fen\^etre.
+Avec ARG, place le point sur la ligne ARG."
+  (interactive "P")
+  (recenter (if (null line)
+                0
+              (prefix-numeric-value line))))
+\endexample
+
+La sp\'ecification \kbd{interactive} indique comment lire
+interactivement les param\`etres. Faites \kbd{C-h f interactive} pour
+plus de pr\'ecisions.
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "pdftex fr-refcard"
+% End:
+

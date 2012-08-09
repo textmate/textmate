@@ -1,0 +1,287 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+This directory contains Calc, an advanced desk calculator for GNU
+Emacs.
+
+"Calc"  Copyright (C) 1990-1993, 2001-2012  Free Software Foundation, Inc.
+
+Written by:
+	Dave Gillespie
+	c/o Synaptics, Inc.
+	2698 Orchard Parkway
+	San Jose CA 95134
+	daveg@synaptics.com, uunet!synaptx!daveg
+
+Currently maintained by:
+     Jay Belanger <jay.p.belanger@gmail.com>
+
+From the introduction to the manual:
+
+  "Calc" is an advanced calculator and mathematical tool that runs as
+  part of the GNU Emacs environment.  Very roughly based on the HP-28/48
+  series of calculators, its many features include:
+
+    * Choice of algebraic or RPN (stack-based) entry of calculations.
+
+    * Arbitrary precision integers and floating-point numbers.
+
+    * Arithmetic on rational numbers, complex numbers (rectangular and
+      polar), error forms with standard deviations, open and closed
+      intervals, vectors and matrices, dates and times, infinities,
+      sets, quantities with units, and algebraic formulas.
+
+    * Mathematical operations such as logarithms and trigonometric functions.
+
+    * Programmer's features (bitwise operations, non-decimal numbers).
+
+    * Financial functions such as future value and internal rate of return.
+
+    * Number theoretical features such as prime factorization and
+      arithmetic modulo M for any M.
+
+    * Algebraic manipulation features, including symbolic calculus.
+
+    * Moving data to and from regular editing buffers.
+
+    * "Embedded mode" for manipulating Calc formulas and data directly
+      inside any editing buffer.
+
+    * Graphics using GNUPLOT, a versatile (and free) plotting program.
+
+    * Easy programming using keyboard macros, algebraic formulas,
+      algebraic rewrite rules, or extended Emacs Lisp.
+
+
+Calc is written entirely in Emacs Lisp, for maximum portability.
+
+I am anxious to hear about your experiences using Calc.  Send mail to
+"jay.p.belanger@gmail.com".  A bug report is most useful if you include the
+exact input and output that occurred, any modes in effect (such as the
+current precision), and so on.  If you find Calc is difficult to operate
+in any way, or if you have other suggestions, don't hesitate to let me
+know.  If you find errors (including simple typos) in the manual, let
+me know.  Even if you find no bugs at all I would love to hear your
+opinions.
+
+
+
+Summary of changes to "Calc"
+------- -- ------- --  ----
+
+Emacs 24.1
+
+* Support for musical notes added.
+
+* Support for logarithmic units added.
+
+* Calc no longer uses the tex prefix for TeX specific unit 
+names when using TeX or LaTeX mode.
+
+* Added option to highlight selections using faces.
+
+* Gave `calc-histogram' the option of using a vector to determine the bins.
+
+* Added "O" option prefix.
+
+* Used "O" prefix to "d r" (`calc-radix') to turn on twos-complement mode.
+
+Emacs 23.2
+
+* Added twos-complement display.
+
+Emacs 23.1:
+
+* Gave `j *' (cal-sel-mult-both-sides) an option to expand the
+  denominator.
+
+* Use `calc-embedded-word-regexp' for finding words in
+  `calc-embedded-word' in place of delimiters.
+
+* Remove version numbering; use Emacs version for reference.
+
+* Added support for using registers.
+
+* Added support for Yacas, Maxima and Giac languages.
+
+* Added a menu.
+
+* Added logistic non-linear curves to curve-fitting.
+
+* Added option of plotting data points and curve when curve-fitting.
+
+* Made unit conversions exact when possible.
+
+* Lowered the precedence of negation.
+
+Version 2.1:
+
+* New matrix mode for square matrices.  Improved handling of
+  non-commutative products.
+
+* New functions: powerexpand and ldiv.
+
+* Added new functions: sec, csc, cot, sech, csch, coth.
+
+* 0^0 now evaluates to 1.
+
+* Added a new language mode for LaTeX.
+
+* Calc now tries to use an appropriate language mode in embedded mode.
+
+* Calc now restores original modes when leaving embedded mode.
+
+* User settable variables which are not set with keystrokes are now
+  customizable.
+
+* Made ~/.calc.el the default Calc settings file.
+
+* Miscellaneous updates and bugfixes.
+
+
+Version 2.02f:
+
+ * Fixed a bug which broke `I', `H', `K' prefix keys in recent Emacs.
+
+ * Fixed a bug in calc.texinfo which prevented "make tex2" from working.
+
+ * Updated `C-y' (calc-yank) to understand Emacs 19 generalized kill ring.
+
+ * Added a copy of "calccard.tex", the Calc quick reference card.
+
+
+Version 2.02e:
+
+ * Fixed an installation bug caused by recent changes to `write-region'.
+
+
+Version 2.02d:
+
+ * Fixed a minor installation problem with a Emacs 19.29 byte-compiler bug.
+
+ * Removed archaic "macedit" package (superseded by "edmacro").
+
+
+Version 2.02c:
+
+ * Patch to port Calc to Lucid Emacs 19; still works with GNU 18 and GNU 19.
+
+ * Fixed a bug that broke `C-x C-c' after Calc graphics had been used.
+
+
+Version 2.02b:
+
+ * Minor patch to port Calc to GNU Emacs 19.  Will be superseded by Calc 3.00.
+
+
+Version 2.02:
+
+ * Revamped the manual a bit; rearranged some sections.
+
+ * Added marginal notes for Key/Function Index refs in printed manual.
+
+ * Changed `M-# r' to deal more gracefully with blank lines.
+
+ * Made reductions like `V R +' and `M-# :' considerably faster.
+
+ * Improved parsing and display of cases like "[a + b]".
+
+ * Added `t +' and `t -' for doing business date arithmetic.
+
+ * Added "syntax tables," the opposite of compositions.
+
+ * Added another Rewrites Tutorial exercise.
+
+ * Added the "vmatches" function.
+
+ * Added the `Modes' variable and `m g' command.
+
+ * Improved `u s' to cancel, e.g., "11 mph hr / yd" to get a number.
+
+ * Added "quick units" commands "u 0" through "u 9".
+
+ * Moved `M-%' to calc.el to avoid autoloading problems.
+
+ * Added `M-=' during algebraic entry, acts like `RET ='.
+
+ * Made `LFD' prevent evaluation when finishing a calc-edit command.
+
+ * Changed calc-store commands to use `t .' mode for trail display.
+
+ * Improved integrator to understand forms involving "erf".
+
+ * Fixed parser to make sense of "[1....1e2]" input.
+
+ * Fixed FORTRAN parser to treat a(i,j) as a_i_j if a is declared matrix.
+
+ * Got rid of some version number stamps to reduce size of patches.
+
+ * Fixed a bug in defmath treating "<=" and ">=" predicates.
+
+ * Fixed a bug in which Calc crashed multiplying two date forms.
+
+ * Fixed a bug in line breaker that crashed for large, nested formulas.
+
+ * Fixed a bug using ` to edit string("foo").
+
+ * Fixed a bug where `M-# y' in Big mode copied stack level number.
+
+ * Fixed a bug where `g O' used wrong default directory, no completion.
+
+ * Fixed a bug where "foo_bar(i)" parsed in C mode but showed as foo#bar.
+
+ * Fixed several bugs where large calculations got "computation too long."
+
+
+Version 2.01:
+
+ * Added percentage commands `M-%', `b %', and `c %'.
+
+ * Changed Big mode to force radix-10 in superscripts.
+
+ * Improved display of fractions in various language modes.
+
+ * Changed `a n' to work properly with equations and inequalities.
+
+ * The problem with cross references to Index nodes in TeX has been fixed.
+
+ * Fixed a bug where recursive esc-maps make calc-ext/-aent unloadable.
+
+ * Fixed a bug in `M-# k', then `OFF' right away, with fresh Emacs.
+
+ * Fixed a bug in which "S_i_j" was formatted wrong after `j s'.
+
+ * Fixed a bug in which `h k u c' positioned cursor on wrong line.
+
+ * Fixed a bug where `z ?' crashed if `z %' was defined.
+
+ * Fixed a bug in `j O' (calc-select-once-maybe).
+
+ * Fixed "make private" not to ask "Delete excess versions" and crash.
+
+
+Version 2.00:
+
+ * First complete posting of Calc since 1.01.
+
+ * Most parts of Calc have seen changes since version 1.07.  See
+   section "New for Calc 2.00" in the manual for a summary.  In
+   the FTP version of the Calc distribution, the file README.prev
+   contains a detailed change history from 1.00 up to 2.00.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

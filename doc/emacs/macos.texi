@@ -1,0 +1,210 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2000-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Mac OS / GNUstep, Microsoft Windows, Antinews, Top
+@appendix Emacs and Mac OS / GNUstep
+@cindex Mac OS X
+@cindex Macintosh
+@cindex GNUstep
+
+  This section describes the peculiarities of using Emacs built with
+the GNUstep libraries on GNU/Linux or other operating systems, or on
+Mac OS X with native window system support.  On Mac OS X, Emacs can be
+built either without window system support, with X11, or with the
+Cocoa interface; this section only applies to the Cocoa build.  This
+does not support versions of Mac OS X earlier than 10.4.
+
+  For various historical and technical reasons, Emacs uses the term
+@samp{Nextstep} internally, instead of ``Cocoa'' or ``Mac OS X''; for
+instance, most of the commands and variables described in this section
+begin with @samp{ns-}, which is short for @samp{Nextstep}.  NeXTstep
+was an application interface released by NeXT Inc during the 1980s, of
+which Cocoa is a direct descendant.  Apart from Cocoa, there is
+another NeXTstep-style system: GNUstep, which is free software.  As of
+this writing, Emacs GNUstep support is alpha status (@pxref{GNUstep
+Support}), but we hope to improve it in the future.
+
+@menu
+* Mac / GNUstep Basics::        Basic Emacs usage under GNUstep or Mac OS.
+* Mac / GNUstep Customization:: Customizations under GNUstep or Mac OS.
+* Mac / GNUstep Events::        How window system events are handled.
+* GNUstep Support::             Details on status of GNUstep support.
+@end menu
+
+@node Mac / GNUstep Basics, Mac / GNUstep Customization, , Mac OS / GNUstep
+@section Basic Emacs usage under Mac OS and GNUstep
+
+  By default, the @key{alt} and @key{option} keys are the same as
+@key{Meta}.  The Mac @key{Cmd} key is the same as @key{Super}, and
+Emacs provides a set of key bindings using this modifier key that mimic
+other Mac / GNUstep applications (@pxref{Mac / GNUstep Events}).  You
+can change these bindings in the usual way (@pxref{Key Bindings}).
+
+@c FIXME mention ns-alternate-modifier?
+  The variable @code{ns-right-alternate-modifier} controls the
+behavior of the right @key{alt} and @key{option} keys.  These keys
+behave like the left-hand keys if the value is @code{left} (the
+default).  A value of @code{control}, @code{meta}, @code{alt},
+@code{super}, or @code{hyper} makes them behave like the corresponding
+modifier keys; a value of @code{none} tells Emacs to ignore them.
+
+  @kbd{S-Mouse-1} adjusts the region to the click position,
+just like @kbd{Mouse-3} (@code{mouse-save-then-kill}); it does not pop
+up a menu for changing the default face, as @kbd{S-Mouse-1} normally
+does (@pxref{Text Scale}).  This change makes Emacs behave more like
+other Mac / GNUstep applications.
+
+  When you open or save files using the menus, or using the
+@kbd{Cmd-o} and @kbd{Cmd-S} bindings, Emacs uses graphical file
+dialogs to read file names.  However, if you use the regular Emacs key
+sequences, such as @kbd{C-x C-f}, Emacs uses the minibuffer to read
+file names.
+
+  On GNUstep, in an X-windows environment you need to use @kbd{Cmd-c}
+instead of one of the @kbd{C-w} or @kbd{M-w} commands to transfer text
+to the X primary selection; otherwise, Emacs will use the
+``clipboard'' selection.  Likewise, @kbd{Cmd-y} (instead of @kbd{C-y})
+yanks from the X primary selection instead of the kill-ring or
+clipboard.
+
+
+@subsection Grabbing environment variables
+
+@c How is this any different to launching from a window manager menu
+@c in GNU/Linux?  These are sometimes not login shells either.
+Many programs which may run under Emacs, like latex or man, depend on the
+settings of environment variables.  If Emacs is launched from the shell, it
+will automatically inherit these environment variables and its subprocesses
+will inherit them from it.  But if Emacs is launched from the Finder it
+is not a descendant of any shell, so its environment variables haven't been
+set, which often causes the subprocesses it launches to behave differently than
+they would when launched from the shell.
+
+For the PATH and MANPATH variables, a system-wide method
+of setting PATH is recommended on Mac OS X 10.5 and later, using the
+@file{/etc/paths} files and the @file{/etc/paths.d} directory.
+
+@node Mac / GNUstep Customization, Mac / GNUstep Events, Mac / GNUstep Basics, Mac OS / GNUstep
+@section Mac / GNUstep Customization
+
+Emacs can be customized in several ways in addition to the standard
+customization buffers and the Options menu.
+
+
+@subsection Font and Color Panels
+
+The standard Mac / GNUstep font and color panels are accessible via
+Lisp commands.  The Font Panel may be accessed with @kbd{M-x
+ns-popup-font-panel}.  It will set the default font in the frame most
+recently used or clicked on.
+
+@c  To make the setting permanent, use @samp{Save Options} in the
+@c Options menu, or run @code{menu-bar-options-save}.
+
+You can bring up a color panel with @kbd{M-x ns-popup-color-panel} and
+drag the color you want over the Emacs face you want to change.  Normal
+dragging will alter the foreground color.  Shift dragging will alter the
+background color.  To discard the settings, create a new frame and
+close the altered one.
+
+@c To make the changes permanent select the "Save Options"
+@c item in the "Options" menu, or run @code{menu-bar-options-save}.
+
+Useful in this context is the listing of all faces obtained by
+@kbd{M-x list-faces-display}.
+
+@subsection Customization options specific to Mac OS / GNUstep
+
+The following customization options are specific to the Nextstep port.
+
+@table @code
+@item ns-auto-hide-menu-bar
+Non-nil means the menu-bar is hidden by default, but appears if you
+move the mouse pointer over it.  (Requires Mac OS X 10.6 or later.)
+
+@end table
+
+
+@node Mac / GNUstep Events, GNUstep Support, Mac / GNUstep Customization, Mac OS / GNUstep
+@section Windowing System Events under Mac OS / GNUstep
+
+  Nextstep applications receive a number of special events which have
+no X equivalent.  These are sent as specially defined ``keys'', which
+do not correspond to any sequence of keystrokes.  Under Emacs, these
+``key'' events can be bound to functions just like ordinary
+keystrokes.  Here is a list of these events.
+
+@table @key
+@item ns-open-file
+@vindex ns-pop-up-frames
+This event occurs when another Nextstep application requests that
+Emacs open a file.  A typical reason for this would be a user
+double-clicking a file in the Finder application.  By default, Emacs
+responds to this event by opening a new frame and visiting the file in
+that frame (@code{ns-find-file}).  As an exception, if the selected
+buffer is the @file{*scratch*} buffer, Emacs visits the file in the
+selected frame.
+
+You can change how Emacs responds to a @code{ns-open-file} event by
+changing the variable @code{ns-pop-up-frames}.  Its default value,
+@samp{fresh}, is what we have just described.  A value of @code{t}
+means to always visit the file in a new frame.  A value of @code{nil}
+means to always visit the file in an existing frame.
+
+@item ns-open-temp-file
+This event occurs when another application requests that Emacs open a
+temporary file.  By default, this is handled by just generating a
+@code{ns-open-file} event, the results of which are described above.
+
+@item ns-open-file-line
+Some applications, such as ProjectBuilder and gdb, request not only a
+particular file, but also a particular line or sequence of lines in
+the file.  Emacs handles this by visiting that file and highlighting
+the requested line (@code{ns-open-file-select-line}).
+
+@item ns-drag-file
+This event occurs when a user drags files from another application
+into an Emacs frame.  The default behavior is to insert the contents
+of all the dragged files into the current buffer
+(@code{ns-insert-files}).  The list of dragged files is stored in the
+variable @code{ns-input-file}.
+
+@item ns-drag-color
+This event occurs when a user drags a color from the color well (or
+some other source) into an Emacs frame.  The default behavior is to
+alter the foreground color of the area the color was dragged onto
+(@code{ns-set-foreground-at-mouse}).  If this event is issued with a
+@key{Shift} modifier, Emacs changes the background color instead
+(@code{ns-set-background-at-mouse}).  The name of the dragged color is
+stored in the variable @code{ns-input-color}.
+
+@item ns-change-font
+This event occurs when the user selects a font in a Nextstep font
+panel (which can be opened with @kbd{Cmd-t}).  The default behavior is
+to adjust the font of the selected frame
+(@code{ns-respond-to-changefont}).  The name and size of the selected
+font are stored in the variables @code{ns-input-font} and
+@code{ns-input-fontsize}, respectively.
+
+@item ns-power-off
+This event occurs when the user logs out and Emacs is still running, or when
+`Quit Emacs' is chosen from the application menu.
+The default behavior is to save all file-visiting buffers.
+@end table
+
+  Emacs also allows users to make use of Nextstep services, via a set
+of commands whose names begin with @samp{ns-service-} and end with the
+name of the service.  Type @kbd{M-x ns-service-@key{TAB}} to
+see a list of these commands.  These functions either operate on
+marked text (replacing it with the result) or take a string argument
+and return the result as a string.  You can also use the Lisp function
+@code{ns-perform-service} to pass arbitrary strings to arbitrary
+services and receive the results back.  Note that you may need to
+restart Emacs to access newly-available services.
+
+@node GNUstep Support, , Mac / GNUstep Events, Mac OS / GNUstep
+@section GNUstep Support
+
+Emacs can be built and run under GNUstep, but there are still
+issues to be addressed.  Interested developers should contact
+@email{emacs-devel@@gnu.org}.

@@ -1,0 +1,44 @@
+# -sed6.inp------------------------------------------------------------------
+# Configuration script for doc/emacs/Makefile, doc/lispref/Makefile,
+# doc/lispintro/Makefile, and doc/misc/Makefile under DJGPP v2.x
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1997, 2000-2012 Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^srcdir *=/s/@[^@\n]*@/./
+/^VPATH *=/s/@[^@\n]*@/./
+/^MAKEINFO *=/s/@[^@\n]*@/makeinfo/
+/^ENVADD/,/^$/c\
+ENVADD =\
+export TEXINPUTS := $(srcdir)";"$(TEXINPUTS)\
+export MAKEINFO := $(MAKEINFO) $(MAKEINFO_OPTS)
+/^SHELL *=/s/^/# /
+/^elisp.dvi:/,/^$/ {
+  /^	 *if \[ *\a${permuted_index}/,/^	 *fi *$/c\
+	command.com /c 'if not a${permuted_index}==a sh ./permute-index' \
+	command.com /c 'if not a${permuted_index}==a mv permuted.fns elisp.fns' \
+	command.com /c 'if not a${permuted_index}==a texindex elisp.tp' \
+	command.com /c 'if a${permuted_index}==a texindex elisp.??'
+}
+/^index.texi:/,/^$/ {
+  /^	 *if \[ *\a${permuted_index}/,/^	 *fi *$/c\
+	command.com /c 'if not a${permuted_index}==a cp -p ./index.perm index.texi' \
+	command.com /c 'if a${permuted_index}==a cp -p ./index.unperm index.texi'
+}
+/^maintainer-clean:/,/^$/ {
+  s/^	for file in $(INFO_TARGETS)\; do rm -f.*$/	rm -f $(INFO_TARGETS)/
+}
+
+/^mkinfodir *=/s| @.*$|@command.com /c if not exist ..\\..\\info\\emacs mkdir ..\\..\\info|
+

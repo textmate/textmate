@@ -1,0 +1,339 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 2010-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/package
+@node Packaging, Antinews, System Interface, Top
+@chapter Preparing Lisp code for distribution
+@cindex package
+@cindex Lisp package
+
+  Emacs provides a standard way to distribute Emacs Lisp code to
+users.  A @dfn{package} is a collection of one or more files,
+formatted and bundled in such a way that users can easily download,
+install, uninstall, and upgrade it.
+
+  The following sections describe how to create a package, and how to
+put it in a @dfn{package archive} for others to download.
+@xref{Packages,,, emacs, The GNU Emacs Manual}, for a description of
+user-level features of the packaging system.
+
+@menu
+* Packaging Basics::        The basic concepts of Emacs Lisp packages.
+* Simple Packages::         How to package a single .el file.
+* Multi-file Packages::     How to package multiple files.
+* Package Archives::        Maintaining package archives.
+@end menu
+
+@node Packaging Basics
+@section Packaging Basics
+@cindex package attributes
+@cindex package name
+@cindex package version
+@cindex dependencies
+@cindex package dependencies
+
+  A package is either a @dfn{simple package} or a @dfn{multi-file
+package}.  A simple package is stored in a package archive as a single
+Emacs Lisp file, while a multi-file package is stored as a tar file
+(containing multiple Lisp files, and possibly non-Lisp files such as a
+manual).
+
+  In ordinary usage, the difference between simple packages and
+multi-file packages is relatively unimportant; the Package Menu
+interface makes no distinction between them.  However, the procedure
+for creating them differs, as explained in the following sections.
+
+  Each package (whether simple or multi-file) has certain
+@dfn{attributes}:
+
+@table @asis
+@item Name
+A short word (e.g. @samp{auctex}).  This is usually also the symbol
+prefix used in the program (@pxref{Coding Conventions}).
+
+@item Version
+A version number, in a form that the function @code{version-to-list}
+understands (e.g. @samp{11.86}).  Each release of a package should be
+accompanied by an increase in the version number.
+
+@item Brief description
+This is shown when the package is listed in the Package Menu.  It
+should occupy a single line, ideally in 36 characters or less.
+
+@item Long description
+This is shown in the buffer created by @kbd{C-h P}
+(@code{describe-package}), following the package's brief description
+and installation status.  It normally spans multiple lines, and should
+fully describe the package's capabilities and how to begin using it
+once it is installed.
+
+@item Dependencies
+A list of other packages (possibly including minimal acceptable
+version numbers) on which this package depends.  The list may be
+empty, meaning this package has no dependencies.  Otherwise,
+installing this package also automatically installs its dependencies;
+if any dependency cannot be found, the package cannot be installed.
+@end table
+
+@cindex content directory, package
+  Installing a package, either via the command @code{package-install-file},
+or via the Package Menu, creates a subdirectory of
+@code{package-user-dir} named @file{@var{name}-@var{version}}, where
+@var{name} is the package's name and @var{version} its version
+(e.g. @file{~/.emacs.d/elpa/auctex-11.86/}).  We call this the
+package's @dfn{content directory}.  It is where Emacs puts the
+package's contents (the single Lisp file for a simple package, or the
+files extracted from a multi-file package).
+
+@cindex package autoloads
+  Emacs then searches every Lisp file in the content directory for
+autoload magic comments (@pxref{Autoload}).  These autoload
+definitions are saved to a file named @file{@var{name}-autoloads.el}
+in the content directory.  They are typically used to autoload the
+principal user commands defined in the package, but they can also
+perform other tasks, such as adding an element to
+@code{auto-mode-alist} (@pxref{Auto Major Mode}).  Note that a package
+typically does @emph{not} autoload every function and variable defined
+within it---only the handful of commands typically called to begin
+using the package.  Emacs then byte-compiles every Lisp file in the
+package.
+
+  After installation, the installed package is @dfn{loaded}: Emacs
+adds the package's content directory to @code{load-path}, and
+evaluates the autoload definitions in @file{@var{name}-autoloads.el}.
+
+  Whenever Emacs starts up, it automatically calls the function
+@code{package-initialize} to load installed packages.  This is done
+after loading the init file and abbrev file (if any) and before
+running @code{after-init-hook} (@pxref{Startup Summary}).  Automatic
+package loading is disabled if the user option
+@code{package-enable-at-startup} is @code{nil}.
+
+@deffn Command package-initialize &optional no-activate
+This function initializes Emacs' internal record of which packages are
+installed, and loads them.  The user option @code{package-load-list}
+specifies which packages to load; by default, all installed packages
+are loaded.  @xref{Package Installation,,, emacs, The GNU Emacs
+Manual}.
+
+The optional argument @var{no-activate}, if non-@code{nil}, causes
+Emacs to update its record of installed packages without actually
+loading them; it is for internal use only.
+@end deffn
+
+@node Simple Packages
+@section Simple Packages
+@cindex single file package
+@cindex simple package
+
+  A simple package consists of a single Emacs Lisp source file.  The
+file must conform to the Emacs Lisp library header conventions
+(@pxref{Library Headers}).  The package's attributes are taken from
+the various headers, as illustrated by the following example:
+
+@example
+@group
+;;; superfrobnicator.el --- Frobnicate and bifurcate flanges
+
+;; Copyright (C) 2011 Free Software Foundation, Inc.
+@end group
+
+;; Author: J. R. Hacker <jrh@@example.com>
+;; Version: 1.3
+;; Package-Requires: ((flange "1.0"))
+;; Keywords: frobnicate
+
+@dots{}
+
+;;; Commentary:
+
+;; This package provides a minor mode to frobnicate and/or
+;; bifurcate any flanges you desire.  To activate it, just type
+@dots{}
+
+;;;###autoload
+(define-minor-mode superfrobnicator-mode
+@dots{}
+@end example
+
+  The name of the package is the same as the base name of the file, as
+written on the first line.  Here, it is @samp{superfrobnicator}.
+
+  The brief description is also taken from the first line.  Here, it
+is @samp{Frobnicate and bifurcate flanges}.
+
+  The version number comes from the @samp{Package-Version} header, if
+it exists, or from the @samp{Version} header otherwise.  One or the
+other @emph{must} be present.  Here, the version number is 1.3.
+
+  If the file has a @samp{;;; Commentary:} section, this section is
+used as the long description.  (When displaying the description, Emacs
+omits the @samp{;;; Commentary:} line, as well as the leading comment
+characters in the commentary itself.)
+
+  If the file has a @samp{Package-Requires} header, that is used as
+the package dependencies.  In the above example, the package depends
+on the @samp{flange} package, version 1.0 or higher.  @xref{Library
+Headers}, for a description of the @samp{Package-Requires} header.  If
+the header is omitted, the package has no dependencies.
+
+  The file ought to also contain one or more autoload magic comments,
+as explained in @ref{Packaging Basics}.  In the above example, a magic
+comment autoloads @code{superfrobnicator-mode}.
+
+  @xref{Package Archives}, for a explanation of how to add a
+single-file package to a package archive.
+
+@node Multi-file Packages
+@section Multi-file Packages
+@cindex multi-file package
+
+  A multi-file package is less convenient to create than a single-file
+package, but it offers more features: it can include multiple Emacs
+Lisp files, an Info manual, and other file types (such as images).
+
+  Prior to installation, a multi-file package is stored in a package
+archive as a tar file.  The tar file must be named
+@file{@var{name}-@var{version}.tar}, where @var{name} is the package
+name and @var{version} is the version number.  Its contents, once
+extracted, must all appear in a directory named
+@file{@var{name}-@var{version}}, the @dfn{content directory}
+(@pxref{Packaging Basics}).  Files may also extract into
+subdirectories of the content directory.
+
+  One of the files in the content directory must be named
+@file{@var{name}-pkg.el}.  It must contain a single Lisp form,
+consisting of a call to the function @code{define-package}, described
+below.  This defines the package's version, brief description, and
+requirements.
+
+  For example, if we distribute version 1.3 of the superfrobnicator as
+a multi-file package, the tar file would be
+@file{superfrobnicator-1.3.tar}.  Its contents would extract into the
+directory @file{superfrobnicator-1.3}, and one of these would be the
+file @file{superfrobnicator-pkg.el}.
+
+@defun define-package name version &optional docstring requirements
+This function defines a package.  @var{name} is the package name, a
+string.  @var{version} is the version, as a string of a form that can
+be understood by the function @code{version-to-list}.  @var{docstring}
+is the brief description.
+
+@var{requirements} is a list of required packages and their versions.
+Each element in this list should have the form @code{(@var{dep-name}
+@var{dep-version})}, where @var{dep-name} is a symbol whose name is
+the dependency's package name, and @var{dep-version} is the
+dependency's version (a string).
+@end defun
+
+  If the content directory contains a file named @file{README}, this
+file is used as the long description.
+
+  If the content directory contains a file named @file{dir}, this is
+assumed to be an Info directory file made with @command{install-info}.
+@xref{Invoking install-info, Invoking install-info, Invoking
+install-info, texinfo, Texinfo}.  The relevant Info files should also
+be present in the content directory.  In this case, Emacs will
+automatically add the content directory to @code{Info-directory-list}
+when the package is activated.
+
+  Do not include any @file{.elc} files in the package.  Those are
+created when the package is installed.  Note that there is no way to
+control the order in which files are byte-compiled.
+
+  Do not include any file named @file{@var{name}-autoloads.el}.  This
+file is reserved for the package's autoload definitions
+(@pxref{Packaging Basics}).  It is created automatically when the
+package is installed, by searching all the Lisp files in the package
+for autoload magic comments.
+
+  If the multi-file package contains auxiliary data files (such as
+images), the package's Lisp code can refer to these files via the
+variable @code{load-file-name} (@pxref{Loading}).  Here is an example:
+
+@smallexample
+(defconst superfrobnicator-base (file-name-directory load-file-name))
+
+(defun superfrobnicator-fetch-image (file)
+  (expand-file-name file superfrobnicator-base))
+@end smallexample
+
+@node Package Archives
+@section Creating and Maintaining Package Archives
+@cindex package archive
+
+  Via the Package Menu, users may download packages from @dfn{package
+archives}.  Such archives are specified by the variable
+@code{package-archives}, whose default value contains a single entry:
+the archive hosted by the GNU project at @url{elpa.gnu.org}.  This
+section describes how to set up and maintain a package archive.
+
+@cindex base location, package archive
+@defopt package-archives
+The value of this variable is an alist of package archives recognized
+by the Emacs package manager.
+
+Each alist element corresponds to one archive, and should have the
+form @code{(@var{id} . @var{location})}, where @var{id} is the name of
+the archive (a string) and @var{location} is its @dfn{base location}
+(a string).
+
+If the base location starts with @samp{http:}, it is treated as a HTTP
+URL, and packages are downloaded from this archive via HTTP (as is the
+case for the default GNU archive).
+
+Otherwise, the base location should be a directory name.  In this
+case, Emacs retrieves packages from this archive via ordinary file
+access.  Such ``local'' archives are mainly useful for testing.
+@end defopt
+
+  A package archive is simply a directory in which the package files,
+and associated files, are stored.  If you want the archive to be
+reachable via HTTP, this directory must be accessible to a web server.
+How to accomplish this is beyond the scope of this manual.
+
+  A convenient way to set up and update a package archive is via the
+@code{package-x} library.  This is included with Emacs, but not loaded
+by default; type @kbd{M-x load-library @key{RET} package-x @key{RET}} to
+load it, or add @code{(require 'package-x)} to your init file.
+@xref{Lisp Libraries,, Lisp Libraries, emacs, The GNU Emacs Manual}.
+Once loaded, you can make use of the following:
+
+@defopt package-archive-upload-base
+The value of this variable is the base location of a package archive,
+as a directory name.  The commands in the @code{package-x} library
+will use this base location.
+
+The directory name should be absolute.  You may specify a remote name,
+such as @file{/ssh:foo@@example.com:/var/www/packages/}, if the
+package archive is on a different machine.  @xref{Remote Files,,
+Remote Files, emacs, The GNU Emacs Manual}.
+@end defopt
+
+@deffn Command package-upload-file filename
+This command prompts for @var{filename}, a file name, and uploads that
+file to @code{package-archive-upload-base}.  The file must be either a
+simple package (a @file{.el} file) or a multi-file package (a
+@file{.tar} file); otherwise, an error is raised.  The package
+attributes are automatically extracted, and the archive's contents
+list is updated with this information.
+
+If @code{package-archive-upload-base} does not specify a valid
+directory, the function prompts interactively for one.  If the
+directory does not exist, it is created.  The directory need not have
+any initial contents (i.e., you can use this command to populate an
+initially empty archive).
+@end deffn
+
+@deffn Command package-upload-buffer
+This command is similar to @code{package-upload-file}, but instead of
+prompting for a package file, it uploads the contents of the current
+buffer.  The current buffer must be visiting a simple package (a
+@file{.el} file) or a multi-file package (a @file{.tar} file);
+otherwise, an error is raised.
+@end deffn
+
+@noindent
+After you create an archive, remember that it is not accessible in the
+Package Menu interface unless it is in @code{package-archives}.

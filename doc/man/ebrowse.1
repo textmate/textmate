@@ -1,0 +1,103 @@
+.\" See section COPYING for copyright and redistribution information.
+.TH EBROWSE 1
+.SH NAME
+ebrowse \- create a class hierarchy database
+.SH SYNOPSIS
+.B ebrowse
+.RI [ options ]
+.RI [ FILES .\|.\|.]
+.SH "DESCRIPTION"
+This manual page documents briefly the
+.BR ebrowse
+command.  Full documentation is available in the GNU Info format.
+.PP
+.B ebrowse
+is used to create the database used by the class browser in Emacs.
+.PP
+.SH OPTIONS
+The program follows the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+.TP
+.B \-a, \-\-append
+append output to existing file
+.TP
+.B \-f, \-\-files=FILES
+read input file names from
+.I FILE
+.TP
+.B \-I, \-\-search-path=LIST
+set search path for input files
+.TP
+.B \-m, \-\-min-regexp-length=N
+set minimum regexp length to
+.I N
+.TP
+.B \-M, \-\-max-regexp-length=N
+set maximum regexp length to
+.I N
+.TP
+.B \-n, \-\-no-nested-classes
+exclude nested classes
+.TP
+.B \-o, \-\-output-file=FILE
+set output file name to
+.I FILE
+.TP
+.B \-p, \-\-position-info
+print info about position in file
+.TP
+.B \-s, \-\-no-structs-or-unions
+don't record structs or unions
+.TP
+.B \-v, \-\-verbose
+be verbose
+.TP
+.B \-V, \-\-very-verbose
+be very verbose
+.TP
+.B \-x, \-\-no-regexps
+don't record regular expressions
+.TP
+.B \-\-help
+display this help
+.TP
+.B \-\-version
+display version info
+.SH "SEE ALSO"
+.BR emacs (1),
+.BR etags (1),
+and the full documentation for
+.B ebrowse
+which is maintained as a Texinfo manual.  If the
+.B info
+and
+.B ebrowse
+programs are properly installed at your site, the command
+.IP
+.B info ebrowse
+.PP
+should give you access to the complete manual.
+.SH AUTHOR
+.I Ebrowse
+was written by Gerd Moellmann.
+.
+.SH COPYING
+Copyright
+.if t \(co
+.if n (C)
+2008-2012 Free Software Foundation, Inc.
+.PP
+Permission is granted to make and distribute verbatim copies of this
+document provided the copyright notice and this permission notice are
+preserved on all copies.
+.PP
+Permission is granted to copy and distribute modified versions of
+this document under the conditions for verbatim copying, provided that
+the entire resulting derived work is distributed under the terms of
+a permission notice identical to this one.
+.PP
+Permission is granted to copy and distribute translations of this
+document into another language, under the above conditions for
+modified versions, except that this permission notice may be stated
+in a translation approved by the Free Software Foundation.
+.

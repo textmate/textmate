@@ -1,0 +1,85 @@
+;; doc-java.srt --- SRecode templates for "document" applications
+
+;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set mode "java-mode"
+
+set application "document"
+
+context declaration
+
+;;; Notes on the DOCUMENT templates.
+;;
+;; These templates recycle existing templates for javadoc in the
+;; more general C++ template set.
+
+template section-comment :indent :blank
+"A comment separating major sections of a file."
+----
+{{>:declaration:javadoc-section-comment}}
+----
+
+template function-comment :tag :indent :blank
+"A comment occurring in front of a function.
+Recycle javadoc comment code from the more general template set."
+----
+{{>:declaration:javadoc-function}}
+----
+
+template variable-same-line-comment :tag
+"A comment occurring after a variable declaration.
+Recycle javadoc comment code from the more general template set."
+----
+{{>:declaration:javadoc-variable-same-line}}
+----
+
+;; These happen to be the same as in a classdecl.
+template group-comment-start :blank :indent
+"A comment occurring in front of a group of declarations.
+Recycle javadoc comment code from the more general template set."
+----
+{{>:classdecl:javadoc-function-group-start}}
+----
+
+template group-comment-end :blank :indent
+"A comment occurring at the end of a group of declarations.
+Recycle javadoc comment code from the more general template set."
+----
+{{>:classdecl:javadoc-function-group-end}}
+----
+
+;; Some templates only show up in classdecls.
+context classdecl
+
+template group-comment-start :blank :indent
+"A comment occurring in front of a group of declarations.
+Recycle javadoc comment code from the more general template set."
+----
+{{>:classdecl:javadoc-function-group-start}}
+----
+
+template group-comment-end :blank :indent
+"A comment occurring at the end of a group of declarations.
+Recycle javadoc comment code from the more general template set."
+----
+{{>:classdecl:javadoc-function-group-end}}
+----
+
+;; end

@@ -1,0 +1,87 @@
+		Censoring my Software
+		   Richard Stallman
+			[From Datamation, 1 March 1996]
+
+
+Last summer, a few clever legislators proposed a bill to "prohibit
+pornography" on the Internet.  Last fall, right-wing Christians made
+this cause their own.  Last week, President Clinton signed the bill,
+and we lost the freedom of the press for the public library of the
+future.  This week, I'm censoring GNU Emacs.
+
+No, GNU Emacs does not contain pornography.  It is a software package,
+an award-winning extensible and programmable text editor.  But the law
+that was passed applies to far more than pornography.  It prohibits
+"indecent" speech, which can include anything from famous poems, to
+masterpieces hanging in the Louvre, to advice about safe sex...to
+software.
+
+Naturally, there was a lot of opposition to this bill.  Not only from
+people who use the Internet, and people who appreciate erotica, but
+from everyone who cares about freedom of the press.
+
+But every time we tried to tell the public what was at stake, the
+forces of censorship responded with a lie: they told the public that
+the issue was simply pornography.  By embedding this lie as a
+presupposition in their statements about the issue, they succeeded in
+misinforming the public.  So here I am, censoring my software.
+
+You see, Emacs contains a version of the famous "doctor program",
+a.k.a. Eliza, originally developed by Professor Weizenbaum at MIT.
+This is the program that imitates a Rogerian psychotherapist.  The
+user talks to the program, and the program responds--by playing back
+the user's own statements, and by recognizing a long list of
+particular words.
+
+The Emacs doctor program was set up to recognize many common curse
+words, and respond with an appropriately cute message such as, "Would
+you please watch your tongue?" or "Let's not be vulgar."  In order to
+do this, it had to have a list of curse words.  That means the source
+code for the program was indecent.
+
+Because of the censorship law, I had to remove this feature.  (I
+replaced it with a message announcing that the program has been
+censored for your protection.)  The new version of the doctor doesn't
+recognize the indecent words.  If you curse at it, it curses right
+back to you--for lack of knowing better.
+
+Now that people are facing the threat of two years in prison for
+indecent network postings, it would be helpful if they could access
+precise rules via the Internet for how to avoid imprisonment.
+However, this is impossible.  The rules would have to mention the
+forbidden words, so posting them on the Internet would be against the
+rules.
+
+Of course, I'm making an assumption about just what "indecent" means.
+I have to do this, because nobody knows for sure.  The most obvious
+possible meaning is the meaning it has for television, so I'm using
+that as a tentative assumption.  However, there is a good chance that
+our courts will reject that interpretation of the law as
+unconstitutional.
+
+We can hope that the courts will recognize the Internet as a medium of
+publication like books and magazines.  If they do, they will entirely
+reject any law prohibiting "indecent" publications on the Internet.
+
+What really worries me is that the courts might take a muddled
+in-between escape route--by choosing another interpretation of
+"indecent", one that permits the doctor program or a statement of the
+decency rules, but prohibits some of the books that children can
+browse through in the public library and the bookstore.  Over the
+years, as the Internet replaces the public library and the bookstore,
+some of our freedom of the press will be lost.
+
+Just a few weeks ago, another country imposed censorship on the
+Internet.  That was China.  We don't think well of China in this
+country--its government doesn't respect basic freedoms.  But how well
+does our government respect them?  And do you care enough to preserve
+them here?
+
+If you care, stay in touch with the Voters Telecommunications Watch.
+Look in their Web site http://www.vtw.org/ for background information
+and political action recommendations.  Censorship won in February, but
+we can beat it in November.
+
+Copyright 1996 Richard Stallman
+Verbatim copying and distribution is permitted in any medium
+provided this notice is preserved.

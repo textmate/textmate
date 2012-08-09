@@ -1,0 +1,434 @@
+;;; semantic-grammar.wy -- LALR grammar of Semantic input grammars
+;;
+;; Copyright (C) 2002-2012 Free Software Foundation, Inc.
+;;
+;; Author: David Ponce <david@dponce.com>
+;; Maintainer: David Ponce <david@dponce.com>
+;; Created: 26 Aug 2002
+;; Keywords: syntax
+;; X-RCS: $Id: semantic-grammar.wy,v 1.16 2005/09/30 20:20:27 zappo Exp $
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+%{
+(defvar semantic-grammar-lex-c-char-re)
+
+;; Current parsed nonterminal name.
+(defvar semantic-grammar-wy--nterm nil)
+;; Index of rule in a nonterminal clause.
+(defvar semantic-grammar-wy--rindx nil)
+}
+
+%package semantic-grammar-wy
+
+%languagemode wy-mode
+
+;; Main
+%start grammar
+;; Reparse
+%start prologue epilogue declaration nonterminal rule
+;; EXPANDFULL
+%start put_names put_values use_names
+
+;; Keywords
+%type    <keyword>
+%keyword DEFAULT-PREC    "%default-prec"
+%keyword NO-DEFAULT-PREC "%no-default-prec"
+%keyword KEYWORD         "%keyword"
+%keyword LANGUAGEMODE    "%languagemode"
+%keyword LEFT            "%left"
+%keyword NONASSOC        "%nonassoc"
+%keyword PACKAGE         "%package"
+%keyword PREC            "%prec"
+%keyword PUT             "%put"
+%keyword QUOTEMODE       "%quotemode"
+%keyword RIGHT           "%right"
+%keyword SCOPESTART      "%scopestart"
+%keyword START           "%start"
+%keyword TOKEN           "%token"
+%keyword TYPE            "%type"
+%keyword USE-MACROS      "%use-macros"
+
+;; Literals
+%type  <string>
+%token <string>      STRING
+
+%type  <symbol>      syntax ":?\\(\\sw\\|\\s_\\)+"
+%token <symbol>      SYMBOL
+%token <symbol>      PERCENT_PERCENT "\\`%%\\'"
+
+%type  <char>        syntax semantic-grammar-lex-c-char-re
+%token <char>        CHARACTER
+
+%type  <qlist>       matchdatatype sexp syntax "\\s'\\s-*("
+%token <qlist>       PREFIXED_LIST
+
+%type  <sexp>        matchdatatype sexp syntax "\\="
+%token <sexp>        SEXP
+
+;; Don't generate these analyzers which needs special handling code.
+%token <code>        PROLOGUE "%{...%}"
+%token <code>        EPILOGUE "%%...EOF"
+
+;; Blocks & Parenthesis
+%type  <block>
+%token <block>       PAREN_BLOCK "(LPAREN RPAREN)"
+%token <block>       BRACE_BLOCK "(LBRACE RBRACE)"
+%token <open-paren>  LPAREN      "("
+%token <close-paren> RPAREN      ")"
+%token <open-paren>  LBRACE      "{"
+%token <close-paren> RBRACE      "}"
+
+;; Punctuations
+%type  <punctuation>
+%token <punctuation> COLON       ":"
+%token <punctuation> SEMI        ";"
+%token <punctuation> OR          "|"
+%token <punctuation> LT          "<"
+%token <punctuation> GT          ">"
+
+%%
+
+grammar:
+    prologue
+  | epilogue
+  | declaration
+  | nonterminal
+  | PERCENT_PERCENT
+  ;
+
+;;; Prologue/Epilogue
+;;
+prologue:
+    PROLOGUE
+    (CODE-TAG "prologue" nil)
+  ;
+
+epilogue:
+    EPILOGUE
+    (CODE-TAG "epilogue" nil)
+  ;
+
+;;; Declarations
+;;
+declaration:
+    decl
+    (eval $1)
+  ;
+
+decl:
+    default_prec_decl
+  | no_default_prec_decl
+  | languagemode_decl
+  | package_decl
+  | precedence_decl
+  | put_decl
+  | quotemode_decl
+  | scopestart_decl
+  | start_decl
+  | keyword_decl
+  | token_decl
+  | type_decl
+  | use_macros_decl
+  ;
+
+default_prec_decl:
+    DEFAULT-PREC
+    `(TAG "default-prec" 'assoc :value '("t"))
+  ;
+
+no_default_prec_decl:
+    NO-DEFAULT-PREC
+    `(TAG "default-prec" 'assoc :value '("nil"))
+  ;
+
+languagemode_decl:
+    LANGUAGEMODE symbols
+    `(TAG ',(car $2) 'languagemode :rest ',(cdr $2))
+  ;
+
+package_decl:
+    PACKAGE SYMBOL
+    `(PACKAGE-TAG ',$2 nil)
+  ;
+
+precedence_decl:
+    associativity token_type_opt items
+    `(TAG ',$1 'assoc :type ',$2 :value ',$3)
+  ;
+
+associativity:
+    LEFT
+    (progn "left")
+  | RIGHT
+    (progn "right")
+  | NONASSOC
+    (progn "nonassoc")
+  ;
+
+put_decl:
+    PUT put_name put_value
+    `(TAG ',$2 'put :value ',(list $3))
+  | PUT put_name put_value_list
+    `(TAG ',$2 'put :value ',$3)
+  | PUT put_name_list put_value
+    `(TAG ',(car $2) 'put :rest ',(cdr $2) :value ',(list $3))
+  | PUT put_name_list put_value_list
+    `(TAG ',(car $2) 'put :rest ',(cdr $2) :value ',$3)
+  ;
+
+put_name_list:
+    BRACE_BLOCK
+    (mapcar 'semantic-tag-name (EXPANDFULL $1 put_names))
+  ;
+
+put_names:
+    LBRACE
+    ()
+  | RBRACE
+    ()
+  | put_name
+ ;; Must return a list of Semantic tags to EXPANDFULL!
+    (TAG $1 'put-name)
+  ;
+
+put_name:
+    SYMBOL
+  | token_type
+  ;
+
+put_value_list:
+    BRACE_BLOCK
+    (mapcar 'semantic-tag-code-detail (EXPANDFULL $1 put_values))
+  ;
+
+put_values:
+    LBRACE
+    ()
+  | RBRACE
+    ()
+  | put_value
+ ;; Must return a list of Semantic tags to EXPANDFULL!
+    (CODE-TAG "put-value" $1)
+  ;
+
+put_value:
+    SYMBOL any_value
+    (cons $1 $2)
+  ;
+
+scopestart_decl:
+    SCOPESTART SYMBOL
+    `(TAG ',$2 'scopestart)
+  ;
+
+quotemode_decl:
+    QUOTEMODE SYMBOL
+    `(TAG ',$2 'quotemode)
+  ;
+
+start_decl:
+    START symbols
+    `(TAG ',(car $2) 'start :rest ',(cdr $2))
+  ;
+
+keyword_decl:
+    KEYWORD SYMBOL string_value
+    `(TAG ',$2 'keyword :value ',$3)
+  ;
+
+token_decl:
+    TOKEN token_type_opt SYMBOL string_value
+    `(TAG ',$3 ',(if $2 'token 'keyword) :type ',$2 :value ',$4)
+  | TOKEN token_type_opt symbols
+    `(TAG ',(car $3) 'token :type ',$2 :rest ',(cdr $3))
+  ;
+
+token_type_opt:
+ ;; EMPTY
+  | token_type
+  ;
+
+token_type:
+    LT SYMBOL GT
+    (progn $2)
+  ;
+
+type_decl:
+    TYPE token_type plist_opt
+    `(TAG ',$2 'type :value ',$3)
+  ;
+
+plist_opt:
+ ;;EMPTY
+  | plist
+  ;
+
+plist:
+    plist put_value
+    (append (list $2) $1)
+  | put_value
+    (list $1)
+  ;
+
+use_name_list:
+    BRACE_BLOCK
+    (mapcar 'semantic-tag-name (EXPANDFULL $1 use_names))
+  ;
+
+use_names:
+    LBRACE
+    ()
+  | RBRACE
+    ()
+  | SYMBOL
+ ;; Must return a list of Semantic tags to EXPANDFULL!
+    (TAG $1 'use-name)
+  ;
+
+use_macros_decl:
+    USE-MACROS SYMBOL use_name_list
+    `(TAG "macro" 'macro :type ',$2 :value ',$3)
+  ;
+
+string_value:
+    STRING
+    (read $1)
+  ;
+
+;; Return a Lisp readable form
+any_value:
+    SYMBOL
+  | STRING
+  | PAREN_BLOCK
+  | PREFIXED_LIST
+  | SEXP
+  ;
+
+symbols:
+    lifo_symbols
+    (nreverse $1)
+  ;
+
+lifo_symbols:
+    lifo_symbols SYMBOL
+    (cons $2 $1)
+  | SYMBOL
+    (list $1)
+  ;
+
+;;; Grammar rules
+;;
+nonterminal:
+    SYMBOL
+    (setq semantic-grammar-wy--nterm $1
+          semantic-grammar-wy--rindx 0)
+    COLON rules SEMI
+    (TAG $1 'nonterminal :children $4)
+  ;
+
+rules:
+    lifo_rules
+    (apply 'nconc (nreverse $1))
+  ;
+
+lifo_rules:
+    lifo_rules OR rule
+    (cons $3 $1)
+  | rule
+    (list $1)
+  ;
+
+rule:
+    rhs
+    (let* ((nterm semantic-grammar-wy--nterm)
+           (rindx semantic-grammar-wy--rindx)
+           (rhs   $1)
+           comps prec action elt)
+      (setq semantic-grammar-wy--rindx (1+ semantic-grammar-wy--rindx))
+      (while rhs
+        (setq elt (car rhs)
+              rhs (cdr rhs))
+        (cond
+         ;; precedence level
+         ((vectorp elt)
+          (if prec
+              (error "Duplicate %%prec in `%s:%d' rule" nterm rindx))
+          (setq prec (aref elt 0)))
+         ;; action
+         ((consp elt)
+          ;; don't forget that rhs items are in reverse order, so
+          ;; the end-of-rule semantic action is the first item.
+          (if (or action comps)
+              ;; a mid-rule action
+              (setq comps (cons elt comps)
+                    ;; keep rule and action index synchronized
+                    semantic-grammar-wy--rindx
+                    (1+ semantic-grammar-wy--rindx))
+            ;; the end-of-rule action
+            (setq action (car elt))))
+         ;; item
+         (t
+          (setq comps (cons elt comps)))))
+      (EXPANDTAG
+       (TAG (format "%s:%d" nterm rindx) 'rule
+            :type (if comps "group" "empty")
+            :value comps :prec prec :expr action)))
+  ;
+
+rhs:
+ ;; EMPTY
+  | rhs item
+    (cons $2 $1)
+  | rhs action
+    (cons (list $2) $1)
+  | rhs PREC item
+    (cons (vector $3) $1)
+  ;
+
+action:
+    PAREN_BLOCK
+  | PREFIXED_LIST
+  | BRACE_BLOCK
+    (format "(progn\n%s)"
+            (let ((s $1))
+              (if (string-match "^{[\r\n\t ]*" s)
+                  (setq s (substring s (match-end 0))))
+              (if (string-match "[\r\n\t ]*}$" s)
+                  (setq s (substring s 0 (match-beginning 0))))
+              s))
+  ;
+
+items:
+    lifo_items
+    (nreverse $1)
+  ;
+
+lifo_items:
+    lifo_items item
+    (cons $2 $1)
+  | item
+    (list $1)
+  ;
+
+item:
+    SYMBOL
+  | CHARACTER
+  ;
+
+%%
+
+;;; grammar.wy ends here

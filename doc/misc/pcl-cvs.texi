@@ -1,0 +1,1431 @@
+\input texinfo  @c -*-texinfo-*-
+@c %**start of header
+@setfilename ../../info/pcl-cvs
+@settitle PCL-CVS --- Emacs Front-End to CVS
+@syncodeindex vr fn
+@c %**end of header
+
+@copying
+Copyright @copyright{} 1991-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs misc features
+@direntry
+* PCL-CVS: (pcl-cvs).           Emacs front-end to CVS.
+@end direntry
+
+@c The titlepage section does not appear in the Info file.
+@titlepage
+@sp 4
+@c The title is printed in a large font.
+@center @titlefont{User's Guide}
+@sp
+@center @titlefont{to}
+@sp
+@center @titlefont{PCL-CVS --- The Emacs Front-End to CVS}
+@ignore
+@sp 2
+@center release 2.9
+@c -release-
+@end ignore
+@sp 3
+@center Per Cederqvist
+@center Stefan Monnier
+@c -date-
+
+@c  The following two commands start the copyright page
+@c  for the printed manual.  This will not appear in the Info file.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@c ================================================================
+@c                   The real text starts here
+@c ================================================================
+
+@node Top, About PCL-CVS, (dir), (dir)
+@ifnottex
+@top PCL-CVS
+
+This manual describes PCL-CVS, the GNU Emacs front-end to CVS.  It
+is nowhere near complete, so you are advised to use @kbd{M-x
+customize-group RET pcl-cvs @key{RET}} and to look at the documentation strings
+of the various commands and major modes for further information.
+@c This manual is updated to release 2.5 of PCL-CVS.
+
+@insertcopying
+
+@end ifnottex
+
+@menu
+* About PCL-CVS::               Credits, history, @dots{}
+
+* Getting started::             An introduction with a walk-through example.
+* Buffer contents::             An explanation of the buffer contents.
+* Selected files::              To which files are commands applied.
+* Commands::                    All commands, grouped by type.
+
+* Log Edit Mode::               Major mode to edit log messages.
+* Log View Mode::               Major mode to browse log changes.
+@c * CVS Status Mode::             Major mode to view CVS' status output.
+* Customization::               How you can tailor PCL-CVS to suit your needs.
+* Bugs::                        Bugs (known and unknown).
+
+* GNU Free Documentation License:: The license for this documentation.
+* Function and Variable Index::  List of functions and variables.
+* Concept Index::               List of concepts.
+* Key Index::                   List of keystrokes.
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+About PCL-CVS
+
+* Contributors::                Contributors to PCL-CVS.
+
+Commands
+
+* Entering PCL-CVS::            Commands to invoke PCL-CVS
+* Setting flags::               Setting flags for CVS commands
+* Updating the buffer::
+* Movement commands::           How to move up and down in the buffer
+* Marking files::               How to mark files that other commands
+                                will later operate on.
+* Committing changes::          Checking in your modifications to the
+                                CVS repository.
+* Editing files::               Loading files into Emacs.
+* Getting info about files::    Display the log and status of files.
+* Adding and removing files::   Adding and removing files
+* Undoing changes::             Undoing changes
+* Removing handled entries::    Uninteresting lines can easily be removed.
+* Ignoring files::              Telling CVS to ignore generated files.
+* Viewing differences::         Commands to @samp{diff} different versions.
+* Invoking Ediff::              Running @samp{ediff} from @samp{*cvs*} buffer.
+* Updating files::              Updating files that Need-update.
+* Tagging files::               Tagging files.
+* Miscellaneous commands::      Miscellaneous commands.
+
+Customization
+
+* Customizing Faces::
+
+@end detailmenu
+@end menu
+
+@node     About PCL-CVS, Getting started, Top, Top
+@chapter About PCL-CVS
+@cindex About PCL-CVS
+
+PCL-CVS is a front-end to CVS versions 1.9 and later.
+It concisely shows the present status of a checked out module in an
+Emacs buffer and provides single-key access to the most frequently used CVS
+commands.  Note that the @code{vc-dir} command (@pxref{VC Directory
+Mode, , , emacs, The GNU Emacs Manual}) provides similar
+functionality, but for several version control systems, including CVS.
+
+PCL-CVS was originally written many years ago by Per Cederqvist who
+proudly maintained it until January 1996, at which point he released the
+beta version 2.0b2 and passed on the maintainership to Greg A Woods.
+Development stayed mostly dormant for a few years during which
+version 2.0 never seemed to be able to leave the ``beta'' stage while a
+separate XEmacs version was slowly splitting away.  In late 1998,
+Stefan Monnier picked up development again, adding some major new
+functionality and taking over the maintenance.
+
+@menu
+* Contributors::                Contributors to PCL-CVS.
+@end menu
+
+@node     Contributors,, About PCL-CVS, About PCL-CVS
+@section Contributors to PCL-CVS
+@cindex Contributors
+@cindex Authors
+
+Contributions to the package are welcome.  I have limited time to work
+on this project, but I will gladly add any code that you contribute to
+me to this package (@pxref{Bugs}).
+
+The following persons have made contributions to PCL-CVS.
+
+@itemize @bullet
+@item
+Brian Berliner wrote CVS, together with some other contributors.
+Without his work on CVS this package would be useless@dots{}
+
+@item
+Per Cederqvist wrote most of the otherwise unattributed functions in
+PCL-CVS as well as all the documentation.
+
+@item
+@email{inge@@lysator.liu.se, Inge Wallin} wrote the skeleton of
+@file{pcl-cvs.texi}, and gave useful comments on it.  He also wrote
+the files @file{elib-node.el} and @file{compile-all.el}.  The file
+@file{cookie.el} was inspired by Inge.@refill
+
+@item
+@email{linus@@lysator.liu.se, Linus Tolke} contributed useful comments
+on both the functionality and the documentation.@refill
+
+@item
+@email{jwz@@jwz.com, Jamie Zawinski} contributed
+@file{pcl-cvs-lucid.el}, which was later renamed to
+@file{pcl-cvs-xemacs.el}.@refill
+
+@item
+Leif Lonnblad contributed RCVS support (since superseded by the new
+remote CVS support).
+
+@item
+@email{jimb@@cyclic.com, Jim Blandy} contributed hooks to automatically
+guess CVS log entries from @file{ChangeLog} contents, and initial support of
+the new Cygnus / Cyclic remote CVS, as well as various sundry bug fixes
+and cleanups.
+
+@item
+@email{kingdon@@cyclic.com, Jim Kingdon} contributed lots of fixes to
+the build and installation procedure.
+
+@item
+@email{woods@@weird.com, Greg A.@: Woods} contributed code to implement
+the use of per-file diff buffers, and vendor join diffs with emerge and
+ediff, as well as various and sundry bug fixes and cleanups.
+
+@item
+@email{greg.klanderman@@alum.mit.edu, Greg Klanderman} implemented
+toggling of marked files, setting of CVS command flags via prefix
+arguments, updated the XEmacs support, updated the manual, and fixed
+numerous bugs.
+
+@item
+@email{monnier@@gnu.org, Stefan Monnier} added a slew of other
+features and introduced even more new bugs.  If there's any bug left,
+you can be sure it's his.
+
+@item
+@c wordy to avoid an underfull hbox
+@email{masata-y@@is.aist-nara.ac.jp, Masatake YAMATO} made a gracious
+contribution of his cvstree code to display a tree of tags which was later
+superseded by the new @code{cvs-status-mode}.
+@end itemize
+
+Apart from these, a lot of people have sent us suggestions, ideas,
+requests, bug reports and encouragement.  Thanks a lot!  Without you
+there would be no new releases of PCL-CVS.
+
+
+@node Getting started, Buffer contents, About PCL-CVS, Top
+@chapter Getting started
+@cindex Introduction
+@cindex Example run
+@cindex Sample session
+
+This document assumes that you know what CVS is, and that you at least
+know the fundamental concepts of CVS.  If that is not the case, you
+should read the CVS documentation.  Type @kbd{info -f cvs} or @kbd{man
+cvs}.
+
+PCL-CVS is only useful once you have checked out a module.  So before
+you invoke it, you must have a copy of a module somewhere in the file
+system.
+
+You can invoke PCL-CVS by typing @kbd{M-x cvs-examine @key{RET}}.
+You can also invoke it via the menu bar, under @samp{Tools}.
+Or, if you prefer, you can also invoke PCL-CVS by simply visiting the
+CVS administrative subdirectory of your module, with a prefix argument.
+For example, to invoke PCL-CVS in a separate frame, type @kbd{C-u C-x 5
+f ~/my/project/CVS @key{RET}}.
+
+The function @code{cvs-examine} will ask for a directory.  The command
+@samp{cvs -n update} will be run in that directory.  (It should contain
+files that have been checked out from a CVS archive.)  The output from
+@code{cvs} will be parsed and presented in a table in a buffer called
+@samp{*cvs*}.  It might look something like this:
+
+@example
+Repository : /usr/CVSroot
+Module     : test
+Working dir: /users/ceder/FOO/test
+
+
+In directory .:
+           Need-Update            bar
+           Need-Update            file.txt
+           Modified               namechange
+           Need-Update            newer
+In directory sub:
+           Modified               ChangeLog
+
+--------------------- End ---------------------
+-- last cmd: cvs -f -z6 -n update -d -P --
+@end example
+
+In this example, your repository is in @file{/usr/CVSroot} and CVS has
+been run in the directory @file{/users/ceder/FOO/test}.  The three files
+(@file{bar}, @file{file.txt} and
+@file{newer}) that are marked with @samp{Need-Update} have been changed
+by someone else in the CVS repository.  Two files (@file{namechange}
+and @file{sub/ChangeLog}) have been modified locally, and need to be
+checked in.
+
+You can move the cursor up and down in the buffer with @kbd{C-n} and
+@kbd{C-p} or @kbd{n} and @kbd{p}.  If you press @kbd{c} on one of the
+@samp{Modified} files, that file will be checked in to the CVS
+repository. @xref{Committing changes}.  You can also press @kbd{O} to
+update any of the files that are marked @samp{Need-Update}.  You can
+also run @kbd{M-x cvs-update @key{RET}} (bound to @kbd{M-u} in the
+@samp{*cvs*} buffer) to update all the files.@refill
+
+You can then press @kbd{=} to easily get a @samp{diff} between your
+modified file and the base version that you started from, or you can
+press @kbd{l} to get the output from @samp{cvs log}.  Many more such
+commands are available simply by pressing a key (@pxref{Getting info
+about files}).
+
+@node Buffer contents, Selected files, Getting started, Top
+@chapter Buffer contents
+@cindex Buffer contents
+@cindex @code{*cvs*} buffer contents
+
+The display contains several columns, some of which are optional.
+These columns are, from left to right:
+
+@itemize @bullet
+
+@item
+Optionally, the head revision of the file.  This is the latest version
+found in the repository.  It might also contain (instead of the head
+revision) a sub status which typically gives further information about
+how we got to the current state, for example @samp{patched},
+@samp{merged}, @dots{}
+
+@item
+An asterisk when the file is @dfn{marked} (@pxref{Selected
+files}).@refill
+
+@item
+The actual status of the file wrt the repository.  See below.
+
+@item
+Optionally, the base revision of the file.  This is the version
+which the copy in your working directory is based upon.
+
+@item
+The file name.
+
+@end itemize
+
+The @samp{file status} field can have the following values:
+
+@table @samp
+@item Modified
+The file is modified in your working directory, and there was no
+modification to the same file in the repository.  This status can have
+the following substatus:
+
+@table @samp
+@item merged
+The file was modified in your working directory, and there were
+modifications in the repository as well, but they were merged
+successfully, without conflict, in your working directory.@refill
+@end table
+
+@item Conflict
+A conflict was detected while trying to merge your changes to @var{file}
+with changes from the repository.  @var{file} (the copy in your
+working directory) is now the output of the @code{rcsmerge} command on
+the two versions; an unmodified copy of your file is also in your
+working directory, with the name @file{.#@var{file}.@var{version}},
+where @var{version} is the RCS revision that your modified file started
+from.  @xref{Viewing differences}, for more details.@refill
+
+A conflict can also come from a disagreement on the existence of the file
+rather than on its content.  This case is indicated by the following
+possible substatus:
+
+@table @samp
+@item removed
+The file is locally removed but a new revision has been committed to
+the repository by someone else.
+
+@item added
+The file is locally added and has also been added to the repository
+by someone else.
+
+@item modified
+The file is locally modified but someone else has removed it from the
+repository.
+@end table
+
+@item Added
+The file has been added by you, but it still needs to be checked in to
+the repository.@refill
+
+@item Removed
+The file has been removed by you, but it still needs to be checked in to
+the repository.  You can resurrect it by typing @kbd{a} (@pxref{Adding
+and removing files}).@refill
+
+@item Unknown
+A file that was detected in your directory, but that neither appears in
+the repository, nor is present on the list of files that CVS should
+ignore.@refill
+
+@item Up-to-date
+The file is up to date with respect to the version in the repository.
+This status can have a substatus of:
+
+@table @samp
+@item added
+You have just added the file to the repository.@refill
+
+@item updated
+The file was brought up to date with respect to the repository.  This is
+done for any file that exists in the repository but not in your source,
+and for files that you haven't changed but are not the most recent
+versions available in the repository.@refill
+
+@item patched
+The file was brought up to date with respect to the remote repository by
+way of fetching and applying a patch to the file in your source.  This
+is equivalent to @samp{updated} except that CVS decided to use a hopefully
+more efficient method.@refill
+
+@item committed
+You just committed the file.@refill
+@end table
+
+@item Need-Update
+Either a newer version than the one in your source is available in the
+repository and you have not modified your checked out version, or the
+file exists in the repository but not in your source.  Use
+@samp{cvs-mode-update} bound to @kbd{O} to update the file.@refill
+
+@item Need-Merge
+You have modified the checked out version of the file, and a newer
+version is available in the repository.  A merge will take place when
+you run a @samp{cvs-update}.
+
+@item Missing
+The file has been unexpectedly removed from your working directory
+although it has not been @samp{cvs remove}d.
+@end table
+
+@node Selected files, Commands, Buffer contents, Top
+@chapter Selected files
+@cindex Selected files
+@cindex Marked files
+@cindex File selection
+@cindex Active files
+@cindex Applicable
+
+Many of the commands work on the current set of @dfn{selected} files
+which can be either the set of marked files (if any file is marked and
+marks are not ignored) or whichever file or directory the cursor is on.
+
+If a directory is selected but the command cannot be applied to a
+directory, then it will be applied to the set of files under this
+directory which are in the @samp{*cvs*} buffer.
+
+@findex cvs-mode-force-command
+@findex cvs-allow-dir-commit
+Furthermore, each command only operates on a subset of the selected
+files, depending on whether or not the command is @dfn{applicable} to
+each file (based on the file's status).  For example,
+@code{cvs-mode-commit} is not applicable to a file whose status is
+@samp{Need-Update}.  If it should happen that PCL-CVS guesses the
+applicability wrong, you can override it with the special prefix
+@code{cvs-mode-force-command} normally bound to @kbd{M-f} (and file a
+bug report).  The applicability rule can be slightly changed with
+@code{cvs-allow-dir-commit} and @code{cvs-force-dir-tag}.
+
+By default, marks are always in effect (you may change this, however, by
+setting the variable @code{cvs-default-ignore-marks}) except for the
+commands that @samp{tag} or @samp{diff} a file (which can be changed
+with the variable @code{cvs-invert-ignore-marks}).
+
+In addition, you may use the special prefix @code{cvs-mode-toggle-marks}
+normally bound to @key{T} to toggle the use of marks for the following
+command.
+
+This scheme might seem a little complicated, but once one gets used to
+it, it is quite powerful.
+
+For commands to mark and unmark files, see @ref{Marking files}.
+
+@node Commands, Log Edit Mode, Selected files, Top
+@chapter Commands
+
+@iftex
+This chapter describes all the commands that you can use in PCL-CVS.
+@end iftex
+@ifnottex
+The nodes in this menu contains explanations about all the commands that
+you can use in PCL-CVS.  They are grouped together by type.
+@end ifnottex
+
+@menu
+* Entering PCL-CVS::            Commands to invoke PCL-CVS
+* Setting flags::               Setting flags for CVS commands
+* Updating the buffer::
+* Movement commands::           How to move up and down in the buffer
+* Marking files::               How to mark files that other commands
+                                will later operate on.
+* Committing changes::          Checking in your modifications to the
+                                CVS repository.
+* Editing files::               Loading files into Emacs.
+* Getting info about files::    Display the log and status of files.
+* Adding and removing files::   Adding and removing files
+* Undoing changes::             Undoing changes
+* Removing handled entries::    Uninteresting lines can easily be removed.
+* Ignoring files::              Telling CVS to ignore generated files.
+* Viewing differences::         Commands to @samp{diff} different versions.
+* Invoking Ediff::              Running @samp{ediff} from @samp{*cvs*} buffer.
+* Updating files::              Updating files that Need-update.
+* Tagging files::               Tagging files.
+* Miscellaneous commands::      Miscellaneous commands.
+@end menu
+
+
+@node Entering PCL-CVS, Setting flags, Commands, Commands
+@section Entering PCL-CVS
+@findex cvs-update
+@findex cvs-examine
+@findex cvs-status
+@findex cvs-checkout
+@findex cvs-quickdir
+@cindex Creating the *cvs* buffer
+
+Most commands in PCL-CVS require that you have a @samp{*cvs*}
+buffer.  The commands that you use to get one are listed below.
+For each, a @samp{cvs} process will be run, the output will be parsed by
+PCL-CVS, and the result will be printed in the @samp{*cvs*} buffer (see
+@ref{Buffer contents}, for a description of the buffer's contents).
+
+@table @kbd
+@item M-x cvs-update
+Run a @samp{cvs update} command.  You will be asked for the directory
+in which the @samp{cvs update} will be run.
+
+@item M-x cvs-examine
+Run a @samp{cvs -n update} command.  This is identical to the previous
+command, except that it will only check what needs to be done but will
+not change anything.  You will be asked for the directory in
+which the @samp{cvs -n update} will be run.
+
+@item M-x cvs-status
+Run a @samp{cvs status} command.  You will be asked for the directory
+in which the @samp{cvs status} will be run.
+
+@item M-x cvs-checkout
+Run a @samp{cvs checkout} command.  You will be asked for the directory
+in which the @samp{cvs update} will be run and the module to be checked
+out.
+
+@item M-x cvs-quickdir
+Populate the @samp{*cvs*} buffer by just looking at the @file{CVS/Entries}
+files.  This is very much like @code{cvs-examine} except that it does
+not access the CVS repository, which is a major advantage when the
+repository is far away.  But of course, it will not be able to detect
+when a file needs to be updated or merged.
+@end table
+
+@findex cvs-dired-action
+@findex cvs-dired-use-hook
+The first four of
+those commands are also reachable from the menu bar
+under @samp{Tools->PCL-CVS}.  Finally, an alternative way is to visit
+the CVS administrative subdirectory in your work area with a simple
+prefix argument.  For example @kbd{C-u C-x C-f ~/my/work/CVS @key{RET}}.  This
+by default runs @code{cvs-quickdir} but the specific behavior can be
+changed with @code{cvs-dired-action} and @code{cvs-dired-use-hook}.
+
+By default, the commands above will descend recursively into
+subdirectories.  You can avoid that behavior by including @samp{-l} in
+the flags for the command.  These flags can be set by giving a prefix
+argument to the command (e.g., by typing
+@kbd{C-u M-x cvs-update @key{RET} -l @key{RET}}).
+
+
+@node Setting flags, Updating the buffer, Entering PCL-CVS, Commands
+@section Setting flags for CVS commands
+@cindex Optional switches to CVS
+@cindex Command-line options to CVS
+
+This section describes the convention used by nearly all PCL-CVS
+commands for setting optional flags sent to CVS.  A single @kbd{C-u}
+prefix argument is used to cause the command to prompt for flags to be
+used for the current invocation of the command only.  Two @kbd{C-u} prefix
+arguments are used to prompt for flags which will be set permanently, for the
+current invocation and all that follow, until the flags are changed, or
+unless temporary flags are set which override them.
+
+Perhaps an example or two is in order.  Say you are about to add a
+binary file to the repository, and want to specify the flags @samp{-kb}
+to @samp{cvs add}.  You can type @kbd{C-u a -kb @key{RET}},
+and the file will be added.  Subsequent @samp{cvs add}
+commands will use the previously prevailing flags.
+
+As a second example, say you are about to perform a diff and want to see
+the result in unified diff format, i.e. you'd like to pass the flag
+@samp{-u} to both @samp{cvs diff} and @samp{diff}.  You'd also like all
+subsequent diffs to use this flag.  You can type @kbd{C-u C-u = -u @key{RET}}
+and the diff will be performed, and the default flags will be set to
+@code{("-u")}.  You can of course override this flag for a single diff
+by using a single @kbd{C-u} prefix argument.
+
+@cindex Special prefix
+In addition to this, some commands can take @dfn{special prefix} arguments.
+These work as follows: When called with a @kbd{C-u} prefix, the user is
+prompted for a new value of the special prefix and the special prefix is
+activated for the next command.  When called without the @kbd{C-u}
+prefix, the special prefix is re-activated (with the same value as last
+time) for the next command.  Calling the prefix command again when it's
+already activated deactivates it.  Calling it with the @kbd{C-u C-u}
+prefix activates it for all subsequent commands until you deactivate it
+explicitly.  The special prefixes are:
+
+@table @kbd
+@item T
+Toggles whether or not marks will be active in the next command.@refill
+
+@item b
+Provide the next command with a branch (can be any version
+specifier) to work on.@refill
+
+@item B
+Secondary branch argument.  Only meaningful if @kbd{b} is also used.
+It can be used to provide a second branch argument to
+@code{cvs-mode-diff} or to @code{cvs-mode-update}.
+
+@item M-f
+Forces the next command to apply to every selected file rather than only
+to the ones PCL-CVS thinks are relevant.
+@end table
+
+@node Updating the buffer, Movement commands, Setting flags, Commands
+@section Updating the @samp{*cvs*} buffer
+@findex cvs-update
+@findex cvs-examine
+@findex cvs-status
+@findex cvs-mode-update
+@findex cvs-mode-examine
+@findex cvs-mode-status
+
+The following commands can be used from within the @samp{*cvs*} buffer
+to update the display:
+
+@table @kbd
+@item M-u
+Runs the command @samp{cvs-update}.@refill
+
+@item M-e
+Runs the command @samp{cvs-examine}.@refill
+
+@item M-s
+Runs the command @samp{cvs-status}.@refill
+@end table
+
+In addition to the above commands which operate on the whole module,
+you can run the equivalent CVS command on just a subset of the
+files/directories with these keys:
+
+@table @kbd
+@item O
+Runs @code{cvs-mode-update} on the selected files.  When run on the
+top-level directory, this is equivalent to @kbd{M-u}.@refill
+
+@item e
+Runs @code{cvs-mode-examine} on the selected files.  When run on the
+top-level directory, this is equivalent to @kbd{M-e}.@refill
+
+@findex cvs-status-mode
+@item s
+Runs @code{cvs-mode-status} on the selected files.  When run on the
+top-level directory, this is equivalent to @kbd{M-s}, except that
+CVS output will be shown in a @samp{*cvs-info*} buffer that will be
+put in @samp{cvs-status-mode}.@refill
+@end table
+
+
+@node Movement commands, Marking files, Updating the buffer, Commands
+@section Movement Commands
+@cindex Movement Commands
+@findex cvs-mode-next-line
+@findex cvs-mode-previous-line
+@kindex SPC@r{--Move down one file}
+@kindex n@r{--Move down one file}
+@kindex p@r{--Move up one file}
+
+You can use most normal Emacs commands to move forward and backward in
+the buffer.  Some keys are rebound to functions that take advantage of
+the fact that the buffer is a PCL-CVS buffer:
+
+
+@table @kbd
+@item @key{SPC}
+@itemx n
+These keys move the cursor one file forward, towards the end of the
+buffer (@code{cvs-mode-next-line}).@refill
+
+@itemx p
+This key moves one file backward, towards the beginning of the buffer
+(@code{cvs-mode-previous-line}).
+@end table
+
+
+@node Marking files, Committing changes, Movement commands, Commands
+@section Marking files
+@cindex Selecting files (commands to mark files)
+@cindex Marking files
+@kindex m@r{--marking a file}
+@kindex M@r{--marking all files}
+@kindex u@r{--unmark a file}
+@kindex ESC DEL@r{--unmark all files}
+@kindex DEL@r{--unmark previous file}
+@kindex %@r{--mark files matching regexp}
+@kindex S@r{--mark files in a particular state}
+@kindex T@r{--toggle marks}
+@findex cvs-mode-mark
+@findex cvs-mode-unmark
+@findex cvs-mode-mark-all-files
+@findex cvs-mode-unmark-all-files
+@findex cvs-mode-unmark-up
+@findex cvs-mode-mark-matching-files
+@findex cvs-mode-mark-on-state
+@findex cvs-mode-toggle-marks
+
+PCL-CVS works on a set of @dfn{selected files} (@pxref{Selected files}).
+You can mark and unmark files with these commands:
+
+@table @kbd
+@item m
+This marks the file that the cursor is positioned on.  If the cursor is
+positioned on a directory all files in that directory are marked
+(@code{cvs-mode-mark}).@refill
+
+@item u
+Unmark the file that the cursor is positioned on. If the cursor is on a
+directory, all files in that directory are unmarked
+(@code{cvs-mode-unmark}).@refill
+
+@item M
+Mark @emph{all} files in the buffer (@code{cvs-mode-mark-all-files}).
+
+@item M-@key{DEL}
+Unmark @emph{all} files (@code{cvs-mode-unmark-all-files}).
+
+@item @key{DEL}
+Unmark the file on the previous line, and move point to that line
+(@code{cvs-mode-unmark-up}).
+
+@item %
+Mark all files matching a regular expression
+(@code{cvs-mode-mark-matching-files}).
+
+@item S
+Mark all files in a particular state, such as ``Modified'' or
+``Removed'' (@code{cvs-mode-mark-on-state}).
+
+@item T
+Toggle use of marks for the next command (@code{cvs-mode-toggle-marks}).
+@end table
+
+
+@node Committing changes, Editing files, Marking files, Commands
+@section Committing changes
+@cindex Committing changes
+@findex cvs-mode-commit
+@findex cvs-mode-commit-setup
+@kindex c@r{--commit files}
+@kindex C@r{--commit files with @file{ChangeLog} message}
+@vindex cvs-auto-revert@r{ (variable)}
+@cindex Commit buffer
+@cindex Edit buffer
+@cindex Erasing commit message
+@cindex Reverting buffers after commit
+
+Committing changes basically works as follows:
+
+@enumerate
+@item
+After having selected the files you want to commit, you type either
+@kbd{c} or @kbd{C} which brings up a special buffer
+@samp{*cvs-commit*}.@refill
+
+@item
+You type in the log message describing the changes you're about to
+commit (@pxref{Log Edit Mode}).
+
+@item
+When you're happy with it, you type @kbd{C-c C-c} to do the actual
+commit.@refill
+@end enumerate
+
+There's no hidden state, so you can abort the process or pick it up
+again at any time.
+
+@vindex log-edit-confirm@r{ (variable)}
+The set of files actually committed is really decided only during the
+very last step, which is a mixed blessing.  It allows you to go back and
+change your mind about which files to commit, but it also means that you
+might inadvertently change the set of selected files.  To reduce the
+risk of error, @kbd{C-c C-c} will ask for confirmation if the set of
+selected files has changed between the first step and the last.  You can
+change this last detail with @code{log-edit-confirm}.
+
+As for the difference between @kbd{c} (i.e. @code{cvs-mode-commit}) and
+@kbd{C} (i.e. @code{cvs-mode-commit-setup}) is that the first gets you
+straight to @samp{*cvs-commit*} without erasing it or changing anything
+to its content, while the second first erases @samp{*cvs-commit*}
+and tries to initialize it with a sane default (it does that by either
+using a template provided by the CVS administrator or by extracting a
+relevant log message from a @file{ChangeLog} file).
+
+If you are editing the files in your Emacs, an automatic
+@samp{revert-buffer} will be performed.  (If the file contains
+@samp{$@asis{Id}$} keywords, @samp{cvs commit} will write a new file with
+the new values substituted.  The auto-revert makes sure that you get
+them into your buffer.)  The revert will not occur if you have modified
+your buffer, or if @samp{cvs-auto-revert} is set to
+@samp{nil}.
+
+
+@node Editing files, Getting info about files, Committing changes, Commands
+@section Editing files
+@cindex Editing files
+@cindex Finding files
+@cindex Loading files
+@cindex Dired
+@cindex Invoking dired
+@findex cvs-mode-find-file
+@findex cvs-mode-find-file-other-window
+@findex cvs-mode-add-change-log-entry-other-window
+@kindex f@r{--find file or directory}
+@kindex o@r{--find file in other window}
+@kindex A@r{--add @file{ChangeLog} entry}
+
+There are currently three commands that can be used to find a file (that
+is, load it into a buffer and start editing it there).  These commands
+work on the line that the cursor is situated at.  They always ignore any marked
+files.
+
+@table @kbd
+@item f
+Find the file that the cursor points to (@code{cvs-mode-find-file}).  If
+the cursor points to a directory, run @code{dired} on that directory;
+@inforef{Dired, , emacs}.
+
+@item o
+Like @kbd{f}, but use another window
+(@code{cvs-mode-find-file-other-window}).@refill
+
+@item A
+Invoke @samp{add-change-log-entry-other-window} to edit a
+@file{ChangeLog} file.  The @file{ChangeLog} file will be found in the
+directory of the file the cursor points to, or in a parent of that
+directory (@code{cvs-mode-add-change-log-entry-other-window}).@refill
+@end table
+
+
+@node Getting info about files, Adding and removing files, Editing files, Commands
+@section Getting info about files
+@cindex Status (cvs command)
+@cindex Log (RCS/cvs command)
+@cindex Getting status
+@kindex l@r{--run @samp{cvs log}}
+@kindex s@r{--run @samp{cvs status}}
+@findex cvs-mode-log
+@findex cvs-mode-status
+
+@table @kbd
+@item l
+Call the command @code{cvs-mode-log} which runs @samp{cvs log} on all
+selected files, and show the result in a temporary buffer
+@samp{*cvs-info*} (@pxref{Log View Mode}).
+
+@item s
+Call the command @code{cvs-mode-status} which runs @samp{cvs status} on
+all selected files, and show the result in a temporary buffer
+@samp{*cvs-info*}.
+@c Fixme: reinstate when node is written:
+@c (@pxref{CVS Status Mode}).
+@end table
+
+
+@node Adding and removing files, Undoing changes, Getting info about files, Commands
+@section Adding and removing files
+@cindex Adding files
+@cindex Removing files
+@cindex Resurrecting files
+@cindex Deleting files
+@cindex Putting files under CVS control
+@kindex a@r{--add a file}
+@kindex r@r{--remove a file}
+@findex cvs-mode-add
+@findex cvs-mode-remove-file
+
+The following commands are available to make it easy to add files to
+and remove them from the CVS repository.
+
+@table @kbd
+@item a
+Add all selected files.  This command can be used on @samp{Unknown}
+files (@pxref{Buffer contents}).  The status of the file will change to
+@samp{Added}, and you will have to use @kbd{c} (@samp{cvs-mode-commit}
+@pxref{Committing changes}), to really add the file to the
+repository.@refill
+
+This command can also be used on @samp{Removed} files (before you commit
+them) to resurrect them.
+
+The command that is run is @code{cvs-mode-add}.
+
+@item r
+This command removes the selected files (after prompting for
+confirmation).  The files are deleted from your directory and
+(unless the status was @samp{Unknown}; @pxref{Buffer contents}) they will
+also be @samp{cvs remove}d.  If the files' status was @samp{Unknown}
+they will disappear from the buffer.  Otherwise their status will change to
+@samp{Removed}, and you must use @kbd{c} (@samp{cvs-mode-commit},
+@pxref{Committing changes}) to commit the removal.@refill
+
+The command that is run is @code{cvs-mode-remove-file}.
+@end table
+
+
+@node Undoing changes, Removing handled entries, Adding and removing files, Commands
+@section Undoing changes
+@cindex Undo changes
+@cindex Flush changes
+@kindex U@r{--undo changes}
+@findex cvs-mode-undo-local-changes
+
+@table @kbd
+@item U
+If you have modified a file, and for some reason decide that you don't
+want to keep the changes, you can undo them with this command.  It works
+by removing your working copy of the file and then getting the latest
+version from the repository (@code{cvs-mode-undo-local-changes}).
+@end table
+
+
+@node Removing handled entries, Ignoring files, Undoing changes, Commands
+@section Removing handled entries
+@cindex Expunging uninteresting entries
+@cindex Uninteresting entries, getting rid of them
+@cindex Getting rid of uninteresting lines
+@cindex Removing uninteresting (processed) lines
+@cindex Handled lines, removing them
+@kindex x@r{--remove processed entries}
+@kindex C-k@r{--remove selected entries}
+@findex cvs-mode-remove-handled
+@findex cvs-mode-acknowledge
+@findex cvs-mode-ignore
+
+@table @kbd
+@item x
+This command allows you to remove all entries that you have processed.
+More specifically, the lines for @samp{Up-to-date} files (@pxref{Buffer
+contents}) are removed from the buffer.  If a directory becomes empty
+the heading for that directory is also removed.  This makes it easier to
+get an overview of what needs to be done.
+
+@vindex cvs-mode-remove-handled@r{ (variable)}
+@kbd{x} invokes @code{cvs-mode-remove-handled}.  If
+@samp{cvs-auto-remove-handled} is set to non-@code{nil}, this will
+automatically be performed after every commit.@refill
+
+@item C-k
+This command can be used for lines that @samp{cvs-mode-remove-handled} would
+not delete, but that you want to delete (@code{cvs-mode-acknowledge}).
+@end table
+
+
+@node Ignoring files, Viewing differences, Removing handled entries, Commands
+@section Ignoring files
+@cindex Ignoring files
+@kindex i@r{--ignoring files}
+@findex cvs-mode-ignore
+
+@table @kbd
+@item i
+Arrange so that CVS will ignore the selected files.  The file names are
+added to the @file{.cvsignore} file in the corresponding directory.  If
+the @file{.cvsignore} file doesn't exist, it will be created.
+
+The @file{.cvsignore} file should normally be added to the repository,
+but you could ignore it as well, if you like it better that way.
+
+This runs @code{cvs-mode-ignore}.
+@end table
+
+@node Viewing differences, Invoking Ediff, Ignoring files, Commands
+@section Viewing differences
+@cindex Diff
+@cindex Invoking @code{diff}
+@cindex Conflicts, how to resolve them
+@cindex Viewing differences
+@kindex d=@r{--run @samp{cvs diff}}
+@kindex =@r{--run @samp{cvs diff}}
+@kindex db@r{--diff against base version}
+@kindex dh@r{--diff against head of repository}
+@kindex dr@r{--diff between base and head of repository}
+@kindex dv@r{--diff against vendor branch}
+@kindex dy@r{--diff against yesterday's head}
+@findex cvs-mode-diff
+@findex cvs-mode-diff-backup
+@findex cvs-mode-diff-head
+@findex cvs-mode-diff-repository
+@findex cvs-mode-diff-vendor
+@findex cvs-mode-diff-yesterday
+@vindex cvs-invert-ignore-marks@r{ (variable)}
+
+@table @kbd
+@item =
+@itemx d =
+Display a @samp{cvs diff} between the selected files and the version
+that they are based on (@code{cvs-mode-diff}).@refill
+
+@item d b
+If CVS finds a conflict while merging two versions of a file (during a
+@samp{cvs update}, @pxref{Updating the buffer}) it will save the
+original file in a file called @file{.#@var{file}.@var{version}} where
+@var{file} is the name of the file, and @var{version} is the revision
+number that @var{file} was based on.@refill
+
+With the @kbd{d b} command you can run a @samp{diff} on the files
+@file{.#@var{file}.@var{version}} and @file{@var{file}}.@refill
+
+@item d h
+Display a @samp{cvs diff} between the selected files and the head
+revision (the most recent version on the current
+branch) in the repository (@code{cvs-mode-diff-head}).@refill
+
+@item d r
+Display a @samp{cvs diff} between the base revision of the selected
+files and the head revision in the repository.  This displays the
+changes anyone has committed to the repository since you last executed
+a checkout, update or commit operation
+(@code{cvs-mode-diff-repository}).
+
+@item d v
+Display a @samp{cvs diff} between the selected files and the head
+revision of the vendor branch in the repository
+(@code{cvs-mode-diff-vendor}).@refill
+
+@item d y
+Display a @samp{cvs diff} between the selected files and yesterday's
+head revision in the repository
+(@code{cvs-mode-diff-yesterday}).@refill
+@end table
+
+By default, @samp{diff} commands ignore the marks.  This can be changed
+with @code{cvs-invert-ignore-marks}.
+
+@node Invoking Ediff, Updating files, Viewing differences, Commands
+@section Running ediff
+@cindex Ediff
+@cindex Invoking ediff
+@cindex Viewing differences
+@cindex Conflicts, how to resolve them
+@cindex Resolving conflicts
+@kindex e@r{--invoke @samp{ediff}}
+@findex cvs-mode-idiff
+@findex cvs-mode-imerge
+
+@table @kbd
+@vindex cvs-idiff-imerge-handlers@r{ (variable)}
+@item d e
+This uses @code{ediff} (or @code{emerge}, depending on
+@samp{cvs-idiff-imerge-handlers}) to allow you to view diffs.
+If a prefix argument is given, PCL-CVS will prompt for a revision against
+which the diff should be made, else the default will be to use the BASE
+revision.
+
+@cindex Merging with @code{ediff} and @code{emerge}
+@item d E
+This command use @code{ediff} (or @code{emerge}, see above) to allow you
+to do an interactive 3-way merge.
+
+@strong{Please note:}  when the file status is @samp{Conflict},
+CVS has already performed a merge.  The resulting file is not used in
+any way if you use this command.  If you use the @kbd{q} command inside
+@samp{ediff} (to successfully terminate a merge) the file that CVS
+created will be overwritten.@refill
+@end table
+
+@node Updating files, Tagging files, Invoking Ediff, Commands
+@section Updating files
+@findex cvs-mode-update
+@cindex Updating files
+@kindex O@r{--update files}
+
+@table @kbd
+@item O
+Update all selected files with status @samp{Need-update} by running
+@samp{cvs update} on them (@code{cvs-mode-update}).
+@end table
+
+
+@node Tagging files, Miscellaneous commands, Updating files, Commands
+@section Tagging files
+@findex cvs-mode-tag
+@findex cvs-mode-untag
+@findex cvs-rtag
+@cindex Tagging files
+@kindex M-t@r{--repository tag files}
+@kindex t@r{--tag files}
+@vindex cvs-invert-ignore-marks@r{ (variable)}
+@vindex cvs-force-dir-tag@r{ (variable)}
+
+@table @kbd
+@item t
+Tag all selected files by running @samp{cvs tag} on
+them (@code{cvs-mode-tag}).  It's usually preferable to tag a directory
+at a time.  Rather than selecting all files (which too often doesn't
+select all files but only the few that are displayed), clear the
+selection with @kbd{M-DEL} (@code{cvs-mode-unmark-all-files}), position
+the cursor on the directory you want to tag and hit @kbd{t}.
+@end table
+
+By default, @samp{tag} commands ignore the marks.  This can be changed
+with @code{cvs-invert-ignore-marks}.  Also, by default @samp{tag} can
+only be applied to directories, see @code{cvs-force-dir-tag} if you want
+to change this behavior.
+
+
+@node Miscellaneous commands,  , Tagging files, Commands
+@section Miscellaneous commands
+@findex cvs-mode-byte-compile-files
+@cindex Recompiling elisp files
+@cindex Byte compilation
+@findex cvs-mode-delete-lock
+@cindex Getting rid of lock files
+@cindex Lock files
+@kindex q@r{--bury the PCL-CVS buffer}
+@findex cvs-bury-buffer
+@findex cvs-mode-quit
+@cindex Quitting
+@kindex h@r{--help}
+@kindex ?@r{--help}
+@findex cvs-help
+@cindex Help
+
+@table @kbd
+@item M-x cvs-mode-byte-compile-files
+Byte compile all selected files that end in @file{.el}.
+
+@item M-x cvs-mode-delete-lock
+This command deletes the lock files that
+the @samp{*cvs*} buffer informs you about.  You should normally never have to
+use this command, since CVS tries very carefully to always remove the
+lock files itself.
+
+You can only use this command when a message in the @samp{*cvs*} buffer tells
+you so.  You should wait a while before using this command in case
+someone else is running a @code{cvs} command.
+
+Also note that this only works if the repository is local.
+
+@item ?
+@itemx h
+Show a summary of common command key bindings in the echo
+area (@code{cvs-help}).
+
+@item q
+Bury the PCL-CVS buffer (@code{cvs-bury-buffer}).
+
+@item M-x cvs-mode-quit
+Quit PCL-CVS, killing the @samp{*cvs*} buffer.
+@end table
+
+@node Log Edit Mode, Log View Mode, Commands, Top
+@chapter Editing a Log Message
+
+@cindex Log Edit mode
+@cindex mode, Log Edit
+Buffers for entering/editing log messages for changes which are about
+to be committed are put into Log Edit mode.
+
+Sometimes the log buffer contains default text when you enter it,
+typically the last log message entered.  If it does, mark and point
+are set around the entire contents of the buffer so that it is easy to
+kill the contents of the buffer with @kbd{C-w}.
+
+@findex log-edit-insert-changelog
+If you work by writing entries in the @file{ChangeLog}
+(@pxref{(emacs)Change Log}) and then commit the change under revision
+control, you can generate the Log Edit text from the ChangeLog using
+@kbd{C-c C-a} (@kbd{log-edit-insert-changelog}).  This looks for
+entries for the file(s) concerned in the top entry in the ChangeLog
+and uses those paragraphs as the log text.  This text is only inserted
+if the top entry was made under your user name on the current date.
+@xref{(emacs)Change Logs and VC}, for the opposite way of
+working---generating ChangeLog entries from the revision control log.
+
+In the Log Edit buffer, @kbd{C-c C-f} (@kbd{M-x log-edit-show-files})
+shows the list of files to be committed in case you need to check
+that.
+
+When you have finished editing the log message, type @kbd{C-c C-c} to
+exit the buffer and commit the change.
+
+@c Fixme: customization variables
+
+@node Log View Mode, Customization, Log Edit Mode, Top
+@chapter Browsing a Log of Changes
+
+@cindex Log View mode
+@cindex mode, Log View
+@cindex output, logs
+
+@findex cvs-mode-log
+@findex vc-print-log
+Log View mode provides a few useful commands for navigating revision
+control log output.  It is used for the output buffers of both
+@code{cvs-mode-log} and @code{vc-print-log}.
+
+In this mode, @kbd{n} goes to the next message and @kbd{p} goes to the
+previous message and @kbd{N} and @kbd{P} go to the next and previous
+files, respectively, in multi-file output.  With a numeric prefix
+argument, these commands move that many messages of files.
+
+@c @node CVS Status Mode
+@c @chapter Viewing CVS' Status output
+
+@node Customization, Bugs, Log View Mode, Top
+@chapter Customization
+@vindex log-edit-changelog-full-paragraphs@r{ (variable)}
+@vindex cvs-auto-remove-handled@r{ (variable)}
+@vindex cvs-auto-remove-directories@r{ (variable)}
+@vindex cvs-update-prog-output-skip-regexp@r{ (variable)}
+@vindex cvs-cvsroot@r{ (variable)}
+@vindex cvs-auto-revert@r{ (variable)}
+@vindex log-edit-require-final-newline@r{ (variable)}
+@vindex cvs-sort-ignore-file@r{ (variable)}
+@cindex Customization
+@cindex Variables, list of all
+@cindex Erasing input buffer
+@cindex Context diff, how to get
+@cindex Unidiff, how to get
+@cindex Automatically remove handled files
+@cindex @samp{-u} option in modules file
+@cindex Modules file (@samp{-u} option)
+@cindex Update program (@samp{-u} option in modules file)
+@cindex Reverting buffers after commit
+@cindex Require final newline
+@cindex Automatically inserting newline
+@cindex Commit message, inserting newline
+@cindex Sorting @file{.cvsignore} file
+@cindex @file{.cvsignore} file, sorting
+@cindex Automatically sorting @file{.cvsignore}
+@cindex @samp{CVSROOT}, overriding
+
+If you have an idea about any customization that would be handy but
+isn't present in this list, please tell us!
+For info on how to reach us, see @ref{Bugs}.@refill
+
+@table @samp
+@item cvs-auto-remove-handled
+If this variable is set to any non-@code{nil} value,
+@samp{cvs-mode-remove-handled} will be called every time you check in
+files, after the check-in is ready.  @xref{Removing handled
+entries}.@refill
+
+@item cvs-auto-remove-directories
+If this variable is set to any non-@code{nil} value, directories that do
+not contain any files to be checked in will not be listed in the
+@samp{*cvs*} buffer.@refill
+
+@item cvs-auto-revert
+If this variable is set to any non-@samp{nil} value any buffers you have
+that visit a file that is committed will be automatically reverted.
+This variable defaults to @samp{t}. @xref{Committing changes}.@refill
+
+@item cvs-update-prog-output-skip-regexp
+The @samp{-u} flag in the @file{modules} file can be used to run a command
+whenever a @samp{cvs update} is performed (see @code{cvs(5)}).  This regexp
+is used to search for the last line in that output.  It is normally set
+to @samp{$}.  That setting is only correct if the command outputs
+nothing.  Note that PCL-CVS will get very confused if the command
+outputs @emph{anything} to @code{stderr}.
+
+@item cvs-cvsroot
+This variable can be set to override @samp{CVSROOT}.  It should be a
+string.  If it is set, then every time a @code{cvs} command is run, it
+will be called as @samp{cvs -d @var{cvs-cvsroot}@dots{}}.  This can be
+useful if your site has several repositories.
+
+@item log-edit-require-final-newline
+@c wordy to avoid underfull hbox
+When you enter a log message by typing into the
+@samp{*cvs-commit-message*} buffer, PCL-CVS normally automatically
+inserts a trailing newline, unless there already is one.  This behavior
+can be controlled via @samp{cvs-commit-buffer-require-final-newline}.
+If it is @samp{t} (the default behavior), a newline will always be
+appended.  If it is @samp{nil}, newlines will never be appended.  Any
+other value causes PCL-CVS to ask the user whenever there is no trailing
+newline in the commit message buffer.
+
+@findex cvs-mode-changelog-commit
+@item log-edit-changelog-full-paragraphs
+If this variable is non-@code{nil}, include full @file{ChangeLog}
+paragraphs in the CVS log created by @samp{cvs-mode-changelog-commit}.
+This may be set in the local variables section of a @file{ChangeLog}
+file, to indicate the policy for that @file{ChangeLog}.
+
+@cindex @file{ChangeLog} paragraphs
+A @dfn{@file{ChangeLog} paragraph} is a bunch of log text containing no
+blank lines; a paragraph usually describes a set of changes with a
+single purpose, but perhaps spanning several functions in several files.
+Changes in different paragraphs are unrelated.
+
+You could argue that the CVS log entry for a file should contain the
+full @file{ChangeLog} paragraph mentioning the change to the file, even though
+it may mention other files, because that gives you the full context you
+need to understand the change.  This is the behavior you get when this
+variable is set to @code{t}, the default.
+
+On the other hand, you could argue that the CVS log entry for a change
+should contain only the text for the changes which occurred in that
+file, because the CVS log is per-file.  This is the behavior you get
+when this variable is set to @code{nil}.
+
+@findex cvs-mode-ignore@r{, and @file{.cvsignore} sorting}
+@item cvs-sort-ignore-file
+If this variable is set to any non-@samp{nil} value, the
+@file{.cvsignore} file will always be sorted whenever you use
+@samp{cvs-mode-ignore} to add a file to it.  This option is on by
+default.
+@end table
+
+
+@menu
+* Customizing Faces::
+@end menu
+
+@node Customizing Faces,  , Customization, Customization
+@section Customizing Faces
+@vindex cvs-header (face)
+@vindex cvs-filename (face)
+@vindex cvs-unknown (face)
+@vindex cvs-handled (face)
+@vindex cvs-need-action (face)
+@vindex cvs-marked (face)
+@vindex cvs-msg (face)
+
+PCL-CVS adds a few extra features, including menus, mouse bindings, and
+fontification of the @samp{*cvs*} buffer.  The faces defined for
+fontification are listed below:
+
+@table @samp
+@item cvs-header
+used to highlight directory changes.
+
+@item cvs-filename
+Used to highlight file names.
+
+@item cvs-unknown
+Used to highlight the status of files which are @samp{Unknown}.
+
+@item cvs-handled
+Used to highlight the status of files which are handled and
+need no further action.
+
+@item cvs-need-action
+Used to highlight the status of files which still need action.
+
+@item cvs-marked
+Used to highlight the marked file indicator (@samp{*}).
+
+@item cvs-msg
+Used to highlight CVS messages.
+@end table
+
+
+@node   Bugs, GNU Free Documentation License, Customization, Top
+@chapter Bugs (known and unknown)
+@cindex Reporting bugs and ideas
+@cindex Bugs, how to report them
+@cindex Author, how to reach
+@cindex Email to the author
+@cindex Known bugs
+@cindex Bugs, known
+@cindex FAQ
+@cindex Problems, list of common
+
+If you find a bug or misfeature, don't hesitate to tell us!  Send email
+to @email{bug-gnu-emacs@@gnu.org} which is gatewayed to the newsgroup
+@samp{gnu.emacs.bugs}.  Feature requests should also be sent there.  We
+prefer discussing one thing at a time.  If you find several unrelated
+bugs, please report them separately.  If you are running PCL-CVS under
+XEmacs, you should also send a copy of bug reports to
+@email{xemacs-beta@@xemacs.org}.
+
+If you have problems using PCL-CVS or other questions, send them to
+@email{help-gnu-emacs@@gnu.org}, which is gatewayed to the
+@samp{gnu.emacs.help} newsgroup.  This is a good place to get help, as
+is @email{cvs-info@@gnu.org}, gatewayed to @samp{gnu.cvs.help}.
+
+If you have ideas for improvements, or if you have written some
+extensions to this package, we would like to hear from you.  We hope that
+you find this package useful!
+
+Below is a partial list of currently known problems with PCL-CVS.
+
+@table @asis
+@item Unexpected output from CVS
+Unexpected output from CVS may confuse PCL-CVS.  It will create
+warning messages in the @samp{*cvs*} buffer alerting you to any parse errors.
+If you get these messages, please send a bug report to the email
+addresses listed above.  Include the contents of the @samp{*cvs*} buffer, the
+output of the CVS process (which should be found in the @samp{ *cvs-tmp*}
+buffer), and the versions of Emacs, PCL-CVS and CVS you are using.
+@end table
+
+@node GNU Free Documentation License, Function and Variable Index, Bugs, Top
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+
+
+@node Function and Variable Index, Concept Index, GNU Free Documentation License, Top
+@unnumbered Function and Variable Index
+
+This is an index of all the functions and variables documented in this
+manual.
+
+@printindex fn
+
+@node     Concept Index, Key Index, Function and Variable Index, Top
+@unnumbered Concept Index
+
+This is an index of concepts discussed in this manual.
+
+@printindex cp
+
+@node     Key Index,  , Concept Index, Top
+@unnumbered Key Index
+
+This index includes an entry for each PCL-CVS key sequence documented in
+this manual.
+
+@printindex ky
+
+@bye

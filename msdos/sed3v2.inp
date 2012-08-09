@@ -1,0 +1,54 @@
+# -sed3v2.inp-------------------------------------------------------------
+# Configuration script for lib-src/makefile under DJGPP v2
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1996, 1998, 2000-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^# DIST: /d
+/^SHELL *=/s/^/# /
+/^CC *=/s/=.*$/=gcc/
+s/-DVERSION[^ ]* //
+/^configname *=/s/=.*$/=msdos/
+/^archlibdir *=/s!=.*$!=/emacs/bin!
+/^bindir *=/s!=.*$!=/emacs/bin!
+/^libdir *=/s!=.*$!=/emacs/bin!
+/^srcdir=/s!srcdir=@srcdir@!srcdir := $(subst \\,/,$(shell command.com /c cd))!
+/^VPATH *=/s!=.*$!=.!
+/^BLESSMAIL_TARGET *=/s!@BLESSMAIL_TARGET@!need-blessmail!
+/^KRB4LIB *=/s/@[^@\n]*@//g
+/^DESLIB *=/s/@[^@\n]*@//g
+/^KRB5LIB *=/s/@[^@\n]*@//g
+/^CRYPTOLIB *=/s/@[^@\n]*@//g
+/^COM_ERRLIB *=/s/@[^@\n]*@//g
+/^LIBHESIOD *=/s/@[^@\n]*@//g
+/^LIBRESOLV *=/s/@[^@\n]*@//g
+/^LIBS_MAIL *=/s/@[^@\n]*@//g
+/^LIBS_SYSTEM *=/s/@[^@\n]*@//g
+/^CFLAGS *=/s!=.*$!=-O2 -g!
+/^C_SWITCH_SYSTEM *=/s!=.*$!=-DMSDOS!
+/^C_SWITCH_MACHINE *=/s/@C_SWITCH_MACHINE@//
+/^C_WARNINGS_SWITCH *=/s/@C_WARNINGS_SWITCH@//
+/^PROFILING_CFLAGS *=/s/@PROFILING_CFLAGS@//
+/^ALLOCA *=/s!@ALLOCA@!!
+/^EXEEXT *=/s!@EXEEXT@!!
+/^GETOPT_H *=/s!@GETOPT_H@!getopt.h!
+/^GETOPTOBJS *=/s!@GETOPTOBJS@!getopt.o getopt1.o!
+/^INSTALLABLES/s/emacsclient[^ ]* *//
+s!^	\./!	!
+/^UTILITIES *=/,/^$/{
+  s/movemail[^ ]* *//
+}
+/^insrcdir=/s/^.*$/\#&/
+/^	 *\$(insrcdir) ||/s,\$(insrcdir) ||,command.com /c if not exist $(<F),
+

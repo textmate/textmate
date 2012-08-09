@@ -1,0 +1,230 @@
+# -*- Makefile -*- for leim subdirectory in GNU Emacs on the Microsoft W32 API.
+
+# Copyright (C) 2000-2012  Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+#   2006, 2007
+#   National Institute of Advanced Industrial Science and Technology (AIST)
+#   Registration Number H14PRO021
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+srcdir=.
+
+# Where to install LEIM files.
+INSTALLDIR=$(INSTALL_DIR)/leim
+
+# On IBM RS6000, double-dot gets screwed up.
+dot = .
+
+# Which Emacs to use to convert TIT files to Emacs Lisp files,
+# byte-compile Emacs Lisp files, and generate the file leim-list.el.
+BUILT_EMACS = $(THISDIR)/$(dot)$(dot)/src/$(BLD)/emacs.exe
+
+buildlisppath=$(CURDIR)/$(dot)$(dot)/lisp
+
+# How to run Emacs.
+RUN_EMACS = "$(BUILT_EMACS)" -batch --no-site-file --no-site-lisp
+
+# Set EMACSLOADPATH correctly (already defined in environment).
+EMACSLOADPATH=$(buildlisppath)
+
+# Subdirectories to be made if $(srcdir) is different from the current
+# directory.
+SUBDIRS=quail
+
+# Files generated from TIT dictionaries for Chinese GB character set.
+TIT_GB=\
+	quail/CCDOSPY.elc	\
+	quail/Punct.elc		\
+	quail/QJ.elc		\
+	quail/SW.elc		\
+	quail/TONEPY.elc
+
+# Files generated from TIT dictionaries for Chinese BIG5 character set.
+TIT_BIG5=\
+	quail/4Corner.elc	\
+	quail/ARRAY30.elc	\
+	quail/ECDICT.elc	\
+	quail/ETZY.elc		\
+	quail/Punct-b5.elc	\
+	quail/PY-b5.elc		\
+	quail/QJ-b5.elc		\
+	quail/ZOZY.elc
+
+CHINESE_TIT=$(TIT_GB) $(TIT_BIG5)
+
+NON_TIT_GB=$(srcdir)/quail/py-punct.elc
+
+NON_TIT_BIG5=$(srcdir)/quail/pypunct-b5.elc
+
+CHINESE_NON_TIT=$(NON_TIT_GB) $(NON_TIT_BIG5)
+
+CHINESE_GB=$(TIT_GB) $(NON_TIT_GB)
+
+CHINESE_BIG5=$(TIT_BIG5) $(NON_TIT_BIG5)
+
+JAPANESE=$(srcdir)/quail/japanese.elc $(srcdir)/ja-dic/ja-dic.elc
+
+KOREAN=	$(srcdir)/quail/hangul.elc	\
+	$(srcdir)/quail/hanja.elc	\
+	$(srcdir)/quail/hanja3.elc	\
+	$(srcdir)/quail/hanja-jis.elc	\
+	$(srcdir)/quail/symbol-ksc.elc
+
+THAI=$(srcdir)/quail/thai.elc
+
+VIETNAMESE=$(srcdir)/quail/viqr.elc $(srcdir)/quail/vntelex.elc
+
+LAO=$(srcdir)/quail/lao.elc $(srcdir)/quail/lrt.elc
+
+INDIAN=$(srcdir)/quail/indian.elc
+
+TIBETAN=$(srcdir)/quail/tibetan.elc
+
+LATIN=	$(srcdir)/quail/latin-pre.elc	\
+	$(srcdir)/quail/latin-post.elc	\
+	$(srcdir)/quail/latin-alt.elc	\
+	$(srcdir)/quail/latin-ltx.elc	\
+	$(srcdir)/quail/welsh.elc
+
+UNICODE=$(srcdir)/quail/sgml-input.elc	\
+	$(srcdir)/quail/rfc1345.elc	\
+	$(srcdir)/quail/uni-input.elc
+
+SLAVIC= \
+	$(srcdir)/quail/czech.elc \
+	$(srcdir)/quail/croatian.elc \
+	$(srcdir)/quail/slovak.elc
+
+GREEK=$(srcdir)/quail/greek.elc
+
+RUSSIAN=$(srcdir)/quail/cyrillic.elc $(srcdir)/quail/cyril-jis.elc
+
+MISC= \
+	$(srcdir)/quail/arabic.elc \
+	$(srcdir)/quail/ethiopic.elc \
+	$(srcdir)/quail/ipa.elc \
+	$(srcdir)/quail/ipa-praat.elc \
+	$(srcdir)/quail/hebrew.elc \
+	$(srcdir)/quail/georgian.elc \
+	$(srcdir)/quail/persian.elc \
+	$(srcdir)/quail/sisheng.elc
+
+MISC_DIC=\
+	quail/tsang-b5.elc	\
+	quail/quick-b5.elc	\
+	quail/tsang-cns.elc	\
+	quail/quick-cns.elc	\
+	quail/PY.elc		\
+	quail/ZIRANMA.elc	\
+	quail/CTLau.elc		\
+	quail/CTLau-b5.elc
+
+CHINESE=$(CHINESE_GB) $(CHINESE_BIG5)
+EASTASIA=$(CHINESE) $(JAPANESE) $(KOREAN)
+ASIA=$(EASTASIA) $(THAI) $(VIETNAMESE) $(LAO) $(INDIAN) $(TIBETAN)
+EUROPEAN=$(LATIN) $(SLAVIC) $(GREEK) $(RUSSIAN)
+WORLD=$(ASIA) $(EUROPEAN) $(MISC) $(MISC_DIC) $(UNICODE)
+
+TIT=$(CHINESE_TIT)
+NON_TIT=$(CHINESE_NON_TIT) $(JAPANESE) $(KOREAN) $(EUROPEAN) $(MISC)
+
+.SUFFIXES: .elc .el
+
+.el.elc:
+	$(RUN_EMACS) -f batch-byte-compile $<
+
+all: $(BUILT_EMACS) $(SUBDIRS) $(WORLD) leim-list.el
+
+# To ensure that we can run Emacs.  This target is ignored (never
+# being hit) if a user changes default value of EMACS.
+$(dot)$(dot)/src/emacs:
+	cd ../src; $(MAKE) $(MFLAGS) emacs
+
+$(SUBDIRS):
+	mkdir "$@"
+	echo stamp>stamp-subdir
+
+# The rules which generate $(TIT) and ${MISC_DIC) files create them all
+# in one go.  So we need to prevent parallel execution for that target,
+# otherwise Emacs complains about files being locked.  .NOTPARALLEL is
+# for GNU Make, .NO_PARALLEL is for other Make's.
+.NOTPARALLEL: $(TIT) $(MISC_DIC)
+
+.NO_PARALLEL: $(TIT) $(MISC_DIC)
+
+# Rule to generate quail/*.el from CXTERM-DIC/*.tit.
+#
+# WARNING: Do NOT split the part inside $(ARGQUOTE)s into multiple lines as
+#          this can break with GNU Make 3.81 and later if sh.exe is used.
+$(TIT):
+	$(RUN_EMACS) -l \
+	    $(ARGQUOTE)$(buildlisppath)/international/titdic-cnv$(ARGQUOTE) \
+	    --eval $(ARGQUOTE)(batch-titdic-convert t)$(ARGQUOTE) \
+	    -dir quail $(srcdir)/CXTERM-DIC
+	$(RUN_EMACS)  -l \
+	    $(ARGQUOTE)$(buildlisppath)/international/quail$(ARGQUOTE) \
+	    -f batch-byte-compile $(TIT:.elc=.el)
+
+# Rule to generate quail/*.el from MISC_DIC/*.tit.
+$(MISC_DIC):
+	$(RUN_EMACS) -l \
+	    $(ARGQUOTE)$(buildlisppath)/international/titdic-cnv$(ARGQUOTE) \
+	    -f batch-miscdic-convert -dir quail $(srcdir)/MISC-DIC
+	$(RUN_EMACS)  -l \
+	    $(ARGQUOTE)$(buildlisppath)/international/quail$(ARGQUOTE) \
+	    -f batch-byte-compile $(MISC_DIC:.elc=.el)
+
+#
+# WARNING: Do NOT split the parts inside $(ARGQUOTE)s into multiple lines as
+#          this can break with GNU Make 3.81 and later if sh.exe is used.
+leim-list.el: $(SUBDIRS) $(WORLD) $(srcdir)/leim-ext.el
+	- $(DEL) leim-list.el
+	$(RUN_EMACS) -l \
+	    $(ARGQUOTE)$(buildlisppath)/international/quail$(ARGQUOTE) \
+	    --eval $(ARGQUOTE)(update-leim-list-file $(DQUOTE).$(DQUOTE))$(ARGQUOTE)
+	$(RUN_EMACS) --eval $(ARGQUOTE)(w32-append-code-lines $(DQUOTE)$@$(DQUOTE) $(DQUOTE)$(srcdir)/leim-ext.el$(DQUOTE))$(ARGQUOTE)
+
+install: all
+	- mkdir "$(INSTALLDIR)"
+	- $(DEL) $(DIRNAME)_same-dir.tst
+	- $(DEL) $(INSTALL_DIR)/$(DIRNAME)_same-dir.tst
+	echo SameDirTest > $(INSTALL_DIR)/$(DIRNAME)_same-dir.tst
+	$(IFNOTSAMEDIR) $(CP) leim-list.el $(INSTALLDIR) $(ENDIF)
+	$(IFNOTSAMEDIR) $(CP_DIR) quail $(INSTALLDIR) $(ENDIF)
+	$(IFNOTSAMEDIR) $(CP_DIR) ja-dic $(INSTALLDIR) $(ENDIF)
+	- $(DEL) $(INSTALL_DIR)/$(DIRNAME)_same-dir.tst
+
+clean mostlyclean:
+	- $(FOREACH) $(TIT) $(FORDO) $(DEL) $(FORVAR) $(ENDFOR)
+	- $(FOREACH) $(MISC_DIC) $(FORDO) $(DEL) $(FORVAR) $(ENDFOR)
+	- $(FOREACH) $(TIT:.elc=.el) $(FORDO) $(DEL) $(FORVAR) $(ENDFOR)
+	- $(FOREACH) $(MISC_DIC:.elc=.el) $(FORDO) $(DEL) $(FORVAR) $(ENDFOR)
+	- $(DEL) leim-list.el
+	- $(DEL) leim-list.el~
+
+distclean: clean
+	- $(DEL) stamp-subdir
+	- $(DEL) makefile
+
+maintainer-clean: distclean
+	- $(FOREACH) $(WORLD) $(FORDO) $(DEL) $(FORVAR) $(ENDFOR)
+
+# We used to delete *~ here, but that might inadvertently remove
+# precious files if it happens to match their short 8+3 aliases.
+extraclean: maintainer-clean
+	- $(FOREACH) *.el~ "#*" $(FORDO) $(DEL) $(FORVAR) $(ENDFOR)

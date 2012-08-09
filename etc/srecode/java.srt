@@ -1,0 +1,181 @@
+;; java.srt
+
+;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set mode "java-mode"
+set escape_start "{{"
+set escape_end "}}"
+
+context file
+
+set comment_start  "/**"
+set comment_end    " */"
+set comment_prefix " *"
+
+template empty :file :user :time :java :indent
+"Fill out an empty file."
+sectiondictionary "CLASSSECTION"
+set NAME macro "FILENAME_AS_CLASS"
+----
+{{>:filecomment}}
+
+package {{FILENAME_AS_PACKAGE}};
+
+{{>CLASSSECTION:declaration:class}}
+
+----
+bind "e"
+
+context declaration
+
+template import :blank :indent
+"Template to import a package."
+----
+{{>:declaration:include}}
+----
+bind "i"
+
+template class :blank :indent
+"Template to declare a variable."
+sectiondictionary "DOCSECTION"
+set NAME macro "NAME"
+----
+{{>DOCSECTION:declaration:javadoc-class}}
+public class {{?NAME}} {
+
+   {{^}}
+
+} // {{NAME}}
+----
+bind "c"
+
+;;; Semantic Tag support
+;;
+template class-tag :indent :blank
+"Insert a Java class with the expectation of it being used by a tag inserter.
+Override this to affect applications, or the outer class structure for
+the user-facing template."
+----
+{{>:declaration:javadoc-class}}
+public Class {{?NAME}} {{#PARENTS}}{{#FIRST}}extends {{/FIRST}}{{#NOTFIRST}}implements {{/NOTFIRST}}{{NAME}}{{/PARENTS}}
+{     
+   {{^}}
+};
+----
+
+template include :blank
+"An include statement."
+----
+import {{?NAME}};
+----
+
+context misc
+
+template arglist
+"Insert an argument list for a function.
+@todo - Support smart CR in a buffer for not too long lines."
+----
+({{#ARGS}}{{TYPE}} {{NAME}}{{#NOTLAST}},{{/NOTLAST}}{{/ARGS}})
+----
+
+context classdecl
+
+template function :indent :blank
+----
+public {{?TYPE}} {{?NAME}}{{>:misc:arglist}} {
+{{^}}
+}
+----
+bind "m"
+
+template variable :indent :blank
+"Insert a variable declaration."
+----
+{{?TYPE}} {{?NAME}}{{#HAVEDEFAULT}} = {{DEFAULT}}{{/HAVEDEFAULT}};
+----
+bind "v"
+
+;;; Java Doc Comments
+;;
+context classdecl
+
+prompt GROUPNAME "Name of declaration group: "
+
+template javadoc-function-group-start :indent :blank
+----
+/**
+ * {{?GROUPNAME}}
+ * @{
+ */
+
+----
+
+template javadoc-function-group-end :indent :blank
+----
+/**
+ * @}
+ */
+
+----
+
+context declaration
+
+template javadoc-class :indent :blank :time :user :tag
+----
+/**
+ * {{DOC}}{{^}}
+ *
+ * Created: {{DATE}}
+ *
+ * @author {{AUTHOR}}
+ * @version 
+ * @since 
+ */
+----
+
+template javadoc-function :indent :blank :tag
+----
+/**
+ * {{DOC}}{{^}}
+ * {{#ARGS}}
+ * @param {{?NAME}} - {{DOC}}{{/ARGS}}
+ * @return {{TYPE}}{{#THROWS}}
+ * @exception {{NAME}} - {{EXDOC}}{{/THROWS}}
+ */
+----
+
+template javadoc-variable-same-line
+----
+/**< {{DOC}}{{^}} */
+----
+
+template javadoc-section-comment :blank :indent
+"Insert a comment that separates sections of an Emacs Lisp file."
+----
+
+/** {{?TITLE}}
+ *
+ * {{^}}
+ */
+
+----
+
+
+;; end

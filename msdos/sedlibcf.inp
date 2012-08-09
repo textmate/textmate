@@ -1,0 +1,22 @@
+# -sedlibcf.inp-----------------------------------------------------------
+# Configuration script for lib/Makefile.in under DJGPP v2.x
+# 
+# This script is run by config.bat to account for renaming of
+# files whose names are invalid on DOS 8+3 filesystems.
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 2011-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+s/c++defs/cxxdefs/g
+s/\([a-zA-Z0-9_]*\)\.in\.h/\1.in-h/g

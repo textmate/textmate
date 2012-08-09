@@ -1,0 +1,196 @@
+---------------- -*- mode: text; coding: utf-8; fill-column: 70 -*- --
+--                                                                  --
+-- Humor (sometimes unintended) on the Emacs developer's list       --
+--                                                                  --
+-- The Free Software Foundation claims no copyright on this file,   --
+-- compiled from the public emacs-devel mailing list.               --
+--                                                                  --
+----------------------------------------------------------------------
+
+  "Is it legal for a `struct interval' to have a total_length field of
+zero?"
+  "We can't be arrested for it as far as I know, but it is definitely
+invalid for an interval to have zero length."
+                                                -- Miles Bader and RMS
+
+----------------------------------------------------------------------
+
+Re: lost argument and doc string
+
+I remember when I lost an argument.  Boy did that hurt!  ;-).
+                                                      -- RMS
+
+----------------------------------------------------------------------
+
+  "'Cowardly' is not an adverb, although it looks like one.  It is an
+adjective.  It makes a statement about general temperament, rather
+than a specific occasion.  I don't think Emacs has a general
+temperament."
+  "Mine does."
+                                             -- RMS and Eli Zaretskii
+
+----------------------------------------------------------------------
+
+  "In order to bring the user's attention to the minibuffer when an
+item such as 'Edit -> Search' is activated from the menu, I was just
+thinking that we could draw a big rectangle around the minibuffer,
+blinking (or zooming in-and-out) until some input is typed in."
+  "How about dancing elephants?"
+  "They don't fit in my office."
+  "Well once the elephants are done, your office will be much...
+bigger."
+                  -- Stefan Monnier, Miles Bader and Kai Grossjohann
+
+----------------------------------------------------------------------
+
+I remember these versions as yard-rocks (is that between inch-pebbles
+and mile-stones?).
+                                                   -- Kai Grossjohann
+
+----------------------------------------------------------------------
+
+  "I think it depends on video drivers.  I cannot reproduce it on my
+home PC, but I can at work."
+  "Can you try to find a workaround at work?  (I guess you don't need
+a homearound at home.  ;-)"
+                                              -- Jason Rumney and RMS
+
+----------------------------------------------------------------------
+
+By the way, I also really really hate this unibyte/multibyte problem.
+Sometimes I think I should have opposed to the introduction of such a
+concept more strongly.
+
+    imagine there's no unibyte
+    it's easy if you try
+    no bytes below us
+    above us only chars
+    imagine all the people living in multibyte
+
+                                                     -- Kenichi Handa
+
+----------------------------------------------------------------------
+
+I try to uphold the ideals that I was taught to value as an American,
+but every year I get less and less help from the United States.
+                                                              -- RMS
+
+----------------------------------------------------------------------
+
+  "If the terminfo entry is most likely wrong, and we know it, then it
+doesn't make sense to follow it."
+  "Nevertheless, until now, we always did."
+  "So.... should we not fix old bugs?"
+  "Why fix an old bug if you can write three new ones in the same
+time?"
+                       -- Miles Bader, Eli Zaretskii and David Kastrup
+
+----------------------------------------------------------------------
+
+  [...] As is well known, people who speak American English tend to
+be more resource-conscious and try to avoid wasting precious bits
+transferring those redundant "u"s.
+  Think of the number of occurrences of "color" and "behavior" in the
+Emacs tarball, multiply that by the number of times it'll be
+downloaded, stored on hard disks, archived, ...that's a substantial
+saving.
+                                                    -- Stefan Monnier
+
+----------------------------------------------------------------------
+
+Re: Parent of a derived mode's keymap.
+
+  "I can't decide whether the title of this thread is more fitting for
+a blues song or a pulp fiction booklet.  It certainly projects drama."
+  "Hey, it says derived, not deprived."
+  "Actually, for some keymaps 'depraved' would fit better."
+  "I knew it!  You're one of them vi lovers!  There is nothing wrong
+with Emacs using escape, meta, alt, control, and shift!"
+                                     -- David Kastrup and Lute Kamstra
+
+----------------------------------------------------------------------
+
+  "Aren't user-defined constants useful in other languages?"
+  "The only user-defined constant is ignorance.  (With programmers,
+this is a variable concept ;-)"
+                        -- Juanma Barranquero and Thien-Thi Nguyen
+
+----------------------------------------------------------------------
+
+  "Uh, 'archaic' and 'alive' is not a contradiction."
+  "Yes it is.  'Archaic' does not mean 'old' or 'early'.  It means
+'obsolete'."
+  "'He arche' in Greek means 'the beginning'.  John 1 starts off with
+'En arche en ho Logos': in the beginning, there was the word.  Now of
+course we all know that Emacs was there before Word, but this might
+have escaped John's notice."
+                                             -- David Kastrup and RMS
+
+----------------------------------------------------------------------
+
+Re: patch for woman (woman-topic-at-point)
+
+  "Sorry for the long message.  I wanted to make the problem clear
+also for people not familiar with `woman'."
+  "Most hackers, I take?
+   For a moment there I thought you had a patch that you could put on
+a woman, and it would make her come right to the topic at point
+without attempting any course of action that requires an advance
+course in divination.
+   There'd be quite a sensational market for that, you know."
+                                    -- Emilio Lopes and David Kastrup
+
+----------------------------------------------------------------------
+
+  "[T]here may be a good reason since the code explicitly checks for
+this; see keyboard.c:789 [...]"
+  "I think I understand, but I can't find the code in keyboard.c.  Do
+you really mean 'line 789'?  Of which revision?"
+  "Sorry; by 789, I mean 3262 :-P"
+                                   -- Chong Yidong and Stefan Monnier
+
+----------------------------------------------------------------------
+
+  "[...] In my opinion, your change does not either increase or
+decrease readability.  It's a tossup."
+  "Uh, setting tem to '', an artificial empty string, in order to have
+j incremented once again before breaking out of the finished loop is
+readable?
+   Is this kind of 'readable' synonymous to 'comprehensible with
+serious effort', reminiscent of mathematicians' use of 'trivial' as
+synonymous with 'provable with serious effort'?"
+                                              -- RMS and David Kastrup
+
+----------------------------------------------------------------------
+
+Re: New Emacs Icon and Tango
+
+  "What about using the 'happy face' with gnu horns?"
+  "It would make Emacs the object of ridicule until the end of time."
+  "Isn't it already?"
+  "It's the object of ridicule until the end of _tape_.  The jury is
+still out about that end of time thing."
+                 -- Kim F. Storm, Miles Bader, RMS and David Kastrup
+
+----------------------------------------------------------------------
+
+  "Despite being a maths graduate, I can't think of any other such
+constants with anything like the universality of e and pi."
+  "42"
+                                -- Alan Mackenzie and David Hansen
+
+----------------------------------------------------------------------
+
+  "[...] So please do not delete anything."
+  "Done."
+                                              -- RMS and David Kastrup
+
+----------------------------------------------------------------------
+
+  "I guess that can work in some circumstances, but it bypasses the
+printer drivers.  Couldn't that lead to problems for the printer
+drivers?"
+  "Current research is that software does not suffer feelings of
+depression or loneliness when it is left out of the picture, so I
+wouldn't worry about it too much."
+                                -- Lennart Borgman and Jason Rumney

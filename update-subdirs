@@ -1,0 +1,56 @@
+#!/bin/sh
+# Write into $1/subdirs.el a list of subdirs of directory $1.
+
+# Copyright (C) 1994-1995, 1997, 1999, 2001-2012
+#   Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+cd $1
+for file in *; do
+    case $file in
+	*.elc | *.el | term | RCS | CVS | Old | . | .. | =* | *~ | *.orig | *.rej)
+	  ;;
+	*)
+	    if [ -d $file ]; then
+		if [ "$file" = "obsolete" ]; then
+		    subdirs="$subdirs \"$file\""
+		else
+		    subdirs="\"$file\" $subdirs"
+		fi
+	    fi
+	    ;;
+    esac
+done
+
+if [ "x$subdirs" = x ]; then
+  rm -f subdirs.el
+else
+  rm -f subdirs.el~
+  echo ";; In load-path, after this directory should come
+;; certain of its subdirectories.  Here we specify them.
+(normal-top-level-add-to-load-path '($subdirs))
+;; Local" "Variables:
+;; version-control: never
+;; no-byte-compile: t
+;; End:" > subdirs.el~
+  if cmp "subdirs.el" "subdirs.el~" >/dev/null 2>&1; then
+    :; # echo "subdirs.el unchanged";
+  else
+  mv subdirs.el~ subdirs.el
+  fi
+fi

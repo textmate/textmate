@@ -1,0 +1,849 @@
+\input texinfo
+@c %**start of header
+@setfilename ../../info/ert
+@settitle Emacs Lisp Regression Testing
+@c %**end of header
+
+@dircategory Emacs misc features
+@direntry
+* ERT: (ert).        Emacs Lisp regression testing tool.
+@end direntry
+
+@copying
+Copyright @copyright{} 2008, 2010-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''
+in the Emacs manual.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+
+This document is part of a collection distributed under the GNU Free
+Documentation License.  If you want to distribute this document
+separately from the collection, you can do so by adding a copy of the
+license to the document, as described in section 6 of the license.
+@end quotation
+@end copying
+
+@node Top, Introduction, (dir), (dir)
+@top ERT: Emacs Lisp Regression Testing
+
+ERT is a tool for automated testing in Emacs Lisp.  Its main features
+are facilities for defining tests, running them and reporting the
+results, and for debugging test failures interactively.
+
+ERT is similar to tools for other environments such as JUnit, but has
+unique features that take advantage of the dynamic and interactive
+nature of Emacs.  Despite its name, it works well both for test-driven
+development (see
+@url{http://en.wikipedia.org/wiki/Test-driven_development}) and for
+traditional software development methods.
+
+@menu
+* Introduction::                A simple example of an ERT test.
+* How to Run Tests::            Run tests in Emacs or from the command line.
+* How to Write Tests::          How to add tests to your Emacs Lisp code.
+* How to Debug Tests::          What to do if a test fails.
+* Extending ERT::               ERT is extensible in several ways.
+* Other Testing Concepts::      Features not in ERT.
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+How to Run Tests
+
+* Running Tests Interactively::  Run tests in your current Emacs.
+* Running Tests in Batch Mode::  Run tests in emacs -Q.
+* Test Selectors::               Choose which tests to run.
+
+How to Write Tests
+
+* The @code{should} Macro::          A powerful way to express assertions.
+* Expected Failures::           Tests for known bugs.
+* Tests and Their Environment:: Don't depend on customizations; no side effects.
+* Useful Techniques::           Some examples.
+
+How to Debug Tests
+
+* Understanding Explanations::  How ERT gives details on why an assertion failed.
+* Interactive Debugging::       Tools available in the ERT results buffer.
+
+Extending ERT
+
+* Defining Explanation Functions::  Teach ERT about more predicates.
+* Low-Level Functions for Working with Tests::  Use ERT's data for your purposes.
+
+Other Testing Concepts
+
+* Mocks and Stubs::           Stubbing out code that is irrelevant to the test.
+* Fixtures and Test Suites::  How ERT differs from tools for other languages.
+
+@end detailmenu
+@end menu
+
+@node Introduction, How to Run Tests, Top, Top
+@chapter Introduction
+
+ERT allows you to define @emph{tests} in addition to functions,
+macros, variables, and the other usual Lisp constructs.  Tests are
+simply Lisp code --- code that invokes other code and checks whether
+it behaves as expected.
+
+ERT keeps track of the tests that are defined and provides convenient
+commands to run them to verify whether the definitions that are
+currently loaded in Emacs pass the tests.
+
+Some Lisp files have comments like the following (adapted from the
+package @code{pp.el}):
+
+@lisp
+;; (pp-to-string '(quote quote))          ; expected: "'quote"
+;; (pp-to-string '((quote a) (quote b)))  ; expected: "('a 'b)\n"
+;; (pp-to-string '('a 'b))                ; same as above
+@end lisp
+
+The code contained in these comments can be evaluated from time to
+time to compare the output with the expected output.  ERT formalizes
+this and introduces a common convention, which simplifies Emacs
+development, since programmers no longer have to manually find and
+evaluate such comments.
+
+An ERT test definition equivalent to the above comments is this:
+
+@lisp
+(ert-deftest pp-test-quote ()
+  "Tests the rendering of `quote' symbols in `pp-to-string'."
+  (should (equal (pp-to-string '(quote quote)) "'quote"))
+  (should (equal (pp-to-string '((quote a) (quote b))) "('a 'b)\n"))
+  (should (equal (pp-to-string '('a 'b)) "('a 'b)\n")))
+@end lisp
+
+If you know @code{defun}, the syntax of @code{ert-deftest} should look
+familiar: This example defines a test named @code{pp-test-quote} that
+will pass if the three calls to @code{equal} all return true
+(non-nil).
+
+@code{should} is a macro with the same meaning as @code{assert} but
+better error reporting.  @xref{The @code{should} Macro}.
+
+Each test should have a name that describes what functionality it tests.
+Test names can be chosen arbitrarily --- they are in a
+namespace separate from functions and variables --- but should follow
+the usual Emacs Lisp convention of having a prefix that indicates
+which package they belong to.  Test names are displayed by ERT when
+reporting failures and can be used when selecting which tests to run.
+
+The empty parentheses @code{()} in the first line don't currently have
+any meaning and are reserved for future extension.  They also make
+the syntax of @code{ert-deftest} more similar to that of @code{defun}.
+
+The docstring describes what feature this test tests.  When running
+tests interactively, the first line of the docstring is displayed for
+tests that fail, so it is good if the first line makes sense on its
+own.
+
+The body of a test can be arbitrary Lisp code.  It should have as few
+side effects as possible; each test should be written to clean up
+after itself, leaving Emacs in the same state as it was before the
+test.  Tests should clean up even if they fail.  @xref{Tests and Their
+Environment}.
+
+
+@node  How to Run Tests, How to Write Tests, Introduction, Top
+@chapter How to Run Tests
+
+You can run tests either in the Emacs you are working in, or on the
+command line in a separate Emacs process in batch mode (i.e., with no
+user interface).  The former mode is convenient during interactive
+development, the latter is useful to make sure that tests pass
+independently of your customizations; and it allows you to invoke
+tests from makefiles, and to write scripts that run tests in several
+different Emacs versions.
+
+@menu
+* Running Tests Interactively::  Run tests in your current Emacs.
+* Running Tests in Batch Mode::  Run tests in emacs -Q.
+* Test Selectors::               Choose which tests to run.
+@end menu
+
+
+@node Running Tests Interactively, Running Tests in Batch Mode, How to Run Tests, How to Run Tests
+@section Running Tests Interactively
+
+You can run the tests that are currently defined in your Emacs with
+the command @kbd{@kbd{M-x} ert @kbd{RET} t @kbd{RET}}.  (For an
+explanation of the @code{t} argument, @pxref{Test Selectors}.) ERT will pop
+up a new buffer, the ERT results buffer, showing the results of the
+tests run.  It looks like this:
+
+@example
+Selector: t
+Passed: 31
+Failed: 2 (2 unexpected)
+Total:  33/33
+
+Started at:   2008-09-11 08:39:25-0700
+Finished.
+Finished at:  2008-09-11 08:39:27-0700
+
+FF...............................
+
+F addition-test
+    (ert-test-failed
+     ((should
+       (=
+        (+ 1 2)
+        4))
+      :form
+      (= 3 4)
+      :value nil))
+
+F list-test
+    (ert-test-failed
+     ((should
+       (equal
+        (list 'a 'b 'c)
+        '(a b d)))
+      :form
+      (equal
+       (a b c)
+       (a b d))
+      :value nil :explanation
+      (list-elt 2
+                (different-atoms c d))))
+@end example
+
+At the top, there is a summary of the results: we ran all tests defined
+in the current Emacs (@code{Selector: t}), 31 of them passed, and 2
+failed unexpectedly.  @xref{Expected Failures}, for an explanation of
+the term @emph{unexpected} in this context.
+
+The line of dots and @code{F}s is a progress bar where each character
+represents one test; it fills while the tests are running.  A dot
+means that the test passed, an @code{F} means that it failed.  Below
+the progress bar, ERT shows details about each test that had an
+unexpected result.  In the example above, there are two failures, both
+due to failed @code{should} forms.  @xref{Understanding Explanations},
+for more details.
+
+In the ERT results buffer, @kbd{TAB} and @kbd{S-TAB} cycle between
+buttons.  Each name of a function or macro in this buffer is a button;
+moving point to it and typing @kbd{RET} jumps to its definition.
+
+Pressing @kbd{r} re-runs the test near point on its own.  Pressing
+@kbd{d} re-runs it with the debugger enabled.  @kbd{.} jumps to the
+definition of the test near point (@kbd{RET} has the same effect if
+point is on the name of the test).  On a failed test, @kbd{b} shows
+the backtrace of the failure.
+
+@kbd{l} shows the list of @code{should} forms executed in the test.
+If any messages were generated (with the Lisp function @code{message})
+in a test or any of the code that it invoked, @kbd{m} will show them.
+
+By default, long expressions in the failure details are abbreviated
+using @code{print-length} and @code{print-level}.  Pressing @kbd{L}
+while point is on a test failure will increase the limits to show more
+of the expression.
+
+
+@node Running Tests in Batch Mode, Test Selectors, Running Tests Interactively, How to Run Tests
+@section Running Tests in Batch Mode
+
+ERT supports automated invocations from the command line or from
+scripts or makefiles.  There are two functions for this purpose,
+@code{ert-run-tests-batch} and @code{ert-run-tests-batch-and-exit}.
+They can be used like this:
+
+@example
+emacs -batch -l ert -l my-tests.el -f ert-run-tests-batch-and-exit
+@end example
+
+This command will start up Emacs in batch mode, load ERT, load
+@code{my-tests.el}, and run all tests defined in it.  It will exit
+with a zero exit status if all tests passed, or nonzero if any tests
+failed or if anything else went wrong.  It will also print progress
+messages and error diagnostics to standard output.
+
+If ERT is not part of your Emacs distribution, you may need to use
+@code{-L /path/to/ert/} so that Emacs can find it.  You may need
+additional @code{-L} flags to ensure that @code{my-tests.el} and all the
+files that it requires are on your @code{load-path}.
+
+
+@node Test Selectors,  , Running Tests in Batch Mode, How to Run Tests
+@section Test Selectors
+
+Functions like @code{ert} accept a @emph{test selector}, a Lisp
+expression specifying a set of tests.  Test selector syntax is similar
+to Common Lisp's type specifier syntax:
+
+@itemize
+@item @code{nil} selects no tests.
+@item @code{t} selects all tests.
+@item @code{:new} selects all tests that have not been run yet.
+@item @code{:failed} and @code{:passed} select tests according to their most recent result.
+@item @code{:expected}, @code{:unexpected} select tests according to their most recent result.
+@item A string is a regular expression that selects all tests with matching names.
+@item A test (i.e., an object of @code{ert-test} data type) selects that test.
+@item A symbol selects the test that the symbol names.
+@item @code{(member TESTS...)} selects the elements of TESTS, a list of
+tests or symbols naming tests.
+@item @code{(eql TEST)} selects TEST, a test or a symbol naming a test.
+@item @code{(and SELECTORS...)} selects the tests that match all SELECTORS.
+@item @code{(or SELECTORS...)} selects the tests that match any SELECTOR.
+@item @code{(not SELECTOR)} selects all tests that do not match SELECTOR.
+@item @code{(tag TAG)} selects all tests that have TAG on their tags list.
+(Tags are optional labels you can apply to tests when you define them.)
+@item @code{(satisfies PREDICATE)} selects all tests that satisfy PREDICATE,
+a function that takes a test as argument and returns non-nil if it is selected.
+@end itemize
+
+Selectors that are frequently useful when selecting tests to run
+include @code{t} to run all tests that are currently defined in Emacs,
+@code{"^foo-"} to run all tests in package @code{foo} (this assumes
+that package @code{foo} uses the prefix @code{foo-} for its test names),
+result-based selectors such as @code{(or :new :unexpected)} to
+run all tests that have either not run yet or that had an unexpected
+result in the last run, and tag-based selectors such as @code{(not
+(tag :causes-redisplay))} to run all tests that are not tagged
+@code{:causes-redisplay}.
+
+
+@node How to Write Tests, How to Debug Tests, How to Run Tests, Top
+@chapter How to Write Tests
+
+ERT lets you define tests in the same way you define functions.  You
+can type @code{ert-deftest} forms in a buffer and evaluate them there
+with @code{eval-defun} or @code{compile-defun}, or you can save the
+file and load it, optionally byte-compiling it first.
+
+Just like @code{find-function} is only able to find where a function
+was defined if the function was loaded from a file, ERT is only able
+to find where a test was defined if the test was loaded from a file.
+
+
+@menu
+* The @code{should} Macro::          A powerful way to express assertions.
+* Expected Failures::           Tests for known bugs.
+* Tests and Their Environment:: Don't depend on customizations; no side effects.
+* Useful Techniques::           Some examples.
+@end menu
+
+@node The @code{should} Macro, Expected Failures, How to Write Tests, How to Write Tests
+@section The @code{should} Macro
+
+Test bodies can include arbitrary code; but to be useful, they need to
+check whether the code being tested (or @emph{code under test})
+does what it is supposed to do.  The macro @code{should} is similar to
+@code{assert} from the cl package
+(@pxref{Assertions,,, cl, Common Lisp Extensions}),
+but analyzes its argument form and records information that ERT can
+display to help debugging.
+
+This test definition
+
+@lisp
+(ert-deftest addition-test ()
+  (should (= (+ 1 2) 4)))
+@end lisp
+
+will produce this output when run via @kbd{M-x ert}:
+
+@example
+F addition-test
+    (ert-test-failed
+     ((should
+       (=
+        (+ 1 2)
+        4))
+      :form
+      (= 3 4)
+      :value nil))
+@end example
+
+In this example, @code{should} recorded the fact that (= (+ 1 2) 4)
+reduced to (= 3 4) before it reduced to nil.  When debugging why the
+test failed, it helps to know that the function @code{+} returned 3
+here.  ERT records the return value for any predicate called directly
+within @code{should}.
+
+In addition to @code{should}, ERT provides @code{should-not}, which
+checks that the predicate returns nil, and @code{should-error}, which
+checks that the form called within it signals an error.  An example
+use of @code{should-error}:
+
+@lisp
+(ert-deftest test-divide-by-zero ()
+  (should-error (/ 1 0)
+                :type 'arith-error))
+@end lisp
+
+This checks that dividing one by zero signals an error of type
+@code{arith-error}.  The @code{:type} argument to @code{should-error}
+is optional; if absent, any type of error is accepted.
+@code{should-error} returns an error description of the error that was
+signaled, to allow additional checks to be made.  The error
+description has the format @code{(ERROR-SYMBOL . DATA)}.
+
+There is no @code{should-not-error} macro since tests that signal an
+error fail anyway, so @code{should-not-error} is effectively the
+default.
+
+@xref{Understanding Explanations}, for more details on what
+@code{should} reports.
+
+
+@node Expected Failures, Tests and Their Environment, The @code{should} Macro, How to Write Tests
+@section Expected Failures
+
+Some bugs are complicated to fix, or not very important, and are left as
+@emph{known bugs}.  If there is a test case that triggers the bug and
+fails, ERT will alert you of this failure every time you run all
+tests.  For known bugs, this alert is a distraction.  The way to
+suppress it is to add @code{:expected-result :failed} to the test
+definition:
+
+@lisp
+(ert-deftest future-bug ()
+  "Test `time-forward' with negative arguments.
+Since this functionality isn't implemented, the test is known to fail."
+  :expected-result :failed
+  (time-forward -1))
+@end lisp
+
+ERT will still display a small @code{f} in the progress bar as a
+reminder that there is a known bug, and will count the test as failed,
+but it will be quiet about it otherwise.
+
+An alternative to marking the test as a known failure this way is to
+delete the test.  This is a good idea if there is no intent to fix it,
+i.e., if the behavior that was formerly considered a bug has become an
+accepted feature.
+
+In general, however, it can be useful to keep tests that are known to
+fail.  If someone wants to fix the bug, they will have a very good
+starting point: an automated test case that reproduces the bug.  This
+makes it much easier to fix the bug, demonstrate that it is fixed, and
+prevent future regressions.
+
+ERT displays the same kind of alerts for tests that pass unexpectedly
+as it displays for unexpected failures.  This way, if you make code
+changes that happen to fix a bug that you weren't aware of, you will
+know to remove the @code{:expected-result} clause of that test and
+close the corresponding bug report, if any.
+
+Since @code{:expected-result} evaluates its argument when the test is
+loaded, tests can be marked as known failures only on certain Emacs
+versions, specific architectures, etc.:
+
+@lisp
+(ert-deftest foo ()
+  "A test that is expected to fail on Emacs 23 but succeed elsewhere."
+  :expected-result (if (string-match "GNU Emacs 23[.]" (emacs-version))
+                       :failed
+                     :passed)
+  ...)
+@end lisp
+
+
+@node Tests and Their Environment, Useful Techniques, Expected Failures, How to Write Tests
+@section Tests and Their Environment
+
+The outcome of running a test should not depend on the current state
+of the environment, and each test should leave its environment in the
+same state it found it in.  In particular, a test should not depend on
+any Emacs customization variables or hooks, and if it has to make any
+changes to Emacs's state or state external to Emacs (such as the file
+system), it should undo these changes before it returns, regardless of
+whether it passed or failed.
+
+Tests should not depend on the environment because any such
+dependencies can make the test brittle or lead to failures that occur
+only under certain circumstances and are hard to reproduce.  Of
+course, the code under test may have settings that affect its
+behavior.  In that case, it is best to make the test @code{let}-bind
+all such setting variables to set up a specific configuration for the
+duration of the test.  The test can also set up a number of different
+configurations and run the code under test with each.
+
+Tests that have side effects on their environment should restore it to
+its original state because any side effects that persist after the
+test can disrupt the workflow of the programmer running the tests.  If
+the code under test has side effects on Emacs's current state, such as
+on the current buffer or window configuration, the test should create
+a temporary buffer for the code to manipulate (using
+@code{with-temp-buffer}), or save and restore the window configuration
+(using @code{save-window-excursion}), respectively.  For aspects of
+the state that can not be preserved with such macros, cleanup should
+be performed with @code{unwind-protect}, to ensure that the cleanup
+occurs even if the test fails.
+
+An exception to this are messages that the code under test prints with
+@code{message} and similar logging; tests should not bother restoring
+the @code{*Message*} buffer to its original state.
+
+The above guidelines imply that tests should avoid calling highly
+customizable commands such as @code{find-file}, except, of course, if
+such commands are what they want to test.  The exact behavior of
+@code{find-file} depends on many settings such as
+@code{find-file-wildcards}, @code{enable-local-variables}, and
+@code{auto-mode-alist}.  It is difficult to write a meaningful test if
+its behavior can be affected by so many external factors.  Also,
+@code{find-file} has side effects that are hard to predict and thus
+hard to undo: It may create a new buffer or reuse an existing
+buffer if one is already visiting the requested file; and it runs
+@code{find-file-hook}, which can have arbitrary side effects.
+
+Instead, it is better to use lower-level mechanisms with simple and
+predictable semantics like @code{with-temp-buffer}, @code{insert} or
+@code{insert-file-contents-literally}, and to activate any desired mode
+by calling the corresponding function directly --- after binding the
+hook variables to nil.  This avoids the above problems.
+
+
+@node Useful Techniques,  , Tests and Their Environment, How to Write Tests
+@section Useful Techniques when Writing Tests
+
+Testing simple functions that have no side effects and no dependencies
+on their environment is easy.  Such tests often look like this:
+
+@lisp
+(ert-deftest ert-test-mismatch ()
+  (should (eql (ert--mismatch "" "") nil))
+  (should (eql (ert--mismatch "" "a") 0))
+  (should (eql (ert--mismatch "a" "a") nil))
+  (should (eql (ert--mismatch "ab" "a") 1))
+  (should (eql (ert--mismatch "Aa" "aA") 0))
+  (should (eql (ert--mismatch '(a b c) '(a b d)) 2)))
+@end lisp
+
+This test calls the function @code{ert--mismatch} several times with
+various combinations of arguments and compares the return value to the
+expected return value.  (Some programmers prefer @code{(should (eql
+EXPECTED ACTUAL))} over the @code{(should (eql ACTUAL EXPECTED))}
+shown here.  ERT works either way.)
+
+Here's a more complicated test:
+
+@lisp
+(ert-deftest ert-test-record-backtrace ()
+  (let ((test (make-ert-test :body (lambda () (ert-fail "foo")))))
+    (let ((result (ert-run-test test)))
+      (should (ert-test-failed-p result))
+      (with-temp-buffer
+        (ert--print-backtrace (ert-test-failed-backtrace result))
+        (goto-char (point-min))
+        (end-of-line)
+        (let ((first-line (buffer-substring-no-properties
+                           (point-min) (point))))
+          (should (equal first-line
+                         "  signal(ert-test-failed (\"foo\"))")))))))
+@end lisp
+
+This test creates a test object using @code{make-ert-test} whose body
+will immediately signal failure.  It then runs that test and asserts
+that it fails.  Then, it creates a temporary buffer and invokes
+@code{ert--print-backtrace} to print the backtrace of the failed test
+to the current buffer.  Finally, it extracts the first line from the
+buffer and asserts that it matches what we expect.  It uses
+@code{buffer-substring-no-properties} and @code{equal} to ignore text
+properties; for a test that takes properties into account,
+@code{buffer-substring} and @code{ert-equal-including-properties}
+could be used instead.
+
+The reason why this test only checks the first line of the backtrace
+is that the remainder of the backtrace is dependent on ERT's internals
+as well as whether the code is running interpreted or compiled.  By
+looking only at the first line, the test checks a useful property
+--- that the backtrace correctly captures the call to @code{signal} that
+results from the call to @code{ert-fail} --- without being brittle.
+
+This example also shows that writing tests is much easier if the code
+under test was structured with testing in mind.
+
+For example, if @code{ert-run-test} accepted only symbols that name
+tests rather than test objects, the test would need a name for the
+failing test, which would have to be a temporary symbol generated with
+@code{make-symbol}, to avoid side effects on Emacs's state.  Choosing
+the right interface for @code{ert-run-tests} allows the test to be
+simpler.
+
+Similarly, if @code{ert--print-backtrace} printed the backtrace to a
+buffer with a fixed name rather than the current buffer, it would be
+much harder for the test to undo the side effect.  Of course, some
+code somewhere needs to pick the buffer name.  But that logic is
+independent of the logic that prints backtraces, and keeping them in
+separate functions allows us to test them independently.
+
+A lot of code that you will encounter in Emacs was not written with
+testing in mind.  Sometimes, the easiest way to write tests for such
+code is to restructure the code slightly to provide better interfaces
+for testing.  Usually, this makes the interfaces easier to use as
+well.
+
+
+@node How to Debug Tests, Extending ERT, How to Write Tests, Top
+@chapter How to Debug Tests
+
+This section describes how to use ERT's features to understand why
+a test failed.
+
+
+@menu
+* Understanding Explanations::  How ERT gives details on why an assertion failed.
+* Interactive Debugging::       Tools available in the ERT results buffer.
+@end menu
+
+
+@node Understanding Explanations, Interactive Debugging, How to Debug Tests, How to Debug Tests
+@section Understanding Explanations
+
+Failed @code{should} forms are reported like this:
+
+@example
+F addition-test
+    (ert-test-failed
+     ((should
+       (=
+        (+ 1 2)
+        4))
+      :form
+      (= 3 4)
+      :value nil))
+@end example
+
+ERT shows what the @code{should} expression looked like and what
+values its subexpressions had: The source code of the assertion was
+@code{(should (= (+ 1 2) 4))}, which applied the function @code{=} to
+the arguments @code{3} and @code{4}, resulting in the value
+@code{nil}.  In this case, the test is wrong; it should expect 3
+rather than 4.
+
+If a predicate like @code{equal} is used with @code{should}, ERT
+provides a so-called @emph{explanation}:
+
+@example
+F list-test
+    (ert-test-failed
+     ((should
+       (equal
+        (list 'a 'b 'c)
+        '(a b d)))
+      :form
+      (equal
+       (a b c)
+       (a b d))
+      :value nil :explanation
+      (list-elt 2
+                (different-atoms c d))))
+@end example
+
+In this case, the function @code{equal} was applied to the arguments
+@code{(a b c)} and @code{(a b d)}.  ERT's explanation shows that
+the item at index 2 differs between the two lists; in one list, it is
+the atom c, in the other, it is the atom d.
+
+In simple examples like the above, the explanation is unnecessary.
+But in cases where the difference is not immediately apparent, it can
+save time:
+
+@example
+F test1
+    (ert-test-failed
+     ((should
+       (equal x y))
+      :form
+      (equal a a)
+      :value nil :explanation
+      (different-symbols-with-the-same-name a a)))
+@end example
+
+ERT only provides explanations for predicates that have an explanation
+function registered.  @xref{Defining Explanation Functions}.
+
+
+@node Interactive Debugging,  , Understanding Explanations, How to Debug Tests
+@section Interactive Debugging
+
+Debugging failed tests essentially works the same way as debugging any
+other problems with Lisp code.  Here are a few tricks specific to
+tests:
+
+@itemize
+@item Re-run the failed test a few times to see if it fails in the same way
+each time.  It's good to find out whether the behavior is
+deterministic before spending any time looking for a cause.  In the
+ERT results buffer, @kbd{r} re-runs the selected test.
+
+@item Use @kbd{.} to jump to the source code of the test to find out exactly
+what it does.  Perhaps the test is broken rather than the code
+under test.
+
+@item If the test contains a series of @code{should} forms and you can't
+tell which one failed, use @kbd{l}, which shows you the list of all
+@code{should} forms executed during the test before it failed.
+
+@item Use @kbd{b} to view the backtrace.  You can also use @kbd{d} to re-run
+the test with debugging enabled, this will enter the debugger and show
+the backtrace as well; but the top few frames shown there will not be
+relevant to you since they are ERT's own debugger hook.  @kbd{b}
+strips them out, so it is more convenient.
+
+@item If the test or the code under testing prints messages using
+@code{message}, use @kbd{m} to see what messages it printed before it
+failed.  This can be useful to figure out how far it got.
+
+@item You can instrument tests for debugging the same way you instrument
+@code{defun}s for debugging --- go to the source code of the test and
+type @kbd{@kbd{C-u} @kbd{C-M-x}}.  Then, go back to the ERT buffer and
+re-run the test with @kbd{r} or @kbd{d}.
+
+@item If you have been editing and rearranging tests, it is possible that
+ERT remembers an old test that you have since renamed or removed ---
+renamings or removals of definitions in the source code leave around a
+stray definition under the old name in the running process (this is a
+common problem in Lisp).  In such a situation, hit @kbd{D} to let ERT
+forget about the obsolete test.
+@end itemize
+
+
+@node Extending ERT, Other Testing Concepts, How to Debug Tests, Top
+@chapter Extending ERT
+
+There are several ways to add functionality to ERT.
+
+@menu
+* Defining Explanation Functions::  Teach ERT about more predicates.
+* Low-Level Functions for Working with Tests::  Use ERT's data for your purposes.
+@end menu
+
+
+@node Defining Explanation Functions, Low-Level Functions for Working with Tests, Extending ERT, Extending ERT
+@section Defining Explanation Functions
+
+The explanation function for a predicate is a function that takes the
+same arguments as the predicate and returns an @emph{explanation}.
+The explanation should explain why the predicate, when invoked with
+the arguments given to the explanation function, returns the value
+that it returns.  The explanation can be any object but should have a
+comprehensible printed representation.  If the return value of the
+predicate needs no explanation for a given list of arguments, the
+explanation function should return nil.
+
+To associate an explanation function with a predicate, add the
+property @code{ert-explainer} to the symbol that names the predicate.
+The value of the property should be the symbol that names the
+explanation function.
+
+
+@node Low-Level Functions for Working with Tests,  , Defining Explanation Functions, Extending ERT
+@section Low-Level Functions for Working with Tests
+
+Both @code{ert-run-tests-interactively} and @code{ert-run-tests-batch}
+are implemented on top of the lower-level test handling code in the
+sections of @file{ert.el} labeled ``Facilities for running a single test'',
+``Test selectors'', and ``Facilities for running a whole set of tests''.
+
+If you want to write code that works with ERT tests, you should take a
+look at this lower-level code.  Symbols that start with @code{ert--}
+are internal to ERT, whereas those that start with @code{ert-} are
+meant to be usable by other code.  But there is no mature API yet.
+
+Contributions to ERT are welcome.
+
+
+@node Other Testing Concepts,  , Extending ERT, Top
+@chapter Other Testing Concepts
+
+For information on mocks, stubs, fixtures, or test suites, see below.
+
+
+@menu
+* Mocks and Stubs::           Stubbing out code that is irrelevant to the test.
+* Fixtures and Test Suites::  How ERT differs from tools for other languages.
+@end menu
+
+@node Mocks and Stubs, Fixtures and Test Suites, Other Testing Concepts, Other Testing Concepts
+@section Other Tools for Emacs Lisp
+
+Stubbing out functions or using so-called @emph{mocks} can make it
+easier to write tests.  See
+@url{http://en.wikipedia.org/wiki/Mock_object} for an explanation of
+the corresponding concepts in object-oriented languages.
+
+ERT does not have built-in support for mocks or stubs.  The package
+@code{el-mock} (see @url{http://www.emacswiki.org/emacs/el-mock.el})
+offers mocks for Emacs Lisp and can be used in conjunction with ERT.
+
+
+@node Fixtures and Test Suites,  , Mocks and Stubs, Other Testing Concepts
+@section Fixtures and Test Suites
+
+In many ways, ERT is similar to frameworks for other languages like
+SUnit or JUnit.  However, two features commonly found in such
+frameworks are notably absent from ERT: fixtures and test suites.
+
+Fixtures are mainly used (e.g., in SUnit or JUnit) to provide an
+environment for a set of tests, and consist of set-up and tear-down
+functions.
+
+While fixtures are a useful syntactic simplification in other
+languages, this does not apply to Lisp, where higher-order functions
+and `unwind-protect' are available.  One way to implement and use a
+fixture in ERT is
+
+@lisp
+(defun my-fixture (body)
+  (unwind-protect
+      (progn [set up]
+             (funcall body))
+    [tear down]))
+
+(ert-deftest my-test ()
+  (my-fixture
+   (lambda ()
+     [test code])))
+@end lisp
+
+(Another way would be a @code{with-my-fixture} macro.)  This solves
+the set-up and tear-down part, and additionally allows any test
+to use any combination of fixtures, so it is more flexible than what
+other tools typically allow.
+
+If the test needs access to the environment the fixture sets up, the
+fixture can be modified to pass arguments to the body.
+
+These are well-known Lisp techniques.  Special syntax for them could
+be added but would provide only a minor simplification.
+
+(If you are interested in such syntax, note that splitting set-up and
+tear-down into separate functions, like *Unit tools usually do, makes
+it impossible to establish dynamic `let' bindings as part of the
+fixture.  So, blindly imitating the way fixtures are implemented in
+other languages would be counter-productive in Lisp.)
+
+The purpose of test suites is to group related tests together.
+
+The most common use of this is to run just the tests for one
+particular module.  Since symbol prefixes are the usual way of
+separating module namespaces in Emacs Lisp, test selectors already
+solve this by allowing regexp matching on test names; e.g., the
+selector "^ert-" selects ERT's self-tests.
+
+Other uses include grouping tests by their expected execution time,
+e.g. to run quick tests during interactive development and slow tests less
+often.  This can be achieved with the @code{:tag} argument to
+@code{ert-deftest} and @code{tag} test selectors.
+
+@bye
+
+@c  LocalWords:  ERT JUnit namespace docstring ERT's
+@c  LocalWords:  backtrace makefiles workflow backtraces API SUnit
+@c  LocalWords:  subexpressions

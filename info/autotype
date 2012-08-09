@@ -1,0 +1,1200 @@
+This is ../../info/autotype, produced by makeinfo version 4.13 from
+autotype.texi.
+
+Copyright (C) 1994-1995, 1999, 2001-2012  Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Autotype: (autotype).         Convenient features for text that you
+                                  enter frequently in Emacs.
+END-INFO-DIR-ENTRY
+
+
+File: autotype,  Node: Top,  Next: Using Skeletons,  Up: (dir)
+
+Autotyping
+**********
+
+Under certain circumstances you will find yourself typing similar things
+over and over again.  This is especially true of form letters and
+programming language constructs.  Project-specific header comments,
+flow-control constructs or magic numbers are essentially the same every
+time.  Emacs has various features for doing tedious and repetitive
+typing chores for you in addition to the Abbrev features (*note
+(emacs)Abbrevs::).
+
+   One solution is using skeletons, flexible rules that say what to
+insert, and how to do it.  Various programming language modes offer some
+ready-to-use skeletons, and you can adapt them to suit your needs or
+taste, or define new ones.
+
+   Another feature is automatic insertion of what you want into empty
+files, depending on the file-name or the mode as appropriate.  You can
+have a file or a skeleton inserted, or you can call a function.  Then
+there is the possibility to have Un*x interpreter scripts automatically
+take on a magic number and be executable as soon as they are saved.  Or
+you can have a copyright notice's year updated, if necessary, every
+time you save a file.  Similarly for time stamps in the file.
+
+   URLs can be inserted based on a word at point.  Flexible templates
+can be defined for inserting and navigating between text more
+generally.  A sort of meta-expansion facility can be used to try a set
+of alternative completions and expansions of text at point.
+
+   Copyright (C) 1994-1995, 1999, 2001-2012  Free Software Foundation,
+Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Using Skeletons::        How to insert a skeleton into your text.
+* Wrapping Skeletons::     Putting existing text within a skeleton.
+* Skeletons as Abbrevs::   An alternative for issuing skeleton commands.
+* Skeleton Language::      Making skeleton commands insert what you want.
+* Inserting Pairs::        Typing one character and getting another
+                             after point.
+* Autoinserting::          Filling up empty files as soon as you visit them.
+* Copyrights::             Inserting and updating copyrights.
+* Executables::            Turning interpreter scripts into executables.
+* Timestamps::             Updating dates and times in modified files.
+* QuickURL::               Inserting URLs based on text at point.
+* Tempo::                  Flexible template insertion.
+* Hippie Expand::          Expansion of text trying various methods.
+
+* GNU Free Documentation License:: The license for this documentation.
+* Concept Index::
+* Command Index::
+* Variable Index::
+
+
+File: autotype,  Node: Using Skeletons,  Next: Wrapping Skeletons,  Prev: Top,  Up: Top
+
+1 Using Skeletons
+*****************
+
+When you want Emacs to insert a form letter or a typical construct of
+the programming language you are using, skeletons are a means of
+accomplishing this.  Normally skeletons each have a command of their
+own, that, when called, will insert the skeleton.  These commands can
+be issued in the usual ways (*note (emacs)Commands::).  Modes that
+offer various skeletons will often bind these to key-sequences on the
+`C-c' prefix, as well as having an `Insert' menu and maybe even
+predefined abbrevs for them (*note Skeletons as Abbrevs::).
+
+   The simplest kind of skeleton will simply insert some text indented
+according to the major mode and leave the cursor at a likely place in
+the middle.  Interactive skeletons may prompt you for a string that
+will be part of the inserted text.
+
+   Skeletons may ask for input several times.  They even have a looping
+mechanism in which you will be asked for input as long as you are
+willing to furnish it.  An example would be multiple "else if"
+conditions.  You can recognize this situation by a prompt ending in
+<RET>, `C-g' or `C-h'.  This means that entering an empty string will
+simply assume that you are finished.  Typing quit on the other hand
+terminates the loop but also the rest of the skeleton, e.g. an "else"
+clause is skipped.  Only a syntactically necessary termination still
+gets inserted.
+
+
+File: autotype,  Node: Wrapping Skeletons,  Next: Skeletons as Abbrevs,  Prev: Using Skeletons,  Up: Top
+
+2 Wrapping Skeletons Around Existing Text
+*****************************************
+
+Often you will find yourself with some code that for whatever reason
+suddenly becomes conditional.  Or you have written a bit of text and
+want to put it in the middle of a form letter.  Skeletons provide a
+means for accomplishing this, and can even, in the case of programming
+languages, reindent the wrapped code for you.
+
+   Skeleton commands take an optional numeric prefix argument (*note
+(emacs)Arguments::).  This is interpreted in two different ways
+depending on whether the prefix is positive, i.e. forwards oriented or
+negative, i.e. backwards oriented.
+
+   A positive prefix means to wrap the skeleton around that many
+following words.  This is accomplished by putting the words there where
+the point is normally left after that skeleton is inserted (*note Using
+Skeletons::).  The point (*note (emacs)Point::) is left at the next
+interesting spot in the skeleton instead.
+
+   A negative prefix means to do something similar with that many
+previously marked interregions (*note (emacs)Mark::).  In the simplest
+case, if you type `M--' just before issuing the skeleton command, that
+will wrap the skeleton around the current region, just like a positive
+argument would have wrapped it around a number of words.
+
+   Smaller negative arguments will wrap that many interregions into
+successive interesting spots within the skeleton, again leaving the
+point at the next one.  We speak about interregions rather than regions
+here, because we treat them in the order they appear in the buffer,
+which coincides with successive regions only if they were marked in
+order.
+
+   That is, if you marked in alphabetical order the points A B C []
+(where [] represents the point) and call a skeleton command with `M--
+3', you will wrap the text from A to B into the first interesting spot
+of the skeleton, the text from B to C into the next one, the text from
+C to the point into the third one, and leave the point in the fourth
+one.  If there are less marks in the buffer, or if the skeleton defines
+less interesting points, the surplus is ignored.
+
+   If, on the other hand, you marked in alphabetical order the points
+[] A C B, and call a skeleton command with `M-- 3', you will wrap the
+text from point to A, then the text from A to C and finally the text
+from C to B.  This is done because the regions overlap and Emacs would
+be helplessly lost if it tried to follow the order in which you marked
+these points.
+
+
+File: autotype,  Node: Skeletons as Abbrevs,  Next: Skeleton Language,  Prev: Wrapping Skeletons,  Up: Top
+
+3 Skeletons as Abbrev Expansions
+********************************
+
+Rather than use a key binding for every skeleton command, you can also
+define an abbreviation (*note (emacs)Defining Abbrevs::) that will
+expand (*note (emacs)Expanding Abbrevs::) into the skeleton.
+
+   Say you want `ifst' to be an abbreviation for the C language if
+statement.  You will tell Emacs that `ifst' expands to the empty string
+and then calls the skeleton command.  In Emacs Lisp you can say
+something like `(define-abbrev c-mode-abbrev-table "ifst" "" 'c-if)'.
+Or you can edit the output from `M-x list-abbrevs' to make it look like
+this:
+
+     (c-mode-abbrev-table)
+     "if"           0    ""         c-if
+
+(Some blank lines of no semantic significance, and other abbrev tables,
+have been omitted.)
+
+
+File: autotype,  Node: Skeleton Language,  Next: Inserting Pairs,  Prev: Skeletons as Abbrevs,  Up: Top
+
+4 Skeleton Language
+*******************
+
+Skeletons are an shorthand extension to the Lisp language, where various
+atoms directly perform either actions on the current buffer or
+rudimentary flow control mechanisms.  Skeletons are interpreted by the
+function `skeleton-insert'.
+
+   A skeleton is a list starting with an interactor, which is usually a
+prompt-string, or `nil' when not needed, but can also be a Lisp
+expression for complex read functions or for returning some calculated
+value.  The rest of the list are any number of elements as described in
+the following table:
+
+`"STRING"', `?C', `?\C'
+     Insert string or character.  Literal strings and characters are
+     passed through `skeleton-transformation' when that is non-`nil'.
+
+`?\n'
+     Insert a newline and align under current line.  Use newline
+     character `?\n' to prevent alignment.
+
+`_'
+     Interesting point.  When wrapping skeletons around successive
+     regions, they are put at these places.  Point is left at first `_'
+     where nothing is wrapped.
+
+`>'
+     Indent line according to major mode.  When following element is
+     `_', and there is a interregion that will be wrapped here, indent
+     that interregion.
+
+`&'
+     Logical and.  Iff preceding element moved point, i.e. usually
+     inserted something, do following element.
+
+`|'
+     Logical xor.  Iff preceding element didn't move point, i.e.
+     usually inserted nothing, do following element.
+
+`-NUMBER'
+     Delete preceding number characters.  Depends on value of
+     `skeleton-untabify'.
+
+`()' or `nil'
+     Ignored.
+
+LISP-EXPRESSION
+     Evaluated, and the return value is again interpreted as a skeleton
+     element.
+
+`str'
+     A special variable that, when evaluated the first time, usually
+     prompts for input according to the skeleton's interactor.  It is
+     then set to the return value resulting from the interactor.  Each
+     subskeleton has its local copy of this variable.
+
+`v1', `v2'
+     Skeleton-local user variables.
+
+`'EXPRESSION'
+     Evaluate following Lisp expression for its side-effect, but
+     prevent it from being interpreted as a skeleton element.
+
+SKELETON
+     Subskeletons are inserted recursively, not once, but as often as
+     the user enters something at the subskeletons interactor.  Thus
+     there must be a `str' in the subskeleton.  They can also be used
+     non-interactively, when prompt is a lisp-expression that returns
+     successive list-elements.
+
+`resume:'
+     Ignored.  Execution resumes here if the user quits during skeleton
+     interpretation.
+
+`quit'
+     A constant which is non-`nil' when the `resume:' section was
+     entered because the user quit.
+
+   Some modes also use other skeleton elements they themselves defined.
+For example in shell script mode's skeletons you will find `<' which
+does a rigid indentation backwards, or in CC mode's skeletons you find
+the self-inserting elements `{' and `}'.  These are defined by the
+buffer-local variable `skeleton-further-elements' which is a list of
+variables bound while interpreting a skeleton.
+
+   The macro `define-skeleton' defines a command for interpreting a
+skeleton.  The first argument is the command name, the second is a
+documentation string, and the rest is an interactor and any number of
+skeleton elements together forming a skeleton.  This skeleton is
+assigned to a variable of the same name as the command and can thus be
+overridden from your `~/.emacs' file (*note (emacs)Init File::).
+
+
+File: autotype,  Node: Inserting Pairs,  Next: Autoinserting,  Prev: Skeleton Language,  Up: Top
+
+5 Inserting Matching Pairs of Characters
+****************************************
+
+Various characters usually appear in pairs.  When, for example, you
+insert an open parenthesis, no matter whether you are programming or
+writing prose, you will surely enter a closing one later.  By entering
+both at the same time and leaving the cursor inbetween, Emacs can
+guarantee you that such parentheses are always balanced.  And if you
+have a non-qwerty keyboard, where typing some of the stranger
+programming language symbols makes you bend your fingers backwards,
+this can be quite relieving too.
+
+   This is done by binding the first key (*note (emacs)Rebinding::) of
+the pair to `skeleton-pair-insert-maybe' instead of
+`self-insert-command'.  The "maybe" comes from the fact that this
+at-first surprising behavior is initially turned off.  To enable it,
+you must set `skeleton-pair' to some non-`nil' value.  And even then, a
+positive argument (*note (emacs)Arguments::) will make this key behave
+like a self-inserting key (*note (emacs)Inserting Text::).
+
+   While this breaks with the stated intention of always balancing
+pairs, it turns out that one often doesn't want pairing to occur, when
+the following character is part of a word.  If you want pairing to
+occur even then, set `skeleton-pair-on-word' to some non-`nil' value.
+
+   Pairing is possible for all visible characters.  By default the
+parenthesis `(', the square bracket `[', the brace `{', the pointed
+bracket `<' and the backquote ``' all pair with the symmetrical
+character.  All other characters pair themselves.  This behavior can be
+modified by the variable `skeleton-pair-alist'.  This is in fact an
+alist of skeletons (*note Skeleton Language::), with the first part of
+each sublist matching the typed character.  This is the position of the
+interactor, but since pairs don't need the `str' element, this is
+ignored.
+
+   Some modes have bound the command `skeleton-pair-insert-maybe' to
+relevant keys.  These modes also configure the pairs as appropriate.
+For example, when typing english prose, you'd expect the backquote
+(``') to pair with the quote (`''), while in Shell script mode it must
+pair to itself.  They can also inhibit pairing in certain contexts.
+For example an escaped character stands for itself.
+
+
+File: autotype,  Node: Autoinserting,  Next: Copyrights,  Prev: Inserting Pairs,  Up: Top
+
+6 Autoinserting Text in Empty Files
+***********************************
+
+`M-x auto-insert' will put some predefined text at the beginning of the
+buffer.  The main application for this function, as its name suggests,
+is to have it be called automatically every time an empty, and only an
+empty file is visited.  This is accomplished by putting `(add-hook
+'find-file-hook 'auto-insert)' into your `~/.emacs' file (*note
+(emacs)Init File::).
+
+   What gets inserted, if anything, is determined by the variable
+`auto-insert-alist'.  The CARs of this list are each either a mode
+name, making an element applicable when a buffer is in that mode.  Or
+they can be a string, which is a regexp matched against the buffer's
+file name.  In that way different kinds of files that have the same
+mode in Emacs can be distinguished.  The CARs may also be cons cells
+consisting of mode name or regexp as above and an additional
+descriptive string.
+
+   When a matching element is found, the CDR says what to do.  It may
+be a string, which is a file name, whose contents are to be inserted, if
+that file is found in the directory `auto-insert-directory' or under a
+absolute file name.  Or it can be a skeleton (*note Skeleton
+Language::) to be inserted.
+
+   It can also be a function, which allows doing various things.  The
+function can simply insert some text, indeed, it can be skeleton
+command (*note Using Skeletons::).  It can be a lambda function which
+will for example conditionally call another function.  Or it can even
+reset the mode for the buffer. If you want to perform several such
+actions in order, you use a vector, i.e. several of the above elements
+between square brackets (`[...]').
+
+   By default C and C++ headers insert a definition of a symbol derived
+from the filename to prevent multiple inclusions.  C and C++ sources
+insert an include of the header.  Makefiles insert the file
+makefile.inc if it exists.
+
+   TeX and bibTeX mode files insert the file tex-insert.tex if it
+exists, while LaTeX mode files insert a typical `\documentclass' frame.
+Html files insert a skeleton with the usual frame.
+
+   Ada mode files call the Ada header skeleton command.  Emacs lisp
+source files insert the usual header, with a copyright of your
+environment variable `$ORGANIZATION' or else the FSF, and prompt for
+valid keywords describing the contents.  Files in a `bin' directory for
+which Emacs could determine no specialized mode (*note (emacs)Choosing
+Modes::) are set to Shell script mode.
+
+   In Lisp (*note (emacs)Init File::) you can use the function
+`define-auto-insert' to add to or modify `auto-insert-alist'.  See its
+documentation with `C-h f define-auto-insert'.
+
+   The variable `auto-insert' says what to do when `auto-insert' is
+called non-interactively, e.g. when a newly found file is empty (see
+above):
+`nil'
+     Do nothing.
+
+`t'
+     Insert something if possible, i.e. there is a matching entry in
+     `auto-insert-alist'.
+
+other
+     Insert something if possible, but mark as unmodified.
+
+   The variable `auto-insert-query' controls whether to ask about
+inserting something.  When this is `nil', inserting is only done with
+`M-x auto-insert'.  When this is `function', you are queried whenever
+`auto-insert' is called as a function, such as when Emacs visits an
+empty file and you have set the above-mentioned hook.  Otherwise you
+are always queried.
+
+   When querying, the variable `auto-insert-prompt''s value is used as a
+prompt for a y-or-n-type question.  If this includes a `%s' construct,
+that is replaced by what caused the insertion rule to be chosen.  This
+is either a descriptive text, the mode-name of the buffer or the regular
+expression that matched the filename.
+
+
+File: autotype,  Node: Copyrights,  Next: Executables,  Prev: Autoinserting,  Up: Top
+
+7 Inserting and Updating Copyrights
+***********************************
+
+`M-x copyright' is a skeleton inserting command, that adds a copyright
+notice at the point.  The "by" part is taken from your environment
+variable `$ORGANIZATION' or if that isn't set you are prompted for it.
+If the buffer has a comment syntax (*note (emacs)Comments::), this is
+inserted as a comment.
+
+   `M-x copyright-update' looks for a copyright notice in the first
+`copyright-limit' characters of the buffer and updates it when
+necessary.  The current year (variable `copyright-current-year') is
+added to the existing ones, in the same format as the preceding year,
+i.e. 1994, '94 or 94.  If a dash-separated year list up to last year is
+found, that is extended to current year, else the year is added
+separated by a comma.  Or it replaces them when this is called with a
+prefix argument.  If a header referring to a wrong version of the GNU
+General Public License (*note (emacs)Copying::) is found, that is
+updated too.
+
+   An interesting application for this function is to have it be called
+automatically every time a file is saved.  This is accomplished by
+putting `(add-hook 'before-save-hook 'copyright-update)' into your
+`~/.emacs' file (*note (emacs)Init File::).  Alternative, you can do
+`M-x customize-variable <RET> before-save-hook <RET>'.
+`copyright-update' is conveniently listed as an option in the
+customization buffer.
+
+   The variable `copyright-query' controls whether to update the
+copyright or whether to ask about it.  When this is `nil' updating is
+only done with `M-x copyright-update'.  When this is `function' you are
+queried whenever `copyright-update' is called as a function, such as in
+the `before-save-hook' feature mentioned above.  Otherwise you are
+always queried.
+
+
+File: autotype,  Node: Executables,  Next: Timestamps,  Prev: Copyrights,  Up: Top
+
+8 Making Interpreter Scripts Executable
+***************************************
+
+Various interpreter modes such as Shell script mode or AWK mode will
+automatically insert or update the buffer's magic number, a special
+comment on the first line that makes the `exec' systemcall know how to
+execute the script.  To this end the script is automatically made
+executable upon saving, with `executable-chmod' as argument to the
+system `chmod' command.  The magic number is prefixed by the value of
+`executable-prefix'.
+
+   Any file whose name matches `executable-magicless-file-regexp' is not
+furnished with a magic number, nor is it made executable.  This is
+mainly intended for resource files, which are only meant to be read in.
+
+   The variable `executable-insert' says what to do when
+`executable-set-magic' is called non-interactively, e.g. when file has
+no or the wrong magic number:
+`nil'
+     Do nothing.
+
+`t'
+     Insert or update magic number.
+
+other
+     Insert or update magic number, but mark as unmodified.
+
+   The variable `executable-query' controls whether to ask about
+inserting or updating the magic number.  When this is `nil' updating is
+only done with `M-x executable-set-magic'.  When this is `function' you
+are queried whenever `executable-set-magic' is called as a function,
+such as when Emacs puts a buffer in Shell script mode.  Otherwise you
+are always queried.
+
+   `M-x executable-self-display' adds a magic number to the buffer,
+which will turn it into a self displaying text file, when called as a
+Un*x command.  The "interpreter" used is `executable-self-display' with
+argument `+2'.
+
+
+File: autotype,  Node: Timestamps,  Next: QuickURL,  Prev: Executables,  Up: Top
+
+9 Maintaining Timestamps in Modified Files
+******************************************
+
+The `time-stamp' command can be used to update automatically a template
+in a file with a new time stamp every time you save the file.
+Customize the hook `before-save-hook' to add the function `time-stamp'
+to arrange this.  It you use Custom to do this, then `time-stamp' is
+conveniently listed as an option in the customization buffer.
+
+   The time stamp is updated only if the customizable variable
+`time-stamp-active' is on, which it is by default; the command
+`time-stamp-toggle-active' can be used to toggle it.  The format of the
+time stamp is set by the customizable variable `time-stamp-format'.
+
+   The variables `time-stamp-line-limit', `time-stamp-start',
+`time-stamp-end', `time-stamp-count', and `time-stamp-inserts-lines'
+control finding the template.  Do not change these in your init file or
+you will be incompatible with other people's files.  If you must change
+them, do so only in the local variables section of the file itself.
+
+   Normally the template must appear in the first 8 lines of a file and
+look like one of the following:
+
+     Time-stamp: <>
+     Time-stamp: " "
+
+   The time stamp is written between the brackets or quotes:
+
+     Time-stamp: <1998-02-18 10:20:51 gildea>
+
+
+File: autotype,  Node: QuickURL,  Next: Tempo,  Prev: Timestamps,  Up: Top
+
+10 QuickURL: Inserting URLs Based on Text at Point
+**************************************************
+
+`M-x quickurl' can be used to insert a URL into a buffer based on the
+text at point.  The URLs are stored in an external file defined by the
+variable `quickurl-url-file' as a list of either cons cells of the form
+`(KEY . URL)' or lists of the form `(KEY URL COMMENT)'.  These specify
+that `M-x quickurl' should insert URL if the word KEY is at point, for
+example:
+
+     (("FSF"      "http://www.fsf.org/" "The Free Software Foundation")
+      ("emacs"  . "http://www.emacs.org/")
+      ("hagbard"  "http://www.hagbard.demon.co.uk" "Hagbard's World"))
+
+   `M-x quickurl-add-url' can be used to add a new KEY/URL pair.  `M-x
+quickurl-list' provides interactive editing of the URL list.
+
+
+File: autotype,  Node: Tempo,  Next: Hippie Expand,  Prev: QuickURL,  Up: Top
+
+11 Tempo: Flexible Template Insertion
+*************************************
+
+The Tempo package provides a simple way to define powerful templates, or
+macros, if you wish.  It is mainly intended for, but not limited to,
+programmers to be used for creating shortcuts for editing certain kinds
+of documents.
+
+   A template is defined as a list of items to be inserted in the
+current buffer at point.  Some can be simple strings, while others can
+control formatting or define special points of interest in the inserted
+text.  `M-x tempo-backward-mark' and `M-x tempo-forward-mark' can be
+used to jump between such points.
+
+   More flexible templates can be created by including Lisp symbols,
+which will be evaluated as variables, or lists, which will be evaluated
+as Lisp expressions.  Automatic completion of specified tags to expanded
+templates can be provided.
+
+   See the documentation for `tempo-define-template' for the different
+items that can be used to define a tempo template with a command for
+inserting it.
+
+   See the commentary in `tempo.el' for more information on using the
+Tempo package.
+
+
+File: autotype,  Node: Hippie Expand,  Next: GNU Free Documentation License,  Prev: Tempo,  Up: Top
+
+12 `Hippie' Expansion
+*********************
+
+`M-x hippie-expand' is a single command providing a variety of
+completions and expansions.  Called repeatedly, it tries all possible
+completions in succession.
+
+   Which ones to try, and in which order, is determined by the contents
+of the customizable option `hippie-expand-try-functions-list'.  Much
+customization of the expansion behavior can be made by changing the
+order of, removing, or inserting new functions in this list.  Given a
+positive numeric argument, `M-x hippie-expand' jumps directly that
+number of functions forward in this list.  Given some other argument (a
+negative argument or just `C-u') it undoes the tried completion.
+
+   See the commentary in `hippie-exp.el' for more information on the
+possibilities.
+
+   Typically you would bind `hippie-expand' to `M-/' with
+`dabbrev-expand', the standard binding of `M-/', providing one of the
+expansion possibilities.
+
+
+File: autotype,  Node: GNU Free Documentation License,  Next: Concept Index,  Prev: Hippie Expand,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: autotype,  Node: Concept Index,  Next: Command Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Concept Index
+*************
+
+ [index ]
+* Menu:
+
+* autoinserting:                         Autoinserting.         (line 6)
+* copyrights:                            Copyrights.            (line 6)
+* executables:                           Executables.           (line 6)
+* inserting pairs:                       Inserting Pairs.       (line 6)
+* pairs:                                 Inserting Pairs.       (line 6)
+* skeleton language:                     Skeleton Language.     (line 6)
+* skeletons:                             Using Skeletons.       (line 6)
+* skeletons as abbrevs:                  Skeletons as Abbrevs.  (line 6)
+* templates:                             Tempo.                 (line 6)
+* timestamps:                            Timestamps.            (line 6)
+* URLs:                                  QuickURL.              (line 6)
+* using skeletons:                       Using Skeletons.       (line 6)
+* wrapping skeletons:                    Wrapping Skeletons.    (line 6)
+
+
+File: autotype,  Node: Command Index,  Next: Variable Index,  Prev: Concept Index,  Up: Top
+
+Command Index
+*************
+
+ [index ]
+* Menu:
+
+* auto-insert:                           Autoinserting.        (line  6)
+* copyright:                             Copyrights.           (line  6)
+* copyright-update:                      Copyrights.           (line 12)
+* define-auto-insert:                    Autoinserting.        (line 52)
+* define-skeleton:                       Skeleton Language.    (line 89)
+* executable-self-display:               Executables.          (line 37)
+* executable-set-magic:                  Executables.          (line 30)
+* hippie-expand:                         Hippie Expand.        (line  6)
+* quickurl:                              QuickURL.             (line  6)
+* quickurl-add-url:                      QuickURL.             (line 17)
+* quickurl-list:                         QuickURL.             (line 17)
+* skeleton-further-elements:             Skeleton Language.    (line 82)
+* skeleton-insert:                       Skeleton Language.    (line  6)
+* skeleton-pair-insert-maybe:            Inserting Pairs.      (line 15)
+* tempo-backward-mark:                   Tempo.                (line 11)
+* tempo-define-template:                 Tempo.                (line 22)
+* tempo-forward-mark:                    Tempo.                (line 11)
+* time-stamp:                            Timestamps.           (line  6)
+
+
+File: autotype,  Node: Variable Index,  Prev: Command Index,  Up: Top
+
+Variable Index
+**************
+
+ [index ]
+* Menu:
+
+* auto-insert:                           Autoinserting.        (line 56)
+* auto-insert-alist:                     Autoinserting.        (line 13)
+* auto-insert-prompt:                    Autoinserting.        (line 76)
+* auto-insert-query:                     Autoinserting.        (line 69)
+* before-save-hook:                      Timestamps.           (line  6)
+* copyright-current-year:                Copyrights.           (line 12)
+* copyright-limit:                       Copyrights.           (line 12)
+* copyright-query:                       Copyrights.           (line 31)
+* executable-chmod:                      Executables.          (line  6)
+* executable-insert:                     Executables.          (line 18)
+* executable-magicless-file-regexp:      Executables.          (line 14)
+* executable-prefix:                     Executables.          (line  6)
+* executable-query:                      Executables.          (line 30)
+* hippie-expand-try-functions-list:      Hippie Expand.        (line  6)
+* quickurl-url-file:                     QuickURL.             (line  6)
+* skeleton-pair:                         Inserting Pairs.      (line 15)
+* skeleton-pair-alist:                   Inserting Pairs.      (line 28)
+* skeleton-pair-on-word:                 Inserting Pairs.      (line 23)
+* skeleton-transformation:               Skeleton Language.    (line 18)
+* time-stamp-active:                     Timestamps.           (line 12)
+* time-stamp-count:                      Timestamps.           (line 17)
+* time-stamp-end:                        Timestamps.           (line 17)
+* time-stamp-format:                     Timestamps.           (line 12)
+* time-stamp-inserts-lines:              Timestamps.           (line 17)
+* time-stamp-line-limit:                 Timestamps.           (line 17)
+* time-stamp-start:                      Timestamps.           (line 12)
+
+
+
+Tag Table:
+Node: Top1020
+Node: Using Skeletons4261
+Node: Wrapping Skeletons5732
+Node: Skeletons as Abbrevs8335
+Node: Skeleton Language9226
+Node: Inserting Pairs12804
+Node: Autoinserting15186
+Node: Copyrights18973
+Node: Executables20841
+Node: Timestamps22539
+Node: QuickURL23914
+Node: Tempo24780
+Node: Hippie Expand25963
+Node: GNU Free Documentation License26995
+Node: Concept Index52173
+Node: Command Index53284
+Node: Variable Index54744
+
+End Tag Table

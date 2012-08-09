@@ -1,0 +1,29 @@
+CHECKLIST FOR ADDING A NEW FILE TO EMACS -*- outline -*-
+
+** Make sure the author(s) have a copyright assignment/disclaimer.
+
+** Make sure the file matches the standard Emacs template (header
+format, copyright and license notice, etc).
+
+** Make sure the filename does not cause the DOS port any problems (8+3).
+Run the `doschk' program like this:
+
+    find /path/to/emacs -print | doschk
+
+and examine the output for DOS-related problems.  The sections of
+output under the headings "The following files are not valid DOS file
+names:" and "The following resolve to the same DOS file names:" should
+not include any files that end up in the release tarball.
+
+** Make the ChangeLog entry in the name of the author(s), not your own name.
+
+** If appropriate, check that the file compiles OK and that Emacs
+builds fine with it.  Address any compilation warnings.
+
+** If a major contribution, consider adding an entry to the
+Acknowledgments in doc/emacs/emacs.texi and ack.texi.
+
+** If appropriate, add a short NEWS entry.
+
+** If appropriate, update make-dist (not needed with "standard" file
+names, eg *.el).

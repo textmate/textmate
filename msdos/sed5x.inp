@@ -1,0 +1,25 @@
+# -sed5x.inp------------------------------------------------------------
+# Configuration script for oldxmenu/makefile for DesqView/X
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1994, 2001-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^srcdir *=/s/@[^@\n]*@/./
+/^VPATH *=/s/@[^@\n]*@/./
+/^C_SWITCH_X_SITE *=/s/@[^@\n]*@//
+/^CC *=/s/@[^@\n]*@/gcc/
+/^CPP *=/s/@[^@\n]*@/gcc -e/
+/^CFLAGS *=/s/@[^@\n]*@/-O2 -g/
+s/|| true//
+

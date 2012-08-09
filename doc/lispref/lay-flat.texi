@@ -1,0 +1,43 @@
+\input texinfo    @c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 2001-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@c
+@comment %**start of header
+@setfilename inner-covers.info
+@settitle Inner Covers
+@smallbook
+@comment %**end of header
+
+@headings off
+
+@w{ }
+@sp 4
+@tex
+\center {\secfonts \rm Lay-Flat Binding}
+@end tex
+@sp 2
+
+We have bound this manual using a new @dfn{lay-flat} binding
+technology.  This type of binding allows you to open a soft cover book
+so that it ``lays flat'' on a table without creasing the binding.
+
+In order to make the book lay flat properly, you need to ``crack'' the
+binding.  To do this, divide the book into two sections and bend it so
+that the front and back covers meet.  Do not worry; the pages are
+sewn and glued to the binding, and will not fall out easily.
+The outer cardboard binding itself is designed so that it will not
+break or crease as an ordinary paperback binding will.  Bend the book
+several times in this manner, dividing it in a different place each
+time and pressing the pages flat and open.  With use, the binding will
+become flexible and the pages will lay flat without needing to be
+pushed or held down.
+
+@page
+
+
+@tex
+\center {\secfonts \rm Notes}
+@end tex
+
+@bye

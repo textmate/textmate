@@ -1,0 +1,2269 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2012-03-25  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (install): Use $(DIRNAME)_same-dir.tst instead
+	of same-dir.tst, to avoid stepping on other (parallel) Make job's
+	toes.
+
+2012-03-21  Kenichi Handa  <handa@m17n.org>
+
+	* quail/indian.el ("devanagari-itrans"): Add a few more useful
+	keys (Bug#10935).
+
+2012-03-16  Kenichi Handa  <handa@m17n.org>
+
+	* quail/indian.el (telugu-inscript): Fix typo.  (Bug#10936)
+
+2012-03-13  Йордан Миладинов  <jordanmiladinov@gmail.com>  (tiny change)
+
+	* quail/cyrillic.el (bulgarian-alt-phonetic):
+	New input method.  (Bug#10893)
+
+2012-03-09  Mohsen BANAN  <libre@mohsen.1.banan.byname.net>
+
+	* quail/persian.el: Update which includes: (1) full compliance to
+	ISIRI-6219, forbidden characters were eliminated and missing
+	characters were added; (2) layer 3 of ISIRI-9147 is now
+	implemented with a '\' prefix; (3) double entry of characters
+	which were postfixed with 'h' is now supported; (4) lots of
+	comment and additional pointers have been added.
+
+2011-12-15  Kenichi Handa  <handa@m17n.org>
+
+	* quail/ethiopic.el ("ethiopic"): Do not refer to
+	ethio-prefer-ascii-punctuation.
+
+2011-11-20  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/hangul.el (hangul-character): Fix typo.
+
+2011-09-27  Jambunathan K  <kjambunathan@gmail.com>
+
+	* quail/indian.el (quail-tamil-itrans-misc-table): Delete it.
+	(quail-tamil-itrans-numerics-and-symbols-table)
+	(quail-tamil-itrans-various-signs-and-digits-table): New variables.
+	("tamil-itrans"): Show the values of above variables (Bug#9336).
+
+2011-09-22  Kenichi Handa  <handa@m17n.org>
+
+	* quail/indian.el (quail-tamil-itrans-syllable-table)
+	(quail-tamil-itrans-misc-table): New variables.
+	("tamil-itrans"): Improve the docstring by showing the values of
+	above variables (Bug#9336).
+
+2011-09-06  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* Makefile.in (install): install-sh is now in build-aux (Bug#9169).
+
+2011-08-29  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* quail/latin-ltx.el: Complete the super and subscript letters.
+
+2011-08-20  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (OTHERS):
+	* makefile.w32-in (MISC): Add ipa-praat.elc.
+
+2011-07-23  Yair F  <yair.f.lists@gmail.com>
+
+	* quail/hebrew.el ("hebrew"): Additional key mappings.
+	("hebrew-new", "hebrew-lyx", "hebrew-full")
+	("hebrew-biblical-tiro", "hebrew-biblical-sil", "yiddish-royal")
+	("yiddish-keyman"): New input methods.
+
+2011-06-12  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* SKK-DIC/SKK-JISYO.L: Add proper coding tag.
+	* CXTERM-DIC/4Corner.tit, CXTERM-DIC/ARRAY30.tit,
+	* CXTERM-DIC/CCDOSPY.tit, CXTERM-DIC/ECDICT.tit,
+	* CXTERM-DIC/ETZY.tit, CXTERM-DIC/PY-b5.tit,
+	* CXTERM-DIC/Punct-b5.tit, CXTERM-DIC/Punct.tit,
+	* CXTERM-DIC/QJ-b5.tit, CXTERM-DIC/QJ.tit, CXTERM-DIC/SW.tit,
+	* CXTERM-DIC/TONEPY.tit, CXTERM-DIC/ZOZY.tit: Likewise.
+	* MISC-DIC/cangjie-table.b5, MISC-DIC/cangjie-table.cns,
+	* MISC-DIC/pinyin.map, MISC-DIC/ziranma.cin: Likewise.
+
+	* Makefile.in (TIT_BIG5): Rename from TIT-BIG5.
+
+2011-05-30  Oliver Scholz  <epameinondas@gmx.de>
+
+	* quail/ipa-praat.el: New input method.
+
+2011-05-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (OTHERS): Add $(srcdir)/quail/persian.elc.
+
+	* makefile.w32-in (MISC): Add $(srcdir)/quail/persian.elc.
+
+2011-05-16  Mohsen BANAN  <libre@mohsen.banan.1.byname.net>
+
+	* quail/persian.el: New file.
+
+2011-05-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* quail/latin-ltx.el <\beth, \gimel, \daleth>: Produce
+	corresponding symbols rather than Hebrew letters.  (Bug#8563)
+
+	* quail/latin-ltx.el <\aleph>: Produce ALEF SYMBOL instead of
+	HEBREW LETTER ALEF.  (Bug#8563)
+
+2011-03-23  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (install): Use `install-sh -d' rather than mkinstalldirs.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-02-28  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/ethiopic.el ("ethiopic"): Fix tpo in docstring.
+
+2011-01-28  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Redo spelling of Makefile variables to conform to POSIX.
+	POSIX does not allow "-" in Makefile variable names.
+	Reported by Bruno Haible in
+	<http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg00990.html>.
+	* Makefile.in (BUILT_EMACS): Rename from BUILT-EMACS.
+	(TIT_GB): Rename from TIT-GB.
+	(CHINESE_TIT): Rename from CHINESE-TIT.
+	(NON_TIT_GB): Rename from NON-TIT-GB.
+	(NON_TIT_BIG5): Rename from NON-TIT-BIG5.
+	(CHINESE_NON_TIT): Rename from CHINESE-NON-TIT.
+	(CHINESE_GB): Rename from CHINESE-GB.
+	(CHINESE_BIG5): Rename from CHINESE-BIG5.
+	(TIT_MISC): Rename from TIT-MISC.
+	(NON_TIT_MISC): Rename from NON-TIT-MISC.
+	(TIT_SOURCES): Rename from TIT-SOURCES.
+	(MISC_SOURCES): Rename from MISC-SOURCES.
+
+2011-01-08  Glenn Morris  <rgm@gnu.org>
+
+	* makefile.w32-in (RUN_EMACS):
+	* Makefile.in (RUN-EMACS): Add --no-site-lisp.
+
+	* makefile.w32-in (RUN_EMACS):
+	* Makefile.in (RUN-EMACS): -batch implies --no-init-file.
+
+2010-08-28  Kenichi Handa  <handa@m17n.org>
+
+	* quail/japanese.el (quail-japanese-update-translation):
+	Fix handling of invalid key.
+
+2010-08-15  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* quail/vntelex.el ("vietnamese-telex"): Doc fix.
+
+	* quail/georgian.el: Remove extra backslashes.
+
+2010-08-14  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* quail/arabic.el: Quote [ and ].
+	* quail/latin-ltx.el: Likewise.
+
+	* quail/greek.el ("greek", "greek-postfix"): Change string to
+	character.
+
+2010-08-13  Kenichi Handa  <handa@m17n.org>
+
+	* quail/greek.el ("greek-postfix"): Add rules for Greek style quotes.
+
+2010-08-09  Kenichi Handa  <handa@m17n.org>
+
+	* quail/greek.el ("greek"): Add rules for Greek style quotes.
+
+2010-05-15  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (install): Remove references to CVS-related files.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-04-06  Chong Yidong  <cyd@stupidchicken.com>
+
+	* quail/vntelex.el: Fix "af" rule (Bug#5836).
+
+2010-03-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in ($(TIT), $(MISC_DIC), leim-list.el): Enclose the
+	argument of "-l" in $(ARGQUOTE), in case it includes blanks or
+	other special characters.
+
+2010-03-18  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (maintainer-clean): Use bootstrap-clean.
+	(extraclean): Fix deletion patterns.
+
+	* Makefile.in (dot): Remove, since ../ is used throughout the
+	other Makefiles.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2010-02-16  Kenichi Handa  <handa@m17n.org>
+
+	* SKK-DIC/SKK-JISYO.L: Updated to the latest version.
+
+2009-12-05  Vasily Korytov  <vasily@korytov.pp.ru>
+
+	* quail/cyrillic.el (russian-typewriter): Change keyboard layout.
+	(Bug#904)
+
+2009-09-09  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (install): Set umask to world-readable before creating
+	directories.
+
+2009-08-31  Juri Linkov  <juri@jurta.org>
+
+	* quail/ipa.el ("ipa"): Set `forget-last-selection' to nil.
+	("ipa-x-sampa"): Set `forget-last-selection' to nil.
+	Set `deterministic' to nil.
+	("ipa"): Bind "g" to U+0261, and "tsh" to a list of "U+02A7",
+	"U+0074 U+0283", "U+0074 U+2040 U+0283".
+	("ipa-kirshenbaum", ipa-x-sampa"): Bind "g" to U+0261, and "tS"
+	to a list of "U+02A7", "U+0074 U+0283", "U+0074 U+2040 U+0283".
+	Fix comments.
+
+2009-08-31  Juri Linkov  <juri@jurta.org>
+
+	* quail/ipa.el ("ipa-kirshenbaum"): Rename from "kirshenbaum-ipa".
+	("ipa-x-sampa"): Rename from "x-sampa-ipa".
+	(ipa-x-sampa-implosive-submap): Rename from
+	x-sampa-implosive-submap.
+	(ipa-x-sampa-prepend-to-keymap-entry): Rename from
+	x-sampa-prepend-to-keymap-entry.
+	(ipa-x-sampa-underscore-implosive): Rename from
+	x-sampa-underscore-implosive.
+	(ipa-x-sampa-implosive-submap): Move before first use.
+
+2009-08-30  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* quail/ipa.el ("kirshenbaum-ipa", "x-sampa-ipa"):
+	Two new input methods, both following widely-used Usenet
+	conventions for mapping ASCII to the IPA.  Kirshenbaum is common in
+	sci.lang and alt.usage.english, X-SAMPA in various (mostly
+	European) non-English language fora.  X-SAMPA is slightly more
+	complex to support in Quail that Kirshenbaum, whence the two extra
+	function and one extra submap to support it.
+	(x-sampa-prepend-to-keymap-entry): New function.
+	(x-sampa-underscore-implosive): New function.
+	(x-sampa-implosive-submap): New Quail submap.
+
+2009-08-30  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* quail/ipa.el: Recode the file as UTF-8, for better
+	interoperability with other applications.
+
+2009-08-29  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* quail/latin-ltx.el (\circ): Use the `ring operator' rather than
+	`white circle'.
+
+	* Makefile.in (leim-list.el, install): Don't use -r to remove files.
+
+2009-08-25  Glenn Morris  <rgm@gnu.org>
+
+	* quail/hangul.el (top-level): Don't require cl at run-time.
+
+2009-08-21  Thamer Mahmoud  <thamer.mahmoud@gmail.com>  (tiny change)
+
+	* quail/arabic.el: Add missing keys that exist on the Arabic X
+	keyboard.  Don't insert Lam-alef ligatures from the Arabic
+	Presentation Forms ranges; instead, separate Lam-Alef ligatures
+	into a list of two letters (Lam and a suitable Alef).
+
+2009-06-23  Kenichi Handa  <handa@m17n.org>
+
+	* quail/hangul.el (hangul-to-hanja-conversion): When it is called
+	while korean input method is off, convert the following character.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2009-06-18  Kenichi Handa  <handa@m17n.org>
+
+	* quail/hangul.el (hangul-im-keymap): Add binding of key
+	Hangul_Hanja.
+
+2009-05-04  Simon Leinen  <simon.leinen@switch.ch>  (tiny change)
+
+	* Makefile.in (install): Avoid using $$(..) construct, for Solaris
+	compatibility.
+
+2009-04-12  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.in (install): Remove .gitignore files.
+
+2009-03-19  Kenichi Handa  <handa@m17n.org>
+
+	* leim-ext.el: Change the encoding to utf-8.
+
+2008-12-30  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* Makefile.in (install): Remove old directories in ns_appresdir before
+	moving new directories there.
+
+2008-11-11  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/hangul.el (hangul-im-keymap, hangul-insert-character)
+	(hangul-djamo, hangul2-input-method-moum, hangul3-input-method-cho)
+	(hangul3-input-method-jung, hangul3-input-method-jong):
+	Fix typos in docstrings.
+
+2008-11-07  Vasily Korytov  <vasily@korytov.pp.ru>  (tiny change)
+
+	* quail/cyrillic.el: Handle backslash key (bug#839).
+
+2008-10-20  Kenichi Handa  <handa@m17n.org>
+
+	* quail/indian.el (inscript-mlm-keytable): New variable.
+	(malayalam-inscript): Use inscript-mlm-keytable.
+
+2008-09-11  Magnus Henoch  <mange@freemail.hu>
+
+	* quail/cyrillic.el ("cyrillic-translit"): Add g' for Ukrainian G
+	with upturn.
+
+2008-09-02  Carsten Bormann  <cabo@tzi.org>
+
+	* quail/latin-post.el ("german-postfix"): Do not translate ue to
+	\"u after a, e or q, because that would be extremely uncommon
+	compared to aue, eue or que.  The only exception is the prefix
+	"ge", after which, according to corpus statistics, a \"u can be
+	expected.
+
+2008-08-10  Jihyun Cho  <jihyun.jo@gmail.com>
+
+	* quail/hangul.el (hangul3-input-method-jong): Fix array indexing bug.
+
+2008-07-19  Juri Linkov  <juri@jurta.org>
+
+	* quail/cyrillic.el ("cyrillic-translit"): Add two rules "//'" and
+	"//`" for combining accents as a separate character.  Keep two
+	rules "i`" and "I`" for characters where accent is not a separate
+	character.  Revert changes that added postfix combining accents.
+
+2008-07-17  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Makefile.in (install): Perform post-install cleanup inside NS app
+	bundle.
+
+2008-07-12  Juri Linkov  <juri@jurta.org>
+
+	* quail/rfc1345.el: Replace non-printable control characters with
+	equivalent text-only notations.
+
+	* quail/cyrillic.el ("cyrillic-translit"): Fix rules with
+	combining acute accent.  Add rules ("e\\" ?э) ("E\\" ?Э).
+	Change conflicting rules ("u'" ?ў) to ("u~" ?ў), and ("U'" ?Ў)
+	to ("U~" ?Ў).  Doc fix.  Put combining accent rules into one group.
+
+2008-07-10  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* quail/cyrillic.el : Add more rules to cyrillic-translit, make
+	everything postfix.  Adjust to eliminate conflicts.
+
+2008-06-30  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/hangul3.el: Remove (unneeded since 2008-06-03).
+
+2008-06-27  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (.el.elc): Copy the echo behavior of lisp/Makefile.in.
+
+2008-06-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* makefile.w32-in (MISC): Add $(srcdir)/quail/arabic.elc.
+
+2008-06-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (distclean): Don't delete `quail' subdir: if we
+	are building in the sandbox, there are precious files there.
+	(clean mostlyclean): Delete leim-list.el~.
+	(distclean): Delete makefile.
+
+2008-06-13  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* quail/cyrillic.el: Add quotation marks, paragraph symbol, angled
+	brackets, number symbol, and accented aeio to cyrillic-translit.
+
+2008-06-03  Jihyun Cho  <jihyun.jo@gmail.com>
+
+	* quail/hangul.el: Completely re-written.
+
+2008-06-03  Kenichi Handa  <handa@m17n.org>
+
+	* makefile.w32-in (KOREAN): Remove ${srcdir}/quail/hangul3.elc.
+	(leim-list.el): Remove leim-list.el at first.
+
+	* Makefile.in (KOREAN): Remove ${srcdir}/quail/hangul3.elc.
+	(leim-list.el): Remove leim-list.el at first.
+
+	* leim-ext.el: Register input methods "korean-hangul",
+	"korean-hangul3f", "korean-hangul390", and "korean-hangul3".
+
+2008-03-26  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* quail/latin-ltx.el: Don't use single-char mapping from ~ to NBSP.
+
+2008-02-21  Kenichi Handa  <handa@ni.aist.go.jp>
+
+	* quail/indian.el: Don't require devan-util.
+
+2008-02-01  James Cloos  <cloos@jhcloos.com>
+
+	* quail/arabic.el: Update (sync with xkeyboard-config keyboard).
+
+2008-02-01  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (OTHERS): Add arabic.elc.
+
+2008-02-01  James Cloos  <cloos@jhcloos.com>
+
+	* quail/arabic.el: New file.
+
+2008-02-01  Kenichi Handa  <handa@m17n.org>
+
+	* MISC-DIC/pinyin.map: Fix encoding to that of the original file.
+
+2008-02-01  KAWABATA, Taichi  <kawabata@m17n.org>
+
+	* quail/indian.el (quail-indian-flatten-list): Delete it.
+	(quail-define-inscript-package): Pay attention to `nil' values of
+	char/key-table.
+	(inscript-tml-keytable): New variable.  Use it for Tamil inscript.
+
+2008-02-01  Dave Love  <fx@gnu.org>
+
+	* quail/latin-post.el ("turkish-latin-3-postfix"): Make it
+	just an alias for turkish-postfix.
+
+	* quail/latin-alt.el ("turkish-latin-3-alt-postfix"): Make it
+	just an alias for turkish-alt-postfix.
+
+	* quail/cyrillic.el (ukrainian-computer): Fix duplicate `\'.
+
+2008-02-01  Kenichi Handa  <handa@m17n.org>
+
+	* quail/thai.el: Don't require thai-util.
+	(quail-thai-update-translation): Delete function.
+	(thai-generate-quail-map): Change to a macro that directly calls
+	quail-define-rules.
+	("thai-kesmanee", "thai-pattachote"): Don't use
+	UPDATE-TRANSLATION-FUNCTION.
+
+	* quail/indian.el (quail-indian-preceding-char-position):
+	Delete function.
+	(quail-indian-update-preceding-char): Delete variable.
+	(quail-indian-update-translation): Delete function.
+	(quail-define-indian-trans-package): Don't call
+	quail-define-package with quail-indian-update-translation.
+	(quail-define-inscript-package): Likewise.
+
+2008-02-01  Dave Love  <fx@gnu.org>
+
+	* quail/indian.el (quail-indian-preceding-char-position)
+	(quail-indian-update-translation, quail-define-inscript-package):
+	Use characterp, not char-valid-p.
+
+2008-02-01  Dave Love  <fx@gnu.org>
+
+	* quail/welsh.el ("welsh"): Doc fix.
+
+	* quail/cyrillic.el: Reinstate some commented-out redundancies.
+	("russian-typewriter"): Rename from cyrillic-typewriter.
+	Make cyrillic-jcuken effectively an alias for it.
+	("russian-computer"): New.
+	("bulgarian-phonetic"): Rename from bulgarian-pho.
+	("bulgarian-bds"): Rename from bulgarian-standard.
+
+2008-02-01  Dave Love  <fx@gnu.org>
+
+	* ja-dic/ja-dic.el: Add coding tag.
+
+2008-02-01  Dave Love  <fx@gnu.org>
+
+	* latin-post.el: Recode to utf-8.
+	("latin-postfix"): New method.
+
+	* latin-alt.el: Recode to utf-8.
+	("latin-alt-postfix"): New method.
+
+	* quail/latin-pre.el: Recode to utf-8.
+	("latin-1-prefix", "latin-8-prefix", "latin-9-prefix"): Add nbsp.
+	("latin-3-prefix"): Remove bogus Latin-3 characters and ~o -> ġ,
+	~O -> Ġ.
+	("latin-prefix"): New method.
+
+	* quail/uni-input.el (utf-8-ccl-encode): Delete.
+	(ucs-input-method): Modify.
+
+2008-02-01  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (RUN-EMACS): Add LC_ALL=C.
+
+2008-01-14  Aidan Kehoe  <kehoea@parhasard.net>  (tiny change)
+
+	* quail/latin-ltx.el ("TeX"): Correct the mappings for \v{k} and \vk.
+
+2008-01-06  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* makefile.w32-in:
+	* Makefile.in: Remove references to Xenix.
+
+2007-12-15  Richard Stallman  <rms@gnu.org>
+
+	* quail/latin-post.el ("scandinavian-postfix"): Doc fix.
+
+	* quail/latin-alt.el: Many doc fixes.
+	("danish-alt-postfix")
+	("esperanto-alt-postfix", "finnish-alt-postfix")
+	("german-alt-postfix", "icelandic-alt-postfix")
+	("norwegian-alt-postfix", "scandinavian-alt-postfix")
+	("spanish-alt-postfix", "swedish-alt-postfix"):
+	Delete; they were identical to the non-alt versions.
+
+2007-12-07  Kenichi Handa  <handa@ni.aist.go.jp>
+
+	* quail/lao.el (quail-map-from-table): Allow a tone just after a
+	consonant.
+
+2007-11-17  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (check-declare): New target.
+
+2007-10-31  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (install): Change ownership of installed files.
+
+2007-10-20  Edward O'Connor  <hober0@gmail.com>  (tiny change)
+
+	* quail/latin-ltx.el ("\\qed"): Add this rule.
+
+2007-10-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/indian.el (quail-indian-update-preceding-char):
+	Don't mark the variable as frame-local; it wasn't used as such.
+
+2007-07-25  Glenn Morris  <rgm@gnu.org>
+
+	* Relicense all FSF files to GPLv3 or later.
+
+	* COPYING: Switch to GPLv3.
+
+2007-07-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (extraclean): Don't delete *~.
+
+2007-06-02  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 22.1 released.
+
+2007-01-30  Kenichi Handa  <handa@m17n.org>
+
+	* CXTERM-DIC/CCDOSPY.tit, CXTERM-DIC/PY-b5.tit, CXTERM-DIC/SW.tit,
+	* CXTERM-DIC/TONEPY.tit: Add copyright and license notices.
+
+	* MISC-DIC/pinyin.map, MISC-DIC/ziranma.cin: Add copyright and
+	license notices.
+
+2007-01-24  Kenichi Handa  <handa@m17n.org>
+
+	* MISC-DIC/README: New file.
+
+	* CXTERM-DIC/README: New file.
+
+	* CXTERM-DIC/4Corner.tit, CXTERM-DIC/CCDOSPY.tit,
+	* CXTERM-DIC/PY-b5.tit, CXTERM-DIC/QJ-b5.tit, CXTERM-DIC/QJ.tit,
+	* CXTERM-DIC/SW.tit, CXTERM-DIC/TONEPY.tit: Updated from
+	X11R6/contrib/programs/cxterm.
+
+	* ja-dic/ja-dic.el: Regenerated.
+
+2007-01-12  Kenichi Handa  <handa@m17n.org>
+
+	* quail/uni-input.el (ucs-input-method): Signal an error for a
+	Unicode character that is not yet supported.
+
+2006-12-26  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (datarootdir): Define.
+
+2006-12-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (leim-list.el): Depend on ${TIT-MISC}, not
+	${NON-TIT-MISC}.
+
+2006-12-09  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/latin-alt.el ("scandinavian-alt-postfix"): Fix typo.
+
+	* quail/uni-input.el (ucs-input-help): Fix title of ucs input method.
+
+2006-12-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (leim-list.el): Depend on leim-ext.el as well.
+	Run Emacs to append non-empty non-comment lines in leim-ext.el
+	to leim-list.el.
+
+2006-12-05  Juanma Barranquero  <lekktu@gmail.com>
+
+	* makefile.w32-in (MISC): Add $(srcdir)/quail/sisheng.elc.
+
+2006-11-29  Juanma Barranquero  <lekktu@gmail.com>
+
+	* quail/greek.el ("greek-mizuochi"): Remove spurious initial newline
+	in docstring.
+
+2006-11-04  Romain Francoise  <romain@orebokech.com>
+
+	* Makefile.in (bootstrap-clean): New target.
+
+2006-10-12  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (install): Be sure to make ${INSTALLDIR} before `cd'
+	to it.
+
+2006-10-05  Chong Yidong  <cyd@stupidchicken.com>
+
+	* quail/latin-ltx.el: Fix typo in previous change.
+
+2006-10-05  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* quail/latin-ltx.el: Remove rules that start with { since they are
+	redundant and hence impact the { key for no good reason.
+
+2006-10-02  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (install): Fix previous change.
+
+2006-09-28  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (install): Be sure to make ${INSTALLDIR}.
+
+2006-09-15  Jay Belanger  <belanger@truman.edu>
+
+	* COPYING: Replace "Library Public License" by "Lesser Public
+	License" throughout.
+
+2006-09-06  Michaël Cadilhac  <michael.cadilhac@lrde.org>
+
+	* quail/uni-input.el (ucs-input-method): Don't make the action of
+	a key not in [0-9a-zA-Z] when it was expected to be.  Let the Emacs
+	mechanism do it.
+
+2006-07-12  David Kastrup  <dak@gnu.org>
+
+	* quail/greek.el: Change iota subscriptum transliteration in
+	Ibycus4 encoding's capitals from "i" to "|".
+
+2006-03-03  Claudio Fontana  <claudio@gnu.org>
+
+	* Makefile.in (install): Add DESTDIR variable to support staged
+	installations.
+
+2005-12-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in ($(TIT), leim-list.el): Warn that parts of
+	commands enclosed in $(ARGQUOTE)s should not be split between two
+	lines, as that will break with GNU Make >3.80, when sh.exe is used
+	and arg quoting is with '..'.
+
+2005-11-03  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (GZIP_PROG): Rename from GZIP.
+	(install): Adjust.
+
+2005-11-01  Romain Francoise  <romain@orebokech.com>
+
+	* Makefile.in (install): Compress source files.
+
+2005-10-28  Juri Linkov  <juri@jurta.org>
+
+	* quail/symbol-ksc.el: Add missing characters from 1st pos of
+	every table of [korean-ksc5601], and swap incorrectly ordered
+	characters at pos 91 and 90.
+
+2005-10-26  Torsten Bronger  <bronger@physik.rwth-aachen.de>  (tiny change)
+
+	* quail/latin-ltx.el ("TeX"): Change "\," mapping to U+202F (not
+	U+2006).  Add more mappings from TeX's textcomp package.
+
+2005-10-25  Juri Linkov  <juri@jurta.org>
+
+	* quail/cyrillic.el ("cyrillic-translit"): Set 4th arg `guidance'
+	to t for this multi-key input method.
+
+2005-10-24  Kenichi Handa  <handa@m17n.org>
+
+	* quail/uni-input.el (ucs-input-activate): Don't add
+	quail-kill-guidance-buf to kill-buffer-hook.
+
+2005-07-08  Kenichi Handa  <handa@m17n.org>
+
+	* quail/japanese.el (quail-japanese-kanji-kkc): Fix order of
+	insertion and deletion.
+
+2005-07-04  Lute Kamstra  <lute@gnu.org>
+
+	Update FSF's address in GPL notices.
+
+2005-06-28  Kenichi Handa  <handa@m17n.org>
+
+	* leim-ext.el: Add rules for inserting full-width space for
+	quail/Punct and quail/Punct-b5.
+
+2005-06-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (distclean): Fix a typo (colon was after "clean").
+	(extraclean): New target, emulates Makefile.in.
+
+2005-04-06  Kenichi Handa  <handa@m17n.org>
+
+	* quail/sgml-input.el ("sgml"): Enable quail-completion by typing TAB.
+
+2005-03-26  Kenichi Handa  <handa@m17n.org>
+
+	* quail/latin-ltx.el ("TeX"): Enable quail-completion by typing TAB.
+
+2005-03-18  Kenichi Handa  <handa@m17n.org>
+
+	* quail/thai.el (quail-thai-update-translation): Delete it.
+	(thai-generate-quail-map): Generate a simpler map.
+	("thai-kesmanee"): Don't use quail-thai-update-translation.
+	(thai-generate-quail-map): Likewise.
+
+2005-03-15  Kenichi Handa  <handa@m17n.org>
+
+	* quail/thai.el (thai-generate-quail-map): Fix the kesmanee layout.
+
+2005-03-08  Kenichi Handa  <handa@m17n.org>
+
+	* quail/latin-pre.el ("latin-1-prefix"): Add rule "__"->"_".
+	("latin-9-prefix"): Add rules "__"->"_", "_ "->NBSP.
+
+2004-12-04  Kenichi Handa  <handa@m17n.org>
+
+	* quail/lao.el (lao-key-alist): Declare it by defvar.
+	(lao-key-alist-vector): New variable.
+	(lao-consonant-key-alist, lao-semivowel-key-alist)
+	(lao-vowel-key-alist, lao-voweltone-key-alist)
+	(lao-tone-key-alist, lao-other-key-alist): Initialize them from
+	lao-key-alist-vector.
+
+2004-09-25  Kenichi Handa  <handa@m17n.org>
+
+	* quail/uni-input.el (ucs-input-method): Add error clause to
+	condition-case.
+
+2004-09-21  Kenichi Handa  <handa@m17n.org>
+
+	* quail/uni-input.el: Move the call of register-input-method to
+	leim-ext.el.
+	(ucs-input-insert-char): New function.
+	(ucs-input-method): Use ucs-input-insert-char.
+	(ucs-input-activate): Call quail-hide-guidance instead of
+	quail-hide-guidance-buf.
+
+	* leim-ext.el: Add autoload for 'ucs-input-activate and
+	register-input-method for "ucs".
+
+2004-08-21  David Kastrup  <dak@gnu.org>
+
+	* quail/greek.el ("greek-babel"): Add accent/breathing/uppercase
+	combinations.
+
+2004-08-16  Kenichi Handa  <handa@m17n.org>
+
+	* quail/georgian.el ("georgian"): Call quail-define-package with
+	the show-layout arg t.
+
+2004-08-06  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (install): Remove .arch-inventory files.
+
+2004-07-01  David Kastrup  <dak@gnu.org>
+
+	* quail/greek.el ("((") ("))"): Add quotation mark shorthands.
+
+2004-06-30  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (${CHINESE-TIT:.elc=.el}): Depend on changed.tit to
+	serialize parallel builds.
+	(${MISC:.elc=.el}): Depend on changed.misc.
+
+2004-06-05  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (leim-list.el): Depend on leim-ext.el.  Append the
+	contents of leim-ext.el to leim-list.el.
+
+	* leim-ext.el: New file.
+
+2004-05-17  Werner Lemberg  <wl@gnu.org>
+
+	* quail/sisheng.el: New file.
+
+2004-05-17  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (OTHERS): Add ${srcdir}/quail/sisheng.elc.
+
+2004-05-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (leim-list.el): Move commands to convert TIT and
+	MISC dictionaries from here...
+	(changed.tit, changed.misc): ...to here.  Remove the (now
+	unneeded) test of the contents of changed.* files.
+
+2004-05-10  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (all): Re-add dependency on ${WORLD} so that lisp
+	files are compiled when bootstrapping.
+
+2004-05-07  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* quail/latin-ltx.el ("TeX"): Fix typo.
+
+2004-05-06  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* quail/latin-ltx.el: Use utf-8 coding.
+	("TeX"): Add de and fr quotes.  From Karl Eichwalder <ke@suse.de>.
+
+2004-05-04  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (TIT-SOURCES): Prepend ${srcdir} to each element.
+	(MISC-SOURCES): Likewise.
+
+2004-05-01  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (OTHERS): Rename from MISC.
+	(MISC): Rename from MISC-DIC.
+	(WORLD): Adjust for the above changes.
+	(TIT-MISC, NON-TIT-MISC): New targets.
+	(all): Don't depend on ${WORLD}.
+	(.NOTPARALLEL, .NO_PARALLEL, ${TIT}, ${MSIC-IDC}): Remove these targets.
+	(TIT-SOURCES, MISC-SOURCES): New macros.
+	(changed.tit, changed.misc): New targets.
+	(leim-list.el): Depend on ${NON-TIT-MISC}, changed.tit, and
+	changed.misc.  Generate quail files from TIT and MISC files if
+	necessary.
+	(clean mostlyclean): Delete ${TIT-MISC} instead of ${TIT} and
+	${MISC-DIC}.
+
+2004-05-03  Jason Rumney  <jasonr@gnu.org>
+
+	* makefile.nt: Remove.
+
+2004-04-23  Juanma Barranquero  <lektu@terra.es>
+
+	* makefile.w32-in: Add "-*- makefile -*-" mode tag.
+
+2004-04-09  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (distclean clean): Remove nmake specific
+	stamp-subdir test.
+
+2004-02-28  Kenichi Handa  <handa@m17n.org>
+
+	* Makefile.in (all): Depend on ${WORLD} instead of ${TIT} and
+	${MISC-DIC}.
+	(clean, mostlyclean): Don't delete *.elc distributed with tarball.
+	(maintainer-clean): Delete files that are not in CVS repository.
+
+	* makefile.nt (all): Depend on $(WORLD) instead of $(TIT) and
+	$(MISC-DIC).
+	(clean, mostlyclean): Don't delete *.elc distributed with tarball.
+	(maintainer-clean): Delete files that are not in CVS repository.
+
+	* makefile.w32-in (all): Depend on $(WORLD) instead of $(TIT) and
+	$(MISC-DIC).
+	(clean, mostlyclean): Don't delete *.elc distributed with tarball.
+	(maintainer-clean): Delete files that are not in CVS repository.
+
+2004-02-16  Jérôme Marant  <jmarant@nerim.net>  (tiny change)
+
+	* Makefile.in (distclean maintainer-clean): Depend on clean.
+
+2004-01-27  Ognyan Kulev  <ogi@fmi.uni-sofia.bg>  (tiny change)
+
+	* quail/cyrillic.el ("bulgarian-bds"): Docstring fixed.
+
+2004-01-22  Ognyan Kulev  <ogi@fmi.uni-sofia.bg>  (tiny change)
+
+	* quail/cyrillic.el ("bulgarian-phonetic"): Docstring fixed.
+	Duplicate entry removed.
+	("bulgarian-bds"): Docstring fixed.
+
+2003-10-06  Dave Love  <fx@gnu.org>
+
+	* quail/latin-ltx.el: Several additions.
+
+2003-08-25  Jesper Harder  <harder@ifa.au.dk>  (tiny change)
+
+	* quail/latin-pre.el ("german-prefix"): Fix typo in the docstring.
+
+2003-08-20  Dave Love  <fx@gnu.org>
+
+	* quail/latin-ltx.el: Add \rhd.
+
+2003-08-19  Markus Rost  <rost@math.ohio-state.edu>
+
+	* quail/latin-pre.el ("french-prefix"): Fix spacing in docstring.
+
+2003-07-21  KAWABATA, Taichi  <kawabata@m17n.org>
+
+	* quail/indian.el (quail-indian-update-translation): Adjust the
+	behavior according to the change of quail-translate-key.
+
+2003-05-22  Kenichi Handa  <handa@m17n.org>
+
+	* quail/pypunct-b5.el ("chinese-py-punct-b5"): Change the title
+	Chinese characters from GB to Big5.
+
+2003-05-01  Wlodzimierz Bzyl  <matwb@julia.univ.gda.pl>  (tiny change)
+
+	* quail/latin-pre.el ("polish-slash"): Add the rule "//"->?/.
+
+2003-04-05  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (install): Remove CVS related and backup files from
+	installation directory.
+
+2003-02-27  David Kastrup  <dak@gnu.org>
+
+	* quail/greek.el (greek-babel): Add koronis transliteration.
+
+2003-02-23  David Kastrup  <dak@gnu.org>
+
+	* quail/greek.el (greek-babel): Fix <' accent.
+
+2003-02-17  Dave Love  <fx@gnu.org>
+
+	* quail/cyrillic.el (ukrainian-computer): Fix duplicate `\'.
+
+2003-02-14  Juanma Barranquero  <lektu@terra.es>
+
+	* quail/uni-input.el (utf-8-ccl-encode): Fix use of character constants.
+
+2003-02-11  KAWABATA, Taichi  <kawabata@m17n.org>
+
+	* quail/indian.el (punjabi-itrans, gujarati-itrans, oriya-itrans)
+	(bengali-itrans, assamese-itrans, telugu-itrans, kannada-itrans)
+	(malayalam-itrans, tamil-itrans): New ITRANS based input methods.
+	(punjabi-inscript, gujarati-inscript, oriya-inscript)
+	(bengali-inscript, assamese-inscript, telugu-inscript)
+	(kannada-inscript, malayalam-inscript, tamil-inscript):
+	New INSCRIPT based input methods.
+
+2003-02-07  Kenichi Handa  <handa@m17n.org>
+
+	* quail/cyrillic.el: Update quail-package-alist (not
+	input-method-alist) to make "cyrillic-jcuken" an alias of
+	"russian-typewriter".  Add cookie for quail-update-leim-list-file.
+
+2003-02-05  David Kastrup  <dak@gnu.org>
+
+	* quail/greek.el: Fix iota accent typos in greek-babel encoding.
+
+2003-01-05  Dave Love  <fx@gnu.org>
+
+	* makefile.w32-in (SLAVIC): Add croatian.elc.
+
+	* Makefile.in (SLAVIC): Add croatian.elc.
+
+	* quail/croatian.el: New file.
+
+2002-12-10  Juanma Barranquero  <lektu@terra.es>
+
+	* makefile.w32-in (LATIN): Add welsh.elc.
+	(MISC): Add georgian.elc.
+	(UNICODE): Add it.
+	(WORLD): Add $(UNICODE).
+
+2002-11-14  Dave Love  <fx@gnu.org>
+
+	* quail/slovak.el: Add coding cookie.
+
+	* quail/latin-ltx.el: Fix coding cookie.
+
+	* quail/hebrew.el: Add coding cookie.
+
+	* quail/czech.el: Add coding cookie.
+
+	* quail/welsh.el: Undo last change.
+
+2002-09-11  Dave Love  <fx@gnu.org>
+
+	* quail/latin-post.el ("slovenian"): New.
+
+2002-09-05  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/thai.el (thai-kesmanee): Fix the mapping of `"' and `}'.
+
+2002-07-24  Dave Love  <fx@gnu.org>
+
+	* quail/latin-alt.el ("latin-alt-postfix"): New.
+
+	* quail/latin-post.el ("latin-postfix"): New.
+
+	* quail/latin-pre.el ("latin-1-prefix"): Add nbsp.
+	("latin-3-prefix"): Doc fix.
+	("latin-prefix"): New.
+
+2002-07-12  Dave Love  <fx@gnu.org>
+
+	* quail/cyrillic.el: Doc fixes.
+	("cyrillic-beylorussian"): Commented-out.
+	("cyrillic-translit-bulgarian"): Delete.
+	("cyrillic-ukrainian"): Fix `q', `Q', `W', `w' bindings.
+	("ukrainian-computer", "belarusian", "bulgarian-bds")
+	("russian-computer"): New.
+	("bulgarian-phonetic"): Rename from bulgarian-pho.  Add §, №, Ю.
+	("russian-typewriter"): Rename from cyrillic-jcuken.
+
+2002-06-20  Dave Love  <fx@gnu.org>
+
+	* quail/latin-pre.el ("latin-3-prefix"): Remove bogus Latin-3
+	characters and ~o -> ġ, ~O -> Ġ.
+
+2002-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (install): Use "tar -chf", to follow symlinks.
+
+2002-05-04  Triet Hoai Lai  <thlai@ee.usyd.edu.au>
+
+	* quail/vntelex.el: Add even more rules.
+
+2002-04-30  Triet Hoai Lai  <thlai@ee.usyd.edu.au>
+
+	* quail/vntelex.el: Add new rules to escape from composition.
+
+2002-04-29  Triet Hoai Lai  <thlai@ee.usyd.edu.au>
+
+	* quail/vntelex.el: Use proper charset.
+
+2002-04-22  Koaunghi Un  <koaunghi@ling.cnu.ac.kr>
+
+	* quail/hanja.el ("Od"): Remove rule.
+
+2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/indian.el: Replace commented-out lines with a condition
+	that is always false.
+
+2002-04-06  Jaeyoun Chung  <jay@kldp.org>
+
+	* quail/hanja3.el ("kf"): Add a few composing rules
+	from "Taik-kyun Lim" <mongmong@milab.yonsei.ac.kr>
+
+	* quail/hangul3.el: Buggy alternative second character
+	sequence fixed ('/' for 'v' pair).
+	added a few more third character composing rule.
+
+2002-03-03  Werner Lemberg  <wl@gnu.org>
+
+	* quail/vntelex.el: New file.
+	* Makefile.in (VIETNAMESE):
+	* makefile.nt (VIETNAMESE):
+	* makefile.w32-in (VIETNAMESE): Add it.
+
+2002-02-10  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in ($(TIT)): Don't depend on $(SUBDIRS).
+	($(MISC_DIC)): Ditto.
+
+2002-02-06  Richard M. Stallman  <rms@gnu.org>
+
+	* quail/latin-pre.el (french-prefix): ", " => "," and "~ " => "~".
+	Don't define "~," at all.
+
+2002-01-29  Pavel Janík  <Pavel@Janik.cz>
+
+	* quail/latin-pre.el (latin-2-prefix): Add Ě and ě.
+	From "Dr. Eduard Werner" <edi.werner@gmx.de>.
+
+2002-01-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/greek.el: Changed the behavior of the "greek" input
+	method, to consider the "accent" and "diaeresis" as prefix keys.
+	A new method (named "greek-postfix") was added which implements
+	the old behavior.  Also changed the mapping of the "Q/q" key to
+	produce the ":/;" characters, as is customary in greek keyboards.
+	From Nick Patavalis <npat@inaccessnetworks.com>.
+
+2002-01-07  Jaeyoun Chung  <jay@kldp.org>
+
+	* quail/hangul.el: Remove key sequence mapping for O[rsfaqtTd].
+	Not used for Korean Hangul Type 2 (request from emacs-kr mailing list).
+
+2002-01-03  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/cyrillic.el ("bulgarian-pho"): Fix a typo in a doc string.
+
+2002-01-01  Dave Love  <fx@gnu.org>
+
+	* quail/indian.el (quail-define-indian-trans-package): Unquote lambda.
+	(quail-define-inscript-package): Avoid mapcar*.
+
+2001-12-20  Dave Love  <fx@gnu.org>
+
+	* quail/latin-ltx.el: Fix un-doubled backslashes.
+
+2001-12-15  Dave Love  <fx@gnu.org>
+
+	* quail/latin-pre.el ("french-prefix", "german-prefix")
+	("spanish-prefix"): Fix language assignment.
+
+	* quail/latin-post.el ("french-postfix", "german-postfix")
+	("spanish-postfix", "turkish-latin-3-postfix", "turkish-postfix")
+	("french-keyboard", "french-azerty", "german")
+	("spanish-keyboard"): Fix language assignment.
+
+	* quail/indian.el: Don't require cl.
+	(quail-indian-flatten-list): Rename from flatten-list.
+
+	* quail/cyrillic.el ("cyrillic-beylorussian")
+	("cyrillic-ukrainian", "cyrillic-translit-bulgarian")
+	("belarusian", "bulgarian-pho"): Fix language assignment.
+
+	* quail/latin-alt.el ("french-alt-postfix", "german-alt-postfix")
+	("spanish-alt-postfix", "turkish-latin-3-alt-postfix")
+	("turkish-alt-postfix"): Fix language assignment.
+	("dutch"): Assign to Dutch.  Use chars, not strings.
+	("lithuanian-numeric", "lithuanian-keyboard", "latvian-keyboard"): New.
+
+2001-12-08  Pavel Janík  <Pavel@Janik.cz>
+
+	* COPYING: New file.
+
+2001-12-03  Jaeyoun Chung  <jay@kldp.org>
+
+	* quail/hangul3.el: Add a few convenient composing sequences for
+	Korean keyboard type 3 users.
+
+2001-11-29  Dave Love  <fx@gnu.org>
+
+	* quail/latin-ltx.el: Extra translations.  Fix some
+	latin-iso8859-4 characters.  Use Hebrew letters, not compatibility
+	symbols.
+
+2001-11-28  Juanma Barranquero  <lektu@terra.es>
+
+	* makefile.w32-in (INDIAN): Adjust for the file name change;
+	quail/devanagari.elc -> quail/indian.elc.
+
+	* makefile.nt (INDIAN): Likewise.
+
+2001-11-21  KAWABATA, Taichi  <batta@beige.ocn.ne.jp>
+
+	* quail/devanagari.el: Renamed to indian.el.
+
+	* quail/indian.el: Renamed from devanagari.el, and completely
+	re-written.  The input method devanagari-hindi-transliteration is
+	merged with devanagari-itrans, devanagari-keyboard-a is renamed to
+	devanagari-inscript, devanagari-transliteration is renamed to
+	devanagari-kyoto-harvard.
+
+	* Makefile.in: Adjusted for the file name change;
+	quail/devanagari.elc -> quail/indian.elc.
+
+2001-11-06  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/welsh.el: Avoid an error message due to a commented-out
+	input method.
+
+2001-11-05  Richard M. Stallman  <rms@gnu.org>
+
+	* quail/rfc1345.el: Get rid of the explicit ^Z character.
+
+2001-11-05  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/latin-ltx.el: Remove the call to IT-setup-unicode-display.
+
+2001-11-04  Dave Love  <fx@gnu.org>
+
+	* Makefile.in (LATIN): Add welsh.
+	(UNICODE): New.
+	(MISC): Add georgian.
+	(WORLD): Add UNICODE.
+
+	* quail/welsh.el, quail/georgian.el, quail/rfc1345.el:
+	* quail/uni-input.el, quail/sgml-input.el: New file.
+
+	* quail/cyrillic.el ("bulgarian-pho", "belarusian"): New methods.
+
+	* quail/latin-alt.el ("dutch"): New method.
+
+2001-10-27  Francesco Potortì  <pot@gnu.org>
+
+	* quail/latin-post.el ("italian-postfix"): Undo previous change.
+
+	* quail/latin-alt.el ("italian-alt-postfix"): Undo previous change.
+
+2001-10-25  Francesco Potortì  <pot@gnu.org>
+
+	* quail/latin-post.el ("italian-postfix"): Euro symbol.
+
+	* quail/latin-alt.el ("italian-alt-postfix"): Euro symbol.
+
+2001-10-20  Gerd Moellmann  <gerd@gnu.org>
+
+	* (Version 21.1 released.)
+
+2001-10-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* CXTERM-DIC/Punct-b5.tit: Add big5 Chinese double spaced alphabet
+	mappings, so that one could type them without leaving the Hanyu
+	Pinyin input method.  Suggested by Kenichi Handa
+	<handa@etl.go.jp>.
+
+2001-10-13  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/greek.el ("greek-babel"): New input method.  From David
+	Kastrup <David.Kastrup@neuroinformatik.ruhr-uni-bochum.de>.
+
+2001-10-05  Gerd Moellmann  <gerd@gnu.org>
+
+	* Branch for 21.1.
+
+2001-09-05  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/greek.el ("greek-mizuochi"): Doc fix.  From David Kastrup
+	<David.Kastrup@neuroinformatik.ruhr-uni-bochum.de>.
+
+2001-08-06  Gerd Moellmann  <gerd@gnu.org>
+
+	* quail/py-punct.el ("chinese-py-punct"): Copy the QUAIL-MAP of
+	"chinese-py".
+	("chinese-tonepy-punct"): Copy the QUAIL-MAP of "chinese-tonepy".
+
+2001-07-16  Pavel Janík  <Pavel@Janik.cz>
+
+	* ja-dic/ja-dic.el, quail/cyril-jis.el, quail/cyrillic.el
+	* quail/czech.el, quail/devanagari.el, quail/ethiopic.el
+	* quail/greek.el, quail/hangul.el, quail/hangul3.el
+	* quail/hanja-jis.el, quail/hanja.el, quail/hanja3.el
+	* quail/hebrew.el, quail/ipa.el, quail/japanese.el, quail/lao.el
+	* quail/latin-alt.el, quail/latin-ltx.el, quail/latin-post.el
+	* quail/latin-pre.el, quail/lrt.el, quail/py-punct.el
+	* quail/pypunct-b5.el, quail/slovak.el, quail/symbol-ksc.el
+	* quail/thai.el, quail/tibetan.el, quail/viqr.el: Some fixes to
+	follow coding conventions.
+
+2001-06-04  Andrew Choi  <akochoi@i-cable.com>
+
+	* quail/.cvsignore: Change CTLauB.el to CTLau-b5.el.
+
+2001-06-01  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.nt (TIT_GB): Remove quail/PY.elc and quail/ZIRANMA.elc.
+	(NON_TIT_BIG5): Remove $(srcdir)/quail/tsang-b5.elc and
+	$(srcdir)/quail/pypunct-b5.elc.
+	(NON_TIT_CNS): Remove.
+	(CHINESE_NON_TIT): Remove $(NON_TIT_CNS).
+	(CHINESE_CNS): Remove.
+	(KOREAN): Add $(srcdir)/quail/hanja3.elc.
+	(LATIN): Add $(srcdir)/quail/latin-alt.elc and
+	$(srcdir)/quail/latin-ltx.elc.
+	(MISC_DIC): Copy from Makefile.in.
+	(CHINESE): Remove $(CHINESE_CNS).
+	(all): Add $(MISC_DIC) as target.
+	(.NOTPARALLEL): New target.
+	(.NO_PARALLEL): New target.
+	($(MISC_DIC)): New target.
+	(clean mostlyclean): Clean more stuff.
+	(TIT_EL): New macro.
+	(MISC_DIC_EL): New macro.
+
+	* makefile.w32-in (TIT-GB): Remove CTLau.elc from it.
+	(TIT-BIG5): Remove CTLauB.elc from it.
+	(MISC-DIC): Add CTLau.elc and CTLau-b5.elc to it.
+	(clean mostlyclean): Remove obsolete reference.
+
+2001-06-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/latin-ltx.el [ms-dos]: Call IT-setup-unicode-display.
+
+2001-05-24  Andrew Choi  <akochoi@i-cable.com>
+
+	* Makefile.in (MISC-DIC): Change CTLauB.elc to CTLau-b5.elc.
+
+	* CXTERM-DIC/CTLau.tit, CXTERM-DIC/CTLauB.tit: Delete files.
+
+	* MISC-DIC/CTLau.html, MISC-DIC/CTLau-b5.html: Add files.
+
+	* Makefile.in (TIT-GB): Remove CTLau.elc from it.
+	(TIT-BIG5): Remove CTLauB.elc from it.
+	(MISC-DIC): Add CTLau.elc and CTLauB.elc to it.
+
+2001-05-17  Dave Love  <fx@gnu.org>
+
+	* quail/latin-ltx.el ("TeX"): Rename from "latin-latex2e".
+	Language family and indicator changed.  Many new translations.
+
+2001-05-17  Gerd Moellmann  <gerd@gnu.org>
+
+	* quail/slovak.el, quail/czech.el: Set guidance to t for czech and
+	slovak input methods.  New maintainer.  From Pavel Janík
+	<Pavel@Janik.cz>.
+
+2001-04-23  Gerd Moellmann  <gerd@gnu.org>
+
+	* quail/latin-ltx.el: Add more translations.
+	From jsbien@mimuw.edu.pl (Janusz S. Bień).
+
+2001-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/hangul.el <korean-hangul>: Doc fix.
+
+2001-04-18  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (EMACSLOADPATH): Define.
+	($(TIT)):
+	($(MISC_DIC)):
+	(.el.elc):
+	(leim-list.el): Remove stuff to set EMACSLOADPATH.
+
+2001-04-05  Gerd Moellmann  <gerd@gnu.org>
+
+	* Makefile.in (install): Remove .cvsignore files.
+
+	* quail/japanese.el ("japanese-hankaku-kana"): Don't use
+	the same translations as for `japanese'.
+
+2001-04-03  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (TIT_GB): Delete quail/PY.elc and
+	quail/ZIRANMA.elc.
+	(NON_TIT_BIG5): Delete $(srcdir)/quail/quick-b5.elc and
+	$(srcdir)/quail/tsang-b5.elc.
+	(NON_TIT_CNS): Delete.
+	(CHINESE_NON_TIT): Delete $(NON-TIT-CNS).
+	(CHINESE_CNS): Delete.
+	(KOREAN): Add ${srcdir}/quail/hanja3.elc.  From Kenichi Handa
+	<handa@etl.go.jp>.
+	(MISC_DIC): New variable.
+	(CHINESE): Delete $(CHINESE_CNS).
+	(WORLD): Add $(MISC_DIC).
+	(all): Depends on $(MISC_DIC).
+	(.NOTPARALLEL, .NO_PARALLEL): New special targets.
+	($(MISC_DIC)): New target.
+	(clean mostlyclean): Delete also $(NONTIT), $(WORLD), $(MISC_DIC)
+	and $(MISC_DIC:.elc=.el).
+
+2001-04-02  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (KOREAN): Add ${srcdir}/quail/hanja3.elc.
+	From Kenichi Handa <handa@etl.go.jp>.
+
+	* Makefile.in (.NOTPARALLEL, .NO_PARALLEL): Add ${MISC-DIC}.
+
+2001-03-31  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (TIT-GB): Delete quail/PY.elc and quail/ZIRANMA.elc.
+	(NON-TIT-BIG5): Delete ${srcdir}/quail/quick-b5.elc
+	${srcdir}/quail/tsang-b5.elc.
+	(CHINESE-NON-TIT): Delete ${NON-TIT-CNS}.
+	(CHINESE-CNS): Delete it.
+	(MISC-DIC): New variable.
+	(CHINESE): Delete ${CHINESE-CNS}.
+	(WORLD): Add ${MISC-DIC}.
+	(all): Depends on ${MISC-DIC}.
+	(${MISC-DIC}): New target.
+	(clean mostlyclean): Delete also ${MISC-DIC} ${MISC-DIC:.elc=.el}.
+
+	* MISC-DIC/cangjie-table.b5, MISC-DIC/cangjie-table.cns,
+	MISC-DIC/pinyin.map, MISC-DIC/ziranma.cin: New files.
+
+	* CXTERM-DIC/PY.tit, CXTERM-DIC/ZIRANMA.tit: Delete them.
+
+	* quail/tsang-b5.el, quail/tsang-cns.el, quail/quick-b5.el,
+	* quail/quick-cns.el: Delete them.
+
+2001-03-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (${TIT}): Fix whitespace.
+
+2001-03-29  Eli Zaretskii  <a34785@is.elta.co.il>
+
+	* Makefile.in (.NOTPARALLEL, .NO_PARALLEL): New special targets.
+	(${TIT}): If the target file already exist, don't remake it.
+
+2001-03-21  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/slovak.el ("slovak"): Translate "=q" to "`".
+
+2001-03-16  Pavel Janík  <Pavel@Janik.cz>
+
+	* quail/slovak.el ("slovak"): Delete translations of "q", "Q",
+	"=q", "+q", "=Q", and "+Q".
+	("slovak-prog-1"): Give t to the arg SHOW-LAYOUT.
+	("slovak-prog-2"): Likewise.
+	("slovak-prog-3"): Likewise.
+
+2001-03-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* quail/latin-post.el ("finnish-keyboard"): Fix a typo.
+
+2001-03-16  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-transliteration-rules):
+	New variable.  Use it to define these input methods: "japanese",
+	"japanese-hiragana", "japanese-katakana".
+	(quail-japanese-kana-state): Delete this variable.
+	(quail-japanese-toggle-kana): Don't use quail-japanese-kana-state,
+	instead check if there's any Hiraganas in the conversion region.
+
+2001-03-14  Kenichi Handa  <handa@mule.m17n.org>
+
+	* quail/slovak.el ("slovak"): Give t to the arg SHOW-LAYOUT.
+
+2001-03-06  Kenichi Handa  <handa@etl.go.jp>
+
+	* CXTERM-DIC/4Corner.tit: Add copyright notice.
+
+2001-03-05  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/ethiopic.el ("ethiopic"): Docstring adjusted for the
+	change of the special key bindings.
+
+2001-02-22  Kenichi Handa  <handa@etl.go.jp>
+
+	* CXTERM-DIC/ARRAY30.tit: Add copyright notice.
+
+	* CXTERM-DIC/ETZY.tit: Likewise.
+
+	* CXTERM-DIC/ZOZY.tit: Likewise.
+
+2001-02-05  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (BUILT_EMACS): Use $(THISDIR) to make emacs.exe
+	path absolute.
+
+2001-02-03  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (LATIN): Fix last change to use () not {}.
+
+2001-02-02  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (LATIN): Include ${srcdir}/quail/latin-alt.elc.
+
+	* makefile.w32-in (LATIN): Likewise.
+
+	* quail/latin-ltx.el: New file -- LaTeX-like Latin input method.
+
+2001-02-01  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (LATIN): Include $(srcdir)/quail/latin-alt.elc.
+
+2001-02-01  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/greek.el ("greek-mizuochi"): New input method for
+	classical Greek.
+
+2001-01-28  Gerd Moellmann  <gerd@gnu.org>
+
+	* Makefile.in (extraclean): Add target so make doesn't die if
+	one runs "make extraclean" at the top level.
+
+2001-01-06  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.nt ($(TIT)): Map .elc to .el.
+	(buildlisppath): Make path relative to $(MAKEDIR).
+
+2001-01-01  Andreas Schwab  <schwab@suse.de>
+
+	* quail/latin-alt.el: Doc fixes.
+
+2000-12-18  Dave Love  <fx@gnu.org>
+
+	* quail/latin-pre.el <latin-9-prefix>: Delete duplicate š entry.
+	Change œ, Œ, ¶.
+
+2000-12-16  Kenichi Handa  <handa@etl.go.jp>
+
+	* ja-dic/ja-dic.el: Re-generated by the new ja-dic-cnv.el.
+
+2000-12-06  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (buildlisppath): Set to an absolute directory,
+	relative to $(CURDIR).
+	(INSTALLDIR): Use forward slash.
+
+2000-11-24  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (.SUFFIXES): New target, include .elc .el.
+
+	* makefile.nt (.SUFFIXES): New target, include .elc .el.
+
+2000-11-21  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (.SUFFIXES): New target, include .elc .el.
+
+2000-11-17  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-kanji-kkc): Use marker to
+	remember the conversion start.
+
+2000-10-21  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.nt ($(TIT)): Add $(SUBDIRS) as dependents, instead
+	of conditional invocation of make.
+	(TIT-GB, TIT-BIG5, NON-TIT-GB, NON-TIT-BIG5)
+	(NON-TIT-CNS, JAPANESE, KOREAN, THAI, VIETNAMESE, LAO, INDIAN)
+	(TIBETAN, LATIN, SLAVIC, GREEK, RUSSIAN, MISC): Rename all .el
+	files to .elc.
+	($(TIT)): Adjust for the above change.
+	(clean mostlyclean): Likewise.
+	(.el.elc): New target.
+
+	* makefile.w32-in ($(TIT)): Add $(SUBDIRS) as dependents, instead
+	of conditional invocation of make.
+	(TIT-GB, TIT-BIG5, NON-TIT-GB, NON-TIT-BIG5)
+	(NON-TIT-CNS, JAPANESE, KOREAN, THAI, VIETNAMESE, LAO, INDIAN)
+	(TIBETAN, LATIN, SLAVIC, GREEK, RUSSIAN, MISC): Rename all .el
+	files to .elc.
+	($(TIT)): Adjust for the above change.
+	(clean mostlyclean): Likewise.
+	(.el.elc): New target.
+
+2000-10-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (${TIT}, clean): Don't use shell `command`
+	expansion, use ${TIT:.elc=.el} instead.
+
+2000-09-26  Gerd Moellmann  <gerd@gnu.org>
+
+	* Makefile.in: Make this the leim Makefile.in.
+	(clean): Also remove $NON-TIT and $WORLD.
+	(RUN-EMACS): Set EMACSLOADPATH.
+
+2000-09-21  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in: Revert to no-leim Makefile.
+
+	* quail/.cvsignore: Include *.elc.
+
+	* ja-dic/.cvsignore: New file.
+
+2000-09-16  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.nt ($(TIT)): Set EMACSLOADPATH when running emacs.
+	(leim-list.el): Ditto.
+
+	* makefile.w32-in ($(TIT)): Set EMACSLOADPATH when running emacs.
+	(leim-list.el): Ditto.
+
+2000-09-15  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (clean mostlyclean): Ignore errors when removing
+	files.
+
+2000-09-14  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in (clean mostlyclean): Ignore errors when deleting
+	leim-list.el.
+	(distclean maintainer-clean): Ditto for stamp-subdir.
+
+	* makefile.nt: Rename skkdic to ja-dic.
+
+2000-09-07  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/thai.el ("thai-kesmanee", "thai-pattachote"): Use keyboard
+	translation.
+
+	* quail/pypunct-b5.el ("chinese-py-punct-b5"): Docstring modified.
+
+	* quail/py-punct.el ("chinese-py-punct"): Docstring modified.
+	("chinese-tonepy-punct"): New input method.
+
+	* quail/latin-pre.el ("polish-slash"): Don't use keyboard
+	translation.
+
+	* quail/japanese.el ("japanese"): Delete the key sequence for
+	Roman transliteration from the docstring because it's now shown
+	automatically.
+	("japanese-ascii", "japanese-zenkaku")
+	("japanese-hankaku-kana", "japanese-hiragana")
+	("japanese-katakana"): Docstring modified.
+
+	* quail/czech.el ("czech-qwerty"): Change to show keyboard layout
+	on describe-input-method.
+	("czech-prog-1", "czech-prog-2", "czech-prog-3"): Likewise.
+
+2000-09-03  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.w32-in: New file.
+	(install) Fix copying of directories.
+
+2000-08-31  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/thai.el (thai-generate-quail-map): If the length of
+	translation is more than one, compose it.
+
+2000-08-29  Dave Love  <fx@gnu.org>
+
+	* quail/latin-pre.el ("latin-9-prefix"): Change entries for œ and Œ.
+
+	* Makefile.in: ja-dic <- skk in several places.
+
+2000-08-25  Kenichi Handa  <handa@etl.go.jp>
+
+	* ja-dic: Directory name changed from skkdic.
+
+	* ja-dic/ja-dic.el[c]: Re-generated by the new ja-dic-cnv.el.
+
+	* README: Rename skkdic to ja-dic throughout the file.
+
+2000-08-24  Dave Love  <fx@gnu.org>
+
+	* quail/latin-pre.el ("latin-8-prefix", "latin-9-prefix"): New.
+	("latin-1-prefix"): Add missing symbols.
+
+2000-08-23  Dave Love  <fx@gnu.org>
+
+	* quail/latin-pre.el ("latin-1-prefix"): Change ~s to give § and
+	add ~p for ¶.
+
+2000-07-18  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el ("japanese"): Fix docstring.
+
+2000-07-17  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el ("japanese"): Docstring modified.
+
+2000-06-12  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/tibetan.el (tibetan-wylie-quote-alist): This variable deleted.
+	("tibetan-wylie"): State transition table modified.
+
+2000-06-01  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/tibetan.el: Change all tibetan-1-column characters to
+	tibetan.  Quail map for "tibetan-wylie" fixed.
+
+2000-03-31  Wlodzimierz Bzyl  <matwb@monika.univ.gda.pl>
+
+	* quail/latin-pre.el ("polish-slash"): New input method.
+
+2000-03-02  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/latin-pre.el ("latin-1-prefix"): Add rules for symbols.
+
+2000-02-01  Gerd Moellmann  <gerd@gnu.org>
+
+	* Makefile.in: Make this the no-leim Makefile.  Move the
+	leim Makefile.in to ../leim-Makefile.in as it originally was.
+
+	* Makefile.noleim: Removed.
+
+2000-01-28  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/hanja.el (korean-hanja): Add an entry for "wod".
+
+2000-01-04  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el ("japanese"): Docstring augmented.
+
+1999-12-15  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/lao.el: Rewritten for new composition.
+
+	* quail/lrt.el: Rewritten for new composition.
+
+	* quail/thai.el: Rewritten for new composition.
+
+	* quail/tibetan.el: Rewritten for new composition.
+
+1999-12-13  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/latin-pre.el ("esperanto-prefix"): Make it produce Latin-3
+	characters, not Latin-1.
+
+1999-11-22  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.nt: No need to generate subdirs.el.
+
+1999-11-21  Andrew Innes  <andrewi@gnu.org>
+
+	* makefile.nt: New file.
+
+1999-10-26  Gerd Moellmann  <gerd@gnu.org>
+
+	* Makefile.noleim: New.
+
+1999-09-19  Ken'ichi Handa  <handa@gnu.org>
+
+	* quail/latin-alt.el ("turkish-latin-3-alt-postfix"): Rename from
+	turkish-postfix.
+	("turkish-postfix"): New Turkish input method which inserts
+	Latin-5 characters.
+
+	* quail/latin-alt.el ("turkish-latin-3-alt-postfix"): Rename from
+	turkish-alt-postfix.
+	("turkish-alt-postfix"): New Turkish input method which inserts
+	Latin-5 characters.
+
+1999-07-12  Richard Stallman  <rms@gnu.org>
+
+	* Version 20.4 released.
+
+1998-07-12  Oleg S. Tihonov  <ost@benetnash.ffke-campus.mipt.ru>
+
+	* quail/cyrillic.el (cyrillic-jcuken): Use X11 keyboard layout.
+
+1999-06-14  Ken'ichi Handa  <handa@gnu.org>
+
+	* quail/ethiopic.el ("ethiopic"): Add translation rules.
+
+1999-06-01  Jae-youn Chung  <jay@compiler.kaist.ac.kr>
+
+	* quail/hanja3.el: Newly generated from hangul.el, hangul3.el, and
+	hanja.el.
+
+1999-05-25  Ken'ichi Handa  <handa@gnu.org>
+
+	* quail/hangul3.el ("korean-hangul3"): Give MAXIMUM-SHORTEST t.
+
+1999-05-09  Tudor Hulubei  <tudor@cs.unh.edu>
+
+	* quail/latin-pre.el ("romanian-prefix"): New input method.
+	("romanian-alt-prefix"): New input method.
+
+1999-03-04  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/latin-post.el ("spanish-postfix"): Add rule U" and u".
+
+1999-01-14  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-kanji-kkc): If the last char
+	to convert is `n', change it to Japanese Hiragana `n' before
+	conversion.
+
+1999-01-11  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (MISC): Add ${srcdir}/quail/hebrew.el.
+
+	* quail/hebrew.el: New file.
+
+1998-12-15  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/devanagari.el (quail-devanagari-compose-characters):
+	Adjust for the change of input method handling.
+	(quail-devanagari-hindi-compose-characters): Likewise.
+
+1998-10-15  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (leim-list.el): Use `(cd foo && pwd)` instead of
+	`(cd foo; pwd)`.
+	(install): Likewise.
+
+1998-10-15  Francesco Potortì  <F.Potorti@cnuce.cnr.it>
+
+	* quail/latin-post.el: Many doc fixes.
+	("latin-1-postfix"): Add sequence for the small superscript o.
+	* quail/latin-pre.el: Many doc fixes.
+	("latin-1-prefix"): Add sequences for the small
+	superscript underlined o and a.
+
+1998-10-13  Francesco Potortì  <F.Potorti@cnuce.cnr.it>
+
+	* latin-alt.el ("latin-1-alt-postfix"): Add a method to enter the
+	small superscript underlined o and a.
+	("italian-alt-postfix"): Change it to something useful and
+	different from italian-postfix.
+	* latin-post.el ("latin-1-postfix"): Add a method to enter the
+	small superscript underlined o and a.
+	("italian-postfix"): Same as above.
+	("italian-postfix"): Add methods to enter e with acute accent and
+	the >> and << symbols.
+
+1998-09-25  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-hankaku-update-translation):
+	Adjust for the change of input method handling.
+
+1998-09-11  Kenichi HANDA  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-katakana-update-translation):
+	Adjust for the change of input method handling.
+
+1998-08-31  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/tibetan.el (quail-tibetan-input-wylie): Adjust for the
+	change of input method handling.
+	(quail-tibetan-input-tibkey): Likewise.
+
+1998-08-19  Richard Stallman  <rms@psilocin.ai.mit.edu>
+
+	* Version 20.3 released.
+
+1998-08-16  Kenichi HANDA  <handa@etl.go.jp>
+
+	* quail/czech.el ("czech"): Make this input method deterministic,
+	kbd-translate, and show-layout.
+
+1998-08-15  Kenichi HANDA  <handa@etl.go.jp>
+
+	* quail/ethiopic.el: Fix several translation rules.
+
+1998-08-12  Milan Zamazal  <pdm@fi.muni.cz>
+
+	* quail/czech.el: Few key sequences added to some keyboards.
+
+1998-08-06  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-use-double-n): New variable.
+	(quail-japanese-update-translation): Adjust for the change of
+	quail-update-translation.  Now this function should return
+	CONTROL-FLAG.
+	(quail-japanese-toggle-kana): Update quail-conversion-str.
+	(quail-japanese-kanji-kkc): Likewise.
+	(quail-japanese-switch-package): Reset quail-current-str and
+	quail-conversion-str.
+
+1998-07-24  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-kanji-kkc):
+	Set quail-translation to nil after calling kkc-region so that
+	translation mode is restarted correctly.
+
+1998-07-21  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-kanji-kkc): Handle the case
+	that conversion is canceled in kkc-region.
+	(quail-japanese-switch-package): Fix previous change.
+
+1998-07-19  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-update-translation):
+	Handle a key which should fix the current translation and start a new
+	translation correctly.
+	(quail-japanese-toggle-kana): Set quail-translating to nil.
+	Don't change point.
+
+1998-07-15  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-kanji-kkc): Adjust for the
+	change of quail.el.
+	(quail-japanese-switch-package): Likewise.
+
+1998-07-03  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/symbol-ksc.el: Keys for modern Korean syllables fixed.
+	Some keys for ancient Korean syllables are changed properly.
+
+1998-06-20  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/ethiopic.el: Don't add hook to quail-mode-hook.
+	(ethio-select-a-translation): New function.
+
+1998-06-10  Richard Stallman  <rms@psilocin.ai.mit.edu>
+
+	* Makefile.in (RUN-EMACS): Add --multibyte.
+
+1998-04-29  Karl Heuer  <kwzh@gnu.org>
+
+	* Makefile.in (SLAVIC): Delete redundant backslash.
+
+1998-04-28  Richard Stallman  <rms@psilocin.gnu.org>
+
+	* Makefile.in (install): Make INSTALLDIR and contents world-readable.
+
+1998-04-20  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (SLAVIC): New macro.
+	(EUROPEAN): Include ${SLAVIC}.
+
+1998-04-14  Andreas Schwab  <schwab@mescaline.gnu.org>
+
+	* Makefile.in: Prepend ${srcdir} to all non-TIT lisp file names.
+	(leim-list.el): Depend on ${WORLD}.
+
+	* latin-alt.el (latin-2-alt-postfix): Doc fix.
+
+1998-04-08  Karl Heuer  <kwzh@mescaline.gnu.org>
+
+	* czech.el, slovak.el: Correct starting commentary.
+
+1998-04-07  Milan Zamazal  <pdm@fi.muni.cz>
+
+	* quail/czech.el, quail/slovak.el: Correct starting commentary.
+
+1998-04-06  Andreas Schwab  <schwab@gnu.org>
+
+	* lrt.el (lrt-composing-pattern-double-c): Change chars-in-string
+	to length.
+	(lrt-generate-quail-map): Change sref to aref, and make second
+	argument of substring a character index.
+
+1998-03-26  Richard Stallman  <rms@psilocin.gnu.org>
+
+	* Makefile.in (${TIT}): Fix shell conditional syntax.
+
+1998-03-18  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/latin-pre.el ("latin-1-prefix"): Fix the translation of
+	"/ " to "/" (instead of " ").
+
+1998-03-17  Richard Stallman  <rms@psilocin.gnu.org>
+
+	* quail/czech.el, quail/slovak.el: New files.
+
+1998-03-10  Richard Stallman  <rms@psilocin.gnu.org>
+
+	* Makefile.in (BUILT-EMACS): Variable renamed from EMACS.
+	Uses changed.
+
+1998-03-05  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (${TIT}): To byte-compile quail packages, use just
+	built quail.
+
+1997-12-09  Koaunghi Un  <koaunghi.un@zdv.uni-tuebingen.de>
+
+	* quail/hanja3.el: New file.
+
+	* quail/hanja-jis.el: Title string of the input method
+	"korean-hanja-jis" changed.
+
+	* quail/symbol-ksc.el: Title string of the input method
+	"korean-symbol" changed.  Require 'korea-util.
+	(quail-hangul-switch-back): Delete.
+
+	* quail/hangul3.el: Require 'korea-util.
+	(quail-hangul-switch-to-symbol-ksc): Delete.
+
+	* quail/hanja.el: Require 'korea-util.  Title string of the input
+	method "korean-hanja" changed.
+	(quail-hanja-switch-to-symbol-ksc): Delete.
+
+	* quail/hangul.el: Require 'korea-util.
+	(quail-hangul-switch-to-symbol-ksc): Delete.
+
+1997-10-23  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/ethiopic.el: The title string of input method "Ethiopic"
+	is changed.
+
+1997-09-19  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.2 released.
+
+1997-09-18  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* quail/latin-post.el (german): Swap y and z.
+
+1997-09-15  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.1 released.
+
+	* quail/latin-alt.el (latin-2-postfix): Use : for double-acute again.
+
+1997-09-13  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* quail/viqr.el (vietnamese-viqr): Doc fix.
+
+1997-09-13  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* quail/latin-alt.el: New file.
+
+1997-09-12  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* quail/latin-post.el: Undo previous change.
+
+1997-09-12  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* quail/latin-post.el (latin-2-postfix):
+	Replace comma and period with `.  Replace colon with /.
+	(latin-1-postfix): Replace comma with /.
+	(french-postfix): Replace comma with /.
+	(latin-3-postfix): Replace comma with ` and period with /.
+	(latin-4-postfix): Replace comma with ` and period with ~.
+	(latin-5-postfix): Replace comma with ` and period with /.
+	(turkish-postfix): Replace comma with ` and period with /.
+
+1997-09-10  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/ethiopic.el: Don't bind keys in quail-mode-map.
+	The function added to quail-mode-hook turn ethio-mode on only when
+	input method "ethiopic" is begin used.
+	(ethio-prefer-ascii-space): Move to lisp/language/ethio-util.el.
+	(ethio-toggle-space): Likewise.
+	(ethio-insert-space): Likewise.
+	(ethio-insert-ethio-space): Likewise.
+	(ethio-prefer-ascii-punctuation): Likewise.
+	(ethio-toggle-punctuation): Likewise.
+	(ethio-gemination): Likewise.
+	("ethiopic"): Doc-string of this Quail package modified.
+	Bind function keys for TRANSLATION-KEYMAP to
+	quail-execute-non-quail-command.
+
+1997-09-10  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Makefile.in (install): Use quail/* in the second tar that
+	copies a dir named quail.
+
+1997-09-03  Ken'ichi Handa  <handa@psilocin.gnu.ai.mit.edu>
+
+	* Makefile.in (install): Do not copy leim-list.el twice.
+	Copy `skk' subdirectory too.
+
+1997-09-03  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/cyrillic.el: For each package, pass t for the SIMPLE
+	argument to quail-define-package.
+	* quail/cyril-jis.el: Likewise
+	* quail/greek.el: Likewise.
+	* quail/ipa.el: Likewise.
+	* quail/lao.el: Likewise.
+	* quail/lrt.el: Likewise.
+	* quail/thai.el: Likewise.
+	* quail/viqr.el: Likewise.
+
+1997-08-30  Naoto TAKAHASHI  <ntakahas@etl.go.jp>
+
+	* quail/ethiopic.el ("ethiopic"): Doc-string fixed.  Change the arg
+	TRANSLATION-KEYS.
+	(quail-mode-map): Change binding for ethio-insert-ethio-space.
+	(quail-mode-hook): Check the current Quail package name.
+
+	* quail/latin-post.el: Add rules for canceling accents by typing
+	two accent keys (e.g. a~ => a-tilde, a~~ => a~) to all Quail
+	packages.
+
+1997-08-28  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* quail/latin-post.el, quail/latin-pre.el: For each package,
+	pass t for the SIMPLE argument to quail-define-package.
+
+1997-08-28  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in (dotdot): This macro deleted.
+	(SUBDIRS): Exclude skk.
+	(all): Substitute ${WORLD} to ${TIT}.
+	(%.el): This target deleted.
+	(${TIT}): Check existence of `quail' subdirectory.
+	(leim-list.el): Do not check old files.
+	(install): If ${srcdir} is different from the current directory,
+	copy also files under ${srcdir}.
+
+1997-08-26  Kenichi Handa  <handa@etl.go.jp>
+
+	* Makefile.in: Re-arrange macros so that the macro TIT contains
+	only Quial packages generated from CXTERM dictionaries, and the
+	macro NON-TIT contains only Quial packages distributed with Emacs.
+	(install): Do not use -h option for tar, instead copy ${NON-TIT}
+	and ${TIT} separately.
+
+1997-08-25  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Makefile.in (install): Discard extra data in tar | tar command.
+
+1997-08-23  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/devanagari.el (quail-devanagari-compose-characters):
+	Fix previous change.
+	(quail-devanagari-hindi-compose-characters): Fix previous change.
+
+	* quail/japanese.el (quail-japanese-kkc-mode-exit): Fix previous
+	change.
+
+1997-08-22  Ken'ichi Handa  <handa@psilocin.gnu.ai.mit.edu>
+
+	* Makefile.in (leim-list.el): Fix previous change.
+
+	* quail/thai.el (thai-keyboard-mapping-alist): Some entry corrected.
+
+1997-08-21  Kenichi HANDA  <handa@etl.go.jp>
+
+	* quail/py-punct-b5.el: Name changed from py-punct-b5.el.
+	* quail/tsang-b5.el: Name changed from tsangchi-b5.el.
+	* quail/tsang-cns.el: Name changed from tsangchi-cns.el.
+
+	* Makefile.in (install): Just copy leim-list.el instead of running
+	update-leim-list-file on ${INSTALLDIR}.
+	(CHINESE-BIG5): File name change: tsangchi-b5.el -> tsang-b5.el,
+	py-punct-b5.el -> pypunct-b5.el.
+	(CHINESE-CNS): File name change: tsangchi-cns.el -> tsang-cns.el.
+	(leim-list.el): Delete old files not contained in ${WORLD}.
+
+	* quail/japanese.el (quail-japanese-kkc-mode-exit):
+	Run input-method-after-insert-chunk-hook.
+
+	* quail/thai.el (thai-keyboard-mapping-alist): Some entry corrected.
+
+1997-08-19  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/hangul.el ("korean-hangul"): Doc-string of this Quail
+	package fixed.
+
+1997-08-18  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/japanese.el (quail-japanese-toggle-kana): Don't call
+	throw.
+	(quail-japanese-kanji-kkc): Completely re-written.
+	(quail-japanese-kkc-mode-exit): New function.
+	(quail-japanese-switch-package): Call activate-input-method
+	instead of select-input-method.
+
+	* quail/thai.el (thai-consonant-input): Typo fixed.
+
+	* quail/devanagari.el (quail-devanagari-compose-characters):
+	Do not call throw.
+	(quail-devanagari-hindi-compose-characters): Likewise.
+
+	* quail/hangul.el (quail-hangul-switch-to-symbol-ksc):
+	Call activate-input-method instead of select-input-method.
+
+	* quail/hangul3.el (quail-hangul-switch-to-symbol-ksc): Likewise.
+
+	* quail/symbol-ksc.el (quail-hangul-switch-back): Likewise.
+	Use input-method-history instead of previous-input-method.
+
+1997-08-16  Valery Alexeev  <valery@domovoy.math.uga.edu>
+
+	* quail/cyrillic.el (cyrillic-translit-bulgarian): New input method.
+
+1997-08-16  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/lrt.el (lrt-vowel-table): Some elements corrected.
+	("lao-lrt"): Doc-string of this Quail package modified.
+	Some translation rules added.
+
+	* quail/lao.el (lao-keyboard-mapping): Some elements corrected.
+	(lao-quail-define-rules): Some translation rules corrected.
+
+1997-08-11  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/lrt.el: Some rules added for Quail package "lao-lrt".
+	(lrt-vowel-table): The entry for "aM" corrected.
+
+1997-08-07  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/lrt.el: Change title string of input method "lao-lrt".
+	(lrt-single-consonant-table): Several key sequence changed.
+	(lrt-composing-pattern-double-c): Handle a consonant with
+	semi-vowel-lower correctly.
+	(lrt-handle-maa-sakod): Do not reset quail-current-key.
+	(lrt-handle-tone-mark): Check the existence of double consonant
+	correctly.
+
+	* quail/lao.el: Change title string of input method "Lao".
+
+1997-08-04  Valery Alexeev  <valery@domovoy.math.uga.edu>
+
+	* quail/cyrillic.el (cyrillic-translit): Doc-string of the package
+	modified.  Several translation rules modified.
+
+1997-08-04  Ken'ichi Handa  <handa@psilocin.gnu.ai.mit.edu>
+
+	* quail/cyrillic.el: Move Quail package cyrillic-jis-russian to
+	quail/cyril-jis.el.
+
+	* quail/cyril-jis.el: New file.
+
+	* Makefile.in (RUSSIAN): Add quail/cyril-jis.el.
+
+1997-08-01  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/ethiopic.el: In quail-mode-map, bind
+	ethio-insert-ethio-space Shift-SPACE.  Add translation rules to
+	Quail package "ethiopic".
+
+1997-08-01  Valery Alexeev  <valery@domovoy.math.uga.edu>
+
+	* quail/cyrillic.el (cyrillic-translit): New input method.
+
+1997-07-25  Ken'ichi Handa  <handa@psilocin.gnu.ai.mit.edu>
+
+	* quail/tibetan.el: New file.
+
+	* quail/py-punct.el: Require 'quail.
+
+	* quail/py-punct-b5.el: Require 'quail.
+
+	* quail/ethiopic.el: Change Quail package name to "ethiopic".
+	(ethio-toggle-punctuation): Give "ethiopic" to quail-defrule.
+
+	* Makefile.in (TIT): New variable, concatenation of TIT-GB and
+	TIT-BIG5.
+	(RUN-EMACS): Do not set EMACSLOADPATH.
+	(ASIA): Include TIBETAN.
+	(all): Remove stamp-bytecomp from dependency list.
+	({$TIT}): New target, substitutes the target ${TIT-GB} ${TIT-BIG5}.
+	(%.el): Make a link for byte-compiled file too.
+	(stamp-bytecomp): Target deleted.
+	(leim-list.el): Run Emacs with loading quail.
+	(install-XXX): These targets deleted.
+	(install): Remove files under INSTALLDIR before copying new files.
+	Run Emacs with loading quail.
+	(clean mostlyclean): Remove only generated files.
+
+1997-07-24  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Makefile.in (stamp-bytecomp): Fix shell conditional.
+	(clean): Fix shell conditional.
+
+1997-07-21  Jim Meyering  <meyering@eng.ascend.com>
+
+	* Makefile.in: Use @LN_S@, not ln -s, in case no symlink support.
+	(clean): Absence of ./Makefile.in is criterion for deleting skkdic.elc.
+
+1997-07-17  Ken'ichi Handa  <handa@psilocin.gnu.ai.mit.edu>
+
+	* Makefile.in: Modified to avoid *.el files being regarded
+	as intermediate files and deleted by GNU make.
+
+	* quail/lrt.el (lrt-vowel-table): Change "ow" -> "ao", "am" -> "arm".
+	(lrt-handle-maa-sakod): Correctly handle the case that
+	quail-current-data is nil.
+	(lrt-handle-tone-mark): Fix bug of handling key sequence "hhai" +
+	tone.
+
+1997-07-15  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/py-punct.el: New file.
+
+	* quail/py-punct-b5.el: New file.
+
+	* quail/japanese.el: Doc-string of Quail package japanese modified.
+
+	* Makefile.in: Rules re-written to avoid tricky code.
+	(CHINESE-GB): Include quail/py-punct.elc.
+	(CHINESE-BIG5): Include quail/py-punct-b5.elc.
+
+1997-07-10  Kenichi Handa  <handa@etl.go.jp>
+
+	* quail/latin-pre.el: Change titles of quail packages.
+
+	* quail/latin-post.el: Likewise.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+  Copyright (C) 1997-1999, 2001-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

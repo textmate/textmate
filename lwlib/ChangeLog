@@ -1,0 +1,1778 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2011-10-13  Dmitry Antipov  <dmantipov@yandex.ru>
+
+	* lwlib-Xaw.c (openFont, xaw_destroy_instance): Replace free with
+	xfree to avoid crash when xmalloc overrun checking is enabled.
+	* lwlib-Xm.c (free_destroyed_instance, xm_update_one_value): Ditto.
+	* lwlib-utils.c (XtApplyToWidgets): Ditto.
+	* lwlib.c (safe_free_str, free_widget_value, free_widget_value_tree)
+	(free_widget_info, free_widget_instance, name_to_widget): Ditto.
+	* xlwmenu.c (openXftFont): Ditto.
+
+2011-06-27  YAMAMOTO Mitsuharu  <mituharu@math.s.chiba-u.ac.jp>
+
+	* Makefile.in (ALL_CFLAGS): Add -I../lib for generated header files
+	in out-of-tree build.
+
+2011-06-06  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* Makefile.in (ALL_CFLAGS): Add -I$(srcdir)/../lib.
+	This is needed because lisp.h includes intprops.h now (Bug#8794).
+
+2011-04-16  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Static checks with GCC 4.6.0 and non-default toolkits.
+
+	* lwlib-Xm.c (make_dialog): Rename local to avoid shadowing.
+	(make_menu_in_widget): Add cast to avoid warning.
+	* lwlib-utils.c (XtCompositeChildren): Likewise.
+
+	* lwlib.c (EXPLAIN, destroy_one_instance): Avoid "else;".
+	(first_child) [USE_MOTIF]: Protoize.
+
+	* lwlib-utils.h, lwlib-utils.c (XtSafelyDestroyWidget): Remove; unused.
+
+	* xlwmenu.c (XlwMenuSetValues): Rename/ move locals to avoid shadowing.
+	(MINL): Define only if not emacs.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-02-14  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.h: Remove Xt[CN]faceName and Xt[NC]defaultFace.
+
+	* xlwmenuP.h (_XlwMenu_part): Remove faceName.  Add fontName.
+
+	* xlwmenu.c (xlwmenu_default_font): Remove, does not work for
+	multi-display.
+	(xlwMenuResources): Remove XtNfaceName and XtNdefaultFace.
+	Make XtNFont a String resource.
+	(make_windows_if_needed): Call XFlush so later changes are seen by the
+	X server.
+	(remap_menubar): Use XtMoveWidget and then
+	XtResizeWidget/XtResizeWindow after XtPopup.  Works better with
+	Compiz.
+	(make_drawing_gcs): Check if mw->menu.font is set.
+	(getDefaultXftFont): New function.
+	(openXftFont): faceName is now fontName.  Try XLoadQueryFont first
+	and then XftFontOpenName.
+	(XlwMenuInitialize): Initialize mw->menu.font with XLoadQueryFont.
+	(XlwMenuClassInitialize): Remove initialization of
+	xlwmenu_default_font.
+	(fontname_changed): Renamed from facename_changed.
+	(XlwMenuSetValues): Use facename_changed.
+
+	* lwlib-Xaw.c (make_dialog): Use *font even for Xft fonts.  Try
+	XLoadQueryFont first and then Xft fonts.
+
+2011-02-13  Glenn Morris  <rgm@gnu.org>
+
+	* lwlib-utils.c (index, rindex): Don't undef (neither used in lwlib/,
+	nor set in config.h).
+
+2011-02-11  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (USE_X_TOOLKIT, RM, TOOLKIT_DEFINES): Remove.
+	(ALL_CFLAGS): Remove -I.
+	(config_h, lisp_h, src_h): New variables.
+	(globals_h): Rename from $globals.
+	($(globals_h)): Check cd exit status.
+	(lwlib.o): Remove special rule.
+	(lwlib-utils.o, lwlib.o, lwlib-Xlw.o, lwlib-Xaw.o, lwlib-Xm.o)
+	(xlwmenu.o): Add lisp.h and config.h to prereqs.
+	(lwlib-utils.o): Add lwlib.h to prereqs.
+	(lwlib.o): Add lwlib-utils.h and lwlib-Xm.h to prereqs.
+	(lwlib-Xlw.o): Add xlwmenu.h to prereqs.
+	(xlwmenu.o): Add ../src/xterm.h to prereqs.
+	(mostlyclean): Forget about "core" files.
+
+2011-02-10  Glenn Morris  <rgm@gnu.org>
+
+	* lwlib-Xaw.c, lwlib-Xlw.c, lwlib-Xm.c, lwlib-utils.c, lwlib.c:
+	* xlwmenu.c: Standardize on <> for includes from the ../src directory.
+
+2011-02-09  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (@SET_MAKE@): New, set by configure.
+	(globals): New variable and rule.
+	(lwlib-utils.o, lwlib.o, lwlib-Xlw.o, lwlib-Xaw.o, lwlib-Xm.o)
+	(xlwmenu.o): Add dependency on src/globals.h.
+
+2011-01-31  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xm.c (make_destroyed_instance):
+	* lwlib-utils.c (XtApplyToWidgets):
+	* lwlib.c (safe_strdup, malloc_widget_value)
+	(allocate_widget_info, allocate_widget_instance): Use xmalloc
+	instead of malloc.
+
+2011-01-25  Werner Meisner  <weme24@gmx.net>
+
+	* lwlib-Xm.c (xm_update_menu): Avoid a NULL pointer dereference
+	(Bug#7690).
+
+2010-09-26  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	Use const for some pointer arguments.
+	* lwlib.h (my_strcasecmp, safe_strcmp, name_to_widget)
+	(find_in_table, dialog_spec_p, lw_separator_p):
+	* lwlib.c (my_strcasecmp, safe_strcmp, name_to_widget)
+	(find_in_table, dialog_spec_p, lw_separator_p): Use const.
+
+2010-09-20  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* lwlib.h (lw_register_widget, lw_create_widget):
+	* lwlib.c (allocate_widget_info, lw_register_widget)
+	(lw_create_widget, separator_table): Use const.
+
+2010-07-29  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* xlwmenu.c (abort_gracefully): Mark as NO_RETURN.
+
+2010-07-26  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* xlwmenu.h (xlwmenu_window_p, xlwmenu_redisplay): Add declarations.
+
+2010-07-12  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.in (C_WARNINGS_SWITCH, PROFILING_CFLAGS): Set from
+	substitution.
+	(ALL_CFLAGS): Add ${C_WARNINGS_SWITCH} and ${PROFILING_CFLAGS}.
+
+2010-07-08  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (size_menu_item): Change from K&R to prototype.
+	Change label_width and height to int.
+	(draw_arrow, draw_shadow_rectangle, draw_shadow_rhombus)
+	(draw_separator, display_menu, fit_to_screen, motion_event_is_in_menu)
+	(map_event_to_widget_value): Reformat.
+	(display_menu_item): Change from K&R to prototype.
+
+	* lwlib.c (allocate_widget_info, lw_register_widget): Change from K&R
+	to prototype.
+	(lw_internal_update_other_instances, merge_widget_value): Reformat.
+
+	* lwlib-int.h (widget_creation_function): Fix prototype.
+
+	* lwlib-Xm.c (x_print_complete_resource_name)
+	(make_destroyed_instance, free_destroyed_instance, first_child)
+	(lw_motif_widget_p, resource_motif_string, destroy_all_children)
+	(xm_arm_callback, xm_update_label, xm_update_list)
+	(xm_update_pushbutton, xm_update_cascadebutton)
+	(xm_update_toggle, xm_update_radiobox, make_menu_in_widget)
+	(update_one_menu_entry, xm_update_menu, xm_update_text)
+	(xm_update_text_field, xm_update_one_widget)
+	(xm_update_one_value, activate_button, dialog_key_cb)
+	(make_dialog, mark_dead_instance_destroyed)
+	(find_matching_instance, recenter_widget, recycle_instance)
+	(xm_create_dialog, make_menubar, remove_grabs, make_popup_menu)
+	(make_main, xm_destroy_instance, xm_popup_menu)
+	(set_min_dialog_size, xm_pop_instance, do_call)
+	(xm_internal_update_other_instances, xm_generic_callback)
+	(xm_nosel_callback, xm_pull_down_callback, xm_pop_down_callback)
+	(xm_set_keyboard_focus, xm_set_main_areas, xm_manage_resizing): Change
+	from K&R to prototype.
+
+	* lwlib-Xlw.c (x_print_complete_resource_name): Change from K&R to
+	prototype.
+	(xlw_update_one_value): Reformat.
+
+	* lwlib-Xaw.c (xaw_generic_callback, command_reset)
+	(xaw_update_one_value): Reformat.
+	(xaw_update_one_widget): Reformat and remove dead code.
+	(xaw_scrollbar_scroll, xaw_scrollbar_jump, xaw_create_scrollbar)
+	(xaw_update_scrollbar): Remove (not used).
+	(make_dialog): Change from K&R to prototype. Remove dead code.
+	(xaw_creation_table): Remove scrollbar entry.
+
+2010-07-08  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* lwlib.c (allocate_widget_instance, get_widget_info)
+	(get_widget_instance, find_instance, set_one_value)
+	(update_one_widget_instance, update_all_widget_values)
+	(lw_modify_all_widgets, lw_get_widget, lw_make_widget)
+	(lw_create_widget, lw_pop_all_widgets, lw_show_busy)
+	(lw_refigure_widget, lw_allow_resizing): Remove alternative K&R
+	declarations.
+	* lwlib-Xlw.c (xlw_update_one_widget):
+	(xlw_pop_instance): Likewise.
+	* lwlib-Xaw.c (xaw_update_one_widget, xaw_pop_instance):
+	Likewise.
+	* lwlib-Xm.c (P_): Remove.
+
+2010-07-07  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* lwlib.c (lwlib_memset, lwlib_bcopy): Remove.
+	(malloc_widget_value, free_widget_info, allocate_widget_instance)
+	(lw_separator_p): Replace lwlib_memset, lwlib_bcopy, bzero, bcmp by
+	memset, memcpy, memcmp.
+	* lwlib-utils.c (XtApplyToWidgets): Likewise.
+	* xlwmenu.c (XlwMenuInitialize): Likewise.
+	* lwlib.h (lwlib_bcopy): Remove declaration.
+
+2010-07-05  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (XlwMenuSetValues, XlwMenuInitialize): Correct prototype.
+	(display_menu_item): Remove unused variable gi.
+	(make_windows_if_needed): Remove unused variable screen.
+	(XlwMenuRedisplay): Remove unused variable i.
+
+	* lwlib-Xaw.c: Include <ctype.h> for isdigit.
+	(fill_xft_data, set_text): Remove unused variable screen.
+	(draw_text): Cast bp to FcChar8*.
+	(find_xft_data): Return 0 if inst or xft_data is not set.
+	(wm_delete_window): Correct prototype.  Initialize widget to 0
+	and return if widget is still 0 after loop.
+
+2010-07-04  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* lwlib-Xaw.c: Convert function definitions to standard C.
+	* lwlib-Xlw.c:
+	* lwlib-utils.c:
+	* lwlib.c:
+	* lwlib.h:
+	* xlwmenu.c: Likewise.
+
+2010-07-02  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xm.c: Remove __P and P_ from .c and .m files.
+	* lwlib-Xm.c:
+	* lwlib.c:
+	* xlwmenu.c: Likewise.
+
+	Remove P_ and __P macros.
+	* lwlib-Xaw.h: Remove P_ and __P macros.
+	* lwlib-Xlw.h:
+	* lwlib-Xm.h:
+	* lwlib-int.h:
+	* lwlib-utils.h:
+	* lwlib.h: Likewise.
+
+2010-05-15  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (mostlyclean): Remove references to non-existent files.
+
+2010-05-13  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xaw.c (make_dialog): Remove extra arg to XtVaGetSubresources.
+
+2010-05-08  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (XlwMenuDestroy): Remove XtDestroyWidget on subwidgets
+	(Bug #6127).
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-05-06  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (CPP, LN_S, TOP, LN): Remove unused variables.
+
+2010-05-04  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (C_SWITCH_SYSTEM, C_SWITCH_MACHINE):
+	Use @C_SWITCH_SYSTEM@, @C_SWITCH_MACHINE@ instead of
+	@c_switch_system@, @c_switch_machine@.
+
+2010-04-27  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (C_SWITCH_X_SYSTEM): Define using autoconf.
+
+2010-04-21  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (expose_cb):
+	* lwlib-Xaw.c (fill_xft_data): Declarations before code.
+
+2010-04-17  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c: Include Shell.h, remove duplicate declaration of
+	XlwMenuRedisplay.
+	(display_menu_item): Replace ws->window with ws->pixmap, remove
+	call to XftDrawRect.
+	(display_menu): Remove this and that argument.
+	Remove just_compute_this_one_p. Fill pixmap at start and copy it to
+	window at end.
+	(expose_cb): New function.
+	(make_windows_if_needed): Replace XCreateWindow with XtCreatePopup.
+	Add eventhandler for expose to expose_cb.  Remove creation of xft_draw.
+	(create_pixmap_for_menu): New function.
+	(remap_menubar): Pop down menus that aren't the same as in old_stack.
+	Set width, heigh, x, y on widget with XtVaSetValues.
+	Call create_pixmap_for_menu.
+	Replace XUnmapWindow with XtPopdown.
+	Remowe two last parameters to display_menu.
+	(map_event_to_widget_value, XlwMenuRedisplay, Key, Select)
+	(pop_up_menu): Remowe two last parameters to display_menu.
+	(XlwMenuRealize): Call create_pixmap_for_menu, set w and pixmap.
+	Remove call to XftDrawCreate.
+	(XlwMenuDestroy): Free pixmap.  Call XtDestroyWidget instead of
+	XDestroyWindow.
+	(handle_motion_event): Only call handle_single_motion_event once.
+	(set_window_type): New function.
+	(make_windows_if_needed, XlwMenuRealize): Call set_window_type.
+
+	* xlwmenuP.h (window_state): Add pixmap and w.
+
+2010-04-16  YAMAMOTO Mitsuharu  <mituharu@math.s.chiba-u.ac.jp>
+
+	* xlwmenu.c (facename_changed): Put function in #ifdef HAVE_XFT.
+
+2010-04-11  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (C_SWITCH_SYSTEM, C_SWITCH_MACHINE)
+	(C_SWITCH_X_SITE): Define using autoconf.
+
+2010-04-11  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xaw.c (widget_xft_data): New for Xft data.
+	(fill_xft_data, openFont, get_text_width_and_height)
+	(draw_text, set_text, find_xft_data, command_press)
+	(command_reset): New functions.
+	(xaw_update_one_widget): Call set_text for dialog and buttons
+	if HAVE_XFT.  Also set internalHeight for buttons.
+	(xaw_destroy_instance): Free all Xft related data.
+	(button_actions, buttonTrans): New structures.
+	(make_dialog): Call XtAppAddActions for button_actions.
+	Find xft font to use and call fill_xft_data for widgets.
+	(xaw_create_dialog): Pass instance parameter to make_dialog.
+
+	* lwlib-int.h (_widget_instance): Add Xft data if HAVE_XFT.
+	Override translations for buttons.  If depth is 16 or more, tell
+	Xaw3d to not be nice to colormap.
+	Remove separator widget, use XtNhorizDistance on first right button
+	instead.
+
+2010-04-08  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (xlwmenu_default_font): Make static.
+	(xlwMenuResources): Add XtNfaceName and XtNdefaultFace.
+	(string_width): Use XftTextExtentsUtf8 if HAVE_XFT.
+	(MENU_FONT_HEIGHT, MENU_FONT_ASCENT): Add versions for
+	HAVE_XFT.
+	(size_menu): Set max_rest_width in window_state structure.
+	(display_menu_item): If HAVE_XFT and xft_draw is set, use
+	XftDrawRect and XftDrawStringUtf8 to draw text.
+	(make_windows_if_needed): Set max_rest_width and xft_draw
+	in windows[i].
+	(openXftFont): New.
+	(XlwMenuInitialize): Call openXftFont if HAVE_XFT. If mw->menu.font
+	is not set, load font fixed and save it in xlwmenu_default_font.
+	(XlwMenuInitialize): Set max_rest_width and xft_draw in windows[0].
+	(XlwMenuClassInitialize): Initialize xlwmenu_default_font.
+	(XlwMenuRealize): Set xft_fg, xft_bg, xft_disabled_fg and
+	windows[0].xft_draw if xft_font is set.
+	(XlwMenuDestroy): Destroy all xft_draw and close xft_font.
+	(facename_changed): New.
+	(XlwMenuSetValues): Call facename_changed. If face name did change,
+	close old fonts and destroy xft_draw:s.  Then create new ones.
+
+	* xlwmenu.h (XtNfaceName, XtCFaceName, XtNdefaultFace,
+	XtCDefaultFace): New.
+
+	* xlwmenuP.h (_window_state): Add max_rest_width and xft_draw.
+	(_XlwMenu_part): Add faceName,xft_fg, xft_bg, xft_disabled_fg and
+	xft_font.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2009-10-19  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* xlwmenu.c:
+	* lwlib.c:
+	* lwlib-utils.c:
+	* lwlib-Xm.c:
+	* lwlib-Xlw.c:
+	* lwlib-Xaw.c: Include setjmp.h.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2008-07-23  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* Makefile.in (ALL_CFLAGS): Remove reference to C_SWITCH_SITE.
+
+2008-06-26  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* lwlib.c: Remove references to obsolete variables.
+
+2008-06-02  Jim Meyering  <meyering@redhat.com>
+
+	Remove useless if-before-free tests.
+	* lwlib-Xm.c (xm_update_one_value): Likewise.
+	* lwlib.c (safe_free_str, free_widget_value_tree): Likewise.
+
+2008-04-18  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* Makefile.in (TOOLKIT_DEFINES): Remove.
+
+2007-08-29  Károly Lőrentey  <lorentey@elte.hu>
+
+	* xlwmenu.c (XlwMenuRealize): Ignore X errors while setting up
+	cursor shape.
+
+2007-07-25  Glenn Morris  <rgm@gnu.org>
+
+	* Relicense all FSF files to GPLv3 or later.
+
+	* COPYING: Switch to GPLv3.
+
+2007-06-13  Chong Yidong  <cyd@stupidchicken.com>
+
+	* lwlib-Xaw.c, lwlib.c: Link to xaw3d if available.
+
+2007-06-02  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 22.1 released.
+
+2007-02-28  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (distclean): Delete Makefile.
+	(maintainer-clean): Delete TAGS.
+
+2007-01-01  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (xlwMenuResources): Add XtNleaveCallback, XtNenterCallback.
+	(display_menu, map_event_to_widget_value): Generate enter and
+	leave callbacks.
+	(pop_up_menu): Initialize mw->menu.inside_entry.
+
+	* xlwmenu.h (XtNleaveCallback, XtNenterCallback): New strings.
+
+	* xlwmenuP.h (_XlwMenu_part): Add enter/leave callbacks and
+	inside_entry.
+
+	* lwlib-Xlw.c (enter_hook, leave_hook): New functions.
+	(xlw_create_menubar, xlw_create_popup_menu): Connect XtNenter/leave
+	to enter/leave_hook.
+
+2006-10-30  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Makefile.in (lwlib-utils.o): Use CPPFLAGS.
+
+2006-09-15  Jay Belanger  <belanger@truman.edu>
+
+	* COPYING: Replace "Library Public License" by "Lesser Public
+	License" throughout.
+
+2006-05-23  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c: Include xterm.h if emacs instead of declaring functions
+	used.
+	(string_width): Declare as static.
+	(Start, pop_up_menu): Set is_hint to 0 before calling
+	handle_motion_event.
+	(pop_up_menu): Return value and parameters for x_catch_errors and
+	x_uncatch_errors changed.
+
+2005-09-27  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* xlwmenu.c (find_next_selectable, find_prev_selectable):
+	Add missing parameter declarations.
+
+2005-09-24  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* xlwmenu.c: Fix the return type for x_clear_errors and
+	x_uncatch_errors.
+
+2005-07-19  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xm.c (make_menu_in_widget): Disable drag and drop for
+	labels in menu bar.
+
+2005-07-04  Lute Kamstra  <lute@gnu.org>
+
+	Update FSF's address in GPL notices.
+
+2005-04-01  Jan Djärv  <jan.h.d@swipnet.se>
+
+	Reenable support for I18N to Lucid menus.
+
+	* xlwmenuP.h (_XlwMenu_part): Add fontSet resource.
+
+	* xlwmenu.c (string_width):
+	(MENU_FONT_HEIGHT, MENU_FONT_ASCENT): Ditto.
+	(display_menu_item, make_drawing_gcs, XlwMenuInitialize)
+	(XlwMenuSetValues): Use font if fontSet is NULL, use only
+	font for !HAVE_X_I18N.
+	(xlwMenuResources): Add fontSet resource.
+
+2005-03-22  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenuP.h: Temporary #undef HAVE_X_I18N until FontSet for UTF-8
+	on XFree86 is investigated.
+
+	* xlwmenu.c: Ditto.
+
+2005-03-17  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	Add support for I18N to Lucid menus.
+
+	* xlwmenuP.h (struct _XlwMenu_part) [HAVE_X_I18N]: Change `font' to be
+	a fontset.  Add a `font_extents' element.
+
+	* xlwmenu.c (xlwMenuResources) [HAVE_X_I18N]: Use a fontset for the
+	`font' resource.
+	(string_width) [HAVE_X_I18N]: Use XmbTextExtents.
+	(MENU_FONT_HEIGHT, MENU_FONT_ASCENT): New macros.
+	(arrow_width, toggle_button_width, size_menu_item, draw_arrow)
+	(draw_toggle, draw_radio, display_menu_item): Use them.
+	(display_menu_item) [HAVE_X_I18N]: Use XmbDrawString.
+	(make_drawing_gcs) [HAVE_X_I18N]: Don't mess with fonts.
+	(XlwMenuInitialize) [HAVE_X_I18N]: Initialize font_extents.
+	(XlwMenuSetValues) [HAVE_X_I18N]: Refresh font_extents if font changes.
+
+	* lwlib-Xm.c (xm_update_label, xm_update_list): Use the recommended
+	XmStringCreateLocalized function.  Add missing copyright.
+
+	* lwlib-Xm.h: Add missing copyright and license notice.
+
+2005-03-12  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* xlwmenuP.h:
+	* xlwmenu.h: Add missing copyright and license notice.
+
+2004-12-27  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (xlwMenuActionsList): Install MenuGadgetEscape as an
+	action procedure for compatibility with Lesstif/Motif.
+
+	* Makefile.in (mostlyclean): Don't remove *~ on clean.
+
+2004-12-26  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xaw.c: Put <KeyPress>Escape in dialogOverride so dialogs only
+	pops down on Escape, not any keypress.
+
+2004-11-01  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c (find_first_selectable, find_next_selectable)
+	(find_prev_selectable): Rename parameter skip_no_call_data to
+	skip_titles.  Recognize titles as having no call_data and no contents.
+	(Down, Up): Comment update.
+
+2004-08-30  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib.h (_widget_value): Add lname and lkey.
+
+2004-01-12  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenuP.h (_XlwMenu_part): Add top_depth.
+
+	* xlwmenu.h: Removed declaration of pop_up_menu
+
+	* xlwmenu.c (Start): Get correct time if time in event is CurrentTime.
+	(find_first_selectable, find_next_selectable)
+	(find_prev_selectable): Add parameter skip_no_call_data to skip
+	over items with no call data (popup menu titles).
+	(Down, Up): Compare old_depth to top_depth instead of 2.
+	Pass True to find_*_selectable:s new parameter if this is a popup menu.
+	(Left, Right): Compare old_depth to top_depth instead of 2.
+	Pass 0 to find_*_selectable:s new parameter.
+	(pop_up_menu): Set top_depth to 1 for pop up menus and 2 for
+	menu bar menus, to enable keyboard traversal of popups.
+
+	* lwlib-Xm.c (dialog_key_cb): New function.
+	(make_dialog): Add event handlers to dialog_key_cb for key press
+	so we can pop down on ESC.
+
+	* lwlib-Xlw.c (xlw_popup_menu): Replace call to pop_up_menu with
+	XtCallActionProc ("start").  Use a full XEvent since "start" copies it.
+
+	* lwlib-Xaw.c (make_dialog): Add override so dialog pops down on ESC.
+	(wm_delete_window): If widget isn't a shell, use the parent.
+
+2003-05-22  Dave Love  <fx@gnu.org>
+
+	* xlwmenu.c: Include lisp.h, not ../src/lisp.h.
+	(make_drawing_gcs): Remove unused `xswa', `mask'.
+
+	* lwlib-Xlw.c: Include lisp.h, not ../src/lisp.h.
+	(lw_lucid_widget_p): Remove unused `mw'.
+	(xlw_update_one_widget, xlw_pop_instance) [PROTOTYPES]:
+	Provide ISO C arglists.
+
+2003-04-30  Lute Kamstra  <lute@gnu.org>
+
+	* Makefile.in: Make things function properly in case both LessTif
+	and Open Motif are installed.
+
+2003-01-26  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xm.c (update_one_menu_entry): Deallocate widget_list.
+	(destroy_all_children): Call it self to destroy sub menu children.
+
+2002-12-22  Richard M. Stallman  <rms@gnu.org>
+
+	* xlwmenu.c (pop_new_stack_if_no_contents): Do nothing if
+	new_depth is 1.
+	(remap_menubar): Don't look in new_stack[0].
+	(Left): At level 1, do the same thing Right does.
+
+2002-11-21  Dave Love  <fx@gnu.org>
+
+	* lwlib-Xaw.c [PROTOTYPES]: Provide ISO C arglists for functions
+	with Boolean args.
+
+2002-11-20  Dave Love  <fx@gnu.org>
+
+	* lwlib.c: Remove obsolete USE_OLIT code.
+	[PROTOTYPES]: Provide ISO C arglists for functions with Boolean args.
+	(lwlib_memset): Declare length arg as size_t.
+	(malloc_widget_value): Cast arg of lwlib_memset.
+
+	* xlwmenu.c (separator_height): Prototype.
+
+2002-05-07  Miles Bader  <miles@gnu.org>
+
+	* xlwmenu.c (make_drawing_gcs): The scaling factor passed to
+	`x_alloc_lighter_color_for_widget' is a float, not an int, and
+	it's a multiplicative factor, so the name `delta' is inaccurate.
+	Always base disabled foreground on the normal foreground.
+	Don't use the temporary variable `temp'.
+
+2002-05-06  Pavel Janík  <Pavel@Janik.cz>
+
+	* xlwmenu.c (xlwMenuResources): New resource.
+	(find_next_selectable): Return current item when the menu is not
+	popped up.
+	Rename `inactive_gc' to `disabled_gc'.
+	Use lighter/darker color for disabled menu items instead of using
+	stipple.  Use stipple only when better color can not be
+	determined automatically.
+
+	* xlwmenu.h (XtNdisabledForeground, XtCDisabledForeground):
+	New resource names.
+
+	* xlwmenuP.h (_XlwMenu_part): Add new member `disabled_foreground'.
+	Rename `inactive_gc' to `disabled_gc'.
+
+2002-04-29  Pavel Janík  <Pavel@Janik.cz>
+
+	* xlwmenu.c <XtNmargin, XtNverticalSpacing, XmNshadowThickness>:
+	Change default values.
+
+2002-04-28  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* xlwmenu.c: Do not grab keyboard if installation-directory is
+	non-nil (not installed Emacs).  To simplify debugging.
+
+2002-04-28  Pavel Janík  <Pavel@Janik.cz>
+
+	* Makefile.in: Remove OpenLook file dependencies.
+	(xrdb-cpp.o): Remove target.
+	Remove unused defines.
+
+	* xrdb.c, xrdb-cpp.c, Imakefile, dispatch.c, dispatch.h:
+	Remove unused file.
+
+	* lwlib.c (instantiate_widget_instance): Remove duplicated prototype.
+
+2002-04-25  Pavel Janík  <Pavel@Janik.cz>
+
+	* lwlib-Xol.c, lwlib-Xol.h, lwlib-Xolmb.c, lwlib-Xolmb.h
+	* lwlib-XolmbP.h: Remove file.
+
+2002-04-22  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* lwlib-Xm.c: Removed compiler warning.
+
+	* xlwmenu.c: Add calls to GrabKeyboard to remove strange
+	interactions with window managers that steal keypresses.
+	Call ungrab_all instead of XtUngrabPointer.
+	(pop_up_menu): Add call to XtGrabKeyboard.
+	(ungrab_all): New function.
+
+2002-04-20  Pavel Janík  <Pavel@Janik.cz>
+
+	* xlwmenu.c (find_next_selectable): New function.
+	(Down, Up, Right): Use it.
+	(find_next_selectable): Prevent endless loops when only one item
+	is enabled in the menu.
+
+2002-04-19  Pavel Janík  <Pavel@Janik.cz>
+
+	These changes allow moving in menu via keyboard.
+
+	* xlwmenu.c (xlwMenuTranslations, xlwMenuActionsList):
+	Add translations for cursor keys and RET.
+	(find_next_selectable, find_prev_selectable): New functions used
+	for finding menu-items.
+	(Down, Up, Left, Right): New functions.
+
+2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (TAGS): Don't use -t, it's the default behavior for
+	etags, so it barfs if invoked with -t.
+
+2002-03-17  Richard M. Stallman  <rms@gnu.org>
+
+	* lwlib.c (P_): Definitions deleted.
+
+2002-03-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* lwlib.c (P_): Don't define if already defined.
+
+2002-01-27  Pavel Janík  <Pavel@Janik.cz>
+
+	* lwlib-Xaw.c (xaw_update_scrollbar, xaw_scrollbar_scroll)
+	(xaw_scrollbar_jump): Put whole functions in #if 0.
+
+2002-01-09  Pavel Janík  <Pavel@Janik.cz>
+
+	* lwlib-Xaw.c (xaw_create_dialog): Initialize icon_name to
+	suppress compiler warnings.
+
+2001-12-18  Pavel Janík  <Pavel@Janik.cz>
+
+	* lwlib.c (separator_names): Add missing braces around initializers.
+
+2001-12-08  Pavel Janík  <Pavel@Janik.cz>
+
+	* COPYING: New file.
+
+2001-12-01  Richard M. Stallman  <rms@gnu.org>
+
+	* lwlib.h (_widget_value): `help' has type Lisp_Object.
+
+	* xlwmenu.c, lwlib-Xaw.c, lwlib-Xlw.c: Include ../src/lisp.h.
+	* lwlib-Xm.c, lwlib-Xol.c, lwlib/lwlib-Xolmb.c: Include ../src/lisp.h.
+	* lwlib/lwlib-utils.c: Include ../src/lisp.h.
+
+	* lwlib.c: Include ../src/lisp.h.  Don't declare xmalloc.
+	(free_widget_value_tree): Don't free `help' field.
+	(copy_widget_value_tree): Copy `help' simply, without safe_strdup.
+	(merge_widget_value): Compare and copy `help' simply.
+
+2001-11-28  Richard M. Stallman  <rms@gnu.org>
+
+	* Makefile.in (TAGS): Find the source files in $(srcdir).
+
+2001-10-20  Gerd Moellmann  <gerd@gnu.org>
+
+	* (Version 21.1 released.)
+
+2001-10-09  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xaw.c (xaw_create_scrollbar) [!0]: Return NULL.
+	From Hallvard B Furuseth <h.b.furuseth@usit.uio.no>.
+
+2001-10-05  Gerd Moellmann  <gerd@gnu.org>
+
+	* Branch for 21.1.
+
+2001-04-30  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (xlwmenu_window_p): New function.
+
+2001-03-23  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xlw.c (x_print_complete_resource_name) [0]: New function.
+
+2001-03-22  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (x_print_complete_resource_name) [0]: New function.
+
+2001-03-13  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menu_in_widget): Remove code forcing LessTif to
+	recompute centered text; it works fine without with current LessTif.
+
+	* lwlib-Xm.c (make_menu_in_widget): Add an XmNpopdownCallback
+	instead of an XmNunmapCallback.
+	(xm_unmap_callback): Remove.
+
+	* lwlib-Xm.c (make_menubar): Take out code in #if 0.
+
+	* lwlib-Xm.c (xm_popup_menu): Don't set XmNmenuPost unless
+	necessary.  From Rick Scott <rwscott@alumni.uwaterloo.ca>.
+
+2001-02-28  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (xm_arm_callback): Don't compare widgets with `None',
+	use NULL instead.
+
+	* lwlib-Xaw.c (xaw_update_one_widget): Use XtSetSensitive instead
+	of setting the value of XtNsensitive.
+
+	* lwlib-Xm.c (xm_update_radiobox, update_one_menu_entry)
+	(xm_update_one_widget): Use XtSetSensitive instead of setting the
+	value of XmNsensitive.  From Rick Scott <rwscott@alumni.uwaterloo.ca>.
+
+2000-12-14  Dave Love  <fx@gnu.org>
+
+	* xlwmenu.c (gray_bitmap_bits): Remove `unsigned' from declaration.
+
+2000-12-11  Dave Love  <fx@gnu.org>
+
+	* xlwmenu.c (draw_separator) <SEPARATOR_SHADOW_ETCHED_IN_DASH>:
+	<SEPARATOR_SHADOW_ETCHED_OUT_DASH>: Fix call of draw_separator.
+
+2000-12-07  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (xm_arm_callback): Fix last change.
+
+2000-11-30  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (xm_arm_callback): Handle case that W is null;
+	also see comment there.
+
+2000-11-21  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (xlwmenu_redisplay): New function.
+
+2000-09-30  Stefan Monnier  <monnier@cs.yale.edu>
+
+	* lwlib.c (lw_separator_p): Init separator_p (bug with "-- some text").
+
+2000-09-28  Sam Steingold  <sds@gnu.org>
+
+	* xlwmenu.c: Before including <X11/Xos.h> on SUN, define SUNOS41
+	to avoid redefining struct timeval and struct timezone.
+
+2000-09-04  Miles Bader  <miles@gnu.org>
+
+	* xlwmenu.c (XlwMenuSetValues): Only frob the display if the menu
+	is actually displayed.
+	(remap_menubar): Only include the menu-margin in the initial X & Y
+	positions for horizontal menu-bars.
+	(fit_to_screen): If moving a sub-menu to the left-side, increment
+	its x-position by the shadow-thickness to make it look more
+	attached to the invoking menu-item (similarly to the way it would
+	be displayed on the right side).
+
+2000-09-03  Miles Bader  <miles@gnu.org>
+
+	* xlwmenu.c (x_alloc_lighter_color_for_widget): New extern declaration.
+	(make_shadow_gcs) [emacs]: Use x_alloc_lighter_color_for_widget to
+	do shadow calculation.
+	(make_shadow_gcs): Remove code that tests whether the top shadow
+	is dimmer than the bottom shadow--it shouldn't ever happen.
+
+2000-08-30  Miles Bader  <miles@gnu.org>
+
+	* xlwmenu.c (XlwMenuSetValues): If the background color has
+	changed, re-make the shadow-gcs too.
+
+2000-08-03  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib.c, lwlib-Xm.c, lwlib-Xaw.c: Use NULL at the end of the
+	variable argument lists of XtVaSetValues and XtVaGetValues
+	functions because 0 is not sufficient on systems where sizeof
+	(int) < sizeof (void *).
+
+2000-07-19  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c [emacs]: Don't include <X11/bitmaps/gray> because that
+	leads to redefinition errors when static is defined as empty in
+	config.h.  Refer to the gray bitmap in xfns.c, instead.
+
+2000-07-18  Dave Love  <fx@gnu.org>
+
+	* lwlib-utils.c (XtApplyToWidgets): Cast args of lwlib_bcopy.
+
+2000-06-23  Dave Love  <fx@gnu.org>
+
+	* lwlib-Xlw.c (xlw_popup_menu): Cast arg of pop_up_menu.
+
+	* lwlib-utils.c: Include lwlib.h.
+
+2000-06-16  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenuP.h (_XlwMenu_part): Add free_top_shadow_color_p and
+	free_bottom_shadow_color_p.
+
+	* xlwmenu.c (make_shadow_gcs): Set free_top_shadow_color_p
+	and free_top_shadow_color_p flags in the menu widget if
+	top and bottom shadow colors must be freed.
+	(release_shadow_gcs): Free colors only if they must be freed.
+
+2000-06-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (make_shadow_gcs): Free and copy colors so that
+	color reference counts are right.
+	(release_shadow_gcs): Free colors.
+
+2000-06-06  Dave Love  <fx@gnu.org>
+
+	* xlwmenu.c (x_alloc_nearest_color_for_widget, x_catch_errors)
+	(x_uncatch_errors, x_had_errors_p, x_clear_errors): Add prototypes
+	-- should be moved into separate header.
+	(make_shadow_gcs) <x_alloc_nearest_color_for_widget>: Cast first arg.
+	(Start) <pop_up_menu>: Cast second arg.
+
+	* lwlib.c (P_): Use PROTOTYPES.
+	(safe_strdup): Declare arg const.
+	(lw_modify_all_widgets) <!info>: Return 0.
+
+	* lwlib-Xm.c (P_): Use PROTOTYPES.
+
+	* xlwmenu.h, lwlib.h, lwlib-utils.h, lwlib-int.h, lwlib-Xm.h:
+	* lwlib-Xlw.h, lwlib-Xaw.h: Enable prototypes.
+
+	* lwlib-Xaw.c (xaw_popup_menu): Add EVENT arg.
+
+	* Makefile.in (lwlib.o): Depend on lwlib-Xlw.h.
+	(lwlib-Xlw.o): Depend on lwlib-Xlw.h.
+	(lwlib-Xaw.o): Depend on lwlib-Xaw.h.
+	(lwlib-Xm.o): Depend on lwlib-Xm.h.
+
+2000-03-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menubar) [LESSTIF_VERSION]: Don't set
+	XmNresizeHeight and XmNresizeWidth.
+
+2000-03-08  Dave Love  <fx@gnu.org>
+
+	* Makefile.in (liblw.a): Don't bother testing for ranlib failing
+	since configure sets it up.
+
+2000-03-06  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menubar): Set XmNresizeHeight and
+	XmNresizeWidth resources only if LESSTIF_VERSION is defined.
+
+2000-03-05  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (xm_manage_resizing): Rewritten.
+
+	* lwlib.c (lw_modify_all_widgets): Return non-zero if widget
+	tree was changed.
+	(merge_widget_value): Add parameter CHANGE_P.  Set *CHANGE_P
+	to 1 if a change occurs.
+
+	* lwlib.h (lw_modify_all_widgets): Change prototype.
+
+2000-03-04  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (make_shadow_gcs): Use the widget's colormap instead
+	of the screen's default colormap.
+
+2000-02-18  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib.c (merge_widget_value): Fix incorrect assignment of
+	safe_strdup'd help string.
+
+2000-01-25  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menu_in_widget): Don't add XmNpopdownCallback,
+	add XmNunmapCallback.
+	(xm_unmap_callback): New function.
+	(xm_pull_down_callback): Call pre-activate callback only if
+	parent is the menu bar.
+
+2000-01-17  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (xm_arm_callback): New function.
+	(make_menu_in_widget): Set xm_arm_callback as XmNarmCallback and
+	XmNdisarmCallback for buttons (not supported for other widgets).
+	(make_menubar): Set XmNresizeHeight and XmNresizeWidth to False.
+
+	* lwlib-Xlw.c (highlight_hook): New function.
+	(xlw_create_menubar, xlw_create_popup_menu): Add highlight_hook as
+	callback XtNhighlightCallback.
+
+	* lwlib.c (copy_widget_value_tree): Copy help string.
+	(free_widget_value_tree): Free help string.
+	(merge_widget_value): Handle help string.
+	(allocate_widget_info, lw_register_widget, lw_create_widget):
+	Add parameter HIGHLIGHT_CB.
+	(lw_get_widget_instance): New function.
+
+	* lwlib-int.h: Add prototype for lw_get_widget_instance.
+
+	* lwlib.h (_widget_value): Add help string.
+
+	* xlwmenu.c (xlwMenuResources): All XtNhighlightCallback.
+	(remap_menubar): Call highlight callback.
+
+	* xlwmenu.h (XtNhighlightCallback): New define.
+
+	* xlwmenuP.h (_XlwMenu_part): Add `highlight' callback list.
+
+1999-10-19  Paul Eggert  <eggert@twinsun.com>
+
+	Add support for large files, plus some locale improvements.
+
+	* dispatch.c, lwlib-Xaw.c, lwlib-Xlw.c, lwlib-Xm.c, lwlib.c, xlwmenu.c,
+	* xrdb-cpp.c, xrdb.c:
+	Include <config.h> before any system include files.
+
+	* lwlib-Xm.c, lwlib.c:
+	Do not include <stdlib.h> or <string.h>, as <config.h> does this.
+
+1999-10-07  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menu_in_widget, update_one_menu_entry):
+	Use widgets instead of gadgets to be able to set colors.
+
+1999-09-17  Richard Stallman  <rms@gnu.org>
+
+	* lwlib-Xaw.c (wm_delete_window): Check all the shell's children,
+	not just the first, to find the dialog box.
+
+1999-09-14  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib.c (lw_separator_p): Check for new-style separators differently.
+
+1999-09-10  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib.c (lw_separator_p): Add `--:space' with the same
+	meaning as `--:noLine'.
+
+1999-09-06  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib.c (lw_separator_p): Add alternative separator type names.
+
+1999-09-03  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (make_shadow_gcs): Call x_alloc_nearest_color_for_widget.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c: Add function prototypes.
+
+	* lwlib-Xm.c (xm_update_label): Use val->name to look up
+	a label string from resources.
+	(xm_update_label): Add some comments.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (all_dashes_p): Removed.
+	(size_menu_item): Call lw_separator_p.
+	(display_menu_item): Ditto.
+	(display_menu): Ditto.
+	(draw_separator): New.
+	(display_menu_item): Call it.
+	(separator_height): New.
+	(size_menu_item): Call it.
+
+	* lwlib-Xm.c (all_dashes_p): Removed.
+	(make_menu_in_widget): Use lw_separator_p.  Set Motif separator type.
+
+	* lwlib.c (lw_separator_p): New.
+
+	* lwlib.h (enum menu_separator): New.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menu_in_widget): Set alignment of menu
+	title after all widgets have been created.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (toggle_button_width): Renamed from
+	toggle_or_radio_button_width.
+	(radio_button_width): New.
+	(size_menu_item): Use new functions.
+	(draw_shadow_rhombus): New.
+	(draw_radio): Use radio_button_width and draw_shadow_rhombus.
+	(draw_toggle): Use toggle_button_width.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (xm_update_toggle): Add callback xm_generic_callback
+	instead of xm_internal_update_other_instances.
+
+	* lwlib-Xm.c (make_menu_in_widget): Do help button before managing
+	children to get it to the right place.
+	(make_menu_in_widget): Create toggle buttons.
+	(update_one_menu_entry): Update toggle buttons.
+
+	* xlwmenu.c (size_menu_item): Add parameter button_width.
+	(size_menu): Compute button_width.
+	(toggle_or_radio_button_width): New.
+	(draw_toggle): New.
+	(draw_radio): New.
+	(draw_shadow_rectangle): Add parameter `down_p'.
+
+	* xlwmenuP.h (_window_state): Add button_width.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (make_shadow_gcs) [emacs]: Use x_alloc_nearest_color.
+
+	* lwlib.c (merge_widget_value): Handle button_type.
+	(copy_widget_value_tree): Copy button_type.
+
+	* lwlib.h (enum button_type): New.
+	(_widget_value): New member button_type.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* lwlib-Xm.c (make_menu_in_widget): Test for menubar widgets
+	using XmNrowColumnType.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (abort_gracefully): New.
+	(display_menu): Use it instead of abort.
+	(size_menu): Ditto.
+
+1999-07-12  Gerd Moellmann  <gerd@gnu.org>
+
+	* xlwmenu.c (xlwMenuResources): Change previously unused
+	XtNmargin to 4.
+	(size_menu): Take margin into account.
+	(display_menu_item): Ditto.
+	(remap_menubar): Ditto.
+	(draw_arrow): Draw it 3D.
+
+1999-07-12  Richard Stallman  <rms@gnu.org>
+
+	* Version 20.4 released.
+
+1998-08-19  Richard Stallman  <rms@psilocin.ai.mit.edu>
+
+	* Version 20.3 released.
+
+1998-07-30  Paul Eggert  <eggert@twinsun.com>
+
+	* lwlib/Makefile.in (lwlib-utils.o, lwlib.o, lwlib-Xlw.o)
+	(lwlib-Xaw.o, lwlib-Xm.o, lwlib-Xol.o, lwlib-Xolmb.o):
+	Add dependencies to corresponding .c files for Solaris 2.x VPATH make.
+
+1998-04-06  Andreas Schwab  <schwab@gnu.org>
+
+	* lwlib.c: Always declare xmalloc.
+	[USE_XAW]: Include <X11/Xaw/Paned.h>.
+	(lwlib_memset, lwlib_bcopy): Explicitly declare return type.
+
+1997-12-20  Richard Stallman  <rms@psilocin.gnu.org>
+
+	* lwlib-Xm.c (update_one_menu_entry):
+	Add conditional in case XmNpositionIndex is missing.
+
+1997-09-19  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.2 released.
+
+	* xlwmenu.c (motion_event_is_in_menu): Extend the left and
+	top windows by the shadow width.
+
+1997-09-15  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.1 released.
+
+1997-07-23  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* xlwmenu.c (display_menu): If an item is disabled,
+	don't display its submenu (if any).
+
+1997-05-01  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* xlwmenu.c (pop_up_menu): Update the call to x_catch_errors.
+
+1997-01-21  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* xlwmenu.c (fit_to_screen): If new menu would overlap the previous
+	one from the side, try moving it up or down.
+
+1996-08-11  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 19.33 released.
+
+	* lwlib-Xm.c (update_one_menu_entry): Fix previous change:
+	When XmIsCascadeButton, don't call XmCreateCascadeButtonGadget,
+	just modify the existing one.
+
+1996-08-09  Marcus G. Daniels  <marcus@sayre.sysc.pdx.edu>
+
+	* lwlib.c (merge_widget_value): Undo previous change.
+
+	* lwlib-Xm.c (update_one_menu_entry): When creating a pulldown
+	in an existing but empty menu item, in order to get a new functional
+	pulldown, the menu item must be switched from an XmPushButtonGadget
+	into a XmCascadeButtonGadget.
+
+1996-07-31  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 19.32 released.
+
+1996-07-31  Marcus G. Daniels  <marcus@sayre.sysc.pdx.edu>
+
+	* lwlib-Xm.c (make_menubar): Turn off menu accelerator.
+
+1996-07-24  Marcus G. Daniels  <marcus@sayre.sysc.pdx.edu>
+
+	* lwlib.c (merge_widget_value) [USE_MOTIF]: Pass along the change
+	flag from merged_contents.
+
+1996-07-13  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* lwlib-Xm.c (xm_update_menu): Fix loop termination test.
+
+1996-07-07  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* lwlib-Xm.h, lwlib-Xm.c, lwlib.h, lwlib.c: Undo previous change.
+
+1996-07-03  Marcus G. Daniels  <marcus@sayre.sysc.pdx.edu>
+
+	* lwlib-Xm.h: Declare lw_motif_menu_related_event_p.
+
+	* lwlib-Xm.c (lw_motif_menu_related_event_p): A predicate to
+	identify keyboard events intended only for menus.
+
+	* lwlib.h: Declare lw_toolkit_related_event_p.
+
+	* lwlib.c (lw_toolkit_related_event_p): A predicate to identify
+	toolkit-specific events.
+
+1996-06-07  Marcus G. Daniels  <marcus@sayre.sysc.pdx.edu>
+
+	* lwlib-Xm.c (make_menu_in_widget): Set mapping delay
+	for cascade buttons to zero.
+
+1996-05-25  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* Version 19.31 released.
+
+1996-03-31  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib-Xm.c (destroy_all_children): When freeing a cascade button,
+	free its submenu too.
+	(make_menu_in_widget): Use a cascade button gadget, not a widget.
+	Include Xm/CascadeBG.h.
+
+1996-03-29  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (tags): New target.
+
+1996-03-28  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (TAGS): Renamed from `tags' and fixed to work.
+
+1996-03-26  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (xlwmenu.o): New explicit target.
+
+1996-03-24  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib.h (struct widget_value): New field this_one_change.
+	* lwlib.c (merge_widget_value): Set the this_one_change field.
+	* lwlib-Xm.c (destroy_all_children): New arg first_child_to_destroy.
+	(make_menu_in_widget): New arg keep_first_children.
+	(xm_update_menu): Preserve the first children even if later ones
+	have a structural change.
+	(update_one_menu_entry): Use this_one_change field.
+
+1996-03-01  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (motion_event_is_in_menu): Make x and y signed.
+
+1996-02-25  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib.c (lw_window_is_in_menubar) [USE_MOTIF]:
+	With Motif, the window WIN can be the menu bar widget itself.
+
+1996-02-21  Richard Stallman  <rms@whiz-bang.gnu.ai.mit.edu>
+
+	* lwlib.c (free_widget_value_tree, merge_widget_value):
+	Use XtFree for the toolkit_data.
+
+1996-02-19  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* lwlib.c (lw_internal_update_other_instances): Move static var
+	outside the function, and rename it to lwlib_updating.
+
+1996-01-04  Paul Eggert  <eggert@twinsun.com>
+
+	* lwlib.c (instantiate_widget_instance): Renamed from
+	instanciate_widget_instance (spelling correction).
+	All callers changed.
+
+1995-12-31  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (xlwMenuActionsList): Add "key" and "nothing".
+	(xlwMenuTranslations): Add translations for Key, KeyUp,
+	and for the modifier keysyms.
+	(Nothing, Key): New functions.
+
+1995-12-24  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (XlwMenuSetValues): Do redisplay if non-null contents
+	get replaced by empty contents.
+
+	* lwlib.c (merge_widget_value): Treat disappearance of entire contents
+	as a STRUCTURAL_CHANGE.
+
+1995-12-20  Richard Stallman  <rms@whiz-bang.gnu.ai.mit.edu>
+
+	* lwlib-utils.c: Add #undef for index and rindex.
+
+1995-11-24  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.30 released.
+
+1995-11-13  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (display_menu_item): Fix previous change.
+
+1995-11-04  Richard Stallman  <rms@whiz-bang.gnu.ai.mit.edu>
+
+	* xlwmenu.c (display_menu_item): Don't treat buttons specially.
+
+1995-08-14  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (RANLIB): Get this var from configure.
+
+1995-08-02  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib.c (lw_popup_menu): New arg `event', passed along.
+	* lwlib-Xlw.c (xlw_popup_menu): New arg `event'.
+	* lwlib-Xm.c (xm_popup_menu): New arg `event'.
+
+1995-06-19  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.29 released.
+
+1995-06-11  Richard Stallman  <rms@gnu.ai.mit.edu>
+
+	* lwlib.c (lwlib_toolkit_type): New variable.
+
+1995-05-26  Richard Stallman  <rms@gnu.ai.mit.edu>
+
+	* xlwmenu.c (Drag): Do nothing unless menu.popped_up field is set.
+
+1995-05-22  Karl Heuer  <kwzh@hal.gnu.ai.mit.edu>
+
+	* xlwmenu.c (XlwMenuInitialize): Cast XCreatePixmapFromBitmapData args.
+
+1995-05-20  Karl Heuer  <kwzh@nutrimat.gnu.ai.mit.edu>
+
+	* lwlib.c: Don't use prototype.
+	* lwlib-Xm.c (activate_button, xm_update_cascadebutton): Likewise.
+
+1995-05-05  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib.c (lw_refigure_widget) [USE_MOTIF]: Fix backward if.
+
+1995-05-04  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (ALL_CFLAGS): Add -I../src.
+
+1995-05-03  Morten Welinder  <terra+@cs.cmu.edu>
+
+	* lwlib.c [__osf__]: Include string.h and stdlib.h.
+	[__osf__] (xmalloc): Declared.
+
+1995-04-13  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib-Xm.c (update_one_menu_entry, make_menu_in_widget):
+	Specify more useful names in XmCreatePulldownMenu calls.
+
+	* lwlib-Xaw.c (xaw_pop_instance): Make x, y, w, h unsigned.
+
+	* xlwmenu.c (size_menu): Make height and label_width unsigned.
+	(fit_to_screen): Make screen_width and screen_height unsigned.
+	(motion_event_is_in_menu): Make x, y unsigned.
+
+1995-04-09  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* lwlib-utils.c: If HAVE_CONFIG_H, include config.h.
+
+	* Makefile.in (ALL_CFLAGS): Define HAVE_CONFIG_H.
+	Add -I${srcdir}/../src.
+
+1995-04-08  Paul Reilly  <pmr@geech.gnu.ai.mit.edu>
+
+	* lwlib-Xm.c: Remove function prototypes.
+	(xm_pop_down_callback): Call the deactivation callback only when
+	popping down the top level submenu.
+
+1995-04-07  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Makefile.in (lwlib.o): Depend on Makefile.
+
+	* lwlib-Xm.h: Remove function prototypes.
+
+	* lwlib-Xm.c (remove_grabs): Use type Widget for `menu'.
+
+1995-02-15  Paul Reilly  <pmr@geech.gnu.ai.mit.edu>
+
+	* Makefile.in (ALL_CFLAGS): Allow include files to be found in
+	`srcdir'.
+
+1995-02-07  Richard Stallman  <rms@pogo.gnu.ai.mit.edu>
+
+	* Makefile.in (maintainer-clean): Renamed from realclean.
+
+1994-11-28  Richard Stallman  <rms@bethel>
+
+	* lwlib-int.h (safe_strdup): Don't use ANSI argument prototype.
+
+1994-11-15  Paul Reilly  <pmr@duality.gnu.ai.mit.edu>
+
+	* lwlib.c (lw_refigure_widget): Use the macro USE_XAW rather than XAW.
+
+1994-11-08  Paul Reilly  <pmr@duality.gnu.ai.mit.edu>
+
+	* lwlib-Xm.c (make_menu_in_widget): Differentiate a separator
+	entry ("--") from a title.
+	(xm_pop_down_callback): Filter all but the last pop down callbacks.
+
+1994-11-07  Paul Reilly  <pmr@duality.gnu.ai.mit.edu>
+
+	* lwlib-Xm.c (update_one_menu_entry): Use the parent of the
+	cascade button as the parent of the pulldown, rather than the
+	cascade button itself.  This works around a Motif SIGSEGV in the
+	function `InSharedMenuHierarchy'.
+
+1994-10-26  Richard Stallman  <rms@duality.gnu.ai.mit.edu>
+
+	* xlwmenu.c (pop_up_menu): Pass a Display * to x_catch_errors, etc.
+
+1994-10-26  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (xlwmenu_default_font): New global variable.
+	(XlwMenuInitialize): Use xlwmenu_default_font to default
+	the font if necessary.  Make mw, itself, an argument.
+
+	* xlwmenu.c (pop_up_menu): Pass a Display * to x_catch_errors, etc.
+
+1994-10-08  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (fit_to_screen): Don't put the menu off the left or top.
+
+1994-10-02  Paul Reilly  <pmr@geech.gnu.ai.mit.edu>
+
+	* xlwmenu.c (display_menu_item): Add support for displaying the
+	title in pop up menus.
+
+	* lwlib.c (lw_set_main_areas): Use xm_set_main_areas().
+	(lw_manage_resizing): Use xm_manage_resizing() for Emacs/Motif.
+
+1994-09-25  Paul Reilly  <pmr@geech.gnu.ai.mit.edu>
+
+	* lwlib-Xaw.c (xaw_create_main): New function to support the
+	toolkit independent creation of the main Emacs widget.  *
+	lwlib-Xlw.c (xlw_create_menubar): When compiling under Emacs, set
+	resizing resources to disable showGrip and to enable both
+	resizeToPreferred and allowShellResize.
+
+	* lwlib-Xm.h: Declare xm_set_main_areas, xm_manage_resizing.
+
+	* lwlib-Xm.c (make_menu_in_widget): Add support for displaying a
+	title in pop up menus.
+	(make_main, xm_set_main_areas, xm_manage_resizing): New functions to
+	create and manage a Motif Main Window widget.
+
+	* xlwmenu.c: Add #include <X11/ObjectP.h> for X11R4.
+
+1994-09-18  Frederic Pierresteguy  <F.Pierresteguy@frcl.bull.fr>
+
+	* lwlib-Xm.c (make_dialog): When there is more than two pushbuttons,
+	set XmPACK_TIGHT and XmHORIZONTAL to the rowcolumn.  Also add a
+	margin of 10 pixels.
+
+1994-09-16  Paul Reilly  <pmr@geech.gnu.ai.mit.edu>
+
+	* lwlib-Xm.c (make_main): New function to support toolkit
+	independent creation of the main Emacs widget.
+	(make_destroyed_instance): Use safe_strdup() instead of strdup().
+
+	* lwlib-int.h: Declare safe_strdup.
+
+	* lwlib.c (lw_refigure_widget): New function.  Handle geometry
+	management inside lwlib instead of in Emacs.
+	(lw_window_is_in_menubar): New function.  Determine if the pointer
+	is in a menubar.
+	(lw_set_main_areas): New function.  Set the main window widgets for
+	Motif.
+
+	* lwlib.h: Declare lw_refigure_widget(), lw_window_is_in_menubar(),
+	lw_set_main_areas().
+
+	* xlwmenu.h: Define Xt{Ns,CS}howGrip, Xt{Nr,CR}esizeToPreferred, and
+	Xt{Na,CA}llowResize.
+
+	* xlwmenu.c (Start): Use pop_up_menu() to post the submenus.
+	(Select): Remove the pointer grab when popping down a menubar submenu.
+	(pop_up_menu): Handle popping up submenus from a menubar, i.e. when
+	the menu widget parent is not a shell widget.
+
+1994-08-25  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (pop_up_menu): Clear next_release_must_exit.
+	(Start): Clear next_release_must_exit when popping up the menu.
+
+1994-08-24  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (Start): Set menu_post_event or next_release_must_exit.
+	(Select): Do nothing if the menu should be left posted.
+
+1994-07-28  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* xlwmenu.c (make_windows_if_needed, pop_up_menu):
+	Enable mouse motion events even when no button down.
+
+1994-07-11  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (pointer_grabbed): New variable.
+	(pop_up_menu): Set the variable.
+	(XlwMenuDestroy): Maybe call XtUngrabPointer.
+
+1994-05-25  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib.c (max): Function deleted.  Define as macro instead,
+	but only if not already defined.
+
+1994-05-20  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (xlwMenuResources): Use XtRDimension for shadow thickness.
+
+1994-05-19  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib-Xaw.c (xaw_pop_instance): Use XtSetValues, not XtMoveWidget.
+
+1994-05-16  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib.c (lwlib_memset: New function, used instead of memset.
+	All callers changed.
+	* lwlib.c (lwlib_bcopy): New function.
+	* lwlib-utils.c (XtApplyToWidgets): Use lwlib_bcopy.
+
+	* lwlib.c: Delete definitions for use of alloca.
+	(name_to_widget): Use xmalloc, not alloca.
+
+1994-05-12  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (XlwMenuDestroy): Set new var submenu_destroyed.
+	(XlwMenuRedisplay): If it's set, truncate the old_depth to 1.
+
+1994-05-09  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xrdb-cpp.c: Don't include string.h, unistd.h, stdlib.h.
+	* lwlib-Xaw.c: Don't include string.h, unistd.h, stdlib.h.
+	* lwlib-utils.c (XtApplyToWidgets): Use bcopy, not memcpy.
+	* lwlib-utils.c: Don't include string.h, unistd.h, stdlib.h, memory.h.
+	* xlwmenu.c: Don't include string.h, unistd.h, stdlib.h.
+	* lwlib.c: Don't include string.h, unistd.h, stdlib.h.
+	(safe_strdup): No longer static.
+	* lwlib-Xm.c: Use safe_strdup, not strdup.
+
+	* xlwmenu.c (string_width): No longer static.
+
+1994-05-06  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenuP.h (struct _XlwMenu_part): Use Pixel and Cursor
+	for foreground and cursor_shape fields.
+
+	* xlwmenu.c (XlwMenuSetValues): Check for change of font.
+
+1994-04-28  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in: Delete all SRCS variables (unused).
+	(lwlib.o, xrdb-cpp.o): Mention srcdir in dep.
+
+1994-04-15  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in (ALL_CFLAGS): Don't define THIS_IS_X11R4.
+
+	* xrdb.c: Define HAVE_X11R5 as in xterm.h.
+	Include X11/Xlib.h, X11/cursorfont.h and X11/Xutil.h.
+	(_XtDisplayInitialize): Test HAVE_X11R5.
+
+	* dispatch.c: Define HAVE_X11R5 as in xterm.h.
+	Include X11/Xlib.h, X11/cursorfont.h and X11/Xutil.h.
+	(_XtConvertTypeToMask): Conditionalize on HAVE_X11R5.
+	(WouldDispatchEvent): Likewise.
+
+1994-04-12  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib-Xaw.c (xaw_generic_callback): Declare without arg names.
+
+1994-04-01  Frederic Pierresteguy  (fp@hal.gnu.ai.mit.edu)
+
+	* lwlib-Xaw.c (make_dialog): Don't allow any geometry request from the
+	user.
+
+1994-03-22  Frederic Pierresteguy  (fp@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (XlwMenuResize): Don't allow the popup menu to resize
+	itself.  Therefore reset the size to its initial value.
+
+1994-03-19  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib-Xaw.c (xaw_update_one_widget): Finish replacing XtVaSetValues.
+	Don't test for scrollbar widget.
+
+1994-03-14  Frederic Pierresteguy  (fp@gnu.ai.mit.edu)
+
+	* lwlib-int.h: Declare lw_get_widget_info.
+
+	* lwlib.c (lw_get_widget_info): Comment out arg in function decl.
+
+	* lwlib-Xaw.h: Comment out args in function decls.
+	* lwlib-Xaw.c: Convert all function definitions to non-prototype K&R.
+	(xaw_update_one_widget - case dialogWidgetClass): Call XtSetValues,
+	not XtVaSetValues.
+
+1994-03-11  Frederic Pierresteguy  (F.Pierresteguy@frcl.bull.fr)
+
+	* xlwmenu.c (display_menu_item): Modify parameters to draw_arrow to
+	right justify the arrow in the pane.
+
+	* lwlib.c: If not defined USE_MOTIF and defined USE_LUCID then
+	define USE_XAW.
+
+	* Makefile.in (LUCID_SRCS, LUCID_OBJS): Add the target lwlib-Xaw.[oc].
+
+	* lwlib.c, lwlib-int.h: Merged from Lucid 19.9 release.
+	* lwlib.c (_AIX): Replace the AIXV3 directive.
+	(USE_XAW): New macro to conditionalize the use of the athena toolkit.
+	(lw_get_widget_info): New function.
+	(set_one_value): Handle USE_XAW.
+	(instanciate_widget_instance): Likewise.
+	(destroy_one_instance): Likewise.
+	(lw_pop_all_widgets): Likewise.
+	(lw_pop_down_all_widgets): Likewise.
+	(get_one_value): Likewise.
+
+	* lwlib-Xaw.c, lwlib-Xaw.h: New files.
+
+1994-02-23  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (XlwMenuInitialize, XlwMenuDestroy): Undo previous changes.
+
+	* lwlib-Xlw.c (xlw_create_menubar, xlw_create_popup_menu):
+	Use XtCreate..., not XtVaCreate...
+	No need to copy instance->info->val any more.
+	(xlw_update_one_widget): Use XtSetValues, not XtVaSetValues.
+
+1994-02-21  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (pop_up_menu): Call XtUngrabPointer if XtGrabPointer fails.
+
+1994-02-19  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in (xrdb-cpp.o, lwlib.o): Put ALL_CFLAGS after other flags.
+
+	* lwlib-Xlw.c (xlw_create_menubar): Don't call free_widget_value.
+	Use malloc for allocation.
+	(xlw_create_popup_menu): Likewise.
+
+1994-02-18  Frederic Pierresteguy  (fp@mole.gnu.ai.mit.edu)
+
+	* lwlib.c (malloc_cpt): New static variable.
+	(malloc_widget_value): Increment malloc_cpt when allocating a cell.
+	(free_widget_value): Really free the cells when the number of
+	allocated ones is bigger than 25.
+
+	* lwlib-Xlw.c (xlw_create_menubar): Call malloc_widget_value and
+	free_widget_value instead of XtMalloc and XtFree.
+	(xlw_create_popup_menu): Likewise.
+
+1994-02-17  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in (ALL_CFLAGS): Specify -Demacs.
+
+	* xlwmenu.c (pop_up_menu) [emacs]: Catch and ignore X protocol errors
+	in XtGrabPointer.
+
+1994-02-17  Frederic Pierresteguy  (fp@mole.gnu.ai.mit.edu)
+
+	* lwlib-Xlw.c (xlw_create_popup_menu): Pass tem to
+	XtVaCreateManagedWidget, not instance->info->val.
+	(xlw_create_menubar): Likewise.
+
+1994-02-15  Frederic Pierresteguy  (fp@mole.gnu.ai.mit.edu)
+
+	* lwlib-Xlw.c (xlw_create_popup_menu): Copy instance->info->val
+	before calling XtVaCreateManagedWidget and then free the copy.
+	(xlw_create_menubar): Likewise.
+
+1994-02-11  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (XlwMenuInitialize): Copy mw->menu.contents.
+	(XlwMenuDestroy): Free mw->menu.contents.
+
+1994-02-09  Frederic Pierresteguy  (fp@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (display_menu_item): Call draw_shadow_rectangle to make
+	visible/invisible the selection of the menubar items.
+
+1994-02-08  Roland McGrath  (roland@churchy.gnu.ai.mit.edu)
+
+	* lwlib.c (strcasecmp): Renamed to my_strcasecmp.
+	(find_in_table): Changed only caller.
+
+1994-02-04  Frederic Pierresteguy  (fp@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (display_menu_item): When dealing with the menubar,
+	always call XDrawRectangle to clear the selection after popping down
+	the pulldown menu.
+
+1994-02-01  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib.c: Include ctype.h.
+
+1994-01-31  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib.c (strcasecmp): New function.
+
+1994-01-30  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c, lwlib.c, lwlib-Xlw.c, lwlib-utils.c:
+	Convert all function definitions to non-prototype K&R.
+
+	* lwlib-Xlw.h: Comment out args in function decls.
+	* lwlib.h: Comment out args in function decls.
+	* lwlib-utils.h: Comment out args in function decls.
+
+1994-01-29  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* lwlib.c: Include StringDefs.h after lwlib.h.
+
+1994-01-22  Roland McGrath  (roland@churchy.gnu.ai.mit.edu)
+
+	* Makefile (xrdb-cpp.o, lwlib.o): Use $(srcdir) and file name
+	instead of $*.
+	(dispatch.o, xrdb.o, lwlib-Xm.o): Rules removed; they were
+	superfluous and didn't work when configured outside srcdir.
+	The implicit .c.o rule works fine.
+
+1994-01-21  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* xlwmenu.c (resource_widget_value): Avoid using strdup.
+
+1994-01-18  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Makefile.in: New file.
+
+	* lwlib-Xolmb.c: Renamed from lwlib-Xol-mb.c.
+	* lwlib-Xolmb.h: Renamed from lwlib-Xol-mb.h.
+	* lwlib-XolmbP.h: Renamed from lwlib-Xol-mbP.h.
+
+	* lwlib-int.h: Renamed from lwlib-internal.h.
+
+
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+  Copyright (C) 1995-1999, 2001-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

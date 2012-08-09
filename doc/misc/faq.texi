@@ -1,0 +1,4440 @@
+\input texinfo   @c -*- mode: texinfo; -*-
+@c %**start of header
+@setfilename ../../info/efaq
+@settitle GNU Emacs FAQ
+@c %**end of header
+
+@include emacsver.texi
+
+@c This file is maintained by Romain Francoise <rfrancoise@gnu.org>.
+@c Feel free to install changes without prior permission (but I'd
+@c appreciate a notice if you do).
+
+@copying
+Copyright @copyright{} 2001-2012 Free Software Foundation, Inc.@*
+Copyright @copyright{} 1994, 1995, 1996, 1997, 1998, 1999, 2000
+Reuven M. Lerner@*
+Copyright @copyright{} 1992, 1993 Steven Byrnes@*
+Copyright @copyright{} 1990, 1991, 1992 Joseph Brian Wells@*
+
+@quotation
+This list of frequently asked questions about GNU Emacs with answers
+(``FAQ'') may be translated into other languages, transformed into other
+formats (e.g. Texinfo, Info, WWW, WAIS), and updated with new information.
+
+The same conditions apply to any derivative of the FAQ as apply to the FAQ
+itself.  Every copy of the FAQ must include this notice or an approved
+translation, information on who is currently maintaining the FAQ and how to
+contact them (including their e-mail address), and information on where the
+latest version of the FAQ is archived (including FTP information).
+
+The FAQ may be copied and redistributed under these conditions, except that
+the FAQ may not be embedded in a larger literary work unless that work
+itself allows free copying and redistribution.
+
+[This version has been heavily edited since it was included in the Emacs
+distribution.]
+@end quotation
+@end copying
+
+@dircategory Emacs
+@direntry
+* Emacs FAQ: (efaq).            Frequently Asked Questions about Emacs.
+@end direntry
+
+@c The @titlepage stuff only appears in the printed version
+@titlepage
+@sp 10
+@center @titlefont{GNU Emacs FAQ}
+
+@c The following two commands start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@node Top, FAQ notation, (dir), (dir)
+@top The GNU Emacs FAQ
+
+@c FIXME @today is just the day we ran `makeinfo'.
+This is the GNU Emacs FAQ, last updated on @today{}.
+
+This FAQ is maintained as a part of GNU Emacs.  If you find any errors,
+or have any suggestions, please use @kbd{M-x report-emacs-bug} to report
+them.
+
+This is the version of the FAQ distributed with Emacs @value{EMACSVER}, and
+mainly describes that version.  Although there is some information on
+older versions, details about very old releases (now only of historical
+interest) have been removed.  If you are interested in this, consult
+either the version of the FAQ distributed with older versions of Emacs,
+or the history of this document in the Emacs source repository.
+
+Since Emacs releases are very stable, we recommend always running the
+latest release.
+
+This FAQ is not updated very frequently.  When you have a question about
+Emacs, the Emacs manual is often the best starting point.
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* FAQ notation::
+* General questions::
+* Getting help::
+* Status of Emacs::
+* Common requests::
+* Bugs and problems::
+* Compiling and installing Emacs::
+* Finding Emacs and related packages::
+* Key bindings::
+* Alternate character sets::
+* Mail and news::
+* Concept index::
+@end menu
+
+@c ------------------------------------------------------------
+@node FAQ notation
+@chapter FAQ notation
+@cindex FAQ notation
+
+This chapter describes notation used in the GNU Emacs FAQ, as well as in
+the Emacs documentation.  Consult this section if this is the first time
+you are reading the FAQ, or if you are confused by notation or terms
+used in the FAQ.
+
+@menu
+* Basic keys::
+* Extended commands::
+* Emacs manual::
+* File-name conventions::
+* Common acronyms::
+@end menu
+
+@node Basic keys
+@section What do these mean: @kbd{C-h}, @kbd{C-M-a}, @key{RET}, @kbd{@key{ESC} a}, etc.?
+@cindex Basic keys
+@cindex Control key, notation for
+@cindex @key{Meta} key, notation for
+@cindex Control-Meta characters, notation for
+@cindex @kbd{C-h}, definition of
+@cindex @kbd{C-M-h}, definition of
+@cindex @key{DEL}, definition of
+@cindex @key{ESC}, definition of
+@cindex @key{LFD}, definition of
+@cindex @key{RET}, definition of
+@cindex @key{SPC}, definition of
+@cindex @key{TAB}, definition of
+@cindex Notation for keys
+
+@itemize @bullet
+
+@item
+@kbd{C-x}: press the @key{x} key while holding down the @key{Control} key
+
+@item
+@kbd{M-x}: press the @key{x} key while holding down the @key{Meta} key
+(if your computer doesn't have a @key{Meta} key, @pxref{No Meta key})
+
+@item
+@kbd{M-C-x}: press the @key{x} key while holding down both @key{Control}
+and @key{Meta}
+
+@item
+@kbd{C-M-x}: a synonym for the above
+
+@item
+@key{LFD}: Linefeed or Newline; same as @kbd{C-j}
+
+@item
+@key{RET}: @key{Return}, sometimes marked @key{Enter}; same as @kbd{C-m}
+
+@item
+@key{DEL}: @key{Delete}, usually @strong{not} the same as
+@key{Backspace}; same as @kbd{C-?} (see @ref{Backspace invokes help}, if
+deleting invokes Emacs help)
+
+@item
+@key{ESC}: Escape; same as @kbd{C-[}
+
+@item
+@key{TAB}: Tab; same as @kbd{C-i}
+
+@item
+@key{SPC}: Space bar
+
+@end itemize
+
+Key sequences longer than one key (and some single-key sequences) are
+written inside quotes or on lines by themselves, like this:
+
+@display
+  @kbd{M-x frobnicate-while-foo RET}
+@end display
+
+@noindent
+Any real spaces in such a key sequence should be ignored; only @key{SPC}
+really means press the space key.
+
+The @acronym{ASCII} code sent by @kbd{C-x} (except for @kbd{C-?}) is the value
+that would be sent by pressing just @key{x} minus 96 (or 64 for
+upper-case @key{X}) and will be from 0 to 31.  On Unix and GNU/Linux
+terminals, the @acronym{ASCII} code sent by @kbd{M-x} is the sum of 128 and the
+@acronym{ASCII} code that would be sent by pressing just @key{x}.  Essentially,
+@key{Control} turns off bits 5 and 6 and @key{Meta} turns on bit
+7@footnote{
+DOS and Windows terminals don't set bit 7 when the @key{Meta} key is
+pressed.}.
+
+@kbd{C-?} (aka @key{DEL}) is @acronym{ASCII} code 127.  It is a misnomer to call
+@kbd{C-?}  a ``control'' key, since 127 has both bits 5 and 6 turned ON.
+Also, on very few keyboards does @kbd{C-?} generate @acronym{ASCII} code 127.
+@c FIXME I cannot understand the previous sentence.
+
+@xref{Keys,,, emacs, The GNU Emacs Manual}.
+
+@node Extended commands
+@section What does @file{M-x @var{command}} mean?
+@cindex Extended commands
+@cindex Commands, extended
+@cindex M-x, meaning of
+
+@kbd{M-x @var{command}} means type @kbd{M-x}, then type the name of the
+command, then type @key{RET}.  (@xref{Basic keys}, if you're not sure
+what @kbd{M-x} and @key{RET} mean.)
+
+@kbd{M-x} (by default) invokes the command
+@code{execute-extended-command}.  This command allows you to run any
+Emacs command if you can remember the command's name.  If you can't
+remember the command's name, you can type @key{TAB} and @key{SPC} for
+completion, @key{?} for a list of possibilities, and @kbd{M-p} and
+@kbd{M-n} (or up-arrow and down-arrow) to see previous commands entered.
+An Emacs @dfn{command} is an @dfn{interactive} Emacs function.
+
+@cindex @key{Do} key
+Your system administrator may have bound other key sequences to invoke
+@code{execute-extended-command}.  A function key labeled @kbd{Do} is a
+good candidate for this, on keyboards that have such a key.
+
+If you need to run non-interactive Emacs functions, see @ref{Evaluating
+Emacs Lisp code}.
+
+@node Emacs manual
+@section How do I read topic XXX in the Emacs manual?
+@cindex Emacs manual, reading topics in
+@cindex Reading topics in the Emacs manual
+@cindex Finding topics in the Emacs manual
+@cindex Info, finding topics in
+
+When we refer you to some @var{topic} in the Emacs manual, you can
+read this manual node inside Emacs (assuming nothing is broken) by
+typing @kbd{C-h i m emacs @key{RET} m @var{topic} @key{RET}}.
+
+This invokes Info, the GNU hypertext documentation browser.  If you don't
+already know how to use Info, type @key{?} from within Info.
+
+If we refer to @var{topic}:@var{subtopic}, type @kbd{C-h i m emacs
+@key{RET} m @var{topic} @key{RET} m @var{subtopic} @key{RET}}.
+
+If these commands don't work as expected, your system administrator may
+not have installed the Info files, or may have installed them
+improperly.  In this case you should complain.
+
+If you are reading this FAQ in Info, you can simply press @key{RET} on a
+reference to follow it.
+
+@xref{Getting a printed manual}, if you would like a paper copy of the
+Emacs manual.
+
+@node File-name conventions
+@section What are @file{src/config.h}, @file{site-lisp/default.el}, etc.?
+@cindex File-name conventions
+@cindex Conventions for file names
+@cindex Directories and files that come with Emacs
+
+These are files that come with Emacs.  The Emacs distribution is divided
+into subdirectories; e.g. @file{etc}, @file{lisp}, and @file{src}.
+Some of these (e.g. @file{etc} and @file{lisp}) are present both in
+an installed Emacs and in the sources, but some (e.g. @file{src}) are
+only found in the sources.
+
+If you use Emacs, but don't know where it is kept on your system, start
+Emacs, then type @kbd{C-h v data-directory @key{RET}}.  The directory
+name displayed by this will be the full pathname of the installed
+@file{etc} directory.  (This full path is recorded in the Emacs variable
+@code{data-directory}, and @kbd{C-h v} displays the value and the
+documentation of a variable.)
+
+The location of your Info directory (i.e., where Info documentation
+is stored) is kept in the variable @code{Info-default-directory-list}.  Use
+@kbd{C-h v Info-default-directory-list @key{RET}} to see the value of
+this variable, which will be a list of directory names.  The last
+directory in that list is probably where most Info files are stored.  By
+default, Emacs Info documentation is placed in @file{/usr/local/share/info}.
+
+For information on some of the files in the @file{etc} directory,
+@pxref{Informational files for Emacs}.
+
+@node Common acronyms
+@section What are FSF, LPF, GNU, RMS, FTP, and GPL?
+@cindex FSF, definition of
+@cindex LPF, definition of
+@cindex GNU, definition of
+@cindex RMS, definition of
+@cindex Stallman, Richard, acronym for
+@cindex Richard Stallman, acronym for
+@cindex FTP, definition of
+@cindex GPL, definition of
+@cindex Acronyms, definitions for
+@cindex Common acronyms, definitions for
+
+@table @asis
+
+@item FSF
+Free Software Foundation
+
+@item LPF
+League for Programming Freedom
+
+@item GNU
+GNU's Not Unix
+
+@item RMS
+Richard Matthew Stallman
+
+@item FTP
+File Transfer Protocol
+
+@item GPL
+GNU General Public License
+
+@end table
+
+Avoid confusing the FSF and the LPF.  The LPF opposes
+look-and-feel copyrights and software patents.  The FSF aims to make
+high quality free software available for everyone.
+
+The word ``free'' in the title of the Free Software Foundation refers to
+``freedom,'' not ``zero cost.''  Anyone can charge any price for
+GPL-covered software that they want to.  However, in practice, the
+freedom enforced by the GPL leads to low prices, because you can always
+get the software for less money from someone else, since everyone has
+the right to resell or give away GPL-covered software.
+
+@c ------------------------------------------------------------
+@node General questions
+@chapter General questions
+@cindex General questions
+
+This chapter contains general questions having to do with Emacs, the
+Free Software Foundation, and related organizations.
+
+@menu
+* The LPF::
+* Real meaning of copyleft::
+* Guidelines for newsgroup postings::
+* Newsgroup archives::
+* Reporting bugs::
+* Unsubscribing from Emacs lists::
+* Contacting the FSF::
+@end menu
+
+@node The LPF
+@section What is the LPF?
+@cindex LPF, description of
+@cindex League for Programming Freedom
+@cindex Software patents, opposition to
+@cindex Patents for software, opposition to
+
+The LPF opposes the expanding danger of software patents and
+look-and-feel copyrights.  More information on the LPF's views is
+available at @uref{http://progfree.org/, the LPF home page}.
+
+@node Real meaning of copyleft
+@section What is the real legal meaning of the GNU copyleft?
+@cindex Copyleft, real meaning of
+@cindex GPL, real meaning of
+@cindex General Public License, real meaning of
+@cindex Discussion of the GPL
+
+The real legal meaning of the GNU General Public License (copyleft) will
+only be known if and when a judge rules on its validity and scope.
+There has never been a copyright infringement case involving the GPL to
+set any precedents.  Although legal actions have been brought against
+companies for violating the terms of the GPL, so far all have been
+settled out of court (in favor of the plaintiffs).  Please take any
+discussion regarding this issue to the newsgroup
+@uref{news:gnu.misc.discuss}, which was created to hold the extensive
+flame wars on the subject.
+
+RMS writes:
+
+@quotation
+The legal meaning of the GNU copyleft is less important than the spirit,
+which is that Emacs is a free software project and that work pertaining
+to Emacs should also be free software.  ``Free'' means that all users
+have the freedom to study, share, change and improve Emacs.  To make
+sure everyone has this freedom, pass along source code when you
+distribute any version of Emacs or a related program, and give the
+recipients the same freedom that you enjoyed.
+@end quotation
+
+@node Guidelines for newsgroup postings
+@section  What are appropriate messages for the various Emacs newsgroups?
+@cindex Newsgroups, appropriate messages for
+@cindex GNU newsgroups, appropriate messages for
+@cindex Usenet groups, appropriate messages for
+@cindex Mailing lists, appropriate messages for
+@cindex Posting messages to newsgroups
+
+@cindex GNU mailing lists
+The file @file{etc/MAILINGLISTS} describes the purpose of each GNU
+mailing list (@pxref{Informational files for Emacs}).  For those lists
+which are gatewayed with newsgroups, it lists both the newsgroup name
+and the mailing list address.  The Emacs mailing lists are also
+described at @uref{http://savannah.gnu.org/mail/?group=emacs, the Emacs
+Savannah page}.
+
+The newsgroup @uref{news:comp.emacs} is for discussion of Emacs programs
+in general.  The newsgroup @uref{news:gnu.emacs.help} is specifically
+for GNU Emacs.  It therefore makes no sense to cross-post to both
+groups, since only one can be appropriate to any question.
+
+Messages advocating ``non-free'' software are considered unacceptable on
+any of the @code{gnu.*} newsgroups except for @uref{news:gnu.misc.discuss},
+which was created to hold the extensive flame-wars on the subject.
+``Non-free'' software includes any software for which the end user can't
+freely modify the source code and exchange enhancements.  Be careful to
+remove the @code{gnu.*} groups from the @samp{Newsgroups:} line when
+posting a followup that recommends such software.
+
+@uref{news:gnu.emacs.bug} is a place where bug reports appear, but avoid
+posting bug reports to this newsgroup directly (@pxref{Reporting bugs}).
+
+@node Newsgroup archives
+@section Where can I get old postings to @uref{news:gnu.emacs.help} and other GNU groups?
+@cindex Archived postings from @code{gnu.emacs.help}
+@cindex Usenet archives for GNU groups
+@cindex Old Usenet postings for GNU groups
+
+The FSF has maintained archives of all of the GNU mailing lists for many
+years, although there may be some unintentional gaps in coverage.  The
+archive can be browsed over the web at
+@uref{http://lists.gnu.org/archive/html/, the GNU mail archive}.  Raw
+files can be downloaded from @uref{ftp://lists.gnu.org/}.
+
+Web-based Usenet search services, such as
+@uref{http://groups.google.com/groups/dir?q=gnu&, Google}, also
+archive the @code{gnu.*} groups.
+
+You can also read the archives of the @code{gnu.*} groups and post new
+messages at @uref{http://gmane.org/, Gmane}.  Gmane is a service that
+presents mailing lists as newsgroups (even those without a traditional
+mail-to-news gateway).
+
+@node Reporting bugs
+@section Where should I report bugs and other problems with Emacs?
+@cindex Bug reporting
+@cindex Good bug reports
+@cindex How to submit a bug report
+@cindex Reporting bugs
+
+The correct way to report Emacs bugs is to use the command
+@kbd{M-x report-emacs-bug}.  It sets up a mail buffer with the
+essential information and the correct e-mail address, which is
+@email{bug-gnu-emacs@@gnu.org} for the released versions of Emacs.
+Anything sent to @email{bug-gnu-emacs@@gnu.org} also appears in the
+newsgroup @uref{news:gnu.emacs.bug}, but please use e-mail instead of
+news to submit the bug report.  This ensures a reliable return address
+so you can be contacted for further details.
+
+Be sure to read the ``Bugs'' section of the Emacs manual before reporting
+a bug!  The manual describes in detail how to submit a useful bug
+report (@pxref{Bugs, , Reporting Bugs, emacs, The GNU Emacs Manual}).
+(@xref{Emacs manual}, if you don't know how to read the manual.)
+
+RMS says:
+
+@quotation
+Sending bug reports to @email{help-gnu-emacs@@gnu.org} (which has the
+effect of posting on @uref{news:gnu.emacs.help}) is undesirable because
+it takes the time of an unnecessarily large group of people, most of
+whom are just users and have no idea how to fix these problem.
+@email{bug-gnu-emacs@@gnu.org} reaches a much smaller group of people
+who are more likely to know what to do and have expressed a wish to
+receive more messages about Emacs than the others.
+@end quotation
+
+RMS says it is sometimes fine to post to @uref{news:gnu.emacs.help}:
+
+@quotation
+If you have reported a bug and you don't hear about a possible fix,
+then after a suitable delay (such as a week) it is okay to post on
+@code{gnu.emacs.help} asking if anyone can help you.
+@end quotation
+
+If you are unsure whether you have found a bug, consider the following
+non-exhaustive list, courtesy of RMS:
+
+@quotation
+If Emacs crashes, that is a bug.  If Emacs gets compilation errors
+while building, that is a bug.  If Emacs crashes while building, that
+is a bug.  If Lisp code does not do what the documentation says it
+does, that is a bug.
+@end quotation
+
+@node Unsubscribing from Emacs lists
+@section  How do I unsubscribe from a mailing list?
+@cindex Unsubscribing from GNU mailing lists
+@cindex Removing yourself from GNU mailing lists
+
+If you are receiving a GNU mailing list named @var{list}, you should be
+able to unsubscribe from it by sending a request to the address
+@email{@var{list}-request@@gnu.org}.  Mailing lists mails normally
+contain information in either the message header
+(@samp{List-Unsubscribe:}) or as a footer that tells you how to
+unsubscribe.
+
+@node Contacting the FSF
+@section  How do I contact the FSF?
+@cindex Contracting the FSF
+@cindex Free Software Foundation, contacting
+
+For up-to-date information, see
+@uref{http://www.fsf.org/about/contact.html, the FSF contact web-page}.
+You can send general correspondence to @email{info@@fsf.org}.
+
+@cindex Ordering GNU software
+For details on how to order items directly from the FSF, see the
+@uref{http://shop.fsf.org/, FSF on-line store}.
+
+@c ------------------------------------------------------------
+@node Getting help
+@chapter Getting help
+@cindex Getting help
+
+This chapter tells you how to get help with Emacs.
+
+@menu
+* Basic editing::
+* Learning how to do something::
+* Getting a printed manual::
+* Emacs Lisp documentation::
+* Installing Texinfo documentation::
+* Printing a Texinfo file::
+* Viewing Info files outside of Emacs::
+* Informational files for Emacs::
+* Help installing Emacs::
+* Obtaining the FAQ::
+@end menu
+
+@node Basic editing
+@section I'm just starting Emacs; how do I do basic editing?
+@cindex Basic editing with Emacs
+@cindex Beginning editing
+@cindex Tutorial, invoking the
+@cindex Self-paced tutorial, invoking the
+@cindex Help system, entering the
+
+Type @kbd{C-h t} to invoke the self-paced tutorial.  Just typing
+@kbd{C-h} enters the help system.  Starting with Emacs 22, the tutorial
+is available in many foreign languages such as French, German, Japanese,
+Russian, etc.  Use @kbd{M-x help-with-tutorial-spec-language @key{RET}}
+to choose your language and start the tutorial.
+
+Your system administrator may have changed @kbd{C-h} to act like
+@key{DEL} to deal with local keyboards.  You can use @kbd{M-x
+help-for-help} instead to invoke help.  To discover what key (if any)
+invokes help on your system, type @kbd{M-x where-is @key{RET}
+help-for-help @key{RET}}.  This will print a comma-separated list of key
+sequences in the echo area.  Ignore the last character in each key
+sequence listed.  Each of the resulting key sequences (e.g. @key{F1} is
+common) invokes help.
+
+Emacs help works best if it is invoked by a single key whose value
+should be stored in the variable @code{help-char}.
+
+@node Learning how to do something
+@section How do I find out how to do something in Emacs?
+@cindex Help for Emacs
+@cindex Learning to do something in Emacs
+@cindex Reference card for Emacs
+@cindex Overview of help systems
+
+There are several methods for finding out how to do things in Emacs.
+
+@itemize @bullet
+
+@cindex Reading the Emacs manual
+@item
+The complete text of the Emacs manual is available via the Info
+hypertext reader.  Type @kbd{C-h r} to display the manual in Info mode.
+Typing @key{h} immediately after entering Info will provide a short
+tutorial on how to use it.
+
+@cindex Lookup a subject in a manual
+@cindex Index search in a manual
+@item
+To quickly locate the section of the manual which discusses a certain
+issue, or describes a command or a variable, type @kbd{C-h i m emacs
+@key{RET} i @var{topic} @key{RET}}, where @var{topic} is the name of the
+topic, the command, or the variable which you are looking for.  If this
+does not land you on the right place in the manual, press @kbd{,}
+(comma) repeatedly until you find what you need.  (The @kbd{i} and
+@kbd{,} keys invoke the index-searching functions, which look for the
+@var{topic} you type in all the indices of the Emacs manual.)
+
+@cindex Apropos
+@item
+You can list all of the commands whose names contain a certain word
+(actually which match a regular expression) using @kbd{C-h a} (@kbd{M-x
+command-apropos}).
+
+@cindex Command description in the manual
+@item
+The command @kbd{C-h F} (@code{Info-goto-emacs-command-node}) prompts
+for the name of a command, and then attempts to find the section in the
+Emacs manual where that command is described.
+
+@cindex Finding commands and variables
+@item
+You can list all of the functions and variables whose names contain a
+certain word using @kbd{M-x apropos}.
+
+@item
+You can list all of the functions and variables whose documentation
+matches a regular expression or a string, using @kbd{M-x
+apropos-documentation}.
+
+@item
+You can order a hardcopy of the manual from the FSF.  @xref{Getting a
+printed manual}.
+
+@cindex Reference cards, in other languages
+@item
+You can get a printed reference card listing commands and keys to
+invoke them.  You can order one from the FSF for $2 (or 10 for $18),
+or you can print your own from the @file{etc/refcards/refcard.tex} or
+@file{etc/refcards/refcard.pdf} files in the Emacs distribution.
+Beginning with version 21.1, the Emacs distribution comes with
+translations of the reference card into several languages; look for
+files named @file{etc/refcards/@var{lang}-refcard.*}, where @var{lang}
+is a two-letter code of the language.  For example, the German version
+of the reference card is in the files @file{etc/refcards/de-refcard.tex}
+and @file{etc/refcards/de-refcard.pdf}.
+
+@item
+There are many other commands in Emacs for getting help and
+information.  To get a list of these commands, type @samp{?} after
+@kbd{C-h}.
+
+@end itemize
+
+@node Getting a printed manual
+@section How do I get a printed copy of the Emacs manual?
+@cindex Printed Emacs manual, obtaining
+@cindex Manual, obtaining a printed or HTML copy of
+@cindex Emacs manual, obtaining a printed or HTML copy of
+
+You can order a printed copy of the Emacs manual from the FSF.  For
+details see the @uref{http://shop.fsf.org/, FSF on-line store}.
+
+The full Texinfo source for the manual also comes in the @file{doc/emacs}
+directory of the Emacs distribution, if you're daring enough to try to
+print out this several-hundred-page manual yourself (@pxref{Printing a Texinfo
+file}).
+
+If you absolutely have to print your own copy, and you don't have @TeX{},
+you can get a PostScript or PDF (or HTML) version from
+
+@uref{http://www.gnu.org/software/emacs/manual/}
+
+@xref{Learning how to do something}, for how to view the manual from Emacs.
+
+@node Emacs Lisp documentation
+@section Where can I get documentation on Emacs Lisp?
+@cindex Documentation on Emacs Lisp
+@cindex Function documentation
+@cindex Variable documentation
+@cindex Emacs Lisp Reference Manual
+@cindex Reference manual for Emacs Lisp
+
+Within Emacs, you can type @kbd{C-h f} to get the documentation for a
+function, @kbd{C-h v} for a variable.
+
+For more information, the Emacs Lisp Reference Manual is available
+in Info format (@pxref{Top, Emacs Lisp,, elisp, The
+Emacs Lisp Reference Manual}).
+
+You can also order a hardcopy of the manual from the FSF, for details
+see the @uref{http://shop.fsf.org/, FSF on-line store}.  (This manual is
+not always in print.)
+
+An HTML version of the Emacs Lisp Reference Manual is available at
+
+@uref{http://www.gnu.org/software/emacs/elisp-manual/elisp.html}
+
+@node Installing Texinfo documentation
+@section How do I install a piece of Texinfo documentation?
+@cindex Texinfo documentation, installing
+@cindex Installing Texinfo documentation
+@cindex New Texinfo files, installing
+@cindex Documentation, installing new Texinfo files
+@cindex Info files, how to install
+
+Emacs releases come with pre-built Info files, and the normal install
+process places them in the correct location.  This is true for most
+applications that provide Info files.  The following section is only
+relevant if you want to install extra Info files by hand.
+
+First, you must turn the Texinfo source files into Info files.  You may
+do this using the stand-alone @file{makeinfo} program, available as part
+of the Texinfo package at
+
+@uref{http://www.gnu.org/software/texinfo/}
+
+For information about the Texinfo format, read the Texinfo manual which
+comes with the Texinfo package.  This manual also comes installed in
+Info format, so you can read it from Emacs; type @kbd{C-h i m texinfo
+@key{RET}}.
+
+@c FIXME is this a complete alternative?
+@c Probably not, given that we require makeinfo to build Emacs.
+Alternatively, you could use the Emacs command @kbd{M-x
+texinfo-format-buffer}, after visiting the Texinfo source file of the
+manual you want to convert.
+
+Neither @code{texinfo-format-buffer} nor @file{makeinfo} installs the
+resulting Info files in Emacs's Info tree.  To install Info files,
+perform these steps:
+
+@enumerate
+@item
+Move the files to the @file{info} directory in the installed Emacs
+distribution.  @xref{File-name conventions}, if you don't know where that
+is.
+
+@item
+Run the @code{install-info} command, which is part of the Texinfo
+distribution, to update the main Info directory menu, like this:
+
+@example
+ install-info --info-dir=@var{dir-path} @var{dir-path}/@var{file}
+@end example
+
+@noindent
+where @var{dir-path} is the full path to the directory where you copied
+the produced Info file(s), and @var{file} is the name of the Info file
+you produced and want to install.
+
+If you don't have the @code{install-info} command installed, you can
+edit the file @file{info/dir} in the installed Emacs distribution, and
+add a line for the top level node in the Info package that you are
+installing.  Follow the examples already in this file.  The format is:
+
+@example
+* Topic: (relative-pathname).  Short description of topic.
+@end example
+
+@end enumerate
+
+If you want to install Info files and you don't have the necessary
+privileges, you have several options:
+
+@itemize @bullet
+@item
+Info files don't actually need to be installed before being used.
+You can use a prefix argument for the @code{info} command and specify
+the name of the Info file in the minibuffer.  This goes to the node
+named @samp{Top} in that file.  For example, to view a Info file named
+@file{@var{info-file}} in your home directory, you can type this:
+
+@example
+@kbd{C-u C-h i ~/@var{info-file} @key{RET}}
+@end example
+
+Alternatively, you can feed a file name to the @code{Info-goto-node}
+command (invoked by pressing @key{g} in Info mode) by typing the name
+of the file in parentheses, like this:
+
+@example
+@kbd{C-h i g (~/@var{info-file}) @key{RET}}
+@end example
+
+@item
+You can create your own Info directory.  You can tell Emacs where that
+Info directory is by adding its pathname to the value of the variable
+@code{Info-default-directory-list}.  For example, to use a private Info
+directory which is a subdirectory of your home directory named @file{Info},
+you could put this in your @file{.emacs} file:
+
+@lisp
+(add-to-list 'Info-default-directory-list "~/Info")
+@end lisp
+
+You will need a top-level Info file named @file{dir} in this directory
+which has everything the system @file{dir} file has in it, except it
+should list only entries for Info files in that directory.  You might
+not need it if (fortuitously) all files in this directory were
+referenced by other @file{dir} files.  The node lists from all
+@file{dir} files in @code{Info-default-directory-list} are merged by the
+Info system.
+
+@end itemize
+
+@node Printing a Texinfo file
+@section How do I print a Texinfo file?
+@cindex Printing a Texinfo file
+@cindex Texinfo file, printing
+@cindex Printing documentation
+
+You can't get nicely printed output from Info files; you must still have
+the original Texinfo source file for the manual you want to print.
+
+Assuming you have @TeX{} installed on your system, follow these steps:
+
+@enumerate
+
+@item
+Make sure the first line of the Texinfo file looks like this:
+
+@example
+\input texinfo
+@end example
+
+You may need to change @samp{texinfo} to the full pathname of the
+@file{texinfo.tex} file, which comes with Emacs as
+@file{doc/misc/texinfo.tex} (or copy or link it into the current directory).
+
+@item
+Type @kbd{texi2dvi @var{texinfo-source}}, where @var{texinfo-source} is
+the name of the Texinfo source file for which you want to produce a
+printed copy.  The @samp{texi2dvi} script is part of the GNU Texinfo
+distribution.
+
+Alternatively, @samp{texi2pdf} produces PDF files.
+
+@item
+Print the DVI file @file{@var{texinfo-source}.dvi} in the normal way for
+printing DVI files at your site.  For example, if you have a PostScript
+printer, run the @code{dvips} program to print the DVI file on that
+printer.
+
+@end enumerate
+
+To get more general instructions, retrieve the latest Texinfo package
+(@pxref{Installing Texinfo documentation}).
+
+@node Viewing Info files outside of Emacs
+@section Can I view Info files without using Emacs?
+@cindex Viewing Info files
+@cindex Info file viewers
+@cindex Alternative Info file viewers
+
+Yes.  Here are some alternative programs:
+
+@itemize @bullet
+
+@item
+@code{info}, a stand-alone version of the Info program, comes as part of
+the Texinfo package.  @xref{Installing Texinfo documentation}, for
+details.
+
+@item
+Tkinfo, an Info viewer that runs under X Window system and uses Tcl/Tk.
+You can get Tkinfo at
+@uref{http://math-www.uni-paderborn.de/~axel/tkinfo/}.
+
+@end itemize
+
+@node Informational files for Emacs
+@section What informational files are available for Emacs?
+@cindex Informational files included with Emacs
+@cindex Files included with Emacs
+@cindex @file{COPYING}, description of file
+@cindex @file{DISTRIB}, description of file
+@cindex @file{GNU}, description of file
+@cindex @file{INTERVIEW}, description of file
+@cindex @file{MACHINES}, description of file
+@cindex @file{MAILINGLISTS}, description of file
+@cindex @file{NEWS}, description of file
+
+This isn't a frequently asked question, but it should be!  A variety of
+informational files about Emacs and relevant aspects of the GNU project
+are available for you to read.
+
+The following files (and others) are available in the @file{etc}
+directory of the Emacs distribution (see @ref{File-name conventions}, if
+you're not sure where that is).  Many of these files are available via
+the Emacs @samp{Help} menu, or by typing @kbd{C-h ?} (@kbd{M-x
+help-for-help}).
+
+@table @file
+
+@item COPYING
+GNU General Public License
+
+@item DISTRIB
+Emacs Availability Information
+
+@item GNU
+The GNU Manifesto
+
+@item INTERVIEW
+Richard Stallman discusses his public-domain UNIX-compatible software
+system with BYTE editors
+
+@item MACHINES
+Status of Emacs on Various Machines and Systems
+
+@item MAILINGLISTS
+GNU Project Electronic Mailing Lists
+
+@item NEWS
+Emacs news, a history of recent user-visible changes
+
+@end table
+
+More GNU information, including back issues of the @cite{GNU's
+Bulletin}, are at
+
+@uref{http://www.gnu.org/bulletins/bulletins.html} and
+
+@uref{http://www.cs.pdx.edu/~trent/gnu/gnu.html}
+
+@node Help installing Emacs
+@section Where can I get help in installing Emacs?
+@cindex Installation help
+@cindex Help installing Emacs
+
+@xref{Installing Emacs}, for some basic installation hints, and see
+@ref{Problems building Emacs}, if you have problems with the installation.
+
+@uref{http://www.fsf.org/resources/service/, The GNU Service directory}
+lists companies and individuals willing to sell you help in installing
+or using Emacs and other GNU software.
+
+@node Obtaining the FAQ
+@section Where can I get the latest version of this FAQ?
+@cindex FAQ, obtaining the
+@cindex Latest FAQ version, obtaining the
+
+The Emacs FAQ is distributed with Emacs in Info format.  You can read it
+by selecting the @samp{Emacs FAQ} option from the @samp{Help} menu of
+the Emacs menu bar at the top of any Emacs frame, or by typing @kbd{C-h
+C-f} (@kbd{M-x view-emacs-FAQ}).  The very latest version is available
+in the Emacs development repository (@pxref{Latest version of Emacs}).
+
+@c ------------------------------------------------------------
+@node Status of Emacs
+@chapter Status of Emacs
+@cindex Status of Emacs
+
+This chapter gives you basic information about Emacs, including the
+status of its latest version.
+
+@menu
+* Origin of the term Emacs::
+* Latest version of Emacs::
+* New in Emacs 24::
+* New in Emacs 23::
+* New in Emacs 22::
+* New in Emacs 21::
+* New in Emacs 20::
+@end menu
+
+@node Origin of the term Emacs
+@section Where does the name ``Emacs'' come from?
+@cindex Origin of the term ``Emacs''
+@cindex Emacs name origin
+@cindex TECO
+@cindex Original version of Emacs
+
+Emacs originally was an acronym for Editor MACroS.  RMS says he ``picked
+the name Emacs because @key{E} was not in use as an abbreviation on ITS at
+the time.''  The first Emacs was a set of macros written in 1976 at MIT
+by RMS for the editor TECO (Text Editor and COrrector, originally Tape
+Editor and COrrector) under ITS (the Incompatible Timesharing System) on
+a PDP-10.  RMS had already extended TECO with a ``real-time''
+full-screen mode with reprogrammable keys.  Emacs was started by
+@email{gls@@east.sun.com, Guy Steele} as a project to unify the many
+divergent TECO command sets and key bindings at MIT, and completed by
+RMS.
+
+Many people have said that TECO code looks a lot like line noise; you
+can read more at @uref{news:alt.lang.teco}.  Someone has written a TECO
+implementation in Emacs Lisp (to find it, see @ref{Packages that do not
+come with Emacs}); it would be an interesting project to run the
+original TECO Emacs inside of Emacs.
+
+@cindex Why Emacs?
+For some not-so-serious alternative reasons for Emacs to have that
+name, check out the file @file{etc/JOKES} (@pxref{File-name
+conventions}).
+
+@node Latest version of Emacs
+@section What is the latest version of Emacs?
+@cindex Version, latest
+@cindex Latest version of Emacs
+@cindex Development, Emacs
+@cindex Repository, Emacs
+@cindex Bazaar repository, Emacs
+
+Emacs @value{EMACSVER} is the current version as of this writing.  A version
+number with two components (e.g. @samp{22.1}) indicates a released
+version; three components indicate a development
+version (e.g. @samp{23.0.50} is what will eventually become @samp{23.1}).
+
+Emacs is under active development, hosted at
+@uref{http://savannah.gnu.org/projects/emacs/, Savannah}.  The source
+code can be retrieved anonymously following the
+@uref{http://savannah.gnu.org/bzr/?group=emacs, instructions}.
+The repository is GNU Bazaar.
+
+Because Emacs undergoes many changes before a release, the version
+number of a development version is not especially meaningful.  It is
+better to refer to the date on which the sources were retrieved from the
+development repository.  The development version is usually quite robust
+for every-day use, but if stability is more important to you than the
+latest features, you may want to stick to the releases.
+
+The following sections list some of the major new features in the last
+few Emacs releases.  For full details of the changes in any version of
+Emacs, type @kbd{C-h C-n} (@kbd{M-x view-emacs-news}).  As of Emacs 22,
+you can give this command a prefix argument to read about which features
+were new in older versions.
+
+@node New in Emacs 24
+@section What is different about Emacs 24?
+@cindex Differences between Emacs 23 and Emacs 24
+@cindex Emacs 24, new features in
+
+@itemize
+@cindex packages, installing more
+@item
+Emacs now includes a package manager.  Type @kbd{M-x list-packages} to
+get started.  You can use this to download and automatically install
+many more Lisp packages.
+
+@cindex lexical binding
+@item
+Emacs Lisp now supports lexical binding on a per-file basis.  In
+@emph{lexical binding}, variable references must be located textually
+within the binding construct.  This contrasts with @emph{dynamic
+binding}, where programs can refer to variables defined outside their
+local textual scope.  A Lisp file can use a local variable setting of
+@code{lexical-binding: t} to indicate that the contents should be
+interpreted using lexical binding.  See the Emacs Lisp Reference
+Manual for more details.
+
+@cindex bidirectional display
+@cindex right-to-left languages
+@item
+Some human languages, such as English, are written from left to right.
+Others, such as Arabic, are written from right to left.  Emacs now has
+support for any mixture of these forms---this is ``bidirectional text''.
+
+@item
+Handling of text selections has been improved, and now integrates
+better with external clipboards.
+
+@cindex themes
+@item
+A new command @kbd{customize-themes} allows you to easily change the
+appearance of your Emacs.
+
+@item
+Emacs can be compiled with the GTK+ 3 toolkit.
+
+@item
+Support for several new external libraries can be included at compile
+time:
+
+@itemize
+
+@item
+``Security-Enhanced Linux'' (SELinux) is a Linux kernel feature that
+provides more sophisticated file access controls than ordinary
+``Unix-style'' file permissions.
+
+@item
+The ImageMagick display library.  This allows you to display many more
+image format in Emacs, as well as carry out transformations such as
+rotations.
+
+@item
+The GnuTLS library for secure network communications.  Emacs uses this
+transparently for email if your mail server supports it.
+
+@item
+The libxml2 library for parsing XML structures.
+@end itemize
+
+@item
+Much more flexibility in the handling of windows and buffer display.
+
+@end itemize
+
+As always, consult the @file{NEWS} file for more information.
+
+
+@node New in Emacs 23
+@section What is different about Emacs 23?
+@cindex Differences between Emacs 22 and Emacs 23
+@cindex Emacs 23, new features in
+
+@itemize
+
+@cindex Anti-aliased fonts
+@cindex Freetype fonts
+@item
+Emacs has a new font code that can use multiple font backends,
+including freetype and fontconfig.  Emacs can use the Xft library for
+anti-aliasing, and the otf and m17n libraries for complex text layout and
+text shaping.
+
+@cindex Unicode
+@cindex Character sets
+@item
+The Emacs character set is now a superset of Unicode.  Several new
+language environments have been added.
+
+@cindex Multi-tty support
+@cindex X and tty displays
+@item
+Emacs now supports using both X displays and ttys in the same session
+(@samp{multi-tty}).
+
+@cindex Daemon mode
+@item
+Emacs can be started as a daemon in the background.
+
+@cindex NeXTstep port
+@cindex GNUstep port
+@cindex Mac OS X Cocoa
+@item
+There is a new NeXTstep port of Emacs.  This supports GNUstep and Mac OS
+X (via the Cocoa libraries).  The Carbon port of Emacs, which supported
+Mac OS X in Emacs 22, has been removed.
+
+@cindex Directory-local variables
+@item
+Directory-local variables can now be defined, in a similar manner to
+file-local variables.
+
+@item
+Transient Mark mode (@pxref{Highlighting a region}) is on by default.
+
+@end itemize
+
+@noindent
+Other changes include: support for serial port access; D-Bus bindings; a
+new Visual Line mode for line-motion; improved completion; a new mode
+(@samp{DocView}) for viewing of PDF, PostScript, and DVI documents; nXML
+mode (for editing XML documents) is included; VC has been updated for
+newer version control systems; etc.
+
+
+@node New in Emacs 22
+@section What is different about Emacs 22?
+@cindex Differences between Emacs 21 and Emacs 22
+@cindex Emacs 22, new features in
+
+@itemize
+@cindex GTK+ Toolkit
+@cindex Drag-and-drop
+@item
+Emacs can be built with GTK+ widgets, and supports drag-and-drop
+operation on X.
+
+@cindex Supported systems
+@item
+Emacs 22 features support for GNU/Linux systems on S390 and x86-64
+machines, as well as support for the Mac OS X and Cygwin operating
+systems.
+
+@item
+The native MS-Windows, and Mac OS X builds include full support
+for images, toolbar, and tooltips.
+
+@item
+Font Lock mode, Auto Compression mode, and File Name Shadow Mode are
+enabled by default.
+
+@item
+The maximum size of buffers is increased: on 32-bit machines, it is
+256 MBytes for Emacs 23.1, and 512 MBytes for Emacs 23.2 and above.
+
+@item
+Links can be followed with @kbd{mouse-1}, in addition to @kbd{mouse-2}.
+
+@cindex Mouse wheel
+@item
+Mouse wheel support is enabled by default.
+
+@item
+Window fringes are customizable.
+
+@item
+The mode line of the selected window is now highlighted.
+
+@item
+The minibuffer prompt is displayed in a distinct face.
+
+@item
+Abbrev definitions are read automatically at startup.
+
+@item
+Grep mode is separate from Compilation mode and has many new options and
+commands specific to grep.
+
+@item
+The original Emacs macro system has been replaced by the new Kmacro
+package, which provides many new commands and features and a simple
+interface that uses the function keys F3 and F4.  Macros are stored in a
+macro ring, and can be debugged and edited interactively.
+
+@item
+The Grand Unified Debugger (GUD) can be used with a full graphical user
+interface to GDB; this provides many features found in traditional
+development environments, making it easy to manipulate breakpoints, add
+watch points, display the call stack, etc.  Breakpoints are visually
+indicated in the source buffer.
+
+@item
+@cindex New modes
+Many new modes and packages have been included in Emacs, such as Calc,
+TRAMP, URL, IDO, CUA, ERC, rcirc, Table, Image-Dired, SES, Ruler, Org,
+PGG, Flymake, Password, Printing, Reveal, wdired, t-mouse, longlines,
+savehist, Conf mode, Python mode, DNS mode, etc.
+
+@cindex Multilingual Environment
+@item
+Leim is now part of Emacs.  Unicode support has been much improved, and
+the following input methods have been added: belarusian, bulgarian-bds,
+bulgarian-phonetic, chinese-sisheng, croatian, dutch, georgian,
+latin-alt-postfix, latin-postfix, latin-prefix, latvian-keyboard,
+lithuanian-numeric, lithuanian-keyboard, malayalam-inscript, rfc1345,
+russian-computer, sgml, slovenian, tamil-inscript, ucs,
+ukrainian-computer, vietnamese-telex, and welsh.
+
+The following language environments have also been added: Belarusian,
+Bulgarian, Chinese-EUC-TW, Croatian, French, Georgian, Italian, Latin-6,
+Latin-7, Latvian, Lithuanian, Malayalam, Russian, Slovenian, Swedish,
+Tajik, Tamil, UTF-8, Ukrainian, Welsh, and Windows-1255.
+
+@cindex Documentation
+@cindex Emacs Lisp Manual
+@item
+In addition, Emacs 22 now includes the Emacs Lisp Reference Manual
+(@pxref{Emacs Lisp documentation}) and the Emacs Lisp Intro.
+@end itemize
+
+
+@node New in Emacs 21
+@section What is different about Emacs 21?
+@cindex Differences between Emacs 20 and Emacs 21
+@cindex Emacs 21, new features in
+
+@cindex Variable-size fonts
+@cindex Toolbar support
+Emacs 21 features a thorough rewrite of the display engine.  The new
+display engine supports variable-size fonts, images, and can play sounds
+on platforms which support that.  As a result, the visual appearance of
+Emacs, when it runs on a windowed display, is much more reminiscent of
+modern GUI programs, and includes 3D widgets (used for the mode line and
+the scroll bars), a configurable and extensible toolbar, tooltips
+(a.k.a.@: balloon help), and other niceties.
+
+@cindex Colors on text-only terminals
+@cindex TTY colors
+In addition, Emacs 21 supports faces on text-only terminals.  This means
+that you can now have colors when you run Emacs on a GNU/Linux console
+and on @code{xterm} with @kbd{emacs -nw}.
+
+
+@node New in Emacs 20
+@section What is different about Emacs 20?
+@cindex Differences between Emacs 19 and Emacs 20
+@cindex Emacs 20, new features in
+
+The differences between Emacs versions 18 and 19 were rather dramatic;
+the introduction of frames, faces, and colors on windowing systems was
+obvious to even the most casual user.
+
+There are differences between Emacs versions 19 and 20 as well, but many
+are more subtle or harder to find.  Among the changes are the inclusion
+of MULE code for languages that use non-Latin characters and for mixing
+several languages in the same document; the ``Customize'' facility for
+modifying variables without having to use Lisp; and automatic conversion
+of files from Macintosh, Microsoft, and Unix platforms.
+
+@c ------------------------------------------------------------
+@node Common requests
+@chapter Common requests
+@cindex Common requests
+
+@menu
+* Setting up a customization file::
+* Using Customize::
+* Colors on a TTY::
+* Debugging a customization file::
+* Displaying the current line or column::
+* Displaying the current file name in the titlebar::
+* Turning on abbrevs by default::
+* Associating modes with files::
+* Highlighting a region::
+* Replacing highlighted text::
+* Controlling case sensitivity::
+* Working with unprintable characters::
+* Searching for/replacing newlines::
+* Yanking text in isearch::
+* Wrapping words automatically::
+* Turning on auto-fill by default::
+* Changing load-path::
+* Using an already running Emacs process::
+* Compiler error messages::
+* Indenting switch statements::
+* Customizing C and C++ indentation::
+* Horizontal scrolling::
+* Overwrite mode::
+* Turning off beeping::
+* Turning the volume down::
+* Automatic indentation::
+* Matching parentheses::
+* Hiding #ifdef lines::
+* Repeating commands::
+* Valid X resources::
+* Evaluating Emacs Lisp code::
+* Changing the length of a Tab::
+* Inserting text at the beginning of each line::
+* Forcing the cursor to remain in the same column::
+* Forcing Emacs to iconify itself::
+* Using regular expressions::
+* Replacing text across multiple files::
+* Documentation for etags::
+* Disabling backups::
+* Disabling auto-save-mode::
+* Going to a line by number::
+* Modifying pull-down menus::
+* Deleting menus and menu options::
+* Turning on syntax highlighting::
+* Scrolling only one line::
+* Editing MS-DOS files::
+* Filling paragraphs with a single space::
+* Escape sequences in shell output::
+* Fullscreen mode on MS-Windows::
+@end menu
+
+@node Setting up a customization file
+@section How do I set up a @file{.emacs} file properly?
+@cindex @file{.emacs} file, setting up
+@cindex @file{.emacs} file, locating
+@cindex Init file, setting up
+@cindex Customization file, setting up
+
+@xref{Init File,,, emacs, The GNU Emacs Manual}.
+
+In general, new Emacs users should not be provided with @file{.emacs}
+files, because this can cause confusing non-standard behavior.  Then
+they send questions to @email{help-gnu-emacs@@gnu.org} asking why Emacs
+isn't behaving as documented.
+
+Emacs includes the Customize facility (@pxref{Using Customize}).  This
+allows users who are unfamiliar with Emacs Lisp to modify their
+@file{.emacs} files in a relatively straightforward way, using menus
+rather than Lisp code.
+
+While Customize might indeed make it easier to configure Emacs,
+consider taking a bit of time to learn Emacs Lisp and modifying your
+@file{.emacs} directly.  Simple configuration options are described
+rather completely in @ref{Init File,,, emacs, The GNU Emacs Manual},
+for users interested in performing frequently requested, basic tasks.
+
+Sometimes users are unsure as to where their @file{.emacs} file should
+be found.  Visiting the file as @file{~/.emacs} from Emacs will find
+the correct file.
+
+@node Using Customize
+@section How do I start using Customize?
+@cindex Customize groups
+@cindex Customizing variables
+@cindex Customizing faces
+
+The main Customize entry point is @kbd{M-x customize @key{RET}}.  This
+command takes you to a buffer listing all the available Customize
+groups.  From there, you can access all customizable options and faces,
+change their values, and save your changes to your init file.
+@xref{Easy Customization,,, emacs, The GNU Emacs Manual}.
+
+If you know the name of the group in advance (e.g. ``shell''), use
+@kbd{M-x customize-group @key{RET}}.
+
+If you wish to customize a single option, use @kbd{M-x customize-option
+@key{RET}}.  This command prompts you for the name of the option to
+customize, with completion.
+
+@node Colors on a TTY
+@section How do I get colors and syntax highlighting on a TTY?
+@cindex Colors on a TTY
+@cindex Syntax highlighting on a TTY
+@cindex Console, colors
+
+In Emacs 21.1 and later, colors and faces are supported in non-windowed mode,
+i.e.@: on Unix and GNU/Linux text-only terminals and consoles, and when
+invoked as @samp{emacs -nw} on X, and MS-Windows.  (Colors and faces were
+supported in the MS-DOS port since Emacs 19.29.)  Emacs automatically
+detects color support at startup and uses it if available.  If you think
+that your terminal supports colors, but Emacs won't use them, check the
+@code{termcap} entry for your display type for color-related
+capabilities.
+
+The command @kbd{M-x list-colors-display} pops up a window which
+exhibits all the colors Emacs knows about on the current display.
+
+Syntax highlighting is on by default since version 22.1.
+
+@node Debugging a customization file
+@section How do I debug a @file{.emacs} file?
+@cindex Debugging @file{.emacs} file
+@cindex @file{.emacs} debugging
+@cindex Init file debugging
+@cindex @samp{-debug-init} option
+
+Start Emacs with the @samp{-debug-init} command-line option.  This
+enables the Emacs Lisp debugger before evaluating your @file{.emacs}
+file, and places you in the debugger if something goes wrong.  The top
+line in the @file{trace-back} buffer will be the error message, and the
+second or third line of that buffer will display the Lisp code from your
+@file{.emacs} file that caused the problem.
+
+You can also evaluate an individual function or argument to a function
+in your @file{.emacs} file by moving the cursor to the end of the
+function or argument and typing @kbd{C-x C-e} (@kbd{M-x
+eval-last-sexp}).
+
+Use @kbd{C-h v} (@kbd{M-x describe-variable}) to check the value of
+variables which you are trying to set or use.
+
+@node Displaying the current line or column
+@section How do I make Emacs display the current line (or column) number?
+@cindex @code{line-number-mode}
+@cindex Displaying the current line or column
+@cindex Line number, displaying the current
+@cindex Column, displaying the current
+@cindex @code{mode-line-format}
+
+By default, Emacs displays the current line number of the point in the
+mode line.  You can toggle this feature off or on with the command
+@kbd{M-x line-number-mode}, or by setting the variable
+@code{line-number-mode}.  Note that Emacs will not display the line
+number if the buffer's size in bytes is larger than the value of the
+variable @code{line-number-display-limit}.
+
+You can similarly display the current column with
+@kbd{M-x column-number-mode}, or by putting the form
+
+@lisp
+(setq column-number-mode t)
+@end lisp
+
+@noindent
+in your @file{.emacs} file.  This feature is off by default.
+
+The @code{"%c"} format specifier in the variable @code{mode-line-format}
+will insert the current column's value into the mode line.  See the
+documentation for @code{mode-line-format} (using @kbd{C-h v
+mode-line-format @key{RET}}) for more information on how to set and use
+this variable.
+
+@cindex Set number capability in @code{vi} emulators
+The @samp{linum} package (distributed with Emacs since version 23.1)
+displays line numbers in the left margin, like the ``set number''
+capability of @code{vi}.  The packages @samp{setnu} and
+@samp{wb-line-number} (not distributed with Emacs) also implement this
+feature.
+
+@node Displaying the current file name in the titlebar
+@section How can I modify the titlebar to contain the current file name?
+@cindex Titlebar, displaying the current file name in
+@cindex File name, displaying in the titlebar
+@cindex @code{frame-title-format}
+
+The contents of an Emacs frame's titlebar is controlled by the variable
+@code{frame-title-format}, which has the same structure as the variable
+@code{mode-line-format}.  (Use @kbd{C-h v} or @kbd{M-x
+describe-variable} to get information about one or both of these
+variables.)
+
+By default, the titlebar for a frame does contain the name of the buffer
+currently being visited, except if there is a single frame.  In such a
+case, the titlebar contains Emacs invocation name and the name of the
+machine at which Emacs was invoked.  This is done by setting
+@code{frame-title-format} to the default value of
+
+@lisp
+(multiple-frames "%b" ("" invocation-name "@@" system-name))
+@end lisp
+
+To modify the behavior such that frame titlebars contain the buffer's
+name regardless of the number of existing frames, include the following
+in your @file{.emacs}:
+
+@lisp
+(setq frame-title-format "%b")
+@end lisp
+
+@node Turning on abbrevs by default
+@section How do I turn on abbrevs by default just in mode @var{mymode}?
+@cindex Abbrevs, turning on by default
+
+Abbrev mode expands abbreviations as you type them.  To turn it on in a
+specific buffer, use @kbd{M-x abbrev-mode}.  To turn it on in every
+buffer by default, put this in your @file{.emacs} file:
+
+@lisp
+(setq-default abbrev-mode t)
+@end lisp
+
+@noindent To turn it on in a specific mode, use:
+
+@lisp
+(add-hook '@var{mymode}-mode-hook
+          (lambda ()
+           (setq abbrev-mode t)))
+@end lisp
+
+@noindent If your Emacs version is older then 22.1, you will also need to use:
+
+@lisp
+(condition-case ()
+   (quietly-read-abbrev-file)
+  (file-error nil))
+@end lisp
+
+@node Associating modes with files
+@section How do I make Emacs use a certain major mode for certain files?
+@cindex Associating modes with files
+@cindex File extensions and modes
+@cindex @code{auto-mode-alist}, modifying
+@cindex Modes, associating with file extensions
+
+If you want to use a certain mode @var{foo} for all files whose names end
+with the extension @file{.@var{bar}}, this will do it for you:
+
+@lisp
+(add-to-list 'auto-mode-alist '("\\.@var{bar}\\'" . @var{foo}-mode))
+@end lisp
+
+Alternatively, put this somewhere in the first line of any file you want to
+edit in the mode @var{foo} (in the second line, if the first line begins
+with @samp{#!}):
+
+@example
+-*- @var{foo} -*-
+@end example
+
+@cindex Major mode for shell scripts
+The variable @code{interpreter-mode-alist} specifies which mode to use
+when loading an interpreted script (e.g. shell, python, etc.).  Emacs
+determines which interpreter you're using by examining the first line of
+the script.  Use @kbd{C-h v} (or @kbd{M-x describe-variable}) on
+@code{interpreter-mode-alist} to learn more.
+
+@node Highlighting a region
+@section How can I highlight a region of text in Emacs?
+@cindex Highlighting text
+@cindex Text, highlighting
+@cindex @code{transient-mark-mode}
+@cindex Region, highlighting a
+
+You can cause the region to be highlighted when the mark is active by
+including
+
+@lisp
+(transient-mark-mode 1)
+@end lisp
+
+@noindent
+in your @file{.emacs} file.  Since Emacs 23.1, this feature is on by default.
+
+@node Replacing highlighted text
+@section How can I replace highlighted text with what I type?
+@cindex @code{delete-selection-mode}
+@cindex Replacing highlighted text
+@cindex Highlighting and replacing text
+
+Use @code{delete-selection-mode}, which you can start automatically by
+placing the following Lisp form in your @file{.emacs} file:
+
+@lisp
+(delete-selection-mode 1)
+@end lisp
+
+According to the documentation string for @code{delete-selection-mode}
+(which you can read using @kbd{M-x describe-function @key{RET}
+delete-selection-mode @key{RET}}):
+
+@quotation
+When Delete Selection mode is enabled, Transient Mark mode is also
+enabled and typed text replaces the selection if the selection is
+active.  Otherwise, typed text is just inserted at point regardless of
+any selection.
+@end quotation
+
+This mode also allows you to delete (not kill) the highlighted region by
+pressing @key{DEL}.
+
+@node Controlling case sensitivity
+@section How do I control Emacs's case-sensitivity when searching/replacing?
+@cindex @code{case-fold-search}
+@cindex Case sensitivity of searches
+@cindex Searching without case sensitivity
+@cindex Ignoring case in searches
+
+@c FIXME
+The value of the variable @code{case-fold-search} determines whether
+searches are case sensitive:
+
+@lisp
+(setq case-fold-search nil) ; make searches case sensitive
+(setq case-fold-search t)   ; make searches case insensitive
+@end lisp
+
+@cindex Case sensitivity in replacements
+@cindex Replacing, and case sensitivity
+@cindex @code{case-replace}
+Similarly, for replacing, the variable @code{case-replace} determines
+whether replacements preserve case.
+
+You can also toggle case sensitivity at will in isearch with @kbd{M-c}.
+
+To change the case sensitivity just for one major mode, use the major
+mode's hook.  For example:
+
+@lisp
+(add-hook '@var{foo}-mode-hook
+          (lambda ()
+           (setq case-fold-search nil)))
+@end lisp
+
+@node Working with unprintable characters
+@section How do I search for, delete, or replace unprintable (eight-bit or control) characters?
+@cindex Unprintable characters, working with
+@cindex Working with unprintable characters
+@cindex Control characters, working with
+@cindex Eight-bit characters, working with
+@cindex Searching for unprintable characters
+@cindex Regexps and unprintable characters
+
+To search for a single character that appears in the buffer as, for
+example, @samp{\237}, you can type @kbd{C-s C-q 2 3 7}.
+Searching for @strong{all} unprintable characters is best done with a
+regular expression (@dfn{regexp}) search.  The easiest regexp to use for
+the unprintable chars is the complement of the regexp for the printable
+chars.
+
+@itemize @bullet
+
+@item
+Regexp for the printable chars: @samp{[\t\n\r\f -~]}
+
+@item
+Regexp for the unprintable chars: @samp{[^\t\n\r\f -~]}
+
+@end itemize
+
+To type these special characters in an interactive argument to
+@code{isearch-forward-regexp} or @code{re-search-forward}, you need to
+use @kbd{C-q}.  (@samp{\t}, @samp{\n}, @samp{\r}, and @samp{\f} stand
+respectively for @key{TAB}, @key{LFD}, @key{RET}, and @kbd{C-l}.)  So,
+to search for unprintable characters using @code{re-search-forward}:
+
+@kbd{M-x re-search-forward @key{RET} [^ @key{TAB} C-q @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~] @key{RET}}
+
+Using @code{isearch-forward-regexp}:
+
+@kbd{C-M-s [^ @key{TAB} @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~]}
+
+To delete all unprintable characters, simply use replace-regexp:
+
+@kbd{M-x replace-regexp @key{RET} [^ @key{TAB} C-q @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~] @key{RET} @key{RET}}
+
+Replacing is similar to the above.  To replace all unprintable
+characters with a colon, use:
+
+M-x replace-regexp @key{RET} [^ @key{TAB} C-q @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~] @key{RET} : @key{RET}
+
+@node Searching for/replacing newlines
+@section How do I input a newline character in isearch or query-replace?
+@cindex Searching for newlines
+@cindex Replacing newlines
+
+Use @kbd{C-q C-j}.  For more information,
+@pxref{Special Isearch,, Special Input for Incremental Search, emacs,
+The GNU Emacs Manual}.
+
+@node Yanking text in isearch
+@section How do I copy text from the kill ring into the search string?
+@cindex Yanking text into the search string
+@cindex isearch yanking
+
+Use @kbd{M-y}.  @xref{Isearch Yank,,, emacs, The GNU Emacs Manual}.
+
+@node Wrapping words automatically
+@section How do I make Emacs wrap words for me?
+@cindex Wrapping word automatically
+@cindex Wrapping lines
+@cindex Line wrap
+@cindex @code{auto-fill-mode}, introduction to
+@cindex Maximum line width, default value
+@cindex @code{fill-column}, default value
+
+Use @code{auto-fill-mode}, activated by typing @kbd{M-x auto-fill-mode}.
+The default maximum line width is 70, determined by the variable
+@code{fill-column}.  To learn how to turn this on automatically, see
+@ref{Turning on auto-fill by default}.
+
+@node Turning on auto-fill by default
+@section How do I turn on @code{auto-fill-mode} by default?
+@cindex @code{auto-fill-mode}, activating automatically
+@cindex Filling automatically
+@cindex Automatic entry to @code{auto-fill-mode}
+
+To turn on @code{auto-fill-mode} just once for one buffer, use @kbd{M-x
+auto-fill-mode}.
+
+To turn it on for every buffer in a certain mode, you must use the hook
+for that mode.  For example, to turn on @code{auto-fill} mode for all
+text buffers, including the following in your @file{.emacs} file:
+
+@lisp
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+@end lisp
+
+If you want @code{auto-fill} mode on in all major modes, do this:
+
+@lisp
+(setq-default auto-fill-function 'do-auto-fill)
+@end lisp
+
+@node Changing load-path
+@section How do I change @code{load-path}?
+@cindex @code{load-path}, modifying
+@cindex Modifying @code{load-path}
+@cindex Adding to @code{load-path}
+
+In general, you should only add to the @code{load-path}.  You can add
+directory @var{/dir/subdir} to the load path like this:
+
+@lisp
+(add-to-list 'load-path "/dir/subdir/")
+@end lisp
+
+To do this relative to your home directory:
+
+@lisp
+(add-to-list 'load-path "~/mysubdir/")
+@end lisp
+
+@node Using an already running Emacs process
+@section How do I use an already running Emacs from another window?
+@cindex @code{emacsclient}
+@cindex Emacs server functions
+@cindex Using an existing Emacs process
+
+@code{emacsclient}, which comes with Emacs, is for editing a file using
+an already running Emacs rather than starting up a new Emacs.  It does
+this by sending a request to the already running Emacs, which must be
+expecting the request.
+
+@itemize @bullet
+
+@item
+Setup:
+
+Emacs must have executed the @code{server-start} function for
+@samp{emacsclient} to work.  This can be done either by a command line
+option:
+
+@example
+emacs -f server-start
+@end example
+
+or by invoking @code{server-start} from @file{.emacs}:
+
+@lisp
+(if (@var{some conditions are met}) (server-start))
+@end lisp
+
+When this is done, Emacs creates a Unix domain socket named
+@file{server} in @file{/tmp/emacs@var{userid}}. See
+@code{server-socket-dir}.
+
+To get your news reader, mail reader, etc., to invoke
+@samp{emacsclient}, try setting the environment variable @code{EDITOR}
+(or sometimes @code{VISUAL}) to the value @samp{emacsclient}.  You may
+have to specify the full pathname of the @samp{emacsclient} program
+instead.  Examples:
+
+@example
+# csh commands:
+setenv EDITOR emacsclient
+
+# using full pathname
+setenv EDITOR /usr/local/emacs/etc/emacsclient
+
+# sh command:
+EDITOR=emacsclient ; export EDITOR
+@end example
+
+@item
+Normal use:
+
+When @samp{emacsclient} is run, it connects to the socket and passes its
+command line options to Emacs, which at the next opportunity will visit
+the files specified.  (Line numbers can be specified just like with
+Emacs.)  The user will have to switch to the Emacs window by hand.  When
+the user is done editing a file, the user can type @kbd{C-x #} (or
+@kbd{M-x server-edit}) to indicate this.  If there is another buffer
+requested by @code{emacsclient}, Emacs will switch to it; otherwise
+@code{emacsclient} will exit, signaling the calling program to continue.
+
+@cindex @code{gnuserv}
+There is an alternative version of @samp{emacsclient} called
+@samp{gnuserv}, written by @email{ange@@hplb.hpl.hp.com, Andy Norman}
+(@pxref{Packages that do not come with Emacs}).  @samp{gnuserv} uses
+Internet domain sockets, so it can work across most network connections.
+
+The most recent @samp{gnuserv} package is available at
+
+@uref{http://meltin.net/hacks/emacs/}
+
+@end itemize
+
+@node Compiler error messages
+@section How do I make Emacs recognize my compiler's funny error messages?
+@cindex Compiler error messages, recognizing
+@cindex Recognizing non-standard compiler errors
+@cindex Regexps for recognizing compiler errors
+@cindex Errors, recognizing compiler
+
+Customize the @code{compilation-error-regexp-alist} variable.
+
+@node Indenting switch statements
+@section How do I change the indentation for @code{switch}?
+@cindex @code{switch}, indenting
+@cindex Indenting of @code{switch}
+
+Many people want to indent their @code{switch} statements like this:
+
+@example
+f()
+@{
+  switch(x) @{
+    case A:
+      x1;
+      break;
+    case B:
+      x2;
+      break;
+    default:
+      x3;
+  @}
+@}
+@end example
+
+@noindent To achieve this, add the following line to your @file{.emacs}:
+
+@lisp
+(c-set-offset 'case-label '+)
+@end lisp
+
+@node Customizing C and C++ indentation
+@section How to customize indentation in C, C@t{++}, and Java buffers?
+@cindex Indentation, how to customize
+@cindex Customize indentation
+
+The Emacs @code{cc-mode} features an interactive procedure for
+customizing the indentation style, which is fully explained in the
+@cite{CC Mode} manual that is part of the Emacs distribution, see
+@ref{Customizing Indentation, , Customization Indentation, ccmode,
+The CC Mode Manual}.  Here's a short summary of the procedure:
+
+@enumerate
+@item
+Go to the beginning of the first line where you don't like the
+indentation and type @kbd{C-c C-o}.  Emacs will prompt you for the
+syntactic symbol; type @key{RET} to accept the default it suggests.
+
+@item
+Emacs now prompts for the offset of this syntactic symbol, showing the
+default (the current definition) inside parentheses.  You can choose
+one of these:
+
+@table @code
+@item 0
+No extra indentation.
+@item +
+Indent one basic offset.
+@item -
+Outdent one basic offset.
+@item ++
+Indent two basic offsets
+@item --
+Outdent two basic offsets.
+@item *
+Indent half basic offset.
+@item /
+Outdent half basic offset.
+@end table
+
+@item
+After choosing one of these symbols, type @kbd{C-c C-q} to reindent
+the line or the block according to what you just specified.
+
+@item
+If you don't like the result, go back to step 1.  Otherwise, add the
+following line to your @file{.emacs}:
+
+@lisp
+(c-set-offset '@var{syntactic-symbol} @var{offset})
+@end lisp
+
+@noindent
+where @var{syntactic-symbol} is the name Emacs shows in the minibuffer
+when you type @kbd{C-c C-o} at the beginning of the line, and
+@var{offset} is one of the indentation symbols listed above (@code{+},
+@code{/}, @code{0}, etc.) that you've chosen during the interactive
+procedure.
+
+@item
+Go to the next line whose indentation is not to your liking and repeat
+the process there.
+@end enumerate
+
+It is recommended to put all the resulting @code{(c-set-offset ...)}
+customizations inside a C mode hook, like this:
+
+@lisp
+(defun my-c-mode-hook ()
+  (c-set-offset ...)
+  (c-set-offset ...))
+(add-hook 'c-mode-hook 'my-c-mode-hook)
+@end lisp
+
+@noindent
+Using @code{c-mode-hook} avoids the need to put a @w{@code{(require
+'cc-mode)}} into your @file{.emacs} file, because @code{c-set-offset}
+might be unavailable when @code{cc-mode} is not loaded.
+
+Note that @code{c-mode-hook} runs for C source files only; use
+@code{c++-mode-hook} for C@t{++} sources, @code{java-mode-hook} for
+Java sources, etc.  If you want the same customizations to be in
+effect in @emph{all} languages supported by @code{cc-mode}, use
+@code{c-mode-common-hook}.
+
+@node Horizontal scrolling
+@section How can I make Emacs automatically scroll horizontally?
+@cindex @code{hscroll-mode}
+@cindex Horizontal scrolling
+@cindex Scrolling horizontally
+
+In Emacs 21 and later, this is on by default: if the variable
+@code{truncate-lines} is non-@code{nil} in the current buffer, Emacs
+automatically scrolls the display horizontally when point moves off the
+left or right edge of the window.
+
+Note that this is overridden by the variable
+@code{truncate-partial-width-windows} if that variable is non-nil
+and the current buffer is not full-frame width.
+
+In Emacs 20, use @code{hscroll-mode}.
+
+@node Overwrite mode
+@section How do I make Emacs ``typeover'' or ``overwrite'' instead of inserting?
+@cindex @key{Insert}
+@cindex @code{overwrite-mode}
+@cindex Overwriting existing text
+@cindex Toggling @code{overwrite-mode}
+
+@kbd{M-x overwrite-mode} (a minor mode).  This toggles
+@code{overwrite-mode} on and off, so exiting from @code{overwrite-mode}
+is as easy as another @kbd{M-x overwrite-mode}.
+
+On some systems, @key{Insert} toggles @code{overwrite-mode} on and off.
+
+@node Turning off beeping
+@section How do I stop Emacs from beeping on a terminal?
+@cindex Beeping, turning off
+@cindex Visible bell
+@cindex Bell, visible
+
+@email{martin@@cc.gatech.edu, Martin R. Frank} writes:
+
+Tell Emacs to use the @dfn{visible bell} instead of the audible bell,
+and set the visible bell to nothing.
+
+That is, put the following in your @code{TERMCAP} environment variable
+(assuming you have one):
+
+@example
+... :vb=: ...
+@end example
+
+And evaluate the following Lisp form:
+
+@example
+(setq visible-bell t)
+@end example
+
+@node Turning the volume down
+@section How do I turn down the bell volume in Emacs running under X?
+@cindex Bell, volume of
+@cindex Volume of bell
+
+On X Window system, you can adjust the bell volume and duration for all
+programs with the shell command @code{xset}.
+
+Invoking @code{xset} without any arguments produces some basic
+information, including the following:
+
+@example
+usage:  xset [-display host:dpy] option ...
+  To turn bell off:
+      -b                b off               b 0
+  To set bell volume, pitch and duration:
+       b [vol [pitch [dur]]]          b on
+@end example
+
+@node Automatic indentation
+@section How do I tell Emacs to automatically indent a new line to the indentation of the previous line?
+@cindex Indenting new lines
+@cindex New lines, indenting of
+@cindex Previous line, indenting according to
+@cindex Text indentation
+
+Such behavior is automatic (in Text mode) in Emacs 20 and later.  From the
+@file{etc/NEWS} file for Emacs 20.2:
+
+@example
+** In Text mode, now only blank lines separate paragraphs.  This makes
+it possible to get the full benefit of Adaptive Fill mode in Text mode,
+and other modes derived from it (such as Mail mode).  @key{TAB} in Text
+mode now runs the command @code{indent-relative}; this makes a practical
+difference only when you use indented paragraphs.
+
+If you want spaces at the beginning of a line to start a paragraph, use
+the new mode, Paragraph Indent Text mode.
+@end example
+
+@cindex Prefixing lines
+@cindex Fill prefix
+If you have @code{auto-fill-mode} turned on (@pxref{Turning on auto-fill
+by default}), you can tell Emacs to prefix every line with a certain
+character sequence, the @dfn{fill prefix}.  Type the prefix at the
+beginning of a line, position point after it, and then type @kbd{C-x .}
+(@code{set-fill-prefix}) to set the fill prefix.  Thereafter,
+auto-filling will automatically put the fill prefix at the beginning of
+new lines, and @kbd{M-q} (@code{fill-paragraph}) will maintain any fill
+prefix when refilling the paragraph.
+
+If you have paragraphs with different levels of indentation, you will
+have to set the fill prefix to the correct value each time you move to a
+new paragraph.  There are many packages available to deal with this
+(@pxref{Packages that do not come with Emacs}).  Look for ``fill'' and
+``indent'' keywords for guidance.
+
+@node Matching parentheses
+@section How do I show which parenthesis matches the one I'm looking at?
+@cindex Parentheses, matching
+@cindex @file{paren.el}
+@cindex Highlighting matching parentheses
+@cindex Pairs of parentheses, highlighting
+@cindex Matching parentheses
+
+Call @code{show-paren-mode} in your @file{.emacs} file:
+
+@lisp
+(show-paren-mode 1)
+@end lisp
+
+You can also enable this mode by selecting the @samp{Paren Match
+Highlighting} option from the @samp{Options} menu of the Emacs menu bar
+at the top of any Emacs frame.
+
+Alternatives to this mode include:
+
+@itemize @bullet
+
+@item
+If you're looking at a right parenthesis (or brace or bracket) you can
+delete it and reinsert it.  Emacs will momentarily move the cursor to
+the matching parenthesis.
+
+@item
+@kbd{C-M-f} (@code{forward-sexp}) and @kbd{C-M-b} (@code{backward-sexp})
+will skip over one set of balanced parentheses, so you can see which
+parentheses match.  (You can train it to skip over balanced brackets
+and braces at the same time by modifying the syntax table.)
+
+@cindex Show matching paren as in @code{vi}
+@item
+Here is some Emacs Lisp that will make the @key{%} key show the matching
+parenthesis, like in @code{vi}.  In addition, if the cursor isn't over a
+parenthesis, it simply inserts a % like normal.
+
+@lisp
+;; By an unknown contributor
+
+(global-set-key "%" 'match-paren)
+
+(defun match-paren (arg)
+  "Go to the matching paren if on a paren; otherwise insert %."
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+        ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+        (t (self-insert-command (or arg 1)))))
+@end lisp
+
+@end itemize
+
+@node Hiding #ifdef lines
+@section In C mode, can I show just the lines that will be left after @code{#ifdef} commands are handled by the compiler?
+@cindex @code{#ifdef}, selective display of
+@cindex @code{hide-ifdef-mode}
+@cindex Hiding @code{#ifdef} text
+@cindex Selectively displaying @code{#ifdef} code
+
+@kbd{M-x hide-ifdef-mode}.  (This is a minor mode.)  You might also want
+to investigate @file{cpp.el}, which is distributed with Emacs.
+
+@node Repeating commands
+@section How do I repeat a command as many times as possible?
+@cindex Repeating commands many times
+@cindex Commands, repeating many times
+@cindex @code{.}, equivalent to @code{vi} command
+
+As of Emacs 20.3, there is indeed a @code{repeat} command (@kbd{C-x z})
+that repeats the last command.  If you preface it with a prefix
+argument, the prefix arg is applied to the command.
+
+You can also type @kbd{C-x @key{ESC} @key{ESC}}
+(@code{repeat-complex-command}) to reinvoke commands that used the
+minibuffer to get arguments.  In @code{repeat-complex-command} you can
+type @kbd{M-p} and @kbd{M-n} (and also up-arrow and down-arrow, if your
+keyboard has these keys) to scan through all the different complex
+commands you've typed.
+
+To repeat a set of commands, use keyboard macros.  Use @kbd{C-x (} and
+@kbd{C-x )} to make a keyboard macro that invokes the command and then
+type @kbd{C-x e}.  @xref{Keyboard Macros,,, emacs, The GNU Emacs Manual}.
+
+If you're really desperate for the @code{.} command in @code{vi} that
+redoes the last insertion/deletion, use VIPER, a @code{vi} emulation
+mode which comes with Emacs, and which appears to support it.
+
+@node Valid X resources
+@section What are the valid X resource settings (i.e., stuff in .Xdefaults)?
+@cindex Resources, X
+@cindex X resources
+@cindex Setting X resources
+
+@xref{X Resources,,, emacs, The GNU Emacs Manual}.
+
+You can also use a resource editor, such as editres (for X11R5 and
+onwards), to look at the resource names for the menu bar, assuming Emacs
+was compiled with the X toolkit.
+
+@node Evaluating Emacs Lisp code
+@section How do I execute (``evaluate'') a piece of Emacs Lisp code?
+@cindex Evaluating Lisp code
+@cindex Lisp forms, evaluating
+
+There are a number of ways to execute (@dfn{evaluate}, in Lisp lingo) an
+Emacs Lisp @dfn{form}:
+
+@itemize @bullet
+
+@item
+If you want it evaluated every time you run Emacs, put it in a file
+named @file{.emacs} in your home directory.  This is known as ``your
+@file{.emacs} file,'' and contains all of your personal customizations.
+
+@item
+You can type the form in the @file{*scratch*} buffer, and then type
+@key{LFD} (or @kbd{C-j}) after it.  The result of evaluating the form
+will be inserted in the buffer.
+
+@item
+In @code{emacs-lisp-mode}, typing @kbd{C-M-x} evaluates a top-level form
+before or around point.
+
+@item
+Typing @kbd{C-x C-e} in any buffer evaluates the Lisp form immediately
+before point and prints its value in the echo area.
+
+@item
+Typing @kbd{M-:} or @kbd{M-x eval-expression} allows you to type a Lisp
+form in the minibuffer which will be evaluated once you press @key{RET}.
+
+@item
+You can use @kbd{M-x load-file} to have Emacs evaluate all the Lisp
+forms in a file.  (To do this from Lisp use the function @code{load}
+instead.)
+
+The functions @code{load-library}, @code{eval-region},
+@code{eval-buffer}, @code{require}, and @code{autoload} are also
+useful; see @ref{Emacs Lisp documentation}, if you want to learn more
+about them.
+
+@end itemize
+
+@node Changing the length of a Tab
+@section How do I change Emacs's idea of the @key{TAB} character's length?
+@cindex Tab length
+@cindex Length of tab character
+
+Set the default value of the variable @code{tab-width}.  For example, to set
+@key{TAB} stops every 10 characters, insert the following in your
+@file{.emacs} file:
+
+@lisp
+(setq-default tab-width 10)
+@end lisp
+
+Do not confuse variable @code{tab-width} with variable
+@code{tab-stop-list}.  The former is used for the display of literal
+@key{TAB} characters.  The latter controls what characters are inserted
+when you press the @key{TAB} character in certain modes.
+
+@node Inserting text at the beginning of each line
+@section How do I insert <some text> at the beginning of every line?
+@cindex Prefixing a region with some text
+@cindex Prefix character, inserting in mail/news replies
+@cindex Replies to mail/news, inserting a prefix character
+@cindex @code{mail-yank-prefix}
+@cindex Mail replies, inserting a prefix character
+@cindex News replies, inserting a prefix character
+
+To do this to an entire buffer, type @kbd{M-< M-x replace-regexp
+@key{RET} ^ @key{RET} your text @key{RET}}.
+
+To do this to a region, use @code{string-insert-rectangle}.
+Set the mark (@kbd{C-@key{SPC}}) at the beginning of the first line you
+want to prefix, move the cursor to last line to be prefixed, and type
+@kbd{M-x string-insert-rectangle @key{RET}}.  To do this for the whole
+buffer, type @kbd{C-x h M-x string-insert-rectangle @key{RET}}.
+
+If you are trying to prefix a yanked mail message with @samp{>}, you
+might want to set the variable @code{mail-yank-prefix}.  In Message
+buffers, you can even use @kbd{M-;} to cite yanked messages (@kbd{M-;}
+runs the function @code{comment-region}, it is a general-purpose
+mechanism to comment regions) (@pxref{Changing the included text prefix}).
+
+@node Forcing the cursor to remain in the same column
+@section How do I make Emacs behave like this: when I go up or down, the cursor should stay in the same column even if the line is too short?
+@cindex @code{picture-mode}
+@cindex Remaining in the same column, regardless of contents
+@cindex Vertical movement in empty documents
+
+Use @kbd{M-x picture-mode}.
+
+See also the variable @code{track-eol} and the command
+@code{set-goal-column} bound to @kbd{C-x C-n}
+(@pxref{Moving Point, , , emacs, The GNU Emacs Manual}).
+
+@node Forcing Emacs to iconify itself
+@section How do I tell Emacs to iconify itself?
+@cindex Iconification under the X Window System
+@cindex X Window System and iconification
+@cindex Suspending Emacs
+
+@kbd{C-z} iconifies Emacs when running under X and suspends Emacs
+otherwise.  @xref{Frame Commands,,, emacs, The GNU Emacs Manual}.
+
+@node Using regular expressions
+@section How do I use regexps (regular expressions) in Emacs?
+@cindex Regexps
+@cindex Regular expressions
+@cindex Differences between Unix and Emacs regexps
+@cindex Unix regexps, differences from Emacs
+@cindex Text strings, putting regexps in
+
+@xref{Regexp Backslash,,, emacs, The GNU Emacs Manual}.
+
+The @code{or} operator is @samp{\|}, not @samp{|}, and the grouping operators
+are @samp{\(} and @samp{\)}.  Also, the string syntax for a backslash is
+@samp{\\}.  To specify a regular expression like @samp{xxx\(foo\|bar\)}
+in a Lisp string, use @samp{xxx\\(foo\\|bar\\)}.
+
+Note the doubled backslashes!
+
+@itemize @bullet
+
+@item
+Unlike in Unix @file{grep}, @file{sed}, etc., a complement character set
+(@samp{[^...]})  can match a newline character (@key{LFD} a.k.a.@:
+@kbd{C-j} a.k.a.@: @samp{\n}), unless newline is mentioned as one of the
+characters not to match.
+
+@item
+The character syntax regexps (e.g., @samp{\sw}) are not
+meaningful inside character set regexps (e.g., @samp{[aeiou]}).  (This
+is actually typical for regexp syntax.)
+
+@end itemize
+
+@node Replacing text across multiple files
+@section How do I perform a replace operation across more than one file?
+@cindex Replacing strings across files
+@cindex Multiple files, replacing across
+@cindex Files, replacing strings across multiple
+@cindex Recursive search/replace operations
+
+Dired mode (@kbd{M-x dired @key{RET}}, or @kbd{C-x d}) supports the
+command @code{dired-do-query-replace-regexp} (@kbd{Q}), which allows
+users to replace regular expressions in multiple files.
+
+You can use this command to perform search/replace operations on
+multiple files by following the following steps:
+
+@itemize @bullet
+@item
+Assemble a list of files you want to operate on with either
+@code{find-dired}, @code{find-name-dired} or @code{find-grep-dired}.
+
+@item
+Mark all files in the resulting Dired buffer using @kbd{t}.
+
+@item
+Use @kbd{Q} to start a @code{query-replace-regexp} session on the marked
+files.
+
+@item
+To accept all replacements in each file, hit @kbd{!}.
+@end itemize
+
+Another way to do the same thing is to use the ``tags'' feature of
+Emacs: it includes the command @code{tags-query-replace} which performs
+a query-replace across all the files mentioned in the @file{TAGS} file.
+@xref{Tags Search,,, emacs, The GNU Emacs Manual}.
+
+@node Documentation for etags
+@section Where is the documentation for @code{etags}?
+@cindex Documentation for @code{etags}
+@cindex @code{etags}, documentation for
+
+The @code{etags} man page should be in the same place as the
+@code{emacs} man page.
+
+Quick command-line switch descriptions are also available.  For example,
+@samp{etags -H}.
+
+@node Disabling backups
+@section How do I disable backup files?
+@cindex Backups, disabling
+@cindex Disabling backups
+
+You probably don't want to do this, since backups are useful, especially
+when something goes wrong.
+
+To avoid seeing backup files (and other ``uninteresting'' files) in Dired,
+load @code{dired-x} by adding the following to your @file{.emacs} file:
+
+@lisp
+(add-hook 'dired-load-hook
+          (lambda ()
+           (require 'dired-x)))
+@end lisp
+
+With @code{dired-x} loaded, @kbd{M-o} toggles omitting in each dired buffer.
+You can make omitting the default for new dired buffers by putting the
+following in your @file{.emacs}:
+
+@lisp
+(add-hook 'dired-mode-hook 'dired-omit-toggle)
+@end lisp
+
+If you're tired of seeing backup files whenever you do an @samp{ls} at
+the Unix shell, try GNU @code{ls} with the @samp{-B} option.  GNU
+@code{ls} is part of the GNU Fileutils package, available from
+@samp{ftp.gnu.org} and its mirrors (@pxref{Current GNU distributions}).
+
+To disable or change the way backups are made,
+@pxref{Backup Names,,, emacs, The GNU Emacs Manual}.
+
+@cindex Backup files in a single directory
+Beginning with Emacs 21.1, you can control where Emacs puts backup files
+by customizing the variable @code{backup-directory-alist}.  This
+variable's value specifies that files whose names match specific patters
+should have their backups put in certain directories.  A typical use is
+to add the element @code{("." . @var{dir})} to force Emacs to put
+@strong{all} backup files in the directory @file{dir}.
+
+@node Disabling auto-save-mode
+@section How do I disable @code{auto-save-mode}?
+@cindex Disabling @code{auto-save-mode}
+@cindex Auto-saving
+@cindex Saving at frequent intervals
+
+You probably don't want to do this, since auto-saving is useful,
+especially when Emacs or your computer crashes while you are editing a
+document.
+
+Instead, you might want to change the variable
+@code{auto-save-interval}, which specifies how many keystrokes Emacs
+waits before auto-saving.  Increasing this value forces Emacs to wait
+longer between auto-saves, which might annoy you less.
+
+You might also want to look into Sebastian Kremer's @code{auto-save}
+package (@pxref{Packages that do not come with Emacs}).  This
+package also allows you to place all auto-save files in one directory,
+such as @file{/tmp}.
+
+To disable or change how @code{auto-save-mode} works,
+@pxref{Auto Save,,, emacs, The GNU Emacs Manual}.
+
+@node Going to a line by number
+@section How can I go to a certain line given its number?
+@cindex Going to a line by number
+@cindex Compilation error messages
+@cindex Recompilation
+
+Are you sure you indeed need to go to a line by its number?  Perhaps all
+you want is to display a line in your source file for which a compiler
+printed an error message?  If so, compiling from within Emacs using the
+@kbd{M-x compile} and @kbd{M-x recompile} commands is a much more
+effective way of doing that.  Emacs automatically intercepts the compile
+error messages, inserts them into a special buffer called
+@code{*compilation*}, and lets you visit the locus of each message in
+the source.  Type @kbd{C-x `} to step through the offending lines one by
+one (starting with Emacs 22, you can also use @kbd{M-g M-p} and
+@kbd{M-g M-n} to go to the previous and next matches directly).  Click
+@kbd{Mouse-2} or press @key{RET} on a message text in the
+@code{*compilation*} buffer to go to the line whose number is mentioned
+in that message.
+
+But if you indeed need to go to a certain text line, type @kbd{M-g M-g}
+(which is the default binding of the @code{goto-line} function starting
+with Emacs 22).  Emacs will prompt you for the number of the line and go
+to that line.
+
+You can do this faster by invoking @code{goto-line} with a numeric
+argument that is the line's number.  For example, @kbd{C-u 286 M-g M-g}
+will jump to line number 286 in the current buffer.
+
+@node Modifying pull-down menus
+@section How can I create or modify new pull-down menu options?
+@cindex Pull-down menus, creating or modifying
+@cindex Menus, creating or modifying
+@cindex Creating new menu options
+@cindex Modifying pull-down menus
+@cindex Menus and keymaps
+@cindex Keymaps and menus
+
+Each menu title (e.g., @samp{File}, @samp{Edit}, @samp{Buffers})
+represents a local or global keymap.  Selecting a menu title with the
+mouse displays that keymap's non-@code{nil} contents in the form of a menu.
+
+So to add a menu option to an existing menu, all you have to do is add a
+new definition to the appropriate keymap.  Adding a @samp{Forward Word}
+item to the @samp{Edit} menu thus requires the following Lisp code:
+
+@lisp
+(define-key global-map
+  [menu-bar edit forward]
+  '("Forward word" . forward-word))
+@end lisp
+
+@noindent
+The first line adds the entry to the global keymap, which includes
+global menu bar entries.  Replacing the reference to @code{global-map}
+with a local keymap would add this menu option only within a particular
+mode.
+
+The second line describes the path from the menu-bar to the new entry.
+Placing this menu entry underneath the @samp{File} menu would mean
+changing the word @code{edit} in the second line to @code{file}.
+
+The third line is a cons cell whose first element is the title that will
+be displayed, and whose second element is the function that will be
+called when that menu option is invoked.
+
+To add a new menu, rather than a new option to an existing menu, we must
+define an entirely new keymap:
+
+@lisp
+(define-key global-map [menu-bar words]
+  (cons "Words" (make-sparse-keymap "Words")))
+@end lisp
+
+The above code creates a new sparse keymap, gives it the name
+@samp{Words}, and attaches it to the global menu bar.  Adding the
+@samp{Forward Word} item to this new menu would thus require the
+following code:
+
+@lisp
+(define-key global-map
+  [menu-bar words forward]
+  '("Forward word" . forward-word))
+@end lisp
+
+@noindent
+Note that because of the way keymaps work, menu options are displayed
+with the more recently defined items at the top.  Thus if you were to
+define menu options @samp{foo}, @samp{bar}, and @samp{baz} (in that
+order), the menu option @samp{baz} would appear at the top, and
+@samp{foo} would be at the bottom.
+
+One way to avoid this problem is to use the function @code{define-key-after},
+which works the same as @code{define-key}, but lets you modify where items
+appear.  The following Lisp code would insert the @samp{Forward Word}
+item in the @samp{Edit} menu immediately following the @samp{Undo} item:
+
+@lisp
+(define-key-after
+  (lookup-key global-map [menu-bar edit])
+  [forward]
+  '("Forward word" . forward-word)
+  'undo)
+@end lisp
+
+Note how the second and third arguments to @code{define-key-after} are
+different from those of @code{define-key}, and that we have added a new
+(final) argument, the function after which our new key should be
+defined.
+
+To move a menu option from one position to another, simply evaluate
+@code{define-key-after} with the appropriate final argument.
+
+More detailed information---and more examples of how to create and
+modify menu options---are in the @cite{Emacs Lisp Reference Manual}, under
+``Menu Keymaps.''  (@xref{Emacs Lisp documentation}, for information on
+this manual.)
+
+@node Deleting menus and menu options
+@section How do I delete menus and menu options?
+@cindex Deleting menus and menu options
+@cindex Menus, deleting
+
+The simplest way to remove a menu is to set its keymap to @samp{nil}.
+For example, to delete the @samp{Words} menu (@pxref{Modifying pull-down
+menus}), use:
+
+@lisp
+(define-key global-map [menu-bar words] nil)
+@end lisp
+
+Similarly, removing a menu option requires redefining a keymap entry to
+@code{nil}.  For example, to delete the @samp{Forward word} menu option
+from the @samp{Edit} menu (we added it in @ref{Modifying pull-down
+menus}), use:
+
+@lisp
+(define-key global-map [menu-bar edit forward] nil)
+@end lisp
+
+@node Turning on syntax highlighting
+@section How do I turn on syntax highlighting?
+@cindex Syntax highlighting
+@cindex @code{font-lock-mode}
+@cindex Highlighting based on syntax
+@cindex Colorizing text
+@cindex FAQ, @code{font-lock-mode}
+
+@code{font-lock-mode} is the standard way to have Emacs perform syntax
+highlighting in the current buffer.  It is enabled by default in Emacs
+22.1 and later.
+
+With @code{font-lock-mode} turned on, different types of text will
+appear in different colors.  For instance, in a programming mode,
+variables will appear in one face, keywords in a second, and comments in
+a third.
+
+To turn @code{font-lock-mode} off within an existing buffer, use
+@kbd{M-x font-lock-mode @key{RET}}.
+
+In Emacs 21 and earlier versions, you could use the following code in
+your @file{.emacs} file to turn on @code{font-lock-mode} globally:
+
+@lisp
+(global-font-lock-mode 1)
+@end lisp
+
+Highlighting a buffer with @code{font-lock-mode} can take quite a while,
+and cause an annoying delay in display, so several features exist to
+work around this.
+
+@cindex Just-In-Time syntax highlighting
+In Emacs 21 and later, turning on @code{font-lock-mode} automatically
+activates the new @dfn{Just-In-Time fontification} provided by
+@code{jit-lock-mode}.  @code{jit-lock-mode} defers the fontification of
+portions of buffer until you actually need to see them, and can also
+fontify while Emacs is idle.  This makes display of the visible portion
+of a buffer almost instantaneous.  For details about customizing
+@code{jit-lock-mode}, type @kbd{C-h f jit-lock-mode @key{RET}}.
+
+@cindex Levels of syntax highlighting
+@cindex Decoration level, in @code{font-lock-mode}
+In versions of Emacs before 21, different levels of decoration are
+available, from slight to gaudy.  More decoration means you need to wait
+more time for a buffer to be fontified (or a faster machine).  To
+control how decorated your buffers should become, set the value of
+@code{font-lock-maximum-decoration} in your @file{.emacs} file, with a
+@code{nil} value indicating default (usually minimum) decoration, and a
+@code{t} value indicating the maximum decoration.  For the gaudiest
+possible look, then, include the line
+
+@lisp
+(setq font-lock-maximum-decoration t)
+@end lisp
+
+@noindent
+in your @file{.emacs} file.  You can also set this variable such that
+different modes are highlighted in a different ways; for more
+information, see the documentation for
+@code{font-lock-maximum-decoration} with @kbd{C-h v} (or @kbd{M-x
+describe-variable @key{RET}}).
+
+Also see the documentation for the function @code{font-lock-mode},
+available by typing @kbd{C-h f font-lock-mode} (@kbd{M-x
+describe-function @key{RET} font-lock-mode @key{RET}}).
+
+To print buffers with the faces (i.e., colors and fonts) intact, use
+@kbd{M-x ps-print-buffer-with-faces} or @kbd{M-x
+ps-print-region-with-faces}.  You will need a way to send text to a
+PostScript printer, or a PostScript interpreter such as Ghostscript;
+consult the documentation of the variables @code{ps-printer-name},
+@code{ps-lpr-command}, and @code{ps-lpr-switches} for more details.
+
+@node Scrolling only one line
+@section How can I force Emacs to scroll only one line when I move past the bottom of the screen?
+@cindex Scrolling only one line
+@cindex Reducing the increment when scrolling
+
+Customize the @code{scroll-conservatively} variable with @kbd{M-x
+customize-variable @key{RET} scroll-conservatively @key{RET}} and set it
+to a large value like, say, 10000.  For an explanation of what this
+means, @pxref{Auto Scrolling,,, emacs, The GNU Emacs Manual}.
+
+Alternatively, use the following Lisp form in your @file{.emacs}:
+
+@lisp
+(setq scroll-conservatively most-positive-fixnum)
+@end lisp
+
+@node Editing MS-DOS files
+@section How can I edit MS-DOS files using Emacs?
+@cindex Editing MS-DOS files
+@cindex MS-DOS files, editing
+@cindex Microsoft files, editing
+@cindex Windows files, editing
+
+As of Emacs 20, detection and handling of MS-DOS (and Windows) files is
+performed transparently.  You can open MS-DOS files on a Unix system,
+edit it, and save it without having to worry about the file format.
+
+When editing an MS-DOS style file, the mode line will indicate that it
+is a DOS file.  On Unix and GNU/Linux systems, and also on a Macintosh,
+the string @samp{(DOS)} will appear near the left edge of the mode line;
+on DOS and Windows, where the DOS end-of-line (EOL) format is the
+default, a backslash (@samp{\}) will appear in the mode line.
+
+@node Filling paragraphs with a single space
+@section How can I tell Emacs to fill paragraphs with a single space after each period?
+@cindex One space following periods
+@cindex Single space following periods
+@cindex Periods, one space following
+
+Add the following line to your @file{.emacs} file:
+
+@lisp
+(setq sentence-end-double-space nil)
+@end lisp
+
+@node Escape sequences in shell output
+@section Why these strange escape sequences from @code{ls} from the Shell mode?
+@cindex Escape sequences in @code{ls} output
+@cindex @code{ls} in Shell mode
+
+In many systems, @code{ls} is aliased to @samp{ls --color}, which
+prints using ANSI color escape sequences.  Emacs version 21.1 and
+later includes the @code{ansi-color} package, which lets Shell mode
+recognize these escape sequences.  In Emacs 23.2 and later, the
+package is enabled by default; in earlier versions you can enable it
+by typing @kbd{M-x ansi-color-for-comint-mode} in the Shell buffer, or
+by adding @code{(add-hook 'shell-mode-hook
+'ansi-color-for-comint-mode-on)} to your init file.
+
+In Emacs versions before 21.1, the @code{ansi-color} package is not
+included.  In that case, you need to unalias @code{ls} for interactive
+shells running in Emacs; this can be done by checking the @code{EMACS}
+variable in the environment.
+
+@node Fullscreen mode on MS-Windows
+@section How can I start Emacs in fullscreen mode on MS-Windows?
+@cindex Maximize frame
+@cindex Fullscreen mode
+
+Use the function @code{w32-send-sys-command}.  For example, you can
+put the following in your @file{.emacs} file:
+
+@lisp
+(add-hook 'term-setup-hook
+          #'(lambda () (w32-send-sys-command ?\xF030)))
+@end lisp
+
+To avoid the slightly distracting visual effect of Emacs starting with
+its default frame size and then growing to fullscreen, you can add an
+@samp{Emacs.Geometry} entry to the Windows registry settings.
+@xref{X Resources,,, emacs, The GNU Emacs Manual}.
+
+To compute the correct values for width and height, first maximize the
+Emacs frame and then evaluate @code{(frame-height)} and
+@code{(frame-width)} with @kbd{M-:}.
+
+@c ------------------------------------------------------------
+@node Bugs and problems
+@chapter Bugs and problems
+@cindex Bugs and problems
+
+The Emacs manual lists some common kinds of trouble users could get
+into, see @ref{Lossage, , Dealing with Emacs Trouble, emacs, The GNU
+Emacs Manual}, so you might look there if the problem you encounter
+isn't described in this chapter.  If you decide you've discovered a bug,
+see @ref{Bugs, , Reporting Bugs, emacs, The GNU Emacs Manual}, for
+instructions how to do that.
+
+The file @file{etc/PROBLEMS} in the Emacs distribution lists various
+known problems with building and using Emacs on specific platforms;
+type @kbd{C-h C-p} to read it.
+
+@menu
+* Problems with very large files::
+* ^M in the shell buffer::
+* Problems with Shell Mode::
+* Termcap/Terminfo entries for Emacs::
+* Errors with init files::
+* Emacs ignores X resources::
+* Emacs ignores frame parameters::
+* Editing files with $ in the name::
+* Shell mode loses the current directory::
+* Security risks with Emacs::
+* Dired claims that no file is on this line::
+@end menu
+
+@node Problems with very large files
+@section Does Emacs have problems with files larger than 8 megabytes?
+@cindex Very large files, opening
+@cindex Large files, opening
+@cindex Opening very large files
+@cindex Maximum file size
+@cindex Files, maximum size
+
+Old versions (i.e., anything before 19.29) of Emacs had problems editing
+files larger than 8 megabytes.  In versions 19.29 and later, the maximum
+buffer size is at least 2^27-1, or 134,217,727 bytes, or 132 MBytes.
+The maximum buffer size on 32-bit machines increased to 256 MBytes in
+Emacs 22, and again to 512 MBytes in Emacs 23.2.
+
+Emacs compiled on a 64-bit machine can handle much larger buffers.
+
+@node ^M in the shell buffer
+@section How do I get rid of @samp{^M} or echoed commands in my shell buffer?
+@cindex Shell buffer, echoed commands and @samp{^M} in
+@cindex Echoed commands in @code{shell-mode}
+
+Try typing @kbd{M-x shell-strip-ctrl-m @key{RET}} while in @code{shell-mode} to
+make them go away.  If that doesn't work, you have several options:
+
+For @code{tcsh}, put this in your @file{.cshrc} (or @file{.tcshrc})
+file:
+
+@example
+if ($?EMACS) then
+    if ("$EMACS" =~ /*) then
+        if ($?tcsh) unset edit
+        stty nl
+    endif
+endif
+@end example
+
+Or put this in your @file{.emacs_tcsh} or @file{~/.emacs.d/init_tcsh.sh} file:
+
+@example
+unset edit
+stty nl
+@end example
+
+Alternatively, use @code{csh} in your shell buffers instead of
+@code{tcsh}.  One way is:
+
+@lisp
+(setq explicit-shell-file-name "/bin/csh")
+@end lisp
+
+@noindent
+and another is to do this in your @file{.cshrc} (or @file{.tcshrc})
+file:
+
+@example
+setenv ESHELL /bin/csh
+@end example
+
+@noindent
+(You must start Emacs over again with the environment variable properly
+set for this to take effect.)
+
+You can also set the @code{ESHELL} environment variable in Emacs Lisp
+with the following Lisp form,
+
+@lisp
+(setenv "ESHELL" "/bin/csh")
+@end lisp
+
+The above solutions try to prevent the shell from producing the
+@samp{^M} characters in the first place.  If this is not possible
+(e.g., if you use a Windows shell), you can get Emacs to remove these
+characters from the buffer by adding this to your @file{.emacs} init
+file:
+
+@smalllisp
+(add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m)
+@end smalllisp
+
+On a related note: if your shell is echoing your input line in the shell
+buffer, you might want to customize the @code{comint-process-echoes}
+variable in your shell buffers, or try the following command in your
+shell start-up file:
+
+@example
+stty -icrnl -onlcr -echo susp ^Z
+@end example
+
+@node Problems with Shell Mode
+@section Why do I get an error message when I try to run @kbd{M-x shell}?
+
+@cindex Shell Mode, problems
+@cindex @code{explicit-shell-file-name}
+This might happen because Emacs tries to look for the shell in a wrong
+place.  If you know where your shell executable is, set the variable
+@code{explicit-shell-file-name} in your @file{.emacs} file to point to
+its full file name.
+
+@cindex Antivirus programs, and Shell Mode
+Some people have trouble with Shell Mode on MS-Windows because of
+intrusive antivirus software; disabling the resident antivirus program
+solves the problems in those cases.
+
+@node Termcap/Terminfo entries for Emacs
+@section Where is the termcap/terminfo entry for terminal type @samp{emacs}?
+@cindex Termcap
+@cindex Terminfo
+@cindex Emacs entries for termcap/terminfo
+
+The termcap entry for terminal type @samp{emacs} is ordinarily put in
+the @samp{TERMCAP} environment variable of subshells.  It may help in
+certain situations (e.g., using rlogin from shell buffer) to add an
+entry for @samp{emacs} to the system-wide termcap file.  Here is a
+correct termcap entry for @samp{emacs}:
+
+@example
+emacs:tc=unknown:
+@end example
+
+To make a terminfo entry for @samp{emacs}, use @code{tic} or
+@code{captoinfo}.  You need to generate
+@file{/usr/lib/terminfo/e/emacs}.  It may work to simply copy
+@file{/usr/lib/terminfo/d/dumb} to @file{/usr/lib/terminfo/e/emacs}.
+
+Having a termcap/terminfo entry will not enable the use of full screen
+programs in shell buffers.  Use @kbd{M-x terminal-emulator} for that
+instead.
+
+A workaround to the problem of missing termcap/terminfo entries is to
+change terminal type @samp{emacs} to type @samp{dumb} or @samp{unknown}
+in your shell start up file.  @code{csh} users could put this in their
+@file{.cshrc} files:
+
+@example
+if ("$term" == emacs) set term=dumb
+@end example
+
+@node Errors with init files
+@section Why does Emacs say @samp{Error in init file}?
+@cindex Error in @file{.emacs}
+@cindex Error in init file
+@cindex Init file, errors in
+@cindex @file{.emacs} file, errors in
+@cindex Debugging @file{.emacs} file
+
+An error occurred while loading either your @file{.emacs} file or the
+system-wide file @file{site-lisp/default.el}.  Emacs 21.1 and later pops the
+@file{*Messages*} buffer, and puts there some additional information
+about the error, to provide some hints for debugging.
+
+For information on how to debug your @file{.emacs} file, see
+@ref{Debugging a customization file}.
+
+It may be the case that you need to load some package first, or use a
+hook that will be evaluated after the package is loaded.  A common case
+of this is explained in @ref{Terminal setup code works after Emacs has
+begun}.
+
+@node Emacs ignores X resources
+@section Why does Emacs ignore my X resources (my .Xdefaults file)?
+@cindex X resources being ignored
+@cindex Ignored X resources
+@cindex @file{.Xdefaults}
+
+As of version 19, Emacs searches for X resources in the files specified
+by the following environment variables:
+
+@itemize @bullet
+
+@item @code{XFILESEARCHPATH}
+@item @code{XUSERFILESEARCHPATH}
+@item @code{XAPPLRESDIR}
+
+@end itemize
+
+This emulates the functionality provided by programs written using the
+Xt toolkit.
+
+@code{XFILESEARCHPATH} and @code{XUSERFILESEARCHPATH} should be a list
+of file names separated by colons.  @code{XAPPLRESDIR} should be a list
+of directory names separated by colons.
+
+Emacs searches for X resources:
+
+@enumerate
+
+@item
+specified on the command line, with the @samp{-xrm RESOURCESTRING} option,
+
+@item
+then in the value of the @samp{XENVIRONMENT} environment variable,
+
+@itemize @minus
+
+@item
+or if that is unset, in the file named
+@file{~/.Xdefaults-@var{hostname}} if it exists (where @var{hostname} is
+the name of the machine Emacs is running on),
+
+@end itemize
+
+@item
+then in the screen-specific and server-wide resource properties provided
+by the server,
+
+@itemize @minus
+
+@item
+or if those properties are unset, in the file named @file{~/.Xdefaults}
+if it exists,
+
+@end itemize
+
+@item
+then in the files listed in @samp{XUSERFILESEARCHPATH},
+
+@itemize @minus
+
+@item
+or in files named @file{@var{lang}/Emacs} in directories listed in
+@samp{XAPPLRESDIR} (where @var{lang} is the value of the @code{LANG}
+environment variable), if the @samp{LANG} environment variable is set,
+@item
+or in files named Emacs in the directories listed in @samp{XAPPLRESDIR}
+@item
+or in @file{~/@var{lang}/Emacs} (if the @code{LANG} environment variable
+is set),
+@item
+or in @file{~/Emacs},
+
+@end itemize
+
+@item
+then in the files listed in  @code{XFILESEARCHPATH}.
+
+@end enumerate
+
+@node Emacs ignores frame parameters
+@section Why don't my customizations of the frame parameters work?
+@cindex Frame parameters
+
+This probably happens because you have set the frame parameters in the
+variable @code{initial-frame-alist}.  That variable holds parameters
+used only for the first frame created when Emacs starts.  To customize
+the parameters of all frames, change the variable
+@code{default-frame-alist} instead.
+
+These two variables exist because many users customize the initial frame
+in a special way.  For example, you could determine the position and
+size of the initial frame, but would like to control the geometry of the
+other frames by individually positioning each one of them.
+
+
+@node Editing files with $ in the name
+@section How do I edit a file with a @samp{$} in its name?
+@cindex Editing files with @samp{$} in the name
+@cindex @samp{$} in file names
+@cindex File names containing @samp{$}, editing
+
+When entering a file name in the minibuffer, Emacs will attempt to expand
+a @samp{$} followed by a word as an environment variable.  To suppress
+this behavior, type @kbd{$$} instead.
+
+@node Shell mode loses the current directory
+@section Why does shell mode lose track of the shell's current directory?
+@cindex Current directory and @code{shell-mode}
+@cindex @code{shell-mode} and current directory
+@cindex Directory, current in @code{shell-mode}
+
+Emacs has no way of knowing when the shell actually changes its
+directory.  This is an intrinsic limitation of Unix.  So it tries to
+guess by recognizing @samp{cd} commands.  If you type @kbd{cd} followed
+by a directory name with a variable reference (@kbd{cd $HOME/bin}) or
+with a shell metacharacter (@kbd{cd ../lib*}), Emacs will fail to
+correctly guess the shell's new current directory.  A huge variety of
+fixes and enhancements to shell mode for this problem have been written
+to handle this problem (@pxref{Finding a package with particular
+functionality}).
+
+You can tell Emacs the shell's current directory with the command
+@kbd{M-x dirs}.
+
+@node Security risks with Emacs
+@section Are there any security risks in Emacs?
+@cindex Security with Emacs
+@cindex @samp{movemail} and security
+@cindex @code{file-local-variable} and security
+@cindex Synthetic X events and security
+@cindex X events and security
+
+@itemize @bullet
+
+@item
+The @file{movemail} incident.  (No, this is not a risk.)
+
+In his book @cite{The Cuckoo's Egg}, Cliff Stoll describes this in
+chapter 4.  The site at LBL had installed the @file{/etc/movemail}
+program setuid root.  (As of version 19, @file{movemail} is in your
+architecture-specific directory; type @kbd{C-h v exec-directory
+@key{RET}} to see what it is.)  Since @code{movemail} had not been
+designed for this situation, a security hole was created and users could
+get root privileges.
+
+@code{movemail} has since been changed so that this security hole will
+not exist, even if it is installed setuid root.  However,
+@code{movemail} no longer needs to be installed setuid root, which
+should eliminate this particular risk.
+
+We have heard unverified reports that the 1988 Internet worm took
+advantage of this configuration problem.
+
+@item
+The @code{file-local-variable} feature.  (Yes, a risk, but easy to
+change.)
+
+There is an Emacs feature that allows the setting of local values for
+variables when editing a file by including specially formatted text near
+the end of the file.  This feature also includes the ability to have
+arbitrary Emacs Lisp code evaluated when the file is visited.
+Obviously, there is a potential for Trojan horses to exploit this
+feature.
+
+As of Emacs 22, Emacs has a list of local variables that are known to
+be safe to set.  If a file tries to set any variable outside this
+list, it asks the user to confirm whether the variables should be set.
+You can also tell Emacs whether to allow the evaluation of Emacs Lisp
+code found at the bottom of files by setting the variable
+@code{enable-local-eval}.
+
+@xref{File Variables,,, emacs, The GNU Emacs Manual}.
+
+@item
+Synthetic X events.  (Yes, a risk; use @samp{MIT-MAGIC-COOKIE-1} or
+better.)
+
+Emacs accepts synthetic X events generated by the @code{SendEvent}
+request as though they were regular events.  As a result, if you are
+using the trivial host-based authentication, other users who can open X
+connections to your X workstation can make your Emacs process do
+anything, including run other processes with your privileges.
+
+The only fix for this is to prevent other users from being able to open
+X connections.  The standard way to prevent this is to use a real
+authentication mechanism, such as @samp{MIT-MAGIC-COOKIE-1}.  If using
+the @code{xauth} program has any effect, then you are probably using
+@samp{MIT-MAGIC-COOKIE-1}.  Your site may be using a superior
+authentication method; ask your system administrator.
+
+If real authentication is not a possibility, you may be satisfied by
+just allowing hosts access for brief intervals while you start your X
+programs, then removing the access.  This reduces the risk somewhat by
+narrowing the time window when hostile users would have access, but
+@emph{does not eliminate the risk}.
+
+On most computers running Unix and X, you enable and disable
+access using the @code{xhost} command.  To allow all hosts access to
+your X server, use
+
+@example
+xhost +
+@end example
+
+@noindent
+at the shell prompt, which (on an HP machine, at least) produces the
+following message:
+
+@example
+access control disabled, clients can connect from any host
+@end example
+
+To deny all hosts access to your X server (except those explicitly
+allowed by name), use
+
+@example
+xhost -
+@end example
+
+On the test HP computer, this command generated the following message:
+
+@example
+access control enabled, only authorized clients can connect
+@end example
+
+@end itemize
+
+@node Dired claims that no file is on this line
+@section Dired says, @samp{no file on this line} when I try to do something.
+@cindex Dired does not see a file
+
+Dired uses a regular expression to find the beginning of a file name.
+In a long Unix-style directory listing (@samp{ls -l}), the file name
+starts after the date.  The regexp has thus been written to look for the
+date.  By default, it should understand dates and times regardless of
+the language, but if your directory listing has an unusual format, Dired
+may get confused.
+
+There are two approaches to solving this.  The first one involves
+setting things up so that @samp{ls -l} outputs a more standard format.
+See your OS manual for more information.
+
+The second approach involves changing the regular expression used by
+dired, @code{directory-listing-before-filename-regexp}.
+
+@c ------------------------------------------------------------
+@node Compiling and installing Emacs
+@chapter    Compiling and installing Emacs
+@cindex    Compiling and installing Emacs
+
+@menu
+* Installing Emacs::
+* Problems building Emacs::
+@end menu
+
+@node Installing Emacs
+@section How do I install Emacs?
+@cindex Installing Emacs
+@cindex Unix systems, installing Emacs on
+@cindex Downloading and installing Emacs
+@cindex Building Emacs from source
+@cindex Source code, building Emacs from
+
+This answer is meant for users of Unix and Unix-like systems.  Users of
+other operating systems should see the series of questions beginning
+with @ref{Emacs for MS-DOS}, which describe where to get non-Unix source
+and binaries, and how to install Emacs on those systems.
+
+Most GNU/Linux distributions provide pre-built Emacs packages.
+If Emacs is not installed already, you can install it by running (as
+root) a command such as @samp{yum install emacs} (Red Hat and
+derivatives) or @samp{apt-get install emacs} (Debian and derivatives).
+
+If you want to compile Emacs yourself, read the file @file{INSTALL} in
+the source distribution.  In brief:
+
+@itemize @bullet
+
+@item
+First download the Emacs sources.  @xref{Current GNU distributions}, for
+a list of ftp sites that make them available.  On @file{ftp.gnu.org},
+the main GNU distribution site, sources are available as
+
+@c Don't include VER in the file name, because pretests are not there.
+@uref{ftp://ftp.gnu.org/pub/gnu/emacs/emacs-VERSION.tar.gz}
+
+(Replace @samp{VERSION} with the relevant version number, e.g. @samp{23.1}.)
+
+@item
+Next uncompress and extract the source files.  This requires
+the @code{gzip} and @code{tar} programs, which are standard utilities.
+If your system does not have them, these can also be downloaded from
+@file{ftp.gnu.org}.
+
+GNU @code{tar} can uncompress and extract in a single-step:
+
+@example
+tar -zxvf emacs-VERSION.tar.gz
+@end example
+
+@item
+At this point, the Emacs sources should be sitting in a directory called
+@file{emacs-VERSION}.  On most common Unix and Unix-like systems,
+you should be able to compile Emacs with the following commands:
+
+@example
+cd emacs-VERSION
+./configure         # configure Emacs for your particular system
+make                # use Makefile to build components, then Emacs
+@end example
+
+If the @code{make} completes successfully, the odds are fairly good that
+the build has gone well.  (@xref{Problems building Emacs}, if you weren't
+successful.)
+
+@item
+By default, Emacs is installed in @file{/usr/local}.  To actually
+install files, become the superuser and type
+
+@example
+make install
+@end example
+
+Note that @samp{make install} will overwrite @file{/usr/local/bin/emacs}
+and any Emacs Info files that might be in @file{/usr/local/share/info/}.
+
+@end itemize
+
+@node Problems building Emacs
+@section What should I do if I have trouble building Emacs?
+@cindex Problems building Emacs
+@cindex Errors when building Emacs
+
+First look in the file @file{etc/PROBLEMS} (where you unpack the Emacs
+source) to see if there is already a solution for your problem.  Next,
+look for other questions in this FAQ that have to do with Emacs
+installation and compilation problems.
+
+If you'd like to have someone look at your problem and help solve it,
+see @ref{Help installing Emacs}.
+
+If you cannot find a solution in the documentation, please report the
+problem (@pxref{Reporting bugs}).
+
+
+@c ------------------------------------------------------------
+@node Finding Emacs and related packages
+@chapter Finding Emacs and related packages
+@cindex Finding Emacs and related packages
+
+@menu
+* Finding Emacs on the Internet::
+* Finding a package with particular functionality::
+* Packages that do not come with Emacs::
+* Spell-checkers::
+* Current GNU distributions::
+* Difference between Emacs and XEmacs::
+* Emacs for minimalists::
+* Emacs for MS-DOS::
+* Emacs for MS-Windows::
+* Emacs for GNUstep::
+* Emacs for Mac OS X::
+@end menu
+
+@node Finding Emacs on the Internet
+@section Where can I get Emacs on the net?
+@cindex Finding Emacs on the Internet
+@cindex Downloading Emacs
+
+Information on downloading Emacs is available at
+@uref{http://www.gnu.org/software/emacs/, the Emacs home-page}.
+
+@xref{Installing Emacs}, for information on how to obtain and build the latest
+version of Emacs, and see @ref{Current GNU distributions}, for a list of
+archive sites that make GNU software available.
+
+@node Finding a package with particular functionality
+@section How do I find a Emacs Lisp package that does XXX?
+@cindex Package, finding
+@cindex Finding an Emacs Lisp package
+@cindex Functionality, finding a particular package
+
+First of all, you should check to make sure that the package isn't
+already available.  For example, typing @kbd{M-x apropos @key{RET}
+wordstar @key{RET}} lists all functions and variables containing the
+string @samp{wordstar}.
+
+It is also possible that the package is on your system, but has not been
+loaded.  To see which packages are available for loading, look through
+your computer's lisp directory (@pxref{File-name conventions}).  The Lisp
+source to most packages contains a short description of how they
+should be loaded, invoked, and configured---so before you use or
+modify a Lisp package, see if the author has provided any hints in the
+source code.
+
+The command @kbd{C-h p} (@code{finder-by-keyword}) allows you to browse
+the constituent Emacs packages.
+
+For advice on how to find extra packages that are not part of Emacs,
+see @ref{Packages that do not come with Emacs}.
+
+@node Packages that do not come with Emacs
+@section Where can I get Emacs Lisp packages that don't come with Emacs?
+@cindex Unbundled packages
+@cindex Finding other packages
+@cindex Lisp packages that do not come with Emacs
+@cindex Packages, those that do not come with Emacs
+@cindex Emacs Lisp List
+@cindex Emacs Lisp Archive
+
+Your first port of call should be the @kbd{M-x list-packages} command.
+This connects to the @uref{http:///elpa.gnu.org, GNU ELPA} (``Emacs
+Lisp Package Archive'') server and fetches the list of additional
+packages that it offers.  These are GNU packages that are available
+for use with Emacs, but are distributed separately.  Select a package
+to get more details about the features that it offers, and then if you
+wish, Emacs can download and automatically install it for you.
+
+@uref{http://www.damtp.cam.ac.uk/user/sje30/emacs/ell.html, The Emacs Lisp
+List (ELL)}, maintained by @email{S.J.Eglen@@damtp.cam.ac.uk, Stephen Eglen},
+aims to provide one compact list with links to all of the current Emacs
+Lisp files on the Internet.  The ELL can be browsed over the web, or
+from Emacs with @uref{http://www.damtp.cam.ac.uk/user/sje30/emacs/ell.el,
+the @file{ell} package}.
+
+Many authors post their packages to the @uref{news:gnu.emacs.sources,
+Emacs sources newsgroup}.  You can search the archives of this
+group with @uref{http://groups.google.com/group/gnu.emacs.sources, Google},
+or @uref{http://dir.gmane.org/gmane.emacs.sources, Gmane}, for example.
+
+Several packages are stored in
+@uref{http://emacswiki.org/elisp/, the Lisp area of the Emacs Wiki}.
+
+Read the file @file{etc/MORE.STUFF} for more information about
+external packages.
+
+@node Spell-checkers
+@section Spell-checkers
+@cindex Spell-checker
+@cindex Checking spelling
+@cindex Ispell
+@cindex Aspell
+@cindex Hunspell
+
+Various spell-checkers are compatible with Emacs, including:
+
+@table @b
+
+@item GNU Aspell
+@uref{http://aspell.net/}
+
+@item Ispell
+@uref{http://fmg-www.cs.ucla.edu/geoff/ispell.html}
+
+@item Hunspell
+@uref{http://hunspell.sourceforge.net/}
+
+@end table
+
+@node Current GNU distributions
+@section Where can I get other up-to-date GNU stuff?
+@cindex Current GNU distributions
+@cindex Sources for current GNU distributions
+@cindex Stuff, current GNU
+@cindex Up-to-date GNU stuff
+@cindex Finding current GNU software
+@cindex Official GNU software sites
+
+The most up-to-date official GNU software is normally kept at
+
+@uref{ftp://ftp.gnu.org/pub/gnu}
+
+A list of sites mirroring @samp{ftp.gnu.org} can be found at
+
+@uref{http://www.gnu.org/order/ftp.html}
+
+@node Difference between Emacs and XEmacs
+@section What is the difference between Emacs and XEmacs (formerly Lucid Emacs)?
+@cindex XEmacs
+@cindex Difference Emacs and XEmacs
+@cindex Lucid Emacs
+@cindex Epoch
+
+XEmacs is a branch version of Emacs.  It was first called Lucid Emacs,
+and was initially derived from a prerelease version of Emacs 19.  In
+this FAQ, we use the name ``Emacs'' only for the official version.
+
+Emacs and XEmacs each come with Lisp packages that are lacking in the
+other.  The two versions have some significant differences at the Lisp
+programming level.  Their current features are roughly comparable,
+though the support for some operating systems, character sets and
+specific packages might be quite different.
+
+Some XEmacs code has been contributed to Emacs, and we would like to
+use other parts, but the earlier XEmacs maintainers did not always
+keep track of the authors of contributed code, which makes it
+impossible for the FSF to get copyright papers signed for that code.
+(The FSF requires these papers for all the code included in the Emacs
+release, aside from generic C support packages that retain their
+separate identity and are not integrated into the code of Emacs
+proper.)
+
+If you want to talk about these two versions and distinguish them,
+please call them ``Emacs'' and ``XEmacs.''  To contrast ``XEmacs''
+with ``GNU Emacs'' would be misleading, since XEmacs too has its
+origin in the work of the GNU Project.  Terms such as ``Emacsen'' and
+``(X)Emacs'' are not wrong, but they are not very clear, so it
+is better to write ``Emacs and XEmacs.''
+
+@node Emacs for minimalists
+@section I don't have enough disk space to install Emacs
+@cindex Zile
+@cindex Not enough disk space to install Emacs
+
+GNU Zile is a lightweight Emacs clone.  Zile is short for @samp{Zile Is
+Lossy Emacs}.  It has all of Emacs's basic editing features.  The Zile
+binary typically has a size of about 130 kbytes, so this can be useful
+if you are in an extremely space-restricted environment.  More
+information is available from
+
+@uref{http://www.gnu.org/software/zile/}
+
+
+@node Emacs for MS-DOS
+@section Where can I get Emacs for MS-DOS?
+@cindex MS-DOS, Emacs for
+@cindex DOS, Emacs for
+@cindex Compiling Emacs for DOS
+@cindex Emacs for MS-DOS
+
+To build Emacs from source for MS-DOS, see the instructions in the file
+@file{msdos/INSTALL} in the distribution.  The DOS port builds and runs
+on plain DOS, and also on all versions of MS-Windows from version 3.X
+onwards, including Windows XP and Vista.
+
+The file @file{etc/PROBLEMS} contains some additional information
+regarding Emacs under MS-DOS.
+
+A pre-built binary distribution of the old Emacs 20 is available, as
+described at
+
+@uref{ftp://ftp.delorie.com/pub/djgpp/current/v2gnu/emacs.README}
+
+For a list of other MS-DOS implementations of Emacs (and Emacs
+look-alikes), consult the list of ``Emacs implementations and literature,''
+available at
+
+@uref{http://www.finseth.com/emacs.html}
+
+Note that while many of these programs look similar to Emacs, they often
+lack certain features, such as the Emacs Lisp extension language.
+
+@node Emacs for MS-Windows
+@section Where can I get Emacs for Microsoft Windows?
+@cindex FAQ for Emacs on MS-Windows
+@cindex Emacs for MS-Windows
+@cindex Microsoft Windows, Emacs for
+
+There is a @uref{http://www.gnu.org/software/emacs/windows/ntemacs.html,
+separate FAQ} for Emacs on MS-Windows.  For MS-DOS, @pxref{Emacs for MS-DOS}.
+
+
+@node Emacs for GNUstep
+@section Where can I get Emacs for GNUstep?
+@cindex GNUstep, Emacs for
+
+Beginning with version 23.1, Emacs supports GNUstep natively.
+See the file @file{nextstep/INSTALL} in the distribution.
+
+@node Emacs for Mac OS X
+@section Where can I get Emacs for Mac OS X?
+@cindex Apple computers, Emacs for
+@cindex Macintosh, Emacs for
+@cindex Mac OS X, Emacs for
+
+Beginning with version 22.1, Emacs supports Mac OS X natively.
+See the file @file{nextstep/INSTALL} in the distribution.
+
+@c ------------------------------------------------------------
+@node Key bindings
+@chapter Key bindings
+@cindex Key bindings
+
+@menu
+* Binding keys to commands::
+* Invalid prefix characters::
+* Terminal setup code works after Emacs has begun::
+* Working with function and arrow keys::
+* X key translations for Emacs::
+* Backspace invokes help::
+* Swapping keys::
+* Producing C-XXX with the keyboard::
+* No Meta key::
+* No Escape key::
+* Compose Character::
+* Binding combinations of modifiers and function keys::
+* Meta key does not work in xterm::
+* ExtendChar key does not work as Meta::
+* SPC no longer completes file names::
+@end menu
+
+@node Binding keys to commands
+@section How do I bind keys (including function keys) to commands?
+@cindex Binding keys to commands
+@cindex Keys, binding to commands
+@cindex Commands, binding keys to
+
+Keys can be bound to commands either interactively or in your
+@file{.emacs} file.  To interactively bind keys for all modes, type
+@kbd{M-x global-set-key @key{RET} @var{key} @var{cmd} @key{RET}}.
+
+To bind a key just in the current major mode, type @kbd{M-x
+local-set-key @key{RET} @var{key} @var{cmd} @key{RET}}.
+
+@xref{Key Bindings,,, emacs, The GNU Emacs Manual}.
+
+To make the process of binding keys interactively easier, use the
+following ``trick'': First bind the key interactively, then immediately
+type @kbd{C-x @key{ESC} @key{ESC} C-a C-k C-g}.  Now, the command needed
+to bind the key is in the kill ring, and can be yanked into your
+@file{.emacs} file.  If the key binding is global, no changes to the
+command are required.  For example,
+
+@lisp
+(global-set-key (quote [f1]) (quote help-for-help))
+@end lisp
+
+@noindent
+can be placed directly into the @file{.emacs} file.  If the key binding is
+local, the command is used in conjunction with the @samp{add-hook} function.
+For example, in TeX mode, a local binding might be
+
+@lisp
+(add-hook 'tex-mode-hook
+  (lambda ()
+   (local-set-key (quote [f1]) (quote help-for-help))))
+@end lisp
+
+
+@itemize @bullet
+
+@item
+Control characters in key sequences, in the form yanked from the kill
+ring are given in their graphic form---i.e., @key{CTRL} is shown as
+@samp{^}, @key{TAB} as a set of spaces (usually 8), etc.  You may want
+to convert these into their vector or string forms.
+
+@item
+If a prefix key of the character sequence to be bound is already
+bound as a complete key, then you must unbind it before the new
+binding.  For example, if @kbd{ESC @{} is previously bound:
+
+@lisp
+(global-unset-key [?\e ?@{])   ;;   or
+(local-unset-key [?\e ?@{])
+@end lisp
+
+@item
+Aside from commands and ``lambda lists,'' a vector or string also
+can be bound to a key and thus treated as a macro.  For example:
+
+@lisp
+(global-set-key [f10] [?\C-x?\e?\e?\C-a?\C-k?\C-g])  ;;  or
+(global-set-key [f10] "\C-x\e\e\C-a\C-k\C-g")
+@end lisp
+
+@end itemize
+
+@node Invalid prefix characters
+@section Why does Emacs say @samp{Key sequence XXX uses invalid prefix characters}?
+@cindex Prefix characters, invalid
+@cindex Invalid prefix characters
+@cindex Misspecified key sequences
+
+Usually, one of two things has happened.  In one case, the control
+character in the key sequence has been misspecified (e.g. @samp{C-f}
+used instead of @samp{\C-f} within a Lisp expression).  In the other
+case, a @dfn{prefix key} in the keystroke sequence you were trying to bind
+was already bound as a @dfn{complete key}.  Historically, the @samp{ESC [}
+prefix was usually the problem, in which case you should evaluate either
+of these forms before attempting to bind the key sequence:
+
+@lisp
+(global-unset-key [?\e ?[])  ;;  or
+(global-unset-key "\e[")
+@end lisp
+
+@node Terminal setup code works after Emacs has begun
+@section Why doesn't this [terminal or window-system setup] code work in my @file{.emacs} file, but it works just fine after Emacs starts up?
+@cindex Terminal setup code in @file{.emacs}
+
+During startup, Emacs initializes itself according to a given code/file
+order.  If some of the code executed in your @file{.emacs} file needs to
+be postponed until the initial terminal or window-system setup code has
+been executed but is not, then you will experience this problem (this
+code/file execution order is not enforced after startup).
+
+To postpone the execution of Emacs Lisp code until after terminal or
+window-system setup, treat the code as a @dfn{lambda list} and set the
+value of either the @code{term-setup-hook} or @code{window-setup-hook}
+variable to this lambda function.  For example,
+
+@lisp
+(add-hook 'term-setup-hook
+          (lambda ()
+           (when (string-match "\\`vt220" (or (getenv "TERM") ""))
+             ;; Make vt220's "Do" key behave like M-x:
+             (global-set-key [do] 'execute-extended-command))))
+@end lisp
+
+For information on what Emacs does every time it is started, see the
+@file{lisp/startup.el} file.
+
+@node Working with function and arrow keys
+@section How do I tell what characters or symbols my function or arrow keys emit?
+@cindex Working with arrow keys
+@cindex Arrow keys, symbols generated by
+@cindex Working with function keys
+@cindex Function keys, symbols generated by
+@cindex Symbols generated by function keys
+
+Type @kbd{C-h c} then the function or arrow keys.  The command will
+return either a function key symbol or character sequence (see the
+Emacs documentation for an explanation).  This works for other
+keys as well.
+
+@node X key translations for Emacs
+@section How do I set the X key ``translations'' for Emacs?
+@cindex X key translations
+@cindex Key translations under X
+@cindex Translations for keys under X
+
+Emacs is not written using the Xt library by default, so there are no
+``translations'' to be set.  (We aren't sure how to set such translations
+if you do build Emacs with Xt; please let us know if you've done this!)
+
+The only way to affect the behavior of keys within Emacs is through
+@code{xmodmap} (outside Emacs) or @code{define-key} (inside Emacs).  The
+@code{define-key} command should be used in conjunction with the
+@code{function-key-map} map.  For instance,
+
+@lisp
+(define-key function-key-map [M-@key{TAB}] [?\M-\t])
+@end lisp
+
+@noindent
+defines the @kbd{M-@key{TAB}} key sequence.
+
+@node Backspace invokes help
+@section Why does the @key{Backspace} key invoke help?
+@cindex Backspace key invokes help
+@cindex Help invoked by Backspace
+@cindex DEL key does not delete
+
+The @key{Backspace} key (on most keyboards) generates @acronym{ASCII} code 8.
+@kbd{C-h} sends the same code.  In Emacs by default @kbd{C-h} invokes
+help-command.  This is intended to be easy to remember since the first
+letter of @samp{help} is @samp{h}.  The easiest solution to this problem
+is to use @kbd{C-h} (and @key{Backspace}) for help and @key{DEL} (the
+@key{Delete} key) for deleting the previous character.
+
+For many people this solution may be problematic:
+
+@itemize @bullet
+
+@item
+They normally use @key{Backspace} outside of Emacs for deleting the
+previous character.  This can be solved by making @key{DEL} the command
+for deleting the previous character outside of Emacs.  On many Unix
+systems, this command will remap @key{DEL}:
+
+@example
+stty erase `^?'
+@end example
+
+@item
+The user may prefer the @key{Backspace} key for deleting the
+previous character because it is more conveniently located on their
+keyboard or because they don't even have a separate @key{Delete} key.
+In this case, the @key{Backspace} key should be made to behave like
+@key{Delete}.  There are several methods.
+
+@itemize @minus
+@item
+Some terminals (e.g., VT3## terminals) and terminal emulators (e.g.,
+TeraTerm) allow the character generated by the @key{Backspace} key to be
+changed from a setup menu.
+
+@item
+You may be able to get a keyboard that is completely programmable, or a
+terminal emulator that supports remapping of any key to any other key.
+
+@item
+With Emacs 21.1 and later, you can control the effect of the
+@key{Backspace} and @key{Delete} keys, on both dumb terminals and a
+windowed displays, by customizing the option
+@code{normal-erase-is-backspace-mode}, or by invoking @kbd{M-x
+normal-erase-is-backspace}.  See the documentation of these symbols
+(@pxref{Emacs Lisp documentation}) for more info.
+
+@item
+It is possible to swap the @key{Backspace} and @key{DEL} keys inside
+Emacs:
+
+@lisp
+(keyboard-translate ?\C-h ?\C-?)
+@end lisp
+
+@noindent
+This is the recommended method of forcing @key{Backspace} to act as
+@key{DEL}, because it works even in modes which bind @key{DEL} to
+something other than @code{delete-backward-char}.
+
+Similarly, you could remap @key{DEL} to act as @kbd{C-d}, which by
+default deletes forward:
+
+@lisp
+(keyboard-translate ?\C-? ?\C-d)
+@end lisp
+
+@xref{Swapping keys}, for further details about @code{keyboard-translate}.
+
+@item
+Another approach is to switch key bindings and put help on @kbd{C-x h}
+instead:
+
+@lisp
+(global-set-key "\C-h" 'delete-backward-char)
+
+;; overrides mark-whole-buffer
+(global-set-key "\C-xh" 'help-command)
+@end lisp
+
+@noindent
+This method is not recommended, though: it only solves the problem for
+those modes which bind @key{DEL} to @code{delete-backward-char}.  Modes
+which bind @key{DEL} to something else, such as @code{view-mode}, will
+not work as you expect when you press the @key{Backspace} key.  For this
+reason, we recommend the @code{keyboard-translate} method, shown
+above.
+
+Other popular key bindings for help are @kbd{M-?} and @kbd{C-x ?}.
+@end itemize
+
+Don't try to bind @key{DEL} to @code{help-command}, because there are
+many modes that have local bindings of @key{DEL} that will interfere.
+
+@end itemize
+
+When Emacs 21 or later runs on a windowed display, it binds the
+@key{Delete} key to a command which deletes the character at point, to
+make Emacs more consistent with keyboard operation on these systems.
+
+For more information about troubleshooting this problem, see @ref{DEL
+Does Not Delete, , If @key{DEL} Fails to Delete, emacs, The GNU Emacs
+Manual}.
+
+@node Swapping keys
+@section How do I swap two keys?
+@cindex Swapping keys
+@cindex Keys, swapping
+@cindex @code{keyboard-translate}
+
+You can swap two keys (or key sequences) by using the
+@code{keyboard-translate} function.  For example, to turn @kbd{C-h}
+into @key{DEL} and @key{DEL} to @kbd{C-h}, use
+
+@lisp
+(keyboard-translate ?\C-h ?\C-?)  ; translate `C-h' to DEL
+(keyboard-translate ?\C-? ?\C-h)  ; translate DEL to `C-h'.
+@end lisp
+
+@noindent
+The first key sequence of the pair after the function identifies what is
+produced by the keyboard; the second, what is matched for in the
+keymaps.
+
+However, in the specific case of @kbd{C-h} and @key{DEL}, you should
+toggle @code{normal-erase-is-backspace-mode} instead of calling
+@code{keyboard-translate}.
+@xref{DEL Does Not Delete,,, emacs, The GNU Emacs Manual}.
+
+Keyboard translations are not the same as key bindings in keymaps.
+Emacs contains numerous keymaps that apply in different situations, but
+there is only one set of keyboard translations, and it applies to every
+character that Emacs reads from the terminal.  Keyboard translations
+take place at the lowest level of input processing; the keys that are
+looked up in keymaps contain the characters that result from keyboard
+translation.
+
+@node Producing C-XXX with the keyboard
+@section How do I produce C-XXX with my keyboard?
+@cindex Producing control characters
+@cindex Generating control characters
+@cindex Control characters, generating
+
+On terminals (but not under X), some common ``aliases'' are:
+
+@table @asis
+
+@item @kbd{C-2}  or  @kbd{C-@key{SPC}}
+@kbd{C-@@}
+
+@item @kbd{C-6}
+@kbd{C-^}
+
+@item @kbd{C-7}  or  @kbd{C-S--}
+@kbd{C-_}
+
+@item @kbd{C-4}
+@kbd{C-\}
+
+@item @kbd{C-5}
+@kbd{C-]}
+
+@item @kbd{C-/}
+@kbd{C-?}
+
+@end table
+
+Often other aliases exist; use the @kbd{C-h c} command and try
+@key{CTRL} with all of the digits on your keyboard to see what gets
+generated.  You can also try the @kbd{C-h w} command if you know the
+name of the command.
+
+@node No Meta key
+@section What if I don't have a @key{Meta} key?
+@cindex No @key{Meta} key
+@cindex @key{Meta} key, what to do if you lack it
+
+On many keyboards, the @key{Alt} key acts as @key{Meta}, so try it.
+
+Instead of typing @kbd{M-a}, you can type @kbd{@key{ESC} a}.  In fact,
+Emacs converts @kbd{M-a} internally into @kbd{@key{ESC} a} anyway
+(depending on the value of @code{meta-prefix-char}).  Note that you
+press @key{Meta} and @key{a} together, but with @key{ESC}, you press
+@key{ESC}, release it, and then press @key{a}.
+
+@node No Escape key
+@section What if I don't have an @key{Escape} key?
+@cindex No Escape key
+@cindex Lacking an Escape key
+@cindex Escape key, lacking
+
+Type @kbd{C-[} instead.  This should send @acronym{ASCII} code 27 just like an
+Escape key would.  @kbd{C-3} may also work on some terminal (but not
+under X).  For many terminals (notably DEC terminals) @key{F11}
+generates @key{ESC}.  If not, the following form can be used to bind it:
+
+@lisp
+;; F11 is the documented ESC replacement on DEC terminals.
+(define-key function-key-map [f11] [?\e])
+@end lisp
+
+@node Compose Character
+@section Can I make my @key{Compose Character} key behave like a @key{Meta} key?
+@cindex @key{Compose Character} key, using as @key{Meta}
+@cindex @key{Meta}, using @key{Compose Character} for
+
+On a dumb terminal such as a VT220, no.  It is rumored that certain
+VT220 clones could have their @key{Compose} key configured this way.  If
+you're using X, you might be able to do this with the @code{xmodmap}
+command.
+
+@node Binding combinations of modifiers and function keys
+@section How do I bind a combination of modifier key and function key?
+@cindex Modifiers and function keys
+@cindex Function keys and modifiers
+@cindex Binding modifiers and function keys
+
+You can represent modified function keys in vector format by adding
+prefixes to the function key symbol.  For example (from the Emacs
+documentation):
+
+@lisp
+(global-set-key [?\C-x right] 'forward-page)
+@end lisp
+
+@noindent
+where @samp{?\C-x} is the Lisp character constant for the character @kbd{C-x}.
+
+You can use the modifier keys @key{Control}, @key{Meta}, @key{Hyper},
+@key{Super}, @key{Alt}, and @key{Shift} with function keys.  To
+represent these modifiers, prepend the strings @samp{C-}, @samp{M-},
+@samp{H-}, @samp{s-}, @samp{A-}, and @samp{S-} to the symbol name.  Here
+is how to make @kbd{H-M-RIGHT} move forward a word:
+
+@lisp
+(global-set-key [H-M-right] 'forward-word)
+@end lisp
+
+@itemize @bullet
+
+@item
+Not all modifiers are permitted in all situations.  @key{Hyper},
+@key{Super}, and @key{Alt} are not available on Unix character
+terminals.  Non-@acronym{ASCII} keys and mouse events (e.g. @kbd{C-=} and
+@kbd{Mouse-1}) also fall under this category.
+
+@end itemize
+
+@xref{Binding keys to commands}, for general key binding instructions.
+
+@node Meta key does not work in xterm
+@section Why doesn't my @key{Meta} key work in an @code{xterm} window?
+@cindex @key{Meta} key and @code{xterm}
+@cindex Xterm and @key{Meta} key
+
+@xref{Unibyte Mode,, Single-Byte Character Set Support, emacs, The GNU Emacs Manual}.
+
+If the advice in the Emacs manual fails, try all of these methods before
+asking for further help:
+
+@itemize @bullet
+
+@item
+You may have big problems using @code{mwm} as your window manager.
+(Does anyone know a good generic solution to allow the use of the
+@key{Meta} key in Emacs with @file{mwm}?)
+
+@item
+For X11: Make sure it really is a @key{Meta} key.  Use @code{xev} to
+find out what keysym your @key{Meta} key generates.  It should be either
+@code{Meta_L} or @code{Meta_R}.  If it isn't, use @file{xmodmap} to fix
+the situation.  If @key{Meta} does generate @code{Meta_L} or
+@code{Meta_R}, but @kbd{M-x} produces a non-@acronym{ASCII} character, put this in
+your @file{~/.Xdefaults} file:
+
+@example
+ XTerm*eightBitInput:   false
+ XTerm*eightBitOutput:  true
+@end example
+
+@item
+Make sure the @code{pty} the @code{xterm} is using is passing 8 bit
+characters.  @samp{stty -a} (or @samp{stty everything}) should show
+@samp{cs8} somewhere.  If it shows @samp{cs7} instead, use @samp{stty
+cs8 -istrip} (or @samp{stty pass8}) to fix it.
+
+@item
+If there is an @code{rlogin} connection between @code{xterm} and Emacs, the
+@samp{-8} argument may need to be given to rlogin to make it pass all 8 bits
+of every character.
+
+@item
+If Emacs is running on Ultrix, it is reported that evaluating
+@code{(set-input-mode t nil)} helps.
+
+@item
+If all else fails, you can make @code{xterm} generate @kbd{@key{ESC} W} when
+you type @kbd{M-W}, which is the same conversion Emacs would make if it
+got the @kbd{M-W} anyway.  In X11R4, the following resource
+specification will do this:
+
+@example
+XTerm.VT100.EightBitInput: false
+@end example
+
+@noindent
+(This changes the behavior of the @code{insert-eight-bit} action.)
+
+With older @code{xterm}s, you can specify this behavior with a translation:
+
+@example
+XTerm.VT100.Translations: #override \
+  Meta<KeyPress>: string(0x1b) insert()
+@end example
+
+@noindent
+You might have to replace @samp{Meta} with @samp{Alt}.
+
+@end itemize
+
+@node ExtendChar key does not work as Meta
+@section Why doesn't my @key{ExtendChar} key work as a @key{Meta} key under HP-UX 8.0 and 9.x?
+@cindex @key{ExtendChar} key as @key{Meta}
+@cindex @key{Meta}, using @key{ExtendChar} for
+@cindex HP-UX, the @key{ExtendChar} key
+
+This is a result of an internationalization extension in X11R4 and the
+fact that HP is now using this extension.  Emacs assumes that the
+@code{XLookupString} function returns the same result regardless of the
+@key{Meta} key state which is no longer necessarily true.  Until Emacs
+is fixed, the temporary kludge is to run this command after each time
+the X server is started but preferably before any xterm clients are:
+
+@example
+xmodmap -e 'remove mod1 = Mode_switch'
+@end example
+
+@c FIXME: Emacs 21 supports I18N in X11; does that mean that this bug is
+@c solved?
+
+This will disable the use of the extra keysyms systemwide, which may be
+undesirable if you actually intend to use them.
+
+@node SPC no longer completes file names
+@section Why doesn't SPC complete file names anymore?
+@cindex @kbd{SPC} file name completion
+
+Starting with Emacs 22.1, @kbd{SPC} no longer completes file names in
+the minibuffer, so that file names with embedded spaces could be typed
+without the need to quote the spaces.
+
+You can get the old behavior by binding @kbd{SPC} to
+@code{minibuffer-complete-word} in the minibuffer, as follows:
+
+@lisp
+(define-key minibuffer-local-filename-completion-map (kbd "SPC")
+  'minibuffer-complete-word)
+
+(define-key minibuffer-local-must-match-filename-map (kbd "SPC")
+  'minibuffer-complete-word)
+@end lisp
+
+@c ------------------------------------------------------------
+@node Alternate character sets
+@chapter Alternate character sets
+@cindex Alternate character sets
+
+@menu
+* Emacs does not display 8-bit characters::
+* Inputting eight-bit characters::
+* Right-to-left alphabets::
+* How to add fonts::
+@end menu
+
+@node Emacs does not display 8-bit characters
+@section How do I make Emacs display 8-bit characters?
+@cindex Displaying eight-bit characters
+@cindex Eight-bit characters, displaying
+
+@xref{Unibyte Mode,, Single-byte Character Set Support, emacs, The GNU
+Emacs Manual}.  On a Unix, when Emacs runs on a text-only terminal
+display or is invoked with @samp{emacs -nw}, you typically need to use
+@code{set-terminal-coding-system} to tell Emacs what the terminal can
+display, even after setting the language environment; otherwise
+non-@acronym{ASCII} characters will display as @samp{?}.  On other operating
+systems, such as MS-DOS and MS-Windows, Emacs queries the OS about the
+character set supported by the display, and sets up the required
+terminal coding system automatically.
+
+@node Inputting eight-bit characters
+@section How do I input eight-bit characters?
+@cindex Entering eight-bit characters
+@cindex Eight-bit characters, entering
+@cindex Input, 8-bit characters
+
+Various methods are available for input of eight-bit characters.
+@xref{Unibyte Mode,, Single-byte Character Set Support, emacs, The GNU
+Emacs Manual}.  For more sophisticated methods,
+@pxref{Input Methods,,, emacs, The GNU Emacs Manual}.
+
+@node Right-to-left alphabets
+@section Where is an Emacs that can handle Semitic (right-to-left) alphabets?
+@cindex Right-to-left alphabets
+@cindex Hebrew, handling with Emacs
+@cindex Semitic alphabets
+@cindex Arabic alphabets
+@cindex Bidirectional text
+
+Emacs supports Hebrew characters (ISO 8859-8) since version 20, but does
+not yet support right-to-left character entry and display.  The
+@uref{http://lists.gnu.org/mailman/listinfo/emacs-bidi, emacs-bidi
+mailing list} discusses development of support for this feature.
+
+
+@node How to add fonts
+@section How do I add fonts for use with Emacs?
+@cindex add fonts for use with Emacs
+@cindex intlfonts
+
+First, download and install the BDF font files and any auxiliary
+packages they need.  The GNU Intlfonts distribution can be found on
+@uref{http://directory.fsf.org/localization/intlfonts.html, the GNU
+Software Directory Web site}.
+
+Next, if you are on X Window system, issue the following two commands
+from the shell's prompt:
+
+@example
+  xset +fp /usr/local/share/emacs/fonts
+  xset fp rehash
+@end example
+
+@noindent
+(Modify the first command if you installed the fonts in a directory
+that is not @file{/usr/local/share/emacs/fonts}.)  You also need to
+arrange for these two commands to run whenever you log in, e.g., by
+adding them to your window-system startup file, such as
+@file{~/.xsessionrc} or @file{~/.gnomerc}.
+
+Now, add the following line to your @file{~/.emacs} init file:
+
+@lisp
+  (add-to-list 'bdf-directory-list "/usr/share/emacs/fonts/bdf")
+@end lisp
+
+@noindent
+(Again, modify the file name if you installed the fonts elsewhere.)
+
+Finally, if you wish to use the installed fonts with @code{ps-print},
+add the following line to your @file{~/.emacs}:
+
+@lisp
+  (setq ps-multibyte-buffer 'bdf-font-except-latin)
+@end lisp
+
+A few additional steps are necessary for MS-Windows; they are listed
+below.
+
+First, make sure @emph{all} the directories with BDF font files are
+mentioned in @code{bdf-directory-list}.  On Unix and GNU/Linux
+systems, one normally runs @kbd{make install} to install the BDF fonts
+in the same directory.  By contrast, Windows users typically don't run
+the Intlfonts installation command, but unpack the distribution in
+some directory, which leaves the BDF fonts in its subdirectories.  For
+example, assume that you unpacked Intlfonts in @file{C:/Intlfonts};
+then you should set @code{bdf-directory-list} as follows:
+
+@lisp
+  (setq bdf-directory-list
+    '("C:/Intlfonts/Asian"
+      "C:/Intlfonts/Chinese" "C:/Intlfonts/Chinese.X"
+      "C:/Intlfonts/Chinese.BIG" "C:/Intlfonts/Ethiopic"
+      "C:/Intlfonts/European" "C:/Intlfonts/European.BIG"
+      "C:/Intlfonts/Japanese" "C:/Intlfonts/Japanese.X"
+      "C:/Intlfonts/Japanese.BIG" "C:/Intlfonts/Korean.X"
+      "C:/Intlfonts/Misc"))
+@end lisp
+
+@cindex @code{w32-bdf-filename-alist}
+@cindex @code{w32-find-bdf-fonts}
+Next, you need to set up the variable @code{w32-bdf-filename-alist} to
+an alist of the BDF fonts and their corresponding file names.
+Assuming you have set @code{bdf-directory-list} to name all the
+directories with the BDF font files, the following Lisp snippet will
+set up @code{w32-bdf-filename-alist}:
+
+@lisp
+  (setq w32-bdf-filename-alist
+     (w32-find-bdf-fonts bdf-directory-list))
+@end lisp
+
+Now, create fontsets for the BDF fonts:
+
+@smallexample
+  (create-fontset-from-fontset-spec
+   "-*-fixed-medium-r-normal-*-16-*-*-*-c-*-fontset-bdf,
+   japanese-jisx0208:-*-*-medium-r-normal-*-16-*-*-*-c-*-jisx0208.1983-*,
+   katakana-jisx0201:-*-*-medium-r-normal-*-16-*-*-*-c-*-jisx0201*-*,
+   latin-jisx0201:-*-*-medium-r-normal-*-16-*-*-*-c-*-jisx0201*-*,
+   japanese-jisx0208-1978:-*-*-medium-r-normal-*-16-*-*-*-c-*-jisx0208.1978-*,
+   thai-tis620:-misc-fixed-medium-r-normal--16-160-72-72-m-80-tis620.2529-1,
+   lao:-misc-fixed-medium-r-normal--16-160-72-72-m-80-MuleLao-1,
+   tibetan-1-column:-TibMdXA-fixed-medium-r-normal--16-160-72-72-m-80-MuleTibetan-1,
+   ethiopic:-Admas-Ethiomx16f-Medium-R-Normal--16-150-100-100-M-160-Ethiopic-Unicode,
+   tibetan:-TibMdXA-fixed-medium-r-normal--16-160-72-72-m-160-MuleTibetan-0")
+@end smallexample
+
+Many of the international bdf fonts from Intlfonts are type 0, and
+therefore need to be added to font-encoding-alist:
+
+@lisp
+  (setq font-encoding-alist
+        (append '(("MuleTibetan-0" (tibetan . 0))
+                  ("GB2312"        (chinese-gb2312 . 0))
+                  ("JISX0208"      (japanese-jisx0208 . 0))
+                  ("JISX0212"      (japanese-jisx0212 . 0))
+                  ("VISCII"        (vietnamese-viscii-lower . 0))
+                  ("KSC5601"       (korean-ksc5601 . 0))
+                  ("MuleArabic-0"  (arabic-digit . 0))
+                  ("MuleArabic-1"  (arabic-1-column . 0))
+                  ("MuleArabic-2"  (arabic-2-column . 0)))
+                font-encoding-alist))
+@end lisp
+
+You can now use the Emacs font menu to select the @samp{bdf: 16-dot medium}
+fontset, or you can select it by setting the default font in your
+@file{~/.emacs}:
+
+@lisp
+  (set-default-font "fontset-bdf")
+@end lisp
+
+
+@c ------------------------------------------------------------
+@node Mail and news
+@chapter Mail and news
+@cindex Mail and news
+
+@menu
+* Changing the included text prefix::
+* Saving a copy of outgoing mail::
+* Expanding aliases when sending mail::
+* Sorting the messages in an Rmail folder::
+* Rmail writes to /var/spool/mail::
+* Replying to the sender of a message::
+* Automatically starting a mail or news reader::
+* Reading news with Emacs::
+* Gnus does not work with NNTP::
+* Making Gnus faster::
+* Catching up in all newsgroups::
+@end menu
+
+@node Changing the included text prefix
+@section How do I change the included text prefix in mail/news followups?
+@cindex Prefix in mail/news followups, changing
+@cindex Included text prefix, changing
+@cindex Setting the included text character
+@cindex Quoting in mail messages
+
+If you read mail with Rmail, set the variable @code{mail-yank-prefix}.
+For Gnus, set @code{message-yank-prefix}.  For VM, set
+@code{vm-included-text-prefix}.  For mh-e, set @code{mh-ins-buf-prefix}.
+
+For fancier control of citations, use Supercite (@pxref{Top,, the Supercite
+Manual, sc, The Supercite Manual}).
+
+To prevent Emacs from including various headers of the replied-to
+message, set the value of @code{mail-yank-ignored-headers} to an
+appropriate regexp.
+
+@node Saving a copy of outgoing mail
+@section How do I save a copy of outgoing mail?
+@cindex Saving a copy of outgoing mail
+@cindex Copying outgoing mail to a file
+@cindex Filing outgoing mail
+@cindex Automatic filing of outgoing mail
+@cindex Mail, saving outgoing automatically
+
+You can either mail yourself a copy by including a @samp{BCC} header in the
+mail message, or store a copy of the message directly to a file by
+including an @samp{FCC} header.
+
+If you use standard mail, you can automatically create a @samp{BCC} to
+yourself by putting
+
+@lisp
+(setq mail-self-blind t)
+@end lisp
+
+@noindent
+in your @file{.emacs} file.  You can automatically include an @samp{FCC}
+field by putting something like the following in your @file{.emacs}
+file:
+
+@lisp
+(setq mail-archive-file-name (expand-file-name "~/outgoing"))
+@end lisp
+
+The output file will be in Unix mail format.
+
+If you use @code{mh-e}, add an @samp{FCC} or @samp{BCC} field to your
+components file.
+
+It does not work to put @samp{set record filename} in the @file{.mailrc}
+file.
+
+@node Expanding aliases when sending mail
+@section Why doesn't Emacs expand my aliases when sending mail?
+@cindex Expanding aliases when sending mail
+@cindex Mail alias expansion
+@cindex Sending mail with aliases
+
+@xref{Mail Aliases,, The Emacs Manual, emacs, The Emacs Manual}.
+
+@itemize @bullet
+
+@item
+Normally, Emacs expands aliases when you send the message.
+To expand them before this, use @kbd{M-x expand-mail-aliases}.
+
+@item
+Emacs normally only reads the @file{.mailrc} file once per session, when
+you start to compose your first mail message.  If you edit the file
+after this, you can use @kbd{M-x build-mail-aliases} to make Emacs
+reread it.  Prior to Emacs 24.1, this is not an interactive command, so
+you must instead type @kbd{M-: (build-mail-aliases) @key{RET}}.
+
+@item
+If you like, you can expand mail aliases as abbrevs, as soon as you
+type them in.  To enable this feature, execute the following:
+
+@lisp
+(add-hook 'mail-mode-hook 'mail-abbrevs-setup)
+@end lisp
+
+Note that the aliases are expanded automatically only after you type
+a word-separator character (e.g. @key{RET} or @kbd{,}).  You can force their
+expansion by moving point to the end of the alias and typing @kbd{C-x a e}
+(@kbd{M-x expand-abbrev}).
+@end itemize
+
+@node Sorting the messages in an Rmail folder
+@section How can I sort the messages in my Rmail folder?
+@cindex Rmail, sorting messages in
+@cindex Folder, sorting messages in an Rmail
+@cindex Sorting messages in an Rmail folder
+
+In Rmail, type @kbd{C-c C-s C-h} to get a list of sorting functions
+and their key bindings.
+
+@node Rmail writes to /var/spool/mail
+@section Why does Rmail need to write to @file{/var/spool/mail}?
+@cindex Rmail and @file{/var/spool/mail}
+@cindex @file{/var/spool/mail} and Rmail
+
+This is the behavior of the @code{movemail} program which Rmail uses.
+This indicates that @code{movemail} is configured to use lock files.
+
+RMS writes:
+
+@quotation
+Certain systems require lock files to interlock access to mail files.
+On these systems, @code{movemail} must write lock files, or you risk losing
+mail.  You simply must arrange to let @code{movemail} write them.
+
+Other systems use the @code{flock} system call to interlock access.  On
+these systems, you should configure @code{movemail} to use @code{flock}.
+@end quotation
+
+@node Replying to the sender of a message
+@section How can I force Rmail to reply to the sender of a message, but not the other recipients?
+@cindex Replying only to the sender of a message
+@cindex Sender, replying only to
+@cindex Rmail, replying to the sender of a message in
+
+@email{isaacson@@seas.upenn.edu, Ron Isaacson} says: When you hit
+@key{r} to reply in Rmail, by default it CCs all of the original
+recipients (everyone on the original @samp{To} and @samp{CC}
+lists). With a prefix argument (i.e., typing @kbd{C-u} before @key{r}),
+it replies only to the sender.  However, going through the whole
+@kbd{C-u} business every time you want to reply is a pain.  This is the
+best fix I've been able to come up with:
+
+@lisp
+(defun rmail-reply-t ()
+  "Reply only to the sender of the current message. (See rmail-reply.)"
+  (interactive)
+  (rmail-reply t))
+
+(add-hook 'rmail-mode-hook
+  (lambda ()
+    (define-key rmail-mode-map "r" 'rmail-reply-t)
+    (define-key rmail-mode-map "R" 'rmail-reply)))
+@end lisp
+
+@node Automatically starting a mail or news reader
+@section How do I make Emacs automatically start my mail/news reader?
+@cindex Mail reader, starting automatically
+@cindex News reader, starting automatically
+@cindex Starting mail/news reader automatically
+
+To start Emacs in Gnus:
+
+@example
+emacs -f gnus
+@end example
+
+@noindent
+in Rmail:
+
+@example
+emacs -f rmail
+@end example
+
+A more convenient way to start with Gnus:
+
+@example
+alias gnus 'emacs -f gnus'
+gnus
+@end example
+
+It is probably unwise to automatically start your mail or news reader
+from your @file{.emacs} file.  This would cause problems if you needed to run
+two copies of Emacs at the same time.  Also, this would make it difficult for
+you to start Emacs quickly when you needed to.
+
+@node Reading news with Emacs
+@section How do I read news under Emacs?
+@cindex Reading news under Emacs
+@cindex Usenet reader in Emacs
+@cindex Gnus newsreader
+@cindex FAQ for Gnus
+@cindex Gnus FAQ
+@cindex Learning more about Gnus
+
+Use @kbd{M-x gnus}.  For more information on Gnus, @pxref{Top,, the Gnus
+Manual, gnus, The Gnus Manual}, which includes @ref{Frequently Asked
+Questions,, the Gnus FAQ, gnus, The Gnus Manual}.
+
+
+@node Gnus does not work with NNTP
+@section Why doesn't Gnus work via NNTP?
+@cindex Gnus and NNTP
+@cindex NNTP, Gnus fails to work with
+
+There is a bug in NNTP version 1.5.10, such that when multiple requests
+are sent to the NNTP server, the server only handles the first one
+before blocking waiting for more input which never comes.  NNTP version
+1.5.11 claims to fix this.
+
+You can work around the bug inside Emacs like this:
+
+@lisp
+(setq nntp-maximum-request 1)
+@end lisp
+
+You can find out what version of NNTP your news server is running by
+telnetting to the NNTP port (usually 119) on the news server machine
+(i.e., @kbd{telnet server-machine 119}).  The server should give its
+version number in the welcome message.  Type @kbd{quit} to get out.
+
+@node Making Gnus faster
+@section How do I make Gnus faster?
+@cindex Faster, starting Gnus
+@cindex Starting Gnus faster
+@cindex Gnus, starting faster
+@cindex Slow catch up in Gnus
+@cindex Gnus is slow when catching up
+@cindex Crosspostings make Gnus catching up slow
+
+From the Gnus FAQ (@pxref{Reading news with Emacs}):
+
+@quotation
+If you have a slow machine, or are just really impatient, there are a
+few things you can do to make Gnus run faster.
+
+Set @code{gnus-check-new-newsgroups} and
+@code{gnus-check-bogus-newsgroups} to @code{nil} to make startup faster.
+
+Set @code{gnus-show-threads}, @code{gnus-use-cross-reference} and
+@code{gnus-nov-is-evil} to @code{nil} to make entering and exiting the
+summary buffer faster.
+@end quotation
+
+@node Catching up in all newsgroups
+@section How do I catch up all newsgroups in Gnus?
+@cindex Catching up all newsgroups in Gnus
+@cindex Gnus, Catching up all newsgroups in
+
+In the @file{*Newsgroup*} buffer, type @kbd{M-< C-x ( c y C-x ) M-0 C-x e}
+
+Leave off the initial @kbd{M-<} if you only want to catch up from point
+to the end of the @file{*Newsgroup*} buffer.
+
+@node Concept index
+@unnumbered Concept Index
+@printindex cp
+
+@bye

@@ -1,0 +1,573 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/symbols
+@node Symbols, Evaluation, Hash Tables, Top
+@chapter Symbols
+@cindex symbol
+
+  A @dfn{symbol} is an object with a unique name.  This chapter
+describes symbols, their components, their property lists, and how they
+are created and interned.  Separate chapters describe the use of symbols
+as variables and as function names; see @ref{Variables}, and
+@ref{Functions}.  For the precise read syntax for symbols, see
+@ref{Symbol Type}.
+
+  You can test whether an arbitrary Lisp object is a symbol
+with @code{symbolp}:
+
+@defun symbolp object
+This function returns @code{t} if @var{object} is a symbol, @code{nil}
+otherwise.
+@end defun
+
+@menu
+* Symbol Components::        Symbols have names, values, function definitions
+                               and property lists.
+* Definitions::              A definition says how a symbol will be used.
+* Creating Symbols::         How symbols are kept unique.
+* Property Lists::           Each symbol has a property list
+                               for recording miscellaneous information.
+@end menu
+
+@node Symbol Components, Definitions, Symbols, Symbols
+@section Symbol Components
+@cindex symbol components
+
+  Each symbol has four components (or ``cells''), each of which
+references another object:
+
+@table @asis
+@item Print name
+@cindex print name cell
+The symbol's name.
+
+@item Value
+@cindex value cell
+The symbol's current value as a variable.
+
+@item Function
+@cindex function cell
+The symbol's function definition.  It can also hold a symbol, a
+keymap, or a keyboard macro.
+
+@item Property list
+@cindex property list cell
+The symbol's property list.
+@end table
+
+@noindent
+The print name cell always holds a string, and cannot be changed.
+Each of the other three cells can be set to any Lisp object.
+
+  The print name cell holds the string that is the name of a symbol.
+Since symbols are represented textually by their names, it is
+important not to have two symbols with the same name.  The Lisp reader
+ensures this: every time it reads a symbol, it looks for an existing
+symbol with the specified name before it creates a new one.  To get a
+symbol's name, use the function @code{symbol-name} (@pxref{Creating
+Symbols}).
+
+  The value cell holds a symbol's value as a variable, which is what
+you get if the symbol itself is evaluated as a Lisp expression.
+@xref{Variables}, for details about how values are set and retrieved,
+including complications such as @dfn{local bindings} and @dfn{scoping
+rules}.  Most symbols can have any Lisp object as a value, but certain
+special symbols have values that cannot be changed; these include
+@code{nil} and @code{t}, and any symbol whose name starts with
+@samp{:} (those are called @dfn{keywords}).  @xref{Constant
+Variables}.
+
+  The function cell holds a symbol's function definition.  Often, we
+refer to ``the function @code{foo}'' when we really mean the function
+stored in the function cell of @code{foo}; we make the distinction
+explicit only when necessary.  Typically, the function cell is used to
+hold a function (@pxref{Functions}) or a macro (@pxref{Macros}).
+However, it can also be used to hold a symbol (@pxref{Function
+Indirection}), keyboard macro (@pxref{Keyboard Macros}), keymap
+(@pxref{Keymaps}), or autoload object (@pxref{Autoloading}).  To get
+the contents of a symbol's function cell, use the function
+@code{symbol-function} (@pxref{Function Cells}).
+
+  The property list cell normally should hold a correctly formatted
+property list.  To get a symbol's property list, use the function
+@code{symbol-plist}.  @xref{Property Lists}.
+
+  The function cell or the value cell may be @dfn{void}, which means
+that the cell does not reference any object.  (This is not the same
+thing as holding the symbol @code{void}, nor the same as holding the
+symbol @code{nil}.)  Examining a function or value cell that is void
+results in an error, such as @samp{Symbol's value as variable is void}.
+
+  Because each symbol has separate value and function cells, variables
+names and function names do not conflict.  For example, the symbol
+@code{buffer-file-name} has a value (the name of the file being
+visited in the current buffer) as well as a function definition (a
+primitive function that returns the name of the file):
+
+@example
+buffer-file-name
+     @result{} "/gnu/elisp/symbols.texi"
+(symbol-function 'buffer-file-name)
+     @result{} #<subr buffer-file-name>
+@end example
+
+@node Definitions, Creating Symbols, Symbol Components, Symbols
+@section Defining Symbols
+@cindex definitions of symbols
+
+  A @dfn{definition} is a special kind of Lisp expression that
+announces your intention to use a symbol in a particular way.  It
+typically specifies a value or meaning for the symbol for one kind of
+use, plus documentation for its meaning when used in this way.  Thus,
+when you define a symbol as a variable, you can supply an initial
+value for the variable, plus documentation for the variable.
+
+  @code{defvar} and @code{defconst} are special forms that define a
+symbol as a @dfn{global variable}---a variable that can be accessed at
+any point in a Lisp program.  @xref{Variables}, for details about
+variables.  To define a customizable variable, use the
+@code{defcustom} macro, which also calls @code{defvar} as a subroutine
+(@pxref{Customization}).
+
+  In principle, you can assign a variable value to any symbol with
+@code{setq}, whether not it has first been defined as a variable.
+However, you ought to write a variable definition for each global
+variable that you want to use; otherwise, your Lisp program may not
+act correctly if it is evaluated with lexical scoping enabled
+(@pxref{Variable Scoping}).
+
+  @code{defun} defines a symbol as a function, creating a lambda
+expression and storing it in the function cell of the symbol.  This
+lambda expression thus becomes the function definition of the symbol.
+(The term ``function definition'', meaning the contents of the function
+cell, is derived from the idea that @code{defun} gives the symbol its
+definition as a function.)  @code{defsubst} and @code{defalias} are two
+other ways of defining a function.  @xref{Functions}.
+
+  @code{defmacro} defines a symbol as a macro.  It creates a macro
+object and stores it in the function cell of the symbol.  Note that a
+given symbol can be a macro or a function, but not both at once, because
+both macro and function definitions are kept in the function cell, and
+that cell can hold only one Lisp object at any given time.
+@xref{Macros}.
+
+  As previously noted, Emacs Lisp allows the same symbol to be defined
+both as a variable (e.g.@: with @code{defvar}) and as a function or
+macro (e.g.@: with @code{defun}).  Such definitions do not conflict.
+
+  These definition also act as guides for programming tools.  For
+example, the @kbd{C-h f} and @kbd{C-h v} commands create help buffers
+containing links to the relevant variable, function, or macro
+definitions.  @xref{Name Help,,, emacs, The GNU Emacs Manual}.
+
+@node Creating Symbols, Property Lists, Definitions, Symbols
+@section Creating and Interning Symbols
+@cindex reading symbols
+
+  To understand how symbols are created in GNU Emacs Lisp, you must know
+how Lisp reads them.  Lisp must ensure that it finds the same symbol
+every time it reads the same set of characters.  Failure to do so would
+cause complete confusion.
+
+@cindex symbol name hashing
+@cindex hashing
+@cindex obarray
+@cindex bucket (in obarray)
+  When the Lisp reader encounters a symbol, it reads all the characters
+of the name.  Then it ``hashes'' those characters to find an index in a
+table called an @dfn{obarray}.  Hashing is an efficient method of
+looking something up.  For example, instead of searching a telephone
+book cover to cover when looking up Jan Jones, you start with the J's
+and go from there.  That is a simple version of hashing.  Each element
+of the obarray is a @dfn{bucket} which holds all the symbols with a
+given hash code; to look for a given name, it is sufficient to look
+through all the symbols in the bucket for that name's hash code.  (The
+same idea is used for general Emacs hash tables, but they are a
+different data type; see @ref{Hash Tables}.)
+
+@cindex interning
+  If a symbol with the desired name is found, the reader uses that
+symbol.  If the obarray does not contain a symbol with that name, the
+reader makes a new symbol and adds it to the obarray.  Finding or adding
+a symbol with a certain name is called @dfn{interning} it, and the
+symbol is then called an @dfn{interned symbol}.
+
+  Interning ensures that each obarray has just one symbol with any
+particular name.  Other like-named symbols may exist, but not in the
+same obarray.  Thus, the reader gets the same symbols for the same
+names, as long as you keep reading with the same obarray.
+
+  Interning usually happens automatically in the reader, but sometimes
+other programs need to do it.  For example, after the @kbd{M-x} command
+obtains the command name as a string using the minibuffer, it then
+interns the string, to get the interned symbol with that name.
+
+@cindex symbol equality
+@cindex uninterned symbol
+  No obarray contains all symbols; in fact, some symbols are not in any
+obarray.  They are called @dfn{uninterned symbols}.  An uninterned
+symbol has the same four cells as other symbols; however, the only way
+to gain access to it is by finding it in some other object or as the
+value of a variable.
+
+  Creating an uninterned symbol is useful in generating Lisp code,
+because an uninterned symbol used as a variable in the code you generate
+cannot clash with any variables used in other Lisp programs.
+
+  In Emacs Lisp, an obarray is actually a vector.  Each element of the
+vector is a bucket; its value is either an interned symbol whose name
+hashes to that bucket, or 0 if the bucket is empty.  Each interned
+symbol has an internal link (invisible to the user) to the next symbol
+in the bucket.  Because these links are invisible, there is no way to
+find all the symbols in an obarray except using @code{mapatoms} (below).
+The order of symbols in a bucket is not significant.
+
+  In an empty obarray, every element is 0, so you can create an obarray
+with @code{(make-vector @var{length} 0)}.  @strong{This is the only
+valid way to create an obarray.}  Prime numbers as lengths tend
+to result in good hashing; lengths one less than a power of two are also
+good.
+
+  @strong{Do not try to put symbols in an obarray yourself.}  This does
+not work---only @code{intern} can enter a symbol in an obarray properly.
+
+@cindex CL note---symbol in obarrays
+@quotation
+@b{Common Lisp note:} Unlike Common Lisp, Emacs Lisp does not provide
+for interning a single symbol in several obarrays.
+@end quotation
+
+  Most of the functions below take a name and sometimes an obarray as
+arguments.  A @code{wrong-type-argument} error is signaled if the name
+is not a string, or if the obarray is not a vector.
+
+@defun symbol-name symbol
+This function returns the string that is @var{symbol}'s name.  For example:
+
+@example
+@group
+(symbol-name 'foo)
+     @result{} "foo"
+@end group
+@end example
+
+@strong{Warning:} Changing the string by substituting characters does
+change the name of the symbol, but fails to update the obarray, so don't
+do it!
+@end defun
+
+@defun make-symbol name
+This function returns a newly-allocated, uninterned symbol whose name is
+@var{name} (which must be a string).  Its value and function definition
+are void, and its property list is @code{nil}.  In the example below,
+the value of @code{sym} is not @code{eq} to @code{foo} because it is a
+distinct uninterned symbol whose name is also @samp{foo}.
+
+@example
+(setq sym (make-symbol "foo"))
+     @result{} foo
+(eq sym 'foo)
+     @result{} nil
+@end example
+@end defun
+
+@defun intern name &optional obarray
+This function returns the interned symbol whose name is @var{name}.  If
+there is no such symbol in the obarray @var{obarray}, @code{intern}
+creates a new one, adds it to the obarray, and returns it.  If
+@var{obarray} is omitted, the value of the global variable
+@code{obarray} is used.
+
+@example
+(setq sym (intern "foo"))
+     @result{} foo
+(eq sym 'foo)
+     @result{} t
+
+(setq sym1 (intern "foo" other-obarray))
+     @result{} foo
+(eq sym1 'foo)
+     @result{} nil
+@end example
+@end defun
+
+@cindex CL note---interning existing symbol
+@quotation
+@b{Common Lisp note:} In Common Lisp, you can intern an existing symbol
+in an obarray.  In Emacs Lisp, you cannot do this, because the argument
+to @code{intern} must be a string, not a symbol.
+@end quotation
+
+@defun intern-soft name &optional obarray
+This function returns the symbol in @var{obarray} whose name is
+@var{name}, or @code{nil} if @var{obarray} has no symbol with that name.
+Therefore, you can use @code{intern-soft} to test whether a symbol with
+a given name is already interned.  If @var{obarray} is omitted, the
+value of the global variable @code{obarray} is used.
+
+The argument @var{name} may also be a symbol; in that case,
+the function returns @var{name} if @var{name} is interned
+in the specified obarray, and otherwise @code{nil}.
+
+@example
+(intern-soft "frazzle")        ; @r{No such symbol exists.}
+     @result{} nil
+(make-symbol "frazzle")        ; @r{Create an uninterned one.}
+     @result{} frazzle
+@group
+(intern-soft "frazzle")        ; @r{That one cannot be found.}
+     @result{} nil
+@end group
+@group
+(setq sym (intern "frazzle"))  ; @r{Create an interned one.}
+     @result{} frazzle
+@end group
+@group
+(intern-soft "frazzle")        ; @r{That one can be found!}
+     @result{} frazzle
+@end group
+@group
+(eq sym 'frazzle)              ; @r{And it is the same one.}
+     @result{} t
+@end group
+@end example
+@end defun
+
+@defvar obarray
+This variable is the standard obarray for use by @code{intern} and
+@code{read}.
+@end defvar
+
+@defun mapatoms function &optional obarray
+@anchor{Definition of mapatoms}
+This function calls @var{function} once with each symbol in the obarray
+@var{obarray}.  Then it returns @code{nil}.  If @var{obarray} is
+omitted, it defaults to the value of @code{obarray}, the standard
+obarray for ordinary symbols.
+
+@example
+(setq count 0)
+     @result{} 0
+(defun count-syms (s)
+  (setq count (1+ count)))
+     @result{} count-syms
+(mapatoms 'count-syms)
+     @result{} nil
+count
+     @result{} 1871
+@end example
+
+See @code{documentation} in @ref{Accessing Documentation}, for another
+example using @code{mapatoms}.
+@end defun
+
+@defun unintern symbol obarray
+This function deletes @var{symbol} from the obarray @var{obarray}.  If
+@code{symbol} is not actually in the obarray, @code{unintern} does
+nothing.  If @var{obarray} is @code{nil}, the current obarray is used.
+
+If you provide a string instead of a symbol as @var{symbol}, it stands
+for a symbol name.  Then @code{unintern} deletes the symbol (if any) in
+the obarray which has that name.  If there is no such symbol,
+@code{unintern} does nothing.
+
+If @code{unintern} does delete a symbol, it returns @code{t}.  Otherwise
+it returns @code{nil}.
+@end defun
+
+@node Property Lists,, Creating Symbols, Symbols
+@section Property Lists
+@cindex property list
+@cindex plist
+
+  A @dfn{property list} (@dfn{plist} for short) is a list of paired
+elements.  Each of the pairs associates a property name (usually a
+symbol) with a property or value.
+
+  Every symbol has a cell that stores a property list (@pxref{Symbol
+Components}).  This property list is used to record information about
+the symbol, such as its variable documentation and the name of the
+file where it was defined.
+
+  Property lists can also be used in other contexts.  For instance,
+you can assign property lists to character positions in a string or
+buffer.  @xref{Text Properties}.
+
+  The property names and values in a property list can be any Lisp
+objects, but the names are usually symbols.  Property list functions
+compare the property names using @code{eq}.  Here is an example of a
+property list, found on the symbol @code{progn} when the compiler is
+loaded:
+
+@example
+(lisp-indent-function 0 byte-compile byte-compile-progn)
+@end example
+
+@noindent
+Here @code{lisp-indent-function} and @code{byte-compile} are property
+names, and the other two elements are the corresponding values.
+
+@menu
+* Plists and Alists::           Comparison of the advantages of property
+                                  lists and association lists.
+* Symbol Plists::               Functions to access symbols' property lists.
+* Other Plists::                Accessing property lists stored elsewhere.
+@end menu
+
+@node Plists and Alists
+@subsection Property Lists and Association Lists
+@cindex plist vs. alist
+@cindex alist vs. plist
+
+@cindex property lists vs association lists
+  Association lists (@pxref{Association Lists}) are very similar to
+property lists.  In contrast to association lists, the order of the
+pairs in the property list is not significant since the property names
+must be distinct.
+
+  Property lists are better than association lists for attaching
+information to various Lisp function names or variables.  If your
+program keeps all such information in one association list, it will
+typically need to search that entire list each time it checks for an
+association for a particular Lisp function name or variable, which
+could be slow.  By contrast, if you keep the same information in the
+property lists of the function names or variables themselves, each
+search will scan only the length of one property list, which is
+usually short.  This is why the documentation for a variable is
+recorded in a property named @code{variable-documentation}.  The byte
+compiler likewise uses properties to record those functions needing
+special treatment.
+
+  However, association lists have their own advantages.  Depending on
+your application, it may be faster to add an association to the front of
+an association list than to update a property.  All properties for a
+symbol are stored in the same property list, so there is a possibility
+of a conflict between different uses of a property name.  (For this
+reason, it is a good idea to choose property names that are probably
+unique, such as by beginning the property name with the program's usual
+name-prefix for variables and functions.)  An association list may be
+used like a stack where associations are pushed on the front of the list
+and later discarded; this is not possible with a property list.
+
+@node Symbol Plists
+@subsection Property List Functions for Symbols
+
+@defun symbol-plist symbol
+This function returns the property list of @var{symbol}.
+@end defun
+
+@defun setplist symbol plist
+This function sets @var{symbol}'s property list to @var{plist}.
+Normally, @var{plist} should be a well-formed property list, but this is
+not enforced.  The return value is @var{plist}.
+
+@example
+(setplist 'foo '(a 1 b (2 3) c nil))
+     @result{} (a 1 b (2 3) c nil)
+(symbol-plist 'foo)
+     @result{} (a 1 b (2 3) c nil)
+@end example
+
+For symbols in special obarrays, which are not used for ordinary
+purposes, it may make sense to use the property list cell in a
+nonstandard fashion; in fact, the abbrev mechanism does so
+(@pxref{Abbrevs}).
+@end defun
+
+@defun get symbol property
+This function finds the value of the property named @var{property} in
+@var{symbol}'s property list.  If there is no such property, @code{nil}
+is returned.  Thus, there is no distinction between a value of
+@code{nil} and the absence of the property.
+
+The name @var{property} is compared with the existing property names
+using @code{eq}, so any object is a legitimate property.
+
+See @code{put} for an example.
+@end defun
+
+@defun put symbol property value
+This function puts @var{value} onto @var{symbol}'s property list under
+the property name @var{property}, replacing any previous property value.
+The @code{put} function returns @var{value}.
+
+@example
+(put 'fly 'verb 'transitive)
+     @result{}'transitive
+(put 'fly 'noun '(a buzzing little bug))
+     @result{} (a buzzing little bug)
+(get 'fly 'verb)
+     @result{} transitive
+(symbol-plist 'fly)
+     @result{} (verb transitive noun (a buzzing little bug))
+@end example
+@end defun
+
+@node Other Plists
+@subsection Property Lists Outside Symbols
+
+  These functions are useful for manipulating property lists
+not stored in symbols:
+
+@defun plist-get plist property
+This returns the value of the @var{property} property stored in the
+property list @var{plist}.  It accepts a malformed @var{plist}
+argument.  If @var{property} is not found in the @var{plist}, it
+returns @code{nil}.  For example,
+
+@example
+(plist-get '(foo 4) 'foo)
+     @result{} 4
+(plist-get '(foo 4 bad) 'foo)
+     @result{} 4
+(plist-get '(foo 4 bad) 'bad)
+     @result{} nil
+(plist-get '(foo 4 bad) 'bar)
+     @result{} nil
+@end example
+@end defun
+
+@defun plist-put plist property value
+This stores @var{value} as the value of the @var{property} property in
+the property list @var{plist}.  It may modify @var{plist} destructively,
+or it may construct a new list structure without altering the old.  The
+function returns the modified property list, so you can store that back
+in the place where you got @var{plist}.  For example,
+
+@example
+(setq my-plist '(bar t foo 4))
+     @result{} (bar t foo 4)
+(setq my-plist (plist-put my-plist 'foo 69))
+     @result{} (bar t foo 69)
+(setq my-plist (plist-put my-plist 'quux '(a)))
+     @result{} (bar t foo 69 quux (a))
+@end example
+@end defun
+
+  You could define @code{put} in terms of @code{plist-put} as follows:
+
+@example
+(defun put (symbol prop value)
+  (setplist symbol
+            (plist-put (symbol-plist symbol) prop value)))
+@end example
+
+@defun lax-plist-get plist property
+Like @code{plist-get} except that it compares properties
+using @code{equal} instead of @code{eq}.
+@end defun
+
+@defun lax-plist-put plist property value
+Like @code{plist-put} except that it compares properties
+using @code{equal} instead of @code{eq}.
+@end defun
+
+@defun plist-member plist property
+This returns non-@code{nil} if @var{plist} contains the given
+@var{property}.  Unlike @code{plist-get}, this allows you to distinguish
+between a missing property and a property with the value @code{nil}.
+The value is actually the tail of @var{plist} whose @code{car} is
+@var{property}.
+@end defun

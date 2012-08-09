@@ -1,0 +1,289 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in emacs-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+@node Picture Mode
+@section Editing Pictures
+@cindex pictures
+@cindex making pictures out of text characters
+@findex picture-mode
+
+  To edit a picture made out of text characters (for example, a picture
+of the division of a register into fields, as a comment in a program),
+use the command @kbd{M-x picture-mode} to enter Picture mode.
+
+  In Picture mode, editing is based on the @dfn{quarter-plane} model of
+text, according to which the text characters lie studded on an area that
+stretches infinitely far to the right and downward.  The concept of the end
+of a line does not exist in this model; the most you can say is where the
+last nonblank character on the line is found.
+
+  Of course, Emacs really always considers text as a sequence of
+characters, and lines really do have ends.  But Picture mode replaces
+the most frequently-used commands with variants that simulate the
+quarter-plane model of text.  They do this by inserting spaces or by
+converting tabs to spaces.
+
+  Most of the basic editing commands of Emacs are redefined by Picture mode
+to do essentially the same thing but in a quarter-plane way.  In addition,
+Picture mode defines various keys starting with the @kbd{C-c} prefix to
+run special picture editing commands.
+
+  One of these keys, @kbd{C-c C-c}, is particularly important.  Often
+a picture is part of a larger file that is usually edited in some
+other major mode.  Picture mode records the name of the previous major
+mode so you can use the @kbd{C-c C-c} command
+(@code{picture-mode-exit}) later to go back to that mode.  @kbd{C-c
+C-c} also deletes spaces from the ends of lines, unless given a
+numeric argument.
+
+  The special commands of Picture mode all work in other modes (provided
+the @file{picture} library is loaded), but are not bound to keys except
+in Picture mode.  The descriptions below talk of moving ``one column''
+and so on, but all the picture mode commands handle numeric arguments as
+their normal equivalents do.
+
+@vindex picture-mode-hook
+  Turning on Picture mode runs the hook @code{picture-mode-hook}.
+Additional extensions to Picture mode can be found in
+@file{artist.el}.
+
+@menu
+* Basic Picture::         Basic concepts and simple commands of Picture Mode.
+* Insert in Picture::     Controlling direction of cursor motion
+                            after "self-inserting" characters.
+* Tabs in Picture::       Various features for tab stops and indentation.
+* Rectangles in Picture:: Clearing and superimposing rectangles.
+@end menu
+
+@node Basic Picture
+@subsection Basic Editing in Picture Mode
+
+@findex picture-forward-column
+@findex picture-backward-column
+@findex picture-move-down
+@findex picture-move-up
+@cindex editing in Picture mode
+
+  Most keys do the same thing in Picture mode that they usually do, but
+do it in a quarter-plane style.  For example, @kbd{C-f} is rebound to
+run @code{picture-forward-column}, a command which moves point one
+column to the right, inserting a space if necessary so that the actual
+end of the line makes no difference.  @kbd{C-b} is rebound to run
+@code{picture-backward-column}, which always moves point left one
+column, converting a tab to multiple spaces if necessary.  @kbd{C-n} and
+@kbd{C-p} are rebound to run @code{picture-move-down} and
+@code{picture-move-up}, which can either insert spaces or convert tabs
+as necessary to make sure that point stays in exactly the same column.
+@kbd{C-e} runs @code{picture-end-of-line}, which moves to after the last
+nonblank character on the line.  @kbd{C-a} runs
+@code{picture-beginning-of-line}.  (The choice of screen model does not
+affect beginnings of lines; the only extra thing this command does is
+update the current picture column to 0.)
+
+@findex picture-newline
+  Insertion of text is adapted to the quarter-plane screen model
+through the use of Overwrite mode
+@iftex
+(@pxref{Minor Modes,,, emacs, the Emacs Manual}.)
+@end iftex
+@ifnottex
+(@pxref{Minor Modes}.)
+@end ifnottex
+Self-inserting characters replace existing text, column by column,
+rather than pushing existing text to the right.  @key{RET} runs
+@code{picture-newline}, which just moves to the beginning of the
+following line so that new text will replace that line.
+
+@findex picture-backward-clear-column
+@findex picture-clear-column
+@findex picture-clear-line
+  In Picture mode, the commands that normally delete or kill text,
+instead erase text (replacing it with spaces).  @key{DEL}
+(@code{picture-backward-clear-column}) replaces the preceding
+character with a space rather than removing it; this moves point
+backwards.  @kbd{C-d} (@code{picture-clear-column}) replaces the next
+character or characters with spaces, but does not move point.  (If you
+want to clear characters to spaces and move forward over them, use
+@key{SPC}.)  @kbd{C-k} (@code{picture-clear-line}) really kills the
+contents of lines, but does not delete the newlines from the buffer.
+
+@findex picture-open-line
+  To do actual insertion, you must use special commands.  @kbd{C-o}
+(@code{picture-open-line}) creates a blank line after the current
+line; it never splits a line.  @kbd{C-M-o} (@code{split-line}) makes
+sense in Picture mode, so it is not changed.  @kbd{C-j}
+(@code{picture-duplicate-line}) inserts another line with the same
+contents below the current line.
+
+@kindex C-c C-d @r{(Picture mode)}
+   To do actual deletion in Picture mode, use @kbd{C-w}, @kbd{C-c C-d}
+(which is defined as @code{delete-char}, as @kbd{C-d} is in other
+modes), or one of the picture rectangle commands (@pxref{Rectangles in
+Picture}).
+
+@node Insert in Picture
+@subsection Controlling Motion after Insert
+
+@findex picture-movement-up
+@findex picture-movement-down
+@findex picture-movement-left
+@findex picture-movement-right
+@findex picture-movement-nw
+@findex picture-movement-ne
+@findex picture-movement-sw
+@findex picture-movement-se
+@kindex C-c < @r{(Picture mode)}
+@kindex C-c > @r{(Picture mode)}
+@kindex C-c ^ @r{(Picture mode)}
+@kindex C-c . @r{(Picture mode)}
+@kindex C-c ` @r{(Picture mode)}
+@kindex C-c ' @r{(Picture mode)}
+@kindex C-c / @r{(Picture mode)}
+@kindex C-c \ @r{(Picture mode)}
+  Since ``self-inserting'' characters in Picture mode overwrite and move
+point, there is no essential restriction on how point should be moved.
+Normally point moves right, but you can specify any of the eight
+orthogonal or diagonal directions for motion after a ``self-inserting''
+character.  This is useful for drawing lines in the buffer.
+
+@table @kbd
+@item C-c <
+@itemx C-c @key{LEFT}
+Move left after insertion (@code{picture-movement-left}).
+@item C-c >
+@itemx C-c @key{RIGHT}
+Move right after insertion (@code{picture-movement-right}).
+@item C-c ^
+@itemx C-c @key{UP}
+Move up after insertion (@code{picture-movement-up}).
+@item C-c .
+@itemx C-c @key{DOWN}
+Move down after insertion (@code{picture-movement-down}).
+@item C-c `
+@itemx C-c @key{HOME}
+Move up and left (``northwest'') after insertion (@code{picture-movement-nw}).
+@item C-c '
+@itemx C-c @key{prior}
+Move up and right (``northeast'') after insertion
+(@code{picture-movement-ne}).
+@item C-c /
+@itemx C-c @key{END}
+Move down and left (``southwest'') after insertion
+@*(@code{picture-movement-sw}).
+@item C-c \
+@itemx C-c @key{next}
+Move down and right (``southeast'') after insertion
+@*(@code{picture-movement-se}).
+@end table
+
+@kindex C-c C-f @r{(Picture mode)}
+@kindex C-c C-b @r{(Picture mode)}
+@findex picture-motion
+@findex picture-motion-reverse
+  Two motion commands move based on the current Picture insertion
+direction.  The command @kbd{C-c C-f} (@code{picture-motion}) moves in the
+same direction as motion after ``insertion'' currently does, while @kbd{C-c
+C-b} (@code{picture-motion-reverse}) moves in the opposite direction.
+
+@node Tabs in Picture
+@subsection Picture Mode Tabs
+
+@kindex M-TAB @r{(Picture mode)}
+@findex picture-tab-search
+@vindex picture-tab-chars
+  Two kinds of tab-like action are provided in Picture mode.  Use
+@kbd{M-@key{TAB}} (@code{picture-tab-search}) for context-based tabbing.
+With no argument, it moves to a point underneath the next
+``interesting'' character that follows whitespace in the previous
+nonblank line.  ``Next'' here means ``appearing at a horizontal position
+greater than the one point starts out at''.  With an argument, as in
+@kbd{C-u M-@key{TAB}}, this command moves to the next such interesting
+character in the current line.  @kbd{M-@key{TAB}} does not change the
+text; it only moves point.  ``Interesting'' characters are defined by
+the variable @code{picture-tab-chars}, which should define a set of
+characters.  The syntax for this variable is like the syntax used inside
+of @samp{[@dots{}]} in a regular expression---but without the @samp{[}
+and the @samp{]}.  Its default value is @code{"!-~"}.
+
+@findex picture-tab
+  @key{TAB} itself runs @code{picture-tab}, which operates based on the
+current tab stop settings; it is the Picture mode equivalent of
+@code{tab-to-tab-stop}.  Normally it just moves point, but with a numeric
+argument it clears the text that it moves over.
+
+@kindex C-c TAB @r{(Picture mode)}
+@findex picture-set-tab-stops
+  The context-based and tab-stop-based forms of tabbing are brought
+together by the command @kbd{C-c @key{TAB}} (@code{picture-set-tab-stops}).
+This command sets the tab stops to the positions which @kbd{M-@key{TAB}}
+would consider significant in the current line.  The use of this command,
+together with @key{TAB}, can get the effect of context-based tabbing.  But
+@kbd{M-@key{TAB}} is more convenient in the cases where it is sufficient.
+
+  It may be convenient to prevent use of actual tab characters in
+pictures.  For example, this prevents @kbd{C-x @key{TAB}} from messing
+up the picture.  You can do this by setting the variable
+@code{indent-tabs-mode} to @code{nil}.
+
+@node Rectangles in Picture
+@subsection Picture Mode Rectangle Commands
+@cindex rectangles and Picture mode
+@cindex Picture mode and rectangles
+
+  Picture mode defines commands for working on rectangular pieces of
+the text in ways that fit with the quarter-plane model.  The standard
+rectangle commands may also be useful.
+@iftex
+@xref{Rectangles,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Rectangles}.
+@end ifnottex
+
+@table @kbd
+@item C-c C-k
+Clear out the region-rectangle with spaces
+(@code{picture-clear-rectangle}).  With a prefix argument, delete the
+text.
+@item C-c C-w @var{r}
+Similar, but save rectangle contents in register @var{r} first
+(@code{picture-clear-rectangle-to-register}).
+@item C-c C-y
+Copy last killed rectangle into the buffer by overwriting, with upper
+left corner at point (@code{picture-yank-rectangle}).  With argument,
+insert instead.
+@item C-c C-x @var{r}
+Similar, but use the rectangle in register @var{r}
+(@code{picture-yank-rectangle-from-register}).
+@end table
+
+@kindex C-c C-k @r{(Picture mode)}
+@kindex C-c C-w @r{(Picture mode)}
+@findex picture-clear-rectangle
+@findex picture-clear-rectangle-to-register
+  The picture rectangle commands @kbd{C-c C-k}
+(@code{picture-clear-rectangle}) and @kbd{C-c C-w}
+(@code{picture-clear-rectangle-to-register}) differ from the standard
+rectangle commands in that they normally clear the rectangle instead of
+deleting it; this is analogous with the way @kbd{C-d} is changed in Picture
+mode.
+
+  However, deletion of rectangles can be useful in Picture mode, so
+these commands delete the rectangle if given a numeric argument.
+@kbd{C-c C-k} either with or without a numeric argument saves the
+rectangle for @kbd{C-c C-y}.
+
+@kindex C-c C-y @r{(Picture mode)}
+@kindex C-c C-x @r{(Picture mode)}
+@findex picture-yank-rectangle
+@findex picture-yank-rectangle-from-register
+  The Picture mode commands for yanking rectangles differ from the
+standard ones in that they overwrite instead of inserting.  This is
+the same way that Picture mode insertion of other text differs from
+other modes.  @kbd{C-c C-y} (@code{picture-yank-rectangle}) inserts
+(by overwriting) the rectangle that was most recently killed, while
+@kbd{C-c C-x} (@code{picture-yank-rectangle-from-register}) does
+likewise for the rectangle found in a specified register.

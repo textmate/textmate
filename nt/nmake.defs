@@ -1,0 +1,271 @@
+#  -*- Makefile -*- definition file for building GNU Emacs on Windows NT.
+# Copyright (C) 2000-2012 Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# Ensure 'all' is the default target
+all:
+
+THE_SHELL = $(COMSPEC)
+SHELLTYPE=CMD
+
+MAKETYPE=nmake
+
+CURDIR		= $(MAKEDIR:\=/)
+THISDIR		= $(MAKEDIR)
+DIRNAME		=
+
+ALL_DEPS	= $**
+
+SUBSYSTEM_WINDOWS=-subsystem:windows
+SUBSYSTEM_CONSOLE=-subsystem:console
+
+# INSTALL_DIR is the directory into which emacs will be installed.
+#
+!ifndef INSTALL_DIR
+INSTALL_DIR     = $(CURDIR)/..
+!endif
+
+# Ensure EMACSLOADPATH is defined in the environment.
+#
+!if [set EMACSLOADPATH=foo]
+!endif
+
+# Allow detection of builds with MSVC 5 or later, so we can
+# speed up compiles (see rule at end).
+#
+_NMAKE_VER_5=162
+_NMAKE_VER_4=0
+
+!IFNDEF _NMAKE_VER
+_NMAKE_VER=$(_NMAKE_VER_4)
+!ENDIF
+
+# Check that the INCLUDE and LIB environment variables are set.
+#
+!ifndef INCLUDE
+!error The INCLUDE environment variable needs to be set.
+!endif
+!ifndef LIB
+!error The LIB environment variable needs to be set.
+!endif
+
+# Determine the architecture we're running on.
+# Define ARCH for our purposes;
+# Define CPU for use by ntwin32.mak;
+# Define CONFIG_H to the appropriate config.h for the system;
+#
+!ifdef PROCESSOR_ARCHITECTURE
+# We're on Windows NT
+CPU		= $(PROCESSOR_ARCHITECTURE)
+CONFIG_H	= config.nt
+OS_TYPE		= windowsnt
+! if "$(PROCESSOR_ARCHITECTURE)" == "x86"
+ARCH		= i386
+CPU		= i386
+! else
+!  if "$(PROCESSOR_ARCHITECTURE)" == "MIPS"
+ARCH		= mips
+!  else
+!   if "$(PROCESSOR_ARCHITECTURE)" == "ALPHA"
+ARCH		= alpha
+!   else
+!    if "$(PROCESSOR_ARCHITECTURE)" == "PPC"
+ARCH		= ppc
+!    else
+!     error Unknown architecture type "$(PROCESSOR_ARCHITECTURE)"
+!    endif
+!   endif
+!  endif
+! endif
+!else
+# We're on Windows 95
+ARCH		= i386
+CPU		= i386
+CONFIG_H	= config.nt
+OS_TYPE		= windows95
+!endif
+
+AR		= lib
+AR_OUT		= -out:
+CC		= cl
+CC_OUT		= -Fo
+LINK		= link
+LINK_OUT	= -out:
+RC		= rc
+RC_OUT		= -Fo
+RC_INCLUDE	= -i
+
+USE_CRT_DLL	= 1
+
+!ifdef USE_CRT_DLL
+libc		= msvcrt$(D).lib
+EMACS_EXTRA_C_FLAGS= -D_DLL -D_MT -DUSE_CRT_DLL=1
+!else
+libc		= libcmt$(D).lib
+EMACS_EXTRA_C_FLAGS= -D_MT
+!endif
+baselibs	=
+O		= obj
+A		= lib
+
+BASE_LIBS	= $(libc) $(baselibs) oldnames.lib
+
+ADVAPI32	= advapi32.lib
+COMCTL32	= comctl32.lib
+COMDLG32	= comdlg32.lib
+GDI32		= gdi32.lib
+MPR		= mpr.lib
+SHELL32		= shell32.lib
+USER32		= user32.lib
+WSOCK32		= wsock32.lib
+WINMM		= winmm.lib
+WINSPOOL	= winspool.lib
+OLE32		= ole32.lib
+UNISCRIBE	= usp10.lib
+UUID		= uuid.lib
+
+!ifdef NOOPT
+DEBUG_CFLAGS	= -DEMACSDEBUG
+!else
+DEBUG_CFLAGS	=
+!endif
+
+!ifdef ENABLECHECKS
+CHECKING_CFLAGS	= -DENABLE_CHECKING -DXASSERTS
+!else
+CHECKING_CFLAGS	=
+!endif
+
+MWINDOWS        = -subsystem:windows -entry:mainCRTStartup
+
+CFLAGS          = -I. $(ARCH_CFLAGS) \
+		  $(DEBUG_CFLAGS) $(CHECKING_CFLAGS) $(USER_CFLAGS) $(LOCAL_FLAGS)
+ESC_CFLAGS      = -I. $(ARCH_CFLAGS) \
+		  $(DEBUG_CFLAGS) $(CHECKING_CFLAGS) $(ESC_USER_CFLAGS) $(LOCAL_FLAGS)
+
+#SYS_LDFLAGS	= -nologo -release -incremental:no -version:3.10 -swaprun:cd -swaprun:net setargv.obj
+!ifdef NOOPT
+SYS_LDFLAGS	= -nologo -manifest -dynamicbase:no -debug -incremental:no -version:3.10 -swaprun:cd -swaprun:net setargv.obj
+!else
+SYS_LDFLAGS	= -nologo -manifest -dynamicbase:no -release -incremental:no -version:3.10 -swaprun:cd -swaprun:net setargv.obj
+!endif
+
+# see comments in allocate_heap in w32heap.c before changing any of the
+# -stack, -heap, or -base settings.
+TEMACS_EXTRA_LINK = -stack:0x00800000 -heap:0x00100000 -base:0x01000000 -pdb:$(BLD)\temacs.pdb -machine:$(ARCH) $(SUBSYSTEM_CONSOLE) -entry:_start -map:$(BLD)\temacs.map $(EXTRA_LINK)
+
+!ifdef NOOPT
+OBJDIR          = obj
+!else
+OBJDIR          = obj-spd
+!endif
+$(OBJDIR):;	-mkdir $(OBJDIR)
+BLD             = $(OBJDIR)/$(ARCH)
+stamp_BLD:      $(OBJDIR)
+		-mkdir "$(BLD)"
+		echo $(BLD) > $@
+
+COMPILER_TEMP_FILES = *.pdb
+
+CP		= cp -f
+CP_DIR		= cp -rf
+IFNOTSAMEDIR	= if not exist ..\$(DIRNAME)_same-dir.tst
+ENDIF		=
+FOREACH		= for %%f in (
+FORVAR		= %%f
+FORDO		= ) do
+ENDFOR		=
+ARGQUOTE	= "
+# "
+DQUOTE		= \"
+DEL		= rm
+DEL_TREE	= rm -r
+
+!ifdef NODEBUG
+DEBUG_FLAG =
+DEBUG_LINK =
+D =
+!else
+DEBUG_FLAG = -Zi
+DEBUG_LINK = -debug
+D = d
+!endif
+
+# gcc-specific pragma (ignore for MSVC)
+PRAGMA_SYSTEM_HEADER =
+
+!if "$(ARCH)" == "i386"
+!ifdef NOOPT
+#ARCH_CFLAGS     = -nologo -c -Zel -W2 -H63 -Od -G3d -Zp8 $(DEBUG_FLAG)
+ARCH_CFLAGS     = -nologo -D_X86_=1 -c -Zl -Zp8 -W2 -Od -Gd $(DEBUG_FLAG)
+!else
+#ARCH_CFLAGS     = -nologo -c -Zel -W2 -H63 -Oxsb2 -Oy- -G6dF -Zp8 $(DEBUG_FLAG)
+ARCH_CFLAGS     = -nologo -D_X86_=1 -c -Zl -Zp8 -W2 -Oi -Ot -Oy- -Ob2 -GF -Gy -Gd $(DEBUG_FLAG)
+!endif
+ARCH_LDFLAGS	= $(SYS_LDFLAGS)
+
+!else
+!if "$(ARCH)" == "mips"
+ARCH_CFLAGS     = -D_MIPS_=1 -c -W2 -Zi -Od -Gt0
+ARCH_LDFLAGS	= $(SYS_LDFLAGS)
+
+!else
+!if "$(ARCH)" == "alpha"
+!if "$(BUILD_TYPE)" == "spd"
+ARCH_CFLAGS     = -D_ALPHA_=1 -c -Ze -Zi -W2 -Od -D__stdcall= -D__cdecl=
+!else
+ARCH_CFLAGS     = -D_ALPHA_=1 -c -Ze -Zi -W2 -O1 -D__stdcall= -D__cdecl=
+!endif
+ARCH_LDFLAGS	= $(SYS_LDFLAGS)
+
+!else
+!if "$(ARCH)" == "ppc"
+# These flags are a guess...if they don't work, please send me mail.
+ARCH_CFLAGS	= -D_PPC_=1 -c -Ze -Zi -W2 -Od
+ARCH_LDFLAGS	= $(SYS_LDFLAGS)
+
+!else
+!ERROR Unknown architecture type "$(ARCH)".
+!endif
+!endif
+!endif
+!endif
+
+LINK_FLAGS	= $(ARCH_LDFLAGS) $(DEBUG_LINK) $(USER_LDFLAGS)
+
+# From MSVC 5.0 onwards, it seem base relocation information is not included,
+# at least in release builds.  We need to ensure the reloc info is included
+# in order to use the MSVC profiler.
+!IF ("$(_NMAKE_VER)" == "$(_NMAKE_VER_4)")
+EXTRA_LINK      =
+!ELSE
+EXTRA_LINK      = -profile
+!ENDIF
+
+#
+# If the compiler supports compiling multiple .c files to .o files at
+# one time, use this feature.
+#
+!IF ("$(_NMAKE_VER)" == "$(_NMAKE_VER_4)")
+.c{$(BLD)}.obj:
+		$(CC) $(CFLAGS) -Fo$(BLD)\ $<
+!ELSE
+.c{$(BLD)}.obj::
+		$(CC) $(CFLAGS) -Fo$(BLD)\ $<
+!ENDIF
+

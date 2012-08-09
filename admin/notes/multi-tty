@@ -1,0 +1,1361 @@
+-*- coding: utf-8; mode: text; -*-
+
+Copyright (C) 2007-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+From README.multi-tty in the multi-tty branch.
+Some of this information may be out of date.
+
+
+THANKS
+------
+
+The following is a (sadly incomplete) list of people who have
+contributed to the project by testing, submitting patches, bug
+reports, and suggestions.  Thanks!
+
+Bernard Adrian <bernadrian@free.fr>
+ARISAWA Akihiro <ari@mbf.ocn.ne.jp>
+Vincent Bernat <bernat@luffy.cx>
+Han Boetes <han@mijncomputer.nl>
+Francisco Borges <borges@let.rug.nl>
+Damien Cassou <damien.cassou@laposte.net>
+Robert J. Chassell <bob@rattlesnake.com>
+Romain Francoise <romain@orebokech.com>
+Ami Fischman <ami@fischman.org>
+Noah Friedman <friedman@splode.com>
+Friedrich Delgado Friedrichs <friedel@nomaden.org>
+Samium Gromoff <_deepfire@mail.ru>
+Mikhail Gusarov <dottedmag@dottedmag.net>
+Eric Hanchrow <offby1@blarg.net>
+IRIE Tetsuya <irie@t.email.ne.jp>
+Yoshiaki Kasahara <kasahara@nc.kyushu-u.ac.jp>
+Bas Kok <nekkobassu@yahoo.com>
+Jurej Kubelka <Juraj.Kubelka@email.cz>
+David Lichteblau <david@lichteblau.com>
+Richard Lewis <rtf@jabble.com>
+mace <mace@kirjakaapeli.lib.hel.fi>
+Suresh Madhu <madhu@cs.unm.edu>
+Xavier Mallard <zedek@gnu-rox.org>
+Istvan Marko <mi-mtty@kismala.com>
+Ted Morse <morse@ciholas.com>
+Gergely Nagy <algernon@debian.org>
+Dan Nicolaescu <dann@ics.uci.edu>
+Kalle Olavi Niemitalo <kon@iki.fi>
+Mark Plaksin <happy@mcplaksin.org>
+Frank Ruell <stoerte@dreamwarrior.net>
+Tom Schutzer-Weissmann <trmsw@yahoo.co.uk>
+Joakim Verona <joakim@verona.se>
+Dan Waber <dwaber@logolalia.com>
+and many others.
+
+Richard Stallman was kind enough to review an earlier version of my
+patches.
+
+
+STATUS
+------
+
+It still needs to be ported to Windows/Mac/DOS.  Both multiple
+tty device support and simultaneous X and tty frame support works
+fine.  Emacsclient has been extended to support opening new tty and X
+frames.  It has been changed to open new Emacs frames by default.
+
+Tested on GNU/Linux, Solaris 8, FreeBSD and OpenBSD.
+
+Known problems:
+
+        * GTK support.  If you compile your Emacs with the GTK
+          toolkit, some functionality of multi-tty may be lost.  In
+          particular, you may get crashes while working on multiple X
+          displays at once.  Previous releases of GTK had limitations
+          and bugs that prevented full-blown multi-display support in
+          Emacs.  (GTK crashed when Emacs tries to disconnect from an
+          X server.)  Things are much improved in the current GTK
+          version, but if you do experience crashes in libgtk, try
+          compiling Emacs with the Lucid toolkit instead.
+
+        * The single-kboard mode.
+
+	  If your multi-tty Emacs session seems to be frozen, you
+	  probably have a recursive editing session or a pending
+	  minibuffer prompt (which is a kind of recursive editing) on
+	  another display.  To unfreeze your session, switch to that
+	  display and complete the recursive edit, for example by
+	  pressing C-] (`abort-recursive-edit').
+
+	  I am sorry to say that currently there is no way to break
+	  out of this "single-kboard mode" from a frozen display.  If
+	  you are unable to switch to the display that locks the
+	  others (for example because it is on a remote computer),
+	  then you can use emacsclient to break out of all recursive
+	  editing sessions:
+
+		emacsclient -e '(top-level)'
+
+	  Note that this (perhaps) unintuitive behavior is by design.
+	  Single-kboard mode is required because of an intrinsic Emacs
+	  limitation that is very hard to eliminate.  (This limitation
+	  is related to the single-threaded nature of Emacs.)
+
+	  I plan to implement better user notification and support for
+	  breaking out of single-kboard mode from locked displays.
+
+	* Mac and DOS support is broken, doesn't even
+  	  compile.  Multiple display support will probably not provide
+  	  new Emacs features on these systems, but the multi-tty
+  	  branch changed a few low-level interfaces, and the
+  	  system-dependent source files need to be adapted
+  	  accordingly.  The changes are mostly trivial, so almost
+  	  anyone can help, if only by compiling the branch and
+  	  reporting the compiler errors.
+
+
+TESTING
+-------
+
+To test the multi-tty feature, start up the Emacs server with the
+following commands:
+
+	emacs
+	M-x server-start
+
+and then (from a shell prompt on another terminal) start emacsclient
+with
+	emacsclient -t /optional/file/names...   (for a tty frame)
+	emacsclient /optional/file/names...      (for an X frame)
+
+(Make sure both emacs and emacsclient are multi-tty versions.)
+You'll hopefully have two fully working, independent frames on
+separate terminals. The new frame is closed automatically when you
+finish editing the specified files (C-x #), but delete-frame (C-x 5 0)
+also works.  Of course, you can create frames on more than two tty
+devices.
+
+Creating new frames on the same tty with C-x 5 2 (make-frame-command)
+works, and behaves the same way as in previous Emacs versions.  If you
+exit emacs, all terminals should be restored to their previous states.
+
+TIPS & TRICKS
+-------------
+
+I think the best way to use the new Emacs is to have it running inside
+a disconnected GNU screen session, and always use emacsclient for
+normal work.  One advantage of this is that not a single keystroke of
+your work will be lost if the display device that you are using
+crashes, or the network connection times out, or whatever.  (I had an
+extremely unstable X server for some time while I was developing these
+patches, and running Emacs this way has saved me a number of M-x
+recover-session invocations.)
+
+I use the following two bash scripts to handle my Emacs sessions:
+
+-------------------------------------------------------connect-emacs--
+#!/bin/bash
+# Usage: connect-emacs <name> <args>...
+#
+# Connects to the Emacs instance called NAME.  Starts up the instance
+# if it is not already running.  The rest of the arguments are passed
+# to emacsclient.
+
+name="$1"
+shift
+
+if [ -z "$name" ]; then
+    echo "Usage: connect_emacs <name> <args>..." >&2
+    exit 1
+fi
+preload-emacs "$name" wait
+/usr/bin/emacsclient.emacs-multi-tty -s "$name" "$@"
+----------------------------------------------------------------------
+
+-------------------------------------------------------preload-emacs--
+#!/bin/bash
+# Usage: preload-emacs <name> [<waitp>]
+#
+# Preloads the Emacs instance called NAME in a detached screen
+# session.  Does nothing if the instance is already running.  If WAITP
+# is non-empty, the function waits until the server starts up and
+# creates its socket; otherwise it returns immediately.
+
+name="$1"
+waitp="$2"
+screendir="/var/run/screen/S-$USER"
+serverdir="/tmp/emacs$UID"
+emacs=/usr/bin/emacs-multi-tty # Or wherever you installed your multi-tty Emacs
+
+if [ -z "$name" ]; then
+    echo "Usage: preload_emacs <name> [<waitp>]" >&2
+    exit 1
+fi
+
+if [ ! -e "$screendir"/*."$name" ]; then
+    if [ -e "$serverdir/$name" ]; then
+	# Delete leftover socket (for the wait option)
+	rm "$serverdir/$name"
+    fi
+    screen -dmS "$name" "$emacs" -nw --eval "(setq server-name \"$name\")" -f server-start
+fi
+if [ ! -z "$waitp" ]; then
+    while [ ! -e "$serverdir/$name" ]; do sleep 0.1; done
+fi
+----------------------------------------------------------------------
+
+I have the following in my profile to have two instances automatically
+preloaded for editing and email:
+
+	preload-emacs editor
+	preload-emacs gnus
+
+It is useful to set up short aliases for connect-emacs.  I use the
+following:
+
+	alias edit="connect-emacs editor"
+	alias e=edit
+	alias et="connect-emacs editor -t"
+	alias gnus="connect-emacs gnus"
+
+
+THINGS TO DO
+------------
+
+** See if `tty-defined-color-alist' needs to be terminal-local.
+   Update: Dan says it should be, so convert it.
+
+** Mikhail Gusarov suggest to add a hook akin to
+   `after-make-frame-functions' that is called whenever Emacs connects
+   to a new terminal.  Good idea!
+
+** emacsclient -t on the console does not work after su.  You have to
+   use non-root accounts or start as root to see this.
+
+   	Login: root
+	Password:
+	# su lorentey
+	$ emacsclient -t
+	*ERROR*: Could not open file: /dev/tty1
+
+   The tty can be opened as /dev/tty by emacsclient, but not by Emacs.
+   This seems to be a serious problem.  Currently my only idea is to
+   bring back the ugly pty proxy hack from the initial versions of
+   multi-tty.  Suggestions would be appreciated.
+
+   Update: we could change emacsclient to pass its open file
+   descriptor to the Emacs process.  Unfortunately, this requires a
+   new Lisp-level Emacs API, and as file descriptors are not otherwise
+   exported to Lisp, this approach seems at least as ugly as the pty
+   proxy idea.
+
+** lisp/vc.el depends on the terminal type during load time.
+   `vc-annotate-color-map' is one example that needs to be fixed.
+
+** Understand how `quit_throw_to_read_char' works, and fix any bugs
+   that come to light.
+
+** See if getcjmp can be eliminated somehow.  Why does Emacs allow
+   asynchronous input processing while it's reading input anyway?
+
+** `delete-frame' events are handled by `special-event-map'
+   immediately when read by `read_char'.  This is fine but it prevents
+   higher-level keymaps from binding that event to get notified of the
+   deleted frame.
+
+   Sometimes it would be useful for Lisp code to be notified of frame
+   deletions after they have happened, usually because they want to
+   clean up after the deleted frame.  Not all frame-local states can
+   be stored as a frame parameter.  For example,
+   `display-splash-screen' uses `recursive-edit' with a special keymap
+   override to create its buffer---and it leads to all kinds of
+   nastiness if Emacs stays in this recursive edit mode after the
+   frame containing the splash screen is deleted.  Basically, the
+   splash-screen implementation wants to throw out of the recursive
+   edit when the frame is deleted; however, it is not legal to throw
+   from `delete-frame-functions' because `delete-frame' must not fail.
+   (Introducing `delete-frame-after-functions' would not help either
+   because `delete-frame' may not fail at that time either.)
+
+   Currently `fancy-splash-screens' installs a
+   `delete-frame-functions' hook that sets up a timer to exit the
+   recursive edit.  This is an adequate solution, but it would perhaps
+   be better to have something like a `frame-deleted' event that could
+   be bound in the normal way.
+
+** Trouble: `setenv' doesn't actually set environment variables in the
+   Emacs process.  This defeats the purpose of the elaborate
+   `server-with-environment' magic around the `tgetent' call in
+   `init_tty'.  D'oh.
+
+** (Possibly) create hooks in struct device for creating frames on a
+   specific terminal, and eliminate the hackish terminal-related frame
+   parameters (display, tty, tty-type).
+
+   	make_terminal_frame
+		create_tty_output
+
+** Decide whether to keep the C implementation of terminal parameters,
+   or revert to the previous, purely Lisp code.  It turned out that
+   local environments do not need terminal parameters after all.
+
+** Move Fsend_string_to_terminal to term.c, and declare get_named_tty
+   as static, removing it from dispextern.h.
+   Move fatal to emacs.c and declare it somewhere.
+
+** Search for `suspend-emacs' references and replace them with
+   `suspend-frame', if necessary.  Ditto for `save-buffers-kill-emacs'
+   vs. `save-buffers-kill-display'.
+
+** Emacs crashes when a tty frame is resized so that there is no space
+   for all its windows.  (Tom Schutzer-Weissmann)
+
+** Report GTK multi-display problems to GTK maintainers.  For extra
+   credit, fix them.
+
+   Currently you can not connect to new X displays when you compile
+   Emacs with GTK support.  If you want to play around with GTK
+   multidisplay (and don't mind core dumps), you can edit src/config.h
+   and define HAVE_GTK_MULTIDISPLAY there by hand.
+
+	http://bugzilla.gnome.org/show_bug.cgi?id=85715
+
+   Update: Han reports that GTK+ version 2.8.9 almost gets display
+   disconnects right.  GTK will probably be fully fixed by the time
+   multi-tty gets into the trunk.
+
+   Update: I am still having problems with GTK+ 2.8.10.  I have the
+   impression that the various multidisplay fixes will only get
+   released in GTK+ 2.10.
+
+** Audit `face-valid-attribute-values' usage in customize and
+   elsewhere.  Its return value depends on the current window system.
+   Replace static initializers using it with runtime functions.  For
+   example, custom's buttons are broken on non-initial device types.
+
+** Possibly turn off the double C-g feature when there is an X frame.
+   C.f. (emacs)Emergency Escape.
+
+** frames-on-display-list should also accept frames.
+
+** Consider the `tty-type' frame parameter and the `display-tty-type'
+   function.  They serve the exact same purpose.  I think it may be
+   a good idea to eliminate one of them, preferably `tty-type'.
+
+** The handling of lisp/term/*.el, and frame creation in general, is a
+   big, big mess.  How come the terminal-specific file is loaded by
+   tty-create-frame-with-faces?  I don't think it is necessary to load
+   these files for each frame; once per terminal should be enough.
+   Update: lisp/term/*.el is not loaded repeatedly anymore, but
+   faces.el still needs to be cleaned up.
+
+** Fix frame-set-background-mode in this branch.  It was recently
+   changed in CVS, and frame.el in multi-tty has not yet been adapted
+   for the changes.  (It needs to look at
+   default-frame-background-mode.)  (Update: maybe it is fixed now;
+   needs testing.) (Note that the byte compiler has this to say about
+   term/rxvt.el:)
+
+	term/rxvt.el:309:17:Warning: assignment to free variable
+	    `default-frame-background-mode'
+
+** I think `(set-)terminal-local-value' and the terminal parameter
+   mechanism should be integrated into a single framework.
+
+   (Update: `(set-)terminal-local-value' is now eliminated, but the
+   terminal-local variables should still be accessible as terminal
+   parameters.  This also applies to `display-name' and similar
+   functions.)
+
+** Add the following hooks: after-delete-frame-hook (for server.el,
+   instead of delete-frame-functions),
+   after-delete-terminal-functions, after-create-terminal-functions.
+
+** BULK RENAME: The `display-' prefix of new Lisp-level functions
+   conflicts with stuff like `display-time-mode'.  Use `device-'
+   or `terminal-' instead.  I think I prefer `terminal-'.
+
+   It turns out that most of the offending Lisp functions were defined
+   in the trunk.  Therefore, compatibility aliases should be defined
+   for the following names:
+
+    display-color-cells			terminal-color-cells
+    display-color-p			terminal-color-p
+    display-graphic-p			terminal-graphic-p
+    display-grayscale-p			terminal-grayscale-p
+    display-images-p			terminal-images-p
+    display-mm-height			terminal-mm-height
+    display-mm-width			terminal-mm-width
+    display-mouse-p			terminal-mouse-p
+    display-multi-font-p		terminal-multi-font-p
+    display-multi-frame-p		terminal-multi-frame-p
+    display-pixel-height		terminal-pixel-height
+    display-pixel-width			terminal-pixel-width
+    display-pixels-per-inch		terminal-pixels-per-inch
+    display-planes			terminal-planes
+    display-popup-menus-p		terminal-popup-menus-p
+    display-save-under			terminal-save-under
+    display-screens			terminal-screens
+    display-supports-face-attributes-p	terminal-supports-face-attributes-p
+    display-visual-class		terminal-visual-class
+    framep-on-display			framep-on-terminal
+    frames-on-display-list		frames-on-terminal-list
+
+   The following functions were introduced in the multi-tty branch, and
+   were renamed without aliases:
+
+    delete-display			delete-terminal
+    display-controlling-tty-p           controlling-tty-p
+    display-list                        terminal-list
+    display-live-p                      terminal-live-p
+    display-name                        terminal-name
+    display-tty-type                    tty-type
+    frame-display                       frame-terminal
+    selected-display			selected-terminal
+
+** The single-keyboard mode of MULTI_KBOARD is extremely confusing
+   sometimes; Emacs does not respond to stimuli from other keyboards.
+   At least a beep or a message would be important, if the single-mode
+   is still required to prevent interference.  (Reported by Dan
+   Nicolaescu.)
+
+   Update: selecting a region with the mouse enables single_kboard
+   under X.  This is very confusing.
+
+   Update: After discussions with Richard Stallman, this will be
+   resolved by having locked displays warn the user to wait, and
+   introducing a complex protocol to remotely bail out of
+   single-kboard mode by pressing C-g.
+
+   Update: Warning the user is not trivial to implement, as Emacs has
+   only one echo area, shared by all frames.  Ideally the warning
+   should not be displayed on the display that is locking the others.
+   Perhaps the high probability of user confusion caused by
+   single_kboard mode deserves a special case in the display code.
+   Alternatively, it might be good enough to signal single_kboard mode
+   by changing the modelines or some other frame-local display element
+   on the locked out displays.
+
+   Update: In fact struct kboard does have an echo_string slot.
+
+** The session management module is prone to crashes when the X
+   connection is closed and then later I try to connect to a new X
+   session:
+
+	#0  0xb7ebc806 in SmcGetIceConnection () from /usr/X11R6/lib/libSM.so.6
+	#1  0x080e6641 in x_session_check_input (bufp=0xbf86c9c0) at xsmfns.c:144
+	#2  0x080d3bbc in XTread_socket (device=0xa722ff8, expected=1, hold_quit=0xbf86ca90) at xterm.c:7037
+	#3  0x080fa404 in read_avail_input (expected=1) at keyboard.c:6696
+	#4  0x080fa4ca in handle_async_input () at keyboard.c:6900
+	#5  0x080d51fa in x_term_init (display_name=162628899, xrm_option=0x0, resource_name=0x857068c "emacs") at xterm.c:10622
+	#6  0x080d920e in x_display_info_for_name (name=162628899) at xfns.c:3975
+	#7  0x080d92f9 in check_x_display_info (object=1) at xfns.c:274
+	#8  0x080d97b8 in Fx_create_frame (parms=151221485) at xfns.c:3016
+	#9  0x0815bf72 in Ffuncall (nargs=2, args=0xbf86ceec) at eval.c:2851
+
+   I installed a workaround to prevent this.  The X session manager is
+   only contacted when the very first display in the Emacs session is
+   an X display.  Also, x_delete_display() on this display aborts
+   session management, and XTread_socket only calls
+   x_session_check_input when it is called for the display that the
+   session was opened on.  While this does not really fix the bug, it
+   makes it much less frequent, because session manager support will
+   not normally be enabled when Emacs can survive the shutdown of the
+   X server.
+
+   See if xsmfns.c should be updated.
+
+** Hunt down display-related functions in frame.el and extend them all
+   to accept display ids.
+
+** rif->flush_display_optional (NULL) calls should be replaced by a
+   new global function.
+
+** The set-locale-environment hack (adding the DISPLAY option) should
+   be replaced with a clean design.
+
+** standard-display-table should be display-local.
+   standard-display-european should be display-local.
+
+** With iswitchb-default-method set to 'always-frame, only frames on
+   the current display should be considered.  This might involve
+   extending `get-buffer-window'.
+
+** Have a look at Vlocale_coding_system.  Seems like it would be a
+   tedious job to localize it, although most references use it for
+   interfacing with libc and are therefore OK with the global
+   definition.
+
+   Exceptions found so far: x-select-text and
+   x-cut-buffer-or-selection-value.
+
+** Have a look at fatal_error_hook.
+
+** Have a look at set_frame_matrix_frame.
+
+** Check if we got term-setup-hook right.
+
+** I think tip_frame should be display-local.
+
+** Check display reference count handling in x_create_tip_frame.
+
+** make-frame does not correctly handle extra parameters in its
+   argument:
+
+	(frame-parameter (make-frame (list (cons 'foobar 42))) 'foobar)
+		=> nil
+
+   (This is likely an error in the CVS trunk.)
+
+** Dan Nicolaescu suggests that -nw should be added as an alias for -t
+   in emacsclient.  Good idea.  (Alas, implementing this is not
+   trivial, getopt_long does not seem to support two-letter ``short''
+   options.  Patches are welcome.)
+
+** Mark Plaksin suggests that emacsclient should accept the same
+   X-related command-line arguments as Emacs.  Most of the X-related
+   argument-handling is done in Lisp, so this should be quite easy to
+   implement.  (For example, Samium Gromoff wants emacsclient to
+   support --geometry; implementing this would add that support.)
+
+** Gergely Nagy suggests that C-x # should only kill the current
+   frame, not any other emacsclient frame that may have the same file
+   opened for editing.  I think I agree with him.
+
+** Very strange bug: visible-bell does not work on secondary
+   terminals in xterm and konsole.  The screen does flicker a bit,
+   but it's so quick it isn't noticeable.
+
+   (Update: This is probably some problem with padding or whatnot on
+   the secondary terminals.)
+
+** Move baud_rate to struct display.
+
+** Implement support for starting an interactive Emacs session without
+   an initial frame.  (The user would connect to it and open frames
+   later, with emacsclient.)
+
+** Fix Mac support (I can't do this entirely myself).  Note that the
+   current state of Mac-specific source files in the multi-tty tree
+   are not useful; before starting work on Mac support, revert to
+   pristine, pre-multi-tty versions.
+
+** Fix DOS support (I can't do this entirely myself).  Note that the
+   current state of DOS-specific source files in the multi-tty tree
+   are not useful; before starting work on DOS support, revert to
+   pristine, pre-multi-tty versions.
+
+** Fix Windows support. Currently bootstrapping works on w32, but Emacs
+   crashes on startup and none of the multi-tty features are
+   implemented. Many XXX comments mark things that probably need
+   updating, ChangeLogs will help in spotting changes to X specific
+   files that may need porting.
+
+** Do a grep on XXX and ?? for more issues.
+
+** flow-ctrl.el must be updated.
+
+** Fix stuff_char for multi-tty.  Doesn't seem to be of high priority.
+
+DIARY OF CHANGES
+----------------
+
+(ex-TODO items with explanations.)
+
+-- Introduce a new struct for terminal devices.
+
+   (Done, see struct tty_output.  The list of members is not yet
+   complete.)
+
+-- Change the bootstrap procedure to initialize tty_list.
+
+   (Done, but needs review.)
+
+-- Change make-terminal-frame to support specifying another tty.
+
+   (Done, new frame parameters: `tty' and `tty-type'.)
+
+-- Implement support for reading from multiple terminals.
+
+   (Done, read_avail_input tries to read from each terminal, until one
+   succeeds.  MULTI_KBOARD is not used.  Secondary terminals don't send
+   SIGIO!)
+
+   (Update: They do, now.)
+
+   (Update2: After enabling X, they don't.)
+
+-- other-frame should cycle through the frames on the `current'
+   terminal only.
+
+   (Done, by trivially modifying next_frame and prev_frame.)
+
+-- Support different terminal sizes.
+
+   (Done, no problem.)
+
+-- Make sure terminal resizes are handled gracefully.  (Could be
+   problematic.)
+
+   (Done.  We don't get automatic SIGWINCH for additional ttys,
+   though.)
+
+-- Extend emacsclient to automatically open a new tty when it connects
+   to Emacs.
+
+   (Done.  It's an ugly hack, needs more work.)
+
+-- Redisplay must refresh the topmost frame on *all* terminals, not
+   just the initial terminal.
+
+   (Done, but introduced an ugly redisplay problems.  Ugh.)
+
+-- Fix redisplay problems.
+
+   (Done; it turned out that the entire Wcm structure must be moved
+   inside tty_output.  Why didn't I catch this earlier?)
+
+-- Provide a way for emacsclient to tell Emacs that the tty has been
+   resized.
+
+   (Done, simply forward the SIGWINCH signal.)
+
+-- Each keypress should automatically select the frame corresponding
+   to the terminal that it was coming from.  This means that Emacs
+   must know from which terminal the last keyboard event came from.
+
+   (Done, it was quite simple, the input event system already
+   supported multiple frames.)
+
+-- Fix SIGIO issue with secondary terminals.
+
+   (Done, emacsclient signals Emacs after writing to the proxy pseudo
+   terminal.  Note that this means that multi-tty does not work with
+   raw ttys!)
+
+   (Update: This is bullshit.  There is a read_input_waiting function,
+   extend that somehow.)
+
+   (Update of update: The first update was not right either, extending
+   read_input_waiting was not necessary.  Secondary ttys do seem to
+   send signals on input.)
+
+   (Update^3: Not any more.)
+
+-- Make make-terminal-frame look up the `tty' and `tty-type' frame
+   parameters from the currently selected terminal before the global
+   default.
+
+   (Done.)
+
+-- Put all cached terminal escape sequences into struct tty_output.
+   Currently, they are still stored in global variables, so we don't
+   really support multiple terminal types.
+
+   (Done.  It was not fun.)
+
+-- Implement sane error handling after initialization.  (Currently
+   emacs exits if you specify a bad terminal type.)  The helpful error
+   messages must still be provided when Emacs starts.
+
+   (Done.)
+
+-- Implement terminal deletion, i.e., deleting local frames, closing
+   the tty device and restoring its previous state without exiting
+   Emacs.
+
+   (Done, but at the moment only called when an error happens during
+   initialization.  There is a memory corruption error around this
+   somewhere.)  (Update: now it is fully enabled.)
+
+-- Implement automatic deletion of terminals when the last frame on
+   that terminal is closed.
+
+   (Done.)
+
+-- Restore tty screen after closing the terminal.
+
+   (Done, we do the same as Emacs 21.2 for all terminals.)
+
+-- 'TERM=dumb src/emacs' does not restore the terminal state.
+
+   (Done.)
+
+-- C-g should work on secondary terminals.
+
+   (Done, but the binding is not configurable.)
+
+-- Deal with SIGHUP in Emacs and in emacsclient.  (After this, the
+   server-frames may be removed from server.el.)
+
+   (Done, nothing to do.  It seems that Emacs does not receive SIGHUP
+   from secondary ttys, which is actually a good thing.)  (Update: I
+   think it would be a bad idea to remove server-frames.)
+
+-- Change emacsclient/server.el to support the -t argument better,
+   i.e. automatically close the socket when the frame is closed.
+
+   (Seems to be working OK.)
+
+-- Fix mysterious memory corruption error with tty deletion.  To
+   trigger it, try the following shell command:
+
+	while true; do TERM=no-such-terminal-definition emacsclient -h; done
+
+   Emacs usually dumps core after a few dozen iterations.  (The bug
+   seems to be related to the xfreeing or bzeroing of
+   tty_output.Wcm.  Maybe there are outside references to struct Wcm?
+   Why were these vars collected into a struct before multi-tty
+   support?)
+
+   (Done.  Whew.  It turned out that the problem had nothing to do
+   with hypothetical external references to Wcm, or any other
+   tty_output component; it was simply that delete_tty closed the
+   filehandles of secondary ttys twice, resulting in fclose doubly
+   freeing memory.  Utterly trivial matter.  I love the C's memory
+   management, it puts hair on your chest.)
+
+-- Support raw secondary terminals.  (Note that SIGIO works only on
+   the controlling terminal.) Hint: extend read_input_waiting for
+   multiple ttys and hopefully this will be fixed.
+
+   (Done, it seems to have been working already for some time.  It
+   seems F_SETOWN does work, after all.  Not sure what made it fail
+   earlier, but it seems to be fixed (there were several changes
+   around request_sigio, maybe one of them did it).
+   read_input_waiting is only used in sys_select, don't change
+   it.)  (Update: After adding X support, it's broken again.)
+   (Update^2: No it isn't.) :-)
+
+-- Find out why does Emacs abort when it wants to close its
+   controlling tty.  Hint: chan_process[] array.  Hey, maybe
+   noninterrupt-IO would work, too?  Update: no, there is no process
+   for stdin/out.
+
+   (Done.  Added add/delete_keyboard_wait_descriptor to
+   term_init/delete_tty.  The hint was right, in a way.)
+
+-- Issue with SIGIO: it needs to be disabled during redisplay.  See if
+   fcntl kernel behavior could be emulated by emacsclient.
+
+   (Done.  Simply disabled the SIGIO emulation hack in emacsclient.)
+   (Update: it was added back.)  (Update^2: and removed again.)
+
+-- server.el: There are issues with saving files in buffers of closed
+   clients.  Try editing a file with emacsclient -f, and (without
+   saving it) do a delete-frame.  The frame is closed without
+   question, and a surprising confirmation prompt appears in another
+   frame.
+
+   (Done.  delete-frame now asks for confirmation if it still has
+   pending buffers, and modified buffers don't seem to be deleted.)
+
+-- emacsclient.el, server.el: Handle eval or file open errors when
+   doing -t.
+
+   (Done.)
+
+-- Make parts of struct tty_output accessible from Lisp.  The device
+   name and the type is sufficient.
+
+   (Done, see frame-tty-name and frame-tty-type.)
+
+-- Export delete_tty to the Lisp environment, for emacsclient.
+
+   (Done, see delete-tty.)
+
+-- Get rid of the accessor macros in termchar.h, or define macros for
+   all members.
+
+   (Done.)
+
+-- Move device-specific parameters (like costs) commonly used by
+   device backends to a common, device-dependent structure.
+
+   (Done.  See struct display_method in termhooks.h.)
+
+-- Fix X support.
+
+   (Done.  Well, it seems to be working.)
+
+-- Allow simultaneous X and tty frames.  (Handling input could be
+   tricky.  Or maybe not.)
+
+   (Done.  Allowed, that is.  It is currently extremely unstable, to
+   the point of being unusable.  The rif variable causes constant
+   core dumps.  Handling input is indeed tricky.)
+
+-- Rewrite multi-tty input in terms of MULTI_KBOARD.
+
+   (Done.  In fact, there was no need to rewrite anything, I just
+   added a kboard member to tty_display_info, and initialized the
+   frame's kboard from there.)
+
+-- Fix rif issue with X-tty combo sessions.  IMHO the best thing to do
+   is to get rid of that global variable (and use the value in
+   display_method, which is guaranteed to be correct).
+
+   (Done, did exactly that.  Core dumps during combo sessions became
+   much rarer.  In fact, I have not yet met a single one.)
+
+-- Add multi-tty support to talk.el.
+
+   (Done.)
+
+-- Clean up the source of emacsclient.  It is a mess.
+
+   (Done, eliminated stupid proxy-pty kludge.)
+
+-- Fix faces on tty frames during X-tty combo sessions.  There is an
+   init_frame_faces call in init_sys_modes, see if there is a problem
+   with it.
+
+   (Done, there was a stupid mistake in
+   Ftty_supports_face_attributes_p. Colors are broken, though.)
+
+-- C-x 5 2, C-x 5 o, C-x 5 0 on an emacsclient frame unexpectedly
+   exits emacsclient.  This is a result of trying to be clever with
+   delete-frame-functions.
+
+   (Fixed, added delete-tty-after-functions, and changed server.el to
+   use it.)
+
+-- Something with (maybe) multi-keyboard support broke function keys
+   and arrows on ttys during X+tty combo sessions.  Debug this.
+
+   (I can't reproduce it, maybe the terminal type was wrong.)
+
+-- Fix input from raw ttys (again).
+
+   (Now it seems to work all right.)
+
+-- During an X-tty combo session, a (message "Hello") from a tty frame
+   goes to the X frame.  Fix this.
+
+   (Done.  There was a safeguard against writing to the initial
+   terminal frame during bootstrap which prevented echo_area_display
+   from working correctly on a tty frame during a combo session.)
+
+-- If there are no frames on its controlling terminal, Emacs should
+   exit if the user presses C-c there.
+
+   (Done, as far as possible.  See the SIGTERM comment in
+   interrupt_signal on why this seems to be impossible to solve this
+   in general.)
+
+-- During an X session, Emacs seems to read from stdin.  Also, Emacs
+   fails to start without a controlling tty.
+
+   (Fixed by replacing the troublesome termcap display with a dummy
+   bootstrap display during bootstrap.
+
+-- Do tty output through struct display, like graphical display
+   backends.
+
+   (Done.)
+
+-- Define an output_initial value for output_method for the initial
+   frame that is dumped with Emacs.  Checking for this frame (e.g. in
+   cmd_error_internal) is ugly.
+
+   (Done, breaking interactive temacs.)
+
+-- The command `emacsclient -t -e '(delete-frame)'' fails to exit.
+
+   (Fixed.)
+
+-- frame-creation-function should always create a frame that is on the
+   same display as the selected frame.  Maybe frame-creation-function
+   should simply be removed and make-frame changed to do the right
+   thing.
+
+   (Done, with a nice hack.  frame-creation-function is now frame-local.)
+
+-- Fix C-g on raw ttys.
+
+   (Done.  I disabled the interrupt/quit keys on all secondary
+   terminals, so Emacs sees C-g as normal input.  This looks like an
+   overkill, because emacsclient has extra code to pass SIGINT to
+   Emacs, so C-g should remain the interrupt/quit key on emacsclient
+   frames.  See the next entry why implementing this distinction would
+   be a bad idea.)
+
+-- Make sure C-g goes to the right frame with ttys.  This is hard, as
+   SIGINT doesn't have a tty parameter. :-(
+
+   (Done, the previous change fixes this as a pleasant side effect.)
+
+-- I have seen a case when Emacs with multiple ttys fell into a loop
+   eating 100% of CPU time.  Strace showed this loop:
+
+	getpid()                                = 30284
+	kill(30284, SIGIO)                      = 0
+	--- SIGIO (I/O possible) @ 0 (0) ---
+	ioctl(6, FIONREAD, [0])                 = -1 EIO (Input/output error)
+	ioctl(5, FIONREAD, [0])                 = -1 EIO (Input/output error)
+	ioctl(0, FIONREAD, [0])                 = 0
+	sigreturn()                             = ? (mask now [])
+	gettimeofday({1072842297, 747760}, NULL) = 0
+	gettimeofday({1072842297, 747806}, NULL) = 0
+	select(9, [0 3 5 6], NULL, NULL, {0, 0}) = 2 (in [5 6], left {0, 0})
+	select(9, [0 3 5 6], NULL, NULL, {0, 0}) = 2 (in [5 6], left {0, 0})
+	gettimeofday({1072842297, 748245}, NULL) = 0
+
+   I have seen something similar with a single X frame, but have not
+   been able to reproduce it for debugging.
+
+   Update: This may have been caused by checking for nread != 0
+   instead of nread > 0 after calling read_socket_hook in
+   read_avail_input.
+
+   (Fixed.  This was caused by unconditionally including stdin in
+   input_wait_mask in init_process.  The select call in
+   wait_reading_process_input always returned immediately, indicating
+   that there is pending input from stdin, which nobody read.
+
+   Note that the above strace output seems to be an unrelated but
+   similar bug.  I think that is now fixed.)
+
+-- Exiting Emacs while there are emacsclient frames doesn't restore the
+   ttys to their default states.
+
+   (This seems to be fixed by some previous change.)
+
+-- Allow opening an X session after -nw.
+
+   (Done.)
+
+-- Fix color handling during tty+X combo sessions.  (It seems that tty
+   sessions automatically convert the face colors to terminal colors
+   when the face is loaded.  This conversion must happen instead on
+   the fly in write_glyphs, which might be problematic, as color
+   approximation is currently done in lisp (term/tty-colors.el).)
+   (Update: hm, colors seem to work fine if I start emacs with -nw and
+   then create an X frame.  Maybe it's just a small buglet somewhere.)
+
+   (Seems to be fixed.  The problem was in startup.el, it did not
+   initialize tty colors when the initial window system was
+   graphical.)
+
+-- emacs -nw --eval '(y-or-n-p "Foobar")' segfaults.  (Reported by
+   Romain Francoise)
+
+   (Fixed, there was a keyboard initialization problem.)
+
+-- Fix interactive use of temacs.  There are face-related SEGVs, most
+   likely because of changes in realize_default_face, realize_face.
+
+   (Fixed.)
+
+-- Don't exit Emacs when the last X connection fails during a
+   multi-display session.
+
+   (Fixed.)
+
+-- Dan Nicolaescu noticed that starting emacsclient on the same
+   terminal device that is the controlling tty of the Emacs process
+   gives unexpected results.
+
+   (Fixed.)
+
+-- Istvan Marko reported that Emacs hang on ttys if it was started
+   from a shell script.
+
+   (Fixed.  There was a bug in the multi-tty version of
+   narrow_foreground_group.  tcsetpgrp blocks if it is called from a
+   process that is not in the same process group as the tty.)
+
+-- emacsclient -t from an Emacs term buffer does not work, complains
+   about face problems.  This can even lock up Emacs (if the recursive
+   frame sets single_kboard).  Update: the face problems are caused by
+   bugs in term.el, not in multi-tty.  The lockup is caused by
+   single_kboard mode, and is not easily resolvable.  The best thing to
+   do is to simply refuse to create a tty frame of type `eterm'.
+
+   (Fixed, changed emacsclient to check for TERM=eterm.  The face
+   complaints seem to be caused by bugs in term.el; they are not
+   related to multi-tty.)
+
+-- Find out the best way to support suspending Emacs with multiple
+   ttys.  My guess: disable it on the controlling tty, but from other
+   ttys pass it on to emacsclient somehow.  (It is (I hope) trivial to
+   extend emacsclient to handle suspend/resume.  A `kill -STOP' almost
+   works right now.)
+
+   (Done.  I needed to play with signal handling and the server
+   protocol a bit to make emacsclient behave as a normal UNIX program
+   wrt foreground/background process groups.)
+
+-- There is a flicker during the startup of `emacs -nw'; it's as if
+   the terminal is initialized, reset and then initialized again.
+   Debug this.  (Hint: narrow_foreground_group is called twice during
+   startup.)
+
+   (This is gone.)
+
+-- Robert Chassell has found serious copy-paste bugs with the
+   multi-tty branch.  There seem to be redisplay bugs while copying
+   from X to a terminal frame.  Copying accented characters do not
+   work for me.
+
+   (Patch-124 should fix this, by changing the interprogram-*-function
+   variables to be frame-local, as suggested by Mark Plaksin
+   (thanks!).  I think that the redisplay bugs are in fact not bugs,
+   but delays caused by single_kboard --> perhaps MULTI_KBOARD should
+   be removed.)
+
+-- frame-creation-function was removed, which might be a bad idea.
+   Think up a compatible solution.
+
+   (It was an internal interface that may be changed when necessary.)
+
+-- Change Lisp code not to (getenv "TERM"); use the `tty-type' frame
+   parameter or the frame-tty-type function instead.  (M-x tags-search
+   "TERM" helps with this.)  Update: Actually, all getenv invocations
+   should be checked for multi-tty compatibility, and an interface
+   must be implemented to get the remote client's environment.
+
+   (Done.  Only getenv calls in lisp/term/*.el were changed; other
+   calls should be mostly left as they are.)
+
+-- Add an elaborate mechanism for display-local variables.  (There are
+   already a few of these; search for `terminal-local' in the Elisp
+   manual.)
+
+   (Not needed.  Display-local variables could be emulated by
+   frame-local variables.)
+
+-- Emacs assumes that all terminal frames have the same locale
+   settings as Emacs itself.  This may lead to bogus results in a
+   multi-locale setup. (E.g., while logging in from a remote client
+   with a different locale.)
+   (Update after new bugreport by Friedrich Delgado Friedrichs:
+   (at least) the structs terminal_coding and keyboard_coding in
+   coding.c must be moved to struct display, and the Lisp interface
+   [set-]keyboard-coding-system must be adapted for the change.)
+
+   (Fixed.  Emacs now uses the locale settings as seen by the
+   emacsclient process for server tty frames.)
+   (Update: Not really; Vlocale_coding_system is still global.)
+
+-- Make `struct display' accessible to Lisp programs.  Accessor functions:
+
+	(displayp OBJECT):  Returns t if OBJECT is a display.
+		=> Implemented as display-live-p.
+
+	(display-list):  Returns list of currently active displays.
+		=> Implemented.
+
+	(selected-display):  Returns the display object of the selected frame.
+		=> Not strictly necessary, but implemented anyway.
+
+	(frame-display FRAME):  Returns the display object of FRAME.
+	        => Implemented.
+
+	(display-frames DISPLAY):  Returns a list of frames on DISPLAY.
+		=> Already implemented, see frames-on-display-list.
+
+	(display-type DISPLAY):  Returns the type of DISPLAY, as a
+		symbol.  (See `framep'.)
+		=> Implemented as display-live-p.
+
+	(display-device DISPLAY): Returns the name of the device that
+		DISPLAY uses, as a string.  (E.g: "/dev/pts/16", or
+		":0.0")
+		=> Implemented as display-name.
+
+	etc.
+
+   See next issue why this is necessary.
+
+   (Update: The consensus on emacs-devel seems to be to do this via
+   integer identifiers.  That's fine by me.)
+
+   (Done.)
+
+-- The following needs to be supported:
+
+	$ emacsclient -t
+		C-z
+	$ emacsclient -t
+		(This fails now.)
+
+   The cleanest way to solve this is to allow multiple displays on the
+   same terminal device; each new emacsclient process should create
+   its own display.  As displays are currently identified by their
+   device names, this is not possible until struct display becomes
+   accessible as a Lisp-level object.
+
+   (Done.)
+
+-- Miles Bader suggests that C-x C-c on an emacsclient frame should
+   only close the frame, not exit the entire Emacs session.  Update:
+   see above for a function that does this.  Maybe this should be the
+   new default?
+
+   (Done.  This is the new default.  No complaints so far.)
+
+-- Clean up the frame-local variable system.  I think it's ugly and
+   error-prone.  But maybe I just haven't yet fully understood it.
+
+   (Nothing to do.  It doesn't seem ugly any more.  It's rather clever.)
+
+-- Support multiple character locales.  A version of
+   `set-locale-environment' needs to be written for setting up
+   display-local settings on ttys.  I think calling
+   set-display-table-and-terminal-coding-system and
+   set-keyboard-coding-system would be enough.  The language
+   environment itself should remain a global setting.
+
+   (Done, by an ugly hack.)
+
+-- The terminal customization files in term/*.el tend to change global
+   parameters, which may confuse Emacs with multiple displays.  Change
+   them to tweak only frame-local settings, if possible.  (They tend
+   to call define-key to set function key sequences a lot.)
+
+   (Done, by making `function-key-map' terminal-local (i.e., part of
+   struct kboard).  This has probably covered all the remaining problems.)
+
+-- Make `function-key-map' and `key-translation-map' terminal-local.
+
+   (Done.)
+
+-- Implement `terminal-local-value' and `set-terminal-local-value' to
+   allow deterministic access to terminal local bindings.  The
+   encode-kb package can not set up `key-translation-map' without
+   these.  The terminal-local bindings seem to be independent of what
+   frame is selected.
+
+   (Done.)
+
+-- xt-mouse.el needs to be adapted for multi-tty.  It currently
+   signals an error on kill-emacs under X, which prevents the user
+   from exiting Emacs. (Reported by Mnemonikk on freenode.)
+
+   (Done, I hope.)
+
+
+-- Having {reset,init}_all_sys_modes in set-input-mode breaks arrow
+   keys on non-selected terminals under screen, and sometimes on other
+   terminal types as well.  The other function keys continue to work
+   fine.  Sometimes faces on these screens become garbled.
+
+   This only seems to affect displays that are of the same terminfo
+   type as the selected one. Interestingly, in screen Emacs normally
+   reports the up arrow key as `M-o A', but after the above SNAFU, it
+   complains about `M-[ a'.  UNIX ttys are a complete mystery to me,
+   but it seems the reset-reinitialize cycle somehow leaves the
+   non-selected terminals in a different state than usual.  I have no
+   idea how this could happen.
+
+   Currently set-input-mode resets only the currently selected
+   terminal, which seems to somehow work around the problem.
+
+   Update:
+
+	Dan Nicolaescu <dann@ics.uci.edu> writes:
+	> Some terminals have 2 modes for cursor keys: Application Mode where
+	> the cursor keys transmit the codes defined in the terminfo entry, and
+	> Cursor mode. Applications have to send the smkx and rmkx terminfo
+	> strings to switch between the 2 modes. So Emacs (and emacsclient) have
+	> to send smkx when initializing and rmkx when quitting (or on
+	> suspend).
+
+   (I think patch-370 fixed this.)
+
+-- This long-standing bug (first reported by Han Boetes) seems to come
+   and go all the time.  It is time to track it down and fix it.
+
+	emacs
+		M-x server-start
+
+	# From another xterm:
+	emacsclient -e '(y-or-n-p "Do you want me to crash? ")'
+		# Notice how the answer ends up in the *scratch* buffer
+		M-x garbage-collect
+		SIGSEGV
+
+   (Fixed in patch-414 after detailed analysis by Kalle Olavi Niemitalo.)
+
+-- normal-erase-is-backspace-mode in simple.el needs to be updated for
+   multi-tty (rep. by Dan Waber).  (The Delete key is broken on X
+   because of this.)
+
+   (Fixed in patch-427.)
+
+-- I think keyboard-translate-table should be made terminal-local.
+
+   (Done in patch-431.)
+
+-- The semantics of terminal-local variables are confusing; it is not
+   clear what binding is in effect in any given time.  See if
+   current_kboard (or at least the terminal-local bindings exported to
+   Lisp) might be changed to be tied to the selected frame instead.
+   Currently, `function-key-map' and `key-translation-map' may be
+   accessed reliably only using the hackish
+   `(set-)terminal-local-value' functions.
+
+   Perhaps there should be a difference between `last-command' &co.
+   and these more conventional configuration variables.
+   (E.g. `symbol-value' would use current_kboard to access
+   `last-command', but SELECTED_FRAME()->display->kboard to get the
+   value of `function-key-map'.
+
+   (Fixed in patch-434.)
+
+-- If the first key pressed on a new tty terminal is a function key,
+   it is not recognized correctly.  May be related to the bug below.
+
+   (Seems to have been fixed as a side effect of patch-434.  "The bug
+   below" was the set-input-mode madness.)
+
+   (Update: this bug was fixed for good in patch-449.  It was tracked
+   down to a bug in `read_key_sequence': it failed to reinitialize its
+   local function-key-map/key-translation-map references when it
+   switched keyboards.  I don't understand why did this bug only
+   appear on brand new frames, though!)
+
+-- Disable connecting to a new X display when we use the GTK toolkit.
+
+   (Disabled in patch-450.)
+
+-- Implement automatic forwarding of client environment variables to
+   forked processes, as discussed on the multi-tty list.  Terminal
+   parameters are now accessible in C code, so the biggest obstacle is
+   gone.  The `getenv_internal' and `child_setup' functions in
+   callproc.c must be changed to support the following variable:
+
+	terminal-local-environment-variables is a variable defined in ...
+
+	Enable or disable terminal-local environment variables.
+
+	If set to t, `getenv', `setenv' and subprocess creation
+	functions use the environment variables of the emacsclient
+	process that created the selected frame, ignoring
+	`process-environment'.
+
+	If set to nil, Emacs uses `process-environment' and ignores
+	the client environment.
+
+	Otherwise, `terminal-local-environment-variables' should be a
+	list of variable names (represented by Lisp strings) to look
+	up in the client environment.  The rest will come from
+	`process-environment'.
+
+   (Implemented in patch-461; `terminal-getenv', `terminal-setenv' and
+   `with-terminal-environment' are now replaced by extensions to
+   `getenv' and `setenv', and the new `local-environment-variables'
+   facility.  Yay!)
+
+   (Updated in patch-465 to fix the semantics of let-binding
+   `process-environment'.  `process-environment' was changed to
+   override all local/global environment variables, and a new variable
+   `global-environment' was introduced to have `process-environment's
+   old meaning.)
+
+   (Updated in patch-466 to fix the case when two emacsclient sessions
+   share the same terminal, but have different environment.  The local
+   environment lists are now stored as frame parameters, so the
+   C-level terminal parameters are not strictly necessary any more.)
+
+-- `Fdelete_frame' is called from various critical places where it is
+   not acceptable for the frame deletion to fail, e.g. from
+   x_connection_closed after an X error.  `Fdelete_frame' now protects
+   against `delete-frame-functions' throwing an error and preventing a
+   frame delete. (patch-475)
+
+-- Fix set-input-mode for multi-tty.  It's a truly horrible interface;
+   what if we'd blow it up into several separate functions (with a
+   compatibility definition)?
+
+   (Done.  See `set-input-interrupt-mode', `set-output-flow-control',
+   `set-input-meta-mode' and `set-quit-char'.) (patch-457)
+
+-- Let-binding `overriding-terminal-local-map' on a brand new frame
+   does not seem to work correctly.  (See `fancy-splash-screens'.)
+   The keymap seems to be set up right, but events go to another
+   terminal.  Or is it `unread-command-events' that gets Emacs
+   confused?  Investigate.
+
+   (Emacs was confused because a process filter entered
+   `recursive-edit' while Emacs was reading input.  I added support
+   for this in the input system.) (patch-489)
+
+-- I smell something funny around pop_kboard's "deleted kboard" case.
+   Determine what are the circumstances of this case, and fix any
+   bug that comes to light.
+
+   (It happens simply because single_kboard's terminal is sometimes
+   deleted while executing a command on it, for example the one that
+   kills the terminal.  There was no bug here, but I rewrote the whole
+   single_kboard mess anyway.) (patch-489)
+
+-- Understand Emacs's low-level input system (it's black magic) :-)
+   What exactly does interrupt_input do?  I tried to disable it for
+   raw secondary tty support, but it does not seem to do anything
+   useful.  (Update: Look again. X unconditionally enables this, maybe
+   that's why raw terminal support is broken again.  I really do need
+   to understand input.)
+   (Update: I am starting to understand the read_key_sequence->read-char
+   ->kbd_buffer_get_event->read_avail_input->read_socket_hook path.  Yay!)
+
+   (Update: OK, it all seems so easy now (NOT).  Input could be done
+   synchronously (with wait_reading_process_input), or asynchronously
+   by SIGIO or polling (SIGALRM).  C-g either sets the Vquit_flag,
+   signals a 'quit condition (when immediate_quit), or throws to
+   `getcjmp' when Emacs was waiting for input when the C-g event
+   arrived.)
+
+-- Replace wrong_kboard_jmpbuf with a special return value of
+   read_char.  It is absurd that we use setjmp/longjmp just to return
+   to the immediate caller.
+
+   (Done in patch-500.)
+
+-- `tool-bar-mode', `scroll-bar-mode', `menu-bar-mode' and
+   'fringe-mode' are modes global to the entire Emacs session, not
+   just a single frame or a single terminal.  This means that their
+   status sometimes differs from what's actually displayed on the
+   screen.  As a consequence, the Options | Show/Hide menu sometimes
+   shows incorrect status, and you have to select an option twice for
+   it to have any visible effect on the current frame.
+
+   Change Emacs so that the status of the items in the Options |
+   Show/Hide menu correspond to the current frame.
+
+   (Done in patch-537.)
+
+-- The `default-directory' variable should somehow be set to the
+   cwd of the emacsclient process when the user runs emacsclient
+   without file arguments.  Perhaps it is OK to just override the
+   directory of the *scratch* buffer.
+
+   (Done in patch-539.)
+
+-- The borders on tooltip frames on X are messed up.  More
+   specifically, the frame's internal border (internal-border-width
+   frame parameter) is not filled with the correct background color.
+
+   It seems the border contents are drawn onto by the
+   update_single_window call in `x-show-tip'.  After some debugging, I
+   think the window's background color is not set up
+   correctly---calling `x_clear_area' fills the specified area with
+   black, not light yellow.
+
+   (Done in patch-544.  A background_pixel field was defined both in
+   struct frame and struct x_output, and Emacs got confused between
+   them.)
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,293 @@
+# Makefile for leim subdirectory in GNU Emacs.
+
+# Copyright (C) 1997-2012  Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+#   2006, 2007, 2008, 2009, 2010, 2011
+#   National Institute of Advanced Industrial Science and Technology (AIST)
+#   Registration Number H14PRO021
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# Avoid trouble on systems where the `SHELL' variable might be
+# inherited from the environment.
+SHELL = /bin/sh
+
+# Here are the things that we expect ../configure to edit.
+version=@version@
+prefix=@prefix@
+datarootdir=@datarootdir@
+datadir=@datadir@
+srcdir=@srcdir@
+ns_appresdir=@ns_appresdir@
+
+# Where to install LEIM files.
+INSTALLDIR=$(DESTDIR)${datadir}/emacs/${version}/leim
+
+GZIP_PROG = @GZIP_PROG@
+
+# Which Emacs to use to convert TIT files to Emacs Lisp files,
+# byte-compile Emacs Lisp files, and generate the file leim-list.el.
+BUILT_EMACS = ../src/emacs
+
+buildlisppath=${srcdir}/../lisp
+
+# How to run Emacs.
+RUN_EMACS = EMACSLOADPATH=$(buildlisppath) LC_ALL=C \
+	${BUILT_EMACS} -batch --no-site-file --no-site-lisp
+
+# Subdirectories to be made if ${srcdir} is different from the current
+# directory.
+SUBDIRS=quail
+
+# Files generated from TIT dictionaries for Chinese GB character set.
+TIT_GB=\
+	quail/CCDOSPY.elc	\
+	quail/Punct.elc		\
+	quail/QJ.elc		\
+	quail/SW.elc		\
+	quail/TONEPY.elc
+
+# Files generated from TIT dictionaries for Chinese BIG5 character set.
+TIT_BIG5=\
+	quail/4Corner.elc	\
+	quail/ARRAY30.elc	\
+	quail/ECDICT.elc	\
+	quail/ETZY.elc		\
+	quail/Punct-b5.elc	\
+	quail/PY-b5.elc		\
+	quail/QJ-b5.elc		\
+	quail/ZOZY.elc
+
+CHINESE_TIT=${TIT_GB} ${TIT_BIG5}
+
+NON_TIT_GB=${srcdir}/quail/py-punct.elc
+
+NON_TIT_BIG5=${srcdir}/quail/pypunct-b5.elc
+
+CHINESE_NON_TIT=${NON_TIT_GB} ${NON_TIT_BIG5}
+
+CHINESE_GB=${TIT_GB} ${NON_TIT_GB}
+
+CHINESE_BIG5=${TIT_BIG5} ${NON_TIT_BIG5}
+
+JAPANESE=${srcdir}/quail/japanese.elc ${srcdir}/ja-dic/ja-dic.elc
+
+KOREAN=	${srcdir}/quail/hangul.elc	\
+	${srcdir}/quail/hanja.elc	\
+	${srcdir}/quail/hanja3.elc	\
+	${srcdir}/quail/hanja-jis.elc	\
+	${srcdir}/quail/symbol-ksc.elc
+
+THAI=${srcdir}/quail/thai.elc
+
+VIETNAMESE=${srcdir}/quail/viqr.elc ${srcdir}/quail/vntelex.elc
+
+LAO=${srcdir}/quail/lao.elc ${srcdir}/quail/lrt.elc
+
+INDIAN=${srcdir}/quail/indian.elc
+
+TIBETAN=${srcdir}/quail/tibetan.elc
+
+LATIN=	${srcdir}/quail/latin-pre.elc	\
+	${srcdir}/quail/latin-post.elc	\
+	${srcdir}/quail/latin-alt.elc	\
+	${srcdir}/quail/latin-ltx.elc   \
+	${srcdir}/quail/welsh.elc
+
+UNICODE=${srcdir}/quail/sgml-input.elc ${srcdir}/quail/rfc1345.elc \
+	${srcdir}/quail/uni-input.elc
+
+SLAVIC= \
+	${srcdir}/quail/czech.elc \
+	${srcdir}/quail/croatian.elc \
+	${srcdir}/quail/slovak.elc
+
+GREEK=${srcdir}/quail/greek.elc
+
+RUSSIAN=${srcdir}/quail/cyrillic.elc ${srcdir}/quail/cyril-jis.elc
+
+OTHERS= \
+	${srcdir}/quail/arabic.elc \
+	${srcdir}/quail/ethiopic.elc \
+	${srcdir}/quail/ipa.elc \
+	${srcdir}/quail/ipa-praat.elc \
+	${srcdir}/quail/hebrew.elc \
+	${srcdir}/quail/georgian.elc \
+	$(srcdir)/quail/persian.elc \
+	${srcdir}/quail/sisheng.elc
+
+MISC= \
+	quail/tsang-b5.elc	\
+	quail/quick-b5.elc	\
+	quail/tsang-cns.elc	\
+	quail/quick-cns.elc	\
+	quail/PY.elc		\
+	quail/ZIRANMA.elc	\
+	quail/CTLau.elc		\
+	quail/CTLau-b5.elc
+
+CHINESE=${CHINESE_GB} ${CHINESE_BIG5}
+EASTASIA=${CHINESE} ${JAPANESE} ${KOREAN}
+ASIA=${EASTASIA} ${THAI} ${VIETNAMESE} ${LAO} ${INDIAN} ${TIBETAN}
+EUROPEAN=${LATIN} ${SLAVIC} ${GREEK} ${RUSSIAN}
+WORLD=${ASIA} ${EUROPEAN} ${OTHERS} ${MISC} ${UNICODE}
+
+TIT_MISC=${CHINESE_TIT} ${MISC}
+NON_TIT_MISC=${CHINESE_NON_TIT} ${JAPANESE} ${KOREAN} ${EUROPEAN} ${OTHERS}
+
+.SUFFIXES: .elc .el
+
+.el.elc:
+	@echo Compiling $<
+	@${RUN_EMACS} -f batch-byte-compile $<
+
+all: ${BUILT_EMACS} ${SUBDIRS} leim-list.el ${WORLD}
+
+# To ensure that we can run Emacs.  This target is ignored (never
+# being hit) if a user changes default value of EMACS.
+../src/emacs:
+	cd ../src; ${MAKE} ${MFLAGS} emacs
+
+${SUBDIRS}:
+	mkdir $@
+	touch stamp-subdir
+
+TIT_SOURCES= \
+	${srcdir}/CXTERM-DIC/4Corner.tit \
+	${srcdir}/CXTERM-DIC/ARRAY30.tit \
+	${srcdir}/CXTERM-DIC/CCDOSPY.tit \
+	${srcdir}/CXTERM-DIC/ECDICT.tit \
+	${srcdir}/CXTERM-DIC/ETZY.tit \
+	${srcdir}/CXTERM-DIC/PY-b5.tit \
+	${srcdir}/CXTERM-DIC/Punct-b5.tit \
+	${srcdir}/CXTERM-DIC/Punct.tit \
+	${srcdir}/CXTERM-DIC/QJ-b5.tit \
+	${srcdir}/CXTERM-DIC/QJ.tit \
+	${srcdir}/CXTERM-DIC/SW.tit \
+	${srcdir}/CXTERM-DIC/TONEPY.tit \
+	${srcdir}/CXTERM-DIC/ZOZY.tit
+
+${CHINESE_TIT:.elc=.el}: changed.tit
+	@true
+
+changed.tit: ${TIT_SOURCES}
+	${RUN_EMACS} -l ${buildlisppath}/international/titdic-cnv \
+	  -f batch-titdic-convert -dir quail ${srcdir}/CXTERM-DIC; \
+	  echo "changed" > $@
+
+MISC_SOURCES= \
+	${srcdir}/MISC-DIC/CTLau-b5.html \
+	${srcdir}/MISC-DIC/CTLau.html \
+	${srcdir}/MISC-DIC/cangjie-table.b5 \
+	${srcdir}/MISC-DIC/cangjie-table.cns \
+	${srcdir}/MISC-DIC/pinyin.map \
+	${srcdir}/MISC-DIC/ziranma.cin
+
+${MISC:.elc=.el}: changed.misc
+	@true
+
+changed.misc: ${MISC_SOURCES}
+	${RUN_EMACS} -l ${buildlisppath}/international/titdic-cnv \
+	  -f batch-miscdic-convert -dir quail ${srcdir}/MISC-DIC; \
+	  echo "changed" > $@
+
+leim-list.el: ${SUBDIRS} ${TIT_MISC} changed.tit changed.misc ${srcdir}/leim-ext.el
+	rm -f leim-list.el
+	${RUN_EMACS}  -l ${buildlisppath}/international/quail \
+	  -f batch-byte-compile-if-not-done ${TIT_MISC:.elc=.el}
+	if [ x`(cd ${srcdir} && /bin/pwd)` = x`(/bin/pwd)` ] ; then \
+	  ${RUN_EMACS} -l ${buildlisppath}/international/quail \
+	    --eval "(update-leim-list-file \".\")" ; \
+	else \
+	  ${RUN_EMACS} -l ${buildlisppath}/international/quail \
+	    --eval "(update-leim-list-file \".\" \"${srcdir}\")" ; \
+	fi
+	sed -n '/^[^;]/ p' < ${srcdir}/leim-ext.el >> $@
+
+MV_DIRS = for i in $$dir; do rm -fr `basename "$$i"` ; mv "$$i" . ; done
+
+install: all
+	if [ ! -d ${INSTALLDIR} ] ; then \
+          umask 022; ${srcdir}/../build-aux/install-sh -d ${INSTALLDIR}; \
+	else true; fi
+	if [ x`(cd ${INSTALLDIR} && /bin/pwd)` != x`(/bin/pwd)` ] ; then \
+	  rm -f ${INSTALLDIR}/leim-list.el; \
+	  rm -rf ${INSTALLDIR}/quail ${INSTALLDIR}/ja-dic ; \
+	  echo "Copying leim files to ${INSTALLDIR} ..." ; \
+	  if [ x`(cd ${srcdir} && /bin/pwd)` = x`(/bin/pwd)` ] ; then \
+	    tar -chf - leim-list.el quail ja-dic \
+		| (cd ${INSTALLDIR}; umask 0; tar -xvf - && cat > /dev/null) ;\
+	  else \
+	    tar -chf - leim-list.el quail \
+		| (cd ${INSTALLDIR}; umask 0; tar -xvf - && cat > /dev/null) ;\
+	    cd ${srcdir}; \
+	    tar -chf - quail/* ja-dic \
+		| (cd ${INSTALLDIR}; umask 0; tar -xvf - && cat > /dev/null) ;\
+	  fi; \
+	  rm -f  ${INSTALLDIR}/.gitignore ${INSTALLDIR}/*/.gitignore; \
+	  rm -f  ${INSTALLDIR}/.arch-inventory ${INSTALLDIR}/*/.arch-inventory; \
+	  rm -f  ${INSTALLDIR}/\#*        ${INSTALLDIR}/*/\#* ; \
+	  rm -f  ${INSTALLDIR}/.\#*       ${INSTALLDIR}/*/.\#* ; \
+	  rm -f  ${INSTALLDIR}/*~         ${INSTALLDIR}/*/*~ ; \
+	  rm -f  ${INSTALLDIR}/*.orig     ${INSTALLDIR}/*/*.orig ; \
+	else true; fi
+	-unset CDPATH; \
+	if [ -n "${GZIP_PROG}" ]; \
+	then \
+	   echo "Compressing *.el ..." ; \
+	   (cd ${INSTALLDIR}; for f in `find . -name "*.elc" -print`; do \
+		${GZIP_PROG} -9n `echo $$f|sed 's/.elc$$/.el/'` ; \
+	    done) \
+	else true; fi
+	-chmod -R a+r ${INSTALLDIR}
+	for installuser in $${LOGNAME} $${USERNAME} $${USER} \
+	  `id -un 2> /dev/null`; do \
+	  [ -n "$${installuser}" ] && break ; \
+	done ; \
+	find ${INSTALLDIR} -exec chown $${installuser} '{}' ';'
+	if [ "${ns_appresdir}" != "" ]; then \
+	  ( cd ${ns_appresdir} ; \
+	    if test -d share/emacs ; then dir=share/emacs/*/*; $(MV_DIRS); fi;\
+	    rm -fr share ) ; \
+	else true ; fi
+
+clean mostlyclean:
+	rm -f ${TIT_MISC} ${TIT_MISC:.elc=.el} \
+		leim-list.el changed.tit changed.misc
+
+# The following target is needed because the `clean' target only removes
+# TIT-generated files and doesn't touch compiled Quail packages.  But
+# bootstrapping should not leave non-fresh .elc files behind.
+bootstrap-clean: clean
+	rm -f ${WORLD}
+## FIXME some compiled files go to srcdir, some don't?
+#	cd ${srcdir}; rm -f *.elc */*.elc
+
+distclean: clean
+	if test -f stamp-subdir; then rm -rf ${SUBDIRS} stamp-subdir; fi
+	rm -f Makefile
+
+maintainer-clean: distclean bootstrap-clean
+
+extraclean: maintainer-clean
+	-rm -f *~ \#* */*~ */\#*
+
+.PHONY: check-declare
+
+check-declare:
+	$(RUN_EMACS) -l $(buildlisppath)/emacs-lisp/check-declare \
+	  --eval '(check-declare-directory "$(srcdir)")'

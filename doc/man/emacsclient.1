@@ -1,0 +1,102 @@
+.\" See section COPYING for conditions for redistribution.
+.TH EMACSCLIENT 1
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+.SH NAME
+emacsclient \- tells a running Emacs to visit a file
+.SH SYNOPSIS
+.B emacsclient
+.I "[options] files ..."
+.SH "DESCRIPTION"
+This manual page documents briefly the
+.BR emacsclient
+command.  Full documentation is available in the GNU Info format; see
+below.
+This manual page was originally written for the Debian GNU/Linux
+distribution, but is not specific to that system.
+.PP
+.B emacsclient
+works in conjunction with the built-in Emacs server.
+.PP
+You can either call
+.B emacsclient
+directly or let other programs run it for you when necessary.  On
+GNU and Unix systems many programs consult the environment
+variable EDITOR (sometimes also VISUAL) to obtain the command used for
+editing.  Thus, setting this environment variable to 'emacsclient'
+will allow these programs to use an already running Emacs for editing.
+Other operating systems might have their own methods for defining the
+default editor.
+
+For
+.B emacsclient
+to work, you need an already running Emacs with a server.  Within Emacs,
+call the functions `server-start' or `server-mode'.  (Your `.emacs' file
+can do this automatically if you add either `(server-start)' or
+`(server-mode 1)' to it.)
+
+When you've finished editing the buffer, type `C-x #'
+(`server-edit').  This saves the file and sends a message back to the
+`emacsclient' program telling it to exit.  The programs that use
+`EDITOR' wait for the "editor" (actually, `emacsclient') to exit.  `C-x
+#' also checks for other pending external requests to edit various
+files, and selects the next such file.
+
+If you set the variable `server-window' to a window or a frame, `C-x
+#' displays the server buffer in that window or in that frame.
+
+.SH OPTIONS
+The programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+.TP
+.B \-a, \-\-alternate-editor=EDITOR
+if the Emacs server is not running, run the specified editor instead.
+This can also be specified via the `ALTERNATE_EDITOR' environment variable.
+If the value of EDITOR is the empty string, run `emacs --daemon' to
+start Emacs in daemon mode, and try to connect to it.
+.TP
+.B -c, \-\-create-frame
+create a new frame instead of trying to use the current Emacs frame
+.TP
+.B \-F, \-\-frame-parameters=ALIST
+set the parameters of a newly-created frame.
+.TP
+.B \-d, \-\-display=DISPLAY
+tell the server to display the files on the given display.
+.TP
+.B \-e, \-\-eval
+do not visit files but instead evaluate the arguments as Emacs
+Lisp expressions.
+.TP
+.B \-f, \-\-server-file=FILENAME
+use TCP configuration file FILENAME for communication.
+This can also be specified via the `EMACS_SERVER_FILE' environment variable.
+.TP
+.B \-n, \-\-no-wait
+returns
+immediately without waiting for you to "finish" the buffer in Emacs.
+.TP
+.B \-nw, \-t, \-\-tty
+open a new Emacs frame on the current terminal
+.TP
+.B \-s, \-\-socket-name=FILENAME
+use socket named FILENAME for communication.
+.TP
+.B \-V, \-\-version
+print version information and exit
+.TP
+.B \-H, \-\-help
+print this usage information message and exit
+.SH "EXIT STATUS"
+Normally, the exit status is 0.  If emacsclient shuts down due to
+Emacs signaling an error, the exit status is 1.
+.SH "SEE ALSO"
+The program is documented fully in
+.IR "Using Emacs as a Server"
+available via the Info system.
+.SH AUTHOR
+This manual page was written by Stephane Bortzmeyer <bortzmeyer@debian.org>,
+for the Debian GNU/Linux system (but may be used by others).
+.SH COPYING
+This manual page is in the public domain.
+

@@ -1,0 +1,11 @@
+This directory contains grammar files in Bison and Wisent, used to
+generate the parser data in the lisp/semantic/bovine/ and
+lisp/semantic/wisent/ directories.  You can run the parser generators
+with
+
+emacs -batch -Q -l bovine-grammar.el -f bovine-make-parsers
+emacs -batch -Q -l wisent-grammar.el -f wisent-make-parsers
+
+Currently, the parser files in lisp/ are not generated directly from
+these grammar files when making Emacs.  This state of affairs, and the
+contents of this directory, will change in a future version of Emacs.

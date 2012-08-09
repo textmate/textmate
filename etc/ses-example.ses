@@ -1,0 +1,223 @@
+Sales summary - Acme fundraising          
+                                          
+         ~~~~~~~~~~~~~Summary~~~~~~~~~~~~~
+                        --Totals-- Average
+         Eastern-area   $46.70   2  $23.35
+         West-district  $80.25  10   $8.03
+         North&South    $99.69   5  $19.94
+         TOTAL           ~$227  17  $13.33
+                                          
+= = = = = =Details = = = = = =            
+99/07/25 North&South    $40.00            
+99/08/16 West-district   $5.25            
+99/08/16 North&South    $12.99            
+99/08/25 West-district   $8.61            
+99/08/26 West-district   $9.97            
+99/09/04 Eastern-area   $21.00            
+00/01/15 West-district   $5.50            
+00/07/15 West-district  $19.01            
+00/07/26 North&South    $27.95            
+00/08/04 West-district  $11.71            
+00/08/16 Eastern-area   $25.70            
+00/08/25 West-district   $4.95            
+00/08/26 West-district   $7.21            
+00/09/01 North&South     $1.25            
+01/07/25 West-district   $5.75            
+01/08/04 West-district   $2.29            
+01/08/15 North&South    $17.50            
+
+
+(ses-cell A1 "Sales summary - Acme fundraising" "Sales summary - Acme fundraising" nil nil)
+(ses-cell B1 *skip* nil nil nil)
+(ses-cell C1 *skip* nil nil nil)
+(ses-cell D1 *skip* nil nil nil)
+(ses-cell E1 nil nil nil nil)
+
+(ses-cell A2 nil nil nil nil)
+(ses-cell B2 nil nil nil nil)
+(ses-cell C2 nil nil nil nil)
+(ses-cell D2 nil nil nil nil)
+(ses-cell E2 nil nil nil nil)
+
+(ses-cell A3 nil nil nil nil)
+(ses-cell B3 "Summary" "Summary" ses-tildefill-span nil)
+(ses-cell C3 *skip* nil nil nil)
+(ses-cell D3 *skip* nil nil nil)
+(ses-cell E3 *skip* nil nil nil)
+
+(ses-cell A4 nil nil nil nil)
+(ses-cell B4 nil nil nil nil)
+(ses-cell C4 "Totals" "Totals" ses-dashfill-span nil)
+(ses-cell D4 *skip* nil nil nil)
+(ses-cell E4 "Average" "Average" nil nil)
+
+(ses-cell A5 nil nil nil nil)
+(ses-cell B5 Eastern-area (quote Eastern-area) nil nil)
+(ses-cell C5 46.7 (apply (quote +) (ses-select (ses-range B11 B27) (quote Eastern-area) (ses-range C11 C27))) nil (C8 E5))
+(ses-cell D5 2 (length (ses-select (ses-range B11 B27) (quote Eastern-area) (ses-range C11 C27))) nil (D8 E5))
+(ses-cell E5 23.35 (/ C5 D5) nil nil)
+
+(ses-cell A6 nil nil nil nil)
+(ses-cell B6 West-district (quote West-district) nil nil)
+(ses-cell C6 80.25 (apply (quote +) (ses-select (ses-range B11 B27) (quote West-district) (ses-range C11 C27))) nil (C8 E6))
+(ses-cell D6 10 (length (ses-select (ses-range B11 B27) (quote West-district) (ses-range C11 C27))) nil (D8 E6))
+(ses-cell E6 8.025 (/ C6 D6) nil nil)
+
+(ses-cell A7 nil nil nil nil)
+(ses-cell B7 North&South (quote North&South) nil nil)
+(ses-cell C7 99.69 (apply (quote +) (ses-select (ses-range B11 B27) (quote North&South) (ses-range C11 C27))) nil (C8 E7))
+(ses-cell D7 5 (length (ses-select (ses-range B11 B27) (quote North&South) (ses-range C11 C27))) nil (D8 E7))
+(ses-cell E7 19.938 (/ C7 D7) nil nil)
+
+(ses-cell A8 nil nil nil nil)
+(ses-cell B8 "TOTAL" "TOTAL" nil nil)
+(ses-cell C8 226.64 (ses+ C5 C6 C7) "~$%.0f" (E8))
+(ses-cell D8 17 (ses+ D5 D6 D7) nil (E8))
+(ses-cell E8 13.331764705882351 (/ C8 D8) nil nil)
+
+(ses-cell A9 nil nil ses-center nil)
+(ses-cell B9 useless (quote useless) (lambda (x) (if (eq x (quote useless)) "" (prin1-to-string x))) nil)
+(ses-cell C9 nil nil nil nil)
+(ses-cell D9 nil nil nil nil)
+(ses-cell E9 nil nil nil nil)
+
+(ses-cell A10 "Details " "Details " (lambda (x) (replace-regexp-in-string "==" "= " (ses-center-span x 61))) nil)
+(ses-cell B10 *skip* nil nil nil)
+(ses-cell C10 *skip* nil nil nil)
+(ses-cell D10 "" "" nil nil)
+(ses-cell E10 nil nil nil nil)
+
+(ses-cell A11 990725 990725 nil nil)
+(ses-cell B11 North&South (quote North&South) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C11 40 40 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D11 nil nil nil nil)
+(ses-cell E11 nil nil nil nil)
+
+(ses-cell A12 990816 990816 nil nil)
+(ses-cell B12 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C12 5.25 5.25 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D12 nil nil nil nil)
+(ses-cell E12 nil nil nil nil)
+
+(ses-cell A13 990816 990816 nil nil)
+(ses-cell B13 North&South (quote North&South) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C13 12.99 12.99 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D13 nil nil nil nil)
+(ses-cell E13 nil nil nil nil)
+
+(ses-cell A14 990825 990825 nil nil)
+(ses-cell B14 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C14 8.61 8.61 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D14 nil nil nil nil)
+(ses-cell E14 nil nil nil nil)
+
+(ses-cell A15 990826 990826 nil nil)
+(ses-cell B15 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C15 9.97 9.97 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D15 nil nil nil nil)
+(ses-cell E15 nil nil nil nil)
+
+(ses-cell A16 990904 990904 nil nil)
+(ses-cell B16 Eastern-area (quote Eastern-area) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C16 21 (/ 42 2) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D16 nil nil nil nil)
+(ses-cell E16 nil nil nil nil)
+
+(ses-cell A17 115 115 nil nil)
+(ses-cell B17 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C17 5.5 5.5 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D17 nil nil nil nil)
+(ses-cell E17 nil nil nil nil)
+
+(ses-cell A18 715 715 nil nil)
+(ses-cell B18 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C18 19.01 19.01 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D18 nil nil nil nil)
+(ses-cell E18 nil nil nil nil)
+
+(ses-cell A19 726 726 nil nil)
+(ses-cell B19 North&South (quote North&South) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C19 27.95 27.95 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D19 nil nil nil nil)
+(ses-cell E19 nil nil nil nil)
+
+(ses-cell A20 804 804 nil nil)
+(ses-cell B20 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C20 11.71 11.71 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D20 nil nil nil nil)
+(ses-cell E20 nil nil nil nil)
+
+(ses-cell A21 816 816 nil nil)
+(ses-cell B21 Eastern-area (quote Eastern-area) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C21 25.7 25.7 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D21 nil nil nil nil)
+(ses-cell E21 nil nil nil nil)
+
+(ses-cell A22 825 825 nil nil)
+(ses-cell B22 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C22 4.95 4.95 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D22 nil nil nil nil)
+(ses-cell E22 nil nil nil nil)
+
+(ses-cell A23 826 826 nil nil)
+(ses-cell B23 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C23 7.21 7.21 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D23 nil nil nil nil)
+(ses-cell E23 nil nil nil nil)
+
+(ses-cell A24 901 901 nil nil)
+(ses-cell B24 North&South (quote North&South) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C24 1.25 1.25 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D24 nil nil nil nil)
+(ses-cell E24 nil nil nil nil)
+
+(ses-cell A25 10725 10725 nil nil)
+(ses-cell B25 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C25 5.75 5.75 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D25 nil nil nil nil)
+(ses-cell E25 nil nil nil nil)
+
+(ses-cell A26 10804 10804 nil nil)
+(ses-cell B26 West-district (quote West-district) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C26 2.29 2.29 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D26 nil nil nil nil)
+(ses-cell E26 nil nil nil nil)
+
+(ses-cell A27 10815 10815 nil nil)
+(ses-cell B27 North&South (quote North&South) nil (D7 C7 D6 C6 D5 C5))
+(ses-cell C27 17.5 17.5 nil (D7 C7 D6 C6 D5 C5))
+(ses-cell D27 nil nil nil nil)
+(ses-cell E27 nil nil nil nil)
+
+(ses-column-widths [8 14 6 3 7])
+(ses-column-printers [(lambda (x) (format "%02d/%02d/%02d" (/ x 10000) (% (/ x 100) 100) (% x 100))) ("%s") "$%.2f" nil "$%.2f"])
+(ses-default-printer "%.7g")
+(ses-header-row 0)
+
+( ;Global parameters (these are read first)
+ 2 ;SES file-format
+ 27 ;numrows
+ 5 ;numcols
+)
+
+;;; Local Variables:
+;;; mode: ses
+;;; ses--symbolic-formulas: (("Eastern area") ("West-district") ("North&South") ("Other"))
+;;; End:
+
+;;; Copyright (C) 2002-2012  Free Software Foundation, Inc.
+
+;;; COPYING PERMISSIONS:
+;;; 
+;;;   This document is free software: you can redistribute it and/or modify
+;;;   it under the terms of the GNU General Public License as published by
+;;;   the Free Software Foundation, either version 3 of the License, or
+;;;   (at your option) any later version.
+;;;
+;;;   This program is distributed in the hope that it will be useful,
+;;;   but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;   GNU General Public License for more details.
+;;;
+;;;   You should have received a copy of the GNU General Public License
+;;;   along with this program.  If not, see <http://www.gnu.org/licenses/>.

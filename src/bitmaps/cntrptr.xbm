@@ -1,0 +1,8 @@
+#define cntr_ptr_width 16
+#define cntr_ptr_height 16
+#define cntr_ptr_x_hot 7
+#define cntr_ptr_y_hot 1
+static char cntr_ptr_bits[] = {
+  '\x00','\x00','\x80','\x01','\x80','\x01','\xc0','\x03','\xc0','\x03','\xe0','\x07',
+  '\xe0','\x07','\xf0','\x0f','\xf0','\x0f','\x98','\x19','\x88','\x11','\x80','\x01',
+  '\x80','\x01','\x80','\x01','\x80','\x01','\x00','\x00'};

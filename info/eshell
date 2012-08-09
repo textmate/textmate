@@ -1,0 +1,1532 @@
+This is ../../info/eshell, produced by makeinfo version 4.13 from
+eshell.texi.
+
+This manual is for Eshell, the Emacs shell.
+
+   Copyright (C) 1999-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Eshell: (eshell).             A command shell implemented in Emacs Lisp.
+END-INFO-DIR-ENTRY
+
+
+File: eshell,  Node: Top,  Next: What is Eshell?,  Prev: (dir),  Up: (dir)
+
+Eshell
+******
+
+Eshell is a shell-like command interpreter implemented in Emacs Lisp.
+It invokes no external processes except for those requested by the
+user.  It is intended to be a functional replacement for command shells
+such as `bash', `zsh', `rc', or `4dos'; since Emacs itself is capable of
+handling the sort of tasks accomplished by those tools.
+
+   This manual is for Eshell, the Emacs shell.
+
+   Copyright (C) 1999-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* What is Eshell?::             A brief introduction to the Emacs Shell.
+* Command basics::              The basics of command usage.
+* Commands::
+* Arguments::
+* Input/Output::
+* Process control::
+* Extension modules::
+* Extras and Goodies::
+* Bugs and ideas::              Known problems, and future ideas.
+* GNU Free Documentation License:: The license for this documentation.
+* Concept Index::
+* Function and Variable Index::
+* Key Index::
+
+
+File: eshell,  Node: What is Eshell?,  Next: Command basics,  Prev: Top,  Up: Top
+
+1 What is Eshell?
+*****************
+
+Eshell is a "command shell" written in Emacs Lisp.  Everything it does,
+it uses Emacs's facilities to do.  This means that Eshell is as
+portable as Emacs itself.  It also means that cooperation with Lisp code
+is natural and seamless.
+
+   What is a command shell?  To properly understand the role of a shell,
+it's necessary to visualize what a computer does for you.  Basically, a
+computer is a tool; in order to use that tool, you must tell it what to
+do--or give it "commands."  These commands take many forms, such as
+clicking with a mouse on certain parts of the screen.  But that is only
+one form of command input.
+
+   By far the most versatile way to express what you want the computer
+to do is by using an abbreviated language called "script".  In script,
+instead of telling the computer, "list my files, please", one writes a
+standard abbreviated command word--`ls'.  Typing `ls' in a command
+shell is a script way of telling the computer to list your files.(1)
+
+   The real flexibility of this approach is apparent only when you
+realize that there are many, many different ways to list files.
+Perhaps you want them sorted by name, sorted by date, in reverse order,
+or grouped by type.  Most graphical browsers have simple ways to
+express this.  But what about showing only a few files, or only files
+that meet a certain criteria?  In very complex and specific situations,
+the request becomes too difficult to express using a mouse or pointing
+device.  It is just these kinds of requests that are easily solved
+using a command shell.
+
+   For example, what if you want to list every Word file on your hard
+drive, larger than 100 kilobytes in size, and which hasn't been looked
+at in over six months?  That is a good candidate list for deletion, when
+you go to clean up your hard drive.  But have you ever tried asking your
+computer for such a list?  There is no way to do it!  At least, not
+without using a command shell.
+
+   The role of a command shell is to give you more control over what
+your computer does for you.  Not everyone needs this amount of control,
+and it does come at a cost: Learning the necessary script commands to
+express what you want done.  A complicated query, such as the example
+above, takes time to learn.  But if you find yourself using your
+computer frequently enough, it is more than worthwhile in the long run.
+Any tool you use often deserves the time spent learning to master it.
+(2)
+
+* Menu:
+
+* Contributors to Eshell::      People who have helped out!
+
+   ---------- Footnotes ----------
+
+   (1) This is comparable to viewing the contents of a folder using a
+graphical display.
+
+   (2) For the understandably curious, here is what that command looks
+like: But don't let it fool you; once you know what's going on, it's
+easier than it looks: `ls -lt **/*.doc(Lk+50aM+5)'.
+
+
+File: eshell,  Node: Contributors to Eshell,  Up: What is Eshell?
+
+1.1 Contributors to Eshell
+==========================
+
+Contributions to Eshell are welcome.  I have limited time to work on
+this project, but I will gladly add any code you contribute to me to
+this package.
+
+   The following persons have made contributions to Eshell.
+
+   * Eli Zaretskii made it possible for Eshell to run without requiring
+     asynchronous subprocess support.  This is important for MS-DOS,
+     which does not have such support.
+
+   * Miles Bader contributed many fixes during the port to Emacs 21.
+
+   * Stefan Monnier fixed the things which bothered him, which of
+     course made things better for all.
+
+   * Gerd Moellmann also helped to contribute bug fixes during the
+     initial integration with Emacs 21.
+
+   * Alex Schroeder contributed code for interactively querying the user
+     before overwriting files.
+
+   * Sudish Joseph helped with some XEmacs compatibility issues.
+
+   Apart from these, a lot of people have sent suggestions, ideas,
+requests, bug reports and encouragement.  Thanks a lot!  Without you
+there would be no new releases of Eshell.
+
+
+File: eshell,  Node: Command basics,  Next: Commands,  Prev: What is Eshell?,  Up: Top
+
+2 Basic overview
+****************
+
+A command shell is a means of entering verbally-formed commands.  This
+is really all that it does, and every feature described in this manual
+is a means to that end.  Therefore, it's important to take firm hold on
+exactly what a command is, and how it fits in the overall picture of
+things.
+
+* Menu:
+
+* Commands verbs::              Commands always begin with a verb.
+* Command arguments::           Some verbs require arguments.
+
+
+File: eshell,  Node: Commands verbs,  Next: Command arguments,  Up: Command basics
+
+2.1 Commands verbs
+==================
+
+Commands are expressed using "script", a special shorthand language
+computers can understand with no trouble.  Script is an extremely simple
+language; oddly enough, this is what makes it look so complicated!
+Whereas normal languages use a variety of embellishments, the form of a
+script command is always:
+
+     VERB [ARGUMENTS]
+
+   The verb expresses what you want your computer to do.  There are a
+fixed number of verbs, although this number is usually quite large.  On
+the author's computer, it reaches almost 1400 in number.  But of course,
+only a handful of these are really necessary.
+
+   Sometimes, the verb is all that's written.  A verb is always a single
+word, usually related to the task it performs.  `reboot' is a good
+example.  Entering that on GNU/Linux will reboot the computer--assuming
+you have sufficient privileges.
+
+   Other verbs require more information.  These are usually very capable
+verbs, and must be told specifically what to do.  The extra information
+is given in the form of "arguments".  For example, the `echo' verb
+prints back whatever arguments you type.  It requires these arguments
+to know what to echo.  A proper use of `echo' looks like this:
+
+     echo This is an example of using echo!
+
+   This script command causes the computer to echo back: "This is an
+example of using echo!"
+
+   Although command verbs are always simple words, like `reboot' or
+`echo', arguments may have a wide variety of forms.  There are textual
+arguments, numerical arguments--even Lisp arguments.  Distinguishing
+these different types of arguments requires special typing, for the
+computer to know exactly what you mean.
+
+
+File: eshell,  Node: Command arguments,  Prev: Commands verbs,  Up: Command basics
+
+2.2 Command arguments
+=====================
+
+Eshell recognizes several different kinds of command arguments:
+
+  1. Strings (also called textual arguments)
+
+  2. Numbers (floating point or integer)
+
+  3. Lisp lists
+
+  4. Lisp symbols
+
+  5. Emacs buffers
+
+  6. Emacs process handles
+
+   Most users need to worry only about the first two.  The third, Lisp
+lists, occur very frequently, but almost always behind the scenes.
+
+   Strings are the most common type of argument, and consist of nearly
+any character.  Special characters--those used by Eshell
+specifically--must be preceded by a backslash (`\').  When in doubt, it
+is safe to add backslashes anywhere and everywhere.
+
+   Here is a more complicated `echo' example:
+
+     echo A\ Multi-word\ Argument\ With\ A\ \$\ dollar
+
+   Beyond this, things get a bit more complicated.  While not beyond the
+reach of someone wishing to learn, it is definitely beyond the scope of
+this manual to present it all in a simplistic manner.  Get comfortable
+with Eshell as a basic command invocation tool, and learn more about the
+commands on your system; then come back when it all sits more familiarly
+on your mind.  Have fun!
+
+
+File: eshell,  Node: Commands,  Next: Arguments,  Prev: Command basics,  Up: Top
+
+3 Commands
+**********
+
+* Menu:
+
+* Invocation::
+* Completion::
+* Aliases::
+* History::
+* Scripts::
+* Built-ins::
+
+   Essentially, a command shell is all about invoking commands--and
+everything that entails.  So understanding how Eshell invokes commands
+is the key to comprehending how it all works.
+
+
+File: eshell,  Node: Invocation,  Next: Completion,  Up: Commands
+
+3.1 Invocation
+==============
+
+Unlike regular system shells, Eshell never invokes kernel functions
+directly, such as `exec(3)'.  Instead, it uses the Lisp functions
+available in the Emacs Lisp library.  It does this by transforming the
+command you specify into a callable Lisp form.(1)
+
+   This transformation, from the string of text typed at the command
+prompt, to the ultimate invocation of either a Lisp function or external
+command, follows these steps:
+
+  1. Parse the command string into separate arguments.
+
+  2.
+   ---------- Footnotes ----------
+
+   (1) To see the Lisp form that will be invoked, type:
+`eshell-parse-command "echo hello"'
+
+
+File: eshell,  Node: Completion,  Next: Aliases,  Prev: Invocation,  Up: Commands
+
+3.2 Completion
+==============
+
+
+File: eshell,  Node: Aliases,  Next: History,  Prev: Completion,  Up: Commands
+
+3.3 Aliases
+===========
+
+
+File: eshell,  Node: History,  Next: Scripts,  Prev: Aliases,  Up: Commands
+
+3.4 History
+===========
+
+Eshell knows a few built-in variables:
+
+`$+'
+     This variable always contains the current working directory.
+
+`$-'
+     This variable always contains the previous working directory (the
+     current working directory from before the last `cd' command).
+
+`$_'
+     It refers to the last argument of the last command.
+
+`$$'
+     This is the result of the last command.  In case of an external
+     command, it is `t' or `nil'.
+
+`$?'
+     This variable contains the exit code of the last command (0 or 1
+     for Lisp functions, based on successful completion).
+
+
+
+File: eshell,  Node: Scripts,  Next: Built-ins,  Prev: History,  Up: Commands
+
+3.5 Scripts
+===========
+
+
+File: eshell,  Node: Built-ins,  Prev: Scripts,  Up: Commands
+
+3.6 Built-in commands
+=====================
+
+Several commands are built-in in Eshell.  In order to call the external
+variant of a built-in command `foo', you could call `*foo'.  Usually,
+this should not be necessary.  You can check what will be applied by
+the `which' command:
+
+     ~ $ which ls
+     eshell/ls is a compiled Lisp function in `em-ls.el'
+     ~ $ which *ls
+     /bin/ls
+
+   If you want to discard a given built-in command, you could declare an
+alias, *note Aliases::.  Eample:
+
+     ~ $ which sudo
+     eshell/sudo is a compiled Lisp function in `em-unix.el'
+     ~ $ alias sudo '*sudo $*'
+     ~ $ which sudo
+     sudo is an alias, defined as "*sudo $*"
+
+   Some of the built-in commands have a special behavior in Eshell:
+
+`cd'
+     This command changes the current working directory.  Usually, it is
+     invoked as `cd foo' where `foo' is the new working directory.  But
+     `cd' knows about a few special arguments:
+
+     When it receives no argument at all, it changes to the home
+     directory.
+
+     Giving the command `cd -' changes back to the previous working
+     directory (this is the same as `cd $-').
+
+     The command `cd =' shows the directory stack.  Each line is
+     numbered.
+
+     With `cd =foo', Eshell searches the directory stack for a
+     directory matching the regular expression `foo' and changes to
+     that directory.
+
+     With `cd -42', you can access the directory stack by number.
+
+`history'
+     The `history' command shows all commands kept in the history ring
+     as numbered list.  If the history ring contains
+     `eshell-history-size' commands, those numbers change after every
+     command invocation, therefore the `history' command shall be
+     applied before using the expansion mechanism with history numbers.
+
+     The n-th entry of the history ring can be applied with the `!n'
+     command.  If `n' is negative, the entry is counted from the end of
+     the history ring.
+
+     `!foo' expands to the last command beginning with `foo', and
+     `!?foo' to the last command containing `foo'.  The n-th argument
+     of the last command beginning with `foo' is accessible by `!foo:n'.
+
+`su'
+`sudo'
+     `su' and `sudo' work as expected: they apply the following
+     commands (`su'), or the command being an argument (`sudo') under
+     the permissions of somebody else.
+
+     This does not work only on the local host, but even on a remote
+     one, when `default-directory' is a remote file name.  The necessary
+     proxy configuration of Tramp is performed automatically, *note
+     Multi-hops: (tramp)Multi-hops.  Example:
+
+          ~ $ cd /ssh:otherhost:/etc
+          /ssh:user@otherhost:/etc $ sudo find-file shadow
+
+
+
+File: eshell,  Node: Arguments,  Next: Input/Output,  Prev: Commands,  Up: Top
+
+4 Arguments
+***********
+
+* Menu:
+
+* The Parser::
+* Variables::
+* Substitution::
+* Globbing::
+* Predicates::
+
+
+File: eshell,  Node: The Parser,  Next: Variables,  Up: Arguments
+
+4.1 The Parser
+==============
+
+
+File: eshell,  Node: Variables,  Next: Substitution,  Prev: The Parser,  Up: Arguments
+
+4.2 Variables
+=============
+
+
+File: eshell,  Node: Substitution,  Next: Globbing,  Prev: Variables,  Up: Arguments
+
+4.3 Substitution
+================
+
+
+File: eshell,  Node: Globbing,  Next: Predicates,  Prev: Substitution,  Up: Arguments
+
+4.4 Globbing
+============
+
+
+File: eshell,  Node: Predicates,  Prev: Globbing,  Up: Arguments
+
+4.5 Predicates
+==============
+
+
+File: eshell,  Node: Input/Output,  Next: Process control,  Prev: Arguments,  Up: Top
+
+5 Input/Output
+**************
+
+
+File: eshell,  Node: Process control,  Next: Extension modules,  Prev: Input/Output,  Up: Top
+
+6 Process control
+*****************
+
+
+File: eshell,  Node: Extension modules,  Next: Extras and Goodies,  Prev: Process control,  Up: Top
+
+7 Extension modules
+*******************
+
+* Menu:
+
+* Writing a module::
+* Module testing::
+* Directory handling::
+* Key rebinding::
+* Smart scrolling::
+* Terminal emulation::
+* Built-in UNIX commands::
+
+
+File: eshell,  Node: Writing a module,  Next: Module testing,  Up: Extension modules
+
+7.1 Writing a module
+====================
+
+
+File: eshell,  Node: Module testing,  Next: Directory handling,  Prev: Writing a module,  Up: Extension modules
+
+7.2 Module testing
+==================
+
+
+File: eshell,  Node: Directory handling,  Next: Key rebinding,  Prev: Module testing,  Up: Extension modules
+
+7.3 Directory handling
+======================
+
+
+File: eshell,  Node: Key rebinding,  Next: Smart scrolling,  Prev: Directory handling,  Up: Extension modules
+
+7.4 Key rebinding
+=================
+
+
+File: eshell,  Node: Smart scrolling,  Next: Terminal emulation,  Prev: Key rebinding,  Up: Extension modules
+
+7.5 Smart scrolling
+===================
+
+
+File: eshell,  Node: Terminal emulation,  Next: Built-in UNIX commands,  Prev: Smart scrolling,  Up: Extension modules
+
+7.6 Terminal emulation
+======================
+
+
+File: eshell,  Node: Built-in UNIX commands,  Prev: Terminal emulation,  Up: Extension modules
+
+7.7 Built-in UNIX commands
+==========================
+
+
+File: eshell,  Node: Extras and Goodies,  Next: Bugs and ideas,  Prev: Extension modules,  Up: Top
+
+8 Extras and Goodies
+********************
+
+
+File: eshell,  Node: Bugs and ideas,  Next: GNU Free Documentation License,  Prev: Extras and Goodies,  Up: Top
+
+9 Bugs and ideas
+****************
+
+If you find a bug or misfeature, don't hesitate to let me know!  Send
+email to <johnw@gnu.org>.  Feature requests should also be sent there.
+I prefer discussing one thing at a time.  If you find several unrelated
+bugs, please report them separately.
+
+   If you have ideas for improvements, or if you have written some
+extensions to this package, I would like to hear from you.  I hope you
+find this package useful!
+
+* Menu:
+
+* Known problems::
+
+
+File: eshell,  Node: Known problems,  Up: Bugs and ideas
+
+9.1 Known problems
+==================
+
+Below is complete list of known problems with Eshell version 2.4.2,
+which is the version included with Emacs 22.
+
+Documentation incomplete
+
+Differentiate between aliases and functions
+     Allow for a bash-compatible syntax, such as:
+
+          alias arg=blah
+          function arg () { blah $* }
+
+`for i in 1 2 3 { grep -q a b && *echo has it } | wc -l' outputs result after prompt
+     In fact, piping to a process from a looping construct doesn't work
+     in general.  If I change the call to `eshell-copy-handles' in
+     `eshell-rewrite-for-command' to use `eshell-protect', it seems to
+     work, but the output occurs after the prompt is displayed.  The
+     whole structured command thing is too complicated at present.
+
+Error with `bc' in `eshell-test'
+     On some XEmacs system, the subprocess interaction test fails
+     inexplicably, although `bc' works fine at the command prompt.
+
+Eshell does not delete `*Help*' buffers in XEmacs 21.1.8+
+     In XEmacs 21.1.8, the `*Help*' buffer has been renamed such that
+     multiple instances of the `*Help*' buffer can exist.
+
+Pcomplete sometimes gets stuck
+     You press <TAB>, but no completions appear, even though the
+     directory has matching files.  This behavior is rare.
+
+`grep python $<rpm -qa>' doesn't work, but using `*grep' does
+     This happens because the `grep' Lisp function returns immediately,
+     and then the asynchronous `grep' process expects to examine the
+     temporary file, which has since been deleted.
+
+Problem with C-r repeating text
+     If the text _before point_ reads "./run", and you type `C-r r u
+     n', it will repeat the line for every character typed.
+
+Backspace doesn't scroll back after continuing (in smart mode)
+     Hitting space during a process invocation, such as `make', will
+     cause it to track the bottom of the output; but backspace no longer
+     scrolls back.
+
+It's not possible to fully `unload-feature' Eshell
+
+Menu support was removed, but never put back
+
+Using C-p and C-n with rebind gets into a locked state
+     This happened a few times in Emacs 21, but has been irreproducible
+     since.
+
+If an interactive process is currently running, `M-!' doesn't work
+
+Use a timer instead of `sleep-for' when killing child processes
+
+Piping to a Lisp function is not supported
+     Make it so that the Lisp command on the right of the pipe is
+     repeatedly called with the input strings as arguments.  This will
+     require changing `eshell-do-pipeline' to handle non-process
+     targets.
+
+Input redirection is not supported
+     See the above entry.
+
+Problem running `less' without arguments on Windows
+     The result in the Eshell buffer is:
+
+          Spawning child process: invalid argument
+
+     Also a new `less' buffer was created with nothing in it...
+     (presumably this holds the output of `less').
+
+     If `less.exe' is invoked from the Eshell command line, the
+     expected output is written to the buffer.
+
+     Note that this happens on NT-Emacs 20.6.1 on Windows 2000. The
+     term.el package and the supplied shell both use the `cmdproxy'
+     program for running shells.
+
+Implement `-r', `-n' and `-s' switches for `cp'
+
+Make `M-5 M-x eshell' switch to "*eshell<5>*", creating if need be
+
+`mv DIR FILE.tar' does not remove directories
+     This is because the tar option -remove-files doesn't do so.
+     Should it be Eshell's job?
+
+Bind `standard-output' and `standard-error'
+     This would be so that if a Lisp function calls `print', everything
+     will happen as it should (albeit slowly).
+
+When an extension module fails to load, `cd /' gives a Lisp error
+
+If a globbing pattern returns one match, should it be a list?
+
+Make sure syntax table is correct in Eshell mode
+     So that `M-DEL' acts in a predictable manner, etc.
+
+Allow all Eshell buffers to share the same history and list-dir
+
+There is a problem with script commands that output to `/dev/null'
+     If a script file, somewhere in the middle, uses `> /dev/null',
+     output from all subsequent commands is swallowed.
+
+Split up parsing of text after `$' in `esh-var.el'
+     Make it similar to the way that `esh-arg.el' is structured.  Then
+     add parsing of `$[?\n]'.
+
+After pressing `M-RET', redisplay before running the next command
+
+Argument predicates and modifiers should work anywhere in a path
+          /usr/local/src/editors/vim $ vi **/CVS(/)/Root(.)
+          Invalid regexp: "Unmatched ( or \\("
+
+     With `zsh', the glob above expands to all files named `Root' in
+     directories named `CVS'.
+
+Typing `echo ${locate locate}/bin<TAB>' results in a Lisp error
+     Perhaps it should interpolate all permutations, and make that the
+     globbing result, since otherwise hitting return here will result in
+     "(list of filenames)/bin", which is never valuable.  Thus, one
+     could `cat' only C backup files by using `ls ${identity *.c}~'.
+     In that case, having an alias command name `glob' for `identity'
+     would be useful.
+
+Once symbolic mode is supported for `umask', implement `chmod' in Lisp
+
+Create `eshell-expand-file-name'
+     This would use a data table to transform things such as `~+',
+     `...', etc.
+
+Abstract `em-smart.el' into `smart-scroll.el'
+     It only really needs: to be hooked onto the output filter and the
+     pre-command hook, and to have the input-end and input-start
+     markers.  And to know whether the last output group was
+     "successful."
+
+Allow for fully persisting the state of Eshell
+     This would include: variables, history, buffer, input, dir stack,
+     etc.
+
+Implement D as an argument predicate
+     It means that files beginning with a dot should be included in the
+     glob match.
+
+A comma in a predicate list should mean OR
+     At the moment, this is not supported.
+
+Error if a glob doesn't expand due to a predicate
+     An error should be generated only if `eshell-error-if-no-glob' is
+     non-`nil'.
+
+`(+ RET SPC TAB' does not cause `indent-according-to-mode' to occur
+
+Create `eshell-auto-accumulate-list'
+     This is a list of commands for which, if the user presses `RET',
+     the text is staged as the next Eshell command, rather than being
+     sent to the current interactive process.
+
+Display file and line number if an error occurs in a script
+
+`wait' doesn't work with process ids at the moment
+
+Enable the direct-to-process input code in `em-term.el'
+
+Problem with repeating `echo ${find /tmp}'
+     With smart display active, if `RET' is held down, after a while it
+     can't keep up anymore and starts outputting blank lines.  It only
+     happens if an asynchronous process is involved...
+
+     I think the problem is that `eshell-send-input' is resetting the
+     input target location, so that if the asynchronous process is not
+     done by the time the next `RET' is received, the input processor
+     thinks that the input is meant for the process; which, when smart
+     display is enabled, will be the text of the last command line!
+     That is a bug in itself.
+
+     In holding down `RET' while an asynchronous process is running,
+     there will be a point in between termination of the process, and
+     the running of `eshell-post-command-hook', which would cause
+     `eshell-send-input' to call `eshell-copy-old-input', and then
+     process that text as a command to be run after the process.
+     Perhaps there should be a way of killing pending input between the
+     death of the process, and the `post-command-hook'.
+
+Allow for a more aggressive smart display mode
+     Perhaps toggled by a command, that makes each output block a smart
+     display block.
+
+Create more meta variables
+
+    `$!'
+          The reason for the failure of the last disk command, or the
+          text of the last Lisp error.
+
+    `$='
+          A special associate array, which can take references of the
+          form `$=[REGEXP]'.  It indexes into the directory ring.
+
+Eshell scripts can't execute in the background
+
+Support zsh's "Parameter Expansion" syntax, i.e. `${NAME:-VAL}'
+
+Write an `info' alias that can take arguments
+     So that the user can enter `info chmod', for example.
+
+Create a mode `eshell-browse'
+     It would treat the Eshell buffer as a outline.  Collapsing the
+     outline hides all of the output text.  Collapsing again would show
+     only the first command run in each directory
+
+Allow other revisions of a file to be referenced using `file{rev}'
+     This would be expanded by `eshell-expand-file-name' (see above).
+
+Print "You have new mail" when the "Mail" icon is turned on
+
+Implement `M-|' for Eshell
+
+Implement input redirection
+     If it's a Lisp function, input redirection implies `xargs' (in a
+     way...).  If input redirection is added, also update the
+     `file-name-quote-list', and the delimiter list.
+
+Allow `#<WORD ARG>' as a generic syntax
+     With the handling of _word_ specified by an `eshell-special-alist'.
+
+In `eshell-eval-using-options', allow a `:complete' tag
+     It would be used to provide completion rules for that command.
+     Then the macro will automagically define the completion function.
+
+For `eshell-command-on-region', apply redirections to the result
+     So that `+ > 'blah' would cause the result of the `+' (using input
+     from the current region) to be inserting into the symbol `blah'.
+
+     If an external command is being invoked, the input is sent as
+     standard input, as if a `cat <region> |' had been invoked.
+
+     If a Lisp command, or an alias, is invoked, then if the line has no
+     newline characters, it is divided by whitespace and passed as
+     arguments to the Lisp function.  Otherwise, it is divided at the
+     newline characters.  Thus, invoking `+' on a series of numbers
+     will add them; `min' would display the smallest figure, etc.
+
+Write `eshell-script-mode' as a minor mode
+     It would provide syntax, abbrev, highlighting and indenting
+     support like `emacs-lisp-mode' and `shell-mode'.
+
+In the history mechanism, finish the `bash'-style support
+     This means `!n', `!#', `!:%', and `!:1-' as separate from `!:1*'.
+
+Support the -n command line option for `history'
+
+Implement `fc' in Lisp
+
+Specifying a frame as a redirection target should imply the currently active window's buffer
+
+Implement `>FUNC-OR-FUNC-LIST'
+     This would allow for an "output translators", that take a function
+     to modify output with, and a target.  Devise a syntax that works
+     well with pipes, and can accommodate multiple functions (i.e.,
+     `>'(upcase regexp-quote)' or `>'upcase').
+
+Allow Eshell to read/write to/from standard input and output
+     This would be optional, rather than always using the Eshell buffer.
+     This would allow it to be run from the command line (perhaps).
+
+Write a `help' command
+     It would call subcommands with `--help', or `-h' or `/?', as
+     appropriate.
+
+Implement `stty' in Lisp
+
+Support `rc''s matching operator, e.g. `~ (LIST) REGEXP'
+
+Implement `bg' and `fg' as editors of `eshell-process-list'
+     Using `bg' on a process that is already in the background does
+     nothing.  Specifying redirection targets replaces (or adds) to the
+     list current being used.
+
+Have `jobs' print only the processes for the current shell
+
+How can Eshell learn if a background process has requested input?
+
+Support `2>&1' and `>&' and `2>' and `|&'
+     The syntax table for parsing these should be customizable, such
+     that the user could change it to use rc syntax: `>[2=1]'.
+
+Allow `$_[-1]', which would indicate the last element of the array
+
+Make `$x[*]' equal to listing out the full contents of `x'
+     Return them as a list, so that `$_[*]' is all the arguments of the
+     last command.
+
+Copy ANSI code handling from `term.el' into `em-term.el'
+     Make it possible for the user to send char-by-char to the
+     underlying process.  Ultimately, I should be able to move away
+     from using term.el altogether, since everything but the ANSI code
+     handling is already part of Eshell.  Then, things would work
+     correctly on MS-Windows as well (which doesn't have `/bin/sh',
+     although `term.el' tries to use it).
+
+Make the shell spawning commands be visual
+     That is, make (`su', `bash', `telnet', `rlogin', `rsh', etc.) be
+     part of `eshell-visual-commands'.  The only exception is if the
+     shell is being used to invoke a single command.  Then, the
+     behavior should be based on what that command is.
+
+Create a smart viewing command named `open'
+     This would search for some way to open its argument (similar to
+     opening a file in the Windows Explorer).
+
+Alias `read' to be the same as `open', only read-only
+
+Write a `tail' command which uses `view-file'
+     It would move point to the end of the buffer, and then turns on
+     auto-revert mode in that buffer at frequent intervals--and a
+     `head' alias which assumes an upper limit of
+     `eshell-maximum-line-length' characters per line.
+
+Make `dgrep' load `dired', mark everything, then invoke `dired-do-search'
+
+Write mesh.c
+     This would run Emacs with the appropriate arguments to invoke
+     Eshell only.  That way, it could be listed as a login shell.
+
+Use an intangible `PS2' string for multi-line input prompts
+
+Auto-detect when a command is visual, by checking `TERMCAP' usage
+
+The first keypress after `M-x watson' triggers `eshell-send-input'
+
+Make `/' electric
+     So that it automatically expands and corrects pathnames.  Or make
+     pathname completion for Pcomplete auto-expand `/u/i/std<TAB>' to
+     `/usr/include/std<TAB>'.
+
+Write the `pushd' stack to disk along with `last-dir-ring'
+
+Add options to `eshell/cat' which would allow it to sort and uniq
+
+Implement `wc' in Lisp
+     Add support for counting sentences, paragraphs, pages, etc.
+
+Once piping is added, implement `sort' and `uniq' in Lisp
+
+Implement `touch' in Lisp
+
+Implement `comm' in Lisp
+
+Implement an `epatch' command in Lisp
+     This would call `ediff-patch-file', or `ediff-patch-buffer',
+     depending on its argument.
+
+Have an option such that `ls -l' generates a dired buffer
+
+Write a version of `xargs' based on command rewriting
+     That is, `find X | xargs Y' would be indicated using `Y ${find
+     X}'.  Maybe `eshell-do-pipelines' could be changed to perform this
+     on-thy-fly rewriting.
+
+Write an alias for `less' that brings up a `view-mode' buffer
+     Such that the user can press <SPC> and <DEL>, and then <q> to
+     return to Eshell.  It would be equivalent to: `X > #<buffer Y>;
+     view-buffer #<buffer Y>'.
+
+Make `eshell-mode' as much a full citizen as `shell-mode'
+     Everywhere in Emacs where `shell-mode' is specially noticed, add
+     `eshell-mode' there.
+
+Permit the umask to be selectively set on a `cp' target
+
+Problem using `M-x eshell' after using `eshell-command'
+     If the first thing that I do after entering Emacs is to run
+     `eshell-command' and invoke `ls', and then use `M-x eshell', it
+     doesn't display anything.
+
+`M-RET' during a long command (using smart display) doesn't work
+     Since it keeps the cursor up where the command was invoked.
+
+
+
+File: eshell,  Node: GNU Free Documentation License,  Next: Concept Index,  Prev: Bugs and ideas,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: eshell,  Node: Concept Index,  Next: Function and Variable Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Concept Index
+*************
+
+ [index ]
+* Menu:
+
+* author, how to reach:                  Bugs and ideas.        (line 6)
+* authors:                               Contributors to Eshell.
+                                                                (line 6)
+* bugs, how to report them:              Bugs and ideas.        (line 6)
+* bugs, known:                           Known problems.        (line 6)
+* contributors:                          Contributors to Eshell.
+                                                                (line 6)
+* email to the author:                   Bugs and ideas.        (line 6)
+* Eshell, what it is:                    What is Eshell?.       (line 6)
+* FAQ:                                   Bugs and ideas.        (line 6)
+* known bugs:                            Known problems.        (line 6)
+* problems, list of common:              Bugs and ideas.        (line 6)
+* reporting bugs and ideas:              Bugs and ideas.        (line 6)
+* what is Eshell?:                       What is Eshell?.       (line 6)
+
+
+File: eshell,  Node: Function and Variable Index,  Next: Key Index,  Prev: Concept Index,  Up: Top
+
+Function and Variable Index
+***************************
+
+ [index ]
+* Menu:
+
+* $$:                                    History.              (line 19)
+* $+:                                    History.              (line  9)
+* $-:                                    History.              (line 12)
+* $?:                                    History.              (line 23)
+* $_:                                    History.              (line 16)
+* cd:                                    Built-ins.            (line 28)
+* history:                               Built-ins.            (line 48)
+* su:                                    Built-ins.            (line 63)
+* sudo:                                  Built-ins.            (line 64)
+
+
+File: eshell,  Node: Key Index,  Prev: Function and Variable Index,  Up: Top
+
+Key Index
+*********
+
+ [index ]
+* Menu:
+
+
+Tag Table:
+Node: Top990
+Node: What is Eshell?2636
+Ref: What is Eshell?-Footnote-15286
+Ref: What is Eshell?-Footnote-25376
+Node: Contributors to Eshell5569
+Node: Command basics6723
+Node: Commands verbs7279
+Node: Command arguments9043
+Node: Commands10294
+Node: Invocation10677
+Ref: Invocation-Footnote-111303
+Node: Completion11396
+Node: Aliases11512
+Node: History11619
+Node: Scripts12286
+Node: Built-ins12392
+Node: Arguments15152
+Node: The Parser15343
+Node: Variables15443
+Node: Substitution15562
+Node: Globbing15685
+Node: Predicates15801
+Node: Input/Output15900
+Node: Process control16020
+Node: Extension modules16154
+Node: Writing a module16459
+Node: Module testing16590
+Node: Directory handling16744
+Node: Key rebinding16903
+Node: Smart scrolling17053
+Node: Terminal emulation17207
+Node: Built-in UNIX commands17376
+Node: Extras and Goodies17529
+Node: Bugs and ideas17674
+Node: Known problems18269
+Node: GNU Free Documentation License33418
+Node: Concept Index58595
+Node: Function and Variable Index59775
+Node: Key Index60613
+
+End Tag Table

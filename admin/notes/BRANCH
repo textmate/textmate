@@ -1,0 +1,32 @@
+You can view the available Emacs branches at
+
+http://bzr.savannah.gnu.org/r/emacs/
+
+Development normally takes places on the trunk.
+Sometimes specialized features are developed on separate branches
+before possibly being merged to the trunk.
+
+Development is discussed on the emacs-devel mailing list.
+
+Sometime before the release of a new major version of Emacs (eg 23.2),
+a "feature freeze" is imposed on the trunk.  No new features may be
+added after this point.  This is usually some months before the release.
+
+Shortly before the release, a release branch is created, and the
+trunk is then free for development.
+For example, "emacs-23" for Emacs 23.2 and later, "EMACS_23_1_RC" for
+23.1, "EMACS_22_BASE" for 22.x, and "EMACS_21_1_RC" for 21.x.
+
+Consult emacs-devel for exactly what kinds of changes are allowed
+on what branch at any time.
+
+If you are looking at this file in a branch other than the trunk,
+there may be some branch-specific documentation below this line.
+________________________________________________________________________
+
+* elpa
+
+  This branch does not contain a copy of Emacs, but of the Emacs Lisp
+  package archive (elpa.gnu.org).  See admin/notes/elpa for further
+  explanation, and the README file in the branch for usage
+  instructions.

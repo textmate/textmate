@@ -1,0 +1,227 @@
+This is ../../info/emacs-gnutls, produced by makeinfo version 4.13 from
+emacs-gnutls.texi.
+
+This file describes the Emacs GnuTLS integration.
+
+   Copyright (C) 2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+INFO-DIR-SECTION Emacs network features
+START-INFO-DIR-ENTRY
+* GnuTLS: (emacs-gnutls).       The Emacs GnuTLS integration.
+END-INFO-DIR-ENTRY
+
+
+File: emacs-gnutls,  Node: Top,  Next: Overview,  Up: (dir)
+
+Emacs GnuTLS
+************
+
+This manual describes the Emacs GnuTLS integration.
+
+   GnuTLS is a library that establishes encrypted SSL or TLS
+connections.  Emacs supports it through the `gnutls.c' and `gnutls.h' C
+files and the `gnutls.el' Emacs Lisp library.
+
+   This file describes the Emacs GnuTLS integration.
+
+   Copyright (C) 2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+* Menu:
+
+* Overview::                    Overview of the GnuTLS integration.
+* Help For Users::
+* Help For Developers::
+* Function Index::
+* Variable Index::
+
+
+File: emacs-gnutls,  Node: Overview,  Next: Help For Users,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+The GnuTLS library is an optional add-on for Emacs.  Through it, any
+Emacs Lisp program can establish encrypted network connections that use
+"Secure Socket Layer" (SSL) and "Transport Layer Security" (TLS)
+protocols.  The process of using SSL and TLS in establishing
+connections is as automated and transparent as possible.
+
+   The user has only a few customization options currently: the log
+level, priority string, trustfile list, and the minimum number of bits
+to be used in Diffie-Hellman key exchange.  Rumors that every Emacs
+library requires at least 83 customizable variables are thus proven
+false.
+
+
+File: emacs-gnutls,  Node: Help For Users,  Next: Help For Developers,  Prev: Overview,  Up: Top
+
+2 Help For Users
+****************
+
+From the user's perspective, there's nothing to the GnuTLS integration.
+It Just Works for any Emacs Lisp code that uses `open-protocol-stream'
+or `open-network-stream' (*note Network Connections: (elisp)Network.).
+The two functions are equivalent, the first one being an alias of the
+second.
+
+   There's one way to find out if GnuTLS is available, by calling
+`gnutls-available-p'.  This is a little bit trickier on the W32
+(Windows) platform, but if you have the GnuTLS DLLs (available from
+`http://sourceforge.net/projects/ezwinports/files/' thanks to Eli
+Zaretskii) in the same directory as Emacs, you should be OK.
+
+ -- Function: gnutls-available-p
+     This function returns t if GnuTLS is available in this instance of
+     Emacs.
+
+   Oh, but sometimes things go wrong.  Budgets aren't balanced,
+television ads lie, and even TLS and SSL connections can fail to work
+properly.  Well, there's something to be done in the last case.
+
+ -- Variable: gnutls-log-level
+     The `gnutls-log-level' variable sets the log level.  1 is verbose.
+     2 is very verbose.  5 is crazy.  Crazy!  Set it to 1 or 2 and look
+     in the `*Messages*' buffer for the debugging information.
+
+ -- Variable: gnutls-algorithm-priority
+     The `gnutls-algorithm-priority' variable sets the GnuTLS priority
+     string.  This is global, not per host name (although
+     `gnutls-negotiate' supports a priority string per connection so it
+     could be done if needed).  The priority string syntax is in the
+     GnuTLS documentation
+     (http://www.gnu.org/software/gnutls/documentation.html).
+
+ -- Variable: gnutls-trustfiles
+     The `gnutls-trustfiles' variable is a list of trustfiles
+     (certificates for the issuing authorities).  This is global, not
+     per host name (although `gnutls-negotiate' supports a trustfile per
+     connection so it could be done if needed).  The trustfiles can be
+     in PEM or DER format and examples can be found in most Unix
+     distributions.  By default four locations are tried in this order:
+     `/etc/ssl/certs/ca-certificates.crt' for Debian, Ubuntu, Gentoo
+     and Arch Linux; `/etc/pki/tls/certs/ca-bundle.crt' for Fedora and
+     RHEL; `/etc/ssl/ca-bundle.pem' for Suse;
+     `/usr/ssl/certs/ca-bundle.crt' for Cygwin.  You can easily
+     customize `gnutls-trustfiles' to be something else, but let us
+     know if you do, so we can make the change to benefit the other
+     users of that platform.
+
+ -- Variable: gnutls-min-prime-bits
+     The `gnutls-min-prime-bits' variable is a pretty exotic
+     customization for cases where you want to refuse handshakes with
+     keys under a specific size.  If you don't know for sure that you
+     need it, you don't.  Leave it `nil'.
+
+
+File: emacs-gnutls,  Node: Help For Developers,  Next: Function Index,  Prev: Help For Users,  Up: Top
+
+3 Help For Developers
+*********************
+
+The GnuTLS library is detected automatically at compile time.  You
+should see that it's enabled in the `configure' output.  If not, follow
+the standard procedure for finding out why a system library is not
+picked up by the Emacs compilation.  On the W32 (Windows) platform,
+installing the DLLs with a recent build should be enough.
+
+   Just use `open-protocol-stream' or `open-network-stream' (the two
+are equivalent, the first one being an alias to the second).  You
+should not have to use the `gnutls.el' functions directly.  But you can
+test them with `open-gnutls-stream'.
+
+ -- Function: open-gnutls-stream name buffer host service
+     This function creates a buffer connected to a specific HOST and
+     SERVICE (port number or service name).  The parameters and their
+     syntax are the same as those given to `open-network-stream' (*note
+     Network Connections: (elisp)Network.).  The connection process is
+     called NAME (made unique if necessary).  This function returns the
+     connection process.
+
+          ;; open a HTTPS connection
+          (open-gnutls-stream "tls" "tls-buffer" "yourserver.com" "https")
+
+          ;; open a IMAPS connection
+          (open-gnutls-stream "tls" "tls-buffer" "imap.gmail.com" "imaps")
+
+
+   The function `gnutls-negotiate' is not generally useful and it may
+change as needed, so please see `gnutls.el' for the details.
+
+ -- Function: gnutls-negotiate spec
+     Please see `gnutls.el' for the SPEC details and for usage, but do
+     not rely on this function's interface if possible.
+
+
+File: emacs-gnutls,  Node: Function Index,  Next: Variable Index,  Prev: Help For Developers,  Up: Top
+
+4 Function Index
+****************
+
+ [index ]
+* Menu:
+
+* gnutls-available-p:                    Help For Users.       (line 19)
+* gnutls-negotiate:                      Help For Developers.  (line 36)
+* open-gnutls-stream:                    Help For Developers.  (line 18)
+
+
+File: emacs-gnutls,  Node: Variable Index,  Prev: Function Index,  Up: Top
+
+5 Variable Index
+****************
+
+ [index ]
+* Menu:
+
+* gnutls-algorithm-priority:             Help For Users.       (line 32)
+* gnutls-log-level:                      Help For Users.       (line 27)
+* gnutls-min-prime-bits:                 Help For Users.       (line 55)
+* gnutls-trustfiles:                     Help For Users.       (line 40)
+
+
+
+Tag Table:
+Node: Top1309
+Node: Overview2868
+Node: Help For Users3583
+Node: Help For Developers6433
+Node: Function Index8123
+Node: Variable Index8505
+
+End Tag Table

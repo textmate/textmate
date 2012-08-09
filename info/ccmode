@@ -1,0 +1,164 @@
+This is ../../info/ccmode, produced by makeinfo version 4.13 from
+cc-mode.texi.
+
+This manual is for CC Mode in Emacs.
+
+   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs editing modes
+START-INFO-DIR-ENTRY
+* CC Mode: (ccmode).            Emacs mode for editing C, C++, Objective-C,
+                                Java, Pike, AWK, and CORBA IDL code.
+END-INFO-DIR-ENTRY
+
+
+Indirect:
+ccmode-1: 1054
+ccmode-2: 292827
+
+Tag Table:
+(Indirect)
+Node: Top1054
+Node: Introduction4240
+Ref: Introduction-Footnote-16186
+Node: Overview6315
+Node: Getting Started8213
+Ref: Getting Started-Footnote-112344
+Node: Commands12418
+Node: Indentation Commands13249
+Ref: Indentation Commands-Footnote-119958
+Node: Comment Commands20079
+Ref: Comment Commands-Footnote-122505
+Node: Movement Commands22572
+Ref: Movement Commands-Footnote-128012
+Node: Filling and Breaking28071
+Ref: Filling and Breaking-Footnote-131484
+Ref: Filling and Breaking-Footnote-231625
+Node: Minor Modes31689
+Ref: Minor Modes-Footnote-135141
+Ref: Minor Modes-Footnote-235259
+Ref: Minor Modes-Footnote-335327
+Node: Electric Keys35395
+Node: Auto-newlines40996
+Ref: Auto-newlines-Footnote-142797
+Node: Hungry WS Deletion42998
+Ref: Hungry WS Deletion-Footnote-148501
+Ref: Hungry WS Deletion-Footnote-248637
+Node: Subword Movement48702
+Node: Other Commands50940
+Node: Font Locking53884
+Node: Font Locking Preliminaries54740
+Node: Faces58773
+Node: Doc Comments61355
+Node: AWK Mode Font Locking64179
+Node: Config Basics66602
+Ref: Config Basics-Footnote-173431
+Ref: Config Basics-Footnote-273477
+Node: CC Hooks73619
+Node: Style Variables76031
+Ref: Style Variables-Footnote-179264
+Ref: Style Variables-Footnote-279662
+Node: Styles79707
+Node: Built-in Styles81036
+Ref: Built-in Styles-Footnote-182730
+Ref: Built-in Styles-Footnote-282835
+Node: Choosing a Style82979
+Node: Adding Styles84999
+Ref: Adding Styles-Footnote-188317
+Ref: Adding Styles-Footnote-288391
+Node: Guessing the Style88617
+Node: File Styles92728
+Ref: File Styles-Footnote-194290
+Node: Custom Filling and Breaking94576
+Ref: Custom Filling and Breaking-Footnote-1101214
+Ref: Custom Filling and Breaking-Footnote-2101434
+Ref: Custom Filling and Breaking-Footnote-3101719
+Ref: Custom Filling and Breaking-Footnote-4101897
+Node: Custom Auto-newlines102163
+Node: Hanging Braces104000
+Ref: Hanging Braces-Footnote-1109401
+Ref: Hanging Braces-Footnote-2109482
+Ref: Hanging Braces-Footnote-3109629
+Node: Custom Braces109842
+Node: Hanging Colons113158
+Node: Hanging Semicolons and Commas114697
+Ref: Hanging Semicolons and Commas-Footnote-1117665
+Node: Clean-ups117716
+Ref: Clean-ups-Footnote-1124365
+Node: Indentation Engine Basics124566
+Node: Syntactic Analysis126824
+Ref: Syntactic Analysis-Footnote-1130339
+Ref: Syntactic Analysis-Footnote-2130614
+Ref: Syntactic Analysis-Footnote-3130715
+Ref: Syntactic Analysis-Footnote-4130845
+Node: Syntactic Symbols131053
+Node: Function Symbols140837
+Node: Class Symbols142003
+Ref: Class Symbols-Footnote-1146324
+Node: Conditional Construct Symbols146547
+Ref: Conditional Construct Symbols-Footnote-1148784
+Node: Switch Statement Symbols148909
+Node: Brace List Symbols149836
+Node: External Scope Symbols151492
+Ref: External Scope Symbols-Footnote-1152860
+Node: Paren List Symbols152994
+Node: Literal Symbols155074
+Node: Multiline Macro Symbols157558
+Ref: Multiline Macro Symbols-Footnote-1159114
+Node: Objective-C Method Symbols159176
+Node: Java Symbols159939
+Node: Statement Block Symbols161210
+Ref: Statement Block Symbols-Footnote-1163230
+Node: K&R Symbols163543
+Ref: K&R Symbols-Footnote-1164164
+Node: Indentation Calculation164211
+Node: Customizing Indentation167440
+Node: c-offsets-alist169032
+Ref: c-offsets-alist-Footnote-1175539
+Ref: c-offsets-alist-Footnote-2175654
+Node: Interactive Customization175977
+Ref: Interactive Customization-Footnote-1178927
+Node: Line-Up Functions179066
+Node: Brace/Paren Line-Up180863
+Ref: c-lineup-arglist-close-under-paren181928
+Ref: Brace/Paren Line-Up-Footnote-1187297
+Node: List Line-Up187437
+Node: Operator Line-Up192266
+Node: Comment Line-Up196314
+Node: Misc Line-Up199136
+Ref: Misc Line-Up-Footnote-1203695
+Node: Custom Line-Up204006
+Ref: Custom Line-Up-Footnote-1208258
+Node: Other Indentation208415
+Ref: Other Indentation-Footnote-1210416
+Node: Custom Macros210610
+Node: Macro Backslashes212060
+Node: Macros with ;213995
+Node: Odds and Ends215869
+Node: Sample .emacs File217517
+Node: Performance Issues219856
+Ref: Performance Issues-Footnote-1225340
+Ref: Performance Issues-Footnote-2225416
+Node: Limitations and Known Bugs225480
+Node: FAQ227932
+Ref: FAQ-Footnote-1230687
+Node: Updating CC Mode230755
+Node: Mailing Lists and Bug Reports231350
+Node: GNU Free Documentation License233224
+Node: Command and Function Index258429
+Node: Variable Index279069
+Node: Concept and Key Index292827
+
+End Tag Table

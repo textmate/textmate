@@ -1,0 +1,1520 @@
+This is ../../info/rcirc, produced by makeinfo version 4.13 from
+rcirc.texi.
+
+Copyright (C) 2006-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs network features
+START-INFO-DIR-ENTRY
+* Rcirc: (rcirc).               Internet Relay Chat (IRC) client.
+END-INFO-DIR-ENTRY
+
+
+File: rcirc,  Node: Top,  Next: Basics,  Prev: (dir),  Up: (dir)
+
+rcirc Manual
+************
+
+`rcirc' is an Emacs IRC client.
+
+   IRC (Internet Relay Chat) is a multi-user chat protocol.  Users
+communicate with each other in real-time.  Communication occurs both in
+topic channels which are collections of many users, or privately, with
+just one other user.
+
+   Copyright (C) 2006-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Basics::
+* Reference::
+* Fighting Information Overload::
+* Hacking and Tweaking::
+* GNU Free Documentation License::
+* Key Index::
+* Variable Index::
+* Index::
+
+ --- The Detailed Node Listing ---
+
+Basics
+
+* Internet Relay Chat::
+* Getting started with rcirc::
+
+Reference
+
+* rcirc commands::
+* Useful IRC commands::
+* Configuration::
+
+Fighting Information Overload
+
+* Channels::
+* People::
+* Keywords::
+* Notices::
+
+Hacking and Tweaking
+
+* Skipping /away messages using handlers::
+* Using fly spell mode::
+* Scrolling conservatively::
+* Changing the time stamp format::
+* Defining a new command::
+* Reconnecting after you have lost the connection::
+
+
+File: rcirc,  Node: Basics,  Next: Reference,  Prev: Top,  Up: Top
+
+1 Basics
+********
+
+This chapter contains a brief introduction to IRC (Internet Relay Chat),
+and a quick tutorial on `rcirc'.
+
+* Menu:
+
+* Internet Relay Chat::
+* Getting started with rcirc::
+
+
+File: rcirc,  Node: Internet Relay Chat,  Next: Getting started with rcirc,  Prev: Basics,  Up: Basics
+
+1.1 Internet Relay Chat
+=======================
+
+"Internet Relay Chat" (IRC) is a form of instant communication over the
+Internet.  It is mainly designed for group (many-to-many) communication
+in discussion forums called channels, but also allows one-to-one
+communication.
+
+   Contrary to most Instant Messenger (IM) systems, users usually don't
+connect to a central server.  Instead, users connect to a random server
+in a network, and servers relay messages from one to the next.
+
+   Here's a typical example:
+
+   When you connect to the Freenode network (`http://freenode.net/'),
+you point your IRC client at the server `irc.freenode.net'.  That
+server will redirect your client to a random server on the network,
+such as `zelazny.freenode.net'.
+
+   Once you're connected, you can send messages to all other users
+connected to the same network, and you can join all channels on the same
+network.  You might join the `#emacs' and the `#rcirc' channels, for
+example.  (Typically, channel names begin with a hash character.)
+
+   Once you have joined a channel, anything you type will be broadcast
+to all the other users on the same channel.
+
+   If you want to address someone specifically, for example as an
+answer to a question, it is customary to prefix the message with the
+nick followed by a colon, like this:
+
+     deego: fsbot rules!
+
+   Since this is so common, you can use <TAB> to do nick completion.
+
+
+File: rcirc,  Node: Getting started with rcirc,  Prev: Internet Relay Chat,  Up: Basics
+
+1.2 Getting started with rcirc
+==============================
+
+Use the command `M-x irc' to connect using the defaults.  *Note
+Configuration::, if you want to change the defaults.
+
+   Use `C-u M-x irc' if you don't want to use the defaults, eg. if you
+want to connect to a different network, or connect to the same network
+using a different nick.  This will prompt you for four things:
+
+IRC Server
+     What server do you want to connect to? All the servers in a
+     particular network are equivalent.  Some networks use a
+     round-robin system where a single server redirects new connections
+     to a random server in the network.  `irc.freenode.net' is such a
+     server for the Freenode network.  Freenode provides the network
+     "for the Free and Open Source Software communities, for
+     not-for-profit organizations and for related communities and
+     organizations."
+
+IRC Port
+     All network connections require a port.  Just as web servers and
+     clients use port 80 per default, IRC uses port 6667 per default.
+     You rarely have to use a different port.
+
+IRC Nick
+     Every users needs a handle on-line.  You will automatically be
+     assigned a slightly different nick if your chosen nick is already
+     in use.  If your `user-login-name' is `alex', and this nick is
+     already in use, you might for example get assigned the nick
+     `alex`'.
+
+IRC Channels
+     A space separated list of channels you want to join when
+     connecting.  You don't need to join any channels, if you just want
+     to have one-to-one conversations with friends on the same network.
+     If you're new to the Freenode network, join `#emacs', the channel
+     about all things Emacs, or join `#rcirc', the channel about
+     `rcirc'.
+
+   When you have answered these questions, `rcirc' will create a server
+buffer, which will be named something like `*irc.freenode.net*', and a
+channel buffer for each of the channels you wanted to join.
+
+   To talk in a channel, just type what you want to say in a channel
+buffer, and press <RET>.
+
+   If you want to paste multiple lines, such as source code, you can use
+`C-c C-c' to edit your message in a separate buffer.  Use `C-c C-c' to
+finish editing.  You still need to press <RET> to send it, though.
+Generally, IRC users don't like people pasting more than around four
+lines of code, so use with care.
+
+   Once you are connected to multiple channels, or once you've turned
+you attention to other buffers in Emacs, you probably want to be
+notified of any activity in channels not currently visible.  All you
+need to do is switch channel tracking on using `M-x
+rcirc-track-minor-mode'.  To make this permanent, add the following to
+your init file:
+
+     (rcirc-track-minor-mode 1)
+
+   Use `C-c C-<SPC>' to switch to these buffers.
+
+
+File: rcirc,  Node: Reference,  Next: Fighting Information Overload,  Prev: Basics,  Up: Top
+
+2 Reference
+***********
+
+This is the reference section of the manual.  It is not complete.  For
+complete listings of `rcirc' features, use Emacs built-in documentation.
+
+* Menu:
+
+* rcirc commands::
+* Useful IRC commands::
+* Configuration::
+
+
+File: rcirc,  Node: rcirc commands,  Next: Useful IRC commands,  Prev: Reference,  Up: Reference
+
+2.1 rcirc commands
+==================
+
+This is a list of commands that you may use in `rcirc'.  It is not
+complete.  For a complete listing, press `C-h m' in an `rcirc' buffer.
+
+   In addition to using regular Emacs key bindings, you can call them by
+typing them into an `rcirc' buffer.
+
+   For instance, instead of using the command `C-c C-j' to join a new
+channel, you may type this in an `rcirc' buffer, and press <RET>:
+
+     /join #emacs
+
+   This is why you cannot start a message with a slash.  You will have
+to precede the command with a space, or rewrite your message in order to
+send it to a channel.
+
+   Many commands take parameters.  IRC commands usually ignore string
+delimiters.  Neither quote nor double-quote have special meanings in
+IRC.
+
+     /nick "alex schroeder"
+
+   This will try to change your nick to `"alex'.  Usually this will
+fail because the double quote character is not a valid character for
+nicks.
+
+   These commands are case insensitive.
+
+   If a command isn't known by `rcirc', it will simply be sent along to
+the server.  There is a list of some useful commands like that in the
+next section.
+
+`C-c C-j'
+     This joins a channel such as `#rcirc' or `#emacs'.  On most
+     networks, anybody can create new channels.  If you want to talk
+     with some friends, for example, all you have to do is agree on a
+     valid channel name and join that channel.  (Also `/join #emacs'.)
+
+`C-c C-p'
+     This leaves the current channel.  You can optionally provide a
+     reason for parting.  When you kill a channel buffer, you
+     automatically part the corresponding channel.  (Also `/part you
+     are too weird!'.)
+
+`C-c C-r'
+     This changes your nick to some other name.  Your nick must be
+     unique across the network.  Most networks don't allow too many
+     nick changes in quick succession, and have restrictions on the
+     valid characters in nick names.  (Also `/nick alex-test')
+
+`C-c C-w'
+     Gives you some basic information about a nick.  This often
+     includes what other channels people are on.  (Also `/whois fsbot'.)
+
+`C-c C-q'
+     Starts a one-to-one conversation with another person on the same
+     network.  A new buffer will be created for this conversation.  It
+     works like a channel with only two members.  (Also `/query fsbot'.)
+
+`C-c <RET>'
+     This sends a single message to a nick.  Like with `C-c C-q', a new
+     buffer is created, where the response from the other party will
+     show up.  (Also `/msg nickserv identify secret'.)
+
+`C-c C-x'
+     This disconnects from the server and parts all channels.  You can
+     optionally provide a reason for quitting.  When you kill the server
+     buffer, you automatically quit the server and part all channels.
+     (Also `/quit ZZZzzz...'.)
+
+
+File: rcirc,  Node: Useful IRC commands,  Next: Configuration,  Prev: rcirc commands,  Up: Reference
+
+2.2 Useful IRC commands
+=======================
+
+As mentioned, if a command isn't known by `rcirc', it will simply be
+sent along to the server.  Some such commands are available on nearly
+all IRC servers, such as:
+
+`/away'
+     This sets your status as "being away" if you provide a reason, or
+     sets your status as "being back" if you do not.  People can use the
+     `C-c C-w' command to check your status.  Example: `/away food'.
+
+   Typical IRC servers implement many more commands.  You can read more
+about the fantastic world of IRC online at the Internet Relay Chat
+(IRC) help archive (http://www.irchelp.org/).
+
+
+File: rcirc,  Node: Configuration,  Prev: Useful IRC commands,  Up: Reference
+
+2.3 Configuration
+=================
+
+These are some variables you can change to configure `rcirc' to your
+liking.
+
+`rcirc-server-alist'
+     This variable contains an alist of servers to connect to by default
+     and the keywords parameters to use.  The keyword parameters are
+     optional.  If you don't provide any, the defaults as documented
+     below will be used.
+
+     The most important parameter is the `:channels' parameter.  It
+     controls which channels you will join by default as soon as you are
+     connected to the server.
+
+     Here's an example of how to set it:
+
+          (add-to-list 'rcirc-server-alist
+                       '("otherworlders.org"
+                         :channels ("#FUDGE" "#game-design")))
+
+     By default you will be connected to the `rcirc' support channel:
+     `#rcirc' on `irc.freenode.net'.
+
+    `:nick'
+          This overrides `rcirc-default-nick'.
+
+    `:port'
+          This overrides `rcirc-default-port'.
+
+    `:user-name'
+          This overrides `rcirc-default-user-name'.
+
+    `:full-name'
+          This overrides `rcirc-default-full-name'.
+
+    `:channels'
+          This describes which channels to join when connecting to the
+          server.  If absent, no channels will be connected to
+          automatically.
+
+
+`rcirc-default-nick'
+     This variable is used for the default nick.  It defaults to the
+     login name returned by `user-login-name'.
+
+          (setq rcirc-default-nick "kensanata")
+
+`rcirc-default-port'
+     This variable contains the default port to connect to.  It is 6667
+     by default and rarely needs changing.
+
+`rcirc-default-user-name'
+     This variable contains the default user name to report to the
+     server.  It defaults to the login name returned by
+     `user-login-name', just like `rcirc-default-nick'.
+
+`rcirc-default-full-name'
+     This variable is used to set your "real name" on IRC.  It defaults
+     to the name returned by `user-full-name'.  If you want to hide
+     your full name, you might want to set it to some pseudonym.
+
+          (setq rcirc-default-full-name "Curious Minds Want To Know")
+
+`rcirc-authinfo'
+     This variable is an alist used to automatically identify yourself
+     on networks.  Each sublist starts with a regular expression that is
+     compared to the server address you're connecting to.  The second
+     element in the list is a symbol representing the method to use,
+     followed by the arguments this method requires.
+
+     Here is an example to illustrate how you would set it:
+
+          (setq rcirc-authinfo
+                '(("freenode" nickserv "bob" "p455w0rd")
+                  ("freenode" chanserv "bob" "#bobland" "passwd99")
+                  ("bitlbee" bitlbee "robert" "sekrit")))
+
+     And here are the valid method symbols and the arguments they
+     require:
+
+    `nickserv'
+          Use this symbol if you need to identify yourself as follows
+          when connecting to a network: `/msg nickserv identify
+          secret'.  The necessary arguments are the nickname you want
+          to use this for, and the password to use.
+
+          Before you can use this method, you will have to register
+          your nick and pick a password for it.  Contact `nickserv' and
+          check out the details.  (Using `/msg nickserv help', for
+          example.)
+
+    `chanserv'
+          Use this symbol if you need to identify yourself as follows
+          if you want to join a particular channel: `/msg chanserv
+          identify #underground secret'.  The necessary arguments are
+          the nickname and channel you want to use this for, and the
+          password to use.
+
+          Before you can use this method, a channel contact must tell
+          you about the password to use.  Contact `chanserv' and check
+          out the details.  (Using `/msg chanserv help', for example.)
+
+    `bitlbee'
+          Use this symbol if you need to identify yourself in the
+          Bitlbee channel as follows: `identify secret'.  The necessary
+          arguments are the nickname you want to use this for, and the
+          password to use.
+
+          Bitlbee acts like an IRC server, but in fact it is a gateway
+          to a lot of other instant messaging services.  You can either
+          install Bitlbee locally or use a public Bitlbee server.
+          There, you need to create an account with a password.  This
+          is the nick and password you need to provide for the bitlbee
+          authentication method.
+
+          Later, you will tell Bitlbee about your accounts and
+          passwords on all the other instant messaging services, and
+          Bitlbee will log you in.  All `rcirc' needs to know, is the
+          login to your Bitlbee account.  Don't confuse the Bitlbee
+          account with all the other accounts.
+
+
+
+
+File: rcirc,  Node: Fighting Information Overload,  Next: Hacking and Tweaking,  Prev: Reference,  Up: Top
+
+3 Fighting Information Overload
+*******************************
+
+This is the section of the manual that caters to the busy person
+online.  There are support channels with several hundred people in
+them.  Trying to follow a conversation in these channels can be a
+daunting task.  This chapters tells you how `rcirc' can help.
+
+* Menu:
+
+* Channels::
+* People::
+* Keywords::
+* Notices::
+
+
+File: rcirc,  Node: Channels,  Next: People,  Prev: Fighting Information Overload,  Up: Fighting Information Overload
+
+3.1 Channels
+============
+
+Most people want a notification when something is said on a channel they
+have joined, particularly if they have been addressed directly.  There
+is a global minor mode that will do this kind of tracking for you.  All
+you need to do is switch it on using `M-x rcirc-track-minor-mode'.  To
+make this permanent, add the following to your init file:
+
+     (rcirc-track-minor-mode 1)
+
+   When other people say things in buffers that are currently buried (no
+window is showing them), the mode line will now show you the abbreviated
+channel or nick name.  Use `C-c C-<SPC>' to switch to these buffers.
+
+   If you prefer not to load `rcirc' immediately, you can delay the
+activation of this mode:
+
+     (add-hook 'rcirc-mode-hook
+               (lambda ()
+                 (rcirc-track-minor-mode 1)))
+
+   If you've joined a very active support channel, tracking activity is
+no longer useful.  The channel will be always active.  Switching to
+active channels using `C-c C-<SPC>' no longer works as expected.
+
+   The solution is to mark this channel as a low priority channel.  Use
+`C-c C-l' to make the current channel a low-priority channel.  Low
+priority channels have the modeline indicator "LowPri".  `C-c C-<SPC>'
+will not switch to low priority channels unless you use the `C-u'
+prefix.
+
+   If you prefer a channel to never show up in the modeline, then you
+have to ignore it.  Use `C-c <TAB>' to ignore the current channel.
+
+
+File: rcirc,  Node: People,  Next: Keywords,  Prev: Channels,  Up: Fighting Information Overload
+
+3.2 People
+==========
+
+The most important command available to the discerning IRC user is
+`/ignore'.  It's the big equalizer online: If people aggravate you,
+just ignore them.
+
+   This is of course a crude all-or-nothing solution.  Fear not,
+`rcirc' offers alternatives: You can "brighten" your buddies and "dim"
+certain other nicks that you don't want to ignore altogether.
+
+`/ignore'
+     This command toggles the ignore status of a nick, if you provide
+     one.  If you don't provide a nick, the command lists all the nicks
+     you are ignoring.  All messages by ignored nicks are--you guessed
+     it--ignored.  Since only "operators" can kick people from
+     channels, the ignore command is often the only way to deal with
+     some of the more obnoxious fellows online.  Example: `/ignore
+     rudybot'.
+
+`/bright'
+     This command toggles the bright status of a nick, if you provide
+     one.  If you don't provide a nick, the command lists all the
+     "brightened" nicks.  All messages by brightened nicks are--you
+     guessed it--brightened.  Use this for your friends.  Example:
+     `/bright rcy'.
+
+`/dim'
+     This command toggles the dim status of a nick, if you provide one.
+     If you don't provide a nick, the command lists all the "dimmed"
+     nicks.  All messages by dimmed nicks are--you guessed it--dimmed.
+     Use this for boring people and bots.  If you are tracking channel
+     activity, messages by dimmed nicks will not register as activity.
+     Example: `/dim fsbot'.
+
+
+File: rcirc,  Node: Keywords,  Next: Notices,  Prev: People,  Up: Fighting Information Overload
+
+3.3 Keywords
+============
+
+On a busy channel, you might want to ignore all activity (using `C-c
+<TAB>') and just watch for certain keywords.  The following command
+allows you to highlight certain keywords:
+
+`/keyword'
+     This command toggles the highlighting of a keyword, if you provide
+     one.  If you don't provide a keyword, the current keywords are
+     listed.  Example: `/keyword manual'.
+
+
+File: rcirc,  Node: Notices,  Prev: Keywords,  Up: Fighting Information Overload
+
+3.4 Notices
+===========
+
+In busy channels you might not be interested in all the joining,
+parting, quitting, and renaming that goes on.  You can omit those
+notices using `C-c C-o'.
+
+   You can control which notices get omitted via the
+`rcirc-omit-responses' variable.  Here's an example of how to omit away
+messages:
+
+     (setq rcirc-omit-responses '("JOIN" "PART" "QUIT" "NICK" "AWAY))
+
+   Notice that these messages will not be omitted if the nick in
+question has recently been active.  After all, you don't want to
+continue a conversation with somebody who just left.  That's why `rcirc'
+checks recent lines in the buffer to figure out if a nick has been
+active and only omits a message if the nick has not been active.  The
+window `rcirc' considers is controlled by the `rcirc-omit-threshold'
+variable.
+
+
+File: rcirc,  Node: Hacking and Tweaking,  Next: GNU Free Documentation License,  Prev: Fighting Information Overload,  Up: Top
+
+4 Hacking and Tweaking
+**********************
+
+Here are some examples of stuff you can do to configure `rcirc'.
+
+* Menu:
+
+* Skipping /away messages using handlers::
+* Using fly spell mode::
+* Scrolling conservatively::
+* Changing the time stamp format::
+* Defining a new command::
+* Reconnecting after you have lost the connection::
+
+
+File: rcirc,  Node: Skipping /away messages using handlers,  Next: Using fly spell mode,  Prev: Hacking and Tweaking,  Up: Hacking and Tweaking
+
+4.1 Skipping `/away' messages using handlers
+============================================
+
+The IRC protocol specifies how certain events are signaled from server
+to client.  These events have numbers and are dealt with using so-called
+handlers.  You can override existing handlers by exploiting the naming
+convention adopted for `rcirc'.
+
+   Here's how to stop `rcirc' from printing `/away' messages.  Since
+`rcirc' doesn't define a 301 handler, you don't need to require `rcirc'
+before defining the handler:
+
+     (defun rcirc-handler-301 (process cmd sender args)
+       "/away message handler.")
+
+
+File: rcirc,  Node: Using fly spell mode,  Next: Scrolling conservatively,  Prev: Skipping /away messages using handlers,  Up: Hacking and Tweaking
+
+4.2 Using fly spell mode
+========================
+
+The following code activates Fly Spell Mode for `rcirc' buffers:
+
+     (add-hook 'rcirc-mode-hook (lambda ()
+                                  (flyspell-mode 1)))
+
+   *Note Flyspell mode: (emacs)Spelling, for details.
+
+
+File: rcirc,  Node: Scrolling conservatively,  Next: Changing the time stamp format,  Prev: Using fly spell mode,  Up: Hacking and Tweaking
+
+4.3 Scrolling conservatively
+============================
+
+IRC buffers are constantly growing.  If you want to see as much as
+possible at all times, you would want the prompt at the bottom of the
+window when possible.  The following snippet uses a local value for
+`scroll-conservatively' to achieve this:
+
+     (add-hook 'rcirc-mode-hook
+               (lambda ()
+                 (set (make-local-variable 'scroll-conservatively)
+                      8192)))
+
+   *Note Scrolling conservatively: (emacs)Scrolling, for details.
+
+
+File: rcirc,  Node: Changing the time stamp format,  Next: Defining a new command,  Prev: Scrolling conservatively,  Up: Hacking and Tweaking
+
+4.4 Changing the time stamp format
+==================================
+
+`rcirc-time-format' is the format used for the time stamp.  Here's how
+to include the date in the time stamp:
+
+     (setq rcirc-time-format "%Y-%m-%d %H:%M ")
+
+
+File: rcirc,  Node: Defining a new command,  Next: Reconnecting after you have lost the connection,  Prev: Changing the time stamp format,  Up: Hacking and Tweaking
+
+4.5 Defining a new command
+==========================
+
+Here's a simple new command, `/sv'.  With it, you can boast about your
+IRC client.  It shows how you can use `defun-rcirc-command' to define
+new commands.
+
+   We're waiting for the definition of this command until `rcirc' is
+loaded because `defun-rcirc-command' is not yet available, and without
+`rcirc' loaded, the command wouldn't do us much good anyway.
+
+     (eval-after-load 'rcirc
+       '(defun-rcirc-command sv (arg)
+          "Boast about rcirc."
+          (interactive "i")
+          (rcirc-send-message process target
+                              (concat "I use " rcirc-id-string))))
+
+
+File: rcirc,  Node: Reconnecting after you have lost the connection,  Prev: Defining a new command,  Up: Hacking and Tweaking
+
+4.6 Reconnecting after you have lost the connection
+===================================================
+
+If you're chatting from a laptop, then you might be familiar with this
+problem: When your laptop falls asleep and wakes up later, your IRC
+client doesn't realize that it has been disconnected.  It takes several
+minutes until the client decides that the connection has in fact been
+lost.  The simple solution is to use `M-x rcirc'.  The problem is that
+this opens an _additional_ connection, so you'll have two copies of
+every channel buffer -- one dead and one live.
+
+   The real answer, therefore, is a `/reconnect' command:
+
+     (eval-after-load 'rcirc
+       '(defun-rcirc-command reconnect (arg)
+          "Reconnect the server process."
+          (interactive "i")
+          (unless process
+            (error "There's no process for this target"))
+          (let* ((server (car (process-contact process)))
+                 (port (process-contact process :service))
+                 (nick (rcirc-nick process))
+                 channels query-buffers)
+            (dolist (buf (buffer-list))
+              (with-current-buffer buf
+                (when (eq process (rcirc-buffer-process))
+                  (remove-hook 'change-major-mode-hook
+                               'rcirc-change-major-mode-hook)
+                  (if (rcirc-channel-p rcirc-target)
+                      (setq channels (cons rcirc-target channels))
+                    (setq query-buffers (cons buf query-buffers))))))
+            (delete-process process)
+            (rcirc-connect server port nick
+                           rcirc-default-user-name
+                           rcirc-default-full-name
+                           channels))))
+
+
+File: rcirc,  Node: GNU Free Documentation License,  Next: Key Index,  Prev: Hacking and Tweaking,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: rcirc,  Node: Key Index,  Next: Variable Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Key Index
+*********
+
+ [index ]
+* Menu:
+
+* C-c C-c:                               Getting started with rcirc.
+                                                               (line 50)
+* C-c C-j:                               rcirc commands.       (line 38)
+* C-c C-l:                               Channels.             (line 29)
+* C-c C-o:                               Notices.              (line  6)
+* C-c C-p:                               rcirc commands.       (line 44)
+* C-c C-q:                               rcirc commands.       (line 60)
+* C-c C-r:                               rcirc commands.       (line 50)
+* C-c C-SPC:                             Channels.             (line  6)
+* C-c C-w:                               rcirc commands.       (line 56)
+* C-c C-x:                               rcirc commands.       (line 70)
+* C-c RET:                               rcirc commands.       (line 65)
+* C-c TAB:                               Channels.             (line 35)
+* C-h m:                                 rcirc commands.       (line  6)
+* RET:                                   Getting started with rcirc.
+                                                               (line 47)
+* TAB:                                   Internet Relay Chat.  (line 36)
+
+
+File: rcirc,  Node: Variable Index,  Next: Index,  Prev: Key Index,  Up: Top
+
+Variable Index
+**************
+
+ [index ]
+* Menu:
+
+* rcirc-authinfo:                        Configuration.        (line 69)
+* rcirc-default-full-name:               Configuration.        (line 62)
+* rcirc-default-nick:                    Configuration.        (line 47)
+* rcirc-default-port:                    Configuration.        (line 53)
+* rcirc-default-user-name:               Configuration.        (line 57)
+* rcirc-mode-hook <1>:                   Scrolling conservatively.
+                                                               (line  6)
+* rcirc-mode-hook <2>:                   Using fly spell mode. (line  6)
+* rcirc-mode-hook:                       Channels.             (line 18)
+* rcirc-omit-responses:                  Notices.              (line 10)
+* rcirc-omit-threshold:                  Notices.              (line 16)
+* rcirc-server-alist:                    Configuration.        (line 10)
+* rcirc-time-format:                     Changing the time stamp format.
+                                                               (line  6)
+* rcirc-track-minor-mode:                Channels.             (line  6)
+* scroll-conservatively:                 Scrolling conservatively.
+                                                               (line  6)
+* user-login-name:                       Getting started with rcirc.
+                                                               (line 29)
+
+
+File: rcirc,  Node: Index,  Prev: Variable Index,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* # starts a channel name:               Internet Relay Chat. (line  22)
+* / starts a command:                    rcirc commands.      (line  17)
+* /away:                                 Useful IRC commands. (line  11)
+* /away messages:                        Skipping /away messages using handlers.
+                                                              (line   6)
+* /bright:                               People.              (line  24)
+* /dim:                                  People.              (line  31)
+* /ignore:                               People.              (line  15)
+* /join:                                 rcirc commands.      (line  38)
+* /keyword:                              Keywords.            (line  11)
+* /msg:                                  rcirc commands.      (line  65)
+* /nick:                                 rcirc commands.      (line  50)
+* /part:                                 rcirc commands.      (line  44)
+* /query:                                rcirc commands.      (line  60)
+* /quit:                                 rcirc commands.      (line  70)
+* /whois:                                rcirc commands.      (line  56)
+* 6667, default IRC port:                Getting started with rcirc.
+                                                              (line  23)
+* abbreviated channel names:             Channels.            (line   6)
+* active channel:                        Channels.            (line   6)
+* addressing other people:               Internet Relay Chat. (line  30)
+* AIM:                                   Configuration.       (line 113)
+* authentication:                        Configuration.       (line  69)
+* automatic spelling:                    Using fly spell mode.
+                                                              (line   6)
+* away notices, how to omit:             Notices.             (line  10)
+* away status:                           Useful IRC commands. (line  11)
+* bitlbee authentication:                Configuration.       (line 108)
+* brighten nicks:                        People.              (line  24)
+* buddies:                               People.              (line   6)
+* buddies, highlight:                    People.              (line  24)
+* busy channels:                         Channels.            (line  25)
+* call commands:                         rcirc commands.      (line  12)
+* case insensitive commands:             rcirc commands.      (line  31)
+* change name:                           rcirc commands.      (line  50)
+* changing nick:                         Getting started with rcirc.
+                                                              (line  28)
+* channel:                               Internet Relay Chat. (line   6)
+* channel name:                          Internet Relay Chat. (line  22)
+* channels:                              Channels.            (line   6)
+* channels other people are on:          rcirc commands.      (line  56)
+* channels, configuration:               Configuration.       (line  10)
+* channels, connecting:                  Getting started with rcirc.
+                                                              (line  35)
+* chanserv authentication:               Configuration.       (line  97)
+* command unknown:                       rcirc commands.      (line  33)
+* commands <1>:                          Useful IRC commands. (line   6)
+* commands:                              rcirc commands.      (line   6)
+* commands, defining:                    Defining a new command.
+                                                              (line   6)
+* communicating:                         Getting started with rcirc.
+                                                              (line  47)
+* completion of nicks:                   Internet Relay Chat. (line  36)
+* configuring rcirc:                     Configuration.       (line   6)
+* connecting to a server:                Getting started with rcirc.
+                                                              (line   6)
+* connection end:                        rcirc commands.      (line  70)
+* contact one person only:               rcirc commands.      (line  60)
+* date time:                             Changing the time stamp format.
+                                                              (line   6)
+* defining commands:                     Defining a new command.
+                                                              (line   6)
+* disappearing messages if starting with a slash: rcirc commands.
+                                                              (line  17)
+* disconnect:                            rcirc commands.      (line  70)
+* disconnect from a channel:             rcirc commands.      (line  44)
+* disconnecting servers, reconnecting:   Reconnecting after you have lost the connection.
+                                                              (line   6)
+* discussion, joining:                   rcirc commands.      (line  38)
+* double-quotes:                         rcirc commands.      (line  21)
+* edit message before sending:           Getting started with rcirc.
+                                                              (line  50)
+* end connection:                        rcirc commands.      (line  70)
+* fly spell:                             Using fly spell mode.
+                                                              (line   6)
+* format time stamp:                     Changing the time stamp format.
+                                                              (line   6)
+* Freenode network:                      Getting started with rcirc.
+                                                              (line  13)
+* friends:                               People.              (line   6)
+* friends, highlight:                    People.              (line  24)
+* full name:                             Configuration.       (line  62)
+* gateway to other IM services:          Configuration.       (line 113)
+* getting started:                       Getting started with rcirc.
+                                                              (line   6)
+* hacking and tweaking:                  Hacking and Tweaking.
+                                                              (line   6)
+* handlers:                              Skipping /away messages using handlers.
+                                                              (line   6)
+* help about irc:                        Useful IRC commands. (line  15)
+* hide some posts:                       People.              (line  15)
+* highlight other people:                People.              (line  24)
+* ICQ:                                   Configuration.       (line 113)
+* identification:                        Configuration.       (line  69)
+* identifying people:                    rcirc commands.      (line  56)
+* idiots online:                         People.              (line  15)
+* ignored channels:                      Channels.            (line  35)
+* ignoring other people:                 People.              (line  15)
+* information overload:                  Fighting Information Overload.
+                                                              (line   6)
+* initial channels:                      Getting started with rcirc.
+                                                              (line  35)
+* initial channels, configuration:       Configuration.       (line  10)
+* initial servers, configuration:        Configuration.       (line  10)
+* input line:                            Scrolling conservatively.
+                                                              (line   6)
+* instant messaging, comparison:         Internet Relay Chat. (line  11)
+* instant messaging, other services:     Configuration.       (line 113)
+* internet relay chat:                   Internet Relay Chat. (line   6)
+* irc:                                   Internet Relay Chat. (line   6)
+* irc command:                           Getting started with rcirc.
+                                                              (line   6)
+* irc commands:                          Useful IRC commands. (line   6)
+* irc resources:                         Useful IRC commands. (line  15)
+* Jabber:                                Configuration.       (line 113)
+* join channels:                         rcirc commands.      (line  38)
+* join notices, how to omit:             Notices.             (line   6)
+* keywords:                              Keywords.            (line   6)
+* kill channel buffer:                   rcirc commands.      (line  44)
+* kill connection:                       rcirc commands.      (line  70)
+* leave a channel:                       rcirc commands.      (line  44)
+* login:                                 Configuration.       (line  69)
+* low priority channels <1>:             Notices.             (line   6)
+* low priority channels:                 Channels.            (line  29)
+* message sending:                       rcirc commands.      (line  65)
+* messages starting with a slash disappear: rcirc commands.   (line  17)
+* messages, multiple lines:              Getting started with rcirc.
+                                                              (line  50)
+* modeline:                              Channels.            (line   6)
+* modeline tracks activity:              Channels.            (line   6)
+* MSN:                                   Configuration.       (line 113)
+* multiline messages:                    Getting started with rcirc.
+                                                              (line  50)
+* multiple words as parameters:          rcirc commands.      (line  21)
+* name changes:                          Getting started with rcirc.
+                                                              (line  28)
+* network:                               Internet Relay Chat. (line  11)
+* new command:                           rcirc commands.      (line  33)
+* new commands, defining:                Defining a new command.
+                                                              (line   6)
+* nick changing:                         rcirc commands.      (line  50)
+* nick completion:                       Internet Relay Chat. (line  36)
+* nick notices, how to omit:             Notices.             (line   6)
+* nick, connecting:                      Getting started with rcirc.
+                                                              (line  28)
+* nicks, highlight:                      People.              (line  24)
+* nicks, how to ignore:                  People.              (line   6)
+* nickserv:                              Configuration.       (line  69)
+* nickserv authentication:               Configuration.       (line  86)
+* obnoxious people online:               People.              (line  31)
+* one-to-one conversation:               rcirc commands.      (line  60)
+* other channels:                        rcirc commands.      (line  38)
+* other name:                            rcirc commands.      (line  50)
+* other people, addressing them:         Internet Relay Chat. (line  30)
+* part a channel:                        rcirc commands.      (line  44)
+* part all channels:                     rcirc commands.      (line  70)
+* part notices, how to omit:             Notices.             (line   6)
+* pasting multiple lines:                Getting started with rcirc.
+                                                              (line  50)
+* pause status:                          Useful IRC commands. (line  11)
+* people, how to ignore:                 People.              (line   6)
+* port:                                  Configuration.       (line  53)
+* port, connecting:                      Getting started with rcirc.
+                                                              (line  23)
+* private conversation:                  rcirc commands.      (line  60)
+* query a person:                        rcirc commands.      (line  60)
+* quit:                                  rcirc commands.      (line  70)
+* quit notices, how to omit:             Notices.             (line   6)
+* quotes:                                rcirc commands.      (line  21)
+* rabble online:                         People.              (line  31)
+* rcirc commands:                        rcirc commands.      (line   6)
+* real name:                             Configuration.       (line  62)
+* reason for quitting:                   rcirc commands.      (line  70)
+* reconnecting:                          Reconnecting after you have lost the connection.
+                                                              (line   6)
+* redirection to random servers:         Internet Relay Chat. (line  17)
+* reference:                             Reference.           (line   6)
+* rename yourself:                       rcirc commands.      (line  50)
+* rooms, joining:                        rcirc commands.      (line  38)
+* scrolling:                             Scrolling conservatively.
+                                                              (line   6)
+* server:                                Internet Relay Chat. (line  11)
+* server buffer:                         Getting started with rcirc.
+                                                              (line  43)
+* server buffer killing:                 rcirc commands.      (line  70)
+* server, connecting:                    Getting started with rcirc.
+                                                              (line  13)
+* servers, configuration:                Configuration.       (line  10)
+* set away status:                       Useful IRC commands. (line  11)
+* single message:                        rcirc commands.      (line  65)
+* slash hides message:                   rcirc commands.      (line  17)
+* soft-ignore other people:              People.              (line  31)
+* spell-checking as you type:            Using fly spell mode.
+                                                              (line   6)
+* spelling:                              Using fly spell mode.
+                                                              (line   6)
+* starting a private conversation:       rcirc commands.      (line  60)
+* startup channels:                      Getting started with rcirc.
+                                                              (line  35)
+* startup channels, configuration:       Configuration.       (line  10)
+* startup servers, configuration:        Configuration.       (line  10)
+* status codes:                          Skipping /away messages using handlers.
+                                                              (line   6)
+* stop talking on a channel:             rcirc commands.      (line  44)
+* string delimiters:                     rcirc commands.      (line  21)
+* surname:                               Configuration.       (line  62)
+* switching channels:                    Channels.            (line   6)
+* talk privately:                        rcirc commands.      (line  60)
+* talk to other people:                  Internet Relay Chat. (line  30)
+* talking:                               Getting started with rcirc.
+                                                              (line  47)
+* time stamp:                            Changing the time stamp format.
+                                                              (line   6)
+* tracking activity:                     Channels.            (line   6)
+* trolls:                                People.              (line   6)
+* trolls, ignoring:                      People.              (line  15)
+* typing commands:                       rcirc commands.      (line  12)
+* unavailable status:                    Useful IRC commands. (line  11)
+* unknown command:                       rcirc commands.      (line  33)
+* user name:                             Configuration.       (line  57)
+* what channels people are on:           rcirc commands.      (line  56)
+* who are these people:                  rcirc commands.      (line  56)
+* Yahoo!:                                Configuration.       (line 113)
+
+
+
+Tag Table:
+Node: Top934
+Node: Basics2666
+Node: Internet Relay Chat2927
+Node: Getting started with rcirc4443
+Node: Reference7320
+Node: rcirc commands7657
+Node: Useful IRC commands10519
+Node: Configuration11246
+Node: Fighting Information Overload16142
+Node: Channels16637
+Node: People18208
+Node: Keywords19814
+Node: Notices20314
+Node: Hacking and Tweaking21207
+Node: Skipping /away messages using handlers21672
+Node: Using fly spell mode22419
+Node: Scrolling conservatively22840
+Node: Changing the time stamp format23512
+Node: Defining a new command23888
+Node: Reconnecting after you have lost the connection24708
+Node: GNU Free Documentation License26568
+Node: Key Index51746
+Node: Variable Index53127
+Node: Index54631
+
+End Tag Table

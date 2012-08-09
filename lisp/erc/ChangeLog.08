@@ -1,0 +1,429 @@
+2008-11-19  Andy Stewart  <lazycat.manatee@gmail.com>
+
+	* erc.el (erc-header-line-uses-tabbar-p): New option that makes
+	tabbar mode usable with ERC if set to non-nil.
+	(erc-update-mode-line-buffer): Use it.
+
+2008-11-19  Glenn Morris  <rgm@gnu.org>
+
+	* erc-compat.el (help-function-arglist): Autoload it.
+
+2008-10-03  Michael Olson  <mwolson@gnu.org>
+
+	* erc-dcc.el (english): Increase size heading by two places.
+	(erc-dcc-byte-count): Move higher.
+	(erc-dcc-do-LIST-command): Use erc-dcc-byte-count to get accurate
+	count.  Coerce byte total to floating point before performing
+	computation, otherwise division will truncate to 0.
+	(erc-dcc-append-contents): Update erc-dcc-byte-count.
+	(erc-dcc-get-filter): Don't update erc-dcc-byte-count, because
+	that will give incorrect size totals.  Instead, figure out how
+	much we have by summing byte count and current buffer size.
+	(erc-dcc-get-sentinel): Don't update erc-dcc-byte-count.
+
+2008-10-01  Michael Olson  <mwolson@gnu.org>
+
+	* erc-dcc.el (erc-pack-int): Make sure returned string is within 4
+	bytes.  Always return a 4-byte string, so that we conform to the
+	CTCP spec.
+	(erc-most-positive-int-bytes): New constant representing the
+	number of bytes that most-positive-fixnum can be stored in.
+	(erc-most-positive-int-msb): New constant representing the
+	contents of the most significant byte of most-positive-fixnum.
+	(erc-unpack-int): Make sure that the integer we get back can be
+	represented in Emacs.
+	(erc-dcc-do-CLOSE-command): Update docstring.  Don't use the line
+	variable.  Try to disambiguate between type and nick when only one
+	is provided.  Validate both type and nick arguments.  Allow
+	matching by just nick.
+	(erc-dcc-append-contents): Set inhibit-read-only to t.  Prevent
+	auto-compression from triggering when we write the contents to a
+	file.
+	(erc-dcc-get-file): Prevent auto-compression from triggering when
+	we truncate a file.
+
+2008-07-27  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* erc.el: Remove code for Carbon.
+
+2008-06-07  Glenn Morris  <rgm@gnu.org>
+
+	* erc/erc-autoaway.el, erc/erc-ibuffer.el, erc/erc-menu.el:
+	* erc/erc-stamp.el, erc/erc.el: Remove unnecessary eval-when-compiles.
+
+2008-05-30  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-backend.el (328): New response handler.
+
+	* erc.el (english): Add 328 to catalog.
+
+2008-05-29  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-services.el (erc-nickserv-alist): Update REGEXP and
+	SUCCESS-REGEXP for freenode.
+
+2008-05-05  Juanma Barranquero  <lekktu@gmail.com>
+
+	* erc-goodies.el (erc-noncommands-list, noncommands)
+	(erc-control-characters, erc-interpret-controls-p)
+	(erc-interpret-mirc-color): Fix typos in docstrings.
+	(erc-controls-highlight): Reflow docstring.
+
+2008-04-26  Johan Bockgård  <bojohan@gnu.org>
+
+	* erc.el (erc-put-text-properties): Don't use mapcar*.
+	(erc-display-line-1): Fix argument order in call to
+	erc-put-text-properties.
+
+2008-04-14  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-remove-text-properties-region): Disable this command
+	by default.  Thanks to e1f for the suggestion.
+
+2008-02-20  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-notice-face): Fix this face for Emacs 21 users.
+
+2008-02-05  Juanma Barranquero  <lekktu@gmail.com>
+
+	* erc.el (erc-valid-nick-regexp):
+	* erc-button.el (erc-button-syntax-table):
+	* erc-match.el (erc-match-syntax-table): Replace `legal' with `valid'.
+
+2008-02-04  Jeremy Maitin-Shepard  <jbms@cmu.edu>
+
+	* erc.el (erc-cmd-QUERY): Bind the value of `erc-auto-query' to
+	`erc-query-display' rather than `erc-join-buffer'.  This fixes a
+	bug where the value of erc-auto-query was being ignored.
+
+2008-01-31  Michael Olson  <mwolson@gnu.org>
+
+	* erc-dcc.el (erc-dcc-do-GET-command, erc-dcc-do-SEND-command):
+	Improve docstring.  If FILE argument is split into multiple
+	arguments, re-join them into a single string, separated by a
+	space.  This fixes an issue where the user wants to send or
+	receive a file with spaces in its name.  It is assumed that no one
+	will try sending or receiving a file with multiple consecutive
+	spaces in its name, otherwise this fix will fail.
+
+	* erc.el (erc-mode-map): Add binding for C-c C-x to
+	erc-quit-server, since rcirc.el binds its quit command in a
+	similar manner.  Thanks to Jari Aalto for the suggestion.
+
+2008-01-28  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-list-old.el (list-old): Define module as list-old, not list.
+	This fixes a bug where an unknown module error would occur when
+	starting ERC and using the list-old module.
+
+	* erc-track.el (erc-track-find-face): If no choice was found
+	return nil to use the default mode-line faces.
+
+2008-01-26  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-version-string): Release ERC 5.3.
+
+	* Makefile (VERSION): Update.
+	(EXTRAS): Remove erc-list.el after all, because this is mainly for
+	users of the version that comes with Emacs, and they will have
+	erc-list.el by Emacs 23.
+	(MISC): Add ChangeLog.07.
+	(elpa): Fix build issue.  Add proper version to erc-pkg.el.
+
+	* README.extras: Mention Emacs 23.
+
+	* erc-pkg.el: Make the version string a template.
+
+	* erc.texi (Obtaining ERC): Update extras URLs for 5.3.
+	(Development): Write instructions for git, and remove those for Arch.
+	(History): Mention the switch to git.
+
+2008-01-25  Michael Olson  <mwolson@gnu.org>
+
+	* NEWS: Update.
+
+	* erc-goodies.el (keep-place): New module which keeps your place
+	in unvisited ERC buffers when new messages arrive.  This is mostly
+	taken from Johan Bockgård's init file.
+	(erc-noncommands-list): Move to correct place.
+
+	* erc-networks.el: Add a module definition.
+
+	* erc-services.el (erc-nickserv-identify-mode): Force-enable the
+	networks module, because we need it to set erc-network for us.
+
+	* erc-track.el (erc-track-faces-normal-list): Indicate in the
+	docstring that this variable can be set to nil.
+
+	* erc.el: On second thought, don't load erc-networks.  Just enable
+	the networks module by default.
+	(erc-modules): Add option for keep-place and networks.  Enable
+	networks by default.
+	(erc-version-string): Make release candidate 1 available.
+
+2008-01-24  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el: Load erc-networks.el so that functions get access to the
+	`erc-network-name' function.
+
+	* erc-track.el (erc-track-faces-normal-list): Add
+	erc-dangerous-host-face.
+	(erc-track-exclude-types): Add 333 and 353 to the default list of
+	things to ignore, and explain what they are in the docstring.
+
+2008-01-23  Michael Olson  <mwolson@gnu.org>
+
+	* erc-track.el (erc-track-faces-priority-list): Move
+	erc-nick-default-face higher, so that it can be used for the
+	activity indication effect.  Add erc-current-nick-face,
+	erc-pal-face, erc-dangerous-host-face, and erc-fool-face by
+	themselves.
+	(erc-track-faces-normal-list): New option that contains a list of
+	faces to consider "normal".
+	(erc-track-position-in-mode-line): Minor docfix.
+	(erc-track-find-face): Use erc-track-faces-normal-list to produce
+	a sort of blinking activity effect.
+
+2008-01-22  Michael Olson  <mwolson@gnu.org>
+
+	* erc-button.el (erc-button-add-nickname-buttons): When in a
+	channel buffer, only look at nicks from the current channel.
+	Thanks to e1f for the report.
+
+2008-01-21  Michael Olson  <mwolson@gnu.org>
+
+	* erc-compat.el (erc-const-expr-p, erc-list*, erc-assert): Remove,
+	since we can use the default `assert' function without it causing
+	us any problems, even in Emacs 21.  Thanks to bojohan for the
+	suggestion.
+
+	* erc-goodies.el (move-to-prompt): Use the "XEmacs" method
+	instead, because the [remap ...] method interferes with
+	delete-selection-mode.
+	(erc-move-to-prompt): Rename from erc-move-to-prompt-xemacs.
+	Deactivate mark and call push-mark before moving point.  Thanks to
+	bojohan for the suggestion.
+	(erc-move-to-prompt-setup): Rename from
+	erc-move-to-prompt-init-xemacs.
+
+	* erc-track.el (erc-track-faces-priority-list): Replace erc-button
+	with '(erc-button erc-default-face) so that we only care about
+	buttons that are part of normal text.  Adjust customization type
+	to handle this case.  Make erc-nick-default-face a list.  Handle
+	pals, fools, current nick, and dangerous hosts.
+	(erc-track-find-face): Simplify.  Adapt for list of faces case.
+	(erc-faces-in): Don't deflate lists of faces.  Add them as-is.
+	(erc-track-face-priority): Use equal instead of eq.
+
+2008-01-20  Michael Olson  <mwolson@gnu.org>
+
+	* erc-goodies.el (erc-move-to-prompt, erc-move-to-prompt-xemacs):
+	Fix off-by-one error that caused the point to move when placed at
+	the beginning of some already-typed text.  Thanks to e1f for the
+	report.
+
+	* erc-dcc.el, erc-xdcc.el: Add simple module definitions.
+
+	* erc.el (erc-modules): Add dcc and xdcc.
+
+2008-01-19  Michael Olson  <mwolson@gnu.org>
+
+	* erc-bbdb.el (erc-bbdb-insinuate-and-show-entry): Work around bug
+	in XEmacs 21.4 that throws an error when the first argument to
+	run-at-time is nil.
+
+	* erc-button.el (button): Undo XEmacs-specific change to all ERC
+	buffers when module is removed.
+	(erc-button-setup): Rename from erc-button-add-keys, and move
+	XEmacs-specific stuff here.
+
+	* erc-goodies.el (erc-unmorse): Improve regexp for detecting
+	morse.  Deal with the morse style that has "/ " at the end of
+	every letter.
+	(erc-imenu-setup): New function that sets up Imenu support.  Add
+	it instead of a lambda form to erc-mode-hook.
+	(scrolltobottom): Remove erc-scroll-to-bottom from all ERC buffers
+	when module is removed.  Activate the functionality in all ERC
+	buffers when the module is activated, rather than leaving it up to
+	the user.
+	(move-to-prompt): New module that moves to the ERC prompt if a
+	user tries to type elsewhere in the buffer, and then inserts their
+	keystrokes there.  This is mostly taken from Johan Bockgård's init
+	file.
+	(erc-move-to-prompt): New function that implements this.
+	(erc-move-to-prompt-xemacs): New function that implements this for
+	XEmacs.
+	(erc-move-to-prompt-init-xemacs): New function to perform the
+	extra initialization step needed for XEmacs.
+
+	* erc-page.el, erc-replace.el: Fix header and footer.
+
+	* erc-track.el (erc-track-minor-mode-maybe): Take an optional
+	buffer arg so that we can put this in erc-connect-pre-hook.  If
+	given this argument, include it in the check to determine whether
+	to activate erc-track-minor-mode.
+	(track): Add erc-track-minor-mode-maybe to erc-connect-pre-hook,
+	so that we can use it as soon as a connection is attempted.
+
+	* erc.el (erc-format-network, erc-format-target-and/or-network):
+	Use erc-network-name function instead, and check to see whether
+	that function is bound.  This fixes an error in process filter for
+	people who did not have erc-services or erc-networks loaded.
+	(erc-modules): Add move-to-prompt module and enable it by
+	default.  Thanks to e1f for the suggestion.
+
+2008-01-18  Michael Olson  <mwolson@gnu.org>
+
+	* Makefile (EXTRAS): Include erc-list-old.el.
+
+	* erc-dcc.el (erc-dcc-verbose): Rename from erc-verbose-dcc.
+	(erc-pack-int): Rewrite to not depend on a count argument.
+	(erc-unpack-int): Rewrite to remove 4-character limitation.
+	(erc-dcc-server): Call set-process-coding-system and
+	set-process-filter-multibyte so that the contents get sent out
+	without modification.
+	(erc-dcc-send-filter): Don't take a substring -- just pass the
+	whole string to erc-unpack-int.
+	(erc-dcc-receive-cache): New option that indicates the number of
+	bytes to let the receive buffer grow before flushing it.
+	(erc-dcc-file-name): New buffer-local variable to keep track of
+	the filename of the currently-received file.
+	(erc-dcc-get-file): Disable undo for a speed increase.  Set
+	erc-dcc-file-name.  Truncate the file before writing to it.
+	(erc-dcc-append-contents): New function to append the contents of
+	a buffer to a file and then erase the contents of the buffer.
+	(erc-dcc-get-filter): Flush buffer contents after exceeding
+	erc-dcc-receive-cache.  This allows large files to be downloaded
+	without storing the whole thing in memory.
+	(erc-dcc-get-sentinel): Flush any remaining contents before
+	closing.  No need to save buffer.
+	(erc-dcc-listen-host): New option that determines which IP address
+	to listen on.
+	(erc-dcc-public-host): New option that determines which IP address
+	to advertise when sending a file.  This is useful for people who
+	are on a local subnet.  Together, these two options replace
+	erc-dcc-host.
+
+	* erc.el (erc-mode-line-format): Add %N and %S.  %N is the name of
+	the network, and %S is much like %s but with the network name
+	trumping the server name.  Default to "%S %a".  Thanks to e1f for
+	the suggestion.
+	(erc-format-network): New function that formats the network name.
+	(erc-format-target-and/or-network): New function that formats both
+	the network name and target, falling back on the server name if
+	the network name is not available.
+	(erc-update-mode-line-buffer): Add the new format spec items.
+
+2008-01-17  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-join-buffer): Improve documentation.
+	(erc-query-display): New option indicating how to display a query
+	buffer that is made by using the /QUERY command.  The default is
+	to display the query in a new window.
+	(erc-cmd-QUERY): Use it.  Improve docstring.
+	(erc-auto-query): Default this to 'window-noselect instead,
+	because I've already seen bug reports about new users thinking
+	that ERC didn't display their test messages.  Improve
+	customization type.
+	(erc-notice-face): Make this work with XEmacs.
+	(erc-join-buffer): Mention 'buffer in docstring.  Improve
+	customization type.
+
+	* erc-dcc.el (erc-dcc-send-sentinel): Better handle case where elt
+	is nil, in order to avoid an error.  Thanks to Brent Goodrick for
+	the initial patch.
+	(erc-dcc-display-send): New function split from erc-dcc-send-hook.
+	(erc-dcc-send-connect-hook): Use it -- we don't like lambda forms
+	in hooks.
+	(erc-dcc-send-filter): Display byte count if the client confirmed
+	too much, and kill the buffer.  Otherwise a DoS might be possible
+	by making Emacs run out of RAM.
+
+	* erc-backend.el (erc-server-connect): Detect early on whether the
+	connection attempt has failed in order to avoid confusing error
+	messages.
+
+	* erc-networks.el (erc-server-alist): Add Rizon network.
+
+	* erc-services.el (erc-nickserv-passwords): Add Rizon to options.
+	(erc-nickserv-alist): Add support for Rizon.
+
+	* erc-track.el (erc-track-find-face): Don't let buttons in notices
+	trump default text.  Use catch/throw.  Default to first element of
+	FACES is nothing is found.
+
+	* erc-xdcc.el: Add local variables for proper indentation setup.
+
+2008-01-15  Michael Olson  <mwolson@gnu.org>
+
+	* erc-backend.el (erc-server-coding-system): Docfix.
+	(erc-coding-system-for-target): Pass the `target' argument along
+	as the first and only argument.  It's not good to just depend on a
+	dynamic binding.
+
+2008-01-10  Michael Olson  <mwolson@gnu.org>
+
+	* erc-backend.el (321, 322): Split message-displaying parts into
+	new functions, which are added to each response's respective
+	hook.  This makes them easier to disable.
+
+	* erc-list.el: New file from Tom Tromey.  Use erc-propertize
+	instead of propertize.  Require 'erc.
+	(list): New module definition.  Remove message-displaying
+	functions for 321 and 322 response handlers when enabling the
+	module, and restore them when disabling.  As a sanity check,
+	remove the erc-list-handle-322 function when disabling the module.
+	(erc-list-handle-322): Handle the case where we run the LIST
+	command, but do not go through the normal steps.
+	(erc-cmd-LIST): Add docstring.  Strip initial space from line if
+	it is non-nil.  Use make-local-variable to silence compiler
+	warning.  Capture current buffer and pass it to
+	erc-list-install-322-handler.
+	(erc-list-install-322-handler): Take server-buffer argument, so
+	that we are certain of being in the right buffer.  Use 4th
+	argument to add-hook, so that erc-server-322-functions is only
+	modified in one buffer.
+
+	* erc-list-old.el: Renamed from old erc-list.el.
+
+	* erc.el (erc-modules): Add list-old.
+	(erc-set-topic): Handle case where there are no newlines in the
+	existing topic, which happens when /LIST is run.
+	(erc-notice-face): If we have less than 88 colors, make this
+	blue.  Otherwise the text will be pink in a tty, which looks
+	dreadful.  Thanks to e1f for the report.
+	(erc-remove-parsed-property): New option that determines whether
+	to remove the erc-parsed property after displaying a message.
+	This should have the effect of making ERC take up less memory.
+	(erc-display-line-1): Use it.
+
+2008-01-04  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* erc-ibuffer.el (erc-channel-modes):
+	Pass mode-name through format-mode-line
+
+
+See ChangeLog.07 for earlier changes.
+
+	Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;; Local Variables:
+;; coding: utf-8
+;; add-log-time-zone-rule: t
+;; End:
+

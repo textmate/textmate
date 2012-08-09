@@ -1,0 +1,1063 @@
+\input texinfo
+@c %**start of header
+@setfilename ../../info/erc
+@settitle ERC Manual
+@syncodeindex fn cp
+@c %**end of header
+
+@copying
+This manual is for ERC version 5.3.
+
+Copyright @copyright{} 2005-2012
+Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+
+All Emacs Lisp code contained in this document may be used, distributed,
+and modified without restriction.
+@end quotation
+@end copying
+
+@dircategory Emacs network features
+@direntry
+* ERC: (erc).                   Powerful and extensible IRC client for Emacs.
+@end direntry
+
+@titlepage
+@title ERC manual
+@subtitle a full-featured IRC client
+@subtitle for Emacs and XEmacs
+
+@c The following two commands
+@c start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+@top ERC
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::                What is ERC?
+* Obtaining ERC::               How to get ERC releases and development
+                                  versions.
+* Installation::                Compiling and installing ERC.
+* Getting Started::             Quick Start guide to using ERC.
+* Keystroke Summary::           Keystrokes used in ERC buffers.
+* Modules::                     Available modules for ERC.
+* Advanced Usage::              Cool ways of using ERC.
+* Getting Help and Reporting Bugs::  
+* History::                     The history of ERC.
+* Copying::                     The GNU General Public License gives you
+                                  permission to redistribute ERC on
+                                  certain terms; it also explains that
+                                  there is no warranty.
+* GNU Free Documentation License::  The license for this documentation.
+* Concept Index::               Search for terms.
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Obtaining ERC
+
+* Releases::                    Released versions of ERC.
+* Development::                 Latest unreleased development changes.
+
+Getting Started
+
+* Sample Session::              Example of connecting to the #emacs channel
+* Special Features::            Differences from standalone IRC clients
+
+Advanced Usage
+
+* Connecting::                  Ways of connecting to an IRC server.
+* Sample Configuration::        An example configuration file.
+* Options::                     Options that are available for ERC.
+
+@end detailmenu
+@end menu
+
+@node Introduction, Obtaining ERC, Top, Top
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+ERC is a powerful, modular, and extensible IRC client for Emacs.
+
+It comes with the following capabilities enabled by default.
+
+@itemize @bullet
+@item Flood control
+@item Timestamps
+@item Join channels automatically
+@item Buttonize URLs, nicknames, and other text
+@item Wrap long lines
+@item Highlight or remove IRC control characters
+@item Highlight pals, fools, and other keywords
+@item Detect netsplits
+@item Complete nicknames and commands in a programmable fashion
+@item Make displayed lines read-only
+@item Input history
+@item Track channel activity in the mode-line
+
+@end itemize
+
+@node Obtaining ERC, Installation, Introduction, Top
+@comment  node-name,  next,  previous,  up
+@chapter Obtaining ERC
+
+@menu
+* Releases::                    Released versions of ERC.
+* Development::                 Latest unreleased development changes.
+@end menu
+
+Note that some ERC files are not included with Emacs due to copyright or
+dependency issues.  If desired, they may be found at the following
+locations, or from your local GNU mirror.
+
+@itemize @bullet
+@item @uref{http://ftp.gnu.org/gnu/erc/erc-5.3-extras.tar.gz}
+@item @uref{http://ftp.gnu.org/gnu/erc/erc-5.3-extras.zip}
+@end itemize
+
+The rest of this chapter may be skipped if you are using the version of
+ERC that comes with Emacs.
+
+@node Releases, Development, Obtaining ERC, Obtaining ERC
+@comment  node-name,  next,  previous,  up
+@section Releases
+
+Choose to install a release if you want to minimize risk.
+
+Errors are corrected in development first.  User-visible changes will be
+announced on the @email{erc-discuss@@gnu.org} mailing list.
+@pxref{Getting Help and Reporting Bugs}.
+
+@cindex releases, Debian package
+@cindex Debian package for ERC
+Debian users can get ERC via apt-get.  The @file{erc} package is
+available in the official Debian repository.
+
+@cindex releases, from source
+Alternatively, you can download the latest release from
+@uref{http://ftp.gnu.org/gnu/erc}, or your local GNU mirror.
+
+@node Development,  , Releases, Obtaining ERC
+@comment  node-name,  next,  previous,  up
+@section Development
+@cindex development
+
+Choose the development version if you want to live on the bleeding edge
+of ERC development or try out new features before release.
+
+@cindex git version control system, using
+The git version control system allows you to keep up-to-date with the
+latest changes to the development version of ERC.  It also allows you
+to contribute changes (via commits, if you are have developer access to
+the repository, or via patches, otherwise).  If you would like to
+contribute to ERC development, it is highly recommended that you use
+git.
+
+If you are new to git, you might find this tutorial helpful:
+@uref{http://www.kernel.org/pub/software/scm/git/docs/gittutorial.html}.
+
+Downloading ERC with git and staying up-to-date involves the following
+steps.
+
+@enumerate
+@item Install git.
+
+@itemize @bullet
+@item Debian and Ubuntu: @kbd{apt-get install git-core}.
+@item Windows: @uref{http://git.or.cz/gitwiki/WindowsInstall}.
+@item Other operating systems: download, compile, and install the source
+from @uref{http://www.kernel.org/pub/software/scm/git/}, or find a git
+package for your operating system.
+@end itemize
+
+@item Download the ERC development branch.
+
+If you have developer access to ERC, do:
+
+@example
+git clone ssh://loginname@@git.sv.gnu.org/srv/git/erc.git
+@end example
+
+otherwise, do:
+
+@example
+git clone git://git.sv.gnu.org/erc.git
+@end example
+
+If you are behind a restrictive firewall, and do not have developer
+access, then do the following instead:
+
+@example
+git clone http://git.sv.gnu.org/r/erc.git
+@end example
+
+@item List upstream changes that are missing from your local copy.
+Do this whenever you want to see whether new changes have been committed
+to ERC.  If you wish, you may skip this step and proceed directly to
+the ``update'' step.
+
+@example
+# Change to the source directory you are interested in.
+cd erc
+
+# Fetch new changes from the repository, but don't apply them yet
+git fetch origin
+
+# Display log messages for the new changes
+git log HEAD..origin
+@end example
+
+``origin'' is git's name for the location where you originally got ERC
+from.  You can change this location at any time by editing the
+@file{.git/config} file in the directory where the ERC source was
+placed.
+
+@cindex updating ERC with git
+@item Update to the latest version by pulling in any missing changes.
+
+@example
+cd erc
+git pull origin
+@end example
+
+git will show how many files changed, and will provide a visual display
+for how many lines were changed in each file.
+
+@end enumerate
+
+There are other ways to interact with the ERC repository.
+
+@itemize
+@item Browse git repo: @uref{http://git.sv.gnu.org/gitweb/?p=erc.git}
+@item Latest development snapshot: @uref{http://mwolson.org/static/dist/erc-latest.tar.gz}
+@item Latest development snapshot (zip file): @uref{http://mwolson.org/static/dist/erc-latest.zip}
+@end itemize
+
+The latest development snapshot can lag behind the git repo by as much
+as 20 minutes, but never more than that.
+
+For further information on committing changes to ERC and performing
+development, please consult
+@uref{http://emacswiki.org/cgi-bin/wiki/ErcDevelopment}.
+
+
+@node Installation, Getting Started, Obtaining ERC, Top
+@comment  node-name,  next,  previous,  up
+@chapter Installation
+
+ERC may be compiled and installed on your machine.
+
+This section may be skipped if you are using the version of ERC that
+comes with Emacs.
+
+@subsubheading Compilation
+
+This is an optional step, since Emacs Lisp source code does not
+necessarily have to be byte-compiled.  It will yield a speed increase,
+though.
+
+A working copy of Emacs or XEmacs is needed in order to compile ERC.  By
+default, the program that is installed with the name @command{emacs}
+will be used.
+
+If you want to use the @command{xemacs} binary to perform the
+compilation, you would need to edit @file{Makefile} in the top-level
+directory as follows.  You can put either a full path to an Emacs or
+XEmacs binary or just the command name, as long as it is in the
+@env{PATH}.
+
+@example
+EMACS    = xemacs
+SITEFLAG = -no-site-file
+@end example
+
+Running @code{make} should compile the ERC source files in the
+@file{lisp} directory.
+
+@subsubheading Installation
+
+ERC may be installed into your file hierarchy by doing the following.
+
+Edit the @file{Makefile} file so that @env{ELISPDIR} points to where you
+want the source and compiled ERC files to be installed and
+@env{INFODIR} indicates where to put the ERC manual.  Of course, you
+will want to edit @env{EMACS} and @env{SITEFLAG} as shown in the
+Compilation section if you are using XEmacs.
+
+If you are installing ERC on a Debian system, you might want to change
+the value of @env{INSTALLINFO} as specified in @file{Makefile}.
+
+Run @code{make} as a normal user.
+
+Run @code{make install} as the root user if you have chosen installation
+locations that require this.
+
+
+@node Getting Started, Keystroke Summary, Installation, Top
+@comment  node-name,  next,  previous,  up
+@chapter Getting Started
+@cindex settings
+
+To use ERC, add the directory containing its files to your
+@code{load-path} variable, in your @file{.emacs} file.  Then, load ERC
+itself.  An example follows.
+
+@lisp
+(require 'erc)
+@end lisp
+
+Once ERC is loaded, the command @kbd{M-x erc} will start ERC and
+prompt for the server to connect to.
+
+If you want to place ERC settings in their own file, you can place them
+in @file{~/.emacs.d/.ercrc.el}, creating it if necessary.
+
+If you would rather use the Customize interface to change how ERC works,
+do @kbd{M-x customize-group RET erc RET}.  In particular, ERC comes with
+lots of modules that may be enabled or disabled; to select which ones
+you want, do @kbd{M-x customize-variable RET erc-modules RET}.
+
+@menu
+* Sample Session::              Example of connecting to the #emacs channel
+* Special Features::            Differences from standalone IRC clients
+@end menu
+
+@node Sample Session, Special Features, Getting Started, Getting Started
+@comment  node-name,  next,  previous,  up
+@section Sample Session
+
+This is an example ERC session which shows how to connect to the #emacs
+channel on Freenode.  Another IRC channel on Freenode that may be of
+interest is #erc, which is a channel where ERC users and developers hang
+out.
+
+@itemize @bullet
+
+@item Connect to Freenode
+
+Run @kbd{M-x erc}.  Use ``irc.freenode.net'' as the IRC server, ``6667''
+as the port, and choose a nickname.
+
+@item Get used to the interface
+
+Switch to the ``irc.freenode.net:6667'' buffer, if you're not already
+there.  You will see first some messages about checking for ident, and
+then a bunch of other messages that describe the current IRC server.
+
+@item Join the #emacs channel
+
+In that buffer, type ``/join SPC #emacs'' and hit @kbd{RET}.  Depending
+on how you've set up ERC, either a new buffer for ``#emacs'' will be
+displayed, or a new buffer called ``#emacs'' will be created in the
+background.  If the latter, switch to the ``#emacs'' buffer.  You will
+see the channel topic and a list of the people who are currently on the
+channel.
+
+@item Register your nickname with Freenode
+
+If you would like to be able to talk with people privately on the
+Freenode network, you will have to ``register'' your nickname.  To do
+so, switch to the ``irc.freenode.net:6667'' buffer and type ``/msg
+NickServ register <password>'', replacing ``<password>'' with your
+desired password.  It should tell you that the operation was successful.
+
+@item Talk to people in the channel
+
+If you switch back to the ``#emacs'' buffer, you can type a message, and
+everyone on the channel will see it.
+
+@item Open a query buffer to talk to someone
+
+If you want to talk with someone in private (this should usually not be
+done for technical help, only for personal questions), type ``/query
+<nick>'', replacing ``<nick>'' with the nickname of the person you would
+like to talk to.  Depending on how ERC is set up, you will either see a
+new buffer with the name of the person, or such a buffer will be created
+in the background and you will have to switch to it.  Begin typing
+messages, and you will be able to have a conversation.
+
+Note that if the other person is not registered, you will not be able to
+talk with them.
+
+@end itemize
+
+@node Special Features, , Sample Session, Getting Started
+@comment  node-name,  next,  previous,  up
+@section Special Features
+
+ERC has some features that distinguish it from some IRC clients.
+
+@itemize @bullet
+
+@item multiple channels and multiple servers
+
+Every channel is put in a separate buffer.  Several IRC servers may be
+connected to at the same time.
+
+@cindex query buffers
+@item private message separation
+
+Private conversations are treated as channels, and are put into separate
+buffers in Emacs.  We call these ``query buffers''.
+
+@item highlighting
+
+Some occurrences of words can be highlighted, which makes it easier to
+track different kinds of conversations.
+
+@item notification
+
+ERC can notify you that certain users are online.
+
+@item channel tracking
+
+Channels can be hidden and conversation continue in the background.  You
+are notified when something is said in such a channel that is not
+currently visible.  This makes it easy to get Real Work done while still
+maintaining an IRC presence.
+
+@item nick completion
+
+ERC can complete words upon hitting @kbd{TAB}, which eases the writing
+of nicknames in messages.
+
+@cindex history ring
+@item history
+
+Past actions are kept in history rings for future use.  To navigate a
+history ring, hit @kbd{M-p} to go backwards and @kbd{M-n} to go
+forwards.
+
+@item multiple languages
+
+Different channels and servers may have different language encodings.
+
+In addition, it is possible to translate the messages that ERC uses into
+multiple languages.  Please contact the developers of ERC at
+@email{erc-discuss@@gnu.org} if you are interested in helping with the
+translation effort.
+
+@item user scripting
+
+Users can load scripts (e.g. auto greeting scripts) when ERC starts up.
+
+It is also possible to make custom IRC commands, if you know a little
+Emacs Lisp.  Just make an Emacs Lisp function and call it
+@code{erc-cmd-NEWCOMMAND}, where @code{NEWCOMMAND} is the name of the
+new command in capital letters.
+
+@item auto reconnect
+
+If the connection goes away at some point, ERC will try to reconnect
+automatically.  If it fails to reconnect, and you want to try to
+manually reestablish the connection at some later point, switch to an
+ERC  buffer and run the @code{/RECONNECT} command.
+
+@end itemize
+
+
+@node Keystroke Summary, Modules, Getting Started, Top
+@comment  node-name,  next,  previous,  up
+@chapter Keys Used in ERC
+@cindex keystrokes
+
+This is a summary of keystrokes available in every ERC buffer.
+
+@table @kbd
+
+@item C-a or <home> (`erc-bol')
+Go to beginning of line or end of prompt.
+
+@item RET (`erc-send-current-line')
+Send the current line
+
+@item TAB (`erc-complete-word')
+If at prompt, complete the current word.
+Otherwise, move to the next link or button.
+
+@item M-TAB (`ispell-complete-word')
+Complete the given word, using ispell.
+
+@item C-c C-a (`erc-bol')
+Go to beginning of line or end of prompt.
+
+@item C-c C-b (`erc-iswitchb')
+Use `iswitchb-read-buffer' to prompt for a ERC buffer to switch to.
+
+@item C-c C-c (`erc-toggle-interpret-controls')
+Toggle interpretation of control sequences in messages.
+
+@item C-c C-d (`erc-input-action')
+Interactively input a user action and send it to IRC.
+
+@item C-c C-e (`erc-toggle-ctcp-autoresponse')
+Toggle automatic CTCP replies (like VERSION and PING).
+
+@item C-c C-f (`erc-toggle-flood-control')
+Toggle use of flood control on sent messages.
+
+@item C-c TAB (`erc-invite-only-mode')
+Turn on the invite only mode (+i) for the current channel.
+
+@item C-c C-j (`erc-join-channel')
+Join channel.  If point is at the beginning of a channel name, use that
+as default.
+
+@item C-c C-k (`erc-go-to-log-matches-buffer')
+Interactively open an erc-log-matches buffer
+
+@item C-c C-l (`erc-save-buffer-in-logs')
+Append buffer contents to the log file, if logging is enabled.
+
+@item C-c C-n (`erc-channel-names')
+Run "/names #channel" in the current channel.
+
+@item C-c C-o (`erc-get-channel-mode-from-keypress')
+Read a key sequence and call the corresponding channel mode function.
+After doing @kbd{C-c C-o}, type in a channel mode letter.
+
+@kbd{C-g} means quit.
+@kbd{RET} lets you type more than one mode at a time.
+If @kbd{l} is pressed, @code{erc-set-channel-limit} gets called.
+If @kbd{k} is pressed, @code{erc-set-channel-key} gets called.
+Anything else will be sent to `erc-toggle-channel-mode'.
+
+@item C-c C-p (`erc-part-from-channel')
+Part from the current channel and prompt for a reason.
+
+@item C-c C-q (`erc-quit-server')
+Disconnect from current server after prompting for reason.
+
+@item C-c C-r (`erc-remove-text-properties-region')
+Clears the region (start,end) in object from all colors, etc.
+
+@item C-c C-t (`erc-set-topic')
+Prompt for a topic for the current channel.
+
+@item C-c C-u (`erc-kill-input')
+Kill current input line using `erc-bol' followed by `kill-line'.
+
+@end table
+
+
+@node Modules, Advanced Usage, Keystroke Summary, Top
+@comment  node-name,  next,  previous,  up
+@chapter Modules
+@cindex modules
+
+One way to add functionality to ERC is to customize which of its many
+modules are loaded.
+
+There is a spiffy customize interface, which may be reached by typing
+@kbd{M-x customize-option erc-modules RET}.  Alternatively, set
+@code{erc-modules} manually and then call @code{erc-update-modules}.
+
+The following is a list of available modules.
+
+@table @code
+
+@cindex modules, autoaway
+@item autoaway
+Set away status automatically
+
+@cindex modules, autojoin
+@item autojoin
+Join channels automatically
+
+@cindex modules, bbdb
+@item bbdb
+Integrate with the Big Brother Database
+
+@cindex modules, button
+@item button
+Buttonize URLs, nicknames, and other text
+
+@cindex modules, capab-identify
+@item capab-identify
+Mark unidentified users on freenode and other servers supporting CAPAB.
+
+@cindex modules, completion
+@cindex modules, pcomplete
+@item completion (aka pcomplete)
+Complete nicknames and commands (programmable)
+
+@cindex modules, fill
+@item fill
+Wrap long lines
+
+@cindex modules, hecomplete
+@item hecomplete
+Complete nicknames and commands (old).  This is the old module---you
+might prefer the ``completion'' module instead.
+
+@cindex modules, identd
+@item identd
+Launch an identd server on port 8113
+
+@cindex modules, irccontrols
+@item irccontrols
+Highlight or remove IRC control characters
+
+@cindex modules, log
+@item log
+Save buffers in logs
+
+@cindex modules, match
+@item match
+Highlight pals, fools, and other keywords
+
+@cindex modules, menu
+@item menu
+Display a menu in ERC buffers
+
+@cindex modules, netsplit
+@item netsplit
+Detect netsplits
+
+@cindex modules, noncommands
+@item noncommands
+Don't display non-IRC commands after evaluation
+
+@cindex modules, notify
+@item notify
+Notify when the online status of certain users changes
+
+@cindex modules, page
+@item page
+Process CTCP PAGE requests from IRC
+
+@cindex modules, readonly
+@item readonly
+Make displayed lines read-only
+
+@cindex modules, replace
+@item replace
+Replace text in messages
+
+@cindex modules, ring
+@item ring
+Enable an input history
+
+@cindex modules, scrolltobottom
+@item scrolltobottom
+Scroll to the bottom of the buffer
+
+@cindex modules, services
+@item services
+Identify to Nickserv (IRC Services) automatically
+
+@cindex modules, smiley
+@item smiley
+Convert smileys to pretty icons
+
+@cindex modules, sound
+@item sound
+Play sounds when you receive CTCP SOUND requests
+
+@cindex modules, spelling
+@item spelling
+Check spelling of messages
+
+@cindex modules, stamp
+@item stamp
+Add timestamps to messages
+
+@cindex modules, track
+@item track
+Track channel activity in the mode-line
+
+@cindex modules, truncate
+@item truncate
+Truncate buffers to a certain size
+
+@cindex modules, unmorse
+@item unmorse
+Translate morse code in messages
+
+@end table
+
+@c PRE5_4: Document every option of every module in its own subnode
+
+
+@node Advanced Usage, Getting Help and Reporting Bugs, Modules, Top
+@comment  node-name,  next,  previous,  up
+@chapter Advanced Usage
+@cindex advanced topics
+
+@menu
+* Connecting::                  Ways of connecting to an IRC server.
+* Sample Configuration::        An example configuration file.
+* Options::                     Options that are available for ERC.
+@end menu
+
+@node Connecting, Sample Configuration, Advanced Usage, Advanced Usage
+@comment  node-name,  next,  previous,  up
+@section Connecting to an IRC Server
+@cindex connecting
+
+The easiest way to connect to an IRC server is to call @kbd{M-x erc}.
+If you want to assign this function to a keystroke, the following will
+help you figure out its parameters.
+
+@defun erc
+Select connection parameters and run ERC.
+Non-interactively, it takes the following keyword arguments.
+
+@itemize @bullet
+@item @var{server}
+@item @var{port}
+@item @var{nick}
+@item @var{password}
+@item @var{full-name}
+@end itemize
+
+That is, if called with the following arguments, @var{server} and
+@var{full-name} will be set to those values, whereas
+@code{erc-compute-port}, @code{erc-compute-nick} and
+@code{erc-compute-full-name} will be invoked for the values of the other
+parameters.
+
+@example
+(erc :server "irc.freenode.net" :full-name "Harry S Truman")
+@end example
+@end defun
+
+@subheading Server
+
+@defun erc-compute-server &optional server
+Return an IRC server name.
+
+This tries a number of increasingly more default methods until a non-nil
+value is found.
+
+@itemize @bullet
+@item @var{server} (the argument passed to this function)
+@item The @code{erc-server} option
+@item The value of the IRCSERVER environment variable
+@item The @code{erc-default-server} variable
+@end itemize
+
+@end defun
+
+@defopt erc-server nil
+IRC server to use if one is not provided.
+@end defopt
+
+@subheading Port
+
+@defun erc-compute-port &optional port
+Return a port for an IRC server.
+
+This tries a number of increasingly more default methods until a non-nil
+value is found.
+
+@itemize @bullet
+@item @var{port} (the argument passed to this function)
+@item The @code{erc-port} option
+@item The @code{erc-default-port} variable
+@end itemize
+
+@end defun
+
+@defopt erc-port
+IRC port to use if not specified.
+
+This can be either a string or a number.
+@end defopt
+
+@subheading Nick
+
+@defun erc-compute-nick &optional nick
+Return user's IRC nick.
+
+This tries a number of increasingly more default methods until a
+non-nil value is found.
+
+@itemize
+@item @var{nick} (the argument passed to this function)
+@item The @code{erc-nick} option
+@item The value of the IRCNICK environment variable
+@item The result from the @code{user-login-name} function
+@end itemize
+
+@end defun
+
+@defopt erc-nick
+Nickname to use if one is not provided.
+
+This can be either a string, or a list of strings.
+In the latter case, if the first nick in the list is already in use,
+other nicks are tried in the list order.
+@end defopt
+
+@defopt erc-nick-uniquifier
+The string to append to the nick if it is already in use.
+@end defopt
+
+@defopt erc-try-new-nick-p
+If the nickname you chose isn't available, and this option is non-nil,
+ERC should automatically attempt to connect with another nickname.
+
+You can manually set another nickname with the /NICK command.
+@end defopt
+
+@subheading Full name
+
+@defun erc-compute-full-name &optional full-name
+Return user's full name.
+
+This tries a number of increasingly more default methods until a
+non-nil value is found.
+
+@itemize @bullet
+@item @var{full-name} (the argument passed to this function)
+@item The @code{erc-user-full-name} option
+@item The value of the IRCNAME environment variable
+@item The result from the @code{user-full-name} function
+@end itemize
+
+@end defun
+
+@defopt erc-user-full-name
+User full name.
+
+This can be either a string or a function to call.
+@end defopt
+
+@node Sample Configuration, Options, Connecting, Advanced Usage
+@comment  node-name,  next,  previous,  up
+@section Sample Configuration
+@cindex configuration, sample
+
+Here is an example of configuration settings for ERC.  This can go into
+your Emacs configuration file.  Everything after the @code{(require
+'erc)} command can optionally go into @file{~/.emacs.d/.ercrc.el}.
+
+@lisp
+;;; Sample ERC configuration
+
+;; Add the ERC directory to load path -- you don't need this if you are
+;; using the version of ERC that comes with Emacs
+(add-to-list 'load-path "~/elisp/erc")
+
+;; Load ERC
+(require 'erc)
+
+;; Load authentication info from an external source.  Put sensitive
+;; passwords and the like in here.
+(load "~/.emacs.d/.erc-auth")
+
+;; This is an example of how to make a new command.  Type "/uptime" to
+;; use it.
+(defun erc-cmd-UPTIME (&rest ignore)
+  "Display the uptime of the system, as well as some load-related
+stuff, to the current ERC buffer."
+  (let ((uname-output
+         (replace-regexp-in-string
+          ", load average: " "] @{Load average@} ["
+          ;; Collapse spaces, remove
+          (replace-regexp-in-string
+           " +" " "
+           ;; Remove beginning and trailing whitespace
+           (replace-regexp-in-string
+            "^ +\\|[ \n]+$" ""
+            (shell-command-to-string "uptime"))))))
+    (erc-send-message
+     (concat "@{Uptime@} [" uname-output "]"))))
+
+;; This causes ERC to connect to the Freenode network upon hitting
+;; C-c e f.  Replace MYNICK with your IRC nick.
+(global-set-key "\C-cef" (lambda () (interactive)
+                           (erc :server "irc.freenode.net" :port "6667"
+                                :nick "MYNICK")))
+
+;; This causes ERC to connect to the IRC server on your own machine (if
+;; you have one) upon hitting C-c e b.  Replace MYNICK with your IRC
+;; nick.  Often, people like to run bitlbee (http://bitlbee.org/) as an
+;; AIM/Jabber/MSN to IRC gateway, so that they can use ERC to chat with
+;; people on those networks.
+(global-set-key "\C-ceb" (lambda () (interactive)
+                           (erc :server "localhost" :port "6667"
+                                :nick "MYNICK")))
+
+;; Make C-c RET (or C-c C-RET) send messages instead of RET. This has
+;; been commented out to avoid confusing new users.
+;; (define-key erc-mode-map (kbd "RET") nil)
+;; (define-key erc-mode-map (kbd "C-c RET") 'erc-send-current-line)
+;; (define-key erc-mode-map (kbd "C-c C-RET") 'erc-send-current-line)
+
+;;; Options
+
+;; Join the #emacs and #erc channels whenever connecting to Freenode.
+(setq erc-autojoin-channels-alist '(("freenode.net" "#emacs" "#erc")))
+
+;; Interpret mIRC-style color commands in IRC chats
+(setq erc-interpret-mirc-color t)
+
+;; The following are commented out by default, but users of other
+;; non-Emacs IRC clients might find them useful.
+;; Kill buffers for channels after /part
+;; (setq erc-kill-buffer-on-part t)
+;; Kill buffers for private queries after quitting the server
+;; (setq erc-kill-queries-on-quit t)
+;; Kill buffers for server messages after quitting the server
+;; (setq erc-kill-server-buffer-on-quit t)
+@end lisp
+
+@node Options, , Sample Configuration, Advanced Usage
+@comment  node-name,  next,  previous,  up
+@section Options
+@cindex options
+
+@c PRE5_4: (Node) Document every ERC option (module options go in
+@c previous chapter)
+
+This section has not yet been written.  For now, the easiest way to
+check out the available options for ERC is to do
+@kbd{M-x customize-group erc RET}.
+
+
+@node Getting Help and Reporting Bugs, History, Advanced Usage, Top
+@comment  node-name,  next,  previous,  up
+@chapter Getting Help and Reporting Bugs
+@cindex help, getting
+@cindex bugs, reporting
+
+After you have read this guide, if you still have questions about ERC,
+or if you have bugs to report, there are several places you can go.
+
+@itemize @bullet
+
+@item
+@uref{http://www.emacswiki.org/cgi-bin/wiki/ERC} is the
+emacswiki.org page for ERC.  Anyone may add tips, hints, or bug
+descriptions to it.
+
+@item
+There are several mailing lists for ERC.  To subscribe, visit
+@uref{http://savannah.gnu.org/mail/?group=erc}.
+
+The mailing lists are also available on Gmane.
+(@url{http://gmane.org/}).  Gmane provides additional methods for
+accessing the mailing lists, adding content to them, and searching them.
+
+@enumerate
+@item gmane.emacs.erc.announce: Announcements
+
+@item gmane.emacs.erc.discuss: General discussion
+
+@item gmane.emacs.erc.cvs: Log messages for changes to the ERC source code
+
+@end enumerate
+
+@item
+You can visit the IRC Freenode channel @samp{#emacs}. Many of the
+contributors are frequently around and willing to answer your
+questions.
+
+@end itemize
+
+
+@node History, Copying, Getting Help and Reporting Bugs, Top
+@comment  node-name,  next,  previous,  up
+@chapter History
+@cindex history, of ERC
+
+ERC was originally written by Alexander L. Belikoff
+@email{abel@@bfr.co.il} and Sergey Berezin
+@email{sergey.berezin@@cs.cmu.edu}.  They stopped development around
+December 1999.  Their last released version was ERC 2.0.
+
+P.S.: If one of the original developers of ERC reads this, we'd like to
+receive additional information for this file and hear comments in
+general.
+
+@itemize
+@item 2001
+
+In June 2001, Mario Lang @email{mlang@@delysid.org} and Alex Schroeder
+@email{alex@@gnu.org} took over development and created a ERC Project at
+@uref{http://sourceforge.net/projects/erc}.
+
+In reaction to a mail about the new ERC development effort, Sergey
+Berezin said, ``First of all, I'm glad that my version of ERC is being
+used out there.  The thing is, I do not have free time and enough
+incentive anymore to work on ERC, so I would be happy if you guys take
+over the project entirely.''
+
+So we happily hacked away on ERC, and soon after (September 2001)
+released the next "stable" version, 2.1.
+
+Most of the development of the new ERC happened on #emacs on
+irc.openprojects.net.  Over time, many people contributed code, ideas,
+bugfixes, and a lot of alpha/beta/gamma testing.
+
+See the @file{CREDITS} file for a list of contributors.
+
+@item 2003
+
+ERC 3.0 was released.
+
+@item 2004
+
+ERC 4.0 was released.
+
+@item 2005
+
+ERC 5.0 was released.  Michael Olson @email{mwolson@@gnu.org} became
+the release manager and eventually the maintainer.
+
+After some discussion between him and the Emacs developers, it was
+decided to include ERC in Emacs.
+
+@item 2006
+
+ERC 5.1 was released.  It was subsequently included in Emacs 22.
+
+ERC became an official GNU project, and development moved to
+@uref{http://sv.gnu.org/projects/erc}.  We switched to using GNU Arch as
+our revision control system.  Our mailing list address changed as well.
+
+@item 2007
+
+We switched to using git for our version control system.
+
+@end itemize
+
+@node Copying, GNU Free Documentation License, History, Top
+@comment  node-name,  next,  previous,  up
+@include gpl.texi
+
+@node GNU Free Documentation License, Concept Index, Copying, Top
+@comment  node-name,  next,  previous,  up
+@include doclicense.texi
+
+@node Concept Index,  , GNU Free Documentation License, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Index
+
+@printindex cp
+
+@bye

@@ -1,0 +1,67 @@
+# Tables Module
+
+# This builds on the basic tables module, unlike with the DTD
+# implementation.
+
+include "xhtml-btable.rnc" {
+  table =
+    element table {
+      table.attlist,
+      caption?,
+      (col* | colgroup*),
+      ((thead?, tfoot?, tbody+) | tr+)
+    }
+  th = element th { th.attlist, Flow.model }
+  td = element td { td.attlist, Flow.model }
+  CellHAlign.attrib =
+    attribute align {
+      "left" | "center" | "right" | "justify" | "char"
+    }?,
+    attribute char { Character.datatype }?,
+    attribute charoff { Length.datatype }?
+  CellVAlign.attrib =
+    attribute valign { "top" | "middle" | "bottom" | "baseline" }?
+  scope.attrib =
+    attribute scope { "row" | "col" | "rowgroup" | "colgroup" }?
+}
+table.attlist &=
+  attribute width { Length.datatype }?,
+  attribute border { Pixels.datatype }?,
+  frame.attrib,
+  rules.attrib,
+  attribute cellspacing { Length.datatype }?,
+  attribute cellpadding { Length.datatype }?
+col = element col { col.attlist }
+col.attlist =
+  Common.attrib,
+  attribute span { Number.datatype }?,
+  attribute width { MultiLength.datatype }?,
+  CellHAlign.attrib,
+  CellVAlign.attrib
+colgroup = element colgroup { colgroup.attlist, col* }
+colgroup.attlist =
+  Common.attrib,
+  attribute span { Number.datatype }?,
+  attribute width { MultiLength.datatype }?,
+  CellHAlign.attrib,
+  CellVAlign.attrib
+tbody = element tbody { tbody.attlist, tr+ }
+tbody.attlist = Common.attrib, CellHAlign.attrib, CellVAlign.attrib
+thead = element thead { thead.attlist, tr+ }
+thead.attlist = Common.attrib, CellHAlign.attrib, CellVAlign.attrib
+tfoot = element tfoot { tfoot.attlist, tr+ }
+tfoot.attlist = Common.attrib, CellHAlign.attrib, CellVAlign.attrib
+frame.attrib =
+  attribute frame {
+    "void"
+    | "above"
+    | "below"
+    | "hsides"
+    | "lhs"
+    | "rhs"
+    | "vsides"
+    | "box"
+    | "border"
+  }?
+rules.attrib =
+  attribute rules { "none" | "groups" | "rows" | "cols" | "all" }?

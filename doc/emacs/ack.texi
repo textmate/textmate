@@ -1,0 +1,1446 @@
+@c -*- coding: iso-latin-1 -*-
+@c This is part of the Emacs manual.
+@c Copyright (C) 1994-1997, 1999-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@node Acknowledgments, Screen, Concept Index, Top
+@unnumbered Acknowledgments
+
+Many people have contributed code included in the Free Software
+Foundation's distribution of GNU Emacs.  To show our appreciation for
+their public spirit, we list here in alphabetical order those who have
+written substantial portions.  Others too numerous to mention have
+reported and fixed bugs, and added features to many parts of Emacs.
+We thank them for their generosity as well.
+
+This list is intended to mention every contributor of a major package or
+feature we currently distribute; if you know of someone we have omitted,
+please report that as a manual bug.  More comprehensive information is
+available in the @file{ChangeLog} files, summarized in the file
+@file{etc/AUTHORS} in the distribution.
+
+@c We should list here anyone who has contributed a new package,
+@c and anyone who has made major enhancements in Emacs
+@c that many users would notice and consider important.
+@c Remove things that are no longer distributed.
+@c Note this file is only used ifnottex; otherwise a shorter version in
+@c emacs.texi is used.
+
+@itemize @bullet
+@item
+Per Abrahamsen wrote the customization facilities, as well as
+@file{double.el}, for typing accented characters not normally available
+from the keyboard; @file{xt-mouse.el}, which allows mouse commands
+through Xterm; @file{gnus-cus.el}, which implements customization
+commands for Gnus; @file{gnus-cite.el}, a citation-parsing facility for
+news articles; @file{gnus-score.el}, scoring for Gnus; @file{cpp.el},
+which hides or highlights parts of C programs according to preprocessor
+conditionals; and the widget library files @file{wid-browse.el},
+@file{wid-edit.el}, @file{widget.el}.  He also co-wrote
+@file{gnus-soup.el}.
+
+@item
+Tomas Abrahamsson wrote @file{artist.el}, a package for producing
+@acronym{ASCII} art with a mouse or with keyboard keys.
+
+@item
+Jay K.@: Adams wrote @file{jka-compr.el} and @file{jka-cmpr-hook.el},
+providing automatic decompression and recompression for compressed
+files.
+
+@item
+Michael Albinus wrote @file{dbus.el}, a package that implements the
+D-Bus message bus protocol; @file{zeroconf.el}, a mode for browsing
+Avahi services; @file{xesam.el}, a Xesam-based search engine
+interface; and @file{secrets.el}, an interface to keyring daemons for
+storing confidential data.  He and Kai Großjohann wrote the Tramp package, which
+provides transparent remote file editing using rcp, ssh, ftp, and
+other network protocols.  He and Daniel Pittman wrote
+@file{tramp-cache.el}.
+
+@item
+Ralf Angeli wrote @file{scroll-lock.el}, a minor mode which keeps the
+point vertically fixed by scrolling the window when moving up and down
+in the buffer.
+
+@item
+Joe Arceneaux wrote the original text property implementation, and
+implemented support for X11.
+
+@item
+Emil Åström, Milan Zamaza, and Stefan Bruda wrote @file{prolog.el},
+a mode for editing Prolog (and Mercury) code.
+
+@item
+Miles Bader wrote @file{image-file.el}, support code for visiting image
+files; @file{minibuf-eldef.el}, a minor mode that hides the minibuffer
+default value when appropriate; @file{rfn-eshadow.el}, shadowing of
+@code{read-file-name} input; @file{mb-depth.el}, display of minibuffer
+depth; @file{button.el}, the library that implements clickable buttons;
+@file{face-remap.el}, a package for changing the default face in
+individual buffers; and @file{macroexp.el} for macro-expansion.  He
+also worked on an early version of the lexical binding code.
+
+@item
+David Bakhash wrote @file{strokes.el}, a mode for controlling Emacs by
+moving the mouse in particular patterns.
+
+@item
+Juanma Barranquero wrote @file{emacs-lock.el} (based on the original
+version by Tom Wurgler), which makes it harder to exit with valuable
+buffers unsaved.  He also made many other contributions to other
+areas, including MS Windows support.
+
+@item
+Eli Barzilay wrote @file{calculator.el}, a desktop calculator for
+Emacs.
+
+@item
+Steven L.@: Baur wrote @file{footnote.el} which lets you include
+footnotes in email messages; and @file{gnus-audio.el} and
+@file{earcon.el}, which provide sound effects for Gnus.  He also wrote
+@file{gnus-setup.el}.
+
+@item
+Alexander L.@: Belikoff, Sergey Berezin, Sacha Chua, David Edmondson,
+Noah Friedman, Andreas Fuchs, Mario Lang, Ben Mesander, Lawrence
+Mitchell, Gergely Nagy, Michael Olson, Per Persson, Jorgen Schaefer,
+Alex Schroeder, and Tom Tromey wrote ERC, an advanced Internet Relay
+Chat client (for more information, see the file @file{CREDITS} in the
+ERC distribution).
+
+@item
+Scott Bender, Michael Brouwer, Christophe de Dinechin, Carl Edman,
+Christian Limpach and Adrian Robert developed and maintained the
+NeXTstep port of Emacs.
+
+@item
+Anna M.@: Bigatti wrote @file{cal-html.el}, which produces HTML calendars.
+
+@item
+Ray Blaak and Simon South wrote @file{delphi.el}, a mode for editing
+Delphi (Object Pascal) source code.
+
+@item
+Martin Blais, Stefan Merten, and David Goodger wrote @file{rst.el}, a
+mode for editing reStructuredText documents.
+
+@item
+Jim Blandy wrote Emacs 19's input system, brought its configuration and
+build process up to the GNU coding standards, and contributed to the
+frame support and multi-face support.  Jim also wrote @file{tvi970.el},
+terminal support for the TeleVideo 970 terminals; and co-wrote
+@file{wyse50.el} (q.v.@:).
+
+@item
+Per Bothner wrote @file{term.el}, a terminal emulator in an Emacs
+buffer.
+
+@item
+Terrence M.@: Brannon wrote @file{landmark.el}, a neural-network robot
+that learns landmarks.
+
+@item
+Frank Bresz wrote @file{diff.el}, a program to display @code{diff}
+output.
+
+@item
+Peter Breton implemented @file{dirtrack.el}, a library for tracking
+directory changes in shell buffers; @file{filecache.el}, which records
+which directories your files are in; @file{locate.el}, which
+interfaces to the @code{locate} command; @file{find-lisp.el}, an Emacs
+Lisp emulation of the @command{find} program; @file{net-utils.el}; and
+the ``generic mode'' feature.
+
+@item
+Emmanuel Briot wrote @file{xml.el}, an XML parser for Emacs; and
+@file{ada-prj.el}, editing of Ada mode project files, as well as
+co-authoring @file{ada-mode.el} and @file{ada-xref.el}.
+
+@item
+Kevin Broadey wrote @file{foldout.el}, providing folding extensions to
+Emacs's outline modes.
+
+@item
+David M.@: Brown wrote @file{array.el}, for editing arrays and other
+tabular data.
+
+@item
+W@l{}odek Bzyl and Ryszard Kubiak wrote @file{ogonek.el}, a package for
+changing the encoding of Polish characters.
+
+@item
+Bill Carpenter provided @file{feedmail.el}, a package for massaging
+outgoing mail messages and sending them through various popular mailers.
+
+@item
+Per Cederqvist and Inge Wallin wrote @file{ewoc.el}, an Emacs widget for
+manipulating object collections.  Per Cederqvist, Inge Wallin, and
+Thomas Bellman wrote @file{avl-tree.el}, for balanced binary trees.
+
+@item
+Hans Chalupsky wrote @file{advice.el}, an overloading mechanism for
+Emacs Lisp functions; and @file{trace.el}, a tracing facility for Emacs
+Lisp.
+
+@item
+Chris Chase, Carsten Dominik, and J.@: D.@: Smith wrote IDLWAVE mode,
+for editing IDL and WAVE CL.
+
+@item
+Bob Chassell wrote @file{texnfo-upd.el}, @file{texinfo.el}, and
+@file{makeinfo.el}, modes and utilities for working with Texinfo files;
+and @file{page-ext.el}, commands for extended page handling.  He also
+wrote the ``Introduction to programming in Emacs Lisp'' manual.
+
+@item
+Jihyun Cho wrote @file{hanja-util.el} and @file{hangul.el}, utilities
+for Korean Hanja.
+
+@item
+Andrew Choi and Yamamoto Mitsuharu wrote the Carbon support, used
+prior to Emacs 23 for Mac OS.
+
+@item
+Chong Yidong was the Emacs co-maintainer from Emacs 23 onwards.  He made many
+improvements to the Emacs display engine.  He also wrote
+@file{tabulated-list.el}, a generic major mode for lists of data;
+and improved support for themes and packages.
+
+@item
+James Clark wrote SGML mode, a mode for editing SGML documents; and
+nXML mode, a mode for editing XML documents.  He also contributed to
+Emacs's dumping procedures.
+
+@item
+Mike Clarkson wrote @file{edt.el}, an emulation of DEC's EDT editor.
+
+@item
+Glynn Clements provided @file{gamegrid.el} and a couple of games that
+use it, Snake and Tetris.
+
+@item
+Andrew Cohen wrote @file{spam-wash.el}, to decode and clean email before
+it is analyzed for spam.
+
+@item
+Edward O'Connor wrote @file{json.el}, a file for parsing and
+generating JSON files.
+
+@item
+Georges Brun-Cottan and Stefan Monnier wrote @file{easy-mmode.el}, a
+package for easy definition of major and minor modes.
+
+@item
+Andrew Csillag wrote M4 mode (@file{m4-mode.el}).
+
+@item
+Doug Cutting and Jamie Zawinski wrote @file{disass.el}, a disassembler
+for compiled Emacs Lisp code.
+
+@item
+Mathias Dahl wrote @file{image-dired.el}, a package for viewing image
+files as ``thumbnails''.
+
+@item
+Julien Danjou wrote an implementation of ``Desktop Notifications''
+(@file{notifications.el}); and @file{color.el}, a library for general
+color manipulation.  He also made various contributions to Gnus.
+
+@item
+Vivek Dasmohapatra wrote @file{htmlfontify.el}, to convert a buffer or
+source tree to HTML.
+
+@item
+Gary Delp wrote @file{mailpost.el}, an interface between RMAIL and the
+@file{/usr/uci/post} mailer.
+
+@item
+Matthieu Devin wrote @file{delsel.el}, a package to make newly-typed
+text replace the current selection.
+
+@item
+Eric Ding wrote @file{goto-addr.el},
+
+@item
+Jan Djärv added support for the GTK+ toolkit and X drag-and-drop.
+He also wrote @file{dynamic-setting.el}.
+
+@item
+Carsten Dominik wrote Ref@TeX{}, a package for setting up labels and
+cross-references in La@TeX{} documents; and co-wrote IDLWAVE mode
+(q.v.@:).  He was the original author of Org mode, for maintaining notes,
+todo lists, and project planning.  Bastien Guerry subsequently took
+over maintainership.  Benjamin Andresen, Thomas Baumann, Joel Boehland, Jan Böcker, Lennart
+Borgman, Baoqiu Cui, Dan Davison, Christian Egli, Eric S.@: Fraga, Daniel German, Chris Gray, Konrad Hinsen, Tassilo Horn, Philip
+Jackson, Martyn Jago, Thorsten Jolitz, Jambunathan K, Tokuya Kameshima, Sergey Litvinov, David Maus, Ross Patterson, Juan Pechiar, Sebastian Rose, Eric Schulte,
+Paul Sexton, Ulf Stegemann, Andy Stewart, Christopher Suckling, David O'Toole, John Wiegley, Zhang Weize,
+Piotr Zielinski, and others also wrote various Org mode components.
+For more information, @pxref{History and Acknowledgments,,, org, The Org Manual}.
+
+@item
+Scott Draves wrote @file{tq.el}, help functions for maintaining
+transaction queues between Emacs and its subprocesses.
+
+@item
+Benjamin Drieu wrote @file{pong.el}, an implementation of the classical
+pong game.
+
+@item
+Viktor Dukhovni wrote support for dumping under SunOS version 4.
+
+@item
+John Eaton and Kurt Hornik wrote Octave mode.
+
+@item
+Rolf Ebert, Markus Heritsch, and Emmanuel Briot wrote Ada mode.
+
+@item
+Paul Eggert integrated the Gnulib portability library, and made many
+other portability fixes to the C code; as well as his contributions
+to VC and the calendar.
+
+@item
+Stephen Eglen wrote @file{mspools.el}, which tells you which Procmail
+folders have mail waiting in them; and @file{iswitchb.el}, a feature
+for incremental reading and completion of buffer names.
+
+@item
+Torbjörn Einarsson wrote @file{f90.el}, a mode for Fortran 90 files.
+
+@item
+Tsugutomo Enami co-wrote the support for international character sets.
+
+@item
+David Engster wrote @file{mairix.el} and @file{nnmairix.el}, an
+interface to the Mairix indexing tool.
+
+@item
+Hans Henrik Eriksen wrote @file{simula.el}, a mode for editing SIMULA 87
+code.
+
+@item
+Michael Ernst wrote @file{reposition.el}, a command for recentering a
+function's source code and preceding comment on the screen.
+
+@item
+Ata Etemadi wrote @file{cdl.el}, functions for working with Common Data
+Language source code.
+
+@item
+Frederick Farnbach implemented @file{morse.el}, which converts text to
+Morse code.
+
+@item
+Oscar Figueiredo wrote EUDC, the Emacs Unified Directory Client, which
+is an interface to directory servers via LDAP, CCSO PH/QI, or BBDB; and
+@file{ldap.el}, the LDAP client interface.
+
+@item
+Fred Fish wrote the support for dumping COFF executable files.
+
+@item
+Karl Fogel wrote @file{bookmark.el}, which implements named
+placeholders; @file{mail-hist.el}, a history mechanism for outgoing
+mail messages; and @file{saveplace.el}, for preserving point's
+location in files between editing sessions.
+
+@item
+Gary Foster wrote @file{crisp.el}, the emulation for CRiSP and Brief
+editors; and @file{scroll-all.el}, a mode for scrolling several buffers
+together.
+
+@item
+Noah Friedman wrote @file{rlogin.el}, an interface to Rlogin,
+@file{type-break.el}, which reminds you to take periodic breaks from
+typing, and @code{eldoc-mode}, a mode to show the defined parameters or
+the doc string for the Lisp function near point.
+
+@item
+Shigeru Fukaya wrote a testsuite for the byte-compiler.
+
+@item
+Keith Gabryelski wrote @file{hexl.el}, a mode for editing binary files.
+
+@item
+Kevin Gallagher rewrote and enhanced the EDT emulation, and wrote
+@file{flow-ctrl.el}, a package for coping with unsuppressible XON/XOFF
+flow control.
+
+@item
+Kevin Gallo added multiple-frame support for Windows NT and wrote
+@file{w32-win.el}, support functions for the MS-Windows window system.
+
+@item
+Juan León Lahoz García wrote @file{wdired.el}, a package for
+performing file operations by directly editing Dired buffers.
+
+@item
+Howard Gayle wrote much of the C and Lisp code for display tables and
+case tables.  He also wrote @file{rot13.el}, a command to display the
+plain-text form of a buffer encoded with the Caesar cipher;
+@file{vt100-led.el}, a package for controlling the LEDs on
+VT100-compatible terminals; and much of the support for ISO-8859
+European character sets (which includes @file{iso-ascii.el},
+@file{iso-insert.el}, @file{iso-swed.el},
+@file{iso-syntax.el}, @file{iso-transl.el}, and @file{swedish.el}).
+
+@item
+Stephen Gildea made the Emacs quick reference card, and made many
+contributions for @file{time-stamp.el}, a package for maintaining
+last-change time stamps in files.
+
+@item
+Julien Gilles wrote @file{gnus-ml.el}, a mailing list minor mode for
+Gnus.
+
+@item
+David Gillespie wrote the Common Lisp compatibility packages;
+@code{Calc}, an advanced calculator and mathematical tool, since
+maintained and developed by Jay Belanger; @file{complete.el}, a partial
+completion mechanism; and @file{edmacro.el}, a package for editing
+keyboard macros.
+
+@item
+Bob Glickstein wrote @file{sregex.el}, a facility for writing regexps
+using a Lisp-like syntax.
+
+@item
+Boris Goldowsky wrote @file{avoid.el}, a package to keep the mouse
+cursor out of the way of the text cursor; @file{shadowfile.el}, a
+package for keeping identical copies of files in more than one place;
+@file{format.el}, a package for reading and writing files in various
+formats; @file{enriched.el}, a package for saving text properties in
+files; @file{facemenu.el}, a package for specifying faces; and
+@file{descr-text.el}, describing text and character properties.
+
+@item
+Michelangelo Grigni wrote @file{ffap.el} which visits a file,
+taking the file name from the buffer.
+
+@item
+Odd Gripenstam wrote @file{dcl-mode.el} for editing DCL command files.
+
+@item
+Michael Gschwind wrote @file{iso-cvt.el}, a package to convert between
+the ISO 8859-1 character set and the notations for non-@acronym{ASCII}
+characters used by @TeX{} and net tradition.
+
+@item
+Bastien Guerry wrote @file{gnus-bookmark.el}, bookmark support for Gnus;
+as well as helping to maintain Org mode (q.v.@:).
+
+@item
+Henry Guillaume wrote @file{find-file.el}, a package to visit files
+related to the currently visited file.
+
+@item
+Doug Gwyn wrote the portable @code{alloca} implementation.
+
+@item
+Ken'ichi Handa implemented most of the support for international
+character sets, and wrote most of the Emacs 23 font handling code.  He
+also wrote @file{composite.el}, which provides a minor mode that
+composes characters automatically when they are displayed;
+@file{isearch-x.el}, a facility for searching non-@acronym{ASCII}
+text; and @file{ps-bdf.el}, a BDF font support for printing
+non-@acronym{ASCII} text on a PostScript printer.  Together with Naoto
+Takahashi, he wrote @file{quail.el}, an input facility for typing
+non-@acronym{ASCII} text from an @acronym{ASCII} keyboard.
+
+@item
+Jesper Harder wrote @file{yenc.el}, for decoding yenc encoded messages.
+
+@item
+Alexandru Harsanyi wrote a library for accessing SOAP web services.
+
+@item
+K.@: Shane Hartman wrote @file{chistory.el} and @file{echistory.el},
+packages for browsing command history lists; @file{electric.el} and
+@file{helper.el}, which provide an alternative command loop and
+appropriate help facilities; @file{emacsbug.el}, a package for
+reporting Emacs bugs; @file{picture.el}, a mode for editing
+@acronym{ASCII} pictures; and @file{view.el}, a package for perusing
+files and buffers without editing them.
+
+@item
+John Heidemann wrote @file{mouse-copy.el} and @file{mouse-drag.el},
+which provide alternative mouse-based editing and scrolling features.
+
+@item
+Jon K Hellan wrote @file{utf7.el}, support for mail-safe transformation
+format of Unicode.
+
+@item
+Karl Heuer wrote the original blessmail script, implemented the
+@code{intangible} text property, and rearranged the structure of the
+@code{Lisp_Object} type to allow for more data bits.
+
+@item
+Manabu Higashida ported Emacs to MS-DOS.
+
+@item
+Anders Holst wrote @file{hippie-exp.el}, a versatile completion and
+expansion package.
+
+@item
+Tassilo Horn wrote DocView mode, allowing viewing of PDF, PostScript and
+DVI documents.
+
+@item
+Tom Houlder wrote @file{mantemp.el}, which generates manual C@t{++}
+template instantiations.
+
+@item
+Joakim Hove wrote @file{html2text.el}, a html to plain text converter.
+
+@item
+Denis Howe wrote @file{browse-url.el}, a package for invoking a WWW
+browser to display a URL.
+
+@item
+Lars Magne Ingebrigtsen did a major redesign of the Gnus news-reader and
+wrote many of its parts.  Several of these are now general components of
+Emacs, including: @file{dns.el} for Domain Name Service lookups;
+@file{format-spec.el} for formatting arbitrary format strings;
+@file{netrc.el} for parsing of @file{.netrc} files; and
+@file{time-date.el} for general date and time handling.
+He also wrote @file{network-stream.el}, for opening network processes;
+@file{url-queue.el}, for controlling parallel downloads of URLs;
+and implemented libxml2 support.
+Components of Gnus have also been written by: Nagy Andras, David
+Blacka, Scott Byer, Ludovic Courtès, Julien Danjou, Kevin Greiner, Kai
+Großjohann, Joe Hildebrand, Paul Jarc, Simon Josefsson, Sascha
+Lüdecke, David Moore, Jim Radford, Benjamin Rutt, Raymond Scholz,
+Thomas Steffen, Reiner Steib, Didier Verna, Ilja Weis, Katsumi
+Yamaoka, Teodor Zlatanov, and others (@pxref{Contributors,,,gnus, the
+Gnus Manual}).
+
+@item
+Andrew Innes contributed extensively to the MS-Windows support.
+
+@item
+Seiichiro Inoue improved Emacs's XIM support.
+
+@item
+Philip Jackson wrote @file{find-cmd.el}, to build a @code{find}
+command-line.
+
+@item
+Ulf Jasper wrote @file{icalendar.el}, a package for converting Emacs
+diary entries to and from the iCalendar format;
+@file{newsticker.el}, an RSS and Atom based Newsticker; and
+@file{bubbles.el}, a puzzle game.
+
+@item
+Kyle Jones wrote @file{life.el}, a package to play Conway's ``life'' game.
+
+@item
+Terry Jones wrote @file{shadow.el}, a package for finding potential
+load-path problems when some Lisp file ``shadows'' another.
+
+@item
+Simon Josefsson wrote @file{dns-mode.el}, an editing mode for Domain
+Name System master files; @file{dig.el}, a Domain Name System interface;
+@file{flow-fill.el}, a package for interpreting RFC2646 formatted text
+in messages; @file{fringe.el}, a package for customizing the fringe;
+@file{imap.el}, an Emacs Lisp library for talking to IMAP servers;
+@file{password-cache.el}, a password reader; @file{nnimap.el}, the IMAP
+back-end for Gnus; @file{url-imap.el} for the URL library;
+@file{rfc2104.el}, a hashed message authentication facility; the Gnus
+S/MIME and Sieve components; and @file{tls.el} and @file{starttls.el}
+for the Transport Layer Security protocol.
+
+@item
+Arne Jørgensen wrote @file{latexenc.el}, a package to
+automatically guess the correct coding system in La@TeX{} files.
+
+@item
+Alexandre Julliard wrote @file{vc-git.el}, support for the Git version
+control system.
+
+@item
+Tomoji Kagatani implemented @file{smtpmail.el}, used for sending out
+mail with SMTP.
+
+@item
+Ivan Kanis wrote @file{vc-hg.el}, support for the Mercurial version
+control system.
+
+@item
+Henry Kautz wrote @file{bib-mode.el}, a mode for maintaining
+bibliography databases compatible with @code{refer} (the @code{troff}
+version) and @code{lookbib}, and @file{refbib.el}, a package to convert
+those databases to the format used by the La@TeX{} text formatting package.
+
+@item
+Taichi Kawabata added support for Devanagari script and the Indian
+languages, and wrote @file{ucs-normalize.el} for Unicode normalization.
+
+@item
+Taro Kawagishi implemented the MD4 Message Digest Algorithm in Lisp; and
+wrote @file{ntlm.el} and @file{sasl-ntlm.el} for NT LanManager
+authentication support.
+
+@item
+Howard Kaye wrote @file{sort.el}, commands to sort text in Emacs
+buffers.
+
+@item
+Michael Kifer wrote @code{ediff}, an interactive interface to the
+@command{diff}, @command{patch}, and @command{merge} programs; and
+Viper, another emulator of the VI editor.
+
+@item
+Richard King wrote the first version of @file{userlock.el} and
+@file{filelock.c}, which provide simple support for multiple users
+editing the same file.  He also wrote the initial version of
+@file{uniquify.el}, a facility to make buffer names unique by adding
+parts of the file's name to the buffer name.
+
+@item
+Peter Kleiweg wrote @file{ps-mode.el}, a mode for editing PostScript
+files and running a PostScript interpreter interactively from within
+Emacs.
+
+@item
+Karel Klí@v{c} contributed SELinux support, for preserving the
+Security-Enhanced Linux context of files on backup and copy.
+
+@item
+Shuhei Kobayashi wrote @file{hex-util.el}, for operating on hexadecimal
+strings; and support for HMAC (Keyed-Hashing for Message Authentication).
+
+@item
+Pavel Kobyakov wrote @file{flymake.el}, a minor mode for performing
+on-the-fly syntax checking.
+
+@item
+David M.@: Koppelman wrote @file{hi-lock.el}, a minor mode for
+interactive automatic highlighting of parts of the buffer text.
+
+@item
+Koseki Yoshinori wrote @file{iimage.el}, a minor mode for displaying
+inline images.
+
+@item
+Robert Krawitz wrote the original @file{xmenu.c}, part of Emacs's pop-up
+menu support.
+
+@item
+Sebastian Kremer wrote @code{dired-mode}, with contributions by Lawrence
+R.@: Dodd.  He also wrote @file{ls-lisp.el}, a Lisp emulation of the
+@code{ls} command for platforms that don't have @code{ls} as a standard
+program.
+
+@item
+David K@ringaccent{a}gedal wrote @file{tempo.el}, providing support for
+easy insertion of boilerplate text and other common constructions.
+
+@item
+Igor Kuzmin wrote @file{cconv.el}, providing closure conversion for
+statically scoped Emacs lisp.
+
+@item
+Daniel LaLiberte wrote @file{edebug.el}, a source-level debugger for
+Emacs Lisp; @file{cl-specs.el}, specifications to help @code{edebug}
+debug code written using David Gillespie's Common Lisp support;
+@file{cust-print.el}, a customizable package for printing lisp
+objects; and @file{isearch.el}, Emacs's incremental search minor mode.
+He also co-wrote @file{hideif.el} (q.v.@:).
+
+@item
+Karl Landstrom and Daniel Colascione wrote @file{js.el}, a mode for
+editing JavaScript.
+
+@item
+Vinicius Jose Latorre wrote the Emacs printing facilities, as well as
+@code{ps-print} (with Jim Thompson, Jacques Duthen, and Kenichi Handa),
+a package for pretty-printing Emacs buffers to PostScript printers;
+@file{delim-col.el}, a package to arrange text into columns;
+@file{ebnf2ps.el}, a package that translates EBNF grammar to a syntactic
+chart that can be printed to a PostScript printer; and
+@file{whitespace.el}, a package that detects and cleans up excess
+whitespace in a file (building on an earlier version by Rajesh Vaidheeswarran).
+
+@item
+Frederic Lepied wrote @file{expand.el}, which uses the abbrev
+mechanism for inserting programming constructs.
+
+@item
+Peter Liljenberg wrote @file{elint.el}, a Lint-style code checker for
+Emacs Lisp programs.
+
+@item
+Lars Lindberg wrote @file{msb.el}, which provides more flexible menus
+for buffer selection; co-wrote @file{imenu.el} (q.v.@:); and rewrote
+@file{dabbrev.el}, originally written by Don Morrison.
+
+@item
+Anders Lindgren wrote @file{autorevert.el}, a package for automatically
+reverting files visited by Emacs that were changed on disk;
+@file{cwarn.el}, a package to highlight suspicious C and C@t{++}
+constructs; and @file{follow.el}, a minor mode to synchronize windows
+that show the same buffer.
+
+@item
+Thomas Link wrote @file{filesets.el}, a package for handling sets of
+files.
+
+@item
+Juri Linkov wrote @file{misearch.el}, extending isearch to multi-buffer
+searches; the code in @file{files-x.el} for handling file- and
+directory-local variables; and the @code{info-finder} feature that
+creates a virtual Info manual of package keywords.
+
+@item
+Károly L@H{o}rentey wrote the ``multi-terminal'' code, which allows
+Emacs to run on graphical and text terminals simultaneously.
+
+@item
+Martin Lorentzon wrote @file{vc-annotate.el}, support for version
+control annotation.
+
+@item
+Dave Love wrote much of the code dealing with Unicode support and
+Latin-N unification.  He added support for many coding systems,
+including the various UTF-7 and UTF-16 coding systems.  He also wrote
+@code{autoarg-mode}, a global minor mode whereby digit keys supply
+prefix arguments; @code{autoarg-kp-mode}, which redefines the keypad
+numeric keys to digit arguments; @file{autoconf.el}, a mode for editing
+Autoconf files; @file{cfengine.el}, a mode for editing Cfengine files;
+@file{elide-head.el}, a package for eliding boilerplate text from file
+headers; @file{hl-line.el}, a minor mode for highlighting the line in
+the current window on which point is; @file{cap-words.el}, a minor mode
+for motion in ``CapitalizedWordIdentifiers''; @file{latin1-disp.el}, a
+package that lets you display ISO 8859 characters on Latin-1 terminals
+by setting up appropriate display tables; @file{python.el}, a major mode
+for the Python programming language; @file{smiley.el}, a facility for
+displaying smiley faces; @file{sym-comp.el}, a library for performing
+mode-dependent symbol completion; @file{benchmark.el} for timing code
+execution; and @file{tool-bar.el}, a mode to control the display of
+the Emacs tool bar.  With Riccardo Murri he wrote @file{vc-bzr.el},
+support for the Bazaar version control system.
+
+@item
+Eric Ludlam wrote the Speedbar package; @file{checkdoc.el}, for checking
+doc strings in Emacs Lisp programs; @file{dframe.el}, providing
+dedicated frame support modes; @file{ezimage.el}, a generalized way to
+place images over text; @file{chart.el} for drawing bar charts etc; and
+the EIEIO (Enhanced Implementation of Emacs Interpreted Objects)
+package.  He was also the main author of the CEDET (Collection of Emacs
+Development Environment Tools) package.  Portions were also written by
+Jan Moringen, David Ponce, and Joakim Verona.
+
+@item
+Roland McGrath wrote @file{compile.el} (since updated by Daniel
+Pfeiffer), a package for running compilations in a buffer, and then
+visiting the locations reported in error messages; @file{etags.el}, a
+package for jumping to function definitions and searching or replacing
+in all the files mentioned in a @file{TAGS} file; with Sebastian
+Kremer @file{find-dired.el}, for using @code{dired} commands on output
+from the @code{find} program; @file{grep.el} for running the
+@code{grep} command; @file{map-ynp.el}, a general purpose boolean
+question-asker; @file{autoload.el}, providing semi-automatic
+maintenance of autoload files.
+
+@item
+Alan Mackenzie wrote the integrated AWK support in CC Mode, and
+maintained CC Mode from Emacs 22 onwards.
+
+@item
+Michael McNamara and Wilson Snyder wrote Verilog mode.
+
+@item
+Christopher J.@: Madsen wrote @file{decipher.el}, a package for cracking
+simple substitution ciphers.
+
+@item
+Neil M.@: Mager wrote @file{appt.el}, functions to notify users of their
+appointments.  It finds appointments recorded in the diary files
+used by the @code{calendar} package.
+
+@item
+Ken Manheimer wrote @file{allout.el}, a mode for manipulating and
+formatting outlines, and @file{icomplete.el}, which provides incremental
+completion feedback in the minibuffer.
+
+@item
+Bill Mann wrote @file{perl-mode.el}, a mode for editing Perl code.
+
+@item
+Brian Marick and Daniel LaLiberte wrote @file{hideif.el}, support for
+hiding selected code within C @code{#ifdef} clauses.
+
+@item
+Simon Marshall wrote @file{regexp-opt.el}, which generates a regular
+expression from a list of strings; and the fast-lock and lazy-lock
+font-lock support modes.  He also extended @file{comint.el} and
+@file{shell.el}, originally written by Olin Shivers.
+
+@item
+Bengt Martensson, Dirk Herrmann, Marc Shapiro, Mike Newton, Aaron Larson,
+and Stefan Schoef, wrote @file{bibtex.el}, a mode for editing Bib@TeX{}
+bibliography files.
+
+@item
+Charlie Martin wrote @file{autoinsert.el}, which provides automatic
+mode-sensitive insertion of text into new files.
+
+@item
+Yukihiro Matsumoto and Nobuyoshi Nakada wrote Ruby-mode.
+
+@item
+Thomas May wrote @file{blackbox.el}, a version of the traditional
+blackbox game.
+
+@item
+David Megginson wrote @file{derived.el}, which allows one to define new
+major modes by inheriting key bindings and commands from existing major
+modes.
+
+@item
+Will Mengarini wrote @file{repeat.el}, a command to repeat the preceding
+command with its arguments.
+
+@item
+Richard Mlynarik wrote @file{cl-indent.el}, a package for indenting
+Common Lisp code; @file{ebuff-menu.el}, an ``electric'' browser for
+buffer listings; @file{ehelp.el}, bindings for browsing help screens;
+@file{rfc822.el}, a parser for E-mail addresses in the RFC-822 format,
+used in mail messages and news articles; @file{terminal.el}, a
+terminal emulator for Emacs subprocesses; and @file{yow.el}, an
+essential utility.
+
+@item
+Gerd Moellmann was the Emacs maintainer from the beginning of Emacs 21
+development until the release of 21.1.  He wrote the new display
+engine used from Emacs 21 onwards, and the asynchronous timers
+facility.  He also wrote @code{ebrowse}, the C@t{++} browser;
+@file{jit-lock.el}, the Just-In-Time font-lock support mode;
+@file{tooltip.el}, a package for displaying tooltips;
+@file{authors.el}, a package for maintaining the @file{AUTHORS} file;
+and @file{rx.el}, a regular expression constructor.
+
+@item
+Stefan Monnier was the Emacs co-maintainer from Emacs 23 onwards.  He added
+support for Arch and Subversion to VC, re-wrote much of the Emacs server
+to use the built-in networking primitives, and re-wrote the abbrev and
+minibuffer completion code for Emacs 23.  He also wrote @code{PCL-CVS},
+a directory-level front end to the CVS version control system;
+@file{reveal.el}, a minor mode for automatically revealing invisible
+text; @file{smerge-mode.el}, a minor mode for resolving @code{diff3}
+conflicts; @file{diff-mode.el}, a mode for viewing and editing context
+diffs; @file{css-mode.el} for Cascading Style Sheets;
+@file{bibtex-style.el} for Bib@TeX{} Style files; @file{mpc.el}, a
+client for the ``Music Player Daemon''; @file{smie.el}, a generic
+indentation engine; and @file{pcase.el}, implementing ML-style pattern
+matching.  He integrated the lexical binding code in Emacs 24.
+
+@item
+Morioka Tomohiko wrote several packages for MIME support in Gnus and
+elsewhere.
+
+@item
+Sen Nagata wrote @file{crm.el}, a package for reading multiple strings
+with completion, and @file{rfc2368.el}, support for @code{mailto:}
+URLs.
+
+@item
+Erik Naggum wrote the time-conversion functions.  He also wrote
+@file{disp-table.el}, for dealing with display tables;
+@file{mailheader.el}, for parsing email headers; and
+@file{parse-time.el}, for parsing time strings.
+
+@item
+Takahashi Naoto co-wrote @file{quail.el} (q.v.@:), and wrote
+@file{robin.el}, another input method.
+
+@item
+Thomas Neumann and Eric Raymond wrote @file{make-mode.el},
+a mode for editing makefiles.
+
+@item
+Thien-Thi Nguyen and Dan Nicolaescu wrote @file{hideshow.el}, a minor
+mode for selectively displaying blocks of text.
+
+@item
+Jurgen Nickelsen wrote @file{ws-mode.el}, providing WordStar emulation.
+
+@item
+Dan Nicolaescu added support for running Emacs as a daemon.  He also
+wrote @file{romanian.el}, support for editing Romanian text;
+@file{iris-ansi.el}, support for running Emacs on SGI's @code{xwsh}
+and @code{winterm} terminal emulators; and @file{vc-dir.el}, displaying
+the status of version-controlled directories.
+
+@item
+Hrvoje Niksic wrote @file{savehist.el}, for saving the minibuffer
+history between Emacs sessions.
+
+@item
+Jeff Norden wrote @file{kermit.el}, a package to help the Kermit
+dialup communications program run comfortably in an Emacs shell buffer.
+
+@item
+Andrew Norman wrote @file{ange-ftp.el}, providing transparent FTP
+support.
+
+@item
+Kentaro Ohkouchi created the Emacs icons used beginning with Emacs 23.
+
+@item
+Christian Ohler wrote @file{ert.el}, a library for automated regression
+testing.
+
+@item
+Alexandre Oliva wrote @file{gnus-mlspl.el}, a group params-based mail
+splitting mechanism.
+
+@item
+Takaaki Ota wrote @file{table.el}, a package for creating and editing
+embedded text-based tables.
+
+@item
+Pieter E.@: J.@: Pareit wrote @file{mixal-mode.el}, an editing mode for
+the MIX assembly language.
+
+@item
+David Pearson wrote @file{quickurl.el}, a simple method of inserting a
+URL into the current buffer based on text at point; @file{5x5.el}, a
+game to fill all squares on the field.
+
+@item
+Jeff Peck wrote @file{sun.el}, key bindings for sunterm keys.
+
+@item
+Damon Anton Permezel wrote @file{hanoi.el}, an animated demonstration of
+the ``Towers of Hanoi'' puzzle.
+
+@item
+William M.@: Perry wrote @file{mailcap.el} (with Lars Magne
+Ingebrigtsen), a MIME media types configuration facility;
+@file{mwheel.el}, a package for supporting mouse wheels; co-wrote (with
+Dave Love) @file{socks.el}, a Socks v5 client; and developed the URL
+package.
+
+@item
+Per Persson wrote @file{gnus-vm.el}, the VM interface for Gnus.
+
+@item
+Jens Petersen wrote @file{find-func.el}, which makes it easy to find
+the source code for an Emacs Lisp function or variable.
+
+@item
+Daniel Pfeiffer wrote @file{conf-mode.el}, a mode for editing
+configuration files; @file{copyright.el}, a package for updating
+copyright notices in files; @file{executable.el}, a package for
+executing interpreter scripts; @file{sh-script.el}, a mode for editing
+shell scripts; @file{skeleton.el}, implementing a concise language for
+writing statement skeletons; and @file{two-column.el}, a minor mode
+for simultaneous two-column editing.
+
+Daniel also rewrote @file{apropos.el} (originally written by Joe Wells),
+for finding commands, functions, and variables matching a regular
+expression; and, together with Jim Blandy, co-authored @file{wyse50.el},
+support for Wyse 50 terminals.  He also co-wrote @file{compile.el}
+(q.v.@:) and @file{ada-stmt.el}.
+
+@item
+Richard L.@: Pieri wrote @file{pop3.el}, a Post Office Protocol (RFC
+1460) interface for Emacs.
+
+@item
+Fred Pierresteguy and Paul Reilly made Emacs work with X Toolkit
+widgets.
+
+@item
+François Pinard, Greg McGary, and Bruno Haible wrote @file{po.el},
+support for PO translation files.
+
+@item
+Christian Plaunt wrote @file{soundex.el}, an implementation of the
+Soundex algorithm for comparing English words by their pronunciation.
+
+@item
+David Ponce wrote @file{recentf.el}, a package that puts a menu of
+recently visited files in the Emacs menu bar; @file{ruler-mode.el}, a
+minor mode for displaying a ruler in the header line; and
+@file{tree-widget.el}, a package to display hierarchical data
+structures.
+
+@item
+Francesco A.@: Potorti wrote @file{cmacexp.el}, providing a command which
+runs the C preprocessor on a region of a file and displays the results.
+He also expanded and redesigned the @code{etags} program.
+
+@item
+Michael D.@: Prange and Steven A.@: Wood wrote @file{fortran.el}, a mode
+for editing Fortran code.
+
+@item
+Ashwin Ram wrote @file{refer.el}, commands to look up references in
+bibliography files by keyword.
+
+@item
+Eric S.@: Raymond wrote @file{vc.el}, an interface to the RCS and SCCS
+source code version control systems, with Paul Eggert; @file{gud.el},
+a package for running source-level debuggers like GDB and SDB in
+Emacs; @file{asm-mode.el}, a mode for editing assembly language code;
+@file{AT386.el}, terminal support package for IBM's AT keyboards;
+@file{cookie1.el}, support for ``fortune-cookie'' programs like
+@file{yow.el} and @file{spook.el}; @file{finder.el}, a package for
+finding Emacs Lisp packages by keyword and topic; @file{keyswap.el},
+code to swap the @key{BS} and @key{DEL} keys; @file{loadhist.el},
+functions for loading and unloading Emacs features;
+@file{lisp-mnt.el}, functions for working with the special headers
+used in Emacs Lisp library files; and code to set and make use of the
+@code{load-history} lisp variable, which records the source file from
+which each lisp function loaded into Emacs came.
+
+@item
+Edward M.@: Reingold wrote the calendar and diary support,
+with contributions from Stewart Clamen (@file{cal-mayan.el}), Nachum
+Dershowitz (@file{cal-hebrew.el}), Paul Eggert (@file{cal-dst.el}),
+Steve Fisk (@file{cal-tex.el}), Michael Kifer (@file{cal-x.el}), Lara
+Rios (@file{cal-menu.el}), and Denis B.@: Roegel (@file{solar.el}).
+Andy Oram contributed to its documentation.  Reingold also contributed
+to @file{tex-mode.el}, a mode for editing @TeX{} files, as did William
+F.@: Schelter, Dick King, Stephen Gildea, Michael Prange, and Jacob
+Gore.
+
+@item
+David Reitter wrote @file{mailclient.el} which can send mail via the
+system's designated mail client.
+
+@item
+Alex Rezinsky wrote @file{which-func.el}, a mode that shows the name
+of the current function in the mode line.
+
+@item
+Rob Riepel wrote @file{tpu-edt.el} and its associated files, providing
+an emulation of the VMS TPU text editor emulating the VMS EDT editor,
+and @file{vt-control.el}, providing some control functions for the DEC
+VT line of terminals.
+
+@item
+Nick Roberts wrote @file{t-mouse.el}, for mouse support in text
+terminals; and @file{gdb-ui.el}, a graphical user interface to GDB.
+Together with Dmitry Dzhus, he wrote @file{gdb-mi.el}, the successor to
+@file{gdb-ui.el}.
+
+@item
+Danny Roozendaal implemented @file{handwrite.el}, which converts text
+into ``handwriting''.
+
+@item
+Markus Rost wrote @file{cus-test.el}, a testing framework for customize.
+
+@item
+Guillermo J.@: Rozas wrote @file{scheme.el}, a mode for editing Scheme and
+DSSSL code.
+
+@item
+Martin Rudalics implemented improved display-buffer handling in Emacs 24.
+
+@item
+Ivar Rummelhoff wrote @file{winner.el}, which records recent window
+configurations so you can move back to them.
+
+@item
+Jason Rumney ported the Emacs 21 display engine to MS-Windows, and has
+contributed extensively to the MS-Windows port of Emacs.
+
+@item
+Wolfgang Rupprecht wrote Emacs 19's floating-point support (including
+@file{float-sup.el} and @file{floatfns.c}), and @file{sup-mouse.el},
+support for the Supdup mouse on lisp machines.
+
+@item
+Kevin Ryde wrote @file{info-xref.el}, a library for checking
+references in Info files.
+
+@item
+James B.@: Salem and Brewster Kahle wrote @file{completion.el}, providing
+dynamic word completion.
+
+@item
+Masahiko Sato wrote @file{vip.el}, an emulation of the VI editor.
+
+@item
+Holger Schauer wrote @file{fortune.el}, a package for using fortune in
+message signatures.
+
+@item
+William Schelter wrote @file{telnet.el}, support for @code{telnet}
+sessions within Emacs.
+
+@item
+Ralph Schleicher wrote @file{battery.el}, a package for displaying
+laptop computer battery status, and @file{info-look.el}, a package for
+looking up Info documentation for symbols in the buffer.
+
+@item
+Michael Schmidt and Tom Perrine wrote @file{modula2.el}, a mode for
+editing Modula-2 code, based on work by Mick Jordan and Peter Robinson.
+
+@item
+Ronald S.@: Schnell wrote @file{dunnet.el}, a text adventure game.
+
+@item
+Philippe Schnoebelen wrote @file{gomoku.el}, a Go Moku game played
+against Emacs; and @file{mpuz.el}, a multiplication puzzle.
+
+@item
+Rainer Schoepf contributed to Alpha and OSF1 support.
+
+@item
+Jan Schormann wrote @file{solitaire.el}, an implementation of the
+Solitaire game.
+
+@item
+Alex Schroeder wrote @file{ansi-color.el}, a package for translating
+ANSI color escape sequences to Emacs faces; @file{sql.el}, a package
+for interactively running an SQL interpreter in an Emacs buffer;
+@file{cus-theme.el}, an interface for custom themes; @file{master.el}, a
+package for making a buffer @samp{master} over another; and
+@file{spam-stat.el}, for statistical detection of junk email.  He also
+wrote parts of the IRC client ERC (q.v.@:).
+
+@item
+Randal Schwartz wrote @file{pp.el}, a pretty-printer for lisp objects.
+
+@item
+Oliver Seidel wrote @file{todo-mode.el}, a package for maintaining
+@file{TODO} list files.
+
+@item
+Manuel Serrano wrote the Flyspell package, which does spell checking
+as you type.
+
+@item
+Hovav Shacham wrote @file{windmove.el}, a set of commands for selecting
+windows based on their geometrical position on the frame.
+
+@item
+Stanislav Shalunov wrote @file{uce.el}, for responding to unsolicited
+commercial email.
+
+@item
+Richard Sharman wrote @file{hilit-chg.el}, which uses colors to show
+recent editing changes.
+
+@item
+Olin Shivers wrote @file{comint.el}, a library for modes running
+interactive command-line-oriented subprocesses, and @file{shell.el}, for
+running inferior shells (both since extended by Simon Marshall);
+@file{cmuscheme.el}, for running inferior Scheme processes;
+@file{inf-lisp.el}, for running inferior Lisp process.
+
+@item
+Espen Skoglund wrote @file{pascal.el}, a mode for editing Pascal code.
+
+@item
+Rick Sladkey wrote @file{backquote.el}, a lisp macro for creating
+mostly-constant data.
+
+@item
+Lynn Slater wrote @file{help-macro.el}, a macro for writing interactive
+help for key bindings.
+
+@item
+Chris Smith wrote @file{icon.el}, a mode for editing Icon code.
+
+@item
+David Smith wrote @file{ielm.el}, a mode for interacting with the Emacs
+Lisp interpreter as a subprocess.
+
+@item
+Paul D.@: Smith wrote @file{snmp-mode.el}.
+
+@item
+William Sommerfeld wrote @file{scribe.el}, a mode for editing Scribe
+files, and @file{server.el}, a package allowing programs to send files
+to an extant Emacs job to be edited.
+
+@item
+Andre Spiegel made many contributions to the Emacs Version Control
+package, and in particular made it support multiple back ends.
+
+@item
+Michael Staats wrote @file{pc-select.el}, which rebinds keys for
+selecting regions to follow many other systems.
+
+@item
+Richard Stallman invented Emacs.  He is the original author of GNU
+Emacs, and has been Emacs maintainer over several non-contiguous
+periods.  In addition to much of the ``core'' Emacs code, he has
+written @file{easymenu.el}, a facility for defining Emacs menus;
+@file{image-mode.el}, support for visiting image files;
+@file{menu-bar.el}, the Emacs menu bar support code;
+@file{paren.el}, a package to make matching parentheses stand out in
+color; and also co-authored portions of CC mode.
+
+@item
+Sam Steingold wrote @file{gulp.el}, a facility for asking package
+maintainers for updated versions of their packages via e-mail, and
+@file{midnight.el}, a package for running a command every midnight.
+
+@item
+Ake Stenhoff and Lars Lindberg wrote @file{imenu.el}, a framework for
+browsing indices made from buffer contents.
+
+@item
+Peter Stephenson wrote @file{vcursor.el}, which implements a ``virtual
+cursor'' that you can move with the keyboard and use for copying text.
+
+@item
+Ken Stevens wrote @file{ispell.el}, a spell-checker interface.
+
+@item
+Kim F.@: Storm made many improvements to the Emacs display engine,
+process support, and networking support. He also wrote
+@file{bindat.el}, a package for encoding and decoding binary data;
+CUA mode, which allows Emacs to emulate the standard CUA key
+bindings; @file{ido.el}, a package for selecting buffers and files
+quickly; @file{keypad.el} for simplified keypad bindings; and
+@file{kmacro.el}, the keyboard macro facility.
+
+@item
+Martin Stjernholm co-authored CC Mode, a major editing mode for C,
+C@t{++}, Objective-C, Java, Pike, CORBA IDL, and AWK code.
+
+@item
+Steve Strassmann did not write @file{spook.el}, and even if he did, he
+really didn't mean for you to use it in an anarchistic way.
+
+@item
+Olaf Sylvester wrote @file{bs.el}, a package for manipulating Emacs
+buffers.
+
+@item
+Tibor @v{S}imko and Milan Zamazal wrote @file{slovak.el}, support for
+editing text in Slovak language.
+
+@item
+Luc Teirlinck wrote @file{help-at-pt.el}, providing local help through
+the keyboard.
+
+@item
+Jean-Philippe Theberge wrote @file{thumbs.el}, a package for viewing
+image files as ``thumbnails''.
+
+@item
+Spencer Thomas wrote the original @file{dabbrev.el}, providing a command
+which completes the partial word before point, based on other nearby
+words for which it is a prefix.  He also wrote the original dumping
+support.
+
+@item
+Toru Tomabechi contributed to Tibetan support.
+
+@item
+Markus Triska wrote @file{linum.el}, a minor mode that displays line
+numbers in the left margin.
+
+@item
+Tom Tromey and Chris Lindblad wrote @file{tcl.el}, a mode for editing
+Tcl/Tk source files and running a Tcl interpreter as an Emacs
+subprocess.  Tom Tromey also wrote @file{bug-reference.el}, providing
+clickable links to bug reports; and the first version of the Emacs
+package system.
+
+@item
+Eli Tziperman wrote @file{rmail-spam-filter.el}, a spam filter for RMAIL.
+
+@item
+Daiki Ueno wrote @file{starttls.el}, support for Transport Layer
+Security protocol; @file{sasl-cram.el} and @file{sasl-digest.el} (with
+Kenichi Okada), and @file{sasl.el}, support for Simple Authentication
+and Security Layer (SASL); @file{plstore.el} for secure storage of
+property lists; and the EasyPG (and its predecessor PGG)
+package, for GnuPG and PGP support.
+
+@item
+Masanobu Umeda wrote GNUS, a feature-rich reader for Usenet news that
+was the ancestor of the current Gnus package.  He also wrote
+@file{rmailsort.el}, a package for sorting messages in RMAIL folders;
+@file{metamail.el}, an interface to the Metamail program;
+@file{gnus-kill.el}, the Kill File mode for Gnus; @file{gnus-mh.el}, an
+mh-e interface for Gnus; @file{gnus-msg.el}, a mail and post interface
+for Gnus; and @file{timezone.el}, providing functions for dealing with
+time zones.
+
+@item
+Neil W.@: Van Dyke wrote @file{webjump.el}, a ``hot links'' package.
+
+@item
+Didier Verna wrote @file{rect.el}, a package of functions for
+operations on rectangle regions of text.  He also contributed to Gnus
+(q.v.@:).
+
+@item
+Joakim Verona implemented ImageMagick support.
+
+@item
+Ulrik Vieth implemented @file{meta-mode.el}, for editing MetaFont code.
+
+@item
+Geoffrey Voelker wrote the Windows NT support.  He also wrote
+@file{dos-w32.el}, functions shared by the MS-DOS and MS-Windows ports
+of Emacs, and @file{w32-fns.el}, MS-Windows specific support functions.
+
+@item
+Johan Vromans wrote @file{forms.el} and its associated files, a mode for
+filling in forms.  He also wrote @file{iso-acc.el}, a minor mode
+providing electric accent keys.
+
+@item
+Colin Walters wrote Ibuffer, an enhanced buffer menu.
+
+@item
+Barry Warsaw wrote @file{assoc.el}, a set of utility functions for
+working with association lists; @file{cc-mode.el}, a mode for editing
+C, C@t{++}, and Java code, based on earlier work by Dave Detlefs,
+Stewart Clamen, and Richard Stallman; @file{elp.el}, a profiler for
+Emacs Lisp programs; @file{man.el}, a mode for reading Unix manual
+pages; @file{regi.el}, providing an AWK-like functionality for use in
+lisp programs; @file{reporter.el}, providing customizable bug
+reporting for lisp packages; and @file{supercite.el}, a minor mode for
+quoting sections of mail messages and news articles.
+
+@item
+Christoph Wedler wrote @file{antlr-mode.el}, a major mode for ANTLR
+grammar files.
+
+@item
+Morten Welinder helped port Emacs to MS-DOS, and introduced face
+support into the MS-DOS port of Emacs.  He also wrote
+@file{desktop.el}, facilities for saving some of Emacs's state between
+sessions; @file{timer.el}, the Emacs facility to run commands at a
+given time or frequency, or when Emacs is idle, and its C-level
+support code; @file{pc-win.el}, the MS-DOS ``window-system'' support;
+@file{internal.el}, an ``internal terminal'' emulator for the MS-DOS
+port of Emacs; @file{arc-mode.el}, the mode for editing compressed
+archives; @file{s-region.el}, commands for setting the region using
+the shift key and motion commands; and @file{dos-fns.el}, functions
+for use under MS-DOS.
+
+@item
+Joe Wells wrote the original version of @file{apropos.el} (q.v.@:);
+@file{resume.el}, support for processing command-line arguments after
+resuming a suspended Emacs job; and @file{mail-extr.el}, a package for
+extracting names and addresses from mail headers, with contributions
+from Jamie Zawinski.
+
+@item
+Rodney Whitby and Reto Zimmermann wrote @file{vhdl-mode.el}, a major
+mode for editing VHDL source code.
+
+@item
+John Wiegley wrote @file{align.el}, a set of commands for aligning text
+according to regular-expression based rules; @file{isearchb.el} for fast
+buffer switching; @file{timeclock.el}, a package for keeping track of
+time spent on projects; the Bahá'í calendar support;
+@file{pcomplete.el}, a programmable completion facility;
+@file{remember.el}, a mode for jotting down things to remember;
+@file{eudcb-mab.el}, an address book backend for the Emacs Unified
+Directory Client; and @code{eshell}, a command shell implemented
+entirely in Emacs Lisp.  He also contributed to Org mode (q.v.@:).
+
+@item
+Mike Williams wrote @file{mouse-sel.el}, providing enhanced mouse
+selection; and @file{thingatpt.el}, a library of functions for finding
+the ``thing'' (word, line, s-expression) containing point.
+
+@item
+Roland Winkler wrote @file{proced.el}, a system process editor.
+
+@item
+Bill Wohler wrote MH-E, the Emacs interface to the MH mail system;
+making use of earlier work by James R.@: Larus.  Satyaki Das, Peter S.@:
+Galbraith, Stephen Gildea, and Jeffrey C.@: Honig also wrote various
+MH-E components.
+
+@item
+Dale R.@: Worley wrote @file{emerge.el}, a package for interactively
+merging two versions of a file.
+
+@item
+Francis J.@: Wright wrote @file{woman.el}, a package for browsing
+manual pages without the @code{man} command.
+
+@item
+Masatake Yamato wrote @file{ld-script.el}, an editing mode for GNU
+linker scripts, and contributed subword handling and style
+``guessing'' in CC mode.
+
+@item
+Jonathan Yavner wrote @file{testcover.el}, a package for keeping track
+of the testing status of Emacs Lisp code; @file{unsafep.el} to determine
+if a Lisp form is safe; and the SES spreadsheet package.
+
+@item
+Ryan Yeske wrote @file{rcirc.el} a simple Internet Relay Chat client.
+
+@item
+Ilya Zakharevich and Bob Olson wrote @file{cperl-mode.el}, a major
+mode for editing Perl code.  Ilya Zakharevich also wrote
+@file{tmm.el}, a mode for accessing the Emacs menu bar on a text-mode
+terminal.
+
+@item
+Milan Zamazal wrote @file{czech.el}, support for editing Czech text;
+@file{glasses.el}, a package for easier reading of source code that
+uses illegible identifier names; and @file{tildify.el}, commands for
+adding hard spaces to text, @TeX{}, and SGML/HTML files.
+
+@item
+Victor Zandy wrote @file{zone.el}, a package for people who like to
+zone out in front of Emacs.
+
+@item
+Eli Zaretskii made many standard Emacs features work on MS-DOS and
+Microsoft Windows.  He also wrote @file{tty-colors.el}, which
+implements transparent mapping of X colors to tty colors; and
+@file{rxvt.el}.  He implemented support for bidirectional text.
+
+@item
+Jamie Zawinski wrote much of the support for faces and X selections.
+With Hallvard Furuseth, he wrote the optimizing byte compiler used
+from Emacs 19 onwards.  He also wrote @file{mailabbrev.el}, a package
+that provides automatic expansion of mail aliases, and
+@file{tar-mode.el}, which provides simple viewing and editing commands
+for tar files.
+
+@item
+Andrew Zhilin created the Emacs 22 icons.
+
+@item
+Shenghuo Zhu wrote @file{binhex.el}, a package for reading and writing
+binhex files; @file{mm-partial.el}, message/partial support for MIME
+messages; @file{rfc1843.el}, an HZ decoding package;
+@file{uudecode.el}, an Emacs Lisp decoder for uuencoded data; and
+@file{webmail.el}, an interface to Web mail.  He also wrote several
+other Gnus components.
+
+@item
+Ian T.@: Zimmerman wrote @file{gametree.el}.
+
+@item
+Reto Zimmermann wrote @file{vera-mode.el}.
+
+@item
+Neal Ziring and Felix S.@: T.@: Wu wrote @file{vi.el}, an emulation of the
+VI text editor.
+
+@item
+Ted Zlatanov (as well as his contributions to the Gnus newsreader)
+wrote an interface to the GnuTLS library, for secure network
+connections; and a futures facility for the URL library.
+
+@item
+Detlev Zundel wrote @file{re-builder.el}, a package for building regexps
+with visual feedback.
+
+@end itemize

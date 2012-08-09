@@ -1,0 +1,836 @@
+2007-12-16  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-services.el (erc-nickserv-alist): Removed autodetect regexp,
+	added identified regexp for OFTC.
+	(erc-nickserv-identification-autodetect): Make sure success-regex
+	is non-nil.
+	(erc-nickserv-identify-autodetect): Make sure identify-regex is
+	non-nil.  Doc fix.
+
+2007-12-13  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-backend.el (PRIVMSG, QUIT, TOPIC, WALLOPS, 376, 004, 221)
+	(312, 315, 319, 330, 331, 333, 367, 368, 391, 405, 406, 412)
+	(421, 432, 433, 437, 442, 461, 474, 477, 482, 431): Doc fix.
+
+2007-12-09  Michael Olson  <mwolson@gnu.org>
+
+	* erc-services.el (erc-nickserv-alist): Fix regexps for GRnet.
+
+2007-12-09  Giorgos Keramidas  <keramida@ceid.upatras.gr>  (tiny change)
+
+	* erc-backend.el, erc.el:
+	Parse 275 (secure connection) responses.
+
+	* erc-services.el: Add identification hooks for GRnet, the Greek
+	IRC network <http://www.irc.gr>.
+
+2007-12-08  David Kastrup  <dak@gnu.org>
+
+	* erc-stamp.el (erc-echo-timestamp):
+	* erc-lang.el (language):
+	* erc-backend.el (erc-server-connect): Fix buggy call to `message'.
+
+2007-12-07  Edward O'Connor  <ted@oconnor.cx>
+
+	* erc-services.el: Provide a hook that runs when nickserv confirms
+	that the user has successfully identified.
+	(services, erc-nickserv-identify-mode): Add and remove
+	erc-nickserv-identification-autodetect from
+	erc-server-NOTICE-functions.
+	(erc-nickserv-alist): Add SUCCESS-REGEXP to each entry.
+	(erc-nickserv-alist-identified-regexp)
+	(erc-nickserv-identification-autodetect): New functions.
+	(erc-nickserv-identified-hook): New hook.
+
+2007-12-06  Deepak Goel  <deego3@gmail.com>
+
+	* erc-match.el (erc-add-entry-to-list): Fix buggy call to `error'.
+
+2007-12-01  Glenn Morris  <rgm@gnu.org>
+
+	* erc-backend.el (erc-server-send-ping): Move after definition of
+	erc-server-send.
+
+2007-11-29  Giorgos Keramidas  <keramida@ceid.upatras.gr>  (tiny change)
+
+	* erc-backend.el, erc.el:
+	Parse 307 (nick has identified) responses.
+
+2007-11-15  Juanma Barranquero  <lekktu@gmail.com>
+
+	* erc.el (erc-open):
+	* erc-backend.el (define-erc-response-handler):
+	* erc-log.el (log):
+	* erc-match.el (erc-log-matches): Fix typos in docstrings.
+
+2007-11-11  Michael Olson  <mwolson@gnu.org>
+
+	* erc-autoaway.el (erc-autoaway-possibly-set-away):
+	* erc-netsplit.el (erc-netsplit-timer):
+	* erc-notify.el (erc-notify-timer):
+	* erc-track.el (erc-user-is-active): Only run if we have
+	successfully established a connection to the server and have
+	logged in.  I suspect that sending messages too soon may make some
+	IRC servers not respond well, particularly when the network
+	connection is iffy or subject to traffic-shaping.
+
+2007-11-01  Michael Olson  <mwolson@gnu.org>
+
+	* erc-compat.el (erc-set-write-file-functions): New compatibility
+	function to set the write hooks appropriately.
+
+	* erc-log.el (erc-log-setup-logging): Use
+	erc-set-write-file-functions.  This fixes a byte-compiler warning.
+
+	* erc-stamp.el: Silence byte-compiler warning about
+	erc-fill-column.
+
+	* erc.el (erc-with-all-buffers-of-server): Bind the result of
+	mapcar to a variable in order to silence a byte-compiler warning.
+
+2007-10-29  Michael Olson  <mwolson@gnu.org>
+
+	* erc-ibuffer.el (erc-modified-channels-alist): Use
+	eval-when-compile, and explain why we are doing this.
+
+2007-10-25  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* erc-ibuffer.el (erc-modified-channels-alist): Pacify
+	byte-compiler.
+
+2007-10-13  Glenn Morris  <rgm@gnu.org>
+
+	* erc-track.el (erc-modified-channels-update): Use mapc rather
+	than mapcar.
+
+2007-10-12  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc.el (erc-join-channel): Prompt for channel key if C-u or
+	another prefix-arg was typed.
+
+	* NEWS: Noted this change.
+
+2007-10-07  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-cmd-ME'S): New command that handles the case where
+	someone types "/me's".  It concatenates the text " 's" to the
+	beginning of the input and then sends the result like a normal
+	"/me" command.
+	(erc-command-regexp): Permit single-quote character.
+
+2007-09-30  Aidan Kehoe  <kehoea@parhasard.net>  (tiny change)
+
+	* erc-log.el (erc-save-buffer-in-logs): Prevent spurious warnings
+	when looking at a log file and concurrently saving to it.
+
+2007-09-18  Exal de Jesus Garcia Carrillo  <exal@gnu.org>  (tiny change)
+
+	* erc.texi (Special-Features): Fix small typo.
+
+2007-09-16  Michael Olson  <mwolson@gnu.org>
+
+	* erc-track.el (erc-track-switch-direction): Mention
+	erc-track-faces-priority-list.  Thanks to Leo for the suggestion.
+
+2007-09-11  Exal de Jesus Garcia Carrillo  <exal@gnu.org>  (tiny change)
+
+	* erc-sound.el: Fix typo in setting up instructions.
+
+2007-09-10  Michael Olson  <mwolson@gnu.org>
+
+	* Makefile (elpa): Copy dir template rather than echoing a few
+	lines.  The reason for this is that the ELPA package for ERC was
+	getting a corrupt dir entry.
+
+	* dir-template: Template for the ELPA dir file.
+
+2007-09-08  Michael Olson  <mwolson@gnu.org>
+
+	* erc-log.el (erc-log-filter-function): New option that specifies
+	the function to call for filtering text before writing it to a log
+	file.  Thanks to David O'Toole for the suggestion.
+	(erc-save-buffer-in-logs): Use erc-log-filter-function.  Make sure
+	we carry along the value of coding-system-for-write, because this
+	could potentially be shadowed by the temporary buffer.
+
+	* erc.el (erc-version-string): Update to 5.3, development version.
+
+2007-09-07  Glenn Morris  <rgm@gnu.org>
+
+	* erc.el (erc-toggle-debug-irc-protocol): Fix call to
+	erc-view-mode-enter.
+
+2007-08-08  Glenn Morris  <rgm@gnu.org>
+
+	* erc-log.el, erc.el: Replace `iff' in doc-strings and comments.
+
+2007-09-03  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-default-port): Make this an integer value rather
+	than a string.  Thanks to Luca Capello for the report.
+
+2007-08-27  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-cmd-GQUIT): If erc-kill-queries-on-quit is non-nil,
+	kill all query buffers after 4 seconds.
+
+2007-08-16  Michael Olson  <mwolson@gnu.org>
+
+	* NEWS: Add ERC 5.3 changes section, and mention jbms' erc-track
+	compatibility note.
+
+	* erc-track.el (erc-track-list-changed-hook): Turn this into a
+	customizable option.
+	(erc-track-switch-direction): Add 'importance option.
+	(erc-modified-channels-display): If erc-track-switch-direction is
+	'importance, call erc-track-sort-by-importance.
+	(erc-track-face-priority): New function that returns a number
+	indicating the position of a face in erc-track-faces-priority-list.
+	(erc-track-sort-by-importance): New function that sorts
+	erc-modified-channels-list according to erc-track-face-priority.
+	(erc-track-get-active-buffer): Make 'oldest a rough opposite of
+	'importance.
+
+2007-08-14  Jeremy Maitin-Shepard  <jbms@cmu.edu>
+
+	* erc-track.el (erc-track-remove-disconnected-buffers): New
+	variable which controls whether buffers associated with a server
+	that is disconnected should be removed from
+	`erc-modified-channels-alist'.  Existing behavior is to
+	unconditionally remove such buffers, which is achieved by setting
+	`erc-track-removed-disconnected-buffers' to t.  When set to t,
+	which is the new default value, such buffers remain in the list,
+	which I think is often the desired behavior, since the user may
+	likely wish to find out about activity that occurred in a channel
+	prior to it being disconnected.
+	(erc-track-list-changed-hook): New hook that is run whenever the
+	contents of `erc-modified-channels-alist' changes; it is useful
+	for users such as myself that don't use the default mode-line
+	notification but instead use a separate mechanism (which is tied
+	to my window manager) to provide notification of channel activity.
+	(erc-track-get-buffer-window): New function that acts as a wrapper
+	around `get-buffer-window' that handles the `selected-visible'
+	option of `erc-track-visibility'; previously, the value of
+	`erc-track-visibility' was passed directly to `get-buffer-window',
+	which does not support `selected-visible'; consequently,
+	`selected-visible' was not properly supported.
+	(erc-track-modified-channels): Fix a bug in the logic for removing
+	buffers from the list in certain cases.
+	(erc-track-position-in-mode-line): Add a supported value that
+	specifies that the tracking information should not be added to the
+	mode line at all.  The value of nil is used to indicate that the
+	information should not be added at all to the mode line.
+	(erc-track-add-to-mode-line): Check for position eq to t, rather
+	than non-nil.
+	(erc-buffer-visible): Use erc-track-get-buffer-window.
+	(erc-modified-channels-update): Take
+	erc-track-remove-disconnected-buffers into account.
+	(erc-modified-channels-display): Run `erc-track-list-changed-hook'.
+
+	* erc.el (erc-reuse-frames): New option that determines whether
+	new frames are always created.  Defaults to t.  This only has an
+	effect when erc-join-buffer is set to 'frame.
+	(erc-setup-buffer): Use it.
+
+2007-08-14  Michael Olson  <mwolson@gnu.org>
+
+	* erc-backend.el (erc-server-reconnect): If the server buffer has
+	been killed, use the current buffer instead.  If the current
+	buffer is not an ERC buffer, give an error.  This fixes a bug when
+	/reconnect is run from a channel buffer whose server buffer has
+	been deleted.  Thanks to jbms for the report.
+	(erc-process-sentinel-1): Take server buffer as an argument, so
+	that we can make sure that it is current.
+	(erc-process-sentinel): Pass buffer to erc-process-sentinel-1.
+	(erc-process-sentinel-2): New function split from
+	erc-process-sentinel-1.  If server buffer is deleted during a
+	reconnect attempt, stop trying to reconnect.  Fix bug where
+	reconnect was not happening when erc-server-reconnect-attempts was
+	t.  Call erc-server-reconnect-p only once each time.  If we are
+	instructed to try connecting indefinitely, tell the user that they
+	can stop this by killing the server buffer.  Call the process
+	sentinel by means of run-at-time, so that there is time to kill
+	the buffer if need be; this also removes the need for a while
+	loop.  Refuse to reconnect again if erc-server-reconnect-timeout
+	is not an number.
+
+	* erc.el (erc-command-no-process-p): Fix bug: the return value of
+	erc-extract-command-from-line is a list rather than a single
+	symbol.  Thanks to jbms for the report.
+	(erc-cmd-RECONNECT): Use simpler logic, and use buffer-live-p
+	rather than bufferp.
+	(erc-send-current-line, erc-display-command, erc-display-msg):
+	Handle case where erc-server-process is nil, so that /reconnect
+	works.
+
+2007-08-12  Michael Olson  <mwolson@gnu.org>
+
+	* erc-identd.el (erc-identd-filter): Instead of sending an EOF
+	character, which now confuses freenode, stop the server process,
+	so that no new connections are accepted, and kill the current
+	client process.
+
+2007-07-29  Michael Olson  <mwolson@gnu.org>
+
+	* erc-list.el: Relicense to GPLv3.  Since the file was already
+	licensed under version 2 or later, it turns out that we do not
+	need the permission of all of the authors in order to proceed.
+
+2007-07-13  Michael Olson  <mwolson@gnu.org>
+
+	* erc-goodies.el (erc-get-bg-color-face, erc-get-fg-color-face):
+	Use erc-error rather than message and beep.
+
+	* erc-sound.el: Indentation fix.
+
+	* erc.el (erc-command-no-process-p): New function that determines
+	if its argument is an ERC command that can be run when the server
+	process is not alive.
+	(erc-cmd-SET, erc-cmd-CLEAR, erc-cmd-COUNTRY, erc-cmd-HELP)
+	(erc-cmd-LASTLOG, erc-cmd-QUIT, erc-cmd-GQUIT)
+	(erc-cmd-RECONNECT, erc-cmd-SERVER): Denote that these commands
+	can be run even when the server process is not alive.
+	(erc-send-current-line): Call erc-command-no-process-p if the
+	server process is not alive, to determine if we have a command
+	that can be run anyway.  Thanks to Tom Tromey for the bug report.
+	(erc-error): New function that either displays a message or throws
+	an error, depending on whether debug-on-error is non-nil.
+	(erc-cmd-SERVER, erc-send-current-line): Use it.
+
+2007-07-10  Michael Olson  <mwolson@gnu.org>
+
+	* Relicense all FSF-assigned code to GPLv3.
+
+2007-06-25  Michael Olson  <mwolson@gnu.org>
+
+	* erc.texi (Options): Fix typo.
+	(Getting Help and Reporting Bugs): Update webpage URL.  Make Gmane
+	part more readable.
+
+2007-06-20  Michael Olson  <mwolson@gnu.org>
+
+	* erc-stamp.el (erc-timestamp-format-left): New option that
+	specifies the left timestamp to use for
+	erc-insert-timestamp-left-and-right.
+	(erc-timestamp-format-right): New option that specifies the right
+	timestamp to use for erc-insert-timestamp-left-and-right.
+	(erc-insert-timestamp-function): Change default to
+	erc-insert-timestamp-left-and-right.
+	(erc-insert-away-timestamp-function): Ditto.
+	(erc-timestamp-last-inserted-left)
+	(erc-timestamp-last-inserted-right): New variables to keep track
+	of data for erc-insert-timestamp-left-and-right.
+	(erc-insert-timestamp-left-and-right): New function that places
+	timestamps on both the left and right sides of the screen, but
+	only if each timestamp has changed since it was last computed.
+	Thanks to offby1 for urging me to merge this.
+
+	* erc.el (erc-open-ssl-stream): Display informative error when
+	ssl.el not found.
+	(erc-tls): New function to connect using tls.el.
+	(erc-open-tls-stream): New function to initiate tls connection.
+	Display informative error when tls.el not found.
+
+2007-06-19  Michael Olson  <mwolson@gnu.org>
+
+	* erc-log.el: Update header with accurate instructions.
+
+2007-06-17  Michael Olson  <mwolson@gnu.org>
+
+	* erc-pkg.el: Update description to match what is currently in ELPA.
+
+2007-06-14  Juanma Barranquero  <lekktu@gmail.com>
+
+	* erc-goodies.el (erc-scroll-to-bottom): Remove redundant check.
+
+2007-06-13  Michael Olson  <mwolson@gnu.org>
+
+	* erc-compat.el (erc-with-selected-window): New compatibility
+	macro that implements `with-selected-window'.
+
+	* erc-goodies.el (erc-scroll-to-bottom): Use it.  This fixes a bug
+	with buffer ordering where ERC buffers would move to the top.
+	Thanks to Ivan Kanis for the patch.
+
+2007-06-10  Michael Olson  <mwolson@gnu.org>
+
+	* erc-log.el (erc-logging-enabled): Fix a bug that occurred when
+	`erc-log-channels-directory' had the name of a function.
+
+2007-06-06  Juanma Barranquero  <lekktu@gmail.com>
+
+	* erc.el (erc-show-channel-key-p, erc-startup-file-list):
+	Fix typo in docstring.
+
+2007-06-03  Michael Olson  <mwolson@gnu.org>
+
+	* erc-compat.el (erc-view-mode-enter): Make this its own function,
+	in order to document what we do, and provide sane fallback
+	behavior.
+
+	* erc.el (erc-toggle-debug-irc-protocol): Don't pass any arguments
+	to erc-view-mode-enter, since we don't do anything special with
+	the exit function.  This fixes a bug with Emacs 21 and Emacs 22.
+	Thanks to Leo for noticing.
+
+2007-05-30  Michael Olson  <mwolson@gnu.org>
+
+	* erc-compat.el (erc-user-emacs-directory): New variable that
+	determines where to find user-specific Emacs settings.  For Emacs,
+	this is usually ~/.emacs.d, and for XEmacs this is usually
+	~/.xemacs.
+
+	* erc.el (erc-startup-file-list): Use erc-user-emacs-directory.
+
+2007-05-28  Michael Olson  <mwolson@gnu.org>
+
+	* erc-button.el (erc-button-url-regexp): Recognize parentheses as
+	part of URLs.  Thanks to Lawrence Mitchell for the fix.
+
+2007-05-26  Michael Olson  <mwolson@gnu.org>
+
+	* erc.texi (Modules): Fix references to completion modules.
+
+2007-05-21  Michael Olson  <mwolson@gnu.org>
+
+	* Makefile (SOURCE): Remove erc-pkg.el.
+	(debclean): New rule to clean old Debian packages of ERC.
+	(debprepare): Don't modify the released tarball, but copy it as
+	the .orig.tar.gz file.
+	(debrelease, debrevision): Remove.
+	(debinstall): New target that copies the generated Debian file to
+	a distro-specific location.
+	(deb): New rule that chains together the stages in building a
+	Debian package.
+	(EXTRAS): Add erc-nicklist.el, since it is not release-quality.
+	(extras): Copy images directory.
+
+	* erc-nicklist.el (erc-nicklist-icons-directory): Use
+	locate-library to find the "images" directory.  This should be
+	more failsafe.  Thanks to Tom Tromey for the idea.
+
+2007-05-19  Michael Olson  <mwolson@gnu.org>
+
+	* Makefile (ELPA): New variable that contains the location of my
+	local ELPA repository.
+	(elpa): New rule that makes an ELPA package for ERC.
+
+2007-04-19  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-parse-prefix): New function that retrieves the
+	PREFIX server parameter from the current server and returns an
+	alist of prefix type to prefix character.
+	(erc-channel-receive-names): Use `erc-parse-prefix' to determine
+	whether the first character of a nick is a prefix character or
+	not.  This should fix a bug reported by bromine about needing to
+	type "%" first to complete nicks of people who are "hops" on
+	Slashnet.  This should also support for very exotic IRC server
+	setups, if any exist.
+	(erc-update-current-channel-member): Indentation.
+
+2007-04-15  Michael Olson  <mwolson@gnu.org>
+
+	* erc-log.el (erc-generate-log-file-name-function): Docfix.
+	Mention how to deal with the case for putting log files in
+	different directories.  Change a customization type from `symbol'
+	to `function'.
+	(erc-log-channels-directory): Allow this to contain a function
+	name, which is called with the same args as in
+	`erc-generate-log-file-name-function'.  Thanks to andrewy for the
+	report and use case.
+	(erc-current-logfile): Detect if `erc-log-channels-directory' is a
+	function and call it with arguments if so.
+
+2007-04-12  Michael Olson  <mwolson@gnu.org>
+
+	* erc-backend.el (define-erc-response-handler): Mention that hook
+	processing stops when the function returns non-nil.  This should
+	help avoid a nasty "gotcha" when making custom functions.  Thanks
+	to John Sullivan for the report.
+
+2007-04-08  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-nicklist.el (erc-nicklist-voiced-position): Fixed
+	customization mismatch.
+
+2007-04-01  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-version-string): Release ERC 5.2.
+
+	* erc-auto.in, erc-chess.el, erc-list.el, erc-speak.el:
+	* erc-viper.el: Update copyright notices.
+
+	* erc.texi: Make Emacs Lisp source code in this document
+	essentially public domain.  Update version to 5.2.
+	(Obtaining ERC): Mention extras tarball.
+	(Releases): Mention local GNU mirror.
+	(Sample Configuration): Remove notice.
+
+	* FOR-RELEASE (5.3): Add item for erc-nicklist.
+	Mark NEWS as done.  Mark extras tarball as done.
+
+	* Makefile (VERSION): Increment to 5.2.
+	(TESTING): Remove.
+	(EXTRAS): New variable containing the contents of our "Emacs 22
+	extras" tarball.
+	(SOURCE): Remove $(TESTING).
+	(MISC): Add COPYING and ChangeLog.06.  Fix ChangeLog.NNNN ->
+	ChangeLog.NN.
+	(release): Use $(SNAPDIR) instead of erc-$(VERSION).
+	(extras): New rule which implements the building of the extras
+	tarball.
+	(upload-extras): New rule to upload the extras tarball.  It's
+	yucky to replicate upload, but oh well.
+	(DISTRIBUTOR): New variable used to differentiate between building
+	packages for Ubuntu and Debian.
+	(debrelease, debrevision): Use it.
+	(debbuild): Run linda in addition to lintian.
+
+	* NEWS: Mention extras tarball.  Note which files have been
+	renamed.  Note that erc-list is enabled by default, except in
+	Emacs 22.
+
+	* README.extras: New file which serves as a README for the extras
+	tarball.
+
+2007-03-31  Michael Olson  <mwolson@gnu.org>
+
+	* NEWS: Update for the 5.2 release.
+
+	* FOR-RELEASE: Finish up 5.2 manual item.  Add documentation item
+	for 5.3.
+
+	* erc.texi (Sample Session): Flesh out.  Mention #erc.
+	(Modules): Defer to 5.3 release.
+	(Advanced Usage): Move Sample Configuration chapter ahead of
+	unfinished chapters.
+	(Sample Configuration): Write.
+	(Options): Mention how to see available ERC options.  Defer to 5.3
+	release.
+	(Tips and Tricks): Remove, since it seems better to just include
+	tips and tricks in the sample configuration, commented out.
+
+	* erc-bbdb.el (erc-bbdb-search-name-and-create): Make prompt more
+	informative about how to skip merging.
+	(erc-bbdb-insinuate-and-show-entry-1): Move contents of
+	erc-bbdb-insinuate-and-show-entry here.
+	(erc-bbdb-insinuate-and-show-entry): Run
+	erc-bbdb-insinuate-and-show-entry-1 "outside" of the calling
+	function, so that we can avoid triggering a process-filter error
+	if the user hits C-g.
+
+2007-03-30  Michael Olson  <mwolson@gnu.org>
+
+	* FOR-RELEASE: Solve C-c C-SPC keybinding dilemma.
+
+	* erc-autoaway.el (erc-autoaway-idle-method): Use `if' rather than
+	`cond' and `set' rather than `set-default'.
+
+	* erc-log.el: Avoid compiler warning by requiring erc-network
+	during compilation.
+	(erc-generate-log-file-name-function): Add tag to each option.
+	Add erc-generate-log-file-name-network.
+	(erc-generate-log-file-name-network): New function which generates
+	a log file name that uses network name rather than server name,
+	when possible.
+
+	* erc-track.el (track): Assimilate track-when-inactive module,
+	since there's no need to have two modules in one file -- an option
+	will do.  Remove track-modified-channels alias.  Call
+	erc-track-minor-mode-maybe, and tear down the minor mode when
+	disabling.
+	(erc-track-when-inactive): New option which determines whether to
+	track visible buffers when inactive.  The default is not to do so.
+	(erc-track-visibility): Mention erc-track-when-inactive.
+	(erc-buffer-visible): Use erc-track-when-inactive.
+	(erc-track-enable-keybindings): New option which determines
+	whether to enable the global-level tracking keybindings.  The
+	default is to do so, unless they would override another binding,
+	in which case we prompt the user about it.
+	(erc-track-minor-mode-map): Move global keybindings here.
+	(erc-track-minor-mode): New minor mode which only enables the
+	keybindings and does nothing else.
+	(erc-track-minor-mode-maybe): New function which starts
+	erc-track-minor-mode, but only if it hasn't already been started,
+	an ERC buffer exists, and the user OK's it, depending on the value
+	of `erc-track-enable-keybindings'.
+	(erc-track-switch-buffer): Display a message if someone calls this
+	without first enabling erc-track-mode.
+
+2007-03-17  Michael Olson  <mwolson@gnu.org>
+
+	* erc.texi (Development): Mention ErcDevelopment page on
+	emacswiki.
+	(Getting Started): Mention ~/.emacs.d/.ercrc.el and the Customize
+	interface.
+	(Sample Session): New section that has a very rough draft for a
+	sample ERC session.
+	(Special Features): New section that explains some of the special
+	features of ERC.  Taken from ErcFeatures on emacswiki, with
+	enhancements.
+
+2007-03-12  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-autoaway.el (erc-autoaway-idle-method): When setting the new
+	value, disable and re-enable `erc-autoaway-mode' only if it was
+	already enabled.  This fixes a bug where autoaway was enabled just
+	by loading the file.
+
+2007-03-10  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-capab.el: Added more information to the Usage section.
+	(erc-capab-identify-prefix): Doc fix.
+	(erc-capab-identify-unidentified): New face.
+	(290): Removed.  Definition moved to erc-backend.el.
+	(erc-capab-identify-send-messages): Renamed from
+	`erc-capab-send-identify-messages'.
+	(erc-capab-identify-setup): Use it.
+	(erc-capab-identify-get-unidentified-nickname): Renamed from
+	`erc-capab-get-unidentified-nickname'.
+	(erc-capab-identify-add-prefix): Use it.  Use
+	`erc-capab-identify-unidentified' as the face.
+
+	* erc-backend.el (290): Moved here from erc-capab.el.
+
+	* erc.el (erc-select): Added an autoload cookie.
+	(erc-message-type-member, erc-restore-text-properties): Use
+	`erc-get-parsed-vector'.
+	(erc-auto-query): Set the default to 'bury since many new users
+	expect private messages from others to be in dedicated query
+	buffers, not the server buffer.
+	(erc-common-server-suffixes): Use "freenode" for freenode.net, not
+	"OPN".  Added oftc.net.
+
+	* NEWS: Added note about erc-auto-query's new default setting.
+
+2007-03-03  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-open, erc): Docfixes.
+
+2007-03-02  Michael Olson  <mwolson@gnu.org>
+
+	* FOR-RELEASE: Make section for 5.3 release and move erc-backend
+	cleanup there.  Awaiting discussion before doing other things.
+	Add tasks for merging filename changes from the 5.2 release
+	branch, and for making a tarball of modules not in Emacs 22.  Add
+	item to remind me to update NEWS.  Mark backtab entry as done.
+
+	* erc-button.el (button): Add call to `erc-button-add-keys'.
+	(erc-button-keys-added): New variable tracking whether we've added
+	the keys yet.
+	(erc-button-add-keys): New function that adds the <backtab> key to
+	erc-mode-map.
+
+	* erc.texi: Change version to 5.2 (pre-release).
+
+2007-02-15  Michael Olson  <mwolson@gnu.org>
+
+	* CREDITS: Update.
+
+	* erc-backend.el (erc-server-send-ping-interval): Change to use a
+	default of 30 seconds.  Improve customize interface.
+	(erc-server-send-ping-timeout): New option that determines when to
+	consider a connection stalled and restart it.  The default is
+	after 120 seconds.
+	(erc-server-send-ping): Use erc-server-send-ping-timeout instead
+	of erc-server-send-ping-interval.  If
+	erc-server-send-ping-timeout is nil, do not ever kill and restart
+	a hung IRC process.
+
+	* erc.el (erc-modules): Include the name of the module in its
+	description.  This should make it easier for people to find and
+	enable a particular module.
+
+2007-02-15  Vivek Dasmohapatra  <vivek@etla.org>
+
+	* erc.el (erc-cmd-RECONNECT): Kill old process if it is still
+	alive.
+	(erc-message-english-PART): Properly escape "%" characters in
+	reason.
+
+	* erc-backend.el (erc-server-reconnecting): New variable that is
+	set when the user requests a reconnect, but the old process is
+	still alive.  This forces the reconnect to work even though the
+	process is killed manually during reconnect.
+	(erc-server-connect): Initialize it.
+	(erc-server-reconnect-p): Use it.
+	(erc-process-sentinel-1): Set it to nil after the first reconnect
+	attempt.
+
+2007-02-07  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-menu.el (erc-menu-definition): Fixed so that the separator
+	is between "Current channel" and "Pals, fools and other keywords",
+	not at the bottom of the "Current channel" submenu.
+
+2007-01-25  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-networks.el (erc-server-alist): Removed SSL server for now
+	since `erc-server-select' doesn't know to use `erc-ssl'.
+
+	* erc-networks.el (erc-server-alist, erc-networks-alist): Added
+	definitions for oftc.net.
+
+	* erc-services.el (erc-nickserv-alist): Fixed OFTC message regexp.
+
+2007-01-22  Michael Olson  <mwolson@gnu.org>
+
+	* erc-backend.el (erc-server-error-occurred): New variable that
+	indicates when an error has been signaled by the server.  This
+	should fix an infinite reconnect bug when giving some servers a
+	bogus :full-name.  Thanks to Angelina Carlton for the report.
+	(erc-server-connect): Initialize erc-server-error-occurred.
+	(erc-server-reconnect-p): Use it.
+	(ERROR): Set it.
+
+	* erc-services.el (erc-nickserv-alist): Alphabetize and add Ars
+	and QuakeNet.  Standardize look of entries.  Fix type mismatch
+	error in customize interface.
+	(erc-nickserv-passwords): Alphabetize and add missing entries from
+	erc-nickserv-alist.
+
+2007-01-21  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-header-line-format): Document how to disable the
+	header line, and add a customization type for it.  Also, make the
+	changes take effect immediately.
+
+2007-01-19  Michael Olson  <mwolson@gnu.org>
+
+	* erc.texi (Modules): Document new menu module.  Thanks to Leo
+	for noticing.
+
+2007-01-16  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc-stamp.el (erc-insert-timestamp-left): Fixed so that the
+	whitespace string filler is hidden correctly when timestamps are
+	hidden.
+	(erc-toggle-timestamps): New function to use instead of
+	`erc-show-timestamps' and `erc-hide-timestamps'.
+
+	* erc.el (erc-restore-text-properties): Moved here from
+	erc-fill.el since it could be useful in general.
+
+	* erc-fill.el (erc-restore-text-properties): Removed.
+
+2007-01-13  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-command-regexp): New variable that is used to match
+	a command.
+	(erc-send-input): Use it.  This fixes a bug where paths --
+	"/usr/bin/foo", for example -- were being displayed as commands,
+	but still sent correctly.
+	(erc-extract-command-from-line): Use it.
+
+	* erc.texi (Modules): Document erc-capab-identify.
+
+2007-01-11  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc.el (erc-find-parsed-property): Moved here from erc-track.el
+	since it can be useful in general.
+
+	* erc-track.el (erc-find-parsed-property): Removed.
+
+	* erc-capab.el (erc-capab-find-parsed): Removed.
+	(erc-capab-identify-add-prefix): Use `erc-find-parsed-property'.
+
+	* erc.el (erc-open): Run `erc-before-connect' hook here.  This
+	makes sure the hook always gets called before a connection is
+	made, as some functions, like `erc-handle-irc-url', use `erc-open'
+	instead of `erc'.
+	(erc): Removed `erc-before-connect' hook.
+
+	* erc-menu.el (erc-menu-definition): Put items specific to
+	channels in a "Current channel" submenu.
+
+	* erc-backend.el (321, 323): Display channel list in server buffer
+	when not using the channel list module.
+
+	* erc.el: Updated copyright years.
+	(erc-version-string): Set to 5.2 (devel).
+	(erc-format-lag-time): Fixed to work when `erc-server-lag' is nil.
+	(erc-update-mode-line-buffer): Set the header face.
+
+2007-01-11  Michael Olson  <mwolson@gnu.org>
+
+	* erc-bbdb.el (erc-bbdb-popup-type): Fix customization type and
+	documentation.
+
+	* erc-services.el (erc-nickserv-identify-mode): Improve
+	documentation for nick-change option and move higher to fix
+	compiler warning.  Avoid a recursive load error.
+	(erc-nickserv-alist): Add simple entry for BitlBee, to avoid
+	"NickServ is AWAY: User is offline" error.  Oddly enough, bitlbee
+	was smart enough to recognize that as an authentication request
+	and log in regardless, which is why I didn't notice this earlier.
+	(erc-nickserv-alist-sender, erc-nickserv-alist-regexp)
+	(erc-nickserv-alist-nickserv, erc-nickserv-alist-ident-keyword)
+	(erc-nickserv-alist-use-nick-p)
+	(erc-nickserv-alist-ident-command): New accessors for
+	erc-nickserv-alist.  Using nth is unwieldy.
+	(erc-nickserv-identify-autodetect)
+	(erc-nickserv-identify-on-connect)
+	(erc-nickserv-identify-on-nick-change, erc-nickserv-identify): Use
+	the new accessors.
+
+2007-01-11  Diane Murray  <disumu@x3y2z1.net>
+
+	* NEWS: Added note for `erc-my-nick-face'.  Fixed capab-identify
+	wording.
+
+2007-01-10  Diane Murray  <disumu@x3y2z1.net>
+
+	* erc.el (erc-mode-line-format): Added %l to documentation.
+	(erc-header-line-format): Removed "[IRC]".  Use the new %l
+	replacement character.  Doc fix.
+	(erc-format-channel-modes): Removed lag code.  Removed parentheses
+	from mode string.
+	(erc-format-lag-time): New function.
+	(erc-update-mode-line-buffer): Use it.
+
+2007-01-10  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el: Fix typo in url-irc-function instructions.
+
+2007-01-09  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-system-name): New option that determines the system
+	name to use when logging in.  The default is to figure this out by
+	calling `system-name'.
+	(erc-login): Use it.
+
+2007-01-07  Michael Olson  <mwolson@gnu.org>
+
+	* erc.el (erc-modules): Add the menu module.  This should fix a
+	bug with incorrect ERC submenus being displayed.
+
+	* erc-menu.el: Turn this into a module.
+	(erc-menu-add, erc-menu-remove): New functions that add and remove
+	the ERC menu.
+
+
+See ChangeLog.06 for earlier changes.
+
+	Copyright (C) 2007-2012 Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;; Local Variables:
+;; coding: utf-8
+;; add-log-time-zone-rule: t
+;; End:
+

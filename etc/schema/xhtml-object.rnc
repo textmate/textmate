@@ -1,0 +1,24 @@
+# Object Module
+
+object =
+  element object {
+    object.attlist,
+    # No restrictions on mixed content in TREX.
+    param*,
+    Flow.model
+  }
+object.attlist =
+  Common.attrib,
+  attribute declare { "declare" }?,
+  attribute classid { URI.datatype }?,
+  attribute codebase { URI.datatype }?,
+  attribute data { URI.datatype }?,
+  attribute type { ContentType.datatype }?,
+  attribute codetype { ContentType.datatype }?,
+  attribute archive { URIs.datatype }?,
+  attribute standby { Text.datatype }?,
+  attribute height { Length.datatype }?,
+  attribute width { Length.datatype }?,
+  attribute name { text }?,
+  attribute tabindex { Number.datatype }?
+Inline.class |= object

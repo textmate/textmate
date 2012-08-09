@@ -1,0 +1,1330 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2012-02-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed3v2.inp (insrcdir): Use $(<F) rather than $<, as
+	command.com's "if not exist" doesn't grok forward slashes in file
+	names.
+
+2012-01-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed4.inp (PATH_DUMPLOADSEARCH): Edit to "../lisp", for when the
+	default in src/epaths.in will change, maybe.
+
+2011-10-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed3v2.inp (insrcdir): Comment out definition.
+	$(insrcdir): Edit into MS-DOS existence test.
+
+2011-09-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (boot): Condition the value on the existence of
+	autogen/README, not admin/admin.el, since the latter is now part
+	of the release tarball.
+	(install): Don't copy lib-src/fns.el, as that file is no longer
+	generated in that directory.
+
+	* sed1v2.inp (LIB_PTHREAD, LIB_PTHREAD_SIGMASK): Edit to empty.
+	(SETTINGS_CFLAGS, SETTINGS_LIBS): Edit these instead of
+	GCONF_CFLAGS and GCONF_LIBS.
+
+	* sedlibmk.inp (ALLOCA_H, AR, ARFLAGS, GNULIB_CHDIR, GNULIB_DUP)
+	(GNULIB_FDATASYNC, GNULIB_FDOPEN, GNULIB_FSTAT, GNULIB_PCLOSE)
+	(GNULIB_PTHREAD_SIGMASK, GNULIB_RAISE, GNULIB_SIGACTION)
+	(GNULIB_SIGPROCMASK, GNULIB_SIGNAL_H_SIGPIPE, HAVE_FDATASYNC)
+	(HAVE_PCLOSE, HAVE_POPEN, HAVE_POSIX_SIGNALBLOCKING)
+	(HAVE_PTHREAD_SIGMASK, HAVE_RAISE, HAVE_SIGACTION)
+	(HAVE_SIGHANDLER_T, HAVE_SIGINFO_T, HAVE_SIGSET_T)
+	(HAVE_STRUCT_SIGACTION_SA_SIGACTION)
+	(HAVE_TYPE_VOLATILE_SIG_ATOMIC_T, LIB_PTHREAD)
+	(LIB_PTHREAD_SIGMASK, NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H)
+	(NEXT_SIGNAL_H, REPLACE_FDOPEN, REPLACE_PTHREAD_SIGMASK)
+	(REPLACE_RAISE): New edits.
+	(gl_LIBOBJS): Remove md5.o, filemode.o, and sha1.o.  Add
+	pthread_sigmask.o.
+	(@GL_GENERATE_ALLOCA_H_TRUE@, @GL_GENERATE_ALLOCA_H_FALSE@): Edit
+	to comment out unneeded lines.
+	(warn-on-use.h): Edit the recipe commands to work with DJGPP
+	without requiring a Unixy shell.
+
+	* inttypes.h (strtoimax) [DJGPP < 2.04]: New macro.
+
+	* sed2v2.inp (HAVE_ALLOCA, HAVE_DECL_STRTOLL, HAVE_DECL_STRTOIMAX)
+	(HAVE_STRTOLL, HAVE_SIGSET_T, HAVE_SNPRINTF): New edits.
+
+2011-09-06  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* sedlibmk.inp (CONFIG_CLEAN_VPATH_FILES): Adjust to snippet moves
+	from top level to build-aux/snippet (Bug#9169).
+
+2011-06-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlibmk.inp (PTRDIFF_T_SUFFIX): Edit to nothing.
+
+2011-05-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp: Edit "make-docfile -d FOO" commands to chdir back to
+	src/.  Make editing of RUN_TEMACS commands less sensitive to
+	leading whitespace.
+
+	* sedlibmk.inp (gl_LIBOBJS): Add sha1.o.
+
+2011-05-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (make-docfile commands): Recognize only if the line
+	begins with a TAB.  Use $(etc) rather than a literal "../etc".
+	(`sed SED-COMMAND $(srcdir)/lisp.mk`): Edit to replace with "$(lisp).
+	(@lisp_frag@): Edit out.
+
+	* sedlibmk.inp (GNULIB_GROUP_MEMBER, HAVE_GROUP_MEMBER): Edit to
+	zero.
+
+2011-05-19  Glenn Morris  <rgm@gnu.org>
+
+	* sed1x.inp (TOOLTIP_SUPPORT, WINDOW_SUPPORT):
+	* sed1v2.inp (MSDOS_SUPPORT, NS_SUPPORT, MOUSE_SUPPORT)
+	(TOOLTIP_SUPPORT, WINDOW_SUPPORT): No need to edit these any more.
+
+2011-05-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* inttypes.h: Include stdint.h.
+	(uintmax_t): Don't define, it is defined in stdint.h.
+
+	* sedlibmk.inp (am__append_1): Edit to comment out.
+	(am__append_2): Edit to expose.
+	(NEXT_AS_FIRST_DIRECTIVE_STDARG_H, NEXT_STDARG_H, STDARG_H): Edit
+	to empty.
+	(@GL_GENERATE_STDARG_H_TRUE@, @GL_GENERATE_STDARG_H_FALSE@): Edit
+	to comment out corresponding lines.
+
+2011-04-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* inttypes.h: New file.
+
+	* sed2v2.inp (HAVE_DECL_STRTOULL, HAVE_DECL_STRTOUMAX)
+	(HAVE_STRTOULL, HAVE_STRTOULL): Define to 1.
+
+	* sedlibmk.inp (BUILT_SOURCES): Edit out inttypes.h.
+
+	* sed1v2.inp (CPPFLAGS): Edit to "-I../msdos".
+	Add ../msdos/inttypes.h to prerequisites of lread.o.
+
+2011-04-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlibmk.inp (am_libgnu_a_OBJECTS): Edit out
+	allocator.$(OBJEXT).  Add editing for the new GNULIB_* and
+	REPLACE_* variables.
+
+2011-04-06  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlibmk.inp: Update checklist.
+	(am_libgnu_a_OBJECTS): Remove careadlinkat.$(OBJEXT).
+	($(top_builddir)/config.status): Edit away, both as target and in
+	prerequisites.
+	(@am__fastdepCC_FALSE@): Fix editing.
+	(@GL_GENERATE_STDBOOL_H_TRUE@, @GL_GENERATE_STDBOOL_H_FALSE@)
+	(@GL_GENERATE_STDDEF_H_TRUE@, @GL_GENERATE_STDDEF_H_FALSE@)
+	(@GL_GENERATE_STDINT_H_TRUE@, @GL_GENERATE_STDINT_H_FALSE@): Edit
+	to either nothing or "#".
+
+2011-03-25  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlibmk.inp: Adapt to addition of the gnulib stdio module.
+	Add a description of what needs to be done when a new gnulib
+	module is added.
+	(MKDIR_P): Fix replacement command.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-02-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlibmk.inp (BITSIZEOF_PTRDIFF_T, BITSIZEOF_SIG_ATOMIC_T)
+	(BITSIZEOF_SIZE_T, BITSIZEOF_WCHAR_T)
+	(BITSIZEOF_WINT_TGNULIB_FCHMODAT, GNULIB_FSTATAT, GNULIB_FUTIMENS)
+	(GNULIB_LCHMOD, GNULIB_LSTAT, GNULIB_MBTOWC, GNULIB_MKDIRAT)
+	(GNULIB_MKFIFO, GNULIB_MKFIFOAT, GNULIB_MKNOD, GNULIB_MKNODAT)
+	(GNULIB_STAT, GNULIB_UTIMENSAT, GNULIB_WCTOMB, HAVE_FCHMODAT)
+	(HAVE_FSTATAT, HAVE_FUTIMENS, HAVE_INTTYPES_H, HAVE_LCHMOD)
+	(HAVE_LONG_LONG_INT, HAVE_LSTAT, HAVE_MKDIRAT, HAVE_MKFIFO)
+	(HAVE_MKFIFOAT, HAVE_MKNOD, HAVE_MKNODAT)
+	(HAVE_SIGNED_SIG_ATOMIC_T, HAVE_SIGNED_WCHAR_T)
+	(HAVE_SIGNED_WINT_T, HAVE_STDINT_H, HAVE_SYS_BITYPES_H)
+	(HAVE_SYS_INTTYPES_H, HAVE_SYS_TYPES_H)
+	(HAVE_UNSIGNED_LONG_LONG_INT, HAVE_UTIMENSAT, HAVE_WCHAR_H)
+	(MKDIR_P, NEXT_AS_FIRST_DIRECTIVE_STDINT_H)
+	(NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H, NEXT_STDINT_H)
+	(NEXT_SYS_STAT_H, REPLACE_LSTAT, REPLACE_MBTOWC, REPLACE_MKDIR)
+	(REPLACE_MKFIFO, REPLACE_MKNOD, REPLACE_STAT, REPLACE_UTIMENSAT)
+	(REPLACE_WCTOMB, SIG_ATOMIC_T_SUFFIX, SIZE_T_SUFFIX, STDINT_H)
+	(WCHAR_T_SUFFIX, WINT_T_SUFFIX, APPLE_UNIVERSAL_BUILD): New edits.
+	($(MKDIR_P)): Replace with equivalent DOS command.
+	(gl_LIBOBJS): Add md5.o and filemode.o.
+
+	* sed2v2.inp (BITSIZEOF_PTRDIFF_T, BITSIZEOF_SIG_ATOMIC_T)
+	(BITSIZEOF_SIZE_T, BITSIZEOF_WCHAR_T, BITSIZEOF_WINT_T)
+	(HAVE_LONG_LONG_INT, HAVE_SIGNED_SIG_ATOMIC_T, HAVE_SIGNED_WINT_T)
+	(HAVE_UNSIGNED_LONG_LONG_INT, HAVE_WCHAR_H, HAVE_INTTYPES_H): New
+	edits.
+
+	* depfiles.bat: Create a dummy .Po file only if a file by the same
+	name does not already exist in the deps/ subdirectory.
+
+2011-02-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* depfiles.bat: New file.
+
+	* sedlibmk.inp: New file.
+
+	* sedlibcf.inp: New file.
+
+	* sedleim.inp (RUN_EMACS): Rename from RUN-EMACS.
+	(BUILT_EMACS): Rename from BUILT-EMACS.
+
+	* sed6.inp (MAKEINFO): Edit to "makeinfo".
+	(ENVADD): Adjust to MAKEINFO_OPTS.
+	(texinputdir): Don't edit.
+
+	* sed3v2.inp (-DVERSION): Edit out.
+	(LOADLIBES): Don't edit to empty.
+
+	* sed2v2.inp: Remove workaround for the "#if ! HAVE_MKTIME ||
+	BROKEN_MKTIME" stuff -- it's no longer in src/config.in.
+	(HAVE_ATTRIBUTE_ALIGNED, HAVE_C99_STRTOLD, HAVE_DECL_GETENV)
+	(HAVE__BOOL): Edit to 1.
+	(VERSION, inline, restrict): Edit for DJGPP.
+	(my_strftime): Edit to nstrftime.
+
+	* sed1v2.inp (NS_OBJC_OBJ): Edit to empty.
+	(@true): Edit to "@rem".
+	(move-if-change): Edit to "update".
+	(echo): Edit to "djecho".
+	(cd $(lib) && ...): Edit to "$(MAKE) -C ...".
+	(LIBOBJS): Edit to empty.
+	($(libsrc)/make-docfile): Two new edits, one each for every
+	invocation of make-docfile.
+	(move-if-change): Fix edit.
+	Remove some unused switches from $(ALL_CFLAGS), to make the GCC
+	command line shorter.
+
+	* mainmake.v2 (version): Remove, no longer needed (config.in
+	defines VERSION).
+	(all): Add lib.
+	(lib): New target and recipe.
+	(lib-src): Depend on lib.
+	(src): Depend on lib and lib-src.
+	(clean, mostlyclean, distclean, maintainer-clean, extraclean)
+	(bootstrap-clean): Recurse into lib.
+	(lib, lib-src, src): Specify "all" as an explicit target.
+
+2011-01-08  Glenn Morris  <rgm@gnu.org>
+
+	* sedleim.inp (RUN-EMACS): -batch implies --no-init-file.
+
+2011-01-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed2v2.inp (HAVE___BUILTIN_UNWIND_INIT): Define.
+
+2010-12-04  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sed1v2.inp (M_FILE, S_FILE): Add $(srcdir)/ prefix.
+
+2010-10-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp: Use $(..) instead of ${..} in all edit commands.
+	Needed because of changes in revno 101897.
+
+	* sed6.inp (mkinfodir): Edit to avoid Unix shell-isms.  Needed
+	because of changes in revno 101876.
+
+2010-10-10  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* sed1v2.inp (PROFILING_LDFLAGS):
+	* sed3v2.inp (PROFILING_LDFLAGS): Remove, not defined anymore.
+
+2010-10-09  Glenn Morris  <rgm@gnu.org>
+
+	* mainmake.v2 (install): Remove b2m.
+
+2010-10-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (TAGS tags): Use `find' to filter out loaddefs
+	files.  Make all file names in TAGS tables absolute.
+
+2010-10-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (LIBGNUTLS_LIBS, LIBGNUTLS_CFLAGS): Edit to empty.
+
+2010-09-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (LINKER): Don't edit, variable was removed from
+	src/Makefile.in.
+	(LD_FIRSTFLAG): Edit to empty.
+
+2010-09-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (LIBXML2_LIBS, LIBXML2_CFLAGS): Edit to empty.
+
+2010-08-22  Chong Yidong  <cyd@stupidchicken.com>
+
+	* sedleim.inp (RUN-EMACS): Don't use --multibyte.
+
+2010-08-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (IMAGEMAGICK_LIBS, IMAGEMAGICK_CFLAGS): Edit to empty.
+
+2010-08-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (version): Update due to change in emacs.c.
+
+2010-08-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (UNEXEC_OBJ): Edit to unexcoff.o, due to renaming of
+	unexec.c => unexcoff.c.
+
+2010-07-29  Chad Brown  <yandros@mit.edu>
+
+	* sed2v2.inp (HAVE_DIRENT_H): Edit to 1.
+
+2010-07-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (C_WARNINGS_SWITCH, PROFILING_CFLAGS, PROFILING_LDFLAGS):
+	Edit to empty.
+
+	* sed3v2.inp(C_WARNINGS_SWITCH, PROFILING_CFLAGS, PROFILING_LDFLAGS):
+	Edit to empty.
+
+2010-07-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed2v2.inp (HAVE_STRCHR, HAVE_STRRCHR): Don't edit, already
+	defined on <sys/config.h>.
+
+2010-07-11  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sed2v2.inp (HAVE_INDEX, HAVE_RINDEX): Don't edit.
+	(HAVE_STRCHR, HAVE_STRRCHR): Edit to 1.
+
+2010-07-08  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (stamp-oldxmenu): Don't edit out in `temacs:' target,
+	which doesn't exist.
+
+	* sed2v2.inp (HAVE_MEMCPY): Don't edit, defined on <sys/config.h>.
+
+2010-07-08  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* sed1v2.inp: Remove reference to prefix-args.
+
+2010-07-07  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sed2v2.inp (HAVE_MEMCPY, HAVE_MEMSET): Edit to 1.
+	(HAVE_BZERO): Don't edit.
+
+2010-07-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (LIB_GCC): Edit to empty.
+	Return back to ../src after compiling each .el file.
+
+2010-06-30  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (CANNOT_DUMP): Update for configure name change.
+
+2010-06-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (version): Use emacs_version[] in src/emacs.c
+	instead of lisp/version.el (see revno 100306).
+
+	* sed1v2.inp (MKDEPDIR): Edit to empty.
+	Delete lines in rules that invoke $(MKDEPDIR).  Fix editing rules
+	that begin with "cd ../lisp".  Edit out sh if-then-else-fi
+	constructs that test ${CANNOT_DUMP}.  Edit out "|| exit ;\"
+	constructs in emacs${EXEEXT} rule.
+
+2010-06-03  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* sed1v2.inp (UNEXEC_OBJ): Use UNEXEC_OBJ instead of unexec.
+
+2010-06-03  Glenn Morris  <rgm@gnu.org>
+
+	* sed2v2.inp: Do not edit HAVE_ALLOCA.
+
+2010-05-26  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (@PRE_EDIT_LDFLAGS@, @POST_EDIT_LDFLAGS@): Edit to nothing.
+
+	* sed1v2.inp (NS_IMPL_GNUSTEP_INC, NS_IMPL_GNUSTEP_TEMACS_LDFLAGS):
+	No longer present.
+
+2010-05-25  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (LD_SWITCH_SYSTEM_EXTRA): No longer present.
+
+2010-05-21  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (@ns_frag@): Edit to nothing.
+
+	* sed1x.inp (OLDXMENU): Replace any initial value.
+	* sed1v2.inp (OLDXMENU): Edit to "nothing".
+
+	* sed1v2.inp (CANNOT_DUMP): Edit to no.
+
+2010-05-20  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (DEPFLAGS, deps_frag): Edit to empty.
+	(MKDEPDIR): Edit to ':'.
+
+2010-05-19  Glenn Morris  <rgm@gnu.org>
+
+	* sed2v2.inp (ORDINARY_LINK): Set here rather than in s/msdos.h.
+
+	* sed1v2.inp (LD): Edit to $(CC).
+	(YMF_PASS_LDFLAGS): Edit to `flags'.
+
+2010-05-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1x.inp: Add copyright notice.
+
+2010-05-18  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (RALLOC_OBJ): Edit to ralloc.o.
+
+	* sed1v2.inp (GMALLOC_OBJ): Edit to gmalloc.o.
+	(VMLIMIT_OBJ): Edit to vm-limit.o.
+
+2010-05-17  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (OLDXMENU_DEPS): Edit to empty.
+	* sed1x.inp (OLDXMENU_DEPS): Edit to ${OLDXMENU} ../src/${OLDXMENU}.
+
+2010-05-16  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (TEMACS_LDFLAGS2): Edit to $(LDFLAGS).
+
+	* sed1v2.inp (GNUSTEP_SYSTEM_LIBRARIES): Remove.
+	(NS_IMPL_GNUSTEP_TEMACS_LDFLAGS): Edit to empty.
+
+2010-05-15  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (LIBXMENU): Edit to empty.
+	* sed1x.inp (LIBXMENU): Expect empty initial value.
+
+	* sed1v2.inp (OLDXMENU): Edit to empty.
+	* sed1x.inp (OLDXMENU): Expect empty initial value.
+
+	* sed1v2.inp (LIBX_OTHER): Edit to empty.
+	* sed1x.inp (LIBX_OTHER): Expect empty initial value.
+
+	* sed1v2.inp (FONT_OBJ): Edit to empty for non-X case.
+	* sed1x.inp (FONT_OBJ): Edit to xfont.o for X case.
+
+2010-05-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed3v2.inp (INSTALLABLES): Edit out extra ${EXEEXT} after
+	"emacsclient".
+	(emacsserver, timer, wakeup): Remove edit-out commands.
+
+	* sed1v2.inp (MSDOS_OBJ): Add w16select.o.
+	(TERMCAP_OBJ): Add termcap.o.
+
+2010-05-15  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (OLDXMENU_TARGET): Edit to empty.
+	* sed1x.inp (OLDXMENU_TARGET): Edit to really-oldxmenu.
+
+	* sed1v2.inp (LIBXT_OTHER): Edit to empty.
+
+2010-05-14  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (ns_appdir, ns_appbindir, ns_appsrc): Edit to empty.
+
+	* sed1v2.inp (MSDOS_OBJ): Edit to dosfns.o msdos.o.
+	(MSDOS_SUPPORT): Edit to $(MSDOS_SUPPORT_REAL).
+	* sed1x.inp (MSDOS_X_OBJ): Edit to w16select.o termcap.o.
+
+	* sed2x.inp (HAVE_WINDOW_SYSTEM): Define.
+	* sed1x.inp (TOOLTIP_SUPPORT): Edit to ${lispsource}tooltip.elc.
+	(WINDOW_SUPPORT): Edit to $(BASE_WINDOW_SUPPORT) $(X_WINDOW_SUPPORT).
+	* sed1v2.inp (MOUSE_SUPPORT): Edit to $(REAL_MOUSE_SUPPORT).
+	(TOOLTIP_SUPPORT, WINDOW_SUPPORT): Edit to empty.
+
+	* sed1v2.inp (FONT_OBJ): Use the plain X version (no XFT, Freetype).
+
+	* sed1v2.inp (@NS_IMPL_GNUSTEP_INC@): Edit to nil.
+
+2010-05-13  Glenn Morris  <rgm@gnu.org>
+
+	* sed1x.inp (OLDXMENU): Edit to ${oldXMenudir}libXMenu11.a.
+	(LIBXMENU): Edit to ${OLDXMENU}.
+	(LIBX_OTHER): Edit to ${LIBXT} ${LIBX_EXTRA}.
+
+	* sed1v2.inp (C_SWITCH_X_SYSTEM, C_SWITCH_X_SITE, LIB_STANDARD)
+	(FONTCONFIG_CFLAGS, FONTCONFIG_LIBS, FREETYPE_CFLAGS, FREETYPE_LIBS)
+	(LIBOTF_CFLAGS, LIBOTF_LIBS, M17N_FLT_CFLAGS, M17N_FLT_LIBS)
+	(GNU_OBJC_CFLAGS, GNUSTEP_SYSTEM_LIBRARIES, LIBRESOLV, LIBGPM):
+	Edit to empty.
+	(LIB_MATH): Edit to -lm.
+	(UNEXEC_OBJ): Edit to unexec.o.
+
+2010-05-12  Glenn Morris  <rgm@gnu.org>
+
+	* sed3v2.inp (INSTALLABLES): No more @LIB_SRC_EXTRA_INSTALLABLES@.
+
+	* sed1v2.inp (LIB_GCC): Edit to -Lgcc.
+
+2010-05-11  Glenn Morris  <rgm@gnu.org>
+
+	* sed1x.inp (LIBS_SYSTEM): Edit to -lxext -lsys.
+	* sed3x.inp: New file.
+
+2010-05-10  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp, sed3v2.inp (LIBS_SYSTEM): Edit to empty.
+
+	* sed3v2.inp (BLESSMAIL_TARGET): Edit to need-blessmail.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-05-08  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp (LIBS_TERMCAP): Edit to empty.
+	(TERMCAP_OBJ): Edit to tparam.o.
+
+2010-05-07  Eli Zaretskii  <eliz@gnu.org>
+
+	Fix breakage due to autoconfiscation of Makefile.in files.
+
+	* sed3v2.inp (C_SWITCH_MACHINE): Edit to empty.
+
+	* sed1v2.inp (@LIB_MATH@): Edit to -lm.
+	(C_SWITCH_MACHINE, C_SWITCH_SYSTEM, LD_SWITCH_SYSTEM_TEMACS)
+	(LD_SWITCH_X_SITE_AUX, LD_SWITCH_X_SITE_AUX_RPATH)
+	(LD_SWITCH_SYSTEM, LD_SWITCH_SYSTEM_EXTRA, LIBTIFF, LIBJPEG)
+	(LIBPNG, LIBGIF, LIBXPM, XFT_LIBS, DBUS_CFLAGS, DBUS_LIBS)
+	(DBUS_OBJ, GCONF_CFLAGS, GCONF_LIBS, GTK_OBJ, LIBXMU, LIBXSM)
+	(LIBXTR6, XOBJ, TOOLKIT_LIBW, WIDGET_OBJ, CYGWIN_OBJ, NS_OBJ)
+	(NS_SUPPORT, LIBSELINUX_LIBS, START_FILES): Edit to empty.
+	(XMENU_OBJ): Edit to xmenu.o.
+	(FONT_OBJ): Edit to value used for X on Unix.
+	(PRE_ALLOC_OBJ): Edit to lastfile.o.
+	(POST_ALLOC_OBJ): Edit to $(vmlimitobj).
+	(@unexec@): Edit to unexec.o.
+
+2010-05-06  Glenn Morris  <rgm@gnu.org>
+
+	* sed1v2.inp, sed5x.inp: Remove LN_S, unused.
+
+2010-04-01  Eli Zaretskii  <eliz@gnu.org>
+
+	Remove support for DJGPP v1.x.
+
+	* sed3.inp:
+	* sed2.inp:
+	* sed1.inp:
+	* mainmake: Files removed.
+
+2010-03-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlisp.inp (VPATH): Don't edit, no longer needed.
+	(lisp, srcdir): Adapt to lisp/Makefile.in changes.
+	(abs_top_builddir): New edit.
+
+	* sed3v2.inp (KRB4LIB, DESLIB, KRB5LIB, CRYPTOLIB, COM_ERRLIB)
+	(LIBHESIOD, LIBRESOLV, LIBS_MAIL): Edit to empty values.
+
+	* sed3.inp (KRB4LIB, DESLIB, KRB5LIB, CRYPTOLIB, COM_ERRLIB)
+	(LIBHESIOD, LIBRESOLV, LIBS_MAIL): Edit to empty values.
+
+	* sed1v2.inp (abs_builddir): Edit into "../src".
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2010-02-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* INSTALL: Remove a CVS-specific note.  Update for latest versions
+	of Windows.
+
+2009-09-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (OTHER_FILES): Edit to empty.
+
+2009-09-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (bootstrap): Ensure enough environment space
+	will be available to run config.bat.
+
+2009-08-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (buildobj.h): Replace "echo" with "djecho".
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2009-04-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (src) <gdb.ini>: Don't replace the line with
+	x_error_quitter; instead, append "set environment NAME" to the end.
+	Set NAME and USERNAME in the environment to the same value.
+
+2009-02-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (boot): Don't require b-emacs.exe if not building
+	out of CVS.  (Bug#2151)
+
+2008-12-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* INSTALL: Document the problems on Windows Vista and the
+	--with-system-malloc option to config.bat.
+
+	* sedalloc.inp: New file.
+
+2008-11-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (misc): New target.
+	(all, info): Depend on `misc'.
+
+2008-11-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (src): Move removal of src/bootlisp after recursing
+	into `lisp'.
+
+	Make bootstrap work again:
+
+	* mainmake.v2 (boot): New variable.
+	(src): Pass $(boot) to sub-Make.  Remove src/bootlisp.  If
+	src/bootlisp exists after running Make, run Make in `lisp' as
+	well.
+	(clean, mostlyclean): Remove bogus repeated clean in the top-level
+	directory.
+	(info, bootstrap-clean): New targets.
+	(bootstrap): Depend only on bootstrap-clean.  Commands modified to
+	be equivalent to top-level Makefile.in.
+	(bootfast, bootstrap-lisp-1, bootstrap-lisp, bootstrap-src)
+	(bootstrap-clean-before, bootstrap-clean-after): Targets deleted.
+	(clean, mostlyclean, distclean, maintainer-clean, extraclean):
+	Don't recurse into lwlib and oldXMenu.
+
+	* sed1v2.inp: Create bootlisp when bootstrapping b-emacs.exe.
+
+	* sedlisp.inp: Don't convert *.el files to Unix text format, and
+	don't copy ldefs-boot.el into loaddefs.el.
+
+	* sed6.inp: Edit out Unixy shell features in maintainer-clean
+	targets in doc/ Makefiles.
+
+	* INSTALL: Update the list of utilities needed by lisp/Makefile
+	and for bootstrapping.
+
+2008-11-08  Eli Zaretskii  <eliz@gnu.org>
+
+	* INSTALL: New file, with build instructions moved from the
+	top-level INSTALL.
+
+2008-10-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlisp.inp (lisp): Set to absolute file name of current
+	directory, not to ".", to have it on EMACSLOADPATH when we descend
+	into subdirectories.
+
+2008-08-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed2v2.inp: Remove definition of USER_FULL_NAME (now defined on
+	src/s/msdos.h).
+
+	* sed3v2.inp: Edit out @LIB_SRC_EXTRA_INSTALLABLES@.
+
+	* sed1v2.inp (version): Define to empty.
+	(ALL_CFLAGS, LIBES): Edit out @FOO@ stuff.
+	(EXEEXT): Define to .exe.
+	Edit "ln -f" into "cp -pf".
+	Edit "touch" into "djecho $@ >", to avoid requiring touch.exe.
+	(b-emacs${EXEEXT}): Don't remove emacs.exe and temacs.exe.
+	Edit "`/bin/pwd`/" into "./".
+	Stubify emacs after it is dumped, to produce emacs.exe.
+	Stubedit temacs.exe to 1024K of stack, emacs.exe to 2048K, and
+	b-emacs.exe to 3072K.
+
+	* mainmake.v2 (emacs lispref lispintro): Chdir under doc/.
+	(emacs): Rename from `man', to reflect changes in doc directory
+	structure.  All callers changed.
+	(clean mostlyclean distclean maintainer-clean extraclean): Chdir
+	into doc/ for manuals.  Add misc subdirectory.
+	(src): Pass an empty BOOTSTRAPEMACS variable to src/Makefile.
+	(install): Don't stubify/stubedit emacs.exe, this is now done by
+	src/Makefile.
+
+2007-10-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed6.inp: Update comment to reflect doc directory structure.
+
+	* sed1v2.inp (RSVG_LIBS, RSVG_CFLAGS): Edit out.
+
+2007-07-25  Glenn Morris  <rgm@gnu.org>
+
+	* Relicense all FSF files to GPLv3 or later.
+
+	* COPYING: Switch to GPLv3.
+
+2007-06-02  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 22.1 released.
+
+2007-02-10  Glenn Morris  <rgm@gnu.org>
+
+	* COPYING.DJ: Remove file since it is no longer needed (see README
+	for details).
+
+2007-01-28  Glenn Morris  <rgm@gnu.org>
+
+	* COPYING.DJ: New file.
+
+2006-12-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed2v2.inp (HAVE_SYNC): Define.
+
+2006-11-25  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (CFLAGS_SOUND): Edit out.
+
+2006-09-15  Jay Belanger  <belanger@truman.edu>
+
+	* COPYING: Replace "Library Public License" by "Lesser Public
+	License" throughout.
+
+2005-09-10  Sven Joachim  <svenjoac@gmx.de>  (tiny change)
+
+	* sed3v2.inp (GETOPT_H, GETOPTOBJS): Define to use getopt.h,
+	getopt.o and getopt1.o.
+
+2005-07-04  Lute Kamstra  <lute@gnu.org>
+
+	Update FSF's address in GPL notices.
+
+2004-11-10  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1.inp: Revert last change.
+
+2004-11-09  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* sed1v2.inp: Use djecho for buildobj.lst.
+
+	* sed1.inp: Ditto.
+
+2004-11-08  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlisp.inp (bootstrap-clean): Copy ldefs-boot.el onto
+	loaddefs.el, unless the latter exists and is newer.
+
+	* mainmake.v2 (mostlyclean, distclean, maintainer-clean)
+	(extraclean, bootfast): New targets.
+	(top_distclean): New macro, used by distclean, maintainer-clean,
+	and extraclean.
+	(.PHONY): Add bootfast.
+	(bootstrap): Make bootstrap-after in lisp.
+	(bootstrap-clean-before): Clean in man, lispref, and lispintro as well.
+
+	* sed2v2.inp (HAVE_BZERO): Define for GCC v3.x and later.
+
+2004-10-06  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp (LC_ALL=C): Fix src/Makefile breakage caused by
+	recent (2004-09-24) changes in src/Makefile.in.
+
+2004-08-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedleim.inp: Remove the lines which say "<TAB>@true", to avoid
+	running a Unixy shell and to reincarnate the "Nothing to be done
+	for `all'" message from Make when there's nothing to be done.
+
+2004-05-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedleim.inp (distclean): Remove stamp-subdirs.
+	(SUBDIRS): Don't use `touch', use `djecho' instead.
+	(changed.tit, changed.misc): Use `djecho' instead of `echo'.
+
+2004-05-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed2v2.inp (HAVE_GETRUSAGE): Define.
+
+2003-09-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (man lispref lispintro): Specify an explicit target
+	`info', like Makefile.in does.
+
+2003-08-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed3v2.inp (srcdir): Use "command.com /c cd" to produce an
+	absolute file name of the current working directory.  This avoids
+	the warning from Make about circular dependencies.
+
+2003-08-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedlisp.inp: Set FNCASE=y for all targets in the lisp directory,
+	so that CVS etc. file names are filtered out of the list of
+	subdirectories.
+
+2003-08-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed6.inp (elisp.dvi, index.texi): Replace Unix shell commands
+	with equivalent COMMAND.COM commands.
+
+2003-08-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed3v2.inp (EXEEXT): Define to an empty string.
+
+	* sed1v2.inp (EXEEXT): Define to an empty string.
+	Remove src/emacs after producing b-emacs.exe.
+
+	* sed2v2.inp (HAVE_DIFFTIME, HAVE_MEMCMP, HAVE_MEMMOVE)
+	(HAVE_SIZE_T): Define.
+
+2002-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2v2.inp: New file.
+
+	* sed2.inp: Remove DJGPP v2.x stuff.
+
+2002-03-27  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sedlisp.inp <bootstrap-clean>: Make sure all *.el files have
+	Unix EOLs, to avoid overflowing pure storage while bootstrapping.
+
+2002-03-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (bootstrap-lisp-1, bootstrap-lisp, bootstrap-src)
+	(bootstrap-clean-before, bootstrap-clean-after): Return to the
+	top-level directory after sub-make.
+	(bootstrap-lisp): Pass an absolute file name as value of ${lisp}.
+
+	* sed1v2.inp: Fix editing of the rule for ${libsrc}make-docfile.
+
+2002-03-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	Add support for bootstrapping Emacs:
+
+	* sed1v2.inp: Edit the bootstrap-* targets.  Fix the mostlyclean
+	target.
+
+	* mainmake.v2 (maybe_bootstrap, bootstrap, bootstrap-lisp-1)
+	(bootstrap-lisp, bootstrap-src, bootstrap-clean-before)
+	(bootstrap-clean-after): New targets.
+	(all): Depend on maybe_bootstrap.
+
+2001-12-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1v2.inp: Delete _gdbinit in distclean target.
+
+2001-12-09  Pavel Janík  <Pavel@Janik.cz>
+
+	* COPYING: Moved back.
+
+2001-12-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (HAVE_VFORK): Don't define: the fragment in sysdep.c
+	which needed it is gone.
+
+2001-11-29  Pavel Janík  <Pavel@Janik.cz>
+
+	* COPYING: Removed.
+
+2001-11-24  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (lispintro): New target.
+	(all): Add lispintro.
+
+	* sed6.inp (SHELL): Comment away, for lispintro.
+
+2001-11-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed6.inp (texinputdir): Add, for the lispref directory.
+
+	* mainmake.v2 (all): Add lispref.
+	(man lispref): Add lispref.
+
+2001-10-20  Gerd Moellmann  <gerd@gnu.org>
+
+	* (Version 21.1 released.)
+
+2001-10-05  Gerd Moellmann  <gerd@gnu.org>
+
+	* Branch for 21.1.
+
+2001-07-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (install): Create site-lisp/subdirs.el if it is not
+	already there.
+
+2001-07-06  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp: Ifdef away the test for !HAVE_MKTIME, to avoid parse
+	error in "gcc -E -traditional" with GCC 3.0.
+
+2001-04-02  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sedleim.inp (srcdir=): Edit @srcdir@ into an absolute file name
+	of the leim subdirectory, so that EMACSLOADPATH doesn't break when
+	titdic-convert chdirs into leim/quail.
+
+2001-03-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sedleim.inp: Adapt to changes in leim/Makefile.in's $(TIT)
+	target.
+
+2001-03-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* README: New file.
+
+	* sed1.inp: Add copyright.
+	* sed1v2.inp: Add copyright.
+	* sed2.inp: Add copyright.
+	* sed2x.inp: Add copyright.
+	* sed3.inp: Add copyright.
+	* sed3v2.inp: Add copyright.
+	* sed4.inp: Add copyright.
+	* sed5x.inp: Add copyright.
+	* sed6.inp: Add copyright.
+	* sedleim.inp: Add copyright.
+	* sedlisp.inp: Add copyright.
+
+2001-02-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2, mainmake: Add copyright.
+
+2000-11-22  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (NSIG) [__DJGPP__ == 2 && __DJGPP_MINOR__ == 1]:
+	Define; it is undefined in DJGPP v2.01.
+
+2000-11-13  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (HAVE_MKSTEMP): Define.
+
+2000-10-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sedleim.inp (RUN-EMACS): Remove EMACSLOADPATH setting as part of
+	the command; use Make's "export EMACSLOADPATH=" instead.  Remove
+	the handling of `command` expansion, leim/Makefile.in doesn't use
+	that anymore.
+
+2000-08-29  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (HAVE_INDEX, HAVE_RINDEX): Define.
+
+2000-08-22  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (TAGS): Don't use [a-zA-Z]*, as it causes wildcard
+	expansion to become case-sensitive and return all file names in
+	upper case on plain DOS.
+
+2000-08-05  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (src): Put gdb.tmp after -a, since djecho's -a
+	switch requires an argument.
+
+2000-07-31  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (src): Make the rule faster by using a single djecho
+	command instead of multiple redir invocations.
+	(install): Speed up by using a command.com's for loop.
+
+2000-07-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed3v2.inp: Define ALLOCA to an empty string.
+
+2000-07-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1v2.inp: Put getloadavg.o into LIBOBJS, not GETLOADAVG_LIBS.
+
+2000-07-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1v2.inp: Set LIBSOUND to an empty string.
+
+2000-06-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp: Define HAVE_STRUCT_TIMEZONE in src/config.h.
+
+2000-06-25  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1v2.inp: Set GETLOADAVG_LIBS to getloadavg.o in src/Makefile.
+
+2000-06-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sedlisp.inp (srcdir): Edit this variable.
+
+2000-06-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sedlisp.inp: New file.
+
+2000-05-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed6.inp: Changes to allow "make foo.dvi" on DJGPP platforms:
+	(ENVADD): Redefine as empty, to avoid requiring a Unixy shell.
+	(TEXINPUTS): Use semi-colon; export explicitly.
+	(MAKEINFO): Export explicitly.
+
+2000-05-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (install): Install ebrowse.exe.
+
+2000-04-14  Dave Love  <fx@gnu.org>
+
+	* sed1v2.inp, sed1.inp: Add LIBS, LIBOBJS.
+
+2000-03-13  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp: Add PROTOTYPES and POINTER_TYPE, per the new
+	config.in.
+
+2000-01-27  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (HAVE_SETITIMER): Define.
+
+1999-11-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (HAVE_TM_GMTOFF, HAVE_MBLEN): Define.
+
+	* sed1v2.inp: Convert "LC_ALL=C ./temacs" to MS-DOS equivalent.
+
+1999-07-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedleim.inp (SHELL, MAKESHELL): Use /xyzzy/command as the shell.
+
+1999-07-12  Richard Stallman  <rms@gnu.org>
+
+	* Version 20.4 released.
+
+1999-07-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (SHELL, MAKESHELL): Don't use /dos/command, it can
+	invoke an incompatible version of COMMAND.COM.
+
+1999-05-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* sed1v2.inp: Use -gcoff instead of -g in CFLAGS, for those who
+	have GCC configured by default to use stabs, which unexec.c
+	doesn't currently support.
+
+1999-01-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (install): Use update instead of sed to install fns.el.
+
+1999-01-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* mainmake.v2 (install): Install fns.el in ../bin, since Emacs
+	looks for it in exec-directory.
+
+1999-01-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* sedleim.inp: New file, for configuring the leim directory.
+
+	* mainmake.v2 (src): Build files in leim if leim/Makefile exists.
+	(clean): Add clean in leim.
+
+1998-11-08  Eli Zaretskii  <eliz@mescaline.gnu.org>
+
+	* mainmake.v2 (SHELL, MAKESHELL): Don't use `override'.
+
+1998-10-20  Eli Zaretskii  <eliz@mescaline.gnu.org>
+
+	* mainmake.v2: Forcibly set SHELL and MAKESHELL to force Make to
+	use COMMAND.COM as the shell.
+
+1998-08-19  Richard Stallman  <rms@psilocin.ai.mit.edu>
+
+	* Version 20.3 released.
+
+1998-05-04  Eli Zaretskii  <eliz@mescaline.gnu.org>
+
+	* mainmake.v2 (TAGS tags): Fix file name wildcards in lisp
+	directory.
+
+1998-04-13  Eli Zaretskii  <eliz@delysid.gnu.org>
+
+	* mainmake.v2 (src): Replace topdir with top_srcdir in commands
+	which generate gdb.ini.
+
+1998-04-12  Eli Zaretskii  <eliz@delysid.gnu.org>
+
+	* mainmake.v2 (version): Determine emacs-version from
+	lisp/version.el.  Pass it to sub-Make's.
+
+1998-04-05  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed3v2.inp: When installing ${version},
+	do it replacing @version@.
+
+	* mainmake.v2 (version): Compute the version from lisp/version.el
+	and pass to sub-Make's.  Pass top_srcdir to sub-Make's.
+
+1997-11-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed6.inp: New file, configures the man directory for MSDOS.
+
+	* mainmake.v2 (man): New target to build the manual.
+	(all): Add the man dependency.
+	(install): Change bin\\nul to bin\nul.
+
+1997-09-19  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.2 released.
+
+1997-09-15  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 20.1 released.
+
+1997-09-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1v2.inp: Enlarge the stack size of temacs to 100KB.
+
+1997-08-13  Eli Zaretskii  <eliz@psilocin.gnu.ai.mit.edu>
+
+	* sed2.inp (EMACS_CONFIGURATION): Set to i386-pc-msdosdjgpp.
+
+1997-08-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1v2.inp (CPPFLAGS, LDFLAGS): Edit to empty.
+
+1997-07-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp (HAVE_LOGB, HAVE_FREXP, HAVE_FMOD, HAVE_RINT)
+	(HAVE_CBRT, HAVE_FPATHCONF, HAVE_SETRLIMIT): Defined.
+
+	* sed1.inp, sed1v2.inp: Remove `stamp-oldxmenu' dependency, so
+	MSDOS users won't need `touch' installed.
+
+	* mainmake.v2 (TAGS, tags): Include new lisp subdirectories.
+
+1996-08-11  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 19.33 released.
+
+1996-08-04  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* is_exec.c: Rename from is-exec.c.
+
+1996-07-27  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* Version 19.32 released.
+
+	* is-exec.c, sigaction.c: New files.
+
+1996-07-24  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (TAGS): Make sure bin/etags.exe is current.  Make
+	the rules always generate TAGS.
+
+1996-06-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp: Don't undef MULTI_FRAME.
+
+1996-05-25  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* Version 19.31 released.
+
+1996-04-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed1.inp: Replace `make-docfile' with `make-doc.exe'.  In case
+	src/Makefile needs to rebuild `make-doc.exe', use one command per line.
+	Undo the previous change.
+
+1996-04-15  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* sed1.inp: Change make-docfile to make-doc.exe in a second place.
+
+1996-04-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* mainmake.v2 (src): Create a file with sed commands instead of using
+	a long sed command line (some versions of Sed don't handle that).
+	(gdb): Merge back into src, undoing April 13 change.
+	(install): Do use if statements, but not a loop.
+
+1996-04-13  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* mainmake.v2 (gdb): New target, broken out of src.
+	(install): Use simple explicit copy commands, not a loop.
+
+1996-04-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* sed2.inp: Under DJGPP v2, use <sys/config.h> instead of most of
+	config.h.in.
+
+	* sed1v2.inp, sed3v2.inp, mainmake.v2: New files.
+
+1996-01-23  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* sed2.inp (LOCALTIME_CACHE, HAVE_TZSET): Define these.
+
+1995-11-24  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* Version 19.30 released.
+
+1995-11-21  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* sed3.inp: Alter test-distrib to test-dis.
+
+1995-11-03  Karl Heuer  <kwzh@gnu.ai.mit.edu>
+
+	* mainmake (install): Don't mv make-doc.exe into ../bin/.
+
+1995-10-11  Kim Storm  <kfstorm@wombat.gnu.ai.mit.edu>
+
+	* sed1.inp: Call make-doc.exe instead of make-docfile.
+
+1995-06-08  Karl Heuer  <kwzh@nutrimat.gnu.ai.mit.edu>
+
+	* sed2.inp: Define STDC_HEADERS.
+	Undefine MULTI_FRAME, until somebody fixes msdos.h and msdos.c.
+
+1995-01-20  Karl Heuer  <kwzh@hal.gnu.ai.mit.edu>
+
+	* sed3.inp: Fix sed append command to behave as intended.
+
+1995-01-20  Morten Welinder  <terra@diku.dk>
+
+	* sed3.inp: Delete mysterious dot.  Add comment to protect blank
+	line at end of file.  Make sure make-docfile is compiled.
+
+1995-01-10  Karl Heuer  <kwzh@hal.gnu.ai.mit.edu>
+
+	* sed3.inp: Use coff2exe on make-docfile.
+	* sed1.inp: Not go32, which has problems with long arg lists.
+
+1994-10-17  Morten Welinder  <terra@mole.gnu.ai.mit.edu>
+
+	* sed1.inp: Handle "\t#"-style comments.
+	(obj): Don't add any files -- now done in src/makefile.in.in.
+	(temacs): Don't depend on prefix-args.
+	(DOC): Reflect makefile changes regarding two-batch run.
+
+	* sed2.inp: Add comments showing how to use the system malloc.
+	(EMACS_CONFIG_OPTIONS): Set though not useful.
+	(HAVE_MKTIME): Define.
+
+	* mainmake (clean): Add target.
+
+	* sed1x.inp, sed2x.inp, sed5x.inp: New files for X configuration.
+
+1994-07-14  Morten Welinder  (terra@diku.dk)
+
+	* sed2.inp (HAVE_STRERROR): Define.
+
+1994-07-08  Morten Welinder  (terra@diku.dk)
+
+	* sed1.inp, sed2.inp: Use "m/intel386" instead of "m/dos386.h".
+
+1994-06-01  Morten Welinder  (terra@diku.dk)
+
+	* sed4.inp: New file for configuring src/paths.h.
+
+1994-05-30  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* Version 19.25 released.
+
+1994-05-22  Morten Welinder  (terra@diku.dk)
+
+	* sed1.inp: Adding dos-fns.elc to the set of lisp files was moved
+	to src/makefile.in.in.
+
+1994-05-20  Morten Welinder  (terra@tyr.diku.dk)
+
+	* sed2.inp: Reflect change from CONFIGURATION to EMACS_CONFIGURATION.
+	Also set it to correct three-part value.
+
+1994-05-16  Morten Welinder  (terra@tyr.diku.dk)
+
+	* Version 19.23 released.
+
+	* sed1.inp: Don't use `+' in regexps as different stream
+	editors interpret them differently.  Use `*' instead.
+
+1994-05-12  Morten Welinder  (terra@diku.dk)
+
+	* mainmake (install): Set the minimum stack (for running under
+	DPMI) to 512K.  Avoid using wildcard for matching one file.
+
+1994-05-08  Morten Welinder  (terra@diku.dk)
+
+	* sed3.inp: Don't pass version to [ce]tags.
+
+1994-04-30  Morten Welinder  (terra@diku.dk)
+
+	* sed1.inp: Don't comment out the inc-vers run as that
+	does not exist anymore.
+	Don't reset DEBUG_MOLE as that no longer is used.
+	Identify the file being patched as src/...
+	* sed2.inp: Identify the file being patched as src/...
+	* sed3.inp: We don't have to have the version number in here
+	anymore.  Instead we patch the way it is passed from make to
+	the C compiler.
+
+1994-04-29  Morten Welinder  (terra@diku.dk)
+
+	* sed1.inp: Set CFLAGS=-O2, not -g.  Handle the new
+	M_FILE, S_FILE, and SET_MAKE defines.  Get rid of ^Ms.
+
+	* sed2.inp: We have bcmp.  Configuration is "msdos".
+	Get rid of ^Ms.
+
+	* sed3.inp: Set CFLAGS=-O2, not -g.  Correct for
+	new configuration regarding utilities not to compile.
+	Fix version number.  Get rid of ^Ms.
+
+1994-01-08  Morten Welinder  (terra@diku.dk)
+
+	* sed3.inp: Improve make-compatibility by not using drive
+	specifications and by not specifying an explicit shell.
+
+1994-01-07  Morten Welinder  (terra@diku.dk)
+
+	* sed1.inp: Incorporate the actions of patch1.
+	* patch1: File deleted.
+
+1993-01-05  Morten Welinder  (terra@diku.dk)
+
+	* mainmake: New file, makefile for the main directory.
+
+	* patch1: New file.  Context diff to turn src/makefile.in into
+	a msdos version called makefile.
+
+	* emacs.pif: New file, program information file for Emacs under
+	Windows.  (This file contains non-printable characters.)
+
+	* emacs.ico: New file, icon for Emacs under Windows.  It's so ugly
+	that someone is bound to create a better one.  Mail uuencoded icons
+	to terra@diku.dk, but be prepared to sign a copyright disclaimer.
+	(This file contains non-printable characters.)
+
+	* sed3.inp: New file for changing lib-src/makefile.in into
+	lib-src/makefile.
+
+	* sed2.inp: New file for changing src/config.h-in into src/config.h.
+
+	* sed1.inp: New file for changing src/makefile.in.in into src/makefile.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+  Copyright (C) 1994-1999, 2001-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

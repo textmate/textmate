@@ -1,0 +1,90 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+			 The admin directory
+
+This directory contains scripts and other things useful for developing
+and maintaining Emacs.  These files are not part of Emacs releases
+because they are not deemed generally useful, and you have to know
+what you do when using them.
+
+
+* Instructions and scripts used to prepare an Emacs release.
+
+** FOR-RELEASE
+
+Living list of activities that must be completed before the next release.
+
+** make-tarball.txt
+
+Instructions to create pretest or release tarballs, announcements, etc.
+
+** admin.el
+
+Utilities for setting version numbers and alike.
+
+** make-announcement, make-changelog-diff
+
+Scripts used to prepare release announcements.
+
+
+* Scripts that can be used to build and test Emacs.
+
+** build-configs
+
+Build Emacs in various configurations.
+
+** make-emacs
+
+Build Emacs in various ways.
+
+** quick-install-emacs
+
+Install emacs quickly (`incrementally').
+
+** alloc-colors.c
+
+A utility program that allocates a given number of colors on X.  Can
+be used to debug Emacs with dense colormaps (PseudoColor).
+
+** check-doc-strings
+
+Check doc strings against documentation.
+
+** cus-test.el
+
+Tests for custom types and load problems.
+
+** diff-tar-files
+
+Show files added/removed between two tar files.
+
+
+Brief description of sub-directories:
+
+charsets		scripts for generating charset map files
+			in ../etc/charsets
+unidata			scripts for generating character property files
+			in ../lisp/international
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:

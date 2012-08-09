@@ -1,0 +1,1333 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/control
+@node Control Structures, Variables, Evaluation, Top
+@chapter Control Structures
+@cindex special forms for control structures
+@cindex control structures
+
+  A Lisp program consists of a set of @dfn{expressions}, or
+@dfn{forms} (@pxref{Forms}).  We control the order of execution of
+these forms by enclosing them in @dfn{control structures}.  Control
+structures are special forms which control when, whether, or how many
+times to execute the forms they contain.
+
+@cindex textual order
+  The simplest order of execution is sequential execution: first form
+@var{a}, then form @var{b}, and so on.  This is what happens when you
+write several forms in succession in the body of a function, or at top
+level in a file of Lisp code---the forms are executed in the order
+written.  We call this @dfn{textual order}.  For example, if a function
+body consists of two forms @var{a} and @var{b}, evaluation of the
+function evaluates first @var{a} and then @var{b}.  The result of
+evaluating @var{b} becomes the value of the function.
+
+  Explicit control structures make possible an order of execution other
+than sequential.
+
+  Emacs Lisp provides several kinds of control structure, including
+other varieties of sequencing, conditionals, iteration, and (controlled)
+jumps---all discussed below.  The built-in control structures are
+special forms since their subforms are not necessarily evaluated or not
+evaluated sequentially.  You can use macros to define your own control
+structure constructs (@pxref{Macros}).
+
+@menu
+* Sequencing::             Evaluation in textual order.
+* Conditionals::           @code{if}, @code{cond}, @code{when}, @code{unless}.
+* Combining Conditions::   @code{and}, @code{or}, @code{not}.
+* Iteration::              @code{while} loops.
+* Nonlocal Exits::         Jumping out of a sequence.
+@end menu
+
+@node Sequencing
+@section Sequencing
+
+  Evaluating forms in the order they appear is the most common way
+control passes from one form to another.  In some contexts, such as in a
+function body, this happens automatically.  Elsewhere you must use a
+control structure construct to do this: @code{progn}, the simplest
+control construct of Lisp.
+
+  A @code{progn} special form looks like this:
+
+@example
+@group
+(progn @var{a} @var{b} @var{c} @dots{})
+@end group
+@end example
+
+@noindent
+and it says to execute the forms @var{a}, @var{b}, @var{c}, and so on, in
+that order.  These forms are called the @dfn{body} of the @code{progn} form.
+The value of the last form in the body becomes the value of the entire
+@code{progn}.  @code{(progn)} returns @code{nil}.
+
+@cindex implicit @code{progn}
+  In the early days of Lisp, @code{progn} was the only way to execute
+two or more forms in succession and use the value of the last of them.
+But programmers found they often needed to use a @code{progn} in the
+body of a function, where (at that time) only one form was allowed.  So
+the body of a function was made into an ``implicit @code{progn}'':
+several forms are allowed just as in the body of an actual @code{progn}.
+Many other control structures likewise contain an implicit @code{progn}.
+As a result, @code{progn} is not used as much as it was many years ago.
+It is needed now most often inside an @code{unwind-protect}, @code{and},
+@code{or}, or in the @var{then}-part of an @code{if}.
+
+@defspec progn forms@dots{}
+This special form evaluates all of the @var{forms}, in textual
+order, returning the result of the final form.
+
+@example
+@group
+(progn (print "The first form")
+       (print "The second form")
+       (print "The third form"))
+     @print{} "The first form"
+     @print{} "The second form"
+     @print{} "The third form"
+@result{} "The third form"
+@end group
+@end example
+@end defspec
+
+  Two other constructs likewise evaluate a series of forms but return
+different values:
+
+@defspec prog1 form1 forms@dots{}
+This special form evaluates @var{form1} and all of the @var{forms}, in
+textual order, returning the result of @var{form1}.
+
+@example
+@group
+(prog1 (print "The first form")
+       (print "The second form")
+       (print "The third form"))
+     @print{} "The first form"
+     @print{} "The second form"
+     @print{} "The third form"
+@result{} "The first form"
+@end group
+@end example
+
+Here is a way to remove the first element from a list in the variable
+@code{x}, then return the value of that former element:
+
+@example
+(prog1 (car x) (setq x (cdr x)))
+@end example
+@end defspec
+
+@defspec prog2 form1 form2 forms@dots{}
+This special form evaluates @var{form1}, @var{form2}, and all of the
+following @var{forms}, in textual order, returning the result of
+@var{form2}.
+
+@example
+@group
+(prog2 (print "The first form")
+       (print "The second form")
+       (print "The third form"))
+     @print{} "The first form"
+     @print{} "The second form"
+     @print{} "The third form"
+@result{} "The second form"
+@end group
+@end example
+@end defspec
+
+@node Conditionals
+@section Conditionals
+@cindex conditional evaluation
+
+  Conditional control structures choose among alternatives.  Emacs Lisp
+has four conditional forms: @code{if}, which is much the same as in
+other languages; @code{when} and @code{unless}, which are variants of
+@code{if}; and @code{cond}, which is a generalized case statement.
+
+@defspec if condition then-form else-forms@dots{}
+@code{if} chooses between the @var{then-form} and the @var{else-forms}
+based on the value of @var{condition}.  If the evaluated @var{condition} is
+non-@code{nil}, @var{then-form} is evaluated and the result returned.
+Otherwise, the @var{else-forms} are evaluated in textual order, and the
+value of the last one is returned.  (The @var{else} part of @code{if} is
+an example of an implicit @code{progn}.  @xref{Sequencing}.)
+
+If @var{condition} has the value @code{nil}, and no @var{else-forms} are
+given, @code{if} returns @code{nil}.
+
+@code{if} is a special form because the branch that is not selected is
+never evaluated---it is ignored.  Thus, in this example,
+@code{true} is not printed because @code{print} is never called:
+
+@example
+@group
+(if nil
+    (print 'true)
+  'very-false)
+@result{} very-false
+@end group
+@end example
+@end defspec
+
+@defmac when condition then-forms@dots{}
+This is a variant of @code{if} where there are no @var{else-forms},
+and possibly several @var{then-forms}.  In particular,
+
+@example
+(when @var{condition} @var{a} @var{b} @var{c})
+@end example
+
+@noindent
+is entirely equivalent to
+
+@example
+(if @var{condition} (progn @var{a} @var{b} @var{c}) nil)
+@end example
+@end defmac
+
+@defmac unless condition forms@dots{}
+This is a variant of @code{if} where there is no @var{then-form}:
+
+@example
+(unless @var{condition} @var{a} @var{b} @var{c})
+@end example
+
+@noindent
+is entirely equivalent to
+
+@example
+(if @var{condition} nil
+   @var{a} @var{b} @var{c})
+@end example
+@end defmac
+
+@defspec cond clause@dots{}
+@code{cond} chooses among an arbitrary number of alternatives.  Each
+@var{clause} in the @code{cond} must be a list.  The @sc{car} of this
+list is the @var{condition}; the remaining elements, if any, the
+@var{body-forms}.  Thus, a clause looks like this:
+
+@example
+(@var{condition} @var{body-forms}@dots{})
+@end example
+
+@code{cond} tries the clauses in textual order, by evaluating the
+@var{condition} of each clause.  If the value of @var{condition} is
+non-@code{nil}, the clause ``succeeds''; then @code{cond} evaluates its
+@var{body-forms}, and the value of the last of @var{body-forms} becomes
+the value of the @code{cond}.  The remaining clauses are ignored.
+
+If the value of @var{condition} is @code{nil}, the clause ``fails'', so
+the @code{cond} moves on to the following clause, trying its
+@var{condition}.
+
+If every @var{condition} evaluates to @code{nil}, so that every clause
+fails, @code{cond} returns @code{nil}.
+
+A clause may also look like this:
+
+@example
+(@var{condition})
+@end example
+
+@noindent
+Then, if @var{condition} is non-@code{nil} when tested, the value of
+@var{condition} becomes the value of the @code{cond} form.
+
+The following example has four clauses, which test for the cases where
+the value of @code{x} is a number, string, buffer and symbol,
+respectively:
+
+@example
+@group
+(cond ((numberp x) x)
+      ((stringp x) x)
+      ((bufferp x)
+       (setq temporary-hack x) ; @r{multiple body-forms}
+       (buffer-name x))        ; @r{in one clause}
+      ((symbolp x) (symbol-value x)))
+@end group
+@end example
+
+Often we want to execute the last clause whenever none of the previous
+clauses was successful.  To do this, we use @code{t} as the
+@var{condition} of the last clause, like this: @code{(t
+@var{body-forms})}.  The form @code{t} evaluates to @code{t}, which is
+never @code{nil}, so this clause never fails, provided the @code{cond}
+gets to it at all.  For example:
+
+@example
+@group
+(setq a 5)
+(cond ((eq a 'hack) 'foo)
+      (t "default"))
+@result{} "default"
+@end group
+@end example
+
+@noindent
+This @code{cond} expression returns @code{foo} if the value of @code{a}
+is @code{hack}, and returns the string @code{"default"} otherwise.
+@end defspec
+
+Any conditional construct can be expressed with @code{cond} or with
+@code{if}.  Therefore, the choice between them is a matter of style.
+For example:
+
+@example
+@group
+(if @var{a} @var{b} @var{c})
+@equiv{}
+(cond (@var{a} @var{b}) (t @var{c}))
+@end group
+@end example
+
+@node Combining Conditions
+@section Constructs for Combining Conditions
+
+  This section describes three constructs that are often used together
+with @code{if} and @code{cond} to express complicated conditions.  The
+constructs @code{and} and @code{or} can also be used individually as
+kinds of multiple conditional constructs.
+
+@defun not condition
+This function tests for the falsehood of @var{condition}.  It returns
+@code{t} if @var{condition} is @code{nil}, and @code{nil} otherwise.
+The function @code{not} is identical to @code{null}, and we recommend
+using the name @code{null} if you are testing for an empty list.
+@end defun
+
+@defspec and conditions@dots{}
+The @code{and} special form tests whether all the @var{conditions} are
+true.  It works by evaluating the @var{conditions} one by one in the
+order written.
+
+If any of the @var{conditions} evaluates to @code{nil}, then the result
+of the @code{and} must be @code{nil} regardless of the remaining
+@var{conditions}; so @code{and} returns @code{nil} right away, ignoring
+the remaining @var{conditions}.
+
+If all the @var{conditions} turn out non-@code{nil}, then the value of
+the last of them becomes the value of the @code{and} form.  Just
+@code{(and)}, with no @var{conditions}, returns @code{t}, appropriate
+because all the @var{conditions} turned out non-@code{nil}.  (Think
+about it; which one did not?)
+
+Here is an example.  The first condition returns the integer 1, which is
+not @code{nil}.  Similarly, the second condition returns the integer 2,
+which is not @code{nil}.  The third condition is @code{nil}, so the
+remaining condition is never evaluated.
+
+@example
+@group
+(and (print 1) (print 2) nil (print 3))
+     @print{} 1
+     @print{} 2
+@result{} nil
+@end group
+@end example
+
+Here is a more realistic example of using @code{and}:
+
+@example
+@group
+(if (and (consp foo) (eq (car foo) 'x))
+    (message "foo is a list starting with x"))
+@end group
+@end example
+
+@noindent
+Note that @code{(car foo)} is not executed if @code{(consp foo)} returns
+@code{nil}, thus avoiding an error.
+
+@code{and} expressions can also be written using either @code{if} or
+@code{cond}.  Here's how:
+
+@example
+@group
+(and @var{arg1} @var{arg2} @var{arg3})
+@equiv{}
+(if @var{arg1} (if @var{arg2} @var{arg3}))
+@equiv{}
+(cond (@var{arg1} (cond (@var{arg2} @var{arg3}))))
+@end group
+@end example
+@end defspec
+
+@defspec or conditions@dots{}
+The @code{or} special form tests whether at least one of the
+@var{conditions} is true.  It works by evaluating all the
+@var{conditions} one by one in the order written.
+
+If any of the @var{conditions} evaluates to a non-@code{nil} value, then
+the result of the @code{or} must be non-@code{nil}; so @code{or} returns
+right away, ignoring the remaining @var{conditions}.  The value it
+returns is the non-@code{nil} value of the condition just evaluated.
+
+If all the @var{conditions} turn out @code{nil}, then the @code{or}
+expression returns @code{nil}.  Just @code{(or)}, with no
+@var{conditions}, returns @code{nil}, appropriate because all the
+@var{conditions} turned out @code{nil}.  (Think about it; which one
+did not?)
+
+For example, this expression tests whether @code{x} is either
+@code{nil} or the integer zero:
+
+@example
+(or (eq x nil) (eq x 0))
+@end example
+
+Like the @code{and} construct, @code{or} can be written in terms of
+@code{cond}.  For example:
+
+@example
+@group
+(or @var{arg1} @var{arg2} @var{arg3})
+@equiv{}
+(cond (@var{arg1})
+      (@var{arg2})
+      (@var{arg3}))
+@end group
+@end example
+
+You could almost write @code{or} in terms of @code{if}, but not quite:
+
+@example
+@group
+(if @var{arg1} @var{arg1}
+  (if @var{arg2} @var{arg2}
+    @var{arg3}))
+@end group
+@end example
+
+@noindent
+This is not completely equivalent because it can evaluate @var{arg1} or
+@var{arg2} twice.  By contrast, @code{(or @var{arg1} @var{arg2}
+@var{arg3})} never evaluates any argument more than once.
+@end defspec
+
+@node Iteration
+@section Iteration
+@cindex iteration
+@cindex recursion
+
+  Iteration means executing part of a program repetitively.  For
+example, you might want to repeat some computation once for each element
+of a list, or once for each integer from 0 to @var{n}.  You can do this
+in Emacs Lisp with the special form @code{while}:
+
+@defspec while condition forms@dots{}
+@code{while} first evaluates @var{condition}.  If the result is
+non-@code{nil}, it evaluates @var{forms} in textual order.  Then it
+reevaluates @var{condition}, and if the result is non-@code{nil}, it
+evaluates @var{forms} again.  This process repeats until @var{condition}
+evaluates to @code{nil}.
+
+There is no limit on the number of iterations that may occur.  The loop
+will continue until either @var{condition} evaluates to @code{nil} or
+until an error or @code{throw} jumps out of it (@pxref{Nonlocal Exits}).
+
+The value of a @code{while} form is always @code{nil}.
+
+@example
+@group
+(setq num 0)
+     @result{} 0
+@end group
+@group
+(while (< num 4)
+  (princ (format "Iteration %d." num))
+  (setq num (1+ num)))
+     @print{} Iteration 0.
+     @print{} Iteration 1.
+     @print{} Iteration 2.
+     @print{} Iteration 3.
+     @result{} nil
+@end group
+@end example
+
+To write a ``repeat...until'' loop, which will execute something on each
+iteration and then do the end-test, put the body followed by the
+end-test in a @code{progn} as the first argument of @code{while}, as
+shown here:
+
+@example
+@group
+(while (progn
+         (forward-line 1)
+         (not (looking-at "^$"))))
+@end group
+@end example
+
+@noindent
+This moves forward one line and continues moving by lines until it
+reaches an empty line.  It is peculiar in that the @code{while} has no
+body, just the end test (which also does the real work of moving point).
+@end defspec
+
+  The @code{dolist} and @code{dotimes} macros provide convenient ways to
+write two common kinds of loops.
+
+@defmac dolist (var list [result]) body@dots{}
+This construct executes @var{body} once for each element of
+@var{list}, binding the variable @var{var} locally to hold the current
+element.  Then it returns the value of evaluating @var{result}, or
+@code{nil} if @var{result} is omitted.  For example, here is how you
+could use @code{dolist} to define the @code{reverse} function:
+
+@example
+(defun reverse (list)
+  (let (value)
+    (dolist (elt list value)
+      (setq value (cons elt value)))))
+@end example
+@end defmac
+
+@defmac dotimes (var count [result]) body@dots{}
+This construct executes @var{body} once for each integer from 0
+(inclusive) to @var{count} (exclusive), binding the variable @var{var}
+to the integer for the current iteration.  Then it returns the value
+of evaluating @var{result}, or @code{nil} if @var{result} is omitted.
+Here is an example of using @code{dotimes} to do something 100 times:
+
+@example
+(dotimes (i 100)
+  (insert "I will not obey absurd orders\n"))
+@end example
+@end defmac
+
+@node Nonlocal Exits
+@section Nonlocal Exits
+@cindex nonlocal exits
+
+  A @dfn{nonlocal exit} is a transfer of control from one point in a
+program to another remote point.  Nonlocal exits can occur in Emacs Lisp
+as a result of errors; you can also use them under explicit control.
+Nonlocal exits unbind all variable bindings made by the constructs being
+exited.
+
+@menu
+* Catch and Throw::     Nonlocal exits for the program's own purposes.
+* Examples of Catch::   Showing how such nonlocal exits can be written.
+* Errors::              How errors are signaled and handled.
+* Cleanups::            Arranging to run a cleanup form if an error happens.
+@end menu
+
+@node Catch and Throw
+@subsection Explicit Nonlocal Exits: @code{catch} and @code{throw}
+
+  Most control constructs affect only the flow of control within the
+construct itself.  The function @code{throw} is the exception to this
+rule of normal program execution: it performs a nonlocal exit on
+request.  (There are other exceptions, but they are for error handling
+only.)  @code{throw} is used inside a @code{catch}, and jumps back to
+that @code{catch}.  For example:
+
+@example
+@group
+(defun foo-outer ()
+  (catch 'foo
+    (foo-inner)))
+
+(defun foo-inner ()
+  @dots{}
+  (if x
+      (throw 'foo t))
+  @dots{})
+@end group
+@end example
+
+@noindent
+The @code{throw} form, if executed, transfers control straight back to
+the corresponding @code{catch}, which returns immediately.  The code
+following the @code{throw} is not executed.  The second argument of
+@code{throw} is used as the return value of the @code{catch}.
+
+  The function @code{throw} finds the matching @code{catch} based on the
+first argument: it searches for a @code{catch} whose first argument is
+@code{eq} to the one specified in the @code{throw}.  If there is more
+than one applicable @code{catch}, the innermost one takes precedence.
+Thus, in the above example, the @code{throw} specifies @code{foo}, and
+the @code{catch} in @code{foo-outer} specifies the same symbol, so that
+@code{catch} is the applicable one (assuming there is no other matching
+@code{catch} in between).
+
+  Executing @code{throw} exits all Lisp constructs up to the matching
+@code{catch}, including function calls.  When binding constructs such as
+@code{let} or function calls are exited in this way, the bindings are
+unbound, just as they are when these constructs exit normally
+(@pxref{Local Variables}).  Likewise, @code{throw} restores the buffer
+and position saved by @code{save-excursion} (@pxref{Excursions}), and
+the narrowing status saved by @code{save-restriction} and the window
+selection saved by @code{save-window-excursion} (@pxref{Window
+Configurations}).  It also runs any cleanups established with the
+@code{unwind-protect} special form when it exits that form
+(@pxref{Cleanups}).
+
+  The @code{throw} need not appear lexically within the @code{catch}
+that it jumps to.  It can equally well be called from another function
+called within the @code{catch}.  As long as the @code{throw} takes place
+chronologically after entry to the @code{catch}, and chronologically
+before exit from it, it has access to that @code{catch}.  This is why
+@code{throw} can be used in commands such as @code{exit-recursive-edit}
+that throw back to the editor command loop (@pxref{Recursive Editing}).
+
+@cindex CL note---only @code{throw} in Emacs
+@quotation
+@b{Common Lisp note:} Most other versions of Lisp, including Common Lisp,
+have several ways of transferring control nonsequentially: @code{return},
+@code{return-from}, and @code{go}, for example.  Emacs Lisp has only
+@code{throw}.
+@end quotation
+
+@defspec catch tag body@dots{}
+@cindex tag on run time stack
+@code{catch} establishes a return point for the @code{throw} function.
+The return point is distinguished from other such return points by
+@var{tag}, which may be any Lisp object except @code{nil}.  The argument
+@var{tag} is evaluated normally before the return point is established.
+
+With the return point in effect, @code{catch} evaluates the forms of the
+@var{body} in textual order.  If the forms execute normally (without
+error or nonlocal exit) the value of the last body form is returned from
+the @code{catch}.
+
+If a @code{throw} is executed during the execution of @var{body},
+specifying the same value @var{tag}, the @code{catch} form exits
+immediately; the value it returns is whatever was specified as the
+second argument of @code{throw}.
+@end defspec
+
+@defun throw tag value
+The purpose of @code{throw} is to return from a return point previously
+established with @code{catch}.  The argument @var{tag} is used to choose
+among the various existing return points; it must be @code{eq} to the value
+specified in the @code{catch}.  If multiple return points match @var{tag},
+the innermost one is used.
+
+The argument @var{value} is used as the value to return from that
+@code{catch}.
+
+@kindex no-catch
+If no return point is in effect with tag @var{tag}, then a @code{no-catch}
+error is signaled with data @code{(@var{tag} @var{value})}.
+@end defun
+
+@node Examples of Catch
+@subsection Examples of @code{catch} and @code{throw}
+
+  One way to use @code{catch} and @code{throw} is to exit from a doubly
+nested loop.  (In most languages, this would be done with a ``goto''.)
+Here we compute @code{(foo @var{i} @var{j})} for @var{i} and @var{j}
+varying from 0 to 9:
+
+@example
+@group
+(defun search-foo ()
+  (catch 'loop
+    (let ((i 0))
+      (while (< i 10)
+        (let ((j 0))
+          (while (< j 10)
+            (if (foo i j)
+                (throw 'loop (list i j)))
+            (setq j (1+ j))))
+        (setq i (1+ i))))))
+@end group
+@end example
+
+@noindent
+If @code{foo} ever returns non-@code{nil}, we stop immediately and return a
+list of @var{i} and @var{j}.  If @code{foo} always returns @code{nil}, the
+@code{catch} returns normally, and the value is @code{nil}, since that
+is the result of the @code{while}.
+
+  Here are two tricky examples, slightly different, showing two
+return points at once.  First, two return points with the same tag,
+@code{hack}:
+
+@example
+@group
+(defun catch2 (tag)
+  (catch tag
+    (throw 'hack 'yes)))
+@result{} catch2
+@end group
+
+@group
+(catch 'hack
+  (print (catch2 'hack))
+  'no)
+@print{} yes
+@result{} no
+@end group
+@end example
+
+@noindent
+Since both return points have tags that match the @code{throw}, it goes to
+the inner one, the one established in @code{catch2}.  Therefore,
+@code{catch2} returns normally with value @code{yes}, and this value is
+printed.  Finally the second body form in the outer @code{catch}, which is
+@code{'no}, is evaluated and returned from the outer @code{catch}.
+
+  Now let's change the argument given to @code{catch2}:
+
+@example
+@group
+(catch 'hack
+  (print (catch2 'quux))
+  'no)
+@result{} yes
+@end group
+@end example
+
+@noindent
+We still have two return points, but this time only the outer one has
+the tag @code{hack}; the inner one has the tag @code{quux} instead.
+Therefore, @code{throw} makes the outer @code{catch} return the value
+@code{yes}.  The function @code{print} is never called, and the
+body-form @code{'no} is never evaluated.
+
+@node Errors
+@subsection Errors
+@cindex errors
+
+  When Emacs Lisp attempts to evaluate a form that, for some reason,
+cannot be evaluated, it @dfn{signals} an @dfn{error}.
+
+  When an error is signaled, Emacs's default reaction is to print an
+error message and terminate execution of the current command.  This is
+the right thing to do in most cases, such as if you type @kbd{C-f} at
+the end of the buffer.
+
+  In complicated programs, simple termination may not be what you want.
+For example, the program may have made temporary changes in data
+structures, or created temporary buffers that should be deleted before
+the program is finished.  In such cases, you would use
+@code{unwind-protect} to establish @dfn{cleanup expressions} to be
+evaluated in case of error.  (@xref{Cleanups}.)  Occasionally, you may
+wish the program to continue execution despite an error in a subroutine.
+In these cases, you would use @code{condition-case} to establish
+@dfn{error handlers} to recover control in case of error.
+
+  Resist the temptation to use error handling to transfer control from
+one part of the program to another; use @code{catch} and @code{throw}
+instead.  @xref{Catch and Throw}.
+
+@menu
+* Signaling Errors::      How to report an error.
+* Processing of Errors::  What Emacs does when you report an error.
+* Handling Errors::       How you can trap errors and continue execution.
+* Error Symbols::         How errors are classified for trapping them.
+@end menu
+
+@node Signaling Errors
+@subsubsection How to Signal an Error
+@cindex signaling errors
+
+   @dfn{Signaling} an error means beginning error processing.  Error
+processing normally aborts all or part of the running program and
+returns to a point that is set up to handle the error
+(@pxref{Processing of Errors}).  Here we describe how to signal an
+error.
+
+  Most errors are signaled ``automatically'' within Lisp primitives
+which you call for other purposes, such as if you try to take the
+@sc{car} of an integer or move forward a character at the end of the
+buffer.  You can also signal errors explicitly with the functions
+@code{error} and @code{signal}.
+
+  Quitting, which happens when the user types @kbd{C-g}, is not
+considered an error, but it is handled almost like an error.
+@xref{Quitting}.
+
+  Every error specifies an error message, one way or another.  The
+message should state what is wrong (``File does not exist''), not how
+things ought to be (``File must exist'').  The convention in Emacs
+Lisp is that error messages should start with a capital letter, but
+should not end with any sort of punctuation.
+
+@defun error format-string &rest args
+This function signals an error with an error message constructed by
+applying @code{format} (@pxref{Formatting Strings}) to
+@var{format-string} and @var{args}.
+
+These examples show typical uses of @code{error}:
+
+@example
+@group
+(error "That is an error -- try something else")
+     @error{} That is an error -- try something else
+@end group
+
+@group
+(error "You have committed %d errors" 10)
+     @error{} You have committed 10 errors
+@end group
+@end example
+
+@code{error} works by calling @code{signal} with two arguments: the
+error symbol @code{error}, and a list containing the string returned by
+@code{format}.
+
+@strong{Warning:} If you want to use your own string as an error message
+verbatim, don't just write @code{(error @var{string})}.  If @var{string}
+contains @samp{%}, it will be interpreted as a format specifier, with
+undesirable results.  Instead, use @code{(error "%s" @var{string})}.
+@end defun
+
+@defun signal error-symbol data
+@anchor{Definition of signal}
+This function signals an error named by @var{error-symbol}.  The
+argument @var{data} is a list of additional Lisp objects relevant to
+the circumstances of the error.
+
+The argument @var{error-symbol} must be an @dfn{error symbol}---a symbol
+bearing a property @code{error-conditions} whose value is a list of
+condition names.  This is how Emacs Lisp classifies different sorts of
+errors. @xref{Error Symbols}, for a description of error symbols,
+error conditions and condition names.
+
+If the error is not handled, the two arguments are used in printing
+the error message.  Normally, this error message is provided by the
+@code{error-message} property of @var{error-symbol}.  If @var{data} is
+non-@code{nil}, this is followed by a colon and a comma separated list
+of the unevaluated elements of @var{data}.  For @code{error}, the
+error message is the @sc{car} of @var{data} (that must be a string).
+Subcategories of @code{file-error} are handled specially.
+
+The number and significance of the objects in @var{data} depends on
+@var{error-symbol}.  For example, with a @code{wrong-type-argument} error,
+there should be two objects in the list: a predicate that describes the type
+that was expected, and the object that failed to fit that type.
+
+Both @var{error-symbol} and @var{data} are available to any error
+handlers that handle the error: @code{condition-case} binds a local
+variable to a list of the form @code{(@var{error-symbol} .@:
+@var{data})} (@pxref{Handling Errors}).
+
+The function @code{signal} never returns.
+@c (though in older Emacs versions it sometimes could).
+
+@example
+@group
+(signal 'wrong-number-of-arguments '(x y))
+     @error{} Wrong number of arguments: x, y
+@end group
+
+@group
+(signal 'no-such-error '("My unknown error condition"))
+     @error{} peculiar error: "My unknown error condition"
+@end group
+@end example
+@end defun
+
+@cindex CL note---no continuable errors
+@quotation
+@b{Common Lisp note:} Emacs Lisp has nothing like the Common Lisp
+concept of continuable errors.
+@end quotation
+
+@node Processing of Errors
+@subsubsection How Emacs Processes Errors
+
+When an error is signaled, @code{signal} searches for an active
+@dfn{handler} for the error.  A handler is a sequence of Lisp
+expressions designated to be executed if an error happens in part of the
+Lisp program.  If the error has an applicable handler, the handler is
+executed, and control resumes following the handler.  The handler
+executes in the environment of the @code{condition-case} that
+established it; all functions called within that @code{condition-case}
+have already been exited, and the handler cannot return to them.
+
+If there is no applicable handler for the error, it terminates the
+current command and returns control to the editor command loop.  (The
+command loop has an implicit handler for all kinds of errors.)  The
+command loop's handler uses the error symbol and associated data to
+print an error message.  You can use the variable
+@code{command-error-function} to control how this is done:
+
+@defvar command-error-function
+This variable, if non-@code{nil}, specifies a function to use to
+handle errors that return control to the Emacs command loop.  The
+function should take three arguments: @var{data}, a list of the same
+form that @code{condition-case} would bind to its variable;
+@var{context}, a string describing the situation in which the error
+occurred, or (more often) @code{nil}; and @var{caller}, the Lisp
+function which called the primitive that signaled the error.
+@end defvar
+
+@cindex @code{debug-on-error} use
+An error that has no explicit handler may call the Lisp debugger.  The
+debugger is enabled if the variable @code{debug-on-error} (@pxref{Error
+Debugging}) is non-@code{nil}.  Unlike error handlers, the debugger runs
+in the environment of the error, so that you can examine values of
+variables precisely as they were at the time of the error.
+
+@node Handling Errors
+@subsubsection Writing Code to Handle Errors
+@cindex error handler
+@cindex handling errors
+
+  The usual effect of signaling an error is to terminate the command
+that is running and return immediately to the Emacs editor command loop.
+You can arrange to trap errors occurring in a part of your program by
+establishing an error handler, with the special form
+@code{condition-case}.  A simple example looks like this:
+
+@example
+@group
+(condition-case nil
+    (delete-file filename)
+  (error nil))
+@end group
+@end example
+
+@noindent
+This deletes the file named @var{filename}, catching any error and
+returning @code{nil} if an error occurs.  (You can use the macro
+@code{ignore-errors} for a simple case like this; see below.)
+
+  The @code{condition-case} construct is often used to trap errors that
+are predictable, such as failure to open a file in a call to
+@code{insert-file-contents}.  It is also used to trap errors that are
+totally unpredictable, such as when the program evaluates an expression
+read from the user.
+
+  The second argument of @code{condition-case} is called the
+@dfn{protected form}.  (In the example above, the protected form is a
+call to @code{delete-file}.)  The error handlers go into effect when
+this form begins execution and are deactivated when this form returns.
+They remain in effect for all the intervening time.  In particular, they
+are in effect during the execution of functions called by this form, in
+their subroutines, and so on.  This is a good thing, since, strictly
+speaking, errors can be signaled only by Lisp primitives (including
+@code{signal} and @code{error}) called by the protected form, not by the
+protected form itself.
+
+  The arguments after the protected form are handlers.  Each handler
+lists one or more @dfn{condition names} (which are symbols) to specify
+which errors it will handle.  The error symbol specified when an error
+is signaled also defines a list of condition names.  A handler applies
+to an error if they have any condition names in common.  In the example
+above, there is one handler, and it specifies one condition name,
+@code{error}, which covers all errors.
+
+  The search for an applicable handler checks all the established handlers
+starting with the most recently established one.  Thus, if two nested
+@code{condition-case} forms offer to handle the same error, the inner of
+the two gets to handle it.
+
+  If an error is handled by some @code{condition-case} form, this
+ordinarily prevents the debugger from being run, even if
+@code{debug-on-error} says this error should invoke the debugger.
+
+  If you want to be able to debug errors that are caught by a
+@code{condition-case}, set the variable @code{debug-on-signal} to a
+non-@code{nil} value.  You can also specify that a particular handler
+should let the debugger run first, by writing @code{debug} among the
+conditions, like this:
+
+@example
+@group
+(condition-case nil
+    (delete-file filename)
+  ((debug error) nil))
+@end group
+@end example
+
+@noindent
+The effect of @code{debug} here is only to prevent
+@code{condition-case} from suppressing the call to the debugger.  Any
+given error will invoke the debugger only if @code{debug-on-error} and
+the other usual filtering mechanisms say it should.  @xref{Error Debugging}.
+
+@defmac condition-case-unless-debug var protected-form handlers@dots{}
+The macro @code{condition-case-unless-debug} provides another way to
+handle debugging of such forms.  It behaves exactly like
+@code{condition-case}, unless the variable @code{debug-on-error} is
+non-@code{nil}, in which case it does not handle any errors at all.
+@end defmac
+
+  Once Emacs decides that a certain handler handles the error, it
+returns control to that handler.  To do so, Emacs unbinds all variable
+bindings made by binding constructs that are being exited, and
+executes the cleanups of all @code{unwind-protect} forms that are
+being exited.  Once control arrives at the handler, the body of the
+handler executes normally.
+
+  After execution of the handler body, execution returns from the
+@code{condition-case} form.  Because the protected form is exited
+completely before execution of the handler, the handler cannot resume
+execution at the point of the error, nor can it examine variable
+bindings that were made within the protected form.  All it can do is
+clean up and proceed.
+
+  Error signaling and handling have some resemblance to @code{throw} and
+@code{catch} (@pxref{Catch and Throw}), but they are entirely separate
+facilities.  An error cannot be caught by a @code{catch}, and a
+@code{throw} cannot be handled by an error handler (though using
+@code{throw} when there is no suitable @code{catch} signals an error
+that can be handled).
+
+@defspec condition-case var protected-form handlers@dots{}
+This special form establishes the error handlers @var{handlers} around
+the execution of @var{protected-form}.  If @var{protected-form} executes
+without error, the value it returns becomes the value of the
+@code{condition-case} form; in this case, the @code{condition-case} has
+no effect.  The @code{condition-case} form makes a difference when an
+error occurs during @var{protected-form}.
+
+Each of the @var{handlers} is a list of the form @code{(@var{conditions}
+@var{body}@dots{})}.  Here @var{conditions} is an error condition name
+to be handled, or a list of condition names (which can include @code{debug}
+to allow the debugger to run before the handler); @var{body} is one or more
+Lisp expressions to be executed when this handler handles an error.
+Here are examples of handlers:
+
+@example
+@group
+(error nil)
+
+(arith-error (message "Division by zero"))
+
+((arith-error file-error)
+ (message
+  "Either division by zero or failure to open a file"))
+@end group
+@end example
+
+Each error that occurs has an @dfn{error symbol} that describes what
+kind of error it is.  The @code{error-conditions} property of this
+symbol is a list of condition names (@pxref{Error Symbols}).  Emacs
+searches all the active @code{condition-case} forms for a handler that
+specifies one or more of these condition names; the innermost matching
+@code{condition-case} handles the error.  Within this
+@code{condition-case}, the first applicable handler handles the error.
+
+After executing the body of the handler, the @code{condition-case}
+returns normally, using the value of the last form in the handler body
+as the overall value.
+
+@cindex error description
+The argument @var{var} is a variable.  @code{condition-case} does not
+bind this variable when executing the @var{protected-form}, only when it
+handles an error.  At that time, it binds @var{var} locally to an
+@dfn{error description}, which is a list giving the particulars of the
+error.  The error description has the form @code{(@var{error-symbol}
+. @var{data})}.  The handler can refer to this list to decide what to
+do.  For example, if the error is for failure opening a file, the file
+name is the second element of @var{data}---the third element of the
+error description.
+
+If @var{var} is @code{nil}, that means no variable is bound.  Then the
+error symbol and associated data are not available to the handler.
+
+@cindex rethrow a signal
+Sometimes it is necessary to re-throw a signal caught by
+@code{condition-case}, for some outer-level handler to catch.  Here's
+how to do that:
+
+@example
+  (signal (car err) (cdr err))
+@end example
+
+@noindent
+where @code{err} is the error description variable, the first argument
+to @code{condition-case} whose error condition you want to re-throw.
+@xref{Definition of signal}.
+@end defspec
+
+@defun error-message-string error-descriptor
+This function returns the error message string for a given error
+descriptor.  It is useful if you want to handle an error by printing the
+usual error message for that error.  @xref{Definition of signal}.
+@end defun
+
+@cindex @code{arith-error} example
+Here is an example of using @code{condition-case} to handle the error
+that results from dividing by zero.  The handler displays the error
+message (but without a beep), then returns a very large number.
+
+@example
+@group
+(defun safe-divide (dividend divisor)
+  (condition-case err
+      ;; @r{Protected form.}
+      (/ dividend divisor)
+@end group
+@group
+    ;; @r{The handler.}
+    (arith-error                        ; @r{Condition.}
+     ;; @r{Display the usual message for this error.}
+     (message "%s" (error-message-string err))
+     1000000)))
+@result{} safe-divide
+@end group
+
+@group
+(safe-divide 5 0)
+     @print{} Arithmetic error: (arith-error)
+@result{} 1000000
+@end group
+@end example
+
+@noindent
+The handler specifies condition name @code{arith-error} so that it
+will handle only division-by-zero errors.  Other kinds of errors will
+not be handled (by this @code{condition-case}).  Thus:
+
+@example
+@group
+(safe-divide nil 3)
+     @error{} Wrong type argument: number-or-marker-p, nil
+@end group
+@end example
+
+  Here is a @code{condition-case} that catches all kinds of errors,
+including those from @code{error}:
+
+@example
+@group
+(setq baz 34)
+     @result{} 34
+@end group
+
+@group
+(condition-case err
+    (if (eq baz 35)
+        t
+      ;; @r{This is a call to the function @code{error}.}
+      (error "Rats!  The variable %s was %s, not 35" 'baz baz))
+  ;; @r{This is the handler; it is not a form.}
+  (error (princ (format "The error was: %s" err))
+         2))
+@print{} The error was: (error "Rats!  The variable baz was 34, not 35")
+@result{} 2
+@end group
+@end example
+
+@defmac ignore-errors body@dots{}
+This construct executes @var{body}, ignoring any errors that occur
+during its execution.  If the execution is without error,
+@code{ignore-errors} returns the value of the last form in @var{body};
+otherwise, it returns @code{nil}.
+
+Here's the example at the beginning of this subsection rewritten using
+@code{ignore-errors}:
+
+@example
+@group
+  (ignore-errors
+   (delete-file filename))
+@end group
+@end example
+@end defmac
+
+@defmac with-demoted-errors body@dots{}
+This macro is like a milder version of @code{ignore-errors}.  Rather
+than suppressing errors altogether, it converts them into messages.
+Use this form around code that is not expected to signal errors, but
+should be robust if one does occur.  Note that this macro uses
+@code{condition-case-unless-debug} rather than @code{condition-case}.
+@end defmac
+
+@node Error Symbols
+@subsubsection Error Symbols and Condition Names
+@cindex error symbol
+@cindex error name
+@cindex condition name
+@cindex user-defined error
+@kindex error-conditions
+
+  When you signal an error, you specify an @dfn{error symbol} to specify
+the kind of error you have in mind.  Each error has one and only one
+error symbol to categorize it.  This is the finest classification of
+errors defined by the Emacs Lisp language.
+
+  These narrow classifications are grouped into a hierarchy of wider
+classes called @dfn{error conditions}, identified by @dfn{condition
+names}.  The narrowest such classes belong to the error symbols
+themselves: each error symbol is also a condition name.  There are also
+condition names for more extensive classes, up to the condition name
+@code{error} which takes in all kinds of errors (but not @code{quit}).
+Thus, each error has one or more condition names: @code{error}, the
+error symbol if that is distinct from @code{error}, and perhaps some
+intermediate classifications.
+
+  In order for a symbol to be an error symbol, it must have an
+@code{error-conditions} property which gives a list of condition names.
+This list defines the conditions that this kind of error belongs to.
+(The error symbol itself, and the symbol @code{error}, should always be
+members of this list.)  Thus, the hierarchy of condition names is
+defined by the @code{error-conditions} properties of the error symbols.
+Because quitting is not considered an error, the value of the
+@code{error-conditions} property of @code{quit} is just @code{(quit)}.
+
+@cindex peculiar error
+  In addition to the @code{error-conditions} list, the error symbol
+should have an @code{error-message} property whose value is a string to
+be printed when that error is signaled but not handled.  If the
+error symbol has no @code{error-message} property or if the
+@code{error-message} property exists, but is not a string, the error
+message @samp{peculiar error} is used.  @xref{Definition of signal}.
+
+  Here is how we define a new error symbol, @code{new-error}:
+
+@example
+@group
+(put 'new-error
+     'error-conditions
+     '(error my-own-errors new-error))
+@result{} (error my-own-errors new-error)
+@end group
+@group
+(put 'new-error 'error-message "A new error")
+@result{} "A new error"
+@end group
+@end example
+
+@noindent
+This error has three condition names: @code{new-error}, the narrowest
+classification; @code{my-own-errors}, which we imagine is a wider
+classification; and @code{error}, which is the widest of all.
+
+  The error string should start with a capital letter but it should
+not end with a period.  This is for consistency with the rest of Emacs.
+
+  Naturally, Emacs will never signal @code{new-error} on its own; only
+an explicit call to @code{signal} (@pxref{Definition of signal}) in
+your code can do this:
+
+@example
+@group
+(signal 'new-error '(x y))
+     @error{} A new error: x, y
+@end group
+@end example
+
+  This error can be handled through any of the three condition names.
+This example handles @code{new-error} and any other errors in the class
+@code{my-own-errors}:
+
+@example
+@group
+(condition-case foo
+    (bar nil t)
+  (my-own-errors nil))
+@end group
+@end example
+
+  The significant way that errors are classified is by their condition
+names---the names used to match errors with handlers.  An error symbol
+serves only as a convenient way to specify the intended error message
+and list of condition names.  It would be cumbersome to give
+@code{signal} a list of condition names rather than one error symbol.
+
+  By contrast, using only error symbols without condition names would
+seriously decrease the power of @code{condition-case}.  Condition names
+make it possible to categorize errors at various levels of generality
+when you write an error handler.  Using error symbols alone would
+eliminate all but the narrowest level of classification.
+
+  @xref{Standard Errors}, for a list of the main error symbols
+and their conditions.
+
+@node Cleanups
+@subsection Cleaning Up from Nonlocal Exits
+
+  The @code{unwind-protect} construct is essential whenever you
+temporarily put a data structure in an inconsistent state; it permits
+you to make the data consistent again in the event of an error or
+throw.  (Another more specific cleanup construct that is used only for
+changes in buffer contents is the atomic change group; @ref{Atomic
+Changes}.)
+
+@defspec unwind-protect body-form cleanup-forms@dots{}
+@cindex cleanup forms
+@cindex protected forms
+@cindex error cleanup
+@cindex unwinding
+@code{unwind-protect} executes @var{body-form} with a guarantee that
+the @var{cleanup-forms} will be evaluated if control leaves
+@var{body-form}, no matter how that happens.  @var{body-form} may
+complete normally, or execute a @code{throw} out of the
+@code{unwind-protect}, or cause an error; in all cases, the
+@var{cleanup-forms} will be evaluated.
+
+If @var{body-form} finishes normally, @code{unwind-protect} returns the
+value of @var{body-form}, after it evaluates the @var{cleanup-forms}.
+If @var{body-form} does not finish, @code{unwind-protect} does not
+return any value in the normal sense.
+
+Only @var{body-form} is protected by the @code{unwind-protect}.  If any
+of the @var{cleanup-forms} themselves exits nonlocally (via a
+@code{throw} or an error), @code{unwind-protect} is @emph{not}
+guaranteed to evaluate the rest of them.  If the failure of one of the
+@var{cleanup-forms} has the potential to cause trouble, then protect
+it with another @code{unwind-protect} around that form.
+
+The number of currently active @code{unwind-protect} forms counts,
+together with the number of local variable bindings, against the limit
+@code{max-specpdl-size} (@pxref{Definition of max-specpdl-size,, Local
+Variables}).
+@end defspec
+
+  For example, here we make an invisible buffer for temporary use, and
+make sure to kill it before finishing:
+
+@example
+@group
+(let ((buffer (get-buffer-create " *temp*")))
+  (with-current-buffer buffer
+    (unwind-protect
+        @var{body-form}
+      (kill-buffer buffer))))
+@end group
+@end example
+
+@noindent
+You might think that we could just as well write @code{(kill-buffer
+(current-buffer))} and dispense with the variable @code{buffer}.
+However, the way shown above is safer, if @var{body-form} happens to
+get an error after switching to a different buffer!  (Alternatively,
+you could write a @code{save-current-buffer} around @var{body-form},
+to ensure that the temporary buffer becomes current again in time to
+kill it.)
+
+  Emacs includes a standard macro called @code{with-temp-buffer} which
+expands into more or less the code shown above (@pxref{Definition of
+with-temp-buffer,, Current Buffer}).  Several of the macros defined in
+this manual use @code{unwind-protect} in this way.
+
+@findex ftp-login
+  Here is an actual example derived from an FTP package.  It creates a
+process (@pxref{Processes}) to try to establish a connection to a remote
+machine.  As the function @code{ftp-login} is highly susceptible to
+numerous problems that the writer of the function cannot anticipate, it
+is protected with a form that guarantees deletion of the process in the
+event of failure.  Otherwise, Emacs might fill up with useless
+subprocesses.
+
+@example
+@group
+(let ((win nil))
+  (unwind-protect
+      (progn
+        (setq process (ftp-setup-buffer host file))
+        (if (setq win (ftp-login process host user password))
+            (message "Logged in")
+          (error "Ftp login failed")))
+    (or win (and process (delete-process process)))))
+@end group
+@end example
+
+  This example has a small bug: if the user types @kbd{C-g} to
+quit, and the quit happens immediately after the function
+@code{ftp-setup-buffer} returns but before the variable @code{process} is
+set, the process will not be killed.  There is no easy way to fix this bug,
+but at least it is very unlikely.

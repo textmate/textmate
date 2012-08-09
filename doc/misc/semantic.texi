@@ -1,0 +1,623 @@
+\input texinfo
+@setfilename ../../info/semantic
+@set TITLE  Semantic Manual
+@set AUTHOR Eric M. Ludlam, David Ponce, and Richard Y. Kim
+@settitle @value{TITLE}
+
+@c *************************************************************************
+@c @ Header
+@c *************************************************************************
+
+@c Merge all indexes into a single index for now.
+@c We can always separate them later into two or more as needed.
+@syncodeindex vr cp
+@syncodeindex fn cp
+@syncodeindex ky cp
+@syncodeindex pg cp
+@syncodeindex tp cp
+
+@c @footnotestyle separate
+@c @paragraphindent 2
+@c @@smallbook
+@c %**end of header
+
+@copying
+This manual documents the Semantic library and utilities.
+
+Copyright @copyright{} 1999-2005, 2007, 2009-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License.''
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs misc features
+@direntry
+* Semantic: (semantic).         Source code parser library and utilities.
+@end direntry
+
+@titlepage
+@center @titlefont{Semantic}
+@sp 4
+@center by @value{AUTHOR}
+@end titlepage
+@page
+
+@macro semantic{}
+@i{Semantic}
+@end macro
+
+@macro keyword{kw}
+@anchor{\kw\}
+@b{\kw\}
+@end macro
+
+@macro obsolete{old,new}
+@sp 1
+@strong{Compatibility}:
+@code{\new\} introduced in @semantic{} version 2.0 supersedes
+@code{\old\} which is now obsolete.
+@end macro
+
+@c *************************************************************************
+@c @ Document
+@c *************************************************************************
+@contents
+
+@node top
+@top @value{TITLE}
+
+@semantic{} is a suite of Emacs libraries and utilities for parsing
+source code.  At its core is a lexical analyzer and two parser
+generators (@code{bovinator} and @code{wisent}) written in Emacs Lisp.
+@semantic{} provides a variety of tools for making use of the parser
+output, including user commands for code navigation and completion, as
+well as enhancements for imenu, speedbar, whichfunc, eldoc,
+hippie-expand, and several other parts of Emacs.
+
+To send bug reports, or participate in discussions about semantic,
+use the mailing list cedet-semantic@@sourceforge.net via the URL:
+@url{http://lists.sourceforge.net/lists/listinfo/cedet-semantic}
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::
+* Using Semantic::
+* Semantic Internals::
+* Glossary::
+* GNU Free Documentation License::
+* Index::
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+This chapter gives an overview of @semantic{} and its goals.
+
+Ordinarily, Emacs uses regular expressions (and syntax tables) to
+analyze source code for purposes such as syntax highlighting.  This
+approach, though simple and efficient, has its limitations: roughly
+speaking, it only ``guesses'' the meaning of each piece of source code
+in the context of the programming language, instead of rigorously
+``understanding'' it.
+
+@semantic{} provides a new infrastructure to analyze source code using
+@dfn{parsers} instead of regular expressions.  It contains two
+built-in parser generators (an @acronym{LL} generator named
+@code{Bovine} and an @acronym{LALR} generator named @code{Wisent},
+both written in Emacs Lisp), and parsers for several common
+programming languages.  It can also make use of @dfn{external
+parsers}---programs such as GNU Global and GNU IDUtils.
+
+@semantic{} provides a uniform, language-independent @acronym{API} for
+accessing the parser output.  This output can be used by other Emacs
+Lisp programs to implement ``syntax-aware'' behavior.  @semantic{}
+itself includes several such utilities, including user-level Emacs
+commands for navigating, searching, and completing source code.
+
+The following diagram illustrates the structure of the @semantic{}
+package:
+
+@table @strong
+@item Please Note:
+The words in all-capital are those that @semantic{} itself provides.
+Others are current or future languages or applications that are not
+distributed along with @semantic{}.
+@end table
+
+@example
+                                                             Applications
+                                                                 and
+                                                              Utilities
+                                                                -------
+                                                               /       \
+               +---------------+    +--------+    +--------+
+         C --->| C      PARSER |--->|        |    |        |
+               +---------------+    |        |    |        |
+               +---------------+    | COMMON |    | COMMON |<--- SPEEDBAR
+      Java --->| JAVA   PARSER |--->| PARSE  |    |        |
+               +---------------+    | TREE   |    | PARSE  |<--- SEMANTICDB
+               +---------------+    | FORMAT |    | API    |
+    Scheme --->| SCHEME PARSER |--->|        |    |        |<--- ecb
+               +---------------+    |        |    |        |
+               +---------------+    |        |    |        |
+   Texinfo --->| TEXI.  PARSER |--->|        |    |        |
+               +---------------+    |        |    |        |
+
+                    ...                ...           ...         ...
+
+               +---------------+    |        |    |        |
+   Lang. Y --->| Y      Parser |--->|        |    |        |<--- app. ?
+               +---------------+    |        |    |        |
+               +---------------+    |        |    |        |<--- app. ?
+   Lang. Z --->| Z      Parser |--->|        |    |        |
+               +---------------+    +--------+    +--------+
+@end example
+
+@menu
+* Semantic Components::
+@end menu
+
+@node Semantic Components
+@section Semantic Components
+
+In this section, we provide a more detailed description of the major
+components of @semantic{}, and how they interact with one another.
+
+The first step in parsing a source code file is to break it up into
+its fundamental components.  This step is called lexical analysis:
+
+@example
+        syntax table, keywords list, and options
+                         |
+                         |
+                         v
+    input file  ---->  Lexer   ----> token stream
+@end example
+
+@noindent
+The output of the lexical analyzer is a list of tokens that make up
+the file.  The next step is the actual parsing, shown below:
+
+@example
+                    parser tables
+                         |
+                         v
+    token stream --->  Parser  ----> parse tree
+@end example
+
+@noindent
+The end result, the parse tree, is @semantic{}'s internal
+representation of the language grammar.  @semantic{} provides an
+@acronym{API} for Emacs Lisp programs to access the parse tree.
+
+Parsing large files can take several seconds or more.  By default,
+@semantic{} automatically caches parse trees by saving them in your
+@file{.emacs.d} directory.  When you revisit a previously-parsed file,
+the parse tree is automatically reloaded from this cache, to save
+time.  @xref{SemanticDB}.
+
+@node Using Semantic
+@chapter Using Semantic
+
+@include sem-user.texi
+
+@node Semantic Internals
+@chapter Semantic Internals
+
+This chapter provides an overview of the internals of @semantic{}.
+This information is usually not needed by application developers or
+grammar developers; it is useful mostly for the hackers who would like
+to learn more about how @semantic{} works.
+
+@menu
+* Parser code ::          Code used for the parsers
+* Tag handling ::         Code used for manipulating tags
+* Semanticdb Internals :: Code used in the semantic database
+* Analyzer Internals ::   Code used in the code analyzer
+* Tools ::                Code used in user tools
+* Tests ::                Code used for testing
+@end menu
+
+@node Parser code
+@section Parser code
+
+@semantic{} parsing code is spread across a range of files.
+
+@table @file
+@item semantic.el
+The core infrastructure sets up buffers for parsing, and has all the
+core parsing routines.  Most parsing routines are overloadable, so the
+actual implementation may be somewhere else.
+
+@item semantic-edit.el
+Incremental reparse based on user edits.
+
+@item semantic-grammar.el
+@itemx semantic-grammar.wy
+Parser for the different grammar languages, and a major mode for
+editing grammars in Emacs.
+
+@item semantic-lex.el
+Infrastructure for implementing lexical analyzers.  Provides macros
+for creating individual analyzers for specific features, and a way to
+combine them together.
+
+@item semantic-lex-spp.el
+Infrastructure for a lexical symbolic preprocessor.  This was written
+to implement the C preprocessor, but could be used for other lexical
+preprocessors.
+
+@item bovine/bovine-grammar.el
+@itemx bovine/bovine-grammar-macros.el
+@itemx bovine/semantic-bovine.el
+The ``bovine'' grammar.  This is the first grammar mode written for
+@semantic{} and is useful for simple creating simple parsers.
+
+@item wisent/wisent.el
+@itemx wisent/bison-wisent.el
+@itemx wisent/semantic-wisent.el
+@itemx wisent/semantic-debug-grammar.el
+A port of bison to Emacs.  This infrastructure lets you create LALR
+based parsers for @semantic{}.
+
+@item semantic-ast.el
+Manage Abstract Syntax Trees for parsers.
+
+@item semantic-debug.el
+Infrastructure for debugging grammars.
+
+@item semantic-util.el
+Various utilities for manipulating tags, such as describing the tag
+under point, adding labels, and the all important
+@code{semantic-something-to-tag-table}.
+
+@end table
+
+@node Tag handling
+@section Tag handling
+
+A tag represents an individual item found in a buffer, such as a
+function or variable.  Tag handling is handled in several source
+files.
+
+@table @file
+@item semantic-tag.el
+Basic tag creation, queries, cloning, binding, and unbinding.
+
+@item semantic-tag-write.el
+Write a tag or tag list to a stream.  These routines are used by
+@file{semanticdb-file.el} when saving a list of tags.
+
+@item semantic-tag-file.el
+Files associated with tags.  Goto-tag, file for include, and file for
+a prototype.
+
+@item semantic-tag-ls.el
+Language dependent features of a tag, such as parent calculation, slot
+protection, and other states like abstract, virtual, static, and leaf.
+
+@item semantic-dep.el
+Include file handling.  Contains the include path concepts, and
+routines for looking up file names in the include path.
+
+@item semantic-format.el
+Convert a tag into a nicely formatted and colored string.  Use
+@code{semantic-test-all-format-tag-functions} to test different output
+options.
+
+@item semantic-find.el
+Find tags matching different conditions in a tag table.
+These routines are used by @file{semanticdb-find.el} once the database
+has been converted into a simpler tag table.
+
+@item semantic-sort.el
+Sorting lists of tags in different ways.  Includes sorting a plain
+list of tags forward or backward.  Includes binning tags based on
+attributes (bucketize), and tag adoption for multiple references to
+the same thing.
+
+@item semantic-doc.el
+Capture documentation comments from near a tag.
+
+@end table
+
+@node Semanticdb Internals
+@section Semanticdb Internals
+
+@acronym{Semanticdb} complexity is certainly an issue.  It is a rather
+hairy problem to try and solve.
+
+@table @file
+@item semanticdb.el
+Defines a @dfn{database} and a @dfn{table} base class.  You can
+instantiate these classes, and use them, but they are not persistent.
+
+This file also provides support for @code{semanticdb-minor-mode},
+which automatically associates files with tables in databases so that
+tags are @emph{saved} while a buffer is not in memory.
+
+The database and tables both also provide applicable cache information,
+and cache flushing system.  The semanticdb search routines use caches
+to save datastructures that are complex to calculate.
+
+Lastly, it provides the concept of @dfn{project root}.  It is a system
+by which a file can be associated with the root of a project, so if
+you have a tree of directories and source files, it can find the root,
+and allow a tag-search to span all available databases in that
+directory hierarchy.
+
+@item semanticdb-file.el
+Provides a subclass of the basic table so that it can be saved to
+disk.  Implements all the code needed to unbind/rebind tags to a
+buffer and writing them to a file.
+
+@item semanticdb-el.el
+Implements a special kind of @dfn{system} database that uses Emacs
+internals to perform queries.
+
+@item semanticdb-ebrowse.el
+Implements a system database that uses Ebrowse to parse files into a
+table that can be queried for tag names.  Successful tag hits during a
+find causes @semantic{} to pick up and parse the reference files to
+get the full details.
+
+@item semanticdb-find.el
+Infrastructure for searching groups @semantic{} databases, and dealing
+with the search results format.
+
+@item semanticdb-ref.el
+Tracks crossreferences.   Cross references are needed when buffer is
+reparsed, and must alert other tables that any dependent caches may
+need to be flushed.  References are in the form of include files.
+
+@end table
+
+@node Analyzer Internals
+@section Analyzer Internals
+
+The @semantic{} analyzer is a complex engine which has been broken
+down across several modules.  When the @semantic{} analyzer fails,
+start with @code{semantic-analyze-debug-assist}, then dive into some
+of these files.
+
+@table @file
+@item semantic-analyze.el
+The core analyzer for defining the @dfn{current context}.  The
+current context is an object that contains references to aspects of
+the local context including the current prefix, and a tag list
+defining what the prefix means.
+
+@item semantic-analyze-complete.el
+Provides @code{semantic-analyze-possible-completions}.
+
+@item semantic-analyze-debug.el
+The analyzer debugger.  Useful when attempting to get everything
+configured.
+
+@item semantic-analyze-fcn.el
+Various support functions needed by the analyzer.
+
+@item semantic-ctxt.el
+Local context parser.  Contains overloadable functions used to move
+around through different scopes, get local variables, and collect the
+current prefix used when doing completion.
+
+@item semantic-scope.el
+Calculate @dfn{scope} for a location in a buffer.  The scope includes
+local variables, and tag lists in scope for various reasons, such as
+C++ using statements.
+
+@item semanticdb-typecache.el
+The typecache is part of @code{semanticdb}, but is used primarily by
+the analyzer to look up datatypes and complex names.  The typecache is
+bound across source files and builds a master lookup table for data
+type names.
+
+@item semantic-ia.el
+Interactive Analyzer functions.  Simple routines that do completion or
+lookups based on the results from the Analyzer.  These routines are
+meant as examples for application writers, but are quite useful as
+they are.
+
+@item semantic-ia-sb.el
+Speedbar support for the analyzer, displaying context info, and
+completion lists.
+
+@end table
+
+@node Tools
+@section Tools
+
+These files contain various tools a user can use.
+
+@table @file
+@item semantic-idle.el
+Idle scheduler for @semantic{}.  Manages reparsing buffers after
+edits, and large work tasks in idle time.  Includes modes for showing
+summary help and pop-up completion.
+
+@item senator.el
+The @semantic{} navigator.  Provides many ways to move through a
+buffer based on the active tag table.
+
+@item semantic-decorate.el
+A minor mode for decorating tags based on details from the parser.
+Includes overlines for functions, or coloring class fields based on
+protection.
+
+@item semantic-decorate-include.el
+A decoration mode for include files, which assists users in setting up
+parsing for their includes.
+
+@item semantic-complete.el
+Advanced completion prompts for reading tag names in the minibuffer, or
+inline in a buffer.
+
+@item semantic-imenu.el
+Imenu support for using @semantic{} tags in imenu.
+
+@item semantic-mru-bookmark.el
+Automatic bookmarking based on tags.  Jump to locations you've been
+before based on tag name.
+
+@item semantic-sb.el
+Support for @semantic{} tag usage in Speedbar.
+
+@item semantic-util-modes.el
+A bunch of small minor-modes that exposes aspects of the semantic
+parser state.  Includes @code{semantic-stickyfunc-mode}.
+
+@item document.el
+@itemx document-vars.el
+Create an update comments for tags.
+
+@item semantic-adebug.el
+Extensions of @file{data-debug.el} for @semantic{}.
+
+@item semantic-chart.el
+Draw some charts from stats generated from parsing.
+
+
+@item semantic-elp.el
+Profiler for helping to optimize the @semantic{} analyzer.
+
+
+@end table
+
+@node Tests
+@section Tests
+
+@table @file
+
+@item semantic-utest.el
+Basic testing of parsing and incremental parsing for most supported
+languages.
+
+@item semantic-ia-utest.el
+Test the semantic analyzer's ability to provide smart completions.
+
+@item semantic-utest-c.el
+Tests for the C parser's lexical pre-processor.
+
+@item semantic-regtest.el
+Regression tests from the older Semantic 1.x API.
+
+@end table
+
+@node Glossary
+@appendix Glossary
+
+@table @keyword
+@item BNF
+In semantic 1.4, a BNF file represented ``Bovine Normal Form'', the
+grammar file used for the 1.4 parser generator.  This was a play on
+Backus-Naur Form which proved too confusing.
+
+@item bovinate
+A verb representing what happens when a bovine parser parses a file.
+
+@item bovine lambda
+In a bovine, or LL parser, the bovine lambda is a function to execute
+when a specific set of match rules has succeeded in matching text from
+the buffer.
+
+@item bovine parser
+A parser using the bovine parser generator.  It is an LL parser
+suitable for small simple languages.
+
+@item context
+
+@item LALR
+
+@item lexer
+A program which converts text into a stream of tokens by analyzing
+them lexically.  Lexers will commonly create strings, symbols,
+keywords and punctuation, and strip whitespaces and comments.
+
+@item LL
+
+@item nonterminal
+A nonterminal symbol or simply a nonterminal stands for a class of
+syntactically equivalent groupings.  A nonterminal symbol name is used
+in writing grammar rules.
+
+@item overloadable
+Some functions are defined via @code{define-overload}.
+These can be overloaded via ....
+
+@item parser
+A program that converts @b{tokens} to @b{tags}.
+
+@item tag
+A tag is a representation of some entity in a language file, such as a
+function, variable, or include statement.  In semantic, the word tag is
+used the same way it is used for the etags or ctags tools.
+
+A tag is usually bound to a buffer region via overlay, or it just
+specifies character locations in a file.
+
+@item token
+A single atomic item returned from a lexer.  It represents some set
+of characters found in a buffer.
+
+@item token stream
+The output of the lexer as well as the input to the parser.
+
+@item wisent parser
+A parser using the wisent parser generator.  It is a port of bison to
+Emacs Lisp.  It is an LALR parser suitable for complex languages.
+@end table
+
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Index
+@unnumbered Index
+@printindex cp
+
+@iftex
+@contents
+@summarycontents
+@end iftex
+
+@bye
+
+@c Following comments are for the benefit of ispell.
+
+@c LocalWords: alist API APIs arg argc args argv asis assoc autoload Wisent
+@c LocalWords: backquote bnf bovinate bovinates LALR
+@c LocalWords: bovinating bovination bovinator bucketize
+@c LocalWords: cb cdr charquote checkcache cindex CLOS
+@c LocalWords: concat concocting const constantness ctxt Decl defcustom
+@c LocalWords: deffn deffnx defun defvar destructor's dfn diff dir
+@c LocalWords: doc docstring EDE EIEIO elisp emacsman emph enum
+@c LocalWords: eq Exp EXPANDFULL expression fn foo func funcall
+@c LocalWords: ia ids iff ifinfo imenu imenus init int isearch itemx java kbd
+@c LocalWords: keymap keywordtable lang languagemode lexer lexing Ludlam
+@c LocalWords: menubar metaparent metaparents min minibuffer Misc mode's
+@c LocalWords: multitable NAvigaTOR noindent nomedian nonterm noselect
+@c LocalWords: nosnarf obarray OLE OO outputfile paren parsetable POINT's
+@c LocalWords: popup positionalonly positiononly positionormarker pre
+@c LocalWords: printf printindex Programmatically pt quotemode
+@c LocalWords: ref regex regexp Regexps reparse resetfile samp sb
+@c LocalWords: scopestart SEmantic semanticdb setfilename setq
+@c LocalWords: settitle setupfunction sexp sp SPC speedbar speedbar's
+@c LocalWords: streamorbuffer struct subalist submenu submenus
+@c LocalWords: subsubsection sw sym texi texinfo titlefont titlepage
+@c LocalWords: tok TOKEN's toplevel typemodifiers uml unset untar
+@c LocalWords: uref usedb var vskip xref yak

@@ -1,0 +1,999 @@
+이맥스(Emacs) 지침서입니다.
+끝에는 복사 조건이
+있습니다.  지금 읽고 있는 이 글은 이맥스(Emacs) 지침서입니다.
+
+이맥스 명령들은 대개 제어쇠 (CTRL이나 CTL이라고도 표시) 혹은
+META쇠 (EDIT이나 ALT라고도 표시)를 사용합니다.  이런 글쇠를 매번 다
+쓰기 보다는 우리는 다음과 같은 약식 표현을 쓰기로 합시다:
+
+ C-<문자>  제어쇠를 누른 채 <문자> 글쇠를 칩니다.  즉, C-f는 제어쇠를
+	   누른 상태에서 f 글쇠를 치는 것을 말합니다.
+ M-<문자>  META쇠나 EDIT쇠 혹은 교체쇠(ALT)를 누른 채 <문자> 글쇠를
+	   칩니다. META쇠, EDIT쇠 혹은 교체쇠가 없으면 나옴쇠(ESC)를
+	   눌렀다 놓은 후 <문자> 글쇠를 칩니다.  나옴쇠는 <ESC>이라고
+	   쓰기로 합니다.
+
+유의:  C-x C-c를 치면 이맥스를 종료할 수 있습니다.  (두 문자.)
+왼쪽 가장자리에 있는 문자 ">>"는 독자가 명령을 실행해 보도록
+하고자 함을 지시합니다. 예를 들어:
+<<help-with-tutorial이 시작하면서 여기에 빈 줄이 끼워졌음>>
+>> 다음 화면으로 움직이기 위해서는 C-v (다음 화면 보기)를 칩니다.
+	(해 보십시오. 제어쇠를 누른 채 v 글쇠를 치면 됩니다.)
+	지금부터는 한 화면을 다 읽었을 때마다 이렇게 해야 합니다.
+
+한 화면에서 다른 화면으로 움직일 때 두 줄이 겹친다는 것을
+유의하십시오; 이는 한 문장을 계속해서 읽을 수 있도록 하기
+위함입니다.
+
+첫번째로 익혀야 하는 것은 문장의 한 곳에서 다른 곳으로 움직이는
+것입니다.  C-v로 한 화면을 앞쪽으로 움직이는 것은 이미 알고 있습니다.
+뒷쪽으로 한 화면을 움직이기 위해서는 M-v를 (META쇠를 누른채 v 글쇠를
+치거나, META쇠나 EDIT쇠, 혹은 교체쇠가 없을 경우 <ESC>v를 칩니다).
+
+>> 몇 번 M-v와 C-v를 번갈아 쳐 보십시오.
+
+
+* 요약
+------
+
+다음은 전체화면을 보는데 유용한 명령들입니다:
+
+	C-v	한 전체 화면을 앞쪽으로 움직인다
+	ESC v   한 전체 화면을 뒷쪽으로 움직인다
+	C-l     화면을 지우고 모든 글월을 다시 화면 표시하면서
+		 깜빡이가 있는 글월을 화면의 중앙에 오게 한다.
+		 (제어쇠-1이 아니라 제어쇠-L입니다.)
+
+>> 깜박이를 찾아서 그 곳의 글월을 기억하십시오.
+   그리고는 C-l을 치십시오.
+   깜박이를 다시 찾아서 같은 글월이 깜박이의 근처에 있는가를
+   확인하십시오.
+
+
+* 기본적인 깜박이의 제어
+------------------------
+
+한 화면을 움직이는 것은 유용합니다만 화면의 한 글월내에서 어떻게
+정해진 장소로 움직일 수 있겠습니까?
+
+이에는 몇가지 방법이 있습니다.  가장 근본적인 방법은 C-p, C-b, C-f
+그리고 C-n 명령을 사용하는 것입니다.  각각은 화면에서 정해진 방향으로
+하나의 가로칸이나 하나의 세로칸씩 깜박이를 움직입니다.
+여기에 이 네가지 명령들과 그 움직이는 방향을 보여주는 표가 있습니다.
+
+				뒷 줄, C-p
+                                    :
+                                    :
+	뒷쪽으로, C-b .... 현재의 깜박이 위치 .... 앞쪽으로, C-f
+                                    :
+                                    :
+			        앞 줄, C-n
+
+>> C-n이나 C-p를 써서 깜박이를 위 도표의 가운데 줄로 움직이십시오.
+   그리고는 C-l을 쳐서 이 도표가 화면의 중앙에 위치하는지를
+   확인하십시오.
+
+이 명령들은 글자로 기억하는 것이 쉬울 것입니다: P는 previous, N은
+next, B는 backward, F는 forward.  이들은 기본적인 깜박이 이동
+명령으로서, 항상 사용하게 될 것이므로 지금 당장 머리 속에 익혀 두는
+것이 좋습니다.
+
+>> C-n을 여러번 쳐서 깜박이를 이 줄로 가져 오십시오.
+
+>> C-f를 쳐서 줄 안에서 이동해 보고 C-p로 뒷 줄로 가십시오.
+   깜박이가 줄의 중간에 있을 때 C-p가 어떤 작용을 하는가 보십시오.
+
+각각의 줄은 다음에 이어지는 줄과 분리하는 새줄 문자로 끝납니다.
+파일의 마지막 줄은 끝에 새줄 문자가 있어야 합니다 (그러나 이맥스는 이를
+요구하지 않습니다).
+
+>> 줄이 시작하는 곳에서 C-b를 쳐 보십시오.  깜박이가 뒷 줄의 끝으로
+   움직여야 합니다.  그 이유는 깜박이가 새줄 문자를 넘어서 뒷쪽으로
+   움직이기 때문입니다.
+
+C-f도 C-b처럼 새줄 문자를 넘어서 이동할 수 있습니다.
+
+>> C-b를 몇 번 더 쳐서 깜박이가 어디 있는가를 보고 C-f로 다시 줄의
+   끝까지 이동하십시오.
+   그 다음에 C-f로 다음 줄로 이동하십시오.
+
+화면의 꼭대기나 밑바닥을 지나쳐서 이동하면 가장자리를 벗어난 글월은
+화면 안으로 밀려 들어 옵니다.  이것을 "두루말기(scrolling)"라고
+합니다.  이는 이맥스가 깜박이를 화면 밖으로 내보내지 않고 글월의 정해진
+장소로 움직일 수 있도록 합니다.
+
+>> C-n으로 깜박이를 화면의 밑바닥 아래로 움직여서, 어떤 일이
+   발생하는가를 보십시오.
+
+한 문자씩 이동하는 것이 느리면, 한 낱말씩 움직일 수 있습니다.  M-f
+(Meta-f)는 한 낱말씩 앞쪽으로, M-b는 한 낱말씩 뒷쪽으로 움직입니다.
+
+>> M-f나 M-b를 몇 번 쳐 보십시오.
+
+낱말의 중간에서는 낱말의 끝으로 움직입니다.  낱말 사이의 공간
+문자에서는 M-f가 다음 낱말의 끝으로 움직입니다.  M-b는 반대 방향으로
+같은 작용을 합니다.
+
+>> 중간 중간에 C-f와 C-b를 치면서 M-f와 M-b를 몇 번
+   연습하십시오.  그러면 낱말의 내부나 중간에서 M-f와 M-b가 어떤
+   작용을 하는가를 볼 수 있습니다.
+
+C-f와 C-b, M-f와 M-b의 유사성에 유의하십시오.  대부분 Meta 문자는
+언어가 정의하는 단위(낱말, 문장, 단락)의 작동에 사용되고 제어
+문자는 편집하는 것과는 관계없는 기본 단위(문자, 줄 등등)에
+사용됩니다.
+
+다음은 줄과 문장 사이에 적용되는 유사성입니다: C-a와 C-e는 줄의
+시작이나 끝으로 움직이고, M-a와 M-e는 문장의 시작이나 끝으로
+움직입니다.
+
+>> C-a를 두세번 친 후 C-e를 두세번 쳐 보십시오.
+   M-a를 두세번 친 후 M-e를 두세번 쳐 보십시오.
+
+C-a는 두 번 이상 반복해도 아무런 작용을 하지 않지만 M-a는 한 문장을
+더 뒤로 움직이는 것에 유의하십시오.  이는 비록 유사성은 아니지만
+당연한 사실로 여겨집니다.
+
+문서에 있는 깜박이의 위치는 "점(point)"이라고 부릅니다.  부연하자면,
+깜박이는 화면상에서, 문서 내에 점이 어디에 위치하고 있는가를
+보여줍니다.
+
+다음은 낱말과 문장 단위의 이동을 포함한 단순한 깜박이 이동 작동을
+요약하였습니다.
+
+	C-f	한 문자 앞쪽으로 움직인다
+	C-b	한 문자 뒷쪽으로 움직인다
+
+	M-f	한 단어 앞쪽으로 움직인다
+	M-b	한 단어 뒷쪽으로 움직인다
+
+	C-n	앞 줄로 움직인다
+	C-p	뒷 줄로 움직인다
+
+	C-a	줄의 시작으로 움직인다
+	C-e	줄의 끝으로 움직인다
+
+	M-a	문장의 시작으로 움직인다
+	M-e	문장의 끝으로 움직인다
+
+>> 이 모든 명령을 몇 번 연습해 보십시오.  이 명령들은 가장 자주
+   사용되는 명령들입니다.
+
+깜박이를 움직이는 다른 두가지 중요한 명령은 전 문서의 시작으로
+움직이는 M-< (Meta쇠 더작음 글쇠)와 전 문서의 끝으로 움직이는 M->
+(Meta쇠 더큼 글쇠)입니다.
+
+>> M-<를 지금 쳐서 지침서의 시작으로 움직여 보십시오. 그리고는 C-v를
+   반복해서 다시 여기로 돌아 오십시오.
+
+>> M->를 쳐서 지침서의 끝으로 가십시오. 그리고는 M-v를 반복해서 다시
+   여기로 돌아 오십시오.
+
+단말기에 화살표 글쇠가 있으면 화살표 글쇠를 써서 깜박이를 움직일 수도
+있습니다.  다음과 같은 세가지 이유로 C-b, C-f, C-n 그리고 C-p를 쓰는
+것을 권장합니다.  첫째로, 이들은 모든 종류의 단말기에서 사용할 수
+있습니다.  둘째로, 일단 이맥스를 쓰는 것에 익숙해 지면, 이런 제어
+문자을 치는 것이 화살표 글쇠를 치는 것보다 훨씬 빠르다는 것을 알게 될
+것입니다 (타자 위치에서 손을 멀리 움직일 필요가 없기 때문에).  셋째로,
+일단 이런 제어 문자 명령을 쓰는 습관이 들면 깜박이를 움직이는 다른
+고급 명령들도 쉽게 배울 수 있습니다.
+
+대부분의 이맥스 명령에는 숫자 인수를 정해줄 수 있습니다; 이는 대부분,
+명령의 반복 횟수를 정해 줍니다.  이렇게 명령에 반복 횟수를 정해주는
+방법은 명령을 치기 전에 C-u와 숫자를 치는 것으로 이루어집니다.  META쇠
+(혹은 EDIT쇠나 교체쇠)가 있으면 다른 방법으로 숫자 인수를 입력할 수
+있습니다: MEAT쇠를 누른 채 숫자를 치십시오.  C-u 방법은 어떤
+단말기에서도 사용할 수 있기 때문에 이를 사용하기 바랍니다.
+
+예를 들어, C-u 8 C-f는 문자 여덟개의 앞쪽으로 움직입니다.
+
+>> 한 번의 명령으로 깜박이가 이 줄 근처에 오도록, 숫자 인수가 주어진
+   C-n 혹은 C-p를 시도해 보십시오.
+
+대부분의 명령들은 숫자 인수를 반복 횟수로 사용하지만 경우에 따라서는
+예외적인 명령들이 다른 용도로 쓸 수 있습니다.  C-v와 M-v는 이런 예외에
+속합니다.  인수를 주면 그 만큼의 화면 수를 두루말기 하지 않고 그
+만큼의 줄을 화면의 위나 아래로 두루말기 합니다.  즉, C-u 4 C-v는
+화면을 4 줄 만큼 두루말기 합니다.
+
+>> 이제 C-u 8 C-v를 쳐 보십시오.
+
+이로서 화면은 8 줄이 위로 두루말기 됐을 것입니다.  다시 밑으로
+두루말기 하기 위해서는 인수를 M-v에 줍니다.
+
+X11나 MS-Windows와 같은 창 기능 화면 표시를 쓸 경우에는 이맥스 창의
+왼편에 두루말기 막대라고 불리우는 기다란 사각형 모양의 터가 있을
+것입니다.  이 두루말기 막대에 다람쥐를 딸깍함으로써 글월을 두루말기 할
+수 있습니다.
+
+>> 두루말기 막대 내에서 눈에 띄는 부분의 꼭대기를 중간 단추로 눌러
+   보십시오.  그러면 글월은 다람쥐로 누른 위치에 따른 양 만큼의 위치를
+   위나 아래로 두루말기 될 것입니다.
+
+>> 다람쥐를 중간 단추가 눌러진 상태에서 위나 아래로 움직여 보십시오.
+   그러면 글월이 다람쥐가 움직이는대로 위나 아래로 두루말기 될
+   것입니다.
+
+
+* 이맥스의 작동이 단절될 때
+---------------------------
+
+명령을 주어도 이맥스가 반응을 하지 않을 때는 C-g를 쳐서 이맥스의 작동을
+안전하게 정지시킬 수 있습니다.  C-g는 실행하는데 너무 오랜 시간이
+걸리는 명령을 중지시킬 때에 사용될 수 있습니다.
+
+C-g는 숫자 인수를 무시해 버릴 때나 어떤 명령을 시작하였지만 실행시키고
+싶지 않을 때에도 사용될 수 있습니다.
+
+>> C-u 100을 쳐서 숫자 인수를 100으로 하고 난 후 C-g를 쳐
+   보십시오.  그리고 나서 C-f를 칩니다.  인수는 C-g로써 없앴음으로 한
+   문자만 앞으로 움직여야 합니다.
+
+
+* 무능 명령
+-----------
+
+어떤 이맥스 명령은 "허용되지 않아서"(disabled) 초보자가 잘못 사용하지
+않도록 되어 있습니다.
+
+이런 무능 명령을 쓰면, 이맥스는 이 명령이 무엇이었으며, 이 명령을 그냥
+그대로 실행할 것인지를 물어 보는 알림말을 화면 표시합니다.
+
+원래가 이 명령을 쓰고자 하였다면, 물음에 대해 사이 문자(Space)를 쳐서
+답하십시오.  보통은 무능 명령을 실행시키지 않기 위해 물음에 "n"으로
+답합니다.
+
+>> C-x C-l (무능 명령의 하나)을 친 후 n으로 물음에 답하십시오.
+
+
+* 창
+----
+
+이맥스는 여러 창을 가질 수 있으며 각각은 따로 문서를 화면 표시합니다.
+다중 창을 쓰는 방법에 대해서는 나중에 설명하기로 합니다.  지금은
+다른 창을 없애고 원래에 있던 창 하나로 돌아가 편집을 계속하는 방법만을
+설명합니다.  간단합니다:
+
+	C-x 1	창을 하나로 만들기 (즉, 다른 창들을 없앱니다).
+
+이것은 제어쇠-x 다음에 숫자 글쇠 1입니다.  C-x 1은 깜박이가 있는
+창을 확장해서 전체 화면을 쓰도록 합니다.  다른 창들은 지워집니다.
+
+>> 깜박이를 이 줄로 움직인 후 C-u 0 C-l을 치십시오.
+>> 제어쇠-h k 제어쇠-f를 치십시오.
+   제어쇠-f 명령에 대한 문서화를 화면 표시하기 위해 새 창이
+   나타나면서 이 창이 어떻게 줄어 드는가를 관찰하십시오.
+
+>> C-x 1을 쳐서 문서화 목록 작성 창이 어떻게 사라지는가를 보십시오.
+
+이 명령은 두 문자로 구성되어 있다는 점에서 지금까지 배운 다른 명령들과
+다릅니다.  시작은 제어쇠-x로 합니다.  제어쇠-x로 시작하는 명령들은
+무척 많습니다; 그런 많은 명령들은 창이나 파일, 사이칸(buffer) 내지는
+그런 것과 연관성이 있는 명령들입니다.  이런 명령들은 둘, 셋 혹은
+네개의 문자를 씁니다.
+
+
+* 끼우기와 지우기
+-----------------
+
+글월을 끼우기 위해서는 그 글월을 타자치면 됩니다.  A, 7, *, 등등과
+같이, 볼 수 있는 문자들은 이맥스가 글월로 인식하여 즉각 끼웁니다.
+<Return>(복귀쇠)를 치면 새줄 문자가 끼워집니다.
+
+<Delete>를 치면 마지막으로 입력된 문자가 지워집니다.  <Delete>는
+글쇠판에 "Del"이라고도 이름표가 달려 있습니다.  어떤 경우에는
+"Backspace" 글쇠가 <Delete>의 역할을 하기도 하지만 항상 그렇지는
+않습니다!
+
+좀 더 일반적으로, <Delete>는 깜박이 현위치의 바로 전에 있는 문자를
+지웁니다.
+
+>> 그 것을 해 보십시오--몇몇 문자를 친 후 <Delete>를 쳐서
+   지워보십시오.  이 파일이 변경되는 것에 대한 걱정은 하지 않아도
+   됩니다; 으뜸 지침서는 변경되지 않습니다.  이 파일은 으뜸 지침서의
+   개인용 복사본입니다.
+
+글월이 화면의 한 줄에 다 들어가지 못할 정도로 커지면 글월의 줄은
+화면의 두번째 줄에서 "계속"됩니다.  오른쪽 한계에 있는 역사선 문자
+("\")는 줄이 다음 줄로 이어지는 것을 가리킵니다.
+
+>> 글월을 계속 끼워서 오른쪽 한계를 넘어서도록 하십시오.  그러면 줄
+   계속 표시가 나타날 것입니다.
+
+>> <Delete>를 써서 글월의 줄이 한 화면 줄에 꽉 차도록 다시
+   지우십시오. 줄 계속 표시는 없어집니다.
+
+새줄 문자도 다른 문자처럼 지울 수 있습니다.  줄을 둘로 나누는 새줄
+문자를 지우면 두 줄이 하나로 합치게 됩니다.  이 합친 줄이 너무 길어서
+화면의 너비를 넘어서면 그 줄은 줄 계속 문자가 표시되면서 다음 줄에
+계속 화면 표시될 것입니다.
+
+>> 깜박이를 줄의 시작으로 움직여서 <Delete>를 치십시오.  그러면 그
+   줄이 이전 줄과 합쳐질 것입니다.
+
+>> 다시 <Return>을 쳐서 지워진 새줄 문자를 끼우십시오.
+
+대부분의 이맥스 명령에는 반복 횟수를 줄 수 있다는 것을 기억하십시오;
+글월 문자도 해당됩니다.  글월 문자를 반복하는 것은 그 것을 여러번
+끼우는 것입니다.
+
+>> 그 것을 지금 해 봅니다 -- C-u 8 *을 쳐서 ********을 끼우십시오.
+
+이제 이맥스에서 무언가를 치고 착오를 교정하는 가장 기본적인 방법을
+배웠습니다.  낱말이나 줄도 한번에 지울 수 있습니다.  여기에 지우는
+작동을 요약합니다.
+
+       	<Delete>     깜박이 직전의 문자 지우기
+	C-d   	     깜박이 다음의 문자 지우기
+
+	M-<Delete>   깜박이 직전의 낱말 죽이기
+	M-d	     깜박이 다음의 낱말 죽이기
+
+	C-k	     깜박이 위치로부터 줄 끝까지 죽이기
+	M-k	     현재 문장의 끝까지 죽이기
+
+C-f와 M-f에서 시작한 유사성이 <Delete>와 C-d 그리고 M-<Delete>와 M-d로
+이어지는 것을 유의하십시오 (<Delete>는 진정한 제어 문자는 아니지만
+그런데에 상념하지 않도록 합시다).  줄과 문장이 다르듯이 C-k와 M-k는
+C-e와 M-e와 다릅니다.
+
+일률적인 방법 하나로 사이칸의 어떤 부분도 죽일 수 있습니다.
+먼저 그 부분의 한쪽 끝으로 이동해서 C-@이나 C-SPC (둘 중 하나)를 칩니다.
+그 부분의 다른쪽 끝으로 이동해서 C-w를 칩니다.  그러면 그 두
+위치사이의 모든 글월은 죽여집니다.
+
+>> 깜빡이를 전 문단의 시작인 `일'자로 움직이십시오.
+>> C-SPC를 치시오.  이맥스는 화면의 바닥에 "Mark set"이라는 알림말을
+   보여줄 것입니다.
+>> 깜빡이를 위 문단의 두번째 줄에 있는 `끝'자로 움직이시오.
+>> C-w를 치시오.  그러면 `일'자로 시작해서 `끝'자까지의 글월이 죽여질
+   것입니다.
+
+"죽이기"와 "지우기"의 다른 점은 "죽여진" 글월은 재차 끼워넣을 수 있는
+반면 "지워진" 것들은 다시 끼워넣을 수 없다는 것입니다.  죽여진 글월을
+다시 사용하는 것을 "잡아당기기(yanking)"라고 합니다.  일반적으로 많은
+글월을 제거하는 명령은 글월을 죽이나 (그런 명령들은 그 글월들을 다시
+잡아당길 수 있도록 그렇게 설정되어져 있습니다), 한 문자를 제거하거나
+빈 줄 혹은 공간문자를 제거하는 명령들은 지움작용을 합니다 (그래서 그
+글월들은 다시 잡아 당길 수 없습니다).
+
+>> 깜박이를 비어져 있지 않은 줄의 시작으로 움직이십시오. 그리고는
+   C-k를 쳐서 그 줄의 글월을 죽이십시오.
+>> C-k를 다시 치십시오.  그러면 그 줄 다음에 있는 새줄 문자가 죽여지는
+   것을 볼 수 있습니다.
+
+C-k를 한 번 치면 그 줄의 내용을 죽이고 두번째에는 그 줄 자체를
+죽임으로서 이어지는 모든 줄을 위로 올립니다.  C-k는 숫자 인수를 특별히
+취급합니다: 그 숫자만큼의 줄과 그 줄의 내용을 함께 죽입니다.  이것은
+단순한 반복이 아닙니다.  C-u 2 C-k는 두 줄과 그 줄의 새줄 문자를
+죽입니다; C-k를 두 번 치면 그렇지 않습니다.
+
+죽여진 글월을 다시 회수하는 것을 "잡아당기기"라고 부릅니다.  (누군가가
+뺏아간 것을 다시 잡아 당기는 것처럼 생각하십시오.)  죽여진 글월은
+죽여진 그 곳에 다시 잡아 당겨질 수도 있지만 사이칸의 다른 장소에서도
+혹은 다른 파일에서조차도 잡아당겨질 수 있습니다.  그 글월은 여러번에
+걸쳐 잡아당겨짐으로써 여러 복사본을 만들게 될 수도 있습니다.
+
+잡아당기기 명령은 C-y입니다.  그러면 가장 마지막으로 죽여진 글월을
+현재의 깜빡이 위치에 회수시킵니다.
+
+>> 해 보십시오; C-y를 쳐서 글월을 다시 잡아당기십시오.
+
+한 가로칸에서 C-k를 여러번 쓰면 죽여진 글월들이 함께 갈무리되어 그 줄
+모두를 C-y 한 번으로 잡아당길 수 있다는 것에 유의하십시오.
+
+>> C-k를 여러번 쳐서 그 것을 해 보십시오.
+
+죽여진 글월을 회수하기 위해서는:
+
+>> C-y를 치십시오.  그리고는 깜박이를 몇 줄 아래로 움직여서 C-y를 다시
+   치십시오.  글월이 어떻게 복사되는가를 알 수 있습니다.
+
+다시 잡아당길 글월이 있는데 다른 것을 또 죽이면 어떻게 되겠습니까?
+C-y는 더 최근에 죽여진 것을 잡아당길 것입니다.  그러나 그 전의 글월은
+잃어버린 것이 아닙니다.  그 것은 M-y 명령을 써서 회수할 수 있습니다.
+가장 최신에 죽여진 글월을 C-y로 회수한 후 M-y를 치면 그 잡아당겨졌던
+글월이 그 전에 죽여진 것으로 새로바뀌어집니다(replace).  M-y를 채차
+연거푸 치면 이전에 죽여진 것들이 차례로 나옵니다.  찾고자 하는 글월이
+나오면 다른 일을 할 필요가 없습니다.  단순히 편집을 계속하면
+잡아당겨진 글월이 그곳에 남아 있게 됩니다.
+
+M-y를 계속 치면 출발점 (가장 최근에 죽여진 것)으로 되돌아 옵니다.
+
+>> 한 줄을 죽이고 주위로 움직인 후 다른 줄을 죽이십시오.
+   그리고는 C-y로 두번째 죽여진 줄을 회수하십시오.
+   그런 다음에 M-y를 치면 첫번째에 죽여진 줄로 새로바뀌게 됩니다.
+   M-y를 더 쳐서 무엇이 나오는가를 보십시오.  두번째 죽여진 줄이 나올
+   때까니 그렇게 계속 한 후 몇 번 더 하십시오.
+   원하면, M-y에 양수나 음수의 인수를 줄 수 있습니다.
+
+
+* 무르기
+--------
+
+글월을 변경하고서 그 것이 실수였음을 알게 되면 무르기(undo) 명령, C-x
+u로 변경사항을 무를 수 있습니다.
+
+보통, C-x u는 하나의 명령에 의해 변경된 사항을 무릅니다; 한 가로칸에서
+C-x u를 여러번 반복하면 각각의 반복은 추가적으로 명령을 무릅니다.
+
+그러나 두가지 예외가 있습니다: 글월을 변경하지 않는 명령은 고려
+대상에서 제외됩니다 (여기에는 깜박이를 움직이는 명령과 화면 두루말기
+명령이 있습니다). 그리고 자체끼우기(self-inserting) 문자들은
+평상적으로 20개까지의 집단으로 처리됩니다.  (이는 글월 끼우기를 무르기
+위해서 타자해야 하는 C-x u의 수를 줄이기 위함입니다.)
+
+>> 이 줄을 C-k로 죽인 후 C-x u를 치면 줄이 다시 나타날 것입니다.
+
+C-_는 무르기 명령의 다른 형태입니다; C-x u와 같은 작용을 하지만 한
+가로칸에서 여러번 타자하기에 편합니다.  C-_의 단점은, 어떤
+글쇠판에서는 이 것을 어떻게 타자해야 되는가가 불명료하다는 것입니다.
+그래서 C-x u도 사용할 수 있도록 되어 있는 것입니다.  어떤
+단말기에서는, CONTROL쇠를 누른 상태에서 /를 침으로써 C-_를 칠 수
+있습니다.
+
+C-_나 C-x u의 숫자 인수는 반복 횟수로 사용됩니다.
+
+글월의 지우기를 무르는 것은 글월 죽이기를 무르는 것과 같은 식으로
+합니다.  어떤 것을 죽이는 것과 지우는 것의 차이점은 C-y로 잡아당길 수
+있느냐는 사실에 있습니다; 무르기에는 차이점이 없습니다.
+
+* 파일
+------
+
+편집한 글월을 영구적으로 하기 위해서는 파일에 넣어 두어야 합니다.
+그렇게 하지 않으면, 이맥스가 없어짐과 함께 글월도 사라집니다.  글월을
+파일에 넣기 위해서는 그러기 전에 그 파일을 "찾아야" 합니다. (이는
+파일을 "방문하는 것"이라고도 합니다.)
+
+파일을 찾는다는 것은 이맥스 안에서 그 파일의 내용을 본다는 것을
+의미합니다. 여러가지 면에서, 그것은 그 파일 자체를 편집하려는 것과
+다름없습니다.  그러나, 이맥스로 변경한 사항은 그 파일을 "갈무리"하기
+전까지는 영구적이지 못합니다.  이는 절반쯤 변경된 파일을 원치 않게
+운영 체계에 남겨 두는 것을 피하기 위해서 그렇습니다. 갈무리를 해도
+이맥스는 변경 사항이 나중에 실수였다고 결정되는 경우를 감안해 근원
+파일을 변경된 이름으로 남겨둡니다.
+
+화면의 바닥 가까이를 보면 "--:-- TUTORIAL.ko"와 같은 식으로 시작하는,
+대시 문자로 시작해서 대시 문자로 끝나는 줄이 있을 것입니다.  화면의 이
+부분은 보통, 방문하고 있는 파일의 이름을 보여 줍니다.  지금은 이맥스
+지침서의 복사본인 "TUTORIAL.ko"라는 파일을 방문하고 있는 중입니다.
+이맥스로 파일 찾기를 하면 정확히 그 곳에 파일의 이름이 나타납니다.
+
+파일 찾기 명령의 특별한 점은 원하는 파일의 이름을 말해야 하는
+것입니다.  명령이 "단말기로부터 인수를 읽는다"라고 합니다 (이 경우,
+인수는 파일의 이름입니다).  아래의 명령을 치고 나면
+
+	C-x C-f   파일 찾기
+
+이맥스는 파일의 이름을 치라고 요구합니다.  파일 이름을 치면 화면의 바닥
+줄에 이름이 나타납니다.  이런 종류의 입력에 쓰일 때에는 바닥 줄을 작은
+사이칸(minibuffer)이라고 부릅니다.  평상시에 쓰는 이맥스의 편집
+명령으로 파일 이름을 편집할 수 있습니다.
+
+파일 이름을 (혹은 모든 종류의 작은 사이칸 입력을) 넣을 때, 명령의
+취소는 C-g로 합니다.
+
+>> C-x C-f를 치고 C-g를 치십시오.  이는 작은 사이칸을 취소하고 또,
+   작은 사이칸을 쓰고 있는 C-x C-f 명령도 취소합니다.  그러므로 아무
+   파일도 찾지 않는 것입니다.
+
+파일 이름을 다 기입했으면 <Return>을 쳐서 종료하십시오.  그러면 C-x
+C-f 명령이 작동되어 선택된 파일을 찾기 시작합니다.  C-x C-f 명령이
+끝나면 작은 사이칸은 사라집니다.
+
+잠시 후에는 파일의 내용이 화면에 나타나고 그 내용을 편집할 수 있게
+됩니다.  변경 사항을 영구적으로 하고 싶으면 다음의 명령을 칩니다.
+
+	C-x C-s   파일 갈무리
+
+이 명령은 이맥스 내의 글월을 파일에 복사합니다.  이 명령이 첫번째로
+수행될 때는 이맥스가 근원 파일을 새 이름으로 바꾸어 놓음으로써 잃어버릴
+우려를 방지합니다.  새 이름은 근원 파일 이름의 끝에 "~"을 더함으로써
+만들어집니다.
+
+갈무리가 끝나면 이맥스는 쓰여진 파일의 이름을 인쇄합니다.  파일은 아주
+자주 갈무리함으로써 운영 체계가 와르르 무너져도 많은 작업이 손실되지
+않도록 합니다.
+
+>> C-x C-s를 쳐서 지침서의 복사본을 갈무리 하십시오.
+   그러면 "Wrote ...TUTORIAL.ko"라고 화면의 바닥에 인쇄될 것입니다.
+
+보거나 편집하기 위해, 존재하는 파일을 찾을 수 있습니다.  또한 존재하지
+않는 파일도 찾을 수 있습니다.  이렇게 하면 이맥스로 파일을 만들게
+됩니다: 빈 내용으로 시작되는 파일을 찾아서 글월을 끼우기 시작합니다.
+파일을 "갈무리"하도록 요청하면 이맥스는 끼워진 글월을 내용으로 하는
+파일을 실제로 만들어 냅니다.  그런 후에는 이 파일은 이미 존재하는
+파일이 됩니다.
+
+
+* 사이칸
+--------
+
+두번째 파일을 C-x C-f로 찾으면, 첫번째 파일은 이맥스의 내부에 남아
+있습니다. 그 파일은 C-x C-f로 재차 찾음으로서 다시 엇바꿀 수
+있습니다. 이런 식으로 매우 많은 수의 파일들을 이맥스 내부에 불러 들일
+수 있습니다.
+
+>> C-x C-f foo <Return>을 쳐서 "foo"라는 이름의 파일을 만드십시오.
+   그리고는 글월을 끼우고 편집하여 C-x C-s로 "foo"를 갈무리하십시오.
+   마지막으로, C-x C-f TUTORIAL.ko <Return>을 쳐서 지침서로 다시 돌아
+   오십시오.
+
+이맥스는 각 파일의 글월을 "사이칸"이라고 불리우는 것 안에 저장합니다.
+파일을 찾는 것은 이맥스의 내부에 새 사이칸을 만드는 것과 같습니다.
+이맥스의 일로 현존하고 있는 사이칸의 목록을 보기 위해서는 다음과 같이
+치십시오.
+
+	C-x C-b   사이칸 목록
+
+>> C-x C-b를 지금 쳐 보십시오.
+
+각 사이칸이 어떤 이름을 갖고 있는가 보십시오.  사이칸은 간직하고 있는
+글월의 모체가 되는 파일의 이름을 갖고 있을 수도 있습니다.  어떤
+사이칸들은 파일과 무관합니다.  예를 들어, "*Buffer List*"라는 사이칸은
+아무 파일도 갖고 있지 않습니다.  이 사이칸은 C-x C-b로 만들어진 사이칸
+목록을 담고 있을 뿐입니다.  이맥스 창 안에서 볼 수 있는 모든 글월은
+어떤 사이칸의 일부분 입니다.
+
+>> C-x 1을 쳐서 사이칸 목록을 없애십시오.
+
+한 파일의 글월을 변경한 후 다른 파일을 찾으면 첫번째 파일은 갈무리되지
+않은 것입니다.  그 변경 사항은 이맥스 내부의 파일 사이칸에만 남아
+있습니다.  두번째 파일의 사이칸을 만들거나 편집하는 것은 첫번째 파일의
+사이칸에 전혀 영향을 주지 않습니다.  이는 매우 유용하기는 하나 다른
+면에서는 첫번째 파일의 사이칸을 갈무리할 수 있는 간편한 다른 방법이
+필요하다는 것을 의미합니다.  C-x C-f를 쳐서 그 사이칸으로 엇바꾼 후
+C-x C-s로 갈무리하는 것은 귀찮은 일입니다.  그래서 다음과 같은 명령이
+있습니다
+
+	C-x s     몇몇 사이칸 갈무리
+
+C-x s는, 변경되었지만 갈무리되지 않은 사이칸이 있나 조사해 봅니다.
+그리고는 그런 사이칸들에 대해서 그 것을 갈무리할 것인가를 물어
+봅니다.
+
+>> 한 줄의 글월을 끼운 후 C-x s를 치십시오.
+   그러면 TUTORIAL.ko라는 이름의 사이칸을 갈무리할 것인지 물어 볼
+   것입니다.  "y"를 쳐서 물음에 예라고 답하십시오.
+
+* 명령어의 확장
+---------------
+
+이맥스의 명령어는 너무 많아서 이 모든 명령을 제어쇠나 meta쇠에 할당할
+수 없습니다.  이맥스는 이런 문제를 X (eXtend) 명령으로 해결합니다.
+이에는 두가지 종류가 있습니다:
+
+	C-x	문자 확장.  문자 하나가 뒤따름.
+	M-x	이름 명령의 확장.  긴 이름이 뒤따름.
+
+이 명령들은 대개 유용하지만, 지금까지 배워 온 명령들보다는 덜 빈번하게
+사용됩니다.  이런 종류의 명령을 이미 두 개 알고 있습니다: 파일
+명령 중에 C-x C-f로 찾기와 C-x C-s로 갈무리하기.  다른 예는 이맥스 작업
+시간을 마치는 명령입니다--이는 C-x C-c 명령.  (변경 사항을
+잃어버리지나 않을까 하는 걱정은 않 해도 됩니다; C-x C-c는 이맥스를
+죽이기 전에 각각의 변경된 파일을 갈무리할 기회를 줍니다.)
+
+C-z는 이맥스를 *임시로* 나오기 위한 명령입니다--그래서 다음에, 하던
+중의 이맥스 작업 시간으로 다시 되돌아 갈 수 있습니다.
+
+운영 체계가 허용하면 C-z는 이맥스를 "중지"시킵니다(suspend); 즉, 이
+명령은 조가비(shell)로 돌아 가도록 하지만 이맥스를 파괴하는 것은
+아닙니다. 대부분의 조가비에서는 `fg'나 `%emacs'명령으로 이맥스를 계속할
+수 있습니다.
+
+중지하는 것을 제공하지 않는 운영 체계에서는 C-z에 의해, 이맥스 밑에서
+실행되는 아랫조가비가 만들어 지게 되는데 여기서 다른 프로그램들을
+실행한 후 이맥스로 돌아 올 수 있는 기회가 있습니다; 사실상 이맥스로부터
+"나가는" 것은 아닙니다.  이 경우 보통, 조가비 명령인 `exit'으로
+아랫조가비에서 이맥스에 되돌아 옵니다.
+
+C-x C-c는 전산기에서 벗어나기 할 때나 사용합니다.  편지를 취급하는
+프로그램이나 다른 잡다한 도움모(utilities)들이 야기한 이맥스는
+중지시킨다는 것을 모르기 때문에 나가기를 해야 합니다.  하지만, 보통의
+경우, 벗어나기를 하지 않는 한, 이맥스를 나가기보다는 중지하는 것이
+좋습니다.
+
+C-x 명령어는 많이 있습니다. 이미 배운 것을 아래에 죽보입니다.
+
+	C-x C-f		파일 찾기.
+	C-x C-s		파일 갈무리.
+	C-x C-b		사이칸 목록.
+	C-x C-c		이맥스 끝내기.
+	C-x u		무르기.
+
+이름 확장 명령은 자주 사용되지 않거나 특별한 방식에서나 쓰이는
+명령입니다.  한가지 예는 replace-string 명령인데 이는 전역적으로 한
+문자열을 다른 문자열로 새로바꿉니다.  M-x를 치면 이맥스는 화면의
+바닥에서 M-x라고 길잡이하여 명령의 이름을 치도록 합니다; 이 경우는
+"replace-string".  "repl s<TAB>"만 쳐도 이맥스는 이름을 완성시킬
+것입니다.  명령 이름은 <Return>으로 끝납니다.
+
+replace-string 명령은 두개의 인수를 요구합니다--바뀌어져야 할 문자열과
+새로바뀌어질 문자열.  각각의 인수는 <Return>으로 끝내야 합니다.
+
+>> 깜박이를 이 줄에서 두 줄 아래의 빈 줄로 움직이십시오.
+   그 후 M-x repl s<Return>변화되<Return>바뀌<Return>을 치십시오.
+
+   이 줄이 어떻게 변화되었는가를 유의하십시오: 깜박이가 있는 초기 위치
+   다음에 변-화-되 라는 낱말이 나올 때마다 "바뀌"라고
+   새로바뀌었습니다.
+
+
+* 자동 갈무리
+-------------
+
+파일을 변경한 후에 아직 갈무리를 하지 않았으면 전산기가 와르르
+무너짐으로써 변경 사항을 잃어 버릴 수 있습니다.  이런 재앙을 방지하기
+위해, 이맥스는 편집하고 있는 각각의 파일을 주기적으로 "자동 갈무리"
+파일에 씁니다.  자동 갈무리된 파일의 이름은 앞뒤로 # 문자가 있습니다;
+예를 들어, "hello.c"라는 이름의 파일은 "#hello.c#"라는 이름의 자동
+갈무리 파일을 갖게 됩니다.  정상적으로 파일을 갈무리하면 이맥스는 자동
+갈무리 파일을 지웁니다.
+
+전산기가 와르르 무너지면 그 파일을 (자동 갈무리된 파일이 아니라
+편집하던 파일) 평상시처럼 찾은 후 M-x recover-file<Return>을 침으로써
+자동 갈무리된 편집물을 회복시킬 수 있습니다.  확인할 것을 요구하면
+yes<Return>을 쳐서 계속 진행하여 자동 갈무리된 자료를 회복시키십시오.
+
+
+* 메아리 터
+-----------
+
+이맥스가, 명령을 치는 속도가 느리다고 인식하면 화면 바닥의 "메아리
+터"라고 불리는 빈 터에 친 명령을 보여줍니다.  메아리 터는 화면의 바닥
+줄입니다.
+
+
+* 방식 줄
+---------
+
+메아리 터의 바로 윗 줄은 "방식 줄"이라고 부릅니다.  방식 줄은 다음과
+같은 식으로 표시되어 있습니다.
+
+--:**  TUTORIAL.ko        (Fundamental)--L670--58%----------------
+
+이 줄에는 이맥스나 편집하고 있는 글월의 상황에 대한 유용한 정보가
+간직되어 있습니다.
+
+파일 이름이 무엇을 의미하는지는 이미 알고 있습니다--그 것은 찾았던
+파일입니다.  -NN%--는 글월에서의 현재 위치를 가리킵니다; 이는 화면
+꼭대기 위로 NN 퍼센트의 글월이 있음을 의미합니다.  파일의 꼭대기가
+화면에 있으면 --00%-- 대신에 --Top--이라고 표시됩니다.  글월의
+밑바닥이 화면에 있으면 --Bot--이라고 표시됩니다.  글월이 아주 작아서
+모든 내용이 화면에 다 나타나면 방식 줄에는 --All--이라고 표시됩니다.
+
+거의 앞부분에 있는 별 문자들은 글월이 변경되었음을 의미합니다.  파일
+방문 직후나 갈무리 직후에는 그 곳에 별 문자가 없고 대시 문자만
+있습니다.
+
+방식 줄의 괄호 문자안은 어떤 편집 방식을 사용하고 있는가를
+알려줍니다.  애초 방식은 Fundamental로서 지금 사용되고 있는
+방식입니다.  이는 "주 방식"의 한 예입니다.
+
+이맥스에는 주 방식이 많이 있습니다.  그 중 몇가지는 다른 언어 또/또는
+다른 종류의 글월을 편집하도록 하는데 쓰이며, Lisp 방식, Text 방식
+등등이 있습니다.  항상 한 가지 주 방식만이 적용되며 지금
+"Fundamental"이라고 적혀 있는 곳에 표시됩니다.
+
+각각의 주 방식은 몇몇 명령들이 작동을 달리하도록 되어 있습니다.  예를
+들어, 프로그램에는 설명문을 만드는 명령이 있는데, 프로그램 언어들은
+설명문의 형태을 각각 달리 하기 때문에 각각의 주 방식은 설명문을 서로
+다르게 끼워 넣도록 되어 있습니다.  모든 주 방식은 확장 명령의 이름을
+사용하므로서 그 방식으로 엇바꾸는 것이 쉽게 인식될 수 있습니다. 한
+예로 M-x fundamental-mode는 Fundamental 방식으로 엇바꾸는 명령입니다.
+
+이 파일과 같은 한글 글월을 편집하려고 한다면 Text 방식을 쓰는 것이
+좋을 것입니다.
+>> M-x text mode<Return>을 쳐 보십시오.
+
+지금까지 배운 이맥스 명령들은 많이 달라지지 않으니 걱정하지 않아도
+됩니다.  그러나 M-f와 M-b가 앞작은따옴표를 낱말의 일부로 처리함을
+관찰할 수 있을 것입니다.  전에 Fundamental 방식에서는 M-f와 M-b가
+앞작은따옴표를 낱말 분리 문자로 취급하였습니다.
+
+주 방식은 보통 다음과 같은 미묘한 변화를 초래합니다: 대부분의 명령들은
+각각의 주 방식에서 "같은 일"을 하지만 약간 다르게 작동한다.
+
+현재의 주 방식에 대한 문서화를 보고자 하면 C-h m을 치십시오.
+
+>> C-u C-v를 몇 번 쳐서 이 줄을 화면의 꼭대기쯤으로 움직이십시오.
+>> C-h m을 쳐서 Text 방식과 Fundamental 방식의 차이점을 보십시오.
+>> C-x 1을 쳐서 문서화를 화면에서 없애십시오.
+
+주 방식은 부 방식이 있기 때문에 주 방식이라고 부릅니다.  부 방식은 주
+방식을 교체할 수 있는 것이 아니라 주 방식을 부차적으로 수정한
+방식입니다.  각각의 부 방식은 다른 부 방식과 독립적으로, 그리고 주
+방식과도 독립적으로, 그 자체로서 끄고 켤 수 있습니다.  그러므로 부
+방식은 쓰지 않을 수도 있고 하나만 쓸 수도 있으면 여러 부 방식을
+짜맞춰서 쓸 수도 있습니다.
+
+아주 유용한 부 방식중, 한글 글월을 편집할 때 자주 사용되는 Auto Fill
+방식이 있습니다.  이 방식이 켜져 있을 때 이맥스는, 줄이 너무 넓어지면
+글월이 끼워짐에 따라 낱말사이에서 자동으로 줄바꿈을 합니다.
+
+Auto Fill 방식을 켜기 위해서는 M-x auto-fill-mode<Return>을 칩니다.
+이 방식이 켜져 있으면 M-x auto-fill-mode<Return>을 쳐서 끌 수
+있습니다.  이 방식이 꺼져 있으면 이 명령은 그 방식을 켜고, 반대로 켜져
+있을 때는 이 방식을 끕니다.  우리는 이 명령이 "방식을 똑딱"한다고
+(toggle) 합니다.
+
+>> M-x auto fill mode<Return>을 지금 쳐 보십시오.  그리고 "asdf "라는
+   줄을 계속 끼워 넣어서 그 줄이 둘로 나뉘도록 하십시오.  Auto Fill
+   방식은 공간 문자에서만 줄바꿈을 하기 때문에 꼭 공간 문자가 들어
+   있어야 합니다.
+
+한계는 보통 70개의 문자로 정해져 있지만 C-x f 명령으로 그 것을 변경할
+수 있습니다.  원하는 한계 설정은 숫자 인수로 하여야 합니다.
+
+>> 20이라는 인수로 C-x f를 쳐 보십시오.  (C-u 2 0 C-x f).
+   그리고 글월을 뭔가 쳐서 이맥스가 20개의 문자로 한 줄을 채우는지를
+   보십시오.  그런 다음에 C-x f를 다시 써서 한계를 70으로 재
+   설정하십시오.
+
+단락의 중간에서 변경하면 Auto Fill 방식은 채움을 다시 하지
+않습니다. 그 단락을 다시 채우기 위해서는 깜박이가 단락 안에 있는
+상태에서 M-q (Meta쇠-q)를 칩니다.
+
+>> 깜박이를 이전 단락으로 움직인 후 M-q를 치십시오.
+
+* 찾기
+------
+
+이맥스는 글월의 앞쪽이나 뒷쪽으로 문자열을 (문자열은 연속된 문자나
+연속된 낱말입니다) 찾을 수 있습니다.  문자열을 찾는 것은 깜박이를
+움직이는 명령입니다; 깜박이가 그 문자열이 나타나는 곳으로 움직입니다.
+
+이맥스의 찾기 명령은 "증가적"이라는 점에서 일반 편집기의 찾기 명령과
+다릅니다.  이는 찾고자 하는 문자열을 타자하고 있는 동안에 찾기가
+이루어지고 있다는 것을 의미합니다.
+
+찾기를 시작시키는 명령은 앞쪽으로 찾기가 C-s이고 뒷쪽으로 찾기가
+C-r입니다.  그러나 잠깐 기다리십시오!  지금 이것을 시도해 보지
+마십시오.
+
+C-s를 치면 메아리 터에, 길잡이로 "I-search"라는 문자열이 나타나는 것을
+볼 수 있습니다.  이는 찾고자 하는 문자열이 타자되기를 기다라면서
+이맥스가 증가적 찾기 중에 있다는 것을 말해 줍니다.  <Return>은 찾기를
+마칩니다.
+
+>> 이제 C-s를 쳐서 찾기를 시작하십시오.  천천히, 한 번에 한 글자씩
+   'cursor'라고 치면서 각각의 문자를 친 후 깜박이에 어떤 일이 일어
+   나는가를 유의하십시오.
+   이제 "cursor"를 한 번 찾은 것입니다.
+>> C-s를 다시 쳐서 다음에 나타나는 "cursor"를 찾으십시오.
+>> 자, 이제는 <Delete>를 네 번 쳐서 깜박이가 어떻게 움직이는가를
+   보십시오.
+>> <Return>을 쳐서 찾기를 끝내십시오.
+
+어떤 현상이 일어나는지를 보았습니까?  증가적 찾기에서 이맥스는 그때까지
+타자한 문자열을 찾으려고 합니다.  '깜박이'가 있는 다음 장소로 가려면
+C-s를 다시 칩니다.  그런 곳이 없으면 이맥스는 삑소리를 내고 찾기가 현재
+"실패"했음을 알려 주며 C-g로도 찾기를 끝낼 수 있게 합니다.
+
+유의: 어떤 운영 체계에서는 C-s를 치면 화면을 동결시켜서, 이맥스가 아무
+출력도 하지 않는 것을 볼 경우가 있습니다.  이것은 "흐름 제어"라고
+불리우는 운영 체계의 "특징"이 C-s를 가로채서 이맥스를 통해 전달되지
+않도록 하기 때문입니다.  C-q를 누르면 화면이 해제됩니다.  그리고 나서
+이맥스 설명서의 "Spontaneous Entry to Incremental Search"라는  단원을
+보면 이런 "특징"을 어떻게 취급할 수 있는가에 대한 조언을 읽을 수
+있습니다.
+
+증가적 찾기 도중에 <Delete>를 치면 찾기 문자열의 마지막 문자가
+지워지고 찾기는 마지막으로 찾았던 곳에 되돌아 가는 것을 볼 수
+있습니다.  예를 들어, "c"가 어디에 처음으로 나오는지를 보기 위해서
+"c"를 쳤다고 합시다.  이제 "u"를 치면 깜박이는 "cu"가 처음으로 나오는
+곳으로 움직일 것입니다.  이제 <Delete>를 치십시오.  그러면 찾기
+문자열에서 "u"가 지워지고 깜박이는 "c"가 처음 나온 곳으로 되돌아
+갑니다.
+
+찾기중에 제어 문자나 meta 문자를 치면 (예외가 있지만--찾기에서 특별한
+의미를 갖는 C-s나 C-r과 같은 문자들) 찾기는 끝나버립니다.
+
+C-s는 깜박이의 현재 위치 다음에 발견되는 찾기 문자열을 찾도록
+시작시킵니다.  이전에 나온 글월에서 무언가를 찾으려면 C-r를 칩니다.
+C-s에 적용되는 모든 사항은 방향만 바뀌었을 뿐 모두 C-r에 적용됩니다.
+
+* 다중 창
+---------
+
+이맥스의 괜찮은 특징 중의 하나로 한 개 이상의 창을 동시에 화면에 표시할
+수 있다는 것을 들 수 있습니다.
+
+>> 깜박이를 이 줄로 움직여서 C-u 0 C-l을 쳐 보십시오.
+
+>> C-x 2를 쳐서 화면을 두 창으로 나누십시오.
+   두 창은 이 지침서를 화면 표시합니다.  깜박이는 윗 창에 있습니다.
+
+>> C-M-v를 쳐서 바닥 창을 두루말기 하십시오.
+   (Meta쇠가 없으면 ESC C-v를 치십시오.)
+
+>> C-x o ("o"는 "other"의 첫 글자)를 쳐서 깜박이를 바닥 창으로
+   움직이십시오.
+>> 바닥 창에서 C-v와 M-v를 써서 두루말기 하십시오.
+   이 지시를 읽는 것은 꼭대기 창에서 합니다.
+
+>> C-x o를 다시 쳐서 깜박이를 다시 꼭대기 창으로 움직이십시오.
+   꼭대기 창에서, 깜박이는 전에 있던 곳으로 갈 것입니다.
+
+C-x o를 계속 사용하여 창들 사이에서 엇바꾸기를 할 수 있습니다.  각각의
+창은 자체의 깜박이 위치를 갖고 있지만 한 창만이 깜박이를 보여 줍니다.
+모든 정상적인 편집 명령은 깜박이가 있는 창에 적용됩니다.  이것을
+"선택된 창"이라고 부릅니다.
+
+C-M-v 명령은 다른 창을 참조하면서 글월을 편집할 때 유용합니다.
+깜박이를 편집하고 있는 창에 두고 다른 창을 C-M-v로 전진시킬 수
+있습니다.
+
+C-M-v는 CONTROL-META 문자의 한 예입니다.  META쇠가 있으면 CONTROL쇠와
+META쇠를 누른 채 v 글쇠를 치므로써 C-M-v를 칠 수 있습니다. CONTROL쇠나
+META쇠는 타자하는 문자를 변경하는 역할을 하기 때문에 그 둘 중 무엇이
+처음에 오는가가 문제되지 않습니다.
+
+META쇠가 없어서 ESC쇠로 대용할 때는 순서가 문제됩니다: ESC쇠를 먼저
+치고 제어쇠-v를 쳐야 하며 제어쇠-ESC v는 작동하지 않습니다.  그
+이유는 ESC이 변경쇠가 아니라 자체로서 기능을 가진 문자이기 때문입니다.
+
+>> C-x 1을 (이 꼭대기 창에서) 쳐서 바닥 창을 없애십시오.
+
+(바닥 창에서 C-x 1을 치면 꼭대기 창이 없어질 것입니다.  이 명령을 "한
+창만 보존하시오--지금 작업중인 창만"이라고 생각하십시오.)
+
+양쪽 창에 같은 사이칸을 화면 표시할 필요는 없습니다.  한 창에서 C-x
+C-f로 파일을 찾으면 다른 창은 변화가 없습니다.  각각의 창에서 파일을
+독립적으로 찾을 수 있습니다.
+
+두 창을 사용하여 다른 내용을 화면 표시하는 또 다른 방법이 있습니다:
+
+>> C-x 4 C-f를 치고 파일 이름 하나를 쳐 보십시오.
+   <Return>으로 끝내십시오.  그 파일이 바닥 창에 나타나는 것을
+   보십시오.  깜박이도 그 곳으로 움직입니다.
+
+>> C-x o를 쳐서 다시 꼭대기 창으로 돌아 가서 C-x 1로 바닥 창을
+   지우십시오.
+
+
+* 회귀적 편집 수준
+------------------
+
+간혹 "회귀적 편집 수준"이라고 (recursive editing level) 불리우는 것에
+봉착하게 됩니다.  방식 줄에서 주 방식 이름의 앞뒤에 있는 소괄호 문자를
+대괄호 문자가 둘러 싸고 있으면 이를 알 수 있습니다.  예를 들어,
+(Fundamental) 대신에 [(Fundamental)]이라고 표시될 때 입니다.
+
+이 회귀적 편집 수준에서 벗어 나기 위해서는 ESC ESC ESC을 칩니다.
+이 것은 다목적 "벗어나기" 명령입니다.  추가된 창을 없애거나 작은
+사이칸에서 나오기 위해서도 사용될 수 있습니다.
+
+>> M-x를 쳐서 작은 사이칸으로 들어 가십시오; 그리고는 ESC ESC ESC을
+   쳐서 빠져 나오십시오.
+
+C-g를 써서는 회귀적 편집 수준에서 벗어날 수 없습니다.  그 이유는 C-g가
+회귀적 편집 수준 이내에서 명령이나 인수를 취소하기 위해 사용되기
+때문입니다.
+
+
+* 더 많은 도움말 얻기
+---------------------
+
+이 지침서에서는 이맥스 사용을 시작하기에 충분한 정보를 제공하려고
+노력하였습니다.  이맥스에는 너무나 많은 기능이 있어서 여기서는 모두 다
+설명할 수 없습니다.  그러나, 이맥스에는 다른 많은 유용한 특징들이
+있어서 이맥스에 대해서 더 많이 배우고 싶을 것 입니다.  이맥스는 이맥스
+명령에 대한 문서화를 읽을 수 있는 명령을 제공합니다.  이 "도움말"
+명령들은 모두 제어쇠-h로 시작하며 이 문자를 "도움말 문자"라고
+부릅니다.
+
+도움말 특징을 사용하려면 C-h 문자를 치고 원하는 종류의 도움말을
+가르키는 문자를 칩니다.  전혀 생각이 않나면 C-h ?를 쳐서, 이맥스가
+어떤 종류의 도움말을 제공할 수 있는가를 보여 주도록 하십시오.  C-h를
+친 후 아무런 도움말이 필요없다고 판단되면 C-g를 쳐서 취소하십시오.
+
+(어떤 곳에서는 C-h의 의미를 변경시켜 놓습니다.  그들이 모든 사용자에게
+이렇듯 일괄적인 조처를 취해서는 않되는 것이므로 이것은 운영 체계
+관리자에게 불평할 수 있는 충분한 근거가 됩니다.  C-h가 화면의 바닥에
+도움 알림말을 화면 표시하지 않으면 불평이 해결될 때까지는 F1 글쇠나
+M-x help <Return>을 대신 사용하도록 하십시오.)
+
+가장 기본적인 도움말 특징은 C-h c 입니다.  C-h를 치고 문자 c를 친 후
+명령 문자나 명령 순차(sequence)를 치십시오; 그러면 이맥스는 그 명령에
+대한 아주 간단한 설명을 화면 표시합니다.
+
+>> C-h c 제어쇠-p를 치십시오.
+   알림말은 다음과 같은 식이어야 합니다.
+
+	C-p runs the command previous-line
+
+이는 "기능의 이름"을 말해 줍니다.  기능 이름은 이맥스를 자기 취향에
+맞게 쓰거나 확장할 때 주로 사용됩니다.  그러나 기능 이름들은 그 명령이
+어떤 일을 하는지를 알 수 있도록 정해지기 때문에 그들은 아주 간단한
+문서화로도 -- 여태까지 배운 명령들을 기억하는데 충분할 정도로 --
+사용될 수 있습니다.
+
+C-x C-s와 (META쇠나 EDIT쇠 혹은 교체쇠가 있으면) <ESC>v와 같은 다중
+문자 명령들도 C-h c의 다음에 올 수 있습니다.
+
+한 명령에 대해 더 자세한 정보를 얻기 위해서는 C-h c 대신에 C-h k를
+사용하십시오.
+
+>> C-h k 제어쇠-p를 쳐 보십시오.
+
+이는 그 기능의 이름과 함께 그 문서화를 이맥스 창에 화면 표시합니다.
+출력된 것을 다 읽었으면 C-x 1로 도움말 글월을 없앱니다.  당장에 없앨
+필요는 없습니다.  도움말 글월을 참조하면서 편집을 하다가 C-x 1을 쳐도
+됩니다.
+
+여기에 또다른 유용한 C-h의 추가 선택이 있습니다:
+
+   C-h f	기능 기술하기.  기능 이름을 칩니다.
+
+>> C-h f previous-line<Return>을 쳐 보십시오.
+   그러면 이맥스가 C-p 명령이 제공하는 기능에 대한 모든 정보를 인쇄할
+   것입니다.
+
+유사한 명령으로 C-h v 가 있으며 이는 이맥스의 행동을 적절하게 하는데
+사용되는 변수값에 대한 문서화를 보여준다.
+
+   C-h a	명령 핵심어(apropos).  핵심어를 치면 이맥스가 이
+		핵심어가 들어 있는 모든 명령들의 목록을 작성할
+		것입니다. 이 명령들은 모두 Meta쇠-x로 부를 수
+		있습니다. 어떤 명령들에 대해서는 같은 명령을 실행하는,
+		한두개의 문자로 된 순차에 대한 목록도 명령 핵심어가
+		작성합니다.
+
+>> C-h a file<Return>을 쳐 보십시오.
+
+그러면 이름에 "file"이 들어 있는 모든 M-x 명령들의 목록이 작성되여
+다른 창에 화면 표시됩니다.  find-file과 같은 명령들에는 C-x C-f와 같은
+문자 명령의 목록이 해당하는 명령의 옆에 작성되어 있는 것을 볼  수 있을
+것입니다.
+
+>> C-M-v를 쳐서 도움말 창을 두루말기 하십시오.  이를 몇 번 하십시오.
+
+>> C-x 1을 쳐서 도움말 창을 지우십시오.
+
+   C-h i	온라인 설명서를 읽기 (즉 Info).  이 명령은
+		`*info*'라는 특별한 사이칸에서 시스템에 설치된
+		꾸러미의 온라인 설명서를 보여줍니다.  m emacs
+		<복귀쇠>를  치면 이맥스 설명서를 읽을 수 있습니다.
+		전에 Info를 읽어 본 적이 없으면 ?를 치십시오.  그러면
+		이맥스가 Info 방식이 어떤 기능이 있는 지를 안내하는
+		여행이 시작됩니다.  이 지침서를 전부 마치면 이맥스의
+		Info 설명서를 주된 문서화로 생각해서 읽어야 합니다.
+
+* 결론
+------
+
+이맥스를 완전히 나가기 위해서는 C-x C-c를 쓴다는 사실을 기억하십시오.
+일시적으로 조가비로 나가서 후에 다시 이맥스에 되돌아 올 수 있기
+위해서는 C-z를 사용하십시오.
+
+이 지침서는 새로운 사용자들 모두가 이해할 수 있도록 만들어졌으므로
+불분명한 사항이 발견되면 앉아서 자기 자신을 탓하지 말고 불평하십시오!
+
+
+복사 조건
+---------
+
+이 지침서는 Stuart Cracraft씨가 이맥스 근원 자료를 위해 쓴, 긴 이맥스
+지침서를 모체로 하여 작성된 것이다.
+
+GNU 이맥스와 같이 이 지침서 판은 저작권이 있으며 특정한 조건을 만족할
+때에 복사본을 배포할 수 있는 허가를 갖고 나온 것이다:
+
+Copyright (C) 1985, 1996, 2001-2012  Free Software Foundation, Inc.
+
+   이 문서는 이 저작권 공고와 허용 공고가 그대로 유지되고, 배포자가
+   수취자에게 이 공고에 따라 허용되는 것처럼 또 재분배하는 것을
+   허용하는 조건으로, 어떤 매체로든지 받은 그대로를 복사하거나
+   복사본이 다른 이에게 배포되는 것이 허용된다.
+
+   이 문서의 수정판이나 수정판의 일부분은 위의 조건과 함께, 또한 누가
+   마지막으로 변경했는지를 눈에 띄게 나타낸다는 조건으로 배포되는 것이
+   허용된다.
+
+이맥스 자체를 복사하는 것은 좀 더 복잡하지만 같은 내용입니다.
+COPYING이라는 파일을 읽고 난 후에 GNU 이맥스의 복사본을 친구에게
+주십시오.  자유 소프트웨어를 쓰고 만들고 공유함으로써 소프트웨어
+방해를 ("소유권") 근절하는데 도웁시다.
+

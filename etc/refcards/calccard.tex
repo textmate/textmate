@@ -1,0 +1,675 @@
+% Reference Card for GNU Emacs Calc 2.02
+%**start of header
+\newcount\columnsperpage
+
+% The format for this file is adapted from the GNU Emacs reference
+% card version 1.9, by Stephen Gildea.
+
+% This file can be printed with 1, 2, or 3 columns per page (see below).
+% Specify how many you want here.
+
+\columnsperpage=3
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+
+\input pdflayout.sty
+\pdflayout=(1l)
+
+% Nothing else needs to be changed.
+% Typical command to format:  tex calccard.tex
+% Typical command to print (3 cols):  dvips -t landscape calccard.dvi
+
+% Copyright (C) 1987, 1992, 2001-2012  Free Software Foundation, Inc.
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+% This file is intended to be processed by plain TeX (TeX82).
+%
+% The final reference card has six columns, three on each side.
+% This file can be used to produce it in any of three ways:
+% 1 column per page
+%    produces six separate pages, each of which needs to be reduced to 80%.
+%    This gives the best resolution.
+% 2 columns per page
+%    produces three already-reduced pages.
+%    You will still need to cut and paste.
+% 3 columns per page
+%    produces two pages which must be printed sideways to make a
+%    ready-to-use 8.5 x 11 inch reference card.
+%    For this you need a dvi device driver that can print sideways.
+% Which mode to use is controlled by setting \columnsperpage above.
+%
+% Author (Calc reference card):
+%  Dave Gillespie
+%  UUCP: uunet!synaptx!daveg
+%  Internet: daveg@synaptics.com
+%
+% Author (refcard.tex format):
+%  Stephen Gildea
+%  UUCP: mit-erl!gildea
+%  Internet: gildea@stop.mail-abuse.org
+
+\def\emacsversionnumber{24}
+\def\year{2012}                 % latest copyright year
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{designed by Dave Gillespie and Stephen Gildea,}
+\centerline{for GNU Emacs Calc.}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+%For copies of the GNU Emacs Calc manual, write to the Free Software
+%Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+%MA 02110-1301, USA.
+%
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip
+\newbox\columna
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea
+% October 1986.
+\if 1\ncolumns
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else
+  \hsize 3.2in
+  \vsize 7.95in
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eighttt=cmtt8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm		%make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+	\global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+	\global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+\outer\def\newcolumn{\vfill\eject}
+
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+\def\paralign{\vskip\parskip\halign}
+
+\def\<#1>{$\langle${\rm #1}$\rangle$}
+
+\def\kbd#1{{\tt#1}\null}	%\null so not an abbrev even if period follows
+
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\quad
+  &\kbd{#3}\quad\cr}
+
+%
+% Calc-specific commands here:
+%
+
+\let\^=^
+\let\_=_
+\catcode`\^=7
+\catcode`\_=8
+
+% Redefine to make spaces a bit smaller
+\let\wkbd=\kbd
+\def\kbd#1{{\spaceskip=.37em\tt#1}\null}
+
+\def\wkey#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\wkbd{#2}\hfil}}
+\def\wthreecol#1#2#3{\hskip\keyindent\relax#1\hfil&\wkbd{#2}\quad
+  &\wkbd{#3}\quad\cr}
+
+\def\stkkey#1#2#3#4{\par\line{\hskip1em\rlap{\kbd{#1}}\hskip4.5em%
+  \rlap{{#2}}\hskip7.5em\rlap{{#3}}\hskip7.5em\rlap{{#4}}\hfill}\par}
+\def\S#1{$S_{\scriptscriptstyle #1}$}
+\def\swap{$\leftrightarrow$}
+
+\def\calcprefix{C-x *\ }
+\def\,{{\rm ,\hskip.55em}\ignorespaces}
+\def\lesssectionskip{\vskip-1.5ex}
+
+\def\iline#1{\par\line{\hskip1em\relax #1\hfill}\par}
+
+\if 1\ncolumns
+\else
+  \font\eighti=cmmi8
+  \textfont1=\eighti
+\fi
+
+%**end of header
+
+
+% Column 1
+
+\title{GNU Calc Reference Card}
+
+\centerline{(for GNU Emacs version \emacsversionnumber)}
+
+\section{Starting and Stopping}
+
+\wkey{start/stop standard Calc}{\calcprefix c}
+\wkey{start/stop X keypad Calc}{\calcprefix k}
+\wkey{\quad start/stop either: \kbd{\calcprefix *}}{}
+\wkey{stop standard Calc}{q}
+
+\wkey{Calc tutorial}{\calcprefix t}
+\wkey{run Calc in other window}{\calcprefix o}
+\wkey{quick calculation in minibuffer}{\calcprefix q}
+
+\section{Getting Help}
+
+\lesssectionskip
+The \kbd{h} prefix key is Calc's analogue of \kbd{C-h} in Emacs.
+
+\key{quick summary of keys}{?}
+\key{describe key briefly}{h c}
+\key{describe key fully}{h k}
+\key{describe function or command}{h f}
+\key{read on-line manual}{h i{\rm\enskip or\enskip}\calcprefix i}
+\key{read full Calc summary}{h s{\rm\enskip or\enskip}\calcprefix s}
+
+\section{Error Recovery}
+
+\key{abort command in progress}{C-g}
+\key{display recent error messages}{w}
+\key{undo last operation}{U}
+\key{redo last operation}{D}
+\key{recall last arguments}{M-RET}
+\key{edit top of stack}{`}
+\wkey{reset Calc to initial state}{\calcprefix 0 {\rm (zero)}}
+
+\section{Transferring Data}
+
+\wkey{grab region from a buffer}{\calcprefix g}
+\wkey{grab rectangle from a buffer}{\calcprefix r}
+\wkey{grab rectangle, summing columns}{\calcprefix :}
+\wkey{grab rectangle, summing rows}{\calcprefix \_}
+
+\wkey{yank data to a buffer}{\calcprefix y}
+
+Also, try \kbd{C-k}/\kbd{C-y} or X cut and paste.
+
+\section{Examples}
+
+\lesssectionskip
+In RPN, enter numbers first, separated by \kbd{RET} if necessary,
+then type the operator.  To enter a calculation in algebraic form,
+press the apostrophe first.
+
+\beginindentedkeys
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt\hfil\quad&#\hfil\cr
+\wthreecol{ }{{\bf RPN style:}}{{\bf algebraic style:}}
+\wthreecol{Example:}{2 RET 3 +}{' 2+3 RET}
+\wthreecol{Example:}{2 RET 3 + 4 *}{' (2+3)*4 RET}
+\wthreecol{Example:}{2 RET 3 RET 4 + *}{' 2*(3+4) RET}
+\wthreecol{Example:}{3 RET 6 + Q 3 \^}{' sqrt(3+6)\^3 RET}
+\wthreecol{Example:}{P 3 / n S}{' sin(-pi/3) RET =}
+}
+\endindentedkeys
+
+\shortcopyrightnotice
+
+% Column 2
+
+\section{Arithmetic}
+
+\key{add, subtract, multiply, divide}{+\, -\, *\, /}
+\key{raise to a power, {\it n\/}th root}{\^\, I \^}
+\key{change sign}{n}
+\key{reciprocal $1/x$}{\&}
+\key{square root $\sqrt x$}{Q}
+
+\key{set precision}{p}
+\key{round off last two digits}{c 2}
+\key{convert to fraction, float}{c F\, c f}
+
+\wkey{enter using algebraic notation}{' 2+3*4}
+\wkey{refer to previous result}{' 3*\$\^2}
+\wkey{refer to higher stack entries}{' \$1*\$2\^2}
+\key{finish alg entry without evaluating}{LFD}
+\key{set mode where alg entry used by default}{m a}
+
+\section{Stack Commands}
+
+\lesssectionskip
+Here \S{n} is the $n$th stack entry, and $N$ is the size of the stack.
+
+\vskip.5ex
+\stkkey{\it key}{\it no prefix}{\it prefix $n$}{\it prefix $-n$}
+\stkkey{RET}{copy \S{1}}{copy \S{1..n}}{copy \S{n}}
+\stkkey{LFD}{copy \S{2}}{copy \S{n}}{copy \S{1..n}}
+\stkkey{DEL}{delete \S{1}}{delete \S{1..n}}{delete \S{n}}
+\stkkey{M-DEL}{delete \S{2}}{delete \S{n}}{delete \S{1..n}}
+\stkkey{TAB}{swap \S{1}\swap\S{2}}{roll \S{1} to \S{n}}{roll \S{n} to \S{N}}
+\stkkey{M-TAB}{roll \S{3} to \S{1}}{roll \S{n} to \S{1}}{roll \S{N} to \S{n}}
+
+With a 0 prefix, these copy, delete, or reverse the entire stack.
+
+\section{Display}
+
+\wkey{scroll horizontally, vertically}{< >\, \{ \}}
+\key{home cursor}{o}
+\key{line numbers on/off}{d l}
+\key{trail display on/off}{t d}
+
+\key{scientific notation}{d s}
+\key{fixed-point notation}{d f}
+\key{floating-point (normal) notation}{d n}
+\key{group digits with commas}{d g}
+
+For display mode commands, \kbd{H} prefix prevents screen redraw
+and \kbd{I} prefix temporarily redraws top of stack.
+
+\section{Notations}
+
+\wkey{scientific notation}{6.02e23}
+\wkey{minus sign in numeric entry}{\_23{\rm\quad or\quad}23 n}
+\wkey{fractions}{3:4}
+\wkey{complex numbers}{({\it x}, {\it y})}
+\wkey{polar complex numbers}{({\it r}; $\theta$)}
+\wkey{vectors (commas optional)}{[1, 2, 3]}
+\wkey{matrices (or nested vectors)}{[1, 2; 3, 4]}
+\wkey{error forms (\kbd{p} key)}{100 +/- 0.5}
+\wkey{interval forms}{[2 ..\ 5)}
+\wkey{modulo forms (\kbd{M} key)}{6 mod 24}
+\wkey{HMS forms}{5@ 30' 0"}
+\wkey{date forms}{<Jul 4, 1992>}
+\wkey{infinity, indeterminate}{inf\, nan}
+
+% Column 3
+
+\section{Scientific Functions}
+
+\key{ln, log${}_{\scriptscriptstyle 10}$, log${}_b$}{L\, H L\, B}
+\key{exponential {\it e}${}^x$, 10${}^x$}{E\, H E}
+\key{sin, cos, tan}{S\, C\, T}
+\key{arcsin, arccos, arctan}{I S\, I C\, I T}
+\key{inverse, hyperbolic prefix keys}{I\, H}
+\key{two-argument arctan}{f T}
+\key{degrees, radians modes}{m d\, m r}
+\key{pi ($\pi$)}{P}
+
+\key{factorial, double factorial}{!\, k d}
+\key{combinations, permutations}{k c\, H k c}
+\key{prime factorization}{k f}
+\key{next prime, previous prime}{k n\, I k n}
+\key{GCD, LCM}{k g\, k l}
+\key{random number, shuffle}{k r\, k h}
+\key{minimum, maximum}{f n\, f x}
+
+\key{error functions erf, erfc}{f e\, I f e}
+\key{gamma, beta functions}{f g\, f b}
+\key{incomplete gamma, beta functions}{f G\, f B}
+\key{Bessel $J_\nu$, $Y_\nu$ functions}{f j\, f y}
+
+\key{complex magnitude, arg, conjugate}{A\, G\, J}
+\key{real, imaginary parts}{f r\, f i}
+\key{convert polar/rectangular}{c p}
+
+\section{Financial Functions}
+
+\key{enter percentage}{M-\%}
+\key{convert to percentage}{c \%}
+\key{percentage change}{b \%}
+
+\key{present value}{b P}
+\key{future value}{b F}
+\key{rate of return}{b T}
+\key{number of payments}{b \#}
+\key{size of payments}{b M}
+\key{net present value, int.\ rate of return}{b N\, b I}
+
+Above computations assume payments at end of period.  Use \kbd{I}
+prefix for beginning of period, or \kbd{H} for a lump sum investment.
+
+\key{straight-line depreciation}{b S}
+\key{sum-of-years'-digits}{b Y}
+\key{double declining balance}{b D}
+
+\section{Units}
+
+\wkey{enter with units}{' 55 mi/hr}
+\key{convert to new units, base units}{u c\, u b}
+\key{convert temperature units}{u t}
+\key{simplify units expression}{u s}
+\key{view units table}{u v}
+
+Common units:
+\iline{distance: \kbd{m}, \kbd{cm}, \kbd{mm}, \kbd{km};
+  \kbd{in}, \kbd{ft}, \kbd{mi}, \kbd{mfi};
+  \kbd{point}, \kbd{lyr}}
+\iline{volume: \kbd{l} or \kbd{L}, \kbd{ml};
+  \kbd{gal}, \kbd{qt}, \kbd{pt}, \kbd{cup}, \kbd{floz},
+  \kbd{tbsp}, \kbd{tsp}}
+\iline{mass: \kbd{g}, \kbd{mg}, \kbd{kg}, \kbd{t};
+  \kbd{lb}, \kbd{oz}, \kbd{ton}}
+\iline{time: \kbd{s} or \kbd{sec}, \kbd{ms}, \kbd{us}, \kbd{ns}, \kbd{min},
+  \kbd{hr}, \kbd{day}, \kbd{wk}}
+\iline{temperature: \kbd{degC}, \kbd{degF}, \kbd{K}}
+
+% Column 4
+
+\newcolumn
+\title{GNU Calc Reference Card}
+
+\section{Programmer's Functions}
+
+\key{binary, octal, hex display}{d 2\, d 8\, d 6}
+\key{decimal, other radix display}{d 0\, d r}
+\key{display leading zeros}{d z}
+\key{entering non-decimal numbers}{16\#7FFF}
+
+\key{binary word size}{b w}
+\key{binary AND, OR, XOR}{b a\, b o\, b x}
+\key{binary DIFF, NOT}{b d\, b n}
+\key{left shift}{b l}
+\key{logical right shift}{b r}
+\key{arithmetic right shift}{b R}
+
+\key{integer quotient, remainder}{\\\, \%}
+\key{integer square root, logarithm}{f Q\, f I}
+\key{floor, ceiling, round to integer}{F\, I F\, R}
+
+\section{Variables}
+
+\lesssectionskip
+Variable names are single digits or whole words.
+
+\key{store to variable}{s t}
+\key{store and keep on stack}{s s}
+\key{recall from variable}{s r}
+\key{shorthands for digit variables}{t {\it n}\, s {\it n}\, r {\it n}}
+\key{unstore, exchange variable}{s u\, s x}
+\key{edit variable}{s e}
+
+\section{Vector Operations}
+
+\key{vector of 1, 2, $\ldots\mskip\thinmuskip$, {\it n}}{v x {\it n}}
+\key{vector of {\it n} counts from {\it a} by {\it b}}{C-u v x}
+\key{vector of copies of a value}{v b}
+\key{concatenate into vector}{|}
+\key{pack many stack items into vector}{v p}
+\key{unpack vector or object}{v u}
+
+\key{length of vector (list)}{v l}
+\key{reverse vector}{v v}
+\key{sort, grade vector}{V S\, V G}
+\key{histogram of vector data}{V H}
+\key{extract vector element}{v r}
+
+\key{matrix determinant, inverse}{V D\, \&}
+\key{matrix transpose, trace}{v t\, V T}
+\key{cross, dot products}{V C\, *}
+\key{identity matrix}{v i}
+\key{extract matrix row, column}{v r\, v c}
+
+\key{intersection, union, diff of sets}{V \^\, V V\, V -}
+\key{cardinality of set}{V \#}
+
+\key{add vectors elementwise (i.e., map \kbd{+})}{V M +}
+\key{sum elements in vector (i.e., reduce \kbd{+})}{V R +}
+\key{sum rows in matrix}{V R \_ +}
+\key{sum columns in matrix}{V R : +}
+\key{sum elements, accumulate results}{V U +}
+
+% Column 5
+
+\section{Algebra}
+
+\wkey{enter an algebraic formula}{' 2x+3y\^2}
+\wkey{enter an equation}{' 2x\^2=18}
+
+\key{symbolic (vs.\ numeric) mode}{m s}
+\key{fractions (vs.\ float) mode}{m f}
+\key{suppress evaluation of formulas}{m O}
+\key{simplify formulas automatically}{m S}
+\key{return to default evaluation rules}{m D}
+
+\key{``Big'' display mode}{d B}
+\key{C, Pascal, FORTRAN modes}{d C\, d P\, d F}
+\key{\TeX, La\TeX, eqn modes}{d T\, d L\, d E}
+\key{Maxima}{d X}
+\key{Unformatted mode}{d U}
+\key{Normal language mode}{d N}
+
+\key{simplify formula}{a s}
+\key{put formula into rational form}{a n}
+\key{evaluate variables in formula}{=}
+\key{evaluate numerically}{N}
+\key{let variable equal a value in formula}{s l {\it x\/}={\it val}}
+\key{declare properties of variable}{s d}
+\iline{Common decls: \kbd{pos}, \kbd{int}, \kbd{real},
+  \kbd{scalar}, \kbd{[{\it a}..{\it b}\hskip.1em]}.}
+
+\key{expand, collect terms}{a x\, a c}
+\key{factor, partial fractions}{a f\, a a}
+\key{polynomial quotient, remainder, GCD}{a \\\, a \%\, a g}
+\key{derivative, integral}{a d\, a i}
+\key{taylor series}{a t}
+
+\key{principal solution to equation(s)}{a S}
+\key{list of solutions}{a P}
+\key{generic solution}{H a S}
+\key{apply function to both sides of eqn}{a M}
+
+\key{rewrite formula}{a r}
+\iline{Example: \wkbd{a r a*b + a*c := a*(b+c)}}
+\iline{Example: \wkbd{a r sin(x)\^2 := 1-cos(x)\^2}}
+\iline{Example: \wkbd{a r cos(n pi) := 1 ::\ integer(n) ::\ n\%2 = 0}}
+\iline{Example: \wkbd{a r [f(0) := 1, f(n) := n f(n-1) ::\ n > 0]}}
+\iline{Put rules in \kbd{EvalRules} to have them apply automatically.}
+\iline{Put rules in \kbd{AlgSimpRules} to apply during \kbd{a s}
+  command.}
+\iline{Common markers: \kbd{opt}, \kbd{plain}, \kbd{quote}, \kbd{eval},
+  \kbd{let}, \kbd{remember}.}
+
+\section{Numerical Computations}
+
+\key{sum formula over a range}{a +}
+\key{product of formula over a range}{a *}
+\key{tabulate formula over a range}{a T}
+\key{integrate numerically over a range}{a I}
+\key{find zero of formula or equation}{a R}
+\key{find local min, max of formula}{a N\, a X}
+\key{fit data to line or curve}{a F}
+
+\key{mean of data in vector or variable}{u M}
+\key{median of data}{H u M}
+\key{geometric mean of data}{u G}
+\key{sum, product of data}{u +\, u *}
+\key{minimum, maximum of data}{u N\, u X}
+\key{sample, pop.\ standard deviation}{u S\, I u S}
+
+% Column 6
+
+\section{Selections}
+
+\key{select subformula under cursor}{j s}
+\key{select {\it n\/}th subformula}{j {\it n}}
+\key{select more}{j m}
+\key{unselect this, all formulas}{j u\, j c}
+
+\key{copy indicated subformula}{j RET}
+\key{delete indicated subformula}{j DEL}
+
+\key{commute selected terms}{j C}
+\key{commute term leftward, rightward}{j L\, j R}
+\key{distribute, merge selection}{j D\, j M}
+\key{isolate selected term in equation}{j I}
+\key{negate, invert term in context}{j N\, j \&}
+\key{rewrite selected term}{j r}
+
+\section{Graphics}
+
+\key{graph function or data}{g f}
+\key{graph 3D function or data}{g F}
+\key{replot current graph}{g p}
+\key{print current graph}{g P}
+\key{add curve to graph}{g a}
+\key{set number of data points}{g N}
+\key{set line, point styles}{g s\, g S}
+\key{set log vs.\ linear {\it x, y} axis}{g l\, g L}
+\key{set range for {\it x, y} axis}{g r\, g R}
+\key{close graphics window}{g q}
+
+\section{Programming}
+
+\key{begin, end recording a macro}{C-x (\, C-x )}
+\key{replay keyboard macro}{X}
+\wkey{read region as written-out macro}{\calcprefix m}
+\key{if, else, endif}{Z [\, Z :\, Z ]}
+\key{equal to, less than, member of}{a =\, a <\, a \{}
+\key{repeat {\it n} times, break from loop}{Z <\, Z >\, Z /}
+\key{``for'' loop: start, end; body, step}{Z (\, Z )}
+\key{save, restore mode settings}{Z `\, Z '}
+\key{query user during macro}{Z \#}
+\key{put finished macro on a key}{Z K}
+
+\key{define function with formula}{Z F}
+\key{edit definition}{Z E}
+
+\key{record user-defined command permanently}{Z P}
+\key{record variable value permanently}{s p}
+\key{record mode settings permanently}{m m}
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "pdftex calccard"
+% End:
+

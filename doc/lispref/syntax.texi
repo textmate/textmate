@@ -1,0 +1,1224 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/syntax
+@node Syntax Tables, Abbrevs, Searching and Matching, Top
+@chapter Syntax Tables
+@cindex parsing buffer text
+@cindex syntax table
+@cindex text parsing
+
+  A @dfn{syntax table} specifies the syntactic role of each character
+in a buffer.  It can be used to determine where words, symbols, and
+other syntactic constructs begin and end.  This information is used by
+many Emacs facilities, including Font Lock mode (@pxref{Font Lock
+Mode}) and the various complex movement commands (@pxref{Motion}).
+
+@menu
+* Basics: Syntax Basics.     Basic concepts of syntax tables.
+* Syntax Descriptors::       How characters are classified.
+* Syntax Table Functions::   How to create, examine and alter syntax tables.
+* Syntax Properties::        Overriding syntax with text properties.
+* Motion and Syntax::        Moving over characters with certain syntaxes.
+* Parsing Expressions::      Parsing balanced expressions
+                                using the syntax table.
+* Standard Syntax Tables::   Syntax tables used by various major modes.
+* Syntax Table Internals::   How syntax table information is stored.
+* Categories::               Another way of classifying character syntax.
+@end menu
+
+@node Syntax Basics
+@section Syntax Table Concepts
+
+  A syntax table is a char-table (@pxref{Char-Tables}).  The element at
+index @var{c} describes the character with code @var{c}.  The element's
+value should be a list that encodes the syntax of the character in
+question.
+
+  Syntax tables are used only for moving across text, not for the Emacs
+Lisp reader.  Emacs Lisp uses built-in syntactic rules when reading Lisp
+expressions, and these rules cannot be changed.  (Some Lisp systems
+provide ways to redefine the read syntax, but we decided to leave this
+feature out of Emacs Lisp for simplicity.)
+
+  Each buffer has its own major mode, and each major mode has its own
+idea of the syntactic class of various characters.  For example, in
+Lisp mode, the character @samp{;} begins a comment, but in C mode, it
+terminates a statement.  To support these variations, Emacs makes the
+syntax table local to each buffer.  Typically, each major mode has its
+own syntax table and installs that table in each buffer that uses that
+mode.  Changing this table alters the syntax in all those buffers as
+well as in any buffers subsequently put in that mode.  Occasionally
+several similar modes share one syntax table.  @xref{Example Major
+Modes}, for an example of how to set up a syntax table.
+
+A syntax table can inherit the data for some characters from the
+standard syntax table, while specifying other characters itself.  The
+``inherit'' syntax class means ``inherit this character's syntax from
+the standard syntax table''.  Just changing the standard syntax for a
+character affects all syntax tables that inherit from it.
+
+@defun syntax-table-p object
+This function returns @code{t} if @var{object} is a syntax table.
+@end defun
+
+@node Syntax Descriptors
+@section Syntax Descriptors
+@cindex syntax class
+
+  The syntactic role of a character is called its @dfn{syntax class}.
+Each syntax table specifies the syntax class of each character.  There
+is no necessary relationship between the class of a character in one
+syntax table and its class in any other table.
+
+  Each syntax class is designated by a mnemonic character, which
+serves as the name of the class when you need to specify a class.
+Usually, this designator character is one that is often assigned that
+class; however, its meaning as a designator is unvarying and
+independent of what syntax that character currently has.  Thus,
+@samp{\} as a designator character always means ``escape character''
+syntax, regardless of whether the @samp{\} character actually has that
+syntax in the current syntax table.
+@ifnottex
+@xref{Syntax Class Table}, for a list of syntax classes.
+@end ifnottex
+
+@cindex syntax descriptor
+  A @dfn{syntax descriptor} is a Lisp string that describes the syntax
+classes and other syntactic properties of a character.  When you want
+to modify the syntax of a character, that is done by calling the
+function @code{modify-syntax-entry} and passing a syntax descriptor as
+one of its arguments (@pxref{Syntax Table Functions}).
+
+  The first character in a syntax descriptor designates the syntax
+class.  The second character specifies a matching character (e.g.@: in
+Lisp, the matching character for @samp{(} is @samp{)}); if there is no
+matching character, put a space there.  Then come the characters for
+any desired flags.
+
+  If no matching character or flags are needed, only one character
+(specifying the syntax class) is sufficient.
+
+  For example, the syntax descriptor for the character @samp{*} in C
+mode is @code{". 23"} (i.e., punctuation, matching character slot
+unused, second character of a comment-starter, first character of a
+comment-ender), and the entry for @samp{/} is @samp{@w{. 14}} (i.e.,
+punctuation, matching character slot unused, first character of a
+comment-starter, second character of a comment-ender).
+
+@menu
+* Syntax Class Table::      Table of syntax classes.
+* Syntax Flags::            Additional flags each character can have.
+@end menu
+
+@node Syntax Class Table
+@subsection Table of Syntax Classes
+
+  Here is a table of syntax classes, the characters that designate
+them, their meanings, and examples of their use.
+
+@table @asis
+@item Whitespace characters: @samp{@ } or @samp{-}
+Characters that separate symbols and words from each other.
+Typically, whitespace characters have no other syntactic significance,
+and multiple whitespace characters are syntactically equivalent to a
+single one.  Space, tab, and formfeed are classified as whitespace in
+almost all major modes.
+
+This syntax class can be designated by either @w{@samp{@ }} or
+@samp{-}.  Both designators are equivalent.
+
+@item Word constituents: @samp{w}
+Parts of words in human languages.  These are typically used in
+variable and command names in programs.  All upper- and lower-case
+letters, and the digits, are typically word constituents.
+
+@item Symbol constituents: @samp{_}
+Extra characters used in variable and command names along with word
+constituents.  Examples include the characters @samp{$&*+-_<>} in Lisp
+mode, which may be part of a symbol name even though they are not part
+of English words.  In standard C, the only non-word-constituent
+character that is valid in symbols is underscore (@samp{_}).
+
+@item Punctuation characters: @samp{.}
+Characters used as punctuation in a human language, or used in a
+programming language to separate symbols from one another.  Some
+programming language modes, such as Emacs Lisp mode, have no
+characters in this class since the few characters that are not symbol
+or word constituents all have other uses.  Other programming language
+modes, such as C mode, use punctuation syntax for operators.
+
+@item Open parenthesis characters: @samp{(}
+@itemx Close parenthesis characters: @samp{)}
+Characters used in dissimilar pairs to surround sentences or
+expressions.  Such a grouping is begun with an open parenthesis
+character and terminated with a close.  Each open parenthesis
+character matches a particular close parenthesis character, and vice
+versa.  Normally, Emacs indicates momentarily the matching open
+parenthesis when you insert a close parenthesis.  @xref{Blinking}.
+
+In human languages, and in C code, the parenthesis pairs are
+@samp{()}, @samp{[]}, and @samp{@{@}}.  In Emacs Lisp, the delimiters
+for lists and vectors (@samp{()} and @samp{[]}) are classified as
+parenthesis characters.
+
+@item String quotes: @samp{"}
+Characters used to delimit string constants.  The same string quote
+character appears at the beginning and the end of a string.  Such
+quoted strings do not nest.
+
+The parsing facilities of Emacs consider a string as a single token.
+The usual syntactic meanings of the characters in the string are
+suppressed.
+
+The Lisp modes have two string quote characters: double-quote (@samp{"})
+and vertical bar (@samp{|}).  @samp{|} is not used in Emacs Lisp, but it
+is used in Common Lisp.  C also has two string quote characters:
+double-quote for strings, and single-quote (@samp{'}) for character
+constants.
+
+Human text has no string quote characters.  We do not want quotation
+marks to turn off the usual syntactic properties of other characters
+in the quotation.
+
+@item Escape-syntax characters: @samp{\}
+Characters that start an escape sequence, such as is used in string
+and character constants.  The character @samp{\} belongs to this class
+in both C and Lisp.  (In C, it is used thus only inside strings, but
+it turns out to cause no trouble to treat it this way throughout C
+code.)
+
+Characters in this class count as part of words if
+@code{words-include-escapes} is non-@code{nil}.  @xref{Word Motion}.
+
+@item Character quotes: @samp{/}
+Characters used to quote the following character so that it loses its
+normal syntactic meaning.  This differs from an escape character in
+that only the character immediately following is ever affected.
+
+Characters in this class count as part of words if
+@code{words-include-escapes} is non-@code{nil}.  @xref{Word Motion}.
+
+This class is used for backslash in @TeX{} mode.
+
+@item Paired delimiters: @samp{$}
+Similar to string quote characters, except that the syntactic
+properties of the characters between the delimiters are not
+suppressed.  Only @TeX{} mode uses a paired delimiter presently---the
+@samp{$} that both enters and leaves math mode.
+
+@item Expression prefixes: @samp{'}
+Characters used for syntactic operators that are considered as part of
+an expression if they appear next to one.  In Lisp modes, these
+characters include the apostrophe, @samp{'} (used for quoting), the
+comma, @samp{,} (used in macros), and @samp{#} (used in the read
+syntax for certain data types).
+
+@item Comment starters: @samp{<}
+@itemx Comment enders: @samp{>}
+@cindex comment syntax
+Characters used in various languages to delimit comments.  Human text
+has no comment characters.  In Lisp, the semicolon (@samp{;}) starts a
+comment and a newline or formfeed ends one.
+
+@item Inherit standard syntax: @samp{@@}
+This syntax class does not specify a particular syntax.  It says to
+look in the standard syntax table to find the syntax of this
+character.
+
+@item Generic comment delimiters: @samp{!}
+Characters that start or end a special kind of comment.  @emph{Any}
+generic comment delimiter matches @emph{any} generic comment
+delimiter, but they cannot match a comment starter or comment ender;
+generic comment delimiters can only match each other.
+
+This syntax class is primarily meant for use with the
+@code{syntax-table} text property (@pxref{Syntax Properties}).  You
+can mark any range of characters as forming a comment, by giving the
+first and last characters of the range @code{syntax-table} properties
+identifying them as generic comment delimiters.
+
+@item Generic string delimiters: @samp{|}
+Characters that start or end a string.  This class differs from the
+string quote class in that @emph{any} generic string delimiter can
+match any other generic string delimiter; but they do not match
+ordinary string quote characters.
+
+This syntax class is primarily meant for use with the
+@code{syntax-table} text property (@pxref{Syntax Properties}).  You
+can mark any range of characters as forming a string constant, by
+giving the first and last characters of the range @code{syntax-table}
+properties identifying them as generic string delimiters.
+@end table
+
+@node Syntax Flags
+@subsection Syntax Flags
+@cindex syntax flags
+
+  In addition to the classes, entries for characters in a syntax table
+can specify flags.  There are eight possible flags, represented by the
+characters @samp{1}, @samp{2}, @samp{3}, @samp{4}, @samp{b}, @samp{c},
+@samp{n}, and @samp{p}.
+
+  All the flags except @samp{p} are used to describe comment
+delimiters.  The digit flags are used for comment delimiters made up
+of 2 characters.  They indicate that a character can @emph{also} be
+part of a comment sequence, in addition to the syntactic properties
+associated with its character class.  The flags are independent of the
+class and each other for the sake of characters such as @samp{*} in
+C mode, which is a punctuation character, @emph{and} the second
+character of a start-of-comment sequence (@samp{/*}), @emph{and} the
+first character of an end-of-comment sequence (@samp{*/}).  The flags
+@samp{b}, @samp{c}, and @samp{n} are used to qualify the corresponding
+comment delimiter.
+
+  Here is a table of the possible flags for a character @var{c},
+and what they mean:
+
+@itemize @bullet
+@item
+@samp{1} means @var{c} is the start of a two-character comment-start
+sequence.
+
+@item
+@samp{2} means @var{c} is the second character of such a sequence.
+
+@item
+@samp{3} means @var{c} is the start of a two-character comment-end
+sequence.
+
+@item
+@samp{4} means @var{c} is the second character of such a sequence.
+
+@item
+@samp{b} means that @var{c} as a comment delimiter belongs to the
+alternative ``b'' comment style.  For a two-character comment starter,
+this flag is only significant on the second char, and for a 2-character
+comment ender it is only significant on the first char.
+
+@item
+@samp{c} means that @var{c} as a comment delimiter belongs to the
+alternative ``c'' comment style.  For a two-character comment
+delimiter, @samp{c} on either character makes it of style ``c''.
+
+@item
+@samp{n} on a comment delimiter character specifies
+that this kind of comment can be nested.  For a two-character
+comment delimiter, @samp{n} on either character makes it
+nestable.
+
+Emacs supports several comment styles simultaneously in any one syntax
+table.  A comment style is a set of flags @samp{b}, @samp{c}, and
+@samp{n}, so there can be up to 8 different comment styles.
+Each comment delimiter has a style and only matches comment delimiters
+of the same style.  Thus if a comment starts with the comment-start
+sequence of style ``bn'', it will extend until the next matching
+comment-end sequence of style ``bn''.
+
+The appropriate comment syntax settings for C++ can be as follows:
+
+@table @asis
+@item @samp{/}
+@samp{124}
+@item @samp{*}
+@samp{23b}
+@item newline
+@samp{>}
+@end table
+
+This defines four comment-delimiting sequences:
+
+@table @asis
+@item @samp{/*}
+This is a comment-start sequence for ``b'' style because the
+second character, @samp{*}, has the @samp{b} flag.
+
+@item @samp{//}
+This is a comment-start sequence for ``a'' style because the second
+character, @samp{/}, does not have the @samp{b} flag.
+
+@item @samp{*/}
+This is a comment-end sequence for ``b'' style because the first
+character, @samp{*}, has the @samp{b} flag.
+
+@item newline
+This is a comment-end sequence for ``a'' style, because the newline
+character does not have the @samp{b} flag.
+@end table
+
+@item
+@c Emacs 19 feature
+@samp{p} identifies an additional ``prefix character'' for Lisp syntax.
+These characters are treated as whitespace when they appear between
+expressions.  When they appear within an expression, they are handled
+according to their usual syntax classes.
+
+The function @code{backward-prefix-chars} moves back over these
+characters, as well as over characters whose primary syntax class is
+prefix (@samp{'}).  @xref{Motion and Syntax}.
+@end itemize
+
+@node Syntax Table Functions
+@section Syntax Table Functions
+
+  In this section we describe functions for creating, accessing and
+altering syntax tables.
+
+@defun make-syntax-table &optional table
+This function creates a new syntax table, with all values initialized
+to @code{nil}.  If @var{table} is non-@code{nil}, it becomes the
+parent of the new syntax table, otherwise the standard syntax table is
+the parent.  Like all char-tables, a syntax table inherits from its
+parent.  Thus the original syntax of all characters in the returned
+syntax table is determined by the parent.  @xref{Char-Tables}.
+
+Most major mode syntax tables are created in this way.
+@end defun
+
+@defun copy-syntax-table &optional table
+This function constructs a copy of @var{table} and returns it.  If
+@var{table} is not supplied (or is @code{nil}), it returns a copy of the
+standard syntax table.  Otherwise, an error is signaled if @var{table} is
+not a syntax table.
+@end defun
+
+@deffn Command modify-syntax-entry char syntax-descriptor  &optional table
+This function sets the syntax entry for @var{char} according to
+@var{syntax-descriptor}.  @var{char} must be a character, or a cons
+cell of the form @code{(@var{min} . @var{max})}; in the latter case,
+the function sets the syntax entries for all characters in the range
+between @var{min} and @var{max}, inclusive.
+
+The syntax is changed only for @var{table}, which defaults to the
+current buffer's syntax table, and not in any other syntax table.
+
+The argument @var{syntax-descriptor} is a syntax descriptor for the
+desired syntax (i.e.@: a string beginning with a class designator
+character, and optionally containing a matching character and syntax
+flags).  An error is signaled if the first character is not one of the
+seventeen syntax class designators.  @xref{Syntax Descriptors}.
+
+This function always returns @code{nil}.  The old syntax information in
+the table for this character is discarded.
+
+@example
+@group
+@exdent @r{Examples:}
+
+;; @r{Put the space character in class whitespace.}
+(modify-syntax-entry ?\s " ")
+     @result{} nil
+@end group
+
+@group
+;; @r{Make @samp{$} an open parenthesis character,}
+;;   @r{with @samp{^} as its matching close.}
+(modify-syntax-entry ?$ "(^")
+     @result{} nil
+@end group
+
+@group
+;; @r{Make @samp{^} a close parenthesis character,}
+;;   @r{with @samp{$} as its matching open.}
+(modify-syntax-entry ?^ ")$")
+     @result{} nil
+@end group
+
+@group
+;; @r{Make @samp{/} a punctuation character,}
+;;   @r{the first character of a start-comment sequence,}
+;;   @r{and the second character of an end-comment sequence.}
+;;   @r{This is used in C mode.}
+(modify-syntax-entry ?/ ". 14")
+     @result{} nil
+@end group
+@end example
+@end deffn
+
+@defun char-syntax character
+This function returns the syntax class of @var{character}, represented
+by its mnemonic designator character.  This returns @emph{only} the
+class, not any matching parenthesis or flags.
+
+An error is signaled if @var{char} is not a character.
+
+The following examples apply to C mode.  The first example shows that
+the syntax class of space is whitespace (represented by a space).  The
+second example shows that the syntax of @samp{/} is punctuation.  This
+does not show the fact that it is also part of comment-start and -end
+sequences.  The third example shows that open parenthesis is in the class
+of open parentheses.  This does not show the fact that it has a matching
+character, @samp{)}.
+
+@example
+@group
+(string (char-syntax ?\s))
+     @result{} " "
+@end group
+
+@group
+(string (char-syntax ?/))
+     @result{} "."
+@end group
+
+@group
+(string (char-syntax ?\())
+     @result{} "("
+@end group
+@end example
+
+We use @code{string} to make it easier to see the character returned by
+@code{char-syntax}.
+@end defun
+
+@defun set-syntax-table table
+This function makes @var{table} the syntax table for the current buffer.
+It returns @var{table}.
+@end defun
+
+@defun syntax-table
+This function returns the current syntax table, which is the table for
+the current buffer.
+@end defun
+
+@defmac with-syntax-table @var{table} @var{body}@dots{}
+This macro executes @var{body} using @var{table} as the current syntax
+table.  It returns the value of the last form in @var{body}, after
+restoring the old current syntax table.
+
+Since each buffer has its own current syntax table, we should make that
+more precise: @code{with-syntax-table} temporarily alters the current
+syntax table of whichever buffer is current at the time the macro
+execution starts.  Other buffers are not affected.
+@end defmac
+
+@node Syntax Properties
+@section Syntax Properties
+@kindex syntax-table @r{(text property)}
+
+When the syntax table is not flexible enough to specify the syntax of
+a language, you can override the syntax table for specific character
+occurrences in the buffer, by applying a @code{syntax-table} text
+property.  @xref{Text Properties}, for how to apply text properties.
+
+  The valid values of @code{syntax-table} text property are:
+
+@table @asis
+@item @var{syntax-table}
+If the property value is a syntax table, that table is used instead of
+the current buffer's syntax table to determine the syntax for the
+underlying text character.
+
+@item @code{(@var{syntax-code} . @var{matching-char})}
+A cons cell of this format specifies the syntax for the underlying
+text character.  (@pxref{Syntax Table Internals})
+
+@item @code{nil}
+If the property is @code{nil}, the character's syntax is determined from
+the current syntax table in the usual way.
+@end table
+
+@defvar parse-sexp-lookup-properties
+If this is non-@code{nil}, the syntax scanning functions, like
+@code{forward-sexp}, pay attention to syntax text properties.
+Otherwise they use only the current syntax table.
+@end defvar
+
+@defvar syntax-propertize-function
+This variable, if non-@code{nil}, should store a function for applying
+@code{syntax-table} properties to a specified stretch of text.  It is
+intended to be used by major modes to install a function which applies
+@code{syntax-table} properties in some mode-appropriate way.
+
+The function is called by @code{syntax-ppss} (@pxref{Position Parse}),
+and by Font Lock mode during syntactic fontification (@pxref{Syntactic
+Font Lock}).  It is called with two arguments, @var{start} and
+@var{end}, which are the starting and ending positions of the text on
+which it should act.  It is allowed to call @code{syntax-ppss} on any
+position before @var{end}.  However, it should not call
+@code{syntax-ppss-flush-cache}; so, it is not allowed to call
+@code{syntax-ppss} on some position and later modify the buffer at an
+earlier position.
+@end defvar
+
+@defvar syntax-propertize-extend-region-functions
+This abnormal hook is run by the syntax parsing code prior to calling
+@code{syntax-propertize-function}.  Its role is to help locate safe
+starting and ending buffer positions for passing to
+@code{syntax-propertize-function}.  For example, a major mode can add
+a function to this hook to identify multi-line syntactic constructs,
+and ensure that the boundaries do not fall in the middle of one.
+
+Each function in this hook should accept two arguments, @var{start}
+and @var{end}.  It should return either a cons cell of two adjusted
+buffer positions, @code{(@var{new-start} . @var{new-end})}, or
+@code{nil} if no adjustment is necessary.  The hook functions are run
+in turn, repeatedly, until they all return @code{nil}.
+@end defvar
+
+@node Motion and Syntax
+@section Motion and Syntax
+
+  This section describes functions for moving across characters that
+have certain syntax classes.
+
+@defun skip-syntax-forward syntaxes &optional limit
+This function moves point forward across characters having syntax
+classes mentioned in @var{syntaxes} (a string of syntax class
+characters).  It stops when it encounters the end of the buffer, or
+position @var{limit} (if specified), or a character it is not supposed
+to skip.
+
+If @var{syntaxes} starts with @samp{^}, then the function skips
+characters whose syntax is @emph{not} in @var{syntaxes}.
+
+The return value is the distance traveled, which is a nonnegative
+integer.
+@end defun
+
+@defun skip-syntax-backward syntaxes &optional limit
+This function moves point backward across characters whose syntax
+classes are mentioned in @var{syntaxes}.  It stops when it encounters
+the beginning of the buffer, or position @var{limit} (if specified), or
+a character it is not supposed to skip.
+
+If @var{syntaxes} starts with @samp{^}, then the function skips
+characters whose syntax is @emph{not} in @var{syntaxes}.
+
+The return value indicates the distance traveled.  It is an integer that
+is zero or less.
+@end defun
+
+@defun backward-prefix-chars
+This function moves point backward over any number of characters with
+expression prefix syntax.  This includes both characters in the
+expression prefix syntax class, and characters with the @samp{p} flag.
+@end defun
+
+@node Parsing Expressions
+@section Parsing Expressions
+
+  This section describes functions for parsing and scanning balanced
+expressions.  We will refer to such expressions as @dfn{sexps},
+following the terminology of Lisp, even though these functions can act
+on languages other than Lisp.  Basically, a sexp is either a balanced
+parenthetical grouping, a string, or a ``symbol'' (i.e.@: a sequence
+of characters whose syntax is either word constituent or symbol
+constituent).  However, characters in the expression prefix syntax
+class (@pxref{Syntax Class Table}) are treated as part of the sexp if
+they appear next to it.
+
+  The syntax table controls the interpretation of characters, so these
+functions can be used for Lisp expressions when in Lisp mode and for C
+expressions when in C mode.  @xref{List Motion}, for convenient
+higher-level functions for moving over balanced expressions.
+
+  A character's syntax controls how it changes the state of the
+parser, rather than describing the state itself.  For example, a
+string delimiter character toggles the parser state between
+``in-string'' and ``in-code'', but the syntax of characters does not
+directly say whether they are inside a string.  For example (note that
+15 is the syntax code for generic string delimiters),
+
+@example
+(put-text-property 1 9 'syntax-table '(15 . nil))
+@end example
+
+@noindent
+does not tell Emacs that the first eight chars of the current buffer
+are a string, but rather that they are all string delimiters.  As a
+result, Emacs treats them as four consecutive empty string constants.
+
+@menu
+* Motion via Parsing::       Motion functions that work by parsing.
+* Position Parse::           Determining the syntactic state of a position.
+* Parser State::             How Emacs represents a syntactic state.
+* Low-Level Parsing::        Parsing across a specified region.
+* Control Parsing::          Parameters that affect parsing.
+@end menu
+
+@node Motion via Parsing
+@subsection Motion Commands Based on Parsing
+
+  This section describes simple point-motion functions that operate
+based on parsing expressions.
+
+@defun scan-lists from count depth
+This function scans forward @var{count} balanced parenthetical
+groupings from position @var{from}.  It returns the position where the
+scan stops.  If @var{count} is negative, the scan moves backwards.
+
+If @var{depth} is nonzero, treat the starting position as being
+@var{depth} parentheses deep.  The scanner moves forward or backward
+through the buffer until the depth changes to zero @var{count} times.
+Hence, a positive value for @var{depth} has the effect of moving out
+@var{depth} levels of parenthesis from the starting position, while a
+negative @var{depth} has the effect of moving deeper by @var{-depth}
+levels of parenthesis.
+
+Scanning ignores comments if @code{parse-sexp-ignore-comments} is
+non-@code{nil}.
+
+If the scan reaches the beginning or end of the accessible part of the
+buffer before it has scanned over @var{count} parenthetical groupings,
+the return value is @code{nil} if the depth at that point is zero; if
+the depth is non-zero, a @code{scan-error} error is signaled.
+@end defun
+
+@defun scan-sexps from count
+This function scans forward @var{count} sexps from position @var{from}.
+It returns the position where the scan stops.  If @var{count} is
+negative, the scan moves backwards.
+
+Scanning ignores comments if @code{parse-sexp-ignore-comments} is
+non-@code{nil}.
+
+If the scan reaches the beginning or end of (the accessible part of) the
+buffer while in the middle of a parenthetical grouping, an error is
+signaled.  If it reaches the beginning or end between groupings but
+before count is used up, @code{nil} is returned.
+@end defun
+
+@defun forward-comment count
+This function moves point forward across @var{count} complete comments
+     (that is, including the starting delimiter and the terminating
+delimiter if any), plus any whitespace encountered on the way.  It
+moves backward if @var{count} is negative.  If it encounters anything
+other than a comment or whitespace, it stops, leaving point at the
+place where it stopped.  This includes (for instance) finding the end
+of a comment when moving forward and expecting the beginning of one.
+The function also stops immediately after moving over the specified
+number of complete comments.  If @var{count} comments are found as
+expected, with nothing except whitespace between them, it returns
+@code{t}; otherwise it returns @code{nil}.
+
+This function cannot tell whether the ``comments'' it traverses are
+embedded within a string.  If they look like comments, it treats them
+as comments.
+
+To move forward over all comments and whitespace following point, use
+@code{(forward-comment (buffer-size))}.  @code{(buffer-size)} is a
+good argument to use, because the number of comments in the buffer
+cannot exceed that many.
+@end defun
+
+@node Position Parse
+@subsection Finding the Parse State for a Position
+
+  For syntactic analysis, such as in indentation, often the useful
+thing is to compute the syntactic state corresponding to a given buffer
+position.  This function does that conveniently.
+
+@defun syntax-ppss &optional pos
+This function returns the parser state that the parser would reach at
+position @var{pos} starting from the beginning of the buffer.
+@iftex
+See the next section for
+@end iftex
+@ifnottex
+@xref{Parser State},
+@end ifnottex
+for a description of the parser state.
+
+The return value is the same as if you call the low-level parsing
+function @code{parse-partial-sexp} to parse from the beginning of the
+buffer to @var{pos} (@pxref{Low-Level Parsing}).  However,
+@code{syntax-ppss} uses a cache to speed up the computation.  Due to
+this optimization, the second value (previous complete subexpression)
+and sixth value (minimum parenthesis depth) in the returned parser
+state are not meaningful.
+
+This function has a side effect: it adds a buffer-local entry to
+@code{before-change-functions} (@pxref{Change Hooks}) for
+@code{syntax-ppss-flush-cache} (see below).  This entry keeps the
+cache consistent as the buffer is modified.  However, the cache might
+not be updated if @code{syntax-ppss} is called while
+@code{before-change-functions} is temporarily let-bound, or if the
+buffer is modified without running the hook, such as when using
+@code{inhibit-modification-hooks}.  In those cases, it is necessary to
+call @code{syntax-ppss-flush-cache} explicitly.
+@end defun
+
+@defun syntax-ppss-flush-cache beg &rest ignored-args
+This function flushes the cache used by @code{syntax-ppss}, starting
+at position @var{beg}.  The remaining arguments, @var{ignored-args},
+are ignored; this function accepts them so that it can be directly
+used on hooks such as @code{before-change-functions} (@pxref{Change
+Hooks}).
+@end defun
+
+  Major modes can make @code{syntax-ppss} run faster by specifying
+where it needs to start parsing.
+
+@defvar syntax-begin-function
+If this is non-@code{nil}, it should be a function that moves to an
+earlier buffer position where the parser state is equivalent to
+@code{nil}---in other words, a position outside of any comment,
+string, or parenthesis.  @code{syntax-ppss} uses it to further
+optimize its computations, when the cache gives no help.
+@end defvar
+
+@node Parser State
+@subsection Parser State
+@cindex parser state
+
+  A @dfn{parser state} is a list of ten elements describing the state
+of the syntactic parser, after it parses the text between a specified
+starting point and a specified end point in the buffer.  Parsing
+functions such as @code{syntax-ppss}
+@ifnottex
+(@pxref{Position Parse})
+@end ifnottex
+return a parser state as the value.  Some parsing functions accept a
+parser state as an argument, for resuming parsing.
+
+  Here are the meanings of the elements of the parser state:
+
+@enumerate 0
+@item
+The depth in parentheses, counting from 0.  @strong{Warning:} this can
+be negative if there are more close parens than open parens between
+the parser's starting point and end point.
+
+@item
+@cindex innermost containing parentheses
+The character position of the start of the innermost parenthetical
+grouping containing the stopping point; @code{nil} if none.
+
+@item
+@cindex previous complete subexpression
+The character position of the start of the last complete subexpression
+terminated; @code{nil} if none.
+
+@item
+@cindex inside string
+Non-@code{nil} if inside a string.  More precisely, this is the
+character that will terminate the string, or @code{t} if a generic
+string delimiter character should terminate it.
+
+@item
+@cindex inside comment
+@code{t} if inside a non-nestable comment (of any comment style;
+@pxref{Syntax Flags}); or the comment nesting level if inside a
+comment that can be nested.
+
+@item
+@cindex quote character
+@code{t} if the end point is just after a quote character.
+
+@item
+The minimum parenthesis depth encountered during this scan.
+
+@item
+What kind of comment is active: @code{nil} if not in a comment or in a
+comment of style @samp{a}; 1 for a comment of style @samp{b}; 2 for a
+comment of style @samp{c}; and @code{syntax-table} for a comment that
+should be ended by a generic comment delimiter character.
+
+@item
+The string or comment start position.  While inside a comment, this is
+the position where the comment began; while inside a string, this is the
+position where the string began.  When outside of strings and comments,
+this element is @code{nil}.
+
+@item
+Internal data for continuing the parsing.  The meaning of this
+data is subject to change; it is used if you pass this list
+as the @var{state} argument to another call.
+@end enumerate
+
+  Elements 1, 2, and 6 are ignored in a state which you pass as an
+argument to continue parsing, and elements 8 and 9 are used only in
+trivial cases.  Those elements are mainly used internally by the
+parser code.
+
+  One additional piece of useful information is available from a
+parser state using this function:
+
+@defun syntax-ppss-toplevel-pos state
+This function extracts, from parser state @var{state}, the last
+position scanned in the parse which was at top level in grammatical
+structure.  ``At top level'' means outside of any parentheses,
+comments, or strings.
+
+The value is @code{nil} if @var{state} represents a parse which has
+arrived at a top level position.
+@end defun
+
+@node Low-Level Parsing
+@subsection Low-Level Parsing
+
+  The most basic way to use the expression parser is to tell it
+to start at a given position with a certain state, and parse up to
+a specified end position.
+
+@defun parse-partial-sexp start limit &optional target-depth stop-before state stop-comment
+This function parses a sexp in the current buffer starting at
+@var{start}, not scanning past @var{limit}.  It stops at position
+@var{limit} or when certain criteria described below are met, and sets
+point to the location where parsing stops.  It returns a parser state
+describing the status of the parse at the point where it stops.
+
+@cindex parenthesis depth
+If the third argument @var{target-depth} is non-@code{nil}, parsing
+stops if the depth in parentheses becomes equal to @var{target-depth}.
+The depth starts at 0, or at whatever is given in @var{state}.
+
+If the fourth argument @var{stop-before} is non-@code{nil}, parsing
+stops when it comes to any character that starts a sexp.  If
+@var{stop-comment} is non-@code{nil}, parsing stops when it comes to the
+start of a comment.  If @var{stop-comment} is the symbol
+@code{syntax-table}, parsing stops after the start of a comment or a
+string, or the end of a comment or a string, whichever comes first.
+
+If @var{state} is @code{nil}, @var{start} is assumed to be at the top
+level of parenthesis structure, such as the beginning of a function
+definition.  Alternatively, you might wish to resume parsing in the
+middle of the structure.  To do this, you must provide a @var{state}
+argument that describes the initial status of parsing.  The value
+returned by a previous call to @code{parse-partial-sexp} will do
+nicely.
+@end defun
+
+@node Control Parsing
+@subsection Parameters to Control Parsing
+
+@defvar multibyte-syntax-as-symbol
+If this variable is non-@code{nil}, @code{scan-sexps} treats all
+non-@acronym{ASCII} characters as symbol constituents regardless
+of what the syntax table says about them.  (However, text properties
+can still override the syntax.)
+@end defvar
+
+@defopt parse-sexp-ignore-comments
+@cindex skipping comments
+If the value is non-@code{nil}, then comments are treated as
+whitespace by the functions in this section and by @code{forward-sexp},
+@code{scan-lists} and @code{scan-sexps}.
+@end defopt
+
+@vindex parse-sexp-lookup-properties
+The behavior of @code{parse-partial-sexp} is also affected by
+@code{parse-sexp-lookup-properties} (@pxref{Syntax Properties}).
+
+You can use @code{forward-comment} to move forward or backward over
+one comment or several comments.
+
+@node Standard Syntax Tables
+@section Some Standard Syntax Tables
+
+  Most of the major modes in Emacs have their own syntax tables.  Here
+are several of them:
+
+@defun standard-syntax-table
+This function returns the standard syntax table, which is the syntax
+table used in Fundamental mode.
+@end defun
+
+@defvar text-mode-syntax-table
+The value of this variable is the syntax table used in Text mode.
+@end defvar
+
+@defvar c-mode-syntax-table
+The value of this variable is the syntax table for C-mode buffers.
+@end defvar
+
+@defvar emacs-lisp-mode-syntax-table
+The value of this variable is the syntax table used in Emacs Lisp mode
+by editing commands.  (It has no effect on the Lisp @code{read}
+function.)
+@end defvar
+
+@node Syntax Table Internals
+@section Syntax Table Internals
+@cindex syntax table internals
+
+  Lisp programs don't usually work with the elements directly; the
+Lisp-level syntax table functions usually work with syntax descriptors
+(@pxref{Syntax Descriptors}).  Nonetheless, here we document the
+internal format.  This format is used mostly when manipulating
+syntax properties.
+
+  Each element of a syntax table is a cons cell of the form
+@code{(@var{syntax-code} . @var{matching-char})}.  The @sc{car},
+@var{syntax-code}, is an integer that encodes the syntax class, and any
+flags.  The @sc{cdr}, @var{matching-char}, is non-@code{nil} if
+a character to match was specified.
+
+  This table gives the value of @var{syntax-code} which corresponds
+to each syntactic type.
+
+@multitable @columnfractions .05 .3 .3 .31
+@item
+@tab
+@i{Integer} @i{Class}
+@tab
+@i{Integer} @i{Class}
+@tab
+@i{Integer} @i{Class}
+@item
+@tab
+0 @ @  whitespace
+@tab
+5 @ @  close parenthesis
+@tab
+10 @ @  character quote
+@item
+@tab
+1 @ @  punctuation
+@tab
+6 @ @  expression prefix
+@tab
+11 @ @  comment-start
+@item
+@tab
+2 @ @  word
+@tab
+7 @ @  string quote
+@tab
+12 @ @  comment-end
+@item
+@tab
+3 @ @  symbol
+@tab
+8 @ @  paired delimiter
+@tab
+13 @ @  inherit
+@item
+@tab
+4 @ @  open parenthesis
+@tab
+9 @ @  escape
+@tab
+14 @ @  generic comment
+@item
+@tab
+15 @  generic string
+@end multitable
+
+  For example, the usual syntax value for @samp{(} is @code{(4 . 41)}.
+(41 is the character code for @samp{)}.)
+
+  The flags are encoded in higher order bits, starting 16 bits from the
+least significant bit.  This table gives the power of two which
+corresponds to each syntax flag.
+
+@multitable @columnfractions .05 .3 .3 .3
+@item
+@tab
+@i{Prefix} @i{Flag}
+@tab
+@i{Prefix} @i{Flag}
+@tab
+@i{Prefix} @i{Flag}
+@item
+@tab
+@samp{1} @ @  @code{(lsh 1 16)}
+@tab
+@samp{4} @ @  @code{(lsh 1 19)}
+@tab
+@samp{b} @ @  @code{(lsh 1 21)}
+@item
+@tab
+@samp{2} @ @  @code{(lsh 1 17)}
+@tab
+@samp{p} @ @  @code{(lsh 1 20)}
+@tab
+@samp{n} @ @  @code{(lsh 1 22)}
+@item
+@tab
+@samp{3} @ @  @code{(lsh 1 18)}
+@end multitable
+
+@defun string-to-syntax @var{desc}
+This function returns the internal form corresponding to the syntax
+descriptor @var{desc}, a cons cell @code{(@var{syntax-code}
+. @var{matching-char})}.
+@end defun
+
+@defun syntax-after pos
+This function returns the syntax code of the character in the buffer
+after position @var{pos}, taking account of syntax properties as well
+as the syntax table.  If @var{pos} is outside the buffer's accessible
+portion (@pxref{Narrowing, accessible portion}), this function returns
+@code{nil}.
+@end defun
+
+@defun syntax-class syntax
+This function returns the syntax class of the syntax code
+@var{syntax}.  (It masks off the high 16 bits that hold the flags
+encoded in the syntax descriptor.)  If @var{syntax} is @code{nil}, it
+returns @code{nil}; this is so evaluating the expression
+
+@example
+(syntax-class (syntax-after pos))
+@end example
+
+@noindent
+where @code{pos} is outside the buffer's accessible portion, will
+yield @code{nil} without throwing errors or producing wrong syntax
+class codes.
+@end defun
+
+@node Categories
+@section Categories
+@cindex categories of characters
+@cindex character categories
+
+  @dfn{Categories} provide an alternate way of classifying characters
+syntactically.  You can define several categories as needed, then
+independently assign each character to one or more categories.  Unlike
+syntax classes, categories are not mutually exclusive; it is normal for
+one character to belong to several categories.
+
+@cindex category table
+  Each buffer has a @dfn{category table} which records which categories
+are defined and also which characters belong to each category.  Each
+category table defines its own categories, but normally these are
+initialized by copying from the standard categories table, so that the
+standard categories are available in all modes.
+
+  Each category has a name, which is an @acronym{ASCII} printing character in
+the range @w{@samp{ }} to @samp{~}.  You specify the name of a category
+when you define it with @code{define-category}.
+
+  The category table is actually a char-table (@pxref{Char-Tables}).
+The element of the category table at index @var{c} is a @dfn{category
+set}---a bool-vector---that indicates which categories character @var{c}
+belongs to.  In this category set, if the element at index @var{cat} is
+@code{t}, that means category @var{cat} is a member of the set, and that
+character @var{c} belongs to category @var{cat}.
+
+For the next three functions, the optional argument @var{table}
+defaults to the current buffer's category table.
+
+@defun define-category char docstring &optional table
+This function defines a new category, with name @var{char} and
+documentation @var{docstring}, for the category table @var{table}.
+
+Here's an example of defining a new category for characters that have
+strong right-to-left directionality (@pxref{Bidirectional Display})
+and using it in a special category table:
+
+@example
+(defvar special-category-table-for-bidi
+  (let ((category-table (make-category-table))
+	(uniprop-table (unicode-property-table-internal 'bidi-class)))
+    (define-category ?R "Characters of bidi-class R, AL, or RLO"
+                     category-table)
+    (map-char-table
+     #'(lambda (key val)
+	 (if (memq val '(R AL RLO))
+	     (modify-category-entry key ?R category-table)))
+     uniprop-table)
+    category-table))
+@end example
+@end defun
+
+@defun category-docstring category &optional table
+This function returns the documentation string of category @var{category}
+in category table @var{table}.
+
+@example
+(category-docstring ?a)
+     @result{} "ASCII"
+(category-docstring ?l)
+     @result{} "Latin"
+@end example
+@end defun
+
+@defun get-unused-category &optional table
+This function returns a category name (a character) which is not
+currently defined in @var{table}.  If all possible categories are in use
+in @var{table}, it returns @code{nil}.
+@end defun
+
+@defun category-table
+This function returns the current buffer's category table.
+@end defun
+
+@defun category-table-p object
+This function returns @code{t} if @var{object} is a category table,
+otherwise @code{nil}.
+@end defun
+
+@defun standard-category-table
+This function returns the standard category table.
+@end defun
+
+@defun copy-category-table &optional table
+This function constructs a copy of @var{table} and returns it.  If
+@var{table} is not supplied (or is @code{nil}), it returns a copy of the
+standard category table.  Otherwise, an error is signaled if @var{table}
+is not a category table.
+@end defun
+
+@defun set-category-table table
+This function makes @var{table} the category table for the current
+buffer.  It returns @var{table}.
+@end defun
+
+@defun make-category-table
+This creates and returns an empty category table.  In an empty category
+table, no categories have been allocated, and no characters belong to
+any categories.
+@end defun
+
+@defun make-category-set categories
+This function returns a new category set---a bool-vector---whose initial
+contents are the categories listed in the string @var{categories}.  The
+elements of @var{categories} should be category names; the new category
+set has @code{t} for each of those categories, and @code{nil} for all
+other categories.
+
+@example
+(make-category-set "al")
+     @result{} #&128"\0\0\0\0\0\0\0\0\0\0\0\0\2\20\0\0"
+@end example
+@end defun
+
+@defun char-category-set char
+This function returns the category set for character @var{char} in the
+current buffer's category table.  This is the bool-vector which
+records which categories the character @var{char} belongs to.  The
+function @code{char-category-set} does not allocate storage, because
+it returns the same bool-vector that exists in the category table.
+
+@example
+(char-category-set ?a)
+     @result{} #&128"\0\0\0\0\0\0\0\0\0\0\0\0\2\20\0\0"
+@end example
+@end defun
+
+@defun category-set-mnemonics category-set
+This function converts the category set @var{category-set} into a string
+containing the characters that designate the categories that are members
+of the set.
+
+@example
+(category-set-mnemonics (char-category-set ?a))
+     @result{} "al"
+@end example
+@end defun
+
+@defun modify-category-entry char category &optional table reset
+This function modifies the category set of @var{char} in category
+table @var{table} (which defaults to the current buffer's category
+table).  @var{char} can be a character, or a cons cell of the form
+@code{(@var{min} . @var{max})}; in the latter case, the function
+modifies the category sets of all characters in the range between
+@var{min} and @var{max}, inclusive.
+
+Normally, it modifies a category set by adding @var{category} to it.
+But if @var{reset} is non-@code{nil}, then it deletes @var{category}
+instead.
+@end defun
+
+@deffn Command describe-categories &optional buffer-or-name
+This function describes the category specifications in the current
+category table.  It inserts the descriptions in a buffer, and then
+displays that buffer.  If @var{buffer-or-name} is non-@code{nil}, it
+describes the category table of that buffer instead.
+@end deffn

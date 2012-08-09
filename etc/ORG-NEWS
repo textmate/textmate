@@ -1,0 +1,948 @@
+ORG NEWS -- history of user-visible changes.           -*- org -*-
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+Please send Org bug reports to emacs-orgmode@gnu.org.
+
+* Incompatible changes
+
+** New keys for TODO sparse trees
+   :PROPERTIES:
+   :OrgVersion:  7.01
+   :END:
+
+   The key =C-c C-v= is now reserved for Org Babel action.  TODO sparse
+   trees can still be made with =C-c / t= (all not-done states) and =C-c /
+   T= (specific states).
+
+** The Agenda =org-agenda-ndays= is now obsolete
+   :PROPERTIES:
+   :OrgVersion:  7.4
+   :END:
+   
+   The variable =org-agenda-ndays= is obsolete - please use
+   =org-agenda-span= instead.
+
+   Thanks to Julien Danjou for this.
+
+** Changes to the intended use of =org-export-latex-classes=
+   :PROPERTIES:
+   :OrgVersion:  6.35
+   :END:
+
+   So far this variable has been used to specify the complete header of the
+   LaTeX document, including all the =\usepackage= calls necessary for the
+   document.  This setup makes it difficult to maintain the list of
+   packages that Org itself would like to call, for example for the special
+   symbol support it needs.
+
+   First of all, you can *opt out of this change* in the following way: You
+   can say: /I want to have full control over headers, and I will take
+   responsibility to include the packages Org needs/.  If that is what you
+   want, add this to your configuration and skip the rest of this section
+   (except maybe for the description of the =[EXTRA]= place holder):
+
+   #+begin_src emacs-lisp
+  (setq org-export-latex-default-packages-alist nil
+        org-export-latex-packages-alist nil)
+   #+end_src
+
+   /Continue to read here if you want to go along with the modified setup./
+
+   There are now two variables that should be used to list the LaTeX
+   packages that need to be included in all classes.  The header definition
+   in =org-export-latex-classes= should then not contain the corresponding
+   =\usepackage= calls (see below).
+
+   The two new variables are:
+
+   1. =org-export-latex-default-packages-alist= :: This is the variable
+        where Org-mode itself puts the packages it needs.  Normally you
+        should not change this variable.  The only reason to change it
+        anyway is when one of these packages causes a conflict with another
+        package you want to use.  Then you can remove that packages and
+        hope that you are not using Org-mode functionality that needs it.
+
+   2. =org-export-latex-packages-alist= :: This is the variable where you
+        can put the packages that you'd like to use across all classes.
+
+   The sequence how these customizations will show up in the LaTeX
+   document are:
+
+   1. Header from =org-export-latex-classes=
+   2. =org-export-latex-default-packages-alist=
+   3. =org-export-latex-packages-alist=
+   4. Buffer-specific things set with =#+LaTeX_HEADER:=
+
+   If you want more control about which segment is placed where, or if you
+   want, for a specific class, have full control over the header and
+   exclude some of the automatic building blocks, you can put the following
+   macro-like place holders into the header:
+
+   #+begin_example
+   [DEFAULT-PACKAGES]      \usepackage statements for default packages
+   [NO-DEFAULT-PACKAGES]   do not include any of the default packages
+   [PACKAGES]              \usepackage statements for packages
+   [NO-PACKAGES]           do not include the packages
+   [EXTRA]                 the stuff from #+LaTeX_HEADER
+   [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
+   #+end_example
+
+   If you have currently customized =org-export-latex-classes=, you should
+   revise that customization and remove any package calls that are covered
+   by =org-export-latex-default-packages-alist=.  This applies to the
+   following packages:
+
+   - inputenc
+   - fontenc
+   - fixltx2e
+   - graphicx
+   - longtable
+   - float
+   - wrapfig
+   - soul
+   - t1enc
+   - textcomp
+   - marvosym
+   - wasysym
+   - latexsym
+   - amssymb
+   - hyperref
+
+   If one of these packages creates a conflict with another package you are
+   using, you can remove it from =org-export-latex-default-packages-alist=.
+   But then you risk that some of the advertised export features of Org
+   will not work properly.
+
+   You can also consider moving packages that you use in all classes to
+   =org-export-latex-packages-alist=.  If necessary, put the place holders
+   so that the packages get loaded in the right sequence.  As said above,
+   for backward compatibility, if you omit the place holders, all the
+   variables will dump their content at the end of the header.
+
+** The constant =org-html-entities= is obsolete
+   :PROPERTIES:
+   :OrgVersion:  6.35
+   :END:
+
+   Its content is now part of the new constant =org-entities=, which is
+   defined in the file org-entities.el.  =org-html-entities= was an internal
+   variable, but it is possible that some users did write code using it.
+
+** `org-bbdb-anniversary-format-alist' has changed
+   :PROPERTIES:
+   :OrgVersion:  7.5
+   :END:
+
+   Please check the docstring and update your settings accordingly.
+
+** Deleted =org-mode-p=
+   :PROPERTIES:
+   :OrgVersion:  7.8
+   :END:
+
+   This function has been deleted: please update your code.
+
+* Important new features
+
+** New Org to ODT exporter
+   :PROPERTIES:
+   :OrgVersion:  7.8
+   :END:
+
+   Jambunathan's Org to ODT exporter is now part of Org.
+
+   To use it, it `C-c C-e o' in an Org file.  See the documentation for more
+   information on how to customize it.
+
+** org-capture.el is now the default capture system
+   :PROPERTIES:
+   :OrgVersion:  7.01
+   :END:
+
+   This replaces the earlier system org-remember.  The manual only describes
+   org-capture, but for people who prefer to continue to use org-remember,
+   we keep a static copy of the former manual section [[http://orgmode.org/org-remember.pdf][chapter about
+   remember]].
+
+   The new system has a technically cleaner implementation and more
+   possibilities for capturing different types of data.  See [[http://thread.gmane.org/gmane.emacs.orgmode/26441/focus%3D26441][Carsten's
+   announcement]] for more details.
+
+   To switch over to the new system:
+
+   1. Run
+
+    : M-x org-capture-import-remember-templates RET
+
+    to get a translated version of your remember templates into the
+    new variable =org-capture-templates=.  This will "mostly" work,
+    but maybe not for all cases.  At least it will give you a good
+    place to modify your templates.  After running this command,
+    enter the customize buffer for this variable with
+
+    : M-x customize-variable RET org-capture-templates RET
+
+    and convince yourself that everything is OK.  Then save the
+    customization.
+
+   2. Bind the command =org-capture= to a key, similar to what you did
+      with org-remember:
+
+    : (define-key global-map "\C-cc" 'org-capture)
+
+    If your fingers prefer =C-c r=, you can also use this key once
+    you have decided to move over completely to the new
+    implementation.  During a test time, there is nothing wrong
+    with using both system in parallel.
+
+* New libraries
+
+** New Org libraries
+*** org-eshell.el (Konrad Hinsen)
+    :PROPERTIES:
+    :OrgVersion:  7.8
+    :END:
+
+    Implement links to eshell buffers.
+
+*** org-special-blocks (Carsten Dominik)
+   :PROPERTIES:
+   :OrgVersion:  7.8
+   :END:
+
+This package generalizes the #+begin_foo and #+end_foo tokens.
+
+To use, put the following in your init file:
+
+#+BEGIN_EXAMPLE
+(require 'org-special-blocks)
+#+END_EXAMPLE
+
+The tokens #+begin_center, #+begin_verse, etc. existed previously.  This
+package generalizes them (at least for the LaTeX and html exporters).  When
+a #+begin_foo token is encountered by the LaTeX exporter, it is expanded
+into \begin{foo}.  The text inside the environment is not protected, as
+text inside environments generally is.  When #+begin_foo is encountered by
+the html exporter, a div with class foo is inserted into the HTML file.  It
+is up to the user to add this class to his or her stylesheet if this div is
+to mean anything.
+
+*** org-taskjuggler.el (Christian Egli)
+    :PROPERTIES:
+    :OrgVersion:  7.01
+    :END:
+
+    Christian Egli's /org-taskjuggler.el/ module is now part of Org.  He
+    also wrote a [[http://orgmode.org/worg/org-tutorials/org-taskjuggler.php][tutorial]] for it.
+
+*** org-ctags.el (Paul Sexton)
+    :PROPERTIES:
+    :OrgVersion:  6.34
+    :END:
+
+    Targets like =<<my target>>= can now be found by Emacs' etag
+    functionality, and Org-mode links can be used to to link to etags, also
+    in non-Org-mode files.  For details, see the file /org-ctags.el/.
+
+    This feature uses a new hook =org-open-link-functions= which will call
+    function to do something special with text links.
+
+    Thanks to Paul Sexton for this contribution.
+
+*** org-docview.el (Jan Böcker)
+    :PROPERTIES:
+    :OrgVersion:  6.34
+    :END:
+
+    This new module allows links to various file types using docview, where
+    Emacs displays images of document pages.  Docview link types can point
+    to a specific page in a document, for example to page 131 of the
+    Org-mode manual:
+
+    : [[docview:~/.elisp/org/doc/org.pdf::131][Org-Mode Manual]]
+
+    Thanks to Jan Böcker for this contribution.
+
+** New Babel libraries
+
+- ob-picolisp.el (Thorsten Jolitz)
+- ob-fortran.el (Sergey Litvinov)
+- ob-shen.el (Eric Schulte)
+- ob-maxima.el (Eric S Fraga)
+- ob-java.el (Eric Schulte)
+- ob-lilypond.el (Martyn Jago)
+- ob-awk.el (Eric Schulte)
+
+* Other new features and various enhancements
+
+** Hyperlinks
+
+*** Org-Bibtex -- major improvements
+    :PROPERTIES:
+    :OrgVersion:  7.6
+    :END:
+
+    Provides support for managing bibtex bibliographical references
+    data in headline properties.  Each headline corresponds to a
+    single reference and the relevant bibliographic meta-data is
+    stored in headline properties, leaving the body of the headline
+    free to hold notes and comments.  Org-bibtex is aware of all
+    standard bibtex reference types and fields.
+
+    The key new functions are
+
+- org-bibtex-check :: queries the user to flesh out all required
+     (and with prefix argument optional) bibtex fields available
+     for the specific reference =type= of the current headline.
+
+- org-bibtex-create :: Create a new entry at the given level,
+     using org-bibtex-check to flesh out the relevant fields.
+
+- org-bibtex-yank :: Yank a bibtex entry on the kill ring as a
+     formatted Org-mode headline into the current buffer
+
+- org-bibtex-export-to-kill-ring :: Export the current headline
+     to the kill ring as a formatted bibtex entry.
+
+
+
+*** org-gnus.el now allows link creation from messages
+    :PROPERTIES:
+    :OrgVersion:  7.5
+    :END:
+
+    You can now create links from messages.  This is particularily
+    useful when the user wants to stored messages that he sends, for
+    later check.  Thanks to Ulf Stegemann for the patch.
+
+
+
+*** Modified link escaping
+    :PROPERTIES:
+    :OrgVersion:  7.5
+    :END:
+
+    David Maus worked on `org-link-escape'.  See [[http://article.gmane.org/gmane.emacs.orgmode/37888][his message]]:
+
+: Percent escaping is used in Org mode to escape certain characters
+: in links that would either break the parser (e.g. square brackets
+: in link target oder description) or are not allowed to appear in
+: a particular link type (e.g. non-ascii characters in a http:
+: link).
+:
+: With this change in place Org will apply percent escaping and
+: unescaping more consistently especially for non-ascii characters.
+: Additionally some of the outstanding bugs or glitches concerning
+: percent escaped links are solved.
+
+    Thanks a lot to David for this work.
+
+
+
+*** Make =org-store-link= point to directory in a dired buffer
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    When, in a dired buffer, the cursor is not in a line listing a
+    file, `org-store-link' will store a link to the directory.
+
+    Patch by Stephen Eglen.
+
+
+
+*** Allow regexps in =org-file-apps= to capture link parameters
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    The way extension regexps in =org-file-apps= are handled has
+    changed.  Instead of matching against the file name, the regexps
+    are now matched against the whole link, and you can use grouping
+    to extract link parameters which you can then use in a command
+    string to be executed.
+
+    For example, to allow linking to PDF files using the syntax
+    =file:/doc.pdf::<page number>=, you can add the following entry to
+    org-file-apps:
+
+    #+begin_example
+    Extension: \.pdf::\([0-9]+\)\'
+    Command:   evince "%s" -p %1
+    #+end_example
+
+    Thanks to Jan Böcker for a patch to this effect.
+
+** Dates and time
+
+*** Allow relative time when scheduling/adding a deadline
+    :PROPERTIES:
+    :OrgVersion:  7.7
+    :END:
+
+    You can now use relative duration strings like "-2d" or "++3w"
+    when calling =org-schedule= or =org-deadline=: it will schedule
+    (or set the deadline for) the item respectively two days before
+    today and three weeks after the current timestamp, if any.
+
+    You can use this programmatically: =(org-schedule nil "+2d")=
+    will work on the current entry.
+
+    You can also use this while (bulk-)rescheduling and
+    (bulk-)resetting the deadline of (several) items from the agenda.
+
+    Thanks to Memnon Anon for a heads up about this!
+
+
+
+
+*** American-style dates are now understood by =org-read-date=
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    So when you are prompted for a date, you can now answer like this
+
+    #+begin_example
+    2/5/3         --> 2003-02-05
+    2/5           --> <CURRENT-YEAR>-02-05
+    #+end_example
+
+** Agenda
+
+*** =org-agenda-custom-commands= has a default value
+    :PROPERTIES:
+    :OrgVersion:  7.8
+    :END:
+
+    This option used to be `nil' by default.  This now has a default
+    value, displaying an agenda and all TODOs.  See the docstring for
+    details.  Thanks to Carsten for this.
+
+
+*** Improved filtering through =org-agenda-to-appt=
+    :PROPERTIES:
+    :OrgVersion:  7.8
+    :END:
+
+    The new function allows the user to refine the scope of entries
+    to pass to =org-agenda-get-day-entries= and allows to filter out
+    entries using a function.
+
+    Thanks to Peter Münster for raising a related issue and to
+    Tassilo Horn for this idea.  Also thanks to Peter Münster for
+    [[git:68ffb7a7][fixing a small bug]] in the final implementation.
+
+
+
+*** Allow ap/pm times in agenda time grid
+    :PROPERTIES:
+    :OrgVersion:  7.4
+    :END:
+
+    Times in the agenda can now be displayed in am/pm format.  See the new
+    variable =org-agenda-timegrid-use-ampm=.  Thanks to C. A. Webber for
+    a patch to this effect.
+
+
+
+*** Agenda: Added a bulk "scattering" command
+    :PROPERTIES:
+    :OrgVersion:  7.4
+    :END:
+
+    =B S= in the agenda buffer will cause tasks to be rescheduled a random
+    number of days into the future, with 7 as the default.  This is useful
+    if you've got a ton of tasks scheduled for today, you realize you'll
+    never deal with them all, and you just want them to be distributed
+    across the next N days.  When called with a prefix arg, rescheduling
+    will avoid weekend days.
+
+    Thanks to John Wiegley for this.
+
+** Exporting
+
+*** Simplification of org-export-html-preamble/postamble
+    :PROPERTIES:
+    :OrgVersion:  7.5
+    :END:
+
+    When set to `t', export the preamble/postamble as usual, honoring the
+    =org-export-email/author/creator-info= variables.
+
+    When set to a formatting string, insert this string.  See the docstring
+    of these variable for details about available %-sequences.
+
+    You can set =:html-preamble= in publishing project in the same way: `t'
+    means to honor =:email/creator/author-info=, and a formatting string
+    will insert a string.
+
+*** New exporters to Latin-1 and UTF-8
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    While Ulf Stegemann was going through the entities list to improve the
+    LaTeX export, he had the great idea to provide representations for many
+    of the entities in Latin-1, and for all of them in UTF-8.  This means
+    that we can now export files rich in special symbols to Latin-1 and to
+    UTF-8 files.  These new exporters can be reached with the commands =C-c
+    C-e n= and =C-c C-e u=, respectively.
+
+    When there is no representation for a given symbol in the targeted
+    coding system, you can choose to keep the TeX-macro-like
+    representation, or to get an "explanatory" representation.  For
+    example, =\simeq= could be represented as "[approx. equal to]".  Please
+    use the variable =org-entities-ascii-explanatory= to state your
+    preference.
+
+*** HTML export: Add class to outline containers using property
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    The =HTML_CONTAINER_CLASS= property can now be used to add a class name
+    to the outline container of a node in HTML export.
+
+*** Throw an error when creating an image from a LaTeX snippet fails
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    This behavior can be configured with the new option variable
+    =org-format-latex-signal-error=.
+
+*** Support for creating BEAMER presentations from Org-mode documents
+    :PROPERTIES:
+    :OrgVersion:  6.34
+    :END:
+
+    Org-mode documents or subtrees can now be converted directly in to
+    BEAMER presentation.  Turning a tree into a simple presentations is
+    straight forward, and there is also quite some support to make richer
+    presentations as well.  See the [[http://orgmode.org/manual/Beamer-class-export.html#Beamer-class-export][BEAMER section]] in the manual for more
+    details.
+
+    Thanks to everyone who has contributed to the discussion about BEAMER
+    support and how it should work.  This was a great example for how this
+    community can achieve a much better result than any individual could.
+
+** Refiling
+
+*** Refile targets can now be cached
+    :PROPERTIES:
+    :OrgVersion:  7.01
+    :END:
+
+    You can turn on caching of refile targets by setting the variable
+    =org-refile-use-cache=.  This should speed up refiling if you have many
+    eligible targets in many files.  If you need to update the cache
+    because Org misses a newly created entry or still offers a deleted one,
+    press =C-0 C-c C-w=.
+
+*** New logging support for refiling
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    Whenever you refile an item, a time stamp and even a note can be added
+    to this entry.  For details, see the new option =org-log-refile=.
+
+    Thanks to Charles Cave for this idea.
+
+** Completion
+
+*** In-buffer completion is now done using John Wiegleys pcomplete.el
+    :PROPERTIES:
+    :OrgVersion:  7.4
+    :END:
+
+    Thanks to John Wiegley for much of this code.
+
+** Tables
+
+*** New command =org-table-transpose-table-at-point=
+    :PROPERTIES:
+    :OrgVersion:  7.8
+    :END:
+
+    See the docstring.  This hack from Juan Pechiar is now part of Org's
+    core.  Thanks to Juan!
+
+*** Display field's coordinates when editing it with =C-c `=
+    :PROPERTIES:
+    :OrgVersion:  7.7
+    :END:
+
+    When editing a field with =C-c `=, the field's coordinate will the
+    displayed in the buffer.
+
+    Thanks to Michael Brand for a patch to this effect.
+
+*** Spreadsheet computation of durations and time values
+    :PROPERTIES:
+    :OrgVersion:  7.6
+    :END:
+
+    If you want to compute time values use the =T= flag, either in Calc
+    formulas or Elisp formulas:
+
+    | Task 1 | Task 2 |   Total |
+    |--------+--------+---------|
+    |  35:00 |  35:00 | 1:10:00 |
+    #+TBLFM: @2$3=$1+$2;T
+
+    Values must be of the form =[HH:]MM:SS=, where hours are optional.
+
+    Thanks to Martin Halder, Eric Schulte and Carsten for code and feedback
+    on this.
+
+*** Implement formulas applying to field ranges
+    :PROPERTIES:
+    :OrgVersion:  7.5
+    :END:
+
+    Carsten implemented this field-ranges formulas.
+
+    : A frequently requested feature for tables has been to be able to define
+    : row formulas in a way similar to column formulas.  The patch below allows
+    : things like
+    :
+    : @3=
+    : @2$2..@5$7=
+    : @I$2..@II$4=
+    :
+    : as the left hand side for table formulas in order to write a formula that
+    : is valid for an entire column or for a rectangular section in a
+    : table.
+
+    Thanks a lot to Carsten for this.
+
+*** Sending radio tables from org buffers is now allowed
+    :PROPERTIES:
+    :OrgVersion:  7.4
+    :END:
+
+    Org radio tables can no also be sent inside Org buffers.  Also, there
+    is a new hook which get called after a table has been sent.
+
+    Thanks to Seweryn Kokot.
+
+** Lists
+
+*** Improved handling of lists
+    :PROPERTIES:
+    :OrgVersion:  7.5
+    :END:
+
+    Nicolas Goaziou extended and improved the way Org handles lists.
+
+    1. Indentation of text determines again end of items in lists. So, some
+       text less indented than the previous item doesn't close the whole
+       list anymore, only all items more indented than it.
+
+    2. Alphabetical bullets are implemented, through the use of the
+       variable `org-alphabetical-lists'. This also adds alphabetical
+       counters like [@c] or [@W].
+
+    3. Lists can now safely contain drawers, inline tasks, or various
+       blocks, themselves containing lists. Two variables are controlling
+       this: `org-list-forbidden-blocks', and `org-list-export-context'.
+
+    4. Improve `newline-and-indent' (C-j): used in an item, it will keep
+       text from moving at column 0. This allows to split text and make
+       paragraphs and still not break the list.
+
+    5. Improve `org-toggle-item' (C-c -): used on a region with standard
+       text, it will change the region into one item. With a prefix
+       argument, it will fallback to the previous behavior and make every
+       line in region an item. It permits to easily integrate paragraphs
+       inside a list.
+
+    6. `fill-paragraph' (M-q) now understands lists. It can freely be used
+       inside items, or on text just after a list, even with no blank line
+       around, without breaking list structure.
+
+    Thanks a lot to Nicolas for all this!
+
+** Inline display of linked images
+   :PROPERTIES:
+   :OrgVersion:  6.36
+   :END:
+
+   Images can now be displayed inline.  The key C-c C-x C-v does toggle the
+   display of such images.  Note that only image links that have no
+   description part will be inlined.
+
+** Implement offsets for ordered lists
+   :PROPERTIES:
+   :OrgVersion:  6.36
+   :END:
+
+   If you want to start an ordered plain list with a number different from
+   1, you can now do it like this:
+
+   : 1. [@start:12] will star a lit a number 12
+
+** Babel: code block body expansion for table and preview
+   :PROPERTIES:
+   :OrgVersion:  6.36
+   :END:
+
+   In org-babel, code is "expanded" prior to evaluation. I.e. the code that
+   is actually evaluated comprises the code block contents, augmented with
+   the extra code which assigns the referenced data to variables. It is now
+   possible to preview expanded contents, and also to expand code during
+   during tangling. This expansion takes into account all header arguments,
+   and variables.
+
+   A new key-binding `C-c M-b p' bound to `org-babel-expand-src-block' can
+   be used from inside of a source code block to preview its expanded
+   contents (which can be very useful for debugging).  tangling
+
+   The expanded body can now be tangled, this includes variable values
+   which may be the results of other source-code blocks, or stored in
+   headline properties or tables. One possible use for this is to allow
+   those using org-babel for their emacs initialization to store values
+   (e.g. usernames, passwords, etc...) in headline properties or in tables.
+
+   Org-babel now supports three new header arguments, and new default
+   behavior for handling horizontal lines in tables (hlines), column names,
+   and rownames across all languages.
+
+** Editing Convenience and Appearance
+
+*** New command =org-copy-visible= (=C-c C-x v=)
+    :PROPERTIES:
+    :OrgVersion:  7.7
+    :END:
+
+    This command will copy the visible text in the region into the kill
+    ring.  Thanks to Florian Beck for this function and to Carsten for
+    adding it to org.el and documenting it!
+
+*** Make it possible to protect hidden subtrees from being killed by =C-k=
+    :PROPERTIES:
+    :OrgVersion:  7.01
+    :END:
+
+    See the new variable =org-ctrl-k-protect-subtree=.  This was a request
+    by Scott Otterson.
+
+*** Implement pretty display of entities, sub-, and superscripts.
+    :PROPERTIES:
+    :OrgVersion:  7.01
+    :END:
+
+    The command =C-c C-x \= toggles the display of Org's special entities
+    like =\alpha= as pretty unicode characters.  Also, sub and superscripts
+    are displayed in a pretty way (raised/lower display, in a smaller
+    font).  If you want to exclude sub- and superscripts, see the variable
+    =org-pretty-entities-include-sub-superscripts=.
+
+    Thanks to Eric Schulte and Ulf Stegeman for making this possible.
+
+*** New faces for title, date, author and email address lines
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    The keywords in these lines are now dimmed out, and the title is
+    displayed in a larger font, and a special font is also used for author,
+    date, and email information.  This is implemented by the following new
+    faces:
+
+    =org-document-title=
+    =org-document-info=
+    =org-document-info-keyword=
+
+    In addition, the variable =org-hidden-keywords= can be used to make the
+    corresponding keywords disappear.
+
+    Thanks to Dan Davison for this feature.
+
+*** Simpler way to specify faces for tags and todo keywords
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    The variables =org-todo-keyword-faces=, =org-tag-faces=, and
+    =org-priority-faces= now accept simple color names as specifications.
+    The colors will be used as either foreground or background color for
+    the corresponding keyword.  See also the variable
+    =org-faces-easy-properties=, which governs which face property is
+    affected by this setting.
+
+    This is really a great simplification for setting keyword faces.  The
+    change is based on an idea and patch by Ryan Thompson.
+
+*** <N> in tables now means fixed width, not maximum width
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    Requested by Michael Brand.
+
+*** Better level cycling function
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    =TAB= in an empty headline cycles the level of that headline through
+    likely states.  Ryan Thompson implemented an improved version of this
+    function, which does not depend upon when exactly this command is used.
+    Thanks to Ryan for this improvement.
+
+*** Adaptive filling
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    For paragraph text, =org-adaptive-fill-function= did not handle the
+    base case of regular text which needed to be filled.  This is now
+    fixed.  Among other things, it allows email-style ">" comments to be
+    filled correctly.
+
+    Thanks to Dan Hackney for this patch.
+
+*** `org-reveal' (=C-c C-r=) also decrypts encrypted entries (org-crypt.el)
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    Thanks to Richard Riley for triggering this change.
+
+*** Better automatic letter selection for TODO keywords
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    When all first letters of keywords have been used, Org now assigns more
+    meaningful characters based on the keywords.
+
+    Thanks to Mikael Fornius for this patch.
+
+** Clocking
+
+*** Clock: Allow synchronous update of timestamps in CLOCK log
+    :PROPERTIES:
+    :OrgVersion:  7.7
+    :END:
+
+    Using =S-M-<up/down>= on CLOCK log timestamps will increase/decrease
+    the two timestamps on this line so that duration will keep the same.
+    Note that duration can still be slightly modified in case a timestamp
+    needs some rounding.
+
+    Thanks to Rainer Stengele for this idea.
+
+*** Localized clock tables
+    :PROPERTIES:
+    :OrgVersion:  7.5
+    :END:
+
+    Clock tables now support a new new =:lang= parameter, allowing the user
+    to customize the localization of the table headers.  See the variable
+    =org-clock-clocktable-language-setup= which controls available
+    translated strings.
+
+*** Show clock overruns in mode line
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    When clocking an item with a planned effort, overrunning the planned
+    time is now made visible in the mode line, for example using the new
+    face =org-mode-line-clock-overrun=, or by adding an extra string given
+    by =org-task-overrun-text=.
+
+    Thanks to Richard Riley for a patch to this effect.
+
+*** Clock reports can now include the running, incomplete clock
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    If you have a clock running, and the entry being clocked falls into the
+    scope when creating a clock table, the time so far spent can be added
+    to the total.  This behavior depends on the setting of
+    =org-clock-report-include-clocking-task=.  The default is =nil=.
+
+    Thanks to Bernt Hansen for this useful addition.
+
+** Misc
+
+*** Improvements with inline tasks and indentation
+    :PROPERTIES:
+    :OrgVersion:  7.4
+    :END:
+
+    There is now a configurable way on how to export inline tasks.  See the
+    new variable =org-inlinetask-export-templates=.
+
+    Thanks to Nicolas Goaziou for coding these changes.
+
+*** A property value of "nil" now means to unset a property
+    :PROPERTIES:
+    :OrgVersion:  7.01
+    :END:
+
+    This can be useful in particular with property inheritance, if some
+    upper level has the property, and some grandchild of it would like to
+    have the default settings (i.e. not overruled by a property) back.
+
+    Thanks to Robert Goldman and Bernt Hansen for suggesting this change.
+
+*** New helper functions in org-table.el
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    There are new functions to access and write to a specific table field.
+    This is for hackers, and maybe for the org-babel people.
+
+    #+begin_example
+    org-table-get
+    org-table-put
+    org-table-current-line
+    org-table-goto-line
+    #+end_example
+
+*** Archiving: Allow to reverse order in target node
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    The new option =org-archive-reversed-order= allows to have archived
+    entries inserted in a last-on-top fashion in the target node.
+
+    This was requested by Tom.
+
+*** Org-reveal: Double prefix arg shows the entire subtree of the parent
+    :PROPERTIES:
+    :OrgVersion:  6.35
+    :END:
+
+    This can help to get out of an inconsistent state produced for example
+    by viewing from the agenda.
+
+    This was a request by Matt Lundin.
+
+* License
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

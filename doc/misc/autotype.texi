@@ -1,0 +1,665 @@
+\input texinfo
+@c This is an annex of the Emacs manual.
+@c Author: Daniel.Pfeiffer@Informatik.START.dbp.de, fax (+49 69) 7588-2389
+@setfilename ../../info/autotype
+@c @node Autotypist, Picture, Abbrevs, Top
+@c @chapter Features for Automatic Typing
+@settitle Features for Automatic Typing
+@c  @cindex text
+@c  @cindex selfinserting text
+@c  @cindex autotypist
+
+@copying
+Copyright @copyright{} 1994-1995, 1999, 2001-2012  Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs misc features
+@direntry
+* Autotype: (autotype).         Convenient features for text that you
+                                  enter frequently in Emacs.
+@end direntry
+
+@titlepage
+@sp 10
+
+@center @titlefont{Autotyping}
+@sp 2
+@center @subtitlefont{Convenient features for text that you enter
+frequently in Emacs}
+@sp 2
+@center Daniel Pfeiffer
+@center additions by Dave Love
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@node Top
+@top Autotyping
+
+  Under certain circumstances you will find yourself typing similar things
+over and over again.  This is especially true of form letters and programming
+language constructs.  Project-specific header comments, flow-control
+constructs or magic numbers are essentially the same every time.  Emacs has
+various features for doing tedious and repetitive typing chores for you
+in addition to the Abbrev features (@pxref{(emacs)Abbrevs}).
+
+  One solution is using skeletons, flexible rules that say what to
+insert, and how to do it.  Various programming language modes offer some
+ready-to-use skeletons, and you can adapt them to suit your needs or
+taste, or define new ones.
+
+  Another feature is automatic insertion of what you want into empty files,
+depending on the file-name or the mode as appropriate.  You can have a file or
+a skeleton inserted, or you can call a function.  Then there is the
+possibility to have Un*x interpreter scripts automatically take on a magic
+number and be executable as soon as they are saved.  Or you can have a
+copyright notice's year updated, if necessary, every time you save a
+file.  Similarly for time stamps in the file.
+
+  URLs can be inserted based on a word at point.  Flexible templates can
+be defined for inserting and navigating between text more generally.  A
+sort of meta-expansion facility can be used to try a set of alternative
+completions and expansions of text at point.
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* Using Skeletons::        How to insert a skeleton into your text.
+* Wrapping Skeletons::     Putting existing text within a skeleton.
+* Skeletons as Abbrevs::   An alternative for issuing skeleton commands.
+* Skeleton Language::      Making skeleton commands insert what you want.
+* Inserting Pairs::        Typing one character and getting another
+                             after point.
+* Autoinserting::          Filling up empty files as soon as you visit them.
+* Copyrights::             Inserting and updating copyrights.
+* Executables::            Turning interpreter scripts into executables.
+* Timestamps::             Updating dates and times in modified files.
+* QuickURL::               Inserting URLs based on text at point.
+* Tempo::                  Flexible template insertion.
+* Hippie Expand::          Expansion of text trying various methods.
+
+* GNU Free Documentation License:: The license for this documentation.
+* Concept Index::
+* Command Index::
+* Variable Index::
+@end menu
+
+
+@node Using Skeletons
+@chapter Using Skeletons
+@cindex skeletons
+@cindex using skeletons
+
+  When you want Emacs to insert a form letter or a typical construct of the
+programming language you are using, skeletons are a means of accomplishing
+this.  Normally skeletons each have a command of their own, that, when called,
+will insert the skeleton.  These commands can be issued in the usual ways
+(@pxref{(emacs)Commands}).  Modes that offer various skeletons will often
+bind these to key-sequences on the @kbd{C-c} prefix, as well as having
+an @cite{Insert} menu and maybe even predefined abbrevs for them
+(@pxref{Skeletons as Abbrevs}).
+
+  The simplest kind of skeleton will simply insert some text indented
+according to the major mode and leave the cursor at a likely place in the
+middle.  Interactive skeletons may prompt you for a string that will be part
+of the inserted text.
+
+  Skeletons may ask for input several times.  They even have a looping
+mechanism in which you will be asked for input as long as you are willing to
+furnish it.  An example would be multiple ``else if'' conditions.  You can
+recognize this situation by a prompt ending in @key{RET}, @kbd{C-g}
+or @kbd{C-h}.  This
+means that entering an empty string will simply assume that you are finished.
+Typing quit on the other hand terminates the loop but also the rest of the
+skeleton, e.g. an ``else'' clause is skipped.  Only a syntactically necessary
+termination still gets inserted.
+
+
+
+@node Wrapping Skeletons
+@chapter Wrapping Skeletons Around Existing Text
+@cindex wrapping skeletons
+
+  Often you will find yourself with some code that for whatever reason
+suddenly becomes conditional.  Or you have written a bit of text and want to
+put it in the middle of a form letter.  Skeletons provide a means for
+accomplishing this, and can even, in the case of programming languages,
+reindent the wrapped code for you.
+
+  Skeleton commands take an optional numeric prefix argument
+(@pxref{(emacs)Arguments}).  This is interpreted in two different ways depending
+on whether the prefix is positive, i.e. forwards oriented or negative,
+i.e. backwards oriented.
+
+  A positive prefix means to wrap the skeleton around that many
+following words.  This is accomplished by putting the words there where
+the point is normally left after that skeleton is inserted (@pxref{Using
+Skeletons}).  The point (@pxref{(emacs)Point}) is left at the next
+interesting spot in the skeleton instead.
+
+  A negative prefix means to do something similar with that many previously
+marked interregions (@pxref{(emacs)Mark}).  In the simplest case, if you type
+@kbd{M--} just before issuing the skeleton command, that will wrap the
+skeleton around the current region, just like a positive argument would have
+wrapped it around a number of words.
+
+  Smaller negative arguments will wrap that many interregions into successive
+interesting spots within the skeleton, again leaving the point at the next one.
+We speak about interregions rather than regions here, because we treat them in
+the order they appear in the buffer, which coincides with successive regions
+only if they were marked in order.
+
+  That is, if you marked in alphabetical order the points A B C [] (where []
+represents the point) and call a skeleton command with @kbd{M-- 3}, you will
+wrap the text from A to B into the first interesting spot of the skeleton, the
+text from B to C into the next one, the text from C to the point into the
+third one, and leave the point in the fourth one.  If there are less marks in
+the buffer, or if the skeleton defines less interesting points, the surplus is
+ignored.
+
+  If, on the other hand, you marked in alphabetical order the points [] A C B,
+and call a skeleton command with @kbd{M-- 3}, you will wrap the text from
+point to A, then the text from A to C and finally the text from C to B.  This
+is done because the regions overlap and Emacs would be helplessly lost if it
+tried to follow the order in which you marked these points.
+
+
+
+@node Skeletons as Abbrevs
+@chapter Skeletons as Abbrev Expansions
+@cindex skeletons as abbrevs
+
+  Rather than use a key binding for every skeleton command, you can also
+define an abbreviation (@pxref{(emacs)Defining Abbrevs}) that will expand
+(@pxref{(emacs)Expanding Abbrevs}) into the skeleton.
+
+  Say you want @samp{ifst} to be an abbreviation for the C language if
+statement.  You will tell Emacs that @samp{ifst} expands to the empty string
+and then calls the skeleton command.  In Emacs Lisp you can say something like
+@code{(define-abbrev c-mode-abbrev-table "ifst" "" 'c-if)}.  Or you can edit
+the output from @kbd{M-x list-abbrevs} to make it look like this:
+
+@example
+(c-mode-abbrev-table)
+"if"           0    ""         c-if
+@end example
+
+@noindent
+(Some blank lines of no semantic significance, and other abbrev tables,
+have been omitted.)
+
+
+
+@node Skeleton Language
+@chapter Skeleton Language
+@cindex skeleton language
+
+@findex skeleton-insert
+  Skeletons are an shorthand extension to the Lisp language, where various
+atoms directly perform either actions on the current buffer or rudimentary
+flow control mechanisms.  Skeletons are interpreted by the function
+@code{skeleton-insert}.
+
+  A skeleton is a list starting with an interactor, which is usually a
+prompt-string, or @code{nil} when not needed, but can also be a Lisp
+expression for complex read functions or for returning some calculated value.
+The rest of the list are any number of elements as described in the following
+table:
+
+@table @asis
+@item @code{"@var{string}"}, @code{?@var{c}}, @code{?\@var{c}}
+@vindex skeleton-transformation
+Insert string or character.  Literal strings and characters are passed through
+@code{skeleton-transformation} when that is non-@code{nil}.
+@item @code{?\n}
+@c ??? something seems very wrong here.
+Insert a newline and align under current line.  Use newline character
+@code{?\n} to prevent alignment.
+@item @code{_}
+Interesting point.  When wrapping skeletons around successive regions, they are
+put at these places.  Point is left at first @code{_} where nothing is wrapped.
+@item @code{>}
+Indent line according to major mode.  When following element is @code{_}, and
+there is a interregion that will be wrapped here, indent that interregion.
+@item @code{&}
+Logical and.  Iff preceding element moved point, i.e. usually inserted
+something, do following element.
+@item @code{|}
+Logical xor.  Iff preceding element didn't move point, i.e. usually inserted
+nothing, do following element.
+@item @code{-@var{number}}
+Delete preceding number characters.  Depends on value of
+@code{skeleton-untabify}.
+@item @code{()} or @code{nil}
+Ignored.
+@item @var{lisp-expression}
+Evaluated, and the return value is again interpreted as a skeleton element.
+@item @code{str}
+A special variable that, when evaluated the first time, usually prompts
+for input according to the skeleton's interactor.  It is then set to the
+return value resulting from the interactor.  Each subskeleton has its local
+copy of this variable.
+@item @code{v1}, @code{v2}
+Skeleton-local user variables.
+@item @code{'@var{expression}}
+Evaluate following Lisp expression for its side-effect, but prevent it from
+being interpreted as a skeleton element.
+@item @var{skeleton}
+Subskeletons are inserted recursively, not once, but as often as the user
+enters something at the subskeletons interactor.  Thus there must be a
+@code{str} in the subskeleton.  They can also be used non-interactively, when
+prompt is a lisp-expression that returns successive list-elements.
+@item @code{resume:}
+Ignored.  Execution resumes here if the user quits during skeleton
+interpretation.
+@item @code{quit}
+A constant which is non-@code{nil} when the @code{resume:} section was entered
+because the user quit.
+@end table
+
+@findex skeleton-further-elements
+  Some modes also use other skeleton elements they themselves defined.  For
+example in shell script mode's skeletons you will find @code{<} which does a
+rigid indentation backwards, or in CC mode's skeletons you find the
+self-inserting elements @code{@{} and @code{@}}.  These are defined by the
+buffer-local variable @code{skeleton-further-elements} which is a list of
+variables bound while interpreting a skeleton.
+
+@findex define-skeleton
+  The macro @code{define-skeleton} defines a command for interpreting a
+skeleton.  The first argument is the command name, the second is a
+documentation string, and the rest is an interactor and any number of skeleton
+elements together forming a skeleton.  This skeleton is assigned to a variable
+of the same name as the command and can thus be overridden from your
+@file{~/.emacs} file (@pxref{(emacs)Init File}).
+
+
+
+@node Inserting Pairs
+@chapter Inserting Matching Pairs of Characters
+@cindex inserting pairs
+@cindex pairs
+
+  Various characters usually appear in pairs.  When, for example, you insert
+an open parenthesis, no matter whether you are programming or writing prose,
+you will surely enter a closing one later.  By entering both at the same time
+and leaving the cursor inbetween, Emacs can guarantee you that such
+parentheses are always balanced.  And if you have a non-qwerty keyboard, where
+typing some of the stranger programming language symbols makes you bend your
+fingers backwards, this can be quite relieving too.
+
+@findex skeleton-pair-insert-maybe
+@vindex skeleton-pair
+  This is done by binding the first key (@pxref{(emacs)Rebinding}) of
+the pair to @code{skeleton-pair-insert-maybe} instead of
+@code{self-insert-command}.  The ``maybe'' comes from the fact that
+this at-first surprising behavior is initially turned off.  To enable
+it, you must set @code{skeleton-pair} to some non-@code{nil} value.
+And even then, a positive argument (@pxref{(emacs)Arguments}) will
+make this key behave like a self-inserting key
+(@pxref{(emacs)Inserting Text}).
+
+@vindex skeleton-pair-on-word
+  While this breaks with the stated intention of always balancing pairs, it
+turns out that one often doesn't want pairing to occur, when the following
+character is part of a word.  If you want pairing to occur even then, set
+@code{skeleton-pair-on-word} to some non-@code{nil} value.
+
+@vindex skeleton-pair-alist
+  Pairing is possible for all visible characters.  By default the
+parenthesis @samp{(}, the square bracket @samp{[}, the brace
+@samp{@{}, the pointed bracket @samp{<} and the backquote @samp{`} all
+pair with the symmetrical character.  All other characters pair
+themselves.  This behavior can be modified by the variable
+@code{skeleton-pair-alist}.  This is in fact an alist of skeletons
+(@pxref{Skeleton Language}), with the first part of each sublist
+matching the typed character.  This is the position of the interactor,
+but since pairs don't need the @code{str} element, this is ignored.
+
+  Some modes have bound the command @code{skeleton-pair-insert-maybe}
+to relevant keys.  These modes also configure the pairs as
+appropriate.  For example, when typing english prose, you'd expect the
+backquote (@samp{`}) to pair with the quote (@samp{'}), while in Shell
+script mode it must pair to itself.  They can also inhibit pairing in
+certain contexts.  For example an escaped character stands for itself.
+
+
+
+@node Autoinserting
+@chapter Autoinserting Text in Empty Files
+@cindex autoinserting
+
+@findex auto-insert
+  @kbd{M-x auto-insert} will put some predefined text at the beginning of
+the buffer.  The main application for this function, as its name suggests,
+is to have it be called automatically every time an empty, and only an
+empty file is visited.  This is accomplished by putting @code{(add-hook
+'find-file-hook 'auto-insert)} into your @file{~/.emacs} file
+(@pxref{(emacs)Init File}).
+
+@vindex auto-insert-alist
+  What gets inserted, if anything, is determined by the variable
+@code{auto-insert-alist}.  The @sc{car}s of this list are each either
+a mode name, making an element applicable when a buffer is in that
+mode.  Or they can be a string, which is a regexp matched against the
+buffer's file name.  In that way different kinds of files that have
+the same mode in Emacs can be distinguished.  The @sc{car}s may also
+be cons cells consisting of mode name or regexp as above and an
+additional descriptive string.
+
+  When a matching element is found, the @sc{cdr} says what to do.  It may
+be a string, which is a file name, whose contents are to be inserted, if
+that file is found in the directory @code{auto-insert-directory} or under a
+absolute file name.  Or it can be a skeleton (@pxref{Skeleton Language}) to
+be inserted.
+
+  It can also be a function, which allows doing various things.  The function
+can simply insert some text, indeed, it can be skeleton command (@pxref{Using
+Skeletons}).  It can be a lambda function which will for example conditionally
+call another function.  Or it can even reset the mode for the buffer. If you
+want to perform several such actions in order, you use a vector, i.e. several
+of the above elements between square brackets (@samp{[@r{@dots{}}]}).
+
+  By default C and C++ headers insert a definition of a symbol derived from
+the filename to prevent multiple inclusions.  C and C++ sources insert an
+include of the header.  Makefiles insert the file makefile.inc if it exists.
+
+  TeX and bibTeX mode files insert the file tex-insert.tex if it exists, while
+LaTeX mode files insert a typical @code{\documentclass} frame.  Html
+files insert a skeleton with the usual frame.
+
+  Ada mode files call the Ada header skeleton command.  Emacs lisp
+source files insert the usual header, with a copyright of your
+environment variable @env{$ORGANIZATION} or else the FSF, and prompt
+for valid keywords describing the contents.  Files in a @file{bin}
+directory for which Emacs could determine no specialized mode
+(@pxref{(emacs)Choosing Modes}) are set to Shell script mode.
+
+@findex define-auto-insert
+  In Lisp (@pxref{(emacs)Init File}) you can use the function
+@code{define-auto-insert} to add to or modify
+@code{auto-insert-alist}.  See its documentation with @kbd{C-h f
+define-auto-insert}.
+
+@vindex auto-insert
+  The variable @code{auto-insert} says what to do when @code{auto-insert} is
+called non-interactively, e.g. when a newly found file is empty (see above):
+@table @asis
+@item @code{nil}
+Do nothing.
+@item @code{t}
+Insert something if possible, i.e. there is a matching entry in
+@code{auto-insert-alist}.
+@item other
+Insert something if possible, but mark as unmodified.
+@end table
+
+@vindex auto-insert-query
+  The variable @code{auto-insert-query} controls whether to ask about
+inserting something.  When this is @code{nil}, inserting is only done with
+@kbd{M-x auto-insert}.  When this is @code{function}, you are queried
+whenever @code{auto-insert} is called as a function, such as when Emacs
+visits an empty file and you have set the above-mentioned hook.  Otherwise
+you are always queried.
+
+@vindex auto-insert-prompt
+  When querying, the variable @code{auto-insert-prompt}'s value is used as a
+prompt for a y-or-n-type question.  If this includes a @samp{%s} construct,
+that is replaced by what caused the insertion rule to be chosen.  This is
+either a descriptive text, the mode-name of the buffer or the regular
+expression that matched the filename.
+
+
+
+@node Copyrights
+@chapter Inserting and Updating Copyrights
+@cindex copyrights
+
+@findex copyright
+  @kbd{M-x copyright} is a skeleton inserting command, that adds a copyright
+notice at the point.  The ``by'' part is taken from your environment variable
+@env{$ORGANIZATION} or if that isn't set you are prompted for it.  If the
+buffer has a comment syntax (@pxref{(emacs)Comments}), this is inserted as a comment.
+
+@findex copyright-update
+@vindex copyright-limit
+@vindex copyright-current-year
+  @kbd{M-x copyright-update} looks for a copyright notice in the first
+@code{copyright-limit} characters of the buffer and updates it when necessary.
+The current year (variable @code{copyright-current-year}) is added to the
+existing ones, in the same format as the preceding year, i.e. 1994, '94 or 94.
+If a dash-separated year list up to last year is found, that is extended to
+current year, else the year is added separated by a comma.  Or it replaces
+them when this is called with a prefix argument.  If a header referring to a
+wrong version of the GNU General Public License (@pxref{(emacs)Copying}) is found,
+that is updated too.
+
+  An interesting application for this function is to have it be called
+automatically every time a file is saved.  This is accomplished by
+putting @code{(add-hook 'before-save-hook 'copyright-update)} into
+your @file{~/.emacs} file (@pxref{(emacs)Init File}).  Alternative,
+you can do @kbd{M-x customize-variable @key{RET} before-save-hook
+@key{RET}}.  @code{copyright-update} is conveniently listed as an
+option in the customization buffer.
+
+@vindex copyright-query
+  The variable @code{copyright-query} controls whether to update the
+copyright or whether to ask about it.  When this is @code{nil} updating is
+only done with @kbd{M-x copyright-update}.  When this is @code{function}
+you are queried whenever @code{copyright-update} is called as a function,
+such as in the @code{before-save-hook} feature mentioned above.  Otherwise
+you are always queried.
+
+
+
+@node Executables
+@chapter Making Interpreter Scripts Executable
+@cindex executables
+
+@vindex executable-prefix
+@vindex executable-chmod
+  Various interpreter modes such as Shell script mode or AWK mode will
+automatically insert or update the buffer's magic number, a special
+comment on the first line that makes the @code{exec} systemcall know
+how to execute the script.  To this end the script is automatically
+made executable upon saving, with @code{executable-chmod} as argument
+to the system @code{chmod} command.  The magic number is prefixed by
+the value of @code{executable-prefix}.
+
+@vindex executable-magicless-file-regexp
+  Any file whose name matches @code{executable-magicless-file-regexp} is not
+furnished with a magic number, nor is it made executable.  This is mainly
+intended for resource files, which are only meant to be read in.
+
+@vindex executable-insert
+  The variable @code{executable-insert} says what to do when
+@code{executable-set-magic} is called non-interactively, e.g. when file has no
+or the wrong magic number:
+@table @asis
+@item @code{nil}
+Do nothing.
+@item @code{t}
+Insert or update magic number.
+@item other
+Insert or update magic number, but mark as unmodified.
+@end table
+
+@findex executable-set-magic
+@vindex executable-query
+  The variable @code{executable-query} controls whether to ask about
+inserting or updating the magic number.  When this is @code{nil} updating
+is only done with @kbd{M-x executable-set-magic}.  When this is
+@code{function} you are queried whenever @code{executable-set-magic} is
+called as a function, such as when Emacs puts a buffer in Shell script
+mode.  Otherwise you are always queried.
+
+@findex executable-self-display
+  @kbd{M-x executable-self-display} adds a magic number to the buffer, which
+will turn it into a self displaying text file, when called as a Un*x command.
+The ``interpreter'' used is @code{executable-self-display} with argument
+@samp{+2}.
+
+@node Timestamps
+@chapter Maintaining Timestamps in Modified Files
+@cindex timestamps
+
+@findex time-stamp
+@vindex before-save-hook
+The @code{time-stamp} command can be used to update automatically a
+template in a file with a new time stamp every time you save the file.
+Customize the hook @code{before-save-hook} to add the function
+@code{time-stamp} to arrange this.  It you use Custom to do this,
+then @code{time-stamp} is conveniently listed as an option in the
+customization buffer.
+
+@vindex time-stamp-active
+@vindex time-stamp-format
+@vindex time-stamp-start
+The time stamp is updated only if the customizable variable
+@code{time-stamp-active} is on, which it is by default; the command
+@code{time-stamp-toggle-active} can be used to toggle it.  The format of
+the time stamp is set by the customizable variable
+@code{time-stamp-format}.
+
+@vindex time-stamp-line-limit
+@vindex time-stamp-end
+@vindex time-stamp-count
+@vindex time-stamp-inserts-lines
+The variables @code{time-stamp-line-limit}, @code{time-stamp-start},
+@code{time-stamp-end}, @code{time-stamp-count}, and
+@code{time-stamp-inserts-lines} control finding the template.  Do not
+change these in your init file or you will be incompatible with other
+people's files.  If you must change them, do so only in the local
+variables section of the file itself.
+
+Normally the template must appear in the first 8 lines of a file and
+look like one of the following:
+
+@example
+Time-stamp: <>
+Time-stamp: " "
+@end example
+
+The time stamp is written between the brackets or quotes:
+
+@example
+Time-stamp: <1998-02-18 10:20:51 gildea>
+@end example
+
+@node QuickURL
+@chapter QuickURL: Inserting URLs Based on Text at Point
+
+@vindex quickurl-url-file
+@findex quickurl
+@cindex URLs
+@kbd{M-x quickurl} can be used to insert a URL into a buffer based on
+the text at point.  The URLs are stored in an external file defined by
+the variable @code{quickurl-url-file} as a list of either cons cells of
+the form @code{(@var{key} . @var{URL})} or
+lists of the form @code{(@var{key} @var{URL} @var{comment})}.  These
+specify that @kbd{M-x quickurl} should insert @var{URL} if the word
+@var{key} is at point, for example:
+
+@example
+(("FSF"      "http://www.fsf.org/" "The Free Software Foundation")
+ ("emacs"  . "http://www.emacs.org/")
+ ("hagbard"  "http://www.hagbard.demon.co.uk" "Hagbard's World"))
+@end example
+
+@findex quickurl-add-url
+@findex quickurl-list
+@kbd{M-x quickurl-add-url} can be used to add a new @var{key}/@var{URL}
+pair.  @kbd{M-x quickurl-list} provides interactive editing of the URL
+list.
+
+@node Tempo
+@chapter Tempo: Flexible Template Insertion
+
+@cindex templates
+The Tempo package provides a simple way to define powerful templates, or
+macros, if you wish.  It is mainly intended for, but not limited to,
+programmers to be used for creating shortcuts for editing
+certain kinds of documents.
+
+@findex tempo-backward-mark
+@findex tempo-forward-mark
+A template is defined as a list of items to be inserted in the current
+buffer at point.  Some can be simple strings, while others can control
+formatting or define special points of interest in the inserted text.
+@kbd{M-x tempo-backward-mark} and @kbd{M-x tempo-forward-mark} can be
+used to jump between such points.
+
+More flexible templates can be created by including Lisp symbols, which
+will be evaluated as variables, or lists, which will be evaluated
+as Lisp expressions.  Automatic completion of specified tags to expanded
+templates can be provided.
+
+@findex tempo-define-template
+See the documentation for @code{tempo-define-template} for the different
+items that can be used to define a tempo template with a command for
+inserting it.
+
+See the commentary in @file{tempo.el} for more information on using the
+Tempo package.
+
+@node Hippie Expand
+@chapter `Hippie' Expansion
+
+@findex hippie-expand
+@kindex M-/
+@vindex hippie-expand-try-functions-list
+@kbd{M-x hippie-expand} is a single command providing a variety of
+completions and expansions.  Called repeatedly, it tries all possible
+completions in succession.
+
+Which ones to try, and in which order, is determined by the contents of
+the customizable option @code{hippie-expand-try-functions-list}.  Much
+customization of the expansion behavior can be made by changing the
+order of, removing, or inserting new functions in this list.  Given a
+positive numeric argument, @kbd{M-x hippie-expand} jumps directly that
+number of functions forward in this list.  Given some other argument (a
+negative argument or just @kbd{C-u}) it undoes the tried completion.
+
+See the commentary in @file{hippie-exp.el} for more information on the
+possibilities.
+
+Typically you would bind @code{hippie-expand} to @kbd{M-/} with
+@code{dabbrev-expand}, the standard binding of @kbd{M-/}, providing one
+of the expansion possibilities.
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Concept Index
+@unnumbered Concept Index
+@printindex cp
+
+@node Command Index
+@unnumbered Command Index
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+@printindex vr
+
+@bye

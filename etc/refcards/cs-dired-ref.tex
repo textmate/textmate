@@ -1,0 +1,400 @@
+% Reference Card for Dired
+
+% Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+% Author: Evgeny Roubinchtein <eroubinc@u.washington.edu>
+% Czech translation: Pavel Janík <Pavel@Janik.cz>, March 2001
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% See dired-ref.tex.
+
+% Process the file with `csplain' from the `CSTeX' distribution (included
+% e.g. in the TeX Live CD).
+
+%**start of header
+
+% Czech hyphenation rules applied
+\chyph
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.
+\newcount\columnsperpage
+\columnsperpage=2
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+% Nothing else needs to be changed.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{For GNU Emacs version \versionemacs}
+\centerline{Originally written May 2000 by Evgeny Roubinchtein,}
+\centerline{using refcard layout designed by Stephen Gildea.}
+\centerline{Translated by Pavel Janík.}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+For copies of the GNU Emacs manual, see:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip       %horizontal space between columns
+\newbox\columna                 %boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns                  %one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else                           %2 or 3 columns uses prereduced size
+  \hsize 3.4in
+  \vsize 9.2in
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=csbx10 \scaledmag2
+  \font\headingfont=csbx10 \scaledmag1
+  \font\smallfont=csr6
+  \font\smallsy=cmsy6
+  \font\eightrm=csr8
+  \font\eightbf=csbx8
+  \font\eightit=csti8
+  \font\eighttt=cstt8
+  \font\eightmi=csmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm           %make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%                    %see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+        \global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+        \global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+\hyphenation{de-le-tion}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}        %\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+% I cannot figure out how to make all dired-x
+% commands fit on a page in two-column format
+\def\dx{{\bf (DX)}}
+
+%**end of header
+
+
+\title{Referenèní karta pro Dired}
+
+\centerline{(urèeno pro Dired v GNU Emacsu \versionemacs)}
+\centerline{Pøíkazy oznaèené \dx{} vy¾adují dired-x}
+
+% trim this down to fit everything on one page
+% \section{General}
+% In dired, you can edit a list of the files in a directory (and optionally
+% its subdirectories in the `ls -lR' format).
+
+% Editing a directory means that you can visit, rename, copy, compress,
+% load, byte-compile  files.  You can change files' attributes, run shell
+% commands on files, or insert subdirectories into the edit buffer.  You can
+% "flag" files for deletion or "mark" files for later commands, either one
+% file at a time or by all files matching certain criteria (e.g., files that
+% match a certain regexp).
+
+% You move throughout the buffer using the usual cursor motion commands.
+% Letters no longer insert themselves, but execute commands instead.  The
+% digits (0-9) are prefix arguments.
+
+% Most commands operate either on all marked files or on the current file if
+% no files are marked.  Use a numeric prefix argument to operate on the next
+% ARG files (or previous ARG if ARG $<$ 0).  Use the prefix argument `1' to
+% operate on the current file only.  Prefix arguments override marks. Commands
+% which run a sub-process on a group of files will display a list of files
+% for which the sub-process failed.  Typing y will try to tell
+% you what went wrong.
+
+% When editing several directories in one buffer, each directory acts as a
+% page, so C-x [ and C-x ] can be used to move between directories.
+
+\section{Spu¹tìní a ukonèení Dired}
+
+\key{spu¹tìní dired}{C-x d}
+\key{spu¹tìní dired v adresáøi s aktuálním souborem}{C-x C-j \dx}
+\key{ukonèení dired}{q}
+
+\section{Pøíkazy pro pøesuny}
+
+\key{zpìt na pøedchozí øádku}{p}
+\key{vpøed na následující øádku}{n}
+\key{nahoru na pøedchozí adresáø}{<}
+\key{dolù na následující adresáø}{>}
+\key{na dal¹í oznaèený soubor}{M-\}}
+\key{na pøedchozí oznaèený soubor}{M-\{}
+\key{zpìt na pøedchozí podadresáø}{M-C-p}
+\key{vpøed na dal¹í podadresáø}{M-C-n}
+\key{na nadøazený adresáø}{^}
+\key{jdi na první podadresáø}{M-C-d}
+
+\section{Pøíkazy pomocí my¹i}
+\metax{otevøi soubor}{Mouse_Button_2}
+\metax{zobraz menu}{Control-Mouse_Button_3}
+
+\section{Okam¾ité akce nad soubory}
+
+\key{otevøi aktuální soubor}{f}
+\key{otevøi aktuální soubor pouze pro ètení}{v}
+\key{otevøi aktuální soubor v jiném oknì}{o}
+%%\key{otevøi aktuální soubor v jiném rámci}{w}
+%%\key{zobraz aktuální soubor}{C-u o}
+\key{vytvoø nový podadresáø}{+}
+\key{porovnej soubor pod kurzorem s oznaèeným}{=}
+
+\section{Znaèení a odznaèení souborù}
+
+\key{oznaè soubor nebo podadresáø pro dal¹í pøíkazy}{m}
+\key{odznaè soubor nebo soubory podadresáøe}{u}
+\key{zru¹ oznaèení v¹ech souborù v bufferu}{M-delete}
+\key{oznaè soubory se zadanou pøíponou}{* .}
+\key{oznaè v¹echny adresáøe}{* /}
+\key{oznaè v¹echny symbolické odkazy}{* @}
+\key{oznaè v¹echny spustitelné soubory}{* *}
+\key{invertuj oznaèení}{* t}
+\key{oznaè v¹echny soubory v aktuálním podadresáøi}{* s}
+\key{oznaè soubory vyhovující regulárnímu výrazu}{* \%}
+\key{zmìò znaèku na jiné písmeno}{* c}
+\key{oznaè soubory, pro které elispový výraz vrací t}{* ( \dx}
+
+\section{Modifikace Dired bufferu}
+
+\key{vlo¾ do tohoto bufferu podadresáø}{i}
+\key{odstraò oznaèené soubory z bufferu}{k}
+\key{odstraò z bufferu výpis podadresáøe}{C-u k}
+\key{znovu naèti adresáøe (znaèky se zachovají)}{g}
+\key{pøepni tøídìní adresáøe podle jména/data}{s}
+\key{uprav volby pøíkazu ls}{C-u s}
+\key{obnov znaèky, skryté øádky apod.}{C-_}
+\key{skryj v¹echny podadresáøe}{M-\$}
+\key{skryj nebo odkryj v¹echny podadresáøe}{\$}
+
+\section{Pøíkazy nad oznaèenými soubory}
+
+\key{kopíruj soubor(y)}{C}
+\key{pøejmenuj soubor nebo pøesuò soubory}{R}
+\key{zmìò vlastníka souboru(ù)}{O}
+\key{zmìò skupinu souboru(ù)}{G}
+\key{zmìò pøístupová práva souboru(ù)}{M}
+\key{vytiskni soubor(y)}{P}
+\key{zmìò název souboru(ù) na malá písmena}{\% l}
+\key{zmìò název souboru(ù) na velká písmena}{\% u}
+\key{sma¾ oznaèené soubory}{D}
+%%\key{proveï uuencode nebo uudecode souboru(ù)}{U}
+\key{zkomprimuj nebo dekomprimuj soubor(y)}{Z}
+\key{spus» info na soubor}{I \dx}
+\key{vytvoø symbolický(é) odkaz(y)}{S}
+\key{vytvoø relativní symbolické odkazy}{Y}
+\key{vytvoø pevný odkaz}{H}
+\key{prohledej soubory na regulární výraz}{A}
+\key{nahraï regulární výrazy}{Q}
+\key{pøelo¾ soubory (byte-compile)}{B}
+\key{naèti soubory (load-file)}{L}
+\key{spus» pøíkaz na soubor(y)}{!}
+
+\section{Oznaèení souborù pro smazání}
+\leftline{\bf Odznaèující pøíkazy ma¾ou znaèku pro smazání}
+\key{oznaè soubor pro smazání}{d}
+%%\key{odstraò znaèku pro smazání}{delete}
+\key{oznaè v¹echny zálohy (soubory konèící na \~{})}{\~{}}
+\key{oznaè v¹echny zálohy (auto-save)}{\#}
+\key{oznaè rùzné doèasné soubory}{\% \&}
+\key{oznaè èíslované zálohy (konèící na .\~{}1\~{} apod.)}{.}
+\key{proveï výmaz souborù oznaèených ke smazání}{x}
+\key{oznaè soubory vyhovující regulárnímu výrazu}{\% d}
+
+\section{Pøíkazy s regulárními výrazy}
+
+\key{oznaè soubory vyhovující regulárnímu výrazu}{\% m}
+\key{kopíruj oznaèené soubory obsahující regexp}{\% C}
+\key{pøejmenuj oznaèené soubory vyhovující regexp}{\% R}
+\key{pevný odkaz}{\% H}
+\key{symbolický odkaz}{\% S}
+\key{symbolický odkaz s relativní cestou}{\% Y}
+\key{oznaè pro smazání}{\% d}
+
+\section{Dired a Find}
+\metax{otevøi v dired soubory vyhovující vzorku}{M-x find-name-dired}
+\metax{otevøi v dired soubory obsahující vzorek}{M-x find-grep-dired}
+\metax{otevøi v dired soubory podle výstupu \kbd{find}}{M-x find-dired}
+
+\section{Nápovìda}
+
+\key{zobraz nápovìdu}{h}
+\key{pøehled pøíkazù dired}{?}
+
+\copyrightnotice
+
+\bye
+

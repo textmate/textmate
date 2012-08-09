@@ -1,0 +1,23 @@
+# -sed4.inp-------------------------------------------------------------
+# Configuration script for src/paths.h
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1994, 2001-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^#define *PATH_LOADSEARCH/s/".*"/rootrelativepath ("lisp")/
+/^#define *PATH_DUMPLOADSEARCH/s/".*"/"..\/lisp"/
+/^#define *PATH_DATA/s/".*"/rootrelativepath ("etc")/
+/^#define *PATH_DOC/s/".*"/rootrelativepath ("etc")/
+/^#define *PATH_INFO/s/".*"/rootrelativepath ("info")/
+

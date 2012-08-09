@@ -1,0 +1,23 @@
+If you think you may have found a bug in GNU Emacs, please read the
+Bugs section of the Emacs manual for advice on
+
+(1) how to tell when to report a bug, and
+(2) how to write a useful bug report and what information it needs to have.
+
+You can read the Bugs section of the manual from inside Emacs.
+Start Emacs, do C-h i to enter Info, then m Emacs RET to get to the
+Emacs manual, then m Bugs RET to get to the section on bugs.
+Or you can use the standalone Info program in a like manner.
+(Standalone Info is part of the Texinfo distribution, not part of the
+Emacs distribution.)
+
+Printed copies of the Emacs manual can be purchased from the Free
+Software Foundation's online store at <http://shop.fsf.org/>.
+
+If necessary, you can read the manual without an info program:
+
+    cat info/emacs* | more "+/^File: emacs,  Node: Bugs,"
+
+
+Please first check the file etc/PROBLEMS (e.g. with C-h C-p in Emacs) to
+make sure it isn't a known issue.

@@ -1,0 +1,447 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012  Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in vc-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+
+@node Miscellaneous VC
+@subsection Miscellaneous Commands and Features of VC
+
+  This section explains the less-frequently-used features of VC.
+
+@menu
+* Change Logs and VC::  Generating a change log file from log entries.
+* VC Delete/Rename::    Deleting and renaming version-controlled files.
+* Revision Tags::       Symbolic names for revisions.
+* Version Headers::     Inserting version control headers into working files.
+@end menu
+
+@node Change Logs and VC
+@subsubsection Change Logs and VC
+
+  If you use RCS or CVS for a program with a @file{ChangeLog} file
+@iftex
+(@pxref{Change Log,,,emacs, the Emacs Manual}),
+@end iftex
+@ifnottex
+(@pxref{Change Log}),
+@end ifnottex
+you can generate change log entries from the version control log
+entries of previous commits.
+
+  Note that this only works with RCS or CVS.  This procedure would be
+particularly incorrect on a modern changeset-based version control
+system, where changes to the @file{ChangeLog} file would normally be
+committed as part of a changeset.  In that case, you should write the
+change log entries first, then pull them into the @samp{*vc-log*}
+buffer when you commit
+@iftex
+(@pxref{Log Buffer,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Log Buffer}).
+@end ifnottex
+
+@table @kbd
+@item C-x v a
+@kindex C-x v a
+@findex vc-update-change-log
+Visit the current directory's @file{ChangeLog} file and, for
+registered files in that directory, create new entries for versions
+committed since the most recent change log entry
+(@code{vc-update-change-log}).
+
+@item C-u C-x v a
+As above, but only find entries for the current buffer's file.
+@end table
+
+  For example, suppose the first line of @file{ChangeLog} is dated
+1999-04-10, and that the only check-in since then was by Nathaniel
+Bowditch to @file{rcs2log} on 1999-05-22 with log entry @samp{Ignore
+log messages that start with `#'.}.  Then @kbd{C-x v a} inserts this
+@file{ChangeLog} entry:
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+@group
+1999-05-22  Nathaniel Bowditch  <nat@@apn.org>
+
+        * rcs2log: Ignore log messages that start with `#'.
+@end group
+@end smallexample
+@iftex
+@medbreak
+@end iftex
+
+@noindent
+If the version control log entry specifies a function name (in
+parenthesis at the beginning of a line), that is reflected in the
+@file{ChangeLog} entry.  For example, if a log entry for @file{vc.el}
+is @samp{(vc-do-command): Check call-process status.}, the
+@file{ChangeLog} entry is:
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+@group
+1999-05-06  Nathaniel Bowditch  <nat@@apn.org>
+
+        * vc.el (vc-do-command): Check call-process status.
+@end group
+@end smallexample
+@iftex
+@medbreak
+@end iftex
+
+  When @kbd{C-x v a} adds several change log entries at once, it
+groups related log entries together if they all are checked in by the
+same author at nearly the same time.  If the log entries for several
+such files all have the same text, it coalesces them into a single
+entry.
+
+@node VC Delete/Rename
+@subsubsection Deleting and Renaming Version-Controlled Files
+@cindex renaming version-controlled files
+
+@table @kbd
+@item M-x vc-delete-file
+Prompt for a file name, delete the file from the working tree, and
+schedule the deletion for committing.
+
+@item M-x vc-rename-file
+Prompt for two file names, @var{VAR} and @var{OLD}, rename them in the
+working tree, and schedule the renaming for committing.
+@end table
+
+@findex vc-delete-file
+  If you wish to delete a version-controlled file, use the command
+@kbd{M-x vc-delete-file}.  This prompts for the file name, and deletes
+it via the version control system.  The file is removed from the
+working tree, and in the VC Directory buffer
+@iftex
+(@pxref{VC Directory Mode,,, emacs, the Emacs Manual}),
+@end iftex
+@ifnottex
+(@pxref{VC Directory Mode}),
+@end ifnottex
+it is displayed with the @samp{removed} status.  When you commit it,
+the deletion takes effect in the repository.
+
+@findex vc-rename-file
+  To rename a version-controlled file, type @kbd{M-x vc-rename-file}.
+This prompts for two arguments: the name of the file you wish to
+rename, and the new name; then it performs the renaming via the
+version control system.  The renaming takes effect immediately in the
+working tree, and takes effect in the repository when you commit the
+renamed file.
+
+  On modern version control systems that have built-in support for
+renaming, the renamed file retains the full change history of the
+original file.  On CVS and older version control systems, the
+@code{vc-rename-file} command actually works by creating a copy of the
+old file under the new name, registering it, and deleting the old
+file.  In this case, the change history is not preserved.
+
+@node Revision Tags
+@subsubsection Revision Tags
+@cindex revision tag
+@cindex tags for version control
+
+  Most version control systems allow you to apply a @dfn{revision tag}
+to a specific version of a version-controlled tree.  On modern
+changeset-based version control systems, a revision tag is simply a
+symbolic name for a particular revision.  On older file-based systems
+like CVS, each tag is added to the entire set of version-controlled
+files, allowing them to be handled as a unit.  Revision tags are
+commonly used to identify releases that are distributed to users.
+
+  There are two basic commands for tags; one makes a tag with a given
+name, the other retrieves a named tag.
+
+@table @code
+@kindex C-x v s
+@findex vc-create-tag
+@item C-x v s @var{name} @key{RET}
+Define the working revision of every registered file in or under the
+current directory as a tag named @var{name}
+(@code{vc-create-tag}).
+
+@kindex C-x v r
+@findex vc-retrieve-tag
+@item C-x v r @var{name} @key{RET}
+For all registered files at or below the current directory level,
+retrieve the tagged revision @var{name}. This command will switch to a
+branch if @var{name} is a branch name and your VCS distinguishes
+branches from tags.  (@code{vc-retrieve-tag}).
+
+This command reports an error if any files are locked at or below the
+current directory, without changing anything; this is to avoid
+overwriting work in progress.
+@end table
+
+  You can give a tag or branch name as an argument to @kbd{C-x v =} or
+@kbd{C-x v ~}
+@iftex
+(@pxref{Old Revisions,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Old Revisions}).
+@end ifnottex
+Thus, you can use it to compare a tagged version against the current files,
+or two tagged versions against each other.
+
+  On SCCS, VC implements tags itself; these tags are visible only
+through VC.  Most later systems (including CVS, Subversion, bzr, git,
+and hg) have a native tag facility, and VC uses it where available;
+those tags will be visible even when you bypass VC.
+
+  In a file-oriented VCS, when you rename a registered file you need
+to rename its master along with it; the command @code{vc-rename-file}
+will do this automatically.  If you are using SCCS, you must also
+update the records of the tag, to mention the file by its new name
+(@code{vc-rename-file} does this, too).  An old tag that refers to a
+master file that no longer exists under the recorded name is invalid;
+VC can no longer retrieve it.  It would be beyond the scope of this
+manual to explain enough about RCS and SCCS to explain how to update
+the tags by hand.  Using @code{vc-rename-file} makes the tag remain
+valid for retrieval, but it does not solve all problems.  For example,
+some of the files in your program probably refer to others by name.
+At the very least, the makefile probably mentions the file that you
+renamed.  If you retrieve an old tag, the renamed file is retrieved
+under its new name, which is not the name that the makefile expects.
+So the program won't really work as retrieved.
+
+@node Version Headers
+@subsubsection Inserting Version Control Headers
+
+  On Subversion, CVS, RCS, and SCCS, you can put certain special
+strings called @dfn{version headers} into a work file.  When the file
+is committed, the version control system automatically puts the
+revision number, the name of the user who made the commit, and other
+relevant information into the version header.
+
+@vindex vc-consult-headers
+  VC does not normally use the information in the version headers.  As
+an exception, when using RCS, Emacs uses the version header, if there
+is one, to determine the file version, since it is often more reliable
+than the RCS master file.  To inhibit using the version header this
+way, change the variable @code{vc-consult-headers} to @code{nil}.
+
+@kindex C-x v h
+@findex vc-insert-headers
+@vindex vc-@var{backend}-header
+  To insert a suitable header string into the current buffer, type
+@kbd{C-x v h} (@code{vc-insert-headers}).  This command works only on
+Subversion, CVS, RCS, and SCCS.  The variable
+@code{vc-@var{backend}-header} contains the list of keywords to insert
+into the version header; for instance, CVS uses @code{vc-cvs-header},
+whose default value is @code{'("\$Id\$")}.  (The extra backslashes
+prevent the string constant from being interpreted as a header, if the
+Emacs Lisp file defining it is maintained with version control.)  The
+@kbd{C-x v h} command inserts each keyword in the list on a new line
+at point, surrounded by tabs, and inside comment delimiters if
+necessary.
+
+@vindex vc-static-header-alist
+  The variable @code{vc-static-header-alist} specifies further strings
+to add based on the name of the buffer.  Its value should be a list of
+elements of the form @code{(@var{regexp} . @var{format})}.  Whenever
+@var{regexp} matches the buffer name, @var{format} is also inserted as
+part of the version header.  A @samp{%s} in @var{format} is replaced
+with the file's version control type.
+
+@node Customizing VC
+@subsection Customizing VC
+
+@vindex vc-handled-backends
+  The variable @code{vc-handled-backends} determines which version
+control systems VC should handle.  The default value is @code{(RCS CVS
+SVN SCCS Bzr Git Hg Mtn Arch)}, so it contains all the version systems
+that are currently supported.  If you want VC to ignore one or more of
+these systems, exclude its name from the list.  To disable VC
+entirely, set this variable to @code{nil}.
+
+  The order of systems in the list is significant: when you visit a
+file registered in more than one system, VC uses the system that comes
+first in @code{vc-handled-backends} by default.  The order is also
+significant when you register a file for the first time
+@iftex
+(@pxref{Registering,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Registering}).
+@end ifnottex
+
+@menu
+* General VC Options::  Options that apply to multiple back ends.
+* RCS and SCCS::        Options for RCS and SCCS.
+* CVS Options::         Options for CVS.
+@end menu
+
+@node General VC Options
+@subsubsection General Options
+
+@vindex vc-make-backup-files
+  Emacs normally does not save backup files for source files that are
+maintained with version control.  If you want to make backup files even
+for files that use version control, set the variable
+@code{vc-make-backup-files} to a non-@code{nil} value.
+
+@vindex vc-follow-symlinks
+@cindex symbolic links (and version control)
+  Editing a version-controlled file through a symbolic link may cause
+unexpected results, if you are unaware that the underlying file is
+version-controlled.  The variable @code{vc-follow-symlinks} controls
+what Emacs does if you try to visit a symbolic link pointing to a
+version-controlled file.  If the value is @code{ask} (the default),
+Emacs asks for confirmation.  If it is @code{nil}, Emacs just displays
+a warning message.  If it is @code{t}, Emacs automatically follows the
+link and visits the real file instead.
+
+@vindex vc-suppress-confirm
+  If @code{vc-suppress-confirm} is non-@code{nil}, then @kbd{C-x v v}
+and @kbd{C-x v i} can save the current buffer without asking, and
+@kbd{C-x v u} also operates without asking for confirmation.
+
+@vindex vc-command-messages
+  VC mode does much of its work by running the shell commands for the
+appropriate version control system.  If @code{vc-command-messages} is
+non-@code{nil}, VC displays messages to indicate which shell commands
+it runs, and additional messages when the commands finish.
+
+@vindex vc-path
+  You can specify additional directories to search for version control
+programs by setting the variable @code{vc-path}.  These directories
+are searched before the usual search path.  It is rarely necessary to
+set this variable, because VC normally finds the proper files
+automatically.
+
+@node RCS and SCCS
+@subsubsection Options for RCS and SCCS
+
+@cindex non-strict locking (RCS)
+@cindex locking, non-strict (RCS)
+  By default, RCS uses locking to coordinate the activities of several
+users, but there is a mode called @dfn{non-strict locking} in which
+you can check-in changes without locking the file first.  Use
+@samp{rcs -U} to switch to non-strict locking for a particular file,
+see the @code{rcs} manual page for details.
+
+  When deducing the version control state of an RCS file, VC first
+looks for an RCS version header string in the file (@pxref{Version
+Headers}).  If there is no header string, VC normally looks at the
+file permissions of the work file; this is fast.  But there might be
+situations when the file permissions cannot be trusted.  In this case
+the master file has to be consulted, which is rather expensive.  Also
+the master file can only tell you @emph{if} there's any lock on the
+file, but not whether your work file really contains that locked
+version.
+
+@vindex vc-consult-headers
+  You can tell VC not to use version headers to determine the file
+status by setting @code{vc-consult-headers} to @code{nil}.  VC then
+always uses the file permissions (if it is supposed to trust them), or
+else checks the master file.
+
+@vindex vc-mistrust-permissions
+  You can specify the criterion for whether to trust the file
+permissions by setting the variable @code{vc-mistrust-permissions}.
+Its value can be @code{t} (always mistrust the file permissions and
+check the master file), @code{nil} (always trust the file
+permissions), or a function of one argument which makes the decision.
+The argument is the directory name of the @file{RCS} subdirectory.  A
+non-@code{nil} value from the function says to mistrust the file
+permissions.  If you find that the file permissions of work files are
+changed erroneously, set @code{vc-mistrust-permissions} to @code{t}.
+Then VC always checks the master file to determine the file's status.
+
+  VC determines the version control state of files under SCCS much as
+with RCS.  It does not consider SCCS version headers, though.  Thus,
+the variable @code{vc-mistrust-permissions} affects SCCS use, but
+@code{vc-consult-headers} does not.
+
+@node CVS Options
+@subsubsection Options specific for CVS
+
+@vindex vc-cvs-global-switches
+  You can specify additional command line options to pass to all CVS
+operations in the variable @code{vc-cvs-global-switches}.  These
+switches are inserted immediately after the @code{cvs} command, before
+the name of the operation to invoke.
+
+@vindex vc-stay-local
+@vindex vc-cvs-stay-local
+@cindex remote repositories (CVS)
+  When using a CVS repository on a remote machine, VC can try keeping
+network interactions to a minimum.  This is controlled by the variable
+@code{vc-cvs-stay-local}.  There is another variable,
+@code{vc-stay-local}, which enables the feature also for other back
+ends that support it, including CVS.  In the following, we will talk
+only about @code{vc-cvs-stay-local}, but everything applies to
+@code{vc-stay-local} as well.
+
+  If @code{vc-cvs-stay-local} is @code{t} (the default), VC determines
+the version control status of each file using only the entry in the
+local CVS subdirectory and the information returned by previous CVS
+commands.  As a consequence, if you have modified a file and somebody
+else has checked in other changes, you will not be notified of the
+conflict until you try to commit.
+
+  If you change @code{vc-cvs-stay-local} to @code{nil}, VC queries the
+remote repository @emph{before} it decides what to do in
+@code{vc-next-action} (@kbd{C-x v v}), just as it does for local
+repositories.
+
+  You can also set @code{vc-cvs-stay-local} to a regular expression
+that is matched against the repository host name; VC then stays local
+only for repositories from hosts that match the pattern.
+
+@cindex automatic version backups
+  When using a remote repository, Emacs normally makes @dfn{automatic
+version backups} of the original versions of each edited file.  These
+local backups are made whenever you save the first changes to a file,
+and they are removed after you commit your changes to the repository.
+(Note that these are not the same as ordinary Emacs backup files;
+@iftex
+@pxref{Backup,,,emacs, the Emacs Manual}.)
+@end iftex
+@ifnottex
+@pxref{Backup}.)
+@end ifnottex
+Commands like @kbd{C-x v =} and @kbd{C-x v u} make use of automatic
+version backups, if possible, to avoid having to access the network.
+
+  Setting @code{vc-cvs-stay-local} to @code{nil} disables the making
+of automatic version backups.
+
+@cindex manual version backups
+  Automatic version backups have names of the form
+@w{@code{@var{file}.~@var{version}.~}}.  This is similar to the name
+that @kbd{C-x v ~} saves old versions to
+@iftex
+(@pxref{Old Revisions,,,emacs, the Emacs Manual}),
+@end iftex
+@ifnottex
+(@pxref{Old Revisions}),
+@end ifnottex
+except for the additional dot (@samp{.}) after the version.  The
+relevant VC commands can use both kinds of version backups.  The main
+difference is that the ``manual'' version backups made by @kbd{C-x v
+~} are not deleted automatically when you commit.
+
+@cindex locking (CVS)
+  CVS does not use locking by default, but there are ways to enable
+locking-like behavior using its @env{CVSREAD} or @dfn{watch} feature;
+see the CVS documentation for details.  If that case, you can use
+@kbd{C-x v v} in Emacs to toggle locking, as you would for a
+locking-based version control system
+@iftex
+(@pxref{VC With A Locking VCS,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{VC With A Locking VCS}).
+@end ifnottex

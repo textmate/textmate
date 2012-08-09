@@ -1,0 +1,61 @@
+HOW TO COMMIT CHANGES TO EMACS
+
+Most of these points are from:
+
+http://lists.gnu.org/archive/html/emacs-devel/2009-03/msg00555.html
+From: 	 Miles Bader
+Subject: commit style redux
+Date: 	 Tue, 31 Mar 2009 12:21:20 +0900
+
+(0) Each commit should correspond to a single change (whether spread
+    over multiple files or not).  Do not mix different changes in the
+    same commit (eg adding a feature in one file, fixing a bug in
+    another should be two commits, not one).
+
+(1) Commit all changed files at once with a single log message (which
+    in CVS will result in an identical log message for all committed
+    files), not one-by-one.  This is pretty easy using vc-dir now.
+
+(2) Make the log message describe the entire changeset, perhaps
+    including relevant changelog entries (I often don't bother with
+    the latter if it's a trivial sort of change).
+
+    Many modern source-control systems vaguely distinguish the first
+    line of the log message to use as a short summary for abbreviated
+    history listing (in arch this was explicitly called the summary,
+    but many other systems have a similar concept).  So it's nice if
+    you can format the log entry like:
+
+        SHORTISH ONE-LINE SUMMARY
+
+        MULTIPLE-LINE DETAILED DESCRIPTION POSSIBLY INCLUDING (OR
+        CONSISTING OF) CHANGELOG ENTRIES
+
+    [Even with CVS this style is useful, because web CVS browsing
+    interfaces often include the first N words of the log message of
+    the most recent commit as a short "most recent change"
+    description.]
+
+(3) Don't phrase log messages assuming the filename is known, because
+    in non-file-oriented systems (everything modern other than CVS),
+    the log listing tends to be treated as global information, and the
+    connection with specific files is less explicit.
+
+    For instance, currently I often see log messages like "Regenerate";
+    for modern source-control systems with a global log, it's better to
+    have something like "Regenerate configure".
+
+
+Followup discussion:
+http://lists.gnu.org/archive/html/emacs-devel/2010-01/msg00897.html
+http://lists.gnu.org/archive/html/emacs-devel/2010-02/msg00401.html
+
+
+PREVIOUS GUIDELINES FOR CVS
+
+For historical interest only, here is the old-style advice for CVS logs:
+http://lists.gnu.org/archive/html/emacs-devel/2007-12/msg01208.html
+
+From: Eli Zaretskii
+Subject: Re: Log messages in CVS
+Date: Sat, 29 Dec 2007 16:06:29 +0200

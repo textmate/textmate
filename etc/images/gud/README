@@ -1,0 +1,54 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+The following icons were created by Nick Roberts <nickrob@snap.net.nz>.
+Copyright (C) 2002-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+  
+  break.pbm, nexti.pbm, go.pbm, pp.pbm, print.pbm, pstar.pbm, remove.pbm
+  break.xpm, nexti.xpm, go.xpm, pp.xpm, print.xpm, pstar.xpm, remove.xpm
+  stepi.pbm, until.pbm, stepi.xpm, until.xpm
+  rnexti.xpm rstepi.xpm 
+  recstart.xpm recstop.xpm
+
+
+Some icons are derived from Red Hat's Insight Debugger:
+
+<http://sourceware.org/insight/>
+"Insight is a graphical user interface to GDB, the GNU Debugger"
+
+<http://sourceware.org/insight/aboutus.php>
+"Insight is being released under the terms of the GNU General Public
+License (GPL)"
+
+In addition to the above, Red Hat has assigned (2002-11-09) copyright
+for its work on GDB to the Free Software Foundation (as well as a
+blanket assignment for all changes to FSF software, 1999-10-21, until
+terminated with 30 days notice). In an email exchange with Richard
+Stallman <rms at gnu.org> in November 2002, Red Hat confirmed that
+their copyright assignment included the icons.
+
+
+The following icons are converted from the Insight Windows style icon
+set in src/gdb/gdbtk/library/images2.
+
+Copyright (C) 2002-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+
+  cont.pbm and cont.xpm were converted from continue.gif
+  down.pbm and down.xpm were converted from down.gif
+  finish.pbm and finish.xpm were converted from finish.gif
+  next.pbm and next.xpm were converted from next.gif
+  run.pbm and run.xpm were converted from run.gif
+  step.pbm and step.xpm	were converted from step.gif
+  stop.pbm and stop.xpm were converted from stop.gif
+  up.pbm and up.xpm were converted from up.gif
+  watch.pbm and watch.xpm were converted from watch.gif
+
+The following icons are created from the Insight Windows style icon
+set in src/gdb/gdbtk/library/images2.
+
+Copyright (C) 2002-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+
+  rcont.xpm rfinish.xpm
+  rnext.xpm  rstep.xpm

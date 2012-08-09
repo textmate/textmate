@@ -1,0 +1,2163 @@
+2003-12-30  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.595 (erc-cmd-HELP):
+	Changed to prefer giving help for erc-cmd-* functions over
+	   similarly-named Elisp functions (e.g., erc-cmd-LIST vs. list).
+
+2003-12-28  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.594 (erc-query-buffer-p): Added this function.
+
+2003-12-28  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.593 (erc-cmd-SV): Use erc-emacs-build-time.
+
+	* erc-compat.el 1.15: erc-emacs-build-time: New variable.
+
+	* erc.el 1.592 (erc-cmd-SAY):
+	Reintroduced the feature where the spaces between
+	"/SAY" and the rest of the line were being sent with the message.
+
+2003-12-28  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.591 (erc-server-buffer-p):
+	Fixed a bug where this function sometimes would return
+	    nil when it should return t.
+
+2003-12-27  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.590 (erc-generate-new-buffer-name):
+	Really fixed a bug where ERC would reuse
+	    a connected server buffer when erc-reuse-buffers is non-nil.
+	(erc-cmd-JOIN): Now we tell the user when he attempts to join the same
+	    channel twice on the same server.
+
+	* erc.el 1.589 (erc-generate-new-buffer-name):
+	Fixed a bug where ERC would reuse a connected server buffer when erc-reuse-buffers is non-nil.
+
+	* erc.el 1.588 (erc-cmd-SAY):
+	Fixed a bug where the spaces between "/SAY" and the rest of the
+	    line were being sent with the message.
+
+	* erc-list.el 1.15: Fixed another typo.
+
+	* erc-list.el 1.14: Fixed a typo.
+
+	* erc-list.el 1.13:
+	Added text to the top of the channel list buffer describing the keybinding for
+	function erc-chanlist-join-channel.
+
+	* erc-list.el 1.12: Minor appearance changes.  No functional change.
+
+	* erc-list.el 1.11:
+	Implemented function erc-chanlist-join-channel.  Added variable
+	erc-chanlist-channel-line-regexp.  Got rid of function
+	erc-chanlist-pre-command-hook.  Changed the logic for how channel lines are
+	highlighted.
+
+2003-12-26  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-list.el 1.10:
+	Removed a bunch of unused code.  No semantic change.
+
+	* erc-list.el 1.9: Added lots of functionality.
+
+2003-12-15  Mario Lang  <mlang@delysid.org>
+
+	* erc-track.el 1.58, erc.el 1.587:
+	New custom type erc-message-type, use it in erc-hide-list and erc-track-exclude-types
+
+2003-12-14  Alex Schroeder  <alex@gnu.org>
+
+	* erc-track.el 1.57 (track-when-inactive): New module.
+	(erc-track-visibility): New option.
+	(erc-buffer-activity): New variable.
+	(erc-buffer-activity-timeout): New variable.
+	(erc-user-is-active): New function.
+	(erc-buffer-visible): New function.
+	(erc-modified-channels-update): Replace get-buffer-window call
+	with call to erc-buffer-visible.
+	(erc-track-modified-channels): Ditto.
+
+2003-12-14  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-track.el 1.56 (erc-modified-channels-update):
+	Force update of modeline.  Makes sure
+	that the tracked channels disappear in other buffers too.
+
+2003-12-06  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc.el 1.586 (define-erc-module):
+	New optional argument LOCAL-P.  If non-nil, then
+	mode will be created as buffer-local rather than a global mode.
+	(erc-cmd-CTCP): Fix indentation from last commit.
+
+	* erc-compat.el 1.14 (erc-define-minor-mode):
+	Deal with :global and :group keywords.
+
+	* erc-nickserv.el 1.13 (erc-current-network):
+	Make server regex more permissive.
+
+	* erc.el 1.585 (erc-cmd-CTCP):
+	Don't add a space to end of command when ARGS are
+	empty.  This fixes a bug whereby requests of the form "VERSION " were
+	being sent, and ignored.
+
+2003-11-27  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-log.el 1.9: From Adrian Aichner <adrian@xemacs.org>
+	* erc-log.el (erc-log-file-coding-system): Use 'binary
+	coding-system under XEmacs (instead of 'emacs-mule).
+	* erc-log.el (erc-w32-invalid-file-characters): Removed as no
+	longer needed.
+	* erc-log.el (erc-generate-log-file-name-long): Use
+	`convert-standard-filename', which exists in XEmacs too.
+
+2003-11-16  Mario Lang  <mlang@delysid.org>
+
+	* erc-identd.el 1.1: Code provided by johnw, thanks!
+
+2003-11-09  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc.el 1.584 (erc-latest-version): Clean up docstring.
+	Remove requirement for w3, wrap REQUIRE statement in IGNORE-ERRORS.
+	Update viewcvs url to correct location.
+	(erc-ediff-latest-version): Make sure that we find the uncompiled
+	erc.el, error if not.
+
+2003-11-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.583: Add more info to /sv
+
+2003-11-06  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.582: Added optional argument BUFFER to erc-server-buffer-p.
+
+2003-11-04  Mario Lang  <mlang@delysid.org>
+
+	* AUTHORS 1.6: Add sachac
+
+2003-11-02  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc.el 1.581 (erc-server-366):
+	chnl is 4th element of parsed, not fifth.
+	(erc-channel-end-receiving-names): Pass correct number of arguments
+	to delete-if-not.
+
+	* erc.el 1.580 (erc-update-current-channel-member):
+	Use erc-downcase when comparing
+	nick entries.  Cleanup indentation.
+
+2003-11-01  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-sound.el 1.4: Added a (provide 'erc-sound) line.
+
+	* erc.el 1.579 (erc-cmd-NAMES): send to TGT, not CHANNEL.
+
+2003-10-29  Sandra Jean Chua  <sacha@free.net.ph>
+
+	* erc-pcomplete.el 1.21, erc.el 1.578, CREDITS 1.6:
+	Merged Jeremy Maitin-Shepard's patch for time-sensitive nick completion.
+
+2003-10-27  Mario Lang  <mlang@delysid.org>
+
+	* Makefile 1.19, debian/changelog 1.24:
+	New Debian package 4.0.cvs.20031027
+
+2003-10-25  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.577: Fix typo tuncate->truncate
+
+2003-10-24  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.80: From Stephan Stahl <stl@isogmbh.de>:
+	(erc-dcc-send-block): Kill buffer if transfer completed correctly.
+
+2003-10-22  Mario Lang  <mlang@delysid.org>
+
+	* erc-track.el 1.55 (erc-track-disable):
+	Do not deactivate all advices for `switch-to-buffer',
+	just disable the erc specific one. (Bug#217022).
+
+2003-10-18  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-log.el 1.8 (erc-log-file-coding-system): New variable.
+	(erc-save-buffer-in-logs): Use it.
+
+2003-10-17  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.576 (erc-interpret-mirc-color): New boolean defcustom
+
+	* erc.el 1.575: Do not use -nowait on darwin (thanks johnw)
+
+2003-10-15  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc.el 1.574 (define-erc-module):
+	Set erc-FOO-mode appropriately in erc-FOO-enable
+	and erc-FOO-disable.
+
+2003-10-12  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-autoaway.el 1.12 (erc-mode):
+	Reset idletime on connect. Fixes an annoying bug which
+	flooded the server with always on reconnect.
+	(erc-autoway-reset-idletime): Accept optional args so we can hook it
+	onto erc-server-001-hook.
+
+2003-10-10  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.573 (erc-hide-list): Add a nice defcustom type
+
+2003-10-08  Mario Lang  <mlang@delysid.org>
+
+	* Makefile 1.18, debian/changelog 1.23, debian/control 1.8:
+	Debian snapshot 20031008
+
+	* erc-speedbar.el 1.11:
+	Patch from Eric M. Ludlam <eric@siege-engine.com>:
+	 - (erc-install-speedbar-variables): Add functions list (needs new speedbar?)
+	 - (erc-speedbar-buttons): Add doc.  Clear the buffer
+	 - (erc-speedbar-sort-channel-members): New function.
+	 - (erc-speedbar-expand-channel): Call new sort function.  Change some visuals.
+	 - (erc-speedbar-insert-user): Change some visuals based on channel data.
+	 - (erc-speedbar-line-text, erc-speedbar-item-info): New functions
+	Add proper elisp file header.
+
+2003-10-02  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-match.el 1.22 (erc-match-syntax-table): New variable.
+	(erc-match-current-nick-p): Use it.
+
+	* erc.el 1.572 (erc-quit-reason-zippy, erc-part-reason-zippy): Use
+	`erc-replace-regexp-in-string' rather than
+	`replace-regexp-in-string'.
+	(erc-command-indicator-face): New face, used to show commands if
+	`erc-hide-prompt' is nil and `erc-command-indicator' is non-nil.
+	(erc-command-indicator): Clean up doc-string.
+	(erc-display-prompt): New optional argument FACE, use this rather
+	than `erc-prompt-face' to fontify the prompt if non-nil.
+	(erc-send-current-line): Pass in `erc-command-indicator-face' to
+	`erc-display-prompt'.
+
+	* erc-compat.el 1.13 (erc-replace-regexp-in-string): New function.
+	Alias for `replace-regexp-in-string' on Emacs 21.
+	Argument massaging for `replace-in-string' for XEmacs.
+
+2003-09-28  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.571 (erc-keywords): Removed. Wasn't used by anything.
+
+2003-09-25  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc.el 1.570: ERC-HIDE-PROMPT: add custom group
+	ERC-COMMAND-INDICATOR: new variable.
+	ERC-COMMAND-INDICATOR: new function.
+	ERC-DISPLAY-PROMPT: new argument, PROMPT, used to override default
+	prompt.
+	ERC-SEND-CURRENT-LINE: pass ERC-COMMAND-INDICATOR to ERC-DISPLAY-PROMPT.
+
+2003-09-24  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.569 (erc-parse-line-from-server):
+	Ignore empty lines as required by RFC.
+
+2003-09-17  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.568: Add lag time calculation
+
+2003-09-13  Mario Lang  <mlang@delysid.org>
+
+	* Makefile 1.17, debian/README.Debian 1.7, debian/changelog 1.22:
+	New debian release
+
+	* erc-notify.el 1.22:
+	Call erc-notify-install-message-catalogs on load, not on module init
+
+	* erc.el 1.567 (erc-update-modules):
+	Use `load' instead of `require'.  XEmacs appears
+	to have the NOERROR arg only sometimes... Strange
+
+	* erc.el 1.566: No fboundp if we have a defvar
+
+	* erc.el 1.565: Properly defvar erc-ping-handler
+
+2003-09-11  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.564 (erc-setup-periodical-server-ping):
+	check if erc-ping-handler is
+	    bound before referencing it
+
+2003-09-10  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.563 (erc-cmd-NICK):
+	Warn about exceeded NICKLEN if we know it.
+
+	* erc.el 1.562: Make erc-server-PONG obey erc-verbose-server-ping.
+	Cancel old `erc-ping-handler' timer when restablishing connection in the same
+	buffer.
+
+	* debian/changelog 1.21, Makefile 1.16: New debian snapshot
+
+	* erc-dcc.el 1.79, erc-xdcc.el 1.6:
+	Use new function erc-dcc-file-to-name to convert spaces to underscores
+
+	* erc-xdcc.el 1.5: Add autoload for erc-xdcc-add-file
+
+2003-09-08  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.78: indent fixes and copyright update
+
+	* erc.el 1.561:
+	erc-send-ping-interval: New defcustom which defaults to 60.
+	Every 60 seconds, we send PING now.
+	This should fix the "connection silently lost" bug.
+	Please test this change extensively, and report problems.
+
+2003-09-07  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.560 (erc-default-coding-system):
+	Test for undecided and utf-8
+	before setting.
+
+2003-09-01  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.559 (erc-modules): Add some more symbols to the set
+
+	* erc.el 1.558 (erc-modules):	* erc.el 1.558 (erc-modules): Add :greedy t to the set in
+
+	* erc-dcc.el 1.77:
+	More autoloads which make dcc autoload upon ctcp dcc query received.
+
+	* erc-dcc.el 1.76 (erc-cmd-DCC): Add Autoload.
+	(pcomplete/erc-mode/DCC): Ditto, makes DCC autoloadable just by using
+	completion.
+	Also only offer "send" if fboundp make-network-process.
+
+	* erc-autojoin.el 1.6: Update copyright
+
+	* erc-autojoin.el 1.5 (erc-autojoin-add):
+	Only add the channel if it is not already there.
+
+	* erc-notify.el 1.21:
+	Use `define-erc-module' instead of old `erc-notify-initialize'.
+	Now defines the global minor mode erc-notify-mode, and should also
+	be controllable via `erc-modules' with symbol `notify'.
+
+	* erc.el 1.557 (erc-modules):
+	Fix paren-in-column-zero bug in docstring.
+	Add a sort of bogus, but still better :type.
+	Add autojoin and netsplit by default.
+	(erc-update-modules): Don't barf with an error if `require' fails.
+	We can still error out if the mode is not defined.
+
+2003-08-31  Andreas Fuchs  <asf@void.at>
+
+	* erc.el 1.556:
+	* make 353 (NAMES reply) output go into the appropriate channel buffer
+	  (if it exists) or into the active erc buffer (if not).
+
+2003-08-29  mtoledo  <mtoledo@confusibombus>
+
+	* erc.el 1.555:
+	Added the variable erc-echo-notices-in-current-buffer to make possible display notices in the current buffer (queries to nickserv/chanserv/memoserv). Defaults to nil so nothing changes from what we have today.
+
+2003-08-29  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.554: Fix typo in varname which led to a compiler warning
+
+	* AUTHORS 1.5: Added lawrence
+
+2003-08-27  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.75:
+	Set process and file-coding system to 'binary (for Windows)
+
+	* erc-stamp.el 1.30: Rename custom group erc-timestamp to erc-stamp.
+
+2003-08-07  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-fill.el 1.23 (erc-fill-disable):
+	Remove erc-fill, not erc-fill-static from
+	erc-insert-modify-hook.
+
+2003-08-05  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.553 (erc-send-current-line):
+	Now we display the prompt for previously entered commands
+	    based on the value of customization variable erc-hide-prompt.  This change is
+	    closely related to revision 1.552 by wencem.
+
+2003-08-04  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc.el 1.552 (erc-send-current-line):
+	If we're sending a command, don't display
+	the prompt.
+
+2003-08-04  Damien Elmes  <erc@repose.cx>
+
+	* erc-track.el 1.54: patch from David Edmondson (dme AT dme DOT org)
+
+	This patch makes button 3 on the erc-track buffer names in the
+	modeline show the selected buffer in another window. It's analogous to
+	button 2 which shows the buffer in the current window.
+
+2003-07-31  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.551 (erc-display-line-1):
+	Fixed bad indentation on one line.  No semantic change.
+
+2003-07-29  Lawrence Mitchell  <wence@gmx.li>
+
+	* erc-match.el 1.21:
+	Quote open paren in docstring of erc-text-matched-hook
+
+	* erc.el 1.550: Anchor match only at beginning in erc-ignored-user-p.
+
+	* erc-button.el 1.47: New variable erc-button-wrap-long-urls.
+	Modified erc-button-add-buttons:
+	  New optional argument REGEXP.
+	  If we're buttonizing a URL and erc-button-wrap-long-urls is
+	  non-nil, try and wrap them
+
+	Modified erc-button-add-buttons-1:
+	  Pass regexp to erc-button-add-buttons.
+
+2003-07-28  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.549 (erc-network-name):
+	Improved docstring.  Removed an unnecessary call to erc-server-buffer.
+
+2003-07-28  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.548: By lawrence:
+	(erc-ignored-user-p): Use anchored regexp.
+	(smiley): Fix missing quote in `remove-hook' call.
+
+2003-07-26  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-nets.el 1.4, erc-nickserv.el 1.12, erc.el 1.547:
+	Changed all references to Openprojects into references to Freenode.
+
+2003-07-25  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.546:
+	Now variable erc-debug-irc-protocol is defvar'ed instead of defcustom'ed.
+	Made the docstring clearer too.
+
+	* erc.el 1.545: Fixed a wrong-type-argument error from window-live-p.
+
+2003-07-15  Damien Elmes  <erc@repose.cx>
+
+	* erc-log.el 1.7 (erc-log-setup-logging):
+	set buffer-file-name to "", as (basic-save-buffer)
+	    will prompt for a buffer name before invoking hooks. the buffer-file-name
+	    will be overridden by (erc-save-buffer-in-logs) anyway - the main danger
+	    of doing this is write-file-contents hooks. Let's see if anyone complains.
+	(erc-save-buffer-in-logs): return t, so that further write hooks are not run
+
+2003-07-09  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.74 (erc-dcc-open-network-stream):
+	-nowait still crashes emacs cvs - disable for now
+
+2003-07-02  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.544 (erc): Minor docstring modification.
+
+2003-07-01  Damien Elmes  <erc@repose.cx>
+
+	* erc-match.el 1.20 (erc-match-current-nick-p):
+	match only on word boundaries
+
+	* erc-log.el 1.6 (erc-log-setup-logging):
+	not sure how this crept in again - make sure we set
+	    buffer-file-name to nil, since otherwise it is not possible to open
+	    previous correspondence in another buffer while a conversation is open
+
+2003-06-28  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.543 (erc-network-name):
+	Now makes some intelligent guesses if the server didn't tell
+	    us the network name.
+
+2003-06-28  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.542 (erc-default-coding-system): Use utf-8 as the default
+	encoding for outgoing stuff and undecided as the default for
+	incoming stuff.
+	(erc-coding-sytem-for-target): New.
+	(erc-encode-string-for-target): Use it.
+	(erc-decode-string-from-target): Use it.  Removed the flet
+	erc-default-target hack and documented the dynamically bound
+	variable `target' instead.
+
+2003-06-25  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.541 (erc-log-irc-protocol):
+	Now we keep point on the bottom line of the window
+	    displaying the *erc-protocol* buffer if it is at the end of the
+	    *erc-protocol* buffer.
+
+	* erc.el 1.540:
+	Added some text to the docstring for variable erc-debug-irc-protocol.
+
+2003-06-23  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-dcc.el 1.73 (erc-dcc-auto-mask-p):
+	Fixed a docstring typo that caused a load-time error.
+
+	* erc-dcc.el 1.72 (erc-dcc-auto-mask-p):
+	Changed reference to undefined variable erc-dcc-auto-mask-list
+	    to erc-dcc-auto-masks.
+	Changed default value of variable erc-dcc-auto-masks to nil and added text to its
+	    docstring.
+
+	* erc-notify.el 1.20 (erc-notify-timer and erc-notify-QUIT):
+	Added network name to notify_off message.
+
+	* erc.el 1.539 (erc-network-name):
+	Now returns the name of the IRC server if the network name
+	    cannot be determined.
+
+	* erc-notify.el 1.19 (erc-notify-JOIN and erc-notify-NICK):
+	Added argument ?m to call to erc-display-message.
+
+	* erc-dcc.el 1.71 (erc-dcc-do-LIST-command):
+	Fixed a bug where I assumed (plist-get elt :type)
+	    returns a string -- it really returns a symbol.
+
+	* erc-notify.el 1.18 (erc-notify-timer):
+	Now we include the network name in the notify_on message.
+
+	* erc.el 1.538:
+	New function: erc-network-name.  Returns the name of the network that the
+	    current buffer is associate with.  Not every server sends the 005 messages
+	    that enable the network name to be known.  If the network name is
+	    not known, the string "UNKNOWN" is returned.
+
+	* erc-dcc.el 1.70 (erc-dcc-chat-setup):
+	Added a comment.  Fixed a bug where a DCC CHAT buffer has no
+	    prompt when it first appears.
+
+	* erc-dcc.el 1.69 (erc-dcc-chat-parse-output):
+	Now a DCC chat buffer displays the nick using
+	    erc-nick-default-face just like in a channel buffer.
+
+2003-06-22  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.537 (erc-display-prompt):
+	Fixed incorrect indentation.  No semantic change.
+
+	* erc.el 1.536 (erc-strip-controls):
+	Minor change to regexp that matches IRC color control
+	    codes.  I was seeing usage as follows: ^C07colored text^C^C04other color.
+	    Now we strip a ^C followed by zero, one, or two digits.  Before this change,
+	    we stripped a ^C followed by one or two digits.
+
+	* erc-dcc.el 1.68 (erc-dcc-do-LIST-command):
+	Improved format of output of /DCC LIST.  Now the
+	    "Size" column for a DCC GET includes the percentage of the file that has
+	    been retrieved.
+	(erc-dcc-do-GET-command): Now it works if erc-dcc-default-directory is set.
+
+2003-06-19  Damien Elmes  <erc@repose.cx>
+
+	* erc-log.el 1.5:
+	* added quickstart information to the comments up the top
+
+2003-06-16  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.535:
+	Default to open-network-stream on MS Windows. (thanks lawrence)
+
+2003-06-11  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.534 (erc-process-input-line):
+	refactor so that wrong-number-of-arguments is
+	    caught when using do-not-parse-args - this lets do-not-parse-args
+	    commands display help messages on incorrect syntax in a uniform manner.
+	    This no longer raises a bad-syntax error - was this a catch-all to stop a
+	    backtrace? Does it belong?
+	(erc-cmd-APPENDTOPIC): the correct way to display help when you want to
+	    accept an arbitrary string is to (signal 'wrong-number-of-arguments nil).
+	    This fixes a bug where people could not /at topics with a space in them.
+
+2003-06-09  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.533:
+	Re-add the last few changes which weren't merged for some reason.
+
+	* erc.el 1.532 (erc-cmd-APPENDTOPIC): show help when given no arguments
+
+	Patch from MrBump. Fixes problem with erc-set-topic inserting ^C characters
+	into the topic. Also removes dependency on CL.
+
+2003-06-08  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.531:
+	Added comment to explain (eval-after-load "erc" '(erc-update-modules)).
+
+2003-06-01  Mario Lang  <mlang@delysid.org>
+
+	* erc-pcomplete.el 1.20: Add completion for /unignore
+
+2003-05-31  Alex Schroeder  <alex@gnu.org>
+
+	* erc-compat.el 1.12 (erc-encode-coding-string): The default binding,
+	if encode-coding-string was not available, must be a defun that
+	takes multiple arguments.  Did that.
+
+2003-05-30  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.530:
+	Add handlers for 313 and 330 (by arne@rfc2549.org, thanks)
+
+2003-05-30  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.529:
+	patch from MrBump to make /mode #foo +b work again (erc-cmd-BANLIST only
+	temporarily changes them now)
+
+2003-05-29  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.528 (erc-select):
+	server is now defaulted with erc-compute-server.
+	A few cosmetic fixes.
+	(erc-default-coding-system): Renamed from erc-encoding-default.
+	(erc-encoding-default): Renamed to erc-default-coding-system.
+	(erc-encoding-coding-alist): Documentation updated to cover regexps.
+	(erc-encode-string-for-target): Now considers keys of
+	erc-encoding-coding-alist to be regexps.  Rely on erc-compat
+	wrt. MULE support.
+	(erc-decode-string-from-target): New function.
+	(erc-send-current-line): eq -> char-equal fix.
+	(erc-server-TOPIC): topic is now decoded with
+	erc-decode-string-from-target.
+	(erc-parse-line-from-server): Line from server is no longer decoded
+	here.
+	(erc-server-PRIVMSG-or-NOTICE): Message from a user is decoded here,
+	sspec -> sender-spec for clarity.  Cosmetic if -> when fix.
+	(erc-server-TOPIC): sspec -> sender-spec
+	(erc-server-WALLOPS): Ditto.
+
+	* erc-compat.el 1.11 (erc-decode-coding-string):
+	Now requires coding-system as an argument.
+
+2003-05-15  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.527:
+	erc-part|quit-hook is only run on a part|quit directed to our nick, reflect that in the docstring to avoid confusion
+
+2003-05-01  Andreas Fuchs  <asf@void.at>
+
+	* erc-truncate.el 1.3:
+	* erc-truncate-buffer-to-size: use fboundp. Scheme takes its toll...
+
+2003-05-01  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-truncate.el 1.2: remove require of erc-log
+	(erc-truncate-buffer-to-size): use erc-save-buffer-in-logs when it's
+	there, else, don't.
+
+2003-04-29  Andreas Fuchs  <asf@void.at>
+
+	* erc-log.el 1.4, erc-truncate.el 1.1, erc.el 1.526: erc.el:
+		* erc-cmd-QUIT: Remove references to code in erc-log.el, to
+		  not force autoloading of erc-log.el
+		* erc-server-PART: ditto.
+		* erc-quit-hook: new hook, run when /quit command is
+		  processed.
+		* erc-cmd-QUIT: use it.
+		* erc-part-hook: new hook, run then PART message is
+		  processed.
+		* erc-cmd-PART: use it.
+		* erc-connect-pre-hook: new hook, run before connection to IRC
+		  server is started.
+		* erc: use it.
+		* erc-max-buffer-size: Move truncation variables and functions
+		  to erc-truncate.el
+		* erc-truncate-buffer-on-save: moved to erc-log.el
+		* erc-initialize-log-marker: new function.
+	erc-log.el:
+		* erc-truncate-buffer-on-save: New defcust here; from erc.el
+		* erc-truncate-buffer-on-save: Put it in group `erc-log'
+		* erc-log-channels-directory: Remove trailing slash from
+		  default value.
+		* Add functions to erc-connect-pre-hook, erc-part-hook and
+		  erc-quit-hook to avoid getting autoloaded.
+
+	erc-truncate.el:
+		* Contains the truncation functions and defcusts from erc.el.
+		* define-erc-module clause added; new erc-truncate-mode.
+
+2003-04-29  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.525 (erc):
+	Check whether erc-save-buffer-in-logs is bound, too
+
+	* erc.el 1.524 (erc):
+	Check whether erc-logging-enabled is bound before using it - not
+	everyone is using erc-log.el!
+
+2003-04-28  Andreas Fuchs  <asf@void.at>
+
+	* erc-log.el 1.3:
+	* while we're at it, remove the (declare (ignore ignore)) statements.
+
+	* erc-log.el 1.2:
+	* add autoload statement for erc-log-mode/etc. Sorry for the delay.
+
+	* erc-log.el 1.1, erc.el 1.523: * erc.el:
+		- move variables and functions to erc-log.el:
+			 defgroup `erc-log'
+	                 defcustom `erc-log-channels-directory'
+			 defcustom `erc-log-insert-log-on-open'
+			 defcustom `erc-generate-log-file-name-function'
+			 defun `erc-save-buffer-in-logs' (autoloads from erc-log.el)
+	 		 defuns `erc-generate-log-file-name-*'
+			 defun `erc-current-logfile'
+			 defun `erc-logging-enabled' (autoloads from erc-log.el)
+		- erc-truncate-buffer-to-size: fix for double-saving bug when
+		  writing out truncated buffer contents. Thanks, lawrence mitchell <wence@gmx.li>!
+		- erc-remove-text-properties-region: Fix case for read-only text.
+		- erc-send-current-line: update insert-marker before calling the hooks.
+		                         also, wrap (erc-display-prompt) so that it doesn't toggle
+					 buffer-modified-p.
+		- erc-interpret-controls: remove /very/ old commented-out function
+		- erc-last-saved-position: make it a marker
+		- erc: use it.
+
+	* erc-log.el: (thanks, lawrence mitchell <wence@gmx.li>!)
+		- Move logging code from erc.el here
+		- define-erc-module log: add; minor mode erc-log-mode is the
+		  same as adding the `erc-save-buffer-in-logs' to
+		  erc-send-post-hook and `erc-insert-post-hook'.
+		- erc-w32-invalid-file-characters: add.
+		- erc-enable-logging: add.
+		- erc-logging-enabled: use it.
+		- erc-logging-enabled: autoload.
+		- erc-save-buffer-in-logs: fix for truncating saved buffer with read-only text.
+		- erc-save-buffer-in-logs: use erc-last-saved-position.
+		- erc-save-buffer-in-logs: fix saving half-written messages on
+		  the prompt when saving the log file. (simply uses
+		  erc-insert-marker as an upper bound for saving).
+
+2003-04-27  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.522:	* erc.el 1.522: erc-modules: added
+
+2003-04-27  Alex Schroeder  <alex@gnu.org>
+
+	* Makefile 1.15 (UNCOMPILED): Added erc-compat.el.
+	(clean): Remove .elc files, too.
+	Patch by Hynek Schlawack <hynek+erc@hys.in-berlin.de>
+
+2003-04-22  Damien Elmes  <erc@repose.cx>
+
+	* erc-button.el 1.46:
+	erc-button-keymap: set the parent keymap to erc-mode-map
+
+2003-04-20  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.521:
+	erc-official-location: shouldn't the official location be the base URL of erc?
+
+	* erc.el 1.520:
+	erc-modules: updated the docstring to make the semantics clearer
+
+2003-04-19  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.519:
+	Fix problem where % in NOTICE produced errors (from mmc)
+
+2003-04-18  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.518 (erc-toggle-debug-irc-protocol):
+	moved a reference to 'buf' inside the let
+	    statement which defines it. it's difficult to tell what the original
+	    intentions were here - at the moment the debug window is displayed when
+	    toggling either way.
+
+	* README 1.3, erc.el 1.517:
+	(erc-update-modules: added a condition in for erc-nickserv -> erc-services
+
+	* erc-pcomplete.el 1.19:
+	- that change to erc-update-modules making it require the modules first means
+	  we don't need any special case handling here, so i reverted the previous
+	  change
+
+	* erc.el 1.516:
+	- don't require 'erc-auto, since windows users don't have access to make.
+	  instead, we handle it in (erc-update-modules)
+
+2003-04-17  Damien Elmes  <erc@repose.cx>
+
+	* README 1.2, Makefile 1.14:
+	Updated Makefile and documentation to reflect the new release
+
+	* erc.el 1.515:
+	- note the previous change also updated the release number to erc 4.0!
+	(erc-connect): fix a bug introduced by the previous release
+
+	* erc.el 1.514:
+	fixed about 20 instances of (message (format ...)) which will break if the
+	format returns a string with %s in it
+
+	* erc.el 1.513: erc-error-face: make it red, not pink
+
+	* erc-pcomplete.el 1.18:
+	since pcomplete is autoloaded via erc-completion-mode, and completion is in
+	erc-modules by default, we remove completion when pcomplete is added
+
+	* erc.el 1.512 (define-erc-module): no need for delete, use delq
+
+	* erc-members.el 1.5 (erc-nick-channels):
+	(erc-person-channels) takes one arg
+	(erc-format-user): again, they all take an arg
+
+	* erc.el 1.511:
+	- require erc-auto when loading, so the default `erc-modules' can be loaded.
+	  this makes erc-auto no longer a convenience but a necessity - all the name
+	  of user friendliness.
+	(define-erc-module): the enable and disable routines now update erc-modules
+	    accordingly
+	erc-modules: new variable controlling the modules which erc has loaded/will
+	    load. when customizing, it will automatically enable modules. it won't
+	    automatically disable modules which are removed, yet.
+	(erc-update-modules): enable all modules in `erc-modules'
+
+	* erc-dcc.el 1.67 (erc-dcc-open-network-stream):
+	use the -nowait equiv if available
+	erc-dcc-server-port: removed
+	erc-dcc-port-range: allows a range of values, so you can have more than one
+	    dcc
+	(erc-dcc-server): support erc-dcc-port-range
+	(erc-dcc-chat): use OCHAT for outgoing chat for now. we need to fix the
+	    issues with allowing more than one chat with the same person
+
+	* erc.el 1.510:
+	erc-log-channels: removed; set the directory to start logging
+	(erc-directory-writeable-p): create directory if it doesn't exist, check if
+	    it's writable
+	(erc-logging-enabled): don't reference erc-log-channels
+
+2003-04-07  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.509 (erc):
+	but when inserting the contents of a previous logfile, use the logfile
+	    name, not ""!
+
+	* erc.el 1.508 (erc):
+	set buffer-file-name to "", since we have a custom saving function and
+	    it's not needed. this enables one to open a log file with previous
+	    correspondence, while talking to the person at the same time
+
+2003-03-29  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.507 (erc-prepare-mode-line-format):
+	Now strips all text properties from the target before
+	    putting it in the mode line.  Keeps the mode line looking consistent.
+	(erc-channel-p): Improved docstring.
+
+2003-03-28  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.506 (erc-generate-log-file-name-with-date): New function.
+	(erc-generate-log-file-name-function): Make it available.
+
+2003-03-24  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.505:
+	Fix erc-prompt and erc-user-mode custom :type (Closes: #185794)
+
+2003-03-20  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.504:
+	erc-server-hook-list: correct documentation of ordering of (proc parsed)
+
+2003-03-16  Alex Schroeder  <alex@gnu.org>
+
+	* erc-track.el 1.53 (erc-modified-channels-string):
+	Make it a risky-local-variable.
+
+2003-03-16  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-track.el 1.52 (erc-track-modified-channels):
+	Use (point-min) if we don't find a
+	parsed-property, so it won't error out with nil...
+
+2003-03-16  Damien Elmes  <erc@repose.cx>
+
+	* erc-track.el 1.51 (erc-track-switch-buffer):
+	removed call to erc-modified-channels-update, as
+	    this is done correctly on buffer switching in both emacs and xemacs now
+
+2003-03-15  Damien Elmes  <erc@repose.cx>
+
+	* erc-track.el 1.50 (erc-find-parsed-property):
+	simplified a little, so it shouldn't return nil anymore
+
+	* erc.el 1.503: erc-send-post-hook: document narrowing which occurs
+
+2003-03-14  Alex Schroeder  <alex@gnu.org>
+
+	* erc-track.el 1.49 (erc-find-parsed-property): New function.
+	(erc-track-modified-channels): Use it instead of relying on
+	point-min.
+
+2003-03-12  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.502:
+	Fix erc-set-topic to accept a channel name as first word
+
+2003-03-11  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-dcc.el 1.66:
+	Small patch (<10 lines, also slightly modified by Jorgen Schäfer) from
+	David Spreen <netzwurm@debian.org> to add hostmask-authentication to
+	DCC auto-accept.
+
+	erc-dcc-auto-mask-list: New variable
+	(erc-dcc-handle-ctcp-send): Check erc-dcc-auto-mask-list
+	(erc-dcc-auto-mask-p): New function
+	erc-dcc-send-request: Docstring now mentions erc-dcc-auto-mask-list
+
+2003-03-10  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-ring.el 1.11 (erc-clear-input-ring):
+	New function.  Erases the contents of the input ring for
+	   the current ERC buffer.
+
+2003-03-08  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.501:
+	(erc-display-line-1) and (erc-send-current-line): Now these functions reset erc-insert-this
+	    to t as soon as possible after consuming the value of that variable.  See the comments in
+	    the code for the strange symptom this fixes.
+	(erc-bol): Changed to call point-at-eol instead of line-end-position.  This increases XEmacs
+	    portability, since XEmacs doesn't have line-end-position.  Patch suggested by Scott Evans
+	    on the ERC mailing list.
+
+2003-03-04  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.500: banlist*: patch from mrbump to avoid using cl packages
+
+2003-03-04  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.499:
+	Changed erc-noncommands-list from a constant to variable, so that users can
+	    add their own erc-cmd-* functions to the list.  Improved the docstring too.
+
+2003-03-02  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.498 (erc-server-353):
+	Now the output of "/NAMES #channel" appears in the currently
+	    active ERC buffer, even if the user is not a member of #channel.
+
+	* erc.el 1.497 (erc-cmd-DEOP):
+	Fixed a syntax error: invalid read syntax ")" caused by my last change.
+
+2003-03-01  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.496 (erc-cmd-DEOP):
+	Fixed a wrong-type-argument error caused by calling split-string
+	    on a list instead of on a string.  Removed the call to split-string entirely,
+	    because it wasn't needed.
+
+	* erc.el 1.495 (erc-cmd-HELP):
+	Changed to use intern-soft instead of intern.  Now "/HELP floob"
+	    doesn't create a void function symbol erc-cmd-FLOOB.
+
+2003-02-25  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.494 (erc-cmd-SERVER):
+	remove erroneous references to line, use server instead
+
+2003-02-23  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.493 (erc-toggle-debug-irc-protocol):
+	Fixed a bug where the global value of
+	    kill-buffer-hook was being modified instead of the buffer-local value.
+
+2003-02-22  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.492 (erc-cmd-KICK):
+	Now supports any number of words in the REASON string.  Examples
+	    of the /KICK command are:
+	      /KICK franl You don't belong here
+	      /KICK franl Bye
+	      /KICK franl
+	      /KICK #channel franl Go away now
+	      /KICK #channel franl Bye
+	      /KICK #channel franl
+
+2003-02-16  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-stamp.el 1.29 (erc-insert-timestamp-right):
+	Make the timestamp rear-nonsticky, so
+	C-e works at the beginning of the next line.
+
+2003-02-16  Andreas Fuchs  <asf@void.at>
+
+	* erc-stamp.el 1.28:
+	* s/choose/choice/ in customize options, as kensanata requested.
+
+2003-02-15  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.491 (erc-toggle-debug-irc-protocol):
+	Now if the *erc-protocol* buffer is killed,
+	    logging is turned off.  Prior to this change, the buffer would come back
+	    into existence (generally unbeknownst to the user) after being killed.
+
+2003-02-11  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.490 (erc-send-current-line):
+	we can't inhibit everything here when not connected,
+	    as the user will expect commands like /server still to work. the
+	    erc-cmd-handler should recover from errors instead
+
+2003-02-10  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.489:
+	* we now run erc-after-connect on 422 (no motd) messages as well as the motd
+	  messages
+	(erc-login): revert the previous change
+
+	* erc.el 1.488 (erc-login): register that we're connected
+
+2003-02-10  Mario Lang  <mlang@delysid.org>
+
+	* erc-members.el 1.4: * Provide erc-members
+	* Fix excessive )
+	* Comment out broken self-tests
+
+2003-02-07  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.487 (erc-connect):
+	notify the user we're trying to connect when using asych
+	    connections
+
+	* erc.el 1.486 (erc-connect): support an asynchronous connection
+	(erc-process-sentinel): ditto
+
+	* erc-track.el 1.48:
+	* advise switch-to-buffer in the case of xemacs, since it doesn't have
+	  window-configuration-change-hook
+
+	* erc.el 1.485 (erc-send-current-line):
+	if not connected, refuse to send either a message or
+	    a command
+
+	* erc.el 1.484: (erc-save-buffer-in-logs):
+	    - check for a sensible region before saving the buffer. if the
+	      connection process is killed early on, there is not a sensible region
+	      to save
+	    - don't set buffer-file-name on save. we don't need it, and it means we
+	      can now find-file a log while an existing query is open with that
+	      user
+
+	* erc.el 1.483 (erc-process-input-line):
+	when displaying the help for a function, if no
+	    documentation exists, don't fall over
+	(erc-cmd-SAY): new function for quoting lines beginning with /
+	(erc-server-NICK):
+	    - fix a bug where the "is now known as" message doesn't appear on newly
+	      created /query buffers
+	    - when a user changes their nick, update the query to point to the new
+	      nick
+
+	* erc.el 1.482 (erc-send-current-command):
+	don't reject multi-line commands. since
+	    multiline-p is used as the no-command arg to erc-process-current-line,
+	    multi-line text is never interpreted as a command. i believe this is the
+	    correct behavior - it allows people to post the output of things like df
+	    (sans header). if you want to change this, please provide a rationale
+	    in the changelog
+
+	* erc.el 1.481 (erc-send-current-line):
+	only match the first line when determining if a
+	    multi-line command is allowed
+
+2003-02-07  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-bbdb.el 1.21 (erc-bbdb-highlight-record):
+	Use alternate strings, not character
+	classes to split the nick-field.
+
+2003-02-06  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.479 (erc-process-sentinel):
+	Now we set erc-connected to nil every time we disconnect
+	    from a server, not just when an unexpected disconnect happens.
+
+	* erc.el 1.478 (erc-connected):
+	Removed redundant defvar of this variable.  Improved the
+	    docstring.
+	(erc-login): Changed to send a correct RFC2812 USER message (see section
+	    3.1.3 of RFC2812 for the documentation of the semantics of each argument
+	    of the USER message.
+
+2003-02-02  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.477 (erc-cmd-NOTICE): fix from mrbump
+
+2003-01-31  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.476 (erc-cmd-JOIN):
+	Now we only send one JOIN command to the server when a channel
+	    key is provided.
+
+2003-01-30  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.475 (erc-remove-channel-member):
+	Fixed so that it runs erc-channel-members-changed-hook
+	    with the channel buffer current, as is documented in the docstring for variable
+	    erc-channel-members-changed-hook: "The buffer where the change happened is
+	    current while this hook is called."
+
+2003-01-28  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.474:
+	(erc-ignored-user-p),(erc-cmd-IGNORE),(erc-cmd-UNIGNORE): Now nicks are ignored
+	    on a per-server basis.  Now, erc-ignore-list is only valid in server
+	    buffers!  Do not reference it in channel buffers.
+
+	* erc.el 1.473 (erc-cmd-IGNORE):
+	Now says "Ignore list is empty" if it erc-ignore-list is empty
+	    instead of showing an empty list.
+
+2003-01-25  Alex Schroeder  <alex@gnu.org>
+
+	* erc-nickserv.el 1.11 (services): Defined a module
+
+2003-01-25  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.472 (erc-process-ctcp-query):
+	Display recipient of CTCP query if it's not
+	our current nick.
+
+	* erc.el 1.471 (erc-cmd-WHOIS):
+	Accept an optional second argument SERVER.
+
+2003-01-25  Alex Schroeder  <alex@gnu.org>
+
+	* erc-stamp.el 1.27 (stamp): erc-add-timestamp must always be added
+	with the APPEND parameter -- not only when adding it on the right.
+
+2003-01-24  Alex Schroeder  <alex@gnu.org>
+
+	* erc-members.el 1.3 (erc-channel-members-changed-hook): Obsolete, use
+	erc-members-changed-hook instead.  When it is set, add its content
+	to erc-members-changed-hook.
+	(erc-update-channel-member): Obsolete, use erc-update-member
+	instead.  Defalias to that effect.
+	(erc-remove-channel-member): New and already obsolete.  Use
+	erc-remove-nick-from-channel instead.
+	(erc-update-channel-info-buffer): Obsolete, use ignore instead.
+	Yes, these have to go.
+	(erc-channel-member-to-user-spec): Obsolete, use erc-format-user
+	instead.
+	(erc-format-user): New.
+	(erc-ignored-reply-p): New, use it.
+
+	* erc-members.el 1.2:
+	Further along the way.  Any function from erc.el that uses
+	channel-members should end up in this file, rewritten to use
+	erc-members.
+
+	(erc-person): Call erc-downcase before getting
+	something from the hash.
+	(erc-nick-in-channel): Checking whether erc-process must be used is
+	unnecessary -- this will be done in erc-person.
+	(erc-nick-channels): New.
+	(erc-add-nick-to-channel, erc-update-member): Call erc-downcase
+	before putting something into the hash.
+	(erc-buffer-list-with-nick): New.
+	(erc-format-nick, erc-format-@nick): New, backwards incompatible.
+	Must check for other places that call these!
+	(erc-server-PRIVMSG-or-NOTICE): Use the new version.
+
+	* erc-compat.el 1.10 (view-mode-enter): defalias to view-mode, if
+	view-mode-enter is not fboundp and view-mode is -- as is the case
+	in XEmacs.  We need view-mode-enter in erc-match.el.
+
+2003-01-23  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.470 (erc-default-server-handler):
+	Minor performance improvement: allow the lambda
+	    expression to be byte-compiled.
+
+2003-01-23  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.469 (erc-cmd-BANLIST):
+	in the absence of a fill-column, use the screen width
+
+2003-01-22  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.468:
+	patch from MrBump to delay fetching the banlist until /bl is run, so we don't
+	fetch it when joining a channel anymore
+
+	* erc-ring.el 1.10:
+	* instead of adjusting hooks when loaded, provide (erc-ring-mode). you'll
+	  need to run (erc-ring-mode 1) now to get the ring
+	* (erc-previous-command), (erc-next-command):
+	    - check if the ring exists and create it if necessary
+	    - don't do anything if the ring is empty
+
+	* erc-pcomplete.el 1.17:
+	Put "how to use" documentation in the comments up the top
+
+2003-01-21  Alex Schroeder  <alex@gnu.org>
+
+	* erc-autojoin.el 1.4 (erc-autojoin-version): New.
+
+	* erc-autojoin.el 1.3 (erc-autojoin-add): Added body.
+	(erc-autojoin-remove): Added body.
+	(erc-autojoin): Provide it.
+
+2003-01-21  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.467: erc-cmd-*: removed a bunch of references to force
+
+2003-01-21  Alex Schroeder  <alex@gnu.org>
+
+	* erc-autojoin.el 1.2 (erc-autojoin-channels-alist): More doc.
+
+2003-01-20  Alex Schroeder  <alex@gnu.org>
+
+	* erc-autojoin.el 1.1:
+	new, based on resolve's mail, and the stuff on the wiki
+
+	* erc-members.el 1.1: new
+
+2003-01-19  Mario Lang  <mlang@delysid.org>
+
+	* debian/README.Debian 1.6, debian/changelog 1.20, debian/scripts/install 1.11,
+	  debian/scripts/startup.erc 1.4, Makefile 1.13:
+	Prepare for 20030119 debian package
+
+	* erc-dcc.el 1.65: <rant>
+	* (erc-decimal-to-ip): Since XEmacs decides that return a completely
+	and utterly wrong number from string-to-number if it is larger than
+	the integer boundary, instead of sanely converting the thing to
+	a float, we now (concat dec ".0").
+	</rant>
+
+	* erc.el 1.466:
+	* (erc-log-irc-protocol): Use erc-propertize, not propertize
+
+2003-01-19  Alex Schroeder  <alex@gnu.org>
+
+	* erc-button.el 1.45 (erc-button-add-buttons): Added regexp-quote for
+	the list case, too.
+
+2003-01-19  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.64 (erc-dcc-member): fix for case where a prop is nil
+
+	* erc-dcc.el 1.63 (erc-dcc-member):
+	fix for xemacs's version of plist-member
+
+2003-01-19  Mario Lang  <mlang@delysid.org>
+
+	* erc-notify.el 1.17: Delete empty strings from the ison-list
+
+	* erc-track.el 1.47:
+	* (erc-track-switch-buffer): Call erc-modified-channels-update here.
+
+	* erc-track.el 1.46: * toplevel: require 'erc-match
+
+	* erc-track.el 1.45: * (erc-track-mode): Make autoload interactive
+
+	* erc-button.el 1.44: * (button): Make the autoload interactive
+
+	* erc.el 1.465:
+	* (erc-mode): Comment out the case-table stuff, breaks xemacs
+	* (erc-downcase): Revert.
+
+	* erc-dcc.el 1.62:
+	* (erc-dcc-handle-ctcp-send): Use erc-decimal-to-ip on the ip we get...
+
+	* erc-speak.el 1.25:
+	Eliminate reference to erc-nick-regexp, which no longer exists
+
+2003-01-19  Alex Schroeder  <alex@gnu.org>
+
+	* erc-stamp.el 1.26 (erc-timestamp-right-column): New, default nil.
+	(erc-insert-timestamp-right): Use it, if non-nil.  Verbose
+	doc string.
+
+2003-01-18  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.464 (erc-downcase): Use the old behavior in non-CVS Emacs.
+
+	* erc.el 1.463 (erc-cmd-QUIT): Remove &rest. The correct fix follows.
+	(erc-cmd-GQUIT): Pass "" to erc-cmd-QUIT.
+	(erc-mode): Use the case-table only in CVS Emacs. See comment.
+
+	* erc.el 1.462 (erc-cmd-QUIT): make reason optional.
+
+	* erc.el 1.461 (erc-cmd-GQUIT): Fixed typo.
+
+2003-01-17  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.460:
+	* (erc-current-logfile): call expand-file-name, so that downcase doesn't mess up ~
+
+	* erc.el 1.459: * (erc-mode): Define a proper case-table.
+	* (erc-downcase): just call downcase for now, let's see if the case-table is portable, if yes, we'll remove all erc-downcase references anyway...
+
+	* erc-button.el 1.43: * (erc-button-add-buttons): regex-quote the nick
+
+2003-01-17  Alex Schroeder  <alex@gnu.org>
+
+	* erc-button.el 1.42 (button): erc-channel-members-changed-hook no
+	longer has erc-recompute-nick-regexp.
+	(erc-button-alist): Use channel-members instead of
+	erc-nick-regexp.
+	(erc-button-add-buttons): Split some code into
+	erc-button-add-buttons-1, and now handle strings, lists, and
+	alists.  Regular expressions in lists and alists are enclosed in
+	< and >.
+	(erc-button-add-buttons-1): New.
+	(erc-nick-regexp): Deleted.
+	(erc-recompute-nick-regexp): Deleted.
+
+	* erc-button.el 1.41: Remove require cl again.
+	(erc-mode-map): No longer bind widget-backward and widget-forward.
+	(erc-button-alist): Explain why byte-compiling makes no sense, and
+	remove all calls to byte-compile.
+	(erc-button-keymap): Define it the standard way, without exposing
+	the list nature of the keymap.
+	(erc-button-marker-list): Deleted.
+	(erc-button-add-buttons): Simplify.  In particular, create the
+	button using the real callback, instead of using the intermediate
+	erc-button-push, and only store the data as described for
+	erc-button-alist.
+	(erc-button-remove-old-buttons): Simplify.  No more list munging.
+	Instead, just remove all the properties that we add in
+	erc-button-add-button.
+	(erc-widget-press-button): Deleted.
+	(erc-button-click-button): New, for mouse clicks.  Moves point to
+	where the mouse is, and calls erc-button-push.
+	(erc-button-push): Instead of matching again, just use the
+	erc-callback and erc-data properties at point to do the right
+	thing.
+	(erc-button-entry): Deleted.
+	(erc-button-next): Use error instead of the beep plus message
+	combo.
+
+2003-01-17  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-autoaway.el 1.11 (erc-autoaway-set-back):
+	Don't pass a force argument to erc-cmd-GAWAY.
+
+	* erc.el 1.458 (erc-cmd-AWAY): Removed usage of the force variable.
+
+2003-01-17  Alex Schroeder  <alex@gnu.org>
+
+	* erc-button.el 1.40 (button):
+	erc-recompute-nick-regexp is no longer added to
+	erc-channel-members-changed-hook unconditionally, but only if
+	erc-button-mode is enabled, and if it is disabled, it is removed
+	again.
+	(erc): Require cl for delete-if.
+	(erc-button-remove-old-buttons): Rewrote using delete-if to
+	prevent excesive consing.  Having the marker list is still ugly,
+	so another solution needs to be found.
+
+2003-01-17  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.457 (erc-banlist-store):
+	Don't assume there's always a setter in the banlist reply.
+
+2003-01-17  Alex Schroeder  <alex@gnu.org>
+
+	* erc-button.el 1.39 (erc-button-url-regexp): Changed regexp according
+	to a suggestion by Max Froumentin <mf@w3.org>.
+
+2003-01-17  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.456:
+	fix erc-remove-channel-member again to not error out on nil as first arg...
+
+	* erc.el 1.455: * (erc-occur): New function
+
+2003-01-17  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.454: erc-banlist-*: return nil so further hooks are called
+
+	* erc.el 1.453 (erc-server-368):
+	suppress "end of ban list" messages - use /listbans now
+
+	* erc.el 1.452 (erc-send-current-line):
+	removed the check for leading whitespace again - the
+	    only time we want to prohibit multi-line commands is if / is the first
+	    thing on the line
+	(erc-get-arglist): new defun for reading a function's arglist which should
+	    work with older copies of emacs. we use help-function-arglist if it's
+	    available, though, since that has support for reading subrs, etc
+
+	* erc.el 1.451 (erc-cmd-JOIN): fixed (again)
+
+	* erc.el 1.450: * fixed call to erc-cmd-NICK when connecting
+	* support for listing bans and mass unbanning, again thanks to MrBump
+
+	* erc.el 1.449 (erc-set-topic):
+	patch from MrBump (Mark Triggs, mst@dishvelled.net) to strip
+	    control chars and topic attribution in C-c C-t
+
+2003-01-16  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.448:
+	* (erc-remove-channel-member): Do not use delq, modify the list using setcdr like delq does.
+	In theory, this should be way faster since the list doesn't get traverse two times.
+	Measurement didn't show any real difference though :(, this system is flawed for channels with >300 users it seems...
+	Also moved some defcustoms up.
+
+2003-01-16  Brian P Templeton  <bpt@tunes.org>
+
+	* erc.el 1.447: moved misplaced paren
+
+2003-01-16  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.446 (erc-cmd-UNIGNORE):
+	reference argument directly - no string matching
+
+	* erc.el 1.445 (erc-extract-command-from-line):
+	hmm, thinko in the canonicalization. should
+	    be fixed
+
+2003-01-16  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.444 (erc-send-current-line):
+	Changed the regexp used to match /COMMANDs so that leading
+	    whitespace is taken into account.
+
+2003-01-16  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.61: * (erc-dcc-do-SEND-command): Fix it
+
+	* erc-ezbounce.el 1.4, erc-lang.el 1.2: Arglist changes...
+
+	* erc.el 1.443: Various docstring fixes and additions.
+
+	* erc-notify.el 1.16:
+	* (erc-cmd-NOTIFY): Change the function arglist to (&rest args)
+
+	* erc-netsplit.el 1.8: * (erc-cmd-WHOLEFT): Has no args...
+
+2003-01-16  Damien Elmes  <erc@repose.cx>
+
+	* erc-fill.el 1.22:
+	erc-fill-column: default to 78, so things like docstrings don't get wrapped
+	    in an ugly manner
+
+2003-01-16  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.442:
+	* (erc-cmd-default): Take a substring, now /mode works again.
+	* (erc-cmd-AWAY): Put do-not-parse-args t
+	* (erc-cmd-GAWAY): Ditto, and fix it.
+	* (erc-cmd-CTCP): Switch to argument system.
+	* (erc-cmd-KICK): Do the same.
+
+2003-01-15  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.60:
+	* (erc-cmd-DCC): Fixed for the new scheme, simplified.
+	* (erc-dcc-do-CHAT-command): Ditto.
+	* (erc-dcc-do-CLOSE-command): Ditto.
+	* (erc-dcc-do-LIST-command): Ditto.
+
+2003-01-15  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.441:
+	erc-error-face: setting a background doesn't work so well with multi-line
+	    messages, so we don't. fg color is negotiable ;-)
+	(erc-cmd-QUERY): fixed, new doco, suppress (erc-delete-query) until we fix it
+	(erc-send-current-line): allow multi-line messages provided they don't start
+	    with a slash - there's no need to prohibit them if the slash isn't the
+	    first character
+
+	* erc.el 1.440: * bad-syntax now reports like incorrect-args
+	* bunch of extra cmds fixed, nick, sv etc.
+
+	* erc.el 1.439 (erc-cmd-HELP): fixed
+	(erc-extract-command-from-line): when determining canon-defun, make sure we
+	    have a valid symbol
+	(erc-cmd-KICK): fixed
+
+	* erc.el 1.438:
+	* removed duplicate do-no-parse-args properties for the defaliased defuns
+	(erc-process-input-line): show function signature when incorrect args
+	(erc-extract-command-from-line): canonicalize defaliases before extracting
+	    plist
+	(erc-cmd-CLEAR): fixed
+	(erc-cmd-UNIGNORE): fixed again
+
+	* erc.el 1.437 (erc-cmd-SET): fixed
+	(erc-cmd-UNIGNORE): fixed
+	(erc-process-input-line): report when incorrect arguments are provided to a
+	    command, and show the command's docstring
+
+	* erc.el 1.436 (erc-cmd-APPENDTOPIC): fixed
+	(erc-process-input-line): more informative error message than 'bad syntax'
+
+2003-01-15  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.435: * (erc-cmd-IGNORE): fixed
+
+	* erc.el 1.434: * (erc-cmd-NAMES): fixed
+
+	* erc.el 1.433:
+	* (erc-cmd-CLEARTOPIC): Simplify, fix doc, make interactive
+
+2003-01-15  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.432 (erc-cmd-JOIN):
+	correct invite behavior, and document it.
+
+2003-01-15  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.431: * (erc-cmd-PART): Put 'do-not-parse-args t
+
+2003-01-15  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.430 (erc-cmd-JOIN): new cmd argument syntax
+	(erc-process-input-line): check if (erc-extract-command-from-line) returned a
+	    list, and apply if that's the case
+
+	* erc.el 1.429:
+	erc-cmd-*: remove optional force and references to `force' in the code
+	(erc-cmd-AMSG): call erc-trim-string, not trim-string
+
+2003-01-15  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.428:
+	* (erc-cmd-CLEARTOPIC): LINE is now ARGS and already parsed.
+	Set erc-cmd-TOPIC to 'do-not-parse-args for now.
+	(comment: I think we should have 'first, so that only first word is parsed...
+	 Or we could autodetect erc-channel-p in the parser before that somehow...)
+
+	* erc.el 1.427: * (erc-cmd-OP): LINE is PEOPLE now, and already parsed.
+
+	* erc-notify.el 1.15:
+	* (erc-cmd-NOTIFY): Arg LINE is now ARGS, and already parsed.
+
+2003-01-15  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-stamp.el 1.25 (erc-insert-timestamp-right):
+	Prefer erc-fill-column to window-width,
+	because on wide screens the timestamp could wander off too far to the
+	right.
+
+2003-01-15  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.426: This is the "everything is suddenly broken!" release
+	You know, this is CVS, you can still go back, and wait until the transition
+	is finished, but here is patch one, which basically breaks every command
+	which is typed on the prompt.
+	Hit me, we can still revert, but something needs to be done about this.
+	* (erc-extract-command-from-line): intern-soft the function here.
+	If the function symbol has a property 'do-not-parse-args, operate as before,
+	otherwise, split the arguments prior to calling the command handler.
+	* (erc-process-input-line): Updated to accommodate the change above.
+	* (erc-send-distinguish-noncommands): Ditto.
+	* (erc-cmd-NAMES): Ditto.
+	* (erc-cmd-ME): Put 'do-not-parse-args property.
+
+	* erc-dcc.el 1.59:nick:	* erc-dcc.el 1.59: * erc-dcc-list: Renamed
+	* (erc-dcc-member). Treat :nick as either a nick!user@host or nick,
+	do appropriate comparisons, simplified.
+	* (erc-dcc-list-add): New functions
+	various callers of (cons (list ...) erc-dcc-list) updated.
+	Other stuff I'm too bored to document now
+
+2003-01-15  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-stamp.el 1.24 (erc-insert-timestamp-right):
+	Removed redundant code that overrid the
+	window-width. Now subtracts (length string) from every found
+	indentation positions.
+
+2003-01-14  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.425:
+	* (erc-cmd-AMSG): Remove useless call to erc-display-message.
+
+	* erc-dcc.el 1.58:
+	* erc-dcc-chat/send-request: New variables, control how to treat
+	incoming dcc chat or send requests. Can be set to 'ask, which behaves
+	like it did before, 'auto, which accepts automatically, and
+	'ignore, which ignores those type of requests completely.
+	* (erc-cmd-CREQ): New user-level command.
+	* (erc-cmd-SREQ): Ditto.
+
+	* erc.el 1.424: * (erc-cmd-AMSG). New command.
+
+	* erc-xdcc.el 1.4: * (erc-xdcc): delete empty strings from ARGS
+
+	* erc-dcc.el 1.57: * erc-dcc-ipv4-regexp: New constant
+	* (erc-ip-to-decimal): Use it.
+	* erc-dcc-host:valid-regexp erc-dcc-ipv4-regexp:
+	* erc-dcc-host: :type
+	* (pcomplete/erc-mode/DCC): Add completion for GET and CLOSE.
+	* Some docstring/comment fixes.
+
+	* erc-stamp.el 1.23:
+	* (erc-insert-timestamp-right): Subtract (length string) from
+	POS in any case, otherwise, linewrap occurs.
+
+	* erc-dcc.el 1.56:
+	* Fixed the unibyte-multibyte problem (now a dcc get buffer is (set-buffer-multibyte nil),
+	  and saves correctly (tried with 21.3.50)). Thanks to Eli for suggesting it!
+	* Added :start-time plist property/value to GET handling so that we can calculate elapsed-time.
+	* Some (unwind-protect (progn (set-buffer ...) ...)) constructs replaced with (with-current-buffer ...)
+
+2003-01-13  Mario Lang  <mlang@delysid.org>
+
+	* erc-xdcc.el 1.3:
+	* erc-xdcc-help-text: New variable which makes replies to the originator
+	much more flexible.
+	* erc-xdcc-help-format: Removed.
+	* (erc-xdcc-help): Handle the new variable.
+	* (erc-xdcc): Simplified
+
+	* erc-xdcc.el 1.2: * erc-xdcc-handler-alist: New variable.
+	* (erc-xdcc): Move code for list and send sub-commands into
+	* (erc-xdcc-help): New function.
+	* (erc-xdcc-list): New function.
+	* (erc-xdcc-send): New function.
+
+2003-01-12  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.423 (erc-server-JOIN):
+	Oops, send MODE command only when *we* joined a channel.
+
+	* erc.el 1.422:
+	Fixing ERCs behavior wrt IRCnet's !channels have a different name for
+	JOIN than in reality (e.g. you can join !forcertest or !!forcertest
+	and really get to !ABCDEforcertest)
+
+	(erc-cmd-JOIN): Removed erc-send-command MODE.
+	(erc-server-JOIN): Ask for MODE now.
+
+2003-01-12  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.55:
+	(erc-dcc-get-filter), (erc-dcc-get-file): store size as a string, not an
+	    integer. check size > 0 for the case where a size wasn't provided, since
+	    string-to-int will return 0 on an empty string
+
+2003-01-12  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.54: * Use RAWFILE arg with find-file-noselect
+	* Fix alist/plist conversion left-over
+	* Add verbose-info about sending blocks.
+
+2003-01-11  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.53: * (pcomplete-erc-mode/DCC): Fixes
+
+	* erc-xdcc.el 1.1: Initial version.
+
+	* erc-pcomplete.el 1.16:
+	* (erc-pcomplete): Fix so that cycle-completion works again.
+	* (pcomplete-parse-erc-arguments): If there is a space after the last word
+	before point, we need to return a "" arg, and it's position.
+
+	* erc-dcc.el 1.52: Fix to pcomplete/erc-mode/DCC
+
+	* erc-dcc.el 1.51: * (pcomplete/erc-mode/DCC): New function
+
+	* erc-dcc.el 1.50: *** empty log message ***
+
+	* erc-dcc.el 1.49: Move code around, just basic changes
+
+2003-01-11  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-stamp.el 1.22 (erc-insert-timestamp-right):
+	Check whether erc-fill-column is
+	available before using it. Else default to fill-column or if
+	everything else fails, the window width of the current window. For the
+	fill-columns, use them directly as the starting position for the
+	timestamp.
+
+2003-01-11  Andreas Fuchs  <asf@void.at>
+
+	* erc-stamp.el 1.21:
+	erc-insert-timestamp-right: use correct window's window-width. If
+	                  buffer is not in a window, use erc-fill-column.
+
+2003-01-11  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.48:	* erc-dcc.el 1.48: * (erc-dcc-do-LIST-command): Fix
+
+	* erc-dcc.el 1.47:
+	* buffer-local variables erc-dcc-sent-marker and erc-dcc-send-confirmed marker removed
+	  Keep This info in erc-dcc-member :sent and :confirmed plist values
+	* :	* :buffer plist for :type 'SEND removed, since we can get this with (marker-buffer
+	* erc-dcc-send-connect-hook: New hook, defaults to erc-dcc-send-block and erc-dcc-send-connected, which now prints a msg...
+
+	* erc-dcc.el 1.46:
+	* (erc-dcc-chat-accept): Renamed from erc-dcc-chat. Callers updated.
+	* (erc-dcc-chat): Renamed from erc-dcc-chat-request.
+	Callers updated, and interactive form added.
+	* (erc-dcc-server-accept): No longer do any type-specific stuff.
+	* (erc-dcc-chat-sentinel): Call erc-dcc-chat-setup if event is "open from "
+	from here, otherwise call erc-dcc-chat-close.
+
+	* (
+
+	* erc-dcc.el 1.45: *** empty log message ***
+
+	* erc-dcc.el 1.43: Moved some functions around.
+	Doc string fixes.
+	"/dcc send nick filename" works now
+
+2003-01-11  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.421 (erc-send-command): Fixed flood protect message.
+
+	* erc-button.el 1.38 (erc-button-syntax-table): Make `-' a legal nick
+	constituent.
+
+2003-01-10  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.42: Some more steps toward dcc send.
+
+2003-01-10  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-notify.el 1.14 (erc-notify-timer):
+	Changed to make it IRC-case-insensitive when comparing nicks.
+	(erc-notify-JOIN): Changed to make it IRC-case-insensitive when comparing nicks.
+	(erc-notify-NICK): Changed to make it IRC-case-insensitive when comparing nicks.
+	(erc-notify-QUIT): Changed to make it IRC-case-insensitive when comparing nicks.
+	(erc-cmd-NOTIFY): Now "/notify -l" lists the nicks on your notify list.  Now
+	    when you remove a nick from your notify list, you no longer receive a spurious
+	    signoff notification for that nick.  Changed to make it IRC-case-insensitive when
+	    comparing nicks.
+
+	* erc.el 1.420 (erc-ison-p):
+	Fixed so it calls erc-member-ignore-case instead of member.
+
+	* erc.el 1.419 (erc-member-ignore-case):
+	New function.  Just like member-ignore-case, but obeys
+	    the IRC protocol case matching rules.
+
+2003-01-10  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.41:
+	(erc-dcc-do-GET-command), (erc-dcc-get-file): use the plist syntax, this
+	    fixes dcc get again
+
+2003-01-10  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.418: erc-complete-functions: New variable.
+	erc-mode-map: Bind \t to 'erc-complete-word
+	erc-complete-word: New function.
+
+	* erc-pcomplete.el 1.15 (erc-pcomplete-mode):
+	Use new erc-complete-functions
+	(erc-pcomplete): Check that we're in the input line, else return nil.
+
+	* erc-button.el 1.37 (erc-button-mode): Use new erc-complete-functions
+	erc-button-old-tab-command: Removed.
+	(erc-button-next-or-old): Removed
+	(erc-button-next): check that we're not in the input line, else just return nil.
+
+2003-01-10  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.40: cleanup
+
+	* erc-dcc.el 1.39:
+	* (erc-dcc-chat-request): No longer use erc-send-ctcp-message.
+
+	* erc-dcc.el 1.38:
+	* (erc-dcc-no-such-nick): Also call delete-process if we have a peer already
+
+	* erc-dcc.el 1.37:
+	* (erc-dcc-no-such-nick): New function, server event handler for event 401.
+	If we send a CTCP message requesting something dcc related, we set up an
+	entry in erc-dcc-list before sending the request (for the server proc object
+	for listening conns for example).  But if that nick does not exist
+	on that server, we now nicely cleanup erc-dcc-list again.
+
+2003-01-09  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.36: Moved code around a bit, and doc fixes
+
+	* erc-dcc.el 1.35: *** empty log message ***
+
+	* erc-dcc.el 1.34: Rename erc-dcc-plist to erc-dcc-list
+
+2003-01-09  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.33 (erc-dcc-server (erc-dcc-chat-setup):
+	use erc's (erc-setup-buffer) to determine how to
+	    display new DCC windows
+	(erc-dcc-chat-buffer-killed): buffer-local hook for DCC buffers to close the
+	    process
+	(erc-dcc-chat-close): code common to a killed buffer or a disconnection from
+	    the other side
+	(erc-dcc-chat-sentinel): use (erc-dcc-chat-close)
+	(erc-dcc-server-accept): use (erc-log) instead of (message)
+
+	* erc.el 1.417:
+	(erc), (erc-setup-buffer): factor out window generation code so DCC can use
+	    it too
+
+	* erc-dcc.el 1.32:
+	(erc-dcc-do-CLOSE-command), (erc-dcc-do-LIST-command): work with erc-dcc-plist
+
+	* erc-dcc.el 1.31:
+	erc-dcc-alist: became erc-dcc-plist, so we can more easily grab particular
+	    properties
+	dcc catalog: unify use of DCC: and [dcc] (either's fine, but let's be
+	    consistent)
+	(erc-dcc-member): takes an arbitrary list of constraints now
+	(erc-dcc-proc-member): removed, as (erc-dcc-member) can be used for this
+	(erc-dcc-do-CHAT-command): use the catalog to show the user what's going on
+	(erc-dcc-chat-server): removed
+	(erc-dcc-server): takes name sentinel and filter arguments, can be used for
+	    both send and chat now
+
+	.. this release means all send/get support is broken until we fix up the
+	things that still expect to be using an alist. this include /dcc list, /dcc
+	close
+
+2003-01-09  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-ring.el 1.9 (erc-previous-command):
+	If you have a partially typed input line and press M-p,
+	    you lose what you typed.  Now we save it so you can come back to it.
+
+2003-01-09  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-ring.el 1.8 (erc-add-to-input-ring): s/nullp/null/
+
+2003-01-09  Damien Elmes  <erc@repose.cx>
+
+	* erc-ring.el 1.7 (erc-add-to-input-ring):
+	set up the ring if it's not already setup
+
+	* erc-dcc.el 1.30 (erc-dcc-member): case insensitive match of nicknames
+	(erc-dcc-do-CHAT-command): echo what we're doing (at least for now)
+
+2003-01-09  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.29: (temporarily) fix erc-process setting...
+
+	* erc-dcc.el 1.28: * (erc-dcc-chat-send-line): Removed
+
+	* erc.el 1.416:
+	Check if target is stringp (we can now also have 'dcc as value...)
+
+	* erc-dcc.el 1.27 (erc-dcc-chat-send-input-line):
+	New function, used for
+	erc-send-input-line-function.
+	Use erc-send-current-line now.
+
+	* erc-dcc.el 1.26: evt to elt...
+
+	* erc-dcc.el 1.25: Remove () from a var (how silly!)
+
+	* erc-dcc.el 1.24: * (erc-dcc-get-host): Use format-network-address.
+	* (erc-dcc-host): Change semantic.  If erc-dcc-host is set, use it.
+	Otherwise, try to figure out the host by calling erc-dcc-get-host.
+	* (erc-dcc-server-port): New variable.
+	* erc-dcc-chat-log: Renamed to erc-dcc-server-accept
+
+	* erc-dcc.el 1.23 (erc-dcc-do-CHAT-command):
+	Change arg of call to erc-dcc-chat-request from elt to nick
+
+2003-01-09  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.415 (erc-send-current-line):
+	Now rejects multi-line commands (i.e., lines that
+	    start with "/" and contain newlines).
+
+2003-01-09  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-button.el 1.36:
+	Functionality to use TAB to jump to the next button:
+
+	(erc-button-next-or-old): New function.
+	(erc-button-next): New function.
+	erc-button-keymap: added erc-button-next
+	erc-button-old-tab-command: New variable.
+	define-erc-module button: Add and remove 'erc-button-next-or-old as
+	appropriate.
+
+2003-01-09  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.414:
+	New variable: erc-auto-reconnect (defaults to t).  If non-nil, ERC will
+	    automatically reconnect to a server after an unexpected disconnection.
+	(erc-process-sentinel): Changed to refer to variable erc-auto-reconnect.
+
+2003-01-08  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.413:
+	* erc-send-input-line-function: New variable, used for dispatch...
+
+2003-01-08  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.22 (erc-dcc-chat-sentinel):
+	check event type before killing process
+	(erc-dcc-chat-log): new, handles the setup of dcc chats for incoming
+	    connections
+	(erc-dcc-chat): use (erc-dcc-chat-setup)
+	(erc-dcc-chat-setup): code common to incoming and outgoing DCC chats
+	(erc-dcc-chat-request): request a DCC chat with another user
+	(erc-dcc-proc-member): locate a member in erc-dcc-alist by process
+
+	The very first ERC to ERC DCC chat was held between delysid and resolve today!
+
+2003-01-08  Mario Lang  <mlang@delysid.org>
+
+	* erc-track.el 1.44 (erc-all-buffer-names):
+	Check for erc-dcc-chat-mode too
+
+2003-01-08  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-ring.el 1.6, erc.el 1.412 (erc-kill-input):
+	Resets erc-input-ring-index to nil, so that invoking this
+	    command conceptually puts you after your most recent input in the input
+	    history.
+	(erc-previous-command and erc-next-command): Changed so that history movement
+	    is more intuitive.  Also preserves the blank input line that marks the
+	    place after the newest command in the history ring (i.e., you'll see a
+	    blank command once every trip around the ring in either direction).
+
+2003-01-08  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.21 (erc-dcc-chat): Add docstring
+	Add self-test.
+	Fix error if /dcc chat nick doesn't find the nick
+
+2003-01-08  Francis Litterio  <franl@users.sourceforge.net>
+
+	* Makefile 1.12:
+	Changed so that "make" works correctly under Cygwin.  Before this change, the
+	pathname passed to Emacs on the command line under Cygwin had the form
+	"/cygwin/c/...", which prevented emacs from finding the file.  Now the pathname
+	has the form "c:/...".  This works for any drive letter.
+
+2003-01-08  Mario Lang  <mlang@delysid.org>
+
+	* erc-button.el 1.35: reindent some code, and add TODO to comments
+
+	* erc-dcc.el 1.20: *** empty log message ***
+
+	* erc-dcc.el 1.19: Make dcc-chat-ended a notice
+	Remove now bogus comment
+
+2003-01-08  Damien Elmes  <erc@repose.cx>
+
+	* erc-dcc.el 1.18 (erc-pack-int): from erc-packed-int
+	(erc-unpack-int): new
+
+	* erc-dcc.el 1.17 (erc-unpack-str): added
+
+2003-01-08  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.411 (erc-server-482):
+	New handler, handles KICK reply if you're not channel-op
+
+	* erc-dcc.el 1.16: Document SEND in erc-dcc-alist.
+	Move sproc, parent-proc and file into erc-dcc-alist
+
+	* erc-dcc.el 1.15: stubs
+
+	* erc-dcc.el 1.14 (erc-dcc-get-host):
+	Change :iface to :local since Kim committed it now to CVS emacs
+
+	* erc-dcc.el 1.13 (erc-dcc-get-host):
+	New function, requires the not-yet-in-CVS-emacs local-address.patch to process.c.
+	Some other minor additions
+
+2003-01-08  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.410 (erc-cmd-IGNORE):
+	Now returns t to prevent "Bad syntax" error.
+	(erc-cmd-UNIGNORE): Now returns t to prevent "Bad syntax" error.
+	(erc-server-PRIVMSG-or-NOTICE): Capitalized first word in message to user.
+
+	* erc.el 1.409 (erc-scroll-to-bottom):
+	Temporarily bind resize-mini-windows to nil so that
+	    users who have it set to a non-nil value will not suffer from premature
+	    minibuffer shrinkage due to the below recenter call.  I have no idea why
+	    this works, but it solves the problem, and has no negative side effects.
+
+2003-01-07  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc-dcc.el 1.12:
+	erc-dcc-ctcp-query-chat-regexp: The IP is not really an IP, but a
+	number (no . allowed there).
+	(erc-dcc-send-ctcp-string): use let* here to avoid cluttering up the
+	match data.
+	Also, use erc-decimal-to-ip to get the IP.
+	(erc-ip-to-decimal): Removed some pasted ERC timestamps
+	(erc-decimal-to-ip): New function.
+	erc-dcc-chat-mode-map: Return map in the initialization.
+
+2003-01-07  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc-match.el 1.19 (erc-match-fool-p):
+	Changed to call erc-match-directed-at-fool-p instead of
+	     erc-directed-at-fool-p.
+
+2003-01-07  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.11 (erc-cmd-DCC):
+	Change (cond ... (t nil)) to (when ...)
+
+	* erc-dcc.el 1.10: Use erc-current-nick-p
+
+2003-01-07  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.408:
+	erc-join-buffer: Added 'window-noselect to docstring and :type.
+	erc-auto-query: Added 'window-noselect to :type.
+	(erc): Treat erc-join-buffer being 'window-noselect appropriately.
+
+	* erc.el 1.407 (erc-current-nick-p): New function.
+	(erc-nick-equal-p): New function.
+	(erc-already-logged-in), (erc-server-JOIN), (erc-auto-query),
+	(erc-server-PRIVMSG-or-NOTICE): Use erc-current-nick-p.
+	(erc-update-channel-member): Use erc-nick-equal-p.
+
+	* erc-match.el 1.18 (erc-match-current-nick-p):
+	Renamed from erc-current-nick-p
+	(erc-match-pal-p): Renamed from erc-pal-p
+	(erc-match-fool-p): Renamed from erc-fool-p
+	(erc-match-keyword-p): Renamed from erc-keyword-p
+	(erc-match-dangerous-host-p): Renamed from erc-dangerous-host-p
+	(erc-match-directed-at-fool-p): Renamed from erc-directed-at-fool-p
+	(erc-match-message): Use erc-match-TYPE-p instead of erc-TYPE-p
+
+	* erc.el 1.406:
+	Support for IRCnets' "nick/channel temporarily unavailable"
+
+	(erc-nickname-in-use): New function (mostly copied from erc-server-433).
+	(erc-server-433): Use erc-nickname-in-use
+	(erc-server-437): New function.
+	erc-server-hook-list: Added (437 erc-server-437).
+
+2003-01-07  Mario Lang  <mlang@delysid.org>
+
+	* erc-fill.el 1.21: Add autoload cookie
+
+	* erc-notify.el 1.13:
+	Now also pass SERVER argument to signon/off hooks, and provide a erc-notify-signon/off function for echo-area printing
+
+	* erc-notify.el 1.12 (erc-notiy-QUIT):
+	Change use of delq to delete, delq does not work with strings
+
+2003-01-06  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.405 (erc-ctcp-query-VERSION):
+	v%s -> %s, so we are no longer vVersion...
+
+2003-01-06  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.404: Small change to erc-ison-p, and fixme tag
+
+2003-01-06  Francis Litterio  <franl@users.sourceforge.net>
+
+	* erc.el 1.403 (erc):
+	Fixed bug where variable "away" would be nil in new channel buffers
+	       even if the user is away when joining the channel.
+	(erc-strip-controls): Fixed a bug where erc-strip-controls accidentally
+	       removed all text properties from the string.
+
+2003-01-06  Mario Lang  <mlang@delysid.org>
+
+	* erc-dcc.el 1.9:
+	Some stub functions, some code, nothing really works yet
+
+	* erc.el 1.402 (erc-ison-p): New function
+
+	* erc-dcc.el 1.8: Some functions which will be needed for dcc send
+
+	* erc-dcc.el 1.7 (erc-ip-address-to-decimal):
+	New function, thanks lawrence
+
+	* erc-dcc.el 1.6: Again, simplify code, fix stuff, DCC CHAT works now
+
+	* erc-dcc.el 1.5: Many fixes, chat nearly works now
+
+	* erc-netsplit.el 1.7: Also detect fast netsplit/joins
+
+	* erc-dcc.el 1.4: some more fixes
+
+	* erc-dcc.el 1.3: Fixup stage 1, now dcc get works
+
+	* erc-dcc.el 1.2: make /dcc LIST work
+
+	* erc-dcc.el 1.1:
+	Initial checkin, don't use it!  its really far from complete.  Hackers: help!
+
+	* erc-notify.el 1.11:
+	New function erc-notify-NICK, and added signon/off hooks which were missing
+
+2003-01-05  Jorgen Schaefer  <forcer@users.sourceforge.net>
+
+	* erc.el 1.401 (erc-truncate-buffer-to-size):
+	set inhibit-read-only to t for the
+	deletion. This is usually done by the function calling the hook, but
+	not if it's called interactively. Also, rewrote some weird if/if
+	combination.
+
+	* erc-track.el 1.43 (erc-track-shortennames):
+	Documentation fix (erc-all-buffers is really
+	erc-all-buffer-names)
+
+	These changes make server buffers be tracked as well, as there are
+	quite a few interesting things going on there (e.g. CTCP etc.)
+	(erc-all-buffer-names): Check for (eq major-mode 'erc-mode) instead of
+	erc-default-recipients.
+	(erc-track-modified-channels): Don't require a default target (e.g.,
+	this-channel being non-nil)
+
+2003-01-03  Damien Elmes  <erc@repose.cx>
+
+	* erc.el 1.400:
+	erc-auto-query: can now be set to a symbol to control how new messages should
+	    be popped up (or not popped up, as the case may be)
+	(erc-query): new function which handles the bulk of what (erc-cmd-QUERY) did
+	    previously
+	(erc-cmd-QUERY): use (erc-query)
+	(erc-auto-query): use (erc-query)
+
+	* erc.el 1.399 (erc-current-logfile):
+	Downcase result of log generation function, as IRC is
+	case insensitive. Fixes problems where "/query user" results in a different
+	log file to a query from "User". Avoided adding an extra flag to control this
+	behavior - if you think this was the wrong decision, please correct it and
+	I'll remember it for next time.
+
+See ChangeLog.02 for earlier changes.
+
+	Copyright (C) 2003, 2006-2012 Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:

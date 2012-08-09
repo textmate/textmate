@@ -1,0 +1,417 @@
+% Title:  GNU Emacs Survival Card
+
+% Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+% Author: Wlodek Bzyl <matwb@univ.gda.pl>
+% Czech translation: Pavel Janík <Pavel@Janik.cz>, March 2001
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% See survival.tex.
+
+% Process the file with `csplain' from the `CSTeX' distribution (included
+% e.g. in the TeX Live CD).
+
+% User interface is `plain.tex' and macros described below
+%
+% \title{CARD TITLE}{for version 21}
+% \section{NAME}
+% optional paragraphs separated with \askip amount of vertical space
+% \key{KEY-NAME} description of key or
+% \mkey{M-x LONG-LISP-NAME} description of Elisp function
+%
+% \kbd{ARG} -- argument is typed literally
+
+
+%**start of header
+
+\def\plainfmtname{plain}
+\ifx\fmtname\plainfmtname
+\else
+  \errmessage{This file requires `plain' format to be typeset correctly}
+  \endinput
+\fi
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0)
+
+% Czech hyphenation rules applied
+\chyph
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+\def\copyrightnotice{\penalty-1\vfill
+  \vbox{\smallfont\baselineskip=0.8\baselineskip\raggedcenter
+    Copyright \copyright\ \year\ Free Software Foundation, Inc.\break
+    Pro GNU Emacs \versionemacs\break
+    W{\l}odek Bzyl (matwb@univ.gda.pl)\break
+    Do èe¹tiny pøelo¾il Pavel Janík (Pavel@Janik.cz)
+
+    Kopie tohoto dokumentu mù¾ete vytváøet a ¹íøit
+    za pøedpokladu, ¾e budou obsahovat tuto poznámku
+    o autorských právech.\par}}
+
+\hsize 3.2in
+\vsize 7.95in
+\font\titlefont=csss10 scaled 1200
+\font\headingfont=csss10
+\font\smallfont=csr6
+\font\smallsy=cmsy6
+\font\eightrm=csr8
+\font\eightbf=csbx8
+\font\eightit=csti8
+\font\eighttt=cstt8
+\font\eightmi=csmi8
+\font\eightsy=cmsy8
+\font\eightss=cmss8
+\textfont0=\eightrm
+\textfont1=\eightmi
+\textfont2=\eightsy
+\def\rm{\eightrm} \rm
+\def\bf{\eightbf}
+\def\it{\eightit}
+\def\tt{\eighttt}
+\def\ss{\eightss}
+\baselineskip=0.8\baselineskip
+
+\newdimen\intercolumnskip % horizontal space between columns
+\intercolumnskip=0.5in
+
+% The TeXbook, p. 257
+\let\lr=L \newbox\leftcolumn
+\output={\if L\lr
+    \global\setbox\leftcolumn\columnbox \global\let\lr=R
+  \else
+       \doubleformat \global\let\lr=L\fi}
+\def\doubleformat{\shipout\vbox{\makeheadline
+    \leftline{\box\leftcolumn\hskip\intercolumnskip\columnbox}
+    \makefootline}
+  \advancepageno}
+\def\columnbox{\leftline{\pagebody}}
+
+\def\newcolumn{\vfil\eject}
+
+\def\bye{\par\vfil\supereject
+  \if R\lr \null\vfil\eject\fi
+  \end}
+
+\outer\def\title#1#2{{\titlefont\centerline{#1}}\vskip 1ex plus 0.5ex
+   \centerline{\ss#2}
+   \vskip2\baselineskip}
+
+\outer\def\section#1{\filbreak
+  \bskip
+  \leftline{\headingfont #1}
+  \askip}
+\def\bskip{\vskip 2.5ex plus 0.25ex }
+\def\askip{\vskip 0.75ex plus 0.25ex}
+
+\newdimen\defwidth \defwidth=0.25\hsize
+\def\hang{\hangindent\defwidth}
+
+\def\textindent#1{\noindent\llap{\hbox to \defwidth{\tt#1\hfil}}\ignorespaces}
+\def\key{\par\hangafter=0\hang\textindent}
+
+\def\mtextindent#1{\noindent\hbox{\tt#1\quad}\ignorespaces}
+\def\mkey{\par\hangafter=1\hang\mtextindent}
+
+\def\kbd#{\bgroup\tt \let\next= }
+
+\newdimen\raggedstretch
+\newskip\raggedparfill \raggedparfill=0pt plus 1fil
+\def\nohyphens
+   {\hyphenpenalty10000\exhyphenpenalty10000\pretolerance10000}
+\def\raggedspaces
+   {\spaceskip=0.3333em\relax
+    \xspaceskip=0.5em\relax}
+\def\raggedright
+   {\raggedstretch=6em
+    \nohyphens
+    \rightskip=0pt plus \raggedstretch
+    \raggedspaces
+    \parfillskip=\raggedparfill
+    \relax}
+\def\raggedcenter
+   {\raggedstretch=6em
+    \nohyphens
+    \rightskip=0pt plus \raggedstretch
+    \leftskip=\rightskip
+    \raggedspaces
+    \parfillskip=0pt
+    \relax}
+
+\chardef\\=`\\
+
+\raggedright
+\nopagenumbers
+\parindent 0pt
+\interlinepenalty=10000
+\hoffset -0.2in
+%\voffset 0.2in
+
+%**end of header
+
+
+\title{Karta\ \ pro\ \ pøe¾ití\ \ s\ \ GNU\ \ Emacsem}{pro verzi \versionemacs}
+
+V~následujícím textu \kbd{C-z} znamená: stisknìte klávesu `\kbd{z}' a
+souèasnì pøidr¾te stisknutou klávesu {\it Ctrl}. \kbd{M-z} znamená, ¾e
+souèasnì s klávesou `\kbd{z}' pøidr¾íte klávesu {\it Meta\/} (vìt¹inou
+oznaèenou {\it Alt\/}) nebo ji stisknete po stisknutí klávesy {\it Esc\/}.
+
+
+\section{Spu¹tìní Emacsu}
+
+Pro spu¹tìní GNU Emacsu jednodu¹e napi¹te jeho jméno: \kbd{emacs}.
+Emacs rozdìluje rámec na nìkolik èástí:
+  øádek menu,
+  buffer s editovaným textem,
+  tzv. mode line popisující buffer nad ní
+  a minibuffer v poslední øádce.
+\askip
+\key{C-x C-c} ukonèení Emacsu
+\key{C-x C-f} editace souboru; tento pøíkaz vyu¾ívá minibuffer k pøeètení
+              jména souboru; tento pøíkaz pou¾ijte i tehdy, chcete-li
+              vytvoøit nový soubor zadaného jména
+\key{C-x C-s} ulo¾it soubor
+\key{C-x k} zavøít buffer
+\key{C-g} ve vìt¹inì situací: zastavení aktuálnì provádìné èinnosti,
+              zru¹ení zadávání pøíkazu apod.
+\key{C-x u} obnovit
+
+\section{Pohyb}
+
+\key{C-l} pøesun aktuální øádky do støedu okna
+\key{C-x b} pøepnutí do jiného bufferu
+\key{M-<} pøesun na zaèátek bufferu
+\key{M->} pøesun na konec bufferu
+\key{M-x goto-line} pøesun na øádek zadaného èísla
+
+\section{Více oken}
+
+\key{C-x 0} odstranìní aktuálního okna
+\key{C-x 1} aktuální okno se stane jediným oknem
+\key{C-x 2} rozdìlení okna horizontálnì
+\key{C-x 3} rozdìlení okna vertikálnì
+\key{C-x o} pøesun do jiného okna
+
+\section{Regiony}
+
+Emacs definuje `region' jako prostor mezi {\it znaèkou\/} a
+{\it bodem}. Znaèka je nastavena pomocí \kbd{C-{\it space}}.
+Bod je v místì aktuální pozice kurzoru.
+\askip
+\key{M-h} oznaè celý odstavec
+\key{C-x h} oznaè celý buffer
+
+\section{Vyjmutí a kopírování}
+
+\key{C-w} vyjmi region
+\key{M-w} zkopíruj region do kill-ringu
+\key{C-k} vyjmi text od kurzoru do konce øádku
+\key{M-DEL} vyjmi slovo
+\key{C-y} vlo¾ zpìt poslední vyjmutý text (kombinace kláves \kbd{C-w C-y}
+          mù¾e být pou¾ita pro pøesuny textù)
+\key{M-y} nahraï poslední vlo¾ený text pøedchozím vyjmutým textem
+
+\section{Vyhledávání}
+
+\key{C-s} hledej øetìzec
+\key{C-r} hledej øetìzec zpìt
+\key{RET} ukonèi hledání
+\key{M-C-s} hledej regulární výraz
+\key{M-C-r} hledej regulární výraz zpìt
+\askip
+Kombinace \kbd{C-s} nebo \kbd{C-r} mù¾ete pou¾ít i k opakování hledání
+jiným smìrem.
+
+\section{Znaèky (tags)}
+
+Tabulky znaèek (tags) zaznamenávají polohu funkcí a procedur, globálních
+promìnných, datových typù a dal¹ího. Pro vytvoøení tabulky znaèek spus»te
+pøíkaz `{\tt etags} {\it vstupní\_soubory}' v pøíkazovém interpretu.
+\askip
+\key{M-.} najdi definici
+\key{C-u M-.} najdi dal¹í výskyt definice
+\key{M-*} bì¾ tam, odkud byla volána poslední \kbd{M-.}
+\mkey{M-x tags-query-replace} spus» query-replace na v¹ech souborech
+zaznamenaných v tabulce znaèek.
+\key{M-,} pokraèuj v posledním hledání znaèky nebo query-replace
+
+\section{Pøeklady}
+
+\key{M-x compile} pøelo¾ kód v aktivním oknì
+\key{C-c C-c} bì¾ na poslední chybu pøekladaèe, v oknì pøekladu
+\key{C-x `} v oknì se zdrojovým textem
+
+\section{Dired, editor adresáøù}
+
+\key{C-x d} spus» Dired
+\key{d} oznaè tento soubor pro smazání
+\key{\~{}} oznaè v¹echny zálohy ke smazání
+\key{u} odstraò v¹echny znaèky pro smazání
+\key{x} sma¾ soubory oznaèené pro smazání
+\key{C} kopíruj soubor
+\key{g} obnov buffer Diredu
+\key{f} nav¹tiv soubor v aktuální øádce
+\key{s} pøepni mezi øazením podle abecedy a data/èasu
+
+\section{Ètení a posílání po¹ty}
+
+\key{M-x rmail} zaèni èíst po¹tu
+\key{q} ukonèi ètení po¹ty
+\key{h} uka¾ hlavièky
+\key{d} oznaè aktuální zprávu ke smazání
+\key{x} sma¾ v¹echny zprávy oznaèené ke smazání
+
+\key{C-x m} nová zpráva
+\key{C-c C-c} po¹li zprávu a pøepni do jiného bufferu
+\key{C-c C-f C-c} pøesuò se na hlavièku `CC' a pokud neexistuje, tak ji
+vytvoø
+
+\section{Rùzné}
+
+\key{M-q} zarovnej odstavec
+\key{M-/} doplò dynamicky pøedchozí slovo
+\key{C-z} ikonizuj (pøeru¹) Emacs
+\mkey{M-x revert-buffer} nahraï text editovaného souboru tímté¾ souborem z disku
+
+\section{Nahrazování}
+
+\key{M-\%} interaktivnì hledej a nahrazuj
+\key{M-C-\%} za pou¾ití regulárních výrazù
+\askip
+Mo¾né odpovìdi v módu hledání jsou
+\askip
+\key{SPC} nahraï tento výskyt; bì¾ na dal¹í
+\key{,} nahraï tento výskyt; nechoï dále
+\key{DEL} tento výskyt nenahrazuj a bì¾ dál
+\key{!} nahraï v¹echny dal¹í výskyty
+\key{\^{}} zpìt na pøedchozí výskyt
+\key{RET} ukonèi query-replace
+\key{C-r} zaèni rekurzivní editaci (\kbd{M-C-c} ji ukonèí)
+
+\section{Regulární výrazy}
+
+\key{. {\rm(teèka)}} libovolný znak kromì znaku nového øádku
+\key{*} ¾ádné nebo mnoho opakování
+\key{+} jedno nebo mnoho opakování
+\key{?} ¾ádné nebo jedno opakování
+\key{[$\ldots$]} oznaèuje tøídu znakù
+\key{[\^{}$\ldots$]} neguje tøídu znakù
+
+\key{\\{\it c}} uvození znaku, který by mìl jinak speciální význam v
+regulárním výrazu
+
+\key{$\ldots$\\|$\ldots$\\|$\ldots$} vyhovuje jedné z alternativ (\uv{nebo})
+\key{\\( $\ldots$ \\)} seskupení nìkolika vzorkù do jednoho
+\key{\\{\it n}} toté¾ jako {\it n\/}-tá skupina
+
+\key{\^{}} vyhovuje na zaèátku øádku
+\key{\$} vyhovuje na konci øádku
+
+\key{\\w} vyhovuje znaku, který mù¾e být souèástí slova
+\key{\\W} vyhovuje znaku, který nemù¾e být souèástí slova
+\key{\\<} vyhovuje na zaèátku slova
+\key{\\>} vyhovuje na konci slova
+\key{\\b} vyhovuje mezislovním mezerám
+\key{\\B} vyhovuje mezerám, které nejsou mezislovní
+
+\section{Registry}
+
+\key{C-x r s} ulo¾ region do registru
+\key{C-x r i} vlo¾ obsah registru do bufferu
+
+\key{C-x r SPC} ulo¾ aktuální pozici kurzoru do registru
+\key{C-x r j} skoè na pozici kurzoru ulo¾enou v registru
+
+\section{Obdélníky}
+
+\key{C-x r r} zkopíruj obdélník do registru
+\key{C-x r k} vyjmi obdélník
+\key{C-x r y} vlo¾ obdélník
+\key{C-x r t} uvození ka¾dého øádku øetìzcem
+
+\key{C-x r o} otevøi obdélník, posuò text vpravo
+\key{C-x r c} vyprázdni obdélník
+
+\section{Pøíkazový interpret}
+
+\key{M-x shell} spus» pøíkazový interpret v Emacsu
+\key{M-!} spus» pøíkaz pøíkazového interpretu
+\key{M-|} spus» pøíkaz pøíkazového interpretu na region
+\key{C-u M-|} filtruj region pøes pøíkaz pøíkazového interpretu
+
+\section{Kontrola pravopisu}
+
+\key{M-\$} zkontroluj pravopis slova pod kurzorem
+\mkey{M-x ispell-region} zkontroluj pravopis v¹ech slov v regionu
+\mkey{M-x ispell-buffer} zkontroluj pravopis v bufferu
+
+\section{Mezinárodní znakové sady}
+
+\key{C-x RET C-\\} zvol a aktivuj vstupní metodu pro aktuální buffer
+\key{C-\\} aktivuj nebo deaktivuj vstupní metodu
+\mkey{M-x list-input-methods} zobraz seznam v¹ech vstupních metod
+\mkey{M-x set-language-environment} specifikuj hlavní jazyk
+
+\key{C-x RET c} nastav kódovací systém pro následující pøíkaz
+\mkey{M-x find-file-literally} edituj soubor bez jakýchkoli konverzí
+
+\mkey{M-x list-coding-systems} uka¾ v¹echny kódovací systémy
+\mkey{M-x prefer-coding-system} zvol preferovaný kódovací systém
+
+\section{Klávesová makra}
+
+\key{C-x (} zaèni definici klávesového makra
+\key{C-x )} ukonèi definici klávesového makra
+\key{C-x e} spus» naposledy definované klávesové makro
+\key{C-u C-x (} pøidej do poslednì definovaného klávesového makra
+\mkey{M-x name-last-kbd-macro} pojmenuj naposledy definované makro
+
+\section{Jednoduché nastavení}
+
+\key{M-x customize} jednoduché nastavení
+
+\section{Pomoc}
+
+Emacs doplòuje pøíkazy. Stisknete-li \kbd{M-x} {\it tab\/} nebo {\it
+space\/} dostanete seznam pøíkazù Emacsu.
+\askip
+\key{C-h} nápovìda Emacsu
+\key{C-h t} spustí tutoriál Emacsu
+\key{C-h i} spustí Info, prohlí¾eè dokumentace
+\key{C-h a} uká¾e pøíkazy vyhovující zadanému øetìzci (apropos)
+\key{C-h k} zobrazí dokumentaci funkce spu¹tìné pomocí zadané klávesy
+\askip
+Emacs pracuje v rùzných {\it módech}, které upravují chování
+Emacsu pro editovaný text daného typu. Mode line obsahuje jména aktuálních
+módù v závorkách.
+\askip
+\key{C-h m} zobraz dokumentaci aktuálních módù.
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "csplain survival"
+% End:
+

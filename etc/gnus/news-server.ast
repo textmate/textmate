@@ -1,0 +1,63 @@
+@title Configuring Gnus for reading news
+
+
+@node Setting up the news server name and port number
+@variable server :string (or (gnus-getenv-nntpserver) "your-server-here")
+@variable port :number 119
+@validate (or (assistant-validate-connect-to-server server port) (y-or-n-p "Do you want to use the server anyway, although you can't confirm it's valid?"))
+@result gnus-select-method (list 'nntp server (list 'nntp-server port))
+@text
+Usenet news is usually read from your Internet service provider's news
+server.  If you don't know the name of this server, contact your ISP.
+
+As a guess, the name of the server might be news.yourisp.com.
+
+Server name: @variable{server}
+Port number: @variable{port}
+
+@end text
+@next t "User name and password"
+
+@node User name and password
+@type interstitial
+@next 
+(if (assistant-password-required-p)
+    "Enter user name and password"
+  "Want user name and password?")
+@end next
+
+
+@node Want user name and password?
+@variable passwordp (:radio ((item "Yes") (item "No"))) "No"
+@text
+Some news servers require that you enter a user name and a password.
+It doesn't look like your news server is one of them.
+
+Do you want to enter user name and password anyway?
+
+@variable{passwordp}
+
+@end text
+
+@next (equal passwordp "No") finish
+@next (not (equal passwordp "No")) "Enter user name and password"
+
+
+@node Enter user name and password
+@variable user-name :string (user-login-name)
+@variable password :password (or (assistant-authinfo-data server port 'password) "")
+@text
+
+It looks like your news server requires you to enter a user name
+and a password:
+
+User name: @variable{user-name}
+Password: @variable{user-name}
+
+@end text
+
+@c Local variables:
+@c mode: texinfo
+@c End:
+
+@c arch tag is missing

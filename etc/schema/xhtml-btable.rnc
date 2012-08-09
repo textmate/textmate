@@ -1,0 +1,28 @@
+# Basic Tables Module
+
+table = element table { table.attlist, caption?, tr+ }
+table.attlist =
+  Common.attrib,
+  attribute summary { Text.datatype }?
+caption = element caption { caption.attlist, Inline.model }
+caption.attlist = Common.attrib
+tr = element tr { tr.attlist, (th | td)+ }
+tr.attlist = Common.attrib, CellHAlign.attrib, CellVAlign.attrib
+th = element th { th.attlist, Flow.model }
+th.attlist = Cell.attrib
+td = element td { td.attlist, Flow.model }
+td.attlist = Cell.attrib
+Cell.attrib =
+  Common.attrib,
+  attribute abbr { Text.datatype }?,
+  attribute axis { text }?,
+  attribute headers { IDREFS.datatype }?,
+  scope.attrib,
+  attribute rowspan { Number.datatype }?,
+  attribute colspan { Number.datatype }?,
+  CellHAlign.attrib,
+  CellVAlign.attrib
+CellHAlign.attrib = attribute align { "left" | "center" | "right" }?
+CellVAlign.attrib = attribute valign { "top" | "middle" | "bottom" }?
+scope.attrib = attribute scope { "row" | "col" }?
+Block.class |= table

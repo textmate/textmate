@@ -1,0 +1,311 @@
+;;; el.srt --- SRecode templates for Emacs Lisp mode
+
+;; Copyright (C) 2007-2012 Free Software Foundation, Inc.
+
+;; Author: Eric Ludlam <zappo@gnu.org>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set escape_start "$"
+set escape_end "$"
+
+set mode "emacs-lisp-mode"
+
+set comment_start  ";;;"
+set comment_prefix  ";;"
+set comment_end  ""
+
+set DOLLAR "$"
+
+context file
+
+template section-comment :blank
+"Insert a comment that separates sections of an Emacs Lisp file."
+----
+
+;;; $^$
+;;
+
+----
+bind "s"
+
+
+template empty :user :time :file
+"Insert a skeleton for an Emacs Lisp file."
+----
+$>:filecomment$
+
+;;; Commentary:
+;;
+;; $^$
+
+;;; Code:
+
+
+(provide '$FILE$)
+
+;;; $FILENAME$ ends here
+
+----
+
+prompt MODESYM "Major Mode Symbol (sans -mode): "
+prompt MODENAME "Nice Name of mode: " defaultmacro "MODESYM"
+prompt MODEEXTENSION "File name extension for mode: "
+
+template major-mode :file :blank :indent
+"Insert the framework needed for a major mode."
+sectiondictionary "FONTLOCK"
+set NAME macro "MODESYM" "-mode-font-lock-keywords"
+set DOC "Keywords for use with srecode macros and font-lock."
+sectiondictionary "MODEHOOK"
+set NAME macro "MODESYM" "-mode-hook"
+set DOC "Hook run when " macro "MODESYM" " starts."
+set GROUP macro "MODESYM" "-mode"
+set CUSTOMTYPE "'hook"
+sectiondictionary "MODEFCN"
+set NAME macro "MODESYM" "-mode"
+set DOC "Major-mode for " macro "MODESYM" "-mode buffers."
+set INTERACTIVE ""
+----
+$>:declaration:defgroup$
+
+$>:syntax-table$
+
+$<FONTLOCK:declaration:variable$
+   '(
+     )
+$/FONTLOCK$
+
+$>:declaration:keymap$
+
+$<MODEHOOK:declaration:variable-option$nil$/MODEHOOK$
+
+;;;###autoload
+$<MODEFCN:declaration:function$
+  (interactive)
+  (kill-all-local-variables)
+  (setq major-mode '$MODESYM$-mode
+        mode-name "$?MODENAME$"
+	comment-start ";;"
+	comment-end "")
+  (set (make-local-variable 'comment-start-skip)
+       "\\(\\(^\\|[^\\\\\n]\\)\\(\\\\\\\\\\)*\\);+ *")
+  (set-syntax-table $MODESYM$-mode-syntax-table)
+  (use-local-map $MODESYM$-mode-map)
+  (set (make-local-variable 'font-lock-defaults)
+       '($MODESYM$-mode-font-lock-keywords
+         nil  ;; perform string/comment fontification
+         nil  ;; keywords are case sensitive.
+         ;; This puts _ & - as a word constituent,
+         ;; simplifying our keywords significantly
+         ((?_ . "w") (?- . "w"))))
+  (run-hooks '$MODESYM$-mode-hook)
+$/MODEFCN$
+
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.$?MODEEXTENSION$$DOLLAR$" . $MODESYM$-mode))
+
+$<A:section-comment$Commands for $MODESYM$$/A$
+
+$<B:section-comment$Utils for $MODESYM$$/B$
+----
+
+template syntax-table
+"Create a syntax table."
+sectiondictionary "A"
+set NAME macro "?MODESYM" "-mode-syntax-table"
+set DOC "Syntax table used in " macro "?MODESYM" " buffers."
+----
+$<A:declaration:variable$
+  (let ((table (make-syntax-table (standard-syntax-table))))
+    (modify-syntax-entry ?\; ". 12"  table) ;; SEMI, Comment start ;;
+    (modify-syntax-entry ?\n ">"     table) ;; Comment end
+    (modify-syntax-entry ?\" "\""    table) ;; String
+    (modify-syntax-entry ?\- "_"     table) ;; Symbol
+    (modify-syntax-entry ?\\ "\\"    table) ;; Quote
+    (modify-syntax-entry ?\` "'"     table) ;; Prefix ` (backquote)
+    (modify-syntax-entry ?\' "'"     table) ;; Prefix ' (quote)
+    (modify-syntax-entry ?\, "'"     table) ;; Prefix , (comma)
+
+    table)
+$/A$
+----
+
+
+context declaration
+
+template include :blank
+"Insert a require statement."
+----
+(require '$?NAME$)
+----
+bind "i"
+
+template include-protected :blank
+"Insert a require statement."
+----
+(condition-case nil
+     (require '$?NAME$)
+   (error nil))
+----
+
+prompt INTERACTIVE "Is this an interactive function? " default "  (interactive)\n  " read y-or-n-p
+prompt NAME "Name: " defaultmacro "PRENAME"
+
+template function :el :indent :blank
+"Insert a defun outline."
+----
+(defun $?NAME$ ($#ARGS$$NAME$$#NOTLAST$ $/NOTLAST$$/ARGS$)
+  "$DOC$"
+$?INTERACTIVE$$^$
+  )
+----
+bind "f"
+
+
+template variable :el :indent :blank
+"Inert a variable.
+DOC is optional."
+----
+(defvar $?NAME$ $^$
+  "$DOC$")
+----
+bind "v"
+
+template variable-const :el :indent :blank
+"Inert a variable."
+----
+(defconst $?NAME$ $^$
+  "$DOC$")
+----
+
+template variable-option :el :el-custom :indent :blank
+"Inert a variable created using defcustom."
+----
+(defcustom $?NAME$ $^$
+  "*$DOC$"
+  :group $GROUP$
+  :type $?CUSTOMTYPE$)
+----
+bind "o"
+
+template class :el :indent :blank
+"Insert a new class."
+----
+(defclass $?NAME$ ()
+   (($?ARG1$ :initarg :$ARG1$
+             :documentation
+	     "$^$")
+   )
+   "Class $NAME$ ")
+----
+bind "c"
+
+template class-tag :el :indent :blank
+"Insert a new class."
+----
+(defclass $?NAME$ ($#PARENTS$$NAME$ $/PARENTS$)
+   ($^$
+    )
+   "Class $NAME$ ")
+----
+
+template method :el :ctxt :indent :blank
+"Insert a new method."
+----
+(defmethod $?NAME$ ((this $?PARENT$))
+  "$DOC$"
+  $^$
+  )
+----
+bind "m"
+
+template method-tag :el :ctxt :indent :blank
+"Insert a new method for tag inserter."
+----
+(defmethod $NAME$ ($#ARGS$$#FIRST$($NAME$ $PARENT$)$/FIRST$$#NOTFIRST$ $NAME$$/NOTFIRST$$/ARGS$)
+  "$DOC$"
+  $^$
+  )
+----
+
+prompt NAME "Method to Override: " defaultmacro "PRENAME" read mode-local-read-function
+prompt PARENT "Major Mode for binding: " defaultmacro "MODESYM"
+
+;; Note: PARENT is used for override methods and for classes.  Handy!
+template modelocal :el :ctxt :indent :blank
+"Insert a new mode-local function."
+----
+(define-mode-local-override $?NAME$ $?PARENT$ ()
+  "$DOC$"
+  $^$)
+----
+bind "l"
+
+
+template defgroup :indent :blank
+"Create a custom group."
+----
+(defgroup $?MODESYM$-mode nil
+  "$MODESYM$ group."
+  :group 'languages)
+----
+bind "g"
+
+
+template keymap :indent :blank
+"Insert a keymap of some sort"
+----
+(defvar $?MODESYM$-mode-map
+  (let ((km (make-sparse-keymap)))
+    (define-key km "\C-c\C-c" '$MODESYM$-mode$^$)
+    km)
+  "Keymap used in `$MODESYM$-mode'.")
+----
+bind "k"
+
+
+context classdecl
+
+prompt NAME "Slot Name: "
+
+template variable-tag :indent :indent :blank
+"A field in a class."
+----
+($?NAME$ :initarg :$NAME$
+	 $#DEFAULTVALUE$:initform $VALUE$$/DEFAULTVALUE$
+	 :documentation
+	 "$DOC$")
+
+----
+
+template variable :indent :indent :blank
+"A field in a class."
+----
+($?NAME$ :initarg :$NAME$
+	 :initform nil
+	 :type list
+	 :documentation
+	 "$DOC$")
+
+----
+bind "s"
+
+
+
+;; end
+
+

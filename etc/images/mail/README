@@ -1,0 +1,37 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+The following icons are from GNOME 2.x. They are not part of Emacs,
+but are distributed and used by Emacs.  They are licensed under the
+GNU General Public License version 2 or later.  See the source of the
+gnome-icons-theme package for more information.
+
+Emacs images and their GNOME source (GNOME icons are from stock/net/
+directory unless otherwise stated):
+
+compose.xpm                 stock_mail-compose
+copy.xpm                    stock_mail-copy
+flag-for-followup.xpm       stock_mail-flag-for-followup
+forward.xpm                 stock_mail-forward
+inbox.xpm                   stock_inbox
+move.xpm                    stock_mail-move
+not-spam.xpm                stock_not-spam
+outbox.xpm                  stock_outbox
+preview.xpm                 combines stock_mail and navigation/stock_zoom
+reply-all.xpm               stock_mail-reply-to-all
+reply.xpm                   stock_mail-reply
+save-draft.xpm              stock_mail-handling
+save.xpm                    combines stock_mail, io/stock_save and
+                              stock_convert (from gnome-themes)
+send.xpm                    stock_mail-send
+spam.xpm                    stock_spam
+
+(preview and save were contributed by Adam Sjøgren <asjo@koldfront.dk>)
+
+repack is a slightly modified version of package-x-generic.
+reply-from is a slightly modified version of reply.
+reply-to is a slightly modified version of reply-all.
+
+
+The pbm versions (where present) were converted from the xpm versions
+via an essentially automatic procedure (see the README file in the
+parent of this directory).

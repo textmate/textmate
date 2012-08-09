@@ -1,0 +1,115 @@
+                                            -*-mode: text; coding: latin-1;-*-
+
+Copyright (C) 2002-2012 Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+Problems, fixmes and other unicode-related issues
+-------------------------------------------------------------
+
+Notes by fx to record various things of variable importance.  handa
+needs to check them -- don't take too seriously, especially with
+regard to completeness.
+
+ * SINGLE_BYTE_CHAR_P returns true for Latin-1 characters, which has
+   undesirable effects.  E.g.:
+   (multibyte-string-p (let ((s "x")) (aset s 0 ?£) s)) => nil
+   (multibyte-string-p (concat [?£])) => nil
+   (text-char-description ?£) => "M-#"
+
+	These examples are all fixed by the change of 2002-10-14, but
+	there still exist questionable SINGLE_BYTE_CHAR_P in the
+	code (keymap.c and print.c).
+
+ * Rationalize character syntax and its relationship to the Unicode
+   database.  (Applies mainly to symbol an punctuation syntax.)
+
+ * Fontset handling and customization needs work.  We want to relate
+   fonts to scripts, probably based on the Unicode blocks.  The
+   presence of small-repertoire 10646-encoded fonts in XFree 4 is a
+   pain, not currently worked round.
+
+	With the change on 2002-07-26, multiple fonts can be
+	specified in a fontset for a specific range of characters.
+	Each range can also be specified by script.  Before using
+	ISO10646 fonts, Emacs checks their repertories to avoid such
+	fonts that don't have a glyph for a specific character.
+
+	fx has worked on fontset customization, but was stymied by
+	basic problems with the way the default face is dealt with
+	(and something else, I think).  This needs revisiting.
+
+ * Work is also needed on charset and coding system priorities.
+
+ * The relevant bits of latin1-disp.el need porting (and probably
+   re-naming/updating).  See also cyril-util.el.
+
+ * Quail files need more work now the encoding is largely irrelevant.
+
+ * What to do with the old coding categories stuff?
+
+ * The preferred-coding-system property of charsets should probably be
+   junked unless it can be made more useful now.
+
+ * find-multibyte-characters needs looking at.
+
+ * Implement Korean cp949/UHC, BIG5-HKSCS and any other important missing
+   charsets.
+
+ * Lazy-load tables for unify-charset somehow?
+
+	Actually, Emacs clears out all charset maps and unify-map just
+	before dumping, and they are loaded again on demand by the
+	dumped emacs.  But, those maps (char tables) generated while
+	temacs is running can't be removed from the dumped emacs.
+
+ * iso-2022 charsets get unified on i/o.
+
+	With the change on 2003-01-06, decoding routines put `charset'
+	property to decoded text, and iso-2022 encoder pay attention
+	to it.  Thus, for instance, reading and writing by
+	iso-2022-7bit preserve the original designation sequences.
+	The property name `preferred-charset' may be better?
+
+	We may have to utilize this property to decide a font.
+
+ * Revisit locale processing: look at treating the language and
+   charset parts separately.  (Language should affect things like
+   spelling and calendar, but that's not a Unicode issue.)
+
+ * Handle Unicode combining characters usefully, e.g. diacritics, and
+   handle more scripts specifically (à la Devanagari).  There are
+   issues with canonicalization.
+
+ * We need tabular input methods, e.g. for maths symbols.  (Not
+   specific to Unicode.)
+
+ * Need multibyte text in menus, e.g. for the above.  (Not specific to
+   Unicode -- see Emacs etc/TODO, but now mostly works with gtk.)
+
+ * There's currently no support for Unicode normalization.
+
+ * Populate char-width-table correctly for Unicode characters and
+   worry about what happens when double-width charsets covering
+   non-CJK characters are unified.
+
+ * There are type errors lurking, e.g. in
+   Fcheck_coding_systems_region.  Define ENABLE_CHECKING to find them.
+
+ * Old auto-save files, and similar files, such as Gnus drafts,
+   containing non-ASCII characters probably won't be re-read correctly.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

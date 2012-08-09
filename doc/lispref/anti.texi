@@ -1,0 +1,141 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1999, 2002-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+
+@c This node must have no pointers.
+
+@node Antinews, GNU Free Documentation License, Packaging, Top
+@appendix Emacs 23 Antinews
+@c Update the elisp.texi, vol1.texi, vol2.texi Antinews menu entries
+@c with the above version number.
+
+For those users who live backwards in time, here is information about
+downgrading to Emacs version 23.4.  We hope you will enjoy the greater
+simplicity that results from the absence of many Emacs @value{EMACSVER}
+features.
+
+@section Old Lisp Features in Emacs 23
+
+@itemize @bullet
+@item
+Support for lexical scoping has been removed; all variables are
+dynamically scoped.  The @code{lexical-binding} variable has been
+removed, and so has the @var{lexical} argument to @code{eval}.  The
+@code{defvar} and @code{defconst} forms no longer mark variables as
+dynamic, since all variables are dynamic.
+
+Having only dynamic binding follows the spirit of Emacs extensibility,
+for it allows any Emacs code to access any defined variable with a
+minimum of fuss.  But @xref{Dynamic Binding Tips}, for tips to avoid
+making your programs hard to understand.
+
+@item
+Calling a minor mode function from Lisp with a nil or omitted argument
+does not enable the minor mode unconditionally; instead, it toggles
+the minor mode---which is the straightforward thing to do, since that
+is the behavior when invoked interactively.  One downside is that it
+is more troublesome to enable minor modes from hooks; you have to do
+something like
+
+@example
+(add-hook 'foo-hook (lambda () (bar-mode 1)))
+@end example
+
+@noindent
+or define @code{turn-on-bar-mode} and call that from the hook.
+
+@item
+The @code{prog-mode} dummy major mode has been removed.  Instead of
+using it as a crutch to meet programming mode conventions, you should
+explicitly ensure that your mode follows those conventions.
+@xref{Major Mode Conventions}.
+
+@item
+Emacs no longer supports bidirectional display and editing.  Since
+there is no need to worry about the insertion of right-to-left text
+messing up how lines and paragraphs are displayed, the function
+@code{bidi-string-mark-left-to-right} has been removed; so have many
+other functions and variables related to bidirectional display.
+Unicode directionality characters like @code{U+200E} ("left-to-right
+mark") have no special effect on display.
+
+@item
+Emacs windows now have most of their internal state hidden from Lisp.
+Internal windows are no longer visible to Lisp; functions such as
+@code{window-parent}, window parameters related to window arrangement,
+and window-local buffer lists have all been removed.  Functions for
+resizing windows can delete windows if they become too small.
+
+The ``action function'' feature for controlling buffer display has
+been removed, including @code{display-buffer-overriding-action} and
+related variables, as well as the @var{action} argument to
+@code{display-buffer} and other functions.  The way to
+programmatically control how Emacs chooses a window to display a
+buffer is to bind the right combination of
+@code{special-display-regexps}, @code{pop-up-frames}, and other
+variables.
+
+@item
+The standard completion interface has been simplified, eliminating the
+@code{completion-extra-properties} variable, the @code{metadata}
+action flag for completion functions, and the concept of
+``completion categories''.  Lisp programmers may now find the choice
+of methods for tuning completion less bewildering, but if a package
+finds the streamlined interface insufficient for its needs, it must
+implement its own specialized completion feature.
+
+@item
+@code{copy-directory} now behaves the same whether or not the
+destination is an existing directory: if the destination exists, the
+@emph{contents} of the first directory are copied into it (with
+subdirectories handled recursively), rather than copying the first
+directory into a subdirectory.
+
+@item
+The @var{trash} arguments for @code{delete-file} and
+@code{delete-directory} have been removed.  The variable
+@code{delete-by-moving-to-trash} must now be used with care; whenever
+it is non-@code{nil}, all calls to @code{delete-file} or
+@code{delete-directory} use the trash.
+
+@item
+Because Emacs no longer supports SELinux file contexts, the
+@var{preserve-selinux-context} argument to @code{copy-file} has been
+removed.  The return value of @code{backup-buffer} no longer has an
+entry for the SELinux file context.
+
+@item
+For mouse click input events in the text area, the Y pixel coordinate
+in the @var{position} list (@pxref{Click Events}) now counts from the
+top of the header line, if there is one, rather than the top of the
+text area.
+
+@item
+Bindings in menu keymaps (@pxref{Format of Keymaps}) now sometimes get
+an additional @var{cache} entry in their definitions, like this:
+
+@example
+(@var{type} @var{item-name} @var{cache} . @var{binding})
+@end example
+
+@noindent
+The @var{cache} entry is used internally by Emacs to record equivalent
+keyboard key sequences for invoking the same command; Lisp programs
+should never use it.
+@c Not really NEWS-worthy then...
+
+@item
+The @code{gnutls} library has been removed, and the function
+@code{open-network-stream} correspondingly simplified.
+Lisp programs that want an encrypted network connection must now call
+external utilities such as @command{starttls} or @command{gnutls-cli}.
+
+@item
+Tool bars can no longer display separators, which frees up several
+pixels of space on each graphical frame.
+
+@item
+As part of the ongoing quest for simplicity, many other functions and
+variables have been eliminated.
+@end itemize

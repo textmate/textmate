@@ -1,0 +1,157 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2011-11-16  Juanma Barranquero  <lekktu@gmail.com>
+
+	* etags.1: Fix typo.
+
+2011-10-06  Chong Yidong  <cyd@stupidchicken.com>
+
+	* emacsclient.1: Document how -a "" starts the daemon.
+
+2011-09-17  Sven Joachim  <svenjoac@gmx.de>
+
+	* emacs.1: Escape a dash.
+
+2011-07-12  Chong Yidong  <cyd@stupidchicken.com>
+
+	* emacsclient.1: Document exit status.
+
+2011-06-25  Andreas Rottmann  <a.rottmann@gmx.at>
+
+	* emacsclient.1: Mention --frame-parameters.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-01-02  Jari Aalto  <jari.aalto@cante.net>
+
+	* emacsclient.1: Arrange options alphabetically (Bug#7620).
+
+2010-10-12  Glenn Morris  <rgm@gnu.org>
+
+	* emacs.1: Small fixes.
+
+2010-10-12  Ulrich Mueller  <ulm@gentoo.org>
+
+	* emacs.1: Update license description.
+
+2010-10-09  Glenn Morris  <rgm@gnu.org>
+
+	* b2m.1: Remove file.
+
+2010-09-25  Ulrich Mueller  <ulm@gentoo.org>
+
+	* etags.1: xz compression is now supported.
+
+2010-08-26  Sven Joachim  <svenjoac@gmx.de>
+
+	* emacs.1: Mention "maximized" value for the "fullscreen" X resource.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2010-01-09  Chong Yidong  <cyd@stupidchicken.com>
+
+	* emacs.1: Copyedits.  Update options -Q, -mm and --daemon.
+	Remove deprecated --unibyte option.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2009-01-31  Glenn Morris  <rgm@gnu.org>
+
+	* b2m.1: Minor fixes.
+
+2008-12-14  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* ebrowse.1: Fix typos.  Add more to the "SEE ALSO" section.
+
+2008-12-14  Glenn Morris  <rgm@gnu.org>
+
+	* emacs.1: Fix MAILINGLISTS (default) location.
+
+2008-12-13  Glenn Morris  <rgm@gnu.org>
+
+	* b2m.1: New file.  Basic man-page.
+
+	* grep-changelog.1: New file.  Basic man-page, largely constructed from
+	program --help output.
+
+	* rcs-checkin.1: New file.  Basic man-page, largely from script
+	commentary.
+
+	* ebrowse.1: Fix "emacsclient" typo.  Replace problematic character.
+	Add some formatting.  Add permissions notice.
+
+	* emacs.1: Remove initial copyright comment, just refer to COPYING
+	section, merge years.
+
+	* etags.1: Don't duplicate copyright info in initial comment,
+	just refer to COPYING section.
+
+2008-12-10  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* ebrowse.1: New file, mostly just the results of --help in man format.
+
+	* emacsclient.1: Describe what an empty string argument does for
+	--alternate-editor.
+
+2008-11-27  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* emacsclient.1: Mention -nw and -c.  Fix the character for --help.
+	Swap the order of -e and -n to follow the order displayed by --help.
+
+2008-03-13  Glenn Morris  <rgm@gnu.org>
+
+	* emacs.1: Fix Emacs version.
+
+2008-01-08  Glenn Morris  <rgm@gnu.org>
+
+	* emacs.1: Update Emacs version.
+
+2007-11-22  Francesco Potortì  <pot@gnu.org>
+
+	* etags.1: Ctags and Etags now share the same defaults, so remove
+	--defines, --globals, --members, --typedefs, --typedefs-and-c++.
+
+2007-11-15  Francesco Potortì  <pot@gnu.org>
+
+	* etags.1: Note that you can use "-" for stdout with -o.
+
+2007-09-06  Glenn Morris  <rgm@gnu.org>
+
+	* ctags.1, emacs.1, emacsclient.1, etags.1: Move from etc/ to
+	doc/man/.
+
+;; Local Variables:
+;; coding: utf-8
+;; fill-column: 79
+;; add-log-time-zone-rule: t
+;; End:
+
+    Copyright (C) 2007-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+

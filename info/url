@@ -1,0 +1,1749 @@
+This is ../../info/url, produced by makeinfo version 4.13 from url.texi.
+
+INFO-DIR-SECTION Emacs lisp libraries
+START-INFO-DIR-ENTRY
+* URL: (url).                   URL loading package.
+END-INFO-DIR-ENTRY
+
+   This file documents the Emacs Lisp URL loading package.
+
+   Copyright (C) 1993-1999, 2002, 2004-2012 Free Software Foundation,
+Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+
+File: url,  Node: Top,  Next: Getting Started,  Up: (dir)
+
+URL
+***
+
+This file documents the Emacs Lisp URL loading package.
+
+   Copyright (C) 1993-1999, 2002, 2004-2012 Free Software Foundation,
+Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Getting Started::             Preparing your program to use URLs.
+* Retrieving URLs::             How to use this package to retrieve a URL.
+* Supported URL Types::         Descriptions of URL types currently supported.
+* Defining New URLs::           How to define a URL loader for a new protocol.
+* General Facilities::          URLs can be cached, accessed via a gateway
+                                and tracked in a history list.
+* Customization::               Variables you can alter.
+* GNU Free Documentation License:: The license for this documentation.
+* Function Index::
+* Variable Index::
+* Concept Index::
+
+
+File: url,  Node: Getting Started,  Next: Retrieving URLs,  Prev: Top,  Up: Top
+
+1 Getting Started
+*****************
+
+"Uniform Resource Locators" (URLs) are a specific form of "Uniform
+Resource Identifiers" (URI) described in RFC 2396 which updates RFC
+1738 and RFC 1808.  RFC 2016 defines uniform resource agents.
+
+   URIs have the form SCHEME:SCHEME-SPECIFIC-PART, where the SCHEMEs
+supported by this library are described below.  *Note Supported URL
+Types::.
+
+   FTP, NFS, HTTP, HTTPS, `rlogin', `telnet', tn3270, IRC and gopher
+URLs all have the form
+
+     SCHEME://[USERINFO@]HOSTNAME[:PORT][/PATH]
+   where `[' and `]' delimit optional parts.  USERINFO sometimes takes
+the form USERNAME:PASSWORD but you should beware of the security risks
+of sending cleartext passwords.  HOSTNAME may be a domain name or a
+dotted decimal address.  If the `:PORT' is omitted then the library will
+use the "well known" port for that service when accessing URLs.  With
+the possible exception of `telnet', it is rare for ports to be
+specified, and it is possible using a non-standard port may have
+undesired consequences if a different service is listening on that port
+(e.g., an HTTP URL specifying the SMTP port can cause mail to be sent).
+The meaning of the PATH component depends on the service.
+
+* Menu:
+
+* Configuration::
+* Parsed URLs::                 URLs are parsed into vector structures.
+
+
+File: url,  Node: Configuration,  Next: Parsed URLs,  Up: Getting Started
+
+1.1 Configuration
+=================
+
+ -- Variable: url-configuration-directory
+     The directory in which URL configuration files, the cache etc.,
+     reside.  The old default was `~/.url', and this directory is still
+     used if it exists.  The new default is a `url/' directory in
+     `user-emacs-directory', which is normally `~/.emacs.d'.
+
+
+File: url,  Node: Parsed URLs,  Prev: Configuration,  Up: Getting Started
+
+1.2 Parsed URLs
+===============
+
+The library functions typically operate on "parsed" versions of URLs.
+These are actually vectors of the form:
+
+     [TYPE USER PASSWORD HOST PORT FILE TARGET ATTRIBUTES FULL]
+
+where
+TYPE
+     is the type of the URL scheme, e.g., `http'
+
+USER
+     is the username associated with it, or `nil';
+
+PASSWORD
+     is the user password associated with it, or `nil';
+
+HOST
+     is the host name associated with it, or `nil';
+
+PORT
+     is the port number associated with it, or `nil';
+
+FILE
+     is the "file" part of it, or `nil'.  This doesn't necessarily
+     actually refer to a file;
+
+TARGET
+     is the target part, or `nil';
+
+ATTRIBUTES
+     is the attributes associated with it, or `nil';
+
+FULL
+     is `t' for a fully-specified URL, with a host part indicated by
+     `//' after the scheme part.
+
+   These attributes have accessors named `url-PART', where PART is the
+name of one of the elements above, e.g., `url-host'.  Similarly, there
+are setters of the form `url-set-PART'.
+
+   There are functions for parsing and unparsing between the string and
+vector forms.
+
+ -- Function: url-generic-parse-url url
+     Return a parsed version of the string URL.
+
+ -- Function: url-recreate-url url
+     Recreates a URL string from the parsed URL.
+
+
+File: url,  Node: Retrieving URLs,  Next: Supported URL Types,  Prev: Getting Started,  Up: Top
+
+2 Retrieving URLs
+*****************
+
+ -- Function: url-retrieve-synchronously url
+     Retrieve URL synchronously and return a buffer containing the
+     data.  URL is either a string or a parsed URL structure.  Return
+     `nil' if there are no data associated with it (the case for dired,
+     info, or mailto URLs that need no further processing).
+
+ -- Function: url-retrieve url callback &optional cbargs silent
+          no-cookies
+     Retrieve URL asynchronously and call CALLBACK with args CBARGS
+     when finished.  The callback is called when the object has been
+     completely retrieved, with the current buffer containing the
+     object and any MIME headers associated with it.  URL is either a
+     string or a parsed URL structure.  Returns the buffer URL will
+     load into, or `nil' if the process has already completed.  If the
+     optional argument SILENT is non-`nil', suppress progress messages.
+     If the optional argument NO-COOKIES is non-`nil', do not store or
+     send cookies.
+
+ -- Function: url-queue-retrieve url callback &optional cbargs silent
+          no-cookies
+     This acts like the `url-retrieve' function, but with limits on the
+     degree of parallelism.  The option `url-queue-parallel-processes'
+     controls the number of concurrent processes, and the option
+     `url-queue-timeout' sets a timeout in seconds.
+
+
+File: url,  Node: Supported URL Types,  Next: Defining New URLs,  Prev: Retrieving URLs,  Up: Top
+
+3 Supported URL Types
+*********************
+
+* Menu:
+
+* http/https::                  Hypertext Transfer Protocol.
+* file/ftp::                    Local files and FTP archives.
+* info::                        Emacs "Info" pages.
+* mailto::                      Sending email.
+* news/nntp/snews::             Usenet news.
+* rlogin/telnet/tn3270::        Remote host connectivity.
+* irc::                         Internet Relay Chat.
+* data::                        Embedded data URLs.
+* nfs::                         Networked File System
+* cid::                         Content-ID.
+* about::
+* ldap::                        Lightweight Directory Access Protocol
+* imap::                        IMAP mailboxes.
+* man::                         Unix man pages.
+
+
+File: url,  Node: http/https,  Next: file/ftp,  Up: Supported URL Types
+
+3.1 `http' and `https'
+======================
+
+The scheme `http' is Hypertext Transfer Protocol.  The library supports
+version 1.1, specified in RFC 2616.  (This supersedes 1.0, defined in
+RFC 1945) HTTP URLs have the following form, where most of the parts
+are optional:
+     http://USER:PASSWORD@HOST:PORT/PATH?SEARCHPART#FRAGMENT
+
+   The scheme `https' is a secure version of `http', with transmission
+via SSL.  It is defined in RFC 2069.  Its default port is 443.  This
+scheme depends on SSL support in Emacs via the `ssl.el' library and is
+actually implemented by forcing the `ssl' gateway method to be used.
+*Note Gateways in general::.
+
+ -- User Option: url-honor-refresh-requests
+     This controls honoring of HTTP `Refresh' headers by which servers
+     can direct clients to reload documents from the same URL or a or
+     different one.  `nil' means they will not be honored, `t' (the
+     default) means they will always be honored, and otherwise the user
+     will be asked on each request.
+
+* Menu:
+
+* Cookies::
+* HTTP language/coding::
+* HTTP URL Options::
+* Dealing with HTTP documents::
+
+
+File: url,  Node: Cookies,  Next: HTTP language/coding,  Up: http/https
+
+3.1.1 Cookies
+-------------
+
+ -- User Option: url-cookie-file
+     The file in which cookies are stored, defaulting to `cookies' in
+     the directory specified by `url-configuration-directory'.
+
+ -- User Option: url-cookie-confirmation
+     Specifies whether confirmation is require to accept cookies.
+
+ -- User Option: url-cookie-multiple-line
+     Specifies whether to put all cookies for the server on one line in
+     the HTTP request to satisfy broken servers like
+     `http://www.hotmail.com'.
+
+ -- User Option: url-cookie-trusted-urls
+     A list of regular expressions matching URLs from which to accept
+     cookies always.
+
+ -- User Option: url-cookie-untrusted-urls
+     A list of regular expressions matching URLs from which to reject
+     cookies always.
+
+ -- User Option: url-cookie-save-interval
+     The number of seconds between automatic saves of cookies to disk.
+     Default is one hour.
+
+
+File: url,  Node: HTTP language/coding,  Next: HTTP URL Options,  Prev: Cookies,  Up: http/https
+
+3.1.2 Language and Encoding Preferences
+---------------------------------------
+
+HTTP allows clients to express preferences for the language and
+encoding of documents which servers may honor.  For each of these
+variables, the value is a string; it can specify a single choice, or it
+can be a comma-separated list.
+
+   Normally, this list is ordered by descending preference.  However,
+each element can be followed by `;q=PRIORITY' to specify its preference
+level, a decimal number from 0 to 1; e.g., for
+`url-mime-language-string', `"de, en-gb;q=0.8, en;q=0.7"'.  An element
+that has no `;q' specification has preference level 1.
+
+ -- User Option: url-mime-charset-string
+     This variable specifies a preference for character sets when
+     documents can be served in more than one encoding.
+
+     HTTP allows specifying a series of MIME charsets which indicate
+     your preferred character set encodings, e.g., Latin-9 or Big5, and
+     these can be weighted.  The default series is generated
+     automatically from the associated MIME types of all defined coding
+     systems, sorted by the coding system priority specified in Emacs.
+     *Note Recognizing Coding Systems: (emacs)Recognize Coding.
+
+ -- User Option: url-mime-language-string
+     A string specifying the preferred language when servers can serve
+     files in several languages.  Use RFC 1766 abbreviations, e.g.,
+     `en' for English, `de' for German.
+
+     The string can be `"*"' to get the first available language (as
+     opposed to the default).
+
+
+File: url,  Node: HTTP URL Options,  Next: Dealing with HTTP documents,  Prev: HTTP language/coding,  Up: http/https
+
+3.1.3 HTTP URL Options
+----------------------
+
+HTTP supports an `OPTIONS' method describing things supported by the
+URL.
+
+ -- Function: url-http-options url
+     Returns a property list describing options available for URL.  The
+     property list members are:
+
+    `methods'
+          A list of symbols specifying what HTTP methods the resource
+          supports.
+
+    `dav'
+          A list of numbers specifying what DAV protocol/schema
+          versions are supported.
+
+    `dasl'
+          A list of supported DASL search types supported (string form).
+
+    `ranges'
+          A list of the units available for use in partial document
+          fetches.
+
+    `p3p'
+          The "Platform For Privacy Protection" description for the
+          resource.  Currently this is just the raw header contents.
+
+
+
+File: url,  Node: Dealing with HTTP documents,  Prev: HTTP URL Options,  Up: http/https
+
+3.1.4 Dealing with HTTP documents
+---------------------------------
+
+HTTP URLs are retrieved into a buffer containing the HTTP headers
+followed by the body.  Since the headers are quasi-MIME, they may be
+processed using the MIME library.  *Note Emacs MIME: (emacs-mime)Top.
+
+
+File: url,  Node: file/ftp,  Next: info,  Prev: http/https,  Up: Supported URL Types
+
+3.2 file and ftp
+================
+
+     ftp://USER:PASSWORD@HOST:PORT/FILE
+     file://USER:PASSWORD@HOST:PORT/FILE
+
+   These schemes are defined in RFC 1808.  `ftp:' and `file:' are
+synonymous in this library.  They allow reading arbitrary files from
+hosts.  Either `ange-ftp' (Emacs) or `efs' (XEmacs) is used to retrieve
+them from remote hosts.  Local files are accessed directly.
+
+   Compressed files are handled, but support is hard-coded so that
+`jka-compr-compression-info-list' and so on have no affect.  Suffixes
+recognized are `.z', `.gz', `.Z' and `.bz2'.
+
+ -- User Option: url-directory-index-file
+     The filename to look for when indexing a directory, default
+     `"index.html"'.  If this file exists, and is readable, then it
+     will be viewed instead of using `dired' to view the directory.
+
+
+File: url,  Node: info,  Next: mailto,  Prev: file/ftp,  Up: Supported URL Types
+
+3.3 info
+========
+
+     info:FILE#NODE
+
+   Info URLs are not officially defined.  They invoke `Info-goto-node'
+with argument `(FILE)NODE'.  `#NODE' is optional, defaulting to `Top'.
+
+
+File: url,  Node: mailto,  Next: news/nntp/snews,  Prev: info,  Up: Supported URL Types
+
+3.4 mailto
+==========
+
+A mailto URL will send an email message to the address in the URL, for
+example `mailto:foo@bar.com' would compose a message to `foo@bar.com'.
+
+ -- User Option: url-mail-command
+     The function called whenever url needs to send mail.  This should
+     normally be left to default from MAIL-USER-AGENT.  *Note
+     Mail-Composition Methods: (emacs)Mail Methods.
+
+   An `X-Url-From' header field containing the URL of the document that
+contained the mailto URL is added if that URL is known.
+
+   RFC 2368 extends the definition of mailto URLs in RFC 1738.  The
+form of a mailto URL is
+     `mailto:MAILBOX[?HEADER=CONTENTS[&HEADER=CONTENTS]]'
+   where an arbitrary number of HEADERs can be added.  If the HEADER is
+`body', then CONTENTS is put in the body otherwise a HEADER header
+field is created with CONTENTS as its contents.  Note that the URL
+library does not consider any headers "dangerous" so you should check
+them before sending the message.
+
+   Email messages are defined in RFC822.
+
+
+File: url,  Node: news/nntp/snews,  Next: rlogin/telnet/tn3270,  Prev: mailto,  Up: Supported URL Types
+
+3.5 `news', `nntp' and `snews'
+==============================
+
+The network news URL scheme take the following forms following RFC 1738
+except that for compatibility with other clients, host and port fields
+may be included in news URLs though they are properly only allowed for
+nntp an snews.
+
+`news:NEWSGROUP'
+     Retrieves a list of messages in NEWSGROUP;
+
+`news:MESSAGE-ID'
+     Retrieves the message with the given MESSAGE-ID;
+
+`news:*'
+     Retrieves a list of all available newsgroups;
+
+`nntp://HOST:PORT/NEWSGROUP'
+`nntp://HOST:PORT/MESSAGE-ID'
+`nntp://HOST:PORT/*'
+     Similar to the `news' versions.
+
+   `:PORT' is optional and defaults to :119.
+
+   `snews' is the same as `nntp' except that the default port is :563.  (It
+is tunneled through SSL.)
+
+   An `nntp' URL is the same as a news URL, except that the URL may
+specify an article by its number.
+
+ -- User Option: url-news-server
+     This variable can be used to override the default news server.
+     Usually this will be set by the Gnus package, which is used to
+     fetch news.  It may be set from the conventional environment
+     variable `NNTPSERVER'.
+
+
+File: url,  Node: rlogin/telnet/tn3270,  Next: irc,  Prev: news/nntp/snews,  Up: Supported URL Types
+
+3.6 rlogin, telnet and tn3270
+=============================
+
+These URL schemes from RFC 1738 for logon via a terminal emulator have
+the form
+     telnet://USER:PASSWORD@HOST:PORT
+   but the `:PASSWORD' component is ignored.
+
+   To handle rlogin, telnet and tn3270 URLs, a `rlogin', `telnet' or
+`tn3270' (the program names and arguments are hardcoded) session is run
+in a `terminal-emulator' buffer.  Well-known ports are used if the URL
+does not specify a port.
+
+
+File: url,  Node: irc,  Next: data,  Prev: rlogin/telnet/tn3270,  Up: Supported URL Types
+
+3.7 irc
+=======
+
+"Internet Relay Chat" (IRC) is handled by handing off the IRC session
+to a function named in `url-irc-function'.
+
+ -- User Option: url-irc-function
+     A function to actually open an IRC connection.  This function must
+     take five arguments, HOST, PORT, CHANNEL, USER and PASSWORD.  The
+     CHANNEL argument specifies the channel to join immediately, this
+     can be `nil'.  By default this is `url-irc-rcirc'.
+
+ -- Function: url-irc-rcirc host port channel user password
+     Processes the arguments and lets `rcirc' handle the session.
+
+ -- Function: url-irc-erc host port channel user password
+     Processes the arguments and lets `ERC' handle the session.
+
+ -- Function: url-irc-zenirc host port channel user password
+     Processes the arguments and lets `zenirc' handle the session.
+
+
+File: url,  Node: data,  Next: nfs,  Prev: irc,  Up: Supported URL Types
+
+3.8 data
+========
+
+     data:[MEDIA-TYPE][;BASE64],DATA
+
+   Data URLs contain MIME data in the URL itself.  They are defined in
+RFC 2397.
+
+   MEDIA-TYPE is a MIME `Content-Type' string, possibly including
+parameters.  It defaults to `text/plain;charset=US-ASCII'.  The
+`text/plain' can be omitted but the charset parameter supplied.  If
+`;base64' is present, the DATA are base64-encoded.
+
+
+File: url,  Node: nfs,  Next: cid,  Prev: data,  Up: Supported URL Types
+
+3.9 nfs
+=======
+
+     nfs://USER:PASSWORD@HOST:PORT/FILE
+
+   The `nfs:' scheme is defined in RFC 2224.  It is similar to `ftp:'
+except that it points to a file on a remote host that is handled by the
+automounter on the local host.
+
+ -- Variable: url-nfs-automounter-directory-spec
+   A string saying how to invoke the NFS automounter.  Certain `%'
+sequences are recognized:
+
+`%h'
+     The hostname of the NFS server;
+
+`%n'
+     The port number of the NFS server;
+
+`%u'
+     The username to use to authenticate;
+
+`%p'
+     The password to use to authenticate;
+
+`%f'
+     The filename on the remote server;
+
+`%%'
+     A literal `%'.
+
+   Each can be used any number of times.
+
+
+File: url,  Node: cid,  Next: about,  Prev: nfs,  Up: Supported URL Types
+
+3.10 cid
+========
+
+RFC 2111
+
+
+File: url,  Node: about,  Next: ldap,  Prev: cid,  Up: Supported URL Types
+
+3.11 about
+==========
+
+
+File: url,  Node: ldap,  Next: imap,  Prev: about,  Up: Supported URL Types
+
+3.12 ldap
+=========
+
+The LDAP scheme is defined in RFC 2255.
+
+
+File: url,  Node: imap,  Next: man,  Prev: ldap,  Up: Supported URL Types
+
+3.13 imap
+=========
+
+RFC 2192
+
+
+File: url,  Node: man,  Prev: imap,  Up: Supported URL Types
+
+3.14 man
+========
+
+     `man:PAGE-SPEC'
+
+   This is a non-standard scheme.  PAGE-SPEC is passed directly to the
+Lisp `man' function.
+
+
+File: url,  Node: Defining New URLs,  Next: General Facilities,  Prev: Supported URL Types,  Up: Top
+
+4 Defining New URLs
+*******************
+
+* Menu:
+
+* Naming conventions::
+* Required functions::
+* Optional functions::
+* Asynchronous fetching::
+* Supporting file-name-handlers::
+
+
+File: url,  Node: Naming conventions,  Next: Required functions,  Up: Defining New URLs
+
+4.1 Naming conventions
+======================
+
+
+File: url,  Node: Required functions,  Next: Optional functions,  Prev: Naming conventions,  Up: Defining New URLs
+
+4.2 Required functions
+======================
+
+
+File: url,  Node: Optional functions,  Next: Asynchronous fetching,  Prev: Required functions,  Up: Defining New URLs
+
+4.3 Optional functions
+======================
+
+
+File: url,  Node: Asynchronous fetching,  Next: Supporting file-name-handlers,  Prev: Optional functions,  Up: Defining New URLs
+
+4.4 Asynchronous fetching
+=========================
+
+
+File: url,  Node: Supporting file-name-handlers,  Prev: Asynchronous fetching,  Up: Defining New URLs
+
+4.5 Supporting file-name-handlers
+=================================
+
+
+File: url,  Node: General Facilities,  Next: Customization,  Prev: Defining New URLs,  Up: Top
+
+5 General Facilities
+********************
+
+* Menu:
+
+* Disk Caching::
+* Proxies::
+* Gateways in general::
+* History::
+
+
+File: url,  Node: Disk Caching,  Next: Proxies,  Up: General Facilities
+
+5.1 Disk Caching
+================
+
+The disk cache stores retrieved documents locally, whence they can be
+retrieved more quickly.  When requesting a URL that is in the cache,
+the library checks to see if the page has changed since it was last
+retrieved from the remote machine.  If not, the local copy is used,
+saving the transmission over the network.  Currently the cache isn't
+cleared automatically.
+
+ -- User Option: url-automatic-caching
+     Setting this variable non-`nil' causes documents to be cached
+     automatically.
+
+ -- User Option: url-cache-directory
+     This variable specifies the directory to store the cache files.
+     It defaults to sub-directory `cache' of
+     `url-configuration-directory'.
+
+ -- User Option: url-cache-creation-function
+     The cache relies on a scheme for mapping URLs to files in the
+     cache.  This variable names a function which sets the type of
+     cache to use.  It takes a URL as argument and returns the absolute
+     file name of the corresponding cache file.  The two supplied
+     possibilities are `url-cache-create-filename-using-md5' and
+     `url-cache-create-filename-human-readable'.
+
+ -- Function: url-cache-create-filename-using-md5 url
+     Creates a cache file name from URL using MD5 hashing.  This is
+     creates entries with very few cache collisions and is fast.  
+          (url-cache-create-filename-using-md5 "http://www.example.com/foo/bar")
+            => "/home/fx/.url/cache/fx/http/com/example/www/b8a35774ad20db71c7c3409a5410e74f"
+
+ -- Function: url-cache-create-filename-human-readable url
+     Creates a cache file name from URL more obviously connected to URL
+     than for `url-cache-create-filename-using-md5', but more likely to
+     conflict with other files.
+          (url-cache-create-filename-human-readable "http://www.example.com/foo/bar")
+            => "/home/fx/.url/cache/fx/http/com/example/www/foo/bar"
+
+ -- Function: url-cache-expired
+     This function returns non-nil if a cache entry has expired (or is
+     absent).  The arguments are a URL and optional expiration delay in
+     seconds (default URL-CACHE-EXPIRE-TIME).
+
+ -- User Option: url-cache-expire-time
+     This variable is the default number of seconds to use for the
+     expire-time argument of the function `url-cache-expired'.
+
+ -- Function: url-fetch-from-cache
+     This function takes a URL as its argument and returns a buffer
+     containing the data cached for that URL.
+
+
+File: url,  Node: Proxies,  Next: Gateways in general,  Prev: Disk Caching,  Up: General Facilities
+
+5.2 Proxies and Gatewaying
+==========================
+
+Proxy servers are commonly used to provide gateways through firewalls
+or as caches serving some more-or-less local network.  Each protocol
+(HTTP, FTP, etc.) can have a different gateway server.  Proxying is
+conventionally configured commonly amongst different programs through
+environment variables of the form `PROTOCOL_proxy', where PROTOCOL is
+one of the supported network protocols (`http', `ftp' etc.).  The
+library recognizes such variables in either upper or lower case.  Their
+values are of one of the forms:
+   * `HOST:PORT'
+
+   * A full URL;
+
+   * Simply a host name.
+
+   The `NO_PROXY' environment variable specifies URLs that should be
+excluded from proxying (on servers that should be contacted directly).
+This should be a comma-separated list of hostnames, domain names, or a
+mixture of both.  Asterisks can be used as wildcards, but other clients
+may not support that.  Domain names may be indicated by a leading dot.
+For example:
+     NO_PROXY="*.aventail.com,home.com,.seanet.com"
+   says to contact all machines in the `aventail.com' and `seanet.com'
+domains directly, as well as the machine named `home.com'.  If
+`NO_PROXY' isn't defined, `no_PROXY' and `no_proxy' are also tried, in
+that order.
+
+   Proxies may also be specified directly in Lisp.
+
+ -- User Option: url-proxy-services
+     This variable is an alist of URL schemes and proxy servers that
+     gateway them.  The items are of the form
+     `(SCHEME . HOST:PORTNUMBER)', says that the URL SCHEME is
+     gatewayed through PORTNUMBER on the specified HOST.  An exception
+     is the pseudo scheme `"no_proxy"', which is paired with a regexp
+     matching host names not to be proxied.  This variable is
+     initialized from the environment as above.
+
+          (setq url-proxy-services
+                '(("http"     . "proxy.aventail.com:80")
+                  ("no_proxy" . "^.*\\(aventail\\|seanet\\)\\.com")))
+
+
+File: url,  Node: Gateways in general,  Next: History,  Prev: Proxies,  Up: General Facilities
+
+5.3 Gateways in General
+=======================
+
+The library provides a general gateway layer through which all
+networking passes.  It can both control access to the network and
+provide access through gateways in firewalls.  This may make direct
+connections in some cases and pass through some sort of gateway in
+others.(1)  The library's basic function responsible for making
+connections is `url-open-stream'.
+
+ -- Function: url-open-stream name buffer host service
+     Open a stream to HOST, possibly via a gateway.  The other
+     arguments are as for `open-network-stream'.  This will not make a
+     connection if `url-gateway-unplugged' is non-`nil'.
+
+ -- Variable: url-gateway-local-host-regexp
+     This is a regular expression that matches local hosts that do not
+     require the use of a gateway.  If `nil', all connections are made
+     through the gateway.
+
+ -- Variable: url-gateway-method
+     This variable controls which gateway method is used.  It may be
+     useful to bind it temporarily in some applications.  It has values
+     taken from a list of symbols.  Possible values are:
+
+    `telnet'
+          Use this method if you must first telnet and log into a
+          gateway host, and then run telnet from that host to connect
+          to outside machines.
+
+    `rlogin'
+          This method is identical to `telnet', but uses `rlogin' to
+          log into the remote machine without having to send the
+          username and password over the wire every time.
+
+    `socks'
+          Use if the firewall has a SOCKS gateway running on it.  The
+          SOCKS v5 protocol is defined in RFC 1928.
+
+    `native'
+          This method uses Emacs's builtin networking directly.  This
+          is the default.  It can be used only if there is no firewall
+          blocking access.
+
+   The following variables control the gateway methods.
+
+ -- User Option: url-gateway-telnet-host
+     The gateway host to telnet to.  Once logged in there, you then
+     telnet out to the hosts you want to connect to.
+
+ -- User Option: url-gateway-telnet-parameters
+     This should be a list of parameters to pass to the `telnet'
+     program.
+
+ -- User Option: url-gateway-telnet-password-prompt
+     This is a regular expression that matches the password prompt when
+     logging in.
+
+ -- User Option: url-gateway-telnet-login-prompt
+     This is a regular expression that matches the username prompt when
+     logging in.
+
+ -- User Option: url-gateway-telnet-user-name
+     The username to log in with.
+
+ -- User Option: url-gateway-telnet-password
+     The password to send when logging in.
+
+ -- User Option: url-gateway-prompt-pattern
+     This is a regular expression that matches the shell prompt.
+
+ -- User Option: url-gateway-rlogin-host
+     Host to `rlogin' to before telnetting out.
+
+ -- User Option: url-gateway-rlogin-parameters
+     Parameters to pass to `rsh'.
+
+ -- User Option: url-gateway-rlogin-user-name
+     User name to use when logging in to the gateway.
+
+ -- User Option: url-gateway-prompt-pattern
+     This is a regular expression that matches the shell prompt.
+
+ -- User Option: socks-server
+     This specifies the default server, it takes the form
+     `("Default server" SERVER PORT VERSION)' where VERSION can be
+     either 4 or 5.
+
+ -- Variable: socks-password
+     If this is `nil' then you will be asked for the password,
+     otherwise it will be used as the password for authenticating you to
+     the SOCKS server.
+
+ -- Variable: socks-username
+     This is the username to use when authenticating yourself to the
+     SOCKS server.  By default this is your login name.
+
+ -- Variable: socks-timeout
+     This controls how long, in seconds, to wait for responses from the
+     SOCKS server; it is 5 by default.
+
+ -- User Option: socks-nslookup-program
+     This the `nslookup' program.  It is `"nslookup"' by default.
+
+* Menu:
+
+* Suppressing network connections::
+
+   ---------- Footnotes ----------
+
+   (1) Proxies (which only operate over HTTP) are implemented using
+this.
+
+
+File: url,  Node: Suppressing network connections,  Up: Gateways in general
+
+5.3.1 Suppressing Network Connections
+-------------------------------------
+
+In some circumstances it is desirable to suppress making network
+connections.  A typical case is when rendering HTML in a mail user
+agent, when external URLs should not be activated, particularly to
+avoid "bugs" which "call home" by fetch single-pixel images and the
+like.  To arrange this, bind the following variable for the duration of
+such processing.
+
+ -- Variable: url-gateway-unplugged
+     If this variable is non-`nil' new network connections are never
+     opened by the URL library.
+
+
+File: url,  Node: History,  Prev: Gateways in general,  Up: General Facilities
+
+5.4 History
+===========
+
+The library can maintain a global history list tracking URLs accessed.
+URL completion can be done from it.  The history mechanism is set up
+automatically via `url-do-setup' when it is configured to be on.  Note
+that the size of the history list is currently not limited.
+
+   The history "list" is actually a hash table,
+`url-history-hash-table'.  It contains access times keyed by URL
+strings.  The times are in the format returned by `current-time'.
+
+ -- Function: url-history-update-url url time
+     This function updates the history table with an entry for URL
+     accessed at the given TIME.
+
+ -- User Option: url-history-track
+     If non-`nil', the library will keep track of all the URLs
+     accessed.  If it is `t', the list is saved to disk at the end of
+     each Emacs session.  The default is `nil'.
+
+ -- User Option: url-history-file
+     The file storing the history list between sessions.  It defaults to
+     `history' in `url-configuration-directory'.
+
+ -- User Option: url-history-save-interval
+     The number of seconds between automatic saves of the history list.
+     Default is one hour.  Note that if you change this variable
+     directly, rather than using Custom, after `url-do-setup' has been
+     run, you need to run the function `url-history-setup-save-timer'.
+
+ -- Function: url-history-parse-history &optional fname
+     Parses the history file FNAME (default `url-history-file') and
+     sets up the history list.
+
+ -- Function: url-history-save-history &optional fname
+     Saves the current history to file FNAME (default
+     `url-history-file').
+
+ -- Function: url-completion-function string predicate function
+     You can use this function to do completion of URLs from the
+     history.
+
+
+File: url,  Node: Customization,  Next: GNU Free Documentation License,  Prev: General Facilities,  Up: Top
+
+6 Customization
+***************
+
+6.1 Environment Variables
+=========================
+
+The following environment variables affect the library's operation at
+startup.
+
+`TMPDIR'
+     If this is defined, URL-TEMPORARY-DIRECTORY is initialized from it.
+
+6.2 General User Options
+========================
+
+The following user options, settable with Customize, affect the general
+operation of the package.
+
+ -- User Option: url-debug
+     Specifies the types of debug messages which are logged to the
+     `*URL-DEBUG*' buffer.  `t' means log all messages.  A number means
+     log all messages and show them with `message'.  It may also be a
+     list of the types of messages to be logged.
+
+ -- User Option: url-personal-mail-address
+
+ -- User Option: url-privacy-level
+
+ -- User Option: url-uncompressor-alist
+
+ -- User Option: url-passwd-entry-func
+
+ -- User Option: url-standalone-mode
+
+ -- User Option: url-bad-port-list
+
+ -- User Option: url-max-password-attempts
+
+ -- User Option: url-temporary-directory
+
+ -- User Option: url-show-status
+
+ -- User Option: url-confirmation-func
+     The function to use for asking yes or no functions.  This is
+     normally either `y-or-n-p' or `yes-or-no-p', but could be another
+     function taking a single argument (the prompt) and returning `t'
+     only if an affirmative answer is given.
+
+ -- User Option: url-gateway-method
+     A symbol specifying the type of gateway support to use for
+     connections from the local machine.  The supported methods are:
+
+    `telnet'
+          Run telnet in a subprocess to connect;
+
+    `rlogin'
+          Rlogin to another machine to connect;
+
+    `socks'
+          Connect through a socks server;
+
+    `ssl'
+          Connect with SSL;
+
+    `native'
+          Connect directly.
+
+
+File: url,  Node: GNU Free Documentation License,  Next: Function Index,  Prev: Customization,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: url,  Node: Function Index,  Next: Variable Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Command and Function Index
+**************************
+
+ [index ]
+* Menu:
+
+* Info-goto-node:                        info.                 (line  6)
+* man:                                   man.                  (line  6)
+* terminal-emulator:                     rlogin/telnet/tn3270. (line  6)
+* url-attributes:                        Parsed URLs.          (line 41)
+* url-cache-create-filename-human-readable: Disk Caching.      (line 37)
+* url-cache-create-filename-using-md5:   Disk Caching.         (line 31)
+* url-cache-expired:                     Disk Caching.         (line 44)
+* url-completion-function:               History.              (line 43)
+* url-do-setup:                          History.              (line  6)
+* url-fetch-from-cache:                  Disk Caching.         (line 53)
+* url-file:                              Parsed URLs.          (line 41)
+* url-full:                              Parsed URLs.          (line 41)
+* url-generic-parse-url:                 Parsed URLs.          (line 49)
+* url-history-parse-history:             History.              (line 35)
+* url-history-save-history:              History.              (line 39)
+* url-history-setup-save-timer:          History.              (line 29)
+* url-history-update-url:                History.              (line 16)
+* url-host:                              Parsed URLs.          (line 41)
+* url-http-options:                      HTTP URL Options.     (line 10)
+* url-irc-erc:                           irc.                  (line 19)
+* url-irc-rcirc:                         irc.                  (line 16)
+* url-irc-zenirc:                        irc.                  (line 22)
+* url-open-stream:                       Gateways in general.  (line 14)
+* url-password:                          Parsed URLs.          (line 41)
+* url-port:                              Parsed URLs.          (line 41)
+* url-queue-retrieve:                    Retrieving URLs.      (line 26)
+* url-recreate-url:                      Parsed URLs.          (line 52)
+* url-retrieve:                          Retrieving URLs.      (line 14)
+* url-retrieve-synchronously:            Retrieving URLs.      (line  7)
+* url-set-attributes:                    Parsed URLs.          (line 41)
+* url-set-file:                          Parsed URLs.          (line 41)
+* url-set-full:                          Parsed URLs.          (line 41)
+* url-set-host:                          Parsed URLs.          (line 41)
+* url-set-password:                      Parsed URLs.          (line 41)
+* url-set-port:                          Parsed URLs.          (line 41)
+* url-set-target:                        Parsed URLs.          (line 41)
+* url-set-type:                          Parsed URLs.          (line 41)
+* url-set-user:                          Parsed URLs.          (line 41)
+* url-target:                            Parsed URLs.          (line 41)
+* url-type:                              Parsed URLs.          (line 41)
+* url-user:                              Parsed URLs.          (line 41)
+
+
+File: url,  Node: Variable Index,  Next: Concept Index,  Prev: Function Index,  Up: Top
+
+Variable Index
+**************
+
+ [index ]
+* Menu:
+
+* HTTP_PROXY:                            Proxies.             (line   6)
+* mail-user-agent:                       mailto.              (line  10)
+* NNTPSERVER:                            news/nntp/snews.     (line  36)
+* NO_PROXY:                              Proxies.             (line  20)
+* socks-nslookup-program:                Gateways in general. (line 105)
+* socks-password:                        Gateways in general. (line  92)
+* socks-server:                          Gateways in general. (line  87)
+* socks-timeout:                         Gateways in general. (line 101)
+* socks-username:                        Gateways in general. (line  97)
+* TMPDIR:                                Customization.       (line  13)
+* url-automatic-caching:                 Disk Caching.        (line  14)
+* url-bad-port-list:                     Customization.       (line  38)
+* url-cache-creation-function:           Disk Caching.        (line  23)
+* url-cache-directory:                   Disk Caching.        (line  18)
+* url-cache-expire-time:                 Disk Caching.        (line  49)
+* url-configuration-directory:           Configuration.       (line   7)
+* url-confirmation-func:                 Customization.       (line  46)
+* url-cookie-confirmation:               Cookies.             (line  11)
+* url-cookie-file:                       Cookies.             (line   7)
+* url-cookie-multiple-line:              Cookies.             (line  14)
+* url-cookie-save-interval:              Cookies.             (line  27)
+* url-cookie-trusted-urls:               Cookies.             (line  19)
+* url-cookie-untrusted-urls:             Cookies.             (line  23)
+* url-debug:                             Customization.       (line  22)
+* url-directory-index-file:              file/ftp.            (line  19)
+* url-gateway-local-host-regexp:         Gateways in general. (line  19)
+* url-gateway-method <1>:                Customization.       (line  52)
+* url-gateway-method:                    Gateways in general. (line  24)
+* url-gateway-prompt-pattern:            Gateways in general. (line  72)
+* url-gateway-rlogin-host:               Gateways in general. (line  75)
+* url-gateway-rlogin-parameters:         Gateways in general. (line  78)
+* url-gateway-rlogin-user-name:          Gateways in general. (line  81)
+* url-gateway-telnet-host:               Gateways in general. (line  50)
+* url-gateway-telnet-login-prompt:       Gateways in general. (line  62)
+* url-gateway-telnet-parameters:         Gateways in general. (line  54)
+* url-gateway-telnet-password:           Gateways in general. (line  69)
+* url-gateway-telnet-password-prompt:    Gateways in general. (line  58)
+* url-gateway-telnet-user-name:          Gateways in general. (line  66)
+* url-gateway-unplugged:                 Suppressing network connections.
+                                                              (line  14)
+* url-history-file:                      History.             (line  25)
+* url-history-hash-table:                History.             (line  11)
+* url-history-save-interval:             History.             (line  29)
+* url-history-track:                     History.             (line  20)
+* url-honor-refresh-requests:            http/https.          (line  19)
+* url-irc-function:                      irc.                 (line  10)
+* url-mail-command:                      mailto.              (line  10)
+* url-max-password-attempts:             Customization.       (line  40)
+* url-mime-charset-string:               HTTP language/coding.
+                                                              (line  18)
+* url-mime-language-string:              HTTP language/coding.
+                                                              (line  29)
+* url-news-server:                       news/nntp/snews.     (line  34)
+* url-nfs-automounter-directory-spec:    nfs.                 (line  13)
+* url-passwd-entry-func:                 Customization.       (line  34)
+* url-personal-mail-address:             Customization.       (line  28)
+* url-privacy-level:                     Customization.       (line  30)
+* url-proxy-services:                    Proxies.             (line  35)
+* url-queue-parallel-processes:          Retrieving URLs.     (line  24)
+* url-queue-timeout:                     Retrieving URLs.     (line  24)
+* url-show-status:                       Customization.       (line  44)
+* url-standalone-mode:                   Customization.       (line  36)
+* url-temporary-directory:               Customization.       (line  13)
+* url-uncompressor-alist:                Customization.       (line  32)
+
+
+File: url,  Node: Concept Index,  Prev: Variable Index,  Up: Top
+
+Concept Index
+*************
+
+ [index ]
+* Menu:
+
+* automounter:                           nfs.                 (line   6)
+* bugs, HTML:                            Suppressing network connections.
+                                                              (line   6)
+* Cache cleaning:                        Disk Caching.        (line  10)
+* Caching:                               Disk Caching.        (line   6)
+* character sets:                        HTTP language/coding.
+                                                              (line  18)
+* Cleaning the cache:                    Disk Caching.        (line  10)
+* Clearing the cache:                    Disk Caching.        (line  10)
+* coding systems:                        HTTP language/coding.
+                                                              (line  18)
+* compressed files:                      file/ftp.            (line   6)
+* configuration files:                   Configuration.       (line   7)
+* Content-ID:                            cid.                 (line   6)
+* DASL:                                  HTTP URL Options.    (line  22)
+* data URLs:                             data.                (line   6)
+* DAV:                                   HTTP URL Options.    (line  18)
+* debugging:                             Customization.       (line  22)
+* dired:                                 file/ftp.            (line   6)
+* Disk Cache:                            Disk Caching.        (line   6)
+* email:                                 mailto.              (line   6)
+* environment variable:                  news/nntp/snews.     (line  36)
+* environment variables <1>:             Customization.       (line   9)
+* environment variables:                 Proxies.             (line   6)
+* ERC:                                   irc.                 (line   6)
+* File Transfer Protocol:                file/ftp.            (line   6)
+* files:                                 file/ftp.            (line   6)
+* firewalls:                             Gateways in general. (line   6)
+* FTP:                                   file/ftp.            (line   6)
+* gateways:                              Gateways in general. (line   6)
+* HTML `bugs':                           Suppressing network connections.
+                                                              (line   6)
+* IMAP:                                  imap.                (line   6)
+* Info:                                  info.                (line   6)
+* Internet Relay Chat:                   irc.                 (line   6)
+* IRC:                                   irc.                 (line   6)
+* language preferences:                  HTTP language/coding.
+                                                              (line  29)
+* LDAP:                                  ldap.                (line   6)
+* Lightweight Directory Access Protocol: ldap.                (line   6)
+* mailto:                                mailto.              (line   6)
+* man:                                   man.                 (line   6)
+* MD5:                                   Disk Caching.        (line  32)
+* network connections, suppressing:      Suppressing network connections.
+                                                              (line   6)
+* Network File System:                   nfs.                 (line   6)
+* network news:                          news/nntp/snews.     (line   6)
+* news:                                  news/nntp/snews.     (line   6)
+* NFS:                                   nfs.                 (line   6)
+* NNTP:                                  news/nntp/snews.     (line   6)
+* nslookup:                              Gateways in general. (line 105)
+* opening a stream:                      Gateways in general. (line  14)
+* P3P:                                   HTTP URL Options.    (line  29)
+* parsed URLs:                           Parsed URLs.         (line   6)
+* Persistent Cache:                      Disk Caching.        (line   6)
+* proxies:                               Proxies.             (line   6)
+* proxy servers:                         Proxies.             (line   6)
+* rcirc:                                 irc.                 (line   6)
+* rlogin <1>:                            Gateways in general. (line  34)
+* rlogin:                                rlogin/telnet/tn3270.
+                                                              (line   6)
+* snews:                                 news/nntp/snews.     (line   6)
+* SOCKS:                                 Gateways in general. (line  39)
+* SSL:                                   news/nntp/snews.     (line  27)
+* stream, opening:                       Gateways in general. (line  14)
+* suppressing network connections:       Suppressing network connections.
+                                                              (line   6)
+* telnet <1>:                            Gateways in general. (line  29)
+* telnet:                                rlogin/telnet/tn3270.
+                                                              (line   6)
+* terminal emulation:                    rlogin/telnet/tn3270.
+                                                              (line   6)
+* Texinfo:                               info.                (line   6)
+* tn3270:                                rlogin/telnet/tn3270.
+                                                              (line   6)
+* Unix man pages:                        man.                 (line   6)
+* unparsing URLs:                        Parsed URLs.         (line  52)
+* URIs:                                  Getting Started.     (line   6)
+* URLs, definition:                      Getting Started.     (line   6)
+* usenet:                                news/nntp/snews.     (line   6)
+* ZEN IRC:                               irc.                 (line   6)
+* ~/.url:                                Configuration.       (line   7)
+
+
+
+Tag Table:
+Node: Top995
+Node: Getting Started2484
+Node: Configuration3874
+Node: Parsed URLs4299
+Node: Retrieving URLs5651
+Node: Supported URL Types7114
+Node: http/https7974
+Node: Cookies9155
+Node: HTTP language/coding10141
+Node: HTTP URL Options11768
+Node: Dealing with HTTP documents12699
+Node: file/ftp13065
+Node: info13965
+Node: mailto14232
+Node: news/nntp/snews15340
+Node: rlogin/telnet/tn327016574
+Node: irc17141
+Node: data18048
+Node: nfs18513
+Node: cid19263
+Node: about19369
+Node: ldap19470
+Node: imap19611
+Node: man19719
+Node: Defining New URLs19917
+Node: Naming conventions20201
+Node: Required functions20339
+Node: Optional functions20504
+Node: Asynchronous fetching20672
+Node: Supporting file-name-handlers20857
+Node: General Facilities21031
+Node: Disk Caching21247
+Node: Proxies23770
+Node: Gateways in general25825
+Ref: Gateways in general-Footnote-129871
+Node: Suppressing network connections29946
+Node: History30597
+Node: Customization32436
+Node: GNU Free Documentation License34310
+Node: Function Index59484
+Node: Variable Index62662
+Node: Concept Index67459
+
+End Tag Table

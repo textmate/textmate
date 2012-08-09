@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- See etc/org/README for copyright information -->
+<office:document-content
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+    xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0"
+    xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0"
+    xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+    xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0"
+    xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0"
+    xmlns:math="http://www.w3.org/1998/Math/MathML"
+    xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0"
+    xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0"
+    xmlns:ooo="http://openoffice.org/2004/office"
+    xmlns:ooow="http://openoffice.org/2004/writer"
+    xmlns:oooc="http://openoffice.org/2004/calc"
+    xmlns:dom="http://www.w3.org/2001/xml-events"
+    xmlns:xforms="http://www.w3.org/2002/xforms"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:rpt="http://openoffice.org/2005/report"
+    xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2"
+    xmlns:xodt="http://www.w3.org/1999/xodt"
+    xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0"    office:version="1.2">
+  <!-- scripts -->
+  <office:scripts/>
+
+  <!-- font face declarations -->
+  <office:font-face-decls>
+    <style:font-face style:name="Tahoma1" svg:font-family="Tahoma"/>
+    <style:font-face style:name="courier" svg:font-family="courier, monospace"/>
+    <style:font-face style:name="Arial Unicode MS" svg:font-family="&apos;Arial Unicode MS&apos;" style:font-pitch="variable"/>
+    <style:font-face style:name="HG Mincho Light J" svg:font-family="&apos;HG Mincho Light J&apos;" style:font-pitch="variable"/>
+    <style:font-face style:name="Thorndale" svg:font-family="Thorndale" style:font-family-generic="roman" style:font-pitch="variable"/>
+    <style:font-face style:name="Times New Roman" svg:font-family="&apos;Times New Roman&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
+    <style:font-face style:name="Albany" svg:font-family="Albany" style:font-family-generic="swiss" style:font-pitch="variable"/>
+    <style:font-face style:name="SimSun" svg:font-family="SimSun" style:font-family-generic="system" style:font-pitch="variable"/>
+    <style:font-face style:name="Tahoma" svg:font-family="Tahoma" style:font-family-generic="system" style:font-pitch="variable"/>
+  </office:font-face-decls>
+
+  <!-- automatic styles -->
+  <office:automatic-styles>
+    <!-- Section styles -->
+    <style:style style:name="OrgIndentedSection-Level-1" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="1.281cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-2" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="1.905cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-3" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="2.54cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-4" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="3.175cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-5" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="3.81cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-6" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="4.445cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-7" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="5.08cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-8" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="5.715cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-9" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="6.35cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+    <style:style style:name="OrgIndentedSection-Level-10" style:family="section">
+      <style:section-properties text:dont-balance-text-columns="false" fo:margin-left="6.985cm" fo:margin-right="0cm" style:editable="false">
+	<style:columns fo:column-count="1" fo:column-gap="0cm"/>
+      </style:section-properties>
+    </style:style>
+
+    <!-- Table styles -->
+    <style:style style:name="OrgTable" style:family="table">
+      <style:table-properties style:rel-width="96%" fo:margin-top="0cm" fo:margin-bottom="0.20cm" table:align="center"/>
+    </style:style>
+
+    <style:style style:name="OrgTableColumn" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="1*"/>
+    </style:style>
+
+    <style:style style:name="OrgTblCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="top" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellT" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellB" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellBL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellBR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellBLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTB" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTBL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTBR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+    <style:style style:name="OrgTblCellTBLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    </style:style>
+
+    <!-- BEGIN: Table styles for numbered equations -->
+    <style:style style:name="OrgEquation" style:family="table">
+      <style:table-properties style:rel-width="100%" fo:margin-top="0cm" fo:margin-bottom="0.20cm" table:align="center"/>
+    </style:style>
+    <style:style style:name="OrgEquationTableColumn" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="1*"/>
+    </style:style>
+    <style:style style:name="OrgFirstEquationFirstColumnTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgEquationLastColumnTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+    <style:style style:name="OrgEquationFirstColumnTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+    </style:style>
+    <style:style style:name="OrgEquationLastColumnTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="end" style:justify-single-word="false"/>
+    </style:style>
+    <!-- END: Table styles for numbered equations -->
+
+    <!-- BEGIN: Custom Table Template -->
+    <style:style style:name="Custom" style:family="table">
+      <style:table-properties style:rel-width="80%" table:align="center"/>
+    </style:style>
+
+    <style:style style:name="CustomColumn" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="1*"/>
+    </style:style>
+
+    <!-- Table Paragraph Styles -->
+    <style:style style:name="CustomTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomLastRowTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomLastColumnTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomFirstRowTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#ffffff" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomFirstColumnTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#ffffff" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <!-- Table Cell Styles -->
+    <style:style style:name="CustomTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#ffffff" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomFirstRowTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#000080" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomLastRowTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomFirstColumnTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#4d4d4d" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomLastColumnTableCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <!-- END: Custom Table Template -->
+
+  </office:automatic-styles>
+
+  <office:body>
+    <office:text>
+      <text:sequence-decls>
+	<text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>
+	<text:sequence-decl text:display-outline-level="0" text:name="Table"/>
+	<text:sequence-decl text:display-outline-level="0" text:name="Text"/>
+	<text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
+	<text:sequence-decl text:display-outline-level="0" text:name="Equation"/>
+	<text:sequence-decl text:display-outline-level="0" text:name="Figure"/>
+      </text:sequence-decls>
+    </office:text>
+  </office:body>
+</office:document-content>

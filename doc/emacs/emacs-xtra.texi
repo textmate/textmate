@@ -1,0 +1,139 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header
+@setfilename ../../info/emacs-xtra
+@settitle Specialized Emacs Features
+@c Merge all functions, variables, and keys into the concept index.
+@syncodeindex fn cp
+@syncodeindex vr cp
+@syncodeindex ky cp
+@comment %**end of header
+
+@copying
+This manual describes specialized features of Emacs.
+
+Copyright @copyright{} 2004-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU
+Manual,'' and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License'' in the Emacs manual.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+
+This document is part of a collection distributed under the GNU Free
+Documentation License.  If you want to distribute this document
+separately from the collection, you can do so by adding a copy of the
+license to the document, as described in section 6 of the license.
+@end quotation
+@end copying
+
+@documentencoding ISO-8859-1
+
+@dircategory Emacs
+@direntry
+* Emacs-Xtra: (emacs-xtra).    Specialized Emacs features.
+@end direntry
+
+@titlepage
+@title Specialized Emacs Features
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Specialized Emacs Features
+
+@insertcopying
+
+@end ifnottex
+
+@menu
+* Introduction::        What documentation belongs here?
+@iftex
+* Picture Mode::        Editing pictures made up of characters using 
+                         the quarter-plane screen model.
+
+* Autorevert::          Auto Reverting non-file buffers.
+* Subdir Switches::     Subdirectory switches in Dired.
+* Advanced Calendar/Diary Usage:: Advanced Calendar/Diary customization.
+* Emerge::              A convenient way of merging two versions of a program.
+* Advanced VC Usage::   Advanced VC (version control) features.
+* Fortran::             Fortran mode and its special features.
+* MS-DOS::              Using Emacs on MS-DOS.
+@end iftex
+* Index::
+@end menu
+
+@node Introduction
+@unnumbered Introduction
+
+This manual contains detailed information about various features that
+are too specialized to be included in the printed Emacs manual.  It is
+intended to be readable by anyone having a basic knowledge of Emacs.
+However, certain sections may be intended for a more specialized
+audience, such as Elisp authors.  This should be clearly pointed out
+at the beginning of these sections.
+
+@c Note to authors - you need to be careful about cross-references to
+@c topics in the Emacs manual.  As a printed document, the xtra files
+@c are separate from the Emacs manual; but as an info document, they
+@c are part of the Emacs manual.  Hence you need to use something like:
+@c @iftex
+@c @ref{Comparing Files,,, emacs, the Emacs Manual},
+@c @end iftex
+@c @ifnottex
+@c @ref{Comparing Files},
+@c @end ifnottex
+
+Certain packages (or collections of related features) have their own
+manuals, separate from the main Emacs manual.  This manual is
+intended as a complement, rather than an alternative, to reading those
+additional manuals.  In a nutshell, it is a collection of smaller
+specialized features (or extra detail about standard features), too
+small or too obscure to justify their own manual, or inclusion in the
+printed Emacs manual.  The chapters in this manual are, however,
+included (at the relevant places) in the main Emacs manual when it is
+formatted as an Info document.
+
+Sections intended specifically for Elisp programmers can follow the
+style of the Elisp manual.  Other sections should follow the style of
+the Emacs manual.
+
+@iftex
+
+@raisesections
+@include picture-xtra.texi
+
+@include arevert-xtra.texi
+
+@include dired-xtra.texi
+
+@include cal-xtra.texi
+
+@include emerge-xtra.texi
+
+@include vc-xtra.texi
+
+@include fortran-xtra.texi
+
+@include msdog-xtra.texi
+
+@lowersections
+@end iftex
+
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@bye

@@ -1,0 +1,38 @@
+HOW TO MAINTAIN COPYRIGHT YEARS FOR GNU EMACS
+
+Maintaining copyright years is now very simple: every time a new year
+rolls around, add that year to every FSF (and AIST) copyright notice.
+
+There's no need to worry about whether an individual file has changed
+in a given year - it's sufficient that Emacs as a whole has changed.
+
+Therefore the years are updated en-masse near the start of each year,
+so basically there is no need for most people to do any updating of them.
+
+The current (in 2011) version of "Information for Maintainers of GNU
+Software" (see that document for more details) says that it is OK to use
+ranges in copyright years, so in early 2011 the years were changed to use
+ranges, which occupy less space and do not grow in length every year.
+
+For more detailed information on maintaining copyright, see the file
+"copyright" in this directory.
+
+The previous policy was more complex, but is now only of historical
+interest (see versions of this file from before 2009).
+
+The refcards in etc/refcards can print only the latest copyright year,
+but should keep the full list in a comment in the source.
+
+
+"Our lawyer says it is ok if we add, to each file that has been in Emacs
+ since Emacs 21 came out in 2001, all the subsequent years[1].  We don't
+ need to check whether *that file* was changed in those years.
+ It's sufficient that *Emacs* was changed in those years (and it was!).
+  
+ For those files that have been added since then, we should add
+ the year it was added to Emacs, and all subsequent years."
+  
+ --RMS, 2005-07-13
+
+[1] Note that this includes 2001 - see
+<http://lists.gnu.org/archive/html/emacs-pretest-bug/2006-12/msg00119.html>

@@ -1,0 +1,3 @@
+This directory contains the source code for the architecture-dependent
+files that go in ${archlibdir}.  At present, these are mostly utility
+programs used by GNU Emacs.

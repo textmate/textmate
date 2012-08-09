@@ -1,0 +1,659 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/macros
+@node Macros, Customization, Functions, Top
+@chapter Macros
+@cindex macros
+
+  @dfn{Macros} enable you to define new control constructs and other
+language features.  A macro is defined much like a function, but instead
+of telling how to compute a value, it tells how to compute another Lisp
+expression which will in turn compute the value.  We call this
+expression the @dfn{expansion} of the macro.
+
+  Macros can do this because they operate on the unevaluated expressions
+for the arguments, not on the argument values as functions do.  They can
+therefore construct an expansion containing these argument expressions
+or parts of them.
+
+  If you are using a macro to do something an ordinary function could
+do, just for the sake of speed, consider using an inline function
+instead.  @xref{Inline Functions}.
+
+@menu
+* Simple Macro::            A basic example.
+* Expansion::               How, when and why macros are expanded.
+* Compiling Macros::        How macros are expanded by the compiler.
+* Defining Macros::         How to write a macro definition.
+* Problems with Macros::    Don't evaluate the macro arguments too many times.
+                              Don't hide the user's variables.
+* Indenting Macros::        Specifying how to indent macro calls.
+@end menu
+
+@node Simple Macro
+@section A Simple Example of a Macro
+
+  Suppose we would like to define a Lisp construct to increment a
+variable value, much like the @code{++} operator in C.  We would like to
+write @code{(inc x)} and have the effect of @code{(setq x (1+ x))}.
+Here's a macro definition that does the job:
+
+@findex inc
+@example
+@group
+(defmacro inc (var)
+   (list 'setq var (list '1+ var)))
+@end group
+@end example
+
+  When this is called with @code{(inc x)}, the argument @var{var} is the
+symbol @code{x}---@emph{not} the @emph{value} of @code{x}, as it would
+be in a function.  The body of the macro uses this to construct the
+expansion, which is @code{(setq x (1+ x))}.  Once the macro definition
+returns this expansion, Lisp proceeds to evaluate it, thus incrementing
+@code{x}.
+
+@node Expansion
+@section Expansion of a Macro Call
+@cindex expansion of macros
+@cindex macro call
+
+  A macro call looks just like a function call in that it is a list which
+starts with the name of the macro.  The rest of the elements of the list
+are the arguments of the macro.
+
+  Evaluation of the macro call begins like evaluation of a function call
+except for one crucial difference: the macro arguments are the actual
+expressions appearing in the macro call.  They are not evaluated before
+they are given to the macro definition.  By contrast, the arguments of a
+function are results of evaluating the elements of the function call
+list.
+
+  Having obtained the arguments, Lisp invokes the macro definition just
+as a function is invoked.  The argument variables of the macro are bound
+to the argument values from the macro call, or to a list of them in the
+case of a @code{&rest} argument.  And the macro body executes and
+returns its value just as a function body does.
+
+  The second crucial difference between macros and functions is that
+the value returned by the macro body is an alternate Lisp expression,
+also known as the @dfn{expansion} of the macro.  The Lisp interpreter
+proceeds to evaluate the expansion as soon as it comes back from the
+macro.
+
+  Since the expansion is evaluated in the normal manner, it may contain
+calls to other macros.  It may even be a call to the same macro, though
+this is unusual.
+
+  You can see the expansion of a given macro call by calling
+@code{macroexpand}.
+
+@defun macroexpand form &optional environment
+@cindex macro expansion
+This function expands @var{form}, if it is a macro call.  If the result
+is another macro call, it is expanded in turn, until something which is
+not a macro call results.  That is the value returned by
+@code{macroexpand}.  If @var{form} is not a macro call to begin with, it
+is returned as given.
+
+Note that @code{macroexpand} does not look at the subexpressions of
+@var{form} (although some macro definitions may do so).  Even if they
+are macro calls themselves, @code{macroexpand} does not expand them.
+
+The function @code{macroexpand} does not expand calls to inline functions.
+Normally there is no need for that, since a call to an inline function is
+no harder to understand than a call to an ordinary function.
+
+If @var{environment} is provided, it specifies an alist of macro
+definitions that shadow the currently defined macros.  Byte compilation
+uses this feature.
+
+@example
+@group
+(defmacro inc (var)
+    (list 'setq var (list '1+ var)))
+     @result{} inc
+@end group
+
+@group
+(macroexpand '(inc r))
+     @result{} (setq r (1+ r))
+@end group
+
+@group
+(defmacro inc2 (var1 var2)
+    (list 'progn (list 'inc var1) (list 'inc var2)))
+     @result{} inc2
+@end group
+
+@group
+(macroexpand '(inc2 r s))
+     @result{} (progn (inc r) (inc s))  ; @r{@code{inc} not expanded here.}
+@end group
+@end example
+@end defun
+
+
+@defun macroexpand-all form &optional environment
+@code{macroexpand-all} expands macros like @code{macroexpand}, but
+will look for and expand all macros in @var{form}, not just at the
+top-level.  If no macros are expanded, the return value is @code{eq}
+to @var{form}.
+
+Repeating the example used for @code{macroexpand} above with
+@code{macroexpand-all}, we see that @code{macroexpand-all} @emph{does}
+expand the embedded calls to @code{inc}:
+
+@example
+(macroexpand-all '(inc2 r s))
+     @result{} (progn (setq r (1+ r)) (setq s (1+ s)))
+@end example
+
+@end defun
+
+@node Compiling Macros
+@section Macros and Byte Compilation
+@cindex byte-compiling macros
+
+  You might ask why we take the trouble to compute an expansion for a
+macro and then evaluate the expansion.  Why not have the macro body
+produce the desired results directly?  The reason has to do with
+compilation.
+
+  When a macro call appears in a Lisp program being compiled, the Lisp
+compiler calls the macro definition just as the interpreter would, and
+receives an expansion.  But instead of evaluating this expansion, it
+compiles the expansion as if it had appeared directly in the program.
+As a result, the compiled code produces the value and side effects
+intended for the macro, but executes at full compiled speed.  This would
+not work if the macro body computed the value and side effects
+itself---they would be computed at compile time, which is not useful.
+
+  In order for compilation of macro calls to work, the macros must
+already be defined in Lisp when the calls to them are compiled.  The
+compiler has a special feature to help you do this: if a file being
+compiled contains a @code{defmacro} form, the macro is defined
+temporarily for the rest of the compilation of that file.
+
+  Byte-compiling a file also executes any @code{require} calls at
+top-level in the file, so you can ensure that necessary macro
+definitions are available during compilation by requiring the files
+that define them (@pxref{Named Features}).  To avoid loading the macro
+definition files when someone @emph{runs} the compiled program, write
+@code{eval-when-compile} around the @code{require} calls (@pxref{Eval
+During Compile}).
+
+@node Defining Macros
+@section Defining Macros
+
+  A Lisp macro is a list whose @sc{car} is @code{macro}.  Its @sc{cdr} should
+be a function; expansion of the macro works by applying the function
+(with @code{apply}) to the list of unevaluated argument-expressions
+from the macro call.
+
+  It is possible to use an anonymous Lisp macro just like an anonymous
+function, but this is never done, because it does not make sense to pass
+an anonymous macro to functionals such as @code{mapcar}.  In practice,
+all Lisp macros have names, and they are usually defined with the
+special form @code{defmacro}.
+
+@defspec defmacro name argument-list body-forms@dots{}
+@code{defmacro} defines the symbol @var{name} as a macro that looks
+like this:
+
+@example
+(macro lambda @var{argument-list} . @var{body-forms})
+@end example
+
+(Note that the @sc{cdr} of this list is a function---a lambda expression.)
+This macro object is stored in the function cell of @var{name}.  The
+value returned by evaluating the @code{defmacro} form is @var{name}, but
+usually we ignore this value.
+
+The shape and meaning of @var{argument-list} is the same as in a
+function, and the keywords @code{&rest} and @code{&optional} may be used
+(@pxref{Argument List}).  Macros may have a documentation string, but
+any @code{interactive} declaration is ignored since macros cannot be
+called interactively.
+@end defspec
+
+  Macros often need to construct large list structures from a mixture
+of constants and nonconstant parts.  To make this easier, use the
+@samp{`} syntax (@pxref{Backquote}).  For example:
+
+@example
+@example
+@group
+(defmacro t-becomes-nil (variable)
+  `(if (eq ,variable t)
+       (setq ,variable nil)))
+@end group
+
+@group
+(t-becomes-nil foo)
+     @equiv{} (if (eq foo t) (setq foo nil))
+@end group
+@end example
+@end example
+
+  The body of a macro definition can include a @code{declare} form,
+which can specify how @key{TAB} should indent macro calls, and how to
+step through them for Edebug.
+
+@defmac declare @var{specs}@dots{}
+@anchor{Definition of declare}
+A @code{declare} form is used in a macro definition to specify various
+additional information about it.  The following specifications are
+currently supported:
+
+@table @code
+@item (debug @var{edebug-form-spec})
+Specify how to step through macro calls for Edebug.
+@xref{Instrumenting Macro Calls}.
+
+@item (indent @var{indent-spec})
+Specify how to indent calls to this macro.  @xref{Indenting Macros},
+for more details.
+
+@item (doc-string @var{number})
+Specify which element of the macro is the documentation string, if
+any.
+@end table
+
+A @code{declare} form only has its special effect in the body of a
+@code{defmacro} form if it immediately follows the documentation
+string, if present, or the argument list otherwise.  (Strictly
+speaking, @emph{several} @code{declare} forms can follow the
+documentation string or argument list, but since a @code{declare} form
+can have several @var{specs}, they can always be combined into a
+single form.)  When used at other places in a @code{defmacro} form, or
+outside a @code{defmacro} form, @code{declare} just returns @code{nil}
+without evaluating any @var{specs}.
+@end defmac
+
+  No macro absolutely needs a @code{declare} form, because that form
+has no effect on how the macro expands, on what the macro means in the
+program.  It only affects the secondary features listed above.
+
+@node Problems with Macros
+@section Common Problems Using Macros
+
+  Macro expansion can have counterintuitive consequences.  This
+section describes some important consequences that can lead to
+trouble, and rules to follow to avoid trouble.
+
+@menu
+* Wrong Time::             Do the work in the expansion, not in the macro.
+* Argument Evaluation::    The expansion should evaluate each macro arg once.
+* Surprising Local Vars::  Local variable bindings in the expansion
+                              require special care.
+* Eval During Expansion::  Don't evaluate them; put them in the expansion.
+* Repeated Expansion::     Avoid depending on how many times expansion is done.
+@end menu
+
+@node Wrong Time
+@subsection Wrong Time
+
+  The most common problem in writing macros is doing some of the
+real work prematurely---while expanding the macro, rather than in the
+expansion itself.  For instance, one real package had this macro
+definition:
+
+@example
+(defmacro my-set-buffer-multibyte (arg)
+  (if (fboundp 'set-buffer-multibyte)
+      (set-buffer-multibyte arg)))
+@end example
+
+With this erroneous macro definition, the program worked fine when
+interpreted but failed when compiled.  This macro definition called
+@code{set-buffer-multibyte} during compilation, which was wrong, and
+then did nothing when the compiled package was run.  The definition
+that the programmer really wanted was this:
+
+@example
+(defmacro my-set-buffer-multibyte (arg)
+  (if (fboundp 'set-buffer-multibyte)
+      `(set-buffer-multibyte ,arg)))
+@end example
+
+@noindent
+This macro expands, if appropriate, into a call to
+@code{set-buffer-multibyte} that will be executed when the compiled
+program is actually run.
+
+@node Argument Evaluation
+@subsection Evaluating Macro Arguments Repeatedly
+
+  When defining a macro you must pay attention to the number of times
+the arguments will be evaluated when the expansion is executed.  The
+following macro (used to facilitate iteration) illustrates the
+problem.  This macro allows us to write a ``for'' loop construct.
+
+@findex for
+@example
+@group
+(defmacro for (var from init to final do &rest body)
+  "Execute a simple \"for\" loop.
+For example, (for i from 1 to 10 do (print i))."
+  (list 'let (list (list var init))
+        (cons 'while (cons (list '<= var final)
+                           (append body (list (list 'inc var)))))))
+@end group
+@result{} for
+
+@group
+(for i from 1 to 3 do
+   (setq square (* i i))
+   (princ (format "\n%d %d" i square)))
+@expansion{}
+@end group
+@group
+(let ((i 1))
+  (while (<= i 3)
+    (setq square (* i i))
+    (princ (format "\n%d %d" i square))
+    (inc i)))
+@end group
+@group
+
+     @print{}1       1
+     @print{}2       4
+     @print{}3       9
+@result{} nil
+@end group
+@end example
+
+@noindent
+The arguments @code{from}, @code{to}, and @code{do} in this macro are
+``syntactic sugar''; they are entirely ignored.  The idea is that you
+will write noise words (such as @code{from}, @code{to}, and @code{do})
+in those positions in the macro call.
+
+Here's an equivalent definition simplified through use of backquote:
+
+@example
+@group
+(defmacro for (var from init to final do &rest body)
+  "Execute a simple \"for\" loop.
+For example, (for i from 1 to 10 do (print i))."
+  `(let ((,var ,init))
+     (while (<= ,var ,final)
+       ,@@body
+       (inc ,var))))
+@end group
+@end example
+
+Both forms of this definition (with backquote and without) suffer from
+the defect that @var{final} is evaluated on every iteration.  If
+@var{final} is a constant, this is not a problem.  If it is a more
+complex form, say @code{(long-complex-calculation x)}, this can slow
+down the execution significantly.  If @var{final} has side effects,
+executing it more than once is probably incorrect.
+
+@cindex macro argument evaluation
+A well-designed macro definition takes steps to avoid this problem by
+producing an expansion that evaluates the argument expressions exactly
+once unless repeated evaluation is part of the intended purpose of the
+macro.  Here is a correct expansion for the @code{for} macro:
+
+@example
+@group
+(let ((i 1)
+      (max 3))
+  (while (<= i max)
+    (setq square (* i i))
+    (princ (format "%d      %d" i square))
+    (inc i)))
+@end group
+@end example
+
+Here is a macro definition that creates this expansion:
+
+@example
+@group
+(defmacro for (var from init to final do &rest body)
+  "Execute a simple for loop: (for i from 1 to 10 do (print i))."
+  `(let ((,var ,init)
+         (max ,final))
+     (while (<= ,var max)
+       ,@@body
+       (inc ,var))))
+@end group
+@end example
+
+  Unfortunately, this fix introduces another problem,
+described in the following section.
+
+@node Surprising Local Vars
+@subsection Local Variables in Macro Expansions
+
+@ifnottex
+  In the previous section, the definition of @code{for} was fixed as
+follows to make the expansion evaluate the macro arguments the proper
+number of times:
+
+@example
+@group
+(defmacro for (var from init to final do &rest body)
+  "Execute a simple for loop: (for i from 1 to 10 do (print i))."
+@end group
+@group
+  `(let ((,var ,init)
+         (max ,final))
+     (while (<= ,var max)
+       ,@@body
+       (inc ,var))))
+@end group
+@end example
+@end ifnottex
+
+  The new definition of @code{for} has a new problem: it introduces a
+local variable named @code{max} which the user does not expect.  This
+causes trouble in examples such as the following:
+
+@example
+@group
+(let ((max 0))
+  (for x from 0 to 10 do
+    (let ((this (frob x)))
+      (if (< max this)
+          (setq max this)))))
+@end group
+@end example
+
+@noindent
+The references to @code{max} inside the body of the @code{for}, which
+are supposed to refer to the user's binding of @code{max}, really access
+the binding made by @code{for}.
+
+The way to correct this is to use an uninterned symbol instead of
+@code{max} (@pxref{Creating Symbols}).  The uninterned symbol can be
+bound and referred to just like any other symbol, but since it is
+created by @code{for}, we know that it cannot already appear in the
+user's program.  Since it is not interned, there is no way the user can
+put it into the program later.  It will never appear anywhere except
+where put by @code{for}.  Here is a definition of @code{for} that works
+this way:
+
+@example
+@group
+(defmacro for (var from init to final do &rest body)
+  "Execute a simple for loop: (for i from 1 to 10 do (print i))."
+  (let ((tempvar (make-symbol "max")))
+    `(let ((,var ,init)
+           (,tempvar ,final))
+       (while (<= ,var ,tempvar)
+         ,@@body
+         (inc ,var)))))
+@end group
+@end example
+
+@noindent
+This creates an uninterned symbol named @code{max} and puts it in the
+expansion instead of the usual interned symbol @code{max} that appears
+in expressions ordinarily.
+
+@node Eval During Expansion
+@subsection Evaluating Macro Arguments in Expansion
+
+  Another problem can happen if the macro definition itself
+evaluates any of the macro argument expressions, such as by calling
+@code{eval} (@pxref{Eval}).  If the argument is supposed to refer to the
+user's variables, you may have trouble if the user happens to use a
+variable with the same name as one of the macro arguments.  Inside the
+macro body, the macro argument binding is the most local binding of this
+variable, so any references inside the form being evaluated do refer to
+it.  Here is an example:
+
+@example
+@group
+(defmacro foo (a)
+  (list 'setq (eval a) t))
+     @result{} foo
+@end group
+@group
+(setq x 'b)
+(foo x) @expansion{} (setq b t)
+     @result{} t                  ; @r{and @code{b} has been set.}
+;; @r{but}
+(setq a 'c)
+(foo a) @expansion{} (setq a t)
+     @result{} t                  ; @r{but this set @code{a}, not @code{c}.}
+
+@end group
+@end example
+
+  It makes a difference whether the user's variable is named @code{a} or
+@code{x}, because @code{a} conflicts with the macro argument variable
+@code{a}.
+
+  Another problem with calling @code{eval} in a macro definition is that
+it probably won't do what you intend in a compiled program.  The
+byte compiler runs macro definitions while compiling the program, when
+the program's own computations (which you might have wished to access
+with @code{eval}) don't occur and its local variable bindings don't
+exist.
+
+  To avoid these problems, @strong{don't evaluate an argument expression
+while computing the macro expansion}.  Instead, substitute the
+expression into the macro expansion, so that its value will be computed
+as part of executing the expansion.  This is how the other examples in
+this chapter work.
+
+@node Repeated Expansion
+@subsection How Many Times is the Macro Expanded?
+
+  Occasionally problems result from the fact that a macro call is
+expanded each time it is evaluated in an interpreted function, but is
+expanded only once (during compilation) for a compiled function.  If the
+macro definition has side effects, they will work differently depending
+on how many times the macro is expanded.
+
+  Therefore, you should avoid side effects in computation of the
+macro expansion, unless you really know what you are doing.
+
+  One special kind of side effect can't be avoided: constructing Lisp
+objects.  Almost all macro expansions include constructed lists; that is
+the whole point of most macros.  This is usually safe; there is just one
+case where you must be careful: when the object you construct is part of a
+quoted constant in the macro expansion.
+
+  If the macro is expanded just once, in compilation, then the object is
+constructed just once, during compilation.  But in interpreted
+execution, the macro is expanded each time the macro call runs, and this
+means a new object is constructed each time.
+
+  In most clean Lisp code, this difference won't matter.  It can matter
+only if you perform side-effects on the objects constructed by the macro
+definition.  Thus, to avoid trouble, @strong{avoid side effects on
+objects constructed by macro definitions}.  Here is an example of how
+such side effects can get you into trouble:
+
+@lisp
+@group
+(defmacro empty-object ()
+  (list 'quote (cons nil nil)))
+@end group
+
+@group
+(defun initialize (condition)
+  (let ((object (empty-object)))
+    (if condition
+        (setcar object condition))
+    object))
+@end group
+@end lisp
+
+@noindent
+If @code{initialize} is interpreted, a new list @code{(nil)} is
+constructed each time @code{initialize} is called.  Thus, no side effect
+survives between calls.  If @code{initialize} is compiled, then the
+macro @code{empty-object} is expanded during compilation, producing a
+single ``constant'' @code{(nil)} that is reused and altered each time
+@code{initialize} is called.
+
+One way to avoid pathological cases like this is to think of
+@code{empty-object} as a funny kind of constant, not as a memory
+allocation construct.  You wouldn't use @code{setcar} on a constant such
+as @code{'(nil)}, so naturally you won't use it on @code{(empty-object)}
+either.
+
+@node Indenting Macros
+@section Indenting Macros
+
+  Within a macro definition, you can use the @code{declare} form
+(@pxref{Defining Macros}) to specify how @key{TAB} should indent
+calls to the macro.  An indentation specification is written like this:
+
+@example
+(declare (indent @var{indent-spec}))
+@end example
+
+@noindent
+Here are the possibilities for @var{indent-spec}:
+
+@table @asis
+@item @code{nil}
+This is the same as no property---use the standard indentation pattern.
+@item @code{defun}
+Handle this function like a @samp{def} construct: treat the second
+line as the start of a @dfn{body}.
+@item an integer, @var{number}
+The first @var{number} arguments of the function are
+@dfn{distinguished} arguments; the rest are considered the body
+of the expression.  A line in the expression is indented according to
+whether the first argument on it is distinguished or not.  If the
+argument is part of the body, the line is indented @code{lisp-body-indent}
+more columns than the open-parenthesis starting the containing
+expression.  If the argument is distinguished and is either the first
+or second argument, it is indented @emph{twice} that many extra columns.
+If the argument is distinguished and not the first or second argument,
+the line uses the standard pattern.
+@item a symbol, @var{symbol}
+@var{symbol} should be a function name; that function is called to
+calculate the indentation of a line within this expression.  The
+function receives two arguments:
+
+@table @asis
+@item @var{state}
+The value returned by @code{parse-partial-sexp} (a Lisp primitive for
+indentation and nesting computation) when it parses up to the
+beginning of this line.
+@item @var{pos}
+The position at which the line being indented begins.
+@end table
+
+@noindent
+It should return either a number, which is the number of columns of
+indentation for that line, or a list whose car is such a number.  The
+difference between returning a number and returning a list is that a
+number says that all following lines at the same nesting level should
+be indented just like this one; a list says that following lines might
+call for different indentations.  This makes a difference when the
+indentation is being computed by @kbd{C-M-q}; if the value is a
+number, @kbd{C-M-q} need not recalculate indentation for the following
+lines until the end of the list.
+@end table

@@ -1,0 +1,902 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename ../../info/nxml-mode
+@settitle nXML Mode
+@c %**end of header
+
+@copying
+This manual documents nXML mode, an Emacs major mode for editing
+XML with RELAX NG support.
+
+Copyright @copyright{} 2007-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU
+Manual,'' and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License'' in the Emacs manual.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+
+This document is part of a collection distributed under the GNU Free
+Documentation License.  If you want to distribute this document
+separately from the collection, you can do so by adding a copy of the
+license to the document, as described in section 6 of the license.
+@end quotation
+@end copying
+
+@dircategory Emacs editing modes
+@direntry
+* nXML Mode: (nxml-mode).       XML editing mode with RELAX NG support.
+@end direntry
+
+@node Top
+@top nXML Mode
+
+@insertcopying
+
+This manual is not yet complete.
+
+@menu
+* Introduction::
+* Completion::
+* Inserting end-tags::
+* Paragraphs::
+* Outlining::
+* Locating a schema::
+* DTDs::
+* Limitations::
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+nXML mode is an Emacs major-mode for editing XML documents.  It supports
+editing well-formed XML documents, and provides schema-sensitive editing
+using RELAX NG Compact Syntax.  To get started, visit a file containing an
+XML document, and, if necessary, use @kbd{M-x nxml-mode} to switch to nXML
+mode.  By default, @code{auto-mode-alist} and @code{magic-fallback-alist}
+put buffers in nXML mode if they have recognizable XML content or file
+extensions.  You may wish to customize the settings, for example to
+recognize different file extensions.
+
+Once in nXML mode, you can type @kbd{C-h m} for basic information on the
+mode.
+
+The @file{etc/nxml} directory in the Emacs distribution contains some data
+files used by nXML mode, and includes two files (@file{test-valid.xml} and
+@file{test-invalid.xml}) that provide examples of valid and invalid XML
+documents.
+
+To get validation and schema-sensitive editing, you need a RELAX NG Compact
+Syntax (RNC) schema for your document (@pxref{Locating a schema}).  The
+@file{etc/schema} directory includes some schemas for popular document
+types.  See @url{http://relaxng.org/} for more information on RELAX NG.
+You can use the @samp{Trang} program from
+@url{http://www.thaiopensource.com/relaxng/trang.html} to
+automatically create RNC schemas.  This program can:
+
+@itemize @bullet
+@item
+infer an RNC schema from an instance document;
+@item
+convert a DTD to an RNC schema;
+@item
+convert a RELAX NG XML syntax schema to an RNC schema.
+@end itemize
+
+@noindent To convert a RELAX NG XML syntax (@samp{.rng}) schema to a RNC
+one, you can also use the XSLT stylesheet from
+@url{http://www.pantor.com/download.html}.
+
+To convert a W3C XML Schema to an RNC schema, you need first to convert it
+to RELAX NG XML syntax using the RELAX NG converter tool @code{rngconv}
+(built on top of MSV).  See @url{https://github.com/kohsuke/msv}
+and @url{https://msv.dev.java.net/}.
+
+For historical discussions only, see the mailing list archives at
+@url{http://groups.yahoo.com/group/emacs-nxml-mode/}.  Please make all new
+discussions on the @samp{help-gnu-emacs} and @samp{emacs-devel} mailing
+lists.  Report any bugs with @kbd{M-x report-emacs-bug}.
+
+
+@node Completion
+@chapter Completion
+
+Apart from real-time validation, the most important feature that nXML
+mode provides for assisting in document creation is "completion".
+Completion assists the user in inserting characters at point, based on
+knowledge of the schema and on the contents of the buffer before
+point.
+
+nXML mode adapts the standard GNU Emacs command for completion in a
+buffer: @code{completion-at-point}, which is bound to @kbd{C-M-i} and
+@kbd{M-@key{TAB}}.  Note that many window systems and window managers
+use @kbd{M-@key{TAB}} themselves (typically for switching between
+windows) and do not pass it to applications.  In that case, you should
+type @kbd{C-M-i} or @kbd{@key{ESC} @key{TAB}} for completion, or bind
+@code{completion-at-point} to a key that is convenient for you.  In
+the following, I will assume that you type @kbd{C-M-i}.
+
+nXML mode completion works by examining the symbol preceding point.
+This is the symbol to be completed. The symbol to be completed may be
+the empty. Completion considers what symbols starting with the symbol
+to be completed would be valid replacements for the symbol to be
+completed, given the schema and the contents of the buffer before
+point.  These symbols are the possible completions.  An example may
+make this clearer.  Suppose the buffer looks like this (where @point{}
+indicates point):
+
+@example
+<html xmlns="http://www.w3.org/1999/xhtml">
+<h@point{}
+@end example
+
+@noindent
+and the schema is XHTML.  In this context, the symbol to be completed
+is @samp{h}.  The possible completions consist of just
+@samp{head}.  Another example, is
+
+@example
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<@point{}
+@end example
+
+@noindent
+In this case, the symbol to be completed is empty, and the possible
+completions are @samp{base}, @samp{isindex},
+@samp{link}, @samp{meta}, @samp{script},
+@samp{style}, @samp{title}.  Another example is:
+
+@example
+<html xmlns="@point{}
+@end example
+
+@noindent
+In this case, the symbol to be completed is empty, and the possible
+completions are just @samp{http://www.w3.org/1999/xhtml}.
+
+When you type @kbd{C-M-i}, what happens depends
+on what the set of possible completions are.
+
+@itemize @bullet
+@item
+If the set of completions is empty, nothing
+happens.
+@item
+If there is one possible completion, then that completion is
+inserted, together with any following characters that are
+required. For example, in this case:
+
+@example
+<html xmlns="http://www.w3.org/1999/xhtml">
+<@point{}
+@end example
+
+@noindent
+@kbd{C-M-i} will yield
+
+@example
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head@point{}
+@end example
+@item
+If there is more than one possible completion, but all
+possible completions share a common non-empty prefix, then that prefix
+is inserted. For example, suppose the buffer is:
+
+@example
+<html x@point{}
+@end example
+
+@noindent
+The symbol to be completed is @samp{x}. The possible completions are
+@samp{xmlns} and @samp{xml:lang}.  These share a common prefix of
+@samp{xml}.  Thus, @kbd{C-M-i} will yield:
+
+@example
+<html xml@point{}
+@end example
+
+@noindent
+Typically, you would do @kbd{C-M-i} again, which would have the result
+described in the next item.
+@item
+If there is more than one possible completion, but the
+possible completions do not share a non-empty prefix, then Emacs will
+prompt you to input the symbol in the minibuffer, initializing the
+minibuffer with the symbol to be completed, and popping up a buffer
+showing the possible completions.  You can now input the symbol to be
+inserted.  The symbol you input will be inserted in the buffer instead
+of the symbol to be completed.  Emacs will then insert any required
+characters after the symbol.  For example, if it contains:
+
+@example
+<html xml@point{}
+@end example
+
+@noindent
+Emacs will prompt you in the minibuffer with
+
+@example
+Attribute: xml@point{}
+@end example
+
+@noindent
+and the buffer showing possible completions will contain
+
+@example
+Possible completions are:
+xml:lang                           xmlns
+@end example
+
+@noindent
+If you input @kbd{xmlns}, the result will be:
+
+@example
+<html xmlns="@point{}
+@end example
+
+@noindent
+(If you do @kbd{C-M-i} again, the namespace URI will be
+inserted. Should that happen automatically?)
+@end itemize
+
+@node Inserting end-tags
+@chapter Inserting end-tags
+
+The main redundancy in XML syntax is end-tags.  nXML mode provides
+several ways to make it easier to enter end-tags.  You can use all of
+these without a schema.
+
+You can use @kbd{C-M-i} after @samp{</} to complete the rest of the
+end-tag.
+
+@kbd{C-c C-f} inserts an end-tag for the element containing
+point. This command is useful when you want to input the start-tag,
+then input the content and finally input the end-tag. The @samp{f}
+is mnemonic for finish.
+
+If you want to keep tags balanced and input the end-tag at the
+same time as the start-tag, before inputting the content, then you can
+use @kbd{C-c C-i}. This inserts a @samp{>}, then inserts
+the end-tag and leaves point before the end-tag.  @kbd{C-c C-b}
+is similar but more convenient for block-level elements: it puts the
+start-tag, point and the end-tag on successive lines, appropriately
+indented. The @samp{i} is mnemonic for inline and the
+@samp{b} is mnemonic for block.
+
+Finally, you can customize nXML mode so that @kbd{/} automatically
+inserts the rest of the end-tag when it occurs after @samp{<}, by
+doing
+
+@display
+@kbd{M-x customize-variable @key{RET} nxml-slash-auto-complete-flag @key{RET}}
+@end display
+
+@noindent
+and then following the instructions in the displayed buffer.
+
+@node Paragraphs
+@chapter Paragraphs
+
+Emacs has several commands that operate on paragraphs, most
+notably @kbd{M-q}. nXML mode redefines these to work in a way
+that is useful for XML.  The exact rules that are used to find the
+beginning and end of a paragraph are complicated; they are designed
+mainly to ensure that @kbd{M-q} does the right thing.
+
+A paragraph consists of one or more complete, consecutive lines.
+A group of lines is not considered a paragraph unless it contains some
+non-whitespace characters between tags or inside comments.  A blank
+line separates paragraphs.  A single tag on a line by itself also
+separates paragraphs.  More precisely, if one tag together with any
+leading and trailing whitespace completely occupy one or more lines,
+then those lines will not be included in any paragraph.
+
+A start-tag at the beginning of the line (possibly indented) may
+be treated as starting a paragraph.  Similarly, an end-tag at the end
+of the line may be treated as ending a paragraph. The following rules
+are used to determine whether such a tag is in fact treated as a
+paragraph boundary:
+
+@itemize @bullet
+@item
+If the schema does not allow text at that point, then it
+is a paragraph boundary.
+@item
+If the end-tag corresponding to the start-tag is not at
+the end of its line, or the start-tag corresponding to the end-tag is
+not at the beginning of its line, then it is not a paragraph
+boundary. For example, in
+
+@example
+<p>This is a paragraph with an
+<emph>emphasized</emph> phrase.
+@end example
+
+@noindent
+the @samp{<emph>} start-tag would not be considered as
+starting a paragraph, because its corresponding end-tag is not at the
+end of the line.
+@item
+If there is text that is a sibling in element tree, then
+it is not a paragraph boundary.  For example, in
+
+@example
+<p>This is a paragraph with an
+<emph>emphasized phrase that takes one source line</emph>
+@end example
+
+@noindent
+the @samp{<emph>} start-tag would not be considered as
+starting a paragraph, even though its end-tag is at the end of its
+line, because there the text @samp{This is a paragraph with an}
+is a sibling of the @samp{emph} element.
+@item
+Otherwise, it is a paragraph boundary.
+@end itemize
+
+@node Outlining
+@chapter Outlining
+
+nXML mode allows you to display all or part of a buffer as an
+outline, in a similar way to Emacs's outline mode.  An outline in nXML
+mode is based on recognizing two kinds of element: sections and
+headings.  There is one heading for every section and one section for
+every heading.  A section contains its heading as or within its first
+child element.  A section also contains its subordinate sections (its
+subsections).  The text content of a section consists of anything in a
+section that is neither a subsection nor a heading.
+
+Note that this is a different model from that used by XHTML.
+nXML mode's outline support will not be useful for XHTML unless you
+adopt a convention of adding a @code{div} to enclose each
+section, rather than having sections implicitly delimited by different
+@code{h@var{n}} elements.  This limitation may be removed
+in a future version.
+
+The variable @code{nxml-section-element-name-regexp} gives
+a regexp for the local names (i.e. the part of the name following any
+prefix) of section elements. The variable
+@code{nxml-heading-element-name-regexp} gives a regexp for the
+local names of heading elements. For an element to be recognized
+as a section
+
+@itemize @bullet
+@item
+its start-tag must occur at the beginning of a line
+(possibly indented);
+@item
+its local name must match
+@code{nxml-section-element-name-regexp};
+@item
+either its first child element or a descendant of that
+first child element must have a local name that matches
+@code{nxml-heading-element-name-regexp}; the first such element
+is treated as the section's heading.
+@end itemize
+
+@noindent
+You can customize these variables using @kbd{M-x
+customize-variable}.
+
+There are three possible outline states for a section:
+
+@itemize @bullet
+@item
+normal, showing everything, including its heading, text
+content and subsections; each subsection is displayed according to the
+state of that subsection;
+@item
+showing just its heading, with both its text content and
+its subsections hidden; all subsections are hidden regardless of their
+state;
+@item
+showing its heading and its subsections, with its text
+content hidden; each subsection is displayed according to the state of
+that subsection.
+@end itemize
+
+In the last two states, where the text content is hidden, the
+heading is displayed specially, in an abbreviated form. An element
+like this:
+
+@example
+<section>
+<title>Food</title>
+<para>There are many kinds of food.</para>
+</section>
+@end example
+
+@noindent
+would be displayed on a single line like this:
+
+@example
+<-section>Food...</>
+@end example
+
+@noindent
+If there are hidden subsections, then a @code{+} will be used
+instead of a @code{-} like this:
+
+@example
+<+section>Food...</>
+@end example
+
+@noindent
+If there are non-hidden subsections, then the section will instead be
+displayed like this:
+
+@example
+<-section>Food...
+  <-section>Delicious Food...</>
+  <-section>Distasteful Food...</>
+</-section>
+@end example
+
+@noindent
+The heading is always displayed with an indent that corresponds to its
+depth in the outline, even it is not actually indented in the buffer.
+The variable @code{nxml-outline-child-indent} controls how much
+a subheading is indented with respect to its parent heading when the
+heading is being displayed specially.
+
+Commands to change the outline state of sections are bound to
+key sequences that start with @kbd{C-c C-o} (@kbd{o} is
+mnemonic for outline).  The third and final key has been chosen to be
+consistent with outline mode.  In the following descriptions
+current section means the section containing point, or, more precisely,
+the innermost section containing the character immediately following
+point.
+
+@itemize @bullet
+@item
+@kbd{C-c C-o C-a} shows all sections in the buffer
+normally.
+@item
+@kbd{C-c C-o C-t} hides the text content
+of all sections in the buffer.
+@item
+@kbd{C-c C-o C-c} hides the text content
+of the current section.
+@item
+@kbd{C-c C-o C-e} shows the text content
+of the current section.
+@item
+@kbd{C-c C-o C-d} hides the text content
+and subsections of the current section.
+@item
+@kbd{C-c C-o C-s} shows the current section
+and all its direct and indirect subsections normally.
+@item
+@kbd{C-c C-o C-k} shows the headings of the
+direct and indirect subsections of the current section.
+@item
+@kbd{C-c C-o C-l} hides the text content of the
+current section and of its direct and indirect
+subsections.
+@item
+@kbd{C-c C-o C-i} shows the headings of the
+direct subsections of the current section.
+@item
+@kbd{C-c C-o C-o} hides as much as possible without
+hiding the current section's text content; the headings of ancestor
+sections of the current section and their child section sections will
+not be hidden.
+@end itemize
+
+When a heading is displayed specially, you can use
+@key{RET} in that heading to show the text content of the section
+in the same way as @kbd{C-c C-o C-e}.
+
+You can also use the mouse to change the outline state:
+@kbd{S-mouse-2} hides the text content of a section in the same
+way as@kbd{C-c C-o C-c}; @kbd{mouse-2} on a specially
+displayed heading shows the text content of the section in the same
+way as @kbd{C-c C-o C-e}; @kbd{mouse-1} on a specially
+displayed start-tag toggles the display of subheadings on and
+off.
+
+The outline state for each section is stored with the first
+character of the section (as a text property). Every command that
+changes the outline state of any section updates the display of the
+buffer so that each section is displayed correctly according to its
+outline state.  If the section structure is subsequently changed, then
+it is possible for the display to no longer correctly reflect the
+stored outline state. @kbd{C-c C-o C-r} can be used to refresh
+the display so it is correct again.
+
+@node Locating a schema
+@chapter Locating a schema
+
+nXML mode has a configurable set of rules to locate a schema for
+the file being edited.  The rules are contained in one or more schema
+locating files, which are XML documents.
+
+The variable @samp{rng-schema-locating-files} specifies
+the list of the file-names of schema locating files that nXML mode
+should use.  The order of the list is significant: when file
+@var{x} occurs in the list before file @var{y} then rules
+from file @var{x} have precedence over rules from file
+@var{y}.  A filename specified in
+@samp{rng-schema-locating-files} may be relative. If so, it will
+be resolved relative to the document for which a schema is being
+located. It is not an error if relative file-names in
+@samp{rng-schema-locating-files} do not exist. You can use
+@kbd{M-x customize-variable @key{RET} rng-schema-locating-files
+@key{RET}} to customize the list of schema locating
+files.
+
+By default, @samp{rng-schema-locating-files} list has two
+members: @samp{schemas.xml}, and
+@samp{@var{dist-dir}/schema/schemas.xml} where
+@samp{@var{dist-dir}} is the directory containing the nXML
+distribution. The first member will cause nXML mode to use a file
+@samp{schemas.xml} in the same directory as the document being
+edited if such a file exist.  The second member contains rules for the
+schemas that are included with the nXML distribution.
+
+@menu
+* Commands for locating a schema::
+* Schema locating files::
+@end menu
+
+@node Commands for locating a schema
+@section Commands for locating a schema
+
+The command @kbd{C-c C-s C-w} will tell you what schema
+is currently being used.
+
+The rules for locating a schema are applied automatically when
+you visit a file in nXML mode. However, if you have just created a new
+file and the schema cannot be inferred from the file-name, then this
+will not locate the right schema.  In this case, you should insert the
+start-tag of the root element and then use the command @kbd{C-c C-s
+C-a}, which reapplies the rules based on the current content of
+the document.  It is usually not necessary to insert the complete
+start-tag; often just @samp{<@var{name}} is
+enough.
+
+If you want to use a schema that has not yet been added to the
+schema locating files, you can use the command @kbd{C-c C-s C-f}
+to manually select the file containing the schema for the document in
+current buffer.  Emacs will read the file-name of the schema from the
+minibuffer. After reading the file-name, Emacs will ask whether you
+wish to add a rule to a schema locating file that persistently
+associates the document with the selected schema.  The rule will be
+added to the first file in the list specified
+@samp{rng-schema-locating-files}; it will create the file if
+necessary, but will not create a directory. If the variable
+@samp{rng-schema-locating-files} has not been customized, this
+means that the rule will be added to the file @samp{schemas.xml}
+in the same directory as the document being edited.
+
+The command @kbd{C-c C-s C-t} allows you to select a schema by
+specifying an identifier for the type of the document.  The schema
+locating files determine the available type identifiers and what
+schema is used for each type identifier. This is useful when it is
+impossible to infer the right schema from either the file-name or the
+content of the document, even though the schema is already in the
+schema locating file.  A situation in which this can occur is when
+there are multiple variants of a schema where all valid documents have
+the same document element.  For example, XHTML has Strict and
+Transitional variants.  In a situation like this, a schema locating file
+can define a type identifier for each variant. As with @kbd{C-c
+C-s C-f}, Emacs will ask whether you wish to add a rule to a schema
+locating file that persistently associates the document with the
+specified type identifier.
+
+The command @kbd{C-c C-s C-l} adds a rule to a schema
+locating file that persistently associates the document with
+the schema that is currently being used.
+
+@node Schema locating files
+@section Schema locating files
+
+Each schema locating file specifies a list of rules.  The rules
+from each file are appended in order. To locate a schema each rule is
+applied in turn until a rule matches.  The first matching rule is then
+used to determine the schema.
+
+Schema locating files are designed to be useful for other
+applications that need to locate a schema for a document. In fact,
+there is nothing specific to locating schemas in the design; it could
+equally well be used for locating a stylesheet.
+
+@menu
+* Schema locating file syntax basics::
+* Using the document's URI to locate a schema::
+* Using the document element to locate a schema::
+* Using type identifiers in schema locating files::
+* Using multiple schema locating files::
+@end menu
+
+@node Schema locating file syntax basics
+@subsection Schema locating file syntax basics
+
+There is a schema for schema locating files in the file
+@samp{locate.rnc} in the schema directory.  Schema locating
+files must be valid with respect to this schema.
+
+The document element of a schema locating file must be
+@samp{locatingRules} and the namespace URI must be
+@samp{http://thaiopensource.com/ns/locating-rules/1.0}.  The
+children of the document element specify rules. The order of the
+children is the same as the order of the rules.  Here's a complete
+example of a schema locating file:
+
+@example
+<?xml version="1.0"?>
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <namespace ns="http://www.w3.org/1999/xhtml" uri="xhtml.rnc"/>
+  <documentElement localName="book" uri="docbook.rnc"/>
+</locatingRules>
+@end example
+
+@noindent
+This says to use the schema @samp{xhtml.rnc} for a document with
+namespace @samp{http://www.w3.org/1999/xhtml}, and to use the
+schema @samp{docbook.rnc} for a document whose local name is
+@samp{book}.  If the document element had both a namespace URI
+of @samp{http://www.w3.org/1999/xhtml} and a local name of
+@samp{book}, then the matching rule that comes first will be
+used and so the schema @samp{xhtml.rnc} would be used.  There is
+no precedence between different types of rule; the first matching rule
+of any type is used.
+
+As usual with XML-related technologies, resources are identified
+by URIs.  The @samp{uri} attribute identifies the schema by
+specifying the URI.  The URI may be relative.  If so, it is resolved
+relative to the URI of the schema locating file that contains
+attribute. This means that if the value of @samp{uri} attribute
+does not contain a @samp{/}, then it will refer to a filename in
+the same directory as the schema locating file.
+
+@node Using the document's URI to locate a schema
+@subsection Using the document's URI to locate a schema
+
+A @samp{uri} rule locates a schema based on the URI of the
+document.  The @samp{uri} attribute specifies the URI of the
+schema.  The @samp{resource} attribute can be used to specify
+the schema for a particular document.  For example,
+
+@example
+<uri resource="spec.xml" uri="docbook.rnc"/>
+@end example
+
+@noindent
+specifies that the schema for @samp{spec.xml} is
+@samp{docbook.rnc}.
+
+The @samp{pattern} attribute can be used instead of the
+@samp{resource} attribute to specify the schema for any document
+whose URI matches a pattern.  The pattern has the same syntax as an
+absolute or relative URI except that the path component of the URI can
+use a @samp{*} character to stand for zero or more characters
+within a path segment (i.e. any character other @samp{/}).
+Typically, the URI pattern looks like a relative URI, but, whereas a
+relative URI in the @samp{resource} attribute is resolved into a
+particular absolute URI using the base URI of the schema locating
+file, a relative URI pattern matches if it matches some number of
+complete path segments of the document's URI ending with the last path
+segment of the document's URI. For example,
+
+@example
+<uri pattern="*.xsl" uri="xslt.rnc"/>
+@end example
+
+@noindent
+specifies that the schema for documents with a URI whose path ends
+with @samp{.xsl} is @samp{xslt.rnc}.
+
+A @samp{transformURI} rule locates a schema by
+transforming the URI of the document. The @samp{fromPattern}
+attribute specifies a URI pattern with the same meaning as the
+@samp{pattern} attribute of the @samp{uri} element.  The
+@samp{toPattern} attribute is a URI pattern that is used to
+generate the URI of the schema.  Each @samp{*} in the
+@samp{toPattern} is replaced by the string that matched the
+corresponding @samp{*} in the @samp{fromPattern}.  The
+resulting string is appended to the initial part of the document's URI
+that was not explicitly matched by the @samp{fromPattern}.  The
+rule matches only if the transformed URI identifies an existing
+resource.  For example, the rule
+
+@example
+<transformURI fromPattern="*.xml" toPattern="*.rnc"/>
+@end example
+
+@noindent
+would transform the URI @samp{file:///home/jjc/docs/spec.xml}
+into the URI @samp{file:///home/jjc/docs/spec.rnc}.  Thus, this
+rule specifies that to locate a schema for a document
+@samp{@var{foo}.xml}, Emacs should test whether a file
+@samp{@var{foo}.rnc} exists in the same directory as
+@samp{@var{foo}.xml}, and, if so, should use it as the
+schema.
+
+@node Using the document element to locate a schema
+@subsection Using the document element to locate a schema
+
+A @samp{documentElement} rule locates a schema based on
+the local name and prefix of the document element. For example, a rule
+
+@example
+<documentElement prefix="xsl" localName="stylesheet" uri="xslt.rnc"/>
+@end example
+
+@noindent
+specifies that when the name of the document element is
+@samp{xsl:stylesheet}, then @samp{xslt.rnc} should be used
+as the schema. Either the @samp{prefix} or
+@samp{localName} attribute may be omitted to allow any prefix or
+local name.
+
+A @samp{namespace} rule locates a schema based on the
+namespace URI of the document element. For example, a rule
+
+@example
+<namespace ns="http://www.w3.org/1999/XSL/Transform" uri="xslt.rnc"/>
+@end example
+
+@noindent
+specifies that when the namespace URI of the document is
+@samp{http://www.w3.org/1999/XSL/Transform}, then
+@samp{xslt.rnc} should be used as the schema.
+
+@node Using type identifiers in schema locating files
+@subsection Using type identifiers in schema locating files
+
+Type identifiers allow a level of indirection in locating the
+schema for a document.  Instead of associating the document directly
+with a schema URI, the document is associated with a type identifier,
+which is in turn associated with a schema URI. nXML mode does not
+constrain the format of type identifiers.  They can be simply strings
+without any formal structure or they can be public identifiers or
+URIs.  Note that these type identifiers have nothing to do with the
+DOCTYPE declaration.  When comparing type identifiers, whitespace is
+normalized in the same way as with the @samp{xsd:token}
+datatype: leading and trailing whitespace is stripped; other sequences
+of whitespace are normalized to a single space character.
+
+Each of the rules described in previous sections that uses a
+@samp{uri} attribute to specify a schema, can instead use a
+@samp{typeId} attribute to specify a type identifier.  The type
+identifier can be associated with a URI using a @samp{typeId}
+element. For example,
+
+@example
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <namespace ns="http://www.w3.org/1999/xhtml" typeId="XHTML"/>
+  <typeId id="XHTML" typeId="XHTML Strict"/>
+  <typeId id="XHTML Strict" uri="xhtml-strict.rnc"/>
+  <typeId id="XHTML Transitional" uri="xhtml-transitional.rnc"/>
+</locatingRules>
+@end example
+
+@noindent
+declares three type identifiers @samp{XHTML} (representing the
+default variant of XHTML to be used), @samp{XHTML Strict} and
+@samp{XHTML Transitional}.  Such a schema locating file would
+use @samp{xhtml-strict.rnc} for a document whose namespace is
+@samp{http://www.w3.org/1999/xhtml}.  But it is considerably
+more flexible than a schema locating file that simply specified
+
+@example
+<namespace ns="http://www.w3.org/1999/xhtml" uri="xhtml-strict.rnc"/>
+@end example
+
+@noindent
+A user can easily use @kbd{C-c C-s C-t} to select between XHTML
+Strict and XHTML Transitional. Also, a user can easily add a catalog
+
+@example
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <typeId id="XHTML" typeId="XHTML Transitional"/>
+</locatingRules>
+@end example
+
+@noindent
+that makes the default variant of XHTML be XHTML Transitional.
+
+@node Using multiple schema locating files
+@subsection Using multiple schema locating files
+
+The @samp{include} element includes rules from another
+schema locating file.  The behavior is exactly as if the rules from
+that file were included in place of the @samp{include} element.
+Relative URIs are resolved into absolute URIs before the inclusion is
+performed. For example,
+
+@example
+<include rules="../rules.xml"/>
+@end example
+
+@noindent
+includes the rules from @samp{rules.xml}.
+
+The process of locating a schema takes as input a list of schema
+locating files.  The rules in all these files and in the files they
+include are resolved into a single list of rules, which are applied
+strictly in order.  Sometimes this order is not what is needed.
+For example, suppose you have two schema locating files, a private
+file
+
+@example
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <namespace ns="http://www.w3.org/1999/xhtml" uri="xhtml.rnc"/>
+</locatingRules>
+@end example
+
+@noindent
+followed by a public file
+
+@example
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <transformURI pathSuffix=".xml" replacePathSuffix=".rnc"/>
+  <namespace ns="http://www.w3.org/1999/XSL/Transform" typeId="XSLT"/>
+</locatingRules>
+@end example
+
+@noindent
+The effect of these two files is that the XHTML @samp{namespace}
+rule takes precedence over the @samp{transformURI} rule, which
+is almost certainly not what is needed.  This can be solved by adding
+an @samp{applyFollowingRules} to the private file.
+
+@example
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <applyFollowingRules ruleType="transformURI"/>
+  <namespace ns="http://www.w3.org/1999/xhtml" uri="xhtml.rnc"/>
+</locatingRules>
+@end example
+
+@node DTDs
+@chapter DTDs
+
+nXML mode is designed to support the creation of standalone XML
+documents that do not depend on a DTD.  Although it is common practice
+to insert a DOCTYPE declaration referencing an external DTD, this has
+undesirable side-effects.  It means that the document is no longer
+self-contained. It also means that different XML parsers may interpret
+the document in different ways, since the XML Recommendation does not
+require XML parsers to read the DTD.  With DTDs, it was impractical to
+get validation without using an external DTD or reference to an
+parameter entity.  With RELAX NG and other schema languages, you can
+simultaneously get the benefits of validation and standalone XML
+documents.  Therefore, I recommend that you do not reference an
+external DOCTYPE in your XML documents.
+
+One problem is entities for characters. Typically, as well as
+providing validation, DTDs also provide a set of character entities
+for documents to use. Schemas cannot provide this functionality,
+because schema validation happens after XML parsing.  The recommended
+solution is to either use the Unicode characters directly, or, if this
+is impractical, use character references.  nXML mode supports this by
+providing commands for entering characters and character references
+using the Unicode names, and can display the glyph corresponding to a
+character reference.
+
+@node Limitations
+@chapter Limitations
+
+nXML mode has some limitations:
+
+@itemize @bullet
+@item
+DTD support is limited.  Internal parsed general entities declared
+in the internal subset are supported provided they do not contain
+elements. Other usage of DTDs is ignored.
+@item
+The restrictions on RELAX NG schemas in section 7 of the RELAX NG
+specification are not enforced.
+@end itemize
+
+@bye

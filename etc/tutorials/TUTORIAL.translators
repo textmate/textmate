@@ -1,0 +1,97 @@
+This file contains the list of translators and maintainers of the
+tutorial.
+
+* TUTORIAL.bg:
+Author:     Ognyan Kulev <ogi@tower.3.bg>
+Maintainer: Ognyan Kulev <ogi@tower.3.bg>
+
+* TUTORIAL.cn:
+Author:     Sun Yijiang <sunyijiang@gmail.com>
+Maintainer: Sun Yijiang <sunyijiang@gmail.com>
+
+* TUTORIAL.cs:
+Author:     Milan Zamazal <pdm@zamazal.org>
+            Pavel Janík <Pavel@Janik.cz>
+Maintainer: Maintainer needed.
+
+* TUTORIAL.de:
+Author:     Werner Lemberg <wl@gnu.org>
+Maintainer: Werner Lemberg <wl@gnu.org>
+
+* TUTORIAL.eo
+Author:     Dale Gulledge <dsplat@rochester.rr.com>
+Maintainer: Dale Gulledge <dsplat@rochester.rr.com>
+
+* TUTORIAL.es:
+Author:     Rafael Sepúlveda <drs@gnulinux.org.mx>
+Maintainer: Rafael Sepúlveda <drs@gnulinux.org.mx>
+
+* TUTORIAL.fr:
+Author:     Éric Jacoboni <jaco@teaser.fr>
+Maintainer: Éric Jacoboni <jaco@teaser.fr>
+
+* TUTORIAL.he
+Author:     Eli Zaretskii <eliz@gnu.org>
+Maintainer: Eli Zaretskii <eliz@gnu.org>
+
+* TUTORIAL.it:
+Author:     Alfredo Finelli <alfredofnl@tiscali.it>
+	    Italian GNU Translation Group <tp@lists.linux.it>
+Maintainer: Alfredo Finelli <alfredofnl@tiscali.it>
+	    Italian GNU Translation Group <tp@lists.linux.it>
+
+* TUTORIAL.ja:
+Author:     Kenichi Handa <handa@m17n.org>
+Maintainer: Kenichi Handa <handa@m17n.org>
+
+* TUTORIAL.ko:
+Author:     Koaunghi Un <koaunghi@ling.cnu.ac.kr>
+Maintainer: Maintainer needed.
+
+* TUTORIAL.nl:
+Author:     Pieter Schoenmakers <tiggr@tiggr.net>
+Maintainer: Pieter Schoenmakers <tiggr@tiggr.net>
+
+* TUTORIAL.pl:
+Author:     Beatę Wierzchołowską <beataw@orient.uw.edu.pl>
+            Janusz S. Bien <jsbien@mail.uw.edu.pl>
+Maintainer: Radoslaw Moszczynski <rm@banita.pl>
+
+* TUTORIAL.pt_BR:
+Author:     Marcelo Toledo <marcelo@gnu.org>
+Maintainer: Marcelo Toledo <marcelo@gnu.org>
+
+* TUTORIAL.ro:
+Author:     Tudor Hulubei <tudor@gnu.org>
+Maintainer: Maintainer needed.
+
+* TUTORIAL.ru:
+Author:     Alex Ott <ottalex@narod.ru>
+Maintainer: Alex Ott <ottalex@narod.ru>
+
+* TUTORIAL.sk:
+Author:     Miroslav Vaško <vasko@debian.cz>
+            Pavel Janík <Pavel@Janik.cz>
+Maintainer: Maintainer needed.
+
+* TUTORIAL.sl:
+Author:     Primož Peterlin <primozz.peterlin@gmail.com>
+Maintainer: Primož Peterlin <primozz.peterlin@gmail.com>
+
+* TUTORIAL.sv:
+Author:     Mats Lidell <matsl@contactor.se>
+Maintainer: Mats Lidell <matsl@contactor.se>
+
+* TUTORIAL.th:
+Author:     Virach Sornlertlamvanich <virach@nectec.or.th>
+Maintainer: Virach Sornlertlamvanich <virach@nectec.or.th>
+
+* TUTORIAL.zh:
+Author:     Chao-Hong Liu <chliu@gnu.org>
+Maintainer: Chao-Hong Liu <chliu@gnu.org>
+
+
+;;; Local Variables:
+;;; coding: utf-8
+;;; End:
+

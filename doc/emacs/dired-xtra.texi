@@ -1,0 +1,50 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in emacs-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+@node Subdir Switches
+@section Subdirectory Switches in Dired
+
+You can insert subdirectories with specified @command{ls} switches in
+Dired buffers using @kbd{C-u i}.  You can change the @command{ls}
+switches of an already inserted subdirectory at point using @kbd{C-u l}.
+
+Dired preserves the switches if you revert the buffer.  Deleting a
+subdirectory forgets about its switches.
+
+Using @code{dired-undo}
+@iftex
+(@pxref{Marks vs Flags,,, emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Marks vs Flags})
+@end ifnottex
+to reinsert or delete
+subdirectories that were inserted with explicit switches can bypass
+Dired's machinery for remembering (or forgetting) switches.  Deleting
+a subdirectory using @code{dired-undo} does not forget its switches.
+When later reinserted using @kbd{i}, it will be reinserted using its
+old switches.  Using @code{dired-undo} to reinsert a subdirectory that
+was deleted using the regular Dired commands (not @code{dired-undo})
+will originally insert it with its old switches.  Reverting the
+buffer, however, will relist it using the buffer's default switches.
+If any of this yields problems, you can easily correct the situation
+using @kbd{C-u i} or @kbd{C-u l}.
+
+Dired does not remember the @code{R} switch.  Inserting a subdirectory
+with switches that include the @code{R} switch is equivalent to
+inserting each of its subdirectories using all remaining switches.
+For instance, updating or killing a subdirectory that was inserted
+with the @code{R} switch will not update or kill its subdirectories.
+
+The buffer's default switches do not affect subdirectories that were
+inserted using explicitly specified switches.  In particular,
+commands such as @kbd{s} that change the buffer's switches do not
+affect such subdirectories.  (They do, however, affect subdirectories
+without explicitly assigned switches.)
+
+You can make Dired forget about all subdirectory switches and relist
+all subdirectories with the buffer's default switches using
+@kbd{M-x dired-reset-subdir-switches}.  This also reverts the Dired buffer.

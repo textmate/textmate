@@ -1,0 +1,647 @@
+The Free Software Foundation claims no copyright on this file,
+compiled largely from postings to public newsgroups and mailing lists,
+and the GNU project email archives.
+
+
+From:  Don Chiasson <G.CHIASSON@DREA-XX.ARPA>
+Subject: Some gnu jokes
+To: jokes@DREA-XX.ARPA, gergely@DREA-XX.ARPA, broome@DREA-XX.ARPA
+cc: G.CHIASSON@DREA-XX.ARPA
+Message-ID: <12329394624.13.G.CHIASSON@DREA-XX.ARPA>
+
+     Richard M. Stallman (RMS, widely known for creating EMACS) is writing
+a UNIX clone called GNU (which means Gnu's Not Unix--a recursive acronym).
+This seems to open the way to a whole gnu class of jokes.  For example:
+
+Q:  What do you call a person who hacks while wearing no clothes?
+A:  A gnudist.
+
+Q:  What do you call an eligible young hacker?
+A:  Gnubile.
+
+Q:  What is a hacker's favorite candy?
+A:  Gnugat.   (Though it contains little gnutrition.)
+
+Q:  What do you call a computer filled with air?
+A:  Gnumatic.
+
+Q:  What do you call a novice hacker who keeps pestering you
+    with foolish questions?
+A:  A gnuisance.
+
+Q:  What do you call a subtle, clever hack in the favorite language?
+A:  A gnuanCe.
+
+Q:  What do you use a supercomputer for?
+A:  Gnumerical analysis.
+
+Q:  What do you call a hacker who collects coins?
+A:  A gnumismatist.
+
+     Well, there are more, just too gnumerous to tell all at once.  I think
+I'd better go before someone starts firing gnuclear weapons at me.
+		Don
+
+From: patl@athena.mit.edu (Patrick J. LoPresti)
+Message-ID: <1991Jul11.031731.9260@athena.mit.edu>
+Sender: news@athena.mit.edu (News system)
+Subject: The True Path (long)
+Date: 11 Jul 91 03:17:31 GMT
+Path: ai-lab!mintaka!olivea!samsung!zaphod.mps.ohio-state.edu!think.com!snorkelwacker.mit.edu!bloom-picayune.mit.edu!athena.mit.edu!patl
+Newsgroups: alt.religion.emacs,alt.slack
+Organization: Massachusetts Institute of Technology
+Lines: 95
+Xref: ai-lab alt.religion.emacs:244 alt.slack:1935
+
+When I log into my Xenix system with my 110 baud teletype, both vi
+*and* Emacs are just too damn slow.  They print useless messages like,
+'C-h for help' and '"foo" File is read only'.  So I use the editor
+that doesn't waste my VALUABLE time.
+
+Ed, man!  !man ed
+
+ED(1)               UNIX Programmer's Manual                ED(1)
+
+NAME
+     ed - text editor
+
+SYNOPSIS
+     ed [ - ] [ -x ] [ name ]
+DESCRIPTION
+     Ed is the standard text editor.
+---
+
+Computer Scientists love ed, not just because it comes first
+alphabetically, but because it's the standard.  Everyone else loves ed
+because it's ED!
+
+"Ed is the standard text editor."
+
+And ed doesn't waste space on my Timex Sinclair.  Just look:
+
+-rwxr-xr-x  1 root          24 Oct 29  1929 /bin/ed
+-rwxr-xr-t  4 root     1310720 Jan  1  1970 /usr/ucb/vi
+-rwxr-xr-x  1 root  5.89824e37 Oct 22  1990 /usr/bin/emacs
+
+Of course, on the system *I* administrate, vi is symlinked to ed.
+Emacs has been replaced by a shell script which 1) Generates a syslog
+message at level LOG_EMERG; 2) reduces the user's disk quota by 100K;
+and 3) RUNS ED!!!!!!
+
+"Ed is the standard text editor."
+
+Let's look at a typical novice's session with the mighty ed:
+
+golem> ed
+
+?
+help
+?
+?
+?
+quit
+?
+exit
+?
+bye
+?
+hello?
+?
+eat flaming death
+?
+^C
+?
+^C
+?
+^D
+?
+
+---
+Note the consistent user interface and error reportage.  Ed is
+generous enough to flag errors, yet prudent enough not to overwhelm
+the novice with verbosity.
+
+"Ed is the standard text editor."
+
+Ed, the greatest WYGIWYG editor of all.
+
+ED IS THE TRUE PATH TO NIRVANA!  ED HAS BEEN THE CHOICE OF EDUCATED
+AND IGNORANT ALIKE FOR CENTURIES!  ED WILL NOT CORRUPT YOUR PRECIOUS
+BODILY FLUIDS!!  ED IS THE STANDARD TEXT EDITOR!  ED MAKES THE SUN
+SHINE AND THE BIRDS SING AND THE GRASS GREEN!!
+
+When I use an editor, I don't want eight extra KILOBYTES of worthless
+help screens and cursor positioning code!  I just want an EDitor!!
+Not a "viitor".  Not a "emacsitor".  Those aren't even WORDS!!!! ED!
+ED! ED IS THE STANDARD!!!
+
+TEXT EDITOR.
+
+When IBM, in its ever-present omnipotence, needed to base their
+"edlin" on a UNIX standard, did they mimic vi?  No.  Emacs?  Surely
+you jest.  They chose the most karmic editor of all.  The standard.
+
+Ed is for those who can *remember* what they are working on.  If you
+are an idiot, you should use Emacs.  If you are an Emacs, you should
+not be vi.  If you use ED, you are on THE PATH TO REDEMPTION.  THE
+SO-CALLED "VISUAL" EDITORS HAVE BEEN PLACED HERE BY ED TO TEMPT THE
+FAITHLESS.  DO NOT GIVE IN!!!  THE MIGHTY ED HAS SPOKEN!!!
+
+?
+
+From: The Unknown User <anonymous@nowhere.uucp>
+Subject: EMACS -- What does it mean?
+To: mit-prep!info-gnu-emacs@TOPAZ.RUTGERS.EDU
+
+EMACS belongs in <sys/errno.h>: Editor too big!
+
+
+Escape-Meta-Alt-Control-Shift
+
+
+From: harvard!topaz!BLUE!BRAIL@mit-eddie
+Date: 9 Sep 85 17:25:27 EDT
+Subject: EMACS -- What does it mean?
+To: mit-prep!info-gnu-emacs@TOPAZ.RUTGERS.EDU
+
+	EMACS may stand for "Editing MACroS," but some friends of mine
+suggested some more creative definitions. Here they are. Anyone have
+any additions?
+
+--------
+Eight
+Megabytes
+And
+Constantly
+Swapping
+
+Even a
+Master of
+Arts
+Comes
+Simpler
+
+Emacs
+Manuals
+Are
+Cryptic and
+Surreal
+
+Energetic
+Merchants
+Always
+Cultivate
+Sales
+
+Each
+Manual's
+Audience is
+Completely
+Stupefied
+
+Emacs
+Means
+A
+Crappy
+Screen
+
+Eventually
+Munches
+All
+Computer
+Storage
+
+Even
+My
+Aunt
+Crashes the
+System
+
+Eradication of
+Memory
+Accomplished with
+Complete
+Simplicity
+
+Elsewhere
+Maybe
+Alternative
+Civilizations
+Survive
+
+Egregious
+Managers
+Actively
+Court
+Stallman
+
+Esoteric
+Malleability
+Always
+Considered
+Silly
+
+Emacs
+Manuals
+Always
+Cause
+Senility
+
+Easily
+Maintained with the
+Assistance of
+Chemical
+Solutions
+
+EMACS
+MACRO
+ACTED
+CREDO
+SODOM
+
+Edwardian
+Manifestation of
+All
+Colonial
+Sins
+
+Generally
+Not
+Used
+
+Except by
+Middle
+Aged
+Computer
+Scientists
+
+Extended
+Macros
+Are
+Considered
+Superfluous
+
+Every
+Mode
+Accelerates
+Creation of
+Software
+
+Elsewhere
+Maybe
+All
+Commands are
+Simple
+
+Emacs
+May
+Allow
+Customized
+Screwups
+
+Excellent
+Manuals
+Are
+Clearly
+Suppressed
+
+Emetic
+Macros
+Assault
+Core and
+Segmentation
+
+Embarrassed
+Manual-Writer
+Accused of
+Communist
+Subversion
+
+Extensibility and
+Modifiability
+Aggravate
+Confirmed
+Simpletons
+
+Emacs
+May
+Annihilate
+Command
+Structures
+
+Easily
+Mangles,
+Aborts,
+Crashes and
+Stupefies
+
+Extraneous
+Macros
+And
+Commands
+Stink
+
+Exceptionally
+Mediocre
+Algorithm for
+Computer
+Scientists
+
+EMACS
+Makes no
+Allowances
+Considering its
+Stiff price
+
+Equine
+Mammals
+Are
+Considerably
+Smaller
+
+Embarrassingly
+Mundane
+Advertising
+Cuts
+Sales
+
+Every
+Moron
+Assumes
+CCA is
+Superior
+
+Exceptionally
+Mediocre
+Autocratic
+Control
+System
+
+EMACS
+May
+Alienate
+Clients and
+Supporters
+
+Excavating
+Mayan
+Architecture
+Comes
+Simpler
+
+Erasing
+Minds
+Allows
+Complete
+Submission
+
+Every
+Male
+Adolescent
+Craves
+Sex
+
+Elephantine
+Memory
+Absolutely
+Considered
+Sine que non
+
+Emacs
+Makers
+Are
+Crazy
+Sickos
+
+Eenie-Meenie-Miney-Mo-
+Macros
+Are
+Completely
+Slow
+
+Experience the
+Mildest
+Ad
+Campaign ever
+Seen
+
+Emacs
+Makefiles
+Annihilate
+C-
+Shells
+
+Eradication of
+Memory
+Accomplished with
+Complete
+Simplicity
+
+Emetic
+Macros
+Assault
+Core and
+Segmentation
+
+Epileptic
+MLisp
+Aggravates
+Compiler
+Seizures
+
+Eleven thousand
+Monkeys
+Asynchronously
+Crank out these
+Slogans
+-------
+
+
+From: ihnss!warren@mit-eddie (Warren Montgomery)
+Newsgroups: net.emacs
+Subject: Re: EMACS -- What does it mean?
+Date: Tue, 10-Sep-85 09:14:24 EDT
+Organization: AT&T Bell Labs, Naperville, IL
+Apparently-To: emacs-netnews-distribution@mit-prep
+
+Someone at a luncheon suggested it meant:
+
+Evenings,
+Mornings,
+And a
+Couple of
+Saturdays
+
+(In reference to the odd hours that went into the creation of my
+implementation).
+
+--
+
+	Warren Montgomery
+	ihnss!warren
+	IH ((312)-979) x2494
+
+Date: Wed, 18 Sep 85 10:11:04 edt
+From: inmet!tower@inmet.inmet (Leonard H. Tower Jr.) <inmet!tower@cca-unix>
+Subject: Re: EMACS -- What does it mean?
+To: tower@MIT-PREP.ARPA
+
+Received: by inmet.uucp (4.12/inmet) id AA02199; Wed, 18 Sep 85 09:10:17 edt
+Date: Wed, 18 Sep 85 09:10:17 edt
+Message-Id: <8509181310.AA02199@inmet.uucp>
+Uucp-Paths: {bellcore,ima,ihnp4}!inmet!tower
+Arpa-Path: ima!inmet!tower@CCA-UNIX.ARPA
+Organization: 	Intermetrics, Inc., Cambridge, MA, USA
+Home: 	36 Porter Street, Somerville, MA  02143, USA   +1 (617) 623-7739
+/* Written  6:48 pm  Sep 14, 1985 by gml@ssc-vax in inmet:net.emacs */
+/* ---------- "Re: EMACS -- What does it mean?" ---------- */
+Pleeeeeeeze!!!  Nice try on the meaning of EMACS.  I believe the
+correct acronym is:
+
+Emacs
+Makes
+All
+Computing
+Simple
+
+Thank you, and Good Night
+/* End of text from inmet:net.emacs */
+
+From: ho95e!wcs@mit-eddie (Bill.Stewart.4K435.x0705)
+Newsgroups: net.emacs
+Subject: Re: EMACS -- What does it mean?
+Date: Thu, 26-Sep-85 21:43:54 EDT
+Organization: AT&T Bell Labs, Holmdel NJ
+Apparently-To: emacs-netnews-distribution@mit-prep
+
+> > very interesting, but what does GNU stand for ?
+> GNU = Gnu's Not UNIX. There is also MINCE, for Mince Is Not a Complete Emacs.
+> More recursive acronyms, anyone?
+Many people have also seen FINE Is Not Emacs, but the one that has
+character is THief Isn't Even Fine.
+--
+## Bill Stewart, AT&T Bell Labs, Holmdel NJ 1-201-949-0705 ihnp4!ho95c!wcs
+
+Path: mit-eddie!think!harvard!bbnccv!bbncca!linus!decvax!mcnc!ncsu!uvacs!edison!ta2
+From: edison!ta2@mit-eddie (tom allebrandi)
+Newsgroups: net.emacs
+Subject: Re: Re: EMACS -- What does it mean?
+Date: Sun, 29-Sep-85 18:11:55 EDT
+Organization: General Electric's Mountain Resort
+Apparently-To: emacs-netnews-distribution@mit-prep
+
+> GNU = Gnu's Not UNIX. There is also MINCE, for Mince Is Not a Complete Emacs.
+>
+> More recursive acronyms, anyone?
+>
+
+For the DEC-system-10/20: FINE - Fine Is Not Emacs.....
+
+--
+...............
+tom allebrandi 2, general electric aco, charlottesville, va
+{decvax,duke}!mcnc!ncsu!uvacs!edison!ta2
+box 8106, charlottesville, va, 22906
+(804) 978-5566
+...............
+
+Date: Wed, 16 Oct 85 01:38:12 edt
+From: inmet!tower (Leonard H. Tower Jr.) <inmet!tower@cca-unix>
+Subject: more names
+To: tower@MIT-PREP.ARPA
+
+Received: by inmet.uucp (4.12/inmet) id AA12997; Tue, 15 Oct 85 22:31:39 edt
+Date: Tue, 15 Oct 85 22:31:39 edt
+Message-Id: <8510160231.AA12997@inmet.uucp>
+Uucp-Paths: {bellcore,ima,ihnp4}!inmet!tower
+Arpa-Path: ima!inmet!tower@CCA-UNIX.ARPA
+Organization: 	Intermetrics, Inc., Cambridge, MA, USA
+Home: 	36 Porter Street, Somerville, MA  02143, USA   +1 (617) 623-7739
+/* Written 12:20 pm  Oct 14, 1985 by rs@mirror.UUCP in inmet:net.emacs */
+
+
+SINE:	Sine Is Not Emacs
+	(MIT Architecture Machine Group)
+
+EINE:	Eine is Not Emacs
+	(MIT Lisp Machine)
+
+ZWEI:	Zwei Was Eine Initially
+	("rev2" of EINE)
+
+--
+Rich $alz	{mit-eddie, ihnp4!inmet, wjh12, cca, datacube} !mirror!rs
+Mirror Systems	2067 Massachusetts Ave.
+617-661-0777	Cambridge, MA, 02140
+/* End of text from inmet:net.emacs */
+
+Path: mit-eddie!genrad!panda!talcott!harvard!seismo!gatech!ulysses!pajb
+From: ulysses!pajb@mit-eddie (Paul Bennett)
+Newsgroups: net.emacs
+Subject: Here we go again ...
+Date: Sat, 19-Oct-85 17:26:49 EDT
+Organization: AT&T Bell Laboratories, Murray Hill
+Apparently-To: emacs-netnews-distribution@mit-prep
+
+
+> EINE:	Eine is Not Emacs
+> 	(MIT Lisp Machine)
+>
+> ZWEI:	Zwei Was Eine Initially
+>	("rev2" of EINE)
+
+DREI:	DREI - Really Emacs Inside
+	(Exists only in my head)
+
+From: friedman@gnu.ai.mit.edu (Noah Friedman)
+Sender: friedman@gnu.ai.mit.edu
+To: jimb@gnu.ai.mit.edu, rms@gnu.ai.mit.edu
+Subject: etc/emacs.names
+Date: Fri, 9 Oct 92 00:54:57 edt
+
+The following should be added:
+
+
+Emacs
+Makes
+A
+Computer
+Slow
+
+From: S_TITZ@iravcl.ira.uka.de (Olaf Titz)
+Newsgroups: alt.religion.emacs
+Subject: Re: what emacs stands for
+Date: 12 Oct 92 19:29:32 GMT
+
+Emacs Masquerades As Comfortable Shell
+Ever Made A Control-key Setup?
+Emacs: My Alternative Computer Story
+Emacs Made Almost Completely Screwed
+       (by extensive use of M-x global-unset-key)
+Emacs Macht Alle Computer Schoen
+       (deutsch)  (=Emacs makes all computers beautiful)
+Each Mail A Continued Surprise
+Every Mode Acknowledges Customized Strokes
+       (keystrokes, of course :-)
+Eating Memory And Cycle-Sucking
+Everyday Material Almost Compiled Successfully
+
+now enough bashing for today :-)
+
+
+From: elvis@gnu.ai.mit.edu
+To: emacs-19-bugs@gnu.ai.mit.edu
+Subject: missing from etc/emacs.names
+Date: Thu, 20 May 93 02:21:27 edt
+
+
+Elvis
+Masterminds
+All
+Computer
+Software
+
+Just so you boys know the score.
+
+Thank you very Much,
+The King

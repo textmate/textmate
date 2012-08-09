@@ -1,0 +1,359 @@
+This is /home/cyd/emacs/doc/lispintro/../../info/eintr, produced by
+makeinfo version 4.13 from
+/home/cyd/emacs/doc/lispintro/emacs-lisp-intro.texi.
+
+INFO-DIR-SECTION GNU Emacs Lisp
+START-INFO-DIR-ENTRY
+* Emacs Lisp Intro: (eintr).
+                          A simple introduction to Emacs Lisp programming.
+END-INFO-DIR-ENTRY
+
+   This is an `Introduction to Programming in Emacs Lisp', for people
+who are not programmers.
+
+   Edition 3.10, 28 October 2009
+
+   Copyright (C) 1990-1995, 1997, 2001-2012 Free Software Foundation,
+Inc.
+
+   Published by the:
+
+     GNU Press,                        http://www.fsf.org/campaigns/gnu-press/
+     a division of the                 email: sales@fsf.org
+     Free Software Foundation, Inc.    Tel: +1 (617) 542-5942
+     51 Franklin Street, Fifth Floor   Fax: +1 (617) 542-2652
+     Boston, MA 02110-1301 USA
+
+
+   ISBN 1-882114-43-4
+
+   Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; there
+being no Invariant Section, with the Front-Cover Texts being "A GNU
+Manual", and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled "GNU Free Documentation
+License".
+
+   (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom."
+
+
+Indirect:
+eintr-1: 1488
+eintr-2: 299880
+eintr-3: 599512
+
+Tag Table:
+(Indirect)
+Node: Top1488
+Node: Preface20527
+Node: Why21810
+Node: On Reading this Text22457
+Node: Who You Are24629
+Node: Lisp History27349
+Node: Note for Novices28103
+Node: Thank You30572
+Node: List Processing31125
+Ref: List Processing-Footnote-132479
+Node: Lisp Lists32685
+Node: Numbers Lists33579
+Node: Lisp Atoms34617
+Node: Whitespace in Lists38292
+Node: Typing Lists39544
+Node: Run a Program40628
+Node: Making Errors43053
+Node: Names & Definitions47856
+Node: Lisp Interpreter49698
+Node: Complications50858
+Node: Byte Compiling52414
+Node: Evaluation53463
+Node: How the Interpreter Acts54072
+Node: Evaluating Inner Lists55391
+Node: Variables57885
+Node: fill-column Example59405
+Node: Void Function60893
+Node: Void Variable61978
+Node: Arguments63733
+Ref: Arguments-Footnote-165371
+Node: Data types66186
+Node: Args as Variable or List68161
+Node: Variable Number of Arguments69687
+Node: Wrong Type of Argument70501
+Ref: Wrong Type of Argument-Footnote-173875
+Node: message73945
+Ref: message-Footnote-177773
+Node: set & setq77951
+Node: Using set78650
+Node: Using setq80898
+Node: Counting83027
+Node: Summary84974
+Node: Error Message Exercises86750
+Node: Practicing Evaluation87247
+Node: How to Evaluate88407
+Node: Buffer Names89918
+Node: Getting Buffers95544
+Ref: Getting Buffers-Footnote-198037
+Node: Switching Buffers98258
+Ref: Switching Buffers-Footnote-1101501
+Ref: Switching Buffers-Footnote-2101767
+Node: Buffer Size & Locations102430
+Node: Evaluation Exercise104536
+Node: Writing Defuns104807
+Node: Primitive Functions106142
+Node: defun107318
+Node: Install113798
+Node: Effect of installation115112
+Node: Change a defun115911
+Node: Interactive117593
+Node: Interactive multiply-by-seven118634
+Node: multiply-by-seven in detail120457
+Node: Interactive Options123089
+Node: Permanent Installation126165
+Node: let128251
+Node: Prevent confusion129527
+Node: Parts of let Expression131403
+Node: Sample let Expression132934
+Ref: Sample let Expression-Footnote-1134679
+Node: Uninitialized let Variables134930
+Node: if136466
+Node: if in more detail137300
+Node: type-of-animal in detail140023
+Node: else142470
+Node: Truth & Falsehood145271
+Node: nil explained146160
+Node: save-excursion148177
+Node: Point and mark148912
+Node: Template for save-excursion151891
+Node: Review153129
+Node: defun Exercises160790
+Node: Buffer Walk Through161205
+Node: Finding More162278
+Node: simplified-beginning-of-buffer166116
+Node: mark-whole-buffer170492
+Node: mark-whole-buffer overview171277
+Node: Body of mark-whole-buffer172648
+Node: append-to-buffer175666
+Node: append-to-buffer overview176330
+Node: append interactive179079
+Node: append-to-buffer body181449
+Node: append save-excursion183504
+Node: Buffer Related Review188307
+Node: Buffer Exercises190236
+Node: More Complex190669
+Node: copy-to-buffer191552
+Node: insert-buffer194158
+Node: insert-buffer code195398
+Node: insert-buffer interactive196403
+Node: Read-only buffer196900
+Node: b for interactive197512
+Node: insert-buffer body198610
+Node: if & or199761
+Node: Insert or202756
+Node: Insert let204969
+Node: New insert-buffer208619
+Node: beginning-of-buffer209778
+Node: Optional Arguments211320
+Node: beginning-of-buffer opt arg214577
+Node: Disentangle beginning-of-buffer215452
+Node: Large buffer case216717
+Node: Small buffer case219169
+Node: beginning-of-buffer complete220788
+Node: Second Buffer Related Review223818
+Node: optional Exercise225442
+Node: Narrowing & Widening225902
+Node: Narrowing advantages226502
+Node: save-restriction228389
+Node: what-line230284
+Node: narrow Exercise234319
+Node: car cdr & cons235284
+Node: Strange Names236265
+Node: car & cdr237267
+Node: cons241488
+Node: Build a list242400
+Ref: Build a list-Footnote-1243897
+Node: length244077
+Node: nthcdr245564
+Node: nth248370
+Node: setcar249704
+Node: setcdr251917
+Node: cons Exercise253382
+Node: Cutting & Storing Text253742
+Node: Storing Text255009
+Node: zap-to-char257035
+Node: Complete zap-to-char258139
+Node: zap-to-char interactive260110
+Node: zap-to-char body261541
+Node: search-forward263042
+Node: progn265994
+Node: Summing up zap-to-char267651
+Node: kill-region268736
+Node: Complete kill-region269670
+Node: condition-case273886
+Node: Lisp macro276390
+Node: copy-region-as-kill278684
+Node: Complete copy-region-as-kill279548
+Node: copy-region-as-kill body282326
+Node: last-command & this-command283296
+Node: kill-append function285518
+Node: kill-new function289566
+Node: Digression into C299880
+Ref: Digression into C-Footnote-1305273
+Node: defvar305448
+Node: See variable current value306912
+Node: defvar and asterisk308780
+Node: cons & search-fwd Review310571
+Node: search Exercises313480
+Node: List Implementation314202
+Node: Lists diagrammed315258
+Node: Symbols as Chest321260
+Node: List Exercise323255
+Node: Yanking323582
+Node: Kill Ring Overview324859
+Node: kill-ring-yank-pointer326482
+Node: yank nthcdr Exercises328845
+Node: Loops & Recursion329544
+Ref: Loops & Recursion-Footnote-1330625
+Node: while331127
+Node: Looping with while332471
+Node: Loop Example334236
+Node: print-elements-of-list337548
+Node: Incrementing Loop340012
+Node: Incrementing Loop Details340569
+Node: Incrementing Example341897
+Node: Inc Example parts344292
+Node: Inc Example altogether348172
+Node: Decrementing Loop351623
+Node: Decrementing Example353038
+Node: Dec Example parts354523
+Node: Dec Example altogether356489
+Node: dolist dotimes358689
+Node: dolist359416
+Node: dotimes362482
+Node: Recursion364011
+Node: Building Robots365099
+Node: Recursive Definition Parts366824
+Node: Recursion with list369225
+Node: Recursive triangle function372745
+Node: Recursive Example arg of 1 or 2374016
+Node: Recursive Example arg of 3 or 4376234
+Node: Recursion with cond379188
+Node: Recursive Patterns381484
+Node: Every381881
+Node: Accumulate384319
+Node: Keep385564
+Node: No Deferment387428
+Node: No deferment solution390079
+Ref: No deferment solution-Footnote-1393992
+Ref: No deferment solution-Footnote-2394096
+Node: Looping exercise394591
+Node: Regexp Search395766
+Node: sentence-end397712
+Node: re-search-forward401542
+Node: forward-sentence403999
+Node: Complete forward-sentence404702
+Node: fwd-sentence while loops408172
+Node: fwd-sentence re-search411666
+Node: forward-paragraph413748
+Node: forward-paragraph in brief415447
+Node: fwd-para let416900
+Node: fwd-para while422100
+Node: etags430333
+Node: Regexp Review434646
+Node: re-search Exercises436968
+Node: Counting Words437719
+Node: Why Count Words438342
+Node: count-words-example439381
+Node: Design count-words-example440598
+Node: Whitespace Bug447132
+Node: recursive-count-words456485
+Node: Counting Exercise468407
+Node: Words in a defun468766
+Node: Divide and Conquer470326
+Node: Words and Symbols471554
+Node: Syntax473500
+Node: count-words-in-defun477055
+Node: Several defuns483099
+Node: Find a File485438
+Node: lengths-list-file487945
+Node: Several files493120
+Node: lengths-list-many-files493816
+Node: append496552
+Node: Several files recursively497147
+Node: Prepare the data499909
+Node: Data for Display in Detail500939
+Node: Sorting501873
+Node: Files List503487
+Node: Counting function definitions510771
+Node: Readying a Graph519863
+Node: Columns of a graph521015
+Node: graph-body-print534392
+Node: recursive-graph-body-print539015
+Node: Printed Axes541652
+Node: Line Graph Exercise542365
+Node: Emacs Initialization542542
+Node: Default Configuration543904
+Ref: Default Configuration-Footnote-1545877
+Node: Site-wide Init546177
+Node: defcustom548130
+Node: Beginning a .emacs File553805
+Node: Text and Auto-fill556134
+Node: Mail Aliases559960
+Node: Indent Tabs Mode560838
+Node: Keybindings561765
+Node: Keymaps565214
+Node: Loading Files567393
+Node: Autoload570369
+Node: Simple Extension573177
+Ref: Simple Extension-Footnote-1575781
+Node: X11 Colors576043
+Ref: X11 Colors-Footnote-1577877
+Node: Miscellaneous578031
+Node: Mode Line582169
+Node: Debugging587585
+Node: debug588383
+Node: debug-on-entry591407
+Node: debug-on-quit594500
+Node: edebug595470
+Node: Debugging Exercises599512
+Node: Conclusion601173
+Node: the-the606382
+Node: Kill Ring609122
+Node: What the Kill Ring Does609801
+Node: current-kill611294
+Node: Code for current-kill611890
+Node: Understanding current-kill614017
+Node: Body of current-kill614747
+Node: Digression concerning error617811
+Node: Determining the Element618978
+Node: yank622454
+Node: yank-pop625582
+Node: ring file628048
+Node: Full Graph628389
+Node: Labeled Example629148
+Node: print-graph Varlist631130
+Node: print-Y-axis632788
+Node: print-Y-axis in Detail633600
+Node: Height of label634394
+Node: Compute a Remainder636378
+Node: Y Axis Element640129
+Node: Y-axis-column643806
+Node: print-Y-axis Penultimate645386
+Node: print-X-axis647288
+Node: Similarities differences648506
+Node: X Axis Tic Marks649312
+Node: Print Whole Graph656207
+Node: The final version657229
+Node: Test print-graph661462
+Node: Graphing words in defuns663046
+Node: lambda665611
+Node: mapcar667253
+Node: Another Bug669227
+Node: Final printed graph674680
+Node: Free Software and Free Manuals675592
+Node: GNU Free Documentation License681831
+Node: Index707015
+Node: About the Author741891
+
+End Tag Table

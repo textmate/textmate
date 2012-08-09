@@ -1,0 +1,245 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2012-01-05  Glenn Morris  <rgm@gnu.org>
+
+	* Cocoa/Emacs.base/Contents/Info.plist:
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings:
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	Update short copyright year to 2012.
+
+2011-10-19  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* INSTALL: Remove XCode part.
+
+2011-10-18  Jan Djärv  <jan.h.d@swipnet.se>
+
+	* Cocoa/Emacs.xcodeproj:
+	* Cocoa/Emacs.xcodeproj/project.pbxproj:
+	Removed.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-03-03  Glenn Morris  <rgm@gnu.org>
+
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	Refer to etc/NEXTSTEP rather than emacs-app.sf.net.
+
+2011-01-02  Glenn Morris  <rgm@gnu.org>
+
+	* Cocoa/Emacs.base/Contents/Info.plist:
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings:
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	Set short copyright year to 2011.
+
+2010-10-13  Glenn Morris  <rgm@gnu.org>
+
+	* README: Remove information duplicated in AUTHORS.
+	Move historical information to new file ../etc/NEXTSTEP.
+	* AUTHORS: Merge into ./etc/NEXTSTEP and remove file.
+
+2010-10-12  Glenn Morris  <rgm@gnu.org>
+
+	* FOR-RELEASE: Merge into ../etc/TODO.
+
+	* DEV-NOTES: Move to ../admin/notes/nextstep.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2010-01-11  Glenn Morris  <rgm@gnu.org>
+
+	* Cocoa/Emacs.base/Contents/Info.plist:
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings:
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	Set copyright year to 2010.
+
+2009-09-23  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* README: Note GNUstep support is now Startup 0.23 or later.
+
+2009-09-18  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* README: Note OS X support is now 10.4 or later.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2009-06-05  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Cocoa/Emacs.xcodeproj/project.pbxproj: Drop deployment target
+	and zerolink, remove shell script dependencies (let makefiles
+	handle), adjust paths.
+
+2009-05-17  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Cocoa/Emacs.xcodeproj/project.pbxproj: Update and redo targets
+	to utilize Makefiles for assembly portions of the build.
+	* INSTALL: Describe the Xcode project.
+
+2009-05-06  Travis Jeffery  <t.jeffery@utoronto.ca>  (tiny change)
+
+	* Cocoa/Emacs.base/Contents/Info.plist: Add editor role for
+	.markdown, .mkdn.
+
+2009-03-14  David Reitter  <david.reitter@gmail.com>
+
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib/classes.nib:
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib/info.nib:
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib/keyedobjects.nib:
+	* GNUstep/Emacs.base/Resources/preferences.gorm/data.classes:
+	* GNUstep/Emacs.base/Resources/preferences.gorm/data.info:
+	* GNUstep/Emacs.base/Resources/preferences.gorm/objects.gorm:
+	Remove files.
+
+2009-02-01  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib:
+	Remove cursor blink slider, add confirm quit checkbox.
+
+2009-01-05  Glenn Morris  <rgm@gnu.org>
+
+	* Cocoa/Emacs.base/Contents/Info.plist:
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings:
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	Update copyright for 2009.
+
+2008-10-23  Glenn Morris  <rgm@gnu.org>
+
+	* Cocoa/Emacs.base/Contents/Info.plist:
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings:
+	Fix copyright strings.
+
+2008-10-22  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Cocoa/Emacs.base/Contents/Info.plist
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings
+	* GNUstep/Emacs.base/Resources/Emacs.desktop
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist: Replace 9.0 version
+	numbers with 23.0.60-involving strings.
+
+2008-10-08  Yavor Doganov  <yavor@gnu.org>  (tiny change)
+
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	Add missing semicolons to make it a valid dictionary.
+
+2008-08-20  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist: Update URLs.
+	* GNUstep/Emacs.base/Resources/emacs.tiff: Update to copy of:
+	../../../Cocoa/Emacs.base/Contents/Resources/Emacs.icns 64 size.
+
+2008-07-27  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* DEV-NOTES: New file.
+
+2008-07-22  Seiji Zenitani  <zenitani@mac.com>
+
+	* Cocoa/Emacs.base/Contents/Info.plist: Import document icon settings
+	and minor configurations from Carbon port.
+	* Cocoa/Emacs.base/Contents/PkgInfo: Change CFBundleSignature to 'EMAx'.
+	* Cocoa/Emacs.base/Contents/Resources/document.icns: New file:
+	copied from Carbon port.
+
+2008-07-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* README: Consolidate credits.  Copyedits.
+
+2008-07-19  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* FOR-RELEASE: Updates.
+
+2008-07-19  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Cocoa/Emacs.base/Contents/Resources/Emacs.icns: Update with latest
+	from mac/Emacs.app/Contents/Resources.
+
+2008-07-17  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* README.txt:
+	* compile: Remove.
+	* README:
+	* INSTALL: New files.
+	* FOR-RELEASE: Updated.
+
+2008-07-15  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* Cocoa/Emacs.base/Contents/Resources/Credits.html: Change URL from
+	sf.net to GNU.org.
+
+2008-07-15  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	* FOR-RELEASE: Remove historical info.
+
+2008-07-15  Adrian Robert  <Adrian.B.Robert@gmail.com>
+
+	New directory with support files to support NeXTstep window system.
+
+	* AUTHORS: New file: contributor information for NS port.
+	* ChangeLog.nextstep: New file: changelog info to be added to
+	various directories on merge.
+	* ChangeLog: New file: recent history of the NS port itself.
+	* Cocoa: New directory: support files for building .app
+	package on OS X systems.
+	* Cocoa/Emacs.base:
+	* Cocoa/Emacs.base/Contents: New directories.
+	* Cocoa/Emacs.base/Contents/Info.plist:
+	* Cocoa/Emacs.base/Contents/PkgInfo: New files.
+	* Cocoa/Emacs.base/Contents/Resources: New directory.
+	* Cocoa/Emacs.base/Contents/Resources/Credits.html: New file:
+	About popup support.
+	* Cocoa/Emacs.base/Contents/Resources/Emacs.icns: New file:
+	copied from Carbon port.
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj: New directory.
+	* Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings:
+	New file.
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib: New directory.
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib/classes.nib:
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib/info.nib:
+	* Cocoa/Emacs.base/Contents/Resources/preferences.nib/keyedobjects.nib:
+	New files.
+	* Cocoa/Emacs.xcodeproj: New directory: build support.
+	* Cocoa/Emacs.xcodeproj/project.pbxproj: New file.
+	* GNUstep: New directory: support files for building .app
+	package on GNUstep systems.
+	* GNUstep/Emacs.base/Resources: New directory.
+	* GNUstep/Emacs.base/Resources/Emacs.desktop:
+	* GNUstep/Emacs.base/Resources/Info-gnustep.plist:
+	* GNUstep/Emacs.base/Resources/emacs.tiff: New files.
+	* GNUstep/Emacs.base/Resources/preferences.gorm: New directory.
+	* GNUstep/Emacs.base/Resources/preferences.gorm/data.classes:
+	* GNUstep/Emacs.base/Resources/preferences.gorm/data.info:
+	* GNUstep/Emacs.base/Resources/preferences.gorm/objects.gorm: New files.
+	* compile: New file: utility script for building Emacs.app.
+	* FOR-RELEASE: New file: release tasks specific to NeXTstep port.
+	* README.txt: New file: descriptive info for NeXTstep port.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+  Copyright (C) 2008-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,998 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+Summary of changes to "Calc" Preceding 2.00
+------- -- ------- --  ----  --------- ----
+
+
+Version 2.00:
+
+ * Changed to compile calc-macs/-maint, to allow "cp *.elc new-dir".
+
+ * Improved calc-describe-bindings to avoid showing redundant ESC maps.
+
+
+Version 2.00 beta 3:
+
+ * Removed version numbers from most .el files to reduce size of patches.
+
+ * Added a "calc-version" command.
+
+ * Changed `M-# ? ?' to allow for modified describe-function.
+
+ * Changed date parser to accept "Sept" as an alternative for "Sep".
+
+ * Inhibited answers to exercise from showing up in table of contents.
+
+ * Changed Makefile to say "texindex calc.[cfkptv]?" to avoid "calc.el".
+
+ * Fixed up the Makefile in various other ways.
+
+ * Rearranged banner at top of `h h' command's output.
+
+ * Changed "make summary" to print "Calc Summary" on the title page.
+
+ * Added "IntegSimpRules".
+
+ * Added `M-# :', `M-# _', and `M-# Z' options.
+
+ * Changed `^' to evaluate "[-3..-1]^-2" properly.
+
+ * Improved `f g' to give symbolic answers for, e.g., 101:2 and -3:2.
+
+ * Fixed a bug where `h k RET' didn't find the right place on the page.
+
+ * Fixed a bug that formatted "x*(y ? a : b)" as "x y ? a : b".
+
+ * Fixed a bug where defmath translated (< x 0) as (math-posp x)!
+
+ * Fixed a bug that prevented quick-calc from working sometimes.
+
+ * Fixed the `z ?' bug again (maybe this time for good?).
+
+ * Fixed a bug in which `V ^' (vint) was just plain wrong, wrong, wrong!
+
+ * Scanned for and fixed remaining bugs relating to autoloading.
+
+
+Version 2.00 beta 2:
+
+ * Changed "make info" to try "make texinfo" if "makeinfo" not found.
+
+ * Changed to "New for Calc 2.00"; texinfo.tex chokes on apostrophes.
+
+ * Added List Tutorial Exercise 14 (just in case there weren't enough!).
+
+ * Added a discussion of the `Z F' command to the Programming Tutorial.
+
+ * Improved `H a f' not to lose info if input is partially pre-factored.
+
+ * Improved simplification of expressions like sqrt(3) + 3^3:2.
+
+ * Changed Big mode to omit "*" in expressions like 2 sqrt(3) 5^3:4.
+
+ * Replaced European date format D/M/Y with D.M.Y.
+
+ * Changed `a N' and `a X' to consider the endpoints of the interval.
+
+ * Fixed a bug where TeX mode made c*(1+a/b) look like a function call.
+
+ * Fixed a bug formatting top-level evalto's while using selections.
+
+ * Fixed a bug that caused `z ?' to crash.
+
+ * Fixed a bug where `Z F' broke for argument names "t" and "nil".
+
+ * Fixed several bugs relating to autoloading.
+
+
+Version 2.00 beta 1:
+
+ * Added "What's new in Calc 2.00" to the manual (summary of info below).
+
+ * Added support for many GNUPLOT 3.0 features.
+
+ * Tweaked the Makefile and calc-compile a bit more.
+
+ * Modified to work with Zawinski's/Furuseth's optimizing byte compiler.
+
+ * Modified Calc to garbage-collect less often (raised gc-cons-threshold).
+
+ * Changed quick-calc to avoid autoloading so many parts of Calc.
+
+ * Changed Calc subfiles to work properly if not byte-compiled.
+
+ * Renamed `M-# s' to `M-# j', made `M-# s' be equivalent to `h s'.
+
+ * Changed calc-quit to avoid reapportioning space among other windows.
+
+ * Added `M-DEL' (calc-pop-above) key, to DEL as LFD is to RET.
+
+ * Added `{' and `}' to scroll vertically, analogous to `<' and `>'.
+
+ * Added `m t' for "total" algebraic mode.
+
+ * Added `d , \' option to group digits with "\,".
+
+ * Improved support of "prime" accent in "eqn" language mode.
+
+ * Changed macedit's read-kbd-macro to accept a string argument in Lisp.
+
+ * Changed calc-check-defines to use a more concise run-hooks linkage.
+
+ * Changed auto-why mode not to say [w=more] if next msg is not urgent.
+
+ * Made `a d' able to differentiate "a?b:c" and "a_i" formulas.
+
+ * Changed probability dist. functions to work with `a f' and `a d'.
+
+ * Added special constants "phi" and "gamma".
+
+ * Added "poly" function, simpler cousin of "gpoly".
+
+ * Added "pdeg", "plead", "pcont", "pprim"; cleaned up "pdiv" and "pgcd".
+
+ * Added `a p' command for polynomial interpolation.
+
+ * Added `a I' command for numerical integration; made IntegLimit variable.
+
+ * Added `a f' to factor polynomials; moved old `a f' to `a "'.
+
+ * Added `a a' to do partial fraction decompositions.
+
+ * Improved `a i' to integrate many more kinds of formulas.
+
+ * Modified `a P' to find numerical roots of high-degree polynomials.
+
+ * Modified `c 0' through `c 9' to convert int-valued floats to integers.
+
+ * Made sinh, arctanh, etc., expandable into exps/logs by `a f'.
+
+ * Added more algebraic simplifications having to do with logs and exps.
+
+ * Changed `s s', `s t', `s x', `s l' to accept an equation at prompt.
+
+ * Changed `s i' not to store Decls if its value is the default, [].
+
+ * Changed `s i' to store in `d O' language mode if in Normal or Big mode.
+
+ * Rearranged `V M'/`V R' matrix mapping modes.
+
+ * Added <#1+#2> notation for lambda expressions.
+
+ * Extended `b l' and other binary shifts to have a 2-argument version.
+
+ * Changed `u c' and `u t' to give unitless result for unitless input.
+
+ * Changed sqrt(1-cos(x)^2)-to-sin(x) to be an unsafe simplification.
+
+ * Improved simplification of sqrts, e.g., sqrt(a^2 x + a^2 y).
+
+ * Changed solver to treat (x-a)(x-b)(x-c) more intelligently.
+
+ * Changed Pascal language mode to use "$FFFF" for hexadecimal numbers.
+
+ * Added support for non-decimal display of floats.
+
+ * Changed `p' to refresh stack display if current float format uses it.
+
+ * Changed Big mode to use subscript notation for log10(x), log(x,b), r#nnn.
+
+ * Changed Big mode to format deriv(u,x) and tderiv(u,x) as du/dx.
+
+ * Changed Big mode to format integ(1/x,x) as "dx/x" instead of "1/x dx".
+
+ * Added "tty" output type for graphics commands.
+
+ * Documented Calc's random number generation algorithm in the manual.
+
+ * Fixed a bug involving having "(setq calc-timing t)" in .emacs.
+
+ * Fixed a bug that incorrectly parsed "|x| - 1" in TeX mode.
+
+ * Fixed bugs and made improvements in `a R' when widening the guess.
+
+ * Fixed a bug that where `a S' didn't solve (x - a)^2 = (x - b)^2.
+
+ * Fixed a bug that sometimes crashed `a P' on systems of equations.
+
+ * Fixed a bug that prevented `b p' (calc-pack-bits) from working.
+
+ * Fixed some bugs in which certain functions didn't get autoloaded.
+
+ * Fixed a bug in which the date <1/1/13> was incorrectly parsed.
+
+ * Fixed a bug which prevented `j D' from expanding (a+b)/c.
+
+ * Fixed a bug in solver: bad inverses for sinh and cosh.
+
+ * Fixed a bug in math-possible-signs that failed for x*0.
+
+ * Fixed a bug where sqrt(-a) was rewritten sqrt(a)*i even if a<0.
+
+ * Fixed a bug in line breaker when first "word" of line was too long.
+
+ * Worked around a makeinfo bug that handled @end group/@group badly.
+
+
+Version 2.00 alpha 3:
+
+ * Changed logic for locating component .elc files to be even smarter.
+
+ * Changed "make install" to "make compile"; added different "make install".
+
+ * Improved "make compile" to check file dates and compile only when needed.
+
+ * Made output of "make compile" in batch mode more compact and readable.
+
+ * Replaced "Quick Overview" in manual with "Demonstration of Calc".
+
+ * Changed to use keymaps for dispatching M-# and h prefix keys.
+
+ * Added TAGS target to the Calc Makefile.
+
+ * Removed most doc strings from functions; new help commands are better.
+
+ * Got rid of some crufty "fset" calls that were cluttering the code.
+
+ * Split calc-grab-region into two functions, calc-grab-region/-rectangle.
+
+ * Swapped positions of stack and trail in full-calc-keypad display.
+
+ * Improved line-breaking algorithm for displaying long formulas.
+
+ * Improved display of control characters in vectors shown as strings.
+
+ * Changed `d o' to allow fraction format to specify desired denominator.
+
+ * Changed `M-# y' to respect overwrite mode in target buffer.
+
+ * Added `H' prefix to display-mode commands to suppress stack refresh.
+
+ * Changed "calc-why" mechanism to display urgent messages automatically.
+
+ * Handled taking derivatives of symbolic integrals and vice-versa.
+
+ * Handled integrating vectors of formulas.
+
+ * Incorporated Ewerlid's polynomial division and GCD functions into Calc.
+
+ * Improved algebraic operations on "mod" forms, esp. polynomials.
+
+ * Added some more financial functions (sln, syd, ddb).
+
+ * Added nest, anest, fixp, and afixp (`H V R' and `H V U') functions.
+
+ * Added `a .' (calc-remove-equal) command to take apart equations.
+
+ * Generalized dfact to work for negative odd integers; added !! syntax.
+
+ * Changed `k f' to factor 1, 0, and negative integers.
+
+ * Changed `u M', etc., to accept +/- and [ .. ] forms as distributions.
+
+ * Changed `g q' to remove *Gnuplot Commands/Trail* window if present.
+
+ * Added support for Francois Pinard's "dumb terminal" driver for GNUPLOT.
+
+ * Added ":: remember" feature for rewrite rules.
+
+ * Changed rewrites to let pattern "a*b" match "x/2" with a=x, b=1/2.
+
+ * Added ability to put function names like "simplify" in rewrite schedule.
+
+ * Added "Rewrites Tutorial" to the manual.
+
+ * Changed ` to bind RET as newline instead of finish if editing a vector.
+
+ * Added some new exercises to the List Tutorial.
+
+ * Changed `Z F', `V M', etc. not to remove stored vars from def arg list.
+
+ * Added parsing for /1, 2, 3/ notation for Fortran mode vectors.
+
+ * Added a "%%" syntax for comments in formulas being read.
+
+ * Fixed a bug in which failing `h k' removed an existing Info window.
+
+ * Fixed a bug in `j /' operating on subformulas like "a + b".
+
+ * Fixed a bug in which "inf = inf" undesirably evaluated to 1.
+
+ * Fixed a bug that simplified "0 = 1 + a + 2" to "0 = a".
+
+ * Fixed a bug that failed for rewrite patterns like "fib(1 ||| 2)".
+
+ * Fixed a bug that arose because rewrite programs are non-reentrant.
+
+
+Version 2.00 alpha 2:
+
+ * Changed LFD terminating algebraic entry to push in no-simplify mode.
+
+ * Changed so that `K -' interprets `-' as calc-minus, not neg prefix arg.
+
+ * Improved `h c' command to understand all Calc key sequences.
+
+ * Fixed problems with DistribRules, NegateRules, and FitRules.
+
+ * Fixed several bad node pointers in the manual.
+
+ * Fixed a bug in `h C-w' when used with makeinfo-formatted manuals.
+
+ * Fixed a bug in sqrt(-1) when Polar and HMS modes are enabled.
+
+ * Fixed/improved dscalar and deven functions; added dodd.
+
+ * Fixed a bug in polynomial handling that also affected sum(sin(k),k,1,n).
+
+ * Fixed various other glitches in the manual.
+
+
+Version 2.00 alpha 1:
+
+ * Calc's tar file now creates a calc-(version) directory to unpack into.
+
+ * Calc now comes with a Makefile; install with "make install".
+
+ * Calc now comes already split into many files; installation is much simpler.
+
+ * Changed base file name of the manual from "calc-info" to "calc.info".
+
+ * Key binding for `M-# w' was documented but not implemented.
+
+ * Bound M-# ' to be synonymous with `M-# f' (used to be `M-# q').
+
+ * Changed M-# M-# to use last interface of C or K; E no longer counts.
+
+ * Changed `i' (and `M-# i') not to return to Top node unnecessarily.
+
+ * Changed `h' to be a prefix key with various help commands.
+
+ * Changed `s' to be a prefix key with various store and recall commands.
+
+ * Keys `i', `r', and `l' are obsolete (moved to `h' and `s' prefixes).
+
+ * Rearranged `K', `X', and `M-RET' keys; `K' is now calc-keep-args.
+
+ * Changed quick-calc to display input formula as well as output if room.
+
+ * Changed quick-calc to interact with the editing buffer and kill ring.
+
+ * Created pack, unpack, unpackt function equivalents of `v p', `v u'.
+
+ * Changed to expand (a/b)^x to a^x/b^x only if b > 0 (not if a > 0).
+
+ * Changed math-possible-signs to understand sqrt function.
+
+ * Changed Z [, rewrites to consider any provably non-zero value as true.
+
+ * Changed normal language modes to accept ** as a synonym for ^.
+
+ * Added "maple" language mode.
+
+ * Changed, e.g., Mathematica "(2 + 3 I)^(1.23*10^20)" to include parens.
+
+ * Generalized math-compose-big properties for all language modes.
+
+ * Introduced "string" and other function for composing expressions.
+
+ * Changed many recursive vector routines to use loops instead.
+
+ * Added evalv, evalvn function equivalents to `=', `N'.
+
+ * Changed "expr =>" not to evaluate at all if in no-simplify mode.
+
+ * Redesigned user interface of `a F' (calc-curve-fit) command.
+
+ * Added "phase" feature to the rewrite rule system.
+
+ * Added "&&&", "|||", "!!!" to the rewrite rule system.
+
+ * Introduced a new notation for rewrites:  LHS := RHS :: COND.
+
+ * Changed `a r' (but not `j r') to repeat 100 times by default.
+
+ * Integrated EvalRules more cleanly into the default simplifications.
+
+ * Added `H v l' [mdims] to measure the dimensions of a matrix.
+
+ * Changed `u c' to interpret "/units" as "1/units".
+
+ * Added `u a' to adjust unit prefix letters automatically.
+
+ * Changed `u s' to enable scalar mode while simplifying.
+
+ * Changed `c f' [pfloat] not to float integer powers or subscripts.
+
+ * Added a three-argument form for the "hms" function.
+
+ * Changed, e.g., sin(90) degrees to produce 1 instead of 1.0.
+
+ * Changed symbolic mode to prefer sqrt(int): abs([1 2 3]) => sqrt(14).
+
+ * Enhanced solver to handle, e.g., x + 1/x = a; exp(x) + exp(-x) = a.
+
+ * Enhanced simplifier to handle, e.g., exp(a+2) / e^a => e^2.
+
+ * Enhanced `a s' to simplify sqrt(x) - x^1:2 and exp(x) - e^x to 0.
+
+ * Added -(a + b) to -a - b as a default simplification.
+
+ * Added rules for differentiating sum() and prod() functions.
+
+ * Added a few more energy units (due to Przemek Klosowski).
+
+ * Added overflow/underflow checking for all floating-point arithmetic.
+
+ * Extended error forms to work with complex numbers.
+
+ * Generalized GCD to handle fractional arguments.
+
+ * Changed graphics routines to evaluate "x" values, e.g., [-pi .. pi].
+
+ * Added `g q', like `g K' but without viewing the Gnuplot Trail.
+
+ * Changed `g p' and `V M' to display better "Working..." messages.
+
+ * Modified `M-# g' to be more robust about grabbing formulas.
+
+ * Added `Y' prefix key reserved for user-written extensions.
+
+ * Added calc-load-hook and calc-ext-load-hook.
+
+ * Prevented calc-install from leaving large ~ files behind.
+
+ * Changed @bullet to @bullet{} in manual to conform to texinfo spec.
+
+ * Rearranged some chapters in the manual to be a bit more logical.
+
+ * Added calc-split-summary command.
+
+ * Fixed several bugs in embedded mode.
+
+ * Fixed a bug in calc-vector-covariance that required a prefix arg.
+
+ * Fixed a bug that prevented parsing "a=>" with no right-hand side.
+
+ * Fixed a bug which allowed incorrectly dividing a vector by a vector.
+
+ * Fixed a bug formatting sum(...)^2 in Big mode.
+
+ * Fixed a bug that prevented Calc from deleting old graphics temp files.
+
+ * Fixed some typos calling calc-inverse-func instead of calc-invert-func.
+
+ * Fixed bugs in the derivatives of conj, deg, and rad; added re, im.
+
+ * Fixed a bug where (r;theta) parsed as r exp(theta i) even in Deg mode.
+
+ * Fixed a bug which gave wrong answer for exp of a polar complex number.
+
+ * Fixed a bug in `Z F' that failed if formula used non-arg variables.
+
+ * Fixed a bad pointer to Info node "Assignments in Embedded Mode".
+
+ * Fixed several errors in the Calc Summary.
+
+
+Version 1.08 beta 1:
+
+ * Calc's copyright has been assigned to FSF, for inclusion in Emacs 19!
+
+ * Changed M-# to be a two-key sequence; use M-# M-# to start Calc now.
+
+ * Rewrote and expanded the introductory chapter of the manual.
+
+ * Added a key and function summary to the manual.
+
+ * Changed the manual to take better advantage of TeX's math formatting.
+
+ * Changed manual to be printable in @smallbook format.
+
+ * Added "calc-embedded" mode.
+
+ * Added "=>" [evalto] operator.
+
+ * Added facilities for date and date/time arithmetic.
+
+ * Added a set of financial functions (pv, fv, etc.).
+
+ * Added infinite quantities inf, uinf, and nan (plus infinite intervals).
+
+ * Added "EvalRules", "SimpRules", and "ExtSimpRules" variables.
+
+ * Added sum and product commands `a +', `a -', `a *', `a T'.
+
+ * Enhanced `a S' and `a P' to solve systems of equations.
+
+ * Enhanced solver to handle eqns like sin(x) = cos(2 x), sqrt(x) + x = 1.
+
+ * Added `a M' (calc-map-equation) command.
+
+ * Added new statistical functions: mean, standard deviation, etc.
+
+ * Added line, polynomial, and curve fitting commands (`a L' and `a F').
+
+ * Added support for composite units, e.g., "mi+ft+in".
+
+ * Enhanced "Big" mode to format square roots, choose, and powers better.
+
+ * Enhanced "Big" mode to display fractions in large notation.
+
+ * Added several alternate formats for matrix display.
+
+ * Changed TeX mode to write "(1 + x^2)" instead of "\left(1 + x^2\right)".
+
+ * Added support for relational operators in TeX and FORTRAN modes.
+
+ * Added recognition of accents like \dot, \tilde, \underline in TeX mode.
+
+ * Added "eqn" language mode.
+
+ * Added extra control over display justification with `d <', `d =', `d >'.
+
+ * Added calc-left-label and calc-right-label (`d {', `d }').
+
+ * Added "nn%" syntax for algebraic formulas; equivalent to "nn * .01".
+
+ * Added input syntaxes like a = b = c, a != b != c, a <= b < c.
+
+ * Changed "_" to mean subscripts; old use of "_" in vars is now "#".
+
+ * Introduced "matrix mode" and "scalar mode" (`m v').
+
+ * Introduced generic identity matrices (idn(1)).
+
+ * Added a method for declaring variables to be real, integer, > 0, etc.
+
+ * Added `Z S' command for editing stored value of a variable.
+
+ * Added "subst" algebraic function equivalent to the `a b' command.
+
+ * Added `a f' command, changed deriv/integ/solve-for to use it.
+
+ * Improved `a s' to simplify (x + y) (y + x) to (x + y)^2.
+
+ * Improved `a s' to simplify i^2 to -1.
+
+ * Improved `a s' to simplify, e.g., sin(pi/3) in Symbolic mode.
+
+ * Improved `a s' to simplify sqrt(8) to 2 sqrt(2), 1/sqrt(2) to sqrt(2)/2.
+
+ * Moved sin(arccos(x)) from `a e' to `a s'; not unsafe after all!
+
+ * Changed (x y)^z => x^z y^z to be a usually-unsafe simplification.
+
+ * Added thorough documentation of `a s' and `a e' to the manual.
+
+ * Improved `a c' to collect "f(a)" even if "a" also appears elsewhere.
+
+ * Introduced lin, linnt, islin, islinnt functions for linearity testing.
+
+ * Improved `a x' to use binomial theorem to give simpler answers.
+
+ * Improved `j D' to distribute powers of sums: (a + b)^n.
+
+ * Improved `j M' to merge products of powers (may need no-simplify mode).
+
+ * Changed to use defvar for DistribRules etc. so `Z V' works with them.
+
+ * Improved `j *' and `j /' to work properly in a few more cases.
+
+ * Improved `V R' to use identity value when reducing empty vectors.
+
+ * Improved `v p' and `v u' to support more complex packing operations.
+
+ * Disabled automatic simplification of sqrt(2)/2 to 1/sqrt(2).
+
+ * Bound SPC and RET to press, TAB to next-menu in *Calc Keypad* buffer.
+
+ * Added C-u ' to do algebraic entry with language mode forced to normal.
+
+ * Added "$1", "$2", etc. input notation for algebraic entry.
+
+ * Changed unary operators like `n', `&' to treat neg prefix args like RET.
+
+ * Changed ` (calc-edit) to show full precision regardless of float format.
+
+ * Enhanced quick-calc to display integers in several formats.
+
+ * Documented `g H' (calc-graph-hide) command (had been left from manual).
+
+ * Enhanced floor/ceil/trunc/round in several ways.
+
+ * Added rounde and roundu functions.
+
+ * Changed `c 1' through `c 9' to change small floats to 0.0; added `c 0'.
+
+ * Enhanced set operations to work on sets of intervals.
+
+ * Fixed erf(0), utpn(x,x,y), and arccosh(-1) to work properly.
+
+ * Changed complex arctan and arctanh to follow Steele 2nd edition.
+
+ * Expanded "Branch Cuts" section of the manual with some useful tables.
+
+ * Rearranged order of words in mode line to be a bit more logical.
+
+ * Changed `m N' (num-simplify) mode to evaluate constant vectors, too.
+
+ * Changed `a r'/`j r' to prompt twice for separate LHS/RHS if necessary.
+
+ * Enhanced `let(v,x)' in rewrites by allowing arbitrary patterns for v.
+
+ * Changed cursor positioning in second prompt for `a b' (calc-substitute).
+
+ * Changed `y' to omit line numbers more consistently.
+
+ * Changed `o' (calc-realign) to reset horizontal scrolling to zero, also.
+
+ * Added "pred" mode for calc-eval.
+
+ * Added "calc-report-bug" as an alias for "report-calc-bug".
+
+ * Added `Z T' and "calc-pass-errors" to aid debugging Calc-related code.
+
+ * Added "calc-load-everything" (`m X' or `M-# L') command.
+
+ * Enhanced calc-install to pre-build units table, CommuteRules, etc.
+
+ * Changed Calc to interact more gracefully with load-path.
+
+ * Changed Lisp Variable Index in manual to include user variables, too.
+
+ * Fixed a bug that prevented calc-install from working under VMS.
+
+ * Fixed a bug that sometimes crashed rewrites dealing with subtractions.
+
+ * Fixed a bug that prevented `a S' from solving "3 - x = 1 + x"!
+
+ * Fixed a bug in solver that crashed for certain cubics and quartics.
+
+ * Fixed a bug in calc-simplify that crashed for equations and ineqs.
+
+ * Fixed a bug which placed the "[" oddly in `d B' + `v /' mode.
+
+ * Fixed a bug where finishing calc-edit improperly obeyed language mode.
+
+ * Fixed a bug formatting (-1)^n in Big mode after selection commands.
+
+ * Fixed a bug that got ">=" and "<=" backwards in rewrite conditions.
+
+ * Fixed a bug that broke the `"x"' key in calc-keypad mode.
+
+ * Fixed a bug in which `MAP$' in calc-keypad didn't display "Working...".
+
+ * Fixed a bug where matrix division gave bad result for singular matrix.
+
+ * Fixed a bug which closed Calc window if calc-grab-region got an error.
+
+ * Fixed a bug where `a s' failed on formulas containing dimension errors.
+
+ * Fixed a bug that caused `m F' to hang.
+
+ * Fixed a bug in complex arithmetic that caused problems with solver.
+
+ * Fixed a bug which raised intervals to interval powers incorrectly.
+
+ * Fixed a bug in utpp/ltpp (order of arguments did not match the manual).
+
+ * Fixed a bug in which `t y' rounded yanked data with old precision.
+
+ * Fixed a bug in which "in(3, [3 .. 3))" returned true.
+
+ * Fixed a bug which simplified abs(abs(x)) incorrectly.
+
+ * Fixed a bug in which (a^2)^1:3 was unsafely simplified to a^2:3.
+
+ * Fixed a bug in rewrite system which missed pattern "2 sin(x) cos(x)".
+
+ * Fixed a bug in rewrite system which missed pattern "a - a cos(x)^2".
+
+ * Fixed obsolete trail tags gsmp, gneg, ginv to jsmp, jneg, jinv.
+
+ * Fixed some errors and made improvements in units table [Ulrich Mueller].
+
+
+Version 1.07:
+
+ * Added `m F' (calc-settings-file-name) command.
+
+ * Added calc-autoload-directory variable.
+
+ * Extended Z ` to accept a prefix argument.
+
+ * Added keystrokes (v h, v k) for head, tail, cons.
+
+ * Extended `v e' to accept a vector as the filler.
+
+ * Changed `V M', `V R' to accept mapping-mode keys in uppercase, too.
+
+ * Changed V M ' etc. to accept $, $$, ... as argument indicators.
+
+ * Changed `t y' to accept a prefix argument.
+
+ * Put in a cleaner and safer random number generator for `k r' et al.
+
+ * Fixed a bug which completely broke `a r' command!
+
+ * Fixed "0 * matrix" to generate a zero matrix instead of 0.
+
+ * Fixed a bug in `a R' which sometimes caused it to crash.
+
+ * Fixed a fatal typo in the TeX version of the manual.
+
+ * Fixed a bug that prevented C-k, C-w, M-w from working in Trail buffer.
+
+ * Fixed another bug in `Z P' command.
+
+ * Fixed a bug in `u s' which incorrectly simplified subtractions.
+
+ * Fixed an argument-name aliasing bug evaluating lambda( ) formulas.
+
+ * Fixed overfull hboxes in the manual.
+
+ * Fixed various other bugs in the manual.
+
+
+Version 1.06:
+
+ * Added "calc-keypad" mode for X window system users (try it!).
+
+ * Improved "calc-eval" for calling/operating Calc from user-written Lisp.
+
+ * Moved vector accumulate command to `V U' (old `H V R' still supported).
+
+ * Added right-to-left reductions: `I V R' and `I V U'.
+
+ * Added set operations on vectors: intersect, union, diff, xor.
+
+ * Added `I v s' to remove a subvector from a vector.
+
+ * Introduced `H |' to append two vectors with no magical special cases.
+
+ * Introduced rhead, rtail, and rcons for isolating last vector element.
+
+ * Changed `g p' to keep temp files around until data actually change.
+
+ * Improved `a S' to solve many higher-order polynomial equations.
+
+ * Added `a P' to produce a vector of all solutions to an equation.
+
+ * Enhanced `a v' and `j v' to allow top-level-only evaluation.
+
+ * Changed `j DEL' to delete a side of an eqn or ineq, leaving other side.
+
+ * Fixed binding for keys `j 1' through `j 9'.
+
+ * Introduced "let" marker in rewrite rules.
+
+ * Enhanced the "sign" function to provide a two-argument version.
+
+ * Changed "max-specpdl-size exceeded" error message to be user-friendly.
+
+ * Put "<Aborted>" in the trail in above case and when user presses C-g.
+
+ * Changed TeX mode to generate \ldots instead of \dots, recognize both.
+
+ * Changed "sin(0)" etc. (for integer 0) to generate "0" instead of "0.".
+
+ * Enhanced Programming Tutorial exercise 2.
+
+ * Fixed an error in the answer to Types Tutorial exercise 3.
+
+ * Fixed several bugs relating to head, tail, and cons functions.
+
+ * Fixed some other minor typos in the manual.
+
+ * Fixed several bugs in `Z P' (calc-user-define-permanent).
+
+ * Fixed several bugs that broke the `g P' command.
+
+
+Version 1.05:
+
+ * Created a calc-install command to ease installation.
+
+ * Added lots of exercises to the Tutorial section of the manual.
+
+ * Added ability to select and operate on sub-formulas.
+
+ * Substantially improved the algebraic rewrite-rule system.
+
+ * Added a set of graphing commands that use GNUPLOT.
+
+ * Added a command (`a R') for finding numerical roots to equations.
+
+ * Added several new math functions, such as erf and Bessel functions.
+
+ * Added key bindings for miscellaneous commands using the "f" prefix key.
+
+ * Added lots of new vector operations, many of them in the spirit of APL.
+
+ * Added more control over vector display, including an abbreviated mode.
+
+ * Improved keyboard macro editing; added read-kbd-macro to macedit.el.
+
+ * Introduced the `m S' (calc-shift-prefix) command.
+
+ * Enhanced the calc-edit command in several ways.
+
+ * Made it possible to hit ` (calc-edit) during numeric/algebraic entry.
+
+ * Enhanced the calc-solve-for command to handle inequalities.
+
+ * Enhanced calc-simplify to handle equations and inequalities.
+
+ * Taught log10 and log to look for exact integer or rational results.
+
+ * Added ability to take Nth roots directly.
+
+ * Added "increment" and "decrement" commands for integers and floats.
+
+ * Added "full-help" command, changed "h" key to invoke it.
+
+ * Added special help for Inverse and Hyperbolic prefixes.
+
+ * Added an optional prefix argument to `o' (calc-realign).
+
+ * Changed `t s' and `t r' to use RET as the search exit key.
+
+ * Made handling of operator keys for V M, V R, etc. more regular.
+
+ * Improved TeX mode; added support for \matrix format.
+
+ * Added a variant of `m a' mode that only affects ( and [ keys.
+
+ * Fixed "Mismatch" message for algebraic entry of semi-open intervals.
+
+ * Trimmed fat from calc.el to speed loading, moved more to calc-ext.el.
+
+ * Fixed a bug in which minibuffer entry rounded to out-of-date precision.
+
+ * Fixed a bug which crashed Calc 1.04 under Epoch.
+
+ * Fixed a bug which messed up Calc Trail's mode line, among other things.
+
+ * Fixed a bug which caused trail ">" to show only when in Trail buffer.
+
+ * Fixed a bug in which "calc" called "calc-grab-region" with too few args.
+
+ * Fixed bugs in both implementation and documentation of calc-perm.
+
+ * Fixed a bug in which calc-simplify-extended always used radians.
+
+ * Fixed a bug where calc-comma failed to override "polar" mode.
+
+ * Fixed a bug doing mixed arithmetic on rectangular+polar complex numbers.
+
+ * Fixed several bugs in transcendental functions with complex arguments.
+
+ * Fixed a bug in which `a s' simplified "x / .5" to ".5 x".
+
+ * Fixed numerous other bugs in various parts of Calc.
+
+ * Completed the "Hooks" section of the "Internals" chapter of the manual.
+
+
+Version 1.04:
+
+ * Included a copy of revision history (from README) in calc.el.
+
+ * Added the "calc-split" feature to split calc-ext.el into smaller bits.
+
+ * Changed calc-unpack to unpack floats and fractions, too.
+
+ * Added "mant", "xpon", and "scf" functions for decomposing floats.
+
+ * Fixed a bug in the "y" command with positive prefix arguments.
+
+ * Rearranged binary shift/rotate command keys to be a bit more convenient.
+
+ * Fixed a bug in which simplifying "(0/0) * 2" crashed with a Lisp error.
+
+ * Made `H F' [ffloor] and friends faster for very large arguments.
+
+ * Made calc-define-del more robust.
+
+ * Handled pasting of data into the Calculator using the mouse under X.
+
+ * Made overlay-arrow variables buffer-local to avoid interference.
+
+ * Fixed a problem in which Calc Trail buffer got stuck after a C-x C-w.
+
+
+Version 1.03:
+
+ * Changed math-choose to compute n-choose-m faster when m is large.
+
+ * Fixed some problems with TeX mode.
+
+ * Fixed a bug that prevented `b s' from working without a prefix argument.
+
+ * Added "calc-eval" function.
+
+ * Improved calc-grab-region.
+
+
+Version 1.02:
+
+ * Fixed a bug in Tutorial: telephone pole height/distance were switched!
+
+ * Fixed a few other things in the manual.
+
+ * Added "full-calc" command.
+
+ * Added "calc-insert-variables" (`Z I') command.
+
+ * Quick Calc now works even if you are already in the minibuffer.
+
+ * Fixed a bug in math-mul-bignum-digit which affected math-and, etc.
+
+ * Definition of "Hectares" was wrong in units table.
+
+ * Fixed a bug in calc-execute-kbd-macro concerning undo and refresh.
+
+ * Bound "calc-undo" to `C-x u' as well as `C-_' and `U'.
+
+Version 1.01:
+
+ * Added a tutorial section to the manual.
+
+ * Next and Prev for node Strings in the manual were reversed; fixed.
+
+ * Changed "'bignum" in calc-isqrt-bignum-iter to "'bigpos".
+
+ * Fixed a bug that prevented "$" from working during algebraic entry.
+
+ * Fixed a bug caused by an X (last-X) command following a K (macro) cmd.
+
+ * Fixed a bug in which K command incorrectly formatted stack in Big mode.
+
+ * Added space between unary operators and non-flat compositions.
+   (Otherwise, "-(a/b)" in Big mode blended the minus sign into the rule!)
+
+ * Fixed formatting of (-1)^n in Big mode.
+
+ * Fixed some problems relating to "not" operator in Pascal language mode.
+
+ * Fixed several bugs relating to V M ' and V M $ sequences.
+
+ * Fixed matrix-vector multiplication to produce a vector.
+
+ * Introduced Z ` ... Z ' commands; renamed old Z ' to Z #.
+
+ * Fixed various other bugs.
+
+ * Added calc-settings-file variable suggested by C. Witty.
+
+
+Version 1.00:
+
+ * First official release of Calc.
+
+ * If you used the Beta test version (0.01), you will find that this
+   version of Calc is over 50% larger than the original release.
+   General areas of improvement include much better algebra features;
+   operations on units; language modes; simplification modes; interval
+   arithmetic; vector mapping and reduction.  Other new commands include
+   calc-fraction and calc-grab-region.  The program has been split into
+   two parts for faster loading, and the manual is more complete.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

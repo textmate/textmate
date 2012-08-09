@@ -1,0 +1,5 @@
+# Server-side Image Map Module
+
+# Depends on image module.
+
+img.attlist &= attribute ismap { "ismap" }?

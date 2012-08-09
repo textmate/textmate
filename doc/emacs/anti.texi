@@ -1,0 +1,114 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2005-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+
+@node Antinews, Mac OS / GNUstep, X Resources, Top
+@appendix Emacs 23 Antinews
+@c Update the emacs.texi Antinews menu entry with the above version number.
+
+  For those users who live backwards in time, here is information
+about downgrading to Emacs version 23.4.  We hope you will enjoy the
+greater simplicity that results from the absence of many Emacs
+@value{EMACSVER} features.
+
+@itemize @bullet
+@item
+Support for displaying and editing ``bidirectional'' text has been
+removed.  Text is now always displayed on the screen in a single
+consistent direction---left to right---regardless of the underlying
+script.  Similarly, @kbd{C-f} and @kbd{C-b} always move the text
+cursor to the right and left respectively.  Also, @key{right} and
+@key{left} are now equivalent to @kbd{C-f} and @kbd{C-b}, as you might
+expect, rather than moving forward or backward based on the underlying
+``paragraph direction''.
+
+Users of ``right-to-left'' languages, like Arabic and Hebrew, may
+adapt by reading and/or editing text in left-to-right order.
+
+@item
+The Emacs Lisp package manager has been removed.  Instead of using a
+``user interface'' (@kbd{M-x list-packages}), additional Lisp packages
+must now be installed by hand, which is the most flexible and
+``Lispy'' method anyway.  Typically, this just involves editing your
+init file to add the package installation directory to the load path
+and defining some autoloads; see each package's commentary section
+and/or README file for details.
+
+@item
+The option @code{delete-active-region} has been deleted.  When the
+region is active, typing @key{DEL} or @key{delete} no longer deletes
+the text in the region; it deletes a single character instead.
+
+@item
+We have reworked how Emacs handles the clipboard and the X primary
+selection.  Commands for killing and yanking, like @kbd{C-w} and
+@kbd{C-y}, use the primary selection and not the clipboard, so you can
+use these commands without interfering with ``cutting'' or ``pasting''
+in other programs.  The @samp{Cut}/@samp{Copy}/@samp{Paste} menu items
+are bound to separate clipboard commands, not to the same commands as
+@kbd{C-w}/@kbd{M-w}/@kbd{C-y}.
+
+Selecting text by dragging with the mouse now puts the text in the
+kill ring, in addition to the primary selection.  But note that
+selecting an active region with @kbd{C-@key{SPC}} does @emph{not}
+alter the kill ring nor the primary selection, even though the text
+highlighting is visually identical.
+
+@item
+In Isearch, @kbd{C-y} and @kbd{M-y} are no longer bound to
+@code{isearch-yank-kill} and @code{isearch-yank-pop} respectively.
+Instead, @kbd{C-y} yanks the rest of the current line into the search
+string (@code{isearch-yank-line}), whereas @kbd{M-y} does
+@code{isearch-yank-kill}.  The mismatch with the usual meanings of
+@kbd{C-y} and @kbd{M-y} is unintended.
+
+@item
+Various completion features have been simplified.  The options
+@code{completion-cycle-threshold} and
+@code{completion-category-overrides} have been removed.  Due to the
+latter removal, Emacs uses a single consistent scheme to generate
+completions, instead of using a separate scheme for (say) buffer name
+completion.  Several major modes, such as Shell mode, now implement
+their own inline completion commands instead of using
+@code{completion-at-point}.
+
+@item
+We have removed various options for controlling how windows are used,
+e.g.@: @code{display-buffer-base-action}, @code{display-buffer-alist},
+@code{window-combination-limit}, and @code{window-combination-resize}.
+
+@item
+The command @kbd{M-x customize-themes} has been removed.  Emacs no
+longer comes with pre-defined themes (you can write your own).
+
+@item
+Emacs no longer adapts various aspects of its display to GTK+
+settings, opting instead for a uniform toolkit-independent look.  GTK+
+scroll bars are placed on the left, the same position as non-GTK+ X
+scroll bars.  Emacs no longer refers to GTK+ to set the default
+@code{region} face, nor for drawing tooltips.
+
+@item
+Setting the option @code{delete-by-moving-to-trash} to a
+non-@code{nil} now causes all file deletions to use the system trash,
+even temporary files created by Lisp programs; furthermore, the
+@kbd{M-x delete-file} and @kbd{M-x delete-directory} commands no
+longer accept prefix arguments to force true deletion.
+
+@item
+On GNU/Linux and Unix, the default method for sending mail (as
+specified by @code{send-mail-function}) is to use the
+@command{sendmail} program.  Emacs no longer asks for a delivery
+method the first time you try to send mail, trusting instead that the
+system is configured for mail delivery, as it ought to be.
+
+@item
+Several VC features have been removed, including the @kbd{C-x v +} and
+@kbd{C-x v m} commands for pulling and merging on distributed version
+control systems, and the ability to view inline log entries in the log
+buffers made by @kbd{C-x v L}.
+
+@item
+To keep up with decreasing computer memory capacity and disk space, many
+other functions and files have been eliminated in Emacs 23.4.
+@end itemize

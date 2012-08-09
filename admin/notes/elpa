@@ -1,0 +1,24 @@
+NOTES ON THE EMACS PACKAGE ARCHIVE
+
+The GNU Emacs package archive, at elpa.gnu.org, is managed using a Bzr
+branch named "elpa", hosted on Savannah.  To check it out:
+
+  bzr branch bzr+ssh://USER@bzr.savannah.gnu.org/emacs/elpa elpa
+  cd elpa
+  echo "public_branch = bzr+ssh://USER@bzr.savannah.gnu.org/emacs/elpa" >> .bzr/branch/branch.conf
+  bzr bind bzr+ssh://USERNAME@bzr.savannah.gnu.org/emacs/elpa
+  [create task branch for edits, etc.]
+
+Changes to this branch propagate to elpa.gnu.org in a semi-manual way.
+There exists a copy of the elpa branch on that machine.  Someone with
+access logs in, pulls the latest changes from Savannah, and runs a
+"deployment" script.  This script (which is itself kept in the Bzr
+branch) generates the content visible at http://elpa.gnu.org/packages.
+
+The reason we set things up this way, instead of using the package
+upload commands in package-x.el, is to let Emacs hackers conveniently
+edit the contents of the "elpa" branch.  (In particular, multi-file
+packages are stored on the branch in source form, not as tarfiles.)
+
+It is easy to use the elpa branch to deploy a "local" copy of the
+package archive.  For details, see the README file in the elpa branch.

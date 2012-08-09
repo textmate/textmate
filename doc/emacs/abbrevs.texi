@@ -1,0 +1,447 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Abbrevs
+@chapter Abbrevs
+@cindex abbrevs
+@cindex expansion (of abbrevs)
+
+  A defined @dfn{abbrev} is a word which @dfn{expands}, if you insert
+it, into some different text.  Abbrevs are defined by the user to expand
+in specific ways.  For example, you might define @samp{foo} as an abbrev
+expanding to @samp{find outer otter}.  Then you could insert
+@samp{find outer otter } into the buffer by typing @kbd{f o o
+@key{SPC}}.
+
+  A second kind of abbreviation facility is called @dfn{dynamic abbrev
+expansion}.  You use dynamic abbrev expansion with an explicit command
+to expand the letters in the buffer before point by looking for other
+words in the buffer that start with those letters.  @xref{Dynamic
+Abbrevs}.
+
+  ``Hippie'' expansion generalizes abbreviation expansion.
+@xref{Hippie Expand, , Hippie Expansion, autotype, Features for
+Automatic Typing}.
+
+@menu
+* Abbrev Concepts::   Fundamentals of defined abbrevs.
+* Defining Abbrevs::  Defining an abbrev, so it will expand when typed.
+* Expanding Abbrevs:: Controlling expansion: prefixes, canceling expansion.
+* Editing Abbrevs::   Viewing or editing the entire list of defined abbrevs.
+* Saving Abbrevs::    Saving the entire list of abbrevs for another session.
+* Dynamic Abbrevs::   Abbreviations for words already in the buffer.
+* Dabbrev Customization:: What is a word, for dynamic abbrevs.  Case handling.
+@end menu
+
+@node Abbrev Concepts
+@section Abbrev Concepts
+
+  An @dfn{abbrev} is a word that has been defined to @dfn{expand} into
+a specified @dfn{expansion}.  When you insert a word-separator character
+following the abbrev, that expands the abbrev---replacing the abbrev
+with its expansion.  For example, if @samp{foo} is defined as an abbrev
+expanding to @samp{find outer otter}, then typing @kbd{f o o .} will
+insert @samp{find outer otter.}.
+
+@findex abbrev-mode
+@cindex Abbrev mode
+@cindex mode, Abbrev
+  Abbrevs expand only when Abbrev mode, a buffer-local minor mode, is
+enabled.  Disabling Abbrev mode does not cause abbrev definitions to
+be forgotten, but they do not expand until Abbrev mode is enabled
+again.  The command @kbd{M-x abbrev-mode} toggles Abbrev mode; with a
+numeric argument, it turns Abbrev mode on if the argument is positive,
+off otherwise.  @xref{Minor Modes}.
+
+  Abbrevs can have @dfn{mode-specific} definitions, active only in one major
+mode.  Abbrevs can also have @dfn{global} definitions that are active in
+all major modes.  The same abbrev can have a global definition and various
+mode-specific definitions for different major modes.  A mode-specific
+definition for the current major mode overrides a global definition.
+
+  You can define abbrevs interactively during the editing session,
+irrespective of whether Abbrev mode is enabled.  You can also save
+lists of abbrev definitions in files, which you can the reload for use
+in later sessions.
+
+@node Defining Abbrevs
+@section Defining Abbrevs
+
+@table @kbd
+@item C-x a g
+Define an abbrev, using one or more words before point as its expansion
+(@code{add-global-abbrev}).
+@item C-x a l
+Similar, but define an abbrev specific to the current major mode
+(@code{add-mode-abbrev}).
+@item C-x a i g
+Define a word in the buffer as an abbrev (@code{inverse-add-global-abbrev}).
+@item C-x a i l
+Define a word in the buffer as a mode-specific abbrev
+(@code{inverse-add-mode-abbrev}).
+@item M-x define-global-abbrev @key{RET} @var{abbrev} @key{RET} @var{exp} @key{RET}
+Define @var{abbrev} as an abbrev expanding into @var{exp}.
+@item M-x define-mode-abbrev @key{RET} @var{abbrev} @key{RET} @var{exp} @key{RET}
+Define @var{abbrev} as a mode-specific abbrev expanding into @var{exp}.
+@item M-x kill-all-abbrevs
+Discard all abbrev definitions, leaving a blank slate.
+@end table
+
+@kindex C-x a g
+@findex add-global-abbrev
+  The usual way to define an abbrev is to enter the text you want the
+abbrev to expand to, position point after it, and type @kbd{C-x a g}
+(@code{add-global-abbrev}).  This reads the abbrev itself using the
+minibuffer, and then defines it as an abbrev for one or more words before
+point.  Use a numeric argument to say how many words before point should be
+taken as the expansion.  For example, to define the abbrev @samp{foo} as
+mentioned above, insert the text @samp{find outer otter} and then type
+@kbd{C-u 3 C-x a g f o o @key{RET}}.
+
+  An argument of zero to @kbd{C-x a g} means to use the contents of the
+region as the expansion of the abbrev being defined.
+
+@kindex C-x a l
+@findex add-mode-abbrev
+  The command @kbd{C-x a l} (@code{add-mode-abbrev}) is similar, but
+defines a mode-specific abbrev for the current major mode.  The
+arguments work the same as for @kbd{C-x a g}.
+
+@kindex C-x a i g
+@findex inverse-add-global-abbrev
+@kindex C-x a i l
+@findex inverse-add-mode-abbrev
+  @kbd{C-x a i g} (@code{inverse-add-global-abbrev}) and @kbd{C-x a i
+l} (@code{inverse-add-mode-abbrev}) perform the opposite task: if the
+abbrev text is already in the buffer, you use these commands to define
+an abbrev by specifying the expansion in the minibuffer.  These
+commands will expand the abbrev text used for the definition.
+
+@findex define-mode-abbrev
+@findex define-global-abbrev
+  You can define an abbrev without inserting either the abbrev or its
+expansion in the buffer using the command @code{define-global-abbrev}.
+It reads two arguments---the abbrev, and its expansion.  The command
+@code{define-mode-abbrev} does likewise for a mode-specific abbrev.
+
+  To change the definition of an abbrev, just make a new definition.
+When an abbrev has a prior definition, the abbrev definition commands
+ask for confirmation before replacing it.
+
+@findex kill-all-abbrevs
+  To remove an abbrev definition, give a negative argument to the
+abbrev definition command: @kbd{C-u - C-x a g} or @kbd{C-u - C-x a l}.
+The former removes a global definition, while the latter removes a
+mode-specific definition.  @kbd{M-x kill-all-abbrevs} removes all
+abbrev definitions, both global and local.
+
+@node Expanding Abbrevs
+@section Controlling Abbrev Expansion
+
+  When Abbrev mode is enabled, an abbrev expands whenever it is
+present in the buffer just before point and you type a self-inserting
+whitespace or punctuation character (@key{SPC}, comma, etc.@:).  More
+precisely, any character that is not a word constituent expands an
+abbrev, and any word-constituent character can be part of an abbrev.
+The most common way to use an abbrev is to insert it and then insert a
+punctuation or whitespace character to expand it.
+
+@vindex abbrev-all-caps
+  Abbrev expansion preserves case: @samp{foo} expands to @samp{find
+outer otter}, and @samp{Foo} to @samp{Find outer otter}.  @samp{FOO}
+expands to @samp{Find Outer Otter} by default, but if you change the
+variable @code{abbrev-all-caps} to a non-@code{nil} value, it expands
+to @samp{FIND OUTER OTTER}.
+
+  These commands are used to control abbrev expansion:
+
+@table @kbd
+@item M-'
+Separate a prefix from a following abbrev to be expanded
+(@code{abbrev-prefix-mark}).
+@item C-x a e
+@findex expand-abbrev
+Expand the abbrev before point (@code{expand-abbrev}).
+This is effective even when Abbrev mode is not enabled.
+@item M-x expand-region-abbrevs
+Expand some or all abbrevs found in the region.
+@end table
+
+@kindex M-'
+@findex abbrev-prefix-mark
+  You may wish to expand an abbrev and attach a prefix to the expansion;
+for example, if @samp{cnst} expands into @samp{construction}, you might want
+to use it to enter @samp{reconstruction}.  It does not work to type
+@kbd{recnst}, because that is not necessarily a defined abbrev.  What
+you can do is use the command @kbd{M-'} (@code{abbrev-prefix-mark}) in
+between the prefix @samp{re} and the abbrev @samp{cnst}.  First, insert
+@samp{re}.  Then type @kbd{M-'}; this inserts a hyphen in the buffer to
+indicate that it has done its work.  Then insert the abbrev @samp{cnst};
+the buffer now contains @samp{re-cnst}.  Now insert a non-word character
+to expand the abbrev @samp{cnst} into @samp{construction}.  This
+expansion step also deletes the hyphen that indicated @kbd{M-'} had been
+used.  The result is the desired @samp{reconstruction}.
+
+  If you actually want the text of the abbrev in the buffer, rather than
+its expansion, you can accomplish this by inserting the following
+punctuation with @kbd{C-q}.  Thus, @kbd{foo C-q ,} leaves @samp{foo,} in
+the buffer, not expanding it.
+
+@findex unexpand-abbrev
+  If you expand an abbrev by mistake, you can undo the expansion by
+typing @kbd{C-/} (@code{undo}).  @xref{Undo}.  This undoes the
+insertion of the abbrev expansion and brings back the abbrev text.  If
+the result you want is the terminating non-word character plus the
+unexpanded abbrev, you must reinsert the terminating character,
+quoting it with @kbd{C-q}.  You can also use the command @kbd{M-x
+unexpand-abbrev} to cancel the last expansion without deleting the
+terminating character.
+
+@findex expand-region-abbrevs
+  @kbd{M-x expand-region-abbrevs} searches through the region for defined
+abbrevs, and for each one found offers to replace it with its expansion.
+This command is useful if you have typed in text using abbrevs but forgot
+to turn on Abbrev mode first.  It may also be useful together with a
+special set of abbrev definitions for making several global replacements at
+once.  This command is effective even if Abbrev mode is not enabled.
+
+  Expanding any abbrev runs @code{abbrev-expand-functions}, a special
+hook.  Functions in this special hook can make arbitrary changes to
+the abbrev expansion.  @xref{Abbrev Expansion,,, elisp, The Emacs Lisp
+Reference Manual}.
+
+@node Editing Abbrevs
+@section Examining and Editing Abbrevs
+
+@table @kbd
+@item M-x list-abbrevs
+Display a list of all abbrev definitions.  With a numeric argument, list
+only local abbrevs.
+@item M-x edit-abbrevs
+Edit a list of abbrevs; you can add, alter or remove definitions.
+@end table
+
+@findex list-abbrevs
+  The output from @kbd{M-x list-abbrevs} looks like this:
+
+@example
+@var{various other tables@dots{}}
+(lisp-mode-abbrev-table)
+"dk"          0    "define-key"
+(global-abbrev-table)
+"dfn"         0    "definition"
+@end example
+
+@noindent
+(Some blank lines of no semantic significance, and some other abbrev
+tables, have been omitted.)
+
+  A line containing a name in parentheses is the header for abbrevs in a
+particular abbrev table; @code{global-abbrev-table} contains all the global
+abbrevs, and the other abbrev tables that are named after major modes
+contain the mode-specific abbrevs.
+
+  Within each abbrev table, each nonblank line defines one abbrev.  The
+word at the beginning of the line is the abbrev.  The number that
+follows is the number of times the abbrev has been expanded.  Emacs
+keeps track of this to help you see which abbrevs you actually use, so
+that you can eliminate those that you don't use often.  The string at
+the end of the line is the expansion.
+
+  Some abbrevs are marked with @samp{(sys)}.  These ``system'' abbrevs
+(@pxref{Abbrevs,,, elisp, The Emacs Lisp Reference Manual}) are
+pre-defined by various modes, and are not saved to your abbrev file.
+To disable a ``system'' abbrev, define an abbrev of the same name that
+expands to itself, and save it to your abbrev file.
+
+@findex edit-abbrevs
+@kindex C-c C-c @r{(Edit Abbrevs)}
+  @kbd{M-x edit-abbrevs} allows you to add, change or kill abbrev
+definitions by editing a list of them in an Emacs buffer.  The list has
+the same format described above.  The buffer of abbrevs is called
+@file{*Abbrevs*}, and is in Edit-Abbrevs mode.  Type @kbd{C-c C-c} in
+this buffer to install the abbrev definitions as specified in the
+buffer---and delete any abbrev definitions not listed.
+
+  The command @code{edit-abbrevs} is actually the same as
+@code{list-abbrevs} except that it selects the buffer @file{*Abbrevs*}
+whereas @code{list-abbrevs} merely displays it in another window.
+
+@node Saving Abbrevs
+@section Saving Abbrevs
+
+  These commands allow you to keep abbrev definitions between editing
+sessions.
+
+@table @kbd
+@item M-x write-abbrev-file @key{RET} @var{file} @key{RET}
+Write a file @var{file} describing all defined abbrevs.
+@item M-x read-abbrev-file @key{RET} @var{file} @key{RET}
+Read the file @var{file} and define abbrevs as specified therein.
+@item M-x define-abbrevs
+Define abbrevs from definitions in current buffer.
+@item M-x insert-abbrevs
+Insert all abbrevs and their expansions into current buffer.
+@end table
+
+@findex write-abbrev-file
+  @kbd{M-x write-abbrev-file} reads a file name using the minibuffer and
+then writes a description of all current abbrev definitions into that
+file.  This is used to save abbrev definitions for use in a later
+session.  The text stored in the file is a series of Lisp expressions
+that, when executed, define the same abbrevs that you currently have.
+
+@findex read-abbrev-file
+@findex quietly-read-abbrev-file
+@vindex abbrev-file-name
+@cindex abbrev file
+  @kbd{M-x read-abbrev-file} reads a file name using the minibuffer
+and then reads the file, defining abbrevs according to the contents of
+the file.  The function @code{quietly-read-abbrev-file} is similar
+except that it does not display a message in the echo area; you cannot
+invoke it interactively, and it is used primarily in your init file
+(@pxref{Init File}).  If either of these functions is called with
+@code{nil} as the argument, it uses the file given by the variable
+@code{abbrev-file-name}, which is @file{~/.emacs.d/abbrev_defs} by
+default.  This is your standard abbrev definition file, and Emacs
+loads abbrevs from it automatically when it starts up.  (As an
+exception, Emacs does not load the abbrev file when it is started in
+batch mode.  @xref{Initial Options}, for a description of batch mode.)
+
+@vindex save-abbrevs
+  Emacs will offer to save abbrevs automatically if you have changed
+any of them, whenever it offers to save all files (for @kbd{C-x s} or
+@kbd{C-x C-c}).  It saves them in the file specified by
+@code{abbrev-file-name}.  This feature can be inhibited by setting the
+variable @code{save-abbrevs} to @code{nil}.
+
+@findex insert-abbrevs
+@findex define-abbrevs
+  The commands @kbd{M-x insert-abbrevs} and @kbd{M-x define-abbrevs} are
+similar to the previous commands but work on text in an Emacs buffer.
+@kbd{M-x insert-abbrevs} inserts text into the current buffer after point,
+describing all current abbrev definitions; @kbd{M-x define-abbrevs} parses
+the entire current buffer and defines abbrevs accordingly.
+
+@node Dynamic Abbrevs
+@section Dynamic Abbrev Expansion
+
+  The abbrev facility described above operates automatically as you
+insert text, but all abbrevs must be defined explicitly.  By contrast,
+@dfn{dynamic abbrevs} allow the meanings of abbreviations to be
+determined automatically from the contents of the buffer, but dynamic
+abbrev expansion happens only when you request it explicitly.
+
+@kindex M-/
+@kindex C-M-/
+@findex dabbrev-expand
+@findex dabbrev-completion
+@table @kbd
+@item M-/
+Expand the word in the buffer before point as a @dfn{dynamic abbrev},
+by searching in the buffer for words starting with that abbreviation
+(@code{dabbrev-expand}).
+
+@item C-M-/
+Complete the word before point as a dynamic abbrev
+(@code{dabbrev-completion}).
+@end table
+
+@vindex dabbrev-limit
+  For example, if the buffer contains @samp{does this follow } and you
+type @kbd{f o M-/}, the effect is to insert @samp{follow} because that
+is the last word in the buffer that starts with @samp{fo}.  A numeric
+argument to @kbd{M-/} says to take the second, third, etc.@: distinct
+expansion found looking backward from point.  Repeating @kbd{M-/}
+searches for an alternative expansion by looking farther back.  After
+scanning all the text before point, it searches the text after point.
+The variable @code{dabbrev-limit}, if non-@code{nil}, specifies how far
+away in the buffer to search for an expansion.
+
+@vindex dabbrev-check-all-buffers
+  After scanning the current buffer, @kbd{M-/} normally searches other
+buffers, unless you have set @code{dabbrev-check-all-buffers} to
+@code{nil}.
+
+@vindex dabbrev-ignored-buffer-regexps
+  For finer control over which buffers to scan, customize the variable
+@code{dabbrev-ignored-buffer-regexps}.  Its value is a list of regular
+expressions.  If a buffer's name matches any of these regular
+expressions, dynamic abbrev expansion skips that buffer.
+
+  A negative argument to @kbd{M-/}, as in @kbd{C-u - M-/}, says to
+search first for expansions after point, then other buffers, and
+consider expansions before point only as a last resort.  If you repeat
+the @kbd{M-/} to look for another expansion, do not specify an
+argument.  Repeating @kbd{M-/} cycles through all the expansions after
+point and then the expansions before point.
+
+  After you have expanded a dynamic abbrev, you can copy additional
+words that follow the expansion in its original context.  Simply type
+@kbd{@key{SPC} M-/} for each additional word you want to copy.  The
+spacing and punctuation between words is copied along with the words.
+
+  The command @kbd{C-M-/} (@code{dabbrev-completion}) performs
+completion of a dynamic abbrev.  Instead of trying the possible
+expansions one by one, it finds all of them, then inserts the text
+that they have in common.  If they have nothing in common, @kbd{C-M-/}
+displays a list of completions, from which you can select a choice in
+the usual manner.  @xref{Completion}.
+
+  Dynamic abbrev expansion is completely independent of Abbrev mode; the
+expansion of a word with @kbd{M-/} is completely independent of whether
+it has a definition as an ordinary abbrev.
+
+@node Dabbrev Customization
+@section Customizing Dynamic Abbreviation
+
+  Normally, dynamic abbrev expansion ignores case when searching for
+expansions.  That is, the expansion need not agree in case with the word
+you are expanding.
+
+@vindex dabbrev-case-fold-search
+  This feature is controlled by the variable
+@code{dabbrev-case-fold-search}.  If it is @code{t}, case is ignored
+in this search; if it is @code{nil}, the word and the expansion must
+match in case.  If the value is @code{case-fold-search} (the default),
+then the variable @code{case-fold-search} controls whether to ignore
+case while searching for expansions (@pxref{Search Case}).
+
+@vindex dabbrev-case-replace
+  Normally, dynamic abbrev expansion preserves the case pattern
+@emph{of the dynamic abbrev you are expanding}, by converting the
+expansion to that case pattern.
+
+@vindex dabbrev-case-fold-search
+  The variable @code{dabbrev-case-replace} controls whether to
+preserve the case pattern of the dynamic abbrev.  If it is @code{t},
+the dynamic abbrev's case pattern is preserved in most cases; if it is
+@code{nil}, the expansion is always copied verbatim.  If the value is
+@code{case-replace} (the default), then the variable
+@code{case-replace} controls whether to copy the expansion verbatim
+(@pxref{Replacement and Case}).
+
+  However, if the expansion contains a complex mixed case pattern, and
+the dynamic abbrev matches this pattern as far as it goes, then the
+expansion is always copied verbatim, regardless of those variables.
+Thus, for example, if the buffer contains
+@code{variableWithSillyCasePattern}, and you type @kbd{v a M-/}, it
+copies the expansion verbatim including its case pattern.
+
+@vindex dabbrev-abbrev-char-regexp
+  The variable @code{dabbrev-abbrev-char-regexp}, if non-@code{nil},
+controls which characters are considered part of a word, for dynamic expansion
+purposes.  The regular expression must match just one character, never
+two or more.  The same regular expression also determines which
+characters are part of an expansion.  The value @code{nil} has a special
+meaning: dynamic abbrevs are made of word characters, but expansions are
+made of word and symbol characters.
+
+@vindex dabbrev-abbrev-skip-leading-regexp
+  In shell scripts and makefiles, a variable name is sometimes prefixed
+with @samp{$} and sometimes not.  Major modes for this kind of text can
+customize dynamic abbrev expansion to handle optional prefixes by setting
+the variable @code{dabbrev-abbrev-skip-leading-regexp}.  Its value
+should be a regular expression that matches the optional prefix that
+dynamic abbrev expression should ignore.

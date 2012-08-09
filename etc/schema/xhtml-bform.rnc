@@ -1,0 +1,63 @@
+# Simplified Forms Module
+
+form =
+  element form {
+    form.attlist,
+    # Don't use Block.model, because this gets redefined by the
+    # legacy module.
+    Block.class+
+  }
+form.attlist =
+  Common.attrib,
+  attribute action { URI.datatype },
+  attribute method { "get" | "post" }?,
+  attribute enctype { ContentType.datatype }?
+label = element label { label.attlist, Inline.model }
+label.attlist =
+  Common.attrib,
+  attribute for { IDREF.datatype }?,
+  attribute accesskey { Character.datatype }?
+input = element input { input.attlist }
+input.attlist =
+  Common.attrib,
+  attribute type { InputType.class }?,
+  attribute name { text }?,
+  attribute value { text }?,
+  attribute checked { "checked" }?,
+  attribute size { text }?,
+  attribute maxlength { Number.datatype }?,
+  attribute src { URI.datatype }?,
+  attribute accesskey { Character.datatype }?
+InputType.class =
+  "text"
+  | "password"
+  | "checkbox"
+  | "radio"
+  | "submit"
+  | "reset"
+  | "hidden"
+select = element select { select.attlist, option+ }
+select.attlist =
+  Common.attrib,
+  attribute name { text }?,
+  attribute size { Number.datatype }?,
+  attribute multiple { "multiple" }?
+option =
+  element option {
+    Common.attrib,
+    attribute selected { "selected" }?,
+    attribute value { text }?,
+    text
+  }
+textarea = element textarea { textarea.attlist }
+textarea.attlist =
+  Common.attrib,
+  attribute name { text }?,
+  attribute rows { Number.datatype },
+  attribute cols { Number.datatype },
+  attribute accesskey { Character.datatype }?,
+  text
+Form.class = form
+Formctrl.class = input | label | select | textarea
+Block.class |= Form.class
+Inline.class |= Formctrl.class

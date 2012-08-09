@@ -1,5 +1,0 @@
-SOURCES      = src/*.mm
-TEST_SOURCES = tests/*.{cc,mm}
-LINK        += text OakFoundation plist
-FRAMEWORKS   = Cocoa
-EXPORT       = src/*.h

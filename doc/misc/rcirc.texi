@@ -1,0 +1,950 @@
+\input texinfo
+@c %**start of header
+@setfilename ../../info/rcirc
+@settitle rcirc Manual
+@c %**end of header
+
+@copying
+Copyright @copyright{} 2006-2012
+Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license is
+included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs network features
+@direntry
+* Rcirc: (rcirc).               Internet Relay Chat (IRC) client.
+@end direntry
+
+@titlepage
+@title rcirc Manual
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top, Basics, (dir), (dir)
+@top rcirc Manual
+
+@code{rcirc} is an Emacs IRC client.
+
+IRC (Internet Relay Chat) is a multi-user chat protocol.  Users
+communicate with each other in real-time.  Communication occurs both in
+topic channels which are collections of many users, or privately, with
+just one other user.
+
+@insertcopying
+
+@end ifnottex
+
+@menu
+* Basics::
+* Reference::
+* Fighting Information Overload::
+* Hacking and Tweaking::
+* GNU Free Documentation License::
+* Key Index::
+* Variable Index::
+* Index::
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Basics
+
+* Internet Relay Chat::
+* Getting started with rcirc::
+
+Reference
+
+* rcirc commands::
+* Useful IRC commands::
+* Configuration::
+
+Fighting Information Overload
+
+* Channels::
+* People::
+* Keywords::
+* Notices::
+
+Hacking and Tweaking
+
+* Skipping /away messages using handlers::
+* Using fly spell mode::
+* Scrolling conservatively::
+* Changing the time stamp format::
+* Defining a new command::
+* Reconnecting after you have lost the connection::
+
+@end detailmenu
+@end menu
+
+@node Basics, Reference, Top, Top
+@chapter Basics
+
+This chapter contains a brief introduction to IRC (Internet Relay Chat),
+and a quick tutorial on @code{rcirc}.
+
+@menu
+* Internet Relay Chat::
+* Getting started with rcirc::
+@end menu
+
+@node Internet Relay Chat, Getting started with rcirc, Basics, Basics
+@section Internet Relay Chat
+@cindex internet relay chat
+@cindex irc
+
+@cindex channel
+@dfn{Internet Relay Chat} (IRC) is a form of instant communication over the
+Internet.  It is mainly designed for group (many-to-many) communication
+in discussion forums called channels, but also allows one-to-one
+communication.
+
+@cindex instant messaging, comparison
+@cindex server
+@cindex network
+Contrary to most Instant Messenger (IM) systems, users usually don't
+connect to a central server.  Instead, users connect to a random
+server in a network, and servers relay messages from one to the next.
+
+Here's a typical example:
+
+@cindex redirection to random servers
+When you connect to the Freenode network
+(@code{http://freenode.net/}), you point your IRC client at the
+server @code{irc.freenode.net}.  That server will redirect your client
+to a random server on the network, such as @code{zelazny.freenode.net}.
+
+@cindex channel name
+@cindex # starts a channel name
+Once you're connected, you can send messages to all other users
+connected to the same network, and you can join all channels on the same
+network.  You might join the @code{#emacs} and the @code{#rcirc}
+channels, for example.  (Typically, channel names begin with a hash
+character.)
+
+Once you have joined a channel, anything you type will be broadcast to
+all the other users on the same channel.
+
+@cindex addressing other people
+@cindex other people, addressing them
+@cindex talk to other people
+If you want to address someone specifically, for example as an answer to
+a question, it is customary to prefix the message with the nick followed
+by a colon, like this:
+
+@example
+deego: fsbot rules!
+@end example
+
+@cindex nick completion
+@cindex completion of nicks
+@kindex TAB
+Since this is so common, you can use @key{TAB} to do nick completion.
+
+@node Getting started with rcirc, , Internet Relay Chat, Basics
+@section Getting started with rcirc
+@cindex getting started
+@cindex connecting to a server
+
+@cindex irc command
+Use the command @kbd{M-x irc} to connect using the defaults.
+@xref{Configuration}, if you want to change the defaults.
+
+Use @kbd{C-u M-x irc} if you don't want to use the defaults, eg. if you
+want to connect to a different network, or connect to the same network
+using a different nick.  This will prompt you for four things:
+
+@table @asis
+@cindex server, connecting
+@cindex Freenode network
+@item IRC Server
+What server do you want to connect to? All the servers in a particular
+network are equivalent.  Some networks use a round-robin system where a
+single server redirects new connections to a random server in the
+network.  @code{irc.freenode.net} is such a server for the Freenode
+network.  Freenode provides the network ``for the Free and Open Source
+Software communities, for not-for-profit organizations and for related
+communities and organizations.''
+
+@cindex port, connecting
+@cindex 6667, default IRC port
+@item IRC Port
+All network connections require a port.  Just as web servers and clients
+use port 80 per default, IRC uses port 6667 per default.  You rarely
+have to use a different port.
+
+@cindex nick, connecting
+@cindex changing nick
+@cindex name changes
+@item IRC Nick
+@vindex user-login-name
+Every users needs a handle on-line.  You will automatically be assigned
+a slightly different nick if your chosen nick is already in use.  If
+your @code{user-login-name} is @code{alex}, and this nick is already
+in use, you might for example get assigned the nick @code{alex`}.
+
+@cindex channels, connecting
+@cindex initial channels
+@cindex startup channels
+@item IRC Channels
+A space separated list of channels you want to join when connecting.
+You don't need to join any channels, if you just want to have one-to-one
+conversations with friends on the same network.  If you're new to the
+Freenode network, join @code{#emacs}, the channel about all things
+Emacs, or join @code{#rcirc}, the channel about @code{rcirc}.
+@end table
+
+@cindex server buffer
+When you have answered these questions, @code{rcirc} will create a server
+buffer, which will be named something like @code{*irc.freenode.net*},
+and a channel buffer for each of the channels you wanted to join.
+
+@kindex RET
+@cindex talking
+@cindex communicating
+To talk in a channel, just type what you want to say in a channel
+buffer, and press @key{RET}.
+
+@kindex C-c C-c
+@cindex multiline messages
+@cindex messages, multiple lines
+@cindex pasting multiple lines
+@cindex edit message before sending
+If you want to paste multiple lines, such as source code, you can use
+@kbd{C-c C-c} to edit your message in a separate buffer.  Use @kbd{C-c
+C-c} to finish editing.  You still need to press @key{RET} to send it,
+though.  Generally, IRC users don't like people pasting more than around
+four lines of code, so use with care.
+
+@comment This section copied from the Channels section.
+@comment All index markers should point to the original!
+Once you are connected to multiple channels, or once you've turned you
+attention to other buffers in Emacs, you probably want to be notified
+of any activity in channels not currently visible.  All you need to do
+is switch channel tracking on using @kbd{M-x rcirc-track-minor-mode}.
+To make this permanent, add the following to your init file:
+
+@example
+(rcirc-track-minor-mode 1)
+@end example
+
+Use @kbd{C-c C-@key{SPC}} to switch to these buffers.
+
+@node Reference, Fighting Information Overload, Basics, Top
+@chapter Reference
+@cindex reference
+
+This is the reference section of the manual.  It is not complete.  For
+complete listings of @code{rcirc} features, use Emacs built-in
+documentation.
+
+@menu
+* rcirc commands::
+* Useful IRC commands::
+* Configuration::
+@end menu
+
+@node rcirc commands, Useful IRC commands, Reference, Reference
+@section rcirc commands
+@cindex rcirc commands
+@cindex commands
+
+@kindex C-h m
+This is a list of commands that you may use in @code{rcirc}.  It is not
+complete.  For a complete listing, press @kbd{C-h m} in an @code{rcirc}
+buffer.
+
+In addition to using regular Emacs key bindings, you can call them by
+typing them into an @code{rcirc} buffer.
+
+@cindex call commands
+@cindex typing commands
+@cindex commands
+For instance, instead of using the command @kbd{C-c C-j} to join a new
+channel, you may type this in an @code{rcirc} buffer, and press @key{RET}:
+
+@example
+/join #emacs
+@end example
+
+@cindex / starts a command
+@cindex messages starting with a slash disappear
+@cindex disappearing messages if starting with a slash
+@cindex slash hides message
+This is why you cannot start a message with a slash.  You will have to
+precede the command with a space, or rewrite your message in order to
+send it to a channel.
+
+@cindex multiple words as parameters
+@cindex string delimiters
+@cindex quotes
+@cindex double-quotes
+Many commands take parameters.  IRC commands usually ignore string
+delimiters.  Neither quote nor double-quote have special meanings in
+IRC.
+
+@example
+/nick "alex schroeder"
+@end example
+
+This will try to change your nick to @code{"alex}.  Usually this will
+fail because the double quote character is not a valid character for
+nicks.
+
+@cindex case insensitive commands
+These commands are case insensitive.
+
+@cindex new command
+@cindex unknown command
+@cindex command unknown
+If a command isn't known by @code{rcirc}, it will simply be sent along to the
+server.  There is a list of some useful commands like that in the next
+section.
+
+@table @kbd
+@item C-c C-j
+@kindex C-c C-j
+@cindex /join
+@cindex join channels
+@cindex other channels
+@cindex rooms, joining
+@cindex discussion, joining
+This joins a channel such as @code{#rcirc} or @code{#emacs}.  On most
+networks, anybody can create new channels.  If you want to talk with
+some friends, for example, all you have to do is agree on a valid
+channel name and join that channel.  (Also @code{/join #emacs}.)
+
+@item C-c C-p
+@kindex C-c C-p
+@cindex /part
+@cindex part a channel
+@cindex leave a channel
+@cindex disconnect from a channel
+@cindex stop talking on a channel
+@cindex kill channel buffer
+This leaves the current channel.  You can optionally provide a reason
+for parting.  When you kill a channel buffer, you automatically part the
+corresponding channel.  (Also @code{/part you are too weird!}.)
+
+@item C-c C-r
+@kindex C-c C-r
+@cindex /nick
+@cindex change name
+@cindex nick changing
+@cindex rename yourself
+@cindex other name
+This changes your nick to some other name.  Your nick must be unique
+across the network.  Most networks don't allow too many nick changes in
+quick succession, and have restrictions on the valid characters in nick
+names.  (Also @code{/nick alex-test})
+
+@item C-c C-w
+@kindex C-c C-w
+@cindex /whois
+@cindex who are these people
+@cindex identifying people
+@cindex channels other people are on
+@cindex what channels people are on
+Gives you some basic information about a nick.  This often includes what
+other channels people are on.  (Also @code{/whois fsbot}.)
+
+@item C-c C-q
+@kindex C-c C-q
+@cindex /query
+@cindex starting a private conversation
+@cindex one-to-one conversation
+@cindex talk privately
+@cindex private conversation
+@cindex contact one person only
+@cindex query a person
+Starts a one-to-one conversation with another person on the same
+network.  A new buffer will be created for this conversation.  It works
+like a channel with only two members.  (Also @code{/query fsbot}.)
+
+@item C-c @key{RET}
+@kindex C-c RET
+@cindex /msg
+@cindex single message
+@cindex message sending
+This sends a single message to a nick.  Like with @kbd{C-c C-q}, a new
+buffer is created, where the response from the other party will show
+up.  (Also @code{/msg nickserv identify secret}.)
+
+@item C-c C-x
+@kindex C-c C-x
+@cindex /quit
+@cindex quit
+@cindex disconnect
+@cindex kill connection
+@cindex connection end
+@cindex part all channels
+@cindex end connection
+@cindex server buffer killing
+@cindex reason for quitting
+This disconnects from the server and parts all channels.  You can
+optionally provide a reason for quitting.  When you kill the server
+buffer, you automatically quit the server and part all channels.  (Also
+@code{/quit ZZZzzz...}.)
+@end table
+
+@node Useful IRC commands, Configuration, rcirc commands, Reference
+@section Useful IRC commands
+@cindex irc commands
+@cindex commands
+
+As mentioned, if a command isn't known by @code{rcirc}, it will simply be sent
+along to the server.  Some such commands are available on nearly all IRC
+servers, such as:
+
+@table @code
+@item /away
+@cindex /away
+@cindex away status
+@cindex pause status
+@cindex unavailable status
+@cindex set away status
+This sets your status as ``being away'' if you provide a reason, or sets
+your status as ``being back'' if you do not.  People can use the
+@kbd{C-c C-w} command to check your status.  Example: @code{/away food}.
+@end table
+
+@cindex irc resources
+@cindex help about irc
+Typical IRC servers implement many more commands.  You can read more
+about the fantastic world of IRC online at
+@uref{http://www.irchelp.org/, the Internet Relay Chat (IRC) help
+archive}.
+
+@node Configuration, , Useful IRC commands, Reference
+@section Configuration
+@cindex configuring rcirc
+
+These are some variables you can change to configure @code{rcirc} to your
+liking.
+
+@table @code
+@item rcirc-server-alist
+@vindex rcirc-server-alist
+@cindex channels, configuration
+@cindex initial channels, configuration
+@cindex startup channels, configuration
+@cindex servers, configuration
+@cindex initial servers, configuration
+@cindex startup servers, configuration
+This variable contains an alist of servers to connect to by default
+and the keywords parameters to use.  The keyword parameters are
+optional.  If you don't provide any, the defaults as documented below
+will be used.
+
+The most important parameter is the @code{:channels} parameter.  It
+controls which channels you will join by default as soon as you are
+connected to the server.
+
+Here's an example of how to set it:
+
+@example
+(add-to-list 'rcirc-server-alist
+             '("otherworlders.org"
+               :channels ("#FUDGE" "#game-design")))
+@end example
+
+By default you will be connected to the @code{rcirc} support channel:
+@code{#rcirc} on @code{irc.freenode.net}.
+
+@table @code
+@item :nick
+This overrides @code{rcirc-default-nick}.
+
+@item :port
+This overrides @code{rcirc-default-port}.
+
+@item :user-name
+This overrides @code{rcirc-default-user-name}.
+
+@item :full-name
+This overrides @code{rcirc-default-full-name}.
+
+@item :channels
+This describes which channels to join when connecting to the server.
+If absent, no channels will be connected to automatically.
+
+@end table
+
+@item rcirc-default-nick
+@vindex rcirc-default-nick
+This variable is used for the default nick.  It defaults to the login
+name returned by @code{user-login-name}.
+
+@example
+(setq rcirc-default-nick "kensanata")
+@end example
+
+@item rcirc-default-port
+@vindex rcirc-default-port
+@cindex port
+This variable contains the default port to connect to.  It is 6667 by
+default and rarely needs changing.
+
+@item rcirc-default-user-name
+@vindex rcirc-default-user-name
+@cindex user name
+This variable contains the default user name to report to the server.
+It defaults to the login name returned by @code{user-login-name}, just
+like @code{rcirc-default-nick}.
+
+@item rcirc-default-full-name
+@vindex rcirc-default-full-name
+@cindex full name
+@cindex real name
+@cindex surname
+This variable is used to set your ``real name'' on IRC.  It defaults
+to the name returned by @code{user-full-name}.  If you want to hide
+your full name, you might want to set it to some pseudonym.
+
+@example
+(setq rcirc-default-full-name "Curious Minds Want To Know")
+@end example
+
+@item rcirc-authinfo
+@vindex rcirc-authinfo
+@cindex authentication
+@cindex identification
+@cindex nickserv
+@cindex login
+This variable is an alist used to automatically identify yourself on
+networks.  Each sublist starts with a regular expression that is
+compared to the server address you're connecting to.  The second
+element in the list is a symbol representing the method to use,
+followed by the arguments this method requires.
+
+Here is an example to illustrate how you would set it:
+
+@example
+(setq rcirc-authinfo
+      '(("freenode" nickserv "bob" "p455w0rd")
+        ("freenode" chanserv "bob" "#bobland" "passwd99")
+        ("bitlbee" bitlbee "robert" "sekrit")))
+@end example
+
+And here are the valid method symbols and the arguments they require:
+
+@table @code
+@item nickserv
+@cindex nickserv authentication
+Use this symbol if you need to identify yourself as follows when
+connecting to a network: @code{/msg nickserv identify secret}.  The
+necessary arguments are the nickname you want to use this for, and the
+password to use.
+
+Before you can use this method, you will have to register your nick and
+pick a password for it.  Contact @code{nickserv} and check out the
+details.  (Using @code{/msg nickserv help}, for example.)
+
+@item chanserv
+@cindex chanserv authentication
+Use this symbol if you need to identify yourself as follows if you want
+to join a particular channel: @code{/msg chanserv identify #underground
+secret}.  The necessary arguments are the nickname and channel you want
+to use this for, and the password to use.
+
+Before you can use this method, a channel contact must tell you about
+the password to use.  Contact @code{chanserv} and check out the details.
+(Using @code{/msg chanserv help}, for example.)
+
+@item bitlbee
+@cindex bitlbee authentication
+Use this symbol if you need to identify yourself in the Bitlbee channel
+as follows: @code{identify secret}.  The necessary arguments are the
+nickname you want to use this for, and the password to use.
+
+@cindex gateway to other IM services
+@cindex instant messaging, other services
+@cindex Jabber
+@cindex AIM
+@cindex ICQ
+@cindex MSN
+@cindex Yahoo!
+Bitlbee acts like an IRC server, but in fact it is a gateway to a lot of
+other instant messaging services.  You can either install Bitlbee
+locally or use a public Bitlbee server.  There, you need to create an
+account with a password.  This is the nick and password you need to
+provide for the bitlbee authentication method.
+
+Later, you will tell Bitlbee about your accounts and passwords on all
+the other instant messaging services, and Bitlbee will log you in.  All
+@code{rcirc} needs to know, is the login to your Bitlbee account.  Don't
+confuse the Bitlbee account with all the other accounts.
+
+@end table
+
+@end table
+
+@node Fighting Information Overload, Hacking and Tweaking, Reference, Top
+@chapter Fighting Information Overload
+@cindex information overload
+
+This is the section of the manual that caters to the busy person
+online.  There are support channels with several hundred people in
+them.  Trying to follow a conversation in these channels can be a
+daunting task.  This chapters tells you how @code{rcirc} can help.
+
+@menu
+* Channels::
+* People::
+* Keywords::
+* Notices::
+@end menu
+
+@node Channels, People, Fighting Information Overload, Fighting Information Overload
+@section Channels
+@cindex channels
+@cindex modeline
+
+@comment This section copied to the Getting started with rcirc section
+@kindex C-c C-SPC
+@vindex rcirc-track-minor-mode
+@cindex switching channels
+@cindex tracking activity
+@cindex active channel
+@cindex abbreviated channel names
+@cindex modeline tracks activity
+Most people want a notification when something is said on a channel they
+have joined, particularly if they have been addressed directly.  There
+is a global minor mode that will do this kind of tracking for you.  All
+you need to do is switch it on using @kbd{M-x rcirc-track-minor-mode}.
+To make this permanent, add the following to your init file:
+
+@example
+(rcirc-track-minor-mode 1)
+@end example
+
+When other people say things in buffers that are currently buried (no
+window is showing them), the mode line will now show you the abbreviated
+channel or nick name.  Use @kbd{C-c C-@key{SPC}} to switch to these
+buffers.
+
+@vindex rcirc-mode-hook
+If you prefer not to load @code{rcirc} immediately, you can delay the
+activation of this mode:
+
+@example
+(add-hook 'rcirc-mode-hook
+          (lambda ()
+            (rcirc-track-minor-mode 1)))
+@end example
+
+@cindex busy channels
+If you've joined a very active support channel, tracking activity is
+no longer useful.  The channel will be always active.  Switching to
+active channels using @kbd{C-c C-@key{SPC}} no longer works as
+expected.
+
+@kindex C-c C-l
+@cindex low priority channels
+The solution is to mark this channel as a low priority channel.
+Use @kbd{C-c C-l} to make the current channel a low-priority channel.
+Low priority channels have the modeline indicator ``LowPri''.
+@kbd{C-c C-@key{SPC}} will not switch to low priority channels unless
+you use the @kbd{C-u} prefix.
+
+@kindex C-c TAB
+@cindex ignored channels
+If you prefer a channel to never show up in the modeline, then you
+have to ignore it.  Use @kbd{C-c @key{TAB}} to ignore the current
+channel.
+
+@node People, Keywords, Channels, Fighting Information Overload
+@section People
+@cindex people, how to ignore
+@cindex nicks, how to ignore
+@cindex friends
+@cindex buddies
+@cindex trolls
+
+The most important command available to the discerning IRC user is
+@code{/ignore}.  It's the big equalizer online: If people aggravate
+you, just ignore them.
+
+This is of course a crude all-or-nothing solution.  Fear not,
+@code{rcirc} offers alternatives: You can ``brighten'' your buddies
+and ``dim'' certain other nicks that you don't want to ignore
+altogether.
+
+@table @code
+@item /ignore
+@cindex /ignore
+@cindex ignoring other people
+@cindex trolls, ignoring
+@cindex hide some posts
+@cindex idiots online
+This command toggles the ignore status of a nick, if you provide one.
+If you don't provide a nick, the command lists all the nicks you are
+ignoring.  All messages by ignored nicks are---you guessed it---ignored.
+Since only ``operators'' can kick people from channels, the
+ignore command is often the only way to deal with some of the more
+obnoxious fellows online.  Example: @code{/ignore rudybot}.
+
+@item /bright
+@cindex /bright
+@cindex highlight other people
+@cindex friends, highlight
+@cindex buddies, highlight
+@cindex nicks, highlight
+@cindex brighten nicks
+This command toggles the bright status of a nick, if you provide one.
+If you don't provide a nick, the command lists all the ``brightened''
+nicks.  All messages by brightened nicks are---you guessed
+it---brightened.  Use this for your friends.  Example: @code{/bright
+rcy}.
+
+@item /dim
+@cindex /dim
+@cindex soft-ignore other people
+@cindex obnoxious people online
+@cindex rabble online
+This command toggles the dim status of a nick, if you provide one.  If
+you don't provide a nick, the command lists all the ``dimmed'' nicks.
+All messages by dimmed nicks are---you guessed it---dimmed.  Use this
+for boring people and bots.  If you are tracking channel activity,
+messages by dimmed nicks will not register as activity.  Example:
+@code{/dim fsbot}.
+@end table
+
+
+@node Keywords, Notices, People, Fighting Information Overload
+@section Keywords
+@cindex keywords
+
+On a busy channel, you might want to ignore all activity (using
+@kbd{C-c @key{TAB}}) and just watch for certain keywords.  The
+following command allows you to highlight certain keywords:
+
+@table @code
+@item /keyword
+@cindex /keyword
+This command toggles the highlighting of a keyword, if you provide
+one.  If you don't provide a keyword, the current keywords are
+listed.  Example: @code{/keyword manual}.
+@end table
+
+@node Notices, , Keywords, Fighting Information Overload
+@section Notices
+@cindex part notices, how to omit
+@cindex join notices, how to omit
+@cindex quit notices, how to omit
+@cindex nick notices, how to omit
+
+@kindex C-c C-o
+@cindex low priority channels
+In busy channels you might not be interested in all the joining,
+parting, quitting, and renaming that goes on.  You can omit those
+notices using @kbd{C-c C-o}.
+
+@vindex rcirc-omit-responses
+@cindex away notices, how to omit
+You can control which notices get omitted via the
+@code{rcirc-omit-responses} variable.  Here's an example of how to
+omit away messages:
+
+@example
+(setq rcirc-omit-responses '("JOIN" "PART" "QUIT" "NICK" "AWAY))
+@end example
+
+@vindex rcirc-omit-threshold
+Notice that these messages will not be omitted if the nick in question
+has recently been active.  After all, you don't want to continue a
+conversation with somebody who just left.  That's why @code{rcirc}
+checks recent lines in the buffer to figure out if a nick has been
+active and only omits a message if the nick has not been active.  The
+window @code{rcirc} considers is controlled by the
+@code{rcirc-omit-threshold} variable.
+
+@node Hacking and Tweaking, GNU Free Documentation License, Fighting Information Overload, Top
+@chapter Hacking and Tweaking
+@cindex hacking and tweaking
+
+Here are some examples of stuff you can do to configure @code{rcirc}.
+
+@menu
+* Skipping /away messages using handlers::
+* Using fly spell mode::
+* Scrolling conservatively::
+* Changing the time stamp format::
+* Defining a new command::
+* Reconnecting after you have lost the connection::
+@end menu
+
+@node Skipping /away messages using handlers, Using fly spell mode, Hacking and Tweaking, Hacking and Tweaking
+@section Skipping @code{/away} messages using handlers
+@cindex /away messages
+
+@cindex handlers
+@cindex status codes
+The IRC protocol specifies how certain events are signaled from server
+to client.  These events have numbers and are dealt with using so-called
+handlers.  You can override existing handlers by exploiting the naming
+convention adopted for @code{rcirc}.
+
+Here's how to stop @code{rcirc} from printing @code{/away} messages.
+Since @code{rcirc} doesn't define a 301 handler, you don't need to
+require @code{rcirc} before defining the handler:
+
+@example
+(defun rcirc-handler-301 (process cmd sender args)
+  "/away message handler.")
+@end example
+
+@node Using fly spell mode, Scrolling conservatively, Skipping /away messages using handlers, Hacking and Tweaking
+@section Using fly spell mode
+@cindex fly spell
+@cindex spelling
+@cindex spell-checking as you type
+@cindex automatic spelling
+@vindex rcirc-mode-hook
+
+The following code activates Fly Spell Mode
+for @code{rcirc} buffers:
+
+@example
+(add-hook 'rcirc-mode-hook (lambda ()
+                             (flyspell-mode 1)))
+@end example
+
+@xref{Spelling, , Flyspell mode, emacs, The GNU Emacs Manual},
+for details.
+
+@node Scrolling conservatively, Changing the time stamp format, Using fly spell mode, Hacking and Tweaking
+@section Scrolling conservatively
+@cindex input line
+@cindex scrolling
+@vindex scroll-conservatively
+@vindex rcirc-mode-hook
+
+IRC buffers are constantly growing.  If you want to see as much as
+possible at all times, you would want the prompt at the bottom of the
+window when possible.  The following snippet uses a local value for
+@code{scroll-conservatively} to achieve this:
+
+@example
+(add-hook 'rcirc-mode-hook
+          (lambda ()
+            (set (make-local-variable 'scroll-conservatively)
+                 8192)))
+@end example
+
+@xref{Scrolling, , Scrolling conservatively, emacs, The GNU Emacs
+Manual}, for details.
+
+@node Changing the time stamp format, Defining a new command, Scrolling conservatively, Hacking and Tweaking
+@section Changing the time stamp format
+@cindex time stamp
+@cindex date time
+@cindex format time stamp
+@vindex rcirc-time-format
+
+@code{rcirc-time-format} is the format used for the time stamp.  Here's
+how to include the date in the time stamp:
+
+@example
+(setq rcirc-time-format "%Y-%m-%d %H:%M ")
+@end example
+
+@node Defining a new command, Reconnecting after you have lost the connection, Changing the time stamp format, Hacking and Tweaking
+@section Defining a new command
+@cindex defining commands
+@cindex commands, defining
+@cindex new commands, defining
+
+Here's a simple new command, @code{/sv}.  With it, you can boast about
+your IRC client.  It shows how you can use @code{defun-rcirc-command} to
+define new commands.
+
+We're waiting for the definition of this command until @code{rcirc} is loaded
+because @code{defun-rcirc-command} is not yet available, and without
+@code{rcirc} loaded, the command wouldn't do us much good anyway.
+
+@smallexample
+(eval-after-load 'rcirc
+  '(defun-rcirc-command sv (arg)
+     "Boast about rcirc."
+     (interactive "i")
+     (rcirc-send-message process target
+                         (concat "I use " rcirc-id-string))))
+@end smallexample
+
+@node Reconnecting after you have lost the connection, , Defining a new command, Hacking and Tweaking
+@section Reconnecting after you have lost the connection
+@cindex reconnecting
+@cindex disconnecting servers, reconnecting
+
+If you're chatting from a laptop, then you might be familiar with this
+problem: When your laptop falls asleep and wakes up later, your IRC
+client doesn't realize that it has been disconnected.  It takes several
+minutes until the client decides that the connection has in fact been
+lost.  The simple solution is to use @kbd{M-x rcirc}.  The problem is
+that this opens an @emph{additional} connection, so you'll have two
+copies of every channel buffer --- one dead and one live.
+
+The real answer, therefore, is a @code{/reconnect} command:
+
+@smallexample
+(eval-after-load 'rcirc
+  '(defun-rcirc-command reconnect (arg)
+     "Reconnect the server process."
+     (interactive "i")
+     (unless process
+       (error "There's no process for this target"))
+     (let* ((server (car (process-contact process)))
+            (port (process-contact process :service))
+            (nick (rcirc-nick process))
+            channels query-buffers)
+       (dolist (buf (buffer-list))
+         (with-current-buffer buf
+           (when (eq process (rcirc-buffer-process))
+             (remove-hook 'change-major-mode-hook
+                          'rcirc-change-major-mode-hook)
+             (if (rcirc-channel-p rcirc-target)
+                 (setq channels (cons rcirc-target channels))
+               (setq query-buffers (cons buf query-buffers))))))
+       (delete-process process)
+       (rcirc-connect server port nick
+                      rcirc-default-user-name
+                      rcirc-default-full-name
+                      channels))))
+@end smallexample
+
+@node GNU Free Documentation License, Key Index, Hacking and Tweaking, Top
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+
+@node Key Index, Variable Index, GNU Free Documentation License, Top
+@unnumbered Key Index
+@printindex ky
+
+@node Variable Index, Index, Key Index, Top
+@unnumbered Variable Index
+@printindex vr
+
+@node Index, , Variable Index, Top
+@unnumbered Index
+@printindex cp
+
+@bye

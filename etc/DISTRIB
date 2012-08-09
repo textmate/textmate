@@ -1,0 +1,95 @@
+						-*- text -*-
+            GNU Emacs availability information
+
+Copyright (C) 1986-1993, 1995, 1998, 2000-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+GNU Emacs is legally owned by the Free Software Foundation, but we
+regard the foundation more as its custodian on behalf of the public.
+
+In the GNU project, when we speak of "free software", this refers to
+liberty, not price.  Specifically, it refers to the users' freedom to
+study, copy, change and improve the software.  Sometimes users pay
+money for copies of GNU software, and sometimes they get copies at no
+charge.  But regardless of how they got the software, or whether it
+was modified by anyone else along the way, they have the freedom to
+copy and change it--those freedoms are what "free software" means.
+
+The precise conditions for copying and modification are stated in the
+document "GNU General Public License," a copy of which is required to
+be distributed with every copy of GNU Emacs.  It is usually in a file
+named `COPYING' in the same directory as this file.  These conditions
+are designed to make sure that everyone who has a copy of GNU Emacs
+(including modified versions) has the freedom to redistribute and
+change it.
+
+For information on how to get GNU software, see
+http://www.gnu.org/software/software.html.  Printed copies of GNU
+manuals, including the Emacs manual, are available from the FSF's
+online store at http://shop.fsf.org.
+
+Emacs has been run on GNU/Linux, FreeBSD, NetBSD, OpenBSD, and on many
+Unix systems, on a variety of types of cpu, as well as on MSDOS,
+Windows and MacOS.  See the file `etc/MACHINES' in the Emacs
+distribution for a full list of machines that GNU Emacs has been tested
+on, with machine-specific installation notes and warnings.
+
+GNU Emacs is distributed with no warranty (see the General Public
+License for full details, in the file `COPYING' in this directory (see
+above)), and neither I nor the Free Software Foundation promises any
+kind of support or assistance to users.  The foundation keeps a list
+of people who are willing to offer support and assistance for hire.
+See http://www.gnu.org/help/gethelp.html.
+
+However, we plan to continue to improve GNU Emacs and keep it
+reliable, so please send us any complaints and suggestions you have.
+We will probably fix anything that we consider a malfunction.  We may
+make improvements that are suggested, but we may choose not to.
+
+If you are on the Internet, report bugs to bug-gnu-emacs@gnu.org.
+You can use the Emacs command M-x report-bug RET to mail a bug report.
+Please read the Bugs section of the Emacs manual before reporting bugs.
+
+General questions about the GNU Project can be asked of gnu@gnu.org.
+
+If you are a computer manufacturer, I encourage you to ship a copy of
+GNU Emacs with every computer you deliver.  The same copying
+permission terms apply to computer manufacturers as to everyone else.
+You should consider making a donation to help support the GNU project;
+if you estimate what it would cost to distribute some commercial
+product and divide it by five, that is a good amount.
+
+If you like GNU Emacs, please express your satisfaction with a donation:
+send me (please email me about how) or the Foundation
+(https://my.fsf.org/donate) what you feel Emacs has been worth to you.
+If you are glad that I developed GNU Emacs and distribute it as free
+software, rather than following the obstructive and antisocial
+practices of proprietary software, you can reward me.  If you would
+like the Foundation to do more to forward the cause of free software,
+you can contribute.
+
+Your donations will help to support the development of additional GNU
+software.  GNU/Linux systems (variants of GNU, based on the kernel
+Linux) have millions of users, but there is still much to be done.
+For more information on GNU, see the file `GNU' in this directory (see
+above).
+
+			Richard M Stallman
+			Chief GNUisance,
+			President of the Free Software Foundation
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

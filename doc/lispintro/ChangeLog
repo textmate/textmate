@@ -1,0 +1,535 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2012-05-04  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (Making Errors): Don't mention Emacs 20.
+	(Void Function, Wrong Type of Argument, Recursion with list)
+	(Simple Extension): Assume a non-ancient Emacs.
+	(Void Variable, Switching Buffers): Improve page breaks.
+
+2012-05-03  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi: Update GNU Press contact details.
+
+2012-04-28  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (Syntax): Reword to avoid underfull hbox.
+
+2012-04-07  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in: Replace non-portable use of $< in ordinary rules.
+
+2012-02-28  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi: Standardize possessive apostrophe usage.
+
+2012-02-17  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (Design @value{COUNT-WORDS}, Syntax)
+	(count-words-in-defun): Fix cross-refs to Emacs manual.
+
+2012-01-28  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* emacs-lisp-intro.texi (Top): Move setting of COUNT-WORDS outside
+	of @menu.  (Bug#10628)
+
+2012-01-19  Juanma Barranquero  <lekktu@gmail.com>
+
+	* emacs-lisp-intro.texi (count-words-in-defun):
+	Add missing parenthesis (bug#10544).
+
+2012-01-17  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (re-search-forward): Fix typo.
+
+2011-11-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* makefile.w32-in: Update dependencies.
+
+2011-11-16  Juanma Barranquero  <lekktu@gmail.com>
+
+	* emacs-lisp-intro.texi (etags): Fix typo.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-02-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* emacs-lisp-intro.texi: Sync @dircategory with ../../info/dir.
+
+2011-01-23  Werner Lemberg  <wl@gnu.org>
+
+	* Makefile.in (MAKEINFO): Now controlled by `configure'.
+	(MAKEINFO_OPTS): New variable.  Use it where appropriate.
+	(ENVADD): New variable to control texi2dvi and texi2pdf.
+
+2010-11-13  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi: Rename the `count-words-region' example,
+	since there is now a standard command of that name.
+
+2010-10-11  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (.dvi.ps): Remove unnecessary suffix rule.
+	(.PHONY): Add ps.
+	(ps, emacs-lisp-intro.ps): New targets.
+	(clean): Delete ps file.
+	(MAKEINFO): Use --force like the other doc/ Makefiles do.
+	Add explicit -I$srcdir.
+
+2010-10-09  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (VPATH): Remove.
+	(infodir): Make it absolute.
+	(mkinfodir, $(infodir)/eintr, infoclean): No need to cd $srcdir.
+
+	* Makefile.in (dist): Anchor regexps.
+
+	* Makefile.in (${infodir}/eintr, emacs-lisp-intro.dvi)
+	(emacs-lisp-intro.pdf, emacs-lisp-intro.html): Use $<.
+
+	* Makefile.in (infoclean): Remove harmless, long-standing error.
+
+	* Makefile.in ($(infodir)): Delete rule.
+	(mkinfodir): New.
+	($(infodir)/eintr): Use $mkinfodir instead of infodir.
+
+2010-10-09  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (.PHONY): Declare info, dvi, html, pdf, dist.
+
+2010-10-07  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (version): New, set by configure.
+	(clean): Delete dist tar file.
+	(dist): Use version in tar name.
+
+2010-10-06  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (SHELL): Use /bin/sh, like every other Makefile.in.
+	(INFO_SOURCES, INFO_TARGETS, DVI_TARGETS): Remove variables.
+	($(infodir), html, pdf, infoclean, dist): New rules.
+	(${infodir}/eintr): Ensure $infodir exists.  Use $@.
+	(emacs-lisp-intro.dvi, emacs-lisp-intro.pdf, emacs-lisp-intro.html):
+	Use $^.
+	(.PHONY): Declare clean rules.
+	(mostlyclean): Delete more temp files.
+	(clean): Delete specific dvi, pdf and html files.
+	(maintainer-clean): Use infoclean.
+	(.NOEXPORT): Remove, unused by any other Makefile.in.
+
+2010-09-21  Glenn Morris  <rgm@gnu.org>
+
+	* cons-1.eps, cons-2.eps, cons-2a.eps, cons-3.eps, cons-4.eps:
+	* cons-5.eps, lambda-1.eps, lambda-2.eps, lambda-3.eps:
+	Add first line EPSF magic comment.  (Bug#7064)
+
+2010-06-23  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi: Untabify.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2010-02-16  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi: Fix typo in name of `find-tag' command.
+
+2010-02-01  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* emacs-lisp-intro.texi (Text and Auto-fill, Mode Line):
+	Avoid obsolete special default variables like default-major-mode.
+
+2009-12-09  David Robinow  <drobinow@gmail.com>  (tiny change)
+
+	* makefile.w32-in: Use parenthesis for macros for nmake compatibility.
+
+2009-12-03  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (Free Software and Free Manuals):
+	Update URL, and remove duplicate text.
+
+2009-10-28  Robert J. Chassell  <bob@gnu.org>
+
+	* emacs-lisp-intro.texi: Don't change urlcolor or linkcolor in tex
+	output (not needed and does not work with recent texinfo.tex).
+	Bump edition number.
+
+2009-10-27  Robert J. Chassell  <bob@gnu.org>
+
+	* emacs-lisp-intro.texi: Bump edition number.
+
+2009-10-27  Glenn Morris  <rgm@gnu.org>
+
+	* cons-1.pdf, cons-2.pdf, cons-2a.pdf, cons-3.pdf, cons-4.pdf:
+	* cons-5.pdf, drawers.pdf, lambda-1.pdf, lambda-2.pdf, lambda-3.pdf:
+	New files, generated from .eps versions with epstopdf.
+	* README: Add copyright information for PDF images.
+
+	* Makefile.in (TEXI2PDF): New variable.
+	(emacs-lisp-intro.pdf): New target.
+
+	* makefile.w32-in (texinfodir, TEXI2PDF): New variables.
+	(ENVADD): Add -I$texinfodir.
+	(emacs-lisp-intro.pdf): New target.
+
+2009-07-28  Chong Yidong  <cyd@stupidchicken.com>
+
+	* emacs-lisp-intro.texi (Simple Extension): Bump emacs versions in
+	examples.
+
+2009-07-10  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (Top): Add missing @detailmenu entry.
+
+2009-07-09  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.in (texinfodir): Rename from usermanualdir, and update.
+
+2009-07-06  Glenn Morris  <rgm@gnu.org>
+
+	* emacs-lisp-intro.texi (defvar and asterisk): Minor rephrasing.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2009-06-14  Chong Yidong  <cyd@stupidchicken.com>
+
+	* emacs-lisp-intro.texi (edebug): Fix typo.
+
+2009-02-22  Karl Berry  <karl@gnu.org>
+
+	* emacs-lisp-intro.texi (Default Configuration): Fix dup word "by by".
+
+2009-02-20  Juanma Barranquero  <lekktu@gmail.com>
+
+	* emacs-lisp-intro.texi (current-kill, Code for current-kill)
+	(Body of current-kill): Remove duplicate words.
+
+2008-11-19  Glenn Morris  <rgm@gnu.org>
+
+	* doclicense.texi: New file.
+	* emacs-lisp-intro.texi: Relicense under FDL 1.3 or later.
+	Include doclicense.texi rather than having license in the file itself.
+
+2008-10-16  Sean Sieger  <sean.sieger@gmail.com>  (tiny change)
+
+	* emacs-lisp-intro.texi (Recursion with list): Fix typo.
+
+2008-10-04  Karl Berry  <karl@gnu.org>
+
+	* emacs-lisp-intro.texi: Apply similar formatting changes as for
+	the emacs and lispref manuals, to save pages.  A couple minor
+	rewordings and reformatting of code to avoid overfull and
+	underfull lines.
+	(edition-number): Bump to 3.08.
+	(update-date): Bump to 4 October 2008.
+
+2008-06-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (distclean): Remove makefile.
+
+2008-06-16  Glenn Morris  <rgm@gnu.org>
+
+	* Makefile.am, Makefile.old, aclocal.m4, configure, configure.in:
+	* install-sh, missing, mkinstalldirs: Remove obsolete files.
+
+2008-05-13  Chong Yidong  <cyd@stupidchicken.com>
+
+	* emacs-lisp-intro.texi (Lisp Atoms): Rephrase "in addition" to
+	avoid confusion with addition operation discussed in previous
+	paragraph.
+
+2008-01-31  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Update back cover text.
+
+2007-09-12  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Add email address to Thank You correctly.
+
+2007-09-06  Romain Francoise  <romain@orebokech.com>
+
+	* Makefile.in (maintainer-clean): Delete info files.
+
+2007-09-06  Glenn Morris  <rgm@gnu.org>
+
+	Move from lispintro/ to doc/lispintro/.
+	* Makefile.in (infodir): Go up one more level.
+	(usermanualdir): Change from ../man to ../emacs.
+	* makefile.w32-in (infodir, ENVADD): Go up one more level.
+	* emacs-lisp-intro.texi (setfilename): Go up one more level.
+
+2007-07-30  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Fix typo on line 5173, change `thee' to
+	`these'.
+
+2007-07-25  Glenn Morris  <rgm@gnu.org>
+
+	* Relicense all FSF files to GPLv3 or later.
+
+2007-06-02  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 22.1 released.
+
+2007-01-30  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi (else): Rephrase message of first
+	if-then-else example so it is right both in itself and in the
+	"true" case of the expression, which asks whether 4 is greater
+	than 5.
+
+2006-11-27  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (usermanualdir): Define.
+	(emacs-lisp-intro.dvi): Pass -I options to texi2dvi instead of
+	using TEXINPUTS.
+
+	* emacs-lisp-intro.texi: Input texinfo instead of ../man/texinfo
+	to fix building outside source directory.
+
+2006-11-09  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Copy descriptions from detailed master
+	menu to menus within body.
+
+	* emacs-lisp-intro.texi (at the beginning): Add `other shell
+	commands' to produce additional output formats; total is now ten.
+	(A Loop with an Incrementing Counter, and others): Ensure Info
+	menus will appear in short windows.
+	(Disentangle beginning-of-buffer): Replace `version 21' with `more
+	recent versions'.
+	(Simple Extension): Show how to handle multiple versions by adding
+	an alternative with a test of `>= 21'.
+
+2006-11-06  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Finish minor changes seen from DVI output.
+	Replace 22.1.100 with 22.1.1.
+	(current-kill): Mention functions that directly or indirectly call
+	`kill-new', which sets `kill-ring-yank-pointer'.
+	(Understanding current-kill): Change `lasted' to `last'.  Remove
+	extraneous parenthesis.  Reword item about returning `car' of list.
+	(yank): Remove mention of `rotate-yank-pointer'.
+	(Y Axis Element): Add comment regarding replacement of blank space.
+	(print-Y-axis Penultimate): Explain that `print-graph' will pass
+	`height-of-top-line' so `print-Y-axis' does not have a bug.
+
+2006-11-05  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Yet more minor changes:
+	(defcustom): Said that `:options' is usually for a hook.  Remove
+	extraneous space in parenthetical remark concerning
+	`text-mode-hook-identify'.  At end, mention other defines, too.
+	(Beginning a .emacs File): Reverse words about comments so they
+	parallel numbers of listed semi-colons.
+	(Text and Auto-fill): Remove extraneous blank line in example.
+	(Mail Aliases): Remove extraneous blank line in example.
+	(Keybindings): Reformat as needed with `key' rather than `kbd'.
+	(Keybindings, Miscellaneous, Mode Line): For small book format, start
+	section name on top of new page.
+	(Simple Extension): Replace longer expression with
+	`emacs-major-version'.  Remove comment about `number-to-string'
+	function.
+	(Miscellaneous): Add filename option, `-H', to `grep' example.
+	(debug, debug-on-entry): Replace `GNU Emacs 22' with `a recent
+	GNU Emacs'.
+	(edebug): More properly state where to place point for 'M-x
+	edebug-defun'.
+
+	* emacs-lisp-intro.texi: More minor changes.
+	Center images for TeX output.
+	(kill-new function): Remove indentation for sentence talking about
+	momentarily skipping code.
+	(cons & search-fwd Review): Document @code{funcall}.  Document
+	@code{re-search-forward} with existing @code{search-forward}.
+	Reference chapter on regular expression searches.
+	(Recursion with list): Specify a more recent version as being Emacs.
+	(Recursion with list, Every, recursive-graph-body-print): Change
+	`if ... progn' expression to `when'.
+	(Recursive triangle function): For printing in small book, ensure
+	section name is not last on bottom of preceding page.
+	(Keep): Remove extraneous space in function definition example.
+	(sentence-end): Specify `in English' for glyphs that end a sentence.
+	Note that in GNU Emacs 22, the name refers to both a variable and a
+	function.
+	(fwd-sentence while loops): Write a function as one, not as a form.
+	(fwd-para let): Add `which' to sentence with `parstart' and `parsep'.
+	(etags): Move sentences involving `find-tag' and sources.  State
+	location of Emacs `src' directory.
+	(Design count-words-region): Better explain two backslashes in a row.
+	(Find a File): Fix grammar; add a `to' and write `to visit'.  Change
+	`named' to `selected'.
+	(lengths-list-file): Remove extraneous parenthesis from reference.
+	(lengths-list-many-files): Explain `expand-file-name' better.
+	(Files List): Rephrase sentence regarding Lisp sources directory
+
+2006-11-04  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Replace 22.0.100 with 22.1.100.
+	(defcustom): Note that the value set by defconst is a variable.
+	(Buffer Size & Locations): Parenthetical remark about evaluation.
+	(Finding More): Change text to include C sources by inference.
+
+	* emacs-lisp-intro.texi: Minor fixes.
+	Replace all tabs with eight spaces each so printed text looks correct.
+	Remove extraneous comma in a printed node name produced by `ref'.
+	(insert-buffer): Add a missing beginning parenthesis.
+	(beginning-of-buffer): Add `beginning of' to note about accessible
+	portion.
+	(narrow Exercise): Write closing parenthesis at end of correct
+	paragraph.
+	(zap-to-char): Remove extraneous `a' from first sentence.
+	(Complete zap-to-char): Remove two extraneous sentences.
+	(zap-to-char body): Move sentences on documentation two nodes earlier.
+	(Lisp macro): Add definition of `unless' macro.
+	(last-command & this-command): Remove comment that `we have not yet
+	seen' the @code{eq} function.
+	(kill-append function): Reformat `kill-append' function definition so
+	it prints well.
+	(kill-new function): Indent the sentence beginning `notice'.  Replace
+	`the same as' with `similar to'.  Repair typo.  Remove obsolete
+	references to `yank' and `yank-pop.  End section with a note that `we
+	will digress into C.'
+
+2006-11-02  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi (kill-ring-yank-pointer): Revert addition
+	of extraneous quotation mark to rotate-yank-pointer.
+
+2006-11-01  Juri Linkov  <juri@jurta.org>
+
+	* emacs-lisp-intro.texi: Fix unbalanced quotes.
+
+2006-10-31  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Revised text for kill-region,
+	copy-region-as-kill, kill-append, kill-new, forward-sentence,
+	forward-paragraph, find-file, current-kill, yank, and yank-pop.
+	Removed INSTALL MANIFEST from the directory since those files are
+	now irrelevant.  Updated Info file in ../info.  Changed numbering
+	so is now Revised Third Edition and this instance's edition-number
+	is 3.00.  Did not update ISBN number.
+
+	* emacs-lisp-intro.texi: Remove version reference for X colors.
+	Document `='.  Remove mention that :eval was new in 21.  Updated
+	instance's edition-number to 3.01.
+
+2006-10-30  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Many changes since it turned out that
+	many `simple' functions were rewritten.  Changes to the text
+	regarding zap-to-char, mark-whole-buffer, append-to-buffer,
+	copy-to-buffer, beginning-of-buffer, what-line, and possibly
+	others.  (I have not reviewed all yet.)  This instance does build
+	for Info and TeX.
+
+2006-10-29  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Makefile.in: Use relative paths to avoid advertising filesystem
+	contents during compilation.
+
+2006-08-21  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Deleted in directory copy of texinfo.tex
+	and pointed towards ../man/texinfo.tex so only one file
+	needs updating.  Added comment of what to do when building on own.
+
+	* texinfo.tex: Changed to version 2006-02-13.16
+	to enable a DVI build using the more recent versions of TeX.
+
+2006-05-25  David Kastrup  <dak@gnu.org>
+
+	* emacs-lisp-intro.texi (setcar): Replace an antelope rather than
+	a giraffe with a hippopotamus.
+
+2006-05-19  Thien-Thi Nguyen  <ttn@gnu.org>
+
+	* emacs-lisp-intro.texi (Digression concerning error): Fix typo.
+
+2005-09-16  Romain Francoise  <romain@orebokech.com>
+
+	* emacs-lisp-intro.texi (GNU Free Documentation License):
+	Specify GFDL version 1.2.
+
+2005-07-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* makefile.w32-in (info): Don't run install-info.
+	($(infodir)/dir): New target, produced by running install-info.
+
+2005-07-04  Lute Kamstra  <lute@gnu.org>
+
+	Update FSF's address in GPL notices.
+
+	* emacs-lisp-intro.texi: Update FSF's address.
+
+2004-04-23  Juanma Barranquero  <lektu@terra.es>
+
+	* makefile.w32-in: Add "-*- makefile -*-" mode tag.
+
+2004-02-29  Juanma Barranquero  <lektu@terra.es>
+
+	* makefile.w32-in (mostlyclean, clean, maintainer-clean):
+	Use $(DEL) instead of rm, and ignore exit code.
+
+2003-11-16  Kevin Ryde  <user42@zip.com.au>
+
+	* emacs-lisp-intro.texi: [CVS commitment by <bob@rattlesnake.com>]
+	Corrections to cross references.
+	(Interactive Options): elisp "interactive" -> "Using Interactive".
+	(defvar and asterisk): Remove emacs "Edit Options" reference,
+	edit-options is no longer described in the emacs manual.
+	(Lists diagrammed): elisp "List Type" -> "Cons Cell Type".
+
+2003-09-03  Peter Runestig  <peter@runestig.com>
+
+	* makefile.w32-in: New file.
+
+2001-11-29  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* emacs-lisp-intro.texi (Index): @ignore extraneous text.
+	Use @dircategory and @direntry to define the DIR entry.
+
+2001-11-25  Robert J. Chassell  <bob@rattlesnake.com>
+
+	* emacs-lisp-intro.texi: Move @contents to the beginning of the
+	file.  Set the size to @smallbook.
+
+2001-11-24  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in: New file.
+
+	* README: Update.
+
+	* *.eps: Rename to avoid clashes in DOS 8+3 namespace.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+  Copyright (C) 2001-2012 Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,362 @@
+# Copyright (C) 2001-2008 World Wide Web Consortium, (Massachusetts
+# Institute of Technology, European Research Consortium for
+# Informatics and Mathematics, Keio University).  All Rights Reserved.
+# This work is distributed under the W3C(R) Software License in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE.
+
+# This was mostly generated from the syntax summary in the XSLT
+# Recommendation (using XSLT of course).
+
+# Issues: this validates extension elements as literal result
+# elements, which is overly restrictive.
+
+namespace local = ""
+default namespace xsl = "http://www.w3.org/1999/XSL/Transform"
+
+start =
+  stylesheet.element
+  | transform.element
+  | literal-result-element-as-stylesheet
+version = "1.0"
+top-level-elements.model =
+  (top-level-element.category | top-level-extension)*
+top-level-extension =
+  element * - (xsl:* | local:*) {
+    grammar {
+      start = any
+      any =
+        (attribute * { text }
+         | text
+         | element * { any })*
+    }
+  }
+template.model = (instruction.category | literal-result-element | text)*
+literal-result-element-as-stylesheet =
+  element * - xsl:* {
+    attribute xsl:version { version },
+    literal-result-element-no-version.atts,
+    template.model
+  }
+literal-result-element =
+  element * - xsl:* { literal-result-element.atts, template.model }
+literal-result-element.atts =
+  literal-result-element-no-version.atts,
+  attribute xsl:version { version }?
+literal-result-element-no-version.atts =
+  (attribute * - xsl:* { avt.datatype }
+   | attribute xsl:extension-element-prefixes { prefixes.datatype }
+   | attribute xsl:exclude-result-prefixes { prefixes.datatype }
+   | attribute xsl:use-attribute-sets { qnames.datatype })*
+top-level-element.category =
+  include.element
+  | strip-space.element
+  | preserve-space.element
+  | template.element
+  | namespace-alias.element
+  | attribute-set.element
+  | variable.element
+  | param.element
+  | key.element
+  | decimal-format.element
+  | output.element
+instruction.category =
+  apply-templates.element
+  | apply-imports.element
+  | call-template.element
+  | element.element
+  | attribute.element
+  | text.element
+  | processing-instruction.element
+  | comment.element
+  | copy.element
+  | value-of.element
+  | number.element
+  | for-each.element
+  | if.element
+  | choose.element
+  | variable.element
+  | copy-of.element
+  | message.element
+  | fallback.element
+extension.atts = attribute * - (xsl:* | local:*) { text }*
+stylesheet.element = element stylesheet { stylesheet.model }
+transform.element = element transform { stylesheet.model }
+stylesheet.model =
+  extension.atts,
+  attribute id { xsd:NCName }?,
+  attribute extension-element-prefixes { prefixes.datatype }?,
+  attribute exclude-result-prefixes { prefixes.datatype }?,
+  attribute version { version },
+  (import.element*, top-level-elements.model)
+include.element =
+  element include {
+    extension.atts,
+    attribute href { xsd:anyURI }
+  }
+import.element =
+  element import {
+    extension.atts,
+    attribute href { xsd:anyURI }
+  }
+strip-space.element =
+  element strip-space {
+    extension.atts,
+    attribute elements { wildcards.datatype }
+  }
+preserve-space.element =
+  element preserve-space {
+    extension.atts,
+    attribute elements { wildcards.datatype }
+  }
+template.element =
+  element template {
+    extension.atts,
+    attribute match { pattern.datatype }?,
+    attribute name { qname.datatype }?,
+    attribute priority { number.datatype }?,
+    attribute mode { qname.datatype }?,
+    (param.element*, template.model)
+  }
+apply-templates.element =
+  element apply-templates {
+    extension.atts,
+    attribute select { expression.datatype }?,
+    attribute mode { qname.datatype }?,
+    (sort.element | with-param.element)*
+  }
+apply-imports.element = element apply-imports { extension.atts }
+call-template.element =
+  element call-template {
+    extension.atts,
+    attribute name { qname.datatype },
+    with-param.element*
+  }
+namespace-alias.element =
+  element namespace-alias {
+    extension.atts,
+    attribute stylesheet-prefix { prefix.datatype },
+    attribute result-prefix { prefix.datatype }
+  }
+element.element =
+  element element {
+    extension.atts,
+    attribute name { qname.datatype | expr-avt.datatype },
+    attribute namespace { xsd:anyURI | brace-avt.datatype }?,
+    attribute use-attribute-sets { qnames.datatype }?,
+    template.model
+  }
+attribute.element =
+  element attribute {
+    extension.atts,
+    attribute name { qname.datatype | expr-avt.datatype },
+    attribute namespace { xsd:anyURI | brace-avt.datatype }?,
+    template.model
+  }
+attribute-set.element =
+  element attribute-set {
+    extension.atts,
+    attribute name { qname.datatype },
+    attribute use-attribute-sets { qnames.datatype }?,
+    attribute.element*
+  }
+text.element =
+  element text {
+    extension.atts,
+    attribute disable-output-escaping {
+      xsd:string "yes" | xsd:string "no"
+    }?,
+    text
+  }
+processing-instruction.element =
+  element processing-instruction {
+    extension.atts,
+    attribute name { xsd:NCName | expr-avt.datatype },
+    template.model
+  }
+comment.element = element comment { extension.atts, template.model }
+copy.element =
+  element copy {
+    extension.atts,
+    attribute use-attribute-sets { qnames.datatype }?,
+    template.model
+  }
+value-of.element =
+  element value-of {
+    extension.atts,
+    attribute select { expression.datatype },
+    attribute disable-output-escaping {
+      xsd:string "yes" | xsd:string "no"
+    }?
+  }
+number.element =
+  element number {
+    extension.atts,
+    attribute level {
+      xsd:string "single" | xsd:string "multiple" | xsd:string "any"
+    }?,
+    attribute count { pattern.datatype }?,
+    attribute from { pattern.datatype }?,
+    attribute value { expression.datatype }?,
+    attribute format { avt.datatype }?,
+    attribute lang { xsd:NMTOKEN | expr-avt.datatype }?,
+    attribute letter-value {
+      xsd:string "alphabetic"
+      | xsd:string "traditional"
+      | expr-avt.datatype
+    }?,
+    attribute grouping-separator { char.datatype | expr-avt.datatype }?,
+    attribute grouping-size { number.datatype | expr-avt.datatype }?
+  }
+for-each.element =
+  element for-each {
+    extension.atts,
+    attribute select { expression.datatype },
+    (sort.element*, template.model)
+  }
+if.element =
+  element if {
+    extension.atts,
+    attribute test { expression.datatype },
+    template.model
+  }
+choose.element =
+  element choose { extension.atts, (when.element+, otherwise.element?) }
+when.element =
+  element when {
+    extension.atts,
+    attribute test { expression.datatype },
+    template.model
+  }
+otherwise.element = element otherwise { extension.atts, template.model }
+sort.element =
+  element sort {
+    extension.atts,
+    attribute select { expression.datatype }?,
+    attribute lang { xsd:NMTOKEN | expr-avt.datatype }?,
+    attribute data-type {
+      xsd:string "text"
+      | xsd:string "number"
+      | qname-but-not-ncname.datatype
+      | expr-avt.datatype
+    }?,
+    attribute order {
+      xsd:string "ascending"
+      | xsd:string "descending"
+      | expr-avt.datatype
+    }?,
+    attribute case-order {
+      xsd:string "upper-first"
+      | xsd:string "lower-first"
+      | expr-avt.datatype
+    }?
+  }
+variable.element =
+  element variable {
+    extension.atts,
+    attribute name { qname.datatype },
+    (attribute select { expression.datatype }
+     | template.model)
+  }
+param.element =
+  element param {
+    extension.atts,
+    attribute name { qname.datatype },
+    (attribute select { expression.datatype }
+     | template.model)
+  }
+copy-of.element =
+  element copy-of {
+    extension.atts,
+    attribute select { expression.datatype }
+  }
+with-param.element =
+  element with-param {
+    extension.atts,
+    attribute name { qname.datatype },
+    (attribute select { expression.datatype }
+     | template.model)
+  }
+key.element =
+  element key {
+    extension.atts,
+    attribute name { qname.datatype },
+    attribute match { pattern.datatype },
+    attribute use { expression.datatype }
+  }
+decimal-format.element =
+  element decimal-format {
+    extension.atts,
+    attribute name { qname.datatype }?,
+    attribute decimal-separator { char.datatype }?,
+    attribute grouping-separator { char.datatype }?,
+    attribute infinity { text }?,
+    attribute minus-sign { char.datatype }?,
+    attribute NaN { text }?,
+    attribute percent { char.datatype }?,
+    attribute per-mille { char.datatype }?,
+    attribute zero-digit { char.datatype }?,
+    attribute digit { char.datatype }?,
+    attribute pattern-separator { char.datatype }?
+  }
+message.element =
+  element message {
+    extension.atts,
+    attribute terminate { xsd:string "yes" | xsd:string "no" }?,
+    template.model
+  }
+fallback.element = element fallback { extension.atts, template.model }
+output.element =
+  element output {
+    extension.atts,
+    attribute method {
+      xsd:string "xml"
+      | xsd:string "html"
+      | xsd:string "text"
+      | qname-but-not-ncname.datatype
+    }?,
+    attribute version { xsd:NMTOKEN }?,
+    attribute encoding { text }?,
+    attribute omit-xml-declaration {
+      xsd:string "yes" | xsd:string "no"
+    }?,
+    attribute standalone { xsd:string "yes" | xsd:string "no" }?,
+    attribute doctype-public { text }?,
+    attribute doctype-system { text }?,
+    attribute cdata-section-elements { qnames.datatype }?,
+    attribute indent { xsd:string "yes" | xsd:string "no" }?,
+    attribute media-type { text }?
+  }
+prefixes.datatype = list { (xsd:NCName | "#default")* }
+prefix.datatype = xsd:NCName | "#default"
+wildcards.datatype =
+  list {
+    (xsd:QName
+     | xsd:token { pattern = "\*|\i\c*:\*" })*
+  }
+qname.datatype = xsd:QName
+qnames.datatype = list { xsd:QName* }
+char.datatype = xsd:string { length = "1" }
+number.datatype = xsd:decimal
+expression.datatype = text
+pattern.datatype = text
+qname-but-not-ncname.datatype = xsd:QName { pattern = ".*:.*" }
+# An AVT containing at least one expression.
+expr-avt.datatype =
+  xsd:string {
+    pattern =
+      """([^\{\}]|\{\{|\}\})*\{([^"'\{\}]|"[^"]*"|'[^']*')+\}([^\{\}]|\{\{|\}\}|\{([^"'\{\}]|"[^"]*"|'[^']*')+\})*"""
+  }
+# An AVT containing at least one brace; ie where instantiated AVT
+# is not the same as the literal AVT.
+brace-avt.datatype =
+  xsd:string {
+    pattern =
+      """[^\{\}]*(\{\{|\}\}|\{([^"'\{\}]|"[^"]*"|'[^']*')+\})([^\{\}]|\{\{|\}\}|\{([^"'\{\}]|"[^"]*"|'[^']*')+\})*"""
+  }
+avt.datatype =
+  xsd:string {
+    pattern =
+      """([^\{\}]|\{\{|\}\}|\{([^"'\{\}]|"[^"]*"|'[^']*')+\})*"""
+  }

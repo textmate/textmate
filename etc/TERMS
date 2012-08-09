@@ -1,0 +1,248 @@
+Copyright (C) 1999, 2001-2012  Free Software Foundation, Inc.
+See the end of the file for copying permissions.
+
+This file describes what you must or might want to do to termcap entries
+to make terminals work properly and efficiently with Emacs.  Information
+on likely problems with specific types of terminals appears at the end
+of the file.
+
+*** What you want in a terminal ***
+
+Vital
+1. Easy to compute suitable padding for.
+2. Never ever sends ^S/^Q unless you type them, at least in one mode.
+
+Nice for speed
+1. Supports insert/delete of multiple lines in one command.
+2. Same for multiple characters, though doing them one by
+one is usually fast enough except on emulators running on
+machines with bitmap screens.
+
+Nice for usability
+1. Considerably more than 24 lines.
+2. Meta key (shift-like key that controls the 0200 bit
+in every character you type).
+
+*** New termcap strings ***
+
+Emacs supports certain termcap strings that are not described in the
+4.2 manual but appear to be standard in system V.  The one exception
+is `cS', which I invented.
+
+`AL'    insert several lines.  Takes one parameter, the number of
+        lines to be inserted.  You specify how to send this parameter
+	using a %-construct, just like the cursor positions in the `cm'
+	string.
+
+`DL'    delete several lines.  One parameter.
+
+`IC'    insert several characters.  One parameter.
+
+`DC'    delete several characters.  One parameter.
+
+`rp'    repeat a character.  Takes two parameters, the character
+        to be repeated and the number of times to repeat it.
+	Most likely you will use `%.' for sending the character
+	to be repeated.  Emacs interprets a padding spec with a *
+	as giving the amount of padding per repetition.
+
+	WARNING: Many terminals have a command to repeat the
+	*last character output* N times.  This means that the character
+	will appear N+1 times in a row when the command argument is N.
+	However, the `rp' string's parameter is the total number of
+	times wanted, not one less.  Therefore, such repeat commands
+	may be used in an `rp' string only if you use Emacs's special
+	termcap operator `%a-c\001' to subtract 1 from the repeat count
+	before substituting it into the string.  It is probably safe
+	to use this even though the Unix termcap does not accept it
+	because programs other than Emacs probably won't look for `rp'
+	anyway.
+
+`cs'    set scroll region.  Takes two parameters, the vertical
+	positions of the first line to include in the scroll region
+	and the last line to include in the scroll region.
+	Both parameters are origin-zero.  The effect of this
+	should be to cause a following insert-line or delete-line
+	not to move lines below the bottom of the scroll region.
+
+	This is not the same convention that Emacs version 16 used.
+	That is because I was led astray by unclear documentation
+	of the meaning of %i in termcap strings.  Since the termcap
+	documentation for `cs' is also unclear, I had to deduce the
+	correct parameter conventions from what would make the VT-100's
+	`cs' string work properly.  From an incorrect assumption about
+	%i, I reached an incorrect conclusion about `cs', but the result
+	worked correctly on the VT100 and ANSII terminals.  In Emacs
+	version 17, both `cs' and %i work correctly.
+
+	The version 16 convention was to pass, for the second parameter,
+	the line number of the first line beyond the end of the
+	scroll region.
+
+`cS'    set scroll region.  Differs from `cs' in taking parameters
+	differently.  There are four parameters:
+	1. Total number of lines on the screen.
+	2. Number of lines above desired scroll region.
+	3. Number of lines below (outside of) desired scroll region.
+	4. Total number of lines on the screen, like #1.
+	This is because an Ambassador needs the parameters like this.
+
+`cr', `do', `le'
+	Emacs will not attempt to use ^M, ^J or ^H for cursor motion
+	unless these capabilities are present and say to use those
+	characters.
+
+`km'    Says the terminal has a Meta key.
+
+Defining these strings is important for getting maximum performance
+from your terminal.
+
+Make sure that the `ti' string sets all modes needed for editing
+in Emacs.  For example, if your terminal has a mode that controls
+wrap at the end of the line, you must decide whether to specify
+the `am' flag in the termcap entry; whichever you decide, the `ti'
+string should contain commands to set the mode that way.
+(Emacs also sends the `vs' string after the `ti' string.
+You can put the mode-setting commands in either one of them.)
+
+*** Specific Terminal Types ***
+
+Watch out for termcap entries for Ann Arbor Ambassadors that
+give too little padding for clear-screen.  7.2 msec per line is right.
+These are the strings whose padding you probably should change:
+    :al=1*\E[L:dl=1*\E[M:cd=7.2*\E[J:cl=7.2*\E[H\E[J:
+I have sometimes seen `\E[2J' at the front of the `ti' string;
+this is a clear-screen, very slow, and it can cause you to get
+Control-s sent by the terminal at startup.  I recommend removing
+the `\E[2J' from the `ti' string.
+The `ti' or `vs' strings also usually need stuff added to them, such as
+    \E[>33;52;54h\E[>30;37;38;39l
+You might want to add the following to the `te' or `ve' strings:
+    \E[>52l\E[>37h
+The following additional capabilities will improve performance:
+    :AL=1*\E[%dL:DL=1*\E[%dM:IC=4\E[%d@:DC=4\E[%dP:rp=1*%.\E[%a-c\001%db:
+If you find that the Meta key does not work, make sure that
+    :km:
+is present in the termcap entry.
+
+Watch out for termcap entries for VT100's that fail to specify
+the `sf' string, or that omit the padding needed for the `sf' and `sr'
+strings (2msec per line affected).  What you need is
+    :sf=2*^J:sr=2*\EM:cs=\E[%i%d;%dr:
+
+The Concept-100 and Concept-108 have many modes that `ti' strings
+often fail to initialize.  If you have problems on one of these
+terminals, that is probably the place to fix them.  These terminals
+can support an `rp' string.
+
+Watch out on HP terminals for problems with standout disappearing on
+part of the mode line.  These problems are due to the absence of
+:sg#0: which some HP terminals need.
+
+The vi55 is said to require `ip=2'.
+
+The Sun console should have these capabilities for good performance.
+	   :AL=\E[%dL:DL=\E[%dM:IC=\E[%d@:DC=\E[%dP:
+
+The vt220 needs to be set to vt220 mode, 7 bit, space parity
+in order to work fully with TERM=vt220.
+
+If you are using a LAT terminal concentrator, you need to issue these
+commands to turn off flow control:
+
+    set port flow control disable
+    define port flow control disable
+
+On System V, in the terminfo database, various terminals may have
+the `xt' flag that should not have it.  `xt' should be present only
+for the Teleray 1061 or equivalent terminal.
+
+In particular, System V for the 386 often has `xt' for terminal type
+AT386 or AT386-M, which is used for the console.  You should delete
+this flag.  Here is how:
+
+You can get a copy of the terminfo "source" for at386 using the
+command: `infocmp at386 >at386.tic'.  Edit the file at386.tic and remove
+the `xt' flag.  Then compile the new entry with: `tic at386.tic'.
+
+It is also reported that these terminal types sometimes have the wrong
+reverse-scroll string.  It should be \E[T, but sometimes is given as \E[S.
+
+Here is what watserv1!maytag!focsys!larry recommends for these terminals:
+
+# This copy of the terminfo description has been fixed.
+# The suggestions came from a number of usenet postings.
+#
+# Intel AT/386 for color card with monochrome display
+#
+AT386-M|at386-m|386AT-M|386at-m|at/386 console,
+	am, bw, eo, xon,
+	cols#80, lines#25,
+	acsc=``a1fxgqh0jYk?lZm@nEooppqDrrsstCu4vAwBx3yyzz{{||}}~~,
+	bel=^G, blink=\E[5m, bold=\E[1m, cbt=\E[Z,
+	clear=\E[2J\E[H,
+	cr=\r, cub=\E[%p1%dD, cub1=\E[D, cud=\E[%p1%dB,
+	cud1=\E[B, cuf=\E[%p1%dC, cuf1=\E[C,
+	cup=\E[%i%p1%02d;%p2%02dH, cuu=\E[%p1%dA, cuu1=\E[A,
+	dch=\E[%p1%dP, dch1=\E[P, dl=\E[%p1%dM, dl1=\E[1M,
+	ech=\E[%p1%dX,ed=\E[J, el=\E[K, el1=\E[1K\E[X, flash=^G, home=\E[H,
+	hpa=\E[%i%p1%dG, ich=\E[%p1%d@, ich1=\E[1@, il=\E[%p1%dL, il1=\E[1L,
+	ind=\E[S, indn=\E[%p1%dS, invis=\E[9m,
+	is2=\E[0;10;38m, kbs=\b, kcbt=^], kclr=\E[2J,
+	kcub1=\E[D, kcud1=\E[B, kcuf1=\E[C, kcuu1=\E[A,
+	kdch1=\E[P, kend=\E[Y, kf1=\EOP, kf10=\EOY, kf11=\EOZ,
+	kf12=\EOA, kf2=\EOQ, kf3=\EOR, kf4=\EOS, kf5=\EOT,
+	kf6=\EOU, kf7=\EOV, kf8=\EOW, kf9=\EOX, khome=\E[H,
+	kich1=\E[@, knp=\E[U, kpp=\E[V, krmir=\E0, rev=\E[7m, ri=\E[T,
+	rin=\E[%p1%dT, rmacs=\E[10m, rmso=\E[m, rmul=\E[m,
+	sgr=\E[10m\E[0%?%p1%p3%|%t;7%;%?%p2%t;4%;%?%p4%t;5%;%?%p6%t;1%;%?%p9%t;12%;%?%p7%t;9%;m,
+	sgr0=\E[0;10m, smacs=\E[12m, smso=\E[7m, smul=\E[4m,
+
+#
+# AT&T 386 color console
+#
+AT386|at386|386AT|386at|at/386 console,
+	colors#8, ncv#3, pairs#64,
+	is2=\E[0;10;39m,
+	op=\E[0m,
+	setb=\E[%?%p1%{0}%=%t40m
+                %e%p1%{1}%=%t44m
+                %e%p1%{2}%=%t42m
+                %e%p1%{3}%=%t46m
+                %e%p1%{4}%=%t41m
+                %e%p1%{5}%=%t45m
+                %e%p1%{6}%=%t43m
+                %e%p1%{7}%=%t47m%;,
+	setf=\E[%?%p1%{0}%=%t30m
+                %e%p1%{1}%=%t34m
+                %e%p1%{2}%=%t32m
+                %e%p1%{3}%=%t36m
+                %e%p1%{4}%=%t31m
+                %e%p1%{5}%=%t35m
+                %e%p1%{6}%=%t33m
+                %e%p1%{6}%=%t33m
+                %e%p1%{7}%=%t37m%;,
+	use=at386-m,
+#
+# Color console version that supports underline but maps blue
+# foreground color to cyan.
+#
+AT386-UL|at386-ul|386AT-UL|386at-ul|at/386 console,
+	is2=\E[0;10;38m,
+	use=at386,
+
+
+COPYING PERMISSIONS:
+
+    This document is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.

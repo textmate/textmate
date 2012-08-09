@@ -1,0 +1,80 @@
+.\" -*- nroff -*-
+.\" See section COPYING for copyright and redistribution information.
+.TH grep-changelog 1
+.SH NAME
+grep-changelog \- print ChangeLog entries matching criteria
+.SH SYNOPSIS
+.B grep-changelog
+.RI [ options ]
+.RI [ CHANGELOG .\|.\|.]
+.SH DESCRIPTION
+.B grep-changelog
+searches the named
+.IR CHANGELOG s
+(by default files matching the regular expressions
+.B ChangeLog
+and
+.BR "ChangeLog\e.[0-9]+" )
+for entries matching the specified criteria.  At least one option or
+file must be specified.  This program is distributed with
+.BR "GNU Emacs" .
+.PP
+.SH OPTIONS
+The program accepts unambiguous abbreviations for option names.
+.TP
+.B \-\-author=AUTHOR
+Print entries whose author matches regular expression
+.IR AUTHOR .
+.TP
+.B \-\-text=TEXT
+Print entries whose text matches regular expression
+.IR TEXT .
+.TP
+.B \-\-exclude=TEXT
+Exclude entries matching regular expression
+.IR TEXT .
+.TP
+.B \-\-from\-date=YYYY\-MM\-DD
+Only consider entries made on or after the given date.
+ChangeLog date entries not in the
+\*(lqYYYY\-MM\-DD\*(rq format are never matched.
+.TP
+.B \-\-to\-date=YYYY\-MM\-DD
+Only consider entries made on or before the given date.
+.TP
+.B \-\-rcs\-log
+Print output in a format suitable for RCS log entries.
+This format removes author lines, leading spaces, and file names.
+.TP
+.B \-\-with\-date
+In RCS log format, print short dates.
+.TP
+.B \-\-reverse
+Show matches in reverse order.
+.TP
+.B \-\-version
+Display version information.
+.TP
+.B \-\-help
+Display basic usage information.
+.
+.SH COPYING
+Copyright 
+.if t \(co
+.if n (C)
+2008-2012 Free Software Foundation, Inc.
+.PP
+Permission is granted to make and distribute verbatim copies of this
+document provided the copyright notice and this permission notice are
+preserved on all copies.
+.PP
+Permission is granted to copy and distribute modified versions of
+this document under the conditions for verbatim copying, provided that
+the entire resulting derived work is distributed under the terms of
+a permission notice identical to this one.
+.PP
+Permission is granted to copy and distribute translations of this
+document into another language, under the above conditions for
+modified versions, except that this permission notice may be stated
+in a translation approved by the Free Software Foundation.
+.

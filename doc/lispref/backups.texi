@@ -1,0 +1,774 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1999, 2001-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/backups
+@node Backups and Auto-Saving, Buffers, Files, Top
+@chapter Backups and Auto-Saving
+@cindex backups and auto-saving
+
+  Backup files and auto-save files are two methods by which Emacs tries
+to protect the user from the consequences of crashes or of the user's
+own errors.  Auto-saving preserves the text from earlier in the current
+editing session; backup files preserve file contents prior to the
+current session.
+
+@menu
+* Backup Files::   How backup files are made; how their names are chosen.
+* Auto-Saving::    How auto-save files are made; how their names are chosen.
+* Reverting::      @code{revert-buffer}, and how to customize what it does.
+@end menu
+
+@node Backup Files
+@section Backup Files
+@cindex backup file
+
+  A @dfn{backup file} is a copy of the old contents of a file you are
+editing.  Emacs makes a backup file the first time you save a buffer
+into its visited file.  Thus, normally, the backup file contains the
+contents of the file as it was before the current editing session.
+The contents of the backup file normally remain unchanged once it
+exists.
+
+  Backups are usually made by renaming the visited file to a new name.
+Optionally, you can specify that backup files should be made by copying
+the visited file.  This choice makes a difference for files with
+multiple names; it also can affect whether the edited file remains owned
+by the original owner or becomes owned by the user editing it.
+
+  By default, Emacs makes a single backup file for each file edited.
+You can alternatively request numbered backups; then each new backup
+file gets a new name.  You can delete old numbered backups when you
+don't want them any more, or Emacs can delete them automatically.
+
+@menu
+* Making Backups::     How Emacs makes backup files, and when.
+* Rename or Copy::     Two alternatives: renaming the old file or copying it.
+* Numbered Backups::   Keeping multiple backups for each source file.
+* Backup Names::       How backup file names are computed; customization.
+@end menu
+
+@node Making Backups
+@subsection Making Backup Files
+
+@defun backup-buffer
+  This function makes a backup of the file visited by the current
+buffer, if appropriate.  It is called by @code{save-buffer} before
+saving the buffer the first time.
+
+If a backup was made by renaming, the return value is a cons cell of
+the form (@var{modes} @var{context} @var{backupname}), where
+@var{modes} are the mode bits of the original file, as returned by
+@code{file-modes} (@pxref{File Attributes,, Other Information about
+Files}), @var{context} is a list describing the original file's
+SELinux context (@pxref{File Attributes}), and @var{backupname} is the
+name of the backup.  In all other cases, that is, if a backup was made
+by copying or if no backup was made, this function returns @code{nil}.
+@end defun
+
+@defvar buffer-backed-up
+  This buffer-local variable says whether this buffer's file has
+been backed up on account of this buffer.  If it is non-@code{nil},
+the backup file has been written.  Otherwise, the file should be backed
+up when it is next saved (if backups are enabled).  This is a
+permanent local; @code{kill-all-local-variables} does not alter@tie{}it.
+@end defvar
+
+@defopt make-backup-files
+This variable determines whether or not to make backup files.  If it
+is non-@code{nil}, then Emacs creates a backup of each file when it is
+saved for the first time---provided that @code{backup-inhibited}
+is @code{nil} (see below).
+
+The following example shows how to change the @code{make-backup-files}
+variable only in the Rmail buffers and not elsewhere.  Setting it
+@code{nil} stops Emacs from making backups of these files, which may
+save disk space.  (You would put this code in your init file.)
+
+@smallexample
+@group
+(add-hook 'rmail-mode-hook
+          (lambda ()
+            (set (make-local-variable 'make-backup-files) nil)))
+@end group
+@end smallexample
+@end defopt
+
+@defvar backup-enable-predicate
+This variable's value is a function to be called on certain occasions to
+decide whether a file should have backup files.  The function receives
+one argument, an absolute file name to consider.  If the function returns
+@code{nil}, backups are disabled for that file.  Otherwise, the other
+variables in this section say whether and how to make backups.
+
+@findex normal-backup-enable-predicate
+The default value is @code{normal-backup-enable-predicate}, which checks
+for files in @code{temporary-file-directory} and
+@code{small-temporary-file-directory}.
+@end defvar
+
+@defvar backup-inhibited
+If this variable is non-@code{nil}, backups are inhibited.  It records
+the result of testing @code{backup-enable-predicate} on the visited file
+name.  It can also coherently be used by other mechanisms that inhibit
+backups based on which file is visited.  For example, VC sets this
+variable non-@code{nil} to prevent making backups for files managed
+with a version control system.
+
+This is a permanent local, so that changing the major mode does not lose
+its value.  Major modes should not set this variable---they should set
+@code{make-backup-files} instead.
+@end defvar
+
+@defopt backup-directory-alist
+This variable's value is an alist of filename patterns and backup
+directory names.  Each element looks like
+@smallexample
+(@var{regexp} . @var{directory})
+@end smallexample
+
+@noindent
+Backups of files with names matching @var{regexp} will be made in
+@var{directory}.  @var{directory} may be relative or absolute.  If it is
+absolute, so that all matching files are backed up into the same
+directory, the file names in this directory will be the full name of the
+file backed up with all directory separators changed to @samp{!} to
+prevent clashes.  This will not work correctly if your filesystem
+truncates the resulting name.
+
+For the common case of all backups going into one directory, the alist
+should contain a single element pairing @samp{"."} with the appropriate
+directory name.
+
+If this variable is @code{nil} (the default), or it fails to match a
+filename, the backup is made in the original file's directory.
+
+On MS-DOS filesystems without long names this variable is always
+ignored.
+@end defopt
+
+@defopt make-backup-file-name-function
+This variable's value is a function to use for making backups instead
+of the default @code{make-backup-file-name}.  A value of @code{nil}
+gives the default @code{make-backup-file-name} behavior.
+@xref{Backup Names,, Naming Backup Files}.
+
+This could be buffer-local to do something special for specific
+files.  If you define it, you may need to change
+@code{backup-file-name-p} and @code{file-name-sans-versions} too.
+@end defopt
+
+
+@node Rename or Copy
+@subsection Backup by Renaming or by Copying?
+@cindex backup files, rename or copy
+
+  There are two ways that Emacs can make a backup file:
+
+@itemize @bullet
+@item
+Emacs can rename the original file so that it becomes a backup file, and
+then write the buffer being saved into a new file.  After this
+procedure, any other names (i.e., hard links) of the original file now
+refer to the backup file.  The new file is owned by the user doing the
+editing, and its group is the default for new files written by the user
+in that directory.
+
+@item
+Emacs can copy the original file into a backup file, and then overwrite
+the original file with new contents.  After this procedure, any other
+names (i.e., hard links) of the original file continue to refer to the
+current (updated) version of the file.  The file's owner and group will
+be unchanged.
+@end itemize
+
+  The first method, renaming, is the default.
+
+  The variable @code{backup-by-copying}, if non-@code{nil}, says to use
+the second method, which is to copy the original file and overwrite it
+with the new buffer contents.  The variable @code{file-precious-flag},
+if non-@code{nil}, also has this effect (as a sideline of its main
+significance).  @xref{Saving Buffers}.
+
+@defopt backup-by-copying
+If this variable is non-@code{nil}, Emacs always makes backup files by
+copying.  The default is @code{nil}.
+@end defopt
+
+  The following three variables, when non-@code{nil}, cause the second
+method to be used in certain special cases.  They have no effect on the
+treatment of files that don't fall into the special cases.
+
+@defopt backup-by-copying-when-linked
+If this variable is non-@code{nil}, Emacs makes backups by copying for
+files with multiple names (hard links).  The default is @code{nil}.
+
+This variable is significant only if @code{backup-by-copying} is
+@code{nil}, since copying is always used when that variable is
+non-@code{nil}.
+@end defopt
+
+@defopt backup-by-copying-when-mismatch
+If this variable is non-@code{nil} (the default), Emacs makes backups
+by copying in cases where renaming would change either the owner or
+the group of the file.
+
+The value has no effect when renaming would not alter the owner or
+group of the file; that is, for files which are owned by the user and
+whose group matches the default for a new file created there by the
+user.
+
+This variable is significant only if @code{backup-by-copying} is
+@code{nil}, since copying is always used when that variable is
+non-@code{nil}.
+@end defopt
+
+@defopt backup-by-copying-when-privileged-mismatch
+This variable, if non-@code{nil}, specifies the same behavior as
+@code{backup-by-copying-when-mismatch}, but only for certain user-id
+values: namely, those less than or equal to a certain number.  You set
+this variable to that number.
+
+Thus, if you set @code{backup-by-copying-when-privileged-mismatch}
+to 0, backup by copying is done for the superuser only,
+when necessary to prevent a change in the owner of the file.
+
+The default is 200.
+@end defopt
+
+@node Numbered Backups
+@subsection Making and Deleting Numbered Backup Files
+
+  If a file's name is @file{foo}, the names of its numbered backup
+versions are @file{foo.~@var{v}~}, for various integers @var{v}, like
+this: @file{foo.~1~}, @file{foo.~2~}, @file{foo.~3~}, @dots{},
+@file{foo.~259~}, and so on.
+
+@defopt version-control
+This variable controls whether to make a single non-numbered backup
+file or multiple numbered backups.
+
+@table @asis
+@item @code{nil}
+Make numbered backups if the visited file already has numbered backups;
+otherwise, do not.  This is the default.
+
+@item @code{never}
+Do not make numbered backups.
+
+@item @var{anything else}
+Make numbered backups.
+@end table
+@end defopt
+
+  The use of numbered backups ultimately leads to a large number of
+backup versions, which must then be deleted.  Emacs can do this
+automatically or it can ask the user whether to delete them.
+
+@defopt kept-new-versions
+The value of this variable is the number of newest versions to keep
+when a new numbered backup is made.  The newly made backup is included
+in the count.  The default value is@tie{}2.
+@end defopt
+
+@defopt kept-old-versions
+The value of this variable is the number of oldest versions to keep
+when a new numbered backup is made.  The default value is@tie{}2.
+@end defopt
+
+  If there are backups numbered 1, 2, 3, 5, and 7, and both of these
+variables have the value 2, then the backups numbered 1 and 2 are kept
+as old versions and those numbered 5 and 7 are kept as new versions;
+backup version 3 is excess.  The function @code{find-backup-file-name}
+(@pxref{Backup Names}) is responsible for determining which backup
+versions to delete, but does not delete them itself.
+
+@defopt delete-old-versions
+If this variable is @code{t}, then saving a file deletes excess
+backup versions silently.  If it is @code{nil}, that means
+to ask for confirmation before deleting excess backups.
+Otherwise, they are not deleted at all.
+@end defopt
+
+@defopt dired-kept-versions
+This variable specifies how many of the newest backup versions to keep
+in the Dired command @kbd{.} (@code{dired-clean-directory}).  That's the
+same thing @code{kept-new-versions} specifies when you make a new backup
+file.  The default is@tie{}2.
+@end defopt
+
+@node Backup Names
+@subsection Naming Backup Files
+
+  The functions in this section are documented mainly because you can
+customize the naming conventions for backup files by redefining them.
+If you change one, you probably need to change the rest.
+
+@defun backup-file-name-p filename
+This function returns a non-@code{nil} value if @var{filename} is a
+possible name for a backup file.  It just checks the name, not whether
+a file with the name @var{filename} exists.
+
+@smallexample
+@group
+(backup-file-name-p "foo")
+     @result{} nil
+@end group
+@group
+(backup-file-name-p "foo~")
+     @result{} 3
+@end group
+@end smallexample
+
+The standard definition of this function is as follows:
+
+@smallexample
+@group
+(defun backup-file-name-p (file)
+  "Return non-nil if FILE is a backup file \
+name (numeric or not)..."
+  (string-match "~\\'" file))
+@end group
+@end smallexample
+
+@noindent
+Thus, the function returns a non-@code{nil} value if the file name ends
+with a @samp{~}.  (We use a backslash to split the documentation
+string's first line into two lines in the text, but produce just one
+line in the string itself.)
+
+This simple expression is placed in a separate function to make it easy
+to redefine for customization.
+@end defun
+
+@defun make-backup-file-name filename
+This function returns a string that is the name to use for a
+non-numbered backup file for file @var{filename}.  On Unix, this is just
+@var{filename} with a tilde appended.
+
+The standard definition of this function, on most operating systems, is
+as follows:
+
+@smallexample
+@group
+(defun make-backup-file-name (file)
+  "Create the non-numeric backup file name for FILE..."
+  (concat file "~"))
+@end group
+@end smallexample
+
+You can change the backup-file naming convention by redefining this
+function.  The following example redefines @code{make-backup-file-name}
+to prepend a @samp{.} in addition to appending a tilde:
+
+@smallexample
+@group
+(defun make-backup-file-name (filename)
+  (expand-file-name
+    (concat "." (file-name-nondirectory filename) "~")
+    (file-name-directory filename)))
+@end group
+
+@group
+(make-backup-file-name "backups.texi")
+     @result{} ".backups.texi~"
+@end group
+@end smallexample
+
+Some parts of Emacs, including some Dired commands, assume that backup
+file names end with @samp{~}.  If you do not follow that convention, it
+will not cause serious problems, but these commands may give
+less-than-desirable results.
+@end defun
+
+@defun find-backup-file-name filename
+This function computes the file name for a new backup file for
+@var{filename}.  It may also propose certain existing backup files for
+deletion.  @code{find-backup-file-name} returns a list whose @sc{car} is
+the name for the new backup file and whose @sc{cdr} is a list of backup
+files whose deletion is proposed.  The value can also be @code{nil},
+which means not to make a backup.
+
+Two variables, @code{kept-old-versions} and @code{kept-new-versions},
+determine which backup versions should be kept.  This function keeps
+those versions by excluding them from the @sc{cdr} of the value.
+@xref{Numbered Backups}.
+
+In this example, the value says that @file{~rms/foo.~5~} is the name
+to use for the new backup file, and @file{~rms/foo.~3~} is an ``excess''
+version that the caller should consider deleting now.
+
+@smallexample
+@group
+(find-backup-file-name "~rms/foo")
+     @result{} ("~rms/foo.~5~" "~rms/foo.~3~")
+@end group
+@end smallexample
+@end defun
+
+@c Emacs 19 feature
+@defun file-newest-backup filename
+This function returns the name of the most recent backup file for
+@var{filename}, or @code{nil} if that file has no backup files.
+
+Some file comparison commands use this function so that they can
+automatically compare a file with its most recent backup.
+@end defun
+
+@node Auto-Saving
+@section Auto-Saving
+@c @cindex auto-saving   Lots of symbols starting with auto-save here.
+
+  Emacs periodically saves all files that you are visiting; this is
+called @dfn{auto-saving}.  Auto-saving prevents you from losing more
+than a limited amount of work if the system crashes.  By default,
+auto-saves happen every 300 keystrokes, or after around 30 seconds of
+idle time.  @xref{Auto Save, Auto Save, Auto-Saving: Protection Against
+Disasters, emacs, The GNU Emacs Manual}, for information on auto-save
+for users.  Here we describe the functions used to implement auto-saving
+and the variables that control them.
+
+@defvar buffer-auto-save-file-name
+This buffer-local variable is the name of the file used for
+auto-saving the current buffer.  It is @code{nil} if the buffer
+should not be auto-saved.
+
+@example
+@group
+buffer-auto-save-file-name
+     @result{} "/xcssun/users/rms/lewis/#backups.texi#"
+@end group
+@end example
+@end defvar
+
+@deffn Command auto-save-mode arg
+When used interactively without an argument, this command is a toggle
+switch: it turns on auto-saving of the current buffer if it is off,
+and vice versa.  When called from Lisp with no argument, it turns
+auto-saving on.  With an argument @var{arg}, it turns auto-saving on
+if the value of @var{arg} is @code{t}, a nonempty list, or a positive
+integer; otherwise, it turns auto-saving off.
+@end deffn
+
+@defun auto-save-file-name-p filename
+This function returns a non-@code{nil} value if @var{filename} is a
+string that could be the name of an auto-save file.  It assumes
+the usual naming convention for auto-save files: a name that
+begins and ends with hash marks (@samp{#}) is a possible auto-save file
+name.  The argument @var{filename} should not contain a directory part.
+
+@example
+@group
+(make-auto-save-file-name)
+     @result{} "/xcssun/users/rms/lewis/#backups.texi#"
+@end group
+@group
+(auto-save-file-name-p "#backups.texi#")
+     @result{} 0
+@end group
+@group
+(auto-save-file-name-p "backups.texi")
+     @result{} nil
+@end group
+@end example
+
+The standard definition of this function is as follows:
+
+@example
+@group
+(defun auto-save-file-name-p (filename)
+  "Return non-nil if FILENAME can be yielded by..."
+  (string-match "^#.*#$" filename))
+@end group
+@end example
+
+This function exists so that you can customize it if you wish to
+change the naming convention for auto-save files.  If you redefine it,
+be sure to redefine the function @code{make-auto-save-file-name}
+correspondingly.
+@end defun
+
+@defun make-auto-save-file-name
+This function returns the file name to use for auto-saving the current
+buffer.  This is just the file name with hash marks (@samp{#}) prepended
+and appended to it.  This function does not look at the variable
+@code{auto-save-visited-file-name} (described below); callers of this
+function should check that variable first.
+
+@example
+@group
+(make-auto-save-file-name)
+     @result{} "/xcssun/users/rms/lewis/#backups.texi#"
+@end group
+@end example
+
+Here is a simplified version of the standard definition of this
+function:
+
+@example
+@group
+(defun make-auto-save-file-name ()
+  "Return file name to use for auto-saves \
+of current buffer.."
+  (if buffer-file-name
+@end group
+@group
+      (concat
+       (file-name-directory buffer-file-name)
+       "#"
+       (file-name-nondirectory buffer-file-name)
+       "#")
+    (expand-file-name
+     (concat "#%" (buffer-name) "#"))))
+@end group
+@end example
+
+This exists as a separate function so that you can redefine it to
+customize the naming convention for auto-save files.  Be sure to
+change @code{auto-save-file-name-p} in a corresponding way.
+@end defun
+
+@defopt auto-save-visited-file-name
+If this variable is non-@code{nil}, Emacs auto-saves buffers in
+the files they are visiting.  That is, the auto-save is done in the same
+file that you are editing.  Normally, this variable is @code{nil}, so
+auto-save files have distinct names that are created by
+@code{make-auto-save-file-name}.
+
+When you change the value of this variable, the new value does not take
+effect in an existing buffer until the next time auto-save mode is
+reenabled in it.  If auto-save mode is already enabled, auto-saves
+continue to go in the same file name until @code{auto-save-mode} is
+called again.
+@end defopt
+
+@defun recent-auto-save-p
+This function returns @code{t} if the current buffer has been
+auto-saved since the last time it was read in or saved.
+@end defun
+
+@defun set-buffer-auto-saved
+This function marks the current buffer as auto-saved.  The buffer will
+not be auto-saved again until the buffer text is changed again.  The
+function returns @code{nil}.
+@end defun
+
+@defopt auto-save-interval
+The value of this variable specifies how often to do auto-saving, in
+terms of number of input events.  Each time this many additional input
+events are read, Emacs does auto-saving for all buffers in which that is
+enabled.  Setting this to zero disables autosaving based on the
+number of characters typed.
+@end defopt
+
+@defopt auto-save-timeout
+The value of this variable is the number of seconds of idle time that
+should cause auto-saving.  Each time the user pauses for this long,
+Emacs does auto-saving for all buffers in which that is enabled.  (If
+the current buffer is large, the specified timeout is multiplied by a
+factor that increases as the size increases; for a million-byte
+buffer, the factor is almost 4.)
+
+If the value is zero or @code{nil}, then auto-saving is not done as a
+result of idleness, only after a certain number of input events as
+specified by @code{auto-save-interval}.
+@end defopt
+
+@defvar auto-save-hook
+This normal hook is run whenever an auto-save is about to happen.
+@end defvar
+
+@defopt auto-save-default
+If this variable is non-@code{nil}, buffers that are visiting files
+have auto-saving enabled by default.  Otherwise, they do not.
+@end defopt
+
+@deffn Command do-auto-save &optional no-message current-only
+This function auto-saves all buffers that need to be auto-saved.  It
+saves all buffers for which auto-saving is enabled and that have been
+changed since the previous auto-save.
+
+If any buffers are auto-saved, @code{do-auto-save} normally displays a
+message saying @samp{Auto-saving...} in the echo area while
+auto-saving is going on.  However, if @var{no-message} is
+non-@code{nil}, the message is inhibited.
+
+If @var{current-only} is non-@code{nil}, only the current buffer
+is auto-saved.
+@end deffn
+
+@defun delete-auto-save-file-if-necessary &optional force
+This function deletes the current buffer's auto-save file if
+@code{delete-auto-save-files} is non-@code{nil}.  It is called every
+time a buffer is saved.
+
+Unless @var{force} is non-@code{nil}, this function only deletes the
+file if it was written by the current Emacs session since the last
+true save.
+@end defun
+
+@defopt delete-auto-save-files
+This variable is used by the function
+@code{delete-auto-save-file-if-necessary}.  If it is non-@code{nil},
+Emacs deletes auto-save files when a true save is done (in the visited
+file).  This saves disk space and unclutters your directory.
+@end defopt
+
+@defun rename-auto-save-file
+This function adjusts the current buffer's auto-save file name if the
+visited file name has changed.  It also renames an existing auto-save
+file, if it was made in the current Emacs session.  If the visited
+file name has not changed, this function does nothing.
+@end defun
+
+@defvar buffer-saved-size
+The value of this buffer-local variable is the length of the current
+buffer, when it was last read in, saved, or auto-saved.  This is
+used to detect a substantial decrease in size, and turn off auto-saving
+in response.
+
+If it is @minus{}1, that means auto-saving is temporarily shut off in
+this buffer due to a substantial decrease in size.  Explicitly saving
+the buffer stores a positive value in this variable, thus reenabling
+auto-saving.  Turning auto-save mode off or on also updates this
+variable, so that the substantial decrease in size is forgotten.
+
+If it is @minus{}2, that means this buffer should disregard changes in
+buffer size; in particular, it should not shut off auto-saving
+temporarily due to changes in buffer size.
+@end defvar
+
+@defvar auto-save-list-file-name
+This variable (if non-@code{nil}) specifies a file for recording the
+names of all the auto-save files.  Each time Emacs does auto-saving, it
+writes two lines into this file for each buffer that has auto-saving
+enabled.  The first line gives the name of the visited file (it's empty
+if the buffer has none), and the second gives the name of the auto-save
+file.
+
+When Emacs exits normally, it deletes this file; if Emacs crashes, you
+can look in the file to find all the auto-save files that might contain
+work that was otherwise lost.  The @code{recover-session} command uses
+this file to find them.
+
+The default name for this file specifies your home directory and starts
+with @samp{.saves-}.  It also contains the Emacs process @acronym{ID} and the
+host name.
+@end defvar
+
+@defopt auto-save-list-file-prefix
+After Emacs reads your init file, it initializes
+@code{auto-save-list-file-name} (if you have not already set it
+non-@code{nil}) based on this prefix, adding the host name and process
+ID.  If you set this to @code{nil} in your init file, then Emacs does
+not initialize @code{auto-save-list-file-name}.
+@end defopt
+
+@node Reverting
+@section Reverting
+
+  If you have made extensive changes to a file and then change your mind
+about them, you can get rid of them by reading in the previous version
+of the file with the @code{revert-buffer} command.  @xref{Reverting, ,
+Reverting a Buffer, emacs, The GNU Emacs Manual}.
+
+@deffn Command revert-buffer &optional ignore-auto noconfirm preserve-modes
+This command replaces the buffer text with the text of the visited
+file on disk.  This action undoes all changes since the file was visited
+or saved.
+
+By default, if the latest auto-save file is more recent than the visited
+file, and the argument @var{ignore-auto} is @code{nil},
+@code{revert-buffer} asks the user whether to use that auto-save
+instead.  When you invoke this command interactively, @var{ignore-auto}
+is @code{t} if there is no numeric prefix argument; thus, the
+interactive default is not to check the auto-save file.
+
+Normally, @code{revert-buffer} asks for confirmation before it changes
+the buffer; but if the argument @var{noconfirm} is non-@code{nil},
+@code{revert-buffer} does not ask for confirmation.
+
+Normally, this command reinitializes the buffer's major and minor modes
+using @code{normal-mode}.  But if @var{preserve-modes} is
+non-@code{nil}, the modes remain unchanged.
+
+Reverting tries to preserve marker positions in the buffer by using the
+replacement feature of @code{insert-file-contents}.  If the buffer
+contents and the file contents are identical before the revert
+operation, reverting preserves all the markers.  If they are not
+identical, reverting does change the buffer; in that case, it preserves
+the markers in the unchanged text (if any) at the beginning and end of
+the buffer.  Preserving any additional markers would be problematical.
+@end deffn
+
+@defvar revert-buffer-in-progress-p
+@code{revert-buffer} binds this variable to a non-@code{nil} value
+while it is working.
+@end defvar
+
+You can customize how @code{revert-buffer} does its work by setting
+the variables described in the rest of this section.
+
+@defopt revert-without-query
+This variable holds a list of files that should be reverted without
+query.  The value is a list of regular expressions.  If the visited file
+name matches one of these regular expressions, and the file has changed
+on disk but the buffer is not modified, then @code{revert-buffer}
+reverts the file without asking the user for confirmation.
+@end defopt
+
+  Some major modes customize @code{revert-buffer} by making
+buffer-local bindings for these variables:
+
+@defvar revert-buffer-function
+@anchor{Definition of revert-buffer-function}
+The value of this variable is the function to use to revert this
+buffer.  If non-@code{nil}, it should be a function with two optional
+arguments to do the work of reverting.  The two optional arguments,
+@var{ignore-auto} and @var{noconfirm}, are the arguments that
+@code{revert-buffer} received.  If the value is @code{nil}, reverting
+works the usual way.
+
+Modes such as Dired mode, in which the text being edited does not
+consist of a file's contents but can be regenerated in some other
+fashion, can give this variable a buffer-local value that is a function to
+regenerate the contents.
+@end defvar
+
+@defvar revert-buffer-insert-file-contents-function
+The value of this variable, if non-@code{nil}, specifies the function to use to
+insert the updated contents when reverting this buffer.  The function
+receives two arguments: first the file name to use; second, @code{t} if
+the user has asked to read the auto-save file.
+
+The reason for a mode to set this variable instead of
+@code{revert-buffer-function} is to avoid duplicating or replacing the
+rest of what @code{revert-buffer} does: asking for confirmation,
+clearing the undo list, deciding the proper major mode, and running the
+hooks listed below.
+@end defvar
+
+@defvar before-revert-hook
+This normal hook is run by @code{revert-buffer} before
+inserting the modified contents---but only if
+@code{revert-buffer-function} is @code{nil}.
+@end defvar
+
+@defvar after-revert-hook
+This normal hook is run by @code{revert-buffer} after inserting
+the modified contents---but only if @code{revert-buffer-function} is
+@code{nil}.
+@end defvar
+
+@c FIXME?  Move this section from arevert-xtra to here?
+@defvar buffer-stale-function
+The value of this variable, if non-@code{nil}, specifies a function
+to call to check whether a non-file buffer needs reverting
+@iftex
+(@pxref{Supporting additional buffers,,, emacs-xtra,  Specialized Emacs Features}).
+@end iftex
+@ifnottex
+(@pxref{Supporting additional buffers,,, emacs}).
+@end ifnottex
+@end defvar
+

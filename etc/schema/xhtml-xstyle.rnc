@@ -1,0 +1,10 @@
+# Style Module
+
+style = element style { style.attlist, text }
+style.attlist =
+  title.attrib,
+  I18n.attrib,
+  attribute type { ContentType.datatype },
+  attribute media { MediaDesc.datatype }?,
+  attribute xml:space { "preserve" }?
+head.content &= style*

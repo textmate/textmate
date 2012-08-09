@@ -1,0 +1,6 @@
+#define cross_weave_width 16
+#define cross_weave_height 16
+static char cross_weave_bits[] = {
+  '\x55','\x55','\x88','\x88','\x55','\x55','\x22','\x22','\x55','\x55','\x88','\x88',
+  '\x55','\x55','\x22','\x22','\x55','\x55','\x88','\x88','\x55','\x55','\x22','\x22',
+  '\x55','\x55','\x88','\x88','\x55','\x55','\x22','\x22'};

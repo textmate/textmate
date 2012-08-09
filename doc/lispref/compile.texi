@@ -1,0 +1,742 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1994, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/compile
+@node Byte Compilation, Advising Functions, Loading, Top
+@chapter Byte Compilation
+@cindex byte compilation
+@cindex byte-code
+@cindex compilation (Emacs Lisp)
+
+  Emacs Lisp has a @dfn{compiler} that translates functions written
+in Lisp into a special representation called @dfn{byte-code} that can be
+executed more efficiently.  The compiler replaces Lisp function
+definitions with byte-code.  When a byte-code function is called, its
+definition is evaluated by the @dfn{byte-code interpreter}.
+
+  Because the byte-compiled code is evaluated by the byte-code
+interpreter, instead of being executed directly by the machine's
+hardware (as true compiled code is), byte-code is completely
+transportable from machine to machine without recompilation.  It is not,
+however, as fast as true compiled code.
+
+  In general, any version of Emacs can run byte-compiled code produced
+by recent earlier versions of Emacs, but the reverse is not true.
+
+@vindex no-byte-compile
+  If you do not want a Lisp file to be compiled, ever, put a file-local
+variable binding for @code{no-byte-compile} into it, like this:
+
+@example
+;; -*-no-byte-compile: t; -*-
+@end example
+
+@menu
+* Speed of Byte-Code::          An example of speedup from byte compilation.
+* Compilation Functions::       Byte compilation functions.
+* Docs and Compilation::        Dynamic loading of documentation strings.
+* Dynamic Loading::             Dynamic loading of individual functions.
+* Eval During Compile::         Code to be evaluated when you compile.
+* Compiler Errors::             Handling compiler error messages.
+* Byte-Code Objects::           The data type used for byte-compiled functions.
+* Disassembly::                 Disassembling byte-code; how to read byte-code.
+@end menu
+
+@node Speed of Byte-Code
+@section Performance of Byte-Compiled Code
+
+  A byte-compiled function is not as efficient as a primitive function
+written in C, but runs much faster than the version written in Lisp.
+Here is an example:
+
+@example
+@group
+(defun silly-loop (n)
+  "Return the time, in seconds, to run N iterations of a loop."
+  (let ((t1 (float-time)))
+    (while (> (setq n (1- n)) 0))
+    (- (float-time) t1)))
+@result{} silly-loop
+@end group
+
+@group
+(silly-loop 50000000)
+@result{} 10.235304117202759
+@end group
+
+@group
+(byte-compile 'silly-loop)
+@result{} @r{[Compiled code not shown]}
+@end group
+
+@group
+(silly-loop 50000000)
+@result{} 3.705854892730713
+@end group
+@end example
+
+  In this example, the interpreted code required 10 seconds to run,
+whereas the byte-compiled code required less than 4 seconds.  These
+results are representative, but actual results may vary.
+
+@node Compilation Functions
+@comment  node-name,  next,  previous,  up
+@section Byte-Compilation Functions
+@cindex compilation functions
+
+  You can byte-compile an individual function or macro definition with
+the @code{byte-compile} function.  You can compile a whole file with
+@code{byte-compile-file}, or several files with
+@code{byte-recompile-directory} or @code{batch-byte-compile}.
+
+  Sometimes, the byte compiler produces warning and/or error messages
+(@pxref{Compiler Errors}, for details).  These messages are recorded
+in a buffer called @file{*Compile-Log*}, which uses Compilation mode.
+@xref{Compilation Mode,,,emacs, The GNU Emacs Manual}.
+
+@cindex macro compilation
+  Be careful when writing macro calls in files that you intend to
+byte-compile.  Since macro calls are expanded when they are compiled,
+the macros need to be loaded into Emacs or the byte compiler will not
+do the right thing.  The usual way to handle this is with
+@code{require} forms which specify the files containing the needed
+macro definitions (@pxref{Named Features}).  Normally, the
+byte compiler does not evaluate the code that it is compiling, but it
+handles @code{require} forms specially, by loading the specified
+libraries.  To avoid loading the macro definition files when someone
+@emph{runs} the compiled program, write @code{eval-when-compile}
+around the @code{require} calls (@pxref{Eval During Compile}).  For
+more details, @xref{Compiling Macros}.
+
+  Inline (@code{defsubst}) functions are less troublesome; if you
+compile a call to such a function before its definition is known, the
+call will still work right, it will just run slower.
+
+@defun byte-compile symbol
+This function byte-compiles the function definition of @var{symbol},
+replacing the previous definition with the compiled one.  The function
+definition of @var{symbol} must be the actual code for the function;
+@code{byte-compile} does not handle function indirection.  The return
+value is the byte-code function object which is the compiled
+definition of @var{symbol} (@pxref{Byte-Code Objects}).
+
+@example
+@group
+(defun factorial (integer)
+  "Compute factorial of INTEGER."
+  (if (= 1 integer) 1
+    (* integer (factorial (1- integer)))))
+@result{} factorial
+@end group
+
+@group
+(byte-compile 'factorial)
+@result{}
+#[(integer)
+  "^H\301U\203^H^@@\301\207\302^H\303^HS!\"\207"
+  [integer 1 * factorial]
+  4 "Compute factorial of INTEGER."]
+@end group
+@end example
+
+If @var{symbol}'s definition is a byte-code function object,
+@code{byte-compile} does nothing and returns @code{nil}.  It does not
+``compile the symbol's definition again'', since the original
+(non-compiled) code has already been replaced in the symbol's function
+cell by the byte-compiled code.
+
+The argument to @code{byte-compile} can also be a @code{lambda}
+expression.  In that case, the function returns the corresponding
+compiled code but does not store it anywhere.
+@end defun
+
+@deffn Command compile-defun &optional arg
+This command reads the defun containing point, compiles it, and
+evaluates the result.  If you use this on a defun that is actually a
+function definition, the effect is to install a compiled version of that
+function.
+
+@code{compile-defun} normally displays the result of evaluation in the
+echo area, but if @var{arg} is non-@code{nil}, it inserts the result
+in the current buffer after the form it compiled.
+@end deffn
+
+@deffn Command byte-compile-file filename &optional load
+This function compiles a file of Lisp code named @var{filename} into a
+file of byte-code.  The output file's name is made by changing the
+@samp{.el} suffix into @samp{.elc}; if @var{filename} does not end in
+@samp{.el}, it adds @samp{.elc} to the end of @var{filename}.
+
+Compilation works by reading the input file one form at a time.  If it
+is a definition of a function or macro, the compiled function or macro
+definition is written out.  Other forms are batched together, then each
+batch is compiled, and written so that its compiled code will be
+executed when the file is read.  All comments are discarded when the
+input file is read.
+
+This command returns @code{t} if there were no errors and @code{nil}
+otherwise.  When called interactively, it prompts for the file name.
+
+If @var{load} is non-@code{nil}, this command loads the compiled file
+after compiling it.  Interactively, @var{load} is the prefix argument.
+
+@example
+@group
+% ls -l push*
+-rw-r--r--  1 lewis     791 Oct  5 20:31 push.el
+@end group
+
+@group
+(byte-compile-file "~/emacs/push.el")
+     @result{} t
+@end group
+
+@group
+% ls -l push*
+-rw-r--r--  1 lewis     791 Oct  5 20:31 push.el
+-rw-rw-rw-  1 lewis     638 Oct  8 20:25 push.elc
+@end group
+@end example
+@end deffn
+
+@deffn Command byte-recompile-directory directory &optional flag force
+@cindex library compilation
+This command recompiles every @samp{.el} file in @var{directory} (or
+its subdirectories) that needs recompilation.  A file needs
+recompilation if a @samp{.elc} file exists but is older than the
+@samp{.el} file.
+
+When a @samp{.el} file has no corresponding @samp{.elc} file,
+@var{flag} says what to do.  If it is @code{nil}, this command ignores
+these files.  If @var{flag} is 0, it compiles them.  If it is neither
+@code{nil} nor 0, it asks the user whether to compile each such file,
+and asks about each subdirectory as well.
+
+Interactively, @code{byte-recompile-directory} prompts for
+@var{directory} and @var{flag} is the prefix argument.
+
+If @var{force} is non-@code{nil}, this command recompiles every
+@samp{.el} file that has a @samp{.elc} file.
+
+The returned value is unpredictable.
+@end deffn
+
+@defun batch-byte-compile &optional noforce
+This function runs @code{byte-compile-file} on files specified on the
+command line.  This function must be used only in a batch execution of
+Emacs, as it kills Emacs on completion.  An error in one file does not
+prevent processing of subsequent files, but no output file will be
+generated for it, and the Emacs process will terminate with a nonzero
+status code.
+
+If @var{noforce} is non-@code{nil}, this function does not recompile
+files that have an up-to-date @samp{.elc} file.
+
+@example
+% emacs -batch -f batch-byte-compile *.el
+@end example
+@end defun
+
+@node Docs and Compilation
+@section Documentation Strings and Compilation
+@cindex dynamic loading of documentation
+
+  Functions and variables loaded from a byte-compiled file access their
+documentation strings dynamically from the file whenever needed.  This
+saves space within Emacs, and makes loading faster because the
+documentation strings themselves need not be processed while loading the
+file.  Actual access to the documentation strings becomes slower as a
+result, but this normally is not enough to bother users.
+
+  Dynamic access to documentation strings does have drawbacks:
+
+@itemize @bullet
+@item
+If you delete or move the compiled file after loading it, Emacs can no
+longer access the documentation strings for the functions and variables
+in the file.
+
+@item
+If you alter the compiled file (such as by compiling a new version),
+then further access to documentation strings in this file will
+probably give nonsense results.
+@end itemize
+
+@noindent
+These problems normally occur only if you build Emacs yourself and use
+it from the directory where you built it, and you happen to edit
+and/or recompile the Lisp source files.  They can be easily cured by
+reloading each file after recompiling it.
+
+@cindex @samp{#@@@var{count}}
+@cindex @samp{#$}
+  The dynamic documentation string feature writes compiled files that
+use a special Lisp reader construct, @samp{#@@@var{count}}.  This
+construct skips the next @var{count} characters.  It also uses the
+@samp{#$} construct, which stands for ``the name of this file, as a
+string''.  It is usually best not to use these constructs in Lisp source
+files, since they are not designed to be clear to humans reading the
+file.
+
+  You can disable the dynamic documentation string feature at compile
+time by setting @code{byte-compile-dynamic-docstrings} to @code{nil};
+this is useful mainly if you expect to change the file, and you want
+Emacs processes that have already loaded it to keep working when the
+file changes.  You can do this globally, or for one source file by
+specifying a file-local binding for the variable.  One way to do that
+is by adding this string to the file's first line:
+
+@example
+-*-byte-compile-dynamic-docstrings: nil;-*-
+@end example
+
+@defopt byte-compile-dynamic-docstrings
+If this is non-@code{nil}, the byte compiler generates compiled files
+that are set up for dynamic loading of documentation strings.
+@end defopt
+
+@node Dynamic Loading
+@section Dynamic Loading of Individual Functions
+
+@cindex dynamic loading of functions
+@cindex lazy loading
+  When you compile a file, you can optionally enable the @dfn{dynamic
+function loading} feature (also known as @dfn{lazy loading}).  With
+dynamic function loading, loading the file doesn't fully read the
+function definitions in the file.  Instead, each function definition
+contains a place-holder which refers to the file.  The first time each
+function is called, it reads the full definition from the file, to
+replace the place-holder.
+
+  The advantage of dynamic function loading is that loading the file
+becomes much faster.  This is a good thing for a file which contains
+many separate user-callable functions, if using one of them does not
+imply you will probably also use the rest.  A specialized mode which
+provides many keyboard commands often has that usage pattern: a user may
+invoke the mode, but use only a few of the commands it provides.
+
+  The dynamic loading feature has certain disadvantages:
+
+@itemize @bullet
+@item
+If you delete or move the compiled file after loading it, Emacs can no
+longer load the remaining function definitions not already loaded.
+
+@item
+If you alter the compiled file (such as by compiling a new version),
+then trying to load any function not already loaded will usually yield
+nonsense results.
+@end itemize
+
+  These problems will never happen in normal circumstances with
+installed Emacs files.  But they are quite likely to happen with Lisp
+files that you are changing.  The easiest way to prevent these problems
+is to reload the new compiled file immediately after each recompilation.
+
+  The byte compiler uses the dynamic function loading feature if the
+variable @code{byte-compile-dynamic} is non-@code{nil} at compilation
+time.  Do not set this variable globally, since dynamic loading is
+desirable only for certain files.  Instead, enable the feature for
+specific source files with file-local variable bindings.  For example,
+you could do it by writing this text in the source file's first line:
+
+@example
+-*-byte-compile-dynamic: t;-*-
+@end example
+
+@defvar byte-compile-dynamic
+If this is non-@code{nil}, the byte compiler generates compiled files
+that are set up for dynamic function loading.
+@end defvar
+
+@defun fetch-bytecode function
+If @var{function} is a byte-code function object, this immediately
+finishes loading the byte code of @var{function} from its
+byte-compiled file, if it is not fully loaded already.  Otherwise,
+it does nothing.  It always returns @var{function}.
+@end defun
+
+@node Eval During Compile
+@section Evaluation During Compilation
+
+  These features permit you to write code to be evaluated during
+compilation of a program.
+
+@defspec eval-and-compile body@dots{}
+This form marks @var{body} to be evaluated both when you compile the
+containing code and when you run it (whether compiled or not).
+
+You can get a similar result by putting @var{body} in a separate file
+and referring to that file with @code{require}.  That method is
+preferable when @var{body} is large.  Effectively @code{require} is
+automatically @code{eval-and-compile}, the package is loaded both when
+compiling and executing.
+
+@code{autoload} is also effectively @code{eval-and-compile} too.  It's
+recognized when compiling, so uses of such a function don't produce
+``not known to be defined'' warnings.
+
+Most uses of @code{eval-and-compile} are fairly sophisticated.
+
+If a macro has a helper function to build its result, and that macro
+is used both locally and outside the package, then
+@code{eval-and-compile} should be used to get the helper both when
+compiling and then later when running.
+
+If functions are defined programmatically (with @code{fset} say), then
+@code{eval-and-compile} can be used to have that done at compile-time
+as well as run-time, so calls to those functions are checked (and
+warnings about ``not known to be defined'' suppressed).
+@end defspec
+
+@defspec eval-when-compile body@dots{}
+This form marks @var{body} to be evaluated at compile time but not when
+the compiled program is loaded.  The result of evaluation by the
+compiler becomes a constant which appears in the compiled program.  If
+you load the source file, rather than compiling it, @var{body} is
+evaluated normally.
+
+@cindex compile-time constant
+If you have a constant that needs some calculation to produce,
+@code{eval-when-compile} can do that at compile-time.  For example,
+
+@lisp
+(defvar my-regexp
+  (eval-when-compile (regexp-opt '("aaa" "aba" "abb"))))
+@end lisp
+
+@cindex macros, at compile time
+If you're using another package, but only need macros from it (the
+byte compiler will expand those), then @code{eval-when-compile} can be
+used to load it for compiling, but not executing.  For example,
+
+@lisp
+(eval-when-compile
+  (require 'my-macro-package))
+@end lisp
+
+The same sort of thing goes for macros and @code{defsubst} functions
+defined locally and only for use within the file.  They are needed for
+compiling the file, but in most cases they are not needed for
+execution of the compiled file.  For example,
+
+@lisp
+(eval-when-compile
+  (unless (fboundp 'some-new-thing)
+    (defmacro 'some-new-thing ()
+      (compatibility code))))
+@end lisp
+
+@noindent
+This is often good for code that's only a fallback for compatibility
+with other versions of Emacs.
+
+@strong{Common Lisp Note:} At top level, @code{eval-when-compile} is analogous to the Common
+Lisp idiom @code{(eval-when (compile eval) @dots{})}.  Elsewhere, the
+Common Lisp @samp{#.} reader macro (but not when interpreting) is closer
+to what @code{eval-when-compile} does.
+@end defspec
+
+@node Compiler Errors
+@section Compiler Errors
+@cindex compiler errors
+
+  Byte compilation outputs all errors and warnings into the buffer
+@file{*Compile-Log*}.  The messages include file names and line
+numbers that identify the location of the problem.  The usual Emacs
+commands for operating on compiler diagnostics work properly on these
+messages.
+
+  When an error is due to invalid syntax in the program, the byte
+compiler might get confused about the errors' exact location.  One way
+to investigate is to switch to the buffer @w{@file{ *Compiler Input*}}.
+(This buffer name starts with a space, so it does not show up in
+@kbd{M-x list-buffers}.)  This buffer contains the program being
+compiled, and point shows how far the byte compiler was able to read;
+the cause of the error might be nearby.  @xref{Syntax Errors}, for
+some tips for locating syntax errors.
+
+  When the byte compiler warns about functions that were used but not
+defined, it always reports the line number for the end of the file,
+not the locations where the missing functions were called.  To find
+the latter, you must search for the function names.
+
+  You can suppress the compiler warning for calling an undefined
+function @var{func} by conditionalizing the function call on an
+@code{fboundp} test, like this:
+
+@example
+(if (fboundp '@var{func}) ...(@var{func} ...)...)
+@end example
+
+@noindent
+The call to @var{func} must be in the @var{then-form} of the
+@code{if}, and @var{func} must appear quoted in the call to
+@code{fboundp}.  (This feature operates for @code{cond} as well.)
+
+  You can tell the compiler that a function is defined using
+@code{declare-function} (@pxref{Declaring Functions}).  Likewise, you
+can tell the compiler that a variable is defined using @code{defvar}
+with no initial value.
+
+  You can suppress the compiler warning for a specific use of an
+undefined variable @var{variable} by conditionalizing its use on a
+@code{boundp} test, like this:
+
+@example
+(if (boundp '@var{variable}) ...@var{variable}...)
+@end example
+
+@noindent
+The reference to @var{variable} must be in the @var{then-form} of the
+@code{if}, and @var{variable} must appear quoted in the call to
+@code{boundp}.
+
+  You can suppress any and all compiler warnings within a certain
+expression using the construct @code{with-no-warnings}:
+
+@c This is implemented with a defun, but conceptually it is
+@c a special form.
+
+@defspec with-no-warnings body@dots{}
+In execution, this is equivalent to @code{(progn @var{body}...)},
+but the compiler does not issue warnings for anything that occurs
+inside @var{body}.
+
+We recommend that you use this construct around the smallest
+possible piece of code, to avoid missing possible warnings other than
+one you intend to suppress.
+@end defspec
+
+  More precise control of warnings is possible by setting the variable
+@code{byte-compile-warnings}.
+
+@node Byte-Code Objects
+@section Byte-Code Function Objects
+@cindex compiled function
+@cindex byte-code function
+
+  Byte-compiled functions have a special data type: they are
+@dfn{byte-code function objects}.  Whenever such an object appears as
+a function to be called, Emacs uses the byte-code interpreter to
+execute the byte-code.
+
+  Internally, a byte-code function object is much like a vector; its
+elements can be accessed using @code{aref}.  Its printed
+representation is like that for a vector, with an additional @samp{#}
+before the opening @samp{[}.  It must have at least four elements;
+there is no maximum number, but only the first six elements have any
+normal use.  They are:
+
+@table @var
+@item arglist
+The list of argument symbols.
+
+@item byte-code
+The string containing the byte-code instructions.
+
+@item constants
+The vector of Lisp objects referenced by the byte code.  These include
+symbols used as function names and variable names.
+
+@item stacksize
+The maximum stack size this function needs.
+
+@item docstring
+The documentation string (if any); otherwise, @code{nil}.  The value may
+be a number or a list, in case the documentation string is stored in a
+file.  Use the function @code{documentation} to get the real
+documentation string (@pxref{Accessing Documentation}).
+
+@item interactive
+The interactive spec (if any).  This can be a string or a Lisp
+expression.  It is @code{nil} for a function that isn't interactive.
+@end table
+
+Here's an example of a byte-code function object, in printed
+representation.  It is the definition of the command
+@code{backward-sexp}.
+
+@example
+#[(&optional arg)
+  "^H\204^F^@@\301^P\302^H[!\207"
+  [arg 1 forward-sexp]
+  2
+  254435
+  "^p"]
+@end example
+
+  The primitive way to create a byte-code object is with
+@code{make-byte-code}:
+
+@defun make-byte-code &rest elements
+This function constructs and returns a byte-code function object
+with @var{elements} as its elements.
+@end defun
+
+  You should not try to come up with the elements for a byte-code
+function yourself, because if they are inconsistent, Emacs may crash
+when you call the function.  Always leave it to the byte compiler to
+create these objects; it makes the elements consistent (we hope).
+
+@node Disassembly
+@section Disassembled Byte-Code
+@cindex disassembled byte-code
+
+  People do not write byte-code; that job is left to the byte
+compiler.  But we provide a disassembler to satisfy a cat-like
+curiosity.  The disassembler converts the byte-compiled code into
+human-readable form.
+
+  The byte-code interpreter is implemented as a simple stack machine.
+It pushes values onto a stack of its own, then pops them off to use them
+in calculations whose results are themselves pushed back on the stack.
+When a byte-code function returns, it pops a value off the stack and
+returns it as the value of the function.
+
+  In addition to the stack, byte-code functions can use, bind, and set
+ordinary Lisp variables, by transferring values between variables and
+the stack.
+
+@deffn Command disassemble object &optional buffer-or-name
+This command displays the disassembled code for @var{object}.  In
+interactive use, or if @var{buffer-or-name} is @code{nil} or omitted,
+the output goes in a buffer named @file{*Disassemble*}.  If
+@var{buffer-or-name} is non-@code{nil}, it must be a buffer or the
+name of an existing buffer.  Then the output goes there, at point, and
+point is left before the output.
+
+The argument @var{object} can be a function name, a lambda expression
+or a byte-code object.  If it is a lambda expression, @code{disassemble}
+compiles it and disassembles the resulting compiled code.
+@end deffn
+
+  Here are two examples of using the @code{disassemble} function.  We
+have added explanatory comments to help you relate the byte-code to the
+Lisp source; these do not appear in the output of @code{disassemble}.
+
+@example
+@group
+(defun factorial (integer)
+  "Compute factorial of an integer."
+  (if (= 1 integer) 1
+    (* integer (factorial (1- integer)))))
+     @result{} factorial
+@end group
+
+@group
+(factorial 4)
+     @result{} 24
+@end group
+
+@group
+(disassemble 'factorial)
+     @print{} byte-code for factorial:
+ doc: Compute factorial of an integer.
+ args: (integer)
+@end group
+
+@group
+0   varref   integer      ; @r{Get the value of @code{integer} and}
+                          ;   @r{push it onto the stack.}
+1   constant 1            ; @r{Push 1 onto stack.}
+@end group
+@group
+2   eqlsign               ; @r{Pop top two values off stack, compare}
+                          ;   @r{them, and push result onto stack.}
+@end group
+@group
+3   goto-if-nil 1         ; @r{Pop and test top of stack;}
+                          ;   @r{if @code{nil}, go to 1, else continue.}
+6   constant 1            ; @r{Push 1 onto top of stack.}
+7   return                ; @r{Return the top element of the stack.}
+@end group
+@group
+8:1 varref   integer      ; @r{Push value of @code{integer} onto stack.}
+9   constant factorial    ; @r{Push @code{factorial} onto stack.}
+10  varref   integer      ; @r{Push value of @code{integer} onto stack.}
+11  sub1                  ; @r{Pop @code{integer}, decrement value,}
+                          ;   @r{push new value onto stack.}
+12  call     1            ; @r{Call function @code{factorial} using first}
+                          ;   @r{(i.e. top) stack element as argument;}
+                          ;   @r{push returned value onto stack.}
+@end group
+@group
+13 mult                   ; @r{Pop top two values off stack, multiply}
+                          ;   @r{them, and push result onto stack.}
+14 return                 ; @r{Return the top element of the stack.}
+@end group
+@end example
+
+The @code{silly-loop} function is somewhat more complex:
+
+@example
+@group
+(defun silly-loop (n)
+  "Return time before and after N iterations of a loop."
+  (let ((t1 (current-time-string)))
+    (while (> (setq n (1- n))
+              0))
+    (list t1 (current-time-string))))
+     @result{} silly-loop
+@end group
+
+@group
+(disassemble 'silly-loop)
+     @print{} byte-code for silly-loop:
+ doc: Return time before and after N iterations of a loop.
+ args: (n)
+@end group
+
+@group
+0   constant current-time-string  ; @r{Push @code{current-time-string}}
+                                  ;   @r{onto top of stack.}
+@end group
+@group
+1   call     0            ; @r{Call @code{current-time-string} with no}
+                          ;   @r{argument, push result onto stack.}
+@end group
+@group
+2   varbind  t1           ; @r{Pop stack and bind @code{t1} to popped value.}
+@end group
+@group
+3:1 varref   n            ; @r{Get value of @code{n} from the environment}
+                          ;   @r{and push the value on the stack.}
+4   sub1                  ; @r{Subtract 1 from top of stack.}
+@end group
+@group
+5   dup                   ; @r{Duplicate top of stack; i.e. copy the top}
+                          ;   @r{of the stack and push copy onto stack.}
+6   varset   n            ; @r{Pop the top of the stack,}
+                          ;   @r{and bind @code{n} to the value.}
+
+;; @r{(In effect, the sequence @code{dup varset} copies the top of the stack}
+;; @r{into the value of @code{n} without popping it.)}
+@end group
+
+@group
+7   constant 0            ; @r{Push 0 onto stack.}
+8   gtr                   ; @r{Pop top two values off stack,}
+                          ;   @r{test if @var{n} is greater than 0}
+                          ;   @r{and push result onto stack.}
+@end group
+@group
+9   goto-if-not-nil 1     ; @r{Goto 1 if @code{n} > 0}
+                          ;   @r{(this continues the while loop)}
+                          ;   @r{else continue.}
+@end group
+@group
+12  varref   t1           ; @r{Push value of @code{t1} onto stack.}
+13  constant current-time-string  ; @r{Push @code{current-time-string}}
+                                  ;   @r{onto the top of the stack.}
+14  call     0            ; @r{Call @code{current-time-string} again.}
+@end group
+@group
+15  unbind   1            ; @r{Unbind @code{t1} in local environment.}
+16  list2                 ; @r{Pop top two elements off stack, create a}
+                          ;   @r{list of them, and push it onto stack.}
+17  return                ; @r{Return value of the top of stack.}
+@end group
+@end example
+

@@ -1,0 +1,252 @@
+\input texinfo    @c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 2001-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@c
+@comment %**start of header
+@setfilename covers.info
+@settitle GNU Emacs Lisp Reference Manual
+@comment %**end of header
+
+@titlepage
+@c ================ Volume 1 ================
+@w{ }
+@sp 2
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 1}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+@page
+@c ================ Volume 2 ================
+@w{ }
+@sp 5
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 2}
+@sp 2
+@center by Bil Lewis,
+@center Dan LaLiberte, and
+@center the GNU Manual Group
+
+@page
+@c ================ Volume 1 with baseline skip 16pt ================
+
+@tex
+\global\baselineskip = 16pt
+@end tex
+
+16 pts baseline skip:
+
+@w{ }
+@sp 2
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 1}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+@page
+@c ================ Volume 1 with baseline skip 18pt ================
+
+@tex
+\global\baselineskip = 18pt
+@end tex
+
+18 pts baseline skip, with 15pts  between sections
+
+@w{ }
+@sp 2
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@tex
+\global\baselineskip = 15pt
+@end tex
+
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 1}
+@sp 2
+@center by Bil Lewis,
+@center Dan LaLiberte, and
+@center the GNU Manual Group
+
+@page
+@c ================ Volume 1 with more baseline skip 24 pts ================
+
+@tex
+\global\baselineskip = 24pt
+@end tex
+
+24 pts baseline skip:
+
+@w{ }
+@sp 2
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 1}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+@page
+@c ================ Volume 2 with more baseline skip 18 pts ================
+
+@tex
+\global\baselineskip = 18pt
+@end tex
+
+18 pts baseline skip:
+
+@w{ }
+@sp 5
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 2}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+@page
+@c ================ Volume 2 with more baseline skip 24 pts ================
+
+@tex
+\global\baselineskip = 24pt
+@end tex
+
+24 pts baseline skip:
+
+@w{ }
+@sp 5
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 2
+@center @titlefont{Volume 2}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+
+@page
+@c ================  Spine 1 ================
+
+@w{@titlefont{The GNU Emacs Lisp Reference Manual --- Vol. 1}}
+@sp 4
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 4
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+@sp 4
+@author The GNU Emacs Lisp Reference Manual --- Vol. 1
+@sp 3
+@author FSF
+
+@author
+
+@page
+@c ================  Spine 2 ================
+
+@w{@titlefont{The GNU Emacs Lisp Reference Manual --- Vol. 2}}
+@sp 4
+@center GNU Emacs Version 19
+@center for Unix Users
+@center Edition 2.3, June 1994
+@sp 4
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+
+@sp 4
+@author The GNU Emacs Lisp Reference Manual --- Vol. 2
+@sp 3
+@author FSF
+
+@end titlepage
+@bye

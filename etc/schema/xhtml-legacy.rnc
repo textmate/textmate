@@ -1,0 +1,100 @@
+# Legacy Module
+
+lang.attrib &= attribute lang { LanguageCode.datatype }?
+basefont = element basefont { basefont.attlist }
+basefont.attlist = id.attrib, Font.attrib
+center = element center { center.attlist, Flow.model }
+center.attlist = Common.attrib
+font = element font { font.attlist, Inline.model }
+font.attlist = Core.attrib, I18n.attrib, Font.attrib
+Font.attrib =
+  attribute size { text }?,
+  attribute color { Color.datatype }?,
+  attribute face { text }?
+s = element s { s.attlist, Inline.model }
+s.attlist = Common.attrib
+strike = element strike { strike.attlist, Inline.model }
+strike.attlist = Common.attrib
+u = element u { u.attlist, Inline.model }
+u.attlist = Common.attrib
+dir = element dir { dir.attlist, li.noblock+ }
+dir.attlist =
+  Common.attrib,
+  attribute compact { "compact" }?
+menu = element menu { menu.attlist, li.noblock+ }
+menu.attlist =
+  Common.attrib,
+  attribute compact { "compact" }?
+li.noblock = element li { li.attlist, Inline.model }
+isindex = element isindex { isindex.attlist }
+isindex.attlist =
+  Core.attrib,
+  I18n.attrib,
+  attribute prompt { Text.datatype }?
+applet.attlist &=
+  attribute align { "top" | "middle" | "bottom" | "left" | "right" }?,
+  attribute hspace { Pixels.datatype }?,
+  attribute vspace { Pixels.datatype }?
+body.attlist &=
+  attribute background { URI.datatype }?,
+  attribute bgcolor { Color.datatype }?,
+  attribute text { Color.datatype }?,
+  attribute link { Color.datatype }?,
+  attribute vlink { Color.datatype }?,
+  attribute alink { Color.datatype }?
+br.attlist &= attribute clear { "left" | "all" | "right" | "none" }?
+caption.attlist &= align.attrib
+div.attlist &= align.attrib
+# Not in the CR, but surely an error.
+dl.attlist &= attribute compact { "compact" }?
+Heading.attrib &= align.attrib
+hr.attlist &=
+  attribute align { "left" | "center" | "right" }?,
+  attribute noshade { "noshade" }?,
+  attribute size { Pixels.datatype }?,
+  attribute width { Pixels.datatype }?
+img.attlist &=
+  attribute align { "top" | "middle" | "bottom" | "left" | "right" }?,
+  attribute border { Pixels.datatype }?,
+  attribute hspace { Pixels.datatype }?,
+  attribute vspace { Pixels.datatype }?
+input.attlist &= align.attrib
+legend.attlist &=
+  attribute align { "top" | "bottom" | "left" | "right" }?
+li.attlist &=
+  attribute type { text }?,
+  attribute value { text }?
+object.attlist &=
+  attribute align { "top" | "middle" | "bottom" | "left" | "right" }?,
+  attribute border { Pixels.datatype }?,
+  attribute hspace { Pixels.datatype }?,
+  attribute vspace { Pixels.datatype }?
+ol.attlist &=
+  attribute type { text }?,
+  attribute compact { "compact" }?,
+  attribute start { text }?
+p.attlist &= align.attrib
+pre.attlist &= attribute width { Length.datatype }?
+script.attlist &= attribute language { ContentType.datatype }?
+table.attlist &=
+  align.attrib,
+  attribute bgcolor { Color.datatype }?
+tr.attlist &= attribute bgcolor { Color.datatype }?
+Cell.attrib &=
+  attribute nowrap { "nowrap" }?,
+  attribute bgcolor { Color.datatype }?,
+  attribute width { Pixels.datatype }?,
+  attribute height { Pixels.datatype }?
+ul.attlist &=
+  attribute type { text }?,
+  attribute compact { "compact" }?
+align.attrib = attribute align { "left" | "all" | "right" | "none" }?
+Color.datatype = text
+Inline.class |= font | basefont | s | strike | u
+Block.class |= center | isindex
+List.class |= dir | menu
+head.content &= isindex?
+Block.mix |= text | Inline.class
+# With the legacy module and the frames modules, the html
+# element can contain either body or frameset.
+frameset |= body

@@ -1,0 +1,61 @@
+# -sedleim.inp-----------------------------------------------------------
+# Configuration script for leim/Makefile under DJGPP v2.x
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1999-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^SHELL *=/c\
+SHELL=/xyzzy/command\
+MAKESHELL=/xyzzy/command
+
+/^version=/d
+/^prefix=/d
+/^datadir=/s|@datadir@|../..|
+/^srcdir=/s|srcdir=@srcdir@|srcdir := $(subst \\,/,$(shell cd))|
+
+/^INSTALLDIR=/c\
+INSTALLDIR=.
+
+/touch stamp-subdir/s|touch|djecho "stamp-subdir" >|
+s|\([ 	]\)echo|\1djecho|g
+/^	@true *$/d
+
+/RUN_EMACS *=/,/^$/c\
+export EMACSLOADPATH=${buildlisppath}\
+RUN_EMACS = ${BUILT_EMACS} -batch --no-site-file
+
+/^	cd ../c\
+	${MAKE} -C ../src ${MFLAGS} emacs
+
+/else make quail/c\
+	if not exist quail\\nul make quail
+
+/if \[ -f $@ \]\; then true/d
+/fi$/s/; fi$//
+
+/^leim-list.el:/,/^$/ {
+	/^	if/d
+	/^	else/,/^	fi/d
+	s|	 *|	|
+	/^	--eval/,/; \\$/s|\; \\||
+}
+
+/^install:/,/^$/c\
+install: all\
+
+/^	if test -f/d
+/^distclean:/,/^$/ {
+	s|\(rm -f Makefile\)|\1 stamp-subdir|
+}
+

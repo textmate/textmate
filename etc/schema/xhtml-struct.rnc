@@ -1,0 +1,14 @@
+# Structure Module
+
+start = html
+title = element title { title.attlist, text }
+title.attlist = I18n.attrib
+head = element head { head.attlist, head.content }
+head.attlist = I18n.attrib, profile.attlist
+head.content = title
+profile.attlist = attribute profile { URI.datatype }?
+body = element body { body.attlist, Block.model }
+body.attlist = Common.attrib
+html = element html { html.attlist, head, body }
+html.attlist = XHTML.version.attrib, I18n.attrib
+XHTML.version.attrib = attribute version { FPI.datatype }?

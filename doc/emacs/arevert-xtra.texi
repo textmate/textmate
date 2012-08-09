@@ -1,0 +1,189 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in emacs-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+@node Autorevert
+@section Auto Reverting Non-File Buffers
+
+Global Auto Revert Mode normally only reverts file buffers.  There are
+two ways to auto-revert certain non-file buffers: by enabling Auto
+Revert Mode in those buffers (using @kbd{M-x auto-revert-mode}); and
+by setting @code{global-auto-revert-non-file-buffers} to a
+non-@code{nil} value.  The latter enables Auto Reverting for all types
+of buffers for which it is implemented (listed in the menu below).
+
+Like file buffers, non-file buffers should normally not revert while
+you are working on them, or while they contain information that might
+get lost after reverting.  Therefore, they do not revert if they are
+``modified''.  This can get tricky, because deciding when a non-file
+buffer should be marked modified is usually more difficult than for
+file buffers.
+
+Another tricky detail is that, for efficiency reasons, Auto Revert
+often does not try to detect all possible changes in the buffer, only
+changes that are ``major'' or easy to detect.  Hence, enabling
+auto-reverting for a non-file buffer does not always guarantee that
+all information in the buffer is up-to-date, and does not necessarily
+make manual reverts useless.
+
+At the other extreme, certain buffers automatically revert every
+@code{auto-revert-interval} seconds.  (This currently only applies to
+the Buffer Menu.)  In this case, Auto Revert does not print any
+messages while reverting, even when @code{auto-revert-verbose} is
+non-@code{nil}.
+
+The details depend on the particular types of buffers and are
+explained in the corresponding sections.
+
+@menu
+* Auto Reverting the Buffer Menu:: Auto Revert of the Buffer Menu.
+* Auto Reverting Dired::           Auto Revert of Dired buffers.
+* Supporting additional buffers::  How to add more Auto Revert support. 
+@end menu
+
+@node Auto Reverting the Buffer Menu
+@subsection Auto Reverting the Buffer Menu
+
+If auto-reverting of non-file buffers is enabled, the Buffer Menu
+automatically reverts every @code{auto-revert-interval} seconds,
+whether there is a need for it or not.  (It would probably take longer
+to check whether there is a need than to actually revert.)
+
+If the Buffer Menu inappropriately gets marked modified, just revert
+it manually using @kbd{g} and auto-reverting will resume.  However, if
+you marked certain buffers to get deleted or to be displayed, you have
+to be careful, because reverting erases all marks.  The fact that
+adding marks sets the buffer's modified flag prevents Auto Revert from
+automatically erasing the marks.
+
+@node Auto Reverting Dired
+@subsection Auto Reverting Dired buffers
+
+Auto-reverting Dired buffers currently works on GNU or Unix style
+operating systems.  It may not work satisfactorily on some other
+systems.
+
+Dired buffers only auto-revert when the file list of the buffer's main
+directory changes (e.g. when a new file is added).  They do not
+auto-revert when information about a particular file changes
+(e.g. when the size changes) or when inserted subdirectories change.
+To be sure that @emph{all} listed information is up to date, you have
+to manually revert using @kbd{g}, @emph{even} if auto-reverting is
+enabled in the Dired buffer.  Sometimes, you might get the impression
+that modifying or saving files listed in the main directory actually
+does cause auto-reverting.  This is because making changes to a file,
+or saving it, very often causes changes in the directory itself; for
+instance, through backup files or auto-save files.  However, this is
+not guaranteed.
+
+If the Dired buffer is marked modified and there are no changes you
+want to protect, then most of the time you can make auto-reverting
+resume by manually reverting the buffer using @kbd{g}.  There is one
+exception.  If you flag or mark files, you can safely revert the
+buffer.  This will not erase the flags or marks (unless the marked
+file has been deleted, of course).  However, the buffer will stay
+modified, even after reverting, and auto-reverting will not resume.
+This is because, if you flag or mark files, you may be working on the
+buffer and you might not want the buffer to change without warning.
+If you want auto-reverting to resume in the presence of marks and
+flags, mark the buffer non-modified using @kbd{M-~}.  However, adding,
+deleting or changing marks or flags will mark it modified again.
+
+Remote Dired buffers are not auto-reverted (because it may be slow).
+Neither are Dired buffers for which you used shell wildcards or file
+arguments to list only some of the files.  @file{*Find*} and
+@file{*Locate*} buffers do not auto-revert either.
+
+@c FIXME?  This should be in the elisp manual?
+@node Supporting additional buffers
+@subsection Adding Support for Auto-Reverting additional Buffers.
+
+This section is intended for Elisp programmers who would like to add
+support for auto-reverting new types of buffers.
+
+To support auto-reverting the buffer must first of all have a
+@code{revert-buffer-function}.  @xref{Definition of
+revert-buffer-function,, Reverting, elisp, the Emacs Lisp Reference Manual}.
+
+In addition, it @emph{must} have a @code{buffer-stale-function}.
+
+@c FIXME only defvar in all of doc/emacs!
+@defvar buffer-stale-function
+The value of this variable is a function to check whether a non-file
+buffer needs reverting.  This should be a function with one optional
+argument @var{noconfirm}.  The function should return non-@code{nil}
+if the buffer should be reverted.  The buffer is current when this
+function is called.
+
+While this function is mainly intended for use in auto-reverting, it
+could be used for other purposes as well.  For instance, if
+auto-reverting is not enabled, it could be used to warn the user that
+the buffer needs reverting.  The idea behind the @var{noconfirm}
+argument is that it should be @code{t} if the buffer is going to be
+reverted without asking the user and @code{nil} if the function is
+just going to be used to warn the user that the buffer is out of date.
+In particular, for use in auto-reverting, @var{noconfirm} is @code{t}.
+If the function is only going to be used for auto-reverting, you can
+ignore the @var{noconfirm} argument.
+
+If you just want to automatically auto-revert every
+@code{auto-revert-interval} seconds (like the Buffer Menu), use:
+
+@example
+(set (make-local-variable 'buffer-stale-function)
+     #'(lambda (&optional noconfirm) 'fast))
+@end example
+
+@noindent
+in the buffer's mode function.
+
+The special return value @samp{fast} tells the caller that the need
+for reverting was not checked, but that reverting the buffer is fast.
+It also tells Auto Revert not to print any revert messages, even if
+@code{auto-revert-verbose} is non-@code{nil}.  This is important, as
+getting revert messages every @code{auto-revert-interval} seconds can
+be very annoying.  The information provided by this return value could
+also be useful if the function is consulted for purposes other than
+auto-reverting.
+@end defvar
+
+Once the buffer has a @code{revert-buffer-function} and a
+@code{buffer-stale-function}, several problems usually remain.
+
+The buffer will only auto-revert if it is marked unmodified.  Hence,
+you will have to make sure that various functions mark the buffer
+modified if and only if either the buffer contains information that
+might be lost by reverting, or there is reason to believe that the user
+might be inconvenienced by auto-reverting, because he is actively
+working on the buffer.  The user can always override this by manually
+adjusting the modified status of the buffer.  To support this, calling
+the @code{revert-buffer-function} on a buffer that is marked
+unmodified should always keep the buffer marked unmodified.
+
+It is important to assure that point does not continuously jump around
+as a consequence of auto-reverting.  Of course, moving point might be
+inevitable if the buffer radically changes.
+
+You should make sure that the @code{revert-buffer-function} does not
+print messages that unnecessarily duplicate Auto Revert's own messages,
+displayed if @code{auto-revert-verbose} is @code{t}, and effectively
+override a @code{nil} value for @code{auto-revert-verbose}.  Hence,
+adapting a mode for auto-reverting often involves getting rid of such
+messages.  This is especially important for buffers that automatically
+revert every @code{auto-revert-interval} seconds.
+
+If the new auto-reverting is part of Emacs, you should mention it
+in the documentation string of @code{global-auto-revert-non-file-buffers}.
+
+@ifinfo
+Similarly, you should add a node to this chapter's menu.  This node
+@end ifinfo
+@ifnotinfo
+Similarly, you should add a section to this chapter.  This section
+@end ifnotinfo
+should at the very least make clear whether enabling auto-reverting
+for the buffer reliably assures that all information in the buffer is
+completely up to date (or will be after @code{auto-revert-interval}
+seconds).

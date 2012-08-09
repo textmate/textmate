@@ -1,0 +1,1021 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Microsoft Windows, Manifesto, Mac OS / GNUstep, Top
+@appendix Emacs and Microsoft Windows/MS-DOS
+@cindex Microsoft Windows
+@cindex MS-Windows, Emacs peculiarities
+
+  This section describes peculiarities of using Emacs on Microsoft
+Windows.  Some of these peculiarities are also relevant to Microsoft's
+older MS-DOS ``operating system'' (also known as ``MS-DOG'').
+However, Emacs features that are relevant @emph{only} to MS-DOS are
+described in a separate
+@iftex
+manual (@pxref{MS-DOS,,, emacs-xtra, Specialized Emacs Features}).
+@end iftex
+@ifnottex
+section (@pxref{MS-DOS}).
+@end ifnottex
+
+
+  The behavior of Emacs on MS-Windows is reasonably similar to what is
+documented in the rest of the manual, including support for long file
+names, multiple frames, scroll bars, mouse menus, and subprocesses.
+However, a few special considerations apply, and they are described
+here.
+
+@menu
+* Windows Startup::     How to start Emacs on Windows.
+* Text and Binary::     Text files use CRLF to terminate lines.
+* Windows Files::       File-name conventions on Windows.
+* ls in Lisp::          Emulation of @code{ls} for Dired.
+* Windows HOME::        Where Emacs looks for your @file{.emacs} and
+                          where it starts up.
+* Windows Keyboard::    Windows-specific keyboard features.
+* Windows Mouse::       Windows-specific mouse features.
+* Windows Processes::   Running subprocesses on Windows.
+* Windows Printing::    How to specify the printer on MS-Windows.
+* Windows Fonts::       Specifying fonts on MS-Windows.
+* Windows Misc::        Miscellaneous Windows features.
+@ifnottex
+* MS-DOS::              Using Emacs on MS-DOS.
+@end ifnottex
+@end menu
+
+@node Windows Startup
+@section How to Start Emacs on MS-Windows
+@cindex starting Emacs on MS-Windows
+
+  There are several ways of starting Emacs on MS-Windows:
+
+@enumerate
+@item
+@pindex runemacs.exe
+@cindex desktop shortcut, MS-Windows
+@cindex start directory, MS-Windows
+@cindex directory where Emacs starts on MS-Windows
+From the desktop shortcut icon: either double-click the left mouse
+button on the icon, or click once, then press @key{RET}.  The desktop
+shortcut should specify as its ``Target'' (in the ``Properties'' of
+the shortcut) the full absolute file name of @file{runemacs.exe},
+@emph{not} of @file{emacs.exe}.  This is because @file{runemacs.exe}
+hides the console window that would have been created if the target of
+the shortcut were @file{emacs.exe} (which is a console program, as far
+as Windows is concerned).  If you use this method, Emacs starts in the
+directory specified by the shortcut.  To control where that is,
+right-click on the shortcut, select ``Properties'', and in the
+``Shortcut'' tab modify the ``Start in'' field to your liking.
+
+@item
+From the Command Prompt window, by typing @kbd{emacs @key{RET}} at the
+prompt.  The Command Prompt window where you did that will not be
+available for invoking other commands until Emacs exits.  In this
+case, Emacs will start in the current directory of the Windows shell.
+
+@item
+From the Command Prompt window, by typing @kbd{runemacs @key{RET}} at
+the prompt.  The Command Prompt window where you did that will be
+immediately available for invoking other commands.  In this case,
+Emacs will start in the current directory of the Windows shell.
+
+@item
+@cindex invoking Emacs from Windows Explorer
+@pindex emacsclient.exe
+@pindex emacsclientw.exe
+Via @file{emacsclient.exe} or @file{emacsclientw.exe}, which allow you
+to invoke Emacs from other programs, and to reuse a running Emacs
+process for serving editing jobs required by other programs.
+@xref{Emacs Server}.  The difference between @file{emacsclient.exe}
+and @file{emacsclientw.exe} is that the former is a console program,
+while the latter is a Windows GUI program.  Both programs wait for
+Emacs to signal that the editing job is finished, before they exit and
+return control to the program that invoked them.  Which one of them to
+use in each case depends on the expectations of the program that needs
+editing services.  If that program is itself a console (text-mode)
+program, you should use @file{emacsclient.exe}, so that any of its
+messages and prompts appear in the same command window as those of the
+invoking program.  By contrast, if the invoking program is a GUI
+program, you will be better off using @file{emacsclientw.exe}, because
+@file{emacsclient.exe} will pop up a command window if it is invoked
+from a GUI program.  A notable situation where you would want
+@file{emacsclientw.exe} is when you right-click on a file in the
+Windows Explorer and select ``Open With'' from the pop-up menu.  Use
+the @samp{--alternate-editor=} or @samp{-a} options if Emacs might not
+be running (or not running as a server) when @command{emacsclient} is
+invoked---that will always give you an editor.  When invoked via
+@command{emacsclient}, Emacs will start in the current directory of
+the program that invoked @command{emacsclient}.
+@end enumerate
+
+@cindex emacsclient, on MS-Windows
+Note that, due to limitations of MS-Windows, Emacs cannot have both
+GUI and text-mode frames in the same session.  It also cannot open
+text-mode frames on more than a single @dfn{Command Prompt} window,
+because each Windows program can have only one console at any given
+time.  For these reasons, if you invoke @command{emacsclient} with the
+@option{-c} option, and the Emacs server runs in a text-mode session,
+Emacs will always create a new text-mode frame in the same
+@dfn{Command Prompt} window where it was started; a GUI frame will be
+created only if the server runs in a GUI session.  Similarly, if you
+invoke @command{emacsclient} with the @option{-t} option, Emacs will
+create a GUI frame if the server runs in a GUI session, or a text-mode
+frame when the session runs in text mode in a @dfn{Command Prompt}
+window.  @xref{emacsclient Options}.
+
+@node Text and Binary
+@section Text Files and Binary Files
+@cindex text and binary files on MS-DOS/MS-Windows
+
+  GNU Emacs uses newline characters to separate text lines.  This is the
+convention used on GNU, Unix, and other Posix-compliant systems.
+
+@cindex end-of-line conversion on MS-DOS/MS-Windows
+  By contrast, MS-DOS and MS-Windows normally use carriage-return linefeed,
+a two-character sequence, to separate text lines.  (Linefeed is the same
+character as newline.)  Therefore, convenient editing of typical files
+with Emacs requires conversion of these end-of-line (EOL) sequences.
+And that is what Emacs normally does: it converts carriage-return
+linefeed into newline when reading files, and converts newline into
+carriage-return linefeed when writing files.  The same mechanism that
+handles conversion of international character codes does this conversion
+also (@pxref{Coding Systems}).
+
+@cindex cursor location, on MS-DOS
+@cindex point location, on MS-DOS
+  One consequence of this special format-conversion of most files is
+that character positions as reported by Emacs (@pxref{Position Info}) do
+not agree with the file size information known to the operating system.
+
+  In addition, if Emacs recognizes from a file's contents that it uses
+newline rather than carriage-return linefeed as its line separator, it
+does not perform EOL conversion when reading or writing that file.
+Thus, you can read and edit files from GNU and Unix systems on MS-DOS
+with no special effort, and they will retain their Unix-style
+end-of-line convention after you edit them.
+
+  The mode line indicates whether end-of-line translation was used for
+the current buffer.  If MS-DOS end-of-line translation is in use for the
+buffer, the MS-Windows build of Emacs displays a backslash @samp{\} after
+the coding system mnemonic near the beginning of the mode line
+(@pxref{Mode Line}).  If no EOL translation was performed, the string
+@samp{(Unix)} is displayed instead of the backslash, to alert you that the
+file's EOL format is not the usual carriage-return linefeed.
+
+@cindex DOS-to-Unix conversion of files
+  To visit a file and specify whether it uses DOS-style or Unix-style
+end-of-line, specify a coding system (@pxref{Text Coding}).  For
+example, @kbd{C-x @key{RET} c unix @key{RET} C-x C-f foobar.txt}
+visits the file @file{foobar.txt} without converting the EOLs; if some
+line ends with a carriage-return linefeed pair, Emacs will display
+@samp{^M} at the end of that line.  Similarly, you can direct Emacs to
+save a buffer in a specified EOL format with the @kbd{C-x @key{RET} f}
+command.  For example, to save a buffer with Unix EOL format, type
+@kbd{C-x @key{RET} f unix @key{RET} C-x C-s}.  If you visit a file
+with DOS EOL conversion, then save it with Unix EOL format, that
+effectively converts the file to Unix EOL style, like the
+@code{dos2unix} program.
+
+@cindex untranslated file system
+@findex add-untranslated-filesystem
+  When you use NFS, Samba, or some other similar method to access file
+systems that reside on computers using GNU or Unix systems, Emacs
+should not perform end-of-line translation on any files in these file
+systems---not even when you create a new file.  To request this,
+designate these file systems as @dfn{untranslated} file systems by
+calling the function @code{add-untranslated-filesystem}.  It takes one
+argument: the file system name, including a drive letter and
+optionally a directory.  For example,
+
+@example
+(add-untranslated-filesystem "Z:")
+@end example
+
+@noindent
+designates drive Z as an untranslated file system, and
+
+@example
+(add-untranslated-filesystem "Z:\\foo")
+@end example
+
+@noindent
+designates directory @file{\foo} on drive Z as an untranslated file
+system.
+
+  Most often you would use @code{add-untranslated-filesystem} in your
+@file{.emacs} file, or in @file{site-start.el} so that all the users at
+your site get the benefit of it.
+
+@findex remove-untranslated-filesystem
+  To countermand the effect of @code{add-untranslated-filesystem}, use
+the function @code{remove-untranslated-filesystem}.  This function takes
+one argument, which should be a string just like the one that was used
+previously with @code{add-untranslated-filesystem}.
+
+  Designating a file system as untranslated does not affect character
+set conversion, only end-of-line conversion.  Essentially, it directs
+Emacs to create new files with the Unix-style convention of using
+newline at the end of a line.  @xref{Coding Systems}.
+
+@vindex file-name-buffer-file-type-alist
+@cindex binary files, on MS-DOS/MS-Windows
+  Some kinds of files should not be converted at all, because their
+contents are not really text.  Therefore, Emacs on MS-Windows distinguishes
+certain files as @dfn{binary files}.  (This distinction is not part of
+MS-Windows; it is made by Emacs only.)  Binary files include executable
+programs, compressed archives, etc.  Emacs uses the file name to decide
+whether to treat a file as binary: the variable
+@code{file-name-buffer-file-type-alist} defines the file-name patterns
+that indicate binary files.  If a file name matches one of the patterns
+for binary files (those whose associations are of the type
+@code{(@var{pattern} . t)}, Emacs reads and writes that file using the
+@code{no-conversion} coding system (@pxref{Coding Systems}) which turns
+off @emph{all} coding-system conversions, not only the EOL conversion.
+@code{file-name-buffer-file-type-alist} also includes file-name patterns
+for files which are known to be Windows-style text files with
+carriage-return linefeed EOL format, such as @file{CONFIG.SYS}; Emacs
+always writes those files with Windows-style EOLs.
+
+  If a file that belongs to an untranslated file system matches one of
+the file-name patterns in @code{file-name-buffer-file-type-alist}, the
+EOL conversion is determined by @code{file-name-buffer-file-type-alist}.
+
+@node Windows Files
+@section File Names on MS-Windows
+@cindex file names on MS-Windows
+
+  MS-Windows and MS-DOS normally use a backslash, @samp{\}, to
+separate name units within a file name, instead of the slash used on
+other systems.  Emacs on MS-DOS/MS-Windows permits use of either slash or
+backslash, and also knows about drive letters in file names.
+
+@cindex file-name completion, on MS-Windows
+  On MS-DOS/MS-Windows, file names are case-insensitive, so Emacs by
+default ignores letter-case in file names during completion.
+
+@vindex w32-get-true-file-attributes
+  The variable @code{w32-get-true-file-attributes} controls whether
+Emacs should issue additional system calls to determine more
+accurately file attributes in primitives like @code{file-attributes}
+and @code{directory-files-and-attributes}.  These additional calls are
+needed to report correct file ownership, link counts and file types
+for special files such as pipes.  Without these system calls, file
+ownership will be attributed to the current user, link counts will be
+always reported as 1, and special files will be reported as regular
+files.
+
+  If the value of this variable is @code{local} (the default), Emacs
+will issue these additional system calls only for files on local fixed
+drives.  Any other non-@code{nil} value means do this even for
+removable and remote volumes, where this could potentially slow down
+Dired and other related features.  The value of @code{nil} means never
+issue those system calls.  Non-@code{nil} values are more useful on
+NTFS volumes, which support hard links and file security, than on FAT,
+FAT32, and XFAT volumes.
+
+@node ls in Lisp
+@section Emulation of @code{ls} on MS-Windows
+@cindex Dired, and MS-Windows/MS-DOS
+@cindex @code{ls} emulation
+
+  Dired normally uses the external program @code{ls}
+to produce the directory listing displayed in Dired
+buffers (@pxref{Dired}).  However, MS-Windows and MS-DOS systems don't
+come with such a program, although several ports of @sc{gnu} @code{ls}
+are available.  Therefore, Emacs on those systems @emph{emulates}
+@code{ls} in Lisp, by using the @file{ls-lisp.el} package.  While
+@file{ls-lisp.el} provides a reasonably full emulation of @code{ls},
+there are some options and features peculiar to that emulation;
+@iftex
+for more details, see the documentation of the variables whose names
+begin with @code{ls-lisp}.
+@end iftex
+@ifnottex
+they are described in this section.
+
+  The @code{ls} emulation supports many of the @code{ls} switches, but
+it doesn't support all of them.  Here's the list of the switches it
+does support: @option{-A}, @option{-a}, @option{-B}, @option{-C},
+@option{-c}, @option{-G}, @option{-g}, @option{-h}, @option{-i}, @option{-n},
+@option{-R}, @option{-r}, @option{-S}, @option{-s}, @option{-t}, @option{-U},
+@option{-u}, and @option{-X}.  The @option{-F} switch is partially
+supported (it appends the character that classifies the file, but does
+not prevent symlink following).
+
+@vindex ls-lisp-use-insert-directory-program
+  On MS-Windows and MS-DOS, @file{ls-lisp.el} is preloaded when Emacs
+is built, so the Lisp emulation of @code{ls} is always used on those
+platforms.  If you have a ported @code{ls}, setting
+@code{ls-lisp-use-insert-directory-program} to a non-@code{nil} value
+will revert to using an external program named by the variable
+@code{insert-directory-program}.
+
+@vindex ls-lisp-ignore-case
+  By default, @file{ls-lisp.el} uses a case-sensitive sort order for
+the directory listing it produces; this is so the listing looks the
+same as on other platforms.  If you wish that the files be sorted in
+case-insensitive order, set the variable @code{ls-lisp-ignore-case} to
+a non-@code{nil} value.
+
+@vindex ls-lisp-dirs-first
+  By default, files and subdirectories are sorted together, to emulate
+the behavior of @code{ls}.  However, native MS-Windows/MS-DOS file
+managers list the directories before the files; if you want that
+behavior, customize the option @code{ls-lisp-dirs-first} to a
+non-@code{nil} value.
+
+@vindex ls-lisp-verbosity
+  The variable @code{ls-lisp-verbosity} controls the file attributes
+that @file{ls-lisp.el} displays.  The value should be a list that
+contains one or more of the symbols @code{links}, @code{uid}, and
+@code{gid}.  @code{links} means display the count of different file
+names that are associated with (a.k.a.@: @dfn{links to}) the file's
+data; this is only useful on NTFS volumes.  @code{uid} means display
+the numerical identifier of the user who owns the file.  @code{gid}
+means display the numerical identifier of the file owner's group.  The
+default value is @code{(links uid gid)} i.e.@: all the 3 optional
+attributes are displayed.
+
+@vindex ls-lisp-emulation
+  The variable @code{ls-lisp-emulation} controls the flavor of the
+@code{ls} emulation by setting the defaults for the 3 options
+described above: @code{ls-lisp-ignore-case},
+@code{ls-lisp-dirs-first}, and @code{ls-lisp-verbosity}.  The value of
+this option can be one of the following symbols:
+
+@table @code
+@item GNU
+@itemx nil
+Emulate @sc{gnu} systems; this is the default.  This sets
+@code{ls-lisp-ignore-case} and @code{ls-lisp-dirs-first} to
+@code{nil}, and @code{ls-lisp-verbosity} to @code{(links uid gid)}.
+@item UNIX
+Emulate Unix systems.  Like @code{GNU}, but sets
+@code{ls-lisp-verbosity} to @code{(links uid)}.
+@item MacOS
+Emulate MacOS.  Sets @code{ls-lisp-ignore-case} to @code{t}, and
+@code{ls-lisp-dirs-first} and @code{ls-lisp-verbosity} to @code{nil}.
+@item MS-Windows
+Emulate MS-Windows.  Sets @code{ls-lisp-ignore-case} and
+@code{ls-lisp-dirs-first} to @code{t}, and @code{ls-lisp-verbosity} to
+@code{(links)} on Windows NT/2K/XP/2K3 and to @code{nil} on Windows 9X.
+Note that the default emulation is @emph{not} @code{MS-Windows}, even
+on Windows, since many users of Emacs on those platforms prefer the
+@sc{gnu} defaults.
+@end table
+
+@noindent
+Any other value of @code{ls-lisp-emulation} means the same as @code{GNU}.
+Customizing this option calls the function @code{ls-lisp-set-options} to
+update the 3 dependent options as needed.  If you change the value of
+this variable without using customize after @file{ls-lisp.el} is loaded
+(note that it is preloaded on MS-Windows and MS-DOS), you can call that
+function manually for the same result.
+
+@vindex ls-lisp-support-shell-wildcards
+  The variable @code{ls-lisp-support-shell-wildcards} controls how
+file-name patterns are supported: if it is non-@code{nil} (the
+default), they are treated as shell-style wildcards; otherwise they
+are treated as Emacs regular expressions.
+
+@vindex ls-lisp-format-time-list
+  The variable @code{ls-lisp-format-time-list} defines how to format
+the date and time of files.  @emph{The value of this variable is
+ignored}, unless Emacs cannot determine the current locale.  (However,
+if the value of @code{ls-lisp-use-localized-time-format} is
+non-@code{nil}, Emacs obeys @code{ls-lisp-format-time-list} even if
+the current locale is available; see below.)
+
+The value of @code{ls-lisp-format-time-list} is a list of 2 strings.
+The first string is used if the file was modified within the current
+year, while the second string is used for older files.  In each of
+these two strings you can use @samp{%}-sequences to substitute parts
+of the time.  For example:
+@lisp
+("%b %e %H:%M" "%b %e  %Y")
+@end lisp
+
+@noindent
+Note that the strings substituted for these @samp{%}-sequences depend
+on the current locale.  @xref{Time Parsing,,, elisp, The Emacs Lisp
+Reference Manual}, for more about format time specs.
+
+@vindex ls-lisp-use-localized-time-format
+  Normally, Emacs formats the file time stamps in either traditional
+or ISO-style time format.  However, if the value of the variable
+@code{ls-lisp-use-localized-time-format} is non-@code{nil}, Emacs
+formats file time stamps according to what
+@code{ls-lisp-format-time-list} specifies.  The @samp{%}-sequences in
+@code{ls-lisp-format-time-list} produce locale-dependent month and day
+names, which might cause misalignment of columns in Dired display.
+@end ifnottex
+
+@node Windows HOME
+@section HOME and Startup Directories on MS-Windows
+@cindex @code{HOME} directory on MS-Windows
+
+  The Windows equivalent of the @code{HOME} directory is the
+@dfn{user-specific application data directory}.  The actual location
+depends on the Windows version; typical values are @file{C:\Documents
+and Settings\@var{username}\Application Data} on Windows 2K/XP/2K3,
+@file{C:\Users\@var{username}\AppData\Roaming} on Windows Vista/7/2K8,
+and either @file{C:\WINDOWS\Application Data} or
+@file{C:\WINDOWS\Profiles\@var{username}\Application Data} on the
+older Windows 9X/ME systems.  If this directory does not exist or
+cannot be accessed, Emacs falls back to @file{C:\} as the default
+value of @code{HOME}.
+
+  You can override this default value of @code{HOME} by explicitly
+setting the environment variable @env{HOME} to point to any directory
+on your system.  @env{HOME} can be set either from the command shell
+prompt or from @samp{Properties} dialog of @samp{My Computer}.
+@code{HOME} can also be set in the system registry,
+@pxref{MS-Windows Registry}.
+
+  For compatibility with older versions of Emacs@footnote{
+Older versions of Emacs didn't check the application data directory.
+}, if there is a file named @file{.emacs} in @file{C:\}, the root
+directory of drive @file{C:}, and @env{HOME} is set neither in the
+environment nor in the Registry, Emacs will treat @file{C:\} as the
+default @code{HOME} location, and will not look in the application
+data directory, even if it exists.  Note that only @file{.emacs} is
+looked for in @file{C:\}; the older name @file{_emacs} (see below) is
+not.  This use of @file{C:\.emacs} to define @code{HOME} is
+deprecated.
+
+  Whatever the final place is, Emacs sets the internal value of the
+@env{HOME} environment variable to point to it, and it will use that
+location for other files and directories it normally looks for or
+creates in your home directory.
+
+  You can always find out what Emacs thinks is your home directory's
+location by typing @kbd{C-x d ~/ @key{RET}}.  This should present the
+list of files in the home directory, and show its full name on the
+first line.  Likewise, to visit your init file, type @kbd{C-x C-f
+~/.emacs @key{RET}} (assuming the file's name is @file{.emacs}).
+
+@cindex init file @file{.emacs} on MS-Windows
+  The home directory is where your init file is stored.  It can have
+any name mentioned in @ref{Init File}.
+
+@cindex @file{_emacs} init file, MS-Windows
+  Because MS-DOS does not allow file names with leading dots, and
+older Windows systems made it hard to create files with such names,
+the Windows port of Emacs supports an init file name @file{_emacs}, if
+such a file exists in the home directory and @file{.emacs} does not.
+This name is considered obsolete.
+
+@node Windows Keyboard
+@section Keyboard Usage on MS-Windows
+@cindex keyboard, MS-Windows
+
+  This section describes the Windows-specific features related to
+keyboard input in Emacs.
+
+@cindex MS-Windows keyboard shortcuts
+  Many key combinations (known as ``keyboard shortcuts'') that have
+conventional uses in MS-Windows programs conflict with traditional
+Emacs key bindings.  (These Emacs key bindings were established years
+before Microsoft was founded.)  Examples of conflicts include
+@kbd{C-c}, @kbd{C-x}, @kbd{C-z}, @kbd{C-a}, and @kbd{W-@key{SPC}}.
+You can redefine some of them with meanings more like the MS-Windows
+meanings by enabling CUA Mode (@pxref{CUA Bindings}).
+
+@kindex F10 @r{(MS-Windows)}
+@cindex menu bar access using keyboard @r{(MS-Windows)}
+  The @key{F10} key on Windows activates the menu bar in a way that
+makes it possible to use the menus without a mouse.  In this mode, the
+arrow keys traverse the menus, @key{RET} selects a highlighted menu
+item, and @key{ESC} closes the menu.
+
+@iftex
+@inforef{Windows Keyboard, , emacs}, for information about additional
+Windows-specific variables in this category.
+@end iftex
+@ifnottex
+@vindex w32-alt-is-meta
+@cindex @code{Alt} key (MS-Windows)
+  By default, the key labeled @key{Alt} is mapped as the @key{META}
+key.  If you wish it to produce the @code{Alt} modifier instead, set
+the variable @code{w32-alt-is-meta} to a @code{nil} value.
+
+@findex w32-register-hot-key
+@findex w32-unregister-hot-key
+  MS-Windows reserves certain key combinations, such as
+@kbd{Alt-@key{TAB}}, for its own use.  These key combinations are
+intercepted by the system before Emacs can see them.  You can use the
+@code{w32-register-hot-key} function to allow a key sequence to be
+seen by Emacs instead of being grabbed by Windows.  This functions
+registers a key sequence as a @dfn{hot key}, overriding the special
+meaning of that key sequence for Windows.  (MS-Windows is told that
+the key sequence is a hot key only when one of the Emacs windows has
+focus, so that the special keys still have their usual meaning for
+other Windows applications.)
+
+  The argument to @code{w32-register-hot-key} must be a single key,
+with or without modifiers, in vector form that would be acceptable to
+@code{define-key}.  The meta modifier is interpreted as the @key{ALT}
+key if @code{w32-alt-is-meta} is @code{t} (the default), and the hyper
+modifier is always interpreted as the Windows key (usually labeled
+with @key{start} and the Windows logo).  If the function succeeds in
+registering the key sequence, it returns the hotkey ID, a number;
+otherwise it returns @code{nil}.
+
+@kindex M-TAB@r{, (MS-Windows)}
+@cindex @kbd{M-@key{TAB}} vs @kbd{Alt-@key{TAB}} (MS-Windows)
+@cindex @kbd{Alt-@key{TAB}} vs @kbd{M-@key{TAB}} (MS-Windows)
+  For example, @code{(w32-register-hot-key [M-tab])} lets you use
+@kbd{M-TAB} normally in Emacs; for instance, to complete the word or
+symbol at point at top level, or to complete the current search string
+against previously sought strings during incremental search.
+
+  The function @code{w32-unregister-hot-key} reverses the effect of
+@code{w32-register-hot-key} for its argument key sequence.
+
+@vindex w32-capslock-is-shiftlock
+  By default, the @key{CapsLock} key only affects normal character
+keys (it converts lower-case characters to their upper-case
+variants).  However, if you set the variable
+@code{w32-capslock-is-shiftlock} to a non-@code{nil} value, the
+@key{CapsLock} key will affect non-character keys as well, as if you
+pressed the @key{Shift} key while typing the non-character key.
+
+@vindex w32-enable-caps-lock
+  If the variable @code{w32-enable-caps-lock} is set to a @code{nil}
+value, the @key{CapsLock} key produces the symbol @code{capslock}
+instead of the shifted version of they keys.  The default value is
+@code{t}.
+
+@vindex w32-enable-num-lock
+@cindex keypad keys (MS-Windows)
+  Similarly, if @code{w32-enable-num-lock} is @code{nil}, the
+@key{NumLock} key will produce the symbol @code{kp-numlock}.  The
+default is @code{t}, which causes @key{NumLock} to work as expected:
+toggle the meaning of the keys on the numeric keypad.
+@end ifnottex
+
+@vindex w32-apps-modifier
+  The variable @code{w32-apps-modifier} controls the effect of the
+@key{Apps} key (usually located between the right @key{Alt} and the
+right @key{Ctrl} keys).  Its value can be one of the symbols
+@code{hyper}, @code{super}, @code{meta}, @code{alt}, @code{control},
+or @code{shift} for the respective modifier, or @code{nil} to appear
+as the key @code{apps}.  The default is @code{nil}.
+
+@vindex w32-lwindow-modifier
+@vindex w32-rwindow-modifier
+@vindex w32-scroll-lock-modifier
+  The variable @code{w32-lwindow-modifier} determines the effect of
+the left Windows key (usually labeled with @key{start} and the Windows
+logo).  If its value is @code{nil} (the default), the key will produce
+the symbol @code{lwindow}.  Setting it to one of the symbols
+@code{hyper}, @code{super}, @code{meta}, @code{alt}, @code{control},
+or @code{shift} will produce the respective modifier.  A similar
+variable @code{w32-rwindow-modifier} controls the effect of the right
+Windows key, and @code{w32-scroll-lock-modifier} does the same for the
+@key{ScrLock} key.  If these variables are set to @code{nil}, the
+right Windows key produces the symbol @code{rwindow} and @key{ScrLock}
+produces the symbol @code{scroll}.
+
+@vindex w32-pass-alt-to-system
+@cindex Windows system menu
+@cindex @code{Alt} key invokes menu (Windows)
+  Emacs compiled as a native Windows application normally turns off
+the Windows feature that tapping the @key{ALT} key invokes the Windows
+menu.  The reason is that the @key{ALT} serves as @key{META} in Emacs.
+When using Emacs, users often press the @key{META} key temporarily and
+then change their minds; if this has the effect of bringing up the
+Windows menu, it alters the meaning of subsequent commands.  Many
+users find this frustrating.
+
+  You can re-enable Windows's default handling of tapping the @key{ALT}
+key by setting @code{w32-pass-alt-to-system} to a non-@code{nil}
+value.
+
+@ifnottex
+@vindex w32-pass-lwindow-to-system
+@vindex w32-pass-rwindow-to-system
+  The variables @code{w32-pass-lwindow-to-system} and
+@code{w32-pass-rwindow-to-system} determine whether the respective
+keys are passed to Windows or swallowed by Emacs.  If the value is
+@code{nil}, the respective key is silently swallowed by Emacs,
+otherwise it is passed to Windows.  The default is @code{t} for both
+of these variables.  Passing each of these keys to Windows produces
+its normal effect: for example, @kbd{@key{Lwindow}} opens the
+@code{Start} menu, etc.@footnote{
+Some combinations of the ``Windows'' keys with other keys are caught
+by Windows at a low level in a way that Emacs currently cannot prevent.
+For example, @kbd{@key{Lwindow} r} always pops up the Windows
+@samp{Run} dialog.  Customizing the value of
+@code{w32-phantom-key-code} might help in some cases, though.}
+
+@vindex w32-recognize-altgr
+@kindex AltGr @r{(MS-Windows)}
+@cindex AltGr key (MS-Windows)
+  The variable @code{w32-recognize-altgr} controls whether the
+@key{AltGr} key (if it exists on your keyboard), or its equivalent,
+the combination of the right @key{Alt} and left @key{Ctrl} keys
+pressed together, is recognized as the @key{AltGr} key.  The default
+is @code{t}, which means these keys produce @code{AltGr}; setting it
+to @code{nil} causes @key{AltGr} or the equivalent key combination to
+be interpreted as the combination of @key{CTRL} and @key{META}
+modifiers.
+@end ifnottex
+
+@node Windows Mouse
+@section Mouse Usage on MS-Windows
+@cindex mouse, and MS-Windows
+
+  This section describes the Windows-specific variables related to
+the mouse.
+
+@vindex w32-mouse-button-tolerance
+@cindex simulation of middle mouse button
+  The variable @code{w32-mouse-button-tolerance} specifies the
+time interval, in milliseconds, for faking middle mouse button press
+on 2-button mice.  If both mouse buttons are depressed within this
+time interval, Emacs generates a middle mouse button click event
+instead of a double click on one of the buttons.
+
+@vindex w32-pass-extra-mouse-buttons-to-system
+  If the variable @code{w32-pass-extra-mouse-buttons-to-system} is
+non-@code{nil}, Emacs passes the fourth and fifth mouse buttons to
+Windows.
+
+@vindex w32-swap-mouse-buttons
+  The variable @code{w32-swap-mouse-buttons} controls which of the 3
+mouse buttons generates the @kbd{mouse-2} events.  When it is
+@code{nil} (the default), the middle button generates @kbd{mouse-2}
+and the right button generates @kbd{mouse-3} events.  If this variable
+is non-@code{nil}, the roles of these two buttons are reversed.
+
+@node Windows Processes
+@section Subprocesses on Windows 9X/ME and Windows NT/2K/XP
+@cindex subprocesses on MS-Windows
+
+@cindex DOS applications, running from Emacs
+  Emacs compiled as a native Windows application (as opposed to the DOS
+version) includes full support for asynchronous subprocesses.
+In the Windows version, synchronous and asynchronous subprocesses work
+fine on both
+Windows 9X/ME and Windows NT/2K/XP as long as you run only 32-bit Windows
+applications.  However, when you run a DOS application in a subprocess,
+you may encounter problems or be unable to run the application at all;
+and if you run two DOS applications at the same time in two
+subprocesses, you may have to reboot your system.
+
+Since the standard command interpreter (and most command line utilities)
+on Windows 9X are DOS applications, these problems are significant when
+using that system.  But there's nothing we can do about them; only
+Microsoft can fix them.
+
+If you run just one DOS application subprocess, the subprocess should
+work as expected as long as it is ``well-behaved'' and does not perform
+direct screen access or other unusual actions.  If you have a CPU
+monitor application, your machine will appear to be 100% busy even when
+the DOS application is idle, but this is only an artifact of the way CPU
+monitors measure processor load.
+
+You must terminate the DOS application before you start any other DOS
+application in a different subprocess.  Emacs is unable to interrupt or
+terminate a DOS subprocess.  The only way you can terminate such a
+subprocess is by giving it a command that tells its program to exit.
+
+If you attempt to run two DOS applications at the same time in separate
+subprocesses, the second one that is started will be suspended until the
+first one finishes, even if either or both of them are asynchronous.
+
+@cindex kill DOS application
+If you can go to the first subprocess, and tell it to exit, the second
+subprocess should continue normally.  However, if the second subprocess
+is synchronous, Emacs itself will be hung until the first subprocess
+finishes.  If it will not finish without user input, then you have no
+choice but to reboot if you are running on Windows 9X.  If you are
+running on Windows NT/2K/XP, you can use a process viewer application to kill
+the appropriate instance of NTVDM instead (this will terminate both DOS
+subprocesses).
+
+If you have to reboot Windows 9X in this situation, do not use the
+@code{Shutdown} command on the @code{Start} menu; that usually hangs the
+system.  Instead, type @kbd{CTL-ALT-@key{DEL}} and then choose
+@code{Shutdown}.  That usually works, although it may take a few minutes
+to do its job.
+
+@vindex w32-quote-process-args
+  The variable @code{w32-quote-process-args} controls how Emacs quotes
+the process arguments.  Non-@code{nil} means quote with the @code{"}
+character.  If the value is a character, Emacs uses that character to escape
+any quote characters that appear; otherwise it chooses a suitable escape
+character based on the type of the program.
+
+@ifnottex
+@findex w32-shell-execute
+  The function @code{w32-shell-execute} can be useful for writing
+customized commands that run MS-Windows applications registered to
+handle a certain standard Windows operation for a specific type of
+document or file.  This function is a wrapper around the Windows
+@code{ShellExecute} API.  See the MS-Windows API documentation for
+more details.
+@end ifnottex
+
+@node Windows Printing
+@section Printing and MS-Windows
+
+  Printing commands, such as @code{lpr-buffer} (@pxref{Printing}) and
+@code{ps-print-buffer} (@pxref{PostScript}) work in MS-DOS and
+MS-Windows by sending the output to one of the printer ports, if a
+Posix-style @code{lpr} program is unavailable.  The same Emacs
+variables control printing on all systems, but in some cases they have
+different default values on MS-DOS and MS-Windows.
+
+  Emacs on MS Windows attempts to determine your default printer
+automatically (using the function @code{default-printer-name}).
+But in some rare cases this can fail, or you may wish to use a different
+printer from within Emacs.  The rest of this section explains how to
+tell Emacs which printer to use.
+
+@vindex printer-name@r{, (MS-DOS/MS-Windows)}
+  If you want to use your local printer, then set the Lisp variable
+@code{lpr-command} to @code{""} (its default value on Windows) and
+@code{printer-name} to the name of the printer port---for example,
+@code{"PRN"}, the usual local printer port, or @code{"LPT2"}, or
+@code{"COM1"} for a serial printer.  You can also set
+@code{printer-name} to a file name, in which case ``printed'' output
+is actually appended to that file.  If you set @code{printer-name} to
+@code{"NUL"}, printed output is silently discarded (sent to the system
+null device).
+
+  You can also use a printer shared by another machine by setting
+@code{printer-name} to the UNC share name for that printer---for
+example, @code{"//joes_pc/hp4si"}.  (It doesn't matter whether you use
+forward slashes or backslashes here.)  To find out the names of shared
+printers, run the command @samp{net view} from the command prompt to
+obtain a list of servers, and @samp{net view @var{server-name}} to see
+the names of printers (and directories) shared by that server.
+Alternatively, click the @samp{Network Neighborhood} icon on your
+desktop, and look for machines that share their printers via the
+network.
+
+@cindex @samp{net use}, and printing on MS-Windows
+@cindex networked printers (MS-Windows)
+  If the printer doesn't appear in the output of @samp{net view}, or
+if setting @code{printer-name} to the UNC share name doesn't produce a
+hardcopy on that printer, you can use the @samp{net use} command to
+connect a local print port such as @code{"LPT2"} to the networked
+printer.  For example, typing @kbd{net use LPT2: \\joes_pc\hp4si}@footnote{
+Note that the @samp{net use} command requires the UNC share name to be
+typed with the Windows-style backslashes, while the value of
+@code{printer-name} can be set with either forward- or backslashes.}
+causes Windows to @dfn{capture} the @code{LPT2} port and redirect the
+printed material to the printer connected to the machine @code{joes_pc}.
+After this command, setting @code{printer-name} to @code{"LPT2"}
+should produce the hardcopy on the networked printer.
+
+  With some varieties of Windows network software, you can instruct
+Windows to capture a specific printer port such as @code{"LPT2"}, and
+redirect it to a networked printer via the @w{@code{Control
+Panel->Printers}} applet instead of @samp{net use}.
+
+  If you set @code{printer-name} to a file name, it's best to use an
+absolute file name.  Emacs changes the working directory according to
+the default directory of the current buffer, so if the file name in
+@code{printer-name} is relative, you will end up with several such
+files, each one in the directory of the buffer from which the printing
+was done.
+
+  If the value of @code{printer-name} is correct, but printing does
+not produce the hardcopy on your printer, it is possible that your
+printer does not support printing plain text (some cheap printers omit
+this functionality).  In that case, try the PostScript print commands,
+described below.
+
+@findex print-buffer @r{(MS-DOS)}
+@findex print-region @r{(MS-DOS)}
+@vindex lpr-headers-switches @r{(MS-DOS)}
+  The commands @code{print-buffer} and @code{print-region} call the
+@code{pr} program, or use special switches to the @code{lpr} program, to
+produce headers on each printed page.  MS-DOS and MS-Windows don't
+normally have these programs, so by default, the variable
+@code{lpr-headers-switches} is set so that the requests to print page
+headers are silently ignored.  Thus, @code{print-buffer} and
+@code{print-region} produce the same output as @code{lpr-buffer} and
+@code{lpr-region}, respectively.  If you do have a suitable @code{pr}
+program (for example, from GNU Coreutils), set
+@code{lpr-headers-switches} to @code{nil}; Emacs will then call
+@code{pr} to produce the page headers, and print the resulting output as
+specified by @code{printer-name}.
+
+@vindex print-region-function @r{(MS-DOS)}
+@cindex lpr usage under MS-DOS
+@vindex lpr-command @r{(MS-DOS)}
+@vindex lpr-switches @r{(MS-DOS)}
+  Finally, if you do have an @code{lpr} work-alike, you can set the
+variable @code{lpr-command} to @code{"lpr"}.  Then Emacs will use
+@code{lpr} for printing, as on other systems.  (If the name of the
+program isn't @code{lpr}, set @code{lpr-command} to the appropriate value.)
+The variable @code{lpr-switches} has its standard meaning
+when @code{lpr-command} is not @code{""}.  If the variable
+@code{printer-name} has a string value, it is used as the value for the
+@code{-P} option to @code{lpr}, as on Unix.
+
+@findex ps-print-buffer @r{(MS-DOS)}
+@findex ps-spool-buffer @r{(MS-DOS)}
+@vindex ps-printer-name @r{(MS-DOS)}
+@vindex ps-lpr-command @r{(MS-DOS)}
+@vindex ps-lpr-switches @r{(MS-DOS)}
+  A parallel set of variables, @code{ps-lpr-command},
+@code{ps-lpr-switches}, and @code{ps-printer-name} (@pxref{PostScript
+Variables}), defines how PostScript files should be printed.  These
+variables are used in the same way as the corresponding variables
+described above for non-PostScript printing.  Thus, the value of
+@code{ps-printer-name} is used as the name of the device (or file) to
+which PostScript output is sent, just as @code{printer-name} is used
+for non-PostScript printing.  (There are two distinct sets of
+variables in case you have two printers attached to two different
+ports, and only one of them is a PostScript printer.)
+
+@cindex Ghostscript, use for PostScript printing
+  The default value of the variable @code{ps-lpr-command} is @code{""},
+which causes PostScript output to be sent to the printer port specified
+by @code{ps-printer-name}; but @code{ps-lpr-command} can also be set to
+the name of a program which will accept PostScript files.  Thus, if you
+have a non-PostScript printer, you can set this variable to the name of
+a PostScript interpreter program (such as Ghostscript).  Any switches
+that need to be passed to the interpreter program are specified using
+@code{ps-lpr-switches}.  (If the value of @code{ps-printer-name} is a
+string, it will be added to the list of switches as the value for the
+@code{-P} option.  This is probably only useful if you are using
+@code{lpr}, so when using an interpreter typically you would set
+@code{ps-printer-name} to something other than a string so it is
+ignored.)
+
+  For example, to use Ghostscript for printing on the system's default
+printer, put this in your @file{.emacs} file:
+
+@example
+(setq ps-printer-name t)
+(setq ps-lpr-command "D:/gs6.01/bin/gswin32c.exe")
+(setq ps-lpr-switches '("-q" "-dNOPAUSE" "-dBATCH"
+                        "-sDEVICE=mswinpr2"
+                        "-sPAPERSIZE=a4"))
+@end example
+
+@noindent
+(This assumes that Ghostscript is installed in the
+@file{D:/gs6.01} directory.)
+
+@node Windows Fonts
+@section Specifying Fonts on MS-Windows
+@cindex font specification (MS Windows)
+
+  Starting with Emacs 23, fonts are specified by their name, size
+and optional properties.  The format for specifying fonts comes from the
+fontconfig library used in modern Free desktops:
+
+@example
+  [Family[-PointSize]][:Option1=Value1[:Option2=Value2[...]]]
+@end example
+
+  The old XLFD based format is also supported for backwards compatibility.
+
+@cindex font backend selection (MS-Windows)
+  Emacs 23 and later supports a number of font backends.  Currently,
+the @code{gdi} and @code{uniscribe} backends are supported on Windows.
+The @code{gdi} font backend is available on all versions of Windows,
+and supports all fonts that are natively supported by Windows.  The
+@code{uniscribe} font backend is available on Windows 2000 and later,
+and supports TrueType and OpenType fonts.  Some languages requiring
+complex layout can only be properly supported by the Uniscribe
+backend.  By default, both backends are enabled if supported, with
+@code{uniscribe} taking priority over @code{gdi}.  To override that
+and use the GDI backend even if Uniscribe is available, invoke Emacs
+with the @kbd{-xrm Emacs.fontBackend:gdi} command-line argument, or
+add a @code{Emacs.fontBackend} resource with the value @code{gdi} in
+the Registry under either the
+@samp{HKEY_CURRENT_USER\SOFTWARE\GNU\Emacs} or the
+@samp{HKEY_LOCAL_MACHINE\SOFTWARE\GNU\Emacs} key (@pxref{Resources}).
+
+@cindex font properties (MS Windows)
+@noindent
+Optional properties common to all font backends on MS-Windows are:
+
+@table @code
+
+@vindex font-weight-table @r{(MS-Windows)}
+@item weight
+Specifies the weight of the font.  Special values @code{light},
+@code{medium}, @code{demibold}, @code{bold}, and @code{black} can be specified
+without @code{weight=} (e.g., @kbd{Courier New-12:bold}).  Otherwise,
+the weight should be a numeric value between 100 and 900, or one of the
+named weights in @code{font-weight-table}.  If unspecified, a regular font
+is assumed.
+
+@vindex font-slant-table @r{(MS-Windows)}
+@item slant
+Specifies whether the font is italic.  Special values
+@code{roman}, @code{italic} and @code{oblique} can be specified
+without @code{slant=} (e.g., @kbd{Courier New-12:italic}).
+Otherwise, the slant should be a numeric value, or one of the named
+slants in @code{font-slant-table}.  On Windows, any slant above 150 is
+treated as italics, and anything below as roman.
+
+@item family
+Specifies the font family, but normally this will be specified
+at the start of the font name.
+
+@item pixelsize
+Specifies the font size in pixels.  This can be used instead
+of the point size specified after the family name.
+
+@item adstyle
+Specifies additional style information for the font.
+On MS-Windows, the values @code{mono}, @code{sans}, @code{serif},
+@code{script} and @code{decorative} are recognized.  These are most useful
+as a fallback with the font family left unspecified.
+
+@vindex w32-charset-info-alist
+@item registry
+Specifies the character set registry that the font is
+expected to cover.  Most TrueType and OpenType fonts will be Unicode fonts
+that cover several national character sets, but you can narrow down the
+selection of fonts to those that support a particular character set by
+using a specific registry from @code{w32-charset-info-alist} here.
+
+@item spacing
+Specifies how the font is spaced.  The @code{p} spacing specifies
+a proportional font, and @code{m} or @code{c} specify a monospaced font.
+
+@item foundry
+Not used on Windows, but for informational purposes and to
+prevent problems with code that expects it to be set, is set internally to
+@code{raster} for bitmapped fonts, @code{outline} for scalable fonts,
+or @code{unknown} if the type cannot be determined as one of those.
+@end table
+
+@cindex font properties (MS Windows gdi backend)
+Options specific to @code{GDI} fonts:
+
+@table @code
+
+@cindex font scripts (MS Windows)
+@cindex font Unicode subranges (MS Windows)
+@item script
+Specifies a Unicode subrange the font should support.
+
+The following scripts are recognized on Windows: @code{latin}, @code{greek},
+@code{coptic}, @code{cyrillic}, @code{armenian}, @code{hebrew}, @code{arabic},
+@code{syriac}, @code{nko}, @code{thaana}, @code{devanagari}, @code{bengali},
+@code{gurmukhi}, @code{gujarati}, @code{oriya}, @code{tamil}, @code{telugu},
+@code{kannada}, @code{malayam}, @code{sinhala}, @code{thai}, @code{lao},
+@code{tibetan}, @code{myanmar}, @code{georgian}, @code{hangul},
+@code{ethiopic}, @code{cherokee}, @code{canadian-aboriginal}, @code{ogham},
+@code{runic}, @code{khmer}, @code{mongolian}, @code{symbol}, @code{braille},
+@code{han}, @code{ideographic-description}, @code{cjk-misc}, @code{kana},
+@code{bopomofo}, @code{kanbun}, @code{yi}, @code{byzantine-musical-symbol},
+@code{musical-symbol}, and @code{mathematical}.
+
+@cindex font antialiasing (MS Windows)
+@item antialias
+Specifies the antialiasing method.  The value @code{none} means no
+antialiasing, @code{standard} means use standard antialiasing,
+@code{subpixel} means use subpixel antialiasing (known as Cleartype on
+Windows), and @code{natural} means use subpixel antialiasing with
+adjusted spacing between letters.  If unspecified, the font will use
+the system default antialiasing.
+@end table
+
+@node Windows Misc
+@section Miscellaneous Windows-specific features
+
+  This section describes miscellaneous Windows-specific features.
+
+@vindex w32-use-visible-system-caret
+@cindex screen reader software, MS-Windows
+  The variable @code{w32-use-visible-system-caret} is a flag that
+determines whether to make the system caret visible.  The default when
+no screen reader software is in use is @code{nil}, which means Emacs
+draws its own cursor to indicate the position of point.  A
+non-@code{nil} value means Emacs will indicate point location with the
+system caret; this facilitates use of screen reader software, and is
+the default when such software is detected when running Emacs.
+When this variable is non-@code{nil}, other variables affecting the
+cursor display have no effect.
+
+@iftex
+@inforef{Windows Misc, , emacs}, for information about additional
+Windows-specific variables in this category.
+@end iftex
+
+@ifnottex
+@vindex w32-grab-focus-on-raise
+@cindex frame focus policy, MS-Windows
+  The variable @code{w32-grab-focus-on-raise}, if set to a
+non-@code{nil} value causes a frame to grab focus when it is raised.
+The default is @code{t}, which fits well with the Windows default
+click-to-focus policy.
+@end ifnottex
+
+@ifnottex
+@include msdog-xtra.texi
+@end ifnottex

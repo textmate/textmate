@@ -1,0 +1,2632 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2012-03-25  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el (url-queue-kill-job): Check whether the buffer has
+	been killed asynchronously before selecting it.
+
+2012-03-14  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el (url-queue-kill-job): Make sure that the callback
+	is always called, even if we have a timeout.
+
+2012-03-11  Chong Yidong  <cyd@gnu.org>
+
+	* url-http.el (url-http-end-of-document-sentinel): Handle
+	keepalive expiry by calling url-http again (Bug#10223).
+	(url-http): New arg, for the above.
+
+2012-03-11  Devon Sean McCullough  <emacs-hacker2012@jovi.net>
+
+	* url-http.el (url-http-find-free-connection): Don't pass a nil
+	argument to url-http-mark-connection-as-busy (bug#10891).
+
+2012-02-20  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el (url-queue-kill-job): Delete the process sentinel
+	before killing the process to avoid a race condition between the
+	two processes killing off the process buffer.
+
+	* url.el (url-retrieve-internal): Warn about file errors when
+	pruning the cache instead of bugging out (bug#10831).
+
+2012-02-19  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el (url-queue-callback-function): Remove the job from
+	the queue so that we don't kill the current buffer, which will
+	then make the callback function kill a random buffer.
+
+2012-02-14  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el (url-queue-kill-job): Refactored out code.
+	(url-queue-remove-jobs-from-host): Use it to kill jobs that are in
+	flight.
+
+2012-02-14  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-future.el: Minor doc update.
+
+2012-02-14  Leo Liu  <sdl.web@gmail.com>
+
+	* url-future.el: Fix last change.
+
+2012-02-13  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-future.el (url-future-test): Move to test/automated.
+
+2012-02-10  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-parse-headers): When redirecting, pass on
+	the `inhibit-cookie' parameter.
+
+2012-02-10  Glenn Morris  <rgm@gnu.org>
+
+	* url-queue.el (url-queue-retrieve): Fic previous doc fix.
+
+2012-02-10  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* url-http.el (url-http-clean-headers): Return the number of
+	removed characters.
+	(url-http-wait-for-headers-change-function): Adjust end position
+	after cleaning the headers.  (Bug#10768)
+
+2012-02-10  Glenn Morris  <rgm@gnu.org>
+
+	* url-queue.el (url-queue-retrieve): Doc fix.
+
+2012-02-08  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-parse.el (url): Add the `use-cookies' slot to the URL struct
+	to be able to keep track of whether to do cookies or not on a
+	per-URL basis.
+
+	* url-queue.el (url-queue-retrieve): Take an optional
+	`inhibit-cookies' parameter.
+
+	* url.el (url-retrieve): Ditto
+
+	* url-http.el (url-http-create-request): Don't send cookies unless
+	requested.
+	(url-http-parse-headers): Don't store cookies unless requested.
+
+2012-02-06  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-cache.el (url-cache-prune-cache): New function.
+	(url-cache-prune-cache): Check that the directory exists before
+	trying to delete it.
+
+	* url.el (url-retrieve-number-of-calls): New variable.
+	(url-retrieve-internal): Use it to expire the cache once in a
+	while.
+
+	* url-queue.el (url-queue-setup-runners): New function that uses
+	`run-with-idle-timer' for extra asynchronicity.
+	(url-queue-remove-jobs-from-host): New function.
+	(url-queue-callback-function): Remove jobs from the same host if
+	connection failed.
+
+2012-01-12  Glenn Morris  <rgm@gnu.org>
+
+	* url-auth.el (url-basic-auth, url-digest-auth):
+	Allow reading usernames etc when the minibuffer is already in use,
+	eg in url-handler-mode.  (Bug#10298)
+
+2011-11-15  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-dav.el (url-dav-delete-file): Fix typo.
+
+2011-11-14  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-async-sentinel): If the server hangs up
+	while we're talking to it, just `message' the error instead of
+	throwing an error.
+
+2011-11-03  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-cookie.el (url-cookie-expired-p): Protect against
+	zero-length cookie expiry dates.
+
+2011-10-19  Chong Yidong  <cyd@gnu.org>
+
+	* url-handlers.el (url-handler-mode): Doc fix.
+
+2011-09-24  Christopher J. White  <chris@grierwhite.com>  (tiny change)
+
+	* url-http.el (url-http-create-request): Avoid adding extra CRLF
+	(Bug#8931).
+
+2011-09-13  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-find-free-connection): If there was an
+	error on connect, make sure the user isn't bothered with
+	irrelevant questions.
+
+2011-08-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-http.el (url-http-parse-headers): For HTTP 301/302/307,
+	don't convert to a GET request (Bug#701).
+
+2011-07-13  Chris Newton  <redshodan@gmail.com>  (tiny change)
+
+	* url-http.el (url-http): Copy over `url-show-status' to the async
+	buffer so that `url-display-percentage' does the right thing
+	(bug#4680).
+
+2011-07-06  Nick Dokos  <nicholas.dokos@hp.com>  (tiny change)
+
+	* url-cache.el (url-cache-extract): Set buffer multibyte flag to
+	nil (bug#8827).
+
+2011-07-03  Nicolas Avrutin  <nicolasavru@gmail.com>  (tiny change)
+
+	* url-http.el (url-http-create-request): Remove double carriage
+	return and newline (bug#8931).
+
+2011-07-03  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-wait-for-headers-change-function): Remove
+	pointless "HTTP/0.9 How I hate thee!" message (bug#6735).
+
+2011-06-04  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* url-future.el (url-future-test): Fix scope of `saver'.
+
+2011-06-01  Glenn Morris  <rgm@gnu.org>
+
+	* url-queue.el (url-queue-parallel-processes, url-queue-timeout):
+	Add :version tag for options that will be new in 24.1.
+
+2011-05-31  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el (url-queue-parallel-processes): Increase the
+	default to 6, since 2 seems too conservative for normal usage.
+
+2011-05-31  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-future.el: Add general futures facility.
+
+2011-05-29  Leo Liu  <sdl.web@gmail.com>
+
+	* url-cookie.el (url-cookie): Add option :named so that
+	url-cookie-p is defined.  (Bug#8747)
+
+2011-05-02  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-queue.el: New file.
+	(url-queue-run-queue): Pick the first waiting job, and not the last.
+	(url-queue-parallel-processes): Lower the concurrency level, since
+	Emacs doesn't seem to like too many async processes.
+	(url-queue-prune-old-entries): Fix up the pruning code.
+
+2011-04-16  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-wait-for-headers-change-function):
+	Protect against malformed headerless responses from servers.
+
+2011-04-02  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-gw.el (url-open-stream): Use new open-network-stream
+	functionality to perform encryption.
+
+2011-04-01  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-cookie.el (url-cookie-handle-set-cookie):
+	Use `dolist' rather than `mapcar'.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-02-12  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-parse.el (url-bit-for-url, url-user-for-url)
+	(url-password-for-url): Use `auto-source-search' instead of
+	`auto-source-user-or-password'.
+
+	* url-auth.el: Autoload `auto-source-search' instead of
+	`auto-source-user-or-password'.
+	(url-basic-auth, url-digest-auth, url-do-auth-source-search): Use it.
+
+2011-02-03  Lars Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-wait-for-headers-change-function):
+	Don't move point if the callback function has moved/changed/killed
+	the process buffer.
+
+2010-12-16  Miles Bader  <miles@gnu.org>
+
+	* url-cookie.el: Require 'cl when compiling -- it's necessary for
+	defstruct.
+
+2010-12-14  Glenn Morris  <rgm@gnu.org>
+
+	* url-cookie.el: Don't require cl when compiling.
+	(url-cookie-clean-up, url-cookie-generate-header-lines): Use dolist.
+	(url-cookie-parse-file, url-cookie-store, url-cookie-retrieve)
+	(url-cookie-handle-set-cookie): Simplify.
+
+2010-12-13  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-cookie.el (url-cookie-retrieve): Handle null LOCALPART.
+	Suggested by Lennart Borgman (Bug#7543).
+
+2010-11-16  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-file.el (url-file-build-filename): Avoid interpreting
+	file:/foo:/bar URLs via tramp.
+
+2010-10-14  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-gw.el (url-open-stream): Use open-gnutls-stream if it exists.
+
+2010-10-07  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-end-of-document-sentinel): Protect against
+	the process buffer being killed.
+
+2010-10-04  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-http.el (url-http-wait-for-headers-change-function):
+	Protect against url-http-response-status for degenerate documents.
+	(url-http-wait-for-headers-change-function): Revert previous
+	change.  It lead to really slow loads.
+
+2010-10-03  Glenn Morris  <rgm@gnu.org>
+
+	* url-util.el (url-get-url-filename-chars): Don't eval-and-compile.
+	(url-get-url-at-point): Don't use eval-when-compile.
+
+	* url-cache.el (url-cache-create-filename-human-readable)
+	(url-cache-create-filename-using-md5):
+	* url-util.el (url-file-directory, url-file-nondirectory):
+	Don't use eval-when-compile and regexp-quote.
+
+2010-10-03  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-vars.el (url-mime-charset-string): Change the default to
+	nil to avoid sending 1171 bytes of not very useful data to the
+	HTTP server every request.
+
+2010-10-02  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-util.el (url-display-percentage): Don't message when the URL
+	is silent.
+	(url-lazy-message): Ditto.
+	(url-lazy-message): Remove leftover debugging code.
+
+	* url-http.el (url-http-parse-headers): Pass the SILENT parameter
+	back to the fetching function.
+
+	* url.el (url-retrieve): Add a silent parameter.
+	(url-retrieve-internal): Ditto.
+
+	* url-parse.el (url): Add a `silent' slot in the URL struct.
+
+2010-10-01  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* url-cookie.el (url-cookie-handle-set-cookie): Use url-lazy-message
+	for the cookie warning, which isn't very interesting.
+
+	* url-http.el (url-http-async-sentinel): Check that the buffer is
+	still alive before switching to it.
+
+2010-09-25  Julien Danjou  <julien@danjou.info>
+
+	* url-cache.el (url-cache-create-filename): Ensure no-port and
+	default-port end up with the same cache file.
+	(url-cache-create-filename-human-readable)
+	(url-cache-create-filename-using-md5): Argument is always in the form of
+	a string now.
+
+2010-09-23  Glenn Morris  <rgm@gnu.org>
+
+	* url-cache.el (url-is-cached): Doc fix.
+
+2010-09-23  Glenn Morris  <rgm@gnu.org>
+
+	* url-cache.el (url-cache-expired): Don't autoload.
+	Tweak previous change.
+	(url-cache-expire-time): Doc fix.
+
+2010-09-23  Julien Danjou  <julien@danjou.info>
+
+	* url-cache.el (url-cache-expire-time): New option.
+	(url-cache-expired): Rewrite.
+
+2010-09-19  Julien Danjou  <julien@danjou.info>
+
+	* url-cache.el (url-fetch-from-cache): New function.
+
+2010-09-18  Julien Danjou  <julien@danjou.info>
+
+	* url-vars.el (url-cache-expired): Remove unused variable.
+
+2010-09-14  Julien Danjou  <julien@danjou.info>
+
+	* url-cache.el (url-store-in-cache):
+	Make `buff' argument really optional.
+
+2010-09-14  Glenn Morris  <rgm@gnu.org>
+
+	* url-cookie.el (url-cookie-expired-p): Tweak previous change.
+
+2010-09-14  shawn boles  <shawn.boles@gmail.com>  (tiny change)
+
+	* url-cookie.el (url-cookie-expired-p): Simplify and fix.  (Bug#6957)
+
+2010-09-11  Glenn Morris  <rgm@gnu.org>
+
+	* url-cache.el, url-gw.el, url-history.el, url-irc.el, url-util.el:
+	* url-vars.el: Remove leading `*' from defcustom docs.
+
+2010-07-27  Michael Albinus  <michael.albinus@gmx.de>
+
+	* url-http.el (url-http-parse-headers): Disable file name handlers at
+	all (not only Tramp).  (Bug#6717)
+
+2010-07-27  Michael Albinus  <michael.albinus@gmx.de>
+
+	* url-http.el (url-http-parse-headers): Disable Tramp.  (Bug#6717)
+
+2010-07-01  Mark A. Hershberger  <mah@everybody.org>
+
+	* url-http.el (url-http-create-request): Add a CRLF on the end so
+	that POSTs with content to https URLs work.
+	See <https://bugs.launchpad.net/mediawiki-el/+bug/540759>
+
+2010-06-22  Mark A. Hershberger  <mah@everybody.org>
+
+	* url-parse.el (url-user-for-url, url-password-for-url):
+	Convenience functions that get usernames and passwords for URLs
+	from auth-source functions.
+
+2010-06-12  Štěpán Němec  <stepnem@gmail.com>  (tiny change)
+
+	* url-vars.el (url-privacy-level): Fix doc typo.  (Bug#6406)
+
+2010-05-19  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-util.el (url-unhex-string): Don't accidentally decode as latin-1.
+
+2010-05-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.2 released.
+
+2010-05-03  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-dired.el (url-dired-minor-mode): Use define-minor-mode.
+
+2010-03-24  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-http.el (url-http-parse-headers): Fix wrong variable name.
+
+2010-03-24  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-http.el (url-http-codes): New variable to hold a mapping of
+	HTTP status codes' numbers, their symbolic name, and their text.
+	(url-http-parse-headers): Use it, leaving the original numeric
+	code in a comment.
+
+2010-03-19  Glenn Morris  <rgm@gnu.org>
+
+	* url.el: Move mailcap require earlier in the file.
+
+2010-03-12  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-vars.el (url): Put in comm group.
+
+2010-03-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.2.
+
+2010-01-23  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-util.el: Require url-vars (Bug#5459).
+
+2009-11-27  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-parse.el (url-generic-parse-url): Bind deactivate-mark.
+
+2009-11-08  Kai Tetzlaff  <kai.tetzlaff@web.de>  (tiny change)
+
+	* url-http.el (url-http-handle-authentication): Use proxy server,
+	if any, for authentication (Bug#4883).
+
+2009-11-03  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-util.el (url-insert-entities-in-string):
+	* url-nfs.el (url-nfs-unescape):
+	* url-ldap.el (url-ldap):
+	* url-imap.el (url-imap):
+	* url-cid.el (url-cid-gnus, url-cid): Use with-current-buffer.
+
+2009-10-01  Glenn Morris  <rgm@gnu.org>
+
+	* url-http.el (url-dav-file-attributes): Fix declaration.
+
+2009-09-13  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-handlers.el (url-copy-file): Add fifth arg for compatibility
+	with 2005-06-25 change to copy-file (Bug#4410).
+
+2009-09-13  Glenn Morris  <rgm@gnu.org>
+
+	* url-file.el (url-file): Avoid assignment to free variable `filename'.
+
+2009-09-12  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-methods.el (url-scheme--registering-proxy): New variable.
+	(url-scheme-register-proxy, url-scheme-get-property):
+	Avoid calling url-scheme-register-proxy in an infloop (Bug#4191).
+
+2009-08-22  Glenn Morris  <rgm@gnu.org>
+
+	* url-file.el (url-file-build-filename):
+	* url-privacy.el (url-setup-privacy-info): Remove code for defunct
+	system-types Apple-Macintosh, emx, ms-windows, next-mach.
+
+2009-06-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Branch for 23.1.
+
+2009-03-27  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-file-handler): Save match data.
+
+2009-02-21  Jason Rumney  <jasonr@gnu.org>
+
+	* url-expand.el (url-default-expander): Use concat to combine
+	parts.  (Bug #1020)
+
+2009-02-10  Glenn Morris  <rgm@gnu.org>
+
+	* url-util.el (url-generate-unique-filename): Silence compiler.
+
+2009-02-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-file.el (url-file): Use make-temp-file.
+
+	* url-util.el (url-generate-unique-filename): Mark as obsolete.
+
+	* url-vars.el (url-temporary-directory): Mark as obsolete.
+
+2009-01-15  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-cookie.el (url-cookie-retrieve): Fix last change.
+
+2009-01-14  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-cookie.el (url-cookie-retrieve): Handle null localpart.
+
+2009-01-13  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-util.el (url-truncate-url-for-viewing): Doc fix.
+
+2009-01-09  Glenn Morris  <rgm@gnu.org>
+
+	* url-cid.el (url-cid-gnus): Fix typo in header name.
+
+2008-11-04  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-util.el (url-basepath): Add url-basepath as an alias for
+	url-file-directory.
+
+2008-10-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url.el (url-configuration-directory): Use `locate-user-emacs-file'.
+
+2008-10-20  İsmail Dönmez  <ismail@namtrac.org>  (tiny change)
+
+	* url-auth.el (url-basic-auth): Encode password string.
+
+2008-08-30  Glenn Morris  <rgm@gnu.org>
+
+	* url-http.el (url-https-expand-file-name): Resolve directly to
+	url-default-expander rather than via another alias.
+	(url-default-expander): Autoload an autoload.  (Bug#825).
+
+2008-07-02  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url.el (url-do-setup):
+	* url-dired.el (url-dired-minor-mode):
+	* url-file.el (url-file-find-possibly-compressed-file):
+	* url-gw.el (url-gateway-broken-resolution):
+	* url-handlers.el (url-handler-regexp):
+	* url-imap.el (url-imap-default-port):
+	* url-methods.el (url-scheme-get-property): Fix typos in docstrings.
+
+	* url-auth.el (url-basic-auth-storage, url-digest-auth):
+	Fix typos in docstrings.
+	(url-digest-auth-storage, url-register-auth-scheme): Reflow docstrings.
+
+	* url-cache.el (url-cache-prepare): Doc fix.
+	(url-cache-create-filename-human-readable, url-cache-extract):
+	Fix typos in docstrings.
+
+	* url-dav.el (url-intersection, url-dav-iso8601-regexp)
+	(url-dav-delete-something): Fix typos in docstrings.
+	(url-dav-http-success-p, url-dav-file-name-all-completions)
+	(url-dav-directory-files, url-dav-file-name-completion): Doc fixes.
+
+	* url-http.el (url-http-idle-sentinel): Doc fix.
+
+	* url-irc.el (url-irc-default-port): Fix typo in docstring.
+	(url-irc-function): Doc fix.
+
+	* url-util.el (url-get-url-filename-chars, url-unhex-string):
+	Fix typos in docstrings.
+	(url-file-extension): Doc fix.
+
+	* url-vars.el (url-current-object, url-current-mime-headers)
+	(url-privacy-level, url-mail-command, url-mime-language-string):
+	Fix typos in docstrings.
+	(url-honor-refresh-requests): Reflow docstring.
+	(url-using-proxy): Doc fix.
+
+2008-06-22  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* vc-dav.el: Move to the parent directory to be together with the
+	rest of the VC backends.
+
+2008-06-07  Glenn Morris  <rgm@gnu.org>
+
+	* url-auth.el (auth-source-user-or-password): Remove unnecessary
+	eval-and-compile.
+
+2008-05-30  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-file-name-completion): Add missing argument.
+
+2008-05-12  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-auth.el: Add autoload cookie for `auth-source-user-or-password'.
+	(url-basic-auth, url-digest-auth): Use it with any realm,
+	overriding the user name and password before the prompt.
+
+2008-04-28  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-vars.el (url-load-hook): Fix typo in docstring.
+
+2008-03-09  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-chunked-encoding-after-change-function):
+	Remove superfluous CRLF at end of file.  (Bug #42)
+
+2008-03-02  Andreas Schwab  <schwab@suse.de>
+
+	* url-util.el: Require cl when compiling.
+
+2008-02-28  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* url-util.el (url-get-normalized-date): Simplify to use
+	`format-time-string'.  Always generate date in UTC, but
+	call it GMT for full compatibility with the RFCs.
+
+2008-02-06  Michael Albinus  <michael.albinus@gmx.de>
+
+	* url-handlers.el (file-remote-p): Add handler.
+	(url-handler-file-remote-p): New fun.
+
+2008-02-06  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-handler-unhandled-file-name-directory):
+	Handle `file' URLs specially.  Return nil for non-local filenames.
+
+2008-02-04  Magnus Henoch  <mange@freemail.hu>
+
+	* url-expand.el: Require cl when compiling, for setf.
+
+2008-01-29  John Wiegley  <johnw@newartisans.com>
+
+	* url-auth.el (url-digest-auth): If the 'opaque' argument is not
+	being used, don't add it to the response text.  Also, changed an
+	if so that the interaction between the PROMPT and OVERWRITE
+	arguments can no longer result in the user being queried twice for
+	the same login and password information.
+
+2008-01-21  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (unhandled-file-name-directory): Add handler.
+	(url-handler-unhandled-file-name-directory): New fun.
+
+2008-01-07  Michael Albinus  <michael.albinus@gmx.de>
+
+	* url-handlers.el (url-file-handler): Autoload.
+
+2007-12-11  Glenn Morris  <rgm@gnu.org>
+
+	* url.el (url-configuration-directory): Make it a defcustom.
+
+	* url-util.el (url-make-private-file): New function.
+	* url-cookie.el (url-cookie-write-file):
+	* url-history.el (url-history-save-history):
+	Use url-make-private-file and with-temp-buffer.
+
+2007-12-06  Glenn Morris  <rgm@gnu.org>
+
+	* url-file.el, url-mailto.el: Remove directory part from filenames
+	in function declarations.
+
+2007-12-02  Glenn Morris  <rgm@gnu.org>
+
+	* url-about.el, url-handlers.el: Don't require cl when compiling.
+
+	* url-dav.el (url-dav-delete-directory): Fix message typo.
+
+	* url-history.el (top-level): Don't require cl when compiling.
+	(url-history-setup-save-timer, url-history-save-history):
+	Use condition-case rather than ignore-errors.
+
+	* url-imap.el (top-level): Don't require cl when compiling.
+	(url-imap): Use signal rather than check-type.
+
+	* url-news.el (top-level): Don't require cl when compiling.
+	(gnus-group-buffer): Define for compiler.
+	(url-news-fetch-message-id): Don't use `declare'.
+	(nntp-open-tls-stream, nntp-open-ssl-stream):
+	No need to define for compiler.
+	(url-snews): Use nntp-open-tls-stream unless ssl is requested.
+	Correct quoting of nntp-open-connection-function value.
+
+2007-12-01  Glenn Morris  <rgm@gnu.org>
+
+	* url-handlers.el (top-level): Always require url-parse, not just
+	when compiling.
+
+2007-11-30  Glenn Morris  <rgm@gnu.org>
+
+	* url-cookie.el (url-cookie-p): Declare as a function.
+
+2007-11-29  Glenn Morris  <rgm@gnu.org>
+
+	* url-file.el (url-file-build-filename, url-file): Wrap uses of
+	efs in (featurep 'xemacs) test.
+
+	* url-irc.el (zenirc, zenirc-send-line): Declare as functions.
+
+2007-11-28  Diane Murray  <disumu@x3y2z1.net>
+
+	* url-dired.el: Don't require w3-fetch and w3-open-local.
+	(url-dired-find-file): Use `find-file'.  Doc fix.
+	(url-dired-find-file-mouse, url-dired-minor-mode): Doc fix.
+
+2007-11-24  Glenn Morris  <rgm@gnu.org>
+
+	* url-privacy.el (url-device-type): Fix typo.
+
+2007-11-20  Dan Nicolaescu  <dann@ics.uci.edu>
+
+	* url-mailto.el (mail-send-and-exit):
+	* url-http.el (url-dav-file-attributes):
+	* url-file.el (ange-ftp-set-passwd, ange-ftp-copy-file-internal)
+	(url-generate-unique-filename): Declare as functions.
+
+	* url-privacy.el (url-device-type): Define unconditionally.
+
+2007-11-15  Richard Stallman  <rms@gnu.org>
+
+	* url.el (url-retrieve-synchronously): Call delete-process.
+
+2007-10-31  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-vars.el (url-vars-unload-hook): Remove function and variable.
+	Hooks are automatically removed by `unload-feature'.
+
+2007-10-13  Richard Stallman  <rms@gnu.org>
+
+	* url-util.el (url-basepath): Function deleted.
+	(url-file-directory, url-file-nondirectory): New functions
+	replacing url-basepath.  Callers changed.
+
+	* url-expand.el (url-default-expander): Use `url-file-directory'.
+
+	* url-auth.el (url-digest-auth, url-basic-auth):
+	Rename `path' to `file'.  Use `url-file-directory'.
+
+2007-10-12  Diane Murray  <disumu@x3y2z1.net>
+
+	* url-auth.el (url-basic-auth): Set path to "/" when URL has an
+	empty string filename.
+
+2007-10-09  Richard Stallman  <rms@gnu.org>
+
+	* url-parse.el (url-type, url-user, url-password, url-host)
+	(url-port, url-filename, url-target, url-attributes)
+	(url-fullness, url-set-type, url-set-user, url-set-password)
+	(url-set-host, url-set-port, url-set-filename, url-set-target)
+	(url-set-attributes, url-set-full): Change macros to defuns.
+
+2007-09-26  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-dav.el (top):
+	* url-vars.el (top): Use `mapc' rather than `mapcar'.
+
+2007-09-22  Diane Murray  <disumu@x3y2z1.net>
+
+	* url-misc.el (url-generic-emulator-loader): Send the port as a
+	string to `url-do-terminal-emulator'.
+
+2007-09-21  Diane Murray  <disumu@x3y2z1.net>
+
+	* url-news.el (url-news-fetch-newsgroup): Fix formatting of Gnus method.
+
+	* url-util.el (url-get-normalized-date): Pass full timezone
+	information to timezone-make-date-arpa-standard, since zone name
+	may be unknown.
+
+2007-09-03  Diane Murray  <disumu@x3y2z1.net>
+
+	* url-http.el (url-http-parse-headers): Bind the current buffer
+	rather than calling `url-mark-buffer-as-dead' with
+	`current-buffer', so that the correct buffer is killed if
+	`url-retrieve-synchronously' gets redirected to a new URL.
+
+2007-08-31  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-parse.el (url): Use defstruct rather than macros.
+	(url-generic-parse-url):
+	* url-util.el (url-normalize-url, url-truncate-url-for-viewing):
+	* url-methods.el (url-scheme-register-proxy):
+	* url-mailto.el (url-mailto):
+	* url-file.el (url-file-build-filename):
+	* url-expand.el (url-identity-expander, url-default-expander):
+	Update all callers.
+
+2007-08-09  Edward O'Connor  <hober0@gmail.com>  (tiny change)
+
+	* url-auth.el (url-basic-auth): When prompting for username
+	and password, default to the username and password in the URL.
+
+2007-08-08  Glenn Morris  <rgm@gnu.org>
+
+	* url-auth.el, url-cache.el, url-dav.el, url-file.el, vc-dav.el:
+	Replace `iff' in doc-strings and comments.
+
+2007-07-25  Glenn Morris  <rgm@gnu.org>
+
+	* Relicense all FSF files to GPLv3 or later.
+
+2007-06-12  Tom Tromey  <tromey@redhat.com>
+
+	* url.el (url-configuration-directory): Use user-emacs-directory.
+
+2007-06-12  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-cookie.el (url-cookie-name, url-cookie-value)
+	(url-cookie-expires, url-cookie-localpart, url-cookie-domain)
+	(url-cookie-secure, url-cookie-set-name, url-cookie-set-value)
+	(url-cookie-set-expires, url-cookie-set-localpart)
+	(url-cookie-set-domain, url-cookie-set-secure)
+	(url-cookie-retrieve-arg, url-cookie-create, url-cookie-p): Remove.
+	(url-cookie): New struct.
+	(url-cookie-store): Use setf instead of url-cookie-set-*.
+
+2007-05-29  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-mailto.el (url-mailto): Insert body after
+	mail-header-separator if present, so that it is before signature.
+	Suggested by Leo <sdl.web@gmail.com>.
+
+2007-04-15  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-parse.el (url-generic-parse-url): Revert 2006-10-09 changes.
+
+2007-04-13  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-http.el (url-http-parse-headers): Stop after a set number of
+	redirections.  Suggested by Diane Murray.
+
+	* url-vars.el (url-max-redirections): New var.
+
+2007-04-01  Diane Murray  <disumu@x3y2z1.net>  (tiny change)
+
+	* url-http.el (url-http-handle-cookies): Reverse list returned by
+	`mail-fetch-field', so that cookies are set in the correct order.
+
+	* url-cookie.el (url-cookie-retrieve, url-cookie-host-can-set-p):
+	Deal with wildcard dots in domain values.
+
+2007-03-31  Andreas Seltenreich  <uwi7@rz.uni-karlsruhe.de>
+
+	* url-http.el (url-http-mark-connection-as-busy)
+	(url-http-mark-connection-as-free): Clear query-on-exit flag on
+	idle connections.
+
+2007-02-04  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-http.el (url-http-connection-opened): New variable.
+	(url-http): Initialize it.
+	(url-http-async-sentinel): Don't try changing sentinels.
+	Run url-http-end-of-document-sentinel if necessary.
+
+2007-01-29  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-auth.el (url-get-authentication): Fix typo in docstring.
+
+2007-01-14  Magnus Henoch  <mange@freemail.hu>
+
+	* url-proxy.el (url-proxy-object): Remove.
+	(url-proxy): Don't use `url-proxy-object'.  Act according to type of
+	proxy (currently only HTTP supported).
+
+	* url.el (url-retrieve-internal): Don't use `url-proxy-object'.
+
+	* url-http.el (url-http-proxy): New variable.
+	(url-http-create-request): Use it.  Don't use `url-proxy-object'.
+	(url-http): Treat `url' argument as resource to download, and
+	dynamic variable `url-using-proxy' as proxy to use.
+	Set `url-current-object' to actual URL, and `url-http-proxy' to proxy
+	used.
+	(url-http-handle-cookies): Assume that `url-current-object' does
+	not point to the proxy used.
+	(url-http-async-sentinel): Adapt error message.
+
+2006-12-10  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-gw.el (url-gateway-nslookup-program): Doc fix.
+
+2006-12-08  Magnus Henoch  <mange@freemail.hu>
+
+	* url-proxy.el (url-proxy-object): New variable.
+	(url-proxy): Bind it instead of `proxy-object'.
+
+	* url-http.el (url-http-create-request): Remove url argument, use
+	the buffer-local variable `url-http-target-url' instead.
+	Both callers updated.  Simplify proxy handling.
+	(url-http): Don't make proxy-object buffer local.
+
+	* url.el (url-retrieve-internal): Bind url-proxy-object to nil.
+
+2006-11-26  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-wait-for-headers-change-function):
+	Use `when' instead of `if' when possible.
+	(url-http): Define url-http-response-version.
+	(url-http-parse-response): Set it.
+	(url-http-parse-headers): Use it to determine keep-alive behavior.
+
+2006-11-23  Diane Murray  <disumu@x3y2z1.net>  (tiny change)
+
+	* url-http.el (url-http-content-length-after-change-function):
+	Use `url-lazy-message'.
+
+	* url-util.el (url-display-percentage): Only show a message if
+	`url-show-status' is non-nil.
+
+2006-11-15  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http): Make proxy-object buffer-local, to
+	handle proxied asynchronous connections correctly.
+
+	* url-parse.el (url-generic-parse-url): Use with-temp-buffer.
+
+2006-11-15  Shun-ichi GOTO  <gotoh@taiyo.co.jp>  (tiny change)
+
+	* url-http.el (url-http-wait-for-headers-change-function):
+	Defer detection of HTTP 0.9 until we have at least one line.
+
+2006-11-10  Shun-ichi GOTO  <gotoh@taiyo.co.jp>  (tiny change)
+
+	* url-http.el (url-http-mark-connection-as-free)
+	(url-http-find-free-connection): Don't treat process with status
+	`connect' as free.
+	(url-http-async-sentinel): Request correct url.
+
+2006-11-08  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-handle-authentication): If there are
+	several authentication headers, use the strongest available
+	method.
+
+	* url.el (url-retrieve-synchronously): Allow quitting when
+	inhibit-quit is t.
+
+2006-11-03  Shun-ichi GOTO  <gotoh@taiyo.co.jp>  (tiny change)
+
+	* url-http.el (url-http-handle-authentication): If there are
+	several authentication headers, use the first with a supported
+	method.
+
+2006-11-01  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-create-request): Use buffer-local
+	equivalents of dynamically bound variables.
+
+2006-10-29  Magnus Henoch  <mange@freemail.hu>
+
+	* url-gw.el (url-open-stream): Really use asynchronous
+	connections (accidentally disabled during debugging).
+
+2006-10-28  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-parse-headers): Fix misplaced paren.
+
+2006-10-27  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-mark-connection-as-free): Verify that
+	connection is open before saving it.
+	(url-http-handle-authentication): Use url-retrieve-internal
+	instead of url-retrieve.
+	(url-http-parse-headers): Adapt to new callback interface.
+	(url-http): Handle non-blocking connections.
+	(url-http-async-sentinel): Create.
+
+	* url.el (url-retrieve): Update docstring for new callback interface.
+	Remove all code.
+	(url-retrieve-internal): Move code from url-retrieve here.
+
+	* url-gw.el (url-open-stream): Use a non-blocking socket for
+	`native' gateway method, if available.
+
+2006-10-16  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-https-create-secure-wrapper):
+	Always use tls gateway method.
+
+2006-10-12  Magnus Henoch  <mange@freemail.hu>
+
+	* url-http.el (url-http-find-free-connection):
+	Handle url-open-stream returning nil.
+
+2006-10-11  Magnus Henoch  <mange@freemail.hu>
+
+	* url-https.el: Remove (clashes with url-http on 8+3 systems).
+
+	* url-http.el: Move contents of url-https.el here.  Add autoloads.
+
+2006-10-09  Magnus Henoch  <mange@freemail.hu>
+
+	* url-parse.el (url-generic-parse-url): Handle URLs with empty
+	path component and non-empty query component.  Untangle path,
+	query and fragment parsing code.  Add references to RFC 3986 in
+	comments.
+	(url-recreate-url-attributes): Start query string with "?", not ";".
+
+2006-09-20  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-dav.el (url-dav-file-attributes): Simplify.
+
+	* url-http.el (url-http-head-file-attributes): Add device "info".
+
+2006-09-18  Michael Olson  <mwolson@gnu.org>
+
+	* url-methods.el (url-scheme-register-proxy): Handle case where
+	getenv returns an empty string for http_proxy.  This prevents an
+	error when calling `format' later on.
+
+2006-08-31  Diane Murray  <disumu@x3y2z1.net>  (tiny change)
+
+	* url-parse.el (url-recreate-url-attributes): New function, code
+	simply moved from `url-recreate-url'.
+	(url-recreate-url): Use it.
+	Put the `url-target' at the end of the URL after the attributes.
+
+	* url-http.el (url-http-create-request):
+	Use `url-recreate-url-attributes' when setting real-fname.
+
+2006-08-29  Diane Murray  <disumu@x3y2z1.net>  (tiny change)
+
+	* url-cookie.el (url-cookie-write-file): Really don't use versioned
+	backups.
+
+2006-08-25  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-file-local-copy): Tell url-copy-file that the
+	dest file will already exist.
+
+2006-07-31  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-util.el (url-hexify-string): Only utf-8 encode if it's
+	a multibyte string.
+	(url-normalize-url): Remove unused var `grok'.
+	(url-truncate-url-for-viewing): Remove unused var `tail'.
+
+2006-07-30  Thien-Thi Nguyen  <ttn@gnu.org>
+
+	* url-util.el (url-hexify-string): Rewrite.
+	Suggested by David Smith <davidsmith@acm.org>.
+
+2006-07-12  Michael Olson  <mwolson@gnu.org>
+
+	* url-irc.el (url-irc-erc): Call erc-handle-irc-url.
+
+2006-07-11  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-cookie.el: Remove spurious * in docstrings.
+	(url-cookie-write-file): Don't use versioned backups.
+	(url-cookie-host-can-set-p): Remove unused var `tmp'.
+
+2006-07-04  Andreas Seltenreich  <uwi7@rz.uni-karlsruhe.de>
+
+	* url-cookie.el (url-cookie-save-interval): Move to url-cookie group.
+	(url-cookie-write-file): Reset url-cookies-changed-since-last-save.
+
+2006-05-12  Reiner Steib  <Reiner.Steib@gmx.de>
+
+	* url-http.el (url-http-file-exists-p): Test if status is integer.
+
+2006-05-05  Andreas Seltenreich  <seltenreich@gmx.de>
+
+	* url-http.el (url-http-parse-headers): Don't reuse connection if
+	"Connection: close" header was seen.
+
+2006-04-26  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-gw.el (url-open-stream): Don't hide errors.
+	(url-gateway-nslookup-host, url-open-telnet): Use with-current-buffer.
+
+	* url-handlers.el (url-insert): New function.
+	(url-insert-file-contents): Use it.
+
+2006-03-29  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-handler-directory-file-name): New handler.
+	(url-file-local-copy): Plug race condition security hole.
+
+2006-03-27  Romain Francoise  <romain@orebokech.com>
+
+	* url-irc.el (url-irc-rcirc, url-irc-erc): New functions.
+	(url-irc-function): Add rcirc and ERC to the list of IRC clients.
+	Default to rcirc, since ZenIRC isn't part of Emacs.
+
+2006-03-07  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-http.el (url-http-find-free-connection): Fix braino in last fix.
+
+2006-03-05  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-http.el (url-http-find-free-connection): Don't kill the process
+	when killing the temp buffer.
+	(url-http-symbol-value-in-buffer): Massage to make it clear to the
+	byte-compiler that the function is defined.
+
+2006-02-20  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url.el (url-redirect-buffer): New var.
+	(url-retrieve-synchronously): Use it to follow redirections.
+
+	* url-http.el: Require `url' rather than try to autoload parts of it.
+	(url-http-find-free-connection): `url-open-stream' needs a real buffer.
+	(url-http-parse-headers): Set `url-redirect-buffer' when following
+	a redirection reply.
+
+2006-01-18  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-news.el: Move defvars out of eval-when-compile.
+	(url-news-fetch-message-id, url-news-fetch-newsgroup):
+	Use with-current-buffer.
+
+2006-01-10  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url.el (url-retrieve-synchronously): Adjust the workaround so as not
+	to stop in the middle of a redirection.
+
+	* url-vars.el (url-privacy-level): Add setter.
+
+2006-01-05  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-history.el (url-history-hash-table): Initialize in declaration.
+	(url-history-parse-history): Don't reset the history.
+	(url-history-save-history): Create parent dir if necessary.
+	(url-history-save-history): Don't write the initialization of
+	url-history-hash-table into the history file.
+	(url-have-visited-url): Simplify since url-history-hash-table isn't nil.
+	(url-completion-function): Simplify.
+
+	* url-cookie.el (url-cookie-parse-file): Don't complain of missing file.
+	(url-cookie-parse-file, url-cookie-write-file, url-cookie-retrieve)
+	(url-cookie-generate-header-lines, url-cookie-handle-set-cookie)
+	(url-cookie-setup-save-timer): Remove autoload cookies.
+	They're only called from files that require url-cookie anyway.
+
+	* url-history.el (url-history-setup-save-timer)
+	(url-history-parse-history, url-history-save-history):
+	Remove autoload cookies.  They're only called from url.el which requires
+	url-history anyway.
+	(url-history-parse-history): Don't complain if the file is missing.
+
+2006-01-02  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-retrieve-synchronously): Don't autoload.
+
+	* url.el (url-retrieve, url-retrieve-synchronously): Autoload.
+
+	* url-cache.el: Require `url'.
+
+2005-12-27  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-cache.el (url-store-in-cache): Use save-current-buffer.
+
+	* url.el (url-configuration-directory): Don't autoload because the
+	default value needs to be computed at run-time, not dump-time.
+
+2005-12-21  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-cookie.el (url-cookie-write-file): Create parent dir.
+
+	* url.el (url-configuration-directory): Use ~/.emacs.d if possible.
+
+2005-12-07  Klaus Straubinger  <KSNetz@Arcor.DE>  (tiny change)
+
+	* url-cookie.el (url-cookie-save-interval): Simplify.
+	(url-cookie-setup-save-timer): Simplify.
+
+2005-12-04  Klaus Straubinger  <KSNetz@Arcor.DE>  (tiny change)
+
+	* url-history.el (url-history-list): Var deleted.
+	(url-history-save-interval): Simplify.
+	(url-history-setup-save-timer): Simplify.
+
+2005-12-01  Kim F. Storm  <storm@cua.dk>
+
+	* url-history.el (url-history-track): Fix last change.
+
+2005-12-01  Klaus Straubinger  <KSNetz@Arcor.DE>  (tiny change)
+
+	* url-history.el (url-history-track):
+	Call url-history-setup-save-timer in :set function.
+	:type allows three alternatives.
+	(url-history-setup-save-timer): Test url-history-track.
+	* url.el (url-retrieve): Test url-history-track.
+
+2005-11-18  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-http.el: Use with-current-buffer.
+	(url-http-target-url): Rename from url-http-cookies-sources.
+	(url-http-parse-headers): Use it.
+	(url-http-handle-authentication): Use subst-char-in-string.
+
+2005-11-16  Jürgen Hötzel  <emacs@hoetzel.info>  (tiny change)
+
+	* url-handlers.el (url-insert-file-contents): Use the charset info
+	provided by the HTTP server, if any.
+
+2005-10-20  CHENG Gao  <chenggao@gmail.com>  (tiny change)
+
+	* url-nfs.el (top level):
+	* url-handlers.el (directory-files):
+	* url-file.el (top level):
+	* url-dired.el (url-dired-minor-mode-map):
+	* url-http.el (url-http-chunked-encoding-after-change-function):
+	Remove XEmacs support.
+
+2005-10-15  Richard M. Stallman  <rms@gnu.org>
+
+	* url.el: Don't try to autoload hash table functions.
+
+2005-10-03  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-http.el (url-http-create-request): Avoid incorrect implicit
+	unibyte->multibyte conversion.
+
+2005-09-17  Richard M. Stallman  <rms@gnu.org>
+
+	* url-vars.el (url-mail-command): Don't test fboundp of `compose-mail'.
+
+	* url-mailto.el (url-mailto): Special case `mail'.
+	Don't test fboundp of `compose-mail'.
+
+2005-09-15  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-mailto.el (url-mailto): Delete mail buffer after sending
+	autogenerated mail.
+	Call `compose-mail with `new' argument if possible.
+
+2005-09-13  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-mailto.el (url-mailto): Always use a new mail buffer.
+
+2005-09-01  Chong Yidong  <cyd@stupidchicken.com>
+
+	* url-util.el (url-parse-query-string): New optional argument
+	allow-newlines allows decoding of newlines.
+
+	* url-mailto.el (url-mailto): Allow newlines in URL arguments.
+	Don't lose original "to" value when there is a "to" header.
+	Remove carriage return characters in message body.
+
+2005-08-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-news.el (nntp-open-tls-stream, nntp-open-ssl-stream):
+	* url-http.el (url-http-cookies-sources): Defvar at compile time.
+
+2005-07-15  Richard M. Stallman  <rms@gnu.org>
+
+	* url-http.el (url-http-parse-headers): Add :redirect arg-pair
+	when calling url-retrieve, to indicate a redirect.
+
+	* url.el (url-retrieve): The callback function can get an additional
+	keyword arg pair.
+
+2005-07-04  Lute Kamstra  <lute@gnu.org>
+
+	Update FSF's address in GPL notices.
+
+2005-07-04  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-history.el (url-history-track): Doc fix.
+	(url-history): Finish `defgroup' description with period.
+
+	* url-cookie.el (url-cookie):
+	* url-gw.el (url-gateway):
+	* url-news.el (url-news):
+	* url-vars.el (url, url-file, url-cache, url-mime, url-hairy):
+	Finish `defgroup' description with period.
+
+2005-06-28  Klaus Straubinger  <KSNetz@Arcor.DE>  (tiny change)
+
+	* url-http.el (url-http-create-request): Call url-recreate-url
+	in proxy case.
+
+2005-06-27  Klaus Straubinger  <KSNetz@Arcor.DE>  (tiny change)
+
+	* url-http.el (url-http-create-request): When computing real-fname,
+	call url-filename in both cases.
+
+2005-06-27  Richard M. Stallman  <rms@gnu.org>
+
+	* url-cookie.el (url-cookie-store): Rename arg PATH to LOCALPART.
+	(url-cookie-retrieve): Likewise.
+	(url-cookie-generate-header-lines): Likewise.
+	(url-cookie-handle-set-cookie): Likewise.
+	(url-cookie-create): Expect :localpart instead of :path.
+	(url-cookie-localpart): Rename from url-cookie-path.
+	(url-cookie-set-localpart): Rename from url-cookie-set-path.
+	(url-cookie-file): Doc fix.
+	(url-cookie-p): Add doc string.
+
+2005-06-23  Richard M. Stallman  <rms@gnu.org>
+
+	* url-cookie.el (url-cookie-generate-header-lines): Fix autoload cookie.
+
+2005-06-21  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-gw.el (url-open-stream):
+	* url-vars.el (url-gateway-unplugged): Fix spellings.
+
+2005-06-14  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-history.el (url-completion-function): Follow error conventions.
+
+2005-06-13  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-file.el (url-file, url-file-asynch-callback): with-current-buffer.
+
+2005-06-10  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-dav.el: Remove most autoload cookies.
+	Don't hook into the url-file-handler since it currently breaks all
+	non-HTTP URLs.
+
+	* url-handlers.el (vc-registered): Explicitly disable VC for URL files.
+
+	* url.el (url-retrieve-synchronously): Don't exit precipitously when
+	fetching a file via ange-ftp.
+
+2005-06-10  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-cookie.el (url-cookie-multiple-line): Fix spelling in docstring.
+
+2005-05-19  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-cookie.el (url-cookie-multiple-line):
+	Specify group and type in defcustom.
+
+2005-05-06  Juanma Barranquero  <lekktu@gmail.com>
+
+	* url-auth.el (url-register-auth-scheme):
+	* url-cookie.el (url-cookie-expired-p):
+	* url-dav.el (url-dav-process-date-property)
+	(url-dav-process-boolean-property, url-dav-process-DAV:status):
+	* url-http.el (url-http-chunked-encoding-after-change-function)
+	(url-http-wait-for-headers-change-function):
+	* url-ns.el (isInNet):
+	* url-parse.el (url-generic-parse-url):
+	* url-util.el (url-get-normalized-date): Replace `string-to-int'
+	by `string-to-number'.
+
+2005-04-18  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url.el (url-retrieve-synchronously): Work around the fact that
+	url-http sometimes doesn't call the callback.
+
+2005-04-04  Lute Kamstra  <lute@gnu.org>
+
+	* url-handlers.el (url-handler-mode): Specify :group.
+
+2005-02-26  James Cloos  <cloos@jhcloos.com>  (tiny change)
+
+	* url-history.el (url-have-visited-url): Don't barf if
+	url-history-hash-table is nil.
+
+2005-02-14  Michael Welsh Duggan  <md5i@cs.cmu.edu>
+
+	* url-http.el (url-http-parse-headers): Test url-automatic-caching.
+
+2005-01-22  Klaus Straubinger  <KSNetz@Arcor.DE>  (tiny change)
+
+	* url-http.el (url-http-parse-headers) <302>: Reset url-http-data
+	to nil, like for the 303 response.
+
+2005-01-13  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url.el (url-retrieve-synchronously): Use accept-process-output rather
+	than sit-for.
+
+2005-01-03  Klaus Straubinger  <ksnetz@arcor.de>  (tiny change)
+
+	* url-http.el (url-http-handle-authentication):
+	Don't kill the current buffer.
+
+2004-12-11  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el: Don't `require' everything eagerly.
+
+2004-11-30  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* url-http.el (url-http-handle-cookies): Bind `url-current-object'
+	to `url-http-cookies-sources' so that cookies are attributed to
+	proper domain.
+	(url-http): Make local variable `url-http-cookies-sources'.
+
+2004-11-28  Andreas Schwab  <schwab@suse.de>
+
+	* url-http.el (url-http-create-request): Don't add newline after
+	the request data.
+
+2004-11-20  Masatake YAMATO  <jet@gyve.org>
+
+	* url.el (url-mm-callback): Delay the invocation
+	of `mm-destroy-parts'.  Invoke `mm-destroy-parts'
+	when the buffer is killed.
+
+2004-11-12  Masatake YAMATO  <jet@gyve.org>
+
+	* url-mailto.el (url-mailto): Fix a typo in the comment.
+
+2004-11-02  Masatake YAMATO  <jet@gyve.org>
+
+	* url-imap.el (url-imap-open-host): Don't use
+	`string-to-int'.  The port returned by `url-port'
+	is expected to be an integer.
+
+	* url-irc.el (url-irc): Ditto.
+
+	* url-news.el (url-news-open-host): Ditto.
+
+	* url-nfs.el (url-nfs-build-filename): Ditto.
+
+2004-10-20  John Paul Wallington  <jpw@gnu.org>
+
+	* url-gw.el (url-gateway-nslookup-host):
+	Use `set-process-query-on-exit-flag'.
+
+2004-10-10  Lars Hansen  <larsh@math.ku.dk>
+
+	* url-auth.el:
+	* url-cache.el:
+	* url-cid.el:
+	* url-dired.el:
+	* url-expand.el:
+	* url-ftp.el:
+	* url-gw.el:
+	* url-imap.el:
+	* url-irc.el:
+	* url-misc.el:
+	* url-news.el:
+	* url-ns.el:
+	* url-privacy.el:
+	* url-proxy.el: Update header and footer.
+
+	* url-vars.el: Update header.
+
+2004-10-16  Richard M. Stallman  <rms@gnu.org>
+
+	* url.el (url-do-setup): Don't set url-passwd-entry-func.
+
+	* url-vars.el (url-passwd-entry-func): Var deleted.
+	(mm-mime-mule-charset-alist): Remove compatibility code for old Gnus.
+	(url-weekday-alist): Rename from weekday-alist.
+	(url-monthabbrev-alist): Rename from monthabbrev-alist.
+	(url-vars-unload-hook): Initialize hook var to hold the function.
+
+	* url-util.el (url-get-normalized-date): Use url-weekday-alist and
+	url-monthabbrev-alist.
+
+	* url-misc.el: Load cl at compile time.
+
+	* url-mailto.el: Don't load cl.
+	(url-mailto): Fix call to `push'.
+
+	* url-gw.el (url-open-telnet): Use read-passwd.
+
+	* url-auth.el (url-basic-auth, url-digest-auth): Use read-passwd.
+
+2004-10-12  Simon Josefsson  <jas@extundo.com>
+
+	* url-vars.el (url-gateway-method): Add new method `tls'.
+
+	* url-news.el (url-snews): Use nntp-open-tls-stream if
+	url-gateway-method is tls.
+
+	* url-ldap.el (url-ldap-certificate-formatter):
+	Use tls-certificate-information if ssl.el is not available.
+
+	* url-https.el (url-https-create-secure-wrapper): Use tls if ssl
+	is not available.
+
+	* url-gw.el (url-open-stream): Support tls url-gateway-method.
+	(url-open-stream): Likewise.
+
+2004-10-10  Lars Hansen  <larsh@math.ku.dk>
+
+	* url-auth.el:
+	* url-cache.el:
+	* url-cookie.el:
+	* url-dired.el:
+	* url-file.el:
+	* url-ftp.el:
+	* url-handlers.el:
+	* url-history.el:
+	* url-irc.el:
+	* url-mailto.el:
+	* url-methods.el:
+	* url-misc.el:
+	* url-news.el:
+	* url-nfs.el:
+	* url-parse.el:
+	* url-privacy.el:
+	* url-vars.el:
+	* url.el:
+	* url-util.el: Fix copyright notice.
+
+2004-10-06  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-insert-file-contents): Use the URL to decide the
+	encoding, not the buffer-file-name (which might not even exist).
+
+2004-09-20  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-handlers.el (url-insert-file-contents): Decode contents.
+
+2004-04-16  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-util.el (url-debug): Use with-current-buffer.
+
+	* url-nfs.el (url-nfs-file-attributes): Add id-format parameter.
+	(url-nfs-create-wrapper): Use new backquote syntax.
+
+	* url-https.el (url-https-file-attributes): Add id-format param.
+
+	* url-http.el (url-http-head-file-attributes)
+	(url-http-file-attributes): Add id-format parameter.
+
+	* url-handlers.el: Use new find-file-hook.
+	(url-file-attributes): Add id-format parameter.
+
+	* url-file.el (url-file-create-wrapper): Use new backquote syntax.
+	(url-file-file-attributes): Add id-format parameter.
+
+	* url-dav.el: Use with-current-buffer.
+	(url-dav-process-response): Fix regexps and spurious quote.
+	(url-dav-file-attributes): Add id-format param.
+
+2004-04-12  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url.el (url-retrieve): Use with-current-buffer.
+
+	* url-http.el (url-http-parse-headers, url-http-file-exists-p):
+	Remove unused var `version'.
+
+	* url-handlers.el (url-handler-mode): New minor mode.
+	(url-setup-file-name-handlers): Remove.
+
+2004-04-12  John Paul Wallington  <jpw@gnu.org>
+
+	* url-cookie.el (url-cookie-handle-set-cookie): Replace calls
+	to obsolete `assoc-ignore-case' with calls to `assoc-string'.
+
+2004-04-11  Dave Love  <fx@gnu.org>
+
+	* url-mailto.el (url-mailto):
+	* url-history.el (url-history-setup-save-timer):
+	* url-cookie.el (url-cookie-setup-save-timer): Avoid warnings.
+
+	* url-file.el (url-file-build-filename): Don't use
+	directory-sep-char.
+
+	* url-auth.el (url-register-auth-scheme): Fix `format' call.
+
+	* url-about.el (url-scheme-registry): Defvar.
+	(url-about): Use text/plain.
+
+	* url-vars.el (cl): Don't require.
+	(url): Add :version.
+	(url-bug-address): Use bug-gnu-emacs.
+
+	* url-util.el (url-hexify-string): Don't give multibyte error
+	for char <16.
+	(mail-header-extract): Autoload.
+
+	* url-parse.el: Doc fixes.
+
+	* url-ldap.el (ldap): Require.
+	(url-ldap): Fix `format' call.
+	(url-ldap-certificate-formatter): Avoid warning.
+
+	* url-https.el (url-https-create-secure-wrapper): Use modern backquotes.
+
+	* url-dav.el (url-dav-rename-file): Fix args of `signal'.
+	(url-intersection): New.
+	(url-dav-supported-p): Use it.
+	(url-dav-save-resource): Declare url-http-response-status special.
+
+	* url-cache.el (url-util): Require.
+
+2004-04-10  Miles Bader  <miles@gnu.org>
+
+	RCS keyword removal (only non-comment changes are enumerated here):
+
+	* url-vars.el (url-version): Use the constant string "Emacs"
+	instead of calculating something from the RCS `State' keyword
+	[the latter is almost entirely useless anyway].
+
+2004-04-03  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url-methods.el:
+	* url-parse.el: Don't require url-auto.
+
+2004-04-03  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* url: Imported the URL package from its own CVS repository into Emacs.
+
+===========================================================================
+===========================================================================
+	Copy of the ChangeLog file from URL's own CVS repository:
+===========================================================================
+===========================================================================
+
+2003-07-16  Dave Love  <fx@gnu.org>
+
+	* lisp/url.el (url-retrieve-synchronously): Revert last change.
+	Should be revisited.
+
+2003-06-26  Sam Steingold  <sds@gnu.org>
+
+	* lisp/url-handlers.el (url-handlers-create-wrapper): Do not call
+	method on invalid urls.
+
+2003-05-29  Dave Love  <fx@gnu.org>
+
+	* lisp/url.el (url-retrieve-synchronously): Use sleep-for, not
+	sit-for.  From monnier@gnu.org.
+
+2002-11-04  Walter C. Pelissero  <walter@pelissero.org>
+
+	* lisp/url-methods.el (url-scheme-register-proxy): Make sure to convert
+	port numbers to integers when creating the URL objects for proxies.
+
+2002-10-29  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-http.el (url-http-parse-headers): When doing a
+	redirect, some broken software (sourceforge) sends a redirect to
+	'/', which is blatantly illegal (see section 14.30 of the HTTP/1.1
+	specification).  I wish we could deal with such lame software
+	appropriately (spank the authors), but this is the web, so we have
+	to kow-tow to the servers.
+
+2002-10-27  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-http.el (url-http-create-request): If we are talking to
+	the default port for a the selected protocol, do NOT send the port
+	in the HOST header.  This fixes the login page at sourceforge.
+
+2002-09-17  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-http.el (url-http-handle-cookies): New function to deal
+	with cookie headers.
+	(url-http-parse-headers): Call `url-http-handle-cookies' here so
+	that cookie additions and deletions get handled immediately.
+	This is so that sites that set cookies while doing redirects
+	(my.yahoo.com, outlook web access, etc) work.  This should also
+	fix sites that delete cookies on invalid access or other error
+	pages the user might not actually see.
+	(url-http-parse-headers): Silently convert non-HEAD and non-GET
+	methods to GET in redirects.  Too many web sites do this now, and
+	it is just likely to confuse users.
+
+2002-05-17  Dave Love  <fx@gnu.org>
+
+	* texi/url.txi: Start making it vaguely useful.
+
+	* texi/Makefile.in (install): Cope with Debian install-info.
+	From Kai.Grossjohann@CS.Uni-Dortmund.DE (Kai Grossjohann).
+
+2002-04-22  Dave Love  <fx@gnu.org>
+
+	* lisp/url-misc.el (man): Autoload to avoid warning.
+	(url-man): Don't require man here.
+	(url-data): Generalize in line with the RFC.
+
+	* lisp/url-gw.el (url-open-stream): Remove obsolete `tcp' case.
+
+	* lisp/url-vars.el: Doc fixes.
+	(url-mime-charset-string): New function.
+	(url-mime-charset-string): Use it to set the variable.
+	(url-set-mime-charset-string): New function.
+	(set-language-environment-hook): Use it.
+	(url-vars-unload-hook): New function.
+
+	* lisp/url-cookie.el (url-header-comparison): Delete.
+	(url-cookie-handle-set-cookie): Use assoc-ignore-case to avoid assoc*.
+	(url-cookie-save-interval): Make value agree with doc.
+
+	* lisp/url.el: Doc fixes.
+	(url-mm-callback): Don't call mm-destroy-parts immediately for
+	external viewing -- set up a process sentinel.
+
+2002-02-02  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/Makefile.in (SOURCES): Remove mule-sysdp.el from the build rules.
+
+2001-12-12  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-vars.el (url-nonrelative-link): Patch from Stefan
+	Monnier to use ` instead of ^ to match the relative link.
+
+2001-12-10  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-dav.el (url-dav-file-attributes): Fix bad call to
+	plist-get (reversed args).
+
+	* lisp/url-file.el (url-file-build-filename): Make sure that we
+	have a parsed URL in this function.
+
+2002-01-22  Dave Love  <fx@gnu.org>
+
+	* lisp/url-cache.el (url-cache-file-writable-p): Doc fix.
+
+	* lisp/url-imap.el (url-imap): Maybe disable multibyte.
+	Bind coding-system-for-read.  Require mm-util.
+
+	* lisp/url.el (url-do-setup): Use (featurep 'xemacs).
+
+	* lisp/mule-sysdp.el: Removed (obsolete).
+
+2001-12-09  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-dav.el (url-dav-delete-something): Utility macro to
+	remove an arbitrary resource.
+	(url-dav-delete-directory): Use it.
+	(url-dav-delete-file): Ditto.
+	(url-dav-make-directory): New function.
+	(url-dav-rename-file): New function.
+	(url-dav-register-handler): New function to easily register a
+	WebDAV-specific file-name-handler operation.
+	(url-dav-file-name-all-completions, url-dav-file-name-completion):
+	New functions that allow file-name completion for WebDAV resources.
+
+2001-12-08  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-dav.el (url-dav-directory-files): New function to
+	mimic `directory-files' for WebDAV.
+	(url-dav-delete-directory): New function to mimic
+	`delete-directory' for WebDAV.
+
+2001-12-06  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-dav.el (url-dav-process-DAV:locktoken): Parse the
+	DAV:locktoken hrefs into a usable format.
+	(url-dav-process-response): Use an unwind-protect to make sure
+	that we clean up the buffer, even if there is a parsing error.
+	(url-dav-request): New function to act as the main entry point for
+	making DAV requests.  Takes care of building the XML document with
+	appropriate namespaces, depth, etc, and parses the results.
+	(url-dav-get-properties): Use new url-dav-request function.
+	This is now just a thin wrapper around that to use PROPFIND and set any
+	extra properties we are looking for.
+	(url-dav-unlock-resource): New function to release a lock given a
+	URL and a lock-token.
+	(url-dav-process-DAV:getlastmodified)
+	(url-dav-process-DAV:creationdate)
+	(url-dav-process-DAV:iscollection)
+	(url-dav-process-DAV:ishidden): Fix typos!  Its url-dav-*, not
+	url-dave-*!
+	(url-dav-active-locks): New function to get a list of all the
+	active locks for a resource.
+	(url-dav-save-resource): New function to actually save a resource
+	using the PUT method.  I can now successfully save files to an
+	HTTP server with some manual steps from a lisp-interaction buffer.
+
+	* lisp/url-http.el (url-http-wait-for-headers-change-function):
+	Special case the 204/205 response codes.  Some servers do not
+	send back a 0 content-length for these, and we would hang.
+	(url-http-parse-headers): Mark 204/205 response codes as
+	'successful' so that the callbacks get activated.
+	(url-http-options): Fix unbound variable usage.
+
+	* lisp/url-dav.el: Added full copyright information.
+	(url-dav-process-response): Make sure that we create a DAV:status
+	property when parsing a singleton response.
+	(url-dav-file-attributes): If the properties returned did not have
+	a successful HTTP response code, then ignore them and use the
+	HEAD-based attributes.
+
+	* lisp/vc-dav.el: Added full copyright information.
+
+	* lisp/url-dav.el (url-dav-process-supportedlock-property):
+	Deal with text nodes in DAV:supportedlock nodes.
+	(url-dav-file-attributes-mode-string): This now gets the entire
+	property list instead of just the DAV:supportedlock node.
+	(url-dav-file-attributes): Make sure to pass the whole list in.
+	(url-dav-file-attributes-mode-string): Now properly sets do 'd' mode.
+	(url-dav-file-attributes-mode-string): Now uses the Apache mod_dav
+	'executable' bit to set the 'x' mode.  See `mod_dav's custom
+	properties' at http://www.webdav.org/mod_dav/ for more details.
+	(url-dav-find-parser): New function to find the proper parser for
+	a node-type.  Looks for
+	url-dav-process-XXX (url-dav-process-DAV:prop), otherwise falls
+	back to using url-dav-node-text.  Caches the results on the nodes
+	symbol name.
+	(url-dav-dispatch-node): Utility routine to call a nodes handler easily.
+	(url-dav-process-*): Rename most of the handlers and made them
+	use url-dav-dispatch-node where appropriate.
+	(url-dav-process-DAV:prop): Instead of using the dav-data-type
+	property to dispatch the node, now uses dav-dispatch-node so that
+	it is easy to add parsers for special nodes.
+	(url-dav-process-DAV:depth, url-dav-process-DAV:resourcetype)
+	(url-dav-process-DAV:locktype, url-dav-process-DAV:lockscope)
+	(url-dav-process-DAV:getcontentlength)
+	(url-dave-process-DAV:getlastmodified)
+	(url-dave-process-DAV:creationdate)
+	(url-dave-process-DAV:iscollection)
+	(url-dave-process-DAV:ishidden): Aliases for the generic
+	url-dav-process-foo-property routines.
+	(url-dav-process-DAV:activelock)
+	(url-dav-process-DAV:lockdiscovery): Can now correctly parse
+	DAV:lockdiscovery nodes, so that we can find out who has a
+	resource locked and properly parse the response to a LOCK request.
+	(url-dav-process-DAV:status): Now parses out the numeric status
+	from the HTTP response line.
+	(url-dav-process-response): New function to handle all the
+	parsing of an XML response from WebDAV.  This handles all the
+	logic of checking the response content-type to make sure it is
+	XML, parses the tree, and interprets the tree.
+	(url-dav-process-response): Make sure that all responses look
+	like a DAV:multistatus response, even if we get a singleton
+	response back.  This will just make the upper layer logic simpler.
+	(url-dav-get-properties): New optional argument NAMESPACES that
+	specifies what namespaces to use in the XML request.
+	(url-dav-get-properties): Got rid of the D: namespace in
+	requests.  It doesn't save that much space.  Just use DAV:
+	(url-dav-lock-identifier): New variable that should hold a URI
+	pointing to contact information for the user.  This will be used
+	as the contents of the DAV:owner/DAV:href tag to identify the
+	owner of a LOCK when requesting it.  This will be shown to other
+	users when the DAV:lockdiscovery property is requested, so make
+	sure you are comfortable with it leaking to the outside world.
+	(url-dav-lock-resource): New function to LOCK a dav resource.
+
+2001-12-05  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-dav.el (url-dav-get-properties): New argument
+	ATTRIBUTES that allows you to ask for specific properties instead
+	of getting all properties via DAV:allprop.
+
+	* lisp/url-http.el (url-http-real-basic-auth-storage):
+	New variable for normal HTTP basic authentication.
+	(url-http-proxy-basic-auth-storage): New variable for HTTP proxy
+	basic authentication.
+	(url-http-handle-authentication): Follow new semantics for
+	url-basic-auth-storage.
+
+	* lisp/url-auth.el (url-basic-auth-storage): Change meaning of
+	this variable.  It is now a symbol pointing to where we really
+	want to store the authorization information.  This fixes proxy
+	auth and normal basic auth because of some local bindings that were
+	making it impossible to store the credentials in the global binding.
+	(url-basic-auth): Make sure we dereference url-basic-auth-storage
+	everywhere.
+
+	* lisp/url-util.el (url-debug): Add new types 'dav and
+	'retrieval to the customization list.
+
+	* lisp/url.el (url-retrieve-synchronously): Put in some debugging
+	statements.
+
+	* lisp/url-http.el (url-http-head-file-attributes): Rename old
+	url-http-file-attributes so that we can have a smarter one that
+	tries WebDAV first, then HEAD.
+	(url-http-file-attributes): New smart version that tries WebDAV first.
+	(url-http-options): New function that returns information gleaned
+	from an OPTIONS request for a URL.  Returns a property list
+	returning the methods supported for the resource, what DAV and
+	DASL levels are supported, p3p information, and whether
+	byte-ranges are supported or not.
+	(url-http-wait-for-headers-change-function): If we got a 0-byte
+	content-length, activate the callback immediately.
+	(url-http-wait-for-headers-change-function): For content-length
+	responses with actual body-data in the chunk we are handling, call
+	url-http-content-length-after-change-function with the remaining
+	data.  Otherwise we can deadlock if the headers and the entire
+	body exist arrive in one chunk.
+
+	* lisp/url-dav.el: New file to contain the WebDAV
+	(http://www.webdav.org/) implementation.
+	(url-dav-supported-p): Cheap way to figure out whether we will be
+	able to do DAV at all.  We rely on the XML parser expanding
+	namespaces for us, and currently you need a patched version of
+	xml.el to do this.  Patch sent to author for consideration.
+	(url-dav-file-attributes): Much more complete version of
+	`file-attributes' using the WebDAV PROPFIND method.  Now correctly
+	finds out whether something is a directory (a WebDAV collection),
+	the last modification time, and permissions (based on the
+	DAV:supportedlock information).
+	(url-dav-get-properties): Generic interface to get WebDAV
+	properties for a URL.  Can specify an optional `depth' parameter
+	to tell the web server how many directory (collection) levels to
+	recurse when retrieving the property lists.  Returns an assoc
+	list keyed off of the resource, the cdr of which is a property list.
+	(url-dav-datatype-attribute): We support the XML-Data note
+	(http://www.w3.org/TR/1998/NOTE-XML-data) to figure out what the
+	datatypes of attributes are.  Currently only date, dateTime, int,
+	number, float, boolean, and uri are supported.
+
+2001-12-04  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-handlers.el (file-name-absolute-p): New hooked
+	version.  If the filename matches our regexp, then it is always
+	absolute, so just return `t'.
+	(expand-file-name): New hooked version.  If the fragment is an
+	absolute file or URL, then expand it relative to '/'.
+	(url-handler-regexp): New regexp for specific schemes that we
+	want the file-name-handlers to work off of.
+	(url-setup-file-name-handlers): Use it when installing the handlers.
+
+	* lisp/url-http.el (url-http-find-free-connection): Better logging
+	about whether we are reusing an existing connection or not.
+
+	* lisp/url-methods.el (url-scheme-register-proxy): Fix bad call
+	to string-match instead of match-string (and with reversed
+	arguments even).
+
+	* lisp/url-http.el (url-http-debug): Change to now use the
+	generic url-debug function to do the actual logging.  Still a
+	separate function so that we can do our magic on the network
+	connection if the user quits while we are downloading.
+
+	* lisp/url-handlers.el (url-file-handler): Now logs the result of
+	the hooked or real call.
+
+	* lisp/url-util.el (url-debug): New function for generic debug logging.
+
+2001-11-28  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-imap.el (url-imap-open-host): Use backquote.
+	(url-imap): Now switches to 'login as the imap authenticator if
+	the URL provides a username and password.
+
+	* lisp/url-handlers.el (url-setup-file-name-handlers): Use cl &
+	push to replace some strange logic in here.
+	(url-run-real-handler): New function to run the real hooks in
+	case we get a false positive or an operation that we do not
+	support.  The old way disabled _ALL_ file-name-handlers when
+	we hit something we didn't understand - this disables JUST us.
+	(url-file-handler): Remove the logic about removing the leading
+	'/' off of the first argument... it may not be safe to always
+	assume that the first argument is the one we are acting on -
+	`default' is the second argument for expand-file-name for example.
+	(url-setup-file-name-handlers): Use url-nonrelative-link
+	directly.  This means that you must type in the URL directly
+	without prefixing it with a '/'.
+
+	(gnus-cache-articles-in-group "nnml+mail:comp.emacs-devel")
+
+	Ends up calling (expand-file-name "nnml+mail:comp.emacs-devel" ...)
+	which activates us (because 'nnml+mail' _is_ a valid scheme name
+	for a URI).  We get thoroughly confused and end up returning
+	`nil' when we shouldn't.
+
+2001-11-26  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-handlers.el (file-writable-p): Add NULL handler for
+	this so that visiting a URL directly will work.
+	(file-symlink-p): Ditto.
+	(url-insert-file-contents): If `visit' is non-nil then make sure
+	we set buffer-file-name.  After these changes you can visit
+	http://www.gnu.org/ directly from the minibuffer.
+	(url-insert-file-contents): When inserting the file contents,
+	use a save-excursion so that we behave just like the original.
+
+2001-11-25  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-util.el (url-hexify-string): Fix bad use of mapconcat.
+
+2001-11-24  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-about.el (url-about): New loader scheme to handle
+	about:foo URLs.  Automatically tries to find a `url-about-foo'
+	function to display the actual data.
+	(url-about-protocols): Implement about:protocols.
+
+	* lisp/url-http.el (url-http): Make sure that we signal an error
+	when we cannot open a network connection for whatever reason.
+	Before, it would just silently clean up after itself and the user
+	got absolutely no indication that an error had occurred.  If the
+	error should truly be ignored, the caller should do that for us.
+	(url-http-chunked-encoding-after-change-function): Doh!  Need to
+	user marker-position in some log messages now that
+	url-http-chunked-start is a marker.
+
+2001-11-22  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-https.el: Fixed definition of url-https - was using the
+	wrong signature.  Too much cut & paste.
+	(url-https-create-secure-wrapper): Fix so that url-https works
+	at all.  Was not taking a null `method' into account when calling
+	the wrapped function so url-https tried to call url-http-nil.  *sigh*
+
+	* lisp/url-http.el
+	(url-http-chunked-encoding-after-change-function): Add some
+	feedback when not debugging about what content-type and chunk # we
+	are reading.
+	(url-http-chunked-encoding-after-change-function): Use a marker
+	for url-http-chunked-start so that we can safely delete the
+	chunk-tokens instead of just marking them as invisible.
+	(url-http-chunked-encoding-after-change-function): Actually delete
+	the chunk-tokens.  Now that we are not run from 'real'
+	after-change functions, this is safe, and the right thing to do.
+	Otherwise the HTML parser still saw them and inferred all sorts of
+	bad things about the document (ie: nothing had a title!)
+
+2001-11-21  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-http.el (url-http-debug): Document this variable.
+	People other than I might want to use it.
+	(url-http-debug): Put some code in here to check quit-flag
+	directly.  When the chunked encoding went into a tight spin, your
+	Emacs would be wedged forever.  This short-circuits all the
+	after-change functions and signals an error.
+	(url-http-debug): If url-http-debug is non-nil and non-t, then log
+	the debug messages using `message' as well as sending them to the
+	buffer.
+	(url-http-chunked-encoding-after-change-function): Got rid of the
+	no-initial-crlf.  Had an epiphany and I can just infer this from
+	url-http-chunked-counter being 0.
+	(url-http-chunked-encoding-after-change-function): Move the debug
+	statement about reading chunk #foo into the loop so that each
+	chunk will have a log message associated with it.
+	(url-http-chunked-encoding-after-change-function): Make sure to
+	set read-next-chunk to nil when the regular expression match fails
+	to fire.  Otherwise we could loop forever.
+	(url-http-chunked-encoding-after-change-function): Tweak the
+	regular expression to be a little less greedy when looking for a chunk.
+	(url-http-wait-for-headers-change-function): Remove the last
+	argument when calling
+	url-http-chunked-encoding-after-change-function.  It is no longer
+	needed.  I should use my brain sometime.
+
+	* lisp/url-vars.el (and): Fix feature test for xemacs and
+	coding-system-list behavior.
+
+	* lisp/url-http.el
+	(url-http-chunked-encoding-after-change-function): Add optional
+	no-initial-crlf flag that modifies the regular expression.
+	This is only set from url-http-wait-for-headers-change-function so that
+	the initial CRLF in the HTTP headers is not swallowed.
+	(url-http-chunked-encoding-after-change-function): Fix a few
+	off-by-one errors by using (match-end 0) instead of 1.
+	(url-http-chunked-encoding-after-change-function): Add a few
+	url-http-debug calls to help track down problems in the chunked
+	encoding.
+	(url-http-chunked-encoding-after-change-function): The chunk
+	reading in here is now in a while loop so that if Emacs feeds us a
+	chunk of data that happens to contain more than one 'chunk'
+	delimiter, we behave correctly.
+	(url-http-wait-for-headers-change-function): Make sure that we
+	pass no-initial-crlf to
+	url-http-chunked-encoding-after-change-function when passing
+	initial data to the decoder.
+	(url-http-generic-filter): url-http-debug statement so we can tell
+	when/where our after-change-functions are being called.
+
+2001-10-11  Dave Love  <fx@gnu.org>
+
+	* lisp/url-handlers.el: Doc fixes.
+	(string-match): Use (featurep 'xemacs).
+
+	* lisp/url-methods.el (url-scheme-get-property): Avoid `mapc'.
+
+	* lisp/url-proxy.el (url-find-proxy-for-url): Avoid `pop'.
+
+	* lisp/url-vars.el (url-running-xemacs): Delete.
+	(url-gateway-unplugged): New variable.
+
+	* lisp/url-gw.el (url-open-stream): Use url-gateway-unplugged.
+	Comment out OS/2 stuff.
+
+2001-10-05  Dave Love  <fx@gnu.org>
+
+	* lisp/url-mailto.el (url-mailto): Don't send auto-generated mail
+	without confirmation.
+
+2001-10-02  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el (url-http-create-request): Check cache for
+	proxy-obj, if defined, rather than url.
+	(url-http): Use dolist, not mapc (runtime cl dependency).
+
+	* lisp/url-methods.el: Maybe require cl at runtime.
+	(url-scheme-register-proxy): Fix fetching from environment.
+	Don't concat a number.
+
+2001-10-01  Dave Love  <fx@gnu.org>
+
+	* lisp/url-parse.el: Use modern backquote syntax.
+
+	* lisp/url-vars.el (url-uncompressor-alist): Add bzip2.
+	(url-mail-command): Prefer compose-mail.
+	(tcp-binary-process-input-services): Comment out.
+	(url-working-buffer): New constant.
+
+	* lisp/url-util.el (url-extract-mime-headers): New function.
+
+	* lisp/url-mailto.el (url-mailto): Set source-url.  Don't add
+	User-Agent.
+
+2001-09-20  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el (url-http-create-request): Don't concat a number.
+
+2001-06-05  Dave Love  <fx@gnu.org>
+
+	* lisp/url.el (url-do-setup): Doc fix.  Don't try to frob
+	tcp-binary-process-input-services.  Remove function wrapper for lambda.
+	(url-retrieve): Barf with sensible message if url-type is null.
+
+	* lisp/url-http.el (url-http): Don't try to set process
+	coding-system here -- done in url-gw.
+
+	* lisp/url-gw.el (url-gw-inhibit-code-conversion): Remove.
+	(url-open-stream): Bind coding-system-for{read,write} when setting
+	up the connection.  Don't call url-gw-inhibit-code-conversion.
+
+2001-05-24  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url.el (url-retrieve-synchronously): Avoid accept-process-output
+	in url-retrieve-synchronously.
+
+2001-05-23  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url.el (url-retrieve-synchronously): Don't put a timeout on
+	accept-process-output.  This is evidently causing hangs in Emacs
+	21 when viewing complex pages with images or stylesheets.
+	www.yahoo.com is now viewable.
+
+	* lisp/url-gw.el (url-open-stream): Avoid using mule-sysdp
+	(mule-inhibit-code-conversion) and just have a local function that
+	does this minimal cruft.
+	(url-gw-inhibit-code-conversion): New function to turn off code
+	conversion in a process.
+
+2001-05-22  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url.el (url-retrieve-synchronously): Use lexical-let so
+	that we can allow multiple asynch retrievals to happen at once.
+	(url-retrieve-synchronously): Use a much smaller timeout when
+	doing the accept-process-output.  This gets rid of the long delays
+	if you are on a fast net connection and retrieve small documents
+	that finish asynchronously before the first accept-process-output
+	can be run.  All hail broadband and 100Mb in the house!
+	(url-retrieve-synchronously): Add documentation for this function.
+	(url-retrieve): Ditto.
+	(url-mm-url): Ditto.
+
+	* lisp/url-vars.el: Replaced `HTTP/1.0' with just `HTTP' in some
+	documentation strings.  Ok, so I'm anal.
+
+	* lisp/url-methods.el (url-scheme-methods): Add default methods
+	for file-directory-p and file-truename.
+
+2001-05-22  Dave Love  <fx@gnu.org>
+
+	* lisp/url-auth.el (url-warn): Autoload.
+
+	* lisp/url-proxy.el (url-warn): Autoload.
+
+	* lisp/url-nfs.el: Fix `file-truname' typo.
+
+	* lisp/url-news.el: Require cl when compiling.
+	(url-warn, gnus-group-read-ephemeral-group): Autoload.
+	(url-nntp-default-port, url-news-default-port, url-nntp): Delete.
+	(url-news-fetch-newsgroup): Declare gnus-group-buffer special.
+
+	* lisp/url-util.el (mule-decode-string): Don't autoload.
+	(url-hexify-string): Just barf on multibyte characters.
+	(url-generate-unique-filename): New function.
+
+	* lisp/url-file.el (url-file): Use url-generate-unique-filename,
+	not mm-generate-unique-filename.
+
+	* lisp/url-http.el: Declare things special in various places.
+	(url-http-activate-callback): Don't set
+	url-http-real-after-change-function.
+
+2001-05-22  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-http.el (url-http-attempt-keepalives): New variable to
+	control whether we try to do keep-alives for our connections.
+	(url-http-version): New variable to control whether we advertise
+	ourselves as an HTTP/1.1 client or not.  This can be useful for
+	avoiding chunked encoding, and other 1.1 features we may not have
+	fully implemented yet.
+	(url-http-create-request): Honor the new variables.
+
+2001-05-21  Dave Love  <fx@gnu.org>
+
+	* lisp/url-vars.el (mm-mime-mule-charset-alist): Don't readjust it
+	in XEmacs.
+	(url-mime-charset-string): Don't reverse the list before sorting.
+
+2001-05-17  William M. Perry  <wmperry@gnu.org>
+
+	* lisp/url-http.el (url-http-generic-filter): Avoid using
+	after-change-functions natively.  There are just too many ways
+	that this screws up in Emacs 21.  Use a filter function on the
+	process instead, and call the hook on
+	url-http-after-change-function manually.  [Actually, it will work
+	in Emacs 21, but one problem that has been fixed in Emacs 21
+	exists in Emacs 20.  -- fx]
+
+	* lisp/url-vars.el (url-mime-charset-string): sort-coding-systems
+	does not exist on older versions of Emacs, or any version of
+	XEmacs.  Do not call it unless it is bound.
+
+2001-05-17  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el (url-http-create-request): Fix non-GET requests.
+
+2001-05-16  Dave Love  <fx@gnu.org>
+
+	* lisp/url-vars.el: Doc fixes.  Require mm-util.
+	(url-mime-charset-string): New variable.
+
+	* lisp/url-http.el: Doc fixes.
+	(url-http-create-request): Rearrange how we assemble the request.
+	Avoid generating bogus requests with an empty real-fname.
+	(url-http-handle-authentication): Declare status and success special.
+	(url-http): Call mm-disable-multibyte.  Set process buffer's
+	coding systems to binary.
+
+	* lisp/url-misc.el (url-data): Call mm-disable-multibyte.
+
+	* lisp/url-file.el: Don't require mule-sysdp.  Fix `file-truname' typo.
+	(url-file-find-possibly-compressed-file): Doc fix.
+	(url-file): Bind coding-system-for-read.  Call mm-disable-multibyte.
+
+	* lisp/url-cache.el: Don't require mule-sysdp.
+	(url-store-in-cache): Avoid mule-write-region-no-coding-system.
+
+	* lisp/url.el: Don't require mule-sysdp.
+	(url-retrieve): Only set text properties if url is a string.
+
+2001-05-14  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el (url-http-create-request):
+	Declare proxy-object, proxy-info special.
+	(url-http-handle-authentication): Declare success special.
+
+2001-05-12  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el: Revert last change.
+
+2001-05-10  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el (url-http-generic-after-change-function):
+	Make it permanent-local.
+
+2001-05-05  Dave Love  <fx@gnu.org>
+
+	* lisp/url-http.el: Autoload some functions.
+	(cl): Require when compiling.
+	(url-http-extra-headers): Defvar when compiling.
+	(url-http): Treat after-change-functions as a local hook.
+
+	* lisp/url-history.el (url-parse): Require.
+	(url-do-setup): Autoload.
+
+	* lisp/url-gw.el: Require url-vars.  Autoload some functions.
+
+	* lisp/url-file.el: Require mailcap.  Require cl when compiling.
+	Use (featurep 'xemacs).
+	(url-file-build-filename): Bind pos-index.
+	(url-file): Call url-find-file-dired, not url-dired-find-file.
+
+	* lisp/url-dired.el: Add copyright notice.  Autoload some functions.
+	(url-dired-minor-mode-map): Use (featurep 'xemacs).
+	(url-dired-find-file-mouse): Use mouse-set-point, not event-point.
+	(url-find-file-dired): Rename from one version of url-dired-find-file.
+
+	* lisp/url-cid.el: Don't require widget.  Require mm-decode
+	unconditionally.
+
+	* lisp/url-util.el: Autoload mule-decode-string,
+	timezone-parse-date, timezone-make-date-arpa-standard.
+	(url-unreserved-chars): Fix list per RFC 2396.
+	(url-hexify-string): Maybe string-make-unibyte.
+
+	* lisp/url-news.el: Require nntp.
+
+	* lisp/url-imap.el: Require cl when compiling.  Require nnimap
+	unconditionally.
+
+2001-05-04  Dave Love  <fx@gnu.org>
+
+	* lisp/url-handlers.el (url-file-local-copy): Use make-temp-file,
+	not non-existent mailcap-generate-unique-filename.
+
+	* lisp/url-privacy.el: Require url-vars.  Require cl when compiling.
+
+	* lisp/url-parse.el: Require url-vars.
+	Autoload url-scheme-get-property.
+
+	* lisp/url-nfs.el: Require cl when compiling.  Test for XEmacs
+	with featurep.
+
+	* lisp/url-mailto.el: Require cl when compiling.
+
+	* lisp/url-cookie.el (url-cookie-handle-set-cookie):
+	Call url-parse-args, not url-util-parse-args.
+
+	* lisp/url-cache.el (url-cache-expired): Remove bogus `return'.
+
+2001-04-09  Dave Love  <fx@gnu.org>
+
+	* lisp/mule-sysdp.el (mule-detect-coding-version)
+	(mule-code-convert-region, mule-inhibit-code-conversion)
+	(mule-write-region-no-coding-system, mule-encode-string)
+	(mule-decode-string, mule-truncate-string)
+	(mule-find-charset-region, mule-coding-system-name)
+	(mule-find-coding-system, mule-make-iso-character): Grok Mule 5.0.
+	[There must be a better way.]
+	(mule-coding-system-p, string-width): Use defalias.
+
+2001-01-03  Sam Steingold  <sds@gnu.org>
+
+	* lisp/url-http.el (url-http-wait-for-headers-change-function):
+	set `url-http-end-of-headers' to 0 for HTTP 0.9.
+
+2001-01-02  Sam Steingold  <sds@gnu.org>
+
+	* lisp/url-auth.el (provide): `url-auth', not `urlauth'.
+
+2000-12-22  Dave Love  <fx@gnu.org>
+
+	* lisp/url-history.el (url): Don't require (to avoid recursion).
+	(cl): Require when compiling.
+
+	* lisp/url-http.el (url-auth): Require.
+	(url-http-handle-authentication): Fix typo.
+
+	* lisp/url-cookie.el (url-cookie-setup-save-timer): Fix typo.
+
+2000-12-20  Dave Love  <fx@gnu.org>
+
+	* lisp/url.el: Require mm-decode, mm-view when compiling.
+	<not (fboundp 'puthash)>: Define puthash and
+	autoload other has functions rather than using cl-...hash.
+	(url-warn): Define.
+
+	* lisp/url-ns.el, lisp/url-methods.el, lisp/url-http.el:
+	Avoid cl-...hash functions.
+
+	* lisp/url-history.el: Avoid cl-...hash functions.
+	(url): Require.
+
+	* lisp/url-gw.el, lisp/url-cookie.el: Require cl only when compiling.
+
+2000-10-03  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-util.el (url-get-url-at-point): Guard against 'url'
+	getting set to nil due to bad string matching.  Subsequent matches
+	would then choke because we passed string-match a nil.
+
+	* lisp/url-http.el (url-http-parse-headers): Need to make the
+	connection as 'free' when we get a 304 response (found in cache),
+	or when a keep-alive connection timed out, it would re-parse the
+	headers and dispatch to the callback again.  Eek.
+
+2000-10-02  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-http.el (url-http-chunked-encoding-after-change-function):
+	implement chunked transfer-coding.
+	(url-http-create-request): We can now advertise ourselves as a 1.1
+	compliant browser!
+
+2000-07-28  Sam Steingold  <sds@gnu.org>
+
+	* lisp/url-methods.el (url-scheme-default-loader): `callback' and
+	`cbargs' are optional args (for calling from w3).
+	(url-scheme-register-proxy): Typos fixes: `url-match' replaced
+	with `string-match' and `protocol' with `scheme'.
+
+2000-07-18  Sam Steingold  <sds@gnu.org>
+
+	* lisp/url-handlers.el (require 'url): For url-retrieve-synchronously.
+	* lisp/url-history.el (url-history-save-interval): Avoid circularity.
+
+2000-07-10  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/mule-sysdp.el (mule-make-iso-character): If we are not in
+	mule, and the character requested is > 255, then return "~"
+	instead of letting whoever call us signal an error when they try
+	to insert the character.
+	(mule-make-iso-character): Also wrap the whole thing in a
+	condition case and return "~" on error, in case make-char bombs on us.
+
+	* lisp/url-cid.el (url-cid): Fix stupid mistake in the loader
+	for cid parts.
+
+	* lisp/url-util.el (url-display-percentage): New routine that uses
+	the progress bar under XEmacs if available.  Looks very sexy under
+	XEmacs/GTK hacked to use the GNOME statusbar.
+
+	* lisp/url-http.el
+	(url-http-content-length-after-change-function): Use new function
+	url-display-percentage instead of url-lazy-message.
+
+2000-01-27  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-file.el (url-file-build-filename): Work around for
+	differences in ange-ftp / efs handling of port numbers other than 21.
+
+1999-12-24  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-irc.el: Added pointer to draft specification for the
+	IRC URL so people don't think I'm crazy.
+
+	* configure.in: Checks to make sure that Gnus was found, since we
+	HAVE to have it now.  Removed conditional compilation of url-cid.el.
+
+1999-12-16  Eric Marsden  <emarsden@mail.dotcom.fr>
+
+	* lisp/url-util.el (url-get-url-at-point): Allow URLs wrapped in
+	() to have periods at the end of the chunk.
+
+1999-12-14  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-misc.el (url-man): Implement `man' URL types.
+	(url-info): Autoload.
+	(url-man): Ditto.
+	(url-rlogin): Ditto.
+	(url-telnet): Ditto.
+	(url-tn3270): Ditto.
+	(url-generic-emulator-loader): Ditto.
+
+	* lisp/url-https.el (url-https-create-secure-wrapper): New macro
+	to wrap arbitrary `http' methods with the appropriate magic to
+	turn SSL on.
+	(file-exists-p): Use it.
+	(file-readable-p): Use it.
+	(file-attributes): Use it.
+
+	* lisp/url-news.el (url-news-fetch-newsgroup): When building the
+	server spec for Gnus, make sure we set
+	nntp-open-connection-function directly, so that other news-related
+	functions above us can set it.
+	(url-snews): Implement `snews' URLs using `nntp-open-ssl-stream'.
+	(url-nntp): Autoload.
+	(url-snews): Ditto.
+	(url-news): Ditto.
+
+1999-12-12  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-http.el (url-http-parse-response): New function to
+	parse just the HTTP response code out of the buffer, without
+	taking any other actions.
+	(url-http-wait-for-headers-change-function): Use it here when we
+	know we have an HTTP/1.x response.
+	(url-http-wait-for-headers-change-function): Special case a
+	response code of '304' or there could be some delays waiting for
+	keep-alives to time out on cached documents with no known
+	content-length on the server.
+
+1999-12-11  William M. Perry  <wmperry@aventail.com>
+
+	* aclocal.m4 (AC_CHECK_CUSTOMLOADS): Don't use $(EMACS) in here -
+	the Makefile does that for us.  We just need to provide what files
+	to load/functions to run.
+
+	* lisp/url-imap.el (url-imap-open-host): Need to bind
+	nnimap-server-buffer or `nnimap-open-server' chokes trying to use
+	the current buffer as the IMAP server buffer, which fails miserably.
+
+1999-12-11  Simon Josefsson  <jas@pdc.kth.se>
+
+	* lisp/url-imap.el: Initial (rough) implementation for IMAP urls.
+
+1999-12-11  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-file.el (url-file-asynch-callback): Make the checks for
+	ange-ftp vs. efs calling semantics consistent, so that if someone
+	has NEITHER of them loaded, everything should still work.
+
+	* lisp/url-handlers.el (url-copy-file): Autoload.
+	(url-file-local-copy): Ditto.
+	(url-insert-file-contents): Ditto.
+	(url-setup-file-name-handlers): Ditto.
+
+1999-12-10  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-http.el (mail-parse): Since we use functions from here,
+	we should require it, eh?
+
+1999-12-10  Shenghuo ZHU  <zsh@cs.rochester.edu>
+
+	* lisp/url-cookie.el (url-cookie-multiple-line): One line cookie
+	if nil.
+	(url-cookie-generate-header-lines): Use it.
+
+1999-12-06  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/mule-sysdp.el (mule-code-convert-region): Deal with Mule
+	4.1 gracefully.
+
+	* lisp/url-news.el: Reimplemented news and nntp URL support.
+	No longer bothers to check for outdated Gnus versions, since this
+	will not work without them anyway.
+
+1999-12-05  Dave Love  <fx@gnu.org>
+
+	* lisp/url-methods.el, lisp/url-proxy.el, lisp/url-util.el,
+	lisp/url.el:
+	Require url-parse.
+
+1999-12-05  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-http.el (url-http-find-free-connection): Spit out a
+	message when we have to contact a host so the user always gets
+	at least some feedback.
+
+	* lisp/url-expand.el (url-expander-remove-relative-links): Move and
+	renamed function.
+	(url-default-expander): Use it.
+
+	* lisp/url-file.el (url-file-asynch-callback): Deal with just efs-auto
+	as well as efs.
+	(url-file): Add default content-type of application/octet-stream if
+	none known.
+	(url-file): Correct bad call to url-host-is-local-p.
+
+	* lisp/url-handlers.el (url-insert-file-contents): Emacs doesn't
+	like buffer-substring with nil arguments.
+	(url-copy-file): Use mm-destroy-parts instead of just killing
+	the buffer.  Use defined interfaces when available!
+	(url-insert-file-contents): Ditto.
+
+	* lisp/url-http.el (url-http-create-request): Lots of changes to
+	get proxying working.
+
+	* lisp/url-methods.el (url-scheme-register-proxy): New function to
+	find and register a proxy for a specific scheme.
+	(url-scheme-get-property): Use it when we load a URL scheme for
+	the first time.
+
+	* lisp/url-util.el (url-get-url-at-point): Re-integrated.
+
+1999-12-04  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-file.el (url-file): Signal an error if
+	url-file-build-filename could not find the filename.
+
+1999-12-01  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url.el (url-retrieve): Use url-history-update-url instead
+	of manipulating the hash table directly.
+
+	* lisp/url-history.el (url-completion-function): New function to
+	use for reading a URL with completion.
+	(url-history-update-url): New function to hide the hashtable
+	implementation from people inserting things into the history.
+
+1999-11-30  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-proxy.el (url-proxy): Minor tweaks to get proxy support
+	working.
+
+	* lisp/url-parse.el (url-generic-parse-url): Fix bad call to
+	url-parse-args, which had changed the type of arguments it expects.
+
+	* lisp/url-handlers.el (url-insert-file-contents): Ditto.
+	(url-copy-file): Ditto.
+
+	* lisp/url.el (url-mm-callback): Use mm-destroy-parts instead of
+	just killing the buffer.  Use defined interfaces when available!
+
+	* aclocal.m4 (AC_EMACS_LISP): Correctly redirect things out to
+	AC_FD_CC so they show up in config.log
+	(AC_EMACS_CHECK_LIB): Duh, fixed stupid mistake that would make
+	this always return 't' instead of 'yes' on successfully finding
+	the library.
+
+	* lisp/url-http.el (url-http-parse-headers): Add some
+	DAV-specific error codes.
+
+	* lisp/url.el (url-retrieve): Allow pre-parsed URLs to be passed in.
+	(url-retrieve-synchronously): Duh, make this function actually
+	work again.  Numerous problems with it, including variable name
+	collisions - I love dynamically scoped lisps!
+
+	* lisp/url-nfs.el (url-nfs-create-wrapper): New function to create
+	wrappers onto the appropriate file-based URLs for file-name-handlers.
+
+	* lisp/url-ftp.el: Moved the FTP stuff into its own file - it
+	might get messy with file-name-handlers and things.
+
+	* lisp/url-http.el (url-http-clean-headers): Fix problem when
+	using 'HEAD' requests.  Thou shalt not change the length of the
+	region during an after-change-function.
+
+	* lisp/url-methods.el (url-scheme-methods): New variable that
+	holds a list of the methods/variables we look for in a URL scheme.
+	(url-scheme-get-property): Use it.
+
+1999-11-29  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-http.el (url-http-file-attributes): Reimplement.
+	(url-http-file-exists-p): Ditto.
+
+	* lisp/url-nfs.el: Reimplemented the `nfs' URL scheme.
+
+	* lisp/url-file.el (url-file-create-wrapper): New macro to create
+	file-name-handler stubs for all the FTP/FILE stuff.
+
+	* lisp/url-handlers.el: New file to handle file-name-handler-alist
+	cruft.  Generic interface on top of functions that each URL
+	loader provides, if capable.
+
+1999-11-27  William M. Perry  <wmperry@aventail.com>
+
+	* lisp/url-https.el: Implemented HTTPS support.
+
+1999-11-26  William M. Perry  <wmperry@aventail.com>
+
+	* url-privacy.el (url-setup-privacy-info): Don't rely on
+	device-type being defined.  Not going to bother redistributing
+	devices.el for just one function.
+
+	* url-methods.el (url-scheme-get-property): Emacs does not have
+	the 3rd-argument to plist-get to specify the default.  *sigh*
+
+	* url-dired.el (add-minor-mode): Add definition for Emacs.
+
+	* url-http.el (url-http-generic-after-change-function):
+	New function, since Emacs does not allow you to change the
+	after-change-functions variable from within a function run by
+	said hook.  This just hands it off to the REAL function.
+	Side-effect is that this now works on Emacs at all. :)
+
+	* Initial checkin of rewritten URL library.
+
+;; Local variables:
+;; coding: utf-8
+;; End:
+
+	Copyright (C) 1999, 2001-2002, 2004-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

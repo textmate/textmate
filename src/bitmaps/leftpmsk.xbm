@@ -1,0 +1,6 @@
+#define left_ptrmsk_width 16
+#define left_ptrmsk_height 16
+static char left_ptrmsk_bits[] = {
+  '\x0c','\x00','\x1c','\x00','\x3c','\x00','\x7c','\x00','\xfc','\x00','\xfc','\x01',
+  '\xfc','\x03','\xfc','\x07','\xfc','\x0f','\xfc','\x0f','\xfc','\x01','\xdc','\x03',
+  '\xcc','\x03','\x80','\x07','\x80','\x07','\x00','\x03'};

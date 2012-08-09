@@ -1,0 +1,16 @@
+# List Module
+
+dl = element dl { dl.attlist, (dt | dd)+ }
+dl.attlist = Common.attrib
+dt = element dt { dt.attlist, Inline.model }
+dt.attlist = Common.attrib
+dd = element dd { dd.attlist, Flow.model }
+dd.attlist = Common.attrib
+ol = element ol { ol.attlist, li+ }
+ol.attlist = Common.attrib
+ul = element ul { ul.attlist, li+ }
+ul.attlist = Common.attrib
+li = element li { li.attlist, Flow.model }
+li.attlist = Common.attrib
+List.class = ul | ol | dl
+Block.class |= List.class

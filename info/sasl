@@ -1,0 +1,307 @@
+This is ../../info/sasl, produced by makeinfo version 4.13 from
+sasl.texi.
+
+This file describes the Emacs SASL library, version 0.2.
+
+   Copyright (C) 2000, 2004-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+INFO-DIR-SECTION Emacs network features
+START-INFO-DIR-ENTRY
+* SASL: (sasl).                 The Emacs SASL library.
+END-INFO-DIR-ENTRY
+
+
+File: sasl,  Node: Top,  Next: Overview,  Up: (dir)
+
+Emacs SASL
+**********
+
+SASL is a common interface to share several authentication mechanisms
+between applications using different protocols.
+
+   This file describes the Emacs SASL library, version 0.2.
+
+   Copyright (C) 2000, 2004-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+* Menu:
+
+* Overview::                    What Emacs SASL library is.
+* How to use::                  Adding authentication support to your applications.
+* Data types::
+* Back end drivers::             Writing your own drivers.
+* Index::
+* Function Index::
+* Variable Index::
+
+
+File: sasl,  Node: Overview,  Next: How to use,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+SASL is short for "Simple Authentication and Security Layer".  This
+standard is documented in RFC2222.  It provides a simple method for
+adding authentication support to various application protocols.
+
+   The toplevel interface of this library is inspired by Java SASL
+Application Program Interface.  It defines an abstraction over a series
+of authentication mechanism drivers (*note Back end drivers::).
+
+   Back end drivers are designed to be close as possible to the
+authentication mechanism.  You can access the additional configuration
+information anywhere from the implementation.
+
+
+File: sasl,  Node: How to use,  Next: Data types,  Prev: Overview,  Up: Top
+
+2 How to use
+************
+
+(Not yet written).
+
+   To use Emacs SASL library, please evaluate following expression at
+the beginning of your application program.
+
+     (require 'sasl)
+
+   If you want to check existence of sasl.el at runtime, instead you
+can list autoload settings for functions you want.
+
+
+File: sasl,  Node: Data types,  Next: Back end drivers,  Prev: How to use,  Up: Top
+
+3 Data types
+************
+
+There are three data types to be used for carrying a negotiated
+security layer--a mechanism, a client parameter and an authentication
+step.
+
+* Menu:
+
+* Mechanisms::
+* Clients::
+* Steps::
+
+
+File: sasl,  Node: Mechanisms,  Next: Clients,  Up: Data types
+
+3.1 Mechanisms
+==============
+
+A mechanism (`sasl-mechanism' object) is a schema of the SASL
+authentication mechanism driver.
+
+ -- Variable: sasl-mechanisms
+     A list of mechanism names.
+
+ -- Function: sasl-find-mechanism mechanisms
+     Retrieve an appropriate mechanism.  This function compares
+     MECHANISMS and `sasl-mechanisms' then returns appropriate
+     `sasl-mechanism' object.
+
+          (let ((sasl-mechanisms '("CRAM-MD5" "DIGEST-MD5")))
+            (setq mechanism (sasl-find-mechanism server-supported-mechanisms)))
+
+
+ -- Function: sasl-mechanism-name mechanism
+     Return name of mechanism, a string.
+
+   If you want to write an authentication mechanism driver (*note Back
+end drivers::), use `sasl-make-mechanism' and modify `sasl-mechanisms'
+and `sasl-mechanism-alist' correctly.
+
+ -- Function: sasl-make-mechanism name steps
+     Allocate a `sasl-mechanism' object.  This function takes two
+     parameters--name of the mechanism, and a list of authentication
+     functions.
+
+          (defconst sasl-anonymous-steps
+            '(identity                            ;no initial response
+              sasl-anonymous-response))
+
+          (put 'sasl-anonymous 'sasl-mechanism
+               (sasl-make-mechanism "ANONYMOUS" sasl-anonymous-steps))
+
+
+
+File: sasl,  Node: Clients,  Next: Steps,  Prev: Mechanisms,  Up: Data types
+
+3.2 Clients
+===========
+
+A client (`sasl-client' object) initialized with four parameters--a
+mechanism, a user name, name of the service and name of the server.
+
+ -- Function: sasl-make-client mechanism name service server
+     Prepare a `sasl-client' object.
+
+ -- Function: sasl-client-mechanism client
+     Return the mechanism (`sasl-mechanism' object) of client.
+
+ -- Function: sasl-client-name client
+     Return the authorization name of client, a string.
+
+ -- Function: sasl-client-service client
+     Return the service name of client, a string.
+
+ -- Function: sasl-client-server client
+     Return the server name of client, a string.
+
+   If you want to specify additional configuration properties, please
+use `sasl-client-set-property'.
+
+ -- Function: sasl-client-set-property client property value
+     Add the given property/value to client.
+
+ -- Function: sasl-client-property client property
+     Return the value of the property of client.
+
+ -- Function: sasl-client-set-properties client plist
+     Destructively set the properties of client.  The second argument
+     is the new property list.
+
+ -- Function: sasl-client-properties client
+     Return the whole property list of client configuration.
+
+
+File: sasl,  Node: Steps,  Prev: Clients,  Up: Data types
+
+3.3 Steps
+=========
+
+A step (`sasl-step' object) is an abstraction of authentication "step"
+which holds the response value and the next entry point for the
+authentication process (the latter is not accessible).
+
+ -- Function: sasl-step-data step
+     Return the data which STEP holds, a string.
+
+ -- Function: sasl-step-set-data step data
+     Store DATA string to STEP.
+
+   To get the initial response, you should call the function
+`sasl-next-step' with the second argument `nil'.
+
+     (setq name (sasl-mechanism-name mechanism))
+
+   At this point we could send the command which starts a SASL
+authentication protocol exchange.  For example,
+
+     (process-send-string
+      process
+      (if (sasl-step-data step)              ;initial response
+          (format "AUTH %s %s\r\n" name (base64-encode-string (sasl-step-data step) t))
+        (format "AUTH %s\r\n" name)))
+
+   To go on with the authentication process, all you have to do is call
+`sasl-next-step' consecutively.
+
+ -- Function: sasl-next-step client step
+     Perform the authentication step.  At the first time STEP should be
+     set to `nil'.
+
+
+File: sasl,  Node: Back end drivers,  Next: Index,  Prev: Data types,  Up: Top
+
+4 Back end drivers
+******************
+
+(Not yet written).
+
+
+File: sasl,  Node: Index,  Next: Function Index,  Prev: Back end drivers,  Up: Top
+
+5 Index
+*******
+
+ [index ]
+* Menu:
+
+File: sasl,  Node: Function Index,  Next: Variable Index,  Prev: Index,  Up: Top
+
+6 Function Index
+****************
+
+ [index ]
+* Menu:
+
+* sasl-client-mechanism:                 Clients.              (line 13)
+* sasl-client-name:                      Clients.              (line 16)
+* sasl-client-properties:                Clients.              (line 38)
+* sasl-client-property:                  Clients.              (line 31)
+* sasl-client-server:                    Clients.              (line 22)
+* sasl-client-service:                   Clients.              (line 19)
+* sasl-client-set-properties:            Clients.              (line 34)
+* sasl-client-set-property:              Clients.              (line 28)
+* sasl-find-mechanism:                   Mechanisms.           (line 13)
+* sasl-make-client:                      Clients.              (line 10)
+* sasl-make-mechanism:                   Mechanisms.           (line 29)
+* sasl-mechanism-name:                   Mechanisms.           (line 22)
+* sasl-next-step:                        Steps.                (line 34)
+* sasl-step-data:                        Steps.                (line 11)
+* sasl-step-set-data:                    Steps.                (line 14)
+
+
+File: sasl,  Node: Variable Index,  Prev: Function Index,  Up: Top
+
+7 Variable Index
+****************
+
+ [index ]
+* Menu:
+
+* sasl-mechanisms:                       Mechanisms.           (line 10)
+
+
+
+Tag Table:
+Node: Top1305
+Node: Overview2873
+Node: How to use3555
+Node: Data types3938
+Node: Mechanisms4240
+Node: Clients5580
+Node: Steps6878
+Node: Back end drivers8052
+Node: Index8193
+Node: Function Index8316
+Node: Variable Index9552
+
+End Tag Table

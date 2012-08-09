@@ -1,0 +1,1488 @@
+This is ../../info/ses, produced by makeinfo version 4.13 from ses.texi.
+
+This file documents SES: the Simple Emacs Spreadsheet.
+
+   Copyright (C) 2002-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License."
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* SES: (ses).                   Simple Emacs Spreadsheet.
+END-INFO-DIR-ENTRY
+
+
+File: ses,  Node: Top,  Next: Sales Pitch,  Prev: (dir),  Up: (dir)
+
+SES: Simple Emacs Spreadsheet
+*****************************
+
+     SES is a major mode for GNU Emacs to edit spreadsheet files, which
+     contain a rectangular grid of cells.  The cells' values are specified
+     by formulas that can refer to the values of other cells.
+
+   To report bugs, send email to <jyavner@member.fsf.org>.
+
+   This file documents SES: the Simple Emacs Spreadsheet.
+
+   Copyright (C) 2002-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License."
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Sales Pitch::                 Why use SES?
+* The Basics::                  Basic spreadsheet commands
+* Advanced Features::           Want to know more?
+* For Gurus::                   Want to know _even more_?
+* Index::                       Concept, Function and Variable Index
+* Acknowledgements::            Acknowledgements
+* GNU Free Documentation License:: The license for this documentation.
+
+
+File: ses,  Node: Sales Pitch,  Next: The Basics,  Prev: Top,  Up: Top
+
+1 Sales Pitch
+*************
+
+   * Create and edit simple spreadsheets with a minimum of fuss.
+
+   * Full undo/redo/autosave.
+
+   * Immune to viruses in spreadsheet files.
+
+   * Cell formulas are straight Emacs Lisp.
+
+   * Printer functions for control of cell appearance.
+
+   * Intuitive keystroke commands: C-o = insert row, M-o = insert
+     column, etc.
+
+   * "Spillover" of lengthy cell values into following blank cells.
+
+   * Header line shows column letters or a selected row.
+
+   * Completing-read for entering symbols as cell values.
+
+   * Cut, copy, and paste can transfer formulas and printer functions.
+
+   * Import and export of tab-separated values or tab-separated
+     formulas.
+
+   * Plaintext, easily-hacked file format.
+
+
+File: ses,  Node: The Basics,  Next: Advanced Features,  Prev: Sales Pitch,  Up: Top
+
+2 The Basics
+************
+
+To create a new spreadsheet, visit a nonexistent file whose name ends
+with ".ses".  For example, `C-x C-f test.ses RET'.
+
+   A "cell identifier" is a symbol with a column letter and a row
+number.  Cell B7 is the 2nd column of the 7th row.  For very wide
+spreadsheets, there are two column letters: cell AB7 is the 28th column
+of the 7th row. Super wide spreadsheets get AAA1, etc.
+
+`j'
+     Moves point to cell, specified by identifier (`ses-jump').
+
+   Point is always at the left edge of a cell, or at the empty endline.
+When mark is inactive, the current cell is underlined.  When mark is
+active, the range is the highlighted rectangle of cells (SES always
+uses transient mark mode).  Drag the mouse from A1 to A3 to create the
+range A1-A2.  Many SES commands operate only on single cells, not
+ranges.
+
+`C-SPC'
+`C-@'
+     Set mark at point (`set-mark-command').
+
+`C-g'
+     Turn off the mark (`keyboard-quit').
+
+`M-h'
+     Highlight current row (`ses-mark-row').
+
+`S-M-h'
+     Highlight current column (`ses-mark-column').
+
+`C-x h'
+     Highlight all cells (`mark-whole-buffer').
+
+* Menu:
+
+* Formulas::
+* Resizing::
+* Printer functions::
+* Clearing cells::
+* Copy/cut/paste::
+* Customizing SES::
+
+
+File: ses,  Node: Formulas,  Next: Resizing,  Prev: The Basics,  Up: The Basics
+
+2.1 Cell formulas
+=================
+
+To enter a number into the current cell, just start typing:
+
+`0..9'
+     Self-insert a digit (`ses-read-cell').
+
+`-'
+     Self-insert a negative number (`ses-read-cell').
+
+`.'
+     Self-insert a fractional number (`ses-read-cell').
+
+`"'
+     Self-insert a quoted string.  The ending double-quote is inserted
+     for you (`ses-read-cell').
+
+`('
+     Self-insert an expression.  The right-parenthesis is inserted for
+     you (`ses-read-cell').  To access another cell's value, just use
+     its identifier in your expression.  Whenever the other cell is
+     changed, this cell's formula will be reevaluated.  While typing in
+     the expression, you can use `M-<TAB>' to complete symbol names.
+
+`' (apostrophe)'
+     Enter a symbol (ses-read-symbol).  SES remembers all symbols that
+     have been used as formulas, so you can type just the beginning of
+     a symbol and use `<SPC>', `<TAB>', and `?' to complete it.
+
+   To enter something else (e.g., a vector), begin with a digit, then
+erase the digit and type whatever you want.
+
+`RET'
+     Edit the existing formula in the current cell (`ses-edit-cell').
+
+`C-c C-c'
+     Force recalculation of the current cell or range
+     (`ses-recalculate-cell').
+
+`C-c C-l'
+     Recalculate the entire spreadsheet (`ses-recalculate-all').
+
+
+File: ses,  Node: Resizing,  Next: Printer functions,  Prev: Formulas,  Up: The Basics
+
+2.2 Resizing the spreadsheet
+============================
+
+Basic commands:
+
+`C-o'
+     (`ses-insert-row')
+
+`M-o'
+     (`ses-insert-column')
+
+`C-k'
+     (`ses-delete-row')
+
+`M-k'
+     (`ses-delete-column')
+
+`w'
+     (`ses-set-column-width')
+
+`TAB'
+     Moves point to the next rightward cell, or inserts a new column if
+     already at last cell on line, or inserts a new row if at endline
+     (`ses-forward-or-insert').
+
+`C-j'
+     Linefeed inserts below the current row and moves to column A
+     (`ses-append-row-jump-first-column').
+
+   Resizing the spreadsheet (unless you're just changing a column width)
+relocates all the cell-references in formulas so they still refer to
+the same cells.  If a formula mentioned B1 and you insert a new first
+row, the formula will now mention B2.
+
+   If you delete a cell that a formula refers to, the cell-symbol is
+deleted from the formula, so `(+ A1 B1 C1)' after deleting the third
+column becomes `(+ A1 B1)'.  In case this is not what you wanted:
+
+`C-_'
+`C-x u'
+     Undo previous action (`(undo)').
+
+
+File: ses,  Node: Printer functions,  Next: Clearing cells,  Prev: Resizing,  Up: The Basics
+
+2.3 Printer functions
+=====================
+
+Printer functions convert binary cell values into the print forms that
+Emacs will display on the screen.
+
+   A printer can be a format string, like `"$%.2f"'.  The result string
+is right-aligned within the print cell.  To get left-alignment, use
+parentheses: `("$%.2f")'.  A printer can also be a one-argument
+function (a symbol or a lambda), whose result is a string
+(right-aligned) or list of one string (left-aligned).  While typing in
+a lambda, you can use `M-<TAB>' to complete the names of symbols.
+
+   Each cell has a printer.  If `nil', the column-printer for the cell's
+column is used.  If that is also `nil', the default-printer for the
+spreadsheet is used.
+
+`p'
+     Enter a printer for current cell or range
+     (`ses-read-cell-printer').
+
+`M-p'
+     Enter a printer for the current column (`ses-read-column-printer').
+
+`C-c C-p'
+     Enter the default printer for the spreadsheet
+     (`ses-read-default-printer').
+
+   The `ses-read-XXX-printer' commands have their own minibuffer
+history, which is preloaded with the set of all printers used in this
+spreadsheet, plus the standard printers.
+
+   The standard printers are suitable only for cells, not columns or
+default, because they format the value using the column-printer (or
+default-printer if `nil') and then center the result:
+
+`ses-center'
+     Just centering.
+
+`ses-center-span'
+     Centering with spill-over to following blank cells.
+
+`ses-dashfill'
+     Centering using dashes (-) instead of spaces.
+
+`ses-dashfill-span'
+     Centering with dashes and spill-over.
+
+`ses-tildefill-span'
+     Centering with tildes (~) and spill-over.
+
+
+File: ses,  Node: Clearing cells,  Next: Copy/cut/paste,  Prev: Printer functions,  Up: The Basics
+
+2.4 Clearing cells
+==================
+
+These commands set both formula and printer to `nil':
+
+`DEL'
+     Clear cell and move left (`ses-clear-cell-backward').
+
+`C-d'
+     Clear cell and move right (`ses-clear-cell-forward').
+
+
+File: ses,  Node: Copy/cut/paste,  Next: Customizing SES,  Prev: Clearing cells,  Up: The Basics
+
+2.5 Copy, cut, and paste
+========================
+
+The copy functions work on rectangular regions of cells.  You can paste
+the copies into non-SES buffers to export the print text.
+
+`M-w'
+`[copy]'
+`[C-insert]'
+     Copy the highlighted cells to kill ring and primary clipboard
+     (`kill-ring-save').
+
+`[drag-mouse-1]'
+     Mark a region and copy it to kill ring and primary clipboard
+     (`mouse-set-region').
+
+`[M-drag-mouse-1]'
+     Mark a region and copy it to kill ring and secondary clipboard
+     (`mouse-set-secondary').
+
+`C-w'
+`[cut]'
+`[S-delete]'
+     The cut functions do not actually delete rows or columns--they copy
+     and then clear (`ses-kill-override').
+
+`C-y'
+`[S-insert]'
+     Paste from kill ring (`yank').  The paste functions behave
+     differently depending on the format of the text being inserted:
+        * When pasting cells that were cut from a SES buffer, the print
+          text is ignored and only the attached formula and printer are
+          inserted; cell references in the formula are relocated unless
+          you use `C-u'.
+
+        * The pasted text overwrites a rectangle of cells whose top
+          left corner is the current cell.  If part of the rectangle is
+          beyond the edges of the spreadsheet, you must confirm the
+          increase in spreadsheet size.
+
+        * Non-SES text is usually inserted as a replacement formula for
+          the current cell.  If the formula would be a symbol, it's
+          treated as a string unless you use `C-u'.  Pasted formulas
+          with syntax errors are always treated as strings.
+
+`[paste]'
+     Paste from primary clipboard or kill ring (`clipboard-yank').
+
+`[mouse-2]'
+     Set point and paste from primary clipboard (`mouse-yank-at-click').
+
+`[M-mouse-2]'
+     Set point and paste from secondary clipboard
+     (`mouse-yank-secondary').
+
+`M-y'
+     Immediately after a paste, you can replace the text with a
+     preceding element from the kill ring (`ses-yank-pop').  Unlike the
+     standard Emacs yank-pop, the SES version uses `undo' to delete the
+     old yank.  This doesn't make any difference?
+
+
+File: ses,  Node: Customizing SES,  Prev: Copy/cut/paste,  Up: The Basics
+
+2.6 Customizing SES
+===================
+
+By default, a newly-created spreadsheet has 1 row and 1 column.  The
+column width is 7 and the default printer is `"%.7g"'.  Each of these
+can be customized.  Look in group "ses".
+
+   After entering a cell value, point normally moves right to the next
+cell.  You can customize `ses-after-entry-functions' to move left or up
+or down.  For diagonal movement, select two functions from the list.
+
+   `ses-mode-hook' is a normal mode hook (list of functions to execute
+when starting SES mode for a buffer).
+
+   The variable `safe-functions' is a list of possibly-unsafe functions
+to be treated as safe when analyzing formulas and printers.  *Note
+Virus protection::.  Before customizing `safe-functions', think about
+how much you trust the person who's suggesting this change.  The value
+`t' turns off all anti-virus protection.  A list-of-functions value
+might enable a "gee whiz" spreadsheet, but it also creates trapdoors in
+your anti-virus armor.  In order for virus protection to work, you must
+always press `n' when presented with a virus warning, unless you
+understand what the questionable code is trying to do.  Do not listen
+to those who tell you to customize `enable-local-eval'--this variable
+is for people who don't wear safety belts!
+
+
+File: ses,  Node: Advanced Features,  Next: For Gurus,  Prev: The Basics,  Up: Top
+
+3 Advanced Features
+*******************
+
+`C-c M-C-h'
+     (`ses-set-header-row').  The header line at the top of the SES
+     window normally shows the column letter for each column.  You can
+     set it to show a copy of some row, such as a row of column titles,
+     so that row will always be visible.  Default is to set the current
+     row as the header; use C-u to prompt for header row.  Set the
+     header to row 0 to show column letters again.
+
+`[header-line mouse-3]'
+     Pops up a menu to set the current row as the header, or revert to
+     column letters.
+
+* Menu:
+
+* The print area::
+* Ranges in formulas::
+* Sorting by column::
+* Standard formula functions::
+* More on cell printing::
+* Import and export::
+* Virus protection::
+* Spreadsheets with details and summary::
+
+
+File: ses,  Node: The print area,  Next: Ranges in formulas,  Prev: Advanced Features,  Up: Advanced Features
+
+3.1 The print area
+==================
+
+A SES file consists of a print area and a data area.  Normally the
+buffer is narrowed to show only the print area.  The print area is
+read-only except for special SES commands; it contains cell values
+formatted by printer functions.  The data area records the formula and
+printer functions, etc.
+
+`C-x n w'
+     Show print and data areas (`widen').
+
+`C-c C-n'
+     Show only print area (`ses-renarrow-buffer').
+
+`S-C-l'
+`M-C-l'
+     Recreate print area by reevaluating printer functions for all cells
+     (`ses-reprint-all').
+
+
+File: ses,  Node: Ranges in formulas,  Next: Sorting by column,  Prev: The print area,  Up: Advanced Features
+
+3.2 Ranges in formulas
+======================
+
+A formula like
+     (+ A1 A2 A3)
+   is the sum of three specific cells.  If you insert a new second row,
+the formula becomes
+     (+ A1 A3 A4)
+   and the new row is not included in the sum.
+
+   The macro `(ses-range FROM TO)' evaluates to a list of the values in
+a rectangle of cells.  If your formula is
+     (apply '+ (ses-range A1 A3))
+   and you insert a new second row, it becomes
+     (apply '+ (ses-range A1 A4))
+   and the new row is included in the sum.
+
+   While entering or editing a formula in the minibuffer, you can select
+a range in the spreadsheet (using mouse or keyboard), then paste a
+representation of that range into your formula.  Suppose you select
+A1-C1:
+
+`[S-mouse-3]'
+     Inserts "A1 B1 C1" `(ses-insert-range-click')
+
+`C-c C-r'
+     Keyboard version (`ses-insert-range').
+
+`[C-S-mouse-3]'
+     Inserts "(ses-range A1 C1)" (`ses-insert-ses-range-click').
+
+`C-c C-s'
+     Keyboard version (`ses-insert-ses-range').
+
+   If you delete the FROM or TO cell for a range, the nearest
+still-existing cell is used instead.  If you delete the entire range,
+the formula relocator will delete the ses-range from the formula.
+
+   If you insert a new row just beyond the end of a one-column range, or
+a new column just beyond a one-row range, the new cell is included in
+the range.  New cells inserted just before a range are not included.
+
+
+File: ses,  Node: Sorting by column,  Next: Standard formula functions,  Prev: Ranges in formulas,  Up: Advanced Features
+
+3.3 Sorting by column
+=====================
+
+`C-c M-C-s'
+     Sort the cells of a range using one of the columns
+     (`ses-sort-column').  The rows (or partial rows if the range
+     doesn't include all columns) are rearranged so the chosen column
+     will be in order.
+
+`[header-line mouse-2]'
+     The easiest way to sort is to click mouse-2 on the chosen column's
+     header row (`ses-sort-column-click').
+
+   The sort comparison uses `string<', which works well for
+right-justified numbers and left-justified strings.
+
+   With prefix arg, sort is in descending order.
+
+   Rows are moved one at a time, with relocation of formulas.  This
+works well if formulas refer to other cells in their row, not so well
+for formulas that refer to other rows in the range or to cells outside
+the range.
+
+
+File: ses,  Node: Standard formula functions,  Next: More on cell printing,  Prev: Sorting by column,  Up: Advanced Features
+
+3.4 Standard formula functions
+==============================
+
+Oftentimes you want a calculation to exclude the blank cells.  Here are
+some useful functions to call from your formulas:
+
+`(ses-delete-blanks &rest ARGS)'
+     Returns a list from which all blank cells (value is either `nil' or
+     '*skip*) have been deleted.
+
+`(ses+ &rest ARGS)'
+     Sum of non-blank arguments.
+
+`(ses-average LIST)'
+     Average of non-blank elements in LIST.  Here the list is passed as
+     a single argument, since you'll probably use it with `ses-range'.
+
+
+File: ses,  Node: More on cell printing,  Next: Import and export,  Prev: Standard formula functions,  Up: Advanced Features
+
+3.5 More on cell printing
+=========================
+
+Special cell values:
+   * nil prints the same as "", but allows previous cell to spill over.
+
+   * '*skip* replaces nil when the previous cell actually does spill
+     over; nothing is printed for it.
+
+   * '*error* indicates that the formula signaled an error instead of
+     producing a value: the print cell is filled with hash marks (#).
+
+   If the result from the printer function is too wide for the cell and
+the following cell is `nil', the result will spill over into the
+following cell.  Very wide results can spill over several cells.  If
+the result is too wide for the available space (up to the end of the
+row or the next non-`nil' cell), the result is truncated if the cell's
+value is a string, or replaced with hash marks otherwise.
+
+   SES could get confused by printer results that contain newlines or
+tabs, so these are replaced with question marks.
+
+`t'
+     Confine a cell to its own column (`ses-truncate-cell').  This
+     allows you to move point to a rightward cell that would otherwise
+     be covered by a spill-over.  If you don't change the rightward
+     cell, the confined cell will spill over again the next time it is
+     reprinted.
+
+`c'
+     When applied to a single cell, this command displays in the echo
+     area any formula error or printer error that occurred during
+     recalculation/reprinting (`ses-recalculate-cell').  You can use
+     this to undo the effect of `t'.
+
+   When a printer function signals an error, the fallback printer
+`"%s"' is substituted.  This is useful when your column printer is
+numeric-only and you use a string as a cell value.  Note that the
+standard default printer is "%.7g" which is numeric-only, so cells that
+are empty of contain strings will use the fallback printer.  `c' on
+such cells will display "Format specifier doesn't match argument type".
+
+
+File: ses,  Node: Import and export,  Next: Virus protection,  Prev: More on cell printing,  Up: Advanced Features
+
+3.6 Import and export
+=====================
+
+`x t'
+     Export a range of cells as tab-separated values (`ses-export-tsv').
+
+`x T'
+     Export a range of cells as tab-separated formulas
+     (`ses-export-tsf').
+
+   The exported text goes to the kill ring -- you can paste it into
+another buffer.  Columns are separated by tabs, rows by newlines.
+
+   To import text, use any of the yank commands where the text to paste
+contains tabs and/or newlines.  Imported formulas are not relocated.
+
+
+File: ses,  Node: Virus protection,  Next: Spreadsheets with details and summary,  Prev: Import and export,  Up: Advanced Features
+
+3.7 Virus protection
+====================
+
+Whenever a formula or printer is read from a file or is pasted into the
+spreadsheet, it receives a "needs safety check" marking.  Later, when
+the formula or printer is evaluated for the first time, it is checked
+for safety using the `unsafep' predicate; if found to be "possibly
+unsafe", the questionable formula or printer is displayed and you must
+press Y to approve it or N to use a substitute.  The substitute always
+signals an error.
+
+   Formulas or printers that you type in are checked immediately for
+safety.  If found to be possibly unsafe and you press N to disapprove,
+the action is canceled and the old formula or printer will remain.
+
+   Besides viruses (which try to copy themselves to other files),
+`unsafep' can also detect all other kinds of Trojan horses, such as
+spreadsheets that delete files, send email, flood Web sites, alter your
+Emacs settings, etc.
+
+   Generally, spreadsheet formulas and printers are simple things that
+don't need to do any fancy computing, so all potentially-dangerous
+parts of the Emacs Lisp environment can be excluded without cramping
+your style as a formula-writer.  See the documentation in `unsafep.el'
+for more info on how Lisp forms are classified as safe or unsafe.
+
+
+File: ses,  Node: Spreadsheets with details and summary,  Prev: Virus protection,  Up: Advanced Features
+
+3.8 Spreadsheets with details and summary
+=========================================
+
+A common organization for spreadsheets is to have a bunch of "detail"
+rows, each perhaps describing a transaction, and then a set of
+"summary" rows that each show reduced data for some subset of the
+details.  SES supports this organization via the `ses-select' function.
+
+`(ses-select FROMRANGE TEST TORANGE)'
+     Returns a subset of TORANGE.  For each member in FROMRANGE that is
+     equal to TEST, the corresponding member of TORANGE is included in
+     the result.
+
+   Example of use:
+     (ses-average (ses-select (ses-range A1 A5) 'Smith (ses-range B1 B5)))
+   This computes the average of the B column values for those rows whose
+A column value is the symbol 'Smith.
+
+   Arguably one could specify only FROMRANGE plus TO-ROW-OFFSET and
+TO-COLUMN-OFFSET.  The TORANGE is stated explicitly to ensure that the
+formula will be recalculated if any cell in either range is changed.
+
+   File `etc/ses-example.el' in the Emacs distribution is an example of
+a details-and-summary spreadsheet.
+
+
+File: ses,  Node: For Gurus,  Next: Index,  Prev: Advanced Features,  Up: Top
+
+4 For Gurus
+***********
+
+* Menu:
+
+* Deferred updates::
+* Nonrelocatable references::
+* The data area::
+* Buffer-local variables in spreadsheets::
+* Uses of defadvice in SES::
+
+
+File: ses,  Node: Deferred updates,  Next: Nonrelocatable references,  Prev: For Gurus,  Up: For Gurus
+
+4.1 Deferred updates
+====================
+
+To save time by avoiding redundant computations, cells that need
+recalculation due to changes in other cells are added to a set.  At the
+end of the command, each cell in the set is recalculated once.  This
+can create a new set of cells that need recalculation.  The process is
+repeated until either the set is empty or it stops changing (due to
+circular references among the cells).  In extreme cases, you might see
+progress messages of the form "Recalculating... (NNN cells left)".  If
+you interrupt the calculation using `C-g', the spreadsheet will be left
+in an inconsistent state, so use `C-_' or `C-c C-l' to fix it.
+
+   To save even more time by avoiding redundant writes, cells that have
+changes are added to a set instead of being written immediately to the
+data area.  Each cell in the set is written once, at the end of the
+command.  If you change vast quantities of cells, you might see a
+progress message of the form "Writing... (NNN cells left)".  These
+deferred cell-writes cannot be interrupted by `C-g', so you'll just
+have to wait.
+
+   SES uses `run-with-idle-timer' to move the cell underline when Emacs
+will be scrolling the buffer after the end of a command, and also to
+narrow and underline after `C-x C-v'.  This is visible as a momentary
+glitch after C-x C-v and certain scrolling commands.  You can type
+ahead without worrying about the glitch.
+
+
+File: ses,  Node: Nonrelocatable references,  Next: The data area,  Prev: Deferred updates,  Up: For Gurus
+
+4.2 Nonrelocatable references
+=============================
+
+`C-y' relocates all cell-references in a pasted formula, while `C-u
+C-y' relocates none of the cell-references.  What about mixed cases?
+
+   You can use
+     (symbol-value 'B3)
+   to make an "absolute reference".  The formula relocator skips over
+quoted things, so this will not be relocated when pasted or when
+rows/columns are inserted/deleted.  However, B3 will not be recorded as
+a dependency of this cell, so this cell will not be updated
+automatically when B3 is changed.
+
+   The variables `row' and `col' are dynamically bound while a cell
+formula is being evaluated.  You can use
+     (ses-cell-value row 0)
+   to get the value from the leftmost column in the current row.  This
+kind of dependency is also not recorded.
+
+
+File: ses,  Node: The data area,  Next: Buffer-local variables in spreadsheets,  Prev: Nonrelocatable references,  Up: For Gurus
+
+4.3 The data area
+=================
+
+Begins with an 014 character, followed by sets of cell-definition
+macros for each row, followed by column-widths, column-printers,
+default-printer, and header-row.  Then there's the global parameters
+(file-format ID, numrows, numcols) and the local variables (specifying
+SES mode for the buffer, etc.)
+
+   When a SES file is loaded, first the numrows and numcols values are
+loaded, then the entire data area is `eval'ed, and finally the local
+variables are processed.
+
+   You can edit the data area, but don't insert or delete any newlines
+except in the local-variables part, since SES locates things by
+counting newlines.  Use `C-x C-e' at the end of a line to install your
+edits into the spreadsheet data structures (this does not update the
+print area, use e.g. `C-c C-l' for that).
+
+   The data area is maintained as an image of spreadsheet data
+structures that area stored in buffer-local variables.  If the data
+area gets messed up, you can try reconstructing the data area from the
+data structures:
+
+`C-c M-C-l'
+     (`ses-reconstruct-all').
+
+
+File: ses,  Node: Buffer-local variables in spreadsheets,  Next: Uses of defadvice in SES,  Prev: The data area,  Up: For Gurus
+
+4.4 Buffer-local variables in spreadsheets
+==========================================
+
+You can add additional local variables to the list at the bottom of the
+data area, such as hidden constants you want to refer to in your
+formulas.
+
+   You can override the variable `ses--symbolic-formulas' to be a list
+of symbols (as parenthesized strings) to show as completions for the '
+command.  This initial completions list is used instead of the actual
+set of symbols-as-formulas in the spreadsheet.
+
+   For an example of this, see file `etc/ses-example.ses'.
+
+   If (for some reason) you want your formulas or printers to save data
+into variables, you must declare these variables as buffer-locals in
+order to avoid a virus warning.
+
+   You can define functions by making them values for the fake local
+variable `eval'.  Such functions can then be used in your formulas and
+printers, but usually each `eval' is presented to the user during file
+loading as a potential virus -- this can get annoying.
+
+   You can define functions in your `.emacs' file.  Other people can
+still read the print area of your spreadsheet, but they won't be able
+to recalculate or reprint anything that depends on your functions.  To
+avoid virus warnings, each function used in a formula needs
+     (put 'your-function-name 'safe-function t)
+
+
+File: ses,  Node: Uses of defadvice in SES,  Prev: Buffer-local variables in spreadsheets,  Up: For Gurus
+
+4.5 Uses of defadvice in SES
+============================
+
+`undo-more'
+     Defines a new undo element format (FUN . ARGS), which means "undo
+     by applying FUN to ARGS".  For spreadsheet buffers, it allows
+     undos in the data area even though that's outside the narrowing.
+
+`copy-region-as-kill'
+     When copying from the print area of a spreadsheet, treat the
+     region as a rectangle and attach each cell's formula and printer
+     as 'ses properties.
+
+`yank'
+     When yanking into the print area of a spreadsheet, first try to
+     yank as cells (if the yank text has 'ses properties), then as
+     tab-separated formulas, then (if all else fails) as a single
+     formula for the current cell.
+
+
+File: ses,  Node: Index,  Next: Acknowledgements,  Prev: For Gurus,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* *error*:                               Standard formula functions.
+                                                                (line 6)
+* *skip*:                                Standard formula functions.
+                                                                (line 6)
+* advanced features <1>:                 For Gurus.             (line 6)
+* advanced features:                     Advanced Features.     (line 6)
+* basic commands:                        The Basics.            (line 6)
+* buffer-local variables:                Buffer-local variables in spreadsheets.
+                                                                (line 6)
+* cell printing, more:                   More on cell printing. (line 6)
+* clearing commands:                     Clearing cells.        (line 6)
+* clipboard-yank:                        Copy/cut/paste.        (line 6)
+* copy:                                  Copy/cut/paste.        (line 6)
+* copy-region-as-kill:                   Uses of defadvice in SES.
+                                                                (line 6)
+* customizing:                           Customizing SES.       (line 6)
+* cut:                                   Copy/cut/paste.        (line 6)
+* data area:                             The data area.         (line 6)
+* defadvice:                             Uses of defadvice in SES.
+                                                                (line 6)
+* deferred updates:                      Deferred updates.      (line 6)
+* details and summary:                   Spreadsheets with details and summary.
+                                                                (line 6)
+* enable-local-eval:                     Customizing SES.       (line 6)
+* export, and import:                    Import and export.     (line 6)
+* features:                              Sales Pitch.           (line 6)
+* formulas:                              Formulas.              (line 6)
+* formulas, entering:                    Formulas.              (line 6)
+* from:                                  Ranges in formulas.    (line 6)
+* import and export:                     Import and export.     (line 6)
+* keyboard-quit:                         The Basics.            (line 6)
+* kill-ring-save:                        Copy/cut/paste.        (line 6)
+* mouse-set-region:                      Copy/cut/paste.        (line 6)
+* mouse-set-secondary:                   Copy/cut/paste.        (line 6)
+* mouse-yank-at-click:                   Copy/cut/paste.        (line 6)
+* mouse-yank-at-secondary:               Copy/cut/paste.        (line 6)
+* nonrelocatable references:             Nonrelocatable references.
+                                                                (line 6)
+* paste:                                 Copy/cut/paste.        (line 6)
+* print area:                            The print area.        (line 6)
+* printer functions:                     Printer functions.     (line 6)
+* ranges:                                Ranges in formulas.    (line 6)
+* references, nonrelocatable:            Nonrelocatable references.
+                                                                (line 6)
+* resizing spreadsheets:                 Resizing.              (line 6)
+* run-with-idle-timer:                   Deferred updates.      (line 6)
+* safe-functions:                        Customizing SES.       (line 6)
+* ses+:                                  Standard formula functions.
+                                                                (line 6)
+* ses-append-row-jump-first-column:      Resizing.              (line 6)
+* ses-average:                           Standard formula functions.
+                                                                (line 6)
+* ses-center:                            Printer functions.     (line 6)
+* ses-center-span:                       Printer functions.     (line 6)
+* ses-clear-cell-backward:               Clearing cells.        (line 6)
+* ses-clear-cell-forward:                Clearing cells.        (line 6)
+* ses-dashfill:                          Printer functions.     (line 6)
+* ses-dashfill-span:                     Printer functions.     (line 6)
+* ses-delete-blanks:                     Standard formula functions.
+                                                                (line 6)
+* ses-delete-column:                     Resizing.              (line 6)
+* ses-delete-row:                        Resizing.              (line 6)
+* ses-edit-cell:                         Formulas.              (line 6)
+* ses-export-tsf:                        Import and export.     (line 6)
+* ses-export-tsv:                        Import and export.     (line 6)
+* ses-forward-or-insert:                 Resizing.              (line 6)
+* ses-insert-column:                     Resizing.              (line 6)
+* ses-insert-range:                      Ranges in formulas.    (line 6)
+* ses-insert-range-click:                Ranges in formulas.    (line 6)
+* ses-insert-row:                        Resizing.              (line 6)
+* ses-insert-ses-range:                  Ranges in formulas.    (line 6)
+* ses-insert-ses-range-click:            Ranges in formulas.    (line 6)
+* ses-jump:                              The Basics.            (line 6)
+* ses-kill-override:                     Copy/cut/paste.        (line 6)
+* ses-mark-column:                       The Basics.            (line 6)
+* ses-mark-row:                          The Basics.            (line 6)
+* ses-mark-whole-buffer:                 The Basics.            (line 6)
+* ses-mode-hook:                         Customizing SES.       (line 6)
+* ses-read-cell:                         Formulas.              (line 6)
+* ses-read-cell-printer:                 Printer functions.     (line 6)
+* ses-read-column-printer:               Printer functions.     (line 6)
+* ses-read-default-printer:              Printer functions.     (line 6)
+* ses-read-header-row:                   Advanced Features.     (line 6)
+* ses-read-symbol:                       Formulas.              (line 6)
+* ses-recalculate-all:                   Formulas.              (line 6)
+* ses-recalculate-cell <1>:              More on cell printing. (line 6)
+* ses-recalculate-cell:                  Formulas.              (line 6)
+* ses-reconstruct-all:                   The data area.         (line 6)
+* ses-renarrow-buffer:                   The print area.        (line 6)
+* ses-reprint-all:                       The print area.        (line 6)
+* ses-set-column-width:                  Resizing.              (line 6)
+* ses-sort-column:                       Sorting by column.     (line 6)
+* ses-sort-column-click:                 Sorting by column.     (line 6)
+* ses-tildefill-span:                    Printer functions.     (line 6)
+* ses-truncate-cell:                     More on cell printing. (line 6)
+* ses-yank-pop:                          Copy/cut/paste.        (line 6)
+* set-mark-command:                      The Basics.            (line 6)
+* sorting:                               Sorting by column.     (line 6)
+* standard formula functions:            Standard formula functions.
+                                                                (line 6)
+* summary, and details:                  Spreadsheets with details and summary.
+                                                                (line 6)
+* to:                                    Ranges in formulas.    (line 6)
+* undo-more:                             Uses of defadvice in SES.
+                                                                (line 6)
+* updates, deferred:                     Deferred updates.      (line 6)
+* variables, buffer-local:               Buffer-local variables in spreadsheets.
+                                                                (line 6)
+* virus protection:                      Virus protection.      (line 6)
+* widen:                                 The print area.        (line 6)
+* yank <1>:                              Uses of defadvice in SES.
+                                                                (line 6)
+* yank:                                  Copy/cut/paste.        (line 6)
+
+
+File: ses,  Node: Acknowledgements,  Next: GNU Free Documentation License,  Prev: Index,  Up: Top
+
+5 Acknowledgements
+******************
+
+Coding by:
+
+     Jonathan Yavner <jyavner@member.fsf.org>
+     Stefan Monnier <monnier@gnu.org>
+     Shigeru Fukaya <shigeru.fukaya@gmail.com>
+
+Texinfo manual by:
+
+     Jonathan Yavner <jyavner@member.fsf.org>
+     Brad Collins <brad@chenla.org>
+
+Ideas from:
+
+     Christoph Conrad <christoph.conrad@gmx.de>
+     CyberBob <cyberbob@redneck.gacracker.org>
+     Syver Enstad <syver-en@online.no>
+     Ami Fischman <fischman@zion.bpnetworks.com>
+     Thomas Gehrlein <Thomas.Gehrlein@t-online.de>
+     Chris F.A. Johnson <c.f.a.johnson@rogers.com>
+     Yusong Li <lyusong@hotmail.com>
+     Juri Linkov <juri@jurta.org>
+     Harald Maier <maierh@myself.com>
+     Alan Nash <anash@san.rr.com>
+     François Pinard <pinard@iro.umontreal.ca>
+     Pedro Pinto <ppinto@cs.cmu.edu>
+     Stefan Reichör <xsteve@riic.at>
+     Oliver Scholz <epameinondas@gmx.de>
+     Richard M. Stallman <rms@gnu.org>
+     Luc Teirlinck <teirllm@dms.auburn.edu>
+     J. Otto Tennant <jotto@pobox.com>
+     Jean-Philippe Theberge <jphil@acs.pagesjaunes.fr>
+
+
+File: ses,  Node: GNU Free Documentation License,  Prev: Acknowledgements,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+
+Tag Table:
+Node: Top978
+Node: Sales Pitch2563
+Node: The Basics3377
+Node: Formulas4692
+Node: Resizing6096
+Node: Printer functions7233
+Node: Clearing cells8984
+Node: Copy/cut/paste9312
+Node: Customizing SES11526
+Node: Advanced Features12889
+Node: The print area13763
+Node: Ranges in formulas14443
+Node: Sorting by column15957
+Node: Standard formula functions16879
+Node: More on cell printing17552
+Node: Import and export19558
+Node: Virus protection20165
+Node: Spreadsheets with details and summary21563
+Node: For Gurus22749
+Node: Deferred updates23006
+Node: Nonrelocatable references24525
+Node: The data area25425
+Node: Buffer-local variables in spreadsheets26644
+Node: Uses of defadvice in SES28090
+Node: Index28908
+Node: Acknowledgements37244
+Node: GNU Free Documentation License38412
+
+End Tag Table

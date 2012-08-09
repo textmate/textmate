@@ -1,0 +1,235 @@
+;;; srecode-template.wy --- Semantic Recoder Template parser
+
+;; Copyright (C) 2005-2012 Free Software Foundation, Inc.
+
+;; Author: Eric Ludlam <zappo@gnu.org>
+;; Keywords: syntax
+;; X-RCS: $Id: srecode-template.wy,v 1.10 2009-01-09 23:01:54 zappo Exp $
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+;;
+;; Parser for the Semantic Recoder template language
+;;
+;; Semantic Recoder templates are based on Google Templates
+;; and are at the bottom of the Semantic Recoder API.
+
+%languagemode  srecode-mode
+
+%start template_file
+
+;;; KEYWORDS
+%type    <keyword>
+%keyword SET  "set"
+%put     SET  summary "set <name> <value>"
+%keyword SHOW "show"
+%put     SHOW summary "show <name>   ; to show a section"
+%keyword MACRO "macro"
+%put     MACRO summary "... macro \"string\" ..."
+%keyword CONTEXT "context"
+%put     CONTEXT summary "context <name>"
+%keyword TEMPLATE  "template"
+%put     TEMPLATE  summary "template <name>\\n <template definition>"
+%keyword SECTIONDICTIONARY "sectiondictionary"
+%put     SECTIONDICTIONARY summary "sectiondictionary <name>\\n <dictionary entries>"
+%keyword PROMPT "prompt"
+%keyword DEFAULT "default"
+%keyword DEFAULTMACRO "defaultmacro"
+%keyword READ "read"
+%put     { PROMPT DEFAULT DEFAULTMACRO READ } summary "prompt <symbol> \"Describe Symbol: \" [default[macro] <lispsym>|\"valuetext\"] [read <lispsym>]"
+%keyword BIND "bind"
+%put     BIND summary "bind \"<letter>\""
+
+;;; Punctuation Types
+%type <punctuation> syntax "\\s.+"
+%type <newline>
+%token <newline> newline
+
+%token <separator> TEMPLATE_BLOCK "^----"
+
+;;; Bland default types
+%type <property> ":\\(\\w\\|\\s_\\)*"
+%token <property> property
+
+%type  <symbol>
+%token <symbol> symbol
+
+%type  <string>
+%token <string> string
+
+%type  <number>
+%token <number> number
+
+%%
+
+template_file
+  : newline ( )
+  | context
+  | prompt
+  | variable
+  | template
+  ;
+
+context
+  : CONTEXT symbol newline
+    (TAG $2 'context)
+  ;
+
+prompt
+  : PROMPT symbol string opt-default-fcn opt-read-fcn newline
+    (TAG $2 'prompt :text (read $3) :default $4 :read $5)
+  ;
+
+opt-default-fcn
+  : DEFAULT symbol
+    (progn (read $2))
+  | DEFAULT string
+    (progn (read $2))
+  | DEFAULTMACRO string
+    (progn (cons 'macro (read $2)))
+  | ()
+  ;
+
+opt-read-fcn
+  : READ symbol
+    (progn (read $2))
+  | ()
+  ;
+
+variable
+  : SET symbol insertable-string-list newline
+    (VARIABLE-TAG $2 nil $3)
+  | SHOW symbol newline
+    (VARIABLE-TAG $2 nil t)
+  ;
+
+insertable-string-list
+  : insertable-string
+    (list $1)
+  | insertable-string-list insertable-string
+    (append $1 (list $2))
+  ;
+
+insertable-string
+  : string
+    (read $1)
+  | MACRO string
+    (cons 'macro (read $2))
+  ;
+
+template
+  : TEMPLATE templatename opt-dynamic-arguments newline
+    opt-string
+    opt-section-dictionaries
+    TEMPLATE_BLOCK newline
+    opt-bind
+    (FUNCTION-TAG $2 nil $3 :documentation $5 :code $7
+		  :dictionaries $6 :binding $9 )
+  ;
+
+templatename
+  : symbol
+  | PROMPT
+  | CONTEXT
+  | TEMPLATE
+  | DEFAULT
+  | MACRO
+  | DEFAULTMACRO
+  | READ
+  | SET
+  ;
+
+opt-dynamic-arguments
+  : property opt-dynamic-arguments
+    (cons $1 $2)
+  | ()
+  ;
+
+opt-string
+  : string newline
+    ( read $1 )
+  | ()
+  ;
+
+opt-section-dictionaries
+  : () ;; EMPTY
+  | section-dictionary-list
+  ;
+
+section-dictionary-list
+  : one-section-dictionary
+    (list $1)
+  | section-dictionary-list one-section-dictionary
+    (append $1 (list $2))
+  ;
+
+one-section-dictionary
+  : SECTIONDICTIONARY string newline
+    variable-list
+    (cons (read $2) $4)
+  ;
+
+variable-list
+  : variable
+    (EXPANDTAG $1)
+  | variable-list variable
+    (append $1 (EXPANDTAG $2))
+  ;
+
+opt-bind
+  : BIND string newline
+    ( read $2 )
+  | ()
+  ;
+
+%%
+(define-lex-simple-regex-analyzer srecode-template-property-analyzer
+  "Detect and create a dynamic argument properties."
+  ":\\(\\w\\|\\s_\\)*" 'property 0)
+
+(define-lex-regex-analyzer srecode-template-separator-block
+  "Detect and create a template quote block."
+  "^----\n"
+  (semantic-lex-push-token
+   (semantic-lex-token
+    'TEMPLATE_BLOCK
+    (match-end 0)
+    (semantic-lex-unterminated-syntax-protection 'TEMPLATE_BLOCK
+      (goto-char (match-end 0))
+      (re-search-forward "^----$")
+      (match-beginning 0))))
+  (setq semantic-lex-end-point (point)))
+
+
+(define-lex wisent-srecode-template-lexer
+  "Lexical analyzer that handles SRecode Template buffers.
+It ignores whitespace, newlines and comments."
+  semantic-lex-newline
+  semantic-lex-ignore-whitespace
+  semantic-lex-ignore-newline
+  semantic-lex-ignore-comments
+  srecode-template-separator-block
+  srecode-template-wy--<keyword>-keyword-analyzer
+  srecode-template-property-analyzer
+  srecode-template-wy--<symbol>-regexp-analyzer
+  srecode-template-wy--<number>-regexp-analyzer
+  srecode-template-wy--<string>-sexp-analyzer
+  srecode-template-wy--<punctuation>-string-analyzer
+  semantic-lex-default-action
+  )
+
+;;; wisent-dot.wy ends here

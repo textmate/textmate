@@ -1,0 +1,535 @@
+This is ../../info/auth, produced by makeinfo version 4.13 from
+auth.texi.
+
+This file describes the Emacs auth-source library.
+
+   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+INFO-DIR-SECTION Emacs lisp libraries
+START-INFO-DIR-ENTRY
+* Auth-source: (auth).          The Emacs auth-source library.
+END-INFO-DIR-ENTRY
+
+
+File: auth,  Node: Top,  Next: Overview,  Up: (dir)
+
+Emacs auth-source
+*****************
+
+This manual describes the Emacs auth-source library.
+
+   It is a way for multiple applications to share a single configuration
+(in Emacs and in files) for user convenience.
+
+   This file describes the Emacs auth-source library.
+
+   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+* Menu:
+
+* Overview::                    Overview of the auth-source library.
+* Help for users::
+* Secret Service API::
+* Help for developers::
+* GnuPG and EasyPG Assistant Configuration::
+* Index::
+* Function Index::
+* Variable Index::
+
+
+File: auth,  Node: Overview,  Next: Help for users,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+The auth-source library is simply a way for Emacs and Gnus, among
+others, to answer the old burning question "What are my user name and
+password?"
+
+   (This is different from the old question about burning "Where is the
+fire extinguisher, please?".)
+
+   The auth-source library supports more than just the user name or the
+password (known as the secret).
+
+   Similarly, the auth-source library supports multiple storage backend,
+currently either the classic "netrc" backend, examples of which you can
+see later in this document, or the Secret Service API.  This is done
+with EIEIO-based backends and you can write your own if you want.
+
+
+File: auth,  Node: Help for users,  Next: Secret Service API,  Prev: Overview,  Up: Top
+
+2 Help for users
+****************
+
+"Netrc" files are a de facto standard.  They look like this:
+     machine MYMACHINE login MYLOGINNAME password MYPASSWORD port MYPORT
+
+   The `machine' is the server (either a DNS name or an IP address).
+It's known as :HOST in `auth-source-search' queries.  You can also use
+`host'.
+
+   The `port' is the connection port or protocol.  It's known as :PORT
+in `auth-source-search' queries.
+
+   The `user' is the user name.  It's known as :USER in
+`auth-source-search' queries.  You can also use `login' and `account'.
+
+   Spaces are always OK as far as auth-source is concerned (but other
+programs may not like them).  Just put the data in quotes, escaping
+quotes as you'd expect with `\'.
+
+   All these are optional.  You could just say (but we don't recommend
+it, we're just showing that it's possible)
+
+     password MYPASSWORD
+
+   to use the same password everywhere.  Again, _DO NOT DO THIS_ or you
+will be pwned as the kids say.
+
+   "Netrc" files are usually called `.authinfo' or `.netrc'; nowadays
+`.authinfo' seems to be more popular and the auth-source library
+encourages this confusion by accepting both, as you'll see later.
+
+   If you have problems with the search, set `auth-source-debug' to
+`'trivia' and see what host, port, and user the library is checking in
+the `*Messages*' buffer.  Ditto for any other problems, your first step
+is always to see what's being checked.  The second step, of course, is
+to write a blog entry about it and wait for the answer in the comments.
+
+   You can customize the variable `auth-sources'.  The following may be
+needed if you are using an older version of Emacs or if the auth-source
+library is not loaded for some other reason.
+
+     (require 'auth-source)             ;; probably not necessary
+     (customize-variable 'auth-sources) ;; optional, do it once
+
+ -- Variable: auth-sources
+     The `auth-sources' variable tells the auth-source library where
+     your netrc files or Secret Service API collection items live for a
+     particular host and protocol.  While you can get fancy, the default
+     and simplest configuration is:
+
+          ;;; old default: required :host and :port, not needed anymore
+          (setq auth-sources '((:source "~/.authinfo.gpg" :host t :port t)))
+          ;;; mostly equivalent (see below about fallbacks) but shorter:
+          (setq auth-sources '((:source "~/.authinfo.gpg")))
+          ;;; even shorter and the _default_:
+          (setq auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc"))
+          ;;; use the Secrets API LOGIN collection (*note Secret Service API::)
+          (setq auth-sources '("secrets:Login"))
+
+     By adding multiple entries to `auth-sources' with a particular
+     host or protocol, you can have specific netrc files for that host
+     or protocol.  Usually this is unnecessary but may make sense if
+     you have shared netrc files or some other unusual setup (90% of
+     Emacs users have unusual setups and the remaining 10% are _really_
+     unusual).
+
+     Here's a mixed example using two sources:
+
+          (setq auth-sources '((:source (:secrets default) :host "myserver" :user "joe")
+                               "~/.authinfo.gpg"))
+
+
+   If you don't customize `auth-sources', you'll have to live with the
+defaults: any host and any port are looked up in the netrc file
+`~/.authinfo.gpg', which is a GnuPG encrypted file (*note GnuPG and
+EasyPG Assistant Configuration::).
+
+   If that fails, the unencrypted netrc files `~/.authinfo' and
+`~/.netrc' will be used.
+
+   The typical netrc line example is without a port.
+
+     machine YOURMACHINE login YOU password YOURPASSWORD
+
+   This will match any authentication port.  Simple, right?  But what if
+there's a SMTP server on port 433 of that machine that needs a
+different password from the IMAP server?
+
+     machine YOURMACHINE login YOU password SMTPPASSWORD port 433
+     machine YOURMACHINE login YOU password GENERALPASSWORD
+
+   For url-auth authentication (HTTP/HTTPS), you need to put this in
+your netrc file:
+
+     machine yourmachine.com:80 port http login testuser password testpass
+
+   This will match any realm and authentication method (basic or digest)
+over HTTP.  HTTPS is set up similarly.  If you want finer controls,
+explore the url-auth source code and variables.
+
+   For Tramp authentication, use:
+
+     machine yourmachine.com port scp login testuser password testpass
+
+   Note that the port denotes the Tramp connection method.  When you
+don't use a port entry, you match any Tramp method, as explained
+earlier.  Since Tramp has about 88 connection methods, this may be
+necessary if you have an unusual (see earlier comment on those) setup.
+
+
+File: auth,  Node: Secret Service API,  Next: Help for developers,  Prev: Help for users,  Up: Top
+
+3 Secret Service API
+********************
+
+The "Secret Service API" is a standard from freedesktop.org to securely
+store passwords and other confidential information.  This API is
+implemented by system daemons such as the GNOME Keyring and the KDE
+Wallet (these are GNOME and KDE packages respectively and should be
+available on most modern GNU/Linux systems).
+
+   The auth-source library uses the `secrets.el' library to connect
+through the Secret Service API.  You can also use that library in other
+packages, it's not exclusive to auth-source.
+
+ -- Variable: secrets-enabled
+     After loading `secrets.el', a non-`nil' value of this variable
+     indicates the existence of a daemon providing the Secret Service
+     API.
+
+ -- Command: secrets-show-secrets
+     This command shows all collections, items, and their attributes.
+
+   The atomic objects managed by the Secret Service API are "secret
+items", which contain things an application wishes to store securely,
+like a password.  Secret items have a label (a name), the "secret"
+(which is the string we want, like a password), and a set of lookup
+attributes.  The attributes can be used to search and retrieve a secret
+item at a later date.
+
+   Secret items are grouped in "collections".  A collection is
+sometimes called a `keyring' or `wallet' in GNOME Keyring and KDE
+Wallet but it's the same thing, a group of secrets.  Collections are
+personal and protected so only the owner can open them.
+
+   The most common collection is called `"login"'.
+
+   A collection can have an alias.  The alias `"default"' is commonly
+used so the clients don't have to know the specific name of the
+collection they open.  Other aliases are not supported yet.  Since
+aliases are globally accessible, set the `"default"' alias only when
+you're sure it's appropriate.
+
+ -- Function: secrets-list-collections
+     This function returns all the collection names as a list.
+
+ -- Function: secrets-set-alias collection alias
+     Set ALIAS as alias of collection labeled COLLECTION.  Currently
+     only the alias `"default"' is supported.
+
+ -- Function: secrets-get-alias alias
+     Return the collection name ALIAS is referencing to.  Currently
+     only the alias `"default"' is supported.
+
+   Collections can be created and deleted by the functions
+`secrets-create-collection' and `secrets-delete-collection'.  Usually,
+this is not done from within Emacs.  Do not delete standard collections
+such as `"login"'.
+
+   The special collection `"session"' exists for the lifetime of the
+corresponding client session (in our case, Emacs's lifetime).  It is
+created automatically when Emacs uses the Secret Service interface and
+it is deleted when Emacs is killed.  Therefore, it can be used to store
+and retrieve secret items temporarily.  The `"session"' collection is
+better than a persistent collection when the secret items should not
+live longer than Emacs.  The session collection can be specified either
+by the string `"session"', or by `nil', whenever a collection parameter
+is needed in the following functions.
+
+ -- Function: secrets-list-items collection
+     Returns all the item labels of COLLECTION as a list.
+
+ -- Function: secrets-create-item collection item password &rest
+          attributes
+     This function creates a new item in COLLECTION with label ITEM and
+     password PASSWORD.  ATTRIBUTES are key-value pairs set for the
+     created item.  The keys are keyword symbols, starting with a
+     colon.  Example:
+
+          ;;; The session "session", the label is "my item"
+          ;;; and the secret (password) is "geheim"
+          (secrets-create-item "session" "my item" "geheim"
+           :method "sudo" :user "joe" :host "remote-host")
+
+ -- Function: secrets-get-secret collection item
+     Return the secret of item labeled ITEM in COLLECTION.  If there is
+     no such item, return `nil'.
+
+ -- Function: secrets-delete-item collection item
+     This function deletes item ITEM in COLLECTION.
+
+   The lookup attributes, which are specified during creation of a
+secret item, must be a key-value pair.  Keys are keyword symbols,
+starting with a colon; values are strings.  They can be retrieved from
+a given secret item and they can be used for searching of items.
+
+ -- Function: secrets-get-attribute collection item attribute
+     Returns the value of key ATTRIBUTE of item labeled ITEM in
+     COLLECTION.  If there is no such item, or the item doesn't own
+     this key, the function returns `nil'.
+
+ -- Function: secrets-get-attributes collection item
+     Return the lookup attributes of item labeled ITEM in COLLECTION.
+     If there is no such item, or the item has no attributes, it
+     returns `nil'.  Example:
+
+          (secrets-get-attributes "session" "my item")
+               => ((:user . "joe") (:host ."remote-host"))
+
+ -- Function: secrets-search-items collection &rest attributes
+     Search for the items in COLLECTION with matching ATTRIBUTES.  The
+     ATTRIBUTES are key-value pairs, as used in `secrets-create-item'.
+     Example:
+
+          (secrets-search-items "session" :user "joe")
+               => ("my item" "another item")
+
+   The auth-source library uses the `secrets.el' library and thus the
+Secret Service API when you specify a source matching
+`"secrets:COLLECTION"'.  For instance, you could use
+`"secrets:session"' to use the `"session"' collection, open only for
+the lifetime of Emacs.  Or you could use `"secrets:Login"' to open the
+`"Login"' collection.  As a special case, you can use the symbol
+`default' in `auth-sources' (not a string, but a symbol) to specify the
+`"default"' alias.  Here is a contrived example that sets
+`auth-sources' to search three collections and then fall back to
+`~/.authinfo.gpg'.
+
+     (setq auth-sources '(default
+                          "secrets:session"
+                          "secrets:Login"
+                          "~/.authinfo.gpg"))
+
+
+File: auth,  Node: Help for developers,  Next: GnuPG and EasyPG Assistant Configuration,  Prev: Secret Service API,  Up: Top
+
+4 Help for developers
+*********************
+
+The auth-source library lets you control logging output easily.
+
+ -- Variable: auth-source-debug
+     Set this variable to `'trivia' to see lots of output in
+     `*Messages*', or set it to a function that behaves like `message'
+     to do your own logging.
+
+   The auth-source library only has a few functions for external use.
+
+ -- Function: auth-source-search &rest spec &key type max host user
+          port secret require create delete &allow-other-keys
+     This function searches (or modifies) authentication backends
+     according to SPEC.  See the function's doc-string for details.
+
+   Let's take a look at an example of using `auth-source-search' from
+Gnus's `nnimap.el'.
+
+     (defun nnimap-credentials (address ports)
+       (let* ((auth-source-creation-prompts
+               '((user  . "IMAP user at %h: ")
+                 (secret . "IMAP password for %u@%h: ")))
+              (found (nth 0 (auth-source-search :max 1
+                                                :host address
+                                                :port ports
+                                                :require '(:user :secret)
+                                                :create t))))
+         (if found
+             (list (plist-get found :user)
+                   (let ((secret (plist-get found :secret)))
+                     (if (functionp secret)
+                         (funcall secret)
+                       secret))
+                   (plist-get found :save-function))
+           nil)))
+
+   This call requires the user and password (secret) to be in the
+results.  It also requests that an entry be created if it doesn't exist
+already.  While the created entry is being assembled, the shown prompts
+will be used to interact with the user.  The caller can also pass data
+in `auth-source-creation-defaults' to supply defaults for any of the
+prompts.
+
+   Note that the password needs to be evaluated if it's a function.
+It's wrapped in a function to provide some security.
+
+   Later, after a successful login, `nnimap.el' calls the
+`:save-function' like so:
+
+     (when (functionp (nth 2 credentials))
+        (funcall (nth 2 credentials)))
+
+   This will work whether the `:save-function' was provided or not.
+`:save-function' will be provided only when a new entry was created, so
+this effectively says "after a successful login, save the
+authentication information we just used, if it was newly created."
+
+   After the first time it's called, the `:save-function' will not run
+again (but it will log something if you have set `auth-source-debug' to
+`'trivia').  This is so it won't ask the same question again, which is
+annoying.  This is so it won't ask the same question again, which is
+annoying.  This is so it won't ask the same question again, which is
+annoying.
+
+   So the responsibility of the API user that specified `:create t' is
+to call the `:save-function' if it's provided.
+
+ -- Function: auth-source-delete &rest spec &key delete
+          &allow-other-keys
+     This function deletes entries matching SPEC from the
+     authentication backends.  It returns the entries that were deleted.
+     The backend may not actually delete the entries.
+
+ -- Function: auth-source-forget spec
+     This function forgets any cached data that exactly matches SPEC.
+     It returns `t' if it forget some data, and `nil' if no matching
+     data was found.
+
+ -- Function: auth-source-forget+ &rest spec &allow-other-keys
+     This function forgets any cached data matching SPEC.  It returns
+     the number of items forgotten.
+
+
+File: auth,  Node: GnuPG and EasyPG Assistant Configuration,  Next: Index,  Prev: Help for developers,  Up: Top
+
+Appendix A GnuPG and EasyPG Assistant Configuration
+***************************************************
+
+If you don't customize `auth-sources', the auth-source library reads
+`~/.authinfo.gpg', which is a GnuPG encrypted file.  Then it will check
+`~/.authinfo' but it's not recommended to use such an unencrypted file.
+
+   In Emacs 23 or later there is an option `auto-encryption-mode' to
+automatically decrypt `*.gpg' files.  It is enabled by default.  If you
+are using earlier versions of Emacs, you will need:
+
+     (require 'epa-file)
+     (epa-file-enable)
+
+   If you want your GnuPG passwords to be cached, set up `gpg-agent' or
+EasyPG Assistant (*note Caching Passphrases: (epa)Caching Passphrases.).
+
+   To quick start, here are some questions:
+
+  1. Do you use GnuPG version 2 instead of GnuPG version 1?
+
+  2. Do you use symmetric encryption rather than public key encryption?
+
+  3. Do you want to use gpg-agent?
+
+   Here are configurations depending on your answers:
+
+1     2     3     Configuration
+Yes   Yes   Yes   Set up gpg-agent.
+Yes   Yes   No    You can't, without gpg-agent.
+Yes   No    Yes   Set up gpg-agent.
+Yes   No    No    You can't, without gpg-agent.
+No    Yes   Yes   Set up elisp passphrase cache.
+No    Yes   No    Set up elisp passphrase cache.
+No    No    Yes   Set up gpg-agent.
+No    No    No    You can't, without gpg-agent.
+
+   To set up gpg-agent, follow the instruction in GnuPG manual (*note
+Invoking GPG-AGENT: (gnupg)Invoking GPG-AGENT.).
+
+   To set up elisp passphrase cache, set
+`epa-file-cache-passphrase-for-symmetric-encryption'.
+
+
+File: auth,  Node: Index,  Next: Function Index,  Prev: GnuPG and EasyPG Assistant Configuration,  Up: Top
+
+2 Index
+*******
+
+ [index ]
+* Menu:
+
+File: auth,  Node: Function Index,  Next: Variable Index,  Prev: Index,  Up: Top
+
+3 Function Index
+****************
+
+ [index ]
+* Menu:
+
+* auth-source-delete:                    Help for developers. (line  74)
+* auth-source-forget:                    Help for developers. (line  79)
+* auth-source-forget+:                   Help for developers. (line  84)
+* auth-source-search:                    Help for developers. (line  17)
+* secrets-create-item:                   Secret Service API.  (line  75)
+* secrets-delete-item:                   Secret Service API.  (line  90)
+* secrets-get-alias:                     Secret Service API.  (line  52)
+* secrets-get-attribute:                 Secret Service API.  (line  98)
+* secrets-get-attributes:                Secret Service API.  (line 103)
+* secrets-get-secret:                    Secret Service API.  (line  86)
+* secrets-list-collections:              Secret Service API.  (line  45)
+* secrets-list-items:                    Secret Service API.  (line  71)
+* secrets-search-items:                  Secret Service API.  (line 111)
+* secrets-set-alias:                     Secret Service API.  (line  48)
+* secrets-show-secrets:                  Secret Service API.  (line  22)
+
+
+File: auth,  Node: Variable Index,  Prev: Function Index,  Up: Top
+
+4 Variable Index
+****************
+
+ [index ]
+* Menu:
+
+* auth-source-debug:                     Help for developers.  (line  9)
+* auth-sources:                          Help for users.       (line 49)
+* secrets-enabled:                       Secret Service API.   (line 17)
+
+
+
+Tag Table:
+Node: Top1298
+Node: Overview2885
+Node: Help for users3621
+Node: Secret Service API8406
+Node: Help for developers14397
+Node: GnuPG and EasyPG Assistant Configuration18115
+Node: Index19807
+Node: Function Index19954
+Node: Variable Index21190
+
+End Tag Table

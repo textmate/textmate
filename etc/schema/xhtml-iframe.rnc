@@ -1,0 +1,14 @@
+# Iframe Module
+
+iframe = element iframe { iframe.attlist, Flow.model }
+iframe.attlist =
+  Core.attrib,
+  attribute longdesc { URI.datatype }?,
+  attribute src { URI.datatype }?,
+  attribute frameborder { "1" | "0" }?,
+  attribute width { Length.datatype }?,
+  attribute height { Length.datatype }?,
+  attribute marginwidth { Pixels.datatype }?,
+  attribute marginheight { Pixels.datatype }?,
+  attribute scrolling { "yes" | "no" | "auto" }?
+Inline.class |= iframe

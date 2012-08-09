@@ -1,4 +1,0 @@
-SOURCES      = src/*.mm
-EXPORT       = src/HTMLOutputWindow.h
-LINK        += HTMLOutput command
-FRAMEWORKS   = Cocoa

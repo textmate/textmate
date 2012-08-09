@@ -1,0 +1,1003 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/loading
+@node Loading, Byte Compilation, Customization, Top
+@chapter Loading
+@cindex loading
+@cindex library
+@cindex Lisp library
+
+  Loading a file of Lisp code means bringing its contents into the
+Lisp environment in the form of Lisp objects.  Emacs finds and opens
+the file, reads the text, evaluates each form, and then closes the
+file.  Such a file is also called a @dfn{Lisp library}.
+
+  The load functions evaluate all the expressions in a file just
+as the @code{eval-buffer} function evaluates all the
+expressions in a buffer.  The difference is that the load functions
+read and evaluate the text in the file as found on disk, not the text
+in an Emacs buffer.
+
+@cindex top-level form
+  The loaded file must contain Lisp expressions, either as source code
+or as byte-compiled code.  Each form in the file is called a
+@dfn{top-level form}.  There is no special format for the forms in a
+loadable file; any form in a file may equally well be typed directly
+into a buffer and evaluated there.  (Indeed, most code is tested this
+way.)  Most often, the forms are function definitions and variable
+definitions.
+
+@menu
+* How Programs Do Loading:: The @code{load} function and others.
+* Load Suffixes::           Details about the suffixes that @code{load} tries.
+* Library Search::          Finding a library to load.
+* Loading Non-ASCII::       Non-@acronym{ASCII} characters in Emacs Lisp files.
+* Autoload::                Setting up a function to autoload.
+* Repeated Loading::        Precautions about loading a file twice.
+* Named Features::          Loading a library if it isn't already loaded.
+* Where Defined::           Finding which file defined a certain symbol.
+* Unloading::               How to "unload" a library that was loaded.
+* Hooks for Loading::       Providing code to be run when
+                              particular libraries are loaded.
+@end menu
+
+@node How Programs Do Loading
+@section How Programs Do Loading
+
+  Emacs Lisp has several interfaces for loading.  For example,
+@code{autoload} creates a placeholder object for a function defined in a
+file; trying to call the autoloading function loads the file to get the
+function's real definition (@pxref{Autoload}).  @code{require} loads a
+file if it isn't already loaded (@pxref{Named Features}).  Ultimately,
+all these facilities call the @code{load} function to do the work.
+
+@defun load filename &optional missing-ok nomessage nosuffix must-suffix
+This function finds and opens a file of Lisp code, evaluates all the
+forms in it, and closes the file.
+
+To find the file, @code{load} first looks for a file named
+@file{@var{filename}.elc}, that is, for a file whose name is
+@var{filename} with the extension @samp{.elc} appended.  If such a
+file exists, it is loaded.  If there is no file by that name, then
+@code{load} looks for a file named @file{@var{filename}.el}.  If that
+file exists, it is loaded.  Finally, if neither of those names is
+found, @code{load} looks for a file named @var{filename} with nothing
+appended, and loads it if it exists.  (The @code{load} function is not
+clever about looking at @var{filename}.  In the perverse case of a
+file named @file{foo.el.el}, evaluation of @code{(load "foo.el")} will
+indeed find it.)
+
+If Auto Compression mode is enabled, as it is by default, then if
+@code{load} can not find a file, it searches for a compressed version
+of the file before trying other file names.  It decompresses and loads
+it if it exists.  It looks for compressed versions by appending each
+of the suffixes in @code{jka-compr-load-suffixes} to the file name.
+The value of this variable must be a list of strings. Its standard
+value is @code{(".gz")}.
+
+If the optional argument @var{nosuffix} is non-@code{nil}, then
+@code{load} does not try the suffixes @samp{.elc} and @samp{.el}.  In
+this case, you must specify the precise file name you want, except
+that, if Auto Compression mode is enabled, @code{load} will still use
+@code{jka-compr-load-suffixes} to find compressed versions.  By
+specifying the precise file name and using @code{t} for
+@var{nosuffix}, you can prevent file names like @file{foo.el.el} from
+being tried.
+
+If the optional argument @var{must-suffix} is non-@code{nil}, then
+@code{load} insists that the file name used must end in either
+@samp{.el} or @samp{.elc} (possibly extended with a compression
+suffix), unless it contains an explicit directory name.
+
+If @var{filename} is a relative file name, such as @file{foo} or
+@file{baz/foo.bar}, @code{load} searches for the file using the variable
+@code{load-path}.  It appends @var{filename} to each of the directories
+listed in @code{load-path}, and loads the first file it finds whose name
+matches.  The current default directory is tried only if it is specified
+in @code{load-path}, where @code{nil} stands for the default directory.
+@code{load} tries all three possible suffixes in the first directory in
+@code{load-path}, then all three suffixes in the second directory, and
+so on.  @xref{Library Search}.
+
+Whatever the name under which the file is eventually found, and the
+directory where Emacs found it, Emacs sets the value of the variable
+@code{load-file-name} to that file's name.
+
+If you get a warning that @file{foo.elc} is older than @file{foo.el}, it
+means you should consider recompiling @file{foo.el}.  @xref{Byte
+Compilation}.
+
+When loading a source file (not compiled), @code{load} performs
+character set translation just as Emacs would do when visiting the file.
+@xref{Coding Systems}.
+
+Messages like @samp{Loading foo...} and @samp{Loading foo...done} appear
+in the echo area during loading unless @var{nomessage} is
+non-@code{nil}.
+
+@cindex load errors
+Any unhandled errors while loading a file terminate loading.  If the
+load was done for the sake of @code{autoload}, any function definitions
+made during the loading are undone.
+
+@kindex file-error
+If @code{load} can't find the file to load, then normally it signals the
+error @code{file-error} (with @samp{Cannot open load file
+@var{filename}}).  But if @var{missing-ok} is non-@code{nil}, then
+@code{load} just returns @code{nil}.
+
+You can use the variable @code{load-read-function} to specify a function
+for @code{load} to use instead of @code{read} for reading expressions.
+See below.
+
+@code{load} returns @code{t} if the file loads successfully.
+@end defun
+
+@deffn Command load-file filename
+This command loads the file @var{filename}.  If @var{filename} is a
+relative file name, then the current default directory is assumed.
+This command does not use @code{load-path}, and does not append
+suffixes.  However, it does look for compressed versions (if Auto
+Compression Mode is enabled).  Use this command if you wish to specify
+precisely the file name to load.
+@end deffn
+
+@deffn Command load-library library
+This command loads the library named @var{library}.  It is equivalent to
+@code{load}, except for the way it reads its argument interactively.
+@xref{Lisp Libraries,,,emacs, The GNU Emacs Manual}.
+@end deffn
+
+@defvar load-in-progress
+This variable is non-@code{nil} if Emacs is in the process of loading a
+file, and it is @code{nil} otherwise.
+@end defvar
+
+@defvar load-file-name
+When Emacs is in the process of loading a file, this variable's value
+is the name of that file, as Emacs found it during the search
+described earlier in this section.
+@end defvar
+
+@defvar load-read-function
+@anchor{Definition of load-read-function}
+@c do not allow page break at anchor; work around Texinfo deficiency.
+This variable specifies an alternate expression-reading function for
+@code{load} and @code{eval-region} to use instead of @code{read}.
+The function should accept one argument, just as @code{read} does.
+
+Normally, the variable's value is @code{nil}, which means those
+functions should use @code{read}.
+
+Instead of using this variable, it is cleaner to use another, newer
+feature: to pass the function as the @var{read-function} argument to
+@code{eval-region}.  @xref{Definition of eval-region,, Eval}.
+@end defvar
+
+  For information about how @code{load} is used in building Emacs, see
+@ref{Building Emacs}.
+
+@node Load Suffixes
+@section Load Suffixes
+We now describe some technical details about the exact suffixes that
+@code{load} tries.
+
+@defvar load-suffixes
+This is a list of suffixes indicating (compiled or source) Emacs Lisp
+files.  It should not include the empty string.  @code{load} uses
+these suffixes in order when it appends Lisp suffixes to the specified
+file name.  The standard value is @code{(".elc" ".el")} which produces
+the behavior described in the previous section.
+@end defvar
+
+@defvar load-file-rep-suffixes
+This is a list of suffixes that indicate representations of the same
+file.  This list should normally start with the empty string.
+When @code{load} searches for a file it appends the suffixes in this
+list, in order, to the file name, before searching for another file.
+
+Enabling Auto Compression mode appends the suffixes in
+@code{jka-compr-load-suffixes} to this list and disabling Auto
+Compression mode removes them again.  The standard value of
+@code{load-file-rep-suffixes} if Auto Compression mode is disabled is
+@code{("")}.  Given that the standard value of
+@code{jka-compr-load-suffixes} is @code{(".gz")}, the standard value
+of @code{load-file-rep-suffixes} if Auto Compression mode is enabled
+is @code{("" ".gz")}.
+@end defvar
+
+@defun get-load-suffixes
+This function returns the list of all suffixes that @code{load} should
+try, in order, when its @var{must-suffix} argument is non-@code{nil}.
+This takes both @code{load-suffixes} and @code{load-file-rep-suffixes}
+into account.  If @code{load-suffixes}, @code{jka-compr-load-suffixes}
+and @code{load-file-rep-suffixes} all have their standard values, this
+function returns @code{(".elc" ".elc.gz" ".el" ".el.gz")} if Auto
+Compression mode is enabled and @code{(".elc" ".el")} if Auto
+Compression mode is disabled.
+@end defun
+
+To summarize, @code{load} normally first tries the suffixes in the
+value of @code{(get-load-suffixes)} and then those in
+@code{load-file-rep-suffixes}.  If @var{nosuffix} is non-@code{nil},
+it skips the former group, and if @var{must-suffix} is non-@code{nil},
+it skips the latter group.
+
+@node Library Search
+@section Library Search
+@cindex library search
+@cindex find library
+
+  When Emacs loads a Lisp library, it searches for the library
+in a list of directories specified by the variable @code{load-path}.
+
+@defvar load-path
+@cindex @env{EMACSLOADPATH} environment variable
+The value of this variable is a list of directories to search when
+loading files with @code{load}.  Each element is a string (which must be
+a directory name) or @code{nil} (which stands for the current working
+directory).
+@end defvar
+
+  Each time Emacs starts up, it sets up the value of @code{load-path}
+in several steps.  First, it initializes @code{load-path} to the
+directories specified by the environment variable @env{EMACSLOADPATH},
+if that exists.  The syntax of @env{EMACSLOADPATH} is the same as used
+for @code{PATH}; directory names are separated by @samp{:} (or
+@samp{;}, on some operating systems), and @samp{.} stands for the
+current default directory.  Here is an example of how to set
+@env{EMACSLOADPATH} variable from @command{sh}:
+
+@example
+export EMACSLOADPATH
+EMACSLOADPATH=/home/foo/.emacs.d/lisp:/opt/emacs/lisp
+@end example
+
+@noindent
+Here is how to set it from @code{csh}:
+
+@example
+setenv EMACSLOADPATH /home/foo/.emacs.d/lisp:/opt/emacs/lisp
+@end example
+
+  If @env{EMACSLOADPATH} is not set (which is usually the case), Emacs
+initializes @code{load-path} with the following two directories:
+
+@example
+"/usr/local/share/emacs/@var{version}/site-lisp"
+@end example
+
+@noindent
+and
+
+@example
+"/usr/local/share/emacs/site-lisp"
+@end example
+
+@noindent
+The first one is for locally installed packages for a particular Emacs
+version; the second is for locally installed packages meant for use
+with all installed Emacs versions.
+
+  If you run Emacs from the directory where it was built---that is, an
+executable that has not been formally installed---Emacs puts two more
+directories in @code{load-path}.  These are the @code{lisp} and
+@code{site-lisp} subdirectories of the main build directory.  (Both
+are represented as absolute file names.)
+
+  Next, Emacs ``expands'' the initial list of directories in
+@code{load-path} by adding the subdirectories of those directories.
+Both immediate subdirectories and subdirectories multiple levels down
+are added.  But it excludes subdirectories whose names do not start
+with a letter or digit, and subdirectories named @file{RCS} or
+@file{CVS}, and subdirectories containing a file named
+@file{.nosearch}.
+
+  Next, Emacs adds any extra load directory that you specify using the
+@samp{-L} command-line option (@pxref{Action Arguments,,,emacs, The
+GNU Emacs Manual}).  It also adds the directories where optional
+packages are installed, if any (@pxref{Packaging Basics}).
+
+  It is common to add code to one's init file (@pxref{Init File}) to
+add one or more directories to @code{load-path}.  For example:
+
+@example
+(push "~/.emacs.d/lisp" load-path)
+@end example
+
+  Dumping Emacs uses a special value of @code{load-path}.  If the
+value of @code{load-path} at the end of dumping is unchanged (that is,
+still the same special value), the dumped Emacs switches to the
+ordinary @code{load-path} value when it starts up, as described above.
+But if @code{load-path} has any other value at the end of dumping,
+that value is used for execution of the dumped Emacs also.
+
+@deffn Command locate-library library &optional nosuffix path interactive-call
+This command finds the precise file name for library @var{library}.  It
+searches for the library in the same way @code{load} does, and the
+argument @var{nosuffix} has the same meaning as in @code{load}: don't
+add suffixes @samp{.elc} or @samp{.el} to the specified name
+@var{library}.
+
+If the @var{path} is non-@code{nil}, that list of directories is used
+instead of @code{load-path}.
+
+When @code{locate-library} is called from a program, it returns the file
+name as a string.  When the user runs @code{locate-library}
+interactively, the argument @var{interactive-call} is @code{t}, and this
+tells @code{locate-library} to display the file name in the echo area.
+@end deffn
+
+@cindex shadowed Lisp files
+@deffn Command list-load-path-shadows &optional stringp
+This command shows a list of @dfn{shadowed} Emacs Lisp files.  A
+shadowed file is one that will not normally be loaded, despite being
+in a directory on @code{load-path}, due to the existence of another
+similarly-named file in a directory earlier on @code{load-path}.
+
+For instance, suppose @code{load-path} is set to
+
+@example
+  ("/opt/emacs/site-lisp" "/usr/share/emacs/23.3/lisp")
+@end example
+
+@noindent
+and that both these directories contain a file named @file{foo.el}.
+Then @code{(require 'foo)} never loads the file in the second
+directory.  Such a situation might indicate a problem in the way Emacs
+was installed.
+
+When called from Lisp, this function prints a message listing the
+shadowed files, instead of displaying them in a buffer.  If the
+optional argument @code{stringp} is non-@code{nil}, it instead returns
+the shadowed files as a string.
+@end deffn
+
+@node Loading Non-ASCII
+@section Loading Non-@acronym{ASCII} Characters
+
+  When Emacs Lisp programs contain string constants with non-@acronym{ASCII}
+characters, these can be represented within Emacs either as unibyte
+strings or as multibyte strings (@pxref{Text Representations}).  Which
+representation is used depends on how the file is read into Emacs.  If
+it is read with decoding into multibyte representation, the text of the
+Lisp program will be multibyte text, and its string constants will be
+multibyte strings.  If a file containing Latin-1 characters (for
+example) is read without decoding, the text of the program will be
+unibyte text, and its string constants will be unibyte strings.
+@xref{Coding Systems}.
+
+  In most Emacs Lisp programs, the fact that non-@acronym{ASCII}
+strings are multibyte strings should not be noticeable, since
+inserting them in unibyte buffers converts them to unibyte
+automatically.  However, if this does make a difference, you can force
+a particular Lisp file to be interpreted as unibyte by writing
+@samp{unibyte: t} in a local variables section.  With
+that designator, the file will unconditionally be interpreted as
+unibyte, even in an ordinary multibyte Emacs session.  This can matter
+when making keybindings to non-@acronym{ASCII} characters written as
+@code{?v@var{literal}}.
+
+@node Autoload
+@section Autoload
+@cindex autoload
+
+  The @dfn{autoload} facility allows you to register the existence of
+a function or macro, but put off loading the file that defines it.
+The first call to the function automatically reads the proper file, in
+order to install the real definition and other associated code, then
+runs the real definition as if it had been loaded all along.
+
+  There are two ways to set up an autoloaded function: by calling
+@code{autoload}, and by writing a special ``magic'' comment in the
+source before the real definition.  @code{autoload} is the low-level
+primitive for autoloading; any Lisp program can call @code{autoload} at
+any time.  Magic comments are the most convenient way to make a function
+autoload, for packages installed along with Emacs.  These comments do
+nothing on their own, but they serve as a guide for the command
+@code{update-file-autoloads}, which constructs calls to @code{autoload}
+and arranges to execute them when Emacs is built.
+
+@defun autoload function filename &optional docstring interactive type
+This function defines the function (or macro) named @var{function} so as
+to load automatically from @var{filename}.  The string @var{filename}
+specifies the file to load to get the real definition of @var{function}.
+
+If @var{filename} does not contain either a directory name, or the
+suffix @code{.el} or @code{.elc}, then @code{autoload} insists on adding
+one of these suffixes, and it will not load from a file whose name is
+just @var{filename} with no added suffix.  (The variable
+@code{load-suffixes} specifies the exact required suffixes.)
+
+The argument @var{docstring} is the documentation string for the
+function.  Specifying the documentation string in the call to
+@code{autoload} makes it possible to look at the documentation without
+loading the function's real definition.  Normally, this should be
+identical to the documentation string in the function definition
+itself.  If it isn't, the function definition's documentation string
+takes effect when it is loaded.
+
+If @var{interactive} is non-@code{nil}, that says @var{function} can be
+called interactively.  This lets completion in @kbd{M-x} work without
+loading @var{function}'s real definition.  The complete interactive
+specification is not given here; it's not needed unless the user
+actually calls @var{function}, and when that happens, it's time to load
+the real definition.
+
+You can autoload macros and keymaps as well as ordinary functions.
+Specify @var{type} as @code{macro} if @var{function} is really a macro.
+Specify @var{type} as @code{keymap} if @var{function} is really a
+keymap.  Various parts of Emacs need to know this information without
+loading the real definition.
+
+An autoloaded keymap loads automatically during key lookup when a prefix
+key's binding is the symbol @var{function}.  Autoloading does not occur
+for other kinds of access to the keymap.  In particular, it does not
+happen when a Lisp program gets the keymap from the value of a variable
+and calls @code{define-key}; not even if the variable name is the same
+symbol @var{function}.
+
+@cindex function cell in autoload
+If @var{function} already has a non-void function definition that is not
+an autoload object, @code{autoload} does nothing and returns @code{nil}.
+If the function cell of @var{function} is void, or is already an autoload
+object, then it is defined as an autoload object like this:
+
+@example
+(autoload @var{filename} @var{docstring} @var{interactive} @var{type})
+@end example
+
+For example,
+
+@example
+@group
+(symbol-function 'run-prolog)
+     @result{} (autoload "prolog" 169681 t nil)
+@end group
+@end example
+
+@noindent
+In this case, @code{"prolog"} is the name of the file to load, 169681
+refers to the documentation string in the
+@file{emacs/etc/DOC-@var{version}} file (@pxref{Documentation Basics}),
+@code{t} means the function is interactive, and @code{nil} that it is
+not a macro or a keymap.
+@end defun
+
+@cindex autoload errors
+  The autoloaded file usually contains other definitions and may require
+or provide one or more features.  If the file is not completely loaded
+(due to an error in the evaluation of its contents), any function
+definitions or @code{provide} calls that occurred during the load are
+undone.  This is to ensure that the next attempt to call any function
+autoloading from this file will try again to load the file.  If not for
+this, then some of the functions in the file might be defined by the
+aborted load, but fail to work properly for the lack of certain
+subroutines not loaded successfully because they come later in the file.
+
+  If the autoloaded file fails to define the desired Lisp function or
+macro, then an error is signaled with data @code{"Autoloading failed to
+define function @var{function-name}"}.
+
+@findex update-file-autoloads
+@findex update-directory-autoloads
+@cindex magic autoload comment
+@cindex autoload cookie
+@anchor{autoload cookie}
+  A magic autoload comment (often called an @dfn{autoload cookie})
+consists of @samp{;;;###autoload}, on a line by itself,
+just before the real definition of the function in its
+autoloadable source file.  The command @kbd{M-x update-file-autoloads}
+writes a corresponding @code{autoload} call into @file{loaddefs.el}.
+(The string that serves as the autoload cookie and the name of the
+file generated by @code{update-file-autoloads} can be changed from the
+above defaults, see below.)
+Building Emacs loads @file{loaddefs.el} and thus calls @code{autoload}.
+@kbd{M-x update-directory-autoloads} is even more powerful; it updates
+autoloads for all files in the current directory.
+
+  The same magic comment can copy any kind of form into
+@file{loaddefs.el}.  The form following the magic comment is copied
+verbatim, @emph{except} if it is one of the forms which the autoload
+facility handles specially (e.g.@: by conversion into an
+@code{autoload} call).  The forms which are not copied verbatim are
+the following:
+
+@table @asis
+@item Definitions for function or function-like objects:
+@code{defun} and @code{defmacro}; also @code{defun*} and
+@code{defmacro*} (@pxref{Argument Lists,,,cl,CL Manual}), and
+@code{define-overloadable-function} (see the commentary in
+@file{mode-local.el}).
+
+@item Definitions for major or minor modes:
+@code{define-minor-mode}, @code{define-globalized-minor-mode},
+@code{define-generic-mode}, @code{easy-mmode-define-minor-mode},
+@code{easy-mmode-define-global-mode}, @code{define-compilation-mode},
+@code{define-derived-mode}, and @code{define-global-minor-mode}.
+
+@item Other definition types:
+@code{defcustom}, @code{defgroup}, @code{defclass}
+(@pxref{Top,EIEIO,,eieio,EIEIO}), and @code{define-skeleton} (see the
+commentary in @file{skeleton.el}).
+@end table
+
+  You can also use a magic comment to execute a form at build time
+@emph{without} executing it when the file itself is loaded.  To do this,
+write the form @emph{on the same line} as the magic comment.  Since it
+is in a comment, it does nothing when you load the source file; but
+@kbd{M-x update-file-autoloads} copies it to @file{loaddefs.el}, where
+it is executed while building Emacs.
+
+  The following example shows how @code{doctor} is prepared for
+autoloading with a magic comment:
+
+@example
+;;;###autoload
+(defun doctor ()
+  "Switch to *doctor* buffer and start giving psychotherapy."
+  (interactive)
+  (switch-to-buffer "*doctor*")
+  (doctor-mode))
+@end example
+
+@noindent
+Here's what that produces in @file{loaddefs.el}:
+
+@example
+(autoload (quote doctor) "doctor" "\
+Switch to *doctor* buffer and start giving psychotherapy.
+
+\(fn)" t nil)
+@end example
+
+@noindent
+@cindex @code{fn} in function's documentation string
+The backslash and newline immediately following the double-quote are a
+convention used only in the preloaded uncompiled Lisp files such as
+@file{loaddefs.el}; they tell @code{make-docfile} to put the
+documentation string in the @file{etc/DOC} file.  @xref{Building Emacs}.
+See also the commentary in @file{lib-src/make-docfile.c}.  @samp{(fn)}
+in the usage part of the documentation string is replaced with the
+function's name when the various help functions (@pxref{Help
+Functions}) display it.
+
+  If you write a function definition with an unusual macro that is not
+one of the known and recognized function definition methods, use of an
+ordinary magic autoload comment would copy the whole definition into
+@code{loaddefs.el}.  That is not desirable.  You can put the desired
+@code{autoload} call into @code{loaddefs.el} instead by writing this:
+
+@example
+;;;###autoload (autoload 'foo "myfile")
+(mydefunmacro foo
+  ...)
+@end example
+
+  You can use a non-default string as the autoload cookie and have the
+corresponding autoload calls written into a file whose name is
+different from the default @file{loaddefs.el}.  Emacs provides two
+variables to control this:
+
+@defvar generate-autoload-cookie
+The value of this variable should be a string whose syntax is a Lisp
+comment.  @kbd{M-x update-file-autoloads} copies the Lisp form that
+follows the cookie into the autoload file it generates.  The default
+value of this variable is @code{";;;###autoload"}.
+@end defvar
+
+@defvar generated-autoload-file
+The value of this variable names an Emacs Lisp file where the autoload
+calls should go.  The default value is @file{loaddefs.el}, but you can
+override that, e.g., in the ``Local Variables'' section of a
+@file{.el} file (@pxref{File Local Variables}).  The autoload file is
+assumed to contain a trailer starting with a formfeed character.
+@end defvar
+
+@node Repeated Loading
+@section Repeated Loading
+@cindex repeated loading
+
+  You can load a given file more than once in an Emacs session.  For
+example, after you have rewritten and reinstalled a function definition
+by editing it in a buffer, you may wish to return to the original
+version; you can do this by reloading the file it came from.
+
+  When you load or reload files, bear in mind that the @code{load} and
+@code{load-library} functions automatically load a byte-compiled file
+rather than a non-compiled file of similar name.  If you rewrite a file
+that you intend to save and reinstall, you need to byte-compile the new
+version; otherwise Emacs will load the older, byte-compiled file instead
+of your newer, non-compiled file!  If that happens, the message
+displayed when loading the file includes, @samp{(compiled; note, source is
+newer)}, to remind you to recompile it.
+
+  When writing the forms in a Lisp library file, keep in mind that the
+file might be loaded more than once.  For example, think about whether
+each variable should be reinitialized when you reload the library;
+@code{defvar} does not change the value if the variable is already
+initialized.  (@xref{Defining Variables}.)
+
+  The simplest way to add an element to an alist is like this:
+
+@example
+(push '(leif-mode " Leif") minor-mode-alist)
+@end example
+
+@noindent
+But this would add multiple elements if the library is reloaded.  To
+avoid the problem, use @code{add-to-list} (@pxref{List Variables}):
+
+@example
+(add-to-list 'minor-mode-alist '(leif-mode " Leif"))
+@end example
+
+  Occasionally you will want to test explicitly whether a library has
+already been loaded.  If the library uses @code{provide} to provide a
+named feature, you can use @code{featurep} earlier in the file to test
+whether the @code{provide} call has been executed before (@pxref{Named
+Features}).  Alternatively, you could use something like this:
+
+@example
+(defvar foo-was-loaded nil)
+
+(unless foo-was-loaded
+  @var{execute-first-time-only}
+  (setq foo-was-loaded t))
+@end example
+
+@noindent
+
+@node Named Features
+@section Features
+@cindex features
+@cindex requiring features
+@cindex providing features
+
+  @code{provide} and @code{require} are an alternative to
+@code{autoload} for loading files automatically.  They work in terms of
+named @dfn{features}.  Autoloading is triggered by calling a specific
+function, but a feature is loaded the first time another program asks
+for it by name.
+
+  A feature name is a symbol that stands for a collection of functions,
+variables, etc.  The file that defines them should @dfn{provide} the
+feature.  Another program that uses them may ensure they are defined by
+@dfn{requiring} the feature.  This loads the file of definitions if it
+hasn't been loaded already.
+
+@cindex load error with require
+  To require the presence of a feature, call @code{require} with the
+feature name as argument.  @code{require} looks in the global variable
+@code{features} to see whether the desired feature has been provided
+already.  If not, it loads the feature from the appropriate file.  This
+file should call @code{provide} at the top level to add the feature to
+@code{features}; if it fails to do so, @code{require} signals an error.
+
+  For example, in @file{idlwave.el}, the definition for
+@code{idlwave-complete-filename} includes the following code:
+
+@example
+(defun idlwave-complete-filename ()
+  "Use the comint stuff to complete a file name."
+   (require 'comint)
+   (let* ((comint-file-name-chars "~/A-Za-z0-9+@:_.$#%=@{@}\\-")
+          (comint-completion-addsuffix nil)
+          ...)
+       (comint-dynamic-complete-filename)))
+@end example
+
+@noindent
+The expression @code{(require 'comint)} loads the file @file{comint.el}
+if it has not yet been loaded, ensuring that
+@code{comint-dynamic-complete-filename} is defined.  Features are
+normally named after the files that provide them, so that
+@code{require} need not be given the file name.  (Note that it is
+important that the @code{require} statement be outside the body of the
+@code{let}.  Loading a library while its variables are let-bound can
+have unintended consequences, namely the variables becoming unbound
+after the let exits.)
+
+The @file{comint.el} file contains the following top-level expression:
+
+@example
+(provide 'comint)
+@end example
+
+@noindent
+This adds @code{comint} to the global @code{features} list, so that
+@code{(require 'comint)} will henceforth know that nothing needs to be
+done.
+
+@cindex byte-compiling @code{require}
+  When @code{require} is used at top level in a file, it takes effect
+when you byte-compile that file (@pxref{Byte Compilation}) as well as
+when you load it.  This is in case the required package contains macros
+that the byte compiler must know about.  It also avoids byte compiler
+warnings for functions and variables defined in the file loaded with
+@code{require}.
+
+  Although top-level calls to @code{require} are evaluated during
+byte compilation, @code{provide} calls are not.  Therefore, you can
+ensure that a file of definitions is loaded before it is byte-compiled
+by including a @code{provide} followed by a @code{require} for the same
+feature, as in the following example.
+
+@example
+@group
+(provide 'my-feature)  ; @r{Ignored by byte compiler,}
+                       ;   @r{evaluated by @code{load}.}
+(require 'my-feature)  ; @r{Evaluated by byte compiler.}
+@end group
+@end example
+
+@noindent
+The compiler ignores the @code{provide}, then processes the
+@code{require} by loading the file in question.  Loading the file does
+execute the @code{provide} call, so the subsequent @code{require} call
+does nothing when the file is loaded.
+
+@defun provide feature &optional subfeatures
+This function announces that @var{feature} is now loaded, or being
+loaded, into the current Emacs session.  This means that the facilities
+associated with @var{feature} are or will be available for other Lisp
+programs.
+
+The direct effect of calling @code{provide} is if not already in
+@var{features} then to add @var{feature} to the front of that list and
+call any @code{eval-after-load} code waiting for it (@pxref{Hooks for
+Loading}).  The argument @var{feature} must be a symbol.
+@code{provide} returns @var{feature}.
+
+If provided, @var{subfeatures} should be a list of symbols indicating
+a set of specific subfeatures provided by this version of
+@var{feature}.  You can test the presence of a subfeature using
+@code{featurep}.  The idea of subfeatures is that you use them when a
+package (which is one @var{feature}) is complex enough to make it
+useful to give names to various parts or functionalities of the
+package, which might or might not be loaded, or might or might not be
+present in a given version.  @xref{Network Feature Testing}, for
+an example.
+
+@example
+features
+     @result{} (bar bish)
+
+(provide 'foo)
+     @result{} foo
+features
+     @result{} (foo bar bish)
+@end example
+
+When a file is loaded to satisfy an autoload, and it stops due to an
+error in the evaluation of its contents, any function definitions or
+@code{provide} calls that occurred during the load are undone.
+@xref{Autoload}.
+@end defun
+
+@defun require feature &optional filename noerror
+This function checks whether @var{feature} is present in the current
+Emacs session (using @code{(featurep @var{feature})}; see below).  The
+argument @var{feature} must be a symbol.
+
+If the feature is not present, then @code{require} loads @var{filename}
+with @code{load}.  If @var{filename} is not supplied, then the name of
+the symbol @var{feature} is used as the base file name to load.
+However, in this case, @code{require} insists on finding @var{feature}
+with an added @samp{.el} or @samp{.elc} suffix (possibly extended with
+a compression suffix); a file whose name is just @var{feature} won't
+be used.  (The variable @code{load-suffixes} specifies the exact
+required Lisp suffixes.)
+
+If @var{noerror} is non-@code{nil}, that suppresses errors from actual
+loading of the file.  In that case, @code{require} returns @code{nil}
+if loading the file fails.  Normally, @code{require} returns
+@var{feature}.
+
+If loading the file succeeds but does not provide @var{feature},
+@code{require} signals an error, @samp{Required feature @var{feature}
+was not provided}.
+@end defun
+
+@defun featurep feature &optional subfeature
+This function returns @code{t} if @var{feature} has been provided in
+the current Emacs session (i.e.@:, if @var{feature} is a member of
+@code{features}.)  If @var{subfeature} is non-@code{nil}, then the
+function returns @code{t} only if that subfeature is provided as well
+(i.e.@: if @var{subfeature} is a member of the @code{subfeature}
+property of the @var{feature} symbol.)
+@end defun
+
+@defvar features
+The value of this variable is a list of symbols that are the features
+loaded in the current Emacs session.  Each symbol was put in this list
+with a call to @code{provide}.  The order of the elements in the
+@code{features} list is not significant.
+@end defvar
+
+@node Where Defined
+@section Which File Defined a Certain Symbol
+
+@defun symbol-file symbol &optional type
+This function returns the name of the file that defined @var{symbol}.
+If @var{type} is @code{nil}, then any kind of definition is acceptable.
+If @var{type} is @code{defun}, @code{defvar}, or @code{defface}, that
+specifies function definition, variable definition, or face definition
+only.
+
+The value is normally an absolute file name.  It can also be @code{nil},
+if the definition is not associated with any file.  If @var{symbol}
+specifies an autoloaded function, the value can be a relative file name
+without extension.
+@end defun
+
+  The basis for @code{symbol-file} is the data in the variable
+@code{load-history}.
+
+@defvar load-history
+The value of this variable is an alist that associates the names of
+loaded library files with the names of the functions and variables
+they defined, as well as the features they provided or required.
+
+Each element in this alist describes one loaded library (including
+libraries that are preloaded at startup).  It is a list whose @sc{car}
+is the absolute file name of the library (a string).  The rest of the
+list elements have these forms:
+
+@table @code
+@item @var{var}
+The symbol @var{var} was defined as a variable.
+@item (defun . @var{fun})
+The function @var{fun} was defined.
+@item (t . @var{fun})
+The function @var{fun} was previously an autoload before this library
+redefined it as a function.  The following element is always
+@code{(defun . @var{fun})}, which represents defining @var{fun} as a
+function.
+@item (autoload . @var{fun})
+The function @var{fun} was defined as an autoload.
+@item (defface . @var{face})
+The face @var{face} was defined.
+@item (require . @var{feature})
+The feature @var{feature} was required.
+@item (provide . @var{feature})
+The feature @var{feature} was provided.
+@end table
+
+The value of @code{load-history} may have one element whose @sc{car} is
+@code{nil}.  This element describes definitions made with
+@code{eval-buffer} on a buffer that is not visiting a file.
+@end defvar
+
+  The command @code{eval-region} updates @code{load-history}, but does so
+by adding the symbols defined to the element for the file being visited,
+rather than replacing that element.  @xref{Eval}.
+
+@node Unloading
+@section Unloading
+@cindex unloading packages
+
+@c Emacs 19 feature
+  You can discard the functions and variables loaded by a library to
+reclaim memory for other Lisp objects.  To do this, use the function
+@code{unload-feature}:
+
+@deffn Command unload-feature feature &optional force
+This command unloads the library that provided feature @var{feature}.
+It undefines all functions, macros, and variables defined in that
+library with @code{defun}, @code{defalias}, @code{defsubst},
+@code{defmacro}, @code{defconst}, @code{defvar}, and @code{defcustom}.
+It then restores any autoloads formerly associated with those symbols.
+(Loading saves these in the @code{autoload} property of the symbol.)
+
+Before restoring the previous definitions, @code{unload-feature} runs
+@code{remove-hook} to remove functions in the library from certain
+hooks.  These hooks include variables whose names end in @samp{hook}
+or @samp{-hooks}, plus those listed in
+@code{unload-feature-special-hooks}, as well as
+@code{auto-mode-alist}.  This is to prevent Emacs from ceasing to
+function because important hooks refer to functions that are no longer
+defined.
+
+Standard unloading activities also undoes ELP profiling of functions
+in that library, unprovides any features provided by the library, and
+cancels timers held in variables defined by the library.
+
+@vindex @var{feature}-unload-function
+If these measures are not sufficient to prevent malfunction, a library
+can define an explicit unloader named @code{@var{feature}-unload-function}.
+If that symbol is defined as a function, @code{unload-feature} calls
+it with no arguments before doing anything else.  It can do whatever
+is appropriate to unload the library.  If it returns @code{nil},
+@code{unload-feature} proceeds to take the normal unload actions.
+Otherwise it considers the job to be done.
+
+Ordinarily, @code{unload-feature} refuses to unload a library on which
+other loaded libraries depend.  (A library @var{a} depends on library
+@var{b} if @var{a} contains a @code{require} for @var{b}.)  If the
+optional argument @var{force} is non-@code{nil}, dependencies are
+ignored and you can unload any library.
+@end deffn
+
+  The @code{unload-feature} function is written in Lisp; its actions are
+based on the variable @code{load-history}.
+
+@defvar unload-feature-special-hooks
+This variable holds a list of hooks to be scanned before unloading a
+library, to remove functions defined in the library.
+@end defvar
+
+@node Hooks for Loading
+@section Hooks for Loading
+@cindex loading hooks
+@cindex hooks for loading
+
+You can ask for code to be executed each time Emacs loads a library,
+by using the variable @code{after-load-functions}:
+
+@defvar after-load-functions
+This abnormal hook is run after loading a file.  Each function in the
+hook is called with a single argument, the absolute filename of the
+file that was just loaded.
+@end defvar
+
+If you want code to be executed when a @emph{particular} library is
+loaded, use the function @code{eval-after-load}:
+
+@defun eval-after-load library form
+This function arranges to evaluate @var{form} at the end of loading
+the file @var{library}, each time @var{library} is loaded.  If
+@var{library} is already loaded, it evaluates @var{form} right away.
+Don't forget to quote @var{form}!
+
+You don't need to give a directory or extension in the file name
+@var{library}.  Normally, you just give a bare file name, like this:
+
+@example
+(eval-after-load "edebug" '(def-edebug-spec c-point t))
+@end example
+
+To restrict which files can trigger the evaluation, include a
+directory or an extension or both in @var{library}.  Only a file whose
+absolute true name (i.e., the name with all symbolic links chased out)
+matches all the given name components will match.  In the following
+example, @file{my_inst.elc} or @file{my_inst.elc.gz} in some directory
+@code{..../foo/bar} will trigger the evaluation, but not
+@file{my_inst.el}:
+
+@example
+(eval-after-load "foo/bar/my_inst.elc" @dots{})
+@end example
+
+@var{library} can also be a feature (i.e.@: a symbol), in which case
+@var{form} is evaluated at the end of any file where
+@code{(provide @var{library})} is called.
+
+An error in @var{form} does not undo the load, but does prevent
+execution of the rest of @var{form}.
+@end defun
+
+Normally, well-designed Lisp programs should not use
+@code{eval-after-load}.  If you need to examine and set the variables
+defined in another library (those meant for outside use), you can do
+it immediately---there is no need to wait until the library is loaded.
+If you need to call functions defined by that library, you should load
+the library, preferably with @code{require} (@pxref{Named Features}).
+
+@defvar after-load-alist
+This variable stores an alist built by @code{eval-after-load},
+containing the expressions to evaluate when certain libraries are
+loaded.  Each element looks like this:
+
+@example
+(@var{regexp-or-feature} @var{forms}@dots{})
+@end example
+
+The key @var{regexp-or-feature} is either a regular expression or a
+symbol, and the value is a list of forms.  The forms are evaluated
+when the key matches the absolute true name or feature name of the
+library being loaded.
+@end defvar

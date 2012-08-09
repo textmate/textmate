@@ -1,2 +1,0 @@
-SOURCES      = src/*.cc
-LINK        += text io updater regexp

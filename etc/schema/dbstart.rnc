@@ -1,0 +1,23 @@
+# This choice of root elements comes from the 1.0b1 RNG schema at
+# http://www.oasis-open.org/docbook/relaxng/1.0b1/index.shtml
+
+start = 
+  set
+  | setindex
+  | book
+  | part
+  | reference
+  | preface
+  | chapter
+  | appendix
+  | article
+  | bibliography
+  | glossary
+  | index
+  | refentry
+  | sect1
+  | sect2
+  | sect3
+  | sect4
+  | sect5
+  | section

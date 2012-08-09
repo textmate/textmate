@@ -1,0 +1,21 @@
+ruby =
+  element ruby {
+    ruby.attlist,
+    ((rb,
+      (rt | (rp, rt, rp)))
+     | (rbc, rtc, rtc?))
+  }
+ruby.attlist = Common.attrib
+rbc = element rbc { rbc.attlist, rb+ }
+rbc.attlist = Common.attrib
+rtc = element rtc { rtc.attlist, rt+ }
+rtc.attlist = Common.attrib
+rb = element rb { rb.attlist, Inline.model }
+rb.attlist = Common.attrib
+rt = element rt { rt.attlist, Inline.model }
+rt.attlist =
+  Common.attrib,
+  attribute rt { Number.datatype }?
+rp = element rp { rp.attlist, text }
+rp.attlist = Common.attrib
+Inline.class |= ruby

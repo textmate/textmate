@@ -1,0 +1,1097 @@
+Tútorial k Emacsu. Podmienky pozri na konci.
+Do èe¹tiny prelo¾il Milan Zamazal <pdm@zamazal.org>, do slovenèiny Miroslav
+Va¹ko <zemiak@zoznam.sk>.
+
+Máte pred sebou tútorial k Emacsu.
+
+Príkazy Emacsu v¹eobecne vyu¾ívajú klávesu CONTROL (obèas oznaèovanú ako CTRL
+alebo CTL) alebo klávesu META (obèas oznaèovanú EDIT alebo ALT).  Aby sme tieto
+názvy nemuseli stále písa» v plnom znení, budeme pou¾íva» nasledujúce skratky:
+ C-<chr>  znamená podr¾a» klávesu CONTROL a stlaèi» znak <chr>.
+          Teda C-f znamená: podr¾te klávesu CONTROL a stlaète f.
+ M-<chr>  znamená podr¾a» klávesu META, EDIT alebo ALT a stlaèi» <chr>.
+          Ak nemáte ¾iadnu z kláves META, EDIT ani ALT, tak namiesto toho
+          stlaète a pustite klávesu ESC a potom <chr>.  Klávesu ESC budeme
+          oznaèova» <ESC>.
+
+Dôle¾itá poznámka: prácu s Emacsom ukonèíte stlaèením C-x C-c (dva znaky).
+Znaky ">>" na µavom okraji oznaèujú miesta, kde si máte vyskú¹a» príkaz. Napr.:
+<<Blank lines inserted here by startup of help-with-tutorial>>
+[Prostredná èas» obrazovky je prázdna zámerne. Text pokraèuje ni¾¹ie.]
+>>  Teraz stlaète C-v (view next screen) pre posun na ïal¹iu obrazovku.
+        (Smelo do toho, spravte to pridr¾aním klávesy control a stlaèením v.)
+	Od tejto chvíle by ste toto mali robi» ak doèítate zobrazenú
+        obrazovku.
+
+V¹imnite si, ¾e pri posuve obrazoviek v¾dy zostávajú zobrazené dva riadky
+z predchádzajúcej obrazovky; to poskytuje urèitú náväznos» pri postupnom
+èítaní textu.
+
+Prvá vec, ktorú potrebujete vedie» je, ako sa v texte pohybova»
+z jedného miesta na druhé.  U¾ viete, ako sa posunú» o jednu obrazovku
+vpred, pomocou C-v.  Na prechod o obrazovku spä» pou¾ite M-v
+(podr¾te klávesu META a stlaète v alebo stlaète <ESC>v ak
+nemáte klávesy META, EDIT ani ALT).
+
+>>  Skúste stlaèi» M-v a potom C-v, niekoµko krát to zopakujte.
+
+
+* ZHRNUTIE
+----------
+
+Na prezeranie obrazovkových stránok sú u¾itoèné nasledujúce príkazy:
+
+	C-v	Posuv o obrazovku vpred
+	M-v	Posuv o obrazovku spä»
+	C-l	Zmazanie obrazovky a znovuzobrazenie celého textu,
+                pritom sa text pod kurzorom presunie k stredu obrazovky.
+                (Ide o Control-L a nie Control-1.)
+
+>> Nájdite kurzor a zapamätajte si, aký je okolo neho text.
+   Potom stlaète C-l.
+   Nájdite kurzor znovu a v¹imnite si, ¾e je okolo neho ten istý text.
+
+Na pohyb po celých obrazovkách mô¾ete tie¾ pou¾i» klávesy PageUp a PageDown,
+ak ich Vá¹ terminál má, ale pre pohyb sú efektívnej¹ie klávesy C-v a M-v.
+
+* ZÁKLADNÉ OVLÁDANIE KURZORU
+----------------------------
+
+Pohyb medzi obrazovkami je u¾itoèný, ale ako sa premiestnime na konkrétne
+miesto v texte na obrazovke?
+
+Je to mo¾né dosiahnu» niekoµkými spôsobmi.  Najzákladnej¹ím spôsobom je
+pou¾itie príkazov C-p, C-b, C-f a C-n.  Ka¾dý z týchto príkazov presunie
+kurzor na obrazovke o jeden riadok alebo ståpec v danom smere.
+Tu je tabuµka znázoròujúca smer posunu kurzoru vyvolaný týmito ¹tyrmi
+príkazmi:
+
+			Predchádzajúci riadok, C-p
+				  :
+				  :
+      Dozadu, C-b .... Momentálna pozícia kurzoru .... Dopredu, C-f
+				  :
+				  :
+			 Nasledujúci riadok, C-n
+
+>> Presuòte kurzor na prostredný riadok tohto diagramu pomocou
+   C-n alebo C-p.  Potom stlaète C-l, aby ste na obrazovke videli celý
+   diagram vycentrovaný.
+
+Pravdepodobne si tieto príkazy µahko zapamätáte podµa zaèiatoèných písmen
+anglických názvov: P ako previous (predchádzajúci), N ako next (nasledujúci),
+B ako backward (spä»), F ako forward (vpred).  Sú to základné príkazy pre
+pohyb kurzoru a budete ich pou¾íva» stále, tak¾e by bolo veµmi vhodné, keby
+ste sa ich teraz nauèili.
+
+>> Stlaète niekoµko krát C-n, aby ste kurzor presunuli na tento riadok.
+
+>> Posuòte kurzor dovnútra riadku pomocou niekoµkých C-f a potom hore
+   stlaèením C-p.  Pozorujte, èo C-p robí, keï je kurzor uprostred riadku.
+
+Ka¾dý riadok textu konèí znakom nového riadku, ktorý ho oddeµuje od
+nasledujúceho riadku.  Znakom nového riadku by mal by» ukonèený aj posledný
+riadok súboru (napriek tomu, ¾e to Emacs nevy¾aduje).
+
+>> Vyskú¹ajte C-b na zaèiatku riadku.  Kurzor by sa mal presunú» na koniec
+   predchádzajúceho riadku, preto¾e ho tým presuniete cez znak nového riadku.
+
+C-f funguje analogicky ako C-b, tj. na konci riadku dôjde k presunu na
+ïal¹í riadok.
+
+>> Stlaète niekoµkokrát C-b, tak¾e uvidíte, kde sa nachádza kurzor.
+   Potom stláèajte C-f, aby ste sa vrátili na koniec riadku.
+   Potom stlaète e¹te raz C-f, aby ste sa presunuli na nasledujúci
+   riadok.
+
+Keï kurzorom prejdete cez horný alebo dolný okraj obrazovky, posunie sa
+text za príslu¹ným okrajom na obrazovku.  Táto vlastnos» sa nazýva
+"scrollovanie".  Umo¾òuje premiestni» kurzor na µubovoµné miesto v texte,
+bez toho, aby kurzor opustil obrazovku.
+
+>> Skúste posunú» kurzor pod dolný okraj obrazovky pomocou C-n a pozorujte,
+   èo sa stane.
+
+Ak je posun po znakoch príli¹ pomalý, mô¾ete sa pohybova» po
+slovách.  M-f (Meta-f) robí posun o slovo vpred a M-b robí posun
+o slovo spä».
+
+>> Stlaète niekoµko krát M-f a M-b.
+
+Ak sa kurzor nachádza uprostred slova, M-f presunie kurzor na koniec
+tohto slova.  Ak sa nachádza kurzor v medzere medzi slovami, M-f presunie
+kurzor na koniec nasledujúceho slova.  M-b pracuje analogicky v opaènom
+smere.
+
+>> Stlaète niekoµko krát M-f a M-b spolu s C-f a C-b, aby ste videli
+   výsledky príkazov M-f a M-b vykonávaných z rôznych miest vnútri slov
+   a medzi nimi.
+
+V¹imnite si analógie medzi C-f a C-b na jednej strane a M-f a M-b na
+strane druhej.  Meta znaky sú veµmi èasto vyu¾ívané pre operácie
+vz»ahujúce sa na entity definované jazykom (slová, vety, odstavce),
+naopak Control znaky pracujú na základných prvkoch nezávislých na tom,
+èo práve editujete (znaky, riadky, a pod.).
+
+Táto analógia platí tie¾ pre riadky a vety: C-a a C-e vykonáva presun
+na zaèiatok a koniec riadku, M-a a M-e vykonáva presun na zaèiatok a koniec
+vety.
+
+>> Skúste niekoµko krát C-a a potom niekoµko krát C-e.
+   Skúste niekoµko krát M-a a potom niekoµko krát M-e.
+
+V¹imnite si, ¾e opakované C-a nerobí niè, ale opakované M-a v¾dy
+vykoná presun na ïal¹iu vetu.  Princípu analógie to síce príli¹
+nezodpovedá, ale napriek tomu je toto chovanie mo¾né pova¾ova» za prirodzené.
+
+Pozícia kurzoru v texte sa tie¾ nazýva "bod" ("point").  Aby sme to
+parafrázovali, kurzor je vidie» na obrazovke v mieste, kde je bod umiestnený
+v texte.
+
+Tu je prehµad jednoduchých operácií pre pohyb kurzoru vrátane príkazov pre
+pohyb medzi slovami a vetami:
+
+	C-f	Presun o znak vpred
+	C-b	Presun o znak spä»
+
+	M-f	Presun o slovo vpred
+	M-b	Presun o slovo spä»
+
+	C-n	Presun na nasledujúci riadok
+	C-p	Presun na predchádzajúci riadok
+
+	C-a	Presun na zaèiatok riadku
+	C-e	Presun na koniec riadku
+
+	M-a	Presun spä» na zaèiatok vety
+	M-e	Presun vpred na koniec vety
+
+>> Vyskú¹ajte si teraz niekoµko krát v¹etky tieto príkazy kvôli cviku.
+   Sú to najpou¾ívanej¹ie príkazy.
+
+Ïal¹ie dva dôle¾ité príkazy pre pohyb kurzoru sú M-< (Meta men¹ie-ako),
+ktorý vykoná presun na zaèiatok celého textu, a M-> (Meta väè¹í-ako),
+ktorý vykoná presun na koniec celého textu.
+
+Na väè¹ine terminálov je "<" nad èiarkou, tak¾e pre vyvolanie tohto znaku
+musíte pou¾i» klávesu Shift.  Na týchto termináloch je teda nutné pou¾i»
+klávesu Shift aj v prípade príkazu M-<; bez klávesy Shift by ste stlaèili
+M-èiarka.
+
+>> Skúste teraz M-< pre presun na zaèiatok tútorialu.
+   Pou¾ite potom opakovane C-v, aby ste sa opä» vrátili sem.
+
+>> Skúste teraz M-> pre presun na koniec tútorialu.
+   Pou¾ite potom opakovane M-v, aby ste sa opä» vrátili sem.
+
+Kurzor mô¾ete presúva» tie¾ pomocou kurzorových kláves (klávesy
+so ¹ípkami), ak ich Vá¹ terminál má.  My Vám v¹ak doporuèujeme nauèi» sa
+C-b, C-f, C-n a C-p, a to z troch dôvodov.  Za prvé, tieto klávesy fungujú
+na v¹etkých typoch terminálov.  Za druhé, akonáhle raz získate cvik
+v pou¾ívaní Emacsu, zistíte, ¾e pou¾ívánie týchto CTRL znakov je
+rýchlej¹ie ako pou¾ívanie kurzorových kláves (preto¾e nemusíte presúva»
+ruku z písacej pozície).  Za tretie, ak si zvyknete pou¾íva» tieto CTRL-znak
+príkazy, µahko sa nauèíte pou¾íva» iné pokroèilé príkazy pre pohyb
+kurzoru.
+
+Väè¹ina príkazov Emacsu akceptuje numerický argument; ten pre väè¹inu
+príkazov slú¾i ako opakovaè.  Poèet opakovaní príkazu zadáte
+prostredníctvom stlaèenia C-u nasledovaného stlaèením príslu¹ných èíslic pred
+vyvolaním príkazu.  Ak máte META (alebo EDIT èi ALT) klávesu, existuje
+alternatívna mo¾nos» zadania numerického argumentu: pridr¾te klávesu META
+a stlaète príslu¹né èíslice.  Doporuèujeme nauèi» sa C-u metódu,
+preto¾e tá funguje na akomkoµvek terminále.  Èíselný argument sa tie¾ nazýva
+"prefixový argument", preto¾e ho pí¹ete e¹te pred príkazom, na ktorý sa
+vz»ahuje.
+
+Napríklad C-u 8 C-f vykoná presun o osem znakov vpred.
+
+>> Skúste pou¾i» C-n alebo C-p s numerickým argumentom, na presun kurzoru
+   k tomuto riadku s jediným príkazom.
+
+Väè¹ina príkazov pou¾íva numerický argument ako opakovaè, ale niektoré príkazy
+ho pou¾ívajú iným spôsobom.  Zopár príkazov (ale ¾iaden z tých, ktoré ste sa
+doteraz nauèili) ho pou¾íva ako príznak -- prítomnos» èíselného argumentu bez
+ohµadu na jeho hodnotu spôsobí, ¾e sa príkaz správa ináè.
+
+Iným druhom výnimky sú C-v a M-v.  Ak dostanú numerický argument, posunú
+obrazovku hore alebo dole o zodpovedajúci poèet riadkov namiesto obrazoviek.
+Napríklad C-u 4 C-v posunie obrazovku o 4 riadky.
+
+>> Skúste teraz stlaèi» C-u 8 C-v.
+
+To by malo posunú» obrazovku o 8 riadkov hore.  Pokiaµ by ste ju chceli
+posunú» naspä» dole, mô¾ete da» argument príkazu M-v.
+
+Ak pou¾ívate X Windows, mali by ste ma» na µavej strane emacsového okna
+vysokú obdå¾nikovú oblas», nazvanú scrollbar.  Mô¾ete potom text
+posúva» klikaním my¹ou na scrollbar.
+
+>> Skúste stlaèi» prostredné tlaèítko na vrchole zvýraznenej oblasti
+   vo vnútri scrollbaru.  To by malo text posunú» na pozíciu danú tým, ako
+   vysoko alebo nízko ste klikli.
+
+>> Skúste pri stlaèenom prostrednom tlaèidle posúva» my¹ou hore a dole.
+   Uvidíte, ako sa text posúva hore a dole podµa toho, ako
+   hýbete my¹ou.
+
+
+* KEÏ EMACS NEREAGUJE
+---------------------
+
+Ak Emacs prestane reagova» na Va¹e príkazy, mô¾ete prebiehajúcu
+èinnos» bezpeène zastavi» pomocou C-g.  Pomocou C-g mô¾ete zastavi»
+príkaz, ktorého èinnos» trvá príli¹ dlho.
+
+C-g mô¾ete pou¾i» tie¾ pre odstránenie numerického argumentu príkazu,
+ktorý nechcete dokonèi».
+
+>> Stlaète C-u 100 pre vytvorenie numerického argumentu 100 a potom
+   stlaète C-g.  Teraz stlaète C-f.  Kurzor by sa mal posunú» iba
+   o jeden znak, preto¾e ste argument zru¹ili prostredníctvom
+   C-g.
+
+Ak ste omylom stlaèili <ESC>, mô¾ete sa ho zbavi» pomocou C-g.
+
+
+* DEAKTIVOVANÉ PRÍKAZY
+----------------------
+
+Niektoré príkazy Emacsu sú "deaktivované" ("disabled"), aby ich
+zaèínajúci pou¾ívatelia nemohli vyvola» náhodne.
+
+Ak vyvoláte niektorý z deaktivovaných príkazov, Emacs zobrazí hlásenie
+oznamujúce, ktorý príkaz to bol, s otázkou, èi chcete tento príkaz
+vykona».
+
+Ak naozaj chcete príkaz vyskú¹a», stlaète medzerník ako odpoveï
+na túto otázku.  Zvyèajne, ak nechcete deaktivovaný príkaz
+vykona», odpovedzte na túto otázku pomocou "n".
+
+>> Stlaète C-x C-l (èo je deaktivovaný príkaz),
+   potom na otázku odpovedzte n.
+
+
+* OKNÁ
+------
+
+Emacs mô¾e ma» niekoµko okien (windows), pritom ka¾dé z nich zobrazuje svoj
+vlastný text.  Ako viac okien pou¾íva», objasníme neskôr.  Teraz chceme
+objasni», ako sa zbavi» nadbytoèných okien a vráti» sa do základnej
+jednookennej editácie.  Je to jednoduché:
+
+	C-x 1	Jedno okno (tj. zru¹enie v¹etkých ostatných okien)
+
+Teda vlo¾enie Control-x nasledované èíslicou 1.  C-x 1 roz¹íri okno
+obsahujúce kurzor cez celú obrazovku.  Zru¹í to v¹etky ostatné okná.
+
+>> Presuòte kurzor na tento riadok a stlaète C-u 0 C-l
+>> Stlaète Control-h k Control-f.
+   Pozorujte, ako sa aktuálne okno zmen¹í a objaví sa nové okno
+   kvôli zobrazeniu dokumentácie pre príkaz Control-f.
+
+>> Stlaète C-x 1 a pozorujte, ako okno s dokumentáciou zmizne.
+
+Tento príkaz sa odli¹uje od u¾ nauèených príkazov tým, ¾e pozostáva z dvoch
+znakov.  Zaèína znakom CONTROL-x.  Exostuje celá séria príkazov zaèínajúcich
+na CONTROL-x; veµa z nich sa týka okien, súborov, bufferov a súvisiacich vecí.
+Tieto príkazy pozostávajú z dvoch, troch alebo ¹tyroch znakov.
+
+
+* VKLADANIE A MAZANIE
+---------------------
+
+Ak chcete vlo¾i» text, proste ho napí¹te.  Znaky, ktoré vidíte,
+ako A, 7, *, atï., sú Emacsom chápané ako text a vkladané okam¾ite.
+Pre vlo¾enie znaku nového riadku stlaète <Return> (klávesu Enter).
+
+Posledný znak, ktorý ste napísali, mô¾ete zmaza» stlaèením <Delback>.
+<Delback> je klávesa na klávesnici -- tá istá, ktorú normálne pou¾ívate na
+zmazanie naposledy napísaného znaku.  Je to zvyèajne veµká klávesa pár riadkov
+nad klávesou <Return>, a je väè¹inou oznaèovaná ako "Delete", "Del" alebo
+"Backspace".
+
+Ak je veµká klávesa na tom mieste oznaèená ako "Backspace", potom je to ona,
+ktorú budete pou¾íva» ako <Delback>.  Mô¾e tam by» niekde inde e¹te klávesa
+oznaèená ako "Delete", ale to nie je <Delback>.
+
+V¹eobecne, <Delback> ma¾e znak bezprostredne pred momentálnou pozíciou kurzoru.
+
+>> Vykonajte to teraz -- napí¹te niekoµko znakov a potom ich zma¾te
+   niekoµkými stlaèeniami <Delback>.  Nebojte sa zmien v tomto súbore;
+   originálny tútorial sa nezmení.  Toto je Va¹a osobná kópia.
+
+Keï sa riadok textu zväè¹í natoµko, ¾e presiahne jeden riadok obrazovky, je
+zobrazený na viacerých riadkoch obrazovky.  Riadok textu, ktorý pokraèuje na
+ïal¹om riadku obrazovky, je indikovaný spätným lomítkom ("\") (alebo, ak
+pou¾ívate grafický systém, malá zakrivená ¹ípka) na pravom okraji obrazovky.
+
+>> Vkladajte text, pokiaµ nedosiahnete pravého okraju, a pokraèujte vo
+   vkladaní. Objaví sa Vám pokraèovací riadok.
+
+>> Pou¾ite <Delback> pre zmazanie textu, pokiaµ se riadok textu opä» nevojde na
+   jeden riadok obrazovky.  Pokraèovací riadok zmizne.
+
+Znak nového riadku mô¾ete zmaza» ako ktorýkoµvek iný znak.  Zmazanie
+znaku nového riadku medzi dvoma riadkami spôsobí ich spojenie do jediného
+riadku.  Ak je výsledný riadok príli¹ dlhý na to, aby sa vo¹iel na ¹írku
+obrazovky, bude zobrazený pokraèovacím riadkom.
+
+>> Presuòte kurzor na zaèiatok riadku a stlaète <Delback>.  To tento
+   riadok spojí s riadkom predchádzajúcim.
+
+>> Stlaète <Return> pre znovuvlo¾enie zmazaného znaku nového riadku.
+
+Spomeòte si, ¾e väè¹ina príkazov Emacsu mô¾e dosta» poèet opakovaní;
+vrátane textových znakov.  Opakovanie textových znakov ich vlo¾í
+niekoµko krát.
+
+>>  Vyskú¹ajte si to -- stlaète C-u 8 * pre vlo¾enie ********.
+
+Teraz u¾ poznáte najzákladnej¹ie spôsoby, ako nieèo v Emacse napísa» a ako
+opravova» chyby.  Mô¾ete ale tie¾ maza» text po slovách alebo po riadkoch.
+Tu je zhrnutie operácií pre mazanie textu:
+
+	<Delback>     Zmazanie znaku bezprostredne pred kurzorom
+	C-d   	     Zmazanie znaku nasledujúceho za kurzorom
+
+	M-<Delback>   Zru¹enie slova bezprostredne pred kurzorom
+	M-d	     Zru¹enie slova nasledujúceho za kurzorom
+
+	C-k	     Zru¹enie textu od pozície kurzoru do konca riadku
+	M-k	     Zru¹enie textu do konca aktuálnej vety
+
+V¹imnite si, ¾e <Delback> a C-d, resp. M-<Delback> a M-d, roz¹irujú paralelu
+zaèatú C-f a M-f (pravda, <Delback> naozaj nie je control znak, ale tým sa
+nebudeme trápi»).  C-k a M-k sú ako C-e a M-e v zmysle vz»ahu riadkov k vetám.
+
+¥ubovoµnú èas» buffera mô¾ete zru¹i» aj nasledujúcim spôsobom.  Presuòte sa
+na koniec tejto èasti a stlaète C-@ alebo C-SPC (µubovoµnú z týchto
+kombinácií). (SPC znamená medzerník.)  Presuòte sa na druhý koniec tejto
+èasti a stlaète C-w.  Text medzi týmito pozíciami bude zru¹ený.
+
+>> Presuòte kurzor na písmeno ¥ na zaèiatku predchádzajúceho odstavca.
+>> Stlaète C-SPC.  Emacs by mal zobrazi» v spodnom riadku obrazovky správu
+   "Mark set".
+>> Presuòte kurzor na písmeno c v slove "koniec" na druhom riadku
+   odstavca.
+>> Stlaète C-w.  Text, ktorý zaèína písmenom L a konèí pred písmenom "c"
+   bude zru¹ený.
+
+Uvedomte si, ¾e rozdiel medzi "ru¹ením" ("killing") a "mazaním"
+("deleting") je ten, ¾e "zru¹ené" veci mô¾u by» vhodené spä», zatiaµ èo
+"zmazané" nie.  V¹eobecne príkazy, ktoré mô¾u zmaza» väè¹ie mno¾stvo
+textu, ukladajú text, zatiaµ èo príkazy, ktoré ma¾ú jediný znak alebo
+iba prázdne riadky a medzery, mazaný text neukladajú.
+
+>> Presuòte kurzor na zaèiatok neprázdneho riadku.
+   Potom stlaète C-k pre zru¹enie textu na tomto riadku.
+>> Stlaète C-k druhý krát.  Uvidíte, ¾e to zru¹í znak nového riadku, ktorý
+   je za týmto riadkom.
+
+V¹imnite si, ¾e jedno C-k zru¹í obsah riadku a druhé C-k zru¹í riadok
+samotný a posunie v¹etky ïal¹ie riadky hore.  C-k spracováva numerický
+argument ¹peciálne: zru¹í zodpovedajúci poèet riadkov VRÁTANE ich
+obsahu.  To u¾ nie je opakovanie.  C-u 2 C-k zru¹í dva riadky a ich
+obsah; dvojité stlaèenie C-k by toto obvykle nespravilo.
+
+Vracanie textov spä» sa nazýva "vhadzovanie" ("yanking").  (Predstavte
+si opätovné vhadzovanie, vracanie spä» textu, ktorý bol odstránený.)
+Zmazaný text mô¾ete vhodi» buï na to isté miesto, odkiaµ bol zmazaný,
+alebo na iné miesto v bufferi, alebo dokonca aj do iného súboru.
+Text mô¾ete vhodi» aj viac krát, keï vytvárate jeho ïal¹ie kópie.
+
+Príkazom na vhadzovanie je C-y.  Tento príkaz vlo¾í posledný zmazaný
+text na pozíciu, na ktorej sa nachádza kurzor.
+
+>> Skúste to; stlaète C-y pre vhodenie textu spä».
+
+Ak stlaèíte C-k niekoµko krát po sebe. v¹etok zmazaný text je ulo¾ený
+spolu tak, aby bolo mo¾né vhodi» spä» v¹etky riadky naraz.
+
+>> Stlaète niekoµko krát C-k.
+
+Teraz obnovte naposledy zru¹ený text:
+
+>> Stlaète C-y.  Potom posuòte kurzor o niekoµko riadkov ni¾¹ie a stlaète
+   C-y znovu.  Teraz vidíte, ako je mo¾né kopírova» text.
+
+Èo keï máte nejaký text, ktorý by ste radi vhodili spä» a potom zru¹íte
+nieèo iného?  C-y by vlo¾ilo posledný zru¹ený text.  Ale predchádzajúci
+text ni je stratený.  Mô¾ete ho získa» spä» pou¾itím príkazu M-y.  Potom,
+èo spravíte C-y pre získanie posledného zru¹eného textu, stlaèenie M-y
+vymení tento vhodený text za predchádzajúci zru¹ený text.  Ïal¹ími a
+ïal¹ími stlaèeniami M-y dostávate predchádzajúce a predchádzajúce zru¹ené
+texty.  Keï dosiahnete text, ktorý hµadáte, nemusíte s ním pre jeho
+uchovanie niè ïal¹ieho robi».  Jednoducho vhodený text ponechajte, kde
+je, a pokraèujte v editácii.
+
+Ak opakujete M-y dostatoène dlho, dostanete se spä» k východziemu
+bodu (posledne zru¹enému textu).
+
+>> Zru¹te riadok, presuòte kurzor niekam inam a zru¹te iný riadok.
+   Potom vykonajte C-y pre vrátenie druhého zru¹eného riadku.
+   Potom stlaète M-y a vhodený riadok bude nahradený prvým zru¹eným riadkom.
+   Opakujte M-y a pozorujte, èo dostávate.  Pokraèujte v tom, pokiaµ sa
+   znova neobjaví druhý zru¹ený riadok a potom niekoµko ïal¹ích.
+   Ak chcete, mô¾ete skúsi» preda» M-y kladné a záporné argumenty.
+
+
+* UNDO
+------
+
+Ak vykonáte v texte zmenu a potom zistíte, ¾e to bol omyl, mô¾ete
+zmenu vráti» príkazom undo, C-x u.
+
+C-x u obvykle vráti zmeny vykonané jedným príkazom; pokiaµ C-x u
+zopakujete niekoµko krát po sebe, ka¾dé opakovanie vráti jeden ïal¹í
+príkaz.
+
+Sú ale dve výnimky: príkazy, ktoré nemenia text, sa nepoèítajú (to
+zahàòa príkazy pre pohyb kurzoru a rolovanie) a znaky vkladajúce
+samy seba sú obvykle spracovávané v skupinách a¾ po 20.  (To je kvôli
+tomu, aby sa zredukoval poèet C-x u nutných pre vrátenie vkladaného
+textu.)
+
+>> Zru¹te tento riadok pomocou C-k, stlaète potom C-x u a riadok by sa mal
+   znova objavi».
+
+Alternatívny undo príkaz je C-_; pracuje rovnako ako C-x u, je v¹ak
+menej pracné ho aplikova» niekoµko krát za sebou.  Nevýhodou C-_ je, ¾e
+na niektorých klávesniciach nie je jasné, ako ho vyvola».  To je dôvod,
+preèo ponúkame aj C-x u.  Na niektorých termináloch mô¾ete C-_ vyvola»
+stlaèením / pri stlaèenom CTRL.
+
+Numerický argument pre C-_ a C-x u funguje ako poèet opakovaní.
+
+Pomocou príkazu undo mô¾ete vráti» zru¹ený aj zmazaný text. Rozdiel medzi
+mazaním a ru¹ením textu ovplyvòuje mo¾nos» vhodenia tohto textu pomocou
+C-y, neovplyvòuje ale mo¾nosti príkazu undo.
+
+
+* SÚBORY
+--------
+
+Aby text, ktorý editujete, zostal trvale uchovaný, musíte ho ulo¾i» do
+súboru.  Inak by bol po ukonèení Emacsu stratený.  Svoju editáciu
+spojíte so súborom "vyhµadaním" ("finding") súboru.  (Tie¾ sa to
+nazýva "nav¹tívenie" ("visiting") súboru.)
+
+Vyhµadanie súboru znamená, ¾e vidíte jeho obsah v Emacse.  V mnohých
+ohµadoch je to, ako by ste editovali priamo ten súbor.  Napriek tomu zmeny,
+ktoré prostredníctvom Emacsu robíte, sa nestanú trvalými, pokiaµ tieto
+zmeny do súboru "neulo¾íte" ("save").  Tým sa zamedzí nechcenému ponechaniu
+èiastoène zmeneného súboru v systéme.  Dokonca aj keï súbor ulo¾íte,
+Emacs uchová pôvodný súbor pod zmeneným názvom pre prípad, ¾e by ste
+zistili, ¾e va¹e úpravy boli chybné.
+
+Keï sa pozriete do dolnej èasti obrazovky, uvidíte riadok, ktorý zaèína a
+konèí pomlèkami a na zaèiatku má "--:-- TUTORIAL.sk" alebo nieèo podobného.
+Táto èas» obrazovky obvykle obsahuje meno súboru, ktorý je práve
+nav¹tívený.  Akurát teraz máte nav¹tívený súbor nazvaný "TUTORIAL.sk",
+ktorý je Va¹ou osobnou èmáraciou kópiou tútorialu Emacsu.  Keï v Emacse
+vyhµadáte súbor, jeho meno sa objaví presne na tom mieste.
+
+Ïal¹ou vecou súvisiacou s príkazom pre vyhµadanie súboru je to, ¾e musíte
+poveda», ktoré meno súboru chcete.  Hovoríme, ¾e príkaz "èíta argument
+z terminálu" (v tomto prípade je argumentom meno súboru).  Potom, èo
+vyvoláte príkaz
+
+	C-x C-f   Vyhµadanie súboru
+
+Emacs sa Vás opýta na meno súboru.  Meno súboru, ktoré pí¹ete, sa
+objavuje v spodnom riadku obrazovky, ktorý sa v tejto situácii nazýva
+minibuffer.  Pre editáciu mena súboru mô¾ete pou¾íva» obvyklé editaèné
+príkazy Emacsu.
+
+Zadávanie mena súboru (v¹eobecne akýkoµvek vstup z minibuffera) mô¾ete
+zru¹i» príkazom C-g.
+
+>> Stlaète C-x C-f a potom C-g.  To minibuffer zru¹í a tie¾ to zru¹í
+   príkaz C-x C-f, ktorý minibuffer pou¾il.  Tak¾e nevyhµadáte ¾iadny
+   súbor.
+
+Po napísaní mena súboru stlaète <Return> na jeho ukonèenie.
+Príkaz C-x C-f potom zaène pracova» a vyhµadá súbor, ktorý ste zvolili.
+Po skonèení príkazu C-x C-f minibuffer zmizne.
+
+Po malej chvíli sa obsah súboru objaví na obrazovke a mô¾ete ho
+editova».  Keï chcete zmeny natrvalo ulo¾i», pou¾ite príkaz
+
+	C-x C-s   Ulo¾enie súboru
+
+To skopíruje text z Emacsu do súboru.  Keï to spravíte prvý krát, Emacs
+premenuje pôvodný súbor na súbor s novým menom, aby nebol stratený.
+Nové meno je vytvorené pridaním "~" na koniec pôvodného mena súboru.
+
+Keï je ukladanie dokonèené, Emacs zobrazí meno zapísaného súboru.
+Mali by ste uklada» rozumne èasto, aby ste nestratili príli¹ veµa práce
+v prípade pádu systému.
+
+>> Stlaète C-x C-s pre ulo¾enie Va¹ej kópie tútorialu.
+   Malo by to zobrazi» "Wrote ...TUTORIAL.sk" v spodnom riadku obrazovky.
+
+Existujúci súbor mô¾ete vyhµada», aby ste ho mohli prehliada» alebo
+editova».  Mô¾ete tie¾ vyhµada» súbor, ktorý e¹te neexistuje.  To je
+spôsob, akým sa dá vytvori» súbor v Emacse: vyhµadajte súbor, ktorý
+bude na zaèiatku prázdny a potom zaènite vklada» text urèený pre tento
+súbor.  Keï po¾iadate o ulo¾enie, Emacs skutoène vytvorí súbor
+s textom, ktorý ste vlo¾ili.  Od tej chvíle sa potom mô¾ete cíti», ako
+keby ste editovali u¾ existujúci súbor.
+
+
+* BUFFERY
+---------
+
+Ak vyhµadáte pomocou C-x C-f druhý súbor, prvý súbor v Emacse
+zostáva.  Mô¾ete sa doò spä» prepnú» jeho opätovným vyhµadaním
+pomocou C-x C-f.  Týmto spôsobom mô¾ete do Emacsu dosta» pomerne veµa
+súborov.
+
+>> Vytvorte súbor pomenovaný "foo" stlaèením C-x C-f foo <Return>.
+   Potom vlo¾te nejaký text, zmeòte ho a ulo¾te "foo" stlaèením C-x C-s.
+   Nakoniec stlaète C-x C-f TUTORIAL.sk <Return>, èím sa vrátite spä» do
+   tútorialu.
+
+Emacs ukladá text ka¾dého súboru do objektu nazývaného "buffer".
+Vyhµadanie súboru vytvorí v Emacse nový buffer.  Ak chcete vidie» zoznam
+bufferov, ktoré momentálne existujú vo Va¹om procese Emacs, stlaète:
+
+	C-x C-b   Zoznam bufferov
+
+>> Skúste teraz C-x C-b.
+
+Uvidíte, ¾e ka¾dý buffer má v zozname meno a mô¾e tam ma» tie¾ meno súboru,
+ktorého text obsahuje.  AKÝKO¥VEK text, ktorý vidíte v emacsovom okne, je v¾dy
+súèas»ou nejakého bufferu.
+
+>> Stlaète C-x 1, aby ste sa zbavili zoznamu bufferov.
+
+Ak máte niekoµko bufferov, iba jeden z nich je "aktuálny".  Je to ten buffer,
+ktorý práve upravujete.  Ak chcete upravova» iný buffer, musíte sa doòho
+"prepnú»".  Ak sa chcete prepnú» do bufferu so súborom, mô¾ete ho znova otvori»
+príkazom C-x C-f.  Ale existuje jednoduch¹í spôsob: pou¾ite príkaz C-x b.  Pri
+tomto príkaze musíte napísa» meno bufferu.
+
+>> Napí¹te C-x b foo <Return> na vrátenie sa do bufferu "foo", ktorý uchováva
+   text súboru "foo".  Potom napí¹te C-x b TUTORIAL.sk <Return> na vrátenie sa
+   do tohto návodu.
+
+Väè¹inu èasu, meno bufferu je také isté ako meno súboru (bez názvu adresára).
+Ale nie je to v¾dy pravda.  Zoznam bufferov vytvorený s C-x C-b v¾dy uká¾e mená
+ka¾dého bufferu.
+
+HOCAKÝ text, ktorý vidíte v okne Emacsu je v¾dy èas» nejakého bufferu.
+Niektoré buffery nezodpovedajú súborom.  Napríklad, buffer pomenovaný
+"*Buffer List*" nemá ¾iadny súbor.  Je to buffer, ktorý obsahuje zoznam
+bufferov, vytvorený pomocou C-x C-b.  Buffer nazvaný "*Messages*" tie¾
+nezodpovedá súboru¨obsahuje správy, ktoré sa objavili na spodnom riadku poèas
+vá¹ho sedenia s Emacsom.
+
+>> Napí¹te C-x b *Messages* <Return> a pozrite sa na buffer so správami.  Potom
+   napí¹te C-x b TUTORIAL.sk <Return> na vrátenie sa do tohto návodu.
+
+Ak zmeníte text jedného súboru a potom vyhµadáte iný súbor,
+nespôsobí to ulo¾enie prvého súboru.  Jeho zmeny zostávajú v Emacse
+uchované v jemu zodpovedajúcom buffere.  Vytvorenie a úprava druhého
+súboru nemá ¾iadny vplyv na buffer prvého súboru.  To je veµmi
+u¾itoèné, ale tie¾ to znamená, ¾e potrebujete vhodný spôsob, ako ulo¾i»
+buffer prvého súboru.  Nutnos» prepnú» sa spä» pomocou C-x C-f, aby
+ho bolo mo¾né ulo¾i» prostredníctvom C-x C-s, by bola nemiestne
+ob»a¾ujúca.  Tak¾e máme
+
+	C-x s     Ulo¾enie niektorých bufferov
+
+C-x s sa Vás spýta na ka¾dý buffer, ktorý obsahuje zmeny, ktoré ste
+neulo¾ili.  Pre ka¾dý taký buffer sa Vás spýta, èi ho má ulo¾i».
+
+>> Vlo¾te riadok textu a potom stlaète C-x s.
+   Emacs by sa Vás mal opýta», èi má by» ulo¾ený buffer nazvaný TUTORIAL.sk.
+   Odpovedzte na túto otázku áno (yes) stlaèením "y".
+
+
+* ROZ©IROVANIE SADY PRÍKAZOV
+----------------------------
+
+Existuje omnoho, omnoho viac príkazov Emacsu, ako tie, ktoré by vôbec mohli
+by» rozmiestnené na v¹etky control a meta znaky.  Emacs tento problém
+obchádza prostredníctvom X (eXtend) príkazu.  Ten vzniká dvoma spôsobmi:
+
+	C-x	Znakový eXtend.  Nasledovaný jedným znakom.
+	M-x	Pomenovaný príkaz eXtend.  Nasledovaný dlhým názvom.
+
+To sú príkazy, ktoré sú v¹eobecne u¾itoèné, ale menej èasto pou¾ívané
+ako tie, ktoré ste sa u¾ nauèili.  U¾ ste videli dva z nich: súborové
+príkazy C-x C-f pre vyhµadanie a C-x C-s pre ulo¾enie.  Iný príklad je
+príkaz pre ukonèenie Emacsu -- tj. príkaz C-x C-c.  (Nemajte obavy
+o stratu zmien, ktoré ste spravili; C-x C-c ponúkne ulo¾enie ka¾dého
+zmeneného súboru pred tým, ne¾ sa Emacs skonèí.)
+
+C-z je príkaz na *doèasné* opustenie Emacsu -- mô¾ete sa po òom do
+spusteného Emacsu vráti».
+
+Na systémoch, ktoré to umo¾òujú, C-z Emacs "pozastaví"; tzn. vráti Vás
+do shellu, ale Emacs neskonèí.  V najbe¾nej¹ích shelloch sa mô¾ete do
+Emacsu vráti» príkazom `fg' alebo pomocou `%emacs'.
+
+Na systémoch, ktoré pozastavovanie procesov nemajú implementované, C-z
+vytvorí subshell be¾iaci pod Emacsom, aby Vám dal ¹ancu spusti» iné
+programy a potom sa do Emacsu vráti»; nevykoná teda pravé opustenie
+Emacsu.  V tom prípade je obvyklou cestou návratu zo subshellu do Emacsu
+shellový príkaz `exit'.
+
+Chvíµa pre pou¾itie C-x C-c nastane vtedy, keï sa chystáte odhlási» sa zo
+systému.  Správne je to tie¾ pri ukonèovaní Emacsu vyvolaného po¹tovým
+programom a rôznymi inými utilitami, preto¾e tie nemusia vedie», ako si poradi»
+s pozastavením Emacsu.  Napriek tomu za normálnych okolností, pokiaµ sa
+nechystáte odhlási», je lep¹ie Emacs pozastavi» pomocou C-z ako ho ukonèi».
+
+Existuje mnoho C-x príkazov.  Tu je zoznam tých, ktoré ste sa u¾ nauèili:
+
+	C-x C-f		Vyhµadanie súboru
+	C-x C-s		Ulo¾enie súboru
+	C-x C-b		Zoznam bufferov
+	C-x C-c		Ukonèenie Emacsu
+	C-x 1		Zru¹enie v¹etkých okien okrem jedného
+	C-x u		Undo
+
+Pomenované eXtended príkazy sú príkazy, ktoré sú pou¾ívané e¹te menej, alebo
+príkazy, ktoré sú pou¾ívané iba v istých módoch.  Príkladom je príkaz
+replace-string, ktorý globálne nahradí jeden re»azec iným.  Keï stlaèíte M-x,
+vypí¹e sa na spodnom riadku obrazovky prompt M-x a vy by ste mali zada» meno
+príkazu; v tomto prípade "replace-string".  Jednoducho napí¹te "repl s<TAB>"
+a Emacs názov doplní. (<TAB> je klávesa Tab, be¾ne sa nachádza nad klávesou
+CapsLock alebo Shift na µavom okraji klávesnice.)  Skonèite zadávanie mena
+príkazu pomocou <Return>.
+
+Príkaz replace-string vy¾aduje dva argumenty -- re»azec, ktorý má by»
+nahradený, a re»azec, ktorý ho má nahradi».  Ka¾dý argument musíte
+ukonèi» pomocou <Return>.
+
+>> Presuòte kurzor na prázdny riadok dva riadky pod týmto.
+   Potom napí¹te M-x repl s<Return>zmenil<Return>modifikoval<Return>.
+
+   V¹imnite si, ako sa tento riadok zmenil: nahradili ste slovo
+   z-m-e-n-i-l slovom "modifikoval", kdekoµvek sa za aktuálnou pozíciou
+   kurzoru vyskytlo.
+
+
+* AUTOMATICKÉ UKLADANIE
+-----------------------
+
+Ak ste spravili zmeny v súbore, ale nemáte ich e¹te ulo¾ené,
+mô¾u by» v prípade páde systému stratené.  Aby vás Emacs pred tým ochránil,
+periodicky zapisuje "auto save" súbor pre ka¾dý súbor, ktorý
+editujete.  Meno auto save súboru má na zaèiatku a na konci #;
+napríklad ak sa Vá¹ soubor nazýva "hello.c", jeho auto save
+súbor sa nazýva "#hello.c#".  Ak súbor ulo¾íte normálnym spôsobom,
+Emacs auto save súbor zma¾e.
+
+Ak nastane pád systému, mô¾ete svoje úpravy obnovi» z auto-save
+súboru, a to normálnym vyhµadaním súboru (toho, ktorý ste editovali,
+nie auto save súboru) a následným spustením M-x recover-file<return>.
+Na ¾iados» o potvrdenie odpovedzte zadaním yes<return> pre pokraèovanie a
+obnovenie auto-save dát.
+
+
+* ECHO OBLAS«
+-------------
+
+Keï Emacs vidí, ¾e pí¹ete príkazy pomaly, ukazuje Vám ich v spodnej
+èasti obrazovky v oblasti nazývanej "echo oblas»".  Echo oblas» obsahuje
+dolný riadok obrazovky.
+
+
+* STAVOVÝ RIADOK
+----------------
+
+Riadok bezprostredne nad echo oblas»ou sa nazýva "stavový riadok"
+("mode line").
+Stavový riadok vraví nieèo ako:
+
+--:** TUTORIAL.sk       (Fundamental)--L670--58%----------------
+
+Tento riadok podáva u¾itoènú informáciu o stave Emacsu a texte, ktorý
+editujete.
+
+U¾ viete, èo znamená meno súboru -- je to súbor, ktorý ste vyhµadali.
+-NN%-- oznaèuje Va¹u aktuálnu pozíciu v texte; vraví, ¾e NN percent textu
+je nad horným okrajom obrazovky.  Ak je zaèiatok súboru na obrazovke, je
+tu --Top-- a nie --00%--.  Ak je koniec textu na obrazovke, je tu
+--Bot--.  Ak sa dívate na tak malý text, ¾e sa celý vojde na obrazovku,
+stavový riadok vraví --All--.
+
+Písmeno L a èíslice oznaèujú pozíciu iným spôsobom, udávajú riadok, na ktorom
+sa nachádza kurzor.
+
+Hviezdièky blízko zaèiatku znamenajú, ¾e ste text zmenili.  Tesne po
+vyhµadaní alebo ulo¾ení súboru v tejto èasti stavového riadku nie sú ¾iadne
+hviezdièky, iba pomlèky.
+
+Èas» stavového riadku v zátvorkách vraví, v akých editaèných módoch sa
+nachádzate.  Implicitný mód je Fundamental, èo je ten, ktorý momentálne
+pou¾ívate.  Je príkladom hlavného módu ("major mode").
+
+Emacs má celý rad hlavných módov.  Niektoré z nich sú urèené pre
+editovanie rôznych programovacích jazykov a/alebo textov ako napr. Lisp mód,
+Text mód, atï.  V µubovoµnom okamihu je aktívny práve jeden hlavný mód a
+jeho meno je mo¾né nájs» v stavovom riadku na mieste, kde je teraz
+"Fundamental".
+
+Ka¾dý hlavný mód mení chovanie niektorých príkazov.  Napríklad existujú
+príkazy pre vytváranie komentárov v programe, a preto¾e ka¾dý programovací
+jazyk má inú predstavu o tom, ako má komentár vyzera»,
+musí ka¾dý hlavný mód vklada» komentáre inak.  Ka¾dý hlavný mód je
+vlastne meno extended príkazu, ktorým sa do tohoto módu mô¾ete
+prepnú».  Napríklad M-x fundamental-mode je príkaz pre prepnutie sa do
+Fundamental módu.
+
+Ak sa chystát meni» normálny text, ako napríklad tento súbor, pravdepodobne by
+ste mali pou¾i» Text mód.
+> Napí¹te M-x text-mode <Return>.
+
+Nebojte sa, ¾iadny z príkazov, ktoré ste sa nauèili, chovanie Emacsu nijako
+významne nezmení.  Mô¾ete si ale v¹imnú», ¾e M-f a M-b teraz pracujú
+s apostrofmi ako so súèas»ou slova.  Pred tým, vo Fundamental móde, M-f
+a M-b pracovali s apostrofmi ako oddeµovaèmi slov.
+
+Hlavné módy obyèajne robia men¹ie zmeny, ako bola táto: príkazy väè¹inou
+robia "to isté", ale v ka¾dom hlavnom móde pracujú trochu inak.
+
+Dokumentáciu k aktuálnemu hlavnému módu si mô¾ete zobrazi» stlaèením C-h m.
+
+>> Raz alebo viac krát pou¾ite C-u C-v, aby ste tento riadok dostali
+   na vrchol obrazovky.
+>> Stlaète C-h m, aby ste videli, ako sa Text mód lí¹i od Fundamental
+   módu.
+>> Stlaète C-x 1 pre odstránenie dokumentácie z obrazovky.
+
+Hlavné módy sa nazývajú hlavné preto, ¾e tie¾ existujú vedµaj¹ie módy
+(minor modes).  Vedµaj¹ie módy nie sú alternatívou k hlavným módom, ale
+ich malé modifikácie.  Ka¾dý vedµaj¹í mód mô¾e by» zapnutý alebo vypnutý
+sám o sebe nezávisle na v¹etkých ostatných vedµaj¹ích módoch a nezávisle na
+hlavnom móde.  Tak¾e nemusíte pou¾íva» ¾iadny vedµaj¹í mód alebo mô¾ete
+pou¾íva» jeden vedµaj¹í mód alebo µubovoµnú kombináciu niekoµkých
+vedµaj¹ích módov.
+
+Jedným z veµmi u¾itoèných vedµaj¹ích módov, hlavne pre úpravy slovenských
+textov, je Auto Fill mód.  Keï je tento mód zapnutý, Emacs zalomí riadok
+medzi dvoma slovami, kedykoµvek vkladáte text a riadok sa stane príli¹
+dlhým.
+
+Auto Fill mód mô¾ete zapnú» vykonaním M-x auto-fill-mode<Return>.
+Ak je tento mód zapnutý, mô¾ete ho vypnú» vykonaním M-x
+auto-fill-mode<Return>.  Ak je mód vypnutý, tento príkaz ho zapína,
+a ak je mód zapnutý, tak ho tento príkaz vypína.  Vravíme, ¾e tento
+príkaz prepína ("toggles") tento mód.
+
+>> Napí¹te teïa M-x auto-fill-mode<Return>.  Potom vkladajte "asdf " stále
+   dookola tak dlho, pokiaµ neuvidíte, ako sa vkladaný riadok rozdelí na dva
+   riadky.  Do textu musíte vklada» medzery preto, ¾e Auto Fill mód
+   zalamuje riadky iba v medzerách.
+
+Okraj je obvykle nastavený na 70 znakov, ale mô¾ete to zmeni» príkazom
+C-x f.  Hodnotu okraju, ktorú si prajete, by ste mali preda» ako
+numerický argument.
+
+>> Napí¹te C-x f s argumentom 20.  (C-u 2 0 C-x f).
+   Potom napí¹te nejaký text a pozorujte, ako Emacs vypåòa riadky po
+   20. znakoch.  Potom nastavte okraj spä» na 70 opätovným pou¾itím
+   C-x f.
+
+Ak spravíte zmeny uprostred odstavca, Auto Fill mód ho
+nepreformátuje.
+Pre preformátovanie odstavca stlaète M-q (Meta-q) s kurzorom vnútri
+odstavca.
+
+>> Presuòte kurzor do predchádzajúceho odstavcu a stlaète M-q.
+
+
+* VYH¥ADÁVANIE
+--------------
+
+Emacs vie v texte vyhµadáva» re»azce (tj. skupiny spojených znakov alebo
+slov) smerom vpred alebo vzad.  Hµadanie re»azca je príkaz presúvajúci
+kurzor; presunie kurzor na najbli¾¹ie miesto, kde sa tento re»azec nachádza.
+
+Vyhµadávací príkaz Emacsu sa lí¹i od vyhµadávacích príkazov väè¹iny
+editorov v tom zmysle, ¾e je "inkrementálny".  To znamená, ¾e vyhµadávanie
+sa robí u¾ v okam¾iku, keï zadávate hµadaný re»azec.
+
+Príkaz pre hµadanie vpred je C-s a pre hµadanie vzad C-r.
+POZOR!  E¹te to neskú¹ajte.
+
+Keï stlaèíte C-s, uvidíte v echo oblasti prompt "I-search".  To Vám
+vraví, ¾e Emacs sa nacháza v stave, ktorý sa nazýva inkrementálne hµadanie,
+a èaká, kým mu zadáte, èo chcete hµada».  <RET> hµadanie ukonèí.
+
+>> Teraz zaènite hµadanie stlaèením C-s.  POMALY, písmeno po písmene, pí¹te
+   slovo 'kurzor'.  Po ka¾dom písmene si v¹imnite, èo sa deje s kurzorom.
+   Teraz ste vyhµadali "kurzor" prvý krát.
+>> Stlaète C-s znova, aby ste na¹li ïal¹í výskyt slova "kurzor".
+>> Teraz ¹tyri krát stlaète <Delback> a pozerajte, ako sa kurzor
+   presúva.
+>> Stlaète <RET> pre ukonèenie hµadania.
+
+Videli ste, èo sa stalo?  Emacs sa v inkrementálnom hµadaní pokú¹a
+prejs» na ïal¹í výskyt re»azca, ktorý ste dosiaµ napísali.  Ak chcete
+prejs» na ïal¹í výskyt 'kurzor', jednoducho stlaète C-s zas.
+Ak u¾ ¾iadny taký výskyt nie je, Emacs pípne a povie Vám, ¾e
+hµadanie momentálne "zlyháva", C-g hµadanie ukonèí.
+
+POZNÁMKA: Na niektorých systémoch stlaèenie C-s spôsobí zatuhnutie
+obrazovky a neuvidíte ¾iadny ïal¹í výstup z Emacsu.  To znamená, ¾e
+"vlastnos»" operaèného systému nazvaná "flow control" zachytáva C-s a
+nepustí ho k Emacsu.  Pre odtuhnutie obrazovky stlaète C-q.  Potom
+vyhµadajte v sekcii "Spontaneous Entry to Incremental Search" v manuále
+Emacsu radu, ako obís» túto "vlastnos»".
+
+Ak uprostred inkrementálneho hµadania stlaèíte <Delback>, uvidíte,
+¾e posledný znak v hµadanom re»azci zmizne a hµadanie sa vracia na posledné
+miesto hµadania.  Predpokladajme napríklad, ¾e ste napísali "c", aby ste
+na¹li prvý výskyt "k".  Ak teraz stlaèíte "u", kurzor sa presunie na
+prvý výskyt "ku".  Teraz stlaète <Delback>.  To vyma¾e "u" z hµadaného
+re»azca a kurzor sa presunie spä» na prvý výskyt "k".
+
+Ak uprostred hµadania stlaèíte control alebo meta znak (s niekoµkými
+výnimkami -- znaky, ktoré sú ¹peciálne v hµadaní, ako C-s a C-r),
+hµadanie bude ukonèené.
+
+C-s zaèína hµadanie, ktoré hµadá akýkoµvek výskyt hµadaného re»azca ZA
+aktuálnu pozíciu kurzoru.  Ak chcete nieèo hµada» v predchádzajúcom texte,
+stlaète namiesto C-s  C-r.  V¹etko, èo sme povedali o C-s, platí tie¾ o C-r
+okrem toho, ¾e smer hµadania je opaèný.
+
+
+* VIAC OKIEN
+------------
+
+Jednou z pekných vlastností Emacsu je to, ¾e mô¾e na obrazovke zobrazi»
+viac okien súèasne.
+
+>> Presuòte kurzor na tento riadok a stlaète C-u 0 C-l (to je CONTROL-L, nie
+   CONTROL-1).
+
+>> Ak stlaèíte C-x 2, obrazovka sa rozdelí na dve okná.
+   Obidve okná zobrazujú tento tútorial.  Kurzor zostáva na vrchu okna.
+
+>> Stlaète C-M-v pre rolovanie spodného okna.
+   (Ak nemáte skutoènú klávesu Meta, stlaète ESC C-v.)
+
+>> Stlaète C-x o ("o" ako "other") pre presun kurzoru do dolného okna.
+>> Pou¾ite C-v a M-v v spodnom okne pre jeho rolovanie.
+   Pokraèujte v èítaní týchto in¹trukcií v hornom okne.
+
+>> Znovu stlaète C-x o pre presun kurzoru spä» do horného okna.
+   Kurzor v hornom okne je presne na mieste, kde bol pôvodne.
+
+Mô¾ete ïalej pou¾íva» C-x o pre prepínanie medzi oknami.  Ka¾dé okno má svoju
+vlastnú pozíciu kurzoru, ale kurzor zobrazuje iba jedno okno.
+V¹etky obvyklé editaèné príkazy platia pre okno, v ktorom sa nachádza
+kurzor.  Toto okno nazývame "aktívne okno" ("selected window").
+
+Príkaz C-M-v je veµmi u¾itoèný, ak v jednom okne editujete text a
+druhé okno pou¾ívate iba pre prehµad.  Mô¾ete necháva» kurzor stále
+v okne, kde editujete, a postupova» po druhom okne pomocou C-M-v.
+
+C-M-v je príkladom CONTROL-META znaku.  Ak máte skutoènú META klávesu,
+mô¾ete vyvola» C-M-v pridr¾aním oboch kláves CTRL a META pri stlaèení v.
+Nezále¾í na tom, èi stlaèíte ako prvú klávesu CTRL alebo META, preto¾e obe
+tieto klávesy fungujú ako modifikátory kláves, ktoré stlaèíte.
+
+Ak nemáte skutoènú META klávesu, mô¾ete namiesto nej pou¾i» ESC, na
+poradí zále¾í: musíte stlaèi» ESC a potom CTRL-v; CTRL-ESC v by
+nefungovalo.  To preto, lebo ESC je samostatný znak, a nie modifikátor.
+
+>> Stlaète C-x 1 (v hornom okne), aby ste sa zbavili dolného okna.
+
+(Ak by ste C-x 1 stlaèili v dolnom okne, odstránilo by to horné okno.
+Chápte tento príkaz ako "ponechaj akurát jedno okno -- to, v ktorom
+akurát som".)
+
+Nemusíte v oboch oknách zobrazova» ten istý buffer.  Ak pou¾ijete
+C-x C-f pre vyhµadanie súboru v jednom z okien, druhé okno sa nezmení.
+Mô¾ete vyhµadáva» súbory v oboch oknách nezávisle.
+
+Tu je ïal¹í spôsob, ako vyu¾i» dve okná na zobrazenie dvoch rôznych vecí:
+
+>> Stlaète C-x 4 C-f nasledované menom niektorého z Va¹ich súborov.
+   Dokonèite to pomocou <Return>.  Vidíte zadaný súbor v dolnom okne.
+   Presunul sa tam aj kurzor.
+
+>> Stlaète C-x o pre presun spä» do horného okna a C-x 1 pre zmazanie
+   dolného okna.
+
+
+* REKURZÍVNE EDITAÈNÉ ÚROVNE
+----------------------------
+
+Obèas sa dostanete do nieèoho, èo sa nazýva "rekurzívna editaèná úroveò"
+("recursive editing level").  To je indikované hranatými zátvorkami v
+stavovom riadku obklopujúcemu zátvorky okolo mena hlavného módu.
+Napríklad mô¾ete vidie» [(Fundamental)] namiesto (Fundamental).
+
+Aby ste sa dostali z rekurzívnej editaènej úrovne, stlaète ESC ESC ESC.
+To je v¹eobecný "vyskakovací" príkaz.  Mô¾ete ho pou¾i» tie¾ pre odstránenie
+niektorých okien a vyskoèenie z minibuffera.
+
+>> Stlaète M-x, aby ste sa dostali do minibuffera; potom stlaète
+   ESC ESC ESC, aby ste sa z neho dostali von.
+
+Z rekurzívnej editaènej úrovne nemô¾ete vyskoèi» pomocou C-g.  To preto, ¾e
+C-g je vyu¾ívané pre ru¹enie príkazov a argumentov VO VNÚTRI rekurzívnej
+editaènej vrstvy.
+
+
+* ZÍSKANIE ÏAL©EJ NÁPOVEDY
+--------------------------
+
+V tomto tútoriale sme sa pokúsili Vám poskytnú» dostatok informácií,
+aby ste mohli zaèa» Emacs pou¾íva».  V Emacse je toho toµko, ¾e by bolo
+nemo¾né to v¹etko objasni» v tomto návode.  V ka¾dom prípade sa o Emacse
+mô¾ete nauèi» viac, preto¾e má veµa u¾itoèných vlastností.  Emacs ponúka
+príkazy pre èítanie dokumentácie svojich príkazov.  V¹etky tieto "help"
+príkazy zaèínajú znakom Control-h, ktorý sa nazýva "help znak".
+
+Pre pou¾itie vlastností nápovedy stlaète znak C-h a potom znak hovoriaci,
+aký druh nápovedy si ¾iadate.  Ak ste NAOZAJ stratení, stlaète C-h ? a
+Emacs Vám povie, aké druhy nápovedy Vám mô¾e poskytnú».  Ak ste stlaèili
+C-h a potom ste sa rozhodli, ¾e ¾iadnu nápovedu nechcete, jednoducho ju
+zru¹te stlaèením C-g.
+
+(Na niektorých poèítaèoch je význam znaku C-h zmenený.  To by naozaj
+nemalo by» v¹eobecným nastavením pre v¹etkých pou¾ívateµov, tak¾e máte právo
+pos»a¾ova» sa systémovému administrátorovi.  Do tej doby, ak C-h
+nezobrazuje hlásenie o nápovede v dolnej èasti obrazovky, skúste namiesto
+toho pou¾íva» klávesu F1 alebo M-x help RET.)
+
+Najzákladnej¹í príkaz nápovedy je C-h c.  Stlaète C-h, znak c a klávesový
+príkaz; Emacs potom zobrazí veµmi struèný popis príkazu.
+
+>> Stlaète C-h c C-p.
+
+   Hlásenie by malo vyzera» asi takto
+
+	C-p runs the command previous-line
+
+To vám oznamuje "meno funkcie".  Mená funkcií sú pou¾ívané hlavne pre
+konfiguráciu a roz¹irovanie Emacsu.  Ale preto¾e mená funkcií sú volené
+tak, aby naznaèovali, èo zodpovedajúci príkaz robí, mô¾u slú¾i» tie¾
+ako veµmi struèná dokumentácia -- dostatoèná na to, aby Vám pripomenula
+príkazy, ktoré ste sa u¾ nauèili.
+
+Viacznakové príkazy ako C-x C-s a (ak nemáte META, EDIT ani ALT
+klávesu) <ESC>v sú pre C-h c povolené tie¾.
+
+Na získanie viac informácií o príkaze pou¾ite namiesto C-h c C-h k.
+
+>> Stlaète C-h k C-p.
+
+To zobrazí dokumentáciu k funkcii a jej meno v emacsovom okne.  Ak
+výstup preèítate, stlaète C-x 1, aby ste sa textu nápovedy zbavili.
+Nemusíte to robi» hneï.  Mô¾ete chvíµu editova» a nazera» do textu
+nápovedy a a¾ potom stlaèi» C-x 1.
+
+Tu sú ïal¹ie u¾itoèné voµby C-h:
+
+   C-h f	Popis funkcie.  Zadáváte meno funkcie.
+
+>> Skúste napísa» C-h f previous-line<Return>.
+   To vypí¹e v¹etky informácie, ktoré Emacs má o funkcii implementujúcej
+   príkaz C-p.
+
+Podobný príkaz C-h v zobrazí dokumentáciu premennej, ktorej hodnotu
+mô¾ete nastavi» pre ovplyvnenie chovania Emacsu.  Meno premennej musíte
+zada», a¾ keï sa naò Emacs spýta.
+
+   C-h a	Príkazové apropos.  Zadajte kµúèové slovo a Emacs vypí¹e
+		v¹etky príkazy, ktorých meno obsahuje toto kµúèové
+		slovo.  V¹etky tieto príkazy mô¾u by» vyvolané pomocou
+		Meta-x.  Pre niektoré príkazy príkazové apropos vypí¹e
+		tie¾ jedno alebo dvojznakové sekvencie, ktoré vykonávajú
+		ten istý príkaz.
+
+>> Napí¹te C-h a file<Return>.
+
+To zobrazí v druhom okne zoznam v¹etkých M-x príkazov obsahujúcich "file" vo
+svojom názve.  Znakové príkazy ako C-x C-f uvidíte vypísané vedµa
+zodpovedajúcich mien príkazov ako find-file.
+
+>> Stlaète C-M-v pre posun okna s nápovedou.  Urobte to viac krát.
+
+>> Stlaète C-x 1 pre zmazanie okna s nápovedou.
+
+   C-h i        Èítanie on-line manuálov (tie¾ Info).  Tento príkaz
+        Vás prepne do ¹peciálneho buffera s názvom `*info*',
+		v ktorom mô¾ete èíta» on-line manuály pre balíky
+        in¹talované na va¹om systéme.  Ak stlaèíte m emacs <Return>,
+		mô¾ete si napríklad preèíta» manuál k Emacsu.  Ak ste
+		doteraz nikdy nepou¾ívali Info, stlaète ? a Emacs vám
+		predstaví hlavné mo¾nosti módu pre Info.  Ak toto
+		predstavenie absolvujete, mali by ste pou¾íva» Info
+		manuál Emacsu ako svoju primárnu dokumentáciu.
+
+
+* VIAC VLASTNOSTÍ
+-----------------
+
+Na to, aby ste sa nauèili viac o Emacse, preèítajte si jeho manuál, buï ako
+knihu alebo on-line vo formáte Info (pou¾ite Help menu alebo stlaète F10 h r).
+Dve vlastnosti, ktoré sa vám mô¾u páèi», je dopåòanie, ktoré ¹etrí písanie a
+dired, ktorý zjednodu¹uje prácu so súbormi.
+
+Dopåòanie je na vyvarovanie sa zbytoèného písania.  Napríklad, keï sa chcete
+dosta» do bufferu *Messages*, mô¾ete napísa» C-x b *M<Tab> a Emacs doplní
+zvy¹ok mena bufferu, a¾ potiaµ, pokiaµ ho doká¾e zisti» z toho, èo ste u¾
+napísali.  Dopåòanie je popísané v Info verzii manuálu Emacsu, v kapitole
+nazvanej "Completion".
+
+Dired vám dovoµuje zobrazi» zoznam súborov v adresári (a voliteµne jeho
+podadresároch), presúva», upravova», premenováva», maza» a ináè manipulova» so
+súbormi.  Dired je popísané v Info verzii manuálu Emacsu, v kapitole nazvanej
+"Dired".
+
+Manuál tie¾ popisuje veµa iných vlastností Emacsu.
+
+* ZÁVER
+-------
+
+Nezabudnite, Emacs ukonèíte vykonaním príkazu C-x C-c.  Pre doèasný
+odskok do shellu, z ktorého sa do Emacsu mô¾ete opä» vráti»,
+pou¾ite C-z.
+
+Zámerom tohto tútorialu je by» zrozumiteµný v¹etkým novým pou¾ívateµom, tak¾e
+ak narazíte na nieèo nejasného, tak nezúfajte a nedávajte to za vinu sebe
+-- s»a¾ujte sa!
+
+
+KOPÍROVANIE
+-----------
+
+Tento tútorial vychádza z dlhej rady emacsových tútorialov zaèatej
+tútorialom napísaným Stuartom Cracraftom pre pôvodný Emacs.
+
+Táto verzia tútorialu je, podobne ako GNU Emacs, chránená copyrightom
+a je ¹írená s povolením distribuova» kópie za istých podmienok:
+
+Copyright (C) 1985, 1996, 1998, 2001-2012  Free Software Foundation, Inc.
+
+   Ka¾dému je zaruèené právo vytvára» a distribuova» presné kópie tohto
+   dokumentu tak, ako ho dostal, na akomkoµvek médiu, s tým, ¾e bude
+   zachovaná táto poznámka o autorstve a poznámka o povolení, a ¾e
+   distribútor zaruèuje príjemcovi právo na ïal¹iu redistribúciu povolenú
+   touto poznámkou.
+
+   Je zaruèené právo distribuova» modifikované verzie tohto dokumentu
+   alebo jeho èastí pod hore uvedenými podmienkami za predpokladu, ¾e
+   obsahuje jasné poznámky uvádzajúce, kto urobil posledné úpravy.
+
+Podmienky pre kopírovanie Emacsu samotného sú zlo¾itej¹ie, ale
+v rovnakom duchu.  Preèítajte si, prosím, súbor COPYING a potom dajte kópie
+GNU Emacsu svojim priateµom.  Pomáhajte potlaèova» softwarovú ob¹trukciu
+("vlastníctvo") pou¾ívaním, písaním a zdieµaním free softwaru!
+
+;;; Local Variables:
+;;; coding: iso-latin-2
+;;; End:
+

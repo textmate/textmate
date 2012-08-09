@@ -1,0 +1,204 @@
+NOTES ON COMMITTING TO EMACS'S BAZAAR REPO    -*- outline -*-
+
+* Install changes only on one branch, let them get merged elsewhere if needed.
+In particular, install bug-fixes only on the release branch (if there
+is one) and let them get synced to the trunk; do not install them by
+hand on the trunk as well.  E.g. if there is an active "emacs-23" branch
+and you have a bug-fix appropriate for the next Emacs-23.x release,
+install it only on the emacs-23 branch, not on the trunk as well.
+
+Installing things manually into more than one branch makes merges more
+difficult.
+
+http://lists.gnu.org/archive/html/emacs-devel/2010-03/msg01124.html
+
+The exception is, if you know that the change will be difficult to
+merge to the trunk (eg because the trunk code has changed a lot).
+In that case, it's helpful if you can apply the change to both trunk
+and branch yourself (when committing the branch change, indicate
+in the commit log that it should not be merged to the trunk; see below).
+
+* Backporting a bug-fix from the trunk to a branch (e.g. "emacs-23").
+Indicate in the commit log that there is no need to merge the commit
+to the trunk.  Anything that matches `bzrmerge-skip-regexp' will do;
+eg start the commit message with "Backport:".  This is helpful for the
+person merging the release branch to the trunk.
+
+http://lists.gnu.org/archive/html/emacs-devel/2010-05/msg00262.html
+
+* Installing changes from your personal branches.
+If your branch has only a single commit, or many different real
+commits, it is fine to do a merge.  If your branch has only a very
+small number of "real" commits, but several "merge from trunks", it is
+preferred that you take your branch's diff, apply it to the trunk, and
+commit directly, not merge.  This keeps the history cleaner.
+
+In general, when working on some feature in a separate branch, it is
+preferable not to merge from trunk until you are done with the
+feature.  Unless you really need some change that was done on the
+trunk while you were developing on the branch, you don't really need
+those merges; just merge once, when you are done with the feature, and
+Bazaar will take care of the rest.  Bazaar is much better in this than
+CVS, so interim merges are unnecessary.
+
+Or use shelves; or rebase; or do something else.  See the thread for
+yet another fun excursion into the exciting world of version control.
+
+http://lists.gnu.org/archive/html/emacs-devel/2010-04/msg00086.html
+
+* Installing changes from gnulib
+Some of the files in Emacs are copied from gnulib.  To synchronize
+these files from the version of gnulib that you have checked out into
+a sibling directory of your branch, type "make sync-from-gnulib"; this
+will check out the latest version of gnulib if there is no sibling
+directory already.  It is a good idea to run "bzr status" afterwards,
+so that if a gnulib module added a file, you can record the new file
+using "bzr add".  After synchronizing from gnulib, do a "make" in the
+usual way.
+
+To change the set of gnulib modules, change the GNULIB_MODULES
+variable in the top-level Makefile.in, and then run:
+
+  ./config.status
+  make sync-from-gnulib
+  bzr status
+
+The last command will mention files that may need to be added using
+"bzr add".  If you remove a gnulib module, or if a gnulib module
+removes a file, then remove the corresponding files by hand.
+
+* How to merge changes from emacs-23 to trunk
+
+The following description uses bound branches, presumably it works in
+a similar way with unbound ones.
+
+0) (This step is only necessary if using bzr older than 2.4.0.)
+Get the bzr changelog_merge plugin:
+
+cd ~/.bazaar/plugins
+bzr branch http://bazaar.launchpad.net/~spiv/bzr-changelog-merge/trunk changelog_merge
+
+This plugin should make merging ChangeLogs smoother.  It merges new
+entries to the top of the file, rather than trying to fit them in
+mid-way through.  Newer versions of the plugin should also be able to
+deal with changes to *old* ChangeLog entries, that should not be
+floated to the head of the file (see launchpad#723968).
+
+It is included in bzr from 2.4.0 onwards, so remember to delete the
+copy in ~/.bazaar if you upgrade bzr.
+
+Maybe the default Emacs behavior without this plugin is better,
+though, it's not clear yet.
+
+1) Get clean, up-to-date copies of the emacs-23 and trunk branches.
+Check for any uncommitted changes with bzr status.
+
+2) M-x cd /path/to/trunk
+
+The first time only, do this:
+cd .bzr/branch
+Add the following line to branch.conf:
+changelog_merge_files = ChangeLog
+
+3) load admin/bzrmerge.el
+
+4) M-x bzrmerge RET /path/to/emacs-23 RET
+
+It will prompt about revisions that should be skipped, based on the
+regexp in bzrmerge-missing.  If there are more revisions that you know
+need skipping, you'll have to do that by hand.
+
+5) It will stop if there are any conflicts.  Resolve them.
+Using smerge-mode, there are menu items to skip to the next conflict,
+and to take either the trunk, branch, or both copies.
+
+6) After resolving all conflicts, you might need to run the bzmerge
+command again if there are more revisions still to merge.
+
+Do not commit (or exit Emacs) until you have run bzrmerge to completion.
+
+Before committing, check bzr status and bzr diff output.
+If you have run bzrmerge enough times, the "pending merge tip" in bzr
+status should be the last revision from the emacs-23 branch, and
+bzr status -v should show all the revisions you expect to merge.
+
+(Note that it will also show "skipped" revisions.  This is expected,
+and is due to a technical limitation of bzr.  The log data for those
+revisions gets merged, the actual changes themselves do not.
+http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg00609.html )
+
+In particular, check the ChangeLog entries (eg in case too many
+entries have been included or whitespace between entries needs fixing).
+bzrmerge tries to fix up the dates to today's date, but it only does
+this where there are conflicts.  If you used the changelog_merge plugin,
+there won't be any conflicts, and (at time of writing) you will need
+to adjust dates by hand.  In any case, if someone made multiple
+ChangeLog entries on different days in the branch, you may wish to
+collapse them all to a single entry for that author in the trunk
+(because in the trunk they all appear under the same date).
+Obviously, if there are multiple changes to the same file by different
+authors, don't break the logical ordering in doing this.
+
+Notes:
+
+1) A lot that was in tramp.el in emacs-23 has moved to tramp-sh.el in
+the trunk.  If you end up with a conflict in tramp.el, the changes may
+need to go to tramp-sh.el instead.  Remember to update the file name in
+the ChangeLog.
+
+2) If a file is modified in emacs-23, and deleted in the trunk, you
+get a "contents conflict".  Assuming the changes don't need to be in
+the trunk at all, use `bzr resolve path/to/file --take-this' to keep the
+trunk version.  Prior to bzr 2.2.3, this may fail.  You can just
+delete the .OTHER etc files by hand and use bzr resolve path/to/file.
+
+3) Conflicts in autoload md5sums in comments.  Strictly speaking, the
+right thing to do is merge everything else, resolve the conflict by
+choosing either the trunk or branch version, then run `make -C lisp
+autoloads' to update the md5sums to the correct trunk value before
+committing.
+
+* Re-adding a file that has been removed from the repository
+
+It's easy to get this wrong. Let's suppose you've done:
+
+bzr remove file; bzr commit
+
+and now, sometime later, you realize this was a mistake and file needs
+to be brought back.  DON'T just do:
+
+bzr add file; bzr commit
+
+This restores file, but without its history (`bzr log file' will be
+very short).  This is because file gets re-added with a new file-id
+(use `bzr file-id file' to see the id).
+
+Instead of adding the file, try:
+
+bzr revert -rN file; bzr commit
+
+where revision N+1 is the one where file was removed.
+
+You could also try `bzr add --file-ids-from', if you have a copy of
+another branch where file still exists.
+
+* Loggerhead
+
+Loggerhead is the bzr tool for viewing a repository over http (similar
+to ViewVC).  The central version is at http://bzr.savannah.gnu.org/lh/emacs,
+but if you just like the way this interface presents data, then if
+you have your own copy of the repository, you can operate your own
+Loggerhead server in stand-alone mode, and so help to reduce the load
+on Savannah:
+
+  bzr branch lp:loggerhead ~/.bazaar/plugins/loggerhead
+  cd /path/to/emacs/bzr
+  bzr serve --http
+
+You may need to install some Python dependencies to get this command to work.
+For example, on RHEL6 I needed:
+
+  yum install python-paste python-simplejson
+  yum --enablerepo=epel install python-simpletal
+
+Then point your web-browser to http://127.0.0.1:8080/ .

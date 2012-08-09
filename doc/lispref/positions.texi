@@ -1,0 +1,988 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/positions
+@node Positions, Markers, Frames, Top
+@chapter Positions
+@cindex position (in buffer)
+
+  A @dfn{position} is the index of a character in the text of a buffer.
+More precisely, a position identifies the place between two characters
+(or before the first character, or after the last character), so we can
+speak of the character before or after a given position.  However, we
+often speak of the character ``at'' a position, meaning the character
+after that position.
+
+  Positions are usually represented as integers starting from 1, but
+can also be represented as @dfn{markers}---special objects that
+relocate automatically when text is inserted or deleted so they stay
+with the surrounding characters.  Functions that expect an argument to
+be a position (an integer), but accept a marker as a substitute,
+normally ignore which buffer the marker points into; they convert the
+marker to an integer, and use that integer, exactly as if you had
+passed the integer as the argument, even if the marker points to the
+``wrong'' buffer.  A marker that points nowhere cannot convert to an
+integer; using it instead of an integer causes an error.
+@xref{Markers}.
+
+  See also the ``field'' feature (@pxref{Fields}), which provides
+functions that are used by many cursor-motion commands.
+
+@menu
+* Point::         The special position where editing takes place.
+* Motion::        Changing point.
+* Excursions::    Temporary motion and buffer changes.
+* Narrowing::     Restricting editing to a portion of the buffer.
+@end menu
+
+@node Point
+@section Point
+@cindex point
+
+  @dfn{Point} is a special buffer position used by many editing
+commands, including the self-inserting typed characters and text
+insertion functions.  Other commands move point through the text
+to allow editing and insertion at different places.
+
+  Like other positions, point designates a place between two characters
+(or before the first character, or after the last character), rather
+than a particular character.  Usually terminals display the cursor over
+the character that immediately follows point; point is actually before
+the character on which the cursor sits.
+
+@cindex point with narrowing
+  The value of point is a number no less than 1, and no greater than the
+buffer size plus 1.  If narrowing is in effect (@pxref{Narrowing}), then
+point is constrained to fall within the accessible portion of the buffer
+(possibly at one end of it).
+
+  Each buffer has its own value of point, which is independent of the
+value of point in other buffers.  Each window also has a value of point,
+which is independent of the value of point in other windows on the same
+buffer.  This is why point can have different values in various windows
+that display the same buffer.  When a buffer appears in only one window,
+the buffer's point and the window's point normally have the same value,
+so the distinction is rarely important.  @xref{Window Point}, for more
+details.
+
+@defun point
+@cindex current buffer position
+This function returns the value of point in the current buffer,
+as an integer.
+
+@need 700
+@example
+@group
+(point)
+     @result{} 175
+@end group
+@end example
+@end defun
+
+@defun point-min
+This function returns the minimum accessible value of point in the
+current buffer.  This is normally 1, but if narrowing is in effect, it
+is the position of the start of the region that you narrowed to.
+(@xref{Narrowing}.)
+@end defun
+
+@defun point-max
+This function returns the maximum accessible value of point in the
+current buffer.  This is @code{(1+ (buffer-size))}, unless narrowing is
+in effect, in which case it is the position of the end of the region
+that you narrowed to.  (@xref{Narrowing}.)
+@end defun
+
+@defun buffer-end flag
+This function returns @code{(point-max)} if @var{flag} is greater than
+0, @code{(point-min)} otherwise.  The argument @var{flag} must be a
+number.
+@end defun
+
+@defun buffer-size &optional buffer
+This function returns the total number of characters in the current
+buffer.  In the absence of any narrowing (@pxref{Narrowing}),
+@code{point-max} returns a value one larger than this.
+
+If you specify a buffer, @var{buffer}, then the value is the
+size of @var{buffer}.
+
+@example
+@group
+(buffer-size)
+     @result{} 35
+@end group
+@group
+(point-max)
+     @result{} 36
+@end group
+@end example
+@end defun
+
+@node Motion
+@section Motion
+@cindex motion by chars, words, lines, lists
+
+  Motion functions change the value of point, either relative to the
+current value of point, relative to the beginning or end of the buffer,
+or relative to the edges of the selected window.  @xref{Point}.
+
+@menu
+* Character Motion::       Moving in terms of characters.
+* Word Motion::            Moving in terms of words.
+* Buffer End Motion::      Moving to the beginning or end of the buffer.
+* Text Lines::             Moving in terms of lines of text.
+* Screen Lines::           Moving in terms of lines as displayed.
+* List Motion::            Moving by parsing lists and sexps.
+* Skipping Characters::    Skipping characters belonging to a certain set.
+@end menu
+
+@node Character Motion
+@subsection Motion by Characters
+
+  These functions move point based on a count of characters.
+@code{goto-char} is the fundamental primitive; the other functions use
+that.
+
+@deffn Command goto-char position
+This function sets point in the current buffer to the value
+@var{position}.  If @var{position} is less than 1, it moves point to the
+beginning of the buffer.  If @var{position} is greater than the length
+of the buffer, it moves point to the end.
+
+If narrowing is in effect, @var{position} still counts from the
+beginning of the buffer, but point cannot go outside the accessible
+portion.  If @var{position} is out of range, @code{goto-char} moves
+point to the beginning or the end of the accessible portion.
+
+When this function is called interactively, @var{position} is the
+numeric prefix argument, if provided; otherwise it is read from the
+minibuffer.
+
+@code{goto-char} returns @var{position}.
+@end deffn
+
+@deffn Command forward-char &optional count
+@c @kindex beginning-of-buffer
+@c @kindex end-of-buffer
+This function moves point @var{count} characters forward, towards the
+end of the buffer (or backward, towards the beginning of the buffer, if
+@var{count} is negative).  If @var{count} is @code{nil}, the default
+is 1.
+
+If this attempts to move past the beginning or end of the buffer (or
+the limits of the accessible portion, when narrowing is in effect), it
+signals an error with error symbol @code{beginning-of-buffer} or
+@code{end-of-buffer}.
+
+In an interactive call, @var{count} is the numeric prefix argument.
+@end deffn
+
+@deffn Command backward-char &optional count
+This is just like @code{forward-char} except that it moves
+in the opposite direction.
+@end deffn
+
+@node Word Motion
+@subsection Motion by Words
+
+  These functions for parsing words use the syntax table to decide
+whether a given character is part of a word.  @xref{Syntax Tables}.
+
+@deffn Command forward-word &optional count
+This function moves point forward @var{count} words (or backward if
+@var{count} is negative).  If @var{count} is @code{nil}, it moves
+forward one word.
+
+``Moving one word'' means moving until point crosses a
+word-constituent character and then encounters a word-separator
+character.  However, this function cannot move point past the boundary
+of the accessible portion of the buffer, or across a field boundary
+(@pxref{Fields}).  The most common case of a field boundary is the end
+of the prompt in the minibuffer.
+
+If it is possible to move @var{count} words, without being stopped
+prematurely by the buffer boundary or a field boundary, the value is
+@code{t}.  Otherwise, the return value is @code{nil} and point stops at
+the buffer boundary or field boundary.
+
+If @code{inhibit-field-text-motion} is non-@code{nil},
+this function ignores field boundaries.
+
+In an interactive call, @var{count} is specified by the numeric prefix
+argument.  If @var{count} is omitted or @code{nil}, it defaults to 1.
+@end deffn
+
+@deffn Command backward-word &optional count
+This function is just like @code{forward-word}, except that it moves
+backward until encountering the front of a word, rather than forward.
+@end deffn
+
+@defopt words-include-escapes
+@c Emacs 19 feature
+This variable affects the behavior of @code{forward-word} and everything
+that uses it.  If it is non-@code{nil}, then characters in the
+``escape'' and ``character quote'' syntax classes count as part of
+words.  Otherwise, they do not.
+@end defopt
+
+@defvar inhibit-field-text-motion
+If this variable is non-@code{nil}, certain motion functions including
+@code{forward-word}, @code{forward-sentence}, and
+@code{forward-paragraph} ignore field boundaries.
+@end defvar
+
+@node Buffer End Motion
+@subsection Motion to an End of the Buffer
+@cindex move to beginning or end of buffer
+
+  To move point to the beginning of the buffer, write:
+
+@example
+@group
+(goto-char (point-min))
+@end group
+@end example
+
+@noindent
+Likewise, to move to the end of the buffer, use:
+
+@example
+@group
+(goto-char (point-max))
+@end group
+@end example
+
+  Here are two commands that users use to do these things.  They are
+documented here to warn you not to use them in Lisp programs, because
+they set the mark and display messages in the echo area.
+
+@deffn Command beginning-of-buffer &optional n
+This function moves point to the beginning of the buffer (or the limits
+of the accessible portion, when narrowing is in effect), setting the
+mark at the previous position (except in Transient Mark mode, if
+the mark is already active, it does not set the mark.)
+
+If @var{n} is non-@code{nil}, then it puts point @var{n} tenths of the
+way from the beginning of the accessible portion of the buffer.  In an
+interactive call, @var{n} is the numeric prefix argument, if provided;
+otherwise @var{n} defaults to @code{nil}.
+
+@strong{Warning:} Don't use this function in Lisp programs!
+@end deffn
+
+@deffn Command end-of-buffer &optional n
+This function moves point to the end of the buffer (or the limits of
+the accessible portion, when narrowing is in effect), setting the mark
+at the previous position (except in Transient Mark mode when the mark
+is already active).  If @var{n} is non-@code{nil}, then it puts point
+@var{n} tenths of the way from the end of the accessible portion of
+the buffer.
+
+In an interactive call, @var{n} is the numeric prefix argument,
+if provided; otherwise @var{n} defaults to @code{nil}.
+
+@strong{Warning:} Don't use this function in Lisp programs!
+@end deffn
+
+@node Text Lines
+@subsection Motion by Text Lines
+@cindex lines
+
+  Text lines are portions of the buffer delimited by newline characters,
+which are regarded as part of the previous line.  The first text line
+begins at the beginning of the buffer, and the last text line ends at
+the end of the buffer whether or not the last character is a newline.
+The division of the buffer into text lines is not affected by the width
+of the window, by line continuation in display, or by how tabs and
+control characters are displayed.
+
+@deffn Command beginning-of-line &optional count
+This function moves point to the beginning of the current line.  With an
+argument @var{count} not @code{nil} or 1, it moves forward
+@var{count}@minus{}1 lines and then to the beginning of the line.
+
+This function does not move point across a field boundary
+(@pxref{Fields}) unless doing so would move beyond there to a
+different line; therefore, if @var{count} is @code{nil} or 1, and
+point starts at a field boundary, point does not move.  To ignore
+field boundaries, either bind @code{inhibit-field-text-motion} to
+@code{t}, or use the @code{forward-line} function instead.  For
+instance, @code{(forward-line 0)} does the same thing as
+@code{(beginning-of-line)}, except that it ignores field boundaries.
+
+If this function reaches the end of the buffer (or of the accessible
+portion, if narrowing is in effect), it positions point there.  No error
+is signaled.
+@end deffn
+
+@defun line-beginning-position &optional count
+Return the position that @code{(beginning-of-line @var{count})}
+would move to.
+@end defun
+
+@deffn Command end-of-line &optional count
+This function moves point to the end of the current line.  With an
+argument @var{count} not @code{nil} or 1, it moves forward
+@var{count}@minus{}1 lines and then to the end of the line.
+
+This function does not move point across a field boundary
+(@pxref{Fields}) unless doing so would move beyond there to a
+different line; therefore, if @var{count} is @code{nil} or 1, and
+point starts at a field boundary, point does not move.  To ignore
+field boundaries, bind @code{inhibit-field-text-motion} to @code{t}.
+
+If this function reaches the end of the buffer (or of the accessible
+portion, if narrowing is in effect), it positions point there.  No error
+is signaled.
+@end deffn
+
+@defun line-end-position &optional count
+Return the position that @code{(end-of-line @var{count})}
+would move to.
+@end defun
+
+@deffn Command forward-line &optional count
+@cindex beginning of line
+This function moves point forward @var{count} lines, to the beginning of
+the line.  If @var{count} is negative, it moves point
+@minus{}@var{count} lines backward, to the beginning of a line.  If
+@var{count} is zero, it moves point to the beginning of the current
+line.  If @var{count} is @code{nil}, that means 1.
+
+If @code{forward-line} encounters the beginning or end of the buffer (or
+of the accessible portion) before finding that many lines, it sets point
+there.  No error is signaled.
+
+@code{forward-line} returns the difference between @var{count} and the
+number of lines actually moved.  If you attempt to move down five lines
+from the beginning of a buffer that has only three lines, point stops at
+the end of the last line, and the value will be 2.
+
+In an interactive call, @var{count} is the numeric prefix argument.
+@end deffn
+
+@defun count-lines start end
+@cindex lines in region
+@anchor{Definition of count-lines}
+This function returns the number of lines between the positions
+@var{start} and @var{end} in the current buffer.  If @var{start} and
+@var{end} are equal, then it returns 0.  Otherwise it returns at least
+1, even if @var{start} and @var{end} are on the same line.  This is
+because the text between them, considered in isolation, must contain at
+least one line unless it is empty.
+@end defun
+
+@deffn Command count-words start end
+@cindex words in region
+This function returns the number of words between the positions
+@var{start} and @var{end} in the current buffer.
+
+This function can also be called interactively.  In that case, it
+prints a message reporting the number of lines, words, and characters
+in the buffer, or in the region if the region is active.
+@end deffn
+
+@defun line-number-at-pos &optional pos
+@cindex line number
+This function returns the line number in the current buffer
+corresponding to the buffer position @var{pos}.  If @var{pos} is @code{nil}
+or omitted, the current buffer position is used.
+@end defun
+
+@ignore
+@c ================
+The @code{previous-line} and @code{next-line} commands are functions
+that should not be used in programs.  They are for users and are
+mentioned here only for completeness.
+
+@deffn Command previous-line count
+@cindex goal column
+This function moves point up @var{count} lines (down if @var{count}
+is negative).  In moving, it attempts to keep point in the ``goal column''
+(normally the same column that it was at the beginning of the move).
+
+If there is no character in the target line exactly under the current
+column, point is positioned after the character in that line which
+spans this column, or at the end of the line if it is not long enough.
+
+If it attempts to move beyond the top or bottom of the buffer (or clipped
+region), then point is positioned in the goal column in the top or
+bottom line.  No error is signaled.
+
+In an interactive call, @var{count} will be the numeric
+prefix argument.
+
+The command @code{set-goal-column} can be used to create a semipermanent
+goal column to which this command always moves.  Then it does not try to
+move vertically.
+
+If you are thinking of using this in a Lisp program, consider using
+@code{forward-line} with a negative argument instead.  It is usually easier
+to use and more reliable (no dependence on goal column, etc.).
+@end deffn
+
+@deffn Command next-line count
+This function moves point down @var{count} lines (up if @var{count}
+is negative).  In moving, it attempts to keep point in the ``goal column''
+(normally the same column that it was at the beginning of the move).
+
+If there is no character in the target line exactly under the current
+column, point is positioned after the character in that line which
+spans this column, or at the end of the line if it is not long enough.
+
+If it attempts to move beyond the top or bottom of the buffer (or clipped
+region), then point is positioned in the goal column in the top or
+bottom line.  No error is signaled.
+
+In the case where the @var{count} is 1, and point is on the last
+line of the buffer (or clipped region), a new empty line is inserted at the
+end of the buffer (or clipped region) and point moved there.
+
+In an interactive call, @var{count} will be the numeric
+prefix argument.
+
+The command @code{set-goal-column} can be used to create a semipermanent
+goal column to which this command always moves.  Then it does not try to
+move vertically.
+
+If you are thinking of using this in a Lisp program, consider using
+@code{forward-line} instead.  It is usually easier
+to use and more reliable (no dependence on goal column, etc.).
+@end deffn
+
+@c ================
+@end ignore
+
+  Also see the functions @code{bolp} and @code{eolp} in @ref{Near Point}.
+These functions do not move point, but test whether it is already at the
+beginning or end of a line.
+
+@node Screen Lines
+@subsection Motion by Screen Lines
+
+  The line functions in the previous section count text lines, delimited
+only by newline characters.  By contrast, these functions count screen
+lines, which are defined by the way the text appears on the screen.  A
+text line is a single screen line if it is short enough to fit the width
+of the selected window, but otherwise it may occupy several screen
+lines.
+
+  In some cases, text lines are truncated on the screen rather than
+continued onto additional screen lines.  In these cases,
+@code{vertical-motion} moves point much like @code{forward-line}.
+@xref{Truncation}.
+
+  Because the width of a given string depends on the flags that control
+the appearance of certain characters, @code{vertical-motion} behaves
+differently, for a given piece of text, depending on the buffer it is
+in, and even on the selected window (because the width, the truncation
+flag, and display table may vary between windows).  @xref{Usual
+Display}.
+
+  These functions scan text to determine where screen lines break, and
+thus take time proportional to the distance scanned.  If you intend to
+use them heavily, Emacs provides caches which may improve the
+performance of your code.  @xref{Truncation, cache-long-line-scans}.
+
+@defun vertical-motion count &optional window
+This function moves point to the start of the screen line @var{count}
+screen lines down from the screen line containing point.  If @var{count}
+is negative, it moves up instead.
+
+The @var{count} argument can be a cons cell, @code{(@var{cols}
+. @var{lines})}, instead of an integer.  Then the function moves by
+@var{lines} screen lines, and puts point @var{cols} columns from the
+start of that screen line.
+
+The return value is the number of screen lines over which point was
+moved.  The value may be less in absolute value than @var{count} if
+the beginning or end of the buffer was reached.
+
+The window @var{window} is used for obtaining parameters such as the
+width, the horizontal scrolling, and the display table.  But
+@code{vertical-motion} always operates on the current buffer, even if
+@var{window} currently displays some other buffer.
+@end defun
+
+@defun count-screen-lines &optional beg end count-final-newline window
+This function returns the number of screen lines in the text from
+@var{beg} to @var{end}.  The number of screen lines may be different
+from the number of actual lines, due to line continuation, the display
+table, etc.  If @var{beg} and @var{end} are @code{nil} or omitted,
+they default to the beginning and end of the accessible portion of the
+buffer.
+
+If the region ends with a newline, that is ignored unless the optional
+third argument @var{count-final-newline} is non-@code{nil}.
+
+The optional fourth argument @var{window} specifies the window for
+obtaining parameters such as width, horizontal scrolling, and so on.
+The default is to use the selected window's parameters.
+
+Like @code{vertical-motion}, @code{count-screen-lines} always uses the
+current buffer, regardless of which buffer is displayed in
+@var{window}.  This makes possible to use @code{count-screen-lines} in
+any buffer, whether or not it is currently displayed in some window.
+@end defun
+
+@deffn Command move-to-window-line count
+This function moves point with respect to the text currently displayed
+in the selected window.  It moves point to the beginning of the screen
+line @var{count} screen lines from the top of the window.  If
+@var{count} is negative, that specifies a position
+@w{@minus{}@var{count}} lines from the bottom (or the last line of the
+buffer, if the buffer ends above the specified screen position).
+
+If @var{count} is @code{nil}, then point moves to the beginning of the
+line in the middle of the window.  If the absolute value of @var{count}
+is greater than the size of the window, then point moves to the place
+that would appear on that screen line if the window were tall enough.
+This will probably cause the next redisplay to scroll to bring that
+location onto the screen.
+
+In an interactive call, @var{count} is the numeric prefix argument.
+
+The value returned is the window line number point has moved to, with
+the top line in the window numbered 0.
+@end deffn
+
+@defun compute-motion from frompos to topos width offsets window
+This function scans the current buffer, calculating screen positions.
+It scans the buffer forward from position @var{from}, assuming that is
+at screen coordinates @var{frompos}, to position @var{to} or coordinates
+@var{topos}, whichever comes first.  It returns the ending buffer
+position and screen coordinates.
+
+The coordinate arguments @var{frompos} and @var{topos} are cons cells of
+the form @code{(@var{hpos} . @var{vpos})}.
+
+The argument @var{width} is the number of columns available to display
+text; this affects handling of continuation lines.  @code{nil} means
+the actual number of usable text columns in the window, which is
+equivalent to the value returned by @code{(window-width window)}.
+
+The argument @var{offsets} is either @code{nil} or a cons cell of the
+form @code{(@var{hscroll} . @var{tab-offset})}.  Here @var{hscroll} is
+the number of columns not being displayed at the left margin; most
+callers get this by calling @code{window-hscroll}.  Meanwhile,
+@var{tab-offset} is the offset between column numbers on the screen and
+column numbers in the buffer.  This can be nonzero in a continuation
+line, when the previous screen lines' widths do not add up to a multiple
+of @code{tab-width}.  It is always zero in a non-continuation line.
+
+The window @var{window} serves only to specify which display table to
+use.  @code{compute-motion} always operates on the current buffer,
+regardless of what buffer is displayed in @var{window}.
+
+The return value is a list of five elements:
+
+@example
+(@var{pos} @var{hpos} @var{vpos} @var{prevhpos} @var{contin})
+@end example
+
+@noindent
+Here @var{pos} is the buffer position where the scan stopped, @var{vpos}
+is the vertical screen position, and @var{hpos} is the horizontal screen
+position.
+
+The result @var{prevhpos} is the horizontal position one character back
+from @var{pos}.  The result @var{contin} is @code{t} if the last line
+was continued after (or within) the previous character.
+
+For example, to find the buffer position of column @var{col} of screen line
+@var{line} of a certain window, pass the window's display start location
+as @var{from} and the window's upper-left coordinates as @var{frompos}.
+Pass the buffer's @code{(point-max)} as @var{to}, to limit the scan to
+the end of the accessible portion of the buffer, and pass @var{line} and
+@var{col} as @var{topos}.  Here's a function that does this:
+
+@example
+(defun coordinates-of-position (col line)
+  (car (compute-motion (window-start)
+                       '(0 . 0)
+                       (point-max)
+                       (cons col line)
+                       (window-width)
+                       (cons (window-hscroll) 0)
+                       (selected-window))))
+@end example
+
+When you use @code{compute-motion} for the minibuffer, you need to use
+@code{minibuffer-prompt-width} to get the horizontal position of the
+beginning of the first screen line.  @xref{Minibuffer Contents}.
+@end defun
+
+@node List Motion
+@comment  node-name,  next,  previous,  up
+@subsection Moving over Balanced Expressions
+@cindex sexp motion
+@cindex Lisp expression motion
+@cindex list motion
+@cindex balanced parenthesis motion
+
+  Here are several functions concerned with balanced-parenthesis
+expressions (also called @dfn{sexps} in connection with moving across
+them in Emacs).  The syntax table controls how these functions interpret
+various characters; see @ref{Syntax Tables}.  @xref{Parsing
+Expressions}, for lower-level primitives for scanning sexps or parts of
+sexps.  For user-level commands, see @ref{Parentheses,, Commands for
+Editing with Parentheses, emacs, The GNU Emacs Manual}.
+
+@deffn Command forward-list &optional arg
+This function moves forward across @var{arg} (default 1) balanced groups of
+parentheses.  (Other syntactic entities such as words or paired string
+quotes are ignored.)
+@end deffn
+
+@deffn Command backward-list &optional arg
+This function moves backward across @var{arg} (default 1) balanced groups of
+parentheses.  (Other syntactic entities such as words or paired string
+quotes are ignored.)
+@end deffn
+
+@deffn Command up-list &optional arg
+This function moves forward out of @var{arg} (default 1) levels of parentheses.
+A negative argument means move backward but still to a less deep spot.
+@end deffn
+
+@deffn Command down-list &optional arg
+This function moves forward into @var{arg} (default 1) levels of
+parentheses.  A negative argument means move backward but still go
+deeper in parentheses (@minus{}@var{arg} levels).
+@end deffn
+
+@deffn Command forward-sexp &optional arg
+This function moves forward across @var{arg} (default 1) balanced expressions.
+Balanced expressions include both those delimited by parentheses and
+other kinds, such as words and string constants.
+@xref{Parsing Expressions}.  For example,
+
+@example
+@group
+---------- Buffer: foo ----------
+(concat@point{} "foo " (car x) y z)
+---------- Buffer: foo ----------
+@end group
+
+@group
+(forward-sexp 3)
+     @result{} nil
+
+---------- Buffer: foo ----------
+(concat "foo " (car x) y@point{} z)
+---------- Buffer: foo ----------
+@end group
+@end example
+@end deffn
+
+@deffn Command backward-sexp &optional arg
+This function moves backward across @var{arg} (default 1) balanced expressions.
+@end deffn
+
+@deffn Command beginning-of-defun &optional arg
+This function moves back to the @var{arg}th beginning of a defun.  If
+@var{arg} is negative, this actually moves forward, but it still moves
+to the beginning of a defun, not to the end of one.  @var{arg} defaults
+to 1.
+@end deffn
+
+@deffn Command end-of-defun &optional arg
+This function moves forward to the @var{arg}th end of a defun.  If
+@var{arg} is negative, this actually moves backward, but it still moves
+to the end of a defun, not to the beginning of one.  @var{arg} defaults
+to 1.
+@end deffn
+
+@defopt defun-prompt-regexp
+If non-@code{nil}, this buffer-local variable holds a regular
+expression that specifies what text can appear before the
+open-parenthesis that starts a defun.  That is to say, a defun begins
+on a line that starts with a match for this regular expression,
+followed by a character with open-parenthesis syntax.
+@end defopt
+
+@defopt open-paren-in-column-0-is-defun-start
+If this variable's value is non-@code{nil}, an open parenthesis in
+column 0 is considered to be the start of a defun.  If it is
+@code{nil}, an open parenthesis in column 0 has no special meaning.
+The default is @code{t}.
+@end defopt
+
+@defvar beginning-of-defun-function
+If non-@code{nil}, this variable holds a function for finding the
+beginning of a defun.  The function @code{beginning-of-defun}
+calls this function instead of using its normal method, passing it its
+optional argument.  If the argument is non-@code{nil}, the function
+should move back by that many functions, like
+@code{beginning-of-defun} does.
+@end defvar
+
+@defvar end-of-defun-function
+If non-@code{nil}, this variable holds a function for finding the end of
+a defun.  The function @code{end-of-defun} calls this function instead
+of using its normal method.
+@end defvar
+
+@node Skipping Characters
+@comment  node-name,  next,  previous,  up
+@subsection Skipping Characters
+@cindex skipping characters
+
+  The following two functions move point over a specified set of
+characters.  For example, they are often used to skip whitespace.  For
+related functions, see @ref{Motion and Syntax}.
+
+These functions convert the set string to multibyte if the buffer is
+multibyte, and they convert it to unibyte if the buffer is unibyte, as
+the search functions do (@pxref{Searching and Matching}).
+
+@defun skip-chars-forward character-set &optional limit
+This function moves point in the current buffer forward, skipping over a
+given set of characters.  It examines the character following point,
+then advances point if the character matches @var{character-set}.  This
+continues until it reaches a character that does not match.  The
+function returns the number of characters moved over.
+
+The argument @var{character-set} is a string, like the inside of a
+@samp{[@dots{}]} in a regular expression except that @samp{]} does not
+terminate it, and @samp{\} quotes @samp{^}, @samp{-} or @samp{\}.
+Thus, @code{"a-zA-Z"} skips over all letters, stopping before the
+first nonletter, and @code{"^a-zA-Z"} skips nonletters stopping before
+the first letter.  See @xref{Regular Expressions}.  Character classes
+can also be used, e.g. @code{"[:alnum:]"}.  See @pxref{Char Classes}.
+
+If @var{limit} is supplied (it must be a number or a marker), it
+specifies the maximum position in the buffer that point can be skipped
+to.  Point will stop at or before @var{limit}.
+
+In the following example, point is initially located directly before the
+@samp{T}.  After the form is evaluated, point is located at the end of
+that line (between the @samp{t} of @samp{hat} and the newline).  The
+function skips all letters and spaces, but not newlines.
+
+@example
+@group
+---------- Buffer: foo ----------
+I read "@point{}The cat in the hat
+comes back" twice.
+---------- Buffer: foo ----------
+@end group
+
+@group
+(skip-chars-forward "a-zA-Z ")
+     @result{} 18
+
+---------- Buffer: foo ----------
+I read "The cat in the hat@point{}
+comes back" twice.
+---------- Buffer: foo ----------
+@end group
+@end example
+@end defun
+
+@defun skip-chars-backward character-set &optional limit
+This function moves point backward, skipping characters that match
+@var{character-set}, until @var{limit}.  It is just like
+@code{skip-chars-forward} except for the direction of motion.
+
+The return value indicates the distance traveled.  It is an integer that
+is zero or less.
+@end defun
+
+@node Excursions
+@section Excursions
+@cindex excursion
+
+  It is often useful to move point ``temporarily'' within a localized
+portion of the program.  This is called an @dfn{excursion}, and it is
+done with the @code{save-excursion} special form.  This construct
+remembers the initial identity of the current buffer, and its values
+of point and the mark, and restores them after the excursion
+completes.  It is the standard way to move point within one part of a
+program and avoid affecting the rest of the program, and is used
+thousands of times in the Lisp sources of Emacs.
+
+  If you only need to save and restore the identity of the current
+buffer, use @code{save-current-buffer} or @code{with-current-buffer}
+instead (@pxref{Current Buffer}).  If you need to save or restore
+window configurations, see the forms described in @ref{Window
+Configurations} and in @ref{Frame Configurations}.
+
+@defspec save-excursion body@dots{}
+@cindex mark excursion
+@cindex point excursion
+This special form saves the identity of the current buffer and the
+values of point and the mark in it, evaluates @var{body}, and finally
+restores the buffer and its saved values of point and the mark.  All
+three saved values are restored even in case of an abnormal exit via
+@code{throw} or error (@pxref{Nonlocal Exits}).
+
+The value returned by @code{save-excursion} is the result of the last
+form in @var{body}, or @code{nil} if no body forms were given.
+@end defspec
+
+  Because @code{save-excursion} only saves point and mark for the
+buffer that was current at the start of the excursion, any changes
+made to point and/or mark in other buffers, during the excursion, will
+remain in effect afterward.  This frequently leads to unintended
+consequences, so the byte compiler warns if you call @code{set-buffer}
+during an excursion:
+
+@example
+Warning: Use `with-current-buffer' rather than save-excursion+set-buffer
+@end example
+
+@noindent
+To avoid such problems, you should call @code{save-excursion} only
+after setting the desired current buffer, as in the following example:
+
+@example
+@group
+(defun append-string-to-buffer (string buffer)
+  "Append STRING to the end of BUFFER."
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-max))
+      (insert string))))
+@end group
+@end example
+
+@cindex window excursions
+  Likewise, @code{save-excursion} does not restore window-buffer
+correspondences altered by functions such as @code{switch-to-buffer}.
+One way to restore these correspondences, and the selected window, is to
+use @code{save-window-excursion} inside @code{save-excursion}
+(@pxref{Window Configurations}).
+
+  @strong{Warning:} Ordinary insertion of text adjacent to the saved
+point value relocates the saved value, just as it relocates all
+markers.  More precisely, the saved value is a marker with insertion
+type @code{nil}.  @xref{Marker Insertion Types}.  Therefore, when the
+saved point value is restored, it normally comes before the inserted
+text.
+
+  Although @code{save-excursion} saves the location of the mark, it does
+not prevent functions which modify the buffer from setting
+@code{deactivate-mark}, and thus causing the deactivation of the mark
+after the command finishes.  @xref{The Mark}.
+
+@node Narrowing
+@section Narrowing
+@cindex narrowing
+@cindex restriction (in a buffer)
+@cindex accessible portion (of a buffer)
+
+  @dfn{Narrowing} means limiting the text addressable by Emacs editing
+commands to a limited range of characters in a buffer.  The text that
+remains addressable is called the @dfn{accessible portion} of the
+buffer.
+
+  Narrowing is specified with two buffer positions which become the
+beginning and end of the accessible portion.  For most editing commands
+and most Emacs primitives, these positions replace the values of the
+beginning and end of the buffer.  While narrowing is in effect, no text
+outside the accessible portion is displayed, and point cannot move
+outside the accessible portion.
+
+  Values such as positions or line numbers, which usually count from the
+beginning of the buffer, do so despite narrowing, but the functions
+which use them refuse to operate on text that is inaccessible.
+
+  The commands for saving buffers are unaffected by narrowing; they save
+the entire buffer regardless of any narrowing.
+
+  If you need to display in a single buffer several very different
+types of text, consider using an alternative facility described in
+@ref{Swapping Text}.
+
+@deffn Command narrow-to-region start end
+This function sets the accessible portion of the current buffer to start
+at @var{start} and end at @var{end}.  Both arguments should be character
+positions.
+
+In an interactive call, @var{start} and @var{end} are set to the bounds
+of the current region (point and the mark, with the smallest first).
+@end deffn
+
+@deffn Command narrow-to-page &optional move-count
+This function sets the accessible portion of the current buffer to
+include just the current page.  An optional first argument
+@var{move-count} non-@code{nil} means to move forward or backward by
+@var{move-count} pages and then narrow to one page.  The variable
+@code{page-delimiter} specifies where pages start and end
+(@pxref{Standard Regexps}).
+
+In an interactive call, @var{move-count} is set to the numeric prefix
+argument.
+@end deffn
+
+@deffn Command widen
+@cindex widening
+This function cancels any narrowing in the current buffer, so that the
+entire contents are accessible.  This is called @dfn{widening}.
+It is equivalent to the following expression:
+
+@example
+(narrow-to-region 1 (1+ (buffer-size)))
+@end example
+@end deffn
+
+@defspec save-restriction body@dots{}
+This special form saves the current bounds of the accessible portion,
+evaluates the @var{body} forms, and finally restores the saved bounds,
+thus restoring the same state of narrowing (or absence thereof) formerly
+in effect.  The state of narrowing is restored even in the event of an
+abnormal exit via @code{throw} or error (@pxref{Nonlocal Exits}).
+Therefore, this construct is a clean way to narrow a buffer temporarily.
+
+The value returned by @code{save-restriction} is that returned by the
+last form in @var{body}, or @code{nil} if no body forms were given.
+
+@c Wordy to avoid overfull hbox.  --rjc 16mar92
+@strong{Caution:} it is easy to make a mistake when using the
+@code{save-restriction} construct.  Read the entire description here
+before you try it.
+
+If @var{body} changes the current buffer, @code{save-restriction} still
+restores the restrictions on the original buffer (the buffer whose
+restrictions it saved from), but it does not restore the identity of the
+current buffer.
+
+@code{save-restriction} does @emph{not} restore point and the mark; use
+@code{save-excursion} for that.  If you use both @code{save-restriction}
+and @code{save-excursion} together, @code{save-excursion} should come
+first (on the outside).  Otherwise, the old point value would be
+restored with temporary narrowing still in effect.  If the old point
+value were outside the limits of the temporary narrowing, this would
+fail to restore it accurately.
+
+Here is a simple example of correct use of @code{save-restriction}:
+
+@example
+@group
+---------- Buffer: foo ----------
+This is the contents of foo
+This is the contents of foo
+This is the contents of foo@point{}
+---------- Buffer: foo ----------
+@end group
+
+@group
+(save-excursion
+  (save-restriction
+    (goto-char 1)
+    (forward-line 2)
+    (narrow-to-region 1 (point))
+    (goto-char (point-min))
+    (replace-string "foo" "bar")))
+
+---------- Buffer: foo ----------
+This is the contents of bar
+This is the contents of bar
+This is the contents of foo@point{}
+---------- Buffer: foo ----------
+@end group
+@end example
+@end defspec

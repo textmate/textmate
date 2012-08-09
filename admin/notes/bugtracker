@@ -1,0 +1,653 @@
+NOTES ON THE EMACS BUG TRACKER   -*- outline -*-
+
+The Emacs Bug Tracker can be found at http://debbugs.gnu.org/
+
+* Quick-start guide
+
+This is 95% of all you will ever need to know.
+
+** How do I report a bug?
+Use M-x report-emacs-bug, or send mail to bug-gnu-emacs@gnu.org.
+If you want to Cc someone, use an "X-Debbugs-CC" header instead.
+
+** How do I comment on a bug?
+Reply to a mail on the bug-gnu-emacs list in the normal way.
+Or send a mail to 123@debbugs.gnu.org.
+
+If the bug is old and closed, you may have to unarchive it first.
+Send a mail to control@debbugs.gnu.org with
+unarchive 123
+on the first line of the body.
+
+** How do I close a bug?
+Send a mail to 123-done@debbugs.gnu.org.  In the body, explain
+why the bug is being closed.
+
+** How do I set bug meta-data?
+By mailing commands to control@debbugs.gnu.org.  Place commands at the
+start of the message body, one per line.
+
+severity 123 serious|important|normal|minor|wishlist
+tags 123 moreinfo|unreproducible|wontfix|patch
+
+* More detailed information
+
+For a list of all bugs, see http://debbugs.gnu.org/db/pa/lemacs.html
+This is a static page, updated once a day.  There is also a dynamic
+list, generated on request. This accepts various options, eg to see
+the most recent bugs:
+
+http://debbugs.gnu.org/cgi/pkgreport.cgi?newest=100
+
+Or follow the links on the front page http://debbugs.gnu.org .
+
+** How do I report a bug in Emacs now?
+The same way as you always did.  Send mail to bug-gnu-emacs@gnu.org,
+or use M-x report-emacs-bug.
+
+The only differences are:
+
+i) Your report will be assigned a number and generate an automatic reply.
+
+ii) Optionally, you can set some database parameters when you first
+report a bug (see "Setting bug parameters" below).
+
+iii) If you want to CC: someone, use X-Debbugs-CC: (this is important;
+see below).
+
+Once your report is filed and assigned a number, it is sent out to the
+bug mailing list.  In some cases, it may be appropriate to just file a
+bug, without sending out a copy.  To do this, send mail to
+quiet@debbugs.gnu.org.
+
+** How do I reply to an existing bug report?
+Reply to 123@debbugs.gnu.org, replacing 123 with the number
+of the bug you are interested in.  NB this only sends mail to the
+bug-list, it does NOT send a CC to the original bug submitter.
+So you need to explicitly CC him/her (and anyone else you like).
+(This works the same way as all the Emacs mailing lists.  We generally
+don't assume anyone who posts to a list is subscribed to it, so we
+cc everyone on replies.)
+
+(Many people think the submitter SHOULD be automatically subscribed
+to subsequent discussion, but this does not seem to be implemented.
+See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=37078
+See also http://debbugs.gnu.org/5439 )
+
+Do NOT send a separate copy to the bug list address, since this may
+generate a new report.  The only time to send mail to the bug list
+address is to create a new report.
+
+Gnus users can add the following to message-dont-reply-to-names;
+similarly with Rmail and rmail-dont-reply-to-names:
+
+"\\(emacs-pretest-bug\\|bug-gnu-emacs\\|bug-\\(e\\|gnu\\)macs\\)@gnu\\.org\\|\
+\\(submit\\|control\\|owner\\)@debbugs\\.gnu\\.org"
+
+The "owner@debbugs.gnu.org" entry is there because it appears in the
+"Resent-To" header.  For a long time Rmail erroneously included such
+headers in replies.  If you correspond with an Rmail user on a bug,
+these addresses may end up in the Cc.  Mailing to them does nothing
+but create duplicates and errors.  (It is possible, but unlikely, that
+you might want to have a dialog with the owner address, outside of
+normal bug reporting.)
+
+** When reporting a bug, to send a Cc to another address
+(e.g. bug-cc-mode@gnu.org), do NOT just use a Cc: header.
+Instead, use "X-Debbugs-CC:".  This ensures the Cc address will get a
+mail with the bug report number in.  If you do not do this, each reply
+in the subsequent discussion will end up creating a new bug.
+This is annoying.
+
+(So annoying that a form of message-id tracking has been implemented
+to hopefully stop this happening, but it is still better to use X-Debbugs-CC.)
+
+If a new report contains X-Debbugs-CC in the input, this is
+converted to a real Cc header in the output.  (See Bug#1720).
+It is also merged into the Resent-CC header (see below).
+
+** How does Debbugs send out mails?
+
+The mails are sent out to the bug list by being resent.  The From:
+header is unchanged.  In new reports only (at present), the To:
+address is altered as follows.  Any "bug-gnu-emacs",
+"emacs-pretest-bug", or "submit@debbugs" address is replaced by
+123@debbugs in the mail that gets sent out.  (This also applies to any
+Cc: header, though you should be using X-Debbugs-CC instead in new
+reports).  The original header is stored as X-Debbugs-Original-To, if
+it was changed.  Any X-Debbugs-CC is merged into the Cc.
+
+Mails arriving at the bug list have the following Resent-* headers:
+
+Resent-From: person who submitted the bug
+Resent-To:   owner@debbugs.gnu.org
+Resent-CC:   maintainer email address, plus any X-Debbugs-CC: entries
+
+The "maintainer email address" is "bug-gnu-emacs@gnu.org" in most cases.
+
+** To not get acknowledgement mail from the tracker,
+add an "X-Debbugs-No-Ack:" header (with any value).  If you use Gnus,
+you can add an element to gnus-posting-styles to do this automatically, eg:
+
+("gnu-emacs\\(-pretest\\)?-bug"
+   ("X-Debbugs-No-Ack" "yes"))
+
+(adjust the regexp according to the name you use for the bug lists)
+
+** To record a bug in the tracker without sending mail to the bug list.
+This can be useful to make a note of something discussed on
+emacs-devel that needs fixing.  In other words, this can be the
+equivalent of adding something to FOR-RELEASE.
+
+To: quiet@debbugs.gnu.org
+[headers end]
+Package: emacs
+Version: 23.0.60
+Severity: minor
+
+Remember to fix FOO, as discussed on emacs-devel at http://... .
+
+** Not interested in tracker control messages (tags being set, etc)?
+Discard mails matching:
+
+^X-GNU-PR-Message: (transcript|closed)
+
+** Not receiving messages in response to your control commands?
+The messages debbugs sends out in response to control-server commands
+always have headers To: your@email, and Cc: tracker@debbugs.gnu.org
+(the latter is an alias for the emacs-bug-tracker mailing list).
+These are also the addresses to which a copy of the response is sent.
+(In general, there need not be any relation between the To: and Cc:
+headers visible in a message and where debbugs actually sends it.)
+If you used an X-Debbugs-No-Ack header, however, a copy is _not_ sent
+to you, but the To: header is unchanged.  If you are subscribed to the
+emacs-bug-tracker mailing list and have duplicate suppression turned
+on, the presence of your address in the To: header will cause Mailman
+to not send you a list copy, because it thinks you have received a
+direct copy.  If you used X-Debbugs-No-Ack, this is not the case, and
+you won't get any copy at all.  If this bothers you, don't use both
+X-Debbugs-No-Ack and Mailman duplicate suppression for the
+emacs-bug-tracker mailing list, just pick one or the other.
+
+** How to avoid multiple copies of mails.
+If you reply to reports in the normal way, this should work fine.
+Basically, reply only to the numbered bug address (and any individual
+people's addresses). Do not send mail direct to bug-gnu-emacs or
+emacs-pretest-bug unless you are reporting a new bug.
+
+** To close bug #123 (for example), send mail
+
+To: 123-done@debbugs.gnu.org
+
+with a brief explanation in the body as to why the bug was closed.
+There is no need to cc the address without the "-done" part or the
+submitter; they get copies anyway so this will just result in more
+duplicate mail.
+
+** Details of closing a bug.
+(For information only)
+Sending a mail to 123-done does the following:
+
+1) Mark the bug as closed in the database.
+
+2) Send a mail to the original submitter telling them that their bug
+has been closed.  This mail has a header:
+
+X-GNU-PR-Message: they-closed 123
+
+3) Send a mail to you and to the emacs-bug-tracker list confirming
+that the bug has been closed.  This mail has a header:
+
+X-GNU-PR-Message: closed 123
+
+4) Send a copy of your mail to the bug-gnu-emacs list in exactly the
+same way as if you had sent mail to "123" (sans -done). This mail has
+headers:
+
+X-GNU-PR-Message: cc-closed 123
+Mail-Followup-To: 123@debbugs.gnu.org, person-who-closed
+
+(This is Emacs-specific.  Normally the bug list gets the same mail as in 3).
+
+** Setting bug parameters.
+There are two ways to set the parameters of bugs in the database
+(tags, severity level, etc).  When you report a new bug, you can
+provide a "pseudo-header" at the start of the report, eg:
+
+Package: emacs
+Version: 23.0.60
+Severity: minor
+
+This can also include tags.  Some things (e.g. submitter) don't seem to
+work here.
+
+Otherwise, send mail to the control server, control@debbugs.gnu.org.
+At the start of the message body, supply the desired commands, one per
+line:
+
+command bug-number [arguments]
+...
+quit|stop|thank|thanks|thankyou|thank you
+
+The control server ignores anything after the last line above.  So you
+can place control commands at the beginning of a reply to a bug
+report, and Bcc: the control server (note the commands have no effect
+if you just send them to the bug-report number).  Bcc: is better than Cc:
+in case people use Reply-to-All in response.
+
+Some useful control commands:
+
+*** To reopen a closed bug:
+reopen 123
+
+*** Bugs can be tagged in various ways (eg wontfix, patch, etc).
+The available tags are:
+patch wontfix moreinfo unreproducible fixed notabug
+See http://debbugs.gnu.org/Developer#tags
+The list of tags can be prefixed with +, - or =, meaning to add (the
+default), remove, or reset the tags. E.g.:
+
+tags 123 + wontfix
+
+** URL shortcuts
+
+http://debbugs.gnu.org/...
+
+123             # given bug number
+123;mbox=yes    # mbox version of given bug
+package         # bugs in given package
+from:submitter@email.address
+severity:severity      # all bugs of given severity
+tag:tag                # all bugs with given tag
+
+** Usertags
+
+See <http://wiki.debian.org/bugs.debian.org/usertags>
+
+"Usertags" are very similar to tags: a set of labels that can be added
+to a bug.  There are two differences between normal tags and user tags:
+
+1) Anyone can define any valid usertag they like.  In contrast, only a
+limited, predefined set of normal tags are available (see above).
+
+2) A usertag is associated with a specific email address.
+
+You set usertags in the same way as tags, by talking to the control
+server.  One difference is that you can also specify the associated
+email address.  If you don't explicitly specify an address, then it
+will use the one from which you send the control message. The address
+must have the form of an email address (with an "@" sign and least 4
+characters after the "@").
+
+*** Setting usertags
+
+a) In a control message:
+
+user bug-gnu-emacs@gnu.org
+usertags 1234 any-tag-you-like
+
+This will add a usertag "any-tag-you-like" to bug 1234.  The tag will
+be associated with the address "bug-gnu-emacs@gnu.org".  If you omit
+the first line, the tag will be associated with your email address.
+
+The syntax of the usertags command is the same as that of tags (eg wrt
+the optional [=+-] argument).
+
+b) In an initial submission, in the pseudo-header:
+
+User: bug-gnu-emacs@gnu.org
+Usertags: a-new-tag
+
+Again, the "User" is optional.
+
+*** Searching by usertags
+
+The search interface is not as advanced as for normal tags.  You need
+to construct the relevant url yourself rather than just typing in a
+search box.  The only piece you really need to add is the "users"
+portion, the rest has the same syntax as normal.
+
+**** To browse bugs by usertag:
+http://debbugs.gnu.org/cgi/pkgindex.cgi?indexon=users
+
+**** To find all bugs usertagged by a given email address:
+
+http://debbugs.gnu.org/cgi/pkgreport.cgi?users=bug-gnu-emacs@gnu.org
+
+(Supposedly, the "users" field can be a comma-separated list of more
+than one email address, but it does not seem to work for me.)
+
+**** To find bugs tagged with a specific usertag:
+
+This works just like a normal tags search, but with the addition of a
+"users" field.  Eg:
+
+http://debbugs.gnu.org/cgi/pkgreport.cgi?users=bug-gnu-emacs@gnu.org;tag=calendar
+
+*** To merge bugs:
+Eg when bad replies create a bunch of new bugs for the same report.
+Bugs must all be in the same state (e.g. same package(s) and severity
+-- see `reassign' and `severity' below), but need not have the same
+tags (tags are merged). E.g.:
+
+merge 123 124 125 ...
+
+Note that merging does not affect titles.  In particular, a "retitle"
+of merged bugs only affects individual bugs, not all of them.
+
+*** Forcing a merge:
+Like `merge', but bugs need not be in the same state.  The packages
+must still match though (see `reassign' below).  The first one listed
+is the master.  E.g.:
+
+forcemerge 123 124 125 ...
+
+Note: you cannot merge with an archived bug - you must unarchive it first.
+
+*** To unmerge bugs:
+To disconnect a bug from all bugs it is merged with:
+
+unmerge 123
+
+This command accepts only one bug number.
+
+*** To clone bugs:
+Useful when one report refers to more than one bug.
+
+clone 123 -1 [-2 ...]
+retitle -1 second bug
+retitle -2 third bug
+
+The negative numbers provide a way to refer to the cloned bugs (which
+will be assigned proper numbers).
+
+NB you cannot clone a merged bug.  You'd think that trying to do so
+would just give you an unmerged copy of the specified bug number, but no:
+
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=474742
+
+You must unmerge, clone, then re-merge.
+
+*** To set severity:
+severity 123 critical|grave|serious|important|normal|minor|wishlist
+
+See http://debbugs.gnu.org/Developer#severities for the meanings.
+
+*** To set the owner of a bug:
+owner 123 A Hacker <none@example.com>
+
+The shorthand `!' means your own address.
+
+*** To remove the owner of a bug:
+noowner 123
+
+*** To mark a bug as fixed in a particular version:
+fixed 123 23.0.60
+
+*** To remove a "fixed" mark:
+notfixed 123 23.0.60
+
+*** To make a bug as present in a particular version:
+found 123 23.2
+NB if there is no specified "fixed" version, or if there is one and it
+is earlier than the found version, this reopens a closed bug.
+
+The leading "23.1;" that M-x report-emacs-bug adds to bug subjects
+automatically sets a found version (if none is explicitly specified).
+
+*** To assign or reassign a bug to a package or list of packages:
+reassign 1234 emacs
+
+Note that reassigning clears the list of found versions, even if the
+new packages includes the original one.
+
+** To remove spam from the tracker, move it to the `spam' pseudo-package:
+reassign 123 spam
+
+(Should not be necessary any more, now that the input is moderated.)
+
+** To change the title of a bug:
+retitle 123 Some New Title
+
+** To change the submitter address:
+submitter 123 none@example.com
+
+Note that it does not seem to work to specify "Submitter:" in the
+pseudo-header when first reporting a bug.
+
+** How does archiving work?
+You can still send mail to a bug after it is closed.  After 28 days with
+no activity, the bug is archived, at which point no more changes can
+be made.  If you try to send mail to the bug after that (or merge with
+it), it will be rejected.  To make any changes, you must unarchive it first:
+
+unarchive 123
+
+The bug will be re-archived after the next 28 day period of no activity.
+
+** The web-page with the list of bugs is slow to load
+
+It's a function of the number of displayed bugs.  You can speed things
+up by only looking at the newest 100 bugs:
+http://debbugs.gnu.org/cgi-bin/pkgreport.cgi?newest=100;package=emacs
+
+Or use the static index:
+http://debbugs.gnu.org/db/ix/full.html
+
+** What are those "mbox folder" links on the bug report pages?
+
+"mbox folder" = messages as they arrived at the tracker
+
+"status mbox" = as above, but with a fake message at the start
+    summarizing the bug status
+
+"maintainer mbox" = messages as sent out from the tracker to the
+    maintainers (ie, bug-gnu-emacs).  These have some changed headers
+    (Resent-*, Subject, etc).
+
+** What do the pkgreport.cgi sort options mean?
+
+"normal" = by open/closed status, then severity, then tag, then bug number
+
+"oldview" = as above, but without the tag part
+
+"age" = as normal, but sort in decreasing order of last modification
+time, rather than by increasing bug number
+
+"raw" = ?
+
+** ChangeLog issues
+
+*** When you fix a bug, it can be helpful to put the bug number in the
+ChangeLog entry, for example:
+
+   * foo.el (foofunc): Fix the `foo' case.  (Bug#123)
+
+Then the relevant bug can be found for easy reference.  If it's an
+obvious fix (e.g. a typo), there's no need to clutter the log with the
+bug number.
+
+Similarly, when you close a bug, it can be helpful to include the
+relevant ChangeLog entry in the message to the bug tracker, so people
+can see exactly what the fix was.
+
+*** bug-reference-mode
+
+Activate `bug-reference-mode' in ChangeLogs to get clickable links to
+the bug web-pages.
+
+*** Debian stuff
+
+http://lists.gnu.org/archive/html/emacs-devel/2009-11/msg00440.html
+
+** Bazaar stuff
+
+*** You can use `bzr commit --fixes debbugs:123' to mark that a commit fixes
+Emacs bug 123.  You will first need to add a line to one of your
+configuration files, ~/.bazaar/bazaar.conf or ~/.bazaar/locations.conf:
+
+bugtracker_debbugs_url = http://debbugs.gnu.org/{id}
+
+Here "{id}" is a literal string, a placeholder that will be replaced
+by the bug number you specify after `--fixes debbugs:' in the bzr
+command line (123 in the example above).
+
+In the bazaar.conf file, this setting should go into the [DEFAULT]
+section.
+
+In the locations.conf file, it should go into the branch-specific
+configuration section for the branch where you want this to be in
+effect.  For example, if you want this to be in effect for the branch
+located at `/home/projects/emacs/trunk', you need to have this in your
+~/.bazaar/locations.conf file:
+
+[/home/projects/emacs/trunk]
+bugtracker_debbugs_url = http://debbugs.gnu.org/{id}
+
+If you want to use this in all Emacs branches whose common parent is
+`/home/projects/emacs', put the setting in the [/home/projects/emacs]
+section.  See "bzr help configuration" for more information about
+the *.conf files, their location and formats.  See "bzr help bugs" for
+more information about the bugtracker_debbugs_url setting.
+
+See also log-edit-rewrite-fixes in .dir-locals.el.
+
+Note that all this does is add some metadata to the commit, it doesn't
+actually mark the bug as closed in the tracker.  You can see this
+information with `bzr log', and it will show up as a link in a recent
+loggerhead installation, or with some of the graphical frontends to
+`bzr log'.
+
+** Gnus-specific voodoo
+
+*** Put point on a bug-number and try: M-x gnus-read-ephemeral-emacs-bug-group
+
+*** If the above is not available:
+(add-hook 'gnus-article-mode-hook
+          (lambda ()
+             (setq bug-reference-url-format "http://debbugs.gnu.org/%s")
+              (bug-reference-mode 1)))
+
+and you can click on the bug number in the subject header.
+
+
+* Technical Notes
+
+The following are technical notes on how it works.  These are just for
+reference, you don't need to read these as a user of the system.
+
+Getting mail from the Emacs bug list into the tracker requires the
+assistance of sysadmin at gnu.org.  The test tracker set-up was, I
+think, [gnu.org #359140]:
+http://lists.gnu.org/archive/html/savannah-hackers/2008-03/msg00074.html
+http://lists.gnu.org/archive/html/savannah-hackers/2008-04/msg00034.html
+
+** The debbugs.gnu.org setup was handled in [gnu.org #510605].
+There are two pieces (replace AT with @ in the following):
+
+i) fencepost has an /etc/aliases entry:
+emacs-pretest-bug: submit AT debbugs.gnu.org
+
+ii) An exim router:
+emacsbugs_router:
+  driver = redirect
+  senders = !Debian-debbugs AT debbugs.gnu.org
+  local_parts = bug-gnu-emacs
+  domains = gnu.org
+  data = submit AT debbugs.gnu.org
+
+This says, for mail arriving at bug-gnu-emacs, only allow it through
+to the list if it was sent from debbugs.gnu.org.  Otherwise, send
+it to the submit address at the bug-tracker.
+
+FIXME There's probably an issue with the mail-news gateway here that
+still needs to be addressed (bug#936).
+
+** fencepost's /etc/exim4/local_domains configuration needs a line
+!debbugs.gnu.org adding [gnu.org #503532].  Otherwise people on
+fencepost can't report bugs, since *.gnu.org addresses are assumed to
+be handled locally on fencepost, unless otherwise specified.
+
+** All mail arriving at debbugs.gnu.org is first run through SpamAssassin.
+Obvious spam is rejected, the rest is sent on to the moderated list
+debbugs-submit.  Approved mail is passed on to the tracker.
+(Note this means that messages may appear out of sequence in the
+tracker, since mail from whitelisted senders goes straight through.)
+
+NOTE: An alternative to this would be to use listhelper AT nongnu.org
+as a moderator address.  Eg the emacs-bug-tracker list uses this.
+It does basic spam processing on the moderator requests and
+automatically rejects the obviously bogus ones.  Someone still has to
+accept the good ones though.  The advantage of this would not be having
+to run and tune our own spam filter.  See
+http://savannah.nongnu.org/projects/listhelper
+
+An "X-Debbugs-Envelope-To" header is used to keep track of where the
+mail was actually bound for:
+http://lists.gnu.org/archive/html/emacs-devel/2009-11/msg01211.html
+
+** Mailing list recipient/sender filters.
+The following mailman filters are useful to stop messages being
+needlessly held for moderation:
+
+*** debbugs-submit
+(quiet|control|submit)@(debbugs\.gnu\.org|emacsbugs\.donarmstrong\.com)
+[0-9]+(-done|-quiet|-subscribe)?@(debbugs\.gnu\.org|emacsbugs\.donarmstrong\.com)
+(bug-gnu-emacs|emacs-pretest-bug|bug-(e|gnu)macs)@gnu\.org
+
+bug-emacs and bug-gnumacs are lesser-used aliases from fencepost's
+/etc/aliases file.
+
+*** emacs-bug-tracker
+sender: bug-gnu-emacs AT gnu.org
+recipient: emacs-bug-tracker AT debbugs\.gnu\.org
+
+The latter is because that is the address that debbugs actually sends to.
+An /etc/aliases entry redirects it to the real emacs-bug-tracker address.
+
+** Recovering from moderation mistakes
+
+All discarded messages are stored in /var/lib/mailman/spam.
+If a non-spam message accidentally gets discarded, just do:
+
+cat /var/lib/mailman/spam/not-really-spam.msg | /usr/lib/debbugs/receive
+chown Debian-debbugs:Debian-debbugs /var/lib/debbugs/spool/incoming/*
+... check it works ...
+mv /var/lib/mailman/spam/not-really-spam.msg /var/lib/mailman/not-spam/
+
+Also check that the sender was not added to the auto-discard/reject list
+in the debbugs-submit Mailman interface.
+
+** Administrivia
+
+The debbugs-submit list should have the administrivia option off,
+else it can by mistake filter out requests to subscribe to bugs.
+But, this feature doesn't work anyway (see bug#5439).
+
+** How to test changes
+
+Add an entry to /etc/debbugs/Maintainers like:
+
+mytest       my.email.address
+
+Then if you do all your testing with 'Package: mytest', the resulting
+mails should only go to your email address.
+
+** Adding new tags
+
+Add them to @gTags in /etc/debbugs/config.
+I think you also have to add them to 'tags' and 'tags_single_letter'
+in /usr/share/perl5/Debbugs/Config.pm.
+And update /var/www/Developer.html with a description of what the tag means.
+And the "valid tags" list in /var/www/index.html.
+
+** Backups
+
+The FSF sysadmins handle multi-generational backups of the filesystem
+on debbugs.gnu.org.  But if you really want to have your own backup of
+the bug database, you can use rsync (this requires login access to
+debbugs.gnu.org):
+
+ rsync -azvv -e ssh USER@debbugs.gnu.org:/var/lib/debbugs/ DEST
+
+Note that this occupies well over 1G of disk space.

@@ -1,0 +1,573 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Keyboard Macros, Files, Fixit, Top
+@chapter Keyboard Macros
+@cindex defining keyboard macros
+@cindex keyboard macro
+
+  In this chapter we describe how to record a sequence of editing
+commands so you can repeat it conveniently later.
+
+  A @dfn{keyboard macro} is a command defined by an Emacs user to stand for
+another sequence of keys.  For example, if you discover that you are
+about to type @kbd{C-n M-d C-d} forty times, you can speed your work by
+defining a keyboard macro to do @kbd{C-n M-d C-d}, and then executing
+it 39 more times.
+
+  You define a keyboard macro by executing and recording the commands
+which are its definition.  Put differently, as you define a keyboard
+macro, the definition is being executed for the first time.  This way,
+you can see the effects of your commands, so that you don't have to
+figure them out in your head.  When you close the definition, the
+keyboard macro is defined and also has been, in effect, executed once.
+You can then do the whole thing over again by invoking the macro.
+
+  Keyboard macros differ from ordinary Emacs commands in that they are
+written in the Emacs command language rather than in Lisp.  This makes it
+easier for the novice to write them, and makes them more convenient as
+temporary hacks.  However, the Emacs command language is not powerful
+enough as a programming language to be useful for writing anything
+intelligent or general.  For such things, Lisp must be used.
+
+@menu
+* Basic Keyboard Macro::     Defining and running keyboard macros.
+* Keyboard Macro Ring::      Where previous keyboard macros are saved.
+* Keyboard Macro Counter::   Inserting incrementing numbers in macros.
+* Keyboard Macro Query::     Making keyboard macros do different things each
+                               time.
+* Save Keyboard Macro::      Giving keyboard macros names; saving them in
+                               files.
+* Edit Keyboard Macro::      Editing keyboard macros.
+* Keyboard Macro Step-Edit:: Interactively executing and editing a keyboard
+                               macro.
+@end menu
+
+@node Basic Keyboard Macro
+@section Basic Use
+
+@table @kbd
+@item @key{F3}
+Start defining a keyboard macro
+(@code{kmacro-start-macro-or-insert-counter}).
+@item @key{F4}
+If a keyboard macro is being defined, end the definition; otherwise,
+execute the most recent keyboard macro
+(@code{kmacro-end-or-call-macro}).
+@item C-u @key{F3}
+Re-execute last keyboard macro, then append keys to its definition.
+@item C-u C-u @key{F3}
+Append keys to the last keyboard macro without re-executing it.
+@item C-x C-k r
+Run the last keyboard macro on each line that begins in the region
+(@code{apply-macro-to-region-lines}).
+@end table
+
+@kindex F3
+@kindex F4
+@findex kmacro-start-macro-or-insert-counter
+@findex kmacro-end-or-call-macro
+@findex kmacro-end-and-call-macro
+  To start defining a keyboard macro, type @key{F3}.  From then on,
+your keys continue to be executed, but also become part of the
+definition of the macro.  @samp{Def} appears in the mode line to
+remind you of what is going on.  When you are finished, type @key{F4}
+(@code{kmacro-end-or-call-macro}) to terminate the definition.  For
+example,
+
+@example
+@key{F3} M-f foo @key{F4}
+@end example
+
+@noindent
+defines a macro to move forward a word and then insert @samp{foo}.
+Note that @key{F3} and @key{F4} do not become part of the macro.
+
+  After defining the macro, you can call it with @key{F4}.  For the
+above example, this has the same effect as typing @kbd{M-f foo} again.
+(Note the two roles of the @key{F4} command: it ends the macro if you
+are in the process of defining one, or calls the last macro
+otherwise.)  You can also supply @key{F4} with a numeric prefix
+argument @samp{n}, which means to invoke the macro @samp{n} times.  An
+argument of zero repeats the macro indefinitely, until it gets an
+error or you type @kbd{C-g} (or, on MS-DOS, @kbd{C-@key{BREAK}}).
+
+  The above example demonstrates a handy trick that you can employ
+with keyboard macros: if you wish to repeat an operation at regularly
+spaced places in the text, include a motion command as part of the
+macro.  In this case, repeating the macro inserts the string
+@samp{foo} after each successive word.
+
+  After terminating the definition of a keyboard macro, you can append
+more keystrokes to its definition by typing @kbd{C-u @key{F3}}.  This
+is equivalent to plain @key{F3} followed by retyping the whole
+definition so far.  As a consequence, it re-executes the macro as
+previously defined.  If you change the variable
+@code{kmacro-execute-before-append} to @code{nil}, the existing macro
+will not be re-executed before appending to it (the default is
+@code{t}).  You can also add to the end of the definition of the last
+keyboard macro without re-executing it by typing @kbd{C-u C-u
+@key{F3}}.
+
+  When a command reads an argument with the minibuffer, your
+minibuffer input becomes part of the macro along with the command.  So
+when you replay the macro, the command gets the same argument as when
+you entered the macro.  For example,
+
+@example
+@key{F3} C-a C-k C-x b foo @key{RET} C-y C-x b @key{RET} @key{F4}
+@end example
+
+@noindent
+defines a macro that kills the current line, yanks it into the buffer
+@samp{foo}, then returns to the original buffer.
+
+  Most keyboard commands work as usual in a keyboard macro definition,
+with some exceptions.  Typing @kbd{C-g} (@code{keyboard-quit}) quits
+the keyboard macro definition.  Typing @kbd{C-M-c}
+(@code{exit-recursive-edit}) can be unreliable: it works as you'd
+expect if exiting a recursive edit that started within the macro, but
+if it exits a recursive edit that started before you invoked the
+keyboard macro, it also necessarily exits the keyboard macro too.
+Mouse events are also unreliable, even though you can use them in a
+keyboard macro: when the macro replays the mouse event, it uses the
+original mouse position of that event, the position that the mouse had
+while you were defining the macro.  The effect of this may be hard to
+predict.
+
+@findex apply-macro-to-region-lines
+@kindex C-x C-k r
+  The command @kbd{C-x C-k r} (@code{apply-macro-to-region-lines})
+repeats the last defined keyboard macro on each line that begins in
+the region.  It does this line by line, by moving point to the
+beginning of the line and then executing the macro.
+
+@kindex C-x (
+@kindex C-x )
+@kindex C-x e
+@findex kmacro-start-macro
+@findex kmacro-end-macro
+  In addition to the @key{F3} and @key{F4} commands described above,
+Emacs also supports an older set of key bindings for defining and
+executing keyboard macros.  To begin a macro definition, type @kbd{C-x
+(} (@code{kmacro-start-macro}); as with @key{F3}, a prefix argument
+appends this definition to the last keyboard macro.  To end a macro
+definition, type @kbd{C-x )} (@code{kmacro-end-macro}).  To execute
+the most recent macro, type @kbd{C-x e}
+(@code{kmacro-end-and-call-macro}).  If you enter @kbd{C-x e} while
+defining a macro, the macro is terminated and executed immediately.
+Immediately after typing @kbd{C-x e}, you can type @key{e} repeatedly
+to immediately repeat the macro one or more times.  You can also give
+@kbd{C-x e} a repeat argument, just like @key{F4}.
+
+  @kbd{C-x )} can be given a repeat count as an argument.  This means
+to repeat the macro right after defining it.  The macro definition
+itself counts as the first repetition, since it is executed as you
+define it, so @kbd{C-u 4 C-x )} executes the macro immediately 3
+additional times.
+
+@node Keyboard Macro Ring
+@section The Keyboard Macro Ring
+
+  All defined keyboard macros are recorded in the @dfn{keyboard macro
+ring}.  There is only one keyboard macro ring, shared by all buffers.
+
+@table @kbd
+@item C-x C-k C-k
+Execute the keyboard macro at the head of the ring (@code{kmacro-end-or-call-macro-repeat}).
+@item C-x C-k C-n
+Rotate the keyboard macro ring to the next macro (defined earlier)
+(@code{kmacro-cycle-ring-next}).
+@item C-x C-k C-p
+Rotate the keyboard macro ring to the previous macro (defined later)
+(@code{kmacro-cycle-ring-previous}).
+@end table
+
+  All commands which operate on the keyboard macro ring use the
+same @kbd{C-x C-k} prefix.  Most of these commands can be executed and
+repeated immediately after each other without repeating the @kbd{C-x
+C-k} prefix.  For example,
+
+@example
+C-x C-k C-p C-p C-k C-k C-k C-n C-n C-k C-p C-k C-d
+@end example
+
+@noindent
+will rotate the keyboard macro ring to the ``second previous'' macro,
+execute the resulting head macro three times, rotate back to the
+original head macro, execute that once, rotate to the ``previous''
+macro, execute that, and finally delete it from the macro ring.
+
+@findex kmacro-end-or-call-macro-repeat
+@kindex C-x C-k C-k
+  The command @kbd{C-x C-k C-k} (@code{kmacro-end-or-call-macro-repeat})
+executes the keyboard macro at the head of the macro ring.  You can
+repeat the macro immediately by typing another @kbd{C-k}, or you can
+rotate the macro ring immediately by typing @kbd{C-n} or @kbd{C-p}.
+
+  When a keyboard macro is being defined, @kbd{C-x C-k C-k} behaves
+like @key{F4} except that, immediately afterward, you can use most key
+bindings of this section without the @kbd{C-x C-k} prefix.  For
+instance, another @kbd{C-k} will re-execute the macro.
+
+@findex kmacro-cycle-ring-next
+@kindex C-x C-k C-n
+@findex kmacro-cycle-ring-previous
+@kindex C-x C-k C-p
+  The commands @kbd{C-x C-k C-n} (@code{kmacro-cycle-ring-next}) and
+@kbd{C-x C-k C-p} (@code{kmacro-cycle-ring-previous}) rotate the
+macro ring, bringing the next or previous keyboard macro to the head
+of the macro ring.  The definition of the new head macro is displayed
+in the echo area.  You can continue to rotate the macro ring
+immediately by repeating just @kbd{C-n} and @kbd{C-p} until the
+desired macro is at the head of the ring.  To execute the new macro
+ring head immediately, just type @kbd{C-k}.
+
+  Note that Emacs treats the head of the macro ring as the ``last
+defined keyboard macro''.  For instance, @key{F4} will execute that
+macro, and @kbd{C-x C-k n} will give it a name.
+
+@vindex kmacro-ring-max
+  The maximum number of macros stored in the keyboard macro ring is
+determined by the customizable variable @code{kmacro-ring-max}.
+
+@node Keyboard Macro Counter
+@section The Keyboard Macro Counter
+
+  Each keyboard macro has an associated counter, which is initialized
+to 0 when you start defining the macro.  This counter allows you to
+insert a number into the buffer that depends on the number of times
+the macro has been called.  The counter is incremented each time its
+value is inserted into the buffer.
+
+@table @kbd
+@item @key{F3}
+In a keyboard macro definition, insert the keyboard macro counter
+value in the buffer (@code{kmacro-start-macro-or-insert-counter}).
+@item C-x C-k C-i
+Insert the keyboard macro counter value in the buffer
+(@code{kmacro-insert-counter}).
+@item C-x C-k C-c
+Set the keyboard macro counter (@code{kmacro-set-counter}).
+@item C-x C-k C-a
+Add the prefix arg to the keyboard macro counter (@code{kmacro-add-counter}).
+@item C-x C-k C-f
+Specify the format for inserting the keyboard macro counter
+(@code{kmacro-set-format}).
+@end table
+
+@findex kmacro-insert-counter
+@kindex C-x C-k C-i
+  When you are defining a keyboard macro, the command @key{F3}
+(@code{kmacro-start-macro-or-insert-counter}) inserts the current
+value of the keyboard macro's counter into the buffer, and increments
+the counter by 1.  (If you are not defining a macro, @key{F3} begins a
+macro definition instead.  @xref{Basic Keyboard Macro}.)  You can use
+a numeric prefix argument to specify a different increment.  If you
+just specify a @kbd{C-u} prefix, that is the same as an increment of
+zero: it inserts the current counter value without changing it.
+
+  As an example, let us show how the keyboard macro counter can be
+used to build a numbered list.  Consider the following key sequence:
+
+@example
+@key{F3} C-a @key{F3} . @key{SPC} @key{F4}
+@end example
+
+@noindent
+As part of this keyboard macro definition, the string @samp{0. } was
+inserted into the beginning of the current line.  If you now move
+somewhere else in the buffer and type @key{F4} to invoke the macro,
+the string @samp{1. } is inserted at the beginning of that line.
+Subsequent invocations insert @samp{2. }, @samp{3. }, and so forth.
+
+  The command @kbd{C-x C-k C-i} (@code{kmacro-insert-counter}) does
+the same thing as @key{F3}, but it can be used outside a keyboard
+macro definition.  When no keyboard macro is being defined or
+executed, it inserts and increments the counter of the macro at the
+head of the keyboard macro ring.
+
+@findex kmacro-set-counter
+@kindex C-x C-k C-c
+  The command @kbd{C-x C-k C-c} (@code{kmacro-set-counter}) sets the
+current macro counter to the value of the numeric argument.  If you use
+it inside the macro, it operates on each repetition of the macro.  If
+you specify just @kbd{C-u} as the prefix, while executing the macro,
+that resets the counter to the value it had at the beginning of the
+current repetition of the macro (undoing any increments so far in this
+repetition).
+
+@findex kmacro-add-counter
+@kindex C-x C-k C-a
+  The command @kbd{C-x C-k C-a} (@code{kmacro-add-counter}) adds the
+prefix argument to the current macro counter.  With just @kbd{C-u} as
+argument, it resets the counter to the last value inserted by any
+keyboard macro.  (Normally, when you use this, the last insertion
+will be in the same macro and it will be the same counter.)
+
+@findex kmacro-set-format
+@kindex C-x C-k C-f
+  The command @kbd{C-x C-k C-f} (@code{kmacro-set-format}) prompts for
+the format to use when inserting the macro counter.  The default
+format is @samp{%d}, which means to insert the number in decimal
+without any padding.  You can exit with empty minibuffer to reset the
+format to this default.  You can specify any format string that the
+@code{format} function accepts and that makes sense with a single
+integer extra argument (@pxref{Formatting Strings,,, elisp, The Emacs
+Lisp Reference Manual}).  Do not put the format string inside double
+quotes when you insert it in the minibuffer.
+
+  If you use this command while no keyboard macro is being defined or
+executed, the new format affects all subsequent macro definitions.
+Existing macros continue to use the format in effect when they were
+defined.  If you set the format while defining a keyboard macro, this
+affects the macro being defined from that point on, but it does not
+affect subsequent macros.  Execution of the macro will, at each step,
+use the format in effect at that step during its definition.  Changes
+to the macro format during execution of a macro, like the
+corresponding changes during its definition, have no effect on
+subsequent macros.
+
+  The format set by @kbd{C-x C-k C-f} does not affect insertion of
+numbers stored in registers.
+
+  If you use a register as a counter, incrementing it on each
+repetition of the macro, that accomplishes the same thing as a
+keyboard macro counter.  @xref{Number Registers}.  For most purposes,
+it is simpler to use a keyboard macro counter.
+
+@node Keyboard Macro Query
+@section Executing Macros with Variations
+
+  In a keyboard macro, you can create an effect similar to that of
+@code{query-replace}, in that the macro asks you each time around
+whether to make a change.
+
+@table @kbd
+@item C-x q
+When this point is reached during macro execution, ask for confirmation
+(@code{kbd-macro-query}).
+@end table
+
+@kindex C-x q
+@findex kbd-macro-query
+  While defining the macro, type @kbd{C-x q} at the point where you
+want the query to occur.  During macro definition, the @kbd{C-x q}
+does nothing, but when you run the macro later, @kbd{C-x q} asks you
+interactively whether to continue.
+
+  The valid responses when @kbd{C-x q} asks are:
+
+@table @asis
+@item @key{SPC} (or @kbd{y})
+Continue executing the keyboard macro.
+
+@item @key{DEL} (or @kbd{n})
+Skip the remainder of this repetition of the macro, and start right
+away with the next repetition.
+
+@item @key{RET} (or @kbd{q})
+Skip the remainder of this repetition and cancel further repetitions.
+
+@item @kbd{C-r}
+Enter a recursive editing level, in which you can perform editing
+which is not part of the macro.  When you exit the recursive edit
+using @kbd{C-M-c}, you are asked again how to continue with the
+keyboard macro.  If you type a @key{SPC} at this time, the rest of the
+macro definition is executed.  It is up to you to leave point and the
+text in a state such that the rest of the macro will do what you want.
+@end table
+
+  @kbd{C-u C-x q}, which is @kbd{C-x q} with a numeric argument,
+performs a completely different function.  It enters a recursive edit
+reading input from the keyboard, both when you type it during the
+definition of the macro, and when it is executed from the macro.  During
+definition, the editing you do inside the recursive edit does not become
+part of the macro.  During macro execution, the recursive edit gives you
+a chance to do some particularized editing on each repetition.
+@xref{Recursive Edit}.
+
+@node Save Keyboard Macro
+@section Naming and Saving Keyboard Macros
+
+@table @kbd
+@item C-x C-k n
+Give a command name (for the duration of the Emacs session) to the most
+recently defined keyboard macro (@code{kmacro-name-last-macro}).
+@item C-x C-k b
+Bind the most recently defined keyboard macro to a key sequence (for
+the duration of the session) (@code{kmacro-bind-to-key}).
+@item M-x insert-kbd-macro
+Insert in the buffer a keyboard macro's definition, as Lisp code.
+@end table
+
+@cindex saving keyboard macros
+@findex kmacro-name-last-macro
+@kindex C-x C-k n
+  If you wish to save a keyboard macro for later use, you can give it
+a name using @kbd{C-x C-k n} (@code{kmacro-name-last-macro}).
+This reads a name as an argument using the minibuffer and defines that
+name to execute the last keyboard macro, in its current form.  (If you
+later add to the definition of this macro, that does not alter the
+name's definition as a macro.)  The macro name is a Lisp symbol, and
+defining it in this way makes it a valid command name for calling with
+@kbd{M-x} or for binding a key to with @code{global-set-key}
+(@pxref{Keymaps}).  If you specify a name that has a prior definition
+other than a keyboard macro, an error message is shown and nothing is
+changed.
+
+@cindex binding keyboard macros
+@findex kmacro-bind-to-key
+@kindex C-x C-k b
+  You can also bind the last keyboard macro (in its current form) to a
+key, using @kbd{C-x C-k b} (@code{kmacro-bind-to-key}) followed by the
+key sequence you want to bind.  You can bind to any key sequence in
+the global keymap, but since most key sequences already have other
+bindings, you should select the key sequence carefully.  If you try to
+bind to a key sequence with an existing binding (in any keymap), this
+command asks you for confirmation before replacing the existing binding.
+
+  To avoid problems caused by overriding existing bindings, the key
+sequences @kbd{C-x C-k 0} through @kbd{C-x C-k 9} and @kbd{C-x C-k A}
+through @kbd{C-x C-k Z} are reserved for your own keyboard macro
+bindings.  In fact, to bind to one of these key sequences, you only
+need to type the digit or letter rather than the whole key sequences.
+For example,
+
+@example
+C-x C-k b 4
+@end example
+
+@noindent
+will bind the last keyboard macro to the key sequence @kbd{C-x C-k 4}.
+
+@findex insert-kbd-macro
+  Once a macro has a command name, you can save its definition in a file.
+Then it can be used in another editing session.  First, visit the file
+you want to save the definition in.  Then use this command:
+
+@example
+M-x insert-kbd-macro @key{RET} @var{macroname} @key{RET}
+@end example
+
+@noindent
+This inserts some Lisp code that, when executed later, will define the
+same macro with the same definition it has now.  (You need not
+understand Lisp code to do this, because @code{insert-kbd-macro} writes
+the Lisp code for you.)  Then save the file.  You can load the file
+later with @code{load-file} (@pxref{Lisp Libraries}).  If the file you
+save in is your init file @file{~/.emacs} (@pxref{Init File}) then the
+macro will be defined each time you run Emacs.
+
+  If you give @code{insert-kbd-macro} a numeric argument, it makes
+additional Lisp code to record the keys (if any) that you have bound
+to @var{macroname}, so that the macro will be reassigned the same keys
+when you load the file.
+
+@node Edit Keyboard Macro
+@section Editing a Keyboard Macro
+
+@table @kbd
+@item C-x C-k C-e
+Edit the last defined keyboard macro (@code{kmacro-edit-macro}).
+@item C-x C-k e @var{name} @key{RET}
+Edit a previously defined keyboard macro @var{name} (@code{edit-kbd-macro}).
+@item C-x C-k l
+Edit the last 300 keystrokes as a keyboard macro
+(@code{kmacro-edit-lossage}).
+@end table
+
+@findex kmacro-edit-macro
+@kindex C-x C-k C-e
+@kindex C-x C-k RET
+  You can edit the last keyboard macro by typing @kbd{C-x C-k C-e} or
+@kbd{C-x C-k RET} (@code{kmacro-edit-macro}).  This formats the macro
+definition in a buffer and enters a specialized major mode for editing
+it.  Type @kbd{C-h m} once in that buffer to display details of how to
+edit the macro.  When you are finished editing, type @kbd{C-c C-c}.
+
+@findex edit-kbd-macro
+@kindex C-x C-k e
+  You can edit a named keyboard macro or a macro bound to a key by typing
+@kbd{C-x C-k e} (@code{edit-kbd-macro}).  Follow that with the
+keyboard input that you would use to invoke the macro---@kbd{C-x e} or
+@kbd{M-x @var{name}} or some other key sequence.
+
+@findex kmacro-edit-lossage
+@kindex C-x C-k l
+  You can edit the last 300 keystrokes as a macro by typing
+@kbd{C-x C-k l} (@code{kmacro-edit-lossage}).
+
+@node Keyboard Macro Step-Edit
+@section Stepwise Editing a Keyboard Macro
+
+@findex kmacro-step-edit-macro
+@kindex C-x C-k SPC
+  You can interactively replay and edit the last keyboard
+macro, one command at a time, by typing @kbd{C-x C-k SPC}
+(@code{kmacro-step-edit-macro}).  Unless you quit the macro using
+@kbd{q} or @kbd{C-g}, the edited macro replaces the last macro on the
+macro ring.
+
+  This macro editing feature shows the last macro in the minibuffer
+together with the first (or next) command to be executed, and prompts
+you for an action.  You can enter @kbd{?} to get a summary of your
+options.  These actions are available:
+
+@itemize @bullet{}
+@item
+@kbd{SPC} and @kbd{y} execute the current command, and advance to the
+next command in the keyboard macro.
+@item
+@kbd{n}, @kbd{d}, and @kbd{DEL} skip and delete the current command.
+@item
+@kbd{f} skips the current command in this execution of the keyboard
+macro, but doesn't delete it from the macro.
+@item
+@kbd{@key{TAB}} executes the current command, as well as all similar
+commands immediately following the current command; for example, @key{TAB}
+may be used to insert a sequence of characters (corresponding to a
+sequence of @code{self-insert-command} commands).
+@item
+@kbd{c} continues execution (without further editing) until the end of
+the keyboard macro.  If execution terminates normally, the edited
+macro replaces the original keyboard macro.
+@item
+@kbd{C-k} skips and deletes the rest of the keyboard macro,
+terminates step-editing, and replaces the original keyboard macro
+with the edited macro.
+@item
+@kbd{q} and @kbd{C-g} cancels the step-editing of the keyboard macro;
+discarding any changes made to the keyboard macro.
+@item
+@kbd{i KEY... C-j} reads and executes a series of key sequences (not
+including the final @kbd{C-j}), and inserts them before the current
+command in the keyboard macro, without advancing over the current
+command.
+@item
+@kbd{I KEY...} reads one key sequence, executes it, and inserts it
+before the current command in the keyboard macro, without advancing
+over the current command.
+@item
+@kbd{r KEY... C-j} reads and executes a series of key sequences (not
+including the final @kbd{C-j}), and replaces the current command in
+the keyboard macro with them, advancing over the inserted key
+sequences.
+@item
+@kbd{R KEY...} reads one key sequence, executes it, and replaces the
+current command in the keyboard macro with that key sequence,
+advancing over the inserted key sequence.
+@item
+@kbd{a KEY... C-j} executes the current command, then reads and
+executes a series of key sequences (not including the final
+@kbd{C-j}), and inserts them after the current command in the keyboard
+macro; it then advances over the current command and the inserted key
+sequences.
+@item
+@kbd{A KEY... C-j} executes the rest of the commands in the keyboard
+macro, then reads and executes a series of key sequences (not
+including the final @kbd{C-j}), and appends them at the end of the
+keyboard macro; it then terminates the step-editing and replaces the
+original keyboard macro with the edited macro.
+@end itemize

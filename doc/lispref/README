@@ -1,0 +1,48 @@
+Copyright (C) 2001-2012 Free Software Foundation, Inc.  -*- outline -*-
+See the end of the file for license conditions.
+
+
+README for the Emacs Lisp Reference Manual.
+
+* This directory contains the texinfo source files for the Emacs Lisp
+Reference Manual.
+
+* Report bugs in the Lisp Manual (or in Emacs) using M-x report-emacs-bug.
+To ask questions, use the help-gnu-emacs mailing list.
+
+* The Emacs Lisp Reference Manual is quite large.  It totals around
+1100 pages in smallbook format; the info files total around 3.0 megabytes.
+
+* You can format this manual for Info, for printing hardcopy using TeX,
+or for HTML.
+
+* You can buy nicely printed copies from the Free Software Foundation.
+Buying a manual from the Free Software Foundation helps support our GNU
+development work.  See <http://shop.fsf.org/>.
+(At time of writing, this manual is out of print.)
+
+* The master file for formatting this manual for Tex is called `elisp.texi'.
+It contains @include commands to include all the chapters that make up
+the manual.
+
+* This distribution contains a Makefile that you can use with GNU Make.
+
+** To make an Info file, you need to install Texinfo, then run `make info'.
+
+** Use `make elisp.pdf' or `make elisp.html' to create PDF or HTML versions.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

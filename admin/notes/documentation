@@ -1,0 +1,117 @@
+-*- outline -*-
+
+Some documentation tips culled from emacs-devel postings.
+
+
+** Manual indices
+
+http://lists.gnu.org/archive/html/emacs-devel/2008-10/msg00400.html
+
+For example, this text:
+
+    @vindex x-gtk-show-hidden-files
+    @vindex x-gtk-file-dialog-help-text
+      When Emacs is compiled with GTK+ support, it uses the GTK+ ``file
+    chooser'' dialog.  Emacs adds an additional toggle button to this
+    dialog, which you can use to enable or disable the display of hidden
+    files (files starting with a dot) in that dialog.  If you want this
+    toggle to be activated by default, change the variable
+    @code{x-gtk-show-hidden-files} to @code{t}.  In addition, Emacs adds
+    help text to the GTK+ file chooser dialog; to disable this help text,
+    change the variable @code{x-gtk-file-dialog-help-text} to @code{nil}.
+
+has index entries for the variables it describes, which is good, but
+what if a user looks for this information without knowing the names of
+these variables?  For those, I added these two concept index entries:
+
+    @cindex hidden files, in GTK+ file chooser
+    @cindex help text, in GTK+ file chooser
+
+Thus, if a user types "i hidden files TAB" in Info, she will see the
+first entry, and so if she types "i file chooser RET".  See why it is
+better?
+
+The way to come up with useful index entries is to put yourself in the
+shoes of someone who looks for the information, and think about words
+and phrases you'd use to find it.
+
+One other rule for good indexing is not to have several index entries
+that begin with the same substring and point to the same page or
+screenful (i.e. to places that are close to one another).  Here's a
+fictitious example of such redundant entries:
+
+  @cindex foobar, how to use
+  @cindex foobar rules
+
+  Either leave only one of these, e.g. just "@cindex foobar", or
+combine them into a single entry, e.g.:
+
+  @cindex foobar, rules and usage
+
+
+** Point is a proper name
+
+http://lists.gnu.org/archive/html/emacs-devel/2008-10/msg00414.html
+
+In Emacs tradition, we treat "point" as a proper name when it refers
+to the current editing location. It should not have an article.
+
+Thus, it is incorrect to write, "The point does not move". It should
+be, "Point does not move".
+
+If you see "the point" anywhere in Emacs documentation or comments,
+referring to point, please fix it.
+
+
+** Don't use passive verbs
+
+http://lists.gnu.org/archive/html/emacs-devel/2008-10/msg00414.html
+
+Documentation is clearer if it avoids the passive voice whenever
+possible.  For example, rather than saying "Point does not move", say
+"This does not move point".  If you come across passive verbs in Emacs
+documentation or comments, please see if it is possible to make the
+text shorter and clearer using the active voice.  Usually that does
+make an improvement.  The explicit subject required by the active voice
+often provides important information which makes the text clearer, too.
+
+
+** Antinews nodes
+
+*** Why Antinews is useful
+
+http://lists.gnu.org/archive/html/emacs-devel/2008-11/msg00893.html
+
+The usefulness of Antinews is to help people who buy the printed
+manual and are still using the previous Emacs version.  That's why we
+focus on the (eliminated) behavior of the old version rather than on
+the new features.
+
+Of course, we try to make it amusing as well.
+
+*** Don't mention in Antinews too many features absent in old versions
+
+http://lists.gnu.org/archive/html/emacs-devel/2008-11/msg01054.html
+
+Since the purpose of Antinews is to help people use the previous Emacs
+version, there is usually no need to mention features that are simply
+absent in that version.  That situation will be clear enough to users
+without help from the manual.
+
+For instance, this
+
+    @item
+    Emacs can no longer be started as a daemon.  We decided that having an
+    Emacs sitting silently in the background with no visual manifestation
+    anywhere in sight is too confusing.
+
+may not need mentioning, because --daemon will give an error message
+saying it's not implemented, and other cases aren't affected.
+
+The kind of change for which the user really needs help from Antinews
+is where a feature works _differently_ in the previous version.
+In those cases, the user might have trouble figuring out how to use
+the old version without some sort of help.
+
+** To indicate possession, write Emacs's rather than Emacs'.
+http://lists.gnu.org/archive/html/emacs-devel/2012-02/msg00649.html

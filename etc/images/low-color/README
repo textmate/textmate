@@ -1,0 +1,13 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+The files:
+
+back-arrow.xpm copy.xpm cut.xpm fwd-arrow.xpm help.xpm home.xpm
+index.xpm jump-to.xpm left-arrow.xpm new.xpm next-node.xpm
+open.xpm paste.xpm preferences.xpm prev-node.xpm print.xpm
+right-arrow.xpm save.xpm saveas.xpm search.xpm spell.xpm
+undo.xpm up-arrow.xpm up-node.xpm
+
+are low-color versions of those with the same name in the parent
+directory.  See the README file in that directory for the relevant
+legal information.

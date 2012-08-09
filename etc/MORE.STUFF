@@ -1,0 +1,231 @@
+More Neat Stuff for your Emacs
+
+Copyright (C) 1993, 1999, 2001-2012 Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+The easiest way to add more features to your Emacs is to use the command
+M-x list-packages.  This contacts the server at <URL:http://elpa.gnu.org>,
+where many Emacs Lisp packages are stored.  These are distributed
+separately from Emacs itself for reasons of space, etc.  You can browse
+the resulting *Packages* buffer to see what is available, and then
+Emacs can automatically download and install the packages that you
+select.  See the section "Emacs Lisp Packages" in the Emacs manual
+for more details.
+
+Below we describe some GNU Emacs programs and resources that are
+maintained by other people.  Some of these may become part of the
+Emacs distribution, or GNU ELPA, in the future.  Others we unfortunately
+can't distribute, even though they are free software, because we lack
+legal papers for copyright purposes.
+
+Also listed are sites where development versions of some packages
+distributed with Emacs may be found.
+
+It is difficult to keep this file up-to-date, and it only lists a fraction
+of the Emacs modes that are available.  If you are interested in
+a particular feature, then after checking Emacs itself and GNU ELPA,
+a web search is often the best way to find results.
+
+* The gnu-emacs-sources mailing list
+  <URL:https://lists.gnu.org/mailman/listinfo/gnu-emacs-sources>
+  which is gatewayed to the gnu.emacs.sources newsgroup (although the
+  connection between the two can be unreliable) is an official
+  place where people can post or announce their extensions to Emacs.
+
+* The `Emacs Lisp List' at
+  <URL:http://www.damtp.cam.ac.uk/user/sje30/emacs/ell.html> has pointers
+  to sources of a large number of packages.  Unfortunately, at the time
+  of writing it seems to no longer be updating.
+
+* emacswiki.org
+  The Emacs Wiki has an area for storing elisp files
+  <URL:http://www.emacswiki.org/cgi-bin/wiki/ElispArea>.
+
+* WikEmacs
+  <URL:http://wikemacs.org> is an alternative wiki for Emacs.
+
+* Emacs slides and tutorials can be found here:
+   <URL:http://web.psung.name/emacs/>
+
+* Maintenance versions of some packages distributed with Emacs
+
+You might find bug-fixes or enhancements in these places.
+In many cases, however, development of these packages has shifted to Emacs,
+so you will find the latest version in Emacs.
+
+ * Ada-mode: <URL:http://stephe-leake.org/emacs/ada-mode/emacs-ada-mode.html>
+
+ * Battery and Info Look: <URL:http://ralph-schleicher.de/emacs.html>
+
+ * CC mode: <URL:http://cc-mode.sourceforge.net/>
+
+ * CPerl: <URL:http://math.berkeley.edu/~ilya/software/emacs/>
+
+ * Ediff and Viper: <URL:http://www.cs.sunysb.edu/~kifer/emacs.html>
+
+ * ERC: <URL:http://savannah.gnu.org/projects/erc/>
+
+ * Gnus: <URL:http://www.gnus.org/>
+
+ * MH-E: <URL:http://mh-e.sourceforge.net/>
+
+ * nXML: <URL:http://www.thaiopensource.com/nxml-mode/>
+
+ * Org mode: <URL:http://orgmode.org/>
+
+ * RefTeX: <URL:http://www.gnu.org/software/auctex/reftex.html>
+
+ * Remember: <URL:https://gna.org/p/remember-el>
+
+ * CEDET: <URL:http://cedet.sourceforge.net/>
+
+ * Tramp: Remote file access via rsh/ssh
+   <URL:http://savannah.gnu.org/projects/tramp/>
+
+* Auxiliary files
+
+ * (Tex)info files for use with Info-look that don't come from GNU
+   packages:
+   * Scheme: <URL:http://groups.csail.mit.edu/mac/ftpdir/scm/r5rs.info.tar.gz>
+   * LaTeX: <URL:ftp://ctan.tug.org/tex-archive/info/latex2e-help-texinfo/
+       latex2e.texi> (or CTAN mirrors)
+   * Perl: <URL:ftp://ftp.cpan.org/pub/CPAN/doc/manual/texinfo/>
+       (or CPAN mirrors)
+
+* GNU Zile: <URL:http://www.gnu.org/software/zile/>
+  A lightweight Emacs clone, for when you don't have room for Emacs proper.
+
+* Packages and add-ons not bundled with Emacs
+
+Various major packages or useful additions aren't distributed as part of
+Emacs for various reasons, sometimes because their authors haven't made
+a copyright assignment to the FSF.  Some of them may be integrated in
+the future.
+
+Your operating system distribution may include several of these as optional
+packages that you can install.
+
+ * AUCTeX: <URL:http://www.gnu.org/software/auctex/>
+   An extensible package that supports writing and formatting TeX
+   files (including AMS-TeX, LaTeX, Texinfo, ConTeXt, and docTeX).
+   Available from GNU ELPA.
+
+ * BBDB: personal Info Rolodex integrated with mail/news:
+   <URL:http://savannah.nongnu.org/projects/bbdb>
+
+ * Boxquote: <URL:http://www.davep.org/emacs/>
+
+ * CJK-emacs: Converting MULE-encoded text to TeX:
+   <URL:ftp://ctan.tug.org/tex-archive/language/chinese/CJK/> and
+   mirrors of the `CTAN' TeX archives.
+
+ * Dismal: spreadsheet:
+   <URL:http://ritter.ist.psu.edu/dismal/dismal.html>
+
+ * ECB: Emacs Code Browser: <URL:http://ecb.sourceforge.net/>
+
+ * EDB: database: <URL:http://www.gnuvola.org/software/edb/>
+
+ * Ee: categorizing information manager:
+   <URL:http://www.jurta.org/en/emacs/ee/>
+
+ * EMacro: <URL:http://emacro.sourceforge.net/>
+   EMacro is a portable configuration file that configures itself.
+
+ * Emacs Muse: <URL:http://mwolson.org/projects/EmacsMuse.html>
+   An authoring and publishing environment for Emacs.
+
+ * Emacs speaks statistics (ESS): statistical programming within Emacs
+   <URL:http://ess.r-project.org>
+
+ * Emacspeak -- A Speech Output Subsystem For Emacs:
+   <URL:http://emacspeak.sourceforge.net/>
+
+ * Emacs-w3m : <URL:http://emacs-w3m.namazu.org/>
+   A simple Emacs interface to w3m, which is a text-mode WWW browser
+
+ * Emacs Wiki Mode: <URL:http://mwolson.org/projects/EmacsWikiMode.html>
+   A wiki-like publishing tool and personal information manager
+
+ * Go in a buffer: Go Text Protocol client:
+   <URL:http://www.gnuvola.org/software/personal-elisp/dist/lisp/diversions/gnugo.el>
+   A modified version is also bundled with GNU Go:
+   <URL:http://www.gnu.org/software/gnugo/gnugo.html>
+
+ * Hyperbole:
+   <URL:http://directory.fsf.org/wiki/Hyperbole>
+   Hyperbole is an open, efficient, programmable information
+   management and hypertext system.
+
+ * JDEE: <URL:http://jdee.sourceforge.net/>
+   Provides a Java development environment for Emacs.
+
+ * Mew: <URL:http://www.mew.org/>
+   A MIME mail reader for Emacs/XEmacs.
+
+ * MMM Mode: <URL:http://mmm-mode.sourceforge.net/>
+   MMM Mode is an emacs add-on package providing a minor mode that
+   allows Multiple Major Modes to coexist in one buffer.
+
+ * Planner Mode: <URL:http://www.wjsullivan.net/PlannerMode.html>
+   Planner is an organizer and day planner for Emacs.
+
+ * Preview LaTeX: embed preview LaTeX images in source buffer.
+   <URL:http://www.gnu.org/software/auctex/preview-latex.html>
+
+ * Quack: <URL:http://www.neilvandyke.org/quack/>
+   Quack enhances Emacs support for Scheme.
+
+ * QWE: <URL:http://www.nongnu.org/qwe/>
+   QWE's not WEB for Emacs is a quasi-WYSIWYG literate programming system for
+   Emacs that can be used with almost every programming language.
+
+ * Session: <URL:http://emacs-session.sourceforge.net/>
+   Session Management for Emacs.
+
+ * SLIME: The Superior Lisp Interaction Mode for Emacs:
+   <URL:http://common-lisp.net/project/slime/>
+
+ * Tamago: Chinese/Japanese/Korean input method
+   <URL:http://www.m17n.org/tamago/index.en.html>
+   Emacs Lisp package to provide input methods for CJK characters.
+
+ * Tiny Tools: <URL:https://savannah.nongnu.org/projects/emacs-tiny-tools>
+
+ * VM (View Mail): Alternative mail reader
+   <URL:http://launchpad.net/vm>
+   Previously hosted at: <URL:http://www.nongnu.org/viewmail/>
+
+ * W3 Web browser: <URL:http://savannah.gnu.org/projects/w3/>
+
+ * Wanderlust: <URL:http://www.gohome.org/wl/>
+   Wanderlust is a mail/news reader for Emacs.
+
+ * WhizzyTex: <URL:http://cristal.inria.fr/whizzytex/>
+   WhizzyTeX provides a minor mode for Emacs or XEmacs, a (bash)
+   shell-script daemon and some LaTeX macros.
+
+ * X-Symbol: <URL:http://x-symbol.sourceforge.net/>
+   Quasi-WYSIWYG editing of TeX & al.
+
+Local Variables:
+mode: text
+mode: view
+mode: goto-address
+End:
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+

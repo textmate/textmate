@@ -1,0 +1,3180 @@
+This is /home/cyd/emacs/doc/lispintro/../../info/eintr, produced by
+makeinfo version 4.13 from
+/home/cyd/emacs/doc/lispintro/emacs-lisp-intro.texi.
+
+INFO-DIR-SECTION GNU Emacs Lisp
+START-INFO-DIR-ENTRY
+* Emacs Lisp Intro: (eintr).
+                          A simple introduction to Emacs Lisp programming.
+END-INFO-DIR-ENTRY
+
+   This is an `Introduction to Programming in Emacs Lisp', for people
+who are not programmers.
+
+   Edition 3.10, 28 October 2009
+
+   Copyright (C) 1990-1995, 1997, 2001-2012 Free Software Foundation,
+Inc.
+
+   Published by the:
+
+     GNU Press,                        http://www.fsf.org/campaigns/gnu-press/
+     a division of the                 email: sales@fsf.org
+     Free Software Foundation, Inc.    Tel: +1 (617) 542-5942
+     51 Franklin Street, Fifth Floor   Fax: +1 (617) 542-2652
+     Boston, MA 02110-1301 USA
+
+
+   ISBN 1-882114-43-4
+
+   Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; there
+being no Invariant Section, with the Front-Cover Texts being "A GNU
+Manual", and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled "GNU Free Documentation
+License".
+
+   (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom."
+
+
+File: eintr,  Node: Debugging Exercises,  Prev: edebug,  Up: Debugging
+
+17.5 Debugging Exercises
+========================
+
+   * Install the `count-words-example' function and then cause it to
+     enter the built-in debugger when you call it.  Run the command on a
+     region containing two words.  You will need to press `d' a
+     remarkable number of times.  On your system, is a `hook' called
+     after the command finishes?  (For information on hooks, see *note
+     Command Loop Overview: (elisp)Command Overview.)
+
+   * Copy `count-words-example' into the `*scratch*' buffer, instrument
+     the function for Edebug, and walk through its execution.  The
+     function does not need to have a bug, although you can introduce
+     one if you wish.  If the function lacks a bug, the walk-through
+     completes without problems.
+
+   * While running Edebug, type `?' to see a list of all the Edebug
+     commands.  (The `global-edebug-prefix' is usually `C-x X', i.e.
+     `<CTRL>-x' followed by an upper case `X'; use this prefix for
+     commands made outside of the Edebug debugging buffer.)
+
+   * In the Edebug debugging buffer, use the `p'
+     (`edebug-bounce-point') command to see where in the region the
+     `count-words-example' is working.
+
+   * Move point to some spot further down the function and then type the
+     `h' (`edebug-goto-here') command to jump to that location.
+
+   * Use the `t' (`edebug-trace-mode') command to cause Edebug to walk
+     through the function on its own; use an upper case `T' for
+     `edebug-Trace-fast-mode'.
+
+   * Set a breakpoint, then run Edebug in Trace mode until it reaches
+     the stopping point.
+
+
+File: eintr,  Node: Conclusion,  Next: the-the,  Prev: Debugging,  Up: Top
+
+18 Conclusion
+*************
+
+We have now reached the end of this Introduction.  You have now learned
+enough about programming in Emacs Lisp to set values, to write simple
+`.emacs' files for yourself and your friends, and write simple
+customizations and extensions to Emacs.
+
+   This is a place to stop.  Or, if you wish, you can now go onward, and
+teach yourself.
+
+   You have learned some of the basic nuts and bolts of programming.
+But only some.  There are a great many more brackets and hinges that are
+easy to use that we have not touched.
+
+   A path you can follow right now lies among the sources to GNU Emacs
+and in *note The GNU Emacs Lisp Reference Manual: (elisp)Top.
+
+   The Emacs Lisp sources are an adventure.  When you read the sources
+and come across a function or expression that is unfamiliar, you need to
+figure out or find out what it does.
+
+   Go to the Reference Manual.  It is a thorough, complete, and fairly
+easy-to-read description of Emacs Lisp.  It is written not only for
+experts, but for people who know what you know.  (The `Reference
+Manual' comes with the standard GNU Emacs distribution.  Like this
+introduction, it comes as a Texinfo source file, so you can read it
+on-line and as a typeset, printed book.)
+
+   Go to the other on-line help that is part of GNU Emacs: the on-line
+documentation for all functions and variables, and `find-tag', the
+program that takes you to sources.
+
+   Here is an example of how I explore the sources.  Because of its
+name, `simple.el' is the file I looked at first, a long time ago.  As
+it happens some of the functions in `simple.el' are complicated, or at
+least look complicated at first sight.  The `open-line' function, for
+example, looks complicated.
+
+   You may want to walk through this function slowly, as we did with the
+`forward-sentence' function.  (*Note The `forward-sentence' function:
+forward-sentence.)  Or you may want to skip that function and look at
+another, such as `split-line'.  You don't need to read all the
+functions.  According to `count-words-in-defun', the `split-line'
+function contains 102 words and symbols.
+
+   Even though it is short, `split-line' contains  expressions we have
+not studied: `skip-chars-forward', `indent-to', `current-column' and
+`insert-and-inherit'.
+
+   Consider the `skip-chars-forward' function.  (It is part of the
+function definition for `back-to-indentation', which is shown in *note
+Review: Review.)
+
+   In GNU Emacs, you can find out more about `skip-chars-forward' by
+typing `C-h f' (`describe-function') and the name of the function.
+This gives you the function documentation.
+
+   You may be able to guess what is done by a well named function such
+as `indent-to'; or you can look it up, too.  Incidentally, the
+`describe-function' function itself is in `help.el'; it is one of those
+long, but decipherable functions.  You can look up `describe-function'
+using the `C-h f' command!
+
+   In this instance, since the code is Lisp, the `*Help*' buffer
+contains the name of the library containing the function's source.  You
+can put point over the name of the library and press the RET key, which
+in this situation is bound to `help-follow', and be taken directly to
+the source, in the same way as `M-.' (`find-tag').
+
+   The definition for `describe-function' illustrates how to customize
+the `interactive' expression without using the standard character
+codes; and it shows how to create a temporary buffer.
+
+   (The `indent-to' function is written in C rather than Emacs Lisp; it
+is a `built-in' function.  `help-follow' takes you to its source as
+does `find-tag', when properly set up.)
+
+   You can look at a function's source using `find-tag', which is bound
+to `M-.'  Finally, you can find out what the Reference Manual has to
+say by visiting the manual in Info, and typing `i' (`Info-index') and
+the name of the function, or by looking up the function in the index to
+a printed copy of the manual.
+
+   Similarly, you can find out what is meant by `insert-and-inherit'.
+
+   Other interesting source files include `paragraphs.el',
+`loaddefs.el', and `loadup.el'.  The `paragraphs.el' file includes
+short, easily understood functions as well as longer ones.  The
+`loaddefs.el' file contains the many standard autoloads and many
+keymaps.  I have never looked at it all; only at parts.  `loadup.el' is
+the file that loads the standard parts of Emacs; it tells you a great
+deal about how Emacs is built.  (*Note Building Emacs: (elisp)Building
+Emacs, for more about building.)
+
+   As I said, you have learned some nuts and bolts; however, and very
+importantly, we have hardly touched major aspects of programming; I
+have said nothing about how to sort information, except to use the
+predefined `sort' function; I have said nothing about how to store
+information, except to use variables and lists; I have said nothing
+about how to write programs that write programs.  These are topics for
+another, and different kind of book, a different kind of learning.
+
+   What you have done is learn enough for much practical work with GNU
+Emacs.  What you have done is get started.  This is the end of a
+beginning.
+
+
+File: eintr,  Node: the-the,  Next: Kill Ring,  Prev: Conclusion,  Up: Top
+
+Appendix A The `the-the' Function
+*********************************
+
+Sometimes when you you write text, you duplicate words--as with "you
+you" near the beginning of this sentence.  I find that most frequently,
+I duplicate "the"; hence, I call the function for detecting duplicated
+words, `the-the'.
+
+   As a first step, you could use the following regular expression to
+search for duplicates:
+
+     \\(\\w+[ \t\n]+\\)\\1
+
+This regexp matches one or more word-constituent characters followed by
+one or more spaces, tabs, or newlines.  However, it does not detect
+duplicated words on different lines, since the ending of the first
+word, the end of the line, is different from the ending of the second
+word, a space.  (For more information about regular expressions, see
+*note Regular Expression Searches: Regexp Search, as well as *note
+Syntax of Regular Expressions: (emacs)Regexps, and *note Regular
+Expressions: (elisp)Regular Expressions.)
+
+   You might try searching just for duplicated word-constituent
+characters but that does not work since the pattern detects doubles
+such as the two occurrences of `th' in `with the'.
+
+   Another possible regexp searches for word-constituent characters
+followed by non-word-constituent characters, reduplicated.  Here,
+`\\w+' matches one or more word-constituent characters and `\\W*'
+matches zero or more non-word-constituent characters.
+
+     \\(\\(\\w+\\)\\W*\\)\\1
+
+Again, not useful.
+
+   Here is the pattern that I use.  It is not perfect, but good enough.
+`\\b' matches the empty string, provided it is at the beginning or end
+of a word; `[^@ \n\t]+' matches one or more occurrences of any
+characters that are _not_ an @-sign, space, newline, or tab.
+
+     \\b\\([^@ \n\t]+\\)[ \n\t]+\\1\\b
+
+   One can write more complicated expressions, but I found that this
+expression is good enough, so I use it.
+
+   Here is the `the-the' function, as I include it in my `.emacs' file,
+along with a handy global key binding:
+
+     (defun the-the ()
+       "Search forward for for a duplicated word."
+       (interactive)
+       (message "Searching for for duplicated words ...")
+       (push-mark)
+       ;; This regexp is not perfect
+       ;; but is fairly good over all:
+       (if (re-search-forward
+            "\\b\\([^@ \n\t]+\\)[ \n\t]+\\1\\b" nil 'move)
+           (message "Found duplicated word.")
+         (message "End of buffer")))
+
+     ;; Bind `the-the' to  C-c \
+     (global-set-key "\C-c\\" 'the-the)
+
+
+   Here is test text:
+
+     one two two three four five
+     five six seven
+
+   You can substitute the other regular expressions shown above in the
+function definition and try each of them on this list.
+
+
+File: eintr,  Node: Kill Ring,  Next: Full Graph,  Prev: the-the,  Up: Top
+
+Appendix B Handling the Kill Ring
+*********************************
+
+The kill ring is a list that is transformed into a ring by the workings
+of the `current-kill' function.  The `yank' and `yank-pop' commands use
+the `current-kill' function.
+
+   This appendix describes the `current-kill' function as well as both
+the `yank' and the `yank-pop' commands, but first, consider the
+workings of the kill ring.
+
+* Menu:
+
+* What the Kill Ring Does::
+* current-kill::
+* yank::                        Paste a copy of a clipped element.
+* yank-pop::                    Insert element pointed to.
+* ring file::
+
+
+File: eintr,  Node: What the Kill Ring Does,  Next: current-kill,  Prev: Kill Ring,  Up: Kill Ring
+
+What the Kill Ring Does
+=======================
+
+   The kill ring has a default maximum length of sixty items; this
+number is too large for an explanation.  Instead, set it to four.
+Please evaluate the following:
+
+     (setq old-kill-ring-max kill-ring-max)
+     (setq kill-ring-max 4)
+
+Then, please copy each line of the following indented example into the
+kill ring.  You may kill each line with `C-k' or mark it and copy it
+with `M-w'.
+
+(In a read-only buffer, such as the `*info*' buffer, the kill command,
+`C-k' (`kill-line'), will not remove the text, merely copy it to the
+kill ring.  However, your machine may beep at you.  Alternatively, for
+silence, you may copy the region of each line with the `M-w'
+(`kill-ring-save') command.  You must mark each line for this command
+to succeed, but it does not matter at which end you put point or mark.)
+
+Please invoke the calls in order, so that five elements attempt to fill
+the kill ring:
+
+     first some text
+     second piece of text
+     third line
+     fourth line of text
+     fifth bit of text
+
+Then find the value of `kill-ring' by evaluating
+
+     kill-ring
+
+It is:
+
+     ("fifth bit of text" "fourth line of text"
+     "third line" "second piece of text")
+
+The first element, `first some text', was dropped.
+
+   To return to the old value for the length of the kill ring, evaluate:
+
+     (setq kill-ring-max old-kill-ring-max)
+
+
+File: eintr,  Node: current-kill,  Next: yank,  Prev: What the Kill Ring Does,  Up: Kill Ring
+
+B.1 The `current-kill' Function
+===============================
+
+The `current-kill' function changes the element in the kill ring to
+which `kill-ring-yank-pointer' points.  (Also, the `kill-new' function
+sets `kill-ring-yank-pointer' to point to the latest element of the
+kill ring.  The `kill-new' function is used directly or indirectly by
+`kill-append', `copy-region-as-kill', `kill-ring-save', `kill-line',
+and `kill-region'.)
+
+* Menu:
+
+* Code for current-kill::
+* Understanding current-kill::
+
+
+File: eintr,  Node: Code for current-kill,  Next: Understanding current-kill,  Prev: current-kill,  Up: current-kill
+
+The code for `current-kill'
+---------------------------
+
+   The `current-kill' function is used by `yank' and by `yank-pop'.
+Here is the code for `current-kill':
+
+     (defun current-kill (n &optional do-not-move)
+       "Rotate the yanking point by N places, and then return that kill.
+     If N is zero, `interprogram-paste-function' is set, and calling it
+     returns a string, then that string is added to the front of the
+     kill ring and returned as the latest kill.
+     If optional arg DO-NOT-MOVE is non-nil, then don't actually move the
+     yanking point; just return the Nth kill forward."
+       (let ((interprogram-paste (and (= n 0)
+                                      interprogram-paste-function
+                                      (funcall interprogram-paste-function))))
+         (if interprogram-paste
+             (progn
+               ;; Disable the interprogram cut function when we add the new
+               ;; text to the kill ring, so Emacs doesn't try to own the
+               ;; selection, with identical text.
+               (let ((interprogram-cut-function nil))
+                 (kill-new interprogram-paste))
+               interprogram-paste)
+           (or kill-ring (error "Kill ring is empty"))
+           (let ((ARGth-kill-element
+                  (nthcdr (mod (- n (length kill-ring-yank-pointer))
+                               (length kill-ring))
+                          kill-ring)))
+             (or do-not-move
+                 (setq kill-ring-yank-pointer ARGth-kill-element))
+             (car ARGth-kill-element)))))
+
+   Remember also that the `kill-new' function sets
+`kill-ring-yank-pointer' to the latest element of the kill ring, which
+means that all the functions that call it set the value indirectly:
+`kill-append', `copy-region-as-kill', `kill-ring-save', `kill-line',
+and `kill-region'.
+
+   Here is the line in `kill-new', which is explained in *note The
+`kill-new' function: kill-new function.
+
+     (setq kill-ring-yank-pointer kill-ring)
+
+
+File: eintr,  Node: Understanding current-kill,  Prev: Code for current-kill,  Up: current-kill
+
+`current-kill' in Outline
+-------------------------
+
+   The `current-kill' function looks complex, but as usual, it can be
+understood by taking it apart piece by piece.  First look at it in
+skeletal form:
+
+     (defun current-kill (n &optional do-not-move)
+       "Rotate the yanking point by N places, and then return that kill."
+       (let VARLIST
+         BODY...)
+
+   This function takes two arguments, one of which is optional.  It has
+a documentation string.  It is _not_ interactive.
+
+* Menu:
+
+* Body of current-kill::
+* Digression concerning error::  How to mislead humans, but not computers.
+* Determining the Element::
+
+
+File: eintr,  Node: Body of current-kill,  Next: Digression concerning error,  Prev: Understanding current-kill,  Up: Understanding current-kill
+
+The Body of `current-kill'
+..........................
+
+   The body of the function definition is a `let' expression, which
+itself has a body as well as a VARLIST.
+
+   The `let' expression declares a variable that will be only usable
+within the bounds of this function.  This variable is called
+`interprogram-paste' and is for copying to another program.  It is not
+for copying within this instance of GNU Emacs.  Most window systems
+provide a facility for interprogram pasting.  Sadly, that facility
+usually provides only for the last element.  Most windowing systems
+have not adopted a ring of many possibilities, even though Emacs has
+provided it for decades.
+
+   The `if' expression has two parts, one if there exists
+`interprogram-paste' and one if not.
+
+   Let us consider the `if not' or else-part of the `current-kill'
+function.  (The then-part uses the `kill-new' function, which we have
+already described.  *Note The `kill-new' function: kill-new function.)
+
+     (or kill-ring (error "Kill ring is empty"))
+     (let ((ARGth-kill-element
+            (nthcdr (mod (- n (length kill-ring-yank-pointer))
+                         (length kill-ring))
+                    kill-ring)))
+       (or do-not-move
+           (setq kill-ring-yank-pointer ARGth-kill-element))
+       (car ARGth-kill-element))
+
+The code first checks whether the kill ring has content; otherwise it
+signals an error.
+
+   Note that the `or' expression is very similar to testing length with
+an `if':
+
+     (if (zerop (length kill-ring))          ; if-part
+         (error "Kill ring is empty"))       ; then-part
+       ;; No else-part
+
+If there is not anything in the kill ring, its length must be zero and
+an error message sent to the user: `Kill ring is empty'.  The
+`current-kill' function uses an `or' expression which is simpler.  But
+an `if' expression reminds us what goes on.
+
+   This `if' expression uses the function `zerop' which returns true if
+the value it is testing is zero.  When `zerop' tests true, the
+then-part of the `if' is evaluated.  The then-part is a list starting
+with the function `error', which is a function that is similar to the
+`message' function (*note The `message' Function: message.) in that it
+prints a one-line message in the echo area.  However, in addition to
+printing a message, `error' also stops evaluation of the function
+within which it is embedded.  This means that the rest of the function
+will not be evaluated if the length of the kill ring is zero.
+
+   Then the `current-kill' function selects the element to return.  The
+selection depends on the number of places that `current-kill' rotates
+and on where `kill-ring-yank-pointer' points.
+
+   Next, either the optional `do-not-move' argument is true or the
+current value of `kill-ring-yank-pointer' is set to point to the list.
+Finally, another expression returns the first element of the list even
+if the `do-not-move' argument is true.
+
+
+File: eintr,  Node: Digression concerning error,  Next: Determining the Element,  Prev: Body of current-kill,  Up: Understanding current-kill
+
+Digression about the word `error'
+.................................
+
+   In my opinion, it is slightly misleading, at least to humans, to use
+the term `error' as the name of the `error' function.  A better term
+would be `cancel'.  Strictly speaking, of course, you cannot point to,
+much less rotate a pointer to a list that has no length, so from the
+point of view of the computer, the word `error' is correct.  But a
+human expects to attempt this sort of thing, if only to find out
+whether the kill ring is full or empty.  This is an act of exploration.
+
+   From the human point of view, the act of exploration and discovery is
+not necessarily an error, and therefore should not be labeled as one,
+even in the bowels of a computer.  As it is, the code in Emacs implies
+that a human who is acting virtuously, by exploring his or her
+environment, is making an error.  This is bad.  Even though the computer
+takes the same steps as it does when there is an `error', a term such as
+`cancel' would have a clearer connotation.
+
+
+File: eintr,  Node: Determining the Element,  Prev: Digression concerning error,  Up: Understanding current-kill
+
+Determining the Element
+.......................
+
+   Among other actions, the else-part of the `if' expression sets the
+value of `kill-ring-yank-pointer' to `ARGth-kill-element' when the kill
+ring has something in it and the value of `do-not-move' is `nil'.
+
+   The code looks like this:
+
+     (nthcdr (mod (- n (length kill-ring-yank-pointer))
+                  (length kill-ring))
+             kill-ring)))
+
+   This needs some examination.  Unless it is not supposed to move the
+pointer, the `current-kill' function changes where
+`kill-ring-yank-pointer' points.  That is what the
+`(setq kill-ring-yank-pointer ARGth-kill-element))' expression does.
+Also, clearly, `ARGth-kill-element' is being set to be equal to some
+CDR of the kill ring, using the `nthcdr' function that is described in
+an earlier section.  (*Note copy-region-as-kill::.)  How does it do
+this?
+
+   As we have seen before (*note nthcdr::), the `nthcdr' function works
+by repeatedly taking the CDR of a list--it takes the CDR of the CDR of
+the CDR ...
+
+   The two following expressions produce the same result:
+
+     (setq kill-ring-yank-pointer (cdr kill-ring))
+
+     (setq kill-ring-yank-pointer (nthcdr 1 kill-ring))
+
+   However, the `nthcdr' expression is more complicated.  It uses the
+`mod' function to determine which CDR to select.
+
+   (You will remember to look at inner functions first; indeed, we will
+have to go inside the `mod'.)
+
+   The `mod' function returns the value of its first argument modulo
+the second; that is to say, it returns the remainder after dividing the
+first argument by the second.  The value returned has the same sign as
+the second argument.
+
+   Thus,
+
+     (mod 12 4)
+       => 0  ;; because there is no remainder
+     (mod 13 4)
+       => 1
+
+   In this case, the first argument is often smaller than the second.
+That is fine.
+
+     (mod 0 4)
+       => 0
+     (mod 1 4)
+       => 1
+
+   We can guess what the `-' function does.  It is like `+' but
+subtracts instead of adds; the `-' function subtracts its second
+argument from its first.  Also, we already know what the `length'
+function does (*note length::).  It returns the length of a list.
+
+   And `n' is the name of the required argument to the `current-kill'
+function.
+
+   So when the first argument to `nthcdr' is zero, the `nthcdr'
+expression returns the whole list, as you can see by evaluating the
+following:
+
+     ;; kill-ring-yank-pointer and kill-ring have a length of four
+     ;; and (mod (- 0 4) 4) => 0
+     (nthcdr (mod (- 0 4) 4)
+             '("fourth line of text"
+               "third line"
+               "second piece of text"
+               "first some text"))
+
+   When the first argument to the `current-kill' function is one, the
+`nthcdr' expression returns the list without its first element.
+
+     (nthcdr (mod (- 1 4) 4)
+             '("fourth line of text"
+               "third line"
+               "second piece of text"
+               "first some text"))
+
+   Incidentally, both `kill-ring' and `kill-ring-yank-pointer' are
+"global variables".  That means that any expression in Emacs Lisp can
+access them.  They are not like the local variables set by `let' or
+like the symbols in an argument list.  Local variables can only be
+accessed within the `let' that defines them or the function that
+specifies them in an argument list (and within expressions called by
+them).
+
+
+File: eintr,  Node: yank,  Next: yank-pop,  Prev: current-kill,  Up: Kill Ring
+
+B.2 `yank'
+==========
+
+After learning about `current-kill', the code for the `yank' function
+is almost easy.
+
+   The `yank' function does not use the `kill-ring-yank-pointer'
+variable directly.  It calls `insert-for-yank' which calls
+`current-kill' which sets the `kill-ring-yank-pointer' variable.
+
+   The code looks like this:
+
+     (defun yank (&optional arg)
+       "Reinsert (\"paste\") the last stretch of killed text.
+     More precisely, reinsert the stretch of killed text most recently
+     killed OR yanked.  Put point at end, and set mark at beginning.
+     With just \\[universal-argument] as argument, same but put point at
+     beginning (and mark at end).  With argument N, reinsert the Nth most
+     recently killed stretch of killed text.
+
+     When this command inserts killed text into the buffer, it honors
+     `yank-excluded-properties' and `yank-handler' as described in the
+     doc string for `insert-for-yank-1', which see.
+
+     See also the command \\[yank-pop]."
+       (interactive "*P")
+       (setq yank-window-start (window-start))
+       ;; If we don't get all the way thru, make last-command indicate that
+       ;; for the following command.
+       (setq this-command t)
+       (push-mark (point))
+       (insert-for-yank (current-kill (cond
+                                       ((listp arg) 0)
+                                       ((eq arg '-) -2)
+                                       (t (1- arg)))))
+       (if (consp arg)
+           ;; This is like exchange-point-and-mark,
+           ;;     but doesn't activate the mark.
+           ;; It is cleaner to avoid activation, even though the command
+           ;; loop would deactivate the mark because we inserted text.
+           (goto-char (prog1 (mark t)
+                        (set-marker (mark-marker) (point) (current-buffer)))))
+       ;; If we do get all the way thru, make this-command indicate that.
+       (if (eq this-command t)
+           (setq this-command 'yank))
+       nil)
+
+   The key expression is `insert-for-yank', which inserts the string
+returned by `current-kill', but removes some text properties from it.
+
+   However, before getting to that expression, the function sets the
+value of `yank-window-start' to the position returned by the
+`(window-start)' expression, the position at which the display
+currently starts.  The `yank' function also sets `this-command' and
+pushes the mark.
+
+   After it yanks the appropriate element, if the optional argument is a
+CONS rather than a number or nothing, it puts point at beginning of the
+yanked text and mark at its end.
+
+   (The `prog1' function is like `progn' but returns the value of its
+first argument rather than the value of its last argument.  Its first
+argument is forced to return the buffer's mark as an integer.  You can
+see the documentation for these functions by placing point over them in
+this buffer and then typing `C-h f' (`describe-function') followed by a
+`RET'; the default is the function.)
+
+   The last part of the function tells what to do when it succeeds.
+
+
+File: eintr,  Node: yank-pop,  Next: ring file,  Prev: yank,  Up: Kill Ring
+
+B.3 `yank-pop'
+==============
+
+After understanding `yank' and `current-kill', you know how to approach
+the `yank-pop' function.  Leaving out the documentation to save space,
+it looks like this:
+
+     (defun yank-pop (&optional arg)
+       "..."
+       (interactive "*p")
+       (if (not (eq last-command 'yank))
+           (error "Previous command was not a yank"))
+       (setq this-command 'yank)
+       (unless arg (setq arg 1))
+       (let ((inhibit-read-only t)
+             (before (< (point) (mark t))))
+         (if before
+             (funcall (or yank-undo-function 'delete-region) (point) (mark t))
+           (funcall (or yank-undo-function 'delete-region) (mark t) (point)))
+         (setq yank-undo-function nil)
+         (set-marker (mark-marker) (point) (current-buffer))
+         (insert-for-yank (current-kill arg))
+         ;; Set the window start back where it was in the yank command,
+         ;; if possible.
+         (set-window-start (selected-window) yank-window-start t)
+         (if before
+             ;; This is like exchange-point-and-mark,
+             ;;     but doesn't activate the mark.
+             ;; It is cleaner to avoid activation, even though the command
+             ;; loop would deactivate the mark because we inserted text.
+             (goto-char (prog1 (mark t)
+                          (set-marker (mark-marker)
+                                      (point)
+                                      (current-buffer))))))
+       nil)
+
+   The function is interactive with a small `p' so the prefix argument
+is processed and passed to the function.  The command can only be used
+after a previous yank; otherwise an error message is sent.  This check
+uses the variable `last-command' which is set by `yank' and is
+discussed elsewhere.  (*Note copy-region-as-kill::.)
+
+   The `let' clause sets the variable `before' to true or false
+depending whether point is before or after mark and then the region
+between point and mark is deleted.  This is the region that was just
+inserted by the previous yank and it is this text that will be replaced.
+
+   `funcall' calls its first argument as a function, passing remaining
+arguments to it.  The first argument is whatever the `or' expression
+returns.  The two remaining arguments are the positions of point and
+mark set by the preceding `yank' command.
+
+   There is more, but that is the hardest part.
+
+
+File: eintr,  Node: ring file,  Prev: yank-pop,  Up: Kill Ring
+
+B.4 The `ring.el' File
+======================
+
+Interestingly, GNU Emacs posses a file called `ring.el' that provides
+many of the features we just discussed.  But functions such as
+`kill-ring-yank-pointer' do not use this library, possibly because they
+were written earlier.
+
+
+File: eintr,  Node: Full Graph,  Next: Free Software and Free Manuals,  Prev: Kill Ring,  Up: Top
+
+Appendix C A Graph with Labeled Axes
+************************************
+
+Printed axes help you understand a graph.  They convey scale.  In an
+earlier chapter (*note Readying a Graph: Readying a Graph.), we wrote
+the code to print the body of a graph.  Here we write the code for
+printing and labeling vertical and horizontal axes, along with the body
+itself.
+
+* Menu:
+
+* Labeled Example::
+* print-graph Varlist::         `let' expression in `print-graph'.
+* print-Y-axis::                Print a label for the vertical axis.
+* print-X-axis::                Print a horizontal label.
+* Print Whole Graph::           The function to print a complete graph.
+
+
+File: eintr,  Node: Labeled Example,  Next: print-graph Varlist,  Prev: Full Graph,  Up: Full Graph
+
+Labeled Example Graph
+=====================
+
+   Since insertions fill a buffer to the right and below point, the new
+graph printing function should first print the Y or vertical axis, then
+the body of the graph, and finally the X or horizontal axis.  This
+sequence lays out for us the contents of the function:
+
+  1. Set up code.
+
+  2. Print Y axis.
+
+  3. Print body of graph.
+
+  4. Print X axis.
+
+   Here is an example of how a finished graph should look:
+
+         10 -
+                       *
+                       *  *
+                       *  **
+                       *  ***
+          5 -      *   *******
+                 * *** *******
+                 *************
+               ***************
+          1 - ****************
+              |   |    |    |
+              1   5   10   15
+
+In this graph, both the vertical and the horizontal axes are labeled
+with numbers.  However, in some graphs, the horizontal axis is time and
+would be better labeled with months, like this:
+
+          5 -      *
+                 * ** *
+                 *******
+               ********** **
+          1 - **************
+              |    ^      |
+              Jan  June   Jan
+
+   Indeed, with a little thought, we can easily come up with a variety
+of vertical and horizontal labeling schemes.  Our task could become
+complicated.  But complications breed confusion.  Rather than permit
+this, it is better choose a simple labeling scheme for our first
+effort, and to modify or replace it later.
+
+   These considerations suggest the following outline for the
+`print-graph' function:
+
+     (defun print-graph (numbers-list)
+       "DOCUMENTATION..."
+       (let ((height  ...
+             ...))
+         (print-Y-axis height ... )
+         (graph-body-print numbers-list)
+         (print-X-axis ... )))
+
+   We can work on each part of the `print-graph' function definition in
+turn.
+
+
+File: eintr,  Node: print-graph Varlist,  Next: print-Y-axis,  Prev: Labeled Example,  Up: Full Graph
+
+C.1 The `print-graph' Varlist
+=============================
+
+In writing the `print-graph' function, the first task is to write the
+varlist in the `let' expression.  (We will leave aside for the moment
+any thoughts about making the function interactive or about the
+contents of its documentation string.)
+
+   The varlist should set several values.  Clearly, the top of the label
+for the vertical axis must be at least the height of the graph, which
+means that we must obtain this information here.  Note that the
+`print-graph-body' function also requires this information.  There is
+no reason to calculate the height of the graph in two different places,
+so we should change `print-graph-body' from the way we defined it
+earlier to take advantage of the calculation.
+
+   Similarly, both the function for printing the X axis labels and the
+`print-graph-body' function need to learn the value of the width of
+each symbol.  We can perform the calculation here and change the
+definition for `print-graph-body' from the way we defined it in the
+previous chapter.
+
+   The length of the label for the horizontal axis must be at least as
+long as the graph.  However, this information is used only in the
+function that prints the horizontal axis, so it does not need to be
+calculated here.
+
+   These thoughts lead us directly to the following form for the varlist
+in the `let' for `print-graph':
+
+     (let ((height (apply 'max numbers-list)) ; First version.
+           (symbol-width (length graph-blank)))
+
+As we shall see, this expression is not quite right.
+
+
+File: eintr,  Node: print-Y-axis,  Next: print-X-axis,  Prev: print-graph Varlist,  Up: Full Graph
+
+C.2 The `print-Y-axis' Function
+===============================
+
+The job of the `print-Y-axis' function is to print a label for the
+vertical axis that looks like this:
+
+         10 -
+
+
+
+
+          5 -
+
+
+
+          1 -
+
+The function should be passed the height of the graph, and then should
+construct and insert the appropriate numbers and marks.
+
+* Menu:
+
+* print-Y-axis in Detail::
+* Height of label::             What height for the Y axis?
+* Compute a Remainder::         How to compute the remainder of a division.
+* Y Axis Element::              Construct a line for the Y axis.
+* Y-axis-column::               Generate a list of Y axis labels.
+* print-Y-axis Penultimate::    A not quite final version.
+
+
+File: eintr,  Node: print-Y-axis in Detail,  Next: Height of label,  Prev: print-Y-axis,  Up: print-Y-axis
+
+The `print-Y-axis' Function in Detail
+-------------------------------------
+
+   It is easy enough to see in the figure what the Y axis label should
+look like; but to say in words, and then to write a function definition
+to do the job is another matter.  It is not quite true to say that we
+want a number and a tic every five lines: there are only three lines
+between the `1' and the `5' (lines 2, 3, and 4), but four lines between
+the `5' and the `10' (lines 6, 7, 8, and 9).  It is better to say that
+we want a number and a tic mark on the base line (number 1) and then
+that we want a number and a tic on the fifth line from the bottom and
+on every line that is a multiple of five.
+
+
+File: eintr,  Node: Height of label,  Next: Compute a Remainder,  Prev: print-Y-axis in Detail,  Up: print-Y-axis
+
+What height should the label be?
+--------------------------------
+
+   The next issue is what height the label should be?  Suppose the
+maximum height of tallest column of the graph is seven.  Should the
+highest label on the Y axis be `5 -', and should the graph stick up
+above the label?  Or should the highest label be `7 -', and mark the
+peak of the graph?  Or should the highest label be `10 -', which is a
+multiple of five, and be higher than the topmost value of the graph?
+
+   The latter form is preferred.  Most graphs are drawn within
+rectangles whose sides are an integral number of steps long--5, 10, 15,
+and so on for a step distance of five.  But as soon as we decide to use
+a step height for the vertical axis, we discover that the simple
+expression in the varlist for computing the height is wrong.  The
+expression is `(apply 'max numbers-list)'.  This returns the precise
+height, not the maximum height plus whatever is necessary to round up
+to the nearest multiple of five.  A more complex expression is required.
+
+   As usual in cases like this, a complex problem becomes simpler if it
+is divided into several smaller problems.
+
+   First, consider the case when the highest value of the graph is an
+integral multiple of five--when it is 5, 10, 15, or some higher
+multiple of five.  We can use this value as the Y axis height.
+
+   A fairly simply way to determine whether a number is a multiple of
+five is to divide it by five and see if the division results in a
+remainder.  If there is no remainder, the number is a multiple of five.
+Thus, seven divided by five has a remainder of two, and seven is not an
+integral multiple of five.  Put in slightly different language, more
+reminiscent of the classroom, five goes into seven once, with a
+remainder of two.  However, five goes into ten twice, with no
+remainder: ten is an integral multiple of five.
+
+
+File: eintr,  Node: Compute a Remainder,  Next: Y Axis Element,  Prev: Height of label,  Up: print-Y-axis
+
+C.2.1 Side Trip: Compute a Remainder
+------------------------------------
+
+In Lisp, the function for computing a remainder is `%'.  The function
+returns the remainder of its first argument divided by its second
+argument.  As it happens, `%' is a function in Emacs Lisp that you
+cannot discover using `apropos': you find nothing if you type `M-x
+apropos <RET> remainder <RET>'.  The only way to learn of the existence
+of `%' is to read about it in a book such as this or in the Emacs Lisp
+sources.
+
+   You can try the `%' function by evaluating the following two
+expressions:
+
+     (% 7 5)
+
+     (% 10 5)
+
+The first expression returns 2 and the second expression returns 0.
+
+   To test whether the returned value is zero or some other number, we
+can use the `zerop' function.  This function returns `t' if its
+argument, which must be a number, is zero.
+
+     (zerop (% 7 5))
+          => nil
+
+     (zerop (% 10 5))
+          => t
+
+   Thus, the following expression will return `t' if the height of the
+graph is evenly divisible by five:
+
+     (zerop (% height 5))
+
+(The value of `height', of course, can be found from `(apply 'max
+numbers-list)'.)
+
+   On the other hand, if the value of `height' is not a multiple of
+five, we want to reset the value to the next higher multiple of five.
+This is straightforward arithmetic using functions with which we are
+already familiar.  First, we divide the value of `height' by five to
+determine how many times five goes into the number.  Thus, five goes
+into twelve twice.  If we add one to this quotient and multiply by
+five, we will obtain the value of the next multiple of five that is
+larger than the height.  Five goes into twelve twice.  Add one to two,
+and multiply by five; the result is fifteen, which is the next multiple
+of five that is higher than twelve.  The Lisp expression for this is:
+
+     (* (1+ (/ height 5)) 5)
+
+For example, if you evaluate the following, the result is 15:
+
+     (* (1+ (/ 12 5)) 5)
+
+   All through this discussion, we have been using `five' as the value
+for spacing labels on the Y axis; but we may want to use some other
+value.  For generality, we should replace `five' with a variable to
+which we can assign a value.  The best name I can think of for this
+variable is `Y-axis-label-spacing'.
+
+   Using this term, and an `if' expression, we produce the following:
+
+     (if (zerop (% height Y-axis-label-spacing))
+         height
+       ;; else
+       (* (1+ (/ height Y-axis-label-spacing))
+          Y-axis-label-spacing))
+
+This expression returns the value of `height' itself if the height is
+an even multiple of the value of the `Y-axis-label-spacing' or else it
+computes and returns a value of `height' that is equal to the next
+higher multiple of the value of the `Y-axis-label-spacing'.
+
+   We can now include this expression in the `let' expression of the
+`print-graph' function (after first setting the value of
+`Y-axis-label-spacing'): 
+
+     (defvar Y-axis-label-spacing 5
+       "Number of lines from one Y axis label to next.")
+
+     ...
+     (let* ((height (apply 'max numbers-list))
+            (height-of-top-line
+             (if (zerop (% height Y-axis-label-spacing))
+                 height
+               ;; else
+               (* (1+ (/ height Y-axis-label-spacing))
+                  Y-axis-label-spacing)))
+            (symbol-width (length graph-blank))))
+     ...
+
+(Note use of the  `let*' function: the initial value of height is
+computed once by the `(apply 'max numbers-list)' expression and then
+the resulting value of  `height' is used to compute its final value.
+*Note The `let*' expression: fwd-para let, for more about `let*'.)
+
+
+File: eintr,  Node: Y Axis Element,  Next: Y-axis-column,  Prev: Compute a Remainder,  Up: print-Y-axis
+
+C.2.2 Construct a Y Axis Element
+--------------------------------
+
+When we print the vertical axis, we want to insert strings such as
+`5 -' and `10 - ' every five lines.  Moreover, we want the numbers and
+dashes to line up, so shorter numbers must be padded with leading
+spaces.  If some of the strings use two digit numbers, the strings with
+single digit numbers must include a leading blank space before the
+number.
+
+   To figure out the length of the number, the `length' function is
+used.  But the `length' function works only with a string, not with a
+number.  So the number has to be converted from being a number to being
+a string.  This is done with the `number-to-string' function.  For
+example,
+
+     (length (number-to-string 35))
+          => 2
+
+     (length (number-to-string 100))
+          => 3
+
+(`number-to-string' is also called `int-to-string'; you will see this
+alternative name in various sources.)
+
+   In addition, in each label, each number is followed by a string such
+as ` - ', which we will call the `Y-axis-tic' marker.  This variable is
+defined with `defvar':
+
+     (defvar Y-axis-tic " - "
+        "String that follows number in a Y axis label.")
+
+   The length of the Y label is the sum of the length of the Y axis tic
+mark and the length of the number of the top of the graph.
+
+     (length (concat (number-to-string height) Y-axis-tic)))
+
+   This value will be calculated by the `print-graph' function in its
+varlist as `full-Y-label-width' and passed on.  (Note that we did not
+think to include this in the varlist when we first proposed it.)
+
+   To make a complete vertical axis label, a tic mark is concatenated
+with a number; and the two together may be preceded by one or more
+spaces depending on how long the number is.  The label consists of
+three parts: the (optional) leading spaces, the number, and the tic
+mark.  The function is passed the value of the number for the specific
+row, and the value of the width of the top line, which is calculated
+(just once) by `print-graph'.
+
+     (defun Y-axis-element (number full-Y-label-width)
+       "Construct a NUMBERed label element.
+     A numbered element looks like this `  5 - ',
+     and is padded as needed so all line up with
+     the element for the largest number."
+       (let* ((leading-spaces
+              (- full-Y-label-width
+                 (length
+                  (concat (number-to-string number)
+                          Y-axis-tic)))))
+         (concat
+          (make-string leading-spaces ? )
+          (number-to-string number)
+          Y-axis-tic)))
+
+   The `Y-axis-element' function concatenates together the leading
+spaces, if any; the number, as a string; and the tic mark.
+
+   To figure out how many leading spaces the label will need, the
+function subtracts the actual length of the label--the length of the
+number plus the length of the tic mark--from the desired label width.
+
+   Blank spaces are inserted using the `make-string' function.  This
+function takes two arguments: the first tells it how long the string
+will be and the second is a symbol for the character to insert, in a
+special format.  The format is a question mark followed by a blank
+space, like this, `? '.  *Note Character Type: (elisp)Character Type,
+for a description of the syntax for characters.  (Of course, you might
+want to replace the blank space by some other character ...  You know
+what to do.)
+
+   The `number-to-string' function is used in the concatenation
+expression, to convert the number to a string that is concatenated with
+the leading spaces and the tic mark.
+
+
+File: eintr,  Node: Y-axis-column,  Next: print-Y-axis Penultimate,  Prev: Y Axis Element,  Up: print-Y-axis
+
+C.2.3 Create a Y Axis Column
+----------------------------
+
+The preceding functions provide all the tools needed to construct a
+function that generates a list of numbered and blank strings to insert
+as the label for the vertical axis:
+
+     (defun Y-axis-column (height width-of-label)
+       "Construct list of Y axis labels and blank strings.
+     For HEIGHT of line above base and WIDTH-OF-LABEL."
+       (let (Y-axis)
+         (while (> height 1)
+           (if (zerop (% height Y-axis-label-spacing))
+               ;; Insert label.
+               (setq Y-axis
+                     (cons
+                      (Y-axis-element height width-of-label)
+                      Y-axis))
+             ;; Else, insert blanks.
+             (setq Y-axis
+                   (cons
+                    (make-string width-of-label ? )
+                    Y-axis)))
+           (setq height (1- height)))
+         ;; Insert base line.
+         (setq Y-axis
+               (cons (Y-axis-element 1 width-of-label) Y-axis))
+         (nreverse Y-axis)))
+
+   In this function, we start with the value of `height' and
+repetitively subtract one from its value.  After each subtraction, we
+test to see whether the value is an integral multiple of the
+`Y-axis-label-spacing'.  If it is, we construct a numbered label using
+the `Y-axis-element' function; if not, we construct a blank label using
+the `make-string' function.  The base line consists of the number one
+followed by a tic mark.
+
+
+File: eintr,  Node: print-Y-axis Penultimate,  Prev: Y-axis-column,  Up: print-Y-axis
+
+C.2.4 The Not Quite Final Version of `print-Y-axis'
+---------------------------------------------------
+
+The list constructed by the `Y-axis-column' function is passed to the
+`print-Y-axis' function, which inserts the list as a column.
+
+     (defun print-Y-axis (height full-Y-label-width)
+       "Insert Y axis using HEIGHT and FULL-Y-LABEL-WIDTH.
+     Height must be the maximum height of the graph.
+     Full width is the width of the highest label element."
+     ;; Value of height and full-Y-label-width
+     ;; are passed by `print-graph'.
+       (let ((start (point)))
+         (insert-rectangle
+          (Y-axis-column height full-Y-label-width))
+         ;; Place point ready for inserting graph.
+         (goto-char start)
+         ;; Move point forward by value of full-Y-label-width
+         (forward-char full-Y-label-width)))
+
+   The `print-Y-axis' uses the `insert-rectangle' function to insert
+the Y axis labels created by the `Y-axis-column' function.  In
+addition, it places point at the correct position for printing the body
+of the graph.
+
+   You can test `print-Y-axis':
+
+  1. Install
+
+          Y-axis-label-spacing
+          Y-axis-tic
+          Y-axis-element
+          Y-axis-column
+          print-Y-axis
+
+  2. Copy the following expression:
+
+          (print-Y-axis 12 5)
+
+  3. Switch to the `*scratch*' buffer and place the cursor where you
+     want the axis labels to start.
+
+  4. Type `M-:' (`eval-expression').
+
+  5. Yank the `graph-body-print' expression into the minibuffer with
+     `C-y' (`yank)'.
+
+  6. Press <RET> to evaluate the expression.
+
+   Emacs will print labels vertically, the top one being `10 - '.  (The
+`print-graph' function will pass the value of `height-of-top-line',
+which in this case will end up as 15, thereby getting rid of what might
+appear as a bug.)
+
+
+File: eintr,  Node: print-X-axis,  Next: Print Whole Graph,  Prev: print-Y-axis,  Up: Full Graph
+
+C.3 The `print-X-axis' Function
+===============================
+
+X axis labels are much like Y axis labels, except that the ticks are on
+a line above the numbers.  Labels should look like this:
+
+         |   |    |    |
+         1   5   10   15
+
+   The first tic is under the first column of the graph and is preceded
+by several blank spaces.  These spaces provide room in rows above for
+the Y axis labels.  The second, third, fourth, and subsequent ticks are
+all spaced equally, according to the value of `X-axis-label-spacing'.
+
+   The second row of the X axis consists of numbers, preceded by several
+blank spaces and also separated according to the value of the variable
+`X-axis-label-spacing'.
+
+   The value of the variable `X-axis-label-spacing' should itself be
+measured in units of `symbol-width', since you may want to change the
+width of the symbols that you are using to print the body of the graph
+without changing the ways the graph is labeled.
+
+* Menu:
+
+* Similarities differences::    Much like `print-Y-axis', but not exactly.
+* X Axis Tic Marks::            Create tic marks for the horizontal axis.
+
+
+File: eintr,  Node: Similarities differences,  Next: X Axis Tic Marks,  Prev: print-X-axis,  Up: print-X-axis
+
+Similarities and differences
+----------------------------
+
+   The `print-X-axis' function is constructed in more or less the same
+fashion as the `print-Y-axis' function except that it has two lines:
+the line of tic marks and the numbers.  We will write a separate
+function to print each line and then combine them within the
+`print-X-axis' function.
+
+   This is a three step process:
+
+  1. Write a function to print the X axis tic marks,
+     `print-X-axis-tic-line'.
+
+  2. Write a function to print the X numbers,
+     `print-X-axis-numbered-line'.
+
+  3. Write a function to print both lines, the `print-X-axis' function,
+     using `print-X-axis-tic-line' and `print-X-axis-numbered-line'.
+
+
+File: eintr,  Node: X Axis Tic Marks,  Prev: Similarities differences,  Up: print-X-axis
+
+C.3.1 X Axis Tic Marks
+----------------------
+
+The first function should print the X axis tic marks.  We must specify
+the tic marks themselves and their spacing:
+
+     (defvar X-axis-label-spacing
+       (if (boundp 'graph-blank)
+           (* 5 (length graph-blank)) 5)
+       "Number of units from one X axis label to next.")
+
+(Note that the value of `graph-blank' is set by another `defvar'.  The
+`boundp' predicate checks whether it has already been set; `boundp'
+returns `nil' if it has not.  If `graph-blank' were unbound and we did
+not use this conditional construction, in a recent GNU Emacs, we would
+enter the debugger and see an error message saying
+`Debugger entered--Lisp error: (void-variable graph-blank)'.)
+
+   Here is the `defvar' for `X-axis-tic-symbol':
+
+     (defvar X-axis-tic-symbol "|"
+       "String to insert to point to a column in X axis.")
+
+   The goal is to make a line that looks like this:
+
+            |   |    |    |
+
+   The first tic is indented so that it is under the first column,
+which is indented to provide space for the Y axis labels.
+
+   A tic element consists of the blank spaces that stretch from one tic
+to the next plus a tic symbol.  The number of blanks is determined by
+the width of the tic symbol and the `X-axis-label-spacing'.
+
+   The code looks like this:
+
+     ;;; X-axis-tic-element
+     ...
+     (concat
+      (make-string
+       ;; Make a string of blanks.
+       (-  (* symbol-width X-axis-label-spacing)
+           (length X-axis-tic-symbol))
+       ? )
+      ;; Concatenate blanks with tic symbol.
+      X-axis-tic-symbol)
+     ...
+
+   Next, we determine how many blanks are needed to indent the first tic
+mark to the first column of the graph.  This uses the value of
+`full-Y-label-width' passed it by the `print-graph' function.
+
+   The code to make `X-axis-leading-spaces' looks like this:
+
+     ;; X-axis-leading-spaces
+     ...
+     (make-string full-Y-label-width ? )
+     ...
+
+   We also need to determine the length of the horizontal axis, which is
+the length of the numbers list, and the number of ticks in the
+horizontal axis:
+
+     ;; X-length
+     ...
+     (length numbers-list)
+
+     ;; tic-width
+     ...
+     (* symbol-width X-axis-label-spacing)
+
+     ;; number-of-X-ticks
+     (if (zerop (% (X-length tic-width)))
+         (/ (X-length tic-width))
+       (1+ (/ (X-length tic-width))))
+
+   All this leads us directly to the function for printing the X axis
+tic line:
+
+     (defun print-X-axis-tic-line
+       (number-of-X-tics X-axis-leading-spaces X-axis-tic-element)
+       "Print ticks for X axis."
+         (insert X-axis-leading-spaces)
+         (insert X-axis-tic-symbol)  ; Under first column.
+         ;; Insert second tic in the right spot.
+         (insert (concat
+                  (make-string
+                   (-  (* symbol-width X-axis-label-spacing)
+                       ;; Insert white space up to second tic symbol.
+                       (* 2 (length X-axis-tic-symbol)))
+                   ? )
+                  X-axis-tic-symbol))
+         ;; Insert remaining ticks.
+         (while (> number-of-X-tics 1)
+           (insert X-axis-tic-element)
+           (setq number-of-X-tics (1- number-of-X-tics))))
+
+   The line of numbers is equally straightforward:
+
+   First, we create a numbered element with blank spaces before each
+number:
+
+     (defun X-axis-element (number)
+       "Construct a numbered X axis element."
+       (let ((leading-spaces
+              (-  (* symbol-width X-axis-label-spacing)
+                  (length (number-to-string number)))))
+         (concat (make-string leading-spaces ? )
+                 (number-to-string number))))
+
+   Next, we create the function to print the numbered line, starting
+with the number "1" under the first column:
+
+     (defun print-X-axis-numbered-line
+       (number-of-X-tics X-axis-leading-spaces)
+       "Print line of X-axis numbers"
+       (let ((number X-axis-label-spacing))
+         (insert X-axis-leading-spaces)
+         (insert "1")
+         (insert (concat
+                  (make-string
+                   ;; Insert white space up to next number.
+                   (-  (* symbol-width X-axis-label-spacing) 2)
+                   ? )
+                  (number-to-string number)))
+         ;; Insert remaining numbers.
+         (setq number (+ number X-axis-label-spacing))
+         (while (> number-of-X-tics 1)
+           (insert (X-axis-element number))
+           (setq number (+ number X-axis-label-spacing))
+           (setq number-of-X-tics (1- number-of-X-tics)))))
+
+   Finally, we need to write the `print-X-axis' that uses
+`print-X-axis-tic-line' and `print-X-axis-numbered-line'.
+
+   The function must determine the local values of the variables used
+by both `print-X-axis-tic-line' and `print-X-axis-numbered-line', and
+then it must call them.  Also, it must print the carriage return that
+separates the two lines.
+
+   The function consists of a varlist that specifies five local
+variables, and calls to each of the two line printing functions:
+
+     (defun print-X-axis (numbers-list)
+       "Print X axis labels to length of NUMBERS-LIST."
+       (let* ((leading-spaces
+               (make-string full-Y-label-width ? ))
+            ;; symbol-width is provided by graph-body-print
+            (tic-width (* symbol-width X-axis-label-spacing))
+            (X-length (length numbers-list))
+            (X-tic
+             (concat
+              (make-string
+               ;; Make a string of blanks.
+               (-  (* symbol-width X-axis-label-spacing)
+                   (length X-axis-tic-symbol))
+               ? )
+              ;; Concatenate blanks with tic symbol.
+              X-axis-tic-symbol))
+            (tic-number
+             (if (zerop (% X-length tic-width))
+                 (/ X-length tic-width)
+               (1+ (/ X-length tic-width)))))
+         (print-X-axis-tic-line tic-number leading-spaces X-tic)
+         (insert "\n")
+         (print-X-axis-numbered-line tic-number leading-spaces)))
+
+   You can test `print-X-axis':
+
+  1. Install `X-axis-tic-symbol', `X-axis-label-spacing',
+     `print-X-axis-tic-line', as well as `X-axis-element',
+     `print-X-axis-numbered-line', and `print-X-axis'.
+
+  2. Copy the following expression:
+
+          (progn
+           (let ((full-Y-label-width 5)
+                 (symbol-width 1))
+             (print-X-axis
+              '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16))))
+
+  3. Switch to the `*scratch*' buffer and place the cursor where you
+     want the axis labels to start.
+
+  4. Type `M-:' (`eval-expression').
+
+  5. Yank the test expression into the minibuffer with `C-y' (`yank)'.
+
+  6. Press <RET> to evaluate the expression.
+
+   Emacs will print the horizontal axis like this:
+
+          |   |    |    |    |
+          1   5   10   15   20
+
+
+File: eintr,  Node: Print Whole Graph,  Prev: print-X-axis,  Up: Full Graph
+
+C.4 Printing the Whole Graph
+============================
+
+Now we are nearly ready to print the whole graph.
+
+   The function to print the graph with the proper labels follows the
+outline we created earlier (*note A Graph with Labeled Axes: Full
+Graph.), but with additions.
+
+   Here is the outline:
+
+     (defun print-graph (numbers-list)
+       "DOCUMENTATION..."
+       (let ((height  ...
+             ...))
+         (print-Y-axis height ... )
+         (graph-body-print numbers-list)
+         (print-X-axis ... )))
+
+* Menu:
+
+* The final version::           A few changes.
+* Test print-graph::            Run a short test.
+* Graphing words in defuns::    Executing the final code.
+* lambda::                      How to write an anonymous function.
+* mapcar::                      Apply a function to elements of a list.
+* Another Bug::                 Yet another bug ... most insidious.
+* Final printed graph::         The graph itself!
+
+
+File: eintr,  Node: The final version,  Next: Test print-graph,  Prev: Print Whole Graph,  Up: Print Whole Graph
+
+Changes for the Final Version
+-----------------------------
+
+   The final version is different from what we planned in two ways:
+first, it contains additional values calculated once in the varlist;
+second, it carries an option to specify the labels' increment per row.
+This latter feature turns out to be essential; otherwise, a graph may
+have more rows than fit on a display or on a sheet of paper.
+
+   This new feature requires a change to the `Y-axis-column' function,
+to add `vertical-step' to it.  The function looks like this:
+
+     ;;; Final version.
+     (defun Y-axis-column
+       (height width-of-label &optional vertical-step)
+       "Construct list of labels for Y axis.
+     HEIGHT is maximum height of graph.
+     WIDTH-OF-LABEL is maximum width of label.
+     VERTICAL-STEP, an option, is a positive integer
+     that specifies how much a Y axis label increments
+     for each line.  For example, a step of 5 means
+     that each line is five units of the graph."
+       (let (Y-axis
+             (number-per-line (or vertical-step 1)))
+         (while (> height 1)
+           (if (zerop (% height Y-axis-label-spacing))
+               ;; Insert label.
+               (setq Y-axis
+                     (cons
+                      (Y-axis-element
+                       (* height number-per-line)
+                       width-of-label)
+                      Y-axis))
+             ;; Else, insert blanks.
+             (setq Y-axis
+                   (cons
+                    (make-string width-of-label ? )
+                    Y-axis)))
+           (setq height (1- height)))
+         ;; Insert base line.
+         (setq Y-axis (cons (Y-axis-element
+                             (or vertical-step 1)
+                             width-of-label)
+                            Y-axis))
+         (nreverse Y-axis)))
+
+   The values for the maximum height of graph and the width of a symbol
+are computed by `print-graph' in its `let' expression; so
+`graph-body-print' must be changed to accept them.
+
+     ;;; Final version.
+     (defun graph-body-print (numbers-list height symbol-width)
+       "Print a bar graph of the NUMBERS-LIST.
+     The numbers-list consists of the Y-axis values.
+     HEIGHT is maximum height of graph.
+     SYMBOL-WIDTH is number of each column."
+       (let (from-position)
+         (while numbers-list
+           (setq from-position (point))
+           (insert-rectangle
+            (column-of-graph height (car numbers-list)))
+           (goto-char from-position)
+           (forward-char symbol-width)
+           ;; Draw graph column by column.
+           (sit-for 0)
+           (setq numbers-list (cdr numbers-list)))
+         ;; Place point for X axis labels.
+         (forward-line height)
+         (insert "\n")))
+
+   Finally, the code for the `print-graph' function:
+
+     ;;; Final version.
+     (defun print-graph
+       (numbers-list &optional vertical-step)
+       "Print labeled bar graph of the NUMBERS-LIST.
+     The numbers-list consists of the Y-axis values.
+
+     Optionally, VERTICAL-STEP, a positive integer,
+     specifies how much a Y axis label increments for
+     each line.  For example, a step of 5 means that
+     each row is five units."
+       (let* ((symbol-width (length graph-blank))
+              ;; `height' is both the largest number
+              ;; and the number with the most digits.
+              (height (apply 'max numbers-list))
+              (height-of-top-line
+               (if (zerop (% height Y-axis-label-spacing))
+                   height
+                 ;; else
+                 (* (1+ (/ height Y-axis-label-spacing))
+                    Y-axis-label-spacing)))
+              (vertical-step (or vertical-step 1))
+              (full-Y-label-width
+               (length
+                (concat
+                 (number-to-string
+                  (* height-of-top-line vertical-step))
+                 Y-axis-tic))))
+
+         (print-Y-axis
+          height-of-top-line full-Y-label-width vertical-step)
+         (graph-body-print
+          numbers-list height-of-top-line symbol-width)
+         (print-X-axis numbers-list)))
+
+
+File: eintr,  Node: Test print-graph,  Next: Graphing words in defuns,  Prev: The final version,  Up: Print Whole Graph
+
+C.4.1 Testing `print-graph'
+---------------------------
+
+We can test the `print-graph' function with a short list of numbers:
+
+  1. Install the final versions of `Y-axis-column', `graph-body-print',
+     and `print-graph' (in addition to the rest of the code.)
+
+  2. Copy the following expression:
+
+          (print-graph '(3 2 5 6 7 5 3 4 6 4 3 2 1))
+
+  3. Switch to the `*scratch*' buffer and place the cursor where you
+     want the axis labels to start.
+
+  4. Type `M-:' (`eval-expression').
+
+  5. Yank the test expression into the minibuffer with `C-y' (`yank)'.
+
+  6. Press <RET> to evaluate the expression.
+
+   Emacs will print a graph that looks like this:
+
+     10 -
+
+
+              *
+             **   *
+      5 -   ****  *
+            **** ***
+          * *********
+          ************
+      1 - *************
+
+          |   |    |    |
+          1   5   10   15
+
+   On the other hand, if you pass `print-graph' a `vertical-step' value
+of 2, by evaluating this expression:
+
+     (print-graph '(3 2 5 6 7 5 3 4 6 4 3 2 1) 2)
+
+The graph looks like this:
+
+     20 -
+
+
+              *
+             **   *
+     10 -   ****  *
+            **** ***
+          * *********
+          ************
+      2 - *************
+
+          |   |    |    |
+          1   5   10   15
+
+(A question: is the `2' on the bottom of the vertical axis a bug or a
+feature?  If you think it is a bug, and should be a `1' instead, (or
+even a `0'), you can modify the sources.)
+
+
+File: eintr,  Node: Graphing words in defuns,  Next: lambda,  Prev: Test print-graph,  Up: Print Whole Graph
+
+C.4.2 Graphing Numbers of Words and Symbols
+-------------------------------------------
+
+Now for the graph for which all this code was written: a graph that
+shows how many function definitions contain fewer than 10 words and
+symbols, how many contain between 10 and 19 words and symbols, how many
+contain between 20 and 29 words and symbols, and so on.
+
+   This is a multi-step process.  First make sure you have loaded all
+the requisite code.
+
+   It is a good idea to reset the value of `top-of-ranges' in case you
+have set it to some different value.  You can evaluate the following:
+
+     (setq top-of-ranges
+      '(10  20  30  40  50
+        60  70  80  90 100
+       110 120 130 140 150
+       160 170 180 190 200
+       210 220 230 240 250
+       260 270 280 290 300)
+
+Next create a list of the number of words and symbols in each range.
+
+Evaluate the following:
+
+     (setq list-for-graph
+            (defuns-per-range
+              (sort
+               (recursive-lengths-list-many-files
+                (directory-files "/usr/local/emacs/lisp"
+                                 t ".+el$"))
+               '<)
+              top-of-ranges))
+
+On my old machine, this took about an hour.  It looked though 303 Lisp
+files in my copy of Emacs version 19.23.  After all that computing, the
+`list-for-graph' had this value:
+
+     (537 1027 955 785 594 483 349 292 224 199 166 120 116 99
+     90 80 67 48 52 45 41 33 28 26 25 20 12 28 11 13 220)
+
+This means that my copy of Emacs had 537 function definitions with
+fewer than 10 words or symbols in them, 1,027 function definitions with
+10 to 19 words or symbols in them, 955 function definitions with 20 to
+29 words or symbols in them, and so on.
+
+   Clearly, just by looking at this list we can see that most function
+definitions contain ten to thirty words and symbols.
+
+   Now for printing.  We do _not_ want to print a graph that is 1,030
+lines high ...  Instead, we should print a graph that is fewer than
+twenty-five lines high.  A graph that height can be displayed on almost
+any monitor, and easily printed on a sheet of paper.
+
+   This means that each value in `list-for-graph' must be reduced to
+one-fiftieth its present value.
+
+   Here is a short function to do just that, using two functions we have
+not yet seen, `mapcar' and `lambda'.
+
+     (defun one-fiftieth (full-range)
+       "Return list, each number one-fiftieth of previous."
+      (mapcar '(lambda (arg) (/ arg 50)) full-range))
+
+
+File: eintr,  Node: lambda,  Next: mapcar,  Prev: Graphing words in defuns,  Up: Print Whole Graph
+
+C.4.3 A `lambda' Expression: Useful Anonymity
+---------------------------------------------
+
+`lambda' is the symbol for an anonymous function, a function without a
+name.  Every time you use an anonymous function, you need to include
+its whole body.
+
+Thus,
+
+     (lambda (arg) (/ arg 50))
+
+is a function definition that says `return the value resulting from
+dividing whatever is passed to me as `arg' by 50'.
+
+   Earlier, for example, we had a function `multiply-by-seven'; it
+multiplied its argument by 7.  This function is similar, except it
+divides its argument by 50; and, it has no name.  The anonymous
+equivalent of `multiply-by-seven' is:
+
+     (lambda (number) (* 7 number))
+
+(*Note The `defun' Special Form: defun.)
+
+If we want to multiply 3 by 7, we can write:
+
+     (multiply-by-seven 3)
+      \_______________/ ^
+              |         |
+           function  argument
+
+
+
+This expression returns 21.
+
+Similarly, we can write:
+
+     ((lambda (number) (* 7 number)) 3)
+      \____________________________/ ^
+                    |                |
+           anonymous function     argument
+
+
+
+If we want to divide 100 by 50, we can write:
+
+     ((lambda (arg) (/ arg 50)) 100)
+      \______________________/  \_/
+                  |              |
+         anonymous function   argument
+
+
+
+This expression returns 2.  The 100 is passed to the function, which
+divides that number by 50.
+
+   *Note Lambda Expressions: (elisp)Lambda Expressions, for more about
+`lambda'.  Lisp and lambda expressions derive from the Lambda Calculus.
+
+
+File: eintr,  Node: mapcar,  Next: Another Bug,  Prev: lambda,  Up: Print Whole Graph
+
+C.4.4 The `mapcar' Function
+---------------------------
+
+`mapcar' is a function that calls its first argument with each element
+of its second argument, in turn.  The second argument must be a
+sequence.
+
+   The `map' part of the name comes from the mathematical phrase,
+`mapping over a domain', meaning to apply a function to each of the
+elements in a domain.  The mathematical phrase is based on the metaphor
+of a surveyor walking, one step at a time, over an area he is mapping.
+And `car', of course, comes from the Lisp notion of the first of a list.
+
+For example,
+
+     (mapcar '1+ '(2 4 6))
+          => (3 5 7)
+
+The function `1+' which adds one to its argument, is executed on _each_
+element of the list, and a new list is returned.
+
+   Contrast this with `apply', which applies its first argument to all
+the remaining.  (*Note Readying a Graph: Readying a Graph, for a
+explanation of `apply'.)
+
+   In the definition of `one-fiftieth', the first argument is the
+anonymous function:
+
+     (lambda (arg) (/ arg 50))
+
+and the second argument is `full-range', which will be bound to
+`list-for-graph'.
+
+   The whole expression looks like this:
+
+     (mapcar '(lambda (arg) (/ arg 50)) full-range))
+
+   *Note Mapping Functions: (elisp)Mapping Functions, for more about
+`mapcar'.
+
+   Using the `one-fiftieth' function, we can generate a list in which
+each element is one-fiftieth the size of the corresponding element in
+`list-for-graph'.
+
+     (setq fiftieth-list-for-graph
+           (one-fiftieth list-for-graph))
+
+   The resulting list looks like this:
+
+     (10 20 19 15 11 9 6 5 4 3 3 2 2
+     1 1 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 4)
+
+This, we are almost ready to print!  (We also notice the loss of
+information: many of the higher ranges are 0, meaning that fewer than
+50 defuns had that many words or symbols--but not necessarily meaning
+that none had that many words or symbols.)
+
+
+File: eintr,  Node: Another Bug,  Next: Final printed graph,  Prev: mapcar,  Up: Print Whole Graph
+
+C.4.5 Another Bug ... Most Insidious
+------------------------------------
+
+I said `almost ready to print'!  Of course, there is a bug in the
+`print-graph' function ...  It has a `vertical-step' option, but not a
+`horizontal-step' option.  The `top-of-range' scale goes from 10 to 300
+by tens.  But the `print-graph' function will print only by ones.
+
+   This is a classic example of what some consider the most insidious
+type of bug, the bug of omission.  This is not the kind of bug you can
+find by studying the code, for it is not in the code; it is an omitted
+feature.  Your best actions are to try your program early and often;
+and try to arrange, as much as you can, to write code that is easy to
+understand and easy to change.  Try to be aware, whenever you can, that
+whatever you have written, _will_ be rewritten, if not soon,
+eventually.  A hard maxim to follow.
+
+   It is the `print-X-axis-numbered-line' function that needs the work;
+and then the `print-X-axis' and the `print-graph' functions need to be
+adapted.  Not much needs to be done; there is one nicety: the numbers
+ought to line up under the tic marks.  This takes a little thought.
+
+   Here is the corrected `print-X-axis-numbered-line':
+
+     (defun print-X-axis-numbered-line
+       (number-of-X-tics X-axis-leading-spaces
+        &optional horizontal-step)
+       "Print line of X-axis numbers"
+       (let ((number X-axis-label-spacing)
+             (horizontal-step (or horizontal-step 1)))
+         (insert X-axis-leading-spaces)
+         ;; Delete extra leading spaces.
+         (delete-char
+          (- (1-
+              (length (number-to-string horizontal-step)))))
+         (insert (concat
+                  (make-string
+                   ;; Insert white space.
+                   (-  (* symbol-width
+                          X-axis-label-spacing)
+                       (1-
+                        (length
+                         (number-to-string horizontal-step)))
+                       2)
+                   ? )
+                  (number-to-string
+                   (* number horizontal-step))))
+         ;; Insert remaining numbers.
+         (setq number (+ number X-axis-label-spacing))
+         (while (> number-of-X-tics 1)
+           (insert (X-axis-element
+                    (* number horizontal-step)))
+           (setq number (+ number X-axis-label-spacing))
+           (setq number-of-X-tics (1- number-of-X-tics)))))
+
+   If you are reading this in Info, you can see the new versions of
+`print-X-axis' `print-graph' and evaluate them.  If you are reading
+this in a printed book, you can see the changed lines here (the full
+text is too much to print).
+
+     (defun print-X-axis (numbers-list horizontal-step)
+       "Print X axis labels to length of NUMBERS-LIST.
+     Optionally, HORIZONTAL-STEP, a positive integer,
+     specifies how much an X  axis label increments for
+     each column."
+     ;; Value of symbol-width and full-Y-label-width
+     ;; are passed by `print-graph'.
+       (let* ((leading-spaces
+               (make-string full-Y-label-width ? ))
+            ;; symbol-width is provided by graph-body-print
+            (tic-width (* symbol-width X-axis-label-spacing))
+            (X-length (length numbers-list))
+            (X-tic
+             (concat
+              (make-string
+               ;; Make a string of blanks.
+               (-  (* symbol-width X-axis-label-spacing)
+                   (length X-axis-tic-symbol))
+               ? )
+              ;; Concatenate blanks with tic symbol.
+              X-axis-tic-symbol))
+            (tic-number
+             (if (zerop (% X-length tic-width))
+                 (/ X-length tic-width)
+               (1+ (/ X-length tic-width)))))
+
+         (print-X-axis-tic-line
+          tic-number leading-spaces X-tic)
+         (insert "\n")
+         (print-X-axis-numbered-line
+          tic-number leading-spaces horizontal-step)))
+
+     (defun print-graph
+       (numbers-list &optional vertical-step horizontal-step)
+       "Print labeled bar graph of the NUMBERS-LIST.
+     The numbers-list consists of the Y-axis values.
+
+     Optionally, VERTICAL-STEP, a positive integer,
+     specifies how much a Y axis label increments for
+     each line.  For example, a step of 5 means that
+     each row is five units.
+
+     Optionally, HORIZONTAL-STEP, a positive integer,
+     specifies how much an X  axis label increments for
+     each column."
+       (let* ((symbol-width (length graph-blank))
+              ;; `height' is both the largest number
+              ;; and the number with the most digits.
+              (height (apply 'max numbers-list))
+              (height-of-top-line
+               (if (zerop (% height Y-axis-label-spacing))
+                   height
+                 ;; else
+                 (* (1+ (/ height Y-axis-label-spacing))
+                    Y-axis-label-spacing)))
+              (vertical-step (or vertical-step 1))
+              (full-Y-label-width
+               (length
+                (concat
+                 (number-to-string
+                  (* height-of-top-line vertical-step))
+                 Y-axis-tic))))
+         (print-Y-axis
+          height-of-top-line full-Y-label-width vertical-step)
+         (graph-body-print
+             numbers-list height-of-top-line symbol-width)
+         (print-X-axis numbers-list horizontal-step)))
+
+
+File: eintr,  Node: Final printed graph,  Prev: Another Bug,  Up: Print Whole Graph
+
+C.4.6 The Printed Graph
+-----------------------
+
+When made and installed, you can call the `print-graph' command like
+this:
+
+     (print-graph fiftieth-list-for-graph 50 10)
+
+
+Here is the graph:
+
+
+     1000 -  *
+             **
+             **
+             **
+             **
+      750 -  ***
+             ***
+             ***
+             ***
+             ****
+      500 - *****
+            ******
+            ******
+            ******
+            *******
+      250 - ********
+            *********                     *
+            ***********                   *
+            *************                 *
+       50 - ***************** *           *
+            |   |    |    |    |    |    |    |
+           10  50  100  150  200  250  300  350
+
+
+
+The largest group of functions contain 10 - 19 words and symbols each.
+
+
+File: eintr,  Node: Free Software and Free Manuals,  Next: GNU Free Documentation License,  Prev: Full Graph,  Up: Top
+
+Appendix D Free Software and Free Manuals
+*****************************************
+
+*by Richard M. Stallman*
+
+   The biggest deficiency in free operating systems is not in the
+software--it is the lack of good free manuals that we can include in
+these systems.  Many of our most important programs do not come with
+full manuals.  Documentation is an essential part of any software
+package; when an important free software package does not come with a
+free manual, that is a major gap.  We have many such gaps today.
+
+   Once upon a time, many years ago, I thought I would learn Perl.  I
+got a copy of a free manual, but I found it hard to read.  When I asked
+Perl users about alternatives, they told me that there were better
+introductory manuals--but those were not free.
+
+   Why was this?  The authors of the good manuals had written them for
+O'Reilly Associates, which published them with restrictive terms--no
+copying, no modification, source files not available--which exclude
+them from the free software community.
+
+   That wasn't the first time this sort of thing has happened, and (to
+our community's great loss) it was far from the last.  Proprietary
+manual publishers have enticed a great many authors to restrict their
+manuals since then.  Many times I have heard a GNU user eagerly tell me
+about a manual that he is writing, with which he expects to help the
+GNU project--and then had my hopes dashed, as he proceeded to explain
+that he had signed a contract with a publisher that would restrict it
+so that we cannot use it.
+
+   Given that writing good English is a rare skill among programmers, we
+can ill afford to lose manuals this way.
+
+   Free documentation, like free software, is a matter of freedom, not
+price.  The problem with these manuals was not that O'Reilly Associates
+charged a price for printed copies--that in itself is fine.  The Free
+Software Foundation sells printed copies (http://shop.fsf.org) of free
+GNU manuals (http://www.gnu.org/doc/doc.html), too.  But GNU manuals
+are available in source code form, while these manuals are available
+only on paper.  GNU manuals come with permission to copy and modify;
+the Perl manuals do not.  These restrictions are the problems.
+
+   The criterion for a free manual is pretty much the same as for free
+software: it is a matter of giving all users certain freedoms.
+Redistribution (including commercial redistribution) must be permitted,
+so that the manual can accompany every copy of the program, on-line or
+on paper.  Permission for modification is crucial too.
+
+   As a general rule, I don't believe that it is essential for people to
+have permission to modify all sorts of articles and books.  The issues
+for writings are not necessarily the same as those for software.  For
+example, I don't think you or I are obliged to give permission to
+modify articles like this one, which describe our actions and our views.
+
+   But there is a particular reason why the freedom to modify is crucial
+for documentation for free software.  When people exercise their right
+to modify the software, and add or change its features, if they are
+conscientious they will change the manual too--so they can provide
+accurate and usable documentation with the modified program.  A manual
+which forbids programmers to be conscientious and finish the job, or
+more precisely requires them to write a new manual from scratch if they
+change the program, does not fill our community's needs.
+
+   While a blanket prohibition on modification is unacceptable, some
+kinds of limits on the method of modification pose no problem.  For
+example, requirements to preserve the original author's copyright
+notice, the distribution terms, or the list of authors, are ok.  It is
+also no problem to require modified versions to include notice that
+they were modified, even to have entire sections that may not be
+deleted or changed, as long as these sections deal with nontechnical
+topics.  (Some GNU manuals have them.)
+
+   These kinds of restrictions are not a problem because, as a practical
+matter, they don't stop the conscientious programmer from adapting the
+manual to fit the modified program.  In other words, they don't block
+the free software community from making full use of the manual.
+
+   However, it must be possible to modify all the technical content of
+the manual, and then distribute the result in all the usual media,
+through all the usual channels; otherwise, the restrictions do block
+the community, the manual is not free, and so we need another manual.
+
+   Unfortunately, it is often hard to find someone to write another
+manual when a proprietary manual exists.  The obstacle is that many
+users think that a proprietary manual is good enough--so they don't see
+the need to write a free manual.  They do not see that the free
+operating system has a gap that needs filling.
+
+   Why do users think that proprietary manuals are good enough? Some
+have not considered the issue.  I hope this article will do something to
+change that.
+
+   Other users consider proprietary manuals acceptable for the same
+reason so many people consider proprietary software acceptable: they
+judge in purely practical terms, not using freedom as a criterion.
+These people are entitled to their opinions, but since those opinions
+spring from values which do not include freedom, they are no guide for
+those of us who do value freedom.
+
+   Please spread the word about this issue.  We continue to lose manuals
+to proprietary publishing.  If we spread the word that proprietary
+manuals are not sufficient, perhaps the next person who wants to help
+GNU by writing documentation will realize, before it is too late, that
+he must above all make it free.
+
+   We can also encourage commercial publishers to sell free, copylefted
+manuals instead of proprietary ones.  One way you can help this is to
+check the distribution terms of a manual before you buy it, and prefer
+copylefted manuals to non-copylefted ones.
+
+
+
+Note: The Free Software Foundation maintains a page on its Web site
+that lists free books available from other publishers:
+`http://www.gnu.org/doc/other-free-books.html'
+
+
+File: eintr,  Node: GNU Free Documentation License,  Next: Index,  Prev: Free Software and Free Manuals,  Up: Top
+
+Appendix E GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: eintr,  Node: Index,  Next: About the Author,  Prev: GNU Free Documentation License,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* % (remainder function):                Compute a Remainder. (line   6)
+* (debug) in code:                       debug-on-quit.       (line  13)
+* * (multiplication):                    defun.               (line 102)
+* * for read-only buffer:                Read-only buffer.    (line   6)
+* *scratch* buffer:                      print-elements-of-list.
+                                                              (line   9)
+* .emacs file:                           Emacs Initialization.
+                                                              (line   6)
+* .emacs file, beginning of:             Beginning a .emacs File.
+                                                              (line   6)
+* / (division):                          Large buffer case.   (line  38)
+* <= (less than or equal):               Inc Example parts.   (line  47)
+* > (greater than):                      if in more detail.   (line  32)
+* Accumulate, type of recursive pattern: Accumulate.          (line   6)
+* add-hook:                              Text and Auto-fill.  (line  54)
+* and <1>:                               fwd-para let.        (line  46)
+* and:                                   kill-new function.   (line 212)
+* Anonymous function:                    lambda.              (line   6)
+* append-to-buffer:                      append-to-buffer.    (line   6)
+* apply:                                 Columns of a graph.  (line 144)
+* apropos:                               Columns of a graph.  (line  33)
+* Argument as local variable:            Dec Example altogether.
+                                                              (line  27)
+* argument defined:                      Arguments.           (line  16)
+* argument list defined:                 defun.               (line  61)
+* Argument, wrong type of:               Wrong Type of Argument.
+                                                              (line   6)
+* Arguments:                             Arguments.           (line   6)
+* Arguments' data types:                 Data types.          (line   6)
+* Arguments, variable number of:         Variable Number of Arguments.
+                                                              (line   6)
+* Asterisk for read-only buffer:         Read-only buffer.    (line   6)
+* Auto Fill mode turned on:              Text and Auto-fill.  (line  54)
+* autoload:                              Autoload.            (line   6)
+* Automatic mode selection:              Text and Auto-fill.  (line  22)
+* Axis, print horizontal:                print-X-axis.        (line   6)
+* Axis, print vertical:                  print-Y-axis.        (line   6)
+* beginning-of-buffer:                   beginning-of-buffer. (line   6)
+* bind defined:                          set & setq.          (line   6)
+* Bindings, key, fixing unpleasant:      Miscellaneous.       (line  89)
+* body defined:                          defun.               (line  39)
+* Body of graph:                         Readying a Graph.    (line   6)
+* Buffer size:                           Buffer Size & Locations.
+                                                              (line   6)
+* Buffer, history of word:               Buffer Names.        (line  66)
+* buffer-file-name:                      Buffer Names.        (line   6)
+* buffer-menu, bound to key:             Keybindings.         (line  69)
+* buffer-name:                           Buffer Names.        (line   6)
+* Bug, most insidious type:              Another Bug.         (line   6)
+* Building robots:                       Building Robots.     (line   6)
+* Building Tags in the Emacs sources:    etags.               (line  88)
+* Byte compiling:                        Byte Compiling.      (line   6)
+* C language primitives:                 Primitive Functions. (line   6)
+* C, a digression into:                  Digression into C.   (line   6)
+* call defined:                          Switching Buffers.   (line  55)
+* cancel-debug-on-entry:                 debug-on-entry.      (line  83)
+* car, introduced:                       car cdr & cons.      (line   6)
+* cdr, introduced:                       car cdr & cons.      (line   6)
+* Changing a function definition:        Change a defun.      (line   6)
+* Chest of Drawers, metaphor for a symbol: Symbols as Chest.  (line   6)
+* Clipping text:                         Cutting & Storing Text.
+                                                              (line   6)
+* Code installation:                     Permanent Installation.
+                                                              (line   6)
+* command defined:                       How to Evaluate.     (line  11)
+* Comments in Lisp code:                 Change a defun.      (line  23)
+* Common Lisp:                           Lisp History.        (line  11)
+* compare-windows:                       Keybindings.         (line  11)
+* concat:                                Data types.          (line  11)
+* cond:                                  Recursion with cond. (line   6)
+* condition-case:                        condition-case.      (line   6)
+* Conditional 'twixt two versions of Emacs: Simple Extension. (line  37)
+* Conditional with if:                   if.                  (line   6)
+* cons, introduced:                      cons.                (line   6)
+* copy-region-as-kill:                   copy-region-as-kill. (line   6)
+* copy-to-buffer:                        copy-to-buffer.      (line   6)
+* Count words recursively:               recursive-count-words.
+                                                              (line   6)
+* count-words-example:                   count-words-example. (line   6)
+* count-words-in-defun:                  count-words-in-defun.
+                                                              (line  99)
+* Counting:                              Counting.            (line   6)
+* Counting words in a defun <1>:         count-words-in-defun.
+                                                              (line   6)
+* Counting words in a defun:             Words in a defun.    (line   6)
+* current-buffer:                        Getting Buffers.     (line   6)
+* current-kill:                          current-kill.        (line   6)
+* Customizing your .emacs file:          Emacs Initialization.
+                                                              (line   6)
+* Cutting and storing text:              Cutting & Storing Text.
+                                                              (line   6)
+* Data types:                            Data types.          (line   6)
+* debug:                                 debug.               (line   6)
+* debug-on-entry:                        debug-on-entry.      (line   6)
+* debug-on-quit:                         debug-on-quit.       (line   9)
+* debugging:                             Debugging.           (line   6)
+* default.el init file:                  Site-wide Init.      (line   6)
+* defconst:                              defcustom.           (line 128)
+* defcustom:                             defcustom.           (line   6)
+* Deferment in recursion:                No Deferment.        (line   6)
+* Defermentless solution:                No deferment solution.
+                                                              (line   6)
+* Definition installation:               Install.             (line   6)
+* Definition writing:                    Writing Defuns.      (line   6)
+* Definition, how to change:             Change a defun.      (line   6)
+* defsubst:                              defcustom.           (line 128)
+* defun:                                 defun.               (line   6)
+* defvar:                                defvar.              (line   6)
+* defvar for a user customizable variable: defvar and asterisk.
+                                                              (line   6)
+* defvar with an asterisk:               defvar and asterisk. (line   6)
+* delete-and-extract-region:             Digression into C.   (line   6)
+* Deleting text:                         Cutting & Storing Text.
+                                                              (line   6)
+* describe-function:                     simplified-beginning-of-buffer.
+                                                              (line  81)
+* describe-function, introduced:         Finding More.        (line   6)
+* Digression into C:                     Digression into C.   (line   6)
+* directory-files:                       Files List.          (line  13)
+* Division:                              Large buffer case.   (line  38)
+* dolist:                                dolist.              (line   6)
+* dotimes:                               dotimes.             (line   6)
+* Drawers, Chest of, metaphor for a symbol: Symbols as Chest. (line   6)
+* Duplicated words function:             the-the.             (line   6)
+* edebug:                                edebug.              (line   6)
+* Else:                                  else.                (line   6)
+* Emacs version, choosing:               Simple Extension.    (line  37)
+* empty list defined:                    Lisp Atoms.          (line  18)
+* empty string defined:                  Review.              (line 141)
+* eobp:                                  fwd-para while.      (line  59)
+* eq:                                    Review.              (line 127)
+* eq (example of use):                   last-command & this-command.
+                                                              (line  36)
+* equal:                                 Review.              (line 127)
+* Erasing text:                          Cutting & Storing Text.
+                                                              (line   6)
+* error:                                 Body of current-kill.
+                                                              (line  40)
+* Error for symbol without function:     Void Function.       (line   6)
+* Error for symbol without value:        Void Variable.       (line   6)
+* Error message generation:              Making Errors.       (line   6)
+* etags:                                 etags.               (line   6)
+* evaluate defined:                      Run a Program.       (line   6)
+* Evaluating inner lists:                Evaluating Inner Lists.
+                                                              (line   6)
+* Evaluation:                            Evaluation.          (line   6)
+* Evaluation practice:                   Practicing Evaluation.
+                                                              (line   6)
+* Every, type of recursive pattern:      Every.               (line   6)
+* Example variable, fill-column:         fill-column Example. (line   6)
+* expression defined:                    Lisp Atoms.          (line  25)
+* Falsehood and truth in Emacs Lisp:     Truth & Falsehood.   (line   6)
+* FDL, GNU Free Documentation License:   GNU Free Documentation License.
+                                                              (line   6)
+* files-in-below-directory:              Files List.          (line  26)
+* fill-column, an example variable:      fill-column Example. (line   6)
+* filter-buffer-substring:               last-command & this-command.
+                                                              (line  29)
+* Find a File:                           Find a File.         (line   6)
+* Find function documentation:           Finding More.        (line   6)
+* Find source of function:               Finding More.        (line  13)
+* find-tag:                              Finding More.        (line  39)
+* Flowers in a field:                    Lisp Lists.          (line  18)
+* Focusing attention (narrowing):        Narrowing & Widening.
+                                                              (line   6)
+* form defined:                          Lisp Atoms.          (line  25)
+* Formatting convention:                 append save-excursion.
+                                                              (line  15)
+* Formatting help:                       Typing Lists.        (line   6)
+* forward-paragraph:                     forward-paragraph.   (line   6)
+* forward-sentence:                      forward-sentence.    (line   6)
+* function defined:                      Making Errors.       (line  46)
+* function definition defined:           defun.               (line   6)
+* Function definition installation:      Install.             (line   6)
+* Function definition writing:           Writing Defuns.      (line   6)
+* Function definition, how to change:    Change a defun.      (line   6)
+* Functions, primitive:                  Primitive Functions. (line   6)
+* Generate an error message:             Making Errors.       (line   6)
+* Getting a buffer:                      Getting Buffers.     (line   6)
+* Global set key:                        Keybindings.         (line  18)
+* global variable defined:               Determining the Element.
+                                                              (line  90)
+* global-set-key:                        Keybindings.         (line  18)
+* global-unset-key:                      Keybindings.         (line  58)
+* Graph prototype:                       Readying a Graph.    (line   6)
+* Graph, printing all:                   Print Whole Graph.   (line   6)
+* graph-body-print:                      graph-body-print.    (line   6)
+* graph-body-print Final version.:       The final version.   (line  53)
+* Handling the kill ring:                Kill Ring.           (line   6)
+* Help typing lists:                     Typing Lists.        (line   6)
+* Horizontal axis printing:              print-X-axis.        (line   6)
+* if:                                    if.                  (line   6)
+* if-part defined:                       if in more detail.   (line   6)
+* indent-tabs-mode:                      Indent Tabs Mode.    (line   6)
+* Indentation for formatting:            append save-excursion.
+                                                              (line  15)
+* Initialization file:                   Emacs Initialization.
+                                                              (line   6)
+* Initializing a variable:               defvar.              (line   6)
+* Inner list evaluation:                 Evaluating Inner Lists.
+                                                              (line   6)
+* insert-buffer:                         insert-buffer.       (line   6)
+* insert-buffer, new version body:       New insert-buffer.   (line   6)
+* insert-buffer-substring:               append-to-buffer overview.
+                                                              (line   6)
+* Insidious type of bug:                 Another Bug.         (line   6)
+* Install a Function Definition:         Install.             (line   6)
+* Install code permanently:              Permanent Installation.
+                                                              (line   6)
+* interactive:                           Interactive.         (line   6)
+* interactive function defined:          How to Evaluate.     (line  11)
+* Interactive functions:                 Interactive.         (line   6)
+* Interactive options:                   Interactive Options. (line   6)
+* interactive, example use of:           insert-buffer interactive.
+                                                              (line   6)
+* Interpreter, Lisp, explained:          Run a Program.       (line  39)
+* Interpreter, what it does:             Lisp Interpreter.    (line   6)
+* Keep, type of recursive pattern:       Keep.                (line   6)
+* Key bindings, fixing:                  Miscellaneous.       (line  89)
+* Key setting globally:                  Keybindings.         (line  18)
+* Key unbinding:                         Keybindings.         (line  58)
+* Keymaps:                               Keymaps.             (line   6)
+* Keyword:                               Optional Arguments.  (line  11)
+* Kill ring handling:                    Kill Ring.           (line   6)
+* Kill ring overview:                    Kill Ring Overview.  (line   6)
+* kill-append:                           kill-append function.
+                                                              (line   6)
+* kill-new:                              kill-new function.   (line   6)
+* kill-region:                           kill-region.         (line   6)
+* Killing text:                          Cutting & Storing Text.
+                                                              (line   6)
+* lambda:                                lambda.              (line   6)
+* length:                                length.              (line   6)
+* lengths-list-file:                     lengths-list-file.   (line  11)
+* lengths-list-many-files:               lengths-list-many-files.
+                                                              (line  33)
+* let:                                   let.                 (line   6)
+* let expression sample:                 Sample let Expression.
+                                                              (line   6)
+* let expression, parts of:              Parts of let Expression.
+                                                              (line   6)
+* let variables uninitialized:           Uninitialized let Variables.
+                                                              (line   6)
+* Library, as term for `file':           Finding More.        (line  63)
+* line-to-top-of-window:                 Simple Extension.    (line   6)
+* Lisp Atoms:                            Lisp Atoms.          (line   6)
+* Lisp history:                          Lisp History.        (line   6)
+* Lisp interpreter, explained:           Run a Program.       (line  39)
+* Lisp interpreter, what it does:        Lisp Interpreter.    (line   6)
+* Lisp Lists:                            Lisp Lists.          (line   6)
+* Lisp macro:                            Lisp macro.          (line   6)
+* list-buffers, rebound:                 Keybindings.         (line  69)
+* Lists in a computer:                   List Implementation. (line   6)
+* load-library:                          Loading Files.       (line  53)
+* load-path:                             Loading Files.       (line  37)
+* Loading files:                         Loading Files.       (line   6)
+* local variable defined:                Prevent confusion.   (line   6)
+* Local variables list, per-buffer,:     Text and Auto-fill.  (line  22)
+* Location of point:                     Buffer Size & Locations.
+                                                              (line   6)
+* looking-at:                            fwd-para while.      (line  82)
+* Loops:                                 while.               (line   6)
+* Loops and recursion:                   Loops & Recursion.   (line   6)
+* Maclisp:                               Lisp History.        (line  11)
+* Macro, lisp:                           Lisp macro.          (line   6)
+* Mail aliases:                          Mail Aliases.        (line  15)
+* make tags:                             etags.               (line  88)
+* make-string:                           Y Axis Element.      (line  74)
+* mapcar:                                mapcar.              (line   6)
+* mark:                                  save-excursion.      (line   6)
+* mark-whole-buffer:                     mark-whole-buffer.   (line   6)
+* match-beginning:                       fwd-para while.      (line 160)
+* max:                                   Columns of a graph.  (line 132)
+* message:                               message.             (line   6)
+* min:                                   Columns of a graph.  (line 132)
+* Mode line format:                      Mode Line.           (line   6)
+* Mode selection, automatic:             Text and Auto-fill.  (line  22)
+* mode-line-format:                      Mode Line.           (line   6)
+* Motion by sentence and paragraph:      Regexp Search.       (line   6)
+* Narrowing:                             Narrowing & Widening.
+                                                              (line   6)
+* narrowing defined:                     Buffer Size & Locations.
+                                                              (line  42)
+* new version body for insert-buffer:    New insert-buffer.   (line   6)
+* nil:                                   Truth & Falsehood.   (line   6)
+* nil, history of word:                  Buffer Names.        (line  42)
+* No deferment solution:                 No deferment solution.
+                                                              (line   6)
+* nreverse:                              Counting function definitions.
+                                                              (line 100)
+* nth:                                   nth.                 (line   6)
+* nthcdr <1>:                            copy-region-as-kill. (line   6)
+* nthcdr:                                nthcdr.              (line   6)
+* nthcdr, example:                       kill-new function.   (line 150)
+* number-to-string:                      Y Axis Element.      (line  13)
+* occur:                                 Keybindings.         (line  53)
+* optional:                              Optional Arguments.  (line  11)
+* Optional arguments:                    Optional Arguments.  (line  11)
+* Options for interactive:               Interactive Options. (line   6)
+* or:                                    Insert or.           (line  13)
+* other-buffer:                          Getting Buffers.     (line   6)
+* Paragraphs, movement by:               Regexp Search.       (line   6)
+* Parts of a Recursive Definition:       Recursive Definition Parts.
+                                                              (line   6)
+* Parts of let expression:               Parts of let Expression.
+                                                              (line   6)
+* Passing information to functions:      Arguments.           (line   6)
+* Pasting text:                          Yanking.             (line   6)
+* Patterns, searching for:               Regexp Search.       (line   6)
+* Per-buffer, local variables list:      Text and Auto-fill.  (line  22)
+* Permanent code installation:           Permanent Installation.
+                                                              (line   6)
+* point:                                 save-excursion.      (line   6)
+* point defined:                         Buffer Size & Locations.
+                                                              (line  19)
+* Point location:                        Buffer Size & Locations.
+                                                              (line   6)
+* Point, mark, buffer preservation:      save-excursion.      (line   6)
+* Practicing evaluation:                 Practicing Evaluation.
+                                                              (line   6)
+* Preserving point, mark, and buffer:    save-excursion.      (line   6)
+* Primitive functions:                   Primitive Functions. (line   6)
+* Primitives written in C:               Primitive Functions. (line   6)
+* Print horizontal axis:                 print-X-axis.        (line   6)
+* Print vertical axis:                   print-Y-axis.        (line   6)
+* print-elements-of-list:                print-elements-of-list.
+                                                              (line   6)
+* print-elements-recursively:            Recursion with list. (line  23)
+* print-graph Final version.:            The final version.   (line  75)
+* print-graph varlist:                   print-graph Varlist. (line   6)
+* print-X-axis:                          X Axis Tic Marks.    (line 146)
+* print-X-axis-numbered-line:            X Axis Tic Marks.    (line 116)
+* print-X-axis-tic-line:                 X Axis Tic Marks.    (line  82)
+* print-Y-axis:                          print-Y-axis Penultimate.
+                                                              (line   9)
+* Printing the whole graph:              Print Whole Graph.   (line   6)
+* progn:                                 progn.               (line   6)
+* Program, running one:                  Run a Program.       (line   6)
+* Properties, in mode line example:      Mode Line.           (line  64)
+* Properties, mention of buffer-substring-no-properties: narrow Exercise.
+                                                              (line  13)
+* Prototype graph:                       Readying a Graph.    (line   6)
+* push, example:                         kill-new function.   (line 119)
+* re-search-forward:                     re-search-forward.   (line   6)
+* Read-only buffer:                      Read-only buffer.    (line   6)
+* Readying a graph:                      Readying a Graph.    (line   6)
+* Rebinding keys:                        Keymaps.             (line   6)
+* Recursion:                             Recursion.           (line   6)
+* Recursion and loops:                   Loops & Recursion.   (line   6)
+* Recursion without Deferments:          No Deferment.        (line   6)
+* Recursive Definition Parts:            Recursive Definition Parts.
+                                                              (line   6)
+* Recursive pattern: accumulate:         Accumulate.          (line   6)
+* Recursive pattern: every:              Every.               (line   6)
+* Recursive pattern: keep:               Keep.                (line   6)
+* Recursive Patterns:                    Recursive Patterns.  (line   6)
+* recursive-count-words:                 recursive-count-words.
+                                                              (line 258)
+* recursive-graph-body-print:            recursive-graph-body-print.
+                                                              (line   6)
+* recursive-lengths-list-many-files:     Several files recursively.
+                                                              (line  17)
+* Recursively counting words:            recursive-count-words.
+                                                              (line   6)
+* regexp-quote:                          fwd-para let.        (line  74)
+* Region, what it is:                    save-excursion.      (line   6)
+* Regular expression searches:           Regexp Search.       (line   6)
+* Regular expressions for word counting: Counting Words.      (line   6)
+* Remainder function, %:                 Compute a Remainder. (line   6)
+* Repetition (loops):                    Loops & Recursion.   (line   6)
+* Repetition for word counting:          Counting Words.      (line   6)
+* Retrieving text:                       Yanking.             (line   6)
+* returned value explained:              How the Interpreter Acts.
+                                                              (line   6)
+* reverse:                               Counting function definitions.
+                                                              (line 115)
+* Ring, making a list like a:            Kill Ring.           (line   6)
+* ring.el file:                          ring file.           (line   6)
+* Robots, building:                      Building Robots.     (line   6)
+* Run a program:                         Run a Program.       (line   6)
+* Sample let expression:                 Sample let Expression.
+                                                              (line   6)
+* save-excursion:                        save-excursion.      (line   6)
+* save-restriction:                      save-restriction.    (line   6)
+* search-forward:                        search-forward.      (line   6)
+* Searches, illustrating:                Regexp Search.       (line   6)
+* sentence-end:                          sentence-end.        (line   6)
+* Sentences, movement by:                Regexp Search.       (line   6)
+* set:                                   Using set.           (line   6)
+* set-buffer:                            Switching Buffers.   (line   6)
+* set-variable:                          defvar and asterisk. (line  22)
+* setcar:                                setcar.              (line   6)
+* setcdr:                                setcdr.              (line   6)
+* setcdr, example:                       kill-new function.   (line 154)
+* setq:                                  Using setq.          (line   6)
+* Setting a key globally:                Keybindings.         (line  18)
+* Setting value of variable:             set & setq.          (line   6)
+* side effect defined:                   How the Interpreter Acts.
+                                                              (line  15)
+* Simple extension in .emacs file:       Simple Extension.    (line   6)
+* simplified-beginning-of-buffer:        simplified-beginning-of-buffer.
+                                                              (line   6)
+* site-init.el init file:                Site-wide Init.      (line   6)
+* site-load.el init file:                Site-wide Init.      (line   6)
+* Size of buffer:                        Buffer Size & Locations.
+                                                              (line   6)
+* Solution without deferment:            No deferment solution.
+                                                              (line   6)
+* sort:                                  Sorting.             (line   6)
+* Source level debugger:                 edebug.              (line   6)
+* Special form:                          Complications.       (line  12)
+* Special form of defun:                 defun.               (line   6)
+* Storing and cutting text:              Cutting & Storing Text.
+                                                              (line   6)
+* string defined:                        Lisp Atoms.          (line  64)
+* switch-to-buffer:                      Switching Buffers.   (line   6)
+* Switching to a buffer:                 Switching Buffers.   (line   6)
+* Symbol names:                          Names & Definitions. (line   6)
+* Symbol without function error:         Void Function.       (line   6)
+* Symbol without value error:            Void Variable.       (line   6)
+* Symbolic expressions, introduced:      Lisp Atoms.          (line  25)
+* Symbols as a Chest of Drawers:         Symbols as Chest.    (line   6)
+* Syntax categories and tables:          Syntax.              (line   6)
+* Tabs, preventing:                      Indent Tabs Mode.    (line   6)
+* TAGS file, create own:                 etags.               (line   6)
+* Tags in the Emacs sources:             etags.               (line  88)
+* TAGS table, specifying:                Finding More.        (line  39)
+* Text between double quotation marks:   Lisp Atoms.          (line  60)
+* Text Mode turned on:                   Text and Auto-fill.  (line  39)
+* Text retrieval:                        Yanking.             (line   6)
+* the-the:                               the-the.             (line   6)
+* then-part defined:                     if in more detail.   (line   6)
+* top-of-ranges:                         Counting function definitions.
+                                                              (line  20)
+* triangle-bugged:                       debug.               (line  14)
+* triangle-recursively:                  Recursive triangle function.
+                                                              (line   6)
+* Truth and falsehood in Emacs Lisp:     Truth & Falsehood.   (line   6)
+* Types of data:                         Data types.          (line   6)
+* Unbinding key:                         Keybindings.         (line  58)
+* Uninitialized let variables:           Uninitialized let Variables.
+                                                              (line   6)
+* Variable initialization:               defvar.              (line   6)
+* Variable number of arguments:          Variable Number of Arguments.
+                                                              (line   6)
+* Variable, example of, fill-column:     fill-column Example. (line   6)
+* variable, global, defined:             Determining the Element.
+                                                              (line  90)
+* variable, local, defined:              Prevent confusion.   (line   6)
+* Variable, setting value:               set & setq.          (line   6)
+* Variables:                             Variables.           (line   6)
+* varlist defined:                       Parts of let Expression.
+                                                              (line   6)
+* Version of Emacs, choosing:            Simple Extension.    (line  37)
+* Vertical axis printing:                print-Y-axis.        (line   6)
+* what-line:                             what-line.           (line   6)
+* while:                                 while.               (line   6)
+* Whitespace in lists:                   Whitespace in Lists. (line   6)
+* Whole graph printing:                  Print Whole Graph.   (line   6)
+* Widening:                              Narrowing & Widening.
+                                                              (line   6)
+* Widening, example of:                  what-line.           (line   6)
+* Word counting in a defun:              Words in a defun.    (line   6)
+* Words and symbols in defun:            Words and Symbols.   (line   6)
+* Words, counted recursively:            recursive-count-words.
+                                                              (line   6)
+* Words, duplicated:                     the-the.             (line   6)
+* Writing a function definition:         Writing Defuns.      (line   6)
+* Wrong type of argument:                Wrong Type of Argument.
+                                                              (line   6)
+* X axis printing:                       print-X-axis.        (line   6)
+* X-axis-element:                        X Axis Tic Marks.    (line 105)
+* Y axis printing:                       print-Y-axis.        (line   6)
+* Y-axis-column:                         Y-axis-column.       (line  10)
+* Y-axis-column Final version.:          The final version.   (line  15)
+* Y-axis-label-spacing:                  Compute a Remainder. (line  79)
+* Y-axis-tic:                            Y Axis Element.      (line  32)
+* yank <1>:                              yank.                (line   6)
+* yank:                                  Yanking.             (line   6)
+* yank-pop:                              yank-pop.            (line   6)
+* zap-to-char:                           zap-to-char.         (line   6)
+* zerop:                                 Body of current-kill.
+                                                              (line  40)
+
+
+File: eintr,  Node: About the Author,  Prev: Index,  Up: Top
+
+About the Author
+****************
+
+     Robert J. Chassell has worked with GNU Emacs since 1985.  He writes
+     and edits, teaches Emacs and Emacs Lisp, and speaks throughout the
+     world on software freedom.  Chassell was a founding Director and
+     Treasurer of the Free Software Foundation, Inc.  He is co-author of
+     the `Texinfo' manual, and has edited more than a dozen other
+     books.  He graduated from Cambridge University, in England.  He
+     has an abiding interest in social and economic history and flies
+     his own airplane.
+
+

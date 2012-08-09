@@ -1,0 +1,94 @@
+;; wisent.srt --- SRecode templates for Emacs/WISENT grammar files.
+
+;; Copyright (C) 2007-2012 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set mode "wisent-grammar-mode"
+set comment_start  ";;"
+set comment_prefix  ";;"
+set comment_end  ""
+
+context file
+
+template empty :file :user :time
+"Insert a skeleton for a grammar file."
+----
+{{>:filecomment}}
+
+;;; Commentary:
+;;
+;; Parser for {{?TARGETMODE}} mode
+
+%languagemode {{TARGETMODE}}-mode
+%parsetable    wisent-{{TARGETMODE}}-parser-tables
+%keywordtable  wisent-{{TARGETMODE}}-keywords
+%tokentable    wisent-{{TARGETMODE}}-tokens
+%languagemode  {{TARGETMODE}}-mode
+%setupfunction wisent-{{TARGETMODE}}-default-setup
+
+%start goal
+
+;;; KEYWORDS
+%type <keyword>
+
+%%
+
+goal
+  : {{^}}
+  ;
+
+%%
+(define-lex wisent-{{TARGETMODE}}-lexer
+  "Lexical analyzer to handle {{TARGETMODE}} buffers."
+  ;; semantic-lex-newline
+  semantic-lex-ignore-whitespace
+  semantic-lex-ignore-newline
+  semantic-lex-ignore-comments
+
+  semantic-lex-default-action
+  )
+
+;; {{FILENAME}} ends here
+----
+
+context declaration
+
+template function
+----
+{{?NAME}}
+  : {{^}}
+  ;
+----
+bind "f"
+
+template keyword
+----
+%keyword {{?NAME:upcase}} "{{NAME:downcase}}"
+%put     {{NAME:upcase}} summary "{{NAME}} {{^}}"
+----
+bind "k"
+
+template token
+----
+%type <{{?LEXTOKEN}}>
+%token <{{LEXTOKEN}}> {{LEXTOKEN}}
+----
+bind "t"
+
+;; end

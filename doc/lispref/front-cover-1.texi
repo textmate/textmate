@@ -1,0 +1,52 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header
+@setfilename front1.info
+@settitle GNU Emacs Lisp Reference Manual
+@smallbook
+@comment %**end of header
+
+@titlepage
+.
+@sp 2
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19.29
+@center for Unix Users
+@center Edition 2.4, June 1995
+@sp 2
+@center @titlefont{Volume 1}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+@page
+.
+@sp 5
+@center @titlefont{The}
+@sp 1
+@center @titlefont{GNU}
+@sp 1
+@center @titlefont{Emacs Lisp}
+@sp 1
+@center @titlefont{Reference}
+@sp 1
+@center @titlefont{Manual}
+@sp 2
+@center GNU Emacs Version 19.29
+@center for Unix Users
+@center Edition 2.4, June 1995
+@sp 2
+@center @titlefont{Volume 2}
+@sp 2
+@center by Bil Lewis, Dan LaLiberte,
+@center and the GNU Manual Group
+
+@end titlepage
+@bye

@@ -1,0 +1,1803 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/lists
+@node Lists, Sequences Arrays Vectors, Strings and Characters, Top
+@chapter Lists
+@cindex lists
+@cindex element (of list)
+
+  A @dfn{list} represents a sequence of zero or more elements (which may
+be any Lisp objects).  The important difference between lists and
+vectors is that two or more lists can share part of their structure; in
+addition, you can insert or delete elements in a list without copying
+the whole list.
+
+@menu
+* Cons Cells::          How lists are made out of cons cells.
+* List-related Predicates::        Is this object a list?  Comparing two lists.
+* List Elements::       Extracting the pieces of a list.
+* Building Lists::      Creating list structure.
+* List Variables::      Modifying lists stored in variables.
+* Modifying Lists::     Storing new pieces into an existing list.
+* Sets And Lists::      A list can represent a finite mathematical set.
+* Association Lists::   A list can represent a finite relation or mapping.
+@end menu
+
+@node Cons Cells
+@section Lists and Cons Cells
+@cindex lists and cons cells
+
+  Lists in Lisp are not a primitive data type; they are built up from
+@dfn{cons cells} (@pxref{Cons Cell Type}).  A cons cell is a data
+object that represents an ordered pair.  That is, it has two slots,
+and each slot @dfn{holds}, or @dfn{refers to}, some Lisp object.  One
+slot is known as the @sc{car}, and the other is known as the @sc{cdr}.
+(These names are traditional; see @ref{Cons Cell Type}.)  @sc{cdr} is
+pronounced ``could-er''.
+
+  We say that ``the @sc{car} of this cons cell is'' whatever object
+its @sc{car} slot currently holds, and likewise for the @sc{cdr}.
+
+  A list is a series of cons cells ``chained together'', so that each
+cell refers to the next one.  There is one cons cell for each element
+of the list.  By convention, the @sc{car}s of the cons cells hold the
+elements of the list, and the @sc{cdr}s are used to chain the list
+(this asymmetry between @sc{car} and @sc{cdr} is entirely a matter of
+convention; at the level of cons cells, the @sc{car} and @sc{cdr}
+slots have similar properties).  Hence, the @sc{cdr} slot of each cons
+cell in a list refers to the following cons cell.
+
+@cindex true list
+  Also by convention, the @sc{cdr} of the last cons cell in a list is
+@code{nil}.  We call such a @code{nil}-terminated structure a
+@dfn{true list}.  In Emacs Lisp, the symbol @code{nil} is both a
+symbol and a list with no elements.  For convenience, the symbol
+@code{nil} is considered to have @code{nil} as its @sc{cdr} (and also
+as its @sc{car}).
+
+  Hence, the @sc{cdr} of a true list is always a true list.  The
+@sc{cdr} of a nonempty true list is a true list containing all the
+elements except the first.
+
+@cindex dotted list
+@cindex circular list
+  If the @sc{cdr} of a list's last cons cell is some value other than
+@code{nil}, we call the structure a @dfn{dotted list}, since its
+printed representation would use dotted pair notation (@pxref{Dotted
+Pair Notation}).  There is one other possibility: some cons cell's
+@sc{cdr} could point to one of the previous cons cells in the list.
+We call that structure a @dfn{circular list}.
+
+  For some purposes, it does not matter whether a list is true,
+circular or dotted.  If a program doesn't look far enough down the
+list to see the @sc{cdr} of the final cons cell, it won't care.
+However, some functions that operate on lists demand true lists and
+signal errors if given a dotted list.  Most functions that try to find
+the end of a list enter infinite loops if given a circular list.
+
+@cindex list structure
+  Because most cons cells are used as part of lists, we refer to any
+structure made out of cons cells as a @dfn{list structure}.
+
+@node List-related Predicates
+@section Predicates on Lists
+
+  The following predicates test whether a Lisp object is an atom,
+whether it is a cons cell or is a list, or whether it is the
+distinguished object @code{nil}.  (Many of these predicates can be
+defined in terms of the others, but they are used so often that it is
+worth having them.)
+
+@defun consp object
+This function returns @code{t} if @var{object} is a cons cell, @code{nil}
+otherwise.  @code{nil} is not a cons cell, although it @emph{is} a list.
+@end defun
+
+@defun atom object
+This function returns @code{t} if @var{object} is an atom, @code{nil}
+otherwise.  All objects except cons cells are atoms.  The symbol
+@code{nil} is an atom and is also a list; it is the only Lisp object
+that is both.
+
+@example
+(atom @var{object}) @equiv{} (not (consp @var{object}))
+@end example
+@end defun
+
+@defun listp object
+This function returns @code{t} if @var{object} is a cons cell or
+@code{nil}.  Otherwise, it returns @code{nil}.
+
+@example
+@group
+(listp '(1))
+     @result{} t
+@end group
+@group
+(listp '())
+     @result{} t
+@end group
+@end example
+@end defun
+
+@defun nlistp object
+This function is the opposite of @code{listp}: it returns @code{t} if
+@var{object} is not a list.  Otherwise, it returns @code{nil}.
+
+@example
+(listp @var{object}) @equiv{} (not (nlistp @var{object}))
+@end example
+@end defun
+
+@defun null object
+This function returns @code{t} if @var{object} is @code{nil}, and
+returns @code{nil} otherwise.  This function is identical to @code{not},
+but as a matter of clarity we use @code{null} when @var{object} is
+considered a list and @code{not} when it is considered a truth value
+(see @code{not} in @ref{Combining Conditions}).
+
+@example
+@group
+(null '(1))
+     @result{} nil
+@end group
+@group
+(null '())
+     @result{} t
+@end group
+@end example
+@end defun
+
+
+@node List Elements
+@section Accessing Elements of Lists
+@cindex list elements
+
+@defun car cons-cell
+This function returns the value referred to by the first slot of the
+cons cell @var{cons-cell}.  In other words, it returns the @sc{car} of
+@var{cons-cell}.
+
+As a special case, if @var{cons-cell} is @code{nil}, this function
+returns @code{nil}.  Therefore, any list is a valid argument.  An
+error is signaled if the argument is not a cons cell or @code{nil}.
+
+@example
+@group
+(car '(a b c))
+     @result{} a
+@end group
+@group
+(car '())
+     @result{} nil
+@end group
+@end example
+@end defun
+
+@defun cdr cons-cell
+This function returns the value referred to by the second slot of the
+cons cell @var{cons-cell}.  In other words, it returns the @sc{cdr} of
+@var{cons-cell}.
+
+As a special case, if @var{cons-cell} is @code{nil}, this function
+returns @code{nil}; therefore, any list is a valid argument.  An error
+is signaled if the argument is not a cons cell or @code{nil}.
+
+@example
+@group
+(cdr '(a b c))
+     @result{} (b c)
+@end group
+@group
+(cdr '())
+     @result{} nil
+@end group
+@end example
+@end defun
+
+@defun car-safe object
+This function lets you take the @sc{car} of a cons cell while avoiding
+errors for other data types.  It returns the @sc{car} of @var{object} if
+@var{object} is a cons cell, @code{nil} otherwise.  This is in contrast
+to @code{car}, which signals an error if @var{object} is not a list.
+
+@example
+@group
+(car-safe @var{object})
+@equiv{}
+(let ((x @var{object}))
+  (if (consp x)
+      (car x)
+    nil))
+@end group
+@end example
+@end defun
+
+@defun cdr-safe object
+This function lets you take the @sc{cdr} of a cons cell while
+avoiding errors for other data types.  It returns the @sc{cdr} of
+@var{object} if @var{object} is a cons cell, @code{nil} otherwise.
+This is in contrast to @code{cdr}, which signals an error if
+@var{object} is not a list.
+
+@example
+@group
+(cdr-safe @var{object})
+@equiv{}
+(let ((x @var{object}))
+  (if (consp x)
+      (cdr x)
+    nil))
+@end group
+@end example
+@end defun
+
+@defmac pop listname
+This macro is a way of examining the @sc{car} of a list,
+and taking it off the list, all at once.
+
+It operates on the list which is stored in the symbol @var{listname}.
+It removes this element from the list by setting @var{listname}
+to the @sc{cdr} of its old value---but it also returns the @sc{car}
+of that list, which is the element being removed.
+
+@example
+x
+     @result{} (a b c)
+(pop x)
+     @result{} a
+x
+     @result{} (b c)
+@end example
+
+@noindent
+For the @code{pop} macro, which removes an element from a list,
+@xref{List Variables}.
+@end defmac
+
+@defun nth n list
+@anchor{Definition of nth}
+This function returns the @var{n}th element of @var{list}.  Elements
+are numbered starting with zero, so the @sc{car} of @var{list} is
+element number zero.  If the length of @var{list} is @var{n} or less,
+the value is @code{nil}.
+
+If @var{n} is negative, @code{nth} returns the first element of
+@var{list}.
+
+@example
+@group
+(nth 2 '(1 2 3 4))
+     @result{} 3
+@end group
+@group
+(nth 10 '(1 2 3 4))
+     @result{} nil
+@end group
+@group
+(nth -3 '(1 2 3 4))
+     @result{} 1
+
+(nth n x) @equiv{} (car (nthcdr n x))
+@end group
+@end example
+
+The function @code{elt} is similar, but applies to any kind of sequence.
+For historical reasons, it takes its arguments in the opposite order.
+@xref{Sequence Functions}.
+@end defun
+
+@defun nthcdr n list
+This function returns the @var{n}th @sc{cdr} of @var{list}.  In other
+words, it skips past the first @var{n} links of @var{list} and returns
+what follows.
+
+If @var{n} is zero or negative, @code{nthcdr} returns all of
+@var{list}.  If the length of @var{list} is @var{n} or less,
+@code{nthcdr} returns @code{nil}.
+
+@example
+@group
+(nthcdr 1 '(1 2 3 4))
+     @result{} (2 3 4)
+@end group
+@group
+(nthcdr 10 '(1 2 3 4))
+     @result{} nil
+@end group
+@group
+(nthcdr -3 '(1 2 3 4))
+     @result{} (1 2 3 4)
+@end group
+@end example
+@end defun
+
+@defun last list &optional n
+This function returns the last link of @var{list}.  The @code{car} of
+this link is the list's last element.  If @var{list} is null,
+@code{nil} is returned.  If @var{n} is non-@code{nil}, the
+@var{n}th-to-last link is returned instead, or the whole of @var{list}
+if @var{n} is bigger than @var{list}'s length.
+@end defun
+
+@defun safe-length list
+@anchor{Definition of safe-length}
+This function returns the length of @var{list}, with no risk of either
+an error or an infinite loop.  It generally returns the number of
+distinct cons cells in the list.  However, for circular lists,
+the value is just an upper bound; it is often too large.
+
+If @var{list} is not @code{nil} or a cons cell, @code{safe-length}
+returns 0.
+@end defun
+
+  The most common way to compute the length of a list, when you are not
+worried that it may be circular, is with @code{length}.  @xref{Sequence
+Functions}.
+
+@defun caar cons-cell
+This is the same as @code{(car (car @var{cons-cell}))}.
+@end defun
+
+@defun cadr cons-cell
+This is the same as @code{(car (cdr @var{cons-cell}))}
+or @code{(nth 1 @var{cons-cell})}.
+@end defun
+
+@defun cdar cons-cell
+This is the same as @code{(cdr (car @var{cons-cell}))}.
+@end defun
+
+@defun cddr cons-cell
+This is the same as @code{(cdr (cdr @var{cons-cell}))}
+or @code{(nthcdr 2 @var{cons-cell})}.
+@end defun
+
+@defun butlast x &optional n
+This function returns the list @var{x} with the last element,
+or the last @var{n} elements, removed.  If @var{n} is greater
+than zero it makes a copy of the list so as not to damage the
+original list.  In general, @code{(append (butlast @var{x} @var{n})
+(last @var{x} @var{n}))} will return a list equal to @var{x}.
+@end defun
+
+@defun nbutlast x &optional n
+This is a version of @code{butlast} that works by destructively
+modifying the @code{cdr} of the appropriate element, rather than
+making a copy of the list.
+@end defun
+
+@node Building Lists
+@comment  node-name,  next,  previous,  up
+@section Building Cons Cells and Lists
+@cindex cons cells
+@cindex building lists
+
+  Many functions build lists, as lists reside at the very heart of Lisp.
+@code{cons} is the fundamental list-building function; however, it is
+interesting to note that @code{list} is used more times in the source
+code for Emacs than @code{cons}.
+
+@defun cons object1 object2
+This function is the most basic function for building new list
+structure.  It creates a new cons cell, making @var{object1} the
+@sc{car}, and @var{object2} the @sc{cdr}.  It then returns the new
+cons cell.  The arguments @var{object1} and @var{object2} may be any
+Lisp objects, but most often @var{object2} is a list.
+
+@example
+@group
+(cons 1 '(2))
+     @result{} (1 2)
+@end group
+@group
+(cons 1 '())
+     @result{} (1)
+@end group
+@group
+(cons 1 2)
+     @result{} (1 . 2)
+@end group
+@end example
+
+@cindex consing
+@code{cons} is often used to add a single element to the front of a
+list.  This is called @dfn{consing the element onto the list}.
+@footnote{There is no strictly equivalent way to add an element to
+the end of a list.  You can use @code{(append @var{listname} (list
+@var{newelt}))}, which creates a whole new list by copying @var{listname}
+and adding @var{newelt} to its end.  Or you can use @code{(nconc
+@var{listname} (list @var{newelt}))}, which modifies @var{listname}
+by following all the @sc{cdr}s and then replacing the terminating
+@code{nil}.  Compare this to adding an element to the beginning of a
+list with @code{cons}, which neither copies nor modifies the list.}
+For example:
+
+@example
+(setq list (cons newelt list))
+@end example
+
+Note that there is no conflict between the variable named @code{list}
+used in this example and the function named @code{list} described below;
+any symbol can serve both purposes.
+@end defun
+
+@defun list &rest objects
+This function creates a list with @var{objects} as its elements.  The
+resulting list is always @code{nil}-terminated.  If no @var{objects}
+are given, the empty list is returned.
+
+@example
+@group
+(list 1 2 3 4 5)
+     @result{} (1 2 3 4 5)
+@end group
+@group
+(list 1 2 '(3 4 5) 'foo)
+     @result{} (1 2 (3 4 5) foo)
+@end group
+@group
+(list)
+     @result{} nil
+@end group
+@end example
+@end defun
+
+@defun make-list length object
+This function creates a list of @var{length} elements, in which each
+element is @var{object}.  Compare @code{make-list} with
+@code{make-string} (@pxref{Creating Strings}).
+
+@example
+@group
+(make-list 3 'pigs)
+     @result{} (pigs pigs pigs)
+@end group
+@group
+(make-list 0 'pigs)
+     @result{} nil
+@end group
+@group
+(setq l (make-list 3 '(a b)))
+     @result{} ((a b) (a b) (a b))
+(eq (car l) (cadr l))
+     @result{} t
+@end group
+@end example
+@end defun
+
+@defun append &rest sequences
+@cindex copying lists
+This function returns a list containing all the elements of
+@var{sequences}.  The @var{sequences} may be lists, vectors,
+bool-vectors, or strings, but the last one should usually be a list.
+All arguments except the last one are copied, so none of the arguments
+is altered.  (See @code{nconc} in @ref{Rearrangement}, for a way to join
+lists with no copying.)
+
+More generally, the final argument to @code{append} may be any Lisp
+object.  The final argument is not copied or converted; it becomes the
+@sc{cdr} of the last cons cell in the new list.  If the final argument
+is itself a list, then its elements become in effect elements of the
+result list.  If the final element is not a list, the result is a
+dotted list since its final @sc{cdr} is not @code{nil} as required
+in a true list.
+@end defun
+
+  Here is an example of using @code{append}:
+
+@example
+@group
+(setq trees '(pine oak))
+     @result{} (pine oak)
+(setq more-trees (append '(maple birch) trees))
+     @result{} (maple birch pine oak)
+@end group
+
+@group
+trees
+     @result{} (pine oak)
+more-trees
+     @result{} (maple birch pine oak)
+@end group
+@group
+(eq trees (cdr (cdr more-trees)))
+     @result{} t
+@end group
+@end example
+
+  You can see how @code{append} works by looking at a box diagram.  The
+variable @code{trees} is set to the list @code{(pine oak)} and then the
+variable @code{more-trees} is set to the list @code{(maple birch pine
+oak)}.  However, the variable @code{trees} continues to refer to the
+original list:
+
+@smallexample
+@group
+more-trees                trees
+|                           |
+|     --- ---      --- ---   -> --- ---      --- ---
+ --> |   |   |--> |   |   |--> |   |   |--> |   |   |--> nil
+      --- ---      --- ---      --- ---      --- ---
+       |            |            |            |
+       |            |            |            |
+        --> maple    -->birch     --> pine     --> oak
+@end group
+@end smallexample
+
+  An empty sequence contributes nothing to the value returned by
+@code{append}.  As a consequence of this, a final @code{nil} argument
+forces a copy of the previous argument:
+
+@example
+@group
+trees
+     @result{} (pine oak)
+@end group
+@group
+(setq wood (append trees nil))
+     @result{} (pine oak)
+@end group
+@group
+wood
+     @result{} (pine oak)
+@end group
+@group
+(eq wood trees)
+     @result{} nil
+@end group
+@end example
+
+@noindent
+This once was the usual way to copy a list, before the function
+@code{copy-sequence} was invented.  @xref{Sequences Arrays Vectors}.
+
+  Here we show the use of vectors and strings as arguments to @code{append}:
+
+@example
+@group
+(append [a b] "cd" nil)
+     @result{} (a b 99 100)
+@end group
+@end example
+
+  With the help of @code{apply} (@pxref{Calling Functions}), we can append
+all the lists in a list of lists:
+
+@example
+@group
+(apply 'append '((a b c) nil (x y z) nil))
+     @result{} (a b c x y z)
+@end group
+@end example
+
+  If no @var{sequences} are given, @code{nil} is returned:
+
+@example
+@group
+(append)
+     @result{} nil
+@end group
+@end example
+
+  Here are some examples where the final argument is not a list:
+
+@example
+(append '(x y) 'z)
+     @result{} (x y . z)
+(append '(x y) [z])
+     @result{} (x y . [z])
+@end example
+
+@noindent
+The second example shows that when the final argument is a sequence but
+not a list, the sequence's elements do not become elements of the
+resulting list.  Instead, the sequence becomes the final @sc{cdr}, like
+any other non-list final argument.
+
+@defun reverse list
+This function creates a new list whose elements are the elements of
+@var{list}, but in reverse order.  The original argument @var{list} is
+@emph{not} altered.
+
+@example
+@group
+(setq x '(1 2 3 4))
+     @result{} (1 2 3 4)
+@end group
+@group
+(reverse x)
+     @result{} (4 3 2 1)
+x
+     @result{} (1 2 3 4)
+@end group
+@end example
+@end defun
+
+@defun copy-tree tree &optional vecp
+This function returns a copy of the tree @code{tree}.  If @var{tree} is a
+cons cell, this makes a new cons cell with the same @sc{car} and
+@sc{cdr}, then recursively copies the @sc{car} and @sc{cdr} in the
+same way.
+
+Normally, when @var{tree} is anything other than a cons cell,
+@code{copy-tree} simply returns @var{tree}.  However, if @var{vecp} is
+non-@code{nil}, it copies vectors too (and operates recursively on
+their elements).
+@end defun
+
+@defun number-sequence from &optional to separation
+This returns a list of numbers starting with @var{from} and
+incrementing by @var{separation}, and ending at or just before
+@var{to}.  @var{separation} can be positive or negative and defaults
+to 1.  If @var{to} is @code{nil} or numerically equal to @var{from},
+the value is the one-element list @code{(@var{from})}.  If @var{to} is
+less than @var{from} with a positive @var{separation}, or greater than
+@var{from} with a negative @var{separation}, the value is @code{nil}
+because those arguments specify an empty sequence.
+
+If @var{separation} is 0 and @var{to} is neither @code{nil} nor
+numerically equal to @var{from}, @code{number-sequence} signals an
+error, since those arguments specify an infinite sequence.
+
+All arguments can be integers or floating point numbers.  However,
+floating point arguments can be tricky, because floating point
+arithmetic is inexact.  For instance, depending on the machine, it may
+quite well happen that @code{(number-sequence 0.4 0.6 0.2)} returns
+the one element list @code{(0.4)}, whereas
+@code{(number-sequence 0.4 0.8 0.2)} returns a list with three
+elements.  The @var{n}th element of the list is computed by the exact
+formula @code{(+ @var{from} (* @var{n} @var{separation}))}.  Thus, if
+one wants to make sure that @var{to} is included in the list, one can
+pass an expression of this exact type for @var{to}.  Alternatively,
+one can replace @var{to} with a slightly larger value (or a slightly
+more negative value if @var{separation} is negative).
+
+Some examples:
+
+@example
+(number-sequence 4 9)
+     @result{} (4 5 6 7 8 9)
+(number-sequence 9 4 -1)
+     @result{} (9 8 7 6 5 4)
+(number-sequence 9 4 -2)
+     @result{} (9 7 5)
+(number-sequence 8)
+     @result{} (8)
+(number-sequence 8 5)
+     @result{} nil
+(number-sequence 5 8 -1)
+     @result{} nil
+(number-sequence 1.5 6 2)
+     @result{} (1.5 3.5 5.5)
+@end example
+@end defun
+
+@node List Variables
+@section Modifying List Variables
+
+  These functions, and one macro, provide convenient ways
+to modify a list which is stored in a variable.
+
+@defmac push newelt listname
+This macro provides an alternative way to write
+@code{(setq @var{listname} (cons @var{newelt} @var{listname}))}.
+
+@example
+(setq l '(a b))
+     @result{} (a b)
+(push 'c l)
+     @result{} (c a b)
+l
+     @result{} (c a b)
+@end example
+
+@noindent
+For the @code{pop} macro, which removes the first element from a list,
+@xref{List Elements}.
+@end defmac
+
+  Two functions modify lists that are the values of variables.
+
+@defun add-to-list symbol element &optional append compare-fn
+This function sets the variable @var{symbol} by consing @var{element}
+onto the old value, if @var{element} is not already a member of that
+value.  It returns the resulting list, whether updated or not.  The
+value of @var{symbol} had better be a list already before the call.
+@code{add-to-list} uses @var{compare-fn} to compare @var{element}
+against existing list members; if @var{compare-fn} is @code{nil}, it
+uses @code{equal}.
+
+Normally, if @var{element} is added, it is added to the front of
+@var{symbol}, but if the optional argument @var{append} is
+non-@code{nil}, it is added at the end.
+
+The argument @var{symbol} is not implicitly quoted; @code{add-to-list}
+is an ordinary function, like @code{set} and unlike @code{setq}.  Quote
+the argument yourself if that is what you want.
+@end defun
+
+Here's a scenario showing how to use @code{add-to-list}:
+
+@example
+(setq foo '(a b))
+     @result{} (a b)
+
+(add-to-list 'foo 'c)     ;; @r{Add @code{c}.}
+     @result{} (c a b)
+
+(add-to-list 'foo 'b)     ;; @r{No effect.}
+     @result{} (c a b)
+
+foo                       ;; @r{@code{foo} was changed.}
+     @result{} (c a b)
+@end example
+
+  An equivalent expression for @code{(add-to-list '@var{var}
+@var{value})} is this:
+
+@example
+(or (member @var{value} @var{var})
+    (setq @var{var} (cons @var{value} @var{var})))
+@end example
+
+@defun add-to-ordered-list symbol element &optional order
+This function sets the variable @var{symbol} by inserting
+@var{element} into the old value, which must be a list, at the
+position specified by @var{order}.  If @var{element} is already a
+member of the list, its position in the list is adjusted according
+to @var{order}.  Membership is tested using @code{eq}.
+This function returns the resulting list, whether updated or not.
+
+The @var{order} is typically a number (integer or float), and the
+elements of the list are sorted in non-decreasing numerical order.
+
+@var{order} may also be omitted or @code{nil}.  Then the numeric order
+of @var{element} stays unchanged if it already has one; otherwise,
+@var{element} has no numeric order.  Elements without a numeric list
+order are placed at the end of the list, in no particular order.
+
+Any other value for @var{order} removes the numeric order of @var{element}
+if it already has one; otherwise, it is equivalent to @code{nil}.
+
+The argument @var{symbol} is not implicitly quoted;
+@code{add-to-ordered-list} is an ordinary function, like @code{set}
+and unlike @code{setq}.  Quote the argument yourself if necessary.
+
+The ordering information is stored in a hash table on @var{symbol}'s
+@code{list-order} property.
+@end defun
+
+Here's a scenario showing how to use @code{add-to-ordered-list}:
+
+@example
+(setq foo '())
+     @result{} nil
+
+(add-to-ordered-list 'foo 'a 1)     ;; @r{Add @code{a}.}
+     @result{} (a)
+
+(add-to-ordered-list 'foo 'c 3)     ;; @r{Add @code{c}.}
+     @result{} (a c)
+
+(add-to-ordered-list 'foo 'b 2)     ;; @r{Add @code{b}.}
+     @result{} (a b c)
+
+(add-to-ordered-list 'foo 'b 4)     ;; @r{Move @code{b}.}
+     @result{} (a c b)
+
+(add-to-ordered-list 'foo 'd)       ;; @r{Append @code{d}.}
+     @result{} (a c b d)
+
+(add-to-ordered-list 'foo 'e)       ;; @r{Add @code{e}}.
+     @result{} (a c b e d)
+
+foo                       ;; @r{@code{foo} was changed.}
+     @result{} (a c b e d)
+@end example
+
+@node Modifying Lists
+@section Modifying Existing List Structure
+@cindex destructive list operations
+
+  You can modify the @sc{car} and @sc{cdr} contents of a cons cell with the
+primitives @code{setcar} and @code{setcdr}.  We call these ``destructive''
+operations because they change existing list structure.
+
+@cindex CL note---@code{rplaca} vs @code{setcar}
+@quotation
+@findex rplaca
+@findex rplacd
+@b{Common Lisp note:} Common Lisp uses functions @code{rplaca} and
+@code{rplacd} to alter list structure; they change structure the same
+way as @code{setcar} and @code{setcdr}, but the Common Lisp functions
+return the cons cell while @code{setcar} and @code{setcdr} return the
+new @sc{car} or @sc{cdr}.
+@end quotation
+
+@menu
+* Setcar::          Replacing an element in a list.
+* Setcdr::          Replacing part of the list backbone.
+                      This can be used to remove or add elements.
+* Rearrangement::   Reordering the elements in a list; combining lists.
+@end menu
+
+@node Setcar
+@subsection Altering List Elements with @code{setcar}
+
+  Changing the @sc{car} of a cons cell is done with @code{setcar}.  When
+used on a list, @code{setcar} replaces one element of a list with a
+different element.
+
+@defun setcar cons object
+This function stores @var{object} as the new @sc{car} of @var{cons},
+replacing its previous @sc{car}.  In other words, it changes the
+@sc{car} slot of @var{cons} to refer to @var{object}.  It returns the
+value @var{object}.  For example:
+
+@example
+@group
+(setq x '(1 2))
+     @result{} (1 2)
+@end group
+@group
+(setcar x 4)
+     @result{} 4
+@end group
+@group
+x
+     @result{} (4 2)
+@end group
+@end example
+@end defun
+
+  When a cons cell is part of the shared structure of several lists,
+storing a new @sc{car} into the cons changes one element of each of
+these lists.  Here is an example:
+
+@example
+@group
+;; @r{Create two lists that are partly shared.}
+(setq x1 '(a b c))
+     @result{} (a b c)
+(setq x2 (cons 'z (cdr x1)))
+     @result{} (z b c)
+@end group
+
+@group
+;; @r{Replace the @sc{car} of a shared link.}
+(setcar (cdr x1) 'foo)
+     @result{} foo
+x1                           ; @r{Both lists are changed.}
+     @result{} (a foo c)
+x2
+     @result{} (z foo c)
+@end group
+
+@group
+;; @r{Replace the @sc{car} of a link that is not shared.}
+(setcar x1 'baz)
+     @result{} baz
+x1                           ; @r{Only one list is changed.}
+     @result{} (baz foo c)
+x2
+     @result{} (z foo c)
+@end group
+@end example
+
+  Here is a graphical depiction of the shared structure of the two lists
+in the variables @code{x1} and @code{x2}, showing why replacing @code{b}
+changes them both:
+
+@example
+@group
+        --- ---        --- ---      --- ---
+x1---> |   |   |----> |   |   |--> |   |   |--> nil
+        --- ---        --- ---      --- ---
+         |        -->   |            |
+         |       |      |            |
+          --> a  |       --> b        --> c
+                 |
+       --- ---   |
+x2--> |   |   |--
+       --- ---
+        |
+        |
+         --> z
+@end group
+@end example
+
+  Here is an alternative form of box diagram, showing the same relationship:
+
+@example
+@group
+x1:
+ --------------       --------------       --------------
+| car   | cdr  |     | car   | cdr  |     | car   | cdr  |
+|   a   |   o------->|   b   |   o------->|   c   |  nil |
+|       |      |  -->|       |      |     |       |      |
+ --------------  |    --------------       --------------
+                 |
+x2:              |
+ --------------  |
+| car   | cdr  | |
+|   z   |   o----
+|       |      |
+ --------------
+@end group
+@end example
+
+@node Setcdr
+@subsection Altering the CDR of a List
+
+  The lowest-level primitive for modifying a @sc{cdr} is @code{setcdr}:
+
+@defun setcdr cons object
+This function stores @var{object} as the new @sc{cdr} of @var{cons},
+replacing its previous @sc{cdr}.  In other words, it changes the
+@sc{cdr} slot of @var{cons} to refer to @var{object}.  It returns the
+value @var{object}.
+@end defun
+
+  Here is an example of replacing the @sc{cdr} of a list with a
+different list.  All but the first element of the list are removed in
+favor of a different sequence of elements.  The first element is
+unchanged, because it resides in the @sc{car} of the list, and is not
+reached via the @sc{cdr}.
+
+@example
+@group
+(setq x '(1 2 3))
+     @result{} (1 2 3)
+@end group
+@group
+(setcdr x '(4))
+     @result{} (4)
+@end group
+@group
+x
+     @result{} (1 4)
+@end group
+@end example
+
+  You can delete elements from the middle of a list by altering the
+@sc{cdr}s of the cons cells in the list.  For example, here we delete
+the second element, @code{b}, from the list @code{(a b c)}, by changing
+the @sc{cdr} of the first cons cell:
+
+@example
+@group
+(setq x1 '(a b c))
+     @result{} (a b c)
+(setcdr x1 (cdr (cdr x1)))
+     @result{} (c)
+x1
+     @result{} (a c)
+@end group
+@end example
+
+  Here is the result in box notation:
+
+@smallexample
+@group
+                   --------------------
+                  |                    |
+ --------------   |   --------------   |    --------------
+| car   | cdr  |  |  | car   | cdr  |   -->| car   | cdr  |
+|   a   |   o-----   |   b   |   o-------->|   c   |  nil |
+|       |      |     |       |      |      |       |      |
+ --------------       --------------        --------------
+@end group
+@end smallexample
+
+@noindent
+The second cons cell, which previously held the element @code{b}, still
+exists and its @sc{car} is still @code{b}, but it no longer forms part
+of this list.
+
+  It is equally easy to insert a new element by changing @sc{cdr}s:
+
+@example
+@group
+(setq x1 '(a b c))
+     @result{} (a b c)
+(setcdr x1 (cons 'd (cdr x1)))
+     @result{} (d b c)
+x1
+     @result{} (a d b c)
+@end group
+@end example
+
+  Here is this result in box notation:
+
+@smallexample
+@group
+ --------------        -------------       -------------
+| car  | cdr   |      | car  | cdr  |     | car  | cdr  |
+|   a  |   o   |   -->|   b  |   o------->|   c  |  nil |
+|      |   |   |  |   |      |      |     |      |      |
+ --------- | --   |    -------------       -------------
+           |      |
+     -----         --------
+    |                      |
+    |    ---------------   |
+    |   | car   | cdr   |  |
+     -->|   d   |   o------
+        |       |       |
+         ---------------
+@end group
+@end smallexample
+
+@node Rearrangement
+@subsection Functions that Rearrange Lists
+@cindex rearrangement of lists
+@cindex modification of lists
+
+  Here are some functions that rearrange lists ``destructively'' by
+modifying the @sc{cdr}s of their component cons cells.  We call these
+functions ``destructive'' because they chew up the original lists passed
+to them as arguments, relinking their cons cells to form a new list that
+is the returned value.
+
+@ifnottex
+  See @code{delq}, in @ref{Sets And Lists}, for another function
+that modifies cons cells.
+@end ifnottex
+@iftex
+   The function @code{delq} in the following section is another example
+of destructive list manipulation.
+@end iftex
+
+@defun nconc &rest lists
+@cindex concatenating lists
+@cindex joining lists
+This function returns a list containing all the elements of @var{lists}.
+Unlike @code{append} (@pxref{Building Lists}), the @var{lists} are
+@emph{not} copied.  Instead, the last @sc{cdr} of each of the
+@var{lists} is changed to refer to the following list.  The last of the
+@var{lists} is not altered.  For example:
+
+@example
+@group
+(setq x '(1 2 3))
+     @result{} (1 2 3)
+@end group
+@group
+(nconc x '(4 5))
+     @result{} (1 2 3 4 5)
+@end group
+@group
+x
+     @result{} (1 2 3 4 5)
+@end group
+@end example
+
+   Since the last argument of @code{nconc} is not itself modified, it is
+reasonable to use a constant list, such as @code{'(4 5)}, as in the
+above example.  For the same reason, the last argument need not be a
+list:
+
+@example
+@group
+(setq x '(1 2 3))
+     @result{} (1 2 3)
+@end group
+@group
+(nconc x 'z)
+     @result{} (1 2 3 . z)
+@end group
+@group
+x
+     @result{} (1 2 3 . z)
+@end group
+@end example
+
+However, the other arguments (all but the last) must be lists.
+
+A common pitfall is to use a quoted constant list as a non-last
+argument to @code{nconc}.  If you do this, your program will change
+each time you run it!  Here is what happens:
+
+@smallexample
+@group
+(defun add-foo (x)            ; @r{We want this function to add}
+  (nconc '(foo) x))           ;   @r{@code{foo} to the front of its arg.}
+@end group
+
+@group
+(symbol-function 'add-foo)
+     @result{} (lambda (x) (nconc (quote (foo)) x))
+@end group
+
+@group
+(setq xx (add-foo '(1 2)))    ; @r{It seems to work.}
+     @result{} (foo 1 2)
+@end group
+@group
+(setq xy (add-foo '(3 4)))    ; @r{What happened?}
+     @result{} (foo 1 2 3 4)
+@end group
+@group
+(eq xx xy)
+     @result{} t
+@end group
+
+@group
+(symbol-function 'add-foo)
+     @result{} (lambda (x) (nconc (quote (foo 1 2 3 4) x)))
+@end group
+@end smallexample
+@end defun
+
+@defun nreverse list
+@cindex reversing a list
+  This function reverses the order of the elements of @var{list}.
+Unlike @code{reverse}, @code{nreverse} alters its argument by reversing
+the @sc{cdr}s in the cons cells forming the list.  The cons cell that
+used to be the last one in @var{list} becomes the first cons cell of the
+value.
+
+  For example:
+
+@example
+@group
+(setq x '(a b c))
+     @result{} (a b c)
+@end group
+@group
+x
+     @result{} (a b c)
+(nreverse x)
+     @result{} (c b a)
+@end group
+@group
+;; @r{The cons cell that was first is now last.}
+x
+     @result{} (a)
+@end group
+@end example
+
+  To avoid confusion, we usually store the result of @code{nreverse}
+back in the same variable which held the original list:
+
+@example
+(setq x (nreverse x))
+@end example
+
+  Here is the @code{nreverse} of our favorite example, @code{(a b c)},
+presented graphically:
+
+@smallexample
+@group
+@r{Original list head:}                       @r{Reversed list:}
+ -------------        -------------        ------------
+| car  | cdr  |      | car  | cdr  |      | car | cdr  |
+|   a  |  nil |<--   |   b  |   o  |<--   |   c |   o  |
+|      |      |   |  |      |   |  |   |  |     |   |  |
+ -------------    |   --------- | -    |   -------- | -
+                  |             |      |            |
+                   -------------        ------------
+@end group
+@end smallexample
+@end defun
+
+@defun sort list predicate
+@cindex stable sort
+@cindex sorting lists
+This function sorts @var{list} stably, though destructively, and
+returns the sorted list.  It compares elements using @var{predicate}.  A
+stable sort is one in which elements with equal sort keys maintain their
+relative order before and after the sort.  Stability is important when
+successive sorts are used to order elements according to different
+criteria.
+
+The argument @var{predicate} must be a function that accepts two
+arguments.  It is called with two elements of @var{list}.  To get an
+increasing order sort, the @var{predicate} should return non-@code{nil} if the
+first element is ``less than'' the second, or @code{nil} if not.
+
+The comparison function @var{predicate} must give reliable results for
+any given pair of arguments, at least within a single call to
+@code{sort}.  It must be @dfn{antisymmetric}; that is, if @var{a} is
+less than @var{b}, @var{b} must not be less than @var{a}.  It must be
+@dfn{transitive}---that is, if @var{a} is less than @var{b}, and @var{b}
+is less than @var{c}, then @var{a} must be less than @var{c}.  If you
+use a comparison function which does not meet these requirements, the
+result of @code{sort} is unpredictable.
+
+The destructive aspect of @code{sort} is that it rearranges the cons
+cells forming @var{list} by changing @sc{cdr}s.  A nondestructive sort
+function would create new cons cells to store the elements in their
+sorted order.  If you wish to make a sorted copy without destroying the
+original, copy it first with @code{copy-sequence} and then sort.
+
+Sorting does not change the @sc{car}s of the cons cells in @var{list};
+the cons cell that originally contained the element @code{a} in
+@var{list} still has @code{a} in its @sc{car} after sorting, but it now
+appears in a different position in the list due to the change of
+@sc{cdr}s.  For example:
+
+@example
+@group
+(setq nums '(1 3 2 6 5 4 0))
+     @result{} (1 3 2 6 5 4 0)
+@end group
+@group
+(sort nums '<)
+     @result{} (0 1 2 3 4 5 6)
+@end group
+@group
+nums
+     @result{} (1 2 3 4 5 6)
+@end group
+@end example
+
+@noindent
+@strong{Warning}: Note that the list in @code{nums} no longer contains
+0; this is the same cons cell that it was before, but it is no longer
+the first one in the list.  Don't assume a variable that formerly held
+the argument now holds the entire sorted list!  Instead, save the result
+of @code{sort} and use that.  Most often we store the result back into
+the variable that held the original list:
+
+@example
+(setq nums (sort nums '<))
+@end example
+
+@xref{Sorting}, for more functions that perform sorting.
+See @code{documentation} in @ref{Accessing Documentation}, for a
+useful example of @code{sort}.
+@end defun
+
+@node Sets And Lists
+@section Using Lists as Sets
+@cindex lists as sets
+@cindex sets
+
+  A list can represent an unordered mathematical set---simply consider a
+value an element of a set if it appears in the list, and ignore the
+order of the list.  To form the union of two sets, use @code{append} (as
+long as you don't mind having duplicate elements).  You can remove
+@code{equal} duplicates using @code{delete-dups}.  Other useful
+functions for sets include @code{memq} and @code{delq}, and their
+@code{equal} versions, @code{member} and @code{delete}.
+
+@cindex CL note---lack @code{union}, @code{intersection}
+@quotation
+@b{Common Lisp note:} Common Lisp has functions @code{union} (which
+avoids duplicate elements) and @code{intersection} for set operations.
+Although standard GNU Emacs Lisp does not have them, the @file{cl}
+library provides versions.  @xref{Top,, Overview, cl, Common Lisp Extensions}.
+@end quotation
+
+@defun memq object list
+@cindex membership in a list
+This function tests to see whether @var{object} is a member of
+@var{list}.  If it is, @code{memq} returns a list starting with the
+first occurrence of @var{object}.  Otherwise, it returns @code{nil}.
+The letter @samp{q} in @code{memq} says that it uses @code{eq} to
+compare @var{object} against the elements of the list.  For example:
+
+@example
+@group
+(memq 'b '(a b c b a))
+     @result{} (b c b a)
+@end group
+@group
+(memq '(2) '((1) (2)))    ; @r{@code{(2)} and @code{(2)} are not @code{eq}.}
+     @result{} nil
+@end group
+@end example
+@end defun
+
+@defun delq object list
+@cindex deleting list elements
+This function destructively removes all elements @code{eq} to
+@var{object} from @var{list}.  The letter @samp{q} in @code{delq} says
+that it uses @code{eq} to compare @var{object} against the elements of
+the list, like @code{memq} and @code{remq}.
+@end defun
+
+When @code{delq} deletes elements from the front of the list, it does so
+simply by advancing down the list and returning a sublist that starts
+after those elements:
+
+@example
+@group
+(delq 'a '(a b c)) @equiv{} (cdr '(a b c))
+@end group
+@end example
+
+When an element to be deleted appears in the middle of the list,
+removing it involves changing the @sc{cdr}s (@pxref{Setcdr}).
+
+@example
+@group
+(setq sample-list '(a b c (4)))
+     @result{} (a b c (4))
+@end group
+@group
+(delq 'a sample-list)
+     @result{} (b c (4))
+@end group
+@group
+sample-list
+     @result{} (a b c (4))
+@end group
+@group
+(delq 'c sample-list)
+     @result{} (a b (4))
+@end group
+@group
+sample-list
+     @result{} (a b (4))
+@end group
+@end example
+
+Note that @code{(delq 'c sample-list)} modifies @code{sample-list} to
+splice out the third element, but @code{(delq 'a sample-list)} does not
+splice anything---it just returns a shorter list.  Don't assume that a
+variable which formerly held the argument @var{list} now has fewer
+elements, or that it still holds the original list!  Instead, save the
+result of @code{delq} and use that.  Most often we store the result back
+into the variable that held the original list:
+
+@example
+(setq flowers (delq 'rose flowers))
+@end example
+
+In the following example, the @code{(4)} that @code{delq} attempts to match
+and the @code{(4)} in the @code{sample-list} are not @code{eq}:
+
+@example
+@group
+(delq '(4) sample-list)
+     @result{} (a c (4))
+@end group
+@end example
+
+If you want to delete elements that are @code{equal} to a given value,
+use @code{delete} (see below).
+
+@defun remq object list
+This function returns a copy of @var{list}, with all elements removed
+which are @code{eq} to @var{object}.  The letter @samp{q} in @code{remq}
+says that it uses @code{eq} to compare @var{object} against the elements
+of @code{list}.
+
+@example
+@group
+(setq sample-list '(a b c a b c))
+     @result{} (a b c a b c)
+@end group
+@group
+(remq 'a sample-list)
+     @result{} (b c b c)
+@end group
+@group
+sample-list
+     @result{} (a b c a b c)
+@end group
+@end example
+@end defun
+
+@defun memql object list
+The function @code{memql} tests to see whether @var{object} is a member
+of @var{list}, comparing members with @var{object} using @code{eql},
+so floating point elements are compared by value.
+If @var{object} is a member, @code{memql} returns a list starting with
+its first occurrence in @var{list}.  Otherwise, it returns @code{nil}.
+
+Compare this with @code{memq}:
+
+@example
+@group
+(memql 1.2 '(1.1 1.2 1.3))  ; @r{@code{1.2} and @code{1.2} are @code{eql}.}
+     @result{} (1.2 1.3)
+@end group
+@group
+(memq 1.2 '(1.1 1.2 1.3))  ; @r{@code{1.2} and @code{1.2} are not @code{eq}.}
+     @result{} nil
+@end group
+@end example
+@end defun
+
+The following three functions are like @code{memq}, @code{delq} and
+@code{remq}, but use @code{equal} rather than @code{eq} to compare
+elements.  @xref{Equality Predicates}.
+
+@defun member object list
+The function @code{member} tests to see whether @var{object} is a member
+of @var{list}, comparing members with @var{object} using @code{equal}.
+If @var{object} is a member, @code{member} returns a list starting with
+its first occurrence in @var{list}.  Otherwise, it returns @code{nil}.
+
+Compare this with @code{memq}:
+
+@example
+@group
+(member '(2) '((1) (2)))  ; @r{@code{(2)} and @code{(2)} are @code{equal}.}
+     @result{} ((2))
+@end group
+@group
+(memq '(2) '((1) (2)))    ; @r{@code{(2)} and @code{(2)} are not @code{eq}.}
+     @result{} nil
+@end group
+@group
+;; @r{Two strings with the same contents are @code{equal}.}
+(member "foo" '("foo" "bar"))
+     @result{} ("foo" "bar")
+@end group
+@end example
+@end defun
+
+@defun delete object sequence
+If @code{sequence} is a list, this function destructively removes all
+elements @code{equal} to @var{object} from @var{sequence}.  For lists,
+@code{delete} is to @code{delq} as @code{member} is to @code{memq}: it
+uses @code{equal} to compare elements with @var{object}, like
+@code{member}; when it finds an element that matches, it cuts the
+element out just as @code{delq} would.
+
+If @code{sequence} is a vector or string, @code{delete} returns a copy
+of @code{sequence} with all elements @code{equal} to @code{object}
+removed.
+
+For example:
+
+@example
+@group
+(setq l '((2) (1) (2)))
+(delete '(2) l)
+     @result{} ((1))
+l
+     @result{} ((2) (1))
+;; @r{If you want to change @code{l} reliably,}
+;; @r{write @code{(setq l (delete '(2) l))}.}
+@end group
+@group
+(setq l '((2) (1) (2)))
+(delete '(1) l)
+     @result{} ((2) (2))
+l
+     @result{} ((2) (2))
+;; @r{In this case, it makes no difference whether you set @code{l},}
+;; @r{but you should do so for the sake of the other case.}
+@end group
+@group
+(delete '(2) [(2) (1) (2)])
+     @result{} [(1)]
+@end group
+@end example
+@end defun
+
+@defun remove object sequence
+This function is the non-destructive counterpart of @code{delete}.  It
+returns a copy of @code{sequence}, a list, vector, or string, with
+elements @code{equal} to @code{object} removed.  For example:
+
+@example
+@group
+(remove '(2) '((2) (1) (2)))
+     @result{} ((1))
+@end group
+@group
+(remove '(2) [(2) (1) (2)])
+     @result{} [(1)]
+@end group
+@end example
+@end defun
+
+@quotation
+@b{Common Lisp note:} The functions @code{member}, @code{delete} and
+@code{remove} in GNU Emacs Lisp are derived from Maclisp, not Common
+Lisp.  The Common Lisp versions do not use @code{equal} to compare
+elements.
+@end quotation
+
+@defun member-ignore-case object list
+This function is like @code{member}, except that @var{object} should
+be a string and that it ignores differences in letter-case and text
+representation: upper-case and lower-case letters are treated as
+equal, and unibyte strings are converted to multibyte prior to
+comparison.
+@end defun
+
+@defun delete-dups list
+This function destructively removes all @code{equal} duplicates from
+@var{list}, stores the result in @var{list} and returns it.  Of
+several @code{equal} occurrences of an element in @var{list},
+@code{delete-dups} keeps the first one.
+@end defun
+
+  See also the function @code{add-to-list}, in @ref{List Variables},
+for a way to add an element to a list stored in a variable and used as a
+set.
+
+@node Association Lists
+@section Association Lists
+@cindex association list
+@cindex alist
+
+  An @dfn{association list}, or @dfn{alist} for short, records a mapping
+from keys to values.  It is a list of cons cells called
+@dfn{associations}: the @sc{car} of each cons cell is the @dfn{key}, and the
+@sc{cdr} is the @dfn{associated value}.@footnote{This usage of ``key''
+is not related to the term ``key sequence''; it means a value used to
+look up an item in a table.  In this case, the table is the alist, and
+the alist associations are the items.}
+
+  Here is an example of an alist.  The key @code{pine} is associated with
+the value @code{cones}; the key @code{oak} is associated with
+@code{acorns}; and the key @code{maple} is associated with @code{seeds}.
+
+@example
+@group
+((pine . cones)
+ (oak . acorns)
+ (maple . seeds))
+@end group
+@end example
+
+  Both the values and the keys in an alist may be any Lisp objects.
+For example, in the following alist, the symbol @code{a} is
+associated with the number @code{1}, and the string @code{"b"} is
+associated with the @emph{list} @code{(2 3)}, which is the @sc{cdr} of
+the alist element:
+
+@example
+((a . 1) ("b" 2 3))
+@end example
+
+  Sometimes it is better to design an alist to store the associated
+value in the @sc{car} of the @sc{cdr} of the element.  Here is an
+example of such an alist:
+
+@example
+((rose red) (lily white) (buttercup yellow))
+@end example
+
+@noindent
+Here we regard @code{red} as the value associated with @code{rose}.  One
+advantage of this kind of alist is that you can store other related
+information---even a list of other items---in the @sc{cdr} of the
+@sc{cdr}.  One disadvantage is that you cannot use @code{rassq} (see
+below) to find the element containing a given value.  When neither of
+these considerations is important, the choice is a matter of taste, as
+long as you are consistent about it for any given alist.
+
+  The same alist shown above could be regarded as having the
+associated value in the @sc{cdr} of the element; the value associated
+with @code{rose} would be the list @code{(red)}.
+
+  Association lists are often used to record information that you might
+otherwise keep on a stack, since new associations may be added easily to
+the front of the list.  When searching an association list for an
+association with a given key, the first one found is returned, if there
+is more than one.
+
+  In Emacs Lisp, it is @emph{not} an error if an element of an
+association list is not a cons cell.  The alist search functions simply
+ignore such elements.  Many other versions of Lisp signal errors in such
+cases.
+
+  Note that property lists are similar to association lists in several
+respects.  A property list behaves like an association list in which
+each key can occur only once.  @xref{Property Lists}, for a comparison
+of property lists and association lists.
+
+@defun assoc key alist
+This function returns the first association for @var{key} in
+@var{alist}, comparing @var{key} against the alist elements using
+@code{equal} (@pxref{Equality Predicates}).  It returns @code{nil} if no
+association in @var{alist} has a @sc{car} @code{equal} to @var{key}.
+For example:
+
+@smallexample
+(setq trees '((pine . cones) (oak . acorns) (maple . seeds)))
+     @result{} ((pine . cones) (oak . acorns) (maple . seeds))
+(assoc 'oak trees)
+     @result{} (oak . acorns)
+(cdr (assoc 'oak trees))
+     @result{} acorns
+(assoc 'birch trees)
+     @result{} nil
+@end smallexample
+
+Here is another example, in which the keys and values are not symbols:
+
+@smallexample
+(setq needles-per-cluster
+      '((2 "Austrian Pine" "Red Pine")
+        (3 "Pitch Pine")
+        (5 "White Pine")))
+
+(cdr (assoc 3 needles-per-cluster))
+     @result{} ("Pitch Pine")
+(cdr (assoc 2 needles-per-cluster))
+     @result{} ("Austrian Pine" "Red Pine")
+@end smallexample
+@end defun
+
+  The function @code{assoc-string} is much like @code{assoc} except
+that it ignores certain differences between strings.  @xref{Text
+Comparison}.
+
+@defun rassoc value alist
+This function returns the first association with value @var{value} in
+@var{alist}.  It returns @code{nil} if no association in @var{alist} has
+a @sc{cdr} @code{equal} to @var{value}.
+
+@code{rassoc} is like @code{assoc} except that it compares the @sc{cdr} of
+each @var{alist} association instead of the @sc{car}.  You can think of
+this as ``reverse @code{assoc}'', finding the key for a given value.
+@end defun
+
+@defun assq key alist
+This function is like @code{assoc} in that it returns the first
+association for @var{key} in @var{alist}, but it makes the comparison
+using @code{eq} instead of @code{equal}.  @code{assq} returns @code{nil}
+if no association in @var{alist} has a @sc{car} @code{eq} to @var{key}.
+This function is used more often than @code{assoc}, since @code{eq} is
+faster than @code{equal} and most alists use symbols as keys.
+@xref{Equality Predicates}.
+
+@smallexample
+(setq trees '((pine . cones) (oak . acorns) (maple . seeds)))
+     @result{} ((pine . cones) (oak . acorns) (maple . seeds))
+(assq 'pine trees)
+     @result{} (pine . cones)
+@end smallexample
+
+On the other hand, @code{assq} is not usually useful in alists where the
+keys may not be symbols:
+
+@smallexample
+(setq leaves
+      '(("simple leaves" . oak)
+        ("compound leaves" . horsechestnut)))
+
+(assq "simple leaves" leaves)
+     @result{} nil
+(assoc "simple leaves" leaves)
+     @result{} ("simple leaves" . oak)
+@end smallexample
+@end defun
+
+@defun rassq value alist
+This function returns the first association with value @var{value} in
+@var{alist}.  It returns @code{nil} if no association in @var{alist} has
+a @sc{cdr} @code{eq} to @var{value}.
+
+@code{rassq} is like @code{assq} except that it compares the @sc{cdr} of
+each @var{alist} association instead of the @sc{car}.  You can think of
+this as ``reverse @code{assq}'', finding the key for a given value.
+
+For example:
+
+@smallexample
+(setq trees '((pine . cones) (oak . acorns) (maple . seeds)))
+
+(rassq 'acorns trees)
+     @result{} (oak . acorns)
+(rassq 'spores trees)
+     @result{} nil
+@end smallexample
+
+@code{rassq} cannot search for a value stored in the @sc{car}
+of the @sc{cdr} of an element:
+
+@smallexample
+(setq colors '((rose red) (lily white) (buttercup yellow)))
+
+(rassq 'white colors)
+     @result{} nil
+@end smallexample
+
+In this case, the @sc{cdr} of the association @code{(lily white)} is not
+the symbol @code{white}, but rather the list @code{(white)}.  This
+becomes clearer if the association is written in dotted pair notation:
+
+@smallexample
+(lily white) @equiv{} (lily . (white))
+@end smallexample
+@end defun
+
+@defun assoc-default key alist &optional test default
+This function searches @var{alist} for a match for @var{key}.  For each
+element of @var{alist}, it compares the element (if it is an atom) or
+the element's @sc{car} (if it is a cons) against @var{key}, by calling
+@var{test} with two arguments: the element or its @sc{car}, and
+@var{key}.  The arguments are passed in that order so that you can get
+useful results using @code{string-match} with an alist that contains
+regular expressions (@pxref{Regexp Search}).  If @var{test} is omitted
+or @code{nil}, @code{equal} is used for comparison.
+
+If an alist element matches @var{key} by this criterion,
+then @code{assoc-default} returns a value based on this element.
+If the element is a cons, then the value is the element's @sc{cdr}.
+Otherwise, the return value is @var{default}.
+
+If no alist element matches @var{key}, @code{assoc-default} returns
+@code{nil}.
+@end defun
+
+@defun copy-alist alist
+@cindex copying alists
+This function returns a two-level deep copy of @var{alist}: it creates a
+new copy of each association, so that you can alter the associations of
+the new alist without changing the old one.
+
+@smallexample
+@group
+(setq needles-per-cluster
+      '((2 . ("Austrian Pine" "Red Pine"))
+        (3 . ("Pitch Pine"))
+@end group
+        (5 . ("White Pine"))))
+@result{}
+((2 "Austrian Pine" "Red Pine")
+ (3 "Pitch Pine")
+ (5 "White Pine"))
+
+(setq copy (copy-alist needles-per-cluster))
+@result{}
+((2 "Austrian Pine" "Red Pine")
+ (3 "Pitch Pine")
+ (5 "White Pine"))
+
+(eq needles-per-cluster copy)
+     @result{} nil
+(equal needles-per-cluster copy)
+     @result{} t
+(eq (car needles-per-cluster) (car copy))
+     @result{} nil
+(cdr (car (cdr needles-per-cluster)))
+     @result{} ("Pitch Pine")
+@group
+(eq (cdr (car (cdr needles-per-cluster)))
+    (cdr (car (cdr copy))))
+     @result{} t
+@end group
+@end smallexample
+
+  This example shows how @code{copy-alist} makes it possible to change
+the associations of one copy without affecting the other:
+
+@smallexample
+@group
+(setcdr (assq 3 copy) '("Martian Vacuum Pine"))
+(cdr (assq 3 needles-per-cluster))
+     @result{} ("Pitch Pine")
+@end group
+@end smallexample
+@end defun
+
+@defun assq-delete-all key alist
+This function deletes from @var{alist} all the elements whose @sc{car}
+is @code{eq} to @var{key}, much as if you used @code{delq} to delete
+each such element one by one.  It returns the shortened alist, and
+often modifies the original list structure of @var{alist}.  For
+correct results, use the return value of @code{assq-delete-all} rather
+than looking at the saved value of @var{alist}.
+
+@example
+(setq alist '((foo 1) (bar 2) (foo 3) (lose 4)))
+     @result{} ((foo 1) (bar 2) (foo 3) (lose 4))
+(assq-delete-all 'foo alist)
+     @result{} ((bar 2) (lose 4))
+alist
+     @result{} ((foo 1) (bar 2) (lose 4))
+@end example
+@end defun
+
+@defun rassq-delete-all value alist
+This function deletes from @var{alist} all the elements whose @sc{cdr}
+is @code{eq} to @var{value}.  It returns the shortened alist, and
+often modifies the original list structure of @var{alist}.
+@code{rassq-delete-all} is like @code{assq-delete-all} except that it
+compares the @sc{cdr} of each @var{alist} association instead of the
+@sc{car}.
+@end defun
