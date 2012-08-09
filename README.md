@@ -47,6 +47,10 @@ To install using [MacPorts][]:
 	sudo port install clang-3.2 clang_select proctools
 	sudo port select clang mp-clang-3.2
 
+Or (for `pgrep` and `pkill`) using [homebrew][]:
+
+	brew install pgrep
+
 ## Building from within TextMate
 
 You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
