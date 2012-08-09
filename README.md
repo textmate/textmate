@@ -18,6 +18,7 @@ In the simplest case you would run:
 To build the source the following must first be installed on your system:
 
  * [ninja][]         — build system similar to `make`
+ * [pgrep][]         - this utility examines the active processes on the system
  * [ragel][]         — state machine compiler
  * [boost][]         — portable C++ source libraries
  * [multimarkdown][] — marked-up plain text compiler
@@ -34,7 +35,7 @@ If `port` fails with a build error then likely you need to agree (system-wide) t
 You can also install the above using [homebrew][]:
 
 	brew install --HEAD https://raw.github.com/adamv/homebrew-alt/master/head-only/ninja.rb
-	brew install ragel boost multimarkdown hg
+	brew install pgrep ragel boost multimarkdown hg
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
@@ -113,6 +114,7 @@ The source for TextMate is released under the GNU General Public License as publ
 TextMate is a trademark of Allan Odgaard.
 
 [boost]:         http://www.boost.org/
+[pgrep]:         http://linux.die.net/man/1/pgrep
 [ninja]:         http://martine.github.com/ninja/
 [multimarkdown]: http://fletcherpenney.net/multimarkdown/
 [ragel]:         http://www.complang.org/ragel/
