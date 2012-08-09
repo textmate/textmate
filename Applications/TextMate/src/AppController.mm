@@ -1,6 +1,7 @@
 #import "AppController.h"
 #import "Favorites.h"
 #import "AboutWindowController.h"
+#import "InstallBundleItems.h"
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <Find/Find.h>
@@ -23,9 +24,15 @@ OAK_DEBUG_VAR(AppController);
 void OakOpenDocuments (NSArray* paths)
 {
 	std::vector<document::document_ptr> documents;
+	NSMutableArray* itemsToInstall = [NSMutableArray array];
 	for(NSString* path in paths)
 	{
-		if(path::is_directory(to_s(path)))
+		static std::set<std::string> const tmItemExtensions = { "tmbundle", "tmcommand", "tmdragcommand", "tmlanguage", "tmmacro", "tmplugin", "tmpreferences", "tmsnippet", "tmtheme" };
+		if(tmItemExtensions.find(to_s([[path pathExtension] lowercaseString])) != tmItemExtensions.end() && !([NSEvent modifierFlags] & NSAlternateKeyMask))
+		{
+			[itemsToInstall addObject:path];
+		}
+		else if(path::is_directory(to_s(path)))
 		{
 			document::show_browser(to_s(path));
 		}
@@ -34,6 +41,9 @@ void OakOpenDocuments (NSArray* paths)
 			documents.push_back(document::create(to_s(path)));
 		}
 	}
+
+	if([itemsToInstall count])
+		InstallBundleItems(itemsToInstall);
 
 	document::show(documents);
 }
