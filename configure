@@ -32,11 +32,11 @@ rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 )) || \
 : "${CXX:=/opt/local/bin/clang++}"
 
 if ! [[ -x "$CC" && -x "$CXX" ]]; then
-	CC='/usr/bin/clang'
-	CXX='/usr/bin/clang++'
+	CC='/usr/bin/xcrun clang'
+	CXX='/usr/bin/xcrun clang++'
 fi
 
-"$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "clang is too old to build this project."
+$CC &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "clang is too old to build this project."
 
 # ===============================
 # = Check if boost is installed =
