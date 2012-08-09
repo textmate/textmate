@@ -51,7 +51,7 @@ To install using [MacPorts][]:
 
 You should install the [Ninja][NinjaBundle] and [CxxTest][] bundles. Both can be installed via _Preferences_ → _Bundles_.
 
-After this you can press ⌘B to build from within TextMate.
+After this you can press ⌘B to build from within TextMate. In case you haven't already you also need to set up the `PATH` variable either in _Preferences_ → _Variables_ or `~/.tm_properties` so it can find `ninja` and related tools; an example could be `$PATH:/opt/local/bin`.
 
 The default target is `TextMate/run`. This will relaunch TextMate but when called from within TextMate, a dialog will appear before the current instance is killed. As there is full session restore, it is safe to relaunch even with unsaved changes.
 
