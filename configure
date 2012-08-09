@@ -32,8 +32,13 @@ rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 )) || \
 : "${CXX:=/opt/local/bin/clang++}"
 
 if ! [[ -x "$CC" && -x "$CXX" ]]; then
-	CC='/usr/bin/clang'
-	CXX='/usr/bin/clang++'
+	if which -s xcrun; then
+		CC=$(xcrun -find clang)
+		CXX=$(xcrun -find clang++)
+	else
+		CC='/usr/bin/clang'
+		CXX='/usr/bin/clang++'
+	fi
 fi
 
 "$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "clang is too old to build this project."
