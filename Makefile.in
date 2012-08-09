@@ -1,0 +1,964 @@
+# DIST: This is the distribution Makefile for Emacs.  configure can
+# DIST: make most of the changes to this file you might want, so try
+# DIST: that first.
+
+# Copyright (C) 1992-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+### Commentary:
+
+# make all	to compile and build Emacs.
+# make install	to install it.
+# make TAGS	to update tags tables.
+#
+# make clean  or  make mostlyclean
+#      Delete all files from the current directory that are normally
+#      created by building the program.	 Don't delete the files that
+#      record the configuration.  Also preserve files that could be made
+#      by building, but normally aren't because the distribution comes
+#      with them.
+#
+#      Delete `.dvi' files here if they are not part of the distribution.
+#
+# make distclean
+#      Delete all files from the current directory that are created by
+#      configuring or building the program.  If you have unpacked the
+#      source and built the program without creating any other files,
+#      `make distclean' should leave only the files that were in the
+#      distribution.
+#
+# make maintainer-clean
+#      Delete everything from the current directory that can be
+#      reconstructed with this Makefile.  This typically includes
+#      everything deleted by distclean, plus more: .elc files,
+#      C source files produced by Bison, tags tables, info files,
+#      and so on.
+#
+# make extraclean
+#      Still more severe - delete backup and autosave files, too.
+#
+# make bootstrap
+#      Removes all the compiled files to force a new bootstrap from a
+#      clean slate, and then build in the normal way.
+
+SHELL = /bin/sh
+
+# This may not work with certain non-GNU make's.  It only matters when
+# inheriting a CDPATH not starting with the current directory.
+CDPATH=
+
+# If Make doesn't predefine MAKE, set it here.
+@SET_MAKE@
+
+# ==================== Things `configure' Might Edit ====================
+
+MAINTAINER_MODE_FLAG = --disable-maintainer-mode
+@MAINT@MAINTAINER_MODE_FLAG = --enable-maintainer-mode
+cache_file = @cache_file@
+CONFIGURE_FLAGS = --cache-file=$(cache_file) $(MAINTAINER_MODE_FLAG)
+
+CC=@CC@
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
+CPPFLAGS=@CPPFLAGS@
+EXEEXT=@EXEEXT@
+
+### These help us choose version- and architecture-specific directories
+### to install files in.
+
+### This should be the number of the Emacs version we're building,
+### like `18.59' or `19.0'.
+version=@version@
+
+### This should be the name of the configuration we're building Emacs
+### for, like `mips-dec-ultrix' or `sparc-sun-sunos'.
+configuration=@configuration@
+
+# ==================== Where To Install Things ====================
+
+# The default location for installation.  Everything is placed in
+# subdirectories of this directory.  The default values for many of
+# the variables below are expressed in terms of this one, so you may
+# not need to change them.  This defaults to /usr/local.
+prefix=@prefix@
+
+# Like `prefix', but used for architecture-specific files.
+exec_prefix=@exec_prefix@
+
+# Where to install Emacs and other binaries that people will want to
+# run directly (like etags).
+bindir=@bindir@
+
+# The root of the directory tree for read-only architecture-independent
+# data files.  ${datadir}, ${infodir} and ${mandir} are based on this.
+datarootdir=@datarootdir@
+
+# Where to install architecture-independent data files.	 ${lispdir}
+# and ${etcdir} are subdirectories of this.
+datadir=@datadir@
+
+# Where to install and expect the files that Emacs modifies as it
+# runs.  These files are all architecture-independent.
+# Right now, this is not used.
+sharedstatedir=@sharedstatedir@
+
+# Where to install and expect executable files to be run by Emacs
+# rather than directly by users, and other architecture-dependent
+# data.	 ${archlibdir} is a subdirectory of this.
+libexecdir=@libexecdir@
+
+# Where to install Emacs's man pages.
+# This used to allow choice of the numeric extension, but this made
+# little sense since the files were always installed in man1/
+# (and they contain cross-references that expect them to be there).
+mandir=@mandir@
+man1dir=$(mandir)/man1
+MAN_PAGES=ctags.1 ebrowse.1 emacs.1 emacsclient.1 etags.1 \
+          grep-changelog.1 rcs-checkin.1
+
+# Where to install and expect the info files describing Emacs.	In the
+# past, this defaulted to a subdirectory of ${prefix}/lib/emacs, but
+# since there are now many packages documented with the texinfo
+# system, it is inappropriate to imply that it is part of Emacs.
+infodir=@infodir@
+INFO_FILES=ada-mode auth autotype calc ccmode cl dbus dired-x ebrowse	\
+           ede ediff edt eieio efaq eintr elisp emacs emacs-gnutls emacs-mime epa erc \
+	   ert eshell eudc flymake forms gnus idlwave info mairix-el	\
+	   message mh-e newsticker nxml-mode org pcl-cvs pgg rcirc	\
+	   reftex remember sasl sc semantic ses sieve smtpmail speedbar \
+	   tramp url vip viper widget woman
+
+# If no makeinfo was found and configured --without-makeinfo, "no"; else "yes".
+HAVE_MAKEINFO=@HAVE_MAKEINFO@
+
+# Directory for local state files for all programs.
+localstatedir=@localstatedir@
+
+# Where to look for bitmap files.
+bitmapdir=@bitmapdir@
+
+# Where to find the source code.  The source code for Emacs's C kernel is
+# expected to be in ${srcdir}/src, and the source code for Emacs's
+# utility programs is expected to be in ${srcdir}/lib-src.  This is
+# set by the configure script's `--srcdir' option.
+
+# We use $(srcdir) explicitly in dependencies so as not to depend on VPATH.
+srcdir=@srcdir@
+
+# Where the manpage source files are kept.
+mansrcdir=$(srcdir)/doc/man
+
+# Tell make where to find source files; this is needed for the makefiles.
+VPATH=@srcdir@
+
+# Where to find the application default.
+x_default_search_path=@x_default_search_path@
+
+# Location to install Emacs.app under NeXT/Open/GNUstep / Cocoa
+ns_appbindir=@ns_appbindir@
+ns_appresdir=@ns_appresdir@
+
+# Where the etc/emacs.desktop file is to be installed.
+desktopdir=$(datarootdir)/applications
+
+# Where the etc/images/icons/hicolor directory is to be installed.
+icondir=$(datarootdir)/icons
+
+# The source directory for the icon files.
+iconsrcdir=$(srcdir)/etc/images/icons
+
+# ==================== Emacs-specific directories ====================
+
+# These variables hold the values Emacs will actually use.  They are
+# based on the values of the standard Make variables above.
+
+# Where to install the lisp files distributed with
+# Emacs.  This includes the Emacs version, so that the
+# lisp files for different versions of Emacs will install
+# themselves in separate directories.
+lispdir=@lispdir@
+
+# Directories Emacs should search for lisp files specific
+# to this site (i.e. customizations), before consulting
+# ${lispdir}.  This should be a colon-separated list of
+# directories.
+locallisppath=@locallisppath@
+
+# Where Emacs will search to find its lisp files.  Before
+# changing this, check to see if your purpose wouldn't
+# better be served by changing locallisppath.  This
+# should be a colon-separated list of directories.
+lisppath=@lisppath@
+
+# Where Emacs will search for its lisp files while
+# building.  This is only used during the process of
+# compiling Emacs, to help Emacs find its lisp files
+# before they've been installed in their final location.
+# This should be a colon-separated list of directories.
+# Normally it points to the lisp/ directory in the sources.
+buildlisppath=${srcdir}/lisp
+
+# Where to install the other architecture-independent
+# data files distributed with Emacs (like the tutorial,
+# the cookie recipes and the Zippy database). This path
+# usually contains the Emacs version number, so the data
+# files for multiple versions of Emacs may be installed
+# at once.
+etcdir=@etcdir@
+
+# Where to put executables to be run by Emacs rather than
+# the user.  This path usually includes the Emacs version
+# and configuration name, so that multiple configurations
+# for multiple versions of Emacs may be installed at
+# once.
+archlibdir=@archlibdir@
+
+# Where to put the docstring file.
+docdir=@docdir@
+
+# Where to install Emacs game score files.
+gamedir=@gamedir@
+
+# ==================== Utility Programs for the Build ====================
+
+# Allow the user to specify the install program.
+# Note that if the system does not provide a suitable install,
+# configure will use build-aux/install-sh.  Annoyingly, it does
+# not use an absolute path.  So we must take care to always run
+# INSTALL-type commands from the top-level directory.
+# This explains (I think) the cd thisdir seen in several install rules.
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_INFO = @INSTALL_INFO@
+# By default, we uphold the dignity of our programs.
+INSTALL_STRIP =
+
+# We use gzip to compress installed .el files.
+GZIP_PROG = @GZIP_PROG@
+# If non-nil, gzip the installed Info and man pages.
+GZIP_INFO = @GZIP_INFO@
+
+# ============================= Targets ==============================
+
+# Program name transformation.
+TRANSFORM = @program_transform_name@
+
+# What emacs should be called when installed.
+EMACS = `echo emacs${EXEEXT} | sed '$(TRANSFORM)'`
+EMACSFULL = `echo emacs-${version}${EXEEXT} | sed '$(TRANSFORM)'`
+
+# Subdirectories to make recursively.  `lisp' is not included
+# because the compiled lisp files are part of the distribution.
+# leim is not included because it needs special handling.
+#
+# Actually, we now include `lisp' as well, since the compiled files
+# are not included any more in case of bootstrap or in case Emacs was
+# checked out from a VCS.
+SUBDIR = lib lib-src src lisp
+
+# The subdir makefiles created by config.status.
+SUBDIR_MAKEFILES_IN = @SUBDIR_MAKEFILES_IN@
+SUBDIR_MAKEFILES = `echo $(SUBDIR_MAKEFILES_IN:.in=) | sed 's|$(srcdir)/||g'`
+
+# Subdirectories to install, and where they'll go.
+# lib-src's makefile knows how to install it, so we don't do that here.
+# leim's makefile also knows how to install it, so we don't do that here.
+# When installing the info files, we need to do special things to
+# avoid nuking an existing dir file, so we don't do that here;
+# instead, we have written out explicit code in the `install' targets.
+COPYDIR = ${srcdir}/etc ${srcdir}/lisp
+COPYDESTS = $(DESTDIR)${etcdir} $(DESTDIR)${lispdir}
+
+all: ${SUBDIR} leim
+
+removenullpaths=sed -e 's/^://g' -e 's/:$$//g' -e 's/::/:/g'
+
+# Generate epaths.h from epaths.in.  This target is invoked by `configure'.
+# See comments in configure.in for why it is done this way, as opposed
+# to just letting configure generate epaths.h from epaths.in in a
+# similar way to how Makefile is made from Makefile.in.
+epaths-force: FRC
+	@(lisppath=`echo ${lisppath} | ${removenullpaths}` ;		\
+	  buildlisppath=`echo ${buildlisppath} | ${removenullpaths}` ;	\
+	  x_default_search_path=`echo ${x_default_search_path}`; \
+	  gamedir=`echo ${gamedir}`; \
+	  sed < ${srcdir}/src/epaths.in > epaths.h.$$$$		\
+	  -e 's;\(#.*PATH_LOADSEARCH\).*$$;\1 "'"$${lisppath}"'";'	\
+	  -e 's;\(#.*PATH_DUMPLOADSEARCH\).*$$;\1 "'"$${buildlisppath}"'";' \
+	  -e 's;\(#.*PATH_EXEC\).*$$;\1 "${archlibdir}";'		\
+	  -e 's;\(#.*PATH_INFO\).*$$;\1 "${infodir}";'			\
+	  -e 's;\(#.*PATH_DATA\).*$$;\1 "${etcdir}";'			\
+	  -e 's;\(#.*PATH_BITMAPS\).*$$;\1 "${bitmapdir}";'		\
+	  -e 's;\(#.*PATH_X_DEFAULTS\).*$$;\1 "${x_default_search_path}";' \
+	  -e 's;\(#.*PATH_GAME\).*$$;\1 "${gamedir}";' \
+	  -e 's;\(#.*PATH_DOC\).*$$;\1 "${docdir}";') &&		\
+	${srcdir}/build-aux/move-if-change epaths.h.$$$$ src/epaths.h
+
+# For parallel make, src should be built before leim.
+# "export PARALLEL=0" is for SGI's Make, to prevent it from
+# running more than 1 process in the leim directory, especially for
+# the $TIT files there.
+leim:   src Makefile FRC
+	(export PARALLEL; PARALLEL=0; cd $@; $(MAKE) all $(MFLAGS) \
+	  CC='${CC}' CFLAGS='${CFLAGS}' CPPFLAGS='${CPPFLAGS}' \
+	  LDFLAGS='${LDFLAGS}' MAKE='${MAKE}')
+
+lib-src src: lib
+
+src:	lib-src FRC
+
+.RECURSIVE: ${SUBDIR} leim
+
+# We need to build `emacs' in `src' to compile the *.elc files in `lisp'.
+lisp: src
+
+# Maintainers can put a copy of gnulib into $(gnulib_srcdir).
+gnulib_srcdir = ../gnulib
+$(gnulib_srcdir):
+	git clone git://git.savannah.gnu.org/gnulib.git $@
+
+# A shorter name that satisfies MS-DOS 8+3 constraints.
+DOS_gnulib_comp.m4 = gl-comp.m4
+
+# Update modules from gnulib, for maintainers, who should have it in
+# $(gnulib_srcdir) (relative to $(srcdir) and should have build tools
+# as per $(gnulib_srcdir)/DEPENDENCIES.
+GNULIB_MODULES = \
+  alloca-opt \
+  careadlinkat crypto/md5 crypto/sha1 crypto/sha256 crypto/sha512 dtoastr \
+  dup2 \
+  filemode getloadavg getopt-gnu ignore-value intprops lstat \
+  mktime pthread_sigmask readlink \
+  socklen stdarg stdio strftime strtoimax strtoumax symlink sys_stat
+GNULIB_TOOL_FLAGS = \
+ --avoid=msvc-inval --avoid=msvc-nothrow \
+ --avoid=raise --avoid=threadlib \
+ --conditional-dependencies --import --no-changelog --no-vc-files \
+ --makefile-name=gnulib.mk
+sync-from-gnulib: $(gnulib_srcdir)
+	-cd $(srcdir)/m4 && cp $(DOS_gnulib_comp.m4) gnulib-comp.m4
+	cd $(srcdir) && \
+	  $(gnulib_srcdir)/gnulib-tool $(GNULIB_TOOL_FLAGS) $(GNULIB_MODULES)
+	cd $(srcdir)/m4 && rm gnulib-cache.m4 warn-on-use.m4
+	cd $(srcdir)/m4 && mv gnulib-comp.m4 $(DOS_gnulib_comp.m4)
+	cp $(gnulib_srcdir)/build-aux/texinfo.tex $(srcdir)/doc/misc
+	cp \
+	  $(gnulib_srcdir)/build-aux/move-if-change \
+	  $(srcdir)/build-aux
+	cd $(srcdir) && autoreconf -i -I m4
+.PHONY: sync-from-gnulib
+
+# These targets should be "${SUBDIR} without `src'".
+lib lib-src lisp: Makefile FRC
+	cd $@; $(MAKE) all $(MFLAGS)                           \
+	  CC='${CC}' CFLAGS='${CFLAGS}' CPPFLAGS='${CPPFLAGS}' \
+	  LDFLAGS='${LDFLAGS}' MAKE='${MAKE}'
+
+# Pass to src/Makefile.in an additional BOOTSTRAPEMACS variable which
+# is either set to bootstrap-emacs (in case bootstrap-emacs has not been
+# constructed yet) or the empty string (otherwise).
+# src/Makefile.in uses it to implement conditional dependencies, so that
+# files that need bootstrap-emacs to be built do not additionally need
+# to be kept fresher than bootstrap-emacs.  Otherwise changing a single
+# file src/foo.c forces dumping a new bootstrap-emacs, then re-byte-compiling
+# all preloaded elisp files, and only then dump the actual src/emacs, which
+# is not wrong, but is overkill in 99.99% of the cases.
+src: Makefile FRC
+	boot=bootstrap-emacs$(EXEEXT);                         \
+	if [ ! -x "src/$$boot" ]; then                                     \
+	    cd $@; $(MAKE) all $(MFLAGS)                                   \
+	      CC='${CC}' CFLAGS='${CFLAGS}' CPPFLAGS='${CPPFLAGS}'         \
+	      LDFLAGS='${LDFLAGS}' MAKE='${MAKE}' BOOTSTRAPEMACS="$$boot"; \
+	fi;
+	if [ -r .bzr/checkout/dirstate ]; then 			\
+	    vcswitness="`pwd`/.bzr/checkout/dirstate"; 	\
+	fi; 							\
+	cd $@; $(MAKE) all $(MFLAGS)                           \
+	  CC='${CC}' CFLAGS='${CFLAGS}' CPPFLAGS='${CPPFLAGS}' \
+	  LDFLAGS='${LDFLAGS}' MAKE='${MAKE}' BOOTSTRAPEMACS=""	\
+	  VCSWITNESS="$$vcswitness"
+
+blessmail: Makefile src FRC
+	cd lib-src; $(MAKE) maybe-blessmail $(MFLAGS) \
+	  MAKE='${MAKE}' archlibdir='$(archlibdir)'
+
+# We used to have one rule per */Makefile.in, but that leads to race
+# conditions with parallel makes, so let's assume that the time stamp on
+# ./Makefile is representative of the time stamp on all the other Makefiles.
+Makefile: config.status $(srcdir)/src/config.in \
+          $(srcdir)/Makefile.in $(SUBDIR_MAKEFILES_IN)
+	./config.status
+
+# Don't erase config.status if make is interrupted while refreshing it.
+.PRECIOUS: config.status
+
+config.status: ${srcdir}/configure ${srcdir}/lisp/version.el
+	if [ -x ./config.status ]; then	\
+	    ./config.status --recheck;	\
+	else				\
+	    ./configure $(CONFIGURE_FLAGS); \
+	fi
+
+AUTOCONF_INPUTS = @MAINT@ $(srcdir)/configure.in $(srcdir)/aclocal.m4
+
+$(srcdir)/configure: $(AUTOCONF_INPUTS)
+	cd ${srcdir} && autoconf
+
+ACLOCAL_INPUTS = @MAINT@ $(srcdir)/m4/$(DOS_gnulib_comp.m4)
+$(srcdir)/aclocal.m4: $(ACLOCAL_INPUTS)
+	cd $(srcdir) && aclocal -I m4
+
+AUTOMAKE_INPUTS = @MAINT@ $(srcdir)/aclocal.m4 $(srcdir)/lib/Makefile.am $(srcdir)/lib/gnulib.mk
+$(srcdir)/lib/Makefile.in: $(AUTOMAKE_INPUTS)
+	cd $(srcdir) && automake --gnu -a -c lib/Makefile
+am--refresh: $(srcdir)/aclocal.m4 $(srcdir)/configure $(srcdir)/src/config.in
+.PHONY: am--refresh
+
+$(srcdir)/src/config.in: $(srcdir)/src/stamp-h.in
+	@ # Usually, there's no need to rebuild src/config.in just
+	@ # because stamp-h.in has changed (since building stamp-h.in
+	@ # refreshes config.in as well), but if config.in is missing
+	@ # then we really need to do something more.
+	[ -r "$@" ] || ( cd ${srcdir} && autoheader )
+$(srcdir)/src/stamp-h.in: $(AUTOCONF_INPUTS)
+	cd ${srcdir} && autoheader
+	rm -f $(srcdir)/src/stamp-h.in
+	echo timestamp > $(srcdir)/src/stamp-h.in
+
+# ==================== Installation ====================
+
+## If we let lib-src do its own installation, that means we
+## don't have to duplicate the list of utilities to install in
+## this Makefile as well.
+
+## On AIX, use tar xBf.
+## On Xenix, use tar xpf.
+
+.PHONY: install mkdir
+
+## We delete each directory in ${COPYDESTS} before we copy into it;
+## that way, we can reinstall over directories that have been put in
+## place with their files read-only (perhaps because they are checked
+## into RCS).  In order to make this safe, we make sure that the
+## source exists and is distinct from the destination.
+### We do install-arch-indep first because
+### the executable needs the Lisp files and DOC file to work properly.
+install: all install-arch-indep install-arch-dep install-leim blessmail
+	@true
+
+MV_DIRS = for i in $$dir; do rm -fr `basename "$$i"` ; mv "$$i" . ; done
+
+### Install the executables that were compiled specifically for this machine.
+### It would be nice to do something for a parallel make
+### to ensure that install-arch-indep finishes before this starts.
+install-arch-dep: mkdir
+	(cd lib-src; \
+	  $(MAKE) install $(MFLAGS) prefix=${prefix} \
+	    exec_prefix=${exec_prefix} bindir=${bindir} \
+	    libexecdir=${libexecdir} archlibdir=${archlibdir} \
+	    INSTALL_STRIP=${INSTALL_STRIP})
+	${INSTALL_PROGRAM} $(INSTALL_STRIP) src/emacs${EXEEXT} $(DESTDIR)${bindir}/$(EMACSFULL)
+	-chmod 1755 $(DESTDIR)${bindir}/$(EMACSFULL)
+	rm -f $(DESTDIR)${bindir}/$(EMACS)
+	-ln $(DESTDIR)${bindir}/$(EMACSFULL) $(DESTDIR)${bindir}/$(EMACS)
+	if test "${ns_appresdir}" != ""; then \
+	  ( cd ${ns_appresdir} ; \
+	    if test -d share/emacs ; then dir=share/emacs/*/*; $(MV_DIRS); fi;\
+	    if test -d share/info ; then dir=share/info; $(MV_DIRS) ; fi ; \
+	    rm -fr share ) ; \
+	  ( cd ${ns_appbindir} ; \
+	    if cd libexec ; then dir=emacs/*/*/* ; $(MV_DIRS); \
+	    rm -fr emacs; if cd ../bin; then rm -f emacs emacs-24*; \
+	    ln -sf ../libexec/* . ; fi ; fi ) ; \
+	else true ; fi
+
+## FIXME is the emacs-24* bit above really necessary and correct?
+## What if I have 24.1 and 24.2 installed at the same time?
+## In any case, it should use something like echo $version | sed 's/\..*//'
+## instead of hard-coding a version.
+
+## http://lists.gnu.org/archive/html/emacs-devel/2007-10/msg01672.html
+## Needs to be the user running install, so configure can't set it.
+set_installuser=for installuser in $${LOGNAME} $${USERNAME} $${USER} \
+	  `id -un 2> /dev/null`; do \
+	  [ -n "$${installuser}" ] && break ; \
+	done
+
+### Install the files that are machine-independent.
+### Most of them come straight from the distribution;
+### the exception is the DOC-* files, which are copied
+### from the build directory.
+
+## Note that we copy DOC* and then delete DOC
+## as a workaround for a bug in tar on Ultrix 4.2.
+
+## We install only the relevant DOC file if possible
+## (ie DOC-${version}.buildnumber), otherwise DOC-${version}*.
+
+## If people complain about the h flag in tar command, take that out.
+## That flag is also used in leim/Makefile.in
+
+## Note that the Makefiles in the etc directory are potentially useful
+## in an installed Emacs, so should not be excluded.
+
+install-arch-indep: mkdir info install-etc
+	-set ${COPYDESTS} ; \
+	unset CDPATH; \
+	for dir in ${COPYDIR} ; do \
+	  if [ `(cd $$1 && /bin/pwd)` != `(cd $${dir} && /bin/pwd)` ] ; then \
+	    rm -rf $$1 ; \
+	  fi ; \
+	  shift ; \
+	done
+	-set ${COPYDESTS} ; \
+	mkdir ${COPYDESTS} ; \
+	chmod ugo+rx ${COPYDESTS} ; \
+	unset CDPATH; \
+	$(set_installuser); \
+	for dir in ${COPYDIR} ; do \
+	  dest=$$1 ; shift ; \
+	  [ -d $${dir} ] \
+	  && [ `(cd $${dir} && /bin/pwd)` != `(cd $${dest} && /bin/pwd)` ] \
+	  && (echo "Copying $${dir} to $${dest}..." ; \
+	      (cd $${dir}; tar -chf - . ) \
+		| (cd $${dest}; umask 022; \
+                   tar -xvf - && cat > /dev/null) || exit 1; \
+	      find $${dest} -exec chown $${installuser} {} ';' ;\
+	      for subdir in `find $${dest} -type d -print` ; do \
+		chmod a+rx $${subdir} ; \
+		rm -f  $${subdir}/.gitignore ; \
+		rm -f  $${subdir}/.arch-inventory ; \
+		rm -f  $${subdir}/.DS_Store ; \
+		rm -f  $${subdir}/\#* ; \
+		rm -f  $${subdir}/.\#* ; \
+		rm -f  $${subdir}/*~ ; \
+		rm -f  $${subdir}/*.orig ; \
+		[ "$${dir}" != "${srcdir}/etc" ] && \
+		 rm -f $${subdir}/[mM]akefile*.c $${subdir}/[mM]akefile*[.-]in \
+		   $${subdir}/[mM]akefile ; \
+		rm -f  $${subdir}/ChangeLog* ; \
+	      done) ; \
+	done
+	-rm -f $(DESTDIR)${lispdir}/subdirs.el
+	$(srcdir)/update-subdirs $(DESTDIR)${lispdir}
+	if [ -f $(DESTDIR)${datadir}/emacs/${version}/site-lisp/subdirs.el ]; \
+	then true; \
+	else \
+	  (echo "(if (fboundp 'normal-top-level-add-subdirs-to-load-path)"; \
+	   echo "    (normal-top-level-add-subdirs-to-load-path))") \
+	    > $(DESTDIR)${datadir}/emacs/${version}/site-lisp/subdirs.el; \
+	fi
+	chmod a+r $(DESTDIR)${datadir}/emacs/${version}/site-lisp/subdirs.el
+	-if [ -f $(DESTDIR)${datadir}/emacs/site-lisp/subdirs.el ]; \
+	then true; \
+	else \
+	  (echo "(if (fboundp 'normal-top-level-add-subdirs-to-load-path)"; \
+	   echo "    (normal-top-level-add-subdirs-to-load-path))") \
+	    > $(DESTDIR)${datadir}/emacs/site-lisp/subdirs.el; \
+	fi
+	-chmod a+r $(DESTDIR)${datadir}/emacs/site-lisp/subdirs.el
+	-unset CDPATH; \
+	if [ `(cd ./etc; /bin/pwd)` != `(cd $(DESTDIR)${docdir}; /bin/pwd)` ]; \
+	then \
+	   fullversion=`./src/emacs --version | sed -n '1 s/GNU Emacs *//p'`; \
+	   if [ -f "./etc/DOC-$${fullversion}" ]; \
+	   then \
+	     docfile="DOC-$${fullversion}"; \
+	   else \
+	     docfile="DOC"; \
+	   fi; \
+	   echo "Copying etc/$${docfile} to $(DESTDIR)${docdir} ..." ; \
+	   (cd ./etc; tar -chf - $${docfile}) \
+	     |(cd $(DESTDIR)${docdir}; umask 022; tar -xvf - && cat > /dev/null) || exit 1; \
+	   (cd $(DESTDIR)$(docdir); \
+	    $(set_installuser); \
+	    chown $${installuser} DOC*; chmod a+r DOC*; \
+	    if test "`echo DOC-*`" != "DOC-*"; then rm -f DOC; fi); \
+	else true; fi
+	-unset CDPATH; \
+	if [ -r ./lisp ] \
+	   && [ -r ./lisp/simple.el ] \
+	   && [ x`(cd ./lisp; /bin/pwd)` != x`(cd $(DESTDIR)${lispdir}; /bin/pwd)` ] \
+	   && [ x`(cd ${srcdir}/lisp; /bin/pwd)` != x`(cd ./lisp; /bin/pwd)` ]; \
+	then \
+	   echo "Copying lisp/*.el and lisp/*.elc to $(DESTDIR)${lispdir} ..." ; \
+	   (cd lisp; tar -chf - *.el *.elc) \
+	     |(cd $(DESTDIR)${lispdir}; umask 022; tar -xvf - && cat > /dev/null) || exit 1; \
+	   (cd $(DESTDIR)${lispdir}; \
+	    $(set_installuser); \
+	    find . -exec chown $${installuser} {} ';') ; \
+	else true; fi
+	-unset CDPATH; \
+	if [ -n "${GZIP_PROG}" ]; \
+	then \
+	   echo "Compressing *.el ..." ; \
+	   (cd $(DESTDIR)${lispdir}; for f in `find . -name "*.elc" -print`; do \
+		${GZIP_PROG} -9n `echo $$f|sed 's/.elc$$/.el/'` ; \
+	    done) \
+	else true; fi
+	-unset CDPATH; \
+	thisdir=`/bin/pwd`; \
+	if [ `(cd ${srcdir}/info && /bin/pwd)` != `(cd $(DESTDIR)${infodir} && /bin/pwd)` ]; \
+	then \
+	  (cd $(DESTDIR)${infodir};  \
+	   if [ -f dir ]; then true; \
+	   else	\
+	     (cd $${thisdir}; \
+	      ${INSTALL_DATA} ${srcdir}/info/dir $(DESTDIR)${infodir}/dir; \
+	      chmod a+r $(DESTDIR)${infodir}/dir); \
+	   fi; \
+	   cd ${srcdir}/info ; \
+	   for elt in $(INFO_FILES); do \
+	      test "$(HAVE_MAKEINFO)" = "no" && test ! -f $$elt && continue; \
+	      for f in `ls $$elt $$elt-[1-9] $$elt-[1-9][0-9] 2>/dev/null`; do \
+	       (cd $${thisdir}; \
+	        ${INSTALL_DATA} ${srcdir}/info/$$f $(DESTDIR)${infodir}/$$f); \
+	        chmod a+r $(DESTDIR)${infodir}/$$f; \
+	        if [ -n "${GZIP_INFO}" ] && [ -n "${GZIP_PROG}" ]; then \
+	          rm -f $(DESTDIR)${infodir}/$$f.gz; \
+	          ${GZIP_PROG} -9n $(DESTDIR)${infodir}/$$f; \
+	        else true; fi; \
+	      done; \
+	   done); \
+	else true; fi
+	-unset CDPATH; \
+	thisdir=`/bin/pwd`; \
+	if [ `(cd ${srcdir}/info && /bin/pwd)` != `(cd $(DESTDIR)${infodir} && /bin/pwd)` ]; \
+	then \
+	  for elt in $(INFO_FILES); do \
+	    test "$(HAVE_MAKEINFO)" = "no" && test ! -f $$elt && continue; \
+	    (cd $${thisdir}; \
+	     ${INSTALL_INFO} --info-dir=$(DESTDIR)${infodir} $(DESTDIR)${infodir}/$$elt); \
+	  done; \
+	else true; fi
+	-chmod -R a+r $(DESTDIR)${datadir}/emacs/${version} ${COPYDESTS}
+	thisdir=`/bin/pwd`; \
+	cd ${mansrcdir}; \
+	for page in ${MAN_PAGES}; do \
+	  (cd $${thisdir}; \
+	   ${INSTALL_DATA} ${mansrcdir}/$${page} $(DESTDIR)${man1dir}/$${page}; \
+	   chmod a+r $(DESTDIR)${man1dir}/$${page}; \
+	   if [ -n "${GZIP_INFO}" ] && [ -n "${GZIP_PROG}" ]; then \
+	     rm -f $(DESTDIR)${man1dir}/$${page}.gz; \
+	     ${GZIP_PROG} -9n $(DESTDIR)${man1dir}/$${page}; \
+	   else true; fi ); \
+	done
+
+## Install those items from etc/ that need to end up elsewhere.
+install-etc: mkdir
+	${INSTALL_DATA} ${srcdir}/etc/emacs.desktop \
+	  $(DESTDIR)${desktopdir}/emacs.desktop
+	for icon in $(iconsrcdir)/*/*/apps/*.* \
+	  $(iconsrcdir)/*/*/mimetypes/*.*; do \
+	  if [ -r $${icon} ]; then \
+	    iicon=`echo "$${icon}" | sed 's,$(srcdir)/etc/images/icons,$(DESTDIR)${icondir},'` ; \
+	    ${INSTALL_DATA} $${icon} $${iicon} ; \
+	  fi ; \
+	done
+
+### Install LEIM files.  Although they are machine-independent, we
+### have separate target here instead of including it in
+### `install-arch-indep'.  People who extracted LEIM files after they
+### installed Emacs itself can install only LEIM files by this target.
+install-leim: leim/Makefile mkdir
+	cd leim; $(MAKE) install
+
+### Build Emacs and install it, stripping binaries while installing them.
+install-strip:
+	$(MAKE) INSTALL_STRIP=-s install
+
+### Build all the directories we're going to install Emacs in.	Since
+### we may be creating several layers of directories (for example,
+### /usr/local/lib/emacs/19.0/mips-dec-ultrix4.2), we use install-sh -d
+### instead of mkdir.  Not all systems' mkdir programs have the `-p' flag.
+### We set the umask so that any created directories are world-readable.
+### FIXME it would be good to warn about non-standard permissions of
+### pre-existing directories, but that does not seem easy.
+mkdir: FRC
+	icondirs= ; \
+	for dir in $(iconsrcdir)/*/*/apps $(iconsrcdir)/*/*/mimetypes; do \
+	  if [ -d $${dir} ]; then \
+	    icondirs="$${icondirs} $${dir}" ; \
+	  fi ; \
+	done ; \
+	icondirs=`echo "$${icondirs}" | sed 's,$(srcdir)/etc/images/icons,$(DESTDIR)${icondir},g'` ; \
+	umask 022 ; \
+	$(srcdir)/build-aux/install-sh -d $(DESTDIR)${datadir} ${COPYDESTS} \
+	  $(DESTDIR)${infodir} $(DESTDIR)${man1dir} \
+	  $(DESTDIR)${bindir} $(DESTDIR)${docdir} $(DESTDIR)${libexecdir} \
+	  $(DESTDIR)${datadir}/emacs/site-lisp \
+	  $(DESTDIR)${datadir}/emacs/${version}/site-lisp \
+	  $(DESTDIR)`echo ${locallisppath} | sed 's,:, $(DESTDIR),g'` \
+	  $(DESTDIR)${desktopdir} $${icondirs}
+
+### Delete all the installed files that the `install' target would
+### create (but not the noninstalled files such as `make all' would create).
+###
+### Don't delete the lisp and etc directories if they're in the source tree.
+uninstall:
+	(cd lib-src; 					\
+	 $(MAKE) $(MFLAGS) uninstall			\
+	    prefix=${prefix} exec_prefix=${exec_prefix}	\
+	    bindir=${bindir} libexecdir=${libexecdir} archlibdir=${archlibdir})
+	-unset CDPATH; \
+	for dir in $(DESTDIR)${lispdir} $(DESTDIR)${etcdir} ; do 	\
+	  if [ -d $${dir} ]; then			\
+	    case `(cd $${dir} ; /bin/pwd)` in		\
+	      `(cd ${srcdir} ; /bin/pwd)`* ) ;;		\
+	      * ) rm -rf $${dir} ;;			\
+	    esac ;					\
+	    case $${dir} in				\
+	      $(DESTDIR)${datadir}/emacs/${version}/* )		\
+	        rm -rf $(DESTDIR)${datadir}/emacs/${version}	\
+	      ;;					\
+	    esac ;					\
+	  fi ;						\
+	done
+	-rm -rf $(DESTDIR)${libexecdir}/emacs/${version}
+	thisdir=`/bin/pwd`; \
+	(cd $(DESTDIR)${infodir} && \
+	  for elt in $(INFO_FILES); do \
+	    (cd $${thisdir}; \
+	     $(INSTALL_INFO) --remove --info-dir=$(DESTDIR)${infodir} $(DESTDIR)${infodir}/$$elt); \
+	    if [ -n "${GZIP_INFO}" ] && [ -n "${GZIP_PROG}" ]; then \
+	       ext=.gz; else ext=; fi; \
+	    rm -f $$elt$$ext $$elt-[1-9]$$ext $$elt-[1-9][0-9]$$ext; \
+	  done;)
+	(if [ -n "${GZIP_INFO}" ] && [ -n "${GZIP_PROG}" ]; then \
+	    ext=.gz; else ext=; fi; \
+	 cd $(DESTDIR)${man1dir} && for page in ${MAN_PAGES}; do \
+	   rm -f $$page$$ext; done )
+	(cd $(DESTDIR)${bindir}  && rm -f $(EMACSFULL) $(EMACS))
+	(cd $(DESTDIR)${icondir} && rm -f hicolor/*x*/apps/emacs.png hicolor/*x*/apps/emacs22.png hicolor/scalable/apps/emacs.svg hicolor/scalable/mimetypes/emacs-document.svg )
+	-rm -f $(DESTDIR)${desktopdir}/emacs.desktop
+	for file in snake-scores tetris-scores; do \
+	  file=$(DESTDIR)${gamedir}/$${file}; \
+	  [ -s $${file} ] || rm -f $$file; \
+	done
+
+FRC:
+
+# ==================== Cleaning up and miscellanea ====================
+
+.PHONY: mostlyclean clean distclean maintainer-clean extraclean
+
+### `mostlyclean'
+###      Like `clean', but may refrain from deleting a few files that people
+###      normally don't want to recompile.  For example, the `mostlyclean'
+###      target for GCC does not delete `libgcc.a', because recompiling it
+###      is rarely necessary and takes a lot of time.
+mostlyclean: FRC
+	(cd src;      $(MAKE) $(MFLAGS) mostlyclean)
+	(cd oldXMenu; $(MAKE) $(MFLAGS) mostlyclean)
+	(cd lwlib;    $(MAKE) $(MFLAGS) mostlyclean)
+	(cd lib;      $(MAKE) $(MFLAGS) mostlyclean)
+	(cd lib-src;  $(MAKE) $(MFLAGS) mostlyclean)
+	-(cd doc/emacs &&   $(MAKE) $(MFLAGS) mostlyclean)
+	-(cd doc/misc &&   $(MAKE) $(MFLAGS) mostlyclean)
+	-(cd doc/lispref &&   $(MAKE) $(MFLAGS) mostlyclean)
+	-(cd doc/lispintro &&   $(MAKE) $(MFLAGS) mostlyclean)
+	(cd leim;     $(MAKE) $(MFLAGS) mostlyclean)
+
+### `clean'
+###      Delete all files from the current directory that are normally
+###      created by building the program.  Don't delete the files that
+###      record the configuration.  Also preserve files that could be made
+###      by building, but normally aren't because the distribution comes
+###      with them.
+###
+###      Delete `.dvi' files here if they are not part of the distribution.
+clean: FRC
+	(cd src;      $(MAKE) $(MFLAGS) clean)
+	(cd oldXMenu; $(MAKE) $(MFLAGS) clean)
+	(cd lwlib;    $(MAKE) $(MFLAGS) clean)
+	(cd lib;      $(MAKE) $(MFLAGS) clean)
+	(cd lib-src;  $(MAKE) $(MFLAGS) clean)
+	-(cd doc/emacs &&   $(MAKE) $(MFLAGS) clean)
+	-(cd doc/misc &&   $(MAKE) $(MFLAGS) clean)
+	-(cd doc/lispref &&   $(MAKE) $(MFLAGS) clean)
+	-(cd doc/lispintro &&   $(MAKE) $(MFLAGS) clean)
+	(cd leim;     $(MAKE) $(MFLAGS) clean)
+
+### `bootclean'
+###      Delete all files that need to be remade for a clean bootstrap.
+top_bootclean=\
+	rm -f config.cache config.log
+### `distclean'
+###      Delete all files from the current directory that are created by
+###      configuring or building the program.  If you have unpacked the
+###      source and built the program without creating any other files,
+###      `make distclean' should leave only the files that were in the
+###      distribution.
+top_distclean=\
+	${top_bootclean}; \
+	rm -f config.status config.log~ Makefile stamp-h1 ${SUBDIR_MAKEFILES}
+distclean: FRC
+	(cd src;      $(MAKE) $(MFLAGS) distclean)
+	(cd oldXMenu; $(MAKE) $(MFLAGS) distclean)
+	(cd lwlib;    $(MAKE) $(MFLAGS) distclean)
+	(cd lib;      $(MAKE) $(MFLAGS) distclean)
+	(cd lib-src;  $(MAKE) $(MFLAGS) distclean)
+	(cd doc/emacs &&    $(MAKE) $(MFLAGS) distclean)
+	(cd doc/misc &&    $(MAKE) $(MFLAGS) distclean)
+	(cd doc/lispref &&    $(MAKE) $(MFLAGS) distclean)
+	(cd doc/lispintro &&    $(MAKE) $(MFLAGS) distclean)
+	(cd leim;     $(MAKE) $(MFLAGS) distclean)
+	(cd lisp;     $(MAKE) $(MFLAGS) distclean)
+	${top_distclean}
+
+### `bootstrap-clean'
+###      Delete everything that can be reconstructed by `make' and that
+###      needs to be deleted in order to force a bootstrap from a clean state.
+bootstrap-clean: FRC
+	(cd src;      $(MAKE) $(MFLAGS) bootstrap-clean)
+	(cd oldXMenu; $(MAKE) $(MFLAGS) maintainer-clean)
+	(cd lwlib;    $(MAKE) $(MFLAGS) maintainer-clean)
+	(cd lib;      $(MAKE) $(MFLAGS) maintainer-clean)
+	(cd lib-src;  $(MAKE) $(MFLAGS) maintainer-clean)
+	-(cd doc/emacs &&   $(MAKE) $(MFLAGS) maintainer-clean)
+	-(cd doc/misc &&   $(MAKE) $(MFLAGS) maintainer-clean)
+	-(cd doc/lispref &&   $(MAKE) $(MFLAGS) maintainer-clean)
+	-(cd doc/lispintro &&   $(MAKE) $(MFLAGS) maintainer-clean)
+	(cd leim;     $(MAKE) $(MFLAGS) maintainer-clean)
+	(cd lisp;     $(MAKE) $(MFLAGS) bootstrap-clean)
+	[ ! -f config.log ] || mv -f config.log config.log~
+	${top_bootclean}
+## configure; make bootstrap replaces the real config.log from configure
+## with the truncated one from config.status.  The former is more useful.
+
+### `maintainer-clean'
+###      Delete everything from the current directory that can be
+###      reconstructed with this Makefile.  This typically includes
+###      everything deleted by distclean, plus more: C source files
+###      produced by Bison, tags tables, info files, and so on.
+###
+###      One exception, however: `make maintainer-clean' should not delete
+###      `configure' even if `configure' can be remade using a rule in the
+###      Makefile.  More generally, `make maintainer-clean' should not delete
+###      anything that needs to exist in order to run `configure' and then
+###      begin to build the program.
+top_maintainer_clean=\
+	${top_distclean}; \
+	rm -fr autom4te.cache
+maintainer-clean: bootstrap-clean FRC
+	(cd src;      $(MAKE) $(MFLAGS) maintainer-clean)
+	(cd lisp;     $(MAKE) $(MFLAGS) maintainer-clean)
+	${top_maintainer_clean}
+
+### This doesn't actually appear in the coding standards, but Karl
+### says GCC supports it, and that's where the configuration part of
+### the coding standards seem to come from.  It's like distclean, but
+### it deletes backup and autosave files too.
+extraclean:
+	for i in ${SUBDIR} leim; do (cd $$i; $(MAKE) $(MFLAGS) extraclean); done
+	${top_maintainer_clean}
+	-rm -f config-tmp-*
+	-rm -f *~ \#*
+
+# The src subdir knows how to do the right thing
+# even when the build directory and source dir are different.
+TAGS tags: lib lib-src src
+	cd src; $(MAKE) $(MFLAGS) tags
+
+check:
+	@if test ! -d test/automated; then \
+	  echo "You do not seem to have the test/ directory."; \
+	  echo "Maybe you are using a release tarfile, rather than a repository checkout."; \
+	else \
+	  cd test/automated && $(MAKE) $(MFLAGS) check; \
+	fi
+
+dist:
+	cd ${srcdir}; ./make-dist
+
+.PHONY: info dvi dist check html
+
+info-real:
+	(cd doc/emacs; $(MAKE) $(MFLAGS) info)
+	(cd doc/misc; $(MAKE) $(MFLAGS) info)
+	(cd doc/lispref; $(MAKE) $(MFLAGS) info)
+	(cd doc/lispintro; $(MAKE) $(MFLAGS) info)
+
+force-info:
+# Note that man/Makefile knows how to put the info files in $(srcdir),
+# so we can do ok running make in the build dir.
+# This used to have a clause that exited with an error if MAKEINFO = no.
+# But it is inappropriate to do so without checking if makeinfo is
+# actually needed - it is not if the info files are up-to-date.  (Bug#3982)
+# Only the doc/*/Makefiles can decide that, so we let those rules run
+# and give a standard error if makeinfo is needed but missing.
+# While it would be nice to give a more detailed error message, that
+# would require changing every rule in doc/ that builds an info file,
+# and it's not worth it.  This case is only relevant if you download a
+# release, then change the .texi files.
+info: force-info
+	@if test "$(HAVE_MAKEINFO)" = "no"; then \
+	  echo "Configured --without-makeinfo, not building manuals" ; \
+	else \
+	  $(MAKE) $(MFLAGS) info-real ; \
+	fi
+
+# The info/dir file must be updated by hand when new manuals are added.
+check-info-dir: info
+	cd info ; \
+	missing= ; \
+	for file in *; do \
+	  test -f "$${file}" || continue ; \
+	  case $${file} in \
+	    *-[0-9]*|COPYING|dir) continue ;; \
+	  esac ; \
+	  grep -q -F ": ($${file})." dir || missing="$${missing} $${file}" ; \
+	done ; \
+	if test -n "$${missing}"; then \
+	  echo "Missing info/dir entries: $${missing}" ; \
+	  exit 1 ; \
+	fi ; \
+	echo "info/dir is OK"
+
+dvi:
+	(cd doc/emacs; $(MAKE) $(MFLAGS) dvi)
+	(cd doc/misc; $(MAKE) $(MFLAGS) dvi)
+	(cd doc/lispref; $(MAKE) $(MFLAGS) elisp.dvi)
+	(cd doc/lispintro; $(MAKE) $(MFLAGS) emacs-lisp-intro.dvi)
+
+#### Bootstrapping.
+
+### This first cleans the lisp subdirectory, removing all compiled
+### Lisp files.  Then re-run make to build all the files anew.
+
+.PHONY: bootstrap
+
+## configure; make bootstrap replaces the real config.log from configure
+## with the truncated one from config.status.  The former is more useful.
+bootstrap: bootstrap-clean FRC
+	if [ -x ./config.status ]; then           \
+	    ./config.status;                      \
+	else                                      \
+	    ./configure $(CONFIGURE_FLAGS);       \
+	fi
+	$(MAKE) $(MFLAGS) info all
+
+.PHONY: check-declare
+
+check-declare:
+	@if [ ! -f $(srcdir)/src/emacs ]; then \
+	  echo "You must build Emacs to use this command"; \
+	  exit 1; \
+	fi
+	(cd leim; $(MAKE) $(MFLAGS) $@)
+	(cd lisp; $(MAKE) $(MFLAGS) $@)

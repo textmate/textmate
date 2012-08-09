@@ -1,0 +1,25 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included in emacs-xtra.texi when producing the printed
+@c version.
+@iftex
+@node Advanced VC Usage
+@section Advanced VC Usage
+
+  Commonly used features of Emacs's version control (VC) support are
+described in the main Emacs manual (@pxref{Version Control,,,emacs,
+the Emacs Manual}).  This chapter describes more advanced VC usage.
+
+@menu
+* Remote Repositories::     Efficient access to remote VCS servers.
+* Revision Tags::           Symbolic names for revisions.
+* Miscellaneous VC::        Various other commands and features of VC.
+* Customizing VC::          Variables that change VC's behavior.
+@end menu
+@end iftex
+
+@iftex
+@include vc1-xtra.texi
+@end iftex

@@ -1,0 +1,417 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Fixit, Keyboard Macros, Search, Top
+@chapter Commands for Fixing Typos
+@cindex typos, fixing
+@cindex mistakes, correcting
+
+  In this chapter we describe commands that are useful when you catch
+a mistake while editing.  The most fundamental of these commands is
+the undo command @kbd{C-/} (also bound to @kbd{C-x u} and @kbd{C-_}).
+This undoes a single command, or a
+part of a command (as in the case of @code{query-replace}), or several
+consecutive character insertions.  Consecutive repetitions of
+@kbd{C-/} undo earlier and earlier changes, back to the limit of the
+undo information available.
+
+  Aside from the commands described here, you can erase text using
+deletion commands such as @key{DEL} (@code{delete-backward-char}).
+These were described earlier in this manual.  @xref{Erasing}.
+
+@menu
+* Undo::        The Undo commands.
+* Transpose::   Exchanging two characters, words, lines, lists...
+* Fixing Case:: Correcting case of last word entered.
+* Spelling::    Apply spelling checker to a word, or a whole file.
+@end menu
+
+@node Undo
+@section Undo
+@cindex undo
+@cindex changes, undoing
+
+  The @dfn{undo} command reverses recent changes in the buffer's text.
+Each buffer records changes individually, and the undo command always
+applies to the current buffer.  You can undo all the changes in a
+buffer for as far as back its records go.  Usually, each editing
+command makes a separate entry in the undo records, but some commands
+such as @code{query-replace} divide their changes into multiple
+entries for flexibility in undoing.  Consecutive character insertion
+commands are usually grouped together into a single undo record, to
+make undoing less tedious.
+
+@table @kbd
+@item C-/
+@itemx C-x u
+@itemx C-_
+Undo one entry in the current buffer's undo records (@code{undo}).
+@end table
+
+@kindex C-x u
+@kindex C-_
+@kindex C-/
+@findex undo
+  To begin to undo, type @kbd{C-/} (or its aliases, @kbd{C-_} or
+@kbd{C-x u})@footnote{Aside from @kbd{C-/}, the @code{undo} command is
+also bound to @kbd{C-x u} because that is more straightforward for
+beginners to remember: @samp{u} stands for ``undo''.  It is also bound
+to @kbd{C-_} because typing @kbd{C-/} on some text terminals actually
+enters @kbd{C-_}.}.  This undoes the most recent change in the buffer,
+and moves point back to where it was before that change.
+  Consecutive repetitions of @kbd{C-/} (or its aliases) undo earlier
+and earlier changes in the current buffer.  If all the recorded
+changes have already been undone, the undo command signals an error.
+
+@cindex redo
+@findex undo-only
+  Any command other than an undo command breaks the sequence of undo
+commands.  Starting from that moment, the entire sequence of undo
+commands that you have just performed are themselves placed into the
+undo record, as a single set of changes.  Therefore, to re-apply
+changes you have undone, type @kbd{C-f} or any other command that
+harmlessly breaks the sequence of undoing; then type @kbd{C-/} to undo
+the undo command.
+
+  Alternatively, if you want to resume undoing, without redoing
+previous undo commands, use @kbd{M-x undo-only}.  This is like
+@code{undo}, but will not redo changes you have just undone.
+
+  If you notice that a buffer has been modified accidentally, the
+easiest way to recover is to type @kbd{C-/} repeatedly until the stars
+disappear from the front of the mode line (@pxref{Mode Line}).
+Whenever an undo command makes the stars disappear from the mode line,
+it means that the buffer contents are the same as they were when the
+file was last read in or saved.  If you do not remember whether you
+changed the buffer deliberately, type @kbd{C-/} once.  When you see
+the last change you made undone, you will see whether it was an
+intentional change.  If it was an accident, leave it undone.  If it
+was deliberate, redo the change as described above.
+
+@cindex selective undo
+@kindex C-u C-/
+  When there is an active region, any use of @code{undo} performs
+@dfn{selective undo}: it undoes the most recent change within the
+region, instead of the entire buffer.  However, when Transient Mark
+mode is off (@pxref{Disabled Transient Mark}), @kbd{C-/} always
+operates on the entire buffer, ignoring the region.  In this case, you
+can perform selective undo by supplying a prefix argument to the
+@code{undo} command: @kbd{C-u C-/}.  To undo further changes in the
+same region, repeat the @code{undo} command (no prefix argument is
+needed).
+
+  Some specialized buffers do not make undo records.  Buffers whose
+names start with spaces never do; these buffers are used internally by
+Emacs to hold text that users don't normally look at or edit.
+
+@vindex undo-limit
+@vindex undo-strong-limit
+@vindex undo-outer-limit
+@cindex undo limit
+  When the undo records for a buffer becomes too large, Emacs discards
+the oldest undo records from time to time (during @dfn{garbage
+collection}).  You can specify how much undo records to keep by
+setting the variables @code{undo-limit}, @code{undo-strong-limit}, and
+@code{undo-outer-limit}.  Their values are expressed in bytes.
+
+  The variable @code{undo-limit} sets a soft limit: Emacs keeps undo
+data for enough commands to reach this size, and perhaps exceed it,
+but does not keep data for any earlier commands beyond that.  Its
+default value is 80000.  The variable @code{undo-strong-limit} sets a
+stricter limit: any previous command (though not the most recent one)
+that pushes the size past this amount is forgotten.  The default value
+of @code{undo-strong-limit} is 120000.
+
+  Regardless of the values of those variables, the most recent change
+is never discarded unless it gets bigger than @code{undo-outer-limit}
+(normally 12,000,000).  At that point, Emacs discards the undo data and
+warns you about it.  This is the only situation in which you cannot
+undo the last command.  If this happens, you can increase the value of
+@code{undo-outer-limit} to make it even less likely to happen in the
+future.  But if you didn't expect the command to create such large
+undo data, then it is probably a bug and you should report it.
+@xref{Bugs,, Reporting Bugs}.
+
+@node Transpose
+@section Transposing Text
+
+@table @kbd
+@item C-t
+Transpose two characters (@code{transpose-chars}).
+@item M-t
+Transpose two words (@code{transpose-words}).
+@item C-M-t
+Transpose two balanced expressions (@code{transpose-sexps}).
+@item C-x C-t
+Transpose two lines (@code{transpose-lines}).
+@end table
+
+@kindex C-t
+@findex transpose-chars
+  The common error of transposing two characters can be fixed, when they
+are adjacent, with the @kbd{C-t} command (@code{transpose-chars}).  Normally,
+@kbd{C-t} transposes the two characters on either side of point.  When
+given at the end of a line, rather than transposing the last character of
+the line with the newline, which would be useless, @kbd{C-t} transposes the
+last two characters on the line.  So, if you catch your transposition error
+right away, you can fix it with just a @kbd{C-t}.  If you don't catch it so
+fast, you must move the cursor back between the two transposed
+characters before you type @kbd{C-t}.  If you transposed a space with
+the last character of the word before it, the word motion commands are
+a good way of getting there.  Otherwise, a reverse search (@kbd{C-r})
+is often the best way.  @xref{Search}.
+
+@kindex C-x C-t
+@findex transpose-lines
+@kindex M-t
+@findex transpose-words
+@c Don't index C-M-t and transpose-sexps here, they are indexed in
+@c programs.texi, in the "List Commands" node.
+@c @kindex C-M-t
+@c @findex transpose-sexps
+  @kbd{M-t} transposes the word before point with the word after point
+(@code{transpose-words}).  It moves point forward over a word,
+dragging the word preceding or containing point forward as well.  The
+punctuation characters between the words do not move.  For example,
+@w{@samp{FOO, BAR}} transposes into @w{@samp{BAR, FOO}} rather than
+@samp{@w{BAR FOO,}}.
+
+  @kbd{C-M-t} (@code{transpose-sexps}) is a similar command for
+transposing two expressions (@pxref{Expressions}), and @kbd{C-x C-t}
+(@code{transpose-lines}) exchanges lines.  They work like @kbd{M-t}
+except as regards what units of text they transpose.
+
+  A numeric argument to a transpose command serves as a repeat count: it
+tells the transpose command to move the character (word, expression, line)
+before or containing point across several other characters (words,
+expressions, lines).  For example, @kbd{C-u 3 C-t} moves the character before
+point forward across three other characters.  It would change
+@samp{f@point{}oobar} into @samp{oobf@point{}ar}.  This is equivalent to
+repeating @kbd{C-t} three times.  @kbd{C-u - 4 M-t} moves the word
+before point backward across four words.  @kbd{C-u - C-M-t} would cancel
+the effect of plain @kbd{C-M-t}.@refill
+
+  A numeric argument of zero is assigned a special meaning (because
+otherwise a command with a repeat count of zero would do nothing): to
+transpose the character (word, expression, line) ending after point
+with the one ending after the mark.
+
+@node Fixing Case
+@section Case Conversion
+
+@table @kbd
+@item M-- M-l
+Convert last word to lower case.  Note @kbd{Meta--} is Meta-minus.
+@item M-- M-u
+Convert last word to all upper case.
+@item M-- M-c
+Convert last word to lower case with capital initial.
+@end table
+
+@kindex M-@t{-} M-l
+@kindex M-@t{-} M-u
+@kindex M-@t{-} M-c
+  A very common error is to type words in the wrong case.  Because of this,
+the word case-conversion commands @kbd{M-l}, @kbd{M-u} and @kbd{M-c} have a
+special feature when used with a negative argument: they do not move the
+cursor.  As soon as you see you have mistyped the last word, you can simply
+case-convert it and go on typing.  @xref{Case}.@refill
+
+@node Spelling
+@section Checking and Correcting Spelling
+@cindex spelling, checking and correcting
+@cindex checking spelling
+@cindex correcting spelling
+
+  This section describes the commands to check the spelling of a
+single word or of a portion of a buffer.  These commands only work if
+the spelling checker program Aspell, Ispell or Hunspell is installed.
+These programs are not part of Emacs, but one of them is usually
+installed in GNU/Linux and other free operating systems.
+@ifnottex
+@xref{Top, Aspell,, aspell, The Aspell Manual}.
+@end ifnottex
+
+@table @kbd
+@item M-$
+Check and correct spelling of the word at point (@code{ispell-word}).
+If the region is active, do it for all words in the region instead.
+@item M-x ispell
+Check and correct spelling of all words in the buffer.  If the region
+is active, do it for all words in the region instead.
+@item M-x ispell-buffer
+Check and correct spelling in the buffer.
+@item M-x ispell-region
+Check and correct spelling in the region.
+@item M-x ispell-message
+Check and correct spelling in a draft mail message, excluding cited
+material.
+@item M-x ispell-change-dictionary @key{RET} @var{dict} @key{RET}
+Restart the Aspell/Ispell/Hunspell process, using @var{dict} as the dictionary.
+@item M-x ispell-kill-ispell
+Kill the Aspell/Ispell/Hunspell subprocess.
+@item M-@key{TAB}
+@itemx @key{ESC} @key{TAB}
+Complete the word before point based on the spelling dictionary
+(@code{ispell-complete-word}).
+@item M-x flyspell-mode
+Enable Flyspell mode, which highlights all misspelled words.
+@item M-x flyspell-prog-mode
+Enable Flyspell mode for comments and strings only.
+@end table
+
+@kindex M-$
+@findex ispell-word
+  To check the spelling of the word around or before point, and
+optionally correct it as well, type @kbd{M-$} (@code{ispell-word}).
+If a region is active, @kbd{M-$} checks the spelling of all words
+within the region.  @xref{Mark}.  (When Transient Mark mode is off,
+@kbd{M-$} always acts on the word around or before point, ignoring the
+region; @pxref{Disabled Transient Mark}.)
+
+@findex ispell
+@findex ispell-buffer
+@findex ispell-region
+@cindex spell-checking the active region
+  Similarly, the command @kbd{M-x ispell} performs spell-checking in
+the region if one is active, or in the entire buffer otherwise.  The
+commands @kbd{M-x ispell-buffer} and @kbd{M-x ispell-region}
+explicitly perform spell-checking on the entire buffer or the region
+respectively.  To check spelling in an email message you are writing,
+use @kbd{M-x ispell-message}; that command checks the whole buffer,
+except for material that is indented or appears to be cited from other
+messages.  @xref{Sending Mail}.
+
+  When one of these commands encounters what appears to be an
+incorrect word, it asks you what to do.  It usually displays a list of
+numbered ``near-misses''---words that are close to the incorrect word.
+Then you must type a single-character response.  Here are the valid
+responses:
+
+@table @kbd
+@item @var{digit}
+Replace the word, just this time, with one of the displayed
+near-misses.  Each near-miss is listed with a digit; type that digit
+to select it.
+
+@item @key{SPC}
+Skip this word---continue to consider it incorrect, but don't change it
+here.
+
+@item r @var{new} @key{RET}
+Replace the word, just this time, with @var{new}.  (The replacement
+string will be rescanned for more spelling errors.)
+
+@item R @var{new} @key{RET}
+Replace the word with @var{new}, and do a @code{query-replace} so you
+can replace it elsewhere in the buffer if you wish.  (The replacements
+will be rescanned for more spelling errors.)
+
+@item a
+Accept the incorrect word---treat it as correct, but only in this
+editing session.
+
+@item A
+Accept the incorrect word---treat it as correct, but only in this
+editing session and for this buffer.
+
+@item i
+Insert this word in your private dictionary file so that Aspell or Ispell
+or Hunspell will consider it correct from now on, even in future sessions.
+
+@item m
+Like @kbd{i}, but you can also specify dictionary completion
+information.
+
+@item u
+Insert the lower-case version of this word in your private dic@-tion@-ary
+file.
+
+@item l @var{word} @key{RET}
+Look in the dictionary for words that match @var{word}.  These words
+become the new list of ``near-misses''; you can select one of them as
+the replacement by typing a digit.  You can use @samp{*} in @var{word} as a
+wildcard.
+
+@item C-g
+@itemx X
+Quit interactive spell checking, leaving point at the word that was
+being checked.  You can restart checking again afterward with @kbd{C-u
+M-$}.
+
+@item x
+Quit interactive spell checking and move point back to where it was
+when you started spell checking.
+
+@item q
+Quit interactive spell checking and kill the spell-checker subprocess.
+
+@item ?
+Show the list of options.
+@end table
+
+@findex ispell-complete-word
+  In Text mode and related modes, @kbd{M-@key{TAB}}
+(@code{ispell-complete-word}) performs in-buffer completion based on
+spelling correction.  Insert the beginning of a word, and then type
+@kbd{M-@key{TAB}}; this shows a list of completions.  (If your
+window manager intercepts @kbd{M-@key{TAB}}, type @kbd{@key{ESC}
+@key{TAB}} or @kbd{C-M-i}.)  Each completion is listed with a digit or
+character; type that digit or character to choose it.
+
+@cindex @code{ispell} program
+@findex ispell-kill-ispell
+  Once started, the Aspell or Ispell or Hunspell subprocess continues
+to run, waiting for something to do, so that subsequent spell checking
+commands complete more quickly.  If you want to get rid of the
+process, use @kbd{M-x ispell-kill-ispell}.  This is not usually
+necessary, since the process uses no processor time except when you do
+spelling correction.
+
+@vindex ispell-dictionary
+@vindex ispell-local-dictionary
+@vindex ispell-personal-dictionary
+@findex ispell-change-dictionary
+  Ispell, Aspell and Hunspell look up spelling in two dictionaries:
+the standard dictionary and your personal dictionary.  The standard
+dictionary is specified by the variable @code{ispell-local-dictionary}
+or, if that is @code{nil}, by the variable @code{ispell-dictionary}.
+If both are @code{nil}, the spelling program's default dictionary is
+used.  The command @kbd{M-x ispell-change-dictionary} sets the
+standard dictionary for the buffer and then restarts the subprocess,
+so that it will use a different standard dictionary.  Your personal
+dictionary is specified by the variable
+@code{ispell-personal-dictionary}.  If that is @code{nil}, the
+spelling program looks for a personal dictionary in a default
+location.
+
+@vindex ispell-complete-word-dict
+  A separate dictionary is used for word completion.  The variable
+@code{ispell-complete-word-dict} specifies the file name of this
+dictionary.  The completion dictionary must be different because it
+cannot use root and affix information.  For some languages, there
+is a spell checking dictionary but no word completion dictionary.
+
+@cindex Flyspell mode
+@cindex mode, Flyspell
+@findex flyspell-mode
+  Flyspell mode is a minor mode that performs automatic spell checking
+as you type.  When it finds a word that it does not recognize, it
+highlights that word.  Type @kbd{M-x flyspell-mode} to toggle Flyspell
+mode in the current buffer.  To enable Flyspell mode in all text mode
+buffers, add @code{flyspell-mode} to @code{text-mode-hook}.
+@xref{Hooks}.
+
+  When Flyspell mode highlights a word as misspelled, you can click on
+it with @kbd{Mouse-2} to display a menu of possible corrections and
+actions.  You can also correct the word by editing it manually in any
+way you like.
+
+@findex flyspell-prog-mode
+  Flyspell Prog mode works just like ordinary Flyspell mode, except
+that it only checks words in comments and string constants.  This
+feature is useful for editing programs.  Type @kbd{M-x
+flyspell-prog-mode} to enable or disable this mode in the current
+buffer.  To enable this mode in all programming mode buffers, add
+@code{flyspell-prog-mode} to @code{prog-mode-hook} (@pxref{Hooks}).

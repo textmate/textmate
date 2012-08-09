@@ -1,0 +1,14 @@
+# Common Attributes Module
+
+id.attrib = attribute id { ID.datatype }?
+class.attrib = attribute class { NMTOKENS.datatype }?
+title.attrib = attribute title { Text.datatype }?
+Core.attrib = id.attrib, class.attrib, title.attrib
+lang.attrib = attribute xml:lang { LanguageCode.datatype }?
+I18n.attrib = lang.attrib
+Common.attrib = Core.attrib, I18n.attrib
+CommonIdRequired.attrib =
+  attribute id { ID.datatype },
+  class.attrib,
+  title.attrib,
+  I18n.attrib

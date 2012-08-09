@@ -1,0 +1,249 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Packages
+@chapter Emacs Lisp Packages
+@cindex Package
+@cindex Emacs Lisp package archive
+@cindex Package archive
+@cindex Emacs Lisp package
+
+Emacs includes a facility that lets you easily download and install
+@dfn{packages} that implement additional features.  Each package is a
+separate Emacs Lisp program, sometimes including other components such
+as an Info manual.
+
+  @kbd{M-x list-packages} brings up a buffer named @file{*Packages*}
+with a list of all packages.  You can install or uninstall packages
+via this buffer.  @xref{Package Menu}.
+
+@findex describe-package
+  The command @kbd{C-h P} (@code{describe-package}) prompts for the
+name of a package, and displays a help buffer describing the
+attributes of the package and the features that it implements.
+
+  By default, Emacs downloads packages from a @dfn{package archive}
+maintained by the Emacs developers and hosted by the GNU project.
+Optionally, you can also download packages from archives maintained by
+third parties.  @xref{Package Installation}.
+
+  For information about turning an Emacs Lisp program into an
+installable package, @xref{Packaging,,,elisp, The Emacs Lisp Reference
+Manual}.  For information about finding third-party packages and other
+Emacs Lisp extensions, @xref{Packages that do not come with
+Emacs,,,efaq, GNU Emacs FAQ}.
+
+@menu
+* Package Menu::         Buffer for viewing and managing packages.
+* Package Installation:: Options for package installation.
+* Package Files::        Where packages are installed.
+@end menu
+
+@node Package Menu
+@section The Package Menu Buffer
+@cindex package menu
+@cindex built-in package
+@findex list-packages
+
+The command @kbd{M-x list-packages} brings up the @dfn{package menu}.
+This is a buffer listing all the packages that Emacs knows about, one
+on each line, with the following information:
+
+@itemize @bullet
+@item
+The package name (e.g. @samp{auctex}).
+
+@item
+The package's version number (e.g. @samp{11.86}).
+
+@item
+The package's status---normally one of @samp{available} (can be
+downloaded from the package archive), @samp{installed}, or
+@samp{built-in} (included in Emacs by default).
+
+In some instances, the status can be @samp{held}, @samp{disabled}, or
+@samp{obsolete}.  @xref{Package Installation}.
+
+@item
+A short description of the package.
+@end itemize
+
+@noindent
+The @code{list-packages} command accesses the network, to retrieve the
+list of available packages from the package archive server.  If the
+network is unavailable, it falls back on the most recently retrieved
+list.
+
+The following commands are available in the package menu:
+
+@table @kbd
+@item h
+Print a short message summarizing how to use the package menu
+(@code{package-menu-quick-help}).
+
+@item ?
+@itemx @key{RET}
+Display a help buffer for the package on the current line
+(@code{package-menu-describe-package}), similar to the help window
+displayed by the @kbd{C-h P} command (@pxref{Packages}).
+
+@item i
+Mark the package on the current line for installation
+(@code{package-menu-mark-install}).  If the package status is
+@samp{available}, this adds an @samp{I} character to the start of the
+line; typing @kbd{x} (see below) will download and install the
+package.
+
+@item d
+Mark the package on the current line for deletion
+(@code{package-menu-mark-delete}).  If the package status is
+@samp{installed}, this adds a @samp{D} character to the start of the
+line; typing @kbd{x} (see below) will delete the package.
+@xref{Package Files}, for information about what package deletion
+entails.
+
+@item u
+Remove any installation or deletion mark previously added to the
+current line by an @kbd{i} or @kbd{d} command.
+
+@item U
+Mark all package with a newer available version for ``upgrading''
+(@code{package-menu-mark-upgrades}).  This places an installation mark
+on the new available versions, and a deletion mark on the old
+installed versions.
+
+@item x
+Download and install all packages marked with @kbd{i}, and their
+dependencies; also, delete all packages marked with @kbd{d}
+(@code{package-menu-execute}).  This also removes the marks.
+
+@item r
+Refresh the package list (@code{package-menu-refresh}).  This fetches
+the list of available packages from the package archive again, and
+recomputes the package list.
+@end table
+
+@noindent
+For example, you can install a package by typing @kbd{i} on the line
+listing that package, followed by @kbd{x}.
+
+@node Package Installation
+@section Package Installation
+
+@findex package-install
+  Packages are most conveniently installed using the package menu
+(@pxref{Package Menu}), but you can also use the command @kbd{M-x
+package-install}.  This prompts for the name of a package with the
+@samp{available} status, then downloads and installs it.
+
+@cindex package requirements
+  A package may @dfn{require} certain other packages to be installed,
+because it relies on functionality provided by them.  When Emacs
+installs such a package, it also automatically downloads and installs
+any required package that is not already installed.  (If a required
+package is somehow unavailable, Emacs signals an error and stops
+installation.)  A package's requirements list is shown in its help
+buffer.
+
+@vindex package-archives
+  By default, packages are downloaded from a single package archive
+maintained by the Emacs developers.  This is controlled by the
+variable @code{package-archives}, whose value is a list of package
+archives known to Emacs.  Each list element must have the form
+@code{(@var{id} . @var{location})}, where @var{id} is the name of a
+package archive and @var{location} is the @acronym{HTTP} address or
+directory name of the package archive.  You can alter this list if you
+wish to use third party package archives---but do so at your own risk,
+and use only third parties that you think you can trust!
+
+  Once a package is downloaded and installed, it is @dfn{loaded} into
+the current Emacs session.  Loading a package is not quite the same as
+loading a Lisp library (@pxref{Lisp Libraries}); its effect varies
+from package to package.  Most packages just make some new commands
+available, while others have more wide-ranging effects on the Emacs
+session.  For such information, consult the package's help buffer.
+
+  By default, Emacs also automatically loads all installed packages in
+subsequent Emacs sessions.  This happens at startup, after processing
+the init file (@pxref{Init File}).  As an exception, Emacs does not
+load packages at startup if invoked with the @samp{-q} or
+@samp{--no-init-file} options (@pxref{Initial Options}).
+
+@vindex package-enable-at-startup
+  To disable automatic package loading, change the variable
+@code{package-enable-at-startup} to @code{nil}.
+
+@findex package-initialize
+  The reason automatic package loading occurs after loading the init
+file is that user options only receive their customized values after
+loading the init file, including user options which affect the
+packaging system.  In some circumstances, you may want to load
+packages explicitly in your init file (usually because some other code
+in your init file depends on a package).  In that case, your init file
+should call the function @code{package-initialize}.  It is up to you
+to ensure that relevant user options, such as @code{package-load-list}
+(see below), are set up prior to the @code{package-initialize} call.
+You should also set @code{package-enable-at-startup} to @code{nil}, to
+avoid loading the packages again after processing the init file.
+Alternatively, you may choose to completely inhibit package loading at
+startup, and invoke the command @kbd{M-x package-initialize} to load
+your packages manually.
+
+@vindex package-load-list
+  For finer control over package loading, you can use the variable
+@code{package-load-list}.  Its value should be a list.  A list element
+of the form @code{(@var{name} @var{version})} tells Emacs to load
+version @var{version} of the package named @var{name}.  Here,
+@var{version} should be a version string (corresponding to a specific
+version of the package), or @code{t} (which means to load any
+installed version), or @code{nil} (which means no version; this
+``disables'' the package, preventing it from being loaded).  A list
+element can also be the symbol @code{all}, which means to load the
+latest installed version of any package not named by the other list
+elements.  The default value is just @code{'(all)}.
+
+  For example, if you set @code{package-load-list} to @code{'((muse
+"3.20") all)}, then Emacs only loads version 3.20 of the @samp{muse}
+package, plus any installed version of packages other than
+@samp{muse}.  Any other version of @samp{muse} that happens to be
+installed will be ignored.  The @samp{muse} package will be listed in
+the package menu with the @samp{held} status.
+
+@node Package Files
+@section Package Files and Directory Layout
+@cindex package directory
+
+@cindex package file
+@findex package-install-file
+  Each package is downloaded from the package archive in the form of a
+single @dfn{package file}---either an Emacs Lisp source file, or a tar
+file containing multiple Emacs Lisp source and other files.  Package
+files are automatically retrieved, processed, and disposed of by the
+Emacs commands that install packages.  Normally, you will not need to
+deal directly with them, unless you are making a package
+(@pxref{Packaging,,,elisp, The Emacs Lisp Reference Manual}).  Should
+you ever need to install a package directly from a package file, use
+the command @kbd{M-x package-install-file}.
+
+@vindex package-user-dir
+  Once installed, the contents of a package are placed in a
+subdirectory of @file{~/.emacs.d/elpa/} (you can change the name of
+that directory by changing the variable @code{package-user-dir}).  The
+package subdirectory is named @file{@var{name}-@var{version}}, where
+@var{name} is the package name and @var{version} is its version
+string.
+
+@cindex system-wide packages
+@vindex package-directory-list
+  In addition to @code{package-user-dir}, Emacs looks for installed
+packages in the directories listed in @code{package-directory-list}.
+These directories are meant for system administrators to make Emacs
+packages available system-wide; Emacs itself never installs packages
+there.  The package subdirectories for @code{package-directory-list}
+are laid out in the same way as in @code{package-user-dir}.
+
+  Deleting a package (@pxref{Package Menu}) involves deleting the
+corresponding package subdirectory.  This only works for packages
+installed in @code{package-user-dir}; if told to act on a package in a
+system-wide package directory, the deletion command signals an error.

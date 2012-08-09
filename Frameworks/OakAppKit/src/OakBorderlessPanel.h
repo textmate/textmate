@@ -1,4 +1,0 @@
-@interface OakBorderlessPanel : NSPanel
-{
-}
-@end

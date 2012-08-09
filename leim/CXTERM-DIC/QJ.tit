@@ -1,0 +1,113 @@
+# -*- coding: euc-china -*-
+# HANZI input table for cxterm
+# To be used by cxterm, convert me to .cit format first
+# .cit version 2
+ENCODE:	GB
+AUTOSELECT:	YES
+PROMPT:	ºº×ÖÊäÈë¡ËÈ«½Ç¡Ë
+#
+COMMENT Copyright 1991 by Yongguang Zhang.      (ygz@cs.purdue.edu)
+COMMENT Permission to use/modify/copy for any purpose is hereby granted.
+COMMENT Absolutely no warranties.
+# define keys
+VALIDINPUTKEY:	\040!"\043$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMN
+VALIDINPUTKEY:	OPQRSTUVWXYZ[\134]^_`abcdefghijklmnopqrstuvwxyz{|}~
+# the following line must not be removed
+BEGINDICTIONARY
+#
+\040	¡¡
+!	£¡
+"	£¢
+\043	££
+$	£¤
+%	£¥
+&	£¦
+'	£§
+(	£¨
+)	£©
+*	£ª
++	£«
+,	£¬
+-	£­
+.	£®
+/	£¯
+0	£°
+1	£±
+2	£²
+3	£³
+4	£´
+5	£µ
+6	£¶
+7	£·
+8	£¸
+9	£¹
+:	£º
+;	£»
+<	£¼
+=	£½
+>	£¾
+?	£¿
+@	£À
+A	£Á
+B	£Â
+C	£Ã
+D	£Ä
+E	£Å
+F	£Æ
+G	£Ç
+H	£È
+I	£É
+J	£Ê
+K	£Ë
+L	£Ì
+M	£Í
+N	£Î
+O	£Ï
+P	£Ð
+Q	£Ñ
+R	£Ò
+S	£Ó
+T	£Ô
+U	£Õ
+V	£Ö
+W	£×
+X	£Ø
+Y	£Ù
+Z	£Ú
+[	£Û
+\134	£Ü
+]	£Ý
+^	£Þ
+_	£ß
+`	£à
+a	£á
+b	£â
+c	£ã
+d	£ä
+e	£å
+f	£æ
+g	£ç
+h	£è
+i	£é
+j	£ê
+k	£ë
+l	£ì
+m	£í
+n	£î
+o	£ï
+p	£ð
+q	£ñ
+r	£ò
+s	£ó
+t	£ô
+u	£õ
+v	£ö
+w	£÷
+x	£ø
+y	£ù
+z	£ú
+{	£û
+|	£ü
+}	£ý
+~	£þ
+

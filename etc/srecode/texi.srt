@@ -1,0 +1,168 @@
+;; texi.srt --- SRecode templates for Texinfo
+
+;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set mode "texinfo-mode"
+
+set escape_start "$"
+set escape_end "$"
+set DOLLAR "$"
+
+context file
+
+prompt NAME "Name of manual: "
+
+template empty :file :user :time
+"Fill a new texinfo file with some baseline stuff."
+----
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename $FILE$.info
+@set TITLE $?NAME$
+@set AUTHOR $?AUTHOR$
+@settitle @value{TITLE}
+@c %**end of header
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* $FILE$: ($FILE$).       $NAME$
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@titlepage
+@sp 10
+@center @titlefont{$FILE$}
+@vskip 0pt plus 1 fill
+Copyright @copyright{} $YEAR$ $AUTHOR$
+@end titlepage
+
+@node Top
+@top @value{TITLE}
+
+$^$
+
+@menu
+* Index::
+@end menu
+
+
+
+
+@node Index
+@chapter Index
+
+@contents
+
+@bye
+----
+
+prompt NAME "Name of item: "
+
+context declaration
+
+;; Note to self: It would be cool to replace the junk in
+;; semantic/document.el with macros from here.
+template function :blank :texitag
+"Import some function tag into texinfo."
+----
+
+@defun $NAME$$#ARGS$ $NAME$$/ARGS$
+@anchor{$NAME$}
+$TAGDOC$
+@end defun
+
+----
+bind "f"
+
+template function-command :blank :texitag
+"Import some function tag into texinfo."
+----
+
+@deffn Command $NAME$$#ARGS$ $NAME$$/ARGS$
+@anchor{$NAME$}
+$TAGDOC$
+@end deffn
+
+----
+bind "f"
+
+
+template variable :blank :texitag
+"Import some variable tag into texinfo"
+----
+
+@defvar $NAME$$#ARGS$ $NAME$$/ARGS$
+@anchor{$NAME$}
+$TAGDOC$
+@end defvar
+
+----
+bind "v"
+
+prompt NAME "Name of node: "
+
+template node :texi
+"Insert a node right about here."
+----
+
+@node $?NAME$
+@$?LEVEL$ $NAME$
+
+$^$
+
+----
+bind "n"
+
+template subnode :texi
+"Insert a node right about here."
+----
+
+@node $?NAME$
+@$?NEXTLEVEL$ $NAME$
+
+$^$
+
+----
+bind "n"
+
+
+template menu :blank
+"Menu items for texinfo."
+----
+
+@menu
+$^$
+@end menu
+
+----
+bind "m"
+
+prompt NAME "Menu item: "
+
+template menuitem :blank
+"Insert a menu item."
+----
+* $?NAME$::	$^$
+----
+
+
+;; end

@@ -1,0 +1,1467 @@
+# ......................................................................
+
+# DocBook document hierarchy module V4.2 ...............................
+
+# File dbhierx.mod .....................................................
+
+# Copyright 1992-2002 HaL Computer Systems, Inc.,
+# O'Reilly & Associates, Inc., ArborText, Inc., Fujitsu Software
+# Corporation, Norman Walsh, Sun Microsystems, Inc., and the
+# Organization for the Advancement of Structured Information
+# Standards (OASIS).
+# 
+# $Id: dbhier.rnc,v 1.1 2003/08/30 04:19:27 jjc Exp $
+# 
+# Permission to use, copy, modify and distribute the DocBook DTD
+# and its accompanying documentation for any purpose and without fee
+# is hereby granted in perpetuity, provided that the above copyright
+# notice and this paragraph appear in all copies.  The copyright
+# holders make no representation about the suitability of the DTD for
+# any purpose.  It is provided "as is" without expressed or implied
+# warranty.
+# 
+# If you modify the DocBook DTD in any way, except for declaring and
+# referencing additional sets of general entities and declaring
+# additional notations, label your DTD as a variant of DocBook.  See
+# the maintenance documentation for more information.
+# 
+# Please direct all questions, bug reports, or suggestions for
+# changes to the docbook@lists.oasis-open.org mailing list. For more
+# information, see http://www.oasis-open.org/docbook/.
+
+# ......................................................................
+
+# This module contains the definitions for the overall document
+# hierarchies of DocBook documents.  It covers computer documentation
+# manuals and manual fragments, as well as reference entries (such as
+# man pages) and technical journals or anthologies containing
+# articles.
+# 
+# This module depends on the DocBook information pool module.  All
+# elements and entities referenced but not defined here are assumed
+# to be defined in the information pool module.
+# 
+# In DTD driver files referring to this module, please use an entity
+# declaration that uses the public identifier shown below:
+# 
+# <!ENTITY % dbhier PUBLIC
+# "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.2//EN"
+# "dbhierx.mod">
+# %dbhier;
+# 
+# See the documentation for detailed information on the parameter
+# entity and module scheme used in DocBook, customizing DocBook and
+# planning for interchange, and changes made since the last release
+# of DocBook.
+
+# ......................................................................
+
+# Entities for module inclusions .......................................
+
+# ......................................................................
+
+# Entities for element classes .........................................
+
+local.appendix.class = notAllowed
+appendix.class = appendix | local.appendix.class
+local.article.class = notAllowed
+article.class = article | local.article.class
+local.book.class = notAllowed
+book.class = book | local.book.class
+local.chapter.class = notAllowed
+chapter.class = chapter | local.chapter.class
+local.index.class = notAllowed
+index.class = index | setindex | local.index.class
+local.refentry.class = notAllowed
+refentry.class = refentry | local.refentry.class
+local.section.class = notAllowed
+section.class = section | local.section.class
+local.nav.class = notAllowed
+nav.class =
+  toc | lot | index | glossary | bibliography | local.nav.class
+# Redeclaration placeholder ............................................
+
+# For redeclaring entities that are declared after this point while
+# retaining their references to the entities that are declared before
+# this point
+
+# ......................................................................
+
+# Entities for element mixtures ........................................
+
+# The DocBook TC may produce an official forms module for DocBook.
+
+# This PE provides the hook by which it can be inserted into the DTD.
+forms.hook = notAllowed
+local.divcomponent.mix = notAllowed
+divcomponent.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | compound.class
+  | genobj.class
+  | descobj.class
+  | ndxterm.class
+  | beginpage
+  | forms.hook
+  | local.divcomponent.mix
+local.refcomponent.mix = notAllowed
+refcomponent.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | compound.class
+  | genobj.class
+  | descobj.class
+  | ndxterm.class
+  | beginpage
+  | local.refcomponent.mix
+local.indexdivcomponent.mix = notAllowed
+indexdivcomponent.mix =
+  itemizedlist
+  | orderedlist
+  | variablelist
+  | simplelist
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | anchor
+  | remark
+  | link.char.class
+  | beginpage
+  | local.indexdivcomponent.mix
+local.refname.char.mix = notAllowed
+refname.char.mix = text | tech.char.class | local.refname.char.mix
+local.partcontent.mix = notAllowed
+partcontent.mix =
+  appendix.class
+  | chapter.class
+  | nav.class
+  | article.class
+  | preface
+  | refentry.class
+  | reference
+  | local.partcontent.mix
+local.refinline.char.mix = notAllowed
+refinline.char.mix =
+  text
+  | xref.char.class
+  | gen.char.class
+  | link.char.class
+  | tech.char.class
+  | base.char.class
+  | docinfo.char.class
+  | other.char.class
+  | ndxterm.class
+  | beginpage
+  | local.refinline.char.mix
+local.refclass.char.mix = notAllowed
+refclass.char.mix = text | application | local.refclass.char.mix
+# Redeclaration placeholder 2 ..........................................
+
+# For redeclaring entities that are declared after this point while
+# retaining their references to the entities that are declared before
+# this point
+
+# ......................................................................
+
+# Entities for content models ..........................................
+div.title.content = title, subtitle?, titleabbrev?
+bookcomponent.title.content = title, subtitle?, titleabbrev?
+sect.title.content = title, subtitle?, titleabbrev?
+refsect.title.content = title, subtitle?, titleabbrev?
+bookcomponent.content =
+  (divcomponent.mix+,
+   (sect1* | refentry.class* | simplesect* | section.class*))
+  | (sect1+ | refentry.class+ | simplesect+ | section.class+)
+# ......................................................................
+
+# Set and SetInfo ......................................................
+local.set.attrib = empty
+set.role.attrib = role.attrib
+set =
+  element set {
+    set.attlist,
+    div.title.content?,
+    setinfo?,
+    toc?,
+    book.class+,
+    setindex?
+  }
+# end of set.element
+
+# FPI: SGML formal public identifier
+set.attlist &=
+  attribute fpi { text }?,
+  status.attrib,
+  common.attrib,
+  set.role.attrib,
+  local.set.attrib
+# end of set.attlist
+
+# end of set.module
+local.setinfo.attrib = empty
+setinfo.role.attrib = role.attrib
+setinfo = element setinfo { setinfo.attlist, info.class+ }
+# end of setinfo.element
+
+# Contents: IDs of the ToC, Books, and SetIndex that comprise
+# the set, in the order of their appearance
+setinfo.attlist &=
+  attribute contents { xsd:IDREFS }?,
+  common.attrib,
+  setinfo.role.attrib,
+  local.setinfo.attrib
+# end of setinfo.attlist
+
+# end of setinfo.module
+
+# end of set.content.module
+
+# ......................................................................
+
+# Book and BookInfo ....................................................
+local.book.attrib = empty
+book.role.attrib = role.attrib
+book =
+  element book {
+    book.attlist,
+    div.title.content?,
+    bookinfo?,
+    (dedication
+     | toc
+     | lot
+     | glossary
+     | bibliography
+     | preface
+     | chapter.class
+     | reference
+     | part
+     | article.class
+     | appendix.class
+     | index.class
+     | colophon)*
+  }
+# end of book.element
+
+# FPI: SGML formal public identifier
+book.attlist &=
+  attribute fpi { text }?,
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  book.role.attrib,
+  local.book.attrib
+# end of book.attlist
+
+# end of book.module
+local.bookinfo.attrib = empty
+bookinfo.role.attrib = role.attrib
+bookinfo = element bookinfo { bookinfo.attlist, info.class+ }
+# end of bookinfo.element
+
+# Contents: IDs of the ToC, LoTs, Prefaces, Parts, Chapters,
+# Appendixes, References, GLossary, Bibliography, and indexes
+# comprising the Book, in the order of their appearance
+bookinfo.attlist &=
+  attribute contents { xsd:IDREFS }?,
+  common.attrib,
+  bookinfo.role.attrib,
+  local.bookinfo.attrib
+# end of bookinfo.attlist
+
+# end of bookinfo.module
+
+# end of book.content.module
+
+# ......................................................................
+
+# Dedication, ToC, and LoT .............................................
+local.dedication.attrib = empty
+dedication.role.attrib = role.attrib
+dedication =
+  element dedication {
+    dedication.attlist, sect.title.content?, legalnotice.mix+
+  }
+# end of dedication.element
+dedication.attlist &=
+  status.attrib,
+  common.attrib,
+  dedication.role.attrib,
+  local.dedication.attrib
+# end of dedication.attlist
+
+# end of dedication.module
+local.colophon.attrib = empty
+colophon.role.attrib = role.attrib
+colophon =
+  element colophon {
+    colophon.attlist, sect.title.content?, textobject.mix+
+  }
+# end of colophon.element
+colophon.attlist &=
+  status.attrib,
+  common.attrib,
+  colophon.role.attrib,
+  local.colophon.attrib
+# end of colophon.attlist
+
+# end of colophon.module
+local.toc.attrib = empty
+toc.role.attrib = role.attrib
+toc =
+  element toc {
+    toc.attlist,
+    beginpage?,
+    bookcomponent.title.content?,
+    tocfront*,
+    (tocpart | tocchap)*,
+    tocback*
+  }
+# end of toc.element
+toc.attlist &=
+  pagenum.attrib, common.attrib, toc.role.attrib, local.toc.attrib
+# end of toc.attlist
+
+# end of toc.module
+local.tocfront.attrib = empty
+tocfront.role.attrib = role.attrib
+tocfront = element tocfront { tocfront.attlist, para.char.mix* }
+# end of tocfront.element
+
+# to element that this entry represents
+tocfront.attlist &=
+  label.attrib,
+  linkend.attrib,
+  pagenum.attrib,
+  common.attrib,
+  tocfront.role.attrib,
+  local.tocfront.attrib
+# end of tocfront.attlist
+
+# end of tocfront.module
+local.tocentry.attrib = empty
+tocentry.role.attrib = role.attrib
+tocentry = element tocentry { tocentry.attlist, para.char.mix* }
+# end of tocentry.element
+
+# to element that this entry represents
+tocentry.attlist &=
+  linkend.attrib,
+  pagenum.attrib,
+  common.attrib,
+  tocentry.role.attrib,
+  local.tocentry.attrib
+# end of tocentry.attlist
+
+# end of tocentry.module
+local.tocpart.attrib = empty
+tocpart.role.attrib = role.attrib
+tocpart = element tocpart { tocpart.attlist, tocentry+, tocchap* }
+# end of tocpart.element
+tocpart.attlist &=
+  common.attrib, tocpart.role.attrib, local.tocpart.attrib
+# end of tocpart.attlist
+
+# end of tocpart.module
+local.tocchap.attrib = empty
+tocchap.role.attrib = role.attrib
+tocchap = element tocchap { tocchap.attlist, tocentry+, toclevel1* }
+# end of tocchap.element
+tocchap.attlist &=
+  label.attrib, common.attrib, tocchap.role.attrib, local.tocchap.attrib
+# end of tocchap.attlist
+
+# end of tocchap.module
+local.toclevel1.attrib = empty
+toclevel1.role.attrib = role.attrib
+toclevel1 =
+  element toclevel1 { toclevel1.attlist, tocentry+, toclevel2* }
+# end of toclevel1.element
+toclevel1.attlist &=
+  common.attrib, toclevel1.role.attrib, local.toclevel1.attrib
+# end of toclevel1.attlist
+
+# end of toclevel1.module
+local.toclevel2.attrib = empty
+toclevel2.role.attrib = role.attrib
+toclevel2 =
+  element toclevel2 { toclevel2.attlist, tocentry+, toclevel3* }
+# end of toclevel2.element
+toclevel2.attlist &=
+  common.attrib, toclevel2.role.attrib, local.toclevel2.attrib
+# end of toclevel2.attlist
+
+# end of toclevel2.module
+local.toclevel3.attrib = empty
+toclevel3.role.attrib = role.attrib
+toclevel3 =
+  element toclevel3 { toclevel3.attlist, tocentry+, toclevel4* }
+# end of toclevel3.element
+toclevel3.attlist &=
+  common.attrib, toclevel3.role.attrib, local.toclevel3.attrib
+# end of toclevel3.attlist
+
+# end of toclevel3.module
+local.toclevel4.attrib = empty
+toclevel4.role.attrib = role.attrib
+toclevel4 =
+  element toclevel4 { toclevel4.attlist, tocentry+, toclevel5* }
+# end of toclevel4.element
+toclevel4.attlist &=
+  common.attrib, toclevel4.role.attrib, local.toclevel4.attrib
+# end of toclevel4.attlist
+
+# end of toclevel4.module
+local.toclevel5.attrib = empty
+toclevel5.role.attrib = role.attrib
+toclevel5 = element toclevel5 { toclevel5.attlist, tocentry+ }
+# end of toclevel5.element
+toclevel5.attlist &=
+  common.attrib, toclevel5.role.attrib, local.toclevel5.attrib
+# end of toclevel5.attlist
+
+# end of toclevel5.module
+local.tocback.attrib = empty
+tocback.role.attrib = role.attrib
+tocback = element tocback { tocback.attlist, para.char.mix* }
+# end of tocback.element
+
+# to element that this entry represents
+tocback.attlist &=
+  label.attrib,
+  linkend.attrib,
+  pagenum.attrib,
+  common.attrib,
+  tocback.role.attrib,
+  local.tocback.attrib
+# end of tocback.attlist
+
+# end of tocback.module
+
+# end of toc.content.module
+local.lot.attrib = empty
+lot.role.attrib = role.attrib
+lot =
+  element lot {
+    lot.attlist, beginpage?, bookcomponent.title.content?, lotentry*
+  }
+# end of lot.element
+lot.attlist &=
+  label.attrib, common.attrib, lot.role.attrib, local.lot.attrib
+# end of lot.attlist
+
+# end of lot.module
+local.lotentry.attrib = empty
+lotentry.role.attrib = role.attrib
+lotentry = element lotentry { lotentry.attlist, para.char.mix* }
+# end of lotentry.element
+
+# SrcCredit: Information about the source of the entry,
+# as for a list of illustrations
+
+#  linkend: to element that this entry represents
+lotentry.attlist &=
+  linkend.attrib,
+  pagenum.attrib,
+  attribute srccredit { text }?,
+  common.attrib,
+  lotentry.role.attrib,
+  local.lotentry.attrib
+# end of lotentry.attlist
+
+# end of lotentry.module
+
+# end of lot.content.module
+
+# ......................................................................
+
+# Appendix, Chapter, Part, Preface, Reference, PartIntro ...............
+local.appendix.attrib = empty
+appendix.role.attrib = role.attrib
+appendix =
+  element appendix {
+    appendix.attlist,
+    beginpage?,
+    appendixinfo?,
+    bookcomponent.title.content,
+    nav.class*,
+    tocchap?,
+    bookcomponent.content,
+    nav.class*
+  }
+# end of appendix.element
+appendix.attlist &=
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  appendix.role.attrib,
+  local.appendix.attrib
+# end of appendix.attlist
+
+# end of appendix.module
+local.chapter.attrib = empty
+chapter.role.attrib = role.attrib
+chapter =
+  element chapter {
+    chapter.attlist,
+    beginpage?,
+    chapterinfo?,
+    bookcomponent.title.content,
+    nav.class*,
+    tocchap?,
+    bookcomponent.content,
+    nav.class*
+  }
+# end of chapter.element
+chapter.attlist &=
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  chapter.role.attrib,
+  local.chapter.attrib
+# end of chapter.attlist
+
+# end of chapter.module
+
+# Note that Part was to have its content model reduced in V4.2.  This
+# change will not be made after all.
+local.part.attrib = empty
+part.role.attrib = role.attrib
+part =
+  element part {
+    part.attlist,
+    beginpage?,
+    partinfo?,
+    bookcomponent.title.content,
+    partintro?,
+    partcontent.mix+
+  }
+# end of part.element
+part.attlist &=
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  part.role.attrib,
+  local.part.attrib
+# end of part.attlist
+
+# ELEMENT PartIntro (defined below)
+
+# end of part.module
+local.preface.attrib = empty
+preface.role.attrib = role.attrib
+preface =
+  element preface {
+    preface.attlist,
+    beginpage?,
+    prefaceinfo?,
+    bookcomponent.title.content,
+    nav.class*,
+    tocchap?,
+    bookcomponent.content,
+    nav.class*
+  }
+# end of preface.element
+preface.attlist &=
+  status.attrib,
+  common.attrib,
+  preface.role.attrib,
+  local.preface.attrib
+# end of preface.attlist
+
+# end of preface.module
+local.reference.attrib = empty
+reference.role.attrib = role.attrib
+reference =
+  element reference {
+    reference.attlist,
+    beginpage?,
+    referenceinfo?,
+    bookcomponent.title.content,
+    partintro?,
+    refentry.class+
+  }
+# end of reference.element
+reference.attlist &=
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  reference.role.attrib,
+  local.reference.attrib
+# end of reference.attlist
+
+# ELEMENT PartIntro (defined below)
+
+# end of reference.module
+local.partintro.attrib = empty
+partintro.role.attrib = role.attrib
+partintro =
+  element partintro {
+    partintro.attlist, div.title.content?, bookcomponent.content
+  }
+# end of partintro.element
+partintro.attlist &=
+  label.attrib,
+  common.attrib,
+  partintro.role.attrib,
+  local.partintro.attrib
+# end of partintro.attlist
+
+# end of partintro.module
+
+# ......................................................................
+
+# Other Info elements ..................................................
+local.appendixinfo.attrib = empty
+appendixinfo.role.attrib = role.attrib
+appendixinfo =
+  element appendixinfo { appendixinfo.attlist, info.class+ }
+# end of appendixinfo.element
+appendixinfo.attlist &=
+  common.attrib, appendixinfo.role.attrib, local.appendixinfo.attrib
+# end of appendixinfo.attlist
+
+# end of appendixinfo.module
+local.bibliographyinfo.attrib = empty
+bibliographyinfo.role.attrib = role.attrib
+bibliographyinfo =
+  element bibliographyinfo { bibliographyinfo.attlist, info.class+ }
+# end of bibliographyinfo.element
+bibliographyinfo.attlist &=
+  common.attrib,
+  bibliographyinfo.role.attrib,
+  local.bibliographyinfo.attrib
+# end of bibliographyinfo.attlist
+
+# end of bibliographyinfo.module
+local.chapterinfo.attrib = empty
+chapterinfo.role.attrib = role.attrib
+chapterinfo = element chapterinfo { chapterinfo.attlist, info.class+ }
+# end of chapterinfo.element
+chapterinfo.attlist &=
+  common.attrib, chapterinfo.role.attrib, local.chapterinfo.attrib
+# end of chapterinfo.attlist
+
+# end of chapterinfo.module
+local.glossaryinfo.attrib = empty
+glossaryinfo.role.attrib = role.attrib
+glossaryinfo =
+  element glossaryinfo { glossaryinfo.attlist, info.class+ }
+# end of glossaryinfo.element
+glossaryinfo.attlist &=
+  common.attrib, glossaryinfo.role.attrib, local.glossaryinfo.attrib
+# end of glossaryinfo.attlist
+
+# end of glossaryinfo.module
+local.indexinfo.attrib = empty
+indexinfo.role.attrib = role.attrib
+indexinfo = element indexinfo { indexinfo.attlist, info.class+ }
+# end of indexinfo.element
+indexinfo.attlist &=
+  common.attrib, indexinfo.role.attrib, local.indexinfo.attrib
+# end of indexinfo.attlist
+
+# end of indexinfo.module
+local.setindexinfo.attrib = empty
+setindexinfo.role.attrib = role.attrib
+setindexinfo =
+  element setindexinfo { setindexinfo.attlist, info.class+ }
+# end of setindexinfo.element
+setindexinfo.attlist &=
+  common.attrib, setindexinfo.role.attrib, local.setindexinfo.attrib
+# end of setindexinfo.attlist
+
+# end of setindexinfo.module
+local.partinfo.attrib = empty
+partinfo.role.attrib = role.attrib
+partinfo = element partinfo { partinfo.attlist, info.class+ }
+# end of partinfo.element
+partinfo.attlist &=
+  common.attrib, partinfo.role.attrib, local.partinfo.attrib
+# end of partinfo.attlist
+
+# end of partinfo.module
+local.prefaceinfo.attrib = empty
+prefaceinfo.role.attrib = role.attrib
+prefaceinfo = element prefaceinfo { prefaceinfo.attlist, info.class+ }
+# end of prefaceinfo.element
+prefaceinfo.attlist &=
+  common.attrib, prefaceinfo.role.attrib, local.prefaceinfo.attrib
+# end of prefaceinfo.attlist
+
+# end of prefaceinfo.module
+local.refentryinfo.attrib = empty
+refentryinfo.role.attrib = role.attrib
+refentryinfo =
+  element refentryinfo { refentryinfo.attlist, info.class+ }
+# end of refentryinfo.element
+refentryinfo.attlist &=
+  common.attrib, refentryinfo.role.attrib, local.refentryinfo.attrib
+# end of refentryinfo.attlist
+
+# end of refentryinfo.module
+local.refsectioninfo.attrib = empty
+refsectioninfo.role.attrib = role.attrib
+refsectioninfo =
+  element refsectioninfo { refsectioninfo.attlist, info.class+ }
+# end of refsectioninfo.element
+refsectioninfo.attlist &=
+  common.attrib, refsectioninfo.role.attrib, local.refsectioninfo.attrib
+# end of refsectioninfo.attlist
+
+# end of refsectioninfo.module
+local.refsect1info.attrib = empty
+refsect1info.role.attrib = role.attrib
+refsect1info =
+  element refsect1info { refsect1info.attlist, info.class+ }
+# end of refsect1info.element
+refsect1info.attlist &=
+  common.attrib, refsect1info.role.attrib, local.refsect1info.attrib
+# end of refsect1info.attlist
+
+# end of refsect1info.module
+local.refsect2info.attrib = empty
+refsect2info.role.attrib = role.attrib
+refsect2info =
+  element refsect2info { refsect2info.attlist, info.class+ }
+# end of refsect2info.element
+refsect2info.attlist &=
+  common.attrib, refsect2info.role.attrib, local.refsect2info.attrib
+# end of refsect2info.attlist
+
+# end of refsect2info.module
+local.refsect3info.attrib = empty
+refsect3info.role.attrib = role.attrib
+refsect3info =
+  element refsect3info { refsect3info.attlist, info.class+ }
+# end of refsect3info.element
+refsect3info.attlist &=
+  common.attrib, refsect3info.role.attrib, local.refsect3info.attrib
+# end of refsect3info.attlist
+
+# end of refsect3info.module
+local.refsynopsisdivinfo.attrib = empty
+refsynopsisdivinfo.role.attrib = role.attrib
+refsynopsisdivinfo =
+  element refsynopsisdivinfo { refsynopsisdivinfo.attlist, info.class+ }
+# end of refsynopsisdivinfo.element
+refsynopsisdivinfo.attlist &=
+  common.attrib,
+  refsynopsisdivinfo.role.attrib,
+  local.refsynopsisdivinfo.attrib
+# end of refsynopsisdivinfo.attlist
+
+# end of refsynopsisdivinfo.module
+local.referenceinfo.attrib = empty
+referenceinfo.role.attrib = role.attrib
+referenceinfo =
+  element referenceinfo { referenceinfo.attlist, info.class+ }
+# end of referenceinfo.element
+referenceinfo.attlist &=
+  common.attrib, referenceinfo.role.attrib, local.referenceinfo.attrib
+# end of referenceinfo.attlist
+
+# end of referenceinfo.module
+local.sect1info.attrib = empty
+sect1info.role.attrib = role.attrib
+sect1info = element sect1info { sect1info.attlist, info.class+ }
+# end of sect1info.element
+sect1info.attlist &=
+  common.attrib, sect1info.role.attrib, local.sect1info.attrib
+# end of sect1info.attlist
+local.sect2info.attrib = empty
+sect2info.role.attrib = role.attrib
+sect2info = element sect2info { sect2info.attlist, info.class+ }
+# end of sect2info.element
+sect2info.attlist &=
+  common.attrib, sect2info.role.attrib, local.sect2info.attrib
+# end of sect2info.attlist
+local.sect3info.attrib = empty
+sect3info.role.attrib = role.attrib
+sect3info = element sect3info { sect3info.attlist, info.class+ }
+# end of sect3info.element
+sect3info.attlist &=
+  common.attrib, sect3info.role.attrib, local.sect3info.attrib
+# end of sect3info.attlist
+local.sect4info.attrib = empty
+sect4info.role.attrib = role.attrib
+sect4info = element sect4info { sect4info.attlist, info.class+ }
+# end of sect4info.element
+sect4info.attlist &=
+  common.attrib, sect4info.role.attrib, local.sect4info.attrib
+# end of sect4info.attlist
+local.sect5info.attrib = empty
+sect5info.role.attrib = role.attrib
+sect5info = element sect5info { sect5info.attlist, info.class+ }
+# end of sect5info.element
+sect5info.attlist &=
+  common.attrib, sect5info.role.attrib, local.sect5info.attrib
+# end of sect5info.attlist
+
+# ......................................................................
+
+# Section (parallel to Sect*) .........................................
+local.section.attrib = empty
+section.role.attrib = role.attrib
+section =
+  element section {
+    section.attlist,
+    sectioninfo?,
+    sect.title.content,
+    nav.class*,
+    ((divcomponent.mix+,
+      (refentry.class* | section.class* | simplesect*))
+     | refentry.class+
+     | section.class+
+     | simplesect+),
+    nav.class*
+  }
+# end of section.element
+section.attlist &=
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  section.role.attrib,
+  local.section.attrib
+# end of section.attlist
+
+# end of section.module
+sectioninfo.role.attrib = role.attrib
+local.sectioninfo.attrib = empty
+sectioninfo = element sectioninfo { sectioninfo.attlist, info.class+ }
+# end of sectioninfo.element
+sectioninfo.attlist &=
+  common.attrib, sectioninfo.role.attrib, local.sectioninfo.attrib
+# end of sectioninfo.attlist
+
+# end of sectioninfo.module
+
+# end of section.content.module
+
+# ......................................................................
+
+# Sect1, Sect2, Sect3, Sect4, Sect5 ....................................
+local.sect1.attrib = empty
+sect1.role.attrib = role.attrib
+sect1 =
+  element sect1 {
+    sect1.attlist,
+    sect1info?,
+    sect.title.content,
+    nav.class*,
+    ((divcomponent.mix+, (refentry.class* | sect2* | simplesect*))
+     | refentry.class+
+     | sect2+
+     | simplesect+),
+    nav.class*
+  }
+# end of sect1.element
+
+# Renderas: Indicates the format in which the heading should
+# appear
+sect1.attlist &=
+  attribute renderas { "sect2" | "sect3" | "sect4" | "sect5" }?,
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  sect1.role.attrib,
+  local.sect1.attrib
+# end of sect1.attlist
+
+# end of sect1.module
+local.sect2.attrib = empty
+sect2.role.attrib = role.attrib
+sect2 =
+  element sect2 {
+    sect2.attlist,
+    sect2info?,
+    sect.title.content,
+    nav.class*,
+    ((divcomponent.mix+, (refentry.class* | sect3* | simplesect*))
+     | refentry.class+
+     | sect3+
+     | simplesect+),
+    nav.class*
+  }
+# end of sect2.element
+
+# Renderas: Indicates the format in which the heading should
+# appear
+sect2.attlist &=
+  attribute renderas { "sect1" | "sect3" | "sect4" | "sect5" }?,
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  sect2.role.attrib,
+  local.sect2.attrib
+# end of sect2.attlist
+
+# end of sect2.module
+local.sect3.attrib = empty
+sect3.role.attrib = role.attrib
+sect3 =
+  element sect3 {
+    sect3.attlist,
+    sect3info?,
+    sect.title.content,
+    nav.class*,
+    ((divcomponent.mix+, (refentry.class* | sect4* | simplesect*))
+     | refentry.class+
+     | sect4+
+     | simplesect+),
+    nav.class*
+  }
+# end of sect3.element
+
+# Renderas: Indicates the format in which the heading should
+# appear
+sect3.attlist &=
+  attribute renderas { "sect1" | "sect2" | "sect4" | "sect5" }?,
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  sect3.role.attrib,
+  local.sect3.attrib
+# end of sect3.attlist
+
+# end of sect3.module
+local.sect4.attrib = empty
+sect4.role.attrib = role.attrib
+sect4 =
+  element sect4 {
+    sect4.attlist,
+    sect4info?,
+    sect.title.content,
+    nav.class*,
+    ((divcomponent.mix+, (refentry.class* | sect5* | simplesect*))
+     | refentry.class+
+     | sect5+
+     | simplesect+),
+    nav.class*
+  }
+# end of sect4.element
+
+# Renderas: Indicates the format in which the heading should
+# appear
+sect4.attlist &=
+  attribute renderas { "sect1" | "sect2" | "sect3" | "sect5" }?,
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  sect4.role.attrib,
+  local.sect4.attrib
+# end of sect4.attlist
+
+# end of sect4.module
+local.sect5.attrib = empty
+sect5.role.attrib = role.attrib
+sect5 =
+  element sect5 {
+    sect5.attlist,
+    sect5info?,
+    sect.title.content,
+    nav.class*,
+    ((divcomponent.mix+, (refentry.class* | simplesect*))
+     | refentry.class+
+     | simplesect+),
+    nav.class*
+  }
+# end of sect5.element
+
+# Renderas: Indicates the format in which the heading should
+# appear
+sect5.attlist &=
+  attribute renderas { "sect1" | "sect2" | "sect3" | "sect4" }?,
+  label.attrib,
+  status.attrib,
+  common.attrib,
+  sect5.role.attrib,
+  local.sect5.attrib
+# end of sect5.attlist
+
+# end of sect5.module
+local.simplesect.attrib = empty
+simplesect.role.attrib = role.attrib
+simplesect =
+  element simplesect {
+    simplesect.attlist, sect.title.content, divcomponent.mix+
+  }
+# end of simplesect.element
+simplesect.attlist &=
+  common.attrib, simplesect.role.attrib, local.simplesect.attrib
+# end of simplesect.attlist
+
+# end of simplesect.module
+
+# ......................................................................
+
+# Bibliography .........................................................
+local.bibliography.attrib = empty
+bibliography.role.attrib = role.attrib
+bibliography =
+  element bibliography {
+    bibliography.attlist,
+    bibliographyinfo?,
+    bookcomponent.title.content?,
+    component.mix*,
+    (bibliodiv+ | (biblioentry | bibliomixed)+)
+  }
+# end of bibliography.element
+bibliography.attlist &=
+  status.attrib,
+  common.attrib,
+  bibliography.role.attrib,
+  local.bibliography.attrib
+# end of bibliography.attlist
+
+# end of bibliography.module
+local.bibliodiv.attrib = empty
+bibliodiv.role.attrib = role.attrib
+bibliodiv =
+  element bibliodiv {
+    bibliodiv.attlist,
+    sect.title.content?,
+    component.mix*,
+    (biblioentry | bibliomixed)+
+  }
+# end of bibliodiv.element
+bibliodiv.attlist &=
+  status.attrib,
+  common.attrib,
+  bibliodiv.role.attrib,
+  local.bibliodiv.attrib
+# end of bibliodiv.attlist
+
+# end of bibliodiv.module
+
+# end of bibliography.content.module
+
+# ......................................................................
+
+# Glossary .............................................................
+local.glossary.attrib = empty
+glossary.role.attrib = role.attrib
+glossary =
+  element glossary {
+    glossary.attlist,
+    glossaryinfo?,
+    bookcomponent.title.content?,
+    component.mix*,
+    (glossdiv+ | glossentry+),
+    bibliography?
+  }
+# end of glossary.element
+glossary.attlist &=
+  status.attrib,
+  common.attrib,
+  glossary.role.attrib,
+  local.glossary.attrib
+# end of glossary.attlist
+
+# end of glossary.module
+local.glossdiv.attrib = empty
+glossdiv.role.attrib = role.attrib
+glossdiv =
+  element glossdiv {
+    glossdiv.attlist, sect.title.content, component.mix*, glossentry+
+  }
+# end of glossdiv.element
+glossdiv.attlist &=
+  status.attrib,
+  common.attrib,
+  glossdiv.role.attrib,
+  local.glossdiv.attrib
+# end of glossdiv.attlist
+
+# end of glossdiv.module
+
+# end of glossary.content.module
+
+# ......................................................................
+
+# Index and SetIndex ...................................................
+local.indexes.attrib = empty
+indexes.role.attrib = role.attrib
+index =
+  element index {
+    index.attlist,
+    indexinfo?,
+    bookcomponent.title.content?,
+    component.mix*,
+    (indexdiv* | indexentry*)
+  }
+# end of index.element
+index.attlist &=
+  common.attrib, indexes.role.attrib, local.indexes.attrib
+# end of index.attlist
+setindex =
+  element setindex {
+    setindex.attlist,
+    setindexinfo?,
+    bookcomponent.title.content?,
+    component.mix*,
+    (indexdiv* | indexentry*)
+  }
+# end of setindex.element
+setindex.attlist &=
+  common.attrib, indexes.role.attrib, local.indexes.attrib
+# end of setindex.attlist
+
+# end of indexes.module
+
+# SegmentedList in this content is useful for marking up permuted
+# indices.
+local.indexdiv.attrib = empty
+indexdiv.role.attrib = role.attrib
+indexdiv =
+  element indexdiv {
+    indexdiv.attlist,
+    sect.title.content?,
+    (indexdivcomponent.mix*, (indexentry+ | segmentedlist))
+  }
+# end of indexdiv.element
+indexdiv.attlist &=
+  common.attrib, indexdiv.role.attrib, local.indexdiv.attrib
+# end of indexdiv.attlist
+
+# end of indexdiv.module
+
+# Index entries appear in the index, not the text.
+local.indexentry.attrib = empty
+indexentry.role.attrib = role.attrib
+indexentry =
+  element indexentry {
+    indexentry.attlist,
+    primaryie,
+    (seeie | seealsoie)*,
+    (secondaryie, (seeie | seealsoie | tertiaryie)*)*
+  }
+# end of indexentry.element
+indexentry.attlist &=
+  common.attrib, indexentry.role.attrib, local.indexentry.attrib
+# end of indexentry.attlist
+
+# end of indexentry.module
+local.primsecterie.attrib = empty
+primsecterie.role.attrib = role.attrib
+primaryie = element primaryie { primaryie.attlist, ndxterm.char.mix* }
+# end of primaryie.element
+
+# to IndexTerms that these entries represent
+primaryie.attlist &=
+  linkends.attrib,
+  common.attrib,
+  primsecterie.role.attrib,
+  local.primsecterie.attrib
+# end of primaryie.attlist
+secondaryie =
+  element secondaryie { secondaryie.attlist, ndxterm.char.mix* }
+# end of secondaryie.element
+
+# to IndexTerms that these entries represent
+secondaryie.attlist &=
+  linkends.attrib,
+  common.attrib,
+  primsecterie.role.attrib,
+  local.primsecterie.attrib
+# end of secondaryie.attlist
+tertiaryie =
+  element tertiaryie { tertiaryie.attlist, ndxterm.char.mix* }
+# end of tertiaryie.element
+
+# to IndexTerms that these entries represent
+tertiaryie.attlist &=
+  linkends.attrib,
+  common.attrib,
+  primsecterie.role.attrib,
+  local.primsecterie.attrib
+# end of tertiaryie.attlist
+
+# end of primsecterie.module
+local.seeie.attrib = empty
+seeie.role.attrib = role.attrib
+seeie = element seeie { seeie.attlist, ndxterm.char.mix* }
+# end of seeie.element
+
+# to IndexEntry to look up
+seeie.attlist &=
+  linkend.attrib, common.attrib, seeie.role.attrib, local.seeie.attrib
+# end of seeie.attlist
+
+# end of seeie.module
+local.seealsoie.attrib = empty
+seealsoie.role.attrib = role.attrib
+seealsoie = element seealsoie { seealsoie.attlist, ndxterm.char.mix* }
+# end of seealsoie.element
+
+# to related IndexEntries
+seealsoie.attlist &=
+  linkends.attrib,
+  common.attrib,
+  seealsoie.role.attrib,
+  local.seealsoie.attrib
+# end of seealsoie.attlist
+
+# end of seealsoie.module
+
+# end of index.content.module
+
+# ......................................................................
+
+# RefEntry .............................................................
+local.refentry.attrib = empty
+refentry.role.attrib = role.attrib
+refentry =
+  element refentry {
+    refentry.attlist,
+    beginpage?,
+    ndxterm.class*,
+    refentryinfo?,
+    refmeta?,
+    (remark | link.char.class)*,
+    refnamediv,
+    refsynopsisdiv?,
+    (refsect1+ | refsection+)
+  }
+# end of refentry.element
+refentry.attlist &=
+  status.attrib,
+  common.attrib,
+  refentry.role.attrib,
+  local.refentry.attrib
+# end of refentry.attlist
+
+# end of refentry.module
+local.refmeta.attrib = empty
+refmeta.role.attrib = role.attrib
+refmeta =
+  element refmeta {
+    refmeta.attlist,
+    ndxterm.class*,
+    refentrytitle,
+    manvolnum?,
+    refmiscinfo*,
+    ndxterm.class*
+  }
+# end of refmeta.element
+refmeta.attlist &=
+  common.attrib, refmeta.role.attrib, local.refmeta.attrib
+# end of refmeta.attlist
+
+# end of refmeta.module
+local.refmiscinfo.attrib = empty
+refmiscinfo.role.attrib = role.attrib
+refmiscinfo =
+  element refmiscinfo { refmiscinfo.attlist, docinfo.char.mix* }
+# end of refmiscinfo.element
+
+# Class: Freely assignable parameter; no default
+refmiscinfo.attlist &=
+  attribute class { text }?,
+  common.attrib,
+  refmiscinfo.role.attrib,
+  local.refmiscinfo.attrib
+# end of refmiscinfo.attlist
+
+# end of refmiscinfo.module
+local.refnamediv.attrib = empty
+refnamediv.role.attrib = role.attrib
+refnamediv =
+  element refnamediv {
+    refnamediv.attlist,
+    refdescriptor?,
+    refname+,
+    refpurpose,
+    refclass*,
+    (remark | link.char.class)*
+  }
+# end of refnamediv.element
+refnamediv.attlist &=
+  common.attrib, refnamediv.role.attrib, local.refnamediv.attrib
+# end of refnamediv.attlist
+
+# end of refnamediv.module
+local.refdescriptor.attrib = empty
+refdescriptor.role.attrib = role.attrib
+refdescriptor =
+  element refdescriptor { refdescriptor.attlist, refname.char.mix* }
+# end of refdescriptor.element
+refdescriptor.attlist &=
+  common.attrib, refdescriptor.role.attrib, local.refdescriptor.attrib
+# end of refdescriptor.attlist
+
+# end of refdescriptor.module
+local.refname.attrib = empty
+refname.role.attrib = role.attrib
+refname = element refname { refname.attlist, refname.char.mix* }
+# end of refname.element
+refname.attlist &=
+  common.attrib, refname.role.attrib, local.refname.attrib
+# end of refname.attlist
+
+# end of refname.module
+local.refpurpose.attrib = empty
+refpurpose.role.attrib = role.attrib
+refpurpose =
+  element refpurpose { refpurpose.attlist, refinline.char.mix* }
+# end of refpurpose.element
+refpurpose.attlist &=
+  common.attrib, refpurpose.role.attrib, local.refpurpose.attrib
+# end of refpurpose.attlist
+
+# end of refpurpose.module
+local.refclass.attrib = empty
+refclass.role.attrib = role.attrib
+refclass = element refclass { refclass.attlist, refclass.char.mix* }
+# end of refclass.element
+refclass.attlist &=
+  common.attrib, refclass.role.attrib, local.refclass.attrib
+# end of refclass.attlist
+
+# end of refclass.module
+local.refsynopsisdiv.attrib = empty
+refsynopsisdiv.role.attrib = role.attrib
+refsynopsisdiv =
+  element refsynopsisdiv {
+    refsynopsisdiv.attlist,
+    refsynopsisdivinfo?,
+    refsect.title.content?,
+    ((refcomponent.mix+, refsect2*) | refsect2+)
+  }
+# end of refsynopsisdiv.element
+refsynopsisdiv.attlist &=
+  common.attrib, refsynopsisdiv.role.attrib, local.refsynopsisdiv.attrib
+# end of refsynopsisdiv.attlist
+
+# end of refsynopsisdiv.module
+local.refsection.attrib = empty
+refsection.role.attrib = role.attrib
+refsection =
+  element refsection {
+    refsection.attlist,
+    refsectioninfo?,
+    refsect.title.content,
+    ((refcomponent.mix+, refsection*) | refsection+)
+  }
+# end of refsection.element
+refsection.attlist &=
+  status.attrib,
+  common.attrib,
+  refsection.role.attrib,
+  local.refsection.attrib
+# end of refsection.attlist
+
+# end of refsection.module
+local.refsect1.attrib = empty
+refsect1.role.attrib = role.attrib
+refsect1 =
+  element refsect1 {
+    refsect1.attlist,
+    refsect1info?,
+    refsect.title.content,
+    ((refcomponent.mix+, refsect2*) | refsect2+)
+  }
+# end of refsect1.element
+refsect1.attlist &=
+  status.attrib,
+  common.attrib,
+  refsect1.role.attrib,
+  local.refsect1.attrib
+# end of refsect1.attlist
+
+# end of refsect1.module
+local.refsect2.attrib = empty
+refsect2.role.attrib = role.attrib
+refsect2 =
+  element refsect2 {
+    refsect2.attlist,
+    refsect2info?,
+    refsect.title.content,
+    ((refcomponent.mix+, refsect3*) | refsect3+)
+  }
+# end of refsect2.element
+refsect2.attlist &=
+  status.attrib,
+  common.attrib,
+  refsect2.role.attrib,
+  local.refsect2.attrib
+# end of refsect2.attlist
+
+# end of refsect2.module
+local.refsect3.attrib = empty
+refsect3.role.attrib = role.attrib
+refsect3 =
+  element refsect3 {
+    refsect3.attlist,
+    refsect3info?,
+    refsect.title.content,
+    refcomponent.mix+
+  }
+# end of refsect3.element
+refsect3.attlist &=
+  status.attrib,
+  common.attrib,
+  refsect3.role.attrib,
+  local.refsect3.attrib
+# end of refsect3.attlist
+
+# end of refsect3.module
+
+# end of refentry.content.module
+
+# ......................................................................
+
+# Article ..............................................................
+
+# An Article is a chapter-level, stand-alone document that is often,
+# but need not be, collected into a Book.
+local.article.attrib = empty
+article.role.attrib = role.attrib
+article =
+  element article {
+    article.attlist,
+    div.title.content?,
+    articleinfo?,
+    tocchap?,
+    lot*,
+    bookcomponent.content,
+    (nav.class | appendix.class | ackno)*
+  }
+# end of article.element
+
+# Class: Indicates the type of a particular article;
+# all articles have the same structure and general purpose.
+# No default.
+
+# ParentBook: ID of the enclosing Book
+article.attlist &=
+  attribute class {
+    "journalarticle"
+    | "productsheet"
+    | "whitepaper"
+    | "techreport"
+    | "specification"
+    | "faq"
+  }?,
+  attribute parentbook { xsd:IDREF }?,
+  status.attrib,
+  common.attrib,
+  article.role.attrib,
+  local.article.attrib
+# end of article.attlist
+
+# end of article.module
+
+# End of DocBook document hierarchy module V4.2 ........................
+
+# ......................................................................

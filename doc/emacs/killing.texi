@@ -1,0 +1,872 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+
+@node Killing, Registers, Mark, Top
+@chapter Killing and Moving Text
+
+  In Emacs, @dfn{killing} means erasing text and copying it into the
+@dfn{kill ring}.  @dfn{Yanking} means bringing text from the kill ring
+back into the buffer.  (Some applications use the terms ``cutting''
+and ``pasting'' for similar operations.)  The kill ring is so-named
+because it can be visualized as a set of blocks of text arranged in a
+ring, which you can access in cyclic order.  @xref{Kill Ring}.
+
+  Killing and yanking are the most common way to move or copy text
+within Emacs.  It is very versatile, because there are commands for
+killing many different types of syntactic units.
+
+@menu
+* Deletion and Killing:: Commands that remove text.
+* Yanking::              Commands that insert text.
+* Cut and Paste::        Clipboard and selections on graphical displays.
+* Accumulating Text::    Other methods to add text to the buffer.
+* Rectangles::           Operating on text in rectangular areas.
+* CUA Bindings::         Using @kbd{C-x}/@kbd{C-c}/@kbd{C-v} to kill and yank.
+@end menu
+
+@node Deletion and Killing
+@section Deletion and Killing
+
+@cindex killing text
+@cindex cutting text
+@cindex deletion
+  Most commands which erase text from the buffer save it in the kill
+ring.  These are known as @dfn{kill} commands, and their names
+normally contain the word @samp{kill} (e.g. @code{kill-line}).  The
+kill ring stores several recent kills, not just the last one, so
+killing is a very safe operation: you don't have to worry much about
+losing text that you previously killed.  The kill ring is shared by
+all buffers, so text that is killed in one buffer can be yanked into
+another buffer.
+
+  When you use @kbd{C-/} (@code{undo}) to undo a kill command
+(@pxref{Undo}), that brings the killed text back into the buffer, but
+does not remove it from the kill ring.
+
+  On graphical displays, killing text also copies it to the system
+clipboard.  @xref{Cut and Paste}.
+
+  Commands that erase text but do not save it in the kill ring are
+known as @dfn{delete} commands; their names usually contain the word
+@samp{delete}.  These include @kbd{C-d} (@code{delete-char}) and
+@key{DEL} (@code{delete-backward-char}), which delete only one
+character at a time, and those commands that delete only spaces or
+newlines.  Commands that can erase significant amounts of nontrivial
+data generally do a kill operation instead.
+
+  You can also use the mouse to kill and yank.  @xref{Cut and Paste}.
+
+@menu
+* Deletion::            Commands for deleting small amounts of text and
+                          blank areas.
+* Killing by Lines::    How to kill entire lines of text at one time.
+* Other Kill Commands:: Commands to kill large regions of text and
+                          syntactic units such as words and sentences.
+* Kill Options::        Options that affect killing.
+@end menu
+
+@node Deletion
+@subsection Deletion
+@findex delete-backward-char
+@findex delete-char
+
+  Deletion means erasing text and not saving it in the kill ring.  For
+the most part, the Emacs commands that delete text are those that
+erase just one character or only whitespace.
+
+@table @kbd
+@item @key{DEL}
+@itemx @key{Backspace}
+Delete the previous character, or the text in the region if it is
+active (@code{delete-backward-char}).
+
+@item @key{Delete}
+Delete the next character, or the text in the region if it is active
+(@code{delete-forward-char}).
+
+@item C-d
+Delete the next character (@code{delete-char}).
+
+@item M-\
+Delete spaces and tabs around point (@code{delete-horizontal-space}).
+@item M-@key{SPC}
+Delete spaces and tabs around point, leaving one space
+(@code{just-one-space}).
+@item C-x C-o
+Delete blank lines around the current line (@code{delete-blank-lines}).
+@item M-^
+Join two lines by deleting the intervening newline, along with any
+indentation following it (@code{delete-indentation}).
+@end table
+
+  We have already described the basic deletion commands @key{DEL}
+(@code{delete-backward-char}), @key{delete}
+(@code{delete-forward-char}), and @kbd{C-d} (@code{delete-char}).
+@xref{Erasing}.  With a numeric argument, they delete the specified
+number of characters.  If the numeric argument is omitted or one, they
+delete all the text in the region if it is active (@pxref{Using
+Region}).
+
+@kindex M-\
+@findex delete-horizontal-space
+@kindex M-SPC
+@findex just-one-space
+  The other delete commands are those that delete only whitespace
+characters: spaces, tabs and newlines.  @kbd{M-\}
+(@code{delete-horizontal-space}) deletes all the spaces and tab
+characters before and after point.  With a prefix argument, this only
+deletes spaces and tab characters before point.  @kbd{M-@key{SPC}}
+(@code{just-one-space}) does likewise but leaves a single space before
+point, regardless of the number of spaces that existed previously
+(even if there were none before).  With a numeric argument @var{n}, it
+leaves @var{n} spaces before point if @var{n} is positive; if @var{n}
+is negative, it deletes newlines in addition to spaces and tabs,
+leaving a single space before point.
+
+  @kbd{C-x C-o} (@code{delete-blank-lines}) deletes all blank lines
+after the current line.  If the current line is blank, it deletes all
+blank lines preceding the current line as well (leaving one blank line,
+the current line).  On a solitary blank line, it deletes that line.
+
+  @kbd{M-^} (@code{delete-indentation}) joins the current line and the
+previous line, by deleting a newline and all surrounding spaces, usually
+leaving a single space.  @xref{Indentation,M-^}.
+
+@node Killing by Lines
+@subsection Killing by Lines
+
+@table @kbd
+@item C-k
+Kill rest of line or one or more lines (@code{kill-line}).
+@item C-S-backspace
+Kill an entire line at once (@code{kill-whole-line})
+@end table
+
+@kindex C-k
+@findex kill-line
+  The simplest kill command is @kbd{C-k} (@code{kill-line}).  If used
+at the end of a line, it kills the line-ending newline character,
+merging the next line into the current one (thus, a blank line is
+entirely removed).  Otherwise, @kbd{C-k} kills all the text from point
+up to the end of the line; if point was originally at the beginning of
+the line, this leaves the line blank.
+
+  Spaces and tabs at the end of the line are ignored when deciding
+which case applies.  As long as point is after the last visible
+character in the line, you can be sure that @kbd{C-k} will kill the
+newline.  To kill an entire non-blank line, go to the beginning and
+type @kbd{C-k} twice.
+
+  In this context, ``line'' means a logical text line, not a screen
+line (@pxref{Continuation Lines}).
+
+  When @kbd{C-k} is given a positive argument @var{n}, it kills
+@var{n} lines and the newlines that follow them (text on the current
+line before point is not killed).  With a negative argument
+@minus{}@var{n}, it kills @var{n} lines preceding the current line,
+together with the text on the current line before point.  @kbd{C-k}
+with an argument of zero kills the text before point on the current
+line.
+
+@vindex kill-whole-line
+  If the variable @code{kill-whole-line} is non-@code{nil}, @kbd{C-k} at
+the very beginning of a line kills the entire line including the
+following newline.  This variable is normally @code{nil}.
+
+@kindex C-S-backspace
+@findex kill-whole-line
+  @kbd{C-S-backspace} (@code{kill-whole-line}) kills a whole line
+including its newline, regardless of the position of point within the
+line.  Note that many text terminals will prevent you from typing the
+key sequence @kbd{C-S-backspace}.
+
+@node Other Kill Commands
+@subsection Other Kill Commands
+@findex kill-region
+@kindex C-w
+
+@table @kbd
+@item C-w
+Kill the region (@code{kill-region}).
+@item M-w
+Copy the region into the kill ring (@code{kill-ring-save}).
+@item M-d
+Kill the next word (@code{kill-word}).  @xref{Words}.
+@item M-@key{DEL}
+Kill one word backwards (@code{backward-kill-word}).
+@item C-x @key{DEL}
+Kill back to beginning of sentence (@code{backward-kill-sentence}).
+@xref{Sentences}.
+@item M-k
+Kill to the end of the sentence (@code{kill-sentence}).
+@item C-M-k
+Kill the following balanced expression (@code{kill-sexp}).  @xref{Expressions}.
+@item M-z @var{char}
+Kill through the next occurrence of @var{char} (@code{zap-to-char}).
+@end table
+
+@kindex C-w
+@findex kill-region
+@kindex M-w
+@findex kill-ring-save
+  One of the commonly-used kill commands is @kbd{C-w}
+(@code{kill-region}), which kills the text in the region
+(@pxref{Mark}).  Similarly, @kbd{M-w} (@code{kill-ring-save}) copies
+the text in the region into the kill ring without removing it from the
+buffer.  If the mark is inactive when you type @kbd{C-w} or @kbd{M-w},
+the command acts on the text between point and where you last set the
+mark (@pxref{Using Region}).
+
+  Emacs also provides commands to kill specific syntactic units:
+words, with @kbd{M-@key{DEL}} and @kbd{M-d} (@pxref{Words}); balanced
+expressions, with @kbd{C-M-k} (@pxref{Expressions}); and sentences,
+with @kbd{C-x @key{DEL}} and @kbd{M-k} (@pxref{Sentences}).
+
+@kindex M-z
+@findex zap-to-char
+  The command @kbd{M-z} (@code{zap-to-char}) combines killing with
+searching: it reads a character and kills from point up to (and
+including) the next occurrence of that character in the buffer.  A
+numeric argument acts as a repeat count; a negative argument means to
+search backward and kill text before point.
+
+@node Kill Options
+@subsection Options for Killing
+
+@vindex kill-read-only-ok
+@cindex read-only text, killing
+  Some specialized buffers contain @dfn{read-only text}, which cannot
+be modified and therefore cannot be killed.  The kill commands work
+specially in a read-only buffer: they move over text and copy it to
+the kill ring, without actually deleting it from the buffer.
+Normally, they also beep and display an error message when this
+happens.  But if you set the variable @code{kill-read-only-ok} to a
+non-@code{nil} value, they just print a message in the echo area to
+explain why the text has not been erased.
+
+@vindex kill-do-not-save-duplicates
+  If you change the variable @code{kill-do-not-save-duplicates} to a
+non-@code{nil} value, identical subsequent kills yield a single
+kill-ring entry, without duplication.
+
+@node Yanking
+@section Yanking
+@cindex moving text
+@cindex copying text
+@cindex kill ring
+@cindex yanking
+@cindex pasting
+
+  @dfn{Yanking} means reinserting text previously killed.  The usual
+way to move or copy text is to kill it and then yank it elsewhere.
+
+@table @kbd
+@item C-y
+Yank the last kill into the buffer, at point (@code{yank}).
+@item M-y
+Replace the text just yanked with an earlier batch of killed text
+(@code{yank-pop}).  @xref{Earlier Kills}.
+@item C-M-w
+Cause the following command, if it is a kill command, to append to the
+previous kill (@code{append-next-kill}).  @xref{Appending Kills}.
+@end table
+
+@kindex C-y
+@findex yank
+  The basic yanking command is @kbd{C-y} (@code{yank}).  It inserts
+the most recent kill, leaving the cursor at the end of the inserted
+text.  It also sets the mark at the beginning of the inserted text,
+without activating the mark; this lets you jump easily to that
+position, if you wish, with @kbd{C-u C-@key{SPC}} (@pxref{Mark Ring}).
+
+  With a plain prefix argument (@kbd{C-u C-y}), the command instead
+leaves the cursor in front of the inserted text, and sets the mark at
+the end.  Using any other prefix argument specifies an earlier kill;
+e.g. @kbd{C-u 4 C-y} reinserts the fourth most recent kill.
+@xref{Earlier Kills}.
+
+  On graphical displays, @kbd{C-y} first checks if another application
+has placed any text in the system clipboard more recently than the
+last Emacs kill.  If so, it inserts the text in the clipboard instead.
+Thus, Emacs effectively treats ``cut'' or ``copy'' clipboard
+operations performed in other applications like Emacs kills, except
+that they are not recorded in the kill ring.  @xref{Cut and Paste},
+for details.
+
+@menu
+* Kill Ring::           Where killed text is stored.
+* Earlier Kills::       Yanking something killed some time ago.
+* Appending Kills::     Several kills in a row all yank together.
+@end menu
+
+@node Kill Ring
+@subsection The Kill Ring
+
+  The @dfn{kill ring} is a list of blocks of text that were previously
+killed.  There is only one kill ring, shared by all buffers, so you
+can kill text in one buffer and yank it in another buffer.  This is
+the usual way to move text from one buffer to another.  (There are
+several other methods: for instance, you could store the text in a
+register; see @ref{Registers}.  @xref{Accumulating Text}, for some
+other ways to move text around.)
+
+@vindex kill-ring-max
+  The maximum number of entries in the kill ring is controlled by the
+variable @code{kill-ring-max}.  The default is 60.  If you make a new
+kill when this limit has been reached, Emacs makes room by deleting
+the oldest entry in the kill ring.
+
+@vindex kill-ring
+  The actual contents of the kill ring are stored in a variable named
+@code{kill-ring}; you can view the entire contents of the kill ring
+with @kbd{C-h v kill-ring}.
+
+@node Earlier Kills
+@subsection Yanking Earlier Kills
+@cindex yanking previous kills
+
+  As explained in @ref{Yanking}, you can use a numeric argument to
+@kbd{C-y} to yank text that is no longer the most recent kill.  This
+is useful if you remember which kill ring entry you want.  If you
+don't, you can use the @kbd{M-y} (@code{yank-pop}) command to cycle
+through the possibilities.
+
+@kindex M-y
+@findex yank-pop
+  If the previous command was a yank command, @kbd{M-y} takes the text
+that was yanked and replaces it with the text from an earlier kill.
+So, to recover the text of the next-to-the-last kill, first use
+@kbd{C-y} to yank the last kill, and then use @kbd{M-y} to replace it
+with the previous kill.  @kbd{M-y} is allowed only after a @kbd{C-y}
+or another @kbd{M-y}.
+
+  You can understand @kbd{M-y} in terms of a ``last yank'' pointer which
+points at an entry in the kill ring.  Each time you kill, the ``last
+yank'' pointer moves to the newly made entry at the front of the ring.
+@kbd{C-y} yanks the entry which the ``last yank'' pointer points to.
+@kbd{M-y} moves the ``last yank'' pointer to a different entry, and the
+text in the buffer changes to match.  Enough @kbd{M-y} commands can move
+the pointer to any entry in the ring, so you can get any entry into the
+buffer.  Eventually the pointer reaches the end of the ring; the next
+@kbd{M-y} loops back around to the first entry again.
+
+  @kbd{M-y} moves the ``last yank'' pointer around the ring, but it does
+not change the order of the entries in the ring, which always runs from
+the most recent kill at the front to the oldest one still remembered.
+
+  @kbd{M-y} can take a numeric argument, which tells it how many entries
+to advance the ``last yank'' pointer by.  A negative argument moves the
+pointer toward the front of the ring; from the front of the ring, it
+moves ``around'' to the last entry and continues forward from there.
+
+  Once the text you are looking for is brought into the buffer, you can
+stop doing @kbd{M-y} commands and it will stay there.  It's just a copy
+of the kill ring entry, so editing it in the buffer does not change
+what's in the ring.  As long as no new killing is done, the ``last
+yank'' pointer remains at the same place in the kill ring, so repeating
+@kbd{C-y} will yank another copy of the same previous kill.
+
+  When you call @kbd{C-y} with a numeric argument, that also sets the
+``last yank'' pointer to the entry that it yanks.
+
+@node Appending Kills
+@subsection Appending Kills
+
+@cindex appending kills in the ring
+  Normally, each kill command pushes a new entry onto the kill ring.
+However, two or more kill commands in a row combine their text into a
+single entry, so that a single @kbd{C-y} yanks all the text as a unit,
+just as it was before it was killed.
+
+  Thus, if you want to yank text as a unit, you need not kill all of it
+with one command; you can keep killing line after line, or word after
+word, until you have killed it all, and you can still get it all back at
+once.
+
+  Commands that kill forward from point add onto the end of the previous
+killed text.  Commands that kill backward from point add text onto the
+beginning.  This way, any sequence of mixed forward and backward kill
+commands puts all the killed text into one entry without rearrangement.
+Numeric arguments do not break the sequence of appending kills.  For
+example, suppose the buffer contains this text:
+
+@example
+This is a line @point{}of sample text.
+@end example
+
+@noindent
+with point shown by @point{}.  If you type @kbd{M-d M-@key{DEL} M-d
+M-@key{DEL}}, killing alternately forward and backward, you end up with
+@samp{a line of sample} as one entry in the kill ring, and @samp{This
+is@ @ text.} in the buffer.  (Note the double space between @samp{is}
+and @samp{text}, which you can clean up with @kbd{M-@key{SPC}} or
+@kbd{M-q}.)
+
+  Another way to kill the same text is to move back two words with
+@kbd{M-b M-b}, then kill all four words forward with @kbd{C-u M-d}.
+This produces exactly the same results in the buffer and in the kill
+ring.  @kbd{M-f M-f C-u M-@key{DEL}} kills the same text, all going
+backward; once again, the result is the same.  The text in the kill ring
+entry always has the same order that it had in the buffer before you
+killed it.
+
+@kindex C-M-w
+@findex append-next-kill
+  If a kill command is separated from the last kill command by other
+commands (not just numeric arguments), it starts a new entry on the kill
+ring.  But you can force it to append by first typing the command
+@kbd{C-M-w} (@code{append-next-kill}) right before it.  The @kbd{C-M-w}
+tells the following command, if it is a kill command, to append the text
+it kills to the last killed text, instead of starting a new entry.  With
+@kbd{C-M-w}, you can kill several separated pieces of text and
+accumulate them to be yanked back in one place.@refill
+
+  A kill command following @kbd{M-w} (@code{kill-ring-save}) does not
+append to the text that @kbd{M-w} copied into the kill ring.
+
+@node Cut and Paste
+@section ``Cut and Paste'' Operations on Graphical Displays
+@cindex cut
+@cindex copy
+@cindex paste
+
+  In most graphical desktop environments, you can transfer data
+(usually text) between different applications using a system facility
+called the @dfn{clipboard}.  On X, two other similar facilities are
+available: the primary selection and the secondary selection.  When
+Emacs is run on a graphical display, its kill and yank commands
+integrate with these facilities, so that you can easily transfer text
+between Emacs and other graphical applications.
+
+  By default, Emacs uses UTF-8 as the coding system for inter-program
+text transfers.  If you find that the pasted text is not what you
+expected, you can specify another coding system by typing @kbd{C-x
+@key{RET} x} or @kbd{C-x @key{RET} X}.  You can also request a
+different data type by customizing @code{x-select-request-type}.
+@xref{Communication Coding}.
+
+@menu
+* Clipboard::           How Emacs uses the system clipboard.
+* Primary Selection::   The temporarily selected text selection.
+* Secondary Selection:: Cutting without altering point and mark.
+@end menu
+
+@node Clipboard
+@subsection Using the Clipboard
+@cindex clipboard
+
+  The @dfn{clipboard} is the facility that most graphical applications
+use for ``cutting and pasting''.  When the clipboard exists, the kill
+and yank commands in Emacs make use of it.
+
+  When you kill some text with a command such as @kbd{C-w}
+(@code{kill-region}), or copy it to the kill ring with a command such
+as @kbd{M-w} (@code{kill-ring-save}), that text is also put in the
+clipboard.
+
+@vindex save-interprogram-paste-before-kill
+  When an Emacs kill command puts text in the clipboard, the existing
+clipboard contents are normally lost.  Optionally, you can change
+@code{save-interprogram-paste-before-kill} to @code{t}.  Then Emacs
+will first save the clipboard to its kill ring, preventing you from
+losing the old clipboard data---at the risk of high memory consumption
+if that data turns out to be large.
+
+  Yank commands, such as @kbd{C-y} (@code{yank}), also use the
+clipboard.  If another application ``owns'' the clipboard---i.e., if
+you cut or copied text there more recently than your last kill command
+in Emacs---then Emacs yanks from the clipboard instead of the kill
+ring.
+
+@vindex yank-pop-change-selection
+  Normally, rotating the kill ring with @kbd{M-y} (@code{yank-pop})
+does not alter the clipboard.  However, if you change
+@code{yank-pop-change-selection} to @code{t}, then @kbd{M-y} saves the
+new yank to the clipboard.
+
+@vindex x-select-enable-clipboard
+  To prevent kill and yank commands from accessing the clipboard,
+change the variable @code{x-select-enable-clipboard} to @code{nil}.
+
+@cindex clipboard manager
+@vindex x-select-enable-clipboard-manager
+  Many X desktop environments support a feature called the
+@dfn{clipboard manager}.  If you exit Emacs while it is the current
+``owner'' of the clipboard data, and there is a clipboard manager
+running, Emacs transfers the clipboard data to the clipboard manager
+so that it is not lost.  In some circumstances, this may cause a delay
+when exiting Emacs; if you wish to prevent Emacs from transferring
+data to the clipboard manager, change the variable
+@code{x-select-enable-clipboard-manager} to @code{nil}.
+
+@vindex x-select-enable-primary
+@findex clipboard-kill-region
+@findex clipboard-kill-ring-save
+@findex clipboard-yank
+  Prior to Emacs 24, the kill and yank commands used the primary
+selection (@pxref{Primary Selection}), not the clipboard.  If you
+prefer this behavior, change @code{x-select-enable-clipboard} to
+@code{nil}, @code{x-select-enable-primary} to @code{t}, and
+@code{mouse-drag-copy-region} to @code{t}.  In this case, you can use
+the following commands to act explicitly on the clipboard:
+@code{clipboard-kill-region} kills the region and saves it to the
+clipboard; @code{clipboard-kill-ring-save} copies the region to the
+kill ring and saves it to the clipboard; and @code{clipboard-yank}
+yanks the contents of the clipboard at point.
+
+@node Primary Selection
+@subsection Cut and Paste with Other Window Applications
+@cindex X cutting and pasting
+@cindex X selection
+@cindex primary selection
+@cindex selection, primary
+
+  Under the X Window System, there exists a @dfn{primary selection}
+containing the last stretch of text selected in an X application
+(usually by dragging the mouse).  Typically, this text can be inserted
+into other X applications by @kbd{mouse-2} clicks.  The primary
+selection is separate from the clipboard.  Its contents are more
+``fragile''; they are overwritten each time you select text with the
+mouse, whereas the clipboard is only overwritten by explicit ``cut''
+or ``copy'' commands.
+
+  Under X, whenever the region is active (@pxref{Mark}), the text in
+the region is saved in the primary selection.  This applies regardless
+of whether the region was made by dragging or clicking the mouse
+(@pxref{Mouse Commands}), or by keyboard commands (e.g. by typing
+@kbd{C-@key{SPC}} and moving point; @pxref{Setting Mark}).
+
+@vindex select-active-regions
+  If you change the variable @code{select-active-regions} to
+@code{only}, Emacs saves only temporarily active regions to the
+primary selection, i.e. those made with the mouse or with shift
+selection (@pxref{Shift Selection}).  If you change
+@code{select-active-regions} to @code{nil}, Emacs avoids saving active
+regions to the primary selection entirely.
+
+  To insert the primary selection into an Emacs buffer, click
+@kbd{mouse-2} (@code{mouse-yank-primary}) where you want to insert it.
+@xref{Mouse Commands}.
+
+@cindex MS-Windows, and primary selection
+  MS-Windows provides no primary selection, but Emacs emulates it
+within a single Emacs session by storing the selected text internally.
+Therefore, all the features and commands related to the primary
+selection work on Windows as they do on X, for cutting and pasting
+within the same session, but not across Emacs sessions or with other
+applications.
+
+@node Secondary Selection
+@subsection Secondary Selection
+@cindex secondary selection
+
+  In addition to the primary selection, the X Window System provides a
+second similar facility known as the @dfn{secondary selection}.
+Nowadays, few X applications make use of the secondary selection, but
+you can access it using the following Emacs commands:
+
+@table @kbd
+@findex mouse-set-secondary
+@kindex M-Drag-Mouse-1
+@item M-Drag-Mouse-1
+Set the secondary selection, with one end at the place where you press
+down the button, and the other end at the place where you release it
+(@code{mouse-set-secondary}).  The selected text is highlighted, using
+the @code{secondary-selection} face, as you drag.  The window scrolls
+automatically if you drag the mouse off the top or bottom of the
+window, just like @code{mouse-set-region} (@pxref{Mouse Commands}).
+
+This command does not alter the kill ring.
+
+@findex mouse-start-secondary
+@kindex M-Mouse-1
+@item M-Mouse-1
+Set one endpoint for the @dfn{secondary selection}
+(@code{mouse-start-secondary}).
+
+@findex mouse-secondary-save-then-kill
+@kindex M-Mouse-3
+@item M-Mouse-3
+Set the secondary selection, with one end at the position clicked and
+the other at the position specified with @kbd{M-Mouse-1}
+(@code{mouse-secondary-save-then-kill}).  This also puts the selected
+text in the kill ring.  A second @kbd{M-Mouse-3} at the same place
+kills the secondary selection just made.
+
+@findex mouse-yank-secondary
+@kindex M-Mouse-2
+@item M-Mouse-2
+Insert the secondary selection where you click, placing point at the
+end of the yanked text (@code{mouse-yank-secondary}).
+@end table
+
+Double or triple clicking of @kbd{M-Mouse-1} operates on words and
+lines, much like @kbd{Mouse-1}.
+
+If @code{mouse-yank-at-point} is non-@code{nil}, @kbd{M-Mouse-2} yanks
+at point.  Then it does not matter precisely where you click, or even
+which of the frame's windows you click on.  @xref{Mouse Commands}.
+
+@node Accumulating Text
+@section Accumulating Text
+@findex append-to-buffer
+@findex prepend-to-buffer
+@findex copy-to-buffer
+@findex append-to-file
+
+@cindex accumulating scattered text
+  Usually we copy or move text by killing it and yanking it, but there
+are other convenient methods for copying one block of text in many
+places, or for copying many scattered blocks of text into one place.
+Here we describe the commands to accumulate scattered pieces of text
+into a buffer or into a file.
+
+@table @kbd
+@item M-x append-to-buffer
+Append region to the contents of a specified buffer.
+@item M-x prepend-to-buffer
+Prepend region to the contents of a specified buffer.
+@item M-x copy-to-buffer
+Copy region into a specified buffer, deleting that buffer's old contents.
+@item M-x insert-buffer
+Insert the contents of a specified buffer into current buffer at point.
+@item M-x append-to-file
+Append region to the contents of a specified file, at the end.
+@end table
+
+  To accumulate text into a buffer, use @kbd{M-x append-to-buffer}.
+This reads a buffer name, then inserts a copy of the region into the
+buffer specified.  If you specify a nonexistent buffer,
+@code{append-to-buffer} creates the buffer.  The text is inserted
+wherever point is in that buffer.  If you have been using the buffer for
+editing, the copied text goes into the middle of the text of the buffer,
+starting from wherever point happens to be at that moment.
+
+  Point in that buffer is left at the end of the copied text, so
+successive uses of @code{append-to-buffer} accumulate the text in the
+specified buffer in the same order as they were copied.  Strictly
+speaking, @code{append-to-buffer} does not always append to the text
+already in the buffer---it appends only if point in that buffer is at
+the end.  However, if @code{append-to-buffer} is the only command you
+use to alter a buffer, then point is always at the end.
+
+  @kbd{M-x prepend-to-buffer} is just like @code{append-to-buffer}
+except that point in the other buffer is left before the copied text, so
+successive prependings add text in reverse order.  @kbd{M-x
+copy-to-buffer} is similar, except that any existing text in the other
+buffer is deleted, so the buffer is left containing just the text newly
+copied into it.
+
+  The command @kbd{M-x insert-buffer} can be used to retrieve the
+accumulated text from another buffer.  This prompts for the name of a
+buffer, and inserts a copy of all the text in that buffer into the
+current buffer at point, leaving point at the beginning of the
+inserted text.  It also adds the position of the end of the inserted
+text to the mark ring, without activating the mark.  @xref{Buffers},
+for background information on buffers.
+
+  Instead of accumulating text in a buffer, you can append text
+directly into a file with @kbd{M-x append-to-file}.  This prompts for
+a filename, and adds the text of the region to the end of the
+specified file.  The file is changed immediately on disk.
+
+  You should use @code{append-to-file} only with files that are
+@emph{not} being visited in Emacs.  Using it on a file that you are
+editing in Emacs would change the file behind Emacs's back, which
+can lead to losing some of your editing.
+
+  Another way to move text around is to store it in a register.
+@xref{Registers}.
+
+@node Rectangles
+@section Rectangles
+@cindex rectangle
+@cindex columns (and rectangles)
+@cindex killing rectangular areas of text
+
+  @dfn{Rectangle} commands operate on rectangular areas of the text:
+all the characters between a certain pair of columns, in a certain
+range of lines.  Emacs has commands to kill rectangles, yank killed
+rectangles, clear them out, fill them with blanks or text, or delete
+them.  Rectangle commands are useful with text in multicolumn formats,
+and for changing text into or out of such formats.
+
+@cindex mark rectangle
+  To specify a rectangle for a command to work on, set the mark at one
+corner and point at the opposite corner.  The rectangle thus specified
+is called the @dfn{region-rectangle}.  If point and the mark are in
+the same column, the region-rectangle is empty.  If they are in the
+same line, the region-rectangle is one line high.
+
+  The region-rectangle is controlled in much the same way as the
+region is controlled.  But remember that a given combination of point
+and mark values can be interpreted either as a region or as a
+rectangle, depending on the command that uses them.
+
+@table @kbd
+@item C-x r k
+Kill the text of the region-rectangle, saving its contents as the
+``last killed rectangle'' (@code{kill-rectangle}).
+@item C-x r d
+Delete the text of the region-rectangle (@code{delete-rectangle}).
+@item C-x r y
+Yank the last killed rectangle with its upper left corner at point
+(@code{yank-rectangle}).
+@item C-x r o
+Insert blank space to fill the space of the region-rectangle
+(@code{open-rectangle}).  This pushes the previous contents of the
+region-rectangle to the right.
+@item C-x r N
+Insert line numbers along the left edge of the region-rectangle
+(@code{rectangle-number-lines}).  This pushes the previous contents of
+the region-rectangle to the right.
+@item C-x r c
+Clear the region-rectangle by replacing all of its contents with spaces
+(@code{clear-rectangle}).
+@item M-x delete-whitespace-rectangle
+Delete whitespace in each of the lines on the specified rectangle,
+starting from the left edge column of the rectangle.
+@item C-x r t @var{string} @key{RET}
+Replace rectangle contents with @var{string} on each line
+(@code{string-rectangle}).
+@item M-x string-insert-rectangle @key{RET} @var{string} @key{RET}
+Insert @var{string} on each line of the rectangle.
+@end table
+
+  The rectangle operations fall into two classes: commands to erase or
+insert rectangles, and commands to make blank rectangles.
+
+@kindex C-x r k
+@kindex C-x r d
+@findex kill-rectangle
+@findex delete-rectangle
+  There are two ways to erase the text in a rectangle: @kbd{C-x r d}
+(@code{delete-rectangle}) to delete the text outright, or @kbd{C-x r
+k} (@code{kill-rectangle}) to remove the text and save it as the
+@dfn{last killed rectangle}.  In both cases, erasing the
+region-rectangle is like erasing the specified text on each line of
+the rectangle; if there is any following text on the line, it moves
+backwards to fill the gap.
+
+  ``Killing'' a rectangle is not killing in the usual sense; the
+rectangle is not stored in the kill ring, but in a special place that
+only records the most recent rectangle killed.  This is because
+yanking a rectangle is so different from yanking linear text that
+different yank commands have to be used.  Yank-popping is not defined
+for rectangles.
+
+@kindex C-x r y
+@findex yank-rectangle
+  To yank the last killed rectangle, type @kbd{C-x r y}
+(@code{yank-rectangle}).  The rectangle's first line is inserted at
+point, the rectangle's second line is inserted at the same horizontal
+position one line vertically below, and so on.  The number of lines
+affected is determined by the height of the saved rectangle.
+
+  For example, you can convert two single-column lists into a
+double-column list by killing one of the single-column lists as a
+rectangle, and then yanking it beside the other list.
+
+  You can also copy rectangles into and out of registers with @kbd{C-x r
+r @var{r}} and @kbd{C-x r i @var{r}}.  @xref{Rectangle Registers}.
+
+@kindex C-x r o
+@findex open-rectangle
+@kindex C-x r c
+@findex clear-rectangle
+  There are two commands you can use for making blank rectangles:
+@kbd{C-x r c} (@code{clear-rectangle}) blanks out existing text in the
+region-rectangle, and @kbd{C-x r o} (@code{open-rectangle}) inserts a
+blank rectangle.
+
+@findex delete-whitespace-rectangle
+  @kbd{M-x delete-whitespace-rectangle} deletes horizontal whitespace
+starting from a particular column.  This applies to each of the lines
+in the rectangle, and the column is specified by the left edge of the
+rectangle.  The right edge of the rectangle does not make any
+difference to this command.
+
+@kindex C-x r N
+@findex rectangle
+  The command @kbd{C-x r N} (@code{rectangle-number-lines}) inserts
+line numbers along the left edge of the region-rectangle.  Normally,
+the numbering begins from 1 (for the first line of the rectangle).
+With a prefix argument, the command prompts for a number to begin
+from, and for a format string with which to print the numbers
+(@pxref{Formatting Strings,,, elisp, The Emacs Lisp Reference
+Manual}).
+
+@kindex C-x r t
+@findex string-rectangle
+  The command @kbd{C-x r t} (@code{string-rectangle}) replaces the
+contents of a region-rectangle with a string on each line.  The
+string's width need not be the same as the width of the rectangle.  If
+the string's width is less, the text after the rectangle shifts left;
+if the string is wider than the rectangle, the text after the
+rectangle shifts right.
+
+@findex string-insert-rectangle
+  The command @kbd{M-x string-insert-rectangle} is similar to
+@code{string-rectangle}, but inserts the string on each line,
+shifting the original text to the right.
+
+@node CUA Bindings
+@section CUA Bindings
+@findex cua-mode
+@vindex cua-mode
+@cindex CUA key bindings
+@vindex cua-enable-cua-keys
+  The command @kbd{M-x cua-mode} sets up key bindings that are
+compatible with the Common User Access (CUA) system used in many other
+applications.
+
+  When CUA mode is enabled, the keys @kbd{C-x}, @kbd{C-c}, @kbd{C-v},
+and @kbd{C-z} invoke commands that cut (kill), copy, paste (yank), and
+undo respectively.  The @kbd{C-x} and @kbd{C-c} keys perform cut and
+copy only if the region is active.  Otherwise, they still act as
+prefix keys, so that standard Emacs commands like @kbd{C-x C-c} still
+work.  Note that this means the variable @code{mark-even-if-inactive}
+has no effect for @kbd{C-x} and @kbd{C-c} (@pxref{Using Region}).
+
+  To enter an Emacs command like @kbd{C-x C-f} while the mark is
+active, use one of the following methods: either hold @kbd{Shift}
+together with the prefix key, e.g. @kbd{S-C-x C-f}, or quickly type
+the prefix key twice, e.g. @kbd{C-x C-x C-f}.
+
+  To disable the overriding of standard Emacs binding by CUA mode,
+while retaining the other features of CUA mode described below, set
+the variable @code{cua-enable-cua-keys} to @code{nil}.
+
+  In CUA mode, typed text replaces the active region as in
+Delete-Selection mode (@pxref{Mouse Commands}).
+
+@cindex rectangle highlighting
+  CUA mode provides enhanced rectangle support with visible
+rectangle highlighting.  Use @kbd{C-RET} to start a rectangle,
+extend it using the movement commands, and cut or copy it using
+@kbd{C-x} or @kbd{C-c}.  @kbd{RET} moves the cursor to the next
+(clockwise) corner of the rectangle, so you can easily expand it in
+any direction.  Normal text you type is inserted to the left or right
+of each line in the rectangle (on the same side as the cursor).
+
+  With CUA you can easily copy text and rectangles into and out of
+registers by providing a one-digit numeric prefix to the kill, copy,
+and yank commands, e.g. @kbd{C-1 C-c} copies the region into register
+@code{1}, and @kbd{C-2 C-v} yanks the contents of register @code{2}.
+
+@cindex global mark
+  CUA mode also has a global mark feature which allows easy moving and
+copying of text between buffers.  Use @kbd{C-S-SPC} to toggle the
+global mark on and off.  When the global mark is on, all text that you
+kill or copy is automatically inserted at the global mark, and text
+you type is inserted at the global mark rather than at the current
+position.
+
+  For example, to copy words from various buffers into a word list in
+a given buffer, set the global mark in the target buffer, then
+navigate to each of the words you want in the list, mark it (e.g. with
+@kbd{S-M-f}), copy it to the list with @kbd{C-c} or @kbd{M-w}, and
+insert a newline after the word in the target list by pressing
+@key{RET}.

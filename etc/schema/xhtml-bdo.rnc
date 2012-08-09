@@ -1,0 +1,7 @@
+# Bi-directional Module
+
+bdo = element bdo { bdo.attlist, Inline.model }
+bdo.attlist = Core.attrib, lang.attrib, dir.attrib
+dir.attrib = attribute dir { "ltr" | "rtl" }
+I18n.attrib &= dir.attrib?
+Inline.class |= bdo

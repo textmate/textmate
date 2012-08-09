@@ -1,0 +1,581 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in emacs-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+@node Fortran
+@section Fortran Mode
+@cindex Fortran mode
+@cindex mode, Fortran
+
+@cindex Fortran fixed form and free form
+@cindex Fortran 77 and Fortran 90, 95, 2003, 2008
+@findex f90-mode
+@findex fortran-mode
+  Fortran mode is meant for editing ``fixed form'' (and also ``tab
+format'') source code (normally Fortran 77).  For editing more modern
+``free form'' source code (Fortran 90, 95, 2003, 2008), use F90 mode
+(@code{f90-mode}).  Emacs normally uses Fortran mode for files with
+extension @samp{.f}, @samp{.F} or @samp{.for}, and F90 mode for the
+extensions @samp{.f90}, @samp{.f95}, @samp{.f03} and @samp{.f08}.
+Customize @code{auto-mode-alist} to add more extensions.  GNU Fortran
+supports both free and fixed form.  This manual mainly documents Fortran
+mode, but the corresponding F90 mode features are mentioned when
+relevant.
+
+  Fortran mode provides special motion commands for Fortran statements
+and subprograms, and indentation commands that understand Fortran
+conventions of nesting, line numbers and continuation statements.
+Fortran mode has support for Auto Fill mode that breaks long lines into
+proper Fortran continuation lines.  Fortran mode also supports Hideshow
+minor mode
+@iftex
+(@pxref{Hideshow,,, emacs, the Emacs Manual}),
+@end iftex
+@ifnottex
+(@pxref{Hideshow}),
+@end ifnottex
+and Imenu
+@iftex
+(@pxref{Imenu,,, emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Imenu}).
+@end ifnottex
+
+  Special commands for comments are provided because Fortran comments
+are unlike those of other languages.  Built-in abbrevs optionally save
+typing when you insert Fortran keywords.
+
+  Use @kbd{M-x fortran-mode} to switch to this major mode.  This
+command runs the hook @code{fortran-mode-hook}.
+@iftex
+@xref{Hooks,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Hooks}.
+@end ifnottex
+
+@menu
+* Motion: Fortran Motion.        Moving point by statements or subprograms.
+* Indent: Fortran Indent.        Indentation commands for Fortran.
+* Comments: Fortran Comments.    Inserting and aligning comments.
+* Autofill: Fortran Autofill.    Auto fill support for Fortran.
+* Columns: Fortran Columns.      Measuring columns for valid Fortran.
+* Abbrev: Fortran Abbrev.        Built-in abbrevs for Fortran keywords.
+@end menu
+
+@node Fortran Motion
+@subsection Motion Commands
+
+  In addition to the normal commands for moving by and operating on
+``defuns'' (Fortran subprograms---functions and subroutines, as well
+as modules for F90 mode, using the commands @code{fortran-end-of-subprogram}
+and @code{fortran-beginning-of-subprogram}), Fortran mode provides
+special commands to move by statements and other program units.
+
+@table @kbd
+@kindex C-c C-n @r{(Fortran mode)}
+@findex fortran-next-statement
+@findex f90-next-statement
+@item C-c C-n
+Move to the beginning of the next statement
+(@code{fortran-next-statement}/@code{f90-next-statement}).
+
+@kindex C-c C-p @r{(Fortran mode)}
+@findex fortran-previous-statement
+@findex f90-previous-statement
+@item C-c C-p
+Move to the beginning of the previous statement
+(@code{fortran-previous-statement}/@code{f90-previous-statement}).
+If there is no previous statement (i.e. if called from the first
+statement in the buffer), move to the start of the buffer.
+
+@kindex C-c C-e @r{(F90 mode)}
+@findex f90-next-block
+@item C-c C-e
+Move point forward to the start of the next code block, or the end of
+the current one, whichever comes first (@code{f90-next-block}).
+A code block is a subroutine, @code{if}--@code{endif} statement, and
+so forth.  This command exists for F90 mode only, not Fortran mode.
+With a numeric argument, it moves forward that many blocks.
+
+@kindex C-c C-a @r{(F90 mode)}
+@findex f90-previous-block
+@item C-c C-a
+Move point backward to the previous block
+(@code{f90-previous-block}).  This is like @code{f90-next-block}, but
+moves backwards.
+
+@kindex C-M-n @r{(Fortran mode)}
+@findex fortran-end-of-block
+@findex f90-end-of-block
+@item C-M-n
+Move to the end of the current code block
+(@code{fortran-end-of-block}/@code{f90-end-of-block}).  With a numeric
+argument, move forward that number of blocks.  The mark is set before
+moving point.  The F90 mode version of this command checks for
+consistency of block types and labels (if present), but it does not
+check the outermost block since that may be incomplete.
+
+@kindex C-M-p @r{(Fortran mode)}
+@findex fortran-beginning-of-block
+@findex f90-beginning-of-block
+@item C-M-p
+Move to the start of the current code block
+(@code{fortran-beginning-of-block}/@code{f90-beginning-of-block}). This
+is like @code{fortran-end-of-block}, but moves backwards.
+@end table
+
+The commands @code{fortran-beginning-of-subprogram} and
+@code{fortran-end-of-subprogram} move to the start or end of the
+current subprogram, respectively.  The commands @code{fortran-mark-do}
+and @code{fortran-mark-if} mark the end of the current @code{do} or
+@code{if} block, and move point to the start.
+
+
+@node Fortran Indent
+@subsection Fortran Indentation
+
+  Special commands and features are needed for indenting fixed (or tab)
+form Fortran code in order to make sure various syntactic entities (line
+numbers, comment line indicators and continuation line flags) appear in
+the required columns.
+
+@menu
+* Commands: ForIndent Commands.  Commands for indenting and filling Fortran.
+* Contline: ForIndent Cont.      How continuation lines indent.
+* Numbers:  ForIndent Num.       How line numbers auto-indent.
+* Conv:     ForIndent Conv.      Conventions you must obey to avoid trouble.
+* Vars:     ForIndent Vars.      Variables controlling Fortran indent style.
+@end menu
+
+@node ForIndent Commands
+@subsubsection Fortran Indentation and Filling Commands
+
+@table @kbd
+@item C-M-j
+Break the current line at point and set up a continuation line
+(@code{fortran-split-line}).
+@item M-^
+Join this line to the previous line (@code{fortran-join-line}).
+@item C-M-q
+Indent all the lines of the subprogram that point is in
+(@code{fortran-indent-subprogram}).
+@item M-q
+Fill a comment block or statement (using @code{fortran-fill-paragraph}
+or @code{fortran-fill-statement}).
+@end table
+
+@kindex C-M-q @r{(Fortran mode)}
+@findex fortran-indent-subprogram
+  The key @kbd{C-M-q} runs @code{fortran-indent-subprogram}, a command
+to reindent all the lines of the Fortran subprogram (function or
+subroutine) containing point.
+
+@kindex C-M-j @r{(Fortran mode)}
+@findex fortran-split-line
+  The key @kbd{C-M-j} runs @code{fortran-split-line}, which splits
+a line in the appropriate fashion for Fortran.  In a non-comment line,
+the second half becomes a continuation line and is indented
+accordingly.  In a comment line, both halves become separate comment
+lines.
+
+@kindex M-^ @r{(Fortran mode)}
+@kindex C-c C-d @r{(Fortran mode)}
+@findex fortran-join-line
+  @kbd{M-^} or @kbd{C-c C-d} runs the command @code{fortran-join-line},
+which joins a continuation line back to the previous line, roughly as
+the inverse of @code{fortran-split-line}.  The point must be on a
+continuation line when this command is invoked.
+
+@kindex M-q @r{(Fortran mode)}
+@kbd{M-q} in Fortran mode fills the comment block or statement that
+point is in.  This removes any excess statement continuations.
+
+@node ForIndent Cont
+@subsubsection Continuation Lines
+@cindex Fortran continuation lines
+
+@vindex fortran-continuation-string
+  Most Fortran 77 compilers allow two ways of writing continuation lines.
+If the first non-space character on a line is in column 5, then that
+line is a continuation of the previous line.  We call this @dfn{fixed
+form}.  (In GNU Emacs we always count columns from 0; but note that
+the Fortran standard counts from 1.)  The variable
+@code{fortran-continuation-string} specifies what character to put in
+column 5.  A line that starts with a tab character followed by any digit
+except @samp{0} is also a continuation line.  We call this style of
+continuation @dfn{tab format}.  (Fortran 90 introduced ``free form'',
+with another style of continuation lines).
+
+@vindex indent-tabs-mode @r{(Fortran mode)}
+@vindex fortran-analyze-depth
+@vindex fortran-tab-mode-default
+  Fortran mode can use either style of continuation line.  When you
+enter Fortran mode, it tries to deduce the proper continuation style
+automatically from the buffer contents.  It does this by scanning up to
+@code{fortran-analyze-depth} (default 100) lines from the start of the
+buffer.  The first line that begins with either a tab character or six
+spaces determines the choice.  If the scan fails (for example, if the
+buffer is new and therefore empty), the value of
+@code{fortran-tab-mode-default} (@code{nil} for fixed form, and
+non-@code{nil} for tab format) is used.  @samp{/t}
+(@code{fortran-tab-mode-string}) in the mode line indicates tab format
+is selected.  Fortran mode sets the value of @code{indent-tabs-mode}
+accordingly.
+
+  If the text on a line starts with the Fortran continuation marker
+@samp{$}, or if it begins with any non-whitespace character in column
+5, Fortran mode treats it as a continuation line.  When you indent a
+continuation line with @key{TAB}, it converts the line to the current
+continuation style.  When you split a Fortran statement with
+@kbd{C-M-j}, the continuation marker on the newline is created according
+to the continuation style.
+
+  The setting of continuation style affects several other aspects of
+editing in Fortran mode.  In fixed form mode, the minimum column
+number for the body of a statement is 6.  Lines inside of Fortran
+blocks that are indented to larger column numbers must use only the
+space character for whitespace.  In tab format mode, the minimum
+column number for the statement body is 8, and the whitespace before
+column 8 must consist of one tab character.
+
+@node ForIndent Num
+@subsubsection Line Numbers
+
+  If a number is the first non-whitespace in the line, Fortran
+indentation assumes it is a line number and moves it to columns 0
+through 4.  (Columns always count from 0 in Emacs.)
+
+@vindex fortran-line-number-indent
+  Line numbers of four digits or less are normally indented one space.
+The variable @code{fortran-line-number-indent} controls this; it
+specifies the maximum indentation a line number can have.  The default
+value of the variable is 1.  Fortran mode tries to prevent line number
+digits passing column 4, reducing the indentation below the specified
+maximum if necessary.  If @code{fortran-line-number-indent} has the
+value 5, line numbers are right-justified to end in column 4.
+
+@vindex fortran-electric-line-number
+  Simply inserting a line number is enough to indent it according to
+these rules.  As each digit is inserted, the indentation is recomputed.
+To turn off this feature, set the variable
+@code{fortran-electric-line-number} to @code{nil}.
+
+
+@node ForIndent Conv
+@subsubsection Syntactic Conventions
+
+  Fortran mode assumes that you follow certain conventions that simplify
+the task of understanding a Fortran program well enough to indent it
+properly:
+
+@itemize @bullet
+@item
+Two nested @samp{do} loops never share a @samp{continue} statement.
+
+@item
+Fortran keywords such as @samp{if}, @samp{else}, @samp{then}, @samp{do}
+and others are written without embedded whitespace or line breaks.
+
+Fortran compilers generally ignore whitespace outside of string
+constants, but Fortran mode does not recognize these keywords if they
+are not contiguous.  Constructs such as @samp{else if} or @samp{end do}
+are acceptable, but the second word should be on the same line as the
+first and not on a continuation line.
+@end itemize
+
+@noindent
+If you fail to follow these conventions, the indentation commands may
+indent some lines unaesthetically.  However, a correct Fortran program
+retains its meaning when reindented even if the conventions are not
+followed.
+
+@node ForIndent Vars
+@subsubsection Variables for Fortran Indentation
+
+@vindex fortran-do-indent
+@vindex fortran-if-indent
+@vindex fortran-structure-indent
+@vindex fortran-continuation-indent
+@vindex fortran-check-all-num@dots{}
+@vindex fortran-minimum-statement-indent@dots{}
+  Several additional variables control how Fortran indentation works:
+
+@table @code
+@item fortran-do-indent
+Extra indentation within each level of @samp{do} statement (default 3).
+
+@item fortran-if-indent
+Extra indentation within each level of @samp{if}, @samp{select case}, or
+@samp{where} statements (default 3).
+
+@item fortran-structure-indent
+Extra indentation within each level of @samp{structure}, @samp{union},
+@samp{map}, or @samp{interface} statements (default 3).
+
+@item fortran-continuation-indent
+Extra indentation for bodies of continuation lines (default 5).
+
+@item fortran-check-all-num-for-matching-do
+In Fortran 77, a numbered @samp{do} statement is ended by any statement
+with a matching line number.  It is common (but not compulsory) to use a
+@samp{continue} statement for this purpose.  If this variable has a
+non-@code{nil} value, indenting any numbered statement must check for a
+@samp{do} that ends there.  If you always end @samp{do} statements with
+a @samp{continue} line (or if you use the more modern @samp{enddo}),
+then you can speed up indentation by setting this variable to
+@code{nil} (the default).
+
+@item fortran-blink-matching-if
+If this is @code{t}, indenting an @samp{endif} (or @samp{enddo}
+statement moves the cursor momentarily to the matching @samp{if} (or
+@samp{do}) statement to show where it is.  The default is @code{nil}.
+
+@item fortran-minimum-statement-indent-fixed
+Minimum indentation for Fortran statements when using fixed form
+continuation line style.  Statement bodies are never indented by less than
+this.  The default is 6.
+
+@item fortran-minimum-statement-indent-tab
+Minimum indentation for Fortran statements for tab format continuation line
+style.  Statement bodies are never indented by less than this.  The
+default is 8.
+@end table
+
+The following section describes the variables controlling the
+indentation of comments.
+
+@node Fortran Comments
+@subsection Fortran Comments
+
+  The usual Emacs comment commands assume that a comment can follow a
+line of code.  In Fortran 77, the standard comment syntax requires an
+entire line to be just a comment.  Therefore, Fortran mode replaces the
+standard Emacs comment commands and defines some new variables.
+
+@vindex fortran-comment-line-start
+  Fortran mode can also handle the Fortran 90 comment syntax where
+comments start with @samp{!} and can follow other text.  Because only
+some Fortran 77 compilers accept this syntax, Fortran mode will not
+insert such comments unless you have said in advance to do so.  To do
+this, set the variable @code{fortran-comment-line-start} to @samp{"!"}.
+If you use an unusual value, you may need to change
+@code{fortran-comment-line-start-skip}.
+
+
+@table @kbd
+@item M-;
+Align comment or insert new comment (@code{comment-dwim}).
+
+@item C-x ;
+Applies to nonstandard @samp{!} comments only (@code{comment-set-column}).
+
+@item C-c ;
+Turn all lines of the region into comments, or (with argument) turn them back
+into real code (@code{fortran-comment-region}).
+@end table
+
+  @kbd{M-;} in Fortran mode runs the standard @code{comment-dwim}.
+This recognizes any kind of existing comment and aligns its text
+appropriately; if there is no existing comment, a comment is inserted
+and aligned.  Inserting and aligning comments are not the same in
+Fortran mode as in other modes.
+
+  When a new comment must be inserted, if the current line is blank, a
+full-line comment is inserted.  On a non-blank line, a nonstandard @samp{!}
+comment is inserted if you have said you want to use them.  Otherwise a
+full-line comment is inserted on a new line before the current line.
+
+  Nonstandard @samp{!} comments are aligned like comments in other
+languages, but full-line comments are different.  In a standard full-line
+comment, the comment delimiter itself must always appear in column zero.
+What can be aligned is the text within the comment.  You can choose from
+three styles of alignment by setting the variable
+@code{fortran-comment-indent-style} to one of these values:
+
+@vindex fortran-comment-indent-style
+@vindex fortran-comment-line-extra-indent
+@table @code
+@item fixed
+Align the text at a fixed column, which is the sum of
+@code{fortran-comment-line-extra-indent} and the minimum statement
+indentation.  This is the default.
+
+The minimum indentation is
+@code{fortran-minimum-statement-indent-tab} for tab format
+continuation line style and @code{fortran-minimum-statement-indent-fixed}
+for fixed form style.
+
+@item relative
+Align the text as if it were a line of code, but with an additional
+@code{fortran-comment-line-extra-indent} columns of indentation.
+
+@item nil
+Don't move text in full-line comments automatically.
+@end table
+
+@vindex fortran-comment-indent-char
+  In addition, you can specify the character to be used to indent within
+full-line comments by setting the variable
+@code{fortran-comment-indent-char} to the single-character string you want
+to use.
+
+@vindex fortran-directive-re
+  Compiler directive lines, or preprocessor lines, have much the same
+appearance as comment lines.  It is important, though, that such lines
+never be indented at all, no matter what the value of
+@code{fortran-comment-indent-style}.  The variable
+@code{fortran-directive-re} is a regular expression that specifies which
+lines are directives.  Matching lines are never indented, and receive
+distinctive font-locking.
+
+  The normal Emacs comment command @kbd{C-x ;} (@code{comment-set-column})
+has not been redefined.  If you use @samp{!} comments, this command
+can be used with them.  Otherwise it is useless in Fortran mode.
+
+@kindex C-c ; @r{(Fortran mode)}
+@findex fortran-comment-region
+@vindex fortran-comment-region
+  The command @kbd{C-c ;} (@code{fortran-comment-region}) turns all the
+lines of the region into comments by inserting the string @samp{c$$$} at
+the front of each one.  With a numeric argument, it turns the region
+back into live code by deleting @samp{c$$$} from the front of each line
+in it.  The string used for these comments can be controlled by setting
+the variable @code{fortran-comment-region}.  Note that here we have an
+example of a command and a variable with the same name; these two uses
+of the name never conflict because in Lisp and in Emacs it is always
+clear from the context which one is meant.
+
+@node Fortran Autofill
+@subsection Auto Fill in Fortran Mode
+
+  Fortran mode has specialized support for Auto Fill mode, which is a
+minor mode that automatically splits statements as you insert them
+when they become too wide.  Splitting a statement involves making
+continuation lines using @code{fortran-continuation-string}
+(@pxref{ForIndent Cont}).  This splitting happens when you type
+@key{SPC}, @key{RET}, or @key{TAB}, and also in the Fortran
+indentation commands.  You activate Auto Fill in Fortran mode in the
+normal way.
+@iftex
+@xref{Auto Fill,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Auto Fill}.
+@end ifnottex
+
+@vindex fortran-break-before-delimiters
+   Auto Fill breaks lines at spaces or delimiters when the lines get
+longer than the desired width (the value of @code{fill-column}).  The
+delimiters (besides whitespace) that Auto Fill can break at are
+@samp{+}, @samp{-}, @samp{/}, @samp{*}, @samp{=}, @samp{<}, @samp{>},
+and @samp{,}.  The line break comes after the delimiter if the
+variable @code{fortran-break-before-delimiters} is @code{nil}.
+Otherwise (and by default), the break comes before the delimiter.
+
+  To enable Auto Fill in all Fortran buffers, add
+@code{auto-fill-mode} to @code{fortran-mode-hook}.
+@iftex
+@xref{Hooks,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Hooks}.
+@end ifnottex
+
+@node Fortran Columns
+@subsection Checking Columns in Fortran
+
+@vindex fortran-line-length
+In standard Fortran 77, anything beyond column 72 is ignored.
+Most compilers provide an option to change this (for example,
+@samp{-ffixed-line-length-N} in gfortran).  Customize the variable
+@code{fortran-line-length} to change the line length in Fortran mode.
+Anything beyond this point is font-locked as a comment.  (Unless it is
+inside a string: strings that extend beyond @code{fortran-line-length}
+will confuse font-lock.)
+
+@table @kbd
+@item C-c C-r
+Display a ``column ruler'' momentarily above the current line
+(@code{fortran-column-ruler}).
+@item C-c C-w
+Split the current window horizontally temporarily so that it is
+@code{fortran-line-length} columns wide
+(@code{fortran-window-create-momentarily}).  This may help you avoid
+making lines longer than the limit imposed by your Fortran compiler.
+@item C-u C-c C-w
+Split the current window horizontally so that it is
+@code{fortran-line-length} columns wide (@code{fortran-window-create}).
+You can then continue editing.
+@item M-x fortran-strip-sequence-nos
+Delete all text in column @code{fortran-line-length} and beyond.
+@end table
+
+@kindex C-c C-r @r{(Fortran mode)}
+@findex fortran-column-ruler
+  The command @kbd{C-c C-r} (@code{fortran-column-ruler}) shows a column
+ruler momentarily above the current line.  The comment ruler is two lines
+of text that show you the locations of columns with special significance in
+Fortran programs.  Square brackets show the limits of the columns for line
+numbers, and curly brackets show the limits of the columns for the
+statement body.  Column numbers appear above them.
+
+  Note that the column numbers count from zero, as always in GNU Emacs.
+As a result, the numbers may be one less than those you are familiar
+with; but the positions they indicate in the line are standard for
+Fortran.
+
+@vindex fortran-column-ruler-fixed
+@vindex fortran-column-ruler-tabs
+  The text used to display the column ruler depends on the value of the
+variable @code{indent-tabs-mode}.  If @code{indent-tabs-mode} is
+@code{nil}, then the value of the variable
+@code{fortran-column-ruler-fixed} is used as the column ruler.
+Otherwise, the value of the variable @code{fortran-column-ruler-tab} is
+displayed.  By changing these variables, you can change the column ruler
+display.
+
+@kindex C-c C-w @r{(Fortran mode)}
+@findex fortran-window-create-momentarily
+  @kbd{C-c C-w} (@code{fortran-window-create-momentarily}) temporarily
+splits the current window horizontally, making a window
+@code{fortran-line-length} columns wide, so you can see any lines that
+are too long.  Type a space to restore the normal width.
+
+@kindex C-u C-c C-w @r{(Fortran mode)}
+@findex fortran-window-create
+  You can also split the window horizontally and continue editing with
+the split in place.  To do this, use @kbd{C-u C-c C-w} (@code{M-x
+fortran-window-create}).  By editing in this window you can
+immediately see when you make a line too wide to be correct Fortran.
+
+@findex fortran-strip-sequence-nos
+  The command @kbd{M-x fortran-strip-sequence-nos} deletes all text in
+column @code{fortran-line-length} and beyond, on all lines in the
+current buffer.  This is the easiest way to get rid of old sequence
+numbers.
+
+@node Fortran Abbrev
+@subsection Fortran Keyword Abbrevs
+
+  Fortran mode provides many built-in abbrevs for common keywords and
+declarations.  These are the same sort of abbrev that you can define
+yourself.  To use them, you must turn on Abbrev mode.
+@iftex
+@xref{Abbrevs,,, emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Abbrevs}.
+@end ifnottex
+
+  The built-in abbrevs are unusual in one way: they all start with a
+semicolon.  For example, one built-in Fortran abbrev is @samp{;c} for
+@samp{continue}.  If you insert @samp{;c} and then insert a punctuation
+character such as a space or a newline, the @samp{;c} expands automatically
+to @samp{continue}, provided Abbrev mode is enabled.@refill
+
+  Type @samp{;?} or @samp{;C-h} to display a list of all the built-in
+Fortran abbrevs and what they stand for.

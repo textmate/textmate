@@ -1,0 +1,1947 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/variables
+@node Variables, Functions, Control Structures, Top
+@chapter Variables
+@cindex variable
+
+  A @dfn{variable} is a name used in a program to stand for a value.
+In Lisp, each variable is represented by a Lisp symbol
+(@pxref{Symbols}).  The variable name is simply the symbol's name, and
+the variable's value is stored in the symbol's value cell@footnote{To
+be precise, under the default @dfn{dynamic binding} rules the value
+cell always holds the variable's current value, but this is not the
+case under @dfn{lexical binding} rules.  @xref{Variable Scoping}, for
+details.}.  @xref{Symbol Components}.  In Emacs Lisp, the use of a
+symbol as a variable is independent of its use as a function name.
+
+  As previously noted in this manual, a Lisp program is represented
+primarily by Lisp objects, and only secondarily as text.  The textual
+form of a Lisp program is given by the read syntax of the Lisp objects
+that constitute the program.  Hence, the textual form of a variable in
+a Lisp program is written using the read syntax for the symbol
+representing the variable.
+
+@menu
+* Global Variables::            Variable values that exist permanently, everywhere.
+* Constant Variables::          Certain "variables" have values that never change.
+* Local Variables::             Variable values that exist only temporarily.
+* Void Variables::              Symbols that lack values.
+* Defining Variables::          A definition says a symbol is used as a variable.
+* Tips for Defining::           Things you should think about when you
+                            define a variable.
+* Accessing Variables::         Examining values of variables whose names
+                            are known only at run time.
+* Setting Variables::           Storing new values in variables.
+* Variable Scoping::            How Lisp chooses among local and global values.
+* Buffer-Local Variables::      Variable values in effect only in one buffer.
+* File Local Variables::        Handling local variable lists in files.
+* Directory Local Variables::   Local variables common to all files in a directory.
+* Variable Aliases::            Variables that are aliases for other variables.
+* Variables with Restricted Values::  Non-constant variables whose value can
+                                        @emph{not} be an arbitrary Lisp object.
+@end menu
+
+@node Global Variables
+@section Global Variables
+@cindex global variable
+
+  The simplest way to use a variable is @dfn{globally}.  This means that
+the variable has just one value at a time, and this value is in effect
+(at least for the moment) throughout the Lisp system.  The value remains
+in effect until you specify a new one.  When a new value replaces the
+old one, no trace of the old value remains in the variable.
+
+  You specify a value for a symbol with @code{setq}.  For example,
+
+@example
+(setq x '(a b))
+@end example
+
+@noindent
+gives the variable @code{x} the value @code{(a b)}.  Note that
+@code{setq} is a special form (@pxref{Special Forms}); it does not
+evaluate its first argument, the name of the variable, but it does
+evaluate the second argument, the new value.
+
+  Once the variable has a value, you can refer to it by using the
+symbol itself as an expression.  Thus,
+
+@example
+@group
+x @result{} (a b)
+@end group
+@end example
+
+@noindent
+assuming the @code{setq} form shown above has already been executed.
+
+  If you do set the same variable again, the new value replaces the old
+one:
+
+@example
+@group
+x
+     @result{} (a b)
+@end group
+@group
+(setq x 4)
+     @result{} 4
+@end group
+@group
+x
+     @result{} 4
+@end group
+@end example
+
+@node Constant Variables
+@section Variables that Never Change
+@cindex @code{setting-constant} error
+@cindex keyword symbol
+@cindex variable with constant value
+@cindex constant variables
+@cindex symbol that evaluates to itself
+@cindex symbol with constant value
+
+  In Emacs Lisp, certain symbols normally evaluate to themselves.  These
+include @code{nil} and @code{t}, as well as any symbol whose name starts
+with @samp{:} (these are called @dfn{keywords}).  These symbols cannot
+be rebound, nor can their values be changed.  Any attempt to set or bind
+@code{nil} or @code{t} signals a @code{setting-constant} error.  The
+same is true for a keyword (a symbol whose name starts with @samp{:}),
+if it is interned in the standard obarray, except that setting such a
+symbol to itself is not an error.
+
+@example
+@group
+nil @equiv{} 'nil
+     @result{} nil
+@end group
+@group
+(setq nil 500)
+@error{} Attempt to set constant symbol: nil
+@end group
+@end example
+
+@defun keywordp object
+function returns @code{t} if @var{object} is a symbol whose name
+starts with @samp{:}, interned in the standard obarray, and returns
+@code{nil} otherwise.
+@end defun
+
+These constants are fundamentally different from the ``constants''
+defined using the @code{defconst} special form (@pxref{Defining
+Variables}).  A @code{defconst} form serves to inform human readers
+that you do not intend to change the value of a variable, but Emacs
+does not raise an error if you actually change it.
+
+@node Local Variables
+@section Local Variables
+@cindex binding local variables
+@cindex local variables
+@cindex local binding
+@cindex global binding
+
+  Global variables have values that last until explicitly superseded
+with new values.  Sometimes it is useful to give a variable a
+@dfn{local value}---a value that takes effect only within a certain
+part of a Lisp program.  When a variable has a local value, we say
+that it is @dfn{locally bound} to that value, and that it is a
+@dfn{local variable}.
+
+  For example, when a function is called, its argument variables
+receive local values, which are the actual arguments supplied to the
+function call; these local bindings take effect within the body of the
+function.  To take another example, the @code{let} special form
+explicitly establishes local bindings for specific variables, which
+take effect within the body of the @code{let} form.
+
+  We also speak of the @dfn{global binding}, which is where
+(conceptually) the global value is kept.
+
+@cindex shadowing of variables
+  Establishing a local binding saves away the variable's previous
+value (or lack of one).  We say that the previous value is
+@dfn{shadowed}.  Both global and local values may be shadowed.  If a
+local binding is in effect, using @code{setq} on the local variable
+stores the specified value in the local binding.  When that local
+binding is no longer in effect, the previously shadowed value (or lack
+of one) comes back.
+
+@cindex current binding
+  A variable can have more than one local binding at a time (e.g.@: if
+there are nested @code{let} forms that bind the variable).  The
+@dfn{current binding} is the local binding that is actually in effect.
+It determines the value returned by evaluating the variable symbol,
+and it is the binding acted on by @code{setq}.
+
+  For most purposes, you can think of the current binding as the
+``innermost'' local binding, or the global binding if there is no
+local binding.  To be more precise, a rule called the @dfn{scoping
+rule} determines where in a program a local binding takes effect.  The
+default scoping rule in Emacs Lisp is called @dfn{dynamic scoping},
+which simply states that the current binding at any given point in the
+execution of a program is the most recently-created binding for that
+variable that still exists.  For details about dynamic scoping, and an
+alternative scoping rule called @dfn{lexical scoping}, @xref{Variable
+Scoping}.
+
+  The special forms @code{let} and @code{let*} exist to create local
+bindings:
+
+@defspec let (bindings@dots{}) forms@dots{}
+This special form sets up local bindings for a certain set of
+variables, as specified by @var{bindings}, and then evaluates all of
+the @var{forms} in textual order.  Its return value is the value of
+the last form in @var{forms}.
+
+Each of the @var{bindings} is either @w{(i) a} symbol, in which case
+that symbol is locally bound to @code{nil}; or @w{(ii) a} list of the
+form @code{(@var{symbol} @var{value-form})}, in which case
+@var{symbol} is locally bound to the result of evaluating
+@var{value-form}.  If @var{value-form} is omitted, @code{nil} is used.
+
+All of the @var{value-form}s in @var{bindings} are evaluated in the
+order they appear and @emph{before} binding any of the symbols to them.
+Here is an example of this: @code{z} is bound to the old value of
+@code{y}, which is 2, not the new value of @code{y}, which is 1.
+
+@example
+@group
+(setq y 2)
+     @result{} 2
+@end group
+
+@group
+(let ((y 1)
+      (z y))
+  (list y z))
+     @result{} (1 2)
+@end group
+@end example
+@end defspec
+
+@defspec let* (bindings@dots{}) forms@dots{}
+This special form is like @code{let}, but it binds each variable right
+after computing its local value, before computing the local value for
+the next variable.  Therefore, an expression in @var{bindings} can
+refer to the preceding symbols bound in this @code{let*} form.
+Compare the following example with the example above for @code{let}.
+
+@example
+@group
+(setq y 2)
+     @result{} 2
+@end group
+
+@group
+(let* ((y 1)
+       (z y))    ; @r{Use the just-established value of @code{y}.}
+  (list y z))
+     @result{} (1 1)
+@end group
+@end example
+@end defspec
+
+  Here is a complete list of the other facilities that create local
+bindings:
+
+@itemize @bullet
+@item
+Function calls (@pxref{Functions}).
+
+@item
+Macro calls (@pxref{Macros}).
+
+@item
+@code{condition-case} (@pxref{Errors}).
+@end itemize
+
+  Variables can also have buffer-local bindings (@pxref{Buffer-Local
+Variables}); a few variables have terminal-local bindings
+(@pxref{Multiple Terminals}).  These kinds of bindings work somewhat
+like ordinary local bindings, but they are localized depending on
+``where'' you are in Emacs.
+
+@defopt max-specpdl-size
+@anchor{Definition of max-specpdl-size}
+@cindex variable limit error
+@cindex evaluation error
+@cindex infinite recursion
+This variable defines the limit on the total number of local variable
+bindings and @code{unwind-protect} cleanups (see @ref{Cleanups,,
+Cleaning Up from Nonlocal Exits}) that are allowed before Emacs
+signals an error (with data @code{"Variable binding depth exceeds
+max-specpdl-size"}).
+
+This limit, with the associated error when it is exceeded, is one way
+that Lisp avoids infinite recursion on an ill-defined function.
+@code{max-lisp-eval-depth} provides another limit on depth of nesting.
+@xref{Definition of max-lisp-eval-depth,, Eval}.
+
+The default value is 1300.  Entry to the Lisp debugger increases the
+value, if there is little room left, to make sure the debugger itself
+has room to execute.
+@end defopt
+
+@node Void Variables
+@section When a Variable is ``Void''
+@cindex @code{void-variable} error
+@cindex void variable
+
+  We say that a variable is void if its symbol has an unassigned value
+cell (@pxref{Symbol Components}).  Under Emacs Lisp's default dynamic
+binding rules (@pxref{Variable Scoping}), the value cell stores the
+variable's current (local or global) value.  Note that an unassigned
+value cell is @emph{not} the same as having @code{nil} in the value
+cell.  The symbol @code{nil} is a Lisp object and can be the value of
+a variable, just as any other object can be; but it is still a value.
+If a variable is void, trying to evaluate the variable signals a
+@code{void-variable} error rather than a value.
+
+  Under lexical binding rules, the value cell only holds the
+variable's global value, i.e.@: the value outside of any lexical
+binding construct.  When a variable is lexically bound, the local value
+is determined by the lexical environment; the variable may have a
+local value if its symbol's value cell is unassigned.
+
+@defun makunbound symbol
+This function empties out the value cell of @var{symbol}, making the
+variable void.  It returns @var{symbol}.
+
+If @var{symbol} has a dynamic local binding, @code{makunbound} voids
+the current binding, and this voidness lasts only as long as the local
+binding is in effect.  Afterwards, the previously shadowed local or
+global binding is reexposed; then the variable will no longer be void,
+unless the reexposed binding is void too.
+
+Here are some examples (assuming dynamic binding is in effect):
+
+@smallexample
+@group
+(setq x 1)               ; @r{Put a value in the global binding.}
+     @result{} 1
+(let ((x 2))             ; @r{Locally bind it.}
+  (makunbound 'x)        ; @r{Void the local binding.}
+  x)
+@error{} Symbol's value as variable is void: x
+@end group
+@group
+x                        ; @r{The global binding is unchanged.}
+     @result{} 1
+
+(let ((x 2))             ; @r{Locally bind it.}
+  (let ((x 3))           ; @r{And again.}
+    (makunbound 'x)      ; @r{Void the innermost-local binding.}
+    x))                  ; @r{And refer: it's void.}
+@error{} Symbol's value as variable is void: x
+@end group
+
+@group
+(let ((x 2))
+  (let ((x 3))
+    (makunbound 'x))     ; @r{Void inner binding, then remove it.}
+  x)                     ; @r{Now outer @code{let} binding is visible.}
+     @result{} 2
+@end group
+@end smallexample
+@end defun
+
+@defun boundp variable
+This function returns @code{t} if @var{variable} (a symbol) is not
+void, and @code{nil} if it is void.
+
+Here are some examples (assuming dynamic binding is in effect):
+
+@smallexample
+@group
+(boundp 'abracadabra)          ; @r{Starts out void.}
+     @result{} nil
+@end group
+@group
+(let ((abracadabra 5))         ; @r{Locally bind it.}
+  (boundp 'abracadabra))
+     @result{} t
+@end group
+@group
+(boundp 'abracadabra)          ; @r{Still globally void.}
+     @result{} nil
+@end group
+@group
+(setq abracadabra 5)           ; @r{Make it globally nonvoid.}
+     @result{} 5
+@end group
+@group
+(boundp 'abracadabra)
+     @result{} t
+@end group
+@end smallexample
+@end defun
+
+@node Defining Variables
+@section Defining Global Variables
+@cindex variable definition
+
+  A @dfn{variable definition} is a construct that announces your
+intention to use a symbol as a global variable.  It uses the special
+forms @code{defvar} or @code{defconst}, which are documented below.
+
+  A variable definition serves three purposes.  First, it informs
+people who read the code that the symbol is @emph{intended} to be used
+a certain way (as a variable).  Second, it informs the Lisp system of
+this, optionally supplying an initial value and a documentation
+string.  Third, it provides information to programming tools such as
+@command{etags}, allowing them to find where the variable was defined.
+
+  The difference between @code{defconst} and @code{defvar} is mainly a
+matter of intent, serving to inform human readers of whether the value
+should ever change.  Emacs Lisp does not actually prevent you from
+changing the value of a variable defined with @code{defconst}.  One
+notable difference between the two forms is that @code{defconst}
+unconditionally initializes the variable, whereas @code{defvar}
+initializes it only if it is originally void.
+
+  To define a customizable variable, you should use @code{defcustom}
+(which calls @code{defvar} as a subroutine).  @xref{Customization}.
+
+@defspec defvar symbol [value [doc-string]]
+This special form defines @var{symbol} as a variable.  Note that
+@var{symbol} is not evaluated; the symbol to be defined should appear
+explicitly in the @code{defvar} form.  The variable is marked as
+@dfn{special}, meaning that it should always be dynamically bound
+(@pxref{Variable Scoping}).
+
+If @var{symbol} is void and @var{value} is specified, @code{defvar}
+evaluates @var{value} and sets @var{symbol} to the result.  But if
+@var{symbol} already has a value (i.e.@: it is not void), @var{value}
+is not even evaluated, and @var{symbol}'s value remains unchanged.  If
+@var{value} is omitted, the value of @var{symbol} is not changed in
+any case.
+
+If @var{symbol} has a buffer-local binding in the current buffer,
+@code{defvar} operates on the default value, which is buffer-independent,
+not the current (buffer-local) binding.  It sets the default value if
+the default value is void.  @xref{Buffer-Local Variables}.
+
+When you evaluate a top-level @code{defvar} form with @kbd{C-M-x} in
+Emacs Lisp mode (@code{eval-defun}), a special feature of
+@code{eval-defun} arranges to set the variable unconditionally, without
+testing whether its value is void.
+
+If the @var{doc-string} argument is supplied, it specifies the
+documentation string for the variable (stored in the symbol's
+@code{variable-documentation} property).  @xref{Documentation}.
+
+Here are some examples.  This form defines @code{foo} but does not
+initialize it:
+
+@example
+@group
+(defvar foo)
+     @result{} foo
+@end group
+@end example
+
+This example initializes the value of @code{bar} to @code{23}, and gives
+it a documentation string:
+
+@example
+@group
+(defvar bar 23
+  "The normal weight of a bar.")
+     @result{} bar
+@end group
+@end example
+
+The @code{defvar} form returns @var{symbol}, but it is normally used
+at top level in a file where its value does not matter.
+@end defspec
+
+@cindex constant variables
+@defspec defconst symbol value [doc-string]
+This special form defines @var{symbol} as a value and initializes it.
+It informs a person reading your code that @var{symbol} has a standard
+global value, established here, that should not be changed by the user
+or by other programs.  Note that @var{symbol} is not evaluated; the
+symbol to be defined must appear explicitly in the @code{defconst}.
+
+The @code{defconst} form, like @code{defvar}, marks the variable as
+@dfn{special}, meaning that it should always be dynamically bound
+(@pxref{Variable Scoping}).  In addition, it marks the variable as
+risky (@pxref{File Local Variables}).
+
+@code{defconst} always evaluates @var{value}, and sets the value of
+@var{symbol} to the result.  If @var{symbol} does have a buffer-local
+binding in the current buffer, @code{defconst} sets the default value,
+not the buffer-local value.  (But you should not be making
+buffer-local bindings for a symbol that is defined with
+@code{defconst}.)
+
+An example of the use of @code{defconst} is Emacs's definition of
+@code{float-pi}---the mathematical constant @math{pi}, which ought not
+to be changed by anyone (attempts by the Indiana State Legislature
+notwithstanding).  As the second form illustrates, however,
+@code{defconst} is only advisory.
+
+@example
+@group
+(defconst float-pi 3.141592653589793 "The value of Pi.")
+     @result{} float-pi
+@end group
+@group
+(setq float-pi 3)
+     @result{} float-pi
+@end group
+@group
+float-pi
+     @result{} 3
+@end group
+@end example
+@end defspec
+
+  @strong{Warning:} If you use a @code{defconst} or @code{defvar}
+special form while the variable has a local binding (made with
+@code{let}, or a function argument), it sets the local binding rather
+than the global binding.  This is not what you usually want.  To
+prevent this, use these special forms at top level in a file, where
+normally no local binding is in effect, and make sure to load the file
+before making a local binding for the variable.
+
+@node Tips for Defining
+@section Tips for Defining Variables Robustly
+
+  When you define a variable whose value is a function, or a list of
+functions, use a name that ends in @samp{-function} or
+@samp{-functions}, respectively.
+
+  There are several other variable name conventions;
+here is a complete list:
+
+@table @samp
+@item @dots{}-hook
+The variable is a normal hook (@pxref{Hooks}).
+
+@item @dots{}-function
+The value is a function.
+
+@item @dots{}-functions
+The value is a list of functions.
+
+@item @dots{}-form
+The value is a form (an expression).
+
+@item @dots{}-forms
+The value is a list of forms (expressions).
+
+@item @dots{}-predicate
+The value is a predicate---a function of one argument that returns
+non-@code{nil} for ``good'' arguments and @code{nil} for ``bad''
+arguments.
+
+@item @dots{}-flag
+The value is significant only as to whether it is @code{nil} or not.
+Since such variables often end up acquiring more values over time,
+this convention is not strongly recommended.
+
+@item @dots{}-program
+The value is a program name.
+
+@item @dots{}-command
+The value is a whole shell command.
+
+@item @dots{}-switches
+The value specifies options for a command.
+@end table
+
+  When you define a variable, always consider whether you should mark
+it as ``safe'' or ``risky''; see @ref{File Local Variables}.
+
+  When defining and initializing a variable that holds a complicated
+value (such as a keymap with bindings in it), it's best to put the
+entire computation of the value into the @code{defvar}, like this:
+
+@example
+(defvar my-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "\C-c\C-a" 'my-command)
+    @dots{}
+    map)
+  @var{docstring})
+@end example
+
+@noindent
+This method has several benefits.  First, if the user quits while
+loading the file, the variable is either still uninitialized or
+initialized properly, never in-between.  If it is still uninitialized,
+reloading the file will initialize it properly.  Second, reloading the
+file once the variable is initialized will not alter it; that is
+important if the user has run hooks to alter part of the contents
+(such as, to rebind keys).  Third, evaluating the @code{defvar} form
+with @kbd{C-M-x} will reinitialize the map completely.
+
+  Putting so much code in the @code{defvar} form has one disadvantage:
+it puts the documentation string far away from the line which names the
+variable.  Here's a safe way to avoid that:
+
+@example
+(defvar my-mode-map nil
+  @var{docstring})
+(unless my-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "\C-c\C-a" 'my-command)
+    @dots{}
+    (setq my-mode-map map)))
+@end example
+
+@noindent
+This has all the same advantages as putting the initialization inside
+the @code{defvar}, except that you must type @kbd{C-M-x} twice, once on
+each form, if you do want to reinitialize the variable.
+
+@node Accessing Variables
+@section Accessing Variable Values
+
+  The usual way to reference a variable is to write the symbol which
+names it.  @xref{Symbol Forms}.
+
+  Occasionally, you may want to reference a variable which is only
+determined at run time.  In that case, you cannot specify the variable
+name in the text of the program.  You can use the @code{symbol-value}
+function to extract the value.
+
+@defun symbol-value symbol
+This function returns the value stored in @var{symbol}'s value cell.
+This is where the variable's current (dynamic) value is stored.  If
+the variable has no local binding, this is simply its global value.
+If the variable is void, a @code{void-variable} error is signaled.
+
+If the variable is lexically bound, the value reported by
+@code{symbol-value} is not necessarily the same as the variable's
+lexical value, which is determined by the lexical environment rather
+than the symbol's value cell.  @xref{Variable Scoping}.
+
+@example
+@group
+(setq abracadabra 5)
+     @result{} 5
+@end group
+@group
+(setq foo 9)
+     @result{} 9
+@end group
+
+@group
+;; @r{Here the symbol @code{abracadabra}}
+;;   @r{is the symbol whose value is examined.}
+(let ((abracadabra 'foo))
+  (symbol-value 'abracadabra))
+     @result{} foo
+@end group
+
+@group
+;; @r{Here, the value of @code{abracadabra},}
+;;   @r{which is @code{foo},}
+;;   @r{is the symbol whose value is examined.}
+(let ((abracadabra 'foo))
+  (symbol-value abracadabra))
+     @result{} 9
+@end group
+
+@group
+(symbol-value 'abracadabra)
+     @result{} 5
+@end group
+@end example
+@end defun
+
+@node Setting Variables
+@section Setting Variable Values
+
+  The usual way to change the value of a variable is with the special
+form @code{setq}.  When you need to compute the choice of variable at
+run time, use the function @code{set}.
+
+@defspec setq [symbol form]@dots{}
+This special form is the most common method of changing a variable's
+value.  Each @var{symbol} is given a new value, which is the result of
+evaluating the corresponding @var{form}.  The current binding of the
+symbol is changed.
+
+@code{setq} does not evaluate @var{symbol}; it sets the symbol that you
+write.  We say that this argument is @dfn{automatically quoted}.  The
+@samp{q} in @code{setq} stands for ``quoted''.
+
+The value of the @code{setq} form is the value of the last @var{form}.
+
+@example
+@group
+(setq x (1+ 2))
+     @result{} 3
+@end group
+x                   ; @r{@code{x} now has a global value.}
+     @result{} 3
+@group
+(let ((x 5))
+  (setq x 6)        ; @r{The local binding of @code{x} is set.}
+  x)
+     @result{} 6
+@end group
+x                   ; @r{The global value is unchanged.}
+     @result{} 3
+@end example
+
+Note that the first @var{form} is evaluated, then the first
+@var{symbol} is set, then the second @var{form} is evaluated, then the
+second @var{symbol} is set, and so on:
+
+@example
+@group
+(setq x 10          ; @r{Notice that @code{x} is set before}
+      y (1+ x))     ;   @r{the value of @code{y} is computed.}
+     @result{} 11
+@end group
+@end example
+@end defspec
+
+@defun set symbol value
+This function puts @var{value} in the value cell of @var{symbol}.
+Since it is a function rather than a special form, the expression
+written for @var{symbol} is evaluated to obtain the symbol to set.
+The return value is @var{value}.
+
+When dynamic variable binding is in effect (the default), @code{set}
+has the same effect as @code{setq}, apart from the fact that
+@code{set} evaluates its @var{symbol} argument whereas @code{setq}
+does not.  But when a variable is lexically bound, @code{set} affects
+its @emph{dynamic} value, whereas @code{setq} affects its current
+(lexical) value.  @xref{Variable Scoping}.
+
+@example
+@group
+(set one 1)
+@error{} Symbol's value as variable is void: one
+@end group
+@group
+(set 'one 1)
+     @result{} 1
+@end group
+@group
+(set 'two 'one)
+     @result{} one
+@end group
+@group
+(set two 2)         ; @r{@code{two} evaluates to symbol @code{one}.}
+     @result{} 2
+@end group
+@group
+one                 ; @r{So it is @code{one} that was set.}
+     @result{} 2
+(let ((one 1))      ; @r{This binding of @code{one} is set,}
+  (set 'one 3)      ;   @r{not the global value.}
+  one)
+     @result{} 3
+@end group
+@group
+one
+     @result{} 2
+@end group
+@end example
+
+If @var{symbol} is not actually a symbol, a @code{wrong-type-argument}
+error is signaled.
+
+@example
+(set '(x y) 'z)
+@error{} Wrong type argument: symbolp, (x y)
+@end example
+@end defun
+
+@node Variable Scoping
+@section Scoping Rules for Variable Bindings
+
+  When you create a local binding for a variable, that binding takes
+effect only within a limited portion of the program (@pxref{Local
+Variables}).  This section describes exactly what this means.
+
+@cindex scope
+@cindex extent
+  Each local binding has a certain @dfn{scope} and @dfn{extent}.
+@dfn{Scope} refers to @emph{where} in the textual source code the
+binding can be accessed.  @dfn{Extent} refers to @emph{when}, as the
+program is executing, the binding exists.
+
+@cindex dynamic binding
+@cindex indefinite scope
+@cindex dynamic extent
+  By default, the local bindings that Emacs creates are @dfn{dynamic
+bindings}.  Such a binding has @dfn{indefinite scope}, meaning that
+any part of the program can potentially access the variable binding.
+It also has @dfn{dynamic extent}, meaning that the binding lasts only
+while the binding construct (such as the body of a @code{let} form) is
+being executed.
+
+@cindex lexical binding
+@cindex lexical scope
+@cindex indefinite extent
+  Emacs can optionally create @dfn{lexical bindings}.  A lexical
+binding has @dfn{lexical scope}, meaning that any reference to the
+variable must be located textually within the binding construct.  It
+also has @dfn{indefinite extent}, meaning that under some
+circumstances the binding can live on even after the binding construct
+has finished executing, by means of special objects called
+@dfn{closures}.
+
+  The following subsections describe dynamic binding and lexical
+binding in greater detail, and how to enable lexical binding in Emacs
+Lisp programs.
+
+@menu
+* Dynamic Binding::         The default for binding local variables in Emacs.
+* Dynamic Binding Tips::    Avoiding problems with dynamic binding.
+* Lexical Binding::         A different type of local variable binding.
+* Using Lexical Binding::   How to enable lexical binding.
+@end menu
+
+@node Dynamic Binding
+@subsection Dynamic Binding
+
+  By default, the local variable bindings made by Emacs are dynamic
+bindings.  When a variable is dynamically bound, its current binding
+at any point in the execution of the Lisp program is simply the most
+recently-created dynamic local binding for that symbol, or the global
+binding if there is no such local binding.
+
+  Dynamic bindings have indefinite scope and dynamic extent, as shown
+by the following example:
+
+@example
+@group
+(defvar x -99)  ; @r{@code{x} receives an initial value of -99.}
+
+(defun getx ()
+  x)            ; @r{@code{x} is used ``free'' in this function.}
+
+(let ((x 1))    ; @r{@code{x} is dynamically bound.}
+  (getx))
+     @result{} 1
+
+;; @r{After the @code{let} form finishes, @code{x} reverts to its}
+;; @r{previous value, which is -99.}
+
+(getx)
+     @result{} -99
+@end group
+@end example
+
+@noindent
+The function @code{getx} refers to @code{x}.  This is a ``free''
+reference, in the sense that there is no binding for @code{x} within
+that @code{defun} construct itself.  When we call @code{getx} from
+within a @code{let} form in which @code{x} is (dynamically) bound, it
+retrieves the local value of @code{x} (i.e.@: 1).  But when we call
+@code{getx} outside the @code{let} form, it retrieves the global value
+of @code{x} (i.e.@: -99).
+
+  Here is another example, which illustrates setting a dynamically
+bound variable using @code{setq}:
+
+@example
+@group
+(defvar x -99)      ; @r{@code{x} receives an initial value of -99.}
+
+(defun addx ()
+  (setq x (1+ x)))  ; @r{Add 1 to @code{x} and return its new value.}
+
+(let ((x 1))
+  (addx)
+  (addx))
+     @result{} 3           ; @r{The two @code{addx} calls add to @code{x} twice.}
+
+;; @r{After the @code{let} form finishes, @code{x} reverts to its}
+;; @r{previous value, which is -99.}
+
+(addx)
+     @result{} -98
+@end group
+@end example
+
+  Dynamic binding is implemented in Emacs Lisp in a simple way.  Each
+symbol has a value cell, which specifies its current dynamic value (or
+absence of value).  @xref{Symbol Components}.  When a symbol is given
+a dynamic local binding, Emacs records the contents of the value cell
+(or absence thereof) in a stack, and stores the new local value in the
+value cell.  When the binding construct finishes executing, Emacs pops
+the old value off the stack, and puts it in the value cell.
+
+@node Dynamic Binding Tips
+@subsection Proper Use of Dynamic Binding
+
+  Dynamic binding is a powerful feature, as it allows programs to
+refer to variables that are not defined within their local textual
+scope.  However, if used without restraint, this can also make
+programs hard to understand.  There are two clean ways to use this
+technique:
+
+@itemize @bullet
+@item
+If a variable has no global definition, use it as a local variable
+only within a binding construct, e.g.@: the body of the @code{let}
+form where the variable was bound, or the body of the function for an
+argument variable.  If this convention is followed consistently
+throughout a program, the value of the variable will not affect, nor
+be affected by, any uses of the same variable symbol elsewhere in the
+program.
+
+@item
+Otherwise, define the variable with @code{defvar}, @code{defconst}, or
+@code{defcustom}.  @xref{Defining Variables}.  Usually, the definition
+should be at top-level in an Emacs Lisp file.  As far as possible, it
+should include a documentation string which explains the meaning and
+purpose of the variable.  You should also choose the variable's name
+to avoid name conflicts (@pxref{Coding Conventions}).
+
+Then you can bind the variable anywhere in a program, knowing reliably
+what the effect will be.  Wherever you encounter the variable, it will
+be easy to refer back to the definition, e.g.@: via the @kbd{C-h v}
+command (provided the variable definition has been loaded into Emacs).
+@xref{Name Help,,, emacs, The GNU Emacs Manual}.
+
+For example, it is common to use local bindings for customizable
+variables like @code{case-fold-search}:
+
+@example
+@group
+(defun search-for-abc ()
+  "Search for the string \"abc\", ignoring case differences."
+  (let ((case-fold-search nil))
+    (re-search-forward "abc")))
+@end group
+@end example
+@end itemize
+
+@node Lexical Binding
+@subsection Lexical Binding
+
+Optionally, you can create lexical bindings in Emacs Lisp.  A
+lexically bound variable has @dfn{lexical scope}, meaning that any
+reference to the variable must be located textually within the binding
+construct.
+
+  Here is an example
+@iftex
+(see the next subsection, for how to actually enable lexical binding):
+@end iftex
+@ifnottex
+(@pxref{Using Lexical Binding}, for how to actually enable lexical binding):
+@end ifnottex
+
+@example
+@group
+(let ((x 1))    ; @r{@code{x} is lexically bound.}
+  (+ x 3))
+     @result{} 4
+
+(defun getx ()
+  x)            ; @r{@code{x} is used ``free'' in this function.}
+
+(let ((x 1))    ; @r{@code{x} is lexically bound.}
+  (getx))
+@error{} Symbol's value as variable is void: x
+@end group
+@end example
+
+@noindent
+Here, the variable @code{x} has no global value.  When it is lexically
+bound within a @code{let} form, it can be used in the textual confines
+of that @code{let} form.  But it can @emph{not} be used from within a
+@code{getx} function called from the @code{let} form, since the
+function definition of @code{getx} occurs outside the @code{let} form
+itself.
+
+@cindex lexical environment
+  Here is how lexical binding works.  Each binding construct defines a
+@dfn{lexical environment}, specifying the symbols that are bound
+within the construct and their local values.  When the Lisp evaluator
+wants the current value of a variable, it looks first in the lexical
+environment; if the variable is not specified in there, it looks in
+the symbol's value cell, where the dynamic value is stored.
+
+@cindex closures
+  Lexical bindings have indefinite extent.  Even after a binding
+construct has finished executing, its lexical environment can be
+``kept around'' in Lisp objects called @dfn{closures}.  A closure is
+created when you create a named or anonymous function with lexical
+binding enabled.  @xref{Closures}, for details.
+
+  When a closure is called as a function, any lexical variable
+references within its definition use the retained lexical environment.
+Here is an example:
+
+@example
+(defvar my-ticker nil)   ; @r{We will use this dynamically bound}
+                         ; @r{variable to store a closure.}
+
+(let ((x 0))             ; @r{@code{x} is lexically bound.}
+  (setq my-ticker (lambda ()
+                    (setq x (1+ x)))))
+    @result{} (closure ((x . 0) t) ()
+          (1+ x))
+
+(funcall my-ticker)
+    @result{} 1
+
+(funcall my-ticker)
+    @result{} 2
+
+(funcall my-ticker)
+    @result{} 3
+
+x                        ; @r{Note that @code{x} has no global value.}
+@error{} Symbol's value as variable is void: x
+@end example
+
+@noindent
+The @code{let} binding defines a lexical environment in which the
+variable @code{x} is locally bound to 0.  Within this binding
+construct, we define a lambda expression which increments @code{x} by
+one and returns the incremented value.  This lambda expression is
+automatically turned into a closure, in which the lexical environment
+lives on even after the @code{let} binding construct has exited.  Each
+time we evaluate the closure, it increments @code{x}, using the
+binding of @code{x} in that lexical environment.
+
+  Note that functions like @code{symbol-value}, @code{boundp}, and
+@code{set} only retrieve or modify a variable's dynamic binding
+(i.e.@: the contents of its symbol's value cell).  Also, the code in
+the body of a @code{defun} or @code{defmacro} cannot refer to
+surrounding lexical variables.
+
+  Currently, lexical binding is not much used within the Emacs
+sources.  However, we expect its importance to increase in the future.
+Lexical binding opens up a lot more opportunities for optimization, so
+Emacs Lisp code that makes use of lexical binding is likely to run
+faster in future Emacs versions.  Such code is also much more friendly
+to concurrency, which we want to add to Emacs in the near future.
+
+@node Using Lexical Binding
+@subsection Using Lexical Binding
+
+  When loading an Emacs Lisp file or evaluating a Lisp buffer, lexical
+binding is enabled if the buffer-local variable @code{lexical-binding}
+is non-@code{nil}:
+
+@defvar lexical-binding
+If this buffer-local variable is non-@code{nil}, Emacs Lisp files and
+buffers are evaluated using lexical binding instead of dynamic
+binding.  (However, special variables are still dynamically bound; see
+below.)  If @code{nil}, dynamic binding is used for all local
+variables.  This variable is typically set for a whole Emacs Lisp
+file, as a file local variable (@pxref{File Local Variables}).
+Note that unlike other such variables, this one must be set in the
+first line of a file.
+@end defvar
+
+@noindent
+When evaluating Emacs Lisp code directly using an @code{eval} call,
+lexical binding is enabled if the @var{lexical} argument to
+@code{eval} is non-@code{nil}.  @xref{Eval}.
+
+@cindex special variables
+  Even when lexical binding is enabled, certain variables will
+continue to be dynamically bound.  These are called @dfn{special
+variables}.  Every variable that has been defined with @code{defvar},
+@code{defcustom} or @code{defconst} is a special variable
+(@pxref{Defining Variables}).  All other variables are subject to
+lexical binding.
+
+@defun special-variable-p SYMBOL
+This function returns non-@code{nil} if @var{symbol} is a special
+variable (i.e.@: it has a @code{defvar}, @code{defcustom}, or
+@code{defconst} variable definition).  Otherwise, the return value is
+@code{nil}.
+@end defun
+
+  The use of a special variable as a formal argument in a function is
+discouraged.  Doing so gives rise to unspecified behavior when lexical
+binding mode is enabled (it may use lexical binding sometimes, and
+dynamic binding other times).
+
+  Converting an Emacs Lisp program to lexical binding is pretty easy.
+First, add a file-local variable setting of @code{lexical-binding} to
+@code{t} in the Emacs Lisp source file.  Second, check that every
+variable in the program which needs to be dynamically bound has a
+variable definition, so that it is not inadvertently bound lexically.
+
+  A simple way to find out which variables need a variable definition
+is to byte-compile the source file.  @xref{Byte Compilation}.  If a
+non-special variable is used outside of a @code{let} form, the
+byte-compiler will warn about reference or assignment to a ``free
+variable''.  If a non-special variable is bound but not used within a
+@code{let} form, the byte-compiler will warn about an ``unused lexical
+variable''.  The byte-compiler will also issue a warning if you use a
+special variable as a function argument.
+
+  (To silence byte-compiler warnings about unused variables, just use
+a variable name that start with an underscore.  The byte-compiler
+interprets this as an indication that this is a variable known not to
+be used.)
+
+@node Buffer-Local Variables
+@section Buffer-Local Variables
+@cindex variable, buffer-local
+@cindex buffer-local variables
+
+  Global and local variable bindings are found in most programming
+languages in one form or another.  Emacs, however, also supports
+additional, unusual kinds of variable binding, such as
+@dfn{buffer-local} bindings, which apply only in one buffer.  Having
+different values for a variable in different buffers is an important
+customization method.  (Variables can also have bindings that are
+local to each terminal.  @xref{Multiple Terminals}.)
+
+@menu
+* Intro to Buffer-Local::       Introduction and concepts.
+* Creating Buffer-Local::       Creating and destroying buffer-local bindings.
+* Default Value::               The default value is seen in buffers
+                                 that don't have their own buffer-local values.
+@end menu
+
+@node Intro to Buffer-Local
+@subsection Introduction to Buffer-Local Variables
+
+  A buffer-local variable has a buffer-local binding associated with a
+particular buffer.  The binding is in effect when that buffer is
+current; otherwise, it is not in effect.  If you set the variable while
+a buffer-local binding is in effect, the new value goes in that binding,
+so its other bindings are unchanged.  This means that the change is
+visible only in the buffer where you made it.
+
+  The variable's ordinary binding, which is not associated with any
+specific buffer, is called the @dfn{default binding}.  In most cases,
+this is the global binding.
+
+  A variable can have buffer-local bindings in some buffers but not in
+other buffers.  The default binding is shared by all the buffers that
+don't have their own bindings for the variable.  (This includes all
+newly-created buffers.)  If you set the variable in a buffer that does
+not have a buffer-local binding for it, this sets the default binding,
+so the new value is visible in all the buffers that see the default
+binding.
+
+  The most common use of buffer-local bindings is for major modes to change
+variables that control the behavior of commands.  For example, C mode and
+Lisp mode both set the variable @code{paragraph-start} to specify that only
+blank lines separate paragraphs.  They do this by making the variable
+buffer-local in the buffer that is being put into C mode or Lisp mode, and
+then setting it to the new value for that mode.  @xref{Major Modes}.
+
+  The usual way to make a buffer-local binding is with
+@code{make-local-variable}, which is what major mode commands typically
+use.  This affects just the current buffer; all other buffers (including
+those yet to be created) will continue to share the default value unless
+they are explicitly given their own buffer-local bindings.
+
+@cindex automatically buffer-local
+  A more powerful operation is to mark the variable as
+@dfn{automatically buffer-local} by calling
+@code{make-variable-buffer-local}.  You can think of this as making the
+variable local in all buffers, even those yet to be created.  More
+precisely, the effect is that setting the variable automatically makes
+the variable local to the current buffer if it is not already so.  All
+buffers start out by sharing the default value of the variable as usual,
+but setting the variable creates a buffer-local binding for the current
+buffer.  The new value is stored in the buffer-local binding, leaving
+the default binding untouched.  This means that the default value cannot
+be changed with @code{setq} in any buffer; the only way to change it is
+with @code{setq-default}.
+
+  @strong{Warning:} When a variable has buffer-local
+bindings in one or more buffers, @code{let} rebinds the binding that's
+currently in effect.  For instance, if the current buffer has a
+buffer-local value, @code{let} temporarily rebinds that.  If no
+buffer-local bindings are in effect, @code{let} rebinds
+the default value.  If inside the @code{let} you then change to a
+different current buffer in which a different binding is in effect,
+you won't see the @code{let} binding any more.  And if you exit the
+@code{let} while still in the other buffer, you won't see the
+unbinding occur (though it will occur properly).  Here is an example
+to illustrate:
+
+@example
+@group
+(setq foo 'g)
+(set-buffer "a")
+(make-local-variable 'foo)
+@end group
+(setq foo 'a)
+(let ((foo 'temp))
+  ;; foo @result{} 'temp  ; @r{let binding in buffer @samp{a}}
+  (set-buffer "b")
+  ;; foo @result{} 'g     ; @r{the global value since foo is not local in @samp{b}}
+  @var{body}@dots{})
+@group
+foo @result{} 'g        ; @r{exiting restored the local value in buffer @samp{a},}
+                 ; @r{but we don't see that in buffer @samp{b}}
+@end group
+@group
+(set-buffer "a") ; @r{verify the local value was restored}
+foo @result{} 'a
+@end group
+@end example
+
+@noindent
+Note that references to @code{foo} in @var{body} access the
+buffer-local binding of buffer @samp{b}.
+
+  When a file specifies local variable values, these become buffer-local
+values when you visit the file.  @xref{File Variables,,, emacs, The
+GNU Emacs Manual}.
+
+  A buffer-local variable cannot be made terminal-local
+(@pxref{Multiple Terminals}).
+
+@node Creating Buffer-Local
+@subsection Creating and Deleting Buffer-Local Bindings
+
+@deffn Command make-local-variable variable
+This function creates a buffer-local binding in the current buffer for
+@var{variable} (a symbol).  Other buffers are not affected.  The value
+returned is @var{variable}.
+
+The buffer-local value of @var{variable} starts out as the same value
+@var{variable} previously had.  If @var{variable} was void, it remains
+void.
+
+@example
+@group
+;; @r{In buffer @samp{b1}:}
+(setq foo 5)                ; @r{Affects all buffers.}
+     @result{} 5
+@end group
+@group
+(make-local-variable 'foo)  ; @r{Now it is local in @samp{b1}.}
+     @result{} foo
+@end group
+@group
+foo                         ; @r{That did not change}
+     @result{} 5                   ;   @r{the value.}
+@end group
+@group
+(setq foo 6)                ; @r{Change the value}
+     @result{} 6                   ;   @r{in @samp{b1}.}
+@end group
+@group
+foo
+     @result{} 6
+@end group
+
+@group
+;; @r{In buffer @samp{b2}, the value hasn't changed.}
+(with-current-buffer "b2"
+  foo)
+     @result{} 5
+@end group
+@end example
+
+Making a variable buffer-local within a @code{let}-binding for that
+variable does not work reliably, unless the buffer in which you do this
+is not current either on entry to or exit from the @code{let}.  This is
+because @code{let} does not distinguish between different kinds of
+bindings; it knows only which variable the binding was made for.
+
+If the variable is terminal-local (@pxref{Multiple Terminals}), this
+function signals an error.  Such variables cannot have buffer-local
+bindings as well.
+
+@strong{Warning:} do not use @code{make-local-variable} for a hook
+variable.  The hook variables are automatically made buffer-local as
+needed if you use the @var{local} argument to @code{add-hook} or
+@code{remove-hook}.
+@end deffn
+
+@deffn Command make-variable-buffer-local variable
+This function marks @var{variable} (a symbol) automatically
+buffer-local, so that any subsequent attempt to set it will make it
+local to the current buffer at the time.  Unlike
+@code{make-local-variable}, with which it is often confused, this
+cannot be undone, and affects the behavior of the variable in all
+buffers.
+
+A peculiar wrinkle of this feature is that binding the variable (with
+@code{let} or other binding constructs) does not create a buffer-local
+binding for it.  Only setting the variable (with @code{set} or
+@code{setq}), while the variable does not have a @code{let}-style
+binding that was made in the current buffer, does so.
+
+If @var{variable} does not have a default value, then calling this
+command will give it a default value of @code{nil}.  If @var{variable}
+already has a default value, that value remains unchanged.
+Subsequently calling @code{makunbound} on @var{variable} will result
+in a void buffer-local value and leave the default value unaffected.
+
+The value returned is @var{variable}.
+
+@strong{Warning:} Don't assume that you should use
+@code{make-variable-buffer-local} for user-option variables, simply
+because users @emph{might} want to customize them differently in
+different buffers.  Users can make any variable local, when they wish
+to.  It is better to leave the choice to them.
+
+The time to use @code{make-variable-buffer-local} is when it is crucial
+that no two buffers ever share the same binding.  For example, when a
+variable is used for internal purposes in a Lisp program which depends
+on having separate values in separate buffers, then using
+@code{make-variable-buffer-local} can be the best solution.
+@end deffn
+
+@defun local-variable-p variable &optional buffer
+This returns @code{t} if @var{variable} is buffer-local in buffer
+@var{buffer} (which defaults to the current buffer); otherwise,
+@code{nil}.
+@end defun
+
+@defun local-variable-if-set-p variable &optional buffer
+This returns @code{t} if @var{variable} will become buffer-local in
+buffer @var{buffer} (which defaults to the current buffer) if it is
+set there.
+@end defun
+
+@defun buffer-local-value variable buffer
+This function returns the buffer-local binding of @var{variable} (a
+symbol) in buffer @var{buffer}.  If @var{variable} does not have a
+buffer-local binding in buffer @var{buffer}, it returns the default
+value (@pxref{Default Value}) of @var{variable} instead.
+@end defun
+
+@defun buffer-local-variables &optional buffer
+This function returns a list describing the buffer-local variables in
+buffer @var{buffer}.  (If @var{buffer} is omitted, the current buffer
+is used.)  Normally, each list element has the form
+@w{@code{(@var{sym} . @var{val})}}, where @var{sym} is a buffer-local
+variable (a symbol) and @var{val} is its buffer-local value.  But when
+a variable's buffer-local binding in @var{buffer} is void, its list
+element is just @var{sym}.
+
+@example
+@group
+(make-local-variable 'foobar)
+(makunbound 'foobar)
+(make-local-variable 'bind-me)
+(setq bind-me 69)
+@end group
+(setq lcl (buffer-local-variables))
+    ;; @r{First, built-in variables local in all buffers:}
+@result{} ((mark-active . nil)
+    (buffer-undo-list . nil)
+    (mode-name . "Fundamental")
+    @dots{}
+@group
+    ;; @r{Next, non-built-in buffer-local variables.}
+    ;; @r{This one is buffer-local and void:}
+    foobar
+    ;; @r{This one is buffer-local and nonvoid:}
+    (bind-me . 69))
+@end group
+@end example
+
+Note that storing new values into the @sc{cdr}s of cons cells in this
+list does @emph{not} change the buffer-local values of the variables.
+@end defun
+
+@deffn Command kill-local-variable variable
+This function deletes the buffer-local binding (if any) for
+@var{variable} (a symbol) in the current buffer.  As a result, the
+default binding of @var{variable} becomes visible in this buffer.  This
+typically results in a change in the value of @var{variable}, since the
+default value is usually different from the buffer-local value just
+eliminated.
+
+If you kill the buffer-local binding of a variable that automatically
+becomes buffer-local when set, this makes the default value visible in
+the current buffer.  However, if you set the variable again, that will
+once again create a buffer-local binding for it.
+
+@code{kill-local-variable} returns @var{variable}.
+
+This function is a command because it is sometimes useful to kill one
+buffer-local variable interactively, just as it is useful to create
+buffer-local variables interactively.
+@end deffn
+
+@defun kill-all-local-variables
+This function eliminates all the buffer-local variable bindings of the
+current buffer except for variables marked as ``permanent'' and local
+hook functions that have a non-@code{nil} @code{permanent-local-hook}
+property (@pxref{Setting Hooks}).  As a result, the buffer will see
+the default values of most variables.
+
+This function also resets certain other information pertaining to the
+buffer: it sets the local keymap to @code{nil}, the syntax table to the
+value of @code{(standard-syntax-table)}, the case table to
+@code{(standard-case-table)}, and the abbrev table to the value of
+@code{fundamental-mode-abbrev-table}.
+
+The very first thing this function does is run the normal hook
+@code{change-major-mode-hook} (see below).
+
+Every major mode command begins by calling this function, which has the
+effect of switching to Fundamental mode and erasing most of the effects
+of the previous major mode.  To ensure that this does its job, the
+variables that major modes set should not be marked permanent.
+
+@code{kill-all-local-variables} returns @code{nil}.
+@end defun
+
+@defvar change-major-mode-hook
+The function @code{kill-all-local-variables} runs this normal hook
+before it does anything else.  This gives major modes a way to arrange
+for something special to be done if the user switches to a different
+major mode.  It is also useful for buffer-specific minor modes
+that should be forgotten if the user changes the major mode.
+
+For best results, make this variable buffer-local, so that it will
+disappear after doing its job and will not interfere with the
+subsequent major mode.  @xref{Hooks}.
+@end defvar
+
+@c Emacs 19 feature
+@cindex permanent local variable
+A buffer-local variable is @dfn{permanent} if the variable name (a
+symbol) has a @code{permanent-local} property that is non-@code{nil}.
+Such variables are unaffected by @code{kill-all-local-variables}, and
+their local bindings are therefore not cleared by changing major modes.
+Permanent locals are appropriate for data pertaining to where the file
+came from or how to save it, rather than with how to edit the contents.
+
+@node Default Value
+@subsection The Default Value of a Buffer-Local Variable
+@cindex default value
+
+  The global value of a variable with buffer-local bindings is also
+called the @dfn{default} value, because it is the value that is in
+effect whenever neither the current buffer nor the selected frame has
+its own binding for the variable.
+
+  The functions @code{default-value} and @code{setq-default} access and
+change a variable's default value regardless of whether the current
+buffer has a buffer-local binding.  For example, you could use
+@code{setq-default} to change the default setting of
+@code{paragraph-start} for most buffers; and this would work even when
+you are in a C or Lisp mode buffer that has a buffer-local value for
+this variable.
+
+@c Emacs 19 feature
+  The special forms @code{defvar} and @code{defconst} also set the
+default value (if they set the variable at all), rather than any
+buffer-local value.
+
+@defun default-value symbol
+This function returns @var{symbol}'s default value.  This is the value
+that is seen in buffers and frames that do not have their own values for
+this variable.  If @var{symbol} is not buffer-local, this is equivalent
+to @code{symbol-value} (@pxref{Accessing Variables}).
+@end defun
+
+@c Emacs 19 feature
+@defun default-boundp symbol
+The function @code{default-boundp} tells you whether @var{symbol}'s
+default value is nonvoid.  If @code{(default-boundp 'foo)} returns
+@code{nil}, then @code{(default-value 'foo)} would get an error.
+
+@code{default-boundp} is to @code{default-value} as @code{boundp} is to
+@code{symbol-value}.
+@end defun
+
+@defspec setq-default [symbol form]@dots{}
+This special form gives each @var{symbol} a new default value, which is
+the result of evaluating the corresponding @var{form}.  It does not
+evaluate @var{symbol}, but does evaluate @var{form}.  The value of the
+@code{setq-default} form is the value of the last @var{form}.
+
+If a @var{symbol} is not buffer-local for the current buffer, and is not
+marked automatically buffer-local, @code{setq-default} has the same
+effect as @code{setq}.  If @var{symbol} is buffer-local for the current
+buffer, then this changes the value that other buffers will see (as long
+as they don't have a buffer-local value), but not the value that the
+current buffer sees.
+
+@example
+@group
+;; @r{In buffer @samp{foo}:}
+(make-local-variable 'buffer-local)
+     @result{} buffer-local
+@end group
+@group
+(setq buffer-local 'value-in-foo)
+     @result{} value-in-foo
+@end group
+@group
+(setq-default buffer-local 'new-default)
+     @result{} new-default
+@end group
+@group
+buffer-local
+     @result{} value-in-foo
+@end group
+@group
+(default-value 'buffer-local)
+     @result{} new-default
+@end group
+
+@group
+;; @r{In (the new) buffer @samp{bar}:}
+buffer-local
+     @result{} new-default
+@end group
+@group
+(default-value 'buffer-local)
+     @result{} new-default
+@end group
+@group
+(setq buffer-local 'another-default)
+     @result{} another-default
+@end group
+@group
+(default-value 'buffer-local)
+     @result{} another-default
+@end group
+
+@group
+;; @r{Back in buffer @samp{foo}:}
+buffer-local
+     @result{} value-in-foo
+(default-value 'buffer-local)
+     @result{} another-default
+@end group
+@end example
+@end defspec
+
+@defun set-default symbol value
+This function is like @code{setq-default}, except that @var{symbol} is
+an ordinary evaluated argument.
+
+@example
+@group
+(set-default (car '(a b c)) 23)
+     @result{} 23
+@end group
+@group
+(default-value 'a)
+     @result{} 23
+@end group
+@end example
+@end defun
+
+@node File Local Variables
+@section File Local Variables
+@cindex file local variables
+
+  A file can specify local variable values; Emacs uses these to create
+buffer-local bindings for those variables in the buffer visiting that
+file.  @xref{File variables, , Local Variables in Files, emacs, The
+GNU Emacs Manual}, for basic information about file-local variables.
+This section describes the functions and variables that affect how
+file-local variables are processed.
+
+  If a file-local variable could specify an arbitrary function or Lisp
+expression that would be called later, visiting a file could take over
+your Emacs.  Emacs protects against this by automatically setting only
+those file-local variables whose specified values are known to be
+safe.  Other file-local variables are set only if the user agrees.
+
+  For additional safety, @code{read-circle} is temporarily bound to
+@code{nil} when Emacs reads file-local variables (@pxref{Input
+Functions}).  This prevents the Lisp reader from recognizing circular
+and shared Lisp structures (@pxref{Circular Objects}).
+
+@defopt enable-local-variables
+This variable controls whether to process file-local variables.
+The possible values are:
+
+@table @asis
+@item @code{t} (the default)
+Set the safe variables, and query (once) about any unsafe variables.
+@item @code{:safe}
+Set only the safe variables and do not query.
+@item @code{:all}
+Set all the variables and do not query.
+@item @code{nil}
+Don't set any variables.
+@item anything else
+Query (once) about all the variables.
+@end table
+@end defopt
+
+@defvar inhibit-local-variables-regexps
+This is a list of regular expressions.  If a file has a name
+matching an element of this list, then it is not scanned for
+any form of file-local variable.  For examples of why you might want
+to use this, @pxref{Auto Major Mode}.
+@end defvar
+
+@defun hack-local-variables &optional mode-only
+This function parses, and binds or evaluates as appropriate, any local
+variables specified by the contents of the current buffer.  The variable
+@code{enable-local-variables} has its effect here.  However, this
+function does not look for the @samp{mode:} local variable in the
+@w{@samp{-*-}} line.  @code{set-auto-mode} does that, also taking
+@code{enable-local-variables} into account (@pxref{Auto Major Mode}).
+
+This function works by walking the alist stored in
+@code{file-local-variables-alist} and applying each local variable in
+turn.  It calls @code{before-hack-local-variables-hook} and
+@code{hack-local-variables-hook} before and after applying the
+variables, respectively.  It only calls the before-hook if the alist
+is non-@code{nil}; it always calls the other hook.  This
+function ignores a @samp{mode} element if it specifies the same major
+mode as the buffer already has.
+
+If the optional argument @var{mode-only} is non-@code{nil}, then all
+this function does is return a symbol specifying the major mode,
+if the @w{@samp{-*-}} line or the local variables list specifies one,
+and @code{nil} otherwise.  It does not set the mode nor any other
+file-local variable.
+@end defun
+
+@defvar file-local-variables-alist
+This buffer-local variable holds the alist of file-local variable
+settings.  Each element of the alist is of the form
+@w{@code{(@var{var} . @var{value})}}, where @var{var} is a symbol of
+the local variable and @var{value} is its value.  When Emacs visits a
+file, it first collects all the file-local variables into this alist,
+and then the @code{hack-local-variables} function applies them one by
+one.
+@end defvar
+
+@defvar before-hack-local-variables-hook
+Emacs calls this hook immediately before applying file-local variables
+stored in @code{file-local-variables-alist}.
+@end defvar
+
+@defvar hack-local-variables-hook
+Emacs calls this hook immediately after it finishes applying
+file-local variables stored in @code{file-local-variables-alist}.
+@end defvar
+
+@cindex safe local variable
+  You can specify safe values for a variable with a
+@code{safe-local-variable} property.  The property has to be a
+function of one argument; any value is safe if the function returns
+non-@code{nil} given that value.  Many commonly-encountered file
+variables have @code{safe-local-variable} properties; these include
+@code{fill-column}, @code{fill-prefix}, and @code{indent-tabs-mode}.
+For boolean-valued variables that are safe, use @code{booleanp} as the
+property value.  Lambda expressions should be quoted so that
+@code{describe-variable} can display the predicate.
+
+  When defining a user option using @code{defcustom}, you can set its
+@code{safe-local-variable} property by adding the arguments
+@code{:safe @var{function}} to @code{defcustom} (@pxref{Variable
+Definitions}).
+
+@defopt safe-local-variable-values
+This variable provides another way to mark some variable values as
+safe.  It is a list of cons cells @code{(@var{var} . @var{val})},
+where @var{var} is a variable name and @var{val} is a value which is
+safe for that variable.
+
+When Emacs asks the user whether or not to obey a set of file-local
+variable specifications, the user can choose to mark them as safe.
+Doing so adds those variable/value pairs to
+@code{safe-local-variable-values}, and saves it to the user's custom
+file.
+@end defopt
+
+@defun safe-local-variable-p sym val
+This function returns non-@code{nil} if it is safe to give @var{sym}
+the value @var{val}, based on the above criteria.
+@end defun
+
+@c @cindex risky local variable   Duplicates risky-local-variable
+  Some variables are considered @dfn{risky}.  If a variable is risky,
+it is never entered automatically into
+@code{safe-local-variable-values}; Emacs always queries before setting
+a risky variable, unless the user explicitly allows a value by
+customizing @code{safe-local-variable-values} directly.
+
+  Any variable whose name has a non-@code{nil}
+@code{risky-local-variable} property is considered risky.  When you
+define a user option using @code{defcustom}, you can set its
+@code{risky-local-variable} property by adding the arguments
+@code{:risky @var{value}} to @code{defcustom} (@pxref{Variable
+Definitions}).  In addition, any variable whose name ends in any of
+@samp{-command}, @samp{-frame-alist}, @samp{-function},
+@samp{-functions}, @samp{-hook}, @samp{-hooks}, @samp{-form},
+@samp{-forms}, @samp{-map}, @samp{-map-alist}, @samp{-mode-alist},
+@samp{-program}, or @samp{-predicate} is automatically considered
+risky.  The variables @samp{font-lock-keywords},
+@samp{font-lock-keywords} followed by a digit, and
+@samp{font-lock-syntactic-keywords} are also considered risky.
+
+@defun risky-local-variable-p sym
+This function returns non-@code{nil} if @var{sym} is a risky variable,
+based on the above criteria.
+@end defun
+
+@defvar ignored-local-variables
+This variable holds a list of variables that should not be given local
+values by files.  Any value specified for one of these variables is
+completely ignored.
+@end defvar
+
+  The @samp{Eval:} ``variable'' is also a potential loophole, so Emacs
+normally asks for confirmation before handling it.
+
+@defopt enable-local-eval
+This variable controls processing of @samp{Eval:} in @samp{-*-} lines
+or local variables
+lists in files being visited.  A value of @code{t} means process them
+unconditionally; @code{nil} means ignore them; anything else means ask
+the user what to do for each file.  The default value is @code{maybe}.
+@end defopt
+
+@defopt safe-local-eval-forms
+This variable holds a list of expressions that are safe to
+evaluate when found in the @samp{Eval:} ``variable'' in a file
+local variables list.
+@end defopt
+
+  If the expression is a function call and the function has a
+@code{safe-local-eval-function} property, the property value
+determines whether the expression is safe to evaluate.  The property
+value can be a predicate to call to test the expression, a list of
+such predicates (it's safe if any predicate succeeds), or @code{t}
+(always safe provided the arguments are constant).
+
+  Text properties are also potential loopholes, since their values
+could include functions to call.  So Emacs discards all text
+properties from string values specified for file-local variables.
+
+@node Directory Local Variables
+@section Directory Local Variables
+@cindex directory local variables
+
+  A directory can specify local variable values common to all files in
+that directory; Emacs uses these to create buffer-local bindings for
+those variables in buffers visiting any file in that directory.  This
+is useful when the files in the directory belong to some @dfn{project}
+and therefore share the same local variables.
+
+  There are two different methods for specifying directory local
+variables: by putting them in a special file, or by defining a
+@dfn{project class} for that directory.
+
+@defvr Constant dir-locals-file
+This constant is the name of the file where Emacs expects to find the
+directory-local variables.  The name of the file is
+@file{.dir-locals.el}@footnote{
+The MS-DOS version of Emacs uses @file{_dir-locals.el} instead, due to
+limitations of the DOS filesystems.
+}.  A file by that name in a directory causes Emacs to apply its
+settings to any file in that directory or any of its subdirectories
+(optionally, you can exclude subdirectories; see below).
+If some of the subdirectories have their own @file{.dir-locals.el}
+files, Emacs uses the settings from the deepest file it finds starting
+from the file's directory and moving up the directory tree.  The file
+specifies local variables as a specially formatted list; see
+@ref{Directory Variables, , Per-directory Local Variables, emacs, The
+GNU Emacs Manual}, for more details.
+@end defvr
+
+@defun hack-dir-local-variables
+This function reads the @code{.dir-locals.el} file and stores the
+directory-local variables in @code{file-local-variables-alist} that is
+local to the buffer visiting any file in the directory, without
+applying them.  It also stores the directory-local settings in
+@code{dir-locals-class-alist}, where it defines a special class for
+the directory in which @file{.dir-locals.el} file was found.  This
+function works by calling @code{dir-locals-set-class-variables} and
+@code{dir-locals-set-directory-class}, described below.
+@end defun
+
+@defun hack-dir-local-variables-non-file-buffer
+This function looks for directory-local variables, and immediately
+applies them in the current buffer.  It is intended to be called in
+the mode commands for non-file buffers, such as Dired buffers, to let
+them obey directory-local variable settings.  For non-file buffers,
+Emacs looks for directory-local variables in @code{default-directory}
+and its parent directories.
+@end defun
+
+@defun dir-locals-set-class-variables class variables
+This function defines a set of variable settings for the named
+@var{class}, which is a symbol.  You can later assign the class to one
+or more directories, and Emacs will apply those variable settings to
+all files in those directories.  The list in @var{variables} can be of
+one of the two forms: @code{(@var{major-mode} . @var{alist})} or
+@code{(@var{directory} . @var{list})}.  With the first form, if the
+file's buffer turns on a mode that is derived from @var{major-mode},
+then the all the variables in the associated @var{alist} are applied;
+@var{alist} should be of the form @code{(@var{name} . @var{value})}.
+A special value @code{nil} for @var{major-mode} means the settings are
+applicable to any mode.  In @var{alist}, you can use a special
+@var{name}: @code{subdirs}.  If the associated value is
+@code{nil}, the alist is only applied to files in the relevant
+directory, not to those in any subdirectories.
+
+With the second form of @var{variables}, if @var{directory} is the
+initial substring of the file's directory, then @var{list} is applied
+recursively by following the above rules; @var{list} should be of one
+of the two forms accepted by this function in @var{variables}.
+@end defun
+
+@defun dir-locals-set-directory-class directory class &optional mtime
+This function assigns @var{class} to all the files in @code{directory}
+and its subdirectories.  Thereafter, all the variable settings
+specified for @var{class} will be applied to any visited file in
+@var{directory} and its children.  @var{class} must have been already
+defined by @code{dir-locals-set-class-variables}.
+
+Emacs uses this function internally when it loads directory variables
+from a @code{.dir-locals.el} file.  In that case, the optional
+argument @var{mtime} holds the file modification time (as returned by
+@code{file-attributes}).  Emacs uses this time to check stored
+local variables are still valid.  If you are assigning a class
+directly, not via a file, this argument should be @code{nil}.
+@end defun
+
+@defvar dir-locals-class-alist
+This alist holds the class symbols and the associated variable
+settings.  It is updated by @code{dir-locals-set-class-variables}.
+@end defvar
+
+@defvar dir-locals-directory-cache
+This alist holds directory names, their assigned class names, and
+modification times of the associated directory local variables file
+(if there is one).  The function @code{dir-locals-set-directory-class}
+updates this list.
+@end defvar
+
+@node Variable Aliases
+@section Variable Aliases
+@cindex variable aliases
+
+  It is sometimes useful to make two variables synonyms, so that both
+variables always have the same value, and changing either one also
+changes the other.  Whenever you change the name of a
+variable---either because you realize its old name was not well
+chosen, or because its meaning has partly changed---it can be useful
+to keep the old name as an @emph{alias} of the new one for
+compatibility.  You can do this with @code{defvaralias}.
+
+@defun defvaralias new-alias base-variable &optional docstring
+This function defines the symbol @var{new-alias} as a variable alias
+for symbol @var{base-variable}. This means that retrieving the value
+of @var{new-alias} returns the value of @var{base-variable}, and
+changing the value of @var{new-alias} changes the value of
+@var{base-variable}.  The two aliased variable names always share the
+same value and the same bindings.
+
+If the @var{docstring} argument is non-@code{nil}, it specifies the
+documentation for @var{new-alias}; otherwise, the alias gets the same
+documentation as @var{base-variable} has, if any, unless
+@var{base-variable} is itself an alias, in which case @var{new-alias} gets
+the documentation of the variable at the end of the chain of aliases.
+
+This function returns @var{base-variable}.
+@end defun
+
+  Variable aliases are convenient for replacing an old name for a
+variable with a new name.  @code{make-obsolete-variable} declares that
+the old name is obsolete and therefore that it may be removed at some
+stage in the future.
+
+@defun make-obsolete-variable obsolete-name current-name when &optional access-type
+This function makes the byte compiler warn that the variable
+@var{obsolete-name} is obsolete.  If @var{current-name} is a symbol,
+it is the variable's new name; then the warning message says to use
+@var{current-name} instead of @var{obsolete-name}.  If
+@var{current-name} is a string, this is the message and there is no
+replacement variable.  @var{when} should be a string indicating when
+the variable was first made obsolete (usually a version number
+string).
+
+The optional argument @var{access-type}, if non-@code{nil}, should
+should specify the kind of access that will trigger obsolescence
+warnings; it can be either @code{get} or @code{set}.
+@end defun
+
+  You can make two variables synonyms and declare one obsolete at the
+same time using the macro @code{define-obsolete-variable-alias}.
+
+@defmac define-obsolete-variable-alias obsolete-name current-name &optional when docstring
+This macro marks the variable @var{obsolete-name} as obsolete and also
+makes it an alias for the variable @var{current-name}.  It is
+equivalent to the following:
+
+@example
+(defvaralias @var{obsolete-name} @var{current-name} @var{docstring})
+(make-obsolete-variable @var{obsolete-name} @var{current-name} @var{when})
+@end example
+@end defmac
+
+@defun indirect-variable variable
+This function returns the variable at the end of the chain of aliases
+of @var{variable}.  If @var{variable} is not a symbol, or if @var{variable} is
+not defined as an alias, the function returns @var{variable}.
+
+This function signals a @code{cyclic-variable-indirection} error if
+there is a loop in the chain of symbols.
+@end defun
+
+@example
+(defvaralias 'foo 'bar)
+(indirect-variable 'foo)
+     @result{} bar
+(indirect-variable 'bar)
+     @result{} bar
+(setq bar 2)
+bar
+     @result{} 2
+@group
+foo
+     @result{} 2
+@end group
+(setq foo 0)
+bar
+     @result{} 0
+foo
+     @result{} 0
+@end example
+
+@node Variables with Restricted Values
+@section Variables with Restricted Values
+
+  Ordinary Lisp variables can be assigned any value that is a valid
+Lisp object.  However, certain Lisp variables are not defined in Lisp,
+but in C.  Most of these variables are defined in the C code using
+@code{DEFVAR_LISP}.  Like variables defined in Lisp, these can take on
+any value.  However, some variables are defined using
+@code{DEFVAR_INT} or @code{DEFVAR_BOOL}.  @xref{Defining Lisp
+variables in C,, Writing Emacs Primitives}, in particular the
+description of functions of the type @code{syms_of_@var{filename}},
+for a brief discussion of the C implementation.
+
+  Variables of type @code{DEFVAR_BOOL} can only take on the values
+@code{nil} or @code{t}.  Attempting to assign them any other value
+will set them to @code{t}:
+
+@example
+(let ((display-hourglass 5))
+  display-hourglass)
+     @result{} t
+@end example
+
+@defvar byte-boolean-vars
+This variable holds a list of all variables of type @code{DEFVAR_BOOL}.
+@end defvar
+
+  Variables of type @code{DEFVAR_INT} can only take on integer values.
+Attempting to assign them any other value will result in an error:
+
+@example
+(setq undo-limit 1000.0)
+@error{} Wrong type argument: integerp, 1000.0
+@end example

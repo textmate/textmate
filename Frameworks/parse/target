@@ -1,4 +1,0 @@
-SOURCES      = src/*.cc
-TEST_SOURCES = tests/t_*.cc
-LINK        += text bundles plist regexp scope
-EXPORT       = src/parse.h src/grammar.h

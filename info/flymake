@@ -1,0 +1,1300 @@
+This is ../../info/flymake, produced by makeinfo version 4.13 from
+flymake.texi.
+
+This manual is for GNU Flymake (version 0.3, April 2004), which is a
+universal on-the-fly syntax checker for GNU Emacs.
+
+   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Flymake: (flymake).           A universal on-the-fly syntax checker.
+END-INFO-DIR-ENTRY
+
+
+File: flymake,  Node: Top,  Next: Overview of Flymake,  Up: (dir)
+
+GNU Flymake
+***********
+
+This manual is for GNU Flymake (version 0.3, April 2004), which is a
+universal on-the-fly syntax checker for GNU Emacs.
+
+   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Overview of Flymake::
+* Installing Flymake::
+* Using Flymake::
+* Configuring Flymake::
+* Flymake Implementation::
+* GNU Free Documentation License::
+* Index::
+
+
+File: flymake,  Node: Overview of Flymake,  Next: Installing Flymake,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+Flymake is a universal on-the-fly syntax checker implemented as an
+Emacs minor mode. Flymake runs the pre-configured syntax check tool
+(compiler for C++ files, `perl' for perl files, etc.) in the
+background, passing it a temporary copy of the current buffer, and
+parses the output for known error/warning message patterns. Flymake
+then highlights erroneous lines (i.e. lines for which at least one
+error or warning has been reported by the syntax check tool), and
+displays an overall buffer status in the mode line. Status information
+displayed by Flymake contains total number of errors and warnings
+reported for the buffer during the last syntax check.
+
+   `flymake-goto-next-error' and `flymake-goto-prev-error' functions
+allow for easy navigation to the next/previous erroneous line,
+respectively.
+
+   Calling `flymake-display-err-menu-for-current-line' will popup a
+menu containing error messages reported by the syntax check tool for
+the current line. Errors/warnings belonging to another file, such as a
+`.h' header file included by a `.c' file, are shown in the current
+buffer as belonging to the first line. Menu items for such messages
+also contain a filename and a line number. Selecting such a menu item
+will automatically open the file and jump to the line with error.
+
+   Syntax check is done 'on-the-fly'. It is started whenever
+
+   * buffer is loaded
+
+   * a newline character is added to the buffer
+
+   * some changes were made to the buffer more than `0.5' seconds ago
+     (the delay is configurable).
+
+   Flymake is a universal syntax checker in the sense that it's easily
+extended to support new syntax check tools and error message patterns.
+*Note Configuring Flymake::.
+
+
+File: flymake,  Node: Installing Flymake,  Next: Using Flymake,  Prev: Overview of Flymake,  Up: Top
+
+2 Installing
+************
+
+Flymake is packaged in a single file, `flymake.el'.
+
+   To install/update Flymake, place `flymake.el' to a directory
+somewhere on Emacs load path. You might also want to byte-compile
+`flymake.el' to improve performance.
+
+   Also, place the following line in the `.emacs' file.
+
+     (require 'flymake)
+
+   You might also map the most frequently used Flymake functions, such
+as `flymake-goto-next-error', to some keyboard shortcuts:
+
+     (global-set-key [f3] 'flymake-display-err-menu-for-current-line)
+     (global-set-key [f4] 'flymake-goto-next-error)
+
+
+File: flymake,  Node: Using Flymake,  Next: Configuring Flymake,  Prev: Installing Flymake,  Up: Top
+
+3 Using Flymake
+***************
+
+* Menu:
+
+* Flymake mode::
+* Running the syntax check::
+* Navigating to error lines::
+* Viewing error messages::
+* Syntax check statuses::
+* Troubleshooting::
+
+
+File: flymake,  Node: Flymake mode,  Next: Running the syntax check,  Up: Using Flymake
+
+3.1 Flymake mode
+================
+
+Flymake is an Emacs minor mode. To use Flymake, you must first activate
+`flymake-mode' by using the `flymake-mode' function.
+
+   Instead of manually activating `flymake-mode', you can configure
+Flymake to automatically enable `flymake-mode' upon opening any file
+for which syntax check is possible. To do so, place the following line
+in `.emacs':
+
+     (add-hook 'find-file-hook 'flymake-find-file-hook)
+
+
+File: flymake,  Node: Running the syntax check,  Next: Navigating to error lines,  Prev: Flymake mode,  Up: Using Flymake
+
+3.2 Running the syntax check
+============================
+
+When `flymake-mode' is active, syntax check is started automatically on
+any of the three conditions mentioned above. Syntax check can also be
+started manually by using the
+`flymake-start-syntax-check-for-current-buffer' function. This can be
+used, for example, when changes were made to some other buffer
+affecting the current buffer.
+
+
+File: flymake,  Node: Navigating to error lines,  Next: Viewing error messages,  Prev: Running the syntax check,  Up: Using Flymake
+
+3.3 Navigating to error lines
+=============================
+
+After syntax check is completed, lines for which at least one error or
+warning has been reported are highlighted, and total number of errors
+and warning is shown in the mode line. Use the following functions to
+navigate the highlighted lines.
+
+`flymake-goto-next-error'Moves point to the next erroneous line, if any.
+`flymake-goto-prev-error'Moves point to the previous erroneous line.
+
+   These functions treat erroneous lines as a linked list. Therefore,
+`flymake-goto-next-error' will go to the first erroneous line when
+invoked in the end of the buffer.
+
+
+File: flymake,  Node: Viewing error messages,  Next: Syntax check statuses,  Prev: Navigating to error lines,  Up: Using Flymake
+
+3.4 Viewing error messages
+==========================
+
+To view error messages belonging to the current line, use the
+`flymake-display-err-menu-for-current-line' function. If there's at
+least one error or warning reported for the current line, this function
+will display a popup menu with error/warning texts.  Selecting the menu
+item whose error belongs to another file brings forward that file with
+the help of the `flymake-goto-file-and-line' function.
+
+
+File: flymake,  Node: Syntax check statuses,  Next: Troubleshooting,  Prev: Viewing error messages,  Up: Using Flymake
+
+3.5 Syntax check statuses
+=========================
+
+After syntax check is finished, its status is displayed in the mode
+line.  The following statuses are defined.
+
+Flymake* or        Flymake is currently running. For the second case,
+Flymake:E/W*       E/W contains the       error and warning count for
+                   the previous run.
+Flymake            Syntax check is not running. Usually this means
+                   syntax check was       successfully passed (no
+                   errors, no warnings). Other possibilities are:
+                   syntax check was killed as a result of executing
+                   `flymake-compile', or syntax check cannot start as
+                   compilation       is currently in progress.
+Flymake:E/W        Number of errors/warnings found by the syntax check
+                   process.
+Flymake:!          Flymake was unable to find master file for the
+                   current buffer.
+
+   The following errors cause a warning message and switch flymake mode
+OFF for the buffer.
+
+CFGERR             Syntax check process returned nonzero exit code, but
+                   no       errors/warnings were reported. This
+                   indicates a possible configuration       error (for
+                   example, no suitable error message patterns for the
+                      syntax check tool).
+NOMASTER           Flymake was unable to find master file for the
+                   current buffer.
+NOMK               Flymake was unable to find a suitable buildfile for
+                   the current buffer.
+PROCERR            Flymake was unable to launch a syntax check process.
+
+
+File: flymake,  Node: Troubleshooting,  Prev: Syntax check statuses,  Up: Using Flymake
+
+3.6 Troubleshooting
+===================
+
+Flymake uses a simple logging facility for indicating important points
+in the control flow. The logging facility sends logging messages to the
+`*Messages*' buffer. The information logged can be used for resolving
+various problems related to Flymake.
+
+   Logging output is controlled by the `flymake-log-level' variable.
+`3' is the  most verbose level, and `-1' switches logging off.
+
+
+File: flymake,  Node: Configuring Flymake,  Next: Flymake Implementation,  Prev: Using Flymake,  Up: Top
+
+4 Configuring and Extending Flymake
+***********************************
+
+* Menu:
+
+* Customizable variables::
+* Adding support for a new syntax check tool::
+
+   Flymake was designed to be easily extended for supporting new syntax
+check tools and error message patterns.
+
+
+File: flymake,  Node: Customizable variables,  Next: Adding support for a new syntax check tool,  Up: Configuring Flymake
+
+4.1 Customizable variables
+==========================
+
+This section summarizes variables used for Flymake configuration.
+
+`flymake-log-level'
+     Controls logging output, see *note Troubleshooting::.
+
+`flymake-allowed-file-name-masks'
+     A list of `(filename-regexp, init-function, cleanup-function
+     getfname-function)' for configuring syntax check tools. *Note
+     Adding support for a new syntax check tool::.
+
+`flymake-buildfile-dirs'
+     A list of directories (relative paths) for searching a buildfile.
+     *Note Locating the buildfile::.
+
+`flymake-master-file-dirs'
+     A list of directories for searching a master file. *Note Locating
+     a master file::.
+
+`flymake-get-project-include-dirs-function'
+     A function used for obtaining a list of project include dirs (C/C++
+     specific). *Note Getting the include directories::.
+
+`flymake-master-file-count-limit'
+`flymake-check-file-limit'
+     Used when looking for a master file. *Note Locating a master
+     file::.
+
+`flymake-err-line-patterns'
+     Patterns for error/warning messages in the form `(regexp file-idx
+     line-idx col-idx err-text-idx)'. *Note Parsing the output::.
+
+`flymake-compilation-prevents-syntax-check'
+     A flag indicating whether compilation and syntax check of the same
+     file cannot be run simultaneously.
+
+`flymake-no-changes-timeout'
+     If any changes are made to the buffer, syntax check is
+     automatically started after `flymake-no-changes-timeout' seconds.
+
+`flymake-gui-warnings-enabled'
+     A boolean flag indicating whether Flymake will show message boxes
+     for non-recoverable errors. If `flymake-gui-warnings-enabled' is
+     `nil', these errors will only be logged to the `*Messages*' buffer.
+
+`flymake-start-syntax-check-on-newline'
+     A boolean flag indicating whether to start syntax check after a
+     newline character is added to the buffer.
+
+`flymake-errline'
+     A custom face for highlighting lines for which at least one error
+     has been reported.
+
+`flymake-warnline'
+     A custom face for highlighting lines for which at least one warning
+     and no errors have been reported.
+
+
+
+File: flymake,  Node: Adding support for a new syntax check tool,  Prev: Customizable variables,  Up: Configuring Flymake
+
+4.2 Adding support for a new syntax check tool
+==============================================
+
+* Menu:
+
+* Example -- Configuring a tool called directly::
+* Example -- Configuring a tool called via make::
+
+   Syntax check tools are configured using the
+`flymake-allowed-file-name-masks' list. Each item of this list has the
+following format:
+
+     (filename-regexp, init-function, cleanup-function, getfname-function)
+
+`filename-regexp'
+     This field is used as a key for locating init/cleanup/getfname
+     functions for the buffer.  Items in
+     `flymake-allowed-file-name-masks' are searched sequentially. The
+     first item with `filename-regexp' matching buffer filename is
+     selected. If no match is found, `flymake-mode' is switched off.
+
+`init-function'
+     `init-function' is required to initialize the syntax check,
+     usually by creating a temporary copy of the buffer contents. The
+     function must return `(list cmd-name arg-list)'. If
+     `init-function' returns null, syntax check is aborted, by
+     `flymake-mode' is not switched off.
+
+`cleanup-function'
+     `cleanup-function' is called after the syntax check process is
+     complete and should take care of proper deinitialization, which is
+     usually deleting a temporary copy created by the `init-function'.
+
+`getfname-function'
+     This function is used for translating filenames reported by the
+     syntax check tool into "real" filenames. Filenames reported by the
+     tool will be different from the real ones, as actually the tool
+     works with the temporary copy.  In most cases, the default
+     implementation provided by Flymake, `flymake-get-real-file-name',
+     can be used as `getfname-function'.
+
+
+   To add support for a new syntax check tool, write corresponding
+`init-function', and, optionally `cleanup-function' and
+`getfname-function'.  If the format of error messages reported by the
+new tool is not yet supported by Flymake, add a new entry to the
+`flymake-err-line-patterns' list.
+
+   The following sections contain some examples of configuring Flymake
+support for various syntax check tools.
+
+
+File: flymake,  Node: Example -- Configuring a tool called directly,  Next: Example -- Configuring a tool called via make,  Up: Adding support for a new syntax check tool
+
+4.2.1 Example - Configuring a tool called directly
+--------------------------------------------------
+
+In this example, we will add support for `perl' as a syntax check tool.
+`perl' supports the `-c' option which does syntax checking.
+
+   First, we write the `init-function':
+
+     (defun flymake-perl-init ()
+       (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                          'flymake-create-temp-inplace))
+              (local-file (file-relative-name
+                           temp-file
+                           (file-name-directory buffer-file-name))))
+         (list "perl" (list "-wc " local-file))))
+
+   `flymake-perl-init' creates a temporary copy of the buffer contents
+with the help of `flymake-init-create-temp-buffer-copy', and builds an
+appropriate command line.
+
+   Next, we add a new entry to the `flymake-allowed-file-name-masks':
+
+     (setq flymake-allowed-file-name-masks
+           (cons '(".+\\.pl$"
+                   flymake-perl-init
+                   flymake-simple-cleanup
+                   flymake-get-real-file-name)
+                 flymake-allowed-file-name-masks))
+
+   Note that we use standard `cleanup-function' and `getfname-function'.
+
+   Finally, we add an entry to `flymake-err-line-patterns':
+
+     (setq flymake-err-line-patterns
+           (cons '("\\(.*\\) at \\([^ \n]+\\) line \\([0-9]+\\)[,.\n]"
+                   2 3 nil 1)
+                 flymake-err-line-patterns))
+
+
+File: flymake,  Node: Example -- Configuring a tool called via make,  Prev: Example -- Configuring a tool called directly,  Up: Adding support for a new syntax check tool
+
+4.2.2 Example - Configuring a tool called via make
+--------------------------------------------------
+
+In this example we will add support for C files syntax checked by `gcc'
+called via `make'.
+
+   We're not required to write any new functions, as Flymake already has
+functions for `make'. We just add a new entry to the
+`flymake-allowed-file-name-masks':
+
+     (setq flymake-allowed-file-name-masks
+           (cons '(".+\\.c$"
+                   flymake-simple-make-init
+                   flymake-simple-cleanup
+                   flymake-get-real-file-name)
+                 flymake-allowed-file-name-masks))
+
+   `flymake-simple-make-init' builds the following `make' command line:
+
+     (list "make"
+           (list "-s" "-C"
+                 base-dir
+                 (concat "CHK_SOURCES=" source)
+                 "SYNTAX_CHECK_MODE=1"
+                 "check-syntax"))
+
+   `base-dir' is a directory containing `Makefile', see *note Locating
+the buildfile::.
+
+   Thus, `Makefile' must contain the `check-syntax' target. In our case
+this target might look like this:
+
+check-syntax:
+	gcc -o /dev/null -S ${CHK_SOURCES}
+
+The format of error messages reported by `gcc' is already supported by
+Flymake, so we don't have to add a new entry to
+`flymake-err-line-patterns'.  Note that if you are using Automake, you
+may want to replace `gcc' with the standard Automake variable `COMPILE':
+
+check-syntax:
+	$(COMPILE) -o /dev/null -S ${CHK_SOURCES}
+
+
+File: flymake,  Node: Flymake Implementation,  Next: GNU Free Documentation License,  Prev: Configuring Flymake,  Up: Top
+
+5 Flymake Implementation
+************************
+
+* Menu:
+
+* Determining whether syntax check is possible::
+* Making a temporary copy::
+* Locating a master file::
+* Getting the include directories::
+* Locating the buildfile::
+* Starting the syntax check process::
+* Parsing the output::
+* Highlighting erroneous lines::
+* Interaction with other modes::
+
+   Syntax check is started by calling
+`flymake-start-syntax-check-for-current-buffer'.  Flymake first
+determines whether it is able to do syntax check. It then saves a copy
+of the buffer in a temporary file in the buffer's directory (or in the
+system temp directory - for java files), creates a syntax check command
+and launches a process with this command. The output is parsed using a
+list of error message patterns, and error information (file name, line
+number, type and text) is saved. After the process has finished,
+Flymake highlights erroneous lines in the buffer using the accumulated
+error information.
+
+
+File: flymake,  Node: Determining whether syntax check is possible,  Next: Making a temporary copy,  Up: Flymake Implementation
+
+5.1 Determining whether syntax check is possible
+================================================
+
+Syntax check is considered possible if there's an entry in
+`flymake-allowed-file-name-masks' matching buffer's filename and its
+`init-function' returns non-`nil' value.
+
+   Two syntax check modes are distinguished:
+
+  1. Buffer can be syntax checked in a standalone fashion, that is, the
+     file (its temporary copy, in fact) can be passed over to the
+     compiler to do the syntax check. Examples are C/C++ (.c, .cpp) and
+     Java (.java) sources.
+
+  2. Buffer can be syntax checked, but additional file, called master
+     file, is required to perform this operation. A master file is a
+     file that includes the current file, so that running a syntax
+     check tool on it will also check syntax in the current file.
+     Examples are C/C++ (.h, .hpp) headers.
+
+
+   These modes are handled inside init/cleanup/getfname functions, see
+*note Adding support for a new syntax check tool::.
+
+   Flymake contains implementations of all functionality required to
+support different syntax check modes described above (making temporary
+copies, finding master files, etc.), as well as some tool-specific
+(routines for Make, Ant, etc.) code.
+
+
+File: flymake,  Node: Making a temporary copy,  Next: Locating a master file,  Prev: Determining whether syntax check is possible,  Up: Flymake Implementation
+
+5.2 Making a temporary copy
+===========================
+
+After the possibility of the syntax check has been determined, a
+temporary copy of the current buffer is made so that the most recent
+unsaved changes could be seen by the syntax check tool. Making a copy
+is quite straightforward in a standalone case (mode `1'), as it's just
+saving buffer contents to a temporary file.
+
+   Things get trickier, however, when master file is involved, as it
+requires to
+
+   * locate a master file
+
+   * patch it to include the current file using its new (temporary)
+     name.
+
+   Locating a master file is discussed in the following section.
+
+   Patching just changes all appropriate lines of the master file so
+that they use the new (temporary) name of the current file. For
+example, suppose current file name is `file.h', the master file is
+`file.cpp', and it includes current file via `#include "file.h"'.
+Current file's copy is saved to file `file_flymake.h', so the include
+line must be changed to `#include "file_flymake.h"'. Finally, patched
+master file is saved to `file_flymake_master.cpp', and the last one is
+passed to the syntax check tool.
+
+
+File: flymake,  Node: Locating a master file,  Next: Getting the include directories,  Prev: Making a temporary copy,  Up: Flymake Implementation
+
+5.3 Locating a master file
+==========================
+
+Master file is located in two steps.
+
+   First, a list of possible master files is built. A simple name
+matching is used to find the files. For a C++ header `file.h', Flymake
+searches for all `.cpp' files in the directories whose relative paths
+are stored in a customizable variable `flymake-master-file-dirs', which
+usually contains something like `("." "./src")'. No more than
+`flymake-master-file-count-limit' entries is added to the master file
+list. The list is then sorted to move files with names `file.cpp' to
+the top.
+
+   Next, each master file in a list is checked to contain the
+appropriate include directives. No more than `flymake-check-file-limit'
+of each file are parsed.
+
+   For `file.h', the include directives to look for are `#include
+"file.h"', `#include "../file.h"', etc. Each include is checked against
+a list of include directories (see *note Getting the include
+directories::) to be sure it points to the correct `file.h'.
+
+   First matching master file found stops the search. The master file
+is then patched and saved to disk. In case no master file is found,
+syntax check is aborted, and corresponding status (!) is reported in
+the mode line.
+
+
+File: flymake,  Node: Getting the include directories,  Next: Locating the buildfile,  Prev: Locating a master file,  Up: Flymake Implementation
+
+5.4 Getting the include directories
+===================================
+
+Two sets of include directories are distinguished: system include
+directories and project include directories. The former is just the
+contents of the `INCLUDE' environment variable. The latter is not so
+easy to obtain, and the way it can be obtained can vary greatly for
+different projects.  Therefore, a customizable variable
+`flymake-get-project-include-dirs-function' is used to provide the way
+to implement the desired behavior.
+
+   The default implementation, `flymake-get-project-include-dirs-imp',
+uses a `make' call. This requires a correct base directory, that is, a
+directory containing a correct `Makefile', to be determined.
+
+   As obtaining the project include directories might be a costly
+operation, its return value is cached in the hash table. The cache is
+cleared in the beginning of every syntax check attempt.
+
+
+File: flymake,  Node: Locating the buildfile,  Next: Starting the syntax check process,  Prev: Getting the include directories,  Up: Flymake Implementation
+
+5.5 Locating the buildfile
+==========================
+
+Flymake can be configured to use different tools for performing syntax
+checks. For example, it can use direct compiler call to syntax check a
+perl script or a call to `make' for a more complicated case of a
+`C/C++' source. The general idea is that simple files, like perl
+scripts and html pages, can be checked by directly invoking a
+corresponding tool. Files that are usually more complex and generally
+used as part of larger projects, might require non-trivial options to
+be passed to the syntax check tool, like include directories for C++.
+The latter files are syntax checked using some build tool, like Make or
+Ant.
+
+   All Make configuration data is usually stored in a file called
+`Makefile'. To allow for future extensions, flymake uses a notion of
+buildfile to reference the 'project configuration' file.
+
+   Special function, `flymake-find-buildfile' is provided for locating
+buildfiles.  Searching for a buildfile is done in a manner similar to
+that of searching for possible master files. A customizable variable
+`flymake-buildfile-dirs' holds a list of relative paths to the
+buildfile. They are checked sequentially until a buildfile is found. In
+case there's no build file, syntax check is aborted.
+
+   Buildfile values are also cached.
+
+
+File: flymake,  Node: Starting the syntax check process,  Next: Parsing the output,  Prev: Locating the buildfile,  Up: Flymake Implementation
+
+5.6 Starting the syntax check process
+=====================================
+
+The command line (command name and the list of arguments) for launching
+a process is returned by the initialization function. Flymake then just
+calls `start-process' to start an asynchronous process and configures
+process filter and sentinel which is used for processing the output of
+the syntax check tool.
+
+
+File: flymake,  Node: Parsing the output,  Next: Highlighting erroneous lines,  Prev: Starting the syntax check process,  Up: Flymake Implementation
+
+5.7 Parsing the output
+======================
+
+The output generated by the syntax check tool is parsed in the process
+filter/sentinel using the error message patterns stored in the
+`flymake-err-line-patterns' variable. This variable contains a list of
+items of the form `(regexp file-idx line-idx err-text-idx)', used to
+determine whether a particular line is an error message and extract
+file name, line number and error text, respectively. Error type
+(error/warning) is also guessed by matching error text with the
+'`^[wW]arning'' pattern. Anything that was not classified as a warning
+is considered an error. Type is then used to sort error menu items,
+which shows error messages first.
+
+   Flymake is also able to interpret error message patterns missing
+err-text-idx information. This is done by merely taking the rest of the
+matched line (`(substring line (match-end 0))') as error text. This
+trick allows to make use of a huge collection of error message line
+patterns from `compile.el'. All these error patterns are appended to
+the end of `flymake-err-line-patterns'.
+
+   The error information obtained is saved in a buffer local variable.
+The buffer for which the process output belongs is determined from the
+process-id->buffer mapping updated after every process launch/exit.
+
+
+File: flymake,  Node: Highlighting erroneous lines,  Next: Interaction with other modes,  Prev: Parsing the output,  Up: Flymake Implementation
+
+5.8 Highlighting erroneous lines
+================================
+
+Highlighting is implemented with overlays and happens in the process
+sentinel, after calling the cleanup function. Two customizable faces
+are used: `flymake-errline' and `flymake-warnline'.  Errors belonging
+outside the current buffer are considered to belong to line 1 of the
+current buffer.
+
+
+File: flymake,  Node: Interaction with other modes,  Prev: Highlighting erroneous lines,  Up: Flymake Implementation
+
+5.9 Interaction with other modes
+================================
+
+The only mode flymake currently knows about is `compile'.
+
+   Flymake can be configured to not start syntax check if it thinks the
+compilation is in progress. The check is made by the
+`flymake-compilation-is-running', which tests the
+`compilation-in-progress' variable. The reason why this might be useful
+is saving CPU time in case both syntax check and compilation are very
+CPU intensive. The original reason for adding this feature, though, was
+working around a locking problem with MS Visual C++ compiler.
+
+   Flymake also provides an alternative command for starting
+compilation, `flymake-compile':
+
+     (defun flymake-compile ()
+       "Kill all flymake syntax checks then start compilation."
+       (interactive)
+       (flymake-stop-all-syntax-checks)
+       (call-interactively 'compile))
+
+   It just kills all the active syntax check processes before calling
+`compile'.
+
+
+File: flymake,  Node: GNU Free Documentation License,  Next: Index,  Prev: Flymake Implementation,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: flymake,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* Adding support for a new syntax check tool: Adding support for a new syntax check tool.
+                                                                (line 6)
+* Adding support for C (gcc+make):       Example -- Configuring a tool called via make.
+                                                                (line 6)
+* Adding support for perl:               Example -- Configuring a tool called directly.
+                                                                (line 6)
+* buildfile, locating:                   Locating the buildfile.
+                                                                (line 6)
+* Configuring and Extending Flymake:     Configuring Flymake.   (line 6)
+* Customizable variables:                Customizable variables.
+                                                                (line 6)
+* Erroneous lines, faces:                Highlighting erroneous lines.
+                                                                (line 6)
+* flymake-mode:                          Flymake mode.          (line 6)
+* Implementation details:                Flymake Implementation.
+                                                                (line 6)
+* Include directories (C/C++ specific):  Getting the include directories.
+                                                                (line 6)
+* Installing Flymake:                    Installing Flymake.    (line 6)
+* Interaction with compile mode:         Interaction with other modes.
+                                                                (line 6)
+* Interaction with other modes:          Interaction with other modes.
+                                                                (line 6)
+* Locating the buildfile:                Locating the buildfile.
+                                                                (line 6)
+* Logging:                               Troubleshooting.       (line 6)
+* Makefile, locating:                    Locating the buildfile.
+                                                                (line 6)
+* Manually starting the syntax check:    Running the syntax check.
+                                                                (line 6)
+* Master file <1>:                       Locating a master file.
+                                                                (line 6)
+* Master file <2>:                       Making a temporary copy.
+                                                                (line 6)
+* Master file:                           Determining whether syntax check is possible.
+                                                                (line 6)
+* Navigating to error lines:             Navigating to error lines.
+                                                                (line 6)
+* Overview of Flymake:                   Overview of Flymake.   (line 6)
+* Parsing the output:                    Parsing the output.    (line 6)
+* Syntax check models:                   Determining whether syntax check is possible.
+                                                                (line 6)
+* Syntax check process:                  Starting the syntax check process.
+                                                                (line 6)
+* Syntax check statuses:                 Syntax check statuses. (line 6)
+* Temporary copy of the buffer:          Making a temporary copy.
+                                                                (line 6)
+* Troubleshooting:                       Troubleshooting.       (line 6)
+* Using Flymake:                         Using Flymake.         (line 6)
+* Viewing error messages:                Viewing error messages.
+                                                                (line 6)
+
+
+
+Tag Table:
+Node: Top1064
+Node: Overview of Flymake2162
+Node: Installing Flymake3973
+Node: Using Flymake4660
+Node: Flymake mode4956
+Node: Running the syntax check5487
+Node: Navigating to error lines6007
+Node: Viewing error messages6762
+Node: Syntax check statuses7350
+Node: Troubleshooting9112
+Node: Configuring Flymake9628
+Node: Customizable variables10006
+Node: Adding support for a new syntax check tool12257
+Node: Example -- Configuring a tool called directly14491
+Node: Example -- Configuring a tool called via make16108
+Node: Flymake Implementation17731
+Node: Determining whether syntax check is possible18825
+Node: Making a temporary copy20196
+Node: Locating a master file21501
+Node: Getting the include directories22877
+Node: Locating the buildfile23929
+Node: Starting the syntax check process25395
+Node: Parsing the output25927
+Node: Highlighting erroneous lines27367
+Node: Interaction with other modes27875
+Node: GNU Free Documentation License28944
+Node: Index54122
+
+End Tag Table

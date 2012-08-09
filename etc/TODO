@@ -1,0 +1,1263 @@
+Emacs TODO List                                                   -*-outline-*-
+
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+If you are ready to start working on any of these TODO items, we
+appreciate your help; please write to emacs-devel@gnu.org so we can be
+aware that the problem is being addressed, and talk with you how to do
+it best.  Since Emacs is an FSF-copyrighted package, please be
+prepared to sign legal papers to transfer the copyright on your work
+to the FSF.
+
+* Tentative plan for Emacs-24
+
+** concurrency: including it as an "experimental" compile-time option
+  sounds good.  Of course there might still be big questions around
+  "which form of concurrency" we'll want.
+** Overhaul of customize: sounds wonderful.
+** better support for dynamic embedded graphics: I like this idea (my
+  mpc.el code could use it for the volume widget), tho I wonder if the
+  resulting efficiency will be sufficient.
+** Spread Semantic.
+** Improve the "code snippets" support: consolidate skeleton.el, tempo.el,
+  and expand.el (any other?) and then advertise/use/improve it.
+** Improve VC: yes, there's a lot of work to be done there :-(
+  And most of it could/should make it into Emacs-23.3.
+
+** Random things that cross my mind right now that I'd like to see (some of
+them from my local hacks), but it's not obvious at all whether they'll
+make it.
+*** multiple inheritance for keymaps (to get rid of the
+  fix_submap_inheritance hack and to more cleanly express the
+  relationship between minibuffer-local-*-map): I've had this locally
+  for a long time, but the details of the semantics is somewhat ... delicate.
+*** prog-mode could/should provide a better fill-paragraph default
+  that uses syntax-tables to recognize string/comment boundaries.
+*** provide more completion-at-point-functions.  Make existing
+  in-buffer completion use completion-at-point.
+*** "functional" function-key-map that would make it easy to add (and
+  remove) mappings like "FOO-mouse-4 -> FOO-scroll-down",
+  "FOO-tab -> ?\FOO-\t", "uppercase -> lowercase", "[fringe KEY...] ->
+  [KEY]", "H-FOO -> M-FOO", "C-x C-y FOO -> H-FOO", ...
+
+
+* Simple tasks. These don't require much Emacs knowledge, they are
+suitable for anyone from beginners to experts.
+
+** Convert modes that use view-mode to be derived from special-mode instead.
+
+** Major modes should have a menu entry.  Examples of modes that do
+not have one at the moment and probably should: text-mode, inferior-lisp-mode.
+
+** Check if all items on the mode-line have a suitable tooltip for all modes.
+
+** edebug and debugger-mode should have a toolbar.
+It can use the same icons as gud.
+
+** Check what minor modes don't use define-minor-mode and convert them
+to use it.
+
+** Convert all defvars with leading `*' in the doc-strings into defcustoms
+of appropriate :type and :group.
+
+** Remove any leading `*'s from defcustom doc-strings.
+
+** Remove unnecessary autoload cookies from defcustoms.
+This needs a bit of care, since often people have become used to
+expecting such variables to always be defined, eg when they modify
+things in their .emacs.
+
+** See if other files can use generated-autoload-file (see eg ps-print).
+
+** Write more tests.  Pick a fixed bug from the database, write a test
+case to make sure it stays fixed.  Or pick your favorite programming
+major-mode, and write a test for its indentation.  Or a version
+control backend, and write a test for its status parser.  Etc.
+See test/automated for examples.
+
+* Small but important fixes needed in existing features:
+
+** Flymake's customization mechanism needs to be both simpler (fewer
+levels of indirection) and better documented, so it is easier to
+understand.  I find it quite hard to figure out what compilation
+command it will use.
+
+I suggest totally rewriting that part of Flymake, using the simplest
+mechanism that suffices for the specific needs.  That will be easy
+for users to customize.
+
+** Compute the list of active keymaps *after* reading the first event.
+
+** Distribute a bar cursor of width > 1 evenly between the two glyphs
+   on each side of the bar (what to do at the edges?).
+
+** buffer-offer-save should be a permanent local.
+
+** revert-buffer should eliminate overlays and the mark.
+   For related problems consult the thread starting with
+   http://lists.gnu.org/archive/html/emacs-devel/2005-11/msg01346.html
+
+** erase-buffer should perhaps disregard read-only properties of text.
+
+** Fix the kill/yank treatment of invisible text.  At the moment,
+  invisible text is placed in the kill-ring, so that the contents of
+  the ring may not correspond to the text as displayed to the user.
+  It ought to be possible to omit text which is invisible (due to a
+  text-property, overlay, or selective display) from the kill-ring.
+
+** Change the way define-minor-mode handles autoloading.
+  It should not generate :require.  Or :require in defcustom
+  should not be recorded in the user's custom-set-variables call.
+
+** Feature to change cursor shape when Emacs is idle (for more than
+  a specified time).
+
+** The buttons at the top of a custom buffer should not omit
+  variables whose values are currently hidden.
+
+** Clean up the variables in browse-url.  Perhaps use a shell command string to
+  specify the browser instead of the mushrooming set of functions.
+  See also ESR's proposal for a BROWSER environment variable
+  <URL:http://www.catb.org/~esr/BROWSER/browse-url.patch>.
+
+** Enhance scroll-bar to handle tall line (similar to line-move).
+
+** In Custom buffers, put the option that turns a mode on or off first,
+  using a heuristic of some kind?
+
+** Define recompute-arg and recompute-arg-if for fix_command to use.
+  See rms message of 11 Dec 05.
+
+** Height returned by frame-parameter ... and height given to
+   make-frame does not mean the same thing.  The former includes menu and
+   tool bar lines, the latter don't.  frame-parameter should return height
+   without menu and tool bar lines.
+
+** In Emacs Info, examples of using Customize should be clickable
+   and they should create Custom buffers.
+
+** The toolbar should show keyboard equivalents in its tooltips.
+
+** Add function to redraw the tool bar.
+
+** Redesign the load-history data structure so it can cope better
+  with evaluating definitions of the same function from different files,
+  recording which file the latest definition came from.
+
+** make back_comment use syntax-ppss or equivalent.
+
+** Consider improving src/sysdep.c's search for a fqdn.
+http://lists.gnu.org/archive/html/emacs-devel/2007-04/msg00782.html
+
+** Find a proper fix for rcirc multiline nick adding.
+http://lists.gnu.org/archive/html/emacs-devel/2007-04/msg00684.html
+
+** Implement `network-interface-list' and `network-interface-info'
+on MS-Windows.  Hint: the information is present in the Registry,
+under the keys
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Linkage\
+and
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\<device>\
+where <device> is the network device found under the first key.
+
+** Check for any included packages that define obsolete bug-reporting commands.
+Change them to use report-emacs-bug.
+
+** Allow fringe indicators to display a tooltip (provide a help-echo property?)
+
+** Add a defcustom that supplies a function to name numeric backup files,
+like make-backup-file-name-function for non-numeric backup files.
+
+** `dired-mode' should specify the semantics of `buffer-modified-p' for
+dired buffers and DTRT WRT `auto-revert-mode'.
+
+** Check uses of prin1 for error-handling.
+http://lists.gnu.org/archive/html/emacs-devel/2008-08/msg00456.html
+
+* Important features:
+** Extended text-properties (to make overlays "obsolete")
+*** Several text-property planes
+This would get us rid of font-lock-face property (and I'd be happy to
+get rid of char-property-alias-alist as well) since font-lock would
+simply use the `face' property in the `font-lock' plane.
+Each property would come with an Elisp merge-function.  The merge
+would be performed in add-text-properties.
+*** zero-width text-properties.
+** Having tabs above a window to switch buffers in it.
+
+** "Perspectives" are named persistent window configurations.  We have
+had the window configuration mechanism in GNU Emacs since the
+beginning but we have never developed a good user interface to take
+advantage of them.  Eclipse's user interface seems to be good.
+
+Perspectives work well even if you do the equivalent of C-x 4 C-f
+because of the distinction between view windows vs file windows.  In
+Emacs this is more or less the "dedicated window" feature, but we have
+never really made it work for this.
+
+Perspectives also need to interact with the tabs.
+
+** Imenu could be extended into a file-structure browsing mechanism
+using code like that of customize-groups.
+
+** Display something in the margin on lines that have compilation errors.
+
+** Compilation error navigation bar, parallel to the scroll bar,
+indicating where in the buffer there are compilation errors.
+Perhaps we could arrange to display these error indications on top
+of the scroll bar itself.  That depends on to what extent toolkit
+scroll bars are extensible.
+
+** Provide user-friendly ways to list all available font families,
+  list fonts, display a font as a sample, etc.  [fx is looking at
+  multilingual font selection for the Unicode branch of Emacs.]
+
+** Provide a convenient way to select a color with the mouse.
+
+** Rewrite the face code to be simpler, clearer and faster.
+
+** Program Enriched mode to read and save in RTF.  [Is there actually a
+  decent single definition of RTF?  Maybe see info at
+  http://latex2rtf.sourceforge.net/.]  This task seems to be addressed
+  by http://savannah.nongnu.org/projects/emacs-rtf/, which is still in
+  very early stages.
+
+** Implement primitive and higher-level functions to allow filling
+  properly with variable-pitch faces.
+
+** Implement a smoother vertical scroll facility, one that allows
+  C-v to scroll through a tall image.  The primitive operations
+  posn-at-point and posn-at-x-y should now make it doable in elisp.
+
+** Implement intelligent search/replace, going beyond query-replace
+  (see http://groups.csail.mit.edu/uid/projects/clustering/chi04.pdf).
+
+** Implement other text formatting properties.
+*** Footnotes that can appear either in place or at the end of the page.
+*** text property that says "don't break line in middle of this".
+   Don't break the line between two characters that have the
+   same value of this property.
+*** Discretionary hyphens that are not visible when they are at end of line.
+
+** Internationalize Emacs's messages.
+
+** Set up a facility to save backtraces when errors happen during
+specified filters, specified timers, and specified hooks.
+
+** Install mmc@maruska.dyndns.org's no-flicker change.
+
+** Add a "current vertical pixel level" value that goes with point,
+  so that motion commands can also move through tall images.
+  This value would be to point as window-vscroll is to window-start.
+
+** Address internationalization of symbols names essentially
+  as documentation, e.g. in command names and Custom.
+
+** Make the Lucid menu widget display multilingual text.  [This
+  probably needs to be done from actual Emacs buffers, either directly
+  in the menu or by rendering in an unmapped window and copying the
+  pixels.  The current code assumes a specific locale; that isn't good
+  enough even if X can render the arbitrary text] [The gtk
+  port now displays multilingual text in menus, but only insofar as
+  Emacs can encode it as utf-8 and gtk can display the result.]
+  Maybe making Lucid menus work like Gtk's (i.e. just force utf-8) is good
+  enough now that Emacs can encode most chars into utf-8.
+
+** Remove the limitation that window and frame widths and heights can
+  be only full columns/lines.
+
+* Other features we would like:
+
+** Make longlines-mode wrap lines based on screen position instead
+   of character position, so that variable-width fonts can be handled
+   properly.
+
+** Allow frames(terminals) created by emacsclient to inherit their environment
+from the emacsclient process.
+** Remove the default toggling behavior of minor modes when called from elisp
+rather than interactively.  This a trivial one-liner in easy-mode.el.
+
+** Create a category of errors called `user-error' for errors which are
+typically due to pilot errors and should thus be in debug-ignored-errors.
+
+** Give Tar mode all the features of Archive mode.
+
+** Create a category of errors called `process-error'
+  for some or all errors associated with using subprocesses.
+
+** Maybe reinterpret `parse-error' as a category of errors
+  and put some other errors under it.
+
+** A function to tell you the argument pattern of functions.
+  See `function-arity' in http://www.loveshack.ukfsn.org/emacs/fx-misc.el.
+
+** Make byte-compile warn when a doc string is too wide.
+
+** Make byte-optimization warnings issue accurate line numbers.
+
+** A function to check for customizable options that have been
+  set but not saved, and ask the user whether to save them.
+  This could go in kill-emacs-query-functions, to remind people
+  to save their changes. If the user says yes, show them
+  in a Custom buffer using customize-customized.
+
+** Record the sxhash of the default value for customized variables
+  and notify the user (maybe by adding a menu item or toolbar button,
+  as the detection can occur during autoload time) when the default
+  changes (meaning that new versions of the Lisp source with a changed
+  default value got installed) and offer ediff on the respective
+  customization buffers.
+
+** Emacs Lisp mode could put an overlay on the defun for every
+  function that has advice.  The overlay could have `after-text' like
+  " [Function has advice]".  It might look like (defun foo [Function
+  has advice] (x y) The overlay could also be a button that you could
+  use to view the advice.
+
+** Add a function to get the insertion-type of the markers in an overlay.
+
+** ange-ftp
+*** understand sftp
+   This is hard to make work because sftp doesn't print status messages.
+
+*** Use MLS for ange-ftp-insert-directory if a list of files is specified.
+
+** Ability to map a key, including all modified-combinations.
+   E.g map mouse-4 to wheel-up as well as M-mouse-4 -> M-wheel-up
+   M-C-mouse-4 -> M-C-wheel-up, H-S-C-M-s-double-mouse-4 ->
+   H-S-C-M-s-double-wheel-up, ...
+
+** Beefed-up syntax-tables.
+*** recognize multi-character syntactic entities like `begin' and `end'.
+*** nested string-delimiters (for PostScript's (foo(bar)baz) strings).
+*** support for infix operators (with precedence).
+*** support for the $ (paired delimiter) in parse-partial-sexp.
+*** support for hook-chars whose effect on the parsing-state is specified
+	by elisp code.  Thus a char could both close a string and open a comment
+	at the same time and do it in a context-sensitive way.
+*** ability to add mode-specific data to the partial-parse-state.
+
+** Add a way to convert a keyboard macro to equivalent Lisp code.
+
+** Have a command suggestion help system that recognizes patterns
+  of commands which could be replaced with a simpler common command.
+  It should not make more than one suggestion per 10 minutes.
+
+** Add a way to define input methods by computing them (when first used)
+  from other input methods.  Then redefine C-x 8 to use a
+  user-selected input method, with the default being the union of
+  latin-1-prefix and latin-1-postfix.
+
+** Switch the Windows port to using Unicode keyboard input (maybe).
+  Based on http://msdn2.microsoft.com/en-us/library/ms633586.aspx,
+  this boils down to (1) calling RegisterClassW function to register
+  Emacs windows, and (2) modifying ALL system messages to use Unicode.
+  In particular, WM_CHAR messages, which result from keyboard input,
+  will then come in encoded in UTF-16.
+
+  One advantage of switching to Unicode is to toss encoded-kbd usage,
+  which will solve the problem with binding non-ASCII keys with modifiers.
+
+  Problem: using this on Windows 9x/ME requires installing the
+  Microsoft Layer for Unicode (MSLU), which might not implement all
+  the required functionality that is available built-in on Windows XP
+  and later.  We should not make this change if it would pressure
+  users of unauthorized copies of older versions of Windows to
+  downgrade to versions that require activation.
+
+** Implement a clean way to use different major modes for
+  different parts of a buffer.  This could be useful in editing
+  Bison input files, for instance, or other kinds of text
+  where one language is embedded in another language.  See
+  http://www.loveshack.ukfsn.org/emacs/multi-mode.el and also
+  mmm-mode, as reference for approaches taken by others.
+
+** Arrange a way for an input method to return the first character
+  immediately, then replace it later.  So that C-s a with
+  input method latin-1-postfix would immediately search for an a.
+
+** Give start-process the ability to direct standard-error
+  output to a different filter.
+
+** Make desktop.el save the "frame configuration" of Emacs (in some
+  useful sense).
+
+** Give desktop.el a feature to switch between different named desktops.
+
+** Add a cpio mode, more or less like tar mode.
+
+** Save undo information in special temporary files, and reload it
+  when needed for undoing.  This could extend undo capacity.
+
+** Change the Windows NT menu code
+  so that it handles the deep_p argument and avoids
+  regenerating the whole menu bar menu tree except
+  when the user tries to use the menubar.
+
+  This requires the RIT to forward the WM_INITMENU message to
+  the main thread, and not return from that message until the main
+  thread has processed the MENU_BAR_ACTIVATE_EVENT and regenerated
+  the whole menu bar.  In the mean time, it should process other messages.
+
+** Get some major packages installed: W3 (development version needs
+  significant work), PSGML, _possibly_ ECB.
+  http://lists.gnu.org/archive/html/emacs-devel/2007-05/msg01493.html
+  Check the assignments file for other packages which might go in and
+  have been missed.
+
+** Possibly install python-mode in place of python.el, or combine the two.
+Someone needs to do the work of figuring out who all the non-trivial
+python-mode.el contributors are and getting assignments.
+http://lists.gnu.org/archive/html/emacs-devel/2008-02/msg02156.html
+http://lists.gnu.org/archive/html/emacs-devel/2008-02/msg02201.html
+http://lists.gnu.org/archive/html/emacs-devel/2008-02/msg02489.html
+http://lists.gnu.org/archive/html/emacs-devel/2008-02/msg02234.html
+
+** Make keymaps a first-class Lisp object (this means a rewrite of
+  keymap.c).  What should it do apart from being opaque ?
+  multiple inheritance ?  faster where-is ?  no more fix_submap_inheritance ?
+  what else ?
+
+** Provide real menus on ttys.  The MS-DOS implementation can serve as
+  an example how to do part of this; see the XMenu* functions on msdos.c.
+
+** Implement popular parts of the rest of the CL functions as compiler
+  macros in cl-macs.
+
+** Make compiler warnings about functions that might be undefined at run time
+ smarter, so that they know which files are required by the file being
+ compiled and don't warn about functions defined in them.
+
+** Highlight rectangles (`mouse-track-rectangle-p' in XEmacs).  Already in CUA,
+  but it's a valuable feature worth making more general.
+
+** Provide MIME support for Rmail using the Gnus MIME library.  [Maybe
+  not now feasible, given Gnus maintenance decisions.  fx looked at
+  this and can say where some of the problems are.]
+
+** Eliminate the storm of warnings concerning char/unsigned char
+  mismatches that we get with GCC 4.x and proprietary compilers on
+  various systems.  They make it difficult to spot the important warnings.
+
+** Fix anything necessary to use `long long' EMACS_INTs with GCC.
+
+** Split out parts of lisp.h [and generate Makefile dependencies automatically.]
+[the last bit is done, see DEPFLAGS etc in src/Makefile.in ]
+
+** Update the FAQ.
+
+** Allow auto-compression-mode to use zlib calls if zlib is available.
+  [It's required for PNG, so may be linked anyhow.]
+
+** Add a --pristine startup flag which does -q --no-site-file plus
+  ignoring X resources (Doze equivalents?) and most of the
+  environment.  What should not be ignored needs consideration.
+  [Do the existing -Q and -D cover this, or is more needed?]
+
+** Improve the GC (generational, incremental).  (We may be able to use
+  the Boehm collector.)  [See the Boehm-GC branch in CVS for work on this.]
+
+** Check what hooks would help Emacspeak -- see the defadvising in W3.
+
+** Add definitions for symbol properties, for documentation purposes.
+
+** Add horizontal scroll bars.
+
+** Provide an optional feature which computes a scroll bar slider's
+  size and its position from lines instead of characters.
+
+** Allow unknown image types to be rendered via an external program
+  converting them to, say, PBM (in the same way as PostScript?). [does
+  doc-view.el do this, or could it be extended to do this?]
+
+** Allow displaying an X window from an external program in a buffer,
+  e.g. to render graphics from Java applets.  [gerd and/or wmperry
+  thought this was feasible.]
+
+** Allow images (not just text) in the margin to be mouse-sensitive.
+  (Requires recursing through display properties).  Provide some way
+  to simulate mouse-clicks on marginal text without a mouse.
+
+** Implement Lisp functions to determine properly whether a character
+  is displayable (particularly needed in XFree 4, sigh).  Use it to
+  define useful glyphs that may be displayed as images or unicodes
+  (with ASCIIfied fallback via latin1-disp).  Examples include
+  box-drawing graphics in Custom buffers, W3 rules and tables, and
+  tree displays generally, mode-line mail indicator.  [See work done
+  already for Emacs 23 and consult fx.]
+
+** Do something to make rms happy with fx's dynamic loading, and use it
+  to implement things like auto-loaded buffer parsers and database
+  access in cases which need more than Lisp.
+
+** Extend ps-print to deal with multiple font sizes, images, and extra
+  encodings.
+
+** Provide portable undumping using mmap (per gerd design).
+
+** Make byte-compile avoid binding an expanded defsubst's args
+  when the body only calls primitives.
+
+** Use the XIE X extension, if available, for image display.
+
+** Make monochrome images display using the foreground and background
+  colors of the applicable faces.
+
+** Make `format-time-string' preserve text properties like `format'.
+
+** Optionally make the cursor a little thinner at the end of a line
+  or the end of the buffer.
+
+** Port the conservative stack marking code of Emacs' garbage collector
+  to more systems, so that we can completely get rid of GCPROs.  Note
+  that Boehm garbage collector provides this.
+
+** Reorder defcustom's in each package so that the more important
+  options come first in the Customize buffers.  This could be done by
+  either rearranging the file (since options are shown in the order
+  they appear in the *.el files), or by adding a few :set-after attributes.
+
+** Maybe document the features of libraries missing from the manual (or
+  ancillary manuals, including the Lisp manual in some cases).
+  This is not worth doing for all of these packages and we need not
+  aim for completeness, but some may be worth documenting.
+
+  Here's a list which is probably not complete/correct: align, allout,
+  artist, ansi-color, array, battery, calculator, cdl, cmuscheme,
+  completion, cua, delim-col, dirtrack, double, echistory, elide-head,
+  easymenu, expand, flow-ctrl, format [format-alist],
+  generic/generic-x [various modes], kermit, log-edit, ledit
+  [obsolete?], makesum, midnight [other than in Kill Buffer node],
+  mouse-copy [?], mouse-drag, mouse-sel, net-utils, rcompile,
+  snmp-mode [?], soundex [should be interactive?], strokes [start from
+  the web page], talk, thingatpt [interactive functions?], type-break,
+  vcursor, xscheme, zone-mode [?], mlconvert [?], iso-cvt, iso-swed,
+  swedish, feedmail [?], uce, bruce, gametree, meese, page-ext,
+  refbib, refer, scribe, sgml-mode, spell, texinfo, underline,
+  cmacexp, hideif, mantemp [obsolete?], pcomplete, assoc, xml,
+  cvs-status (should be described in PCL-CVS manual); other progmodes,
+  probably in separate manual.
+
+** Convert the XPM bitmaps to PPM, replace the PBMs with them and scrap
+  the XPMs so that the color versions work generally.  (Requires care
+  with the color used for the transparent regions.)
+
+** Convenient access to the `values' variable.  It would be nice to have an
+  interface that would show you the printed reps of the elements of the
+  list in a menu, let you select one of the values, and put it into some
+  other variable, without changing the value of `values'.
+
+** (Controlled by a flag) make open and close syntax match exactly,
+  i.e. `(' doesn't match `]'.
+
+** Specify parameter ID-FORMAT in all calls to `file-attributes' and
+  `directory-files-and-attributes' where attributes UID or GID are used.
+  Whenever possible, use value 'string.
+  When done, change meaning of default value from 'integer to 'string.
+  If value 'integer is used nowhere, remove the parameter ID-FORMAT from
+  the definition of `file-attributes' and `directory-files-and-attributes'
+  and from the calls.
+
+** Make language-info-alist customizable.  Currently a user can customize
+  only the variable `current-language-environment'.
+
+** Improve language environment handling so that Emacs can fit
+  better to a users locale.  Currently Emacs uses utf-8 language
+  environment for all utf-8 locales, thus a user in ja_JP.UTF-8 locale
+  are also put in utf-8 lang. env.  In such a case, it is
+  better to use Japanese lang. env. but prefer utf-8 coding system.
+
+** Enhance locale handling:  handle language, territory and charset
+  orthogonally and de-emphasize language environments.  Use the locale
+  to set up more things, such as fontsets, the default Ispell
+  dictionary, diary format, calendar holidays and display, quoting
+  characters and phrase boundaries, sentence endings, collation for
+  sorting (at least for unicodes), HTTP Accept-language, patterns for
+  directory listings and compilation messages, yes-or-no replies,
+  common menu items when the toolkit supports it ...  `locale-info'
+  needs extending for LC_COLLATE &c.  [fx started on this.]
+
+** Eliminate the current restriction on header printing by ps-print.
+  Currently, a header can contain only single 1-byte charset in
+  addition to ASCII.
+
+** In ps-print, provide an user friendly interface to specify fonts.
+
+** Enhance word boundary detection for such a script that doesn't use
+  space at word boundary (e.g. Thai).
+
+** Implement interface programs with major Japanese conversion server
+  in lib-src so that they can be used from the input method
+  "japanese".  Currently, most Japanese users are using external
+  packages (e.g. tamago, anthy) or an input method via XIM.
+
+** Let LEIM handle the Mode_switch key like XIM does (i.e. a toggle like C-\
+   but which can also be used as a modifier).
+
+** Improve Help buffers: Change the face of previously visited links (like
+   Info, but also with regard to namespace), and give the value of
+   lisp expressions, e.g auto-mode-alist, the right face.
+
+** Possibly make `list-holidays' eval items in the calendar-holidays variable.
+   See thread
+   <http://lists.gnu.org/archive/html/emacs-devel/2006-02/msg01034.html>.
+   [rgm@gnu.org will look at this after 22.1]
+
+** Possibly make cal-dst use the system timezone database directly.
+   See thread
+   <http://lists.gnu.org/archive/html/emacs-pretest-bug/2006-11/msg00060.html>
+
+** Possibly add a "close" button to the modeline.
+   The idea is to add an "X" of some kind, that when clicked deletes
+   the window associated with that modeline.
+   http://lists.gnu.org/archive/html/emacs-devel/2007-09/msg02416.html
+
+* Things to be done for specific packages or features
+
+** NeXTstep port
+
+*** Bugs
+
+**** (mouse-avoidance-mode 'banish) then minimize Emacs, will pop window back
+up on top of all others
+
+**** free_frame_resources, face colors
+
+**** Numeric keysetting bug.
+
+*** Mac-related
+
+**** Open file:/// URLs.
+
+**** Put frame autopositioning into C code somewhere -- if loc = same, offset.
+
+**** Automap ctrl-mouse-1 to mouse-3.
+
+**** Deal with Finder aliases somehow.
+
+**** Ctrl-F2 won't pull up menus.
+
+*** Other / Low Priority:
+
+**** Better recognition of Unicode scripts / Greek / composition.
+
+**** Undo for color-drag face customization.
+
+** Bidirectional editing
+
+*** Support reordering structured text
+Two important use cases: (1) comments and strings in program sources,
+and (2) text with markup, like HTML or XML.
+
+One idea is to invent a special text property that would instruct the
+display engine to reorder only the parts of buffer text covered by
+that property.  The display engine will then push its state onto the
+iterator stack, restrict the bidi iterator to accessing only the
+portion of buffer text covered by the property, reorder the text, then
+pop its state from stack and continue as usual.  This will require
+minor changes in the bidi_it structure.
+
+This design requires Lisp-level code to put the text properties on the
+relevant parts of the buffer text.  That could be done using JIT
+fontifications, or as a preliminary processing when the file is
+visited.  With HTML/XML, the code that puts text properties needs to
+pay attention to the bidi directives embedded in the HTML/XML stream.
+
+*** Allow the user to control the direction of the UI
+
+**** Introduce user option to control direction of mode line.
+One problem is the header line, which is produced by the same routines
+as the mode line.  While it makes sense to have the mode-line
+direction controlled by a single global variable, header lines are
+buffer-specific, so they need a separate treatment in this regard.
+
+**** User options to control direction of menu bar and tool bar.
+For the tool bar, it's relatively easy: set it.paragraph_embedding
+in redisplay_tool_bar according to the user variable, and make
+f->desired_tool_bar_string multibyte with STRING_SET_MULTIBYTE.  Some
+minor changes will be needed to set the right_box_line_p and
+left_box_line_p flags correctly for the R2L tool bar.
+
+However, it makes no sense to display the tool bar right to left if
+the menu bar cannot be displayed in the same direction.
+
+R2L menu bar is tricky for the same reasons as the mode line.  In
+addition, toolkit builds create their menu bars in toolkit-specific
+parts of code, bypassing xdisp.c, so those parts need to be enhanced
+with toolkit-specific code to display the menu bar right to left.
+
+** ImageMagick support
+
+*** image-type-header-regexps priorities the jpeg loader over the
+ImageMagick one.  This is not wrong, but how should a user go about
+preferring the ImageMagick loader?  The user might like zooming etc in jpegs.
+
+Try (setq image-type-header-regexps nil) for a quick hack to prefer
+ImageMagick over the jpg loader.
+
+*** For some reason its unbearably slow to look at a page in a large
+image bundle using the :index feature.  The ImageMagick "display"
+command is also a bit slow, but nowhere near as slow as the Emacs
+code.  It seems ImageMagick tries to unpack every page when loading the
+bundle.  This feature is not the primary usecase in Emacs though.
+
+ImageMagick 6.6.2-9 introduced a bugfix for single page djvu load.  It
+is now much faster to use the :index feature, but still not very fast.
+
+*** Try to cache the num pages calculation.  It can take a while to
+calculate the number of pages, and if you need to do it for each page
+view, page-flipping becomes uselessly slow.
+
+*** Integrate with image-dired.
+
+*** Integrate with docview.
+
+*** Integrate with image-mode.
+Some work has been done, e.g. M-x image-transform-fit-to-height will
+fit the image to the height of the Emacs window.
+
+*** Look for optimizations for handling images with low depth.
+Currently the code seems to default to 24 bit RGB which is costly for
+images with lower bit depth.
+
+*** Decide what to do with some uncommitted imagemagick support
+functions for image size etc.
+
+*** Test with more systems.
+Tested on Fedora 12, 14, and the libmagick that ships with it.
+I also tried using an ImageMagick compiled from their SVN, in
+parallel with the one packaged by Fedora, it worked well.
+Ubuntu 8.04 was tested, but it seems it ships a broken ImageMagick.
+
+** nxml mode
+
+*** High priority
+
+**** Command to insert an element template, including all required
+attributes and child elements.  When there's a choice of elements
+possible, we could insert a comment, and put an overlay on that
+comment that makes it behave like a button with a pop-up menu to
+select the appropriate choice.
+
+**** Command to tag a region.  With a schema should complete using legal
+tags, but should work without a schema as well.
+
+**** Provide a way to conveniently rename an element.  With a schema should
+complete using legal tags, but should work without a schema as well.
+
+*** Outlining
+
+**** Implement C-c C-o C-q.
+
+**** Install pre/post command hook for moving out of invisible section.
+
+**** Put a modify hook on invisible sections that expands them.
+
+**** Integrate dumb folding somehow.
+
+**** An element should be able to be its own heading.
+
+**** Optimize to avoid complete buffer scan on each command.
+
+**** Make it work with HTML-style headings (i.e. level indicated by
+name of heading element rather than depth of section nesting).
+
+**** Recognize root element as a section provided it has a title, even
+if it doesn't match section-element-name-regex.
+
+**** Support for incremental search automatically making hidden text visible.
+
+**** Allow title to be an attribute.
+
+**** Command that says to recognize the tag at point as a section/heading.
+
+**** Explore better ways to determine when an element is a section
+or a heading.
+
+**** rng-next-error needs to either ignore invisible portion or reveal it
+(maybe use isearch oriented text properties).
+
+**** Errors within hidden section should be highlighted by underlining the
+ellipsis.
+
+**** Make indirect buffers work.
+
+**** How should nxml-refresh outline recover from non well-formed tags?
+
+**** Hide tags in title elements?
+
+**** Use overlays instead of text properties for holding outline state?
+Necessary for indirect buffers to work?
+
+**** Allow an outline to go in the speedbar.
+
+**** Split up outlining manual section into subsections.
+
+**** More detail in the manual about each outlining command.
+
+**** More menu entries for hiding/showing?
+
+**** Indication of many lines have been hidden?
+
+*** Locating schemas
+
+**** Should rng-validate-mode give the user an opportunity to specify a
+schema if there is currently none? Or should it at least give a hint
+to the user how to specify a non-vacuous schema?
+
+**** Support for adding new schemas to schema-locating files.
+Add documentElement and namespace elements.
+
+**** C-c C-w should be able to report current type id.
+
+**** Implement doctypePublicId.
+
+**** Implement typeIdBase.
+
+**** Implement typeIdProcessingInstruction.
+
+**** Support xml:base.
+
+**** Implement group.
+
+**** Find preferred prefix from schema-locating files.  Get rid of
+rng-preferred-prefix-alist.
+
+**** Inserting document element with vacuous schema should complete using
+document elements declared in schema locating files, and set schema
+appropriately.
+
+**** Add a ruleType attribute to the <include> element?
+
+**** Allow processing instruction in prolog to contain the compact syntax
+schema directly.
+
+**** Use RDDL to locate a schema based on the namespace URI.
+
+**** Should not prompt to add redundant association to schema locating file.
+
+**** Command to reload current schema.
+
+*** Schema-sensitive features
+
+**** Should filter dynamic markup possibilities using schema validity, by
+adding hook to nxml-mode.
+
+**** Dynamic markup word should (at least optionally) be able to look in
+other buffers that are using nxml-mode.
+
+**** Should clicking on Invalid move to next error if already on an error?
+
+**** Take advantage of a:documentation.  Needs change to schema format.
+
+**** Provide feasible validation (as in Jing) toggle.
+
+**** Save the validation state as a property on the error overlay to enable
+more detailed diagnosis.
+
+**** Provide an Error Summary buffer showing all the validation errors.
+
+**** Pop-up menu.  What is useful?  Tag a region (should be grayed out if
+the region is not balanced).  Suggestions based on error messages.
+
+**** Have configurable list of namespace URIs so that we can provide
+namespace URI completion on extension elements or with schema-less documents.
+
+**** Allow validation to handle XInclude.
+
+**** ID/IDREF support.
+
+*** Completion
+
+**** Make it work with icomplete.  Only use a function to complete when
+some of the possible names have undeclared namespaces.
+
+**** How should C-return in mixed text work?
+
+**** When there's a vacuous schema, C-return after < will insert the end-tag.
+Is this a bug or a feature?
+
+**** After completing start-tag, ensure we don't get unhelpful message
+from validation
+
+**** Syntax table for completion.
+
+**** Should complete start-tag name with a space if namespace attributes
+are required.
+
+**** When completing start-tag name with no prefix and it doesn't match
+should try to infer namespace from local name.
+
+**** Should completion pay attention to characters after point?  If so, how?
+
+**** When completing start-tag name, add required atts if only one required
+attribute.
+
+**** When completing attribute name, add attribute value if only one value
+is possible.
+
+**** After attribute-value completion, insert space after close delimiter
+if more attributes are required.
+
+**** Complete on enumerated data values in elements.
+
+**** When in context that allows only elements, should get tag
+completion without having to type < first.
+
+**** When immediately after start-tag name, and name is valid and not
+prefix of any other name, should C-return complete on attribute names?
+
+**** When completing attributes, more consistent to ignore all attributes
+after point.
+
+**** Inserting attribute value completions needs to be sensitive to what
+delimiter is used so that it quotes the correct character.
+
+**** Complete on encoding-names in XML decl.
+
+**** Complete namespace declarations by searching for all namespaces
+mentioned in the schema.
+
+*** Well-formed XML support
+
+**** Deal better with Mule-UCS
+
+**** Deal with UTF-8 BOM when reading.
+
+**** Complete entity names.
+
+**** Provide some support for entity names for MathML.
+
+**** Command to repeat the last tag.
+
+**** Support for changing between character references and characters.
+Need to check that context is one in which character references are
+allowed.  xmltok prolog parsing will need to distinguish parameter
+literals from other kinds of literal.
+
+**** Provide a comment command to bind to M-; that works better than the
+normal one.
+
+**** Make indenting in a multi-line comment work.
+
+**** Structure view.  Separate buffer displaying element tree.
+Be able to navigate from structure view to document and vice-versa.
+
+**** Flash matching >.
+
+**** Smart selection command that selects increasingly large syntactically
+coherent chunks of XML.  If point is in an attribute value, first
+select complete value; then if command is repeated, select value plus
+delimiters, then select attribute name as well, then complete
+start-tag, then complete element, then enclosing element, etc.
+
+**** ispell integration.
+
+**** Block-level items in mixed content should be indented, e.g:
+  <para>This is list:
+    <ul>
+      <li>item</li>
+
+**** Provide option to indent like this:
+    <para>This is a paragraph
+     occupying multiple lines.</para>
+
+**** Option to add make a / that closes a start-tag electrically insert a
+space for the XHTML guys.
+
+**** C-M-q should work.
+
+*** Datatypes
+
+**** Figure out workaround for CJK characters with regexps.
+
+**** Does category C contain Cn?
+
+**** Do ENTITY datatype properly.
+
+*** XML Parsing Library
+
+**** Parameter entity parsing option, nil (never), t (always),
+unless-standalone (unless standalone="yes" in XML declaration).
+
+**** When a file is currently being edited, there should be an option to
+use its buffer instead of the on-disk copy.
+
+*** Handling all XML features
+
+**** Provide better support for editing external general parsed entities.
+Perhaps provide a way to force ignoring undefined entities; maybe turn
+this on automatically with <?xml encoding=""?> (with no version
+pseudo-att).
+
+**** Handle internal general entity declarations containing elements.
+
+**** Handle external general entity declarations.
+
+**** Handle default attribute declarations in internal subset.
+
+**** Handle parameter entities (including DTD).
+
+*** RELAX NG
+
+**** Do complete schema checking, at least optionally.
+
+**** Detect include/external loops during schema parse.
+
+**** Coding system detection for schemas.  Should use utf-8/utf-16 per the
+spec.  But also need to allow encodings other than UTF-8/16 to support
+CJK charsets that Emacs cannot represent in Unicode.
+
+*** Catching XML errors
+
+**** Check public identifiers.
+
+**** Check default attribute values.
+
+*** Performance
+
+**** Explore whether overlay-recenter can cure overlays performance problems.
+
+**** Cache schemas.  Need to have list of files and mtimes.
+
+**** Make it possible to reduce rng-validate-chunk-size significantly,
+perhaps to 500 bytes, without bad performance impact: don't do
+redisplay on every chunk; pass continue functions on other uses of
+rng-do-some-validation.
+
+**** Cache after first tag.
+
+**** Introduce a new name class that is a choice between names (so that
+we can use member)
+
+**** intern-choice should simplify after patterns with same 1st/2nd args
+
+**** Large numbers of overlays slow things down dramatically.  Represent
+errors using text properties.  This implies we cannot incrementally
+keep track of the number of errors, in order to determine validity.
+Instead, when validation completes, scan for any characters with an
+error text property; this seems to be fast enough even with large
+buffers.  Problem with error at end of buffer, where there's no
+character; need special variable for this.  Need to merge face from
+font-lock with the error face: use :inherit attribute with list of two
+faces.  How do we avoid making rng-valid depend on nxml-mode?
+
+*** Error recovery
+
+**** Don't stop at newline in looking for close of start-tag.
+
+**** Use indentation to guide recovery from mismatched end-tags
+
+**** Don't keep parsing when currently not well-formed but previously
+well-formed
+
+**** Try to recover from a bad start-tag by popping an open element if
+there was a mismatched end-tag unaccounted for.
+
+**** Try to recover from a bad start-tag open on the hypothesis that there
+was an error in the namespace URI.
+
+**** Better recovery from ill-formed XML declarations.
+
+*** Usability improvements
+
+**** Should print a "Parsing..." message during long movements.
+
+**** Provide better position for reference to undefined pattern error.
+
+**** Put Well-formed in the mode-line when validating against any-content.
+
+**** Trim marking of illegal data for leading and trailing whitespace.
+
+**** Show Invalid status as soon as we are sure it's invalid, rather than
+waiting for everything to be completely up to date.
+
+**** When narrowed, Valid or Invalid status should probably consider only
+validity of narrowed region.
+
+*** Bug fixes
+
+**** Need to give an error for a document like: <foo/><![CDATA[  ]]>
+
+**** Make nxml-forward-balanced-item work better for the prolog.
+
+**** Make filling and indenting comments work in the prolog.
+
+**** Should delete RNC Input buffers.
+
+**** Figure out what regex use for NCName and use it consistently,
+
+**** Should have not-well-formed tokens in ref.
+
+**** Require version in XML declaration? Probably not because prevents
+use for external parsed entities.  At least forbid standalone without version.
+
+**** Reject schema that compiles to rng-not-allowed-ipattern.
+
+**** Move point backwards on schema parse error so that it's on the right token.
+
+*** Internal
+
+**** Use rng-quote-string consistently.
+
+**** Use parsing library for XML to texinfo conversion.
+
+**** Rename xmltok.el to nxml-token.el.  Use nxml-t- prefix instead of
+xmltok-.  Change nxml-t-type to nxml-t-token-type, nxml-t-start to
+nxml-t-token-start.
+
+**** Can we set fill-prefix to nil and rely on indenting?
+
+**** xmltok should make available replacement text of entities containing
+elements
+
+**** In rng-valid, instead of using modification-hooks and
+insert-behind-hooks on dependent overlays, use same technique as nxml-mode.
+
+**** Port to XEmacs.  Issues include: Unicode (XEmacs seems to be based on
+Mule-UCS); overlays/text properties vs extents; absence of
+fontification-functions hook.
+
+*** Fontification
+
+**** Allow face to depend on element qname, attribute qname, attribute
+value.  Use list with pairs of (R . F), where R specifies regexps and
+F specifies faces.  How can this list be made to depend on the document type?
+
+*** Other
+
+**** Support RELAX NG XML syntax (use XML parsing library).
+
+**** Support W3C XML Schema (use XML parsing library).
+
+**** Command to infer schema from current document (like trang).
+
+*** Schemas
+
+**** XSLT schema should take advantage of RELAX NG to express cooccurrence
+constraints on attributes (e.g. xsl:template).
+
+*** Documentation
+
+**** Move material from README to manual.
+
+**** Document encodings.
+
+*** Notes
+
+**** How can we allow an error to be displayed on a different token from
+where it is detected?  In particular, for a missing closing ">" we
+will need to display it at the beginning of the following token.  At the
+moment, when we parse the following token the error overlay will get cleared.
+
+**** How should rng-goto-next-error deal with narrowing?
+
+**** Perhaps should merge errors having same start position even if they
+have different ends.
+
+**** How to handle surrogates? One possibility is to be compatible with
+utf8.e: represent as sequence of 4 chars.  But utf-16 is incompatible
+with this.
+
+**** Should we distinguish well-formedness errors from invalidity errors?
+(I think not: we may want to recover from a bad start-tag by implying
+an end-tag.)
+
+**** Seems to be a bug with Emacs, where a mouse movement that causes
+help-echo text to appear counts as pending input but does not cause
+idle timer to be restarted.
+
+**** Use XML to represent this file.
+
+**** I had a TODO which said simply "split-string".  What did I mean?
+
+**** Investigate performance on large files all on one line.
+
+*** Issues for Emacs versions >= 22
+
+**** Take advantage of UTF-8 CJK support.
+
+**** Supply a next-error-function.
+
+**** Investigate this NEWS item "Emacs now tries to set up buffer coding
+systems for HTML/XML files automatically."
+
+**** Take advantage of the pointer text property.
+
+**** Leverage char-displayable-p.
+
+* Internal changes
+
+** Cleanup all the GC_ mark bit stuff -- there is no longer any distinction
+   since the mark bit is no longer stored in the Lisp_Object itself.
+
+** Refine the `predicate' arg to read-file-name.
+   Currently, it mixes up the predicate to apply when doing completion and the
+   one to use when terminating the selection.
+
+** Merge ibuffer.el and buff-menu.el.
+   More specifically do what's needed to make ibuffer.el the default,
+   or just an extension of buff-menu.el.
+
+** Use pcomplete by default in shell-mode.
+   This means to make it behave (by default) more like the current code.
+   Use it also for read-shell-command, M-x compile, ...
+
+** Merge sendmail.el and messages.el.
+   Probably not a complete merge, but at least arrange for messages.el to be
+   a derived mode of sendmail.el.  Or arrange for messages.el to be split
+   into a small core and "the rest" so that we use less resources as long as
+   we stick to the features provided in sendmail.el.
+
+** Replace gmalloc.c with the modified Doug Lea code from the current
+   GNU libc so that the special mmapping of buffers can be removed --
+   that apparently loses under Solaris, at least. [fx has mostly done
+   this.]
+
+** Rewrite make-docfile to be clean and maintainable.
+
+** Add an inferior-comint-minor-mode to capture the common set of operations
+   offered by major modes that offer an associated inferior
+   comint-derived mode.  I.e. basically make cmuscheme.el/inf-lisp.el generic.
+   For use by sml-mode, python-mode, tex-mode, scheme-mode, lisp-mode,
+   haskell-mode, tuareg-mode, ...
+
+** Make SYNC_INPUT the default. [true since 2008-03-11]
+   All loops using immediate_quit need to be checked to ensure that
+   C-g can interrupt them, in case of an infinite loop.  Once we
+   switch to using SYNC_INPUT, we can remove the BLOCK_INPUTs in the
+   allocation functions (allocate_string etc.) without worrying about
+   data munging.
+
+** Add "link" button class
+   Add a standard button-class named "link", and make all other link-like
+   button classes inherit from it.  Set the default face of the "link" button
+   class to the standard "link" face.
+
+* Other known bugs:
+
+** `make-frame' forgets unhandled parameters, at least for X11 frames.
+
+** a two-char comment-starter whose two chars are symbol constituents will
+not be noticed if it appears within a word.
+
+** Fix unexelf.c to handle the .data.rel and .data.rel.local
+   sections made by GCC 3.4 on IRIX.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

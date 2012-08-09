@@ -1,0 +1,284 @@
+GNUS NEWS -- history of user-visible changes.
+
+Copyright (C) 1999-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+Please send Gnus bug reports to bugs@gnus.org.
+For older news, see Gnus info node "New Features".
+
+
+* Installation changes
+
+** Upgrading from previous (stable) version if you have used No Gnus.
+
+If you have tried No Gnus (the unstable Gnus branch leading to this
+release) but went back to a stable version, be careful when upgrading to
+this version.  In particular, you will probably want to remove the
+`~/News/marks' directory (perhaps selectively), so that flags are read
+from your `~/.newsrc.eld' instead of from the stale marks file, where
+this release will store flags for nntp.  See a later entry for more
+information about nntp marks.  Note that downgrading isn't safe in
+general.
+
+** Incompatibility when switching from Emacs 23 to Emacs 22 In Emacs 23,
+Gnus uses Emacs' new internal coding system `utf-8-emacs' for saving
+articles drafts and `~/.newsrc.eld'.  These files may not be read
+correctly in Emacs 22 and below.  If you want to use Gnus across
+different Emacs versions, you may set `mm-auto-save-coding-system' to
+`emacs-mule'.
+
+** Lisp files are now installed in `.../site-lisp/gnus/' by default.  It
+defaulted to `.../site-lisp/' formerly.  In addition to this, the new
+installer issues a warning if other Gnus installations which will shadow
+the latest one are detected.  You can then remove those shadows manually
+or remove them using `make remove-installed-shadows'.
+
+** The installation directory name is allowed to have spaces and/or tabs.
+
+
+* New packages and libraries within Gnus
+
+** Gnus includes the Emacs Lisp SASL library.
+
+This provides a clean API to SASL mechanisms from within Emacs.  The
+user visible aspects of this, compared to the earlier situation, include
+support for DIGEST-MD5 and NTLM.   *Note Emacs SASL: (sasl)Top.
+
+** ManageSieve connections uses the SASL library by default.
+
+The primary change this brings is support for DIGEST-MD5 and NTLM, when
+the server supports it.
+
+** Gnus includes a password cache mechanism in password-cache.el.
+
+It is enabled by default (see `password-cache'), with a short timeout of
+16 seconds (see `password-cache-expiry').  If PGG is used as the PGP
+back end, the PGP passphrase is managed by this mechanism.  Passwords
+for ManageSieve connections are managed by this mechanism, after
+querying the user about whether to do so.
+
+** Using EasyPG with Gnus When EasyPG, is available, Gnus will use it
+instead of PGG.  EasyPG is an Emacs user interface to GNU Privacy Guard.
+ *Note EasyPG Assistant user's manual: (epa)Top.  EasyPG is included in
+Emacs 23 and available separately as well.
+
+
+* Changes in group mode
+
+** Old intermediate incoming mail files (`Incoming*') are deleted after a
+couple of days, not immediately.  *Note Mail Source Customization::.
+(New in Gnus 5.10.10 / Emacs 22.2)
+
+
+
+* Changes in summary and article mode
+
+** Gnus now supports sticky article buffers.  Those are article buffers
+that are not reused when you select another article.  *Note Sticky
+Articles::.
+
+** Gnus can selectively display `text/html' articles with a WWW browser
+with `K H'.  *Note MIME Commands::.
+
+** International host names (IDNA) can now be decoded inside article bodies
+using `W i' (`gnus-summary-idna-message').  This requires that GNU Libidn
+(`http://www.gnu.org/software/libidn/') has been installed.
+
+** The non-ASCII group names handling has been much improved.  The back
+ends that fully support non-ASCII group names are now `nntp', `nnml',
+and `nnrss'.  Also the agent, the cache, and the marks features work
+with those back ends.  *Note Non-ASCII Group Names::.
+
+** Gnus now displays DNS master files sent as text/dns using dns-mode.
+
+** Gnus supports new limiting commands in the Summary buffer: `/ r'
+(`gnus-summary-limit-to-replied') and `/ R'
+(`gnus-summary-limit-to-recipient').  *Note Limiting::.
+
+** You can now fetch all ticked articles from the server using `Y t'
+(`gnus-summary-insert-ticked-articles').  *Note Summary Generation
+Commands::.
+
+** Gnus supports a new sort command in the Summary buffer: `C-c C-s C-t'
+(`gnus-summary-sort-by-recipient').  *Note Summary Sorting::.
+
+** S/MIME now features LDAP user certificate searches.  You need to
+configure the server in `smime-ldap-host-list'.
+
+** URLs inside OpenPGP headers are retrieved and imported to your PGP key
+ring when you click on them.
+
+** Picons can be displayed right from the textual address, see
+`gnus-picon-style'.  *Note Picons::.
+
+** ANSI SGR control sequences can be transformed using `W A'.
+
+ANSI sequences are used in some Chinese hierarchies for highlighting
+articles (`gnus-article-treat-ansi-sequences').
+
+** Gnus now MIME decodes articles even when they lack "MIME-Version" header.
+This changes the default of `gnus-article-loose-mime'.
+
+** `gnus-decay-scores' can be a regexp matching score files.  For example,
+set it to `\\.ADAPT\\'' and only adaptive score files will be decayed.
+ *Note Score Decays::.
+
+** Strings prefixing to the `To' and `Newsgroup' headers in summary lines
+when using `gnus-ignored-from-addresses' can be customized with
+`gnus-summary-to-prefix' and `gnus-summary-newsgroup-prefix'.  *Note To
+From Newsgroups::.
+
+** You can replace MIME parts with external bodies.  See
+`gnus-mime-replace-part' and `gnus-article-replace-part'.  *Note MIME
+Commands::, *note Using MIME::.
+
+** The option `mm-fill-flowed' can be used to disable treatment of
+format=flowed messages.  Also, flowed text is disabled when sending
+inline PGP signed messages.  *Note Flowed text: (emacs-mime)Flowed text.
+(New in Gnus 5.10.7)
+
+** Now the new command `S W' (`gnus-article-wide-reply-with-original') for
+a wide reply in the article buffer yanks a text that is in the active
+region, if it is set, as well as the `R'
+(`gnus-article-reply-with-original') command.  Note that the `R' command
+in the article buffer no longer accepts a prefix argument, which was
+used to make it do a wide reply.  *Note Article Keymap::.
+
+** The new command `C-h b' (`gnus-article-describe-bindings') used in the
+article buffer now shows not only the article commands but also the real
+summary commands that are accessible from the article buffer.
+
+
+
+* Changes in Message mode
+
+** Gnus now supports the "hashcash" client puzzle anti-spam mechanism.  Use
+`(setq message-generate-hashcash t)' to enable.  *Note Hashcash::.
+
+** You can now drag and drop attachments to the Message buffer.  See
+`mml-dnd-protocol-alist' and `mml-dnd-attach-options'.  *Note MIME:
+(message)MIME.
+
+** The option `message-yank-empty-prefix' now controls how empty lines are
+prefixed in cited text.  *Note Insertion Variables: (message)Insertion
+Variables.
+
+** Gnus uses narrowing to hide headers in Message buffers.  The
+`References' header is hidden by default.  To make all headers visible,
+use `(setq message-hidden-headers nil)'.  *Note Message Headers:
+(message)Message Headers.
+
+** You can highlight different levels of citations like in the article
+buffer.  See `gnus-message-highlight-citation'.
+
+** `auto-fill-mode' is enabled by default in Message mode.  See
+`message-fill-column'.  *Note Message Headers: (message)Various Message
+Variables.
+
+** You can now store signature files in a special directory named
+`message-signature-directory'.
+
+** The option `message-citation-line-format' controls the format of the
+"Whomever writes:" line.  You need to set
+`message-citation-line-function' to
+`message-insert-formatted-citation-line' as well.
+
+
+* Changes in back ends
+
+** The nntp back end stores article marks in `~/News/marks'.
+
+The directory can be changed using the (customizable) variable
+`nntp-marks-directory', and marks can be disabled using the (back end)
+variable `nntp-marks-is-evil'.  The advantage of this is that you can
+copy `~/News/marks' (using rsync, scp or whatever) to another Gnus
+installation, and it will realize what articles you have read and
+marked.  The data in `~/News/marks' has priority over the same data in
+`~/.newsrc.eld'.
+
+** You can import and export your RSS subscriptions from OPML files.  *Note
+RSS::.
+
+** IMAP identity (RFC 2971) is supported.
+
+By default, Gnus does not send any information about itself, but you can
+customize it using the variable `nnimap-id'.
+
+** The `nnrss' back end now supports multilingual text.  Non-ASCII group
+names for the `nnrss' groups are also supported.  *Note RSS::.
+
+** Retrieving mail with POP3 is supported over SSL/TLS and with StartTLS.
+
+** The nnml back end allows other compression programs beside `gzip' for
+compressed message files.  *Note Mail Spool::.
+
+** The nnml back end supports group compaction.
+
+This feature, accessible via the functions `gnus-group-compact-group'
+(`G z' in the group buffer) and `gnus-server-compact-server' (`z' in the
+server buffer) renumbers all articles in a group, starting from 1 and
+removing gaps.  As a consequence, you get a correct total article count
+(until messages are deleted again).
+
+
+
+* Appearance
+
+** The tool bar has been updated to use GNOME icons.  You can also
+customize the tool bars: `M-x customize-apropos RET -tool-bar$' should
+get you started.  (Only for Emacs, not in XEmacs.)
+
+** The tool bar icons are now (de)activated correctly in the group buffer,
+see the variable `gnus-group-update-tool-bar'.  Its default value
+depends on your Emacs version.
+
+** You can change the location of XEmacs' toolbars in Gnus buffers.  See
+`gnus-use-toolbar' and `message-use-toolbar'.
+
+
+
+* Miscellaneous changes
+
+** Having edited the select-method for the foreign server in the server
+buffer is immediately reflected to the subscription of the groups which
+use the server in question.  For instance, if you change
+`nntp-via-address' into `bar.example.com' from `foo.example.com', Gnus
+will connect to the news host by way of the intermediate host
+`bar.example.com' from next time.
+
+** The `all.SCORE' file can be edited from the group buffer using `W e'.
+
+** You can set `gnus-mark-copied-or-moved-articles-as-expirable' to a
+non-`nil' value so that articles that have been read may be marked as
+expirable automatically when copying or moving them to a group that has
+auto-expire turned on.  The default is `nil' and copying and moving of
+articles behave as before; i.e., the expirable marks will be unchanged
+except that the marks will be removed when copying or moving articles to
+a group that has not turned auto-expire on.  *Note Expiring Mail::.
+
+
+
+* For older news, see Gnus info node "New Features".
+
+----------------------------------------------------------------------
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:

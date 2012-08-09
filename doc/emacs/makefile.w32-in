@@ -1,0 +1,150 @@
+#### -*- Makefile -*- for the Emacs Manual
+
+# Copyright (C) 2003-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# Where to find the source code.  The source code for Emacs's C kernel is
+# expected to be in $(srcdir)/src, and the source code for Emacs's
+# utility programs is expected to be in $(srcdir)/lib-src.  This is
+# set by the configure script's `--srcdir' option.
+srcdir=.
+
+infodir = $(srcdir)/../../info
+
+# The makeinfo program is part of the Texinfo distribution.
+MAKEINFO = makeinfo
+MAKEINFO_OPTS = --force --enable-encoding -I$(srcdir)
+MULTI_INSTALL_INFO = $(srcdir)\..\..\nt\multi-install-info.bat
+INFO_TARGETS = $(infodir)/emacs
+DVI_TARGETS = 	emacs.dvi
+INFOSOURCES = info.texi
+
+# The following rule does not work with all versions of `make'.
+.SUFFIXES: .texi .dvi
+.texi.dvi:
+	texi2dvi $<
+
+TEXI2DVI = texi2dvi
+ENVADD = $(srcdir)\..\..\nt\envadd.bat "TEXINPUTS=$(srcdir);$(TEXINPUTS)" \
+	 "MAKEINFO=$(MAKEINFO) $(MAKEINFO_OPTS)" /C
+
+EMACS_XTRA=\
+	$(srcdir)/arevert-xtra.texi \
+	$(srcdir)/cal-xtra.texi \
+	$(srcdir)/dired-xtra.texi \
+	$(srcdir)/picture-xtra.texi \
+	$(srcdir)/emerge-xtra.texi \
+	$(srcdir)/vc-xtra.texi \
+	$(srcdir)/vc1-xtra.texi \
+	$(srcdir)/fortran-xtra.texi \
+	$(srcdir)/msdog-xtra.texi
+
+EMACSSOURCES= \
+	$(srcdir)/emacs.texi \
+	$(srcdir)/emacsver.texi \
+	$(srcdir)/doclicense.texi \
+	$(srcdir)/screen.texi \
+	$(srcdir)/commands.texi \
+	$(srcdir)/entering.texi \
+	$(srcdir)/basic.texi \
+	$(srcdir)/mini.texi \
+	$(srcdir)/m-x.texi \
+	$(srcdir)/help.texi \
+	$(srcdir)/mark.texi \
+	$(srcdir)/killing.texi \
+	$(srcdir)/regs.texi \
+	$(srcdir)/display.texi \
+	$(srcdir)/search.texi \
+	$(srcdir)/fixit.texi \
+	$(srcdir)/files.texi \
+	$(srcdir)/buffers.texi \
+	$(srcdir)/windows.texi \
+	$(srcdir)/frames.texi \
+	$(srcdir)/mule.texi \
+	$(srcdir)/modes.texi \
+	$(srcdir)/indent.texi \
+	$(srcdir)/text.texi \
+	$(srcdir)/programs.texi \
+	$(srcdir)/building.texi \
+	$(srcdir)/maintaining.texi \
+	$(srcdir)/abbrevs.texi \
+	$(srcdir)/sending.texi \
+	$(srcdir)/rmail.texi \
+	$(srcdir)/dired.texi \
+	$(srcdir)/calendar.texi \
+	$(srcdir)/misc.texi \
+	$(srcdir)/package.texi \
+	$(srcdir)/custom.texi \
+	$(srcdir)/trouble.texi \
+	$(srcdir)/cmdargs.texi \
+	$(srcdir)/xresources.texi \
+	$(srcdir)/anti.texi \
+	$(srcdir)/macos.texi \
+	$(srcdir)/msdog.texi \
+	$(srcdir)/gnu.texi \
+	$(srcdir)/glossary.texi \
+	$(srcdir)/ack.texi \
+	$(srcdir)/kmacro.texi \
+	$(EMACS_XTRA)
+
+info: $(INFO_TARGETS)
+
+dvi: $(DVI_TARGETS)
+
+# Note that all the Info targets build the Info files
+# in srcdir.  There is no provision for Info files
+# to exist in the build directory.
+# In a distribution of Emacs, the Info files should be up to date.
+
+$(infodir)/dir:
+	$(MULTI_INSTALL_INFO) --info-dir=$(infodir) $(INFO_TARGETS)
+
+$(infodir)/emacs: $(EMACSSOURCES)
+	$(MAKEINFO) $(MAKEINFO_OPTS) emacs.texi
+
+emacs.dvi: $(EMACSSOURCES)
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/emacs.texi
+
+emacs.html: $(EMACSSOURCES)
+	$(MAKEINFO) $(MAKEINFO_OPTS) --html -o $@ emacs.texi
+
+emacs-xtra.dvi: emacs-xtra.texi $(EMACS_XTRA)
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/emacs-xtra.texi
+
+mostlyclean:
+	- $(DEL) *.log *.cp *.fn *.ky *.pg *.vr core *.tp *.core gnustmp.*
+
+clean: mostlyclean
+	- $(DEL) *.dvi
+	- $(DEL) $(infodir)/emacs*
+	- $(DEL_TREE) emacs.html
+
+distclean: clean
+	- $(DEL) makefile
+
+maintainer-clean: distclean
+	- $(DEL) *.aux *.cps *.fns *.kys *.pgs *.vrs *.toc
+# Don't delete these, because they are outside the current directory.
+#	for file in $(INFO_TARGETS); do rm -f $${file}*; done
+
+
+# Formerly this directory had texindex.c and getopt.c in it
+# and this makefile built them to make texindex.
+# That caused trouble because this is run entirely in the source directory.
+# Since we expect to get texi2dvi from elsewhere,
+# it is ok to expect texindex from elsewhere also.

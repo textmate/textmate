@@ -1,0 +1,2786 @@
+This is ../../info/mh-e, produced by makeinfo version 4.13 from
+mh-e.texi.
+
+This is version 8.3 of `The MH-E Manual', last updated 2011-09-20.
+
+   Copyright (C) 1995, 2001-2003, 2005-2012  Free Software Foundation,
+Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of either:
+
+       a. the GNU Free Documentation License, Version 1.3 or any later
+          version published by the Free Software Foundation; with no
+          Invariant Sections, with the Front-Cover texts being "A GNU
+          Manual," and with the Back-Cover Texts as in (a) below. A
+          copy of the license is included in the section entitled "GNU
+          Free Documentation License."
+
+          (a) The FSF's Back-Cover Text is: "You have the freedom to
+          copy and modify this GNU manual. Buying copies from the FSF
+          supports it in developing GNU and promoting software freedom."
+
+       b. the GNU General Public License as published by the Free
+          Software Foundation; either version 3, or (at your option)
+          any later version. A copy of the license is included in the
+          section entitled "GNU General Public License."
+
+
+INFO-DIR-SECTION Emacs network features
+START-INFO-DIR-ENTRY
+* MH-E: (mh-e).                 Emacs interface to the MH mail system.
+END-INFO-DIR-ENTRY
+
+
+File: mh-e,  Node: GPL,  Next: Key Index,  Prev: GFDL,  Up: Top
+
+Appendix F GNU General Public License
+*************************************
+
+                        Version 3, 29 June 2007
+
+     Copyright (C) 2007 Free Software Foundation, Inc. `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies of this
+     license document, but changing it is not allowed.
+
+Preamble
+========
+
+The GNU General Public License is a free, copyleft license for software
+and other kinds of works.
+
+   The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains
+free software for all its users.  We, the Free Software Foundation, use
+the GNU General Public License for most of our software; it applies
+also to any other work released this way by its authors.  You can apply
+it to your programs, too.
+
+   When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+   To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you
+have certain responsibilities if you distribute copies of the software,
+or if you modify it: responsibilities to respect the freedom of others.
+
+   For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+   Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+   For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+   Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the
+manufacturer can do so.  This is fundamentally incompatible with the
+aim of protecting users' freedom to change the software.  The
+systematic pattern of such abuse occurs in the area of products for
+individuals to use, which is precisely where it is most unacceptable.
+Therefore, we have designed this version of the GPL to prohibit the
+practice for those products.  If such problems arise substantially in
+other domains, we stand ready to extend this provision to those domains
+in future versions of the GPL, as needed to protect the freedom of
+users.
+
+   Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+   The precise terms and conditions for copying, distribution and
+modification follow.
+
+TERMS AND CONDITIONS
+====================
+
+  0. Definitions.
+
+     "This License" refers to version 3 of the GNU General Public
+     License.
+
+     "Copyright" also means copyright-like laws that apply to other
+     kinds of works, such as semiconductor masks.
+
+     "The Program" refers to any copyrightable work licensed under this
+     License.  Each licensee is addressed as "you".  "Licensees" and
+     "recipients" may be individuals or organizations.
+
+     To "modify" a work means to copy from or adapt all or part of the
+     work in a fashion requiring copyright permission, other than the
+     making of an exact copy.  The resulting work is called a "modified
+     version" of the earlier work or a work "based on" the earlier work.
+
+     A "covered work" means either the unmodified Program or a work
+     based on the Program.
+
+     To "propagate" a work means to do anything with it that, without
+     permission, would make you directly or secondarily liable for
+     infringement under applicable copyright law, except executing it
+     on a computer or modifying a private copy.  Propagation includes
+     copying, distribution (with or without modification), making
+     available to the public, and in some countries other activities as
+     well.
+
+     To "convey" a work means any kind of propagation that enables other
+     parties to make or receive copies.  Mere interaction with a user
+     through a computer network, with no transfer of a copy, is not
+     conveying.
+
+     An interactive user interface displays "Appropriate Legal Notices"
+     to the extent that it includes a convenient and prominently visible
+     feature that (1) displays an appropriate copyright notice, and (2)
+     tells the user that there is no warranty for the work (except to
+     the extent that warranties are provided), that licensees may
+     convey the work under this License, and how to view a copy of this
+     License.  If the interface presents a list of user commands or
+     options, such as a menu, a prominent item in the list meets this
+     criterion.
+
+  1. Source Code.
+
+     The "source code" for a work means the preferred form of the work
+     for making modifications to it.  "Object code" means any
+     non-source form of a work.
+
+     A "Standard Interface" means an interface that either is an
+     official standard defined by a recognized standards body, or, in
+     the case of interfaces specified for a particular programming
+     language, one that is widely used among developers working in that
+     language.
+
+     The "System Libraries" of an executable work include anything,
+     other than the work as a whole, that (a) is included in the normal
+     form of packaging a Major Component, but which is not part of that
+     Major Component, and (b) serves only to enable use of the work
+     with that Major Component, or to implement a Standard Interface
+     for which an implementation is available to the public in source
+     code form.  A "Major Component", in this context, means a major
+     essential component (kernel, window system, and so on) of the
+     specific operating system (if any) on which the executable work
+     runs, or a compiler used to produce the work, or an object code
+     interpreter used to run it.
+
+     The "Corresponding Source" for a work in object code form means all
+     the source code needed to generate, install, and (for an executable
+     work) run the object code and to modify the work, including
+     scripts to control those activities.  However, it does not include
+     the work's System Libraries, or general-purpose tools or generally
+     available free programs which are used unmodified in performing
+     those activities but which are not part of the work.  For example,
+     Corresponding Source includes interface definition files
+     associated with source files for the work, and the source code for
+     shared libraries and dynamically linked subprograms that the work
+     is specifically designed to require, such as by intimate data
+     communication or control flow between those subprograms and other
+     parts of the work.
+
+     The Corresponding Source need not include anything that users can
+     regenerate automatically from other parts of the Corresponding
+     Source.
+
+     The Corresponding Source for a work in source code form is that
+     same work.
+
+  2. Basic Permissions.
+
+     All rights granted under this License are granted for the term of
+     copyright on the Program, and are irrevocable provided the stated
+     conditions are met.  This License explicitly affirms your unlimited
+     permission to run the unmodified Program.  The output from running
+     a covered work is covered by this License only if the output,
+     given its content, constitutes a covered work.  This License
+     acknowledges your rights of fair use or other equivalent, as
+     provided by copyright law.
+
+     You may make, run and propagate covered works that you do not
+     convey, without conditions so long as your license otherwise
+     remains in force.  You may convey covered works to others for the
+     sole purpose of having them make modifications exclusively for
+     you, or provide you with facilities for running those works,
+     provided that you comply with the terms of this License in
+     conveying all material for which you do not control copyright.
+     Those thus making or running the covered works for you must do so
+     exclusively on your behalf, under your direction and control, on
+     terms that prohibit them from making any copies of your
+     copyrighted material outside their relationship with you.
+
+     Conveying under any other circumstances is permitted solely under
+     the conditions stated below.  Sublicensing is not allowed; section
+     10 makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+     No covered work shall be deemed part of an effective technological
+     measure under any applicable law fulfilling obligations under
+     article 11 of the WIPO copyright treaty adopted on 20 December
+     1996, or similar laws prohibiting or restricting circumvention of
+     such measures.
+
+     When you convey a covered work, you waive any legal power to forbid
+     circumvention of technological measures to the extent such
+     circumvention is effected by exercising rights under this License
+     with respect to the covered work, and you disclaim any intention
+     to limit operation or modification of the work as a means of
+     enforcing, against the work's users, your or third parties' legal
+     rights to forbid circumvention of technological measures.
+
+  4. Conveying Verbatim Copies.
+
+     You may convey verbatim copies of the Program's source code as you
+     receive it, in any medium, provided that you conspicuously and
+     appropriately publish on each copy an appropriate copyright notice;
+     keep intact all notices stating that this License and any
+     non-permissive terms added in accord with section 7 apply to the
+     code; keep intact all notices of the absence of any warranty; and
+     give all recipients a copy of this License along with the Program.
+
+     You may charge any price or no price for each copy that you convey,
+     and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+     You may convey a work based on the Program, or the modifications to
+     produce it from the Program, in the form of source code under the
+     terms of section 4, provided that you also meet all of these
+     conditions:
+
+       a. The work must carry prominent notices stating that you
+          modified it, and giving a relevant date.
+
+       b. The work must carry prominent notices stating that it is
+          released under this License and any conditions added under
+          section 7.  This requirement modifies the requirement in
+          section 4 to "keep intact all notices".
+
+       c. You must license the entire work, as a whole, under this
+          License to anyone who comes into possession of a copy.  This
+          License will therefore apply, along with any applicable
+          section 7 additional terms, to the whole of the work, and all
+          its parts, regardless of how they are packaged.  This License
+          gives no permission to license the work in any other way, but
+          it does not invalidate such permission if you have separately
+          received it.
+
+       d. If the work has interactive user interfaces, each must display
+          Appropriate Legal Notices; however, if the Program has
+          interactive interfaces that do not display Appropriate Legal
+          Notices, your work need not make them do so.
+
+     A compilation of a covered work with other separate and independent
+     works, which are not by their nature extensions of the covered
+     work, and which are not combined with it such as to form a larger
+     program, in or on a volume of a storage or distribution medium, is
+     called an "aggregate" if the compilation and its resulting
+     copyright are not used to limit the access or legal rights of the
+     compilation's users beyond what the individual works permit.
+     Inclusion of a covered work in an aggregate does not cause this
+     License to apply to the other parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+     You may convey a covered work in object code form under the terms
+     of sections 4 and 5, provided that you also convey the
+     machine-readable Corresponding Source under the terms of this
+     License, in one of these ways:
+
+       a. Convey the object code in, or embodied in, a physical product
+          (including a physical distribution medium), accompanied by the
+          Corresponding Source fixed on a durable physical medium
+          customarily used for software interchange.
+
+       b. Convey the object code in, or embodied in, a physical product
+          (including a physical distribution medium), accompanied by a
+          written offer, valid for at least three years and valid for
+          as long as you offer spare parts or customer support for that
+          product model, to give anyone who possesses the object code
+          either (1) a copy of the Corresponding Source for all the
+          software in the product that is covered by this License, on a
+          durable physical medium customarily used for software
+          interchange, for a price no more than your reasonable cost of
+          physically performing this conveying of source, or (2) access
+          to copy the Corresponding Source from a network server at no
+          charge.
+
+       c. Convey individual copies of the object code with a copy of
+          the written offer to provide the Corresponding Source.  This
+          alternative is allowed only occasionally and noncommercially,
+          and only if you received the object code with such an offer,
+          in accord with subsection 6b.
+
+       d. Convey the object code by offering access from a designated
+          place (gratis or for a charge), and offer equivalent access
+          to the Corresponding Source in the same way through the same
+          place at no further charge.  You need not require recipients
+          to copy the Corresponding Source along with the object code.
+          If the place to copy the object code is a network server, the
+          Corresponding Source may be on a different server (operated
+          by you or a third party) that supports equivalent copying
+          facilities, provided you maintain clear directions next to
+          the object code saying where to find the Corresponding Source.
+          Regardless of what server hosts the Corresponding Source, you
+          remain obligated to ensure that it is available for as long
+          as needed to satisfy these requirements.
+
+       e. Convey the object code using peer-to-peer transmission,
+          provided you inform other peers where the object code and
+          Corresponding Source of the work are being offered to the
+          general public at no charge under subsection 6d.
+
+
+     A separable portion of the object code, whose source code is
+     excluded from the Corresponding Source as a System Library, need
+     not be included in conveying the object code work.
+
+     A "User Product" is either (1) a "consumer product", which means
+     any tangible personal property which is normally used for personal,
+     family, or household purposes, or (2) anything designed or sold for
+     incorporation into a dwelling.  In determining whether a product
+     is a consumer product, doubtful cases shall be resolved in favor of
+     coverage.  For a particular product received by a particular user,
+     "normally used" refers to a typical or common use of that class of
+     product, regardless of the status of the particular user or of the
+     way in which the particular user actually uses, or expects or is
+     expected to use, the product.  A product is a consumer product
+     regardless of whether the product has substantial commercial,
+     industrial or non-consumer uses, unless such uses represent the
+     only significant mode of use of the product.
+
+     "Installation Information" for a User Product means any methods,
+     procedures, authorization keys, or other information required to
+     install and execute modified versions of a covered work in that
+     User Product from a modified version of its Corresponding Source.
+     The information must suffice to ensure that the continued
+     functioning of the modified object code is in no case prevented or
+     interfered with solely because modification has been made.
+
+     If you convey an object code work under this section in, or with,
+     or specifically for use in, a User Product, and the conveying
+     occurs as part of a transaction in which the right of possession
+     and use of the User Product is transferred to the recipient in
+     perpetuity or for a fixed term (regardless of how the transaction
+     is characterized), the Corresponding Source conveyed under this
+     section must be accompanied by the Installation Information.  But
+     this requirement does not apply if neither you nor any third party
+     retains the ability to install modified object code on the User
+     Product (for example, the work has been installed in ROM).
+
+     The requirement to provide Installation Information does not
+     include a requirement to continue to provide support service,
+     warranty, or updates for a work that has been modified or
+     installed by the recipient, or for the User Product in which it
+     has been modified or installed.  Access to a network may be denied
+     when the modification itself materially and adversely affects the
+     operation of the network or violates the rules and protocols for
+     communication across the network.
+
+     Corresponding Source conveyed, and Installation Information
+     provided, in accord with this section must be in a format that is
+     publicly documented (and with an implementation available to the
+     public in source code form), and must require no special password
+     or key for unpacking, reading or copying.
+
+  7. Additional Terms.
+
+     "Additional permissions" are terms that supplement the terms of
+     this License by making exceptions from one or more of its
+     conditions.  Additional permissions that are applicable to the
+     entire Program shall be treated as though they were included in
+     this License, to the extent that they are valid under applicable
+     law.  If additional permissions apply only to part of the Program,
+     that part may be used separately under those permissions, but the
+     entire Program remains governed by this License without regard to
+     the additional permissions.
+
+     When you convey a copy of a covered work, you may at your option
+     remove any additional permissions from that copy, or from any part
+     of it.  (Additional permissions may be written to require their own
+     removal in certain cases when you modify the work.)  You may place
+     additional permissions on material, added by you to a covered work,
+     for which you have or can give appropriate copyright permission.
+
+     Notwithstanding any other provision of this License, for material
+     you add to a covered work, you may (if authorized by the copyright
+     holders of that material) supplement the terms of this License
+     with terms:
+
+       a. Disclaiming warranty or limiting liability differently from
+          the terms of sections 15 and 16 of this License; or
+
+       b. Requiring preservation of specified reasonable legal notices
+          or author attributions in that material or in the Appropriate
+          Legal Notices displayed by works containing it; or
+
+       c. Prohibiting misrepresentation of the origin of that material,
+          or requiring that modified versions of such material be
+          marked in reasonable ways as different from the original
+          version; or
+
+       d. Limiting the use for publicity purposes of names of licensors
+          or authors of the material; or
+
+       e. Declining to grant rights under trademark law for use of some
+          trade names, trademarks, or service marks; or
+
+       f. Requiring indemnification of licensors and authors of that
+          material by anyone who conveys the material (or modified
+          versions of it) with contractual assumptions of liability to
+          the recipient, for any liability that these contractual
+          assumptions directly impose on those licensors and authors.
+
+     All other non-permissive additional terms are considered "further
+     restrictions" within the meaning of section 10.  If the Program as
+     you received it, or any part of it, contains a notice stating that
+     it is governed by this License along with a term that is a further
+     restriction, you may remove that term.  If a license document
+     contains a further restriction but permits relicensing or
+     conveying under this License, you may add to a covered work
+     material governed by the terms of that license document, provided
+     that the further restriction does not survive such relicensing or
+     conveying.
+
+     If you add terms to a covered work in accord with this section, you
+     must place, in the relevant source files, a statement of the
+     additional terms that apply to those files, or a notice indicating
+     where to find the applicable terms.
+
+     Additional terms, permissive or non-permissive, may be stated in
+     the form of a separately written license, or stated as exceptions;
+     the above requirements apply either way.
+
+  8. Termination.
+
+     You may not propagate or modify a covered work except as expressly
+     provided under this License.  Any attempt otherwise to propagate or
+     modify it is void, and will automatically terminate your rights
+     under this License (including any patent licenses granted under
+     the third paragraph of section 11).
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, you do not qualify to receive new
+     licenses for the same material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+     You are not required to accept this License in order to receive or
+     run a copy of the Program.  Ancillary propagation of a covered work
+     occurring solely as a consequence of using peer-to-peer
+     transmission to receive a copy likewise does not require
+     acceptance.  However, nothing other than this License grants you
+     permission to propagate or modify any covered work.  These actions
+     infringe copyright if you do not accept this License.  Therefore,
+     by modifying or propagating a covered work, you indicate your
+     acceptance of this License to do so.
+
+ 10. Automatic Licensing of Downstream Recipients.
+
+     Each time you convey a covered work, the recipient automatically
+     receives a license from the original licensors, to run, modify and
+     propagate that work, subject to this License.  You are not
+     responsible for enforcing compliance by third parties with this
+     License.
+
+     An "entity transaction" is a transaction transferring control of an
+     organization, or substantially all assets of one, or subdividing an
+     organization, or merging organizations.  If propagation of a
+     covered work results from an entity transaction, each party to that
+     transaction who receives a copy of the work also receives whatever
+     licenses to the work the party's predecessor in interest had or
+     could give under the previous paragraph, plus a right to
+     possession of the Corresponding Source of the work from the
+     predecessor in interest, if the predecessor has it or can get it
+     with reasonable efforts.
+
+     You may not impose any further restrictions on the exercise of the
+     rights granted or affirmed under this License.  For example, you
+     may not impose a license fee, royalty, or other charge for
+     exercise of rights granted under this License, and you may not
+     initiate litigation (including a cross-claim or counterclaim in a
+     lawsuit) alleging that any patent claim is infringed by making,
+     using, selling, offering for sale, or importing the Program or any
+     portion of it.
+
+ 11. Patents.
+
+     A "contributor" is a copyright holder who authorizes use under this
+     License of the Program or a work on which the Program is based.
+     The work thus licensed is called the contributor's "contributor
+     version".
+
+     A contributor's "essential patent claims" are all patent claims
+     owned or controlled by the contributor, whether already acquired or
+     hereafter acquired, that would be infringed by some manner,
+     permitted by this License, of making, using, or selling its
+     contributor version, but do not include claims that would be
+     infringed only as a consequence of further modification of the
+     contributor version.  For purposes of this definition, "control"
+     includes the right to grant patent sublicenses in a manner
+     consistent with the requirements of this License.
+
+     Each contributor grants you a non-exclusive, worldwide,
+     royalty-free patent license under the contributor's essential
+     patent claims, to make, use, sell, offer for sale, import and
+     otherwise run, modify and propagate the contents of its
+     contributor version.
+
+     In the following three paragraphs, a "patent license" is any
+     express agreement or commitment, however denominated, not to
+     enforce a patent (such as an express permission to practice a
+     patent or covenant not to sue for patent infringement).  To
+     "grant" such a patent license to a party means to make such an
+     agreement or commitment not to enforce a patent against the party.
+
+     If you convey a covered work, knowingly relying on a patent
+     license, and the Corresponding Source of the work is not available
+     for anyone to copy, free of charge and under the terms of this
+     License, through a publicly available network server or other
+     readily accessible means, then you must either (1) cause the
+     Corresponding Source to be so available, or (2) arrange to deprive
+     yourself of the benefit of the patent license for this particular
+     work, or (3) arrange, in a manner consistent with the requirements
+     of this License, to extend the patent license to downstream
+     recipients.  "Knowingly relying" means you have actual knowledge
+     that, but for the patent license, your conveying the covered work
+     in a country, or your recipient's use of the covered work in a
+     country, would infringe one or more identifiable patents in that
+     country that you have reason to believe are valid.
+
+     If, pursuant to or in connection with a single transaction or
+     arrangement, you convey, or propagate by procuring conveyance of, a
+     covered work, and grant a patent license to some of the parties
+     receiving the covered work authorizing them to use, propagate,
+     modify or convey a specific copy of the covered work, then the
+     patent license you grant is automatically extended to all
+     recipients of the covered work and works based on it.
+
+     A patent license is "discriminatory" if it does not include within
+     the scope of its coverage, prohibits the exercise of, or is
+     conditioned on the non-exercise of one or more of the rights that
+     are specifically granted under this License.  You may not convey a
+     covered work if you are a party to an arrangement with a third
+     party that is in the business of distributing software, under
+     which you make payment to the third party based on the extent of
+     your activity of conveying the work, and under which the third
+     party grants, to any of the parties who would receive the covered
+     work from you, a discriminatory patent license (a) in connection
+     with copies of the covered work conveyed by you (or copies made
+     from those copies), or (b) primarily for and in connection with
+     specific products or compilations that contain the covered work,
+     unless you entered into that arrangement, or that patent license
+     was granted, prior to 28 March 2007.
+
+     Nothing in this License shall be construed as excluding or limiting
+     any implied license or other defenses to infringement that may
+     otherwise be available to you under applicable patent law.
+
+ 12. No Surrender of Others' Freedom.
+
+     If conditions are imposed on you (whether by court order,
+     agreement or otherwise) that contradict the conditions of this
+     License, they do not excuse you from the conditions of this
+     License.  If you cannot convey a covered work so as to satisfy
+     simultaneously your obligations under this License and any other
+     pertinent obligations, then as a consequence you may not convey it
+     at all.  For example, if you agree to terms that obligate you to
+     collect a royalty for further conveying from those to whom you
+     convey the Program, the only way you could satisfy both those
+     terms and this License would be to refrain entirely from conveying
+     the Program.
+
+ 13. Use with the GNU Affero General Public License.
+
+     Notwithstanding any other provision of this License, you have
+     permission to link or combine any covered work with a work licensed
+     under version 3 of the GNU Affero General Public License into a
+     single combined work, and to convey the resulting work.  The terms
+     of this License will continue to apply to the part which is the
+     covered work, but the special requirements of the GNU Affero
+     General Public License, section 13, concerning interaction through
+     a network will apply to the combination as such.
+
+ 14. Revised Versions of this License.
+
+     The Free Software Foundation may publish revised and/or new
+     versions of the GNU General Public License from time to time.
+     Such new versions will be similar in spirit to the present
+     version, but may differ in detail to address new problems or
+     concerns.
+
+     Each version is given a distinguishing version number.  If the
+     Program specifies that a certain numbered version of the GNU
+     General Public License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that numbered version or of any later version published by the
+     Free Software Foundation.  If the Program does not specify a
+     version number of the GNU General Public License, you may choose
+     any version ever published by the Free Software Foundation.
+
+     If the Program specifies that a proxy can decide which future
+     versions of the GNU General Public License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Program.
+
+     Later license versions may give you additional or different
+     permissions.  However, no additional obligations are imposed on any
+     author or copyright holder as a result of your choosing to follow a
+     later version.
+
+ 15. Disclaimer of Warranty.
+
+     THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+     APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE
+     COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS"
+     WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
+     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE
+     RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
+     SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+     NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+ 16. Limitation of Liability.
+
+     IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN
+     WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES
+     AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU
+     FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR
+     CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+     THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA
+     BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+     PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
+     PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF
+     THE POSSIBILITY OF SUCH DAMAGES.
+
+ 17. Interpretation of Sections 15 and 16.
+
+     If the disclaimer of warranty and limitation of liability provided
+     above cannot be given local legal effect according to their terms,
+     reviewing courts shall apply local law that most closely
+     approximates an absolute waiver of all civil liability in
+     connection with the Program, unless a warranty or assumption of
+     liability accompanies a copy of the Program in return for a fee.
+
+
+END OF TERMS AND CONDITIONS
+===========================
+
+How to Apply These Terms to Your New Programs
+=============================================
+
+If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these
+terms.
+
+   To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least the
+"copyright" line and a pointer to where the full notice is found.
+
+     ONE LINE TO GIVE THE PROGRAM'S NAME AND A BRIEF IDEA OF WHAT IT DOES.
+     Copyright (C) YEAR NAME OF AUTHOR
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or (at
+     your option) any later version.
+
+     This program is distributed in the hope that it will be useful, but
+     WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see `http://www.gnu.org/licenses/'.
+
+   Also add information on how to contact you by electronic and paper
+mail.
+
+   If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+     PROGRAM Copyright (C) YEAR NAME OF AUTHOR
+     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+     This is free software, and you are welcome to redistribute it
+     under certain conditions; type `show c' for details.
+
+   The hypothetical commands `show w' and `show c' should show the
+appropriate parts of the General Public License.  Of course, your
+program's commands might be different; for a GUI interface, you would
+use an "about box".
+
+   You should also get your employer (if you work as a programmer) or
+school, if any, to sign a "copyright disclaimer" for the program, if
+necessary.  For more information on this, and how to apply and follow
+the GNU GPL, see `http://www.gnu.org/licenses/'.
+
+   The GNU General Public License does not permit incorporating your
+program into proprietary programs.  If your program is a subroutine
+library, you may consider it more useful to permit linking proprietary
+applications with the library.  If this is what you want to do, use the
+GNU Lesser General Public License instead of this License.  But first,
+please read `http://www.gnu.org/philosophy/why-not-lgpl.html'.
+
+
+File: mh-e,  Node: Key Index,  Next: Command Index,  Prev: GPL,  Up: Top
+
+Key (Character) Index
+*********************
+
+ [index ]
+* Menu:
+
+* ! <1>:                                 Folders.             (line  11)
+* !:                                     Files and Pipes.     (line   6)
+* ':                                     Sequences.           (line  13)
+* , (comma) <1>:                         Editing Message.     (line  32)
+* , (comma) <2>:                         Editing Drafts.      (line  16)
+* , (comma) <3>:                         Viewing.             (line   6)
+* , (comma):                             Reading Mail.        (line  27)
+* . (period):                            Viewing.             (line   6)
+* / ':                                   Limits.              (line  13)
+* / ?:                                   Limits.              (line  11)
+* / c:                                   Limits.              (line  16)
+* / g:                                   Limits.              (line  23)
+* / m:                                   Limits.              (line  19)
+* / s:                                   Limits.              (line  26)
+* / t:                                   Limits.              (line  30)
+* / w:                                   Limits.              (line  33)
+* : (colon) <1>:                         Viewing Attachments. (line 125)
+* : (colon):                             Reading Mail.        (line  30)
+* ; (semicolon) <1>:                     Viewing Attachments. (line  11)
+* ; (semicolon):                         Reading Mail.        (line  34)
+* <BS> <1>:                              Digests.             (line   6)
+* <BS> <2>:                              Viewing.             (line   6)
+* <BS> <3>:                              Reading Mail.        (line  41)
+* <BS>:                                  Processing Mail Tour.
+                                                              (line  42)
+* <DEL>:                                 Reading Mail Tour.   (line  41)
+* <RET> <1>:                             Navigating.          (line  18)
+* <RET> <2>:                             Files and Pipes.     (line  31)
+* <RET> <3>:                             Viewing Attachments. (line  25)
+* <RET> <4>:                             Viewing.             (line   6)
+* <RET> <5>:                             Reading Mail.        (line  24)
+* <RET> <6>:                             Processing Mail Tour.
+                                                              (line   6)
+* <RET>:                                 Reading Mail Tour.   (line  20)
+* <SPC> <1>:                             Aliases.             (line  13)
+* <SPC> <2>:                             Editing Message.     (line  32)
+* <SPC> <3>:                             Editing Drafts.      (line  11)
+* <SPC> <4>:                             Digests.             (line   6)
+* <SPC> <5>:                             Viewing.             (line   6)
+* <SPC> <6>:                             Reading Mail.        (line  38)
+* <SPC> <7>:                             Processing Mail Tour.
+                                                              (line  51)
+* <SPC>:                                 Reading Mail Tour.   (line  41)
+* <TAB> <1>:                             Searching.           (line  67)
+* <TAB> <2>:                             Aliases.             (line  74)
+* <TAB> <3>:                             Editing Message.     (line  19)
+* <TAB> <4>:                             Editing Drafts.      (line  19)
+* <TAB>:                                 Folders.             (line 325)
+* > <1>:                                 Files and Pipes.     (line   6)
+* >:                                     Reading Mail.        (line  44)
+* ? <1>:                                 Miscellaneous.       (line  29)
+* ? <2>:                                 Folders.             (line  10)
+* ? <3>:                                 Reading Mail.        (line  23)
+* ? <4>:                                 Using This Manual.   (line   9)
+* ?:                                     Processing Mail Tour.
+                                                              (line  75)
+* c:                                     Folders.             (line  14)
+* C-<SPC>:                               Conventions.         (line  90)
+* C-@:                                   Conventions.         (line  90)
+* C-b:                                   Processing Mail Tour.
+                                                              (line  42)
+* C-c <RET>:                             Viewing.             (line 113)
+* C-c ? <1>:                             Miscellaneous.       (line  29)
+* C-c ? <2>:                             Searching.           (line  12)
+* C-c ? <3>:                             Editing Drafts.      (line  26)
+* C-c ? <4>:                             Using This Manual.   (line   9)
+* C-c ?:                                 Sending Mail Tour.   (line  44)
+* C-c C-c <1>:                           Searching.           (line  13)
+* C-c C-c <2>:                           Sending Message.     (line   6)
+* C-c C-c <3>:                           Editing Drafts.      (line  29)
+* C-c C-c <4>:                           Editing Again.       (line  17)
+* C-c C-c <5>:                           Processing Mail Tour.
+                                                              (line  42)
+* C-c C-c:                               Sending Mail Tour.   (line  44)
+* C-c C-d <1>:                           Identities.          (line  13)
+* C-c C-d:                               Editing Drafts.      (line  32)
+* C-c C-e <1>:                           Adding Attachments.  (line 201)
+* C-c C-e:                               Editing Drafts.      (line  36)
+* C-c C-f a <1>:                         Searching.           (line  22)
+* C-c C-f a:                             Editing Drafts.      (line  39)
+* C-c C-f b <1>:                         Searching.           (line  26)
+* C-c C-f b:                             Editing Drafts.      (line  43)
+* C-c C-f c <1>:                         Searching.           (line  30)
+* C-c C-f c:                             Editing Drafts.      (line  47)
+* C-c C-f C-a <1>:                       Searching.           (line  22)
+* C-c C-f C-a:                           Editing Drafts.      (line  39)
+* C-c C-f C-b <1>:                       Searching.           (line  26)
+* C-c C-f C-b:                           Editing Drafts.      (line  43)
+* C-c C-f C-c <1>:                       Searching.           (line  30)
+* C-c C-f C-c:                           Editing Drafts.      (line  47)
+* C-c C-f C-d <1>:                       Searching.           (line  34)
+* C-c C-f C-d:                           Editing Drafts.      (line  51)
+* C-c C-f C-f <1>:                       Searching.           (line  38)
+* C-c C-f C-f <2>:                       Editing Message.     (line  14)
+* C-c C-f C-f:                           Editing Drafts.      (line  55)
+* C-c C-f C-l <1>:                       Searching.           (line  42)
+* C-c C-f C-l:                           Editing Drafts.      (line  59)
+* C-c C-f C-m <1>:                       Searching.           (line  46)
+* C-c C-f C-m:                           Editing Drafts.      (line  63)
+* C-c C-f C-r <1>:                       Searching.           (line  50)
+* C-c C-f C-r:                           Editing Drafts.      (line  67)
+* C-c C-f C-s <1>:                       Searching.           (line  54)
+* C-c C-f C-s:                           Editing Drafts.      (line  71)
+* C-c C-f C-t <1>:                       Searching.           (line  58)
+* C-c C-f C-t <2>:                       Editing Message.     (line   6)
+* C-c C-f C-t <3>:                       Editing Drafts.      (line  75)
+* C-c C-f C-t:                           Processing Mail Tour.
+                                                              (line  42)
+* C-c C-f d <1>:                         Searching.           (line  34)
+* C-c C-f d:                             Editing Drafts.      (line  51)
+* C-c C-f f <1>:                         Searching.           (line  38)
+* C-c C-f f <2>:                         Editing Message.     (line  14)
+* C-c C-f f:                             Editing Drafts.      (line  55)
+* C-c C-f l <1>:                         Searching.           (line  42)
+* C-c C-f l:                             Editing Drafts.      (line  59)
+* C-c C-f m <1>:                         Searching.           (line  46)
+* C-c C-f m:                             Editing Drafts.      (line  63)
+* C-c C-f r <1>:                         Searching.           (line  50)
+* C-c C-f r:                             Editing Drafts.      (line  67)
+* C-c C-f s <1>:                         Searching.           (line  54)
+* C-c C-f s:                             Editing Drafts.      (line  71)
+* C-c C-f t <1>:                         Searching.           (line  58)
+* C-c C-f t <2>:                         Editing Message.     (line   6)
+* C-c C-f t:                             Editing Drafts.      (line  75)
+* C-c C-i <1>:                           Inserting Messages.  (line   6)
+* C-c C-i:                               Editing Drafts.      (line  79)
+* C-c C-m:                               Adding Attachments.  (line  12)
+* C-c C-m C-e <1>:                       Sending PGP.         (line  11)
+* C-c C-m C-e:                           Editing Drafts.      (line  82)
+* C-c C-m C-f <1>:                       Adding Attachments.  (line 109)
+* C-c C-m C-f:                           Editing Drafts.      (line  85)
+* C-c C-m C-g <1>:                       Adding Attachments.  (line 118)
+* C-c C-m C-g:                           Editing Drafts.      (line  89)
+* C-c C-m C-i <1>:                       Adding Attachments.  (line  99)
+* C-c C-m C-i:                           Editing Drafts.      (line  94)
+* C-c C-m C-m <1>:                       Adding Attachments.  (line 168)
+* C-c C-m C-m:                           Editing Drafts.      (line  99)
+* C-c C-m C-n <1>:                       Sending PGP.         (line  27)
+* C-c C-m C-n:                           Editing Drafts.      (line 103)
+* C-c C-m C-s <1>:                       Sending PGP.         (line  11)
+* C-c C-m C-s:                           Editing Drafts.      (line 107)
+* C-c C-m C-t <1>:                       Adding Attachments.  (line 126)
+* C-c C-m C-t:                           Editing Drafts.      (line 110)
+* C-c C-m C-u <1>:                       Adding Attachments.  (line 201)
+* C-c C-m C-u:                           Editing Drafts.      (line 115)
+* C-c C-m C-x <1>:                       Adding Attachments.  (line 136)
+* C-c C-m C-x:                           Editing Drafts.      (line 119)
+* C-c C-m e e <1>:                       Sending PGP.         (line  11)
+* C-c C-m e e:                           Editing Drafts.      (line 123)
+* C-c C-m e s <1>:                       Sending PGP.         (line  11)
+* C-c C-m e s:                           Editing Drafts.      (line 126)
+* C-c C-m f <1>:                         Adding Attachments.  (line 109)
+* C-c C-m f:                             Editing Drafts.      (line  85)
+* C-c C-m g <1>:                         Adding Attachments.  (line 118)
+* C-c C-m g:                             Editing Drafts.      (line  89)
+* C-c C-m i <1>:                         Adding Attachments.  (line  99)
+* C-c C-m i:                             Editing Drafts.      (line  94)
+* C-c C-m m <1>:                         Adding Attachments.  (line 168)
+* C-c C-m m:                             Editing Drafts.      (line  99)
+* C-c C-m n <1>:                         Sending PGP.         (line  27)
+* C-c C-m n:                             Editing Drafts.      (line 103)
+* C-c C-m s e <1>:                       Sending PGP.         (line  11)
+* C-c C-m s e:                           Editing Drafts.      (line 130)
+* C-c C-m s s <1>:                       Sending PGP.         (line  11)
+* C-c C-m s s:                           Editing Drafts.      (line 134)
+* C-c C-m t <1>:                         Adding Attachments.  (line 126)
+* C-c C-m t:                             Editing Drafts.      (line 110)
+* C-c C-m u <1>:                         Adding Attachments.  (line 201)
+* C-c C-m u:                             Editing Drafts.      (line 115)
+* C-c C-m x <1>:                         Adding Attachments.  (line 136)
+* C-c C-m x:                             Editing Drafts.      (line 119)
+* C-c C-o <1>:                           Editing Message.     (line  80)
+* C-c C-o:                               Editing Drafts.      (line 137)
+* C-c C-p:                               Searching.           (line  16)
+* C-c C-q <1>:                           Killing Draft.       (line   6)
+* C-c C-q:                               Editing Drafts.      (line 140)
+* C-c C-s <1>:                           Signature.           (line   6)
+* C-c C-s:                               Editing Drafts.      (line 143)
+* C-c C-t <1>:                           Editing Message.     (line  47)
+* C-c C-t:                               Editing Drafts.      (line 146)
+* C-c C-w <1>:                           Miscellaneous.       (line  44)
+* C-c C-w <2>:                           Checking Recipients. (line   6)
+* C-c C-w:                               Editing Drafts.      (line 150)
+* C-c C-y <1>:                           Inserting Letter.    (line   6)
+* C-c C-y:                               Editing Drafts.      (line 154)
+* C-c M-d <1>:                           Identities.          (line  14)
+* C-c M-d:                               Editing Drafts.      (line 158)
+* C-d <1>:                               Navigating.          (line  33)
+* C-d:                                   Reading Mail.        (line  50)
+* C-f:                                   Processing Mail Tour.
+                                                              (line  42)
+* C-h C-h:                               Using This Manual.   (line   9)
+* C-h C-k i:                             Using This Manual.   (line   9)
+* C-h i <1>:                             Using This Manual.   (line   9)
+* C-h i:                                 Preface.             (line  29)
+* C-h m <1>:                             Using This Manual.   (line   9)
+* C-h m <2>:                             Processing Mail Tour.
+                                                              (line  75)
+* C-h m:                                 Sending Mail Tour.   (line  44)
+* C-h t <1>:                             Conventions.         (line 106)
+* C-h t:                                 Preface.             (line  19)
+* C-n <1>:                               Navigating.          (line  18)
+* C-n:                                   Processing Mail Tour.
+                                                              (line  42)
+* C-o:                                   Editing Message.     (line  80)
+* C-p <1>:                               Navigating.          (line  18)
+* C-p:                                   Processing Mail Tour.
+                                                              (line  42)
+* C-u:                                   Conventions.         (line  45)
+* C-u, with ranges:                      Ranges.              (line  10)
+* C-x 5 0:                               Speedbar.            (line  37)
+* C-x b:                                 Leaving MH-E.        (line  12)
+* C-x C-c:                               Leaving MH-E.        (line   6)
+* C-x k <1>:                             Killing Draft.       (line   6)
+* C-x k:                                 Leaving MH-E.        (line  12)
+* d <1>:                                 Sequences.           (line 105)
+* d <2>:                                 Navigating.          (line  23)
+* d <3>:                                 Digests.             (line  13)
+* d <4>:                                 Reading Mail.        (line  54)
+* d:                                     Processing Mail Tour.
+                                                              (line  63)
+* D <BS> <1>:                            Digests.             (line   6)
+* D <BS>:                                Reading Mail.        (line  64)
+* D <SPC> <1>:                           Digests.             (line   6)
+* D <SPC>:                               Reading Mail.        (line  61)
+* D ?:                                   Reading Mail.        (line  57)
+* D b <1>:                               Digests.             (line  13)
+* D b:                                   Reading Mail.        (line  67)
+* E:                                     Editing Again.       (line  17)
+* e <1>:                                 Editing Again.       (line   6)
+* e:                                     Redistributing.      (line  12)
+* E:                                     Sending Mail.        (line  20)
+* e:                                     Sending Mail.        (line  19)
+* f <1>:                                 Forwarding.          (line   6)
+* f:                                     Sending Mail.        (line  24)
+* F ' <1>:                               Sequences.           (line  73)
+* F ':                                   Folders.             (line  21)
+* F ? <1>:                               Folders.             (line  17)
+* F ?:                                   Processing Mail Tour.
+                                                              (line  75)
+* F c:                                   Folders.             (line  24)
+* F k <1>:                               Searching.           (line 185)
+* F k:                                   Folders.             (line  27)
+* F l <1>:                               Miscellaneous.       (line  25)
+* F l:                                   Folders.             (line  30)
+* F n:                                   Folders.             (line  33)
+* F p:                                   Folders.             (line  36)
+* F q:                                   Folders.             (line  39)
+* F r <1>:                               Searching.           (line 176)
+* F r <2>:                               Folders.             (line  42)
+* F r <3>:                               Reading Mail.        (line   6)
+* F r:                                   Reading Mail Tour.   (line  12)
+* F s:                                   Searching.           (line   6)
+* F S:                                   Folders.             (line 309)
+* F s:                                   Folders.             (line 280)
+* F S:                                   Folders.             (line  48)
+* F s:                                   Folders.             (line  45)
+* F u:                                   Folders.             (line  51)
+* F v <1>:                               Speedbar.            (line   6)
+* F v <2>:                               Folders.             (line  55)
+* F v:                                   Reading Mail.        (line   6)
+* F v drafts:                            Editing Again.       (line   6)
+* g <1>:                                 Navigating.          (line   6)
+* g:                                     Reading Mail.        (line  70)
+* i <1>:                                 Incorporating Mail.  (line  10)
+* i:                                     Processing Mail Tour.
+                                                              (line  63)
+* I *:                                   Incorporating Mail.  (line  67)
+* J ?:                                   Junk.                (line  17)
+* J b:                                   Junk.                (line  19)
+* J w:                                   Junk.                (line  22)
+* k <1>:                                 Threading.           (line  60)
+* k <2>:                                 Folders.             (line 330)
+* k <3>:                                 Navigating.          (line  37)
+* k:                                     Reading Mail.        (line  73)
+* K <TAB> <1>:                           Viewing Attachments. (line  25)
+* K <TAB>:                               Reading Mail.        (line  81)
+* K ?:                                   Reading Mail.        (line  77)
+* K a <1>:                               Viewing Attachments. (line  72)
+* K a:                                   Reading Mail.        (line  87)
+* K e <1>:                               Viewing Attachments. (line  48)
+* K e:                                   Reading Mail.        (line  90)
+* K i <1>:                               Viewing Attachments. (line 131)
+* K i:                                   Reading Mail.        (line  93)
+* K o <1>:                               Viewing Attachments. (line  63)
+* K o:                                   Reading Mail.        (line  96)
+* K S-<TAB> <1>:                         Viewing Attachments. (line  25)
+* K S-<TAB>:                             Reading Mail.        (line  84)
+* K t <1>:                               Viewing Attachments. (line  88)
+* K t:                                   Reading Mail.        (line  99)
+* K v <1>:                               Viewing Attachments. (line  37)
+* K v:                                   Reading Mail.        (line 103)
+* l:                                     Files and Pipes.     (line  14)
+* m:                                     Composing.           (line  16)
+* M <1>:                                 Miscellaneous Commands and Options.
+                                                              (line   8)
+* M:                                     Reading Mail.        (line 106)
+* m:                                     Processing Mail Tour.
+                                                              (line  72)
+* M-< <1>:                               Navigating.          (line   6)
+* M-<:                                   Reading Mail.        (line 109)
+* M-<TAB> <1>:                           Aliases.             (line  14)
+* M-<TAB> <2>:                           Editing Message.     (line  32)
+* M-<TAB>:                               Editing Drafts.      (line  12)
+* M-> <1>:                               Navigating.          (line   6)
+* M->:                                   Reading Mail.        (line 112)
+* M-d <1>:                               Redistributing.      (line   6)
+* M-d:                                   Sending Mail.        (line  33)
+* M-n <1>:                               Navigating.          (line   6)
+* M-n:                                   Reading Mail.        (line 115)
+* M-p <1>:                               Navigating.          (line   6)
+* M-p:                                   Reading Mail.        (line 118)
+* M-q:                                   Editing Message.     (line  62)
+* M-x:                                   Conventions.         (line 106)
+* M-x mh-alias-add-address-under-point:  Aliases.             (line 203)
+* M-x mh-alias-add-alias:                Aliases.             (line 175)
+* M-x mh-alias-apropos:                  Aliases.             (line 225)
+* M-x mh-alias-grab-from-field:          Aliases.             (line 203)
+* M-x mh-alias-reload:                   Aliases.             (line 162)
+* M-x mh-rmail <1>:                      Reading Mail.        (line   6)
+* M-x mh-rmail <2>:                      Leaving MH-E.        (line  12)
+* M-x mh-rmail:                          Reading Mail Tour.   (line   6)
+* M-x mh-smail <1>:                      Composing.           (line   6)
+* M-x mh-smail <2>:                      Sending Mail.        (line   6)
+* M-x mh-smail <3>:                      Processing Mail Tour.
+                                                              (line  72)
+* M-x mh-smail:                          Sending Mail Tour.   (line   6)
+* M-x mh-smail-other-window:             Composing.           (line   6)
+* M-x mh-update-sequences:               Sequences.           (line 112)
+* M-x mh-version <1>:                    Getting MH-E.        (line  24)
+* M-x mh-version <2>:                    Bug Reports.         (line   6)
+* M-x mh-version:                        Miscellaneous.       (line  12)
+* M-x speedbar:                          Speedbar.            (line   6)
+* Mouse-1 <1>:                           Viewing Attachments. (line  25)
+* Mouse-1:                               Reading Mail.        (line 163)
+* Mouse-2 <1>:                           Speedbar.            (line   6)
+* Mouse-2 <2>:                           HTML.                (line  30)
+* Mouse-2 <3>:                           Viewing Attachments. (line  25)
+* Mouse-2 <4>:                           Viewing.             (line   6)
+* Mouse-2:                               Reading Mail.        (line 156)
+* Mouse-3:                               Speedbar.            (line  37)
+* n <1>:                                 Editing Again.       (line   6)
+* n <2>:                                 Navigating.          (line   6)
+* n <3>:                                 Reading Mail.        (line 121)
+* n <4>:                                 Processing Mail Tour.
+                                                              (line  63)
+* n:                                     Reading Mail Tour.   (line  20)
+* o <1>:                                 Folders.             (line  58)
+* o:                                     Processing Mail Tour.
+                                                              (line  51)
+* p <1>:                                 Navigating.          (line   6)
+* p <2>:                                 Reading Mail.        (line 124)
+* p <3>:                                 Processing Mail Tour.
+                                                              (line  63)
+* p:                                     Reading Mail Tour.   (line  20)
+* P ?:                                   Reading Mail.        (line 127)
+* P C <1>:                               Printing.            (line  18)
+* P C:                                   Reading Mail.        (line 131)
+* P f:                                   Printing.            (line  40)
+* P F:                                   Printing.            (line  26)
+* P f <1>:                               Printing.            (line   6)
+* P f:                                   Reading Mail.        (line 139)
+* P F:                                   Reading Mail.        (line 135)
+* P l <1>:                               Printing.            (line  35)
+* P l:                                   Reading Mail.        (line 142)
+* P p <1>:                               Printing.            (line   6)
+* P p:                                   Reading Mail.        (line 145)
+* q <1>:                                 Sequences.           (line 112)
+* q <2>:                                 Folders.             (line  61)
+* q:                                     Leaving MH-E.        (line  12)
+* r <1>:                                 Inserting Letter.    (line  36)
+* r <2>:                                 Replying.            (line   6)
+* r <3>:                                 Sending Mail.        (line  27)
+* r:                                     Processing Mail Tour.
+                                                              (line   6)
+* s:                                     Sending Mail.        (line  30)
+* S ':                                   Sequences.           (line  18)
+* S ?:                                   Sequences.           (line  14)
+* S d:                                   Sequences.           (line  21)
+* S k:                                   Sequences.           (line  24)
+* S l:                                   Sequences.           (line  27)
+* S n:                                   Sequences.           (line  30)
+* S p:                                   Sequences.           (line  33)
+* S s:                                   Sequences.           (line  36)
+* S w:                                   Sequences.           (line  40)
+* S-<TAB> <1>:                           Searching.           (line  68)
+* S-<TAB> <2>:                           Editing Message.     (line  19)
+* S-<TAB>:                               Editing Drafts.      (line  22)
+* S-Mouse-2:                             HTML.                (line  93)
+* SPC:                                   Conventions.         (line  98)
+* t <1>:                                 Folders.             (line  64)
+* t:                                     Digests.             (line  13)
+* T ?:                                   Threading.           (line  19)
+* T d <1>:                               Threading.           (line  24)
+* T d:                                   Navigating.          (line  37)
+* T n:                                   Threading.           (line  30)
+* T o:                                   Threading.           (line  21)
+* T p:                                   Threading.           (line  33)
+* T t:                                   Threading.           (line  27)
+* T u:                                   Threading.           (line  36)
+* TAB:                                   Conventions.         (line  98)
+* u <1>:                                 Folders.             (line  68)
+* u:                                     Navigating.          (line  37)
+* v:                                     Searching.           (line  71)
+* x <1>:                                 Sequences.           (line 112)
+* x <2>:                                 Folders.             (line  71)
+* x <3>:                                 Navigating.          (line  46)
+* x <4>:                                 Leaving MH-E.        (line   6)
+* x:                                     Processing Mail Tour.
+                                                              (line  63)
+* X ?:                                   Reading Mail.        (line 148)
+* X s <1>:                               Files and Pipes.     (line  21)
+* X s:                                   Reading Mail.        (line 152)
+* X u:                                   Reading Mail.        (line 152)
+* | <1>:                                 Files and Pipes.     (line  14)
+* |:                                     Reading Mail.        (line  47)
+
+
+File: mh-e,  Node: Command Index,  Next: Option Index,  Prev: Key Index,  Up: Top
+
+Command Index
+*************
+
+ [index ]
+* Menu:
+
+* add-hook:                              Conventions.         (line  80)
+* backward-char:                         Processing Mail Tour.
+                                                              (line  42)
+* browse-url-at-mouse:                   HTML.                (line  93)
+* call-process:                          Junk.                (line  67)
+* customize-face:                        Conventions.         (line  74)
+* customize-group <1>:                   Options.             (line  33)
+* customize-group:                       Conventions.         (line  68)
+* customize-option <1>:                  Options.             (line   6)
+* customize-option:                      Conventions.         (line  68)
+* delete-frame:                          Speedbar.            (line  37)
+* describe-mode <1>:                     Using This Manual.   (line   9)
+* describe-mode <2>:                     Processing Mail Tour.
+                                                              (line  75)
+* describe-mode:                         Sending Mail Tour.   (line  44)
+* dired:                                 Folders.             (line 384)
+* dired-do-rename:                       Folders.             (line 384)
+* display-time <1>:                      Reading Mail.        (line  11)
+* display-time:                          Incorporating Mail.  (line  39)
+* fill-paragraph:                        Editing Message.     (line  62)
+* forward-char:                          Processing Mail Tour.
+                                                              (line  42)
+* goto-address-at-point <1>:             Sending Mail.        (line  11)
+* goto-address-at-point:                 Viewing.             (line 113)
+* help-with-tutorial <1>:                Conventions.         (line 106)
+* help-with-tutorial:                    Preface.             (line  19)
+* indent-relative:                       Editing Message.     (line  19)
+* ispell-complete-word:                  Editing Message.     (line  32)
+* ispell-message:                        Sending Message.     (line  12)
+* kill-buffer:                           Killing Draft.       (line   6)
+* mailcap-mime-info:                     Viewing Attachments. (line  48)
+* mailcap-mime-types:                    Adding Attachments.  (line  32)
+* mh-alias-add-alias:                    Aliases.             (line 175)
+* mh-alias-apropos:                      Aliases.             (line  18)
+* mh-alias-grab-from-field:              Aliases.             (line  21)
+* mh-alias-minibuffer-confirm-address:   Aliases.             (line 102)
+* mh-alias-reload:                       Aliases.             (line  24)
+* mh-annotate-msg:                       Sending Mail.        (line  89)
+* mh-burst-digest <1>:                   Digests.             (line  13)
+* mh-burst-digest:                       Reading Mail.        (line  67)
+* mh-catchup:                            Folders.             (line  24)
+* mh-check-whom <1>:                     Miscellaneous.       (line  41)
+* mh-check-whom <2>:                     Checking Recipients. (line   6)
+* mh-check-whom:                         Editing Drafts.      (line 150)
+* mh-compose-forward <1>:                Adding Attachments.  (line 109)
+* mh-compose-forward:                    Editing Drafts.      (line  85)
+* mh-compose-insertion <1>:              Adding Attachments.  (line  99)
+* mh-compose-insertion:                  Editing Drafts.      (line  94)
+* mh-copy-msg:                           Folders.             (line  14)
+* mh-customize:                          Options.             (line  33)
+* mh-delete-msg <1>:                     Navigating.          (line  23)
+* mh-delete-msg:                         Reading Mail.        (line  54)
+* mh-delete-msg-from-seq:                Sequences.           (line  21)
+* mh-delete-msg-no-motion <1>:           Navigating.          (line  33)
+* mh-delete-msg-no-motion:               Reading Mail.        (line  50)
+* mh-delete-seq:                         Sequences.           (line  24)
+* mh-delete-subject:                     Navigating.          (line  37)
+* mh-delete-subject-or-thread <1>:       Threading.           (line  60)
+* mh-delete-subject-or-thread <2>:       Navigating.          (line  37)
+* mh-delete-subject-or-thread:           Reading Mail.        (line  73)
+* mh-display-with-external-viewer <1>:   Viewing Attachments. (line  48)
+* mh-display-with-external-viewer:       Reading Mail.        (line  90)
+* mh-edit-again <1>:                     Editing Again.       (line   6)
+* mh-edit-again <2>:                     Redistributing.      (line  12)
+* mh-edit-again:                         Sending Mail.        (line  19)
+* mh-execute-commands <1>:               Folders.             (line  71)
+* mh-execute-commands <2>:               Navigating.          (line  46)
+* mh-execute-commands:                   Incorporating Mail.  (line  90)
+* mh-extract-rejected-mail <1>:          Editing Again.       (line  17)
+* mh-extract-rejected-mail:              Sending Mail.        (line  20)
+* mh-find-path:                          Getting Started.     (line  69)
+* mh-first-msg <1>:                      Navigating.          (line   6)
+* mh-first-msg:                          Reading Mail.        (line 109)
+* mh-folder-inline-mime-part <1>:        Viewing Attachments. (line 131)
+* mh-folder-inline-mime-part:            Reading Mail.        (line  93)
+* mh-folder-save-mime-part <1>:          Viewing Attachments. (line  63)
+* mh-folder-save-mime-part:              Reading Mail.        (line  96)
+* mh-folder-toggle-mime-part <1>:        Viewing Attachments. (line  37)
+* mh-folder-toggle-mime-part:            Reading Mail.        (line 103)
+* mh-forward <1>:                        Forwarding.          (line   6)
+* mh-forward:                            Sending Mail.        (line  24)
+* mh-fully-kill-draft <1>:               Killing Draft.       (line   6)
+* mh-fully-kill-draft:                   Editing Drafts.      (line 140)
+* mh-goto-msg <1>:                       Navigating.          (line   6)
+* mh-goto-msg:                           Reading Mail.        (line  70)
+* mh-header-display <1>:                 Viewing.             (line   6)
+* mh-header-display:                     Reading Mail.        (line  27)
+* mh-help <1>:                           Miscellaneous.       (line  26)
+* mh-help <2>:                           Searching.           (line  12)
+* mh-help <3>:                           Editing Drafts.      (line  26)
+* mh-help <4>:                           Folders.             (line  10)
+* mh-help <5>:                           Reading Mail.        (line  23)
+* mh-help:                               Using This Manual.   (line   9)
+* mh-inc-folder:                         Incorporating Mail.  (line  10)
+* mh-inc-spool-*:                        Incorporating Mail.  (line  67)
+* mh-index-do-search:                    Searching.           (line  13)
+* mh-index-new-messages:                 Folders.             (line  33)
+* mh-index-next-folder:                  Searching.           (line  67)
+* mh-index-previous-folder:              Searching.           (line  68)
+* mh-index-sequenced-messages:           Folders.             (line  39)
+* mh-index-ticked-messages <1>:          Sequences.           (line  73)
+* mh-index-ticked-messages:              Folders.             (line  21)
+* mh-index-visit-folder:                 Searching.           (line  71)
+* mh-insert-auto-fields <1>:             Identities.          (line  14)
+* mh-insert-auto-fields:                 Editing Drafts.      (line 158)
+* mh-insert-identity <1>:                Identities.          (line  13)
+* mh-insert-identity:                    Editing Drafts.      (line  32)
+* mh-insert-letter <1>:                  Inserting Messages.  (line   6)
+* mh-insert-letter:                      Editing Drafts.      (line  79)
+* mh-insert-signature <1>:               Signature.           (line   6)
+* mh-insert-signature:                   Editing Drafts.      (line 143)
+* mh-insert-signature, example:          Composing.           (line  41)
+* mh-junk-blacklist:                     Junk.                (line  19)
+* mh-junk-whitelist:                     Junk.                (line  22)
+* mh-kill-folder <1>:                    Searching.           (line 185)
+* mh-kill-folder <2>:                    Folders.             (line  27)
+* mh-kill-folder:                        Miscellaneous Commands and Options.
+                                                              (line  14)
+* mh-last-msg <1>:                       Navigating.          (line   6)
+* mh-last-msg:                           Reading Mail.        (line 112)
+* mh-letter-complete <1>:                Aliases.             (line  14)
+* mh-letter-complete <2>:                Editing Message.     (line  32)
+* mh-letter-complete:                    Editing Drafts.      (line  12)
+* mh-letter-complete-or-space <1>:       Aliases.             (line  13)
+* mh-letter-complete-or-space <2>:       Editing Message.     (line  32)
+* mh-letter-complete-or-space:           Editing Drafts.      (line  11)
+* mh-letter-confirm-address <1>:         Aliases.             (line 102)
+* mh-letter-confirm-address <2>:         Editing Message.     (line  32)
+* mh-letter-confirm-address:             Editing Drafts.      (line  16)
+* mh-letter-next-header-field-or-indent <1>: Editing Message. (line  19)
+* mh-letter-next-header-field-or-indent: Editing Drafts.      (line  19)
+* mh-letter-previous-header-field <1>:   Editing Message.     (line  19)
+* mh-letter-previous-header-field:       Editing Drafts.      (line  22)
+* mh-letter-toggle-header-field-display <1>: Editing Message. (line  47)
+* mh-letter-toggle-header-field-display: Editing Drafts.      (line 146)
+* mh-list-folders <1>:                   Miscellaneous.       (line  24)
+* mh-list-folders:                       Folders.             (line  30)
+* mh-list-sequences:                     Sequences.           (line  27)
+* mh-mh-compose-anon-ftp <1>:            Adding Attachments.  (line 118)
+* mh-mh-compose-anon-ftp:                Editing Drafts.      (line  89)
+* mh-mh-compose-external-compressed-tar <1>: Adding Attachments.
+                                                              (line 126)
+* mh-mh-compose-external-compressed-tar: Editing Drafts.      (line 110)
+* mh-mh-compose-external-type <1>:       Adding Attachments.  (line 136)
+* mh-mh-compose-external-type:           Editing Drafts.      (line 119)
+* mh-mh-to-mime <1>:                     Adding Attachments.  (line 201)
+* mh-mh-to-mime:                         Editing Drafts.      (line  36)
+* mh-mh-to-mime-undo <1>:                Adding Attachments.  (line 201)
+* mh-mh-to-mime-undo:                    Editing Drafts.      (line 115)
+* mh-mime-save-parts <1>:                Viewing Attachments. (line  72)
+* mh-mime-save-parts:                    Reading Mail.        (line  87)
+* mh-mml-secure-message-encrypt <1>:     Sending PGP.         (line  11)
+* mh-mml-secure-message-encrypt:         Editing Drafts.      (line  82)
+* mh-mml-secure-message-sign <1>:        Sending PGP.         (line  11)
+* mh-mml-secure-message-sign:            Editing Drafts.      (line 107)
+* mh-mml-secure-message-signencrypt <1>: Sending PGP.         (line  11)
+* mh-mml-secure-message-signencrypt:     Editing Drafts.      (line 126)
+* mh-mml-to-mime <1>:                    Adding Attachments.  (line 168)
+* mh-mml-to-mime:                        Editing Drafts.      (line  99)
+* mh-mml-unsecure-message <1>:           Sending PGP.         (line  27)
+* mh-mml-unsecure-message:               Editing Drafts.      (line 103)
+* mh-modify <1>:                         Miscellaneous Commands and Options.
+                                                              (line   8)
+* mh-modify:                             Reading Mail.        (line 106)
+* mh-msg-is-in-seq:                      Sequences.           (line  36)
+* mh-narrow-to-cc:                       Limits.              (line  16)
+* mh-narrow-to-from:                     Limits.              (line  19)
+* mh-narrow-to-range:                    Limits.              (line  23)
+* mh-narrow-to-seq:                      Sequences.           (line  30)
+* mh-narrow-to-subject:                  Limits.              (line  26)
+* mh-narrow-to-tick <1>:                 Sequences.           (line  18)
+* mh-narrow-to-tick:                     Limits.              (line  13)
+* mh-narrow-to-to:                       Limits.              (line  30)
+* mh-next-button <1>:                    Viewing Attachments. (line  25)
+* mh-next-button:                        Reading Mail.        (line  81)
+* mh-next-undeleted-msg <1>:             Navigating.          (line   6)
+* mh-next-undeleted-msg:                 Reading Mail.        (line 121)
+* mh-next-unread-msg <1>:                Navigating.          (line   6)
+* mh-next-unread-msg:                    Reading Mail.        (line 115)
+* mh-open-line <1>:                      Editing Message.     (line  80)
+* mh-open-line:                          Editing Drafts.      (line 137)
+* mh-pack-folder <1>:                    Folders.             (line  36)
+* mh-pack-folder:                        Miscellaneous Commands and Options.
+                                                              (line  14)
+* mh-page-digest <1>:                    Digests.             (line   6)
+* mh-page-digest:                        Reading Mail.        (line  61)
+* mh-page-digest-backwards <1>:          Digests.             (line   6)
+* mh-page-digest-backwards:              Reading Mail.        (line  64)
+* mh-page-msg <1>:                       Viewing.             (line   6)
+* mh-page-msg:                           Reading Mail.        (line  38)
+* mh-pick-do-search:                     Searching.           (line  16)
+* mh-pipe-msg <1>:                       Files and Pipes.     (line  14)
+* mh-pipe-msg:                           Reading Mail.        (line  47)
+* mh-prefix-help <1>:                    Junk.                (line  17)
+* mh-prefix-help <2>:                    Sequences.           (line  14)
+* mh-prefix-help <3>:                    Limits.              (line  11)
+* mh-prefix-help <4>:                    Threading.           (line  19)
+* mh-prefix-help <5>:                    Folders.             (line  17)
+* mh-prefix-help:                        Reading Mail.        (line  57)
+* mh-press-button <1>:                   Viewing Attachments. (line  25)
+* mh-press-button:                       Reading Mail.        (line 163)
+* mh-prev-button <1>:                    Viewing Attachments. (line  25)
+* mh-prev-button:                        Reading Mail.        (line  84)
+* mh-previous-page <1>:                  Viewing.             (line   6)
+* mh-previous-page:                      Reading Mail.        (line  41)
+* mh-previous-undeleted-msg <1>:         Navigating.          (line   6)
+* mh-previous-undeleted-msg:             Reading Mail.        (line 124)
+* mh-previous-unread-msg <1>:            Navigating.          (line   6)
+* mh-previous-unread-msg:                Reading Mail.        (line 118)
+* mh-print-msg <1>:                      Printing.            (line  35)
+* mh-print-msg:                          Reading Mail.        (line 142)
+* mh-ps-print-msg <1>:                   Printing.            (line   6)
+* mh-ps-print-msg:                       Reading Mail.        (line 145)
+* mh-ps-print-msg-file <1>:              Printing.            (line   6)
+* mh-ps-print-msg-file:                  Reading Mail.        (line 139)
+* mh-ps-print-toggle-color <1>:          Printing.            (line  18)
+* mh-ps-print-toggle-color:              Reading Mail.        (line 131)
+* mh-ps-print-toggle-faces <1>:          Printing.            (line  26)
+* mh-ps-print-toggle-faces:              Reading Mail.        (line 135)
+* mh-put-msg-in-seq:                     Sequences.           (line  33)
+* mh-quit:                               Folders.             (line  61)
+* mh-redistribute <1>:                   Redistributing.      (line   6)
+* mh-redistribute:                       Sending Mail.        (line  33)
+* mh-refile-msg:                         Folders.             (line  58)
+* mh-refile-or-write-again <1>:          Folders.             (line  11)
+* mh-refile-or-write-again:              Files and Pipes.     (line   6)
+* mh-reply <1>:                          Replying.            (line   6)
+* mh-reply:                              Sending Mail.        (line  27)
+* mh-rescan-folder <1>:                  Searching.           (line 176)
+* mh-rescan-folder:                      Folders.             (line  42)
+* mh-rescan-folder, example:             Incorporating Mail.  (line  90)
+* mh-rmail <1>:                          Reading Mail.        (line   6)
+* mh-rmail <2>:                          Leaving MH-E.        (line  12)
+* mh-rmail:                              Reading Mail Tour.   (line   6)
+* mh-rmail, example:                     Miscellaneous Commands and Options.
+                                                              (line  42)
+* mh-search <1>:                         Searching.           (line   6)
+* mh-search <2>:                         Tool Bar.            (line  42)
+* mh-search:                             Folders.             (line  45)
+* mh-search-folder:                      Searching.           (line  93)
+* mh-search-p:                           Folders.             (line 330)
+* mh-send <1>:                           Composing.           (line  16)
+* mh-send:                               Sending Mail.        (line  30)
+* mh-send-letter <1>:                    Sending Message.     (line   6)
+* mh-send-letter:                        Editing Drafts.      (line  29)
+* mh-set-cmd-note:                       Scan Line Formats.   (line  34)
+* mh-show <1>:                           Viewing.             (line   6)
+* mh-show:                               Reading Mail.        (line  24)
+* mh-show, example:                      Incorporating Mail.  (line  90)
+* mh-show-mouse <1>:                     Viewing.             (line   6)
+* mh-show-mouse:                         Reading Mail.        (line 156)
+* mh-show-preferred-alternative <1>:     Viewing Attachments. (line 125)
+* mh-show-preferred-alternative:         Reading Mail.        (line  30)
+* mh-signature-separator-p:              Signature.           (line  14)
+* mh-smail <1>:                          Composing.           (line   6)
+* mh-smail <2>:                          Sending Mail.        (line   6)
+* mh-smail <3>:                          Processing Mail Tour.
+                                                              (line  72)
+* mh-smail:                              Sending Mail Tour.   (line   6)
+* mh-smail-other-window <1>:             Composing.           (line   6)
+* mh-smail-other-window:                 Sending Mail.        (line  39)
+* mh-sort-folder:                        Folders.             (line  48)
+* mh-speed-contract-folder:              Speedbar.            (line  25)
+* mh-speed-expand-folder:                Speedbar.            (line  21)
+* mh-speed-refresh:                      Speedbar.            (line  29)
+* mh-speed-view:                         Speedbar.            (line  19)
+* mh-store-buffer:                       Files and Pipes.     (line  31)
+* mh-store-msg <1>:                      Files and Pipes.     (line  21)
+* mh-store-msg:                          Reading Mail.        (line 152)
+* mh-thread-ancestor:                    Threading.           (line  36)
+* mh-thread-delete <1>:                  Threading.           (line  24)
+* mh-thread-delete:                      Navigating.          (line  37)
+* mh-thread-next-sibling:                Threading.           (line  30)
+* mh-thread-previous-sibling:            Threading.           (line  33)
+* mh-thread-refile:                      Threading.           (line  21)
+* mh-to-fcc <1>:                         Editing Message.     (line  14)
+* mh-to-fcc:                             Editing Drafts.      (line  55)
+* mh-to-field <1>:                       Searching.           (line  22)
+* mh-to-field <2>:                       Editing Message.     (line   6)
+* mh-to-field:                           Editing Drafts.      (line  39)
+* mh-toggle-mh-decode-mime-flag <1>:     Viewing Attachments. (line  11)
+* mh-toggle-mh-decode-mime-flag:         Reading Mail.        (line  34)
+* mh-toggle-mime-buttons <1>:            Viewing Attachments. (line  88)
+* mh-toggle-mime-buttons:                Reading Mail.        (line  99)
+* mh-toggle-showing:                     Folders.             (line  64)
+* mh-toggle-threads:                     Threading.           (line  27)
+* mh-toggle-tick:                        Sequences.           (line  13)
+* mh-undo <1>:                           Folders.             (line  68)
+* mh-undo:                               Navigating.          (line  37)
+* mh-undo-folder:                        Folders.             (line  51)
+* mh-update-sequences:                   Sequences.           (line  43)
+* mh-version <1>:                        Miscellaneous.       (line   8)
+* mh-version:                            Getting Started.     (line  11)
+* mh-visit-folder <1>:                   Speedbar.            (line   6)
+* mh-visit-folder:                       Folders.             (line  55)
+* mh-widen <1>:                          Sequences.           (line  40)
+* mh-widen:                              Limits.              (line  33)
+* mh-write-msg-to-file <1>:              Folders.             (line 214)
+* mh-write-msg-to-file <2>:              Files and Pipes.     (line   6)
+* mh-write-msg-to-file:                  Reading Mail.        (line  44)
+* mh-yank-behavior:                      Inserting Messages.  (line   6)
+* mh-yank-cur-msg <1>:                   Inserting Letter.    (line   6)
+* mh-yank-cur-msg:                       Editing Drafts.      (line 154)
+* minibuffer-complete:                   Aliases.             (line  74)
+* next-line <1>:                         Navigating.          (line  18)
+* next-line:                             Processing Mail Tour.
+                                                              (line  42)
+* open-line:                             Editing Message.     (line  80)
+* previous-line <1>:                     Navigating.          (line  18)
+* previous-line:                         Processing Mail Tour.
+                                                              (line  42)
+* setq <1>:                              Scan Line Formats.   (line  95)
+* setq:                                  Conventions.         (line  65)
+* trivial-cite:                          Inserting Letter.    (line  65)
+
+
+File: mh-e,  Node: Option Index,  Next: Concept Index,  Prev: Command Index,  Up: Top
+
+Option (Variable) Index
+***********************
+
+ [index ]
+* Menu:
+
+* exec-path:                             Getting Started.     (line  45)
+* gnus-emphasis-alist:                   Viewing.             (line 120)
+* gnus-secondary-select-methods:         Procmail.            (line  83)
+* goto-address-highlight-p:              Viewing.             (line 113)
+* mail-citation-hook <1>:                Inserting Letter.    (line  24)
+* mail-citation-hook:                    Editing Drafts.      (line 218)
+* mail-mode-hook:                        Composing.           (line  34)
+* mail-sources:                          Procmail.            (line  88)
+* mail-user-agent <1>:                   Procmail.            (line  90)
+* mail-user-agent:                       Sending Mail.        (line  11)
+* message-mail-user-agent:               Procmail.            (line  92)
+* mh-adaptive-cmd-note-flag:             Scan Line Formats.   (line  13)
+* mh-after-commands-processed-hook:      Folders.             (line 101)
+* mh-alias-completion-ignore-case-flag:  Aliases.             (line  32)
+* mh-alias-expand-aliases-flag:          Aliases.             (line  36)
+* mh-alias-flash-on-comma <1>:           Aliases.             (line  40)
+* mh-alias-flash-on-comma:               Editing Message.     (line  32)
+* mh-alias-insert-file:                  Aliases.             (line  44)
+* mh-alias-insertion-location:           Aliases.             (line  48)
+* mh-alias-local-users:                  Aliases.             (line  52)
+* mh-alias-local-users-prefix:           Aliases.             (line  55)
+* mh-alias-passwd-gecos-comma-separator-flag: Aliases.        (line  59)
+* mh-alias-reloaded-hook:                Aliases.             (line  65)
+* mh-annotate-list:                      Sending Mail.        (line  89)
+* mh-annotate-msg-hook:                  Sending Mail.        (line  80)
+* mh-auto-fields-list:                   Identities.          (line  22)
+* mh-auto-fields-prompt-flag:            Identities.          (line  26)
+* mh-before-commands-processed-hook:     Folders.             (line 105)
+* mh-before-quit-hook:                   Folders.             (line 109)
+* mh-before-quit-hook, example:          Folders.             (line 359)
+* mh-before-send-letter-hook <1>:        Sending Message.     (line  12)
+* mh-before-send-letter-hook:            Editing Drafts.      (line 222)
+* mh-bury-show-buffer-flag <1>:          Miscellaneous Commands and Options.
+                                                              (line  27)
+* mh-bury-show-buffer-flag:              Reading Mail.        (line 171)
+* mh-bury-show-buffer-flag, example:     Options.             (line  15)
+* mh-clean-message-header-flag <1>:      Viewing.             (line  31)
+* mh-clean-message-header-flag:          Reading Mail.        (line 174)
+* mh-cmd-note:                           Scan Line Formats.   (line 255)
+* mh-compose-forward-as-mime-flag <1>:   Forwarding.          (line  14)
+* mh-compose-forward-as-mime-flag:       Sending Mail.        (line  48)
+* mh-compose-insertion <1>:              Adding Attachments.  (line  21)
+* mh-compose-insertion:                  Editing Drafts.      (line 168)
+* mh-compose-letter-function <1>:        Composing.           (line  64)
+* mh-compose-letter-function:            Sending Mail.        (line  52)
+* mh-compose-prompt-flag <1>:            Aliases.             (line  74)
+* mh-compose-prompt-flag <2>:            Composing.           (line  25)
+* mh-compose-prompt-flag:                Sending Mail.        (line  55)
+* mh-compose-skipped-header-fields <1>:  Editing Message.     (line  19)
+* mh-compose-skipped-header-fields:      Editing Drafts.      (line 172)
+* mh-compose-space-does-completion-flag <1>: Editing Message. (line  32)
+* mh-compose-space-does-completion-flag: Editing Drafts.      (line 177)
+* mh-current-folder <1>:                 Sending Mail.        (line  89)
+* mh-current-folder:                     Folders.             (line 236)
+* mh-decode-mime-flag <1>:               Viewing Attachments. (line  11)
+* mh-decode-mime-flag <2>:               Viewing.             (line 120)
+* mh-decode-mime-flag:                   Reading Mail.        (line 177)
+* mh-default-folder-for-message-function: Folder Selection.   (line  15)
+* mh-default-folder-list:                Folder Selection.    (line  19)
+* mh-default-folder-must-exist-flag:     Folder Selection.    (line  22)
+* mh-default-folder-prefix:              Folder Selection.    (line  25)
+* mh-delete-msg-hook <1>:                Navigating.          (line  50)
+* mh-delete-msg-hook:                    Reading Mail.        (line 255)
+* mh-delete-yanked-msg-window-flag <1>:  Inserting Letter.    (line  32)
+* mh-delete-yanked-msg-window-flag:      Editing Drafts.      (line 180)
+* mh-display-buttons-for-alternatives-flag <1>: Viewing Attachments.
+                                                              (line 113)
+* mh-display-buttons-for-alternatives-flag: Reading Mail.     (line 181)
+* mh-display-buttons-for-inline-parts-flag <1>: Viewing Attachments.
+                                                              (line  88)
+* mh-display-buttons-for-inline-parts-flag: Reading Mail.     (line 185)
+* mh-do-not-confirm-flag <1>:            Miscellaneous Commands and Options.
+                                                              (line  14)
+* mh-do-not-confirm-flag:                Reading Mail.        (line 189)
+* mh-draft-folder:                       Getting Started.     (line  69)
+* mh-extract-from-attribution-verb <1>:  Inserting Letter.    (line  18)
+* mh-extract-from-attribution-verb:      Editing Drafts.      (line 183)
+* mh-fetch-x-image-url <1>:              Viewing.             (line  60)
+* mh-fetch-x-image-url:                  Reading Mail.        (line 193)
+* mh-find-path-hook:                     Getting Started.     (line  69)
+* mh-flists-present-flag:                Getting Started.     (line  57)
+* mh-folder-address <1>:                 Scan Line Formats.   (line 196)
+* mh-folder-address:                     Folders.             (line 134)
+* mh-folder-body <1>:                    Scan Line Formats.   (line 114)
+* mh-folder-body:                        Folders.             (line 137)
+* mh-folder-cur-msg-number <1>:          Scan Line Formats.   (line 121)
+* mh-folder-cur-msg-number:              Folders.             (line 140)
+* mh-folder-date <1>:                    Scan Line Formats.   (line 134)
+* mh-folder-date:                        Folders.             (line 143)
+* mh-folder-deleted <1>:                 Scan Line Formats.   (line 144)
+* mh-folder-deleted:                     Folders.             (line 146)
+* mh-folder-followup <1>:                Scan Line Formats.   (line 233)
+* mh-folder-followup:                    Folders.             (line 149)
+* mh-folder-font-lock-keywords:          Scan Line Formats.   (line 114)
+* mh-folder-mode-hook:                   Folders.             (line 112)
+* mh-folder-mode-hook, example:          Folders.             (line 183)
+* mh-folder-msg-number <1>:              Scan Line Formats.   (line 156)
+* mh-folder-msg-number:                  Folders.             (line 152)
+* mh-folder-refiled <1>:                 Scan Line Formats.   (line 208)
+* mh-folder-refiled:                     Folders.             (line 155)
+* mh-folder-scan-format:                 Folders.             (line 164)
+* mh-folder-sent-to-me-hint:             Folders.             (line 158)
+* mh-folder-sent-to-me-sender:           Scan Line Formats.   (line 220)
+* mh-folder-subject <1>:                 Scan Line Formats.   (line 233)
+* mh-folder-subject:                     Folders.             (line 170)
+* mh-folder-tick:                        Folders.             (line 173)
+* mh-folder-to <1>:                      Scan Line Formats.   (line 196)
+* mh-folder-to:                          Folders.             (line 176)
+* mh-forward-hook <1>:                   Forwarding.          (line   6)
+* mh-forward-hook:                       Sending Mail.        (line  83)
+* mh-forward-subject-format <1>:         Forwarding.          (line  26)
+* mh-forward-subject-format:             Sending Mail.        (line  59)
+* mh-graphical-emphasis-flag <1>:        Viewing.             (line 120)
+* mh-graphical-emphasis-flag:            Reading Mail.        (line 200)
+* mh-graphical-smileys-flag <1>:         Viewing.             (line 120)
+* mh-graphical-smileys-flag:             Reading Mail.        (line 197)
+* mh-highlight-citation-style <1>:       Viewing.             (line 105)
+* mh-highlight-citation-style:           Reading Mail.        (line 203)
+* mh-identity-default:                   Identities.          (line  30)
+* mh-identity-handlers:                  Identities.          (line  34)
+* mh-identity-list:                      Identities.          (line  37)
+* mh-inbox:                              Getting Started.     (line  69)
+* mh-inc-folder-hook:                    Incorporating Mail.  (line  23)
+* mh-inc-folder-hook, example:           Incorporating Mail.  (line  90)
+* mh-inc-prog:                           Incorporating Mail.  (line  15)
+* mh-inc-spool-list:                     Incorporating Mail.  (line  18)
+* mh-ins-buf-prefix <1>:                 Inserting Messages.  (line   6)
+* mh-ins-buf-prefix <2>:                 Inserting Letter.    (line   6)
+* mh-ins-buf-prefix <3>:                 Editing Message.     (line  62)
+* mh-ins-buf-prefix:                     Editing Drafts.      (line 187)
+* mh-insert-signature-hook <1>:          Signature.           (line  30)
+* mh-insert-signature-hook:              Editing Drafts.      (line 229)
+* mh-insert-x-mailer-flag <1>:           Composing.           (line  29)
+* mh-insert-x-mailer-flag:               Sending Mail.        (line  62)
+* mh-interpret-number-as-range-flag:     Ranges.              (line  45)
+* mh-invisible-header-fields <1>:        Viewing.             (line  31)
+* mh-invisible-header-fields:            Reading Mail.        (line 210)
+* mh-invisible-header-fields-compiled:   Inserting Messages.  (line   6)
+* mh-invisible-header-fields-default <1>: Viewing.            (line  31)
+* mh-invisible-header-fields-default:    Reading Mail.        (line 206)
+* mh-junk-background:                    Junk.                (line  33)
+* mh-junk-disposition:                   Junk.                (line  36)
+* mh-junk-program:                       Junk.                (line  39)
+* mh-kill-folder-suppress-prompt-hook:   Folders.             (line 116)
+* mh-kill-folder-suppress-prompt-hooks:  Folders.             (line 330)
+* mh-large-folder <1>:                   Threading.           (line  46)
+* mh-large-folder:                       Folders.             (line  85)
+* mh-letter-complete-function <1>:       Editing Message.     (line  32)
+* mh-letter-complete-function:           Editing Drafts.      (line 191)
+* mh-letter-fill-column <1>:             Editing Message.     (line  56)
+* mh-letter-fill-column:                 Editing Drafts.      (line 195)
+* mh-letter-header-field <1>:            Editing Message.     (line  19)
+* mh-letter-header-field:                Editing Drafts.      (line 235)
+* mh-letter-mode-hook <1>:               Composing.           (line  34)
+* mh-letter-mode-hook:                   Sending Mail.        (line  86)
+* mh-lib:                                Getting Started.     (line  57)
+* mh-lib-progs:                          Getting Started.     (line  57)
+* mh-lpr-command-format <1>:             Printing.            (line   6)
+* mh-lpr-command-format:                 Reading Mail.        (line 213)
+* mh-lpr-command-format, example:        Options.             (line   6)
+* mh-max-inline-image-height <1>:        Viewing Attachments. (line 104)
+* mh-max-inline-image-height:            Reading Mail.        (line 216)
+* mh-max-inline-image-width <1>:         Viewing Attachments. (line 104)
+* mh-max-inline-image-width:             Reading Mail.        (line 220)
+* mh-mh-folder-sent-to-me-hint:          Scan Line Formats.   (line 220)
+* mh-mh-to-mime-args:                    Adding Attachments.  (line 209)
+* mh-mh-to-mime-hook <1>:                Adding Attachments.  (line 218)
+* mh-mh-to-mime-hook:                    Editing Drafts.      (line 226)
+* mh-mhl-format-file <1>:                Viewing.             (line  89)
+* mh-mhl-format-file:                    Reading Mail.        (line 224)
+* mh-mhl-format-file, example:           Options.             (line  27)
+* mh-mime-save-parts-default-directory <1>: Viewing Attachments.
+                                                              (line  72)
+* mh-mime-save-parts-default-directory:  Reading Mail.        (line 228)
+* mh-mml-method-default <1>:             Sending PGP.         (line  27)
+* mh-mml-method-default:                 Editing Drafts.      (line 198)
+* mh-new-messages-folders:               Folders.             (line  79)
+* mh-note-copied:                        Scan Line Formats.   (line 262)
+* mh-note-cur:                           Scan Line Formats.   (line 121)
+* mh-note-deleted:                       Scan Line Formats.   (line 144)
+* mh-note-dist:                          Scan Line Formats.   (line 275)
+* mh-note-forw:                          Scan Line Formats.   (line 279)
+* mh-note-printed:                       Scan Line Formats.   (line 283)
+* mh-note-refiled:                       Scan Line Formats.   (line 208)
+* mh-note-repl:                          Scan Line Formats.   (line 291)
+* mh-note-seq:                           Scan Line Formats.   (line 295)
+* mh-pack-folder-hook:                   Folders.             (line 120)
+* mh-path:                               Getting Started.     (line  45)
+* mh-previous-seq:                       Getting Started.     (line  69)
+* mh-print-background-flag <1>:          Printing.            (line   6)
+* mh-print-background-flag:              Reading Mail.        (line 231)
+* mh-progs <1>:                          Scan Line Formats.   (line  88)
+* mh-progs <2>:                          Incorporating Mail.  (line  41)
+* mh-progs:                              Getting Started.     (line  57)
+* mh-quit-hook:                          Folders.             (line 124)
+* mh-quit-hook, example:                 Folders.             (line 359)
+* mh-recenter-summary-flag:              Folders.             (line  89)
+* mh-recursive-folders-flag:             Folders.             (line  92)
+* mh-redist-full-contents-flag <1>:      Redistributing.      (line  16)
+* mh-redist-full-contents-flag:          Sending Mail.        (line  66)
+* mh-refile-msg-hook:                    Folders.             (line 127)
+* mh-refile-preserves-sequences-flag:    Sequences.           (line  51)
+* mh-reply-default-reply-to <1>:         Replying.            (line  21)
+* mh-reply-default-reply-to:             Sending Mail.        (line  70)
+* mh-reply-show-message-flag <1>:        Replying.            (line  51)
+* mh-reply-show-message-flag:            Sending Mail.        (line  74)
+* mh-scan-body-regexp:                   Scan Line Formats.   (line 114)
+* mh-scan-cur-msg-number-regexp:         Scan Line Formats.   (line 123)
+* mh-scan-cur-msg-number-regexp, example: Scan Line Formats.  (line 333)
+* mh-scan-date-regexp:                   Scan Line Formats.   (line 136)
+* mh-scan-deleted-msg-regexp:            Scan Line Formats.   (line 146)
+* mh-scan-deleted-msg-regexp, example:   Scan Line Formats.   (line 338)
+* mh-scan-format-file:                   Scan Line Formats.   (line  17)
+* mh-scan-format-file, example:          Scan Line Formats.   (line 307)
+* mh-scan-format-mh:                     Scan Line Formats.   (line  43)
+* mh-scan-format-nmh <1>:                Scan Line Formats.   (line  43)
+* mh-scan-format-nmh:                    Folders.             (line 156)
+* mh-scan-good-msg-regexp:               Scan Line Formats.   (line 158)
+* mh-scan-good-msg-regexp, example:      Scan Line Formats.   (line 327)
+* mh-scan-msg-format-regexp:             Scan Line Formats.   (line 169)
+* mh-scan-msg-format-string:             Scan Line Formats.   (line 176)
+* mh-scan-msg-number-regexp:             Scan Line Formats.   (line 182)
+* mh-scan-msg-number-regexp, example:    Scan Line Formats.   (line 322)
+* mh-scan-msg-overflow-regexp:           Scan Line Formats.   (line 188)
+* mh-scan-msg-search-regexp:             Scan Line Formats.   (line 192)
+* mh-scan-msg-search-regexp, example:    Scan Line Formats.   (line 322)
+* mh-scan-prog:                          Scan Line Formats.   (line  21)
+* mh-scan-rcpt-regexp:                   Scan Line Formats.   (line 198)
+* mh-scan-refiled-msg-regexp:            Scan Line Formats.   (line 210)
+* mh-scan-refiled-msg-regexp, example:   Scan Line Formats.   (line 338)
+* mh-scan-sent-to-me-sender-regexp <1>:  Scan Line Formats.   (line 134)
+* mh-scan-sent-to-me-sender-regexp:      Folders.             (line 156)
+* mh-scan-subject-regexp:                Scan Line Formats.   (line 235)
+* mh-scan-valid-regexp:                  Scan Line Formats.   (line 107)
+* mh-scan-valid-regexp, example:         Scan Line Formats.   (line 315)
+* mh-search-folder:                      Searching.           (line  90)
+* mh-search-mode-hook:                   Searching.           (line  85)
+* mh-search-program:                     Searching.           (line  80)
+* mh-seen-list:                          Sequences.           (line 120)
+* mh-send-prog:                          Sending Message.     (line  16)
+* mh-show-buffer-mode-line-buffer-id <1>: Viewing.            (line 147)
+* mh-show-buffer-mode-line-buffer-id:    Reading Mail.        (line 235)
+* mh-show-cc <1>:                        Viewing.             (line  25)
+* mh-show-cc:                            Reading Mail.        (line 266)
+* mh-show-date <1>:                      Viewing.             (line  25)
+* mh-show-date:                          Reading Mail.        (line 269)
+* mh-show-from <1>:                      Viewing.             (line  25)
+* mh-show-from:                          Reading Mail.        (line 272)
+* mh-show-header <1>:                    Viewing.             (line  25)
+* mh-show-header:                        Reading Mail.        (line 275)
+* mh-show-hook <1>:                      Viewing.             (line 140)
+* mh-show-hook:                          Reading Mail.        (line 258)
+* mh-show-maximum-size <1>:              Viewing.             (line  19)
+* mh-show-maximum-size:                  Reading Mail.        (line 239)
+* mh-show-mode-hook <1>:                 Viewing.             (line 140)
+* mh-show-mode-hook:                     Reading Mail.        (line 261)
+* mh-show-pgg-bad <1>:                   Reading PGP.         (line  70)
+* mh-show-pgg-bad:                       Reading Mail.        (line 278)
+* mh-show-pgg-good <1>:                  Reading PGP.         (line  70)
+* mh-show-pgg-good:                      Reading Mail.        (line 281)
+* mh-show-pgg-unknown <1>:               Reading PGP.         (line  70)
+* mh-show-pgg-unknown:                   Reading Mail.        (line 284)
+* mh-show-signature <1>:                 Viewing.             (line 134)
+* mh-show-signature:                     Reading Mail.        (line 287)
+* mh-show-subject <1>:                   Viewing.             (line  25)
+* mh-show-subject:                       Reading Mail.        (line 290)
+* mh-show-threads-flag:                  Threading.           (line  43)
+* mh-show-to <1>:                        Viewing.             (line  25)
+* mh-show-to:                            Reading Mail.        (line 293)
+* mh-show-use-xface-flag <1>:            Viewing.             (line  44)
+* mh-show-use-xface-flag:                Reading Mail.        (line 243)
+* mh-show-xface <1>:                     Viewing.             (line  56)
+* mh-show-xface:                         Reading Mail.        (line 296)
+* mh-signature-file-name <1>:            Identities.          (line  66)
+* mh-signature-file-name <2>:            Signature.           (line   9)
+* mh-signature-file-name:                Editing Drafts.      (line 202)
+* mh-signature-separator:                Signature.           (line  14)
+* mh-signature-separator-flag <1>:       Signature.           (line  23)
+* mh-signature-separator-flag:           Editing Drafts.      (line 205)
+* mh-signature-separator-regexp:         Signature.           (line  14)
+* mh-sortm-args:                         Folders.             (line  96)
+* mh-speed-update-interval:              Speedbar.            (line  44)
+* mh-speedbar-folder:                    Speedbar.            (line  51)
+* mh-speedbar-folder-with-unseen-messages: Speedbar.          (line  54)
+* mh-speedbar-selected-folder:           Speedbar.            (line  57)
+* mh-speedbar-selected-folder-with-unseen-messages: Speedbar. (line  60)
+* mh-store-default-directory <1>:        Files and Pipes.     (line  21)
+* mh-store-default-directory:            Reading Mail.        (line 246)
+* mh-summary-height <1>:                 Miscellaneous Commands and Options.
+                                                              (line  20)
+* mh-summary-height:                     Reading Mail.        (line 249)
+* mh-sys-path:                           Getting Started.     (line  45)
+* mh-tick-seq:                           Sequences.           (line  55)
+* mh-ticked-messages-folders:            Folders.             (line  82)
+* mh-tool-bar-folder-buttons:            Tool Bar.            (line  12)
+* mh-tool-bar-letter-buttons:            Tool Bar.            (line  16)
+* mh-tool-bar-search-function:           Tool Bar.            (line  20)
+* mh-unseen-seq:                         Getting Started.     (line  69)
+* mh-unseen-updated-hook:                Sequences.           (line  64)
+* mh-update-sequences-after-mh-show-flag: Sequences.          (line  58)
+* mh-user-path:                          Getting Started.     (line  69)
+* mh-variant:                            Getting Started.     (line  45)
+* mh-variant-in-use:                     Getting Started.     (line  45)
+* mh-x-face-file <1>:                    Picture.             (line   6)
+* mh-x-face-file:                        Editing Drafts.      (line 208)
+* mh-xemacs-tool-bar-position:           Tool Bar.            (line  24)
+* mh-xemacs-use-tool-bar-flag:           Tool Bar.            (line  27)
+* mh-yank-behavior <1>:                  Inserting Messages.  (line   6)
+* mh-yank-behavior <2>:                  Inserting Letter.    (line  24)
+* mh-yank-behavior <3>:                  Editing Drafts.      (line 212)
+* mh-yank-behavior:                      Replying.            (line  44)
+* mm-discouraged-alternatives:           Viewing Attachments. (line 120)
+* mm-text-html-renderer:                 HTML.                (line  17)
+* nnmail-keep-last-article:              Procmail.            (line  97)
+* pgg-encrypt-for-me:                    Sending PGP.         (line  42)
+* ps-print-color-p:                      Printing.            (line  18)
+* read-mail-command:                     Reading Mail.        (line  11)
+* set-mh-cmd-note, example:              Scan Line Formats.   (line 333)
+* text-mode-hook:                        Composing.           (line  34)
+* transient-mark-mode:                   Ranges.              (line  38)
+
+
+File: mh-e,  Node: Concept Index,  Prev: Option Index,  Up: Top
+
+Concept Index
+*************
+
+ [index ]
+* Menu:
+
+* *MH-E Folders* <1>:                    Miscellaneous.       (line  24)
+* *MH-E Folders*:                        Folders.             (line 309)
+* *MH-E Help*:                           Miscellaneous.       (line  26)
+* *MH-E Info*:                           Miscellaneous.       (line  12)
+* *MH-E Log* <1>:                        Miscellaneous.       (line  33)
+* *MH-E Log*:                            Junk.                (line  67)
+* *MH-E Mail Delivery* <1>:              Miscellaneous.       (line  37)
+* *MH-E Mail Delivery*:                  Sending Message.     (line   6)
+* *MH-E Recipients* <1>:                 Miscellaneous.       (line  41)
+* *MH-E Recipients*:                     Checking Recipients. (line   6)
+* *MH-E Sequences* <1>:                  Miscellaneous.       (line  45)
+* *MH-E Sequences*:                      Sequences.           (line  93)
+* *mh-temp*:                             Miscellaneous.       (line  49)
+* +inbox <1>:                            Reading Mail.        (line   6)
+* +inbox:                                Incorporating Mail.  (line  27)
+* +mhe-index:                            Searching.           (line 167)
+* .emacs <1>:                            Composing.           (line   6)
+* .emacs <2>:                            Miscellaneous Commands and Options.
+                                                              (line  35)
+* .emacs <3>:                            HTML.                (line  93)
+* .emacs <4>:                            Incorporating Mail.  (line  35)
+* .emacs <5>:                            Getting Started.     (line  61)
+* .emacs:                                Conventions.         (line  65)
+* .face:                                 Picture.             (line   6)
+* .mh_profile <1>:                       Forwarding.          (line  14)
+* .mh_profile:                           Folders.             (line 345)
+* .mhe-x-image-cache:                    Viewing.             (line  85)
+* .procmailrc <1>:                       Procmail.            (line  11)
+* .procmailrc <2>:                       Junk.                (line  75)
+* .procmailrc:                           Incorporating Mail.  (line  57)
+* .signature:                            Signature.           (line   9)
+* .spamassassin/user_prefs:              Junk.                (line 124)
+* /etc/mailcap:                          Viewing Attachments. (line  48)
+* /etc/mime.types:                       Adding Attachments.  (line  32)
+* /etc/nmh/MailAliases:                  Aliases.             (line 117)
+* /etc/passwd:                           Aliases.             (line 122)
+* `MH & nmh: Email for Users & Programmers': Preface.         (line  29)
+* abnormal hooks:                        Conventions.         (line  80)
+* ali:                                   Aliases.             (line 117)
+* alias completion:                      Editing Message.     (line  32)
+* aliases:                               Aliases.             (line   6)
+* Aliasfile: MH profile component:       Aliases.             (line 117)
+* alternatives:                          Viewing Attachments. (line 113)
+* ancestor, in threads:                  Threading.           (line  12)
+* attachments:                           Viewing Attachments. (line   6)
+* attachments, alternatives:             Viewing Attachments. (line 113)
+* attachments, inline:                   Viewing Attachments. (line  88)
+* attachments, inserting:                Adding Attachments.  (line  99)
+* attachments, saving:                   Viewing Attachments. (line  63)
+* attachments, viewing:                  Viewing Attachments. (line  37)
+* Bcc: header field:                     Editing Message.     (line   6)
+* Bill Wohler <1>:                       From Bill Wohler.    (line   6)
+* Bill Wohler <2>:                       History.             (line   6)
+* Bill Wohler:                           Preface.             (line  40)
+* blacklisting:                          Junk.                (line  11)
+* body parts:                            Viewing Attachments. (line   6)
+* bogofilter:                            Junk.                (line  42)
+* boldface, showing:                     Viewing.             (line 120)
+* Brian Reid <1>:                        From Brian Reid.     (line   6)
+* Brian Reid:                            History.             (line   6)
+* browser, html2text:                    HTML.                (line  79)
+* browser, links:                        HTML.                (line  46)
+* browser, lynx:                         HTML.                (line  54)
+* browser, w3:                           HTML.                (line  67)
+* browser, w3m:                          HTML.                (line  30)
+* browser, w3m-standalone:               HTML.                (line  37)
+* buffers, *MH-E Folders* <1>:           Miscellaneous.       (line  24)
+* buffers, *MH-E Folders*:               Folders.             (line 309)
+* buffers, *MH-E Help*:                  Miscellaneous.       (line  26)
+* buffers, *MH-E Info*:                  Miscellaneous.       (line  12)
+* buffers, *MH-E Log* <1>:               Miscellaneous.       (line  33)
+* buffers, *MH-E Log*:                   Junk.                (line  67)
+* buffers, *MH-E Mail Delivery* <1>:     Miscellaneous.       (line  37)
+* buffers, *MH-E Mail Delivery*:         Sending Message.     (line   6)
+* buffers, *MH-E Recipients* <1>:        Miscellaneous.       (line  41)
+* buffers, *MH-E Recipients*:            Checking Recipients. (line   6)
+* buffers, *MH-E Sequences* <1>:         Miscellaneous.       (line  45)
+* buffers, *MH-E Sequences*:             Sequences.           (line  93)
+* buffers, *mh-temp*:                    Miscellaneous.       (line  49)
+* bugs:                                  Bug Reports.         (line   6)
+* burst:                                 Digests.             (line  13)
+* buttons:                               Viewing Attachments. (line  21)
+* Cc: header field:                      Editing Message.     (line   6)
+* change log:                            Getting MH-E.        (line  11)
+* checking recipients:                   Checking Recipients. (line   6)
+* citations, highlighting:               Viewing.             (line 105)
+* commands:                              Conventions.         (line  10)
+* commands, MH:                          Conventions.         (line  10)
+* commands, shell:                       Conventions.         (line  10)
+* commands, Unix:                        Conventions.         (line  10)
+* compface:                              Picture.             (line  17)
+* completion <1>:                        Editing Message.     (line  32)
+* completion:                            Conventions.         (line  98)
+* completion, folders:                   Folder Selection.    (line   6)
+* components:                            Composing.           (line  34)
+* composing mail:                        Composing.           (line   6)
+* content description:                   Adding Attachments.  (line  44)
+* Content-Disposition: header field:     Viewing Attachments. (line 104)
+* Content-Transfer-Encoding: header field: Junk.              (line 242)
+* Content-Type: header field:            Junk.                (line 242)
+* contributed software:                  Getting MH-E.        (line  31)
+* conventions, Emacs:                    Conventions.         (line   6)
+* conventions, key names:                Conventions.         (line  17)
+* convert:                               Viewing.             (line  60)
+* cur sequence:                          Sequences.           (line 100)
+* customization group, mh:               Options.             (line  33)
+* customization group, mh-alias:         Aliases.             (line  29)
+* customization group, mh-folder:        Folders.             (line  77)
+* customization group, mh-folder-selection: Folder Selection. (line  12)
+* customization group, mh-identity:      Identities.          (line  20)
+* customization group, mh-inc:           Incorporating Mail.  (line  13)
+* customization group, mh-junk:          Junk.                (line  30)
+* customization group, mh-letter:        Editing Drafts.      (line 165)
+* customization group, mh-range:         Ranges.              (line  42)
+* customization group, mh-scan-line-formats: Scan Line Formats.
+                                                              (line  10)
+* customization group, mh-search:        Searching.           (line  77)
+* customization group, mh-sending-mail:  Sending Mail.        (line  44)
+* customization group, mh-sequences:     Sequences.           (line  48)
+* customization group, mh-show:          Reading Mail.        (line 168)
+* customization group, mh-speedbar:      Speedbar.            (line  40)
+* customization group, mh-thread:        Threading.           (line  41)
+* customization group, mh-tool-bar:      Tool Bar.            (line   9)
+* customization group, pgg <1>:          Sending PGP.         (line  39)
+* customization group, pgg:              Reading PGP.         (line  75)
+* customizing MH-E:                      Options.             (line   6)
+* Dcc: header field:                     Editing Message.     (line   6)
+* Debian <1>:                            Getting MH-E.        (line  21)
+* Debian:                                Getting Started.     (line  23)
+* decoding RFC 2047:                     Scan Line Formats.   (line  74)
+* decrypting messages:                   Reading PGP.         (line  31)
+* deleting messages:                     Navigating.          (line  23)
+* digests:                               Digests.             (line   6)
+* dist:                                  Redistributing.      (line   6)
+* documentation:                         Getting MH-E.        (line  31)
+* draft <1>:                             Editing Drafts.      (line   6)
+* draft <2>:                             Editing Again.       (line   6)
+* draft <3>:                             Forwarding.          (line   6)
+* draft <4>:                             Replying.            (line  30)
+* draft:                                 Composing.           (line   6)
+* draft folder:                          Composing.           (line  16)
+* Draft-Folder: MH profile component:    Getting Started.     (line  69)
+* editing draft:                         Editing Drafts.      (line   6)
+* editing header:                        Editing Message.     (line   6)
+* editing message:                       Miscellaneous Commands and Options.
+                                                              (line   8)
+* Emacs <1>:                             Conventions.         (line   6)
+* Emacs:                                 Preface.             (line   6)
+* Emacs commands:                        Conventions.         (line  10)
+* Emacs Lisp Manual:                     Using This Manual.   (line  35)
+* Emacs, completion:                     Conventions.         (line  98)
+* Emacs, conventions:                    Conventions.         (line   6)
+* Emacs, customizing:                    Options.             (line   6)
+* Emacs, Emacs Lisp Manual:              Using This Manual.   (line  35)
+* Emacs, faces:                          Conventions.         (line  74)
+* Emacs, file completion:                Conventions.         (line  98)
+* Emacs, folder completion:              Conventions.         (line  98)
+* Emacs, info:                           Using This Manual.   (line   9)
+* Emacs, interrupting:                   Conventions.         (line 119)
+* Emacs, mark:                           Conventions.         (line  90)
+* Emacs, minibuffer:                     Conventions.         (line  98)
+* Emacs, notification of new mail:       Incorporating Mail.  (line  35)
+* Emacs, online help:                    Using This Manual.   (line   9)
+* Emacs, options:                        Conventions.         (line  68)
+* Emacs, packages, mm-decode:            Viewing Attachments. (line  11)
+* Emacs, packages, ps-print:             Printing.            (line  31)
+* Emacs, packages, supercite:            Inserting Letter.    (line  36)
+* Emacs, packages, trivial-cite:         Inserting Letter.    (line  74)
+* Emacs, packages, x-face:               Viewing.             (line  56)
+* Emacs, point:                          Conventions.         (line  90)
+* Emacs, prefix argument:                Conventions.         (line  45)
+* Emacs, quitting <1>:                   Leaving MH-E.        (line   6)
+* Emacs, quitting:                       Conventions.         (line 119)
+* Emacs, region:                         Conventions.         (line  90)
+* Emacs, setting options:                Options.             (line   6)
+* Emacs, terms:                          Conventions.         (line   6)
+* Emacs, variables:                      Conventions.         (line  65)
+* emacsclient:                           Incorporating Mail.  (line  72)
+* email addresses, highlighting:         Viewing.             (line 113)
+* emphasis:                              Viewing.             (line 120)
+* encrypted messages:                    Reading PGP.         (line   6)
+* encrypting messages:                   Sending PGP.         (line   6)
+* exiting:                               Folders.             (line 351)
+* exporting folders:                     Leaving MH-E.        (line  16)
+* expunging refiles and deletes:         Folders.             (line 220)
+* Face: header field <1>:                Picture.             (line  12)
+* Face: header field:                    Viewing.             (line  44)
+* faces:                                 Conventions.         (line  74)
+* FAQ:                                   MH FAQ and Support.  (line   6)
+* Fcc: header field <1>:                 Identities.          (line 101)
+* Fcc: header field:                     Sending PGP.         (line  42)
+* file:                                  Adding Attachments.  (line  32)
+* file completion:                       Conventions.         (line  98)
+* files:                                 Files and Pipes.     (line   6)
+* files, .emacs <1>:                     Composing.           (line   6)
+* files, .emacs <2>:                     Miscellaneous Commands and Options.
+                                                              (line  35)
+* files, .emacs <3>:                     HTML.                (line  93)
+* files, .emacs <4>:                     Incorporating Mail.  (line  35)
+* files, .emacs <5>:                     Getting Started.     (line  61)
+* files, .emacs:                         Conventions.         (line  65)
+* files, .face:                          Picture.             (line   6)
+* files, .mh_profile <1>:                Forwarding.          (line  14)
+* files, .mh_profile:                    Folders.             (line 345)
+* files, .mhe-x-image-cache:             Viewing.             (line  85)
+* files, .procmailrc <1>:                Procmail.            (line  11)
+* files, .procmailrc <2>:                Junk.                (line  75)
+* files, .procmailrc:                    Incorporating Mail.  (line  57)
+* files, .signature:                     Signature.           (line   9)
+* files, .spamassassin/user_prefs:       Junk.                (line 124)
+* files, /etc/mailcap:                   Viewing Attachments. (line  48)
+* files, /etc/mime.types:                Adding Attachments.  (line  32)
+* files, /etc/nmh/MailAliases:           Aliases.             (line 117)
+* files, /etc/passwd:                    Aliases.             (line 122)
+* files, components:                     Composing.           (line  34)
+* files, draft:                          Editing Again.       (line   6)
+* files, MH-E-NEWS:                      Getting MH-E.        (line  24)
+* files, mhl.reply:                      Replying.            (line   6)
+* files, README:                         Getting MH-E.        (line  24)
+* filling paragraphs:                    Editing Message.     (line  62)
+* filters:                               Limits.              (line   6)
+* flists:                                Speedbar.            (line  40)
+* folder:                                Folders.             (line 206)
+* Folder > Incorporate New Mail menu item: Incorporating Mail.
+                                                              (line  10)
+* Folder > List Folders menu item:       Folders.             (line  30)
+* Folder > Pack Folder menu item:        Folders.             (line  36)
+* Folder > Quit MH-E menu item:          Folders.             (line  61)
+* Folder > Rescan Folder menu item:      Folders.             (line  42)
+* Folder > Search... menu item:          Folders.             (line  45)
+* Folder > Sort Folder menu item:        Folders.             (line  48)
+* Folder > Toggle Show/Folder menu item: Folders.             (line  64)
+* Folder > View New Messages menu item:  Folders.             (line  33)
+* Folder > Visit a Folder... menu item:  Folders.             (line  55)
+* folder completion:                     Conventions.         (line  98)
+* Folder menu <1>:                       Menu Bar.            (line   6)
+* Folder menu <2>:                       Folders.             (line   6)
+* Folder menu:                           Incorporating Mail.  (line   6)
+* folder navigation:                     Speedbar.            (line   6)
+* folders <1>:                           Folders.             (line   6)
+* folders:                               Processing Mail Tour.
+                                                              (line  51)
+* folders, +mhe-index:                   Searching.           (line 167)
+* folders, completion:                   Folder Selection.    (line   6)
+* folders, exporting:                    Leaving MH-E.        (line  16)
+* folders, renaming:                     Folders.             (line 384)
+* folders, selecting:                    Folder Selection.    (line   6)
+* formail:                               Junk.                (line 215)
+* forw:                                  Forwarding.          (line   6)
+* forw: MH profile component:            Forwarding.          (line  14)
+* forwarding:                            Forwarding.          (line   6)
+* From: header field <1>:                Identities.          (line  50)
+* From: header field:                    Editing Message.     (line   6)
+* ftp:                                   Adding Attachments.  (line 118)
+* full training:                         Junk.                (line 170)
+* functions:                             Conventions.         (line  10)
+* getting MH-E:                          Getting MH-E.        (line   6)
+* Gildea, Stephen <1>:                   From Stephen Gildea. (line   6)
+* Gildea, Stephen:                       History.             (line   6)
+* GNU mailutils MH:                      Getting Started.     (line  23)
+* gnuclient:                             Incorporating Mail.  (line  72)
+* GnuPG:                                 Reading PGP.         (line   6)
+* Gnus <1>:                              Procmail.            (line   6)
+* Gnus <2>:                              Reading PGP.         (line   6)
+* Gnus:                                  HTML.                (line   6)
+* gnuserv:                               Incorporating Mail.  (line  72)
+* GPG:                                   Reading PGP.         (line   6)
+* grep:                                  Searching.           (line 206)
+* ham:                                   Junk.                (line  11)
+* header field, Bcc::                    Editing Message.     (line   6)
+* header field, Cc::                     Editing Message.     (line   6)
+* header field, Content-Disposition::    Viewing Attachments. (line 104)
+* header field, Content-Transfer-Encoding:: Junk.             (line 242)
+* header field, Content-Type::           Junk.                (line 242)
+* header field, Dcc::                    Editing Message.     (line   6)
+* header field, Face: <1>:               Picture.             (line  12)
+* header field, Face::                   Viewing.             (line  44)
+* header field, Fcc: <1>:                Identities.          (line 101)
+* header field, Fcc::                    Sending PGP.         (line  42)
+* header field, From: <1>:               Identities.          (line  50)
+* header field, From::                   Editing Message.     (line   6)
+* header field, Mail-Followup-To: <1>:   Identities.          (line 106)
+* header field, Mail-Followup-To::       Editing Message.     (line   6)
+* header field, Mail-Reply-To::          Editing Message.     (line   6)
+* header field, Organization::           Identities.          (line  54)
+* header field, Reply-To::               Editing Message.     (line   6)
+* header field, Subject: <1>:            Junk.                (line 242)
+* header field, Subject::                Editing Message.     (line   6)
+* header field, To::                     Editing Message.     (line   6)
+* header field, X-Bogosity::             Junk.                (line 177)
+* header field, X-Face: <1>:             Picture.             (line  12)
+* header field, X-Face::                 Viewing.             (line  44)
+* header field, X-Image-URL: <1>:        Picture.             (line  12)
+* header field, X-Image-URL::            Viewing.             (line  44)
+* header field, X-Mailer::               Composing.           (line  29)
+* header field, X-MHE-Checksum::         Searching.           (line 192)
+* header field, X-Spam-Level::           Junk.                (line  84)
+* header field, X-Spam-Status::          Junk.                (line  84)
+* header field, X-SpamProbe::            Junk.                (line 215)
+* help <1>:                              Processing Mail Tour.
+                                                              (line  75)
+* help:                                  Sending Mail Tour.   (line  44)
+* highlighting:                          Conventions.         (line  74)
+* highlighting citations:                Viewing.             (line 105)
+* highlighting email addresses:          Viewing.             (line 113)
+* highlighting URLs:                     Viewing.             (line 113)
+* history:                               Getting Started.     (line   6)
+* history of MH-E:                       History.             (line   6)
+* hooks:                                 Conventions.         (line  80)
+* HTML:                                  HTML.                (line   6)
+* html2text:                             HTML.                (line  79)
+* identities:                            Identities.          (line   6)
+* Identity > Customize Identities menu item: Identities.      (line  81)
+* Identity > Insert Auto Fields menu item: Identities.        (line  14)
+* Identity > Save as Default menu item:  Identities.          (line  81)
+* Identity > Set Default for Session menu item: Identities.   (line  81)
+* Identity menu <1>:                     Menu Bar.            (line   6)
+* Identity menu:                         Identities.          (line  10)
+* ImageMagick:                           Viewing.             (line  60)
+* images:                                Adding Attachments.  (line  99)
+* inc <1>:                               Scan Line Formats.   (line 107)
+* inc <2>:                               Incorporating Mail.  (line  41)
+* inc:                                   Reading Mail Tour.   (line   6)
+* incorporating:                         Incorporating Mail.  (line   6)
+* index:                                 Searching.           (line 244)
+* index++:                               Searching.           (line 244)
+* info <1>:                              Using This Manual.   (line   9)
+* info:                                  Preface.             (line  29)
+* inline attachments:                    Viewing Attachments. (line  88)
+* inline images:                         Viewing Attachments. (line 104)
+* inserting messages <1>:                Inserting Messages.  (line   6)
+* inserting messages:                    Inserting Letter.    (line   6)
+* install-mh:                            Getting Started.     (line  31)
+* interrupting:                          Conventions.         (line 119)
+* introduction:                          Tour Through MH-E.   (line   6)
+* italics, showing:                      Viewing.             (line 120)
+* Jim Larus <1>:                         From Jim Larus.      (line   6)
+* Jim Larus:                             History.             (line   6)
+* junk mail <1>:                         Junk.                (line   6)
+* junk mail:                             Folders.             (line 253)
+* key names:                             Conventions.         (line  17)
+* key server:                            Reading PGP.         (line  17)
+* keychain:                              Reading PGP.         (line  17)
+* killing draft:                         Killing Draft.       (line   6)
+* Larus, Jim <1>:                        From Jim Larus.      (line   6)
+* Larus, Jim:                            History.             (line   6)
+* Letter > Check Recipient menu item:    Editing Drafts.      (line 150)
+* Letter > Compose Compressed tar (MH)... menu item: Editing Drafts.
+                                                              (line 110)
+* Letter > Compose Forward... menu item: Editing Drafts.      (line  85)
+* Letter > Compose Get File (MH)... menu item: Editing Drafts.
+                                                              (line  89)
+* Letter > Compose Insertion... menu item: Editing Drafts.    (line  94)
+* Letter > Insert a Message... menu item: Editing Drafts.     (line  79)
+* Letter > Insert Signature menu item:   Editing Drafts.      (line 143)
+* Letter > Kill This Draft menu item:    Editing Drafts.      (line 140)
+* Letter > Pull in All Compositions (MH) menu item: Editing Drafts.
+                                                              (line  36)
+* Letter > Pull in All Compositions (MML) menu item: Editing Drafts.
+                                                              (line  99)
+* Letter > Revert to Non-MIME Edit (MH) menu item: Editing Drafts.
+                                                              (line 115)
+* Letter > Send This Draft menu item:    Editing Drafts.      (line  29)
+* Letter > Split Current Line menu item: Editing Drafts.      (line 137)
+* Letter > Yank Current Message menu item: Editing Drafts.    (line 154)
+* Letter menu <1>:                       Menu Bar.            (line   6)
+* Letter menu:                           Editing Drafts.      (line   6)
+* limits:                                Limits.              (line   6)
+* links:                                 HTML.                (line  46)
+* links, following:                      Viewing.             (line 113)
+* lpr:                                   Printing.            (line  35)
+* lynx:                                  HTML.                (line  54)
+* Mail mode:                             Composing.           (line  34)
+* Mail-Followup-To: header field <1>:    Identities.          (line 106)
+* Mail-Followup-To: header field:        Editing Message.     (line   6)
+* Mail-Reply-To: header field:           Editing Message.     (line   6)
+* Mailer-Daemon:                         Editing Again.       (line  17)
+* mailing lists:                         Mailing Lists.       (line   6)
+* mailing lists, reading:                Procmail.            (line   6)
+* mairix:                                Searching.           (line 206)
+* manual:                                Getting MH-E.        (line  31)
+* mark <1>:                              Sequences.           (line 125)
+* mark:                                  Conventions.         (line  90)
+* Marshall Rose:                         Junk.                (line   6)
+* mbox-style folder:                     Leaving MH-E.        (line  16)
+* media types:                           Adding Attachments.  (line  27)
+* menu bar:                              Menu Bar.            (line   6)
+* menu item, Folder > Incorporate New Mail: Incorporating Mail.
+                                                              (line  10)
+* menu item, Folder > List Folders:      Folders.             (line  30)
+* menu item, Folder > Pack Folder:       Folders.             (line  36)
+* menu item, Folder > Quit MH-E:         Folders.             (line  61)
+* menu item, Folder > Rescan Folder:     Folders.             (line  42)
+* menu item, Folder > Search...:         Folders.             (line  45)
+* menu item, Folder > Sort Folder:       Folders.             (line  48)
+* menu item, Folder > Toggle Show/Folder: Folders.            (line  64)
+* menu item, Folder > View New Messages: Folders.             (line  33)
+* menu item, Folder > Visit a Folder...: Folders.             (line  55)
+* menu item, Identity > Customize Identities: Identities.     (line  81)
+* menu item, Identity > Insert Auto Fields: Identities.       (line  14)
+* menu item, Identity > Save as Default: Identities.          (line  81)
+* menu item, Identity > Set Default for Session: Identities.  (line  81)
+* menu item, Letter > Check Recipient:   Editing Drafts.      (line 150)
+* menu item, Letter > Compose Compressed tar (MH)...: Editing Drafts.
+                                                              (line 110)
+* menu item, Letter > Compose Forward...: Editing Drafts.     (line  85)
+* menu item, Letter > Compose Get File (MH)...: Editing Drafts.
+                                                              (line  89)
+* menu item, Letter > Compose Insertion...: Editing Drafts.   (line  94)
+* menu item, Letter > Insert a Message...: Editing Drafts.    (line  79)
+* menu item, Letter > Insert Signature:  Editing Drafts.      (line 143)
+* menu item, Letter > Kill This Draft:   Editing Drafts.      (line 140)
+* menu item, Letter > Pull in All Compositions (MH): Editing Drafts.
+                                                              (line  36)
+* menu item, Letter > Pull in All Compositions (MML): Editing Drafts.
+                                                              (line  99)
+* menu item, Letter > Revert to Non-MIME Edit (MH): Editing Drafts.
+                                                              (line 115)
+* menu item, Letter > Send This Draft:   Editing Drafts.      (line  29)
+* menu item, Letter > Split Current Line: Editing Drafts.     (line 137)
+* menu item, Letter > Yank Current Message: Editing Drafts.   (line 154)
+* menu item, Message > Burst Digest Message: Reading Mail.    (line  67)
+* menu item, Message > Compose a New Message: Sending Mail.   (line  30)
+* menu item, Message > Copy Message to Folder...: Folders.    (line  14)
+* menu item, Message > Delete Message:   Reading Mail.        (line  54)
+* menu item, Message > Edit Message Again: Sending Mail.      (line  19)
+* menu item, Message > Execute Delete/Refile: Folders.        (line  71)
+* menu item, Message > Forward Message...: Sending Mail.      (line  24)
+* menu item, Message > Go to First Message: Reading Mail.     (line 109)
+* menu item, Message > Go to Last Message: Reading Mail.      (line 112)
+* menu item, Message > Go to Message by Number...: Reading Mail.
+                                                              (line  70)
+* menu item, Message > Modify Message:   Reading Mail.        (line 106)
+* menu item, Message > Next Message:     Reading Mail.        (line 121)
+* menu item, Message > Pipe Message to Command...: Reading Mail.
+                                                              (line  47)
+* menu item, Message > Previous Message: Reading Mail.        (line 124)
+* menu item, Message > Print Message:    Reading Mail.        (line 142)
+* menu item, Message > Re-edit a Bounced Message: Sending Mail.
+                                                              (line  20)
+* menu item, Message > Redistribute Message...: Sending Mail. (line  33)
+* menu item, Message > Refile Message:   Folders.             (line  58)
+* menu item, Message > Reply to Message...: Sending Mail.     (line  27)
+* menu item, Message > Show Message:     Reading Mail.        (line  24)
+* menu item, Message > Show Message with Header: Reading Mail.
+                                                              (line  27)
+* menu item, Message > Show Message with Preferred Alternative: Reading Mail.
+                                                              (line  30)
+* menu item, Message > Undo Delete/Refile: Folders.           (line  68)
+* menu item, Message > Unpack Uuencoded Message...: Reading Mail.
+                                                              (line 152)
+* menu item, Message > Write Message to File...: Reading Mail.
+                                                              (line  44)
+* menu item, Search > Perform Search:    Searching.           (line  13)
+* menu item, Search > Search with pick:  Searching.           (line  16)
+* menu item, Sequence > Add Message to Sequence...: Sequences.
+                                                              (line  33)
+* menu item, Sequence > Delete Message from Sequence...: Sequences.
+                                                              (line  21)
+* menu item, Sequence > Delete Sequence...: Sequences.        (line  24)
+* menu item, Sequence > List Sequences for Message: Sequences.
+                                                              (line  36)
+* menu item, Sequence > List Sequences in Folder...: Sequences.
+                                                              (line  27)
+* menu item, Sequence > Narrow to Sequence...: Sequences.     (line  30)
+* menu item, Sequence > Narrow to Subject Sequence: Limits.   (line  26)
+* menu item, Sequence > Narrow to Tick Sequence <1>: Sequences.
+                                                              (line  18)
+* menu item, Sequence > Narrow to Tick Sequence: Limits.      (line  13)
+* menu item, Sequence > Toggle Tick Mark: Sequences.          (line  13)
+* menu item, Sequence > Widen from Sequence <1>: Sequences.   (line  40)
+* menu item, Sequence > Widen from Sequence: Limits.          (line  33)
+* menu, Folder <1>:                      Menu Bar.            (line   6)
+* menu, Folder <2>:                      Folders.             (line   6)
+* menu, Folder:                          Incorporating Mail.  (line   6)
+* menu, Identity <1>:                    Menu Bar.            (line   6)
+* menu, Identity:                        Identities.          (line  10)
+* menu, Letter <1>:                      Menu Bar.            (line   6)
+* menu, Letter:                          Editing Drafts.      (line   6)
+* menu, Message <1>:                     Menu Bar.            (line   6)
+* menu, Message <2>:                     Sending Mail.        (line  16)
+* menu, Message <3>:                     Folders.             (line   6)
+* menu, Message:                         Reading Mail.        (line  16)
+* menu, Search <1>:                      Searching.           (line   6)
+* menu, Search:                          Menu Bar.            (line   6)
+* menu, Sequence <1>:                    Sequences.           (line   6)
+* menu, Sequence:                        Menu Bar.            (line   6)
+* Message > Burst Digest Message menu item: Reading Mail.     (line  67)
+* Message > Compose a New Message menu item: Sending Mail.    (line  30)
+* Message > Copy Message to Folder... menu item: Folders.     (line  14)
+* Message > Delete Message menu item:    Reading Mail.        (line  54)
+* Message > Edit Message Again menu item: Sending Mail.       (line  19)
+* Message > Execute Delete/Refile menu item: Folders.         (line  71)
+* Message > Forward Message... menu item: Sending Mail.       (line  24)
+* Message > Go to First Message menu item: Reading Mail.      (line 109)
+* Message > Go to Last Message menu item: Reading Mail.       (line 112)
+* Message > Go to Message by Number... menu item: Reading Mail.
+                                                              (line  70)
+* Message > Modify Message menu item:    Reading Mail.        (line 106)
+* Message > Next Message menu item:      Reading Mail.        (line 121)
+* Message > Pipe Message to Command... menu item: Reading Mail.
+                                                              (line  47)
+* Message > Previous Message menu item:  Reading Mail.        (line 124)
+* Message > Print Message menu item:     Reading Mail.        (line 142)
+* Message > Re-edit a Bounced Message menu item: Sending Mail.
+                                                              (line  20)
+* Message > Redistribute Message... menu item: Sending Mail.  (line  33)
+* Message > Refile Message menu item:    Folders.             (line  58)
+* Message > Reply to Message... menu item: Sending Mail.      (line  27)
+* Message > Show Message menu item:      Reading Mail.        (line  24)
+* Message > Show Message with Header menu item: Reading Mail. (line  27)
+* Message > Show Message with Preferred Alternative menu item: Reading Mail.
+                                                              (line  30)
+* Message > Undo Delete/Refile menu item: Folders.            (line  68)
+* Message > Unpack Uuencoded Message... menu item: Reading Mail.
+                                                              (line 152)
+* Message > Write Message to File... menu item: Reading Mail. (line  44)
+* message abbreviations:                 Ranges.              (line   6)
+* Message menu <1>:                      Menu Bar.            (line   6)
+* Message menu <2>:                      Sending Mail.        (line  16)
+* Message menu <3>:                      Folders.             (line   6)
+* Message menu:                          Reading Mail.        (line  16)
+* message numbers:                       Scan Line Formats.   (line  34)
+* message ranges:                        Ranges.              (line   6)
+* MH book <1>:                           Getting Started.     (line  31)
+* MH book:                               Preface.             (line  29)
+* MH commands:                           Conventions.         (line  10)
+* MH commands, ali:                      Aliases.             (line 117)
+* MH commands, burst:                    Digests.             (line  13)
+* MH commands, dist:                     Redistributing.      (line   6)
+* MH commands, flists:                   Speedbar.            (line  40)
+* MH commands, folder:                   Folders.             (line 206)
+* MH commands, forw:                     Forwarding.          (line   6)
+* MH commands, inc <1>:                  Scan Line Formats.   (line 107)
+* MH commands, inc <2>:                  Incorporating Mail.  (line  41)
+* MH commands, inc:                      Reading Mail Tour.   (line   6)
+* MH commands, install-mh:               Getting Started.     (line  31)
+* MH commands, mark:                     Sequences.           (line 125)
+* MH commands, mhbuild:                  Adding Attachments.  (line   6)
+* MH commands, mhl <1>:                  Replying.            (line   6)
+* MH commands, mhl <2>:                  Printing.            (line  35)
+* MH commands, mhl:                      Viewing.             (line  89)
+* MH commands, mhn <1>:                  Adding Attachments.  (line   6)
+* MH commands, mhn:                      Viewing Attachments. (line  72)
+* MH commands, mhparam:                  Getting Started.     (line  45)
+* MH commands, mhshow:                   Viewing Attachments. (line   6)
+* MH commands, mhstore:                  Viewing Attachments. (line  72)
+* MH commands, packf:                    Leaving MH-E.        (line  16)
+* MH commands, pick <1>:                 Sequences.           (line  68)
+* MH commands, pick <2>:                 Limits.              (line  40)
+* MH commands, pick:                     Searching.           (line  99)
+* MH commands, rcvstore:                 Procmail.            (line  33)
+* MH commands, refile <1>:               Folders.             (line 206)
+* MH commands, refile:                   Processing Mail Tour.
+                                                              (line  51)
+* MH commands, repl <1>:                 Replying.            (line  21)
+* MH commands, repl:                     Composing.           (line  34)
+* MH commands, scan <1>:                 Scan Line Formats.   (line  88)
+* MH commands, scan <2>:                 Reading Mail.        (line  16)
+* MH commands, scan:                     Reading Mail Tour.   (line   6)
+* MH commands, send <1>:                 Sending Message.     (line  16)
+* MH commands, send:                     Redistributing.      (line  16)
+* MH commands, show:                     Viewing Attachments. (line   6)
+* MH commands, slocal:                   Procmail.            (line   6)
+* MH commands, sortm:                    Folders.             (line 345)
+* MH commands, whom:                     Checking Recipients. (line   6)
+* mh customization group:                Options.             (line  33)
+* MH FAQ:                                MH FAQ and Support.  (line   6)
+* MH profile:                            Getting Started.     (line  39)
+* MH profile component:                  Getting Started.     (line  39)
+* MH profile component, Aliasfile::      Aliases.             (line 117)
+* MH profile component, Draft-Folder::   Getting Started.     (line  69)
+* MH profile component, forw::           Forwarding.          (line  14)
+* MH profile component, Path::           Getting Started.     (line  39)
+* MH profile component, Previous-Sequence: <1>: Sequences.    (line 100)
+* MH profile component, Previous-Sequence:: Getting Started.  (line  69)
+* MH profile component, repl::           Replying.            (line  30)
+* MH profile component, sortm::          Folders.             (line 345)
+* MH profile component, Unseen-Sequence: <1>: Procmail.       (line  42)
+* MH profile component, Unseen-Sequence: <2>: Sequences.      (line 112)
+* MH profile component, Unseen-Sequence:: Getting Started.    (line  69)
+* mh-alias customization group:          Aliases.             (line  29)
+* MH-E version:                          Miscellaneous.       (line  12)
+* MH-E, obtaining:                       Getting MH-E.        (line   6)
+* MH-E, versions <1>:                    History.             (line   6)
+* MH-E, versions:                        Getting Started.     (line   6)
+* MH-E-NEWS:                             Getting MH-E.        (line  24)
+* mh-folder customization group:         Folders.             (line  77)
+* MH-Folder mode <1>:                    Sequences.           (line  83)
+* MH-Folder mode <2>:                    Menu Bar.            (line   6)
+* MH-Folder mode <3>:                    Composing.           (line   6)
+* MH-Folder mode <4>:                    Folders.             (line 253)
+* MH-Folder mode <5>:                    Miscellaneous Commands and Options.
+                                                              (line  20)
+* MH-Folder mode <6>:                    Navigating.          (line  18)
+* MH-Folder mode <7>:                    Reading Mail.        (line   6)
+* MH-Folder mode <8>:                    Processing Mail Tour.
+                                                              (line  63)
+* MH-Folder mode:                        Reading Mail Tour.   (line   6)
+* MH-Folder Show mode <1>:               Folders.             (line 253)
+* MH-Folder Show mode:                   Digests.             (line  13)
+* mh-folder-selection customization group: Folder Selection.  (line  12)
+* mh-identity customization group:       Identities.          (line  20)
+* mh-inc customization group:            Incorporating Mail.  (line  13)
+* mh-junk customization group:           Junk.                (line  30)
+* mh-letter customization group:         Editing Drafts.      (line 165)
+* MH-Letter mode <1>:                    Menu Bar.            (line   6)
+* MH-Letter mode <2>:                    Aliases.             (line  10)
+* MH-Letter mode <3>:                    Editing Drafts.      (line   6)
+* MH-Letter mode <4>:                    Replying.            (line  30)
+* MH-Letter mode <5>:                    Composing.           (line  16)
+* MH-Letter mode:                        Sending Mail Tour.   (line   6)
+* mh-range customization group:          Ranges.              (line  42)
+* mh-scan-line-formats customization group: Scan Line Formats.
+                                                              (line  10)
+* mh-search customization group:         Searching.           (line  77)
+* MH-Search mode <1>:                    Searching.           (line 109)
+* MH-Search mode:                        Menu Bar.            (line   6)
+* mh-sending-mail customization group:   Sending Mail.        (line  44)
+* mh-sequences customization group:      Sequences.           (line  48)
+* mh-show customization group:           Reading Mail.        (line 168)
+* MH-Show mode <1>:                      Replying.            (line  30)
+* MH-Show mode <2>:                      Folders.             (line 260)
+* MH-Show mode <3>:                      Viewing.             (line 147)
+* MH-Show mode:                          Reading Mail.        (line   6)
+* mh-speedbar customization group:       Speedbar.            (line  40)
+* mh-thread customization group:         Threading.           (line  41)
+* mh-tool-bar customization group:       Tool Bar.            (line   9)
+* mhbuild:                               Adding Attachments.  (line   6)
+* mhl <1>:                               Replying.            (line   6)
+* mhl <2>:                               Printing.            (line  35)
+* mhl:                                   Viewing.             (line  89)
+* mhl.reply:                             Replying.            (line   6)
+* mhn <1>:                               Adding Attachments.  (line   6)
+* mhn:                                   Viewing Attachments. (line  72)
+* mhparam:                               Getting Started.     (line  45)
+* mhshow:                                Viewing Attachments. (line   6)
+* mhstore:                               Viewing Attachments. (line  72)
+* MIME <1>:                              Adding Attachments.  (line   6)
+* MIME:                                  Viewing Attachments. (line   6)
+* MIME Meta Language (MML):              Adding Attachments.  (line  21)
+* MIME, content description:             Adding Attachments.  (line  44)
+* MIME, ftp:                             Adding Attachments.  (line 118)
+* MIME, images:                          Adding Attachments.  (line  99)
+* MIME, media types:                     Adding Attachments.  (line  27)
+* MIME, sound:                           Adding Attachments.  (line  99)
+* MIME, tar:                             Adding Attachments.  (line 126)
+* MIME, video:                           Adding Attachments.  (line  99)
+* minibuffer:                            Conventions.         (line  98)
+* mm-decode package:                     Viewing Attachments. (line  11)
+* MML:                                   Adding Attachments.  (line  21)
+* mode:                                  Sending Mail Tour.   (line   6)
+* modes, Mail:                           Composing.           (line  34)
+* modes, MH-Folder <1>:                  Sequences.           (line  83)
+* modes, MH-Folder <2>:                  Menu Bar.            (line   6)
+* modes, MH-Folder <3>:                  Composing.           (line   6)
+* modes, MH-Folder <4>:                  Folders.             (line 253)
+* modes, MH-Folder <5>:                  Miscellaneous Commands and Options.
+                                                              (line  20)
+* modes, MH-Folder <6>:                  Navigating.          (line  18)
+* modes, MH-Folder <7>:                  Reading Mail.        (line   6)
+* modes, MH-Folder <8>:                  Processing Mail Tour.
+                                                              (line  63)
+* modes, MH-Folder:                      Reading Mail Tour.   (line   6)
+* modes, MH-Folder Show <1>:             Folders.             (line 253)
+* modes, MH-Folder Show:                 Digests.             (line  13)
+* modes, MH-Letter <1>:                  Menu Bar.            (line   6)
+* modes, MH-Letter <2>:                  Aliases.             (line  10)
+* modes, MH-Letter <3>:                  Editing Drafts.      (line   6)
+* modes, MH-Letter <4>:                  Replying.            (line  30)
+* modes, MH-Letter <5>:                  Composing.           (line  16)
+* modes, MH-Letter:                      Sending Mail Tour.   (line   6)
+* modes, MH-Search <1>:                  Searching.           (line 109)
+* modes, MH-Search:                      Menu Bar.            (line   6)
+* modes, MH-Show <1>:                    Replying.            (line  30)
+* modes, MH-Show <2>:                    Folders.             (line 260)
+* modes, MH-Show <3>:                    Viewing.             (line 147)
+* modes, MH-Show:                        Reading Mail.        (line   6)
+* moving between messages <1>:           Folders.             (line 260)
+* moving between messages:               Navigating.          (line   6)
+* multimedia mail <1>:                   Adding Attachments.  (line   6)
+* multimedia mail:                       Viewing Attachments. (line   6)
+* multiple personalities:                Identities.          (line   6)
+* namazu:                                Searching.           (line 206)
+* navigation:                            Navigating.          (line   6)
+* new mail:                              Incorporating Mail.  (line  35)
+* news:                                  Getting MH-E.        (line  24)
+* nil:                                   Options.             (line  15)
+* NIS, obtaining local aliases from:     Aliases.             (line 155)
+* nmh:                                   Getting Started.     (line  23)
+* normal hooks:                          Conventions.         (line  80)
+* notations, scan line:                  Scan Line Formats.   (line  78)
+* notification of new mail:              Incorporating Mail.  (line  35)
+* obtaining MH-E:                        Getting MH-E.        (line   6)
+* off, option:                           Options.             (line  15)
+* on, option:                            Options.             (line  15)
+* online help:                           Using This Manual.   (line   9)
+* OpenPGP:                               Reading PGP.         (line   6)
+* option, turning on and off:            Options.             (line  15)
+* options:                               Conventions.         (line  68)
+* Organization: header field:            Identities.          (line  54)
+* packf:                                 Leaving MH-E.        (line  16)
+* paragraphs, filling:                   Editing Message.     (line  62)
+* Path: MH profile component:            Getting Started.     (line  39)
+* PGG <1>:                               Sending PGP.         (line  39)
+* PGG:                                   Reading PGP.         (line  75)
+* pgg customization group <1>:           Sending PGP.         (line  39)
+* pgg customization group:               Reading PGP.         (line  75)
+* PGP:                                   Reading PGP.         (line   6)
+* pick <1>:                              Sequences.           (line  68)
+* pick <2>:                              Limits.              (line  40)
+* pick:                                  Searching.           (line  99)
+* pipes:                                 Files and Pipes.     (line   6)
+* point:                                 Conventions.         (line  90)
+* preface:                               Preface.             (line   6)
+* prefix argument:                       Conventions.         (line  45)
+* prefix characters:                     Processing Mail Tour.
+                                                              (line  75)
+* Previous-Sequence: MH profile component <1>: Sequences.     (line 100)
+* Previous-Sequence: MH profile component: Getting Started.   (line  69)
+* printing:                              Printing.            (line   6)
+* processing mail:                       Processing Mail Tour.
+                                                              (line   6)
+* procmail <1>:                          Procmail.            (line   6)
+* procmail <2>:                          Searching.           (line 192)
+* procmail <3>:                          Folders.             (line 283)
+* procmail:                              Incorporating Mail.  (line  57)
+* ps-print package:                      Printing.            (line  31)
+* quitting <1>:                          Folders.             (line 351)
+* quitting <2>:                          Leaving MH-E.        (line   6)
+* quitting:                              Conventions.         (line 119)
+* ranges:                                Ranges.              (line   6)
+* rcvstore:                              Procmail.            (line  33)
+* re-editing drafts:                     Editing Again.       (line   6)
+* reading mail <1>:                      Miscellaneous Commands and Options.
+                                                              (line  35)
+* reading mail <2>:                      Reading Mail.        (line   6)
+* reading mail:                          Reading Mail Tour.   (line   6)
+* README:                                Getting MH-E.        (line  24)
+* recipients, checking:                  Checking Recipients. (line   6)
+* redistributing:                        Redistributing.      (line   6)
+* refile <1>:                            Folders.             (line 206)
+* refile:                                Processing Mail Tour.
+                                                              (line  51)
+* region:                                Conventions.         (line  90)
+* regular expressions, mh-alias-apropos: Aliases.             (line 225)
+* regular expressions, mh-auto-fields-list: Identities.       (line  90)
+* regular expressions, mh-invisible-header-fields: Viewing.   (line  31)
+* regular expressions, scan line formats: Scan Line Formats.  (line  95)
+* Reid, Brian <1>:                       From Brian Reid.     (line   6)
+* Reid, Brian:                           History.             (line   6)
+* release notes:                         Getting MH-E.        (line  11)
+* renaming folders:                      Folders.             (line 384)
+* repl <1>:                              Replying.            (line  21)
+* repl:                                  Composing.           (line  34)
+* repl: MH profile component:            Replying.            (line  30)
+* Reply-To: header field:                Editing Message.     (line   6)
+* replying:                              Replying.            (line   6)
+* replying to messages:                  Inserting Letter.    (line   6)
+* RFC 2047, decoding:                    Scan Line Formats.   (line  74)
+* RFC 3156 <1>:                          Sending PGP.         (line   6)
+* RFC 3156:                              Reading PGP.         (line   6)
+* root, in threads:                      Threading.           (line  12)
+* sa-learn:                              Junk.                (line 124)
+* saving attachments:                    Viewing Attachments. (line  63)
+* scan <1>:                              Scan Line Formats.   (line  88)
+* scan <2>:                              Reading Mail.        (line  16)
+* scan:                                  Reading Mail Tour.   (line   6)
+* scan line formats:                     Scan Line Formats.   (line   6)
+* scan line notations:                   Scan Line Formats.   (line  78)
+* scan lines:                            Reading Mail.        (line  16)
+* Search > Perform Search menu item:     Searching.           (line  13)
+* Search > Search with pick menu item:   Searching.           (line  16)
+* Search menu <1>:                       Searching.           (line   6)
+* Search menu:                           Menu Bar.            (line   6)
+* searching:                             Searching.           (line   6)
+* security:                              Reading PGP.         (line   6)
+* send <1>:                              Sending Message.     (line  16)
+* send:                                  Redistributing.      (line  16)
+* sending mail <1>:                      Sending Message.     (line   6)
+* sending mail <2>:                      Composing.           (line   6)
+* sending mail <3>:                      Sending Mail.        (line   6)
+* sending mail:                          Sending Mail Tour.   (line   6)
+* Sequence > Add Message to Sequence... menu item: Sequences. (line  33)
+* Sequence > Delete Message from Sequence... menu item: Sequences.
+                                                              (line  21)
+* Sequence > Delete Sequence... menu item: Sequences.         (line  24)
+* Sequence > List Sequences for Message menu item: Sequences. (line  36)
+* Sequence > List Sequences in Folder... menu item: Sequences.
+                                                              (line  27)
+* Sequence > Narrow to Sequence... menu item: Sequences.      (line  30)
+* Sequence > Narrow to Subject Sequence menu item: Limits.    (line  26)
+* Sequence > Narrow to Tick Sequence menu item <1>: Sequences.
+                                                              (line  18)
+* Sequence > Narrow to Tick Sequence menu item: Limits.       (line  13)
+* Sequence > Toggle Tick Mark menu item: Sequences.           (line  13)
+* Sequence > Widen from Sequence menu item <1>: Sequences.    (line  40)
+* Sequence > Widen from Sequence menu item: Limits.           (line  33)
+* Sequence menu <1>:                     Sequences.           (line   6)
+* Sequence menu:                         Menu Bar.            (line   6)
+* sequence, cur:                         Sequences.           (line 100)
+* sequence, Previous-Sequence:           Sequences.           (line 100)
+* sequence, tick <1>:                    Sequences.           (line  73)
+* sequence, tick <2>:                    Limits.              (line  46)
+* sequence, tick:                        Folders.             (line 291)
+* sequence, unseen:                      Folders.             (line 283)
+* sequence, Unseen-Sequence:             Sequences.           (line 112)
+* sequences:                             Sequences.           (line   6)
+* setting options:                       Options.             (line   6)
+* shar:                                  Files and Pipes.     (line  21)
+* shell commands:                        Conventions.         (line  10)
+* show:                                  Viewing Attachments. (line   6)
+* siblings, in threads:                  Threading.           (line  12)
+* signature <1>:                         Identities.          (line  66)
+* signature:                             Signature.           (line   6)
+* signature separator <1>:               Signature.           (line  23)
+* signature separator:                   Viewing.             (line 134)
+* signed messages:                       Reading PGP.         (line   6)
+* signing messages:                      Sending PGP.         (line   6)
+* slocal:                                Procmail.            (line   6)
+* smileys:                               Viewing.             (line 120)
+* sortm:                                 Folders.             (line 345)
+* sortm: MH profile component:           Folders.             (line 345)
+* sound:                                 Adding Attachments.  (line  99)
+* SourceForge <1>:                       History.             (line   6)
+* SourceForge <2>:                       Mailing Lists.       (line   6)
+* SourceForge:                           Bug Reports.         (line   6)
+* spam <1>:                              Junk.                (line   6)
+* spam:                                  Folders.             (line 253)
+* spam filters, bogofilter:              Junk.                (line  42)
+* spam filters, Spamassassin:            Junk.                (line  42)
+* spam filters, SpamProbe:               Junk.                (line  42)
+* Spamassassin:                          Junk.                (line  42)
+* spamc:                                 Junk.                (line  84)
+* SpamProbe:                             Junk.                (line  42)
+* speedbar:                              Speedbar.            (line   6)
+* spell check <1>:                       Sending Message.     (line  12)
+* spell check:                           Editing Message.     (line  32)
+* starting from command line:            Sending Mail.        (line   9)
+* Stephen Gildea <1>:                    From Stephen Gildea. (line   6)
+* Stephen Gildea:                        History.             (line   6)
+* Subject: header field <1>:             Junk.                (line 242)
+* Subject: header field:                 Editing Message.     (line   6)
+* supercite package:                     Inserting Letter.    (line  36)
+* support:                               MH FAQ and Support.  (line  12)
+* swish++:                               Searching.           (line 206)
+* swish-e:                               Searching.           (line 206)
+* t:                                     Options.             (line  15)
+* tar:                                   Adding Attachments.  (line 126)
+* terms, Emacs:                          Conventions.         (line   6)
+* threading:                             Threading.           (line   6)
+* tick sequence <1>:                     Sequences.           (line  73)
+* tick sequence <2>:                     Limits.              (line  46)
+* tick sequence:                         Folders.             (line 291)
+* ticked messages, viewing <1>:          Limits.              (line  46)
+* ticked messages, viewing:              Folders.             (line 291)
+* ticking messages:                      Sequences.           (line  73)
+* To: header field:                      Editing Message.     (line   6)
+* tool bar:                              Tool Bar.            (line   6)
+* tour:                                  Tour Through MH-E.   (line   6)
+* trivial-cite package:                  Inserting Letter.    (line  74)
+* tutorial:                              Tour Through MH-E.   (line   6)
+* typesetting:                           Viewing.             (line 120)
+* uncompface:                            Viewing.             (line  56)
+* underline, showing:                    Viewing.             (line 120)
+* undo effects of mh-mh-to-mime:         Adding Attachments.  (line 201)
+* undo effects of mh-mml-to-mime:        Adding Attachments.  (line 199)
+* undoing refiles and deletes:           Folders.             (line 220)
+* Unix commands:                         Conventions.         (line  10)
+* Unix commands, compface:               Picture.             (line  17)
+* Unix commands, convert:                Viewing.             (line  60)
+* Unix commands, Emacs <1>:              Conventions.         (line   6)
+* Unix commands, Emacs:                  Preface.             (line   6)
+* Unix commands, emacsclient:            Incorporating Mail.  (line  72)
+* Unix commands, file:                   Adding Attachments.  (line  32)
+* Unix commands, ftp:                    Adding Attachments.  (line 118)
+* Unix commands, gnuclient:              Incorporating Mail.  (line  72)
+* Unix commands, grep:                   Searching.           (line 206)
+* Unix commands, index:                  Searching.           (line 244)
+* Unix commands, index++:                Searching.           (line 244)
+* Unix commands, lpr:                    Printing.            (line  35)
+* Unix commands, mairix:                 Searching.           (line 206)
+* Unix commands, namazu:                 Searching.           (line 206)
+* Unix commands, pick:                   Searching.           (line 206)
+* Unix commands, procmail <1>:           Procmail.            (line   6)
+* Unix commands, procmail <2>:           Searching.           (line 192)
+* Unix commands, procmail <3>:           Folders.             (line 283)
+* Unix commands, procmail:               Incorporating Mail.  (line  57)
+* Unix commands, shar:                   Files and Pipes.     (line  21)
+* Unix commands, swish++:                Searching.           (line 206)
+* Unix commands, swish-e:                Searching.           (line 206)
+* Unix commands, tar:                    Adding Attachments.  (line 126)
+* Unix commands, uncompface:             Viewing.             (line  56)
+* Unix commands, uuencode:               Files and Pipes.     (line  21)
+* Unix commands, wget:                   Viewing.             (line  60)
+* Unix commands, xbuffy:                 Incorporating Mail.  (line  72)
+* unseen messages, viewing:              Folders.             (line 283)
+* unseen sequence:                       Folders.             (line 283)
+* Unseen-Sequence: MH profile component <1>: Procmail.        (line  42)
+* Unseen-Sequence: MH profile component <2>: Sequences.       (line 112)
+* Unseen-Sequence: MH profile component: Getting Started.     (line  69)
+* URLs, highlighting:                    Viewing.             (line 113)
+* using folders:                         Folders.             (line   6)
+* uuencode:                              Files and Pipes.     (line  21)
+* variables:                             Conventions.         (line  65)
+* vCard <1>:                             Signature.           (line   9)
+* vCard:                                 Viewing.             (line 134)
+* version:                               Miscellaneous.       (line  12)
+* versions of MH-E <1>:                  History.             (line   6)
+* versions of MH-E:                      Getting Started.     (line   6)
+* video:                                 Adding Attachments.  (line  99)
+* viewing attachments:                   Viewing Attachments. (line  37)
+* viruses:                               Junk.                (line  11)
+* w3:                                    HTML.                (line  67)
+* w3m:                                   HTML.                (line  30)
+* w3m-standalone:                        HTML.                (line  37)
+* wget:                                  Viewing.             (line  60)
+* whitelisting:                          Junk.                (line  11)
+* whom:                                  Checking Recipients. (line   6)
+* Wohler, Bill <1>:                      From Bill Wohler.    (line   6)
+* Wohler, Bill <2>:                      History.             (line   6)
+* Wohler, Bill:                          Preface.             (line  40)
+* worms:                                 Junk.                (line  11)
+* X-Bogosity: header field:              Junk.                (line 177)
+* x-face package:                        Viewing.             (line  56)
+* X-Face: header field <1>:              Picture.             (line  12)
+* X-Face: header field:                  Viewing.             (line  44)
+* X-Image-URL: header field <1>:         Picture.             (line  12)
+* X-Image-URL: header field:             Viewing.             (line  44)
+* X-Mailer: header field:                Composing.           (line  29)
+* X-MHE-Checksum: header field:          Searching.           (line 192)
+* X-Spam-Level: header field:            Junk.                (line  84)
+* X-Spam-Status: header field:           Junk.                (line  84)
+* X-SpamProbe: header field:             Junk.                (line 215)
+* xbuffy:                                Incorporating Mail.  (line  72)
+* xmh, in MH-E history:                  From Jim Larus.      (line  31)
+* yanking messages:                      Inserting Letter.    (line   6)
+* ypcat passwd:                          Aliases.             (line 155)
+* ~:                                     Conventions.         (line 113)
+
+

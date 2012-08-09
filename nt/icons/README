@@ -1,0 +1,38 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+File: emacs.ico
+Author: Kentaro Ohkouchi <nanasess@fsm.ne.jp>
+Copyright (C) 2008-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later
+
+
+File: emacs22.ico
+Author: Andrew Zhilin
+Copyright (C) 2005-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+
+
+Files: gnu2a32.ico gnu2a32t.ico gnu2b48.ico gnu2b48t.ico
+       gnu3b32.ico gnu3b32t.ico gnu4g48.ico gnu4g48t.ico
+       gnu5w32.ico gnu5w32t.ico gnu6w48.ico gnu6w48t.ico
+       gnu7.ico    gnu8.ico     gnu9.ico
+Author: Rob Davenport <rgd at bigfoot.com>
+Copyright (C) 1999, 2001-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)
+
+  <http://users.adelphia.net/~rob.davenport/gnuicons.html>
+  "These are some images of a 3D stylized gnu head that I created back
+  in 1998. I started studying pictures of gnus and wildebeests and
+  worked with a 3D modeller, sPatch, until I came up with these. Then
+  I worked to make them into icons - cropping the horns off the sides
+  so the images were big enough to be recognizable (to me anyway)."
+
+
+File: hand.cur
+Converted from index.png in GTK+ 2.x by Jason Rumney.
+Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
+Tuomas Kuosmanen, Rodney Dawes, Jakub Steiner, Alexander Larsson, Tor
+Lillqvist, Garrett LeSage, Dennis Cranston, Jody Goldberg, Luca
+Ferretti, Mark Finlay, Lapo Calamandrei, Andreas Nilsson and Marco
+Pesenti Gritti
+License: GNU General Public License version 2

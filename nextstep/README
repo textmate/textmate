@@ -1,0 +1,37 @@
+Copyright (C) 2008-2012 Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+This directory contains the files needed to build Emacs on
+Nextstep-based platforms, including GNUstep and Mac OS X.
+
+The Nextstep support code works on many POSIX systems (and possibly
+W32) using the GNUstep libraries, and on MacOS X systems using the
+Cocoa libraries.
+
+See the INSTALL file in this directory for compilation instructions.
+
+Requirements
+------------
+MacOS X 10.4 or later
+
+- or -
+
+GNUstep "Startup 0.23" or later
+Tested on GNU/Linux, should work on other systems, perhaps with minor
+build tweaking.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

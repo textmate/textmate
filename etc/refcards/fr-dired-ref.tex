@@ -1,0 +1,414 @@
+% Reference Card for Dired
+
+% Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+% Author: Evgeny Roubinchtein <eroubinc@u.washington.edu>
+% French translation: Eric Jacoboni
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% See dired-ref.tex.
+
+%**start of header
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.
+\newcount\columnsperpage
+\columnsperpage=2
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+% Nothing else needs to be changed.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions au dos.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{Pour GNU Emacs version  \versionemacs}
+\centerline{Conception de Stephen Gildea}
+\centerline{Mis \`a jour pour Dired en Mai 2000 par Evgeny Roubinchtein}
+\centerline{Traduction fran\c{c}aise d'\'Eric Jacoboni}
+
+Vous pouvez faire et distribuer des copies de cette carte, pourvu que
+la notice de copyright et cette note de permission soient pr\'eserv\'ees
+sur toutes les copies.
+
+Pour obtenir des copies du manuel de GNU Emacs:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip       %horizontal space between columns
+\newbox\columna                 %boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns                  %one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else                           %2 or 3 columns uses prereduced size
+  \hsize 3.4in
+  \vsize 10in
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eighttt=cmtt8
+  \font\eightmi=cmmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm           %make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%                    %see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+        \global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+        \global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+\hyphenation{de-le-tion}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}        %\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+% First hfill tweaked from 0.75 to 0.8 to allow for longer descriptions.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.8\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+% I cannot figure out how to make all dired-x
+% commands fit on a page in two-column format
+\def\dx{\bf (DX)}
+
+% Set to non-zero to check for layout problems.
+\overfullrule 0pt
+\nopagenumbers
+
+%**end of header
+
+
+\title{Carte de r\'ef\'erence de Dired}
+
+\centerline{(bas\'e sur Dired de GNU Emacs \versionemacs)}
+\centerline{Les commandes marqu\'ees par \dx{} n\'ecessitent dired-x}
+
+% trim this down to fit everything on one page
+% \section{G\'en\'eral}
+% Avec dired, vous pouvez \'editer la liste des fichiers d'un r\'epertoire
+% (et, \'eventuellement, ses r\'epertoires au format 'ls -lR').
+
+% L'\'edition d'un r\'epertoire signifie que vous pouvez visiter,
+% renommer, copier, compresser, compiler des fichiers. Dans le tampon
+% d'\'edition, vous pouvez modifier les attributs des fichiers, leur
+% appliquer des commandes
+% shell ou ins\'erer des sous-r\'epertoires. Vous pouvez « marquer » des
+% fichiers pour qu'ils soient supprim\'es plus tard ou pour leur
+% appliquer des commandes ; cela peut \^etre fait pour un seul fichier \`a
+% la fois ou pour un ensemble de fichiers correspondant \`a certains
+% crit\`eres (fichiers correspondant \`a une expression rationnelle
+% donn\'ee, par exemple).
+
+% On se d\'eplace dans le tampon \`a l'aide des commandes habituelles de
+% d\'eplacement du curseur. Les lettres ne s'ins\`erent plus mais servent
+% \`a ex\'ecuter des commandes, les chiffres (0-9) sont des param\`etres pr\'efixes.
+
+% La plupart des commandes agissent soit sur tous les fichiers marqu\'es,
+% soit sur le fichier courant s'il n'y a pas de fichier marqu\'e. On
+% utilise un param\`etre pr\'efixe pour agir sur les NUM fichiers suivants
+% (ou les NUM pr\'ec\'edents si NUM $<$ 0). Le param\`etre pr\'efixe '1' sert
+% \`a op\'erer sur le fichier courant uniquement. Les param\`etres pr\'efixes
+% ont priorit\'e sur les marques. Les commandes lan\c{c}ant un
+% sous-processus sur un groupe de fichiers afficheront une liste des
+% fichiers pour lesquels le sous-processus a \'echou\'e. Taper y tentera
+% de vous expliquer ce qui a pos\'e probl\`eme.
+
+% Lorsque l'on \'edite plusieurs fichiers dans un unique tampon, chaque
+% r\'epertoire agit comme une page : C-x [ et C-x ] peuvent donc servir
+% \`a se d\'eplacer dans ces r\'epertoires.
+
+\section{Lancer et sortir de Dired}
+
+\key{lancer dired}{C-x d} \key{\'edite le r\'epertoire du fichier que l'on
+  est en train d'\'editer}{C-x C-j\dx} \key{quitter dired}{q}
+
+\section{Commandes de d\'eplacement}
+
+\key{ligne pr\'ec\'edente}{p}
+\key{ligne suivante}{n}
+\key{ligne de r\'epertoire pr\'ec\'edente}{<}
+\key{ligne de r\'epertoire suivante}{>}
+\key{fichier marqu\'e suivant}{M-\}}
+\key{fichier marqu\'e pr\'ec\'edent}{M-\{}
+\key{sous-r\'epertoire pr\'ec\'edent}{M-C-p}
+\key{sous-r\'epertoire suivant}{M-C-n}
+\key{r\'epertoire p\`ere}{^}
+\key{premier sous-r\'epertoire}{M-C-d}
+
+\section{Commandes avec la souris}
+\metax{visiter le fichier}{Mouse_Button_2}
+\metax{ouvrir un menu}{Control-Mouse_Button_3}
+
+\section{Actions immediates sur les fichiers}
+
+\key{visiter le fichier courant}{f}
+\key{visualiser le fichier courant}{v}
+\key{visiter le fichier courant dans une autre fen\^etre}{o}
+%%\key{visiter le fichier courant dans un autre cadre}{w}
+%%\key{afficher le fichier courant}{C-u o}
+\key{cr\'eer un nouveau sous-r\'epertoire}{+}
+\key{comparer le fichier sous le point avec celui sous la marque}{=}
+
+\section{Marquer et \^oter les marques des fichiers}
+
+\key{marquer un fichier ou un sous-r\'epertoire pour de futures commandes}{m}
+\key{\^oter la marque d'un fichier ou de tous les fichiers d'un sous-r\'epertoire}{u}
+\key{\^oter la marque de tous les fichiers d'un tampon}{M-delete}
+\key{marquer les fichiers ayant une extension donn\'ee}{* .}
+\key{marquer tous les sous-r\'epertoires}{* /}
+\key{marquer tous les liens symboliques}{* @}
+\key{marquer tous les ex\'ecutables}{* *}
+\key{inverser le marquage}{* t}
+\key{marquer tous les fichiers du sous-r\'epertoire courant}{* s}
+\key{marquer les fichiers dont les noms correspondent \`a une expression
+  rationnelle}{* \%}
+\key{modifier les marques par un caract\`ere diff\'erent}{* c}
+\key{marquer les fichiers pour lesquels une expression Elisp renvoie t}{* (\dx}
+
+\section{Modifier le tampon Dired}
+
+\key{ins\'erer un sous-r\'epertoire dans ce tampon}{i}
+\key{supprimer les fichiers marqu\'es de la liste}{k}
+\key{supprimer le listing d'un sous-r\'epertoire}{C-u k}
+\key{relire tous les r\'epertoires (conserve toutes les marques)}{g}
+\key{bascule le tri sur le nom/date du r\'epertoire courant}{s}
+\key{\'edite les options de ls }{C-u s}
+\key{r\'ecup\`ere les marques, les lignes cach\'ees, etc.}{C-_}
+\key{cache tous les sous-r\'epertoires}{M-\$}
+\key{cache ou fait appara\^\i{}tre le sous-r\'epertoire}{\$}
+
+\section{Commandes sur les fichiers marqu\'es ou sp\'ecifi\'es par le pr\'efixe}
+
+\key{copier le(s) fichier(s)}{C}
+\key{renommer un fichier ou d\'eplacer des fichiers dans un autre r\'epertoire}{R}
+\key{changer le propri\'etaire d'un (des) fichier(s)}{O}
+\key{changer le groupe d'un (des) fichier(s)}{G}
+\key{changer le mode d'un (des) fichier(s)}{M}
+\key{imprimer le(s) fichier(s)}{P}
+\key{convertir le(s) nom(s) de fichier(s) en minuscules}{\% l}
+\key{convertir le(s) nom(s) de fichier(s) en majuscules}{\% u}
+\key{supprimer les fichiers marqu\'es (pas ceux ayant un `flag')}{D}
+%%\key{uuencoder ou uudecoder le(s) fichier(s)}{U}
+\key{compresser ou d\'ecompacter le(s) fichier(s)}{Z}
+\key{lancer info sur le fichier}{I\dx}
+\key{cr\'eer un (des) lien(s) symbolique(s)}{S}
+\key{cr\'eer des liens symboliques relatifs}{Y}
+\key{cr\'eer un (des) liens physique(s)}{H}
+\key{rechercher une expression rationnelle dans des fichiers}{A}
+\key{remplacer interactivement une expression rationnelle}{Q}
+\key{byte-compiler des fichiers}{B}
+\key{charger le(s) fichier(s)}{L}
+\key{lancer une commande shell sur le(s) fichier(s)}{!}
+
+\section{Mettre un flag sur les fichiers \`a d\'etruire}
+%% Hack for overfull line. Proper fix?
+\leftline{\bf Les commandes qui \^otent les marquent suppriment les}
+\leftline{\bf flags de suppression}
+\key{placer un flag de suppression sur le fichier}{d}
+%%\key{sauvegarder et supprimer le flag de suppression}{delete}
+\key{placer un flag sur tous les fichiers de sauvegarde (dont les noms
+  se terminent par \~{})}{\~{}}
+\key{placer un flag sur tous les fichiers de sauvegarde automatique}{\#}
+\key{placer un flag sur les diff\'erents fichiers interm\'ediaires}{\% \&}
+\key{placer un flag sur les sauvegardes num\'erot\'ees (finissant par
+  .\~{}1\~{}, .\~{}2\~{}, etc.)}{.}
+\key{ex\'ecuter les suppressions demand\'ees (fichiers ayant un flag)}{x}
+\key{placer un flag sur les fichiers correspondant \`a une expression
+  rationnelle }{\% d}
+
+\section{Commandes sur les expressions rationnelles}
+
+\key{marquer les noms de fichiers correspondant \`a une expression
+  rationnelle}{\% m}
+\key{copier les fichiers marqu\'es par une expression rationnelle}{\% C}
+\key{renommer les fichiers marqu\'es par une expression rationnelle}{\% R}
+\key{lien physique}{\% H}
+\key{lien symbolique}{\% S}
+\key{lien symbolique avec chemin relatif}{\% Y}
+\key{marquer pour une suppression}{\% d}
+
+\section{Dired et Find}
+%% Hack for overfull line (should be \metax). Proper fix?
+\key{fichier(s) dired dont le nom correspond \`a un motif}{M-x
+  find-names-dired}
+\metax{fichier(s) dired contenant un motif}{M-x find-grep-dired}
+\metax{fichier(s) dired bas\'es sur ce que produit \kbd{find}}{M-x find-dired}
+
+\section{Obtenir de l'aide}
+
+\key{aide sur dired}{h}
+\key{r\'esum\'e de dired (aide succinte) et trace d'erreur}{?}
+
+\copyrightnotice
+
+\bye
+

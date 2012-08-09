@@ -1,0 +1,11 @@
+# Image Module
+
+img = element img { img.attlist }
+img.attlist =
+  Common.attrib,
+  attribute src { URI.datatype },
+  attribute alt { Text.datatype },
+  attribute longdesc { URI.datatype }?,
+  attribute height { Length.datatype }?,
+  attribute width { Length.datatype }?
+Inline.class |= img

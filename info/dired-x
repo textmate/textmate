@@ -1,0 +1,1629 @@
+This is ../../info/dired-x, produced by makeinfo version 4.13 from
+dired-x.texi.
+
+Copyright (C) 1994-1995, 1999, 2001-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Dired-X: (dired-x).           Dired Extra Features.
+END-INFO-DIR-ENTRY
+
+
+File: dired-x,  Node: Top,  Next: Introduction,  Up: (dir)
+
+Dired Extra
+***********
+
+This documents the "extra" features for GNU Emacs's Dired Mode that are
+provided by the file `dired-x.el'.
+
+   * Based on `dired.texi' by Sebastian Kremer <sk@thp.uni-koeln.de>
+
+   * For `dired-x.el' as distributed with GNU Emacs 24.1.
+
+
+   Copyright (C) 1994-1995, 1999, 2001-2012 Free Software Foundation,
+Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Introduction::
+* Installation::
+* Omitting Files in Dired::
+* Local Variables::
+* Shell Command Guessing::
+* Virtual Dired::
+* Advanced Mark Commands::
+* Multiple Dired Directories::
+* Find File At Point::
+* Miscellaneous Commands::
+* Bugs::
+
+* GNU Free Documentation License::
+* Concept Index::
+* Command Index::
+* Key Index::
+* Variable Index::
+
+
+File: dired-x,  Node: Introduction,  Next: Installation,  Prev: Top,  Up: Top
+
+1 Introduction
+**************
+
+This documents some _extra_ features for GNU Emacs's Dired Mode that
+are provided by `dired-x.el' (derived from Sebastian Kremer's original
+`dired-x.el').
+
+* Menu:
+
+* Features::
+* Technical Details::
+
+
+File: dired-x,  Node: Features,  Next: Technical Details,  Up: Introduction
+
+1.1 Features
+============
+
+Some features provided by Dired Extra:
+
+  1. Omitting uninteresting files from Dired listing (*note Omitting
+     Files in Dired::).
+
+  2. Guessing shell commands in Dired buffers (*note Shell Command
+     Guessing::).
+
+  3. Running Dired command in non-Dired buffers (*note Virtual Dired::).
+
+  4. Finding a file mentioned in a buffer (*note Find File At Point::).
+
+  5. Commands using file marking (*note Advanced Mark Commands::).
+
+`dired-x.el' binds some functions to keys in Dired Mode (*note Key
+Index::) and also binds `C-x C-j' and `C-x 4 C-j' _globally_ to
+`dired-jump' (*note Miscellaneous Commands::).  Optionally, it also
+binds `C-x C-f' and `C-x 4 C-f' to `dired-x-find-file' and
+`dired-x-find-file-other-window', respectively (*note Find File At
+Point::).
+
+
+File: dired-x,  Node: Technical Details,  Prev: Features,  Up: Introduction
+
+1.2 Technical Details
+=====================
+
+When `dired-x.el' is loaded, some standard Dired functions from
+`dired.el' and `dired-aux.el' offer additional features.
+`dired-add-entry' obeys Dired Omit mode (*note Omitting Files in
+Dired::), if it is active.  `dired-find-buffer-nocreate' and
+`dired-initial-position' respect the value of `dired-find-subdir'
+(*note Miscellaneous Commands::).  `dired-clean-up-after-deletion'
+respects the value of `dired-clean-up-buffers-too'.
+`dired-read-shell-command' uses `dired-guess-shell-command' (*note
+Shell Command Guessing::) to offer a smarter default command.
+
+
+File: dired-x,  Node: Installation,  Next: Omitting Files in Dired,  Prev: Introduction,  Up: Top
+
+2 Installation
+**************
+
+This manual describes the Dired features provided by the file
+`dired-x.el'.  To take advantage of these features, you must load the
+file and (optionally) set some variables.
+
+In your `~/.emacs' file, or in the system-wide initialization file
+`default.el' in the `site-lisp' directory, put
+
+     (add-hook 'dired-load-hook
+               (lambda ()
+                 (load "dired-x")
+                 ;; Set dired-x global variables here.  For example:
+                 ;; (setq dired-guess-shell-gnutar "gtar")
+                 ;; (setq dired-x-hands-off-my-keys nil)
+                 ))
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 ;; Set dired-x buffer-local variables here.  For example:
+                 ;; (dired-omit-mode 1)
+                 ))
+
+This will load `dired-x.el' when Dired is first invoked (for example,
+when you first type `C-x d').
+
+* Menu:
+
+* Optional Installation Dired Jump::
+* Optional Installation File At Point::
+
+
+File: dired-x,  Node: Optional Installation Dired Jump,  Next: Optional Installation File At Point,  Up: Installation
+
+2.1 Optional Installation Dired Jump
+====================================
+
+In order to have `dired-jump' and `dired-jump-other-window' (*note
+Miscellaneous Commands::) work _before_ `dired' and `dired-x' have been
+properly loaded you should set-up an autoload for these functions.  In
+your `.emacs' file put
+
+     (autoload 'dired-jump "dired-x"
+       "Jump to Dired buffer corresponding to current buffer." t)
+
+     (autoload 'dired-jump-other-window "dired-x"
+       "Like \\[dired-jump] (dired-jump) but in other window." t)
+
+     (define-key global-map "\C-x\C-j" 'dired-jump)
+     (define-key global-map "\C-x4\C-j" 'dired-jump-other-window)
+
+
+File: dired-x,  Node: Optional Installation File At Point,  Prev: Optional Installation Dired Jump,  Up: Installation
+
+2.2 Optional Installation File At Point
+=======================================
+
+If you choose to have `dired-x.el' bind `dired-x-find-file' over
+`find-file' (*note Find File At Point::), then you will need to set
+`dired-x-hands-off-my-keys'.  To do this, either set it _before_
+`dired-x.el' is loaded, or use `M-x customize-variable', or call
+`dired-x-bind-find-file' after changing the value.
+
+     (add-hook 'dired-load-hook
+               (lambda ()
+                 ;; Bind dired-x-find-file.
+                 (setq dired-x-hands-off-my-keys nil)
+                 (load "dired-x")
+                 ))
+
+
+File: dired-x,  Node: Omitting Files in Dired,  Next: Local Variables,  Prev: Installation,  Up: Top
+
+3 Omitting Files in Dired
+*************************
+
+"Omitting" a file means removing it from the directory listing.
+Omitting is useful for keeping Dired buffers free of "uninteresting"
+files (for instance, auto-save, auxiliary, backup, and revision control
+files) so that the user can concentrate on the interesting files.  Like
+hidden files, omitted files are never seen by Dired.  Omitting differs
+from hiding in several respects:
+
+   * Omitting works on individual files, not on directories; an entire
+     directory cannot be omitted (though each of its files could be).
+
+   * Omitting is wholesale; if omitting is turned on for a Dired
+     buffer, then all uninteresting files listed in that buffer are
+     omitted.  The user does not omit (or unomit) files one at a time.
+
+   * Omitting can be automatic; uninteresting file lines in the buffer
+     can be removed before the user ever sees them.
+
+   * Marked files are never omitted.
+
+`M-o'
+     (`dired-omit-mode') Toggle between displaying and omitting
+     "uninteresting" files.
+
+`* O'
+     (`dired-mark-omitted') Mark "uninteresting" files.
+
+In order to make Dired Omit work you first need to load `dired-x.el'
+inside `dired-load-hook' (*note Installation::) and then evaluate
+`(dired-omit-mode 1)' in some way (*note Omitting Variables::).
+
+* Menu:
+
+* Omitting Variables::
+* Omitting Examples::
+* Omitting Technical::
+
+
+File: dired-x,  Node: Omitting Variables,  Next: Omitting Examples,  Up: Omitting Files in Dired
+
+3.1 Omitting Variables
+======================
+
+The following variables can be used to customize omitting.
+
+`dired-omit-mode'
+     Default: `nil'
+
+     If non-`nil', "uninteresting" files are not listed.  Uninteresting
+     files are those whose files whose names match regexp
+     `dired-omit-files', plus those ending with extensions in
+     `dired-omit-extensions'.  `M-o' (`dired-omit-mode') toggles its
+     value, which is buffer-local.  Put
+
+          (dired-omit-mode 1)
+
+     inside your `dired-mode-hook' to have omitting initially turned on
+     in _every_ Dired buffer (*note Installation::).  You can then use
+     `M-o' to unomit in that buffer.
+
+     To enable omitting automatically only in certain directories you
+     can add a directory local setting (*note Directory Variables:
+     (emacs)Directory Variables.) for Dired mode
+
+          ((dired-mode . ((dired-omit-mode . t))))
+
+     to a `.dir-locals.el' file in that directory.  You can use the
+     command `add-dir-local-variable' to do this.
+
+`dired-omit-files'
+     Default: `"^#\\|\\.$"'
+
+     Files whose names match this buffer-local regexp will not be
+     displayed.  This only has effect when `dired-omit-mode''s value is
+     `t'.
+
+     The default value omits the special directories `.' and `..'  and
+     autosave files (plus other files ending in `.') (*note Omitting
+     Examples::).
+
+`dired-omit-extensions'
+     Default: The elements of `completion-ignored-extensions',
+     `dired-latex-unclean-extensions', `dired-bibtex-unclean-extensions'
+     and `dired-texinfo-unclean-extensions'.
+
+     If non-`nil', a list of extensions (strings) to omit from Dired
+     listings.  Its format is the same as that of
+     `completion-ignored-extensions'.
+
+`dired-omit-localp'
+     Default:  `no-dir'
+
+     The LOCALP argument `dired-omit-expunge' passes to
+     `dired-get-filename'.  If it is `no-dir', omitting is much faster,
+     but you can only match against the non-directory part of the file
+     name.  Set it to `nil' if you need to match the whole file name or
+     `t' to match the file name relative to the buffer's top-level
+     directory.
+
+`dired-omit-marker-char'
+     Default: `C-o'
+
+     Temporary marker used by Dired to implement omitting.  Should
+     never be used as marker by the user or other packages.  There is
+     one exception to this rule: by adding
+
+          (setq dired-mark-keys "\C-o")
+          ;; i.e., the value of dired-omit-marker-char
+          ;; (which is not defined yet)
+
+     to your `~/.emacs', you can bind the `C-o' key to insert a `C-o'
+     marker, thus causing these files to be omitted in addition to the
+     usually omitted files.  Unfortunately the files you omitted
+     manually this way will show up again after reverting the buffer,
+     unlike the others.
+
+
+
+File: dired-x,  Node: Omitting Examples,  Next: Omitting Technical,  Prev: Omitting Variables,  Up: Omitting Files in Dired
+
+3.2 Examples of Omitting Various File Types
+===========================================
+
+   * If you wish to avoid seeing RCS files and the `RCS' directory,
+     then put
+
+          (setq dired-omit-files
+                (concat dired-omit-files "\\|^RCS$\\|,v$"))
+
+     in the `dired-load-hook' (*note Installation::).  This assumes
+     `dired-omit-localp' has its default value of `no-dir' to make the
+     `^'-anchored matches work.  As a slower alternative, with
+     `dired-omit-localp' set to `nil', you can use `/' instead of `^'
+     in the regexp.
+
+   * If you use `tib', the bibliography program for use with TeX and
+     LaTeX, and you want to omit the `INDEX' and the `*-t.tex' files,
+     then put
+
+          (setq dired-omit-files
+                (concat dired-omit-files "\\|^INDEX$\\|-t\\.tex$"))
+
+     in the `dired-load-hook' (*note Installation::).
+
+   * If you do not wish to see `dot' files (files starting with a `.'),
+     then put
+
+          (setq dired-omit-files
+                (concat dired-omit-files "\\|^\\..+$"))
+
+     in the `dired-load-hook' (*note Installation::).  (Of course, a
+     better way to achieve this particular goal is simply to omit `-a'
+     from `dired-listing-switches'.)
+
+
+
+File: dired-x,  Node: Omitting Technical,  Prev: Omitting Examples,  Up: Omitting Files in Dired
+
+3.3 Some Technical Details of Omitting
+======================================
+
+Loading `dired-x.el' will install Dired Omit by putting
+`dired-omit-expunge' on your `dired-after-readin-hook', and will call
+`dired-extra-startup', which in turn calls `dired-omit-startup' in your
+`dired-mode-hook'.
+
+
+File: dired-x,  Node: Local Variables,  Next: Shell Command Guessing,  Prev: Omitting Files in Dired,  Up: Top
+
+4 Local Variables for Dired Directories
+***************************************
+
+This Dired-X feature is obsolete as of Emacs 24.1.  The standard Emacs
+directory local variables mechanism (*note Directory Variables:
+(emacs)Directory Variables.) replaces it.  For an example of the new
+mechanisms, *note Omitting Variables::.
+
+   When Dired visits a directory, it looks for a file whose name is the
+value of variable `dired-local-variables-file' (default: `.dired').  If
+such a file is found, Dired will temporarily insert it into the Dired
+buffer and run `hack-local-variables'.
+
+For example, if the user puts
+
+     Local Variables:
+     dired-actual-switches: "-lat"
+     dired-omit-mode: t
+     End:
+
+into a file called `.dired' in a directory then when that directory is
+viewed it will be
+
+  1. sorted by date
+
+  2. omitted automatically
+
+You can set `dired-local-variables-file' to `nil' to suppress this.
+The value of `dired-enable-local-variables' controls if and how these
+local variables are read.  This variable exists so that it may override
+the default value of `enable-local-variables'.
+
+Please see the GNU Emacs Manual to learn more about local variables.
+*Note Local Variables in Files: (emacs)File Variables.
+
+The following variables affect Dired Local Variables
+
+`dired-local-variables-file'
+     Default: `".dired"'
+
+     If non-`nil', file name for local variables for Dired.  If Dired
+     finds a file with that name in the current directory, it will
+     temporarily insert it into the Dired buffer and run
+     `hack-local-variables'.
+
+`dired-enable-local-variables'
+     Default: `t'
+
+     Controls the use of local-variables lists in Dired.  This variable
+     temporarily overrides the value of `enable-local-variables' when
+     the Dired Local Variables are hacked.  It takes the same values as
+     that variable.  A value of `nil' means to ignore any Dired Local
+     Variables.
+
+
+File: dired-x,  Node: Shell Command Guessing,  Next: Virtual Dired,  Prev: Local Variables,  Up: Top
+
+5 Shell Command Guessing
+************************
+
+Based upon the name of a file, Dired tries to guess what shell command
+you might want to apply to it.  For example, if you have point on a
+file named `foo.tar' and you press `!', Dired will guess you want to
+`tar xvf' it and suggest that as the default shell command.
+
+   The default is mentioned in brackets and you can type `M-n' to get
+the default into the minibuffer and then edit it, e.g., to change `tar
+xvf' to `tar tvf'.  If there are several commands for a given file,
+e.g., `xtex' and `dvips' for a `.dvi' file, you can type `M-n' several
+times to see each of the matching commands.
+
+   Dired only tries to guess a command for a single file, never for a
+list of marked files.
+
+`dired-guess-shell-alist-default'
+     Predefined rules for shell commands.  Set this to `nil' to turn
+     guessing off.  The elements of `dired-guess-shell-alist-user'
+     (defined by the user) will override these rules.
+
+`dired-guess-shell-alist-user'
+     If non-`nil', a user-defined alist of file regexps and their
+     suggested commands.  These rules take precedence over the
+     predefined rules in the variable `dired-guess-shell-alist-default'
+     (to which they are prepended) when `dired-do-shell-command' is
+     run).
+
+     Each element of the alist looks like
+
+          (REGEXP COMMAND...)
+
+     where each COMMAND can either be a string or a Lisp expression
+     that evaluates to a string.  If several commands are given, all of
+     them will temporarily be pushed onto the history.
+
+     If `*' in the shell command, that means to substitute the file
+     name.
+
+     You can set this variable in your `~/.emacs'.  For example, to add
+     rules for `.foo' and `.bar' file extensions, write
+
+          (setq dired-guess-shell-alist-user
+                (list
+                 (list "\\.foo$" "FOO-COMMAND");; fixed rule
+                 ;; possibly more rules...
+                 (list "\\.bar$";; rule with condition test
+                        '(if CONDITION
+                             "BAR-COMMAND-1"
+                           "BAR-COMMAND-2"))))
+
+     This will override any predefined rules for the same extensions.
+
+`dired-guess-shell-case-fold-search'
+     Default: `t'
+
+     Non-`nil' means `dired-guess-shell-alist-default' and
+     `dired-guess-shell-alist-user' are matched case-insensitively.
+
+`dired-guess-shell-gnutar'
+     Default: `nil'
+
+     If non-`nil', this is the name of the GNU Tar executable (e.g.,
+     `tar' or `gnutar').  GNU Tar's `z' switch is used for compressed
+     tar files.  If you don't have GNU tar, set this to `nil': a pipe
+     using `zcat' is then used.
+
+`dired-guess-shell-gzip-quiet'
+     Default: `t'
+
+     A non-`nil' value means that `-q' is passed to `gzip' overriding a
+     verbose option in the `GZIP' environment variable.
+
+`dired-guess-shell-znew-switches nil'
+     Default: `nil'
+
+     A string of switches passed to `znew'.  An example is `-K' which
+     will make `znew' keep a `.Z' file when it is smaller than the
+     `.gz' file.
+
+`dired-shell-command-history nil'
+     History list for commands that read dired-shell commands.
+
+
+File: dired-x,  Node: Virtual Dired,  Next: Advanced Mark Commands,  Prev: Shell Command Guessing,  Up: Top
+
+6 Virtual Dired
+***************
+
+Using "Virtual Dired" means putting a buffer with Dired-like contents
+in Dired mode.  The files described by the buffer contents need not
+actually exist.  This is useful if you want to peruse an `ls -lR'
+output file, for example one you got from an FTP server.  You can use
+all motion commands usually available in Dired.  You can also use it to
+save a Dired buffer in a file and resume it in a later session.
+
+   Type `M-x dired-virtual' to put the current buffer into virtual
+Dired mode.  You will be prompted for the top level directory of this
+buffer, with a default value guessed from the buffer contents.  To
+convert the virtual to a real Dired buffer again, type `g' (which calls
+`dired-virtual-revert') in the virtual Dired buffer and answer `y'.
+You don't have to do this, though: you can relist single subdirectories
+using `l' (`dired-do-redisplay') on the subdirectory headerline,
+leaving the buffer in virtual Dired mode all the time.
+
+   The function `dired-virtual-mode' is specially designed to turn on
+virtual Dired mode from the `auto-mode-alist'.  To edit all `*.dired'
+files automatically in virtual Dired mode, put this into your
+`~/.emacs':
+
+     (setq auto-mode-alist (cons '("[^/]\\.dired$" . dired-virtual-mode)
+                                   auto-mode-alist))
+
+The regexp is a bit more complicated than usual to exclude `.dired'
+local-variable files.
+
+
+File: dired-x,  Node: Advanced Mark Commands,  Next: Multiple Dired Directories,  Prev: Virtual Dired,  Up: Top
+
+7 Advanced Mark Commands
+************************
+
+`F'
+     (`dired-do-find-marked-files') Find all marked files at once
+     displaying them simultaneously.  If optional NOSELECT is non-`nil'
+     then just find the files but do not select.  If you want to keep
+     the Dired buffer displayed, type `C-x 2' first.  If you want just
+     the marked files displayed and nothing else, type `C-x 1' first.
+
+     The current window is split across all files marked, as evenly as
+     possible.  Remaining lines go to the bottom-most window.  The
+     number of files that can be displayed this way is restricted by
+     the height of the current window and the variable
+     `window-min-height'.
+
+`dired-mark-extension'
+     Mark all files with a certain extension for use in later commands.
+     A `.' is not automatically prepended to the string entered, you
+     must type it explicitly.
+
+     When called from Lisp, EXTENSION may also be a list of extensions
+     and an optional argument MARKER-CHAR specifies the marker used.
+
+`dired-flag-extension'
+     Flag all files with a certain extension for deletion.  A `.' is
+     _not_ automatically prepended to the string entered.
+
+* Menu:
+
+* Advanced Cleaning Functions::
+* Advanced Cleaning Variables::
+* Special Marking Function::
+
+
+File: dired-x,  Node: Advanced Cleaning Functions,  Next: Advanced Cleaning Variables,  Up: Advanced Mark Commands
+
+7.1 Advanced Cleaning Functions
+===============================
+
+`dired-clean-patch'
+     Flag dispensable files created by the `patch' program for
+     deletion.  See variable `dired-patch-unclean-extensions'.
+
+`dired-clean-tex'
+     Flag dispensable files created by TeX, LaTeX, and `texinfo' for
+     deletion.  See the following variables (*note Advanced Cleaning
+     Variables::):
+
+        * `dired-tex-unclean-extensions'
+
+        * `dired-texinfo-unclean-extensions'
+
+        * `dired-latex-unclean-extensions'
+
+        * `dired-bibtex-unclean-extensions'
+
+`dired-very-clean-tex'
+     Flag dispensable files created by TeX, LaTeX, `texinfo', and
+     `*.dvi' files for deletion.
+
+
+File: dired-x,  Node: Advanced Cleaning Variables,  Next: Special Marking Function,  Prev: Advanced Cleaning Functions,  Up: Advanced Mark Commands
+
+7.2 Advanced Cleaning Variables
+===============================
+
+Variables used by the above cleaning commands (and in the default value
+for variable `dired-omit-extensions', *note Omitting Variables::)
+
+`dired-patch-unclean-extensions'
+     Default: `(".rej" ".orig")'
+
+     List of extensions of dispensable files created by the `patch'
+     program.
+
+`dired-tex-unclean-extensions'
+     Default:  `(".toc" ".log" ".aux")'
+
+     List of extensions of dispensable files created by TeX.
+
+`dired-texinfo-unclean-extensions'
+     Default: `(".cp" ".cps" ".fn" ".fns" ".ky" ".kys"' `".pg" ".pgs"
+     ".tp" ".tps" ".vr" ".vrs")'
+
+     List of extensions of dispensable files created by `texinfo'.
+
+`dired-latex-unclean-extensions'
+     Default: `(".idx" ".lof" ".lot" ".glo")'
+
+     List of extensions of dispensable files created by LaTeX.
+
+`dired-bibtex-unclean-extensions'
+     Default:  `(".blg" ".bbl")'
+
+     List of extensions of dispensable files created by BibTeX.
+
+
+File: dired-x,  Node: Special Marking Function,  Prev: Advanced Cleaning Variables,  Up: Advanced Mark Commands
+
+7.3 Special Marking Function
+============================
+
+`M-('
+     (`dired-mark-sexp') Mark files for which PREDICATE returns
+     non-`nil'.  With a prefix argument, unflag those files instead.
+
+     The PREDICATE is a Lisp expression that can refer to the following
+     symbols:
+    `inode'
+          [integer] the inode of the file (only for `ls -i' output)
+
+    `s'
+          [integer] the size of the file for `ls -s' output (usually in
+          blocks or, with `-k', in KBytes)
+
+    `mode'
+          [string]  file permission bits, e.g., `-rw-r--r--'
+
+    `nlink'
+          [integer] number of links to file
+
+    `uid'
+          [string]  owner
+
+    `gid'
+          [string]  group  (If the gid is not displayed by `ls', this
+          will still be set (to the same as uid))
+
+    `size'
+          [integer] file size in bytes
+
+    `time'
+          [string]  the time that `ls' displays, e.g., `Feb 12 14:17'
+
+    `name'
+          [string]  the name of the file
+
+    `sym'
+          [string]  if file is a symbolic link, the linked-to name,
+          else `""'
+
+     For example, use
+          (equal 0 size)
+     to mark all zero length files.
+
+     To find out all not yet compiled Emacs Lisp files in a directory,
+     Dired all `.el' files in the lisp directory using the wildcard
+     `*.el'.  Then use `M-(' with
+          (not (file-exists-p (concat name "c")))
+     to mark all `.el' files without a corresponding `.elc' file.
+
+
+
+File: dired-x,  Node: Multiple Dired Directories,  Next: Find File At Point,  Prev: Advanced Mark Commands,  Up: Top
+
+8 Multiple Dired Directories and Non-Dired Commands
+***************************************************
+
+An Emacs buffer can have but one working directory, stored in the
+buffer-local variable `default-directory'.  A Dired buffer may have
+several subdirectories inserted, but it still has only one working
+directory: that of the top-level Dired directory in that buffer.  For
+some commands it is appropriate that they use the current Dired
+directory instead of `default-directory', e.g., `find-file' and
+`compile'.
+
+   The command `dired-smart-shell-command', bound to `M-!' in Dired
+buffers, is like `shell-command', but it runs with `default-directory'
+bound to the current Dired directory.
+
+
+File: dired-x,  Node: Find File At Point,  Next: Miscellaneous Commands,  Prev: Multiple Dired Directories,  Up: Top
+
+8.1 Find File At Point
+======================
+
+`dired-x' provides a method of visiting or editing a file mentioned in
+the buffer you are viewing (e.g., a mail buffer, a news article, a
+`README' file, etc.) or to test if that file exists.  You can then
+modify this in the minibuffer after snatching the file name.
+
+   When installed `dired-x' will substitute `dired-x-find-file' for
+`find-file' (normally bound to `C-x C-f') and
+`dired-x-find-file-other-window' for `find-file-other-window' (normally
+bound to `C-x 4 C-f').
+
+   In order to use this feature, you will need to set
+`dired-x-hands-off-my-keys' to `nil' inside `dired-load-hook' (*note
+Optional Installation File At Point::).
+
+`dired-x-find-file'
+     `dired-x-find-file' behaves exactly like `find-file' (normally
+     bound to `C-x C-f') unless a prefix argument is passed to the
+     function in which case it will use the file name at point as a
+     guess for the file to visit.
+
+     For example, if the buffer you were reading contained the words
+
+          Available via anonymous ftp in
+
+             /roebling.poly.edu:/pub/lisp/crypt++.el.gz
+
+     then you could move your cursor to the line containing the ftp
+     address and type `C-u C-x C-f' (the `C-u' is a universal
+     argument).  The minibuffer would read
+
+          Find file: /roebling.poly.edu:/pub/lisp/crypt++.el.gz
+
+     with the point after the last `/'.  If you hit <RET>, emacs will
+     visit the file at that address.  This also works with files on
+     your own computer.
+
+`dired-x-find-file-other-window'
+     `dired-x-find-file-other-window' behaves exactly like
+     `find-file-other-window' (normally bound to `C-x 4 C-f') unless a
+     prefix argument is used.  See `dired-x-find-file' for more
+     information.
+
+`dired-x-hands-off-my-keys'
+     If set to `t', then it means that `dired-x' should _not_ bind
+     `dired-x-find-file' over `find-file' on keyboard.  Similarly, it
+     should not bind `dired-x-find-file-other-window' over
+     `find-file-other-window'.  If you change this variable after
+     `dired-x.el' is loaded then do `M-x dired-x-bind-find-file'.  The
+     default value of this variable is `t'; by default, the binding is
+     not done.  See *Note Optional Installation File At Point::.
+
+`dired-x-bind-find-file'
+     A function, which can be called interactively or in your
+     `~/.emacs' file, that uses the value of
+     `dired-x-hands-off-my-keys' to determine if `dired-x-find-file'
+     should be bound over `find-file' and
+     `dired-x-find-file-other-window' bound over
+     `find-file-other-window'.  See *Note Optional Installation File At
+     Point::.
+
+
+File: dired-x,  Node: Miscellaneous Commands,  Next: Bugs,  Prev: Find File At Point,  Up: Top
+
+9 Miscellaneous Commands
+************************
+
+Miscellaneous features not fitting anywhere else:
+
+`dired-find-subdir'
+     Default: `nil'
+
+     If non-`nil', Dired does not make a new buffer for a directory if
+     it can be found (perhaps as subdirectory) in some existing Dired
+     buffer.
+
+     If there are several Dired buffers for a directory, the most
+     recently used is chosen.
+
+     Dired avoids switching to the current buffer, so that if you have a
+     normal and a wildcard buffer for the same directory, `C-x d RET'
+     will toggle between those two.
+
+`M-G'
+     (`dired-goto-subdir') Go to the header line of an inserted
+     directory.  This command reads its argument, with completion
+     derived from the names of the inserted subdirectories.
+
+`dired-jump'
+     Bound to `C-x C-j'.  Jump back to Dired: If in a file, edit the
+     current directory and move to file's line.  If in Dired already,
+     pop up a level and go to old directory's line.  In case the proper
+     Dired file line cannot be found, refresh the Dired buffer and try
+     again.
+
+`dired-jump-other-window'
+     Bound to `C-x 4 C-j'. Like `dired-jump', but to other window.
+
+     These functions can be autoloaded so they work even though
+     `dired-x.el' has not been loaded yet (*note Optional Installation
+     Dired Jump::).
+
+     If the variable `dired-bind-jump' is `nil', `dired-jump' will not
+     be bound to `C-x C-j' and `dired-jump-other-window' will not be
+     bound to `C-x 4 C-j'.
+
+`dired-vm'
+     Bound to `V' if `dired-bind-vm' is `t'.  Run VM on this file
+     (assumed to be a UNIX mail folder).
+
+     If you give this command a prefix argument, it will visit the
+     folder read-only.
+
+     If the variable `dired-vm-read-only-folders' is `t', `dired-vm'
+     will visit all folders read-only.  If it is neither `nil' nor `t',
+     e.g., the symbol `if-file-read-only', only files not writable by
+     you are visited read-only.
+
+     If the variable `dired-bind-vm' is `t', `dired-vm' will be bound
+     to `V'.  Otherwise, `dired-bind-rmail' will be bound.
+
+`dired-rmail'
+     Bound to `V' if `dired-bind-vm' is `nil'.  Run Rmail on this file
+     (assumed to be mail folder in Rmail format).
+
+`dired-info'
+     Bound to `I'.  Run Info on this file (assumed to be a file in Info
+     format).
+
+     If the variable `dired-bind-info' is `nil', `dired-info' will not
+     be bound to `I'.
+
+`dired-man'
+     Bound to `N'.  Run man on this file (assumed to be a file in
+     `nroff' format).
+
+     If the variable `dired-bind-man' is `nil', `dired-man' will not be
+     bound to `N'.
+
+`dired-do-relsymlink'
+     Bound to `Y'.  Relative symlink all marked (or next ARG) files
+     into a directory, or make a relative symbolic link to the current
+     file.  This creates relative symbolic links like
+
+              foo -> ../bar/foo
+
+     not absolute ones like
+
+              foo -> /ugly/path/that/may/change/any/day/bar/foo
+
+`dired-do-relsymlink-regexp'
+     Bound to `%Y'.  Relative symlink all marked files containing
+     REGEXP to NEWNAME.  See functions `dired-do-rename-regexp' and
+     `dired-do-relsymlink' for more info.
+
+
+File: dired-x,  Node: Bugs,  Next: GNU Free Documentation License,  Prev: Miscellaneous Commands,  Up: Top
+
+10 Bugs
+*******
+
+If you encounter a bug in this package, or wish to suggest an
+enhancement, then please use `M-x report-emacs-bug' to report it.
+
+
+File: dired-x,  Node: GNU Free Documentation License,  Next: Concept Index,  Prev: Bugs,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: dired-x,  Node: Concept Index,  Next: Command Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Concept Index
+*************
+
+ [index ]
+* Menu:
+
+* Autoloading dired-jump and dired-jump-other-window: Optional Installation Dired Jump.
+                                                               (line  6)
+* Binding dired-x-find-file:             Optional Installation File At Point.
+                                                               (line  6)
+* Bugs:                                  Bugs.                 (line  6)
+* Customizing file omitting:             Omitting Variables.   (line  6)
+* dired-aux.el:                          Technical Details.    (line  6)
+* Dot files, how to omit them in Dired:  Omitting Examples.    (line 27)
+* Features:                              Features.             (line  6)
+* Finding a file at point:               Find File At Point.   (line  6)
+* Guessing shell commands for files.:    Shell Command Guessing.
+                                                               (line  6)
+* gzip:                                  Shell Command Guessing.
+                                                               (line 72)
+* How to make omitting the default in Dired: Omitting Variables.
+                                                               (line 11)
+* Jumping to Dired listing containing file.: Miscellaneous Commands.
+                                                               (line 28)
+* Lisp expression, marking files with in Dired: Special Marking Function.
+                                                               (line  7)
+* Local Variables for Dired Directories: Local Variables.      (line  6)
+* ls listings, how to peruse them in Dired: Virtual Dired.     (line  6)
+* Mark file by Lisp expression:          Special Marking Function.
+                                                               (line  7)
+* Modified functions:                    Technical Details.    (line  6)
+* Multiple Dired directories:            Multiple Dired Directories.
+                                                               (line  6)
+* Omitting additional files:             Omitting Variables.   (line 63)
+* Omitting dot files in Dired:           Omitting Examples.    (line 27)
+* Omitting Files in Dired:               Omitting Files in Dired.
+                                                               (line  6)
+* Omitting RCS files in Dired:           Omitting Examples.    (line  6)
+* Omitting tib files in Dired:           Omitting Examples.    (line 18)
+* Passing GNU Tar its z switch.:         Shell Command Guessing.
+                                                               (line 64)
+* Perusing ls listings:                  Virtual Dired.        (line  6)
+* RCS files, how to omit them in Dired:  Omitting Examples.    (line  6)
+* Reading mail.:                         Miscellaneous Commands.
+                                                               (line 46)
+* Relative symbolic links.:              Miscellaneous Commands.
+                                                               (line 79)
+* Running info.:                         Miscellaneous Commands.
+                                                               (line 65)
+* Running man.:                          Miscellaneous Commands.
+                                                               (line 72)
+* Simultaneous visiting of several files: Advanced Mark Commands.
+                                                               (line  7)
+* Tib files, how to omit them in Dired:  Omitting Examples.    (line 18)
+* Uninteresting files:                   Omitting Files in Dired.
+                                                               (line  6)
+* Virtual Dired:                         Virtual Dired.        (line  6)
+* Visiting a file mentioned in a buffer: Find File At Point.   (line  6)
+* Visiting several files at once:        Advanced Mark Commands.
+                                                               (line  7)
+* Working directory:                     Multiple Dired Directories.
+                                                               (line  6)
+* znew:                                  Shell Command Guessing.
+                                                               (line 78)
+
+
+File: dired-x,  Node: Command Index,  Next: Key Index,  Prev: Concept Index,  Up: Top
+
+Function Index
+**************
+
+ [index ]
+* Menu:
+
+* dired-clean-patch:                     Advanced Cleaning Functions.
+                                                               (line  7)
+* dired-clean-tex:                       Advanced Cleaning Functions.
+                                                               (line 11)
+* dired-do-find-marked-files:            Advanced Mark Commands.
+                                                               (line  7)
+* dired-do-relsymlink:                   Miscellaneous Commands.
+                                                               (line 79)
+* dired-do-relsymlink-regexp:            Miscellaneous Commands.
+                                                               (line 90)
+* dired-flag-extension:                  Advanced Mark Commands.
+                                                               (line 28)
+* dired-goto-subdir:                     Miscellaneous Commands.
+                                                               (line 22)
+* dired-info:                            Miscellaneous Commands.
+                                                               (line 65)
+* dired-jump:                            Miscellaneous Commands.
+                                                               (line 28)
+* dired-jump-other-window:               Miscellaneous Commands.
+                                                               (line 35)
+* dired-man:                             Miscellaneous Commands.
+                                                               (line 72)
+* dired-mark-extension:                  Advanced Mark Commands.
+                                                               (line 20)
+* dired-mark-omitted:                    Omitting Files in Dired.
+                                                               (line 30)
+* dired-mark-sexp:                       Special Marking Function.
+                                                               (line  7)
+* dired-omit-mode:                       Omitting Files in Dired.
+                                                               (line 26)
+* dired-rmail:                           Miscellaneous Commands.
+                                                               (line 61)
+* dired-smart-shell-command:             Multiple Dired Directories.
+                                                               (line 14)
+* dired-very-clean-tex:                  Advanced Cleaning Functions.
+                                                               (line 24)
+* dired-virtual:                         Virtual Dired.        (line 13)
+* dired-virtual-mode:                    Virtual Dired.        (line 22)
+* dired-virtual-revert:                  Virtual Dired.        (line 13)
+* dired-vm:                              Miscellaneous Commands.
+                                                               (line 46)
+* dired-x-bind-find-file:                Find File At Point.   (line 58)
+* dired-x-find-file:                     Find File At Point.   (line 21)
+* dired-x-find-file-other-window:        Find File At Point.   (line 43)
+* shell-command:                         Multiple Dired Directories.
+                                                               (line 14)
+
+
+File: dired-x,  Node: Key Index,  Next: Variable Index,  Prev: Command Index,  Up: Top
+
+Key Index
+*********
+
+ [index ]
+* Menu:
+
+* %Y:                                    Miscellaneous Commands.
+                                                               (line 90)
+* * O:                                   Omitting Files in Dired.
+                                                               (line 30)
+* C-x 4 C-f:                             Find File At Point.   (line 43)
+* C-x 4 C-j:                             Miscellaneous Commands.
+                                                               (line 35)
+* C-x C-f:                               Find File At Point.   (line 21)
+* C-x C-j:                               Miscellaneous Commands.
+                                                               (line 28)
+* F:                                     Advanced Mark Commands.
+                                                               (line  7)
+* g:                                     Virtual Dired.        (line 13)
+* I:                                     Miscellaneous Commands.
+                                                               (line 65)
+* M-!:                                   Multiple Dired Directories.
+                                                               (line 14)
+* M-(:                                   Special Marking Function.
+                                                               (line  7)
+* M-G:                                   Miscellaneous Commands.
+                                                               (line 22)
+* M-o:                                   Omitting Files in Dired.
+                                                               (line 26)
+* N:                                     Miscellaneous Commands.
+                                                               (line 72)
+* V:                                     Miscellaneous Commands.
+                                                               (line 46)
+* Y:                                     Miscellaneous Commands.
+                                                               (line 79)
+
+
+File: dired-x,  Node: Variable Index,  Prev: Key Index,  Up: Top
+
+Variable Index
+**************
+
+ [index ]
+* Menu:
+
+* auto-mode-alist:                       Virtual Dired.        (line 22)
+* dired-bibtex-unclean-extensions:       Advanced Cleaning Variables.
+                                                               (line 32)
+* dired-bind-info:                       Miscellaneous Commands.
+                                                               (line 68)
+* dired-bind-jump:                       Miscellaneous Commands.
+                                                               (line 41)
+* dired-bind-man:                        Miscellaneous Commands.
+                                                               (line 75)
+* dired-bind-vm:                         Miscellaneous Commands.
+                                                               (line 57)
+* dired-enable-local-variables:          Local Variables.      (line  6)
+* dired-find-subdir:                     Miscellaneous Commands.
+                                                               (line  9)
+* dired-guess-shell-alist-default:       Shell Command Guessing.
+                                                               (line 21)
+* dired-guess-shell-alist-user:          Shell Command Guessing.
+                                                               (line 26)
+* dired-guess-shell-case-fold-search:    Shell Command Guessing.
+                                                               (line 58)
+* dired-guess-shell-gnutar:              Shell Command Guessing.
+                                                               (line 64)
+* dired-guess-shell-gzip-quiet:          Shell Command Guessing.
+                                                               (line 72)
+* dired-guess-shell-znew-switches nil:   Shell Command Guessing.
+                                                               (line 78)
+* dired-latex-unclean-extensions:        Advanced Cleaning Variables.
+                                                               (line 27)
+* dired-local-variables-file:            Local Variables.      (line  6)
+* dired-omit-extensions:                 Omitting Variables.   (line 43)
+* dired-omit-files:                      Omitting Variables.   (line 32)
+* dired-omit-localp:                     Omitting Variables.   (line 52)
+* dired-omit-marker-char:                Omitting Variables.   (line 63)
+* dired-omit-mode:                       Omitting Variables.   (line  8)
+* dired-patch-unclean-extensions:        Advanced Cleaning Variables.
+                                                               (line 10)
+* dired-shell-command-history nil:       Shell Command Guessing.
+                                                               (line 85)
+* dired-tex-unclean-extensions:          Advanced Cleaning Variables.
+                                                               (line 16)
+* dired-texinfo-unclean-extensions:      Advanced Cleaning Variables.
+                                                               (line 21)
+* dired-vm-read-only-folders:            Miscellaneous Commands.
+                                                               (line 49)
+* dired-x-hands-off-my-keys:             Find File At Point.   (line 49)
+
+
+
+Tag Table:
+Node: Top940
+Node: Introduction2353
+Node: Features2666
+Node: Technical Details3543
+Node: Installation4229
+Node: Optional Installation Dired Jump5330
+Node: Optional Installation File At Point6100
+Node: Omitting Files in Dired6828
+Node: Omitting Variables8316
+Node: Omitting Examples11219
+Node: Omitting Technical12572
+Node: Local Variables12969
+Node: Shell Command Guessing14992
+Node: Virtual Dired18249
+Node: Advanced Mark Commands19774
+Node: Advanced Cleaning Functions21173
+Node: Advanced Cleaning Variables21979
+Node: Special Marking Function23102
+Node: Multiple Dired Directories24665
+Node: Find File At Point25479
+Node: Miscellaneous Commands28239
+Node: Bugs31491
+Node: GNU Free Documentation License31747
+Node: Concept Index56915
+Node: Command Index61212
+Node: Key Index64579
+Node: Variable Index66733
+
+End Tag Table

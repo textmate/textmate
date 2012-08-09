@@ -1,0 +1,413 @@
+%&tex
+% Title:  GNU Emacs Survival Card
+
+% Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+% Author: Wlodek Bzyl <matwb@univ.gda.pl>
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+%**start of header
+
+% User interface is `plain.tex' and macros described below
+%
+% \title{CARD TITLE}{for version 23}
+% \section{NAME}
+% optional paragraphs separated with \askip amount of vertical space
+% \key{KEY-NAME} description of key or
+% \mkey{M-x LONG-LISP-NAME} description of Elisp function
+%
+% \kbd{ARG} -- argument is typed literally
+
+\def\plainfmtname{plain}
+\ifx\fmtname\plainfmtname
+\else
+  \errmessage{This file requires `plain' format to be typeset correctly}
+  \endinput
+\fi
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(1)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+\def\copyrightnotice{\penalty-1\vfill
+  \vbox{\smallfont\baselineskip=0.8\baselineskip\raggedcenter
+    Copyright \copyright\ \year\ Free Software Foundation, Inc.\break
+    For GNU Emacs version \versionemacs\break
+    Author W{\l}odek Bzyl (matwb@univ.gda.pl)
+
+    Permission is granted to make and distribute copies of
+    this card provided the copyright notice and this permission notice
+    are preserved on all copies.\par}}
+
+\hsize 3.2in
+\vsize 7.95in
+\font\titlefont=cmss10 scaled 1200
+\font\headingfont=cmss10
+\font\smallfont=cmr6
+\font\smallsy=cmsy6
+\font\eightrm=cmr8
+\font\eightbf=cmbx8
+\font\eightit=cmti8
+\font\eighttt=cmtt8
+\font\eightmi=cmmi8
+\font\eightsy=cmsy8
+\font\eightss=cmss8
+\textfont0=\eightrm
+\textfont1=\eightmi
+\textfont2=\eightsy
+\def\rm{\eightrm} \rm
+\def\bf{\eightbf}
+\def\it{\eightit}
+\def\tt{\eighttt}
+\def\ss{\eightss}
+\baselineskip=0.8\baselineskip
+
+\newdimen\intercolumnskip % horizontal space between columns
+\intercolumnskip=0.5in
+
+% The TeXbook, p. 257
+\let\lr=L \newbox\leftcolumn
+\output={\if L\lr
+    \global\setbox\leftcolumn\columnbox \global\let\lr=R
+  \else
+       \doubleformat \global\let\lr=L\fi}
+\def\doubleformat{\shipout\vbox{\makeheadline
+    \leftline{\box\leftcolumn\hskip\intercolumnskip\columnbox}
+    \makefootline}
+  \advancepageno}
+\def\columnbox{\leftline{\pagebody}}
+
+\def\newcolumn{\vfil\eject}
+
+\def\bye{\par\vfil\supereject
+  \if R\lr \null\vfil\eject\fi
+  \end}
+
+\outer\def\title#1#2{{\titlefont\centerline{#1}}\vskip 1ex plus 0.5ex
+   \centerline{\ss#2}
+   \vskip2\baselineskip}
+
+\outer\def\section#1{\filbreak
+  \bskip
+  \leftline{\headingfont #1}
+  \askip}
+\def\bskip{\vskip 2.5ex plus 0.25ex }
+\def\askip{\vskip 0.75ex plus 0.25ex}
+
+\newdimen\defwidth \defwidth=0.25\hsize
+\def\hang{\hangindent\defwidth}
+
+\def\textindent#1{\noindent\llap{\hbox to \defwidth{\tt#1\hfil}}\ignorespaces}
+\def\key{\par\hangafter=0\hang\textindent}
+
+\def\mtextindent#1{\noindent\hbox{\tt#1\quad}\ignorespaces}
+\def\mkey{\par\hangafter=1\hang\mtextindent}
+
+\def\kbd#{\bgroup\tt \let\next= }
+
+\newdimen\raggedstretch
+\newskip\raggedparfill \raggedparfill=0pt plus 1fil
+\def\nohyphens
+   {\hyphenpenalty10000\exhyphenpenalty10000\pretolerance10000}
+\def\raggedspaces
+   {\spaceskip=0.3333em\relax
+    \xspaceskip=0.5em\relax}
+\def\raggedright
+   {\raggedstretch=6em
+    \nohyphens
+    \rightskip=0pt plus \raggedstretch
+    \raggedspaces
+    \parfillskip=\raggedparfill
+    \relax}
+\def\raggedcenter
+   {\raggedstretch=6em
+    \nohyphens
+    \rightskip=0pt plus \raggedstretch
+    \leftskip=\rightskip
+    \raggedspaces
+    \parfillskip=0pt
+    \relax}
+
+\chardef\\=`\\
+
+\raggedright
+\nopagenumbers
+\parindent 0pt
+\interlinepenalty=10000
+\hoffset -0.2in
+%\voffset 0.2in
+
+%**end of header
+
+
+\title{GNU\ \ Emacs\ \ Survival\ \ Card}{for version \versionemacs}
+
+In the following, \kbd{C-z} means hit the `\kbd{z}' key while
+holding down the {\it Ctrl}\ \ key. \kbd{M-z} means hit the
+`\kbd{z}' key while hitting the {\it Meta\/} (labeled {\it Alt\/}
+on some keyboards) or after hitting {\it Esc\/} key.
+
+\section{Running Emacs}
+
+To enter GNU Emacs, just type its name: \kbd{emacs}.
+Emacs divides the frame into several areas:
+  menu line,
+  buffer area with the edited text,
+  mode line describing the buffer in the window above it,
+  and a minibuffer/echo area in the last line.
+\askip
+\key{C-x C-c} quit Emacs
+\key{C-x C-f} edit file; this command uses the minibuffer to read
+  the file name; use this to create new files by entering the name
+  of the new file
+\key{C-x C-s} save the file
+\key{C-x k} kill a buffer
+\key{C-g} in most context: cancel, stop, abort partially typed or
+  executing command
+\key{C-x u} undo
+
+\section{Moving About}
+
+\key{C-l} scroll current line to center of window
+\key{C-x b} switch to another buffer
+\key{M-<} move to beginning of buffer
+\key{M->} move to end of buffer
+\key{M-g M-g} go to a given line number
+
+\section{Multiple Windows}
+
+\key{C-x 0} remove the current window from the display
+\key{C-x 1} make active window the only window
+\key{C-x 2} split window horizontally
+\key{C-x 3} split window vertically
+\key{C-x o} move to other window
+
+\section{Regions}
+
+Emacs defines a `region' as the space between the {\it mark\/} and
+the {\it point}. A mark is set with \kbd{C-{\it space}}.
+The point is at the cursor position.
+\askip
+\key{M-h} mark entire paragraph
+\key{C-x h} mark entire buffer
+
+\section{Killing and Copying}
+
+\key{C-w} kill region
+\key{M-w} copy region to kill-ring
+\key{C-k} kill from the cursor all the way to the end of the line
+\key{M-DEL} kill word
+\key{C-y} yank back the last kill (\kbd{C-w C-y} combination could be
+  used to move text around)
+\key{M-y} replace last yank with previous kill
+
+\section{Searching}
+
+\key{C-s} search for a string
+\key{C-r} search for a string backwards
+\key{RET} quit searching
+\key{M-C-s} regular expression search
+\key{M-C-r} reverse regular expression search
+\askip
+Use \kbd{C-s} or \kbd{C-r} again to repeat the search in either direction.
+
+\section{Tags}
+
+Tags tables files record locations of function and
+procedure definitions, global variables, data types and anything
+else convenient. To create a tags table file, type
+`{\tt etags} {\it input\_files}' as a shell command.
+\askip
+\key{M-.} find a definition
+\key{C-u M-.} find next occurrence of definition
+\key{M-*} pop back to where \kbd{M-.} was last invoked
+\mkey{M-x tags-query-replace} run query-replace on all files
+  recorded in tags table
+\key{M-,} continue last tags search or query-replace
+
+\section{Compiling}
+
+\key{M-x compile} compile code in active window
+\key{C-c C-c} go to the next compiler error, when in
+  the compile window or
+\key{C-x `} when in the window with source code
+
+\section{Dired, the Directory Editor}
+
+\key{C-x d} invoke Dired
+\key{d} flag this file for deletion
+\key{\~{}} flag all backup files for deletion
+\key{u} remove deletion flag
+\key{x} delete the files flagged for deletion
+\key{C} copy file
+\key{g} update the Dired buffer
+\key{f} visit the file described on the current line
+\key{s} switch between alphabetical date/time order
+
+\section{Reading and Sending Mail}
+
+\key{M-x rmail} start reading mail
+\key{q} quit reading mail
+\key{h} show headers
+\key{d} mark the current message for deletion
+\key{x} remove all messages marked for deletion
+
+\key{C-x m} begin composing a message
+\key{C-c C-c} send the message and switch to another buffer
+\key{C-c C-f C-c} move to the `CC' header field, creating one
+  if there is none
+
+\section{Miscellaneous}
+
+\key{M-q} fill paragraph
+\key{M-/} expand previous word dynamically
+\key{C-z} iconify (suspend) Emacs when running it under X or
+  shell, respectively
+\mkey{M-x revert-buffer} replace the text being edited with the
+  text of the file on disk
+
+\section{Query Replace}
+
+\key{M-\%} interactively search and replace
+\key{M-C-\%} using regular expressions
+\askip
+Valid responses in query-replace mode are
+\askip
+\key{SPC} replace this one, go on to next
+\key{,} replace this one, don't move
+\key{DEL} skip to next without replacing
+\key{!} replace all remaining matches
+\key{\^{}} back up to the previous match
+\key{RET} exit query-replace
+\key{C-r} enter recursive edit (\kbd{M-C-c} to exit)
+
+\section{Regular Expressions}
+
+\key{. {\rm(dot)}} any single character except a newline
+\key{*} zero or more repeats
+\key{+} one or more repeats
+\key{?} zero or one repeat
+\key{[$\ldots$]} denotes a class of character to match
+\key{[\^{}$\ldots$]} negates the class
+
+\key{\\{\it c}} quote characters otherwise having a special
+  meaning in regular expressions
+
+\key{$\ldots$\\|$\ldots$\\|$\ldots$} matches one of
+  the alternatives (``or'')
+\key{\\( $\ldots$ \\)} groups a series of pattern elements to
+  a single element
+\key{\\{\it n}} same text as {\it n\/}th group
+
+\key{\^{}} matches at line beginning
+\key{\$} matches at line end
+
+\key{\\w} matches word-syntax character
+\key{\\W} matches non-word-syntax character
+\key{\\<} matches at word beginning
+\key{\\>} matches at word end
+\key{\\b} matches at word break
+\key{\\B} matches at non-word break
+
+\section{Registers}
+
+\key{C-x r s} save region in register
+\key{C-x r i} insert register contents into buffer
+
+\key{C-x r SPC} save value of point in register
+\key{C-x r j} jump to point saved in register
+
+\section{Rectangles}
+
+\key{C-x r r} copy rectangle to register
+\key{C-x r k} kill rectangle
+\key{C-x r y} yank rectangle
+\key{C-x r t} prefix each line with a string
+
+\key{C-x r o} open rectangle, shifting text right
+\key{C-x r c} blank out rectangle
+
+\section{Shells}
+
+\key{M-x shell} start a shell within Emacs
+\key{M-!} execute a shell command
+\key{M-|} run a shell command on the region
+\key{C-u M-|} filter region through a shell command
+
+\section{Spelling Check}
+
+\key{M-\$} check spelling of word at the cursor
+\mkey{M-x ispell-region} check spelling of all words in region
+\mkey{M-x ispell-buffer} check spelling of entire buffer
+
+\section{International Character Sets}
+
+\key{C-x RET C-\\} select and activate input method for
+  the current buffer
+\key{C-\\} enable or disable input method
+\mkey{M-x list-input-methods} show all input methods
+\mkey{M-x set-language-environment} specify principal language
+
+\key{C-x RET c} set coding system for next command
+\mkey{M-x find-file-literally} visit file with no conversion
+  of any kind
+
+\mkey{M-x list-coding-systems} show all coding systems
+\mkey{M-x prefer-coding-system} choose preferred coding system
+
+\section{Keyboard Macros}
+
+\key{C-x (} start defining a keyboard macro
+\key{C-x )} end keyboard macro definition
+\key{C-x e} execute last-defined keyboard macro
+\key{C-u C-x (} append to last keyboard macro
+\mkey{M-x name-last-kbd-macro} name last keyboard macro
+
+\section{Simple Customization}
+
+\key{M-x customize} customize variables and faces
+
+\section{Getting Help}
+
+Emacs does command completion for you. Typing \kbd{M-x}
+{\it tab\/} or {\it space\/} gives a list of Emacs commands.
+\askip
+\key{C-h} Emacs help
+\key{C-h t} run the Emacs tutorial
+\key{C-h i} enter Info, the documentation browser
+\key{C-h a} show commands matching a string (apropos)
+\key{C-h k} display documentation of the function invoked by
+  keystroke
+\askip
+Emacs gets into different {\it modes}, each of which customizes
+Emacs for editing text of a particular sort. The mode line
+contains names of the current modes, in parentheses.
+\askip
+\key{C-h m} get mode-specific information
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "pdftex survival"
+% End:
+

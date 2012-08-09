@@ -1,0 +1,211 @@
+# RELAX NG Compact Schema for RDF/XML Syntax
+#
+# Copyright (C) 2001-2008 World Wide Web Consortium, (Massachusetts
+# Institute of Technology, European Research Consortium for
+# Informatics and Mathematics, Keio University).  All Rights Reserved.
+# This work is distributed under the W3C(R) Software License in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE.
+#
+# This schema is for information only and NON-NORMATIVE
+#
+# It is based on one originally written by James Clark in
+# http://lists.w3.org/Archives/Public/www-rdf-comments/2001JulSep/0248.html
+# and updated with later changes.
+
+namespace local = ""
+namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+
+start = doc
+
+
+# I cannot seem to do this in RNGC so they are expanded in-line
+
+# coreSyntaxTerms = rdf:RDF | rdf:ID | rdf:about | rdf:parseType | rdf:resource | rdf:nodeID | rdf:datatype
+# syntaxTerms = coreSyntaxTerms | rdf:Description | rdf:li
+# oldTerms    = rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID
+# nodeElementURIs       = * - ( coreSyntaxTerms | rdf:li | oldTerms )
+# propertyElementURIs   = * - ( coreSyntaxTerms | rdf:Description | oldTerms )
+# propertyAttributeURIs = * - ( coreSyntaxTerms | rdf:Description | rdf:li | oldTerms )
+
+# Also needed to allow rdf:li on all property element productions
+# since we can't capture the rdf:li rewriting to rdf_<n> in relaxng
+
+# Need to add these explicitly
+xmllang = attribute xml:lang { text }
+xmlbase = attribute xml:base { text }
+# and to forbid every other xml:* attribute, element
+
+doc = 
+  RDF
+
+RDF =
+  element rdf:RDF { 
+     xmllang?, xmlbase?, nodeElementList
+}
+
+nodeElementList = 
+  nodeElement*
+
+  # Should be something like:
+  #  ws* , (  nodeElement , ws* )*
+  # but RELAXNG does this by default, ignoring whitespace separating tags.
+
+nodeElement =
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype | rdf:li |
+                rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID ) {
+      (idAttr | nodeIdAttr | aboutAttr )?, xmllang?, xmlbase?, propertyAttr*, propertyEltList
+  }
+
+  # It is not possible to say "and not things
+  # beginning with _ in the rdf: namespace" in RELAX NG.
+
+ws = 
+  " "
+
+  # Not used in this RELAX NG schema; but should be any legal XML
+  # whitespace defined by http://www.w3.org/TR/2000/REC-xml-20001006#NT-S
+
+
+propertyEltList = 
+  propertyElt*
+
+  # Should be something like:
+  #  ws* , ( propertyElt , ws* )*
+  # but RELAXNG does this by default, ignoring whitespace separating tags.
+
+propertyElt = 
+  resourcePropertyElt | 
+  literalPropertyElt | 
+  parseTypeLiteralPropertyElt |
+  parseTypeResourcePropertyElt |
+  parseTypeCollectionPropertyElt |
+  parseTypeOtherPropertyElt |
+  emptyPropertyElt
+
+resourcePropertyElt = 
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype |
+                rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                xml:* ) {
+      idAttr?, xmllang?, xmlbase?, nodeElement
+  }
+
+literalPropertyElt =
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype |
+                rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                xml:* ) {
+      (idAttr | datatypeAttr )?, xmllang?, xmlbase?, text 
+  }
+
+parseTypeLiteralPropertyElt = 
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype |
+                rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                xml:* ) {
+      idAttr?, parseLiteral, xmllang?, xmlbase?, literal 
+  }
+
+parseTypeResourcePropertyElt = 
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype |
+                rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                xml:* ) {
+      idAttr?, parseResource, xmllang?, xmlbase?, propertyEltList
+  }
+
+parseTypeCollectionPropertyElt = 
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype |
+                rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                xml:* ) {
+      idAttr?, xmllang?, xmlbase?, parseCollection, nodeElementList
+  }
+
+parseTypeOtherPropertyElt = 
+  element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                rdf:resource | rdf:nodeID | rdf:datatype |
+                rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                xml:* ) {
+      idAttr?, xmllang?, xmlbase?, parseOther, any
+  }
+
+emptyPropertyElt =
+   element * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                 rdf:resource | rdf:nodeID | rdf:datatype |
+                 rdf:Description | rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID |
+                 xml:* ) {
+       idAttr?, (resourceAttr | nodeIdAttr)?, xmllang?, xmlbase?, propertyAttr*
+   }
+
+idAttr = 
+  attribute rdf:ID { 
+      IDsymbol 
+  }
+
+nodeIdAttr = 
+  attribute rdf:nodeID { 
+      IDsymbol 
+  }
+
+aboutAttr = 
+  attribute rdf:about { 
+      URI-reference 
+  }
+
+propertyAttr = 
+  attribute * - ( local:* | rdf:RDF | rdf:ID | rdf:about | rdf:parseType |
+                  rdf:resource | rdf:nodeID | rdf:datatype | rdf:li |
+                  rdf:Description | rdf:aboutEach |
+		  rdf:aboutEachPrefix | rdf:bagID |
+                  xml:* ) {
+      string
+  }
+
+resourceAttr = 
+  attribute rdf:resource {
+      URI-reference 
+  }
+
+datatypeAttr = 
+  attribute rdf:datatype {
+      URI-reference 
+  }
+
+parseLiteral = 
+  attribute rdf:parseType {
+      "Literal" 
+  }
+
+parseResource = 
+  attribute rdf:parseType {
+      "Resource"
+  }
+
+parseCollection = 
+  attribute rdf:parseType {
+      "Collection"
+  }
+
+parseOther = 
+  attribute rdf:parseType {
+      text
+  }
+
+URI-reference = 
+  string
+
+literal =
+  any
+
+IDsymbol = 
+  xsd:NMTOKEN
+
+any =
+  mixed { element * { attribute * { text }*, any }* }
+

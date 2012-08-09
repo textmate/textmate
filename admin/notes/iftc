@@ -1,0 +1,26 @@
+Iso-Functional Type Contour
+
+
+This is a term coined to describe "column int->float" change approach, and can
+be used whenever low-level types need to change (hopefully not often!) but the
+meanings of the values (whose type has changed) do not.
+
+The premise is that changing a low-level type potentially means lots of code
+needs to be changed as well, and the question is how to do this incrementally,
+which is the preferred way to change things.
+
+Say LOW and HIGH are C functions:
+
+  int LOW (void) { return 1; }
+  void HIGH (void) { int value = LOW (); }
+
+We want to convert LOW to return float, so we cast HIGH usage:
+
+  float LOW (void) { return 1.0; }
+  void HIGH (void) { int value = (int) LOW (); }  /* iftc */
+
+The comment /* iftc */ is used to mark this type of casting to differentiate
+it from other casting.  We commit the changes and can now go about modifying
+LOW and HIGH separately.  When HIGH is ready to handle the type change, the
+cast can be removed.
+

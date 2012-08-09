@@ -1,0 +1,158 @@
+This file summarizes primary aspects of the NS port architecture.  If
+possible, it should be updated for changes.
+
+Currently it summarizes the state as of:
+
+  summer 2008 shortly after merging to trunk
+
+
+
+Startup
+-------
+
+Init sequence:
+  emacs.c: ns_alloc_autorelease_pool()		nsterm.m
+  emacs.c: ns_init_paths()			nsterm.m
+    - override EMACSLOADPATH, etc. so resources can be found in-bundle
+  emacs.c: init_display()			dispnew.c
+    - sets Vwindow_system (window-system) to 'ns
+  emacs.c: loadup.el -> startup.el -> ns-initialize-window-system
+    -> x-open-connection (nsfns.m)
+      - ns-list-services
+      -> nsterm.m: ns_term_init()
+	- EmacsApp sharedApplication
+	- read NS defaults (org.gnu.Emacs.plist)
+	- init X-style color list
+	- ns_create_terminal()
+	- NSApp run (goes to applicationDidFinishLaunching which terminates
+	  	     event loop -- see below)
+
+
+
+Event Loop
+----------
+
+In an NS application, the event loop is normally managed by system and all
+user code is event-driven.  [NSApp run] is called by user and never returns.
+
+In Emacs, the event loop is managed by emacs itself.
+
+The NS port mediates between these two styles by intercepting the NS event
+dispatch at [NSApp sendEvent].  If a special event is detected, the event loop
+is broken, and control returned to Emacs.  This special event is sent by
+ns_send_appdefined, which is called under these circumstances:
+
+ - if a user input event is received
+ - when a timeout fires
+
+NS event processing is instigated from Emacs through ns_select() and
+ns_read_socket() in nsterm.m.  Parts of the codepaths leading to these
+functions are:
+
+
+ keyboard.c:read_avail_input()
+     -> ns_read_socket (ns_send_appdefined) -> [NSApp run]
+
+ process.c:wait_reading_process_output()
+     -> ns_select -> gobble_input (global inNsSelect=1)
+       -> ns_read_socket (ns_send_appdefined if !expected) -> [NSApp run]
+
+ sysdep.c:sys_select() -> read_input_waiting()
+     -> ns_read_socket (send_appdefined) -> [NSApp run]
+ [this codepath may not be used]
+
+
+Currently ctrl-g is not detected in as many circumstances as other emacsen.
+It is not certain whether this is due to the means of event loop integration,
+or errors of omission in the NS code.  This is an area for improvement.
+Also, see the article here and its containing thread:
+
+http://article.gmane.org/gmane.emacs.devel/92021/match=handling%5fsignal
+
+
+
+
+Text Rendering and Font Handling
+--------------------------------
+
+nsfont.m implements the font driver, responsible for managing fonts and
+rendering text.  Fonts are obtained through NSFontManager.  Rendering must be
+done at a low level due to emacs' fine control over this process, therefore
+there are different approaches under Cocoa and GNUstep.  Under GNUstep, the
+original NeXT Display PostScript (DPS) APIs are available and used.  Under
+Cocoa, these were removed and Quartz drawing functions replaced them.
+
+In both cases, font glyphs are accessed through UTF8 character
+representations.  It would be preferable to use Unicode indices, but prior
+attempts at this have failed.
+
+Multi-script fontsets are auto-created in nsfont_make_fontset_for_font() using
+the facilities of NSTextStorage and NSLayoutManager.
+
+
+Object Architecture
+-------------------
+
+Unlike the other GUIs, the NS interface is based on a high-level and
+object-oriented API.  This creates some tension in the code because emacs
+itself has been architected around the low-level Xlib and Xt APIs.  The NS
+port tries to strike a balance between simplifying code on its side using OO
+features, and keeping code as similar as possible to other ports to ease
+maintenance.  The following are the main classes (see nsterm.h):
+
+EmacsApp : NSApplication
+  - event loop integration, interapp comms point for Finder (NSWorkspace) msgs,
+    Services
+  - one global instance (NSApp)
+  - nsterm.m
+
+EmacsView : NSView <TextInput>
+  - handles rendering of text and fringe, interapp comms for drag/drop
+  - instance for each frame
+  - child of window's content view
+  - nsterm.m
+
+EmacsWindow : NSWindow
+  - utility override for resize handling
+
+EmacsScroller : NSScroller
+  - instance for each emacs window, renders scrollbar
+  - child of window's content view
+  - nsterm.m
+
+EmacsImage : NSImage
+  - image rendering, toolbar icons, stippling, fringe bitmaps
+  - instance for each image
+  - nsimage.m
+
+EmacsMenu : NSMenu
+  - menu management
+  - one tree of instances for menubar, one instance for each popup menu
+  - nsmenu.m
+
+EmacsToolbar : NSToolbar
+  - toolbar management, one instance for each frame
+  - nsmenu.m
+
+
+EmacsDialogPanel : NSPanel
+  - popup dialogs, one instance for each
+  - nsmenu.m
+
+EmacsTooltip : NSObject
+  - tooltip popups, one instance for each
+  - nsmenu.m
+
+EmacsGlyphStorage : NSObject <NSGlyphStorage>
+  - utility for text rendering
+  - nsfont.m
+
+EmacsPrefsController : NSObject
+  - utility for preferences panel management, one global instance
+  - nsterm.m
+  - nextstep/Cocoa/Emacs.base/Contents/Resources/preferences.nib
+  - nextstep/GNUstep/Emacs.base/Resources/preferences.gorm
+
+EmacsSavePanel : NSSavePanel
+EmacsOpenPanel : NSOpenPanel
+  - utility override for panel notifications

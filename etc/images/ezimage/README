@@ -1,0 +1,11 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+Files: bits.xpm bitsbang.xpm box-minus.xpm box-plus.xpm
+       box.xpm checkmark.xpm dir-minus.xpm dir-plus.xpm dir.xpm
+       doc-minus.xpm doc-plus.xpm doc.xpm info.xpm key.xpm label.xpm
+       lock.xpm mail.xpm page-minus.xpm page-plus.xpm page.xpm
+       tag-gt.xpm tag-minus.xpm tag-plus.xpm tag-type.xpm tag-v.xpm
+       tag.xpm unlock.xpm
+Author: Eric M. Ludlam
+Copyright (C) 1999-2012  Free Software Foundation, Inc.
+License: GNU General Public License version 3 or later (see COPYING)

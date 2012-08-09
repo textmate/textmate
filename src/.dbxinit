@@ -1,0 +1,15 @@
+ignore 14
+catch 18
+ignore 20
+ignore 23
+alias s step
+alias n next
+alias c cont
+alias st status
+alias r run
+alias l list
+alias f file
+alias q quit
+alias w where
+alias d delete
+alias p print

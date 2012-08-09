@@ -1,0 +1,8 @@
+This directory contains C header files containing
+operating-system-specific definitions.  Each file describes a
+particular operating system.  The emacs configuration script edits
+../config.h to include the appropriate one of these files, and then
+each emacs source file includes config.h.
+
+template.h is a generic template for system descriptions; it describes
+the parameters a system file can specify.

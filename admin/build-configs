@@ -1,0 +1,98 @@
+#! /usr/bin/perl
+# Build Emacs in several different configurations.
+
+# Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+require 5;
+use Getopt::Long;
+use File::Basename;
+use Cwd;
+
+@configs =
+  (
+   ["--without-x", 		  "--optim"],
+   ["--without-x-toolkit", 	  "--optim"],
+   ["--without-toolkit-scroll-bars", "--optim"],
+   ["--with-x-toolkit=lucid", 	  "--optim"],
+   ["--with-x-toolkit=motif", 	  "--optim"],
+   ["--with-x-toolkit=motif", 	  "--enable-checking"],
+   ["--with-x-toolkit=motif", 	  "--gcc3"],
+   ["--with-x-toolkit=motif", 	  ""],
+  );
+
+$log = "/tmp/$$.out";
+print "Using log file $log\n";
+unlink $log;
+
+$root = $ENV{"EMACS_ROOT"};
+$root = "/gd/gnu/emacs" unless $root;
+
+$rc = GetOptions ("help" => \$help);
+if ($rc == 0 || $help)
+  {
+    print <<USAGE;
+build-configs
+
+Build Emacs in different configurations.
+
+--help			show this help
+
+USAGE
+    exit 1;
+  }
+
+# Chdir to the top-level directory of the tree.  If not in a tree
+# containing Emacs, use the default.
+
+while (! -f "src/emacs.c" && cwd () ne "/")
+  {
+    chdir "..";
+  }
+
+chdir $root if cwd () eq "/";
+print "Build in ", cwd (), "\n";
+
+foreach $config (@configs)
+  {
+    my $configure_options = @$config[0];
+    my $make_options = @$config[1];
+    my $rc;
+
+    print "$configure_options, $make_options\n";
+    unlink "config.cache";
+
+    $rc = system ("$root/configure $configure_options >>$log 2>&1");
+    if ($rc != 0)
+      {
+	print "configure failed\n";
+	exit 1;
+      }
+
+    $rc = system ("make-emacs --all $make_options >>$log 2>&1");
+    if ($rc != 0)
+      {
+	print "Make failed\n";
+	exit 1;
+      }
+  }
+
+# Local Variables:
+# mode: cperl
+# End:
+

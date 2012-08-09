@@ -1,0 +1,1056 @@
+2001-12-18  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.176: * Added missing 747 numreply (banned)
+
+2001-12-15  Gergely Nagy  <algernon@debian.org>
+
+	* debian/scripts/install 1.4, debian/rules 1.6:
+	updated to 2.1.cvs.20011215-1
+
+	* debian/changelog 1.12: Debian version 2.1.cvs.20011215-1
+
+2001-12-11  Andreas Fuchs  <asf@void.at>
+
+	* erc.el 1.175:
+	* applied a nicer version of mhp's patch to remove the last prompt from
+	  saved logs
+
+	* erc-replace.el 1.1: * Initial checkin
+
+2001-12-11  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.174:
+	* fixed bug triggered when reuse-buffer was enabled (the default).
+	  Another silly port type problem. Maybe we should unify that once and for all sometimes...
+
+2001-12-10  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.173: * erc-message-english: New QUIT and s004 entries.
+	* (erc-save-buffer-on-part): New variable.
+	* (erc-kill-buffer-on-part): New variable.
+	* (erc-server-PART): Use above variables.
+	* (erc-join-channel): Use DEF argument instead of initial input for completing-read.
+
+2001-12-08  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.172: added defcustom erc-nick-uniquifier ^ (i prefer _)
+
+2001-12-07  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.11: changelog for version 2.1.cvs.20011208-1
+
+2001-12-07  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.171:
+	Added erc-scroll-to-bottom as an erc-insert-hook function.  It still bugs a bit, so please test it, thanks
+
+2001-12-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.170: * Fixed silly bug in erc-server-TOPIC (thanks mhp)
+
+	* erc-speak.el 1.17:
+	* Fix non-greedy matching bug. That one somehow swallowed text
+
+	* erc.el 1.169:
+	Fix Emacs20 problem. For now, we disable erc-track-modified-channels-minor-mode in emacs20
+
+2001-12-07  Andreas Fuchs  <asf@void.at>
+
+	* erc-fill.el 1.5:
+	* Fix another stupid one-off error. This time it really works!
+	 (Until I find the next bug. I guess you can hold your breath) (-:
+
+2001-12-06  Andreas Fuchs  <asf@void.at>
+
+	* erc-fill.el 1.4: * Fixed static filling:
+	** No more \ed (continued on next line) lines anymore
+	** Fixed bug with previous version where longer lines wouldn't get
+	   filled correctly (i.e. at all)
+
+2001-12-06  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.10: changelog for 2.1.cvs.20011206-1 added
+
+2001-12-06  Andreas Fuchs  <asf@void.at>
+
+	* erc.el 1.168:
+	* Don't discard away status when identifying to NickServ
+	* Modify `erc-already-logged-in': check for port, too.
+
+	* erc-fill.el 1.3:
+	* Fix stupid loop non-termination error in erc-fill-static when filling
+	  one-line regions.
+	* Make erc-count-lines return meaningful values
+
+2001-12-05  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.167:
+	* (erc-process-input): Make ' /command' work for quoting /commands
+
+	* erc-speak.el 1.16: see changelog
+
+	* erc-fill.el 1.2: see erc.el changelog
+
+	* erc.el 1.166:
+	* erc-insert-hook: Changed strategy completely, no start end parameters any more.
+	We narrow-to-region now, that's much cleaner.
+	* rename erc-fill-region to erc-fill and change the autoload
+	** You'll probably need to restart Emacs
+
+2001-12-04  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.165:
+	* (erc-send-current-line): Fixed long outstanding bug. XEmacs users with erc-fill-region on erc-insert-hook knew that one a long time.
+
+	* erc.el 1.164: fix order of attack
+
+	* erc.el 1.163: * macroexpanded define-minor-mode for XEmacs
+
+	* erc.el 1.162: First try to make channel tracking mouse sensitive
+
+	* erc.el 1.161: * More erc-message-format conversion.
+	  erc-format-message-english-PART as an example on how to use functions to format message
+	* (erc-format-message): Fallback mechanism to use english catalog if variable is not bound
+
+2001-12-03  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.160: * (erc-iswitchb): Rewrite, docfix.
+	Make it use erc-modified-channels as default if available.
+
+	* erc-menu.el 1.2:
+	* Fixage related to erc-track-modified-channels-minor-mode rewrite
+
+	* erc.el 1.159:
+	* (erc-track-modified-channels-minor-mode): Use buffer objects instead of erc-default-target return value for internal state keeping.
+
+	* erc.el 1.158: * Made reconnect behave nicer (erc-process-sentinel)
+	* Rewrote erc-modified-channels-tracking completely.
+	  Its now a minor mode (erc-track-modified-channels-minor-mode)
+	  It uses a list as internal representation now, so all silly string-parsing
+	  related bugs should be gone.
+	  Use (erc-track-modified-channels-minor-mode t) now to toggle this functionality.
+	  Don't set the erc-track-modified-channels-minor-mode variable yourself, use the toggle function
+
+2001-11-29  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.9: final version
+
+2001-11-29  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.157:
+	* (erc-channel-p): Make it work with string and buffer as parameter. buffer.
+	* (erc-format-message): Add a check for functionp. This allows a format-specifier also to be a function name, which gets called with args applied and needs to return the actual format string.
+	* Converted some formats, JOIN, JOIN-you, MODE, ...
+
+2001-11-28  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.156:
+	* (erc-prepare-mode-line-format): Added sanity checks to prevent it from having problems with server buffers where the connection failed
+
+	* erc-bbdb.el 1.7:
+	* (erc-bbdb-JOIN): regexp-quote the fingerhost before searching, some people have really strange characters as their user names
+
+	* erc.el 1.155: Remove a stupid debug like (message ...) call
+
+2001-11-28  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.8: draft of 2.1.cvs.20011128-1
+
+	* debian/rules 1.5: simplify for the all-in-one erc package
+
+	* debian/control 1.3: integrated erc-speak back into erc
+
+	* debian/maint/conffiles 1.3, debian/maint/conffiles.in 1.2, debian/maint/postinst 1.3,
+	  debian/maint/postinst.in 1.2, debian/maint/prerm 1.3, debian/maint/prerm.in 1.2,
+	  debian/scripts/install 1.3, debian/scripts/install.in 1.3, debian/scripts/remove 1.3,
+	  debian/scripts/remove.in 1.2, debian/scripts/startup.erc-speak 1.2:
+	since erc-speak is gone, resurrect the static files, and update them to support the latest erc
+
+2001-11-28  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.154: * (erc-mode): Shouldn't be interactive.
+	* (erc-info-mode): Ditto.
+
+	* erc.el 1.153: * (erc-server-352): Added hopcount parsing.
+	Added call to erc-update-channel-member to fill in channel-members information
+	on /WHO if the channel is joined.
+
+2001-11-27  Mario Lang  <mlang@delysid.org>
+
+	* erc-speedbar.el 1.6: *** empty log message ***
+
+	* erc-speedbar.el 1.5: * (erc-speedbar-expand-user): New function.
+	Used when more information than just the nick name is available about a dude.
+
+	* erc.el 1.152: * Fixed stupid edit,checkin,save cycle error :)
+
+	* erc.el 1.151:
+	* (erc-generate-log-file-name-default): Renamed to -long
+	Doc fix.
+	* (erc-generate-log-file-name-old): Renamed to -long
+	Doc fix.
+	* (erc-generate-log-file-name-function): Set default to ...-long
+	Doc fixes
+
+	* erc-speedbar.el 1.4: *** empty log message ***
+
+2001-11-26  Mario Lang  <mlang@delysid.org>
+
+	* erc-speedbar.el 1.3: * Integrated channel names list
+	  what else do we need to replace info buffers???
+	  please test that code and comment on erc-ehlp, thanks
+
+	* erc-speedbar.el 1.2:
+	* Added erc-speedbar-goto-buffer and therefore enable switching to the buffers from speedbar
+
+	* erc-speedbar.el 1.1:
+	I had to check this in, it works !! sort of,, megaalphagammaversion, first version. test, play, submit ideas/patches
+
+2001-11-26  Gergely Nagy  <algernon@debian.org>
+
+	* erc.el 1.150 (erc-mode): moved erc-last-saved-position here
+	moved buffer naming code from here..
+	(erc): ...to here
+	(erc-generate-log-file-name-old): only prepend target if it exists
+
+	made erc-log-insert-log-on-open a defcustom
+
+2001-11-26  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.149:
+	* Applied antifuchs/mhp patches, the latest on erc-help, unmodified
+	* New variable: erc-reuse-buffers default to t.
+	* Modified erc-generate-new-buffer-name to use it. it checks if server and port are the same,
+	  then one can assume that's the same channel/query target again.
+
+2001-11-23  Mario Lang  <mlang@delysid.org>
+
+	* erc-bbdb.el 1.6:
+	* new function erc-BBDB-NICK to handle nickname annotation on a nick-change event of a known record
+
+	* erc.el 1.148: * Remove erc-rename-buffer, its no longer necessary
+	* Remove erc-autoop-*. it was broken, and needed rewrite anyway
+	* write erc-already-logged-in in terms of erc-buffer-list and make the duplicate login check work again
+
+	* erc.el 1.147: * Fixed stupid typo
+
+2001-11-22  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.146: * New local variable, erc-announced-server-name
+	* erc-mode-line-format supports a new symbol, target-and/or-server
+	* The mode-line displays the announced server name now (for autojoin later...,
+	  greets Adam)
+	* New macro, erc-server-hook-list for a nice way to define the defcustoms of the erc-server-*-hook's
+	  Thanks go to the guy from #emacs who helped with that
+	* erc-fill-region is now autoloaded from erc-fill.el
+	  * erc-fill.el implements a new fill method, erc-fill-static
+	    (setq erc-fill-function 'erc-fill-static)
+	* Some other things I forgot right now
+
+	* erc-bbdb.el 1.5: *** empty log message ***
+
+	* erc-fill.el 1.1: Initial version.
+
+	* erc-complete.el 1.4:
+	Applied antifuchs patch to make completion work with (string= erc-prompt "")
+
+	* erc-complete.el 1.3:
+	added function erc-nick-completion-exclude-myself
+	you can set erc-nick-completion to 'erc-nick-completion-exclude-myself to use it
+
+2001-11-21  Mario Lang  <mlang@delysid.org>
+
+	* erc-bbdb.el 1.4:
+	* Changed usage of 'finger-host to bbdb-finger-host-field
+
+	* erc-bbdb.el 1.3:
+	* Changed WHOIS to use finger-host instead of net field.
+	* Added 'visible as option to erc-bbdb-popup-p to only pop-up the bbdb buffer if a join happened in a visible buffer on any visible frame.
+	* Added (regexp-quote ...) for nickname search in erc-bbdb-JOIN
+
+2001-11-20  Mario Lang  <mlang@delysid.org>
+
+	* erc-bbdb.el 1.2: * Added JOIN support
+
+2001-11-19  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.145:
+	Initial message catalog code. converted erc-action-format usage to use it
+
+	* erc.el 1.144: * erc-play-sound: Added XEmacs related check
+
+	* erc-bbdb.el 1.1: * Initial version, many thanks to Andreas Fuchs
+
+	* erc.el 1.143: * Fixed silly problem with whois/was handling
+
+	* erc.el 1.142: * Renamed prev-rd to erc-previous-read
+	* Removed erc-next-line-add-newlines and s next-line-add-newlines to nil in defun erc by default
+
+	* erc.el 1.141:
+	fixed xemacs compatibility prob with delete, thanks Adam
+
+2001-11-18  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.140: numreplies 301 & 461
+
+2001-11-13  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.139:
+	Added code for error reply 421 "Unknown command", to test the new server parsing system.
+	This was really easy!  Thanks ZenIRC guys & delysid :-)
+
+2001-11-13  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.138: * Allow connecting to SSL enabled irc servers.
+	   Ugly hack, but it works for now. Be sure to use the numeric irc port 994 so that erc can recognize what you want
+	  good example is
+	irc server: ircs.segfault.net
+	port: 994
+
+	meet me there, I am still delYsid :)
+
+	* erc.el 1.137: * some more numreply handlers
+	* cleanup in erc-process-away-p
+	* new function erc-display-error-notice
+
+	* erc.el 1.136: * numreply 501 and 221
+
+	* erc.el 1.135:
+	removed obsolete old hook variables. Your functions may break, but it is easy to hook them up to the new hooks.
+	erc-part-hook: use erc-server-PART-hook instead
+	erc-kick-hook: use erc-server-KICK-hook instead
+	and so on
+
+	* erc.el 1.134:
+	fixed serious bug which cause privmsgs vanishing when erc-auto-query was set to nil
+
+	* erc.el 1.133: cleaned up erc-process-filter
+
+	* erc.el 1.132: * 401 and 320 numreplies implemented
+
+	* erc.el 1.131: * Removed old/now obsolete code
+
+	* erc.el 1.130: * Fixed bug in erc-server-MODE
+
+2001-11-12  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.129: fixed it
+
+	* erc.el 1.128:
+	*** We switched over. New server message parsing/handling is running now. Thanks to the zenirc developers for the great ideas I got from the code!!!!! Go and test it, poke at it, bug me on irc about problems
+
+	* erc.el 1.127: *** empty log message ***
+
+2001-11-12  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.125:
+	Fixed bug in erc-get-buffer, now channel names are compared in
+	a case-insensitive way.
+
+2001-11-12  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.124: erc-server-353
+
+2001-11-12  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.123: Fixed docstring for erc-get-buffer.
+	Added erc-process to a lot of calls to erc-get-buffer, so
+	that only the local process is searched.
+
+2001-11-12  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.122: * erc-buffer-filter: do it differently
+
+	* erc.el 1.121: ugly but working fix for mhp's query problem
+
+	* erc.el 1.120: * erc-server-PRIVMSG-or-NOTICE
+	  Now, all the server word replies are finished. Going to numreplies now
+
+	* erc.el 1.119:
+	* debugging facilities for the transition. C-x 2 C-x o M-x ielm RET erc-server-vectors RET ; to get a list of all server messages currently not handled in the new code. Feel free to pick one and implement it
+
+	* erc.el 1.118: * erc-server-KICK and erc-server-TOPIC. new functions
+	* erc-server-305-or-306 and erc-server-311-or-314
+
+	* erc.el 1.117:
+	* ported PART and QUIT msgs to the new scheme, many to go. but it is a easy task. does someone wanna try and start with numreplies?
+
+	* erc.el 1.116: * erc-server-JOIN
+
+	* erc.el 1.115: * Ported erc-server-INVITE code
+
+	* erc.el 1.114: * erc-server-ERROR and erc-server-MODE
+
+2001-11-11  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.113: * zen
+
+	* erc.el 1.112: * New variable erc-connect-function.
+
+	* erc.el 1.111:
+	* New function erc-channel-p and use it where appropriate
+
+	* erc.el 1.110: * Removed the variable erc-buffer-list completely now
+	* Moved erc-dbuf around a bit
+
+	* erc.el 1.109: * Fix silly change in quit/rename msg handling
+
+	* erc.el 1.108: thanks mhp, fixed
+
+	* erc.el 1.107: * Tijs van Bakel's work from 10th Nov. merged in
+	* My additions to that idea merged in too
+	Basically, this is a major rewrite, if you are scared and want avoid problems,
+	stay at your current version. It seems fairly stable though.
+	That changed? erc-buffer-name handling was completely rewritten,
+	and erc-buffer-list local variable handling removed.
+	Simplifies alot of code. Poke at it. read the diff. report bug/send patches!
+
+	* erc.el 1.106: * Added variable listing when /set is used without args
+
+2001-11-10  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.105:
+	* Comment/structure cleanup, removal of unnecessary code
+
+	* erc.el 1.104: only some code beautification
+
+	* erc-imenu.el 1.2:
+	remove add-hook call, that's done in erc.el now for autoloadability
+
+	* erc.el 1.103: * Make erc-imenu autoloadable
+
+	* erc.el 1.102:
+	* The long promised erc-mode-line-format handling rewrite
+	   Poke at it, try it, play with it, report bugs
+
+	* erc.el 1.101:
+	some regex-quote fixes, new function erc-cmd-set, and minor things
+
+2001-11-08  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.100:
+	* added second timestamp-format (erc-away-timestamp-format) for marking msgs when being away
+
+	* erc-complete.el 1.2: fixed silly defun
+
+	* erc.el 1.99: * Rewrote erc-load-irc-script (simplified)
+	* Removed deprecated code
+
+	* erc-speak.el 1.15: * reflect changes in erc.el
+
+	* erc.el 1.98:
+	* Moved completion related functions into erc-complete.el
+	  placed an autoload instead into erc.el. That quite cool,
+	  because erc-complete.el only gets loaded when you use
+	  TAB first time in erc.
+
+	* erc-complete.el 1.1: _ Initial checkin
+
+	* erc.el 1.97: * New function: erc-chain-hook-with-args
+	* Changed calls to erc-insert-hook to use it
+
+2001-11-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.96: * Patch from Fabien Penso
+	  Make completion case insensitive. try it! its cool
+
+	* erc.el 1.95: * Reduction patch 2
+	  This time, we move the input ring handling into erc-ring.el
+	  Remember that you need (require 'erc-ring) in your .emacs to get the input handling as a feature
+	  And remember, that you don't need it if you don't use input ring :-)
+
+	* erc-ring.el 1.1: * Initial checkin
+
+	* erc.el 1.94: * The great reduction patch :-)
+	  moved relevant function from erc.el to new file erc-menu.el and erc-imenu.el
+
+	* erc-imenu.el 1.1: Initial version
+
+	* erc-menu.el 1.1: * Initial version
+
+	* erc.el 1.93: * wording change suggested by Benjamin Drieu
+
+2001-11-07  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.92: Added Emacs version to /SV
+
+2001-11-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.91: * Hookification patch, read the diff
+
+	* erc.el 1.90: too tired for a changelog :)
+
+2001-11-06  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.89:
+	* make erc-cmd-op and erc-cmd-deop take multiple nicknames as argument
+
+2001-11-06  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.7: sync
+
+	* debian/rules 1.4: fixed a typo: PKGDIR, not PKIDR
+
+2001-11-06  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.88:
+	* Changed timestamping when away to use erc-timestamp-format and append the timestamp instead of prepending it..
+	* minor cleanup, s/(if (not /(unless/ and the like
+
+2001-11-06  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.87: Fixed OP and DEOP commands to return T.
+	Added SV say-version command.
+	Added erc-send-message utility function, but it's not used everywhere yet.
+
+2001-11-05  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.86: stupid delYsid, forgot require 'format-spec. good nite
+
+	* erc.el 1.85:
+	* new variable erc-action-format. Some erc-notice-prefix fixes again
+
+	* erc.el 1.84: * erc-minibuffer-privmsg defaults to t
+
+	* erc.el 1.83:
+	* Small fix in relation to the transition to erc-make-notice
+
+2001-11-05  Tijs van Bakel  <smoke@wanadoo.nl>
+
+	* erc.el 1.82:
+	Renamed erc-message-notices to erc-minibuffer-notice, and renamed erc-prevent-minibuffer-privmsg to erc-minibuffer-privmsg, inverting its functionality
+
+	* erc.el 1.81: Added support for channel names starting with & + and !.
+	Also, many changes partially discussed on the mailing list:
+
+		* erc.el (cl): Add requirement for cl package.
+		(erc-buffer-list): Make this variable global again.
+		(erc-default-face): Fix typo.
+		(erc-timestamp-face): Add face for timestamps.
+		(erc-join-buffer, erc): Add a 'bury option.
+		(erc-send-action): Add timestamp.
+		(erc-command-table): Add /CLEAR, /DEOP, /OP, /Q.
+		(erc-send-current-line): Add timestamp.
+		(erc-send-current-line): Add call to erc-insert-hook.
+		(erc-cmd-clear): New command to clear buffer contents.
+		(erc-cmd-whois): Fix cut'n'paste-o.
+		(erc-cmd-deop): New command to deop a user.
+		(erc-cmd-op): New command to op a user.
+		(erc-make-notice): Moved a lot of duplicate code here.  Perhaps
+		this should also be done for erc-highlight-error.
+		(erc-parse-line-from-server): Now NOTICE will also open a new
+		query, just as PRIVMSG.
+		(erc-parse-line-from-server): Call erc-put-text-property on a
+		channel message/notice first, before concatenating nick and
+		timestamp &c.
+		(erc-message-notices): Add option to display notices in
+		minibuffer.
+		(erc-fill-region): No longer strip spaces in front of incoming
+		messages.
+		(erc-parse-current-line): No longer strip spaces in front of text
+		input by user.
+
+	Hopefully I didn't break too much :(
+
+2001-11-05  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.80:
+	* New function erc-nickserv-identify-autodetect for erc-insert-hook. Added by default currently.
+
+	* erc.el 1.79:
+	* Mini-fix in erc-process-num-reply (= n 353): Added @ as prefix character to make certain channels on opn work again nicely
+
+2001-10-31  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.6: updated to reflect changes
+
+	* debian/scripts/install.in 1.2:
+	moved #PKGFLAG# before -f batch-byte-compile
+
+2001-10-29  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.78:
+	Imenu fixed somehow, added IRC services interactive function for indentify to NickServ. Read the diff
+
+2001-10-26  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.5: sigh. -2
+
+2001-10-25  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.4: updated to reflect changes
+
+	* debian/rules 1.3: handle conffiles.in too
+
+	* debian/maint/conffiles.in 1.1: new file
+
+	* debian/maint/conffiles 1.2: superseded by conffiles.in
+
+	* debian/scripts/startup 1.2: superseded by startup.erc
+
+2001-10-25  Mario Lang  <mlang@delysid.org>
+
+	* debian/scripts/startup.erc-speak 1.1: * Initial version
+
+	* debian/scripts/startup.erc 1.1: * Added and fixes minimal typo
+
+2001-10-25  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.3: updated to reflect changes
+
+	* debian/rules 1.2:
+	modified to be able to build the erc-speak package too
+
+	* debian/control 1.2: added the new erc-speak package
+
+	* debian/README.erc-speak 1.1, debian/maint/postinst.in 1.1, debian/maint/prerm.in 1.1,
+	  debian/scripts/install.in 1.1, debian/scripts/remove.in 1.1:
+	new file
+
+	* debian/maint/postinst 1.2, debian/maint/prerm 1.2, debian/scripts/install 1.2,
+	  debian/scripts/remove 1.2:
+	removed, superseded by its .in counterpart
+
+2001-10-25  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.77: * Fixed some defcustom :type 's
+	* Added erc-before-connect hook which gets called with server port and nick.
+	  Use this hook to e.g. setup a tunnel before actually connecting.
+	  something like (when (string= server "localhost") ...)
+
+2001-10-24  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.76: * Patch by smoke: fix erc-cmd-* commands and add aliases
+
+2001-10-23  Mario Lang  <mlang@delysid.org>
+
+	* erc-speak.el 1.14:
+	* Added a new personality for channel name announcement, This makes streams of flooded channels much easier to listen to,
+	  especially if you are on more than one channel simultaneously.
+
+	* erc.el 1.75:
+	* Made the completion postfix customizable through erc-nick-completion-postfix
+
+	* erc-speak.el 1.13, erc.el 1.74:
+	* Added erc-prevent-minibuffer-privmsg
+
+	* erc-speak.el 1.12:
+	* Quickish hack to allow exclusion of timestamps from speaking. see erc-speak-filter-timestamps
+
+2001-10-21  Mario Lang  <mlang@delysid.org>
+
+	* erc-speak.el 1.11:
+	* Removed now really obsolete code. Package size reduced by 50%
+
+	* erc-speak.el 1.10:
+	* Very important fix! Now erc-speak is really complete. Messages don't get cut anymore. Be sure to use auditory icons,
+	  it's reallllly cool now!!!
+
+	* erc-speak.el 1.9: *** empty log message ***
+
+	* erc-speak.el 1.5: * Major simplification. depends on erc.el,v 1.73
+	* Things removed, read diff
+
+2001-10-21  Gergely Nagy  <algernon@debian.org>
+
+	* debian/changelog 1.2: oops, silly typo
+
+	* debian/changelog 1.1, debian/control 1.1, debian/copyright 1.1,
+	  debian/maint/conffiles 1.1, debian/maint/postinst 1.1, debian/maint/prerm 1.1,
+	  debian/rules 1.1, debian/scripts/install 1.1, debian/scripts/remove 1.1,
+	  debian/scripts/startup 1.1:
+	initial check-in
+
+2001-10-21  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.73:
+	* Changed erc-insert-hook to get two arguments, START and END of the region
+	  which got inserted. CAREFUL! This could break stuff, but it makes the hook
+	  much more usable.
+
+	* erc.el 1.72:
+	* Made erc-smiley a new option, currently set to t to showoff this feature. :)
+
+2001-10-20  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.71: * Add missing erc-mode-hook variable
+	* Add smiley-support (preliminary test)
+
+2001-10-20  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.70:
+	Replaced all occurrences of put-text-property with a call to
+	erc-put-text-property.
+	(erc-put-text-property): New function.
+	(erc-tracking-modified-channels): Moved to the front of the file such
+	that it is already defined when the menu is being defined.
+	(erc-modified-channel-string): Ditto.
+
+2001-10-18  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.69: Removed some commentary.  The wiki page is the place to
+	put such information.
+	(erc-fill-prefix): Doc change.
+	(erc-notice-highlight-type): Doc change, now a user option.
+	(erc-pal-highlight-type): Doc change, now a user option.
+	(erc-fool-highlight-type): New option.
+	(erc-keyword-highlight-type): New option.
+	(erc-dangerous-host-highlight-type): New option.
+	(erc-uncontrol-input-line): Doc change.
+	(erc-interpret-controls-p): Doc change, now a user option.
+	(erc-multiline-input): Doc change.
+	(erc-auto-discard-away): Doc change.
+	(erc-pals): Changed from string to regexp.
+	(erc-fools): New option.
+	(erc-keywords): Renamed from erc-highlight-strings.  WATCH OUT:
+	Not backwards compatible change!
+	(erc-dangerous-hosts): Renamed from erc-host-danger-highlight.
+	WATCH OUT: Not backwards compatible change!
+	(erc-menu-definition): Added menu entries for fools, keywords and
+	dangerous hosts.
+	(erc-mode-map): Changed keybindings from C-c <plain ascii> to
+	various C-c <C-ascii> combinations.
+	(erc-dangerous-host-face): Renamed from erc-host-danger-face.
+	WATCH OUT: Not backwards compatible change!
+	(erc-fool-face): New face.
+	(erc-keyword-face): Renamed from erc-highlight-face.  WATCH OUT:
+	Not backwards compatible change!
+	(erc-parse-line-from-server): Fixed highlighting in the cases
+	where (equal erc-pal-highlight-type 'all), added code to handle
+	erc-fool-highlight-type, erc-dangerous-host-highlight-type
+	(erc-update-modes): Replaced erc-delete-string with delete.
+	(erc-keywords): Renamed from erc-highlight-strings, handle
+	erc-keyword-highlight-type.
+	(erc-delete-string): Removed.
+	(erc-list-match): New function.
+	(erc-pal-p): Use erc-list-match.
+	(erc-fool-p): New function.
+	(erc-keyword-p): New function.
+	(erc-dangerous-host-p): Renamed from erc-host-danger-p, use
+	erc-list-match.
+	(erc-directed-at-fool-p): New function.
+	(erc-add-entry-to-list): New function.
+	(erc-remove-entry-from-list): New function.
+	(erc-add-pal): Use erc-add-entry-to-list.
+	(erc-delete-pal): Use erc-remove-entry-from-list.
+	(erc-add-fool): New function.
+	(erc-delete-fool): New function.
+	(erc-add-keyword): New function.
+	(erc-delete-keyword): New function.
+	(erc-add-dangerous-host): New function.
+	(erc-delete-dangerous-host): New function.
+
+2001-10-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.68: * irc vs ircd default port fixed
+
+	* erc.el 1.67: * Added topic-change to imenu
+
+	* erc.el 1.66: * More imenu spiffyness
+
+	* erc.el 1.65: * Added imenu support
+
+	* erc.el 1.64:
+	* Fix to /topic to show topic instead of setting it to null :)
+
+2001-10-05  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.63: * First version of erc-rename-buffer
+
+	* erc.el 1.62: * more header-line tricks.
+
+	* erc.el 1.61:
+	* Small fix to do erc-update-mode-line-buffer in erc-update-channel-topic
+
+	* erc.el 1.60: * Added erc-header-line-format
+
+2001-10-04  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.59: * mini-fix, add msgp to auto-query code
+
+	* erc.el 1.58: * Added command-names to completion (erc-command-table)
+	* New variable erc-auto-query. When set, every arriving message to you
+	will open a query buffer for that sender if not already open.
+	* Compatibility function fo non-existing line-beginning|end-position functions in XEmacs.
+
+2001-10-03  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.57:
+	* Removed alot of (progn ...) where they were not necessary
+	* Changed some (if ...) without else part to (when ...)
+	* Some (while ...) to use (dolist ...)
+	* Fix for completion popup generating tracebacks.
+	* New function erc-arrange-session-in-multiple-windows
+	* Lots of other stuff, read the diff
+
+2001-10-02  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.56: * Added erc-kill-input and keybinding C-c C-u for it
+
+2001-10-01  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.55: * Another fix to nick-completion
+	* Additional checks in erc-track-modified-channels
+
+2001-09-26  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.54: * Fixed completion (alex)
+	  * Now popup buffer doesn't destroy your window configuration.
+	* Fixed away handling (incomplete)
+
+2001-09-24  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.53: Fixed silly quoting-escape error
+
+2001-09-23  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.52: * Added auto-op support (unfinished)
+	* Added erc-latest-version.
+	* Added erc-ediff-latest-version.
+
+2001-09-21  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.51:
+	* Minor menu additions (invite only mode is now a checkbox)
+
+2001-09-20  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.50:
+	* Fix (erc-cmd-names): This should fix C-c C-n too, hopefully it was the right fix and doesn't break anything else.
+
+	* erc.el 1.49: * Fixes XEmacs easymenu usage (2nd time).
+
+2001-09-19  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.48:
+	* (erc-complete-nick): Add ": " only if one completes directly after the erc-prompt, otherwise, add just one space
+
+	* erc.el 1.47:
+	* Changed menu-definition to use easymenu (hopefully this now works under XEmacs)
+	* Fix for custom problem with :must-match on XEmacs (thanks shapr)
+	* Added /COUNTRY command using (what-domain) from package mail-extr (shapr)
+	* Fix for case-sensitivity problem with pals (they are now all downcased)
+	* Different (erc-version) function which now can take prefix argument to insert the version information into the current buffer,
+	  instead of just displaying it in the minibuffer.
+
+2001-09-10  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.46: Updated erc-version-string
+
+	* erc.el 1.45: Version number change and last read-through...
+
+2001-09-04  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.44: Added some asterisks
+
+2001-08-24  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.43:
+	Fixed hidden channel buffer tracking (sort of), now using switch-to-buffer for advice.
+	This version is unofficially named 2.1prebeta1. Please test it and send
+	fixes to various problems you may encounter so that we can eventually
+	release 2.1 soon.
+
+2001-08-14  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.42:
+	Added function erc-bol and keybinding C-c C-a for it (contributed by Benjamin Rutt <brutt@bloomington.in.us)
+
+2001-08-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.41:
+	Checked in lathis code and modified it slightly. Still unsure about set-window-buffer advice, current attempt doesn't seem to work.
+	Removed (nick -> #channel) from mode-line. (CLOSED) and (AWAY...) should still be displayed when appropriate
+
+2001-08-06  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.40:
+	added local-variable channel-list in session-buffers and make /LIST use it.
+	erc-join-channel can now do completion after /LIST was executed
+
+2001-08-05  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.39: Tweaked erc-join-channel and erc-part-from-channel
+
+2001-07-27  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.38: some more defcustom stuff
+
+	* erc.el 1.37: Patch from Henrik Enberg <henrik@enberg.org>:
+	   Adds variables erc-frame-alist and erc-frame-dedicated-p.
+
+	* erc.el 1.36: fixed erc-part-from-channel
+
+	* erc.el 1.35:
+	fixed match-string problem and added interactive topic setting function.
+
+	* erc.el 1.34: fixed silly string-match bug
+
+	* erc.el 1.33:
+	Added erc-join-channel and erc-part-from-channel (interactive prompts), as well as keybindings. C-c C-j #emacs RET is now enough :)
+
+2001-07-27  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.32 (erc-display-line-buffer): Simplified filling.
+	(erc-fill-region): New function.
+
+2001-07-27  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.31: Added redundancy check in output
+
+2001-07-26  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.30 (erc-send-action): Add text-property stuff.
+	(erc-input-action): Removed text-property stuff.
+	(erc-command-table): Corrected command for DESCRIBE.  Still
+	doesn't work though.  No idea what it should do.  Looks like a no op.
+	(erc-cmd-me): Doc change.
+
+2001-07-26  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.29:
+	fixed one occurrence of a setq with only one argument (XEmacs didn't like that)
+
+	* erc.el 1.28:
+	Added erc-next-line-add-newlines customization possibility.
+
+	* erc.el 1.27:
+	added erc-fill-prefix for defining your own way of filling and fixed filling somehow
+
+	* erc.el 1.26:
+	fixed small incompatibility in erc-parse-line-from-server at (and (= n 353) regexp
+
+2001-07-25  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.25:
+	Added erc-filling and filling code to erc-display-line-buffer.
+
+2001-07-08  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.24 (try-complete-erc-nick): Make the ": " part of the
+	expansion
+
+	* erc.el 1.23: require ring
+
+2001-07-08  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.22: *** empty log message ***
+
+2001-07-07  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.21: typo
+
+	* erc.el 1.20: omit
+
+2001-07-06  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.19 (erc-mode): Call erc-input-ring-setup.
+	(erc-send-current-line): Call erc-add-to-input-ring.
+	(erc-input-ring): New variable.  Currently not buffer local.
+	(erc-input-ring-index): New variable.  Currently not buffer local.
+	(erc-input-ring-setup): New function.
+	(erc-add-to-input-ring): New function.
+	(erc-previous-command): New function.
+	(erc-next-command): New function.
+	(erc-mode-map): Uncommented keybindings for erc-next-command and
+	erc-previous-command.
+
+2001-07-05  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.18 (erc-highlight-strings): Removed debug message.
+
+	* erc.el 1.17 (erc-join-buffer): Changed default to 'buffer.
+	(erc-join-info-buffer): Changed default to 'disable.
+	(erc-nick-completion): Changed default to 'all.
+
+2001-07-04  uid31117  <uid31117@confusibombus>
+
+	* erc.el 1.16: Resolved...
+
+2001-07-03  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.15 (erc-highlight-strings): New option and new function.
+	(erc-parse-line-from-server): Use it.
+	Various empty lines removed.  Various doc strings fixed.
+
+	* erc.el 1.14: Removed more empty lines.
+
+	* erc.el 1.13 (erc-member-string): replaced by plain member
+	Otherwise, lots of deleting of empty lines...  I'm not too happy with that
+	but I feel better when the code is "cleaned up".
+
+2001-07-03  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.12: Ugly hack, but looks nicer when giving commands
+
+	* erc-speak.el 1.4: ugly hack, but looks nicer now
+
+2001-07-03  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.11 (try-complete-erc-nick): New function.
+	(erc-try-complete-nick): New function.
+	(erc-nick-completion): New option.
+	(erc-complete): Call hippie-expand such that erc-try-complete-nick
+	will be called eventually.  Based on erc-nick-completion
+	try-complete-erc-nick will then complete on the nick at point.
+
+2001-07-02  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.10:
+	Insert (erc-current-nick) instead of (erc-display-prompt). good night :)
+
+	* erc.el 1.9:
+	small, but it was annoying, so I just did it (defcustom for erc-join-buffer and erc-join-info-buffer)
+
+2001-06-29  Alex Schroeder  <alex@gnu.org>
+
+	* erc.el 1.8: Use defface to define all faces.
+	Removed some history from the commentary, as well as some other
+	commentary editing.
+
+2001-06-28  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.7: hmm, defcustom for erc-user-full-name
+
+	* erc-speak.el 1.3, erc.el 1.6: *** empty log message ***
+
+2001-06-27  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.5: typo
+
+	* erc.el 1.4: Some more defcustom
+
+	* erc-speak.el 1.2: nothing, really
+
+2001-06-26  Mario Lang  <mlang@delysid.org>
+
+	* erc.el 1.3: Some defcustom stuff. Still no defgroup though :)
+
+	* erc.el 1.2:
+	Initial change to erc.el (2.0). Mainly list of ideas and features
+	and syntax-table entries.
+
+	* erc-speak.el 1.1.1.1, erc.el 1.1.1.1: Initial Import
+
+	* erc-speak.el 1.1, erc.el 1.1: New file.
+
+	Copyright (C) 2001, 2006-2012 Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:

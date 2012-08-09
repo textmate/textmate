@@ -1,0 +1,49 @@
+# Forms Module
+
+# Unlike the DTD implementation, this builds on the basic-form module
+
+include "xhtml-bform.rnc" {
+  select = element select { select.attlist, (option | optgroup)+ }
+}
+form.attlist &=
+  attribute accept-charset { Charsets.datatype }?,
+  attribute accept { ContentTypes.datatype }?
+input.attlist &=
+  attribute disabled { "disabled" }?,
+  attribute readonly { "readonly" }?,
+  attribute alt { text }?,
+  attribute tabindex { Number.datatype }?,
+  attribute accept { ContentTypes.datatype }?
+InputType.class |= "image" | "button"
+select.attlist &=
+  attribute disabled { "disabled" }?,
+  attribute tabindex { Number.datatype }?
+option.attlist &=
+  attribute disabled { "disabled" }?,
+  attribute label { Text.datatype }?
+optgroup = element optgroup { optgroup.attlist, option+ }
+optgroup.attlist =
+  Common.attrib,
+  attribute disabled { "disabled" }?,
+  attribute label { Text.datatype }
+textarea.attlist &=
+  attribute disabled { "disabled" }?,
+  attribute readonly { "readonly" }?,
+  attribute tabindex { Number.datatype }?
+fieldset = element fieldset { fieldset.attlist, legend, Flow.model }
+fieldset.attlist = Common.attrib
+button = element button { button.attlist, Flow.model }
+button.attlist =
+  Common.attrib,
+  attribute name { text }?,
+  attribute value { text }?,
+  attribute type { "button" | "submit" | "reset" }?,
+  attribute disabled { "disabled" }?,
+  attribute tabindex { Number.datatype }?,
+  attribute accesskey { Character.datatype }?
+legend = element legend { legend.attlist, Inline.model }
+legend.attlist =
+  Common.attrib,
+  attribute accesskey { Character.datatype }?
+Form.class |= fieldset
+Formctrl.class |= button

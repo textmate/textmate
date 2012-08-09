@@ -1,0 +1,681 @@
+% Quick Reference Card for VIP
+
+% Copyright (C) 1987, 2001-2012  Free Software Foundation, Inc.
+
+% Author: Masahiko Sato <ms@sail.stanford.edu>, <masahiko@sato.riec.tohoku.junet>
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% This file is intended to be processed by plain TeX (TeX82).
+%
+% The final reference card has six columns, three on each side.
+% This file can be used to produce it in any of three ways:
+% 1 column per page
+%    produces six separate pages, each of which needs to be reduced to 80%.
+%    This gives the best resolution.
+% 2 columns per page
+%    produces three already-reduced pages.
+%    You will still need to cut and paste.
+% 3 columns per page
+%    produces two pages which must be printed sideways to make a
+%    ready-to-use 8.5 x 11 inch reference card.
+%    For this you need a dvi device driver that can print sideways.
+% Which mode to use is controlled by setting \columnsperpage.
+
+
+%**start of header
+\newcount\columnsperpage
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.
+\columnsperpage=1
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(1)
+
+\def\versionemacs{18}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+\def\versionvip{3.5}
+
+% Nothing else needs to be changed.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\def\copyrightnotice{
+%\vskip 1ex plus 2 fill\begingroup\small
+\vskip 1ex \begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{For VIP \versionvip\ with GNU Emacs version \versionemacs}
+\centerline{Written by Masahiko Sato,}
+\centerline{using refcard layout designed by Stephen Gildea.}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+For copies of the GNU Emacs manual, see:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip
+\newbox\columna
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea
+% October 1986.
+% Slightly modified by Masahiko Sato, September 1987.
+\if 1\ncolumns
+  \hsize 4in
+  \vsize 10in
+  %\voffset -.7in
+  \voffset -.57in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\miniheadingfont=\fontname\tenbf \scaledmag1 % masahiko
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else
+  %\hsize 3.2in
+  %\vsize 7.95in
+  \hsize 3.41in % masahiko
+  \vsize 8in % masahiko
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\miniheadingfont=cmbx10 % masahiko
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eightsl=cmsl8
+  \font\eighttt=cmtt8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\sl{\eightsl} % masahiko
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm		%make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  %\intercolumnskip=.46in
+  \intercolumnskip=.19in % masahiko .19x4 + 3.41x3 = 10.99
+  \def\abc{a}
+  \output={%
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+	\global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+	\global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+\outer\def\newcolumn{\vfill\eject}
+
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+% masahiko
+\outer\def\subsection#1{\par\filbreak
+  \vskip 2ex plus 2ex minus 2ex {\miniheadingfont #1}\mark{#1}%
+  \vskip 1ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+\def\paralign{\vskip\parskip\halign}
+
+\def\<#1>{$\langle${\rm #1}$\rangle$}
+
+\def\kbd#1{{\tt#1}\null}	%\null so not an abbrev even if period follows
+
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+\def\fivecol#1#2#3#4#5{\hskip\keyindent\relax#1\hfil&\kbd{#2}\quad
+  &\kbd{#3}\quad&\kbd{#4}\quad&\kbd{#5}\cr}
+
+\def\fourcol#1#2#3#4{\hskip\keyindent\relax#1\hfil&\kbd{#2}\quad
+  &\kbd{#3}\quad&\kbd{#4}\quad\cr}
+
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\quad
+  &\kbd{#3}\quad\cr}
+
+\def\twocol#1#2{\hskip\keyindent\relax\kbd{#1}\hfil&\kbd{#2}\quad\cr}
+
+\def\twocolkey#1#2#3#4{\hskip\keyindent\relax#1\hfil&\kbd{#2}\quad&\relax#3\hfil&\kbd{#4}\quad\cr}
+
+%**end of header
+
+\beginindentedkeys
+
+\title{VIP Quick Reference Card}
+
+\centerline{(Based on VIP \versionvip\ in GNU Emacs \versionemacs)}
+
+%\copyrightnotice
+
+\section{Loading VIP}
+
+Just type \kbd{M-x vip-mode} followed by \kbd{RET}
+
+\section{VIP Modes}
+
+VIP has three modes: {\it emacs mode}, {\it vi mode} and {\it insert mode}.
+Mode line tells you which mode you are in.
+In emacs mode you can do all the normal GNU Emacs editing.
+This card explains only vi mode and insert mode.
+{\bf GNU Emacs Reference Card} explains emacs mode.
+You can switch modes as follows.
+
+\key{from emacs mode to vi mode}{C-z}
+\key{from vi mode to emacs mode}{C-z}
+\metax{from vi mode to insert mode}{i, I, a, A, o, O {\rm or} C-o}
+\key{from insert mode to vi mode}{ESC}
+
+If you wish to be in vi mode just after you startup Emacs,
+include the line:
+
+\hskip 5ex
+\kbd{(setq term-setup-hook 'vip-mode)}
+
+in your \kbd{.emacs} file.
+Or, you can put the following alias in your \kbd{.cshrc} file.
+
+\hskip 5ex
+\kbd{alias vip 'emacs \\!* -f vip-mode'}
+
+
+\section{Insert Mode}
+Insert mode is like emacs mode except for the following.
+
+\key{go back to vi mode}{ESC}
+\key{delete previous character}{C-h}
+\key{delete previous word}{C-w}
+\key{emulate \kbd{ESC} key in emacs mode}{C-z}
+
+The rest of this card explains commands in {\bf vi mode}.
+
+\section{Getting Information on VIP}
+
+Execute info command by typing \kbd{M-x info} and select menu item
+\kbd{vip}.  Also:
+
+\key{describe function attached to the key {\it x}}{C-h k {\it x}}
+
+\section{Leaving Emacs}
+
+\key{suspend Emacs}{X Z {\rm or} :st}
+\metax{exit Emacs permanently}{Z Z {\rm or} X C {\rm or} :q}
+
+\section{Error Recovery}
+
+\key{abort partially typed or executing command}{C-g}
+\key{redraw messed up screen}{C-l}
+\metax{{\bf recover} a file lost by a system crash}{M-x recover-file}
+\metax{restore a buffer to its original contents}{M-x revert-buffer}
+
+\shortcopyrightnotice
+
+\section{Counts}
+
+Most commands in vi mode accept a {\it count} which can be supplied as a
+prefix to the commands.  In most cases, if a count is given, the
+command is executed that many times.  E.g., \kbd{5 d d} deletes 5
+lines.
+
+%\shortcopyrightnotice
+\section{Registers}
+
+There are 26 registers (\kbd{a} to \kbd{z}) that can store texts
+and marks.
+You can append a text at the end of a register (say \kbd{x}) by
+specifying the register name in capital letter (say \kbd{X}).
+There are also 9 read only registers (\kbd{1} to \kbd{9}) that store
+up to 9 previous changes.
+We will use {\it x\/} to denote a register.
+\section{Entering Insert Mode}
+
+\key{{\bf insert} at point}{i}
+\key{{\bf append} after cursor}{a}
+\key{{\bf insert} before first non-white}{I}
+\key{{\bf append} at end of line}{A}
+\key{{\bf open} line below}{o}
+\key{{\bf open} line above}{O}
+\key{{\bf open} line at point}{C-o}
+
+\section{Buffers and Windows}
+
+\key{move cursor to {\bf next} window}{C-n}
+\key{delete current window}{X 0}
+\key{delete other windows}{X 1}
+\key{split current window into two windows}{X 2}
+\key{show current buffer in two windows}{X 3}
+\key{{\bf switch} to a buffer in the current window}{s {\sl buffer}}
+\key{{\bf switch} to a buffer in another window}{S {\sl buffer}}
+\key{{\bf kill} a buffer}{K}
+\key{list existing {\bf buffers}}{X B}
+
+\section{Files}
+
+\metax{{\bf visit} file in the current window}{v {\sl file} {\rm or} :e {\sl file}}
+\key{{\bf visit} file in another window}{V {\sl file}}
+\key{{\bf save} buffer to the associated file}{X S}
+\key{{\bf write} buffer to a specified file}{X W}
+\key{{\bf insert} a specified file at point}{X I}
+\key{{\bf get} information on the current {\bf file}}{g {\rm or} :f}
+\key{run the {\bf directory} editor}{X d}
+
+\section{Viewing the Buffer}
+
+\key{scroll to next screen}{SPC {\rm or} C-f}
+\key{scroll to previous screen}{RET {\rm or} C-b}
+\key{scroll {\bf down} half screen}{C-d}
+\key{scroll {\bf up} half screen}{C-u}
+\key{scroll down one line}{C-e}
+\key{scroll up one line}{C-y}
+
+\key{put current line on the {\bf home} line}{z H {\rm or} z RET}
+\key{put current line on the {\bf middle} line}{z M {\rm or} z .}
+\key{put current line on the {\bf last} line}{z L {\rm or} z -}
+
+\section{Marking and Returning}
+
+\key{{\bf mark} point in register {\it x}}{m {\it x}}
+\key{set mark at buffer beginning}{m <}
+\key{set mark at buffer end}{m >}
+\key{set mark at point}{m .}
+\key{jump to mark}{m ,}
+\key{exchange point and mark}{` `}
+\key{... and skip to first non-white on line}{' '}
+\key{go to mark {\it x}}{` {\it x}}
+\key{... and skip to first non-white on line}{' {\it x}}
+
+\section{Macros}
+
+\key{start remembering keyboard macro}{X (}
+\key{finish remembering keyboard macro}{X )}
+\key{call last keyboard macro}{*}
+\key{execute macro stored in register {\it x}}{@ {\it x}}
+
+\section{Motion Commands}
+
+\key{go backward one character}{h}
+\key{go forward one character}{l}
+\key{next line keeping the column}{j}
+\key{previous line keeping the column}{k}
+\key{next line at first non-white}{+}
+\key{previous line at first non-white}{-}
+
+\key{beginning of line}{0}
+\key{first non-white on line}{^}
+\key{end of line}{\$}
+\key{go to {\it n}-th column on line}{{\it n} |}
+
+\key{go to {\it n}-th line}{{\it n} G}
+\key{go to last line}{G}
+\key{find matching parenthesis for \kbd{()}, \kbd{\{\}} and \kbd{[]}}{\%}
+
+\key{go to {\bf home} window line}{H}
+\key{go to {\bf middle} window line}{M}
+\key{go to {\bf last} window line}{L}
+
+\subsection{Words, Sentences, Paragraphs}
+
+\key{forward {\bf word}}{w {\rm or} W}
+\key{{\bf backward} word}{b {\rm or} B}
+\key{{\bf end} of word}{e {\rm or} E}
+
+In the case of capital letter commands, a word is delimited by a
+non-white character.
+
+\key{forward sentence}{)}
+\key{backward sentence}{(}
+
+\key{forward paragraph}{\}}
+\key{backward paragraph}{\{}
+
+\subsection{Find Characters on the Line}
+
+\key{{\bf find} {\it c} forward on line}{f {\it c}}
+\key{{\bf find} {\it c} backward on line}{F {\it c}}
+\key{up {\bf to} {\it c} forward on line}{t {\it c}}
+\key{up {\bf to} {\it c} backward on line}{T {\it c}}
+\key{repeat previous \kbd{f}, \kbd{F}, \kbd{t} or \kbd{T}}{;}
+\key{... in the opposite direction}{,}
+
+\newcolumn
+\title{VIP Quick Reference Card}
+
+\section{Searching and Replacing}
+
+\key{search forward for {\sl pat}}{/ {\sl pat}}
+\key{search backward for {\sl pat}}{?\ {\sl pat}}
+\key{repeat previous search}{n}
+\key{... in the opposite direction}{N}
+
+\key{incremental {\bf search}}{C-s}
+\key{{\bf reverse} incremental search}{C-r}
+
+\key{{\bf replace}}{R}
+\key{{\bf query} replace}{Q}
+\key{{\bf replace} a character by another character {\it c}}{r {\it c}}
+
+\section{Modifying Commands}
+
+The delete (yank, change) commands explained below accept a motion command as
+their argument and delete (yank, change) the region determined by the motion
+command.  Motion commands are classified into {\it point commands} and
+{\it line commands}.  In the case of line commands, whole lines will
+be affected by the command.  Motion commands will be represented by
+{\it m} below.
+
+The point commands are as follows:
+
+\hskip 5ex
+\kbd{h l 0 ^ \$ w W b B e E ( ) / ?\ ` f F t T \% ; ,}
+
+The line commands are as follows:
+
+\hskip 5ex
+\kbd{j k + - H M L \{ \} G '}
+
+\subsection{Delete/Yank/Change Commands}
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\tabskip=0pt&#\cr
+\fourcol{}{{\bf delete}}{{\bf yank}}{{\bf change}}
+\fourcol{region determined by {\it m}}{d {\it m}}{y {\it m}}{c {\it m}}
+\fourcol{... into register {\it x}}{" {\it x\/} d {\it m}}{" {\it x\/} y {\it m}}{" {\it x\/} c {\it m}}
+\fourcol{a line}{d d}{Y {\rm or} y y}{c c}
+\fourcol{current {\bf region}}{d r}{y r}{c r}
+\fourcol{expanded {\bf region}}{d R}{y R}{c R}
+\fourcol{to end of line}{D}{y \$}{c \$}
+\fourcol{a character after point}{x}{y l}{c l}
+\fourcol{a character before point}{DEL}{y h}{c h}
+}
+
+\subsection{Put Back Commands}
+
+Deleted/yanked/changed text can be put back by the following commands.
+
+\key{{\bf Put} back at point/above line}{P}
+\key{... from register {\it x}}{" {\it x\/} P}
+\key{{\bf put} back after point/below line}{p}
+\key{... from register {\it x}}{" {\it x\/} p}
+
+\subsection{Repeating and Undoing Modifications}
+
+\key{{\bf undo} last change}{u {\rm or} :und}
+\key{repeat last change}{.\ {\rm (dot)}}
+
+Undo is undoable by \kbd{u} and repeatable by \kbd{.}.
+For example, \kbd{u...} will undo 4 previous changes.
+A \kbd{.} after \kbd{5dd} is equivalent to \kbd{5dd},
+while \kbd{3.} after \kbd{5dd} is equivalent to \kbd{3dd}.
+
+\section{Miscellaneous Commands}
+
+\endindentedkeys
+
+\paralign to \hsize{#\tabskip=5pt plus 1 fil&#\tabskip=0pt&#\tabskip=0pt&#\tabskip=0pt&#\cr
+\fivecol{}{{\bf shift left}}{{\bf shift right}}{{\bf filter shell command}}{{\bf indent}}
+\fivecol{region}{< {\it m}}{> {\it m}}{!\ {\it m\/} {\sl shell-com}}{= {\it m}}
+\fivecol{line}{< <}{> >}{!\ !\ {\sl shell-com}}{= =}
+}
+
+\key{emulate \kbd{ESC}/\kbd{C-h} in emacs mode}{ESC{\rm /}C-h}
+\key{emulate \kbd{C-c}/\kbd{C-x} in emacs mode}{C{\rm /}X}
+
+\key{{\bf join} lines}{J}
+
+\key{lowercase region}{\# c {\it m}}
+\key{uppercase region}{\# C {\it m}}
+\key{execute last keyboard macro on each line in the region}{\# g {\it m}}
+
+\key{insert specified string for each line in the region}{\# q {\it m}}
+\key{check spelling of the words in the region}{\# s {\it m}}
+
+\section{Differences from Vi}
+
+\beginindentedkeys
+
+In VIP some keys behave rather differently from Vi.
+The table below lists such keys, and you can get the effect of typing
+these keys by typing the corresponding keys in the VIP column.
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\threecol{}{{\bf Vi}}{{\bf VIP}}
+\threecol{forward character}{SPC}{l}
+\threecol{backward character}{C-h}{h}
+\threecol{next line at first non-white}{RET}{+}
+\threecol{delete previous character}{X}{DEL}
+\threecol{get information on file}{C-g}{g}
+\threecol{substitute characters}{s}{x i}
+\threecol{substitute line}{S}{c c}
+\threecol{change to end of line}{C {\rm or} R}{c \$}
+}
+
+(Strictly speaking, \kbd{C} and \kbd{R} behave slightly differently in Vi.)
+
+\section{Customization}
+
+By default, search is case sensitive.
+You can change this by including the following line in your \kbd{.vip} file.
+
+\hskip 5ex
+\kbd{(setq vip-case-fold-search t)}
+
+\beginindentedkeys
+
+\paralign to \hsize{#\tabskip=10pt plus 1 fil&#\tabskip=0pt&#\cr
+\twocol{{\bf variable}}{{\bf default value}}
+\twocol{vip-search-wrap-around}{t}
+\twocol{vip-case-fold-search}{nil}
+\twocol{vip-re-search}{nil}
+\twocol{vip-re-replace}{nil}
+\twocol{vip-re-query-replace}{nil}
+\twocol{vip-open-with-indent}{nil}
+\twocol{vip-help-in-insert-mode}{nil}
+\twocol{vip-shift-width}{8}
+\twocol{vip-tags-file-name}{"TAGS"}
+}
+
+%\subsection{Customizing Key Bindings}
+
+Include (some of) following lines in your \kbd{.vip} file
+to restore Vi key bindings.
+
+\beginexample
+(define-key vip-mode-map "\\C-g" 'vip-info-on-file)
+(define-key vip-mode-map "\\C-h" 'vip-backward-char)
+(define-key vip-mode-map "\\C-m" 'vip-next-line-at-bol)
+(define-key vip-mode-map " " 'vip-forward-char)
+(define-key vip-mode-map "g" 'vip-keyboard-quit)
+(define-key vip-mode-map "s" 'vip-substitute)
+(define-key vip-mode-map "C" 'vip-change-to-eol)
+(define-key vip-mode-map "R" 'vip-change-to-eol)
+(define-key vip-mode-map "S" 'vip-substitute-line)
+(define-key vip-mode-map "X" 'vip-delete-backward-char)
+\endexample
+
+\newcolumn
+
+\title{Ex Commands in VIP}
+
+In vi mode, an Ex command is entered by typing:
+
+\hskip 5ex
+\kbd{:\ {\sl ex-command} RET}
+
+\section{Ex Addresses}
+
+\paralign to \hsize{#\tabskip=5pt plus 1 fil&#\tabskip=2pt&#\tabskip=5pt plus 1 fil&#\cr
+\twocolkey{current line}{.}{next line with {\sl pat}}{/ {\sl pat} /}
+\twocolkey{line {\it n}}{{\it n}}{previous line with {\sl pat}}{?\ {\sl pat} ?}
+\twocolkey{last line}{\$}{{\it n\/} line before {\it a}}{{\it a} - {\it n}}
+\twocolkey{next line}{+}{{\it a\/} through {\it b}}{{\it a\/} , {\it b}}
+\twocolkey{previous line}{-}{line marked with {\it x}}{' {\it x}}
+\twocolkey{entire buffer}{\%}{previous context}{' '}
+}
+
+Addresses can be specified in front of a command.
+For example,
+
+\hskip 5ex
+\kbd{:.,.+10m\$}
+
+moves 11 lines below current line to the end of buffer.
+
+\section{Ex Commands}
+
+\endindentedkeys
+
+\key{mark lines matching {\sl pat} and execute {\sl cmds} on these lines}{:g /{\sl pat}/ {\sl cmds}}
+
+\key{mark lines {\it not\/} matching {\sl pat} and execute {\sl cmds} on these lines}{:v /{\sl pat}/ {\sl cmds}}
+
+
+\key{{\bf move} specified lines after {\sl addr}}{:m {\sl addr}}
+\key{{\bf copy} specified lines after {\sl addr}}{:co\rm\ (or \kbd{:t})\ \sl addr}
+\key{{\bf delete} specified lines [into register {\it x\/}]}{:d {\rm [{\it x\/}]}}
+\key{{\bf yank} specified lines [into register {\it x\/}]}{:y {\rm [{\it x\/}]}}
+\key{{\bf put} back text [from register {\it x\/}]}{:pu {\rm [{\it x\/}]}}
+
+\key{{\bf substitute} {\sl repl} for first string on line matching {\sl pat}}{:s /{\sl pat}/{\sl repl}/}
+
+\key{repeat last substitution}{:\&}
+\key{repeat previous substitute with previous search pattern as {\sl pat}}{:\~{}}
+
+\key{{\bf read} in a file}{:r {\sl file}}
+\key{{\bf read} in the output of a shell command}{:r!\ {\sl command}}
+\key{write out specified lines into {\sl file}}{:w {\sl file}}
+\key{write out specified lines at the end of {\sl file}}{:w>> {\sl file}}
+\key{write out and then quit}{:wq {\sl file}}
+
+\key{define a macro {\it x} that expands to {\sl cmd}}{:map {\it x} {\sl cmd}}
+\key{remove macro expansion associated with {\it x}}{:unma {\it x}}
+
+\key{print line number}{:=}
+\key{print {\bf version} number of VIP}{:ve}
+
+\key{shift specified lines to the right}{:>}
+\key{shift specified lines to the left}{:<}
+
+\key{{\bf join} lines}{:j}
+\key{mark specified line to register {\it x}}{:k {\it x}}
+\key{{\bf set} a variable's value}{:se}
+\key{run a sub{\bf shell} in a window}{:sh}
+\key{execute shell command {\sl command}}{:!\ {\sl command}}
+\key{find first definition of {\bf tag} {\sl tag}}{:ta {\sl tag}}
+
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "pdftex vipcard"
+% End:
+

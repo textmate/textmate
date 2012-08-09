@@ -1,0 +1,13 @@
+# Link Module
+
+link = element link { link.attlist }
+link.attlist =
+  Common.attrib,
+  attribute charset { Charset.datatype }?,
+  attribute href { URI.datatype }?,
+  attribute hreflang { LanguageCode.datatype }?,
+  attribute type { ContentType.datatype }?,
+  attribute rel { LinkTypes.datatype }?,
+  attribute rev { LinkTypes.datatype }?,
+  attribute media { MediaDesc.datatype }?
+head.content &= link*

@@ -1,0 +1,29 @@
+# Client-side Image Map Module
+
+area = element area { area.attlist }
+area.attlist =
+  Common.attrib,
+  attribute href { URI.datatype }?,
+  shape.attrib,
+  coords.attrib,
+  attribute nohref { "nohref" }?,
+  attribute alt { Text.datatype },
+  attribute tabindex { Number.datatype }?,
+  attribute accesskey { Character.datatype }?
+map =
+  element map {
+    map.attlist,
+    (# This does not use Block.mix
+     # because loose.dtd doesn't use %Flow;
+     Block.class
+     | area)+
+  }
+map.attlist = CommonIdRequired.attrib
+a.attlist &= shape.attrib, coords.attrib
+img.attlist &= usemap.attlist
+object.attlist &= usemap.attlist
+usemap.attlist = attribute usemap { IDREF.datatype }?
+shape.attrib =
+  attribute shape { "rect" | "circle" | "poly" | "default" }?
+coords.attrib = attribute coords { text }?
+Inline.class |= map

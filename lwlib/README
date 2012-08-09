@@ -1,0 +1,7 @@
+This subdirectory contains the Lucid Widget Library (lwlib), which
+provides a uniform interface to a few different X toolkits.  The
+library was written by Lucid, Inc and released under the terms of the
+GPL version 1 (or later).  It is not considered part of GNU Emacs.
+
+This version of the library differs from the original as described in
+the ChangeLog file.

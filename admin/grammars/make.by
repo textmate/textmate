@@ -1,0 +1,168 @@
+;;; make.by -- BY notation for Makefiles.
+
+;; Copyright (C) 1999-2012 Free Software Foundation, Inc.
+;;
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;;         David Ponce <david@dponce.com>
+;;         Klaus Berndl <klaus.berndl@sdm.de>
+;;
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+%package semantic-make-by
+
+%languagemode  makefile-mode
+%start         Makefile
+
+;; This was always a test case.
+%quotemode     backquote
+
+%token IF      "if"
+%token IFDEF   "ifdef"
+%token IFNDEF  "ifndef"
+%token IFEQ    "ifeq"
+%token IFNEQ   "ifneq"
+%token ELSE    "else"
+%token ENDIF   "endif"
+%token INCLUDE "include"
+
+%put { IF ELSE ENDIF } summary "Conditional: if (expression) ... else ... endif"
+%put IFDEF   summary "Conditional: ifdef (expression) ... else ... endif"
+%put IFNDEF  summary "Conditional: ifndef (expression) ... else ... endif"
+%put IFEQ    summary "Conditional: ifeq (expression) ... else ... endif"
+%put IFNEQ   summary "Conditional: ifneq (expression) ... else ... endif"
+%put INCLUDE summary "Macro: include filename1 filename2 ..."
+
+%token <punctuation> COLON     "\\`[:]\\'"
+%token <punctuation> PLUS      "\\`[+]\\'"
+%token <punctuation> EQUAL     "\\`[=]\\'"
+%token <punctuation> DOLLAR    "\\`[$]\\'"
+%token <punctuation> BACKSLASH "\\`[\\]\\'"
+
+%%
+
+Makefile : bol newline (nil)
+	 | bol variable
+	   ( ,@$2 )
+	 | bol rule
+	   ( ,@$2 )
+	 | bol conditional
+	   ( ,@$2 )
+	 | bol include
+	   ( ,@$2 )
+	 | whitespace ( nil )
+	 | newline ( nil )
+	 ;
+
+variable: symbol opt-whitespace equals opt-whitespace element-list
+	  (VARIABLE-TAG ,$1 nil ,$5)
+	;
+
+rule: targets opt-whitespace colons opt-whitespace element-list commands
+      (FUNCTION-TAG ,$1 nil ,$5)
+    ;
+
+targets: target opt-whitespace targets
+	 ( (car ,$1) (car ,@$3) )
+       | target
+	 ( (car ,$1) )
+       ;
+
+target: sub-target target
+	( (concat (car ,$1) (car ,@$3) ) )
+      | sub-target
+	( (car ,$1) )
+      ;
+
+sub-target: symbol
+	  | string
+	  | varref
+	  ;
+
+conditional: IF some-whitespace symbol newline
+	     ( nil )
+	   | IFDEF some-whitespace symbol newline
+	     ( nil )
+	   | IFNDEF some-whitespace symbol newline
+	     ( nil )
+	   | IFEQ some-whitespace expression newline
+	     ( nil )
+	   | IFNEQ some-whitespace expression newline
+	     ( nil )
+	   | ELSE newline
+	     ( nil )
+	   | ENDIF newline
+	     ( nil )
+	   ;
+
+expression : semantic-list
+	   ;
+
+include: INCLUDE some-whitespace element-list
+	 (INCLUDE-TAG ,$3 nil)
+       ;
+
+equals: COLON EQUAL ()
+      | PLUS EQUAL ()
+      | EQUAL ()
+      ;
+
+colons: COLON COLON ()
+      | COLON ()
+      ;
+
+element-list: elements newline
+	      ( ,@$1 )
+	    ;
+
+elements: element some-whitespace elements
+	  ( ,@$1 ,@$3 )
+	| element
+	  ( ,@$1 )
+	| ;;EMPTY
+	;
+  
+element: sub-element element
+	 ( (concat (car ,$1) (car ,$2)) )
+       | ;;EMPTY
+       ;
+
+sub-element: symbol
+	   | string
+	   | punctuation
+	   | semantic-list
+	     ( (buffer-substring-no-properties
+		 (identity start) (identity end)) )
+	   ;
+
+varref: DOLLAR semantic-list
+	( (buffer-substring-no-properties (identity start) (identity end)) )
+      ;
+
+commands: bol shell-command newline commands
+	  ( ,$1 ,@$2 )
+	| ;;EMPTY
+	  ( )
+	;
+
+opt-whitespace : some-whitespace ( nil )
+	       | ;;EMPTY
+	       ;
+
+some-whitespace : whitespace some-whitespace (nil)
+		| whitespace (nil)
+		;
+
+;;; make.by ends here

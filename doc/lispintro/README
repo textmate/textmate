@@ -1,0 +1,82 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+This directory contains the source of the "Introduction to Programming
+in Emacs Lisp" written by Robert J. Chassell, bob@gnu.org.  This
+manual is an elementary introduction to programming in Emacs Lisp for
+people who are not programmers, and who are not necessarily interested
+in programming, but who do want to customize or extend their computing
+environment.
+
+This third edition of 2006 Oct 31 updates the previous editions to GNU
+Emacs 22.
+
+The Texinfo source file `emacs-lisp-intro.texi', formats without
+reported error using `pdfeTeXk', Version 3.141592-1.21a-2.2 (Web2C
+7.5.4) and texinfo.tex version 2006-08-26.17 started by `texi2dvi'
+version 4.8, and with `makeinfo' version 4.8.
+
+This directory contains the following Encapsulated PostScript figures:
+
+  cons-1.eps, cons-2.eps, cons-2a.eps, cons-3.eps, cons-4.eps, cons-5.eps
+  drawers.eps, lambda-1.eps, lambda-2.eps, lambda-3.eps
+
+See the beginning of the `emacs-lisp-intro.texi' file for appropriate
+settings.  These figures are not necessary; they are merely nice to
+look at --- without them you get the same figures printed with ASCII
+characters.
+
+Whether and how you print PostScript depends on your site.  You not
+only need to set 'print-postscript-figures' before creating the .dvi
+file, but then must convert the .dvi file to .ps with a 'dvips' or
+equivalent command.
+
+On some systems you will see an error message when `psfig.tex' is
+loaded for the last two .eps files:
+
+            ! No room for a new \write .
+
+If this happens, try `epsf.tex' instead of `psfig.tex', or try typing
+RET at the error; the formatting may continue successfully.
+
+Or else find the section that says:
+
+ @c !!! Clear print-postscript-figures if the computer formatting this
+ @c     document is too small and cannot handle all the diagrams and figures.
+ @c clear print-postscript-figures
+
+and change the file so it reads:   @clear print-postscript-figures
+This will prevent TeX from attempting to load the last few .eps files.
+
+You will find additional instructions on formatting in the beginning
+of the Texinfo file 'emacs-lisp-intro.texi'.  Best Wishes!
+
+2006 Oct 31
+Robert J. Chassell, bob@gnu.org
+
+
+
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+The PostScript images (*.eps) contain copyright and license information
+in their headers.  The PDF versions were automatically generated using
+the epstopdf utility, and are subject to the same conditions as their
+EPS counterparts.
+
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

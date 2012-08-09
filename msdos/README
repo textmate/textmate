@@ -1,0 +1,164 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+This directory contains scripts for building the DJGPP (a.k.a. MS-DOS)
+version of Emacs, and other files useful for running that version of
+Emacs.
+
+The files emacs.ico and emacs.pif are for using the DJGPP version on
+Windows 3.X.  Since these are binary files, their copyright notice is
+reproduced here:
+
+# Copyright (C) 1993, 2002-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+
+
+NOTE ON THE LEGAL STATUS OF THE FILES IS_EXEC.C, SIGACTION.C
+
+As distributed with GNU Emacs, the files is_exec.c and sigaction.c are
+Copyright (C) 1995 DJ Delorie, and are licensed under the terms of the
+GNU General Public License version 3 (see COPYING), or (at your
+option) any later version.
+
+Here we record the details of the legal history of these files.
+
+The files is_exec.c and sigaction.c were originally part of DJGPP,
+distributed by DJ Delorie. The versions of these files in DJGPP
+contain the following license notice:
+
+  Copyright (C) 1995 DJ Delorie, see COPYING.DJ for details
+
+The contents of the file COPYING.DJ (as available at, for example, the
+URL: <http://www.delorie.com/bin/cvsweb.cgi/djgpp/copying.dj>) are as
+follows:
+
+-- COPYING.DJ STARTS HERE --
+
+This is the file "COPYING.DJ".  It does NOT apply to any sources or
+binaries copyrighted by UCB Berkeley, the Free Software Foundation, or
+any other agency besides DJ Delorie and others who have agreed to
+allow their sources to be distributed under these terms.
+
+   Copyright Information for sources and executables that are marked
+   Copyright (C) DJ Delorie
+                 334 North Rd
+                 Deerfield NH 03037-1110
+
+This document is Copyright (C) DJ Delorie and may be distributed
+verbatim, but changing it is not allowed.
+
+Source code copyright DJ Delorie is distributed under the terms of the
+GNU General Public License, with the following exceptions:
+
+* Sources used to build crt0.o, gcrt0.o, libc.a, libdbg.a, and
+  libemu.a are distributed under the terms of the GNU Library General
+  Public License, rather than the GNU GPL.
+
+* Any existing copyright or authorship information in any given source
+  file must remain intact.  If you modify a source file, a notice to that
+  effect must be added to the authorship information in the source file.
+
+* Runtime binaries, as provided by DJ in DJGPP, may be distributed
+  without sources ONLY if the recipient is given sufficient information
+  to obtain a copy of djgpp themselves.  This primarily applies to
+  go32-v2.exe, emu387.dxe, and stubedit.exe.
+
+* Runtime objects and libraries, as provided by DJ in DJGPP, when
+  linked into an application, may be distributed without sources ONLY
+  if the recipient is given sufficient information to obtain a copy of
+  djgpp themselves.  This primarily applies to crt0.o and libc.a.
+
+-----
+
+Changes to source code copyright BSD, FSF, or others, by DJ Delorie
+fall under the terms of the original copyright.  Such files usually
+have multiple copyright notices in them.
+
+A copy of the files "COPYING" and "COPYING.LIB" are included with this
+document.  If you did not receive a copy of these files, you may
+obtain one from whence this document was obtained, or by writing:
+
+      Free Software Foundation, Inc.
+      51 Franklin Street,
+      Fifth Floor,
+      Boston, MA 02110-1301,
+      USA
+
+-- COPYING.DJ ENDS HERE --
+
+Both is_exec.c and sigaction.c are parts of DJGPP's libc.a, therefore
+according to exception 1 in the above terms their "base" license is
+the GNU Library General Public License [now known as the GNU Lesser
+General Public License].
+
+The terms of the GNU LGPL, specifically clause 3, which begins:
+
+    3. You may opt to apply the terms of the ordinary GNU General
+    Public License instead of this License to a given copy of the
+    Library.
+
+permit us to relicense the files is_exec.c and sigaction.c as used in
+GNU Emacs under the terms of the GNU GPL.
+
+COPYING.DJ, however, lists extra exceptions 2-4 to the GNU licenses.
+Items 3 and 4 are not relevant in the case of GNU Emacs, since they
+can only apply to copies of DJGPP [confirmed by email from DJ Delorie
+to rms at gnu.org and others, 2007/01/31].
+
+Exception 2 of COPYING.DJ, when viewed as an added restriction, rather
+than as an interpretation of the GPL, leads to problems. The added
+requirement makes the overall license of the file incompatible with
+the GNU GPL.
+
+As a solution to this problem, DJ Delorie has kindly granted (February
+2007) GNU Emacs an exception, and permits us to license the files
+is_exec.c and sigaction.c solely under the terms of the GNU GPL. This
+exception applies _only_ to these files as distributed with GNU Emacs.
+This solution was arrived at in an email discussion between DJ Delorie
+<dj at delorie.com> and Richard Stallman <rms at gnu.org> in
+January/February 2007. We record below a summary of the relevant final
+email in this discussion:
+
+    From: DJ Delorie <dj at delorie.com>
+    To: rms at gnu.org
+    Subject: Re: COPYING.DJ and Emacsn
+
+    I have no problem with whatever you wish to do with those files in
+    emacs (as long as djgpp itself doesn't need to change).
+
+
+Accordingly, in February 2007 we relicensed the files is_exec.c and
+sigaction.c as used in GNU Emacs under the GNU GPL.
+
+Copies of both the GNU General Public License and GNU Lesser (Library)
+Public License may be obtained from <http://www.gnu.org/licenses/>, or:
+the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA 02110-1301, USA.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

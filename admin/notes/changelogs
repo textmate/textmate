@@ -1,0 +1,21 @@
+If installing changes written by someone else, make the ChangeLog
+entry in their name, not yours.
+
+
+http://lists.gnu.org/archive/html/emacs-devel/2007-09/msg00793.html
+  There is no need to make change log entries for files such as NEWS,
+  MAINTAINERS, and FOR-RELEASE.
+
+http://lists.gnu.org/archive/html/emacs-devel/2006-12/msg01135.html
+  There is no need to indicate regeneration of files such as configure
+  in ChangeLog.
+
+
+http://lists.gnu.org/archive/html/emacs-devel/2008-11/msg00940.html
+Preferred form for several entries with the same content:
+
+   * help.el (view-lossage):
+   * kmacro.el (kmacro-edit-lossage):
+   * edmacro.el (edit-kbd-macro): Fix docstring, lossage is now 300 keys.
+
+(Rather than anything involving "ditto" and suchlike.)

@@ -1,0 +1,10 @@
+# Name Identification Module
+
+a.attlist &= name.attlist
+applet.attlist &= name.attlist
+form.attlist &= name.attlist
+frame.attrib &= name.attlist
+iframe.attlist &= name.attlist
+img.attlist &= name.attlist
+map.attlist &= name.attlist
+name.attlist = attribute name { text }?

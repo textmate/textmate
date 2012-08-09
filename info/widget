@@ -1,0 +1,2339 @@
+This is ../../info/widget, produced by makeinfo version 4.13 from
+widget.texi.
+
+Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs lisp libraries
+START-INFO-DIR-ENTRY
+* Widget: (widget).             The "widget" package used by the Emacs
+                                  Customization facility.
+END-INFO-DIR-ENTRY
+
+
+File: widget,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
+
+The Emacs Widget Library
+************************
+
+Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Introduction::
+* User Interface::
+* Programming Example::
+* Setting Up the Buffer::
+* Basic Types::
+* Sexp Types::
+* Widget Properties::
+* Defining New Widgets::
+* Widget Browser::
+* Widget Minor Mode::
+* Utilities::
+* Widget Wishlist::
+* GNU Free Documentation License::
+* Index::
+
+
+File: widget,  Node: Introduction,  Next: User Interface,  Prev: Top,  Up: Top
+
+Introduction
+============
+
+Most graphical user interface toolkits provide a number of standard
+user interface controls (sometimes known as `widgets' or `gadgets').
+Emacs doesn't really support anything like this, except for an
+incredibly powerful text "widget."  On the other hand, Emacs does
+provide the necessary primitives to implement many other widgets within
+a text buffer.  The `widget' package simplifies this task.
+
+   The basic widgets are:
+
+`link'
+     Areas of text with an associated action.  Intended for hypertext
+     links embedded in text.
+
+`push-button'
+     Like link, but intended for stand-alone buttons.
+
+`editable-field'
+     An editable text field.  It can be either variable or fixed length.
+
+`menu-choice'
+     Allows the user to choose one of multiple options from a menu, each
+     option is itself a widget.  Only the selected option will be
+     visible in the buffer.
+
+`radio-button-choice'
+     Allows the user to choose one of multiple options by activating
+     radio buttons.  The options are implemented as widgets.  All
+     options will be visible in the buffer.
+
+`item'
+     A simple constant widget intended to be used in the `menu-choice'
+     and `radio-button-choice' widgets.
+
+`choice-item'
+     A button item only intended for use in choices.  When invoked, the
+     user will be asked to select another option from the choice widget.
+
+`toggle'
+     A simple `on'/`off' switch.
+
+`checkbox'
+     A checkbox (`[ ]'/`[X]').
+
+`editable-list'
+     Create an editable list.  The user can insert or delete items in
+     the list.  Each list item is itself a widget.
+
+   Now, of what possible use can support for widgets be in a text
+editor?  I'm glad you asked.  The answer is that widgets are useful for
+implementing forms.  A "form" in Emacs is a buffer where the user is
+supposed to fill out a number of fields, each of which has a specific
+meaning.  The user is not supposed to change or delete any of the text
+between the fields.  Examples of forms in Emacs are the `forms' package
+(of course), the customize buffers, the mail and news compose modes,
+and the HTML form support in the `w3' browser.
+
+   The advantages for a programmer of using the `widget' package to
+implement forms are:
+
+  1. More complex fields than just editable text are supported.
+
+  2. You can give the users immediate feedback if they enter invalid
+     data in a text field, and sometimes prevent entering invalid data.
+
+  3. You can have fixed sized fields, thus allowing multiple fields to
+     be lined up in columns.
+
+  4. It is simple to query or set the value of a field.
+
+  5. Editing happens in the buffer, not in the mini-buffer.
+
+  6. Packages using the library get a uniform look, making them easier
+     for the user to learn.
+
+  7. As support for embedded graphics improve, the widget library will
+     be extended to use the GUI features.  This means that your code
+     using the widget library will also use the new graphic features
+     automatically.
+
+
+File: widget,  Node: User Interface,  Next: Programming Example,  Prev: Introduction,  Up: Top
+
+User Interface
+==============
+
+A form consists of read only text for documentation and some fields,
+where each field contains two parts, a tag and a value.  The tags are
+used to identify the fields, so the documentation can refer to the `foo
+field', meaning the field tagged with `Foo'. Here is an example form:
+
+     Here is some documentation.
+
+     Name: My Name     *Choose*: This option
+     Address:  Some Place
+     In some City
+     Some country.
+
+     See also _other work_ for more information.
+
+     Numbers: count to three below
+     [INS] [DEL] One
+     [INS] [DEL] Eh, two?
+     [INS] [DEL] Five!
+     [INS]
+
+     Select multiple:
+
+     [X] This
+     [ ] That
+     [X] Thus
+
+     Select one:
+
+     (*) One
+     ( ) Another One.
+     ( ) A Final One.
+
+     [Apply Form] [Reset Form]
+
+   The top level widgets in this example are tagged `Name', `Choose',
+`Address', `_other work_', `Numbers', `Select multiple', `Select one',
+`[Apply Form]', and `[Reset Form]'.  There are basically two things the
+user can do within a form, namely editing the editable text fields and
+activating the buttons.
+
+Editable Text Fields
+--------------------
+
+In the example, the value for the `Name' is most likely displayed in an
+editable text field, and so are values for each of the members of the
+`Numbers' list.  All the normal Emacs editing operations are available
+for editing these fields.  The only restriction is that each change you
+make must be contained within a single editable text field.  For
+example, capitalizing all text from the middle of one field to the
+middle of another field is prohibited.
+
+   Editable text fields are created by the `editable-field' widget.
+
+   *Warning:* In an `editable-field' widget, the editable field must
+not be adjacent to another widget--that won't work.  You must put some
+text in between.  Either make this text part of the `editable-field'
+widget itself, or insert it with `widget-insert'.
+
+   The `:format' keyword is useful for generating the necessary text;
+for instance, if you give it a value of `"Name: %v "', the `Name: '
+part will provide the necessary separating text before the field and
+the trailing space will provide the separating text after the field.
+If you don't include the `:size' keyword, the field will extend to the
+end of the line, and the terminating newline will provide separation
+after.
+
+   *Warning:* In an `editable-field' widget, the `%v' escape must be
+preceded by some other text in the `:format' string (if specified).
+
+   The editing text fields are highlighted with the `widget-field-face'
+face, making them easy to find.
+
+ -- Face: widget-field-face
+     Face used for other editing fields.
+
+Buttons
+-------
+
+Some portions of the buffer have an associated "action", which can be
+"invoked" by a standard key or mouse command.  These portions are
+called "buttons".  The default commands for activating a button are:
+
+`<RET>'
+      -- Command: widget-button-press POS &optional EVENT
+          Invoke the button at POS, defaulting to point.  If point is
+          not located on a button, invoke the binding in
+          `widget-global-map' (by default the global map).
+
+`Mouse-2'
+      -- Command: widget-button-click EVENT
+          Invoke the button at the location of the mouse pointer.  If
+          the mouse pointer is located in an editable text field,
+          invoke the binding in `widget-global-map' (by default the
+          global map).
+
+   There are several different kind of buttons, all of which are
+present in the example:
+
+_The Option Field Tags_
+     When you invoke one of these buttons, you will be asked to choose
+     between a number of different options.  This is how you edit an
+     option field.  Option fields are created by the `menu-choice'
+     widget.  In the example, `Choose' is an option field tag.
+
+_The `[INS]' and `[DEL]' buttons_
+     Activating these will insert or delete elements from an editable
+     list.  The list is created by the `editable-list' widget.  
+
+_Embedded Buttons_
+     The `_other work_' is an example of an embedded button.  Embedded
+     buttons are not associated with any fields, but can serve any
+     purpose, such as implementing hypertext references.  They are
+     usually created by the `link' widget.
+
+_The `[ ]' and `[X]' buttons_
+     Activating one of these will convert it to the other.  This is
+     useful for implementing multiple-choice fields.  You can create
+     them with the `checkbox' widget.
+
+_The `( )' and `(*)' buttons_
+     Only one radio button in a `radio-button-choice' widget can be
+     selected at any time.  When you invoke one of the unselected radio
+     buttons, it will be selected and the previous selected radio
+     button will become unselected.
+
+_The `[Apply Form]' and `[Reset Form]' buttons_
+     These are explicit buttons made with the `push-button' widget.  The
+     main difference from the `link' widget is that the buttons will be
+     displayed as GUI buttons when possible.
+
+   To make them easier to locate, buttons are emphasized in the buffer.
+
+ -- Face: widget-button-face
+     Face used for buttons.
+
+ -- User Option: widget-mouse-face
+     Face used for highlighting a button when the mouse pointer moves
+     across it.
+
+Navigation
+----------
+
+You can use all the normal Emacs commands to move around in a form
+buffer, plus you will have these additional commands:
+
+`<TAB>'
+      -- Command: widget-forward &optional count
+          Move point COUNT buttons or editing fields forward.
+
+`M-<TAB>'
+`S-<TAB>'
+      -- Command: widget-backward &optional count
+          Move point COUNT buttons or editing fields backward.
+
+
+File: widget,  Node: Programming Example,  Next: Setting Up the Buffer,  Prev: User Interface,  Up: Top
+
+Programming Example
+===================
+
+Here is the code to implement the user interface example (*note User
+Interface::).
+
+     (require 'widget)
+
+     (eval-when-compile
+       (require 'wid-edit))
+
+     (defvar widget-example-repeat)
+
+     (defun widget-example ()
+       "Create the widgets from the Widget manual."
+       (interactive)
+       (switch-to-buffer "*Widget Example*")
+       (kill-all-local-variables)
+       (make-local-variable 'widget-example-repeat)
+       (let ((inhibit-read-only t))
+         (erase-buffer))
+       (remove-overlays)
+       (widget-insert "Here is some documentation.\n\n")
+       (widget-create 'editable-field
+                      :size 13
+                      :format "Name: %v " ; Text after the field!
+                      "My Name")
+       (widget-create 'menu-choice
+                      :tag "Choose"
+                      :value "This"
+                      :help-echo "Choose me, please!"
+                      :notify (lambda (widget &rest ignore)
+                                (message "%s is a good choice!"
+                                         (widget-value widget)))
+                      '(item :tag "This option" :value "This")
+                      '(choice-item "That option")
+                      '(editable-field :menu-tag "No option" "Thus option"))
+       (widget-create 'editable-field
+                      :format "Address: %v"
+                      "Some Place\nIn some City\nSome country.")
+       (widget-insert "\nSee also ")
+       (widget-create 'link
+                      :notify (lambda (&rest ignore)
+                                (widget-value-set widget-example-repeat
+                                                  '("En" "To" "Tre"))
+                                (widget-setup))
+                      "other work")
+       (widget-insert
+         " for more information.\n\nNumbers: count to three below\n")
+       (setq widget-example-repeat
+             (widget-create 'editable-list
+                            :entry-format "%i %d %v"
+                            :notify (lambda (widget &rest ignore)
+                                      (let ((old (widget-get widget
+                                                             ':example-length))
+                                            (new (length (widget-value widget))))
+                                        (unless (eq old new)
+                                          (widget-put widget ':example-length new)
+                                          (message "You can count to %d." new))))
+                            :value '("One" "Eh, two?" "Five!")
+                            '(editable-field :value "three")))
+       (widget-insert "\n\nSelect multiple:\n\n")
+       (widget-create 'checkbox t)
+       (widget-insert " This\n")
+       (widget-create 'checkbox nil)
+       (widget-insert " That\n")
+       (widget-create 'checkbox
+                      :notify (lambda (&rest ignore) (message "Tickle"))
+                      t)
+       (widget-insert " Thus\n\nSelect one:\n\n")
+       (widget-create 'radio-button-choice
+                      :value "One"
+                      :notify (lambda (widget &rest ignore)
+                                (message "You selected %s"
+                                         (widget-value widget)))
+                      '(item "One") '(item "Another One.") '(item "A Final One."))
+       (widget-insert "\n")
+       (widget-create 'push-button
+                      :notify (lambda (&rest ignore)
+                                (if (= (length (widget-value widget-example-repeat))
+                                       3)
+                                    (message "Congratulation!")
+                                  (error "Three was the count!")))
+                      "Apply Form")
+       (widget-insert " ")
+       (widget-create 'push-button
+                      :notify (lambda (&rest ignore)
+                                (widget-example))
+                      "Reset Form")
+       (widget-insert "\n")
+       (use-local-map widget-keymap)
+       (widget-setup))
+
+
+File: widget,  Node: Setting Up the Buffer,  Next: Basic Types,  Prev: Programming Example,  Up: Top
+
+Setting Up the Buffer
+=====================
+
+Widgets are created with `widget-create', which returns a "widget"
+object.  This object can be queried and manipulated by other widget
+functions, until it is deleted with `widget-delete'.  After the widgets
+have been created, `widget-setup' must be called to enable them.
+
+ -- Function: widget-create type [ keyword argument ]...
+     Create and return a widget of type TYPE.  The syntax for the TYPE
+     argument is described in *note Basic Types::.
+
+     The keyword arguments can be used to overwrite the keyword
+     arguments that are part of TYPE.
+
+ -- Function: widget-delete widget
+     Delete WIDGET and remove it from the buffer.
+
+ -- Function: widget-setup
+     Set up a buffer to support widgets.
+
+     This should be called after creating all the widgets and before
+     allowing the user to edit them.
+
+
+   If you want to insert text outside the widgets in the form, the
+recommended way to do that is with `widget-insert'.
+
+ -- Function: widget-insert
+     Insert the arguments, either strings or characters, at point.  The
+     inserted text will be read-only.
+
+   There is a standard widget keymap which you might find useful.
+
+ -- Const: widget-keymap
+     <TAB> and `C-<TAB>' are bound to `widget-forward' and
+     `widget-backward', respectively.  <RET> and `Mouse-2' are bound to
+     `widget-button-press' and `widget-button-click'.
+
+ -- Variable: widget-global-map
+     Keymap used by `widget-button-press' and `widget-button-click'
+     when not on a button.  By default this is `global-map'.
+
+
+File: widget,  Node: Basic Types,  Next: Sexp Types,  Prev: Setting Up the Buffer,  Up: Top
+
+Basic Types
+===========
+
+This is the general syntax of a type specification:
+
+     NAME ::= (NAME [KEYWORD ARGUMENT]... ARGS)
+          |   NAME
+
+   Where, NAME is a widget name, KEYWORD is the name of a property,
+ARGUMENT is the value of the property, and ARGS are interpreted in a
+widget specific way.
+
+   The following keyword arguments apply to all widgets:
+
+`:value'
+     The initial value for widgets of this type.
+
+`:format'
+     This string will be inserted in the buffer when you create a
+     widget.  The following `%' escapes are available:
+
+    `%['
+    `%]'
+          The text inside will be marked as a button.
+
+          By default, the text will be shown in `widget-button-face',
+          and surrounded by brackets.
+
+           -- User Option: widget-button-prefix
+               String to prefix buttons.
+
+           -- User Option: widget-button-suffix
+               String to suffix buttons.
+
+    `%{'
+    `%}'
+          The text inside will be displayed with the face specified by
+          `:sample-face'.
+
+    `%v'
+          This will be replaced with the buffer representation of the
+          widget's value.  What this is depends on the widget type.
+
+          *Warning:* In an `editable-field' widget, the `%v' escape
+          must be preceded by some other text in the format string (if
+          specified).
+
+    `%d'
+          Insert the string specified by `:doc' here.
+
+    `%h'
+          Like `%d', with the following modifications: If the
+          documentation string is more than one line, it will add a
+          button which will toggle between showing only the first line,
+          and showing the full text.  Furthermore, if there is no
+          `:doc' property in the widget, it will instead examine the
+          `:documentation-property' property.  If it is a lambda
+          expression, it will be called with the widget's value as an
+          argument, and the result will be used as the documentation
+          text.
+
+    `%t'
+          Insert the string specified by `:tag' here, or the `princ'
+          representation of the value if there is no tag.
+
+    `%%'
+          Insert a literal `%'.
+
+`:button-face'
+     Face used to highlight text inside %[ %] in the format.
+
+`:button-prefix'
+`:button-suffix'
+     Text around %[ %] in the format.
+
+     These can be
+    _nil_
+          No text is inserted.
+
+    _a string_
+          The string is inserted literally.
+
+    _a symbol_
+          The value of the symbol is expanded according to this table.
+
+`:doc'
+     The string inserted by the `%d' escape in the format string.
+
+`:tag'
+     The string inserted by the `%t' escape in the format string.
+
+`:tag-glyph'
+     Name of image to use instead of the string specified by `:tag' on
+     Emacsen that supports it.
+
+`:help-echo'
+     Specifies how to display a message whenever you move to the widget
+     with either `widget-forward' or `widget-backward' or move the mouse
+     over it (using the standard `help-echo' mechanism).  The argument
+     is either a string to display, a function of one argument, the
+     widget, which should return a string to display, or a form that
+     evaluates to such a string.
+
+`:follow-link'
+     Specifies how to interpret a <mouse-1> click on the widget.  *Note
+     Defining Clickable Text: (elisp)Clickable Text.
+
+`:indent'
+     An integer indicating the absolute number of spaces to indent
+     children of this widget.
+
+`:offset'
+     An integer indicating how many extra spaces to add to the widget's
+     grandchildren compared to this widget.
+
+`:extra-offset'
+     An integer indicating how many extra spaces to add to the widget's
+     children compared to this widget.
+
+`:notify'
+     A function called each time the widget or a nested widget is
+     changed.  The function is called with two or three arguments.  The
+     first argument is the widget itself, the second argument is the
+     widget that was changed, and the third argument is the event
+     leading to the change, if any.
+
+`:menu-tag'
+     Tag used in the menu when the widget is used as an option in a
+     `menu-choice' widget.
+
+`:menu-tag-get'
+     Function used for finding the tag when the widget is used as an
+     option in a `menu-choice' widget.  By default, the tag used will
+     be either the `:menu-tag' or `:tag' property if present, or the
+     `princ' representation of the `:value' property if not.
+
+`:match'
+     Should be a function called with two arguments, the widget and a
+     value, and returning non-`nil' if the widget can represent the
+     specified value.
+
+`:validate'
+     A function which takes a widget as an argument, and returns `nil'
+     if the widget's current value is valid for the widget.  Otherwise
+     it should return the widget containing the invalid data, and set
+     that widget's `:error' property to a string explaining the error.
+
+     The following predefined function can be used:
+
+      -- Function: widget-children-validate widget
+          All the `:children' of WIDGET must be valid.
+
+`:tab-order'
+     Specify the order in which widgets are traversed with
+     `widget-forward' or `widget-backward'.  This is only partially
+     implemented.
+
+       a. Widgets with tabbing order `-1' are ignored.
+
+       b. (Unimplemented) When on a widget with tabbing order N, go to
+          the next widget in the buffer with tabbing order N+1 or `nil',
+          whichever comes first.
+
+       c. When on a widget with no tabbing order specified, go to the
+          next widget in the buffer with a positive tabbing order, or
+          `nil'
+
+`:parent'
+     The parent of a nested widget (e.g. a `menu-choice' item or an
+     element of a `editable-list' widget).
+
+`:sibling-args'
+     This keyword is only used for members of a `radio-button-choice' or
+     `checklist'.  The value should be a list of extra keyword
+     arguments, which will be used when creating the `radio-button' or
+     `checkbox' associated with this item.
+
+
+ -- User Option: widget-glyph-directory
+     Directory where glyphs are found.  Widget will look here for a
+     file with the same name as specified for the image, with either a
+     `.xpm' (if supported) or `.xbm' extension.
+
+ -- User Option: widget-glyph-enable
+     If non-`nil', allow glyphs to appear on displays where they are
+     supported.
+
+* Menu:
+
+* link::
+* url-link::
+* info-link::
+* push-button::
+* editable-field::
+* text::
+* menu-choice::
+* radio-button-choice::
+* item::
+* choice-item::
+* toggle::
+* checkbox::
+* checklist::
+* editable-list::
+* group::
+
+
+File: widget,  Node: link,  Next: url-link,  Prev: Basic Types,  Up: Basic Types
+
+The `link' Widget
+-----------------
+
+Syntax:
+
+     TYPE ::= (link [KEYWORD ARGUMENT]...  [ VALUE ])
+
+   The VALUE, if present, is used to initialize the `:value' property.
+The value should be a string, which will be inserted in the buffer.
+
+   By default the link will be shown in brackets.
+
+ -- User Option: widget-link-prefix
+     String to prefix links.
+
+ -- User Option: widget-link-suffix
+     String to suffix links.
+
+
+File: widget,  Node: url-link,  Next: info-link,  Prev: link,  Up: Basic Types
+
+The `url-link' Widget
+---------------------
+
+Syntax:
+
+     TYPE ::= (url-link [KEYWORD ARGUMENT]...  URL)
+
+   When this link is invoked, the WWW browser specified by
+`browse-url-browser-function' will be called with URL.
+
+
+File: widget,  Node: info-link,  Next: push-button,  Prev: url-link,  Up: Basic Types
+
+The `info-link' Widget
+----------------------
+
+Syntax:
+
+     TYPE ::= (info-link [KEYWORD ARGUMENT]...  ADDRESS)
+
+   When this link is invoked, the built-in Info reader is started on
+ADDRESS.
+
+
+File: widget,  Node: push-button,  Next: editable-field,  Prev: info-link,  Up: Basic Types
+
+The `push-button' Widget
+------------------------
+
+Syntax:
+
+     TYPE ::= (push-button [KEYWORD ARGUMENT]...  [ VALUE ])
+
+   The VALUE, if present, is used to initialize the `:value' property.
+The value should be a string, which will be inserted in the buffer.
+
+   By default the tag will be shown in brackets.
+
+ -- User Option: widget-push-button-prefix
+     String to prefix push buttons.
+
+ -- User Option: widget-push-button-suffix
+     String to suffix push buttons.
+
+
+File: widget,  Node: editable-field,  Next: text,  Prev: push-button,  Up: Basic Types
+
+The `editable-field' Widget
+---------------------------
+
+Syntax:
+
+     TYPE ::= (editable-field [KEYWORD ARGUMENT]... [ VALUE ])
+
+   The VALUE, if present, is used to initialize the `:value' property.
+The value should be a string, which will be inserted in the field.
+This widget will match all string values.
+
+   The following extra properties are recognized:
+
+`:size'
+     The width of the editable field.
+     By default the field will reach to the end of the line.
+
+`:value-face'
+     Face used for highlighting the editable field.  Default is
+     `widget-field-face', see *note User Interface::.
+
+`:secret'
+     Character used to display the value.  You can set this to e.g. `?*'
+     if the field contains a password or other secret information.  By
+     default, this is `nil', and the value is not secret.
+
+`:valid-regexp'
+     By default the `:validate' function will match the content of the
+     field with the value of this attribute.  The default value is `""'
+     which matches everything.
+
+`:keymap'
+     Keymap used in the editable field.  The default value is
+     `widget-field-keymap', which allows you to use all the normal
+     editing commands, even if the buffer's major mode suppresses some
+     of them.  Pressing <RET> invokes the function specified by
+     `:action'.
+
+
+File: widget,  Node: text,  Next: menu-choice,  Prev: editable-field,  Up: Basic Types
+
+The `text' Widget
+-----------------
+
+This is just like `editable-field', but intended for multiline text
+fields.  The default `:keymap' is `widget-text-keymap', which does not
+rebind the <RET> key.
+
+
+File: widget,  Node: menu-choice,  Next: radio-button-choice,  Prev: text,  Up: Basic Types
+
+The `menu-choice' Widget
+------------------------
+
+Syntax:
+
+     TYPE ::= (menu-choice [KEYWORD ARGUMENT]... TYPE ... )
+
+   The TYPE argument represents each possible choice.  The widget's
+value will be that of the chosen TYPE argument.  This widget will match
+any value matching at least one of the specified TYPE arguments.
+
+`:void'
+     Widget type used as a fallback when the value does not match any
+     of the specified TYPE arguments.
+
+`:case-fold'
+     Set this to `nil' if you don't want to ignore case when prompting
+     for a choice through the minibuffer.
+
+`:children'
+     A list whose CAR is the widget representing the currently chosen
+     type in the buffer.
+
+`:choice'
+     The current chosen type.
+
+`:args'
+     The list of types.
+
+
+File: widget,  Node: radio-button-choice,  Next: item,  Prev: menu-choice,  Up: Basic Types
+
+The `radio-button-choice' Widget
+--------------------------------
+
+Syntax:
+
+     TYPE ::= (radio-button-choice [KEYWORD ARGUMENT]...  TYPE ... )
+
+   The component types specify the choices, with one radio button for
+each.  The widget's value will be that of the chosen TYPE argument.
+This widget matches any value that matches at least one of the
+specified TYPE arguments.
+
+   The following extra properties are recognized.
+
+`:entry-format'
+     This string will be inserted for each entry in the list.  The
+     following `%' escapes are available:
+    `%v'
+          Replace with the buffer representation of the TYPE widget.
+
+    `%b'
+          Replace with the radio button.
+
+    `%%'
+          Insert a literal `%'.
+
+`:button-args'
+     A list of keywords to pass to the radio buttons.  Useful for
+     setting e.g. the `:help-echo' for each button.
+
+`:buttons'
+     The widgets representing the radio buttons.
+
+`:children'
+     The widgets representing each type.
+
+`:choice'
+     The current chosen type
+
+`:args'
+     The list of types.
+
+   You can add extra radio button items to a `radio-button-choice'
+widget after it has been created with the function
+`widget-radio-add-item'.
+
+ -- Function: widget-radio-add-item widget type
+     Add to `radio-button-choice' widget WIDGET a new radio button item
+     of type TYPE.
+
+   Please note that such items added after the `radio-button-choice'
+widget has been created will *not* be properly destructed when you call
+`widget-delete'.
+
+
+File: widget,  Node: item,  Next: choice-item,  Prev: radio-button-choice,  Up: Basic Types
+
+The `item' Widget
+-----------------
+
+Syntax:
+
+     ITEM ::= (item [KEYWORD ARGUMENT]... VALUE)
+
+   The VALUE, if present, is used to initialize the `:value' property.
+The value should be a string, which will be inserted in the buffer.
+This widget will only match the specified value.
+
+
+File: widget,  Node: choice-item,  Next: toggle,  Prev: item,  Up: Basic Types
+
+The `choice-item' Widget
+------------------------
+
+Syntax:
+
+     ITEM ::= (choice-item [KEYWORD ARGUMENT]... VALUE)
+
+   The VALUE, if present, is used to initialize the `:value' property.
+The value should be a string, which will be inserted in the buffer as a
+button.  Activating the button of a `choice-item' is equivalent to
+activating the parent widget.  This widget will only match the
+specified value.
+
+
+File: widget,  Node: toggle,  Next: checkbox,  Prev: choice-item,  Up: Basic Types
+
+The `toggle' Widget
+-------------------
+
+Syntax:
+
+     TYPE ::= (toggle [KEYWORD ARGUMENT]...)
+
+   The widget has two possible states, `on' and `off', which correspond
+to a `t' or `nil' value, respectively.
+
+   The following extra properties are recognized:
+
+`:on'
+     A string representing the `on' state.  By default the string `on'.
+
+`:off'
+     A string representing the `off' state.  By default the string
+     `off'.  
+
+`:on-glyph'
+     Name of a glyph to be used instead of the `:on' text string, on
+     emacsen that supports this.  
+
+`:off-glyph'
+     Name of a glyph to be used instead of the `:off' text string, on
+     emacsen that supports this.
+
+
+File: widget,  Node: checkbox,  Next: checklist,  Prev: toggle,  Up: Basic Types
+
+The `checkbox' Widget
+---------------------
+
+This widget has two possible states, `selected' and `unselected', which
+corresponds to a `t' or `nil' value.
+
+   Syntax:
+
+     TYPE ::= (checkbox [KEYWORD ARGUMENT]...)
+
+
+File: widget,  Node: checklist,  Next: editable-list,  Prev: checkbox,  Up: Basic Types
+
+The `checklist' Widget
+----------------------
+
+Syntax:
+
+     TYPE ::= (checklist [KEYWORD ARGUMENT]...  TYPE ... )
+
+   The TYPE arguments represent each checklist item.  The widget's
+value will be a list containing the values of all checked TYPE
+arguments.  The checklist widget will match a list whose elements all
+match at least one of the specified TYPE arguments.
+
+   The following extra properties are recognized:
+
+`:entry-format'
+     This string will be inserted for each entry in the list.  The
+     following `%' escapes are available:
+    `%v'
+          Replaced with the buffer representation of the TYPE widget.
+
+    `%b'
+          Replace with the checkbox.
+
+    `%%'
+          Insert a literal `%'.
+
+`:greedy'
+     Usually a checklist will only match if the items are in the exact
+     sequence given in the specification.  By setting `:greedy' to
+     non-`nil', it will allow the items to come in any sequence.
+     However, if you extract the value they will be in the sequence
+     given in the checklist, i.e. the original sequence is forgotten.
+
+`:button-args'
+     A list of keywords to pass to the checkboxes.  Useful for setting
+     e.g. the `:help-echo' for each checkbox.
+
+`:buttons'
+     The widgets representing the checkboxes.
+
+`:children'
+     The widgets representing each type.
+
+`:args'
+     The list of types.
+
+
+File: widget,  Node: editable-list,  Next: group,  Prev: checklist,  Up: Basic Types
+
+The `editable-list' Widget
+--------------------------
+
+Syntax:
+
+     TYPE ::= (editable-list [KEYWORD ARGUMENT]... TYPE)
+
+   The value is a list, where each member represents one widget of type
+TYPE.
+
+   The following extra properties are recognized:
+
+`:entry-format'
+     This string will be inserted for each entry in the list.  The
+     following `%' escapes are available:
+    `%v'
+          This will be replaced with the buffer representation of the
+          TYPE widget.
+
+    `%i'
+          Insert the [INS] button.
+
+    `%d'
+          Insert the [DEL] button.
+
+    `%%'
+          Insert a literal `%'.
+
+`:insert-button-args'
+     A list of keyword arguments to pass to the insert buttons.
+
+`:delete-button-args'
+     A list of keyword arguments to pass to the delete buttons.
+
+`:append-button-args'
+     A list of keyword arguments to pass to the trailing insert button.
+
+`:buttons'
+     The widgets representing the insert and delete buttons.
+
+`:children'
+     The widgets representing the elements of the list.
+
+`:args'
+     List whose CAR is the type of the list elements.
+
+
+File: widget,  Node: group,  Prev: editable-list,  Up: Basic Types
+
+The `group' Widget
+------------------
+
+This widget simply group other widgets together.
+
+   Syntax:
+
+     TYPE ::= (group [KEYWORD ARGUMENT]... TYPE...)
+
+   The value is a list, with one member for each TYPE.
+
+
+File: widget,  Node: Sexp Types,  Next: Widget Properties,  Prev: Basic Types,  Up: Top
+
+Sexp Types
+==========
+
+A number of widgets for editing "s-expressions" (Lisp types), sexp for
+short, are also available.  These basically fall in several categories
+described in this section.
+
+* Menu:
+
+* constants::
+* generic::
+* atoms::
+* composite::
+
+
+File: widget,  Node: constants,  Next: generic,  Prev: Sexp Types,  Up: Sexp Types
+
+The Constant Widgets
+--------------------
+
+The `const' widget can contain any Lisp expression, but the user is
+prohibited from editing it, which is mainly useful as a component of one
+of the composite widgets.
+
+   The syntax for the `const' widget is:
+
+     TYPE ::= (const [KEYWORD ARGUMENT]...  [ VALUE ])
+
+   The VALUE, if present, is used to initialize the `:value' property
+and can be any s-expression.
+
+ -- Widget: const
+     This will display any valid s-expression in an immutable part of
+     the buffer.
+
+   There are two variations of the `const' widget, namely
+`variable-item' and `function-item'.  These should contain a symbol
+with a variable or function binding.  The major difference from the
+`const' widget is that they will allow the user to see the variable or
+function documentation for the symbol.
+
+ -- Widget: variable-item
+     An immutable symbol that is bound as a variable.
+
+ -- Widget: function-item
+     An immutable symbol that is bound as a function.
+
+
+File: widget,  Node: generic,  Next: atoms,  Prev: constants,  Up: Sexp Types
+
+Generic Sexp Widget
+-------------------
+
+The `sexp' widget can contain any Lisp expression, and allows the user
+to edit it inline in the buffer.
+
+   The syntax for the `sexp' widget is:
+
+     TYPE ::= (sexp [KEYWORD ARGUMENT]...  [ VALUE ])
+
+ -- Widget: sexp
+     This will allow you to edit any valid s-expression in an editable
+     buffer field.
+
+     The `sexp' widget takes the same keyword arguments as the
+     `editable-field' widget.  *Note editable-field::.
+
+
+File: widget,  Node: atoms,  Next: composite,  Prev: generic,  Up: Sexp Types
+
+Atomic Sexp Widgets
+-------------------
+
+The atoms are s-expressions that do not consist of other s-expressions.
+For example, a string, a file name, or a symbol are atoms, while a list
+is a composite type.  You can edit the value of an atom with the
+following widgets.
+
+   The syntax for all the atoms are:
+
+     TYPE ::= (CONSTRUCT [KEYWORD ARGUMENT]...  [ VALUE ])
+
+   The VALUE, if present, is used to initialize the `:value' property
+and must be an expression of the same type as the widget.  That is, the
+string widget can only be initialized with a string.
+
+   All the atom widgets take the same keyword arguments as the
+`editable-field' widget.  *Note editable-field::.
+
+ -- Widget: string
+     Allows you to edit a string in an editable field.
+
+ -- Widget: regexp
+     Allows you to edit a regular expression in an editable field.
+
+ -- Widget: character
+     Allows you to enter a character in an editable field.
+
+ -- Widget: file
+     Allows you to edit a file name in an editable field.
+
+     Keywords:
+    `:must-match'
+          If this is set to non-`nil', only existing file names will be
+          allowed in the minibuffer.
+
+ -- Widget: directory
+     Allows you to edit a directory name in an editable field.  Similar
+     to the `file' widget.
+
+ -- Widget: symbol
+     Allows you to edit a Lisp symbol in an editable field.
+
+ -- Widget: function
+     Allows you to edit a lambda expression, or a function name with
+     completion.
+
+ -- Widget: variable
+     Allows you to edit a variable name, with completion.
+
+ -- Widget: integer
+     Allows you to edit an integer in an editable field.
+
+ -- Widget: number
+     Allows you to edit a number in an editable field.
+
+ -- Widget: boolean
+     Allows you to edit a boolean.  In Lisp this means a variable which
+     is either `nil' meaning false, or non-`nil' meaning true.
+
+
+File: widget,  Node: composite,  Prev: atoms,  Up: Sexp Types
+
+Composite Sexp Widgets
+----------------------
+
+The syntax for the composite widget construct is:
+
+     TYPE ::= (CONSTRUCT [KEYWORD ARGUMENT]...  COMPONENT...)
+
+where each COMPONENT must be a widget type.  Each component widget will
+be displayed in the buffer, and will be editable by the user.
+
+ -- Widget: cons
+     The value of a `cons' widget must be a cons-cell whose CAR and CDR
+     have two specified types.  It uses this syntax:
+
+          TYPE ::= (cons [KEYWORD ARGUMENT]...  CAR-TYPE CDR-TYPE)
+
+ -- Widget: choice
+     The value matched by a `choice' widget must have one of a fixed
+     set of types.  The widget's syntax is as follows:
+
+          TYPE ::= (choice [KEYWORD ARGUMENT]...  TYPE ... )
+
+     The value of a `choice' widget can be anything that matches any of
+     the TYPES.
+
+ -- Widget: list
+     The value of a `list' widget must be a list whose element types
+     match the specified component types:
+
+          TYPE ::= (list [KEYWORD ARGUMENT]...  COMPONENT-TYPE...)
+
+     Thus, `(list string number)' matches lists of two elements, the
+     first being a string and the second being a number.
+
+ -- Widget: vector
+     The `vector' widget is like the `list' widget but matches vectors
+     instead of lists.  Thus, `(vector string number)' matches vectors
+     of two elements, the first being a string and the second being a
+     number.
+
+   The above suffice for specifying fixed size lists and vectors.  To
+get variable length lists and vectors, you can use a `choice', `set',
+or `repeat' widget together with the `:inline' keyword.  If any
+component of a composite widget has the `:inline' keyword set, its
+value must be a list which will then be spliced into the composite.
+For example, to specify a list whose first element must be a file name,
+and whose remaining elements should either be the symbol `t' or two
+strings (file names), you can use the following widget specification:
+
+     (list file
+           (choice (const t)
+                   (list :inline t
+                         :value ("foo" "bar")
+                         string string)))
+
+   The value of a widget of this type will either have the form `(file
+t)' or `(file STRING STRING)'.
+
+   This concept of `:inline' may be hard to understand.  It was
+certainly hard to implement, so instead of confusing you more by trying
+to explain it here, I'll just suggest you meditate over it for a while.
+
+ -- Widget: set
+     Specifies a type whose values are the lists whose elements all
+     belong to a given set.  The order of elements of the list is not
+     significant.  Here's the syntax:
+
+          TYPE ::= (set [KEYWORD ARGUMENT]...  PERMITTED-ELEMENT ... )
+
+     Use `const' to specify each permitted element, like this: `(set
+     (const a) (const b))'.
+
+ -- Widget: repeat
+     Specifies a list of any number of elements that fit a certain type.
+
+          TYPE ::= (repeat [KEYWORD ARGUMENT]...  TYPE)
+
+
+File: widget,  Node: Widget Properties,  Next: Defining New Widgets,  Prev: Sexp Types,  Up: Top
+
+Properties
+==========
+
+You can examine or set the value of a widget by using the widget object
+that was returned by `widget-create'.
+
+ -- Function: widget-value widget
+     Return the current value contained in WIDGET.  It is an error to
+     call this function on an uninitialized widget.
+
+ -- Function: widget-value-set widget value
+     Set the value contained in WIDGET to VALUE.  It is an error to
+     call this function with an invalid VALUE.
+
+   *Important:* You _must_ call `widget-setup' after modifying the
+value of a widget before the user is allowed to edit the widget again.
+It is enough to call `widget-setup' once if you modify multiple
+widgets.  This is currently only necessary if the widget contains an
+editing field, but may be necessary for other widgets in the future.
+
+   If your application needs to associate some information with the
+widget objects, for example a reference to the item being edited, it
+can be done with `widget-put' and `widget-get'.  The property names
+must begin with a `:'.
+
+ -- Function: widget-put widget property value
+     In WIDGET set PROPERTY to VALUE.  PROPERTY should be a symbol,
+     while VALUE can be anything.
+
+ -- Function: widget-get widget property
+     In WIDGET return the value for PROPERTY.  PROPERTY should be a
+     symbol, the value is what was last set by `widget-put' for
+     PROPERTY.
+
+ -- Function: widget-member widget property
+     Non-`nil' if WIDGET has a value (even `nil') for property PROPERTY.
+
+   Occasionally it can be useful to know which kind of widget you have,
+i.e. the name of the widget type you gave when the widget was created.
+
+ -- Function: widget-type widget
+     Return the name of WIDGET, a symbol.
+
+   Widgets can be in two states: active, which means they are
+modifiable by the user, or inactive, which means they cannot be
+modified by the user.  You can query or set the state with the
+following code:
+
+     ;; Examine if WIDGET is active or not.
+     (if (widget-apply WIDGET :active)
+         (message "Widget is active.")
+       (message "Widget is inactive.")
+
+     ;; Make WIDGET inactive.
+     (widget-apply WIDGET :deactivate)
+
+     ;; Make WIDGET active.
+     (widget-apply WIDGET :activate)
+
+   A widget is inactive if it, or any of its ancestors (found by
+following the `:parent' link), have been deactivated.  To make sure a
+widget is really active, you must therefore activate both it and all
+its ancestors.
+
+     (while widget
+       (widget-apply widget :activate)
+       (setq widget (widget-get widget :parent)))
+
+   You can check if a widget has been made inactive by examining the
+value of the `:inactive' keyword.  If this is non-`nil', the widget
+itself has been deactivated.  This is different from using the `:active'
+keyword, in that the latter tells you if the widget *or* any of its
+ancestors have been deactivated.  Do not attempt to set the `:inactive'
+keyword directly.  Use the `:activate' `:deactivate' keywords instead.
+
+
+File: widget,  Node: Defining New Widgets,  Next: Widget Browser,  Prev: Widget Properties,  Up: Top
+
+Defining New Widgets
+====================
+
+You can define specialized widgets with `define-widget'.  It allows you
+to create a shorthand for more complex widgets, including specifying
+component widgets and new default values for the keyword arguments.
+
+ -- Function: define-widget name class doc &rest args
+     Define a new widget type named NAME from `class'.
+
+     NAME and class should both be symbols, `class' should be one of
+     the existing widget types.
+
+     The third argument DOC is a documentation string for the widget.
+
+     After the new widget has been defined, the following two calls will
+     create identical widgets:
+
+        *      (widget-create NAME)
+
+        *      (apply widget-create CLASS ARGS)
+
+
+   Using `define-widget' just stores the definition of the widget type
+in the `widget-type' property of NAME, which is what `widget-create'
+uses.
+
+   If you only want to specify defaults for keywords with no complex
+conversions, you can use `identity' as your conversion function.
+
+   The following additional keyword arguments are useful when defining
+new widgets:
+`:convert-widget'
+     Function to convert a widget type before creating a widget of that
+     type.  It takes a widget type as an argument, and returns the
+     converted widget type.  When a widget is created, this function is
+     called for the widget type and all the widget's parent types, most
+     derived first.
+
+     The following predefined functions can be used here:
+
+      -- Function: widget-types-convert-widget widget
+          Convert `:args' as widget types in WIDGET.
+
+      -- Function: widget-value-convert-widget widget
+          Initialize `:value' from `:args' in WIDGET.
+
+`:copy'
+     Function to deep copy a widget type.  It takes a shallow copy of
+     the widget type as an argument (made by `copy-sequence'), and
+     returns a deep copy.  The purpose of this is to avoid having
+     different instances of combined widgets share nested attributes.
+
+     The following predefined functions can be used here:
+
+      -- Function: widget-types-copy widget
+          Copy `:args' as widget types in WIDGET.
+
+`:value-to-internal'
+     Function to convert the value to the internal format.  The function
+     takes two arguments, a widget and an external value, and returns
+     the internal value.  The function is called on the present `:value'
+     when the widget is created, and on any value set later with
+     `widget-value-set'.
+
+`:value-to-external'
+     Function to convert the value to the external format.  The function
+     takes two arguments, a widget and an internal value, and returns
+     the external value.  The function is called on the present `:value'
+     when the widget is created, and on any value set later with
+     `widget-value-set'.
+
+`:create'
+     Function to create a widget from scratch.  The function takes one
+     argument, a widget type, and creates a widget of that type,
+     inserts it in the buffer, and returns a widget object.
+
+`:delete'
+     Function to delete a widget.  The function takes one argument, a
+     widget, and should remove all traces of the widget from the buffer.
+
+     The default value is:
+
+      -- Function: widget-default-delete widget
+          Remove WIDGET from the buffer.  Delete all `:children' and
+          `:buttons' in WIDGET.
+
+     In most cases you should not change this value, but instead use
+     `:value-delete' to make any additional cleanup.
+
+`:value-create'
+     Function to expand the `%v' escape in the format string.  It will
+     be called with the widget as its argument and should insert a
+     representation of the widget's value in the buffer.
+
+     Nested widgets should be listed in `:children' or `:buttons' to
+     make sure they are automatically deleted.
+
+`:value-delete'
+     Should remove the representation of the widget's value from the
+     buffer.  It will be called with the widget as its argument.  It
+     doesn't have to remove the text, but it should release markers and
+     delete nested widgets if these are not listed in `:children' or
+     `:buttons'.
+
+`:value-get'
+     Function to extract the value of a widget, as it is displayed in
+     the buffer.
+
+     The following predefined function can be used here:
+
+      -- Function: widget-value-value-get widget
+          Return the `:value' property of WIDGET.
+
+`:format-handler'
+     Function to handle unknown `%' escapes in the format string.  It
+     will be called with the widget and the character that follows the
+     `%' as arguments.  You can set this to allow your widget to handle
+     non-standard escapes.
+
+     You should end up calling `widget-default-format-handler' to handle
+     unknown escape sequences, which will handle the `%h' and any future
+     escape sequences, as well as give an error for unknown escapes.
+
+`:action'
+     Function to handle user initiated events.  By default, `:notify'
+     the parent.
+
+     The following predefined function can be used here:
+
+      -- Function: widget-parent-action widget &optional event
+          Tell `:parent' of WIDGET to handle the `:action'.  Optional
+          EVENT is the event that triggered the action.
+
+`:prompt-value'
+     Function to prompt for a value in the minibuffer.  The function
+     should take four arguments, WIDGET, PROMPT, VALUE, and UNBOUND and
+     should return a value for widget entered by the user.  PROMPT is
+     the prompt to use.  VALUE is the default value to use, unless
+     UNBOUND is non-`nil', in which case there is no default value.
+     The function should read the value using the method most natural
+     for this widget, and does not have to check that it matches.
+
+   If you want to define a new widget from scratch, use the `default'
+widget as its base.
+
+ -- Widget: default
+     Widget used as a base for other widgets.
+
+     It provides most of the functionality that is referred to as "by
+     default" in this text.
+
+
+File: widget,  Node: Widget Browser,  Next: Widget Minor Mode,  Prev: Defining New Widgets,  Up: Top
+
+Widget Browser
+==============
+
+There is a separate package to browse widgets.  This is intended to help
+programmers who want to examine the content of a widget.  The browser
+shows the value of each keyword, but uses links for certain keywords
+such as `:parent', which avoids printing cyclic structures.
+
+ -- Command: widget-browse WIDGET
+     Create a widget browser for WIDGET.  When called interactively,
+     prompt for WIDGET.
+
+ -- Command: widget-browse-other-window WIDGET
+     Create a widget browser for WIDGET and show it in another window.
+     When called interactively, prompt for WIDGET.
+
+ -- Command: widget-browse-at POS
+     Create a widget browser for the widget at POS.  When called
+     interactively, use the position of point.
+
+
+File: widget,  Node: Widget Minor Mode,  Next: Utilities,  Prev: Widget Browser,  Up: Top
+
+Widget Minor Mode
+=================
+
+There is a minor mode for manipulating widgets in major modes that
+don't provide any support for widgets themselves.  This is mostly
+intended to be useful for programmers doing experiments.
+
+ -- Command: widget-minor-mode
+     Toggle minor mode for traversing widgets.  With arg, turn widget
+     mode on if and only if arg is positive.
+
+ -- Variable: widget-minor-mode-keymap
+     Keymap used in `widget-minor-mode'.
+
+
+File: widget,  Node: Utilities,  Next: Widget Wishlist,  Prev: Widget Minor Mode,  Up: Top
+
+Utilities.
+==========
+
+ -- Function: widget-prompt-value widget prompt [ value unbound ]
+     Prompt for a value matching WIDGET, using PROMPT.  The current
+     value is assumed to be VALUE, unless UNBOUND is non-`nil'.
+
+ -- Function: widget-get-sibling widget
+     Get the item which WIDGET is assumed to toggle.  This is only
+     meaningful for radio buttons or checkboxes in a list.
+
+
+File: widget,  Node: Widget Wishlist,  Next: GNU Free Documentation License,  Prev: Utilities,  Up: Top
+
+Wishlist
+========
+
+   * It should be possible to add or remove items from a list with `C-k'
+     and `C-o' (suggested by RMS).
+
+   * The `[INS]' and `[DEL]' buttons should be replaced by a single
+     dash (`-').  The dash should be a button that, when invoked, asks
+     whether you want to add or delete an item (RMS wanted to git rid of
+     the ugly buttons, the dash is my idea).
+
+   * The `menu-choice' tag should be prettier, something like the
+     abbreviated menus in Open Look.
+
+   * Finish `:tab-order'.
+
+   * Make indentation work with glyphs and proportional fonts.
+
+   * Add commands to show overview of object and class hierarchies to
+     the browser.
+
+   * Find a way to disable mouse highlight for inactive widgets.
+
+   * Find a way to make glyphs look inactive.
+
+   * Add `property-list' widget.
+
+   * Add `association-list' widget.
+
+   * Add `key-binding' widget.
+
+   * Add `widget' widget for editing widget specifications.
+
+   * Find clean way to implement variable length list.  See
+     `TeX-printer-list' for an explanation.
+
+   * `C-h' in `widget-prompt-value' should give type specific help.
+
+   * Add a `mailto' widget.
+
+
+File: widget,  Node: GNU Free Documentation License,  Next: Index,  Prev: Widget Wishlist,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: widget,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Index
+*****
+
+This is an alphabetical listing of all concepts, functions, commands,
+variables, and widgets described in this manual.
+
+ [index ]
+* Menu:
+
+* action keyword:                        Defining New Widgets.
+                                                              (line 127)
+* activate a widget:                     Widget Properties.   (line  46)
+* active widget:                         Widget Properties.   (line  46)
+* append-button-args keyword:            editable-list.       (line  37)
+* args keyword <1>:                      editable-list.       (line  46)
+* args keyword <2>:                      checklist.           (line  46)
+* args keyword <3>:                      radio-button-choice. (line  42)
+* args keyword:                          menu-choice.         (line  29)
+* atomic sexp widget:                    atoms.               (line   6)
+* basic widgets:                         Introduction.        (line  13)
+* boolean:                               atoms.               (line  60)
+* browse-url-browser-function, and url-link widget: url-link. (line  10)
+* button widgets:                        User Interface.      (line  84)
+* button-args keyword <1>:               checklist.           (line  36)
+* button-args keyword:                   radio-button-choice. (line  29)
+* button-face keyword:                   Basic Types.         (line  71)
+* button-prefix keyword:                 Basic Types.         (line  74)
+* button-suffix keyword:                 Basic Types.         (line  74)
+* buttons keyword <1>:                   editable-list.       (line  40)
+* buttons keyword <2>:                   checklist.           (line  40)
+* buttons keyword:                       radio-button-choice. (line  33)
+* case-fold keyword:                     menu-choice.         (line  18)
+* character:                             atoms.               (line  29)
+* checkbox widget:                       checkbox.            (line   6)
+* checklist widget:                      checklist.           (line   6)
+* children keyword <1>:                  editable-list.       (line  43)
+* children keyword <2>:                  checklist.           (line  43)
+* children keyword <3>:                  radio-button-choice. (line  36)
+* children keyword:                      menu-choice.         (line  22)
+* choice:                                composite.           (line  20)
+* choice keyword <1>:                    radio-button-choice. (line  39)
+* choice keyword:                        menu-choice.         (line  26)
+* choice-item widget:                    choice-item.         (line   6)
+* composite sexp widgets:                composite.           (line   6)
+* cons:                                  composite.           (line  14)
+* const:                                 constants.           (line  18)
+* constant widgets:                      constants.           (line   6)
+* convert-widget keyword:                Defining New Widgets.
+                                                              (line  35)
+* copy keyword:                          Defining New Widgets.
+                                                              (line  50)
+* create keyword:                        Defining New Widgets.
+                                                              (line  75)
+* deactivate a widget:                   Widget Properties.   (line  46)
+* default:                               Defining New Widgets.
+                                                              (line 150)
+* define-widget:                         Defining New Widgets.
+                                                              (line  11)
+* defining new widgets:                  Defining New Widgets.
+                                                              (line   6)
+* delete keyword:                        Defining New Widgets.
+                                                              (line  80)
+* delete-button-args keyword:            editable-list.       (line  34)
+* directory:                             atoms.               (line  40)
+* doc keyword:                           Basic Types.         (line  88)
+* editable-field widget:                 editable-field.      (line   6)
+* editable-list widget:                  editable-list.       (line   6)
+* embedded buttons:                      User Interface.      (line 112)
+* entry-format keyword <1>:              editable-list.       (line  15)
+* entry-format keyword <2>:              checklist.           (line  17)
+* entry-format keyword:                  radio-button-choice. (line  17)
+* example of using widgets:              Programming Example. (line   6)
+* extra-offset keyword:                  Basic Types.         (line 118)
+* file:                                  atoms.               (line  32)
+* follow-link keyword:                   Basic Types.         (line 106)
+* format keyword:                        Basic Types.         (line  20)
+* format-handler keyword:                Defining New Widgets.
+                                                              (line 117)
+* function:                              atoms.               (line  47)
+* function-item:                         constants.           (line  31)
+* generic sexp widget:                   generic.             (line   6)
+* greedy keyword:                        checklist.           (line  29)
+* group widget:                          group.               (line   6)
+* help-echo keyword:                     Basic Types.         (line  98)
+* inactive widget:                       Widget Properties.   (line  46)
+* indent keyword:                        Basic Types.         (line 110)
+* info-link widget:                      info-link.           (line   6)
+* insert-button-args keyword:            editable-list.       (line  31)
+* integer:                               atoms.               (line  54)
+* item widget:                           item.                (line   6)
+* keymap keyword:                        editable-field.      (line  34)
+* keyword arguments:                     Basic Types.         (line  15)
+* link widget:                           link.                (line   6)
+* list:                                  composite.           (line  29)
+* match keyword:                         Basic Types.         (line 139)
+* menu-choice widget:                    menu-choice.         (line   6)
+* menu-tag keyword:                      Basic Types.         (line 129)
+* menu-tag-get keyword:                  Basic Types.         (line 133)
+* Mouse-2 (on button widgets):           User Interface.      (line  94)
+* must-match keyword:                    atoms.               (line  35)
+* new widgets:                           Defining New Widgets.
+                                                              (line   6)
+* notify keyword:                        Basic Types.         (line 122)
+* number:                                atoms.               (line  57)
+* off-glyph keyword:                     toggle.              (line  24)
+* offset keyword:                        Basic Types.         (line 114)
+* on-glyph keyword:                      toggle.              (line  20)
+* option field tag:                      User Interface.      (line 104)
+* parent keyword:                        Basic Types.         (line 170)
+* prompt-value keyword:                  Defining New Widgets.
+                                                              (line 137)
+* properties of widgets:                 Widget Properties.   (line   6)
+* push-button widget:                    push-button.         (line   6)
+* radio-button-choice widget:            radio-button-choice. (line   6)
+* regexp:                                atoms.               (line  26)
+* repeat:                                composite.           (line  76)
+* secret keyword:                        editable-field.      (line  24)
+* set:                                   composite.           (line  66)
+* sexp:                                  generic.             (line  14)
+* sexp types:                            Sexp Types.          (line   6)
+* sibling-args keyword:                  Basic Types.         (line 174)
+* size keyword:                          editable-field.      (line  16)
+* string:                                atoms.               (line  23)
+* symbol:                                atoms.               (line  44)
+* tab-order keyword:                     Basic Types.         (line 155)
+* tag keyword:                           Basic Types.         (line  91)
+* tag-glyph keyword:                     Basic Types.         (line  94)
+* text widget:                           text.                (line   6)
+* todo:                                  Widget Wishlist.     (line   6)
+* toggle widget:                         toggle.              (line   6)
+* url-link widget:                       url-link.            (line   6)
+* utility functions for widgets:         Utilities.           (line   6)
+* valid-regexp keyword:                  editable-field.      (line  29)
+* validate keyword:                      Basic Types.         (line 144)
+* value keyword:                         Basic Types.         (line  17)
+* value-create keyword:                  Defining New Widgets.
+                                                              (line  93)
+* value-delete keyword:                  Defining New Widgets.
+                                                              (line 101)
+* value-face keyword:                    editable-field.      (line  20)
+* value-get keyword:                     Defining New Widgets.
+                                                              (line 108)
+* value-to-external keyword:             Defining New Widgets.
+                                                              (line  68)
+* value-to-internal keyword:             Defining New Widgets.
+                                                              (line  61)
+* variable:                              atoms.               (line  51)
+* variable-item:                         constants.           (line  28)
+* vector:                                composite.           (line  38)
+* void keyword:                          menu-choice.         (line  14)
+* widget browser:                        Widget Browser.      (line   6)
+* widget buttons:                        User Interface.      (line  84)
+* widget library, why use it:            Introduction.        (line  62)
+* widget minor mode:                     Widget Minor Mode.   (line   6)
+* widget properties:                     Widget Properties.   (line   6)
+* widget-backward:                       User Interface.      (line 158)
+* widget-browse:                         Widget Browser.      (line  12)
+* widget-browse-at:                      Widget Browser.      (line  20)
+* widget-browse-other-window:            Widget Browser.      (line  16)
+* widget-button-click <1>:               Setting Up the Buffer.
+                                                              (line  37)
+* widget-button-click:                   User Interface.      (line  96)
+* widget-button-face:                    User Interface.      (line 139)
+* widget-button-prefix:                  Basic Types.         (line  32)
+* widget-button-press <1>:               Setting Up the Buffer.
+                                                              (line  37)
+* widget-button-press:                   User Interface.      (line  90)
+* widget-button-suffix:                  Basic Types.         (line  35)
+* widget-children-validate:              Basic Types.         (line 153)
+* widget-create:                         Setting Up the Buffer.
+                                                              (line  12)
+* widget-default-delete:                 Defining New Widgets.
+                                                              (line  87)
+* widget-default-format-handler:         Defining New Widgets.
+                                                              (line 123)
+* widget-delete:                         Setting Up the Buffer.
+                                                              (line  19)
+* widget-field-face:                     User Interface.      (line  79)
+* widget-field-keymap:                   editable-field.      (line  34)
+* widget-forward:                        User Interface.      (line 153)
+* widget-get:                            Widget Properties.   (line  33)
+* widget-get-sibling:                    Utilities.           (line  11)
+* widget-global-map:                     Setting Up the Buffer.
+                                                              (line  43)
+* widget-glyph-directory:                Basic Types.         (line 182)
+* widget-glyph-enable:                   Basic Types.         (line 187)
+* widget-insert:                         Setting Up the Buffer.
+                                                              (line  32)
+* widget-keymap:                         Setting Up the Buffer.
+                                                              (line  38)
+* widget-link-prefix:                    link.                (line  16)
+* widget-link-suffix:                    link.                (line  19)
+* widget-member:                         Widget Properties.   (line  38)
+* widget-minor-mode:                     Widget Minor Mode.   (line  11)
+* widget-minor-mode-keymap:              Widget Minor Mode.   (line  15)
+* widget-mouse-face:                     User Interface.      (line 142)
+* widget-parent-action:                  Defining New Widgets.
+                                                              (line 134)
+* widget-prompt-value:                   Utilities.           (line   7)
+* widget-push-button-prefix:             push-button.         (line  16)
+* widget-push-button-suffix:             push-button.         (line  19)
+* widget-put:                            Widget Properties.   (line  29)
+* widget-radio-add-item:                 radio-button-choice. (line  50)
+* widget-setup:                          Setting Up the Buffer.
+                                                              (line  22)
+* widget-text-keymap:                    text.                (line   6)
+* widget-type:                           Widget Properties.   (line  44)
+* widget-types-convert-widget:           Defining New Widgets.
+                                                              (line  45)
+* widget-types-copy:                     Defining New Widgets.
+                                                              (line  59)
+* widget-value:                          Widget Properties.   (line  10)
+* widget-value-convert-widget:           Defining New Widgets.
+                                                              (line  48)
+* widget-value-set:                      Widget Properties.   (line  14)
+* widget-value-value-get:                Defining New Widgets.
+                                                              (line 115)
+* widgets, basic types:                  Introduction.        (line  13)
+* widgets, programming example:          Programming Example. (line   6)
+
+
+
+Tag Table:
+Node: Top998
+Node: Introduction2128
+Node: User Interface5199
+Node: Programming Example10920
+Node: Setting Up the Buffer15127
+Node: Basic Types16794
+Node: link23418
+Node: url-link23926
+Node: info-link24230
+Node: push-button24512
+Node: editable-field25079
+Node: text26467
+Node: menu-choice26756
+Node: radio-button-choice27604
+Node: item29186
+Node: choice-item29566
+Node: toggle30056
+Node: checkbox30803
+Node: checklist31102
+Node: editable-list32537
+Node: group33711
+Node: Sexp Types33991
+Node: constants34335
+Node: generic35403
+Node: atoms35953
+Node: composite37874
+Node: Widget Properties40854
+Node: Defining New Widgets43907
+Node: Widget Browser49935
+Node: Widget Minor Mode50788
+Node: Utilities51337
+Node: Widget Wishlist51820
+Node: GNU Free Documentation License53077
+Node: Index78247
+
+End Tag Table

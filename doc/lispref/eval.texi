@@ -1,0 +1,866 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1994, 1998, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/eval
+@node Evaluation, Control Structures, Symbols, Top
+@chapter Evaluation
+@cindex evaluation
+@cindex  interpreter
+@cindex interpreter
+@cindex value of expression
+
+  The @dfn{evaluation} of expressions in Emacs Lisp is performed by the
+@dfn{Lisp interpreter}---a program that receives a Lisp object as input
+and computes its @dfn{value as an expression}.  How it does this depends
+on the data type of the object, according to rules described in this
+chapter.  The interpreter runs automatically to evaluate portions of
+your program, but can also be called explicitly via the Lisp primitive
+function @code{eval}.
+
+@ifnottex
+@menu
+* Intro Eval::  Evaluation in the scheme of things.
+* Forms::       How various sorts of objects are evaluated.
+* Quoting::     Avoiding evaluation (to put constants in the program).
+* Backquote::   Easier construction of list structure.
+* Eval::        How to invoke the Lisp interpreter explicitly.
+@end menu
+
+@node Intro Eval
+@section Introduction to Evaluation
+
+  The Lisp interpreter, or evaluator, is the part of Emacs that
+computes the value of an expression that is given to it.  When a
+function written in Lisp is called, the evaluator computes the value
+of the function by evaluating the expressions in the function body.
+Thus, running any Lisp program really means running the Lisp
+interpreter.
+@end ifnottex
+
+@cindex form
+@cindex expression
+@cindex S-expression
+  A Lisp object that is intended for evaluation is called a @dfn{form}
+or @dfn{expression}@footnote{It is sometimes also referred to as an
+@dfn{S-expression} or @dfn{sexp}, but we generally do not use this
+terminology in this manual.}.  The fact that forms are data objects
+and not merely text is one of the fundamental differences between
+Lisp-like languages and typical programming languages.  Any object can
+be evaluated, but in practice only numbers, symbols, lists and strings
+are evaluated very often.
+
+  In subsequent sections, we will describe the details of what
+evaluation means for each kind of form.
+
+  It is very common to read a Lisp form and then evaluate the form,
+but reading and evaluation are separate activities, and either can be
+performed alone.  Reading per se does not evaluate anything; it
+converts the printed representation of a Lisp object to the object
+itself.  It is up to the caller of @code{read} to specify whether this
+object is a form to be evaluated, or serves some entirely different
+purpose.  @xref{Input Functions}.
+
+@cindex recursive evaluation
+  Evaluation is a recursive process, and evaluating a form often
+involves evaluating parts within that form.  For instance, when you
+evaluate a @dfn{function call} form such as @code{(car x)}, Emacs
+first evaluates the argument (the subform @code{x}).  After evaluating
+the argument, Emacs @dfn{executes} the function (@code{car}), and if
+the function is written in Lisp, execution works by evaluating the
+@dfn{body} of the function (in this example, however, @code{car} is
+not a Lisp function; it is a primitive function implemented in C).
+@xref{Functions}, for more information about functions and function
+calls.
+
+@cindex environment
+  Evaluation takes place in a context called the @dfn{environment},
+which consists of the current values and bindings of all Lisp
+variables (@pxref{Variables}).@footnote{This definition of
+``environment'' is specifically not intended to include all the data
+that can affect the result of a program.}  Whenever a form refers to a
+variable without creating a new binding for it, the variable evaluates
+to the value given by the current environment.  Evaluating a form may
+also temporarily alter the environment by binding variables
+(@pxref{Local Variables}).
+
+@cindex side effect
+  Evaluating a form may also make changes that persist; these changes
+are called @dfn{side effects}.  An example of a form that produces a
+side effect is @code{(setq foo 1)}.
+
+  Do not confuse evaluation with command key interpretation.  The
+editor command loop translates keyboard input into a command (an
+interactively callable function) using the active keymaps, and then
+uses @code{call-interactively} to execute that command.  Executing the
+command usually involves evaluation, if the command is written in
+Lisp; however, this step is not considered a part of command key
+interpretation.  @xref{Command Loop}.
+
+@node Forms
+@section Kinds of Forms
+
+  A Lisp object that is intended to be evaluated is called a
+@dfn{form} (or an @dfn{expression}).  How Emacs evaluates a form
+depends on its data type.  Emacs has three different kinds of form
+that are evaluated differently: symbols, lists, and ``all other
+types''.  This section describes all three kinds, one by one, starting
+with the ``all other types'' which are self-evaluating forms.
+
+@menu
+* Self-Evaluating Forms::   Forms that evaluate to themselves.
+* Symbol Forms::            Symbols evaluate as variables.
+* Classifying Lists::       How to distinguish various sorts of list forms.
+* Function Indirection::    When a symbol appears as the car of a list,
+                              we find the real function via the symbol.
+* Function Forms::          Forms that call functions.
+* Macro Forms::             Forms that call macros.
+* Special Forms::           "Special forms" are idiosyncratic primitives,
+                              most of them extremely important.
+* Autoloading::             Functions set up to load files
+                              containing their real definitions.
+@end menu
+
+@node Self-Evaluating Forms
+@subsection Self-Evaluating Forms
+@cindex vector evaluation
+@cindex literal evaluation
+@cindex self-evaluating form
+
+  A @dfn{self-evaluating form} is any form that is not a list or
+symbol.  Self-evaluating forms evaluate to themselves: the result of
+evaluation is the same object that was evaluated.  Thus, the number 25
+evaluates to 25, and the string @code{"foo"} evaluates to the string
+@code{"foo"}.  Likewise, evaluating a vector does not cause evaluation
+of the elements of the vector---it returns the same vector with its
+contents unchanged.
+
+@example
+@group
+'123               ; @r{A number, shown without evaluation.}
+     @result{} 123
+@end group
+@group
+123                ; @r{Evaluated as usual---result is the same.}
+     @result{} 123
+@end group
+@group
+(eval '123)        ; @r{Evaluated ``by hand''---result is the same.}
+     @result{} 123
+@end group
+@group
+(eval (eval '123)) ; @r{Evaluating twice changes nothing.}
+     @result{} 123
+@end group
+@end example
+
+  It is common to write numbers, characters, strings, and even vectors
+in Lisp code, taking advantage of the fact that they self-evaluate.
+However, it is quite unusual to do this for types that lack a read
+syntax, because there's no way to write them textually.  It is possible
+to construct Lisp expressions containing these types by means of a Lisp
+program.  Here is an example:
+
+@example
+@group
+;; @r{Build an expression containing a buffer object.}
+(setq print-exp (list 'print (current-buffer)))
+     @result{} (print #<buffer eval.texi>)
+@end group
+@group
+;; @r{Evaluate it.}
+(eval print-exp)
+     @print{} #<buffer eval.texi>
+     @result{} #<buffer eval.texi>
+@end group
+@end example
+
+@node Symbol Forms
+@subsection Symbol Forms
+@cindex symbol evaluation
+
+  When a symbol is evaluated, it is treated as a variable.  The result
+is the variable's value, if it has one.  If the symbol has no value as
+a variable, the Lisp interpreter signals an error.  For more
+information on the use of variables, see @ref{Variables}.
+
+  In the following example, we set the value of a symbol with
+@code{setq}.  Then we evaluate the symbol, and get back the value that
+@code{setq} stored.
+
+@example
+@group
+(setq a 123)
+     @result{} 123
+@end group
+@group
+(eval 'a)
+     @result{} 123
+@end group
+@group
+a
+     @result{} 123
+@end group
+@end example
+
+  The symbols @code{nil} and @code{t} are treated specially, so that the
+value of @code{nil} is always @code{nil}, and the value of @code{t} is
+always @code{t}; you cannot set or bind them to any other values.  Thus,
+these two symbols act like self-evaluating forms, even though
+@code{eval} treats them like any other symbol.  A symbol whose name
+starts with @samp{:} also self-evaluates in the same way; likewise,
+its value ordinarily cannot be changed.  @xref{Constant Variables}.
+
+@node Classifying Lists
+@subsection Classification of List Forms
+@cindex list form evaluation
+
+  A form that is a nonempty list is either a function call, a macro
+call, or a special form, according to its first element.  These three
+kinds of forms are evaluated in different ways, described below.  The
+remaining list elements constitute the @dfn{arguments} for the function,
+macro, or special form.
+
+  The first step in evaluating a nonempty list is to examine its first
+element.  This element alone determines what kind of form the list is
+and how the rest of the list is to be processed.  The first element is
+@emph{not} evaluated, as it would be in some Lisp dialects such as
+Scheme.
+
+@node Function Indirection
+@subsection Symbol Function Indirection
+@cindex symbol function indirection
+@cindex indirection for functions
+@cindex void function
+
+  If the first element of the list is a symbol then evaluation
+examines the symbol's function cell, and uses its contents instead of
+the original symbol.  If the contents are another symbol, this
+process, called @dfn{symbol function indirection}, is repeated until
+it obtains a non-symbol.  @xref{Function Names}, for more information
+about symbol function indirection.
+
+  One possible consequence of this process is an infinite loop, in the
+event that a symbol's function cell refers to the same symbol.  Or a
+symbol may have a void function cell, in which case the subroutine
+@code{symbol-function} signals a @code{void-function} error.  But if
+neither of these things happens, we eventually obtain a non-symbol,
+which ought to be a function or other suitable object.
+
+@kindex invalid-function
+  More precisely, we should now have a Lisp function (a lambda
+expression), a byte-code function, a primitive function, a Lisp macro,
+a special form, or an autoload object.  Each of these types is a case
+described in one of the following sections.  If the object is not one
+of these types, Emacs signals an @code{invalid-function} error.
+
+  The following example illustrates the symbol indirection process.  We
+use @code{fset} to set the function cell of a symbol and
+@code{symbol-function} to get the function cell contents
+(@pxref{Function Cells}).  Specifically, we store the symbol @code{car}
+into the function cell of @code{first}, and the symbol @code{first} into
+the function cell of @code{erste}.
+
+@example
+@group
+;; @r{Build this function cell linkage:}
+;;   -------------       -----        -------        -------
+;;  | #<subr car> | <-- | car |  <-- | first |  <-- | erste |
+;;   -------------       -----        -------        -------
+@end group
+@group
+(symbol-function 'car)
+     @result{} #<subr car>
+@end group
+@group
+(fset 'first 'car)
+     @result{} car
+@end group
+@group
+(fset 'erste 'first)
+     @result{} first
+@end group
+@group
+(erste '(1 2 3))   ; @r{Call the function referenced by @code{erste}.}
+     @result{} 1
+@end group
+@end example
+
+  By contrast, the following example calls a function without any symbol
+function indirection, because the first element is an anonymous Lisp
+function, not a symbol.
+
+@example
+@group
+((lambda (arg) (erste arg))
+ '(1 2 3))
+     @result{} 1
+@end group
+@end example
+
+@noindent
+Executing the function itself evaluates its body; this does involve
+symbol function indirection when calling @code{erste}.
+
+  This form is rarely used and is now deprecated.  Instead, you should write it
+as:
+
+@example
+@group
+(funcall (lambda (arg) (erste arg))
+         '(1 2 3))
+@end group
+@end example
+or just
+@example
+@group
+(let ((arg '(1 2 3))) (erste arg))
+@end group
+@end example
+
+  The built-in function @code{indirect-function} provides an easy way to
+perform symbol function indirection explicitly.
+
+@c Emacs 19 feature
+@defun indirect-function function &optional noerror
+@anchor{Definition of indirect-function}
+This function returns the meaning of @var{function} as a function.  If
+@var{function} is a symbol, then it finds @var{function}'s function
+definition and starts over with that value.  If @var{function} is not a
+symbol, then it returns @var{function} itself.
+
+This function signals a @code{void-function} error if the final symbol
+is unbound and optional argument @var{noerror} is @code{nil} or
+omitted.  Otherwise, if @var{noerror} is non-@code{nil}, it returns
+@code{nil} if the final symbol is unbound.
+
+It signals a @code{cyclic-function-indirection} error if there is a
+loop in the chain of symbols.
+
+Here is how you could define @code{indirect-function} in Lisp:
+
+@example
+(defun indirect-function (function)
+  (if (symbolp function)
+      (indirect-function (symbol-function function))
+    function))
+@end example
+@end defun
+
+@node Function Forms
+@subsection Evaluation of Function Forms
+@cindex function form evaluation
+@cindex function call
+
+  If the first element of a list being evaluated is a Lisp function
+object, byte-code object or primitive function object, then that list is
+a @dfn{function call}.  For example, here is a call to the function
+@code{+}:
+
+@example
+(+ 1 x)
+@end example
+
+  The first step in evaluating a function call is to evaluate the
+remaining elements of the list from left to right.  The results are the
+actual argument values, one value for each list element.  The next step
+is to call the function with this list of arguments, effectively using
+the function @code{apply} (@pxref{Calling Functions}).  If the function
+is written in Lisp, the arguments are used to bind the argument
+variables of the function (@pxref{Lambda Expressions}); then the forms
+in the function body are evaluated in order, and the value of the last
+body form becomes the value of the function call.
+
+@node Macro Forms
+@subsection Lisp Macro Evaluation
+@cindex macro call evaluation
+
+  If the first element of a list being evaluated is a macro object, then
+the list is a @dfn{macro call}.  When a macro call is evaluated, the
+elements of the rest of the list are @emph{not} initially evaluated.
+Instead, these elements themselves are used as the arguments of the
+macro.  The macro definition computes a replacement form, called the
+@dfn{expansion} of the macro, to be evaluated in place of the original
+form.  The expansion may be any sort of form: a self-evaluating
+constant, a symbol, or a list.  If the expansion is itself a macro call,
+this process of expansion repeats until some other sort of form results.
+
+  Ordinary evaluation of a macro call finishes by evaluating the
+expansion.  However, the macro expansion is not necessarily evaluated
+right away, or at all, because other programs also expand macro calls,
+and they may or may not evaluate the expansions.
+
+  Normally, the argument expressions are not evaluated as part of
+computing the macro expansion, but instead appear as part of the
+expansion, so they are computed when the expansion is evaluated.
+
+  For example, given a macro defined as follows:
+
+@example
+@group
+(defmacro cadr (x)
+  (list 'car (list 'cdr x)))
+@end group
+@end example
+
+@noindent
+an expression such as @code{(cadr (assq 'handler list))} is a macro
+call, and its expansion is:
+
+@example
+(car (cdr (assq 'handler list)))
+@end example
+
+@noindent
+Note that the argument @code{(assq 'handler list)} appears in the
+expansion.
+
+@xref{Macros}, for a complete description of Emacs Lisp macros.
+
+@node Special Forms
+@subsection Special Forms
+@cindex special forms
+@cindex evaluation of special forms
+
+  A @dfn{special form} is a primitive function specially marked so that
+its arguments are not all evaluated.  Most special forms define control
+structures or perform variable bindings---things which functions cannot
+do.
+
+  Each special form has its own rules for which arguments are evaluated
+and which are used without evaluation.  Whether a particular argument is
+evaluated may depend on the results of evaluating other arguments.
+
+  Here is a list, in alphabetical order, of all of the special forms in
+Emacs Lisp with a reference to where each is described.
+
+@table @code
+@item and
+@pxref{Combining Conditions}
+
+@item catch
+@pxref{Catch and Throw}
+
+@item cond
+@pxref{Conditionals}
+
+@item condition-case
+@pxref{Handling Errors}
+
+@item defconst
+@pxref{Defining Variables}
+
+@item defmacro
+@pxref{Defining Macros}
+
+@item defun
+@pxref{Defining Functions}
+
+@item defvar
+@pxref{Defining Variables}
+
+@item function
+@pxref{Anonymous Functions}
+
+@item if
+@pxref{Conditionals}
+
+@item interactive
+@pxref{Interactive Call}
+
+@item let
+@itemx let*
+@pxref{Local Variables}
+
+@item or
+@pxref{Combining Conditions}
+
+@item prog1
+@itemx prog2
+@itemx progn
+@pxref{Sequencing}
+
+@item quote
+@pxref{Quoting}
+
+@item save-current-buffer
+@pxref{Current Buffer}
+
+@item save-excursion
+@pxref{Excursions}
+
+@item save-restriction
+@pxref{Narrowing}
+
+@item save-window-excursion
+@pxref{Window Configurations}
+
+@item setq
+@pxref{Setting Variables}
+
+@item setq-default
+@pxref{Creating Buffer-Local}
+
+@item track-mouse
+@pxref{Mouse Tracking}
+
+@item unwind-protect
+@pxref{Nonlocal Exits}
+
+@item while
+@pxref{Iteration}
+
+@item with-output-to-temp-buffer
+@pxref{Temporary Displays}
+@end table
+
+@cindex CL note---special forms compared
+@quotation
+@b{Common Lisp note:} Here are some comparisons of special forms in
+GNU Emacs Lisp and Common Lisp.  @code{setq}, @code{if}, and
+@code{catch} are special forms in both Emacs Lisp and Common Lisp.
+@code{defun} is a special form in Emacs Lisp, but a macro in Common
+Lisp.  @code{save-excursion} is a special form in Emacs Lisp, but
+doesn't exist in Common Lisp.  @code{throw} is a special form in
+Common Lisp (because it must be able to throw multiple values), but it
+is a function in Emacs Lisp (which doesn't have multiple
+values).@refill
+@end quotation
+
+@node Autoloading
+@subsection Autoloading
+
+  The @dfn{autoload} feature allows you to call a function or macro
+whose function definition has not yet been loaded into Emacs.  It
+specifies which file contains the definition.  When an autoload object
+appears as a symbol's function definition, calling that symbol as a
+function automatically loads the specified file; then it calls the
+real definition loaded from that file.  The way to arrange for an
+autoload object to appear as a symbol's function definition is
+described in @ref{Autoload}.
+
+@node Quoting
+@section Quoting
+
+  The special form @code{quote} returns its single argument, as written,
+without evaluating it.  This provides a way to include constant symbols
+and lists, which are not self-evaluating objects, in a program.  (It is
+not necessary to quote self-evaluating objects such as numbers, strings,
+and vectors.)
+
+@defspec quote object
+This special form returns @var{object}, without evaluating it.
+@end defspec
+
+@cindex @samp{'} for quoting
+@cindex quoting using apostrophe
+@cindex apostrophe for quoting
+Because @code{quote} is used so often in programs, Lisp provides a
+convenient read syntax for it.  An apostrophe character (@samp{'})
+followed by a Lisp object (in read syntax) expands to a list whose first
+element is @code{quote}, and whose second element is the object.  Thus,
+the read syntax @code{'x} is an abbreviation for @code{(quote x)}.
+
+Here are some examples of expressions that use @code{quote}:
+
+@example
+@group
+(quote (+ 1 2))
+     @result{} (+ 1 2)
+@end group
+@group
+(quote foo)
+     @result{} foo
+@end group
+@group
+'foo
+     @result{} foo
+@end group
+@group
+''foo
+     @result{} (quote foo)
+@end group
+@group
+'(quote foo)
+     @result{} (quote foo)
+@end group
+@group
+['foo]
+     @result{} [(quote foo)]
+@end group
+@end example
+
+  Other quoting constructs include @code{function} (@pxref{Anonymous
+Functions}), which causes an anonymous lambda expression written in Lisp
+to be compiled, and @samp{`} (@pxref{Backquote}), which is used to quote
+only part of a list, while computing and substituting other parts.
+
+@node Backquote
+@section Backquote
+@cindex backquote (list substitution)
+@cindex ` (list substitution)
+@findex `
+
+  @dfn{Backquote constructs} allow you to quote a list, but
+selectively evaluate elements of that list.  In the simplest case, it
+is identical to the special form @code{quote}
+@iftex
+@end iftex
+@ifnottex
+(described in the previous section; @pxref{Quoting}).
+@end ifnottex
+For example, these two forms yield identical results:
+
+@example
+@group
+`(a list of (+ 2 3) elements)
+     @result{} (a list of (+ 2 3) elements)
+@end group
+@group
+'(a list of (+ 2 3) elements)
+     @result{} (a list of (+ 2 3) elements)
+@end group
+@end example
+
+@findex , @r{(with backquote)}
+  The special marker @samp{,} inside of the argument to backquote
+indicates a value that isn't constant.  The Emacs Lisp evaluator
+evaluates the argument of @samp{,}, and puts the value in the list
+structure:
+
+@example
+@group
+`(a list of ,(+ 2 3) elements)
+     @result{} (a list of 5 elements)
+@end group
+@end example
+
+@noindent
+Substitution with @samp{,} is allowed at deeper levels of the list
+structure also.  For example:
+
+@example
+@group
+`(1 2 (3 ,(+ 4 5)))
+     @result{} (1 2 (3 9))
+@end group
+@end example
+
+@findex ,@@ @r{(with backquote)}
+@cindex splicing (with backquote)
+  You can also @dfn{splice} an evaluated value into the resulting list,
+using the special marker @samp{,@@}.  The elements of the spliced list
+become elements at the same level as the other elements of the resulting
+list.  The equivalent code without using @samp{`} is often unreadable.
+Here are some examples:
+
+@example
+@group
+(setq some-list '(2 3))
+     @result{} (2 3)
+@end group
+@group
+(cons 1 (append some-list '(4) some-list))
+     @result{} (1 2 3 4 2 3)
+@end group
+@group
+`(1 ,@@some-list 4 ,@@some-list)
+     @result{} (1 2 3 4 2 3)
+@end group
+
+@group
+(setq list '(hack foo bar))
+     @result{} (hack foo bar)
+@end group
+@group
+(cons 'use
+  (cons 'the
+    (cons 'words (append (cdr list) '(as elements)))))
+     @result{} (use the words foo bar as elements)
+@end group
+@group
+`(use the words ,@@(cdr list) as elements)
+     @result{} (use the words foo bar as elements)
+@end group
+@end example
+
+
+@node Eval
+@section Eval
+
+  Most often, forms are evaluated automatically, by virtue of their
+occurrence in a program being run.  On rare occasions, you may need to
+write code that evaluates a form that is computed at run time, such as
+after reading a form from text being edited or getting one from a
+property list.  On these occasions, use the @code{eval} function.
+Often @code{eval} is not needed and something else should be used instead.
+For example, to get the value of a variable, while @code{eval} works,
+@code{symbol-value} is preferable; or rather than store expressions
+in a property list that then need to go through @code{eval}, it is better to
+store functions instead that are then passed to @code{funcall}.
+
+  The functions and variables described in this section evaluate forms,
+specify limits to the evaluation process, or record recently returned
+values.  Loading a file also does evaluation (@pxref{Loading}).
+
+  It is generally cleaner and more flexible to store a function in a
+data structure, and call it with @code{funcall} or @code{apply}, than
+to store an expression in the data structure and evaluate it.  Using
+functions provides the ability to pass information to them as
+arguments.
+
+@defun eval form &optional lexical
+This is the basic function for evaluating an expression.  It evaluates
+@var{form} in the current environment and returns the result.  How the
+evaluation proceeds depends on the type of the object (@pxref{Forms}).
+
+The argument @var{lexical}, if non-@code{nil}, means to evaluate
+@var{form} using lexical scoping rules for variables, instead of the
+default dynamic scoping rules.  @xref{Lexical Binding}.
+
+Since @code{eval} is a function, the argument expression that appears
+in a call to @code{eval} is evaluated twice: once as preparation before
+@code{eval} is called, and again by the @code{eval} function itself.
+Here is an example:
+
+@example
+@group
+(setq foo 'bar)
+     @result{} bar
+@end group
+@group
+(setq bar 'baz)
+     @result{} baz
+;; @r{Here @code{eval} receives argument @code{foo}}
+(eval 'foo)
+     @result{} bar
+;; @r{Here @code{eval} receives argument @code{bar}, which is the value of @code{foo}}
+(eval foo)
+     @result{} baz
+@end group
+@end example
+
+The number of currently active calls to @code{eval} is limited to
+@code{max-lisp-eval-depth} (see below).
+@end defun
+
+@deffn Command eval-region start end &optional stream read-function
+@anchor{Definition of eval-region}
+This function evaluates the forms in the current buffer in the region
+defined by the positions @var{start} and @var{end}.  It reads forms from
+the region and calls @code{eval} on them until the end of the region is
+reached, or until an error is signaled and not handled.
+
+By default, @code{eval-region} does not produce any output.  However,
+if @var{stream} is non-@code{nil}, any output produced by output
+functions (@pxref{Output Functions}), as well as the values that
+result from evaluating the expressions in the region are printed using
+@var{stream}.  @xref{Output Streams}.
+
+If @var{read-function} is non-@code{nil}, it should be a function,
+which is used instead of @code{read} to read expressions one by one.
+This function is called with one argument, the stream for reading
+input.  You can also use the variable @code{load-read-function}
+(@pxref{Definition of load-read-function,, How Programs Do Loading})
+to specify this function, but it is more robust to use the
+@var{read-function} argument.
+
+@code{eval-region} does not move point.  It always returns @code{nil}.
+@end deffn
+
+@cindex evaluation of buffer contents
+@deffn Command eval-buffer &optional buffer-or-name stream filename unibyte print
+This is similar to @code{eval-region}, but the arguments provide
+different optional features.  @code{eval-buffer} operates on the
+entire accessible portion of buffer @var{buffer-or-name}.
+@var{buffer-or-name} can be a buffer, a buffer name (a string), or
+@code{nil} (or omitted), which means to use the current buffer.
+@var{stream} is used as in @code{eval-region}, unless @var{stream} is
+@code{nil} and @var{print} non-@code{nil}.  In that case, values that
+result from evaluating the expressions are still discarded, but the
+output of the output functions is printed in the echo area.
+@var{filename} is the file name to use for @code{load-history}
+(@pxref{Unloading}), and defaults to @code{buffer-file-name}
+(@pxref{Buffer File Name}).  If @var{unibyte} is non-@code{nil},
+@code{read} converts strings to unibyte whenever possible.
+
+@findex eval-current-buffer
+@code{eval-current-buffer} is an alias for this command.
+@end deffn
+
+@defopt max-lisp-eval-depth
+@anchor{Definition of max-lisp-eval-depth}
+This variable defines the maximum depth allowed in calls to @code{eval},
+@code{apply}, and @code{funcall} before an error is signaled (with error
+message @code{"Lisp nesting exceeds max-lisp-eval-depth"}).
+
+This limit, with the associated error when it is exceeded, is one way
+Emacs Lisp avoids infinite recursion on an ill-defined function.  If
+you increase the value of @code{max-lisp-eval-depth} too much, such
+code can cause stack overflow instead.
+@cindex Lisp nesting error
+
+The depth limit counts internal uses of @code{eval}, @code{apply}, and
+@code{funcall}, such as for calling the functions mentioned in Lisp
+expressions, and recursive evaluation of function call arguments and
+function body forms, as well as explicit calls in Lisp code.
+
+The default value of this variable is 400.  If you set it to a value
+less than 100, Lisp will reset it to 100 if the given value is
+reached.  Entry to the Lisp debugger increases the value, if there is
+little room left, to make sure the debugger itself has room to
+execute.
+
+@code{max-specpdl-size} provides another limit on nesting.
+@xref{Definition of max-specpdl-size,, Local Variables}.
+@end defopt
+
+@defvar values
+The value of this variable is a list of the values returned by all the
+expressions that were read, evaluated, and printed from buffers
+(including the minibuffer) by the standard Emacs commands which do
+this.  (Note that this does @emph{not} include evaluation in
+@file{*ielm*} buffers, nor evaluation using @kbd{C-j} in
+@code{lisp-interaction-mode}.)  The elements are ordered most recent
+first.
+
+@example
+@group
+(setq x 1)
+     @result{} 1
+@end group
+@group
+(list 'A (1+ 2) auto-save-default)
+     @result{} (A 3 t)
+@end group
+@group
+values
+     @result{} ((A 3 t) 1 @dots{})
+@end group
+@end example
+
+This variable is useful for referring back to values of forms recently
+evaluated.  It is generally a bad idea to print the value of
+@code{values} itself, since this may be very long.  Instead, examine
+particular elements, like this:
+
+@example
+@group
+;; @r{Refer to the most recent evaluation result.}
+(nth 0 values)
+     @result{} (A 3 t)
+@end group
+@group
+;; @r{That put a new element on,}
+;;   @r{so all elements move back one.}
+(nth 1 values)
+     @result{} (A 3 t)
+@end group
+@group
+;; @r{This gets the element that was next-to-most-recent}
+;;   @r{before this example.}
+(nth 3 values)
+     @result{} 1
+@end group
+@end example
+@end defvar

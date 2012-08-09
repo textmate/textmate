@@ -1,0 +1,238 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1993, 1999, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/errors
+@node Standard Errors, Standard Keymaps, GNU Emacs Internals, Top
+@appendix Standard Errors
+@cindex standard errors
+
+  Here is a list of the more important error symbols in standard Emacs,
+grouped by concept.  The list includes each symbol's message (on the
+@code{error-message} property of the symbol) and a cross reference to a
+description of how the error can occur.
+
+  Each error symbol has an @code{error-conditions} property that is a
+list of symbols.  Normally this list includes the error symbol itself
+and the symbol @code{error}.  Occasionally it includes additional
+symbols, which are intermediate classifications, narrower than
+@code{error} but broader than a single error symbol.  For example, all
+the errors in accessing files have the condition @code{file-error}.  If
+we do not say here that a certain error symbol has additional error
+conditions, that means it has none.
+
+  As a special exception, the error symbol @code{quit} does not have the
+condition @code{error}, because quitting is not considered an error.
+
+@c You can grep for "(put 'foo 'error-conditions ...) to find
+@c examples defined in Lisp.  Eg soap-client.el, sasl.el.
+  Most of these error symbols are defined in C (mainly @file{data.c}),
+but some are defined in Lisp.  For example, the file @file{userlock.el}
+defines the @code{file-locked} and @code{file-supersession} errors.
+Several of the specialized Lisp libraries distributed with Emacs
+define their own error symbols.  We do not attempt to list of all
+those here.
+
+  @xref{Errors}, for an explanation of how errors are generated and
+handled.
+
+@table @code
+@item error
+@code{"error"}@*
+@xref{Errors}.
+
+@item quit
+@code{"Quit"}@*
+@xref{Quitting}.
+
+@item args-out-of-range
+@code{"Args out of range"}@*
+This happens when trying to access an element beyond the range of a
+sequence or buffer.@*
+@xref{Sequences Arrays Vectors}, @xref{Text}.
+
+@item arith-error
+@code{"Arithmetic error"}@*
+@xref{Arithmetic Operations}.
+
+@item beginning-of-buffer
+@code{"Beginning of buffer"}@*
+@xref{Character Motion}.
+
+@item buffer-read-only
+@code{"Buffer is read-only"}@*
+@xref{Read Only Buffers}.
+
+@item circular-list
+@code{"List contains a loop"}@*
+This happens when some operations (e.g. resolving face names)
+encounter circular structures.@*
+@xref{Circular Objects}.
+
+@item cl-assertion-failed
+@code{"Assertion failed"}@*
+This happens when the @code{assert} macro fails a test.@*
+@xref{Assertions,,, cl, Common Lisp Extensions}.
+
+@item coding-system-error
+@code{"Invalid coding system"}@*
+@xref{Lisp and Coding Systems}.
+
+@item cyclic-function-indirection
+@code{"Symbol's chain of function indirections contains a loop"}@*
+@xref{Function Indirection}.
+
+@item cyclic-variable-indirection
+@code{"Symbol's chain of variable indirections contains a loop"}@*
+@xref{Variable Aliases}.
+
+@item dbus-error
+@code{"D-Bus error"}@*
+This is only defined if Emacs was compiled with D-Bus support.@*
+@xref{Errors and Events,,, dbus, D-Bus integration in Emacs}.
+
+@item end-of-buffer
+@code{"End of buffer"}@*
+@xref{Character Motion}.
+
+@item end-of-file
+@code{"End of file during parsing"}@*
+Note that this is not a subcategory of @code{file-error},
+because it pertains to the Lisp reader, not to file I/O.@*
+@xref{Input Functions}.
+
+@item file-already-exists
+This is a subcategory of @code{file-error}.@*
+@xref{Writing to Files}.
+
+@item file-date-error
+This is a subcategory of @code{file-error}.  It occurs when
+@code{copy-file} tries and fails to set the last-modification time of
+the output file.@*
+@xref{Changing Files}.
+
+@item file-error
+We do not list the error-strings of this error and its subcategories,
+because the error message is normally constructed from the data items
+alone when the error condition @code{file-error} is present.  Thus,
+the error-strings are not very relevant.  However, these error symbols
+do have @code{error-message} properties, and if no data is provided,
+the @code{error-message} property @emph{is} used.@*
+@xref{Files}.
+
+@c jka-compr.el
+@item compression-error
+This is a subcategory of @code{file-error}, which results from
+problems handling a compressed file.@*
+@xref{How Programs Do Loading}.
+
+@c userlock.el
+@item file-locked
+This is a subcategory of @code{file-error}.@*
+@xref{File Locks}.
+
+@c userlock.el
+@item file-supersession
+This is a subcategory of @code{file-error}.@*
+@xref{Modification Time}.
+
+@c net/ange-ftp.el
+@item ftp-error
+This is a subcategory of @code{file-error}, which results from problems
+in accessing a remote file using ftp.@*
+@xref{Remote Files,,, emacs, The GNU Emacs Manual}.
+
+@item invalid-function
+@code{"Invalid function"}@*
+@xref{Function Indirection}.
+
+@item invalid-read-syntax
+@code{"Invalid read syntax"}@*
+@xref{Printed Representation}.
+
+@item invalid-regexp
+@code{"Invalid regexp"}@*
+@xref{Regular Expressions}.
+
+@c simple.el
+@item mark-inactive
+@code{"The mark is not active now"}@*
+@xref{The Mark}.
+
+@item no-catch
+@code{"No catch for tag"}@*
+@xref{Catch and Throw}.
+
+@ignore
+@c Not actually used for anything?  Probably definition should be removed.
+@item protected-field
+@code{"Attempt to modify a protected field"}
+@end ignore
+
+@item scan-error
+@code{"Scan error"}@*
+This happens when certain syntax-parsing functions
+find invalid syntax or mismatched parentheses.@*
+@xref{List Motion}, and @ref{Parsing Expressions}.
+
+@item search-failed
+@code{"Search failed"}@*
+@xref{Searching and Matching}.
+
+@item setting-constant
+@code{"Attempt to set a constant symbol"}@*
+The values of the symbols @code{nil} and @code{t},
+and any symbols that start with @samp{:},
+may not be changed.@*
+@xref{Constant Variables, , Variables that Never Change}.
+
+@c simple.el
+@item text-read-only
+@code{"Text is read-only"}@*
+This is a subcategory of @code{buffer-read-only}.@*
+@xref{Special Properties}.
+
+@item undefined-color
+@code{"Undefined color"}@*
+@xref{Color Names}.
+
+@item void-function
+@code{"Symbol's function definition is void"}@*
+@xref{Function Cells}.
+
+@item void-variable
+@code{"Symbol's value as variable is void"}@*
+@xref{Accessing Variables}.
+
+@item wrong-number-of-arguments
+@code{"Wrong number of arguments"}@*
+@xref{Classifying Lists}.
+
+@item wrong-type-argument
+@code{"Wrong type argument"}@*
+@xref{Type Predicates}.
+@end table
+
+  The following kinds of error, which are classified as special cases of
+@code{arith-error}, can occur on certain systems for invalid use of
+mathematical functions.  @xref{Math Functions}.
+
+@table @code
+@item domain-error
+@code{"Arithmetic domain error"}
+
+@item overflow-error
+@code{"Arithmetic overflow error"}@*
+This is a subcategory of @code{domain-error}.
+
+@item range-error
+@code{"Arithmetic range error"}
+
+@item singularity-error
+@code{"Arithmetic singularity error"}@*
+This is a subcategory of @code{domain-error}.
+
+@item underflow-error
+@code{"Arithmetic underflow error"}@*
+This is a subcategory of @code{domain-error}.
+@end table

@@ -1,0 +1,827 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/sequences
+@node Sequences Arrays Vectors, Hash Tables, Lists, Top
+@chapter Sequences, Arrays, and Vectors
+@cindex sequence
+
+  The @dfn{sequence} type is the union of two other Lisp types: lists
+and arrays.  In other words, any list is a sequence, and any array is
+a sequence.  The common property that all sequences have is that each
+is an ordered collection of elements.
+
+  An @dfn{array} is a fixed-length object with a slot for each of its
+elements.  All the elements are accessible in constant time.  The four
+types of arrays are strings, vectors, char-tables and bool-vectors.
+
+  A list is a sequence of elements, but it is not a single primitive
+object; it is made of cons cells, one cell per element.  Finding the
+@var{n}th element requires looking through @var{n} cons cells, so
+elements farther from the beginning of the list take longer to access.
+But it is possible to add elements to the list, or remove elements.
+
+  The following diagram shows the relationship between these types:
+
+@example
+@group
+          _____________________________________________
+         |                                             |
+         |          Sequence                           |
+         |  ______   ________________________________  |
+         | |      | |                                | |
+         | | List | |             Array              | |
+         | |      | |    ________       ________     | |
+         | |______| |   |        |     |        |    | |
+         |          |   | Vector |     | String |    | |
+         |          |   |________|     |________|    | |
+         |          |  ____________   _____________  | |
+         |          | |            | |             | | |
+         |          | | Char-table | | Bool-vector | | |
+         |          | |____________| |_____________| | |
+         |          |________________________________| |
+         |_____________________________________________|
+@end group
+@end example
+
+@menu
+* Sequence Functions::    Functions that accept any kind of sequence.
+* Arrays::                Characteristics of arrays in Emacs Lisp.
+* Array Functions::       Functions specifically for arrays.
+* Vectors::               Special characteristics of Emacs Lisp vectors.
+* Vector Functions::      Functions specifically for vectors.
+* Char-Tables::           How to work with char-tables.
+* Bool-Vectors::          How to work with bool-vectors.
+* Rings::                 Managing a fixed-size ring of objects.
+@end menu
+
+@node Sequence Functions
+@section Sequences
+
+  This section describes functions that accept any kind of sequence.
+
+@defun sequencep object
+This function returns @code{t} if @var{object} is a list, vector,
+string, bool-vector, or char-table, @code{nil} otherwise.
+@end defun
+
+@defun length sequence
+@cindex string length
+@cindex list length
+@cindex vector length
+@cindex sequence length
+@cindex char-table length
+This function returns the number of elements in @var{sequence}.  If
+@var{sequence} is a dotted list, a @code{wrong-type-argument} error is
+signaled.  Circular lists may cause an infinite loop.  For a
+char-table, the value returned is always one more than the maximum
+Emacs character code.
+
+@xref{Definition of safe-length}, for the related function @code{safe-length}.
+
+@example
+@group
+(length '(1 2 3))
+    @result{} 3
+@end group
+@group
+(length ())
+    @result{} 0
+@end group
+@group
+(length "foobar")
+    @result{} 6
+@end group
+@group
+(length [1 2 3])
+    @result{} 3
+@end group
+@group
+(length (make-bool-vector 5 nil))
+    @result{} 5
+@end group
+@end example
+@end defun
+
+@noindent
+See also @code{string-bytes}, in @ref{Text Representations}.
+
+If you need to compute the width of a string on display, you should
+use @code{string-width} (@pxref{Width}), not @code{length}, since
+@code{length} only counts the number of characters, but does not
+account for the display width of each character.
+
+@defun elt sequence index
+@cindex elements of sequences
+This function returns the element of @var{sequence} indexed by
+@var{index}.  Legitimate values of @var{index} are integers ranging
+from 0 up to one less than the length of @var{sequence}.  If
+@var{sequence} is a list, out-of-range values behave as for
+@code{nth}.  @xref{Definition of nth}.  Otherwise, out-of-range values
+trigger an @code{args-out-of-range} error.
+
+@example
+@group
+(elt [1 2 3 4] 2)
+     @result{} 3
+@end group
+@group
+(elt '(1 2 3 4) 2)
+     @result{} 3
+@end group
+@group
+;; @r{We use @code{string} to show clearly which character @code{elt} returns.}
+(string (elt "1234" 2))
+     @result{} "3"
+@end group
+@group
+(elt [1 2 3 4] 4)
+     @error{} Args out of range: [1 2 3 4], 4
+@end group
+@group
+(elt [1 2 3 4] -1)
+     @error{} Args out of range: [1 2 3 4], -1
+@end group
+@end example
+
+This function generalizes @code{aref} (@pxref{Array Functions}) and
+@code{nth} (@pxref{Definition of nth}).
+@end defun
+
+@defun copy-sequence sequence
+@cindex copying sequences
+This function returns a copy of @var{sequence}.  The copy is the same
+type of object as the original sequence, and it has the same elements
+in the same order.
+
+Storing a new element into the copy does not affect the original
+@var{sequence}, and vice versa.  However, the elements of the new
+sequence are not copies; they are identical (@code{eq}) to the elements
+of the original.  Therefore, changes made within these elements, as
+found via the copied sequence, are also visible in the original
+sequence.
+
+If the sequence is a string with text properties, the property list in
+the copy is itself a copy, not shared with the original's property
+list.  However, the actual values of the properties are shared.
+@xref{Text Properties}.
+
+This function does not work for dotted lists.  Trying to copy a
+circular list may cause an infinite loop.
+
+See also @code{append} in @ref{Building Lists}, @code{concat} in
+@ref{Creating Strings}, and @code{vconcat} in @ref{Vector Functions},
+for other ways to copy sequences.
+
+@example
+@group
+(setq bar '(1 2))
+     @result{} (1 2)
+@end group
+@group
+(setq x (vector 'foo bar))
+     @result{} [foo (1 2)]
+@end group
+@group
+(setq y (copy-sequence x))
+     @result{} [foo (1 2)]
+@end group
+
+@group
+(eq x y)
+     @result{} nil
+@end group
+@group
+(equal x y)
+     @result{} t
+@end group
+@group
+(eq (elt x 1) (elt y 1))
+     @result{} t
+@end group
+
+@group
+;; @r{Replacing an element of one sequence.}
+(aset x 0 'quux)
+x @result{} [quux (1 2)]
+y @result{} [foo (1 2)]
+@end group
+
+@group
+;; @r{Modifying the inside of a shared element.}
+(setcar (aref x 1) 69)
+x @result{} [quux (69 2)]
+y @result{} [foo (69 2)]
+@end group
+@end example
+@end defun
+
+@node Arrays
+@section Arrays
+@cindex array
+
+  An @dfn{array} object has slots that hold a number of other Lisp
+objects, called the elements of the array.  Any element of an array
+may be accessed in constant time.  In contrast, the time to access an
+element of a list is proportional to the position of that element in
+the list.
+
+  Emacs defines four types of array, all one-dimensional:
+@dfn{strings} (@pxref{String Type}), @dfn{vectors} (@pxref{Vector
+Type}), @dfn{bool-vectors} (@pxref{Bool-Vector Type}), and
+@dfn{char-tables} (@pxref{Char-Table Type}).  Vectors and char-tables
+can hold elements of any type, but strings can only hold characters,
+and bool-vectors can only hold @code{t} and @code{nil}.
+
+  All four kinds of array share these characteristics:
+
+@itemize @bullet
+@item
+The first element of an array has index zero, the second element has
+index 1, and so on.  This is called @dfn{zero-origin} indexing.  For
+example, an array of four elements has indices 0, 1, 2, @w{and 3}.
+
+@item
+The length of the array is fixed once you create it; you cannot
+change the length of an existing array.
+
+@item
+For purposes of evaluation, the array is a constant---i.e.,
+it evaluates to itself.
+
+@item
+The elements of an array may be referenced or changed with the functions
+@code{aref} and @code{aset}, respectively (@pxref{Array Functions}).
+@end itemize
+
+    When you create an array, other than a char-table, you must specify
+its length.  You cannot specify the length of a char-table, because that
+is determined by the range of character codes.
+
+  In principle, if you want an array of text characters, you could use
+either a string or a vector.  In practice, we always choose strings for
+such applications, for four reasons:
+
+@itemize @bullet
+@item
+They occupy one-fourth the space of a vector of the same elements.
+
+@item
+Strings are printed in a way that shows the contents more clearly
+as text.
+
+@item
+Strings can hold text properties.  @xref{Text Properties}.
+
+@item
+Many of the specialized editing and I/O facilities of Emacs accept only
+strings.  For example, you cannot insert a vector of characters into a
+buffer the way you can insert a string.  @xref{Strings and Characters}.
+@end itemize
+
+  By contrast, for an array of keyboard input characters (such as a key
+sequence), a vector may be necessary, because many keyboard input
+characters are outside the range that will fit in a string.  @xref{Key
+Sequence Input}.
+
+@node Array Functions
+@section Functions that Operate on Arrays
+
+  In this section, we describe the functions that accept all types of
+arrays.
+
+@defun arrayp object
+This function returns @code{t} if @var{object} is an array (i.e., a
+vector, a string, a bool-vector or a char-table).
+
+@example
+@group
+(arrayp [a])
+     @result{} t
+(arrayp "asdf")
+     @result{} t
+(arrayp (syntax-table))    ;; @r{A char-table.}
+     @result{} t
+@end group
+@end example
+@end defun
+
+@defun aref array index
+@cindex array elements
+This function returns the @var{index}th element of @var{array}.  The
+first element is at index zero.
+
+@example
+@group
+(setq primes [2 3 5 7 11 13])
+     @result{} [2 3 5 7 11 13]
+(aref primes 4)
+     @result{} 11
+@end group
+@group
+(aref "abcdefg" 1)
+     @result{} 98           ; @r{@samp{b} is @acronym{ASCII} code 98.}
+@end group
+@end example
+
+See also the function @code{elt}, in @ref{Sequence Functions}.
+@end defun
+
+@defun aset array index object
+This function sets the @var{index}th element of @var{array} to be
+@var{object}.  It returns @var{object}.
+
+@example
+@group
+(setq w [foo bar baz])
+     @result{} [foo bar baz]
+(aset w 0 'fu)
+     @result{} fu
+w
+     @result{} [fu bar baz]
+@end group
+
+@group
+(setq x "asdfasfd")
+     @result{} "asdfasfd"
+(aset x 3 ?Z)
+     @result{} 90
+x
+     @result{} "asdZasfd"
+@end group
+@end example
+
+If @var{array} is a string and @var{object} is not a character, a
+@code{wrong-type-argument} error results.  The function converts a
+unibyte string to multibyte if necessary to insert a character.
+@end defun
+
+@defun fillarray array object
+This function fills the array @var{array} with @var{object}, so that
+each element of @var{array} is @var{object}.  It returns @var{array}.
+
+@example
+@group
+(setq a [a b c d e f g])
+     @result{} [a b c d e f g]
+(fillarray a 0)
+     @result{} [0 0 0 0 0 0 0]
+a
+     @result{} [0 0 0 0 0 0 0]
+@end group
+@group
+(setq s "When in the course")
+     @result{} "When in the course"
+(fillarray s ?-)
+     @result{} "------------------"
+@end group
+@end example
+
+If @var{array} is a string and @var{object} is not a character, a
+@code{wrong-type-argument} error results.
+@end defun
+
+The general sequence functions @code{copy-sequence} and @code{length}
+are often useful for objects known to be arrays.  @xref{Sequence Functions}.
+
+@node Vectors
+@section Vectors
+@cindex vector (type)
+
+  A @dfn{vector} is a general-purpose array whose elements can be any
+Lisp objects.  (By contrast, the elements of a string can only be
+characters.  @xref{Strings and Characters}.)  Vectors are used in
+Emacs for many purposes: as key sequences (@pxref{Key Sequences}), as
+symbol-lookup tables (@pxref{Creating Symbols}), as part of the
+representation of a byte-compiled function (@pxref{Byte Compilation}),
+and more.
+
+  Like other arrays, vectors use zero-origin indexing: the first
+element has index 0.
+
+  Vectors are printed with square brackets surrounding the elements.
+Thus, a vector whose elements are the symbols @code{a}, @code{b} and
+@code{a} is printed as @code{[a b a]}.  You can write vectors in the
+same way in Lisp input.
+
+  A vector, like a string or a number, is considered a constant for
+evaluation: the result of evaluating it is the same vector.  This does
+not evaluate or even examine the elements of the vector.
+@xref{Self-Evaluating Forms}.
+
+  Here are examples illustrating these principles:
+
+@example
+@group
+(setq avector [1 two '(three) "four" [five]])
+     @result{} [1 two (quote (three)) "four" [five]]
+(eval avector)
+     @result{} [1 two (quote (three)) "four" [five]]
+(eq avector (eval avector))
+     @result{} t
+@end group
+@end example
+
+@node Vector Functions
+@section Functions for Vectors
+
+  Here are some functions that relate to vectors:
+
+@defun vectorp object
+This function returns @code{t} if @var{object} is a vector.
+
+@example
+@group
+(vectorp [a])
+     @result{} t
+(vectorp "asdf")
+     @result{} nil
+@end group
+@end example
+@end defun
+
+@defun vector &rest objects
+This function creates and returns a vector whose elements are the
+arguments, @var{objects}.
+
+@example
+@group
+(vector 'foo 23 [bar baz] "rats")
+     @result{} [foo 23 [bar baz] "rats"]
+(vector)
+     @result{} []
+@end group
+@end example
+@end defun
+
+@defun make-vector length object
+This function returns a new vector consisting of @var{length} elements,
+each initialized to @var{object}.
+
+@example
+@group
+(setq sleepy (make-vector 9 'Z))
+     @result{} [Z Z Z Z Z Z Z Z Z]
+@end group
+@end example
+@end defun
+
+@defun vconcat &rest sequences
+@cindex copying vectors
+This function returns a new vector containing all the elements of
+@var{sequences}.  The arguments @var{sequences} may be true lists,
+vectors, strings or bool-vectors.  If no @var{sequences} are given, an
+empty vector is returned.
+
+The value is a newly constructed vector that is not @code{eq} to any
+existing vector.
+
+@example
+@group
+(setq a (vconcat '(A B C) '(D E F)))
+     @result{} [A B C D E F]
+(eq a (vconcat a))
+     @result{} nil
+@end group
+@group
+(vconcat)
+     @result{} []
+(vconcat [A B C] "aa" '(foo (6 7)))
+     @result{} [A B C 97 97 foo (6 7)]
+@end group
+@end example
+
+The @code{vconcat} function also allows byte-code function objects as
+arguments.  This is a special feature to make it easy to access the entire
+contents of a byte-code function object.  @xref{Byte-Code Objects}.
+
+For other concatenation functions, see @code{mapconcat} in @ref{Mapping
+Functions}, @code{concat} in @ref{Creating Strings}, and @code{append}
+in @ref{Building Lists}.
+@end defun
+
+  The @code{append} function also provides a way to convert a vector into a
+list with the same elements:
+
+@example
+@group
+(setq avector [1 two (quote (three)) "four" [five]])
+     @result{} [1 two (quote (three)) "four" [five]]
+(append avector nil)
+     @result{} (1 two (quote (three)) "four" [five])
+@end group
+@end example
+
+@node Char-Tables
+@section Char-Tables
+@cindex char-tables
+@cindex extra slots of char-table
+
+  A char-table is much like a vector, except that it is indexed by
+character codes.  Any valid character code, without modifiers, can be
+used as an index in a char-table.  You can access a char-table's
+elements with @code{aref} and @code{aset}, as with any array.  In
+addition, a char-table can have @dfn{extra slots} to hold additional
+data not associated with particular character codes.  Like vectors,
+char-tables are constants when evaluated, and can hold elements of any
+type.
+
+@cindex subtype of char-table
+  Each char-table has a @dfn{subtype}, a symbol, which serves two
+purposes:
+
+@itemize @bullet
+@item
+The subtype provides an easy way to tell what the char-table is for.
+For instance, display tables are char-tables with @code{display-table}
+as the subtype, and syntax tables are char-tables with
+@code{syntax-table} as the subtype.  The subtype can be queried using
+the function @code{char-table-subtype}, described below.
+
+@item
+The subtype controls the number of @dfn{extra slots} in the
+char-table.  This number is specified by the subtype's
+@code{char-table-extra-slots} symbol property, which should be an
+integer between 0 and 10.  If the subtype has no such symbol property,
+the char-table has no extra slots.  @xref{Property Lists}, for
+information about symbol properties.
+@end itemize
+
+@cindex parent of char-table
+  A char-table can have a @dfn{parent}, which is another char-table.  If
+it does, then whenever the char-table specifies @code{nil} for a
+particular character @var{c}, it inherits the value specified in the
+parent.  In other words, @code{(aref @var{char-table} @var{c})} returns
+the value from the parent of @var{char-table} if @var{char-table} itself
+specifies @code{nil}.
+
+@cindex default value of char-table
+  A char-table can also have a @dfn{default value}.  If so, then
+@code{(aref @var{char-table} @var{c})} returns the default value
+whenever the char-table does not specify any other non-@code{nil} value.
+
+@defun make-char-table subtype &optional init
+Return a newly-created char-table, with subtype @var{subtype} (a
+symbol).  Each element is initialized to @var{init}, which defaults to
+@code{nil}.  You cannot alter the subtype of a char-table after the
+char-table is created.
+
+There is no argument to specify the length of the char-table, because
+all char-tables have room for any valid character code as an index.
+
+If @var{subtype} has the @code{char-table-extra-slots} symbol
+property, that specifies the number of extra slots in the char-table.
+This should be an integer between 0 and 10; otherwise,
+@code{make-char-table} raises an error.  If @var{subtype} has no
+@code{char-table-extra-slots} symbol property (@pxref{Property
+Lists}), the char-table has no extra slots.
+@end defun
+
+@defun char-table-p object
+This function returns @code{t} if @var{object} is a char-table, and
+@code{nil} otherwise.
+@end defun
+
+@defun char-table-subtype char-table
+This function returns the subtype symbol of @var{char-table}.
+@end defun
+
+There is no special function to access default values in a char-table.
+To do that, use @code{char-table-range} (see below).
+
+@defun char-table-parent char-table
+This function returns the parent of @var{char-table}.  The parent is
+always either @code{nil} or another char-table.
+@end defun
+
+@defun set-char-table-parent char-table new-parent
+This function sets the parent of @var{char-table} to @var{new-parent}.
+@end defun
+
+@defun char-table-extra-slot char-table n
+This function returns the contents of extra slot @var{n} of
+@var{char-table}.  The number of extra slots in a char-table is
+determined by its subtype.
+@end defun
+
+@defun set-char-table-extra-slot char-table n value
+This function stores @var{value} in extra slot @var{n} of
+@var{char-table}.
+@end defun
+
+  A char-table can specify an element value for a single character code;
+it can also specify a value for an entire character set.
+
+@defun char-table-range char-table range
+This returns the value specified in @var{char-table} for a range of
+characters @var{range}.  Here are the possibilities for @var{range}:
+
+@table @asis
+@item @code{nil}
+Refers to the default value.
+
+@item @var{char}
+Refers to the element for character @var{char}
+(supposing @var{char} is a valid character code).
+
+@item @code{(@var{from} . @var{to})}
+A cons cell refers to all the characters in the inclusive range
+@samp{[@var{from}..@var{to}]}.
+@end table
+@end defun
+
+@defun set-char-table-range char-table range value
+This function sets the value in @var{char-table} for a range of
+characters @var{range}.  Here are the possibilities for @var{range}:
+
+@table @asis
+@item @code{nil}
+Refers to the default value.
+
+@item @code{t}
+Refers to the whole range of character codes.
+
+@item @var{char}
+Refers to the element for character @var{char}
+(supposing @var{char} is a valid character code).
+
+@item @code{(@var{from} . @var{to})}
+A cons cell refers to all the characters in the inclusive range
+@samp{[@var{from}..@var{to}]}.
+@end table
+@end defun
+
+@defun map-char-table function char-table
+This function calls its argument @var{function} for each element of
+@var{char-table} that has a non-@code{nil} value.  The call to
+@var{function} is with two arguments, a key and a value.  The key
+is a possible @var{range} argument for @code{char-table-range}---either
+a valid character or a cons cell @code{(@var{from} . @var{to})},
+specifying a range of characters that share the same value.  The value is
+what @code{(char-table-range @var{char-table} @var{key})} returns.
+
+Overall, the key-value pairs passed to @var{function} describe all the
+values stored in @var{char-table}.
+
+The return value is always @code{nil}; to make calls to
+@code{map-char-table} useful, @var{function} should have side effects.
+For example, here is how to examine the elements of the syntax table:
+
+@example
+(let (accumulator)
+   (map-char-table
+    #'(lambda (key value)
+        (setq accumulator
+              (cons (list
+                     (if (consp key)
+                         (list (car key) (cdr key))
+                       key)
+                     value)
+                    accumulator)))
+    (syntax-table))
+   accumulator)
+@result{}
+(((2597602 4194303) (2)) ((2597523 2597601) (3))
+ ... (65379 (5 . 65378)) (65378 (4 . 65379)) (65377 (1))
+ ... (12 (0)) (11 (3)) (10 (12)) (9 (0)) ((0 8) (3)))
+@end example
+@end defun
+
+@node Bool-Vectors
+@section Bool-vectors
+@cindex Bool-vectors
+
+  A bool-vector is much like a vector, except that it stores only the
+values @code{t} and @code{nil}.  If you try to store any non-@code{nil}
+value into an element of the bool-vector, the effect is to store
+@code{t} there.  As with all arrays, bool-vector indices start from 0,
+and the length cannot be changed once the bool-vector is created.
+Bool-vectors are constants when evaluated.
+
+  There are two special functions for working with bool-vectors; aside
+from that, you manipulate them with same functions used for other kinds
+of arrays.
+
+@defun make-bool-vector length initial
+Return a new bool-vector of @var{length} elements,
+each one initialized to @var{initial}.
+@end defun
+
+@defun bool-vector-p object
+This returns @code{t} if @var{object} is a bool-vector,
+and @code{nil} otherwise.
+@end defun
+
+  Here is an example of creating, examining, and updating a
+bool-vector.  Note that the printed form represents up to 8 boolean
+values as a single character.
+
+@example
+(setq bv (make-bool-vector 5 t))
+     @result{} #&5"^_"
+(aref bv 1)
+     @result{} t
+(aset bv 3 nil)
+     @result{} nil
+bv
+     @result{} #&5"^W"
+@end example
+
+@noindent
+These results make sense because the binary codes for control-_ and
+control-W are 11111 and 10111, respectively.
+
+@node Rings
+@section Managing a Fixed-Size Ring of Objects
+
+@cindex ring data structure
+  A @dfn{ring} is a fixed-size data structure that supports insertion,
+deletion, rotation, and modulo-indexed reference and traversal.  An
+efficient ring data structure is implemented by the @code{ring}
+package.  It provides the functions listed in this section.
+
+  Note that several ``rings'' in Emacs, like the kill ring and the
+mark ring, are actually implemented as simple lists, @emph{not} using
+the @code{ring} package; thus the following functions won't work on
+them.
+
+@defun make-ring size
+This returns a new ring capable of holding @var{size} objects.
+@var{size} should be an integer.
+@end defun
+
+@defun ring-p object
+This returns @code{t} if @var{object} is a ring, @code{nil} otherwise.
+@end defun
+
+@defun ring-size ring
+This returns the maximum capacity of the @var{ring}.
+@end defun
+
+@defun ring-length ring
+This returns the number of objects that @var{ring} currently contains.
+The value will never exceed that returned by @code{ring-size}.
+@end defun
+
+@defun ring-elements ring
+This returns a list of the objects in @var{ring}, in order, newest first.
+@end defun
+
+@defun ring-copy ring
+This returns a new ring which is a copy of @var{ring}.
+The new ring contains the same (@code{eq}) objects as @var{ring}.
+@end defun
+
+@defun ring-empty-p ring
+This returns @code{t} if @var{ring} is empty, @code{nil} otherwise.
+@end defun
+
+  The newest element in the ring always has index 0.  Higher indices
+correspond to older elements.  Indices are computed modulo the ring
+length.  Index @minus{}1 corresponds to the oldest element, @minus{}2
+to the next-oldest, and so forth.
+
+@defun ring-ref ring index
+This returns the object in @var{ring} found at index @var{index}.
+@var{index} may be negative or greater than the ring length.  If
+@var{ring} is empty, @code{ring-ref} signals an error.
+@end defun
+
+@defun ring-insert ring object
+This inserts @var{object} into @var{ring}, making it the newest
+element, and returns @var{object}.
+
+If the ring is full, insertion removes the oldest element to
+make room for the new element.
+@end defun
+
+@defun ring-remove ring &optional index
+Remove an object from @var{ring}, and return that object.  The
+argument @var{index} specifies which item to remove; if it is
+@code{nil}, that means to remove the oldest item.  If @var{ring} is
+empty, @code{ring-remove} signals an error.
+@end defun
+
+@defun ring-insert-at-beginning ring object
+This inserts @var{object} into @var{ring}, treating it as the oldest
+element.  The return value is not significant.
+
+If the ring is full, this function removes the newest element to make
+room for the inserted element.
+@end defun
+
+@cindex fifo data structure
+  If you are careful not to exceed the ring size, you can
+use the ring as a first-in-first-out queue.  For example:
+
+@lisp
+(let ((fifo (make-ring 5)))
+  (mapc (lambda (obj) (ring-insert fifo obj))
+        '(0 one "two"))
+  (list (ring-remove fifo) t
+        (ring-remove fifo) t
+        (ring-remove fifo)))
+     @result{} (0 t one t "two")
+@end lisp

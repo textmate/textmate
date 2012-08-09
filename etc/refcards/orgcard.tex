@@ -1,0 +1,689 @@
+% Reference Card for Org Mode
+\def\orgversionnumber{7.8.11}
+\def\versionyear{2012}          % latest update
+\def\year{2012}                 % latest copyright year
+
+%**start of header
+\newcount\columnsperpage
+\newcount\letterpaper
+
+% This file can be printed with 1, 2, or 3 columns per page (see below).
+% Specify how many you want here.
+\columnsperpage=3
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0l)
+
+% Nothing else needs to be changed below this line.
+% Copyright (C) 1987, 1993, 1996-1997, 2001-2012
+%   Free Software Foundation, Inc.
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+% This file is intended to be processed by plain TeX (TeX82).
+%
+% The final reference card has six columns, three on each side.
+% This file can be used to produce it in any of three ways:
+% 1 column per page
+%    produces six separate pages, each of which needs to be reduced to 80%.
+%    This gives the best resolution.
+% 2 columns per page
+%    produces three already-reduced pages.
+%    You will still need to cut and paste.
+% 3 columns per page
+%    produces two pages which must be printed sideways to make a
+%    ready-to-use 8.5 x 11 inch reference card.
+%    For this you need a dvi device driver that can print sideways.
+% Which mode to use is controlled by setting \columnsperpage above.
+%
+% To compile and print this document:
+% tex refcard.tex
+% dvips -t landscape refcard.dvi
+%
+% Author:
+%  Stephen Gildea
+%  Internet: gildea@stop.mail-abuse.org
+%
+% Thanks to Paul Rubin, Bob Chassell, Len Tower, and Richard Mlynarik
+% for their many good ideas.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.  v\orgversionnumber}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 100 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{v\orgversionnumber{} for Org-Mode \orgversionnumber{}, \versionyear}
+\centerline{Author: Philip Rooke}
+\centerline{based on refcard design and format by Stephen Gildea}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip	%horizontal space between columns
+\newbox\columna			%boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns			%one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else				%2 or 3 columns uses prereduced size
+  \if 1\the\letterpaper
+     \hsize 3.2in
+     \vsize 7.95in
+     \hoffset -.75in
+     \voffset -.745in
+  \else
+     \hsize 3.2in
+     \vsize 7.65in
+     \hoffset -.25in
+     \voffset -.745in
+  \fi
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eighttt=cmtt8
+  \font\eightmi=cmmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \if 1\the\letterpaper
+     \normalbaselineskip=.8\normalbaselineskip
+  \else
+     \normalbaselineskip=.7\normalbaselineskip
+  \fi
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm		%make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%			%see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+	\global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+	\global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+%\catcode`\^=12
+\catcode`\_=12
+
+% we also need the tilde, for file names.
+\catcode`\~=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}	%\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+\def\noteone{{\small \hfill [1]}}
+\def\notetwo{{\small \hfill [2]}}
+
+
+%**end of header
+
+
+\title{Org-Mode Reference Card (1/2)}
+
+\centerline{(for version \orgversionnumber)}
+
+\section{Getting Started}
+\metax{To read the on-line documentation try}{M-x org-info}
+
+\section{Visibility Cycling}
+
+\key{rotate current subtree between states}{TAB}
+\key{rotate entire buffer between states}{S-TAB}
+\key{restore property-dependent startup visibility}{C-u C-u TAB}
+\metax{show the whole file, including drawers}{C-u C-u C-u TAB}
+\key{reveal context around point}{C-c C-r}
+
+\section{Motion}
+
+\key{next/previous heading}{C-c C-n/p}
+\key{next/previous heading, same level}{C-c C-f/b}
+\key{backward to higher level heading}{C-c C-u}
+\key{jump to another place in document}{C-c C-j}
+\key{previous/next plain list item}{S-UP/DOWN\notetwo}
+
+\section{Structure Editing}
+
+\key{insert new heading/item at current level}{M-RET}
+\key{insert new heading after subtree}{C-RET}
+\key{insert new TODO entry/checkbox item}{M-S-RET}
+\key{insert TODO entry/ckbx after subtree}{C-S-RET}
+\key{turn (head)line into item, cycle item type}{C-c -}
+\key{turn item/line into headline}{C-c *}
+\key{promote/demote heading}{M-LEFT/RIGHT}
+\metax{promote/demote current subtree}{M-S-LEFT/RIGHT}
+\metax{move subtree/list item up/down}{M-S-UP/DOWN}
+\metax{sort subtree/region/plain-list}{C-c \^{}}
+\metax{clone a subtree}{C-c C-x c}
+\metax{copy visible text}{C-c C-x v}
+\metax{kill/copy subtree}{C-c C-x C-w/M-w}
+\metax{yank subtree}{C-c C-x C-y or C-y}
+\metax{narrow buffer to subtree / widen}{C-x n s/w}
+
+\section{Capture - Refile - Archiving}
+\key{capture a new item (C-u C-u = goto last)}{C-c c \noteone}
+\key{refile subtree (C-u C-u = goto last)}{C-c C-w}
+\key{archive subtree using the default command}{C-c C-x C-a}
+\key{move subtree to archive file}{C-c C-x C-s}
+\key{toggle ARCHIVE tag / to ARCHIVE sibling}{C-c C-x a/A}
+\key{force cycling of an ARCHIVEd tree}{C-TAB}
+
+\section{Filtering and Sparse Trees}
+
+\key{construct a sparse tree by various criteria}{C-c /}
+\key{view TODO's in sparse tree}{C-c / t/T}
+\key{global TODO list in agenda mode}{C-c a t \noteone}
+\key{time sorted view of current org file}{C-c a L}
+
+\section{Tables}
+
+{\bf Creating a table}
+
+%\metax{insert a new Org-mode table}{M-x org-table-create}
+\metax{just start typing, e.g.}{|Name|Phone|Age RET |- TAB}
+\key{convert region to table}{C-c |}
+\key{... separator at least 3 spaces}{C-3 C-c |}
+
+{\bf Commands available inside tables}
+
+The following commands work when the cursor is {\it inside a table}.
+Outside of tables, the same keys may have other functionality.
+
+{\bf Re-aligning and field motion}
+
+\key{re-align the table without moving the cursor}{C-c C-c}
+\key{re-align the table, move to next field}{TAB}
+\key{move to previous field}{S-TAB}
+\key{re-align the table, move to next row}{RET}
+\key{move to beginning/end of field}{M-a/e}
+
+{\bf Row and column editing}
+
+\key{move the current column left}{M-LEFT/RIGHT}
+\key{kill the current column}{M-S-LEFT}
+\key{insert new column to left of cursor position}{M-S-RIGHT}
+
+\key{move the current row up/down}{M-UP/DOWN}
+\key{kill the current row or horizontal line}{M-S-UP}
+\key{insert new row above the current row}{M-S-DOWN}
+\key{insert hline below (\kbd{C-u} : above) current row}{C-c -}
+\key{insert hline and move to line below it}{C-c RET}
+\key{sort lines in region}{C-c \^{}}
+
+{\bf Regions}
+
+\metax{cut/copy/paste rectangular region}{C-c C-x C-w/M-w/C-y}
+%\key{copy rectangular region}{C-c C-x M-w}
+%\key{paste rectangular region}{C-c C-x C-y}
+\key{fill paragraph across selected cells}{C-c C-q}
+
+{\bf Miscellaneous}
+
+\key{to limit column width to \kbd{N} characters, use}{...| <N> |...}
+\key{edit the current field in a separate window}{C-c `}
+\key{make current field fully visible}{C-u TAB}
+\metax{export as tab-separated file}{M-x org-table-export}
+\metax{import tab-separated file}{M-x org-table-import}
+\key{sum numbers in current column/rectangle}{C-c +}
+
+{\bf Tables created with the \kbd{table.el} package}
+
+\key{insert a new \kbd{table.el} table}{C-c ~}
+\key{recognize existing table.el table}{C-c C-c}
+\key{convert table (Org-mode $\leftrightarrow$ table.el)}{C-c ~}
+
+{\bf Spreadsheet}
+
+Formulas typed in field are executed by \kbd{TAB},
+\kbd{RET} and \kbd{C-c C-c}.  \kbd{=} introduces a column
+formula, \kbd{:=} a field formula.
+
+\key{Example: Add Col1 and Col2}{|=\$1+\$2      |}
+\key{... with printf format specification}{|=\$1+\$2;\%.2f|}
+\key{... with constants from constants.el}{|=\$1/\$c/\$cm |}
+\metax{sum from 2nd to 3rd hline}{|:=vsum(@II..@III)|}
+\key{apply current column formula}{| = |}
+
+\key{set and eval column formula}{C-c =}
+\key{set and eval field formula}{C-u C-c =}
+\key{re-apply all stored equations to current line}{C-c *}
+\key{re-apply all stored equations to entire table}{C-u C-c *}
+\key{iterate table to stability}{C-u C-u C-c *}
+\key{rotate calculation mark through \# * ! \^ \_ \$}{C-\#}
+\key{show line, column, formula reference}{C-c ?}
+\key{toggle grid / debugger}{C-c \}/\{}
+
+\newcolumn
+{\it Formula Editor}
+
+\key{edit formulas in separate buffer}{C-c '}
+\key{exit and install new formulas}{C-c C-c}
+\key{exit, install, and apply new formulas}{C-u C-c C-c}
+\key{abort}{C-c C-q}
+\key{toggle reference style}{C-c C-r}
+\key{pretty-print Lisp formula}{TAB}
+\key{complete Lisp symbol}{M-TAB}
+\key{shift reference point}{S-cursor}
+\key{shift test line for column references}{M-up/down}
+\key{scroll the window showing the table}{M-S-up/down}
+\key{toggle table coordinate grid}{C-c \}}
+
+\section{Links}
+
+\key{globally store link to the current location}{C-c l \noteone}
+\key{insert a link (TAB completes stored links)}{C-c C-l}
+\key{insert file link with file name completion}{C-u C-c C-l}
+\key{edit (also hidden part of) link at point}{C-c C-l}
+
+\key{open file links in emacs}{C-c C-o}
+\key{...force open in emacs/other window}{C-u C-c C-o}
+\key{open link at point}{mouse-1/2}
+\key{...force open in emacs/other window}{mouse-3}
+\key{record a position in mark ring}{C-c \%}
+\key{jump back to last followed link(s)}{C-c \&}
+\key{find next link}{C-c C-x C-n}
+\key{find previous link}{C-c C-x C-p}
+\key{edit code snippet of file at point}{C-c '}
+\key{toggle inline display of linked images}{C-c C-x C-v}
+
+\section{Working with Code (Babel)}
+
+\key{execute code block at point}{C-c C-c}
+\key{open results of code block at point}{C-c C-o}
+\key{check code block at point for errors}{C-c C-v c}
+\key{insert a header argument with completion}{C-c C-v j}
+\key{view expanded body of code block at point}{C-c C-v v}
+\key{view information about code block at point}{C-c C-v I}
+\key{go to named code block}{C-c C-v g}
+\key{go to named result}{C-c C-v r}
+\key{go to the head of the current code block}{C-c C-v u}
+\key{go to the next code block}{C-c C-v n}
+\key{go to the previous code block}{C-c C-v p}
+\key{demarcate a code block}{C-c C-v d}
+\key{execute the next key sequence in the code edit buffer}{C-c C-v x}
+\key{execute all code blocks in current buffer}{C-c C-v b}
+\key{execute all code blocks in current subtree}{C-c C-v s}
+\key{tangle code blocks in current file}{C-c C-v t}
+\key{tangle code blocks in supplied file}{C-c C-v f}
+\key{ingest all code blocks in supplied file into the Library of Babel}{C-c C-v i}
+\key{switch to the session of the current code block}{C-c C-v z}
+\key{load the current code block into a session}{C-c C-v l}
+\key{view sha1 hash of the current code block}{C-c C-v a}
+
+\section{Completion}
+
+In-buffer completion completes TODO keywords at headline start, TeX
+macros after ``{\tt \\}'', option keywords after ``{\tt \#-}'', TAGS
+after  ``{\tt :}'', and dictionary words elsewhere.
+
+\key{complete word at point}{M-TAB}
+
+
+\newcolumn
+\title{Org-Mode Reference Card (2/2)}
+
+\centerline{(for version \orgversionnumber)}
+
+\section{TODO Items and Checkboxes}
+
+\key{rotate the state of the current item}{C-c C-t}
+\metax{select next/previous state}{S-LEFT/RIGHT}
+\metax{select next/previous set}{C-S-LEFT/RIGHT}
+\key{toggle ORDERED property}{C-c C-x o}
+\key{view TODO items in a sparse tree}{C-c C-v}
+\key{view 3rd TODO keyword's sparse tree}{C-3 C-c C-v}
+
+\key{set the priority of the current item}{C-c , [ABC]}
+\key{remove priority cookie from current item}{C-c , SPC}
+\key{raise/lower priority of current item}{S-UP/DOWN\notetwo}
+
+\key{insert new checkbox item in plain list}{M-S-RET}
+\key{toggle checkbox(es) in region/entry/at point}{C-c C-x C-b}
+\key{toggle checkbox at point}{C-c C-c}
+%\metax{checkbox statistics cookies: insert {\tt [/]} or {\tt [\%]}}{}
+\key{update checkbox statistics (\kbd{C-u} : whole file)}{C-c \#}
+
+\section{Tags}
+
+\key{set tags for current heading}{C-c C-q}
+\key{realign tags in all headings}{C-u C-c C-q}
+\key{create sparse tree with matching tags}{C-c \\}
+\key{globally (agenda) match tags at cursor}{C-c C-o}
+
+\section{Properties and Column View}
+
+\key{set property/effort}{C-c C-x p/e}
+\key{special commands in property lines}{C-c C-c}
+\key{next/previous allowed value}{S-left/right}
+\key{turn on column view}{C-c C-x C-c}
+\key{capture columns view in dynamic block}{C-c C-x i}
+
+\key{quit column view}{q}
+\key{show full value}{v}
+\key{edit value}{e}
+\metax{next/previous allowed value}{n/p or S-left/right}
+\key{edit allowed values list}{a}
+\key{make column wider/narrower}{> / <}
+\key{move column left/right}{M-left/right}
+\key{add new column}{M-S-right}
+\key{Delete current column}{M-S-left}
+
+
+\section{Timestamps}
+
+\key{prompt for date and insert timestamp}{C-c .}
+\key{like \kbd{C-c .} but insert date and time format}{C-u C-c .}
+\key{like \kbd{C-c .} but make stamp inactive}{C-c !} % FIXME
+\key{insert DEADLINE timestamp}{C-c C-d}
+\key{insert SCHEDULED timestamp}{C-c C-s}
+\key{create sparse tree with all deadlines due}{C-c / d}
+\key{the time between 2 dates in a time range}{C-c C-y}
+\metax{change timestamp at cursor $\pm 1$ day}{S-RIGHT/LEFT\notetwo}
+\key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN\notetwo}
+\key{access the calendar for the current date}{C-c >}
+\key{insert timestamp matching date in calendar}{C-c <}
+\key{access agenda for current date}{C-c C-o}
+\key{select date while prompted}{mouse-1/RET}
+%\key{... select date in calendar}{mouse-1/RET}
+%\key{... scroll calendar back/forward one month}{< / >}
+%\key{... forward/backward one day}{S-LEFT/RIGHT}
+%\key{... forward/backward one week}{S-UP/DOWN}
+%\key{... forward/backward one month}{M-S-LEFT/RIGHT}
+\key{toggle custom format display for dates/times}{C-c C-x C-t}
+
+\newcolumn
+
+{\bf Clocking time}
+
+\key{start clock on current item}{C-c C-x C-i}
+\key{stop/cancel clock on current item}{C-c C-x C-o/x}
+\key{display total subtree times}{C-c C-x C-d}
+\key{remove displayed times}{C-c C-c}
+\key{insert/update table with clock report}{C-c C-x C-r}
+
+\section{Agenda Views}
+
+\key{add/move current file to front of agenda}{C-c [}
+\key{remove current file from your agenda}{C-c ]}
+\key{cycle through agenda file list}{C-'}
+\key{set/remove restriction lock}{C-c C-x </>}
+
+\key{compile agenda for the current week}{C-c a a \noteone}
+\key{compile global TODO list}{C-c a t \noteone}
+\key{compile TODO list for specific keyword}{C-c a T \noteone}
+\key{match tags, TODO kwds, properties}{C-c a m \noteone}
+\key{match only in TODO entries}{C-c a M \noteone}
+\key{find stuck projects}{C-c a \# \noteone}
+\key{show timeline of current org file}{C-c a L \noteone}
+\key{configure custom commands}{C-c a C \noteone}
+%\key{configure stuck projects}{C-c a ! \noteone}
+\key{agenda for date at cursor}{C-c C-o}
+
+{\bf Commands available in an agenda buffer}
+
+{\bf View Org file}
+
+\key{show original location of item}{SPC/mouse-3}
+%\key{... also available with}{mouse-3}
+\key{show and recenter window}{L}
+\key{goto original location in other window}{TAB/mouse-2}
+%\key{... also available with}{mouse-2}
+\key{goto original location, delete other windows}{RET}
+\key{show subtree in indirect buffer, ded.\ frame}{C-c C-x b}
+\key{toggle follow-mode}{F}
+
+{\bf Change display}
+
+\key{delete other windows}{o}
+\key{view mode dispatcher}{v}
+\key{switch to day/week/month/year/def view}{d w vm vy vSP}
+\key{toggle diary entries / time grid / habits}{D / G / K}
+\key{toggle entry text / clock report}{E / R}
+\key{toggle display of logbook entries}{l / v l/L/c}
+\key{toggle inclusion of archived trees/files}{v a/A}
+\key{refresh agenda buffer with any changes}{r / g}
+\key{filter with respect to a tag}{/}
+\key{save all org-mode buffers}{s}
+\key{display next/previous day,week,...}{f / b}
+\key{goto today / some date (prompt)}{. / j}
+
+{\bf Remote editing}
+
+\key{digit argument}{0-9}
+\key{change state of current TODO item}{t}
+\key{kill item and source}{C-k}
+\key{archive default}{\$ / a}
+\key{refile the subtree}{C-c C-w}
+\key{set/show tags of current headline}{: / T}
+\key{set effort property (prefix=nth)}{e}
+\key{set / compute priority of current item}{, / P}
+\key{raise/lower priority of current item}{S-UP/DOWN\notetwo}
+\key{run an attachment command}{C-c C-a}
+\key{schedule/set deadline for this item}{C-c C-s/d}
+\metax{change timestamp one day earlier/later}{S-LEFT/RIGHT\notetwo}
+\key{change timestamp to today}{>}
+\key{insert new entry into diary}{i}
+\newcolumn
+\key{start/stop/cancel the clock on current item}{I / O / X}
+\key{jump to running clock entry}{J}
+\key{mark / unmark / execute bulk action}{m / u / B}
+
+{\bf Misc}
+
+\key{follow one or offer all links in current entry}{C-c C-o}
+
+{\bf Calendar commands}
+
+\key{find agenda cursor date in calendar}{c}
+\key{compute agenda for calendar cursor date}{c}
+\key{show phases of the moon}{M}
+\key{show sunrise/sunset times}{S}
+\key{show holidays}{H}
+\key{convert date to other calendars}{C}
+
+{\bf Quit and Exit}
+
+\key{quit agenda, remove agenda buffer}{q}
+\key{exit agenda, remove all agenda buffers}{x}
+
+\section{LaTeX and cdlatex-mode}
+
+\key{preview LaTeX fragment}{C-c C-x C-l}
+\key{expand abbreviation (cdlatex-mode)}{TAB}
+\key{insert/modify math symbol (cdlatex-mode)}{` / '}
+\key{insert citation using RefTeX}{C-c C-x [}
+
+\section{Exporting and Publishing}
+
+Exporting creates files with extensions {\it .txt\/} and {\it .html\/}
+in the current directory.  Publishing puts the resulting file into
+some other place.
+
+\key{export/publish dispatcher}{C-c C-e}
+
+\key{export visible part only}{C-c C-e v}
+\key{insert template of export options}{C-c C-e t}
+\key{toggle fixed width for entry or region}{C-c :}
+\key{toggle pretty display of scripts, entities}{C-c C-x {\tt\char`\\}}
+
+{\bf Comments: Text not being exported}
+
+Lines starting with \kbd{\#} and subtrees starting with COMMENT are
+never exported.
+
+\key{toggle COMMENT keyword on entry}{C-c ;}
+
+\section{Dynamic Blocks}
+
+\key{update dynamic block at point}{C-c C-x C-u}
+\metax{update all dynamic blocks}{C-u C-c C-x C-u}
+
+\section{Notes}
+[1] This is only a suggestion for a binding of this command.  Choose
+your own key as shown under ACTIVATION.
+
+[2] Keybinding affected by {\tt org-support-shift-select} and also
+ {\tt org-replace-disputed-keys}.
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "tex refcard"
+% End:
+

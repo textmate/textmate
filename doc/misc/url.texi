@@ -1,0 +1,1196 @@
+\input texinfo
+@setfilename ../../info/url
+@settitle URL Programmer's Manual
+
+@iftex
+@c @finalout
+@end iftex
+@c @setchapternewpage odd
+@c @smallbook
+
+@tex
+\overfullrule=0pt
+%\global\baselineskip 30pt      % for printing in double space
+@end tex
+@dircategory Emacs lisp libraries
+@direntry
+* URL: (url).                   URL loading package.
+@end direntry
+
+@copying
+This file documents the Emacs Lisp URL loading package.
+
+Copyright @copyright{} 1993-1999, 2002, 2004-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@c
+@titlepage
+@title URL Programmer's Manual
+@subtitle First Edition, URL Version 2.0
+@author William M. Perry @email{wmperry@@gnu.org}
+@author David Love @email{fx@@gnu.org}
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@node Top
+@top URL
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* Getting Started::             Preparing your program to use URLs.
+* Retrieving URLs::             How to use this package to retrieve a URL.
+* Supported URL Types::         Descriptions of URL types currently supported.
+* Defining New URLs::           How to define a URL loader for a new protocol.
+* General Facilities::          URLs can be cached, accessed via a gateway
+                                and tracked in a history list.
+* Customization::               Variables you can alter.
+* GNU Free Documentation License:: The license for this documentation.
+* Function Index::
+* Variable Index::
+* Concept Index::
+@end menu
+
+@node Getting Started
+@chapter Getting Started
+@cindex URLs, definition
+@cindex URIs
+
+@dfn{Uniform Resource Locators} (URLs) are a specific form of
+@dfn{Uniform Resource Identifiers} (URI) described in RFC 2396 which
+updates RFC 1738 and RFC 1808.  RFC 2016 defines uniform resource
+agents.
+
+URIs have the form @var{scheme}:@var{scheme-specific-part}, where the
+@var{scheme}s supported by this library are described below.
+@xref{Supported URL Types}.
+
+FTP, NFS, HTTP, HTTPS, @code{rlogin}, @code{telnet}, tn3270,
+IRC and gopher URLs all have the form
+
+@example
+@var{scheme}://@r{[}@var{userinfo}@@@r{]}@var{hostname}@r{[}:@var{port}@r{]}@r{[}/@var{path}@r{]}
+@end example
+@noindent
+where @samp{@r{[}} and @samp{@r{]}} delimit optional parts.
+@var{userinfo} sometimes takes the form @var{username}:@var{password}
+but you should beware of the security risks of sending cleartext
+passwords.  @var{hostname} may be a domain name or a dotted decimal
+address.  If the @samp{:@var{port}} is omitted then the library will
+use the ``well known'' port for that service when accessing URLs.  With
+the possible exception of @code{telnet}, it is rare for ports to be
+specified, and it is possible using a non-standard port may have
+undesired consequences if a different service is listening on that
+port (e.g., an HTTP URL specifying the SMTP port can cause mail to be
+sent). @c , but @xref{Other Variables, url-bad-port-list}.
+The meaning of the @var{path} component depends on the service.
+
+@menu
+* Configuration::
+* Parsed URLs::                 URLs are parsed into vector structures.
+@end menu
+
+@node Configuration
+@section Configuration
+
+@defvar url-configuration-directory
+@cindex @file{~/.url}
+@cindex configuration files
+The directory in which URL configuration files, the cache etc.,
+reside.  The old default was @file{~/.url}, and this directory
+is still used if it exists.  The new default is a @file{url/}
+directory in @code{user-emacs-directory}, which is normally
+@file{~/.emacs.d}.
+@end defvar
+
+@node Parsed URLs
+@section Parsed URLs
+@cindex parsed URLs
+The library functions typically operate on @dfn{parsed} versions of
+URLs.  These are actually vectors of the form:
+
+@example
+[@var{type} @var{user} @var{password} @var{host} @var{port} @var{file} @var{target} @var{attributes} @var{full}]
+@end example
+
+@noindent where
+@table @var
+@item type
+is the type of the URL scheme, e.g., @code{http}
+@item user
+is the username associated with it, or @code{nil};
+@item password
+is the user password associated with it, or @code{nil};
+@item host
+is the host name associated with it, or @code{nil};
+@item port
+is the port number associated with it, or @code{nil};
+@item file
+is the ``file'' part of it, or @code{nil}.  This doesn't necessarily
+actually refer to a file;
+@item target
+is the target part, or @code{nil};
+@item attributes
+is the attributes associated with it, or @code{nil};
+@item full
+is @code{t} for a fully-specified URL, with a host part indicated by
+@samp{//} after the scheme part.
+@end table
+
+@findex url-type
+@findex url-user
+@findex url-password
+@findex url-host
+@findex url-port
+@findex url-file
+@findex url-target
+@findex url-attributes
+@findex url-full
+@findex url-set-type
+@findex url-set-user
+@findex url-set-password
+@findex url-set-host
+@findex url-set-port
+@findex url-set-file
+@findex url-set-target
+@findex url-set-attributes
+@findex url-set-full
+These attributes have accessors named @code{url-@var{part}}, where
+@var{part} is the name of one of the elements above, e.g.,
+@code{url-host}.  Similarly, there are setters of the form
+@code{url-set-@var{part}}.
+
+There are functions for parsing and unparsing between the string and
+vector forms.
+
+@defun url-generic-parse-url url
+Return a parsed version of the string @var{url}.
+@end defun
+
+@defun url-recreate-url url
+@cindex unparsing URLs
+Recreates a URL string from the parsed @var{url}.
+@end defun
+
+@node Retrieving URLs
+@chapter Retrieving URLs
+
+@defun url-retrieve-synchronously url
+Retrieve @var{url} synchronously and return a buffer containing the
+data.  @var{url} is either a string or a parsed URL structure.  Return
+@code{nil} if there are no data associated with it (the case for dired,
+info, or mailto URLs that need no further processing).
+@end defun
+
+@defun url-retrieve url callback &optional cbargs silent no-cookies
+Retrieve @var{url} asynchronously and call @var{callback} with args
+@var{cbargs} when finished.  The callback is called when the object
+has been completely retrieved, with the current buffer containing the
+object and any MIME headers associated with it.  @var{url} is either a
+string or a parsed URL structure.  Returns the buffer @var{url} will
+load into, or @code{nil} if the process has already completed.
+If the optional argument @var{silent} is non-@code{nil}, suppress
+progress messages.  If the optional argument @var{no-cookies} is
+non-@code{nil}, do not store or send cookies.
+@end defun
+
+@vindex url-queue-parallel-processes
+@vindex url-queue-timeout
+@defun url-queue-retrieve url callback &optional cbargs silent no-cookies
+This acts like the @code{url-retrieve} function, but with limits on
+the degree of parallelism.  The option @code{url-queue-parallel-processes}
+controls the number of concurrent processes, and the option
+@code{url-queue-timeout} sets a timeout in seconds.
+@end defun
+
+@node Supported URL Types
+@chapter Supported URL Types
+
+@menu
+* http/https::                  Hypertext Transfer Protocol.
+* file/ftp::                    Local files and FTP archives.
+* info::                        Emacs "Info" pages.
+* mailto::                      Sending email.
+* news/nntp/snews::             Usenet news.
+* rlogin/telnet/tn3270::        Remote host connectivity.
+* irc::                         Internet Relay Chat.
+* data::                        Embedded data URLs.
+* nfs::                         Networked File System
+@c * finger::
+@c * gopher::
+@c * netrek::
+@c * prospero::
+* cid::                         Content-ID.
+* about::
+* ldap::                        Lightweight Directory Access Protocol
+* imap::                        IMAP mailboxes.
+* man::                         Unix man pages.
+@end menu
+
+@node http/https
+@section @code{http} and @code{https}
+
+The scheme @code{http} is Hypertext Transfer Protocol.  The library
+supports version 1.1, specified in RFC 2616.  (This supersedes 1.0,
+defined in RFC 1945) HTTP URLs have the following form, where most of
+the parts are optional:
+@example
+http://@var{user}:@var{password}@@@var{host}:@var{port}/@var{path}?@var{searchpart}#@var{fragment}
+@end example
+@c The @code{:@var{port}} part is optional, and @var{port} defaults to
+@c 80.  The @code{/@var{path}} part, if present, is a slash-separated
+@c series elements.  The @code{?@var{searchpart}}, if present, is the
+@c query for a search or the content of a form submission.  The
+@c @code{#fragment} part, if present, is a location in the document.
+
+The scheme @code{https} is a secure version of @code{http}, with
+transmission via SSL.  It is defined in RFC 2069.  Its default port is
+443.  This scheme depends on SSL support in Emacs via the
+@file{ssl.el} library and is actually implemented by forcing the
+@code{ssl} gateway method to be used.  @xref{Gateways in general}.
+
+@defopt url-honor-refresh-requests
+This controls honoring of HTTP @samp{Refresh} headers by which
+servers can direct clients to reload documents from the same URL or a
+or different one.  @code{nil} means they will not be honored,
+@code{t} (the default) means they will always be honored, and
+otherwise the user will be asked on each request.
+@end defopt
+
+
+@menu
+* Cookies::
+* HTTP language/coding::
+* HTTP URL Options::
+* Dealing with HTTP documents::
+@end menu
+
+@node Cookies
+@subsection Cookies
+
+@defopt url-cookie-file
+The file in which cookies are stored, defaulting to @file{cookies} in
+the directory specified by @code{url-configuration-directory}.
+@end defopt
+
+@defopt url-cookie-confirmation
+Specifies whether confirmation is require to accept cookies.
+@end defopt
+
+@defopt url-cookie-multiple-line
+Specifies whether to put all cookies for the server on one line in the
+HTTP request to satisfy broken servers like
+@url{http://www.hotmail.com}.
+@end defopt
+
+@defopt url-cookie-trusted-urls
+A list of regular expressions matching URLs from which to accept
+cookies always.
+@end defopt
+
+@defopt url-cookie-untrusted-urls
+A list of regular expressions matching URLs from which to reject
+cookies always.
+@end defopt
+
+@defopt url-cookie-save-interval
+The number of seconds between automatic saves of cookies to disk.
+Default is one hour.
+@end defopt
+
+
+@node HTTP language/coding
+@subsection Language and Encoding Preferences
+
+HTTP allows clients to express preferences for the language and
+encoding of documents which servers may honor.  For each of these
+variables, the value is a string; it can specify a single choice, or
+it can be a comma-separated list.
+
+Normally, this list is ordered by descending preference.  However, each
+element can be followed by @samp{;q=@var{priority}} to specify its
+preference level, a decimal number from 0 to 1; e.g., for
+@code{url-mime-language-string}, @w{@code{"de, en-gb;q=0.8,
+en;q=0.7"}}.  An element that has no @samp{;q} specification has
+preference level 1.
+
+@defopt url-mime-charset-string
+@cindex character sets
+@cindex coding systems
+This variable specifies a preference for character sets when documents
+can be served in more than one encoding.
+
+HTTP allows specifying a series of MIME charsets which indicate your
+preferred character set encodings, e.g., Latin-9 or Big5, and these
+can be weighted.  The default series is generated automatically from
+the associated MIME types of all defined coding systems, sorted by the
+coding system priority specified in Emacs.  @xref{Recognize Coding, ,
+Recognizing Coding Systems, emacs, The GNU Emacs Manual}.
+@end defopt
+
+@defopt url-mime-language-string
+@cindex language preferences
+A string specifying the preferred language when servers can serve
+files in several languages.  Use RFC 1766 abbreviations, e.g.,
+@samp{en} for English, @samp{de} for German.
+
+The string can be @code{"*"} to get the first available language (as
+opposed to the default).
+@end defopt
+
+@node HTTP URL Options
+@subsection HTTP URL Options
+
+HTTP supports an @samp{OPTIONS} method describing things supported by
+the URL@.
+
+@defun url-http-options url
+Returns a property list describing options available for URL.  The
+property list members are:
+
+@table @code
+@item methods
+A list of symbols specifying what HTTP methods the resource
+supports.
+
+@item dav
+@cindex DAV
+A list of numbers specifying what DAV protocol/schema versions are
+supported.
+
+@item dasl
+@cindex DASL
+A list of supported DASL search types supported (string form).
+
+@item ranges
+A list of the units available for use in partial document fetches.
+
+@item p3p
+@cindex P3P
+The @dfn{Platform For Privacy Protection} description for the resource.
+Currently this is just the raw header contents.
+@end table
+
+@end defun
+
+@node Dealing with HTTP documents
+@subsection Dealing with HTTP documents
+
+HTTP URLs are retrieved into a buffer containing the HTTP headers
+followed by the body.  Since the headers are quasi-MIME, they may be
+processed using the MIME library.  @xref{Top,, Emacs MIME,
+emacs-mime, The Emacs MIME Manual}.
+
+@node file/ftp
+@section file and ftp
+@cindex files
+@cindex FTP
+@cindex File Transfer Protocol
+@cindex compressed files
+@cindex dired
+
+@example
+ftp://@var{user}:@var{password}@@@var{host}:@var{port}/@var{file}
+file://@var{user}:@var{password}@@@var{host}:@var{port}/@var{file}
+@end example
+
+These schemes are defined in RFC 1808.
+@samp{ftp:} and @samp{file:} are synonymous in this library.  They
+allow reading arbitrary files from hosts.  Either @samp{ange-ftp}
+(Emacs) or @samp{efs} (XEmacs) is used to retrieve them from remote
+hosts.  Local files are accessed directly.
+
+Compressed files are handled, but support is hard-coded so that
+@code{jka-compr-compression-info-list} and so on have no affect.
+Suffixes recognized are @samp{.z}, @samp{.gz}, @samp{.Z} and
+@samp{.bz2}.
+
+@defopt url-directory-index-file
+The filename to look for when indexing a directory, default
+@samp{"index.html"}.  If this file exists, and is readable, then it
+will be viewed instead of using @code{dired} to view the directory.
+@end defopt
+
+@node info
+@section info
+@cindex Info
+@cindex Texinfo
+@findex Info-goto-node
+
+@example
+info:@var{file}#@var{node}
+@end example
+
+Info URLs are not officially defined.  They invoke
+@code{Info-goto-node} with argument @samp{(@var{file})@var{node}}.
+@samp{#@var{node}} is optional, defaulting to @samp{Top}.
+
+@node mailto
+@section mailto
+
+@cindex mailto
+@cindex email
+A mailto URL will send an email message to the address in the
+URL, for example @samp{mailto:foo@@bar.com} would compose a
+message to @samp{foo@@bar.com}.
+
+@defopt url-mail-command
+@vindex mail-user-agent
+The function called whenever url needs to send mail.  This should
+normally be left to default from @var{mail-user-agent}.  @xref{Mail
+Methods, , Mail-Composition Methods, emacs, The GNU Emacs Manual}.
+@end defopt
+
+An @samp{X-Url-From} header field containing the URL of the document
+that contained the mailto URL is added if that URL is known.
+
+RFC 2368 extends the definition of mailto URLs in RFC 1738.
+The form of a mailto URL is
+@example
+@samp{mailto:@var{mailbox}[?@var{header}=@var{contents}[&@var{header}=@var{contents}]]}
+@end example
+@noindent where an arbitrary number of @var{header}s can be added.  If the
+@var{header} is @samp{body}, then @var{contents} is put in the body
+otherwise a @var{header} header field is created with @var{contents}
+as its contents.  Note that the URL library does not consider any
+headers ``dangerous'' so you should check them before sending the
+message.
+
+@c Fixme: update
+Email messages are defined in @sc{rfc}822.
+
+@node news/nntp/snews
+@section @code{news}, @code{nntp} and @code{snews}
+@cindex news
+@cindex network news
+@cindex usenet
+@cindex NNTP
+@cindex snews
+
+@c draft-gilman-news-url-01
+The network news URL scheme take the following forms following RFC
+1738 except that for compatibility with other clients, host and port
+fields may be included in news URLs though they are properly only
+allowed for nntp an snews.
+
+@table @samp
+@item news:@var{newsgroup}
+Retrieves a list of messages in @var{newsgroup};
+@item news:@var{message-id}
+Retrieves the message with the given @var{message-id};
+@item news:*
+Retrieves a list of all available newsgroups;
+@item nntp://@var{host}:@var{port}/@var{newsgroup}
+@itemx nntp://@var{host}:@var{port}/@var{message-id}
+@itemx nntp://@var{host}:@var{port}/*
+Similar to the @samp{news} versions.
+@end table
+
+@samp{:@var{port}} is optional and defaults to :119.
+
+@samp{snews} is the same as @samp{nntp} except that the default port
+is :563.
+@cindex SSL
+(It is tunneled through SSL.)
+
+An @samp{nntp} URL is the same as a news URL, except that the URL may
+specify an article by its number.
+
+@defopt url-news-server
+This variable can be used to override the default news server.
+Usually this will be set by the Gnus package, which is used to fetch
+news.
+@cindex environment variable
+@vindex NNTPSERVER
+It may be set from the conventional environment variable
+@code{NNTPSERVER}.
+@end defopt
+
+@node rlogin/telnet/tn3270
+@section rlogin, telnet and tn3270
+@cindex rlogin
+@cindex telnet
+@cindex tn3270
+@cindex terminal emulation
+@findex terminal-emulator
+
+These URL schemes from RFC 1738 for logon via a terminal emulator have
+the form
+@example
+telnet://@var{user}:@var{password}@@@var{host}:@var{port}
+@end example
+but the @code{:@var{password}} component is ignored.
+
+To handle rlogin, telnet and tn3270 URLs, a @code{rlogin},
+@code{telnet} or @code{tn3270} (the program names and arguments are
+hardcoded) session is run in a @code{terminal-emulator} buffer.
+Well-known ports are used if the URL does not specify a port.
+
+@node irc
+@section irc
+@cindex IRC
+@cindex Internet Relay Chat
+@cindex ZEN IRC
+@cindex ERC
+@cindex rcirc
+@c Fixme: reference (was http://www.w3.org/Addressing/draft-mirashi-url-irc-01.txt)
+@dfn{Internet Relay Chat} (IRC) is handled by handing off the @sc{irc}
+session to a function named in @code{url-irc-function}.
+
+@defopt url-irc-function
+A function to actually open an IRC connection.
+This function
+must take five arguments, @var{host}, @var{port}, @var{channel},
+@var{user} and @var{password}.  The @var{channel} argument specifies the
+channel to join immediately, this can be @code{nil}.  By default this is
+@code{url-irc-rcirc}.
+@end defopt
+@defun url-irc-rcirc host port channel user password
+Processes the arguments and lets @code{rcirc} handle the session.
+@end defun
+@defun url-irc-erc host port channel user password
+Processes the arguments and lets @code{ERC} handle the session.
+@end defun
+@defun url-irc-zenirc host port channel user password
+Processes the arguments and lets @code{zenirc} handle the session.
+@end defun
+
+@node data
+@section data
+@cindex data URLs
+
+@example
+data:@r{[}@var{media-type}@r{]}@r{[};@var{base64}@r{]},@var{data}
+@end example
+
+Data URLs contain MIME data in the URL itself.  They are defined in
+RFC 2397.
+
+@var{media-type} is a MIME @samp{Content-Type} string, possibly
+including parameters.  It defaults to
+@samp{text/plain;charset=US-ASCII}.  The @samp{text/plain} can be
+omitted but the charset parameter supplied.  If @samp{;base64} is
+present, the @var{data} are base64-encoded.
+
+@node nfs
+@section nfs
+@cindex NFS
+@cindex Network File System
+@cindex automounter
+
+@example
+nfs://@var{user}:@var{password}@@@var{host}:@var{port}/@var{file}
+@end example
+
+The @samp{nfs:} scheme is defined in RFC 2224.  It is similar to
+@samp{ftp:} except that it points to a file on a remote host that is
+handled by the automounter on the local host.
+
+@defvar url-nfs-automounter-directory-spec
+@end defvar
+A string saying how to invoke the NFS automounter.  Certain @samp{%}
+sequences are recognized:
+
+@table @samp
+@item %h
+The hostname of the NFS server;
+@item %n
+The port number of the NFS server;
+@item %u
+The username to use to authenticate;
+@item %p
+The password to use to authenticate;
+@item %f
+The filename on the remote server;
+@item %%
+A literal @samp{%}.
+@end table
+
+Each can be used any number of times.
+
+@node cid
+@section cid
+@cindex Content-ID
+
+RFC 2111
+
+@node about
+@section about
+
+@node ldap
+@section ldap
+@cindex LDAP
+@cindex Lightweight Directory Access Protocol
+
+The LDAP scheme is defined in RFC 2255.
+
+@node imap
+@section imap
+@cindex IMAP
+
+RFC 2192
+
+@node man
+@section man
+@cindex @command{man}
+@cindex Unix man pages
+@findex man
+
+@example
+@samp{man:@var{page-spec}}
+@end example
+
+This is a non-standard scheme.  @var{page-spec} is passed directly to
+the Lisp @code{man} function.
+
+@node Defining New URLs
+@chapter Defining New URLs
+
+@menu
+* Naming conventions::
+* Required functions::
+* Optional functions::
+* Asynchronous fetching::
+* Supporting file-name-handlers::
+@end menu
+
+@node Naming conventions
+@section Naming conventions
+
+@node Required functions
+@section Required functions
+
+@node Optional functions
+@section Optional functions
+
+@node Asynchronous fetching
+@section Asynchronous fetching
+
+@node Supporting file-name-handlers
+@section Supporting file-name-handlers
+
+@node General Facilities
+@chapter General Facilities
+
+@menu
+* Disk Caching::
+* Proxies::
+* Gateways in general::
+* History::
+@end menu
+
+@node Disk Caching
+@section Disk Caching
+@cindex Caching
+@cindex Persistent Cache
+@cindex Disk Cache
+
+The disk cache stores retrieved documents locally, whence they can be
+retrieved more quickly.  When requesting a URL that is in the cache,
+the library checks to see if the page has changed since it was last
+retrieved from the remote machine.  If not, the local copy is used,
+saving the transmission over the network.
+@cindex Cleaning the cache
+@cindex Clearing the cache
+@cindex Cache cleaning
+Currently the cache isn't cleared automatically.
+@c Running the @code{clean-cache} shell script
+@c fist is recommended, to allow for future cleaning of the cache.  This
+@c shell script will remove all files that have not been accessed since it
+@c was last run.  To keep the cache pared down, it is recommended that this
+@c script be run from @i{at} or @i{cron} (see the manual pages for
+@c crontab(5) or at(1) for more information)
+
+@defopt url-automatic-caching
+Setting this variable non-@code{nil} causes documents to be cached
+automatically.
+@end defopt
+
+@defopt url-cache-directory
+This variable specifies the
+directory to store the cache files.  It defaults to sub-directory
+@file{cache} of @code{url-configuration-directory}.
+@end defopt
+
+@defopt url-cache-creation-function
+The cache relies on a scheme for mapping URLs to files in the cache.
+This variable names a function which sets the type of cache to use.
+It takes a URL as argument and returns the absolute file name of the
+corresponding cache file.  The two supplied possibilities are
+@code{url-cache-create-filename-using-md5} and
+@code{url-cache-create-filename-human-readable}.
+@end defopt
+
+@defun url-cache-create-filename-using-md5 url
+Creates a cache file name from @var{url} using MD5 hashing.
+This is creates entries with very few cache collisions and is fast.
+@cindex MD5
+@smallexample
+(url-cache-create-filename-using-md5 "http://www.example.com/foo/bar")
+  @result{} "/home/fx/.url/cache/fx/http/com/example/www/b8a35774ad20db71c7c3409a5410e74f"
+@end smallexample
+@end defun
+
+@defun url-cache-create-filename-human-readable url
+Creates a cache file name from @var{url} more obviously connected to
+@var{url} than for @code{url-cache-create-filename-using-md5}, but
+more likely to conflict with other files.
+@smallexample
+(url-cache-create-filename-human-readable "http://www.example.com/foo/bar")
+  @result{} "/home/fx/.url/cache/fx/http/com/example/www/foo/bar"
+@end smallexample
+@end defun
+
+@defun url-cache-expired
+This function returns non-nil if a cache entry has expired (or is absent).
+The arguments are a URL and optional expiration delay in seconds
+(default @var{url-cache-expire-time}).
+@end defun
+
+@defopt url-cache-expire-time
+This variable is the default number of seconds to use for the
+expire-time argument of the function @code{url-cache-expired}.
+@end defopt
+
+@defun url-fetch-from-cache
+This function takes a URL as its argument and returns a buffer
+containing the data cached for that URL.
+@end defun
+
+@c Fixme: never actually used currently?
+@c @defopt url-standalone-mode
+@c @cindex Relying on cache
+@c @cindex Cache only mode
+@c @cindex Standalone mode
+@c If this variable is non-@code{nil}, the library relies solely on the
+@c cache for fetching documents and avoids checking if they have changed
+@c on remote servers.
+@c @end defopt
+
+@c With a large cache of documents on the local disk, it can be very handy
+@c when traveling, or any other time the network connection is not active
+@c (a laptop with a dial-on-demand PPP connection, etc).  Emacs/W3 can rely
+@c solely on its cache, and avoid checking to see if the page has changed
+@c on the remote server.  In the case of a dial-on-demand PPP connection,
+@c this will keep the phone line free as long as possible, only bringing up
+@c the PPP connection when asking for a page that is not located in the
+@c cache.  This is very useful for demonstrations as well.
+
+@node Proxies
+@section Proxies and Gatewaying
+
+@c fixme: check/document url-ns stuff
+@cindex proxy servers
+@cindex proxies
+@cindex environment variables
+@vindex HTTP_PROXY
+Proxy servers are commonly used to provide gateways through firewalls
+or as caches serving some more-or-less local network.  Each protocol
+(HTTP, FTP, etc.)@: can have a different gateway server.  Proxying is
+conventionally configured commonly amongst different programs through
+environment variables of the form @code{@var{protocol}_proxy}, where
+@var{protocol} is one of the supported network protocols (@code{http},
+@code{ftp} etc.).  The library recognizes such variables in either
+upper or lower case.  Their values are of one of the forms:
+@itemize @bullet
+@item @code{@var{host}:@var{port}}
+@item A full URL;
+@item Simply a host name.
+@end itemize
+
+@vindex NO_PROXY
+The @code{NO_PROXY} environment variable specifies URLs that should be
+excluded from proxying (on servers that should be contacted directly).
+This should be a comma-separated list of hostnames, domain names, or a
+mixture of both.  Asterisks can be used as wildcards, but other
+clients may not support that.  Domain names may be indicated by a
+leading dot.  For example:
+@example
+NO_PROXY="*.aventail.com,home.com,.seanet.com"
+@end example
+@noindent says to contact all machines in the @samp{aventail.com} and
+@samp{seanet.com} domains directly, as well as the machine named
+@samp{home.com}.  If @code{NO_PROXY} isn't defined, @code{no_PROXY}
+and @code{no_proxy} are also tried, in that order.
+
+Proxies may also be specified directly in Lisp.
+
+@defopt url-proxy-services
+This variable is an alist of URL schemes and proxy servers that
+gateway them.  The items are of the form @w{@code{(@var{scheme}
+. @var{host}:@var{portnumber})}}, says that the URL @var{scheme} is
+gatewayed through @var{portnumber} on the specified @var{host}.  An
+exception is the pseudo scheme @code{"no_proxy"}, which is paired with
+a regexp matching host names not to be proxied.  This variable is
+initialized from the environment as above.
+
+@example
+(setq url-proxy-services
+      '(("http"     . "proxy.aventail.com:80")
+        ("no_proxy" . "^.*\\(aventail\\|seanet\\)\\.com")))
+@end example
+@end defopt
+
+@node Gateways in general
+@section Gateways in General
+@cindex gateways
+@cindex firewalls
+
+The library provides a general gateway layer through which all
+networking passes.  It can both control access to the network and
+provide access through gateways in firewalls.  This may make direct
+connections in some cases and pass through some sort of gateway in
+others.@footnote{Proxies (which only operate over HTTP) are
+implemented using this.}  The library's basic function responsible for
+making connections is @code{url-open-stream}.
+
+@defun url-open-stream name buffer host service
+@cindex opening a stream
+@cindex stream, opening
+Open a stream to @var{host}, possibly via a gateway.  The other
+arguments are as for @code{open-network-stream}.  This will not make a
+connection if @code{url-gateway-unplugged} is non-@code{nil}.
+@end defun
+
+@defvar url-gateway-local-host-regexp
+This is a regular expression that matches local hosts that do not
+require the use of a gateway.  If @code{nil}, all connections are made
+through the gateway.
+@end defvar
+
+@defvar url-gateway-method
+This variable controls which gateway method is used.  It may be useful
+to bind it temporarily in some applications.  It has values taken from
+a list of symbols.  Possible values are:
+
+@table @code
+@item telnet
+@cindex @command{telnet}
+Use this method if you must first telnet and log into a gateway host,
+and then run telnet from that host to connect to outside machines.
+
+@item rlogin
+@cindex @command{rlogin}
+This method is identical to @code{telnet}, but uses @command{rlogin}
+to log into the remote machine without having to send the username and
+password over the wire every time.
+
+@item socks
+@cindex @sc{socks}
+Use if the firewall has a @sc{socks} gateway running on it.  The
+@sc{socks} v5 protocol is defined in RFC 1928.
+
+@c @item ssl
+@c This probably shouldn't be documented
+@c Fixme: why not? -- fx
+
+@item native
+This method uses Emacs's builtin networking directly.  This is the
+default.  It can be used only if there is no firewall blocking access.
+@end table
+@end defvar
+
+The following variables control the gateway methods.
+
+@defopt url-gateway-telnet-host
+The gateway host to telnet to.  Once logged in there, you then telnet
+out to the hosts you want to connect to.
+@end defopt
+@defopt url-gateway-telnet-parameters
+This should be a list of parameters to pass to the @command{telnet} program.
+@end defopt
+@defopt url-gateway-telnet-password-prompt
+This is a regular expression that matches the password prompt when
+logging in.
+@end defopt
+@defopt url-gateway-telnet-login-prompt
+This is a regular expression that matches the username prompt when
+logging in.
+@end defopt
+@defopt url-gateway-telnet-user-name
+The username to log in with.
+@end defopt
+@defopt url-gateway-telnet-password
+The password to send when logging in.
+@end defopt
+@defopt url-gateway-prompt-pattern
+This is a regular expression that matches the shell prompt.
+@end defopt
+
+@defopt url-gateway-rlogin-host
+Host to @samp{rlogin} to before telnetting out.
+@end defopt
+@defopt url-gateway-rlogin-parameters
+Parameters to pass to @samp{rsh}.
+@end defopt
+@defopt url-gateway-rlogin-user-name
+User name to use when logging in to the gateway.
+@end defopt
+@defopt url-gateway-prompt-pattern
+This is a regular expression that matches the shell prompt.
+@end defopt
+
+@defopt socks-server
+This specifies the default server, it takes the form
+@w{@code{("Default server" @var{server} @var{port} @var{version})}}
+where @var{version} can be either 4 or 5.
+@end defopt
+@defvar socks-password
+If this is @code{nil} then you will be asked for the password,
+otherwise it will be used as the password for authenticating you to
+the @sc{socks} server.
+@end defvar
+@defvar socks-username
+This is the username to use when authenticating yourself to the
+@sc{socks} server.  By default this is your login name.
+@end defvar
+@defvar socks-timeout
+This controls how long, in seconds, to wait for responses from the
+@sc{socks} server; it is 5 by default.
+@end defvar
+@c fixme: these have been effectively commented-out in the code
+@c @defopt socks-server-aliases
+@c This a list of server aliases.  It is a list of aliases of the form
+@c @var{(alias hostname port version)}.
+@c @end defopt
+@c @defopt socks-network-aliases
+@c This a list of network aliases.  Each entry in the list takes the form
+@c @var{(alias (network))} where @var{alias} is a string that names the
+@c @var{network}.  The networks can contain a pair (not a dotted pair) of
+@c @sc{ip} addresses which specify a range of @sc{ip} addresses, an @sc{ip}
+@c address and a netmask, a domain name or a unique hostname or @sc{ip}
+@c address.
+@c @end defopt
+@c @defopt socks-redirection-rules
+@c This a list of redirection rules.  Each rule take the form
+@c @var{(Destination network Connection type)} where @var{Destination
+@c network} is a network alias from @code{socks-network-aliases} and
+@c @var{Connection type} can be @code{nil} in which case a direct
+@c connection is used, or it can be an alias from
+@c @code{socks-server-aliases} in which case that server is used as a
+@c proxy.
+@c @end defopt
+@defopt socks-nslookup-program
+@cindex @command{nslookup}
+This the @samp{nslookup} program.  It is @code{"nslookup"} by default.
+@end defopt
+
+@menu
+* Suppressing network connections::
+@end menu
+@c * Broken hostname resolution::
+
+@node Suppressing network connections
+@subsection Suppressing Network Connections
+
+@cindex network connections, suppressing
+@cindex suppressing network connections
+@cindex bugs, HTML
+@cindex HTML `bugs'
+In some circumstances it is desirable to suppress making network
+connections.  A typical case is when rendering HTML in a mail user
+agent, when external URLs should not be activated, particularly to
+avoid ``bugs'' which ``call home'' by fetch single-pixel images and the
+like.  To arrange this, bind the following variable for the duration
+of such processing.
+
+@defvar url-gateway-unplugged
+If this variable is non-@code{nil} new network connections are never
+opened by the URL library.
+@end defvar
+
+@c @node Broken hostname resolution
+@c @subsection Broken Hostname Resolution
+
+@c @cindex hostname resolver
+@c @cindex resolver, hostname
+@c Some C libraries do not include the hostname resolver routines in
+@c their static libraries.  If Emacs was linked statically, and was not
+@c linked with the resolver libraries, it will not be able to get to any
+@c machines off the local network.  This is characterized by being able
+@c to reach someplace with a raw ip number, but not its hostname
+@c (@url{http://129.79.254.191/} works, but
+@c @url{http://www.cs.indiana.edu/} doesn't).  This used to happen on
+@c SunOS4 and Ultrix, but is now probably now rare.  If Emacs can't be
+@c rebuilt linked against the resolver library, it can use the external
+@c @command{nslookup} program instead.
+
+@c @defopt url-gateway-broken-resolution
+@c @cindex @code{nslookup} program
+@c @cindex program, @code{nslookup}
+@c If non-@code{nil}, this variable says to use the program specified by
+@c @code{url-gateway-nslookup-program} program to do hostname resolution.
+@c @end defopt
+
+@c @defopt url-gateway-nslookup-program
+@c The name of the program to do hostname lookup if Emacs can't do it
+@c directly.  This program should expect a single argument on the command
+@c line---the hostname to resolve---and should produce output similar to
+@c the standard Unix @command{nslookup} program:
+@c @example
+@c Name: www.cs.indiana.edu
+@c Address: 129.79.254.191
+@c @end example
+@c @end defopt
+
+@node History
+@section History
+
+@findex url-do-setup
+The library can maintain a global history list tracking URLs accessed.
+URL completion can be done from it.  The history mechanism is set up
+automatically via @code{url-do-setup} when it is configured to be on.
+Note that the size of the history list is currently not limited.
+
+@vindex url-history-hash-table
+The history ``list'' is actually a hash table,
+@code{url-history-hash-table}.  It contains access times keyed by URL
+strings.  The times are in the format returned by @code{current-time}.
+
+@defun url-history-update-url url time
+This function updates the history table with an entry for @var{url}
+accessed at the given @var{time}.
+@end defun
+
+@defopt url-history-track
+If non-@code{nil}, the library will keep track of all the URLs
+accessed.  If it is @code{t}, the list is saved to disk at the end of
+each Emacs session.  The default is @code{nil}.
+@end defopt
+
+@defopt url-history-file
+The file storing the history list between sessions.  It defaults to
+@file{history} in @code{url-configuration-directory}.
+@end defopt
+
+@defopt url-history-save-interval
+@findex url-history-setup-save-timer
+The number of seconds between automatic saves of the history list.
+Default is one hour.  Note that if you change this variable directly,
+rather than using Custom, after @code{url-do-setup} has been run, you
+need to run the function @code{url-history-setup-save-timer}.
+@end defopt
+
+@defun url-history-parse-history &optional fname
+Parses the history file @var{fname} (default @code{url-history-file})
+and sets up the history list.
+@end defun
+
+@defun url-history-save-history &optional fname
+Saves the current history to file @var{fname} (default
+@code{url-history-file}).
+@end defun
+
+@defun url-completion-function string predicate function
+You can use this function to do completion of URLs from the history.
+@end defun
+
+@node Customization
+@chapter Customization
+
+@section Environment Variables
+
+@cindex environment variables
+The following environment variables affect the library's operation at
+startup.
+
+@table @code
+@item TMPDIR
+@vindex TMPDIR
+@vindex url-temporary-directory
+If this is defined, @var{url-temporary-directory} is initialized from
+it.
+@end table
+
+@section General User Options
+
+The following user options, settable with Customize, affect the
+general operation of the package.
+
+@defopt url-debug
+@cindex debugging
+Specifies the types of debug messages which are logged to
+the @code{*URL-DEBUG*} buffer.
+@code{t} means log all messages.
+A number means log all messages and show them with @code{message}.
+It may also be a list of the types of messages to be logged.
+@end defopt
+@defopt url-personal-mail-address
+@end defopt
+@defopt url-privacy-level
+@end defopt
+@defopt url-uncompressor-alist
+@end defopt
+@defopt url-passwd-entry-func
+@end defopt
+@defopt url-standalone-mode
+@end defopt
+@defopt url-bad-port-list
+@end defopt
+@defopt url-max-password-attempts
+@end defopt
+@defopt url-temporary-directory
+@end defopt
+@defopt url-show-status
+@end defopt
+@defopt url-confirmation-func
+The function to use for asking yes or no functions.  This is normally
+either @code{y-or-n-p} or @code{yes-or-no-p}, but could be another
+function taking a single argument (the prompt) and returning @code{t}
+only if an affirmative answer is given.
+@end defopt
+@defopt url-gateway-method
+@c fixme: describe gatewaying
+A symbol specifying the type of gateway support to use for connections
+from the local machine.  The supported methods are:
+
+@table @code
+@item telnet
+Run telnet in a subprocess to connect;
+@item rlogin
+Rlogin to another machine to connect;
+@item socks
+Connect through a socks server;
+@item ssl
+Connect with SSL;
+@item native
+Connect directly.
+@end table
+@end defopt
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Function Index
+@unnumbered Command and Function Index
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+@printindex vr
+
+@node Concept Index
+@unnumbered Concept Index
+@printindex cp
+
+@bye

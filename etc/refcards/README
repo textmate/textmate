@@ -1,0 +1,19 @@
+To generate these refcards, you need to install the TeX document
+production system.  For example, http://www.tug.org/texlive/ .
+
+All modern GNU/Linux distributions provide TeX packages, so the
+easiest way is just to install those.  Your distribution may have
+split some of the files needed to process non-English output into
+separate, optional packages such as: texlive-lang-cyrillic,
+texlive-lang-czechslovak, texlive-lang-german, and texlive-lang-polish.
+
+
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+The file gnus-logo.eps contains copyright and license information, but
+it is reproduced here for convenience.
+
+File: gnus-logo.eps, gnus-logo.pdf
+  Author: Luis Fernandes <elf@ee.ryerson.ca>
+  Copyright (C) 2001-2012 Free Software Foundation, Inc.
+  License: GNU General Public License version 3 or later (see COPYING)

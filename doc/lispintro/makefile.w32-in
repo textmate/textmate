@@ -1,0 +1,79 @@
+#### -*- Makefile -*- for the Emacs Lisp Introduction manual.
+
+# Copyright (C) 2003-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+srcdir = .
+
+infodir = $(srcdir)/../../info
+# Directory with the (customized) texinfo.tex file.
+texinfodir = $(srcdir)/../misc
+
+INFO_SOURCES = $(srcdir)/emacs-lisp-intro.texi $(srcdir)/doclicense.texi
+# The file name eintr must fit within 5 characters, to allow for
+# -NN extensions to fit into DOS 8+3 limits without clashing
+INFO_TARGETS = $(infodir)/eintr
+DVI_TARGETS = emacs-lisp-intro.dvi
+
+MAKEINFO = makeinfo
+INSTALL_INFO = install-info
+TEXI2DVI = texi2dvi
+TEXI2PDF = texi2pdf
+DVIPS = dvips
+ENVADD = $(srcdir)\..\..\nt\envadd.bat "TEXINPUTS=$(srcdir);$(TEXINPUTS)" \
+	 "MAKEINFO=$(MAKEINFO) -I$(srcdir) -I$(texinfodir)" /C
+
+.SUFFIXES: .dvi .ps .texi
+
+info: $(INFO_TARGETS)
+
+$(infodir)/dir:
+	$(INSTALL_INFO) --info-dir=$(infodir) $(INFO_TARGETS)
+
+dvi: $(DVI_TARGETS)
+
+$(infodir)/eintr: $(INFO_SOURCES)
+	$(MAKEINFO) -o $@ $(srcdir)/emacs-lisp-intro.texi
+
+emacs-lisp-intro.dvi: $(INFO_SOURCES)
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/emacs-lisp-intro.texi
+
+emacs-lisp-intro.pdf: $(INFO_SOURCES)
+	$(ENVADD) $(TEXI2PDF) $(srcdir)/emacs-lisp-intro.texi
+
+emacs-lisp-intro.html: $(INFO_SOURCES)
+	$(MAKEINFO) --html -o $@ $(srcdir)/emacs-lisp-intro.texi
+
+.dvi.ps:
+	$(DVIPS) $< -o $@
+
+mostlyclean:
+	- $(DEL) *.log *.cp *.fn *.ky *.pg *.vr *.tp
+
+clean: mostlyclean
+	- $(DEL) *.dvi $(infodir)/eintr*
+
+distclean: clean
+	- $(DEL) makefile
+
+maintainer-clean: distclean
+	- $(DEL) *.aux *.cps *.fns *.kys *.pgs *.vrs *.toc
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

@@ -1,0 +1,1901 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1995, 1998-1999, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/searching
+@node Searching and Matching, Syntax Tables, Non-ASCII Characters, Top
+@chapter Searching and Matching
+@cindex searching
+
+  GNU Emacs provides two ways to search through a buffer for specified
+text: exact string searches and regular expression searches.  After a
+regular expression search, you can examine the @dfn{match data} to
+determine which text matched the whole regular expression or various
+portions of it.
+
+@menu
+* String Search::         Search for an exact match.
+* Searching and Case::    Case-independent or case-significant searching.
+* Regular Expressions::   Describing classes of strings.
+* Regexp Search::         Searching for a match for a regexp.
+* POSIX Regexps::         Searching POSIX-style for the longest match.
+* Match Data::            Finding out which part of the text matched,
+                            after a string or regexp search.
+* Search and Replace::    Commands that loop, searching and replacing.
+* Standard Regexps::      Useful regexps for finding sentences, pages,...
+@end menu
+
+  The @samp{skip-chars@dots{}} functions also perform a kind of searching.
+@xref{Skipping Characters}.  To search for changes in character
+properties, see @ref{Property Search}.
+
+@node String Search
+@section Searching for Strings
+@cindex string search
+
+  These are the primitive functions for searching through the text in a
+buffer.  They are meant for use in programs, but you may call them
+interactively.  If you do so, they prompt for the search string; the
+arguments @var{limit} and @var{noerror} are @code{nil}, and @var{repeat}
+is 1.  For more details on interactive searching, @pxref{Search,,
+Searching and Replacement, emacs, The GNU Emacs Manual}.
+
+  These search functions convert the search string to multibyte if the
+buffer is multibyte; they convert the search string to unibyte if the
+buffer is unibyte.  @xref{Text Representations}.
+
+@deffn Command search-forward string &optional limit noerror repeat
+This function searches forward from point for an exact match for
+@var{string}.  If successful, it sets point to the end of the occurrence
+found, and returns the new value of point.  If no match is found, the
+value and side effects depend on @var{noerror} (see below).
+
+In the following example, point is initially at the beginning of the
+line.  Then @code{(search-forward "fox")} moves point after the last
+letter of @samp{fox}:
+
+@example
+@group
+---------- Buffer: foo ----------
+@point{}The quick brown fox jumped over the lazy dog.
+---------- Buffer: foo ----------
+@end group
+
+@group
+(search-forward "fox")
+     @result{} 20
+
+---------- Buffer: foo ----------
+The quick brown fox@point{} jumped over the lazy dog.
+---------- Buffer: foo ----------
+@end group
+@end example
+
+The argument @var{limit} specifies the bound to the search, and should
+be a position in the current buffer.  No match extending after
+that position is accepted.  If @var{limit} is omitted or @code{nil}, it
+defaults to the end of the accessible portion of the buffer.
+
+@kindex search-failed
+What happens when the search fails depends on the value of
+@var{noerror}.  If @var{noerror} is @code{nil}, a @code{search-failed}
+error is signaled.  If @var{noerror} is @code{t}, @code{search-forward}
+returns @code{nil} and does nothing.  If @var{noerror} is neither
+@code{nil} nor @code{t}, then @code{search-forward} moves point to the
+upper bound and returns @code{nil}.
+@c I see no prospect of this ever changing, and frankly the current
+@c behavior seems better, so there seems no need to mention this.
+@ignore
+(It would be more consistent now to return the new position of point
+in that case, but some existing programs may depend on a value of
+@code{nil}.)
+@end ignore
+
+The argument @var{noerror} only affects valid searches which fail to
+find a match.  Invalid arguments cause errors regardless of
+@var{noerror}.
+
+If @var{repeat} is a positive number @var{n}, it serves as a repeat
+count: the search is repeated @var{n} times, each time starting at the
+end of the previous time's match.  If these successive searches
+succeed, the function succeeds, moving point and returning its new
+value.  Otherwise the search fails, with results depending on the
+value of @var{noerror}, as described above.  If @var{repeat} is a
+negative number -@var{n}, it serves as a repeat count of @var{n} for a
+search in the opposite (backward) direction.
+@end deffn
+
+@deffn Command search-backward string &optional limit noerror repeat
+This function searches backward from point for @var{string}.  It is
+like @code{search-forward}, except that it searches backwards rather
+than forwards.  Backward searches leave point at the beginning of the
+match.
+@end deffn
+
+@deffn Command word-search-forward string &optional limit noerror repeat
+This function searches forward from point for a ``word'' match for
+@var{string}.  If it finds a match, it sets point to the end of the
+match found, and returns the new value of point.
+
+Word matching regards @var{string} as a sequence of words, disregarding
+punctuation that separates them.  It searches the buffer for the same
+sequence of words.  Each word must be distinct in the buffer (searching
+for the word @samp{ball} does not match the word @samp{balls}), but the
+details of punctuation and spacing are ignored (searching for @samp{ball
+boy} does match @samp{ball.  Boy!}).
+
+In this example, point is initially at the beginning of the buffer; the
+search leaves it between the @samp{y} and the @samp{!}.
+
+@example
+@group
+---------- Buffer: foo ----------
+@point{}He said "Please!  Find
+the ball boy!"
+---------- Buffer: foo ----------
+@end group
+
+@group
+(word-search-forward "Please find the ball, boy.")
+     @result{} 36
+
+---------- Buffer: foo ----------
+He said "Please!  Find
+the ball boy@point{}!"
+---------- Buffer: foo ----------
+@end group
+@end example
+
+If @var{limit} is non-@code{nil}, it must be a position in the current
+buffer; it specifies the upper bound to the search.  The match found
+must not extend after that position.
+
+If @var{noerror} is @code{nil}, then @code{word-search-forward} signals
+an error if the search fails.  If @var{noerror} is @code{t}, then it
+returns @code{nil} instead of signaling an error.  If @var{noerror} is
+neither @code{nil} nor @code{t}, it moves point to @var{limit} (or the
+end of the accessible portion of the buffer) and returns @code{nil}.
+
+If @var{repeat} is non-@code{nil}, then the search is repeated that many
+times.  Point is positioned at the end of the last match.
+
+@findex word-search-regexp
+Internal, @code{word-search-forward} and related functions use the
+function @code{word-search-regexp} to convert @var{string} to a
+regular expression that ignores punctuation.
+@end deffn
+
+@deffn Command word-search-forward-lax string &optional limit noerror repeat
+This command is identical to @code{word-search-forward}, except that
+the end of @var{string} need not match a word boundary, unless @var{string} ends
+in whitespace.  For instance, searching for @samp{ball boy} matches
+@samp{ball boyee}, but does not match @samp{aball boy}.
+@end deffn
+
+@deffn Command word-search-backward string &optional limit noerror repeat
+This function searches backward from point for a word match to
+@var{string}.  This function is just like @code{word-search-forward}
+except that it searches backward and normally leaves point at the
+beginning of the match.
+@end deffn
+
+@deffn Command word-search-backward-lax string &optional limit noerror repeat
+This command is identical to @code{word-search-backward}, except that
+the end of @var{string} need not match a word boundary, unless @var{string} ends
+in whitespace.
+@end deffn
+
+@node Searching and Case
+@section Searching and Case
+@cindex searching and case
+
+  By default, searches in Emacs ignore the case of the text they are
+searching through; if you specify searching for @samp{FOO}, then
+@samp{Foo} or @samp{foo} is also considered a match.  This applies to
+regular expressions, too; thus, @samp{[aB]} would match @samp{a} or
+@samp{A} or @samp{b} or @samp{B}.
+
+  If you do not want this feature, set the variable
+@code{case-fold-search} to @code{nil}.  Then all letters must match
+exactly, including case.  This is a buffer-local variable; altering the
+variable affects only the current buffer.  (@xref{Intro to
+Buffer-Local}.)  Alternatively, you may change the default value.
+In Lisp code, you will more typically use @code{let} to bind
+@code{case-fold-search} to the desired value.
+
+  Note that the user-level incremental search feature handles case
+distinctions differently.  When the search string contains only lower
+case letters, the search ignores case, but when the search string
+contains one or more upper case letters, the search becomes
+case-sensitive.  But this has nothing to do with the searching
+functions used in Lisp code.  @xref{Incremental Search,,, emacs,
+The GNU Emacs Manual}.
+
+@defopt case-fold-search
+This buffer-local variable determines whether searches should ignore
+case.  If the variable is @code{nil} they do not ignore case; otherwise
+(and by default) they do ignore case.
+@end defopt
+
+@defopt case-replace
+This variable determines whether the higher-level replacement
+functions should preserve case.  If the variable is @code{nil}, that
+means to use the replacement text verbatim.  A non-@code{nil} value
+means to convert the case of the replacement text according to the
+text being replaced.
+
+This variable is used by passing it as an argument to the function
+@code{replace-match}.  @xref{Replacing Match}.
+@end defopt
+
+@node Regular Expressions
+@section Regular Expressions
+@cindex regular expression
+@cindex regexp
+
+  A @dfn{regular expression}, or @dfn{regexp} for short, is a pattern that
+denotes a (possibly infinite) set of strings.  Searching for matches for
+a regexp is a very powerful operation.  This section explains how to write
+regexps; the following section says how to search for them.
+
+@findex re-builder
+@cindex regular expressions, developing
+  For interactive development of regular expressions, you
+can use the @kbd{M-x re-builder} command.  It provides a convenient
+interface for creating regular expressions, by giving immediate visual
+feedback in a separate buffer.  As you edit the regexp, all its
+matches in the target buffer are highlighted.  Each parenthesized
+sub-expression of the regexp is shown in a distinct face, which makes
+it easier to verify even very complex regexps.
+
+@menu
+* Syntax of Regexps::       Rules for writing regular expressions.
+* Regexp Example::          Illustrates regular expression syntax.
+* Regexp Functions::        Functions for operating on regular expressions.
+@end menu
+
+@node Syntax of Regexps
+@subsection Syntax of Regular Expressions
+
+  Regular expressions have a syntax in which a few characters are
+special constructs and the rest are @dfn{ordinary}.  An ordinary
+character is a simple regular expression that matches that character
+and nothing else.  The special characters are @samp{.}, @samp{*},
+@samp{+}, @samp{?}, @samp{[}, @samp{^}, @samp{$}, and @samp{\}; no new
+special characters will be defined in the future.  The character
+@samp{]} is special if it ends a character alternative (see later).
+The character @samp{-} is special inside a character alternative.  A
+@samp{[:} and balancing @samp{:]} enclose a character class inside a
+character alternative.  Any other character appearing in a regular
+expression is ordinary, unless a @samp{\} precedes it.
+
+  For example, @samp{f} is not a special character, so it is ordinary, and
+therefore @samp{f} is a regular expression that matches the string
+@samp{f} and no other string.  (It does @emph{not} match the string
+@samp{fg}, but it does match a @emph{part} of that string.)  Likewise,
+@samp{o} is a regular expression that matches only @samp{o}.@refill
+
+  Any two regular expressions @var{a} and @var{b} can be concatenated.  The
+result is a regular expression that matches a string if @var{a} matches
+some amount of the beginning of that string and @var{b} matches the rest of
+the string.@refill
+
+  As a simple example, we can concatenate the regular expressions @samp{f}
+and @samp{o} to get the regular expression @samp{fo}, which matches only
+the string @samp{fo}.  Still trivial.  To do something more powerful, you
+need to use one of the special regular expression constructs.
+
+@menu
+* Regexp Special::      Special characters in regular expressions.
+* Char Classes::        Character classes used in regular expressions.
+* Regexp Backslash::    Backslash-sequences in regular expressions.
+@end menu
+
+@node Regexp Special
+@subsubsection Special Characters in Regular Expressions
+
+  Here is a list of the characters that are special in a regular
+expression.
+
+@need 800
+@table @asis
+@item @samp{.}@: @r{(Period)}
+@cindex @samp{.} in regexp
+is a special character that matches any single character except a newline.
+Using concatenation, we can make regular expressions like @samp{a.b}, which
+matches any three-character string that begins with @samp{a} and ends with
+@samp{b}.@refill
+
+@item @samp{*}
+@cindex @samp{*} in regexp
+is not a construct by itself; it is a postfix operator that means to
+match the preceding regular expression repetitively as many times as
+possible.  Thus, @samp{o*} matches any number of @samp{o}s (including no
+@samp{o}s).
+
+@samp{*} always applies to the @emph{smallest} possible preceding
+expression.  Thus, @samp{fo*} has a repeating @samp{o}, not a repeating
+@samp{fo}.  It matches @samp{f}, @samp{fo}, @samp{foo}, and so on.
+
+@cindex backtracking and regular expressions
+The matcher processes a @samp{*} construct by matching, immediately, as
+many repetitions as can be found.  Then it continues with the rest of
+the pattern.  If that fails, backtracking occurs, discarding some of the
+matches of the @samp{*}-modified construct in the hope that that will
+make it possible to match the rest of the pattern.  For example, in
+matching @samp{ca*ar} against the string @samp{caaar}, the @samp{a*}
+first tries to match all three @samp{a}s; but the rest of the pattern is
+@samp{ar} and there is only @samp{r} left to match, so this try fails.
+The next alternative is for @samp{a*} to match only two @samp{a}s.  With
+this choice, the rest of the regexp matches successfully.
+
+@strong{Warning:} Nested repetition operators can run for an
+indefinitely long time, if they lead to ambiguous matching.  For
+example, trying to match the regular expression @samp{\(x+y*\)*a}
+against the string @samp{xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxz} could
+take hours before it ultimately fails.  Emacs must try each way of
+grouping the @samp{x}s before concluding that none of them can work.
+Even worse, @samp{\(x*\)*} can match the null string in infinitely
+many ways, so it causes an infinite loop.  To avoid these problems,
+check nested repetitions carefully, to make sure that they do not
+cause combinatorial explosions in backtracking.
+
+@item @samp{+}
+@cindex @samp{+} in regexp
+is a postfix operator, similar to @samp{*} except that it must match
+the preceding expression at least once.  So, for example, @samp{ca+r}
+matches the strings @samp{car} and @samp{caaaar} but not the string
+@samp{cr}, whereas @samp{ca*r} matches all three strings.
+
+@item @samp{?}
+@cindex @samp{?} in regexp
+is a postfix operator, similar to @samp{*} except that it must match the
+preceding expression either once or not at all.  For example,
+@samp{ca?r} matches @samp{car} or @samp{cr}; nothing else.
+
+@item @samp{*?}, @samp{+?}, @samp{??}
+@cindex non-greedy repetition characters in regexp
+These are ``non-greedy'' variants of the operators @samp{*}, @samp{+}
+and @samp{?}.  Where those operators match the largest possible
+substring (consistent with matching the entire containing expression),
+the non-greedy variants match the smallest possible substring
+(consistent with matching the entire containing expression).
+
+For example, the regular expression @samp{c[ad]*a} when applied to the
+string @samp{cdaaada} matches the whole string; but the regular
+expression @samp{c[ad]*?a}, applied to that same string, matches just
+@samp{cda}.  (The smallest possible match here for @samp{[ad]*?} that
+permits the whole expression to match is @samp{d}.)
+
+@item @samp{[ @dots{} ]}
+@cindex character alternative (in regexp)
+@cindex @samp{[} in regexp
+@cindex @samp{]} in regexp
+is a @dfn{character alternative}, which begins with @samp{[} and is
+terminated by @samp{]}.  In the simplest case, the characters between
+the two brackets are what this character alternative can match.
+
+Thus, @samp{[ad]} matches either one @samp{a} or one @samp{d}, and
+@samp{[ad]*} matches any string composed of just @samp{a}s and @samp{d}s
+(including the empty string).  It follows that @samp{c[ad]*r}
+matches @samp{cr}, @samp{car}, @samp{cdr}, @samp{caddaar}, etc.
+
+You can also include character ranges in a character alternative, by
+writing the starting and ending characters with a @samp{-} between them.
+Thus, @samp{[a-z]} matches any lower-case @acronym{ASCII} letter.
+Ranges may be intermixed freely with individual characters, as in
+@samp{[a-z$%.]}, which matches any lower case @acronym{ASCII} letter
+or @samp{$}, @samp{%} or period.
+
+If @code{case-fold-search} is non-@code{nil}, @samp{[a-z]} also
+matches upper-case letters.  Note that a range like @samp{[a-z]} is
+not affected by the locale's collation sequence, it always represents
+a sequence in @acronym{ASCII} order.
+@c This wasn't obvious to me, since eg the grep manual "Character
+@c Classes and Bracket Expressions" specifically notes the opposite
+@c behavior.  But by experiment Emacs seems unaffected by LC_COLLATE
+@c in this regard.
+
+Note also that the usual regexp special characters are not special inside a
+character alternative.  A completely different set of characters is
+special inside character alternatives: @samp{]}, @samp{-} and @samp{^}.
+
+To include a @samp{]} in a character alternative, you must make it the
+first character.  For example, @samp{[]a]} matches @samp{]} or @samp{a}.
+To include a @samp{-}, write @samp{-} as the first or last character of
+the character alternative, or put it after a range.  Thus, @samp{[]-]}
+matches both @samp{]} and @samp{-}.  (As explained below, you cannot
+use @samp{\]} to include a @samp{]} inside a character alternative,
+since @samp{\} is not special there.)
+
+To include @samp{^} in a character alternative, put it anywhere but at
+the beginning.
+
+@c What if it starts with a multibyte and ends with a unibyte?
+@c That doesn't seem to match anything...?
+If a range starts with a unibyte character @var{c} and ends with a
+multibyte character @var{c2}, the range is divided into two parts: one
+spans the unibyte characters @samp{@var{c}..?\377}, the other the
+multibyte characters @samp{@var{c1}..@var{c2}}, where @var{c1} is the
+first character of the charset to which @var{c2} belongs.
+
+A character alternative can also specify named character classes
+(@pxref{Char Classes}).  This is a POSIX feature.  For example,
+@samp{[[:ascii:]]} matches any @acronym{ASCII} character.
+Using a character class is equivalent to mentioning each of the
+characters in that class; but the latter is not feasible in practice,
+since some classes include thousands of different characters.
+
+@item @samp{[^ @dots{} ]}
+@cindex @samp{^} in regexp
+@samp{[^} begins a @dfn{complemented character alternative}.  This
+matches any character except the ones specified.  Thus,
+@samp{[^a-z0-9A-Z]} matches all characters @emph{except} letters and
+digits.
+
+@samp{^} is not special in a character alternative unless it is the first
+character.  The character following the @samp{^} is treated as if it
+were first (in other words, @samp{-} and @samp{]} are not special there).
+
+A complemented character alternative can match a newline, unless newline is
+mentioned as one of the characters not to match.  This is in contrast to
+the handling of regexps in programs such as @code{grep}.
+
+You can specify named character classes, just like in character
+alternatives.  For instance, @samp{[^[:ascii:]]} matches any
+non-@acronym{ASCII} character.  @xref{Char Classes}.
+
+@item @samp{^}
+@cindex beginning of line in regexp
+When matching a buffer, @samp{^} matches the empty string, but only at the
+beginning of a line in the text being matched (or the beginning of the
+accessible portion of the buffer).  Otherwise it fails to match
+anything.  Thus, @samp{^foo} matches a @samp{foo} that occurs at the
+beginning of a line.
+
+When matching a string instead of a buffer, @samp{^} matches at the
+beginning of the string or after a newline character.
+
+For historical compatibility reasons, @samp{^} can be used only at the
+beginning of the regular expression, or after @samp{\(}, @samp{\(?:}
+or @samp{\|}.
+
+@item @samp{$}
+@cindex @samp{$} in regexp
+@cindex end of line in regexp
+is similar to @samp{^} but matches only at the end of a line (or the
+end of the accessible portion of the buffer).  Thus, @samp{x+$}
+matches a string of one @samp{x} or more at the end of a line.
+
+When matching a string instead of a buffer, @samp{$} matches at the end
+of the string or before a newline character.
+
+For historical compatibility reasons, @samp{$} can be used only at the
+end of the regular expression, or before @samp{\)} or @samp{\|}.
+
+@item @samp{\}
+@cindex @samp{\} in regexp
+has two functions: it quotes the special characters (including
+@samp{\}), and it introduces additional special constructs.
+
+Because @samp{\} quotes special characters, @samp{\$} is a regular
+expression that matches only @samp{$}, and @samp{\[} is a regular
+expression that matches only @samp{[}, and so on.
+
+Note that @samp{\} also has special meaning in the read syntax of Lisp
+strings (@pxref{String Type}), and must be quoted with @samp{\}.  For
+example, the regular expression that matches the @samp{\} character is
+@samp{\\}.  To write a Lisp string that contains the characters
+@samp{\\}, Lisp syntax requires you to quote each @samp{\} with another
+@samp{\}.  Therefore, the read syntax for a regular expression matching
+@samp{\} is @code{"\\\\"}.@refill
+@end table
+
+@strong{Please note:} For historical compatibility, special characters
+are treated as ordinary ones if they are in contexts where their special
+meanings make no sense.  For example, @samp{*foo} treats @samp{*} as
+ordinary since there is no preceding expression on which the @samp{*}
+can act.  It is poor practice to depend on this behavior; quote the
+special character anyway, regardless of where it appears.@refill
+
+As a @samp{\} is not special inside a character alternative, it can
+never remove the special meaning of @samp{-} or @samp{]}.  So you
+should not quote these characters when they have no special meaning
+either.  This would not clarify anything, since backslashes can
+legitimately precede these characters where they @emph{have} special
+meaning, as in @samp{[^\]} (@code{"[^\\]"} for Lisp string syntax),
+which matches any single character except a backslash.
+
+In practice, most @samp{]} that occur in regular expressions close a
+character alternative and hence are special.  However, occasionally a
+regular expression may try to match a complex pattern of literal
+@samp{[} and @samp{]}.  In such situations, it sometimes may be
+necessary to carefully parse the regexp from the start to determine
+which square brackets enclose a character alternative.  For example,
+@samp{[^][]]} consists of the complemented character alternative
+@samp{[^][]} (which matches any single character that is not a square
+bracket), followed by a literal @samp{]}.
+
+The exact rules are that at the beginning of a regexp, @samp{[} is
+special and @samp{]} not.  This lasts until the first unquoted
+@samp{[}, after which we are in a character alternative; @samp{[} is
+no longer special (except when it starts a character class) but @samp{]}
+is special, unless it immediately follows the special @samp{[} or that
+@samp{[} followed by a @samp{^}.  This lasts until the next special
+@samp{]} that does not end a character class.  This ends the character
+alternative and restores the ordinary syntax of regular expressions;
+an unquoted @samp{[} is special again and a @samp{]} not.
+
+@node Char Classes
+@subsubsection Character Classes
+@cindex character classes in regexp
+
+  Here is a table of the classes you can use in a character alternative,
+and what they mean:
+
+@table @samp
+@item [:ascii:]
+This matches any @acronym{ASCII} character (codes 0--127).
+@item [:alnum:]
+This matches any letter or digit.  (At present, for multibyte
+characters, it matches anything that has word syntax.)
+@item [:alpha:]
+This matches any letter.  (At present, for multibyte characters, it
+matches anything that has word syntax.)
+@item [:blank:]
+This matches space and tab only.
+@item [:cntrl:]
+This matches any @acronym{ASCII} control character.
+@item [:digit:]
+This matches @samp{0} through @samp{9}.  Thus, @samp{[-+[:digit:]]}
+matches any digit, as well as @samp{+} and @samp{-}.
+@item [:graph:]
+This matches graphic characters---everything except @acronym{ASCII} control
+characters, space, and the delete character.
+@item [:lower:]
+This matches any lower-case letter, as determined by the current case
+table (@pxref{Case Tables}).  If @code{case-fold-search} is
+non-@code{nil}, this also matches any upper-case letter.
+@item [:multibyte:]
+This matches any multibyte character (@pxref{Text Representations}).
+@item [:nonascii:]
+This matches any non-@acronym{ASCII} character.
+@item [:print:]
+This matches printing characters---everything except @acronym{ASCII} control
+characters and the delete character.
+@item [:punct:]
+This matches any punctuation character.  (At present, for multibyte
+characters, it matches anything that has non-word syntax.)
+@item [:space:]
+This matches any character that has whitespace syntax
+(@pxref{Syntax Class Table}).
+@item [:unibyte:]
+This matches any unibyte character (@pxref{Text Representations}).
+@item [:upper:]
+This matches any upper-case letter, as determined by the current case
+table (@pxref{Case Tables}).  If @code{case-fold-search} is
+non-@code{nil}, this also matches any lower-case letter.
+@item [:word:]
+This matches any character that has word syntax (@pxref{Syntax Class
+Table}).
+@item [:xdigit:]
+This matches the hexadecimal digits: @samp{0} through @samp{9}, @samp{a}
+through @samp{f} and @samp{A} through @samp{F}.
+@end table
+
+@node Regexp Backslash
+@subsubsection Backslash Constructs in Regular Expressions
+@cindex backslash in regular expressions
+
+  For the most part, @samp{\} followed by any character matches only
+that character.  However, there are several exceptions: certain
+two-character sequences starting with @samp{\} that have special
+meanings.  (The character after the @samp{\} in such a sequence is
+always ordinary when used on its own.)  Here is a table of the special
+@samp{\} constructs.
+
+@table @samp
+@item \|
+@cindex @samp{|} in regexp
+@cindex regexp alternative
+specifies an alternative.
+Two regular expressions @var{a} and @var{b} with @samp{\|} in
+between form an expression that matches anything that either @var{a} or
+@var{b} matches.@refill
+
+Thus, @samp{foo\|bar} matches either @samp{foo} or @samp{bar}
+but no other string.@refill
+
+@samp{\|} applies to the largest possible surrounding expressions.  Only a
+surrounding @samp{\( @dots{} \)} grouping can limit the grouping power of
+@samp{\|}.@refill
+
+If you need full backtracking capability to handle multiple uses of
+@samp{\|}, use the POSIX regular expression functions (@pxref{POSIX
+Regexps}).
+
+@item \@{@var{m}\@}
+is a postfix operator that repeats the previous pattern exactly @var{m}
+times.  Thus, @samp{x\@{5\@}} matches the string @samp{xxxxx}
+and nothing else.  @samp{c[ad]\@{3\@}r} matches string such as
+@samp{caaar}, @samp{cdddr}, @samp{cadar}, and so on.
+
+@item \@{@var{m},@var{n}\@}
+is a more general postfix operator that specifies repetition with a
+minimum of @var{m} repeats and a maximum of @var{n} repeats.  If @var{m}
+is omitted, the minimum is 0; if @var{n} is omitted, there is no
+maximum.
+
+For example, @samp{c[ad]\@{1,2\@}r} matches the strings @samp{car},
+@samp{cdr}, @samp{caar}, @samp{cadr}, @samp{cdar}, and @samp{cddr}, and
+nothing else.@*
+@samp{\@{0,1\@}} or @samp{\@{,1\@}} is equivalent to @samp{?}.@*
+@samp{\@{0,\@}} or @samp{\@{,\@}} is equivalent to @samp{*}.@*
+@samp{\@{1,\@}} is equivalent to @samp{+}.
+
+@item \( @dots{} \)
+@cindex @samp{(} in regexp
+@cindex @samp{)} in regexp
+@cindex regexp grouping
+is a grouping construct that serves three purposes:
+
+@enumerate
+@item
+To enclose a set of @samp{\|} alternatives for other operations.  Thus,
+the regular expression @samp{\(foo\|bar\)x} matches either @samp{foox}
+or @samp{barx}.
+
+@item
+To enclose a complicated expression for the postfix operators @samp{*},
+@samp{+} and @samp{?} to operate on.  Thus, @samp{ba\(na\)*} matches
+@samp{ba}, @samp{bana}, @samp{banana}, @samp{bananana}, etc., with any
+number (zero or more) of @samp{na} strings.
+
+@item
+To record a matched substring for future reference with
+@samp{\@var{digit}} (see below).
+@end enumerate
+
+This last application is not a consequence of the idea of a
+parenthetical grouping; it is a separate feature that was assigned as a
+second meaning to the same @samp{\( @dots{} \)} construct because, in
+practice, there was usually no conflict between the two meanings.  But
+occasionally there is a conflict, and that led to the introduction of
+shy groups.
+
+@item \(?: @dots{} \)
+@cindex shy groups
+@cindex non-capturing group
+@cindex unnumbered group
+@cindex @samp{(?:} in regexp
+is the @dfn{shy group} construct.  A shy group serves the first two
+purposes of an ordinary group (controlling the nesting of other
+operators), but it does not get a number, so you cannot refer back to
+its value with @samp{\@var{digit}}.  Shy groups are particularly
+useful for mechanically-constructed regular expressions, because they
+can be added automatically without altering the numbering of ordinary,
+non-shy groups.
+
+Shy groups are also called @dfn{non-capturing} or @dfn{unnumbered
+groups}.
+
+@item \(?@var{num}: @dots{} \)
+is the @dfn{explicitly numbered group} construct.  Normal groups get
+their number implicitly, based on their position, which can be
+inconvenient.  This construct allows you to force a particular group
+number.  There is no particular restriction on the numbering,
+e.g.@: you can have several groups with the same number in which case
+the last one to match (i.e.@: the rightmost match) will win.
+Implicitly numbered groups always get the smallest integer larger than
+the one of any previous group.
+
+@item \@var{digit}
+matches the same text that matched the @var{digit}th occurrence of a
+grouping (@samp{\( @dots{} \)}) construct.
+
+In other words, after the end of a group, the matcher remembers the
+beginning and end of the text matched by that group.  Later on in the
+regular expression you can use @samp{\} followed by @var{digit} to
+match that same text, whatever it may have been.
+
+The strings matching the first nine grouping constructs appearing in
+the entire regular expression passed to a search or matching function
+are assigned numbers 1 through 9 in the order that the open
+parentheses appear in the regular expression.  So you can use
+@samp{\1} through @samp{\9} to refer to the text matched by the
+corresponding grouping constructs.
+
+For example, @samp{\(.*\)\1} matches any newline-free string that is
+composed of two identical halves.  The @samp{\(.*\)} matches the first
+half, which may be anything, but the @samp{\1} that follows must match
+the same exact text.
+
+If a @samp{\( @dots{} \)} construct matches more than once (which can
+happen, for instance, if it is followed by @samp{*}), only the last
+match is recorded.
+
+If a particular grouping construct in the regular expression was never
+matched---for instance, if it appears inside of an alternative that
+wasn't used, or inside of a repetition that repeated zero times---then
+the corresponding @samp{\@var{digit}} construct never matches
+anything.  To use an artificial example, @samp{\(foo\(b*\)\|lose\)\2}
+cannot match @samp{lose}: the second alternative inside the larger
+group matches it, but then @samp{\2} is undefined and can't match
+anything.  But it can match @samp{foobb}, because the first
+alternative matches @samp{foob} and @samp{\2} matches @samp{b}.
+
+@item \w
+@cindex @samp{\w} in regexp
+matches any word-constituent character.  The editor syntax table
+determines which characters these are.  @xref{Syntax Tables}.
+
+@item \W
+@cindex @samp{\W} in regexp
+matches any character that is not a word constituent.
+
+@item \s@var{code}
+@cindex @samp{\s} in regexp
+matches any character whose syntax is @var{code}.  Here @var{code} is a
+character that represents a syntax code: thus, @samp{w} for word
+constituent, @samp{-} for whitespace, @samp{(} for open parenthesis,
+etc.  To represent whitespace syntax, use either @samp{-} or a space
+character.  @xref{Syntax Class Table}, for a list of syntax codes and
+the characters that stand for them.
+
+@item \S@var{code}
+@cindex @samp{\S} in regexp
+matches any character whose syntax is not @var{code}.
+
+@cindex category, regexp search for
+@item \c@var{c}
+matches any character whose category is @var{c}.  Here @var{c} is a
+character that represents a category: thus, @samp{c} for Chinese
+characters or @samp{g} for Greek characters in the standard category
+table.  You can see the list of all the currently defined categories
+with @kbd{M-x describe-categories @key{RET}}.  You can also define
+your own categories in addition to the standard ones using the
+@code{define-category} function (@pxref{Categories}).
+
+@item \C@var{c}
+matches any character whose category is not @var{c}.
+@end table
+
+  The following regular expression constructs match the empty string---that is,
+they don't use up any characters---but whether they match depends on the
+context.  For all, the beginning and end of the accessible portion of
+the buffer are treated as if they were the actual beginning and end of
+the buffer.
+
+@table @samp
+@item \`
+@cindex @samp{\`} in regexp
+matches the empty string, but only at the beginning
+of the buffer or string being matched against.
+
+@item \'
+@cindex @samp{\'} in regexp
+matches the empty string, but only at the end of
+the buffer or string being matched against.
+
+@item \=
+@cindex @samp{\=} in regexp
+matches the empty string, but only at point.
+(This construct is not defined when matching against a string.)
+
+@item \b
+@cindex @samp{\b} in regexp
+matches the empty string, but only at the beginning or
+end of a word.  Thus, @samp{\bfoo\b} matches any occurrence of
+@samp{foo} as a separate word.  @samp{\bballs?\b} matches
+@samp{ball} or @samp{balls} as a separate word.@refill
+
+@samp{\b} matches at the beginning or end of the buffer (or string)
+regardless of what text appears next to it.
+
+@item \B
+@cindex @samp{\B} in regexp
+matches the empty string, but @emph{not} at the beginning or
+end of a word, nor at the beginning or end of the buffer (or string).
+
+@item \<
+@cindex @samp{\<} in regexp
+matches the empty string, but only at the beginning of a word.
+@samp{\<} matches at the beginning of the buffer (or string) only if a
+word-constituent character follows.
+
+@item \>
+@cindex @samp{\>} in regexp
+matches the empty string, but only at the end of a word.  @samp{\>}
+matches at the end of the buffer (or string) only if the contents end
+with a word-constituent character.
+
+@item \_<
+@cindex @samp{\_<} in regexp
+matches the empty string, but only at the beginning of a symbol.  A
+symbol is a sequence of one or more word or symbol constituent
+characters.  @samp{\_<} matches at the beginning of the buffer (or
+string) only if a symbol-constituent character follows.
+
+@item \_>
+@cindex @samp{\_>} in regexp
+matches the empty string, but only at the end of a symbol.  @samp{\_>}
+matches at the end of the buffer (or string) only if the contents end
+with a symbol-constituent character.
+@end table
+
+@kindex invalid-regexp
+  Not every string is a valid regular expression.  For example, a string
+that ends inside a character alternative without a terminating @samp{]}
+is invalid, and so is a string that ends with a single @samp{\}.  If
+an invalid regular expression is passed to any of the search functions,
+an @code{invalid-regexp} error is signaled.
+
+@node Regexp Example
+@comment  node-name,  next,  previous,  up
+@subsection Complex Regexp Example
+
+  Here is a complicated regexp which was formerly used by Emacs to
+recognize the end of a sentence together with any whitespace that
+follows.  (Nowadays Emacs uses a similar but more complex default
+regexp constructed by the function @code{sentence-end}.
+@xref{Standard Regexps}.)
+
+  Below, we show first the regexp as a string in Lisp syntax (to
+distinguish spaces from tab characters), and then the result of
+evaluating it.  The string constant begins and ends with a
+double-quote.  @samp{\"} stands for a double-quote as part of the
+string, @samp{\\} for a backslash as part of the string, @samp{\t} for a
+tab and @samp{\n} for a newline.
+
+@example
+@group
+"[.?!][]\"')@}]*\\($\\| $\\|\t\\|@ @ \\)[ \t\n]*"
+     @result{} "[.?!][]\"')@}]*\\($\\| $\\|  \\|@ @ \\)[
+]*"
+@end group
+@end example
+
+@noindent
+In the output, tab and newline appear as themselves.
+
+  This regular expression contains four parts in succession and can be
+deciphered as follows:
+
+@table @code
+@item [.?!]
+The first part of the pattern is a character alternative that matches
+any one of three characters: period, question mark, and exclamation
+mark.  The match must begin with one of these three characters.  (This
+is one point where the new default regexp used by Emacs differs from
+the old.  The new value also allows some non-@acronym{ASCII}
+characters that end a sentence without any following whitespace.)
+
+@item []\"')@}]*
+The second part of the pattern matches any closing braces and quotation
+marks, zero or more of them, that may follow the period, question mark
+or exclamation mark.  The @code{\"} is Lisp syntax for a double-quote in
+a string.  The @samp{*} at the end indicates that the immediately
+preceding regular expression (a character alternative, in this case) may be
+repeated zero or more times.
+
+@item \\($\\|@ $\\|\t\\|@ @ \\)
+The third part of the pattern matches the whitespace that follows the
+end of a sentence: the end of a line (optionally with a space), or a
+tab, or two spaces.  The double backslashes mark the parentheses and
+vertical bars as regular expression syntax; the parentheses delimit a
+group and the vertical bars separate alternatives.  The dollar sign is
+used to match the end of a line.
+
+@item [ \t\n]*
+Finally, the last part of the pattern matches any additional whitespace
+beyond the minimum needed to end a sentence.
+@end table
+
+@node Regexp Functions
+@subsection Regular Expression Functions
+
+  These functions operate on regular expressions.
+
+@defun regexp-quote string
+This function returns a regular expression whose only exact match is
+@var{string}.  Using this regular expression in @code{looking-at} will
+succeed only if the next characters in the buffer are @var{string};
+using it in a search function will succeed if the text being searched
+contains @var{string}.  @xref{Regexp Search}.
+
+This allows you to request an exact string match or search when calling
+a function that wants a regular expression.
+
+@example
+@group
+(regexp-quote "^The cat$")
+     @result{} "\\^The cat\\$"
+@end group
+@end example
+
+One use of @code{regexp-quote} is to combine an exact string match with
+context described as a regular expression.  For example, this searches
+for the string that is the value of @var{string}, surrounded by
+whitespace:
+
+@example
+@group
+(re-search-forward
+ (concat "\\s-" (regexp-quote string) "\\s-"))
+@end group
+@end example
+@end defun
+
+@defun regexp-opt strings &optional paren
+This function returns an efficient regular expression that will match
+any of the strings in the list @var{strings}.  This is useful when you
+need to make matching or searching as fast as possible---for example,
+for Font Lock mode@footnote{Note that @code{regexp-opt} does not
+guarantee that its result is absolutely the most efficient form
+possible.  A hand-tuned regular expression can sometimes be slightly
+more efficient, but is almost never worth the effort.}.
+@c See eg http://debbugs.gnu.org/2816
+
+If the optional argument @var{paren} is non-@code{nil}, then the
+returned regular expression is always enclosed by at least one
+parentheses-grouping construct.  If @var{paren} is @code{words}, then
+that construct is additionally surrounded by @samp{\<} and @samp{\>};
+alternatively, if @var{paren} is @code{symbols}, then that construct
+is additionally surrounded by @samp{\_<} and @samp{\_>}
+(@code{symbols} is often appropriate when matching
+programming-language keywords and the like).
+
+This simplified definition of @code{regexp-opt} produces a
+regular expression which is equivalent to the actual value
+(but not as efficient):
+
+@example
+(defun regexp-opt (strings &optional paren)
+  (let ((open-paren (if paren "\\(" ""))
+        (close-paren (if paren "\\)" "")))
+    (concat open-paren
+            (mapconcat 'regexp-quote strings "\\|")
+            close-paren)))
+@end example
+@end defun
+
+@defun regexp-opt-depth regexp
+This function returns the total number of grouping constructs
+(parenthesized expressions) in @var{regexp}.  This does not include
+shy groups (@pxref{Regexp Backslash}).
+@end defun
+
+@c Supposedly an internal regexp-opt function, but table.el uses it at least.
+@defun regexp-opt-charset chars
+This function returns a regular expression matching a character in the
+list of characters @var{chars}.
+
+@example
+(regexp-opt-charset '(?a ?b ?c ?d ?e))
+     @result{} "[a-e]"
+@end example
+@end defun
+
+@c Internal functions: regexp-opt-group
+
+@node Regexp Search
+@section Regular Expression Searching
+@cindex regular expression searching
+@cindex regexp searching
+@cindex searching for regexp
+
+  In GNU Emacs, you can search for the next match for a regular
+expression either incrementally or not.  For incremental search
+commands, see @ref{Regexp Search, , Regular Expression Search, emacs,
+The GNU Emacs Manual}.  Here we describe only the search functions
+useful in programs.  The principal one is @code{re-search-forward}.
+
+  These search functions convert the regular expression to multibyte if
+the buffer is multibyte; they convert the regular expression to unibyte
+if the buffer is unibyte.  @xref{Text Representations}.
+
+@deffn Command re-search-forward regexp &optional limit noerror repeat
+This function searches forward in the current buffer for a string of
+text that is matched by the regular expression @var{regexp}.  The
+function skips over any amount of text that is not matched by
+@var{regexp}, and leaves point at the end of the first match found.
+It returns the new value of point.
+
+If @var{limit} is non-@code{nil}, it must be a position in the current
+buffer.  It specifies the upper bound to the search.  No match
+extending after that position is accepted.
+
+If @var{repeat} is supplied, it must be a positive number; the search
+is repeated that many times; each repetition starts at the end of the
+previous match.  If all these successive searches succeed, the search
+succeeds, moving point and returning its new value.  Otherwise the
+search fails.  What @code{re-search-forward} does when the search
+fails depends on the value of @var{noerror}:
+
+@table @asis
+@item @code{nil}
+Signal a @code{search-failed} error.
+@item @code{t}
+Do nothing and return @code{nil}.
+@item anything else
+Move point to @var{limit} (or the end of the accessible portion of the
+buffer) and return @code{nil}.
+@end table
+
+In the following example, point is initially before the @samp{T}.
+Evaluating the search call moves point to the end of that line (between
+the @samp{t} of @samp{hat} and the newline).
+
+@example
+@group
+---------- Buffer: foo ----------
+I read "@point{}The cat in the hat
+comes back" twice.
+---------- Buffer: foo ----------
+@end group
+
+@group
+(re-search-forward "[a-z]+" nil t 5)
+     @result{} 27
+
+---------- Buffer: foo ----------
+I read "The cat in the hat@point{}
+comes back" twice.
+---------- Buffer: foo ----------
+@end group
+@end example
+@end deffn
+
+@deffn Command re-search-backward regexp &optional limit noerror repeat
+This function searches backward in the current buffer for a string of
+text that is matched by the regular expression @var{regexp}, leaving
+point at the beginning of the first text found.
+
+This function is analogous to @code{re-search-forward}, but they are not
+simple mirror images.  @code{re-search-forward} finds the match whose
+beginning is as close as possible to the starting point.  If
+@code{re-search-backward} were a perfect mirror image, it would find the
+match whose end is as close as possible.  However, in fact it finds the
+match whose beginning is as close as possible (and yet ends before the
+starting point).  The reason for this is that matching a regular
+expression at a given spot always works from beginning to end, and
+starts at a specified beginning position.
+
+A true mirror-image of @code{re-search-forward} would require a special
+feature for matching regular expressions from end to beginning.  It's
+not worth the trouble of implementing that.
+@end deffn
+
+@defun string-match regexp string &optional start
+This function returns the index of the start of the first match for
+the regular expression @var{regexp} in @var{string}, or @code{nil} if
+there is no match.  If @var{start} is non-@code{nil}, the search starts
+at that index in @var{string}.
+
+For example,
+
+@example
+@group
+(string-match
+ "quick" "The quick brown fox jumped quickly.")
+     @result{} 4
+@end group
+@group
+(string-match
+ "quick" "The quick brown fox jumped quickly." 8)
+     @result{} 27
+@end group
+@end example
+
+@noindent
+The index of the first character of the
+string is 0, the index of the second character is 1, and so on.
+
+After this function returns, the index of the first character beyond
+the match is available as @code{(match-end 0)}.  @xref{Match Data}.
+
+@example
+@group
+(string-match
+ "quick" "The quick brown fox jumped quickly." 8)
+     @result{} 27
+@end group
+
+@group
+(match-end 0)
+     @result{} 32
+@end group
+@end example
+@end defun
+
+@defun string-match-p regexp string &optional start
+This predicate function does what @code{string-match} does, but it
+avoids modifying the match data.
+@end defun
+
+@defun looking-at regexp
+This function determines whether the text in the current buffer directly
+following point matches the regular expression @var{regexp}.  ``Directly
+following'' means precisely that: the search is ``anchored'' and it can
+succeed only starting with the first character following point.  The
+result is @code{t} if so, @code{nil} otherwise.
+
+This function does not move point, but it does update the match data.
+@xref{Match Data}.  If you need to test for a match without modifying
+the match data, use @code{looking-at-p}, described below.
+
+In this example, point is located directly before the @samp{T}.  If it
+were anywhere else, the result would be @code{nil}.
+
+@example
+@group
+---------- Buffer: foo ----------
+I read "@point{}The cat in the hat
+comes back" twice.
+---------- Buffer: foo ----------
+
+(looking-at "The cat in the hat$")
+     @result{} t
+@end group
+@end example
+@end defun
+
+@defun looking-back regexp &optional limit greedy
+This function returns @code{t} if @var{regexp} matches the text
+immediately before point (i.e., ending at point), and @code{nil} otherwise.
+
+Because regular expression matching works only going forward, this is
+implemented by searching backwards from point for a match that ends at
+point.  That can be quite slow if it has to search a long distance.
+You can bound the time required by specifying @var{limit}, which says
+not to search before @var{limit}.  In this case, the match that is
+found must begin at or after @var{limit}.
+
+If @var{greedy} is non-@code{nil}, this function extends the match
+backwards as far as possible, stopping when a single additional
+previous character cannot be part of a match for regexp.  When the
+match is extended, its starting position is allowed to occur before
+@var{limit}.
+
+@example
+@group
+---------- Buffer: foo ----------
+I read "@point{}The cat in the hat
+comes back" twice.
+---------- Buffer: foo ----------
+
+(looking-back "read \"" 3)
+     @result{} t
+(looking-back "read \"" 4)
+     @result{} nil
+@end group
+@end example
+
+@c http://debbugs.gnu.org/5689
+As a general recommendation, try to avoid using @code{looking-back}
+wherever possible, since it is slow.  For this reason, there are no
+plans to add a @code{looking-back-p} function.
+@end defun
+
+@defun looking-at-p regexp
+This predicate function works like @code{looking-at}, but without
+updating the match data.
+@end defun
+
+@defvar search-spaces-regexp
+If this variable is non-@code{nil}, it should be a regular expression
+that says how to search for whitespace.  In that case, any group of
+spaces in a regular expression being searched for stands for use of
+this regular expression.  However, spaces inside of constructs such as
+@samp{[@dots{}]} and @samp{*}, @samp{+}, @samp{?} are not affected by
+@code{search-spaces-regexp}.
+
+Since this variable affects all regular expression search and match
+constructs, you should bind it temporarily for as small as possible
+a part of the code.
+@end defvar
+
+@node POSIX Regexps
+@section POSIX Regular Expression Searching
+
+@cindex backtracking and POSIX regular expressions
+  The usual regular expression functions do backtracking when necessary
+to handle the @samp{\|} and repetition constructs, but they continue
+this only until they find @emph{some} match.  Then they succeed and
+report the first match found.
+
+  This section describes alternative search functions which perform the
+full backtracking specified by the POSIX standard for regular expression
+matching.  They continue backtracking until they have tried all
+possibilities and found all matches, so they can report the longest
+match, as required by POSIX.  This is much slower, so use these
+functions only when you really need the longest match.
+
+  The POSIX search and match functions do not properly support the
+non-greedy repetition operators (@pxref{Regexp Special, non-greedy}).
+This is because POSIX backtracking conflicts with the semantics of
+non-greedy repetition.
+
+@deffn Command posix-search-forward regexp &optional limit noerror repeat
+This is like @code{re-search-forward} except that it performs the full
+backtracking specified by the POSIX standard for regular expression
+matching.
+@end deffn
+
+@deffn Command posix-search-backward regexp &optional limit noerror repeat
+This is like @code{re-search-backward} except that it performs the full
+backtracking specified by the POSIX standard for regular expression
+matching.
+@end deffn
+
+@defun posix-looking-at regexp
+This is like @code{looking-at} except that it performs the full
+backtracking specified by the POSIX standard for regular expression
+matching.
+@end defun
+
+@defun posix-string-match regexp string &optional start
+This is like @code{string-match} except that it performs the full
+backtracking specified by the POSIX standard for regular expression
+matching.
+@end defun
+
+@node Match Data
+@section The Match Data
+@cindex match data
+
+  Emacs keeps track of the start and end positions of the segments of
+text found during a search; this is called the @dfn{match data}.
+Thanks to the match data, you can search for a complex pattern, such
+as a date in a mail message, and then extract parts of the match under
+control of the pattern.
+
+  Because the match data normally describe the most recent search only,
+you must be careful not to do another search inadvertently between the
+search you wish to refer back to and the use of the match data.  If you
+can't avoid another intervening search, you must save and restore the
+match data around it, to prevent it from being overwritten.
+
+  Notice that all functions are allowed to overwrite the match data
+unless they're explicitly documented not to do so.  A consequence is
+that functions that are run implicitly in the background
+(@pxref{Timers}, and @ref{Idle Timers}) should likely save and restore
+the match data explicitly.
+
+@menu
+* Replacing Match::       Replacing a substring that was matched.
+* Simple Match Data::     Accessing single items of match data,
+                            such as where a particular subexpression started.
+* Entire Match Data::     Accessing the entire match data at once, as a list.
+* Saving Match Data::     Saving and restoring the match data.
+@end menu
+
+@node Replacing Match
+@subsection Replacing the Text that Matched
+@cindex replace matched text
+
+  This function replaces all or part of the text matched by the last
+search.  It works by means of the match data.
+
+@cindex case in replacements
+@defun replace-match replacement &optional fixedcase literal string subexp
+This function replaces the text in the buffer (or in @var{string}) that
+was matched by the last search.  It replaces that text with
+@var{replacement}.
+
+If you did the last search in a buffer, you should specify @code{nil}
+for @var{string} and make sure that the current buffer when you call
+@code{replace-match} is the one in which you did the searching or
+matching.  Then @code{replace-match} does the replacement by editing
+the buffer; it leaves point at the end of the replacement text, and
+returns @code{t}.
+
+If you did the search in a string, pass the same string as @var{string}.
+Then @code{replace-match} does the replacement by constructing and
+returning a new string.
+
+If @var{fixedcase} is non-@code{nil}, then @code{replace-match} uses
+the replacement text without case conversion; otherwise, it converts
+the replacement text depending upon the capitalization of the text to
+be replaced.  If the original text is all upper case, this converts
+the replacement text to upper case.  If all words of the original text
+are capitalized, this capitalizes all the words of the replacement
+text.  If all the words are one-letter and they are all upper case,
+they are treated as capitalized words rather than all-upper-case
+words.
+
+If @var{literal} is non-@code{nil}, then @var{replacement} is inserted
+exactly as it is, the only alterations being case changes as needed.
+If it is @code{nil} (the default), then the character @samp{\} is treated
+specially.  If a @samp{\} appears in @var{replacement}, then it must be
+part of one of the following sequences:
+
+@table @asis
+@item @samp{\&}
+@cindex @samp{&} in replacement
+@samp{\&} stands for the entire text being replaced.
+
+@item @samp{\@var{n}}
+@cindex @samp{\@var{n}} in replacement
+@samp{\@var{n}}, where @var{n} is a digit, stands for the text that
+matched the @var{n}th subexpression in the original regexp.
+Subexpressions are those expressions grouped inside @samp{\(@dots{}\)}.
+If the @var{n}th subexpression never matched, an empty string is substituted.
+
+@item @samp{\\}
+@cindex @samp{\} in replacement
+@samp{\\} stands for a single @samp{\} in the replacement text.
+@end table
+
+These substitutions occur after case conversion, if any,
+so the strings they substitute are never case-converted.
+
+If @var{subexp} is non-@code{nil}, that says to replace just
+subexpression number @var{subexp} of the regexp that was matched, not
+the entire match.  For example, after matching @samp{foo \(ba*r\)},
+calling @code{replace-match} with 1 as @var{subexp} means to replace
+just the text that matched @samp{\(ba*r\)}.
+@end defun
+
+@defun match-substitute-replacement replacement &optional fixedcase literal string subexp
+This function returns the text that would be inserted into the buffer
+by @code{replace-match}, but without modifying the buffer.  It is
+useful if you want to present the user with actual replacement result,
+with constructs like @samp{\@var{n}} or @samp{\&} substituted with
+matched groups.  Arguments @var{replacement} and optional
+@var{fixedcase}, @var{literal}, @var{string} and @var{subexp} have the
+same meaning as for @code{replace-match}.
+@end defun
+
+@node Simple Match Data
+@subsection Simple Match Data Access
+
+  This section explains how to use the match data to find out what was
+matched by the last search or match operation, if it succeeded.
+
+  You can ask about the entire matching text, or about a particular
+parenthetical subexpression of a regular expression.  The @var{count}
+argument in the functions below specifies which.  If @var{count} is
+zero, you are asking about the entire match.  If @var{count} is
+positive, it specifies which subexpression you want.
+
+  Recall that the subexpressions of a regular expression are those
+expressions grouped with escaped parentheses, @samp{\(@dots{}\)}.  The
+@var{count}th subexpression is found by counting occurrences of
+@samp{\(} from the beginning of the whole regular expression.  The first
+subexpression is numbered 1, the second 2, and so on.  Only regular
+expressions can have subexpressions---after a simple string search, the
+only information available is about the entire match.
+
+  Every successful search sets the match data.  Therefore, you should
+query the match data immediately after searching, before calling any
+other function that might perform another search.  Alternatively, you
+may save and restore the match data (@pxref{Saving Match Data}) around
+the call to functions that could perform another search.  Or use the
+functions that explicitly do not modify the match data;
+e.g. @code{string-match-p}.
+
+@c This is an old comment and presumably there is no prospect of this
+@c changing now.  But still the advice stands.
+  A search which fails may or may not alter the match data.  In the
+current implementation, it does not, but we may change it in the
+future.  Don't try to rely on the value of the match data after a
+failing search.
+
+@defun match-string count &optional in-string
+This function returns, as a string, the text matched in the last search
+or match operation.  It returns the entire text if @var{count} is zero,
+or just the portion corresponding to the @var{count}th parenthetical
+subexpression, if @var{count} is positive.
+
+If the last such operation was done against a string with
+@code{string-match}, then you should pass the same string as the
+argument @var{in-string}.  After a buffer search or match,
+you should omit @var{in-string} or pass @code{nil} for it; but you
+should make sure that the current buffer when you call
+@code{match-string} is the one in which you did the searching or
+matching.  Failure to follow this advice will lead to incorrect results.
+
+The value is @code{nil} if @var{count} is out of range, or for a
+subexpression inside a @samp{\|} alternative that wasn't used or a
+repetition that repeated zero times.
+@end defun
+
+@defun match-string-no-properties count &optional in-string
+This function is like @code{match-string} except that the result
+has no text properties.
+@end defun
+
+@defun match-beginning count
+This function returns the position of the start of the text matched by the
+last regular expression searched for, or a subexpression of it.
+
+If @var{count} is zero, then the value is the position of the start of
+the entire match.  Otherwise, @var{count} specifies a subexpression in
+the regular expression, and the value of the function is the starting
+position of the match for that subexpression.
+
+The value is @code{nil} for a subexpression inside a @samp{\|}
+alternative that wasn't used or a repetition that repeated zero times.
+@end defun
+
+@defun match-end count
+This function is like @code{match-beginning} except that it returns the
+position of the end of the match, rather than the position of the
+beginning.
+@end defun
+
+  Here is an example of using the match data, with a comment showing the
+positions within the text:
+
+@example
+@group
+(string-match "\\(qu\\)\\(ick\\)"
+              "The quick fox jumped quickly.")
+              ;0123456789
+     @result{} 4
+@end group
+
+@group
+(match-string 0 "The quick fox jumped quickly.")
+     @result{} "quick"
+(match-string 1 "The quick fox jumped quickly.")
+     @result{} "qu"
+(match-string 2 "The quick fox jumped quickly.")
+     @result{} "ick"
+@end group
+
+@group
+(match-beginning 1)       ; @r{The beginning of the match}
+     @result{} 4                 ;   @r{with @samp{qu} is at index 4.}
+@end group
+
+@group
+(match-beginning 2)       ; @r{The beginning of the match}
+     @result{} 6                 ;   @r{with @samp{ick} is at index 6.}
+@end group
+
+@group
+(match-end 1)             ; @r{The end of the match}
+     @result{} 6                 ;   @r{with @samp{qu} is at index 6.}
+
+(match-end 2)             ; @r{The end of the match}
+     @result{} 9                 ;   @r{with @samp{ick} is at index 9.}
+@end group
+@end example
+
+  Here is another example.  Point is initially located at the beginning
+of the line.  Searching moves point to between the space and the word
+@samp{in}.  The beginning of the entire match is at the 9th character of
+the buffer (@samp{T}), and the beginning of the match for the first
+subexpression is at the 13th character (@samp{c}).
+
+@example
+@group
+(list
+  (re-search-forward "The \\(cat \\)")
+  (match-beginning 0)
+  (match-beginning 1))
+    @result{} (17 9 13)
+@end group
+
+@group
+---------- Buffer: foo ----------
+I read "The cat @point{}in the hat comes back" twice.
+        ^   ^
+        9  13
+---------- Buffer: foo ----------
+@end group
+@end example
+
+@noindent
+(In this case, the index returned is a buffer position; the first
+character of the buffer counts as 1.)
+
+@node Entire Match Data
+@subsection Accessing the Entire Match Data
+
+  The functions @code{match-data} and @code{set-match-data} read or
+write the entire match data, all at once.
+
+@defun match-data &optional integers reuse reseat
+This function returns a list of positions (markers or integers) that
+record all the information on the text that the last search matched.
+Element zero is the position of the beginning of the match for the
+whole expression; element one is the position of the end of the match
+for the expression.  The next two elements are the positions of the
+beginning and end of the match for the first subexpression, and so on.
+In general, element
+@ifnottex
+number 2@var{n}
+@end ifnottex
+@tex
+number {\mathsurround=0pt $2n$}
+@end tex
+corresponds to @code{(match-beginning @var{n})}; and
+element
+@ifnottex
+number 2@var{n} + 1
+@end ifnottex
+@tex
+number {\mathsurround=0pt $2n+1$}
+@end tex
+corresponds to @code{(match-end @var{n})}.
+
+Normally all the elements are markers or @code{nil}, but if
+@var{integers} is non-@code{nil}, that means to use integers instead
+of markers.  (In that case, the buffer itself is appended as an
+additional element at the end of the list, to facilitate complete
+restoration of the match data.)  If the last match was done on a
+string with @code{string-match}, then integers are always used,
+since markers can't point into a string.
+
+If @var{reuse} is non-@code{nil}, it should be a list.  In that case,
+@code{match-data} stores the match data in @var{reuse}.  That is,
+@var{reuse} is destructively modified.  @var{reuse} does not need to
+have the right length.  If it is not long enough to contain the match
+data, it is extended.  If it is too long, the length of @var{reuse}
+stays the same, but the elements that were not used are set to
+@code{nil}.  The purpose of this feature is to reduce the need for
+garbage collection.
+
+If @var{reseat} is non-@code{nil}, all markers on the @var{reuse} list
+are reseated to point to nowhere.
+
+As always, there must be no possibility of intervening searches between
+the call to a search function and the call to @code{match-data} that is
+intended to access the match data for that search.
+
+@example
+@group
+(match-data)
+     @result{}  (#<marker at 9 in foo>
+          #<marker at 17 in foo>
+          #<marker at 13 in foo>
+          #<marker at 17 in foo>)
+@end group
+@end example
+@end defun
+
+@defun set-match-data match-list &optional reseat
+This function sets the match data from the elements of @var{match-list},
+which should be a list that was the value of a previous call to
+@code{match-data}.  (More precisely, anything that has the same format
+will work.)
+
+If @var{match-list} refers to a buffer that doesn't exist, you don't get
+an error; that sets the match data in a meaningless but harmless way.
+
+If @var{reseat} is non-@code{nil}, all markers on the @var{match-list} list
+are reseated to point to nowhere.
+
+@c TODO Make it properly obsolete.
+@findex store-match-data
+@code{store-match-data} is a semi-obsolete alias for @code{set-match-data}.
+@end defun
+
+@node Saving Match Data
+@subsection Saving and Restoring the Match Data
+
+  When you call a function that may search, you may need to save
+and restore the match data around that call, if you want to preserve the
+match data from an earlier search for later use.  Here is an example
+that shows the problem that arises if you fail to save the match data:
+
+@example
+@group
+(re-search-forward "The \\(cat \\)")
+     @result{} 48
+(foo)                   ; @r{@code{foo} does more searching.}
+(match-end 0)
+     @result{} 61              ; @r{Unexpected result---not 48!}
+@end group
+@end example
+
+  You can save and restore the match data with @code{save-match-data}:
+
+@defmac save-match-data body@dots{}
+This macro executes @var{body}, saving and restoring the match
+data around it.  The return value is the value of the last form in
+@var{body}.
+@end defmac
+
+  You could use @code{set-match-data} together with @code{match-data} to
+imitate the effect of the special form @code{save-match-data}.  Here is
+how:
+
+@example
+@group
+(let ((data (match-data)))
+  (unwind-protect
+      @dots{}   ; @r{Ok to change the original match data.}
+    (set-match-data data)))
+@end group
+@end example
+
+  Emacs automatically saves and restores the match data when it runs
+process filter functions (@pxref{Filter Functions}) and process
+sentinels (@pxref{Sentinels}).
+
+@ignore
+  Here is a function which restores the match data provided the buffer
+associated with it still exists.
+
+@smallexample
+@group
+(defun restore-match-data (data)
+@c It is incorrect to split the first line of a doc string.
+@c If there's a problem here, it should be solved in some other way.
+  "Restore the match data DATA unless the buffer is missing."
+  (catch 'foo
+    (let ((d data))
+@end group
+      (while d
+        (and (car d)
+             (null (marker-buffer (car d)))
+@group
+             ;; @file{match-data} @r{buffer is deleted.}
+             (throw 'foo nil))
+        (setq d (cdr d)))
+      (set-match-data data))))
+@end group
+@end smallexample
+@end ignore
+
+@node Search and Replace
+@section Search and Replace
+@cindex replacement after search
+@cindex searching and replacing
+
+  If you want to find all matches for a regexp in part of the buffer,
+and replace them, the best way is to write an explicit loop using
+@code{re-search-forward} and @code{replace-match}, like this:
+
+@example
+(while (re-search-forward "foo[ \t]+bar" nil t)
+  (replace-match "foobar"))
+@end example
+
+@noindent
+@xref{Replacing Match,, Replacing the Text that Matched}, for a
+description of @code{replace-match}.
+
+  However, replacing matches in a string is more complex, especially
+if you want to do it efficiently.  So Emacs provides a function to do
+this.
+
+@defun replace-regexp-in-string regexp rep string &optional fixedcase literal subexp start
+This function copies @var{string} and searches it for matches for
+@var{regexp}, and replaces them with @var{rep}.  It returns the
+modified copy.  If @var{start} is non-@code{nil}, the search for
+matches starts at that index in @var{string}, so matches starting
+before that index are not changed.
+
+This function uses @code{replace-match} to do the replacement, and it
+passes the optional arguments @var{fixedcase}, @var{literal} and
+@var{subexp} along to @code{replace-match}.
+
+Instead of a string, @var{rep} can be a function.  In that case,
+@code{replace-regexp-in-string} calls @var{rep} for each match,
+passing the text of the match as its sole argument.  It collects the
+value @var{rep} returns and passes that to @code{replace-match} as the
+replacement string.  The match data at this point are the result
+of matching @var{regexp} against a substring of @var{string}.
+@end defun
+
+  If you want to write a command along the lines of @code{query-replace},
+you can use @code{perform-replace} to do the work.
+
+@defun perform-replace from-string replacements query-flag regexp-flag delimited-flag &optional repeat-count map start end
+This function is the guts of @code{query-replace} and related
+commands.  It searches for occurrences of @var{from-string} in the
+text between positions @var{start} and @var{end} and replaces some or
+all of them.  If @var{start} is @code{nil} (or omitted), point is used
+instead, and the end of the buffer's accessible portion is used for
+@var{end}.
+
+If @var{query-flag} is @code{nil}, it replaces all
+occurrences; otherwise, it asks the user what to do about each one.
+
+If @var{regexp-flag} is non-@code{nil}, then @var{from-string} is
+considered a regular expression; otherwise, it must match literally.  If
+@var{delimited-flag} is non-@code{nil}, then only replacements
+surrounded by word boundaries are considered.
+
+The argument @var{replacements} specifies what to replace occurrences
+with.  If it is a string, that string is used.  It can also be a list of
+strings, to be used in cyclic order.
+
+If @var{replacements} is a cons cell, @w{@code{(@var{function}
+. @var{data})}}, this means to call @var{function} after each match to
+get the replacement text.  This function is called with two arguments:
+@var{data}, and the number of replacements already made.
+
+If @var{repeat-count} is non-@code{nil}, it should be an integer.  Then
+it specifies how many times to use each of the strings in the
+@var{replacements} list before advancing cyclically to the next one.
+
+If @var{from-string} contains upper-case letters, then
+@code{perform-replace} binds @code{case-fold-search} to @code{nil}, and
+it uses the @var{replacements} without altering their case.
+
+Normally, the keymap @code{query-replace-map} defines the possible
+user responses for queries.  The argument @var{map}, if
+non-@code{nil}, specifies a keymap to use instead of
+@code{query-replace-map}.
+
+This function uses one of two functions to search for the next
+occurrence of @var{from-string}.  These functions are specified by the
+values of two variables: @code{replace-re-search-function} and
+@code{replace-search-function}.  The former is called when the
+argument @var{regexp-flag} is non-@code{nil}, the latter when it is
+@code{nil}.
+@end defun
+
+@defvar query-replace-map
+This variable holds a special keymap that defines the valid user
+responses for @code{perform-replace} and the commands that use it, as
+well as @code{y-or-n-p} and @code{map-y-or-n-p}.  This map is unusual
+in two ways:
+
+@itemize @bullet
+@item
+The ``key bindings'' are not commands, just symbols that are meaningful
+to the functions that use this map.
+
+@item
+Prefix keys are not supported; each key binding must be for a
+single-event key sequence.  This is because the functions don't use
+@code{read-key-sequence} to get the input; instead, they read a single
+event and look it up ``by hand''.
+@end itemize
+@end defvar
+
+Here are the meaningful ``bindings'' for @code{query-replace-map}.
+Several of them are meaningful only for @code{query-replace} and
+friends.
+
+@table @code
+@item act
+Do take the action being considered---in other words, ``yes''.
+
+@item skip
+Do not take action for this question---in other words, ``no''.
+
+@item exit
+Answer this question ``no'', and give up on the entire series of
+questions, assuming that the answers will be ``no''.
+
+@item exit-prefix
+Like @code{exit}, but add the key that was pressed to
+@code{unread-comment-events}.
+
+@item act-and-exit
+Answer this question ``yes'', and give up on the entire series of
+questions, assuming that subsequent answers will be ``no''.
+
+@item act-and-show
+Answer this question ``yes'', but show the results---don't advance yet
+to the next question.
+
+@item automatic
+Answer this question and all subsequent questions in the series with
+``yes'', without further user interaction.
+
+@item backup
+Move back to the previous place that a question was asked about.
+
+@item edit
+Enter a recursive edit to deal with this question---instead of any
+other action that would normally be taken.
+
+@item edit-replacement
+Edit the replacement for this question in the minibuffer.
+
+@item delete-and-edit
+Delete the text being considered, then enter a recursive edit to replace
+it.
+
+@item recenter
+Redisplay and center the window, then ask the same question again.
+
+@item quit
+Perform a quit right away.  Only @code{y-or-n-p} and related functions
+use this answer.
+
+@item help
+Display some help, then ask again.
+@end table
+
+@defvar multi-query-replace-map
+This variable holds a keymap that extends @code{query-replace-map} by
+providing additional keybindings that are useful in multi-buffer
+replacements.  The additional ``bindings'' are:
+
+@table @code
+@item automatic-all
+Answer this question and all subsequent questions in the series with
+``yes'', without further user interaction, for all remaining buffers.
+
+@item exit-current
+Answer this question ``no'', and give up on the entire series of
+questions for the current buffer.  Continue to the next buffer in the
+sequence.
+@end table
+@end defvar
+
+@defvar replace-search-function
+This variable specifies a function that @code{perform-replace} calls
+to search for the next string to replace.  Its default value is
+@code{search-forward}.  Any other value should name a function of 3
+arguments: the first 3 arguments of @code{search-forward}
+(@pxref{String Search}).
+@end defvar
+
+@defvar replace-re-search-function
+This variable specifies a function that @code{perform-replace} calls
+to search for the next regexp to replace.  Its default value is
+@code{re-search-forward}.  Any other value should name a function of 3
+arguments: the first 3 arguments of @code{re-search-forward}
+(@pxref{Regexp Search}).
+@end defvar
+
+@node Standard Regexps
+@section Standard Regular Expressions Used in Editing
+@cindex regexps used standardly in editing
+@cindex standard regexps used in editing
+
+  This section describes some variables that hold regular expressions
+used for certain purposes in editing:
+
+@defopt page-delimiter
+This is the regular expression describing line-beginnings that separate
+pages.  The default value is @code{"^\014"} (i.e., @code{"^^L"} or
+@code{"^\C-l"}); this matches a line that starts with a formfeed
+character.
+@end defopt
+
+  The following two regular expressions should @emph{not} assume the
+match always starts at the beginning of a line; they should not use
+@samp{^} to anchor the match.  Most often, the paragraph commands do
+check for a match only at the beginning of a line, which means that
+@samp{^} would be superfluous.  When there is a nonzero left margin,
+they accept matches that start after the left margin.  In that case, a
+@samp{^} would be incorrect.  However, a @samp{^} is harmless in modes
+where a left margin is never used.
+
+@defopt paragraph-separate
+This is the regular expression for recognizing the beginning of a line
+that separates paragraphs.  (If you change this, you may have to
+change @code{paragraph-start} also.)  The default value is
+@w{@code{"[@ \t\f]*$"}}, which matches a line that consists entirely of
+spaces, tabs, and form feeds (after its left margin).
+@end defopt
+
+@defopt paragraph-start
+This is the regular expression for recognizing the beginning of a line
+that starts @emph{or} separates paragraphs.  The default value is
+@w{@code{"\f\\|[ \t]*$"}}, which matches a line containing only
+whitespace or starting with a form feed (after its left margin).
+@end defopt
+
+@defopt sentence-end
+If non-@code{nil}, the value should be a regular expression describing
+the end of a sentence, including the whitespace following the
+sentence.  (All paragraph boundaries also end sentences, regardless.)
+
+If the value is @code{nil}, as it is by default, then the function
+@code{sentence-end} constructs the regexp.  That is why you
+should always call the function @code{sentence-end} to obtain the
+regexp to be used to recognize the end of a sentence.
+@end defopt
+
+@defun sentence-end
+This function returns the value of the variable @code{sentence-end},
+if non-@code{nil}.  Otherwise it returns a default value based on the
+values of the variables @code{sentence-end-double-space}
+(@pxref{Definition of sentence-end-double-space}),
+@code{sentence-end-without-period}, and
+@code{sentence-end-without-space}.
+@end defun

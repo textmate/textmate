@@ -1,0 +1,199 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1990-1993, 1999, 2001-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/maps
+@node Standard Keymaps, Standard Hooks, Standard Errors, Top
+@appendix Standard Keymaps
+@cindex keymaps, standard
+
+In this section we list some of the more general keymaps.  Many of
+these exist when Emacs is first started, but some are loaded only when
+the respective feature is accessed.
+
+There are many other, more specialized, maps than these; in particular
+those associated with major and minor modes.  The minibuffer uses
+several keymaps (@pxref{Completion Commands}).  For more details on
+keymaps, @pxref{Keymaps}.
+
+@c Don't list individual major mode keymaps here, only more general things.
+@c Only add vindex for things not covered elsewhere in this manual.
+@c Don't add xrefs to things covered in {Keymaps}.
+@table @code
+@item 2C-mode-map
+A sparse keymap for subcommands of the prefix @kbd{C-x 6}.@*
+@xref{Two-Column,, Two-Column Editing, emacs, The GNU Emacs Manual}.
+
+@item abbrev-map
+@vindex abbrev-map
+A sparse keymap for subcommands of the prefix @kbd{C-x a}.@*
+@xref{Defining Abbrevs,,, emacs, The GNU Emacs Manual}.
+
+@item button-buffer-map
+A sparse keymap useful for buffers containing buffers.@*
+You may want to use this as a parent keymap.  @xref{Buttons}.
+
+@item button-map
+A sparse keymap used by buttons.
+
+@item ctl-x-4-map
+A sparse keymap for subcommands of the prefix @kbd{C-x 4}.
+
+@item ctl-x-5-map
+A sparse keymap for subcommands of the prefix @kbd{C-x 5}.
+
+@item ctl-x-map
+A full keymap for @kbd{C-x} commands.
+
+@item ctl-x-r-map
+@vindex ctl-x-r-map
+A sparse keymap for subcommands of the prefix @kbd{C-x r}.@*
+@xref{Registers,,, emacs, The GNU Emacs Manual}.
+
+@item esc-map
+A full keymap for @kbd{ESC} (or @kbd{Meta}) commands.
+
+@item facemenu-keymap
+A sparse keymap used for the @kbd{M-o} prefix key.
+
+@item function-key-map
+The parent keymap of all @code{local-function-key-map} (q.v.) instances.
+
+@ignore
+@c Doesn't exist.
+@item fundamental-mode-map
+@vindex fundamental-mode-map
+The sparse keymap for Fundamental mode.@*
+It is empty and should not be changed.
+@end ignore
+
+@item global-map
+The full keymap containing default global key bindings.@*
+Modes should not modify the Global map.
+
+@item goto-map
+A sparse keymap used for the @kbd{M-g} prefix key.
+
+@item help-map
+A sparse keymap for the keys following the help character @kbd{C-h}.@*
+@xref{Help Functions}.
+
+@item Helper-help-map
+A full keymap used by the help utility package.@*
+It has the same keymap in its value cell and in its function cell.
+
+@item input-decode-map
+The keymap for translating keypad and function keys.@*
+If there are none, then it contains an empty sparse keymap.
+@xref{Translation Keymaps}.
+
+@item key-translation-map
+A keymap for translating keys.  This one overrides ordinary key
+bindings, unlike @code{local-function-key-map}.  @xref{Translation
+Keymaps}.
+
+@item kmacro-keymap
+@vindex kmacro-keymap
+A sparse keymap for keys that follows the @kbd{C-x C-k} prefix search.@*
+@xref{Keyboard Macros,,, emacs, The GNU Emacs Manual}.
+
+@item local-function-key-map
+The keymap for translating key sequences to preferred alternatives.@*
+If there are none, then it contains an empty sparse keymap.
+@xref{Translation Keymaps}.
+
+@item menu-bar-file-menu
+@itemx menu-bar-edit-menu
+@itemx menu-bar-options-menu
+@itemx global-buffers-menu-map
+@itemx menu-bar-tools-menu
+@itemx menu-bar-help-menu
+@cindex menu bar keymaps
+@vindex menu-bar-file-menu
+@vindex menu-bar-options-menu
+@vindex global-buffers-menu-map
+@vindex menu-bar-tools-menu
+@vindex menu-bar-help-menu
+These keymaps display the main, top-level menus in the menu bar.@*
+Some of them contain sub-menus.  For example, the Edit menu contains
+@code{menu-bar-search-menu}, etc.  @xref{Menu Bar}.
+@ignore
+TODO list all submenus?
+There are probably too many, and it would not be useful to do so, eg:
+The Edit menu includes @code{yank-menu}, @code{menu-bar-search-menu},
+@code{menu-bar-replace-menu}, @code{menu-bar-goto-menu},
+@code{menu-bar-bookmark-map}, and @code{facemenu-menu}.
+There is also mule-menu-keymap, set-coding-system-map,
+setup-language-environment-map, describe-language-environment-map, 
+menu-bar-epatch-menu, menu-bar-ediff-merge-menu, menu-bar-ediff-menu, etc.
+@end ignore
+
+@item minibuffer-inactive-mode-map
+A full keymap used in the minibuffer when it is not active.@*
+@xref{Minibuffer Edit,, Editing in the Minibuffer, emacs, The GNU Emacs Manual}.
+
+@item mode-line-coding-system-map
+@itemx mode-line-input-method-map
+@itemx mode-line-column-line-number-mode-map
+@vindex mode-line-coding-system-map
+@vindex mode-line-input-method-map
+@vindex mode-line-column-line-number-mode-map
+These keymaps control various areas of the mode line.@*
+@xref{Mode Line Format}.
+
+@item mode-specific-map
+The keymap for characters following @kbd{C-c}.  Note, this is in the
+global map.  This map is not actually mode-specific: its name was chosen
+to be informative in @kbd{C-h b} (@code{display-bindings}),
+where it describes the main use of the @kbd{C-c} prefix key.
+
+@c FIXME - don't mention this one?
+@item mouse-appearance-menu-map
+@vindex mouse-appearance-menu-map
+A sparse keymap used for the @kbd{S-mouse-1} key.
+
+@item mule-keymap
+The global keymap used for the @kbd{C-x @key{RET}} prefix key.
+
+@item narrow-map
+@vindex narrow-map
+A sparse keymap for subcommands of the prefix @kbd{C-x n}.
+
+@item prog-mode-map
+The keymap used by Prog mode.@*
+@xref{Basic Major Modes}.
+
+@item query-replace-map
+@itemx multi-query-replace-map
+A sparse keymap used for responses in @code{query-replace} and related
+commands; also for @code{y-or-n-p} and @code{map-y-or-n-p}.  The functions
+that use this map do not support prefix keys; they look up one event at a
+time.  @code{multi-query-replace-map} extends @code{query-replace-map}
+for multi-buffer replacements.  @xref{Search and Replace, query-replace-map}.
+
+@item search-map
+A sparse keymap that provides global bindings for search-related commands.
+
+@item special-mode-map
+The keymap used by Special mode.@*
+@xref{Basic Major Modes}.
+
+@item tool-bar-map
+The keymap defining the contents of the tool bar.@*
+@xref{Tool Bar}.
+
+@item universal-argument-map
+@vindex universal-argument-map
+A sparse keymap used while processing @kbd{C-u}.@*
+@xref{Prefix Command Arguments}.
+
+@item vc-prefix-map
+The global keymap used for the @kbd{C-x v} prefix key.
+
+@item x-alternatives-map
+@vindex x-alternatives-map
+@findex x-setup-function-keys
+A sparse keymap used to map certain keys under graphical frames.@*
+The function @code{x-setup-function-keys} uses this.
+
+@end table

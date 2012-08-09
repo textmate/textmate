@@ -1,0 +1,217 @@
+# Copyright (C) 2003-2004, 2007-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+default namespace this = "http://thaiopensource.com/ns/locating-rules/1.0"
+namespace local = ""
+
+start = locatingRules
+
+locatingRules =  element locatingRules { common, rule* }
+
+rule =
+  \include
+  # | group
+  | applyFollowingRules
+  | documentElement
+  # | doctypePublicId
+  | \namespace
+  | uri
+  | transformURI
+  # | typeIdProcessingInstruction
+  | \default
+  | typeId
+  # | typeIdBase
+  | extensionRule
+ 
+## Group of rules. Useful with xml:base.
+group = element group { common, rule* }
+
+\include =
+  element include {
+    common,
+    attribute rules { xsd:anyURI }
+  }
+
+applyFollowingRules =
+  element applyFollowingRules {
+    common,
+    attribute ruleType {
+      "documentElement"
+      | "doctypePublicId"
+      | "namespace"
+      | "uri"
+      | "transformURI"
+      | "typeIdProcessingInstruction"
+      | "default"
+    }
+  }
+
+documentElement =
+  ## Matches if the prefix and/or local name of document element
+  ## match the values of the prefix and localName attributes.
+  element documentElement {
+    common,
+    nameAtts,
+    targetAtt
+  }
+
+## If there's no prefix attribute, then only the local name must match.
+## If there's no local name attribute, then only the prefix must match.
+nameAtts = (prefixAtt, localNameAtt?) | localNameAtt
+
+## prefix="" matches if the document element has no prefix.
+prefixAtt = attribute prefix { (xsd:NCName - "xmlns") | "" }
+localNameAtt = attribute localName { xsd:NCName - "xmlns" }
+
+doctypePublicId =
+  ## Matches if the document has a DOCTYPE declaration with a public
+  ## identifier that, after normalization, matches the value of the
+  ## publicId attribute.
+  element doctypePublicId {
+    common,
+    attribute publicId { publicIdValue },
+    targetAtt
+  }
+
+publicIdValue =
+  xsd:token {
+    ## Newline and tab are excluded, because pattern applies to
+    ## the post-normalization value.
+    pattern = "[\-'()+,./:=?;!*#@$_%a-zA-Z0-9 ]*"
+  }
+
+# This is separate from documentElement so it can be distinguished
+# by applyFollowingRules.
+\namespace =
+  ## Matches if the document element has a namespace URI equal to the value
+  ## of the ns attribute.  A document element with no namespace matches if
+  ## the value of the ns attribute is the empty string.
+  element namespace {
+    common,
+    attribute ns { xsd:string },
+    targetAtt
+  }
+
+uri =
+  ## Matches based on the URI of the document.
+  element uri {
+    common,
+    (resourceAtt | patternAtt),
+    targetAtt
+  }
+
+## Matches if it can be determined that the document resource is
+## the same resource as that identified by the value of the resource
+## attribute.  In determining this, the implementation should apply
+## the semantics of the URI scheme used by the URI.
+resourceAtt = attribute resource { xsd:anyURI }
+
+## Matches if the document's URI matches the pattern specified
+## by the pattern attribute.  A * in the path component matches
+## zero or more characters other than / (after resolving escapes).
+## If the pattern is a relative URI, it means that there must
+## be some URI such that when the pattern is resolved relative
+## to that URI, it matches the document's URI. Thus an empty
+## pattern will always match.
+patternAtt = attribute pattern { uriPattern }
+
+## A pattern for a URI. Same syntax as a URI, except that a * in
+## the path component has a special meaning.
+uriPattern = xsd:anyURI
+
+transformURI =
+  ## Generates a URI for the related resource by transforming
+  ## the URI of the document. Matches if the transformation
+  ## yields a valid URI that identifies an existing resource.
+  element transformURI {
+    common,
+    ## Semantics are the same as the pattern attribute of the uri element.
+    attribute fromPattern { uriPattern },
+    ## The result of the transformation is produced from the toPattern
+    ## by replacing each * by the string that matched the corresponding
+    ## * in the toPattern.  The toPattern is appended to the initial
+    ## part of the document's URI that was not explicitly matched
+    ## by fromPattern.
+    attribute toPattern { uriPattern }
+  }
+
+\default =
+  ## Always matches.
+  element default {
+    common,
+    targetAtt
+  }
+
+## A document can be mapped onto a URI either indirectly via a typeId
+## or directly.
+targetAtt = uriAtt | typeIdAtt
+
+## Specifies the URI of the related resource.
+## xml:base is used if it's relative.
+uriAtt = attribute uri { xsd:anyURI }
+
+## Specifies an identifier of the type of document. typeId and
+## typeIdBase rules will be used to map this to a URI.
+typeIdAtt = attribute typeId { typeIdValue }
+
+## A type identifier can be anything convenient (e.g. a public identifier,
+## a URL or just a string with no formal structure).  Whitespace is
+## normalized like a public identifier before comparing type identifiers
+## for equality.
+typeIdValue = xsd:token
+
+typeIdProcessingInstruction =
+  ## Matches if there's a processing instruction in the prolog
+  ## before any DOCTYPE declaration whose target is the value of
+  ## the target attribute.  The value of the processing instruction
+  ## is interpreted as a typeId, which will be mapped to a
+  ## URI as normal.
+  element typeIdProcessingInstruction {
+    common,
+    attribute target { xsd:NCName }
+  }
+
+typeId =
+  ## Maps a typeId onto a URI.
+  element typeId {
+    common,
+    attribute id { typeIdValue },
+    targetAtt
+  }
+
+typeIdBase =
+  ## Used to map a typeId onto a URI. First, any URI reserved characters
+  ## are URI encoded. If the append attribute is specified, it is appended.
+  ## This is then treated as a URI. If relative, it is resolved using
+  ## the applicable base URI as usual.  If the resulting URI identifies
+  ## an existing resource, then the typeId is mapped to this resource.
+  ## This is intended to be useful with file URIs.
+  element typeIdBase {
+    common,
+    attribute append { xsd:string }?
+  }
+
+extensionRule =
+  element * - this:* {
+    attribute * { text }*, (text|anyElement)*
+  }
+
+anyElement = element * { attribute * { text }*, (text|anyElement)* }
+
+common = 
+  # attribute xml:base { xsd:anyURI }?,
+  attribute * - (xml:base|this:*|local:*) { text }*

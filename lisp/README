@@ -1,0 +1,13 @@
+This directory contains source code for the parts of Emacs that are
+written in Emacs Lisp.  *.el files are Emacs Lisp source, and the
+corresponding *.elc files are byte-compiled versions.  Byte-compiled
+files are architecture-independent.
+
+The term subdirectory contains Lisp files that customize Emacs for
+certain terminal types.  When Emacs starts, it checks the TERM
+environment variable to get the terminal type and loads
+`term/${TERM}.el' if it exists.
+
+The other subdirectories hold Lisp packages grouped by their general
+purpose.
+

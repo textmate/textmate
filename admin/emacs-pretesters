@@ -1,0 +1,217 @@
+Here are the guidelines for being an Emacs pretester.
+If you would like to do this, say so, and I'll add you to
+the pretest list.
+
+
+		  Information for Emacs Pretesters
+
+The purpose of Emacs pretesting is to verify that the new Emacs
+distribution, about to be released, works properly on your system *with
+no change whatever*, when installed following the precise
+recommendations that come with the Emacs distribution.
+
+Here are some guidelines on how to do pretesting so as to make it
+helpful.  All of them follow from common sense together with the
+nature of the purpose and the situation.
+
+Please save this file, and reread it when a new series of pretests
+starts.
+
+* Get the pretest from gnu/emacs/pretest/emacs-MM.0.NN.tar.gz
+on alpha.gnu.org.
+
+* After a few days of testing, if there are no problems, please report
+that Emacs works for you and what configuration you are testing it on.
+
+* If you want to communicate with other pretesters, send mail to
+emacs-pretesters@gnu.org.  I don't use that mailing list when I send
+to you because I've found that mailing lists tend to amplify random
+noise into long discussions or even arguments, and that can waste a
+lot of time.  But when you have a reason to ask other pretesters for
+help, you can do it that way.
+
+* It is absolutely vital that you report even the smallest change or
+departure from the standard sources and procedure.
+
+Otherwise, you are not testing the same program that we asked you to
+test.  Testing a different program is usually of no use whatever.  It
+can even cause trouble, if you fail to tell us that you tested some
+other program instead of what we are about to release.  We might think
+that Emacs works, when in fact it has not even been tried, and might
+have a glaring fault.
+
+* Don't use a site-load.el file or a site-init.el file when you pretest.
+Using either of those files means you are not testing Emacs as a typical
+site would use it.
+
+Actually, it does no harm to test Emacs with such customizations *as
+well as* testing it "out of the box".  Anything you do that could find
+a bug is useful, as long as you make sure we know exactly what you
+did.  The important point is that testing with local changes is no
+substitute for testing Emacs exactly as it is distributed.
+
+* Even changing the compilation options counts as a change in the
+program.  The Emacs sources specify which compilation options to use.
+Some of them are specified in makefiles, and some in machine-specific
+configuration files.  They also give you ways to override this--but if
+you do, then you are not testing what ordinary users will do.
+Therefore, when pretesting, it is vital to test with the default
+compilation options.
+
+(Testing with a different set of options can be useful *in addition*,
+but not *instead of* the default options.)
+
+* The machine and system configuration files of Emacs are parts of
+Emacs.  So when you test Emacs, you need to do it with the
+configuration files that come with Emacs.
+
+If Emacs does not come with configuration files for a certain machine,
+and you test it with configuration files that don't come with Emacs,
+this is effectively changing Emacs.  Because the crucial fact about
+the planned release is that, without changes, it doesn't work on that
+machine.
+
+To make Emacs work on that machine, we would need to install new
+configuration files.  That is not out of the question, since it is
+safe--it certainly won't break any other machines that already work.
+But you will have to rush in the legal papers to give the FSF
+permission to use such a large piece of text.
+
+* Look in the etc/MACHINES file.
+
+The etc/MACHINES file says which configuration files to use for your
+machine, so use the ones that are recommended.  If you guess, you might
+guess wrong and encounter spurious difficulties.  What's more, if you
+don't follow etc/MACHINES then you aren't helping to test that its
+recommendations are valid.
+
+The etc/MACHINES file may describe other things that you need to do
+to make Emacs work on your machine.  If so, you should follow these
+recommendations also, for the same reason.
+
+* Send your problem reports to bug-gnu-emacs@gnu.org.
+
+Sometimes we won't know what to do about a system-dependent issue, and
+we may need people to say what happens if you try a certain thing on a
+certain system.  When this happens, we'll send out a query.
+
+* Don't delay sending information.
+
+When you test on a system and encounter no problems, please report it
+right away.  That way, we will know that someone has tested Emacs on
+that kind of system.
+
+Please don't wait for several days "to see if it really works before
+you say anything."  Tell us right away that Emacs seems basically to
+work; then, if you notice a problem a few days later, tell us
+immediately about that when you see it.
+
+It is okay if you double check things before reporting a problem, such
+as to see if you can easily fix it.  But don't wait very long.  A good
+rule to use in pretesting is always to report every problem on the
+same day you encounter it, even if that means you can't find a
+solution before you report the problem.
+
+I'd much rather hear about a problem today and a solution tomorrow
+than get both of them tomorrow at the same time.
+
+* Make each bug report self-contained.
+
+If you refer back to another message, whether from you or from someone
+else, then it will be necessary for anyone who wants to investigate
+the bug to find the other message.  This may be difficult, it is
+probably time-consuming.
+
+To help save our time, simply copy the relevant parts of any previous
+messages into your own bug report.
+
+In particular, if we ask you for more information because a bug report
+was incomplete, it is best to send me the *entire* collection of
+relevant information, all together.  If you send just the additional
+information, that makes extra work for us.  There is even a risk that
+we won't remember what question you are sending the answer to.
+
+* When you encounter a bug that manifests itself as a Lisp error,
+try setting debug-on-error to t and making the bug happen again.
+Then you will get a Lisp backtrace.  Including that in your bug report
+is very useful.
+
+* For advice on debugging, see etc/DEBUG.
+
+* Debugging optimized code is possible, if you compile with GCC, but
+in some cases the optimized code can be confusing.  If you are not
+accustomed to that, recompile Emacs without -O.  One way to do this is
+
+    make clean
+    make CFLAGS=-g
+
+* Configure tries to figure out what kind of system you have by
+compiling and linking programs which calls various functions and looks
+at whether that succeeds.  The file config.log contains any messages
+produced by compilers while running configure, to aid debugging if
+configure makes a mistake.  But note that config.cache reads:
+
+# Giving --cache-file=/dev/null disables caching, for debugging configure.
+
+or more simply,
+
+rm config.cache
+./configure
+
+* Don't try changing Emacs *in any way* during pretest unless it fails
+to work unchanged.
+
+* Always be precise when talking about changes you have made.  Show
+things rather than describing them.  Use exact filenames (relative to
+the main directory of the distribution), not partial ones.  For
+example, say "I changed Makefile" rather than "I changed the
+makefile".  Instead of saying "I defined the MUMBLE macro", send a
+diff.
+
+* Always use `diff -c' to make diffs.  If you don't include context, it
+may be hard for us to figure out where you propose to make the
+changes.  So we might ignore your patch.
+
+* When you write a fix, keep in mind that we can't install a change
+that *might* break other systems without the risk that it will fail to
+work and therefore require an additional cycle of pretesting.
+
+People often suggest fixing a problem by changing config.h or
+src/Makefile to do something special that a particular system needs.
+Sometimes it is totally obvious that such changes would break Emacs
+for almost all users.  We can't possibly make a change like that.  All
+we can do is ask you to find a fix that is safe to install.
+
+Sometimes people send fixes that *might* be an improvement in
+general--but it is hard to be sure of this.  I can install such
+changes some of the time, but not during pretest, when I am trying to
+get a new version to work reliably as quickly as possible.
+
+The safest changes for us to install are changes to the s- and m-
+files.  At least those can't break other systems.
+
+Another safe kind of change is one that uses a conditional to make
+sure it will apply only to a particular kind of system.  Ordinarily,
+that is a bad way to solve a problem, and I would want to find a
+cleaner alternative.  But the virtue of safety can make it superior at
+pretest time.
+
+* Don't suggest changes during pretest to add features or make
+something cleaner.  Every change risks introducing a bug, so I won't
+install a change during pretest unless it is *necessary*.
+
+* If you would like to suggest changes for purposes other than fixing
+user-visible bugs, don't wait till pretest time.  Instead, send them
+after we have made a release that proves to be stable.  That is the
+easiest time to consider such suggestions.  If you send them at
+pretest time, we will have to defer them till later, and that might
+mean we forget all about them.
+
+* In some cases, if you don't follow these guidelines, your
+information might still be useful, but we would have to do more work
+to make use of it.  That might cause it to fall by the wayside.
+
+Local Variables:
+mode: text
+End:
+

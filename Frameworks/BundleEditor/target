@@ -1,5 +1,0 @@
-SOURCES      = src/*.{cc,mm}
-LINK        += bundles ns OakFoundation OakTextView
-EXPORT       = src/BundleEditor.h
-CP_Resources = resources/* templates/*.plist gfx/**/*.png
-FRAMEWORKS   = Cocoa AddressBook

@@ -1,0 +1,58 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+			   Emacs for Windows
+
+This README file describes how to dump a bare precompiled version of
+GNU Emacs for Windows.  This barebin distribution supplements the
+standard distribution of Emacs, which you can download from:
+
+	ftp://ftp.gnu.org/gnu/emacs/
+
+If you do not have the "bin" or "src" distribution, then you will need
+to download one of those before you can use this barebin version.
+
+An additional feature of the barebin version that is not present in
+the bin distribution is that it contains an undumped binary of Emacs
+(temacs.exe).  This can be used to dump Emacs yourself.  Note that you
+should only need to dump Emacs yourself if you want to dump Emacs with
+more elisp files than are included normally, or to rebuild Emacs after
+patching one of the elisp files that is preloaded.
+
+The dumping process consists of running a bare Emacs, loading up a
+number of general elisp files, and then creating a new Emacs executable
+preinitialized and ready to run.  In the precompiled distributions,
+Emacs has already been dumped with the standard configuration.
+
+To dump Emacs, unpack this distribution into the directory created by
+unpacking the corresponding standard src or bin distribution.  To
+verify that you unpacked in the proper place, check to make sure that
+you now have a temacs.exe file in the bin directory.
+
+Once you have unpacked this distribution, cd into the bin directory and
+run dump.bat.  This will produce a new bin\emacs.exe executable for you
+to use (the original one is renamed to emacs.exe.orig; this is not
+overwritten if you run dump more than once).
+
+For more information about running Emacs, read the README.W32 file
+that came with this distribution.  If you need help using Emacs on
+Windows, including problems with dumping, send email to
+<help-emacs-windows@gnu.org>.
+
+Enjoy!
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

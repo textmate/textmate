@@ -1,0 +1,10 @@
+# Meta Module
+
+meta = element meta { meta.attlist }
+meta.attlist =
+  I18n.attrib,
+  attribute http-equiv { NMTOKEN.datatype }?,
+  attribute name { NMTOKEN.datatype }?,
+  attribute content { text }?,
+  attribute scheme { text }?
+head.content &= meta*

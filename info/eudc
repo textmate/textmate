@@ -1,0 +1,1509 @@
+This is ../../info/eudc, produced by makeinfo version 4.13 from
+eudc.texi.
+
+This file documents EUDC v1.30b.
+
+   EUDC is the Emacs Unified Directory Client, a common interface to
+directory servers using various protocols such as LDAP or the CCSO white
+pages directory system (PH/QI)
+
+   Copyright (C) 1998, 2000-2012  Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs network features
+START-INFO-DIR-ENTRY
+* EUDC: (eudc).                 Emacs client for directory servers (LDAP, PH).
+END-INFO-DIR-ENTRY
+
+
+File: eudc,  Node: Top,  Next: Overview,  Prev: (dir),  Up: (dir)
+
+Emacs Unified Directory Client
+******************************
+
+This file documents EUDC v1.30b.
+
+   EUDC is the Emacs Unified Directory Client, a common interface to
+directory servers using various protocols such as LDAP or the CCSO white
+pages directory system (PH/QI)
+
+   Copyright (C) 1998, 2000-2012  Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Overview::                    Summary of EUDC features
+* Installation::                How to install EUDC
+* Usage::                       The various usage possibilities explained
+* Credits::                     Who's done what
+* GNU Free Documentation License:: The license for this documentation.
+* Command and Function Index::
+* Variables Index::
+
+
+File: eudc,  Node: Overview,  Next: Installation,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+EUDC, the "Emacs Unified Directory Client", provides a common user
+interface to access directory servers using different directory
+protocols.
+
+   Currently supported back-ends are:
+
+   * LDAP, Lightweight Directory Access Protocol
+
+   * CCSO PH/QI
+
+   * BBDB, Big Brother's Insidious Database
+
+   The main features of the EUDC interface are:
+
+   * Queries using a customizable form
+
+   * Inline query expansion (for instance you can expand a name to an
+     email address in a mail message buffer using a server as an
+     address book)
+
+   * Multiple servers can be tried in turn until a match is found for an
+     inline query
+
+   * Fast minibuffer queries for email addresses and phone numbers
+
+   * Interface to BBDB to let you insert server records into your own
+     BBDB database (*note BBDB: (bbdb)Top.)
+
+* Menu:
+
+* LDAP::                        What is LDAP ?
+* CCSO PH/QI::                  What is CCSO, PH, QI ?
+* BBDB::                        What is BBDB ?
+
+
+File: eudc,  Node: LDAP,  Next: CCSO PH/QI,  Prev: Overview,  Up: Overview
+
+1.1 LDAP
+========
+
+LDAP, "the Lightweight Directory Access Protocol", is a communication
+protocol for directory applications defined in RFC 1777.
+
+   Quoted from RFC 1777:
+
+     [LDAP] is designed to provide access to the X.500 Directory while
+     not incurring the resource requirements of the Directory Access
+     Protocol (DAP). This protocol is specifically targeted at simple
+     management applications and browser applications that provide
+     simple read/write interactive access to the X.500 Directory, and
+     is intended to be a complement to the DAP itself.
+
+   LDAP servers usually store (but are not limited to) information about
+people such as their name, phone number, email address, office
+location, etc... More information about LDAP can be found at
+`http://www.openldap.org/'.
+
+   EUDC requires external support to access LDAP directory servers
+(*note LDAP Requirements::)
+
+
+File: eudc,  Node: CCSO PH/QI,  Next: BBDB,  Prev: LDAP,  Up: Overview
+
+1.2 CCSO PH/QI
+==============
+
+The Central Computing Services Office (CCSO) of the University of
+Illinois at Urbana Champaign created and freely distributed a directory
+system that was used by many organizations in the 1990s.  The system
+records information about people such as their address, phone number,
+email, academic information or any other details it was configured to.
+Nowadays this system is not widely used.
+
+   The system consists of two parts: a database server traditionally
+called `qi' and a command-line client called `ph'.  As of 2010, the
+code can still be downloaded from `http://www-dev.cites.uiuc.edu/ph/'.
+
+   The original command-line `ph' client that comes with the `ph/qi'
+distribution provides additional features like the possibility to
+communicate with the server in login-mode which makes it possible to
+change records in the database.  This is not implemented in EUDC.
+
+
+File: eudc,  Node: BBDB,  Prev: CCSO PH/QI,  Up: Overview
+
+1.3 BBDB
+========
+
+BBDB is the "Big Brother's Insidious Database", a package for Emacs
+originally written by Jamie Zawinski which provides rolodex-like
+database functionality featuring tight integration with the Emacs mail
+and news readers.
+
+   It is often used as an enhanced email address book.
+
+   EUDC considers BBDB as a directory server back end just like LDAP or
+PH/QI servers, though BBDB has no client/server protocol and thus always
+resides locally on your machine.  The point in this is not to offer an
+alternate way to query your BBDB database (BBDB itself provides much
+more flexible ways to do that), but rather to offer an interface to your
+local directory that is consistent with the interface to external
+directories (LDAP, PH/QI).  This is particularly interesting when
+performing queries on multiple servers.
+
+   EUDC also offers a means to insert results from directory queries
+into your own local BBDB (*note Creating BBDB Records::)
+
+
+File: eudc,  Node: Installation,  Next: Usage,  Prev: Overview,  Up: Top
+
+2 Installation
+**************
+
+Add the following to your `.emacs' init file:
+     (require 'eudc)
+   This will install EUDC at startup.
+
+   After installing EUDC you will find (the next time you launch Emacs)
+a new `Directory Search' submenu in the `Tools' menu that will give you
+access to EUDC.
+
+   You may also find it useful to add the following to your `.emacs'
+initialization file to add a shortcut for email address expansion in
+email composition buffers (*note Inline Query Expansion::)
+
+     (eval-after-load
+      "message"
+      '(define-key message-mode-map [(control ?c) (tab)] 'eudc-expand-inline))
+     (eval-after-load
+      "sendmail"
+      '(define-key mail-mode-map [(control ?c) (tab)] 'eudc-expand-inline))
+
+* Menu:
+
+* LDAP Requirements::           EUDC needs external support for LDAP
+
+
+File: eudc,  Node: LDAP Requirements,  Prev: Installation,  Up: Installation
+
+2.1 LDAP Requirements
+=====================
+
+LDAP support is added by means of `ldap.el', which is part of Emacs.
+`ldap.el' needs an external command line utility named `ldapsearch',
+available as part of Open LDAP (`http://www.openldap.org/').
+
+
+File: eudc,  Node: Usage,  Next: Credits,  Prev: Installation,  Up: Top
+
+3 Usage
+*******
+
+This chapter describes the usage of EUDC.  Most functions and
+customization options are available through the `Directory Search'
+submenu of the `Tools' submenu.
+
+* Menu:
+
+* Querying Servers::            How queries are performed and handled
+* Query Form::                  How to use and customize the query form
+* Display of Query Results::    Controlling how query results are presented
+* Inline Query Expansion::      How to use and customize inline queries
+* The Server Hotlist::          How to use and manage the server hotlist
+* Multi-server Queries::        How to query multiple servers successively
+* Creating BBDB Records::       How to insert query results into your BBDB
+* Server/Protocol Locals::      Customizing on a per server/protocol basis
+
+
+File: eudc,  Node: Querying Servers,  Next: Query Form,  Prev: Usage,  Up: Usage
+
+3.1 Querying Servers
+====================
+
+EUDC's basic functionality is to let you query a directory server and
+return the results back to you.  There are several things you may want
+to customize in this process.
+
+* Menu:
+
+* Selecting a Server::          The first thing to do
+* Return Attributes::           Configuring what the server should return
+* Duplicate Attributes::        What to do when records have duplicate attributes
+
+
+File: eudc,  Node: Selecting a Server,  Next: Return Attributes,  Prev: Querying Servers,  Up: Querying Servers
+
+3.1.1 Selecting a Server
+------------------------
+
+Before doing any query you will need to set the directory server.  You
+need to specify the name of the host machine running the server software
+and the protocol to use. If you do not set the server in any fashion,
+EUDC will ask you for one when you make your first query.
+
+   You can set the server by selecting one from your hotlist of servers
+(*note The Server Hotlist::) available in the `Server' submenu or by
+selecting `New Server' in that same menu.
+
+   LDAP servers generally require some configuration before you can
+perform queries on them.  In particular, the "search base" must be
+configured.  If the server you select has no configured search base then
+EUDC will propose you to configure it at this point.  A customization
+buffer will be displayed where you can edit the search base and other
+parameters for the server.
+
+ -- Variable: eudc-server
+     The name or IP address of the remote directory server. A TCP port
+     number may be specified by appending a colon and a number to the
+     name of the server. You will not need this unless your server runs
+     on a port other than the default (which depends on the protocol).
+     If the directory server resides on your own computer (which is the
+     case if you use the BBDB back end) then `localhost' is a
+     reasonable value but it will be ignored anyway.
+
+ -- Variable: eudc-protocol
+     The directory protocol to use to query the server.  Currently
+     supported protocols in this version of EUDC are `ph', `ldap' and
+     `bbdb'.
+
+ -- Command: eudc-set-server
+     This command accessible from `New Server' submenu lets you specify
+     a new directory server and protocol.
+
+
+File: eudc,  Node: Return Attributes,  Next: Duplicate Attributes,  Prev: Selecting a Server,  Up: Querying Servers
+
+3.1.2 Return Attributes
+-----------------------
+
+Directory servers may be configured to return a default set of
+attributes for each record matching a query if the query specifies none.
+The variable `eudc-default-return-attributes' controls the return
+attributes you want to see, if different from the server defaults.
+
+ -- Variable: eudc-default-return-attributes
+     A list of the default attributes to extract from directory
+     entries.  If set to the symbol `all' then all available attributes
+     are returned. A value of `nil', the default, means to return the
+     default attributes as configured in the server.
+
+   The server may return several matching records to a query. Some of
+the records may however not contain all the attributes you requested.
+You can discard those records.
+
+ -- User Option: eudc-strict-return-matches
+     If non-`nil', entries that do not contain all the requested return
+     attributes are ignored.  Default is `t'.
+
+
+File: eudc,  Node: Duplicate Attributes,  Prev: Return Attributes,  Up: Querying Servers
+
+3.1.3 Duplicate Attributes
+--------------------------
+
+Directory standards may authorize different instances of the same
+attribute in a record. For instance the record of a person may contain
+several email fields containing different email addresses. When using a
+QI directory server this is difficult to distinguish from attributes
+having multi-line values such as the postal address that may contain a
+line for the street and another one for the zip code and city name. In
+both cases, EUDC will consider the attribute duplicated.
+
+   EUDC has several methods to deal with duplicated attributes. The
+available methods are:
+
+`list'
+     Makes a list with the different values of the duplicate attribute.
+     The record is returned with only one instance of the attribute
+     with a list of all the different values as a value. This is the
+     default method that is used to handle duplicate fields for which
+     no other method has been specified.
+
+`first'
+     Discards all the duplicate values of the field keeping only the
+     first one.
+
+`concat'
+     Concatenates the different values using a newline as a separator.
+     The record keeps only one instance of the field the value of which
+     is a single multi-line string.
+
+`duplicate'
+     Duplicates the whole record into as many instances as there are
+     different values for the field. This is the default for the email
+     field. Thus a record containing 3 different email addresses is
+     duplicated into three different records each having a single email
+     address. This is particularly useful in combination with `select'
+     as the method to handle multiple matches in inline expansion
+     queries (*note Inline Query Expansion::) because you are presented
+     with the 3 addresses in a selection buffer
+
+   Because a method may not be applicable to all fields, the variable
+`eudc-duplicate-attribute-handling-method' lets you specify either a
+default method for all fields or a method for each individual field.
+
+ -- Variable: eudc-duplicate-attribute-handling-method
+     A method to handle entries containing duplicate attributes.  This
+     is either an alist of elements `(ATTR . METHOD)', or a symbol
+     METHOD.  The alist form of the variable associates a method to an
+     individual attribute name; the second form specifies a method
+     applicable to all attribute names. Available methods are: `list',
+     `first', `concat', and `duplicate' (see above).  The default is
+     `list'.
+
+
+File: eudc,  Node: Query Form,  Next: Display of Query Results,  Prev: Querying Servers,  Up: Usage
+
+3.2 Query Form
+==============
+
+The simplest way to query your directory server is to use the query
+form. You display the query form with the `Query with Form' menu item
+or by invoking the command `M-x eudc-query-form'. The attribute names
+presented in this form are defined by the `eudc-query-form-attributes'
+variable (unless a non-`nil' argument is supplied to `eudc-query-form').
+
+   Since the different directory protocols to which EUDC interfaces may
+use different names for equivalent attributes, EUDC defines its own set
+of attribute names and a mapping between these names and their
+protocol-specific equivalent through the variable
+`eudc-protocol-attributes-translation-alist'.  Names currently defined
+by EUDC are `name', `firstname', `email' and `phone'.
+
+ -- Variable: eudc-query-form-attributes
+     A list of attributes presented in the query form.  Attribute names
+     in this list should be either EUDC attribute names or valid
+     attribute names.  You can get a list of valid attribute names for
+     the current protocol with the `List Valid Attribute Names' menu
+     item or the `M-x eudc-get-attribute-list' command.  Defaults to
+     `name', `email' and `phone'.
+
+ -- Command: eudc-query-form get-fields-from-server
+     Display a form to query the directory server.  If given a non-`nil'
+     argument the function first queries the server for the existing
+     fields and displays a corresponding form.  Not all protocols may
+     support a non-`nil' argument here.
+
+   Since the names of the fields may not be explicit enough or adapted
+to be directly displayed as prompt strings in the form, the variable
+`eudc-user-attribute-names-alist' lets you define more explicit names
+for directory attribute names.  This variable is ignored if
+`eudc-use-raw-directory-names' is non-`nil'.
+
+ -- Variable: eudc-user-attribute-names-alist
+     This is an alist of user-defined names for the directory
+     attributes used in query/response forms. Prompt strings for
+     attributes that are not in this alist are derived by splitting the
+     attribute name at underscores and capitalizing the individual
+     words.
+
+ -- Variable: eudc-use-raw-directory-names
+     If non-`nil', use attributes names as defined in the directory.
+     Otherwise, directory query/response forms display the user
+     attribute names defined in `eudc-user-attribute-names-alist'.
+
+
+File: eudc,  Node: Display of Query Results,  Next: Inline Query Expansion,  Prev: Query Form,  Up: Usage
+
+3.3 Display of Query Results
+============================
+
+Upon successful completion of a form query, EUDC will display a buffer
+containing the results of the query.
+
+   The fields that are returned for each record are controlled by
+`eudc-default-return-attributes' (*note Return Attributes::).
+
+   The display of each individual field can be performed by an arbitrary
+function which allows specific processing for binary values, such as
+images or audio samples, as well as values with semantics, such as URLs.
+
+ -- Variable: eudc-attribute-display-method-alist
+     An alist specifying methods to display attribute values.  Each
+     member of the list is of the form `(NAME . FUNC)' where NAME is a
+     lowercased string naming a directory attribute (translated
+     according to `eudc-user-attribute-names-alist' if
+     `eudc-use-raw-directory-names' is non-`nil') and FUNC a function
+     that will be passed the corresponding attribute values for display.
+
+   This variable has protocol-local definitions (see *note
+Server/Protocol Locals::).  For instance, it is defined as follows for
+LDAP:
+
+     (eudc-protocol-set 'eudc-attribute-display-method-alist
+                        '(("jpegphoto" . eudc-display-jpeg-inline)
+                          ("labeledurl" . eudc-display-url)
+                          ("audio" . eudc-display-sound)
+                          ("labeledurl" . eudc-display-url)
+                          ("url" . eudc-display-url))
+                        'ldap)
+
+   EUDC provides a set of built-in functions to display binary value
+types:
+
+ -- Function: eudc-display-generic-binary data
+     Display a button for unidentified binary DATA.
+
+ -- Function: eudc-display-url url
+     Display URL and make it clickable.
+
+ -- Function: eudc-display-sound data
+     Display a button to play the sound DATA.
+
+ -- Function: eudc-display-jpeg-inline data
+     Display the JPEG DATA inline at point if possible.
+
+ -- Function: eudc-display-jpeg-as-button data
+     Display a button for the JPEG DATA.
+
+   Right-clicking on a binary value button pops up a contextual menu
+with options to process the value.  Among these are saving the attribute
+value to a file or sending it to an external viewer command.  External
+viewers should expect the value on their standard input and should
+display it or perform arbitrary processing on it.  Messages sent to
+standard output are discarded.  External viewers are listed in the
+variable `eudc-external-viewers' which you can customize.
+
+ -- Variable: eudc-external-viewers
+     This is a list of viewer program specifications.  Each
+     specification is a list whose first element is a string naming the
+     viewer for unique identification, the second element is the
+     executable program which should be invoked and the following
+     elements are arguments that should be passed to the program.
+
+
+File: eudc,  Node: Inline Query Expansion,  Next: The Server Hotlist,  Prev: Display of Query Results,  Up: Usage
+
+3.4 Inline Query Expansion
+==========================
+
+Inline query expansion is a powerful method to get completion from your
+directory server.  The most common usage is for expanding names to email
+addresses in mail message buffers.  The expansion is performed by the
+command `M-x eudc-expand-inline' which is available from the `Expand
+Inline Query' menu item but can also be conveniently bound to a key
+shortcut (*note Installation::).  The operation is controlled by the
+variables `eudc-inline-expansion-format', `eudc-inline-query-format',
+`eudc-expanding-overwrites-query' and
+`eudc-multiple-match-handling-method'.
+
+   If the query fails for a server, other servers may be tried
+successively until one of them finds a match (*note Multi-server
+Queries::).
+
+ -- Command: eudc-expand-inline replace-p
+     Query the server and expand the query string before point.  The
+     query string consists of the buffer substring from the point back
+     to the preceding comma, colon or beginning of line.
+     `eudc-inline-query-format' controls how individual words are
+     mapped onto directory attribute names.  After querying the server
+     for the given string, the expansion specified by
+     `eudc-inline-expansion-format' is inserted in the buffer at point.
+     If REPLACE-P is `t' then this expansion replaces the query string
+     in the buffer.  If `eudc-expanding-overwrites-query' is non-`nil'
+     then the meaning of REPLACE-P is negated.
+
+ -- Variable: eudc-inline-query-format
+     Format of an inline expansion query.  This is actually a list of
+     FORMATs.  A FORMAT is a list of one or more EUDC attribute names.
+     A FORMAT applies if it contains as many attributes as individual
+     words in the inline query string.  If several FORMATs apply then
+     they are tried in order until a match is found.  If `nil' all the
+     words will be mapped onto the default server/protocol attribute
+     name (generally `name').
+
+     For instance, use the following
+          (setq eudc-inline-query-format '((name)
+                                           (firstname)
+                                           (firstname name)))
+     to indicate that single word expansion queries are to be
+     considered as surnames and if no match is found then they should
+     be tried as first names.  Inline queries consisting of two words
+     are considered as consisting of a first name followed by a
+     surname.  If the query consists of more than two words, then the
+     first one is considered as the first name and the remaining words
+     are all considered as surname constituents.
+
+     FORMATs are in fact not limited to EUDC attribute names, you can
+     use server or protocol specific names in them.  It may be safer if
+     you do so, to set the variable `eudc-inline-query-format' in a
+     protocol or server local fashion (see *note Server/Protocol
+     Locals::).
+
+     For instance you could use the following to match up to three words
+     against the `cn' attribute of LDAP servers:
+          (eudc-protocol-set 'eudc-inline-query-format
+                             '((cn)
+                               (cn cn)
+                               (cn cn cn))
+                             'ldap)
+
+ -- Variable: eudc-inline-expansion-format
+     This variable lets you control exactly what is inserted into the
+     buffer upon an inline expansion request.  It is a list whose first
+     element is a string passed to `format'.  Remaining elements are
+     symbols corresponding to directory attribute names.  The
+     corresponding attribute values are passed as additional arguments
+     to `format'.  Default is `("%s" email)' but you may want to
+     consider a value like `("%s <%s>" name email)'
+
+ -- Variable: eudc-multiple-match-handling-method
+     This variable controls what to do when multiple entries match a
+     query for an inline expansion.  Possible values are:
+    `first'
+          The first match is considered as being the only one, the
+          others are discarded.
+
+    `select'
+          A selection buffer pops up where you can choose a particular
+          match.  This is the default value of the variable.
+
+    `all'
+          The expansion uses all records successively
+
+    `abort'
+          An error is signaled.  The expansion aborts.
+
+     Default is `select'
+
+
+File: eudc,  Node: The Server Hotlist,  Next: Multi-server Queries,  Prev: Inline Query Expansion,  Up: Usage
+
+3.5 The Server Hotlist
+======================
+
+EUDC lets you maintain a list of frequently used servers so that you
+can easily switch from one to another.  This hotlist appears in the
+`Server' submenu.  You select a server in this list by clicking on its
+name.  You can add the current server to the list with the command `M-x
+eudc-bookmark-current-server'.  The list is contained in the variable
+`eudc-server-hotlist' which is stored in and retrieved from the file
+designated by `eudc-options-file'.  EUDC also provides a facility to
+edit the hotlist interactively (*note The Hotlist Edit Buffer::).
+
+   The hotlist is also used to make queries on multiple servers
+successively (*note Multi-server Queries::).  The order in which the
+servers are tried is the order they appear in the hotlist, therefore it
+is important to sort the hotlist appropriately.
+
+ -- Command: eudc-bookmark-server server
+     Add SERVER to the hotlist of servers
+
+ -- Command: eudc-bookmark-current-server
+     Add the current server to the hotlist of servers
+
+ -- Variable: eudc-options-file
+     The name of a file where EUDC stores its internal variables (the
+     hotlist and the current server).  EUDC will try to load that file
+     upon initialization so, if you choose a file name different from
+     the defaults `~/.eudc-options', be sure to set this variable to
+     the appropriate value _before_ EUDC is itself loaded.
+
+* Menu:
+
+* The Hotlist Edit Buffer::     An interactive hotlist editing facility
+
+
+File: eudc,  Node: The Hotlist Edit Buffer,  Prev: The Server Hotlist,  Up: The Server Hotlist
+
+3.5.1 The Hotlist Edit Buffer
+-----------------------------
+
+The hotlist edit buffer offers a means to manage a list of frequently
+used servers.  Commands are available in the context pop-up menu
+generally bound to the right mouse button.  Those commands also have
+equivalent key bindings.
+
+ -- Command: eudc-hotlist-add-server
+     Bound to `a'.  Add a new server to the hotlist on the line after
+     point
+
+ -- Command: eudc-hotlist-delete-server
+     Bound to `d'.  Delete the server on the line point is on
+
+ -- Command: eudc-hotlist-select-server
+     Bound to `s'.  Select the server the point is on as the current
+     directory server for the next queries
+
+ -- Command: eudc-hotlist-transpose-servers
+     Bound to `t'.  Bubble up the server the point is on to the top of
+     the list
+
+ -- Command: eudc-hotlist-quit-edit
+     Bound to `q'.  Save the changes and quit the hotlist edit buffer.
+     Use `x' or `M-x kill-buffer' to exit without saving.
+
+
+File: eudc,  Node: Multi-server Queries,  Next: Creating BBDB Records,  Prev: The Server Hotlist,  Up: Usage
+
+3.6 Multi-server Queries
+========================
+
+When using inline query expansion (*note Inline Query Expansion::), EUDC
+can try to query successively a sequence of directory servers until one
+of them successfully finds a match for the query.
+
+ -- Variable: eudc-inline-expansion-servers
+     This variable controls which servers are tried and in which order
+     when trying to perform an inline query.  Possible values are:
+    `current-server'
+          Only the current directory server is tried
+
+    `hotlist'
+          The servers in the hotlist are tried in order until one finds
+          a match for the query or `eudc-max-servers-to-query' is
+          reached
+
+    `server-then-hotlist'
+          The current server then the servers in the hotlist are tried
+          in the order they appear in the hotlist until one of them
+          finds a match or `eudc-max-servers-to-query' is reached.
+          This is the default.
+
+ -- Variable: eudc-max-servers-to-query
+     This variable indicates the maximum number of servers to query when
+     performing a multi-server query.  The default, `nil', indicates
+     that all available servers should be tried.
+
+
+File: eudc,  Node: Creating BBDB Records,  Next: Server/Protocol Locals,  Prev: Multi-server Queries,  Up: Usage
+
+3.7 Creating BBDB Records
+=========================
+
+With EUDC, you can automatically create BBDB records (*note BBDB:
+(bbdb)Top.) from records you get from a directory server.  You do this
+by moving point to the appropriate record in a query result display
+buffer and invoking the command `M-x
+eudc-insert-record-at-point-into-bbdb' with the keyboard binding
+`b'(1), or with the menu.  EUDC cannot update an existing BBDB record
+and will signal an error if you try to insert a record matching an
+existing one.
+
+   It is also possible to export to BBDB the whole batch of records
+contained in the directory query result with the command `M-x
+eudc-batch-export-records-to-bbdb'.
+
+   Because directory systems may not enforce a strict record format,
+local server installations may use different attribute names and have
+different ways to organize the information.  Furthermore BBDB has its
+own record structure.  For these reasons converting a record from its
+external directory format to the BBDB format is a highly customizable
+process.
+
+ -- Variable: eudc-bbdb-conversion-alist
+     The value of this variable should be a symbol naming an alist
+     defining a mapping between BBDB field names onto directory
+     attribute names records.  This is a protocol-local variable and is
+     initialized upon protocol switch (*note Server/Protocol Locals::).
+     The alist is made of cells of the form `(BBDB-FIELD .
+     SPEC-OR-LIST)'.  BBDB-FIELD is the name of a field that must be
+     defined in your BBDB environment (standard field names are `name',
+     `company', `net', `phone', `address' and `notes').  SPEC-OR-LIST
+     is either a single mapping specification or a list of mapping
+     specifications.  Lists of mapping specifications are valid for the
+     `phone' and `address' BBDB fields only. SPECs are actually
+     s-expressions which are evaluated as follows:
+
+    a string
+          evaluates to itself
+
+    a symbol
+          evaluates to the symbol value.  Symbols corresponding to
+          directory attribute names present in the record evaluate to
+          the value of the field in the record
+
+    a form
+          is evaluated as a function.  The argument list may contain
+          attribute names which evaluate to the corresponding values in
+          the record.  The form evaluation should return something
+          appropriate for the particular BBDB-FIELD (see
+          `bbdb-create-internal').  `eudc-bbdbify-phone' and
+          `eudc-bbdbify-address' are provided as convenience functions
+          to parse phones and addresses.
+
+   The default value of the PH-specific value of that variable is
+`eudc-ph-bbdb-conversion-alist':
+
+     ((name . name)
+      (net . email)
+      (address . (eudc-bbdbify-address address "Address"))
+      (phone . ((eudc-bbdbify-phone phone "Phone")
+                (eudc-bbdbify-phone office_phone "Office Phone"))))
+
+   This means that:
+
+   * the `name' field of the BBDB record gets its value from the `name'
+     attribute of the directory record
+
+   * the `net' field of the BBDB record gets its value from the `email'
+     attribute of the directory record
+
+   * the `address' field of the BBDB record is obtained by parsing the
+     `address' attribute of the directory record with the function
+     `eudc-bbdbify-address'
+
+   * two `phone' fields are created (when possible) in the BBDB record.
+     The first one has `Phone' for location and its value is obtained by
+     parsing the `phone' attribute of the PH/QI record with the function
+     `eudc-bbdbify-phone'.  The second one has `Office Phone' for
+     location its value is obtained by parsing the `office_phone'
+     attribute of the PH/QI record with the function
+     `eudc-bbdbify-phone'.
+
+ -- Function: eudc-bbdbify-phone phone location
+     This is a convenience function provided for use in
+     `eudc-bbdb-conversion-alist'.  It parses PHONE into a vector
+     compatible with `bbdb-create-internal'.  PHONE is either a string
+     supposedly containing a phone number or a list of such strings
+     which are concatenated. LOCATION is used as the phone location for
+     BBDB.
+
+ -- Function: eudc-bbdbify-address addr location
+     This is a convenience function provided for use in
+     `eudc-bbdb-conversion-alist'.  It parses ADDR into a vector
+     compatible with `bbdb-create-internal'.  ADDR should be an address
+     string of no more than four lines or a list of lines.  The last
+     line is searched for the zip code, city and state name.  LOCATION
+     is used as the phone location for BBDB.
+
+   Note that only a subset of the attributes you selected with
+`eudc-default-return-attributes' and that are actually displayed may
+actually be inserted as part of the newly created BBDB record.
+
+   ---------- Footnotes ----------
+
+   (1) This key binding does not actually call
+`eudc-insert-record-at-point-into-bbdb' but uses `eudc-try-bbdb-insert'
+instead.
+
+
+File: eudc,  Node: Server/Protocol Locals,  Prev: Creating BBDB Records,  Up: Usage
+
+3.8 Server/Protocol Locals
+==========================
+
+EUDC can be customized independently for each server or directory
+protocol.  All variables can be given local bindings that are activated
+when a particular server and/or protocol becomes active.  This is much
+like buffer-local bindings but on a per server or per protocol basis.
+
+* Menu:
+
+* Manipulating local bindings::  Functions to set and query local bindings
+
+
+File: eudc,  Node: Manipulating local bindings,  Prev: Server/Protocol Locals,  Up: Server/Protocol Locals
+
+3.8.1 Manipulating local bindings
+---------------------------------
+
+EUDC offers functions that let you set and query variables on a per
+server or per protocol basis.
+
+   The following predicates allow you to test the existence of
+server/protocol local bindings for a particular variable.
+
+ -- Function: eudc-server-local-variable-p var
+     Return non-`nil' if VAR has server-local bindings
+
+ -- Function: eudc-protocol-local-variable-p var
+     Return non-`nil' if VAR has protocol-local bindings
+
+   The following functions allow you to set the value of a variable with
+various degrees of locality.
+
+ -- Function: eudc-default-set var val
+     Set the EUDC default value of VAR to VAL.  The current binding of
+     VAR (if local to the current server or protocol) is not changed.
+
+ -- Function: eudc-protocol-set var val &optional protocol
+     Set the binding of VAR local to PROTOCOL to VAL.  If omitted,
+     PROTOCOL defaults to the current value of `eudc-protocol'.  The
+     current binding of VAR is changed only if PROTOCOL is omitted.
+
+ -- Function: eudc-server-set var val &optional server
+     Set the binding of VAR local to SERVER to VAL.  If omitted, SERVER
+     defaults to the current value of `eudc-server'.  The current
+     binding of VAR is changed only if SERVER is omitted.
+
+ -- Function: eudc-set var val
+     Set the most local (server, protocol or default) binding of VAR to
+     VAL.  The current binding of VAR is also set to VAL.
+
+   The following variables allow you to query the various bindings of a
+variable (local or non-local).
+
+ -- Function: eudc-variable-default-value var
+     Return the default binding of VAR (outside of a particular server
+     or protocol local binding).  Return `unbound' if VAR has no EUDC
+     default value.
+
+ -- Function: eudc-variable-protocol-value var &optional protocol
+     Return the value of VAR local to PROTOCOL.  Return `unbound' if
+     VAR has no value local to PROTOCOL.  PROTOCOL defaults to
+     `eudc-protocol'.
+
+ -- Function: eudc-variable-server-value var [server]
+     Return the value of VAR local to SERVER.  Return `unbound' if VAR
+     has no value local to SERVER.  SERVER defaults to `eudc-server'.
+
+   Changing a protocol-local or server-local value of a variable has no
+effect on its current value.  The following command is used to
+synchronize the current values of variables with their local values
+given the current `eudc-server' and `eudc-protocol':
+
+ -- Function: eudc-update-local-variables
+     Update all EUDC variables according to their local settings.
+
+
+File: eudc,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Usage,  Up: Top
+
+4 Credits
+*********
+
+EUDC was written by Oscar Figueiredo based on `ph.el' by the same
+author.
+
+   Thanks to Soren Dayton for his suggestions, his enthusiasm and his
+help in testing and proofreading the code and docs of `ph.el'.
+
+
+File: eudc,  Node: GNU Free Documentation License,  Next: Command and Function Index,  Prev: Credits,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: eudc,  Node: Command and Function Index,  Next: Variables Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Command and Function Index
+**************************
+
+ [index ]
+* Menu:
+
+* eudc-batch-export-records-to-bbdb:     Creating BBDB Records.
+                                                               (line 15)
+* eudc-bbdbify-address:                  Creating BBDB Records.
+                                                               (line 95)
+* eudc-bbdbify-phone:                    Creating BBDB Records.
+                                                               (line 87)
+* eudc-bookmark-current-server:          The Server Hotlist.   (line 24)
+* eudc-bookmark-server:                  The Server Hotlist.   (line 21)
+* eudc-default-set:                      Manipulating local bindings.
+                                                               (line 22)
+* eudc-display-generic-binary:           Display of Query Results.
+                                                               (line 40)
+* eudc-display-jpeg-as-button:           Display of Query Results.
+                                                               (line 52)
+* eudc-display-jpeg-inline:              Display of Query Results.
+                                                               (line 49)
+* eudc-display-sound:                    Display of Query Results.
+                                                               (line 46)
+* eudc-display-url:                      Display of Query Results.
+                                                               (line 43)
+* eudc-expand-inline:                    Inline Query Expansion.
+                                                               (line 21)
+* eudc-get-attribute-list:               Query Form.           (line 20)
+* eudc-hotlist-add-server:               The Hotlist Edit Buffer.
+                                                               (line 12)
+* eudc-hotlist-delete-server:            The Hotlist Edit Buffer.
+                                                               (line 16)
+* eudc-hotlist-quit-edit:                The Hotlist Edit Buffer.
+                                                               (line 27)
+* eudc-hotlist-select-server:            The Hotlist Edit Buffer.
+                                                               (line 19)
+* eudc-hotlist-transpose-servers:        The Hotlist Edit Buffer.
+                                                               (line 23)
+* eudc-insert-record-at-point-into-bbdb: Creating BBDB Records.
+                                                               (line  6)
+* eudc-protocol-local-variable-p:        Manipulating local bindings.
+                                                               (line 16)
+* eudc-protocol-set:                     Manipulating local bindings.
+                                                               (line 26)
+* eudc-query-form:                       Query Form.           (line 28)
+* eudc-server-local-variable-p:          Manipulating local bindings.
+                                                               (line 13)
+* eudc-server-set:                       Manipulating local bindings.
+                                                               (line 31)
+* eudc-set:                              Manipulating local bindings.
+                                                               (line 36)
+* eudc-set-server:                       Selecting a Server.   (line 37)
+* eudc-try-bbdb-insert:                  Creating BBDB Records.
+                                                               (line  6)
+* eudc-update-local-variables:           Manipulating local bindings.
+                                                               (line 62)
+* eudc-variable-default-value:           Manipulating local bindings.
+                                                               (line 43)
+* eudc-variable-protocol-value:          Manipulating local bindings.
+                                                               (line 48)
+* eudc-variable-server-value:            Manipulating local bindings.
+                                                               (line 53)
+
+
+File: eudc,  Node: Variables Index,  Prev: Command and Function Index,  Up: Top
+
+Variables Index
+***************
+
+ [index ]
+* Menu:
+
+* eudc-attribute-display-method-alist:   Display of Query Results.
+                                                               (line 17)
+* eudc-bbdb-conversion-alist:            Creating BBDB Records.
+                                                               (line 27)
+* eudc-default-return-attributes:        Return Attributes.    (line 12)
+* eudc-duplicate-attribute-handling-method: Duplicate Attributes.
+                                                               (line 48)
+* eudc-external-viewers:                 Display of Query Results.
+                                                               (line 63)
+* eudc-inline-expansion-format:          Inline Query Expansion.
+                                                               (line 68)
+* eudc-inline-expansion-servers:         Multi-server Queries. (line 11)
+* eudc-inline-query-format:              Inline Query Expansion.
+                                                               (line 33)
+* eudc-max-servers-to-query:             Multi-server Queries. (line 28)
+* eudc-multiple-match-handling-method:   Inline Query Expansion.
+                                                               (line 77)
+* eudc-options-file:                     The Server Hotlist.   (line 27)
+* eudc-protocol:                         Selecting a Server.   (line 32)
+* eudc-query-form-attributes:            Query Form.           (line 20)
+* eudc-server:                           Selecting a Server.   (line 23)
+* eudc-strict-return-matches:            Return Attributes.    (line 22)
+* eudc-use-raw-directory-names:          Query Form.           (line 47)
+* eudc-user-attribute-names-alist:       Query Form.           (line 40)
+
+
+
+Tag Table:
+Node: Top1163
+Node: Overview2585
+Node: LDAP3654
+Node: CCSO PH/QI4630
+Node: BBDB5605
+Node: Installation6622
+Node: LDAP Requirements7506
+Node: Usage7831
+Node: Querying Servers8683
+Node: Selecting a Server9202
+Node: Return Attributes11022
+Node: Duplicate Attributes12100
+Node: Query Form14672
+Node: Display of Query Results17154
+Node: Inline Query Expansion20124
+Node: The Server Hotlist24573
+Node: The Hotlist Edit Buffer26177
+Node: Multi-server Queries27237
+Node: Creating BBDB Records28520
+Ref: Creating BBDB Records-Footnote-133422
+Node: Server/Protocol Locals33551
+Node: Manipulating local bindings34058
+Node: Credits36725
+Node: GNU Free Documentation License37048
+Node: Command and Function Index62229
+Node: Variables Index66441
+
+End Tag Table

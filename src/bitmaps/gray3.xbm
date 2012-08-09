@@ -1,0 +1,4 @@
+#define gray3_width 4
+#define gray3_height 4
+static char gray3_bits[] = {
+  '\x01','\x00','\x04','\x00'};

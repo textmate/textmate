@@ -1,0 +1,122 @@
+# -sed2v2.inp-------------------------------------------------------------
+# Configuration script for src/config.h under DJGPP v2.x
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1993-1997, 1999-2000, 2002-2012 Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+
+/^#define EMACS_CONFIG_H/a\
+\
+#include <sys/version.h>\
+/* In DJGPP v2.x almost everything is already defined in a system header.  */\
+#include <sys/config.h>\
+/* For those who still use DJGPP v2.01  */\
+#if __DJGPP__ == 2 && __DJGPP_MINOR__ == 1\
+#define NSIG 320\
+#endif
+
+/^#undef HAVE_ALLOCA *$/s/^.*$/#define HAVE_ALLOCA 1/
+/^#undef HAVE_SETITIMER *$/s/^.*$/#define HAVE_SETITIMER 1/
+/^#undef HAVE_STRUCT_UTIMBUF *$/s/^.*$/#define HAVE_STRUCT_UTIMBUF 1/
+/^#undef LOCALTIME_CACHE *$/s/^.*$/#define LOCALTIME_CACHE 1/
+/^#undef HAVE_TZSET *$/s/^.*$/#define HAVE_TZSET 1/
+/^#undef HAVE_LOGB *$/s/^.*$/#define HAVE_LOGB 1/
+/^#undef HAVE_FREXP *$/s/^.*$/#define HAVE_FREXP 1/
+/^#undef HAVE_FMOD *$/s/^.*$/#define HAVE_FMOD 1/
+/^#undef HAVE_RINT *$/s/^.*$/#define HAVE_RINT 1/
+/^#undef HAVE_ATTRIBUTE_ALIGNED *$/s/^.*$/#define HAVE_ATTRIBUTE_ALIGNED 1/
+/^#undef HAVE_C99_STRTOLD *$/s/^.*$/#define HAVE_C99_STRTOLD 1/
+/^#undef HAVE_CBRT *$/s/^.*$/#define HAVE_CBRT 1/
+/^#undef HAVE_DIFFTIME *$/s/^.*$/#define HAVE_DIFFTIME 1/
+/^#undef HAVE_FPATHCONF *$/s/^.*$/#define HAVE_FPATHCONF 1/
+/^#undef HAVE_MEMSET *$/s/^.*$/#define HAVE_MEMSET 1/
+/^#undef HAVE_MEMCMP *$/s/^.*$/#define HAVE_MEMCMP 1/
+/^#undef HAVE_MEMMOVE *$/s/^.*$/#define HAVE_MEMMOVE 1/
+/^#undef HAVE_SETRLIMIT *$/s/^.*$/#define HAVE_SETRLIMIT 1/
+/^#undef HAVE_GETRUSAGE *$/s/^.*$/#define HAVE_GETRUSAGE 1/
+/^#undef HAVE_TM_GMTOFF *$/s/^.*$/#define HAVE_TM_GMTOFF 1/
+/^#undef HAVE_MBLEN *$/s/^.*$/#define HAVE_MBLEN 1/
+/^#undef HAVE_STRUCT_TIMEZONE *$/s/^.*$/#define HAVE_STRUCT_TIMEZONE 1/
+/^#undef HAVE_SIZE_T *$/s/^.*$/#define HAVE_SIZE_T 1/
+/^#undef HAVE_MKSTEMP *$/s/^.*$/#define HAVE_MKSTEMP 1/
+/^#undef HAVE_STRUCT_TM_TM_ZONE *$/s/^.*$/#define HAVE_STRUCT_TM_TM_ZONE 1/
+/^#undef HAVE_SYNC *$/s/^.*$/#define HAVE_SYNC 1/
+/^#undef HAVE___BUILTIN_UNWIND_INIT *$/s/^.*$/#define HAVE___BUILTIN_UNWIND_INIT 1/
+/^#undef ORDINARY_LINK/s/^.*$/#define ORDINARY_LINK 1/
+/^#undef PACKAGE_BUGREPORT/s/^.*$/#define PACKAGE_BUGREPORT ""/
+/^#undef PACKAGE_NAME/s/^.*$/#define PACKAGE_NAME ""/
+/^#undef PACKAGE_STRING/s/^.*$/#define PACKAGE_STRING ""/
+/^#undef PACKAGE_TARNAME/s/^.*$/#define PACKAGE_TARNAME ""/
+/^#undef PACKAGE_VERSION/s/^.*$/#define PACKAGE_VERSION ""/
+/^#undef VERSION/s/^.*$/#define VERSION "24.1"/
+/^#undef HAVE_DECL_GETENV/s/^.*$/#define HAVE_DECL_GETENV 1/
+/^#undef SYS_SIGLIST_DECLARED/s/^.*$/#define SYS_SIGLIST_DECLARED 1/
+/^#undef HAVE_DIRENT_H/s/^.*$/#define HAVE_DIRENT_H 1/
+
+/^#undef BITSIZEOF_PTRDIFF_T *$/s/^.*$/#define BITSIZEOF_PTRDIFF_T 32/
+/^#undef BITSIZEOF_SIG_ATOMIC_T *$/s/^.*$/#define BITSIZEOF_SIG_ATOMIC_T 32/
+/^#undef BITSIZEOF_SIZE_T *$/s/^.*$/#define BITSIZEOF_SIZE_T 32/
+/^#undef BITSIZEOF_WCHAR_T *$/s/^.*$/#define BITSIZEOF_WCHAR_T 16/
+/^#undef BITSIZEOF_WINT_T *$/s/^.*$/#define BITSIZEOF_WINT_T 32/
+/^#undef HAVE__BOOL/s/^.*$/#define HAVE__BOOL 1/
+/^#undef HAVE_LONG_LONG_INT *$/s/^.*$/#define HAVE_LONG_LONG_INT 1/
+/^#undef HAVE_SIGNED_SIG_ATOMIC_T *$/s/^.*$/#define HAVE_SIGNED_SIG_ATOMIC_T 1/
+/^#undef HAVE_SIGNED_WINT_T *$/s/^.*$/#define HAVE_SIGNED_WINT_T 1/
+/^#undef HAVE_UNSIGNED_LONG_LONG_INT *$/s/^.*$/#define HAVE_UNSIGNED_LONG_LONG_INT 1/
+/^#under HAVE_WCHAR_H *$/s/^.*$/#define HAVE_WCHAR_H 1/
+/^#undef inline/s/^.*$/#define inline __inline__/
+/^#undef my_strftime/s/^.*$/#define my_strftime nstrftime/
+/^#undef restrict/s/^.*$/#define restrict __restrict/
+
+/^#undef GNU_MALLOC *$/s/^.*$/#define GNU_MALLOC 1/
+/^#undef REL_ALLOC *$/s/^.*$/#define REL_ALLOC 1/
+
+s/^#undef STACK_DIRECTION *$/#define STACK_DIRECTION -1/
+s/^#undef EMACS_CONFIGURATION *$/#define EMACS_CONFIGURATION "i386-pc-msdosdjgpp"/
+s/^#undef EMACS_CONFIG_OPTIONS *$/#define EMACS_CONFIG_OPTIONS "msdos"/
+s!^#undef config_opsysfile *$!#define config_opsysfile "s/msdos.h"!
+s!^#undef config_machfile *$!#define config_machfile "m/intel386.h"!
+s/^#undef PROTOTYPES *$/#define PROTOTYPES 1/
+s/^#undef POINTER_TYPE *$/#define POINTER_TYPE void/
+/^#undef HAVE_INTTYPES_H/c\
+#if __DJGPP__ > 2 || __DJGPP_MINOR__ > 3\
+#define HAVE_INTTYPES_H 1\
+#else\
+#undef HAVE_INTTYPES_H\
+#endif
+/^#undef HAVE_STDINT_H/c\
+#if __DJGPP__ > 2 || __DJGPP_MINOR__ > 3\
+#define HAVE_STDINT_H 1\
+#else\
+#undef HAVE_STDINT_H\
+#endif
+s/^#undef HAVE_DECL_STRTOLL *$/#define HAVE_DECL_STRTOLL 1/
+s/^#undef HAVE_DECL_STRTOULL *$/#define HAVE_DECL_STRTOULL 1/
+s/^#undef HAVE_DECL_STRTOIMAX *$/#define HAVE_DECL_STRTOIMAX 1/
+s/^#undef HAVE_DECL_STRTOUMAX *$/#define HAVE_DECL_STRTOUMAX 1/
+s/^#undef HAVE_STRTOLL *$/#define HAVE_STRTOLL 1/
+s/^#undef HAVE_STRTOULL *$/#define HAVE_STRTOULL 1/
+/^#undef HAVE_SIGSET_T *$/s/^.*$/#define HAVE_SIGSET_T 1/
+/^#undef HAVE_SNPRINTF/c\
+#if __DJGPP__ > 2 || __DJGPP_MINOR__ > 3\
+#define HAVE_SNPRINTF 1\
+#else\
+#undef HAVE_SNPRINTF\
+#endif
+
+# Comment out any remaining undef directives, because some of them
+# might be defined in sys/config.h we include at the top of config.h.
+/^#undef BSTRING/s|#undef|# undef|
+/^#undef .*$/s|^.*$|/* & */|
+

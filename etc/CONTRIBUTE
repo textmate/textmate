@@ -1,0 +1,223 @@
+Copyright (C) 2006-2012 Free Software Foundation, Inc.
+See end for license conditions.
+
+
+			Contributing to Emacs
+
+Emacs is a collaborative project and we encourage contributions from
+anyone and everyone.  If you want to contribute in the way that will
+help us most, we recommend (1) fixing reported bugs and (2)
+implementing the feature ideas in etc/TODO.  However, if you think of
+new features to add, please suggest them too -- we might like your
+idea.  Porting to new platforms is also useful, when there is a new
+platform, but that is not common nowadays.
+
+For documentation on how to develop Emacs changes, refer to the Emacs
+Manual and the Emacs Lisp Reference Manual (both included in the Emacs
+distribution).  The web pages in http://www.gnu.org/software/emacs
+contain additional information.
+
+You may also want to submit your change so that can be considered for
+inclusion in a future version of Emacs (see below).
+
+If you don't feel up to hacking Emacs, there are many other ways to
+help.  You can answer questions on the mailing lists, write
+documentation, find and report bugs, contribute to the Emacs web
+pages, or develop a package that works with Emacs.
+
+Here are some style and legal conventions for contributors to Emacs:
+
+
+* Coding Standards
+
+Contributed code should follow the GNU Coding Standards.
+
+If it doesn't, we'll need to find someone to fix the code before we
+can use it.
+
+Emacs has certain additional style and coding conventions.
+
+Ref: http://www.gnu.org/prep/standards/
+Ref: GNU Coding Standards Info Manual
+Ref: The "Tips" Appendix in the Emacs Lisp Reference.
+
+
+* Copyright Assignment
+
+The FSF (Free Software Foundation) is the copyright holder for GNU Emacs.
+The FSF is a nonprofit with a worldwide mission to promote computer
+user freedom and to defend the rights of all free software users.
+For general information, see the website http://www.fsf.org/ .
+
+Generally speaking, for non-trivial contributions to GNU Emacs we
+require that the copyright be assigned to the FSF.  For the reasons
+behind this, see: http://www.gnu.org/licenses/why-assign.html .
+
+Copyright assignment is a simple process.  If you live in the US, you
+can do it entirely electronically.  We can help you get started, and
+answer any questions you may have (or point you to the people with the
+answers), at the emacs-devel@gnu.org mailing list.
+
+A copyright disclaimer is also a possibility, but we prefer an assignment.
+We can accept small changes (roughly, fewer than 15 lines) without
+an assignment.  This is a cumulative limit (e.g. three separate 5 line
+patches) over all your contributions.
+
+* Getting the Source Code
+
+The latest version of Emacs can be downloaded using Bazaar from the
+Savannah web site.  It is important to write your patch based on the
+latest version.  If you start from an older version, your patch may be
+outdated (so that maintainers will have a hard time applying it), or
+changes in Emacs may have made your patch unnecessary.
+
+After you have downloaded the Bazaar source, you should read the file
+INSTALL.BZR for build instructions (they differ to some extent from a
+normal build).
+
+Ref: http://savannah.gnu.org/projects/emacs
+
+
+* Submitting Patches
+
+Every patch must have several pieces of information before we
+can properly evaluate it.
+
+When you have all these pieces, bundle them up in a mail message and
+send it to the developers.  Sending it to bug-gnu-emacs@gnu.org
+(which is the bug/feature list) is recommended, because that list
+is coupled to a tracking system that makes it easier to locate patches.
+If your patch is not complete and you think it needs more discussion,
+you might want to send it to emacs-devel@gnu.org instead.  If you
+revise your patch, send it as a followup to the initial topic.
+
+** Description
+
+For bug fixes, a description of the bug and how your patch fixes this
+bug.
+
+For new features, a description of the feature and your implementation.
+
+** ChangeLog
+
+A ChangeLog entry as plaintext (separate from the patch).
+
+See the various ChangeLog files for format and content.  Note that,
+unlike some other projects, we do require ChangeLogs also for
+documentation, i.e. Texinfo files.
+
+Ref: "Change Log Concepts" node of the GNU Coding Standards Info
+Manual, for how to write good log entries.
+
+** The patch itself.
+
+Please use "Context Diff" format.
+
+If you are accessing the Bazaar repository, make sure your copy is
+up-to-date (e.g. with `bzr pull'), then use
+        bzr diff --no-aliases --diff-options=-cp
+Else, use
+	diff -cp OLD NEW
+
+If your version of diff does not support these options, then get the
+latest version of GNU Diff.
+
+** Mail format.
+
+We prefer to get the patches as inline plain text.
+
+Please be aware of line wrapping which will make the patch unreadable
+and useless for us.  To avoid that, you can use MIME attachments or,
+as a last resort, uuencoded gzipped text.
+
+** Please reread your patch before submitting it.
+
+** Do not mix changes.
+
+If you send several unrelated changes together, we will ask you to
+separate them so we can consider each of the changes by itself.
+
+** Do not make formatting changes.
+
+Making cosmetic formatting changes (indentation, etc) makes it harder
+to see what you have really changed.
+
+
+* Coding style and conventions.
+
+** Mandatory reading:
+
+The "Tips and Conventions" Appendix of the Emacs Lisp Reference.
+
+** Avoid using `defadvice' or `eval-after-load' for Lisp code to be
+included in Emacs.
+
+** Remove all trailing whitespace in all source and text files.
+
+** Use ?\s instead of ?  in Lisp code for a space character.
+
+
+* Supplemental information for Emacs Developers.
+
+** Write access to the Emacs repository.
+
+Once you become a frequent contributor to Emacs, we can consider
+giving you write access to the Bazaar repository.
+
+
+** Emacs Mailing lists.
+
+Discussion about Emacs development takes place on emacs-devel@gnu.org.
+
+Bug reports and fixes, feature requests and implementations should be
+sent to bug-gnu-emacs@gnu.org, the bug/feature list.  This is coupled
+to the tracker at http://debbugs.gnu.org .
+
+You can subscribe to the mailing lists, or see the list archives,
+by following links from http://savannah.gnu.org/mail/?group=emacs .
+
+** Document your changes.
+
+Think carefully about whether your change requires updating the
+documentation.  If it does, you can either do this yourself or add an
+item to the NEWS file.
+
+If you document your change in NEWS, please mark the NEWS entry with
+the documentation status of the change: if you submit the changes for
+the manuals, mark it with "+++"; if it doesn't need to be documented,
+mark it with "---"; if it needs to be documented, but you didn't
+submit documentation changes, leave the NEWS entry unmarked.  (These
+marks are checked by the Emacs maintainers to make sure every change
+was reflected in the manuals.)
+
+
+** Understanding Emacs Internals.
+
+The best way to understand Emacs Internals is to read the code,
+but the nodes "Tips" and "GNU Emacs Internals" in the Appendix
+of the Emacs Lisp Reference Manual may also help.
+
+The file etc/DEBUG describes how to debug Emacs bugs.
+
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:
+

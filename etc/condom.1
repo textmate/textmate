@@ -1,0 +1,148 @@
+CONDOM(1)	      EUNUCH Programmer's Manual		CONDOM(1)
+
+
+
+NAME
+	condom - Protection against viruses and prevention of child
+		 processes
+
+SYNOPSIS
+	condom [options] [processid]
+
+DESCRIPTION
+	_condom_ provides protection against System Transmitted
+Viruses (STVs) that may invade your system.  Although the spread of
+such viruses across a network can only be abated by aware and cautious
+users, _condom_ is the only highly-effective means of preventing
+viruses from entering your system (see celibacy(1)).  Any data passed
+to _condom_ by the protected process will be blocked, as specified by
+the value of the -s option (see OPTIONS below).  _condom_ is known to
+defend against the following viruses and other malicious
+afflictions...
+
+	o AIDS
+	o Herpes Simplex (genital varieties)
+	o Syphilis
+	o Crabs
+	o Genital warts
+	o Gonorrhea
+	o Chlamydia
+	o Michelangelo
+	o Jerusalem
+
+	When used alone or in conjunction with pill(1), sponge(1),
+foam(1), and/or setiud(3), _condom_ also prevents the conception of a
+child process.  If invoked from within a synchronous process, _condom_
+has, by default, an 80% chance of preventing the external processes
+from becoming parent processes (see the -s option below).  When other
+process contraceptives are used, the chance of preventing a child
+process from being forked becomes much greater.  See pill(1),
+sponge(1), foam(1), and setiud(3) for more information.
+	If no options are given, the current user's login process (as
+determined by the environment variable USER) is protected with a
+Trojan rough-cut latex condom without a reservoir tip.  The optional
+'processid' argument is an integer specifying the process to protect.
+	NOTE: _condom_ may only be used with a hard disk.  _condom_
+will terminate abnormally with exit code -1 if used with a floppy
+disk (see DIAGNOSTICS below).
+
+OPTIONS
+     The following options may be given to _condom_...
+
+	-b BRAND	BRANDs are as follows...
+
+			trojan (default)
+			ramses
+			sheik
+			goldcoin
+			fourex
+
+	-m MATERIAL	The valid MATERIALs are...
+
+			latex (default)
+			saranwrap
+			membrane -- WARNING!  The membrane option is _not_
+			endorsed by the System Administrator General as an
+			effective barrier against certain viruses.  It is
+			supported only for the sake of tradition.
+
+	-f FLAVOR	The following FLAVORs are currently supported...
+
+			plain (default)
+			apple
+			banana
+			cherry
+			cinnamon
+			licorice
+			orange
+			peppermint
+			raspberry
+			spearmint
+			strawberry
+
+	-r		Toggle reservoir tip (default is no reservoir tip)
+
+	-s STRENGTH	STRENGTH is an integer between 20 and 100 specifying
+			the resilience of _condom_ against data passed to
+			_condom_ by the protected process.  Using a larger
+			value of STRENGTH increases _condom_'s protective
+			abilities, but also reduces interprocess communication.
+			A smaller value of STRENGTH increases interprocess
+			communication, but also increases the likelihood of a
+			security breach.  An extremely vigorous process or
+			one passing an enormous amount of data to _condom_
+			will increase the chance of _condom_'s failure.  The
+			default STRENGTH is 80%.
+
+	-t TEXTURE	Valid TEXTUREs are...
+
+			rough (default)
+			ribbed
+			bumps
+			lubricated (provides smoother interaction between
+			            processes)
+
+	WARNING: The use of an external application to _condom_ in
+order to reduce friction between processes has been proven in
+benchmark tests to decrease _condom_'s strength factor!  If execution
+speed is important to your process, use the '-t lubricated' option.
+
+DIAGNOSTICS
+	_condom_ terminates with one of the following exit codes...
+
+	-1	An attempt was made to use _condom_ on a floppy disk.
+
+	 0	_condom_ exited successfully (no data was passed to
+		the synchronous process).
+
+	 1	_condom_ failed and data was allowed through.  The
+		danger of transmission of an STV or the forking of a child
+		process is inversely proportional to the number of other
+		protections employed and is directly proportional to
+		the ages of the processes involved.
+
+BUGS
+	_condom_ is NOT 100% effective at preventing a child process
+from being forked or at deterring the invasion of a virus (although
+the System Administrator General has deemed that _condom_ is the most
+effective means of preventing the spread of system transmitted
+viruses).  See celibacy(1) for information on a 100% effective program
+for preventing these problems.
+	Remember... the use of sex(1) and other related routines
+should only occur between mature, consenting processes.  If you must
+use sex(1), please employ _condom_ to protect your process and your
+synchronous process.  If we are all responsible, we can stop the
+spread of STVs.
+
+AUTHORS and HISTORY
+	The original version of _condom_ was released in Roman times
+and was only marginally effective.  With the advent of modern
+technology, _condom_ now supports many more options and is much more
+effective.
+	The current release of _condom_ was written by Ken Maupin at
+the University of Washington (maupin@cs.washington.edu) and was last
+updated on 10/7/92.
+
+SEE ALSO
+	celibacy(1), sex(1), pill(1), sponge(1), foam(1), and
+setiud(3)

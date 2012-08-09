@@ -1,0 +1,115 @@
+locate.rnc, relaxng.rnc, and schemas.xml are part of Emacs.  They are
+used by nXML mode for mapping schemas to documents.
+
+The remaining files in this directory are schema for a variety of
+specifications released by the DocBook project, the Organization for
+the Advancement of Structured Information Standards (OASIS) and the
+World Wide Web Consortium (W3C).  These schema are used by nXML mode.
+
+COPYRIGHT AND LICENSE INFORMATION FOR SCHEMA FILES
+
+The following files are part of the DocBook project:
+
+  calstbl.rnc dbcalstbl.rnc dbhier.rnc dbnotn.rnc dbpool.rnc
+  dbstart.rnc docbook.rnc
+
+These files are Copyright (C) 1992-2002 HaL Computer Systems, Inc.,
+O'Reilly & Associates, Inc., ArborText, Inc., Fujitsu Software
+Corporation, Norman Walsh, Sun Microsystems, Inc., and the
+Organization for the Advancement of Structured Information Standards
+(OASIS).  They are distributed under the terms of the following
+license:
+
+  Permission to use, copy, modify and distribute the DocBook DTD and
+  its accompanying documentation for any purpose and without fee is
+  hereby granted in perpetuity, provided that the above copyright
+  notice and this paragraph appear in all copies.  The copyright
+  holders make no representation about the suitability of the DTD for
+  any purpose.  It is provided "as is" without expressed or implied
+  warranty.
+
+
+
+The following files are derived from technical recommendations
+published by the World Wide Web Consortium (W3C):
+
+  1. The XHTML Modularization Version 1.1 standard, available online
+     at http://www.w3.org/TR/xhtml-modularization/
+
+      xhtml-applet.rnc xhtml-attribs.rnc xhtml-base.rnc xhtml-bdo.rnc
+      xhtml-bform.rnc xhtml-btable.rnc xhtml-csismap.rnc
+      xhtml-datatypes.rnc xhtml-edit.rnc xhtml-events.rnc
+      xhtml-form.rnc xhtml-frames.rnc xhtml-hypertext.rnc
+      xhtml-iframe.rnc xhtml-image.rnc xhtml-inlstyle.rnc
+      xhtml-legacy.rnc xhtml-link.rnc xhtml-lst.rnc xhtml-meta.rnc
+      xhtml-nameident.rnc xhtml-object.rnc xhtml-param.rnc
+      xhtml-pres.rnc xhtml.rnc xhtml-ruby.rnc xhtml-script.rnc
+      xhtml-ssismap.rnc xhtml-struct.rnc xhtml-table.rnc
+      xhtml-text.rnc xhtml-tgt.rnc xhtml-xstyle.rnc
+
+  2. The XSL Transformations (XSLT) Version 1.0 standard, available
+     online at http://www.w3.org/TR/xslt
+
+      xslt.rnc
+
+  3. The W3C RDF/XML Syntax Specification (Revised), available online
+     at http://www.w3.org/TR/rdf-syntax-grammar
+
+      rdfxml.rnc
+
+These files are
+
+  Copyright (C) 2001-2008 World Wide Web Consortium, (Massachusetts
+  Institute of Technology, European Research Consortium for
+  Informatics and Mathematics, Keio University).  All Rights Reserved.
+  This work is distributed under the W3C(R) Software License in the
+  hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+  PURPOSE.
+
+From section 5.10 of the W3C Intellectual Rights FAQ
+( http://www.w3.org/Consortium/Legal/IPR-FAQ-20000620 ), schemas and
+DTDs that are part of W3C specifications are licensed under the W3C
+Software License:
+
+  This work (and included software, documentation such as READMEs, or
+  other related items) is being provided by the copyright holders
+  under the following license. By obtaining, using and/or copying this
+  work, you (the licensee) agree that you have read, understood, and
+  will comply with the following terms and conditions.
+
+  Permission to copy, modify, and distribute this software and its
+  documentation, with or without modification, for any purpose and
+  without fee or royalty is hereby granted, provided that you include
+  the following on ALL copies of the software and documentation or
+  portions thereof, including modifications:
+
+   1. The full text of this NOTICE in a location viewable to users of
+      the redistributed or derivative work.
+
+   2. Any pre-existing intellectual property disclaimers, notices, or
+      terms and conditions. If none exist, the W3C Software Short
+      Notice should be included (hypertext is preferred, text is
+      permitted) within the body of any redistributed or derivative
+      code.
+
+   3. Notice of any changes or modifications to the files, including
+      the date changes were made. (We recommend you provide URIs to
+      the location from which the code is derived.)
+
+  THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT
+  HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY OR
+  FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE
+  OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS,
+  COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+
+  COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE
+  SOFTWARE OR DOCUMENTATION.
+
+  The name and trademarks of copyright holders may NOT be used in
+  advertising or publicity pertaining to the software without
+  specific, written prior permission. Title to copyright in this
+  software and any associated documentation will at all times remain
+  with copyright holders.

@@ -1,0 +1,750 @@
+;;; java-tags.wy -- Semantic LALR grammar for Java
+
+;; Copyright (C) 2002-2012 Free Software Foundation, Inc.
+;;
+;; Author: David Ponce <david@dponce.com>
+;; Maintainer: David Ponce <david@dponce.com>
+;; Created: 26 Aug 2002
+;; Keywords: syntax
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+%package wisent-java-tags-wy
+
+%languagemode  java-mode
+
+;; The default start symbol
+%start compilation_unit
+;; Alternate entry points
+;;    - Needed by partial re-parse
+%start package_declaration
+%start import_declaration
+%start class_declaration
+%start field_declaration
+%start method_declaration
+%start formal_parameter
+%start constructor_declaration
+%start interface_declaration
+;;    - Needed by EXPANDFULL clauses
+%start class_member_declaration
+%start interface_member_declaration
+%start formal_parameters
+
+;; -----------------------------
+;; Block & Parenthesis terminals
+;; -----------------------------
+%type  <block>       ;;syntax "\\s(\\|\\s)" matchdatatype block
+
+%token <block>       PAREN_BLOCK "(LPAREN RPAREN)"
+%token <block>       BRACE_BLOCK "(LBRACE RBRACE)"
+%token <block>       BRACK_BLOCK "(LBRACK RBRACK)"
+
+%token <open-paren>  LPAREN      "("
+%token <close-paren> RPAREN      ")"
+%token <open-paren>  LBRACE      "{"
+%token <close-paren> RBRACE      "}"
+%token <open-paren>  LBRACK      "["
+%token <close-paren> RBRACK      "]"
+
+;; ------------------
+;; Operator terminals
+;; ------------------
+%type  <punctuation> ;;syntax "\\(\\s.\\|\\s$\\|\\s'\\)+" matchdatatype string
+
+%token <punctuation> NOT         "!"
+%token <punctuation> NOTEQ       "!="
+%token <punctuation> MOD         "%"
+%token <punctuation> MODEQ       "%="
+%token <punctuation> AND         "&"
+%token <punctuation> ANDAND      "&&"
+%token <punctuation> ANDEQ       "&="
+%token <punctuation> MULT        "*"
+%token <punctuation> MULTEQ      "*="
+%token <punctuation> PLUS        "+"
+%token <punctuation> PLUSPLUS    "++"
+%token <punctuation> PLUSEQ      "+="
+%token <punctuation> COMMA       ","
+%token <punctuation> MINUS       "-"
+%token <punctuation> MINUSMINUS  "--"
+%token <punctuation> MINUSEQ     "-="
+%token <punctuation> DOT         "."
+%token <punctuation> DIV         "/"
+%token <punctuation> DIVEQ       "/="
+%token <punctuation> COLON       ":"
+%token <punctuation> SEMICOLON   ";"
+%token <punctuation> LT          "<"
+%token <punctuation> LSHIFT      "<<"
+%token <punctuation> LSHIFTEQ    "<<="
+%token <punctuation> LTEQ        "<="
+%token <punctuation> EQ          "="
+%token <punctuation> EQEQ        "=="
+%token <punctuation> GT          ">"
+%token <punctuation> GTEQ        ">="
+%token <punctuation> RSHIFT      ">>"
+%token <punctuation> RSHIFTEQ    ">>="
+%token <punctuation> URSHIFT     ">>>"
+%token <punctuation> URSHIFTEQ   ">>>="
+%token <punctuation> QUESTION    "?"
+%token <punctuation> XOR         "^"
+%token <punctuation> XOREQ       "^="
+%token <punctuation> OR          "|"
+%token <punctuation> OREQ        "|="
+%token <punctuation> OROR        "||"
+%token <punctuation> COMP        "~"
+
+;; -----------------
+;; Literal terminals
+;; -----------------
+%type  <symbol>      ;;syntax "\\(\\sw\\|\\s_\\)+"
+%token <symbol>      IDENTIFIER
+
+%type  <string>      ;;syntax "\\s\"" matchdatatype sexp
+%token <string>      STRING_LITERAL
+
+%type  <number>      ;;syntax semantic-lex-number-expression
+%token <number>      NUMBER_LITERAL
+
+%type <unicode>      syntax "\\\\u[0-9a-f][0-9a-f][0-9a-f][0-9a-f]"
+%token <unicode>     unicodecharacter
+
+;; -----------------
+;; Keyword terminals
+;; -----------------
+
+;; Generate a keyword analyzer
+%type  <keyword> ;;syntax "\\(\\sw\\|\\s_\\)+" matchdatatype keyword
+
+%keyword ABSTRACT     "abstract"
+%put     ABSTRACT summary
+"Class|Method declaration modifier: abstract {class|<type>} <name> ..."
+
+%keyword BOOLEAN      "boolean"
+%put     BOOLEAN summary
+"Primitive logical quantity type (true or false)"
+
+%keyword BREAK        "break"
+%put     BREAK summary
+"break [<label>] ;"
+
+%keyword BYTE         "byte"
+%put     BYTE summary
+"Integral primitive type (-128 to 127)"
+
+%keyword CASE         "case"
+%put     CASE summary
+"switch(<expr>) {case <const-expr>: <stmts> ... }"
+
+%keyword CATCH        "catch"
+%put     CATCH summary
+"try {<stmts>} catch(<parm>) {<stmts>} ... "
+
+%keyword CHAR         "char"
+%put     CHAR summary
+"Integral primitive type ('\u0000' to '\uffff') (0 to 65535)"
+
+%keyword CLASS        "class"
+%put     CLASS summary
+"Class declaration: class <name>"
+
+%keyword CONST        "const"
+%put     CONST summary
+"Unused reserved word"
+
+%keyword CONTINUE     "continue"
+%put     CONTINUE summary
+"continue [<label>] ;"
+
+%keyword DEFAULT      "default"
+%put     DEFAULT summary
+"switch(<expr>) { ... default: <stmts>}"
+
+%keyword DO           "do"
+%put     DO summary
+"do <stmt> while (<expr>);"
+
+%keyword DOUBLE       "double"
+%put     DOUBLE summary
+"Primitive floating-point type (double-precision 64-bit IEEE 754)"
+
+%keyword ELSE         "else"
+%put     ELSE summary
+"if (<expr>) <stmt> else <stmt>"
+
+%keyword EXTENDS      "extends"
+%put     EXTENDS summary
+"SuperClass|SuperInterfaces declaration: extends <name> [, ...]"
+
+%keyword FINAL        "final"
+%put     FINAL summary
+"Class|Member declaration modifier: final {class|<type>} <name> ..."
+
+%keyword FINALLY      "finally"
+%put     FINALLY summary
+"try {<stmts>} ... finally {<stmts>}"
+
+%keyword FLOAT        "float"
+%put     FLOAT summary
+"Primitive floating-point type (single-precision 32-bit IEEE 754)"
+
+%keyword FOR          "for"
+%put     FOR summary
+"for ([<init-expr>]; [<expr>]; [<update-expr>]) <stmt>"
+
+%keyword GOTO         "goto"
+%put     GOTO summary
+"Unused reserved word"
+
+%keyword IF           "if"
+%put     IF summary
+"if (<expr>) <stmt> [else <stmt>]"
+
+%keyword IMPLEMENTS   "implements"
+%put     IMPLEMENTS summary
+"Class SuperInterfaces declaration: implements <name> [, ...]"
+
+%keyword IMPORT       "import"
+%put     IMPORT summary
+"Import package declarations: import <package>"
+
+%keyword INSTANCEOF   "instanceof"
+
+%keyword INT          "int"
+%put     INT summary
+"Integral primitive type (-2147483648 to 2147483647)"
+
+%keyword INTERFACE    "interface"
+%put     INTERFACE summary
+"Interface declaration: interface <name>"
+
+%keyword LONG         "long"
+%put     LONG summary
+"Integral primitive type (-9223372036854775808 to 9223372036854775807)"
+
+%keyword NATIVE       "native"
+%put     NATIVE summary
+"Method declaration modifier: native <type> <name> ..."
+
+%keyword NEW          "new"
+
+%keyword PACKAGE      "package"
+%put     PACKAGE summary
+"Package declaration: package <name>"
+
+%keyword PRIVATE      "private"
+%put     PRIVATE summary
+"Access level modifier: private {class|interface|<type>} <name> ..."
+
+%keyword PROTECTED    "protected"
+%put     PROTECTED summary
+"Access level modifier: protected {class|interface|<type>} <name> ..."
+
+%keyword PUBLIC       "public"
+%put     PUBLIC summary
+"Access level modifier: public {class|interface|<type>} <name> ..."
+
+%keyword RETURN       "return"
+%put     RETURN summary
+"return [<expr>] ;"
+
+%keyword SHORT        "short"
+%put     SHORT summary
+"Integral primitive type (-32768 to 32767)"
+
+%keyword STATIC       "static"
+%put     STATIC summary
+"Declaration modifier: static {class|interface|<type>} <name> ..."
+
+%keyword STRICTFP     "strictfp"
+%put     STRICTFP summary
+"Declaration modifier: strictfp {class|interface|<type>} <name> ..."
+
+%keyword SUPER        "super"
+
+%keyword SWITCH       "switch"
+%put     SWITCH summary
+"switch(<expr>) {[case <const-expr>: <stmts> ...] [default: <stmts>]}"
+
+
+%keyword SYNCHRONIZED "synchronized"
+%put     SYNCHRONIZED summary
+"synchronized (<expr>) ... | Method decl. modifier: synchronized <type> <name> ..."
+
+%keyword THIS         "this"
+
+%keyword THROW        "throw"
+%put     THROW summary
+"throw <expr> ;"
+
+%keyword THROWS       "throws"
+%put     THROWS summary
+"Method|Constructor declaration: throws <classType>, ..."
+
+%keyword TRANSIENT    "transient"
+%put     TRANSIENT summary
+"Field declaration modifier: transient <type> <name> ..."
+
+%keyword TRY          "try"
+%put     TRY summary
+"try {<stmts>} [catch(<parm>) {<stmts>} ...] [finally {<stmts>}]"
+
+%keyword VOID         "void"
+%put     VOID summary
+"Method return type: void <name> ..."
+
+%keyword VOLATILE     "volatile"
+%put     VOLATILE summary
+"Field declaration modifier: volatile <type> <name> ..."
+
+%keyword WHILE        "while"
+%put     WHILE summary
+"while (<expr>) <stmt> | do <stmt> while (<expr>);"
+  
+;; --------------------------
+;; Official javadoc line tags
+;; --------------------------
+
+;; Javadoc tags are identified by a 'javadoc' keyword property.  The
+;; value of this property must be itself a property list where the
+;; following properties are recognized:
+;;
+;; - `seq' (mandatory) is the tag sequence number used to check if tags
+;;   are correctly ordered in a javadoc comment block.
+;;
+;; - `usage' (mandatory) is the list of token categories for which this
+;;   documentation tag is allowed.
+;;
+;; - `opt' (optional) if non-nil indicates this is an optional tag.
+;;   By default tags are mandatory.
+;;
+;; - `with-name' (optional) if non-nil indicates that this tag is
+;;   followed by an identifier like in "@param <var-name> description"
+;;   or "@exception <class-name> description".
+;;
+;; - `with-ref' (optional) if non-nil indicates that the tag is
+;;   followed by a reference like in "@see <reference>".
+
+%keyword _AUTHOR      "@author"
+%put     _AUTHOR      javadoc (seq 1 usage (type))
+%keyword _VERSION     "@version"
+%put     _VERSION     javadoc (seq 2 usage (type)) 
+%keyword _PARAM       "@param"
+%put     _PARAM       javadoc (seq 3 usage (function) with-name t) 
+%keyword _RETURN      "@return"
+%put     _RETURN      javadoc (seq 4 usage (function)) 
+%keyword _EXCEPTION   "@exception"
+%put     _EXCEPTION   javadoc (seq 5 usage (function) with-name t) 
+%keyword _THROWS      "@throws"
+%put     _THROWS      javadoc (seq 6 usage (function) with-name t) 
+%keyword _SEE         "@see"
+%put     _SEE         javadoc (seq 7 usage (type function variable) opt t with-ref t) 
+%keyword _SINCE       "@since"
+%put     _SINCE       javadoc (seq 8 usage (type function variable) opt t) 
+%keyword _SERIAL      "@serial"
+%put     _SERIAL      javadoc (seq 9 usage (variable) opt t) 
+%keyword _SERIALDATA  "@serialData"
+%put     _SERIALDATA  javadoc (seq 10 usage (function) opt t) 
+%keyword _SERIALFIELD "@serialField"
+%put     _SERIALFIELD javadoc (seq 11 usage (variable) opt t) 
+%keyword _DEPRECATED  "@deprecated"
+%put     _DEPRECATED  javadoc (seq 12 usage (type function variable) opt t) 
+
+%%
+
+;; ------------
+;; LALR Grammar
+;; ------------
+
+;; This grammar is not designed to fully parse correct Java syntax.  It
+;; is optimized to work in an interactive environment to extract tokens
+;; (tags) needed by Semantic.  In some cases a syntax not allowed by
+;; the Java Language Specification will be accepted by this grammar.
+
+compilation_unit
+  : package_declaration
+  | import_declaration
+  | type_declaration
+  ;
+
+;;; Package statement token
+;; ("NAME" package DETAIL "DOCSTRING")
+package_declaration
+  : PACKAGE qualified_name SEMICOLON
+    (PACKAGE-TAG $2 nil)
+  ;
+
+;;; Include file token
+;; ("FILE" include SYSTEM "DOCSTRING") 
+import_declaration
+  : IMPORT qualified_name SEMICOLON
+    (INCLUDE-TAG $2 nil)
+  | IMPORT qualified_name DOT MULT SEMICOLON
+    (INCLUDE-TAG (concat $2 $3 $4) nil)
+  ;
+
+type_declaration
+  : SEMICOLON
+    ()
+  | class_declaration
+  | interface_declaration
+  ;
+
+;;; Type Declaration token
+;; ("NAME" type "TYPE" ( PART-LIST ) ( PARENTS ) EXTRA-SPEC "DOCSTRING")
+class_declaration
+  : modifiers_opt CLASS qualified_name superc_opt interfaces_opt class_body
+    (TYPE-TAG $3 $2 $6 (if (or $4 $5) (cons $4 $5)) :typemodifiers $1)
+  ;
+
+superc_opt
+  : ;;EMPTY
+  | EXTENDS qualified_name
+    (identity $2)
+  ;
+
+interfaces_opt
+  : ;;EMPTY
+  | IMPLEMENTS qualified_name_list
+    (nreverse $2)
+  ;
+
+class_body
+  : BRACE_BLOCK
+    (EXPANDFULL $1 class_member_declaration)
+  ;
+
+class_member_declaration
+  : LBRACE
+    ()
+  | RBRACE
+    ()
+  | block
+    ()
+  | static_initializer
+    ()
+  | constructor_declaration
+  | interface_declaration
+  | class_declaration
+  | method_declaration
+  | field_declaration
+  ;
+
+;;; Type Declaration token
+;; ("NAME" type "TYPE" ( PART-LIST ) ( PARENTS ) EXTRA-SPEC "DOCSTRING")
+interface_declaration
+  : modifiers_opt INTERFACE IDENTIFIER extends_interfaces_opt interface_body
+    (TYPE-TAG $3 $2 $5 (if $4 (cons nil $4)) :typemodifiers $1)
+  ;
+
+extends_interfaces_opt
+  : ;;EMPTY
+  | EXTENDS qualified_name_list
+    (identity $2)
+  ;
+
+interface_body
+  : BRACE_BLOCK
+    (EXPANDFULL $1 interface_member_declaration)
+  ;
+
+interface_member_declaration
+  : LBRACE
+    ()
+  | RBRACE
+    ()
+  | interface_declaration
+  | class_declaration
+  | method_declaration
+  | field_declaration
+  ;
+
+static_initializer
+  : STATIC block
+  ;
+
+;;; Function token
+;; ("NAME" function "TYPE" ( ARG-LIST ) EXTRA-SPEC "DOCSTRING") 
+constructor_declaration
+  : modifiers_opt constructor_declarator throwsc_opt constructor_body
+    (FUNCTION-TAG (car $2) nil (cdr $2)
+                  :typemodifiers $1
+                  :throws $3
+                  :constructor-flag t)
+  ;
+
+constructor_declarator
+  : IDENTIFIER formal_parameter_list
+    (cons $1 $2)
+  ;
+
+constructor_body
+  : block 
+  ;
+
+;;; Function token
+;; ("NAME" function "TYPE" ( ARG-LIST ) EXTRA-SPEC "DOCSTRING") 
+method_declaration
+  : modifiers_opt VOID method_declarator throwsc_opt method_body
+    (FUNCTION-TAG (car $3) $2 (cdr $3) :typemodifiers $1 :throws $4)
+  | modifiers_opt type method_declarator throwsc_opt method_body
+    (FUNCTION-TAG (car $3) $2 (cdr $3) :typemodifiers $1 :throws $4)
+  ;
+
+method_declarator
+  : IDENTIFIER formal_parameter_list dims_opt
+    (cons (concat $1 $3) $2)
+  ;
+
+throwsc_opt
+  : ;;EMPTY
+  | THROWS qualified_name_list
+    (nreverse $2)
+  ;
+
+qualified_name_list
+  : qualified_name_list COMMA qualified_name
+    (cons $3 $1)
+  | qualified_name
+    (list $1)
+  ;
+
+method_body
+  : SEMICOLON
+  | block
+  ;
+
+;; Just eat {...} block!
+block
+  : BRACE_BLOCK
+  ;
+
+formal_parameter_list
+  : PAREN_BLOCK
+    (EXPANDFULL $1 formal_parameters)
+  ;
+
+formal_parameters
+  : LPAREN
+    ()
+  | RPAREN
+    ()
+  | formal_parameter COMMA
+  | formal_parameter RPAREN
+  ;
+
+;;; Variable token
+;; ("NAME" variable "TYPE" DEFAULT-VALUE EXTRA-SPEC "DOCSTRING")
+formal_parameter
+  : formal_parameter_modifier_opt type variable_declarator_id
+    (VARIABLE-TAG $3 $2 nil :typemodifiers $1)
+  ;
+
+formal_parameter_modifier_opt
+  : ;;EMPTY
+  | FINAL
+    (list $1)
+  ;
+
+;;; Variable token
+;; ("NAME" variable "TYPE" DEFAULT-VALUE EXTRA-SPEC "DOCSTRING")
+field_declaration
+  : modifiers_opt type variable_declarators SEMICOLON
+    (VARIABLE-TAG $3 $2 nil :typemodifiers $1)
+  ;
+
+variable_declarators
+  : variable_declarators COMMA variable_declarator
+    (progn
+      ;; Set the end of the compound declaration to the end of the
+      ;; COMMA delimiter.
+      (setcdr (cdr (car $1)) (cdr $region2))
+      (cons $3 $1))
+  | variable_declarator
+    (list $1)
+  ;
+
+variable_declarator
+  : variable_declarator_id EQ variable_initializer
+    (cons $1 $region)
+  | variable_declarator_id
+    (cons $1 $region)
+  ;
+
+variable_declarator_id
+  : IDENTIFIER dims_opt
+    (concat $1 $2)
+  ;
+
+variable_initializer
+  : expression
+  ;
+
+;; Just eat expression!
+expression
+  : expression term
+  | term
+  ;
+
+term
+  : literal
+  | operator
+  | primitive_type
+  | IDENTIFIER
+  | BRACK_BLOCK
+  | PAREN_BLOCK
+  | BRACE_BLOCK
+  | NEW
+  | CLASS
+  | THIS
+  | SUPER
+  ;
+
+literal
+;;   : NULL_LITERAL
+;;   | BOOLEAN_LITERAL
+  : STRING_LITERAL
+  | NUMBER_LITERAL
+  ;
+
+operator
+  : NOT
+  | PLUS
+  | PLUSPLUS
+  | MINUS
+  | MINUSMINUS
+  | NOTEQ
+  | MOD
+  | MODEQ
+  | AND
+  | ANDAND
+  | ANDEQ
+  | MULT
+  | MULTEQ
+  | PLUSEQ
+  | MINUSEQ
+  | DOT
+  | DIV
+  | DIVEQ
+  | COLON
+  | LT
+  | LSHIFT
+  | LSHIFTEQ
+  | LTEQ
+  | EQ
+  | EQEQ
+  | GT
+  | GTEQ
+  | RSHIFT
+  | RSHIFTEQ
+  | URSHIFT
+  | URSHIFTEQ
+  | QUESTION
+  | XOR
+  | XOREQ
+  | OR
+  | OREQ
+  | OROR
+  | COMP
+  | INSTANCEOF
+  ;
+
+primitive_type
+  : BOOLEAN
+  | CHAR
+  | LONG
+  | INT
+  | SHORT
+  | BYTE
+  | DOUBLE
+  | FLOAT
+  ;
+
+modifiers_opt
+  : ;;EMPTY
+  | modifiers
+    (nreverse $1)
+  ;
+
+modifiers
+  : modifiers modifier
+    (cons $2 $1)
+  | modifier
+    (list $1)
+  ;
+
+modifier
+  : STRICTFP
+  | VOLATILE
+  | TRANSIENT
+  | SYNCHRONIZED
+  | NATIVE
+  | FINAL
+  | ABSTRACT
+  | STATIC
+  | PRIVATE
+  | PROTECTED
+  | PUBLIC
+  ;
+
+type
+  : qualified_name dims_opt
+    (concat $1 $2)
+  | primitive_type dims_opt
+    (concat $1 $2)
+  ;
+
+qualified_name
+  : qualified_name DOT IDENTIFIER
+    (concat $1 $2 $3)
+  | IDENTIFIER
+  ;
+
+dims_opt
+  : ;;EMPTY
+    (identity "")
+  | dims
+  ;
+
+dims
+  : dims BRACK_BLOCK
+    (concat $1 "[]")
+  | BRACK_BLOCK
+    (identity "[]")
+  ;
+
+%%
+;; Define the lexer for this grammar
+(define-lex wisent-java-tags-lexer
+  "Lexical analyzer that handles Java buffers.
+It ignores whitespaces, newlines and comments."
+  semantic-lex-ignore-whitespace
+  semantic-lex-ignore-newline
+  semantic-lex-ignore-comments
+  ;;;; Auto-generated analyzers.
+  wisent-java-tags-wy--<number>-regexp-analyzer
+  wisent-java-tags-wy--<string>-sexp-analyzer
+  ;; Must detect keywords before other symbols
+  wisent-java-tags-wy--<keyword>-keyword-analyzer
+  wisent-java-tags-wy--<symbol>-regexp-analyzer
+  wisent-java-tags-wy--<punctuation>-string-analyzer
+  wisent-java-tags-wy--<block>-block-analyzer
+  ;; In theory, Unicode chars should be turned into normal chars
+  ;; and then combined into regular ascii keywords and text.  This
+  ;; analyzer just keeps these things from making the lexer go boom.
+  wisent-java-tags-wy--<unicode>-regexp-analyzer
+  ;;;;
+  semantic-lex-default-action)
+
+;;; java-tags.wy ends here

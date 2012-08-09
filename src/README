@@ -1,0 +1,31 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+This directory contains the source files for the C component of GNU Emacs.
+Nothing in this directory is needed for using Emacs once it is built
+and installed, if the dumped Emacs (on Unix systems) is copied elsewhere.
+
+See the files ../README and then ../INSTALL for installation instructions.
+
+Under GNU and Unix systems, the file `Makefile.in' is used as a
+template by the script `../configure' to produce `Makefile'.  This
+is the file which actually controls the compilation of Emacs.
+All of this should work transparently to the user; you should only
+need to run `../configure', and then type `make'.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

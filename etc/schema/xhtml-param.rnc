@@ -1,0 +1,9 @@
+# Param Module
+
+param = element param { param.attlist }
+param.attlist =
+  id.attrib,
+  attribute name { text },
+  attribute value { text }?,
+  attribute valuetype { "data" | "ref" | "object" }?,
+  attribute type { ContentType.datatype }?

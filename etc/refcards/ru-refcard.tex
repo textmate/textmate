@@ -1,0 +1,525 @@
+% Copyright (C) 1997, 2002-2012  Free Software Foundation, Inc.
+
+% Author: Stephen Gildea <gildea@stop.mail-abuse.org>
+% Russian translation: Alex Ott <alexott@gmail.com>
+
+\documentclass[10pt]{article}
+\usepackage{multicol,tabularx}
+\usepackage[a4paper,hmargin={2cm,2cm},vmargin={2cm,2cm},nohead,twoside]{geometry}
+\usepackage[T2A]{fontenc}
+\usepackage[koi8-r]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{verbatim}
+%\usepackage{enumerate,calc}
+%\usepackage{indentfirst,amsmath,graphicx,citehack,floatflt}
+%
+%\usepackage{pscyr}
+%\renewcommand{\rmdefault}{fha}
+
+\newlength{\ColWidth}
+\setlength{\ColWidth}{120mm}
+\newlength{\ColThreeWidth}
+\setlength{\ColThreeWidth}{25mm}
+
+\newcommand{\versionemacs}[0]{24} % version of Emacs this is for
+\newcommand{\cyear}[0]{2012}       % copyright year
+
+\newcommand\shortcopyrightnotice[0]{\vskip 1ex plus 2 fill
+  \centerline{\footnotesize \copyright\ \cyear\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\newcommand\copyrightnotice[0]{
+\vskip 1ex plus 2 fill\begingroup\footnotesize
+\centerline{Copyright \copyright\ \cyear\ Free Software Foundation, Inc.}
+\centerline{For GNU Emacs version \versionemacs}
+\centerline{Designed by Stephen Gildea}
+\centerline{Перевод Alex Ott <alexott@gmail.com>}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+For copies of the GNU Emacs manual, see:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+\hyphenation{mini-buf-fer}
+
+\parindent 0pt
+%\parskip 0.5ex plus .2ex minus .2ex
+
+\newcommand{\kbd}[1]{\texttt{#1}}
+
+\begin{document}
+
+%\begin{multicols}{3}
+
+\centerline{Справочник команд GNU Emacs}
+\centerline{(для версии \versionemacs)}
+
+\section{Запуск Emacs}
+
+Для запуска GNU Emacs \versionemacs, просто наберите имя программы: \kbd{emacs}
+
+\section{Выход из Emacs}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+Приостановить работу Emacs (или свернуть в иконку при работе в X) & \kbd{C-z} \\
+Выйти из Emacs & \kbd{C-x C-c} \\
+\end{tabular}
+
+\section{Файлы}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+{\bf открыть} файл в Emacs & \kbd{C-x C-f} \\
+{\bf сохранить} файл обратно на диск & \kbd{C-x C-s} \\
+сохранить {\bf все} файлы & \kbd{C-x s} \\
+{\bf вставить} содержимое другого файла в текущий буфер & \kbd{C-x i} \\
+открыть нужный вам файл вместо текущего & \kbd{C-x C-v} \\
+сохранить буфер в указанном файле & \kbd{C-x C-w} \\
+Переключить состояние буфера ``только для чтения'' & \kbd{C-x C-q} \\
+\end{tabular}
+
+\section{Получение помощи}
+
+Справочная система достаточно проста. Hажмите \kbd{C-h} (или \kbd{F1}) и
+следуйте инструкциям.  Если вы в первый раз работаете с Emacs, то наберите
+\kbd{C-u C-h t Russian RET} для вызова {\bf учебника}.
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+Скрыть окно справки & \kbd{C-x 1} \\
+Прокрутить окно справки & \kbd{C-M-v} \\
+
+apropos: показать команды, соответствующие строке & \kbd{C-h a} \\
+показать имя функции, которая запускается клавишей & \kbd{C-h k} \\
+получить информацию о функции & \kbd{C-h f} \\
+получить информацию о режиме & \kbd{C-h m} \\
+\end{tabular}
+
+\section{Исправление ошибок}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+{\bf прервать} частично набранную или исполняемую команду & \kbd{C-g} \\
+{\bf восстановить} файл, потерянный при крахе системы & \kbd{M-x recover-file} \\
+{\bf отменить} нежелательные изменения & \kbd{C-x u, C-\_ {\rm или} C-/} \\
+восстановить буфер в первоначальное состояние & \kbd{M-x revert-buffer} \\
+перерисовать заполненный мусором экран & \kbd{C-l} \\
+\end{tabular}
+
+\section{Hаращиваемый поиск}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+поиск вперед & \kbd{C-s} \\
+поиск назад & \kbd{C-r} \\
+поиск по регулярному выражению вперед & \kbd{C-M-s} \\
+поиск по регулярному выражению назад & \kbd{C-M-r} \\
+
+выбрать предыдущую строку поиска & \kbd{M-p} \\
+выбрать следующую строку поиска & \kbd{M-n} \\
+прекратить наращиваемый поиск & \kbd{RET} \\
+отменить эффект ввода последнего символа & \kbd{DEL} \\
+прервать текущий поиск & \kbd{C-g} \\
+\end{tabular}
+
+Для повтора поиска в любом направлении используйте клавиши \kbd{C-s} или
+\kbd{C-r}. Если Emacs все еще производит поиск, \kbd{C-g} отменит только
+не выполненную часть.
+
+\section{Перемещение}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+{\bf единицы перемещения} & {\bf назад} & {\bf вперед} \\
+символ & \kbd{C-b} & \kbd{C-f} \\
+слово & \kbd{M-b} & \kbd{M-f} \\
+строка & \kbd{C-p} & \kbd{C-n} \\
+начало (или конец) строки & \kbd{C-a} & \kbd{C-e} \\
+предложение & \kbd{M-a} & \kbd{M-e} \\
+абзац & \kbd{M-\{} & \kbd{M-\}} \\
+страница & \kbd{C-x [} & \kbd{C-x ]} \\
+выражение (sexp) & \kbd{C-M-b} & \kbd{C-M-f} \\
+функция & \kbd{C-M-a} & \kbd{C-M-e} \\
+переход в начало (или конец) буфера & \kbd{M-<} & \kbd{M->} \\
+
+\end{tabular}
+
+\begin{tabular}{p{\ColWidth}l}
+прокрутка экрана вниз & \kbd{C-v} \\
+прокрутка экрана вверх & \kbd{M-v} \\
+прокрутка влево & \kbd{C-x <} \\
+прокрутка вправо & \kbd{C-x >} \\
+установка текущей строки в центр экрана & \kbd{C-u C-l} \\
+\end{tabular}
+
+\section{Уничтожение и удаление}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+{\bf уничтожаемый объект} & {\bf назад} & {\bf вперед} \\
+символ (удаление, а не уничтожение) & \kbd{DEL} & \kbd{C-d} \\
+слово & \kbd{M-DEL} & \kbd{M-d} \\
+строка (до конца строки) & \kbd{M-0 C-k} & \kbd{C-k} \\
+предложение & \kbd{C-x DEL} & \kbd{M-k} \\
+выражение & \kbd{M-- C-M-k} & \kbd{C-M-k} \\
+\end{tabular}
+
+
+\begin{tabular}{p{\ColWidth}l}
+уничтожить {\bf область} & \kbd{C-w} \\
+скопировать область в список уничтожений & \kbd{M-w} \\
+уничтожить до следующего вхождения символа {\it char} & \kbd{M-z {\it char}} \\
+
+вставить последний уничтоженный объект & \kbd{C-y} \\
+заменить только что восстановленный текст предшествующим уничтоженным текстом & M-y \\
+\end{tabular}
+
+\section{Пометка}
+
+\begin{tabular}{p{\ColWidth}l}
+установить пометки & \kbd{C-@ {\rm или} C-SPC} \\
+поменять местами курсор и пометку & \kbd{C-x C-x} \\
+
+пометить {\it arg\/} {\bf слов} & \kbd{M-@} \\
+пометить {\bf параграф} & \kbd{M-h} \\
+пометить {\bf страницу} & \kbd{C-x C-p} \\
+пометить {\bf выражение} & \kbd{C-M-@} \\
+пометить {\bf функцию} & \kbd{C-M-h} \\
+пометить весь {\bf буфер} & \kbd{C-x h} \\
+\end{tabular}
+
+\section{Замена с запросом}
+
+\begin{tabular}{p{\ColWidth}l}
+интерактивная замена текстовой строки & \kbd{M-\%} \\
+с использованием регулярных выражений & \kbd{M-x query-replace-regexp} \\
+\end{tabular}
+
+В режиме интерактивной замены пользователю доступны следующие команды:
+
+\begin{tabular}{p{\ColWidth}l}
+{\bf заменить} данное соответствие, перейти к следующему & \kbd{SPC} \\
+заменить это соответствие, не перемещаться & \kbd{,} \\
+{\bf пропустить} соответствие без замены & \kbd{DEL} \\
+заменить все оставшиеся соответствия & \kbd{!} \\
+{\bf вернуться} к предыдущему соответствию & \kbd{\^} \\
+{\bf выйти} из режима ``замена с запросом'' & \kbd{RET} \\
+войти в режим рекурсивного редактирования (для выхода используется \kbd{C-M-c}) & \kbd{C-r} \\
+\end{tabular}
+
+\section{Использование нескольких окон}
+
+Команды, приведенные во втором столбце, применяются к другому
+фрэйму (окну используемой оконной системы).
+
+\begin{tabular}{p{\ColWidth}l}
+удалить все остальные окна & \kbd{C-x 1} \\
+\end{tabular}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+разбить окно по горизонтали & \kbd{C-x 2\ \ \ \ } & \kbd{C-x 5 2} \\
+удалить данное окно & \kbd{C-x 0\ \ \ \ } & \kbd{C-x 5 0} \\
+
+разбить окно по вертикали & \kbd{C-x 3} \\
+
+выполнить прокрутку в другом окне & \kbd{C-M-v} \\
+\end{tabular}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+переместить курсор в другое окно & \kbd{C-x o} & \kbd{C-x 5 o} \\
+
+выбрать буфер в другом окне & \kbd{C-x 4 b} & \kbd{C-x 5 b} \\
+показать буфер в другом окне & \kbd{C-x 4 C-o} & \kbd{C-x 5 C-o} \\
+загрузить файл в другое окно & \kbd{C-x 4 f} & \kbd{C-x 5 f} \\
+открыть файл в режиме чтения в другом окне & \kbd{C-x 4 r} & \kbd{C-x 5 r} \\
+запустить Dired в другом окне & \kbd{C-x 4 d} & \kbd{C-x 5 d} \\
+найти таг в другом окне & \kbd{C-x 4 .} & \kbd{C-x 5 .} \\
+
+\end{tabular}
+
+\begin{tabular}{p{\ColWidth}l}
+увеличить высоту окна & \kbd{C-x \^} \\
+сузить текущее окно & \kbd{C-x \{} \\
+расширить текущее окно & \kbd{C-x \}} \\
+\end{tabular}
+
+\section{Форматирование}
+
+\begin{tabular}{p{\ColWidth}l}
+сделать отступ для текущей {\bf строки} (в зависимости от режима) & \kbd{TAB} \\
+сделать отступ для {\bf области} (в зависимости от режима) & \kbd{C-M-$\backslash$} \\
+сделать отступ для {\bf выражения} (в зависимости от режима) & \kbd{C-M-q} \\
+сделать отступ к заданной {\it arg\/} колонке & \kbd{C-x TAB} \\
+
+вставить новую строку после курсора & \kbd{C-o} \\
+сдвинуть остаток строки вертикально вниз & \kbd{C-M-o} \\
+удалить пустые строки вокруг курсора & \kbd{C-x C-o} \\
+объединить строку с предыдущей (со следующими arg) & \kbd{M-\^} \\
+удалить пустое пространство вокруг курсора & \kbd{M-$\backslash$} \\
+поместить только один пробел в позиции курсора & \kbd{M-SPC} \\
+
+отформатировать текущий параграф & \kbd{M-q} \\
+установить столбец заполнения & \kbd{C-x f} \\
+установить префикс заполнения каждой строки & \kbd{C-x .} \\
+
+установить начертание (face) & \kbd{M-g} \\
+\end{tabular}
+
+\section{Изменение регистра}
+
+\begin{tabular}{p{\ColWidth}l}
+сделать буквы слова заглавными & \kbd{M-u} \\
+сделать буквы слова строчными & \kbd{M-l} \\
+сделать первую букву слова заглавной & \kbd{M-c} \\
+
+сделать буквы области заглавными & \kbd{C-x C-u} \\
+сделать буквы области строчными & \kbd{C-x C-l} \\
+\end{tabular}
+
+\section{Минибуфер}
+
+Следующие клавиши (ключи) определены в минибуфере.
+
+\begin{tabular}{p{\ColWidth}l}
+дополнить насколько возможно & \kbd{TAB} \\
+дополнить до одного слова & \kbd{SPC} \\
+дополнить и выполнить & \kbd{RET} \\
+показать возможные дополнения & \kbd{?} \\
+выбрать предыдущую строку из истории ввода & \kbd{M-p} \\
+выбрать следующую строку из истории ввода & \kbd{M-n} \\
+поиск в истории по регулярному выражению в обратном напрвлении & \kbd{M-r} \\
+поиск в истории по регулярному выражению в прямом напрвлении & \kbd{M-s} \\
+прервать команду & \kbd{C-g} \\
+\end{tabular}
+
+Наберите \kbd{C-x ESC ESC} для редактирования и повторения последней
+команды набранной в минибуфере. Наберите \kbd{F10}, чтобы работать с
+пунктами меню при помощи команд минибуфера.
+
+\section{Буфера}
+
+\begin{tabular}{p{\ColWidth}l}
+выбрать другой буфер & \kbd{C-x b} \\
+выдать список всех буферов & \kbd{C-x C-b} \\
+уничтожить буфер & \kbd{C-x k} \\
+\end{tabular}
+
+\section{Перестановка данных}
+
+\begin{tabular}{p{\ColWidth}l}
+обменять местами {\bf символы} & \kbd{C-t} \\
+обменять местами  {\bf слова} & \kbd{M-t} \\
+обменять местами  {\bf строки} & \kbd{C-x C-t} \\
+обменять местами  {\bf выражения} & \kbd{C-M-t} \\
+\end{tabular}
+
+\section{Проверка правописания}
+
+\begin{tabular}{p{\ColWidth}l}
+проверить текущее слово & \kbd{M-\$} \\
+проверить все слова в области & \kbd{M-x ispell-region} \\
+выполнить проверку всего буфера & \kbd{M-x ispell-buffer} \\
+\end{tabular}
+
+\section{Теги}
+
+\begin{tabular}{p{\ColWidth}l}
+найти определение тега & \kbd{M-.} \\
+найти следующее вхождение тега & \kbd{C-u M-.} \\
+использовать новый файл с тегами & \kbd{M-x visit-tags-table} \\
+
+поиск по шаблону по всей таблице тегов & \kbd{M-x tags-search} \\
+выполнить query-replace над всеми файлами & \kbd{M-x tags-query-replace} \\
+продолжить поиск или поиск-замену тега & \kbd{M-,} \\
+\end{tabular}
+
+\section{Командные процессоры}
+
+\begin{tabular}{p{\ColWidth}l}
+Выполнить команду командного процессора & \kbd{M-!} \\
+выполнить команду командного процессора над областью & \kbd{M-|} \\
+пропустить содержимое области через команду командного процессора & \kbd{C-u M-|} \\
+запустить командный процессор в окне \kbd{*shell*} & \kbd{M-x shell} \\
+\end{tabular}
+
+\section{Прямоугольные области}
+
+\begin{tabular}{p{\ColWidth}l}
+скопировать прямоугольную область в регистр & \kbd{C-x r r} \\
+удалить прямоугольную область & \kbd{C-x r k} \\
+вставить последную уничтоженную прямоугольную область & \kbd{C-x r y} \\
+открыть прямоугольную область, сдвигая текст вправо & \kbd{C-x r o} \\
+очистить прямоугольную область & \kbd{C-x r c} \\
+предварить каждую строку строкой текста & \kbd{C-x r t} \\
+\end{tabular}
+
+\section{Сокращения}
+
+\begin{tabular}{p{\ColWidth}l}
+добавить глобальное сокращение & \kbd{C-x a g} \\
+добавить локальное для режима сокращение & \kbd{C-x a l} \\
+добавить глобальное значение для данного сокращения & \kbd{C-x a i g} \\
+добавить специфическое для режима значение данного сокращения & \kbd{C-x a i l} \\
+явно вставить значение для сокращения & \kbd{C-x a e} \\
+
+динамически дополнить предыдущее слово & \kbd{M-/} \\
+\end{tabular}
+
+\section{Регулярные выражения}
+
+\begin{tabular}{p{\ColWidth}l}
+любой одиночный символ (за исключением символа новой строки) & \kbd{. {\rm(dot)}} \\
+ноль или более повторений & \kbd{*} \\
+одно или более повторений & \kbd{+} \\
+ноль или одно повторение & \kbd{?} \\
+экранировать специальный символ {\it c\/} & \kbd{$\backslash${\it c}} \\
+выбор между альтернативами (``или'') & \kbd{$\backslash|$} \\
+группировка & \kbd{$\backslash$( {\rm$\ldots$} $\backslash$)} \\
+текст в {\it n\/}-й группе & \kbd{$\backslash${\it n}} \\
+граница слова & \kbd{$\backslash$b} \\
+не граница слова & \kbd{$\backslash$B} \\
+\end{tabular}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+{\bf объект} & {\bf начало соответствия} & {\bf конец соответствия} \\
+строка & \kbd{\^} & \kbd{\$} \\
+слово & \kbd{$\backslash$<} & \kbd{$\backslash$>} \\
+буфер & \kbd{$\backslash$`} & \kbd{$\backslash$'} \\
+\end{tabular}
+
+\begin{tabular}{p{\ColWidth}p{\ColThreeWidth}p{\ColThreeWidth}}
+{\bf класс символов} & {\bf соответ\-ствует им} & {\bf соответ\-ствует другим} \\
+явный набор & \kbd{[ {\rm$\ldots$} ]} & \kbd{[\^ {\rm$\ldots$} ]} \\
+символ-буква & \kbd{$\backslash$w} & \kbd{$\backslash$W} \\
+символ с синтаксисом {\it c} & \kbd{$\backslash$s{\it c}} & \kbd{$\backslash$S{\it c}} \\
+\end{tabular}
+
+\section{Международные наборы символов}
+
+\begin{tabular}{p{\ColWidth}l}
+выбрать язык & \kbd{C-x RET l} \\
+показать все возможные методы ввода & \kbd{M-x list-input-methods} \\
+разрешить или запретить метод ввода & \kbd{C-$\backslash$} \\
+установить систему кодирования для следующей команды & \kbd{C-x RET c} \\
+показать список всех систем кодирования & \kbd{M-x list-coding-systems} \\
+выбрать предпочтительную систему кодирования & \kbd{M-x prefer-coding-system} \\
+\end{tabular}
+
+\section{Информация (система Info)}
+
+\begin{tabular}{p{\ColWidth}l}
+запустить систему доступа к документации & \kbd{C-h i} \\
+найти указанную функцию или переменную в документации & \kbd{C-h S} \\
+\end{tabular}
+
+Перемещение внутри узла (нодами):
+
+\begin{tabular}{p{\ColWidth}l}
+прокрутка вперед & \kbd{SPC} \\
+прокрутка назад & \kbd{DEL} \\
+перейти к началу узла & \kbd{. {\rm (dot)}} \\
+\end{tabular}
+
+Перемещение между узлами:
+
+\begin{tabular}{p{\ColWidth}l}
+{\bf следующий} узел & \kbd{n} \\
+{\bf предыдущий} узел & \kbd{p} \\
+перейти к {\bf верхнему} узлу & \kbd{u} \\
+выбрать пункт меню по имени & \kbd{m} \\
+выбрать {\it n\/}-й пункт меню по номеру (1--9) & \kbd{{\it n}} \\
+перейти по ссылке (возврат с помощью \kbd{l}) & \kbd{f} \\
+возвратится к последнему просмотренному узлу & \kbd{l} \\
+возвратится к узлу-каталогу & \kbd{d} \\
+Перейти к верхему узлу файла & \kbd{t} \\
+перейти к узлу, заданному именем & \kbd{g} \\
+\end{tabular}
+
+Другие команды:
+
+\begin{tabular}{p{\ColWidth}l}
+запустить {\bf учебник} по системе документации & \kbd{h} \\
+поиск темы в индексе & \kbd{i} \\
+поиск в узлах с помощью регулярных выражений & \kbd{s} \\
+{\bf прекратить работу} с документацией & \kbd{q} \\
+\end{tabular}
+
+\section{Регистры}
+
+\begin{tabular}{p{\ColWidth}l}
+сохранить область в регистре & \kbd{C-x r s} \\
+вставить содержимое регистра в буфер & \kbd{C-x r i} \\
+
+сохранить положение курсора в регистре & \kbd{C-x r SPC} \\
+перейти к положению курсора, сохраненному в регистре & \kbd{C-x r j} \\
+\end{tabular}
+
+\section{Клавиатурные макросы}
+
+\begin{tabular}{p{\ColWidth}l}
+{\bf начать} определение клавиатурного макроса & \kbd{C-x (} \\
+{\bf закончить} определение клавиатурного макроса & \kbd{C-x )} \\
+{\bf выполнить} последний определенный макрос & \kbd{C-x e} \\
+дополнить последний определенный макрос & \kbd{C-u C-x (} \\
+задать имя для последнего определенного макроса & \kbd{M-x name-last-kbd-macro} \\
+вставить в буфер определение макроса на языке Lisp & \kbd{M-x insert-kbd-macro} \\
+\end{tabular}
+
+\section{Команды, связанные с Emacs Lisp}
+
+\begin{tabular}{p{\ColWidth}l}
+вычислить {\bf выражение} перед курсором & \kbd{C-x C-e} \\
+вычислить текущую функцию {\bf defun} & \kbd{C-M-x} \\
+вычислить {\bf область} как выражение & \kbd{M-x eval-region} \\
+считать и вычислить выражение из минибуфера & \kbd{M-:} \\
+загрузить из стандартного системного каталога & \kbd{M-x load-library} \\
+\end{tabular}
+
+\section{Простая настройка}
+
+\begin{tabular}{p{\ColWidth}l}
+настроить переменные и оформление (faces) & \kbd{M-x customize} \\
+\end{tabular}
+
+% The intended audience here is the person who wants to make simple
+% customizations and knows Lisp syntax.
+
+Создание глобальных привязок клавиш (ключей) на Emacs Lisp (примеры):
+
+\begin{verbatim}
+(global-set-key "\C-cg" 'goto-line)
+(global-set-key "\M-#" 'query-replace-regexp)
+\end{verbatim}
+
+\section{Написание команд}
+
+\begin{verbatim}
+(defun <command-name> (<args>)
+  "<documentation>" (interactive "<template>")
+  <body>)
+\end{verbatim}
+
+Пример:
+
+\begin{verbatim}
+(defun this-line-to-top-of-window (line)
+  "Reposition line point is on to top of window.
+With ARG, put point on line ARG."
+  (interactive "P")
+  (recenter (if (null line)
+                0
+              (prefix-numeric-value line))))
+\end{verbatim}
+
+Спецификация \kbd{interactive} сообщает о том, что аргумент надо считывать
+интерактивно. Для дополнительной информации наберите \kbd{C-h f interactive}.
+
+\copyrightnotice
+
+%\end{multicols}
+
+\end{document}
+
+% Local variables:
+% compile-command: "pdflatex ru-refcard"
+% coding: cyrillic-koi8
+% End:
+

@@ -1,0 +1,125 @@
+	     Emacs for Windows NT/2000 and Windows 95/98/ME
+
+  Copyright (C) 2001-2012  Free Software Foundation, Inc.
+  See the end of the file for license conditions.
+
+  This directory contains support for compiling and running GNU Emacs on
+  Windows NT, Windows 95, and their successors.  This port supports all
+  of the major functionality of the Unix version, including
+  subprocesses, windowing features (fonts, colors, scroll bars, multiple
+  frames, etc.), and networking support.
+
+  Precompiled distributions are also available; ftp to
+
+	ftp://ftp.gnu.org/gnu/emacs/windows/
+
+  for the latest precompiled distributions.
+
+* Building and installing
+
+  See the INSTALL file in this directory for detailed instructions on
+  building and installing Emacs on your system.
+
+* EXE files produced
+
+  Building and installing Emacs will produce the following executable
+  files in the bin directory.
+
+  + emacs.exe - The main Emacs executable. As this is designed to run
+    as both a text-mode application (emacs -nw) and as a GUI application,
+    it will pop up a command prompt window if run directly from Explorer.
+
+  + runemacs.exe - A wrapper for running Emacs as a GUI application
+    without popping up a command prompt window.
+
+  + emacsclient.exe - A command-line client program that can
+    communicate with a running Emacs process. See the `Emacs Server'
+    node of the Emacs manual.
+
+  + emacsclientw.exe - A version of emacsclient that does not open
+    a command-line window.
+
+  + addpm.exe - A basic installer that creates Start Menu icons for Emacs.
+    Running this is optional.
+
+  + cmdproxy.exe - Used internally by Emacs to work around problems with
+    the native shells in various versions of Windows.
+
+  + ctags.exe, etags.exe - Tools for generating tag files.  See the
+  `Tags' node of the Emacs manual.
+
+  + ebrowse.exe - A tool for generating C++ browse information.  See the
+    `Ebrowse' manual.
+
+  + ddeclient.exe - A tool for interacting with DDE servers.
+
+  + hexl.exe - A tool for converting files to hex dumps.  See the
+    `Editing Binary Files' node of the Emacs manual.
+
+  + movemail.exe - A helper application for safely moving mail from
+    a mail spool or POP server to a local user mailbox.  See the
+    `Movemail' node of the Emacs manual.
+
+* Further information
+
+  There is a web page that serves as a FAQ for the Windows port of
+  Emacs (a.k.a. NTEmacs) at:
+
+	http://www.gnu.org/software/emacs/windows/ntemacs.html
+
+  There is also a mailing list for discussing issues related to this
+  port of Emacs.  For information about the list, see this Web page:
+
+	http://mail.gnu.org/mailman/listinfo/help-emacs-windows
+
+  To ask questions on the mailing list, send email to
+  help-emacs-windows@gnu.org.  (You don't need to subscribe for that.)
+  To subscribe to the list or unsubscribe from it, fill the form you
+  find at http://mail.gnu.org/mailman/listinfo/help-emacs-windows as
+  explained there.
+
+  Another valuable source of information and help which should not be
+  overlooked is the various Usenet news groups dedicated to Emacs.
+  These are particularly good for help with general issues which aren't
+  specific to the Windows port of Emacs.  The main news groups to use
+  for seeking help are:
+
+	gnu.emacs.help
+	comp.emacs
+
+  There are also fairly regular postings and announcements of new or
+  updated Emacs packages on this group:
+
+	gnu.emacs.sources
+
+* Reporting bugs
+
+  If you encounter a bug in this port of Emacs, we would like to hear
+  about it.  First check the file etc/PROBLEMS and the FAQ on the web
+  page above to see if the bug is already known and if there are any
+  workarounds.  If not, then check whether the bug has something to do
+  with code in your .emacs file, e.g. by invoking Emacs with the "-Q"
+  option.
+
+  Use the built in bug reporting functionality in Emacs so that it
+  will be seen by the right people.  You can use the command M-x
+  report-emacs-bug to create and send the bug report, but in some
+  cases there is a function to report bugs in a specific package;
+  e.g. M-x gnus-bug for Gnus, M-x c-submit-bug-report for C/C++/Java
+  mode, etc.
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

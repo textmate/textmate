@@ -1,0 +1,1016 @@
+\input texinfo  @c -*-texinfo-*-
+@c %**start of header
+@setfilename ../../info/eshell
+@settitle Eshell: The Emacs Shell
+@synindex vr fn
+@c %**end of header
+
+@copying
+This manual is for Eshell, the Emacs shell.
+
+Copyright @copyright{} 1999-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs misc features
+@direntry
+* Eshell: (eshell).             A command shell implemented in Emacs Lisp.
+@end direntry
+
+@titlepage
+@sp 4
+@c The title is printed in a large font.
+@center @titlefont{User's Guide}
+@sp
+@center @titlefont{to}
+@sp
+@center @titlefont{Eshell: The Emacs Shell}
+@ignore
+@sp 2
+@center release 2.4
+@c -release-
+@end ignore
+@sp 3
+@center John Wiegley
+@c -date-
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@c ================================================================
+@c                   The real text starts here
+@c ================================================================
+
+@ifnottex
+@node Top, What is Eshell?, (dir), (dir)
+@top Eshell
+
+Eshell is a shell-like command interpreter
+implemented in Emacs Lisp.  It invokes no external processes except for
+those requested by the user.  It is intended to be a functional
+replacement for command shells such as @command{bash}, @command{zsh},
+@command{rc}, or @command{4dos}; since Emacs itself is capable of
+handling the sort of tasks accomplished by those tools.
+@c This manual is updated to release 2.4 of Eshell.
+
+@insertcopying
+@end ifnottex
+
+@menu
+* What is Eshell?::             A brief introduction to the Emacs Shell.
+* Command basics::              The basics of command usage.
+* Commands::
+* Arguments::
+* Input/Output::
+* Process control::
+* Extension modules::
+* Extras and Goodies::
+* Bugs and ideas::              Known problems, and future ideas.
+* GNU Free Documentation License:: The license for this documentation.
+* Concept Index::
+* Function and Variable Index::
+* Key Index::
+@end menu
+
+@node What is Eshell?
+@chapter What is Eshell?
+@cindex what is Eshell?
+@cindex Eshell, what it is
+
+Eshell is a @dfn{command shell} written in Emacs Lisp.  Everything it
+does, it uses Emacs's facilities to do.  This means that Eshell is as
+portable as Emacs itself.  It also means that cooperation with Lisp code
+is natural and seamless.
+
+What is a command shell?  To properly understand the role of a shell,
+it's necessary to visualize what a computer does for you.  Basically, a
+computer is a tool; in order to use that tool, you must tell it what to
+do---or give it ``commands.''  These commands take many forms, such as
+clicking with a mouse on certain parts of the screen.  But that is only
+one form of command input.
+
+By far the most versatile way to express what you want the computer to
+do is by using an abbreviated language called @dfn{script}.  In
+script, instead of telling the computer, ``list my files, please'',
+one writes a standard abbreviated command word---@samp{ls}.  Typing
+@samp{ls} in a command shell is a script way of telling the computer
+to list your files.@footnote{This is comparable to viewing the
+contents of a folder using a graphical display.}
+
+The real flexibility of this approach is apparent only when you realize
+that there are many, many different ways to list files.  Perhaps you
+want them sorted by name, sorted by date, in reverse order, or grouped
+by type.  Most graphical browsers have simple ways to express this.  But
+what about showing only a few files, or only files that meet a certain
+criteria?  In very complex and specific situations, the request becomes
+too difficult to express using a mouse or pointing device.  It is just
+these kinds of requests that are easily solved using a command shell.
+
+For example, what if you want to list every Word file on your hard
+drive, larger than 100 kilobytes in size, and which hasn't been looked
+at in over six months?  That is a good candidate list for deletion, when
+you go to clean up your hard drive.  But have you ever tried asking your
+computer for such a list?  There is no way to do it!  At least, not
+without using a command shell.
+
+The role of a command shell is to give you more control over what your
+computer does for you.  Not everyone needs this amount of control, and
+it does come at a cost: Learning the necessary script commands to
+express what you want done.  A complicated query, such as the example
+above, takes time to learn.  But if you find yourself using your
+computer frequently enough, it is more than worthwhile in the long run.
+Any tool you use often deserves the time spent learning to master it.
+@footnote{For the understandably curious, here is what that command
+looks like: But don't let it fool you; once you know what's going on,
+it's easier than it looks: @code{ls -lt **/*.doc(Lk+50aM+5)}.}
+
+@menu
+* Contributors to Eshell::      People who have helped out!
+@end menu
+
+@node Contributors to Eshell
+@section Contributors to Eshell
+@cindex contributors
+@cindex authors
+
+Contributions to Eshell are welcome.  I have limited time to work on
+this project, but I will gladly add any code you contribute to me to
+this package.
+
+The following persons have made contributions to Eshell.
+
+@itemize @bullet
+@item
+Eli Zaretskii made it possible for Eshell to run without requiring
+asynchronous subprocess support.  This is important for MS-DOS, which
+does not have such support.@refill
+
+@item
+Miles Bader contributed many fixes during the port to Emacs 21.@refill
+
+@item
+Stefan Monnier fixed the things which bothered him, which of course made
+things better for all.@refill
+
+@item
+Gerd Moellmann also helped to contribute bug fixes during the initial
+integration with Emacs 21.@refill
+
+@item
+Alex Schroeder contributed code for interactively querying the user
+before overwriting files.@refill
+
+@item
+Sudish Joseph helped with some XEmacs compatibility issues.@refill
+@end itemize
+
+Apart from these, a lot of people have sent suggestions, ideas,
+requests, bug reports and encouragement.  Thanks a lot!  Without you
+there would be no new releases of Eshell.
+
+@node Command basics
+@chapter Basic overview
+
+A command shell is a means of entering verbally-formed commands.  This
+is really all that it does, and every feature described in this manual
+is a means to that end.  Therefore, it's important to take firm hold on
+exactly what a command is, and how it fits in the overall picture of
+things.
+
+@menu
+* Commands verbs::              Commands always begin with a verb.
+* Command arguments::           Some verbs require arguments.
+@end menu
+
+@node Commands verbs
+@section Commands verbs
+
+Commands are expressed using @dfn{script}, a special shorthand language
+computers can understand with no trouble.  Script is an extremely simple
+language; oddly enough, this is what makes it look so complicated!
+Whereas normal languages use a variety of embellishments, the form of a
+script command is always:
+
+@example
+@var{verb} [@var{arguments}]
+@end example
+
+The verb expresses what you want your computer to do.  There are a fixed
+number of verbs, although this number is usually quite large.  On the
+author's computer, it reaches almost 1400 in number.  But of course,
+only a handful of these are really necessary.
+
+Sometimes, the verb is all that's written.  A verb is always a single
+word, usually related to the task it performs.  @command{reboot} is a
+good example.  Entering that on GNU/Linux will reboot the
+computer---assuming you have sufficient privileges.
+
+Other verbs require more information.  These are usually very capable
+verbs, and must be told specifically what to do.  The extra information
+is given in the form of @dfn{arguments}.  For example, the
+@command{echo} verb prints back whatever arguments you type.  It
+requires these arguments to know what to echo.  A proper use of
+@command{echo} looks like this:
+
+@example
+echo This is an example of using echo!
+@end example
+
+This script command causes the computer to echo back: ``This is an
+example of using echo!''
+
+Although command verbs are always simple words, like @command{reboot} or
+@command{echo}, arguments may have a wide variety of forms.  There are
+textual arguments, numerical arguments---even Lisp arguments.
+Distinguishing these different types of arguments requires special
+typing, for the computer to know exactly what you mean.
+
+@node Command arguments
+@section Command arguments
+
+Eshell recognizes several different kinds of command arguments:
+
+@enumerate
+@item Strings (also called textual arguments)
+@item Numbers (floating point or integer)
+@item Lisp lists
+@item Lisp symbols
+@item Emacs buffers
+@item Emacs process handles
+@end enumerate
+
+Most users need to worry only about the first two.  The third, Lisp lists,
+occur very frequently, but almost always behind the scenes.
+
+Strings are the most common type of argument, and consist of nearly any
+character.  Special characters---those used by Eshell
+specifically---must be preceded by a backslash (@samp{\}).  When in doubt, it
+is safe to add backslashes anywhere and everywhere.
+
+Here is a more complicated @command{echo} example:
+
+@example
+echo A\ Multi-word\ Argument\ With\ A\ \$\ dollar
+@end example
+
+Beyond this, things get a bit more complicated.  While not beyond the
+reach of someone wishing to learn, it is definitely beyond the scope of
+this manual to present it all in a simplistic manner.  Get comfortable
+with Eshell as a basic command invocation tool, and learn more about the
+commands on your system; then come back when it all sits more familiarly
+on your mind.  Have fun!
+
+@node Commands
+@chapter Commands
+
+@menu
+* Invocation::
+* Completion::
+* Aliases::
+* History::
+* Scripts::
+* Built-ins::
+@end menu
+
+Essentially, a command shell is all about invoking commands---and
+everything that entails.  So understanding how Eshell invokes commands
+is the key to comprehending how it all works.
+
+@node Invocation
+@section Invocation
+
+Unlike regular system shells, Eshell never invokes kernel functions
+directly, such as @code{exec(3)}.  Instead, it uses the Lisp functions
+available in the Emacs Lisp library.  It does this by transforming the
+command you specify into a callable Lisp form.@footnote{To see the Lisp
+form that will be invoked, type: @samp{eshell-parse-command "echo
+hello"}}
+
+This transformation, from the string of text typed at the command
+prompt, to the ultimate invocation of either a Lisp function or external
+command, follows these steps:
+
+@enumerate
+@item Parse the command string into separate arguments.
+@item
+@end enumerate
+
+@node Completion
+@section Completion
+
+@node Aliases
+@section Aliases
+
+@node History
+@section History
+
+Eshell knows a few built-in variables:
+
+@table @code
+
+@item $+
+@vindex $+
+This variable always contains the current working directory.
+
+@item $-
+@vindex $-
+This variable always contains the previous working directory (the
+current working directory from before the last @code{cd} command).
+
+@item $_
+@vindex $_
+It refers to the last argument of the last command.
+
+@item $$
+@vindex $$
+This is the result of the last command.  In case of an external
+command, it is @code{t} or @code{nil}.
+
+@item $?
+@vindex $?
+This variable contains the exit code of the last command (0 or 1 for
+Lisp functions, based on successful completion).
+
+@end table
+
+@node Scripts
+@section Scripts
+
+
+@node Built-ins
+@section Built-in commands
+
+Several commands are built-in in Eshell.  In order to call the
+external variant of a built-in command @code{foo}, you could call
+@code{*foo}.  Usually, this should not be necessary.  You can check
+what will be applied by the @code{which} command:
+
+@example
+~ $ which ls
+eshell/ls is a compiled Lisp function in `em-ls.el'
+~ $ which *ls
+/bin/ls
+@end example
+
+If you want to discard a given built-in command, you could declare an
+alias, @ref{Aliases}.  Eample:
+
+@example
+~ $ which sudo
+eshell/sudo is a compiled Lisp function in `em-unix.el'
+~ $ alias sudo '*sudo $*'
+~ $ which sudo
+sudo is an alias, defined as "*sudo $*"
+@end example
+
+Some of the built-in commands have a special behavior in Eshell:
+
+@table @code
+
+@item cd
+@findex cd
+This command changes the current working directory.  Usually, it is
+invoked as @samp{cd foo} where @file{foo} is the new working
+directory.  But @code{cd} knows about a few special arguments:
+
+When it receives no argument at all, it changes to the home directory.
+
+Giving the command @samp{cd -} changes back to the previous working
+directory (this is the same as @samp{cd $-}).
+
+The command @samp{cd =} shows the directory stack.  Each line is
+numbered.
+
+With @samp{cd =foo}, Eshell searches the directory stack for a
+directory matching the regular expression @samp{foo} and changes to
+that directory.
+
+With @samp{cd -42}, you can access the directory stack by number.
+
+@item history
+@findex history
+The @samp{history} command shows all commands kept in the history ring
+as numbered list.  If the history ring contains
+@code{eshell-history-size} commands, those numbers change after every
+command invocation, therefore the @samp{history} command shall be
+applied before using the expansion mechanism with history numbers.
+
+The n-th entry of the history ring can be applied with the @samp{!n}
+command.  If @code{n} is negative, the entry is counted from the end
+of the history ring.
+
+@samp{!foo} expands to the last command beginning with @code{foo}, and
+@samp{!?foo} to the last command containing @code{foo}.  The n-th
+argument of the last command beginning with @code{foo} is accessible
+by @code{!foo:n}.
+
+@item su
+@findex su
+@itemx sudo
+@findex sudo
+@code{su} and @code{sudo} work as expected: they apply the following
+commands (@code{su}), or the command being an argument (@code{sudo})
+under the permissions of somebody else.
+
+This does not work only on
+the local host, but even on a remote one, when
+@code{default-directory} is a remote file name.  The necessary
+proxy configuration of Tramp is performed
+@ifinfo
+automatically, @ref{Multi-hops, , , tramp}.
+@end ifinfo
+@ifnotinfo
+automatically.
+@end ifnotinfo
+Example:
+
+@example
+~ $ cd /ssh:otherhost:/etc
+/ssh:user@@otherhost:/etc $ sudo find-file shadow
+@end example
+
+@end table
+
+
+@node Arguments
+@chapter Arguments
+
+@menu
+* The Parser::
+* Variables::
+* Substitution::
+* Globbing::
+* Predicates::
+@end menu
+
+@node The Parser
+@section The Parser
+
+@node Variables
+@section Variables
+
+@node Substitution
+@section Substitution
+
+@node Globbing
+@section Globbing
+
+@node Predicates
+@section Predicates
+
+
+@node Input/Output
+@chapter Input/Output
+
+@node Process control
+@chapter Process control
+
+
+@node Extension modules
+@chapter Extension modules
+
+@menu
+* Writing a module::
+* Module testing::
+* Directory handling::
+* Key rebinding::
+* Smart scrolling::
+* Terminal emulation::
+* Built-in UNIX commands::
+@end menu
+
+@node Writing a module
+@section Writing a module
+
+@node Module testing
+@section Module testing
+
+@node Directory handling
+@section Directory handling
+
+@node Key rebinding
+@section Key rebinding
+
+@node Smart scrolling
+@section Smart scrolling
+
+@node Terminal emulation
+@section Terminal emulation
+
+@node Built-in UNIX commands
+@section Built-in UNIX commands
+
+
+@node Extras and Goodies
+@chapter Extras and Goodies
+
+@node Bugs and ideas
+@chapter Bugs and ideas
+@cindex reporting bugs and ideas
+@cindex bugs, how to report them
+@cindex author, how to reach
+@cindex email to the author
+@cindex FAQ
+@cindex problems, list of common
+
+If you find a bug or misfeature, don't hesitate to let me know!  Send
+email to @email{johnw@@gnu.org}.  Feature requests should also be sent
+there.  I prefer discussing one thing at a time.  If you find several
+unrelated bugs, please report them separately.
+
+If you have ideas for improvements, or if you have written some
+extensions to this package, I would like to hear from you.  I hope you
+find this package useful!
+
+@menu
+* Known problems::
+@end menu
+
+@node Known problems
+@section Known problems
+@cindex known bugs
+@cindex bugs, known
+
+Below is complete list of known problems with Eshell version 2.4.2,
+which is the version included with Emacs 22.
+
+@table @asis
+@item Documentation incomplete
+
+@item Differentiate between aliases and functions
+
+Allow for a bash-compatible syntax, such as:
+
+@example
+alias arg=blah
+function arg () @{ blah $* @}
+@end example
+
+@item @samp{for i in 1 2 3 @{ grep -q a b && *echo has it @} | wc -l} outputs result after prompt
+
+In fact, piping to a process from a looping construct doesn't work in
+general.  If I change the call to @code{eshell-copy-handles} in
+@code{eshell-rewrite-for-command} to use @code{eshell-protect}, it seems
+to work, but the output occurs after the prompt is displayed.  The whole
+structured command thing is too complicated at present.
+
+@item Error with @command{bc} in @code{eshell-test}
+
+On some XEmacs system, the subprocess interaction test fails
+inexplicably, although @command{bc} works fine at the command prompt.
+
+@item Eshell does not delete @file{*Help*} buffers in XEmacs 21.1.8+
+
+In XEmacs 21.1.8, the @file{*Help*} buffer has been renamed such that
+multiple instances of the @file{*Help*} buffer can exist.
+
+@item Pcomplete sometimes gets stuck
+
+You press @key{TAB}, but no completions appear, even though the
+directory has matching files.  This behavior is rare.
+
+@item @samp{grep python $<rpm -qa>} doesn't work, but using @samp{*grep} does
+
+This happens because the @code{grep} Lisp function returns immediately,
+and then the asynchronous @command{grep} process expects to examine the
+temporary file, which has since been deleted.
+
+@item Problem with C-r repeating text
+
+If the text @emph{before point} reads "./run", and you type @kbd{C-r r u
+n}, it will repeat the line for every character typed.
+
+@item Backspace doesn't scroll back after continuing (in smart mode)
+
+Hitting space during a process invocation, such as @command{make}, will
+cause it to track the bottom of the output; but backspace no longer
+scrolls back.
+
+@item It's not possible to fully @code{unload-feature} Eshell
+
+@item Menu support was removed, but never put back
+
+@item Using C-p and C-n with rebind gets into a locked state
+
+This happened a few times in Emacs 21, but has been irreproducible
+since.
+
+@item If an interactive process is currently running, @kbd{M-!} doesn't work
+
+@item Use a timer instead of @code{sleep-for} when killing child processes
+
+@item Piping to a Lisp function is not supported
+
+Make it so that the Lisp command on the right of the pipe is repeatedly
+called with the input strings as arguments.  This will require changing
+@code{eshell-do-pipeline} to handle non-process targets.
+
+@item Input redirection is not supported
+
+See the above entry.
+
+@item Problem running @command{less} without arguments on Windows
+
+The result in the Eshell buffer is:
+
+@example
+Spawning child process: invalid argument
+@end example
+
+Also a new @command{less} buffer was created with nothing in it@dots{}
+(presumably this holds the output of @command{less}).
+
+If @command{less.exe} is invoked from the Eshell command line, the
+expected output is written to the buffer.
+
+Note that this happens on NT-Emacs 20.6.1 on Windows 2000. The term.el
+package and the supplied shell both use the @command{cmdproxy} program
+for running shells.
+
+@item Implement @samp{-r}, @samp{-n} and @samp{-s} switches for @command{cp}
+
+@item Make @kbd{M-5 M-x eshell} switch to ``*eshell<5>*'', creating if need be
+
+@item @samp{mv @var{dir} @var{file}.tar} does not remove directories
+
+This is because the tar option --remove-files doesn't do so.  Should it
+be Eshell's job?
+
+@item Bind @code{standard-output} and @code{standard-error}
+
+This would be so that if a Lisp function calls @code{print}, everything
+will happen as it should (albeit slowly).
+
+@item When an extension module fails to load, @samp{cd /} gives a Lisp error
+
+@item If a globbing pattern returns one match, should it be a list?
+
+@item Make sure syntax table is correct in Eshell mode
+
+So that @kbd{M-DEL} acts in a predictable manner, etc.
+
+@item Allow all Eshell buffers to share the same history and list-dir
+
+@item There is a problem with script commands that output to @file{/dev/null}
+
+If a script file, somewhere in the middle, uses @samp{> /dev/null},
+output from all subsequent commands is swallowed.
+
+@item Split up parsing of text after @samp{$} in @file{esh-var.el}
+
+Make it similar to the way that @file{esh-arg.el} is structured.
+Then add parsing of @samp{$[?\n]}.
+
+@item After pressing @kbd{M-RET}, redisplay before running the next command
+
+@item Argument predicates and modifiers should work anywhere in a path
+
+@example
+/usr/local/src/editors/vim $ vi **/CVS(/)/Root(.)
+Invalid regexp: "Unmatched ( or \\("
+@end example
+
+With @command{zsh}, the glob above expands to all files named
+@file{Root} in directories named @file{CVS}.
+
+@item Typing @samp{echo $@{locate locate@}/bin<TAB>} results in a Lisp error
+
+Perhaps it should interpolate all permutations, and make that the
+globbing result, since otherwise hitting return here will result in
+``(list of filenames)/bin'', which is never valuable.  Thus, one could
+@command{cat} only C backup files by using @samp{ls $@{identity *.c@}~}.
+In that case, having an alias command name @command{glob} for
+@command{identity} would be useful.
+
+@item Once symbolic mode is supported for @command{umask}, implement @command{chmod} in Lisp
+
+@item Create @code{eshell-expand-file-name}
+
+This would use a data table to transform things such as @samp{~+},
+@samp{...}, etc.
+
+@item Abstract @file{em-smart.el} into @file{smart-scroll.el}
+
+It only really needs: to be hooked onto the output filter and the
+pre-command hook, and to have the input-end and input-start markers.
+And to know whether the last output group was ``successful.''
+
+@item Allow for fully persisting the state of Eshell
+
+This would include: variables, history, buffer, input, dir stack, etc.
+
+@item Implement D as an argument predicate
+
+It means that files beginning with a dot should be included in the
+glob match.
+
+@item A comma in a predicate list should mean OR
+
+At the moment, this is not supported.
+
+@item Error if a glob doesn't expand due to a predicate
+
+An error should be generated only if @code{eshell-error-if-no-glob} is
+non-@code{nil}.
+
+@item @samp{(+ RET SPC TAB} does not cause @code{indent-according-to-mode} to occur
+
+@item Create @code{eshell-auto-accumulate-list}
+
+This is a list of commands for which, if the user presses @kbd{RET}, the
+text is staged as the next Eshell command, rather than being sent to the
+current interactive process.
+
+@item Display file and line number if an error occurs in a script
+
+@item @command{wait} doesn't work with process ids at the moment
+
+@item Enable the direct-to-process input code in @file{em-term.el}
+
+@item Problem with repeating @samp{echo $@{find /tmp@}}
+
+With smart display active, if @kbd{RET} is held down, after a while it
+can't keep up anymore and starts outputting blank lines.  It only
+happens if an asynchronous process is involved@dots{}
+
+I think the problem is that @code{eshell-send-input} is resetting the
+input target location, so that if the asynchronous process is not done
+by the time the next @kbd{RET} is received, the input processor thinks
+that the input is meant for the process; which, when smart display is
+enabled, will be the text of the last command line!  That is a bug in
+itself.
+
+In holding down @kbd{RET} while an asynchronous process is running,
+there will be a point in between termination of the process, and the
+running of @code{eshell-post-command-hook}, which would cause
+@code{eshell-send-input} to call @code{eshell-copy-old-input}, and then
+process that text as a command to be run after the process.  Perhaps
+there should be a way of killing pending input between the death of the
+process, and the @code{post-command-hook}.
+
+@item Allow for a more aggressive smart display mode
+
+Perhaps toggled by a command, that makes each output block a smart
+display block.
+
+@item Create more meta variables
+
+@table @samp
+@item $!
+The reason for the failure of the last disk command, or the text of the
+last Lisp error.
+
+@item $=
+A special associate array, which can take references of the form
+@samp{$=[REGEXP]}.  It indexes into the directory ring.
+@end table
+
+@item Eshell scripts can't execute in the background
+
+@item Support zsh's ``Parameter Expansion'' syntax, i.e. @samp{$@{@var{name}:-@var{val}@}}
+
+@item Write an @command{info} alias that can take arguments
+
+So that the user can enter @samp{info chmod}, for example.
+
+@item Create a mode @code{eshell-browse}
+
+It would treat the Eshell buffer as a outline.  Collapsing the outline
+hides all of the output text.  Collapsing again would show only the
+first command run in each directory
+
+@item Allow other revisions of a file to be referenced using @samp{file@{rev@}}
+
+This would be expanded by @code{eshell-expand-file-name} (see above).
+
+@item Print ``You have new mail'' when the ``Mail'' icon is turned on
+
+@item Implement @kbd{M-|} for Eshell
+
+@item Implement input redirection
+
+If it's a Lisp function, input redirection implies @command{xargs} (in a
+way@dots{}).  If input redirection is added, also update the
+@code{file-name-quote-list}, and the delimiter list.
+
+@item Allow @samp{#<@var{word} @var{arg}>} as a generic syntax
+
+With the handling of @emph{word} specified by an
+@code{eshell-special-alist}.
+
+@item In @code{eshell-eval-using-options}, allow a @code{:complete} tag
+
+It would be used to provide completion rules for that command.  Then the
+macro will automagically define the completion function.
+
+@item For @code{eshell-command-on-region}, apply redirections to the result
+
+So that @samp{+ > 'blah} would cause the result of the @code{+} (using
+input from the current region) to be inserting into the symbol
+@code{blah}.
+
+If an external command is being invoked, the input is sent as standard
+input, as if a @samp{cat <region> |} had been invoked.
+
+If a Lisp command, or an alias, is invoked, then if the line has no
+newline characters, it is divided by whitespace and passed as arguments
+to the Lisp function.  Otherwise, it is divided at the newline
+characters.  Thus, invoking @code{+} on a series of numbers will add
+them; @code{min} would display the smallest figure, etc.
+
+@item Write @code{eshell-script-mode} as a minor mode
+
+It would provide syntax, abbrev, highlighting and indenting support like
+@code{emacs-lisp-mode} and @code{shell-mode}.
+
+@item In the history mechanism, finish the @command{bash}-style support
+
+This means @samp{!n}, @samp{!#}, @samp{!:%}, and @samp{!:1-} as separate
+from @samp{!:1*}.
+
+@item Support the -n command line option for @command{history}
+
+@item Implement @command{fc} in Lisp
+
+@item Specifying a frame as a redirection target should imply the currently active window's buffer
+
+@item Implement @samp{>@var{func-or-func-list}}
+
+This would allow for an ``output translators'', that take a function to
+modify output with, and a target.  Devise a syntax that works well with
+pipes, and can accommodate multiple functions (i.e., @samp{>'(upcase
+regexp-quote)} or @samp{>'upcase}).
+
+@item Allow Eshell to read/write to/from standard input and output
+
+This would be optional, rather than always using the Eshell buffer.
+This would allow it to be run from the command line (perhaps).
+
+@item Write a @command{help} command
+
+It would call subcommands with @option{--help}, or @option{-h} or
+@option{/?}, as appropriate.
+
+@item Implement @command{stty} in Lisp
+
+@item Support @command{rc}'s matching operator, e.g. @samp{~ (@var{list}) @var{regexp}}
+
+@item Implement @command{bg} and @command{fg} as editors of @code{eshell-process-list}
+
+Using @command{bg} on a process that is already in the background does
+nothing.  Specifying redirection targets replaces (or adds) to the list
+current being used.
+
+@item Have @command{jobs} print only the processes for the current shell
+
+@item How can Eshell learn if a background process has requested input?
+
+@item Support @samp{2>&1} and @samp{>&} and @samp{2>} and @samp{|&}
+
+The syntax table for parsing these should be customizable, such that the
+user could change it to use rc syntax: @samp{>[2=1]}.
+
+@item Allow @samp{$_[-1]}, which would indicate the last element of the array
+
+@item Make @samp{$x[*]} equal to listing out the full contents of @samp{x}
+
+Return them as a list, so that @samp{$_[*]} is all the arguments of the
+last command.
+
+@item Copy ANSI code handling from @file{term.el} into @file{em-term.el}
+
+Make it possible for the user to send char-by-char to the underlying
+process.  Ultimately, I should be able to move away from using term.el
+altogether, since everything but the ANSI code handling is already part
+of Eshell.  Then, things would work correctly on MS-Windows as well
+(which doesn't have @file{/bin/sh}, although @file{term.el} tries to use
+it).
+
+@item Make the shell spawning commands be visual
+
+That is, make (@command{su}, @command{bash}, @command{telnet},
+@command{rlogin}, @command{rsh}, etc.) be part of
+@code{eshell-visual-commands}.  The only exception is if the shell is
+being used to invoke a single command.  Then, the behavior should be
+based on what that command is.
+
+@item Create a smart viewing command named @command{open}
+
+This would search for some way to open its argument (similar to opening
+a file in the Windows Explorer).
+
+@item Alias @command{read} to be the same as @command{open}, only read-only
+
+@item Write a @command{tail} command which uses @code{view-file}
+
+It would move point to the end of the buffer, and then turns on
+auto-revert mode in that buffer at frequent intervals---and a
+@command{head} alias which assumes an upper limit of
+@code{eshell-maximum-line-length} characters per line.
+
+@item Make @command{dgrep} load @code{dired}, mark everything, then invoke @code{dired-do-search}
+
+@item Write mesh.c
+
+This would run Emacs with the appropriate arguments to invoke Eshell
+only.  That way, it could be listed as a login shell.
+
+@item Use an intangible @code{PS2} string for multi-line input prompts
+
+@item Auto-detect when a command is visual, by checking @code{TERMCAP} usage
+
+@item The first keypress after @kbd{M-x watson} triggers `eshell-send-input'
+
+@item Make @kbd{/} electric
+
+So that it automatically expands and corrects pathnames.  Or make
+pathname completion for Pcomplete auto-expand @samp{/u/i/std<TAB>} to
+@samp{/usr/include/std<TAB>}.
+
+@item Write the @command{pushd} stack to disk along with @code{last-dir-ring}
+
+@item Add options to @code{eshell/cat} which would allow it to sort and uniq
+
+@item Implement @command{wc} in Lisp
+
+Add support for counting sentences, paragraphs, pages, etc.
+
+@item Once piping is added, implement @command{sort} and @command{uniq} in Lisp
+
+@item Implement @command{touch} in Lisp
+
+@item Implement @command{comm} in Lisp
+
+@item Implement an @command{epatch} command in Lisp
+
+This would call @code{ediff-patch-file}, or @code{ediff-patch-buffer},
+depending on its argument.
+
+@item Have an option such that @samp{ls -l} generates a dired buffer
+
+@item Write a version of @command{xargs} based on command rewriting
+
+That is, @samp{find X | xargs Y} would be indicated using @samp{Y
+$@{find X@}}.  Maybe @code{eshell-do-pipelines} could be changed to
+perform this on-thy-fly rewriting.
+
+@item Write an alias for @command{less} that brings up a @code{view-mode} buffer
+
+Such that the user can press @key{SPC} and @key{DEL}, and then @key{q}
+to return to Eshell.  It would be equivalent to:
+@samp{X > #<buffer Y>; view-buffer #<buffer Y>}.
+
+@item Make @code{eshell-mode} as much a full citizen as @code{shell-mode}
+
+Everywhere in Emacs where @code{shell-mode} is specially noticed, add
+@code{eshell-mode} there.
+
+@item Permit the umask to be selectively set on a @command{cp} target
+
+@item Problem using @kbd{M-x eshell} after using @code{eshell-command}
+
+If the first thing that I do after entering Emacs is to run
+@code{eshell-command} and invoke @command{ls}, and then use @kbd{M-x
+eshell}, it doesn't display anything.
+
+@item @kbd{M-RET} during a long command (using smart display) doesn't work
+
+Since it keeps the cursor up where the command was invoked.
+
+@end table
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Concept Index
+@unnumbered Concept Index
+
+@printindex cp
+
+@node Function and Variable Index
+@unnumbered Function and Variable Index
+
+@printindex fn
+
+@node Key Index
+@unnumbered Key Index
+
+@printindex ky
+@bye

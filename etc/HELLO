@@ -1,0 +1,96 @@
+This is a list of ways to say hello in various languages.
+It is not intended to be comprehensive, but to demonstrate
+some of the character sets that Emacs supports.
+
+Non-ASCII examples:
+  Europe: ,A!(BHola!, Gr,A|_(B Gott, Hyv,Add(B p,Ad(Biv,Add(B, Tere ,Au(Bhtust, Bon,Cu(Bu
+          Cze,B6f(B!, Dobr,B}(B den, ,L7T`PRabRcYbU(B!, ,FCei\(B ,Fsar(B, $,1J2J0J;J0J@JOJ=J1J0(B
+  Africa: $(3!A!,!>(B
+  Middle/Near East: ,Hylem(B, $,1-g.$-s.1.$-g.%(B $,1-y.$.*.#.%(B
+  South Asia: $,19h9n9x:-9d:'(B, $,15h5n5x6-5d6'(B, $,1?(?.?8?M>u?>?0(B, $,1@H@N@X@m@5@^@P@"(B, $,1;6;A;#;?;,;G(B,
+              $,1AFAzB4AvB=B AqB*(B, $,1<U<C<5<m<5<N<m(B, $,1=h=n=x>-=U=~=p=B(B, $(7"7"!#C!;"E"S"G!;"7"2"[!;"D"["#"G!>(B
+  South East Asia: $,1\'\f\:\V\4\?\]\:(B, (1JP:R-4U(B, $,1H9H$HZHYH"H<HLH5HK(B, ,TJGQJ4U$CQ:(B, Ch,1`(Bo b,1U(Bn
+  East Asia: $ADc:C(B, $(0*/=((B, $B$3$s$K$A$O(B, $(C>H3gGO<<?d(B
+  Misc: E,C6(Bo,C~(Ban,Cx(Bo ,Cf(Biu,C<(Ba,C}(Bde, $,2(3(1('('(5(B, $,1x (B p $,1x((B world $,1s"(B hello p  $,2!a(B
+  CJK variety: GB($AT*Fx(B,$A?*7"(B), BIG5($(0&x86(B,$(0DeBv(B), JIS($B855$(B,$B3+H/(B), KSC($(Cj*Q((B,$(CKR[!(B)
+  Unicode charset: E$,1 E(Bo$,1 }(Ban$,1 =(Bo $,1 )(Biu$,1 U(Ba$,1!-(Bde, $,1&s'5'9',(B $,1'C'1'B(B, $,1-),|,u,}(B, $,1(7(T(`(P(R(a(b(R(c(Y(b(U(B!
+
+LANGUAGE (NATIVE NAME)	HELLO
+----------------------	-----
+Amharic ($,1O M[MmN{(B)	$,1M`MKM](B
+Arabic $,1ro(B($,1-g.$-y-q-h.*.1-i(B)	$,1-g.$-s.1.$-g.%(B $,1-y.$.*.#.%(B
+Bengali ($,17,7>6b727>(B)	$,17(7.787M6u7>70(B
+Braille	$,2(3(1('('(5(B
+Burmese ($,1H9H\H4HZH9HL(B)	$,1H9H$HZHYH"H<HLH5HK(B
+C	printf ("Hello, world!\n");
+Czech (,Bh(Be,B9(Btina)	Dobr,A}(B den
+Danish (dansk)	Hej / Goddag / Hall,Ax(Bj
+Dutch (Nederlands)	Hallo / Dag
+Emacs	emacs --no-splash -f view-hello-file
+English /$(O+S,0!,D?$(O*y(Bl,0!$(O*h(B/	Hello
+Esperanto	Saluton (E,C6(Bo,C~(Ban,Cx(Bo ,Cf(Biu,C<(Ba,C}(Bde)
+Estonian (eesti keel)	Tere p,Ad(Bevast / Tere ,Au(Bhtust
+Finnish (suomi)	Hei / Hyv,Add(B p,Ad(Biv,Add(B
+French (fran,Ag(Bais)	Bonjour / Salut
+Georgian ($,1JEJ0J@J7J5J4J:J8(B)	$,1J2J0J;J0J@JOJ=J1J0(B
+German (Deutsch)	Guten Tag / Gr,A|_(B Gott
+Greek (,Fekkgmij\(B)	,FCei\(B ,Fsar(B
+Greek, ancient ($,1p1,Fkkgmij^(B)	,FO$,1pv,Fk](B ,Fte(B ,Fja$,1q6(B ,Fl]ca(B ,Fwa$,1r6,Fqe(B
+Gujarati ($,19W:!9\9p9~9d: (B)	$,19h9n9x:-9d:'(B
+Hebrew $,1ro(B($,1-",q-(,y-*(B)	,Hylem(B
+Hungarian (magyar)	Sz,Bi(Bp j,Bs(B napot!
+Hindi ($,15y55B5f6 (B)	$,15h5n5x6-5d6'(B / $,15h5n5x6-5U5~5p(B $,16D(B
+Italian (italiano)	Ciao / Buon giorno
+Javanese (Jawa)	System.out.println("Sugeng siang!");
+Kannada ($,1>u?(?M?(?!(B)	$,1?(?.?8?M>u?>?0(B
+Khmer ($,1\7\V\?\V\!\r\8\b\:(B)	$,1\'\f\:\V\4\?\]\:(B
+Lao ((1>RJRERG(B)	(1JP:R-4U(B / (1"mcKib*!4U(B
+Malayalam ($,1@N@R@O@^@S@"(B)	$,1@H@N@X@m@5@^@P@"(B
+Maltese (il-Malti)	Bon,Cu(Bu / Sa,C11(Ba
+Mathematics	$,1x (B p $,1x((B world $,1s"(B hello p  $,2!a(B
+Norwegian (norsk)	Hei / God dag
+Oriya ($,1:s;\;?:f(B)	$,1;6;A;#;?;,;G(B
+Polish  (j,Bj(Bzyk polski)	Dzie,Bq(B dobry! / Cze,B6f(B!
+Russian (,L`caaZXY(B)	,L7T`P$(O+Z,LRabRcYbU(B!
+Sinhala ($,1B#B2ABB$A}(B)	$,1AFAzB4AvB=B AqB*(B
+Slovak (sloven,Bh(Bina)	Dobr,A}(B de,Br(B
+Slovenian (sloven,B9h(Bina)	Pozdravljeni!
+Spanish (espa,Aq(Bol)	,A!(BHola!
+Swedish (svenska)	Hej / Goddag / Hall,Ae(B
+Tamil ($,1<D<N<_<T<m(B)	$,1<U<C<5<m<5<N<m(B
+Telugu ($,1=d>&=r>!=W>!(B)	$,1=h=n=x>-=U=~=p=B(B
+Thai (,T@RIRd7B(B)	,TJGQJ4U$CQ:(B / ,TJGQJ4U$hP(B
+Tibetan ($(7"7"]"2!;"G#!"2!;(B)	$(7"7"!#C!;"E"S"G!;"7"2"[!;"D"["#"G!>(B
+Tigrigna ($,1NUP-MmN{(B)	$,1MpMKM[NU(B
+Turkish (T,A|(Brk,Ag(Be)	Merhaba
+Ukrainian (,LcZ`Pw]alZP(B)	,L2vbPn(B
+Vietnamese (ti,1*(Bng Vi,1.(Bt)	Ch,A`(Bo b,1U(Bn
+
+Japanese ($BF|K\8l(B)	$B$3$s$K$A$O(B / (I:]FAJ(B
+Chinese ($AVPND(B,$AFUM(;0(B,$A::So(B)	$ADc:C(B
+Cantonese ($(0GnM$(B,$(0N]0*Hd(B)	$(0*/=((B, $(0+$)p(B
+Korean ($(CGQ1[(B)	$(C>H3gGO<<?d(B / $(C>H3gGO=J4O1n(B
+
+
+
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Local Variables:
+;;; tab-width: 32
+;;; bidi-display-reordering: t
+;;; End:

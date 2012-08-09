@@ -1,0 +1,27 @@
+\input texinfo  @c -*-texinfo-*-
+@c %**start of header
+@setfilename book-spine
+@settitle book-spine
+@c %**end of header
+
+@include emacsver.texi
+
+@c need dot in text so first space command works!
+.
+@sp 7
+
+@center @titlefont{GNU Emacs Lisp Reference Manual}
+@sp 5
+@center GNU
+@center Emacs Version @value{EMACSVER}
+@center for Unix Users
+@sp 5
+
+@center by
+@center Bil Lewis,
+@center Dan LaLiberte,
+@center the GNU Manual Group,
+@center et al.
+@sp 5
+@center Free Software Foundation
+@bye

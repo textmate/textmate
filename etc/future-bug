@@ -1,0 +1,37 @@
+Date: Tue, 23 Feb 2199 21:03:50 -0600
+From: Karl Fogel <kfogel@floss.cyclic.com>
+To: bug-gnu-emacs@prep.ai.mit.edu
+Subject: M-x search-backward-in-time broken...
+X-Windows: you'll envy the dead.
+
+In GNU Emacs 51.70.4 (i9986-unknown-linux-gnu, X toolkit) of Sat Feb  20 2199 on floss
+configured using `configure  --with-x-toolkit=yes'
+
+        The `search-backward-in-time' function appears to be broken in
+Emacs 51.70.
+
+        Unfortunately, I can never seem to start the debugger early
+enough to catch the error as it happens.  However I have traced the
+problem through source by eye, and it looks like `time-forward' can't
+handle negative arguments anymore.  This is consistent with other
+symptoms: for example, `undo' (which since 51.25 has worked by passing
+a negative arg to `time-forward') is also broken.  However, `do' still
+works -- it seems that `time-forward' continues to handle positive
+arguments just fine.
+
+        No one here-and-now can figure out how to fix the problem,
+because the code for `time-forward' is so hairy.  We're using M-x
+report-future-emacs-bug to request that you folks include more
+comments when you write it (sometime in 2198 as I recall).
+
+        Thanks!
+
+-Karl Fogel   <kfogel@red-bean.com>
+
+
+P.S. You'll be pleased to know that since (time-forward N) still works
+     for N >= 0, we've used it to pre-emptively update configure.in.
+     Emacs now configures and builds on every platform that will ever
+     be made.  It wasn't easy, but at least that's one problem out of
+     the way for good.  If you'd like the patch, just ask.
+

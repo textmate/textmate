@@ -1,0 +1,347 @@
+Here are some of the cpp macros used, together with some short explanation
+of their use.  Feel free to add more macros and more categories.
+
+** Distinguishing OSes **
+
+CYGWIN		Compiling the Cygwin port.
+__CYGWIN__	Ditto
+MSDOS		Compiling the MS-DOS port.
+__MSDOS__	Ditto.
+__DJGPP_MINOR__ Minor version number of the DJGPP library; used only in msdos.c and dosfns.c.
+DOS_NT		Compiling for either the MS-DOS or native MS-Windows port.
+WINDOWSNT	Compiling the native MS-Windows (W32) port.
+__MINGW32__	Compiling the W32 port with the MinGW port of GCC.
+_MSC_VER	Compiling the W32 port with the Microsoft C compiler.
+DARWIN_OS	Compiling on Mac OS X or pure Darwin (and using s/darwin.h).
+
+** Distinguishing GUIs **
+
+HAVE_NTGUI	Use the native W32 GUI for windows, frames, menus&scrollbars.
+HAVE_NS		Use the NeXT/OpenStep/Cocoa UI under Mac OS X or GNUstep.
+NS_IMPL_GNUSTEP	Compile support for GNUstep implementation of NS GUI API.
+NS_IMPL_COCOA	Compile support for Cocoa (Apple) implementation of NS GUI API.
+HAVE_X11	Compile support for the X11 GUI.
+HAVE_X_WINDOWS	Compile support for X Window system
+  (It looks like, nowadays, if HAVE_X11 is set, HAVE_X_WINDOWS must
+   be, and vice versa.  At least, this is true for configure, and
+   msdos; not sure about nt.)
+USE_LUCID	Use the Lucid toolkit for menus&scrollbars.  Requires HAVE_X11.
+USE_MOTIF	Use the Motif toolkit for menus&scrollbars.  Requires HAVE_X11.
+USE_GTK		Use the Gtk   toolkit for menus&scrollbars.  Requires HAVE_X11.
+
+** Frame types **
+
+FRAME_TERMCAP_P	A tty (character terminal) frame.
+FRAME_X_P	A frame on X Window system.
+FRAME_MSDOS_P	An MS-DOS frame (used only by the DOS port).
+FRAME_W32_P	A frame using native MS-Windows GUI.
+FRAME_WINDOW_P	A GUI frame (like X, w32, etc.)
+
+** Support for accessing other processes on the system **
+
+HAVE_PROCFS     The /proc filesystem is supported.
+
+** Compile-time options **
+
+REL_ALLOC	Compile in the relocatable memory allocator ralloc.c.
+SYSTEM_MALLOC	Use the system library's malloc.
+subprocesses    System can use subprocesses (for M-x shell for example).  Defined by default, only MSDOS undefines it.
+USE_LISP_UNION_TYPE Define it in lisp.h to make Lisp_Object be a union type instead of the default int.
+
+** System specific macros, described in detail in src/s/template.h
+CLASH_DETECTION
+COFF
+FIRST_PTY_LETTER
+HAVE_PTYS
+INTERRUPT_INPUT
+NARROWPROTO
+SEPCHAR
+SYSTEM_TYPE
+
+** Misc macros
+USER_FULL_NAME   If defined, overrides the default pw->pw_gecos for getting at the full user name.  Only MSDOS overrides the default.
+
+** Replace, the definition is trivial: SWITCH_ENUM_CAST
+
+** Defines from src/m/*.h and src/s/*.h.  Some of these might not be used in the code anymore, so they can be removed.  The HAVE_* definitions are probably handled by autoconf, so it might be possible to just remove them from src/[sm]/*.h.
+
+
+AIX
+AMPERSAND_FULL_NAME
+BITS_PER_EMACS_INT
+BITS_PER_LONG
+BITS_PER_CHAR
+BITS_PER_SHORT
+BITS_PER_INT
+BROKEN_DATAGRAM_SOCKETS
+BROKEN_FIONREAD
+BROKEN_GET_CURRENT_DIR_NAME
+BROKEN_NON_BLOCKING_CONNECT
+BROKEN_PTY_READ_AFTER_EAGAIN
+BROKEN_SA_RESTART
+BROKEN_SIGAIO
+BROKEN_SIGIO
+BROKEN_SIGPOLL
+BROKEN_SIGPTY
+BSD4_2
+BSD4_3
+BSD_SYSTEM
+CLASH_DETECTION
+DATA_SEG_BITS
+DATA_START
+DBL_MIN_REPLACEMENT
+DEFAULT_SOUND_DEVICE
+DEVICE_SEP
+DIRECTORY_SEP
+DONT_REOPEN_PTY
+DOUG_LEA_MALLOC
+DebPrint
+EMACSDEBUG
+EMACS_CONFIGURATION
+EMACS_CONFIG_OPTIONS
+EMACS_INT
+EMACS_UINT
+FILE_SYSTEM_CASE
+FLOAT_CHECK_DOMAIN
+GC_LISP_OBJECT_ALIGNMENT
+GC_MARK_SECONDARY_STACK
+GC_MARK_STACK
+GC_SETJMP_WORKS
+GMALLOC_INHIBIT_VALLOC
+GNU_LIBRARY_PENDING_OUTPUT_COUNT
+GNU_LINUX
+GNU_MALLOC
+HAVE_AIX_SMT_EXP
+HAVE_CBRT
+HAVE_CLOSEDIR
+HAVE_DUP2
+HAVE_EUIDACCESS
+HAVE_FMOD
+HAVE_FPATHCONF
+HAVE_FREXP
+HAVE_FSYNC
+HAVE_FTIME
+HAVE_GETCWD
+HAVE_GETDOMAINNAME
+HAVE_GETHOSTNAME
+HAVE_GETLOADAVG
+HAVE_GETPAGESIZE
+HAVE_GETPT
+HAVE_GETTIMEOFDAY
+HAVE_GETWD
+HAVE_H_ERRNO
+HAVE_INET_SOCKETS
+HAVE_INVERSE_HYPERBOLIC
+HAVE_LIBKSTAT
+HAVE_LIMITS_H
+HAVE_LINUX_VERSION_H
+HAVE_LOGB
+HAVE_LONG_FILE_NAMES
+HAVE_LRAND48
+HAVE_MENUS
+HAVE_MKDIR
+HAVE_MKTIME
+HAVE_MOUSE
+HAVE_PERROR
+HAVE_PSTAT_GETDYNAMIC
+HAVE_PWD_H
+HAVE_RANDOM
+HAVE_RENAME
+HAVE_RES_INIT
+HAVE_RINT
+HAVE_RMDIR
+HAVE_SELECT
+HAVE_SETLOCALE
+HAVE_SETPGID
+HAVE_SETRLIMIT
+HAVE_SETSID
+HAVE_SHUTDOWN
+HAVE_SOCKETS
+HAVE_SOUND
+HAVE_STDLIB_H
+HAVE_STRERROR
+HAVE_STRFTIME
+HAVE_STRING_H
+HAVE_STRUCT_UTIMBUF
+HAVE_SYSINFO
+HAVE_SYSV_SIGPAUSE
+HAVE_SYS_SELECT_H
+HAVE_SYS_SYSTEMINFO_H
+HAVE_SYS_TIMEB_H
+HAVE_SYS_TIME_H
+HAVE_TCATTR
+HAVE_TIMEVAL
+HAVE_TM_ZONE
+HAVE_TZSET
+HAVE_UNISTD_H
+HAVE_UTIMES
+HAVE_UTIME_H
+HAVE_WINDOW_SYSTEM
+HAVE_WORKING_VFORK
+HAVE_XRMSETDATABASE
+HPUX
+INTERNAL_TERMINAL
+IS_ANY_SEP
+IS_DIRECTORY_SEP
+LINKER
+LINUX_VERSION_CODE
+LISP_FLOAT_TYPE
+LNOFLSH
+LOCALTIME_CACHE
+MAIL_USE_FLOCK
+MAIL_USE_LOCKF
+MAIL_USE_POP
+MAIL_USE_SYSTEM_LOCK
+MAXPATHLEN
+MIN_PTY_KERNEL_VERSION -- only used on Mac
+MODE_LINE_BINARY_TEXT
+MUST_UNDEF__STDC__
+NLIST_STRUCT
+NO_ABORT
+NO_EDITRES
+NO_MATHERR
+NO_TERMIO
+NSIG
+NSIG_MINIMUM
+NULL
+NULL_DEVICE
+ORDINARY_LINK
+O_APPEND
+O_RDONLY
+O_RDWR
+PAGESIZE
+PENDING_OUTPUT_COUNT
+POSIX
+PREFER_VSUSP
+PTY_ITERATION
+PTY_NAME_SPRINTF
+PTY_OPEN
+PTY_TTY_NAME_SPRINTF
+PURESIZE
+RUN_TIME_REMAP
+SA_RESTART
+SEGMENT_MASK
+SETPGRP_RELEASES_CTTY
+SETUP_SLAVE_PTY
+SIGALRM
+SIGCHLD
+SIGHUP
+SIGKILL
+SIGNALS_VIA_CHARACTERS
+SIGPIPE
+SIGQUIT
+SIGTRAP
+SOLARIS2
+STDC_HEADERS
+SYSTEM_PURESIZE_EXTRA
+SYSTEM_MALLOC
+SYSV_SYSTEM_DIR
+TAB3
+TABDLY
+TERM
+TIME_WITH_SYS_TIME
+TIOCSIGSEND
+TM_IN_SYS_TIME
+ULIMIT_BREAK_VALUE
+UNIX98_PTYS
+USE_CRT_DLL
+USE_TOOLKIT_SCROLL_BARS
+USG
+USG5
+USG5_4
+USG_SUBTTY_WORKS
+VALBITS
+WRETCODE
+XOS_NEEDS_TIME_H
+_AIX
+_ARCH_PPC64
+_FILE_OFFSET_BITS
+_LP64
+_MALLOC_INTERNAL
+_NAIVE_DOS_REGS
+_VARARGS_
+_WINSOCKAPI_
+_WINSOCK_H
+_longjmp
+_setjmp
+_start
+abort
+access
+alloca
+brk
+calloc
+chdir
+chmod
+chown
+close
+const
+creat
+ctime
+dup
+dup2
+edata
+emacs
+etext
+execlp
+execvp
+fdopen
+fileno
+fopen
+free
+fsync
+ftruncate
+fwrite
+getdefdir
+getdisk
+getenv
+getpid
+getuid
+gmtime
+index
+isatty
+kill
+link
+linux
+localtime
+logb
+lseek
+malloc
+mkdir
+mktemp
+open
+pclose
+pipe
+popen
+random
+read
+realloc
+rename
+rindex
+rmdir
+sbrk
+select
+sigmask
+signal
+sigsetmask
+sleep
+spawnve
+srandom
+strdup
+strerror
+stricmp
+strnicmp
+strupr
+sys_nerr
+system
+temacs
+tzname
+tzset
+umask
+unix
+unlink
+utimbuf
+utime
+vfork
+wait
+write
+xfree

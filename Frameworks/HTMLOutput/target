@@ -1,5 +1,0 @@
-SOURCES      = src/**/*.mm
-EXPORT       = src/HTMLOutput.h
-CP_Resources = resources/*
-LINK        += text ns document command OakAppKit OakFoundation OakSystem
-FRAMEWORKS   = Cocoa WebKit

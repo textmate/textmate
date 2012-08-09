@@ -1,0 +1,1526 @@
+\input texinfo  @c -*-texinfo-*-
+@setfilename ../../info/ada-mode
+@settitle Ada Mode
+
+@copying
+Copyright @copyright{} 1999-2012  Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs editing modes
+@direntry
+* Ada mode: (ada-mode).         Emacs mode for editing and compiling Ada code.
+@end direntry
+
+@titlepage
+@sp 10
+@title{Ada Mode}
+@sp 2
+@subtitle An Emacs major mode for programming in Ada
+@subtitle Ada Mode Version 4.00
+@sp 2
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@node Top, Overview, (dir), (dir)
+@top Ada Mode
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* Overview::
+* Installation::                Installing Ada mode on your system
+* Customization::               Setting up Ada mode to your taste
+* Compiling Executing::         Working with your application within Emacs
+* Project files::               Describing the organization of your project
+* Compiling Examples::          A small tutorial
+* Moving Through Ada Code::     Moving easily through Ada sources
+* Identifier completion::       Finishing words automatically
+* Automatic Smart Indentation::  Indenting your code automatically as you type
+* Formatting Parameter Lists::  Formatting subprograms' parameter lists
+                                     automatically
+* Automatic Casing::            Adjusting the case of words automatically
+* Statement Templates::         Inserting code templates
+* Comment Handling::            Reformatting comments easily
+* GNU Free Documentation License::  The license for this documentation.
+* Index::
+@end menu
+
+
+@node Overview, Installation, Top, Top
+@chapter Overview
+
+The Emacs mode for programming in Ada helps the user in understanding
+existing code and facilitates writing new code.
+
+When the Gnu Ada compiler GNAT is used, the cross-reference
+information output by the compiler is used to provide powerful code
+navigation (jump to definition, find all uses, etc).
+
+When you open a file with a file extension of @file{.ads} or
+@file{.adb}, Emacs will automatically load and activate Ada mode.
+
+Ada mode works without any customization, if you are using the GNAT
+compiler (@url{https://libre2.adacore.com/}) and the GNAT default
+naming convention.
+
+You must customize a few things if you are using a different compiler
+or file naming convention; @xref{Other compiler}, @xref{Non-standard
+file names}.
+
+In addition, you may want to customize the indentation,
+capitalization, and other things; @xref{Other customization}.
+
+Finally, for large Ada projects, you will want to set up an Emacs
+Ada mode project file for each project; @xref{Project files}. Note
+that these are different from the GNAT project files used by gnatmake
+and other GNAT commands.
+
+See the Emacs info manual, section 'Running Debuggers Under Emacs',
+for general information on debugging.
+
+@node Installation, Customization, Overview, Top
+@chapter Installation
+
+Ada mode is part of the standard Emacs distribution; if you use that,
+no files need to be installed.
+
+Ada mode is also available as a separate distribution, from the Emacs
+Ada mode website
+@uref{http://stephe-leake.org/emacs/ada-mode/emacs-ada-mode.html}. The
+separate distribution may be more recent.
+
+For installing the separate distribution, see the @file{README} file
+in the distribution.
+
+To see what version of Ada mode you have installed, do @kbd{M-x
+ada-mode-version}.
+
+The following files are provided with the Ada mode distribution:
+
+@itemize @bullet
+
+@item
+@file{ada-mode.el}: The main file for Ada mode, providing indentation,
+formatting of parameter lists, moving through code, comment handling
+and automatic casing.
+
+@item
+@file{ada-prj.el}: GUI editing of Ada mode project files, using Emacs
+widgets.
+
+@item
+@file{ada-stmt.el}: Ada statement templates.
+
+@item
+@file{ada-xref.el}: GNAT cross-references, completion of identifiers,
+and compilation. Also provides project files (which are not
+GNAT-specific).
+
+@end itemize
+
+@node Customization, Compiling Executing, Installation, Top
+@chapter Customizing Ada mode
+
+Here we assume you are familiar with setting variables in Emacs,
+either thru 'customize' or in elisp (in your @file{.emacs} file). For
+a basic introduction to customize, elisp, and Emacs in general, see
+the tutorial in
+@iftex
+@cite{The GNU Emacs Manual}.
+@end iftex
+@ifhtml
+@cite{The GNU Emacs Manual}.
+@end ifhtml
+@ifinfo
+@ref{Top, , The GNU Emacs Manual, emacs, The GNU Emacs Manual}.
+@end ifinfo
+
+These global Emacs settings are strongly recommended (put them in your
+.emacs):
+
+@example
+(global-font-lock-mode t)
+(transient-mark-mode t)
+@end example
+
+@samp{(global-font-lock-mode t)} turns on syntax
+highlighting for all buffers (it is off by default because it may be
+too slow for some machines).
+
+@samp{(transient-mark-mode t)} highlights selected text.
+
+See the Emacs help for each of these variables for more information.
+
+@menu
+* Non-standard file names::
+* Other compiler::
+* Other customization::
+@end menu
+
+@node Non-standard file names, Other compiler, Customization, Customization
+@section Non-standard file names
+
+By default, Ada mode is configured to use the GNAT file naming
+convention, where file names are a simple modification of the Ada
+names, and the extension for specs and bodies are
+@samp{.ads} and @samp{.adb}, respectively.
+
+Ada mode uses the file extensions to allow moving from a package body
+to the corresponding spec and back.
+
+Ada mode supports a list of alternative file extensions for specs and bodies.
+
+For instance, if your spec and bodies files are called
+@file{@var{unit}_s.ada} and @file{@var{unit}_b.ada}, respectively, you
+can add the following to your @file{.emacs} file:
+
+@example
+(ada-add-extensions "_s.ada" "_b.ada")
+@end example
+
+You can define additional extensions:
+
+@example
+(ada-add-extensions ".ads" "_b.ada")
+(ada-add-extensions ".ads" ".body")
+@end example
+
+This means that whenever Ada mode looks for the body for a file
+whose extension is @file{.ads}, it will take the first available file
+that ends with either @file{.adb}, @file{_b.ada} or
+@file{.body}.
+
+Similarly, if Ada mode is looking for a spec, it will look for
+@file{.ads} or @file{_s.ada}.
+
+If the filename is not derived from the Ada name following the GNAT
+convention, things are a little more complicated. You then need to
+rewrite the function @code{ada-make-filename-from-adaname}. Doing that
+is beyond the scope of this manual; see the current definitions in
+@file{ada-mode.el} and @file{ada-xref.el} for examples.
+
+@node Other compiler, Other customization, Non-standard file names, Customization
+@section Other compiler
+
+By default, Ada mode is configured to use the Gnu Ada compiler GNAT.
+
+To use a different Ada compiler, you must specify the command lines
+used to run that compiler, either in lisp variables or in Emacs
+Ada mode project files. See @ref{Project file variables} for the list
+of project variables, and the corresponding lisp variables.
+
+@node Other customization,  , Other compiler, Customization
+@section Other customization
+
+All user-settable Ada mode variables can be set via the menu
+@samp{Ada | Customize}.  Click on the @samp{Help} button there for help
+on using customize.
+
+To modify a specific variable, you can directly call the function
+@code{customize-variable}; just type @kbd{M-x customize-variable
+@key{RET} @var{variable-name} @key{RET}}).
+
+Alternately, you can specify variable settings in the Emacs
+configuration file, @file{.emacs}. This file is coded in Emacs lisp,
+and the syntax to set a variable is the following:
+@example
+(setq variable-name value)
+@end example
+
+@node Compiling Executing, Project files, Customization, Top
+@chapter Compiling Executing
+
+Ada projects can be compiled, linked, and executed using commands on
+the Ada menu. All of these commands can be customized via a project
+file (@pxref{Project files}), but the defaults are sufficient for using
+the GNAT compiler for simple projects (single files, or several files
+in a single directory).
+
+Even when no project file is used, the GUI project editor (menu
+@samp{Ada | Project | Edit}) shows the settings of the various project
+file variables referenced here.
+
+@menu
+* Compile commands::
+* Compiler errors::
+@end menu
+
+@node Compile commands, Compiler errors, Compiling Executing, Compiling Executing
+@section Compile commands
+
+Here are the commands for building and using an Ada project, as
+listed in the Ada menu.
+
+In multi-file projects, there must be one file that is the main
+program. That is given by the @code{main} project file variable;
+it defaults to the current file if not yet set, but is also set by the
+``set main and build'' command.
+
+@table @code
+
+@item Check file
+Compiles the current file in syntax check mode, by running
+@code{check_cmd} defined in the current project file. This typically
+runs faster than full compile mode, speeding up finding and fixing
+compilation errors.
+
+This sets @code{main} only if it has not been set yet.
+
+@item Compile file
+Compiles the current file, by running @code{comp_cmd} from the current
+project file.
+
+This does not set @code{main}.
+
+@item Set main and Build
+Sets @code{main} to the current file, then executes the Build
+command.
+
+@item Show main
+Display @code{main} in the message buffer.
+
+@item Build
+Compiles all obsolete units of the current @code{main}, and links
+@code{main}, by running @code{make_cmd} from the current project.
+
+This sets @code{main} only if it has not been set yet.
+
+@item Run
+Executes the main program in a shell, displayed in a separate Emacs
+buffer. This runs @code{run_cmd} from the current project. The
+execution buffer allows for interactive input/output.
+
+To modify the run command, in particular to provide or change the
+command line arguments, type @kbd{C-u} before invoking the command.
+
+This command is not available for a cross-compilation toolchain.
+
+@end table
+It is important when using these commands to understand how
+@code{main} is used and changed.
+
+Build runs 'gnatmake' on the main unit. During a typical edit/compile
+session, this is the only command you need to invoke, which is why it
+is bound to @kbd{C-c C-c}. It will compile all files needed by the
+main unit, and display compilation errors in any of them.
+
+Note that Build can be invoked from any Ada buffer; typically you will
+be fixing errors in files other than the main, but you don't have to
+switch back to the main to invoke the compiler again.
+
+Novices and students typically work on single-file Ada projects. In
+this case, @kbd{C-c C-m} will normally be the only command needed; it
+will build the current file, rather than the last-built main.
+
+There are three ways to change @code{main}:
+
+@enumerate
+@item
+Invoke @samp{Ada | Set main and Build}, which sets @code{main} to
+the current file.
+
+@item
+Invoke @samp{Ada | Project | Edit}, edit @code{main} and
+@code{main}, and click @samp{[save]}
+
+@item
+Invoke @samp{Ada | Project | Load}, and load a project file that specifies @code{main}
+
+@end enumerate
+
+@node Compiler errors,  , Compile commands, Compiling Executing
+@section Compiler errors
+
+The @code{Check file}, @code{Compile file}, and @code{Build} commands
+all place compilation errors in a separate buffer named
+@code{*compilation*}.
+
+Each line in this buffer will become active: you can simply click on
+it with the middle button of the mouse, or move point to it and press
+@key{RET}. Emacs will then display the relevant source file and put
+point on the line and column where the error was found.
+
+You can also press the @kbd{C-x `} key (@code{next-error}), and Emacs
+will jump to the first error. If you press that key again, it will
+move you to the second error, and so on.
+
+Some error messages might also include references to other files. These
+references are also clickable in the same way, or put point after the
+line number and press @key{RET}.
+
+@node Project files, Compiling Examples, Compiling Executing, Top
+@chapter Project files
+
+An Emacs Ada mode project file specifies what directories hold sources
+for your project, and allows you to customize the compilation commands
+and other things on a per-project basis.
+
+Note that Ada mode project files @samp{*.adp} are different than GNAT
+compiler project files @samp{*.gpr}. However, Emacs Ada mode can use a
+GNAT project file to specify the project directories. If no
+other customization is needed, a GNAT project file can be used without
+an Emacs Ada mode project file.
+
+@menu
+* Project File Overview::
+* GUI Editor::
+* Project file variables::
+@end menu
+
+@node Project File Overview, GUI Editor, Project files, Project files
+@section Project File Overview
+
+Project files have a simple syntax; they may be edited directly. Each
+line specifies a project variable name and its value, separated by ``='':
+@example
+src_dir=/Projects/my_project/src_1
+src_dir=/Projects/my_project/src_2
+@end example
+
+Some variables (like @code{src_dir}) are lists; multiple occurrences
+are concatenated.
+
+There must be no space between the variable name and ``='', and no
+trailing spaces.
+
+Alternately, a GUI editor for project files is available (@pxref{GUI
+Editor}). It uses Emacs widgets, similar to Emacs customize.
+
+The GUI editor also provides a convenient way to view current project
+settings, if they have been modified using menu commands rather than
+by editing the project file.
+
+After the first Ada mode build command is invoked, there is always a
+current project file, given by the lisp variable
+@code{ada-prj-default-project-file}. Currently, the only way to show
+the current project file is to invoke the GUI editor.
+
+To find the project file the first time, Ada mode uses the following
+search algorithm:
+
+@itemize @bullet
+@item
+If @code{ada-prj-default-project-file} is set, use that.
+
+@item
+Otherwise, search for a file in the current directory with
+the same base name as the Ada file, but extension given by
+@code{ada-prj-file-extension} (default @code{".adp"}).
+
+@item
+If not found, search for @file{*.adp} in the current directory; if
+several are found, prompt the user to select one.
+
+@item
+If none are found, use @file{default.adp} in the current directory (even
+if it does not exist).
+
+@end itemize
+
+This algorithm always sets @code{ada-prj-default-project-file}, even
+when the file does not actually exist.
+
+To change the project file before or after the first one is found,
+invoke @samp{Ada | Project | Load ...}.
+
+Or, in lisp, evaluate @code{(ada-set-default-project-file "/path/file.adp")}.
+This sets @code{ada-prj-default-project-file}, and reads the project file.
+
+You can also specify a GNAT project file to @samp{Ada | Project | Load
+...} or @code{ada-set-default-project-file}. Emacs Ada mode checks the
+file extension; if it is @code{.gpr}, the file is treated as a GNAT
+project file. Any other extension is treated as an Emacs Ada mode
+project file.
+
+@node GUI Editor, Project file variables, Project File Overview, Project files
+@section GUI Editor
+
+The project file editor is invoked with the menu @samp{Ada | Projects
+| Edit}.
+
+Once in the buffer for editing the project file, you can save your
+modification using the @samp{[save]} button at the bottom of the
+buffer, or the @kbd{C-x C-s} binding. To cancel your modifications,
+kill the buffer or click on the @samp{[cancel]} button.
+
+@node Project file variables,  , GUI Editor, Project files
+@section Project file variables
+
+The following variables can be defined in a project file; some can
+also be defined in lisp variables.
+
+To set a project variable that is a list, specify each element of the
+list on a separate line in the project file.
+
+Any project variable can be referenced in other project variables,
+using a shell-like notation. For instance, if the variable
+@code{comp_cmd} contains @code{$@{comp_opt@}}, the value of the
+@code{comp_opt} variable will be substituted when @code{comp_cmd} is
+used.
+
+In addition, process environment variables can be referenced using the
+same syntax, or the normal @code{$var} syntax.
+
+Most project variables have defaults that can be changed by setting
+lisp variables; the table below identifies the lisp variable for each
+project variable. Lisp variables corresponding to project variables
+that are lists are lisp lists.
+
+In general, project variables are evaluated when referenced in
+Emacs Ada mode commands. Relative file paths are expanded to
+absolute relative to @code{$@{build_dir@}}.
+
+Here is the list of variables. In the default values, the current
+directory @code{"."} is the project file directory.
+
+@table @asis
+@c defined in ada-default-prj-properties; alphabetical order
+
+@item @code{ada_project_path_sep}   [default: @code{":" or ";"}]
+Path separator for @code{ADA_PROJECT_PATH}. It defaults to the correct
+value for a native implementation of GNAT for the current operating
+system. The user must override this when using Windows native GNAT
+with Cygwin Emacs, and perhaps in other cases.
+
+Lisp variable: @code{ada-prj-ada-project-path-sep}.
+
+@item @code{ada_project_path}   [default: @code{""}]
+A list of directories to search for GNAT project files.
+
+If set, the @code{ADA_PROJECT_PATH} process environment variable is
+set to this value in the Emacs process when the Emacs Ada mode project
+is selected via menu @samp{Ada | Project | Load}.
+
+For @code{ada_project_path}, relative file paths are expanded to
+absolute when the Emacs Ada project file is read, rather than when the
+project file is selected.
+
+For example if the project file is in the directory
+@file{/home/myproject}, the environment variable @code{GDS_ROOT} is
+set to @code{/home/shared}, and the project file contains:
+@example
+ada_project_path_sep=:
+ada_project_path=$GDS_ROOT/makerules
+ada_project_path=../opentoken
+@end example
+the environment variable @code{ADA_PROJECT_PATH} will be set to
+@code{"/home/shared/makerules:/home/opentoken/"}.
+
+The default value is not the current value of this environment
+variable, because that will typically have been set by another
+project, and will therefore be incorrect for this project.
+
+If you have the environment variable set correctly for all of your
+projects, you do not need to set this project variable.
+
+@item @code{bind_opt}       [default: @code{""}]
+Holds user binder options; used in the default build commands.
+
+Lisp variable: @code{ada-prj-default-bind-opt}.
+
+@item @code{build_dir}      [default: @code{"."}]
+The compile commands will be issued in this directory.
+
+@item @code{casing}         [default: @code{("~/.emacs_case_exceptions")}
+List of files containing casing exceptions. See the help on
+@code{ada-case-exception-file} for more info.
+@c FIXME: section on case exceptions
+
+Lisp variable: @code{ada-case-exception-file}.
+
+@item @code{check_cmd}      [default: @code{"$@{cross_prefix@}gnatmake -u -c -gnatc $@{gnatmake_opt@} $@{full_current@} -cargs $@{comp_opt@}"}]
+Command used to syntax check a single file.
+The name of the file is substituted for @code{full_current}.
+
+Lisp variable: @code{ada-prj-default-check-cmd}
+
+@item @code{comp_cmd}       [default: @code{"$@{cross_prefix@}gnatmake -u -c $@{gnatmake_opt@} $@{full_current@} -cargs $@{comp_opt@}"}]
+Command used to compile a single file.
+The name of the file is substituted for @code{full_current}.
+
+Lisp variable: @code{ada-prj-default-comp-cmd}.
+
+@item @code{comp_opt}       [default: @code{"-gnatq -gnatQ"}]
+Holds user compiler options; used in the default compile commands. The
+default value tells gnatmake to generate library files for
+cross-referencing even when there are errors.
+
+If source code for the project is in multiple directories, the
+appropriate compiler options must be added here. @ref{Set source
+search path} for examples of this. Alternately, GNAT project files may
+be used; @ref{Use GNAT project file}.
+
+Lisp variable: @code{ada-prj-default-comp-opt}.
+
+@item @code{cross_prefix}   [default: @code{""}]
+Name of target machine in a cross-compilation environment. Used in
+default compile and build commands.
+
+@item @code{debug_cmd}      [default: @code{"$@{cross_prefix@}gdb $@{main@}"}]
+Command used to debug the application
+
+Lisp variable: @code{ada-prj-default-debugger}.
+
+@item @code{debug_post_cmd} [default: @code{""}]
+Command executed after @code{debug_cmd}.
+
+@item @code{debug_pre_cmd}  [default: @code{"cd $@{build_dir@}"}]
+Command executed before @code{debug_cmd}.
+
+@item @code{gnatfind_opt}   [default: @code{"-rf"}]
+Holds user gnatfind options; used in the default find commands.
+
+Lisp variable: @code{ada-prj-gnatfind-switches}.
+
+@item @code{gnatmake_opt}   [default: @code{"-g"}]
+Holds user gnatmake options; used in the default build commands.
+
+Lisp variable: @code{ada-prj-default-gnatmake-opt}.
+
+@item @code{gpr_file}   [default: @code{""}]
+Specify GNAT project file.
+
+If set, the source and object directories specified in the GNAT
+project file are appended to @code{src_dir} and @code{obj_dir}. This
+allows specifying Ada source directories with a GNAT project file, and
+other source directories with the Emacs project file.
+
+In addition, @code{-P@{gpr_file@}} is added to the project variable
+@code{gnatmake_opt} whenever it is referenced. With the default
+project variables, this passes the project file to all gnatmake
+commands.
+
+Lisp variable: @code{ada-prj-default-gpr-file}.
+
+@c FIXME: add gnatstub-opts
+
+@item @code{link_opt}       [default: @code{""}]
+Holds user linker options; used in the default build commands.
+
+Lisp variable: @code{ada-prj-default-link-opt}.
+
+@item @code{main}           [default: current file]
+Specifies the name of the executable file for the project; used in the
+default build commands.
+
+@item @code{make_cmd}       [default: @code{"$@{cross_prefix@}gnatmake -o $@{main@} $@{main@} $@{gnatmake_opt@} -cargs $@{comp_opt@} -bargs $@{bind_opt@} -largs $@{link_opt@}"}]
+Command used to build the application.
+
+Lisp variable: @code{ada-prj-default-make-cmd}.
+
+@item @code{obj_dir}        [default: @code{"."}]
+A list of directories to search for library files. Ada mode searches
+this list for the @samp{.ali} files generated by GNAT that contain
+cross-reference information.
+
+The compiler commands must place the @samp{.ali} files in one of these
+directories; the default commands do that.
+
+@item @code{remote_machine} [default: @code{""}]
+Name of the machine to log into before issuing the compile and build
+commands. If this variable is empty, the command will be run on the
+local machine.
+
+@item @code{run_cmd}        [default: @code{"./$@{main@}"}]
+Command used to run the application.
+
+@item @code{src_dir}        [default: @code{"."}]
+A list of directories to search for source files, both for compile
+commands and source navigation.
+
+@end table
+
+@node Compiling Examples, Moving Through Ada Code, Project files, Top
+@chapter Compiling Examples
+
+We present several small projects, and walk thru the process of
+compiling, linking, and running them.
+
+The first example illustrates more Ada mode features than the others;
+you should work thru that example before doing the others.
+
+All of these examples assume you are using GNAT.
+
+The source for these examples is available on the Emacs Ada mode
+website mentioned in @xref{Installation}.
+
+@menu
+* No project files::            Just menus
+* Set compiler options::        A basic Ada mode project file
+* Set source search path::      Source in multiple directories
+* Use GNAT project file::
+* Use multiple GNAT project files::
+@end menu
+
+@node No project files, Set compiler options, Compiling Examples, Compiling Examples
+@section No project files
+This example uses no project files.
+
+First, create a directory @file{Example_1}, containing:
+
+@file{hello.adb}:
+
+@example
+with Ada.Text_IO;
+procedure Hello
+is begin
+   Put_Line("Hello from hello.adb");
+end Hello;
+@end example
+
+Yes, this is missing ``use Ada.Text_IO;'' - we want to demonstrate
+compiler error handling.
+
+@file{hello_2.adb}:
+
+@example
+with Hello_Pkg;
+procedure Hello_2
+is begin
+   Hello_Pkg.Say_Hello;
+end Hello_2;
+@end example
+
+This file has no errors.
+
+@file{hello_pkg.ads}:
+
+@example
+package Hello_Pkg is
+   procedure Say_Hello;
+end Hello_Pkg;
+@end example
+
+This file has no errors.
+
+@file{hello_pkg.adb}:
+
+@example
+with Ada.Text_IO;
+package Hello_Pkg is
+   procedure Say_Hello
+   is begin
+      Ada.Text_IO.Put_Line ("Hello from hello_pkg.adb");
+   end Say_Hello;
+end Hello_Pkg;
+@end example
+
+Yes, this is missing the keyword @code{body}; another compiler error
+example.
+
+In buffer @file{hello.adb}, invoke @samp{Ada | Check file}. You should
+get a @code{*compilation*} buffer containing something like (the
+directory paths will be different):
+
+@example
+cd c:/Examples/Example_1/
+gnatmake -u -c -gnatc -g c:/Examples/Example_1/hello.adb -cargs -gnatq -gnatQ
+gcc -c -Ic:/Examples/Example_1/ -gnatc -g -gnatq -gnatQ -I- c:/Examples/Example_1/hello.adb
+hello.adb:4:04: "Put_Line" is not visible
+hello.adb:4:04: non-visible declaration at a-textio.ads:264
+hello.adb:4:04: non-visible declaration at a-textio.ads:260
+gnatmake: "c:/Examples/Example_1/hello.adb" compilation error
+@end example
+
+If you have enabled font-lock, the lines with actual errors (starting
+with @file{hello.adb}) are highlighted, with the file name in red.
+
+Now type @kbd{C-x `} (on a PC keyboard, @key{`} is next to @key{1}).
+Or you can click the middle mouse button on the first error line. The
+compilation buffer scrolls to put the first error on the top line, and
+point is put at the place of the error in the @file{hello.adb} buffer.
+
+To fix the error, change the line to be
+
+@example
+    Ada.Text_IO.Put_Line ("hello from hello.adb");
+@end example
+
+Now invoke @samp{Ada | Show main}; this displays @samp{Ada mode main: hello}.
+
+Now (in buffer @file{hello.adb}), invoke @samp{Ada | Build}. You are
+prompted to save the file (if you haven't already). Then the
+compilation buffer is displayed again, containing:
+
+@example
+cd c:/Examples/Example_1/
+gnatmake -o hello hello -g -cargs -gnatq -gnatQ -bargs  -largs
+gcc -c -g -gnatq -gnatQ hello.adb
+gnatbind -x hello.ali
+gnatlink hello.ali -o hello.exe -g
+@end example
+
+The compilation has succeeded without errors; @file{hello.exe} now
+exists in the same directory as @file{hello.adb}.
+
+Now invoke @samp{Ada | Run}. A @file{*run*} buffer is displayed,
+containing
+
+@example
+Hello from hello.adb
+
+Process run finished
+@end example
+
+That completes the first part of this example.
+
+Now we will compile a multi-file project. Open the file
+@file{hello_2.adb}, and invoke @samp{Ada | Set main and Build}. This
+finds an error in @file{hello_pkg.adb}:
+
+@example
+cd c:/Examples/Example_1/
+gnatmake -o hello_2 hello_2 -g -cargs -gnatq -gnatQ -bargs  -largs
+gcc -c -g -gnatq -gnatQ hello_pkg.adb
+hello_pkg.adb:2:08: keyword "body" expected here [see file name]
+gnatmake: "hello_pkg.adb" compilation error
+@end example
+
+This demonstrates that gnatmake finds the files needed by the main
+program. However, it cannot find files in a different directory,
+unless you use an Emacs Ada mode project file to specify the other directories;
+@xref{Set source search path}, or a GNAT project file; @ref{Use GNAT
+project file}.
+
+Invoke @samp{Ada | Show main}; this displays @file{Ada mode main: hello_2}.
+
+Move to the error with @kbd{C-x `}, and fix the error by adding @code{body}:
+
+@example
+package body Hello_Pkg is
+@end example
+
+Now, while still in @file{hello_pkg.adb}, invoke @samp{Ada | Build}.
+gnatmake successfully builds @file{hello_2}. This demonstrates that
+Emacs has remembered the main file, in the project variable
+@code{main}, and used it for the Build command.
+
+Finally, again while in @file{hello_pkg.adb}, invoke @samp{Ada | Run}.
+The @code{*run*} buffer displays @code{Hello from hello_pkg.adb}.
+
+One final point. If you switch back to buffer @file{hello.adb}, and
+invoke @samp{Ada | Run}, @file{hello_2.exe} will be run. That is
+because @code{main} is still set to @code{hello_2}, as you can
+see when you invoke @samp{Ada | Project | Edit}.
+
+There are three ways to change @code{main}:
+
+@enumerate
+@item
+Invoke @samp{Ada | Set main and Build}, which sets @code{main} to
+the current file.
+
+@item
+Invoke @samp{Ada | Project | Edit}, edit @code{main}, and click @samp{[save]}
+
+@item
+Invoke @samp{Ada | Project | Load}, and load a project file that specifies @code{main}
+
+@end enumerate
+
+@node Set compiler options, Set source search path, No project files, Compiling Examples
+@section Set compiler options
+
+This example illustrates using an Emacs Ada mode project file to set a
+compiler option.
+
+If you have files from @file{Example_1} open in Emacs, you should
+close them so you don't get confused. Use menu @samp{File | Close
+(current buffer)}.
+
+In directory @file{Example_2}, create these files:
+
+@file{hello.adb}:
+
+@example
+with Ada.Text_IO;
+procedure Hello
+is begin
+   Put_Line("Hello from hello.adb");
+end Hello;
+@end example
+
+This is the same as @file{hello.adb} from @file{Example_1}. It has two
+errors; missing ``use Ada.Text_IO;'', and no space between
+@code{Put_Line} and its argument list.
+
+@file{hello.adp}:
+
+@example
+comp_opt=-gnatyt
+@end example
+
+This tells the GNAT compiler to check for token spacing; in
+particular, there must be a space preceding a parenthesis.
+
+In buffer @file{hello.adb}, invoke @samp{Ada | Project | Load...}, and
+select @file{Example_2/hello.adp}.
+
+Then, again in buffer @file{hello.adb}, invoke @samp{Ada | Set main and
+Build}. You should get a @code{*compilation*} buffer containing
+something like (the directory paths will be different):
+
+@example
+cd c:/Examples/Example_2/
+gnatmake -o hello hello -g -cargs -gnatyt  -bargs  -largs
+gcc -c -g -gnatyt hello.adb
+hello.adb:4:04: "Put_Line" is not visible
+hello.adb:4:04: non-visible declaration at a-textio.ads:264
+hello.adb:4:04: non-visible declaration at a-textio.ads:260
+hello.adb:4:12: (style) space required
+gnatmake: "hello.adb" compilation error
+@end example
+
+Compare this to the compiler output in @ref{No project files}; the
+gnatmake option @code{-cargs -gnatq -gnatQ} has been replaced by
+@code{-cargs -gnaty}, and an additional error is reported in
+@file{hello.adb} on line 4. This shows that @file{hello.adp} is being
+used to set the compiler options.
+
+Fixing the error, linking and running the code proceed as in @ref{No
+project files}.
+
+@node Set source search path, Use GNAT project file, Set compiler options, Compiling Examples
+@section Set source search path
+
+In this example, we show how to deal with files in more than one
+directory. We start with the same code as in @ref{No project files};
+create those files (with the errors present)
+
+Create the directory @file{Example_3}, containing:
+
+@file{hello_pkg.ads}:
+
+@example
+package Hello_Pkg is
+   procedure Say_Hello;
+end Hello_Pkg;
+@end example
+
+@file{hello_pkg.adb}:
+
+@example
+with Ada.Text_IO;
+package Hello_Pkg is
+   procedure Say_Hello
+   is begin
+      Ada.Text_IO.Put_Line ("Hello from hello_pkg.adb");
+   end Say_Hello;
+end Hello_Pkg;
+@end example
+
+These are the same files from example 1; @file{hello_pkg.adb} has an
+error on line 2.
+
+In addition, create a directory @file{Example_3/Other}, containing these files:
+
+@file{Other/hello_3.adb}:
+
+@example
+with Hello_Pkg;
+with Ada.Text_IO; use Ada.Text_IO;
+procedure Hello_3
+is begin
+   Hello_Pkg.Say_Hello;
+   Put_Line ("From hello_3");
+end Hello_3;
+@end example
+
+There are no errors in this file.
+
+@file{Other/other.adp}:
+
+@example
+src_dir=..
+comp_opt=-I..
+@end example
+
+Note that there must be no trailing spaces.
+
+In buffer @file{hello_3.adb}, invoke @samp{Ada | Project | Load...}, and
+select @file{Example_3/Other/other.adp}.
+
+Then, again in @file{hello_3.adb}, invoke @samp{Ada | Set main and
+Build}. You should get a @code{*compilation*} buffer containing
+something like (the directory paths will be different):
+
+@example
+cd c:/Examples/Example_3/Other/
+gnatmake -o hello_3 hello_3 -g -cargs -I.. -bargs  -largs
+gcc -c -g -I.. hello_3.adb
+gcc -c -I./ -g -I.. -I- C:\Examples\Example_3\hello_pkg.adb
+hello_pkg.adb:2:08: keyword "body" expected here [see file name]
+gnatmake: "C:\Examples\Example_3\hello_pkg.adb" compilation error
+@end example
+
+Compare the @code{-cargs} option to the compiler output in @ref{Set
+compiler options}; this shows that @file{other.adp} is being used to
+set the compiler options.
+
+Move to the error with @kbd{C-x `}. Ada mode searches the list of
+directories given by @code{src_dir} for the file mentioned in the
+compiler error message.
+
+Fixing the error, linking and running the code proceed as in @ref{No
+project files}.
+
+@node Use GNAT project file, Use multiple GNAT project files, Set source search path, Compiling Examples
+@section Use GNAT project file
+
+In this example, we show how to use a GNAT project file, with no Ada
+mode project file.
+
+Create the directory @file{Example_4}, containing:
+
+@file{hello_pkg.ads}:
+
+@example
+package Hello_Pkg is
+   procedure Say_Hello;
+end Hello_Pkg;
+@end example
+
+@file{hello_pkg.adb}:
+
+@example
+with Ada.Text_IO;
+package Hello_Pkg is
+   procedure Say_Hello
+   is begin
+      Ada.Text_IO.Put_Line ("Hello from hello_pkg.adb");
+   end Say_Hello;
+end Hello_Pkg;
+@end example
+
+These are the same files from example 1; @file{hello_pkg.adb} has an
+error on line 2.
+
+In addition, create a directory @file{Example_4/Gnat_Project},
+containing these files:
+
+@file{Gnat_Project/hello_4.adb}:
+
+@example
+with Hello_Pkg;
+with Ada.Text_IO; use Ada.Text_IO;
+procedure Hello_4
+is begin
+   Hello_Pkg.Say_Hello;
+   Put_Line ("From hello_4");
+end Hello_4;
+@end example
+
+There are no errors in this file.
+
+@file{Gnat_Project/hello_4.gpr}:
+
+@example
+Project Hello_4 is
+   for Source_Dirs use (".", "..");
+end Hello_4;
+@end example
+
+In buffer @file{hello_4.adb}, invoke @samp{Ada | Project | Load...}, and
+select @file{Example_4/Gnat_Project/hello_4.gpr}.
+
+Then, again in @file{hello_4.adb}, invoke @samp{Ada | Set main and
+Build}. You should get a @code{*compilation*} buffer containing
+something like (the directory paths will be different):
+
+@example
+cd c:/Examples/Example_4/Gnat_Project/
+gnatmake -o hello_4 hello_4 -Phello_4.gpr -cargs -gnatq -gnatQ -bargs  -largs
+gcc -c -g -gnatyt -gnatq -gnatQ -I- -gnatA c:\Examples\Example_4\Gnat_Project\hello_4.adb
+gcc -c -g -gnatyt -gnatq -gnatQ -I- -gnatA c:\Examples\Example_4\hello_pkg.adb
+hello_pkg.adb:2:08: keyword "body" expected here [see file name]
+gnatmake: "c:\examples\example_4\hello_pkg.adb" compilation error
+@end example
+
+Compare the @code{gcc} options to the compiler output in @ref{Set
+compiler options}; this shows that @file{hello_4.gpr} is being used to
+set the compiler options.
+
+Fixing the error, linking and running the code proceed as in @ref{No
+project files}.
+
+@node Use multiple GNAT project files,  , Use GNAT project file, Compiling Examples
+@section Use multiple GNAT project files
+
+In this example, we show how to use multiple GNAT project files,
+specifying the GNAT project search path in an Ada mode project file.
+
+Create the directory @file{Example_4} as specified in @ref{Use GNAT
+project file}.
+
+Create the directory @file{Example_5}, containing:
+
+@file{hello_5.adb}:
+
+@example
+with Hello_Pkg;
+with Ada.Text_IO; use Ada.Text_IO;
+procedure Hello_5
+is begin
+   Hello_Pkg.Say_Hello;
+   Put_Line ("From hello_5");
+end Hello_5;
+@end example
+
+There are no errors in this file.
+
+@file{hello_5.adp}:
+
+@example
+ada_project_path=../Example_4/Gnat_Project
+gpr_file=hello_5.gpr
+@end example
+
+@file{hello_5.gpr}:
+
+@example
+with "hello_4";
+Project Hello_5 is
+   for Source_Dirs use (".");
+   package Compiler is
+      for Default_Switches ("Ada") use ("-g", "-gnatyt");
+   end Compiler;
+end Hello_5;
+@end example
+
+In buffer @file{hello_5.adb}, invoke @samp{Ada | Project | Load...}, and
+select @file{Example_5/hello_5.adp}.
+
+Then, again in @file{hello_5.adb}, invoke @samp{Ada | Set main and
+Build}. You should get a @code{*compilation*} buffer containing
+something like (the directory paths will be different):
+
+@example
+cd c:/Examples/Example_5/
+gnatmake -o hello_5 hello_5 -Phello_5.gpr -g -cargs -gnatq -gnatQ -bargs  -largs
+gcc -c -g -gnatyt -g -gnatq -gnatQ -I- -gnatA c:\Examples\Example_5\hello_5.adb
+gcc -c -g -gnatyt -g -gnatq -gnatQ -I- -gnatA c:\Examples\Example_4\hello_pkg.adb
+hello_pkg.adb:2:08: keyword "body" expected here [see file name]
+gnatmake: "c:\examples\example_4\hello_pkg.adb" compilation error
+@end example
+
+Now type @kbd{C-x `}. @file{Example_4/hello_pkg.adb} is shown,
+demonstrating that @file{hello_5.gpr} and @file{hello_4.gpr} are being
+used to set the compilation search path.
+
+@node Moving Through Ada Code, Identifier completion, Compiling Examples, Top
+@chapter Moving Through Ada Code
+
+There are several easy to use commands to navigate through Ada code. All
+these functions are available through the Ada menu, and you can also
+use the following key bindings or the command names. Some of these
+menu entries are available only if the GNAT compiler is used, since
+the implementation relies on the GNAT cross-referencing information.
+
+@table @kbd
+@item M-C-e
+@findex ada-next-procedure
+Move to the next function/procedure/task, which ever comes next
+(@code{ada-next-procedure}).
+@item M-C-a
+@findex ada-previous-procedure
+Move to previous function/procedure/task
+(@code{ada-previous-procedure}).
+@item M-x ada-next-package
+@findex ada-next-package
+Move to next package.
+@item M-x ada-previous-package
+@findex ada-previous-package
+Move to previous package.
+@item C-c C-a
+@findex ada-move-to-start
+Move to matching start of @code{end} (@code{ada-move-to-start}).  If
+point is at the end of a subprogram, this command jumps to the
+corresponding @code{begin} if the user option
+@code{ada-move-to-declaration} is @code{nil} (default), otherwise it jumps to
+the subprogram declaration.
+@item C-c C-e
+@findex ada-move-to-end
+Move point to end of current block (@code{ada-move-to-end}).
+@item C-c o
+Switch between corresponding spec and body file
+(@code{ff-find-other-file}).  If point is in a subprogram, position
+point on the corresponding declaration or body in the other file.
+@item C-c c-d
+@findex ada-goto-declaration
+Move from any reference to its declaration, for from a declaration to
+its body (for procedures, tasks, private and incomplete types).
+@item C-c C-r
+@findex ada-find-references
+Runs the @file{gnatfind} command to search for all references to the
+identifier surrounding point (@code{ada-find-references}). Use
+@kbd{C-x `} (@code{next-error}) to visit each reference (as for
+compilation errors).
+@end table
+
+If the @code{ada-xref-create-ali} variable is non-@code{nil}, Emacs
+will try to run GNAT for you whenever cross-reference information is
+needed, and is older than the current source file.
+
+@node Identifier completion, Automatic Smart Indentation, Moving Through Ada Code, Top
+@chapter Identifier completion
+
+Emacs and Ada mode provide two general ways for the completion of
+identifiers. This is an easy way to type faster: you just have to type
+the first few letters of an identifiers, and then loop through all the
+possible completions.
+
+The first method is general for Emacs. It works by parsing all open
+files for possible completions.
+
+For instance, if the words @samp{my_identifier}, @samp{my_subprogram}
+are the only words starting with @samp{my} in any of the opened files,
+then you will have this scenario:
+
+@example
+You type:  my@kbd{M-/}
+Emacs inserts:  @samp{my_identifier}
+If you press @kbd{M-/} once again, Emacs replaces @samp{my_identifier} with
+@samp{my_subprogram}.
+Pressing @kbd{M-/} once more will bring you back to @samp{my_identifier}.
+@end example
+
+This is a very fast way to do completion, and the casing of words will
+also be respected.
+
+The second method (@kbd{C-@key{TAB}}) is specific to Ada mode and the GNAT
+compiler. Emacs will search the cross-information for possible
+completions.
+
+The main advantage is that this completion is more accurate: only
+existing identifier will be suggested.
+
+On the other hand, this completion is a little bit slower and requires
+that you have compiled your file at least once since you created that
+identifier.
+
+@table @kbd
+@item C-@key{TAB}
+@findex ada-complete-identifier
+Complete current identifier using cross-reference information.
+@item M-/
+Complete identifier using buffer information (not Ada-specific).
+@end table
+
+@node Automatic Smart Indentation, Formatting Parameter Lists, Identifier completion, Top
+@chapter Automatic Smart Indentation
+
+Ada mode comes with a full set of rules for automatic indentation. You
+can also configure the indentation, via the following variables:
+
+@table @asis
+@item @code{ada-broken-indent}           (default value: 2)
+Number of columns to indent the continuation of a broken line.
+
+@item @code{ada-indent}                  (default value: 3)
+Number of columns for default indentation.
+
+@item @code{ada-indent-record-rel-type}  (default value: 3)
+Indentation for @code{record} relative to @code{type} or @code{use}.
+
+@item @code{ada-indent-return}           (default value: 0)
+Indentation for @code{return} relative to @code{function} (if
+@code{ada-indent-return} is greater than 0), or the open parenthesis
+(if @code{ada-indent-return} is negative or 0).  Note that in the second
+case, when there is no open parenthesis, the indentation is done
+relative to @code{function} with the value of @code{ada-broken-indent}.
+
+@item @code{ada-label-indent}            (default value: -4)
+Number of columns to indent a label.
+
+@item @code{ada-stmt-end-indent}         (default value: 0)
+Number of columns to indent a statement @code{end} keyword on a separate line.
+
+@item @code{ada-when-indent}             (default value: 3)
+Indentation for @code{when} relative to @code{exception} or @code{case}.
+
+@item @code{ada-indent-is-separate}      (default value: t)
+Non-@code{nil} means indent @code{is separate} or @code{is abstract} if on a single line.
+
+@item @code{ada-indent-to-open-paren}    (default value: t)
+Non-@code{nil} means indent according to the innermost open parenthesis.
+
+@item @code{ada-indent-after-return}     (default value: t)
+Non-@code{nil} means that the current line will also be re-indented
+before inserting a newline, when you press @key{RET}.
+@end table
+
+Most of the time, the indentation will be automatic, i.e when you
+press @key{RET}, the cursor will move to the correct column on the
+next line.
+
+You can also indent single lines, or the current region, with @key{TAB}.
+
+Another mode of indentation exists that helps you to set up your
+indentation scheme. If you press @kbd{C-c @key{TAB}}, Ada mode will do
+the following:
+
+@itemize @bullet
+@item
+Reindent the current line, as @key{TAB} would do.
+@item
+Temporarily move the cursor to a reference line, i.e., the line that
+was used to calculate the current indentation.
+@item
+Display in the message window the name of the variable that provided
+the offset for the indentation.
+@end itemize
+
+The exact indentation of the current line is the same as the one for the
+reference line, plus an offset given by the variable.
+
+@table @kbd
+@item @key{TAB}
+Indent the current line or the current region.
+@item C-M-\
+Indent lines in the current region.
+@item C-c @key{TAB}
+Indent the current line and display the name of the variable used for
+indentation.
+@end table
+
+@node Formatting Parameter Lists, Automatic Casing, Automatic Smart Indentation, Top
+@chapter Formatting Parameter Lists
+
+@table @kbd
+@item C-c C-f
+@findex ada-format-paramlist
+Format the parameter list (@code{ada-format-paramlist}).
+@end table
+
+This aligns the declarations on the colon (@samp{:}) separating
+argument names and argument types, and aligns the @code{in},
+@code{out} and @code{in out} keywords.
+
+@node Automatic Casing, Statement Templates, Formatting Parameter Lists, Top
+@chapter Automatic Casing
+
+Casing of identifiers, attributes and keywords is automatically
+performed while typing when the variable @code{ada-auto-case} is set.
+Every time you press a word separator, the previous word is
+automatically cased.
+
+You can customize the automatic casing differently for keywords,
+attributes and identifiers. The relevant variables are the following:
+@code{ada-case-keyword}, @code{ada-case-attribute} and
+@code{ada-case-identifier}.
+
+All these variables can have one of the following values:
+
+@table @code
+@item downcase-word
+The word will be lowercase. For instance @code{My_vARIable} is
+converted to @code{my_variable}.
+
+@item upcase-word
+The word will be uppercase. For instance @code{My_vARIable} is
+converted to @code{MY_VARIABLE}.
+
+@item ada-capitalize-word
+The first letter and each letter following an underscore (@samp{_})
+are uppercase, others are lowercase. For instance @code{My_vARIable}
+is converted to @code{My_Variable}.
+
+@item ada-loose-case-word
+Characters after an underscore @samp{_} character are uppercase,
+others are not modified. For instance @code{My_vARIable} is converted
+to @code{My_VARIable}.
+@end table
+
+Ada mode allows you to define exceptions to these rules, in a file
+specified by the variable @code{ada-case-exception-file}
+(default @file{~/.emacs_case_exceptions}). Each line in this file
+specifies the casing of one word or word fragment. Comments may be
+included, separated from the word by a space.
+
+If the word starts with an asterisk (@key{*}), it defines the casing
+as a word fragment (or ``substring''); part of a word between two
+underscores or word boundary.
+
+For example:
+
+@example
+DOD        Department of Defense
+*IO
+GNAT       The GNAT compiler from Ada Core Technologies
+@end example
+
+The word fragment @code{*IO} applies to any word containing ``_io'';
+@code{Text_IO}, @code{Hardware_IO}, etc.
+
+@findex ada-create-case-exception
+There are two ways to add new items to this file: you can simply edit
+it as you would edit any text file. Or you can position point on the
+word you want to add, and select menu @samp{Ada | Edit | Create Case
+Exception}, or press @kbd{C-c C-y} (@code{ada-create-case-exception}).
+The word will automatically be added to the current list of exceptions
+and to the file.
+
+To define a word fragment case exception, select the word fragment,
+then select menu @samp{Ada | Edit | Create Case Exception Substring}.
+
+It is sometimes useful to have multiple exception files around (for
+instance, one could be the standard Ada acronyms, the second some
+company specific exceptions, and the last one some project specific
+exceptions). If you set up the variable @code{ada-case-exception-file}
+as a list of files, each of them will be parsed and used in your emacs
+session. However, when you save a new exception through the menu, as
+described above, the new exception will be added to the first file in
+the list.
+
+@table @kbd
+@item C-c C-b
+@findex ada-adjust-case-buffer
+Adjust case in the whole buffer (@code{ada-adjust-case-buffer}).
+@item C-c C-y
+Create a new entry in the exception dictionary, with the word under
+the cursor (@code{ada-create-case-exception})
+@item C-c C-t
+@findex ada-case-read-exceptions
+Rereads the exception dictionary from the file
+@code{ada-case-exception-file} (@code{ada-case-read-exceptions}).
+@end table
+
+@node Statement Templates, Comment Handling, Automatic Casing, Top
+@chapter Statement Templates
+
+Templates are defined for most Ada statements, using the Emacs
+``skeleton'' package. They can be inserted in the buffer using the
+following commands:
+
+@table @kbd
+@item C-c t b
+@findex ada-exception-block
+exception Block (@code{ada-exception-block}).
+@item C-c t c
+@findex ada-case
+case (@code{ada-case}).
+@item C-c t d
+@findex ada-declare-block
+declare Block (@code{ada-declare-block}).
+@item C-c t e
+@findex ada-else
+else (@code{ada-else}).
+@item C-c t f
+@findex ada-for-loop
+for Loop (@code{ada-for-loop}).
+@item C-c t h
+@findex ada-header
+Header (@code{ada-header}).
+@item C-c t i
+@findex ada-if
+if (@code{ada-if}).
+@item C-c t k
+@findex ada-package-body
+package Body (@code{ada-package-body}).
+@item C-c t l
+@findex ada-loop
+loop (@code{ada-loop}).
+@item C-c p
+@findex ada-subprogram-body
+subprogram body (@code{ada-subprogram-body}).
+@item C-c t t
+@findex ada-task-body
+task Body (@code{ada-task-body}).
+@item C-c t w
+@findex ada-while
+while Loop (@code{ada-while}).
+@item C-c t u
+@findex ada-use
+use (@code{ada-use}).
+@item C-c t x
+@findex ada-exit
+exit (@code{ada-exit}).
+@item C-c t C-a
+@findex ada-array
+array (@code{ada-array}).
+@item C-c t C-e
+@findex ada-elsif
+elsif (@code{ada-elsif}).
+@item C-c t C-f
+@findex ada-function-spec
+function Spec (@code{ada-function-spec}).
+@item C-c t C-k
+@findex ada-package-spec
+package Spec (@code{ada-package-spec}).
+@item C-c t C-p
+@findex ada-procedure-spec
+procedure Spec (@code{ada-package-spec}.
+@item C-c t C-r
+@findex ada-record
+record (@code{ada-record}).
+@item C-c t C-s
+@findex ada-subtype
+subtype (@code{ada-subtype}).
+@item C-c t C-t
+@findex ada-task-spec
+task Spec (@code{ada-task-spec}).
+@item C-c t C-u
+@findex ada-with
+with (@code{ada-with}).
+@item C-c t C-v
+@findex ada-private
+private (@code{ada-private}).
+@item C-c t C-w
+@findex ada-when
+when (@code{ada-when}).
+@item C-c t C-x
+@findex ada-exception
+exception (@code{ada-exception}).
+@item C-c t C-y
+@findex ada-type
+type (@code{ada-type}).
+@end table
+
+@node Comment Handling, GNU Free Documentation License, Statement Templates, Top
+@chapter Comment Handling
+
+By default, comment lines get indented like Ada code. There are a few
+additional functions to handle comments:
+
+@table @kbd
+@item M-;
+Start a comment in default column.
+@item M-j
+Continue comment on next line.
+@item C-c ;
+Comment the selected region (add -- at the beginning of lines).
+@item C-c :
+Uncomment the selected region
+@item M-q
+autofill the current comment.
+@end table
+
+@node GNU Free Documentation License, Index, Comment Handling, Top
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Index,  , GNU Free Documentation License, Top
+@unnumbered Index
+
+@printindex fn
+
+@bye

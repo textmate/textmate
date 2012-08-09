@@ -1,0 +1,331 @@
+This is ../../info/mairix-el, produced by makeinfo version 4.13 from
+mairix-el.texi.
+
+Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs network features
+START-INFO-DIR-ENTRY
+* Mairix: (mairix-el).          Emacs interface to the Mairix mail indexer.
+END-INFO-DIR-ENTRY
+
+
+File: mairix-el,  Node: Top,  Next: About mairix and mairix.el,  Up: (dir)
+
+mairix.el - Mairix interface for Emacs
+**************************************
+
+Mairix is a tool for indexing and searching words in locally stored
+mail.  It was written by Richard Curnow and is licensed under the GPL.
+
+   `mairix.el' is an interface to the mairix search engine.  It allows
+you to call mairix with a search term, easily create searches based on
+the currently displayed mail, save regularly used searches in your
+`.emacs' for future use and lets you call mairix for updating the
+database.
+
+   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* About mairix and mairix.el::  About the mairix search engine and mairix.el
+* Configuring mairix::          How to configure mairix
+* Setting up mairix.el::        Set up mairix.el
+* Using mairix.el::             List of interactive functions
+* Extending mairix.el::         Support your favorite mail reader!
+
+
+File: mairix-el,  Node: About mairix and mairix.el,  Next: Configuring mairix,  Prev: Top,  Up: Top
+
+1 About mairix and mairix.el
+****************************
+
+Mairix is a tool for indexing and searching words in locally stored
+mail.  It was written by Richard Curnow and is licensed under the GPL.
+Mairix comes with most popular GNU/Linux distributions, but it also
+runs under Windows (with cygwin), Mac OS X and Solaris.  The homepage
+can be found at `http://www.rpcurnow.force9.co.uk/mairix/index.html'
+
+   Though mairix might not be as flexible as other search tools like
+swish++ or namazu, it has the prime advantage of being incredibly fast.
+On current systems, it can easily search through headers and message
+bodies of thousands and thousands of mails in well under a second.
+Building the database necessary for searching might take a minute or
+two, but only has to be done once fully.  Afterwards, the updates are
+done incrementally and therefore are really fast, too.  Additionally,
+mairix is very easy to set up.
+
+   Mairix presents the search results by either populating a _virtual_
+maildir/MH folder with symlinks which point to the "real" message
+files, or if mbox is used, it creates a new mbox file which contains
+copies of the found messages.
+
+   `mairix.el' is an interface to the mairix search engine.  It allows
+you to call mairix with a search term, easily create searches based on
+the currently displayed mail, save regularly used searches in your
+`.emacs' for future use and lets you call mairix for updating the
+database.  It also lets you easily create search queries using graphical
+widgets, similar to a customization buffer.
+
+   Currently, `mairix.el' is only tested with mbox output together with
+RMail, Gnus, or VM as the Emacs mail program.  However, it should also
+work with Maildir or MH, and it should be very easy to integrate other
+Emacs mail programs into `mairix.el' (*note Extending mairix.el::).
+
+   If you use Gnus with maildir or MH, you should really use the native
+Gnus back end `nnmairix' instead, since it is more tightly integrated
+into Gnus and has more features.
+
+
+File: mairix-el,  Node: Configuring mairix,  Next: Setting up mairix.el,  Prev: About mairix and mairix.el,  Up: Top
+
+2 Configuring mairix
+********************
+
+Setting up mairix is easy: simply create a `.mairixrc' file with (at
+least) the following entries:
+
+     # Your mail base folder
+     base=~/Mail
+
+   This is the base folder for your mails.  All the following
+directories, except the one for the database, are relative to this base
+folder.
+
+     mbox = ... your mbox files which should be indexed ...
+     maildir= ... your maildir folders which should be indexed ...
+     mh= ... your nnml/mh folders which should be indexed ...
+
+   Specify all your maildir/nnml folders and mbox files (relative to the
+base directory!) you want to index with mairix.  Use colons to separate
+different files.  See the man-page for `mairixrc' for details.
+
+     mformat = mbox
+     database = ... location of database file ...
+
+   This chooses `mbox' as the output format for the mairix search
+results.  Currently, this is the supported format by mairix.el, but
+technically it should be possible to also use maildir or mh; it's just
+not tested (yet).
+
+   You should make sure that you don't accidentally index the search
+results produced by mairix.  This can be done by pointing
+`mairix-file-path' to a directory which is surely not indexed by mairix.
+Another possibility is to use something like
+
+     omit = mairix*
+
+   in the `.mairixrc' file, and prefix every search file you use with
+"mairix".
+
+     database = /home/user/.mairixdatabase
+
+   This specifies the name of the database file.  Note that this is not
+relative to the `base' folder.
+
+   See the man page for `mairixrc' for details and further options,
+especially regarding wildcard usage, which may be a little different
+than you are used to.
+
+   Now simply call `mairix' to create the index for the first time.
+Note that this may take a few minutes, but every following index will do
+the updates incrementally and hence is very fast.
+
+
+File: mairix-el,  Node: Setting up mairix.el,  Next: Using mairix.el,  Prev: Configuring mairix,  Up: Top
+
+3 Setting up mairix.el
+**********************
+
+First, put `mairix.el' in your Emacs search path and put `(require
+'mairix)' into your `.emacs' file.  Then, use `M-x customize-group
+mairix RET' to set your preferences for mairix.el.  The most important
+items are _Mairix File Path_, _Mairix Search File_ and _Mairix Mail
+Program_.  The latter specifies which mail program should be used to
+display the mairix search results.  Currently, RMail, Gnus with mbox
+files, and VM are supported.  If you use Gnus with maildir or mh, use
+the native Gnus back end nnmairix instead.
+
+   If you use another Emacs mail program which is not yet supported by
+mairix.el, it is pretty easy to integrate it.  *Note Extending
+mairix.el::, on how to integrate it into mairix.el.
+
+   Now you should be ready to go. *Note Using mairix.el::, for the
+available commands.
+
+
+File: mairix-el,  Node: Using mairix.el,  Next: Extending mairix.el,  Prev: Setting up mairix.el,  Up: Top
+
+4 Using mairix.el
+*****************
+
+There are currently no default key bindings for mairix.el, since those
+should depend on the used mail program and I personally do not use
+RMail, so I wouldn't know which key bindings are reasonable.  I hope
+some day this will change and `mairix.el' will come with some good key
+bindings for the different mail programs.  Feel free to send me your
+suggestions.  Until then, define some bindings yourself.  Here's a quick
+and dirty solution with global key definitions I currently use, which
+might or might not collide with some other modes.  Simply include them
+in your `.emacs' and adapt to your needs:
+
+     (global-set-key (kbd "C-c C-o m") 'mairix-search)
+     (global-set-key (kbd "C-c C-o w") 'mairix-widget-search)
+     (global-set-key (kbd "C-c C-o u") 'mairix-update-database)
+     (global-set-key (kbd "C-c C-o f") 'mairix-search-from-this-article)
+     (global-set-key (kbd "C-c C-o t") 'mairix-search-thread-this-article)
+     (global-set-key (kbd "C-c C-o b") 'mairix-widget-search-based-on-article)
+     (global-set-key (kbd "C-c C-o s") 'mairix-save-search)
+     (global-set-key (kbd "C-c C-o i") 'mairix-use-saved-search)
+     (global-set-key (kbd "C-c C-o e") 'mairix-edit-saved-searches)
+
+   Here's a description of the available interactive functions:
+
+`mairix-search'
+     Call mairix with a search query.  You will also be asked if you
+     want to include whole threads.  The results are saved by mairix in
+     the default mail file, which is set through the variable
+     `mairix-search-file', which again is prefixed by
+     `mairix-file-path'.  The results will then be displayed with the
+     chosen mail program.  The command used to call mairix is specified
+     by the variable `mairix-command', together with the options
+     `mairix-search-options'.  The latter has the default "-F" for
+     making searching faster.
+
+`mairix-widget-search'
+     Creates a mairix query using graphical widgets.  Very handy if
+     you're not (yet) familiar with the mairix search syntax.  Just
+     call it to see how it works.  You can then directly call mairix
+     with the search term or save it for future use.  Since mairix
+     allows almost arbitrary combinations of search commands (like "tc"
+     for "to or cc"), you might want to include some other fields.
+     This can be easily done by modifying `mairix-widget-fields-list'.
+
+`mairix-widget-search-based-on-article'
+     Create a mairix query using graphical widgets, but based on the
+     currently displayed article, i.e. the available fields will be
+     filled with the current header values.
+
+`mairix-search-from-this-article'
+     Search messages from sender of the current article.  This is
+     effectively a shortcut for calling `mairix-search' with
+     `f:current_from'.  If used with a prefix, include whole threads of
+     the found messages.
+
+`mairix-search-thread-this-article'
+     Search thread for the current article.  This is effectively a
+     shortcut for calling `mairix-search' with `m:msgid' of the current
+     article and enabled threads.
+
+`mairix-save-search'
+     Save the last search for future use.  You will have to specify a
+     name for the search and will then be asked if you want to save
+     your saved searches in your `.emacs'.  If you answer with yes, the
+     variable `mairix-saved-searches' will be saved in the customize
+     section of your `.emacs'.  You can also do this later by using
+     `mairix-edit-saved-searches'.
+
+`mairix-use-saved-search'
+     Call mairix with a previously saved search.  You will be asked for
+     the name of the saved search (use `TAB' for completion).
+
+`mairix-edit-saved-searches'
+     Edit your current mairix searches.  This is a simple major mode for
+     editing the contents of the variable `mairix-saved-searches'.  You
+     can edit and delete searches and save them in your `.emacs'.  You
+     can also use this mode to call mairix with one of the saved
+     searches.  Additionally, you can specify a file name for mairix to
+     use for a certain search instead of the default one.  This is
+     useful if you want to open different searches at the same time, or
+     if you want to regularly access certain searches without the need
+     to call mairix.
+
+`mairix-edit-saved-searches-customize'
+     Edit the variable `mairix-saved-searches' in a normal customization
+     buffer.  This function exists more or less for historic reasons,
+     but maybe you like it.
+
+`mairix-update-database'
+     Call mairix to update the database.  Mairix will be called with the
+     options `mairix-update-options'; the default is "-F" and "-Q" to
+     make updates as fast as possible.  Note that by using these
+     options, absolutely no integrity checking is done.  If your
+     database somehow gets corrupted, simply delete it and update.  If
+     `mairix-synchronous-update' is nil (the default), mairix will be
+     called in a subprocess so Emacs will still be usable while the
+     update is done.
+
+
+
+File: mairix-el,  Node: Extending mairix.el,  Prev: Using mairix.el,  Up: Top
+
+5 Extending mairix.el
+*********************
+
+Your favorite Emacs mail program is not supported?  Shame on me.  But
+it is really easy to integrate other mail programs into mairix.el.  Just
+do the following:
+
+*Write a display function*
+     Write a function that displays the mairix search results.  This
+     function will be called from `mairix.el' with the mail file/folder
+     as the single argument.  For example, the function
+     `mairix-rmail-display' is currently used for RMail and
+     `mairix-gnus-ephemeral-nndoc' is used for Gnus.
+
+*Write a get-header function*
+     Write a function that retrieves a header from the currently active
+     mail.  The single argument for this function is a string with the
+     header name.  For examples, see `mairix-rmail-fetch-field' and
+     `mairix-gnus-fetch-field' for RMail and Gnus, respectively.
+
+*Integrate the functions into mairix.el*
+     Add your mail program to the defcustom of `mairix-mail-program'.
+     Then add the functions to `mairix-display-functions' and
+     `mairix-get-mail-header-functions'.
+
+*Let me know...*
+     ...so that I can eventually integrate it into future versions of
+     mairix.el.
+
+   And that's it!
+
+
+
+Tag Table:
+Node: Top952
+Node: About mairix and mairix.el2568
+Node: Configuring mairix4684
+Node: Setting up mairix.el6679
+Node: Using mairix.el7635
+Node: Extending mairix.el12748
+
+End Tag Table
+
+
+Local Variables:
+coding: iso-8859-1
+End:

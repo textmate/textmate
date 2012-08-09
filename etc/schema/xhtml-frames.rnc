@@ -1,0 +1,26 @@
+# Frames Module
+
+include "xhtml-struct.rnc" {
+  html = element html { html.attlist, head, frameset }
+}
+frameset =
+  element frameset {
+    frameset.attlist,
+    ((frameset | frame)+ & noframes?)
+  }
+frameset.attlist =
+  Core.attrib,
+  attribute cols { MultiLength.datatype }?,
+  attribute rows { MultiLength.datatype }?
+frame = element frame { frame.attlist }
+frame.attlist =
+  Core.attrib,
+  attribute longdesc { URI.datatype }?,
+  attribute src { URI.datatype }?,
+  attribute frameborder { "1" | "0" }?,
+  attribute marginwidth { Pixels.datatype }?,
+  attribute marginheight { Pixels.datatype }?,
+  attribute noresize { "noresize" }?,
+  attribute scrolling { "yes" | "no" | "auto" }?
+noframes = element noframes { noframes.attlist, body }
+noframes.attlist = Common.attrib

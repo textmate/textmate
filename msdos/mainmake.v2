@@ -1,0 +1,302 @@
+# Top-level Makefile for Emacs under MS-DOS/DJGPP v2.0 or higher. -*-makefile-*-
+
+# Copyright (C) 1996-2012 Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+# make all	to compile and build Emacs.
+# make install	to install it (installs in-place, in `bin' subdir of top dir).
+# make TAGS	to update tags tables.
+#
+# make clean  or  make mostlyclean
+#      Delete all files from the current directory that are normally
+#      created by building the program.	 Don't delete the files that
+#      record the configuration.  Also preserve files that could be made
+#      by building, but normally aren't because the distribution comes
+#      with them.
+#
+#      Delete `.dvi' files here if they are not part of the distribution.
+#
+# make distclean
+#      Delete all files from the current directory that are created by
+#      configuring or building the program.  If you have unpacked the
+#      source and built the program without creating any other files,
+#      `make distclean' should leave only the files that were in the
+#      distribution.
+#
+# make maintainer-clean
+#      Delete everything from the current directory that can be
+#      reconstructed with this Makefile.  This typically includes
+#      everything deleted by distclean, plus more: *.elc files,
+#      C source files produced by Bison, tags tables, info files,
+#      and so on.
+#
+# make extraclean
+#      Still more severe - delete backup and autosave files, too.
+
+# This gork is required for those who use a Unix-style shell, and
+# have SHELL in the environment pointing to it.  Here we force
+# Make to use COMMAND.COM instead.  This Makefile won't work otherwise.
+# (The /xyzzy directory is used to minimize the chance that someone
+# actually has such a directory with an incompatible command.com.  We
+# used to have /dos there, but some Windows installations have an old
+# version of DOS stashed in that directory, and command.com from there
+# won't run on Windows, complaining about "Incorrect DOS version".
+# Make will look up PATH for the shell executable, so the directory name
+# is not important.)
+SHELL=/xyzzy/command
+MAKESHELL=/xyzzy/command
+
+# Generate a full pathname of the top-level installation directory
+top_srcdir := $(subst \,/,$(shell cd))
+
+# Q: Do we need to bootstrap?
+# A: Only if we find autogen/README, i.e. we are building out of
+#    a VCS-checkout (not a release), and src/b-emacs.exe does not exist.
+#    This avoids building a bootstrap-emacs and recompiling Lisp files
+#    when building a pretest/release tarball.  Recompiling Lisp files
+#    is BAD because lisp/Makefile.in requires a Unixy shell.
+boot :=
+ifneq ($(wildcard autogen/README),)
+ifeq ($(wildcard src/b-emacs.exe),)
+boot := b-emacs.exe
+endif
+endif
+
+# Subdirectories to run Make.  `lisp' is not included because the
+# compiled lisp files are part of the distribution.  (If we are
+# bootstrapping, the src target will run Make in `lisp' as well.)
+# leim is not included because it is part of the src target.
+all:	lib lib-src src emacs misc lispref lispintro
+
+lib: FRC
+	cd lib
+	$(MAKE) top_srcdir=${top_srcdir} all
+	cd ..
+
+lib-src: lib FRC
+	cd lib-src
+	$(MAKE) top_srcdir=${top_srcdir} all
+	cd ..
+
+# Pass to src/Makefile.in an additional BOOTSTRAPEMACS variable which
+# is either set to b-emacs.exe (in case bootstrap-emacs has not been
+# constructed yet) or the empty string (otherwise).
+# src/Makefile.in uses it to implement conditional dependencies, so that
+# files that need bootstrap-emacs to be built do not additionally need
+# to be kept fresher than b-emacs.exe.  Otherwise changing a single
+# file src/foo.c forces dumping a new bootstrap-emacs, then re-byte-compiling
+# all preloaded elisp files, and only then dump the actual src/emacs, which
+# is not wrong, but is overkill in 99.99% of the cases.
+src: lib lib-src FRC
+	cd src
+	$(MAKE) top_srcdir=${top_srcdir} BOOTSTRAPEMACS="${boot}" all
+	djecho -s '/-geometry/s,^.*,set environment HOME $(top_srcdir),' \
+	          '/environment *TERM/s/^.*/set environment TERM internal/' \
+	       >gdb.sed
+	sed -f gdb.sed _gdbinit >gdb.tmp
+	djecho -a gdb.tmp -s 'set environment USER root' \
+	                     'set environment NAME root' \
+	                     'set environment USERNAME root' \
+	                     'set environment EMACSPATH $(top_srcdir)/bin' \
+	                     'set environment SHELL $(subst \,/,$(COMSPEC))' \
+	                     'set environment PATH $(subst \,/,$(PATH))'
+	update gdb.tmp gdb.ini
+	rm -f gdb.tmp gdb.sed
+	cd ..
+	if exist src\bootlisp redir $(MAKE) -C lisp top_srcdir=${top_srcdir}
+	rm -f src/bootlisp
+	if exist leim\Makefile redir $(MAKE) -C leim top_srcdir=${top_srcdir}
+
+info: emacs misc lispref lispintro
+
+emacs misc lispref lispintro:	FRC
+	cd doc/$@
+	$(MAKE) top_srcdir=${top_srcdir} info
+	cd ../..
+
+install: all
+	if not exist bin\nul md bin
+	cd lib-src
+	command.com /c >/dev/null for %p in (hexl etags ctags ebrowse) do\
+	   if exist %p.exe mv -f %p.exe ../bin
+	cd ..
+	cd src
+	mv -f emacs.exe ../bin/
+	cd ..
+	djecho -s "(if (fboundp 'normal-top-level-add-subdirs-to-load-path)" \
+	          "    (normal-top-level-add-subdirs-to-load-path))" \
+	    > ./subdirs.el
+	if not exist .\site-lisp\subdirs.el \
+	   update ./subdirs.el ./site-lisp/subdirs.el
+	rm -f ./subdirs.el
+
+FRC:
+
+# We cannot use [a-zA-Z]* like the mainline distribution does, because
+# that causes all file names to be returned in upper-case on DOS...
+# Must use `find' to filter out loaddefs files; ignore errors if `find'
+# is not available or is an MS `find'.
+# The "cd $(CURDIR)" gork is for when `find' fails and leaves us inside
+# `lisp' or one of its subdirectories.
+TAGS tags:	lib-src FRC
+	cd lib-src
+	if exist etags.exe mv -f etags.exe ../bin
+	cd ..
+	- find $(CURDIR)/lisp -iname "*.el" -a -! -( -iname "*loaddefs.el" -o -iname "ldefs-boot.el" -) | ./bin/etags -o lisp/TAGS -
+	cd $(CURDIR)
+	cd src
+	../bin/etags --include=../lisp/TAGS \
+	 --regex='/[ 	]*DEFVAR_[A-Z_ 	(]+"\([^"]+\)"/' \
+	 $(CURDIR)/src/*.c $(CURDIR)/src/*.h \
+         $(CURDIR)/src/s/msdos.h $(CURDIR)/src/m/intel386.h
+	cd ..
+	./bin/etags --include=src/TAGS
+
+check:
+	@echo "We don't have any tests for GNU Emacs yet."
+
+clean mostlyclean:
+	cd lib
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lib-src
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd src
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd doc
+	cd emacs
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd misc
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lispref
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lispintro
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd ..
+	cd leim
+	if exist Makefile redir $(MAKE) $(MFLAGS) $@
+	cd ..
+
+top_distclean=rm -f Makefile */Makefile src/_gdbinit
+
+distclean maintainer-clean: FRC
+	cd src
+	$(MAKE) $(MFLAGS) $@
+	if exist bootlisp rm -f bootlisp
+	cd ..
+	cd lib
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lib-src
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd doc
+	cd emacs
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd misc
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lispref
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lispintro
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd ..
+	cd leim
+	if exist Makefile redir $(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lisp
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	${top_distclean}
+
+extraclean:
+	cd src
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lib
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lib-src
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd doc
+	cd emacs
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd misc
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lispref
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lispintro
+	-$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd ..
+	cd leim
+	if exist Makefile redir $(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lisp
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	${top_distclean}
+	-rm -f *~ #*
+
+.PHONY: bootstrap
+
+bootstrap-clean: FRC
+	cd lib
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd src
+	$(MAKE) $(MFLAGS) $@
+	cd ..
+	cd lib-src
+	$(MAKE) $(MFLAGS) maintainer-clean
+	cd ..
+	cd doc
+	cd emacs
+	-$(MAKE) $(MFLAGS) maintainer-clean
+	cd ../misc
+	-$(MAKE) $(MFLAGS) maintainer-clean
+	cd ../lispref
+	-$(MAKE) $(MFLAGS) maintainer-clean
+	cd ../lispintro
+	-$(MAKE) $(MFLAGS) maintainer-clean
+	cd ..
+	cd ..
+	cd leim
+	$(MAKE) $(MFLAGS) maintainer-clean
+	cd ..
+	cd lisp
+	$(MAKE) $(MFLAGS) bootstrap-clean
+	cd ..
+	${top_bootclean}
+
+bootstrap: bootstrap-clean FRC
+	command.com /e:2048 /c config msdos
+	$(MAKE) $(MFLAGS) info all
+

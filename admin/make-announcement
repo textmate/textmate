@@ -1,0 +1,87 @@
+#! /bin/bash
+
+## Copyright (C) 2002-2012  Free Software Foundation, Inc.
+
+## Author: Francesco Potorti` <pot@gnu.org>
+
+## This file is part of GNU Emacs.
+
+## GNU Emacs is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+
+## GNU Emacs is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+### Code:
+
+if [ $# -ne 2 ]; then
+    echo "usage: $0 <old version number> <new version number>" >&2
+    exit 1
+fi
+
+if [ ! -f INSTALL -o ! -f configure -o ! -d lib-src ]; then
+    echo "this script should be run in the emacs root directory" >&2
+    exit 2
+fi
+
+OLD=$1
+NEW=$2
+outfile=emacs-$NEW.announce
+oldtag=EMACS_PRETEST_$(echo $OLD|tr . _)
+newtag=EMACS_PRETEST_$(echo $NEW|tr . _)
+
+if [ -f $outfile ]; then
+    echo "$outfile exists"
+    echo -n "interrupt to abort, ENTER to overwrite "; read answer
+fi
+
+echo -n "tag name for OLD emacs version $OLD [$oldtag]: "; read answer
+if [ "$answer" ]; then oldtag=$answer; fi
+
+echo -n "tag name for NEW emacs version $NEW [$newtag]: "; read answer
+if [ "$answer" ]; then newtag=$answer; fi
+
+exec > $outfile
+
+cat <<EOF
+
+There is a new pretest available in
+
+  <ftp://alpha.gnu.org/gnu/emacs/pretest/emacs-$NEW.tar.gz>
+
+Please report results from compiling and running the pretest to
+<bug-gnu-emacs@gnu.org>.  Your feedback is necessary for us
+to know on which platforms the pretest has been tried.
+
+If you have the tars from the previous pretest, and you have the
+\`xdelta' utility, you can instead download the much smaller
+
+  <ftp://alpha.gnu.org/gnu/emacs/pretest/emacs-$OLD-$NEW.xdelta>
+
+You can use a command like
+
+  $ xdelta patch XDELTA PREVIOUS-TAR CURRENT-TAR
+
+to generate the new tar from the old one, where XDELTA is the xdelta
+file you downloaded, PREVIOUS-TAR is the tar file from the previous
+pretest, and CURRENT-TAR is the name of the tar file you downloaded.
+
+Information about xdelta can be found on the GNU ftp site, in
+/non-gnu/xdelta.README.
+
+Changes since $OLD
+
+EOF
+
+make-changelog-diff $oldtag $newtag
+
+echo " announcement created in $outfile" >&2
+

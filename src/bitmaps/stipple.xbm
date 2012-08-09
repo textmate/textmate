@@ -1,0 +1,4 @@
+#define stipple_width 16
+#define stipple_height 4
+static char stipple_bits[] = {
+  '\x55','\x55','\xee','\xee','\x55','\x55','\xba','\xbb'};

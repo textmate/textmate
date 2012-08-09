@@ -1,0 +1,114 @@
+#! /bin/sh
+
+# Enhanced sccs diff utility for use with vc mode.
+# This version is more compatible with rcsdiff(1).
+
+# Copyright (C) 1992-1993, 1995, 1997, 2001-2012
+#   Free Software Foundation, Inc.
+
+# Author: Paul Eggert
+# (according to authors.el)
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+DIFF="diff"
+usage="$0: Usage: vcdiff [--brief] [-q] [-r<sid1>] [-r<sid2>] [diffopts] sccsfile..."
+
+# Now that we use `sccs get' rather than just `get', we don't need this.
+# PATH=$PATH:/usr/ccs/bin:/usr/sccs:/usr/xpg4/bin # common SCCS hangouts
+
+echo="echo"
+sid1= sid2=
+
+for f
+do
+	case $f in
+	-*)
+		case $f in
+		--brief)
+			DIFF=cmp;;
+		-q)
+			echo=:;;
+		-r?*)
+			case $sid1 in
+			'')
+				sid1=$f
+				;;
+			*)
+				case $sid2 in
+				?*) echo "$usage" >&2; exit 2 ;;
+				esac
+				sid2=$f
+				;;
+			esac
+			;;
+		*)
+			options="$options $f"
+			;;
+		esac
+		shift
+		;;
+	*)
+		break
+		;;
+	esac
+done
+
+case $# in
+0)
+	echo "$usage" >&2
+	exit 2
+esac
+
+
+rev1= rev2= status=0
+trap 'status=2; exit' 1 2 13 15
+trap 'rm -f $rev1 $rev2 || status=2; exit $status' 0
+
+for f
+do
+	s=2
+
+	case $f in
+	s.* | */s.*)
+		if
+			rev1=`mktemp /tmp/geta.XXXXXXXX`
+			sccs get -s -p -k $sid1 "$f" > $rev1 &&
+			case $sid2 in
+			'')
+				workfile=`expr " /$f" : '.*/s.\(.*\)'`
+				;;
+			*)
+				rev2=`mktemp /tmp/getb.XXXXXXXX`
+				sccs get -s -p -k $sid2 "$f" > $rev2
+				workfile=$rev2
+			esac
+		then
+			$echo $DIFF $options $rev1 $workfile >&2
+			$DIFF $options $rev1 $workfile
+			s=$?
+		fi
+		;;
+	*)
+		echo "$0: $f is not an SCCS file" >&2
+	esac
+
+	if test $status -lt $s
+	then status=$s
+	fi
+done
+

@@ -1,0 +1,235 @@
+# -*- Makefile -*- for GNU Emacs on the Microsoft W32 API.
+# Copyright (C) 2011 Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+ALL = gnulib
+
+.PHONY: $(ALL)
+
+LOCAL_FLAGS	= -DHAVE_CONFIG_H=1 -I. -I../nt/inc -I../src
+LIBS 		=
+
+GNULIBOBJS = $(BLD)/dtoastr.$(O) \
+	     $(BLD)/getopt.$(O)  \
+	     $(BLD)/getopt1.$(O) \
+	     $(BLD)/strftime.$(O) \
+	     $(BLD)/time_r.$(O) \
+	     $(BLD)/md5.$(O) \
+	     $(BLD)/sha1.$(O) \
+	     $(BLD)/sha256.$(O) \
+	     $(BLD)/sha512.$(O) \
+	     $(BLD)/filemode.$(O)
+
+#
+# Build the library
+#
+$(BLD)/libgnu.$(A):	$(GNULIBOBJS)
+	- $(DEL) $@
+	$(AR) $(AR_OUT)$@ $(ALL_DEPS)
+
+gnulib:	stamp_BLD $(BLD)/libgnu.$(A)
+
+#
+# Build everything
+#
+all:		stamp_BLD $(ALL)
+
+### TAGS ###
+
+FRC:
+
+TAGS: FRC
+	 ../lib-src/$(BLD)/etags.exe *.c *.h
+
+### DEPENDENCIES ###
+
+EMACS_ROOT	= ..
+SRC		= .
+
+$(BLD)/dtoastr.$(O) : \
+	$(SRC)/dtoastr.c \
+	$(SRC)/ftoastr.c \
+	$(SRC)/ftoastr.h \
+	$(SRC)/intprops.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/getopt.$(O) : \
+	$(SRC)/getopt.c \
+	$(SRC)/getopt.h \
+	$(SRC)/getopt_int.h \
+	$(SRC)/gettext.h \
+	$(EMACS_ROOT)/nt/inc/unistd.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/getopt1.$(O) : \
+	$(SRC)/getopt1.c \
+	$(SRC)/getopt.h \
+	$(SRC)/getopt_int.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/strftime.$(O) : \
+	$(SRC)/strftime.c \
+	$(SRC)/strftime.h \
+	$(EMACS_ROOT)/nt/inc/stdbool.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/time_r.$(O) : \
+	$(SRC)/time_r.c \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/md5.$(O) : \
+	$(SRC)/md5.c \
+	$(SRC)/md5.h \
+	$(EMACS_ROOT)/nt/inc/stdint.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/sha1.$(O) : \
+	$(SRC)/sha1.c \
+	$(SRC)/sha1.h \
+	$(EMACS_ROOT)/nt/inc/stdint.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/sha256.$(O) : \
+	$(SRC)/sha256.c \
+	$(SRC)/sha256.h \
+	$(EMACS_ROOT)/nt/inc/stdint.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/sha512.$(O) : \
+	$(SRC)/sha512.c \
+	$(SRC)/sha512.h \
+	$(EMACS_ROOT)/nt/inc/stdint.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+$(BLD)/filemode.$(O) : \
+	$(SRC)/filemode.c \
+	$(SRC)/filemode.h \
+	$(EMACS_ROOT)/nt/inc/sys/stat.h \
+	$(EMACS_ROOT)/src/s/ms-w32.h \
+	$(EMACS_ROOT)/src/m/intel386.h \
+	$(EMACS_ROOT)/src/config.h
+
+# The following dependencies are for supporting parallel builds, where
+# we must make sure $(BLD) exists before any compilation starts.
+#
+$(BLD)/dtoastr.$(O) $(BLD)/getopt.$(O) $(BLD)/getopt1.$(O): stamp_BLD
+$(BLD)/strftime.$(O) $(BLD)/time_r.$(O) $(BLD)/md5.$(O): stamp_BLD
+$(BLD)/sha1.$(O) $(BLD)/sha256.$(O) $(BLD)/sha512.$(O): stamp_BLD
+$(BLD)/filemode.$(O): stamp_BLD
+
+#
+# Headers we would preprocess if we could.
+#
+getopt.h:	getopt_.h
+	$(CP) $(ALL_DEPS) $@
+
+#
+# Maintenance
+#
+clean:
+	- $(DEL) $(COMPILER_TEMP_FILES)
+	- $(DEL) getopt.h
+	- $(DEL_TREE) $(OBJDIR)
+	- $(DEL) stamp_BLD
+
+distclean:	cleanall
+	- $(DEL) TAGS
+	- $(DEL) Makefile
+
+maintainer-clean: distclean
+	- $(DEL) getopt_.h
+
+cleanall:	clean
+	- $(DEL_TREE) obj
+	- $(DEL_TREE) obj-spd
+	- $(DEL_TREE) oo
+	- $(DEL_TREE) oo-spd
+
+# A dummy target to force other targets to be evaluated.
+doit:
+
+getopt_.h: getopt.in.h $(ARG_NONNULL_H)
+	$(MAKE) $(MFLAGS) getopt_.h-$(SHELLTYPE)
+
+getopt_.h-CMD: doit
+	@echo getopt.in.h or $(ARG_NONNULL_H) is newer than getopt_.h.
+	@echo Run "$(MAKETYPE) getopt_h" in the lib/ subdirectory.
+	@echo You will need GNU Sed to be installed.
+	exit -1
+
+getopt_.h-SH: doit
+	@echo getopt.in.h or $(ARG_NONNULL_H) is newer than getopt_.h.
+	@echo Run '"$(MAKETYPE) getopt_h"' in the lib/ subdirectory.
+	@echo You will need GNU Sed to be installed.
+	exit -1
+
+# Generating getopt_.h from getopt.in.h.
+#
+# To avoid requiring all end users to install Sed, we have below
+# a maintainer-only target that produces getopt_.h from getopt.in.h.
+# For easier maintenance, all the strings that replace the @FOO@
+# placeholder are defined as Make macros below.
+
+HAVE_GETOPT_H = HAVE_GETOPT_H
+INCLUDE_NEXT = include_next
+PRAGMA_COLUMNS =
+NEXT_GETOPT_H = <getopt.h>
+ARG_NONNULL_H = ../build-aux/snippet/arg-nonnull.h
+
+getopt_h:
+	- $(DEL) getopt_.h-t getopt_.h
+	sed -e "s!@GUARD_PREFIX@!GL!g" \
+	    -e "s!@HAVE_GETOPT_H@!$(HAVE_GETOPT_H)!g" \
+	    -e "s!@INCLUDE_NEXT@!$(INCLUDE_NEXT)!g" \
+	    -e "s!@PRAGMA_SYSTEM_HEADER@!$(PRAGMA_SYSTEM_HEADER)!g" \
+	    -e "s!@PRAGMA_COLUMNS@!$(PRAGMA_COLUMNS)!g" \
+	    -e "s!@NEXT_GETOPT_H@!$(NEXT_GETOPT_H)!g" \
+	    -e "/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)" \
+	    -e "/^\# include_next/i # ifndef __GNUC__" \
+	    -e "/^\# include_next/i # include <next_getopt.h>" \
+	    -e "/^\# include_next/i # else" \
+	    -e "/^\# include_next/a # endif" \
+	      < getopt.in.h > getopt_.h-t
+	$(CP) getopt_.h-t getopt_.h
+	- $(DEL) getopt_.h-t

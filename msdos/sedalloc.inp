@@ -1,0 +1,24 @@
+# -sedalloc.inp-----------------------------------------------------------
+# Configuration script for SYSTEM_MALLOC/REL_ALLOC in src/config.h
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 2008-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^#define GNU_MALLOC  *1 *$/s|^.*$|/* #undef GNU_MALLOC */|
+/^#define REL_ALLOC.*$/a\
+\
+/* Inserted by the --with-system-malloc switch to config.bat.  */\
+#define SYSTEM_MALLOC 1
+/^#define REL_ALLOC  *1 *$/s|^.*$|/* #undef REL_ALLOC */|
+

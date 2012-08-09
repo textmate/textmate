@@ -1,9 +1,0 @@
-TEST_SOURCES = tests/*.cc
-SOURCES      = "{src/*.{c,cc},onig-latest/{enc/{ascii,euc_jp,iso8859_1,sjis,unicode,utf*},{reg*,st}}.c}"
-LINK        += text cf
-EXPORT       = src/{find,format_string,parser_fwd,regexp,snippet,glob,indent}.h onig-latest/oniguruma.h
-LIBS         = iconv
-
-FLAGS       += -IFrameworks/regexp/onig-latest
-C_FLAGS     += -Wno-pointer-sign -Wno-char-subscripts -Wno-conversion -Wno-error
-C_FLAGS     += -Wno-incompatible-pointer-types

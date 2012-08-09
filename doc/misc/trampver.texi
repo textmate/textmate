@@ -1,0 +1,69 @@
+@c -*-texinfo-*-
+@c texi/trampver.texi.  Generated from trampver.texi.in by configure.
+
+@c This is part of the Emacs manual.
+@c Copyright (C) 2003-2012 Free Software Foundation, Inc.
+@c See file doclicense.texi for copying conditions.
+
+@c In the Tramp CVS, the version number is auto-frobbed from
+@c configure.ac, so you should edit that file and run
+@c "autoconf && ./configure" to change the version number.
+@set trampver 2.2.3-24.1
+
+@c Other flags from configuration
+@set instprefix /usr/local
+@set lispdir /usr/local/share/emacs/site-lisp
+@set infodir /usr/local/share/info
+
+@c Formatting of the tramp program name consistent.
+@set tramp @sc{tramp}
+
+@c Whether or not describe GVFS integration.
+@ifclear noemacsgvfs
+@set emacsgvfs
+@end ifclear
+
+@c Whether or not describe gateway methods.
+@ifclear noemacsgw
+@set emacsgw
+@end ifclear
+
+@c Some flags which make the text independent on the (X)Emacs flavor.
+@c "emacs" resp "xemacs" are set in the Makefile.  Default is "emacs".
+@ifclear emacs
+@ifclear xemacs
+@set emacs
+@end ifclear
+@end ifclear
+
+@c Emacs values.
+@ifset emacs
+@set emacsname          Emacs
+@set emacsdir           emacs
+@set ftppackagename     Ange-FTP
+@set prefix             /
+@set prefixhop
+@set postfix            :
+@set postfixhop         :
+@set ipv6prefix         [
+@set ipv6postfix        ]
+@set emacsothername     XEmacs
+@set emacsotherdir      xemacs
+@set emacsotherfilename tramp-xemacs.html
+@end ifset
+
+@c XEmacs counterparts.
+@ifset xemacs
+@set emacsname          XEmacs
+@set emacsdir           xemacs
+@set ftppackagename     EFS
+@set prefix             /[
+@set prefixhop          [
+@set postfix            ]
+@set postfixhop         /
+@set ipv6prefix
+@set ipv6postfix
+@set emacsothername     Emacs
+@set emacsotherdir      emacs
+@set emacsotherfilename tramp-emacs.html
+@end ifset

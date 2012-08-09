@@ -1,0 +1,82 @@
+Copyright (C) 2009-2012 Free Software Foundation, Inc.
+Copyright (C) 2009, 2010, 2011
+  National Institute of Advanced Industrial Science and Technology (AIST)
+  Registration Number H13PRO009
+See the end of the file for license conditions.
+
+		   The charset map files directory
+
+This directory contains two kinds of charset map files; verbatim copies
+(or their compressed versions) of files freely available in the
+Internet, and newly created files based on freely available
+information.
+
+(1) Copied files (all files are copied on 2009-06-12)
+
+* CP932.TXT.gz
+
+The uncompressed version is available at:
+    <http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT>
+
+* PTCP154.gz
+
+The uncompressed version is available at:
+    <http://www.iana.org/assignments/charset-reg/PTCP154>
+
+* Uni2JIS.gz
+
+The version compressed by Unix's "compress" command is available at:
+    <http://kanji.zinbun.kyoto-u.ac.jp/~yasuoka/ftp/CJKtable/Uni2JIS.Z>
+
+* bulgarian-mik.txt.gz
+
+It is available at:
+    <http://czyborra.com/charsets/bulgarian-mik.txt.gz>.
+
+* cns2ucsdkw.txt.gz
+
+Uncompressed version is available at:
+    <http://kanji-database.cvs.sourceforge.net/viewvc/*checkout*/kanji-database/kanji-database/data/cns2ucsdkw.txt?revision=1.4>
+
+* stdenc.txt.gz and symbol.txt.gz
+
+The uncompressed versions are available at:
+    <http://www.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/stdenc.txt>
+    <http://www.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/symbol.txt>
+
+(2) Newly created files
+
+* CP720.map.gz and CP858.map.gz
+
+Created manually by looking at these pages:
+    <http://en.wikipedia.org/wiki/Code_page_720>.
+    <http://en.wikipedia.org/wiki/Code_page_859>.
+The text in that page is under the terms of the GNU Free Documentation
+License.
+
+* JISX213A.map.gz
+
+Created manually based on the description of the section 33 in "JIS X
+0213:2004 Amendment 1".  It lists 10 characters that are newly added
+to "JIS X 0213:2004".
+
+* MULE-*.map.gz
+
+Created by using ../mule-charsets.el in Emacs 22 as this:
+    % emacs-22 -batch -l ../mule-charsets.el
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

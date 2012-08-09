@@ -1,0 +1,3872 @@
+dnl  Autoconf script for GNU Emacs
+dnl To rebuild the `configure' script from this, execute the command
+dnl 	autoconf
+dnl in the directory containing this script.
+dnl If you changed any AC_DEFINES, also run autoheader.
+dnl
+dnl Copyright (C) 1994-1996, 1999-2012  Free Software Foundation, Inc.
+dnl
+dnl  This file is part of GNU Emacs.
+dnl
+dnl  GNU Emacs is free software: you can redistribute it and/or modify
+dnl  it under the terms of the GNU General Public License as published by
+dnl  the Free Software Foundation, either version 3 of the License, or
+dnl  (at your option) any later version.
+dnl
+dnl  GNU Emacs is distributed in the hope that it will be useful,
+dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl  GNU General Public License for more details.
+dnl
+dnl  You should have received a copy of the GNU General Public License
+dnl  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+AC_PREREQ(2.65)
+AC_INIT(emacs, 24.1)
+AC_CONFIG_HEADER(src/config.h:src/config.in)
+AC_CONFIG_SRCDIR(src/lisp.h)
+AC_CONFIG_AUX_DIR(build-aux)
+AM_INIT_AUTOMAKE
+
+dnl Support for --program-prefix, --program-suffix and
+dnl --program-transform-name options
+AC_ARG_PROGRAM
+
+dnl It is important that variables on the RHS not be expanded here,
+dnl hence the single quotes.  This is per the GNU coding standards, see
+dnl (autoconf) Installation Directory Variables
+dnl See also epaths.h below.
+lispdir='${datadir}/emacs/${version}/lisp'
+locallisppath='${datadir}/emacs/${version}/site-lisp:'\
+'${datadir}/emacs/site-lisp'
+lisppath='${locallisppath}:${lispdir}:${datadir}/emacs/${version}/leim'
+etcdir='${datadir}/emacs/${version}/etc'
+archlibdir='${libexecdir}/emacs/${version}/${configuration}'
+docdir='${datadir}/emacs/${version}/etc'
+gamedir='${localstatedir}/games/emacs'
+
+dnl OPTION_DEFAULT_OFF(NAME, HELP-STRING)
+dnl Create a new --with option that defaults to being disabled.
+dnl NAME is the base name of the option.  The shell variable with_NAME
+dnl   will be set to either the user's value (if the option is
+dnl   specified; 'yes' for a plain --with-NAME) or to 'no' (if the
+dnl   option is not specified).  Note that the shell variable name is
+dnl   constructed as autoconf does, by replacing non-alphanumeric
+dnl   characters with "_".
+dnl HELP-STRING is the help text for the option.
+AC_DEFUN([OPTION_DEFAULT_OFF], [dnl
+  AC_ARG_WITH([$1],[AS_HELP_STRING([--with-$1],[$2])],[],[dnl
+    m4_bpatsubst([with_$1], [[^0-9a-z]], [_])=no])dnl
+])dnl
+
+dnl OPTION_DEFAULT_ON(NAME, HELP-STRING)
+dnl Create a new --with option that defaults to being enabled.  NAME
+dnl   is the base name of the option.  The shell variable with_NAME
+dnl   will be set either to 'no' (for a plain --without-NAME) or to
+dnl   'yes' (if the option is not specified).  Note that the shell
+dnl   variable name is constructed as autoconf does, by replacing
+dnl   non-alphanumeric characters with "_".
+dnl HELP-STRING is the help text for the option.
+AC_DEFUN([OPTION_DEFAULT_ON], [dnl
+  AC_ARG_WITH([$1],[AS_HELP_STRING([--without-$1],[$2])],[],[dnl
+   m4_bpatsubst([with_$1], [[^0-9a-z]], [_])=yes])dnl
+])dnl
+
+OPTION_DEFAULT_ON([pop],[don't support POP mail retrieval with movemail])
+if test "$with_pop" = yes; then
+   AC_DEFINE(MAIL_USE_POP)
+fi
+AH_TEMPLATE(MAIL_USE_POP, [Define to support POP mail retrieval.])dnl
+
+OPTION_DEFAULT_OFF([kerberos],[support Kerberos-authenticated POP])
+if test "$with_kerberos" != no; then
+   AC_DEFINE(KERBEROS)
+fi
+AH_TEMPLATE(KERBEROS,
+	    [Define to support Kerberos-authenticated POP mail retrieval.])dnl
+
+OPTION_DEFAULT_OFF([kerberos5],[support Kerberos version 5 authenticated POP])
+if test "${with_kerberos5}" != no; then
+  if test "${with_kerberos}" = no; then
+    with_kerberos=yes
+    AC_DEFINE(KERBEROS)
+  fi
+  AC_DEFINE(KERBEROS5, 1, [Define to use Kerberos 5 instead of Kerberos 4.])
+fi
+
+OPTION_DEFAULT_OFF([hesiod],[support Hesiod to get the POP server host])
+dnl FIXME hesiod support may not be present, so it seems like an error
+dnl to define, or at least use, this unconditionally.
+if test "$with_hesiod" != no; then
+  AC_DEFINE(HESIOD, 1, [Define to support using a Hesiod database to find the POP server.])
+fi
+
+OPTION_DEFAULT_OFF([mmdf],[support MMDF mailboxes])
+if test "$with_mmdf" != no; then
+   AC_DEFINE(MAIL_USE_MMDF, 1, [Define to support MMDF mailboxes in movemail.])
+fi
+
+OPTION_DEFAULT_OFF([mail-unlink],[unlink, rather than empty, mail spool after reading])
+if test "$with_mail_unlink" != no; then
+   AC_DEFINE(MAIL_UNLINK_SPOOL, 1, [Define to unlink, rather than empty, mail spool after reading.])
+fi
+
+AC_ARG_WITH([mailhost],[AS_HELP_STRING([--with-mailhost=HOSTNAME],
+    [string giving default POP mail host])],
+    AC_DEFINE_UNQUOTED(MAILHOST, ["$withval"], [String giving fallback POP mail host.]))
+
+OPTION_DEFAULT_ON([sound],[don't compile with sound support])
+
+OPTION_DEFAULT_ON([sync-input],[process async input synchronously])
+if test "$with_sync_input" = yes; then
+   AC_DEFINE(SYNC_INPUT, 1, [Process async input synchronously.])
+fi
+
+dnl FIXME currently it is not the last.
+dnl This should be the last --with option, because --with-x is
+dnl added later on when we find the path of X, and it's best to
+dnl keep them together visually.
+AC_ARG_WITH([x-toolkit],[AS_HELP_STRING([--with-x-toolkit=KIT],
+ [use an X toolkit (KIT one of: yes or gtk, gtk3, lucid or athena, motif, no)])],
+[	  case "${withval}" in
+	    y | ye | yes )	val=gtk ;;
+	    n | no )		val=no  ;;
+	    l | lu | luc | luci | lucid )	val=lucid ;;
+	    a | at | ath | athe | athen | athena )	val=athena ;;
+	    m | mo | mot | moti | motif )	val=motif ;;
+	    g | gt | gtk  )	val=gtk ;;
+	    gtk3  )	val=gtk3 ;;
+	    * )
+AC_MSG_ERROR([`--with-x-toolkit=$withval' is invalid;
+this option's value should be `yes', `no', `lucid', `athena', `motif', `gtk' or
+`gtk3'.  `yes' and `gtk' are synonyms. `athena' and `lucid' are synonyms.])
+	    ;;
+	  esac
+	  with_x_toolkit=$val
+])
+
+OPTION_DEFAULT_OFF([wide-int], [prefer wide Emacs integers (typically 62-bit)])
+if test "$with_wide_int" = yes; then
+  AC_DEFINE([WIDE_EMACS_INT], 1, [Use long long for EMACS_INT if available.])
+fi
+
+dnl _ON results in a '--without' option in the --help output, so
+dnl the help text should refer to "don't compile", etc.
+OPTION_DEFAULT_ON([xpm],[don't compile with XPM image support])
+OPTION_DEFAULT_ON([jpeg],[don't compile with JPEG image support])
+OPTION_DEFAULT_ON([tiff],[don't compile with TIFF image support])
+OPTION_DEFAULT_ON([gif],[don't compile with GIF image support])
+OPTION_DEFAULT_ON([png],[don't compile with PNG image support])
+OPTION_DEFAULT_ON([rsvg],[don't compile with SVG image support])
+OPTION_DEFAULT_ON([xml2],[don't compile with XML parsing support])
+OPTION_DEFAULT_ON([imagemagick],[don't compile with ImageMagick image support])
+
+OPTION_DEFAULT_ON([xft],[don't use XFT for anti aliased fonts])
+OPTION_DEFAULT_ON([libotf],[don't use libotf for OpenType font support])
+OPTION_DEFAULT_ON([m17n-flt],[don't use m17n-flt for text shaping])
+
+OPTION_DEFAULT_ON([toolkit-scroll-bars],[don't use Motif or Xaw3d scroll bars])
+OPTION_DEFAULT_ON([xaw3d],[don't use Xaw3d])
+OPTION_DEFAULT_ON([xim],[don't use X11 XIM])
+OPTION_DEFAULT_OFF([ns],[use NeXTstep (Cocoa or GNUstep) windowing system])
+
+OPTION_DEFAULT_ON([gpm],[don't use -lgpm for mouse support on a GNU/Linux console])
+OPTION_DEFAULT_ON([dbus],[don't compile with D-Bus support])
+OPTION_DEFAULT_ON([gconf],[don't compile with GConf support])
+OPTION_DEFAULT_ON([gsettings],[don't compile with GSettings support])
+OPTION_DEFAULT_ON([selinux],[don't compile with SELinux support])
+OPTION_DEFAULT_ON([gnutls],[don't use -lgnutls for SSL/TLS support])
+
+## For the times when you want to build Emacs but don't have
+## a suitable makeinfo, and can live without the manuals.
+dnl http://lists.gnu.org/archive/html/emacs-devel/2008-04/msg01844.html
+OPTION_DEFAULT_ON([makeinfo],[don't require makeinfo for building manuals])
+
+## Makefile.in needs the cache file name.
+AC_SUBST(cache_file)
+
+## This is an option because I do not know if all info/man support
+## compressed files, nor how to test if they do so.
+OPTION_DEFAULT_ON([compress-info],[don't compress the installed Info pages])
+if test $with_compress_info = yes; then
+   GZIP_INFO=yes
+else
+   GZIP_INFO=
+fi
+AC_SUBST(GZIP_INFO)
+
+AC_ARG_WITH([pkg-config-prog],dnl
+[AS_HELP_STRING([--with-pkg-config-prog=PATH],
+                  [path to pkg-config for finding GTK and librsvg])])
+if test "X${with_pkg_config_prog}" != X; then
+   if test "${with_pkg_config_prog}" != yes; then
+      PKG_CONFIG="${with_pkg_config_prog}"
+   fi
+fi
+
+CRT_DIR=
+AC_ARG_WITH([crt-dir],dnl
+[AS_HELP_STRING([--with-crt-dir=DIR],[directory containing crtn.o etc.
+The default is /usr/lib, or /usr/lib64 on some platforms.])])
+CRT_DIR="${with_crt_dir}"
+
+AC_ARG_WITH(gameuser,dnl
+[AS_HELP_STRING([--with-gameuser=USER],[user for shared game score files])])
+test "X${with_gameuser}" != X && test "${with_gameuser}" != yes \
+  && gameuser="${with_gameuser}"
+test "X$gameuser" = X && gameuser=games
+
+AC_ARG_WITH([gnustep-conf],dnl
+[AS_HELP_STRING([--with-gnustep-conf=PATH],[path to GNUstep.conf; default $GNUSTEP_CONFIG_FILE, or /etc/GNUstep/GNUstep.conf])])
+test "X${with_gnustep_conf}" != X && test "${with_gnustep_conf}" != yes && \
+  GNUSTEP_CONFIG_FILE="${with_gnustep_conf}"
+test "X$GNUSTEP_CONFIG_FILE" = "X" && \
+     GNUSTEP_CONFIG_FILE=/etc/GNUstep/GNUstep.conf
+
+AC_ARG_ENABLE(ns-self-contained,
+[AS_HELP_STRING([--disable-ns-self-contained],
+                [disable self contained build under NeXTstep])],
+   EN_NS_SELF_CONTAINED=$enableval,
+   EN_NS_SELF_CONTAINED=yes)
+
+AC_ARG_ENABLE(asserts,
+[AS_HELP_STRING([--enable-asserts], [compile code with asserts enabled])],
+      USE_XASSERTS=$enableval,
+      USE_XASSERTS=no)
+
+AC_ARG_ENABLE(maintainer-mode,
+[AS_HELP_STRING([--disable-maintainer-mode],
+                [disable make rules and dependencies not useful (and sometimes
+		 confusing) to the casual installer])],
+      USE_MAINTAINER_MODE=$enableval,
+      USE_MAINTAINER_MODE=yes)
+if test $USE_MAINTAINER_MODE = yes; then
+  MAINT=
+else
+  MAINT=#
+fi
+AC_SUBST(MAINT)
+
+AC_ARG_ENABLE(locallisppath,
+[AS_HELP_STRING([--enable-locallisppath=PATH],
+                [directories Emacs should search for lisp files specific
+		 to this site])],
+if test "${enableval}" = "no"; then
+  locallisppath=
+elif test "${enableval}" != "yes"; then
+  locallisppath=${enableval}
+fi)
+
+AC_ARG_ENABLE(checking,
+[AS_HELP_STRING([--enable-checking@<:@=LIST@:>@],
+		[enable expensive run-time checks.  With LIST,
+		 enable only specific categories of checks.
+		 Categories are: all,yes,no.
+		 Flags are: stringbytes, stringoverrun, stringfreelist,
+		 xmallocoverrun, conslist])],
+[ac_checking_flags="${enableval}"],[])
+IFS="${IFS= 	}"; ac_save_IFS="$IFS"; IFS="$IFS,"
+for check in $ac_checking_flags
+do
+	case $check in
+	# these set all the flags to specific states
+	yes)		ac_enable_checking=1 ;;
+	no)		ac_enable_checking= ;
+			ac_gc_check_stringbytes= ;
+	                ac_gc_check_string_overrun= ;
+	                ac_gc_check_string_free_list= ;
+	                ac_xmalloc_overrun= ;
+	                ac_gc_check_cons_list= ;;
+	all)		ac_enable_checking=1 ;
+			ac_gc_check_stringbytes=1 ;
+	                ac_gc_check_string_overrun=1 ;
+	                ac_gc_check_string_free_list=1 ;
+	                ac_xmalloc_overrun=1 ;
+	                ac_gc_check_cons_list=1 ;;
+	# these enable particular checks
+	stringbytes) 	ac_gc_check_stringbytes=1 ;;
+	stringoverrun) 	ac_gc_check_string_overrun=1 ;;
+	stringfreelist) ac_gc_check_string_free_list=1 ;;
+	xmallocoverrun)	ac_xmalloc_overrun=1 ;;
+	conslist)	ac_gc_check_cons_list=1 ;;
+	*)	AC_MSG_ERROR(unknown check category $check) ;;
+	esac
+done
+IFS="$ac_save_IFS"
+
+if test x$ac_enable_checking != x ; then
+  AC_DEFINE(ENABLE_CHECKING, 1,
+[Enable expensive run-time checking of data types?])
+fi
+if test x$ac_gc_check_stringbytes != x ; then
+  AC_DEFINE(GC_CHECK_STRING_BYTES, 1,
+[Define this temporarily to hunt a bug.  If defined, the size of
+   strings is redundantly recorded in sdata structures so that it can
+   be compared to the sizes recorded in Lisp strings.])
+fi
+if test x$ac_gc_check_string_overrun != x ; then
+  AC_DEFINE(GC_CHECK_STRING_OVERRUN, 1,
+[Define this to check for short string overrun.])
+fi
+if test x$ac_gc_check_string_free_list != x ; then
+  AC_DEFINE(GC_CHECK_STRING_FREE_LIST, 1,
+[Define this to check the string free list.])
+fi
+if test x$ac_xmalloc_overrun != x ; then
+  AC_DEFINE(XMALLOC_OVERRUN_CHECK, 1,
+[Define this to check for malloc buffer overrun.])
+fi
+if test x$ac_gc_check_cons_list != x ; then
+  AC_DEFINE(GC_CHECK_CONS_LIST, 1,
+[Define this to check for errors in cons list.])
+fi
+
+AC_ARG_ENABLE(use-lisp-union-type,
+[AS_HELP_STRING([--enable-use-lisp-union-type],
+                [use a union for the Lisp_Object data type.
+		This is only useful for development for catching certain types of bugs.])],
+if test "${enableval}" != "no"; then
+   AC_DEFINE(USE_LISP_UNION_TYPE, 1,
+   [Define this to use a lisp union for the Lisp_Object data type.])
+fi)
+
+
+AC_ARG_ENABLE(profiling,
+[AS_HELP_STRING([--enable-profiling],
+		[build emacs with profiling support.
+		 This might not work on all platforms])],
+[ac_enable_profiling="${enableval}"],[])
+if test x$ac_enable_profiling != x ; then
+   PROFILING_CFLAGS="-DPROFILING=1 -pg"
+else
+   PROFILING_CFLAGS=
+fi
+AC_SUBST(PROFILING_CFLAGS)
+
+AC_ARG_ENABLE(autodepend,
+[AS_HELP_STRING([--enable-autodepend],
+		[automatically generate dependencies to .h-files.
+ 		 Requires GNU Make and Gcc. Enabled if GNU Make and Gcc is
+ 		 found])],
+[ac_enable_autodepend="${enableval}"],[ac_enable_autodepend=yes])
+
+#### Make srcdir absolute, if it isn't already.  It's important to
+#### avoid running the path through pwd unnecessarily, since pwd can
+#### give you automounter prefixes, which can go away.  We do all this
+#### so Emacs can find its files when run uninstalled.
+## Make sure CDPATH doesn't affect cd (in case PWD is relative).
+unset CDPATH
+case "${srcdir}" in
+  /* ) ;;
+  . )
+    ## We may be able to use the $PWD environment variable to make this
+    ## absolute.  But sometimes PWD is inaccurate.
+    ## Note: we used to use ${PWD} at the end instead of `pwd`,
+    ## but that tested only for a well-formed and valid PWD,
+    ## it did not object when PWD was well-formed and valid but just wrong.
+    if test ".${PWD}" != "." && test ".`(cd ${PWD} ; sh -c pwd)`" = ".`pwd`"  ;
+    then
+      srcdir="$PWD"
+    else
+      srcdir="`(cd ${srcdir}; pwd)`"
+    fi
+  ;;
+  *  ) srcdir="`(cd ${srcdir}; pwd)`" ;;
+esac
+
+#### Given the configuration name, set machfile and opsysfile to the
+#### names of the m/*.h and s/*.h files we should use.
+
+### Canonicalize the configuration name.
+
+AC_CANONICAL_HOST
+canonical=$host
+configuration=${host_alias-${build_alias-$host}}
+
+dnl This used to use changequote, but, apart from `changequote is evil'
+dnl per the autoconf manual, we can speed up autoconf somewhat by quoting
+dnl the great gob of text.  Thus it's not processed for possible expansion.
+dnl Just make sure the brackets remain balanced.
+dnl
+dnl Since Emacs can't find matching pairs of quotes, boundaries are
+dnl indicated by comments.
+dnl quotation begins
+[
+
+### If you add support for a new configuration, add code to this
+### switch statement to recognize your configuration name and select
+### the appropriate operating system and machine description files.
+
+### You would hope that you could choose an m/*.h file pretty much
+### based on the machine portion of the configuration name, and an s/*.h
+### file based on the operating system portion.  However, it turns out
+### that each m/*.h file is pretty manufacturer-specific - for
+### example mips.h is MIPS
+### So we basically have to have a special case for each
+### configuration name.
+###
+### As far as handling version numbers on operating systems is
+### concerned, make sure things will fail in a fixable way.  If
+### /etc/MACHINES doesn't say anything about version numbers, be
+### prepared to handle anything reasonably.  If version numbers
+### matter, be sure /etc/MACHINES says something about it.
+
+machine='' opsys='' unported=no
+case "${canonical}" in
+
+  ## GNU/Linux and similar ports
+  *-*-linux* )
+    opsys=gnu-linux
+    case ${canonical} in
+      alpha*)	machine=alpha ;;
+      s390x-*)	machine=ibms390x ;;
+      powerpc*)	machine=macppc ;;
+      sparc*)	machine=sparc ;;
+      ia64*)	machine=ia64 ;;
+      m68k*)	machine=m68k ;;
+      x86_64*)	machine=amdx86-64 ;;
+    esac
+  ;;
+
+  ## FreeBSD ports
+  *-*-freebsd* )
+    opsys=freebsd
+    case "${canonical}" in
+      alpha*)           machine=alpha ;;
+      amd64-*|x86_64-*) machine=amdx86-64 ;;
+      ia64-*)           machine=ia64 ;;
+      i[3456]86-*)      machine=intel386 ;;
+      powerpc-*)        machine=macppc ;;
+      sparc-*)          machine=sparc ;;
+      sparc64-*)        machine=sparc ;;
+    esac
+  ;;
+
+  ## FreeBSD kernel + glibc based userland
+  *-*-kfreebsd*gnu* )
+    opsys=gnu-kfreebsd
+    case "${canonical}" in
+      alpha*)           machine=alpha ;;
+      amd64-*|x86_64-*) machine=amdx86-64 ;;
+      ia64-*)           machine=ia64 ;;
+      i[3456]86-*)      machine=intel386 ;;
+      powerpc-*)        machine=macppc ;;
+      sparc-*)          machine=sparc ;;
+      sparc64-*)        machine=sparc ;;
+    esac
+  ;;
+
+  ## NetBSD ports
+  *-*-netbsd* )
+    opsys=netbsd
+    case "${canonical}" in
+      alpha*)      machine=alpha ;;
+      x86_64-*)    machine=amdx86-64 ;;
+      i[3456]86-*) machine=intel386 ;;
+      m68k-*)      machine=m68k ;;
+      powerpc-*)   machine=macppc ;;
+      sparc*-)     machine=sparc ;;
+      vax-*)       machine=vax ;;
+    esac
+  ;;
+
+  ## OpenBSD ports
+  *-*-openbsd* )
+    opsys=openbsd
+    case "${canonical}" in
+      alpha*)    machine=alpha ;;
+      x86_64-*)  machine=amdx86-64 ;;
+      i386-*)    machine=intel386 ;;
+      powerpc-*) machine=macppc ;;
+      sparc*)    machine=sparc ;;
+      vax-*)     machine=vax ;;
+    esac
+  ;;
+
+  ## Apple Darwin / Mac OS X
+  *-apple-darwin* )
+    case "${canonical}" in
+      i[3456]86-* )  machine=intel386 ;;
+      powerpc-* )    machine=macppc ;;
+      x86_64-* )     machine=amdx86-64 ;;
+      * )            unported=yes ;;
+    esac
+    opsys=darwin
+    # Define CPP as follows to make autoconf work correctly.
+    CPP="${CC-cc} -E -no-cpp-precomp"
+    # Use fink packages if available.
+    if test -d /sw/include && test -d /sw/lib; then
+      GCC_TEST_OPTIONS="-I/sw/include -L/sw/lib"
+      CPP="${CPP} ${GCC_TEST_OPTIONS}"
+      NON_GCC_TEST_OPTIONS=${GCC_TEST_OPTIONS}
+    fi
+  ;;
+
+  ## HP 9000 series 700 and 800, running HP/UX
+  hppa*-hp-hpux10.2* )
+    opsys=hpux10-20
+  ;;
+  hppa*-hp-hpux1[1-9]* )
+    opsys=hpux11
+    CFLAGS="-D_INCLUDE__STDC_A1_SOURCE $CFLAGS"
+  ;;
+
+  ## IBM machines
+  rs6000-ibm-aix4.[23]* )
+    machine=ibmrs6000 opsys=aix4-2
+  ;;
+  powerpc-ibm-aix4.[23]*  )
+    machine=ibmrs6000 opsys=aix4-2
+  ;;
+  rs6000-ibm-aix[56]* )
+    machine=ibmrs6000 opsys=aix4-2
+  ;;
+  powerpc-ibm-aix[56]*  )
+    machine=ibmrs6000 opsys=aix4-2
+  ;;
+
+  ## Silicon Graphics machines
+  ## Iris 4D
+  mips-sgi-irix6.5 )
+    opsys=irix6-5
+    # Without defining _LANGUAGE_C, things get masked out in the headers
+    # so that, for instance, grepping for `free' in stdlib.h fails and
+    # AC_HEADER_STD_C fails.   (MIPSPro 7.2.1.2m compilers, Irix 6.5.3m).
+    NON_GNU_CPP="/lib/cpp -D_LANGUAGE_C"
+    NON_GCC_TEST_OPTIONS="-D_LANGUAGE_C"
+  ;;
+
+  ## Suns
+  *-sun-solaris* \
+    | i[3456]86-*-solaris2* | i[3456]86-*-sunos5* \
+    | x86_64-*-solaris2*    | x86_64-*-sunos5*)
+    case "${canonical}" in
+      i[3456]86-*-* )     machine=intel386 ;;
+      amd64-*-*|x86_64-*-*)	machine=amdx86-64 ;;
+      sparc* )		machine=sparc ;;
+      * )		unported=yes ;;
+    esac
+    case "${canonical}" in
+      *-sunos5.6* | *-solaris2.6* )
+		opsys=sol2-6
+		NON_GNU_CPP=/usr/ccs/lib/cpp
+		RANLIB="ar -ts"
+		;;
+      *-sunos5.[7-9]* | *-solaris2.[7-9]* )
+		opsys=sol2-6
+		emacs_check_sunpro_c=yes
+		NON_GNU_CPP=/usr/ccs/lib/cpp
+		;;
+      *-sunos5* | *-solaris* )
+		opsys=sol2-10
+		emacs_check_sunpro_c=yes
+		NON_GNU_CPP=/usr/ccs/lib/cpp
+		;;
+    esac
+    ## Watch out for a compiler that we know will not work.
+    case "${canonical}" in
+     *-solaris* | *-sunos5* )
+		if [ "x$CC" = x/usr/ucb/cc ]; then
+		  ## /usr/ucb/cc doesn't work;
+		  ## we should find some other compiler that does work.
+		  unset CC
+		fi
+		;;
+      *) ;;
+    esac
+  ;;
+
+  ## Intel 386 machines where we don't care about the manufacturer.
+  i[3456]86-*-* )
+    machine=intel386
+    case "${canonical}" in
+      *-cygwin )                opsys=cygwin ;;
+      *-darwin* )               opsys=darwin
+                                CPP="${CC-cc} -E -no-cpp-precomp"
+ 				;;
+      *-sysv4.2uw* )	  	opsys=unixware; NON_GNU_CPP=/lib/cpp ;;
+      *-sysv5uw* )	  	opsys=unixware; NON_GNU_CPP=/lib/cpp ;;
+      *-sysv5OpenUNIX* )  	opsys=unixware; NON_GNU_CPP=/lib/cpp ;;
+      ## Otherwise, we'll fall through to the generic opsys code at the bottom.
+    esac
+  ;;
+
+  * )
+    unported=yes
+  ;;
+esac
+
+### If the code above didn't choose an operating system, just choose
+### an operating system based on the configuration name.  You really
+### only want to use this when you have no idea what the right
+### operating system is; if you know what operating systems a machine
+### runs, it's cleaner to make it explicit in the case statement
+### above.
+if test x"${opsys}" = x; then
+  case "${canonical}" in
+    *-gnu* )				opsys=gnu ;;
+    * )
+      unported=yes
+    ;;
+  esac
+fi
+
+]
+dnl quotation ends
+
+if test $unported = yes; then
+  AC_MSG_ERROR([Emacs hasn't been ported to `${canonical}' systems.
+Check `etc/MACHINES' for recognized configuration names.])
+fi
+
+if test -n "$machine"; then
+  machfile="m/${machine}.h"
+else
+  machfile=
+fi
+opsysfile="s/${opsys}.h"
+
+
+#### Choose a compiler.
+test -n "$CC" && cc_specified=yes
+
+# Save the value of CFLAGS that the user specified.
+SPECIFIED_CFLAGS="$CFLAGS"
+
+dnl Sets GCC=yes if using gcc.
+AC_PROG_CC
+AM_PROG_CC_C_O
+
+# Initialize gnulib right after verifying that the C compiler works.
+gl_EARLY
+
+# On Suns, sometimes $CPP names a directory.
+if test -n "$CPP" && test -d "$CPP"; then
+  CPP=
+fi
+
+## If not using gcc, and on Solaris, and no CPP specified, see if
+## using a Sun compiler, which needs -Xs to prevent whitespace.
+if test x"$GCC" != xyes && test x"$emacs_check_sunpro_c" = xyes && \
+ test x"$CPP" = x; then
+  AC_MSG_CHECKING([whether we are using a Sun C compiler])
+  AC_CACHE_VAL(emacs_cv_sunpro_c,
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],
+[[#ifndef __SUNPRO_C
+fail;
+#endif
+]])], emacs_cv_sunpro_c=yes, emacs_cv_sunpro_c=no)])
+  AC_MSG_RESULT($emacs_cv_sunpro_c)
+
+  if test x"$emacs_cv_sunpro_c" = xyes; then
+    NON_GNU_CPP="$CC -E -Xs"
+  fi
+fi
+
+#### Some systems specify a CPP to use unless we are using GCC.
+#### Now that we know whether we are using GCC, we can decide whether
+#### to use that one.
+if test "x$NON_GNU_CPP" != x && test x$GCC != xyes && test "x$CPP" = x
+then
+  CPP="$NON_GNU_CPP"
+fi
+
+#### Some systems specify a CC to use unless we are using GCC.
+#### Now that we know whether we are using GCC, we can decide whether
+#### to use that one.
+if test "x$NON_GNU_CC" != x && test x$GCC != xyes &&
+  test x$cc_specified != xyes
+then
+  CC="$NON_GNU_CC"
+fi
+
+if test x$GCC = xyes; then
+  test "x$GCC_TEST_OPTIONS" != x && CC="$CC $GCC_TEST_OPTIONS"
+else
+  test "x$NON_GCC_TEST_OPTIONS" != x && CC="$CC $NON_GCC_TEST_OPTIONS"
+fi
+
+### Use -Wdeclaration-after-statement if the compiler supports it
+AC_MSG_CHECKING([whether gcc understands -Wdeclaration-after-statement])
+SAVE_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Wdeclaration-after-statement"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])], has_option=yes, has_option=no)
+if test $has_option = yes; then
+   C_WARNINGS_SWITCH="-Wdeclaration-after-statement $C_WARNINGS_SWITCH"
+fi
+AC_MSG_RESULT($has_option)
+CFLAGS="$SAVE_CFLAGS"
+unset has_option
+unset SAVE_CFLAGS
+
+### Use -Wold-style-definition if the compiler supports it
+# This can be removed when conversion to standard C is finished.
+AC_MSG_CHECKING([whether gcc understands -Wold-style-definition])
+SAVE_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Wold-style-definition"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])], has_option=yes, has_option=no)
+if test $has_option = yes; then
+   C_WARNINGS_SWITCH="-Wold-style-definition $C_WARNINGS_SWITCH"
+fi
+AC_MSG_RESULT($has_option)
+CFLAGS="$SAVE_CFLAGS"
+unset has_option
+unset SAVE_CFLAGS
+
+### Use -Wimplicit-function-declaration if the compiler supports it
+AC_MSG_CHECKING([whether gcc understands -Wimplicit-function-declaration])
+SAVE_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Wimplicit-function-declaration"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])], has_option=yes, has_option=no)
+if test $has_option = yes; then
+   C_WARNINGS_SWITCH="-Wimplicit-function-declaration $C_WARNINGS_SWITCH"
+fi
+AC_MSG_RESULT($has_option)
+CFLAGS="$SAVE_CFLAGS"
+unset has_option
+unset SAVE_CFLAGS
+
+AC_SUBST(C_WARNINGS_SWITCH)
+
+
+#### Some other nice autoconf tests.
+
+dnl checks for programs
+AC_PROG_CPP
+AC_PROG_INSTALL
+if test "x$RANLIB" = x; then
+  AC_PROG_RANLIB
+fi
+
+## Although we're running on an amd64 kernel, we're actually compiling for
+## the x86 architecture.  The user should probably have provided an
+## explicit --build to `configure', but if everything else than the kernel
+## is running in i386 mode, we can help them out.
+if test "$machine" = "amdx86-64"; then
+  AC_CHECK_DECL([i386])
+  if test "$ac_cv_have_decl_i386" = "yes"; then
+    canonical=`echo "$canonical" | sed -e 's/^amd64/i386/' -e 's/^x86_64/i386/'`
+    machine=intel386
+    machfile="m/${machine}.h"
+  fi
+fi
+
+AC_PATH_PROG(INSTALL_INFO, install-info)
+AC_PATH_PROG(INSTALL_INFO, install-info,, /usr/sbin)
+AC_PATH_PROG(INSTALL_INFO, install-info,:, /sbin)
+dnl Don't use GZIP, which is used by gzip for additional parameters.
+AC_PATH_PROG(GZIP_PROG, gzip)
+
+
+## Need makeinfo >= 4.6 (?) to build the manuals.
+AC_PATH_PROG(MAKEINFO, makeinfo, no)
+dnl By this stage, configure has already checked for egrep and set EGREP,
+dnl or exited with an error if no egrep was found.
+if test "$MAKEINFO" != "no" && \
+  test x"`$MAKEINFO --version 2> /dev/null | $EGREP 'texinfo[[^0-9]]*([[1-4]][[0-9]]+|[[5-9]]|4\.[[6-9]]|4\.[[1-5]][[0-9]]+)'`" = x; then
+   MAKEINFO=no
+fi
+
+## Makeinfo is unusual.  For a released Emacs, the manuals are
+## pre-built, and not deleted by the normal clean rules.  makeinfo is
+## therefore in the category of "special tools" not normally required, which
+## configure does not have to check for (eg autoconf itself).
+## In a Bazaar checkout on the other hand, the manuals are not included.
+## So makeinfo is a requirement to build from Bazaar, and configure
+## should test for it as it does for any other build requirement.
+## We use the presence of $srcdir/info/emacs to distinguish a release,
+## with pre-built manuals, from a Bazaar checkout.
+HAVE_MAKEINFO=yes
+
+if test "$MAKEINFO" = "no"; then
+  MAKEINFO=makeinfo
+  if test "x${with_makeinfo}" = "xno"; then
+    HAVE_MAKEINFO=no
+  elif test ! -e $srcdir/info/emacs; then
+    AC_MSG_ERROR( [You do not seem to have makeinfo >= 4.6, and your
+source tree does not seem to have pre-built manuals in the `info' directory.
+Either install a suitable version of makeinfo, or re-run configure
+with the `--without-makeinfo' option to build without the manuals.] )
+  fi
+fi
+AC_SUBST(HAVE_MAKEINFO)
+
+dnl Add our options to ac_link now, after it is set up.
+
+if test x$GCC = xyes; then
+  test "x$GCC_LINK_TEST_OPTIONS" != x && \
+    ac_link="$ac_link $GCC_LINK_TEST_OPTIONS"
+else
+  test "x$NON_GCC_LINK_TEST_OPTIONS" != x && \
+    ac_link="$ac_link $NON_GCC_LINK_TEST_OPTIONS"
+fi
+
+dnl We need -znocombreloc if we're using a relatively recent GNU ld.
+dnl If we can link with the flag, it shouldn't do any harm anyhow.
+dnl (Don't use `-z nocombreloc' as -z takes no arg on Irix.)
+dnl Treat GCC specially since it just gives a non-fatal `unrecognized option'
+dnl if not built to support GNU ld.
+
+late_LDFLAGS=$LDFLAGS
+if test x$GCC = xyes; then
+  LDFLAGS="$LDFLAGS -Wl,-znocombreloc"
+else
+  LDFLAGS="$LDFLAGS -znocombreloc"
+fi
+
+AC_MSG_CHECKING([for -znocombreloc])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],
+  [AC_MSG_RESULT(yes)],
+  LDFLAGS=$late_LDFLAGS
+  [AC_MSG_RESULT(no)])
+
+
+# The value of CPP is a quoted variable reference, so we need to do this
+# to get its actual value...
+CPP=`eval "echo $CPP"`
+
+
+dnl The function dump-emacs will not be defined and temacs will do
+dnl (load "loadup") automatically unless told otherwise.
+test "x$CANNOT_DUMP" = "x" && CANNOT_DUMP=no
+case "$opsys" in
+  your-opsys-here) CANNOT_DUMP=yes ;;
+esac
+
+test "$CANNOT_DUMP" = "yes" && \
+  AC_DEFINE(CANNOT_DUMP, 1, [Define if Emacs cannot be dumped on your system.])
+
+AC_SUBST(CANNOT_DUMP)
+
+
+UNEXEC_OBJ=unexelf.o
+case "$opsys" in
+  # MSDOS uses unexcoff.o
+  # MSWindows uses unexw32.o
+  aix4-2)
+   UNEXEC_OBJ=unexaix.o
+   ;;
+  cygwin)
+   UNEXEC_OBJ=unexcw.o
+   ;;
+  darwin)
+   UNEXEC_OBJ=unexmacosx.o
+   ;;
+  hpux10-20 | hpux11)
+   UNEXEC_OBJ=unexhp9k800.o
+   ;;
+  sol2-10)
+   # Use the Solaris dldump() function, called from unexsol.c, to dump
+   # emacs, instead of the generic ELF dump code found in unexelf.c.
+   # The resulting binary has a complete symbol table, and is better
+   # for debugging and other observability tools (debuggers, pstack, etc).
+   #
+   # If you encounter a problem using dldump(), please consider sending
+   # a message to the OpenSolaris tools-linking mailing list:
+   #      http://mail.opensolaris.org/mailman/listinfo/tools-linking
+   #
+   # It is likely that dldump() works with older Solaris too, but this has
+   # not been tested, so for now this change is for Solaris 10 or newer.
+   UNEXEC_OBJ=unexsol.o
+   ;;
+esac
+
+LD_SWITCH_SYSTEM=
+case "$opsys" in
+  freebsd)
+   ## Let `ld' find image libs and similar things in /usr/local/lib.
+   ## The system compiler, GCC, has apparently been modified to not
+   ## look there, contrary to what a stock GCC would do.
+   LD_SWITCH_SYSTEM=-L/usr/local/lib
+   ;;
+
+  gnu-linux)
+   ## cpp test was "ifdef __mips__", but presumably this is equivalent...
+   case $host_cpu in mips*) LD_SWITCH_SYSTEM="-G 0";; esac
+   ;;
+
+  netbsd)
+   LD_SWITCH_SYSTEM="-Wl,-rpath,/usr/pkg/lib -L/usr/pkg/lib -Wl,-rpath,/usr/local/lib -L/usr/local/lib"
+   ;;
+
+  openbsd)
+   ## Han Boetes <han@mijncomputer.nl> says this is necessary,
+   ## otherwise Emacs dumps core on elf systems.
+   LD_SWITCH_SYSTEM="-Z"
+   ;;
+esac
+AC_SUBST(LD_SWITCH_SYSTEM)
+
+ac_link="$ac_link $LD_SWITCH_SYSTEM"
+
+## This setting of LD_SWITCH_SYSTEM references LD_SWITCH_X_SITE_AUX,
+## which has not been defined yet.  When this was handled with cpp,
+## it was expanded to null when configure sourced the s/*.h file.
+## Thus LD_SWITCH_SYSTEM had different values in configure and the Makefiles.
+## FIXME it would be cleaner to put this in LD_SWITCH_SYSTEM_TEMACS
+## (or somesuch), but because it is supposed to go at the _front_
+## of LD_SWITCH_SYSTEM, we cannot do that in exactly the same way.
+## Compare with the gnu-linux case below, which added to the end
+## of LD_SWITCH_SYSTEM, and so can instead go at the front of
+## LD_SWITCH_SYSTEM_TEMACS.
+case "$opsys" in
+  netbsd|openbsd)
+   ## _AUX_RPATH is like _AUX, but uses -rpath instead of -R.
+   LD_SWITCH_SYSTEM="\$(LD_SWITCH_X_SITE_AUX_RPATH) $LD_SWITCH_SYSTEM" ;;
+esac
+
+
+C_SWITCH_MACHINE=
+if test "$machine" = "alpha"; then
+  AC_CHECK_DECL([__ELF__])
+  if test "$ac_cv_have_decl___ELF__" = "yes"; then
+    ## With ELF, make sure that all common symbols get allocated to in the
+    ## data section.  Otherwise, the dump of temacs may miss variables in
+    ## the shared library that have been initialized.  For example, with
+    ## GNU libc, __malloc_initialized would normally be resolved to the
+    ## shared library's .bss section, which is fatal.
+    if test "x$GCC" = "xyes"; then
+      C_SWITCH_MACHINE="-fno-common"
+    else
+      AC_MSG_ERROR([What gives?  Fix me if DEC Unix supports ELF now.])
+    fi
+  else
+    UNEXEC_OBJ=unexalpha.o
+  fi
+fi
+AC_SUBST(C_SWITCH_MACHINE)
+
+AC_SUBST(UNEXEC_OBJ)
+
+C_SWITCH_SYSTEM=
+## Some programs in src produce warnings saying certain subprograms
+## are too complex and need a MAXMEM value greater than 2000 for
+## additional optimization.  --nils@exp-math.uni-essen.de
+test "$opsys" = "aix4.2" && test "x$GCC" != "xyes" && \
+  C_SWITCH_SYSTEM="-ma -qmaxmem=4000"
+## gnu-linux might need -D_BSD_SOURCE on old libc5 systems.
+## It is redundant in glibc2, since we define _GNU_SOURCE.
+AC_SUBST(C_SWITCH_SYSTEM)
+
+
+LIBS_SYSTEM=
+case "$opsys" in
+  ## IBM's X11R5 uses -lIM and -liconv in AIX 3.2.2.
+  aix4-2) LIBS_SYSTEM="-lrts -lIM -liconv" ;;
+
+  freebsd) LIBS_SYSTEM="-lutil" ;;
+
+  hpux*) LIBS_SYSTEM="-l:libdld.sl" ;;
+
+  sol2*) LIBS_SYSTEM="-lsocket -lnsl" ;;
+
+  ## Motif needs -lgen.
+  unixware) LIBS_SYSTEM="-lsocket -lnsl -lelf -lgen" ;;
+esac
+AC_SUBST(LIBS_SYSTEM)
+
+
+### Make sure subsequent tests use flags consistent with the build flags.
+
+if test x"${OVERRIDE_CPPFLAGS}" != x; then
+  CPPFLAGS="${OVERRIDE_CPPFLAGS}"
+else
+  CPPFLAGS="$C_SWITCH_SYSTEM $C_SWITCH_MACHINE $CPPFLAGS"
+fi
+
+# Suppress obsolescent Autoconf test for size_t; Emacs assumes C89 or better.
+AC_DEFUN([AC_TYPE_SIZE_T])
+# Likewise for obsolescent test for uid_t, gid_t; Emacs assumes them.
+AC_DEFUN([AC_TYPE_UID_T])
+
+dnl Do this early because it can frob feature test macros for Unix-98 &c.
+AC_SYS_LARGEFILE
+
+
+LIB_MATH=-lm
+LIB_STANDARD=
+START_FILES=
+
+dnl NB do not use CRT_DIR unquoted here, since it might not be set yet.
+case $opsys in
+  cygwin )
+    LIB_MATH=
+    START_FILES='pre-crt0.o'
+    ;;
+  darwin )
+    ## Adding -lm confuses the dynamic linker, so omit it.
+    LIB_MATH=
+    START_FILES='pre-crt0.o'
+    ;;
+  freebsd )
+    LIB_STANDARD='-lgcc -lc -lgcc $(CRT_DIR)/crtend.o $(CRT_DIR)/crtn.o'
+    START_FILES='pre-crt0.o $(CRT_DIR)/crt1.o $(CRT_DIR)/crti.o $(CRT_DIR)/crtbegin.o'
+    ;;
+  gnu-linux | gnu-kfreebsd )
+    LIB_STANDARD='-lgcc -lc -lgcc $(CRT_DIR)/crtn.o'
+    START_FILES='pre-crt0.o $(CRT_DIR)/crt1.o $(CRT_DIR)/crti.o'
+    ;;
+  hpux10-20 | hpux11 )
+    LIB_STANDARD=-lc
+    START_FILES='pre-crt0.o $(CRT_DIR)/crt0.o'
+    ;;
+  dnl NB this may be adjusted below.
+  netbsd | openbsd )
+    LIB_STANDARD='-lgcc -lc -lgcc $(CRT_DIR)/crtend.o'
+    START_FILES='pre-crt0.o $(CRT_DIR)/crt0.o $(CRT_DIR)/crtbegin.o'
+    ;;
+esac
+
+AC_SUBST(LIB_MATH)
+AC_SUBST(START_FILES)
+
+dnl Not all platforms use crtn.o files.  Check if the current one does.
+crt_files=
+
+for file in x $LIB_STANDARD $START_FILES; do
+  case "$file" in
+    *CRT_DIR*) crt_files="$crt_files `echo $file | sed -e 's|.*/||'`" ;;
+  esac
+done
+
+if test "x$crt_files" != x; then
+
+  ## If user specified a crt-dir, use that unconditionally.
+  crt_gcc=no
+
+  if test "X$CRT_DIR" = "X"; then
+
+    CRT_DIR=/usr/lib            # default
+
+    case "$canonical" in
+      x86_64-*-linux-gnu* | s390x-*-linux-gnu*)
+      ## On x86-64 and s390x GNU/Linux distributions, the standard library
+      ## can be in a variety of places.  We only try /usr/lib64 and /usr/lib.
+      ## For anything else (eg /usr/lib32), it is up the user to specify
+      ## the location (bug#5655).
+      ## Test for crtn.o, not just the directory, because sometimes the
+      ## directory exists but does not have the relevant files (bug#1287).
+      ## FIXME better to test for binary compatibility somehow.
+      test -e /usr/lib64/crtn.o && CRT_DIR=/usr/lib64
+      ;;
+
+      powerpc64-*-linux-gnu* | sparc64-*-linux-gnu*) CRT_DIR=/usr/lib64 ;;
+    esac
+
+    case "$opsys" in
+      hpux10-20) CRT_DIR=/lib ;;
+    esac
+
+    test "x${GCC}" = xyes && crt_gcc=yes
+
+  fi                            # CRT_DIR = ""
+
+  crt_missing=
+
+  for file in $crt_files; do
+
+    ## If we're using gcc, try to determine it automatically by asking
+    ## gcc.  [If this doesn't work, CRT_DIR will remain at the
+    ## system-dependent default from above.]
+    if test $crt_gcc = yes && test ! -e $CRT_DIR/$file; then
+
+       crt_file=`$CC --print-file-name=$file 2>/dev/null`
+       case "$crt_file" in
+         */*)
+           CRT_DIR=`AS_DIRNAME(["$crt_file"])`
+           ;;
+       esac
+    fi
+
+    dnl We expect all the files to be in a single directory, so after the
+    dnl first there is no point asking gcc.
+    crt_gcc=no
+
+    test -e $CRT_DIR/$file || crt_missing="$crt_missing $file"
+  done                          # $crt_files
+
+  test "x$crt_missing" = x || \
+    AC_MSG_ERROR([Required file(s) not found:$crt_missing
+Try using the --with-crt-dir option.])
+
+fi                              # crt_files != ""
+
+AC_SUBST(CRT_DIR)
+
+case $opsys in
+  netbsd | openbsd )
+    if test -f $CRT_DIR/crti.o; then
+
+        test -f $CRT_DIR/crtn.o || \
+          AC_MSG_ERROR([Required file not found: crtn.o])
+
+        LIB_STANDARD='-lgcc -lc -lgcc $(CRT_DIR)/crtend.o $(CRT_DIR)/crtn.o'
+        START_FILES='pre-crt0.o $(CRT_DIR)/crt0.o $(CRT_DIR)/crti.o $(CRT_DIR)/crtbegin.o'
+    fi
+    ;;
+esac
+
+
+dnl This function definition taken from Gnome 2.0
+dnl PKG_CHECK_MODULES(GSTUFF, gtk+-2.0 >= 1.3 glib = 1.3.4, action-if, action-not)
+dnl defines GSTUFF_LIBS, GSTUFF_CFLAGS, see pkg-config man page
+dnl also defines GSTUFF_PKG_ERRORS on error
+AC_DEFUN([PKG_CHECK_MODULES], [
+  succeeded=no
+
+  AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+
+  if test "$PKG_CONFIG" = "no" ; then
+     ifelse([$4], , [AC_MSG_ERROR([
+      *** The pkg-config script could not be found. Make sure it is in your path, or give the full path to pkg-config with the PKG_CONFIG environment variable or --with-pkg-config-prog.  Or see http://www.freedesktop.org/software/pkgconfig to get pkg-config.])], [$4])
+  else
+     PKG_CONFIG_MIN_VERSION=0.9.0
+     if $PKG_CONFIG --atleast-pkgconfig-version $PKG_CONFIG_MIN_VERSION; then
+        AC_MSG_CHECKING(for $2)
+
+        if $PKG_CONFIG --exists "$2" 2>&AS_MESSAGE_LOG_FD; then
+            AC_MSG_RESULT(yes)
+            succeeded=yes
+
+            AC_MSG_CHECKING($1_CFLAGS)
+            $1_CFLAGS=`$PKG_CONFIG --cflags "$2"|sed -e 's,///*,/,g'`
+            AC_MSG_RESULT($$1_CFLAGS)
+
+            AC_MSG_CHECKING($1_LIBS)
+            $1_LIBS=`$PKG_CONFIG --libs "$2"|sed -e 's,///*,/,g'`
+            AC_MSG_RESULT($$1_LIBS)
+        else
+            AC_MSG_RESULT(no)
+            $1_CFLAGS=""
+            $1_LIBS=""
+            ## If we have a custom action on failure, don't print errors, but
+            ## do set a variable so people can do so.
+            $1_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "$2"`
+            ifelse([$4], ,echo $$1_PKG_ERRORS,)
+        fi
+
+        AC_SUBST($1_CFLAGS)
+        AC_SUBST($1_LIBS)
+     else
+        echo "*** Your version of pkg-config is too old. You need version $PKG_CONFIG_MIN_VERSION or newer."
+        echo "*** See http://www.freedesktop.org/software/pkgconfig"
+     fi
+  fi
+
+  if test $succeeded = yes; then
+     ifelse([$3], , :, [$3])
+  else
+     ifelse([$4], , [AC_MSG_ERROR([Library requirements ($2) not met; consider adjusting the PKG_CONFIG_PATH environment variable if your libraries are in a nonstandard prefix so pkg-config can find them.])], [$4])
+  fi
+])
+
+
+if test "${with_sound}" != "no"; then
+  # Sound support for GNU/Linux and the free BSDs.
+  AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h soundcard.h,
+    have_sound_header=yes)
+  # Emulation library used on NetBSD.
+  AC_CHECK_LIB(ossaudio, _oss_ioctl, LIBSOUND=-lossaudio, LIBSOUND=)
+  AC_SUBST(LIBSOUND)
+
+  ALSA_REQUIRED=1.0.0
+  ALSA_MODULES="alsa >= $ALSA_REQUIRED"
+  PKG_CHECK_MODULES(ALSA, $ALSA_MODULES, HAVE_ALSA=yes, HAVE_ALSA=no)
+  if test $HAVE_ALSA = yes; then
+    SAVE_CFLAGS="$CFLAGS"
+    SAVE_LIBS="$LIBS"
+    CFLAGS="$ALSA_CFLAGS $CFLAGS"
+    LIBS="$ALSA_LIBS $LIBS"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <asoundlib.h>]], [[snd_lib_error_set_handler (0);]])],
+                    emacs_alsa_normal=yes,
+	            emacs_alsa_normal=no)
+    if test "$emacs_alsa_normal" != yes; then
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <alsa/asoundlib.h>]],
+                     [[snd_lib_error_set_handler (0);]])],
+                     emacs_alsa_subdir=yes,
+	             emacs_alsa_subdir=no)
+      if test "$emacs_alsa_subdir" != yes; then
+        AC_MSG_ERROR([pkg-config found alsa, but it does not compile.  See config.log for error messages.])
+      fi
+      ALSA_CFLAGS="$ALSA_CFLAGS -DALSA_SUBDIR_INCLUDE"
+    fi
+
+    CFLAGS="$SAVE_CFLAGS"
+    LIBS="$SAVE_LIBS"
+    LIBSOUND="$LIBSOUND $ALSA_LIBS"
+    CFLAGS_SOUND="$CFLAGS_SOUND $ALSA_CFLAGS"
+    AC_DEFINE(HAVE_ALSA, 1, [Define to 1 if ALSA is available.])
+  fi
+
+  dnl Define HAVE_SOUND if we have sound support.  We know it works and
+  dnl compiles only on the specified platforms.  For others, it
+  dnl probably doesn't make sense to try.
+  if test x$have_sound_header = xyes || test $HAVE_ALSA = yes; then
+     case "$opsys" in
+       dnl defined __FreeBSD__ || defined __NetBSD__ || defined __linux__
+       gnu-linux|freebsd|netbsd)
+         AC_DEFINE(HAVE_SOUND, 1, [Define to 1 if you have sound support.])
+         ;;
+     esac
+  fi
+
+  AC_SUBST(CFLAGS_SOUND)
+fi
+
+dnl checks for header files
+AC_CHECK_HEADERS(sys/select.h sys/time.h unistd.h utime.h \
+  linux/version.h sys/systeminfo.h \
+  stdio_ext.h fcntl.h coff.h pty.h sys/mman.h \
+  sys/vlimit.h sys/resource.h locale.h sys/_mbstate_t.h \
+  sys/utsname.h pwd.h utmp.h dirent.h util.h)
+
+AC_MSG_CHECKING(if personality LINUX32 can be set)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/personality.h>]], [[personality (PER_LINUX32)]])],
+               emacs_cv_personality_linux32=yes,
+	       emacs_cv_personality_linux32=no)
+AC_MSG_RESULT($emacs_cv_personality_linux32)
+
+if test $emacs_cv_personality_linux32 = yes; then
+  AC_DEFINE(HAVE_PERSONALITY_LINUX32, 1,
+            [Define to 1 if personality LINUX32 can be set.])
+fi
+
+dnl On Solaris 8 there's a compilation warning for term.h because
+dnl it doesn't define `bool'.
+AC_CHECK_HEADERS(term.h, , , -)
+AC_HEADER_TIME
+AC_CHECK_DECLS([sys_siglist])
+if test $ac_cv_have_decl_sys_siglist != yes; then
+  # For Tru64, at least:
+  AC_CHECK_DECLS([__sys_siglist])
+  if test $ac_cv_have_decl___sys_siglist = yes; then
+    AC_DEFINE(sys_siglist, __sys_siglist,
+              [Define to any substitute for sys_siglist.])
+  fi
+fi
+AC_HEADER_SYS_WAIT
+
+dnl Some systems have utime.h but don't declare the struct anyplace.
+AC_CACHE_CHECK(for struct utimbuf, emacs_cv_struct_utimbuf,
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#ifdef TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
+#ifdef HAVE_UTIME_H
+#include <utime.h>
+#endif]], [[static struct utimbuf x; x.actime = x.modtime;]])],
+  emacs_cv_struct_utimbuf=yes, emacs_cv_struct_utimbuf=no))
+if test $emacs_cv_struct_utimbuf = yes; then
+  AC_DEFINE(HAVE_STRUCT_UTIMBUF, 1, [Define to 1 if `struct utimbuf' is declared by <utime.h>.])
+fi
+
+dnl Check for speed_t typedef.
+AC_CACHE_CHECK(for speed_t, emacs_cv_speed_t,
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <termios.h>]], [[speed_t x = 1;]])],
+    emacs_cv_speed_t=yes, emacs_cv_speed_t=no)])
+if test $emacs_cv_speed_t = yes; then
+  AC_DEFINE(HAVE_SPEED_T, 1,
+  	   [Define to 1 if `speed_t' is declared by <termios.h>.])
+fi
+
+AC_CACHE_CHECK(for struct timeval, emacs_cv_struct_timeval,
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#ifdef TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif]], [[static struct timeval x; x.tv_sec = x.tv_usec;]])],
+  emacs_cv_struct_timeval=yes, emacs_cv_struct_timeval=no))
+HAVE_TIMEVAL=$emacs_cv_struct_timeval
+if test $emacs_cv_struct_timeval = yes; then
+  AC_DEFINE(HAVE_TIMEVAL, 1, [Define to 1 if `struct timeval' is declared by <sys/time.h>.])
+fi
+
+AC_CACHE_CHECK(for struct exception, emacs_cv_struct_exception,
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <math.h>]],
+[[static struct exception x; x.arg1 = x.arg2 = x.retval; x.name = ""; x.type = 1;]])],
+  emacs_cv_struct_exception=yes, emacs_cv_struct_exception=no))
+HAVE_EXCEPTION=$emacs_cv_struct_exception
+if test $emacs_cv_struct_exception != yes; then
+  AC_DEFINE(NO_MATHERR, 1, [Define to 1 if you don't have struct exception in math.h.])
+fi
+
+AC_CHECK_HEADERS(sys/socket.h)
+AC_CHECK_HEADERS(net/if.h, , , [AC_INCLUDES_DEFAULT
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif])
+AC_CHECK_HEADERS(ifaddrs.h, , , [AC_INCLUDES_DEFAULT
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif])
+AC_CHECK_HEADERS(net/if_dl.h, , , [AC_INCLUDES_DEFAULT
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif])
+AC_CHECK_FUNCS(getifaddrs freeifaddrs)
+
+dnl checks for structure members
+AC_CHECK_MEMBERS([struct ifreq.ifr_flags, struct ifreq.ifr_hwaddr,
+		  struct ifreq.ifr_netmask, struct ifreq.ifr_broadaddr,
+		  struct ifreq.ifr_addr,
+		  struct ifreq.ifr_addr.sa_len], , ,
+		 [AC_INCLUDES_DEFAULT
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif])
+
+dnl checks for compiler characteristics
+
+dnl Testing __STDC__ to determine prototype support isn't good enough.
+dnl DEC C, for instance, doesn't define it with default options, and
+dnl is used on 64-bit systems (OSF Alphas).  Similarly for volatile
+dnl and void *.
+AC_C_PROTOTYPES
+AC_C_VOLATILE
+AC_C_CONST
+AC_CACHE_CHECK([for void * support], emacs_cv_void_star,
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[void * foo;]])],
+                   emacs_cv_void_star=yes, emacs_cv_void_star=no)])
+if test $emacs_cv_void_star = yes; then
+  AC_DEFINE(POINTER_TYPE, void)
+else
+  AC_DEFINE(POINTER_TYPE, char)
+fi
+AH_TEMPLATE(POINTER_TYPE,
+	    [Define as `void' if your compiler accepts `void *'; otherwise
+	     define as `char'.])dnl
+
+dnl Check for endianness.
+AC_C_BIGENDIAN
+
+AC_CACHE_CHECK([for  __attribute__ ((__aligned__ (expr)))],
+  [emacs_cv_attribute_aligned],
+  [AC_COMPILE_IFELSE(
+     [AC_LANG_PROGRAM(
+	[[char __attribute__ ((__aligned__ (1 << 3))) c;]],
+	[[]])],
+     [emacs_cv_attribute_aligned=yes],
+     [emacs_cv_attribute_aligned=no])])
+if test $emacs_cv_attribute_aligned = yes; then
+  AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1,
+    [Define to 1 if GCC-style __attribute__ ((__aligned__ (expr))) works.])
+fi
+
+dnl check for Make feature
+AC_PROG_MAKE_SET
+
+DEPFLAGS=
+MKDEPDIR=":"
+deps_frag=deps.mk
+dnl check for GNU Make if we have GCC and autodepend is on.
+if test "$GCC" = yes && test "$ac_enable_autodepend" = yes; then
+   AC_MSG_CHECKING([whether we are using GNU Make])
+   HAVE_GNU_MAKE=no
+   testval=`${MAKE-make} --version 2>/dev/null | grep 'GNU Make'`
+   if test "x$testval" != x; then
+      HAVE_GNU_MAKE=yes
+   else
+      ac_enable_autodepend=no
+   fi
+   AC_MSG_RESULT([$HAVE_GNU_MAKE])
+   if test $HAVE_GNU_MAKE = yes; then
+      AC_MSG_CHECKING([whether gcc understands -MMD -MF])
+      SAVE_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS -MMD -MF deps.d -MP"
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])], , ac_enable_autodepend=no)
+      CFLAGS="$SAVE_CFLAGS"
+      test -f deps.d || ac_enable_autodepend=no
+      rm -rf deps.d
+      AC_MSG_RESULT([$ac_enable_autodepend])
+   fi
+   if test $ac_enable_autodepend = yes; then
+      DEPFLAGS='-MMD -MF ${DEPDIR}/$*.d -MP'
+      ## In parallel builds, another make might create depdir between
+      ## the first test and mkdir, so stick another test on the end.
+      ## Or use install-sh -d?  mkdir -p is not portable.
+      MKDEPDIR='test -d ${DEPDIR} || mkdir ${DEPDIR} || test -d ${DEPDIR}'
+      deps_frag=autodeps.mk
+   fi
+fi
+deps_frag=$srcdir/src/$deps_frag
+AC_SUBST(MKDEPDIR)
+AC_SUBST(DEPFLAGS)
+AC_SUBST_FILE(deps_frag)
+
+
+lisp_frag=$srcdir/src/lisp.mk
+AC_SUBST_FILE(lisp_frag)
+
+
+dnl checks for operating system services
+AC_SYS_LONG_FILE_NAMES
+
+#### Choose a window system.
+
+AC_PATH_X
+if test "$no_x" = yes; then
+  window_system=none
+else
+  window_system=x11
+fi
+
+## Workaround for bug in autoconf <= 2.62.
+## http://lists.gnu.org/archive/html/emacs-devel/2008-04/msg01551.html
+## No need to do anything special for these standard directories.
+if test -n "${x_libraries}" && test x"${x_libraries}" != xNONE; then
+
+   x_libraries=`echo :${x_libraries}: | sed -e 's|:/usr/lib64:|:|g' -e 's|:/lib64:|:|g' -e 's|^:||' -e 's|:$||'`
+
+fi
+
+LD_SWITCH_X_SITE_AUX=
+LD_SWITCH_X_SITE_AUX_RPATH=
+if test "${x_libraries}" != NONE; then
+  if test -n "${x_libraries}"; then
+    LD_SWITCH_X_SITE=-L`echo ${x_libraries} | sed -e "s/:/ -L/g"`
+    LD_SWITCH_X_SITE_AUX=-R`echo ${x_libraries} | sed -e "s/:/ -R/g"`
+    LD_SWITCH_X_SITE_AUX_RPATH=`echo ${LD_SWITCH_X_SITE_AUX} | sed -e 's/-R/-Wl,-rpath,/'`
+  fi
+  x_default_search_path=""
+  x_search_path=${x_libraries}
+  if test -z "${x_search_path}"; then
+    x_search_path=/usr/lib
+  fi
+  for x_library in `echo ${x_search_path}: | \
+		    sed -e "s/:/ /g" -e p -e "s:/lib[[^ /]]* :/share :g"`; do
+    x_search_path="\
+${x_library}/X11/%L/%T/%N%C%S:\
+${x_library}/X11/%l/%T/%N%C%S:\
+${x_library}/X11/%T/%N%C%S:\
+${x_library}/X11/%L/%T/%N%S:\
+${x_library}/X11/%l/%T/%N%S:\
+${x_library}/X11/%T/%N%S"
+    if test x"${x_default_search_path}" = x; then
+      x_default_search_path=${x_search_path}
+    else
+      x_default_search_path="${x_search_path}:${x_default_search_path}"
+    fi
+  done
+fi
+AC_SUBST(LD_SWITCH_X_SITE_AUX)
+AC_SUBST(LD_SWITCH_X_SITE_AUX_RPATH)
+
+if test "${x_includes}" != NONE && test -n "${x_includes}"; then
+  C_SWITCH_X_SITE=-I`echo ${x_includes} | sed -e "s/:/ -I/g"`
+fi
+
+if test x"${x_includes}" = x; then
+  bitmapdir=/usr/include/X11/bitmaps
+else
+  # accumulate include directories that have X11 bitmap subdirectories
+  bmd_acc="dummyval"
+  for bmd in `echo ${x_includes} | sed -e "s/:/ /g"`; do
+    if test -d "${bmd}/X11/bitmaps"; then
+      bmd_acc="${bmd_acc}:${bmd}/X11/bitmaps"
+    fi
+    if test -d "${bmd}/bitmaps"; then
+      bmd_acc="${bmd_acc}:${bmd}/bitmaps"
+    fi
+  done
+  if test ${bmd_acc} != "dummyval"; then
+    bitmapdir=`echo ${bmd_acc} | sed -e "s/^dummyval://"`
+  fi
+fi
+
+HAVE_NS=no
+NS_IMPL_COCOA=no
+NS_IMPL_GNUSTEP=no
+tmp_CPPFLAGS="$CPPFLAGS"
+tmp_CFLAGS="$CFLAGS"
+CPPFLAGS="$CPPFLAGS -x objective-c"
+CFLAGS="$CFLAGS -x objective-c"
+TEMACS_LDFLAGS2="\${LDFLAGS}"
+GNU_OBJC_CFLAGS=
+dnl I don't think it's especially important, but src/Makefile.in
+dnl (now the only user of ns_appdir) used to go to the trouble of adding a
+dnl trailing "/" to it, so now we do it here.
+if test "${with_ns}" != no; then
+  if test "${opsys}" = darwin; then
+     NS_IMPL_COCOA=yes
+     ns_appdir=`pwd`/nextstep/Emacs.app
+     ns_appbindir=${ns_appdir}/Contents/MacOS/
+     ns_appresdir=${ns_appdir}/Contents/Resources
+     ns_appsrc=${srcdir}/nextstep/Cocoa/Emacs.base
+  elif test -f $GNUSTEP_CONFIG_FILE; then
+     NS_IMPL_GNUSTEP=yes
+     ns_appdir=`pwd`/nextstep/Emacs.app
+     ns_appbindir=${ns_appdir}/
+     ns_appresdir=${ns_appdir}/Resources
+     ns_appsrc=${srcdir}/nextstep/GNUstep/Emacs.base
+     dnl FIXME sourcing this several times in subshells seems inefficient.
+     GNUSTEP_SYSTEM_HEADERS="$(. $GNUSTEP_CONFIG_FILE; echo $GNUSTEP_SYSTEM_HEADERS)"
+     GNUSTEP_SYSTEM_LIBRARIES="$(. $GNUSTEP_CONFIG_FILE; echo $GNUSTEP_SYSTEM_LIBRARIES)"
+     dnl I seemed to need these as well with GNUstep-startup 0.25.
+     GNUSTEP_LOCAL_HEADERS="$(. $GNUSTEP_CONFIG_FILE; echo $GNUSTEP_LOCAL_HEADERS)"
+     GNUSTEP_LOCAL_LIBRARIES="$(. $GNUSTEP_CONFIG_FILE; echo $GNUSTEP_LOCAL_LIBRARIES)"
+     test "x${GNUSTEP_LOCAL_HEADERS}" != "x" && \
+       GNUSTEP_LOCAL_HEADERS="-I${GNUSTEP_LOCAL_HEADERS}"
+     test "x${GNUSTEP_LOCAL_LIBRARIES}" != "x" && \
+       GNUSTEP_LOCAL_LIBRARIES="-L${GNUSTEP_LOCAL_LIBRARIES}"
+     CPPFLAGS="$CPPFLAGS -I${GNUSTEP_SYSTEM_HEADERS} ${GNUSTEP_LOCAL_HEADERS}"
+     CFLAGS="$CFLAGS -I${GNUSTEP_SYSTEM_HEADERS} ${GNUSTEP_LOCAL_HEADERS}"
+     LDFLAGS="$LDFLAGS -L${GNUSTEP_SYSTEM_LIBRARIES} ${GNUSTEP_LOCAL_LIBRARIES}"
+     LIB_STANDARD=
+     START_FILES=
+     TEMACS_LDFLAGS2=
+     dnl GNUstep defines BASE_NATIVE_OBJC_EXCEPTIONS to 0 or 1.
+     dnl If they had chosen to either define it or not, we could have
+     dnl just used AC_CHECK_DECL here.
+     AC_CACHE_CHECK(if GNUstep defines BASE_NATIVE_OBJC_EXCEPTIONS,
+       emacs_cv_objc_exceptions,
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <GNUstepBase/GSConfig.h>]],
+[[#if defined BASE_NATIVE_OBJC_EXCEPTIONS && BASE_NATIVE_OBJC_EXCEPTIONS > 0
+1;
+#else
+fail;
+#endif]])], emacs_cv_objc_exceptions=yes, emacs_cv_objc_exceptions=no ) )
+     if test $emacs_cv_objc_exceptions = yes; then
+       dnl _NATIVE_OBJC_EXCEPTIONS is used by the GNUstep headers.
+       AC_DEFINE(_NATIVE_OBJC_EXCEPTIONS, 1,
+         [Define if GNUstep uses ObjC exceptions.])
+       GNU_OBJC_CFLAGS="-fobjc-exceptions"
+     fi
+  fi
+
+  dnl This is only used while we test the NS headers, it gets reset below.
+  CFLAGS="$CFLAGS $GNU_OBJC_CFLAGS"
+
+  AC_CHECK_HEADER([AppKit/AppKit.h], [HAVE_NS=yes],
+  		  [AC_MSG_ERROR([`--with-ns' was specified, but the include
+  files are missing or cannot be compiled.])])
+  NS_HAVE_NSINTEGER=yes
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <Foundation/NSObjCRuntime.h>],
+                                     [NSInteger i;])],
+		    ns_have_nsinteger=yes,
+		    ns_have_nsinteger=no)
+  if test $ns_have_nsinteger = no; then
+    NS_HAVE_NSINTEGER=no
+  fi
+fi
+AC_SUBST(TEMACS_LDFLAGS2)
+
+ns_frag=/dev/null
+NS_OBJ=
+NS_OBJC_OBJ=
+if test "${HAVE_NS}" = yes; then
+  if test "$with_toolkit_scroll_bars" = "no"; then
+    AC_MSG_ERROR([Non-toolkit scroll bars are not implemented for Nextstep.])
+  fi
+
+  window_system=nextstep
+  with_xft=no
+  # set up packaging dirs
+  if test "${EN_NS_SELF_CONTAINED}" = yes; then
+     prefix=${ns_appresdir}
+     exec_prefix=${ns_appbindir}
+     libexecdir=${ns_appbindir}/libexec
+  fi
+  ns_frag=$srcdir/src/ns.mk
+  NS_OBJ="fontset.o fringe.o image.o"
+  NS_OBJC_OBJ="nsterm.o nsfns.o nsmenu.o nsselect.o nsimage.o nsfont.o"
+fi
+CFLAGS="$tmp_CFLAGS"
+CPPFLAGS="$tmp_CPPFLAGS"
+AC_SUBST(NS_OBJ)
+AC_SUBST(NS_OBJC_OBJ)
+AC_SUBST(LIB_STANDARD)
+AC_SUBST_FILE(ns_frag)
+
+case "${window_system}" in
+  x11 )
+    HAVE_X_WINDOWS=yes
+    HAVE_X11=yes
+    case "${with_x_toolkit}" in
+      athena | lucid ) USE_X_TOOLKIT=LUCID ;;
+      motif ) USE_X_TOOLKIT=MOTIF ;;
+      gtk ) with_gtk=yes
+dnl Don't set this for GTK.  A lot of tests below assumes Xt when
+dnl USE_X_TOOLKIT is set.
+            USE_X_TOOLKIT=none ;;
+      gtk3 ) with_gtk3=yes
+             USE_X_TOOLKIT=none ;;
+      no ) USE_X_TOOLKIT=none ;;
+dnl If user did not say whether to use a toolkit, make this decision later:
+dnl use the toolkit if we have gtk, or X11R5 or newer.
+      * ) USE_X_TOOLKIT=maybe ;;
+    esac
+  ;;
+  nextstep | none )
+    HAVE_X_WINDOWS=no
+    HAVE_X11=no
+    USE_X_TOOLKIT=none
+  ;;
+esac
+
+if test "$window_system" = none && test "X$with_x" != "Xno"; then
+   AC_CHECK_PROG(HAVE_XSERVER, X, true, false)
+   if test "$HAVE_XSERVER" = true ||
+      test -n "$DISPLAY" ||
+      test "`echo /usr/lib/libX11.*`" != "/usr/lib/libX11.*"; then
+        AC_MSG_ERROR([You seem to be running X, but no X development libraries
+were found.  You should install the relevant development files for X
+and for the toolkit you want, such as Gtk+, Lesstif or Motif.  Also make
+sure you have development files for image handling, i.e.
+tiff, gif, jpeg, png and xpm.
+If you are sure you want Emacs compiled without X window support, pass
+  --without-x
+to configure.])
+   fi
+fi
+
+### If we're using X11, we should use the X menu package.
+HAVE_MENUS=no
+case ${HAVE_X11} in
+  yes ) HAVE_MENUS=yes ;;
+esac
+
+# Do the opsystem or machine files prohibit the use of the GNU malloc?
+# Assume not, until told otherwise.
+GNU_MALLOC=yes
+doug_lea_malloc=yes
+AC_CHECK_FUNC(malloc_get_state, ,doug_lea_malloc=no)
+AC_CHECK_FUNC(malloc_set_state, ,doug_lea_malloc=no)
+AC_CACHE_CHECK(whether __after_morecore_hook exists,
+	       emacs_cv_var___after_morecore_hook,
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[extern void (* __after_morecore_hook)();]],[[__after_morecore_hook = 0]])],
+  emacs_cv_var___after_morecore_hook=yes,
+  emacs_cv_var___after_morecore_hook=no)])
+if test $emacs_cv_var___after_morecore_hook = no; then
+  doug_lea_malloc=no
+fi
+
+
+dnl See comments in aix4-2.h about maybe using system malloc there.
+system_malloc=no
+case "$opsys" in
+  ## darwin ld insists on the use of malloc routines in the System framework.
+  darwin|sol2-10) system_malloc=yes ;;
+esac
+
+if test "${system_malloc}" = "yes"; then
+  AC_DEFINE(SYSTEM_MALLOC, 1, [Define to use system malloc.])
+  GNU_MALLOC=no
+  GNU_MALLOC_reason="
+    (The GNU allocators don't work with this system configuration.)"
+  GMALLOC_OBJ=
+  VMLIMIT_OBJ=
+else
+  test "$doug_lea_malloc" != "yes" && GMALLOC_OBJ=gmalloc.o
+  VMLIMIT_OBJ=vm-limit.o
+fi
+AC_SUBST(GMALLOC_OBJ)
+AC_SUBST(VMLIMIT_OBJ)
+
+if test "$doug_lea_malloc" = "yes" ; then
+  if test "$GNU_MALLOC" = yes ; then
+    GNU_MALLOC_reason="
+      (Using Doug Lea's new malloc from the GNU C Library.)"
+  fi
+  AC_DEFINE(DOUG_LEA_MALLOC, 1,
+	    [Define to 1 if you are using the GNU C Library.])
+
+  ## Use mmap directly for allocating larger buffers.
+  ## FIXME this comes from src/s/{gnu,gnu-linux}.h:
+  ## #ifdef DOUG_LEA_MALLOC; #undef REL_ALLOC; #endif
+  ## Does the AC_FUNC_MMAP test below make this check unnecessary?
+  case "$opsys" in
+    gnu*) REL_ALLOC=no ;;
+  esac
+fi
+
+if test x"${REL_ALLOC}" = x; then
+  REL_ALLOC=${GNU_MALLOC}
+fi
+
+use_mmap_for_buffers=no
+case "$opsys" in
+  cygwin|freebsd|irix6-5) use_mmap_for_buffers=yes ;;
+esac
+
+AC_FUNC_MMAP
+if test $use_mmap_for_buffers = yes; then
+  AC_DEFINE(USE_MMAP_FOR_BUFFERS, 1, [Define to use mmap to allocate buffer text.])
+  REL_ALLOC=no
+fi
+
+LIBS="$LIBS_SYSTEM $LIBS"
+
+dnl If found, this defines HAVE_LIBDNET, which m/pmax.h checks,
+dnl and also adds -ldnet to LIBS, which Autoconf uses for checks.
+AC_CHECK_LIB(dnet, dnet_ntoa)
+dnl This causes -lresolv to get used in subsequent tests,
+dnl which causes failures on some systems such as HPUX 9.
+dnl AC_CHECK_LIB(resolv, gethostbyname)
+
+dnl FIXME replace main with a function we actually want from this library.
+AC_CHECK_LIB(Xbsd, main, LD_SWITCH_X_SITE="$LD_SWITCH_X_SITE -lXbsd")
+
+dnl Check if pthreads is available.
+LIB_PTHREAD=
+AC_CHECK_HEADERS(pthread.h)
+if test "$ac_cv_header_pthread_h"; then
+  dnl gmalloc.c uses pthread_atfork, which is not available on older-style
+  dnl hosts such as MirBSD 10, so test for pthread_atfork instead of merely
+  dnl testing for pthread_self if Emacs uses gmalloc.c.
+  if test "$GMALLOC_OBJ" = gmalloc.o; then
+    emacs_pthread_function=pthread_atfork
+  else
+    emacs_pthread_function=pthread_self
+  fi
+  AC_CHECK_LIB(pthread, $emacs_pthread_function, HAVE_PTHREAD=yes)
+fi
+if test "$HAVE_PTHREAD" = yes; then
+  case "${canonical}" in
+    *-hpux*) ;;
+    *) LIB_PTHREAD="-lpthread"
+       LIBS="$LIB_PTHREAD $LIBS" ;;
+  esac
+  AC_DEFINE(HAVE_PTHREAD, 1, [Define to 1 if you have pthread (-lpthread).])
+fi
+AC_SUBST([LIB_PTHREAD])
+
+AC_CHECK_LIB(pthreads, cma_open)
+
+## Note: when using cpp in s/aix4.2.h, this definition depended on
+## HAVE_LIBPTHREADS.  That was not defined earlier in configure when
+## the system file was sourced.  Hence the value of LIBS_SYSTEM
+## added to LIBS in configure would never contain the pthreads part,
+## but the value used in Makefiles might.  FIXME?
+##
+## -lpthreads seems to be necessary for Xlib in X11R6, and should
+## be harmless on older versions of X where it happens to exist.
+test "$opsys" = "aix4-2" && \
+  test $ac_cv_lib_pthreads_cma_open = yes && \
+  LIBS_SYSTEM="$LIBS_SYSTEM -lpthreads"
+
+dnl Check for need for bigtoc support on IBM AIX
+
+case ${host_os} in
+aix*)
+  AC_CACHE_CHECK([for -bbigtoc option], [gdb_cv_bigtoc], [
+    case $GCC in
+    yes) gdb_cv_bigtoc=-Wl,-bbigtoc ;;
+    *) gdb_cv_bigtoc=-bbigtoc ;;
+    esac
+
+    LDFLAGS=$LDFLAGS\ $gdb_cv_bigtoc
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[int i;]])], [], [gdb_cv_bigtoc=])
+  ])
+  ;;
+esac
+
+# Change CFLAGS and CPPFLAGS temporarily so that C_SWITCH_X_SITE gets
+# used for the tests that follow.  We set them back to REAL_CFLAGS and
+# REAL_CPPFLAGS later on.
+
+REAL_CFLAGS="$CFLAGS"
+REAL_CPPFLAGS="$CPPFLAGS"
+
+if test "${HAVE_X11}" = "yes"; then
+  DEFS="$C_SWITCH_X_SITE $DEFS"
+  LDFLAGS="$LDFLAGS $LD_SWITCH_X_SITE"
+  LIBS="-lX11 $LIBS"
+  CFLAGS="$C_SWITCH_X_SITE $CFLAGS"
+  CPPFLAGS="$C_SWITCH_X_SITE $CPPFLAGS"
+
+  # On Solaris, arrange for LD_RUN_PATH to point to the X libraries for tests.
+  # This is handled by LD_SWITCH_X_SITE_AUX during the real build,
+  # but it's more convenient here to set LD_RUN_PATH
+  # since this also works on hosts that don't understand LD_SWITCH_X_SITE_AUX.
+  if test "${x_libraries}" != NONE && test -n "${x_libraries}"; then
+    LD_RUN_PATH=$x_libraries${LD_RUN_PATH+:}$LD_RUN_PATH
+    export LD_RUN_PATH
+  fi
+
+  if test "${opsys}" = "gnu-linux"; then
+    AC_MSG_CHECKING(whether X on GNU/Linux needs -b to link)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],
+     [[XOpenDisplay ("foo");]])],
+     [xgnu_linux_first_failure=no],
+     [xgnu_linux_first_failure=yes])
+    if test "${xgnu_linux_first_failure}" = "yes"; then
+      OLD_LD_SWITCH_X_SITE="$LD_SWITCH_X_SITE"
+      OLD_C_SWITCH_X_SITE="$C_SWITCH_X_SITE"
+      OLD_CPPFLAGS="$CPPFLAGS"
+      OLD_LIBS="$LIBS"
+      LD_SWITCH_X_SITE="$LD_SWITCH_X_SITE -b i486-linuxaout"
+      C_SWITCH_X_SITE="$C_SWITCH_X_SITE -b i486-linuxaout"
+      CPPFLAGS="$CPPFLAGS -b i486-linuxaout"
+      LIBS="$LIBS -b i486-linuxaout"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[]],
+       [[XOpenDisplay ("foo");]])],
+       [xgnu_linux_second_failure=no],
+       [xgnu_linux_second_failure=yes])
+      if test "${xgnu_linux_second_failure}" = "yes"; then
+	# If we get the same failure with -b, there is no use adding -b.
+	# So take it out.  This plays safe.
+	LD_SWITCH_X_SITE="$OLD_LD_SWITCH_X_SITE"
+	C_SWITCH_X_SITE="$OLD_C_SWITCH_X_SITE"
+	CPPFLAGS="$OLD_CPPFLAGS"
+	LIBS="$OLD_LIBS"
+        AC_MSG_RESULT(no)
+      else
+        AC_MSG_RESULT(yes)
+      fi
+    else
+      AC_MSG_RESULT(no)
+    fi
+  fi
+
+  # Reportedly, some broken Solaris systems have XKBlib.h but are missing
+  # header files included from there.
+  AC_MSG_CHECKING(for Xkb)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <X11/Xlib.h>
+#include <X11/XKBlib.h>]],
+	[[XkbDescPtr kb = XkbGetKeyboard (0, XkbAllComponentsMask, XkbUseCoreKbd);]])],
+	emacs_xkb=yes, emacs_xkb=no)
+  AC_MSG_RESULT($emacs_xkb)
+  if test $emacs_xkb = yes; then
+    AC_DEFINE(HAVE_XKBGETKEYBOARD, 1, [Define to 1 if you have the XkbGetKeyboard function.])
+  fi
+
+  AC_CHECK_FUNCS(XrmSetDatabase XScreenResourceString \
+XScreenNumberOfScreen XSetWMProtocols)
+fi
+
+if test "${window_system}" = "x11"; then
+  AC_MSG_CHECKING(X11 version 6)
+  AC_CACHE_VAL(emacs_cv_x11_version_6,
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <X11/Xlib.h>]],
+[[#if XlibSpecificationRelease < 6
+fail;
+#endif
+]])], emacs_cv_x11_version_6=yes, emacs_cv_x11_version_6=no)])
+  if test $emacs_cv_x11_version_6 = yes; then
+    AC_MSG_RESULT(6 or newer)
+    AC_DEFINE(HAVE_X11R6, 1,
+	      [Define to 1 if you have the X11R6 or newer version of Xlib.])
+    AC_DEFINE(HAVE_X_I18N, 1, [Define if you have usable i18n support.])
+    ## inoue@ainet.or.jp says Solaris has a bug related to X11R6-style
+    ## XIM support.
+    case "$opsys" in
+      sol2-*) : ;;
+      *) AC_DEFINE(HAVE_X11R6_XIM, 1,
+           [Define if you have usable X11R6-style XIM support.])
+         ;;
+    esac
+  else
+    AC_MSG_RESULT(before 6)
+  fi
+fi
+
+
+### Use -lrsvg-2 if available, unless `--with-rsvg=no' is specified.
+HAVE_RSVG=no
+if test "${HAVE_X11}" = "yes" || test "${HAVE_NS}" = "yes"; then
+  if test "${with_rsvg}" != "no"; then
+    RSVG_REQUIRED=2.11.0
+    RSVG_MODULE="librsvg-2.0 >= $RSVG_REQUIRED"
+
+    PKG_CHECK_MODULES(RSVG, $RSVG_MODULE, HAVE_RSVG=yes, :)
+    AC_SUBST(RSVG_CFLAGS)
+    AC_SUBST(RSVG_LIBS)
+
+    if test $HAVE_RSVG = yes; then
+      AC_DEFINE(HAVE_RSVG, 1, [Define to 1 if using librsvg.])
+      CFLAGS="$CFLAGS $RSVG_CFLAGS"
+      LIBS="$RSVG_LIBS $LIBS"
+    fi
+  fi
+fi
+
+HAVE_IMAGEMAGICK=no
+if test "${HAVE_X11}" = "yes"; then
+  if test "${with_imagemagick}" != "no"; then
+    ## 6.2.8 is the earliest version known to work, but earlier versions
+    ## might work - let us know if you find one.
+    ## 6.0.7 does not work.  See bug#7955.
+    IMAGEMAGICK_MODULE="Wand >= 6.2.8"
+    PKG_CHECK_MODULES(IMAGEMAGICK, $IMAGEMAGICK_MODULE, HAVE_IMAGEMAGICK=yes, :)
+    AC_SUBST(IMAGEMAGICK_CFLAGS)
+    AC_SUBST(IMAGEMAGICK_LIBS)
+
+    if test $HAVE_IMAGEMAGICK = yes; then
+      AC_DEFINE(HAVE_IMAGEMAGICK, 1, [Define to 1 if using imagemagick.])
+      CFLAGS="$CFLAGS $IMAGEMAGICK_CFLAGS"
+      LIBS="$IMAGEMAGICK_LIBS $LIBS"
+      AC_CHECK_FUNCS(MagickExportImagePixels)
+    fi
+  fi
+fi
+
+
+HAVE_GTK=no
+GTK_OBJ=
+if test "${with_gtk3}" = "yes"; then
+  GLIB_REQUIRED=2.28
+  GTK_REQUIRED=3.0
+  GTK_MODULES="gtk+-3.0 >= $GTK_REQUIRED glib-2.0 >= $GLIB_REQUIRED"
+
+  dnl Checks for libraries.
+  PKG_CHECK_MODULES(GTK, $GTK_MODULES, pkg_check_gtk=yes, pkg_check_gtk=no)
+  if test "$pkg_check_gtk" = "no" && test "$USE_X_TOOLKIT" != "maybe"; then
+     AC_MSG_ERROR($GTK_PKG_ERRORS)
+  fi
+  AC_DEFINE(HAVE_GTK3, 1, [Define to 1 if using GTK 3 or later.])
+  GTK_OBJ=emacsgtkfixed.o
+fi
+
+if test "$pkg_check_gtk" != "yes"; then
+  HAVE_GTK=no
+if test "${with_gtk}" = "yes" || test "$USE_X_TOOLKIT" = "maybe"; then
+  GLIB_REQUIRED=2.10
+  GTK_REQUIRED=2.10
+  GTK_MODULES="gtk+-2.0 >= $GTK_REQUIRED glib-2.0 >= $GLIB_REQUIRED"
+
+  dnl Checks for libraries.
+  PKG_CHECK_MODULES(GTK, $GTK_MODULES, pkg_check_gtk=yes, pkg_check_gtk=no)
+  if test "$pkg_check_gtk" = "no" && test "$USE_X_TOOLKIT" != "maybe"; then
+     AC_MSG_ERROR($GTK_PKG_ERRORS)
+  fi
+fi
+fi
+
+if test x"$pkg_check_gtk" = xyes; then
+
+  AC_SUBST(GTK_CFLAGS)
+  AC_SUBST(GTK_LIBS)
+  C_SWITCH_X_SITE="$C_SWITCH_X_SITE $GTK_CFLAGS"
+  CFLAGS="$CFLAGS $GTK_CFLAGS"
+  LIBS="$GTK_LIBS $LIBS"
+  dnl Try to compile a simple GTK program.
+  GTK_COMPILES=no
+  AC_CHECK_FUNCS(gtk_main, GTK_COMPILES=yes)
+  if test "${GTK_COMPILES}" != "yes"; then
+    if test "$USE_X_TOOLKIT" != "maybe"; then
+      AC_MSG_ERROR([Gtk+ wanted, but it does not compile, see config.log.  Maybe some x11-devel files missing?]);
+    fi
+  else
+    HAVE_GTK=yes
+    AC_DEFINE(USE_GTK, 1, [Define to 1 if using GTK.])
+    GTK_OBJ="gtkutil.o $GTK_OBJ"
+    USE_X_TOOLKIT=none
+    if $PKG_CONFIG --atleast-version=2.10 gtk+-2.0; then
+      :
+    else
+      AC_MSG_WARN([[Your version of Gtk+ will have problems with
+       closing open displays.  This is no problem if you just use
+       one display, but if you use more than one and close one of them
+       Emacs may crash.]])
+      sleep 3
+    fi
+  fi
+
+fi
+AC_SUBST(GTK_OBJ)
+
+
+if test "${HAVE_GTK}" = "yes"; then
+
+  dnl  GTK scrollbars resemble toolkit scrollbars a lot, so to avoid
+  dnl  a lot if #ifdef:s, say we have toolkit scrollbars.
+  if test "$with_toolkit_scroll_bars" != no; then
+    with_toolkit_scroll_bars=yes
+  fi
+
+  dnl  Check if we have the old file selection dialog declared and
+  dnl  in the link library.  In 2.x it may be in the library,
+  dnl  but not declared if deprecated featured has been selected out.
+  dnl  AC_CHECK_DECL checks for a macro, so check for GTK_TYPE_FILE_SELECTION.
+  HAVE_GTK_FILE_SELECTION=no
+  AC_CHECK_DECL(GTK_TYPE_FILE_SELECTION, HAVE_GTK_FILE_SELECTION=yes,
+                   HAVE_GTK_FILE_SELECTION=no, [AC_INCLUDES_DEFAULT
+#include <gtk/gtk.h>])
+  if test "$HAVE_GTK_FILE_SELECTION" = yes; then
+    AC_CHECK_FUNCS(gtk_file_selection_new)
+  fi
+
+
+  dnl Check for functions introduced in 2.14 and later.
+  AC_CHECK_FUNCS(gtk_widget_get_window gtk_widget_set_has_window \
+                 gtk_dialog_get_action_area gtk_widget_get_sensitive \
+                 gtk_widget_get_mapped gtk_adjustment_get_page_size \
+                 gtk_orientable_set_orientation \
+		 gtk_window_set_has_resize_grip)
+fi
+
+dnl D-Bus has been tested under GNU/Linux only.  Must be adapted for
+dnl other platforms.  Support for higher D-Bus versions than 1.0 is
+dnl also not configured.
+HAVE_DBUS=no
+DBUS_OBJ=
+if test "${with_dbus}" = "yes"; then
+   PKG_CHECK_MODULES(DBUS, dbus-1 >= 1.0, HAVE_DBUS=yes, HAVE_DBUS=no)
+   if test "$HAVE_DBUS" = yes; then
+     LIBS="$LIBS $DBUS_LIBS"
+     AC_DEFINE(HAVE_DBUS, 1, [Define to 1 if using D-Bus.])
+     AC_CHECK_FUNCS([dbus_watch_get_unix_fd])
+     DBUS_OBJ=dbusbind.o
+   fi
+fi
+AC_SUBST(DBUS_OBJ)
+
+dnl GSettings has been tested under GNU/Linux only.
+HAVE_GSETTINGS=no
+if test "${HAVE_X11}" = "yes" && test "${with_gsettings}" = "yes"; then
+   PKG_CHECK_MODULES(GSETTINGS, gio-2.0 >= 2.26, HAVE_GSETTINGS=yes, HAVE_GSETTINGS=no)
+   if test "$HAVE_GSETTINGS" = "yes"; then
+      AC_DEFINE(HAVE_GSETTINGS, 1, [Define to 1 if using GSettings.])
+      SETTINGS_CFLAGS="$GSETTINGS_CFLAGS"
+      SETTINGS_LIBS="$GSETTINGS_LIBS"
+   fi
+fi
+
+dnl GConf has been tested under GNU/Linux only.
+dnl The version is really arbitrary, it is about the same age as Gtk+ 2.6.
+HAVE_GCONF=no
+if test "${HAVE_X11}" = "yes" && test "${with_gconf}" = "yes"; then
+   PKG_CHECK_MODULES(GCONF, gconf-2.0 >= 2.13, HAVE_GCONF=yes, HAVE_GCONF=no)
+   if test "$HAVE_GCONF" = yes; then
+      AC_DEFINE(HAVE_GCONF, 1, [Define to 1 if using GConf.])
+      dnl Newer GConf doesn't link with g_objects, so this is not defined.
+      SETTINGS_CFLAGS="$SETTINGS_CFLAGS $GCONF_CFLAGS"
+      SETTINGS_LIBS="$SETTINGS_LIBS $GCONF_LIBS"
+   fi
+fi
+
+if test "$HAVE_GSETTINGS" = "yes" || test "$HAVE_GCONF" = "yes"; then
+    SAVE_CFLAGS="$CFLAGS"
+    SAVE_LIBS="$LIBS"
+    CFLAGS="$SETTINGS_CFLAGS $CFLAGS"
+    LIBS="$SETTINGS_LIBS $LIBS"
+    AC_CHECK_FUNCS([g_type_init])
+    CFLAGS="$SAVE_CFLAGS"
+    LIBS="$SAVE_LIBS"
+fi
+AC_SUBST(SETTINGS_CFLAGS)
+AC_SUBST(SETTINGS_LIBS)
+
+
+dnl SELinux is available for GNU/Linux only.
+HAVE_LIBSELINUX=no
+LIBSELINUX_LIBS=
+if test "${with_selinux}" = "yes"; then
+   AC_CHECK_LIB([selinux], [lgetfilecon], HAVE_LIBSELINUX=yes, HAVE_LIBSELINUX=no)
+   if test "$HAVE_LIBSELINUX" = yes; then
+      AC_DEFINE(HAVE_LIBSELINUX, 1, [Define to 1 if using SELinux.])
+      LIBSELINUX_LIBS=-lselinux
+   fi
+fi
+AC_SUBST(LIBSELINUX_LIBS)
+
+HAVE_GNUTLS=no
+HAVE_GNUTLS_CALLBACK_CERTIFICATE_VERIFY=no
+if test "${with_gnutls}" = "yes" ; then
+  PKG_CHECK_MODULES([LIBGNUTLS], [gnutls >= 2.6.6], HAVE_GNUTLS=yes, HAVE_GNUTLS=no)
+  if test "${HAVE_GNUTLS}" = "yes"; then
+    AC_DEFINE(HAVE_GNUTLS, 1, [Define if using GnuTLS.])
+  fi
+
+  CFLAGS="$CFLAGS $LIBGNUTLS_CFLAGS"
+  LIBS="$LIBGNUTLS_LIBS $LIBS"
+  AC_CHECK_FUNCS(gnutls_certificate_set_verify_function, HAVE_GNUTLS_CALLBACK_CERTIFICATE_VERIFY=yes)
+
+  if test "${HAVE_GNUTLS_CALLBACK_CERTIFICATE_VERIFY}" = "yes"; then
+    AC_DEFINE(HAVE_GNUTLS_CALLBACK_CERTIFICATE_VERIFY, 1, [Define if using GnuTLS certificate verification callbacks.])
+  fi
+fi
+
+AC_SUBST(LIBGNUTLS_LIBS)
+AC_SUBST(LIBGNUTLS_CFLAGS)
+
+dnl Do not put whitespace before the #include statements below.
+dnl Older compilers (eg sunos4 cc) choke on it.
+HAVE_XAW3D=no
+LUCID_LIBW=
+if test x"${USE_X_TOOLKIT}" = xmaybe || test x"${USE_X_TOOLKIT}" = xLUCID; then
+  if test "$with_xaw3d" != no; then
+    AC_MSG_CHECKING(for xaw3d)
+    AC_CACHE_VAL(emacs_cv_xaw3d,
+    [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <X11/Intrinsic.h>
+#include <X11/Xaw3d/Simple.h>]],
+      [[]])],
+      [AC_CHECK_LIB(Xaw3d, XawScrollbarSetThumb,
+                    emacs_cv_xaw3d=yes, emacs_cv_xaw3d=no)],
+      emacs_cv_xaw3d=no)])
+  else
+    emacs_cv_xaw3d=no
+  fi
+  if test $emacs_cv_xaw3d = yes; then
+    AC_MSG_RESULT([yes; using Lucid toolkit])
+    USE_X_TOOLKIT=LUCID
+    HAVE_XAW3D=yes
+    LUCID_LIBW=-lXaw3d
+    AC_DEFINE(HAVE_XAW3D, 1,
+              [Define to 1 if you have the Xaw3d library (-lXaw3d).])
+  else
+    AC_MSG_RESULT(no)
+    AC_MSG_CHECKING(for libXaw)
+    AC_CACHE_VAL(emacs_cv_xaw,
+    [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <X11/Intrinsic.h>
+#include <X11/Xaw/Simple.h>]],
+      [[]])],
+      emacs_cv_xaw=yes,
+      emacs_cv_xaw=no)])
+    if test $emacs_cv_xaw = yes; then
+      AC_MSG_RESULT([yes; using Lucid toolkit])
+      USE_X_TOOLKIT=LUCID
+      LUCID_LIBW=-lXaw
+    elif test x"${USE_X_TOOLKIT}" = xLUCID; then
+      AC_MSG_ERROR([Lucid toolkit requires X11/Xaw include files])
+    else
+      AC_MSG_ERROR([No X toolkit could be found.
+If you are sure you want Emacs compiled without an X toolkit, pass
+  --with-x-toolkit=no
+to configure.  Otherwise, install the development libraries for the toolkit
+that you want to use (e.g. Gtk+) and re-run configure.])
+    fi
+  fi
+fi
+
+X_TOOLKIT_TYPE=$USE_X_TOOLKIT
+
+LIBXTR6=
+if test "${USE_X_TOOLKIT}" != "none"; then
+  AC_MSG_CHECKING(X11 toolkit version)
+  AC_CACHE_VAL(emacs_cv_x11_toolkit_version_6,
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <X11/Intrinsic.h>]],
+[[#if XtSpecificationRelease < 6
+fail;
+#endif
+]])], emacs_cv_x11_toolkit_version_6=yes, emacs_cv_x11_toolkit_version_6=no)])
+  HAVE_X11XTR6=$emacs_cv_x11_toolkit_version_6
+  if test $emacs_cv_x11_toolkit_version_6 = yes; then
+    AC_MSG_RESULT(6 or newer)
+    AC_DEFINE(HAVE_X11XTR6, 1,
+	      [Define to 1 if you have the X11R6 or newer version of Xt.])
+    LIBXTR6="-lSM -lICE"
+    case "$opsys" in
+      ## Use libw.a along with X11R6 Xt.
+      unixware) LIBXTR6="$LIBXTR6 -lw" ;;
+    esac
+  else
+    AC_MSG_RESULT(before 6)
+  fi
+
+dnl If using toolkit, check whether libXmu.a exists.
+dnl tranle@intellicorp.com says libXmu.a can need XtMalloc in libXt.a to link.
+  OLDLIBS="$LIBS"
+  if test x$HAVE_X11XTR6 = xyes; then
+    LIBS="-lXt -lSM -lICE $LIBS"
+  else
+    LIBS="-lXt $LIBS"
+  fi
+  AC_CHECK_LIB(Xmu, XmuConvertStandardSelection)
+  test $ac_cv_lib_Xmu_XmuConvertStandardSelection = no && LIBS="$OLDLIBS"
+fi
+AC_SUBST(LIBXTR6)
+
+dnl FIXME the logic here seems weird, but this is what cpp was doing.
+dnl Why not just test for libxmu in the normal way?
+LIBXMU=-lXmu
+case $opsys in
+  ## These systems don't supply Xmu.
+  hpux* | aix4-2 )
+    test "X$ac_cv_lib_Xmu_XmuConvertStandardSelection" != "Xyes" && LIBXMU=
+    ;;
+esac
+AC_SUBST(LIBXMU)
+
+# On Irix 6.5, at least, we need XShapeQueryExtension from -lXext for Xaw3D.
+if test "${HAVE_X11}" = "yes"; then
+  if test "${USE_X_TOOLKIT}" != "none"; then
+    AC_CHECK_LIB(Xext, XShapeQueryExtension)
+  fi
+fi
+
+LIBXP=
+if test "${USE_X_TOOLKIT}" = "MOTIF"; then
+  AC_CACHE_CHECK(for Motif version 2.1, emacs_cv_motif_version_2_1,
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <Xm/Xm.h>]],
+    [[#if XmVERSION > 2 || (XmVERSION == 2 && XmREVISION >= 1)
+int x = 5;
+#else
+Motif version prior to 2.1.
+#endif]])],
+    emacs_cv_motif_version_2_1=yes, emacs_cv_motif_version_2_1=no)])
+  if test $emacs_cv_motif_version_2_1 = yes; then
+    AC_CHECK_LIB(Xp, XpCreateContext, LIBXP=-lXp)
+  else
+    AC_CACHE_CHECK(for LessTif where some systems put it, emacs_cv_lesstif,
+    # We put this in CFLAGS temporarily to precede other -I options
+    # that might be in CFLAGS temporarily.
+    # We put this in CPPFLAGS where it precedes the other -I options.
+    OLD_CPPFLAGS=$CPPFLAGS
+    OLD_CFLAGS=$CFLAGS
+    CPPFLAGS="-I/usr/X11R6/LessTif/Motif1.2/include $CPPFLAGS"
+    CFLAGS="-I/usr/X11R6/LessTif/Motif1.2/include $CFLAGS"
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include </usr/X11R6/LessTif/Motif1.2/include/Xm/Xm.h>]],
+      [[int x = 5;]])],
+      emacs_cv_lesstif=yes, emacs_cv_lesstif=no)])
+    if test $emacs_cv_lesstif = yes; then
+      # Make sure this -I option remains in CPPFLAGS after it is set
+      # back to REAL_CPPFLAGS.
+      # There is no need to change REAL_CFLAGS, because REAL_CFLAGS does not
+      # have those other -I options anyway.  Ultimately, having this
+      # directory ultimately in CPPFLAGS will be enough.
+      REAL_CPPFLAGS="-I/usr/X11R6/LessTif/Motif1.2/include $REAL_CPPFLAGS"
+      LDFLAGS="-L/usr/X11R6/LessTif/Motif1.2/lib $LDFLAGS"
+    else
+      CFLAGS=$OLD_CFLAGS
+      CPPFLAGS=$OLD_CPPFLAGS
+    fi
+  fi
+  AC_CHECK_HEADER([Xm/BulletinB.h], [],
+    [AC_MSG_ERROR([Motif toolkit requested but requirements not found.])])
+fi
+
+dnl Use toolkit scroll bars if configured for GTK or X toolkit and either
+dnl using Motif or Xaw3d is available, and unless
+dnl --with-toolkit-scroll-bars=no was specified.
+
+AH_TEMPLATE(USE_TOOLKIT_SCROLL_BARS,
+	    [Define to 1 if we should use toolkit scroll bars.])dnl
+USE_TOOLKIT_SCROLL_BARS=no
+if test "${with_toolkit_scroll_bars}" != "no"; then
+  if test "${USE_X_TOOLKIT}" != "none"; then
+    if test "${USE_X_TOOLKIT}" = "MOTIF"; then
+      AC_DEFINE(USE_TOOLKIT_SCROLL_BARS)
+      HAVE_XAW3D=no
+      USE_TOOLKIT_SCROLL_BARS=yes
+    elif test "${HAVE_XAW3D}" = "yes" || test "${USE_X_TOOLKIT}" = "LUCID"; then
+      AC_DEFINE(USE_TOOLKIT_SCROLL_BARS)
+      USE_TOOLKIT_SCROLL_BARS=yes
+    fi
+  elif test "${HAVE_GTK}" = "yes"; then
+    AC_DEFINE(USE_TOOLKIT_SCROLL_BARS)
+    USE_TOOLKIT_SCROLL_BARS=yes
+  elif test "${HAVE_NS}" = "yes"; then
+    AC_DEFINE(USE_TOOLKIT_SCROLL_BARS)
+    USE_TOOLKIT_SCROLL_BARS=yes
+  fi
+fi
+
+dnl See if XIM is available.
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+	  #include <X11/Xlib.h>
+	  #include <X11/Xresource.h>]],
+	 [[XIMProc  callback;]])],
+	 [HAVE_XIM=yes
+	 AC_DEFINE(HAVE_XIM, 1, [Define to 1 if XIM is available])],
+	 HAVE_XIM=no)
+
+dnl `--with-xim' now controls only the initial value of use_xim at run time.
+
+if test "${with_xim}" != "no"; then
+  AC_DEFINE(USE_XIM, 1,
+	    [Define to 1 if we should use XIM, if it is available.])
+fi
+
+
+if test "${HAVE_XIM}" != "no"; then
+  late_CFLAGS=$CFLAGS
+  if test "$GCC" = yes; then
+    CFLAGS="$CFLAGS --pedantic-errors"
+  fi
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <X11/Xlib.h>
+#include <X11/Xresource.h>]],
+[[Display *display;
+XrmDatabase db;
+char *res_name;
+char *res_class;
+XIMProc  callback;
+XPointer *client_data;
+#ifndef __GNUC__
+/* If we're not using GCC, it's probably not XFree86, and this is
+   probably right, but we can't use something like --pedantic-errors.  */
+extern Bool XRegisterIMInstantiateCallback(Display*, XrmDatabase, char*,
+                                           char*, XIMProc, XPointer*);
+#endif
+(void)XRegisterIMInstantiateCallback(display, db, res_name, res_class, callback,
+   client_data);]])],
+    [emacs_cv_arg6_star=yes])
+  AH_TEMPLATE(XRegisterIMInstantiateCallback_arg6,
+         [Define to the type of the 6th arg of XRegisterIMInstantiateCallback,
+either XPointer or XPointer*.])dnl
+  if test "$emacs_cv_arg6_star" = yes; then
+    AC_DEFINE(XRegisterIMInstantiateCallback_arg6, [XPointer*])
+  else
+    AC_DEFINE(XRegisterIMInstantiateCallback_arg6, [XPointer])
+  fi
+  CFLAGS=$late_CFLAGS
+fi
+
+### Start of font-backend (under any platform) section.
+# (nothing here yet -- this is a placeholder)
+### End of font-backend (under any platform) section.
+
+### Start of font-backend (under X11) section.
+if test "${HAVE_X11}" = "yes"; then
+   PKG_CHECK_MODULES(FONTCONFIG, fontconfig >= 2.2.0, HAVE_FC=yes, HAVE_FC=no)
+
+   ## Use -lXft if available, unless `--with-xft=no'.
+   HAVE_XFT=maybe
+    if test "${HAVE_FC}" = "no" || test "x${with_x}" = "xno"; then
+      with_xft="no";
+    fi
+    if test "x${with_xft}" != "xno"; then
+
+      PKG_CHECK_MODULES(XFT, xft >= 0.13.0, , HAVE_XFT=no)
+      ## Because xftfont.c uses XRenderQueryExtension, we also
+      ## need to link to -lXrender.
+      HAVE_XRENDER=no
+      AC_CHECK_LIB(Xrender, XRenderQueryExtension, HAVE_XRENDER=yes)
+      if test "$HAVE_XFT" != no && test "$HAVE_XRENDER" != no; then
+	OLD_CPPFLAGS="$CPPFLAGS"
+	OLD_CFLAGS="$CFLAGS"
+	OLD_LIBS="$LIBS"
+	CPPFLAGS="$CPPFLAGS $XFT_CFLAGS"
+	CFLAGS="$CFLAGS $XFT_CFLAGS"
+	XFT_LIBS="-lXrender $XFT_LIBS"
+	LIBS="$XFT_LIBS $LIBS"
+	AC_CHECK_HEADER(X11/Xft/Xft.h,
+	  AC_CHECK_LIB(Xft, XftFontOpen, HAVE_XFT=yes, , $XFT_LIBS))
+
+	if test "${HAVE_XFT}" = "yes"; then
+	  AC_DEFINE(HAVE_XFT, 1, [Define to 1 if you have the Xft library.])
+	    AC_SUBST(XFT_LIBS)
+	  C_SWITCH_X_SITE="$C_SWITCH_X_SITE $XFT_CFLAGS"
+	else
+	  CPPFLAGS="$OLD_CPPFLAGS"
+	  CFLAGS="$OLD_CFLAGS"
+	  LIBS="$OLD_LIBS"
+	fi                        # "${HAVE_XFT}" = "yes"
+      fi                          # "$HAVE_XFT" != no
+    fi                            # "x${with_xft}" != "xno"
+
+    ## We used to allow building with FreeType and without Xft.
+    ## However, the ftx font backend driver is not in good shape.
+    if test "$HAVE_XFT" != "yes"; then
+       dnl For the "Does Emacs use" message at the end.
+       HAVE_XFT=no
+       HAVE_FREETYPE=no
+    else
+       dnl Strict linkers fail with
+       dnl ftfont.o: undefined reference to symbol 'FT_New_Face'
+       dnl if -lfreetype is not specified.
+       dnl The following is needed to set FREETYPE_LIBS.
+       PKG_CHECK_MODULES(FREETYPE, freetype2, HAVE_FREETYPE=yes,
+			 HAVE_FREETYPE=no)
+
+       test "$HAVE_FREETYPE" = "no" && AC_MSG_ERROR(libxft requires libfreetype)
+    fi
+
+    HAVE_LIBOTF=no
+    if test "${HAVE_FREETYPE}" = "yes"; then
+      AC_DEFINE(HAVE_FREETYPE, 1,
+		[Define to 1 if using the freetype and fontconfig libraries.])
+      if test "${with_libotf}" != "no"; then
+	PKG_CHECK_MODULES(LIBOTF, libotf, HAVE_LIBOTF=yes,
+			  HAVE_LIBOTF=no)
+	if test "$HAVE_LIBOTF" = "yes"; then
+	  AC_DEFINE(HAVE_LIBOTF, 1, [Define to 1 if using libotf.])
+	  AC_CHECK_LIB(otf, OTF_get_variation_glyphs,
+		       HAVE_OTF_GET_VARIATION_GLYPHS=yes,
+		       HAVE_OTF_GET_VARIATION_GLYPHS=no)
+	  if test "${HAVE_OTF_GET_VARIATION_GLYPHS}" = "yes"; then
+	    AC_DEFINE(HAVE_OTF_GET_VARIATION_GLYPHS, 1,
+		      [Define to 1 if libotf has OTF_get_variation_glyphs.])
+	  fi
+	fi
+      fi
+    dnl FIXME should there be an error if HAVE_FREETYPE != yes?
+    dnl Does the new font backend require it, or can it work without it?
+    fi
+
+    HAVE_M17N_FLT=no
+    if test "${HAVE_LIBOTF}" = yes; then
+      if test "${with_m17n_flt}" != "no"; then
+	PKG_CHECK_MODULES(M17N_FLT, m17n-flt, HAVE_M17N_FLT=yes, HAVE_M17N_FLT=no)
+	if test "$HAVE_M17N_FLT" = "yes"; then
+	  AC_DEFINE(HAVE_M17N_FLT, 1, [Define to 1 if using libm17n-flt.])
+	fi
+      fi
+    fi
+else
+    HAVE_XFT=no
+    HAVE_FREETYPE=no
+    HAVE_LIBOTF=no
+    HAVE_M17N_FLT=no
+fi
+
+### End of font-backend (under X11) section.
+
+AC_SUBST(FREETYPE_CFLAGS)
+AC_SUBST(FREETYPE_LIBS)
+AC_SUBST(FONTCONFIG_CFLAGS)
+AC_SUBST(FONTCONFIG_LIBS)
+AC_SUBST(LIBOTF_CFLAGS)
+AC_SUBST(LIBOTF_LIBS)
+AC_SUBST(M17N_FLT_CFLAGS)
+AC_SUBST(M17N_FLT_LIBS)
+
+### Use -lXpm if available, unless `--with-xpm=no'.
+HAVE_XPM=no
+LIBXPM=
+if test "${HAVE_X11}" = "yes"; then
+  if test "${with_xpm}" != "no"; then
+    AC_CHECK_HEADER(X11/xpm.h,
+      [AC_CHECK_LIB(Xpm, XpmReadFileToPixmap, HAVE_XPM=yes, , -lX11)])
+    if test "${HAVE_XPM}" = "yes"; then
+      AC_MSG_CHECKING(for XpmReturnAllocPixels preprocessor define)
+      AC_EGREP_CPP(no_return_alloc_pixels,
+      [#include "X11/xpm.h"
+#ifndef XpmReturnAllocPixels
+no_return_alloc_pixels
+#endif
+      ], HAVE_XPM=no, HAVE_XPM=yes)
+
+      if test "${HAVE_XPM}" = "yes"; then
+	AC_MSG_RESULT(yes)
+      else
+	AC_MSG_RESULT(no)
+      fi
+    fi
+  fi
+
+  if test "${HAVE_XPM}" = "yes"; then
+    AC_DEFINE(HAVE_XPM, 1, [Define to 1 if you have the Xpm library (-lXpm).])
+    LIBXPM=-lXpm
+  fi
+fi
+AC_SUBST(LIBXPM)
+
+### Use -ljpeg if available, unless `--with-jpeg=no'.
+HAVE_JPEG=no
+LIBJPEG=
+if test "${HAVE_X11}" = "yes"; then
+  if test "${with_jpeg}" != "no"; then
+    dnl Checking for jpeglib.h can lose because of a redefinition of
+    dnl  HAVE_STDLIB_H.
+    AC_CHECK_HEADER(jerror.h,
+      [AC_CHECK_LIB(jpeg, jpeg_destroy_compress, HAVE_JPEG=yes)])
+  fi
+
+  AH_TEMPLATE(HAVE_JPEG, [Define to 1 if you have the jpeg library (-ljpeg).])dnl
+  if test "${HAVE_JPEG}" = "yes"; then
+    AC_DEFINE(HAVE_JPEG)
+    AC_EGREP_CPP([version= *(6[2-9]|[7-9][0-9])],
+        [#include <jpeglib.h>
+	 version=JPEG_LIB_VERSION
+],
+        [AC_DEFINE(HAVE_JPEG)],
+        [AC_MSG_WARN([libjpeg found, but not version 6b or later])
+        HAVE_JPEG=no])
+  fi
+  if test "${HAVE_JPEG}" = "yes"; then
+    LIBJPEG=-ljpeg
+  fi
+fi
+AC_SUBST(LIBJPEG)
+
+### Use -lpng if available, unless `--with-png=no'.
+HAVE_PNG=no
+LIBPNG=
+if test "${HAVE_X11}" = "yes"; then
+  if test "${with_png}" != "no"; then
+    # Debian unstable as of July 2003 has multiple libpngs, and puts png.h
+    # in /usr/include/libpng.
+    AC_CHECK_HEADERS(png.h libpng/png.h)
+    if test "$ac_cv_header_png_h" = yes || test "$ac_cv_header_libpng_png_h" = yes ; then
+      AC_CHECK_LIB(png, png_get_channels, HAVE_PNG=yes, , -lz -lm)
+    fi
+  fi
+
+  if test "${HAVE_PNG}" = "yes"; then
+    AC_DEFINE(HAVE_PNG, 1, [Define to 1 if you have the png library (-lpng).])
+    LIBPNG="-lpng -lz -lm"
+  fi
+fi
+AC_SUBST(LIBPNG)
+
+### Use -ltiff if available, unless `--with-tiff=no'.
+HAVE_TIFF=no
+LIBTIFF=
+if test "${HAVE_X11}" = "yes"; then
+  if test "${with_tiff}" != "no"; then
+    AC_CHECK_HEADER(tiffio.h,
+      [tifflibs="-lz -lm"
+      # At least one tiff package requires the jpeg library.
+      if test "${HAVE_JPEG}" = yes; then tifflibs="-ljpeg $tifflibs"; fi
+      AC_CHECK_LIB(tiff, TIFFGetVersion, HAVE_TIFF=yes, , $tifflibs)])
+  fi
+
+  if test "${HAVE_TIFF}" = "yes"; then
+    AC_DEFINE(HAVE_TIFF, 1, [Define to 1 if you have the tiff library (-ltiff).])
+    dnl FIXME -lz -lm, as per libpng?
+    LIBTIFF=-ltiff
+  fi
+fi
+AC_SUBST(LIBTIFF)
+
+### Use -lgif or -lungif if available, unless `--with-gif=no'.
+HAVE_GIF=no
+LIBGIF=
+if test "${HAVE_X11}" = "yes" && test "${with_gif}" != "no"; then
+  AC_CHECK_HEADER(gif_lib.h,
+# EGifPutExtensionLast only exists from version libungif-4.1.0b1.
+# Earlier versions can crash Emacs.
+    [AC_CHECK_LIB(gif, EGifPutExtensionLast, HAVE_GIF=yes, HAVE_GIF=maybe)])
+
+  if test "$HAVE_GIF" = yes; then
+    LIBGIF=-lgif
+  elif test "$HAVE_GIF" = maybe; then
+# If gif_lib.h but no libgif, try libungif.
+    AC_CHECK_LIB(ungif, EGifPutExtensionLast, HAVE_GIF=yes, HAVE_GIF=no)
+    test "$HAVE_GIF" = yes && LIBGIF=-lungif
+  fi
+
+  if test "${HAVE_GIF}" = "yes"; then
+    AC_DEFINE(HAVE_GIF, 1, [Define to 1 if you have a gif (or ungif) library.])
+  fi
+fi
+AC_SUBST(LIBGIF)
+
+dnl Check for required libraries.
+if test "${HAVE_X11}" = "yes"; then
+  MISSING=""
+  WITH_NO=""
+  test "${with_xpm}" != "no" && test "${HAVE_XPM}" != "yes" &&
+    MISSING="libXpm" && WITH_NO="--with-xpm=no"
+  test "${with_jpeg}" != "no" && test "${HAVE_JPEG}" != "yes" &&
+    MISSING="$MISSING libjpeg" && WITH_NO="$WITH_NO --with-jpeg=no"
+  test "${with_png}" != "no" && test "${HAVE_PNG}" != "yes" &&
+    MISSING="$MISSING libpng" && WITH_NO="$WITH_NO --with-png=no"
+  test "${with_gif}" != "no" && test "${HAVE_GIF}" != "yes" &&
+    MISSING="$MISSING libgif/libungif" && WITH_NO="$WITH_NO --with-gif=no"
+  test "${with_tiff}" != "no" && test "${HAVE_TIFF}" != "yes" &&
+    MISSING="$MISSING libtiff" && WITH_NO="$WITH_NO --with-tiff=no"
+
+  if test "X${MISSING}" != X; then
+    AC_MSG_ERROR([The following required libraries were not found:
+    $MISSING
+Maybe some development libraries/packages are missing?
+If you don't want to link with them give
+    $WITH_NO
+as options to configure])
+  fi
+fi
+
+### Use -lgpm if available, unless `--with-gpm=no'.
+HAVE_GPM=no
+LIBGPM=
+if test "${with_gpm}" != "no"; then
+  AC_CHECK_HEADER(gpm.h,
+    [AC_CHECK_LIB(gpm, Gpm_Open, HAVE_GPM=yes)])
+
+  if test "${HAVE_GPM}" = "yes"; then
+    AC_DEFINE(HAVE_GPM, 1, [Define to 1 if you have the gpm library (-lgpm).])
+    LIBGPM=-lgpm
+  fi
+fi
+AC_SUBST(LIBGPM)
+
+dnl Check for malloc/malloc.h on darwin
+AC_CHECK_HEADER(malloc/malloc.h, [AC_DEFINE(HAVE_MALLOC_MALLOC_H, 1, [Define to 1 if you have the <malloc/malloc.h> header file.])])
+
+C_SWITCH_X_SYSTEM=
+### Use NeXTstep API to implement GUI.
+if test "${HAVE_NS}" = "yes"; then
+  AC_DEFINE(HAVE_NS, 1, [Define to 1 if you are using the NeXTstep API, either GNUstep or Cocoa on Mac OS X.])
+  if test "${NS_IMPL_COCOA}" = "yes"; then
+    AC_DEFINE(NS_IMPL_COCOA, 1, [Define to 1 if you are using NS windowing under MacOS X.])
+  fi
+  if test "${NS_IMPL_GNUSTEP}" = "yes"; then
+    AC_DEFINE(NS_IMPL_GNUSTEP, 1, [Define to 1 if you are using NS windowing under GNUstep.])
+    # See also .m.o rule in Makefile.in */
+    # FIXME: are all these flags really needed?  Document here why.  */
+    dnl FIXME this should be renamed to GNUSTEP_CFLAGS, and only
+    dnl used in src/Makefile.in.
+    C_SWITCH_X_SYSTEM="-D_REENTRANT -fPIC -fno-strict-aliasing -I${GNUSTEP_SYSTEM_HEADERS} ${GNUSTEP_LOCAL_HEADERS}"
+    ## Extra CFLAGS applied to src/*.m files.
+    GNU_OBJC_CFLAGS="$GNU_OBJC_CFLAGS -fgnu-runtime -Wno-import -fconstant-string-class=NSConstantString -DGNUSTEP_BASE_LIBRARY=1 -DGNU_GUI_LIBRARY=1 -DGNU_RUNTIME=1 -DGSWARN -DGSDIAGNOSE"
+  fi
+  if test "${NS_HAVE_NSINTEGER}" = "yes"; then
+    AC_DEFINE(NS_HAVE_NSINTEGER, 1, [Define to 1 if `NSInteger' is defined.])
+  fi
+  # We also have mouse menus.
+  HAVE_MENUS=yes
+  OTHER_FILES=ns-app
+fi
+
+
+### Use session management (-lSM -lICE) if available
+HAVE_X_SM=no
+LIBXSM=
+if test "${HAVE_X11}" = "yes"; then
+  AC_CHECK_HEADER(X11/SM/SMlib.h,
+    [AC_CHECK_LIB(SM, SmcOpenConnection, HAVE_X_SM=yes, , -lICE)])
+
+  if test "${HAVE_X_SM}" = "yes"; then
+    AC_DEFINE(HAVE_X_SM, 1, [Define to 1 if you have the SM library (-lSM).])
+    LIBXSM="-lSM -lICE"
+    case "$LIBS" in
+      *-lSM*) ;;
+      *)      LIBS="$LIBXSM $LIBS" ;;
+    esac
+  fi
+fi
+AC_SUBST(LIBXSM)
+
+### Use libxml (-lxml2) if available
+HAVE_LIBXML2=no
+if test "${with_xml2}" != "no"; then
+  ### I'm not sure what the version number should be, so I just guessed.
+  PKG_CHECK_MODULES(LIBXML2, libxml-2.0 > 2.6.17, HAVE_LIBXML2=yes, HAVE_LIBXML2=no)
+  if test "${HAVE_LIBXML2}" = "yes"; then
+    LIBS="$LIBXML2_LIBS $LIBS"
+    AC_CHECK_LIB(xml2, htmlReadMemory, HAVE_LIBXML2=yes, HAVE_LIBXML2=no)
+    if test "${HAVE_LIBXML2}" = "yes"; then
+      AC_DEFINE(HAVE_LIBXML2, 1, [Define to 1 if you have the libxml library (-lxml2).])
+    else
+      LIBXML2_LIBS=""
+      LIBXML2_CFLAGS=""
+    fi
+  fi
+fi
+AC_SUBST(LIBXML2_LIBS)
+AC_SUBST(LIBXML2_CFLAGS)
+
+# If netdb.h doesn't declare h_errno, we must declare it by hand.
+AC_CACHE_CHECK(whether netdb declares h_errno,
+	       emacs_cv_netdb_declares_h_errno,
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
+  [[return h_errno;]])],
+  emacs_cv_netdb_declares_h_errno=yes, emacs_cv_netdb_declares_h_errno=no)])
+if test $emacs_cv_netdb_declares_h_errno = yes; then
+  AC_DEFINE(HAVE_H_ERRNO, 1, [Define to 1 if netdb.h declares h_errno.])
+fi
+
+# fmod, logb, and frexp are found in -lm on most systems.
+# On HPUX 9.01, -lm does not contain logb, so check for sqrt.
+AC_CHECK_LIB(m, sqrt)
+
+# Check for mail-locking functions in a "mail" library.  Probably this should
+# have the same check as for liblockfile below.
+AC_CHECK_LIB(mail, maillock, have_mail=yes, have_mail=no)
+if test $have_mail = yes; then
+  LIBS_MAIL=-lmail
+  LIBS="$LIBS_MAIL $LIBS"
+  AC_DEFINE(HAVE_LIBMAIL, 1, [Define to 1 if you have the `mail' library (-lmail).])
+else
+  LIBS_MAIL=
+fi
+dnl Debian, at least:
+AC_CHECK_LIB(lockfile, maillock, have_lockfile=yes, have_lockfile=no)
+if test $have_lockfile = yes; then
+   LIBS_MAIL=-llockfile
+   LIBS="$LIBS_MAIL $LIBS"
+   AC_DEFINE(HAVE_LIBLOCKFILE, 1, [Define to 1 if you have the `lockfile' library (-llockfile).])
+else
+# If we have the shared liblockfile, assume we must use it for mail
+# locking (e.g. Debian).  If we couldn't link against liblockfile
+# (no liblockfile.a installed), ensure that we don't need to.
+  dnl This works for files generally, not just executables.
+  dnl Should we look elsewhere for it?  Maybe examine /etc/ld.so.conf?
+  AC_CHECK_PROG(liblockfile, liblockfile.so, yes, no,
+                /usr/lib:/lib:/usr/local/lib:$LD_LIBRARY_PATH)
+  if test $ac_cv_prog_liblockfile = yes; then
+    AC_MSG_ERROR([Shared liblockfile found but can't link against it.
+This probably means that movemail could lose mail.
+There may be a `development' package to install containing liblockfile.])
+  fi
+fi
+AC_CHECK_FUNCS(touchlock)
+AC_CHECK_HEADERS(maillock.h)
+AC_SUBST(LIBS_MAIL)
+
+## Define MAIL_USE_FLOCK (or LOCKF) if the mailer uses flock (or lockf) to
+## interlock access to the mail spool.  The alternative is a lock file named
+## /usr/spool/mail/$USER.lock.
+mail_lock=no
+case "$opsys" in
+  aix4-2) mail_lock="lockf" ;;
+
+  gnu|freebsd|netbsd|openbsd|darwin|irix6-5) mail_lock="flock" ;;
+
+  ## On GNU/Linux systems, both methods are used by various mail programs.
+  ## I assume most people are using newer mailers that have heard of flock.
+  ## Change this if you need to.
+  ## Debian contains a patch which says: ``On Debian/GNU/Linux systems,
+  ## configure gets the right answers, and that means *NOT* using flock.
+  ## Using flock is guaranteed to be the wrong thing. See Debian Policy
+  ## for details.'' and then uses `#ifdef DEBIAN'.  Unfortunately the
+  ## Debian maintainer hasn't provided a clean fix for Emacs.
+  ## movemail.c will use `maillock' when MAILDIR, HAVE_LIBMAIL and
+  ## HAVE_MAILLOCK_H are defined, so the following appears to be the
+  ## correct logic.  -- fx
+  ## We must check for HAVE_LIBLOCKFILE too, as movemail does.
+  ## liblockfile is a Free Software replacement for libmail, used on
+  ## Debian systems and elsewhere. -rfr.
+  gnu-*)
+    mail_lock="flock"
+    if test $have_mail = yes || test $have_lockfile = yes; then
+      test $ac_cv_header_maillock_h = yes && mail_lock=no
+    fi
+    ;;
+esac
+
+BLESSMAIL_TARGET=
+case "$mail_lock" in
+  flock) AC_DEFINE(MAIL_USE_FLOCK, 1, [Define if the mailer uses flock to interlock the mail spool.]) ;;
+
+  lockf) AC_DEFINE(MAIL_USE_LOCKF, 1, [Define if the mailer uses lockf to interlock the mail spool.]) ;;
+
+  *) BLESSMAIL_TARGET="need-blessmail" ;;
+esac
+AC_SUBST(BLESSMAIL_TARGET)
+
+
+AC_CHECK_FUNCS(gethostname getdomainname \
+rename closedir mkdir rmdir sysinfo getrusage get_current_dir_name \
+random lrand48 logb frexp fmod rint cbrt ftime setsid \
+strerror fpathconf select euidaccess getpagesize tzset setlocale \
+utimes getrlimit setrlimit setpgid getcwd getwd shutdown getaddrinfo \
+__fpending mblen mbrlen mbsinit strsignal setitimer ualarm \
+sendto recvfrom getsockopt setsockopt getsockname getpeername \
+gai_strerror mkstemp getline getdelim mremap fsync sync \
+difftime mempcpy mblen mbrlen posix_memalign \
+cfmakeraw cfsetspeed copysign __executable_start)
+
+dnl Cannot use AC_CHECK_FUNCS
+AC_CACHE_CHECK([for __builtin_unwind_init],
+	       emacs_cv_func___builtin_unwind_init,
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [__builtin_unwind_init ();])],
+		emacs_cv_func___builtin_unwind_init=yes,
+		emacs_cv_func___builtin_unwind_init=no)])
+if test $emacs_cv_func___builtin_unwind_init = yes; then
+  AC_DEFINE(HAVE___BUILTIN_UNWIND_INIT, 1,
+	    [Define to 1 if you have the `__builtin_unwind_init' function.])
+fi
+
+AC_CHECK_HEADERS(sys/un.h)
+
+AC_FUNC_FSEEKO
+
+AC_FUNC_GETPGRP
+
+# UNIX98 PTYs.
+AC_CHECK_FUNCS(grantpt)
+
+# PTY-related GNU extensions.
+AC_CHECK_FUNCS(getpt)
+
+# Check this now, so that we will NOT find the above functions in ncurses.
+# That is because we have not set up to link ncurses in lib-src.
+# It's better to believe a function is not available
+# than to expect to find it in ncurses.
+# Also we need tputs and friends to be able to build at all.
+AC_MSG_CHECKING([for library containing tputs])
+# Run a test program that contains a call to tputs, a call that is
+# never executed.  This tests whether a pre-'main' dynamic linker
+# works with the library.  It's too much trouble to actually call
+# tputs in the test program, due to portability hassles.  When
+# cross-compiling, assume the test program will run if it links.
+AC_DEFUN([tputs_link_source], [
+  AC_LANG_SOURCE(
+     [[extern void tputs (const char *, int, int (*)(int));
+       int main (int argc, char **argv)
+       {
+	  if (argc == 10000)
+	    tputs (argv[0], 0, 0);
+	  return 0;
+       }]])
+])
+# Maybe curses should be tried earlier?
+# See http://debbugs.gnu.org/cgi/bugreport.cgi?bug=9736#35
+for tputs_library in '' ncurses terminfo termcap curses; do
+  OLIBS=$LIBS
+  if test -z "$tputs_library"; then
+    LIBS_TERMCAP=
+    msg='none required'
+  else
+    LIBS_TERMCAP=-l$tputs_library
+    msg=$LIBS_TERMCAP
+    LIBS="$LIBS_TERMCAP $LIBS"
+  fi
+  AC_RUN_IFELSE([tputs_link_source], [], [msg=no],
+    [AC_LINK_IFELSE([tputs_link_source], [], [msg=no])])
+  LIBS=$OLIBS
+  if test "X$msg" != Xno; then
+    break
+  fi
+done
+AC_MSG_RESULT([$msg])
+if test "X$msg" = Xno; then
+  AC_MSG_ERROR([The required function `tputs' was not found in any library.
+These libraries were tried: libncurses, libterminfo, libtermcap, libcurses.
+Please try installing whichever of these libraries is most appropriate
+for your system, together with its header files.
+For example, a libncurses-dev(el) or similar package.])
+fi
+# Must define this when any termcap library is found.
+AC_DEFINE(HAVE_LIBNCURSES, 1,
+          [Define to 1 if you have the `ncurses' library (-lncurses).])
+## FIXME This was the cpp logic, but I am not sure it is right.
+## The above test has not necessarily found libncurses.
+HAVE_LIBNCURSES=yes
+
+## Use terminfo instead of termcap?
+## Note only system files NOT using terminfo are:
+## freebsd < 40000, ms-w32, msdos, netbsd < 599002500, and
+## darwin|gnu without ncurses.
+TERMINFO=no
+case "$opsys" in
+  ## cygwin: Fewer environment variables to go wrong, more terminal types.
+  ## hpux10-20: Use the system provided termcap(3) library.
+  ## openbsd: David Mazieres <dm@reeducation-labor.lcs.mit.edu> says this
+  ##  is necessary.  Otherwise Emacs dumps core when run -nw.
+  aix4-2|cygwin|hpux*|irix6-5|openbsd|sol2*|unixware) TERMINFO=yes ;;
+
+  ## darwin: Prevents crashes when running Emacs in Terminal.app under 10.2.
+  ##  The ncurses library has been moved out of the System framework in
+  ##  Mac OS X 10.2.  So if configure detects it, set the command-line
+  ##  option to use it.
+  darwin|gnu*)
+    ## (HAVE_LIBNCURSES was not always true, but is since 2010-03-18.)
+    if test "x$HAVE_LIBNCURSES" = "xyes"; then
+      TERMINFO=yes
+      LIBS_TERMCAP="-lncurses"
+    fi
+    ;;
+
+  freebsd)
+    AC_MSG_CHECKING([whether FreeBSD is new enough to use terminfo])
+    AC_CACHE_VAL(emacs_cv_freebsd_terminfo,
+    [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <osreldate.h>]],
+[[#if __FreeBSD_version < 400000
+fail;
+#endif
+]])], emacs_cv_freebsd_terminfo=yes, emacs_cv_freebsd_terminfo=no)])
+
+    AC_MSG_RESULT($emacs_cv_freebsd_terminfo)
+
+    if test $emacs_cv_freebsd_terminfo = yes; then
+      TERMINFO=yes
+      LIBS_TERMCAP="-lncurses"
+    else
+      LIBS_TERMCAP="-ltermcap"
+    fi
+    ;;
+
+  netbsd)
+    if test "x$LIBS_TERMCAP" = "x-lterminfo"; then
+      TERMINFO=yes
+    else
+      LIBS_TERMCAP="-ltermcap"
+    fi
+    ;;
+
+esac
+
+case "$opsys" in
+  ## hpux: Make sure we get select from libc rather than from libcurses
+  ##  because libcurses on HPUX 10.10 has a broken version of select.
+  ##  We used to use -lc -lcurses, but this may be cleaner.
+  hpux*) LIBS_TERMCAP="-ltermcap" ;;
+
+  openbsd) LIBS_TERMCAP="-lncurses" ;;
+
+  ## Must use system termcap, if we use any termcap.  It does special things.
+  sol2*) test "$TERMINFO" != yes && LIBS_TERMCAP="-ltermcap" ;;
+esac
+
+TERMCAP_OBJ=tparam.o
+if test $TERMINFO = yes; then
+  AC_DEFINE(TERMINFO, 1, [Define to 1 if you use terminfo instead of termcap.])
+  TERMCAP_OBJ=terminfo.o
+fi
+AC_SUBST(LIBS_TERMCAP)
+AC_SUBST(TERMCAP_OBJ)
+
+
+# Do we have res_init, for detecting changes in /etc/resolv.conf?
+resolv=no
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>]],
+    [[return res_init();]])],
+    have_res_init=yes, have_res_init=no)
+if test "$have_res_init" = no; then
+  OLIBS="$LIBS"
+  LIBS="$LIBS -lresolv"
+  AC_MSG_CHECKING(for res_init with -lresolv)
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>]],
+    [[return res_init();]])],
+    have_res_init=yes, have_res_init=no)
+  AC_MSG_RESULT($have_res_init)
+  if test "$have_res_init" = yes ; then
+    resolv=yes
+  fi
+  LIBS="$OLIBS"
+fi
+
+if test "$have_res_init" = yes; then
+  AC_DEFINE(HAVE_RES_INIT, 1, [Define to 1 if res_init is available.])
+fi
+
+# Do we need the Hesiod library to provide the support routines?
+LIBHESIOD=
+if test "$with_hesiod" != no ; then
+  # Don't set $LIBS here -- see comments above.  FIXME which comments?
+  AC_CHECK_FUNC(res_send, , [AC_CHECK_FUNC(__res_send, ,
+     [AC_CHECK_LIB(resolv, res_send, resolv=yes,
+		  [AC_CHECK_LIB(resolv, __res_send, resolv=yes)])])])
+  if test "$resolv" = yes ; then
+    RESOLVLIB=-lresolv
+  else
+    RESOLVLIB=
+  fi
+  AC_CHECK_FUNC(hes_getmailhost, , [AC_CHECK_LIB(hesiod, hes_getmailhost,
+	hesiod=yes, :, $RESOLVLIB)])
+
+  if test x"$hesiod" = xyes; then
+    AC_DEFINE(HAVE_LIBHESIOD, 1,
+              [Define to 1 if you have the hesiod library (-lhesiod).])
+    LIBHESIOD=-lhesiod
+  fi
+fi
+AC_SUBST(LIBHESIOD)
+
+# Do we need libresolv (due to res_init or Hesiod)?
+if test "$resolv" = yes ; then
+  AC_DEFINE(HAVE_LIBRESOLV, 1,
+            [Define to 1 if you have the resolv library (-lresolv).])
+  LIBRESOLV=-lresolv
+else
+  LIBRESOLV=
+fi
+AC_SUBST(LIBRESOLV)
+
+# These tell us which Kerberos-related libraries to use.
+COM_ERRLIB=
+CRYPTOLIB=
+KRB5LIB=
+DESLIB=
+KRB4LIB=
+
+if test "${with_kerberos}" != no; then
+  AC_CHECK_LIB(com_err, com_err, have_com_err=yes, have_com_err=no)
+  if test $have_com_err = yes; then
+    COM_ERRLIB=-lcom_err
+    LIBS="$COM_ERRLIB $LIBS"
+    AC_DEFINE(HAVE_LIBCOM_ERR, 1, [Define to 1 if you have the `com_err' library (-lcom_err).])
+  fi
+  AC_CHECK_LIB(crypto, mit_des_cbc_encrypt, have_crypto=yes, have_crypto=no)
+  if test $have_crypto = yes; then
+    CRYPTOLIB=-lcrypto
+    LIBS="$CRYPTOLIB $LIBS"
+    AC_DEFINE(HAVE_LIBCRYPTO, 1, [Define to 1 if you have the `crypto' library (-lcrypto).])
+  fi
+  AC_CHECK_LIB(k5crypto, mit_des_cbc_encrypt, have_k5crypto=yes, have_k5crypto=no)
+  if test $have_k5crypto = yes; then
+    CRYPTOLIB=-lk5crypto
+    LIBS="$CRYPTOLIB $LIBS"
+    AC_DEFINE(HAVE_LIBK5CRYPTO, 1, [Define to 1 if you have the `k5crypto' library (-lk5crypto).])
+  fi
+  AC_CHECK_LIB(krb5, krb5_init_context, have_krb5=yes, have_krb5=no)
+  if test $have_krb5=yes; then
+    KRB5LIB=-lkrb5
+    LIBS="$KRB5LIB $LIBS"
+    AC_DEFINE(HAVE_LIBKRB5, 1, [Define to 1 if you have the `krb5' library (-lkrb5).])
+  fi
+  dnl FIXME Simplify.  Does not match 22 logic, thanks to default_off?
+  if test "${with_kerberos5}" = no; then
+    AC_CHECK_LIB(des425, des_cbc_encrypt, have_des425=yes, have_des425=no )
+    if test $have_des425 = yes; then
+      DESLIB=-ldes425
+      LIBS="$DESLIB $LIBS"
+      AC_DEFINE(HAVE_LIBDES425, 1, [Define to 1 if you have the `des425' library (-ldes425).])
+    else
+      AC_CHECK_LIB(des, des_cbc_encrypt, have_des=yes, have_des=no)
+      if test $have_des = yes; then
+        DESLIB=-ldes
+        LIBS="$DESLIB $LIBS"
+        AC_DEFINE(HAVE_LIBDES, 1, [Define to 1 if you have the `des' library (-ldes).])
+      fi
+    fi
+    AC_CHECK_LIB(krb4, krb_get_cred, have_krb4=yes, have_krb4=no)
+    if test $have_krb4 = yes; then
+      KRB4LIB=-lkrb4
+      LIBS="$KRB4LIB $LIBS"
+      AC_DEFINE(HAVE_LIBKRB4, 1, [Define to 1 if you have the `krb4' library (-lkrb4).])
+    else
+      AC_CHECK_LIB(krb, krb_get_cred, have_krb=yes, have_krb=no)
+      if test $have_krb = yes; then
+        KRB4LIB=-lkrb
+        LIBS="$KRB4LIB $LIBS"
+        AC_DEFINE(HAVE_LIBKRB, 1, [Define to 1 if you have the `krb' library (-lkrb).])
+      fi
+    fi
+  fi
+
+  if test "${with_kerberos5}" != no; then
+    AC_CHECK_HEADERS(krb5.h,
+      [AC_CHECK_MEMBERS([krb5_error.text, krb5_error.e_text],,,
+		        [#include <krb5.h>])])
+  else
+    AC_CHECK_HEADERS(des.h,,
+		     [AC_CHECK_HEADERS(kerberosIV/des.h,,
+				       [AC_CHECK_HEADERS(kerberos/des.h)])])
+    AC_CHECK_HEADERS(krb.h,,
+		     [AC_CHECK_HEADERS(kerberosIV/krb.h,,
+				       [AC_CHECK_HEADERS(kerberos/krb.h)])])
+  fi
+  AC_CHECK_HEADERS(com_err.h)
+fi
+
+AC_SUBST(COM_ERRLIB)
+AC_SUBST(CRYPTOLIB)
+AC_SUBST(KRB5LIB)
+AC_SUBST(DESLIB)
+AC_SUBST(KRB4LIB)
+
+AC_MSG_CHECKING(whether localtime caches TZ)
+AC_CACHE_VAL(emacs_cv_localtime_cache,
+[if test x$ac_cv_func_tzset = xyes; then
+AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <time.h>
+char TZ_GMT0[] = "TZ=GMT0";
+char TZ_PST8[] = "TZ=PST8";
+main()
+{
+  time_t now = time ((time_t *) 0);
+  int hour_GMT0, hour_unset;
+  if (putenv (TZ_GMT0) != 0)
+    exit (1);
+  hour_GMT0 = localtime (&now)->tm_hour;
+  unsetenv("TZ");
+  hour_unset = localtime (&now)->tm_hour;
+  if (putenv (TZ_PST8) != 0)
+    exit (1);
+  if (localtime (&now)->tm_hour == hour_GMT0)
+    exit (1);
+  unsetenv("TZ");
+  if (localtime (&now)->tm_hour != hour_unset)
+    exit (1);
+  exit (0);
+}]])], emacs_cv_localtime_cache=no, emacs_cv_localtime_cache=yes,
+[# If we have tzset, assume the worst when cross-compiling.
+emacs_cv_localtime_cache=yes])
+else
+	# If we lack tzset, report that localtime does not cache TZ,
+	# since we can't invalidate the cache if we don't have tzset.
+	emacs_cv_localtime_cache=no
+fi])dnl
+AC_MSG_RESULT($emacs_cv_localtime_cache)
+if test $emacs_cv_localtime_cache = yes; then
+  AC_DEFINE(LOCALTIME_CACHE, 1,
+	    [Define to 1 if localtime caches TZ.])
+fi
+
+if test "x$HAVE_TIMEVAL" = xyes; then
+  AC_CHECK_FUNCS(gettimeofday)
+  if test $ac_cv_func_gettimeofday = yes; then
+    AC_CACHE_CHECK(whether gettimeofday can accept two arguments,
+		   emacs_cv_gettimeofday_two_arguments,
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#ifdef TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif]],
+      [[struct timeval time;
+       gettimeofday (&time, 0);]])],
+      emacs_cv_gettimeofday_two_arguments=yes,
+      emacs_cv_gettimeofday_two_arguments=no)])
+    if test $emacs_cv_gettimeofday_two_arguments = no; then
+      AC_DEFINE(GETTIMEOFDAY_ONE_ARGUMENT, 1,
+		[Define to 1 if gettimeofday accepts only one argument.])
+    fi
+  fi
+fi
+
+ok_so_far=yes
+AC_CHECK_FUNC(socket, , ok_so_far=no)
+if test $ok_so_far = yes; then
+  AC_CHECK_HEADER(netinet/in.h, , ok_so_far=no)
+fi
+if test $ok_so_far = yes; then
+  AC_CHECK_HEADER(arpa/inet.h, , ok_so_far=no)
+fi
+if test $ok_so_far = yes; then
+dnl Fixme: Not used.  Should this be HAVE_SOCKETS?
+  AC_DEFINE(HAVE_INET_SOCKETS, 1,
+	    [Define to 1 if you have inet sockets.])
+fi
+
+if test -f /usr/lpp/X11/bin/smt.exp; then
+  AC_DEFINE(HAVE_AIX_SMT_EXP, 1,
+	    [Define to 1 if the file /usr/lpp/X11/bin/smt.exp exists.])
+fi
+
+AC_MSG_CHECKING(whether system supports dynamic ptys)
+if test -d /dev/pts && ls -d /dev/ptmx > /dev/null 2>&1 ; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_DEV_PTMX, 1, [Define to 1 if dynamic ptys are supported.])
+else
+  AC_MSG_RESULT(no)
+fi
+
+AC_FUNC_FORK
+
+AC_CHECK_FUNCS(snprintf)
+
+dnl Adapted from Haible's version.
+AC_CACHE_CHECK([for nl_langinfo and CODESET], emacs_cv_langinfo_codeset,
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <langinfo.h>]],
+    [[char* cs = nl_langinfo(CODESET);]])],
+    emacs_cv_langinfo_codeset=yes,
+    emacs_cv_langinfo_codeset=no)
+  ])
+if test $emacs_cv_langinfo_codeset = yes; then
+  AC_DEFINE(HAVE_LANGINFO_CODESET, 1,
+    [Define if you have <langinfo.h> and nl_langinfo(CODESET).])
+fi
+
+AC_TYPE_MBSTATE_T
+
+AC_CACHE_CHECK([for C restricted array declarations], emacs_cv_c_restrict_arr,
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[void fred (int x[__restrict]);]], [[]])],
+                  emacs_cv_c_restrict_arr=yes, emacs_cv_c_restrict_arr=no)])
+if test "$emacs_cv_c_restrict_arr" = yes; then
+  AC_DEFINE(__restrict_arr, __restrict,
+    [Define to compiler's equivalent of C99 restrict keyword in array
+     declarations.  Define as empty for no equivalent.])
+fi
+
+dnl Fixme: AC_SYS_POSIX_TERMIOS should probably be used, but it's not clear
+dnl how the tty code is related to POSIX and/or other versions of termios.
+dnl The following looks like a useful start.
+dnl
+dnl AC_SYS_POSIX_TERMIOS
+dnl if test $ac_cv_sys_posix_termios = yes; then
+dnl    AC_DEFINE(HAVE_TERMIOS, 1, [Define to 1 if you have POSIX-style functions
+dnl                                and macros for terminal control.])
+dnl    AC_DEFINE(HAVE_TCATTR, 1, [Define to 1 if you have tcgetattr and tcsetattr.])
+dnl fi
+
+# Set up the CFLAGS for real compilation, so we can substitute it.
+CFLAGS="$REAL_CFLAGS"
+CPPFLAGS="$REAL_CPPFLAGS"
+
+## Hack to detect a buggy GCC version.
+if test "x$GCC" = xyes \
+   && test x"`$CC --version 2> /dev/null | grep 'gcc.* 4.5.0'`" != x \
+   && test x"`echo $CFLAGS | grep '\-O@<:@23@:>@'`" != x \
+   && test x"`echo $CFLAGS | grep '\-fno-optimize-sibling-calls'`" = x; then
+   AC_MSG_ERROR([GCC 4.5.0 has problems compiling Emacs; see etc/PROBLEMS'.])
+fi
+
+version=$PACKAGE_VERSION
+
+### Specify what sort of things we'll be editing into Makefile and config.h.
+### Use configuration here uncanonicalized to avoid exceeding size limits.
+AC_SUBST(version)
+AC_SUBST(configuration)
+## Unused?
+AC_SUBST(canonical)
+AC_SUBST(srcdir)
+AC_SUBST(prefix)
+AC_SUBST(exec_prefix)
+AC_SUBST(bindir)
+AC_SUBST(datadir)
+AC_SUBST(sharedstatedir)
+AC_SUBST(libexecdir)
+AC_SUBST(mandir)
+AC_SUBST(infodir)
+AC_SUBST(lispdir)
+AC_SUBST(locallisppath)
+AC_SUBST(lisppath)
+AC_SUBST(x_default_search_path)
+AC_SUBST(etcdir)
+AC_SUBST(archlibdir)
+AC_SUBST(docdir)
+AC_SUBST(bitmapdir)
+AC_SUBST(gamedir)
+AC_SUBST(gameuser)
+## FIXME? Nothing uses @LD_SWITCH_X_SITE@.
+## src/Makefile.in did add LD_SWITCH_X_SITE (as a cpp define) to the
+## end of LIBX_BASE, but nothing ever set it.
+AC_SUBST(LD_SWITCH_X_SITE)
+AC_SUBST(C_SWITCH_X_SITE)
+AC_SUBST(C_SWITCH_X_SYSTEM)
+AC_SUBST(CFLAGS)
+## Used in lwlib/Makefile.in.
+AC_SUBST(X_TOOLKIT_TYPE)
+if test -n "${machfile}"; then
+  M_FILE="\$(srcdir)/${machfile}"
+else
+  M_FILE=
+fi
+S_FILE="\$(srcdir)/${opsysfile}"
+AC_SUBST(M_FILE)
+AC_SUBST(S_FILE)
+AC_SUBST(ns_appdir)
+AC_SUBST(ns_appbindir)
+AC_SUBST(ns_appresdir)
+AC_SUBST(ns_appsrc)
+AC_SUBST(GNU_OBJC_CFLAGS)
+AC_SUBST(OTHER_FILES)
+
+AC_DEFINE_UNQUOTED(EMACS_CONFIGURATION,  "${canonical}",
+		   [Define to the canonical Emacs configuration name.])
+AC_DEFINE_UNQUOTED(EMACS_CONFIG_OPTIONS, "${ac_configure_args}",
+		   [Define to the options passed to configure.])
+if test -n "$machfile"; then
+  AC_DEFINE_UNQUOTED(config_machfile,  "${machfile}",
+		     [Define to the used machine dependent file.])
+fi
+AC_DEFINE_UNQUOTED(config_opsysfile, "${opsysfile}",
+		   [Define to the used os dependent file.])
+
+XMENU_OBJ=
+XOBJ=
+FONT_OBJ=
+if test "${HAVE_X_WINDOWS}" = "yes" ; then
+  AC_DEFINE(HAVE_X_WINDOWS, 1,
+	    [Define to 1 if you want to use the X window system.])
+  XMENU_OBJ=xmenu.o
+  XOBJ="xterm.o xfns.o xselect.o xrdb.o fontset.o xsmfns.o fringe.o image.o xsettings.o xgselect.o"
+  FONT_OBJ=xfont.o
+  if test "$HAVE_XFT" = "yes"; then
+    FONT_OBJ="$FONT_OBJ ftfont.o xftfont.o ftxfont.o"
+  elif test "$HAVE_FREETYPE" = "yes"; then
+    FONT_OBJ="$FONT_OBJ ftfont.o ftxfont.o"
+  fi
+  AC_SUBST(FONT_OBJ)
+fi
+AC_SUBST(XMENU_OBJ)
+AC_SUBST(XOBJ)
+AC_SUBST(FONT_OBJ)
+
+WIDGET_OBJ=
+MOTIF_LIBW=
+if test "${USE_X_TOOLKIT}" != "none" ; then
+  WIDGET_OBJ=widget.o
+  AC_DEFINE(USE_X_TOOLKIT, 1, [Define to 1 if using an X toolkit.])
+  if test "${USE_X_TOOLKIT}" = "LUCID"; then
+    AC_DEFINE(USE_LUCID, 1, [Define to 1 if using the Lucid X toolkit.])
+  elif test "${USE_X_TOOLKIT}" = "MOTIF"; then
+    AC_DEFINE(USE_MOTIF, 1, [Define to 1 if using the Motif X toolkit.])
+    MOTIF_LIBW=-lXm
+    case "$opsys" in
+      gnu-linux)
+        ## Paul Abrahams <abrahams at equinox.shaysnet.com> says this is needed.
+        MOTIF_LIBW="$MOTIF_LIBW -lXpm"
+        ;;
+
+      unixware)
+        ## Richard Anthony Ryan <ryanr at ellingtn.ftc.nrcs.usda.gov>
+        ## says -lXimp is needed in UNIX_SV ... 4.2 1.1.2.
+        MOTIF_LIBW="MOTIF_LIBW -lXimp"
+        ;;
+
+      aix4-2)
+        ## olson@mcs.anl.gov says -li18n is needed by -lXm.
+        MOTIF_LIBW="$MOTIF_LIBW -li18n"
+        ;;
+    esac
+    MOTIF_LIBW="$MOTIF_LIBW $LIBXP"
+  fi
+fi
+AC_SUBST(WIDGET_OBJ)
+
+TOOLKIT_LIBW=
+case "$USE_X_TOOLKIT" in
+  MOTIF) TOOLKIT_LIBW="$MOTIF_LIBW" ;;
+  LUCID) TOOLKIT_LIBW="$LUCID_LIBW" ;;
+  none) test "x$HAVE_GTK" = "xyes" && TOOLKIT_LIBW="$GTK_LIBS" ;;
+esac
+AC_SUBST(TOOLKIT_LIBW)
+
+if test "$USE_X_TOOLKIT" = "none"; then
+  LIBXT_OTHER="\$(LIBXSM)"
+  OLDXMENU_TARGET="really-oldXMenu"
+else
+  LIBXT_OTHER="\$(LIBXMU) -lXt \$(LIBXTR6) -lXext"
+  OLDXMENU_TARGET="really-lwlib"
+fi
+AC_SUBST(LIBXT_OTHER)
+
+## The X Menu stuff is present in the X10 distribution, but missing
+## from X11.  If we have X10, just use the installed library;
+## otherwise, use our own copy.
+if test "${HAVE_X11}" = "yes" ; then
+  AC_DEFINE(HAVE_X11, 1,
+	    [Define to 1 if you want to use version 11 of X windows.
+	     Otherwise, Emacs expects to use version 10.])
+
+  if test "$USE_X_TOOLKIT" = "none"; then
+    OLDXMENU="\${oldXMenudir}/libXMenu11.a"
+  else
+    OLDXMENU="\${lwlibdir}/liblw.a"
+  fi
+  LIBXMENU="\$(OLDXMENU)"
+  LIBX_OTHER="\$(LIBXT) \$(LIBX_EXTRA)"
+  OLDXMENU_DEPS="\${OLDXMENU} ../src/\${OLDXMENU}"
+else
+  ## For a syntactically valid Makefile; not actually used for anything.
+  ## See comments in src/Makefile.in.
+  OLDXMENU=nothing
+  ## FIXME This case (!HAVE_X11 && HAVE_X_WINDOWS) is no longer possible(?).
+  if test "${HAVE_X_WINDOWS}" = "yes"; then
+    LIBXMENU="-lXMenu"
+  else
+    LIBXMENU=
+  fi
+  LIBX_OTHER=
+  OLDXMENU_DEPS=
+fi
+
+if test "$HAVE_GTK" = "yes" || test "$HAVE_MENUS" != "yes"; then
+  OLDXMENU_TARGET=
+  OLDXMENU=nothing
+  LIBXMENU=
+  OLDXMENU_DEPS=
+fi
+
+AC_SUBST(OLDXMENU_TARGET)
+AC_SUBST(OLDXMENU)
+AC_SUBST(LIBXMENU)
+AC_SUBST(LIBX_OTHER)
+AC_SUBST(OLDXMENU_DEPS)
+
+if test "${HAVE_MENUS}" = "yes" ; then
+  AC_DEFINE(HAVE_MENUS, 1,
+	    [Define to 1 if you have mouse menus.
+	     (This is automatic if you use X, but the option to specify it remains.)
+	     It is also defined with other window systems that support xmenu.c.])
+fi
+
+if test "${GNU_MALLOC}" = "yes" ; then
+  AC_DEFINE(GNU_MALLOC, 1,
+	    [Define to 1 if you want to use the GNU memory allocator.])
+fi
+
+RALLOC_OBJ=
+if test "${REL_ALLOC}" = "yes" ; then
+  AC_DEFINE(REL_ALLOC, 1,
+	    [Define REL_ALLOC if you want to use the relocating allocator for
+	     buffer space.])
+
+  test "$system_malloc" != "yes" && RALLOC_OBJ=ralloc.o
+fi
+AC_SUBST(RALLOC_OBJ)
+
+if test "$opsys" = "cygwin"; then
+  CYGWIN_OBJ="sheap.o"
+  ## Cygwin differs because of its unexec().
+  PRE_ALLOC_OBJ=
+  POST_ALLOC_OBJ=lastfile.o
+else
+  CYGWIN_OBJ=
+  PRE_ALLOC_OBJ=lastfile.o
+  POST_ALLOC_OBJ=
+fi
+AC_SUBST(CYGWIN_OBJ)
+AC_SUBST(PRE_ALLOC_OBJ)
+AC_SUBST(POST_ALLOC_OBJ)
+
+# Configure gnulib here, now that we know LIBS.
+gl_ASSERT_NO_GNULIB_POSIXCHECK
+gl_ASSERT_NO_GNULIB_TESTS
+gl_INIT
+
+case "$opsys" in
+  aix4-2) LD_SWITCH_SYSTEM_TEMACS="-Wl,-bnodelcsect" ;;
+
+  darwin)
+   ## The -headerpad option tells ld (see man page) to leave room at the
+   ## end of the header for adding load commands.  Needed for dumping.
+   ## 0x690 is the total size of 30 segment load commands (at 56
+   ## each); under Cocoa 31 commands are required.
+   if test "$HAVE_NS" = "yes"; then
+     libs_nsgui="-framework AppKit"
+     headerpad_extra=6C8
+   else
+     libs_nsgui=
+     headerpad_extra=690
+   fi
+   LD_SWITCH_SYSTEM_TEMACS="-fno-pie -prebind $libs_nsgui -Xlinker -headerpad -Xlinker $headerpad_extra"
+
+   ## This is here because src/Makefile.in did some extra fiddling around
+   ## with LD_SWITCH_SYSTEM.  The cpp logic was:
+   ##   #ifndef LD_SWITCH_SYSTEM
+   ##   #if !defined (__GNUC__) && ((defined (BSD_SYSTEM) && !defined (COFF)))
+   ## Since all the *bsds define LD_SWITCH_SYSTEM, this simplifies to:
+   ## not using gcc, darwin system not on an alpha (ie darwin, since
+   ## darwin + alpha does not occur).
+   ## Because this was done in src/Makefile.in, the resulting part of
+   ## LD_SWITCH_SYSTEM was not used in configure (ie, in ac_link).
+   ## It therefore seems cleaner to put this in LD_SWITCH_SYSTEM_TEMACS,
+   ## rather than LD_SWITCH_SYSTEM.
+   test "x$LD_SWITCH_SYSTEM" = "x" && test "x$GCC" != "xyes" && \
+     LD_SWITCH_SYSTEM_TEMACS="-X $LD_SWITCH_SYSTEM_TEMACS"
+   ;;
+
+  ## LD_SWITCH_X_SITE_AUX is a -R option saying where to find X at run-time.
+  ## When handled by cpp, this was in LD_SWITCH_SYSTEM.  However, at
+  ## the point where configure sourced the s/*.h file, LD_SWITCH_X_SITE_AUX
+  ## had not yet been defined and was expanded to null.  Hence LD_SWITCH_SYSTEM
+  ## had different values in configure (in ac_link) and src/Makefile.in.
+  ## It seems clearer therefore to put this piece in LD_SWITCH_SYSTEM_TEMACS.
+  gnu*) LD_SWITCH_SYSTEM_TEMACS="\$(LD_SWITCH_X_SITE_AUX_RPATH)" ;;
+
+  *) LD_SWITCH_SYSTEM_TEMACS= ;;
+esac
+
+if test "$NS_IMPL_GNUSTEP" = "yes"; then
+  LD_SWITCH_SYSTEM_TEMACS="${LD_SWITCH_SYSTEM_TEMACS} -L${GNUSTEP_SYSTEM_LIBRARIES} ${GNUSTEP_LOCAL_LIBRARIES} -lgnustep-gui -lgnustep-base -lobjc -lpthread"
+fi
+
+AC_SUBST(LD_SWITCH_SYSTEM_TEMACS)
+
+
+LD_FIRSTFLAG=
+ORDINARY_LINK=
+case "$opsys" in
+  ## gnu: GNU needs its own crt0.
+  aix4-2|cygwin|darwin|gnu|hpux*|irix6-5|sol2*|unixware) ORDINARY_LINK=yes ;;
+
+  ## On post 1.3 releases of NetBSD, gcc -nostdlib also clears the
+  ## library search parth, i.e. it won't search /usr/lib for libc and
+  ## friends.  Using -nostartfiles instead avoids this problem, and
+  ## will also work on earlier NetBSD releases.
+  netbsd|openbsd) LD_FIRSTFLAG="-nostartfiles" ;;
+
+  ## macpcc: NAKAJI Hiroyuki <nakaji@tutrp.tut.ac.jp> says
+  ##   MkLinux/LinuxPPC needs this.
+  ## ibms390x only supports opsys = gnu-linux so it can be added here.
+  gnu-*)
+    case "$machine" in
+      macppc|ibms390x) LD_FIRSTFLAG="-nostdlib" ;;
+    esac
+    ;;
+esac
+
+
+if test "x$ORDINARY_LINK" = "xyes"; then
+
+  LD_FIRSTFLAG=""
+  AC_DEFINE(ORDINARY_LINK, 1, [Define if the C compiler is the linker.])
+
+## The system files defining neither ORDINARY_LINK nor LD_FIRSTFLAG are:
+## freebsd, gnu-* not on macppc|ibms390x.
+elif test "x$GCC" = "xyes" && test "x$LD_FIRSTFLAG" = "x"; then
+
+  ## Versions of GCC >= 2.0 put their library, libgcc.a, in obscure
+  ## places that are difficult to figure out at make time.  Fortunately,
+  ## these same versions allow you to pass arbitrary flags on to the
+  ## linker, so there is no reason not to use it as a linker.
+  ##
+  ## Well, it is not quite perfect.  The "-nostdlib" keeps GCC from
+  ## searching for libraries in its internal directories, so we have to
+  ## ask GCC explicitly where to find libgcc.a (LIB_GCC below).
+  LD_FIRSTFLAG="-nostdlib"
+fi
+
+## FIXME? What setting of EDIT_LDFLAGS should this have?
+test "$NS_IMPL_GNUSTEP" = "yes" && LD_FIRSTFLAG="-rdynamic"
+
+AC_SUBST(LD_FIRSTFLAG)
+
+
+## FIXME? The logic here is not precisely the same as that above.
+## There is no check here for a pre-defined LD_FIRSTFLAG.
+## Should we only be setting LIB_GCC if LD ~ -nostdlib?
+LIB_GCC=
+if test "x$GCC" = "xyes" && test "x$ORDINARY_LINK" != "xyes"; then
+
+  case "$opsys" in
+    freebsd|netbsd|openbsd) LIB_GCC= ;;
+
+    gnu-*)
+      ## armin76@gentoo.org reported that the lgcc_s flag is necessary to
+      ## build on ARM EABI under GNU/Linux.  (Bug#5518)
+      case $host_cpu in
+      arm*)
+        LIB_GCC="-lgcc_s"
+	;;
+      *)
+        ## FIXME? s/gnu-linux.h used to define LIB_GCC as below, then
+        ## immediately undefine it again and redefine it to empty.
+        ## Was the C_SWITCH_X_SITE part really necessary?
+##      LIB_GCC=`$CC $C_SWITCH_X_SITE -print-libgcc-file-name`
+        LIB_GCC=
+	;;
+      esac
+      ;;
+
+    ## Ask GCC where to find libgcc.a.
+    *) LIB_GCC=`$CC -print-libgcc-file-name 2> /dev/null` ;;
+  esac
+fi                              dnl if $GCC
+AC_SUBST(LIB_GCC)
+
+
+## If we're using X11/GNUstep, define some consequences.
+if test "$HAVE_X_WINDOWS" = "yes" || test "$HAVE_NS" = "yes"; then
+  AC_DEFINE(HAVE_WINDOW_SYSTEM, 1, [Define if you have a window system.])
+  AC_DEFINE(HAVE_MOUSE, 1, [Define if you have mouse support.])
+fi
+
+
+AH_TOP([/* GNU Emacs site configuration template file.
+
+Copyright (C) 1988, 1993-1994, 1999-2002, 2004-2012
+  Free Software Foundation, Inc.
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+
+
+/* No code in Emacs #includes config.h twice, but some bits of code
+   intended to work with other packages as well (like gmalloc.c)
+   think they can include it as many times as they like.  */
+#ifndef EMACS_CONFIG_H
+#define EMACS_CONFIG_H
+])dnl
+
+AH_BOTTOM([
+/* On AIX 3 this must be included before any other include file.  */
+#include <alloca.h>
+#if ! HAVE_ALLOCA
+# error "alloca not available on this machine"
+#endif
+
+/* Define AMPERSAND_FULL_NAME if you use the convention
+   that & in the full name stands for the login id.  */
+/* Turned on June 1996 supposing nobody will mind it.  */
+#define AMPERSAND_FULL_NAME
+
+/* `subprocesses' should be defined if you want to
+   have code for asynchronous subprocesses
+   (as used in M-x compile and M-x shell).
+   Only MSDOS does not support this (it overrides
+   this in its config_opsysfile below).  */
+
+#define subprocesses
+
+/* Include the os and machine dependent files.  */
+#include config_opsysfile
+#ifdef config_machfile
+# include config_machfile
+#endif
+
+/* GNUstep needs a bit more pure memory.  Of the existing knobs,
+   SYSTEM_PURESIZE_EXTRA seems like the least likely to cause problems.
+  (There is probably a better place to do this, but right now the
+   Cocoa side does this in s/darwin.h and we cannot parallel this
+   exactly since GNUstep is multi-OS.  */
+#if defined HAVE_NS && defined NS_IMPL_GNUSTEP
+#  define SYSTEM_PURESIZE_EXTRA 30000
+#endif
+
+#ifdef emacs /* Don't do this for lib-src.  */
+/* Tell regex.c to use a type compatible with Emacs.  */
+#define RE_TRANSLATE_TYPE Lisp_Object
+#define RE_TRANSLATE(TBL, C) CHAR_TABLE_TRANSLATE (TBL, C)
+#ifdef make_number
+/* If make_number is a macro, use it.  */
+#define RE_TRANSLATE_P(TBL) (!EQ (TBL, make_number (0)))
+#else
+/* If make_number is a function, avoid it.  */
+#define RE_TRANSLATE_P(TBL) (!(INTEGERP (TBL) && XINT (TBL) == 0))
+#endif
+#endif
+
+/* These default definitions are good for almost all machines.
+   Any exceptions should override them in m/MACHINE.h.
+   They must be usable in preprocessor conditionals.  */
+
+#ifndef BITS_PER_CHAR
+#define BITS_PER_CHAR 8
+#endif
+
+#ifndef BITS_PER_SHORT
+#define BITS_PER_SHORT 16
+#endif
+
+#ifndef BITS_PER_INT
+#define BITS_PER_INT 32
+#endif
+
+#ifndef BITS_PER_LONG
+#ifdef _LP64
+#define BITS_PER_LONG 64
+#else
+#define BITS_PER_LONG 32
+#endif
+#endif
+
+#if !defined BITS_PER_LONG_LONG && HAVE_LONG_LONG_INT
+#define BITS_PER_LONG_LONG 64
+#endif
+
+/* Define if the compiler supports function prototypes.  It may do so but
+   not define __STDC__ (e.g. DEC C by default) or may define it as zero.  */
+#undef PROTOTYPES
+
+#include <string.h>
+#include <stdlib.h>
+
+#if defined __GNUC__ && (__GNUC__ > 2 \
+                         || (__GNUC__ == 2 && __GNUC_MINOR__ >= 5))
+#define NO_RETURN	__attribute__ ((__noreturn__))
+#else
+#define NO_RETURN	/* nothing */
+#endif
+
+#if __GNUC__ >= 3  /* On GCC 3.0 we might get a warning.  */
+#define NO_INLINE __attribute__((noinline))
+#else
+#define NO_INLINE
+#endif
+
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))
+#define EXTERNALLY_VISIBLE __attribute__((externally_visible))
+#else
+#define EXTERNALLY_VISIBLE
+#endif
+
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+# define ATTRIBUTE_FORMAT(spec) __attribute__ ((__format__ spec))
+#else
+# define ATTRIBUTE_FORMAT(spec) /* empty */
+#endif
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+# define ATTRIBUTE_FORMAT_PRINTF(formatstring_parameter, first_argument) \
+   ATTRIBUTE_FORMAT ((__gnu_printf__, formatstring_parameter, first_argument))
+#else
+# define ATTRIBUTE_FORMAT_PRINTF(formatstring_parameter, first_argument) \
+   ATTRIBUTE_FORMAT ((__printf__, formatstring_parameter, first_argument))
+#endif
+
+/* Some versions of GNU/Linux define noinline in their headers.  */
+#ifdef noinline
+#undef noinline
+#endif
+
+/* These won't be used automatically yet.  We also need to know, at least,
+   that the stack is continuous.  */
+#ifdef __GNUC__
+#  ifndef GC_SETJMP_WORKS
+  /* GC_SETJMP_WORKS is nearly always appropriate for GCC.  */
+#    define GC_SETJMP_WORKS 1
+#  endif
+#endif
+
+#endif /* EMACS_CONFIG_H */
+
+/*
+Local Variables:
+mode: c
+End:
+*/
+])dnl
+
+#### Report on what we decided to do.
+#### Report GTK as a toolkit, even if it doesn't use Xt.
+#### It makes printing result more understandable as using GTK sets
+#### toolkit_scroll_bars to yes by default.
+if test "${HAVE_GTK}" = "yes"; then
+  USE_X_TOOLKIT=GTK
+fi
+
+and_machfile=
+if test -n "$machfile"; then
+  and_machfile=" and \`${machfile}'"
+fi
+
+echo "
+Configured for \`${canonical}'.
+
+  Where should the build process find the source code?    ${srcdir}
+  What operating system and machine description files should Emacs use?
+        \`${opsysfile}'${and_machfile}
+  What compiler should emacs be built with?               ${CC} ${CFLAGS}
+  Should Emacs use the GNU version of malloc?             ${GNU_MALLOC}${GNU_MALLOC_reason}
+  Should Emacs use a relocating allocator for buffers?    ${REL_ALLOC}
+  Should Emacs use mmap(2) for buffer allocation?         $use_mmap_for_buffers
+  What window system should Emacs use?                    ${window_system}
+  What toolkit should Emacs use?                          ${USE_X_TOOLKIT}"
+
+if test -n "${x_includes}"; then
+echo "  Where do we find X Windows header files?                ${x_includes}"
+else
+echo "  Where do we find X Windows header files?                Standard dirs"
+fi
+if test -n "${x_libraries}"; then
+echo "  Where do we find X Windows libraries?                   ${x_libraries}"
+else
+echo "  Where do we find X Windows libraries?                   Standard dirs"
+fi
+
+echo "  Does Emacs use -lXaw3d?                                 ${HAVE_XAW3D}"
+echo "  Does Emacs use -lXpm?                                   ${HAVE_XPM}"
+echo "  Does Emacs use -ljpeg?                                  ${HAVE_JPEG}"
+echo "  Does Emacs use -ltiff?                                  ${HAVE_TIFF}"
+echo "  Does Emacs use a gif library?                           ${HAVE_GIF} $LIBGIF"
+echo "  Does Emacs use -lpng?                                   ${HAVE_PNG}"
+echo "  Does Emacs use -lrsvg-2?                                ${HAVE_RSVG}"
+echo "  Does Emacs use imagemagick?                             ${HAVE_IMAGEMAGICK}"
+
+echo "  Does Emacs use -lgpm?                                   ${HAVE_GPM}"
+echo "  Does Emacs use -ldbus?                                  ${HAVE_DBUS}"
+echo "  Does Emacs use -lgconf?                                 ${HAVE_GCONF}"
+echo "  Does Emacs use GSettings?                               ${HAVE_GSETTINGS}"
+echo "  Does Emacs use -lselinux?                               ${HAVE_LIBSELINUX}"
+echo "  Does Emacs use -lgnutls?                                ${HAVE_GNUTLS}"
+echo "  Does Emacs use -lxml2?                                  ${HAVE_LIBXML2}"
+
+echo "  Does Emacs use -lfreetype?                              ${HAVE_FREETYPE}"
+echo "  Does Emacs use -lm17n-flt?                              ${HAVE_M17N_FLT}"
+echo "  Does Emacs use -lotf?                                   ${HAVE_LIBOTF}"
+echo "  Does Emacs use -lxft?                                   ${HAVE_XFT}"
+
+echo "  Does Emacs use toolkit scroll bars?                     ${USE_TOOLKIT_SCROLL_BARS}"
+echo
+
+if test -n "${EMACSDATA}"; then
+   echo "  Environment variable EMACSDATA set to:                  $EMACSDATA"
+fi
+if test -n "${EMACSDOC}"; then
+   echo "  Environment variable EMACSDOC set to:                   $EMACSDOC"
+fi
+
+if test $USE_XASSERTS = yes; then
+   echo "  Compiling with asserts turned on."
+   CPPFLAGS="$CPPFLAGS -DXASSERTS=1"
+fi
+
+echo
+
+if test "$HAVE_NS" = "yes"; then
+   echo
+   echo "You must run \"${MAKE-make} install\" in order to test the built application.
+The installed application will go to nextstep/Emacs.app and can be
+run or moved from there."
+   if test "$EN_NS_SELF_CONTAINED" = "yes"; then
+      echo "The application will be fully self-contained."
+    else
+      echo "The lisp resources for the application will be installed under ${prefix}.
+You may need to run \"${MAKE-make} install\" with sudo.  The application will fail
+to run if these resources are not installed."
+   fi
+   echo
+fi
+
+
+# Remove any trailing slashes in these variables.
+[test "${prefix}" != NONE &&
+  prefix=`echo "${prefix}" | sed 's,\([^/]\)/*$,\1,'`
+test "${exec_prefix}" != NONE &&
+  exec_prefix=`echo "${exec_prefix}" | sed 's,\([^/]\)/*$,\1,'`]
+
+dnl Obviously there is duplication here wrt $SUBDIR_MAKEFILES.
+dnl You _can_ use that variable in AC_CONFIG_FILES, so long as any directory
+dnl using automake (ie lib/) is explicitly listed and not "hidden" in a variable
+dnl (else you get "no `Makefile.am' found for any configure output").
+dnl This will work, but you get a config.status that is not quite right
+dnl (see http://lists.gnu.org/archive/html/bug-autoconf/2008-08/msg00028.html).
+dnl That doesn't have any obvious consequences for Emacs, but on the whole
+dnl it seems better to just live with the duplication.
+SUBDIR_MAKEFILES="lib/Makefile lib-src/Makefile oldXMenu/Makefile doc/emacs/Makefile doc/misc/Makefile doc/lispintro/Makefile doc/lispref/Makefile src/Makefile lwlib/Makefile lisp/Makefile leim/Makefile"
+
+AC_CONFIG_FILES([Makefile lib/Makefile lib-src/Makefile oldXMenu/Makefile \
+       doc/emacs/Makefile doc/misc/Makefile doc/lispintro/Makefile \
+       doc/lispref/Makefile src/Makefile lwlib/Makefile lisp/Makefile \
+       leim/Makefile])
+
+dnl test/ is not present in release tarfiles.
+opt_makefile=test/automated/Makefile
+
+if test -f $srcdir/${opt_makefile}.in; then
+  SUBDIR_MAKEFILES="$SUBDIR_MAKEFILES $opt_makefile"
+  dnl Again, it's best not to use a variable.  Though you can add
+  dnl ", [], [opt_makefile='$opt_makefile']" and it should work.
+  AC_CONFIG_FILES([test/automated/Makefile])
+fi
+
+SUBDIR_MAKEFILES_IN=`echo " ${SUBDIR_MAKEFILES}" | sed -e 's| | $(srcdir)/|g' -e 's|Makefile|Makefile.in|g'`
+
+AC_SUBST(SUBDIR_MAKEFILES_IN)
+
+dnl Make the necessary directories, if they don't exist.
+AC_CONFIG_COMMANDS([mkdirs], [
+for dir in etc lisp ; do
+  test -d ${dir} || mkdir ${dir}
+done
+])
+
+dnl You might wonder (I did) why epaths.h is generated by running make,
+dnl rather than just letting configure generate it from epaths.in.
+dnl One reason is that the various paths are not fully expanded (see above);
+dnl eg gamedir=${prefix}/var/games/emacs.
+dnl Secondly, the GNU Coding standards require that one should be able
+dnl to run `make prefix=/some/where/else' and override the values set
+dnl by configure.  This also explains the `move-if-change' test and
+dnl the use of force in the `epaths-force' rule in Makefile.in.
+AC_CONFIG_COMMANDS([epaths], [
+echo creating src/epaths.h
+${MAKE-make} epaths-force
+], [GCC="$GCC" NON_GNU_CPP="$NON_GNU_CPP" CPP="$CPP" CPPFLAGS="$CPPFLAGS"])
+
+AC_CONFIG_COMMANDS([gdbinit], [
+if test ! -f src/.gdbinit && test -f $srcdir/src/.gdbinit; then
+  echo creating src/.gdbinit
+  echo source $srcdir/src/.gdbinit > src/.gdbinit
+fi
+])
+
+AC_OUTPUT
+
+dnl configure.in ends here

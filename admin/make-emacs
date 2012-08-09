@@ -1,0 +1,185 @@
+#! /usr/bin/perl
+# Build Emacs with various options for profiling, debugging,
+# with and without warnings enabled etc.
+
+# Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+require 5;
+use Getopt::Long;
+use File::Basename;
+use Cwd;
+
+# Default CVS sandbox directory.  Only used when called from outside
+# of the sandbox.
+
+$root = $ENV{"EMACS_ROOT"};
+$root = "/gd/gnu/emacs" unless $root;
+
+# Default make command.
+
+$make = $ENV{"EMACS_MAKE"};
+$make = "gmake" unless $make;
+
+$rc = GetOptions ("help" => \$help,
+		  "enable-checking" => \$enable_checking,
+		  "no-warn" => \$no_warn,
+		  "check-marked" => \$check_marked,
+		  "all" => \$all,
+		  "no-optim" => \$no_optim,
+		  "union-type" => \$union_type,
+		  "gprof" => \$profile,
+		  "malloc-check" => \$malloc_check,
+		  "no-mcheck" => \$no_mcheck,
+		  "alias" => \$aliasing,
+                  "boot" => \$boot,
+		  "wall" => \$wall,
+		  "gcc3" => \$gcc3,
+		  "trace-selection" => \$trace_selection,
+		  "trace-move" => \$trace_move,
+		  "stabs" => \$use_stabs,
+		  "optim" => \$optim);
+
+if ($rc == 0 || $help)
+ {
+   print <<USAGE;
+make-emacs [options] ...
+
+Build Emacs.
+
+ --help			show this help
+ --all			make clean versionclean first
+ --boot			make bootstrap, log to boot.log
+ --enable-checking	ENABLE_CHECKING=1
+ --no-warn		disable warnings
+ --check-marked		GC_CHECK_MARKED_OBJECTS=1
+ --optim		no debug defines
+ --gprof		make Emacs for profiling
+ --union-type		define USE_LISP_UNION_TYPE (bad for GDB)
+ --malloc-check		define GC_MALLOC_CHECK
+ --no-mcheck		don't define GC_MCHECK
+ --wall			compile with -Wall
+ --gcc3			use GCC 3.0 (30% slower compilation, slower code)
+ --trace-selection	print traces in xselect.c
+ --trace-move		print traces for move_it* functions
+ --stabs		use -gstabs instead -g
+
+Default is to compile with warnings, with -DGC_MCHECK=1, and
+with -DGLYPH_DEBUG=1.
+
+USAGE
+   exit 1;
+ }
+
+# Chdir to the top-level directory of the tree.  If not in a tree
+# containing Emacs, use the default.
+
+while (! -f "src/emacs.c" && cwd () ne "/")
+  {
+    chdir "..";
+  }
+
+chdir $root if cwd () eq "/";
+chdir "./src";
+print "Build in ", cwd (), "\n";
+
+# If first arg is `all' or if `--all' specified, ensure a clean
+# build.
+
+if (@ARGV && $ARGV[0] eq "all")
+  {
+    $all = 1;
+    shift @ARGV;
+  }
+
+system ("$make clean versionclean") if $all;
+
+if ($wall)
+  {
+    $warn = "-Wall";
+  }
+elsif (!$no_warn)
+  {
+    $warn = "-Wpointer-arith -Wchar-subscripts -Wformat -Wimplicit-int";
+    $warn = "$warn -Wreturn-type -Wswitch -Wuninitialized";
+  }
+
+$defs = "-DGLYPH_DEBUG=1" unless $optim;
+$defs = "$defs -DGC_CHECK_MARKED_OBJECTS=1" if $check_marked;
+$defs = "$defs -DENABLE_CHECKING=1" if $enable_checking;
+
+if ($profile)
+  {
+    $opts = "-pg";
+    $defs = "$defs -DPROFILING=1";
+  }
+else
+  {
+    if ($use_stabs)
+      {
+	$opts = "-gstabs";
+      }
+    else
+      {
+	$opts = "-g";
+      }
+  }
+
+$defs = "$defs -DUSE_LISP_UNION_TYPE" if $union_type;
+$defs = "$defs -DGC_MALLOC_CHECK=1 -DGC_PROTECT_MALLOC_STATE=1" if $malloc_check;
+$defs = "$defs -DGC_MCHECK=1" unless $no_mcheck;
+
+$defs = "$defs -DTRACE_SELECTION" if $trace_selection;
+$defs = "$defs -DDEBUG_TRACE_MOVE" if $trace_move;
+
+# arch=pentium leads to slightly faster code than without.
+$opts = "$opts -march=pentiumpro";
+
+if ($optim)
+  {
+    $opts = "$opts -pipe -O3";
+  }
+elsif ($no_optim)
+  {
+    $opts = "$opts -pipe -fno-inline";
+  }
+else
+  {
+    $opts = "$opts -O -pipe -fno-inline";
+  }
+
+$opts = "$opts -fstrict-aliasing" if $aliasing;
+
+$opts = "$opts $defs" if $defs;
+$opts = "$opts $warn" if $warn;
+
+$cc = "/usr/bin/gcc";
+$cc = "/gd/local/bin/gcc" if $gcc3;
+
+if ($boot)
+  {
+    chdir "..";
+    system "mv boot.log boot.log.old" if -f "boot.log";
+    exit system "script boot.log $make CC=\"$cc\" CFLAGS=\"$opts\" bootstrap";
+  }
+
+exit system "$make CC=\"$cc\" CFLAGS=\"$opts\" @ARGV";
+
+# Local Variables:
+# mode: cperl
+# End:

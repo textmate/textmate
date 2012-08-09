@@ -1,0 +1,554 @@
+/* GNU Emacs site configuration template file.  -*- C -*-
+
+Copyright (C) 1988, 1993-1994, 2001-2012  Free Software Foundation, Inc.
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+
+
+/* No code in Emacs #includes config.h twice, but some of the code
+   intended to work with other packages as well (like gmalloc.c)
+   think they can include it as many times as they like.  */
+#ifndef EMACS_CONFIG_H
+#define EMACS_CONFIG_H
+
+/* These are all defined in the top-level Makefile by configure.
+   They're here only for reference.  */
+
+/* Define LISP_FLOAT_TYPE if you want emacs to support floating-point
+   numbers. */
+#undef LISP_FLOAT_TYPE
+
+/* Define GNU_MALLOC if you want to use the GNU memory allocator. */
+#define GNU_MALLOC
+
+/* Define if you are using the GNU C Library. */
+#undef DOUG_LEA_MALLOC
+
+/* Define REL_ALLOC if you want to use the relocating allocator for
+   buffer space. */
+#define REL_ALLOC
+
+/* Enable conservative stack marking for GC.  */
+#define GC_MARK_STACK 1
+
+/* MSVC ignores the "register" keyword, so test fails even though
+   setjmp does work.  */
+#define GC_SETJMP_WORKS 1
+
+/* Define HAVE_X_WINDOWS if you want to use the X window system.  */
+#undef HAVE_X_WINDOWS
+
+/* Define HAVE_X11 if you want to use version 11 of X windows.
+   Otherwise, Emacs expects to use version 10.  */
+#undef HAVE_X11
+
+/* Define if using an X toolkit.  */
+#undef USE_X_TOOLKIT
+
+/* Define this if you're using XFree386.  */
+#undef HAVE_XFREE386
+
+/* Define this if you have Motif 2.1 or newer.  */
+#undef HAVE_MOTIF_2_1
+
+/* Define HAVE_MENUS if you have mouse menus.
+   (This is automatic if you use X, but the option to specify it remains.)
+   It is also defined with other window systems that support xmenu.c.  */
+#undef HAVE_MENUS
+
+/* Define if we have the X11R6 or newer version of Xt.  */
+#undef HAVE_X11XTR6
+
+/* Define if we have the X11R6 or newer version of Xlib.  */
+#undef HAVE_X11R6
+
+/* Define if netdb.h declares h_errno.  */
+#undef HAVE_H_ERRNO
+
+/* If we're using any sort of window system, define some consequences.  */
+#ifdef HAVE_X_WINDOWS
+#define HAVE_WINDOW_SYSTEM
+#define HAVE_MOUSE
+#endif
+
+/* Define USE_TEXT_PROPERTIES to support visual and other properties
+   on text. */
+#define USE_TEXT_PROPERTIES
+
+/* Define USER_FULL_NAME to return a string
+   that is the user's full name.
+   It can assume that the variable `pw'
+   points to the password file entry for this user.
+
+   At some sites, the pw_gecos field contains
+   the user's full name.  If neither this nor any other
+   field contains the right thing, use pw_name,
+   giving the user's login name, since that is better than nothing.  */
+#define USER_FULL_NAME pw->pw_gecos
+
+/* Define AMPERSAND_FULL_NAME if you use the convention
+   that & in the full name stands for the login id.  */
+#undef AMPERSAND_FULL_NAME
+
+/* Things set by --with options in the configure script.  */
+
+/* Define to support POP mail retrieval.  */
+#undef MAIL_USE_POP
+
+/* Define to support Kerberos-authenticated POP mail retrieval.  */
+#undef KERBEROS
+/* Define to use Kerberos 5 instead of Kerberos 4 */
+#undef KERBEROS5
+/* Define to support GSS-API in addition to (or instead of) Kerberos */
+#undef GSSAPI
+
+/* Define to support using a Hesiod database to find the POP server.  */
+#undef HESIOD
+
+/* Some things figured out by the configure script, grouped as they are in
+   configure.in.  */
+#ifndef _ALL_SOURCE  /* suppress warning if this is pre-defined */
+#undef _ALL_SOURCE
+#endif
+#undef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_TIMEB_H
+#undef HAVE_SYS_TIME_H
+#undef HAVE_UNISTD_H
+#undef HAVE_UTIME_H
+#undef HAVE_LINUX_VERSION_H
+#undef HAVE_SYS_SYSTEMINFO_H
+#undef HAVE_TERMIOS_H
+#undef HAVE_STRINGS_H
+#undef HAVE_PWD_H
+
+#undef HAVE_LIBDNET
+#undef HAVE_LIBPTHREADS
+#undef HAVE_LIBRESOLV
+#undef HAVE_LIBXMU
+#undef HAVE_LIBNCURSES
+#undef HAVE_LIBINTL
+
+/* movemail Kerberos support */
+/* libraries */
+#undef HAVE_LIBKRB
+#undef HAVE_LIBKRB4
+#undef HAVE_LIBDES
+#undef HAVE_LIBDES425
+#undef HAVE_LIBKRB5
+#undef HAVE_LIBCRYPTO
+#undef HAVE_LIBCOM_ERR
+/* header files */
+#undef HAVE_KRB5_H
+#undef HAVE_DES_H
+#undef HAVE_KRB_H
+#undef HAVE_KERBEROSIV_DES_H
+#undef HAVE_KERBEROSIV_KRB_H
+#undef HAVE_KERBEROS_DES_H
+#undef HAVE_KERBEROS_KRB_H
+#undef HAVE_COM_ERR_H
+
+/* GSS-API libraries and headers */
+#undef HAVE_LIBGSSAPI_KRB5
+#undef HAVE_LIBGSSAPI
+#undef HAVE_GSSAPI_H
+
+/* Mail-file locking */
+#undef HAVE_LIBMAIL
+#undef HAVE_MAILLOCK_H
+#undef HAVE_TOUCHLOCK
+
+#undef HAVE_ALLOCA_H
+
+#undef HAVE_GETTIMEOFDAY
+/* If we don't have gettimeofday,
+   the test for GETTIMEOFDAY_ONE_ARGUMENT may succeed,
+   but we should ignore it.  */
+#ifdef HAVE_GETTIMEOFDAY
+#undef GETTIMEOFDAY_ONE_ARGUMENT
+#endif
+#undef HAVE_GETHOSTNAME
+#undef HAVE_GETDOMAINNAME
+#undef HAVE_DUP2
+#undef HAVE_RENAME
+#undef HAVE_CLOSEDIR
+
+#undef TM_IN_SYS_TIME
+#undef HAVE_TM_ZONE
+
+/* Define to 1 if you don't have `tm_zone' but do have the external array
+   `tzname'. */
+#define HAVE_TZNAME 1
+
+/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
+   */
+#define HAVE_DECL_TZNAME 1
+
+#undef const
+
+#undef HAVE_LONG_FILE_NAMES
+
+#undef CRAY_STACKSEG_END
+
+#undef HAVE_LIBXBSD
+#undef HAVE_XRMSETDATABASE
+#undef HAVE_XSCREENRESOURCESTRING
+#undef HAVE_XSCREENNUMBEROFSCREEN
+#undef HAVE_XSETWMPROTOCOLS
+
+#undef HAVE_MKDIR
+#undef HAVE_RMDIR
+#undef HAVE_SYSINFO
+#undef HAVE_RANDOM
+#undef HAVE_LRAND48
+#undef HAVE_MEMCPY
+#undef HAVE_MEMMOVE
+#undef HAVE_MEMSET
+#undef HAVE_MEMCMP
+#undef HAVE_LOGB
+#undef HAVE_FREXP
+#undef HAVE_FMOD
+#undef HAVE_RINT
+#undef HAVE_CBRT
+#undef HAVE_FTIME
+#undef HAVE_RES_INIT /* For -lresolv on Suns.  */
+#undef HAVE_SETSID
+#undef HAVE_FPATHCONF
+#undef HAVE_SELECT
+#undef HAVE_EUIDACCESS
+#undef HAVE_GETPAGESIZE
+#undef HAVE_GET_CURRENT_DIR_NAME
+#undef HAVE_TZSET
+#undef HAVE_SETLOCALE
+#undef HAVE_UTIMES
+#undef HAVE_SETRLIMIT
+#undef HAVE_SETPGID
+/* If you think about defining HAVE_GETCWD, don't: the alternative
+   getwd is redefined on w32.c, and does not really return the current
+   directory, to get the desired results elsewhere in Emacs */
+#undef HAVE_GETCWD
+#undef HAVE_SHUTDOWN
+#undef HAVE_STRFTIME
+/* Standard Windows strftime does not support POSIX.2 extensions.  */
+#define STRFTIME_NO_POSIX2 1
+
+#define HAVE_SENDTO 1
+#define HAVE_RECVFROM 1
+#define HAVE_GETSOCKOPT 1
+#define HAVE_SETSOCKOPT 1
+#define HAVE_GETSOCKNAME 1
+#define HAVE_GETPEERNAME 1
+#define HAVE_SNPRINTF 1
+#define HAVE_LANGINFO_CODESET 1
+/* Local (unix) sockets are not supported.  */
+#undef HAVE_SYS_UN_H
+
+#define LOCALTIME_CACHE
+#undef HAVE_INET_SOCKETS
+
+#undef HAVE_AIX_SMT_EXP
+
+/* Define if you have the ANSI `strerror' function.
+   Otherwise you must have the variable `char *sys_errlist[]'.  */
+#undef HAVE_STRERROR
+
+/* Define if `sys_siglist' is declared by <signal.h>.  */
+#undef SYS_SIGLIST_DECLARED
+
+/* Define if `struct utimbuf' is declared by <utime.h>.  */
+#undef HAVE_STRUCT_UTIMBUF
+
+/* Define if `struct timeval' is declared by <sys/time.h>.  */
+#undef HAVE_TIMEVAL
+
+/* Define to 1 if you have the <getopt.h> header file. */
+#undef HAVE_GETOPT_H
+
+/* Define to 1 if you have the `getopt_long_only' function. */
+#undef HAVE_GETOPT_LONG_ONLY
+
+/* Preprocessor macros needed for gnulib imports.  */
+
+/* Define to 1 if GCC-style __attribute__ ((__aligned__ (expr))) works. */
+#ifdef __GNUC__
+#define HAVE_ATTRIBUTE_ALIGNED 1
+#else
+#undef HAVE_ATTRIBUTE_ALIGNED
+#endif
+
+/* Define to 1 if strtold conforms to C99. */
+#ifdef __GNUC__
+#define HAVE_C99_STRTOLD 1
+#else
+#undef HAVE_C99_STRTOLD
+#endif
+
+/* Define to 1 if you have the declaration of `getenv', and to 0 if you don't.
+   */
+#define HAVE_DECL_GETENV 1
+
+/* Define to 1 if you have the declaration of `localtime_r', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LOCALTIME_R
+
+/* Define to 1 if you have the `localtime_r' function. */
+#undef HAVE_LOCALTIME_R
+
+/* Define to 1 if you have the declaration of `strtoll', and to 0 if you
+   don't. */
+#define HAVE_DECL_STRTOLL 1
+
+/* Define to 1 if you have the declaration of `strtoull', and to 0 if you
+   don't. */
+#define HAVE_DECL_STRTOULL 1
+
+/* Define to 1 if you have the declaration of `strtoumax', and to 0 if you
+   don't. */
+#define HAVE_DECL_STRTOUMAX 1
+
+/* Define to 1 if you have the `strtoull' function. */
+#define HAVE_STRTOULL 1
+
+/* Define to 1 if you have the `strtoumax' function. */
+#define HAVE_STRTOUMAX 1
+
+/* Define if you have the 'wchar_t' type. */
+#define HAVE_WCHAR_T 1
+
+/* Name of package */
+#define PACKAGE "emacs"
+
+/* Version number of package */
+#define VERSION "24.1"
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifdef __GNUC__
+#ifndef __cplusplus
+#undef inline
+#endif
+#else  /* MSVC */
+#define inline __inline
+#endif
+
+/* Define to the equivalent of the C99 'restrict' keyword, or to
+   nothing if this is not supported.  Do not define if restrict is
+   supported directly.  */
+#ifdef __GNUC__
+# define restrict __restrict__
+#else
+# define restrict
+#endif
+
+/* `mode_t' is not defined for MSVC. Define. */
+#ifdef _MSC_VER
+typedef unsigned short mode_t;
+#endif
+
+/* A va_copy replacement for MSVC.  */
+#ifdef _MSC_VER
+# ifdef _WIN64
+#  ifndef va_copy               /* Need to be checked (?) */
+#   define va_copy(d,s) ((d) = (s))
+#  endif
+# else	/* not _WIN64 */
+#  define va_copy(d,s) ((d) = (s))
+# endif	 /* not _WIN64 */
+#endif	 /* _MSC_VER */
+
+/* Define as a marker that can be attached to declarations that might not
+    be used.  This helps to reduce warnings, such as from
+    GCC -Wunused-parameter.  */
+#if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+# define _GL_UNUSED __attribute__ ((__unused__))
+#else
+# define _GL_UNUSED
+#endif
+/* The name _UNUSED_PARAMETER_ is an earlier spelling, although the name
+   is a misnomer outside of parameter lists.  */
+#define _UNUSED_PARAMETER_ _GL_UNUSED
+
+/* End of gnulib-related stuff.  */
+
+#if __GNUC__ >= 3  /* On GCC 3.0 we might get a warning.  */
+#define NO_INLINE __attribute__((noinline))
+#else
+#define NO_INLINE
+#endif
+
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))
+#define EXTERNALLY_VISIBLE __attribute__((externally_visible))
+#else
+#define EXTERNALLY_VISIBLE
+#endif
+
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+# define ATTRIBUTE_FORMAT(spec) __attribute__ ((__format__ spec))
+#else
+# define ATTRIBUTE_FORMAT(spec) /* empty */
+#endif
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+# define ATTRIBUTE_FORMAT_PRINTF(formatstring_parameter, first_argument) \
+   ATTRIBUTE_FORMAT ((__gnu_printf__, formatstring_parameter, first_argument))
+#else
+# define ATTRIBUTE_FORMAT_PRINTF(formatstring_parameter, first_argument) \
+   ATTRIBUTE_FORMAT ((__printf__, formatstring_parameter, first_argument))
+#endif
+
+#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 8))
+#define HAVE___BUILTIN_UNWIND_INIT 1
+#endif
+
+#undef EMACS_CONFIGURATION
+
+#undef EMACS_CONFIG_OPTIONS
+
+/* The configuration script defines opsysfile to be the name of the
+   s/SYSTEM.h file that describes the system type you are using.  The file
+   is chosen based on the configuration name you give.
+
+   See the file ../etc/MACHINES for a list of systems and the
+   configuration names to use for them.
+
+   See s/template.h for documentation on writing s/SYSTEM.h files.  */
+#undef config_opsysfile
+#include "s/ms-w32.h"
+
+/* The configuration script defines machfile to be the name of the
+   m/MACHINE.h file that describes the machine you are using.  The file is
+   chosen based on the configuration name you give.
+
+   See the file ../etc/MACHINES for a list of machines and the
+   configuration names to use for them.
+
+   See m/template.h for documentation on writing m/MACHINE.h files.  */
+#undef config_machfile
+#include "m/intel386.h"
+
+/* Define `subprocesses' should be defined if you want to
+   have code for asynchronous subprocesses
+   (as used in M-x compile and M-x shell).
+   Only MSDOS does not support this.  */
+
+#define subprocesses
+
+/* Define STACK_DIRECTION here, but not if m/foo.h did.  */
+#ifndef STACK_DIRECTION
+#undef STACK_DIRECTION
+#endif
+
+#ifdef emacs /* Don't do this for lib-src.  */
+/* Tell regex.c to use a type compatible with Emacs.  */
+#define RE_TRANSLATE_TYPE Lisp_Object
+#define RE_TRANSLATE(TBL, C) CHAR_TABLE_TRANSLATE (TBL, C)
+#define RE_TRANSLATE_P(TBL) (XFASTINT (TBL) != 0)
+#endif
+
+#define my_strftime nstrftime   /* for strftime.c */
+
+/* Define to the type of st_nlink in struct stat, or a supertype. */
+#define nlink_t short
+
+#ifndef WINDOWSNT
+/* Some of the files of Emacs which are intended for use with other
+   programs assume that if you have a config.h file, you must declare
+   the type of getenv.  */
+extern char *getenv ();
+#endif
+
+#endif /* EMACS_CONFIG_H */
+
+/* These default definitions are good for almost all machines.
+   The exceptions override them in m/MACHINE.h.  */
+
+#ifndef BITS_PER_CHAR
+#define BITS_PER_CHAR 8
+#endif
+
+#ifndef BITS_PER_SHORT
+#define BITS_PER_SHORT 16
+#endif
+
+/* Note that lisp.h uses this in a preprocessor conditional, so it
+   would not work to use sizeof.  That being so, we do all of them
+   without sizeof, for uniformity's sake.  */
+#ifndef BITS_PER_INT
+#define BITS_PER_INT 32
+#endif
+
+#ifndef BITS_PER_LONG
+#define BITS_PER_LONG 32
+#endif
+
+#if defined (__MINGW32__) || _MSC_VER >= 1400
+
+/* Define to 1 if the system has the type `long long int'. */
+# define HAVE_LONG_LONG_INT 1
+
+/* Define to 1 if the system has the type `unsigned long long int'. */
+# define HAVE_UNSIGNED_LONG_LONG_INT 1
+
+#elif _MSC_VER >= 1200
+
+/* Temporarily disable wider-than-pointer integers until they're tested more.
+   Build with CFLAGS='-DWIDE_EMACS_INT' to try them out.  */
+/* #undef WIDE_EMACS_INT */
+
+# ifdef WIDE_EMACS_INT
+
+/* Use pre-C99-style 64-bit integers.  */
+# define EMACS_INT __int64
+# define BITS_PER_EMACS_INT 64
+# define pI "I64"
+
+# endif
+
+#endif
+
+#ifndef POINTER_TYPE
+#define POINTER_TYPE void
+#endif
+
+#ifndef PROTOTYPES
+#define PROTOTYPES 1
+#endif
+
+#include "string.h"
+#ifdef HAVE_STRINGS_H
+#include "strings.h"
+#endif
+#include <stdlib.h>
+
+#ifndef NO_RETURN
+#if defined __GNUC__ && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR >= 5))
+#define NO_RETURN	__attribute__ ((__noreturn__))
+#else
+#define NO_RETURN	/* nothing */
+#endif
+#endif
+
+/* Redefine abort.  */
+#ifdef HAVE_NTGUI
+#define abort	w32_abort
+void w32_abort (void) NO_RETURN;
+#endif
+
+/* Prevent accidental use of features unavailable in
+   older Windows versions we still support.  */
+#define _WIN32_WINNT 0x0400
+
+/* Make a leaner executable.  */
+#define WIN32_LEAN_AND_MEAN 1

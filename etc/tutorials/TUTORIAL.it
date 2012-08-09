@@ -1,0 +1,1111 @@
+Esercitazione di Emacs.  Condizioni d'uso alla fine del file.
+
+I comandi di Emacs comportano generalmente l'uso del tasto CONTROL (a
+volte indicato con CTRL o CTL) o del tasto META (a volte indicato con EDIT
+o ALT).  Piuttosto che indicarli per esteso ogni volta, useremo le
+seguenti abbreviazioni:
+
+ C-<car>  significa che bisogna tenere abbassato il tasto CONTROL mentre si
+          preme il carattere <car>.  Quindi C-f significa: tieni premuto
+          CONTROL e batti f.
+
+ M-<car>  significa che bisogna tenere abbassato il tasto META o EDIT o ALT
+          mentre si preme il carattere <car>.  Se non ci sono tasti META,
+          EDIT o ALT, al loro posto si può premere e poi rilasciare il
+          tasto ESC e quindi premere <car>.  Useremo <ESC> per indicare il
+          tasto ESC.
+
+Nota importante: per chiudere una sessione di lavoro di Emacs usa C-x
+C-c.  (Due caratteri.)  I caratteri ">>" posti al margine sinistro
+indicano le direttive per provare a usare un comando.  Per esempio:
+<<Blank lines inserted here by startup of help-with-tutorial>>
+>> Adesso premi C-v (Vedi schermata successiva) per spostarti
+   alla prossima schermata.  (Vai avanti, tieni premuto il tasto
+   CONTROL mentre premi v).  D'ora in poi dovrai fare così ogni volta
+   che finisci di leggere lo schermo.
+
+Si noti che le ultime due righe di ogni schermata appaiono in cima alla
+schermata successiva, favorendo così la continuità di lettura.
+
+La prima cosa che bisogna imparare è come raggiungere un certo punto del
+testo.  Sai già come andare avanti di una schermata, con C-v.  Per
+andare indietro di una schermata, premi M-v (tieni premuto il tasto META
+e poi premi v, oppure usa <ESC>v se non c'è un tasto META, EDIT o ALT).
+
+>> Ora prova: premi M-v e quindi C-v alcune volte.
+
+
+* SOMMARIO
+----------
+
+I comandi seguenti sono utili per visualizzare le varie parti del testo:
+
+    C-v    Vai avanti di una schermata
+    M-v    Vai indietro di una schermata
+    C-l    Cancella lo schermo e riscrivi tutto il testo, muovendo
+           il testo che si trova vicino al cursore al centro dello
+           schermo.  (Il tasto è CONTROL-L, non CONTROL-1.)
+
+>> Trova il cursore, osserva quale parte di testo gli è vicina.  Premi
+   C-l.  Trova di nuovo il cursore e osserva che si trova sullo stesso
+   punto del testo.
+
+
+* CONTROLLO DEL CURSORE
+-----------------------
+
+Spostarsi da una schermata all'altra è utile, ma come ci si può spostare
+fino ad un certo preciso punto del testo?
+
+Ci sono diversi modi per farlo.  Il più elementare consiste nell'usare i
+comandi C-p, C-b, C-f, C-n.  Ognuno di essi muove il cursore di una riga o
+di una colonna in una data direzione sullo schermo.  La tabella seguente
+mostra le direzioni in cui operano questi quattro comandi:
+
+                           Riga precedente, C-p
+                                    :
+                                    :
+      Indietro, C-b .... Posizione attuale cursore .... Avanti, C-f
+                                    :
+                                    :
+			   Riga successiva, C-n
+
+>> Sposta il cursore sulla riga centrale del diagramma qui sopra usando
+   C-n o C-p.  Poi usa C-l per portare il diagramma al centro dello
+   schermo.
+
+Le quattro lettere dei comandi sono mnemoniche in inglese: P per
+precedente (previous), N per successivo (next), B per indietro (backward)
+e F per avanti (forward).  Questi sono tutti i comandi elementari per
+posizionare il cursore, li userai IN CONTINUAZIONE e conviene perciò
+impararli subito.
+
+>> Usa alcuni C-n per portare il cursore su questa riga.
+>> Muovi il cursore sulla riga con C-f e poi in alto con C-p.  Osserva
+   l'effetto di un C-p quando il cursore si trova a metà della riga.
+
+Ogni riga di testo termina con un carattere Newline, che serve a separarla
+dalla successiva.  È bene che l'ultima riga del tuo file termini con un
+carattere Newline, benché Emacs non lo richieda.
+
+>> Prova a usare C-b all'inizio di una riga.  Sposterà il cursore
+   alla fine della precedente.  Questo avviene perché il cursore ha
+   superato all'indietro il carattere Newline.
+
+C-f sposta il cursore avanti attravero il carattere Newline proprio come
+C-b.
+
+>> Premi alcune volte C-b per vedere dove si trova il cursore.  Poi usa
+   C-f per tornare alla fine della riga.  Usa quindi C-f per andare alla
+   riga successiva.
+
+Quando ci si sposta oltre l'inizio o la fine della schermata, il testo che
+si trova oltre si sposta sullo schermo, ottenendo uno "scorrimento"
+(scrolling).  In questo modo Emacs posiziona il cursore sulla parte di
+testo desiderata senza doverlo portare fuori dallo schermo visibile.
+
+>> Prova a muovere il cursore al di là della fine dello schermo con C-n e
+   osserva cosa succede.
+
+Se lo spostamento di un solo carattere alla volta è troppo lento allora ci
+si può muovere di un'intera parola alla volta.  M-f (META-f) e M-b
+spostano il cursore rispettivamente in avanti e indietro di una parola.
+
+>> Prova alcune volte M-f e M-b.
+
+Quando il cursore è a metà di una parola, M-f lo sposta alla fine della
+stessa.  Quando è sullo spazio bianco tra due parole, M-f lo sposta alla
+fine della parola successiva.  M-b funziona in modo simile ma in direzione
+opposta.
+
+>> Ora prova M-f e M-b alcune volte, alternandoli con C-f e C-b così da
+   poter osservare l'azione di M-f e M-b da vari punti tra le parole e
+   sulle stesse.
+
+Osserva il parallelo tra C-f e C-b da una parte e M-f e M-b dall'altra.
+Molto spesso i caratteri con Meta sono usati per operazioni relative alle
+unità definite dal linguaggio (parole, frasi, paragrafi), mentre i
+caratteri con Control operano su unità base indipendenti da ciò che si
+scrive (caratteri, righe, ecc.).
+
+Questo parallelo funziona anche tra righe e frasi: C-a e C-e spostano
+all'inizio o alla fine di una riga, e M-a e M-e all'inizio o alla fine di
+una frase.
+
+>> Prova due C-a e poi due C-e.  Prova due M-a e poi due M-e.
+
+Osserva come un C-a ripetuto non abbia effetto, mentre M-a ripetuti
+continuano a spostare il cursore all'inizio di frasi precendenti.  Sebbene
+questi due ultimi comandi non siano perfettamente analoghi, riteniamo che
+il loro comportamento sia ragionevole.
+
+La posizione del cursore nel testo è anche chiamata "punto".  Per meglio
+dire, il cursore mostra sullo schermo dove si trova, al momento, il punto
+nel testo.
+
+Ecco un sommario delle più semplici operazioni di spostamento del cursore,
+compresi i comandi di spostamento di parola in parola o di frase in frase:
+
+    C-f    Sposta avanti di un carattere
+    C-b    Sposta indietro di un carattere
+
+    M-f    Sposta avanti di una parola
+    M-b    Sposta indietro di una parola
+
+    C-n    Sposta alla riga successiva
+    C-p    Sposta alla riga precedente
+
+    C-a    Sposta all'inizio della riga
+    C-e    Sposta alla fine della riga
+
+    M-a    Sposta all'inizio della frase
+    M-e    Sposta alla fine della frase
+
+>> Prova tutti questi comandi alcune volte per fare pratica.  Questi sono
+   i comandi più usati.
+
+Altri due importanti comandi di spostamento del cursore sono M-< (META
+Minore-di), che sposta all'inizio dell'intero testo, e M-> (META
+Maggiore-di), che sposta alla fine dell'intero testo.
+
+Su molte tastiere il carattere ">" si raggiunge premendo il tasto SHIFT.
+Su queste tastiere bisogna usare il tasto SHIFT assieme a quello META;
+senza il tasto SHIFT si otterrebbe un carattere diverso.
+
+>> Prova M-< adesso per andare all'inizio del tutorial.  Poi usa C-v
+   ripetutamente per tornare a questo punto.
+>> Prova M-> adesso, per andare alla fine del tutorial.  Quindi usa M-v
+   ripetutamente per tornare a questo punto.
+
+Il cursore si può anche spostare con i tasti freccia, se il terminale li
+ha.  Noi raccomandiamo di imparare C-b, C-f, C-n e C-p per tre motivi:
+primo, funzionano su tutti i terminali; secondo, una volta acquisita
+pratica nell'uso di Emacs, ci si accorgerà che raggiungere questi
+caratteri di controllo è più rapido che usare i tasti freccia perché non
+bisogna spostare le mani dalla posizione di scrittura sulla tastiera;
+terzo, una volta acquisita l'abitudine ad usare questi comandi con il
+carattere Control, si può allo stesso modo imparare ad usare altri comandi
+avanzati di spostamento del cursore.
+
+Molti comandi di Emacs accettano un argomento numerico che spesso serve a
+conteggiare per quante volte vanno ripetuti.  Il modo in cui si può
+fornire ad un comando il numero di ripetizioni è il seguente: si usa C-u e
+quindi si indicano le cifre prima di impartire il comando stesso.  Se
+esiste un tasto META (o EDIT o ALT) c'è un modo alternativo: si battono le
+cifre tenendo premuto il tasto META.  Noi consigliamo di imparare il
+metodo con C-u perché funziona su tutti i terminali.  L'argomento numerico
+è anche chiamato "argomento prefisso", perché viene indicato prima del
+comando a cui si riferisce.
+
+Per esempio, C-u 8 C-f sposta il cursore in avanti di otto caratteri.
+
+>> Prova ad usare C-n, o C-p, con un argomento numerico per spostare il
+   cursore su una riga vicina a questa con un solo comando.
+
+La maggior parte dei comandi usa l'argomento numerico come numero delle
+ripetizioni da effettuare, tuttavia alcuni lo usano in modo diverso.
+Altri comandi (ma nessuno di quelli imparati fino ad ora) lo usano come
+indicatore di alternativa: la presenza di un argomento prefisso,
+indipendentemente dal suo valore, modifica il comportamento del comando.
+
+C-v e M-v sono un'altra eccezione.  Quando gli si fornisce un argomento
+spostano l'area di testo visualizzato in alto o in basso del numero di
+righe indicato invece che del numero di schermate.  Per esempio, C-u 8 C-v
+fa scorrere lo schermo di 8 righe.
+
+>> Ora prova con C-u 8 C-v.
+
+La schermata si sposta di 8 righe verso l'alto.  Se vuoi tornare di nuovo
+in basso puoi usare un argomento numerico con M-v.
+
+Quando si usa un sistema a finestre, come X11 o MS-Windows, ci dovrebbe
+essere un'area rettangolare allungata chiamata barra di scorrimento a
+un lato della finestra di Emacs.  Si può far scorrere il testo con un 
+click del mouse nella barra di scorrimento.
+
+>> Prova a premere il pulsante centrale del mouse sopra all'area
+   evidenziata nella barra di scorrimento.  Verrà visualizzata una parte
+   del testo, più verso l'inizio o la fine, a seconda del punto della
+   barra che il puntatore indicava mentre premevi il pulsante del mouse.
+>> Prova a spostare il mouse in su e in giù mentre tieni premuto il
+   pulsante centrale.  Osserva come il testo scorre in su e in giù mentre
+   muovi il mouse.
+
+
+* QUANDO EMACS SI BLOCCA
+------------------------
+
+Se Emacs smette di rispondere ai comandi può essere fermato in modo sicuro
+premendo C-g.  Si può usare C-g per fermare un comando che sta impiegando
+troppo tempo per l'esecuzione.
+
+Si può anche usare C-g per annullare un argomento numerico o l'esecuzione
+di un comando che non si vuole più portare a termine.
+
+>> Batti C-u 100 per indicare un argomento numerico di 100, quindi premi
+   C-g.  Ora premi C-f.  Il cursore si sposta in avanti di un solo
+   carattere perché hai annullato l'argomento numerico con C-g.
+
+Se hai premuto <ESC> per errore puoi annullare con C-g.
+
+
+* COMANDI DISATTIVATI
+---------------------
+
+Alcuni comandi di Emacs sono "disattivati", così da evitare che utenti
+principianti possano usarli per errore.
+
+Se si inserisce uno dei comandi disattivati Emacs mostra un messaggio in
+cui dice quale sia il comando e chiede se davvero si vuole procedere con
+l'esecuzione.
+
+Se effettivamente si vuole provare il comando bisogna premere la barra
+spaziatrice come risposta a questa domanda.  Normalmente, se non si vuole
+eseguire il comando disattivato, bisogna rispondere alla domanda con "n".
+
+>> Prova C-x C-l (che è un comando disattivato), poi rispondi con "n" alla
+   domanda.
+
+
+* FINESTRE
+----------
+
+Emacs può avere diverse finestre, ognuna contenente il suo testo.
+Spiegheremo dopo come usare finestre multiple.  Adesso ci occupiamo di
+come eliminare le finestre in più e tornare alla scrittura con una sola
+finestra.  È semplice:
+
+    C-x 1    Una finestra (cioè, elimina tutte le altre finestre).
+
+È un CONTROL-x seguito dalla cifra 1.  C-x 1 espande la finestra che
+continene il cursore su tutto lo schermo ed elimina tutte le altre
+finestre.
+
+>> Sposta il cursore su questa riga e poi batti C-u 0 C-l.
+>> Batti C-h k C-f.  Osserva come questa finestra viene rimpicciolita
+   mentre ne appare un'altra che contiene la spiegazione del comando
+   CONTROL-f.
+>> Batti C-x 1 e guarda come la finestra contenente la spiegazione
+   scompare.
+
+Questo comando è diverso da tutti quelli imparati finora perché contiene
+due caratteri.  Inizia con il carattere CONTROL-x.  C'è un'ampia serie di
+comandi che iniziano con CONTROL-x; molti di essi riguardano finestre,
+file, buffer, e cose simili.  Questi comandi possono essere lunghi due,
+tre o quattro caratteri.
+
+
+* INSERIMENTO E CANCELLAZIONE
+-----------------------------
+
+Per inserire del testo basta premere i tasti corrispondenti alle varie
+lettere che lo compongono.  I caratteri visibili, come A, 7, *, ecc., sono
+considerati testo e inseriti immediatamente.  Si usa <Return> (il tasto
+Invio) per inserire un carattere Newline.
+
+L'ultimo carattere inserito si cancella usando <Delete>.  <Delete> è un
+tasto che si trova sulla tastiera e che potrebbe essere etichettato come
+"Del" o "Canc".  Spesso il tasto "Backspace" (quello con la freccia
+rivolta verso sinistra sopra il tasto Invio) serve da <Delete>, ma non
+sempre!
+
+Più in generale <Delete> cancella il carattere posto immediatamente prima
+della posizione attuale del cursore.
+
+>> Prova questo adesso - batti alcuni caratteri e poi cancellali con
+   <Delete> ripetuto alcune volte.  Non preoccuparti delle modifiche fatte
+   a questo file: l'esercitazione principale rimarrà intatta, quella che
+   stai usando ne è una tua copia personale.
+
+Quando una riga di testo diventa troppo lunga per essere visualizzata su
+una riga di schermo essa viene "continuata" su una seconda riga dello
+schermo.  Un carattere barra retroversa ("\") posto accanto al margine
+sinistro indica la prosecuzione della riga precedente.  Quando si usa un
+sistema a finestre grafico, invece della barra retroversa comparirà una
+piccola freccia ricurva.
+
+>> Inserisci del testo fino a raggiungere il margine destro e poi
+   continua.  Vedrai apparire la prosecuzione della riga.
+>> Usa <Delete> per cancellare il testo fino a quando la riga di testo è
+   di nuovo tutta contenuta in una sola riga dello schermo.  La
+   prosecuzione alla riga successiva scompare.
+
+Si può cancellare un carattere Newline ("a capo", è un carattere che ha un
+effetto ma non viene visualizzato esplicitamente) proprio come ogni altro.
+Quando si cancella il carattere Newline che separa due righe queste
+vengono unite in una riga sola.  Se la riga risultante è troppo lunga per
+essere contenuta dallo schermo allora sarà continuata nella riga
+successiva.
+
+>> Muovi il cursore all'inizio di una riga e poi premi <Delete>.  Questo
+   unisce la riga alla precedente.
+>> Premi <Invio> per inserire di nuovo il carattere Newline che hai
+   cancellato.
+
+Si ricordi che la maggior parte dei comandi di Emacs può ricevere un
+argomento numerico, compresi i caratteri per inserire il testo.  Quando si
+ripete un carattere di testo questo viene inserito un certo numero di
+volte.
+
+>> Prova adesso - inserisci C-u 8 * per ottenere ********.
+
+Fino ad ora si è visto il modo più semplice di inserire testo in Emacs e
+di correggere gli errori.  In modo analogo è possibile cancellare parola
+per parola o riga per riga.  Ecco un sommario delle operazioni di
+cancellazione:
+
+    <Delete>    cancella il carattere posto subito prima del cursore
+    C-d         cancella il carattere posto subito dopo il cursore
+
+    M-<Delete>  elimina la parola posta prima del cursore
+    M-d         elimina la parola posta subito dopo il cursore
+
+    C-k         cancella dalla posizione del cursore fino a fine riga
+    M-k         cancella fino alla fine della frase corrente.
+
+Si osservi che <Delete> e C-d da una parte e M-<Delete> e M-d dall'altra
+estendono il parallelo tra C-f e M-f (a dire il vero, <Delete> non è un
+vero e proprio carattere di controllo, ma non preoccupiamoci di questo).
+C-k è simile a C-e e M-k è simile a M-e, nel senso che i primi operano su
+righe e i secondi su frasi.
+
+Si può anche cancellare una qualsiasi parte del buffer in modo uniforme:
+si sposta il cursore alla fine di quella parte e poi si usa C-@ o C-SPC
+(uno o l'altro, SPC è la Barra Spaziatrice), poi si muove il cursore
+all'altro estremo della zona e si preme C-w.  Questo cancella tutto il
+testo posto tra i due estremi.
+
+>> Sposta il cursore sulla P all'inizio del paragrafo precedente.  Premi
+   C-SPC.  Emacs dovrebbe mostrarti il messaggio "Mark set" nella parte
+   bassa dello schermo.  Muovi il cursore sulla s di "estremi" del
+   paragrafo precedente.  Premi C-w.  Questo cancellerà il testo a partire
+   dalla `P' e fino alla lettera che precede `s'.
+
+La differenza tra "killing" (eliminazione) e "deleting" (cancellazione) è
+che il testo "eliminato" può essere inserito di nuovo, mentre quello che
+viene cancellato non si può recuperare.  L'operazione di reinserimento del
+testo soppresso si chiama "yanking".  In genere i comandi che possono
+rimuovere molto testo fanno un'operazione di eliminazione (così da poterlo
+eventualmente reinserire), mentre i comandi che rimuovono un solo
+carattere o solo righe vuote e spazi effettuano una cancellazione (quindi
+non è possibile recuperare quel testo).
+
+>> Muovi il cursore all'inizio di una riga non vuota.  Usa C-k per
+   eliminare il testo di quella riga.  Premi C-k una seconda volta.  Ti
+   accorgerai di come viene cancellato il carattere Newline posto dopo la
+   riga stessa.
+
+Si noti che un singolo C-k elimina il contenuto di una sola riga, un
+secondo C-k cancella la riga stessa, e fa spostare in alto tutte le righe
+successive.  C-k usa un eventuale argomento numerico in modo speciale:
+elimina quel numero di righe ed il loro contenuto.  Non è una semplice
+ripetizione del comando.  C-u 2 C-k elimina due righe e i rispettivi
+caratteri Newline; battere due volte C-k sarebbe diverso.
+
+Recuperare il testo eliminato è un'operazione chiamata "yanking".
+(Significa "strappare", si deve pensare di riprendere del testo che era
+stato portato via).  Si può recuperare il testo che è stato eliminato sia
+nella sua posizione originaria che in un altro punto del buffer o anche in
+un diverso file.  Si può reinserire diverse volte, facendone copie
+multiple.
+
+Il comando per fare "yanking" è C-y.  Inserisce il testo eliminato per
+ultimo nel punto in cui si trova attualmente il cursore.
+
+>> Prova: premi C-y per recuperare il testo di prima.
+
+Se si eseguono operazioni di eliminazione immediatamente successive il
+testo eliminato è considerato un tutt'uno e quindi un solo C-y inserirà
+quelle righe tutte assieme.
+
+>> Prova adesso, premi C-k alcune volte.
+
+Adesso, per recuperare il testo eliminato:
+
+>> Premi C-y.  Sposta il cursore alcune righe più in basso e premi di
+   nuovo C-y.  Hai appena visto come copiare una parte di testo.
+
+Cosa succede se c'è del testo da recuperare tra quello eliminato ma è
+stato eliminato altro testo dopo di esso?  C-y restituirebbe il testo
+dell'ultima eliminazione, tuttavia il testo eliminato in precedenza non è
+perso.  Si recupera con il comando M-y.  Dopo aver usato C-y per
+recuperare il testo più recentemente eliminato, un M-y sostituisce quel
+testo con quello dell'eliminazione precedente.  Premere M-y altre volte
+recupera il testo delle eliminazioni via via precedenti.  Quando è stato
+trovato il testo cercato non si deve fare altro per tenerlo.  Si può
+andare avanti con la scrittura lasciando il testo recuperato dove si
+trova.
+
+Quando si usa M-y un certo numero di volte si arriva di nuovo al testo di
+partenza (quello eliminato per ultimo).
+
+>> Elimina una riga, sposta il cursore, elimina un'altra riga.  Usa C-y per
+   recuperare la seconda riga eliminata.  Premi M-y e verrà sostituita
+   dalla riga eliminata prima.  Usa di nuovo M-y e osserva cosa succede.
+   Continua fino a quando non ritrovi la riga che avevi eliminato per
+   seconda.  Se vuoi puoi usare un argomento numerico sia positivo che
+   negativo per M-y.
+
+
+* ANNULLAMENTO
+--------------
+
+Se si modifica il testo e subito dopo ci si accorge di aver fatto un
+errore si può annullare la modifica con il comando di annullamento C-x u.
+
+Normalmente C-x u annulla le modifiche fatte da un solo comando; se si usa
+C-x u alcune volte di seguito ogni ripetizione annulla un comando
+precedente.
+
+Ci sono due eccezioni: i comandi che non modificano il testo non contano,
+tra questi i comandi di spostamento del cursore e quelli di scorrimento
+del testo; i caratteri inseriti nel testo sono gestiti in gruppi, fino a
+20 elementi, ciò per ridurre il numero di C-x u da usare per annullare
+l'inserimento del testo.
+
+>> Elimina questa riga con C-k poi usa C-x u e guardala ricomparire.
+
+C-_ è un comando di annullamento alternativo; funziona come C-x u ma è più
+semplice da inserire più volte di seguito.  Lo svantaggio di C-_ è che su
+alcune tastiere non è di inserimento immediato.  Ecco perché abbiamo
+previsto anche C-x u.  Su alcuni terminali si può ottenere C-_ dal simbolo
+/ mentre si tiene premuto il tasto CONTROL.
+
+Un argomento numerico per C-x u o C-_ agisce come numero delle ripetizioni
+da effettuare.
+
+Si può annullare la cancellazione del testo proprio come se ne annulla
+l'eliminazione.  La distinzione tra l'eliminazione e la cancellazione
+riguarda solo la possibilità di recuperare il testo con C-y; non c'è
+differenza rispetto all'operazione di annullamento.
+
+
+* FILE
+------
+
+Per conservare in modo permanente il testo inserito biaogna conservarlo in
+un file, altrimenti sarà perso al termine dell'esecuzione di Emacs.  Per
+inserire il testo in un file bisogna aprire quel file prima di comporre il
+testo.  (Questa operazione si chiama anche "visita" del file.)
+
+Aprire un file significa osservarne il contenuto all'interno di Emacs.
+Per molti versi è come se si operasse sul file stesso, tuttavia le
+modifiche apportate al contenuto non sono definitive fino a quando non si
+"salva" il file.  Tutto questo avviene in modo tale da evitare di lasciare
+un file su disco quando è modificato solo in parte.  Persino quando si
+salva il file Emacs conserva il contenuto originale dello stesso in un
+file con un altro nome, nel caso in cui si capisca più tardi che le
+modifiche sono state un errore.
+
+Osservando la parte bassa dello schermo si noti che c'è una riga che
+inizia e finisce con dei trattini e che all'inizio contiene questo testo
+"--:-- TUTORIAL.it" o qualcosa di simile.  Questa parte dello schermo
+normalmente mostra il nome del file che si sta "visitando".  In questo
+momento si "visita" un file che si chiama "TUTORIAL.it" che è poi una
+copia dell'esercitazione di Emacs.  Quando si apre un file con Emacs il
+suo nome apparirà sempre in quel punto preciso.
+
+Una caratteristica particolare del comando per aprire i file è che bisogna
+fornirgli il nome del file.  Diciamo in questo caso che il comando "legge
+un argomento dal terminale" (l'argomento è proprio il nome del file).
+Dopo aver scritto il comando
+
+    C-x C-f    Trova un file
+
+Emacs chiede il nome del file.  Il nome che si inserisce compare nella
+riga più in basso sullo schermo.  La riga di fondo è chiamata "minibuffer"
+quando viene usato per questo genere di operazioni di inserimento.  Si
+possono usare i consueti comandi di Emacs per operare sul nome del file.
+
+Mentre si inserisce il nome del file (oppure ogni altro testo nel
+minibuffer), si può annullare il comando con un C-g.
+
+>> Premi C-x C-f, poi premi C-g.  Questo vuota il "minibuffer" e
+   interrompe l'esecuzione del comando C-x C-f che stava usando il
+   "minibuffer".  Quindi non sarà aperto alcun file.
+
+Quando si finisce di indicare il nome del file bisogna premere <Invio> per
+portare a termine il comando.  Il comando C-x C-f inizia il suo lavoro e
+trova il file che è stato scelto.  Il "minibuffer" scompare quando il
+comando C-x C-f ha terminato l'esecuzione.
+
+Subito dopo, il contenuto del file compare sullo schermo e si può
+modificare a piacere.  Quando si desidera rendere permanenti le modifiche
+si usa il comando
+
+    C-x C-s    Salva il file
+
+Questo copia il testo contenuto in Emacs nel file su disco.  La prima
+volta che si effetta questa operazione Emacs dà un nuovo nome al file
+originale in modo da conservarlo.  Il nuovo nome è ottenuto aggiungendo un
+carattere "~" alla fine del nome originale.
+
+Quando il salvataggio è terminato Emacs mostra il nome del file appena
+scritto.  Si dovrebbero salvare le modifiche piuttosto spesso in modo da
+non perdere troppo lavoro se per caso il sistema dovesse bloccarsi.
+
+>> Usa C-x C-f per salvare la tua copia di questa esercitazione.  Questo
+   dovrebbe mostrare il messaggio "Wrote ...TUTORIAL.it" nella parte bassa
+   dello schermo.
+
+Si può aprire un file già esistente per leggerlo o modificarlo.  Si può
+anche "visitare" un file che ancora non esiste.  Questo è un modo per
+creare un nuovo file con Emacs: si apre il file che sarà inizialmente
+vuoto e quindi si inizia ad inserire il testo.  Quando si chiederà di
+salvare il file Emacs lo creerà ed esso conterrà tutto il testo che è
+stato inserito.  Da quel punto in poi si potrà pensare di operare su un
+file già esistente.
+
+
+* BUFFER
+--------
+
+Se si apre un secondo file con C-x C-f il primo rimane aperto all'interno
+di Emacs.  Si può tornare a visualizzarlo "visitandolo" di nuovo con il
+comando C-x C-f.  In questo modo si possono aprire quanti file si vogliono
+all'interno di Emacs.
+
+>> Crea un file chiamato "pippo" usando C-x C-f pippo <Invio>.  Inserisci
+   del testo e poi salva "pippo" con C-x C-s.  Poi usa C-x C-f TUTORIAL.it
+   <Invio> per tornare all'esercitazione.
+
+Emacs conserva il testo di ogni file all'interno di un oggetto chiamato
+"buffer".  La "visita" di un file produce un nuovo buffer all'interno di
+Emacs.  Per guardare una lista dei buffer che esistono attualmente nella
+tua sessione di Emacs si usa
+
+    C-x C-b    Elenca buffer
+
+>> Prova C-x C-b adesso.
+
+Si osservi come ogni buffer abbia un nome e come possa avere anche il nome
+di un file del quale conserva il contenuto.  Alcuni buffer non
+corrispondono ad alcun file.  Per esempio il buffer che ha nome "*Buffer
+List*" non ha un file corrispondente, è quello che contiene la lista che è
+stata creata da C-x C-b.  OGNI testo che si legge all'interno di Emacs è
+sempre parte di un buffer.
+
+>> Usa C-x 1 per eliminare la lista dei buffer.
+
+Se si modifica in qualche modo il testo di un file e poi si visita un altro
+file questo non comporta un salvataggio del primo.  Le modifiche rimangono
+solo all'interno di Emacs, nel buffer relativo a quel file.  La creazione
+o la modifica del buffer del secondo file non ha alcun effetto sul buffer
+del primo.  Sarebbe fastidioso dover tornare al primo file con C-x C-f per
+salvarlo con C-x C-s.  Così c'è il comando
+
+    C-x s    Salva alcuni buffer
+
+C-x s chiede conferma del salvataggio per ogni buffer che contiene testo
+modificato e non ancora salvato.  Chiede, per ognuno di quei buffer, se si
+voglia salvarne il contenuto nel file corrispondente.
+
+>> Inserisci una riga di testo e poi premi C-x s.  Dovrebbe chiederti se
+   vuoi salvare il buffer chiamato TUTORIAL.it.  Rispondi di sì battendo
+   "y".
+
+
+* ESTENDERE L'INSIEME DEI COMANDI
+---------------------------------
+
+Emacs ha molti comandi in più rispetto a quelli che potrebbero trovare
+posto su tutti i caratteri CONTROL e META.  Emacs risolve questo problema
+usando il comando "estendi" (eXtend).  Ce ne sono di due tipi:
+
+    C-x    Comando esteso carattere.  Seguito da un carattere.
+    M-x    Comando esteso con nome.  Seguito da un nome di comando.
+
+Si tratta di comandi utili ma meno utilizzati di quelli che già osservati.
+Se ne sono visti due: il comando C-x C-f per visitare un file e quello C-x
+C-s per salvarlo.  Un altro esempio è quello che serve per chiudere la
+sessione Emacs - cioè il comando C-x C-c.  Non bisogna temere di perdere
+le modifiche fatte: C-x C-c propone infatti di salvare ogni file
+modificato prima di chiudere Emacs.
+
+C-z è il comando che serve per uscire da Emacs *temporaneamente* - così da
+poter tornare alla stessa sessione di Emacs in un momento successivo.
+
+Su sistemi che lo permettono C-z "sospende" Emacs, cioè riporta alla shell
+che lo aveva invocato senza però porre termine alla sessione attuale.
+Nelle shell più comuni si può riaprire la sessione in corso con il comando
+`fg' oppure con `%emacs'.
+
+Su sistemi che non prevedono la possibilità di "sospensione", C-z crea una
+subshell che funziona all'interno di Emacs per dare la possibilità di
+usare altri programmi e poi tornare a Emacs successivamente; in pratica
+non fa "uscire" veramente da Emacs.  In questo caso il comando di shell
+`exit' è il modo comune per tornare ad Emacs dalla subshell.
+
+Il momento di usare C-x C-c è quando si sta per effettuare il log-out dal
+sistema.  È anche il comando giusto quando si deve chiudere Emacs che è
+stato invocato da un programma che gestisce la posta o da altri programmi
+simili, dal momento che essi potrebbero non riuscire a gestire la
+sospensione di Emacs.  In circostanze normali, invece, se non si è sul
+punto di fare un log-out è meglio sospendere l'esecuzione di Emacs
+piuttosto che interromperla.
+
+Ci sono molti comandi che usano C-x.  Ecco una lista di quelli già
+conosciuti:
+
+    C-x C-f    Apri un file.
+    C-x C-s    Salva un file.
+    C-x C-b    Elenca buffer.
+    C-x C-c    Chiudi Emacs.
+    C-x 1      Elimina tutte le finestre tranne una.
+    C-x u      Annulla.
+
+I comandi estesi con nome sono usati ancora meno spesso, oppure sono usati
+solo in certi "modi" di esecuzione.  Un esempio è il comando
+replace-string per sostituire in tutto il testo una stringa di caratteri
+con un'altra.  Quando si usa M-x Emacs visualizza "M-x" nella parte bassa
+dello schermo, quindi si deve inserire per esteso il nome del comando; in
+questo caso "replace-string".  Inserisci solo "repl s<TAB>" ed Emacs
+completerà da solo il nome.  (<TAB> è il tasto di tabulazione, che si
+trova di solito sul lato sinistro della tastiera sopra al tasto Blocca
+Maiuscole).  Concludi l'inserimento del comando con il tasto <Invio>.
+
+Il comando replace-string richiede due argomenti: la stringa da sostituire
+e quella con cui sostituirla.  Bisogna indicare la fine di ogni argomento
+con <Invio>.
+
+>> Muovi il cursore sulla riga bianca qui sotto, quindi batti M-x repl s
+   <Invio> cambiata <Invio> modificata <Invio>.
+
+Osserva come questa riga è cambiata: hai sostituito la parola cam-bia-ta
+con "modificata" tutte le volte che quella compariva nel testo, a partire
+dalla posizione iniziale del cursore.
+
+
+* SALVATAGGIO AUTOMATICO
+------------------------
+
+Quando si apportano delle modifiche ad un file ma non sono ancora state
+salvate potrebbero essere perse se per caso il sistema si bloccasse.  Per
+proteggerti da questa eventualità Emacs scrive periodicamente un file di
+"salvataggio automatico" per ogni file che si sta scrivendo.  Il nome del
+file di salvataggio automatico ha un carattere # all'inizio e alla fine;
+per esempio se il file si chiama "ciao.c" il nome del file di salvataggio
+automatico sarà "#ciao.c#".  Quando si salva il file nel modo consueto
+Emacs cancella il file di salvataggio automatico.
+
+Se il computer si blocca si può recuperare il file salvato automaticamente
+aprendo il file in modo normale (il file che si stava scrivendo, non
+quello di salvataggio automatico) e usando poi M-x recover file<Invio>.
+Quando viene chiesta la conferma si risponda con yes<Invio> per andare
+avanti nel recupero dei dati salvati automaticamente.
+
+
+* AREA DI ECO
+-------------
+
+Se Emacs si accorge che si inseriscono comandi multicarattere in modo
+troppo lento allora mostra la sequenza nella parte bassa dello schermo in
+un'area chiamata "area di eco".  L'area in questione contiene l'ultima riga
+dello schermo.
+
+
+* MODE LINE
+-----------
+
+La riga immediatamente sopra all'area di eco è chiamata "mode line" (riga
+di modo).  La "mode line" si presenta più o meno così:
+
+--:** TUTORIAL.it (Fundamental)--L720--64%---------------
+
+Questa riga fornisce informazioni utili sullo stato di Emacs e sul testo
+che si inserisce.
+
+Abbiamo già visto cosa significa il nome del file - è il file che si sta
+visitando.  --NN%-- (due cifre e il segno %) indica la posizione attuale
+nel testo: significa che NN percento del testo si trova sopra al margine
+superiore dello schermo.  Se si visualizza l'inizio del file ci sarà
+scritto --Top-- (inizio) invece che --00%--.  Se invece ci si trova alla
+fine del file ci sarà scritto --Bot-- (fine).  Se si osserva un file
+talmente piccolo da essere visualizzato per intero sullo schermo allora la
+"mode line" indicherà --All-- (tutto).
+
+La lettera L e le cifre indicano il numero di riga (Line) del punto
+indicato dal cursore in quel momento.
+
+I due asterischi vicino all'inizio indicano che sono state fatte delle
+modifiche al testo.  Se il file è stato appena aperto o appena salvato
+quella parte della "mode line" non mostra alcun asterisco, solo trattini.
+
+La parte di "mode line" racchiusa tra parentesi serve ad indicare in quale
+modo di scrittura ci si trovi.  Il modo standard è "Fundamental" ed è
+quello che probabilmente è attivo adesso.  È un esempio di "modalità
+primaria" (major mode).
+
+Emacs ha tanti diversi tipi di "modalità primarie".  Alcuni di questi
+servono per la scrittura di diversi linguaggi di programmazione e/o tipi
+di testo, come la modalità Lisp, la modalità Testo, ecc.  In un
+determinato momento una sola "modalità primaria" alla volta può essere
+attiva, e il suo nome è visualizzato sulla "mode line", proprio come
+"Fundamental" lo è adesso.
+
+Ogni "modalità primaria" condiziona il comportamento di alcuni comandi.
+Per esempio ci sono comandi per creare commenti in un programma e, dal
+momento che ogni linguaggio di programmazione ha un diverso tipo di
+commento, ogni "modalità primaria" deve inserire i commenti in modo
+diverso.  Ogni "modalità primaria" è anche il nome di un comando esteso
+con nome che serve per attivare quella "modalità primaria".  Per esempio
+M-x fundamental-mode è il comando per attivare la modalità primaria
+"Fundamental".
+
+Se si vuole inserire del testo in italiano, come questo file, serve
+probabilmente la modalità testo ("text-mode").
+
+>> Inserisci M-x text mode<Invio>.
+
+Non preoccuparti, nessuno dei comandi che hai imparato verrà modificato in
+modo sostanziale.  Tuttavia adesso puoi osservare come M-f e M-b
+considerino gli apostrofi come parti di parole.  Al contrario, nella
+modalità "Fundamental", M-f e M-b consideravano gli apostrofi dei
+separatori di parole.
+
+Le "modalità primarie" di solito producono nei comandi piccoli cambiamenti
+come questo: la maggior parte di essi "fa lo stesso lavoro" ma in maniera
+appena diversa.
+
+Per leggere la documentazione sulla "modalità primaria" attuale si usa
+C-h m.
+
+>> Usa C-u C-v una o più volte per portare questa riga vicino all'inizio
+   dello schermo.  Usa C-h m per leggere come il "text-mode" (modo testo)
+   differisce dalla modalità "Fundamental".  Premi C-x 1 per eliminare la
+   finestra contenente la documentazione.
+
+Le "modalità primarie" sono chiamate così perché ci sono anche delle
+"modalità secondarie" (minor modes).  Le "modalità secondarie" non sono
+alternative alle "modalità primarie" ma solo piccole varianti di esse.
+Ogni "modalità secondaria" può essere attivata o disattivata
+indipendentemente da tutte le altre "modalità secondarie" e
+indipendentemente dalla "modalità primaria" attiva in quel momento.  Si
+può quindi usare nessuna "modalità secondaria", una soltanto oppure ogni
+altra combinazione di modalità secondarie.
+
+Una "modalità secondaria" molto utile, specialmente per il testo italiano,
+è la modalità "Auto Fill".  Quando questa modalità è attiva, Emacs
+interrompe la riga tra due parole ogni volta che, nel corso
+dell'inserimento, essa diventa troppo lunga.
+
+Si può attivare il modo "Auto Fill" con: M-x auto fill mode<Invio>.
+Quando la modalità suddetta è attiva può essere disattivata con M-x auto
+fill mode<Invio>.  Se la modalità è disattivata questo comando la attiva,
+viceversa se è già attiva.  Un comando che funziona così si comporta come
+un interruttore, attiva o disattiva qualcosa ogni volta che viene premuto.
+
+>> Usa M-x auto fill mode<Invio> adesso.  Inserisci una riga di "asdf"
+   ripetuti fino a quando non la vedi dividersi in due righe.  Devi
+   interporre degli spazi perché la modalità "Auto Fill" spezza le righe
+   solo in corrispondenza di uno spazio.
+
+Il margine di solito è predisposto a 70 caratteri ma può essere spostato
+con il comando C-x f.  Bisogna fornire al comando l'argomento numerico del
+margine che si desidera.
+
+>> Usa C-x f con un argomento di 20 (C-u 2 0 C-x f), poi inserisci del
+   testo e osserva come Emacs interrompe le righe a 20 caratteri.  Infine
+   torna di nuovo a un margine di 70 caratteri con C-x f.
+
+Se si modifica il testo all'interno di un paragrafo la modalità
+"Auto Fill" non
+lo risistema.
+Per risistemare i margini di un paragrafo
+si usa M-q (META-q)
+quando il cursore si trova in quel paragrafo.
+
+>> Muovi il cursore sul paragrafo precedente e premi M-q.
+
+
+* CERCARE DEL TESTO
+-------------------
+
+Emacs può effettuare la ricerca di stringhe (che sono gruppi di caratteri
+contigui o parole) in posizione sia successiva che precedente nel testo.
+Cercare una stringa è un comando che provoca lo spostamento del cursore:
+lo porta lì dove la stringa compare.
+
+Il comando di ricerca di Emacs è diverso da quello di molti altri editor
+perché è "incrementale".  Ciò significa che la ricerca avviene proprio
+mentre si inserisce la stringa da cercare.
+
+I comandi per iniziare la ricerca sono C-s per quella in avanti e C-r per
+quella all'indietro nel testo.  ASPETTA!  Non provarli ora.
+
+Quando si preme C-s si vede comparire il messaggio "I-search" nell'"area
+di eco", ciò significa che Emacs aspetta che si indichi ciò che deve
+cercare.  <Invio> serve a concludere la ricerca.
+
+>> Adesso usa C-s per inziare la ricerca.  LENTAMENTE, una lettera alla
+   volta, inserisci la parola `cursore', facendo una pausa dopo ogni
+   carattere scritto per vedere cosa succede al cursore.  Hai cercato
+   "cursore" una volta sola.
+>> Usa C-s un'altra volta per trovare il punto in cui la parola "cursore"
+   compare successivamente.
+>> Adesso premi <Delete> quattro volte e osserva come si muove il cursore.
+>> Premi <Invio> per concludere la ricerca.
+
+Hai visto cos'è successo?  Durante una ricerca incrementale Emacs prova ad
+andare al punto successivo in cui compare la stringa indicata fino a quel
+momento.  Per raggiungere il punto successivo in cui compare di nuovo
+`cursore' basta solo premere C-s ancora una volta.  Se la stringa cercata
+non compare in alcun punto successivo Emacs emette un "beep" e informa che
+la ricerca non è andata a buon fine ("failing").  C-g è un modo
+alternativo per concludere la ricerca.
+
+NOTA: su alcuni sistemi il comando C-s bloccherà lo schermo e poi non si
+vedrà alcun altro messaggio da Emacs.  Questo significa che una
+caratteristica del sistema operativo chiamata "controllo di flusso" sta
+intercettando il carattere C-s e non gli permette di arrivare fino ad
+Emacs.  Per sbloccare lo schermo si può usare C-q.  Poi si legga la
+sezione "Spontaneous Entry to Incremental Search" nel manuale di Emacs per
+suggerimenti su come gestire questa caratteristica del proprio sistema.
+
+Se durante una ricerca incrementale si preme il tasto <Delete> ci si
+accorgerà che l'ultimo carattere della stringa da cercare scompare e la
+ricerca torna all'ultimo risultato trovato prima che fosse stato scritto.
+Per esempio, supponiamo di aver battuto una "c" e di aver trovato la prima
+"c" che compare nel testo.  Se poi aggiungiamo una "u" il cursore si
+sposta alla prima stringa "cu" che trova.  Ora se si preme <Delete> la "u"
+viene cancellata dalla stringa da cercare e il cursore torna sulla "c" che
+era stata trovata in precedenza.
+
+Se ci si trova nel mezzo di una operazione di ricerca e si usa un
+carattere control o meta (con poche eccezioni - i caratteri che hanno
+significato particolare durante la ricerca sono C-s e C-r) allora la
+ricerca viene conclusa.
+
+Il comando C-s inizia la ricerca di ogni presenza della stringa in
+posizione SUCCESSIVA a quella attuale del cursore.  Se si vuole cercare
+qualcosa che nel testo precede il cursore allora bisogna usare il comando
+C-r.  Tutto quello che abbiamo detto su C-s si applica allo stesso modo
+per C-r, invertendo ovviamente la direzione di ricerca.
+
+
+* FINESTRE MULTIPLE
+-------------------
+
+Una delle caratteristiche interessanti di Emacs è che si possono
+visualizzare più finestre sullo schermo nello stesso momento.
+
+>> Muovi il cursore su questa riga e inserisci C-u 0 C-l (è CONTROL-L, non
+   CONTROL-1).
+>> Adesso usa C-x 2 che divide lo schermo in due parti.  Entrambe le
+   finestre visualizzano questo tutorial.  Il cursore si trova nella
+   finestra superiore.
+>> Premi C-M-v per far scorrere la finestra inferiore.  (Se non hai un
+   tasto META usa <ESC> C-v.)
+>> Usa C-x o per muovere il cursore nella finestra inferiore.
+>> Usa C-v e M-v nella finestra inferiore per farvi scorrere il testo.
+   Continua a leggere queste indicazioni nella finestra superiore.
+>> Premi C-x o di nuovo per muovere il cursore nella finestra superiore.
+   Il cursore si trova sul punto che occupava in precedenza.
+
+Si può continuare a usare C-x o per andare da una finestra all'altra.  Ogni
+finestra ha la sua posizione per il cursore ma solo una alla volta lo
+visualizza.  Tutti i comandi impartiti funzionano sulla finestra in cui si
+trova il cursore.  Noi la chiamiamo la "finestra selezionata".
+
+Il comando C-M-v è molto utile quando si inserisce del testo in una
+finestra mentre si usa l'altra solo come riferimento.  Si può tenere il
+cursore sempre nella finestra in cui si lavora e portare avanti
+sequenzialmente il testo contenuto nell'altra con C-M-v.
+
+C-M-v è un esempio di carattere CONTROL-META.  Se c'è un vero e proprio
+tasto META si può ottenere C-M-v tenendo premuti contemporaneamente
+CONTROL e META mentre si batte v.  Non importa quale tra CONTROL e META
+viene premuto per primo perché essi agiscono assieme modificando i
+caratteri inseriti dopo.
+
+Se non c'è un tasto META e si usa il tasto ESC l'ordine diventa
+importante: bisogna premere prima <ESC> e poi farlo seguire da CONTROL-v
+perché CONTROL-ESC-v non funziona.  Questo perché <ESC> è un carattere a
+sé stante e non uno che ne modifica altri.
+
+>> Usa C-x 1 (nella finestra superiore) per eliminare la finestra
+   inferiore.
+
+(Se usi C-x 1 nella finestra inferiore allora viene eliminata quella
+superiore.  Questo comando conserva una sola finestra, quella in cui si
+trova il cursore.)
+
+Due finestre aperte contemporaneamente non devono necessariamente
+contenere lo stesso buffer.  Quando si usa C-x C-f per visitare un file in
+una finestra il contenuto dell'altra non cambia.  Si può "visitare" in
+modo indipendente un file diverso in ogni finestra.
+
+Ecco un altro modo per usare due finestre per visualizzare cose diverse:
+
+>> Inserisci C-x 4 C-f seguito dal nome di uno dei tuoi file.  Premi
+   <Invio>.  Osserva come il file viene aperto nella finestra inferiore.
+   Il cursore si posiziona in quella.
+>> Usa C-x o per tornare alla finestra superiore e C-x 1 per eliminare
+   quella inferiore.
+
+
+* LIVELLI DI EDITING RICORSIVO
+------------------------------
+
+A volte ci si può trovare in quello che si chiama un "livello di editing
+ricorsivo", ciò è indicato dalla presenza di parentesi quadre nella "mode
+line", attorno alle parentesi della "modalità primaria" attualmente in
+uso.  Per esempio si potrebbe leggere [(Fundamental)] invece che
+(Fundamental).
+
+Per uscire dal livello di editing ricorsivo si usa <ESC> <ESC> <ESC>.  È
+un comando di uscita di uso piuttosto generale, si può anche usare per
+eliminare finestre in più e per uscire dal "minibuffer".
+
+>> Usa M-x per entrare nel "minibuffer": poi usa <ESC> <ESC> <ESC> per
+   uscirne.
+
+Non è possibile usare C-g per uscire da un livello di editing ricorsivo,
+ciò avviene perché C-g è usato per annullare i comandi all'INTERNO del
+livello di editing ricorsivo.
+
+
+* COME IMPARARE ALTRO
+---------------------
+
+In questo tutorial abbiamo provato a fornire le informazioni sufficienti
+per iniziare ad usare Emacs.  Ci sono così tante opzioni in Emacs che
+sarebbe impossibile spiegarle tutte qui, ma è possibile imparare tutte le
+altre caratteristiche di Emacs utili per il proprio lavoro.  Ci sono
+comandi per leggere la documentazione dei comandi disponibili in Emacs.
+Questi comandi di aiuto iniziano tutti con il carattere C-h, che infatti è
+chiamato "carattere di aiuto (help)".
+
+Per raggiungere le voci di Aiuto si usa il carattere C-h e poi un altro
+carattere che specifica la richiesta.  Quando davvero non si sa cosa fare
+si può provare con C-h ? ed Emacs indicherà tutti i tipi di aiuto che può
+fornire.  Se si è attivato l'aiuto con C-h e si decide che non serve più
+si può annullare la richiesta con C-g.
+
+Alcuni sistemi fanno un diverso uso del carattere C-h perché questo viene
+indebitamente modificato dall'amministratore di sistema.  A parte
+rivolgerti allo stesso perché risolva il problema puoi provare ad accedere
+alla funzione aiuto di Emacs con il tasto F1 oppure con M-x help<Invio>.
+
+La forma base di aiuto è data da C-h c.  Si inserisce C-h, il carattere c
+e poi un carattere o una sequenza di caratteri; Emacs mostrerà una breve
+descrizione del comando stesso.
+
+>> Prova C-h c C-p.  Dovresti leggere un messaggio del tipo
+
+    C-p runs the command previous-line (purtroppo in inglese!)
+
+Questo messaggio indica il "nome della funzione".  I nomi di funzione sono
+usati principalmente per personalizzare ed estendere Emacs e sono scelti
+anche in modo da indicare che cosa il comando fa.  Servono quindi anche da
+breve descrizione, sufficiente per ricordarsi di comandi già imparati.
+
+I comandi con più caratteri come ad esempio C-x C-s e (se non c'è il tasto
+META o EDIT o ALT) <ESC>v sono permessi allo stesso modo dopo una
+richiesta di aiuto fatta con C-h c.
+
+Per avere ulteriori informazioni su un comando si usa C-h k invece che C-h
+c.
+
+>> Prova C-h k C-p.
+
+Questo mostrerà la documentazione della funzione, così come il suo nome,
+all'interno di una finestra di Emacs.  Quando hai finito di leggere usa
+C-x 1 per eliminare la finestra con il testo di aiuto.  Non sei obbligato
+a farlo subito.  Puoi anche lavorare sul tuo testo mentre fai riferimento
+al testo di aiuto e poi usare un C-x 1.
+
+Ecco altre utili opzioni di C-h:
+
+    C-h f    Descrive una funzione.  Inserisci il nome della funzione.
+
+>> Prova con C-h f previous-line<Invio>.  Avrai tutte le informazioni che
+   Emacs possiede sulla funzione che implementa il comando C-p.
+
+Un comando simile è C-h v che mostra la documentazione di variabili i cui
+valori sono utilizzati per personalizzare il comportamento di Emacs.  Devi
+inserire il nome della variabile quando Emacs lo richiede.
+
+    C-h a    "Apropos" comando.  Inserisci una parola ed Emacs ti
+             elencherà tutti i comandi il cui nome contiene quella
+             parola.  Questi comandi possono tutti essere eseguiti con
+             META-x.  Per alcuni comandi ti sarà mostrata anche una
+             sequenza di uno o due caratteri che serve a far partire il
+             comando senza doverlo inserire per esteso.
+
+>> Prova C-h a file<Invio>
+
+Questo mostrerà in un'altra finestra una lista di tutti i comandi che
+contengono la parola "file" nel nome.  Nella lista si vedranno
+comandi-carattere, come C-x C-f, assieme ai corrispondenti nomi per esteso
+come "find-file".
+
+>> Usa C-M-v per far scorrere il testo nella finestra di aiuto.  Ripeti
+   per alcune volte.
+>> Usa C-x 1 per eliminare la finestra di aiuto.
+
+    C-h i    Leggi la documentazione.  Questo comando apre un buffer
+             speciale chiamato `*info*' in cui puoi leggere i manuali
+             on-line dei pacchetti installati sul tuo sistema.  Batti m
+             emacs <Invio> per leggere il manuale di Emacs.  Se non hai
+             mai usato il sistema Info prima d'ora premi ? ed Emacs ti
+             guiderà nell'uso delle opzioni del modo Info.  Una volta
+             terminata questa esercitazione il manuale di Emacs contenuto
+             nel sistema Info dovrebbe diventare la tua principale fonte
+             di documentazione.
+
+
+* CONCLUSIONI
+-------------
+
+Ricorda che per chiudere una sessione di Emacs si usa C-x C-c.  Per
+tornare temporaneamente alla shell, così da poter rientrare in Emacs
+successivamente, si usa C-z.
+
+Questo documento è stato creato per essere utile a tutti i nuovi utenti,
+se qualcosa per te è stato poco chiaro non dare la colpa a te stesso -
+lamentati!
+
+
+* COPIA
+-------
+
+La versione inglese di questo testo (disponibile nel file "TUTORIAL")
+deriva da una lunga serie di tutorial di Emacs che iniziò con quello
+scritto da Stuart Cracraft per il primo Emacs.  La versione italiana è a
+cura di Alfredo Finelli (alfredofnl@tiscali.it).
+
+Questo documento, come GNU Emacs, è coperto da copyright e viene
+distribuito con il permesso di farne copie a determinate condizioni:
+
+   NOTA BENE: la licenza che definisce a tutti gli effetti i termini
+   secondo i quali è possibile la copia e la distribuzione di questo
+   documento è quella originale in lingua inglese contenuta nel file
+   "TUTORIAL".  Qui di seguito se ne riporta una traduzione a scopo
+   indicativo, restando comunque inteso il fatto che è quella originale a
+   fare fede.
+
+Copyright (C) 2003-2012  Free Software Foundation, Inc.
+
+   È permesso a chiunque copiare e distribuire attraverso ogni mezzo copie
+   fedeli di questo documento così come viene ricevuto, a condizione che
+   le informazioni sul copyright e sui permessi garantiti siano conservate
+   intatte e che il distributore riconosca a colui che riceve la copia il
+   diritto ad un'ulteriore distribuzione, che deve avvenire così come
+   definito in questa clausola.
+
+   È permesso distribuire versioni modificate di questo documento, o di
+   ogni sua parte, alle condizioni indicate precedentemente, purché esse
+   portino chiaramente indicato il nome di colui che le ha modificate per
+   ultimo.
+
+Le condizioni per copiare Emacs sono più complesse ma definite con lo
+stesso spirito.  Per favore, leggete il file COPYING e poi distribuite
+copie di GNU Emacs ai vostri amici.  Aiutateci a combattere
+l'ostruzionismo al software ("la proprietà") usando, scrivendo e
+condividendo software libero!
+
+;;; Local Variables:
+;;;   coding: latin-1
+;;; End:
+

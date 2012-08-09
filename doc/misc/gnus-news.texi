@@ -1,0 +1,371 @@
+@c -*-texinfo-*-
+
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+
+@c    Permission is granted to anyone to make or distribute verbatim copies
+@c    of this document as received, in any medium, provided that the
+@c    copyright notice and this permission notice are preserved,
+@c    thus giving the recipient permission to redistribute in turn.
+
+@c    Permission is granted to distribute modified versions
+@c    of this document, or of portions of it,
+@c    under the above conditions, provided also that they
+@c    carry prominent notices stating who last changed them.
+
+@c This file contains a list of news features Gnus.  It is supposed to be
+@c included in `gnus.texi'.  `GNUS-NEWS' is automatically generated from
+@c this file (see `gnus-news.el').
+
+@itemize @bullet
+
+@item Supported Emacs versions
+The following Emacs versions are supported by No Gnus:
+@itemize @bullet
+
+@item Emacs 22 and up
+@item XEmacs 21.4
+@item XEmacs 21.5
+@item SXEmacs
+
+@end itemize
+
+@item Installation changes
+
+@itemize @bullet
+@item Upgrading from previous (stable) version if you have used No Gnus.
+
+If you have tried No Gnus (the unstable Gnus branch leading to this
+release) but went back to a stable version, be careful when upgrading
+to this version.  In particular, you will probably want to remove the
+@file{~/News/marks} directory (perhaps selectively), so that flags are
+read from your @file{~/.newsrc.eld} instead of from the stale marks
+file, where this release will store flags for nntp.  See a later entry
+for more information about nntp marks.  Note that downgrading isn't
+safe in general.
+
+@item Incompatibility when switching from Emacs 23 to Emacs 22 
+In Emacs 23, Gnus uses Emacs's new internal coding system @code{utf-8-emacs}
+for saving articles drafts and @file{~/.newsrc.eld}.  These files may not
+be read correctly in Emacs 22 and below.  If you want to use Gnus across
+different Emacs versions, you may set @code{mm-auto-save-coding-system}
+to @code{emacs-mule}.
+@c FIXME: Untested.  (Or did anyone test it?)
+@c Cf. http://thread.gmane.org/gmane.emacs.gnus.general/66251/focus=66344
+
+@item Lisp files are now installed in @file{.../site-lisp/gnus/} by default.
+It defaulted to @file{.../site-lisp/} formerly.  In addition to this,
+the new installer issues a warning if other Gnus installations which
+will shadow the latest one are detected.  You can then remove those
+shadows manually or remove them using @code{make
+remove-installed-shadows}.
+
+@item The installation directory name is allowed to have spaces and/or tabs.
+@end itemize
+
+@item New packages and libraries within Gnus
+
+@itemize @bullet
+
+@item New version of @code{nnimap}
+
+@code{nnimap} has been reimplemented in a mostly-compatible way.  See
+the Gnus manual for a description of the new interface.  In
+particular, @code{nnimap-inbox} and the client side split method has
+changed.
+
+@item Gnus includes the Emacs Lisp @acronym{SASL} library.
+
+This provides a clean @acronym{API} to @acronym{SASL} mechanisms from
+within Emacs.  The user visible aspects of this, compared to the earlier
+situation, include support for @acronym{DIGEST}-@acronym{MD5} and
+@acronym{NTLM}.   @xref{Top, ,Emacs SASL, sasl, Emacs SASL}.
+
+@item ManageSieve connections uses the @acronym{SASL} library by default.
+
+The primary change this brings is support for @acronym{DIGEST-MD5} and
+@acronym{NTLM}, when the server supports it.
+
+@item Gnus includes a password cache mechanism in password.el.
+
+It is enabled by default (see @code{password-cache}), with a short
+timeout of 16 seconds (see @code{password-cache-expiry}).  If
+@acronym{PGG} is used as the @acronym{PGP} back end, the @acronym{PGP}
+passphrase is managed by this mechanism.  Passwords for ManageSieve
+connections are managed by this mechanism, after querying the user
+about whether to do so.
+
+@item Using EasyPG with Gnus
+When EasyPG, is available, Gnus will use it instead of @acronym{PGG}.
+EasyPG is an Emacs user interface to GNU Privacy Guard.  @xref{Top,
+,EasyPG Assistant user's manual, epa, EasyPG Assistant user's manual}.
+EasyPG is included in Emacs 23 and available separately as well.
+@end itemize
+
+@item Changes in group mode
+@c ************************
+
+@itemize @bullet
+
+@item
+Symbols like @code{gcc-self} now have the same precedence rules in
+@code{gnus-parameters} as other ``real'' variables: The last match
+wins instead of the first match.
+
+@item
+Old intermediate incoming mail files (@file{Incoming*}) are deleted
+after a couple of days, not immediately.  @xref{Mail Source
+Customization}.
+(New in Gnus 5.10.10 / No Gnus 0.8)
+@c This entry is also present in the node "Oort Gnus".
+
+@end itemize
+
+@item Changes in summary and article mode
+
+@itemize @bullet
+
+@item There's now only one variable that determines how @acronym{HTML}
+is rendered: @code{mm-text-html-renderer}.
+
+@item Gnus now supports sticky article buffers.  Those are article buffers
+that are not reused when you select another article.  @xref{Sticky
+Articles}.
+
+@c @item Bookmarks
+@c FIXME: To be added
+
+@item Gnus can selectively display @samp{text/html} articles
+with a WWW browser with @kbd{K H}.  @xref{MIME Commands}.
+
+@c gnus-registry-marks
+@c FIXME: To be added
+
+@item International host names (@acronym{IDNA}) can now be decoded
+inside article bodies using @kbd{W i}
+(@code{gnus-summary-idna-message}).  This requires that GNU Libidn
+(@url{http://www.gnu.org/software/libidn/}) has been installed.
+@c FIXME: Also mention @code{message-use-idna}?
+
+@item The non-@acronym{ASCII} group names handling has been much
+improved.  The back ends that fully support non-@acronym{ASCII} group
+names are now @code{nntp}, @code{nnml}, and @code{nnrss}.  Also the
+agent, the cache, and the marks features work with those back ends.
+@xref{Non-ASCII Group Names}.
+
+@item Gnus now displays @acronym{DNS} master files sent as text/dns
+using dns-mode.
+
+@item Gnus supports new limiting commands in the Summary buffer:
+@kbd{/ r} (@code{gnus-summary-limit-to-replied}) and @kbd{/ R}
+(@code{gnus-summary-limit-to-recipient}).  @xref{Limiting}.
+
+@item You can now fetch all ticked articles from the server using
+@kbd{Y t} (@code{gnus-summary-insert-ticked-articles}).  @xref{Summary
+Generation Commands}.
+
+@item Gnus supports a new sort command in the Summary buffer:
+@kbd{C-c C-s C-t} (@code{gnus-summary-sort-by-recipient}).  @xref{Summary
+Sorting}.
+
+@item @acronym{S/MIME} now features @acronym{LDAP} user certificate searches.
+You need to configure the server in @code{smime-ldap-host-list}.
+
+@item URLs inside Open@acronym{PGP} headers are retrieved and imported
+to your PGP key ring when you click on them.
+
+@item
+Picons can be displayed right from the textual address, see
+@code{gnus-picon-style}.  @xref{Picons}.
+
+@item @acronym{ANSI} @acronym{SGR} control sequences can be transformed
+using @kbd{W A}.
+
+@acronym{ANSI} sequences are used in some Chinese hierarchies for
+highlighting articles (@code{gnus-article-treat-ansi-sequences}).
+
+@item Gnus now MIME decodes articles even when they lack "MIME-Version" header.
+This changes the default of @code{gnus-article-loose-mime}.
+
+@item @code{gnus-decay-scores} can be a regexp matching score files.
+For example, set it to @samp{\\.ADAPT\\'} and only adaptive score files
+will be decayed.  @xref{Score Decays}.
+
+@item Strings prefixing to the @code{To} and @code{Newsgroup} headers in
+summary lines when using @code{gnus-ignored-from-addresses} can be
+customized with @code{gnus-summary-to-prefix} and
+@code{gnus-summary-newsgroup-prefix}.  @xref{To From Newsgroups}.
+
+@item You can replace @acronym{MIME} parts with external bodies.
+See @code{gnus-mime-replace-part} and @code{gnus-article-replace-part}.
+@xref{MIME Commands}, @ref{Using MIME}.
+
+@item
+The option @code{mm-fill-flowed} can be used to disable treatment of
+format=flowed messages.  Also, flowed text is disabled when sending
+inline @acronym{PGP} signed messages.  @xref{Flowed text, ,Flowed text,
+emacs-mime, The Emacs MIME Manual}.  (New in Gnus 5.10.7)
+@c This entry is also present in the node "Oort Gnus".
+
+@item Now the new command @kbd{S W}
+(@code{gnus-article-wide-reply-with-original}) for a wide reply in the
+article buffer yanks a text that is in the active region, if it is set,
+as well as the @kbd{R} (@code{gnus-article-reply-with-original}) command.
+Note that the @kbd{R} command in the article buffer no longer accepts a
+prefix argument, which was used to make it do a wide reply.
+@xref{Article Keymap}.
+
+@item The new command @kbd{C-h b}
+(@code{gnus-article-describe-bindings}) used in the article buffer now
+shows not only the article commands but also the real summary commands
+that are accessible from the article buffer.
+
+@end itemize
+
+@item Changes in Message mode
+
+@itemize @bullet
+@item Gnus now defaults to saving all outgoing messages in per-month
+nnfolder archives.
+
+@item Gnus now supports the ``hashcash'' client puzzle anti-spam mechanism.
+Use @code{(setq message-generate-hashcash t)} to enable.
+@xref{Hashcash}.
+
+@item You can now drag and drop attachments to the Message buffer.
+See @code{mml-dnd-protocol-alist} and @code{mml-dnd-attach-options}.
+@xref{MIME, ,MIME, message, Message Manual}.
+
+@item The option @code{message-yank-empty-prefix} now controls how
+empty lines are prefixed in cited text.  @xref{Insertion Variables,
+,Insertion Variables, message, Message Manual}.
+
+@item Gnus uses narrowing to hide headers in Message buffers.
+The @code{References} header is hidden by default.  To make all
+headers visible, use @code{(setq message-hidden-headers nil)}.
+@xref{Message Headers, ,Message Headers, message, Message Manual}.
+
+@item You can highlight different levels of citations like in the
+article buffer.  See @code{gnus-message-highlight-citation}.
+
+@item @code{auto-fill-mode} is enabled by default in Message mode.
+See @code{message-fill-column}.  @xref{Various Message Variables, ,
+Message Headers, message, Message Manual}.
+
+@item You can now store signature files in a special directory
+named @code{message-signature-directory}.
+
+@item The option @code{message-citation-line-format} controls the format
+of the "Whomever writes:" line.  You need to set
+@code{message-citation-line-function} to
+@code{message-insert-formatted-citation-line} as well.
+@end itemize
+
+@item Changes in Browse Server mode
+
+@itemize @bullet
+@item Gnus' sophisticated subscription methods are now available in
+Browse Server buffers as well using the variable
+@code{gnus-browse-subscribe-newsgroup-method}.
+
+@end itemize
+
+
+@item Changes in back ends
+
+@itemize @bullet
+@item The nntp back end stores article marks in @file{~/News/marks}.
+
+The directory can be changed using the (customizable) variable
+@code{nntp-marks-directory}, and marks can be disabled using the
+(back end) variable @code{nntp-marks-is-evil}.  The advantage of this
+is that you can copy @file{~/News/marks} (using rsync, scp or
+whatever) to another Gnus installation, and it will realize what
+articles you have read and marked.  The data in @file{~/News/marks}
+has priority over the same data in @file{~/.newsrc.eld}.
+
+@item
+You can import and export your @acronym{RSS} subscriptions from
+@acronym{OPML} files.  @xref{RSS}.
+
+@item @acronym{IMAP} identity (@acronym{RFC} 2971) is supported.
+
+By default, Gnus does not send any information about itself, but you can
+customize it using the variable @code{nnimap-id}.
+
+@item The @code{nnrss} back end now supports multilingual text.
+Non-@acronym{ASCII} group names for the @code{nnrss} groups are also
+supported.  @xref{RSS}.
+
+@item Retrieving mail with @acronym{POP3} is supported over @acronym{SSL}/@acronym{TLS} and with StartTLS.
+
+@item The nnml back end allows other compression programs beside @file{gzip}
+for compressed message files.  @xref{Mail Spool}.
+
+@item The nnml back end supports group compaction.
+
+This feature, accessible via the functions
+@code{gnus-group-compact-group} (@kbd{G z} in the group buffer) and
+@code{gnus-server-compact-server} (@kbd{z} in the server buffer)
+renumbers all articles in a group, starting from 1 and removing gaps.
+As a consequence, you get a correct total article count (until
+messages are deleted again).
+
+@c @item nnmairix.el
+@c FIXME
+
+@c @item nnir.el
+@c FIXME
+
+@end itemize
+
+@item Appearance
+@c Maybe it's not worth to separate this from "Miscellaneous"?
+
+@itemize @bullet
+
+@item The tool bar has been updated to use GNOME icons.
+You can also customize the tool bars: @kbd{M-x customize-apropos RET
+-tool-bar$} should get you started.  (Only for Emacs, not in XEmacs.)
+@c FIXME: Document this in the manual
+
+@item The tool bar icons are now (de)activated correctly
+in the group buffer, see the variable @code{gnus-group-update-tool-bar}.
+Its default value depends on your Emacs version.
+@c FIXME: Document this in the manual
+
+@item You can change the location of XEmacs's toolbars in Gnus buffers.
+See @code{gnus-use-toolbar} and @code{message-use-toolbar}.
+
+@end itemize
+
+@item Miscellaneous changes
+
+@itemize @bullet
+@item Having edited the select-method for the foreign server in the
+server buffer is immediately reflected to the subscription of the groups
+which use the server in question.  For instance, if you change
+@code{nntp-via-address} into @samp{bar.example.com} from
+@samp{foo.example.com}, Gnus will connect to the news host by way of the
+intermediate host @samp{bar.example.com} from next time.
+
+@item The @file{all.SCORE} file can be edited from the group buffer
+using @kbd{W e}.
+
+@item You can set @code{gnus-mark-copied-or-moved-articles-as-expirable}
+to a non-@code{nil} value so that articles that have been read may be
+marked as expirable automatically when copying or moving them to a group
+that has auto-expire turned on.  The default is @code{nil} and copying
+and moving of articles behave as before; i.e., the expirable marks will
+be unchanged except that the marks will be removed when copying or
+moving articles to a group that has not turned auto-expire on.
+@xref{Expiring Mail}.
+
+@item NoCeM support has been removed.
+
+@item Carpal mode has been removed.
+
+@end itemize
+
+@end itemize
+
+@c gnus-news.texi ends here.

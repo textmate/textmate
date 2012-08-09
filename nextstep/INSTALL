@@ -1,0 +1,54 @@
+Copyright (C) 2008-2012 Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+Compilation
+-----------
+
+In the top-level directory, use:
+
+  ./configure --with-ns
+
+This will compile all the files, but emacs will not be able to be run except
+in -nw (terminal) mode.
+
+In order to run Emacs.app, you must run:
+
+  make install
+
+This will assemble the app in nextstep/Emacs.app.
+
+If you pass the --disable-ns-self-contained option to configure, the lisp
+files will be installed under whatever 'prefix' is set to (defaults to
+/usr/local).  The bundle will be smaller, but depend on these resources (may
+require 'sudo' for "make install").
+
+
+Installation
+------------
+
+Move nextstep/Emacs.app to any desired install location.
+
+
+Distributions and Universal Binaries
+------------------------------------
+
+Building as outlined above will create ordinary binaries running on your
+architecture only.  To create universal binaries, set CFLAGS to include
+"-arch ppc -arch i386".
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

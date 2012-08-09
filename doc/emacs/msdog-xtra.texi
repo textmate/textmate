@@ -1,0 +1,620 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2004-2012 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@c
+@c This file is included either in emacs-xtra.texi (when producing the
+@c printed version) or in the main Emacs manual (for the on-line version).
+@node MS-DOS
+@section Emacs and MS-DOS
+@cindex MS-DOG
+@cindex MS-DOS peculiarities
+
+  This section briefly describes the peculiarities of using Emacs on
+the MS-DOS ``operating system'' (also known as ``MS-DOG'').
+@iftex
+Information about Emacs and Microsoft's current operating system
+Windows (also known as ``Losedows'') is in the main Emacs manual
+(@pxref{Microsoft Windows,,, emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+Information about peculiarities common to MS-DOS and Microsoft's
+current operating systems Windows (also known as ``Losedows'') is in
+@ref{Microsoft Windows}.
+@end ifnottex
+
+  If you build Emacs for MS-DOS, the binary will also run on Windows
+3.X, Windows NT, Windows 9X/ME, Windows 2000/XP, or OS/2 as a DOS
+application; all of this chapter applies for all of those systems, if
+you use an Emacs that was built for MS-DOS.
+
+@iftex
+  @xref{Text and Binary,,,emacs, the Emacs Manual}, for information
+@end iftex
+@ifnottex
+  @xref{Text and Binary}, for information
+@end ifnottex
+about Emacs's special handling of text files under MS-DOS (and Windows).
+
+@menu
+* Keyboard: MS-DOS Keyboard.   Keyboard conventions on MS-DOS.
+* Mouse: MS-DOS Mouse.         Mouse conventions on MS-DOS.
+* Display: MS-DOS Display.     Fonts, frames and display size on MS-DOS.
+* Files: MS-DOS File Names.    File name conventions on MS-DOS.
+* Printing: MS-DOS Printing.   Printing specifics on MS-DOS.
+* I18N: MS-DOS and MULE.       Support for internationalization on MS-DOS.
+* Processes: MS-DOS Processes. Running subprocesses on MS-DOS.
+@end menu
+
+@node MS-DOS Keyboard
+@subsection Keyboard Usage on MS-DOS
+
+@kindex DEL @r{(MS-DOS)}
+@kindex BS @r{(MS-DOS)}
+  The key that is called @key{DEL} in Emacs (because that's how it is
+designated on most workstations) is known as @key{BS} (backspace) on a
+PC.  That is why the PC-specific terminal initialization remaps the
+@key{BS} key to act as @key{DEL}; the @key{DELETE} key is remapped to act
+as @kbd{C-d} for the same reasons.
+
+@kindex C-g @r{(MS-DOS)}
+@kindex C-BREAK @r{(MS-DOS)}
+@cindex quitting on MS-DOS
+  Emacs built for MS-DOS recognizes @kbd{C-@key{BREAK}} as a quit
+character, just like @kbd{C-g}.  This is because Emacs cannot detect
+that you have typed @kbd{C-g} until it is ready for more input.  As a
+consequence, you cannot use @kbd{C-g} to stop a running command
+@iftex
+(@pxref{Quitting,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Quitting}).
+@end ifnottex
+By contrast, @kbd{C-@key{BREAK}} @emph{is} detected as soon as you
+type it (as @kbd{C-g} is on other systems), so it can be used to stop
+a running command and for emergency escape
+@iftex
+(@pxref{Emergency Escape,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Emergency Escape}).
+@end ifnottex
+
+@cindex Meta (under MS-DOS)
+@cindex Hyper (under MS-DOS)
+@cindex Super (under MS-DOS)
+@vindex dos-super-key
+@vindex dos-hyper-key
+  The PC keyboard maps use the left @key{ALT} key as the @key{META} key.
+You have two choices for emulating the @key{SUPER} and @key{HYPER} keys:
+choose either the right @key{CTRL} key or the right @key{ALT} key by
+setting the variables @code{dos-hyper-key} and @code{dos-super-key} to 1
+or 2 respectively.  If neither @code{dos-super-key} nor
+@code{dos-hyper-key} is 1, then by default the right @key{ALT} key is
+also mapped to the @key{META} key.  However, if the MS-DOS international
+keyboard support program @file{KEYB.COM} is installed, Emacs will
+@emph{not} map the right @key{ALT} to @key{META}, since it is used for
+accessing characters like @kbd{~} and @kbd{@@} on non-US keyboard
+layouts; in this case, you may only use the left @key{ALT} as @key{META}
+key.
+
+@kindex C-j @r{(MS-DOS)}
+@vindex dos-keypad-mode
+  The variable @code{dos-keypad-mode} is a flag variable that controls
+what key codes are returned by keys in the numeric keypad.  You can also
+define the keypad @key{ENTER} key to act like @kbd{C-j}, by putting the
+following line into your @file{_emacs} file:
+
+@smallexample
+;; @r{Make the @key{ENTER} key from the numeric keypad act as @kbd{C-j}.}
+(define-key function-key-map [kp-enter] [?\C-j])
+@end smallexample
+
+@node MS-DOS Mouse
+@subsection Mouse Usage on MS-DOS
+
+@cindex mouse support under MS-DOS
+  Emacs on MS-DOS supports a mouse (on the default terminal only).
+The mouse commands work as documented, including those that use menus
+and the menu bar
+@iftex
+(@pxref{Menu Bar,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Menu Bar}).
+@end ifnottex
+ Scroll bars don't work in MS-DOS Emacs.  PC mice usually have only
+two buttons; these act as @kbd{Mouse-1} and @kbd{Mouse-2}, but if you
+press both of them together, that has the effect of @kbd{Mouse-3}.  If
+the mouse does have 3 buttons, Emacs detects that at startup, and all
+the 3 buttons function normally, as on X.
+
+  Help strings for menu-bar and pop-up menus are displayed in the echo
+area when the mouse pointer moves across the menu items.  Highlighting
+of mouse-sensitive text
+@iftex
+(@pxref{Mouse References,,,emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Mouse References})
+@end ifnottex
+is also supported.
+
+@cindex mouse, set number of buttons
+@findex msdos-set-mouse-buttons
+  Some versions of mouse drivers don't report the number of mouse
+buttons correctly.  For example, mice with a wheel report that they
+have 3 buttons, but only 2 of them are passed to Emacs; the clicks on
+the wheel, which serves as the middle button, are not passed.  In
+these cases, you can use the @kbd{M-x msdos-set-mouse-buttons} command
+to tell Emacs how many mouse buttons to expect.  You could make such a
+setting permanent by adding this fragment to your @file{_emacs} init
+file:
+
+@example
+;; @r{Treat the mouse like a 2-button mouse.}
+(msdos-set-mouse-buttons 2)
+@end example
+
+@cindex Windows clipboard support
+  Emacs built for MS-DOS supports clipboard operations when it runs on
+Windows.  Commands that put text on the kill ring, or yank text from
+the ring, check the Windows clipboard first, just as Emacs does on the
+X Window System
+@iftex
+(@pxref{Mouse Commands,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Mouse Commands}).
+@end ifnottex
+Only the primary selection and the cut buffer are supported by MS-DOS
+Emacs on Windows; the secondary selection always appears as empty.
+
+  Due to the way clipboard access is implemented by Windows, the
+length of text you can put into the clipboard is limited by the amount
+of free DOS memory that is available to Emacs.  Usually, up to 620KB of
+text can be put into the clipboard, but this limit depends on the system
+configuration and is lower if you run Emacs as a subprocess of
+another program.  If the killed text does not fit, Emacs outputs a
+message saying so, and does not put the text into the clipboard.
+
+  Null characters also cannot be put into the Windows clipboard.  If the
+killed text includes null characters, Emacs does not put such text into
+the clipboard, and displays in the echo area a message to that effect.
+
+@vindex dos-display-scancodes
+  The variable @code{dos-display-scancodes}, when non-@code{nil},
+directs Emacs to display the @acronym{ASCII} value and the keyboard scan code of
+each keystroke; this feature serves as a complement to the
+@code{view-lossage} command, for debugging.
+
+@node MS-DOS Display
+@subsection Display on MS-DOS
+@cindex faces under MS-DOS
+@cindex fonts, emulating under MS-DOS
+
+  Display on MS-DOS cannot use font variants, like bold or italic, but
+it does support multiple faces, each of which can specify a foreground
+and a background color.  Therefore, you can get the full functionality
+of Emacs packages that use fonts (such as @code{font-lock}, Enriched
+Text mode, and others) by defining the relevant faces to use different
+colors.  Use the @code{list-colors-display} command
+@iftex
+(@pxref{Colors,,,emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Colors})
+@end ifnottex
+and the @code{list-faces-display} command
+@iftex
+(@pxref{Faces,,,emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Faces})
+@end ifnottex
+to see what colors and faces are available and what they look like.
+
+  @xref{MS-DOS and MULE}, later in this chapter, for information on
+how Emacs displays glyphs and characters that aren't supported by the
+native font built into the DOS display.
+
+@cindex cursor shape on MS-DOS
+  When Emacs starts, it changes the cursor shape to a solid box.  This
+is for compatibility with other systems, where the box cursor is the
+default in Emacs.  This default shape can be changed to a bar by
+specifying the @code{cursor-type} parameter in the variable
+@code{default-frame-alist}
+@iftex
+(@pxref{Creating Frames,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Creating Frames}).
+@end ifnottex
+The MS-DOS terminal doesn't support a vertical-bar cursor,
+so the bar cursor is horizontal, and the @code{@var{width}} parameter,
+if specified by the frame parameters, actually determines its height.
+For this reason, the @code{bar} and @code{hbar} cursor types produce
+the same effect on MS-DOS.  As an extension, the bar cursor
+specification can include the starting scan line of the cursor as well
+as its width, like this:
+
+@example
+ '(cursor-type bar @var{width} . @var{start})
+@end example
+
+@noindent
+In addition, if the @var{width} parameter is negative, the cursor bar
+begins at the top of the character cell.
+
+@cindex frames on MS-DOS
+  The MS-DOS terminal can only display a single frame at a time.  The
+Emacs frame facilities work on MS-DOS much as they do on text
+terminals
+@iftex
+(@pxref{Frames,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Frames}).
+@end ifnottex
+When you run Emacs from a DOS window on MS-Windows, you can make the
+visible frame smaller than the full screen, but Emacs still cannot
+display more than a single frame at a time.
+
+@cindex frame size under MS-DOS
+@findex dos-mode4350
+@findex dos-mode25
+  The @code{dos-mode4350} command switches the display to 43 or 50
+lines, depending on your hardware; the @code{dos-mode25} command switches
+to the default 80x25 screen size.
+
+  By default, Emacs only knows how to set screen sizes of 80 columns by
+25, 28, 35, 40, 43 or 50 rows.  However, if your video adapter has
+special video modes that will switch the display to other sizes, you can
+have Emacs support those too.  When you ask Emacs to switch the frame to
+@var{n} rows by @var{m} columns dimensions, it checks if there is a
+variable called @code{screen-dimensions-@var{n}x@var{m}}, and if so,
+uses its value (which must be an integer) as the video mode to switch
+to.  (Emacs switches to that video mode by calling the BIOS @code{Set
+Video Mode} function with the value of
+@code{screen-dimensions-@var{n}x@var{m}} in the @code{AL} register.)
+For example, suppose your adapter will switch to 66x80 dimensions when
+put into video mode 85.  Then you can make Emacs support this screen
+size by putting the following into your @file{_emacs} file:
+
+@example
+(setq screen-dimensions-66x80 85)
+@end example
+
+  Since Emacs on MS-DOS can only set the frame size to specific
+supported dimensions, it cannot honor every possible frame resizing
+request.  When an unsupported size is requested, Emacs chooses the next
+larger supported size beyond the specified size.  For example, if you
+ask for 36x80 frame, you will get 40x80 instead.
+
+  The variables @code{screen-dimensions-@var{n}x@var{m}} are used only
+when they exactly match the specified size; the search for the next
+larger supported size ignores them.  In the above example, even if your
+VGA supports 38x80 dimensions and you define a variable
+@code{screen-dimensions-38x80} with a suitable value, you will still get
+40x80 screen when you ask for a 36x80 frame.  If you want to get the
+38x80 size in this case, you can do it by setting the variable named
+@code{screen-dimensions-36x80} with the same video mode value as
+@code{screen-dimensions-38x80}.
+
+  Changing frame dimensions on MS-DOS has the effect of changing all the
+other frames to the new dimensions.
+
+@node MS-DOS File Names
+@subsection File Names on MS-DOS
+@cindex file names under MS-DOS
+@cindex init file, default name under MS-DOS
+
+  On MS-DOS, file names are case-insensitive and limited to eight
+characters, plus optionally a period and three more characters.  Emacs
+knows enough about these limitations to handle file names that were
+meant for other operating systems.  For instance, leading dots
+@samp{.}  in file names are invalid in MS-DOS, so Emacs transparently
+converts them to underscores @samp{_}; thus your default init file
+@iftex
+(@pxref{Init File,,,emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Init File})
+@end ifnottex
+is called @file{_emacs} on MS-DOS.  Excess characters before or after
+the period are generally ignored by MS-DOS itself; thus, if you visit
+the file @file{LongFileName.EvenLongerExtension}, you will silently
+get @file{longfile.eve}, but Emacs will still display the long file
+name on the mode line.  Other than that, it's up to you to specify
+file names which are valid under MS-DOS; the transparent conversion as
+described above only works on file names built into Emacs.
+
+@cindex backup file names on MS-DOS
+  The above restrictions on the file names on MS-DOS make it almost
+impossible to construct the name of a backup file
+@iftex
+(@pxref{Backup Names,,,emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Backup Names})
+@end ifnottex
+without losing some of the original file name characters.  For
+example, the name of a backup file for @file{docs.txt} is
+@file{docs.tx~} even if single backup is used.
+
+@cindex file names under Windows 95/NT
+@cindex long file names in DOS box under Windows 95/NT
+  If you run Emacs as a DOS application under Windows 9X, Windows ME, or
+Windows 2000/XP, you can turn on support for long file names.  If you do
+that, Emacs doesn't truncate file names or convert them to lower case;
+instead, it uses the file names that you specify, verbatim.  To enable
+long file name support, set the environment variable @env{LFN} to
+@samp{y} before starting Emacs.  Unfortunately, Windows NT doesn't allow
+DOS programs to access long file names, so Emacs built for MS-DOS will
+only see their short 8+3 aliases.
+
+@cindex @env{HOME} directory under MS-DOS
+  MS-DOS has no notion of home directory, so Emacs on MS-DOS pretends
+that the directory where it is installed is the value of the @env{HOME}
+environment variable.  That is, if your Emacs binary,
+@file{emacs.exe}, is in the directory @file{c:/utils/emacs/bin}, then
+Emacs acts as if @env{HOME} were set to @samp{c:/utils/emacs}.  In
+particular, that is where Emacs looks for the init file @file{_emacs}.
+With this in mind, you can use @samp{~} in file names as an alias for
+the home directory, as you would on GNU or Unix.  You can also set
+@env{HOME} variable in the environment before starting Emacs; its
+value will then override the above default behavior.
+
+  Emacs on MS-DOS handles the directory name @file{/dev} specially,
+because of a feature in the emulator libraries of DJGPP that pretends
+I/O devices have names in that directory.  We recommend that you avoid
+using an actual directory named @file{/dev} on any disk.
+
+@node MS-DOS Printing
+@subsection Printing and MS-DOS
+
+  Printing commands, such as @code{lpr-buffer}
+@iftex
+(@pxref{Printing,,,emacs, the Emacs Manual}) and @code{ps-print-buffer}
+(@pxref{PostScript,,,emacs, the Emacs Manual})
+@end iftex
+@ifnottex
+(@pxref{Printing}) and @code{ps-print-buffer} (@pxref{PostScript})
+@end ifnottex
+can work on MS-DOS by sending the output to one of the printer ports,
+if a Posix-style @code{lpr} program is unavailable.  The same Emacs
+variables control printing on all systems, but in some cases they have
+different default values on MS-DOS.
+
+@iftex
+@xref{Windows Printing,,,emacs, the Emacs Manual},
+@end iftex
+@ifnottex
+@xref{Windows Printing},
+@end ifnottex
+for details about setting up printing to a networked printer.
+
+  Some printers expect DOS codepage encoding of non-@acronym{ASCII} text, even
+though they are connected to a Windows machine that uses a different
+encoding for the same locale.  For example, in the Latin-1 locale, DOS
+uses codepage 850 whereas Windows uses codepage 1252.  @xref{MS-DOS and
+MULE}.  When you print to such printers from Windows, you can use the
+@kbd{C-x RET c} (@code{universal-coding-system-argument}) command before
+@kbd{M-x lpr-buffer}; Emacs will then convert the text to the DOS
+codepage that you specify.  For example, @kbd{C-x RET c cp850-dos RET
+M-x lpr-region RET} will print the region while converting it to the
+codepage 850 encoding.
+
+@vindex dos-printer
+@vindex dos-ps-printer
+  For backwards compatibility, the value of @code{dos-printer}
+(@code{dos-ps-printer}), if it has a value, overrides the value of
+@code{printer-name} (@code{ps-printer-name}), on MS-DOS.
+
+
+@node MS-DOS and MULE
+@subsection International Support on MS-DOS
+@cindex international support @r{(MS-DOS)}
+
+  Emacs on MS-DOS supports the same international character sets as it
+does on GNU, Unix and other platforms
+@iftex
+(@pxref{International,,,emacs, the Emacs Manual}),
+@end iftex
+@ifnottex
+(@pxref{International}),
+@end ifnottex
+including coding systems for converting between the different
+character sets.  However, due to incompatibilities between
+MS-DOS/MS-Windows and other systems, there are several DOS-specific
+aspects of this support that you should be aware of.  This section
+describes these aspects.
+
+  The description below is largely specific to the MS-DOS port of
+Emacs, especially where it talks about practical implications for
+Emacs users.
+
+@table @kbd
+@item M-x dos-codepage-setup
+Set up Emacs display and coding systems as appropriate for the current
+DOS codepage.
+@end table
+
+@cindex codepage, MS-DOS
+@cindex DOS codepages
+  MS-DOS is designed to support one character set of 256 characters at
+any given time, but gives you a variety of character sets to choose
+from.  The alternative character sets are known as @dfn{DOS codepages}.
+Each codepage includes all 128 @acronym{ASCII} characters, but the other 128
+characters (codes 128 through 255) vary from one codepage to another.
+Each DOS codepage is identified by a 3-digit number, such as 850, 862,
+etc.
+
+  In contrast to X, which lets you use several fonts at the same time,
+MS-DOS normally doesn't allow use of several codepages in a single
+session.  MS-DOS was designed to load a single codepage at system
+startup, and require you to reboot in order to change
+it@footnote{Normally, one particular codepage is burnt into the
+display memory, while other codepages can be installed by modifying
+system configuration files, such as @file{CONFIG.SYS}, and rebooting.
+While there is third-party software that allows changing the codepage
+without rebooting, we describe here how a stock MS-DOS system
+behaves.}.  Much the same limitation applies when you run DOS
+executables on other systems such as MS-Windows.
+
+@vindex dos-codepage
+  For multibyte operation on MS-DOS, Emacs needs to know which
+characters the chosen DOS codepage can display.  So it queries the
+system shortly after startup to get the chosen codepage number, and
+stores the number in the variable @code{dos-codepage}.  Some systems
+return the default value 437 for the current codepage, even though the
+actual codepage is different.  (This typically happens when you use the
+codepage built into the display hardware.)  You can specify a different
+codepage for Emacs to use by setting the variable @code{dos-codepage} in
+your init file.
+
+@cindex language environment, automatic selection on @r{MS-DOS}
+  Multibyte Emacs supports only certain DOS codepages: those which can
+display Far-Eastern scripts, like the Japanese codepage 932, and those
+that encode a single ISO 8859 character set.
+
+  The Far-Eastern codepages can directly display one of the MULE
+character sets for these countries, so Emacs simply sets up to use the
+appropriate terminal coding system that is supported by the codepage.
+The special features described in the rest of this section mostly
+pertain to codepages that encode ISO 8859 character sets.
+
+  For the codepages that correspond to one of the ISO character sets,
+Emacs knows the character set based on the codepage number.  Emacs
+automatically creates a coding system to support reading and writing
+files that use the current codepage, and uses this coding system by
+default.  The name of this coding system is @code{cp@var{nnn}}, where
+@var{nnn} is the codepage number.@footnote{The standard Emacs coding
+systems for ISO 8859 are not quite right for the purpose, because
+typically the DOS codepage does not match the standard ISO character
+codes.  For example, the letter @samp{@,{c}} (@samp{c} with cedilla) has
+code 231 in the standard Latin-1 character set, but the corresponding
+DOS codepage 850 uses code 135 for this glyph.}
+
+@cindex mode line @r{(MS-DOS)}
+  All the @code{cp@var{nnn}} coding systems use the letter @samp{D}
+(for ``DOS'') as their mode-line mnemonic.  Since both the terminal
+coding system and the default coding system for file I/O are set to
+the proper @code{cp@var{nnn}} coding system at startup, it is normal
+for the mode line on MS-DOS to begin with @samp{-DD\-}.
+@iftex
+@xref{Mode Line,,,emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Mode Line}.
+@end ifnottex
+Far-Eastern DOS terminals do not use the @code{cp@var{nnn}} coding
+systems, and thus their initial mode line looks like the Emacs
+default.
+
+  Since the codepage number also indicates which script you are using,
+Emacs automatically runs @code{set-language-environment} to select the
+language environment for that script
+@iftex
+(@pxref{Language Environments,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{Language Environments}).
+@end ifnottex
+
+  If a buffer contains a character belonging to some other ISO 8859
+character set, not the one that the chosen DOS codepage supports, Emacs
+displays it using a sequence of @acronym{ASCII} characters.  For example, if the
+current codepage doesn't have a glyph for the letter @samp{@`o} (small
+@samp{o} with a grave accent), it is displayed as @samp{@{`o@}}, where
+the braces serve as a visual indication that this is a single character.
+(This may look awkward for some non-Latin characters, such as those from
+Greek or Hebrew alphabets, but it is still readable by a person who
+knows the language.)  Even though the character may occupy several
+columns on the screen, it is really still just a single character, and
+all Emacs commands treat it as one.
+
+@cindex MS-Windows codepages
+  MS-Windows provides its own codepages, which are different from the
+DOS codepages for the same locale.  For example, DOS codepage 850
+supports the same character set as Windows codepage 1252; DOS codepage
+855 supports the same character set as Windows codepage 1251, etc.
+The MS-Windows version of Emacs uses the current codepage for display
+when invoked with the @samp{-nw} option.
+
+@node MS-DOS Processes
+@subsection Subprocesses on MS-DOS
+
+@cindex compilation under MS-DOS
+@cindex inferior processes under MS-DOS
+@findex compile @r{(MS-DOS)}
+@findex grep @r{(MS-DOS)}
+  Because MS-DOS is a single-process ``operating system'',
+asynchronous subprocesses are not available.  In particular, Shell
+mode and its variants do not work.  Most Emacs features that use
+asynchronous subprocesses also don't work on MS-DOS, including
+Shell mode and GUD.  When in doubt, try and see; commands that
+don't work output an error message saying that asynchronous processes
+aren't supported.
+
+  Compilation under Emacs with @kbd{M-x compile}, searching files with
+@kbd{M-x grep} and displaying differences between files with @kbd{M-x
+diff} do work, by running the inferior processes synchronously.  This
+means you cannot do any more editing until the inferior process
+finishes.
+
+  Spell checking also works, by means of special support for synchronous
+invocation of the @code{ispell} program.  This is slower than the
+asynchronous invocation on other platforms
+
+  Instead of the Shell mode, which doesn't work on MS-DOS, you can use
+the @kbd{M-x eshell} command.  This invokes the Eshell package that
+implements a Posix-like shell entirely in Emacs Lisp.
+
+  By contrast, Emacs compiled as a native Windows application
+@strong{does} support asynchronous subprocesses.
+@iftex
+@xref{Windows Processes,,,emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+@xref{Windows Processes}.
+@end ifnottex
+
+@cindex printing under MS-DOS
+  Printing commands, such as @code{lpr-buffer}
+@iftex
+(@pxref{Printing,,,emacs, the Emacs Manual}) and
+@code{ps-print-buffer} (@pxref{PostScript,,,emacs, the Emacs Manual}),
+work in MS-DOS by sending the output to one of the printer ports.
+@xref{MS-DOS Printing,,,emacs, the Emacs Manual}.
+@end iftex
+@ifnottex
+(@pxref{Printing}) and @code{ps-print-buffer} (@pxref{PostScript}),
+work in MS-DOS by sending the output to one of the printer ports.
+@xref{MS-DOS Printing}.
+@end ifnottex
+
+  When you run a subprocess synchronously on MS-DOS, make sure the
+program terminates and does not try to read keyboard input.  If the
+program does not terminate on its own, you will be unable to terminate
+it, because MS-DOS provides no general way to terminate a process.
+Pressing @kbd{C-c} or @kbd{C-@key{BREAK}} might sometimes help in these
+cases.
+
+  Accessing files on other machines is not supported on MS-DOS.  Other
+network-oriented commands such as sending mail, Web browsing, remote
+login, etc., don't work either, unless network access is built into
+MS-DOS with some network redirector.
+
+@cindex directory listing on MS-DOS
+@vindex dired-listing-switches @r{(MS-DOS)}
+  Dired on MS-DOS uses the @code{ls-lisp} package
+@iftex
+(@pxref{ls in Lisp,,,emacs, the Emacs Manual}).
+@end iftex
+@ifnottex
+(@pxref{ls in Lisp}).
+@end ifnottex
+Therefore, Dired on MS-DOS supports only some of the possible options
+you can mention in the @code{dired-listing-switches} variable.  The
+options that work are @samp{-A}, @samp{-a}, @samp{-c}, @samp{-i},
+@samp{-r}, @samp{-S}, @samp{-s}, @samp{-t}, and @samp{-u}.

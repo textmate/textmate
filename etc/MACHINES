@@ -1,0 +1,222 @@
+Emacs machines list
+
+Copyright (C) 1989-1990, 1992-1993, 1998, 2001-2012
+  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+This is a list of the status of GNU Emacs on various machines and systems.
+
+Information about older releases, and platforms that are no longer
+supported, has been removed.  Consult older versions of this file if
+you are interested in this information.
+
+The `configure' script uses the configuration name to decide which
+machine and operating system description files `src/config.h' should
+include.  The machine description files are all in `src/m', and have
+names similar to, but not identical to, the machine names used in
+configuration names.  The operating system files are all in `src/s',
+and are named similarly.  See the `configure' script if you need to
+know which configuration names use which machine and operating system
+description files.
+
+If you add support for a new configuration, add a section to this
+file, and then edit the `configure' script to tell it which
+configuration name(s) should select your new machine description and
+system description files.
+
+Some obsolete platforms are unsupported beginning with Emacs 23.1.  See
+the list at the end of this file.
+
+
+* Here are notes about some of the systems supported:
+
+** GNU/Linux
+
+  Most of the complete systems which use the Linux kernel are close
+  enough to the GNU system to be considered variant GNU systems.  We
+  call them "Linux-based GNU systems," or GNU/Linux for short.
+
+  It is not coincidence that many of the other components used with
+  Linux--including GNU Emacs--were developed specifically for the GNU
+  project.  The GNU project was launched in 1984 to develop a free
+  complete Unix-like operating system.  To reach this goal, we had to
+  develop whatever system components were not available as freely
+  redistributable software from some other source.
+
+  The GNU project wants users of GNU/Linux systems to be aware of how
+  these systems relate to the GNU project, because that will help
+  spread the GNU idea that software should be free--and thus encourage
+  people to write more free software.  See the file LINUX-GNU in this
+  directory for more explanation.
+
+*** 64-bit GNU/Linux
+
+  No special procedures should be needed to build a 64-bit Emacs on a
+  64-bit GNU/Linux system.  To build a 32-bit Emacs, first ensure that
+  the necessary 32-bit system libraries and include files are
+  installed.  Then use:
+
+    ./configure CC='gcc -m32' --build=i386-linux-gnu \
+      --x-libraries=/usr/X11R6/lib
+
+  (using the location of the 32-bit X libraries on your system).
+
+*** IBM System/390 running GNU/Linux (s390-*-linux-gnu)
+
+  As of Emacs 21.2, a 31-bit only version is supported on this system.
+
+*** SuperH (sh[34]*-*-linux-gnu)
+
+  Emacs 23.0.60 was reported to work on GNU/Linux (October 2008).
+  This was tested on a little-endian sh4 system (cpu type SH7751R) running
+  Gentoo Linux 2008.0.
+
+** Mac OS X
+
+  For installation instructions see the file nextstep/INSTALL.
+
+** Microsoft Windows
+
+  For installation instructions see the file nt/INSTALL.
+
+** MS-DOS
+
+  For installation instructions see the file msdos/INSTALL.
+  See the "MS-DOS" chapter of the manual for information about using
+  Emacs on MS-DOS.
+
+** Solaris
+
+  On Solaris it is also possible to use either GCC or Solaris Studio
+  to build Emacs, by pointing ./configure to the right compiler:
+
+    ./configure CC='/usr/sfw/bin/gcc'  # GCC
+    ./configure CC='cc'                # Solaris Studio
+
+  On Solaris, do not use /usr/ucb/cc.  Use /opt/SUNWspro/bin/cc.  Make
+  sure that /usr/ccs/bin and /opt/SUNWspro/bin are in your PATH before
+  /usr/ucb.  (Most free software packages have the same requirement on
+  Solaris.)  With this compiler, use `/opt/SUNWspro/bin/cc -E' as the
+  preprocessor.  If this inserts extra whitespace into its output (see
+  the PROBLEMS file) then add the option `-Xs'.
+
+  To build a 64-bit Emacs (with larger maximum buffer size) on a
+  Solaris system which supports 64-bit executables, specify the -m64
+  compiler option.  For example:
+
+    ./configure CC='/usr/sfw/bin/gcc -m64'  # GCC
+    ./configure CC='cc -m64'                # Solaris Studio
+
+
+* Obsolete platforms
+
+Support for the following obsolete platforms was removed in Emacs 23.1
+(the names in parentheses state the files in src/ that were removed):
+
+  Apollo SR10.x (unexapollo.c)
+  Convex (unexconvex.c and m/convex.c)
+  Xenix (unexenix.c and s/xenix.h)
+  Iris  (unexmips.c m/iris4d.h m/irist.h s/iris3-5.h s/iris3-6.h)
+  Gould (m/gould*)
+  Siemens machines running Sinix (unexsni.c)
+  Harris CXUX (s/cxux*)
+  ESIX, a variant of v.5.3 for the 386 (s/esix*)
+  Interactive (ISC) Unix (s/isc*)
+  Sony News (s/newsos*)
+  RTU 3.0, ucb universe (s/rtu.h)
+  UniSoft's UniPlus 5.2 (s/uniplus.h)
+  UMAX (s/umax.h)
+  AT&T UNIX PC model 7300 (m/7300.h)
+  Acorn
+  Alliant (m/alliant*)
+  Amdahl (m/amdahl*)
+  Altos 3068 Unix System V Release 2 (m/altos.h)
+  Apollo (m/apollo.h)
+  AT&T 3b (m/att3b.h)
+  Aviion (m/aviion*)
+  Berkeley 4.1 (m/bsd4.1.h)
+  Berkeley 4.2 (m/bsd4.2.h)
+  Berkeley 4.3 (m/bsd4.3.h)
+  Celerity (m/celerity.h)
+  clipper (m/clipper.h)
+  convergent S series (m/cnvrgnt.h)
+  cydra (m/cydra5.h)
+  Motorola System V/88 machines (m/delta88k.h)
+  Bull DPX/2 range (m/dpx2.h)
+  Dual machines using unisoft port (m/dual.h)
+  Elxsi machine (running enix) (m/elxsi.h)
+  Fujitsu F301 machine (m/f301.h)
+  i860 (m/i860.h)
+  ibm ps/2 aix386 (m/ibmps2-aix.h)
+  ISI 68000's (m/is*)
+  Masscomp 5000 series running RTU, ucb universe (m/masscomp.h)
+  Megatest 68000's (m/mega68.h)
+  Whitechapel Computer Works MG1 (ns16000 based) (m/mg1.h)
+  Harris Night Hawk Series 1200 and Series 3000 (m/nh3000.h m/nh4000.h)
+  ns16000 (m/ns16000.h)
+  National Semiconductor 32000, running Genix (m/ns32000.h)
+  TI Nu machines using system V (m/nu.h)
+  HLH Orion (m/orion.h m/orion105.h)
+  Paragon i860 (m/paragon.h)
+  PFU A-series (m/pfa50.h)
+  Plexus running System V.2 (m/plexus.h)
+  pyramid. (m/pyramid.h)
+  Bull SPS-7 (m/sps7.h)
+  Hitachi SR2001/SR2201 (m/sr2k.h)
+  Stride (m/stride.h)
+  Sun 1 (m/sun1.h)
+  Sun 2 (m/sun2.h)
+  SEQUENT SYMMETRY  (m/symmetry.h)
+  Tadpole 68k machines (m/tad68k.h)
+  tahoe (m/tahoe.h)
+  targon31 (m/targon31.h)
+  Tektronix* (m/tek4300.h m/tekxd88.h)
+  NCR Tower 32 running System V.2 (m/tower32.h)
+  NCR Tower 32 running System V.3 (m/tower32v3.h)
+  U-station (Nihon Unisys, SS5E; Sumitomo Denkoh, U-Station E30) (m/ustation.h)
+  Wicat (m/wicat.h)
+  Honeywell XPS100 running UNIX System V.2 (m/xps100.h)
+  Data General's DG/UX  (s/dgux*)
+  Irix before version 6
+  osf1 (s/osf*)
+  SunOS4 (s/sunos*)
+  RISCiX (s/riscix*)
+  SCO 3.2v4 (s/sco4.h)
+  SCO 3.2v5 (s/sco5.h)
+  Sun's 386-based RoadRunner (m/sun386.h)
+  Sun3 machines (m/sun3*)
+  Integrated Solutions 386 machine (m/is386.h)
+  Integrated Solutions `Optimum V' -- m68k-isi-bsd4.2 or -bsd4.3
+  Harris Power PC (powerpc-harris-powerunix)
+  Hewlett-Packard 9000 series 200 or 300 on some platforms -- m68k-hp-bsd or
+    m68k-hp-hpux; note m68k-*-netbsd* still works
+  IBM PS/2 -- i386-ibm-aix1.1 or i386-ibm-aix1.2
+  GEC 63 -- local-gec63-usg5.2
+  Tandem Integrity S2 -- mips-tandem-sysv
+  System V rel 0 -- usg5.0
+  System V rel 2 -- usg5.2
+  System V rel 2.2 -- usg5.2.2
+  System V rel 3 -- usg5.3
+  Ultrix -- bsd4.3
+  VMS (s/vms.h)
+
+
+Local variables:
+mode: outline
+fill-prefix: "  "
+End:
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,84 @@
+# ......................................................................
+
+# DocBook notations module V4.2 ........................................
+
+# File dbnotnx.mod .....................................................
+
+# Copyright 1992-2002 HaL Computer Systems, Inc.,
+# O'Reilly & Associates, Inc., ArborText, Inc., Fujitsu Software
+# Corporation, Norman Walsh, Sun Microsystems, Inc., and the
+# Organization for the Advancement of Structured Information
+# Standards (OASIS).
+# 
+# $Id: dbnotn.rnc,v 1.1 2003/08/30 04:19:27 jjc Exp $
+# 
+# Permission to use, copy, modify and distribute the DocBook DTD
+# and its accompanying documentation for any purpose and without fee
+# is hereby granted in perpetuity, provided that the above copyright
+# notice and this paragraph appear in all copies.  The copyright
+# holders make no representation about the suitability of the DTD for
+# any purpose.  It is provided "as is" without expressed or implied
+# warranty.
+# 
+# If you modify the DocBook DTD in any way, except for declaring and
+# referencing additional sets of general entities and declaring
+# additional notations, label your DTD as a variant of DocBook.  See
+# the maintenance documentation for more information.
+# 
+# Please direct all questions, bug reports, or suggestions for
+# changes to the docbook@lists.oasis-open.org mailing list. For more
+# information, see http://www.oasis-open.org/docbook/.
+
+# ......................................................................
+
+# This module contains the entity declarations for the standard ISO
+# entity sets used by DocBook.
+# 
+# In DTD driver files referring to this module, please use an entity
+# declaration that uses the public identifier shown below:
+# 
+# <!ENTITY % dbnotn PUBLIC
+# "-//OASIS//ENTITIES DocBook Notations V4.2//EN"
+# "dbnotnx.mod">
+# %dbnotn;
+# 
+# See the documentation for detailed information on the parameter
+# entity and module scheme used in DocBook, customizing DocBook and
+# planning for interchange, and changes made since the last release
+# of DocBook.
+
+local.notation.class = notAllowed
+notation.class =
+  "BMP"
+  | "CGM-CHAR"
+  | "CGM-BINARY"
+  | "CGM-CLEAR"
+  | "DITROFF"
+  | "DVI"
+  | "EPS"
+  | "EQN"
+  | "FAX"
+  | "GIF"
+  | "GIF87a"
+  | "GIF89a"
+  | "JPG"
+  | "JPEG"
+  | "IGES"
+  | "PCX"
+  | "PIC"
+  | "PNG"
+  | "PS"
+  | "SGML"
+  | "TBL"
+  | "TEX"
+  | "TIFF"
+  | "WMF"
+  | "WPG"
+  | "SVG"
+  | "linespecific"
+  | local.notation.class
+# WordPerfect Graphic format
+
+# End of DocBook notations module V4.2 .................................
+
+# ......................................................................

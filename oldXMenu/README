@@ -1,0 +1,22 @@
+Most of the files in this directory are originally from the X11R2
+XMenu library, distributed by MIT under the terms in the file copyright.h.
+
+As of Release 2 of the X Window System, Version 11 from MIT, the XMenu
+library is no longer supported.  It is not used in any software
+supplied by MIT and its use is not encouraged.
+
+In X11R1, oldXMenu/ was found in the lib/ directory of the X11 source;
+but in X11R2 it was moved to contrib/.
+
+The following files are from the X11 oldXMenu/ directory:
+
+ Activate.c AddPane.c AddSel.c ChgPane.c ChgSel.c Create.c DelPane.c
+ DelSel.c Destroy.c Error.c EvHand.c FindPane.c FindSel.c InsPane.c
+ InsSel.c Internal.c Locate.c Post.c Recomp.c SetAEQ.c SetFrz.c
+ SetPane.c SetSel.c XMenu.h XMenuInt.h (renamed from "XMenuInternal.h")
+
+The following files are from the X11 oldX/ directory:
+
+ X10.h XCrAssoc.c XDelAssoc.c XDestAssoc.c XLookAssoc.c XMakeAssoc.c
+
+This code is used by Emacs in the absence of an X-toolkit.

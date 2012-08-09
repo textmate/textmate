@@ -1,0 +1,377 @@
+#!/bin/sh
+### quick-install-emacs --- do a halfway-decent job of installing emacs quickly
+
+## Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+## Author: Miles Bader <miles@gnu.org>
+
+## This file is part of GNU Emacs.
+
+## GNU Emacs is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+
+## GNU Emacs is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+### Commentary:
+
+## This script is mainly intended for emacs maintainer or pretesters who
+## install emacs very often.  See the --help output for more details.
+
+
+PUBLIC_LIBSRC_BINARIES='emacsclient etags ctags ebrowse'
+PUBLIC_LIBSRC_SCRIPTS='grep-changelog rcs-checkin'
+
+AVOID="CVS -DIC README COPYING ChangeLog ~ [.]orig$ [.]rej$ Makefile$ Makefile.in$ makefile$ makefile.w32-in$ stamp-subdir [.]cvsignore [.]arch-ids [{]arch[}] [.][cho]$ make-docfile testfile test-distrib"
+
+# Prune old binaries lying around in the source tree
+PRUNE=no
+# Re-install files even if they already exist
+FORCE=no
+# Command verbose flag
+VERBOSE=''
+
+me="`basename $0`"
+
+# Install commands (if the user specifies the `--verbose' option, it is
+# passed to these commands, so that feature only works if these commands
+# implement it too)
+LINK='cp -lf'
+COPY='cp -f'
+REMOVE='rm -r'
+MKDIR='mkdir -p'
+
+# Used to execute commands once we create them
+EXEC='sh'
+
+NAWK=/usr/bin/nawk
+
+# avoid non-standard command output from non-C locales
+unset LANG LC_ALL LC_MESSAGES
+
+# Some messages
+USAGE="Usage: $me [OPTION...] BUILD_TREE [PREFIX]"
+TRY="Try "\`"$me --help' for more information."
+
+# Parse command-line options
+while :; do
+  case "$1" in
+    -n|--dry-run)
+      EXEC=cat; shift;;
+    -p|--prune)
+      PRUNE=yes; shift;;
+    -P|--no-prune)
+      PRUNE=no; shift;;
+    --prune-only)
+      PRUNE=only; shift;;
+    -f|--force)
+      FORCE=yes; shift;;
+    -v|--verbose)
+      VERBOSE="-v"; shift;;
+    --help)
+      cat <<EOF
+$USAGE
+Install emacs quickly
+
+  -n, --dry-run              print installation commands instead of
+                             executing them
+
+  -f, --force                install even files that haven't changed
+  -v, --verbose              print messages describing what is done
+
+  -p, --prune                prune old generated files
+  -P, --no-prune             don't prune old generated files (default)
+      --prune-only           prune old generated files, but don't install
+
+      --help                 display this help and exit
+      --version              output version information and exit
+
+$me install emacs \`incrementally,' that is, it will
+install only those files that have changed since the last time it was
+invoked, and remove any obsolete files from the installation
+directories.  It also uses hard-links into the source and build trees to
+do the install, so it uses much less space than the default Makefile
+install target; however, this also means that $me can
+not install onto a disk partition other than the one on which the source
+and build directories reside.
+
+Optionally, $me can also remove old versions of
+automatically generated files that are version-specific (such as the
+versioned emacs executables in the \`src' directory, and the DOC-* files
+in the \`etc' directory).  The latter action is called \`pruning,' and
+can be enabled using the \`-p' or \`--prune' options.
+EOF
+      exit 0
+      ;;
+    --version)
+      cat <<EOF
+$me 1.6
+
+Written by Miles Bader <miles@gnu.org>
+EOF
+      exit 0
+      ;;
+    -[!-]?*)
+      # split concatenated single-letter options apart
+      FIRST="$1"; shift
+      set -- `echo $FIRST | sed 's/-\(.\)\(.*\)/-\1 -\2/'` "$@"
+      ;;
+    -*)
+      echo 1>&2 "$me: unrecognized option "\`"$1'"
+      echo 1>&2 "$TRY"
+      exit 1
+      ;;
+    *)
+      break;
+  esac
+done
+
+LINK_CMD="$LINK $VERBOSE"
+REMOVE_CMD="$REMOVE $VERBOSE"
+
+case $# in
+  1) BUILD="$1";;
+  2) BUILD="$1"; prefix="$2";;
+  *)
+    echo 1>&2 "$USAGE"
+    echo 1>&2 "$TRY"
+    exit 1
+    ;;
+esac
+
+if test ! -d "$BUILD"; then
+  echo 1>&2 "$me: $BUILD: Build tree not found"
+  exit 2
+elif test ! -r "$BUILD/config.status"; then
+  echo 1>&2 "$me: $BUILD: Not a proper build tree, config.status not found"
+  exit 2
+fi
+
+CONFIG_STATUS="$BUILD/config.status"
+get_config_var ()
+{
+  { sed -n "s/^S[[]\"$1\"[]]=\"\([^\"]*\)\"/\1/p" $CONFIG_STATUS | sed q | grep ''; } ||
+  { sed -n "s/^s\(.\)@$1@\1\(|#_!!_#|\)*\(.*\)\1.*$/\3/p" $CONFIG_STATUS | sed q | grep ''; } ||
+  {
+    echo 1>&2 "$me: $1: Configuration variable not found in $CONFIG_STATUS"
+    exit 4
+  }
+}
+
+test x"$SRC" = x && { SRC="`get_config_var srcdir`" || exit 4 ; }
+test x"$prefix" = x && { prefix="`get_config_var prefix`" || exit 4 ; }
+test x"$ARCH" = x && { ARCH="`get_config_var host`" || exit 4 ; }
+
+VERSION=`
+  sed -n 's/^AC_INIT(emacs,[	 ]*\([^	 )]*\).*/\1/p' <$SRC/configure.in
+` || exit 4
+test -n "$VERSION" || { echo >&2 "$me: no version in configure.in"; exit 4; }
+
+DST_SHARE="$prefix/share/emacs/$VERSION"
+DST_BIN="$prefix/bin"
+DST_LIBEXEC="$prefix/libexec/emacs/$VERSION/$ARCH"
+
+# There are various common places for the info dir to be, so try to
+# use whatever's already there, defaulting to (and preferring)
+# .../share/info.
+#
+DST_INFO=''
+for D in "$prefix/share/info" "$prefix/info"; do
+  if test -d "$D"; then
+    DST_INFO="$D"
+    break
+  fi
+done
+DST_INFO=${DST_INFO:-"$prefix/share/info"}
+
+maybe_mkdir ()
+{
+  if ! test -d "$1"; then
+    $MKDIR $VERBOSE "$1" 2>&1 | sed "s/^mkdir:/$me:/" 1>&2
+  fi
+}
+
+maybe_mkdir "$DST_BIN"
+maybe_mkdir "$DST_SHARE"
+maybe_mkdir "$DST_SHARE/site-lisp"
+maybe_mkdir "$DST_LIBEXEC"
+maybe_mkdir "$DST_INFO"
+
+(  # start of command-generating sub-shell
+
+PRUNED=""
+if test x"$PRUNE" != xno; then
+  for D in `ls -1t $BUILD/etc/DOC-* | sed 1d`; do
+    echo $REMOVE_CMD $D
+    PRUNED="$PRUNED $D"
+  done
+  for D in `ls -1t $BUILD/src/emacs-$VERSION.* | sed 1d`; do
+    echo $REMOVE_CMD $D
+    PRUNED="$PRUNED $D"
+  done
+fi
+
+test x"$PRUNE" = xonly && exit 0
+
+maybe_emit_copy ()
+{
+  if test "$FORCE" = yes || ! cmp -s $1 $2; then
+    echo $LINK_CMD $1 $2
+  fi
+}
+
+maybe_emit_copy $BUILD/src/emacs $DST_BIN/emacs
+maybe_emit_copy $BUILD/src/emacs $DST_BIN/emacs-$VERSION
+
+for F in $PUBLIC_LIBSRC_BINARIES; do
+  maybe_emit_copy $BUILD/lib-src/$F $DST_BIN/$F
+done
+for F in $PUBLIC_LIBSRC_SCRIPTS; do
+  maybe_emit_copy $SRC/lib-src/$F $DST_BIN/$F
+done
+
+if test x"$SRC" = x"$BUILD"; then
+  PFXS="$BUILD"
+else
+  PFXS="$SRC $BUILD"
+fi
+
+for SUBDIR in lisp leim etc lib-src info; do
+  # defaults
+  SHARED=no
+  FORCED=''
+  AVOID_PAT="`echo "($AVOID)" | tr ' ' '|'`"
+
+  # Set subdir-specific values
+  case $SUBDIR in
+    lisp|leim)
+      DST="$DST_SHARE/$SUBDIR"
+      ;;
+    etc)
+      DST="$DST_SHARE/$SUBDIR"
+      # COPYING is in the avoid list, but there should be a copy of it in
+      # the install etc dir, so make that here.
+      FORCED="$DST/COPYING"
+      ;;
+    lib-src)
+      DST="$DST_LIBEXEC"
+      AVOID_PAT="`echo "($AVOID ($PUBLIC_LIBSRC_BINARIES $PUBLIC_LIBSRC_SCRIPTS)\$)" | tr ' ' '|'`"
+      ;;
+    info)
+      DST="$DST_INFO"
+      SHARED=yes
+      ;;
+  esac
+
+  for PFX in $PFXS; do
+    if [ -d $PFX/$SUBDIR ]; then
+      for DIR in `(cd $PFX/$SUBDIR; find . -type d -print | sed 's@^./@@')`; do
+	if [ -d $DST/$DIR ]; then
+	  echo Directory $DST/$DIR exists
+	else
+	  echo Directory $DST/$DIR non-existent
+	  if [ "`echo $DIR | egrep -v "$AVOID_PAT"`" ]; then
+	    maybe_mkdir $DST/$DIR
+	  fi
+	fi
+      done
+      diff -sqr $PFX/$SUBDIR $DST
+    fi
+  done | $NAWK '
+BEGIN {
+  src_pat = "^'"$SRC"'/'"$SUBDIR"'/"
+  build_pat = "^'"$BUILD"'/'"$SUBDIR"'/"
+  dst_pat = "^'"$DST"'/"
+  dst_pfx = "'"$DST"'/"
+  avoid_pat = "'"$AVOID_PAT"'"
+  force = ("'"$FORCE"'" == "yes")
+  shared = ("'"$SHARED"'" == "yes")
+  init_bool_array(pruned, "'"$PRUNED"'")
+  init_bool_array(forced, "'"$FORCED"'")
+}
+function init_bool_array(array, string,  a,k)
+{
+  split (string, a)
+  for (k in a)
+    array[a[k]] = 1
+}
+function install(src, dst)
+{
+  if (! (src in pruned)) {
+    cp[src] = dst;
+    from[dst] = src;
+    delete rm[dst];
+  }
+}
+function update(src, dst, copy)
+{
+  if (src in pruned) {
+    rm[dst] = 1;
+    delete from[dst]
+  } else {
+    if (copy)
+      cp[src] = dst;
+    from[dst] = src;
+    delete rm[dst];
+  }
+}
+function uninstall(dst)
+{
+  if (!(dst in from))
+    rm[dst] = 1;
+}
+/^Directory / {
+  if ($2 ~ avoid_pat) {
+    if ($NF == "exists")
+      uninstall($2)
+  } else
+    update(0, $2, 0)
+  next
+}
+/^Files / {
+  if ($4 ~ avoid_pat && !($4 in forced))
+    uninstall($4)
+  else if ($NF == "identical")
+    update($2, $4, force)
+  else
+    update($2, $4, 1)
+  next
+}
+/^Only /  {
+  pfx = $3
+  sub (/:$/, "/", pfx)
+
+  if (pfx ~ dst_pat) {
+    if (! shared)
+      uninstall(pfx $4)
+  } else {
+    subdir = pfx
+    if (subdir ~ src_pat)
+      sub (src_pat, "", subdir)
+    else
+      sub (build_pat, "", subdir)
+
+    dst = dst_pfx subdir $4
+    if (! (dst ~ avoid_pat))
+      install(pfx $4, dst)
+  }
+  next
+}
+END {
+  for (f in rm)
+    print "'"$REMOVE_CMD"' " f
+  for (f in cp)
+    print "'"$LINK_CMD"' " f " " cp[f]
+}
+'
+done
+
+) | eval $EXEC

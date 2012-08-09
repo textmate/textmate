@@ -1,0 +1,5 @@
+# -sed3x.inp------------------------------------------------------------
+# Extra configuration script for lib-src/makefile for DesqView/X
+# ----------------------------------------------------------------------
+/^LIBS_SYSTEM *=/s!= *!= -lxext -lsys!
+

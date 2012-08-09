@@ -1,0 +1,506 @@
+\input texinfo                  @c -*-texinfo-*-
+
+@include gnus-overrides.texi
+
+@setfilename ../../info/pgg
+@settitle PGG @value{VERSION}
+
+@set VERSION 0.1
+
+@copying
+This file describes PGG @value{VERSION}, an Emacs interface to various
+PGP implementations.
+
+Copyright @copyright{} 2001, 2003-2012  Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License.''
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs network features
+@direntry
+* PGG: (pgg).                   Emacs interface to various PGP implementations.
+@end direntry
+
+@titlepage
+@ifset WEBHACKDEVEL
+@title PGG (DEVELOPMENT VERSION)
+@end ifset
+@ifclear WEBHACKDEVEL
+@title PGG
+@end ifclear
+
+@author by Daiki Ueno
+@page
+
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@node Top
+@top PGG
+
+PGG is an interface library between Emacs
+and various tools for secure communication.  PGG also provides a simple
+user interface to encrypt, decrypt, sign, and verify MIME messages.
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* Overview::                    What PGG is.
+* Prerequisites::               Complicated stuff you may have to do.
+* How to use::                  Getting started quickly.
+* Architecture::
+* Parsing OpenPGP packets::
+* GNU Free Documentation License:: The license for this documentation.
+* Function Index::
+* Variable Index::
+@end menu
+
+@node Overview
+@chapter Overview
+
+PGG is an interface library between Emacs and various tools for secure
+communication.  Even though Mailcrypt has similar feature, it does not
+deal with detached PGP messages, normally used in PGP/MIME
+infrastructure.  This was the main reason why I wrote the new library.
+
+PGP/MIME is an application of MIME Object Security Services (RFC1848).
+The standard is documented in RFC2015.
+
+@node Prerequisites
+@chapter Prerequisites
+
+PGG requires at least one implementation of privacy guard system.
+This document assumes that you have already obtained and installed them
+and that you are familiar with its basic functions.
+
+By default, PGG uses GnuPG.  If you are new to such a system, I
+recommend that you should look over the GNU Privacy Handbook (GPH)
+which is available at @uref{http://www.gnupg.org/documentation/}.
+
+When using GnuPG, we recommend the use of the @code{gpg-agent}
+program, which is distributed with versions 2.0 and later of GnuPG.
+This is a daemon to manage private keys independently from any
+protocol, and provides the most secure way to input and cache your
+passphrases (@pxref{Caching passphrase}).  By default, PGG will
+attempt to use @code{gpg-agent} if it is running.  @xref{Invoking
+GPG-AGENT,,,gnupg,Using the GNU Privacy Guard}.
+
+PGG also supports Pretty Good Privacy version 2 or version 5.
+
+@node How to use
+@chapter How to use
+
+The toplevel interface of this library is quite simple, and only
+intended to use with public-key cryptographic operation.
+
+To use PGG, evaluate following expression at the beginning of your
+application program.
+
+@lisp
+(require 'pgg)
+@end lisp
+
+If you want to check existence of pgg.el at runtime, instead you can
+list autoload setting for desired functions as follows.
+
+@lisp
+(autoload 'pgg-encrypt-region "pgg"
+  "Encrypt the current region." t)
+(autoload 'pgg-encrypt-symmetric-region "pgg"
+  "Encrypt the current region with symmetric algorithm." t)
+(autoload 'pgg-decrypt-region "pgg"
+  "Decrypt the current region." t)
+(autoload 'pgg-sign-region "pgg"
+  "Sign the current region." t)
+(autoload 'pgg-verify-region "pgg"
+  "Verify the current region." t)
+(autoload 'pgg-insert-key "pgg"
+  "Insert the ASCII armored public key." t)
+(autoload 'pgg-snarf-keys-region "pgg"
+  "Import public keys in the current region." t)
+@end lisp
+
+@menu
+* User Commands::
+* Selecting an implementation::
+* Caching passphrase::
+* Default user identity::
+@end menu
+
+@node User Commands
+@section User Commands
+
+At this time you can use some cryptographic commands.  The behavior of
+these commands relies on a fashion of invocation because they are also
+intended to be used as library functions.  In case you don't have the
+signer's public key, for example, the function @code{pgg-verify-region}
+fails immediately, but if the function had been called interactively, it
+would ask you to retrieve the signer's public key from the server.
+
+@deffn Command pgg-encrypt-region start end recipients &optional sign passphrase
+Encrypt the current region between @var{start} and @var{end} for
+@var{recipients}.  When the function were called interactively, you
+would be asked about the recipients.
+
+If encryption is successful, it replaces the current region contents (in
+the accessible portion) with the resulting data.
+
+If optional argument @var{sign} is non-@code{nil}, the function is
+request to do a combined sign and encrypt.  This currently is
+confirmed to work with GnuPG, but might not work with PGP or PGP5.
+
+If optional @var{passphrase} is @code{nil}, the passphrase will be
+obtained from the passphrase cache or user.
+@end deffn
+
+@deffn Command pgg-encrypt-symmetric-region &optional start end passphrase
+Encrypt the current region between @var{start} and @var{end} using a
+symmetric cipher.  After invocation you are asked for a passphrase.
+
+If optional @var{passphrase} is @code{nil}, the passphrase will be
+obtained from the passphrase cache or user.
+
+symmetric-cipher encryption is currently only implemented for GnuPG.
+@end deffn
+
+@deffn Command pgg-decrypt-region start end &optional passphrase
+Decrypt the current region between @var{start} and @var{end}.  If
+decryption is successful, it replaces the current region contents (in
+the accessible portion) with the resulting data.
+
+If optional @var{passphrase} is @code{nil}, the passphrase will be
+obtained from the passphrase cache or user.
+@end deffn
+
+@deffn Command pgg-sign-region start end &optional cleartext passphrase
+Make the signature from text between @var{start} and @var{end}.  If the
+optional third argument @var{cleartext} is non-@code{nil}, or the
+function is called interactively, it does not create a detached
+signature.  In such a case, it replaces the current region contents (in
+the accessible portion) with the resulting data.
+
+If optional @var{passphrase} is @code{nil}, the passphrase will be
+obtained from the passphrase cache or user.
+@end deffn
+
+@deffn Command pgg-verify-region start end &optional signature fetch
+Verify the current region between @var{start} and @var{end}.  If the
+optional third argument @var{signature} is non-@code{nil}, it is treated
+as the detached signature file of the current region.
+
+If the optional 4th argument @var{fetch} is non-@code{nil}, or the
+function is called interactively, we attempt to fetch the signer's
+public key from the key server.
+@end deffn
+
+@deffn Command pgg-insert-key
+Retrieve the user's public key and insert it as ASCII-armored format.
+@end deffn
+
+@deffn Command pgg-snarf-keys-region start end
+Collect public keys in the current region between @var{start} and
+@var{end}, and add them into the user's keyring.
+@end deffn
+
+@node Selecting an implementation
+@section Selecting an implementation
+
+Since PGP has a long history and there are a number of PGP
+implementations available today, the function which each one has differs
+considerably.  For example, if you are using GnuPG, you know you can
+select cipher algorithm from 3DES, CAST5, BLOWFISH, and so on, but on
+the other hand the version 2 of PGP only supports IDEA.
+
+Which implementation is used is controlled by the @code{pgg-scheme}
+variable.  If it is @code{nil} (the default), the value of the
+@code{pgg-default-scheme} variable will be used instead.
+
+@defvar pgg-scheme
+Force specify the scheme of PGP implementation.  The value can be set to
+@code{gpg}, @code{pgp}, and @code{pgp5}.  The default is @code{nil}.
+@end defvar
+
+@defvar pgg-default-scheme
+The default scheme of PGP implementation.  The value should be one of
+@code{gpg}, @code{pgp}, and @code{pgp5}.  The default is @code{gpg}.
+@end defvar
+
+@node Caching passphrase
+@section Caching passphrase
+
+When using GnuPG (gpg) as the PGP scheme, we recommend using a program
+called @code{gpg-agent} for entering and caching
+passphrases@footnote{Actually, @code{gpg-agent} does not cache
+passphrases but private keys.  On the other hand, from a user's point
+of view, this technical difference isn't visible.}.
+
+@defvar pgg-gpg-use-agent
+If non-@code{nil}, attempt to use @code{gpg-agent} whenever possible.
+The default is @code{t}.  If @code{gpg-agent} is not running, or GnuPG
+is not the current PGP scheme, PGG's own passphrase-caching mechanism
+is used (see below).
+@end defvar
+
+To use @code{gpg-agent} with PGG, you must first ensure that
+@code{gpg-agent} is running.  For example, if you are running in the X
+Window System, you can do this by putting the following line in your
+@file{.xsession} file:
+
+@smallexample
+eval "$(gpg-agent --daemon)"
+@end smallexample
+
+For more details on invoking @code{gpg-agent}, @xref{Invoking
+GPG-AGENT,,,gnupg,Using the GNU Privacy Guard}.
+
+Whenever you perform a PGG operation that requires a GnuPG passphrase,
+GnuPG will contact @code{gpg-agent}, which prompts you for the
+passphrase.  Furthermore, @code{gpg-agent} ``caches'' the result, so
+that subsequent uses will not require you to enter the passphrase
+again.  (This cache usually expires after a certain time has passed;
+you can change this using the @code{--default-cache-ttl} option when
+invoking @code{gpg-agent}.)
+
+If you are running in a X Window System environment, @code{gpg-agent}
+prompts for a passphrase by opening a graphical window.  However, if
+you are running Emacs on a text terminal, @code{gpg-agent} has trouble
+receiving input from the terminal, since it is being sent to Emacs.
+One workaround for this problem is to run @code{gpg-agent} on a
+different terminal from Emacs, with the @code{--keep-tty} option; this
+tells @code{gpg-agent} use its own terminal to prompt for passphrases.
+
+When @code{gpg-agent} is not being used, PGG prompts for a passphrase
+through Emacs.  It also has its own passphrase caching mechanism,
+which is controlled by the variable @code{pgg-cache-passphrase} (see
+below).
+
+There is a security risk in handling passphrases through PGG rather
+than @code{gpg-agent}.  When you enter your passphrase into an Emacs
+prompt, it is temporarily stored as a cleartext string in the memory
+of the Emacs executable.  If the executable memory is swapped to disk,
+the root user can, in theory, extract the passphrase from the
+swapfile.  Furthermore, the swapfile containing the cleartext
+passphrase might remain on the disk after the system is discarded or
+stolen.  @code{gpg-agent} avoids this problem by using certain tricks,
+such as memory locking, which have not been implemented in Emacs.
+
+@defvar pgg-cache-passphrase
+If non-@code{nil}, store passphrases.  The default value of this
+variable is @code{t}.  If you are worried about security issues,
+however, you could stop the caching of passphrases by setting this
+variable to @code{nil}.
+@end defvar
+
+@defvar pgg-passphrase-cache-expiry
+Elapsed time for expiration in seconds.
+@end defvar
+
+If your passphrase contains non-ASCII characters, you might need to
+specify the coding system to be used to encode your passphrases, since
+GnuPG treats them as a byte sequence, not as a character sequence.
+
+@defvar pgg-passphrase-coding-system
+Coding system used to encode passphrase.
+@end defvar
+
+@node Default user identity
+@section Default user identity
+
+The PGP implementation is usually able to select the proper key to use
+for signing and decryption, but if you have more than one key, you may
+need to specify the key id to use.
+
+@defvar pgg-default-user-id
+User ID of your default identity.  It defaults to the value returned
+by @samp{(user-login-name)}.  You can customize this variable.
+@end defvar
+
+@defvar pgg-gpg-user-id
+User ID of the GnuPG default identity.  It defaults to @samp{nil}.
+This overrides @samp{pgg-default-user-id}.  You can customize this
+variable.
+@end defvar
+
+@defvar pgg-pgp-user-id
+User ID of the PGP 2.x/6.x default identity.  It defaults to
+@samp{nil}.  This overrides @samp{pgg-default-user-id}.  You can
+customize this variable.
+@end defvar
+
+@defvar pgg-pgp5-user-id
+User ID of the PGP 5.x default identity.  It defaults to @samp{nil}.
+This overrides @samp{pgg-default-user-id}.  You can customize this
+variable.
+@end defvar
+
+@node Architecture
+@chapter Architecture
+
+PGG introduces the notion of a "scheme of PGP implementation" (used
+interchangeably with "scheme" in this document).  This term refers to a
+singleton object wrapped with the luna object system.
+
+Since PGG was designed for accessing and developing PGP functionality,
+the architecture had to be designed not just for interoperability but
+also for extensibility.  In this chapter we explore the architecture
+while finding out how to write the PGG back end.
+
+@menu
+* Initializing::
+* Back end methods::
+* Getting output::
+@end menu
+
+@node Initializing
+@section Initializing
+
+A scheme must be initialized before it is used.
+It had better guarantee to keep only one instance of a scheme.
+
+The following code is snipped out of @file{pgg-gpg.el}.  Once an
+instance of @code{pgg-gpg} scheme is initialized, it's stored to the
+variable @code{pgg-scheme-gpg-instance} and will be reused from now on.
+
+@lisp
+(defvar pgg-scheme-gpg-instance nil)
+
+(defun pgg-make-scheme-gpg ()
+  (or pgg-scheme-gpg-instance
+      (setq pgg-scheme-gpg-instance
+            (luna-make-entity 'pgg-scheme-gpg))))
+@end lisp
+
+The name of the function must follow the
+regulation---@code{pgg-make-scheme-} follows the back end name.
+
+@node Back end methods
+@section Back end methods
+
+In each back end, these methods must be present.  The output of these
+methods is stored in special buffers (@ref{Getting output}), so that
+these methods must tell the status of the execution.
+
+@deffn Method pgg-scheme-lookup-key scheme string &optional type
+Return keys associated with @var{string}.  If the optional third
+argument @var{type} is non-@code{nil}, it searches from the secret
+keyrings.
+@end deffn
+
+@deffn Method pgg-scheme-encrypt-region scheme start end recipients &optional sign passphrase
+Encrypt the current region between @var{start} and @var{end} for
+@var{recipients}.  If @var{sign} is non-@code{nil}, do a combined sign
+and encrypt.  If encryption is successful, it returns @code{t},
+otherwise @code{nil}.
+@end deffn
+
+@deffn Method pgg-scheme-encrypt-symmetric-region scheme start end &optional passphrase
+Encrypt the current region between @var{start} and @var{end} using a
+symmetric cipher and a passphrases.  If encryption is successful, it
+returns @code{t}, otherwise @code{nil}.  This function is currently only
+implemented for GnuPG.
+@end deffn
+
+@deffn Method pgg-scheme-decrypt-region scheme start end &optional passphrase
+Decrypt the current region between @var{start} and @var{end}.  If
+decryption is successful, it returns @code{t}, otherwise @code{nil}.
+@end deffn
+
+@deffn Method pgg-scheme-sign-region scheme start end &optional cleartext passphrase
+Make the signature from text between @var{start} and @var{end}.  If the
+optional third argument @var{cleartext} is non-@code{nil}, it does not
+create a detached signature.  If signing is successful, it returns
+@code{t}, otherwise @code{nil}.
+@end deffn
+
+@deffn Method pgg-scheme-verify-region scheme start end &optional signature
+Verify the current region between @var{start} and @var{end}.  If the
+optional third argument @var{signature} is non-@code{nil}, it is treated
+as the detached signature of the current region.  If the signature is
+successfully verified, it returns @code{t}, otherwise @code{nil}.
+@end deffn
+
+@deffn Method pgg-scheme-insert-key scheme
+Retrieve the user's public key and insert it as ASCII-armored format.
+On success, it returns @code{t}, otherwise @code{nil}.
+@end deffn
+
+@deffn Method pgg-scheme-snarf-keys-region scheme start end
+Collect public keys in the current region between @var{start} and
+@var{end}, and add them into the user's keyring.
+On success, it returns @code{t}, otherwise @code{nil}.
+@end deffn
+
+@node Getting output
+@section Getting output
+
+The output of the back end methods (@ref{Back end methods}) is stored in
+special buffers, so that these methods must tell the status of the
+execution.
+
+@defvar pgg-errors-buffer
+The standard error output of the execution of the PGP command is stored
+here.
+@end defvar
+
+@defvar pgg-output-buffer
+The standard output of the execution of the PGP command is stored here.
+@end defvar
+
+@defvar pgg-status-buffer
+The rest of status information of the execution of the PGP command is
+stored here.
+@end defvar
+
+@node Parsing OpenPGP packets
+@chapter Parsing OpenPGP packets
+
+The format of OpenPGP messages is maintained in order to publish all
+necessary information needed to develop interoperable applications.
+The standard is documented in RFC 2440.
+
+PGG has its own parser for the OpenPGP packets.
+
+@defun pgg-parse-armor string
+List the sequence of packets in @var{string}.
+@end defun
+
+@defun pgg-parse-armor-region start end
+List the sequence of packets in the current region between @var{start}
+and @var{end}.
+@end defun
+
+@defvar pgg-ignore-packet-checksum
+If non-@code{nil}, don't check the checksum of the packets.
+@end defvar
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Function Index
+@unnumbered Function Index
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+@printindex vr
+
+@bye
+
+@c End:

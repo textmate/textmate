@@ -1,0 +1,41 @@
+This directory contains bitmap files that Emacs uses from
+/usr/include/X11/bitmaps.
+
+
+COPYRIGHT AND LICENSE INFORMATION
+
+These bitmaps are the same as those contained in X Version 11 Release
+4 (released 1989). The correspondence between the Emacs filenames and
+the original include/X11/bitmaps/ filenames is as follows:
+
+    Emacs:           X11R4:
+    cntrpmsk.xbm     cntr_ptrmsk
+    cntrptr.xbm      cntr_ptr
+    crosswv.xbm      cross_weave
+    dimple1.xbm      dimple1
+    dimple3.xbm      dimple3
+    gray.xbm         gray
+    gray1.xbm        gray1
+    gray3.xbm        gray3
+    leftpmsk.xbm     left_ptrmsk
+    leftptr.xbm      left_ptr
+    rtpmsk.xbm       right_ptrmsk
+    rtptr.xbm        right_ptr
+    stipple.xbm      stipple
+
+
+The following copyright and license notice appeared in the parent
+directory of the X11R4 bitmaps/ directory (in include/X11/copyright.h):
+
+    Copyright 1985, 1986, 1987, 1988, 1989 by the
+    Massachusetts Institute of Technology
+
+    Permission to use, copy, modify, distribute, and sell this software and its
+    documentation for any purpose is hereby granted without fee, provided that
+    the above copyright notice appear in all copies and that both that
+    copyright notice and this permission notice appear in supporting
+    documentation, and that the name of M.I.T. not be used in advertising or
+    publicity pertaining to distribution of the software without specific,
+    written prior permission.  M.I.T. makes no representations about the
+    suitability of this software for any purpose.  It is provided "as is"
+    without express or implied warranty.

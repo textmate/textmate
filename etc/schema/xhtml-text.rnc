@@ -1,0 +1,73 @@
+# Text Module
+
+br = element br { br.attlist, empty }
+br.attlist = Core.attrib
+span = element span { span.attlist, Inline.model }
+span.attlist = Common.attrib
+abbr = element abbr { abbr.attlist, Inline.model }
+abbr.attlist = Common.attrib
+acronym = element acronym { acronym.attlist, Inline.model }
+acronym.attlist = Common.attrib
+cite = element cite { cite.attlist, Inline.model }
+cite.attlist = Common.attrib
+code = element code { code.attlist, Inline.model }
+code.attlist = Common.attrib
+dfn = element dfn { dfn.attlist, Inline.model }
+dfn.attlist = Common.attrib
+em = element em { em.attlist, Inline.model }
+em.attlist = Common.attrib
+kbd = element kbd { kbd.attlist, Inline.model }
+kbd.attlist = Common.attrib
+q = element q { q.attlist, Inline.model }
+q.attlist =
+  Common.attrib,
+  attribute cite { URI.datatype }?
+samp = element samp { samp.attlist, Inline.model }
+samp.attlist = Common.attrib
+strong = element strong { strong.attlist, Inline.model }
+strong.attlist = Common.attrib
+var = element var { var.attlist, Inline.model }
+var.attlist = Common.attrib
+\div = element div { div.attlist, Flow.model }
+div.attlist = Common.attrib
+p = element p { p.attlist, Inline.model }
+p.attlist = Common.attrib
+address = element address { address.attlist, Inline.model }
+address.attlist = Common.attrib
+blockquote = element blockquote { blockquote.attlist, Block.model }
+blockquote.attlist =
+  Common.attrib,
+  attribute cite { URI.datatype }?
+pre = element pre { pre.attlist, Inline.model }
+pre.attlist =
+  Common.attrib,
+  attribute xml:space { "preserve" }?
+h1 = element h1 { Heading.attrib, Heading.content }
+h2 = element h2 { Heading.attrib, Heading.content }
+h3 = element h3 { Heading.attrib, Heading.content }
+h4 = element h4 { Heading.attrib, Heading.content }
+h5 = element h5 { Heading.attrib, Heading.content }
+h6 = element h6 { Heading.attrib, Heading.content }
+Heading.attrib = Common.attrib
+Heading.content = Inline.model
+Heading.class = h1 | h2 | h3 | h4 | h5 | h6
+Block.class = address | blockquote | \div | p | pre | Heading.class
+Inline.class =
+  abbr
+  | acronym
+  | br
+  | cite
+  | code
+  | dfn
+  | em
+  | kbd
+  | q
+  | samp
+  | span
+  | strong
+  | var
+Inline.model = (text | Inline.class)*
+# This is redefined by the legacy module to include inlines.
+Block.mix = Block.class
+Block.model = Block.mix+
+Flow.model = (text | Inline.class | Block.class)*

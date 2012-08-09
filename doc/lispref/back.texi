@@ -1,0 +1,37 @@
+\input texinfo  @c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 2001-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@c
+@c %**start of header
+@setfilename back-cover
+@settitle GNU Emacs Lisp Reference Manual
+@c %**end of header
+.
+@sp 7
+@center @titlefont {GNU Emacs Lisp}
+@sp 1
+
+@quotation
+  Most of the GNU Emacs text editor is written in the programming
+language called Emacs Lisp.  You can write new code in Emacs Lisp and
+install it as an extension to the editor.  However, Emacs Lisp is more
+than a mere ``extension language''; it is a full computer programming
+language in its own right.  You can use it as you would any other
+programming language.
+
+  Because Emacs Lisp is designed for use in an editor, it has special
+features for scanning and parsing text as well as features for handling
+files, buffers, displays, subprocesses, and so on.  Emacs Lisp is
+closely integrated with the editing facilities; thus, editing commands
+are functions that can also conveniently be called from Lisp programs,
+and parameters for customization are ordinary Lisp variables.
+
+  This manual describes Emacs Lisp.  Generally speaking, the earlier
+chapters describe features of Emacs Lisp that have counterparts in
+many programming languages, and later chapters describe features that
+are peculiar to Emacs Lisp or relate specifically to editing.
+@end quotation
+
+@hfil
+@bye

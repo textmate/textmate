@@ -1,0 +1,4 @@
+@c It would be nicer to generate this using configure and @version@.
+@c However, that would mean emacsver.texi would always be newer
+@c then the info files in release tarfiles.
+@set EMACSVER 24.1

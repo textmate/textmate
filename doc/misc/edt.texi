@@ -1,0 +1,944 @@
+\input texinfo
+@setfilename ../../info/edt
+@settitle EDT Emulation for Emacs
+
+@copying
+This file documents the EDT emulation package for Emacs.
+
+Copyright @copyright{} 1986, 1992, 1994-1995, 1999-2012
+Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs misc features
+@direntry
+* EDT: (edt).                   An Emacs emulation of the EDT editor.
+@end direntry
+
+@titlepage
+@title EDT Emulation User's Manual
+@author Kevin Gallagher
+@author @email{Kevin.Gallagher@@boeing.com}
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Emacs EDT emulation
+This manual describes the Emacs EDT package, which provides emulation
+of DEC's EDT editor.
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Overview::                Overview of the EDT package.
+* Supported terminals::     Terminals/keyboards that are supported.
+* Starting emulation::      How to get started.
+* Platform-specific notes:: Notes specific to certain platforms.
+* Differences::             How does this EDT emulation differ from real EDT?
+* Highlights::              Some highlights, and comparisons to the
+                              original Emacs EDT emulation.
+* Customizing::             Customizing emulation.
+* GNU Free Documentation License::  The license for this manual.
+@end menu
+
+@node Overview
+@chapter Overview of the EDT Package
+
+This manual describes version 4.0 of the EDT Emulation for Emacs.
+It comes with special functions which replicate nearly all of
+EDT's keypad mode behavior.  It sets up default keypad and function key
+bindings which closely match those found in EDT.  Support is provided so
+that users may reconfigure most keypad and function key bindings to
+their own liking.
+
+Version 4.0 contains several enhancements (@pxref{Changes}).
+
+@menu
+* Quick start::             How to begin using EDT.
+* Changes::                 What's new in version 4.0.
+* Goals::                   The aims of this package.
+@end menu
+
+@node Quick start
+@section How to Begin Using EDT
+
+To start the EDT Emulation, first start Emacs and then enter @kbd{M-x
+edt-emulation-on} to begin the emulation.  After initialization is
+complete, the following message will appear below the status line
+informing you that the emulation has been enabled: ``Default EDT keymap
+active''.
+
+   You can have the EDT Emulation start up automatically, each time you
+initiate an Emacs session, by adding the following line to your
+@file{.emacs} file:
+
+@example
+(add-hook term-setup-hook 'edt-emulation-on)
+@end example
+
+@noindent @strong{Important:} Be sure to read the rest of this manual.
+It contains very useful information on how the EDT Emulation behaves and
+how to customize it to your liking.
+
+@noindent The EDT emulation consists of the following files:
+
+@itemize
+
+@item
+@file{edt.texi} - This manual.
+
+@item
+@file{edt-user.el} - An example customization file.
+
+@item
+@file{edt.el} - EDT emulation functions and default configuration.
+
+@item
+@file{edt-lk201.el} - Built-in support for DEC LK-201 keyboards.
+
+@item
+@file{edt-vt100.el} - Built-in support for DEC VT-100 (and above) terminals.
+
+@item
+@file{edt-pc.el} - Built-in support for PC 101 Keyboards under MS-DOS.
+
+@item
+@file{edt-mapper.el} - Create an EDT LK-201 map file for keyboards
+without built-in support.
+
+@end itemize
+
+@node Changes
+@section What's New in Version 4.0
+
+Version 4.0 contains the following enhancements:
+
+@enumerate
+
+@item
+Scroll margins at the top and bottom of the window are now supported.
+(The design was copied from @file{tpu-extras.el}.)  By default, this
+feature is enabled with the top margin set to 10% of the window and the
+bottom margin set to 15% of the window.  To change these settings, you
+can invoke the function @code{edt-set-scroll-margins} in your
+@file{.emacs} file.  For example, the following line
+
+@example
+(edt-set-scroll-margins "20%" "25%")
+@end example
+
+@noindent sets the top margin to 20% of the window and the bottom margin
+to 25% of the window.  To disable this feature, set each margin to 0%.
+You can also invoke @code{edt-set-scroll-margins} interactively while
+EDT Emulation is active to change the settings for that session.
+
+@strong{Please note:} Another way to set the scroll margins is to use
+the Emacs customization feature to set the following two variables
+directly: @code{edt-top-scroll-margin} and @code{edt-bottom-scroll-margin}.
+
+Enter the Emacs @code{customize} command.  First select the
+@samp{Editing} group and then select the @samp{Emulations} group.
+Finally, select the @samp{Edt} group and follow the directions.
+
+@item
+The @samp{SUBS} command is now supported and bound to @kbd{GOLD-Enter}
+by default.  (This design was copied from @file{tpu-edt.el}.)  Note, in
+earlier versions of EDT Emulation, @kbd{GOLD-Enter} was assigned to the
+Emacs function @code{query-replace}.  The binding of
+@code{query-replace} has been moved to @kbd{GOLD-/}.  If you prefer to
+restore @code{query-replace} to @kbd{GOLD-Enter}, then use an EDT user
+customization file, @file{edt-user.el}, to do this
+(@pxref{Customizing}).
+
+@item
+EDT Emulation now also works in XEmacs, including the highlighting of
+selected text.
+
+@item
+If you access a workstation using an X Server, observe that the
+initialization file generated by @file{edt-mapper.el} will now contain
+the name of the X Server vendor.  This is a convenience for those who
+have access to their Unix account from more than one type of X Server.
+Since different X Servers typically require different EDT emulation
+initialization files, @file{edt-mapper.el} will now generate these
+different initialization files and save them with different names.
+Then, the correct initialization file for the particular X server in use
+is loaded correctly automatically.
+
+@item
+Also, @file{edt-mapper.el} is now capable of binding an @acronym{ASCII}
+key sequence, providing the @acronym{ASCII} key sequence prefix is
+already known by Emacs to be a prefix.  As a result of providing this
+support, some terminal/keyboard/window system configurations, which
+don't have a complete set of sensible function key bindings built into
+Emacs in @code{function-key-map}, can still be configured for use with
+EDT Emulation.  (Note: In a few rare circumstances this does not work
+properly.  In particular, it does not work if a subset of the leading
+@acronym{ASCII} characters in a key sequence are recognized by Emacs as
+having an existing binding.  For example, if the keypad 7 (@key{KP7})
+key generates the sequence @samp{<ESC>Ow} and @samp{<ESC>O} is already
+bound to a function, pressing @key{KP7} when told to do so by
+@file{edt-mapper.el} will result in @file{edt-mapper.el} incorrectly
+mapping @samp{<ESC>O} to @key{KP7} and @samp{w} to @key{KP8}.  If
+something like this happens to you, it is probably a bug in the support
+for your keyboard within Emacs @strong{or} a bug in the Unix
+termcap/terminfo support for your terminal @strong{or} a bug in the
+terminal emulation software you are using.)
+
+@item
+The @code{edt-quit} function (bound to @kbd{GOLD-q} by default) has been
+modified to warn the user when file-related buffer modifications exist.
+It now cautions the user that those modifications will be lost if the
+user quits without saving those buffers.
+
+@end enumerate
+
+@node Goals
+@section The Aims of this Package
+
+@enumerate
+
+@item
+Emulate EDT Keypad Mode commands closely so that current EDT users will
+find that it easy and comfortable to use Emacs with a small learning
+curve.
+
+@item
+Make it easy for a user to customize EDT emulation key bindings without
+knowing much about Emacs Lisp.
+
+@item
+Make it easy to switch between the original EDT default bindings and the
+user's customized EDT bindings, without having to exit Emacs.
+
+@item
+Provide support for some TPU/EVE functions not supported in EDT.
+
+@item
+Provide an easy way to restore @strong{all} original Emacs key bindings,
+just as they existed before the EDT emulation was first invoked.
+
+@item
+Support Emacs and XEmacs 19 and higher.
+
+@item
+Supports highlighting of marked text within the EDT emulation on all
+platforms on which Emacs supports highlighting of marked text.
+
+@item
+Handle terminal configuration interactively for most terminal
+configurations, when the emulation is invoked for the first time.
+
+@item
+Support a PC AT keyboard under MS-DOS.
+
+@end enumerate
+
+@node Supported terminals
+@chapter Terminals/Keyboards that are Supported
+
+Keyboards used under a Window System are supported via the
+@code{edt-mapper} function.  The first time you invoke the emulation
+under a window system, the @code{edt-mapper} function is run
+automatically and the user is prompted to identify which keys the
+emulation is to use for the standard keypad and function keys EDT
+expects (e.g., @key{PF1}, @key{PF2}, @key{KP0}, @key{KP1}, @key{F1},
+@key{F2}, etc.).  This configuration is saved to disk read each time the
+emulation is invoked.
+
+In character oriented connections not running a window manager, built-in
+support for the following terminals/keyboards is provided:
+
+@enumerate
+
+@item
+DEC VT-100 series and higher.  This includes well behaved VT clones and
+emulators.  If you are using a VT series terminal, be sure that the
+@env{TERM} environment variable is set properly before invoking emacs.
+
+@item
+PC AT keyboard under MS-DOS.
+
+@end enumerate
+
+Be sure to read @ref{Platform-specific notes} to see if those notes
+apply to you.
+
+@node Starting emulation
+@chapter How to Get Started
+
+Start up Emacs and enter @kbd{M-x edt-emulation-on} to begin the
+emulation.  After initialization is complete, the following message will
+appear below the status line informing you that the emulation has been
+enabled: ``Default EDT keymap active''.
+
+You can have the EDT Emulation start up automatically, each time you
+initiate an Emacs session, by adding the following line to your
+@file{.emacs} file:
+
+@example
+(add-hook term-setup-hook 'edt-emulation-on)
+@end example
+
+A reference sheet is included (later on) listing the default EDT
+Emulation key bindings.  This sheet is also accessible on line from
+within Emacs by pressing @key{PF2}, @kbd{GOLD-H}, or @samp{HELP} (when
+in the EDT Default Mode).
+
+It is easy to customize key bindings in the EDT Emulation
+(@pxref{Customizing}).  Customizations are placed in a file called
+@file{edt-user.el}.  The Emacs @file{etc/} directory contains an
+example.  If @file{edt-user.el} is found in your Emacs load path
+during EDT Emulation initialization, then the following message will
+appear below the status line indicating that the emulation has been
+enabled, enhanced by your own customizations: ``User EDT custom keymap
+active''.
+
+Once enabled, it is easy to switch back and forth between your
+customized EDT Emulation key bindings and the default EDT Emulation key
+bindings.  (Look at the binding to @kbd{GOLD-Z} in the sample
+@file{edt-user.el} file.)  It is also easy to turn off the emulation
+(via the command @code{edt-emulation-off}).  Doing so completely
+restores the original key bindings in effect just prior to invoking the
+emulation.
+
+Emacs binds keys to @acronym{ASCII} control characters and so does the
+real EDT.  Where EDT key bindings and Emacs key bindings conflict,
+the default Emacs key bindings are retained by the EDT emulation by
+default.  If you are a diehard EDT user you may not like this.  The
+@ref{Control keys} section explains how to change this so that the EDT
+bindings to @acronym{ASCII} control characters override the default
+Emacs bindings.
+
+@node Platform-specific notes
+@chapter Notes Specific to Certain Platforms
+
+@menu
+* Sun workstations::  Sun workstations running X.
+* MS-DOS::            PC users running MS-DOS.
+* GNU/Linux::         PC users running GNU/Linux.
+* Unix::              Using @key{NumLock} for the @key{PF1} key on Unix systems.
+@end menu
+
+@node Sun workstations
+@section Sun Workstations Running X
+
+Some earlier Sun keyboards do not have arrow keys separate from the
+keypad keys.  It is difficult to emulate the full EDT keypad and still
+retain use of the arrow keys on such keyboards.
+
+The Sun Type 5 and other more recent Sun keyboards, however, do have
+separate arrow keys.  This makes them candidates for setting up a
+reasonable EDT keypad emulation.
+
+Depending upon the configuration of the version of X installed on your
+system, you may find the default X keynames for the keypad keys don't
+permit Emacs to interpret some or all the keypad keys as something other
+than arrow keys, numeric keys, @key{Home}, @key{PageUp}, etc.  Both Sun
+and HP have been particularly guilty of making bizarre keysym
+assignments to the keypad keys.
+
+In most cases, the X Windows command, @code{xmodmap}, can be used to
+correct the problem.  Here's a sample @file{.xmodmaprc} file which
+corrects this problem on one Sun workstation configuration using an
+older SunOS release configured with a Sun Type 5 keyboard:
+
+@example
+! File:  .xmodmaprc
+!
+! Set up Sun Type 5 keypad for use with the Emacs EDT Emulation
+!
+keycode  53 = KP_Divide
+keycode  54 = KP_Multiply
+keycode  57 = KP_Decimal
+keycode  75 = KP_7
+keycode  76 = KP_8
+keycode  77 = KP_9
+keycode  78 = KP_Subtract
+keycode  97 = KP_Enter
+keycode  98 = KP_4
+keycode  99 = KP_5
+keycode 100 = KP_6
+keycode 101 = KP_0
+keycode 105 = F24
+keycode 119 = KP_1
+keycode 120 = KP_2
+keycode 121 = KP_3
+keycode 132 = KP_Add
+@end example
+
+If @file{edt-mapper.el} does not recognize your keypad keys as unique
+keys, use the command @samp{xmodmap -pke} to get a listing of the actual
+key codes and the keysyms mapped to them and then generate you own
+custom @file{.xmodmaprc} similar to the one above.
+
+Next, feed @file{.xmodmaprc} to the @code{xmodmap} command and all the
+Sun Type 5 keypad keys will now be configurable for the emulation of an
+LK-201 keypad (less the @key{,} key).  In this example, the line
+
+@example
+keycode 105 = F24
+@end example
+
+@noindent changes the X Windows name of the keypad @key{NumLock} key to
+be known internally as the @key{F24} key.  Doing so permits it to be
+configured to behave as the @key{PF1} (@key{GOLD}) key.
+
+The side effect of this change is that you will no longer have a
+@key{NumLock} key.  If you are using other software under X which
+requires a @key{NumLock} key, then examine your keyboard and look for
+one you don't use and redefine it to be the @key{NumLock} key.
+Basically, you need to clear the @key{NumLock} key from being assigned
+as a modifier, assign it to the key of your choice, and then add it back
+as a modifier.  (@ref{Unix} for further help on how to do this.)
+
+@node MS-DOS
+@section PC Users Running MS-DOS
+
+By default, F1 is configured to emulate the @key{PF1} (@key{GOLD}) key.
+But @key{NumLock} can be used instead if you load a freeware TSR
+distributed with MS-Kermit, call @samp{gold.com}.  This was once
+distributed in a file called @file{gold22.zip} and came with the source
+code as well as a loadable binary image.  (See @file{edt-pc.el} in the
+Emacs @file{lisp/emulation} directory for more information.)
+
+@node GNU/Linux
+@section PC Users Running GNU/Linux
+
+The default X server configuration varies from distribution to
+distribution and release to release of GNU/Linux.  If your system fails
+to recognize the keypad keys as distinct keys, change the NumLock state,
+turning it on or off, as the case may be, then try again.  If this
+doesn't solve your problem, you may have to modify the X keysym mappings
+with @code{xmodmap}.
+
+On one distribution on an Intel PC, the following @file{.xmodmaprc} set
+things up nicely.
+
+@example
+! File:  .xmodmaprc
+!
+! Set up PC keypad under GNU/Linux for the Emacs EDT Emulation
+!
+clear  mod2
+keycode  77 = F12
+keycode  96 = Num_Lock Pointer_EnableKeys
+add mod2 = Num_Lock
+@end example
+
+In this example, after feeding the file to the @code{xmodmap} command,
+the PC @key{NumLock} keypad key will be configurable for the emulation
+of the @key{PF1} key.  The PC keypad can now emulate an LK-201 keypad
+(less the comma key), the standard keyboard supplied with DEC terminals
+VT-200 and above.  This @file{.xmodmaprc} file switches the role of the
+@key{F12} and @key{NumLock} keys.  It has been tested on RedHat
+GNU/Linux 5.2.  Other versions of GNU/Linux may require different
+keycodes.  (@ref{Unix} for further help on how to do this.)
+
+@strong{Please note:} Remember, it may be necessary to have @key{NumLock} in
+one position (ON) or the other (OFF) for the PC keypad to emulate the
+LK-201 keypad properly.
+
+@node Unix
+@section General Notes on Using @key{NumLock} for the @key{PF1} Key on Unix Systems
+
+Making the physical @key{NumLock} key available for use in the EDT Emulation
+requires some modification to the default X Window settings.  Since the
+keycode assignments vary from system to system, some investigation is
+needed to see how to do this on a particular system.
+
+You will need to look at the output generated by @code{xmodmap} invoked
+with the "-pm" switch.  For example, on RedHat GNU/Linux 5.2 on a PC, we
+get the following output when running @samp{xmodmap -pm}:
+
+@example
+xmodmap:  up to 2 keys per modifier, (keycodes in parentheses):
+
+shift       Shift_L (0x32),  Shift_R (0x3e)
+lock        Caps_Lock (0x42)
+control     Control_L (0x25),  Control_R (0x6d)
+mod1        Alt_L (0x40),  Alt_R (0x71)
+mod2        Num_Lock (0x4d)
+mod3
+mod4
+mod5        Scroll_Lock (0x4e)
+@end example
+
+@noindent Note that Num_Lock is assigned to the modifier @samp{mod2}.  This is
+what hides Num_Lock from being seen by Emacs.
+
+Now, @samp{xmodmap -pke} yields:
+
+@example
+   .
+   .
+   .
+keycode  77 = Num_Lock Pointer_EnableKeys
+   .
+   .
+   .
+keycode  96 = F12
+   .
+   .
+   .
+@end example
+
+@noindent So, in RedHat GNU/Linux 5.2 on a PC, Num_Lock generates keycode 77.
+The following steps are taken:
+
+@enumerate
+@item
+clear the assignment of Num_Lock to mod2;
+@item
+swap the keycodes assigned to F12 and Num_Lock;
+@item
+assign Num_Lock back to mod2.
+@end enumerate
+
+@noindent The @file{.xmodmaprc} file looks like this:
+
+@example
+! File:  .xmodmaprc
+!
+! Set up PC keypad under GNU/Linux for the Emacs EDT Emulation
+!
+clear  mod2
+keycode  77 = F12
+keycode  96 = Num_Lock Pointer_EnableKeys
+add mod2 = Num_Lock
+@end example
+
+So, after executing @samp{xmodmap .xmodmaprc}, a press of the physical
+@key{F12} key looks like a Num_Lock keypress to X.  Also, a press of the
+physical @key{NumLock} key looks like a press of the @key{F12} key to X.
+
+Now, @file{edt-mapper.el} will see @samp{f12} when the physical
+@key{NumLock} key is pressed, allowing the @key{NumLock} key to be used
+as the EDT @key{PF1} (@key{GOLD}) key.
+
+@node Differences
+@chapter How Does this EDT Emulation Differ from Real EDT?
+
+In general, you will find that this emulation of EDT replicates most,
+but not all, of EDT's most used Keypad Mode editing functions and
+behavior.  It is not perfect, but most EDT users who have tried the
+emulation agree that it is quite good enough to make it easy for
+die-hard EDT users to move over to using Emacs.
+
+Here's a list of the most important differences between EDT and this GNU
+Emacs EDT Emulation.  The list is short but you must be aware of these
+differences if you are to use the EDT Emulation effectively.
+
+@enumerate
+
+@item
+Entering repeat counts works a little differently than in EDT.
+
+EDT allows users to enter a repeat count before entering a command that
+accepts repeat counts.  For example, when using the real EDT, pressing
+these three keys in sequence, @kbd{GOLD 5 KP1}, will move the cursor in
+the current direction 5 words.  This does @strong{not} work in Emacs!
+
+Emacs provides two ways to enter repeat counts and neither involves
+using the @key{GOLD} key.  First, repeat counts can be entered in Emacs
+by using the @key{ESC} key.  For example, pressing these keys in
+sequence, @kbd{ESC 1 0 KP1}, will move the cursor in the current
+direction 10 words.  Second, Emacs provides another command called
+@code{universal-argument} that can be used to do the same thing.
+Normally, in Emacs has this bound to @kbd{C-u}.
+
+@item
+EDT's line mode commands and nokeypad mode commands are @strong{not}
+supported (with one important exception; see item 8 in
+@ref{Highlights}).  Although, at first, this may seem like a big
+omission, the set of built-in Emacs commands provides a much richer set
+of capabilities which more than make up for this omission.
+
+To enter Emacs commands not bound to keys, you can press @kbd{GOLD KP7}
+or the @key{DO} key.  Emacs will display its own command prompt "M-x".
+This stands for the keypress @kbd{Meta-x}, where @key{Meta} is a special
+shift key.  The @key{Alt} key is often mapped to behave as a @key{Meta}
+key.  So, you can also invoke this prompt by pressing @kbd{Meta-x}.
+Typing the sequence @kbd{ESC x} will also invoke the prompt.
+
+@item
+Selected text is highlighted @strong{only} on systems where Emacs
+supports the highlighting of text.
+
+@item
+Just like in TPU/EVE, the @key{ENTER} key is @strong{not} used to
+terminate input when the editor prompts you for input.  The @key{RETURN}
+key is used, instead.  (@key{KP4} and @key{KP5} (the direction keys) do
+terminate input for the @samp{FIND} command, just like in EDT, however.)
+
+@end enumerate
+
+@node Highlights
+@chapter Some Highlights, and Comparisons to the Original Emacs EDT Emulation
+
+@enumerate
+
+@item
+The EDT define key command is supported (@code{edt-define-key}) and is
+bound to @kbd{C-k} in the default EDT mode when EDT control sequence
+bindings are enabled, or when the sample @file{edt-user.el}
+customization file is used.  The TPU/EVE learn command is supported but
+not bound to a key in the default EDT mode but is bound in the sample
+@file{edt-user.el} file.
+
+Unlike the TPU/EVE learn command, which uses one key to begin the learn
+sequence, @kbd{C-l}, and another command to remember the sequence,
+@kbd{C-r}, this version of the learn command (@code{edt-learn}) serves
+as a toggle to both begin and to remember the learn sequence.
+
+Many users who change the meaning of a key with the define key and the
+learn commands, would like to be able to restore the original key
+binding without having to quit and restart emacs.  So a restore key
+command is provided to do just that.  When invoked, it prompts you to
+press the key to which you wish the last replaced key definition
+restored.  It is bound to @kbd{GOLD C-k} in the default EDT mode when
+EDT control sequence bindings are enabled or the sample
+@file{edt-user.el} customization file is used.
+
+@item
+Direction support is fully supported.
+
+@item
+All original Emacs bindings are fully restored when EDT emulation is
+turned off.  So, if a fellow worker comes over to your terminal to help
+you with a software problem, for example, and is completely confused by
+your EDT emulation bindings, just enter the command,
+@code{edt-emulation-off}, at the @samp{M-x} prompt and the original
+Emacs bindings will be restored.  To resume the EDT emulation, just
+enter @code{edt-emulation-on}.
+
+@item
+User custom EDT bindings are kept separate from the default EDT
+bindings.  One can toggle back and forth between the custom EDT bindings
+and default EDT bindings.
+
+@item
+The Emacs functions in @file{edt.el} attempt to emulate, where
+practical, the exact behavior of the corresponding EDT keypad mode
+commands.  In a few cases, the emulation is not exact, but we hope you
+will agree it is close enough.  In a very few cases, we chose to use the
+Emacs way of handling things.  As mentioned earlier, we do not emulate
+the EDT @samp{SUBS} command.  Instead, we chose to use the Emacs
+@code{query-replace} function, which we find to be easier to use.
+
+@item
+Emacs uses the regexp assigned to @code{page-delimiter} to determine
+what marks a page break.  This is normally @samp{^\f}, which causes the
+@code{edt-page} command to ignore form feeds not located at the
+beginning of a line.  To emulate the EDT @samp{PAGE} command exactly,
+page-delimiter is set to @samp{\f} when EDT emulation is turned on, and
+restored to @samp{^\f} when EDT emulation is turned off.  But, since
+some users prefer the Emacs definition of a page break, or may wish to
+preserve a customized definition of page break, one can override the EDT
+definition by placing
+
+@example
+(setq edt-keep-current-page-delimiter t)
+@end example
+
+@noindent in your @file{.emacs} file.  Or, you can used the Emacs customize
+command to change its setting.
+
+@item
+The EDT definition of a section of a terminal window is hardwired to be
+16 lines of its one-and-only 24-line window (the EDT @samp{SECT} command
+bound to @key{KP8}).  That's two-thirds of the window at a time.  Since
+Emacs, like TPU/EVE, can handle multiple windows of sizes of other than
+24 lines, the definition of section used here has been modified to
+two-thirds of the current window.  (There is also an
+@code{edt-scroll-window} function which you may prefer over the
+@samp{SECT} emulation.)
+
+@item
+Cursor movement and deletion involving word entities is identical to
+EDT.  This, above all else, gives the die-hard EDT user a sense of being
+at home.  Also, an emulation of EDT's @samp{SET ENTITY WORD} command is
+provided, for those users who like to customize movement by a word at a
+time to their own liking.
+
+@item
+EDT's @samp{FIND} and @samp{FNDNXT} are supported.
+
+@item
+EDT's @samp{APPEND}, @samp{REPLACE}, and @samp{SUBS} commands are supported.
+
+@item
+@samp{CHNGCASE} is supported.  It works on individual characters or
+selected text, if @samp{SELECT} is active.  In addition, two new
+commands are provided: @code{edt-lowercase} and @code{edt-uppercase}.
+They work on individual @strong{words} or selected text, if
+@samp{SELECT} is active.
+
+@item
+Form feed and tab insert commands are supported.
+
+@item
+A new command, @code{edt-duplicate-word}, is provided.  If you
+experiment with it, you might find it to be surprisingly useful and may
+wonder how you ever got along without it!  It is assigned to @kbd{C-j}
+in the sample @file{edt-user.el} customization file.
+
+@item
+TPU/EVE's Rectangular Cut and Paste functions (originally from the
+EVE-Plus package) are supported.  But unlike the TPU/EVE versions, these
+here support both insert and overwrite modes.  The seven rectangular
+functions are bound to @key{F7}, @key{F8}, @kbd{GOLD-F8}, @key{F9},
+@kbd{GOLD-F9}, @key{F10}, and @kbd{GOLD-F10} in the default EDT mode.
+
+@item
+The original EDT emulation package set up many default regular and GOLD
+bindings.  We tried to preserve most (but not all!) of these, so users
+of the original emulation package will feel more at home.
+
+Nevertheless, there are still many GOLD key sequences which are not
+bound to any functions.  These are prime candidates to use for your own
+customizations.
+
+Also, there are several commands in @file{edt.el} not bound to any key.
+So, you will find it worthwhile to look through @file{edt.el} for
+functions you may wish to add to your personal customized bindings.
+
+@item
+The VT200/VT300 series terminals steal the function keys @key{F1} to
+@key{F5} for their own use.  These do not generate signals which are
+sent to the host.  So, @file{edt.el} does not assign any default
+bindings to @key{F1} through @key{F5}.
+
+In addition, our VT220 terminals generate an interrupt when the @key{F6}
+key is pressed (@samp{^C} or @samp{^Y}, can't remember which) and not
+the character sequence documented in the manual.  So, binding Emacs
+commands to @key{F6} will not work if your terminal behaves the same
+way.
+
+@item
+The VT220 terminal has no @key{ESC}, @key{BS}, nor @key{LF} keys, as
+does a VT100.  So the default EDT bindings adopt the standard DEC
+convention of having the @key{F11}, @key{F12}, and @key{F13} keys, on a
+VT200 series (and above) terminal, assigned to the same EDT functions
+that are bound to @key{ESC}, @key{BS}, and @key{LF} on a VT100 terminal.
+
+@item
+Each user, through the use of a private @file{edt-user.el} file, can
+customize, very easily, personal EDT emulation bindings.
+
+@item
+The EDT @samp{SELECT} and @samp{RESET} functions are supported.
+However, unlike EDT, pressing @samp{RESET} to cancel text selection does
+@strong{not} reset the existing setting of the current direction.
+
+We also provide a TPU/EVE like version of the single @samp{SELECT/RESET}
+function, called @code{edt-toggle-select}, which makes the EDT
+@samp{SELECT} function into a toggle on/off switch.  That is, if
+selection is on, pressing @samp{SELECT} again turns selection off
+(cancels selection).  This function is used in the sample
+@file{edt-user.el} customization file.
+
+@item
+EDT scroll margins are supported, but are disabled by default.
+(@ref{Scroll margins} for instructions on how to enable them.)
+
+@end enumerate
+
+@node Customizing
+@chapter Customizing Emulation
+
+Most EDT users, at one time or another, make some custom key bindings,
+or use someone else's custom key bindings, which they come to depend
+upon just as if they were built-in bindings.  This EDT Emulation for GNU
+Emacs is designed to make it easy to customize bindings.
+
+If you wish to customize the EDT Emulation to use some of your own key
+bindings, you need to make a private version of @file{edt-user.el} in
+your own private lisp directory.  The Emacs @file{etc/} directory
+contains an example for you to use as a template and for ideas.
+@c This seems to be untrue.
+@ignore
+There are two sample files @file{edt-user.el1} and @file{edt-user.el2}
+for you to use as templates and for ideas.  Look at @file{edt-user.el1}
+first.  Unless you will be using two or more very different types of
+terminals on the same system, you need not look at @file{edt-user.el2}.
+@end ignore
+
+First, you need to have your own private lisp directory, say
+@file{~/lisp}, and you should add it to the Emacs load path.
+
+@strong{Please note:} A few sites have different load-path requirements,
+so the above directions may need some modification if your site has such
+special needs.
+
+@menu
+* edt-user.el::          Creating your own @file{edt-user.el} file.
+* Words::                Specifying word entities.
+* Control keys::         Enabling EDT control key sequence bindings.
+* Scroll margins::       Setting scroll margins.
+@end menu
+
+@node edt-user.el
+@section Creating your own @file{edt-user.el} File
+
+A sample @file{edt-user.el} file is provided in the Emacs @file{etc/}
+directory.  You should use it as a guide to learn how you can customize
+EDT emulation bindings to your own liking.  Names used to identify the
+set of LK-201 keypad and function keys are:
+
+@example
+Keypad Keys:
+                PF1 PF2 PF3 PF4
+                KP7 KP8 KP9 KP-
+                KP4 KP5 KP6 KP,
+                KP1 KP2 KP3
+                KP0     KPP KPE
+@end example
+
+@example
+Arrow Keys:
+                LEFT RIGHT DOWN UP
+@end example
+
+@example
+Function Keys:
+                F1 F2 F3 F4 F5  F6 F7 F8 F9 F10  F11 F12 F13 F14
+                HELP DO  F17 F18 F19 F20
+
+                FIND   INSERT   REMOVE
+                SELECT PREVIOUS NEXT
+@end example
+
+Note: Many VT-200 terminals, and above, steal function keys @key{F1}
+through @key{F5} for terminal setup control and don't send anything to
+the host if pressed.  So customizing bindings to these keys may not work
+for you.
+
+There are three basic functions that do the EDT emulation custom
+bindings: @code{edt-bind-key}, @code{edt-bind-gold-key}, and
+@code{edt-bind-function-key}.
+
+The first two are for binding functions to keys which are standard
+across most keyboards.  This makes them keyboard independent, making it
+possible to define these key bindings for all terminals in the file
+@file{edt.el}.
+
+The first, @code{edt-bind-key}, is used typically to bind emacs commands
+to control keys, although some people use it to bind commands to other
+keys, as well.  (For example, some people use it to bind the VT200
+seldom used back-tick key (@samp{`}) to the function @samp{ESC-prefix}
+so it will behave like an @key{ESC} key.)  The second function,
+@code{edt-bind-gold-key}, is used to bind emacs commands to gold key
+sequences involving alpha-numeric keys, special character keys, and
+control keys.
+
+The third function, @code{edt-bind-function-key}, is terminal dependent
+and is defined in a terminal specific file (see @file{edt-vt100.el} for
+example).  It is used to bind emacs commands to LK-201 function keys, to
+keypad keys, and to gold sequences of those keys.
+
+@node Words
+@section Specifying Word Entities
+
+The variable @code{edt-word-entities} is used to emulate EDT's @samp{SET
+ENTITY WORD} command.  It contains a list of characters to be treated as
+words in themselves.  If the user does not define
+@code{edt-word-entities} in his/her @file{.emacs} file, then it is set
+up with the EDT default containing only @key{TAB}.
+
+The characters are stored in the list by their numerical values, not as
+strings.  Emacs supports several ways to specify the numerical value of
+a character.  One method is to use the question mark: @samp{?A} means
+the numerical value for @samp{A}, @samp{?/} means the numerical value
+for @samp{/}, and so on.  Several unprintable characters have special
+representations:
+
+@example
+?\b  specifies  BS, C-h
+?\t  specifies  TAB, C-i
+?\n  specifies  LFD, C-j
+?\v  specifies  VTAB, C-k
+?\f  specifies  FF, C-l
+?\r  specifies  CR, C-m
+?\e  specifies  ESC, C-[
+?\\  specifies  \
+@end example
+
+Here are some examples:
+
+@example
+(setq edt-word-entities '(?\t ?- ?/)) ; specifies TAB, - , and /
+(setq edt-word-entities '(?\t)        ; specifies TAB, the default
+@end example
+
+@noindent You can also specify characters by their decimal ascii values:
+
+@example
+(setq edt-word-entities '(9 45 47))   ; specifies TAB, - , and /
+@end example
+
+@node Control keys
+@section Enabling EDT Control Key Sequence Bindings
+
+Where EDT key bindings and Emacs key bindings conflict, the default
+Emacs key bindings are retained by default.  Some diehard EDT users
+may not like this.  So, if the variable
+@code{edt-use-EDT-control-key-bindings} is set to true in a user's
+@file{.emacs} file, then the default EDT Emulation mode will enable most
+of the original EDT control key sequence bindings.  If you wish to do
+this, add the following line to your @file{.emacs} file:
+
+@example
+(setq edt-use-EDT-control-key-bindings t)
+@end example
+
+@node Scroll margins
+@section Setting Scroll Margins
+
+Scroll margins at the top and bottom of the window are now supported.
+(The design was copied from @file{tpu-extras.el}.)  By default, this
+feature is enabled with the top margin set to 10% of the window and the
+bottom margin set to 15% of the window.  To change these settings, you
+can invoke the function @code{edt-set-scroll-margins} in your
+@file{.emacs} file.  For example, the following line
+
+@example
+(edt-set-scroll-margins "20%" "25%")
+@end example
+
+@noindent sets the top margin to 20% of the window and the bottom margin
+to 25% of the window.  To disable this feature, set each margin to 0%.
+You can also invoke @code{edt-set-scroll-margins} interactively while
+EDT Emulation is active to change the settings for that session.
+
+@strong{Please note:} Another way to set the scroll margins is to use
+the Emacs customization feature to set the following two variables
+directly: @code{edt-top-scroll-margin} and @code{edt-bottom-scroll-margin}.
+
+Enter the Emacs @code{customize} command.  First select the
+@samp{Editing} group and then select the @samp{Emulations} group.
+Finally, select the @samp{Edt} group and follow the directions.
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@bye

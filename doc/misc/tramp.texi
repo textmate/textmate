@@ -1,0 +1,3716 @@
+\input texinfo   @c -*-texinfo-*-
+@setfilename ../../info/tramp
+@c %**start of header
+@settitle TRAMP User Manual
+@c %**end of header
+
+@c This is *so* much nicer :)
+@footnotestyle end
+
+@c In the Tramp CVS, the version number is auto-frobbed from
+@c configure.ac, so you should edit that file and run
+@c "autoconf && ./configure" to change the version number.
+
+@c Additionally, flags are set with respect to the Emacs flavor; and
+@c depending whether Tramp is packaged into (X)Emacs, or standalone.
+
+@include trampver.texi
+
+@c Macro for formatting a filename according to the respective syntax.
+@c xxx and yyy are auxiliary macros in order to omit leading and
+@c trailing whitespace.  Not very elegant, but I don't know it better.
+
+@macro xxx {one}@c
+@set \one\@c
+@end macro
+
+@macro yyy {one, two}@c
+@xxx{x\one\}@c
+@ifclear x@c
+\one\@w{}\two\@c
+@end ifclear
+@clear x\one\@c
+@end macro
+
+@macro trampfn {method, user, host, localname}@c
+@value{prefix}@yyy{\method\,@value{postfixhop}}@yyy{\user\,@@}\host\@value{postfix}\localname\@c
+@end macro
+
+@copying
+Copyright @copyright{} 1999-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to
+copy and modify this GNU manual.  Buying copies from the FSF
+supports it in developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@c Entries for @command{install-info} to use
+@dircategory @value{emacsname} network features
+@direntry
+* TRAMP: (tramp).               Transparent Remote Access, Multiple Protocol
+                                @value{emacsname} remote file access via rsh and rcp.
+@end direntry
+
+@titlepage
+@title @value{tramp} version @value{trampver} User Manual
+@author by Daniel Pittman
+@author based on documentation by Kai Gro@ss{}johann
+@page
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top, Overview, (dir), (dir)
+@top @value{tramp} version @value{trampver} User Manual
+
+This file documents @value{tramp} version @value{trampver}, a remote file
+editing package for @value{emacsname}.
+
+@value{tramp} stands for `Transparent Remote (file) Access, Multiple
+Protocol'.  This package provides remote file editing, similar to
+@value{ftppackagename}.
+
+The difference is that @value{ftppackagename} uses FTP to transfer
+files between the local and the remote host, whereas @value{tramp} uses a
+combination of @command{rsh} and @command{rcp} or other work-alike
+programs, such as @command{ssh}/@command{scp}.
+
+You can find the latest version of this document on the web at
+@uref{http://www.gnu.org/software/tramp/}.
+
+@c Pointer to the other Emacs flavor is necessary only in case of
+@c standalone installation.
+@ifset installchapter
+The manual has been generated for @value{emacsname}.
+@ifinfo
+If you want to read the info pages for @value{emacsothername}, you
+should read in @ref{Installation} how to create them.
+@end ifinfo
+@ifhtml
+If you're using the other Emacs flavor, you should read the
+@uref{@value{emacsotherfilename}, @value{emacsothername}} pages.
+@end ifhtml
+@end ifset
+
+@ifhtml
+The latest release of @value{tramp} is available for
+@uref{ftp://ftp.gnu.org/gnu/tramp/, download}, or you may see
+@ref{Obtaining Tramp} for more details, including the CVS server
+details.
+
+@value{tramp} also has a @uref{http://savannah.gnu.org/projects/tramp/,
+Savannah Project Page}.
+@end ifhtml
+
+There is a mailing list for @value{tramp}, available at
+@email{tramp-devel@@gnu.org}, and archived at
+@uref{http://lists.gnu.org/archive/html/tramp-devel/, the
+@value{tramp} Mail Archive}.
+@ifhtml
+Older archives are located at
+@uref{http://sourceforge.net/mailarchive/forum.php?forum=tramp-devel,
+SourceForge Mail Archive} and
+@uref{http://www.mail-archive.com/emacs-rcp@@ls6.cs.uni-dortmund.de/,
+The Mail Archive}.
+@c in HTML output, there's no new paragraph.
+@*@*
+@end ifhtml
+
+@insertcopying
+
+@end ifnottex
+
+@menu
+* Overview::                    What @value{tramp} can and cannot do.
+
+For the end user:
+
+* Obtaining Tramp::             How to obtain @value{tramp}.
+* History::                     History of @value{tramp}.
+@ifset installchapter
+* Installation::                Installing @value{tramp} with your @value{emacsname}.
+@end ifset
+* Configuration::               Configuring @value{tramp} for use.
+* Usage::                       An overview of the operation of @value{tramp}.
+* Bug Reports::                 Reporting Bugs and Problems.
+* Frequently Asked Questions::  Questions and answers from the mailing list.
+* Function Index::              @value{tramp} functions.
+* Variable Index::              User options and variables.
+* Concept Index::               An item for each concept.
+
+For the developer:
+
+* Files directories and localnames::  How file names, directories and localnames are mangled and managed.
+* Traces and Profiles::         How to Customize Traces.
+* Issues::                      Debatable Issues and What Was Decided.
+
+* GNU Free Documentation License:: The license for this documentation.
+
+@detailmenu
+ --- The Detailed Node Listing ---
+@c
+@ifset installchapter
+Installing @value{tramp} with your @value{emacsname}
+
+* Installation parameters::     Parameters in order to control installation.
+* Load paths::                  How to plug-in @value{tramp} into your environment.
+
+@end ifset
+
+Configuring @value{tramp} for use
+
+* Connection types::            Types of connections made to remote machines.
+* Inline methods::              Inline methods.
+* External methods::            External methods.
+@ifset emacsgvfs
+* GVFS based methods::          GVFS based external methods.
+@end ifset
+@ifset emacsgw
+* Gateway methods::             Gateway methods.
+@end ifset
+* Default Method::              Selecting a default method.
+* Default User::                Selecting a default user.
+* Default Host::                Selecting a default host.
+* Multi-hops::                  Connecting to a remote host using multiple hops.
+* Customizing Methods::         Using Non-Standard Methods.
+* Customizing Completion::      Selecting config files for user/host name completion.
+* Password handling::           Reusing passwords for several connections.
+* Connection caching::          Reusing connection related information.
+* Remote Programs::             How @value{tramp} finds and uses programs on the remote machine.
+* Remote shell setup::          Remote shell setup hints.
+* Windows setup hints::         Issues with Cygwin ssh.
+* Auto-save and Backup::        Auto-save and Backup.
+
+Using @value{tramp}
+
+* Filename Syntax::             @value{tramp} filename conventions.
+* Alternative Syntax::          URL-like filename syntax.
+* Filename completion::         Filename completion.
+* Remote processes::            Integration with other @value{emacsname} packages.
+* Cleanup remote connections::  Cleanup remote connections.
+
+How file names, directories and localnames are mangled and managed
+
+* Localname deconstruction::    Breaking a localname into its components.
+@ifset emacs
+* External packages::           Integration with external Lisp packages.
+@end ifset
+
+@end detailmenu
+@end menu
+
+@node Overview
+@chapter An overview of @value{tramp}
+@cindex overview
+
+After the installation of @value{tramp} into your @value{emacsname}, you
+will be able to access files on remote machines as though they were
+local.  Access to the remote file system for editing files, version
+control, and @code{dired} are transparently enabled.
+
+Your access to the remote machine can be with the @command{rsh},
+@command{rlogin}, @command{telnet} programs or with any similar
+connection method.  This connection must pass @acronym{ASCII}
+successfully to be usable but need not be 8-bit clean.
+
+The package provides support for @command{ssh} connections out of the
+box, one of the more common uses of the package.  This allows
+relatively secure access to machines, especially if @command{ftp}
+access is disabled.
+
+Under Windows, @value{tramp} is integrated with the PuTTY package,
+using the @command{plink} program.
+
+The majority of activity carried out by @value{tramp} requires only that
+the remote login is possible and is carried out at the terminal.  In
+order to access remote files @value{tramp} needs to transfer their content
+to the local machine temporarily.
+
+@value{tramp} can transfer files between the machines in a variety of ways.
+The details are easy to select, depending on your needs and the
+machines in question.
+
+The fastest transfer methods for large files rely on a remote file
+transfer package such as @command{rcp}, @command{scp}, @command{rsync}
+or (under Windows) @command{pscp}.
+
+If the remote copy methods are not suitable for you, @value{tramp} also
+supports the use of encoded transfers directly through the shell.
+This requires that the @command{mimencode} or @command{uuencode} tools
+are available on the remote machine.  These methods are generally
+faster for small files.
+
+@value{tramp} is still under active development and any problems you encounter,
+trivial or major, should be reported to the @value{tramp} developers.
+@xref{Bug Reports}.
+
+
+@subsubheading Behind the scenes
+@cindex behind the scenes
+@cindex details of operation
+@cindex how it works
+
+This section tries to explain what goes on behind the scenes when you
+access a remote file through @value{tramp}.
+
+Suppose you type @kbd{C-x C-f} and enter part of an @value{tramp} file name,
+then hit @kbd{@key{TAB}} for completion.  Suppose further that this is
+the first time that @value{tramp} is invoked for the host in question.  Here's
+what happens:
+
+@itemize
+@item
+@value{tramp} discovers that it needs a connection to the host.  So it
+invokes @samp{telnet @var{host}} or @samp{rsh @var{host} -l
+@var{user}} or a similar tool to connect to the remote host.
+Communication with this process happens through an
+@value{emacsname} buffer, that is, the output from the remote end
+goes into a buffer.
+
+@item
+The remote host may prompt for a login name (for @command{telnet}).
+The login name is given in the file name, so @value{tramp} sends the
+login name and a newline.
+
+@item
+The remote host may prompt for a password or pass phrase (for
+@command{rsh} or for @command{telnet} after sending the login name).
+@value{tramp} displays the prompt in the minibuffer, asking you for the
+password or pass phrase.
+
+You enter the password or pass phrase.  @value{tramp} sends it to the remote
+host, followed by a newline.
+
+@item
+@value{tramp} now waits for the shell prompt or for a message that the login
+failed.
+
+If @value{tramp} sees neither of them after a certain period of time
+(a minute, say), then it issues an error message saying that it
+couldn't find the remote shell prompt and shows you what the remote
+host has sent.
+
+If @value{tramp} sees a @samp{login failed} message, it tells you so,
+aborts the login attempt and allows you to try again.
+
+@item
+Suppose that the login was successful and @value{tramp} sees the shell prompt
+from the remote host.  Now @value{tramp} invokes @command{/bin/sh} because
+Bourne shells and C shells have different command
+syntaxes.@footnote{Invoking @command{/bin/sh} will fail if your login
+shell doesn't recognize @samp{exec /bin/sh} as a valid command.
+Maybe you use the Scheme shell @command{scsh}@dots{}}
+
+After the Bourne shell has come up, @value{tramp} sends a few commands to
+ensure a good working environment.  It turns off echoing, it sets the
+shell prompt, and a few other things.
+
+@item
+Now the remote shell is up and it good working order.  Remember, what
+was supposed to happen is that @value{tramp} tries to find out what files exist
+on the remote host so that it can do filename completion.
+
+So, @value{tramp} basically issues @command{cd} and @command{ls} commands and
+also sometimes @command{echo} with globbing.  Another command that is
+often used is @command{test} to find out whether a file is writable or a
+directory or the like.  The output of each command is parsed for the
+necessary operation.
+
+@item
+Suppose you are finished with filename completion, have entered @kbd{C-x
+C-f}, a full file name and hit @kbd{@key{RET}}.  Now comes the time to
+transfer the file contents from the remote host to the local host so
+that you can edit them.
+
+See above for an explanation of how @value{tramp} transfers the file contents.
+
+For inline transfers, @value{tramp} issues a command like @samp{mimencode -b
+/path/to/remote/file}, waits until the output has accumulated in the
+buffer that's used for communication, then decodes that output to
+produce the file contents.
+
+For external transfers, @value{tramp} issues a command like the
+following:
+@example
+rcp user@@host:/path/to/remote/file /tmp/tramp.4711
+@end example
+It then reads the local temporary file @file{/tmp/tramp.4711} into a
+buffer and deletes the temporary file.
+
+@item
+You now edit the buffer contents, blithely unaware of what has happened
+behind the scenes.  (Unless you have read this section, that is.)  When
+you are finished, you type @kbd{C-x C-s} to save the buffer.
+
+@item
+Again, @value{tramp} transfers the file contents to the remote host
+either inline or external.  This is the reverse of what happens when
+reading the file.
+@end itemize
+
+I hope this has provided you with a basic overview of what happens
+behind the scenes when you open a file with @value{tramp}.
+
+
+@c For the end user
+@node Obtaining Tramp
+@chapter Obtaining Tramp.
+@cindex obtaining Tramp
+
+@value{tramp} is freely available on the Internet and the latest
+release may be downloaded from @uref{ftp://ftp.gnu.org/gnu/tramp/}.
+This release includes the full documentation and code for
+@value{tramp}, suitable for installation.  But Emacs (22 or later)
+includes @value{tramp} already, and there is a @value{tramp} package
+for XEmacs, as well.  So maybe it is easier to just use those.  But if
+you want the bleeding edge, read on@dots{...}
+
+For the especially brave, @value{tramp} is available from CVS.  The CVS
+version is the latest version of the code and may contain incomplete
+features or new issues.  Use these versions at your own risk.
+
+Instructions for obtaining the latest development version of @value{tramp}
+from CVS can be found by going to the Savannah project page at the
+following URL and then clicking on the CVS link in the navigation bar
+at the top.
+
+@noindent
+@uref{http://savannah.gnu.org/projects/tramp/}
+
+@noindent
+Or follow the example session below:
+
+@example
+] @strong{cd ~/@value{emacsdir}}
+] @strong{export CVS_RSH="ssh"}
+] @strong{cvs -z3 -d:pserver:anonymous@@cvs.savannah.gnu.org:/sources/tramp co tramp}
+@end example
+
+@noindent
+You should now have a directory @file{~/@value{emacsdir}/tramp}
+containing the latest version of @value{tramp}.  You can fetch the latest
+updates from the repository by issuing the command:
+
+@example
+] @strong{cd ~/@value{emacsdir}/tramp}
+] @strong{export CVS_RSH="ssh"}
+] @strong{cvs update -d}
+@end example
+
+@noindent
+Once you've got updated files from the CVS repository, you need to run
+@command{autoconf} in order to get an up-to-date @file{configure}
+script:
+
+@example
+] @strong{cd ~/@value{emacsdir}/tramp}
+] @strong{autoconf}
+@end example
+
+
+@node History
+@chapter History of @value{tramp}
+@cindex history
+@cindex development history
+
+Development was started end of November 1998.  The package was called
+@file{rssh.el}, back then.  It only provided one method to access a
+file, using @command{ssh} to log in to a remote host and using
+@command{scp} to transfer the file contents.  After a while, the name
+was changed to @file{rcp.el}, and now it's @value{tramp}.  Along the way,
+many more methods for getting a remote shell and for transferring the
+file contents were added.  Support for VC was added.
+
+After that, there were added the multi-hop methods in April 2000 and
+the unification of @value{tramp} and Ange-FTP filenames in July 2002.
+In July 2004, multi-hop methods have been replaced by proxy hosts.
+Running commands on remote hosts was introduced in December 2005.
+@ifset emacsgw
+Support of gateways exists since April 2007.
+@end ifset
+@ifset emacsgvfs
+GVFS integration started in February 2009.
+@end ifset
+
+In December 2001, @value{tramp} has been added to the XEmacs package
+repository.  Being part of the Emacs repository happened in June 2002,
+the first release including @value{tramp} was Emacs 22.1.
+
+@value{tramp} is also a Debian GNU/Linux package since February 2001.
+
+
+@c Installation chapter is necessary only in case of standalone
+@c installation.  Text taken from trampinst.texi.
+@ifset installchapter
+@include trampinst.texi
+@end ifset
+
+@node Configuration
+@chapter Configuring @value{tramp} for use
+@cindex configuration
+
+@cindex default configuration
+@value{tramp} is (normally) fully functional when it is initially
+installed.  It is initially configured to use the @command{scp}
+program to connect to the remote host.  So in the easiest case, you
+just type @kbd{C-x C-f} and then enter the filename
+@file{@trampfn{, user, machine, /path/to.file}}.
+
+On some hosts, there are problems with opening a connection.  These are
+related to the behavior of the remote shell.  See @xref{Remote shell
+setup}, for details on this.
+
+If you do not wish to use these commands to connect to the remote
+host, you should change the default connection and transfer method
+that @value{tramp} uses.  There are several different methods that @value{tramp}
+can use to connect to remote machines and transfer files
+(@pxref{Connection types}).
+
+If you don't know which method is right for you, see @xref{Default
+Method}.
+
+
+@menu
+* Connection types::            Types of connections made to remote machines.
+* Inline methods::              Inline methods.
+* External methods::            External methods.
+@ifset emacsgvfs
+* GVFS based methods::          GVFS based external methods.
+@end ifset
+@ifset emacsgw
+* Gateway methods::             Gateway methods.
+@end ifset
+* Default Method::              Selecting a default method.
+                                  Here we also try to help those who
+                                  don't have the foggiest which method
+                                  is right for them.
+* Default User::                Selecting a default user.
+* Default Host::                Selecting a default host.
+* Multi-hops::                  Connecting to a remote host using multiple hops.
+* Customizing Methods::         Using Non-Standard Methods.
+* Customizing Completion::      Selecting config files for user/host name completion.
+* Password handling::           Reusing passwords for several connections.
+* Connection caching::          Reusing connection related information.
+* Remote Programs::             How @value{tramp} finds and uses programs on the remote machine.
+* Remote shell setup::          Remote shell setup hints.
+* Windows setup hints::         Issues with Cygwin ssh.
+* Auto-save and Backup::        Auto-save and Backup.
+@end menu
+
+
+@node Connection types
+@section Types of connections made to remote machines.
+@cindex connection types, overview
+
+There are two basic types of transfer methods, each with its own
+advantages and limitations.  Both types of connection make use of a
+remote shell access program such as @command{rsh}, @command{ssh} or
+@command{telnet} to connect to the remote machine.
+
+This connection is used to perform many of the operations that @value{tramp}
+requires to make the remote file system transparently accessible from
+the local machine.  It is only when visiting files that the methods
+differ.
+
+@cindex inline methods
+@cindex external methods
+@cindex methods, inline
+@cindex methods, external
+Loading or saving a remote file requires that the content of the file
+be transferred between the two machines.  The content of the file can
+be transferred using one of two methods: the @dfn{inline method} over
+the same connection used to log in to the remote machine, or the
+@dfn{external method} through another connection using a remote copy
+program such as @command{rcp}, @command{scp} or @command{rsync}.
+
+The performance of the external methods is generally better than that
+of the inline methods, at least for large files.  This is caused by
+the need to encode and decode the data when transferring inline.
+
+The one exception to this rule are the @command{scp} based transfer
+methods.  While these methods do see better performance when actually
+transferring files, the overhead of the cryptographic negotiation at
+startup may drown out the improvement in file transfer times.
+
+External methods should be configured such a way that they don't
+require a password (with @command{ssh-agent}, or such alike).  Modern
+@command{scp} implementations offer options to reuse existing
+@command{ssh} connections, see method @command{scpc}.  If it isn't
+possible, you should consider @ref{Password handling}, otherwise you
+will be prompted for a password every copy action.
+
+
+@node Inline methods
+@section Inline methods
+@cindex inline methods
+@cindex methods, inline
+
+The inline methods in @value{tramp} are quite powerful and can work in
+situations where you cannot use an external transfer program to connect.
+Inline methods are the only methods that work when connecting to the
+remote machine via telnet.  (There are also strange inline methods which
+allow you to transfer files between @emph{user identities} rather than
+hosts, see below.)
+
+These methods depend on the existence of a suitable encoding and
+decoding command on remote machine.  Locally, @value{tramp} may be able to
+use features of @value{emacsname} to decode and encode the files or
+it may require access to external commands to perform that task.
+
+@cindex uuencode
+@cindex mimencode
+@cindex base-64 encoding
+@value{tramp} checks the availability and usability of commands like
+@command{mimencode} (part of the @command{metamail} package) or
+@command{uuencode} on the remote host.  The first reliable command
+will be used.  The search path can be customized, see @ref{Remote
+Programs}.
+
+If both commands aren't available on the remote host, @value{tramp}
+transfers a small piece of Perl code to the remote host, and tries to
+apply it for encoding and decoding.
+
+The variable @var{tramp-inline-compress-start-size} controls, whether
+a file shall be compressed before encoding.  This could increase
+transfer speed for large text files.
+
+
+@table @asis
+@item @option{rsh}
+@cindex method rsh
+@cindex rsh method
+
+Connect to the remote host with @command{rsh}.  Due to the unsecure
+connection it is recommended for very local host topology only.
+
+On operating systems which provide the command @command{remsh} instead
+of @command{rsh}, you can use the method @option{remsh}.  This is true
+for HP-UX or Cray UNICOS, for example.
+
+
+@item @option{ssh}
+@cindex method ssh
+@cindex ssh method
+
+Connect to the remote host with @command{ssh}.  This is identical to
+the previous option except that the @command{ssh} package is used,
+making the connection more secure.
+
+There are also two variants, @option{ssh1} and @option{ssh2}, that
+call @samp{ssh -1} and @samp{ssh -2}, respectively.  This way, you can
+explicitly select whether you want to use the SSH protocol version 1
+or 2 to connect to the remote host.  (You can also specify in
+@file{~/.ssh/config}, the SSH configuration file, which protocol
+should be used, and use the regular @option{ssh} method.)
+
+All the methods based on @command{ssh} have an additional feature: you
+can specify a host name which looks like @file{host#42} (the real host
+name, then a hash sign, then a port number).  This means to connect to
+the given host but to also pass @code{-p 42} as arguments to the
+@command{ssh} command.
+
+
+@item @option{telnet}
+@cindex method telnet
+@cindex telnet method
+
+Connect to the remote host with @command{telnet}.  This is as unsecure
+as the @option{rsh} method.
+
+
+@item @option{su}
+@cindex method su
+@cindex su method
+
+This method does not connect to a remote host at all, rather it uses
+the @command{su} program to allow you to edit files as another user.
+That means, the specified host name in the file name must be either
+@samp{localhost} or the host name as returned by the function
+@command{(system-name)}.  For an exception of this rule see
+@ref{Multi-hops}.
+
+
+@item @option{sudo}
+@cindex method sudo
+@cindex sudo method
+
+This is similar to the @option{su} method, but it uses @command{sudo}
+rather than @command{su} to become a different user.
+
+Note that @command{sudo} must be configured to allow you to start a
+shell as the user.  It would be nice if it was sufficient if
+@command{ls} and @command{mimencode} were allowed, but that is not
+easy to implement, so I haven't got around to it, yet.
+
+
+@item @option{sshx}
+@cindex method sshx
+@cindex sshx method
+
+As you would expect, this is similar to @option{ssh}, only a little
+different.  Whereas @option{ssh} opens a normal interactive shell on
+the remote host, this option uses @samp{ssh -t -t @var{host} -l
+@var{user} /bin/sh} to open a connection.  This is useful for users
+where the normal login shell is set up to ask them a number of
+questions when logging in.  This procedure avoids these questions, and
+just gives @value{tramp} a more-or-less `standard' login shell to work
+with.
+
+Note that this procedure does not eliminate questions asked by
+@command{ssh} itself.  For example, @command{ssh} might ask ``Are you
+sure you want to continue connecting?'' if the host key of the remote
+host is not known.  @value{tramp} does not know how to deal with such a
+question (yet), therefore you will need to make sure that you can log
+in without such questions.
+
+This is also useful for Windows users where @command{ssh}, when
+invoked from an @value{emacsname} buffer, tells them that it is not
+allocating a pseudo tty.  When this happens, the login shell is wont
+to not print any shell prompt, which confuses @value{tramp} mightily.
+
+This supports the @samp{-p} argument.
+
+
+@item @option{krlogin}
+@cindex method krlogin
+@cindex krlogin method
+@cindex Kerberos (with krlogin method)
+
+This method is also similar to @option{ssh}.  It only uses the
+@command{krlogin -x} command to log in to the remote host.
+
+
+@item @option{ksu}
+@cindex method ksu
+@cindex ksu method
+@cindex Kerberos (with ksu method)
+
+This is another method from the Kerberos suite.  It behaves like @option{su}.
+
+
+@item @option{plink}
+@cindex method plink
+@cindex plink method
+
+This method is mostly interesting for Windows users using the PuTTY
+implementation of SSH.  It uses @samp{plink -ssh} to log in to the
+remote host.
+
+This supports the @samp{-P} argument.
+
+Additionally, the methods @option{plink1} and @option{plink2} are
+provided, which call @samp{plink -1 -ssh} or @samp{plink -2 -ssh} in
+order to use SSH protocol version 1 or 2 explicitly.
+
+CCC: Do we have to connect to the remote host once from the command
+line to accept the SSH key?  Maybe this can be made automatic?
+
+CCC: Say something about the first shell command failing.  This might
+be due to a wrong setting of @code{tramp-rsh-end-of-line}.
+
+
+@item @option{plinkx}
+@cindex method plinkx
+@cindex plinkx method
+
+Another method using PuTTY on Windows.  Instead of host names, it
+expects PuTTY session names, calling @samp{plink -load @var{session}
+-t"}.  User names are relevant only in case the corresponding session
+hasn't defined a user name.  Different port numbers must be defined in
+the session.
+
+@end table
+
+
+@node External methods
+@section External methods
+@cindex methods, external
+@cindex external methods
+
+The external methods operate through multiple channels, using the
+remote shell connection for many actions while delegating file
+transfers to an external transfer utility.
+
+This saves the overhead of encoding and decoding that multiplexing the
+transfer through the one connection has with the inline methods.
+
+Since external methods need their own overhead opening a new channel,
+all files which are smaller than @var{tramp-copy-size-limit} are still
+transferred with the corresponding inline method.  It should provide a
+fair trade-off between both approaches.
+
+@table @asis
+@item @option{rcp}  ---  @command{rsh} and @command{rcp}
+@cindex method rcp
+@cindex rcp method
+@cindex rcp (with rcp method)
+@cindex rsh (with rcp method)
+
+This method uses the @command{rsh} and @command{rcp} commands to connect
+to the remote machine and transfer files.  This is probably the fastest
+connection method available.
+
+The alternative method @option{remcp} uses the @command{remsh} and
+@command{rcp} commands.  It should be applied on machines where
+@command{remsh} is used instead of @command{rsh}.
+
+
+@item @option{scp}  ---  @command{ssh} and @command{scp}
+@cindex method scp
+@cindex scp method
+@cindex scp (with scp method)
+@cindex ssh (with scp method)
+
+Using @command{ssh} to connect to the remote host and @command{scp} to
+transfer files between the machines is the best method for securely
+connecting to a remote machine and accessing files.
+
+The performance of this option is also quite good.  It may be slower than
+the inline methods when you often open and close small files however.
+The cost of the cryptographic handshake at the start of an @command{scp}
+session can begin to absorb the advantage that the lack of encoding and
+decoding presents.
+
+There are also two variants, @option{scp1} and @option{scp2}, that
+call @samp{ssh -1} and @samp{ssh -2}, respectively.  This way, you can
+explicitly select whether you want to use the SSH protocol version 1
+or 2 to connect to the remote host.  (You can also specify in
+@file{~/.ssh/config}, the SSH configuration file, which protocol
+should be used, and use the regular @option{scp} method.)
+
+All the @command{ssh} based methods support the @samp{-p} feature
+where you can specify a port number to connect to in the host name.
+For example, the host name @file{host#42} tells @value{tramp} to
+specify @samp{-p 42} in the argument list for @command{ssh}, and to
+specify @samp{-P 42} in the argument list for @command{scp}.
+
+
+@item @option{sftp}  ---  @command{ssh} and @command{sftp}
+@cindex method sftp
+@cindex sftp method
+@cindex sftp (with sftp method)
+@cindex ssh (with sftp method)
+
+That is mostly the same method as @option{scp}, but using
+@command{sftp} as transfer command.  So the same remarks are valid.
+
+This command does not work like @value{ftppackagename}, where
+@command{ftp} is called interactively, and all commands are send from
+within this session.  Instead of, @command{ssh} is used for login.
+
+This method supports the @samp{-p} argument.
+
+
+@item @option{rsync}  ---  @command{ssh} and @command{rsync}
+@cindex method rsync
+@cindex rsync method
+@cindex rsync (with rsync method)
+@cindex ssh (with rsync method)
+
+Using the @command{ssh} command to connect securely to the remote
+machine and the @command{rsync} command to transfer files is almost
+identical to the @option{scp} method.
+
+While @command{rsync} performs much better than @command{scp} when
+transferring files that exist on both hosts, this advantage is lost if
+the file exists only on one side of the connection.  A file can exists
+on both the remote and local host, when you copy a file from/to a
+remote host.  When you just open a file from the remote host (or write
+a file there), a temporary file on the local side is kept as long as
+the corresponding buffer, visiting this file, is alive.
+
+This method supports the @samp{-p} argument.
+
+
+@item @option{scpx} --- @command{ssh} and @command{scp}
+@cindex method scpx
+@cindex scpx method
+@cindex scp (with scpx method)
+@cindex ssh (with scpx method)
+
+As you would expect, this is similar to @option{scp}, only a little
+different.  Whereas @option{scp} opens a normal interactive shell on
+the remote host, this option uses @samp{ssh -t -t @var{host} -l
+@var{user} /bin/sh} to open a connection.  This is useful for users
+where the normal login shell is set up to ask them a number of
+questions when logging in.  This procedure avoids these questions, and
+just gives @value{tramp} a more-or-less `standard' login shell to work
+with.
+
+This is also useful for Windows users where @command{ssh}, when
+invoked from an @value{emacsname} buffer, tells them that it is not
+allocating a pseudo tty.  When this happens, the login shell is wont
+to not print any shell prompt, which confuses @value{tramp} mightily.
+
+This method supports the @samp{-p} argument.
+
+
+@item @option{scpc} --- @command{ssh} and @command{scp}
+@cindex method scpc
+@cindex scpc method
+@cindex scp (with scpc method)
+@cindex ssh (with scpc method)
+
+Newer versions of @option{ssh} (for example OpenSSH 4) offer an option
+@option{ControlMaster}.  This allows @option{scp} to reuse an existing
+@option{ssh} channel, which increases performance.
+
+Before you use this method, you should check whether your @option{ssh}
+implementation supports this option.  Try from the command line
+
+@example
+ssh localhost -o ControlMaster=yes /bin/true
+@end example
+
+If that command succeeds silently, then you can use @option{scpc}; but
+if it fails like
+
+@example
+command-line: line 0: Bad configuration option: ControlMaster
+@end example
+
+then you cannot use it.
+
+This method supports the @samp{-p} argument.
+
+
+@item @option{rsyncc}  ---  @command{ssh} and @command{rsync}
+@cindex method rsyncc
+@cindex rsyncc method
+@cindex rsync (with rsyncc method)
+@cindex ssh (with rsyncc method)
+
+Like the @option{scpc} method, @option{rsyncc} improves the underlying
+@command{ssh} connection by the option @option{ControlMaster}.  This
+allows @command{rsync} to reuse an existing @command{ssh} channel,
+which increases performance.
+
+This method supports the @samp{-p} argument.
+
+
+@item @option{pscp} --- @command{plink} and @command{pscp}
+@cindex method pscp
+@cindex pscp method
+@cindex pscp (with pscp method)
+@cindex plink (with pscp method)
+@cindex PuTTY (with pscp method)
+
+This method is similar to @option{scp}, but it uses the
+@command{plink} command to connect to the remote host, and it uses
+@command{pscp} for transferring the files.  These programs are part
+of PuTTY, an SSH implementation for Windows.
+
+This method supports the @samp{-P} argument.
+
+
+@item @option{psftp} --- @command{plink} and @command{psftp}
+@cindex method psftp
+@cindex psftp method
+@cindex psftp (with psftp method)
+@cindex plink (with psftp method)
+@cindex PuTTY (with psftp method)
+
+As you would expect, this method is similar to @option{sftp}, but it
+uses the @command{plink} command to connect to the remote host, and it
+uses @command{psftp} for transferring the files.  These programs are
+part of PuTTY, an SSH implementation for Windows.
+
+This method supports the @samp{-P} argument.
+
+
+@item @option{fcp} --- @command{fsh} and @command{fcp}
+@cindex method fcp
+@cindex fcp method
+@cindex fsh (with fcp method)
+@cindex fcp (with fcp method)
+
+This method is similar to @option{scp}, but it uses the @command{fsh}
+command to connect to the remote host, and it uses @command{fcp} for
+transferring the files.  @command{fsh/fcp} are a front-end for
+@command{ssh} which allow for reusing the same @command{ssh} session
+for submitting several commands.  This avoids the startup overhead of
+@command{scp} (which has to establish a secure connection whenever it
+is called).  Note, however, that you can also use one of the inline
+methods to achieve a similar effect.
+
+This method uses the command @samp{fsh @var{host} -l @var{user}
+/bin/sh -i} to establish the connection, it does not work to just say
+@command{fsh @var{host} -l @var{user}}.
+
+@cindex method fsh
+@cindex fsh method
+
+There is no inline method using @command{fsh} as the multiplexing
+provided by the program is not very useful in our context.  @value{tramp}
+opens just one connection to the remote host and then keeps it open,
+anyway.
+
+
+@item @option{ftp}
+@cindex method ftp
+@cindex ftp method
+
+This is not a native @value{tramp} method.  Instead, it forwards all
+requests to @value{ftppackagename}.
+@ifset xemacs
+This works only for unified filenames, see @ref{Issues}.
+@end ifset
+
+
+@item @option{smb} --- @command{smbclient}
+@cindex method smb
+@cindex smb method
+
+This is another not natural @value{tramp} method.  It uses the
+@command{smbclient} command on different Unices in order to connect to
+an SMB server.  An SMB server might be a Samba (or CIFS) server on
+another UNIX host or, more interesting, a host running MS Windows.  So
+far, it is tested against MS Windows NT, MS Windows 2000, and MS
+Windows XP.
+
+The first directory in the localname must be a share name on the remote
+host.  Remember that the @code{$} character, in which default shares
+usually end, must be written @code{$$} due to environment variable
+substitution in file names.  If no share name is given (i.e. remote
+directory @code{/}), all available shares are listed.
+
+Since authorization is done on share level, you will always be
+prompted for a password if you access another share on the same host.
+This can be suppressed by @ref{Password handling}.
+
+For authorization, MS Windows uses both a user name and a domain name.
+Because of this, the @value{tramp} syntax has been extended: you can
+specify a user name which looks like @code{user%domain} (the real user
+name, then a percent sign, then the domain name).  So, to connect to
+the machine @code{melancholia} as user @code{daniel} of the domain
+@code{BIZARRE}, and edit @file{.emacs} in the home directory (share
+@code{daniel$}) I would specify the filename @file{@trampfn{smb,
+daniel%BIZARRE, melancholia, /daniel$$/.emacs}}.
+
+Depending on the Windows domain configuration, a Windows user might be
+considered as domain user per default.  In order to connect as local
+user, the WINS name of that machine must be given as domain name.
+Usually, it is the machine name in capital letters.  In the example
+above, the local user @code{daniel} would be specified as
+@file{@trampfn{smb, daniel%MELANCHOLIA, melancholia, /daniel$$/.emacs}}.
+
+The domain name as well as the user name are optional.  If no user
+name is specified at all, the anonymous user (without password
+prompting) is assumed.  This is different from all other @value{tramp}
+methods, where in such a case the local user name is taken.
+
+The @option{smb} method supports the @samp{-p} argument.
+
+@strong{Please note:} If @value{emacsname} runs locally under MS
+Windows, this method isn't available.  Instead, you can use UNC
+file names like @file{//melancholia/daniel$$/.emacs}.  The only
+disadvantage is that there's no possibility to specify another user
+name.
+@end table
+
+
+@ifset emacsgvfs
+@node GVFS based methods
+@section GVFS based external methods
+@cindex methods, gvfs
+@cindex gvfs based methods
+@cindex dbus
+
+The connection methods described in this section are based on GVFS
+@uref{http://en.wikipedia.org/wiki/GVFS}.  Via GVFS, the remote
+filesystem is mounted locally through FUSE.  @value{tramp} uses
+this local mounted directory internally.
+
+The communication with GVFS is implemented via D-Bus messages.
+Therefore, your @value{emacsname} must have D-Bus integration,
+@pxref{Top, , D-Bus, dbus}.
+
+@table @asis
+@item @option{dav}
+@cindex method dav
+@cindex method davs
+@cindex dav method
+@cindex davs method
+
+This method provides access to WebDAV files and directories.  There
+exists also the external method @option{davs}, which uses SSL
+encryption for the access.
+
+Both methods support the port number specification as discussed above.
+
+
+@item @option{obex}
+@cindex method obex
+@cindex obex method
+
+OBEX is an FTP-like access protocol for simple devices, like cell
+phones.  For the time being, @value{tramp} only supports OBEX over Bluetooth.
+
+
+@item @option{synce}
+@cindex method synce
+@cindex synce method
+
+The @option{synce} method allows communication with Windows Mobile
+devices.  Beside GVFS for mounting remote files and directories via
+FUSE, it also needs the SYNCE-GVFS plugin.
+@end table
+
+@defopt tramp-gvfs-methods
+This customer option, a list, defines the external methods which
+shall be used with GVFS.  Per default, these are @option{dav},
+@option{davs}, @option{obex} and @option{synce}.  Other possible
+values are @option{ftp}, @option{sftp} and @option{smb}.
+@end defopt
+@end ifset
+
+
+@ifset emacsgw
+@node Gateway methods
+@section Gateway methods
+@cindex methods, gateway
+@cindex gateway methods
+
+Gateway methods are not methods to access a remote host directly.
+These methods are intended to pass firewalls or proxy servers.
+Therefore, they can be used for proxy host declarations
+(@pxref{Multi-hops}) only.
+
+A gateway method must always come along with a method which supports
+port setting.  This is because @value{tramp} targets the accompanied
+method to @file{localhost#random_port}, from where the firewall or
+proxy server is accessed.
+
+Gateway methods support user name and password declarations.  These
+are used to authenticate towards the corresponding firewall or proxy
+server.  They can be passed only if your friendly administrator has
+granted your access.
+
+@table @asis
+@item @option{tunnel}
+@cindex method tunnel
+@cindex tunnel method
+
+This method implements an HTTP tunnel via the @command{CONNECT}
+command (see RFC 2616, 2817).  Any HTTP 1.1 compliant (proxy) server
+shall support this command.
+
+As authentication method, only @option{Basic Authentication} (see RFC
+2617) is implemented so far.  If no port number is given in the
+declaration, port @option{8080} is used for the proxy server.
+
+
+@item @option{socks}
+@cindex method socks
+@cindex socks method
+
+The @command{socks} method provides access to SOCKSv5 servers (see
+RFC 1928).  @option{Username/Password Authentication} according to RFC
+1929 is supported.
+
+The default port number of the socks server is @option{1080}, if not
+specified otherwise.
+
+@end table
+@end ifset
+
+
+@node Default Method
+@section Selecting a default method
+@cindex default method
+
+@vindex tramp-default-method
+When you select an appropriate transfer method for your typical usage
+you should set the variable @code{tramp-default-method} to reflect that
+choice.  This variable controls which method will be used when a method
+is not specified in the @value{tramp} file name.  For example:
+
+@lisp
+(setq tramp-default-method "ssh")
+@end lisp
+
+@vindex tramp-default-method-alist
+You can also specify different methods for certain user/host
+combinations, via the variable @code{tramp-default-method-alist}.  For
+example, the following two lines specify to use the @option{ssh}
+method for all user names matching @samp{john} and the @option{rsync}
+method for all host names matching @samp{lily}.  The third line
+specifies to use the @option{su} method for the user @samp{root} on
+the machine @samp{localhost}.
+
+@lisp
+(add-to-list 'tramp-default-method-alist '("" "john" "ssh"))
+(add-to-list 'tramp-default-method-alist '("lily" "" "rsync"))
+(add-to-list 'tramp-default-method-alist
+             '("\\`localhost\\'" "\\`root\\'" "su"))
+@end lisp
+
+@noindent
+See the documentation for the variable
+@code{tramp-default-method-alist} for more details.
+
+External methods are normally preferable to inline methods, giving
+better performance.
+
+@xref{Inline methods}.
+@xref{External methods}.
+
+Another consideration with the selection of transfer methods is the
+environment you will use them in and, especially when used over the
+Internet, the security implications of your preferred method.
+
+The @option{rsh} and @option{telnet} methods send your password as
+plain text as you log in to the remote machine, as well as
+transferring the files in such a way that the content can easily be
+read from other machines.
+
+If you need to connect to remote systems that are accessible from the
+Internet, you should give serious thought to using @option{ssh} based
+methods to connect.  These provide a much higher level of security,
+making it a non-trivial exercise for someone to obtain your password
+or read the content of the files you are editing.
+
+
+@subsection Which method is the right one for me?
+@cindex choosing the right method
+
+Given all of the above, you are probably thinking that this is all fine
+and good, but it's not helping you to choose a method!  Right you are.
+As a developer, we don't want to boss our users around but give them
+maximum freedom instead.  However, the reality is that some users would
+like to have some guidance, so here I'll try to give you this guidance
+without bossing you around.  You tell me whether it works @dots{}
+
+My suggestion is to use an inline method.  For large files, external
+methods might be more efficient, but I guess that most people will
+want to edit mostly small files.  And if you access large text files,
+compression (driven by @var{tramp-inline-compress-start-size}) shall
+still result in good performance.
+
+I guess that these days, most people can access a remote machine by
+using @command{ssh}.  So I suggest that you use the @option{ssh}
+method.  So, type @kbd{C-x C-f @trampfn{ssh, root, otherhost,
+/etc/motd} @key{RET}} to edit the @file{/etc/motd} file on the other
+host.
+
+If you can't use @option{ssh} to log in to the remote host, then
+select a method that uses a program that works.  For instance, Windows
+users might like the @option{plink} method which uses the PuTTY
+implementation of @command{ssh}.  Or you use Kerberos and thus like
+@option{krlogin}.
+
+For the special case of editing files on the local host as another
+user, see the @option{su} or @option{sudo} methods.  They offer
+shortened syntax for the @samp{root} account, like
+@file{@trampfn{su, , , /etc/motd}}.
+
+People who edit large files may want to consider @option{scpc} instead
+of @option{ssh}, or @option{pscp} instead of @option{plink}.  These
+external methods are faster than inline methods for large files.
+Note, however, that external methods suffer from some limitations.
+Please try first whether you really get a noticeable speed advantage
+from using an external method!  Maybe even for large files, inline
+methods are fast enough.
+
+
+@node Default User
+@section Selecting a default user
+@cindex default user
+
+The user part of a @value{tramp} file name can be omitted.  Usually,
+it is replaced by the user name you are logged in.  Often, this is not
+what you want.  A typical use of @value{tramp} might be to edit some
+files with root permissions on the local host.  This case, you should
+set the variable @code{tramp-default-user} to reflect that choice.
+For example:
+
+@lisp
+(setq tramp-default-user "root")
+@end lisp
+
+@code{tramp-default-user} is regarded as obsolete, and will be removed
+soon.
+
+@vindex tramp-default-user-alist
+You can also specify different users for certain method/host
+combinations, via the variable @code{tramp-default-user-alist}.  For
+example, if you always have to use the user @samp{john} in the domain
+@samp{somewhere.else}, you can specify the following:
+
+@lisp
+(add-to-list 'tramp-default-user-alist
+             '("ssh" ".*\\.somewhere\\.else\\'" "john"))
+@end lisp
+
+@noindent
+See the documentation for the variable
+@code{tramp-default-user-alist} for more details.
+
+One trap to fall in must be known.  If @value{tramp} finds a default
+user, this user will be passed always to the connection command as
+parameter (for example @samp{ssh here.somewhere.else -l john}.  If you
+have specified another user for your command in its configuration
+files, @value{tramp} cannot know it, and the remote access will fail.
+If you have specified in the given example in @file{~/.ssh/config} the
+lines
+
+@example
+Host here.somewhere.else
+     User lily
+@end example
+
+@noindent
+than you must discard selecting a default user by @value{tramp}.  This
+will be done by setting it to @code{nil} (or @samp{lily}, likewise):
+
+@lisp
+(add-to-list 'tramp-default-user-alist
+             '("ssh" "\\`here\\.somewhere\\.else\\'" nil))
+@end lisp
+
+The last entry in @code{tramp-default-user-alist} could be your
+default user you'll apply predominantly.  You shall @emph{append} it
+to that list at the end:
+
+@lisp
+(add-to-list 'tramp-default-user-alist '(nil nil "jonas") t)
+@end lisp
+
+
+@node Default Host
+@section Selecting a default host
+@cindex default host
+
+@vindex tramp-default-host
+Finally, it is even possible to omit the host name part of a
+@value{tramp} file name.  This case, the value of the variable
+@code{tramp-default-host} is used.  Per default, it is initialized
+with the host name your local @value{emacsname} is running.
+
+If you, for example, use @value{tramp} mainly to contact the host
+@samp{target} as user @samp{john}, you can specify:
+
+@lisp
+(setq tramp-default-user "john"
+      tramp-default-host "target")
+@end lisp
+
+Then the simple file name @samp{@trampfn{ssh, , ,}} will connect you
+to John's home directory on target.
+@ifset emacs
+Note, however, that the most simplification @samp{/::} won't work,
+because @samp{/:} is the prefix for quoted file names.
+@end ifset
+
+
+@node Multi-hops
+@section Connecting to a remote host using multiple hops
+@cindex multi-hop
+@cindex proxy hosts
+
+Sometimes, the methods described before are not sufficient.  Sometimes,
+it is not possible to connect to a remote host using a simple command.
+For example, if you are in a secured network, you might have to log in
+to a `bastion host' first before you can connect to the outside world.
+Of course, the target host may also require a bastion host.
+
+@vindex tramp-default-proxies-alist
+In order to specify such multiple hops, it is possible to define a proxy
+host to pass through, via the variable
+@code{tramp-default-proxies-alist}.  This variable keeps a list of
+triples (@var{host} @var{user} @var{proxy}).
+
+ The first matching item specifies the proxy host to be passed for a
+file name located on a remote target matching @var{user}@@@var{host}.
+@var{host} and @var{user} are regular expressions or @code{nil}, which
+is interpreted as a regular expression which always matches.
+
+@var{proxy} must be a Tramp filename which localname part is ignored.
+Method and user name on @var{proxy} are optional, which is interpreted
+with the default values.
+@ifset emacsgw
+The method must be an inline or gateway method (@pxref{Inline
+methods}, @pxref{Gateway methods}).
+@end ifset
+@ifclear emacsgw
+The method must be an inline method (@pxref{Inline methods}).
+@end ifclear
+If @var{proxy} is @code{nil}, no additional hop is required reaching
+@var{user}@@@var{host}.
+
+If you, for example, must pass the host @samp{bastion.your.domain} as
+user @samp{bird} for any remote host which is not located in your local
+domain, you can set
+
+@lisp
+(add-to-list 'tramp-default-proxies-alist
+             '("\\." nil "@trampfn{ssh, bird, bastion.your.domain,}"))
+(add-to-list 'tramp-default-proxies-alist
+             '("\\.your\\.domain\\'" nil nil))
+@end lisp
+
+Please note the order of the code.  @code{add-to-list} adds elements at the
+beginning of a list.  Therefore, most relevant rules must be added last.
+
+Proxy hosts can be cascaded.  If there is another host called
+@samp{jump.your.domain}, which is the only one in your local domain who
+is allowed connecting @samp{bastion.your.domain}, you can add another
+rule:
+
+@lisp
+(add-to-list 'tramp-default-proxies-alist
+             '("\\`bastion\\.your\\.domain\\'"
+               "\\`bird\\'"
+               "@trampfn{ssh, , jump.your.domain,}"))
+@end lisp
+
+@var{proxy} can contain the patterns @code{%h} or @code{%u}.  These
+patterns are replaced by the strings matching @var{host} or
+@var{user}, respectively.
+
+If you, for example, wants to work as @samp{root} on hosts in the
+domain @samp{your.domain}, but login as @samp{root} is disabled for
+non-local access, you might add the following rule:
+
+@lisp
+(add-to-list 'tramp-default-proxies-alist
+             '("\\.your\\.domain\\'" "\\`root\\'" "@trampfn{ssh, , %h,}"))
+@end lisp
+
+Opening @file{@trampfn{sudo, , randomhost.your.domain,}} would connect
+first @samp{randomhost.your.domain} via @code{ssh} under your account
+name, and perform @code{sudo -u root} on that host afterwards.  It is
+important to know that the given method is applied on the host which
+has been reached so far.  @code{sudo -u root}, applied on your local
+host, wouldn't be useful here.
+
+@var{host}, @var{user} and @var{proxy} can also be Lisp forms.  These
+forms are evaluated, and must return a string, or @code{nil}.  The
+previous example could be generalized then: For all hosts except my
+local one connect via @code{ssh} first, and apply @code{sudo -u root}
+afterwards:
+
+@lisp
+(add-to-list 'tramp-default-proxies-alist
+             '(nil "\\`root\\'" "@trampfn{ssh, , %h,}"))
+(add-to-list 'tramp-default-proxies-alist
+             '((regexp-quote (system-name)) nil nil))
+@end lisp
+
+This is the recommended configuration to work as @samp{root} on remote
+Ubuntu hosts.
+
+@ifset emacsgw
+Finally, @code{tramp-default-proxies-alist} can be used to pass
+firewalls or proxy servers.  Imagine your local network has a host
+@samp{proxy.your.domain} which is used on port 3128 as HTTP proxy to
+the outer world.  Your friendly administrator has granted you access
+under your user name to @samp{host.other.domain} on that proxy
+server.@footnote{HTTP tunnels are intended for secure SSL/TLS
+communication.  Therefore, many proxy server restrict the tunnels to
+related target ports.  You might need to run your ssh server on your
+target host @samp{host.other.domain} on such a port, like 443 (https).
+See @uref{http://savannah.gnu.org/maintenance/CvsFromBehindFirewall}
+for discussion of ethical issues.}  You would need to add the
+following rule:
+
+@lisp
+(add-to-list 'tramp-default-proxies-alist
+             '("\\`host\\.other\\.domain\\'" nil
+               "@trampfn{tunnel, , proxy.your.domain#3128,}"))
+@end lisp
+
+Gateway methods can be declared as first hop only in a multiple hop
+chain.
+@end ifset
+
+
+@node Customizing Methods
+@section Using Non-Standard Methods
+@cindex customizing methods
+@cindex using non-standard methods
+@cindex create your own methods
+
+There is a variable @code{tramp-methods} which you can change if the
+predefined methods don't seem right.
+
+For the time being, I'll refer you to the Lisp documentation of that
+variable, accessible with @kbd{C-h v tramp-methods @key{RET}}.
+
+
+@node Customizing Completion
+@section Selecting config files for user/host name completion
+@cindex customizing completion
+@cindex selecting config files
+@vindex tramp-completion-function-alist
+
+The variable @code{tramp-completion-function-alist} is intended to
+customize which files are taken into account for user and host name
+completion (@pxref{Filename completion}).  For every method, it keeps
+a set of configuration files, accompanied by a Lisp function able to
+parse that file.  Entries in @code{tramp-completion-function-alist}
+have the form (@var{method} @var{pair1} @var{pair2} ...).
+
+Each @var{pair} is composed of (@var{function} @var{file}).
+@var{function} is responsible to extract user names and host names
+from @var{file} for completion.  There are two functions which access
+this variable:
+
+@defun tramp-get-completion-function method
+This function returns the list of completion functions for @var{method}.
+
+Example:
+@example
+(tramp-get-completion-function "rsh")
+
+     @result{} ((tramp-parse-rhosts "/etc/hosts.equiv")
+         (tramp-parse-rhosts "~/.rhosts"))
+@end example
+@end defun
+
+@defun tramp-set-completion-function method function-list
+This function sets @var{function-list} as list of completion functions
+for @var{method}.
+
+Example:
+@example
+(tramp-set-completion-function "ssh"
+ '((tramp-parse-sconfig "/etc/ssh_config")
+   (tramp-parse-sconfig "~/.ssh/config")))
+
+     @result{} ((tramp-parse-sconfig "/etc/ssh_config")
+         (tramp-parse-sconfig "~/.ssh/config"))
+@end example
+@end defun
+
+The following predefined functions parsing configuration files exist:
+
+@table @asis
+@item @code{tramp-parse-rhosts}
+@findex tramp-parse-rhosts
+
+This function parses files which are syntactical equivalent to
+@file{~/.rhosts}.  It returns both host names and user names, if
+specified.
+
+@item @code{tramp-parse-shosts}
+@findex tramp-parse-shosts
+
+This function parses files which are syntactical equivalent to
+@file{~/.ssh/known_hosts}.  Since there are no user names specified
+in such files, it can return host names only.
+
+@item @code{tramp-parse-sconfig}
+@findex tramp-parse-shosts
+
+This function returns the host nicknames defined by @code{Host} entries
+in @file{~/.ssh/config} style files.
+
+@item @code{tramp-parse-shostkeys}
+@findex tramp-parse-shostkeys
+
+SSH2 parsing of directories @file{/etc/ssh2/hostkeys/*} and
+@file{~/ssh2/hostkeys/*}.  Hosts are coded in file names
+@file{hostkey_@var{portnumber}_@var{host-name}.pub}.  User names
+are always @code{nil}.
+
+@item @code{tramp-parse-sknownhosts}
+@findex tramp-parse-shostkeys
+
+Another SSH2 style parsing of directories like
+@file{/etc/ssh2/knownhosts/*} and @file{~/ssh2/knownhosts/*}.  This
+case, hosts names are coded in file names
+@file{@var{host-name}.@var{algorithm}.pub}.  User names are always @code{nil}.
+
+@item @code{tramp-parse-hosts}
+@findex tramp-parse-hosts
+
+A function dedicated to @file{/etc/hosts} style files.  It returns
+host names only.
+
+@item @code{tramp-parse-passwd}
+@findex tramp-parse-passwd
+
+A function which parses @file{/etc/passwd} like files.  Obviously, it
+can return user names only.
+
+@item @code{tramp-parse-netrc}
+@findex tramp-parse-netrc
+
+Finally, a function which parses @file{~/.netrc} like files.  This
+includes also @file{~/.authinfo}-style files.
+@end table
+
+If you want to keep your own data in a file, with your own structure,
+you might provide such a function as well.  This function must meet
+the following conventions:
+
+@defun my-tramp-parse file
+@var{file} must be either a file name on your host, or @code{nil}.
+The function must return a list of (@var{user} @var{host}), which are
+taken as candidates for user and host name completion.
+
+Example:
+@example
+(my-tramp-parse "~/.my-tramp-hosts")
+
+     @result{} ((nil "toto") ("daniel" "melancholia"))
+@end example
+@end defun
+
+
+@node Password handling
+@section Reusing passwords for several connections.
+@cindex passwords
+
+Sometimes it is necessary to connect to the same remote host several
+times.  Reentering passwords again and again would be annoying, when
+the chosen method does not support access without password prompt
+through own configuration.
+
+The best recommendation is to use the method's own mechanism for
+password handling. Consider @command{ssh-agent} for @option{ssh}-like
+methods, or @command{pageant} for @option{plink}-like methods.
+
+However, if you cannot apply such native password handling,
+@value{tramp} offers alternatives.
+
+
+@anchor{Using an authentication file}
+@subsection Using an authentication file
+
+@vindex auth-sources
+The package @file{auth-source.el}, originally developed in No Gnus,
+offers the possibility to read passwords from a file, like FTP does it
+from @file{~/.netrc}.  The default authentication file is
+@file{~/.authinfo.gpg}, this can be changed via the variable
+@code{auth-sources}.
+
+@noindent
+A typical entry in the authentication file would be
+
+@example
+machine melancholia port scp login daniel password geheim
+@end example
+
+The port can be any @value{tramp} method (@pxref{Inline methods},
+@pxref{External methods}), to match only this method.  When you omit
+the port, you match all @value{tramp} methods.
+
+In case of problems, setting @code{auth-source-debug} to @code{t}
+gives useful debug messages.
+
+
+@anchor{Caching passwords}
+@subsection Caching passwords
+
+If there is no authentication file, @value{tramp} caches the passwords
+entered by you.  They will be reused next time if a connection needs
+them for the same user name and host name, independently of the
+connection method.
+
+@vindex password-cache-expiry
+Passwords are not saved permanently, that means the password caching
+is limited to the lifetime of your @value{emacsname} session.  You
+can influence the lifetime of password caching by customizing the
+variable @code{password-cache-expiry}.  The value is the number of
+seconds how long passwords are cached.  Setting it to @code{nil}
+disables the expiration.
+
+@vindex password-cache
+If you don't like this feature for security reasons, password caching
+can be disabled totally by customizing the variable
+@code{password-cache} (setting it to @code{nil}).
+
+Implementation Note: password caching is based on the package
+@file{password-cache.el}.  For the time being, it is activated only
+when this package is seen in the @code{load-path} while loading
+@value{tramp}.
+@ifset installchapter
+If you don't use No Gnus, you can take @file{password.el} from the
+@value{tramp} @file{contrib} directory, see @ref{Installation
+parameters}.
+@end ifset
+
+
+@node Connection caching
+@section Reusing connection related information.
+@cindex caching
+
+@vindex tramp-persistency-file-name
+In order to reduce initial connection time, @value{tramp} stores
+connection related information persistently.  The variable
+@code{tramp-persistency-file-name} keeps the file name where these
+information are written.  Its default value is
+@ifset emacs
+@file{~/.emacs.d/tramp}.
+@end ifset
+@ifset xemacs
+@file{~/.xemacs/tramp}.
+@end ifset
+It is recommended to choose a local file name.
+
+@value{tramp} reads this file during startup, and writes it when
+exiting @value{emacsname}.  You can simply remove this file if
+@value{tramp} shall be urged to recompute these information next
+@value{emacsname} startup time.
+
+Using such persistent information can be disabled by setting
+@code{tramp-persistency-file-name} to @code{nil}.
+
+Once consequence of reusing connection related information is that
+@var{tramp} needs to distinguish hosts.  If you, for example, run a
+local @code{sshd} on port 3001, which tunnels @command{ssh} to another
+host, you could access both @file{@trampfn{ssh, , localhost,}} and
+@file{@trampfn{ssh, , localhost#3001,}}.  @var{tramp} would use the
+same host related information (like paths, Perl variants, etc) for
+both connections, although the information is valid only for one of
+them.
+
+In order to avoid trouble, you must use another host name for one of
+the connections, like introducing a @option{Host} section in
+@file{~/.ssh/config} (@pxref{Frequently Asked Questions}) or applying
+multiple hops (@pxref{Multi-hops}).
+
+When @value{tramp} detects a changed operating system version on a
+remote host (via the command @command{uname -sr}), it flushes all
+connection related information for this host, and opens the
+connection again.
+
+
+@node Remote Programs
+@section How @value{tramp} finds and uses programs on the remote machine.
+
+@value{tramp} depends on a number of programs on the remote host in order to
+function, including @command{ls}, @command{test}, @command{find} and
+@command{cat}.
+
+In addition to these required tools, there are various tools that may be
+required based on the connection method.  See @ref{Inline methods} and
+@ref{External methods} for details on these.
+
+Certain other tools, such as @command{perl} (or @command{perl5}) and
+@command{grep} will be used if they can be found.  When they are
+available, they are used to improve the performance and accuracy of
+remote file access.
+
+@vindex tramp-remote-path
+@vindex tramp-default-remote-path
+@vindex tramp-own-remote-path
+@defopt tramp-remote-path
+When @value{tramp} connects to the remote machine, it searches for the
+programs that it can use.  The variable @code{tramp-remote-path}
+controls the directories searched on the remote machine.
+
+By default, this is set to a reasonable set of defaults for most
+machines.  The symbol @code{tramp-default-remote-path} is a place
+holder, it is replaced by the list of directories received via the
+command @command{getconf PATH} on your remote machine.  For example,
+on Debian GNU/Linux this is @file{/bin:/usr/bin}, whereas on Solaris
+this is @file{/usr/xpg4/bin:/usr/ccs/bin:/usr/bin:/opt/SUNWspro/bin}.
+It is recommended to apply this symbol on top of
+@code{tramp-remote-path}.
+
+It is possible, however, that your local (or remote ;) system
+administrator has put the tools you want in some obscure local
+directory.
+
+In this case, you can still use them with @value{tramp}.  You simply
+need to add code to your @file{.emacs} to add the directory to the
+remote path.  This will then be searched by @value{tramp} when you
+connect and the software found.
+
+To add a directory to the remote search path, you could use code such
+as:
+
+@lisp
+@i{;; We load @value{tramp} to define the variable.}
+(require 'tramp)
+@i{;; We have @command{perl} in "/usr/local/perl/bin"}
+(add-to-list 'tramp-remote-path "/usr/local/perl/bin")
+@end lisp
+
+Another possibility is to reuse the path settings of your remote
+account when you log in.  Usually, these settings are overwritten,
+because they might not be useful for @value{tramp}.  The place holder
+@code{tramp-own-remote-path} preserves these settings.  You can
+activate it via
+
+@lisp
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+@end lisp
+@end defopt
+
+@value{tramp} caches several information, like the Perl binary
+location.  The changed remote search path wouldn't affect these
+settings.  In order to force @value{tramp} to recompute these values,
+you must exit @value{emacsname}, remove your persistency file
+(@pxref{Connection caching}), and restart @value{emacsname}.
+
+
+@node Remote shell setup
+@section Remote shell setup hints
+@cindex remote shell setup
+@cindex @file{.profile} file
+@cindex @file{.login} file
+@cindex shell init files
+
+As explained in the @ref{Overview} section, @value{tramp} connects to the
+remote host and talks to the shell it finds there.  Of course, when you
+log in, the shell executes its init files.  Suppose your init file
+requires you to enter the birth date of your mother; clearly @value{tramp}
+does not know this and hence fails to log you in to that host.
+
+There are different possible strategies for pursuing this problem.  One
+strategy is to enable @value{tramp} to deal with all possible situations.
+This is a losing battle, since it is not possible to deal with
+@emph{all} situations.  The other strategy is to require you to set up
+the remote host such that it behaves like @value{tramp} expects.  This might
+be inconvenient because you have to invest a lot of effort into shell
+setup before you can begin to use @value{tramp}.
+
+The package, therefore, pursues a combined approach.  It tries to
+figure out some of the more common setups, and only requires you to
+avoid really exotic stuff.  For example, it looks through a list of
+directories to find some programs on the remote host.  And also, it
+knows that it is not obvious how to check whether a file exists, and
+therefore it tries different possibilities.  (On some hosts and
+shells, the command @command{test -e} does the trick, on some hosts
+the shell builtin doesn't work but the program @command{/usr/bin/test
+-e} or @command{/bin/test -e} works.  And on still other hosts,
+@command{ls -d} is the right way to do this.)
+
+Below you find a discussion of a few things that @value{tramp} does not deal
+with, and that you therefore have to set up correctly.
+
+@table @asis
+@item @var{shell-prompt-pattern}
+@vindex shell-prompt-pattern
+
+After logging in to the remote host, @value{tramp} has to wait for the remote
+shell startup to finish before it can send commands to the remote
+shell.  The strategy here is to wait for the shell prompt.  In order to
+recognize the shell prompt, the variable @code{shell-prompt-pattern} has
+to be set correctly to recognize the shell prompt on the remote host.
+
+Note that @value{tramp} requires the match for @code{shell-prompt-pattern}
+to be at the end of the buffer.  Many people have something like the
+following as the value for the variable: @code{"^[^>$][>$] *"}.  Now
+suppose your shell prompt is @code{a <b> c $ }.  In this case,
+@value{tramp} recognizes the @code{>} character as the end of the prompt,
+but it is not at the end of the buffer.
+
+@item @var{tramp-shell-prompt-pattern}
+@vindex tramp-shell-prompt-pattern
+
+This regular expression is used by @value{tramp} in the same way as
+@code{shell-prompt-pattern}, to match prompts from the remote shell.
+This second variable exists because the prompt from the remote shell
+might be different from the prompt from a local shell --- after all,
+the whole point of @value{tramp} is to log in to remote hosts as a
+different user.  The default value of
+@code{tramp-shell-prompt-pattern} is the same as the default value of
+@code{shell-prompt-pattern}, which is reported to work well in many
+circumstances.
+
+@item @var{tramp-password-prompt-regexp}
+@vindex tramp-password-prompt-regexp
+@vindex tramp-wrong-passwd-regexp
+
+During login, @value{tramp} might be forced to enter a password or a
+passphrase.  The difference between both is that a password is
+requested from the shell on the remote host, while a passphrase is
+needed for accessing local authentication information, like your ssh
+key.
+
+@var{tramp-password-prompt-regexp} handles the detection of such
+requests for English environments.  When you use another localization
+of your (local or remote) host, you might need to adapt this. Example:
+
+@lisp
+(setq
+  tramp-password-prompt-regexp
+    (concat
+      "^.*"
+      (regexp-opt
+        '("passphrase" "Passphrase"
+          ;; English
+          "password" "Password"
+          ;; Deutsch
+          "passwort" "Passwort"
+          ;; Fran@,{c}ais
+          "mot de passe" "Mot de passe") t)
+      ".*: ? *"))
+@end lisp
+
+In parallel, it might also be necessary to adapt
+@var{tramp-wrong-passwd-regexp}.
+
+@item @command{tset} and other questions
+@cindex Unix command tset
+@cindex tset Unix command
+
+Some people invoke the @command{tset} program from their shell startup
+scripts which asks the user about the terminal type of the shell.
+Maybe some shells ask other questions when they are started.
+@value{tramp} does not know how to answer these questions.  There are
+two approaches for dealing with this problem.  One approach is to take
+care that the shell does not ask any questions when invoked from
+@value{tramp}.  You can do this by checking the @code{TERM}
+environment variable, it will be set to @code{dumb} when connecting.
+
+@vindex tramp-terminal-type
+The variable @code{tramp-terminal-type} can be used to change this value
+to @code{dumb}.
+
+@vindex tramp-actions-before-shell
+The other approach is to teach @value{tramp} about these questions.  See
+the variable @code{tramp-actions-before-shell}.  Example:
+
+@lisp
+(defconst my-tramp-prompt-regexp
+  (concat (regexp-opt '("Enter the birth date of your mother:") t)
+          "\\s-*")
+  "Regular expression matching my login prompt question.")
+
+(defun my-tramp-action (proc vec)
+  "Enter \"19000101\" in order to give a correct answer."
+  (save-window-excursion
+    (with-current-buffer (tramp-get-connection-buffer vec)
+      (tramp-message vec 6 "\n%s" (buffer-string))
+      (tramp-send-string vec "19000101"))))
+
+(add-to-list 'tramp-actions-before-shell
+             '(my-tramp-prompt-regexp my-tramp-action))
+@end lisp
+
+
+@item Environment variables named like users in @file{.profile}
+
+If you have a user named frumple and set the variable @code{FRUMPLE} in
+your shell environment, then this might cause trouble.  Maybe rename
+the variable to @code{FRUMPLE_DIR} or the like.
+
+This weird effect was actually reported by a @value{tramp} user!
+
+
+@item Non-Bourne commands in @file{.profile}
+
+After logging in to the remote host, @value{tramp} issues the command
+@command{exec /bin/sh}.  (Actually, the command is slightly
+different.)  When @command{/bin/sh} is executed, it reads some init
+files, such as @file{~/.shrc} or @file{~/.profile}.
+
+Now, some people have a login shell which is not @code{/bin/sh} but a
+Bourne-ish shell such as bash or ksh.  Some of these people might put
+their shell setup into the files @file{~/.shrc} or @file{~/.profile}.
+This way, it is possible for non-Bourne constructs to end up in those
+files.  Then, @command{exec /bin/sh} might cause the Bourne shell to
+barf on those constructs.
+
+As an example, imagine somebody putting @command{export FOO=bar} into
+the file @file{~/.profile}.  The standard Bourne shell does not
+understand this syntax and will emit a syntax error when it reaches
+this line.
+
+Another example is the tilde (@code{~}) character, say when adding
+@file{~/bin} to @code{PATH}.  Many Bourne shells will not expand this
+character, and since there is usually no directory whose name consists
+of the single character tilde, strange things will happen.
+
+What can you do about this?
+
+Well, one possibility is to make sure that everything in
+@file{~/.shrc} and @file{~/.profile} on all remote hosts is
+Bourne-compatible.  In the above example, instead of @command{export
+FOO=bar}, you might use @command{FOO=bar; export FOO} instead.
+
+The other possibility is to put your non-Bourne shell setup into some
+other files.  For example, bash reads the file @file{~/.bash_profile}
+instead of @file{~/.profile}, if the former exists.  So bash
+aficionados just rename their @file{~/.profile} to
+@file{~/.bash_profile} on all remote hosts, and Bob's your uncle.
+
+The @value{tramp} developers would like to circumvent this problem, so
+if you have an idea about it, please tell us.  However, we are afraid
+it is not that simple: before saying @command{exec /bin/sh},
+@value{tramp} does not know which kind of shell it might be talking
+to.  It could be a Bourne-ish shell like ksh or bash, or it could be a
+csh derivative like tcsh, or it could be zsh, or even rc.  If the
+shell is Bourne-ish already, then it might be prudent to omit the
+@command{exec /bin/sh} step.  But how to find out if the shell is
+Bourne-ish?
+
+
+@item Interactive shell prompt
+
+@value{tramp} redefines the shell prompt in order to parse the shell's
+output robustly.  When calling an interactive shell by @kbd{M-x
+shell}, this doesn't look nice.
+
+You can redefine the shell prompt by checking the environment variable
+@code{INSIDE_EMACS}, which is set by @value{tramp}, in your startup
+script @file{~/.emacs_SHELLNAME}. @code{SHELLNAME} might be the string
+@code{bash} or similar, in case of doubt you could set it the
+environment variable @code{ESHELL} in your @file{.emacs}:
+
+@lisp
+(setenv "ESHELL" "bash")
+@end lisp
+
+Your file @file{~/.emacs_SHELLNAME} could contain code like
+
+@example
+# Reset the prompt for remote Tramp shells.
+if [ "$@{INSIDE_EMACS/*tramp*/tramp@}" == "tramp" ] ; then
+   PS1="[\u@@\h \w]$ "
+fi
+@end example
+
+@ifinfo
+@ifset emacs
+@xref{Interactive Shell, , , @value{emacsdir}}.
+@end ifset
+@end ifinfo
+
+@end table
+
+
+@node Auto-save and Backup
+@section Auto-save and Backup configuration
+@cindex auto-save
+@cindex backup
+@ifset emacs
+@vindex backup-directory-alist
+@end ifset
+@ifset xemacs
+@vindex bkup-backup-directory-info
+@end ifset
+
+Normally, @value{emacsname} writes backup files to the same directory
+as the original files, but this behavior can be changed via the
+variable
+@ifset emacs
+@code{backup-directory-alist}.
+@end ifset
+@ifset xemacs
+@code{bkup-backup-directory-info}.
+@end ifset
+In connection with @value{tramp}, this can have unexpected side
+effects.  Suppose that you specify that all backups should go to the
+directory @file{~/.emacs.d/backups/}, and then you edit the file
+@file{@trampfn{su, root, localhost, /etc/secretfile}}.  The effect is
+that the backup file will be owned by you and not by root, thus
+possibly enabling others to see it even if they were not intended to
+see it.
+
+When
+@ifset emacs
+@code{backup-directory-alist}
+@end ifset
+@ifset xemacs
+@code{bkup-backup-directory-info}
+@end ifset
+is @code{nil} (the default), such problems do not occur.
+
+Therefore, it is useful to set special values for @value{tramp}
+files.  For example, the following statement effectively `turns off'
+the effect of
+@ifset emacs
+@code{backup-directory-alist}
+@end ifset
+@ifset xemacs
+@code{bkup-backup-directory-info}
+@end ifset
+for @value{tramp} files:
+
+@ifset emacs
+@lisp
+(add-to-list 'backup-directory-alist
+             (cons tramp-file-name-regexp nil))
+@end lisp
+@end ifset
+@ifset xemacs
+@lisp
+(require 'backup-dir)
+(add-to-list 'bkup-backup-directory-info
+             (list tramp-file-name-regexp ""))
+@end lisp
+@end ifset
+
+@ifset emacs
+It is also possible to disable backups depending on the used method.
+The following code disables backups for the @option{su} and
+@option{sudo} methods:
+
+@lisp
+(setq backup-enable-predicate
+      (lambda (name)
+        (and (normal-backup-enable-predicate name)
+             (not
+              (let ((method (file-remote-p name 'method)))
+                (when (stringp method)
+                  (member method '("su" "sudo"))))))))
+@end lisp
+@end ifset
+
+
+Another possibility is to use the @value{tramp} variable
+@ifset emacs
+@code{tramp-backup-directory-alist}.
+@end ifset
+@ifset xemacs
+@code{tramp-bkup-backup-directory-info}.
+@end ifset
+This variable has the same meaning like
+@ifset emacs
+@code{backup-directory-alist}.
+@end ifset
+@ifset xemacs
+@code{bkup-backup-directory-info}.
+@end ifset
+If a @value{tramp} file is backed up, and DIRECTORY is an absolute
+local file name, DIRECTORY is prepended with the @value{tramp} file
+name prefix of the file to be backed up.
+
+@noindent
+Example:
+
+@ifset emacs
+@lisp
+(add-to-list 'backup-directory-alist
+             (cons "." "~/.emacs.d/backups/"))
+(setq tramp-backup-directory-alist backup-directory-alist)
+@end lisp
+@end ifset
+@ifset xemacs
+@lisp
+(require 'backup-dir)
+(add-to-list 'bkup-backup-directory-info
+             (list "." "~/.emacs.d/backups/" 'full-path))
+(setq tramp-bkup-backup-directory-info bkup-backup-directory-info)
+@end lisp
+@end ifset
+
+@noindent
+The backup file name of @file{@trampfn{su, root, localhost,
+/etc/secretfile}} would be
+@ifset emacs
+@file{@trampfn{su, root, localhost,
+~/.emacs.d/backups/!su:root@@localhost:!etc!secretfile~}}
+@end ifset
+@ifset xemacs
+@file{@trampfn{su, root, localhost,
+~/.emacs.d/backups/![su!root@@localhost]!etc!secretfile~}}
+@end ifset
+
+The same problem can happen with auto-saving files.
+@ifset emacs
+The variable @code{auto-save-file-name-transforms} keeps information,
+on which directory an auto-saved file should go.  By default, it is
+initialized for @value{tramp} files to the local temporary directory.
+
+On some versions of @value{emacsname}, namely the version built for
+Debian GNU/Linux, the variable @code{auto-save-file-name-transforms}
+contains the directory where @value{emacsname} was built.  A
+workaround is to manually set the variable to a sane value.
+
+If auto-saved files should go into the same directory as the original
+files, @code{auto-save-file-name-transforms} should be set to @code{nil}.
+
+Another possibility is to set the variable
+@code{tramp-auto-save-directory} to a proper value.
+@end ifset
+@ifset xemacs
+For this purpose you can set the variable @code{auto-save-directory}
+to a proper value.
+@end ifset
+
+
+@node Windows setup hints
+@section Issues with Cygwin ssh
+@cindex Cygwin, issues
+
+This section needs a lot of work!  Please help.
+
+@cindex method sshx with Cygwin
+@cindex sshx method with Cygwin
+The recent Cygwin installation of @command{ssh} works only with a
+Cygwinized @value{emacsname}.  You can check it by typing @kbd{M-x
+eshell}, and starting @kbd{ssh test.machine}.  The problem is evident
+if you see a message like this:
+
+@example
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+@end example
+
+Older @command{ssh} versions of Cygwin are told to cooperate with
+@value{tramp} selecting @option{sshx} as the connection method.  You
+can find information about setting up Cygwin in their FAQ at
+@uref{http://cygwin.com/faq/}.
+
+@cindex method scpx with Cygwin
+@cindex scpx method with Cygwin
+If you wish to use the @option{scpx} connection method, then you might
+have the problem that @value{emacsname} calls @command{scp} with a
+Windows filename such as @code{c:/foo}.  The Cygwin version of
+@command{scp} does not know about Windows filenames and interprets
+this as a remote filename on the host @code{c}.
+
+One possible workaround is to write a wrapper script for @option{scp}
+which converts the Windows filename to a Cygwinized filename.
+
+@cindex Cygwin and ssh-agent
+@cindex SSH_AUTH_SOCK and @value{emacsname} on Windows
+If you want to use either @option{ssh} based method on Windows, then
+you might encounter problems with @command{ssh-agent}.  Using this
+program, you can avoid typing the pass-phrase every time you log in.
+However, if you start @value{emacsname} from a desktop shortcut, then
+the environment variable @code{SSH_AUTH_SOCK} is not set and so
+@value{emacsname} and thus @value{tramp} and thus @command{ssh} and
+@command{scp} started from @value{tramp} cannot communicate with
+@command{ssh-agent}.  It works better to start @value{emacsname} from
+the shell.
+
+If anyone knows how to start @command{ssh-agent} under Windows in such a
+way that desktop shortcuts can profit, please holler.  I don't really
+know anything at all about Windows@dots{}
+
+
+@node Usage
+@chapter Using @value{tramp}
+@cindex using @value{tramp}
+
+Once you have installed @value{tramp} it will operate fairly
+transparently.  You will be able to access files on any remote machine
+that you can log in to as though they were local.
+
+Files are specified to @value{tramp} using a formalized syntax specifying the
+details of the system to connect to.  This is similar to the syntax used
+by the @value{ftppackagename} package.
+
+@cindex type-ahead
+Something that might happen which surprises you is that
+@value{emacsname} remembers all your keystrokes, so if you see a
+password prompt from @value{emacsname}, say, and hit @kbd{@key{RET}}
+twice instead of once, then the second keystroke will be processed by
+@value{emacsname} after @value{tramp} has done its thing.  Why, this
+type-ahead is normal behavior, you say.  Right you are, but be aware
+that opening a remote file might take quite a while, maybe half a
+minute when a connection needs to be opened.  Maybe after half a
+minute you have already forgotten that you hit that key!
+
+@menu
+* Filename Syntax::             @value{tramp} filename conventions.
+* Alternative Syntax::          URL-like filename syntax.
+* Filename completion::         Filename completion.
+* Remote processes::            Integration with other @value{emacsname} packages.
+* Cleanup remote connections::  Cleanup remote connections.
+@end menu
+
+
+@node Filename Syntax
+@section @value{tramp} filename conventions
+@cindex filename syntax
+@cindex filename examples
+
+To access the file @var{localname} on the remote machine @var{machine}
+you would specify the filename @file{@trampfn{, , machine,
+localname}}.  This will connect to @var{machine} and transfer the file
+using the default method.  @xref{Default Method}.
+
+Some examples of @value{tramp} filenames are shown below.
+
+@table @file
+@item @trampfn{, , melancholia, .emacs}
+Edit the file @file{.emacs} in your home directory on the machine
+@code{melancholia}.
+
+@item @trampfn{, , melancholia.danann.net, .emacs}
+This edits the same file, using the fully qualified domain name of
+the machine.
+
+@item @trampfn{, , melancholia, ~/.emacs}
+This also edits the same file --- the @file{~} is expanded to your
+home directory on the remote machine, just like it is locally.
+
+@item @trampfn{, , melancholia, ~daniel/.emacs}
+This edits the file @file{.emacs} in the home directory of the user
+@code{daniel} on the machine @code{melancholia}.  The @file{~<user>}
+construct is expanded to the home directory of that user on the remote
+machine.
+
+@item @trampfn{, , melancholia, /etc/squid.conf}
+This edits the file @file{/etc/squid.conf} on the machine
+@code{melancholia}.
+
+@end table
+
+@var{machine} can also be an IPv4 or IPv6 address, like in
+@file{@trampfn{, , 127.0.0.1, .emacs}} or @file{@trampfn{, ,
+@value{ipv6prefix}::1@value{ipv6postfix}, .emacs}}.
+@ifset emacs
+For syntactical reasons, IPv6 addresses must be embedded in square
+brackets @file{@value{ipv6prefix}} and @file{@value{ipv6postfix}}.
+@end ifset
+
+Unless you specify a different name to use, @value{tramp} will use the
+current local user name as the remote user name to log in with.  If you
+need to log in as a different user, you can specify the user name as
+part of the filename.
+
+To log in to the remote machine as a specific user, you use the syntax
+@file{@trampfn{, user, machine, path/to.file}}.  That means that
+connecting to @code{melancholia} as @code{daniel} and editing
+@file{.emacs} in your home directory you would specify
+@file{@trampfn{, daniel, melancholia, .emacs}}.
+
+It is also possible to specify other file transfer methods
+(@pxref{Inline methods}, @pxref{External methods}) as part of the
+filename.
+@ifset emacs
+This is done by putting the method before the user and host name, as
+in @file{@value{prefix}@var{method}@value{postfixhop}} (Note the
+trailing colon).
+@end ifset
+@ifset xemacs
+This is done by replacing the initial @file{@value{prefix}} with
+@file{@value{prefix}<method>@value{postfixhop}}.  (Note the trailing
+slash!).
+@end ifset
+The user, machine and file specification remain the same.
+
+So, to connect to the machine @code{melancholia} as @code{daniel},
+using the @option{ssh} method to transfer files, and edit
+@file{.emacs} in my home directory I would specify the filename
+@file{@trampfn{ssh, daniel, melancholia, .emacs}}.
+
+Finally, for some methods it is possible to specify a different port
+number than the default one, given by the method.  This is specified
+by adding @file{#<port>} to the host name, like in @file{@trampfn{ssh,
+daniel, melancholia#42, .emacs}}.
+
+
+@node Alternative Syntax
+@section URL-like filename syntax
+@cindex filename syntax
+@cindex filename examples
+
+Additionally to the syntax described in the previous chapter, it is
+possible to use a URL-like syntax for @value{tramp}.  This can be
+switched on by customizing the variable @code{tramp-syntax}.  Please
+note that this feature is experimental for the time being.
+
+The variable @code{tramp-syntax} must be set before requiring @value{tramp}:
+
+@lisp
+(setq tramp-syntax 'url)
+(require 'tramp)
+@end lisp
+
+Then, a @value{tramp} filename would look like this:
+@file{/@var{method}://@var{user}@@@var{machine}:@var{port}/@var{path/to.file}}.
+@file{/@var{method}://} is mandatory, all other parts are optional.
+@file{:@var{port}} is useful for methods only who support this.
+
+The last example from the previous section would look like this:
+@file{/ssh://daniel@@melancholia/.emacs}.
+
+For the time being, @code{tramp-syntax} can have the following values:
+
+@itemize @w{}
+@ifset emacs
+@item @code{ftp} -- That is the default syntax
+@item @code{url} -- URL-like syntax
+@end ifset
+@ifset xemacs
+@item @code{sep} -- That is the default syntax
+@item @code{url} -- URL-like syntax
+@item @code{ftp} -- EFS-like syntax
+@end ifset
+@end itemize
+
+
+@node Filename completion
+@section Filename completion
+@cindex filename completion
+
+Filename completion works with @value{tramp} for completion of method
+names, of user names and of machine names as well as for completion of
+file names on remote machines.
+@ifset emacs
+In order to enable this, partial completion must be activated in your
+@file{.emacs}.
+@ifinfo
+@xref{Completion Options, , , @value{emacsdir}}.
+@end ifinfo
+@end ifset
+
+If you, for example, type @kbd{C-x C-f @value{prefix}t
+@key{TAB}}, @value{tramp} might give you as result the choice for
+
+@example
+@multitable {@trampfn{telnet, , melancholia.danann.net,}} {@trampfn{telnet, , 192.168.0.1,}}
+@ifset emacs
+@item @value{prefixhop}telnet@value{postfixhop} @tab tmp/
+@item @value{prefixhop}toto@value{postfix} @tab
+@end ifset
+@ifset xemacs
+@item @value{prefixhop}telnet@value{postfixhop} @tab @value{prefixhop}toto@value{postfix}
+@end ifset
+@end multitable
+@end example
+
+@samp{@value{prefixhop}telnet@value{postfixhop}}
+is a possible completion for the respective method,
+@ifset emacs
+@samp{tmp/} stands for the directory @file{/tmp} on your local
+machine,
+@end ifset
+and @samp{@value{prefixhop}toto@value{postfix}}
+might be a host @value{tramp} has detected in your @file{~/.ssh/known_hosts}
+file (given you're using default method @option{ssh}).
+
+If you go on to type @kbd{e @key{TAB}}, the minibuffer is completed to
+@samp{@value{prefix}telnet@value{postfixhop}}.
+Next @kbd{@key{TAB}} brings you all machine names @value{tramp} detects in
+your @file{/etc/hosts} file, let's say
+
+@example
+@multitable {@trampfn{telnet, , melancholia.danann.net,}} {@trampfn{telnet, , 192.168.0.1,}}
+@item @trampfn{telnet, , 127.0.0.1,} @tab @trampfn{telnet, , 192.168.0.1,}
+@item @trampfn{telnet, , @value{ipv6prefix}::1@value{ipv6postfix},} @tab @trampfn{telnet, , localhost,}
+@item @trampfn{telnet, , melancholia.danann.net,} @tab @trampfn{telnet, , melancholia,}
+@end multitable
+@end example
+
+Now you can choose the desired machine, and you can continue to
+complete file names on that machine.
+
+If the configuration files (@pxref{Customizing Completion}), which
+@value{tramp} uses for analysis of completion, offer user names, those user
+names will be taken into account as well.
+
+Remote machines which have been visited in the past and kept
+persistently (@pxref{Connection caching}) will be offered too.
+
+Once the remote machine identification is completed, it comes to
+filename completion on the remote host.  This works pretty much like
+for files on the local host, with the exception that minibuffer
+killing via a double-slash works only on the filename part, except
+that filename part starts with @file{//}.
+@ifset emacs
+A triple-slash stands for the default behavior.
+@end ifset
+@ifinfo
+@xref{Minibuffer File, , , @value{emacsdir}}.
+@end ifinfo
+
+@noindent
+Example:
+
+@example
+@ifset emacs
+@kbd{C-x C-f @trampfn{telnet, , melancholia, /usr/local/bin//etc} @key{TAB}}
+     @print{} @trampfn{telnet, , melancholia, /etc}
+
+@kbd{C-x C-f @trampfn{telnet, , melancholia, //etc} @key{TAB}}
+     @print{} /etc
+
+@kbd{C-x C-f @trampfn{telnet, , melancholia, /usr/local/bin///etc} @key{TAB}}
+     @print{} /etc
+@end ifset
+
+@ifset xemacs
+@kbd{C-x C-f @trampfn{telnet, , melancholia, /usr/local/bin//}}
+     @print{} @trampfn{telnet, , melancholia, /}
+
+@kbd{C-x C-f @trampfn{telnet, , melancholia, //}}
+     @print{} /
+@end ifset
+@end example
+
+A remote directory might have changed its contents out of
+@value{emacsname} control, for example by creation or deletion of
+files by other processes.  Therefore, during filename completion, the
+remote directory contents are reread regularly in order to detect such
+changes, which would be invisible otherwise (@pxref{Connection caching}).
+
+@defopt tramp-completion-reread-directory-timeout
+This variable defines the number of seconds since last remote command
+before rereading a directory contents.  A value of 0 would require an
+immediate reread during filename completion, @code{nil} means to use
+always cached values for the directory contents.
+@end defopt
+
+
+@node Remote processes
+@section Integration with other @value{emacsname} packages.
+@cindex compile
+@cindex recompile
+
+@value{tramp} supports running processes on a remote host.  This
+allows to exploit @value{emacsname} packages without modification for
+remote file names.  It does not work for the @option{ftp} and
+@option{smb} methods.  Association of a pty, as specified in
+@code{start-file-process}, is not supported.
+
+@code{process-file} and @code{start-file-process} work on the remote
+host when the variable @code{default-directory} is remote:
+
+@lisp
+(let ((default-directory "/ssh:remote.host:"))
+  (start-file-process "grep" (get-buffer-create "*grep*")
+                      "/bin/sh" "-c" "grep -e tramp *"))
+@end lisp
+
+@ifset emacsgvfs
+If the remote host is mounted via GVFS (see @ref{GVFS based methods}),
+the remote filesystem is mounted locally.  Therefore, there are no
+remote processes; all processes run still locally on your machine with
+an adapted @code{default-directory}.  This section does not apply for
+such connection methods.
+@end ifset
+
+Remote processes are started when a corresponding command is executed
+from a buffer belonging to a remote file or directory.  Up to now, the
+packages @file{compile.el} (commands like @code{compile} and
+@code{grep}) and @file{gud.el} (@code{gdb} or @code{perldb}) have been
+integrated.  Integration of further packages is planned, any help for
+this is welcome!
+
+When your program is not found in the default search path
+@value{tramp} sets on the remote machine, you should either use an
+absolute path, or extend @code{tramp-remote-path} (see @ref{Remote
+Programs}):
+
+@lisp
+(add-to-list 'tramp-remote-path "~/bin")
+(add-to-list 'tramp-remote-path "/appli/pub/bin")
+@end lisp
+
+The environment for your program can be adapted by customizing
+@code{tramp-remote-process-environment}.  This variable is a list of
+strings.  It is structured like @code{process-environment}.  Each
+element is a string of the form ENVVARNAME=VALUE.  An entry
+ENVVARNAME= disables the corresponding environment variable, which
+might have been set in your init file like @file{~/.profile}.
+
+@noindent
+Adding an entry can be performed via @code{add-to-list}:
+
+@lisp
+(add-to-list 'tramp-remote-process-environment "JAVA_HOME=/opt/java")
+@end lisp
+
+Changing or removing an existing entry is not encouraged.  The default
+values are chosen for proper @value{tramp} work.  Nevertheless, if for
+example a paranoid system administrator disallows changing the
+@code{HISTORY} environment variable, you can customize
+@code{tramp-remote-process-environment}, or you can apply the
+following code in your @file{.emacs}:
+
+@lisp
+(let ((process-environment tramp-remote-process-environment))
+  (setenv "HISTORY" nil)
+  (setq tramp-remote-process-environment process-environment))
+@end lisp
+
+If you use other @value{emacsname} packages which do not run
+out-of-the-box on a remote host, please let us know.  We will try to
+integrate them as well.  @xref{Bug Reports}.
+
+
+@subsection Running remote programs that create local X11 windows
+
+If you want to run a remote program, which shall connect the X11
+server you are using with your local host, you can set the
+@code{DISPLAY} environment variable on the remote host:
+
+@lisp
+(add-to-list 'tramp-remote-process-environment
+             (format "DISPLAY=%s" (getenv "DISPLAY")))
+@end lisp
+
+@noindent
+@code{(getenv "DISPLAY")} shall return a string containing a host
+name, which can be interpreted on the remote host; otherwise you might
+use a fixed host name.  Strings like @code{:0} cannot be used properly
+on the remote host.
+
+Another trick might be that you put @code{ForwardX11 yes} or
+@code{ForwardX11Trusted yes} to your @file{~/.ssh/config} file for
+that host.
+
+
+@subsection Running @code{shell} on a remote host
+@cindex shell
+
+Calling @code{M-x shell} in a buffer related to a remote host runs the
+local shell as defined in @option{shell-file-name}.  This might be
+also a valid path name for a shell to be applied on the remote host,
+but it will fail at least when your local and remote hosts belong to
+different system types, like @samp{windows-nt} and @samp{gnu/linux}.
+
+You must set the variable @option{explicit-shell-file-name} to the
+shell path name on the remote host, in order to start that shell on
+the remote host.
+
+@ifset emacs
+Starting with Emacs 24 this won't be necessary, if you call
+@code{shell} interactively.  You will be asked for the remote shell
+path, if you are on a remote buffer, and if
+@option{explicit-shell-file-name} is equal to @code{nil}.
+@end ifset
+
+
+@subsection Running @code{shell-command} on a remote host
+@cindex shell-command
+
+@code{shell-command} allows to execute commands in a shell, either
+synchronously, either asynchronously.  This works also on remote
+hosts.  Example:
+
+@example
+@kbd{C-x C-f @trampfn{sudo, , , } @key{RET}}
+@kbd{M-! tail -f /var/log/syslog.log & @key{RET}}
+@end example
+
+You will see the buffer @file{*Async Shell Command*}, containing the
+continuous output of the @command{tail} command.
+
+
+@subsection Running @code{eshell} on a remote host
+@cindex eshell
+
+@value{tramp} is integrated into @file{eshell.el}.  That is, you can
+open an interactive shell on your remote host, and run commands there.
+After you have started @code{M-x eshell}, you could perform commands
+like this:
+
+@example
+@b{~ $} cd @trampfn{sudo, , , /etc} @key{RET}
+@b{@trampfn{sudo, root, host, /etc} $} hostname @key{RET}
+host
+@b{@trampfn{sudo, root, host, /etc} $} id @key{RET}
+uid=0(root) gid=0(root) groups=0(root)
+@b{@trampfn{sudo, root, host, /etc} $} find-file shadow @key{RET}
+#<buffer shadow>
+@b{@trampfn{sudo, root, host, /etc} $}
+@end example
+
+@ifset emacs
+Since @value{emacsname} 23.2, @code{eshell} has also an own
+implementation of the @code{su} and @code{sudo} commands.  Both
+commands change the default directory of the @file{*eshell*} buffer to
+the value related to the user the command has switched to.  This works
+even on remote hosts, adding silently a corresponding entry to the
+variable @code{tramp-default-proxies-alist} (@pxref{Multi-hops}):
+
+@example
+@b{~ $} cd @trampfn{ssh, user, remotehost, /etc} @key{RET}
+@b{@trampfn{ssh, user, remotehost, /etc} $} find-file shadow @key{RET}
+File is not readable: @trampfn{ssh, user, remotehost, /etc/shadow}
+@b{@trampfn{ssh, user, remotehost, /etc} $} sudo find-file shadow @key{RET}
+#<buffer shadow>
+
+@b{@trampfn{ssh, user, remotehost, /etc} $} su - @key{RET}
+@b{@trampfn{su, root, remotehost, /root} $} id @key{RET}
+uid=0(root) gid=0(root) groups=0(root)
+@b{@trampfn{su, root, remotehost, /root} $}
+@end example
+@end ifset
+
+
+@anchor{Running a debugger on a remote host}
+@subsection Running a debugger on a remote host
+@cindex gud
+@cindex gdb
+@cindex perldb
+
+@file{gud.el} offers an unified interface to several symbolic
+debuggers
+@ifset emacs
+@ifinfo
+(@ref{Debuggers, , , @value{emacsdir}}).
+@end ifinfo
+@end ifset
+With @value{tramp}, it is possible to debug programs on
+remote hosts.  You can call @code{gdb} with a remote file name:
+
+@example
+@kbd{M-x gdb @key{RET}}
+@b{Run gdb (like this):} gdb --annotate=3 @trampfn{ssh, , host, ~/myprog} @key{RET}
+@end example
+
+The file name can also be relative to a remote default directory.
+Given you are in a buffer that belongs to the remote directory
+@trampfn{ssh, , host, /home/user}, you could call
+
+@example
+@kbd{M-x perldb @key{RET}}
+@b{Run perldb (like this):} perl -d myprog.pl @key{RET}
+@end example
+
+It is not possible to use just the absolute local part of a remote
+file name as program to debug, like @kbd{perl -d
+/home/user/myprog.pl}, though.
+
+Arguments of the program to be debugged are taken literally.  That
+means, file names as arguments must be given as ordinary relative or
+absolute file names, without any remote specification.
+
+
+@node Cleanup remote connections
+@section Cleanup remote connections.
+@cindex cleanup
+
+Sometimes it is useful to cleanup remote connections.  The following
+commands support this.
+
+@deffn Command tramp-cleanup-connection vec
+This command flushes all connection related objects.  @option{vec} is
+the internal representation of a remote connection.  Called
+interactively, the command offers all active remote connections in the
+minibuffer as remote file name prefix like @file{@trampfn{method,
+user, host, }}.  The cleanup includes password cache (@pxref{Password
+handling}), file cache, connection cache (@pxref{Connection caching}),
+connection buffers.
+@end deffn
+
+@deffn Command tramp-cleanup-this-connection
+This command flushes all objects of the current buffer's remote
+connection.  The same objects are removed as in
+@code{tramp-cleanup-connection}.
+@end deffn
+
+@deffn Command tramp-cleanup-all-connections
+This command flushes objects for all active remote connections.  The
+same objects are removed as in @code{tramp-cleanup-connection}.
+@end deffn
+
+@deffn Command tramp-cleanup-all-buffers
+Like in @code{tramp-cleanup-all-connections}, all remote connections
+are cleaned up.  Additionally all buffers, which are related to a
+remote connection, are killed.
+@end deffn
+
+
+@node Bug Reports
+@chapter Reporting Bugs and Problems
+@cindex bug reports
+
+Bugs and problems with @value{tramp} are actively worked on by the
+development team.  Feature requests and suggestions are also more than
+welcome.
+
+The @value{tramp} mailing list is a great place to get information on
+working with @value{tramp}, solving problems and general discussion
+and advice on topics relating to the package.  It is moderated so
+non-subscribers can post but messages will be delayed, possibly up to
+48 hours (or longer in case of holidays), until the moderator approves
+your message.
+
+The mailing list is at @email{tramp-devel@@gnu.org}.  Messages sent to
+this address go to all the subscribers.  This is @emph{not} the address
+to send subscription requests to.
+
+Subscribing to the list is performed via
+@uref{http://lists.gnu.org/mailman/listinfo/tramp-devel/,
+the @value{tramp} Mail Subscription Page}.
+
+@findex tramp-bug
+To report a bug in @value{tramp}, you should execute @kbd{M-x
+tramp-bug}.  This will automatically generate a buffer with the details
+of your system and @value{tramp} version.
+
+When submitting a bug report, please try to describe in excruciating
+detail the steps required to reproduce the problem, the setup of the
+remote machine and any special conditions that exist.  You should also
+check that your problem is not described already in @xref{Frequently
+Asked Questions}.
+
+If you can identify a minimal test case that reproduces the problem,
+include that with your bug report.  This will make it much easier for
+the development team to analyze and correct the problem.
+
+Before reporting the bug, you should set the verbosity level to 6
+(@pxref{Traces and Profiles, Traces}) in the @file{~/.emacs} file and
+repeat the bug.  Then, include the contents of the @file{*tramp/foo*}
+and @file{*debug tramp/foo*} buffers in your bug report.  A verbosity
+level greater than 6 will produce a very huge debug buffer, which is
+mostly not necessary for the analysis.
+
+Please be aware that, with a verbosity level of 6 or greater, the
+contents of files and directories will be included in the debug
+buffer.  Passwords you've typed will never be included there.
+
+
+@node Frequently Asked Questions
+@chapter Frequently Asked Questions
+@cindex frequently asked questions
+@cindex FAQ
+
+@itemize @bullet
+@item
+Where can I get the latest @value{tramp}?
+
+@value{tramp} is available under the URL below.
+
+@noindent
+@uref{ftp://ftp.gnu.org/gnu/tramp/}
+
+@noindent
+There is also a Savannah project page.
+
+@noindent
+@uref{http://savannah.gnu.org/projects/tramp/}
+
+
+@item
+Which systems does it work on?
+
+The package has been used successfully on Emacs 22, Emacs 23, Emacs
+24, XEmacs 21 (starting with 21.4), and SXEmacs 22.
+
+The package was intended to work on Unix, and it really expects a
+Unix-like system on the remote end (except the @option{smb} method),
+but some people seemed to have some success getting it to work on MS
+Windows XP/Vista/7 @value{emacsname}.
+
+
+@item
+How could I speed up @value{tramp}?
+
+In the backstage, @value{tramp} needs a lot of operations on the
+remote host.  The time for transferring data from and to the remote
+host as well as the time needed to perform the operations there count.
+In order to speed up @value{tramp}, one could either try to avoid some
+of the operations, or one could try to improve their performance.
+
+Use an external method, like @option{scpc}.
+
+Use caching.  This is already enabled by default.  Information about
+the remote host as well as the remote files are cached for reuse.  The
+information about remote hosts is kept in the file specified in
+@code{tramp-persistency-file-name}.  Keep this file.  If you are
+confident that files on remote hosts are not changed out of
+@value{emacsname}' control, set @code{remote-file-name-inhibit-cache}
+to @code{nil}.
+
+Disable version control.  If you access remote files which are not
+under version control, a lot of check operations can be avoided by
+disabling VC.  This can be achieved by
+
+@lisp
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
+@end lisp
+
+Disable excessive traces.  The default trace level of @value{tramp},
+defined in the variable @code{tramp-verbose}, is 3.  You should
+increase this level only temporarily, hunting bugs.
+
+
+@item
+@value{tramp} does not connect to the remote host
+
+When @value{tramp} does not connect to the remote host, there are three
+reasons heading the bug mailing list:
+
+@itemize @minus
+@item
+Unknown characters in the prompt
+
+@value{tramp} needs to recognize the prompt on the remote machine
+after execution any command.  This is not possible when the prompt
+contains unknown characters like escape sequences for coloring.  This
+should be avoided on the remote side.  @xref{Remote shell setup}. for
+setting the regular expression detecting the prompt.
+
+You can check your settings after an unsuccessful connection by
+switching to the @value{tramp} connection buffer @file{*tramp/foo*},
+setting the cursor at the top of the buffer, and applying the expression
+
+@example
+@kbd{M-: (re-search-forward (concat tramp-shell-prompt-pattern "$"))}
+@end example
+
+If it fails, or the cursor is not moved at the end of the buffer, your
+prompt is not recognized correctly.
+
+A special problem is the zsh, which uses left-hand side and right-hand
+side prompts in parallel.  Therefore, it is necessary to disable the
+zsh line editor on the remote host.  You shall add to @file{~/.zshrc}
+the following command:
+
+@example
+[ $TERM = "dumb" ] && unsetopt zle && PS1='$ '
+@end example
+
+Furthermore it has been reported, that @value{tramp} (like sshfs,
+incidentally) doesn't work with WinSSHD due to strange prompt settings.
+
+@item
+Echoed characters after login
+
+When the remote machine opens an echoing shell, there might be control
+characters in the welcome message.  @value{tramp} tries to suppress
+such echoes via the @code{stty -echo} command, but sometimes this
+command is not reached, because the echoed output has confused
+@value{tramp} already.  In such situations it might be helpful to use
+the @option{sshx} or @option{scpx} methods, which allocate a pseudo tty.
+@xref{Inline methods}.
+
+@item
+@value{tramp} doesn't transfer strings with more than 500 characters
+correctly
+
+On some few systems, the implementation of @code{process-send-string}
+seems to be broken for longer strings.  It is reported for HP-UX,
+FreeBSD and Tru64 Unix, for example.  This case, you should customize
+the variable @code{tramp-chunksize} to 500.  For a description how to
+determine whether this is necessary see the documentation of
+@code{tramp-chunksize}.
+
+Additionally, it will be useful to set @code{file-precious-flag} to
+@code{t} for @value{tramp} files.  Then the file contents will be
+written into a temporary file first, which is checked for correct
+checksum.
+@ifinfo
+@pxref{Saving Buffers, , , elisp}
+@end ifinfo
+
+@lisp
+(add-hook
+ 'find-file-hooks
+ '(lambda ()
+    (when (file-remote-p default-directory)
+      (set (make-local-variable 'file-precious-flag) t))))
+@end lisp
+@end itemize
+
+
+@item
+@value{tramp} does not recognize hung @command{ssh} sessions
+
+When your network connection is down, @command{ssh} sessions might
+hang.  @value{tramp} cannot detect it safely, because it still sees a
+running @command{ssh} process.  Timeouts cannot be used as well,
+because it cannot be predicted how long a remote command will last,
+for example when copying very large files.
+
+Therefore, you must configure the @command{ssh} process to die
+in such a case.  The following entry in @file{~/.ssh/config} would do
+the job:
+
+@example
+Host *
+     ServerAliveInterval 5
+@end example
+
+
+@item
+File name completion does not work with @value{tramp}
+
+When you log in to the remote machine, do you see the output of
+@command{ls} in color? If so, this may be the cause of your problems.
+
+@command{ls} outputs @acronym{ANSI} escape sequences that your terminal
+emulator interprets to set the colors.  These escape sequences will
+confuse @value{tramp} however.
+
+In your @file{.bashrc}, @file{.profile} or equivalent on the remote
+machine you probably have an alias configured that adds the option
+@option{--color=yes} or @option{--color=auto}.
+
+You should remove that alias and ensure that a new login @emph{does not}
+display the output of @command{ls} in color.  If you still cannot use
+filename completion, report a bug to the @value{tramp} developers.
+
+
+@item
+File name completion does not work in large directories
+
+@value{tramp} uses globbing for some operations.  (Globbing means to use the
+shell to expand wildcards such as `*.c'.)  This might create long
+command lines, especially in directories with many files.  Some shells
+choke on long command lines, or don't cope well with the globbing
+itself.
+
+If you have a large directory on the remote end, you may wish to execute
+a command like @samp{ls -d * ..?* > /dev/null} and see if it hangs.
+Note that you must first start the right shell, which might be
+@command{/bin/sh}, @command{ksh} or @command{bash}, depending on which
+of those supports tilde expansion.
+
+
+@item
+How can I get notified when @value{tramp} file transfers are complete?
+
+The following snippet can be put in your @file{~/.emacs} file.  It
+makes @value{emacsname} beep after reading from or writing to the
+remote host.
+
+@lisp
+(defadvice tramp-handle-write-region
+  (after tramp-write-beep-advice activate)
+  "Make tramp beep after writing a file."
+  (interactive)
+  (beep))
+
+(defadvice tramp-handle-do-copy-or-rename-file
+  (after tramp-copy-beep-advice activate)
+  "Make tramp beep after copying a file."
+  (interactive)
+  (beep))
+
+(defadvice tramp-handle-insert-file-contents
+  (after tramp-insert-beep-advice activate)
+  "Make tramp beep after inserting a file."
+  (interactive)
+  (beep))
+@end lisp
+
+
+@ifset emacs
+@item
+I'ld like to get a Visual Warning when working in a sudo:ed context
+
+When you are working with @samp{root} privileges, it might be useful
+to get an indication in the buffer's modeline.  The following code,
+tested with @value{emacsname} 22.1, does the job.  You should put it
+into your @file{~/.emacs}:
+
+@lisp
+(defun my-mode-line-function ()
+  (when (string-match "^/su\\(do\\)?:" default-directory)
+    (setq mode-line-format
+          (format-mode-line mode-line-format 'font-lock-warning-face))))
+
+(add-hook 'find-file-hooks 'my-mode-line-function)
+(add-hook 'dired-mode-hook 'my-mode-line-function)
+@end lisp
+@end ifset
+
+
+@ifset emacs
+@item
+I'ld like to see a host indication in the mode line when I'm remote
+
+The following code has been tested with @value{emacsname} 22.1.  You
+should put it into your @file{~/.emacs}:
+
+@lisp
+(defconst my-mode-line-buffer-identification
+  (list
+   '(:eval
+     (let ((host-name
+            (if (file-remote-p default-directory)
+                (tramp-file-name-host
+                 (tramp-dissect-file-name default-directory))
+              (system-name))))
+       (if (string-match "^[^0-9][^.]*\\(\\..*\\)" host-name)
+           (substring host-name 0 (match-beginning 1))
+         host-name)))
+   ": %12b"))
+
+(setq-default
+ mode-line-buffer-identification
+ my-mode-line-buffer-identification)
+
+(add-hook
+ 'dired-mode-hook
+ '(lambda ()
+    (setq
+     mode-line-buffer-identification
+     my-mode-line-buffer-identification)))
+@end lisp
+
+Since @value{emacsname} 23.1, the mode line contains an indication if
+@code{default-directory} for the current buffer is on a remote host.
+The corresponding tooltip includes the name of that host.  If you
+still want the host name as part of the mode line, you can use the
+example above, but the @code{:eval} clause can be simplified:
+
+@lisp
+   '(:eval
+     (let ((host-name
+            (or (file-remote-p default-directory 'host)
+                (system-name))))
+       (if (string-match "^[^0-9][^.]*\\(\\..*\\)" host-name)
+           (substring host-name 0 (match-beginning 1))
+         host-name)))
+@end lisp
+@end ifset
+
+
+@ifset emacs
+@item
+My remote host does not understand default directory listing options
+
+@value{emacsname} computes the @command{dired} options depending on
+the local host you are working.  If your @command{ls} command on the
+remote host does not understand those options, you can change them
+like this:
+
+@lisp
+(add-hook
+ 'dired-before-readin-hook
+ '(lambda ()
+    (when (file-remote-p default-directory)
+      (setq dired-actual-switches "-al"))))
+@end lisp
+@end ifset
+
+
+@item
+There's this @file{~/.sh_history} file on the remote host which keeps
+growing and growing.  What's that?
+
+Sometimes, @value{tramp} starts @command{ksh} on the remote host for
+tilde expansion.  Maybe @command{ksh} saves the history by default.
+@value{tramp} tries to turn off saving the history, but maybe you have
+to help.  For example, you could put this in your @file{.kshrc}:
+
+@example
+if [ -f $HOME/.sh_history ] ; then
+   /bin/rm $HOME/.sh_history
+fi
+if [ "$@{HISTFILE-unset@}" != "unset" ] ; then
+   unset HISTFILE
+fi
+if [ "$@{HISTSIZE-unset@}" != "unset" ] ; then
+   unset HISTSIZE
+fi
+@end example
+
+
+@item There are longish file names to type.  How to shorten this?
+
+Let's say you need regularly access to @file{@trampfn{ssh, news,
+news.my.domain, /opt/news/etc}}, which is boring to type again and
+again.  The following approaches can be mixed:
+
+@enumerate
+
+@item Use default values for method and user name:
+
+You can define default methods and user names for hosts,
+(@pxref{Default Method}, @pxref{Default User}):
+
+@lisp
+(setq tramp-default-method "ssh"
+      tramp-default-user "news")
+@end lisp
+
+The file name left to type would be
+@kbd{C-x C-f @trampfn{, , news.my.domain, /opt/news/etc}}.
+
+Note that there are some useful settings already.  Accessing your
+local host as @samp{root} user, is possible just by @kbd{C-x C-f
+@trampfn{su, , ,}}.
+
+@item Use configuration possibilities of your method:
+
+Several connection methods (i.e. the programs used) offer powerful
+configuration possibilities (@pxref{Customizing Completion}).  In the
+given case, this could be @file{~/.ssh/config}:
+
+@example
+Host xy
+     HostName news.my.domain
+     User news
+@end example
+
+The file name left to type would be @kbd{C-x C-f @trampfn{ssh, , xy,
+/opt/news/etc}}.  Depending on files in your directories, it is even
+possible to complete the host name with @kbd{C-x C-f
+@value{prefix}ssh@value{postfixhop}x @key{TAB}}.
+
+@item Use environment variables:
+
+File names typed in the minibuffer can be expanded by environment
+variables.  You can set them outside @value{emacsname}, or even with
+Lisp:
+
+@lisp
+(setenv "xy" "@trampfn{ssh, news, news.my.domain, /opt/news/etc/}")
+@end lisp
+
+Then you need simply to type @kbd{C-x C-f $xy @key{RET}}, and here you
+are.  The disadvantage is that you cannot edit the file name, because
+environment variables are not expanded during editing in the
+minibuffer.
+
+@item Define own keys:
+
+You can define your own key sequences in @value{emacsname}, which can
+be used instead of @kbd{C-x C-f}:
+
+@lisp
+(global-set-key
+ [(control x) (control y)]
+ (lambda ()
+   (interactive)
+   (find-file
+    (read-file-name
+     "Find Tramp file: "
+     "@trampfn{ssh, news, news.my.domain, /opt/news/etc/}"))))
+@end lisp
+
+Simply typing @kbd{C-x C-y} would initialize the minibuffer for
+editing with your beloved file name.
+
+See also @uref{http://www.emacswiki.org/cgi-bin/wiki/TrampMode, the
+Emacs Wiki} for a more comprehensive example.
+
+@item Define own abbreviation (1):
+
+It is possible to define an own abbreviation list for expanding file
+names:
+
+@lisp
+(add-to-list
+ 'directory-abbrev-alist
+ '("^/xy" . "@trampfn{ssh, news, news.my.domain, /opt/news/etc/}"))
+@end lisp
+
+This shortens the file opening command to @kbd{C-x C-f /xy
+@key{RET}}.  The disadvantage is, again, that you cannot edit the file
+name, because the expansion happens after entering the file name only.
+
+@item Define own abbreviation (2):
+
+The @code{abbrev-mode} gives more flexibility for editing the
+minibuffer:
+
+@lisp
+(define-abbrev-table 'my-tramp-abbrev-table
+  '(("xy" "@trampfn{ssh, news, news.my.domain, /opt/news/etc/}")))
+
+(add-hook
+ 'minibuffer-setup-hook
+ '(lambda ()
+    (abbrev-mode 1)
+    (setq local-abbrev-table my-tramp-abbrev-table)))
+
+(defadvice minibuffer-complete
+  (before my-minibuffer-complete activate)
+  (expand-abbrev))
+
+;; If you use partial-completion-mode
+(defadvice PC-do-completion
+  (before my-PC-do-completion activate)
+  (expand-abbrev))
+@end lisp
+
+After entering @kbd{C-x C-f xy @key{TAB}}, the minibuffer is
+expanded, and you can continue editing.
+
+@item Use bookmarks:
+
+Bookmarks can be used to visit Tramp files or directories.
+@ifinfo
+@pxref{Bookmarks, , , @value{emacsdir}}
+@end ifinfo
+
+When you have opened @file{@trampfn{ssh, news, news.my.domain,
+/opt/news/etc/}}, you should save the bookmark via
+@ifset emacs
+@kbd{@key{menu-bar} @key{edit} @key{bookmarks} @key{set}}.
+@end ifset
+@ifset xemacs
+@kbd{@key{menu-bar} @key{view} @key{bookmarks} @key{set}}.
+@end ifset
+
+Later on, you can always navigate to that bookmark via
+@ifset emacs
+@kbd{@key{menu-bar} @key{edit} @key{bookmarks} @key{jump}}.
+@end ifset
+@ifset xemacs
+@kbd{@key{menu-bar} @key{view} @key{bookmarks} @key{jump}}.
+@end ifset
+
+@item Use recent files:
+
+@ifset emacs
+@file{recentf}
+@end ifset
+@ifset xemacs
+@file{recent-files}
+@end ifset
+remembers visited places.
+@ifinfo
+@ifset emacs
+@pxref{File Conveniences, , , @value{emacsdir}}
+@end ifset
+@ifset xemacs
+@pxref{recent-files, , , edit-utils}
+@end ifset
+@end ifinfo
+
+You could keep remote file names in the recent list without checking
+their readability through a remote access:
+
+@lisp
+@ifset emacs
+(recentf-mode 1)
+@end ifset
+@ifset xemacs
+(recent-files-initialize)
+(add-hook
+ 'find-file-hooks
+ (lambda ()
+   (when (file-remote-p (buffer-file-name))
+     (recent-files-make-permanent)))
+ 'append)
+@end ifset
+@end lisp
+
+The list of files opened recently is reachable via
+@ifset emacs
+@kbd{@key{menu-bar} @key{file} @key{Open Recent}}.
+@end ifset
+@ifset xemacs
+@kbd{@key{menu-bar} @key{Recent Files}}.
+@end ifset
+
+@ifset emacs
+@item Use filecache:
+
+@file{filecache} remembers visited places.  Add the directory into
+the cache:
+
+@lisp
+(eval-after-load "filecache"
+  '(file-cache-add-directory
+    "@trampfn{ssh, news, news.my.domain, /opt/news/etc/}"))
+@end lisp
+
+Whenever you want to load a file, you can enter @kbd{C-x C-f
+C-@key{TAB}} in the minibuffer.  The completion is done for the given
+directory.
+@end ifset
+
+@ifset emacs
+@item Use bbdb:
+
+@file{bbdb} has a built-in feature for @value{ftppackagename} files,
+which works also for @value{tramp}.
+@ifinfo
+@pxref{bbdb-ftp, Storing FTP sites in the BBDB, , bbdb}
+@end ifinfo
+
+You need to load @file{bbdb}:
+
+@lisp
+(require 'bbdb)
+(bbdb-initialize)
+@end lisp
+
+Then you can create a BBDB entry via @kbd{M-x bbdb-create-ftp-site}.
+Because BBDB is not prepared for @value{tramp} syntax, you must
+specify a method together with the user name when needed. Example:
+
+@example
+@kbd{M-x bbdb-create-ftp-site @key{RET}}
+@b{Ftp Site:} news.my.domain @key{RET}
+@b{Ftp Directory:} /opt/news/etc/ @key{RET}
+@b{Ftp Username:} ssh@value{postfixhop}news @key{RET}
+@b{Company:} @key{RET}
+@b{Additional Comments:} @key{RET}
+@end example
+
+When you have opened your BBDB buffer, you can access such an entry by
+pressing the key @key{F}.
+@end ifset
+
+@end enumerate
+
+I would like to thank all @value{tramp} users who have contributed to
+the different recipes!
+
+
+@ifset emacs
+@item
+How can I use @value{tramp} to connect to a remote @value{emacsname}
+session?
+
+You can configure Emacs Client doing this.
+@ifinfo
+@xref{Emacs Server, , , @value{emacsdir}}.
+@end ifinfo
+
+On the remote host, you start the Emacs Server:
+
+@lisp
+(require 'server)
+(setq server-host (system-name)
+      server-use-tcp t)
+(server-start)
+@end lisp
+
+Make sure that the result of @code{(system-name)} can be resolved on
+your local host; otherwise you might use a hard coded IP address.
+
+The resulting file @file{~/.emacs.d/server/server} must be copied to
+your local host, at the same location.  You can call then the Emacs
+Client from the command line:
+
+@example
+emacsclient @trampfn{ssh, user, host, /file/to/edit}
+@end example
+
+@code{user} and @code{host} shall be related to your local host.
+
+If you want to use Emacs Client also as editor for other programs, you
+could write a script @file{emacsclient.sh}:
+
+@example
+#!/bin/sh
+emacsclient @trampfn{ssh, $(whoami), $(hostname --fqdn), $1}
+@end example
+
+Then you must set the environment variable @code{EDITOR} pointing to
+that script:
+
+@example
+export EDITOR=/path/to/emacsclient.sh
+@end example
+@end ifset
+
+
+@item
+There are packages which call @value{tramp} although I haven't entered
+a remote file name ever.  I dislike it, how could I disable it?
+
+In general, @value{tramp} functions are used only when
+you apply remote file name syntax.  However, some packages enable
+@value{tramp} on their own.
+
+@itemize @minus
+@item
+@file{ido.el}
+
+You could disable @value{tramp} file name completion:
+
+@lisp
+(custom-set-variables
+ '(ido-enable-tramp-completion nil))
+@end lisp
+
+@item
+@file{rlogin.el}
+
+You could disable remote directory tracking mode:
+
+@lisp
+(rlogin-directory-tracking-mode -1)
+@end lisp
+@end itemize
+
+
+@item
+How can I disable @value{tramp} at all?
+
+Shame on you, why did you read until now?
+
+@itemize @minus
+@ifset emacs
+@item
+If you just want to have @value{ftppackagename} as default remote
+files access package, you should apply the following code:
+
+@lisp
+(setq tramp-default-method "ftp")
+@end lisp
+@end ifset
+
+@item
+In order to disable
+@ifset emacs
+@value{tramp} (and @value{ftppackagename}),
+@end ifset
+@ifset xemacs
+@value{tramp},
+@end ifset
+you must set @code{tramp-mode} to @code{nil}:
+
+@lisp
+(setq tramp-mode nil)
+@end lisp
+
+@item
+Unloading @value{tramp} can be achieved by applying @kbd{M-x
+tramp-unload-tramp}.
+@ifset emacs
+This resets also the @value{ftppackagename} plugins.
+@end ifset
+@end itemize
+@end itemize
+
+
+@c For the developer
+@node Files directories and localnames
+@chapter How file names, directories and localnames are mangled and managed.
+
+@menu
+* Localname deconstruction::    Breaking a localname into its components.
+@ifset emacs
+* External packages::           Integration with external Lisp packages.
+@end ifset
+@end menu
+
+
+@node Localname deconstruction
+@section Breaking a localname into its components.
+
+@value{tramp} file names are somewhat different, obviously, to ordinary file
+names.  As such, the lisp functions @code{file-name-directory} and
+@code{file-name-nondirectory} are overridden within the @value{tramp}
+package.
+
+Their replacements are reasonably simplistic in their approach.  They
+dissect the filename, call the original handler on the localname and
+then rebuild the @value{tramp} file name with the result.
+
+This allows the platform specific hacks in the original handlers to take
+effect while preserving the @value{tramp} file name information.
+
+
+@ifset emacs
+@node External packages
+@section Integration with external Lisp packages.
+@subsection Filename completion.
+
+While reading filenames in the minibuffer, @value{tramp} must decide
+whether it completes possible incomplete filenames, or not.  Imagine
+there is the following situation: You have typed @kbd{C-x C-f
+@value{prefix}ssh@value{postfixhop} @key{TAB}}.  @value{tramp} cannot
+know, whether @option{ssh} is a method or a host name.  It checks
+therefore the last input character you have typed.  If this is
+@key{TAB}, @key{SPACE} or @kbd{?}, @value{tramp} assumes that you are
+still in filename completion, and it does not connect to the possible
+remote host @option{ssh}.
+
+@vindex tramp-completion-mode
+External packages, which use other characters for completing filenames
+in the minibuffer, must signal this to @value{tramp}.  For this case,
+the variable @code{tramp-completion-mode} can be bound temporarily to
+a non-@code{nil} value.
+
+@lisp
+(let ((tramp-completion-mode t))
+  ...)
+@end lisp
+
+
+@subsection File attributes cache.
+
+When @value{tramp} runs remote processes, files on the remote host
+could change their attributes.  Consequently, @value{tramp} must flush
+its complete cache keeping attributes for all files of the remote host
+it has seen so far.
+
+This is a performance degradation, because the lost file attributes
+must be recomputed when needed again.  In cases the caller of
+@code{process-file} knows that there are no file attribute changes, it
+shall let-bind the variable @code{process-file-side-effects} to
+@code{nil}.  @value{tramp} wouldn't flush the file attributes cache then.
+
+@lisp
+(let (process-file-side-effects)
+  ...)
+@end lisp
+
+For asynchronous processes, @value{tramp} flushes the file attributes
+cache via a process sentinel.  If the caller of
+@code{start-file-process} knows that there are no file attribute
+changes, it shall set the process sentinel to @code{nil}.  In case the
+caller defines an own process sentinel, @value{tramp}'s process
+sentinel is overwritten.  The caller can still flush the file
+attributes cache in its process sentinel with this code:
+
+@lisp
+(unless (memq (process-status proc) '(run open))
+  (dired-uncache remote-directory))
+@end lisp
+
+@code{remote-directory} shall be the root directory, where file
+attribute changes can happen during the process lifetime.
+@value{tramp} traverses all subdirectories, starting at this
+directory.  Often, it is sufficient to use @code{default-directory} of
+the process buffer as root directory.
+@end ifset
+
+
+@node Traces and Profiles
+@chapter How to Customize Traces
+
+All @value{tramp} messages are raised with a verbosity level.  The
+verbosity level can be any number between 0 and 10.  Only messages with
+a verbosity level less than or equal to @code{tramp-verbose} are
+displayed.
+
+The verbosity levels are
+
+          @w{ 0}  silent (no @value{tramp} messages at all)
+@*@indent @w{ 1}  errors
+@*@indent @w{ 2}  warnings
+@*@indent @w{ 3}  connection to remote hosts (default verbosity)
+@*@indent @w{ 4}  activities
+@*@indent @w{ 5}  internal
+@*@indent @w{ 6}  sent and received strings
+@*@indent @w{ 7}  file caching
+@*@indent @w{ 8}  connection properties
+@*@indent @w{ 9}  test commands
+@*@indent @w{10}  traces (huge)
+
+When @code{tramp-verbose} is greater than or equal to 4, the messages
+are also written into a @value{tramp} debug buffer.  This debug buffer
+is useful for analyzing problems; sending a @value{tramp} bug report
+should be done with @code{tramp-verbose} set to a verbosity level of at
+least 6 (@pxref{Bug Reports}).
+
+The debug buffer is in
+@ifinfo
+@ref{Outline Mode, , , @value{emacsdir}}.
+@end ifinfo
+@ifnotinfo
+Outline Mode.
+@end ifnotinfo
+That means, you can change the level of messages to be viewed.  If you
+want, for example, see only messages up to verbosity level 5, you must
+enter @kbd{C-u 6 C-c C-q}.
+@ifinfo
+Other keys for navigating are described in
+@ref{Outline Visibility, , , @value{emacsdir}}.
+@end ifinfo
+
+@value{tramp} errors are handled internally in order to raise the
+verbosity level 1 messages.  When you want to get a Lisp backtrace in
+case of an error, you need to set both
+
+@lisp
+(setq debug-on-error t
+      debug-on-signal t)
+@end lisp
+
+Sometimes, it might be even necessary to step through @value{tramp}
+function call traces.  Such traces are enabled by the following code:
+
+@lisp
+(require 'tramp)
+(require 'trace)
+(dolist (elt (all-completions "tramp-" obarray 'functionp))
+  (trace-function-background (intern elt)))
+(untrace-function 'tramp-read-passwd)
+(untrace-function 'tramp-gw-basic-authentication)
+@end lisp
+
+The function call traces are inserted in the buffer
+@file{*trace-output*}.  @code{tramp-read-passwd} and
+@code{tramp-gw-basic-authentication} shall be disabled when the
+function call traces are added to @value{tramp}, because both
+functions return password strings, which should not be distributed.
+
+
+@node Issues
+@chapter Debatable Issues and What Was Decided
+
+@itemize @bullet
+@item The uuencode method does not always work.
+
+Due to the design of @value{tramp}, the encoding and decoding programs
+need to read from stdin and write to stdout.  On some systems,
+@command{uudecode -o -} will read stdin and write the decoded file to
+stdout, on other systems @command{uudecode -p} does the same thing.
+But some systems have uudecode implementations which cannot do this at
+all---it is not possible to call these uudecode implementations with
+suitable parameters so that they write to stdout.
+
+Of course, this could be circumvented: the @code{begin foo 644} line
+could be rewritten to put in some temporary file name, then
+@command{uudecode} could be called, then the temp file could be
+printed and deleted.
+
+But I have decided that this is too fragile to reliably work, so on some
+systems you'll have to do without the uuencode methods.
+
+@item The @value{tramp} filename syntax differs between Emacs and XEmacs.
+
+The Emacs maintainers wish to use a unified filename syntax for
+Ange-FTP and @value{tramp} so that users don't have to learn a new
+syntax.  It is sufficient to learn some extensions to the old syntax.
+
+For the XEmacs maintainers, the problems caused from using a unified
+filename syntax are greater than the gains.  The XEmacs package system
+uses EFS for downloading new packages.  So, obviously, EFS has to be
+installed from the start.  If the filenames were unified, @value{tramp}
+would have to be installed from the start, too.
+
+@ifset xemacs
+@strong{Note:} If you'd like to use a similar syntax like
+@value{ftppackagename}, you need the following settings in your init
+file:
+
+@lisp
+(setq tramp-unified-filenames t)
+(require 'tramp)
+@end lisp
+
+The autoload of the @value{emacsname} @value{tramp} package must be
+disabled.  This can be achieved by setting file permissions @code{000}
+to the files @file{.../xemacs-packages/lisp/tramp/auto-autoloads.el*}.
+
+In case of unified filenames, all @value{emacsname} download sites are
+added to @code{tramp-default-method-alist} with default method
+@option{ftp} @xref{Default Method}.  These settings shouldn't be
+touched for proper working of the @value{emacsname} package system.
+
+The syntax for unified filenames is described in the @value{tramp} manual
+for @value{emacsothername}.
+@end ifset
+@end itemize
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Function Index
+@unnumbered Function Index
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+@printindex vr
+
+@node Concept Index
+@unnumbered Concept Index
+@printindex cp
+
+@bye
+
+@c TODO
+@c
+@c * Say something about the .login and .profile files of the remote
+@c   shells.
+@c * Explain how tramp.el works in principle: open a shell on a remote
+@c   host and then send commands to it.
+@c * Use `filename' resp. `file name' consistently.
+@c * Use `host' resp. `machine' consistently.
+@c * Consistent small or capitalized words especially in menus.

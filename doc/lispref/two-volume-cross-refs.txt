@@ -1,0 +1,319 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See end for copying conditions.
+
+Two Volume Cross References
+===========================
+
+12 June 2007 (karl)
+
+For lispref 2.9 (for Emacs 22, June 2007), I created a very ugly
+Makefile, in the file two-volume.make, to encapsulate all the steps
+below, without manual intervention.  In theory, simply running "make -f
+two-volume.make" should create a vol1.pdf and vol2.pdf with all the
+niceties worked out.
+
+One issue not explicitly discussed below is getting page numbers right.
+It's not enough to go through the whole process.  You have to go through
+the whole process twice -- otherwise, some index entries and/or toc
+entries will be off by one.  See two-volume.make for a few more comments.
+
+For future editions, it should suffice to update the usual things in
+vol[12].texi (as well as elisp.texi).  That was my hope, anyway.
+
+
+18 March 1992 (bob)
+
+This enables you to create manuals in *two* volumes, with tables of
+contents, cross references, and indices in each volume referring to
+*both* volumes.
+
+The procedure is tedious.  However, the resulting two volumes are
+conveniently organized.  Each has an index of the whole two volumes.
+Each volume starts with page 1.  (I don't like multi-volume works
+where each volume starts with a higher page number since I find it
+harder to go to the right place in the volume.)
+
+References to the same volume are just the page number; references to
+the other volume are a volume number (in Roman numerals) preceding
+the page number.
+
+For example, in Volume I:
+
+    list length ......... 90
+    list motion ......II:117
+
+and in Volume II:
+
+    list length ....... I:90
+    list motion .........117
+
+All other references and the table of contents work the same way.  I
+find this *very* helpful.
+
+
+In brief: you run tex on a .texi file with
+
+  a. redefined @contents and @summarycontents inputting elisp-toc-2vol.toc file
+  b. redone .aux file
+  c. redone .fns file
+
+
+Here are the steps in detail:
+
+% tex vol1.texi
+% texindex vol1.??
+% tex vol1.texi
+
+% tex vol2.texi
+% texindex vol2.??
+% tex vol2.texi
+
+### Create .aux files with volume numbers for other volume.
+
+% cp vol1.aux elisp1-aux
+% cp vol2.aux elisp2-aux
+
+% cp vol1.aux elisp1-aux-vol-added
+% cp vol2.aux elisp2-aux-vol-added
+
+on elisp1-aux-vol-number-added
+(volume-aux-markup 1)           see defun for volume-aux-markup below.
+to create             elisp1-aux-vol-added
+
+on elisp2-aux-vol-number-added
+(volume-aux-markup 2)
+to create             elisp2-aux-vol-added
+
+insert elisp2-aux-vol-added into vol1.aux  (append)
+insert elisp1-aux-vol-added into vol2.aux  (prepend)
+
+(so you don't have to do it again)
+% cp vol1.aux elisp1-aux-ready
+% cp vol2.aux elisp2-aux-ready
+
+
+### Create .fn files with volume numbers for other volume.
+
+% cp vol1.fn elisp1-fn
+% cp vol2.fn elisp2-fn
+
+% cp vol1.fn elisp1-fn-vol-number-added
+% cp vol2.fn elisp2-fn-vol-number-added
+
+on elisp1-fn-vol-number-added
+(volume-index-markup "I")
+to create             elisp1-fn-vol-number-added
+
+on elisp2-fn-vol-number-added
+(volume-index-markup "II")
+to create             elisp2-fn-vol-number-added
+
+insert elisp2-fn-vol-number-added into vol1.fn: do following `cat'
+insert elisp1-fn-vol-number-added into vol2.fn: do following `cat'
+
+% cat elisp2-fn-vol-number-added >> vol1.fn
+% cat elisp1-fn-vol-number-added >> vol2.fn
+
+Be sure to handle special case entries by hand.
+Be sure that .fn file has no blank lines.
+
+% texindex vol1.fn
+% texindex vol2.fn
+
+(so you don't have to do it again)
+% cp vol1.fns elisp1-fns-2vol-ready
+% cp vol2.fns elisp2-fns-2vol-ready
+
+### Create merged .toc file with volume number headings.
+
+append vol2.toc to vol1.toc  with following `cat'
+
+% cat vol1.toc vol2.toc > elisp-toc-2vol.toc
+
+and edit in Volume titles
+
+\unnumbchapentry {Volume 1}{}
+\unnumbchapentry {}{}
+
+\unnumbchapentry {Index}{295}
+\unnumbchapentry {}{}
+\unnumbchapentry {Volume 2}{}
+\unnumbchapentry {}{}
+
+If you want to put in volume numbers for TOC, then do this:
+Create volume specific .toc files with volume numbers in them.
+
+% cp elisp-toc-2vol.toc elisp1-toc.toc
+% cp elisp-toc-2vol.toc elisp2-toc.toc
+
+Use keyboard macro to put I: in first half of elisp1-toc.toc and
+II: in first half of elisp2-toc.toc
+
+Copy the tocs to something you can remember more easily
+
+% cp elisp2-toc.toc elisp1-toc-ready.toc
+% cp elisp1-toc.toc elisp2-toc-ready.toc
+
+Then, edit vol1.texi to input elisp1-toc-ready.toc
+and vol2.texi to input elisp2-toc-ready.toc
+
+
+### Now format the two volumes:
+
+% cp elisp1-aux-2vol-ready vol1.aux
+% cp elisp2-aux-2vol-ready vol2.aux
+
+% tex vol1.texi
+% tex vol2.texi
+
+
+
+For every additional run:
+
+### recopy aux files so the correct ones are read:
+% cp elisp1-aux-2vol-ready vol1.aux
+% cp elisp2-aux-2vol-ready vol2.aux
+
+Do not run texindex.  Then proper sorted index will stay.
+ else do: % cp elisp2-fns-2vol-ready vol2.fns
+
+Do not change the .texi files; they will call the elisp-toc-2vol.toc file.
+
+% tex vol1.texi
+% tex vol2.texi
+
+================================================================
+
+
+(defun volume-aux-markup (arg)
+  "Append `vol. NUMBER' to page number.
+Apply to aux file that you save.
+Then insert marked file into other volume's .aux file."
+  (interactive "sType volume number, 1 or 2: " )
+  (goto-char (point-min))
+  (while (search-forward "-pg" nil t)
+    (end-of-line 1)
+    (delete-backward-char 1 nil)
+    (insert ", vol.'tie" arg "}")))
+
+(defun volume-index-markup (arg)
+  "Prepend  `NUMBER:' to page number.  Use Roman Numeral.
+Apply only to unsorted index file,
+Then insert marked file into other volume's unsorted index file.
+Then run texindex on that file and save."
+  (interactive
+   "sType volume number,  roman number I or II: " )
+  (goto-char (point-min))
+  (while (search-forward "\\entry" nil t)
+    (search-forward "}{" (save-excursion (end-of-line) (point)) nil)
+    (insert arg ":")))
+
+
+================================================================
+
+
+The steps:
+
+1. Run TeX, texindex and TeX on file1.
+2. Run TeX, texindex and TeX on file2.
+
+3. Copy both .aux files into specially named files
+
+4. In the case of the elisp ref manual,
+
+   copy the *unsorted* function index files into specially named files
+   (no other index used in elisp ref manual)
+
+
+5. For aux files:
+
+   Run a function on the specially named .aux files to label each
+   entry according to volume.  Save these files.
+
+   i.e., convert
+   'xrdef {Special-pg}{7}  to 'xrdef {Special-pg}{7, vol.'tie1}
+
+5a.Insert each specially named .aux file into the regular .aux file of
+   the other volume.
+
+6. For index files:
+
+   Run a function on the specially named unsorted index files to label
+   each entry according to volume.  Save these files.
+
+6b.Insert each specially named marked unsorted index file into the
+   regular unsorted file of the other volume.  Run texindex on this
+
+7. Insert the other volumes .toc file into the .toc, edit, and rename to
+   elisp-toc-2vol.toc
+
+7a. insert special @contents and @summarycontents defs into .texi files.
+
+8. Run TeX on each .texi file.
+
+================
+
+
+
+Here is the discursive commentary:
+
+I've been running some small test files, called test1.texi and
+test2.texi.  As far as I can see, if we run tex on the two test files,
+tex creates a .aux for each that includes the names of all the nodes
+in that file.  The node names are used for cross references.
+
+If you insert the .aux file for the second test file, test2.aux, into
+the .aux file for the first test file, test1.aux, then when you next
+run TeX on the first test file, test1.texi, the second volume cross
+references are inserted.
+
+You can edit the text of the cross reference in test2.aux to include
+the volume number.
+
+For example, you can take the following two lines from test1.texi and
+insert them into test2.texi:
+
+    'xrdef {Special-pg}{7}
+    'xrdef {Special-snt}{Section'tie1.6}
+
+You can re-edit this to show that the page is in volume 1:
+
+    'xrdef {Special-pg}{7, vol.'tie1}
+    'xrdef {Special-snt}{Section'tie1.6}
+
+(The  'tie  is a TeX special command to keep the number tied on one
+line to the previous word.  I don't know if it works after a period in
+the "vol." but figure it is worth trying.  {The  ' is the @  of  .aux files.}
+Apparently 'tie is like the tilde in plain tex; in texinfo.tex, the
+definition for 'tie is the following:
+
+    \def\tie{\penalty 10000\ }     % Save plain tex definition of ~.
+
+)
+
+After running tex on the test2.texi file with the augmented test2.aux
+file, you can see the following in the resulting DVI file:
+
+    See Section 1.6 [Special], page 7, vol. 1
+
+Note that TeX rewrites the .aux file each time TeX is run, so after
+running Tex using an .aux file augmented with the .aux file from the
+other volume, the new .aux file will *lack* the other volumes cross
+references.  Save your augmented .aux file in some other name for
+another run!
+
+
+COPYING CONDITIONS
+
+This file is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This file is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this file.  If not, see <http://www.gnu.org/licenses/>.

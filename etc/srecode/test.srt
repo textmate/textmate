@@ -1,0 +1,148 @@
+;; test.srt --- SRecode templates for testing
+
+;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set mode "srecode-template-mode"
+set escape_start "$"
+set escape_end "$"
+set application "tests"
+
+set UTESTVAR1 ".SRT VAR 1"
+;;
+;; These are for testing features of template files.
+;;
+context test
+
+template test :user
+----
+$! This is a comment in the template. $
+;; $AUTHOR$
+;; $AUTHOR:upcase$
+----
+
+template subs :blank
+----
+;; Before Loop
+$#LOOP$
+;;  - loop stuff
+$/LOOP$
+;; After Loop
+----
+
+;; Before insertion
+;; After insertion
+
+template firstlast
+sectiondictionary "A"
+set MOOSE "FIRST"
+sectiondictionary "A"
+set MOOSE "MIDDLE"
+sectiondictionary "A"
+set MOOSE "LAST"
+----
+$#A$
+;; << -- $MOOSE$
+$#FIRST$;; I'm First$/FIRST$
+$#NOTFIRST$;; I'm Not First$/NOTFIRST$
+$#LAST$;; I'm Last$/LAST$
+$#NOTLAST$;; I'm Not Last$/NOTLAST$
+;; -- >>
+$/A$
+----
+
+
+template wrapsomething :region
+----
+;; Put this line in front:
+$REGIONTEXT$
+;; Put this line at the end:
+----
+
+template gapsomething :blank
+----
+### ALL ALONE ON A LINE ###
+----
+
+template inlinetext
+"Insert text that has no newlines"
+----
+ *In the middle* 
+----
+
+template includable :blank
+----
+;; An includable $COMMENT$ we could use.
+;; $^$
+;; Text after a point inserter.
+----
+
+template wrapinclude-basic
+----
+$>WI1:includable$
+----
+
+template wrapinclude-around
+----
+$<WI1:includable$Intermediate Comments$/WI1$
+----
+
+template complex-subdict
+sectiondictionary "A"
+set MYVAR1 "cow"
+set MYVAR2 "dog"
+set CPLX "I have a " macro "MYVAR1" " and a " macro "MYVAR2" "."
+----
+;; $#A$$CPLX$$/A$
+----
+
+template wrap-new-template
+sectiondictionary "NEWTMP"
+set DOC "A nice doc string goes here."
+----
+$<NEWTMP:declaration:function$Random text in the new template
+$/NEWTMP$
+----
+
+template column-data
+sectiondictionary "A"
+set MOOSE "FIRST"
+sectiondictionary "A"
+set MOOSE "VERY VERY LONG STRING THAT WILL BE CROPPED."
+sectiondictionary "A"
+set MOOSE "MIDDLE"
+sectiondictionary "A"
+set MOOSE "S"
+sectiondictionary "A"
+set MOOSE "LAST"
+----
+Table of Values:
+Left Justified       | Right Justified$#A$
+$|MOOSE:20:right$ | $|MOOSE:20:left$$/A$
+----
+
+template custom-arg-handler :utest
+sectiondictionary "A"
+set MOOSE "why"
+----
+OUTSIDE SECTION: $UTESTVAR1$
+INSIDE SECTION: $#A$$UTESTVAR1$$/A$
+----
+
+;; end

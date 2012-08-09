@@ -1,0 +1,101 @@
+#### Makefile for the Emacs Lisp Introduction manual
+
+# Copyright (C) 1994-1999, 2001-2012 Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+version=@version@
+
+infodir = $(srcdir)/../../info
+# Directory with the (customized) texinfo.tex file.
+texinfodir = $(srcdir)/../misc
+
+MAKEINFO = @MAKEINFO@
+MAKEINFO_OPTS = --force -I $(srcdir)
+TEXI2DVI = texi2dvi
+TEXI2PDF = texi2pdf
+DVIPS = dvips
+
+ENVADD = TEXINPUTS="$(srcdir):$(texinfodir):$(TEXINPUTS)" \
+         MAKEINFO="$(MAKEINFO) $(MAKEINFO_OPTS)"
+
+mkinfodir = @test -d ${infodir} || mkdir ${infodir} || test -d ${infodir}
+
+.PHONY: info dvi html pdf ps
+
+info: ${infodir}/eintr
+
+dvi: emacs-lisp-intro.dvi
+html: emacs-lisp-intro.html
+pdf: emacs-lisp-intro.pdf
+ps: emacs-lisp-intro.ps
+
+# The file name eintr must fit within 5 characters, to allow for
+# -NN extensions to fit into DOS 8+3 limits without clashing.
+# Note: "<" is not portable in ordinary make rules.
+${infodir}/eintr: ${srcdir}/emacs-lisp-intro.texi
+	$(mkinfodir)
+	$(MAKEINFO) $(MAKEINFO_OPTS) -o $@ ${srcdir}/emacs-lisp-intro.texi
+
+emacs-lisp-intro.dvi: ${srcdir}/emacs-lisp-intro.texi
+	$(ENVADD) $(TEXI2DVI) ${srcdir}/emacs-lisp-intro.texi
+
+emacs-lisp-intro.ps: emacs-lisp-intro.dvi
+	$(DVIPS) -o $@ emacs-lisp-intro.dvi
+
+emacs-lisp-intro.pdf: ${srcdir}/emacs-lisp-intro.texi
+	$(ENVADD) $(TEXI2PDF) ${srcdir}/emacs-lisp-intro.texi
+
+emacs-lisp-intro.html: ${srcdir}/emacs-lisp-intro.texi
+	$(MAKEINFO) $(MAKEINFO_OPTS) --html -o $@ ${srcdir}/emacs-lisp-intro.texi
+
+.PHONY: mostlyclean clean distclean maintainer-clean infoclean
+
+mostlyclean:
+	rm -f *.aux *.log *.toc *.cp *.cps *.fn *.fns *.ky *.kys \
+	  *.op *.ops *.pg *.pgs *.tp *.tps *.vr *.vrs
+
+clean: mostlyclean
+	rm -f emacs-lisp-intro.dvi emacs-lisp-intro.pdf emacs-lisp-intro.ps
+	rm -rf emacs-lisp-intro.html/
+	rm -f emacs-lispintro-${version}.tar*
+
+distclean: clean
+
+infoclean:
+	-cd $(infodir) && rm -f eintr eintr-[1-9]
+
+maintainer-clean: distclean infoclean
+
+.PHONY: dist
+
+dist:
+	rm -rf emacs-lispintro-${version}
+	mkdir emacs-lispintro-${version}
+	cp ${srcdir}/*.texi ${srcdir}/*.eps ${srcdir}/*.pdf \
+	  ${texinfodir}/texinfo.tex \
+	  ${srcdir}/ChangeLog* ${srcdir}/README emacs-lispintro-${version}/
+	sed -e 's/@sr[c]dir@/./' -e 's/^\(texinfodir *=\).*/\1 ./' \
+	  -e 's/^\(infodir *=\).*/\1 ./' -e 's/^\(clean:.*\)/\1 infoclean/' \
+	  -e "s/@ver[s]ion@/${version}/" \
+	  ${srcdir}/Makefile.in > emacs-lispintro-${version}/Makefile
+	tar -cf emacs-lispintro-${version}.tar emacs-lispintro-${version}
+	rm -rf emacs-lispintro-${version}
+
+### Makefile ends here

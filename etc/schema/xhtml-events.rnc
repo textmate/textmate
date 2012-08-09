@@ -1,0 +1,47 @@
+# Events Module
+
+a.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onfocus { Script.datatype }?
+area.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onfocus { Script.datatype }?
+form.attlist &=
+  attribute onreset { Script.datatype }?,
+  attribute onsubmit { Script.datatype }?
+body.attlist &=
+  attribute onload { Script.datatype }?,
+  attribute onunload { Script.datatype }?
+label.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onfocus { Script.datatype }?
+input.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onchange { Script.datatype }?,
+  attribute onfocus { Script.datatype }?,
+  attribute onselect { Script.datatype }?
+select.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onchange { Script.datatype }?,
+  attribute onfocus { Script.datatype }?
+textarea.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onchange { Script.datatype }?,
+  attribute onfocus { Script.datatype }?,
+  attribute onselect { Script.datatype }?
+button.attlist &=
+  attribute onblur { Script.datatype }?,
+  attribute onfocus { Script.datatype }?
+Events.attrib =
+  attribute onclick { Script.datatype }?,
+  attribute ondblclick { Script.datatype }?,
+  attribute onmousedown { Script.datatype }?,
+  attribute onmouseup { Script.datatype }?,
+  attribute onmouseover { Script.datatype }?,
+  attribute onmousemove { Script.datatype }?,
+  attribute onmouseout { Script.datatype }?,
+  attribute onkeypress { Script.datatype }?,
+  attribute onkeydown { Script.datatype }?,
+  attribute onkeyup { Script.datatype }?
+Common.attrib &= Events.attrib
+CommonIdRequired.attrib &= Events.attrib

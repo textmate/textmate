@@ -1,0 +1,393 @@
+\input texinfo
+
+@setfilename gnus-coding
+@settitle Gnus Coding Style and Maintenance Guide
+@syncodeindex fn cp
+@syncodeindex vr cp
+@syncodeindex pg cp
+
+@copying
+Copyright @copyright{} 2004-2005, 2007-2012  Free Software
+Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU
+Manual'', and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License'' in the Gnus manual.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+
+This document is part of a collection distributed under the GNU Free
+Documentation License.  If you want to distribute this document
+separately from the collection, you can do so by adding a copy of the
+license to the document, as described in section 6 of the license.
+@end quotation
+@end copying
+
+
+@titlepage
+@title Gnus Coding Style and Maintenance Guide
+
+@author by Reiner Steib  <Reiner.Steib@@gmx.de>
+
+@insertcopying
+@end titlepage
+
+@c Obviously this is only a very rudimentary draft.  We put it in the
+@c repository anyway hoping that it might annoy someone enough to fix
+@c it.  ;-) Fixing only a paragraph also is appreciated.
+
+@ifnottex
+@node Top
+@top Gnus Coding Style and Maintenance Guide
+This manual describes @dots{}
+
+@insertcopying 
+@end ifnottex
+
+@menu
+* Gnus Coding Style:: Gnus Coding Style
+* Gnus Maintenance Guide:: Gnus Maintenance Guide
+@end menu
+
+@c @ref{Gnus Reference Guide, ,Gnus Reference Guide, gnus, The Gnus Newsreader}
+
+@node Gnus Coding Style
+@chapter Gnus Coding Style
+@section Dependencies
+
+The Gnus distribution contains a lot of libraries that have been written
+for Gnus and used intensively for Gnus.  But many of those libraries are
+useful on their own.  E.g. other Emacs Lisp packages might use the
+@acronym{MIME} library @xref{Top, ,Top, emacs-mime, The Emacs MIME
+Manual}.
+
+@subsection General purpose libraries
+
+@table @file
+
+@item netrc.el
+@file{.netrc} parsing functionality.
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item format-spec.el
+Functions for formatting arbitrary formatting strings.
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item hex-util.el
+Functions to encode/decode hexadecimal string.
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+@end table
+
+@subsection Encryption and security
+
+@table @file
+@item encrypt.el
+File encryption routines
+@c As of 2005-10-25...
+There are no Gnus dependencies in this file.
+
+@item password.el
+Read passwords from user, possibly using a password cache.
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item tls.el
+TLS/SSL support via wrapper around GnuTLS
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item pgg*.el
+Glue for the various PGP implementations.
+@c As of 2005-10-21...
+There are no Gnus dependencies in these files.
+
+@item sha1.el
+SHA1 Secure Hash Algorithm.
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+@end table
+
+@subsection Networking
+
+@table @file
+@item dig.el
+Domain Name System dig interface.
+@c As of 2005-10-21...
+There are no serious Gnus dependencies in this file.  Uses
+@code{gnus-run-mode-hooks} (a wrapper function).
+
+@item dns.el, dns-mode.el
+Domain Name Service lookups.
+@c As of 2005-10-21...
+There are no Gnus dependencies in these files.
+@end table
+
+@subsection Mail and News related RFCs
+
+@table @file
+@item pop3.el
+Post Office Protocol (RFC 1460) interface.
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item imap.el
+@acronym{IMAP} library.
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item ietf-drums.el
+Functions for parsing RFC822bis headers.
+@c As of 2005-10-21...
+There are no Gnus dependencies in this file.
+
+@item rfc1843.el
+HZ (rfc1843) decoding.  HZ is a data format for exchanging files of
+arbitrarily mixed Chinese and @acronym{ASCII} characters.
+@c As of 2005-10-21...
+@code{rfc1843-gnus-setup} seem to be useful only for Gnus.  Maybe this
+function should be relocated to remove dependencies on Gnus.  Other
+minor dependencies: @code{gnus-newsgroup-name} could be eliminated by
+using an optional argument to @code{rfc1843-decode-article-body}.
+
+@item rfc2045.el
+Functions for decoding rfc2045 headers
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+
+@item rfc2047.el
+Functions for encoding and decoding rfc2047 messages
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+@c
+Only a couple of tests for gnusy symbols.
+
+@item rfc2104.el
+RFC2104 Hashed Message Authentication Codes
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+
+@item rfc2231.el
+Functions for decoding rfc2231 headers
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+
+@item flow-fill.el
+Interpret RFC2646 "flowed" text.
+@c As of 2005-10-27...
+There are no Gnus dependencies in this file.
+
+@item uudecode.el
+Elisp native uudecode.
+@c As of 2005-12-06...
+There are no Gnus dependencies in this file.
+@c ... but the custom group is gnus-extract.
+
+@item canlock.el
+Functions for Cancel-Lock feature
+@c Cf. draft-ietf-usefor-cancel-lock-01.txt
+@c Although this draft has expired, Canlock-Lock revived in 2007 when
+@c major news providers (e.g. news.individual.org) started to use it.
+@c As of 2007-08-25...
+There are no Gnus dependencies in these files.
+
+@end table
+
+@subsection message
+
+All message composition from Gnus (both mail and news) takes place in
+Message mode buffers.  Message mode is intended to be a replacement for
+Emacs mail mode.  There should be no Gnus dependencies in
+@file{message.el}.  Alas it is not anymore.  Patches and suggestions to
+remove the dependencies are welcome.
+
+@c message.el requires nnheader which requires gnus-util.
+
+@subsection Emacs @acronym{MIME}
+
+The files @file{mml*.el} and @file{mm-*.el} provide @acronym{MIME}
+functionality for Emacs.
+
+@acronym{MML} (@acronym{MIME} Meta Language) is supposed to be
+independent from Gnus.  Alas it is not anymore.  Patches and suggestions
+to remove the dependencies are welcome.
+
+@subsection Gnus backends
+
+The files @file{nn*.el} provide functionality for accessing NNTP
+(@file{nntp.el}), IMAP (@file{nnimap.el}) and several other Mail back
+ends (probably @file{nnml.el}, @file{nnfolder.el} and
+@file{nnmaildir.el} are the most widely used mail back ends).
+
+@c mm-uu requires nnheader which requires gnus-util.  message.el also
+@c requires nnheader.
+
+
+@section Compatibility
+
+No Gnus and Gnus 5.10.10 and up should work on:
+@itemize @bullet
+@item
+Emacs 21.1 and up.
+@item
+XEmacs 21.4 and up.
+@end itemize
+
+Gnus 5.10.8 and below should work on:
+@itemize @bullet
+@item
+Emacs 20.7 and up.
+@item
+XEmacs 21.1 and up.
+@end itemize
+
+@node Gnus Maintenance Guide
+@chapter Gnus Maintenance Guide
+
+@section Stable and development versions
+
+The development of Gnus normally is done on the Git repository trunk
+as of April 19, 2010 (formerly it was done in CVS; the repository is
+at http://git.gnus.org), i.e. there are no separate branches to
+develop and test new features.  Most of the time, the trunk is
+developed quite actively with more or less daily changes.  Only after
+a new major release, e.g. 5.10.1, there's usually a feature period of
+several months.  After the release of Gnus 5.10.6 the development of
+new features started again on the trunk while the 5.10 series is
+continued on the stable branch (v5-10) from which more stable releases
+will be done when needed (5.10.8, @dots{}).  @ref{Gnus Development,
+,Gnus Development, gnus, The Gnus Newsreader}
+
+Stable releases of Gnus finally become part of Emacs.  E.g. Gnus 5.8
+became a part of Emacs 21 (relabeled to Gnus 5.9).  The 5.10 series 
+became part of Emacs 22 as Gnus 5.11.
+
+@section Syncing
+
+@c Some MIDs related to this follow.  Use http://thread.gmane.org/MID
+@c (and click on the subject) to get the thread on Gmane.
+
+@c Some quotes from Miles Bader follow...
+
+@c <v9eklyke6b.fsf@marauder.physik.uni-ulm.de>
+@c <buovfd71nkk.fsf@mctpc71.ucom.lsi.nec.co.jp>
+
+In the past, the inclusion of Gnus into Emacs was quite cumbersome.  For
+each change made to Gnus in Emacs repository, it had to be checked that
+it was applied to the new Gnus version, too.  Else, bug fixes done in
+Emacs repository might have been lost.
+
+With the inclusion of Gnus 5.10, Miles Bader has set up an Emacs-Gnus
+gateway to ensure the bug fixes from Emacs CVS are propagated to Gnus
+CVS semi-automatically.
+
+After Emacs moved to bzr and Gnus moved to git, Katsumi Yamaoka has
+taken over the chore of keeping Emacs and Gnus in sync.  In general,
+changes made to one repository will usually be replicated in the other
+within a few days.
+
+Basically the idea is that the gateway will cause all common files in
+Emacs and Gnus v5-13 to be identical except when there's a very good
+reason (e.g., the Gnus version string in Emacs says @samp{5.11}, but
+the v5-13 version string remains @samp{5.13.x}).  Furthermore, all
+changes in these files in either Emacs or the v5-13 branch will be
+installed into the Gnus git trunk, again except where there's a good
+reason.
+
+@c (typically so far the only exception has been that the changes
+@c already exist in the trunk in modified form).
+Because of this, when the next major version of Gnus will be included in
+Emacs, it should be very easy -- just plonk in the files from the Gnus
+trunk without worrying about lost changes from the Emacs tree.
+
+The effect of this is that as hacker, you should generally only have to
+make changes in one place:
+
+@itemize
+@item
+If it's a file which is thought of as being outside of Gnus (e.g., the
+new @file{encrypt.el}), you should probably make the change in the Emacs
+tree, and it will show up in the Gnus tree a few days later.
+
+If you don't have Emacs bzr access (or it's inconvenient), you can
+change such a file in the v5-10 branch, and it should propagate to Emacs
+bzr -- however, it will get some extra scrutiny (by Miles) to see if the
+changes are possibly controversial and need discussion on the mailing
+list.  Many changes are obvious bug-fixes however, so often there won't
+be any problem.
+
+@item
+If it's to a Gnus file, and it's important enough that it should be part
+of Emacs and the v5-10 branch, then you can make the change on the v5-10
+branch, and it will go into Emacs bzr and the Gnus git trunk (a few days
+later).  The most prominent examples for such changes are bug-fixed
+including improvements on the documentation.
+
+If you know that there will be conflicts (perhaps because the affected
+source code is different in v5-10 and the Gnus git trunk), then you can
+install your change in both places, and when I try to sync them, there
+will be a conflict -- however, since in most such cases there would be a
+conflict @emph{anyway}, it's often easier for me to resolve it simply if
+I see two @samp{identical} changes, and can just choose the proper one,
+rather than having to actually fix the code.
+
+@item
+For general Gnus development changes, of course you just make the
+change on the Gnus Git trunk and it goes into Emacs a few years
+later... :-)
+
+@end itemize
+
+Of course in any case, if you just can't wait for me to sync your
+change, you can commit it in more than one place and probably there will
+be no problem; usually the changes are textually identical anyway, so
+can be easily resolved automatically (sometimes I notice silly things in
+such multiple commits, like whitespace differences, and unify those ;-).
+
+
+@c I do Emacs->Gnus less often (than Gnus->Emacs) because it tends to
+@c require more manual work.
+
+@c By default I sync about once a week.  I also try to follow any Gnus
+@c threads on the mailing lists and make sure any changes being discussed
+@c are kept more up-to-date (so say 1-2 days delay for "topical" changes).
+
+@c <buovfd71nkk.fsf@mctpc71.ucom.lsi.nec.co.jp>
+
+@c BTW, just to add even more verbose explanation about the syncing thing:
+
+@section Miscellanea
+
+@heading @file{GNUS-NEWS}
+
+Starting from No Gnus, the @file{GNUS-NEWS} is created from
+@file{texi/gnus-news.texi}.  Don't edit @file{GNUS-NEWS}.  Edit
+@file{texi/gnus-news.texi}, type @command{make GNUS-NEWS} in the
+@file{texi} directory and commit @file{GNUS-NEWS} and
+@file{texi/gnus-news.texi}.
+
+@heading Conventions for version information in defcustoms
+
+For new customizable variables introduced in Oort Gnus (including the
+v5-10 branch) use @code{:version "22.1" ;; Oort Gnus} (including the
+comment) or e.g. @code{:version "22.2" ;; Gnus 5.10.10} if the feature
+was added for Emacs 22.2 and Gnus 5.10.10.
+@c
+If the variable is new in No Gnus use @code{:version "23.1" ;; No Gnus}.
+
+The same applies for customizable variables when its default value was
+changed.
+
+@c Local Variables:
+@c mode: texinfo
+@c coding: iso-8859-1
+@c End:

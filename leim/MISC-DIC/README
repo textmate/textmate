@@ -1,0 +1,27 @@
+The source and copyright status of dictionary files in this directory
+are categorized into these three groups.
+
+(1) cangjie-table.b5
+    cangjie-table.cns
+
+They are verbatim copies of those distributed by the author Christian
+Wittern himself.  Each file contains a license notice.
+
+(2) CTLau.html
+    CTLau-b5.html
+
+They are verbatim copies of those distributed at the author's home
+page <umunhum.stanford.edu/~lee/chicomp/>. Each file contains a
+license notice.
+
+(3) pinyin.map
+    ziranma.cin
+
+They are copies of those distributed with a free package
+called CCE at:
+	http://ftp.debian.org/debian/dists/potato/main
+		/source/utils/cce_0.36.orig.tar.gz
+
+As the original files don't contain copyright and license notices, a
+proper notice is extracted from the file Copyright and added at the
+head of each file.

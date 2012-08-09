@@ -1,0 +1,7 @@
+This directory contains C header files containing machine-specific
+definitions.  Each file describes a particular machine.  The emacs
+configuration script edits ../config.h to include the appropriate one of
+these files, and then each emacs source file includes config.h.
+
+template.h is a generic template for machine descriptions; it
+describes the parameters a machine file can specify.

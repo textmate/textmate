@@ -1,0 +1,1924 @@
+\input texinfo  @comment -*-texinfo-*-
+@comment 3.48
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename ../../info/sc
+@settitle Supercite User's Manual
+@iftex
+@finalout
+@end iftex
+
+@c @setchapternewpage odd               % For book style double sided manual.
+@comment %**end of header (This is for running Texinfo on a region.)
+
+@copying
+This document describes Supercite, an Emacs package for citing and
+attributing replies to mail and news messages.
+
+Copyright @copyright{} 1993, 2001-2012 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@c      @smallbook
+
+@dircategory Emacs network features
+@direntry
+* SC: (sc).                     Supercite lets you cite parts of messages
+                                  you're replying to, in flexible ways.
+@end direntry
+
+@titlepage
+@title Supercite User's Manual
+@subtitle cite and attribute mail and
+@subtitle news, in flexible ways
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@summarycontents
+@contents
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top Supercite
+@comment  node-name,  next,  previous,  up
+
+@insertcopying
+
+The manual is divided
+into the following chapters.
+
+@menu
+* Introduction::
+* Citations::
+* Getting Connected::
+* Replying and Yanking::
+* Selecting an Attribution::
+* Configuring the Citation Engine::
+* Post-yank Formatting Commands::
+* Information Keys and the Info Alist::
+* Reference Headers::
+* Hints to MUA Authors::
+* Thanks and History::
+
+* GNU Free Documentation License::
+* Concept Index::
+* Command Index::
+* Key Index::
+* Variable Index::
+@end menu
+@end ifnottex
+
+
+@node  Introduction, Usage Overview, Top, Top
+@chapter Introduction
+
+Supercite is a GNU Emacs package written entirely in Emacs Lisp. It
+interfaces to most of the commonly used Emacs mail user agents
+(@dfn{MUAs}) and news user agents (@dfn{NUAs}), and provides
+sophisticated facilities for the citing and attributing of message
+replies.  Supercite has a very specific and limited role in the process
+of composing replies to both USENET network news and electronic mail.
+
+The preferred way to spell Supercite is with a capital @samp{S},
+lowercase @samp{upercite}.
+
+@menu
+* Usage Overview::
+* What Supercite Does Not Do::
+* What Supercite Does::
+@end menu
+
+@cindex MUA
+@cindex NUA
+Supercite is only useful in conjunction with MUAs and NUAs such as VM,
+Gnus, RMAIL, MH-E, etc.  Supercite is typically called by the MUA after a
+reply buffer has been setup.  Thereafter, Supercite's many commands and
+formatting styles are available in that reply buffer until the reply is
+sent.  Supercite is re-initialized in each new reply buffer.
+
+
+@node Usage Overview, What Supercite Does Not Do, Introduction, Introduction
+@kindex r
+@kindex f
+@kindex C-c C-y
+@cindex yank
+@cindex cite, citing
+@cindex attribute, attributing
+@section Usage Overview
+
+Typical usage is as follows. You want to reply or followup to a message
+in your MUA. You will probably hit @kbd{r} (i.e., ``reply'') or @kbd{f}
+(i.e., ``forward'') to begin composing the reply.  In response, the MUA
+will create a reply buffer and initialize the outgoing mail headers
+appropriately.  The body of the reply will usually be empty at this
+point.  You now decide that you would like to include part of the
+original message in your reply. To do this, you @dfn{yank} the original
+message into the reply buffer, typically with a key stroke such as
+@kbd{C-c C-y}.  This sequence will invoke an MUA-specific function which
+fills the body of the reply with the original message and then
+@dfn{attributes} this text to its author.  This is called @dfn{citing}
+and its effect is to prefix every line from the original message with a
+special text tag.  Most MUAs provide some default style of citing; by
+using Supercite you gain a wider flexibility in the look and style of
+citations.  Supercite's only job is to cite the original message.
+
+@node  What Supercite Does Not Do, What Supercite Does, Usage Overview, Introduction
+@section What Supercite Doesn't Do
+
+Because of this clear division of labor, there are useful features which
+are the sole responsibility of the MUA, even though it might seem that
+Supercite should provide them.  For example, many people would like to
+be able to yank (and cite) only a portion of the original message.
+Since Supercite only modifies the text it finds in the reply buffer as
+set up by the MUA, it is the MUA's responsibility to do partial yanking.
+@xref{Reply Buffer Initialization}.@refill
+
+@vindex mail-header-separator
+Another potentially useful thing would be for Supercite to set up the
+outgoing mail headers with information it gleans from the reply buffer.
+But by previously agreed upon convention, any text above the
+@code{mail-header-separator} which separates mail headers from message
+bodies cannot be modified by Supercite.  Supercite, in fact, doesn't
+know anything about the meaning of these headers, and never ventures
+outside the designated region. @xref{Hints to MUA Authors}, for more
+details.@refill
+
+@node  What Supercite Does, Citations, What Supercite Does Not Do, Introduction
+@findex sc-cite-original
+@section What Supercite Does
+
+Supercite is invoked for the first time on a reply buffer via your MUA's
+reply or forward command.  This command will actually perform citations
+by calling a hook variable to which Supercite's top-level function
+@code{sc-cite-original} has been added.  When @code{sc-cite-original} is
+executed, the original message must be set up in a very specific way,
+but this is handled automatically by the MUA.  @xref{Hints to MUA
+Authors}.@refill
+
+@cindex info alist
+The first thing Supercite does, via @code{sc-cite-original}, is to parse
+through the original message's mail headers.  It saves this data in an
+@dfn{information association list}, or @dfn{info alist}.  The information
+in this list is used in a number of places throughout Supercite.
+@xref{Information Keys and the Info Alist}.@refill
+
+@cindex nuking mail headers
+@cindex reference header
+After the mail header info is extracted, the headers are optionally
+removed (@dfn{nuked}) from the reply.  Supercite then writes a
+@dfn{reference header} into the buffer.  This reference header is a
+string carrying details about the citation it is about to perform.
+
+@cindex modeline
+Next, Supercite visits each line in the reply, transforming the line
+according to a customizable ``script.''  Lines which were not previously
+cited in the original message are given a citation, while already cited
+lines remain untouched, or are coerced to your preferred style.
+Finally, Supercite installs a keymap into the reply buffer so that you
+have access to Supercite's post-yank formatting and reciting commands as
+you subsequently edit your reply.  You can tell that Supercite has been
+installed into the reply buffer because that buffer's modeline will
+display the minor mode string @samp{SC}.
+
+@cindex filladapt
+@cindex gin-mode
+@vindex fill-prefix
+@findex fill-paragraph
+When the original message is cited by @code{sc-cite-original}, it will
+(optionally) be filled by Supercite.  However, if you manually edit the
+cited text and want to re-fill it, you must use an add-on package such
+as @cite{filladapt} or @cite{gin-mode}.  These packages can recognize
+Supercited text and will fill them appropriately.  Emacs's built-in
+filling routines, e.g@. @code{fill-paragraph}, do not recognize cited
+text and will not re-fill them properly because it cannot guess the
+@code{fill-prefix} being used.
+@xref{Post-yank Formatting Commands}, for details.@refill
+
+As mentioned above, Supercite provides commands to recite or uncite
+regions of text in the reply buffer, and commands to perform other
+beautifications on the cited original text, maintaining consistent and
+informative citations throughout.  Supercite tries to be as configurable
+as possible to allow for a wide range of personalized citation styles,
+but it is also immediately useful with the default configuration, once
+it has been properly connected to your MUA.  @xref{Getting Connected},
+for more details.@refill
+
+@node  Citations, Citation Elements, What Supercite Does, Top
+@cindex nested citations
+@cindex citation
+@chapter Citations
+
+A @dfn{citation} is the acknowledgement of the original author of a mail
+message in the body of the reply.  There are two basic citation styles
+which Supercite supports.  The first, called @dfn{nested citations} is
+an anonymous form of citation; in other words, an indication is made
+that the cited line was written by someone @emph{other} that the current
+message author (i.e., other than you, the person composing the reply),
+but no reference is made as to the identity of the original author.
+This style should look familiar since its use on the net is widespread.
+Here's an example of what a message buffer would look like using nested
+citations after multiple replies:
+
+@example
+>> John originally wrote this
+>> and this as well
+> Jane said that John didn't know
+> what he was talking about
+And that's what I think too.
+@end example
+
+@menu
+* Citation Elements::
+* Recognizing Citations::
+@end menu
+
+Note that multiple inclusions of the original messages result in a
+nesting of the @samp{@code{>}} characters.  This can sometimes be quite
+confusing when many levels of citations are included since it may be
+difficult or impossible to figure out who actually participated in the
+thread, and multiple nesting of @samp{@code{>}} characters can sometimes
+make the message very difficult for the eye to scan.
+
+@cindex non-nested citations
+In @dfn{non-nested citations}, each cited line begins with an
+informative string attributing that line to the original author. Only
+the first level of attribution will be shown; subsequent citations don't
+nest the citation strings. The above dialog might look like this when
+non-nested citations are used:
+
+@example
+John> John originally wrote this
+John> and this as well
+Jane> Jane said that John didn't know
+Jane> what he was talking about
+And that's what I think too.
+@end example
+
+Notice here that my inclusion of Jane's inclusion of John's original
+message did not result in a line cited with @samp{Jane>John>}.
+
+@vindex sc-nested-citation-p
+@vindex nested-citation-p (sc-)
+Supercite supports both styles of citation, and the variable
+@code{sc-nested-citation-p} controls which style it will use when citing
+previously uncited text. When this variable is @code{nil} (the default),
+non-nested citations are used.  When non-@code{nil}, nested citations
+are used.
+
+
+@node  Citation Elements, Recognizing Citations, Citations, Citations
+@cindex citation string
+@section Citation Elements
+
+@dfn{Citation strings} are composed of one or more elements. Non-nested
+citations are composed of four elements, three of which are directly
+user definable.  The elements are concatenated together, in this order:
+
+@cindex citation leader
+@vindex citation-leader (sc-)
+@vindex sc-citation-leader
+@enumerate
+@item
+The @dfn{citation leader}.  The citation leader is contained in the
+variable @code{sc-citation-leader}, and has the default value of a
+string containing four spaces.
+
+@cindex attribution string
+@item
+The @dfn{attribution string}.  This element is supplied automatically by
+Supercite, based on your preferences and the original message's mail
+headers, though you may be asked to confirm Supercite's choice.
+@xref{Selecting an Attribution}, for more details.@refill
+
+@cindex citation delimiter
+@vindex sc-citation-delimiter
+@vindex citation-delimiter (sc-)
+@item
+The @dfn{citation delimiter}.  This string, contained in the variable
+@code{sc-citation-delimiter} visually separates the citation from the
+text of the line.  This variable has a default value of @code{">"} and
+for best results, the string should consist of only a single character.
+
+@cindex citation separator
+@vindex citation-separator (sc-)
+@vindex sc-citation-separator
+@item
+The @dfn{citation separator}.  The citation separator is contained in
+the variable @code{sc-citation-separator}, and has the default value of
+a string containing a single space.
+@end enumerate
+
+For example, suppose you were using the default values for the above
+variables, and Supercite provided the attribution string @samp{Jane}.
+In this case, the composed, non-nested citation string used might be
+something like
+@code{@asis{"    Jane> "}}.
+This citation string will be inserted in front of
+every line in the original message that is not already cited.@refill
+
+Nested citations, being simpler than non-nested citations, are composed
+of the same elements, sans the attribution string.  Supercite is smart
+enough to not put additional spaces between citation delimiters for
+multi-level nested citations.
+
+@node  Recognizing Citations, Getting Connected, Citation Elements, Citations
+@section Recognizing Citations
+
+Supercite also recognizes citations in the original article, and can
+transform these already cited lines in a number of ways. This is how
+Supercite suppresses the multiple citing of non-nested citations.
+Recognition of cited lines is controlled by variables analogous to those
+that make up the citation string as mentioned previously.
+
+@vindex sc-citation-leader-regexp
+@vindex citation-leader-regexp (sc-)
+@vindex sc-citation-delimiter-regexp
+@vindex citation-delimiter-regexp (sc-)
+@vindex sc-citation-separator-regexp
+@vindex citation-separator-regexp (sc-)
+@vindex sc-citation-root-regexp
+@vindex citation-root-regexp (sc-)
+@vindex sc-citation-nonnested-root-regexp
+@vindex citation-nonnested-root-regexp (sc-)
+
+The variable @code{sc-citation-leader-regexp} describes how citation
+leaders can look, by default it matches any number of spaces or tabs.
+Note that since the lisp function @code{looking-at} is used to do the
+matching, if you change this variable it need not start with a leading
+@code{"^"}.
+
+Similarly, the variables @code{sc-citation-delimiter-regexp} and
+@code{sc-citation-separator-regexp} respectively describe how citation
+delimiters and separators can look.  They follow the same rule as
+@code{sc-citation-leader-regexp} above.
+
+When Supercite composes a citation string, it provides the attribution
+automatically.  The analogous variable which handles recognition of the
+attribution part of citation strings is @code{sc-citation-root-regexp}.
+This variable describes the attribution root for both nested and
+non-nested citations.  By default it can match zero-to-many alphanumeric
+characters (also ``.'', ``-'', and ``_'').  But in some situations,
+Supercite has to determine whether it is looking at a nested or
+non-nested citation.  Thus the variable
+@code{sc-citation-nonnested-root-regexp} is used to describe only
+non-nested citation roots.  It is important to remember that if you
+change @code{sc-citation-root-regexp} you should always also change
+@code{sc-citation-nonnested-root-regexp}.@refill
+
+@node  Information Keys and the Info Alist, Reference Headers, Miscellaneous Commands, Top
+@cindex information keys
+@cindex Info Alist
+@cindex information extracted from mail fields
+@findex sc-mail-field
+@findex mail-field (sc-)
+@chapter Information Keys and the Info Alist
+
+@dfn{Mail header information keys} are nuggets of information that
+Supercite extracts from the various mail headers of the original
+message, placed in the reply buffer by the MUA.  Information is kept in
+the @dfn{Info Alist} as key-value pairs, and can be retrieved for use in
+various places within Supercite, such as in header rewrite functions and
+attribution selection.  Other bits of data, composed and created by
+Supercite, are also kept as key-value pairs in this alist. In the case
+of mail fields, the key is the name of the field, omitting the trailing
+colon.  Info keys are always case insensitive (as are mail headers), and
+the value for a corresponding key can be retrieved from the alist with
+the @code{sc-mail-field} function.  Thus, if the following fields were
+present in the original article:@refill
+
+@example
+Date:@: 08 April 1991, 17:32:09 EST
+Subject:@: Better get out your asbestos suit
+@end example
+
+@vindex sc-mumble
+@vindex mumble (sc-)
+@noindent
+then, the following lisp constructs return:
+
+@example
+(sc-mail-field "date")
+==> "08 April 1991, 17:32:09 EST"
+
+(sc-mail-field "subject")
+==> "Better get out your asbestos suit"
+@end example
+
+Since the argument to @code{sc-mail-field} can be any string, it is
+possible that the mail field will not be present on the info alist
+(possibly because the mail header was not present in the original
+message). In this case, @code{sc-mail-field} will return the value of
+the variable @code{sc-mumble}.
+
+Supercite always places all mail fields found in the yanked original
+article into the info alist.  If possible, Supercite will also places
+the following keys into the info alist:
+
+@table @code
+@cindex sc-attribution info field
+@cindex attribution info field (sc-)
+@item "sc-attribution"
+the selected attribution string.
+
+@cindex sc-citation info field
+@cindex citation info field (sc-)
+@item "sc-citation"
+the non-nested citation string.
+
+@cindex sc-from-address info field
+@cindex from-address info field (sc-)
+@item "sc-from-address"
+email address extracted from the @samp{From:@:} field.
+
+@cindex sc-reply-address info field
+@cindex reply-address info field (sc-)
+@item "sc-reply-address"
+email address extracted from the @samp{Reply-To:@:} field.
+
+@cindex sc-sender-address info field
+@cindex sender-address info field (sc-)
+@item "sc-sender-address"
+email address extracted from the @samp{Sender:@:} field.
+
+@cindex sc-emailname info field
+@cindex emailname info field (sc-)
+@item "sc-emailname"
+email terminus extracted from the @samp{From:@:} field.
+
+@cindex sc-initials info field
+@cindex initials info field (sc-)
+@item "sc-initials"
+the author's initials.
+
+@cindex sc-author info field
+@cindex author info field (sc-)
+@item "sc-author"
+the author's full name.
+
+@cindex sc-firstname info field
+@cindex firstname info field (sc-)
+@item "sc-firstname"
+the author's first name.
+
+@cindex sc-lastname info field
+@cindex lastname info field (sc-)
+@item "sc-lastname"
+the author's last name.
+
+@cindex sc-middlename-1 info field
+@cindex middlename-1 info field (sc-)
+@item "sc-middlename-1"
+the author's first middle name.
+@end table
+
+If the author's name has more than one middle name, they will appear as
+info keys with the appropriate index (e.g., @code{"sc-middlename-2"},
+@dots{}).  @xref{Selecting an Attribution}.@refill
+
+@node  Reference Headers, The Built-in Header Rewrite Functions, Information Keys and the Info Alist, Top
+@cindex reference headers
+@chapter Reference Headers
+
+Supercite will insert an informative @dfn{reference header} at the
+beginning of the cited body of text, which display more detail about the
+original article and provides the mapping between the attribution and
+the original author in non-nested citations.  Whereas the citation
+string usually only contains a portion of the original author's name,
+the reference header can contain such information as the author's full
+name, email address, the original article's subject, etc.  In fact any
+information contained in the info alist can be inserted into a reference
+header.
+
+@menu
+* The Built-in Header Rewrite Functions::
+* Electric References::
+@end menu
+
+@cindex header rewrite functions
+@vindex sc-rewrite-header-list
+@vindex rewrite-header-list (sc-)
+There are a number of built-in @dfn{header rewrite functions} supplied
+by Supercite, but you can write your own custom header rewrite functions
+(perhaps using the built-in ones as examples). The variable
+@code{sc-rewrite-header-list} contains the list of such header rewrite
+functions.  This list is consulted both when inserting the initial
+reference header, and when displaying @dfn{electric references}.
+@xref{Electric References}.
+
+@vindex sc-preferred-header-style
+@vindex preferred-header-style (sc-)
+When Supercite is initially run on a reply buffer (via
+@code{sc-cite-original}), it will automatically call one of these
+functions. The one it uses is defined in the variable
+@code{sc-preferred-header-style}.  The value of this variable is an
+integer which is an index into the @code{sc-rewrite-header-list},
+beginning at zero.
+
+@node  The Built-in Header Rewrite Functions, Electric References, Reference Headers, Reference Headers
+@cindex header rewrite functions, built-in
+@section The Built-in Header Rewrite Functions
+
+Below are examples of the various built-in header rewrite functions.
+Please note the following:@: first, the text which appears in the
+examples below as @var{infokey} indicates that the corresponding value
+of the info key from the info alist will be inserted there.
+(@pxref{Information Keys and the Info Alist}).  For example, in @code{sc-header-on-said}
+below, @var{date} and @var{from} correspond to the values of the
+@samp{Date:@:} and @samp{From:@:} mail headers respectively.@refill
+
+@vindex sc-reference-tag-string
+@vindex reference-tag-string (sc-)
+Also, the string @code{">>>>>"} below is really the value of the
+variable @code{sc-reference-tag-string}.  This variable is used in all
+built-in header rewrite functions, and you can customize its value to
+change the tag string globally.
+
+Finally, the references headers actually written may omit certain parts
+of the header if the info key associated with @var{infokey} is not
+present in the info alist.  In fact, for all built-in headers, if the
+@samp{From:@:} field is not present in the mail headers, the entire
+reference header will be omitted (but this usually signals a serious
+problem either in your MUA or in Supercite's installation).
+
+@table @code
+@findex sc-no-header
+@findex no-header (sc-)
+@item sc-no-header
+This function produces no header. It should be used instead of
+@code{nil} to produce a blank header.  This header can possibly contain
+a blank line after the @code{mail-header-separator} line.
+
+@item sc-no-blank-line-or-header
+@findex sc-no-blank-line-or-header
+@findex no-blank-line-or-header (sc-)
+This function is similar to @code{sc-no-header} except that any blank
+line after the @code{mail-header-separator} line will be removed.
+
+@item sc-header-on-said
+@findex sc-header-on-said
+@findex header-on-said (sc-)
+@code{>>>>> On @var{date}, @var{from} said:}
+
+@item sc-header-inarticle-writes
+@findex sc-header-inarticle-writes
+@findex header-inarticle-writes (sc-)
+@code{>>>>> In article @var{message-id}, @var{from} writes:}
+
+@item sc-header-regarding-adds
+@findex sc-header-regarding-adds
+@findex header-regarding-adds (sc-)
+@code{>>>>> Regarding @var{subject}; @var{from} adds:}
+
+@item sc-header-attributed-writes
+@findex sc-header-attributed-writes
+@findex header-attributed-writes (sc-)
+@code{>>>>> "@var{sc-attribution}" == @var{sc-author} <@var{sc-reply-address}> writes:}
+
+@item sc-header-author-writes
+@findex sc-header-author-writes
+@findex header-author-writes (sc-)
+@code{>>>>> @var{sc-author} writes:}
+
+@item sc-header-verbose
+@findex sc-header-verbose
+@findex header-verbose (sc-)
+@code{>>>>> On @var{date},}@*
+@code{>>>>> @var{sc-author}}@*
+@code{>>>>> from the organization of @var{organization}}@*
+@code{>>>>> who can be reached at:@: @var{sc-reply-address}}@*
+@code{>>>>> (whose comments are cited below with:@: "@var{sc-cite}")}@*
+@code{>>>>> had this to say in article @var{message-id}}@*
+@code{>>>>> in newsgroups @var{newsgroups}}@*
+@code{>>>>> concerning the subject of @var{subject}}@*
+@code{>>>>> see @var{references} for more details}
+@end table
+
+@node  Electric References, Hints to MUA Authors, The Built-in Header Rewrite Functions, Reference Headers
+@cindex electric references
+@section Electric References
+
+By default, when Supercite cites the original message for the first
+time, it just goes ahead and inserts the reference header indexed by
+@code{sc-preferred-header-style}.  However, you may want to select
+different reference headers based on the type of reply or forwarding you
+are doing. You may also want to preview the reference header before
+deciding whether to insert it into the reply buffer or not. Supercite
+provides an optional @dfn{electric reference} mode which you can drop
+into to give you this functionality.
+
+@vindex sc-electric-references-p
+@vindex electric-references-p (sc-)
+If the variable @code{sc-electric-references-p} is non-@code{nil},
+Supercite will bring up an electric reference mode buffer and place you
+into a recursive edit.  The electric reference buffer is read-only, so
+you cannot directly modify the reference text until you exit electric
+references and insert the text into the reply buffer.  But you can cycle
+through all the reference header rewrite functions in your
+@code{sc-rewrite-header-list}.
+
+You can also set a new preferred header style, jump to any header, or
+jump to the preferred header. The header will be shown in the electric
+reference buffer and the header index and function name will appear in
+the echo area.
+
+The following commands are available while in electric reference mode
+(shown here with their default key bindings):
+
+@table @asis
+@item @code{sc-eref-next} (@kbd{n})
+@findex sc-eref-next
+@findex eref-next (sc-)
+@kindex n
+@vindex sc-electric-circular-p
+@vindex electric-circular-p (sc-)
+Displays the next reference header in the electric reference buffer. If
+the variable @code{sc-electric-circular-p} is non-@code{nil}, invoking
+@code{sc-eref-next} while viewing the last reference header in the list
+will wrap around to the first header.@refill
+
+@item @code{sc-eref-prev} (@kbd{p})
+@findex sc-eref-prev
+@findex eref-prev (sc-)
+@kindex p
+Displays the previous reference header in the electric reference buffer.
+If the variable @code{sc-electric-circular-p} is non-@code{nil},
+invoking @code{sc-eref-prev} will wrap around to the last header.@refill
+
+@item @code{sc-eref-goto} (@kbd{g})
+@findex sc-eref-goto
+@findex eref-goto (sc-)
+@kindex g
+Goes to a specified reference header.  The index (into the
+@code{sc-rewrite-header-list}) can be specified as a numeric argument to
+the command.  Otherwise, Supercite will query you for the index in the
+minibuffer.@refill
+
+@item @code{sc-eref-jump} (@kbd{j})
+@findex sc-eref-jump
+@findex eref-jump (sc-)
+@kindex j
+Display the preferred reference header, i.e., the one indexed by the current
+value of @code{sc-preferred-header-style}.
+
+@item @code{sc-eref-setn} (@kbd{s})
+@findex sc-eref-setn
+@findex eref-setn (sc-)
+@kindex s
+Set the preferred reference header (i.e.,
+@code{sc-preferred-header-style}) to the currently displayed header.@refill
+
+@item @code{sc-eref-exit} (@kbd{C-j}, @key{RET}, and @key{ESC C-c})
+@kindex RET
+@kindex C-j
+@kindex q
+@findex sc-eref-exit
+@findex eref-exit (sc-)
+Exit from electric reference mode and insert the current header into the
+reply buffer.@refill
+
+@item @code{sc-eref-abort} (@kbd{q}, @kbd{x})
+@findex sc-eref-abort
+@findex eref-abort (sc-)
+@kindex x
+Exit from electric reference mode without inserting the current header.
+@end table
+
+@vindex sc-electric-mode-hook
+@vindex electric-mode-hook (sc-)
+@noindent
+Supercite will execute the hook @code{sc-electric-mode-hook} before
+entering electric reference mode.
+
+@node  Getting Connected, Replying and Yanking, Recognizing Citations, Top
+@cindex citation interface specification
+@chapter Getting Connected
+
+
+@vindex mail-citation-hook
+@cindex .emacs file
+In most cases, all that is necessary to begin using Supercite is to add
+the following to @file{~.emacs}:
+
+@example
+(add-hook 'mail-citation-hook 'sc-cite-original)
+@end example
+
+@noindent For more details of the process, read on@dots{}
+
+Hitting @kbd{C-c C-y} in your MUA's reply buffer yanks and cites the
+original message into the reply buffer.  In reality, the citation of the
+original message is performed via a call through a configurable hook
+variable.  The name of this variable has been agreed to in advance as
+part of the @dfn{citation interface specification}.  By default this
+hook variable has a @code{nil} value, which the MUA recognizes to mean,
+``use your default citation function.''  When you add Supercite's
+citation function to the hook, thereby giving the variable a
+non-@code{nil} value, it tells the MUA to run the hook via
+@code{run-hooks} instead of using the default citation.@refill
+
+Early in Supercite's development, the Supercite author, a few MUA
+authors, and some early Supercite users got together and agreed upon a
+standard interface between MUAs and citation packages (of which
+Supercite is currently the only known add-on @t{:-)}.  Supercite can
+probably be used with most Emacs MUAs, with a greater or lesser degree
+of effort.
+
+To learn exactly how to connect Supercite to the software systems you
+are using, read the appropriate following sections.  For details on the
+interface specifications, or if you are writing or maintaining an MUA,
+@pxref{Hints to MUA Authors}.
+
+@cindex autoload
+@cindex .emacs file
+@findex sc-cite-original
+@findex cite-original (sc-)
+The first thing that everyone should do, regardless of the MUA you are
+using is to set up Emacs so it will load Supercite at the appropriate
+time.  This happens automatically if Supercite is distributed with your
+Emacs version.  If not, you can set up an @dfn{autoload} for Supercite.
+
+To do the latter, put the following in your @file{.emacs} file:
+
+@example
+(autoload 'sc-cite-original "supercite" nil t)
+@end example
+
+@cindex point
+@cindex mark
+The function @code{sc-cite-original} is the top-level Supercite function
+designed to be run from the citation hook.  It expects
+@samp{point} and @samp{mark} to be set around the region to cite, and it
+expects the original article's mail headers to be present within this
+region.  Note that Supercite @emph{never} touches any text outside this
+region.  Note further that the region need not be active
+for @code{sc-cite-original} to do its job.
+@xref{Hints to MUA Authors}.@refill
+
+The other step in the getting connected process is to make sure your
+MUA calls @code{sc-cite-original} at the right time.  As mentioned
+above, some MUAs handle this differently.  Read the sections that follow
+pertaining to the MUAs you are using.
+
+@vindex sc-load-hook
+@vindex load-hook (sc-)
+@vindex sc-pre-hook
+@vindex pre-hook (sc-)
+One final note.  After Supercite is loaded into your Emacs session, it
+runs the hook @code{sc-load-hook}.  You can put any customizations into
+this hook since it is only run once.  This will not work, however, if
+your Emacs maintainer has put Supercite into your dumped Emacs image.
+In that case, you can use the @code{sc-pre-hook} variable, but this will
+get executed every time @code{sc-cite-original} is called.  @xref{Reply
+Buffer Initialization}.@refill
+
+@node  Replying and Yanking, Reply Buffer Initialization, Getting Connected, Top
+@chapter Replying and Yanking
+
+This chapter explains what happens when you reply and yank an original
+message from an MUA.
+
+@menu
+* Reply Buffer Initialization::
+* Filling Cited Text::
+@end menu
+
+@node  Reply Buffer Initialization, Filling Cited Text, Replying and Yanking, Replying and Yanking
+@findex sc-cite-original
+@findex cite-original (sc-)
+@section Reply Buffer Initialization
+
+Executing @code{sc-cite-original} performs the following steps as it
+initializes the reply buffer:
+
+@enumerate
+@item
+@vindex sc-pre-hook
+@vindex pre-hook (sc-)
+@emph{Runs @code{sc-pre-hook}.}
+This hook variable is run before @code{sc-cite-original} does any other
+work.  You could conceivably use this hook to set certain Supercite
+variables based on the reply buffer's mode or name (i.e., to do
+something different based on whether you are replying or following up to
+an article).@refill
+
+@item
+@emph{Inserts Supercite's keymap.}
+@vindex sc-mode-map-prefix
+@vindex mode-map-prefix (sc-)
+@kindex C-c C-p
+@cindex keymap prefix
+Supercite provides a number of commands for performing post-yank
+modifications to the reply buffer.  These commands are installed on
+Supercite's top-level keymap.  Since Supercite has to interface with a
+wide variety of MUAs, it does not install all of its commands directly
+into the reply buffer's keymap.  Instead, it puts its commands on a
+keymap prefix, then installs this prefix onto the buffer's keymap.  What
+this means is that you typically have to type more characters to invoke
+a Supercite command, but Supercite's key bindings can be made much more
+consistent across MUAs.
+
+You can control what key Supercite uses as its keymap prefix by changing
+the variable @code{sc-mode-map-prefix}.  By default, this variable is
+set to @code{C-c C-p}; a finger twister perhaps, but unfortunately the
+best default due to the scarcity of available key bindings in many MUAs.
+
+@item
+@emph{Turns on Supercite minor mode.}
+@cindex modeline
+The modeline of the reply buffer should indicate that Supercite is
+active in that buffer by displaying the string @samp{SC}.
+
+@item
+@emph{Sets the ``Undo Boundary.''}
+@cindex undo boundary
+Supercite sets an undo boundary before it begins to modify the original
+yanked text.  This allows you to easily undo Supercite's changes to
+affect alternative citing styles.
+
+@item
+@emph{Processes the mail headers.}
+@vindex sc-confirm-always-p
+@vindex confirm-always-p (sc-)
+@vindex sc-mail-warn-if-non-rfc822-p
+@vindex mail-warn-if-non-rfc822-p (sc-)
+All previously retrieved info key-value pairs are deleted from the info
+alist, then the mail headers in the body of the yanked message are
+scanned. Info key-value pairs are created for each header found. Also,
+such useful information as the author's name and email address are
+extracted.  If the variable @code{sc-mail-warn-if-non-rfc822-p} is
+non-@code{nil}, then Supercite will warn you if it finds a mail header
+that does not conform to RFC822.  This is rare and indicates a problem
+either with your MUA or the original author's MUA, or some MTA (mail
+transport agent) along the way.
+
+@vindex sc-nuke-mail-headers
+@vindex sc-nuke-mail-header-list
+@vindex nuke-mail-headers (sc-)
+@vindex nuke-mail-header-list (sc-)
+Once the info keys have been extracted from the mail headers, the
+headers are nuked from the reply buffer.  You can control exactly which
+headers are removed or kept, but by default, all headers are removed.
+
+There are two variables which control mail header nuking.  The variable
+@code{sc-nuke-mail-headers} controls the overall behavior of the header
+nuking routines.  By setting this variable to @code{'all}, you
+automatically nuke all mail headers.  Likewise, setting this variable to
+@code{'none} inhibits nuking of any mail headers.  In between these
+extremes, you can tell Supercite to nuke only a specified list of mail
+headers by setting this variable to @code{'specified}, or to keep only a
+specified list of headers by setting it to @code{'keep}.
+
+If @code{sc-nuke-mail-headers} is set to @code{'specified} or
+@code{'keep}, then the variable @code{sc-nuke-mail-header-list} is
+consulted for the list of headers to nuke or keep.  This variable
+contains a list of regular expressions.  If the mail header line matches
+a regular expression in this list, the header will be nuked or kept.
+The line is matched against the regexp using @code{looking-at} rooted at
+the beginning of the line.
+
+@vindex sc-blank-lines-after-headers
+@vindex blank-lines-after-headers (sc-)
+If the variable @code{sc-blank-lines-after-headers} is non-@code{nil},
+it contains the number of blank lines remaining in the buffer after mail
+headers are nuked.  By default, only one blank line is left in the buffer.
+
+@item
+@emph{Selects the attribution and citation strings.}
+Once the mail headers have been processed, Supercite selects a
+attribution string and a citation string which it will use to cite the
+original message.  @xref{Selecting an Attribution}, for details.
+
+@item
+@emph{Cites the message body.}
+@vindex sc-cite-region-limit
+@vindex cite-region-limit (sc-)b
+After the selection of the attribution and citation strings, Supercite
+cites the original message by inserting the citation string prefix in
+front of every uncited line.  You may not want Supercite to
+automatically cite very long messages however.  For example, some email
+could contain a smaller header section followed by a huge uuencoded
+message.  It wouldn't make sense to cite the uuencoded message part when
+responding to the original author's short preface.  For this reason,
+Supercite provides a variable which limits the automatic citation of
+long messages to a certain maximum number of lines.  The variable is
+called @code{sc-cite-region-limit}.  If this variable contains an
+integer, messages with more lines that this will not be cited at all,
+and a warning message will be displayed.  Supercite has performed
+everything necessary, though, for you to manually cite only the small
+portion of the original message that you want to use.
+
+If @code{sc-cite-region-limit} contains a non-@code{nil} value, the
+original message will always be cited, regardless of its size.  If the
+variable contains the value @code{nil}, the region will never be cited
+automatically.  Use this if you always want to be able to edit and cite
+the message manually.
+
+@vindex sc-cite-blank-lines-p
+@vindex cite-blank-lines-p (sc-)
+The variable @code{sc-cite-blank-lines-p} controls whether blank lines
+in the original message should be cited or not.  If this variable is
+non-@code{nil}, blank lines will be cited just like non-blank lines.
+Otherwise, blank lines will be treated as paragraph separators.
+
+Citing of the original message is highly configurable. Supercite's
+default setup does a pretty good job of citing many common forms of
+previously cited messages.  But there are as many citation styles out
+there as people on the net, or just about!  It would be impossible for
+Supercite to anticipate every style in existence, and you probably
+wouldn't encounter them all anyway.  But you can configure Supercite to
+recognize those styles you see often.
+@xref{Configuring the Citation Engine}, for details.@refill
+
+@item
+@emph{Runs @code{sc-post-hook}.}
+@vindex sc-post-hook
+@vindex post-hook (sc-)
+This variable is very similar to @code{sc-pre-hook}, except that it runs
+after @code{sc-cite-original} is finished. This hook is provided mostly
+for completeness and backward compatibility. Perhaps it could be used to
+reset certain variables set in @code{sc-pre-hook}.@refill
+@end enumerate
+
+@node  Filling Cited Text, Selecting an Attribution, Reply Buffer Initialization, Replying and Yanking
+@cindex filling paragraphs
+@vindex sc-auto-fill-region-p
+@vindex auto-fill-region-p (sc-)
+@cindex filladapt
+@cindex gin-mode
+@findex sc-setup-filladapt
+@findex setup-filladapt (sc-)
+@vindex sc-load-hook
+@vindex load-hook (sc-)
+@section Filling Cited Text
+
+Supercite will automatically fill newly cited text from the original
+message unless the variable @code{sc-auto-fill-region-p} has a
+@code{nil} value.  Supercite will also re-fill paragraphs when you
+manually cite or re-cite text.
+
+However, during normal editing, Supercite itself cannot be used to fill
+paragraphs.  This is a change from version 2.  There are other add-on
+lisp packages which do filling much better than Supercite ever did.  The
+two best known are @dfn{filladapt} and @dfn{gin-mode}.  Both work well
+with Supercite and both are available at the normal Emacs Lisp archive
+sites.  @dfn{gin-mode} works pretty well out of the box, but if you use
+@dfn{filladapt}, you may want to run the function
+@code{sc-setup-filladapt} from your @code{sc-load-hook}.  This simply
+makes @dfn{filladapt} a little more Supercite savvy than its default
+setup.
+
+@vindex sc-fixup-whitespace-p
+@vindex fixup-whitespace-p (sc-)
+Also, Supercite will collapse leading whitespace between the citation
+string and the text on a line when the variable
+@code{sc-fixup-whitespace-p} is non-@code{nil}.  The default value for
+this variable is @code{nil}.@refill
+
+@vindex fill-prefix
+Its important to understand that Supercite's automatic filling (during
+the initial citation of the reply) is very fragile.  That is because
+figuring out the @code{fill-prefix} for a particular paragraph is a
+really hard thing to do automatically.  This is especially the case when
+the original message contains code or some other text where leading
+whitespace is important to preserve.  For this reason, many Supercite
+users typically run with @code{sc-auto-fill-region-p} (and possibly also
+@code{sc-fixup-whitespace-p}) set to @code{nil}.  They then manually
+fill each cited paragraph in the reply buffer.
+
+I usually run with both these variables containing their default values.
+When Supercite's automatic filling breaks on a particular message, I
+will use Emacs's undo feature to undo back before the citation was
+applied to the original message.  Then I'll toggle the variables and
+manually cite those paragraphs that I don't want to fill or collapse
+whitespace on.  @xref{Variable Toggling Shortcuts}.@refill
+
+@kindex C-c C-p C-p
+If you find that Supercite's automatic filling is just too fragile for
+your tastes, you might consider one of these alternate approaches.
+Also, to make life easier, a shortcut function to toggle the state of
+both of these variables is provided on the key binding
+@kbd{C-c C-p C-p} (with the default value of @code{sc-mode-map-prefix};
+@pxref{Post-yank Formatting Commands}).@refill
+
+You will noticed that the minor mode string will
+show the state of these variables as qualifier characters. When both
+variables are @code{nil}, the Supercite minor mode string will display
+@samp{SC}.  When just @code{sc-auto-fill-region-p} is non-@code{nil}, the
+string will display @samp{SC:f}, and when just
+@code{sc-fixup-whitespace-p} is non-@code{nil}, the string will display
+@samp{SC:w}.  When both variables are non-@code{nil}, the string will
+display @samp{SC:fw}.  Note that the qualifiers chosen are mnemonics for
+the default bindings of the toggling function for each respective
+variable.
+@xref{Variable Toggling Shortcuts}.@refill
+
+Why are these variables not set to @code{nil} by default?  It is because
+many users won't manually fill paragraphs that are Supercited, and there
+have been widespread complaints on the net about mail and news messages
+containing lines greater than about 72 characters.  So the default is to
+fill cited text.
+
+@node  Selecting an Attribution, Attribution Preferences, Filling Cited Text, Top
+@cindex attribution list
+@vindex sc-preferred-attribution-list
+@vindex preferred-attribution-list (sc-)
+@chapter Selecting an Attribution
+
+As you know, the attribution string is the part of the author's name
+that will be used to composed a non-nested citation string. Supercite
+scans the various mail headers present in the original article and uses
+a number of heuristics to extract strings which it puts into the
+@dfn{attribution association list} or @dfn{attribution alist}. This is
+analogous, but different than, the info alist previously mentioned. Each
+element in the attribution alist is a key-value pair containing such
+information as the author's first name, middle names, and last name, the
+author's initials, and the author's email terminus.
+
+@menu
+* Attribution Preferences::
+* Anonymous Attributions::
+* Author Names::
+@end menu
+
+@node  Attribution Preferences, Anonymous Attributions, Selecting an Attribution, Selecting an Attribution
+@section Attribution Preferences
+
+When you cite an original message, you can tell Supercite which part of
+the author's name you would prefer it to use as the attribution.  The
+variable @code{sc-preferred-attribution-list} controls this; it contains
+keys which are matched against the attribution alist in the given order.
+The first value of a key that produces a non-@code{nil}, non-empty
+string match is used as the attribution string, and if no keys match, a
+secondary mechanism is used to generate the attribution.
+@xref{Anonymous Attributions}.
+
+The following preferences are always available in the attribution alist
+(barring error):
+
+@table @code
+@item "emailname"
+the author's email terminus.
+
+@item "initials"
+the author's initials.
+
+@item "firstname"
+the author's first name.
+
+@item "lastname"
+the author's last name.
+
+@item "middlename-1"
+the author's first middle name.
+
+@item "sc-lastchoice"
+the last attribution string you have selected. This is useful when you
+recite paragraphs in the reply.@refill
+
+@item "sc-consult"
+@vindex sc-attrib-selection-list
+@vindex attrib-selection-list (sc-)
+consults the customizable list @code{sc-attrib-selection-list} which can
+be used to select special attributions based on the value of any info
+key.  See below for details.
+
+@item "x-attribution"
+the original author's suggestion for attribution string choice. See below
+for details.@refill
+@end table
+
+Middle name indexes can be any positive integer greater than zero,
+though it is unlikely that many authors will have more than one middle
+name, if that many.
+
+At this point, let me digress into a discussion of etiquette.  It is my
+belief that while the style of the citations is a reflection of the
+personal tastes of the replier (i.e., you), the attribution selection is
+ultimately the personal choice of the original author.  In a sense it is
+his or her ``net nickname'', and therefore the author should have some
+say in the selection of attribution string.  Imagine how you would feel
+if someone gave you a nickname that you didn't like?
+
+For this reason, Supercite recognizes a special mail header,
+@samp{X-Attribution:}, which if present, tells Supercite the attribution
+string preferred by the original author.  It is the value of this header
+that is associated with the @code{"x-attribution"} key in the
+attribution alist.  Currently, you can override the preference of this
+key by changing @code{sc-preferred-attribution-list}, but that isn't
+polite, and in the future Supercite may hard-code this.  For now, it is
+suggested that if you change the order of the keys in this list, that
+@code{"x-attribution"} always be first, or possible second behind only
+@code{"sc-lastchoice"}.  This latter is the default.
+
+@vindex sc-attrib-selection-list
+@vindex attrib-selection-list (sc-)
+The value @code{"sc-consult"} in @code{sc-preferred-attribution-list}
+has a special meaning during attribution selection.  When Supercite
+encounters this preference, it begins processing a customizable list of
+attributions, contained in the variable @code{sc-attrib-selection-list}.
+Each element in this list contains lists of the following form:
+
+@example
+@group
+(@var{infokey} ((@var{regexp} @. @var{attribution})
+         (@var{regexp} @. @var{attribution})
+         (@dots{})))
+@end group
+@end example
+
+@noindent
+@findex sc-mail-field
+@findex mail-field (sc-)
+where @var{infokey} is a key for @code{sc-mail-field} and @var{regexp}
+is a regular expression to match against the @var{infokey}'s value. If
+@var{regexp} matches the @var{infokey}'s value, the @var{attribution} is
+used as the attribution string.  Actually, @var{attribution} can be a
+string or a list; if it is a list, it is @code{eval}uated and the return
+value (which must be a string), is used as the attribution.
+
+This can be very useful for when you are replying to net acquaintances
+who do not use the @samp{X-Attribution:@:} mail header.  You may know
+what nickname they would prefer to use, and you can set up this list to
+match against a specific mail field, e.g., @samp{From:@:}, allowing you
+to cite your friend's message with the appropriate attribution.
+
+@node  Anonymous Attributions, Author Names, Attribution Preferences, Selecting an Attribution
+@vindex sc-default-author-name
+@vindex default-author-name (sc-)
+@vindex sc-default-attribution
+@vindex default-attribution (sc-)
+@section Anonymous Attributions
+
+When the author's name cannot be found in the @samp{From:@:} mail
+header, a fallback author name and attribution string must be supplied.
+The fallback author name is contained in the variable
+@code{sc-default-author-name} and the fallback attribution string is
+contained in the variable @code{sc-default-attribution}.  Default values
+for these variables are @code{"Anonymous"} and @code{"Anon"},
+respectively. Note that in most circumstances, getting the default
+author name or attribution is a sign that something is set up
+incorrectly.
+
+@vindex sc-use-only-preference-p
+@vindex use-only-preference-p (sc-)
+Also, if the preferred attribution, which you specified in your
+@code{sc-preferred-attribution-list} variable cannot be found, a
+secondary method can be employed to find a valid attribution string. The
+variable @code{sc-use-only-preference-p} controls what happens in this
+case.  If the variable's value is non-@code{nil}, then
+@code{sc-default-author-name} and @code{sc-default-attribution} are
+used, otherwise, the following steps are taken to find a valid
+attribution string, and the first step to return a non-@code{nil},
+non-empty string becomes the attribution:@refill
+
+@enumerate
+@item
+Use the last selected attribution, if there is one.
+
+@item
+Use the value of the @code{"x-attribution"} key.
+
+@item
+Use the author's first name.
+
+@item
+Use the author's last name.
+
+@item
+Use the author's initials.
+
+@item
+Find the first non-@code{nil}, non-empty attribution string in the
+attribution alist.
+
+@item
+@code{sc-default-attribution} is used.
+@end enumerate
+
+@vindex sc-confirm-always-p
+@vindex confirm-always-p (sc-)
+Once the attribution string has been automatically selected, a number of
+things can happen. If the variable @code{sc-confirm-always-p} is
+non-@code{nil}, you are queried for confirmation of the chosen
+attribution string. The possible values for completion are those strings
+in the attribution alist, however you are not limited to these choices.
+You can type any arbitrary string at the confirmation prompt. The string
+you enter becomes the value associated with the @code{"sc-lastchoice"}
+key in the attribution alist.
+
+@vindex sc-downcase-p
+@vindex downcase-p (sc-)
+Once an attribution string has been selected, Supercite will force the
+string to lower case if the variable @code{sc-downcase-p} is
+non-@code{nil}.
+
+@vindex sc-attribs-preselect-hook
+@vindex attribs-preselect-hook (sc-)
+@vindex sc-attribs-postselect-hook
+@vindex attribs-postselect-hook (sc-)
+
+Two hook variables provide even greater control of the attribution
+selection process.  The hook @code{sc-attribs-preselect-hook} is run
+before any attribution is selected.  Likewise, the hook
+@code{sc-attribs-postselect-hook} is run after the attribution is
+selected (and the corresponding citation string is built), but before
+these values are committed for use by Supercite.  During the
+post-selection hook, the local variables @code{attribution} and
+@code{citation} are bound to the appropriate strings.  By changing these
+variables in your hook functions, you change the attribution and
+citation strings used by Supercite.  One possible use of this would be
+to override any automatically derived attribution string when it is only
+one character long; e.g. you prefer to use @code{"initials"} but the
+author only has one name.@refill
+
+@node  Author Names, Configuring the Citation Engine, Anonymous Attributions, Selecting an Attribution
+@cindex author names
+@section Author Names
+
+Supercite employs a number of heuristics to decipher the author's name
+based on value of the @samp{From:@:} mail field of the original message.
+Supercite can recognize almost all of the common @samp{From:@:} field
+formats in use.  If you encounter a @samp{From:@:} field that Supercite
+cannot parse, please report this bug using @kbd{M-x report-emacs-bug}.
+
+@vindex sc-titlecue-regexp
+@vindex titlecue-regexp (sc-)
+There are a number of Supercite variables that control how author names
+are extracted from the @samp{From:@:} header.  Some headers may contain a
+descriptive title as in:
+
+@example
+From:@: computer!speedy!doe (John Xavier-Doe -- Decent Hacker)
+@end example
+
+Supercite knows which part of the @samp{From:@:} header is email address
+and which part is author name, but in this case the string @code{"Decent
+Hacker"} is not part of the author's name.  You can tell Supercite to
+ignore the title, while still recognizing hyphenated names through the
+use of a regular expression in the variable @code{sc-titlecue-regexp}.
+This variable has the default value of @code{"\\\\s +-+\\\\s +"}.  Any
+text after this regexp is encountered is ignored as noise.
+
+@vindex sc-name-filter-alist
+@vindex name-filter-alist (sc-)
+Some @samp{From:@:} headers may contain extra titles in the name fields
+not separated by a title cue, but which are nonetheless not part of the
+author's name proper.  Examples include the titles ``Dr.'', ``Mr.'',
+``Ms.'', ``Jr.'', ``Sr.'', and ``III'' (e.g., Thurston Howe, the Third).
+Also, some companies prepend or append the name of the division,
+organization, or project on the author's name.  All of these titles are
+noise which should be ignored.  The variable @code{sc-name-filter-alist}
+is used for this purpose. As implied by its name, this variable is an
+association list, where each element is a cons cell of the form:
+
+@example
+(@var{regexp} @. @var{position})
+@end example
+
+@noindent
+where @var{regexp} is a regular expression that is matched (using
+@code{string-match}) against each element of the @samp{From:@:} field's
+author name.  @var{position} is a position indicator, starting at zero.
+Thus to strip out all titles of ``Dr.'', ``Mr.'', etc. from the name,
+@code{sc-name-filter-alist} would have an entry such as:
+
+@example
+("^\\(Mr\\|Mrs\\|Ms\\|Dr\\)[.]?$" @. 0)
+@end example
+
+@noindent
+which only removes them if they appear as the first word in the name.
+The position indicator is an integer, or one of the two special symbols
+@code{last} or @code{any}.  @code{last} always matches against the last
+word in the name field, while @code{any} matches against every word in
+the name field.
+
+@node  Configuring the Citation Engine, Using Regi, Author Names, Top
+@cindex Regi
+@cindex frames (Regi)
+@cindex entries (Regi)
+@chapter Configuring the Citation Engine
+
+At the heart of Supercite is a regular expression interpreting engine
+called @dfn{Regi}.  Regi operates by interpreting a data structure
+called a Regi-frame (or just @dfn{frame}), which is a list of
+Regi-entries (or just @dfn{entry}).  Each entry contains a predicate,
+typically a regular expression, which is matched against a line of text
+in the current buffer.  If the predicate matches true, an associated
+expression is @code{eval}uated.  In this way, an entire region of text
+can be transformed in an @emph{awk}-like manner.  Regi is used
+throughout Supercite, from mail header information extraction, to header
+nuking, to citing text.
+
+@menu
+* Using Regi::
+* Frames You Can Customize::
+@end menu
+
+While the details of Regi are discussed below (@pxref{Using Regi}), only
+those who wish to customize certain aspects of Supercite need concern
+themselves with it.  It is important to understand though, that any
+conceivable citation style that can be described by a regular expression
+can be recognized by Supercite.  This leads to some interesting
+applications.  For example, if you regularly receive email from a
+co-worker that uses an uncommon citation style (say one that employs a
+@samp{|} or @samp{@}} character at the front of the line), it is
+possible for Supercite to recognize this and @emph{coerce} the citation
+to your preferred style, for consistency.  In theory, it is possible for
+Supercite to recognize such things as uuencoded messages or C code and
+cite or fill those differently than normal text.  None of this is
+currently part of Supercite, but contributions are welcome!
+
+@node  Using Regi, Frames You Can Customize, Configuring the Citation Engine, Configuring the Citation Engine
+@findex regi-interpret
+@findex eval
+@findex looking-at
+@section Using Regi
+
+Regi works by interpreting frames with the function
+@code{regi-interpret}.  A frame is a list of arbitrary size where each
+element is a entry of the following form:
+
+@example
+(@var{pred} @var{func} [@var{negate-p} [@var{case-fold-search}]])
+@end example
+
+Regi starts with the first entry in a frame, evaluating the @var{pred}
+of that entry against the beginning of the line that @samp{point} is on.
+If the @var{pred} evaluates to true (or false if the optional
+@var{negate-p} is non-@code{nil}), then the @var{func} for that entry is
+@code{eval}uated.  How processing continues is determined by the return
+value for @var{func}, and is described below.  If @var{pred} was false
+the next entry in the frame is checked until all entries have been
+matched against the current line.  If no entry matches, @samp{point} is
+moved forward one line and the frame is reset to the first entry.
+
+@var{pred} can be a string, a variable, a list or one of the following
+symbols: @code{t}, @code{begin}, @code{end}, or @code{every}.  If
+@var{pred} is a string, or a variable or list that @code{eval}uates to a
+string, it is interpreted as a regular expression.  This regexp is
+matched against the current line, from the beginning, using
+@code{looking-at}.  This match folds case if the optional
+@var{case-fold-search} is non-@code{nil}.  If @var{pred} is not a
+string, or does not @code{eval}uate to a string, it is interpreted as a
+binary value (@code{nil} or non-@code{nil}).@refill
+
+The four special symbol values for @var{pred} are recognized:
+
+@table @code
+@item t
+Always produces a true outcome.
+@item begin
+Always executed before the frame is interpreted. This can be used to
+initialize some global variables for example.
+@item end
+Always executed after frame interpreting is completed. This can be used
+to perform any necessary post-processing.
+@item every
+Executes whenever the frame is reset, usually after the entire frame has
+been matched against the current line.
+@end table
+
+Note that @var{negate-p} and @var{case-fold-search} are ignored if
+@var{pred} is one of these special symbols.  Only the first occurrence of
+each symbol in a frame is used; any duplicates are ignored.  Also
+note that for performance reasons, the entries associated with these
+symbols are removed from the frame during the main interpreting loop.
+
+Your @var{func} can return certain values which control continued Regi
+processing.  By default, if your @var{func} returns @code{nil} (as it
+should be careful to do explicitly), Regi will reset the frame to the
+first entry, and advance @samp{point} to the beginning of the next line.
+If a list is returned from your function, it can contain any combination
+of the following elements:@refill
+
+@table @asis
+@item the symbol @code{continue}
+This tells Regi to continue processing entries after a match, instead of
+resetting the frame and moving @samp{point}. In this way, lines of text
+can have multiple matches, but you have to be careful to avoid entering
+infinite loops.
+
+@item the symbol @code{abort}
+This tells Regi to terminate frame processing. However, any @code{end}
+entry is still processed.
+
+@item the list @code{(frame . @var{newframe})}
+This tells Regi to substitute @var{newframe} as the frame it is
+interpreting.  In other words, your @var{func} can modify the Regi frame
+on the fly.  @var{newframe} can be a variable containing a frame, or it
+can be the frame in-lined.@refill
+
+@item the list @code{(step . @var{step})}
+Tells Regi to move @var{step} number of lines forward as it continues
+processing. By default, Regi moves forward one line.  @var{step} can be
+zero or negative of course, but watch out for infinite loops.@refill
+@end table
+
+During execution of your @var{func}, the following variables will be
+temporarily bound to some useful information:@refill
+
+@table @code
+@item curline
+The current line in the buffer that Regi is @code{looking-at}, as a string.
+@item curframe
+The current frame being interpreted.
+@item curentry
+The current frame entry being interpreted.
+@end table
+
+@node  Frames You Can Customize, Post-yank Formatting Commands, Using Regi, Configuring the Citation Engine
+@vindex sc-nuke-mail-header
+@section Frames You Can Customize
+
+As mentioned earlier, Supercite uses various frames to perform
+certain jobs such as mail header information extraction and mail header
+nuking.  However, these frames are not available for you to customize,
+except through abstract interfaces such as @code{sc-nuke-mail-header},
+et al.
+
+@vindex sc-default-cite-frame
+However, the citation frames Supercite uses provide a lot of customizing
+power and are thus available to you to change to suit your needs.  The
+workhorse of citation is the frame contained in the variable
+@code{sc-default-cite-frame}.  This frame recognizes many situations,
+such as blank lines, which it interprets as paragraph separators.  It
+also recognizes previously cited nested and non-nested citations in the
+original message.  By default it will coerce non-nested citations into
+your preferred citation style, and it will add a level of citation to
+nested citations.  It will also simply cite uncited lines in your
+preferred style.
+
+@cindex unciting
+@cindex reciting
+@vindex sc-default-uncite-frame
+@vindex sc-default-recite-frame
+In a similar vein, there are default frames for @dfn{unciting} and
+@dfn{reciting}, contained in the variables
+@code{sc-default-uncite-frame} and @code{sc-default-recite-frame}
+respectively.@refill
+
+As mentioned earlier (@pxref{Recognizing Citations}), citations are
+recognized through the values of the regular expressions
+@code{sc-citation-root-regexp}, et al.  To recognize odd styles, you
+could modify these variables, or you could modify the default citing
+frame.  Alternatively, you could set up association lists of frames for
+recognizing specific alternative forms.
+
+@vindex sc-cite-frame-alist
+@vindex sc-uncite-frame-alist
+@vindex sc-recite-frame-alist
+For each of the actions -- citing, unciting, and reciting -- an alist is
+consulted to find the frame to use (@code{sc-cite-frame-alist},
+@code{sc-uncite-frame-alist}, and @code{sc-recite-frame-alist}
+respectively).  These frames can contain alists of the form:
+
+@example
+((@var{infokey} (@var{regexp} @. @var{frame}) (@var{regexp} @. @var{frame}) @dots{})
+ (@var{infokey} (@var{regexp} @. @var{frame}) (@var{regexp} @. @var{frame}) @dots{})
+ (@dots{}))
+@end example
+
+@vindex sc-mail-field
+@findex string-match
+Where @var{infokey} is a key suitable for @code{sc-mail-field},
+@var{regexp} is a regular expression which is @code{string-match}'d
+against the value of the @code{sc-mail-field} key, and @var{frame} is
+the frame to use if a match occurred.  @var{frame} can be a variable
+containing a frame or a frame in-lined.@refill
+
+When Supercite is about to cite, uncite, or recite a region, it consults
+the appropriate alist and attempts to find a frame to use.  If one
+is not found from the alist, then the appropriate default frame is used.
+
+@node  Post-yank Formatting Commands, Citing Commands, Frames You Can Customize, Top
+@vindex sc-mode-map-prefix
+@vindex mode-map-prefix (sc-)
+@kindex C-c C-p
+@chapter Post-yank Formatting Commands
+
+Once the original message has been yanked into the reply buffer, and
+@code{sc-cite-original} has had a chance to do its thing, a number of
+useful Supercite commands will be available to you. Since there is wide
+variety in the keymaps that MUAs set up in their reply buffers, it is
+next to impossible for Supercite to properly sprinkle its commands into
+the existing keymap.  For this reason Supercite places its commands on a
+separate keymap, putting this keymap onto a prefix key in the reply
+buffer. You can customize the prefix key Supercite uses by changing the
+variable @code{sc-mode-map-prefix}.  By default, the
+@code{sc-mode-map-prefix} is @kbd{C-c C-p}; granted, not a great choice,
+but unfortunately the best general solution so far.  In the rest of this
+chapter, we'll assume you've installed Supercite's keymap on the default
+prefix.@refill
+
+@menu
+* Citing Commands::
+* Insertion Commands::
+* Variable Toggling Shortcuts::
+* Mail Field Commands::
+* Miscellaneous Commands::
+@end menu
+
+@node   Citing Commands, Insertion Commands, Post-yank Formatting Commands, Post-yank Formatting Commands
+@vindex sc-cite-region-limit
+@section Commands to Manually Cite, Recite, and Uncite
+
+Probably the three most common post-yank formatting operations that you
+will perform will be the manual citing, reciting, and unciting of
+regions of text in the reply buffer. Often you may want to recite a
+paragraph to use a nickname, or manually cite a message when setting
+@code{sc-cite-region-limit} to @code{nil}.  The following commands
+perform these functions on the region of text between @samp{point} and
+@samp{mark}.  Each of them sets the @dfn{undo boundary} before modifying
+the region so that the command can be undone in the standard Emacs
+way.@refill
+
+Here is the list of Supercite citing commands:
+
+@table @asis
+@findex sc-cite-region
+@findex cite-region (sc-)
+@kindex C-c C-p c
+@vindex sc-pre-cite-hook
+@vindex pre-cite-hook (sc-)
+@vindex sc-confirm-always-p
+@vindex confirm-always-p
+@kindex C-u
+@item @code{sc-cite-region} (@kbd{C-c C-p c})
+This command cites each line in the region of text by interpreting the
+selected frame from @code{sc-cite-frame-alist}, or the default citing
+frame @code{sc-default-cite-frame}.  It runs the hook
+@code{sc-pre-cite-hook} before interpreting the frame.  With an optional
+universal argument (@kbd{C-u}), it temporarily sets
+@code{sc-confirm-always-p} to @code{t} so you can confirm the
+attribution string for a single manual citing.
+@xref{Configuring the Citation Engine}.@refill
+
+@findex sc-uncite-region
+@findex uncite-region (sc-)
+@kindex C-c C-p u
+@item @code{sc-uncite-region} (@kbd{C-c C-p u})
+This command removes any citation strings from the beginning of each
+cited line in the region by interpreting the selected frame from
+@code{sc-uncite-frame-alist}, or the default unciting frame
+@code{sc-default-uncite-frame}.  It runs the hook
+@code{sc-pre-uncite-hook} before interpreting the frame.
+@xref{Configuring the Citation Engine}.@refill
+
+@findex sc-recite-region
+@findex recite-region (sc-)
+@kindex C-c C-p r
+@item @code{sc-recite-region} (@kbd{C-c C-p r})
+This command recites each line the region by interpreting the selected
+frame from @code{sc-recite-frame-alist}, or the default reciting frame
+@code{sc-default-recite-frame}. It runs the hook
+@code{sc-pre-recite-hook} before interpreting the frame.
+@xref{Configuring the Citation Engine}.@refill
+
+@vindex sc-confirm-always-p
+@vindex confirm-always-p (sc-)
+Supercite will always ask you to confirm the attribution when reciting a
+region, regardless of the value of @code{sc-confirm-always-p}.
+@end table
+
+@node  Insertion Commands, Variable Toggling Shortcuts, Citing Commands, Post-yank Formatting Commands
+@section Insertion Commands
+
+These two functions insert various strings into the reply buffer.
+
+@table @asis
+@findex sc-insert-reference
+@findex insert-reference (sc-)
+@kindex C-c C-p w
+@item @code{sc-insert-reference} (@kbd{C-c C-p w})
+@vindex sc-preferred-header-style
+@vindex preferred-header-style (sc-)
+Inserts a reference header into the reply buffer at @samp{point}.  With
+no arguments, the header indexed by @code{sc-preferred-header-style} is
+inserted. An optional numeric argument is the index into
+@code{sc-rewrite-header-list} indicating which reference header to
+write.@refill
+
+With just the universal argument (@kbd{C-u}), electric reference mode is
+entered, regardless of the value of @code{sc-electric-references-p}.
+
+@findex sc-insert-citation
+@findex insert-citation (sc-)
+@kindex C-c C-p i
+@item @code{sc-insert-citation} (@kbd{C-c C-p i})
+Inserts the current citation string at the beginning of the line that
+@samp{point} is on.  If the line is already cited, Supercite will issue
+an error and will not cite the line.
+@end table
+
+@node  Variable Toggling Shortcuts, Mail Field Commands, Insertion Commands, Post-yank Formatting Commands
+@cindex toggling variables
+@section Variable Toggling Shortcuts
+
+Supercite defines a number of commands that make it easier for you to
+toggle and set various Supercite variables as you are editing the reply
+buffer.  For example, you may want to turn off filling or whitespace
+cleanup, but only temporarily.  These toggling shortcut commands make
+this easy to do.
+
+@kindex C-c C-p C-t
+Like Supercite commands in general, the toggling commands are placed on
+a keymap prefix within the greater Supercite keymap.  For the default
+value of @code{sc-mode-map-prefix}, this will be
+@kbd{C-c C-p C-t}.@refill
+
+The following commands toggle the value of certain Supercite variables
+which take only a binary value:
+
+@table @kbd
+@item C-c C-p C-t b
+Toggles the variable @code{sc-mail-nuke-blank-lines-p}.
+
+@item C-c C-p C-t c
+Toggles the variable @code{sc-confirm-always-p}.
+
+@item C-c C-p C-t d
+Toggles the variable @code{sc-downcase-p}.
+
+@item C-c C-p C-t e
+Toggles the variable @code{sc-electric-references-p}.
+
+@item C-c C-p C-t f
+Toggles the variable @code{sc-auto-fill-region-p}.
+
+@item C-c C-p C-t o
+Toggles the variable @code{sc-electric-circular-p}.
+
+@item C-c C-p C-t s
+Toggles the variable @code{sc-nested-citation-p}.
+
+@item C-c C-p C-t u
+Toggles the variable @code{sc-use-only-preferences-p}.
+
+@item C-c C-p C-t w
+Toggles the variable @code{sc-fixup-whitespace-p}.
+@end table
+
+@findex set-variable
+The following commands let you set the value of multi-value variables,
+in the same way that Emacs's @code{set-variable} does:
+
+@table @kbd
+@item C-c C-p C-t a
+Sets the value of the variable @code{sc-preferred-attribution-list}.
+
+@item C-c C-p C-t l
+Sets the value of the variable @code{sc-cite-region-limit}.
+
+@item C-c C-p C-t n
+Sets the value of the variable @code{sc-mail-nuke-mail-headers}.
+
+@item C-c C-p C-t N
+Sets the value of the variable @code{sc-mail-header-nuke-list}.
+
+@item C-c C-p C-t p
+Sets the value of the variable @code{sc-preferred-header-style}.
+@end table
+
+@kindex C-c C-p C-p
+One special command is provided to toggle both
+@code{sc-auto-fill-region-p} and @code{sc-fixup-whitespace-p} together.
+This is because you typically want to run Supercite with either variable
+as @code{nil} or non-@code{nil}.  The command to toggle these variables
+together is bound on @kbd{C-c C-p C-p}.@refill
+
+Finally, the command @kbd{C-c C-p C-t h} (also @kbd{C-c C-p C-t ?})
+brings up a Help message on the toggling keymap.
+
+
+@node  Mail Field Commands, Miscellaneous Commands, Variable Toggling Shortcuts, Post-yank Formatting Commands
+@section Mail Field Commands
+
+These commands allow you to view, modify, add, and delete various bits
+of information from the info alist.
+@xref{Information Keys and the Info Alist}.@refill
+
+@table @asis
+@kindex C-c C-p f
+@findex sc-mail-field-query
+@findex mail-field-query (sc-)
+@kindex C-c C-p f
+@item @code{sc-mail-field-query} (@kbd{C-c C-p f})
+Allows you to interactively view, modify, add, and delete info alist
+key-value pairs.  With no argument, you are prompted (with completion)
+for a info key.  The value associated with that key is displayed in the
+minibuffer.  With an argument, this command will first ask if you want
+to view, modify, add, or delete an info key. Viewing is identical to
+running the command with no arguments.
+
+If you want to modify the value of a key, Supercite will first prompt
+you (with completion) for the key of the value you want to change.  It
+will then put you in the minibuffer with the key's current value so you
+can edit the value as you wish.  When you hit @key{RET}, the key's value
+is changed.  Minibuffer history is kept for the values.
+
+If you choose to delete a key-value pair, Supercite will prompt you (with
+completion) for the key to delete.
+
+If you choose to add a new key-value pair, Supercite firsts prompts you
+for the key to add.  Note that completion is turned on for this prompt,
+but you can type any key name here, even one that does not yet exist.
+After entering the key, Supercite prompts you for the key's value.  It
+is not an error to enter a key that already exists, but the new value
+will override any old value.  It will not replace it though; if you
+subsequently delete the key-value pair, the old value will reappear.
+
+@findex sc-mail-process-headers
+@findex mail-process-headers (sc-)
+@kindex C-c C-p g
+@item @code{sc-mail-process-headers} (@kbd{C-c C-p g})
+This command lets you re-initialize Supercite's info alist from any set
+of mail headers in the region between @samp{point} and @samp{mark}.
+This function is especially useful for replying to digest messages where
+Supercite will initially set up its information for the digest
+originator, but you want to cite each component article with the real
+message author.  Note that unless an error during processing occurs, any
+old information is lost.@refill
+@end table
+
+@node  Miscellaneous Commands, Information Keys and the Info Alist, Mail Field Commands, Post-yank Formatting Commands
+@section Miscellaneous Commands
+
+@table @asis
+@findex sc-open-line
+@findex open-line (sc-)
+@findex open-line
+@kindex C-c C-p o
+@item @code{sc-open-line} (@kbd{C-c C-p o})
+Similar to Emacs's standard @code{open-line} commands, but inserts the
+citation string in front of the new line.  As with @code{open-line},
+an optional numeric argument inserts that many new lines.@refill
+@end table
+
+@node  Hints to MUA Authors, Thanks and History, Electric References, Top
+@chapter Hints to MUA Authors
+
+In June of 1989, some discussion was held between the various MUA
+authors, the Supercite author, and other Supercite users. These
+discussions centered around the need for a standard interface between
+MUAs and Supercite (or any future Supercite-like packages).  This
+interface was formally proposed by Martin Neitzel on Fri, 23 Jun 89, in
+a mail message to the Supercite mailing list:
+
+@example
+        Martin> Each news/mail-reader should provide a form of
+        Martin> mail-yank-original that
+
+        Martin> 1: inserts the original message incl. header into the
+        Martin>    reply buffer; no indentation/prefixing is done, the header
+        Martin>    tends to be a "full blown" version rather than to be
+        Martin>    stripped down.
+
+        Martin> 2: `point' is at the start of the header, `mark' at the
+        Martin>    end of the message body.
+
+        Martin> 3: (run-hooks 'mail-yank-hooks)
+
+        Martin> [Supercite] should be run as such a hook and merely
+        Martin> rewrite the message.  This way it isn't anymore
+        Martin> [Supercite]'s job to gather the original from obscure
+        Martin> sources. [@dots{}]
+@end example
+
+@vindex mail-citation-hook
+@vindex mail-yank-hooks
+@cindex sendmail.el
+@findex mail-yank-original
+@findex defvar
+This specification was adopted, but underwent a slight modification with
+the release of Emacs 19.  Instead of the variable
+@code{mail-yank-hooks}, the hook variable that the MUA should provide is
+@code{mail-citation-hook}.  Richard Stallman suggests that the MUAs
+should @code{defvar} @code{mail-citation-hook} to @code{nil} and perform
+some default citing when that is the case.@refill
+
+If you are writing a new MUA package, or maintaining an existing MUA
+package, you should make it conform to this interface so that your users
+will be able to link Supercite easily and seamlessly. To do this, when
+setting up a reply or forward buffer, your MUA should follow these
+steps:
+
+@enumerate
+@item
+Insert the original message, including the mail headers into the reply
+buffer. At this point you should not modify the raw text in any way
+(except for any necessary decoding, e.g. of quoted-printable text), and
+you should place all the original headers into the body of the reply.
+This means that many of the mail headers will be duplicated, one copy
+above the @code{mail-header-separator} line and one copy below, however
+there will probably be more headers below this line.@refill
+
+@item
+Set @samp{point} to the beginning of the line containing the first mail
+header in the body of the reply. Set @samp{mark} at the end of the
+message text.  It is very important that the region be set around the
+text Supercite is to modify and that the mail headers are within this
+region.  Supercite will not venture outside the region for any reason,
+and anything within the region is fair game, so don't put anything that
+@strong{must} remain unchanged inside the region.@refill
+
+@item
+Run the hook @code{mail-citation-hook}. You will probably want to
+provide some kind of default citation functions in cases where the user
+does not have Supercite installed.  By default, your MUA should
+@code{defvar} @code{mail-citation-hook} to @code{nil}, and in your
+yanking function, check its value.  If it finds
+@code{mail-citation-hook} to be @code{nil}, it should perform some
+default citing behavior.  User who want to connect to Supercite then
+need only add @code{sc-cite-original} to this list of hooks using
+@code{add-hook}.@refill
+@end enumerate
+
+If you do all this your MUA will join the ranks of those that conform to
+this interface ``out of the box.''
+
+@node Thanks and History, GNU Free Documentation License, Hints to MUA Authors, Top
+@chapter Thanks and History
+
+The Supercite package was derived from its predecessor Superyank 1.11
+which was inspired by various bits of code and ideas from Martin Neitzel
+and Ashwin Ram. They were the folks who came up with the idea of
+non-nested citations and implemented some rough code to provide this
+style. Superyank and Supercite version 2 evolved to the point where much
+of the attribution selection mechanism was automatic, and features have
+been continuously added through the comments and suggestions of the
+Supercite mailing list participants.
+
+With version 3, Supercite underwent an almost complete rewrite,
+benefiting in a number of ways, including vast improvements in the
+speed of performance, a big reduction in size of the code and in the use
+of Emacs resources, and a much cleaner and flexible internal
+architecture.  Most of this work was internal and not of very great
+importance to the casual user.  There were some changes at the
+user-visible level, but for the most part, the Supercite configuration
+variables from version 2 should still be relevant to version 3.
+Hopefully Supercite version 3 is faster, smaller, and much more flexible
+than its predecessors.
+
+In the version 2 manual I thanked some specific people for their help in
+developing Supercite 2.  You folks know who you are and your continued
+support is greatly appreciated.  I wish to thank everyone on the
+Supercite mailing list, especially the brave alpha testers, who helped
+considerably in testing out the concepts and implementation of Supercite
+version 3.  Special thanks go out to the MUA and Emacs authors Kyle
+Jones, Stephen Gildea, Richard Stallman, and Jamie Zawinski for coming
+to a quick agreement on the new @code{mail-citation-hook} interface, and
+for adding the magic lisp to their code to support this.
+
+All who have helped and contributed have been greatly appreciated.
+
+Supercite was written by Barry Warsaw.
+
+@node GNU Free Documentation License, Concept Index, Thanks and History, Top
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node  Concept Index, Command Index, GNU Free Documentation License, Top
+@unnumbered Concept Index
+@printindex cp
+
+@node  Command Index, Key Index, Concept Index, Top
+@unnumbered Command Index
+
+Since all supercite commands are prepended with the string
+``@code{sc-}'', each appears under its @code{sc-}@var{command} name and
+its @var{command} name.
+@iftex
+@sp 2
+@end iftex
+@printindex fn
+
+@node  Key Index, Variable Index, Command Index, Top
+@unnumbered Key Index
+@printindex ky
+
+@node Variable Index,  , Key Index, Top
+@unnumbered Variable Index
+
+Since all supercite variables are prepended with the string
+``@code{sc-}'', each appears under its @code{sc-}@var{variable} name and
+its @var{variable} name.
+@iftex
+@sp 2
+@end iftex
+@printindex vr
+@bye

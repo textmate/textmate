@@ -1,0 +1,356 @@
+# Makefile for lib-src subdirectory in GNU Emacs.
+# Copyright (C) 1985, 1987-1988, 1993-1994, 2001-2012
+#   Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# Avoid trouble on systems where the `SHELL' variable might be
+# inherited from the environment.
+SHELL = /bin/sh
+
+# Following ../lisp/Makefile.in.
+EMACS = ../src/emacs
+EMACSOPT = -batch --no-site-file --no-site-lisp
+
+# ==================== Things `configure' will edit ====================
+
+CC=@CC@
+CFLAGS=@CFLAGS@
+version=@version@
+## Used in $archlibdir.
+configuration=@configuration@
+EXEEXT=@EXEEXT@
+C_SWITCH_SYSTEM=@C_SWITCH_SYSTEM@
+C_SWITCH_MACHINE=@C_SWITCH_MACHINE@
+C_WARNINGS_SWITCH = @C_WARNINGS_SWITCH@
+PROFILING_CFLAGS = @PROFILING_CFLAGS@
+
+# Program name transformation.
+TRANSFORM = @program_transform_name@
+
+# ==================== Where To Install Things ====================
+
+# The default location for installation.  Everything is placed in
+# subdirectories of this directory.  The default values for many of
+# the variables below are expressed in terms of this one, so you may
+# not need to change them.  This is set with the --prefix option to
+# `../configure'.
+prefix=@prefix@
+
+# Like `prefix', but used for architecture-specific files.  This is
+# set with the --exec-prefix option to `../configure'.
+exec_prefix=@exec_prefix@
+
+# Where to install Emacs and other binaries that people will want to
+# run directly (like etags).  This is set with the --bindir option
+# to `../configure'.
+bindir=@bindir@
+
+# Where to install and expect executable files to be run by Emacs
+# rather than directly by users, and other architecture-dependent
+# data.  ${archlibdir} is usually below this.  This is set with the
+# --libexecdir option to `../configure'.
+libexecdir=@libexecdir@
+
+# Directory for local state files for all programs.
+localstatedir=@localstatedir@
+
+# Where to find the source code.  This is set by the configure
+# script's `--srcdir' option.  However, the value of ${srcdir} in
+# this makefile is not identical to what was specified with --srcdir,
+# since the variable here has `/lib-src' added at the end.
+
+# We use $(srcdir) explicitly in dependencies so as not to depend on VPATH.
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+# The top-level source directory, also set by configure.
+top_srcdir=@top_srcdir@
+
+# ==================== Emacs-specific directories ====================
+
+# These variables hold the values Emacs will actually use.  They are
+# based on the values of the standard Make variables above.
+
+# Where to put executables to be run by Emacs rather than the user.
+# This path usually includes the Emacs version and configuration name,
+# so that multiple configurations for multiple versions of Emacs may
+# be installed at once.  This can be set with the --archlibdir option
+# to `../configure'.
+archlibdir=@archlibdir@
+
+gamedir=@gamedir@
+gameuser=@gameuser@
+
+# ==================== Utility Programs for the Build =================
+
+# ../configure figures out the correct values for these.
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+# By default, we uphold the dignity of our programs.
+INSTALL_STRIP =
+
+# ========================== Lists of Files ===========================
+
+# Things that a user might actually run, which should be installed in bindir.
+INSTALLABLES = etags${EXEEXT} ctags${EXEEXT} emacsclient${EXEEXT} \
+               ebrowse${EXEEXT}
+
+INSTALLABLE_SCRIPTS = rcs-checkin grep-changelog
+STAMP_INST_SCRIPTS = stamp-rcs-checkin stamp-grep-changelog
+
+# Things that Emacs runs internally, or during the build process,
+#  which should not be installed in bindir.
+UTILITIES = profile${EXEEXT} movemail${EXEEXT} hexl${EXEEXT} \
+            update-game-score${EXEEXT}
+
+DONT_INSTALL= test-distrib${EXEEXT} make-docfile${EXEEXT}
+
+# Like UTILITIES, but they're not system-dependent, and should not be
+#  deleted by the distclean target.
+SCRIPTS= rcs2log vcdiff
+STAMP_SCRIPTS= stamp-rcs2log stamp-vcdiff
+
+# All files that are created by the linker, i.e., whose names end in ${EXEEXT}.
+EXE_FILES = ${INSTALLABLES} ${UTILITIES} ${DONT_INSTALL}
+
+# Specify additional -D flags for movemail. Options:
+# -DMAIL_USE_FLOCK or -DMAIL_USE_LOCKF (use flock or lockf for file locking).
+# See the comments about locking in movemail.c.  Normally the values
+# set by configure should be correct and you should not need to do anything.
+# If neither flag is set, you need to use blessmail.
+MOVE_FLAGS=
+
+## Empty if either MAIL_USE_FLOCK or MAIL_USE_LOCKF, else need-blessmail.
+BLESSMAIL_TARGET=@BLESSMAIL_TARGET@
+
+## -lkrb if HAVE_LIBKRB or -lkrb4 if HAVE_LIBKRB4
+KRB4LIB=@KRB4LIB@
+## -ldes if HAVE_LIBDES or -ldes425 if HAVE_LIBDES425
+DESLIB=@DESLIB@
+## -lkrb5 if HAVE_LIBKRB5
+KRB5LIB=@KRB5LIB@
+## -lk5crypto if HAVE_LIBK5CRYPTO or -lcrypto if HAVE_LIBCRYPTO
+CRYPTOLIB=@CRYPTOLIB@
+## -lcom_err if HAVE_LIBCOM_ERR
+COM_ERRLIB=@COM_ERRLIB@
+## -lhesiod if HAVE_LIBHESIOD
+LIBHESIOD=@LIBHESIOD@
+## -lresolv if HAVE_LIBRESOLV
+LIBRESOLV=@LIBRESOLV@
+## -llockfile if HAVE_LIBLOCKFILE or -lmail if HAVE_LIBMAIL
+LIBS_MAIL=@LIBS_MAIL@
+
+## Extra libraries to use when linking movemail.
+LIBS_MOVE = $(LIBS_MAIL) $(KRB4LIB) $(DESLIB) $(KRB5LIB) $(CRYPTOLIB) \
+            $(COM_ERRLIB) $(LIBHESIOD) $(LIBRESOLV)
+
+## Some systems define this to request special libraries.
+LIBS_SYSTEM = @LIBS_SYSTEM@
+
+# Those files shared with other GNU utilities need HAVE_CONFIG_H
+# defined before they know they can take advantage of the information
+# in ../src/config.h.
+BASE_CFLAGS = $(C_SWITCH_SYSTEM) $(C_SWITCH_MACHINE) ${C_WARNINGS_SWITCH} \
+	      -DHAVE_CONFIG_H -I. -I../src -I../lib \
+	      -I${srcdir} -I${srcdir}/../src -I${srcdir}/../lib
+
+ALL_CFLAGS = ${BASE_CFLAGS} ${PROFILING_CFLAGS} ${LDFLAGS} ${CPPFLAGS} ${CFLAGS}
+LINK_CFLAGS = ${BASE_CFLAGS} ${LDFLAGS} ${CFLAGS}
+CPP_CFLAGS = ${BASE_CFLAGS} ${PROFILING_CFLAGS} ${CPPFLAGS} ${CFLAGS}
+
+all: ${EXE_FILES} ${SCRIPTS} ${INSTALLABLE_SCRIPTS} ${STAMP_INST_SCRIPTS} ${STAMP_SCRIPTS}
+
+LOADLIBES = ../lib/libgnu.a $(LIBS_SYSTEM)
+$(EXE_FILES): ../lib/libgnu.a
+
+## These targets copy the scripts into the build directory so that
+## they can be run from there in an uninstalled Emacs.
+## Nothing to do if pwd = srcdir.
+insrcdir=[ "`/bin/pwd`" = "`(cd $(srcdir) && /bin/pwd)`" ]
+
+stamp-rcs2log: $(srcdir)/rcs2log
+	$(insrcdir) || cp -p $(srcdir)/rcs2log rcs2log
+	touch $@
+
+stamp-rcs-checkin: $(srcdir)/rcs-checkin
+	$(insrcdir) || cp -p $(srcdir)/rcs-checkin rcs-checkin
+	touch $@
+
+stamp-grep-changelog: $(srcdir)/grep-changelog
+	$(insrcdir) || cp -p $(srcdir)/grep-changelog grep-changelog
+	touch $@
+
+stamp-vcdiff: $(srcdir)/vcdiff
+	$(insrcdir) || cp -p $(srcdir)/vcdiff vcdiff
+	touch $@
+
+## Only used if we need blessmail, but no harm in always defining.
+## This makes the actual blessmail executable.
+blessmail:
+	$(EMACS) $(EMACSOPT) -l $(srcdir)/../lisp/mail/blessmail.el
+	chmod +x blessmail
+
+## This checks if we need to run blessmail.
+## Do not charge ahead and do it!  Let the installer decide.
+need-blessmail: blessmail
+	@if [ `wc -l <blessmail` != 2 ] ; then \
+	  dir=`sed -n -e 's/echo mail directory = \(.*\)/\1/p' blessmail`; \
+	  echo Assuming $$dir is really the mail spool directory, you should; \
+	  echo run  lib-src/blessmail $(DESTDIR)${archlibdir}/movemail${EXEEXT}; \
+	  echo as root, to give  movemail${EXEEXT}  appropriate permissions.; \
+	  echo Do that after running  make install.; \
+	fi
+
+## This is the target invoked by the top-level Makefile.
+maybe-blessmail: $(BLESSMAIL_TARGET)
+
+## Install the internal utilities.  Until they are installed, we can
+## just run them directly from lib-src.
+## If the chown/chmod commands fail, that is not a big deal.
+## update-game-score will detect at runtime that it is not setuid,
+## and handle things accordingly.
+$(DESTDIR)${archlibdir}: all
+	@echo
+	@echo "Installing utilities run internally by Emacs."
+	umask 022; $(top_srcdir)/build-aux/install-sh -d $(DESTDIR)${archlibdir}
+	if [ `(cd $(DESTDIR)${archlibdir} && /bin/pwd)` != `/bin/pwd` ]; then \
+	  for file in ${UTILITIES}; do \
+	    $(INSTALL_PROGRAM) $(INSTALL_STRIP) $$file $(DESTDIR)${archlibdir}/$$file ; \
+	  done ; \
+        fi
+	umask 022; $(top_srcdir)/build-aux/install-sh -d $(DESTDIR)${gamedir}; \
+	touch $(DESTDIR)${gamedir}/snake-scores; \
+	touch $(DESTDIR)${gamedir}/tetris-scores
+	-if chown ${gameuser} $(DESTDIR)${archlibdir}/update-game-score && chmod u+s $(DESTDIR)${archlibdir}/update-game-score; then \
+	  chown ${gameuser} $(DESTDIR)${gamedir}; \
+	  chmod u=rwx,g=rwx,o=rx $(DESTDIR)${gamedir}; \
+	fi
+	if [ `(cd $(DESTDIR)${archlibdir} && /bin/pwd)` \
+             != `(cd ${srcdir} && /bin/pwd)` ]; then \
+	  for file in ${SCRIPTS}; do \
+	    $(INSTALL_SCRIPT) ${srcdir}/$$file $(DESTDIR)${archlibdir}/$$file; \
+	  done ; \
+	fi
+
+install: $(DESTDIR)${archlibdir}
+	@echo
+	@echo "Installing utilities for users to run."
+	for file in ${INSTALLABLES} ; do \
+	  $(INSTALL_PROGRAM) $(INSTALL_STRIP) $${file} $(DESTDIR)${bindir}/`echo $${file} | sed '$(TRANSFORM)'` ; \
+	  chmod a+rx $(DESTDIR)${bindir}/`echo $${file} | sed '$(TRANSFORM)'`; \
+	done
+	for file in ${INSTALLABLE_SCRIPTS} ; do \
+	  $(INSTALL_SCRIPT) ${srcdir}/$${file} $(DESTDIR)${bindir}/`echo $${file} | sed '$(TRANSFORM)'`  ; \
+	  chmod a+rx $(DESTDIR)${bindir}/`echo $${file} | sed '$(TRANSFORM)'`; \
+	done
+
+uninstall:
+	(cd $(DESTDIR)${bindir}; \
+	for file in ${INSTALLABLES} ${INSTALLABLE_SCRIPTS}; do \
+	  rm -f $(DESTDIR)${bindir}/`echo $${file} | sed '$(TRANSFORM)'` ; \
+	done)
+	if [ -d $(DESTDIR)${archlibdir} ]; then \
+	  (cd $(DESTDIR)${archlibdir} && \
+	   rm -f ${UTILITIES} ${INSTALLABLES} ${SCRIPTS} ${INSTALLABLE_SCRIPTS}) \
+	fi
+
+mostlyclean:
+	-rm -f core *.o
+
+clean: mostlyclean
+	-rm -f ${EXE_FILES}
+	-rm -f ${STAMP_INST_SCRIPTS} ${STAMP_SCRIPTS}
+
+distclean: clean
+	-rm -f TAGS
+	-rm -f Makefile blessmail
+
+maintainer-clean: distclean
+	true
+
+extraclean: maintainer-clean
+	-rm -f *~ \#*
+
+## Test the contents of the directory.
+check:
+	@echo "We don't have any tests for the lib-src/ directory yet."
+
+tags: TAGS
+TAGS: etags${EXEEXT}
+	etags *.[ch]
+
+## This verifies that the non-ASCII characters in the file \`testfile\'
+## have not been clobbered by whatever means were used to copy and
+## distribute Emacs.  If they were clobbered, all the .elc files were
+## clobbered too.
+test-distrib${EXEEXT}: ${srcdir}/test-distrib.c
+	$(CC) ${ALL_CFLAGS} -o test-distrib ${srcdir}/test-distrib.c
+	./test-distrib ${srcdir}/testfile
+
+../lib/libgnu.a: ../src/config.h
+	cd ../lib && $(MAKE) libgnu.a
+
+regex.o: $(srcdir)/../src/regex.c $(srcdir)/../src/regex.h ../src/config.h
+	${CC} -c ${CPP_CFLAGS} -DCONFIG_BROKETS -DINHIBIT_STRING_HEADER \
+	  ${srcdir}/../src/regex.c
+
+etags${EXEEXT}: ${srcdir}/etags.c regex.o ../src/config.h
+	$(CC) ${ALL_CFLAGS} -DEMACS_NAME="\"GNU Emacs\"" \
+	  -DVERSION="\"${version}\"" ${srcdir}/etags.c \
+	  regex.o $(LOADLIBES) -o etags
+
+ebrowse${EXEEXT}: ${srcdir}/ebrowse.c ${srcdir}/../lib/min-max.h ../src/config.h
+	$(CC) ${ALL_CFLAGS} -DVERSION="\"${version}\"" \
+	  ${srcdir}/ebrowse.c $(LOADLIBES) -o ebrowse
+
+## We depend on etags to assure that parallel makes do not write two
+## etags.o files on top of each other.
+ctags${EXEEXT}: etags${EXEEXT}
+	$(CC) ${ALL_CFLAGS} -DCTAGS -DEMACS_NAME="\"GNU Emacs\"" \
+	  -DVERSION="\"${version}\"" ${srcdir}/etags.c \
+	  regex.o $(LOADLIBES) -o ctags
+
+profile${EXEEXT}: ${srcdir}/profile.c ../src/config.h
+	$(CC) ${ALL_CFLAGS} ${srcdir}/profile.c $(LOADLIBES) -o profile
+
+make-docfile${EXEEXT}: ${srcdir}/make-docfile.c ../src/config.h
+	$(CC) ${ALL_CFLAGS} ${srcdir}/make-docfile.c $(LOADLIBES) \
+	  -o make-docfile
+
+movemail${EXEEXT}: ${srcdir}/movemail.c pop.o ../src/config.h
+	$(CC) ${ALL_CFLAGS} ${MOVE_FLAGS} ${srcdir}/movemail.c pop.o \
+	  $(LOADLIBES) $(LIBS_MOVE) -o movemail
+
+pop.o: ${srcdir}/pop.c ${srcdir}/../lib/min-max.h ../src/config.h
+	$(CC) -c ${CPP_CFLAGS} ${MOVE_FLAGS} ${srcdir}/pop.c
+
+emacsclient${EXEEXT}: ${srcdir}/emacsclient.c ../src/config.h
+	$(CC) ${ALL_CFLAGS} ${srcdir}/emacsclient.c \
+	   -DVERSION="\"${version}\"" \
+	   $(LOADLIBES) -o emacsclient
+
+hexl${EXEEXT}: ${srcdir}/hexl.c ../src/config.h
+	$(CC) ${ALL_CFLAGS} ${srcdir}/hexl.c $(LOADLIBES) -o hexl
+
+update-game-score${EXEEXT}: ${srcdir}/update-game-score.c ../src/config.h
+	$(CC) ${ALL_CFLAGS} -DHAVE_SHARED_GAME_DIR="\"$(gamedir)\"" \
+	  ${srcdir}/update-game-score.c $(LOADLIBES) -o update-game-score
+
+## Makefile ends here.

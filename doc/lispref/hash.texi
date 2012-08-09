@@ -1,0 +1,356 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1999, 2001-2012  Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/hash
+@node Hash Tables, Symbols, Sequences Arrays Vectors, Top
+@chapter Hash Tables
+@cindex hash tables
+@cindex lookup tables
+
+  A hash table is a very fast kind of lookup table, somewhat like an
+alist (@pxref{Association Lists}) in that it maps keys to
+corresponding values.  It differs from an alist in these ways:
+
+@itemize @bullet
+@item
+Lookup in a hash table is extremely fast for large tables---in fact, the
+time required is essentially @emph{independent} of how many elements are
+stored in the table.  For smaller tables (a few tens of elements)
+alists may still be faster because hash tables have a more-or-less
+constant overhead.
+
+@item
+The correspondences in a hash table are in no particular order.
+
+@item
+There is no way to share structure between two hash tables,
+the way two alists can share a common tail.
+@end itemize
+
+  Emacs Lisp provides a general-purpose hash table data type, along
+with a series of functions for operating on them.  Hash tables have a
+special printed representation, which consists of @samp{#s} followed
+by a list specifying the hash table properties and contents.
+@xref{Creating Hash}.  (Note that the term ``hash notation'', which
+refers to the initial @samp{#} character used in the printed
+representations of objects with no read representation, has nothing to
+do with the term ``hash table''.  @xref{Printed Representation}.)
+
+  Obarrays are also a kind of hash table, but they are a different type
+of object and are used only for recording interned symbols
+(@pxref{Creating Symbols}).
+
+@menu
+* Creating Hash::       Functions to create hash tables.
+* Hash Access::         Reading and writing the hash table contents.
+* Defining Hash::       Defining new comparison methods.
+* Other Hash::          Miscellaneous.
+@end menu
+
+@node Creating Hash
+@section Creating Hash Tables
+@cindex creating hash tables
+
+  The principal function for creating a hash table is
+@code{make-hash-table}.
+
+@defun make-hash-table &rest keyword-args
+This function creates a new hash table according to the specified
+arguments.  The arguments should consist of alternating keywords
+(particular symbols recognized specially) and values corresponding to
+them.
+
+Several keywords make sense in @code{make-hash-table}, but the only two
+that you really need to know about are @code{:test} and @code{:weakness}.
+
+@table @code
+@item :test @var{test}
+This specifies the method of key lookup for this hash table.  The
+default is @code{eql}; @code{eq} and @code{equal} are other
+alternatives:
+
+@table @code
+@item eql
+Keys which are numbers are ``the same'' if they are @code{equal}, that
+is, if they are equal in value and either both are integers or both
+are floating point numbers; otherwise, two distinct objects are never
+``the same''.
+
+@item eq
+Any two distinct Lisp objects are ``different'' as keys.
+
+@item equal
+Two Lisp objects are ``the same'', as keys, if they are equal
+according to @code{equal}.
+@end table
+
+You can use @code{define-hash-table-test} (@pxref{Defining Hash}) to
+define additional possibilities for @var{test}.
+
+@item :weakness @var{weak}
+The weakness of a hash table specifies whether the presence of a key or
+value in the hash table preserves it from garbage collection.
+
+The value, @var{weak}, must be one of @code{nil}, @code{key},
+@code{value}, @code{key-or-value}, @code{key-and-value}, or @code{t}
+which is an alias for @code{key-and-value}.  If @var{weak} is @code{key}
+then the hash table does not prevent its keys from being collected as
+garbage (if they are not referenced anywhere else); if a particular key
+does get collected, the corresponding association is removed from the
+hash table.
+
+If @var{weak} is @code{value}, then the hash table does not prevent
+values from being collected as garbage (if they are not referenced
+anywhere else); if a particular value does get collected, the
+corresponding association is removed from the hash table.
+
+If @var{weak} is @code{key-and-value} or @code{t}, both the key and
+the value must be live in order to preserve the association.  Thus,
+the hash table does not protect either keys or values from garbage
+collection; if either one is collected as garbage, that removes the
+association.
+
+If @var{weak} is @code{key-or-value}, either the key or
+the value can preserve the association.  Thus, associations are
+removed from the hash table when both their key and value would be
+collected as garbage (if not for references from weak hash tables).
+
+The default for @var{weak} is @code{nil}, so that all keys and values
+referenced in the hash table are preserved from garbage collection.
+
+@item :size @var{size}
+This specifies a hint for how many associations you plan to store in the
+hash table.  If you know the approximate number, you can make things a
+little more efficient by specifying it this way.  If you specify too
+small a size, the hash table will grow automatically when necessary, but
+doing that takes some extra time.
+
+The default size is 65.
+
+@item :rehash-size @var{rehash-size}
+When you add an association to a hash table and the table is ``full'',
+it grows automatically.  This value specifies how to make the hash table
+larger, at that time.
+
+If @var{rehash-size} is an integer, it should be positive, and the hash
+table grows by adding that much to the nominal size.  If
+@var{rehash-size} is a floating point number, it had better be greater
+than 1, and the hash table grows by multiplying the old size by that
+number.
+
+The default value is 1.5.
+
+@item :rehash-threshold @var{threshold}
+This specifies the criterion for when the hash table is ``full'' (so
+it should be made larger).  The value, @var{threshold}, should be a
+positive floating point number, no greater than 1.  The hash table is
+``full'' whenever the actual number of entries exceeds this fraction
+of the nominal size.  The default for @var{threshold} is 0.8.
+@end table
+@end defun
+
+@defun makehash &optional test
+This is equivalent to @code{make-hash-table}, but with a different style
+argument list.  The argument @var{test} specifies the method
+of key lookup.
+
+This function is obsolete. Use @code{make-hash-table} instead.
+@end defun
+
+You can also create a new hash table using the printed representation
+for hash tables.  The Lisp reader can read this printed
+representation, provided each element in the specified hash table has
+a valid read syntax (@pxref{Printed Representation}).  For instance,
+the following specifies a new hash table containing the keys
+@code{key1} and @code{key2} (both symbols) associated with @code{val1}
+(a symbol) and @code{300} (a number) respectively.
+
+@example
+#s(hash-table size 30 data (key1 val1 key2 300))
+@end example
+
+@noindent
+The printed representation for a hash table consists of @samp{#s}
+followed by a list beginning with @samp{hash-table}.  The rest of the
+list should consist of zero or more property-value pairs specifying
+the hash table's properties and initial contents.  The properties and
+values are read literally.  Valid property names are @code{size},
+@code{test}, @code{weakness}, @code{rehash-size},
+@code{rehash-threshold}, and @code{data}.  The @code{data} property
+should be a list of key-value pairs for the initial contents; the
+other properties have the same meanings as the matching
+@code{make-hash-table} keywords (@code{:size}, @code{:test}, etc.),
+described above.
+
+Note that you cannot specify a hash table whose initial contents
+include objects that have no read syntax, such as buffers and frames.
+Such objects may be added to the hash table after it is created.
+
+@node Hash Access
+@section Hash Table Access
+
+  This section describes the functions for accessing and storing
+associations in a hash table.  In general, any Lisp object can be used
+as a hash key, unless the comparison method imposes limits.  Any Lisp
+object can also be used as the value.
+
+@defun gethash key table &optional default
+This function looks up @var{key} in @var{table}, and returns its
+associated @var{value}---or @var{default}, if @var{key} has no
+association in @var{table}.
+@end defun
+
+@defun puthash key value table
+This function enters an association for @var{key} in @var{table}, with
+value @var{value}.  If @var{key} already has an association in
+@var{table}, @var{value} replaces the old associated value.
+@end defun
+
+@defun remhash key table
+This function removes the association for @var{key} from @var{table}, if
+there is one.  If @var{key} has no association, @code{remhash} does
+nothing.
+
+@b{Common Lisp note:} In Common Lisp, @code{remhash} returns
+non-@code{nil} if it actually removed an association and @code{nil}
+otherwise.  In Emacs Lisp, @code{remhash} always returns @code{nil}.
+@end defun
+
+@defun clrhash table
+This function removes all the associations from hash table @var{table},
+so that it becomes empty.  This is also called @dfn{clearing} the hash
+table.
+
+@b{Common Lisp note:} In Common Lisp, @code{clrhash} returns the empty
+@var{table}.  In Emacs Lisp, it returns @code{nil}.
+@end defun
+
+@defun maphash function table
+@anchor{Definition of maphash}
+This function calls @var{function} once for each of the associations in
+@var{table}.  The function @var{function} should accept two
+arguments---a @var{key} listed in @var{table}, and its associated
+@var{value}.  @code{maphash} returns @code{nil}.
+@end defun
+
+@node Defining Hash
+@section Defining Hash Comparisons
+@cindex hash code
+@cindex define hash comparisons
+
+  You can define new methods of key lookup by means of
+@code{define-hash-table-test}.  In order to use this feature, you need
+to understand how hash tables work, and what a @dfn{hash code} means.
+
+  You can think of a hash table conceptually as a large array of many
+slots, each capable of holding one association.  To look up a key,
+@code{gethash} first computes an integer, the hash code, from the key.
+It reduces this integer modulo the length of the array, to produce an
+index in the array.  Then it looks in that slot, and if necessary in
+other nearby slots, to see if it has found the key being sought.
+
+  Thus, to define a new method of key lookup, you need to specify both a
+function to compute the hash code from a key, and a function to compare
+two keys directly.
+
+@defun define-hash-table-test name test-fn hash-fn
+This function defines a new hash table test, named @var{name}.
+
+After defining @var{name} in this way, you can use it as the @var{test}
+argument in @code{make-hash-table}.  When you do that, the hash table
+will use @var{test-fn} to compare key values, and @var{hash-fn} to compute
+a ``hash code'' from a key value.
+
+The function @var{test-fn} should accept two arguments, two keys, and
+return non-@code{nil} if they are considered ``the same''.
+
+The function @var{hash-fn} should accept one argument, a key, and return
+an integer that is the ``hash code'' of that key.  For good results, the
+function should use the whole range of integer values for hash codes,
+including negative integers.
+
+The specified functions are stored in the property list of @var{name}
+under the property @code{hash-table-test}; the property value's form is
+@code{(@var{test-fn} @var{hash-fn})}.
+@end defun
+
+@defun sxhash obj
+This function returns a hash code for Lisp object @var{obj}.
+This is an integer which reflects the contents of @var{obj}
+and the other Lisp objects it points to.
+
+If two objects @var{obj1} and @var{obj2} are equal, then @code{(sxhash
+@var{obj1})} and @code{(sxhash @var{obj2})} are the same integer.
+
+If the two objects are not equal, the values returned by @code{sxhash}
+are usually different, but not always; once in a rare while, by luck,
+you will encounter two distinct-looking objects that give the same
+result from @code{sxhash}.
+@end defun
+
+  This example creates a hash table whose keys are strings that are
+compared case-insensitively.
+
+@example
+(defun case-fold-string= (a b)
+  (compare-strings a nil nil b nil nil t))
+(defun case-fold-string-hash (a)
+  (sxhash (upcase a)))
+
+(define-hash-table-test 'case-fold
+  'case-fold-string= 'case-fold-string-hash)
+
+(make-hash-table :test 'case-fold)
+@end example
+
+  Here is how you could define a hash table test equivalent to the
+predefined test value @code{equal}.  The keys can be any Lisp object,
+and equal-looking objects are considered the same key.
+
+@example
+(define-hash-table-test 'contents-hash 'equal 'sxhash)
+
+(make-hash-table :test 'contents-hash)
+@end example
+
+@node Other Hash
+@section Other Hash Table Functions
+
+  Here are some other functions for working with hash tables.
+
+@defun hash-table-p table
+This returns non-@code{nil} if @var{table} is a hash table object.
+@end defun
+
+@defun copy-hash-table table
+This function creates and returns a copy of @var{table}.  Only the table
+itself is copied---the keys and values are shared.
+@end defun
+
+@defun hash-table-count table
+This function returns the actual number of entries in @var{table}.
+@end defun
+
+@defun hash-table-test table
+This returns the @var{test} value that was given when @var{table} was
+created, to specify how to hash and compare keys.  See
+@code{make-hash-table} (@pxref{Creating Hash}).
+@end defun
+
+@defun hash-table-weakness table
+This function returns the @var{weak} value that was specified for hash
+table @var{table}.
+@end defun
+
+@defun hash-table-rehash-size table
+This returns the rehash size of @var{table}.
+@end defun
+
+@defun hash-table-rehash-threshold table
+This returns the rehash threshold of @var{table}.
+@end defun
+
+@defun hash-table-size table
+This returns the current nominal size of @var{table}.
+@end defun

@@ -1,0 +1,50 @@
+@title Configuring Gnus for the first time
+
+@node What do you want to do with Gnus?
+
+@variable outbound (:radio ((item :tag "Send mail via sendmail" "sendmail") (item :tag "Send mail via SMTP" "smtp"))) "sendmail"
+
+@variable backends (:set ((item :tag "Read news via NNTP" "nntp") (item :tag "Read mail, store it locally" "nnml") (item :tag "Read mail and store it on an IMAP server" "nnimap"))) (list "nnml")
+@result primary-mail-selections (list backends outbound)
+
+@text
+Welcome to Gnus.  You need to tell us what you want to do with Gnus
+before we go on to specific configurations.
+
+Choose the tasks you want to set up: 
+@variable{backends}
+
+Choose the method Gnus will use to send mail: 
+@variable{outbound}
+
+@end text
+
+@next (member "nnml" backends) "Setting up local mail storage (nnml)"
+@next (member "nntp" backends) "Setting up a NNTP server"
+
+@node Setting up local mail storage (nnml)
+@variable mechanism (:radio ((item :tag "Get mail from your Unix mbox" "mbox") (item :tag "Use POP3 to retrieve mail" "pop3"))) "mbox"
+@result nnml-mechanism (list mechanism)
+@text
+You are setting up local mail storage, using the nnml backend in Gnus terms.
+
+Your mail can be downloaded into Gnus in several ways, choose one:
+@variable{mechanism}
+
+@end text
+
+@next 'finish
+
+@node Setting up a NNTP server
+
+@text
+TODO: this will be a real link.
+Run M-x assistant and use the news-server.ast file as input.
+@end text
+
+@next 'finish
+
+
+@c Local variables:
+@c mode: texinfo
+@c End:

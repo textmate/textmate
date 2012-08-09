@@ -1,0 +1,409 @@
+% Reference Card for Dired
+
+% Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+% Author: Evgeny Roubinchtein <eroubinc@u.washington.edu>
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% This file is intended to be processed by plain TeX (TeX82).
+
+% This is a bit of a dirty hack on the GNU Emacs reference card
+% to produce a Dired reference card instead.
+
+% I put this together because I wanted a Dired reference card, but
+% couldn't find anything on the 'net.  Based mostly off Dired's
+% describe-mode.
+
+%**start of header
+\newcount\columnsperpage
+
+% This file can be printed with 1, 2, or 3 columns per page.
+% Specify how many you want here.  
+% The reference card looks OK with 2 columns per page, portrait mode.
+% I haven't tried it with 3 columns per page.
+\columnsperpage=2
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(1)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+% Nothing else needs to be changed.
+
+\def\shortcopyrightnotice{\vskip 1ex plus 2 fill
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
+  Permissions on back.}}
+
+\def\copyrightnotice{
+\vskip 1ex plus 2 fill\begingroup\small
+\centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
+\centerline{For GNU Emacs version \versionemacs}
+\centerline{Originally written May 2000 by Evgeny Roubinchtein,}
+\centerline{using refcard layout designed by Stephen Gildea.}
+
+Permission is granted to make and distribute copies of
+this card provided the copyright notice and this permission notice
+are preserved on all copies.
+
+For copies of the GNU Emacs manual, see:
+
+{\tt http://www.gnu.org/software/emacs/\#Manuals}
+\endgroup}
+
+% make \bye not \outer so that the \def\bye in the \else clause below
+% can be scanned without complaint.
+\def\bye{\par\vfill\supereject\end}
+
+\newdimen\intercolumnskip       %horizontal space between columns
+\newbox\columna                 %boxes to hold columns already built
+\newbox\columnb
+
+\def\ncolumns{\the\columnsperpage}
+
+\message{[\ncolumns\space
+  column\if 1\ncolumns\else s\fi\space per page]}
+
+\def\scaledmag#1{ scaled \magstep #1}
+
+% This multi-way format was designed by Stephen Gildea October 1986.
+% Note that the 1-column format is fontfamily-independent.
+\if 1\ncolumns                  %one-column format uses normal size
+  \hsize 4in
+  \vsize 10in
+  \voffset -.7in
+  \font\titlefont=\fontname\tenbf \scaledmag3
+  \font\headingfont=\fontname\tenbf \scaledmag2
+  \font\smallfont=\fontname\sevenrm
+  \font\smallsy=\fontname\sevensy
+
+  \footline{\hss\folio}
+  \def\makefootline{\baselineskip10pt\hsize6.5in\line{\the\footline}}
+\else                           %2 or 3 columns uses prereduced size
+  \hsize 3.4in
+  \vsize 9.2in
+  \hoffset -.75in
+  \voffset -.745in
+  \font\titlefont=cmbx10 \scaledmag2
+  \font\headingfont=cmbx10 \scaledmag1
+  \font\smallfont=cmr6
+  \font\smallsy=cmsy6
+  \font\eightrm=cmr8
+  \font\eightbf=cmbx8
+  \font\eightit=cmti8
+  \font\eighttt=cmtt8
+  \font\eightmi=cmmi8
+  \font\eightsy=cmsy8
+  \textfont0=\eightrm
+  \textfont1=\eightmi
+  \textfont2=\eightsy
+  \def\rm{\eightrm}
+  \def\bf{\eightbf}
+  \def\it{\eightit}
+  \def\tt{\eighttt}
+  \normalbaselineskip=.8\normalbaselineskip
+  \normallineskip=.8\normallineskip
+  \normallineskiplimit=.8\normallineskiplimit
+  \normalbaselines\rm           %make definitions take effect
+
+  \if 2\ncolumns
+    \let\maxcolumn=b
+    \footline{\hss\rm\folio\hss}
+    \def\makefootline{\vskip 2in \hsize=6.86in\line{\the\footline}}
+  \else \if 3\ncolumns
+    \let\maxcolumn=c
+    \nopagenumbers
+  \else
+    \errhelp{You must set \columnsperpage equal to 1, 2, or 3.}
+    \errmessage{Illegal number of columns per page}
+  \fi\fi
+
+  \intercolumnskip=.46in
+  \def\abc{a}
+  \output={%                    %see The TeXbook page 257
+      % This next line is useful when designing the layout.
+      %\immediate\write16{Column \folio\abc\space starts with \firstmark}
+      \if \maxcolumn\abc \multicolumnformat \global\def\abc{a}
+      \else\if a\abc
+        \global\setbox\columna\columnbox \global\def\abc{b}
+        %% in case we never use \columnb (two-column mode)
+        \global\setbox\columnb\hbox to -\intercolumnskip{}
+      \else
+        \global\setbox\columnb\columnbox \global\def\abc{c}\fi\fi}
+  \def\multicolumnformat{\shipout\vbox{\makeheadline
+      \hbox{\box\columna\hskip\intercolumnskip
+        \box\columnb\hskip\intercolumnskip\columnbox}
+      \makefootline}\advancepageno}
+  \def\columnbox{\leftline{\pagebody}}
+
+  \def\bye{\par\vfill\supereject
+    \if a\abc \else\null\vfill\eject\fi
+    \if a\abc \else\null\vfill\eject\fi
+    \end}
+\fi
+
+% we won't be using math mode much, so redefine some of the characters
+% we might want to talk about
+\catcode`\^=12
+\catcode`\_=12
+
+\chardef\\=`\\
+\chardef\{=`\{
+\chardef\}=`\}
+
+\hyphenation{mini-buf-fer}
+\hyphenation{de-le-tion}
+
+\parindent 0pt
+\parskip 1ex plus .5ex minus .5ex
+
+\def\small{\smallfont\textfont2=\smallsy\baselineskip=.8\baselineskip}
+
+% newcolumn - force a new column.  Use sparingly, probably only for
+% the first column of a page, which should have a title anyway.
+\outer\def\newcolumn{\vfill\eject}
+
+% title - page title.  Argument is title text.
+\outer\def\title#1{{\titlefont\centerline{#1}}\vskip 1ex plus .5ex}
+
+% section - new major section.  Argument is section name.
+\outer\def\section#1{\par\filbreak
+  \vskip 3ex plus 2ex minus 2ex {\headingfont #1}\mark{#1}%
+  \vskip 2ex plus 1ex minus 1.5ex}
+
+\newdimen\keyindent
+
+% beginindentedkeys...endindentedkeys - key definitions will be
+% indented, but running text, typically used as headings to group
+% definitions, will not.
+\def\beginindentedkeys{\keyindent=1em}
+\def\endindentedkeys{\keyindent=0em}
+\endindentedkeys
+
+% paralign - begin paragraph containing an alignment.
+% If an \halign is entered while in vertical mode, a parskip is never
+% inserted.  Using \paralign instead of \halign solves this problem.
+\def\paralign{\vskip\parskip\halign}
+
+% \<...> - surrounds a variable name in a code example
+\def\<#1>{{\it #1\/}}
+
+% kbd - argument is characters typed literally.  Like the Texinfo command.
+\def\kbd#1{{\tt#1}\null}        %\null so not an abbrev even if period follows
+
+% beginexample...endexample - surrounds literal text, such a code example.
+% typeset in a typewriter font with line breaks preserved
+\def\beginexample{\par\leavevmode\begingroup
+  \obeylines\obeyspaces\parskip0pt\tt}
+{\obeyspaces\global\let =\ }
+\def\endexample{\endgroup}
+
+% key - definition of a key.
+% \key{description of key}{key-name}
+% prints the description left-justified, and the key-name in a \kbd
+% form near the right margin.
+\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
+  {\hsize=.75\hsize\rightskip=1em
+  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
+
+\newbox\metaxbox
+\setbox\metaxbox\hbox{\kbd{M-x }}
+\newdimen\metaxwidth
+\metaxwidth=\wd\metaxbox
+
+% metax - definition of a M-x command.
+% \metax{description of command}{M-x command-name}
+% Tries to justify the beginning of the command name at the same place
+% as \key starts the key name.  (The "M-x " sticks out to the left.)
+\def\metax#1#2{\leavevmode\hbox to \hsize{\hbox to .75\hsize
+  {\hskip\keyindent\relax#1\hfil}%
+  \hskip -\metaxwidth minus 1fil
+  \kbd{#2}\hfil}}
+
+% threecol - like "key" but with two key names.
+% for example, one for doing the action backward, and one for forward.
+\def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
+  &\kbd{#3}\hfil\quad\cr}
+
+% I cannot figure out how to make all dired-x
+% commands fit on a page in two-column format
+\def\dx{{\bf (DX)}}
+
+\nopagenumbers
+
+%**end of header
+
+
+\title{Dired Reference Card}
+
+\centerline{(based on Dired in GNU Emacs \versionemacs)}
+\centerline{Commands marked with \dx{} require dired-x}
+
+% trim this down to fit everything on one page
+% \section{General}
+% In dired, you can edit a list of the files in a directory (and optionally
+% its subdirectories in the `ls -lR' format).
+
+% Editing a directory means that you can visit, rename, copy, compress,
+% load, byte-compile  files.  You can change files' attributes, run shell
+% commands on files, or insert subdirectories into the edit buffer.  You can
+% "flag" files for deletion or "mark" files for later commands, either one
+% file at a time or by all files matching certain criteria (e.g., files that
+% match a certain regexp).
+
+% You move throughout the buffer using the usual cursor motion commands.
+% Letters no longer insert themselves, but execute commands instead.  The
+% digits (0-9) are prefix arguments.
+
+% Most commands operate either on all marked files or on the current file if
+% no files are marked.  Use a numeric prefix argument to operate on the next
+% ARG files (or previous ARG if ARG $<$ 0).  Use the prefix argument `1' to
+% operate on the current file only.  Prefix arguments override marks. Commands
+% which run a sub-process on a group of files will display a list of files
+% for which the sub-process failed.  Typing y will try to tell
+% you what went wrong.
+
+% When editing several directories in one buffer, each directory acts as a
+% page, so C-x [ and C-x ] can be used to move between directories.
+
+\section{Entering and Exiting Dired}
+
+\key{run dired}{C-x d}
+\key{dired the directory of the file you are editing}{C-x C-j \dx}
+\key{quit dired}{q}
+
+\section{Motion Commands}
+
+\key{move up to previous line}{p}
+\key{move down to next line}{n}
+\key{move up to previous directory line}{<}
+\key{move down to next directory line}{>}
+\key{move to next marked file}{M-\}}
+\key{move to previous marked file}{M-\{}
+\key{move up to previous subdirectory}{M-C-p}
+\key{move down to next subdirectory}{M-C-n}
+\key{move to parent directory}{^}
+\key{move to first child subdirectory}{M-C-d}
+
+\section{Mouse Commands}
+\metax{visit file}{Mouse_Button_2}
+\metax{popup menu}{Control-Mouse_Button_3}
+
+\section{Immediate Actions on Files}
+
+\key{visit current file}{f}
+\key{view current file}{v}
+\key{visit current file in other window}{o}
+%% Huh?
+%% \key{visit current file in other frame}{w}
+%% Huh?
+%%\key{display current file}{C-u o}
+\key{create a new subdirectory}{+}
+\key{compare file at point with the one at mark}{=}
+
+\section{Marking and Unmarking Files}
+
+\key{mark a file or subdirectory for later commands}{m}
+\key{unmark a file or all files of a subdirectory}{u}
+\key{unmark all marked files in a buffer}{M-delete}
+\key{mark files with a given extension}{* .}
+\key{mark all directories}{* /}
+\key{mark all symlinks}{* @}
+\key{mark all executables}{* *}
+\key{invert marking}{* t}
+\key{mark all files in the current subdir}{* s}
+\key{mark file names matching a regular expression}{* \%}
+\key{change the marks to a different character}{* c}
+\key{mark files for which Elisp expression returns t}{* ( \dx}
+
+\section{Modifying the Dired Buffer}
+
+\key{insert a subdirectory into this buffer}{i}
+\key{remove marked files from the listing}{k}
+\key{remove a subdir listing}{C-u k}
+\key{re-read all directories (retains all marks)}{g}
+\key{toggle sorting of current subdir by name/date}{s}
+\key{edit ls switches}{C-u s}
+\key{recover marks, hidden lines, and such}{C-_}
+\key{hide all subdirectories}{M-\$}
+\key{hide or unhide subdirectory}{\$}
+
+\section{Commands on Files Marked or Specified by the Prefix}
+
+\key{copy file(s)}{C}
+\key{rename a file or move files to another directory}{R}
+\key{change ownership of file(s)}{O}
+\key{change the group of the file(s)}{G}
+\key{change mode of file(s)}{M}
+\key{print file(s)}{P}
+\key{convert filename(s) to lower case}{\% l}
+\key{convert filename(s) to upper case}{\% u}
+\key{delete marked (as opposed to flagged) files}{D}
+%% Huh?
+%%\key{uuencode or uudecode file(s)}{U}
+\key{compress or uncompress file(s)}{Z}
+%% Only uses the current file.
+\key{run info on file}{I \dx}
+\key{make symbolic link(s)}{S}
+\key{make relative symbolic link(s)}{Y}
+\key{make hard link(s)}{H}
+\key{search files for a regular expression}{A}
+\key{query replace regular expression}{Q}
+\key{byte-compile files}{B}
+\key{load files}{L}
+\key{shell command on file(s)}{!}
+\key{asynchronous shell command on file(s)}{\&}
+
+\section{Flagging Files for Deletion}
+\leftline{\bf Unmark commands remove delete flags}
+\key{flag file for deletion}{d}
+%% Huh?
+%%\key{backup and remove deletion flag}{delete}
+\key{flag all backup files (file names ending in \~{})}{\~{}}
+\key{flag all auto-save files}{\#}
+\key{flag various intermediate files}{\% \&}
+\key{flag numeric backups (ending in .\~{}1\~{}, .\~{}2\~{}, etc.)}{.}
+\key{execute the deletions requested (flagged files)}{x}
+\key{flag files matching a regular expression}{\% d}
+
+\section{Regular Expression Commands}
+
+\key{mark filenames matching a regular expression}{\% m}
+\key{copy marked files by regexp}{\% C}
+\key{rename marked files by regexp}{\% R}
+\key{hardlink}{\% H}
+\key{symlink}{\% S}
+\key{symlink, with relative paths}{\% Y}
+\key{mark for deletion}{\% d}
+
+\section{Dired and Find}
+\metax{dired file(s) whose name matches a pattern}{M-x find-name-dired}
+\metax{dired file(s) that contain pattern}{M-x find-grep-dired}
+\metax{dired file(s) based on \kbd{find} output}{M-x find-dired}
+
+\section{Getting Help}
+
+\key{dired help}{h}
+\key{dired summary (short help) and error log}{?}
+
+\copyrightnotice
+
+\bye
+

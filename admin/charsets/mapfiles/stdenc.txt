@@ -1,0 +1,203 @@
+#
+#  Name:             Adobe Standard Encoding to Unicode
+#  Unicode version:  2.0
+#  Table version:    0.2
+#  Date:             30 March 1999
+#  
+#  Copyright (c) 1991-1999 Unicode, Inc. All Rights reserved.
+#  
+#  This file is provided as-is by Unicode, Inc. (The Unicode Consortium). No
+#  claims are made as to fitness for any particular purpose. No warranties of
+#  any kind are expressed or implied. The recipient agrees to determine
+#  applicability of information provided. If this file has been provided on
+#  magnetic media by Unicode, Inc., the sole remedy for any claim will be
+#  exchange of defective media within 90 days of receipt.
+#  
+#  Recipient is granted the right to make copies in any form for internal
+#  distribution and to freely use the information supplied in the creation of
+#  products supporting Unicode. Unicode, Inc. specifically excludes the right
+#  to re-distribute this file directly to third parties or other organizations
+#  whether for profit or not.
+#  
+#  Format: 4 tab-delimited fields:
+#
+#    (1) The Unicode value (in hexadecimal)
+#    (2) The Adobe Standard Encoding code point (in hexadecimal)
+#    (3) # Unicode name
+#    (4) # PostScript character name
+#  
+#  General Notes:
+# 
+#    The Unicode values in this table were produced as the result of applying
+#    the algorithm described in the section "Populating a Unicode space" in the
+#    document "Unicode and Glyph Names," at
+#    http://partners.adobe.com/asn/developer/typeforum/unicodegn.html
+#    to the characters encoded in Adobe Standard Encoding. Note that some
+#    Standard Encoding characters, such as "space", are mapped to 2 Unicode
+#    values. Refer to the above document for more details.
+#
+#  Revision History:
+#
+#    [v0.2, 30 March 1999]
+#    Different algorithm to produce Unicode values (see notes above) results in
+#    some character codes being mapped to 2 Unicode values. Updated Unicode
+#    names to Unicode 2.0 names.
+#    
+#    [v0.1, 5 May 1995] First release.
+#
+#  Contact <unicode-inc@unicode.org> with any questions or comments.
+#
+0020	20	# SPACE	# space
+00A0	20	# NO-BREAK SPACE	# space
+0021	21	# EXCLAMATION MARK	# exclam
+0022	22	# QUOTATION MARK	# quotedbl
+0023	23	# NUMBER SIGN	# numbersign
+0024	24	# DOLLAR SIGN	# dollar
+0025	25	# PERCENT SIGN	# percent
+0026	26	# AMPERSAND	# ampersand
+2019	27	# RIGHT SINGLE QUOTATION MARK	# quoteright
+0028	28	# LEFT PARENTHESIS	# parenleft
+0029	29	# RIGHT PARENTHESIS	# parenright
+002A	2A	# ASTERISK	# asterisk
+002B	2B	# PLUS SIGN	# plus
+002C	2C	# COMMA	# comma
+002D	2D	# HYPHEN-MINUS	# hyphen
+00AD	2D	# SOFT HYPHEN	# hyphen
+002E	2E	# FULL STOP	# period
+002F	2F	# SOLIDUS	# slash
+0030	30	# DIGIT ZERO	# zero
+0031	31	# DIGIT ONE	# one
+0032	32	# DIGIT TWO	# two
+0033	33	# DIGIT THREE	# three
+0034	34	# DIGIT FOUR	# four
+0035	35	# DIGIT FIVE	# five
+0036	36	# DIGIT SIX	# six
+0037	37	# DIGIT SEVEN	# seven
+0038	38	# DIGIT EIGHT	# eight
+0039	39	# DIGIT NINE	# nine
+003A	3A	# COLON	# colon
+003B	3B	# SEMICOLON	# semicolon
+003C	3C	# LESS-THAN SIGN	# less
+003D	3D	# EQUALS SIGN	# equal
+003E	3E	# GREATER-THAN SIGN	# greater
+003F	3F	# QUESTION MARK	# question
+0040	40	# COMMERCIAL AT	# at
+0041	41	# LATIN CAPITAL LETTER A	# A
+0042	42	# LATIN CAPITAL LETTER B	# B
+0043	43	# LATIN CAPITAL LETTER C	# C
+0044	44	# LATIN CAPITAL LETTER D	# D
+0045	45	# LATIN CAPITAL LETTER E	# E
+0046	46	# LATIN CAPITAL LETTER F	# F
+0047	47	# LATIN CAPITAL LETTER G	# G
+0048	48	# LATIN CAPITAL LETTER H	# H
+0049	49	# LATIN CAPITAL LETTER I	# I
+004A	4A	# LATIN CAPITAL LETTER J	# J
+004B	4B	# LATIN CAPITAL LETTER K	# K
+004C	4C	# LATIN CAPITAL LETTER L	# L
+004D	4D	# LATIN CAPITAL LETTER M	# M
+004E	4E	# LATIN CAPITAL LETTER N	# N
+004F	4F	# LATIN CAPITAL LETTER O	# O
+0050	50	# LATIN CAPITAL LETTER P	# P
+0051	51	# LATIN CAPITAL LETTER Q	# Q
+0052	52	# LATIN CAPITAL LETTER R	# R
+0053	53	# LATIN CAPITAL LETTER S	# S
+0054	54	# LATIN CAPITAL LETTER T	# T
+0055	55	# LATIN CAPITAL LETTER U	# U
+0056	56	# LATIN CAPITAL LETTER V	# V
+0057	57	# LATIN CAPITAL LETTER W	# W
+0058	58	# LATIN CAPITAL LETTER X	# X
+0059	59	# LATIN CAPITAL LETTER Y	# Y
+005A	5A	# LATIN CAPITAL LETTER Z	# Z
+005B	5B	# LEFT SQUARE BRACKET	# bracketleft
+005C	5C	# REVERSE SOLIDUS	# backslash
+005D	5D	# RIGHT SQUARE BRACKET	# bracketright
+005E	5E	# CIRCUMFLEX ACCENT	# asciicircum
+005F	5F	# LOW LINE	# underscore
+2018	60	# LEFT SINGLE QUOTATION MARK	# quoteleft
+0061	61	# LATIN SMALL LETTER A	# a
+0062	62	# LATIN SMALL LETTER B	# b
+0063	63	# LATIN SMALL LETTER C	# c
+0064	64	# LATIN SMALL LETTER D	# d
+0065	65	# LATIN SMALL LETTER E	# e
+0066	66	# LATIN SMALL LETTER F	# f
+0067	67	# LATIN SMALL LETTER G	# g
+0068	68	# LATIN SMALL LETTER H	# h
+0069	69	# LATIN SMALL LETTER I	# i
+006A	6A	# LATIN SMALL LETTER J	# j
+006B	6B	# LATIN SMALL LETTER K	# k
+006C	6C	# LATIN SMALL LETTER L	# l
+006D	6D	# LATIN SMALL LETTER M	# m
+006E	6E	# LATIN SMALL LETTER N	# n
+006F	6F	# LATIN SMALL LETTER O	# o
+0070	70	# LATIN SMALL LETTER P	# p
+0071	71	# LATIN SMALL LETTER Q	# q
+0072	72	# LATIN SMALL LETTER R	# r
+0073	73	# LATIN SMALL LETTER S	# s
+0074	74	# LATIN SMALL LETTER T	# t
+0075	75	# LATIN SMALL LETTER U	# u
+0076	76	# LATIN SMALL LETTER V	# v
+0077	77	# LATIN SMALL LETTER W	# w
+0078	78	# LATIN SMALL LETTER X	# x
+0079	79	# LATIN SMALL LETTER Y	# y
+007A	7A	# LATIN SMALL LETTER Z	# z
+007B	7B	# LEFT CURLY BRACKET	# braceleft
+007C	7C	# VERTICAL LINE	# bar
+007D	7D	# RIGHT CURLY BRACKET	# braceright
+007E	7E	# TILDE	# asciitilde
+00A1	A1	# INVERTED EXCLAMATION MARK	# exclamdown
+00A2	A2	# CENT SIGN	# cent
+00A3	A3	# POUND SIGN	# sterling
+2044	A4	# FRACTION SLASH	# fraction
+2215	A4	# DIVISION SLASH	# fraction
+00A5	A5	# YEN SIGN	# yen
+0192	A6	# LATIN SMALL LETTER F WITH HOOK	# florin
+00A7	A7	# SECTION SIGN	# section
+00A4	A8	# CURRENCY SIGN	# currency
+0027	A9	# APOSTROPHE	# quotesingle
+201C	AA	# LEFT DOUBLE QUOTATION MARK	# quotedblleft
+00AB	AB	# LEFT-POINTING DOUBLE ANGLE QUOTATION MARK	# guillemotleft
+2039	AC	# SINGLE LEFT-POINTING ANGLE QUOTATION MARK	# guilsinglleft
+203A	AD	# SINGLE RIGHT-POINTING ANGLE QUOTATION MARK	# guilsinglright
+FB01	AE	# LATIN SMALL LIGATURE FI	# fi
+FB02	AF	# LATIN SMALL LIGATURE FL	# fl
+2013	B1	# EN DASH	# endash
+2020	B2	# DAGGER	# dagger
+2021	B3	# DOUBLE DAGGER	# daggerdbl
+00B7	B4	# MIDDLE DOT	# periodcentered
+2219	B4	# BULLET OPERATOR	# periodcentered
+00B6	B6	# PILCROW SIGN	# paragraph
+2022	B7	# BULLET	# bullet
+201A	B8	# SINGLE LOW-9 QUOTATION MARK	# quotesinglbase
+201E	B9	# DOUBLE LOW-9 QUOTATION MARK	# quotedblbase
+201D	BA	# RIGHT DOUBLE QUOTATION MARK	# quotedblright
+00BB	BB	# RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK	# guillemotright
+2026	BC	# HORIZONTAL ELLIPSIS	# ellipsis
+2030	BD	# PER MILLE SIGN	# perthousand
+00BF	BF	# INVERTED QUESTION MARK	# questiondown
+0060	C1	# GRAVE ACCENT	# grave
+00B4	C2	# ACUTE ACCENT	# acute
+02C6	C3	# MODIFIER LETTER CIRCUMFLEX ACCENT	# circumflex
+02DC	C4	# SMALL TILDE	# tilde
+00AF	C5	# MACRON	# macron
+02C9	C5	# MODIFIER LETTER MACRON	# macron
+02D8	C6	# BREVE	# breve
+02D9	C7	# DOT ABOVE	# dotaccent
+00A8	C8	# DIAERESIS	# dieresis
+02DA	CA	# RING ABOVE	# ring
+00B8	CB	# CEDILLA	# cedilla
+02DD	CD	# DOUBLE ACUTE ACCENT	# hungarumlaut
+02DB	CE	# OGONEK	# ogonek
+02C7	CF	# CARON	# caron
+2014	D0	# EM DASH	# emdash
+00C6	E1	# LATIN CAPITAL LETTER AE	# AE
+00AA	E3	# FEMININE ORDINAL INDICATOR	# ordfeminine
+0141	E8	# LATIN CAPITAL LETTER L WITH STROKE	# Lslash
+00D8	E9	# LATIN CAPITAL LETTER O WITH STROKE	# Oslash
+0152	EA	# LATIN CAPITAL LIGATURE OE	# OE
+00BA	EB	# MASCULINE ORDINAL INDICATOR	# ordmasculine
+00E6	F1	# LATIN SMALL LETTER AE	# ae
+0131	F5	# LATIN SMALL LETTER DOTLESS I	# dotlessi
+0142	F8	# LATIN SMALL LETTER L WITH STROKE	# lslash
+00F8	F9	# LATIN SMALL LETTER O WITH STROKE	# oslash
+0153	FA	# LATIN SMALL LIGATURE OE	# oe
+00DF	FB	# LATIN SMALL LETTER SHARP S	# germandbls

@@ -1,0 +1,25 @@
+# -sed2x.inp------------------------------------------------------------
+# Extra configuration script for src/config.h for DesqView/X
+# ----------------------------------------------------------------------
+#
+# Copyright (C) 1994, 2001-2012  Free Software Foundation, Inc.
+#
+# This file is part of GNU Emacs.
+#
+# This file is free software; as a special exception, the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# ----------------------------------------------------------------------
+/^#undef HAVE_X_WINDOWS *$/s/undef/define/
+/^#undef HAVE_WINDOW_SYSTEM *$/s/undef/define/
+/^#undef HAVE_X11 *$/s/undef/define/
+/^#undef HAVE_X_MENU *$/s/undef/define/
+/^#undef HAVE_XSCREENNUMBEROFSCREEN *$/s/undef/define/
+/^#undef HAVE_XSETWMPROTOCOLS *$/s/undef/define/
+/^#undef HAVE_SELECT *$/s/undef/define/
+

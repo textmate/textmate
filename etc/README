@@ -1,0 +1,13 @@
+This directory contains the architecture-independent files used by or
+with Emacs.  This includes some text files of documentation for GNU
+Emacs or of interest to Emacs users, and the file of dumped docstrings
+for Emacs functions and variables.
+
+`forms-d2.dat' is an example data file used by forms-d2.el.
+
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+File: emacs.icon
+  Author: Sun Microsystems, Inc
+  Copyright (C) 1999, 2001-2012  Free Software Foundation, Inc.
+  License: GNU General Public License version 3 or later (see COPYING)

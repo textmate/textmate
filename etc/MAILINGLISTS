@@ -1,0 +1,331 @@
+      GNU Project Electronic Mailing Lists and gnUSENET Newsgroups
+			Last Updated 2006-06-03
+
+	   Please report improvements to: gnu@gnu.org
+
+  See the end of this file for copyright notice and copying conditions
+
+* Mailing list archives
+
+The GNU mailing lists are archived at http://lists.gnu.org.
+
+* Some GNU mailing lists are also distributed as USENET news groups
+
+Certain GNU mailing lists are gated both ways with the gnu.all
+newsgroups at uunet.  You can tell which they are, because the names
+correspond.  For instance, bug-gnu-emacs corresponds to gnu.emacs.bug;
+info-gnu-emacs, to gnu.emacs.announce; help-gnu-emacs, to
+gnu.emacs.help; gnu-emacs-sources, to gnu.emacs.sources.  Replacing
+`emacs' with some other program in those four examples shows you
+the whole pattern.
+
+If you don't know if your site is on USENET, ask your system
+administrator.  If you are a USENET site and don't get the gnu.all
+newsgroups, please ask your USENET administrator to get them.  If he has
+your feeds ask their feeds, you should win.  And everyone else wins:
+newsgroups make better use of the limited bandwidth of the computer
+networks and your home machine than mailing list traffic; and staying
+off the mailing lists make better use of the people who maintain the
+lists and the machines that the GNU people working with rms use (i.e. we
+have more time to produce code!!).  Thanx.
+
+* Getting the mailing lists directly
+
+If several users at your site or local network want to read a list and
+you aren't a USENET site, Project GNU would prefer that you would set up
+one address that redistributes locally.  This reduces overhead on our
+people and machines, your gateway machine, and the network(s) used to
+transport the mail from us to you.
+
+* How to subscribe to and report bugs in mailing lists
+
+Send requests to be added or removed, to help-gnu-emacs-request (or
+info-gnu-request, bug-gdb-request, etc.), NOT to info-gnu-emacs (or
+info-gnu, etc.).  Most <LIST_NAME>-request addresses are now handled
+automagically by GNU Mailman.
+
+If you need to report problems to a human, send mail to gnu@gnu.org
+explaining the problem.
+
+Many of the GNU mailing lists are very large and are received by many
+people.  Most are unmoderated, so please don't send them anything that
+is not seriously important to all their readers.
+
+If a message you mail to a list is returned from a MAILER-DAEMON (often
+with the line:
+      ----- Transcript of session follows -----
+ don't resend the message to the list.  All this return means is that
+your original message failed to reach a few addresses on the list.  Such
+messages are NEVER a reason to resend a piece of mail a 2nd time.  This
+just bothers all (less the few delivery failures (which will probably
+just fail again!)) of the readers of the list with a message they have
+already seen.  It also wastes computer and network resources.
+
+It is appropriate to send these to the -request address for a list, and
+ask them to check the problem out.
+
+* Send Specific Requests for Information to: gnu@gnu.org
+
+Specific requests for information about obtaining GNU software, or GNU
+activities in Cambridge and elsewhere can be directed to:
+	gnu@gnu.org
+
+* General Information about all lists
+
+Please keep each message under 25,000 characters.  Some mailers bounce
+messages that are longer than this.  If your message is long, it is
+generally better to send a message offering to make the large file
+available to only those people who want it (e.g. mailing it to people
+who ask, or putting it up for FTP).  In the case of gnu.emacs.sources,
+somewhat larger postings (up to 10 parts of no more than 25,000
+characters each) are acceptable (assuming they are likely to be of
+interest to a reasonable number of people); if it is larger than that,
+put it in a web page and announce its URL.  Good bug reports are short.
+See section '* General Information about bug-* lists and ...'  for
+further details.
+
+Most of the time, when you reply to a message sent to a list, the reply
+should not go to the list.  But most mail reading programs supply, by
+default, all the recipients of the original as recipients of the reply.
+Make a point of deleting the list address from the header when it does
+not belong.  This prevents bothering all readers of a list, and reduces
+network congestion.
+
+The GNU mailing lists and newsgroups, like the GNU project itself, exist
+to promote the freedom to share software.  So don't use these lists to
+promote or recommend non-free software or documentation, like
+proprietary books on GNU software.  (Using them to post ordering
+information is the ultimate faux pas.)  If there is no free program to
+do a certain task, then somebody should write one!  Similarly, free
+documentation that is inadequate should be improved--a way in which
+non-programmers can make a valuable contribution.  See also the article
+at <URL:http://www.gnu.org/philosophy/free-doc.html>.
+
+* General Information about info-* lists
+
+These lists and their newsgroups are meant for important announcements.
+Since the GNU project uses software development as a means for social
+change, the announcements may be technical or political.
+
+Most GNU projects info-* lists (and their corresponding gnu.*.announce
+newsgroups) are moderated to keep their content significant and
+relevant.  If you have a bug to report, send it to the bug-* list.  If
+you need help on something else and the help-* list exists, ask it.
+
+See section '* General Information about all lists'.
+
+* General Information about help-* lists
+
+These lists (and their newsgroups) exist for anyone to ask questions
+about the GNU software that the list deals with.  The lists are read by
+people who are willing to take the time to help other users.
+
+When you answer the questions that people ask on the help-* lists, keep
+in mind that you shouldn't answer by promoting a proprietary program as
+a solution.  The only real solutions are the ones all the readers can
+share.
+
+If a program crashes, or if you build it following the standard
+procedure on a system on which it is supposed to work and it does not
+work at all, or if an command does not behave as it is documented to
+behave, this is a bug.  Don't send bug reports to a help-* list; mail
+them to the bug-* list instead.
+
+See section '* General Information about all lists'.
+
+* General Information about bug-* lists and reporting program bugs
+
+If you think something is a bug in a program, it might be one; or, it
+might be a misunderstanding or even a feature.  Before beginning to
+report bugs, please read the section ``Reporting Emacs Bugs'' toward the
+end of the GNU Emacs reference manual (or node Emacs/Bugs in Emacs's
+built-in Info system) for a discussion of how and when to send in bug
+reports.  For GNU programs other than GNU Emacs, also consult their
+documentation for their bug reporting procedures.  Always include the
+version number of the GNU program, as well as the operating system and
+machine the program was ran on (if the program doesn't have a version
+number, send the date of the latest entry in the file ChangeLog).  For
+GNU Emacs bugs, type "M-x emacs-version".  A debugger backtrace of any
+core dump can also be useful.  Be careful to separate out hypothesis
+from fact!  For bugs in GNU Emacs lisp, set variable debug-on-error to
+t, and re-enter the command(s) that cause the error message; Emacs will
+pop up a debug buffer if something is wrong; please include a copy of
+the buffer in your bug report.  Please also try to make your bug report
+as short as possible; distill the problem to as few lines of code and/or
+input as possible.  GNU maintainers give priority to the shortest, high
+quality bug reports.
+
+Please don't send in a patch without a test case to illustrate the
+problem the patch is supposed to fix.  Sometimes the patches aren't
+correct or aren't the best way to do the job, and without a test case
+there is no way to debug an alternate fix.
+
+The purpose of reporting a bug is to enable the bug to be fixed for the
+sake of the whole community of users.  You may or may not receive a
+response; the maintainers will send one if that helps them find or
+verify a fix.  Most GNU maintainers are volunteers and all are
+overworked; they don't have time to help individuals and still fix the
+bugs and make the improvements that everyone wants.  If you want help
+for yourself in particular, you may have to hire someone.  The GNU
+project maintains a list of people providing such services.  It is
+found in <URL:http://www.gnu.org/prep/SERVICE>.
+
+Anything addressed to the implementers and maintainers of a GNU program
+via a bug-* list, should NOT be sent to the corresponding info-* or
+help-* list.
+
+Please DON'T post your bug reports on the gnu.*.bug newsgroups!  Mail
+them to bug-*@gnu.org instead!  At first sight, it seems to make no
+difference: anything sent to one will be propagated to the other; but:
+	- if you post on the newsgroup, the information about how to
+reach you is lost in the message that goes on the mailing list.  It
+can be very important to know how to reach you, if there is anything
+in the bug report that we don't understand;
+	- bug reports reach the GNU maintainers quickest when they are
+sent to the bug-* mailing list submittal address;
+	- mail is much more reliable then netnews; and
+	- if the internet mailers can't get your bug report delivered,
+they almost always send you an error message, so you can find another
+way to get the bug report in.  When netnews fails to get your message
+delivered to the maintainers, you'll never know about it and the
+maintainers will never see the bug report.
+
+And please DON'T post your GNU bug reports to comp.* or other gnu.*
+newsgroups, they never make it to the GNU maintainers at all.  Please
+mail them to bug-*@gnu.org instead!
+
+* Some special lists that don't fit the usual patterns of help-, bug- and info-
+
+** info-gnu-request@gnu.org to subscribe to info-gnu
+
+gnUSENET newsgroup: gnu.announce
+Send announcements to: info-gnu@gnu.org
+
+This list distributes progress reports on the GNU Project.  It is also
+used by the GNU Project to ask people for various kinds of help.  It is
+moderated and NOT for general discussion.
+
+** gnu-misc-discuss-request@gnu.org to subscribe to gnu-misc-discuss
+
+gnUSENET newsgroup: gnu.misc.discuss
+Send contributions to: gnu-misc-discuss@gnu.org
+
+This list is for serious discussion of free software, the GNU Project,
+the GNU Manifesto, and their implications.  It's THE place for
+discussion that is not appropriate in the other GNU mailing lists and
+gnUSENET newsgroups.
+
+Flaming is out of place.  Tit-for-tat is not welcome.  Repetition
+should not occur.
+
+Good READING and writing are expected.  Before posting, wait a while,
+cool off, and think.
+
+Don't use this group for complaints and bug reports about GNU software!
+The maintainers of the package you are using probably don't read this
+group; they won't see your complaint.  Use the appropriate bug-reporting
+mailing list instead, so that people who can do something about the
+problem will see it.  Likewise, use the help- list for technical
+questions.
+
+Don't trust pronouncements made on gnu-misc-discuss about what GNU is,
+what FSF position is, what the GNU General Public License is, etc.,
+unless they are made by someone you know is well connected with GNU and
+are sure the message is not forged.
+
+USENET and gnUSENET readers are expected to have read ALL the articles
+in news.announce.newusers before posting.  If news.announce.newusers is
+empty at your site, wait (the articles are posted monthly), your posting
+isn't that urgent!  Readers on the Internet can anonymous FTP these
+articles from host ftp.uu.net under directory ??
+
+Remember, "GNUs Not Unix" and "gnUSENET is Not USENET".  We have
+higher standards!
+
+** guile-sources-request@gnu.org to subscribe to guile-sources
+
+gnUSENET newsgroup: NONE PLANNED
+Guile source code to: guile-sources@gnu.org
+
+This list will be for the posting, by their authors, of GUILE, Scheme,
+and C sources and patches that improve Guile.  Its contents will be
+reviewed by the FSF for inclusion in future releases of GUILE.
+
+Please do NOT discuss or request source code here.  Use bug-guile for
+those purposes.  This allows the automatic archiving of sources posted
+to this list.
+
+Please do NOT post such sources to any other GNU mailing list (e.g
+bug-guile) or gnUSENET newsgroups.  It's up to each poster to decide
+whether to cross-post to any non-gnUSENET newsgroup.
+
+Please do NOT announce that you have posted source code to guile.sources
+to any other GNU mailing list (e.g. bug-guile) or gnUSENET newsgroups.
+People who want to keep up with sources will read this list.  It's up to
+each poster to decide whether to announce a guile.sources article in any
+non-gnUSENET newsgroup (e.g. comp.emacs or comp.sources.d).
+
+If source or patches that were previously posted or a simple fix is
+requested in bug-guile, please mail it to the requester.  Do NOT
+repost it.  If you also want something that is requested, send mail to
+the requester asking him to forward it to you.  This kind of traffic is
+best handled by e-mail, not by a broadcast medium that reaches millions
+of sites.
+
+If the requested source is very long (>10k bytes) send mail offering to
+send it.  This prevents the requester from getting many redundant copies
+and saves network bandwidth.
+
+** gnu-emacs-sources-request@gnu.org to subscribe to gnu-emacs-sources
+
+gnUSENET newsgroup: gnu.emacs.sources
+GNU Emacs source code to: gnu-emacs-sources@gnu.org
+
+This list/newsgroup will be for the posting, by their authors, of Emacs
+Lisp and C sources and patches that improve GNU Emacs.  Its contents
+will be reviewed by the FSF for inclusion in future releases of GNU
+Emacs.
+
+Please do NOT discuss or request source code here.  Use
+help-gnu-emacs/gnu.emacs.help for those purposes.  This allows the
+automatic archiving of sources posted to this list/newsgroup.
+
+Please do NOT post such sources to any other GNU mailing list (e.g
+help-gnu-emacs) or gnUSENET newsgroups (e.g. gnu.emacs.help).  It's up
+to each poster to decide whether to cross-post to any non-gnUSENET
+newsgroup (e.g. comp.emacs or vmsnet.sources).
+
+Please do NOT announce that you have posted source code to
+gnu.emacs.sources to any other GNU mailing list (e.g. help-gnu-emacs) or
+gnUSENET newsgroups (e.g. gnu.emacs.help).  People who want to keep up
+with sources will read this list/newsgroup.  It's up to each poster to
+decide whether to announce a gnu.emacs.sources article in any
+non-gnUSENET newsgroup (e.g. comp.emacs or comp.sources.d).
+
+If source or patches that were previously posted or a simple fix is
+requested in help-gnu-emacs, please mail it to the requester.  Do NOT
+repost it.  If you also want something that is requested, send mail to
+the requester asking him to forward it to you.  This kind of traffic is
+best handled by e-mail, not by a broadcast medium that reaches millions
+of sites.
+
+If the requested source is very long (>10k bytes) send mail offering to
+send it.  This prevents the requester from getting many redundant copies
+and saves network bandwidth.
+
+Local variables:
+mode: outline
+fill-column: 72
+End:
+
+Copyright (C) 1999, 2001-2012  Free Software Foundation, Inc.
+
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this file, to deal in the file without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the file, and to
+    permit persons to whom the file is furnished to do so, subject to
+    the following condition:
+
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the file.

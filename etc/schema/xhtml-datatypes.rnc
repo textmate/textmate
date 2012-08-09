@@ -1,0 +1,47 @@
+# Datatypes Module
+
+# Length defined for cellpadding/cellspacing
+
+# nn for pixels or nn% for percentage length
+Length.datatype = text
+# space-separated list of link types
+LinkTypes.datatype = NMTOKENS.datatype
+# single or comma-separated list of media descriptors
+MediaDesc.datatype = text
+# pixel, percentage, or relative
+MultiLength.datatype = text
+# one or more digits (NUMBER)
+Number.datatype = text
+# integer representing length in pixels
+Pixels.datatype = text
+# script expression
+Script.datatype = text
+# textual content
+Text.datatype = text
+# Imported Datatypes ................................
+
+# a single character from [ISO10646]
+Character.datatype = text
+# a character encoding, as per [RFC2045]
+Charset.datatype = text
+# a space separated list of character encodings, as per [RFC2045]
+Charsets.datatype = text
+# media type, as per [RFC2045]
+ContentType.datatype = text
+# comma-separated list of media types, as per [RFC2045]
+ContentTypes.datatype = text
+# date and time information. ISO date format
+Datetime.datatype = text
+# formal public identifier, as per [ISO8879]
+FPI.datatype = text
+# a language code, as per [RFC1766]
+LanguageCode.datatype = xsd:language
+# a Uniform Resource Identifier, see [URI]
+URI.datatype = xsd:anyURI
+# a space-separated list of Uniform Resource Identifiers, see [URI]
+URIs.datatype = text
+NMTOKEN.datatype = xsd:NMTOKEN
+NMTOKENS.datatype = xsd:NMTOKENS
+ID.datatype = xsd:ID
+IDREF.datatype = xsd:IDREF
+IDREFS.datatype = xsd:IDREFS

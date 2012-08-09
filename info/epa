@@ -1,0 +1,471 @@
+This is ../../info/epa, produced by makeinfo version 4.13 from epa.texi.
+
+This file describes EasyPG Assistant 1.0.0.
+
+   Copyright (C) 2007-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* EasyPG Assistant: (epa).      An Emacs user interface to GNU Privacy Guard.
+END-INFO-DIR-ENTRY
+
+
+File: epa,  Node: Top,  Next: Overview,  Up: (dir)
+
+EasyPG Assistant user's manual
+******************************
+
+EasyPG Assistant is an Emacs user interface to GNU Privacy Guard
+(GnuPG, *note Top: (gnupg)Top.).
+
+   EasyPG Assistant is a part of the package called EasyPG, an
+all-in-one GnuPG interface for Emacs.  EasyPG also contains the library
+interface called EasyPG Library.
+
+   This file describes EasyPG Assistant 1.0.0.
+
+   Copyright (C) 2007-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License" in the Emacs manual.
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+     This document is part of a collection distributed under the GNU
+     Free Documentation License.  If you want to distribute this
+     document separately from the collection, you can do so by adding a
+     copy of the license to the document, as described in section 6 of
+     the license.
+
+* Menu:
+
+* Overview::
+* Quick start::
+* Commands::
+* Caching Passphrases::
+* Bug Reports::
+
+
+File: epa,  Node: Overview,  Next: Quick start,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+EasyPG Assistant provides the following features.
+
+   * Key management.
+
+   * Cryptographic operations on regions.
+
+   * Cryptographic operations on files.
+
+   * Dired integration.
+
+   * Mail-mode integration.
+
+   * Automatic encryption/decryption of *.gpg files.
+
+
+File: epa,  Node: Quick start,  Next: Commands,  Prev: Overview,  Up: Top
+
+2 Quick start
+*************
+
+EasyPG Assistant commands are prefixed by `epa-'.  For example,
+
+   * To browse your keyring, type `M-x epa-list-keys'
+
+   * To create a cleartext signature of the region, type `M-x
+     epa-sign-region'
+
+   * To encrypt a file, type `M-x epa-encrypt-file'
+
+   EasyPG Assistant provides several cryptographic features which can be
+integrated into other Emacs functionalities.  For example, automatic
+encryption/decryption of `*.gpg' files.
+
+
+File: epa,  Node: Commands,  Next: Caching Passphrases,  Prev: Quick start,  Up: Top
+
+3 Commands
+**********
+
+This chapter introduces various commands for typical use cases.
+
+* Menu:
+
+* Key management::
+* Cryptographic operations on regions::
+* Cryptographic operations on files::
+* Dired integration::
+* Mail-mode integration::
+* Encrypting/decrypting *.gpg files::
+
+
+File: epa,  Node: Key management,  Next: Cryptographic operations on regions,  Up: Commands
+
+3.1 Key management
+==================
+
+Probably the first step of using EasyPG Assistant is to browse your
+keyring.  `M-x epa-list-keys' is corresponding to `gpg --list-keys'
+from the command line.
+
+ -- Command: epa-list-keys name mode
+     Show all keys matched with NAME from the public keyring.
+
+The output looks as follows.
+
+       u A5B6B2D4B15813FE Daiki Ueno <ueno@unixuser.org>
+
+A character on the leftmost column indicates the trust level of the
+key.  If it is `u', the key is marked as ultimately trusted.  The
+second column is the key ID, and the rest is the user ID.
+
+   You can move over entries by <TAB>.  If you type <RET> or click
+button1 on an entry, you will see more detailed information about the
+key you selected.
+
+      u Daiki Ueno <ueno@unixuser.org>
+      u A5B6B2D4B15813FE 1024bits DSA
+             Created: 2001-10-09
+             Expires: 2007-09-04
+             Capabilities: sign certify
+             Fingerprint: 8003 7CD0 0F1A 9400 03CA  50AA A5B6 B2D4 B158 13FE
+      u 4447461B2A9BEA2D 2048bits ELGAMAL_E
+             Created: 2001-10-09
+             Expires: 2007-09-04
+             Capabilities: encrypt
+             Fingerprint: 9003 D76B 73B7 4A8A E588  10AF 4447 461B 2A9B EA2D
+
+To browse your private keyring, use `M-x epa-list-secret-keys'.
+
+ -- Command: epa-list-secret-keys name
+     Show all keys matched with NAME from the private keyring.
+
+In `*Keys*' buffer, several commands are available.  The common use
+case is to export some keys to a file.  To do that, type `m' to select
+keys, type `o', and then supply the filename.
+
+   Below are other commands related to key management.  Some of them
+take a file as input/output, and others take the current region.
+
+ -- Command: epa-insert-keys keys
+     Insert selected KEYS after the point.  It will let you select keys
+     before insertion.  By default, it will encode keys in the OpenPGP
+     armor format.
+
+ -- Command: epa-import-keys file
+     Import keys from FILE to your keyring.
+
+ -- Command: epa-import-keys-region start end
+     Import keys from the current region between START and END to your
+     keyring.
+
+ -- Command: epa-import-armor-in-region start end
+     Import keys in the OpenPGP armor format in the current region
+     between START and END.  The difference from
+     `epa-import-keys-region' is that `epa-import-armor-in-region'
+     searches armors in the region and applies `epa-import-keys-region'
+     to each of them.
+
+ -- Command: epa-delete-keys allow-secret
+     Delete selected keys.  If ALLOW-SECRET is non-`nil', it also
+     delete the secret keys.
+
+
+File: epa,  Node: Cryptographic operations on regions,  Next: Cryptographic operations on files,  Prev: Key management,  Up: Commands
+
+3.2 Cryptographic operations on regions
+=======================================
+
+ -- Command: epa-decrypt-region start end
+     Decrypt the current region between START and END.  It replaces the
+     region with the decrypted text.
+
+ -- Command: epa-decrypt-armor-in-region start end
+     Decrypt OpenPGP armors in the current region between START and
+     END.  The difference from `epa-decrypt-region' is that
+     `epa-decrypt-armor-in-region' searches armors in the region and
+     applies `epa-decrypt-region' to each of them.  That is, this
+     command does not alter the original text around armors.
+
+ -- Command: epa-verify-region start end
+     Verify the current region between START and END.  It sends the
+     verification result to the minibuffer or a popup window.  It
+     replaces the region with the signed text.
+
+ -- Command: epa-verify-cleartext-in-region
+     Verify OpenPGP cleartext blocks in the current region between
+     START and END.  The difference from `epa-verify-region' is that
+     `epa-verify-cleartext-in-region' searches OpenPGP cleartext blocks
+     in the region and applies `epa-verify-region' to each of them.
+     That is, this command does not alter the original text around
+     OpenPGP cleartext blocks.
+
+ -- Command: epa-sign-region start end signers type
+     Sign the current region between START and END.  By default, it
+     creates a cleartext signature.  If a prefix argument is given, it
+     will let you select signing keys, and then a signature type.
+
+ -- Command: epa-encrypt-region start end recipients sign signers
+     Encrypt the current region between START and END.  It will let you
+     select recipients.  If a prefix argument is given, it will also
+     ask you whether or not to sign the text before encryption and if
+     you answered yes, it will let you select the signing keys.
+
+
+File: epa,  Node: Cryptographic operations on files,  Next: Dired integration,  Prev: Cryptographic operations on regions,  Up: Commands
+
+3.3 Cryptographic operations on files
+=====================================
+
+ -- Command: epa-decrypt-file file
+     Decrypt FILE.
+
+ -- Command: epa-verify-file file
+     Verify FILE.
+
+ -- Command: epa-sign-file file signers type
+     Sign FILE.  If a prefix argument is given, it will let you select
+     signing keys, and then a signature type.
+
+ -- Command: epa-encrypt-file file recipients
+     Encrypt FILE.  It will let you select recipients.
+
+
+File: epa,  Node: Dired integration,  Next: Mail-mode integration,  Prev: Cryptographic operations on files,  Up: Commands
+
+3.4 Dired integration
+=====================
+
+EasyPG Assistant extends Dired Mode for GNU Emacs to allow users to
+easily do cryptographic operations on files.  For example,
+
+     M-x dired
+     (mark some files)
+     : e (or M-x epa-dired-do-encrypt)
+     (select recipients by 'm' and click [OK])
+
+The following keys are assigned.
+
+`: d'
+     Decrypt marked files.
+
+`: v'
+     Verify marked files.
+
+`: s'
+     Sign marked files.
+
+`: e'
+     Encrypt marked files.
+
+
+
+File: epa,  Node: Mail-mode integration,  Next: Encrypting/decrypting *.gpg files,  Prev: Dired integration,  Up: Commands
+
+3.5 Mail-mode integration
+=========================
+
+EasyPG Assistant provides a minor mode `epa-mail-mode' to help user
+compose inline OpenPGP messages.  Inline OpenPGP is a traditional style
+of sending signed/encrypted emails by embedding raw OpenPGP blobs
+inside a message body, not using modern MIME format.
+
+   NOTE: Inline OpenPGP is not recommended and you should consider to
+use PGP/MIME.  See Inline OpenPGP in E-mail is bad, Mm'kay?
+(http://josefsson.org/inline-openpgp-considered-harmful.html).
+
+Once `epa-mail-mode' is enabled, the following keys are assigned.  You
+can do it by `C-u 1 M-x epa-mail-mode' or through the Customize
+interface.  Try `M-x customize-variable epa-global-mail-mode'.
+
+`C-c C-e C-d and C-c C-e d'
+     Decrypt OpenPGP armors in the current buffer.
+
+`C-c C-e C-v and C-c C-e v'
+     Verify OpenPGP cleartext signed messages in the current buffer.
+
+`C-c C-e C-s and C-c C-e s'
+     Compose a signed message from the current buffer.
+
+`C-c C-e C-e and C-c C-e e'
+     Compose an encrypted message from the current buffer.  By default
+     it tries to build the recipient list from `to', `cc', and `bcc'
+     fields of the mail header.  To include your key in the recipient
+     list, use `encrypt-to' option in `~/.gnupg/gpg.conf'.
+
+
+
+File: epa,  Node: Encrypting/decrypting *.gpg files,  Prev: Mail-mode integration,  Up: Commands
+
+3.6 Encrypting/decrypting *.gpg files
+=====================================
+
+By default, every file whose name ends with `.gpg' will be treated as
+encrypted.  That is, when you open such a file, the decrypted text is
+inserted in the buffer rather than encrypted one.  Similarly, when you
+save the buffer to a `foo.gpg' file, encrypted data is written.
+
+   The file name pattern for encrypted files can be controlled by
+EPA-FILE-NAME-REGEXP.
+
+ -- Variable: epa-file-name-regexp
+     Regexp which matches filenames treated as encrypted.
+
+   You can disable this behavior with `M-x epa-file-disable', and then
+get it back with `M-x epa-file-enable'.
+
+ -- Command: epa-file-disable
+     Disable automatic encryption/decryption of *.gpg files.
+
+ -- Command: epa-file-enable
+     Enable automatic encryption/decryption of *.gpg files.
+
+By default, `epa-file' will try to use symmetric encryption, aka
+password-based encryption.  If you want to use public key encryption
+instead, do `M-x epa-file-select-keys', which will pops up the key
+selection dialog.
+
+ -- Command: epa-file-select-keys
+     Select recipient keys to encrypt the currently visiting file with
+     public key encryption.
+
+   You can also change the default behavior with the variable
+EPA-FILE-SELECT-KEYS.
+
+ -- Variable: epa-file-select-keys
+     Control whether or not to pop up the key selection dialog.
+
+   For frequently visited files, it might be a good idea to tell Emacs
+which encryption method should be used through *Note File Variables:
+(emacs)File Variables.  Use the `epa-file-encrypt-to' local variable
+for this.  
+
+   For example, if you want an Elisp file should be encrypted with a
+public key associated with an email address `ueno@unixuser.org', add
+the following line to the beginning of the file.
+
+     ;; -*- epa-file-encrypt-to: ("ueno@unixuser.org") -*-
+
+   Instead, if you want the file always (regardless of the value of the
+`epa-file-select-keys' variable) encrypted with symmetric encryption,
+change the line as follows.
+
+     ;; -*- epa-file-encrypt-to: nil -*-
+
+   Other variables which control the automatic encryption/decryption
+behavior are below.
+
+ -- Variable: epa-file-cache-passphrase-for-symmetric-encryption
+     If non-`nil', cache passphrase for symmetric encryption.  The
+     default value is `nil'.
+
+ -- Variable: epa-file-inhibit-auto-save
+     If non-`nil', disable auto-saving when opening an encrypted file.
+     The default value is `t'.
+
+
+File: epa,  Node: Caching Passphrases,  Next: Bug Reports,  Prev: Commands,  Up: Top
+
+4 Caching Passphrases
+*********************
+
+Typing passphrases is an irritating task if you frequently open and
+close the same file.  GnuPG and EasyPG Assistant provide mechanisms to
+remember your passphrases.  However, the configuration is a bit
+confusing since it depends on your GnuPG installation (GnuPG version 1
+or GnuPG version 2), encryption method (symmetric or public key), and
+whether or not you want to use gpg-agent.  Here are some questions:
+
+  1. Do you use GnuPG version 2 instead of GnuPG version 1?
+
+  2. Do you use symmetric encryption rather than public key encryption?
+
+  3. Do you want to use gpg-agent?
+
+   Here are configurations depending on your answers:
+
+1     2     3     Configuration
+Yes   Yes   Yes   Set up gpg-agent.
+Yes   Yes   No    You can't, without gpg-agent.
+Yes   No    Yes   Set up gpg-agent.
+Yes   No    No    You can't, without gpg-agent.
+No    Yes   Yes   Set up elisp passphrase cache.
+No    Yes   No    Set up elisp passphrase cache.
+No    No    Yes   Set up gpg-agent.
+No    No    No    You can't, without gpg-agent.
+
+   To set up gpg-agent, follow the instruction in GnuPG manual.  *note
+Invoking GPG-AGENT: (gnupg)Invoking GPG-AGENT.
+
+   To set up elisp passphrase cache, set
+`epa-file-cache-passphrase-for-symmetric-encryption'.  *Note
+Encrypting/decrypting *.gpg files::.
+
+
+File: epa,  Node: Bug Reports,  Prev: Caching Passphrases,  Up: Top
+
+5 Bug Reports
+*************
+
+Bugs and problems with EasyPG Assistant are actively worked on by the
+Emacs development team.  Feature requests and suggestions are also more
+than welcome.  Use `M-x report-emacs-bug', *note Bugs: (emacs)Bugs.
+
+   When submitting a bug report, please try to describe in excruciating
+detail the steps required to reproduce the problem.  Also try to
+collect necessary information to fix the bug, such as:
+
+   * the GnuPG version.  Send the output of `gpg --version'.
+
+   * the GnuPG configuration.  Send the contents of `~/.gnupg/gpg.conf'.
+
+   Before reporting the bug, you should set `epg-debug' in the
+`~/.emacs' file and repeat the bug.  Then, include the contents of the
+` *epg-debug*' buffer.  Note that the first letter of the buffer name
+is a whitespace.
+
+
+
+Tag Table:
+Node: Top1303
+Node: Overview2856
+Node: Quick start3216
+Node: Commands3763
+Node: Key management4132
+Node: Cryptographic operations on regions6809
+Node: Cryptographic operations on files8797
+Node: Dired integration9387
+Node: Mail-mode integration9978
+Node: Encrypting/decrypting *.gpg files11371
+Node: Caching Passphrases13919
+Node: Bug Reports15332
+
+End Tag Table

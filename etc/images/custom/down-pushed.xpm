@@ -1,0 +1,19 @@
+/* XPM */
+static char * down_pushed_xpm[] = {
+"8 12 4 1",
+" 	c none",
+".	c gray45",
+"X	c gray90",
+"O	c gray60",
+"........",
+".OOOOOOX",
+" .OOOOX ",
+" .OOOOX ",
+"  .OOX  ",
+"  .OOX  ",
+"   OX   ",
+"   OX   ",
+"        ",
+"        ",
+"        ",
+"        "};

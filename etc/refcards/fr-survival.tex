@@ -1,0 +1,421 @@
+%&tex
+% Title:  GNU Emacs Survival Card
+
+% Copyright (C) 2000-2012  Free Software Foundation, Inc.
+
+% Author: Wlodek Bzyl <matwb@univ.gda.pl>
+% French translation:  \'Eric Jacoboni <jaco@teaser.fr>, November 2001
+
+% This file is part of GNU Emacs.
+
+% GNU Emacs is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% GNU Emacs is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+
+% You should have received a copy of the GNU General Public License
+% along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+% See survival.tex.
+
+% User interface is `plain.tex' and macros described below
+%
+% \title{CARD TITLE}{for version 21}
+% \section{NAME}
+% optional paragraphs separated with \askip amount of vertical space
+% \key{KEY-NAME} description of key or
+% \mkey{M-x LONG-LISP-NAME} description of Elisp function
+%
+% \kbd{ARG} -- argument is typed literally
+
+
+%**start of header
+
+\def\plainfmtname{plain}
+\ifx\fmtname\plainfmtname
+\else
+  \errmessage{This file requires `plain' format to be typeset correctly}
+  \endinput
+\fi
+
+% PDF output layout.  0 for A4, 1 for letter (US), a `l' is added for
+% a landscape layout.
+\input pdflayout.sty
+\pdflayout=(0)
+
+\def\versionemacs{24}           % version of Emacs this is for
+\def\year{2012}                 % latest copyright year
+
+\def\copyrightnotice{\penalty-1\vfill
+  \vbox{\smallfont\baselineskip=0.8\baselineskip\raggedcenter
+    Copyright \copyright\ \year\ Free Software Foundation, Inc.\break
+    Pour GNU Emacs \versionemacs\break
+    Auteur W{\l}odek Bzyl (matwb@univ.gda.pl)\break
+    Traduction fran\c{c}aise \'Eric Jacoboni (jaco@teaser.fr)
+
+    Vous pouvez faire et distribuer des copies de cette carte, pourvu
+    que la note de copyright, ainsi que cette notice soient
+    pr\'eserv\'ees sur toutes les copies.\par}}
+
+\hsize 3.2in
+\vsize 7.95in
+\font\titlefont=cmss10 scaled 1200
+\font\headingfont=cmss10
+\font\smallfont=cmr6
+\font\smallsy=cmsy6
+\font\eightrm=cmr8
+\font\eightbf=cmbx8
+\font\eightit=cmti8
+\font\eighttt=cmtt8
+\font\eightmi=cmmi8
+\font\eightsy=cmsy8
+\font\eightss=cmss8
+\textfont0=\eightrm
+\textfont1=\eightmi
+\textfont2=\eightsy
+\def\rm{\eightrm} \rm
+\def\bf{\eightbf}
+\def\it{\eightit}
+\def\tt{\eighttt}
+\def\ss{\eightss}
+\baselineskip=0.8\baselineskip
+
+\newdimen\intercolumnskip % horizontal space between columns
+\intercolumnskip=0.5in
+
+% The TeXbook, p. 257
+\let\lr=L \newbox\leftcolumn
+\output={\if L\lr
+    \global\setbox\leftcolumn\columnbox \global\let\lr=R
+  \else
+       \doubleformat \global\let\lr=L\fi}
+\def\doubleformat{\shipout\vbox{\makeheadline
+    \leftline{\box\leftcolumn\hskip\intercolumnskip\columnbox}
+    \makefootline}
+  \advancepageno}
+\def\columnbox{\leftline{\pagebody}}
+
+\def\newcolumn{\vfil\eject}
+
+\def\bye{\par\vfil\supereject
+  \if R\lr \null\vfil\eject\fi
+  \end}
+
+\outer\def\title#1#2{{\titlefont\centerline{#1}}\vskip 1ex plus 0.5ex
+   \centerline{\ss#2}
+   \vskip2\baselineskip}
+
+\outer\def\section#1{\filbreak
+  \bskip
+  \leftline{\headingfont #1}
+  \askip}
+\def\bskip{\vskip 2.5ex plus 0.25ex }
+\def\askip{\vskip 0.75ex plus 0.25ex}
+
+\newdimen\defwidth \defwidth=0.25\hsize
+\def\hang{\hangindent\defwidth}
+
+\def\textindent#1{\noindent\llap{\hbox to \defwidth{\tt#1\hfil}}\ignorespaces}
+\def\key{\par\hangafter=0\hang\textindent}
+
+\def\mtextindent#1{\noindent\hbox{\tt#1\quad}\ignorespaces}
+\def\mkey{\par\hangafter=1\hang\mtextindent}
+
+\def\kbd#{\bgroup\tt \let\next= }
+
+\newdimen\raggedstretch
+\newskip\raggedparfill \raggedparfill=0pt plus 1fil
+\def\nohyphens
+   {\hyphenpenalty10000\exhyphenpenalty10000\pretolerance10000}
+\def\raggedspaces
+   {\spaceskip=0.3333em\relax
+    \xspaceskip=0.5em\relax}
+\def\raggedright
+   {\raggedstretch=6em
+    \nohyphens
+    \rightskip=0pt plus \raggedstretch
+    \raggedspaces
+    \parfillskip=\raggedparfill
+    \relax}
+\def\raggedcenter
+   {\raggedstretch=6em
+    \nohyphens
+    \rightskip=0pt plus \raggedstretch
+    \leftskip=\rightskip
+    \raggedspaces
+    \parfillskip=0pt
+    \relax}
+
+\chardef\\=`\\
+
+\raggedright
+\nopagenumbers
+\parindent 0pt
+\interlinepenalty=10000
+\hoffset -0.2in
+%\voffset 0.2in
+
+%**end of header
+
+
+\title{Carte de survie pour GNU\ \ Emacs}{version \versionemacs}
+
+Dans ce qui suit, \kbd{C-z} signifie qu'il faut appuyer sur la touche
+`\kbd{z}' tout en maintenant la touche {\it Ctrl}\ \
+press\'ee. \kbd{M-z} signifie qu'il faut appuyer sur la touche
+`\kbd{z}' tout en maintenant la touche {\it Meta\/} (marqu\'ee {\it Alt\/}
+sur certains claviers) ou apr\`es avoir press\'e la touche {\it Echap\/} key.
+
+\section{Lancement de Emacs}
+
+Pour lancer GNU Emacs, il suffit de taper son nom~: \kbd{emacs}.
+Emacs divise son cadre en plusieurs parties~:
+  une ligne de menu,
+  une zone tampon contenant le texte \'edit\'e,
+  une ligne de mode d\'ecrivant le tampon de la fenêtre au-dessus d'elle,
+  et un mini-tampon/zone d'\'echo sur la derni\`ere ligne.
+\askip
+\key{C-x C-c} quitte Emacs
+\key{C-x C-f} \'edite une fichier~; cette commande utilise le
+mini-tampon pour lire le nom du fichier~; utilisez-la pour cr\'eer de
+nouveaux fichiers en entrant le nom du fichier \`a cr\'eer
+\key{C-x C-s} sauve le fichier
+\key{C-x k} supprime un tampon
+\key{C-g} dans la plupart des contextes~: annule, stoppe, avorte une
+commande en cours d'ex\'ecution ou de saisie
+\key{C-x u} annule
+
+\section{D\'eplacements}
+
+\key{C-l} place la ligne courante au centre de la fen\^etre
+\key{C-x b} bascule dans un autre tampon
+\key{M-<} va au d\'ebut du tampon
+\key{M->} va \`a la fin du tampon
+\key{M-x goto-line} va \`a la ligne indiqu\'ee
+
+\section{Fen\^etres multiples}
+
+\key{C-x 0} \^ote la fen\^etre courante de l'affichage
+\key{C-x 1} ne conserve que la fen\^etre active
+\key{C-x 2} divise la fen\^etre dans le sens de la hauteur
+\key{C-x 3} divise la fen\^etre dans le sens de la largeur
+\key{C-x o} va dans une autre fen\^etre
+
+\section{R\'egions}
+
+Emacs d\'efinit une 'r\'egion' comme l'espace entre la {\it marque\/} et
+le {\it point}. On positionne une marque avec \kbd{C-{\it espace}}.
+Le point est la position courante du curseur.
+\askip
+\key{M-h} marque le paragraphe entier
+\key{C-x h} marque le tampon entier
+
+\section{Suppression et copie}
+
+\key{C-w} supprime la r\'egion
+\key{M-w} copie la r\'egion dans le 'kill-ring'
+\key{C-k} supprime du curseur jusqu'\`a la fin de la ligne
+\key{M-DEL} supprime le mot
+\key{C-y} restaure la derni\`ere suppression (la combinaison \kbd{C-w
+  C-y} sert \`a se d\'eplacer dans le texte)
+\key{M-y} remplace la derni\`ere restauration avec la suppression pr\'ec\'edente
+
+\section{Recherche}
+
+\key{C-s} recherche une cha\^\i{}ne
+\key{C-r} recherche une cha\^\i{}ne vers l'arri\`ere
+\key{RET} quitte la recherche
+\key{M-C-s} recherche par expression rationnelle
+\key{M-C-r} recherche par expression rationnelle vers l'arri\`ere
+\askip
+R\'ep\'etez \kbd{C-s} ou \kbd{C-r} pour renouveler une recherche dans une
+des deux directions.
+
+\section{Marqueurs}
+
+Les fichiers de tableaux de marqueurs enregistrent les emplacements des
+d\'efinitions de fonctions ou de proc\'edures, des variables globales, des
+types de donn\'ees et de tout ce qui peut \^etre pratique. Pour cr\'eer un
+tel fichier, tapez `{\tt etags} {\it fichier\_entr\'ee}' \`a l'invite du shell.
+\askip
+\key{M-.} trouve une d\'efinition
+\key{C-u M-.} trouve l'occurrence suivante de la d\'efinition
+\key{M-*} revient o\`u \kbd{M-.} a \'et\'e appel\'e pour la derni\`ere fois
+\mkey{M-x tags-query-replace} lance query-replace sur tous les
+fichiers enregistr\'es dans le tableau des marqueurs
+\key{M-,} continue la derni\`ere recherche de marqueurs ou le dernier
+query-replace
+
+\section{Compilation}
+
+\key{M-x compile} compile le code situ\'e dans la fen\^etre active
+\key{C-c C-c} va \`a l'erreur de compilation suivante, lorsque l'on est
+dans la fen\^etre de compilation, ou
+\key{C-x `} lorsque l'on est dans la fen\^etre du code source
+
+\section{Dired, l'\'editeur de r\'epertoires}
+
+\key{C-x d}  appelle Dired
+\key{d} marque ce fichier pour une suppression
+\key{\~{}} marque tous les fichiers de sauvegarde pour leur suppression
+\key{u} supprime la marque de suppression
+\key{x} supprime les fichiers marqu\'es pour suppression
+\key{C} copie le fichier
+\key{g} met \`a jour le tampon de Dired
+\key{f} visite le fichier d\'ecrit sur la ligne courante
+\key{s} bascule entre ordre alphab\'etique et ordre date/heure
+
+\section{Lecture et envoi de courrier}
+
+\key{M-x rmail} d\'emarre la lecture du courrier
+\key{q} quitte la lecture du courrier
+\key{h} montre les ent\^etes
+\key{d} marque le message courant pour suppression
+\key{x} supprime tous les messages marqu\'es pour suppression
+
+\key{C-x m} d\'ebute la composition d'un message
+\key{C-c C-c} envoie le message et bascule dans un autre tampon
+\key{C-c C-f C-c} va \`a l'ent\^ete `CC', en cr\'ee un s'il n'existe pas
+
+\section{Divers}
+
+\key{M-q} formate le paragraphe
+\key{M-/} expanse dynamiquement le mot pr\'ec\'edent
+\key{C-z} iconifie (suspend) Emacs lorsqu'il s'ex\'ecute sous X ou
+  sous un shell, respectivement
+\mkey{M-x revert-buffer} remplace le texte en cours d'\'edition par le
+texte du fichier sur disque
+
+\section{Remplacement interactif}
+
+\key{M-\%} cherche et remplace interactivement
+\key{M-C-\%} utilise les expressions rationnelles
+\askip
+Les r\'eponses correctes dans le mode query-replace sont :
+\askip
+\key{SPC} remplace celui-ci, passe au suivant
+\key{,} remplace ce celui-ci, pas de d\'eplacement
+\key{DEL} passe au suivant sans remplacer celui-ci
+\key{!} remplace toutes les occurrences suivantes
+\key{\^{}} revient \`a l'occurrence pr\'ec\'edente
+\key{RET} quitte query-replace
+\key{C-r} entre en \'edition r\'ecursive (\kbd{M-C-c} pour en sortir)
+
+\section{Expressions rationnelles}
+
+\key{. {\rm(point)}} n'importe quel caract\`ere unique, sauf la fin de ligne
+\key{*} z\'ero r\'ep\'etition ou plus
+\key{+} une r\'ep\'etition ou plus
+\key{?} z\'ero ou une r\'ep\'etition
+\key{[$\ldots$]} repr\'esente une classe de caract\`eres
+\key{[\^{}$\ldots$]} compl\'emente la classe
+
+\key{\\{\it c}} prot\`ege les caract\`eres qui, sinon, auraient une
+  signification sp\'eciale dans les expressions rationnelles.
+
+\key{$\ldots$\\|$\ldots$\\|$\ldots$} correspond \`a une
+alternative (``ou'') .
+\key{\\( $\ldots$ \\)} groupe une suite d'\'el\'ements de motif pour
+former un \'el\'ement unique.
+\key{\\{\it n}} le m\^eme texte que le {\it n\/}i\`eme groupe.
+
+\key{\^{}} correspond au d\'ebut de ligne
+\key{\$} correspond \`a la fin de ligne
+
+\key{\\w} correspond \`a un caract\`ere de mot
+\key{\\W} correspond \`a ce qui n'est pas un caract\`ere mot
+\key{\\<} correspond au d\'ebut d'un mot
+\key{\\>} correspond \`a la fin d'un mot
+\key{\\b} correspond \`a une coupure de mot
+\key{\\B} correspond \`a ce qui n'est pas une une coupure de mot
+
+\section{Registres}
+
+\key{C-x r s} sauve la r\'egion dans un registre
+\key{C-x r i} ins\`ere le contenu d'un registre dans le tampon
+
+\key{C-x r SPC} sauve la valeur du point dans un registre
+\key{C-x r j} va au point sauvegard\'e dans un registre
+
+\section{Rectangles}
+
+\key{C-x r r} copie le rectangle dans un registre
+\key{C-x r k} supprime le rectangle
+\key{C-x r y} restaure le rectangle
+\key{C-x r t} pr\'efixe chaque ligne d'une cha\^\i{}ne
+
+\key{C-x r o} ouvre un rectangle en d\'ecalant le texte vers la droite
+\key{C-x r c} vide le rectangle
+
+\section{Shells}
+
+\key{M-x shell} lance un shell dans Emacs
+\key{M-!} ex\'ecute une commande dans un shell
+\key{M-|} lance une commande shell sur la r\'egion
+\key{C-u M-|} filtre la r\'egion via une commande shell
+
+\section{V\'erification orthographique}
+
+\key{M-\$} v\'erifie l'orthographe du mot sous le curseur
+\mkey{M-x ispell-region} v\'erifie l'orthographe de tous les mots de la r\'egion
+\mkey{M-x ispell-buffer} v\'erifie l'orthographe de tout le tampon
+
+\section{Jeux de caract\`eres internationaux}
+
+\key{C-x RET C-\\} s\'electionne et active une m\'ethode d'entr\'ee pour le
+  tampon courant
+\key{C-\\} active ou d\'esactive la m\'ethode d'entr\'ee
+\mkey{M-x list-input-methods} affiche toutes les m\'ethodes d'entr\'ee
+\mkey{M-x set-language-environment} pr\'ecise la langue principale
+
+\key{C-x RET c} fixe le syst\`eme de codage pour la commande suivante
+\mkey{M-x find-file-literally} visite un fichier sans aucune conversion
+
+\mkey{M-x list-coding-systems} affiche tous les syst\`emes de codage
+\mkey{M-x prefer-coding-system} choisit le syst\`eme de codage pr\'ef\'er\'e
+
+\section{Macros clavier}
+
+\key{C-x (} lance la d\'efinition d'une macro clavier
+\key{C-x )} termine la d\'efinition d'une macro clavier
+\key{C-x e} ex\'ecute la derni\`ere macro clavier d\'efinie
+\key{C-u C-x (} ajoute \`a la derni\`ere macro clavier
+\mkey{M-x name-last-kbd-macro} donne un nom \`a la derni\`ere macro clavier
+
+\section{Personnalisation simple}
+
+\key{M-x customize} personnalise les variables et les fontes
+
+\section{Obtenir de l'aide}
+
+Emacs effectue pour vous la compl\'etion des commandes. En faisant \kbd{M-x}
+{\it tab\/} ou {\it espace\/}, vous obtiendrez une liste des commandes
+Emacs.
+\askip
+\key{C-h} aide d'Emacs
+\key{C-h t} lance le didacticiel d'Emacs
+\key{C-h i} lance Info, le navigateur de documentations
+\key{C-h a} affiche les commandes correspondant \`a une cha\^\i{}ne (apropos)
+\key{C-h k} affiche la documentation de la fonction appel\'ee par la
+combinaison de touches
+\askip
+Emacs utilise diff\'erents {\it modes}, chacun d'eux personnalisant
+Emacs pour l'\'edition de textes de diff\'erents types. La ligne de mode
+contient entre parenth\`eses le nom des modes en cours.
+\askip
+\key{C-h m} affiche les informations sp\'ecifiques au mode en cours
+
+\copyrightnotice
+
+\bye
+
+% Local variables:
+% compile-command: "pdftex survival"
+% End:
+

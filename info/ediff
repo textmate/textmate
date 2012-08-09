@@ -1,0 +1,3180 @@
+This is ../../info/ediff, produced by makeinfo version 4.13 from
+ediff.texi.
+
+This file documents Ediff, a comprehensive visual interface to Unix diff
+and patch utilities.
+
+   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Ediff: (ediff).       A visual interface for comparing and merging programs.
+END-INFO-DIR-ENTRY
+
+
+File: ediff,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
+
+Ediff
+*****
+
+This file documents Ediff, a comprehensive visual interface to Unix diff
+and patch utilities.
+
+   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Introduction::                About Ediff.
+* Major Entry Points::          How to use Ediff.
+* Session Commands::            Ediff commands used within a session.
+* Registry of Ediff Sessions::  Keeping track of multiple Ediff sessions.
+* Session Groups::              Comparing and merging directories.
+* Remote and Compressed Files::  You may want to know about this.
+* Customization::               How to make Ediff work the way YOU want.
+* Credits::                     Thanks to those who helped.
+* GNU Free Documentation License:: The license for this documentation.
+* Index::
+
+
+File: ediff,  Node: Introduction,  Next: Major Entry Points,  Prev: Top,  Up: Top
+
+1 Introduction
+**************
+
+Ediff provides a convenient way for simultaneous browsing through the
+differences between a pair (or a triple) of files or buffers (which are
+called `variants' for our purposes).  The files being compared, file-A,
+file-B, and file-C (if applicable) are shown in separate windows (side
+by side, one above the another, or in separate frames), and the
+differences are highlighted as you step through them.  You can also
+copy difference regions from one buffer to another (and recover old
+differences if you change your mind).
+
+   Another powerful feature is the ability to merge a pair of files
+into a third buffer.  Merging with an ancestor file is also supported.
+Furthermore, Ediff is equipped with directory-level capabilities that
+allow the user to conveniently launch browsing or merging sessions on
+groups of files in two (or three) different directories.
+
+   In addition, Ediff can apply a patch to a file and then let you step
+through both files, the patched and the original one, simultaneously,
+difference-by-difference.  You can even apply a patch right out of a
+mail buffer, i.e., patches received by mail don't even have to be
+saved.  Since Ediff lets you copy differences between variants, you
+can, in effect, apply patches selectively (i.e., you can copy a
+difference region from `file.orig' to `file', thereby undoing any
+particular patch that you don't like).
+
+   Ediff even understands multi-file patches and can apply them
+interactively!  (Ediff can recognize multi-file patches only if they
+are in the context format or GNU unified format.  All other patches are
+treated as 1-file patches.  Ediff is [hopefully] using the same
+algorithm as `patch' to determine which files need to be patched.)
+
+   Ediff is aware of version control, which lets you compare files with
+their older versions.  Ediff also works with remote and compressed
+files, automatically ftp'ing them over and uncompressing them.  *Note
+Remote and Compressed Files::, for details.
+
+   This package builds upon ideas borrowed from Emerge, and several of
+Ediff's functions are adaptations from Emerge.  Although Ediff subsumes
+and greatly extends Emerge, much of the functionality in Ediff is
+influenced by Emerge.  The architecture and the interface are, of
+course, drastically different.
+
+
+File: ediff,  Node: Major Entry Points,  Next: Session Commands,  Prev: Introduction,  Up: Top
+
+2 Major Entry Points
+********************
+
+When Ediff starts up, it displays a small control window, which accepts
+the Ediff commands, and two or three windows displaying the files to be
+compared or merged. The control window can be in its own small frame or
+it can be part of a bigger frame that displays other buffers. In any
+case, it is important that the control window be active (i.e., be the
+one receiving the keystrokes) when you use Ediff. You can switch to
+other Emacs buffers at will and even edit the files currently being
+compared with Ediff and then switch back to Ediff at any time by
+activating the appropriate Emacs windows.
+
+   Ediff can be invoked interactively using the following functions,
+which can be run either from the minibuffer or from the menu bar.  In
+the menu bar, all Ediff's entry points belong to three submenus of the
+Tools menu: Compare, Merge, and Apply Patch.
+
+`ediff-files'
+`ediff'
+     Compare two files.
+
+`ediff-backup'
+     Compare a file with its backup. If there are several numerical
+     backups, use the latest. If the file is itself a backup, then
+     compare it with its original.
+
+`ediff-current-file'
+     Compare the buffer with its file on disk. This function can be
+     used as a safe version of `revert-buffer'.
+
+`ediff-buffers'
+     Compare two buffers.
+
+`ediff-files3'
+`ediff3'
+     Compare three files.
+
+`ediff-buffers3'
+     Compare three buffers.
+
+`edirs'
+`ediff-directories'
+     Compare files common to two directories.
+
+`edirs3'
+`ediff-directories3'
+     Compare files common to three directories.
+
+`edir-revisions'
+`ediff-directory-revisions'
+     Compare versions of files in a given directory.  Ediff selects
+     only the files that are under version control.
+
+`edir-merge-revisions'
+`ediff-merge-directory-revisions'
+     Merge versions of files in a given directory.  Ediff selects only
+     the files that are under version control.
+
+`edir-merge-revisions-with-ancestor'
+`ediff-merge-directory-revisions-with-ancestor'
+     Merge versions of files in a given directory using other versions
+     as ancestors.  Ediff selects only the files that are under version
+     control.
+
+`ediff-windows-wordwise'
+     Compare windows word-by-word.
+
+`ediff-windows-linewise'
+     Compare windows line-by-line.
+
+`ediff-regions-wordwise'
+     Compare regions word-by-word.  The regions can come from the same
+     buffer and they can even overlap.  You will be asked to specify
+     the buffers that contain the regions, which you want to compare.
+     For each buffer, you will also be asked to mark the regions to be
+     compared. Pay attention to the messages that appear in the
+     minibuffer.
+
+`ediff-regions-linewise'
+     Similar to `ediff-windows-linewise', but compares the regions
+     line-by-line. See `ediff-windows-linewise' for more details.
+
+`ediff-revision'
+     Compare versions of the current buffer, if the buffer is visiting
+     a file under version control.
+
+`ediff-patch-file'
+`epatch'
+     Patch a file or multiple files, then compare.  If the patch
+     applies to just one file, Ediff will invoke a regular comparison
+     session.  If it is a multi-file patch, then a session group
+     interface will be used and the user will be able to patch the
+     files selectively.  *Note Session Groups::, for more details.
+
+     Since the patch might be in a buffer or a file, you will be asked
+     which is the case. To avoid this extra prompt, you can invoke this
+     command with a prefix argument.  With an odd prefix argument,
+     Ediff assumes the patch is in a file; with an even argument, a
+     buffer is assumed.
+
+     Note that `ediff-patch-file' will actually use the `patch' utility
+     to change the original files on disk.  This is not that dangerous,
+     since you will always have the original contents of the file saved
+     in another file that has the extension `.orig'.  Furthermore, if
+     the file is under version control, then you can always back out to
+     one of the previous versions (see the section on Version Control in
+     the Emacs manual).
+
+     `ediff-patch-file' is careful about versions control: if the file
+     to be patched is checked in, then Ediff will offer to check it
+     out, because failing to do so may result in the loss of the
+     changes when the file is checked out the next time.
+
+     If you don't intend to modify the file via the patch and just want
+     to see what the patch is all about (and decide later), then
+     `ediff-patch-buffer' might be a better choice.
+
+`ediff-patch-buffer'
+`epatch-buffer'
+     Patch a buffer, then compare.  The buffer being patched and the
+     file visited by that buffer (if any) is _not_ modified.  The
+     result of the patch appears in some other buffer that has the name
+     ending with __patched_.
+
+     This function would refuse to apply a multifile patch to a buffer.
+     Use `ediff-patch-file' for that (and when you want the original
+     file to be modified by the `patch' utility).
+
+     Since the patch might be in a buffer or a file, you will be asked
+     which is the case. To avoid this extra prompt, you can invoke this
+     command with a prefix argument.  With an odd prefix argument,
+     Ediff assumes the patch is in a file; with an even argument, a
+     buffer is assumed.
+
+`ediff-merge-files'
+`ediff-merge'
+     Merge two files.
+
+`ediff-merge-files-with-ancestor'
+`ediff-merge-with-ancestor'
+     Like `ediff-merge', but with a third ancestor file.
+
+`ediff-merge-buffers'
+     Merge two buffers.
+
+`ediff-merge-buffers-with-ancestor'
+     Same but with ancestor.
+
+`edirs-merge'
+`ediff-merge-directories'
+     Merge files common to two directories.
+
+`edirs-merge-with-ancestor'
+`ediff-merge-directories-with-ancestor'
+     Same but using files in a third directory as ancestors.   If a
+     pair of files doesn't have an ancestor in the ancestor-directory,
+     you  will still be able to merge them without the ancestor.
+
+`ediff-merge-revisions'
+     Merge two versions of the file visited by the current buffer.
+
+`ediff-merge-revisions-with-ancestor'
+     Same but with ancestor.
+
+`ediff-documentation'
+     Brings up this manual.
+
+`ediff-show-registry'
+`eregistry'
+     Brings up Ediff session registry.  This feature enables you to
+     quickly find and restart active Ediff sessions.
+
+   When the above functions are invoked, the user is prompted for all
+the necessary information--typically the files or buffers to compare,
+merge, or patch.  Ediff tries to be smart about these prompts.  For
+instance, in comparing/merging files, it will offer the visible buffers
+as defaults.  In prompting for files, if the user enters a directory,
+the previously input file name will be appended to that directory.  In
+addition, if the variable `ediff-use-last-dir' is not `nil', Ediff will
+offer previously entered directories as defaults (which will be
+maintained separately for each type of file, A, B, or C).  
+
+   All the above functions use the POSIX `diff' or `diff3' programs to
+find differences between two files.  They process the `diff' output and
+display it in a convenient form.  At present, Ediff understands only
+the plain output from diff.  Options such as `-c' are not supported,
+nor is the format produced by incompatible file comparison programs
+such as the VMS version of `diff'.
+
+   The functions `ediff-files', `ediff-buffers', `ediff-files3',
+`ediff-buffers3' first display the coarse, line-based difference
+regions, as reported by the `diff' program.  The total number of
+difference regions and the current difference number are always
+displayed in the mode line of the control window.
+
+   Since `diff' may report fairly large chunks of text as being
+different, even though the difference may be localized to just a few
+words or even to the white space or line breaks, Ediff further
+_refines_ the regions to indicate which exact words differ.  If the
+only difference is in the white space and line breaks, Ediff says so.
+
+   On a color display, fine differences are highlighted with color; on a
+monochrome display, they are underlined.  *Note Highlighting Difference
+Regions::, for information on how to customize this.
+
+   The commands `ediff-windows-wordwise', `ediff-windows-linewise',
+`ediff-regions-wordwise' and `ediff-regions-linewise' do comparison on
+parts of existing Emacs buffers.  The commands `ediff-windows-wordwise'
+and `ediff-regions-wordwise' are intended for relatively small segments
+of buffers (e.g., up to 100 lines, depending on the speed of your
+machine), as they perform comparison on the basis of words rather than
+lines.  (Word-wise comparison of large chunks of text can be slow.)
+
+   To compare large regions, use `ediff-regions-linewise'.  This
+command displays differences much like `ediff-files' and
+`ediff-buffers'.
+
+   The functions `ediff-patch-file' and `ediff-patch-buffer' apply a
+patch to a file or a buffer and then run Ediff on the appropriate
+files/buffers, displaying the difference regions.
+
+   The entry points `ediff-directories', `ediff-merge-directories',
+etc., provide a convenient interface for comparing and merging files in
+different directories.  The user is presented with Dired-like interface
+from which one can run a group of related Ediff sessions.
+
+   For files under version control, `ediff-revision' lets you compare
+the file visited by the current buffer to one of its checked-in
+versions.  You can also compare two checked-in versions of the visited
+file.  Moreover, the functions `ediff-directory-revisions',
+`ediff-merge-directory-revisions', etc., let you run a group of related
+Ediff sessions by taking a directory and comparing (or merging)
+versions of files in that directory.
+
+
+File: ediff,  Node: Session Commands,  Next: Registry of Ediff Sessions,  Prev: Major Entry Points,  Up: Top
+
+3 Session Commands
+******************
+
+All Ediff commands are displayed in a Quick Help window, unless you type
+`?' to shrink the window to just one line.  You can redisplay the help
+window by typing `?' again.  The Quick Help commands are detailed below.
+
+   Many Ediff commands take numeric prefix arguments.  For instance, if
+you type a number, say 3, and then `j' (`ediff-jump-to-difference'),
+Ediff moves to the third difference region.  Typing 3 and then `a'
+(`ediff-diff-to-diff') copies the 3rd difference region from variant A
+to variant B.  Likewise, 4 followed by `ra' restores the 4th difference
+region in buffer A (if it was previously written over via the command
+`a').
+
+   Some commands take negative prefix arguments as well.  For instance,
+typing `-' and then `j' will make the last difference region current.
+Typing `-2' then `j' makes the penultimate difference region current,
+etc.
+
+   Without the prefix argument, all commands operate on the currently
+selected difference region.  You can make any difference region current
+using the various commands explained below.
+
+   For some commands, the actual value of the prefix argument is
+immaterial.  However, if supplied, the prefix argument may modify the
+command (see `ga', `gb', and `gc').
+
+* Menu:
+
+* Quick Help Commands::             Frequently used commands.
+* Other Session Commands::          Commands that are not bound to keys.
+
+
+File: ediff,  Node: Quick Help Commands,  Next: Other Session Commands,  Up: Session Commands
+
+3.1 Quick Help Commands
+=======================
+
+`?'
+     Toggles the Ediff Quick Help window ON and OFF.
+
+`G'
+     Prepares a mail buffer for sending a praise or a curse to the
+     Ediff maintainer.
+
+`E'
+     Brings up the top node of this manual, where you can find further
+     information on the various Ediff functions and advanced issues,
+     such as customization, session groups, etc.
+
+`v'
+     Scrolls up buffers A and B (and buffer C where appropriate) in a
+     coordinated fashion.
+
+`V'
+     Scrolls the buffers down.
+
+`<'
+     Scrolls the buffers to the left simultaneously.
+
+`>'
+     Scrolls buffers to the right.
+
+`wd'
+     Saves the output from the diff utility, for further reference.
+
+     With prefix argument, saves the plain output from `diff' (see
+     `ediff-diff-program' and `ediff-diff-options').  Without the
+     argument, it saves customized `diff' output (see
+     `ediff-custom-diff-program' and `ediff-custom-diff-options'), if
+     it is available.
+
+`wa'
+     Saves buffer A, if it was modified.
+
+`wb'
+     Saves buffer B, if it was modified.
+
+`wc'
+     Saves buffer C, if it was modified (if you are in a session that
+     compares three files simultaneously).
+
+`a'
+     _In comparison sessions:_ Copies the current difference region (or
+     the region specified as the prefix to this command) from buffer A
+     to buffer B.  Ediff saves the old contents of buffer B's region;
+     it can be restored via the command `rb', which see.
+
+     _In merge sessions:_ Copies the current difference region (or the
+     region specified as the prefix to this command) from buffer A to
+     the merge buffer.  The old contents of this region in buffer C can
+     be restored via the command `r'.
+
+`b'
+     Works similarly, but copies the current difference region from
+     buffer B to buffer A (in _comparison sessions_) or the merge
+     buffer (in _merge sessions_).
+
+     Ediff saves the old contents of the difference region copied over;
+     it can be reinstated via the command `ra' in comparison sessions
+     and `r' in merge sessions.
+
+`ab'
+     Copies the current difference region (or the region specified as
+     the prefix to this command) from buffer A to buffer B.  This (and
+     the next five) command is enabled only in sessions that compare
+     three files simultaneously.  The old region in buffer B is saved
+     and can be restored via the command `rb'.
+
+`ac'
+     Copies the difference region from buffer A to buffer C.  The old
+     region in buffer C is saved and can be restored via the command
+     `rc'.
+
+`ba'
+     Copies the difference region from buffer B to buffer A.  The old
+     region in buffer A is saved and can be restored via the command
+     `ra'.
+
+`bc'
+     Copies the difference region from buffer B to buffer C.  The
+     command `rc' undoes this.
+
+`ca'
+     Copies the difference region from buffer C to buffer A.  The
+     command `ra' undoes this.
+
+`cb'
+     Copies the difference region from buffer C to buffer B.  The
+     command `rb' undoes this.
+
+`p'
+`DEL'
+     Makes the previous difference region current.
+
+`n'
+`SPC'
+     Makes the next difference region current.
+
+`j'
+`-j'
+`Nj'
+     Makes the very first difference region current.
+
+     `-j' makes the last region current.  Typing a number, N, and then
+     `j' makes the difference region N current.  Typing -N (a negative
+     number) then `j' makes current the region Last - N.
+
+`ga'
+     Makes current the difference region closest to the position of the
+     point in buffer A.
+
+     However, with a prefix argument, Ediff would position all variants
+     around the area indicated by the current point in buffer A: if the
+     point is inside a difference region, then the variants will be
+     positioned at this difference region.  If the point is not in any
+     difference region, then it is in an area where all variants agree
+     with each other.  In this case, the variants will be positioned so
+     that each would display this area (of agreement).
+
+`gb'
+     Makes current the difference region closest to the position of the
+     point in buffer B.
+
+     With a prefix argument, behaves like `ga', but with respect to
+     buffer B.
+
+`gc'
+     _In merge sessions:_ makes current the difference region closest
+     to the point in the merge buffer.
+
+     _In 3-file comparison sessions:_ makes current the region closest
+     to the point in buffer C.
+
+     With a prefix argument, behaves like `ga', but with respect to
+     buffer C.
+
+`!'
+     Recomputes the difference regions, bringing them up to date.  This
+     is often needed because it is common to do all sorts of editing
+     during Ediff sessions, so after a while, the highlighted
+     difference regions may no longer reflect the actual differences
+     among the buffers.
+
+`*'
+     Forces refinement of the current difference region, which
+     highlights the exact words of disagreement among the buffers.
+     With a negative prefix argument, unhighlights the current region.
+
+     Forceful refinement may be needed if Ediff encounters a difference
+     region that is larger than `ediff-auto-refine-limit'.  In this
+     situation, Ediff doesn't do automatic refinement in order to
+     improve response time.  (Ediff doesn't auto-refine on dumb
+     terminals as well, but `*' still works there.  However, the only
+     useful piece of information it can tell you is whether or not the
+     difference regions disagree only in the amount of white space.)
+
+     This command is also useful when the highlighted fine differences
+     are no longer current, due to user editing.
+
+`m'
+     Displays the current Ediff session in a frame as wide as the
+     physical display.  This is useful when comparing files
+     side-by-side.  Typing `m' again restores the original size of the
+     frame.
+
+`|'
+     Toggles the horizontal/vertical split of the Ediff display.
+     Horizontal split is convenient when it is possible to compare files
+     side-by-side.  If the frame in which files are displayed is too
+     narrow and lines are cut off, typing `m' may help some.
+
+`@'
+     Toggles auto-refinement of difference regions (i.e., automatic
+     highlighting of the exact words that differ among the variants).
+     Auto-refinement is turned off on devices where Emacs doesn't
+     support highlighting.
+
+     On slow machines, it may be advantageous to turn auto-refinement
+     off.  The user can always forcefully refine specific difference
+     regions by typing `*'.
+
+`h'
+     Cycles between full highlighting, the mode where fine differences
+     are not highlighted (but computed), and the mode where
+     highlighting is done with ASCII strings.  The latter is not really
+     recommended, unless on a dumb TTY.
+
+`r'
+     Restores the old contents of the region in the merge buffer.  (If
+     you copied a difference region from buffer A or B into the merge
+     buffer using the commands `a' or `b', Ediff saves the old contents
+     of the region in case you change your mind.)
+
+     This command is enabled in merge sessions only.
+
+`ra'
+     Restores the old contents of the current difference region in
+     buffer A, which was previously saved when the user invoked one of
+     these commands: `b', `ba', `ca', which see.  This command is
+     enabled in comparison sessions only.
+
+`rb'
+     Restores the old contents of the current difference region in
+     buffer B, which was previously saved when the user invoked one of
+     these commands: `a', `ab', `cb', which see.  This command is
+     enabled in comparison sessions only.
+
+`rc'
+     Restores the old contents of the current difference region in
+     buffer C, which was previously saved when the user invoked one of
+     these commands: `ac', `bc', which see.  This command is enabled in
+     3-file comparison sessions only.
+
+`##'
+     Tell Ediff to skip over regions that disagree among themselves
+     only in the amount of white space and line breaks.
+
+     Even though such regions will be skipped over, you can still jump
+     to any one of them by typing the region number and then `j'.
+     Typing `##' again puts Ediff back in the original state.
+
+`#c'
+     Toggle case sensitivity in the diff program. All diffs are
+     recomputed.  Case sensitivity is controlled by the variables
+     `ediff-ignore-case-option', `ediff-ignore-case-option3', and
+     `ediff-ignore-case', which are explained elsewhere.
+
+`#h'
+`#f'
+     Ediff works hard to ameliorate the effects of boredom in the
+     workplace...
+
+     Quite often differences are due to identical replacements (e.g.,
+     the word `foo' is replaced with the word `bar' everywhere).  If
+     the number of regions with such boring differences exceeds your
+     tolerance threshold, you may be tempted to tell Ediff to skip
+     these regions altogether (you will still be able to jump to them
+     via the command `j').  The above commands, `#h' and `#f', may well
+     save your day!
+
+     `#h' prompts you to specify regular expressions for each variant.
+     Difference regions where each variant's region matches the
+     corresponding regular expression will be skipped from then on.
+     (You can also tell Ediff to skip regions where at least one
+     variant matches its regular expression.)
+
+     `#f' does dual job: it focuses on regions that match the
+     corresponding regular expressions.  All other regions will be
+     skipped over.  *Note Selective Browsing::, for more.
+
+`A'
+     Toggles the read-only property in buffer A.  If file A is under
+     version control and is checked in, it is checked out (with your
+     permission).
+
+`B'
+     Toggles the read-only property in buffer B.  If file B is under
+     version control and is checked in, it is checked out.
+
+`C'
+     Toggles the read-only property in buffer C (in 3-file comparison
+     sessions).  If file C is under version control and is checked in,
+     it is checked out.
+
+`~'
+     Swaps the windows where buffers A and B are displayed.  If you are
+     comparing three buffers at once, then this command would rotate
+     the windows among buffers A, B, and C.
+
+`i'
+     Displays all kinds of useful data about the current Ediff session.
+
+`D'
+     Runs `ediff-custom-diff-program' on the variants and displays the
+     buffer containing the output.  This is useful when you must send
+     the output to your Mom.
+
+     With a prefix argument, displays the plain `diff' output.  *Note
+     Patch and Diff Programs::, for details.
+
+`R'
+     Displays a list of currently active Ediff sessions--the Ediff
+     Registry.  You can then restart any of these sessions by either
+     clicking on a session record or by putting the cursor over it and
+     then typing the return key.
+
+     (Some poor souls leave so many active Ediff sessions around that
+     they lose track of them completely...  The `R' command is designed
+     to save these people from the recently discovered Ediff
+     Proficiency Syndrome.)
+
+     Typing `R' brings up Ediff Registry only if it is typed into an
+     Ediff Control Panel.  If you don't have a control panel handy,
+     type this in the minibuffer: `M-x eregistry'.  *Note Registry of
+     Ediff Sessions::.
+
+`M'
+     Shows the session group buffer that invoked the current Ediff
+     session.  *Note Session Groups::, for more information on session
+     groups.
+
+`z'
+     Suspends the current Ediff session.  (If you develop a condition
+     known as Repetitive Ediff Injury--a serious but curable
+     illness--you must change your current activity.  This command
+     tries hard to hide all Ediff-related buffers.)
+
+     The easiest way to resume a suspended Ediff session is through the
+     registry of active sessions.  *Note Registry of Ediff Sessions::,
+     for details.
+
+`q'
+     Terminates this Ediff session.  With a prefix argument
+     (e.g.,`1q'), asks if you also want to delete the buffers of the
+     variants.  Modified files and the results of merges are never
+     deleted.
+
+`%'
+     Toggles narrowing in Ediff buffers.  Ediff buffers may be narrowed
+     if you are comparing only parts of these buffers via the commands
+     `ediff-windows-*' and `ediff-regions-*', which see.
+
+`C-l'
+     Restores the usual Ediff window setup.  This is the quickest way
+     to resume an Ediff session, but it works only if the control panel
+     of that session is visible.
+
+`$$'
+     While merging with an ancestor file, Ediff is determined to reduce
+     user's wear and tear by saving him and her much of unproductive,
+     repetitive typing.  If it notices that, say, file A's difference
+     region is identical to the same difference region in the ancestor
+     file, then the merge buffer will automatically get the difference
+     region taken from buffer B.  The rationale is that this difference
+     region in buffer A is as old as that in the ancestor buffer, so
+     the contents of that region in buffer B represents real change.
+
+     You may want to ignore such `obvious' merges and concentrate on
+     difference regions where both files `clash' with the ancestor,
+     since this means that two different people have been changing this
+     region independently and they had different ideas on how to do
+     this.
+
+     The above command does this for you by skipping the regions where
+     only one of the variants clashes with the ancestor but the other
+     variant agrees with it.  Typing `$$' again undoes this setting.
+
+`$*'
+     When merging files with large number of differences, it is
+     sometimes convenient to be able to skip the difference regions for
+     which you already decided which variant is most appropriate.
+     Typing `$*' will accomplish precisely this.
+
+     To be more precise, this toggles the check for whether the current
+     merge is identical to its default setting, as originally decided
+     by Ediff.  For instance, if Ediff is merging according to the
+     `combined' policy, then the merge region is skipped over if it is
+     different from the combination of the regions in buffers A and B.
+     (Warning: swapping buffers A and B will confuse things in this
+     respect.)  If the merge region is marked as `prefer-A' then this
+     region will be skipped if it differs from the current difference
+     region in buffer A, etc.
+
+`/'
+     Displays the ancestor file during merges.
+
+`&'
+     In some situations, such as when one of the files agrees with the
+     ancestor file on a difference region and the other doesn't, Ediff
+     knows what to do: it copies the current difference region from the
+     second buffer into the merge buffer.
+
+     In other cases, the right course of action is not that clearcut,
+     and Ediff would use a default action.  The above command changes
+     the default action.  The default action can be `default-A' (choose
+     the region from buffer A), `default-B' (choose the region from
+     buffer B), or `combined' (combine the regions from the two
+     buffers).  *Note Merging and diff3::, for further details.
+
+     The command `&' also affects the regions in the merge buffers that
+     have `default-A', `default-B', or `combined' status, provided they
+     weren't changed with respect to the original.  For instance, if
+     such a region has the status `default-A' then changing the default
+     action to `default-B' will also replace this merge-buffer's region
+     with the corresponding region from buffer B.
+
+`s'
+     Causes the merge window shrink to its minimum size, thereby
+     exposing as much of the variant buffers as possible.  Typing `s'
+     again restores the original size of that window.
+
+     With a positive prefix argument, this command enlarges the merge
+     window.  E.g., `4s' increases the size of the window by about 4
+     lines, if possible.  With a negative numeric argument, the size of
+     the merge window shrinks by that many lines, if possible.  Thus,
+     `-s' shrinks the window by about 1 line and `-3s' by about 3 lines.
+
+     This command is intended only for temporary viewing; therefore,
+     Ediff restores window C to its original size whenever it makes any
+     other change in the window configuration.  However, redisplaying
+     (`C-l') or jumping to another difference does not affect window
+     C's size.
+
+     The split between the merge window and the variant windows is
+     controlled by the variable `ediff-merge-window-share', which see.
+
+`+'
+     Combines the difference regions from buffers A and B and copies the
+     result into the merge buffer.  *Note Merging and diff3::, and the
+     variables `ediff-combine-diffs' and `ediff-combination-pattern'.
+
+`='
+     You may run into situations when a large chunk of text in one file
+     has been edited and then moved to a different place in another
+     file.  In such a case, these two chunks of text are unlikely to
+     belong to the same difference region, so the refinement feature of
+     Ediff will not be able to tell you what exactly differs inside
+     these chunks.  Since eyeballing large pieces of text is contrary
+     to human nature, Ediff has a special command to help reduce the
+     risk of developing a cataract.
+
+     In other situations, the currently highlighted region might be big
+     and you might want to reconcile of them interactively.
+
+     All of this can be done with the above command, `=', which
+     compares regions within Ediff buffers.  Typing `=' creates a child
+     Ediff session for comparing regions in buffers A, B, or C as
+     follows.
+
+     First, you will be asked whether you want to compare the fine
+     differences between the currently highlighted buffers on a
+     word-by-word basis. If you accept, a child Ediff session will
+     start using the currently highlighted regions. Ediff will let you
+     step over the differences word-wise.
+
+     If you reject the offer, you will be asked to select regions of
+     your choice.
+
+     _If you are comparing 2 files or buffers:_ Ediff will ask you to
+     select regions in buffers A and B.
+
+     _If you are comparing 3 files or buffers simultaneously:_ Ediff
+     will ask you to choose buffers and then select regions inside
+     those buffers.
+
+     _If you are merging files or buffers (with or without ancestor):_
+     Ediff will ask you to choose which buffer (A or B) to compare with
+     the merge buffer and then select regions in those buffers.
+
+
+
+File: ediff,  Node: Other Session Commands,  Prev: Quick Help Commands,  Up: Session Commands
+
+3.2 Other Session Commands
+==========================
+
+The following commands can be invoked from within any Ediff session,
+although some of them are not bound to a key.
+
+`eregistry'
+`ediff-show-registry'
+     This command brings up the registry of active Ediff sessions.
+     Ediff registry is a device that can be used to resume any active
+     Ediff session (which may have been postponed because the user
+     switched to some other activity).  This command is also useful for
+     switching between multiple active Ediff sessions that are run at
+     the same time.  The function `eregistry' is an alias for
+     `ediff-show-registry'.  *Note Registry of Ediff Sessions::, for
+     more information on this registry.
+
+`ediff-toggle-multiframe'
+     Changes the display from the multi-frame mode (where the quick
+     help window is in a separate frame) to the single-frame mode
+     (where all Ediff buffers share the same frame), and vice versa.
+     See `ediff-window-setup-function' for details on how to make
+     either of these modes the default one.
+
+     This function can also be invoked from the Menubar.  However, in
+     some cases, the change will take place only after you execute one
+     of the Ediff commands, such as going to the next difference or
+     redisplaying.
+
+`ediff-toggle-use-toolbar'
+     Available in XEmacs only.  The Ediff toolbar provides quick access
+     to some of the common Ediff functions.  This function toggles the
+     display of the toolbar.  If invoked from the menubar, the function
+     may take sometimes effect only after you execute an Ediff command,
+     such as going to the next difference.
+
+`ediff-use-toolbar-p'
+     The use of the toolbar can also be specified via the variable
+     `ediff-use-toolbar-p' (default is `t').  This variable can be set
+     only in `.emacs' -- do *not* change it interactively.  Use the
+     function `ediff-toggle-use-toolbar' instead.
+
+`ediff-revert-buffers-then-recompute-diffs'
+     This command reverts the buffers you are comparing and recomputes
+     their differences.  It is useful when, after making changes, you
+     decided to make a fresh start, or if at some point you changed the
+     files being compared but want to discard any changes to comparison
+     buffers that were done since then.
+
+     This command normally asks for confirmation before reverting files.
+     With a prefix argument, it reverts files without asking.
+
+`ediff-profile'
+     Ediff has an admittedly primitive (but useful) facility for
+     profiling Ediff's commands.  It is meant for Ediff
+     maintenance--specifically, for making it run faster.  The function
+     `ediff-profile' toggles profiling of ediff commands.
+
+
+File: ediff,  Node: Registry of Ediff Sessions,  Next: Session Groups,  Prev: Session Commands,  Up: Top
+
+4 Registry of Ediff Sessions
+****************************
+
+Ediff maintains a registry of all its invocations that are still
+_active_.  This feature is very convenient for switching among active
+Ediff sessions or for quickly restarting a suspended Ediff session.
+
+   The focal point of this activity is a buffer called _*Ediff
+Registry*_.  You can display this buffer by typing `R' in any Ediff
+Control Buffer or Session Group Buffer (*note Session Groups::), or by
+typing `M-x eregistry' into the Minibuffer.  The latter would be the
+fastest way to bring up the registry buffer if no control or group
+buffer is displayed in any of the visible Emacs windows.  If you are in
+a habit of running multiple long Ediff sessions and often need to
+suspend, resume, or switch between them, it may be a good idea to have
+the registry buffer permanently displayed in a separate, dedicated
+window.
+
+   The registry buffer has several convenient key bindings.  For
+instance, clicking mouse button 2 or typing `RET' or `v' over any
+session record resumes that session.  Session records in the registry
+buffer provide a fairly complete description of each session, so it is
+usually easy to identify the right session to resume.
+
+   Other useful commands are bound to `SPC' (next registry record) and
+`DEL' (previous registry record).  There are other commands as well,
+but you don't need to memorize them, since they are listed at the top of
+the registry buffer.
+
+
+File: ediff,  Node: Session Groups,  Next: Remote and Compressed Files,  Prev: Registry of Ediff Sessions,  Up: Top
+
+5 Session Groups
+****************
+
+Several major entries of Ediff perform comparison and merging on
+directories.  On entering `ediff-directories', `ediff-directories3',
+`ediff-merge-directories', `ediff-merge-directories-with-ancestor',
+`ediff-directory-revisions', `ediff-merge-directory-revisions', or
+`ediff-merge-directory-revisions-with-ancestor', the user is presented
+with a Dired-like buffer that lists files common to the directories
+involved along with their sizes.  (The list of common files can be
+further filtered through a regular expression, which the user is
+prompted for.)  We call this buffer _Session Group Panel_ because all
+Ediff sessions associated with the listed files will have this buffer
+as a common focal point.
+
+   Clicking button 2 or typing `RET' or `v' over a record describing
+files invokes Ediff in the appropriate mode on these files.  You can
+come back to the session group buffer associated with a particular
+invocation of Ediff by typing `M' in Ediff control buffer of that
+invocation.
+
+   Many commands are available in the session group buffer; some are
+applicable only to certain types of work.  The relevant commands are
+always listed at the top of each session group buffer, so there is no
+need to memorize them.
+
+   In directory comparison or merging, a session group panel displays
+only the files common to all directories involved.  The differences are
+kept in a separate _directory difference buffer_ and are conveniently
+displayed by typing `D' to the corresponding session group panel.
+Thus, as an added benefit, Ediff can be used to compare the contents of
+up to three directories.
+
+   Sometimes it is desirable to copy some files from one directory to
+another without exiting Ediff. The _directory difference buffer_, which
+is displayed by typing `D' as discussed above, can be used for this
+purpose. If a file is, say, in Ediff's Directory A, but is missing in
+Ediff's Directory B (Ediff will refuse to override existing files), then
+typing `C' or clicking mouse button 2 over that file (which must be
+displayed in directory difference buffer) will copy that file from
+Directory A to Directory B.
+
+   Session records in session group panels are also marked with `+', for
+active sessions, and with `-', for finished sessions.
+
+   Sometimes, it is convenient to exclude certain sessions from a group.
+Usually this happens when the user doesn't intend to run Ediff of
+certain files in the group, and the corresponding session records just
+add clutter to the session group buffer.  To help alleviate this
+problem, the user can type `h' to mark a session as a candidate for
+exclusion and `x' to actually hide the marked sessions.  There actions
+are reversible: with a prefix argument, `h' unmarks the session under
+the cursor, and `x' brings the hidden sessions into the view (`x'
+doesn't unmark them, though, so the user has to explicitly unmark the
+sessions of interest).
+
+   Group sessions also understand the command `m', which marks sessions
+for future operations (other than hiding) on a group of sessions.  At
+present, the only such group-level operation is the creation of a
+multi-file patch.
+
+   For group sessions created to merge files, Ediff can store all merges
+automatically in a directory.  The user is asked to specify such
+directory if the value of `ediff-autostore-merges' is non-`nil'.  If
+the value is `nil', nothing is done to the merge buffers--it will be
+the user's responsibility to save them.  If the value is `t', the user
+will be asked where to save the merge buffers in all merge jobs, even
+those that do not originate from a session group.  It the value is
+neither `nil' nor `t', the merge buffer is saved _only_ if this merge
+session was invoked from a session group.  This behavior is implemented
+in the function `ediff-maybe-save-and-delete-merge', which is a hook in
+`ediff-quit-merge-hook'.  The user can supply a different hook, if
+necessary.
+
+   The variable `ediff-autostore-merges' is buffer-local, so it can be
+set on a per-buffer basis.  Therefore, use `setq-default' to change
+this variable globally.
+
+   A multi-file patch is a concatenated output of several runs of the
+Unix `diff' command (some versions of `diff' let you create a
+multi-file patch in just one run).  Ediff facilitates creation of
+multi-file patches as follows.  If you are in a session group buffer
+created in response to `ediff-directories' or
+`ediff-directory-revisions', you can mark (by typing `m') the desired
+Ediff sessions and then type `P' to create a multi-file patch of those
+marked sessions.  Ediff will then display a buffer containing the patch.
+The patch is generated by invoking `diff' on all marked individual
+sessions (represented by files) and session groups (represented by
+directories).  Ediff will also recursively descend into any _unmarked_
+session group and will search for marked sessions there.  In this way,
+you can create multi-file patches that span file subtrees that grow out
+of any given directory.
+
+   In an `ediff-directories' session, it is enough to just mark the
+requisite sessions.  In `ediff-directory-revisions' revisions, the
+marked sessions must also be active, or else Ediff will refuse to
+produce a multi-file patch.  This is because, in the latter-style
+sessions, there are many ways to create diff output, and it is easier
+to handle by running Ediff on the inactive sessions.
+
+   Last, but not least, by typing `==', you can quickly find out which
+sessions have identical entries, so you won't have to run Ediff on those
+sessions.  This, however, works only on local, uncompressed files.  For
+compressed or remote files, this command won't report anything.
+Likewise, you can use `=h' to mark sessions with identical entries for
+hiding or, with `=m', for further operations.
+
+   The comparison operations `==', `=h', and `=m' can recurse into
+subdirectories to see if they have identical contents (so the user will
+not need to descend into those subdirectories manually). These commands
+ask the user whether or not to do a recursive descent.
+
+
+File: ediff,  Node: Remote and Compressed Files,  Next: Customization,  Prev: Session Groups,  Up: Top
+
+6 Remote and Compressed Files
+*****************************
+
+Ediff works with remote, compressed, and encrypted files.  Ediff
+supports `ange-ftp.el', `jka-compr.el', `uncompress.el' and
+`crypt++.el', but it may work with other similar packages as well.
+This means that you can compare files residing on another machine, or
+you can apply a patch to a file on another machine.  Even the patch
+itself can be a remote file!
+
+   When patching compressed or remote files, Ediff does not rename the
+source file (unlike what the `patch' utility would usually do).
+Instead, the source file retains its name and the result of applying
+the patch is placed in a temporary file that has the suffix `_patched'
+attached.  Generally, this applies to files that are handled using
+black magic, such as special file handlers (ange-ftp and some
+compression and encryption packages also use this method).
+
+   Regular files are treated by the `patch' utility in the usual manner,
+i.e., the original is renamed into `source-name.orig' and the result of
+the patch is placed into the file source-name (`_orig' is used on
+systems like DOS, etc.)
+
+
+File: ediff,  Node: Customization,  Next: Credits,  Prev: Remote and Compressed Files,  Up: Top
+
+7 Customization
+***************
+
+Ediff has a rather self-explanatory interface, and in most cases you
+won't need to change anything.  However, should the need arise, there
+are extensive facilities for changing the default behavior.
+
+   Most of the customization can be done by setting various variables
+in the `.emacs' file.  Some customization (mostly window-related
+customization and faces) can be done by putting appropriate lines in
+`.Xdefaults', `.xrdb', or whatever X resource file is in use.
+
+   With respect to the latter, please note that the X resource for
+Ediff customization is `Ediff', _not_ `emacs'.  *Note Window and Frame
+Configuration::, *Note Highlighting Difference Regions::, for further
+details.  Please also refer to Emacs manual for the information on how
+to set Emacs X resources.
+
+* Menu:
+
+* Hooks::                       Customization via the hooks.
+* Quick Help Customization::    How to customize Ediff's quick help feature.
+* Window and Frame Configuration::  Controlling the way Ediff displays things.
+* Selective Browsing::          Advanced browsing through difference regions.
+* Highlighting Difference Regions::  Controlling highlighting.
+* Narrowing::                   Comparing regions, windows, etc.
+* Refinement of Difference Regions::  How to control the refinement process.
+* Patch and Diff Programs::     Changing the utilities that compute differences
+                                and apply patches.
+* Merging and diff3::           How to customize Ediff in its Merge Mode.
+* Support for Version Control::  Changing the version control package.
+                                 You are not likely to do that.
+* Customizing the Mode Line::   Changing the look of the mode line in Ediff.
+* Miscellaneous::               Other customization.
+* Notes on Heavy-duty Customization::  Customization for the gurus.
+
+
+File: ediff,  Node: Hooks,  Next: Quick Help Customization,  Prev: Customization,  Up: Customization
+
+7.1 Hooks
+=========
+
+The bulk of customization can be done via the following hooks:
+
+`ediff-load-hook'
+     This hook can be used to change defaults after Ediff is loaded.
+
+`ediff-before-setup-hook'
+     Hook that is run just before Ediff rearranges windows to its
+     liking.  Can be used to save windows configuration.
+
+`ediff-keymap-setup-hook'
+     This hook can be used to alter bindings in Ediff's keymap,
+     `ediff-mode-map'.  These hooks are run right after the default
+     bindings are set but before `ediff-load-hook'.  The regular user
+     needs not be concerned with this hook--it is provided for
+     implementers of other Emacs packages built on top of Ediff.
+
+`ediff-before-setup-windows-hook'
+`ediff-after-setup-windows-hook'
+     These two hooks are called before and after Ediff sets up its
+     window configuration.  These hooks are run each time Ediff
+     rearranges windows to its liking. This happens whenever it detects
+     that the user changed the windows setup.
+
+`ediff-suspend-hook'
+`ediff-quit-hook'
+     These two hooks are run when you suspend or quit Ediff.  They can
+     be used to set desired window configurations, delete files Ediff
+     didn't want to clean up after exiting, etc.
+
+     By default, `ediff-quit-hook' holds one hook function,
+     `ediff-cleanup-mess', which cleans after Ediff, as appropriate in
+     most cases.  You probably won't want to change it, but you might
+     want to add other hook functions.
+
+     Keep in mind that hooks executing before `ediff-cleanup-mess' start
+     in `ediff-control-buffer;' they should also leave
+     `ediff-control-buffer' as the current buffer when they finish.
+     Hooks that are executed after `ediff-cleanup-mess' should expect
+     the current buffer be either buffer A or buffer B.
+     `ediff-cleanup-mess' doesn't kill the buffers being compared or
+     merged (see `ediff-cleanup-hook', below).
+
+`ediff-cleanup-hook'
+     This hook is run just before `ediff-quit-hook'.  This is a good
+     place to do various cleanups, such as deleting the variant buffers.
+     Ediff provides a function, `ediff-janitor', as one such possible
+     hook, which you can add to `ediff-cleanup-hook' with `add-hooks'.
+
+     This function kills buffers A, B, and, possibly, C, if these
+     buffers aren't modified.  In merge jobs, buffer C is never
+     deleted.  However, the side effect of using this function is that
+     you may not be able to compare the same buffer in two separate
+     Ediff sessions: quitting one of them will delete this buffer in
+     another session as well.
+
+`ediff-quit-merge-hook'
+     This hook is called when Ediff quits a merge job.  By default, the
+     value is `ediff-maybe-save-and-delete-merge', which is a function
+     that attempts to save the merge buffer according to the value of
+     `ediff-autostore-merges', as described later.
+
+`ediff-before-setup-control-frame-hook'
+`ediff-after-setup-control-frame-hook'
+     These two hooks run before and after Ediff sets up the control
+     frame.  They can be used to relocate Ediff control frame when
+     Ediff runs in a multiframe mode (i.e., when the control buffer is
+     in its own dedicated frame).  Be aware that many variables that
+     drive Ediff are local to Ediff Control Panel
+     (`ediff-control-buffer'), which requires special care in writing
+     these hooks.  Take a look at `ediff-default-suspend-hook' and
+     `ediff-default-quit-hook' to see what's involved.
+
+`ediff-startup-hook'
+     This hook is run at the end of Ediff startup.
+
+`ediff-select-hook'
+     This hook is run after Ediff selects the next difference region.
+
+`ediff-unselect-hook'
+     This hook is run after Ediff unselects the current difference
+     region.
+
+`ediff-prepare-buffer-hook'
+     This hook is run for each Ediff buffer (A, B, C) right after the
+     buffer is arranged.
+
+`ediff-display-help-hook'
+     Ediff runs this hook each time after setting up the help message.
+     It can be used to alter the help message for custom packages that
+     run on top of Ediff.
+
+`ediff-mode-hook'
+     This hook is run just after Ediff mode is set up in the control
+     buffer.  This is done before any Ediff window is created.  You can
+     use it to set local variables that alter the look of the display.
+
+`ediff-registry-setup-hook'
+     Hooks run after setting up the registry for all active Ediff
+     session.  *Note Session Groups::, for details.
+
+`ediff-before-session-group-setup-hook'
+     Hooks run before setting up a control panel for a group of related
+     Ediff sessions. Can be used, for example, to save window
+     configuration to restore later.
+
+`ediff-after-session-group-setup-hook'
+     Hooks run after setting up a control panel for a group of related
+     Ediff sessions.  *Note Session Groups::, for details.
+
+`ediff-quit-session-group-hook'
+     Hooks run just before exiting a session group.
+
+`ediff-meta-buffer-keymap-setup-hook'
+     Hooks run just after setting up the `ediff-meta-buffer-map' -- the
+     map that controls key bindings in the meta buffer.  Since
+     `ediff-meta-buffer-map' is a local variable, you can set different
+     bindings for different kinds of meta buffers.
+
+
+File: ediff,  Node: Quick Help Customization,  Next: Window and Frame Configuration,  Prev: Hooks,  Up: Customization
+
+7.2 Quick Help Customization
+============================
+
+Ediff provides quick help using its control panel window.  Since this
+window takes a fair share of the screen real estate, you can toggle it
+off by typing `?'.  The control window will then shrink to just one
+line and a mode line, displaying a short help message.
+
+   The variable `ediff-use-long-help-message' tells Ediff whether you
+use the short message or the long one.  By default, it is set to `nil',
+meaning that the short message is used.  Set this to `t', if you want
+Ediff to use the long message by default.  This property can always be
+changed interactively, by typing `?' into Ediff Control Buffer.
+
+   If you want to change the appearance of the help message on a
+per-buffer basis, you must use `ediff-startup-hook' to change the value
+of the variable `ediff-help-message', which is local to
+`ediff-control-buffer'.
+
+
+File: ediff,  Node: Window and Frame Configuration,  Next: Selective Browsing,  Prev: Quick Help Customization,  Up: Customization
+
+7.3 Window and Frame Configuration
+==================================
+
+On a non-windowing display, Ediff sets things up in one frame, splitting
+it between a small control window and the windows for buffers A, B, and
+C.  The split between these windows can be horizontal or vertical,
+which can be changed interactively by typing `|' while the cursor is in
+the control window.
+
+   On a window display, Ediff sets up a dedicated frame for Ediff
+Control Panel and then it chooses windows as follows: If one of the
+buffers is invisible, it is displayed in the currently selected frame.
+If a buffer is visible, it is displayed in the frame where it is
+visible.  If, according to the above criteria, the two buffers fall
+into the same frame, then so be it--the frame will be shared by the
+two.  The same algorithm works when you type `C-l' (`ediff-recenter'),
+`p' (`ediff-previous-difference'), `n' (`ediff-next-difference'), etc.
+
+   The above behavior also depends on whether the current frame is
+splittable, dedicated, etc.  Unfortunately, the margin of this book is
+too narrow to present the details of this remarkable algorithm.
+
+   The upshot of all this is that you can compare buffers in one frame
+or in different frames.  The former is done by default, while the
+latter can be achieved by arranging buffers A, B (and C, if applicable)
+to be seen in different frames.  Ediff respects these arrangements,
+automatically adapting itself to the multi-frame mode.
+
+   Ediff uses the following variables to set up its control panel
+(a.k.a. control buffer, a.k.a. quick help window):
+
+`ediff-control-frame-parameters'
+     You can change or augment this variable including the font, color,
+     etc.  The X resource name of Ediff Control Panel frames is
+     `Ediff'.  Under X-windows, you can use this name to set up
+     preferences in your `~/.Xdefaults', `~/.xrdb', or whatever X
+     resource file is in use.  Usually this is preferable to changing
+     `ediff-control-frame-parameters' directly.  For instance, you can
+     specify in `~/.Xdefaults' the color of the control frame using the
+     resource `Ediff*background'.
+
+     In general, any X resource pertaining the control frame can be
+     reached via the prefix `Ediff*'.
+
+`ediff-control-frame-position-function'
+     The preferred way of specifying the position of the control frame
+     is by setting the variable `ediff-control-frame-position-function'
+     to an appropriate function.  The default value of this variable is
+     `ediff-make-frame-position'.  This function places the control
+     frame in the vicinity of the North-East corner of the frame
+     displaying buffer A.
+
+
+   The following variables can be used to adjust the location produced
+by `ediff-make-frame-position' and for related customization.
+
+`ediff-narrow-control-frame-leftward-shift'
+     Specifies the number of characters for shifting the control frame
+     from the rightmost edge of frame A when the control frame is
+     displayed as a small window.
+
+`ediff-wide-control-frame-rightward-shift'
+     Specifies the rightward shift of the control frame from the left
+     edge of frame A when the control frame shows the full menu of
+     options.
+
+`ediff-control-frame-upward-shift'
+     Specifies the number of pixels for the upward shift of the control
+     frame.
+
+`ediff-prefer-iconified-control-frame'
+     If this variable is `t', the control frame becomes iconified
+     automatically when you toggle the quick help message off.  This
+     saves valuable real estate on the screen.  Toggling help back will
+     deiconify the control frame.
+
+     To start Ediff with an iconified Control Panel, you should set this
+     variable to `t' and `ediff-prefer-long-help-message' to `nil'
+     (*note Quick Help Customization::).  This behavior is useful only
+     if icons are allowed to accept keyboard input (which depends on the
+     window manager and other factors).
+
+   To make more creative changes in the way Ediff sets up windows, you
+can rewrite the function `ediff-setup-windows'.  However, we believe
+that detaching Ediff Control Panel from the rest and making it into a
+separate frame offers an important opportunity by allowing you to
+iconify that frame.  The icon will usually accept all of the Ediff
+commands, but will free up valuable real estate on your screen (this may
+depend on your window manager, though).
+
+   The following variable controls how windows are set up:
+
+`ediff-window-setup-function'
+     The multiframe setup is done by the
+     `ediff-setup-windows-multiframe' function, which is the default on
+     windowing displays.  The plain setup, one where all windows are
+     always in one frame, is done by `ediff-setup-windows-plain', which
+     is the default on a non-windowing display (or in an xterm window).
+     In fact, under Emacs, you can switch freely between these two
+     setups by executing the command `ediff-toggle-multiframe' using
+     the Minibuffer of the Menubar.  
+
+     If you don't like any of these setups, write your own function.
+     See the documentation for `ediff-window-setup-function' for the
+     basic guidelines.  However, writing window setups is not easy, so
+     you should first take a close look at `ediff-setup-windows-plain'
+     and `ediff-setup-windows-multiframe'.
+
+   You can run multiple Ediff sessions at once, by invoking Ediff
+several times without exiting previous Ediff sessions.  Different
+sessions may even operate on the same pair of files.
+
+   Each session has its own Ediff Control Panel and all the regarding a
+particular session is local to the associated control panel buffer.  You
+can switch between sessions by suspending one session and then switching
+to another control panel.  (Different control panel buffers are
+distinguished by a numerical suffix, e.g., `Ediff Control Panel<3>'.)
+
+
+File: ediff,  Node: Selective Browsing,  Next: Highlighting Difference Regions,  Prev: Window and Frame Configuration,  Up: Customization
+
+7.4 Selective Browsing
+======================
+
+Sometimes it is convenient to be able to step through only some
+difference regions, those that match certain regular expressions, and
+to ignore all others.  On other occasions, you may want to ignore
+difference regions that match some regular expressions, and to look
+only at the rest.
+
+   The commands `#f' and `#h' let you do precisely this.
+
+   Typing `#f' lets you specify regular expressions that match
+difference regions you want to focus on.  We shall call these regular
+expressions REGEXP-A, REGEXP-B and REGEXP-C.  Ediff will then start
+stepping through only those difference regions where the region in
+buffer A matches REGEXP-A and/or the region in buffer B matches
+REGEXP-B, etc.  Whether `and' or `or' will be used depends on how you
+respond to a question.
+
+   When scanning difference regions for the aforesaid regular
+expressions, Ediff narrows the buffers to those regions.  This means
+that you can use the expressions `\`' and `\'' to tie search to the
+beginning or end of the difference regions.
+
+   On the other hand, typing `#h' lets you specify (hide) uninteresting
+regions.  That is, if a difference region in buffer A matches REGEXP-A,
+the corresponding region in buffer B matches REGEXP-B and (if
+applicable) buffer C's region matches REGEXP-C, then the region will be
+ignored by the commands `n'/<SPC> (`ediff-next-difference') and
+`p'/<DEL> (`ediff-previous-difference') commands.
+
+   Typing `#f' and `#h' toggles selective browsing on and off.
+
+   Note that selective browsing affects only `ediff-next-difference'
+and `ediff-previous-difference', i.e., the commands `n'/<SPC> and
+`p'/<DEL>.  `#f' and `#h' do not change the position of the point in
+the buffers.  And you can still jump directly (using `j')  to any
+numbered difference.
+
+   Users can supply their own functions to specify how Ediff should do
+selective browsing.  To change the default Ediff function, add a
+function to `ediff-load-hook' which will do the following assignments:
+
+     (setq ediff-hide-regexp-matches-function 'your-hide-function)
+     (setq ediff-focus-on-regexp-matches-function 'your-focus-function)
+
+   *Useful hint*: To specify a regexp that matches everything, don't
+simply type <RET> in response to a prompt.  Typing <RET> tells Ediff to
+accept the default value, which may not be what you want.  Instead, you
+should enter something like <^> or <$>.  These match every line.
+
+   You can use the status command, `i', to find out whether selective
+browsing is currently in effect.
+
+   The regular expressions you specified are kept in the local variables
+`ediff-regexp-focus-A', `ediff-regexp-focus-B', `ediff-regexp-focus-C',
+`ediff-regexp-hide-A', `ediff-regexp-hide-B', `ediff-regexp-hide-C'.
+Their default value is the empty string (i.e., nothing is hidden or
+focused on).  To change the default, set these variables in `.emacs'
+using `setq-default'.
+
+   In addition to the ability to ignore regions that match regular
+expressions, Ediff can be ordered to start skipping over certain
+"uninteresting" difference regions.  This is controlled by the following
+variable:
+
+`ediff-ignore-similar-regions'
+     If `t', causes Ediff to skip over "uninteresting" difference
+     regions, which are the regions where the variants differ only in
+     the amount of the white space and newlines.  This feature can be
+     toggled on/off interactively, via the command `##'.
+
+   *Please note:* in order for this feature to work, auto-refining of
+difference regions must be on, since otherwise Ediff won't know if there
+are fine differences between regions.  On devices where Emacs can
+display faces, auto-refining is a default, but it is not turned on by
+default on text-only terminals.  In that case, you must explicitly turn
+auto-refining on (such as, by typing `@').
+
+   *Reassurance:* If many such uninteresting regions appear in a row,
+Ediff may take a long time to skip over them because it has to compute
+fine differences of all intermediate regions.  This delay does not
+indicate any problem.
+
+   Finally, Ediff can be told to ignore the case of the letters. This
+behavior can be toggled with `#c' and it is controlled with three
+variables: `ediff-ignore-case-option', `ediff-ignore-case-option3', and
+`ediff-ignore-case'.
+
+   The variable `ediff-ignore-case-option' specifies the option to pass
+to the diff program for comparing two files or buffers. For GNU `diff',
+this option is `"-i"'. The variable `ediff-ignore-case-option3'
+specifies the option to pass to the `diff3' program in order to make it
+case-insensitive. GNU `diff3' does not have such an option, so when
+merging or comparing three files with this program, ignoring the letter
+case is not supported.
+
+   The variable `ediff-ignore-case' controls whether Ediff starts out by
+ignoring letter case or not. It can be set in `.emacs' using
+`setq-default'.
+
+   When case sensitivity is toggled, all difference regions are
+recomputed.
+
+
+File: ediff,  Node: Highlighting Difference Regions,  Next: Narrowing,  Prev: Selective Browsing,  Up: Customization
+
+7.5 Highlighting Difference Regions
+===================================
+
+The following variables control the way Ediff highlights difference
+regions:
+
+`ediff-before-flag-bol'
+`ediff-after-flag-eol'
+`ediff-before-flag-mol'
+`ediff-after-flag-mol'
+     These variables hold strings that Ediff uses to mark the beginning
+     and the end of the differences found in files A, B, and C on
+     devices where Emacs cannot display faces.  Ediff uses different
+     flags to highlight regions that begin/end at the beginning/end of
+     a line or in a middle of a line.
+
+`ediff-current-diff-face-A'
+`ediff-current-diff-face-B'
+`ediff-current-diff-face-C'
+     Ediff uses these faces to highlight current differences on devices
+     where Emacs can display faces.  These and subsequently described
+     faces can be set either in `.emacs' or in `.Xdefaults'.  The X
+     resource for Ediff is `Ediff', _not_ `emacs'.  Please refer to
+     Emacs manual for the information on how to set X resources.
+
+`ediff-fine-diff-face-A'
+`ediff-fine-diff-face-B'
+`ediff-fine-diff-face-C'
+     Ediff uses these faces to show the fine differences between the
+     current differences regions in buffers A, B, and C, respectively.
+
+`ediff-even-diff-face-A'
+`ediff-even-diff-face-B'
+`ediff-even-diff-face-C'
+`ediff-odd-diff-face-A'
+`ediff-odd-diff-face-B'
+`ediff-odd-diff-face-C'
+     Non-current difference regions are displayed using these
+     alternating faces.  The odd and the even faces are actually
+     identical on monochrome displays, because without colors options
+     are limited.  So, Ediff uses italics to highlight non-current
+     differences.
+
+`ediff-force-faces'
+     Ediff generally can detect when Emacs is running on a device where
+     it can use highlighting with faces.  However, if it fails to
+     determine that faces can be used, the user can set this variable
+     to `t' to make sure that Ediff uses faces to highlight differences.
+
+`ediff-highlight-all-diffs'
+     Indicates whether--on a windowing display--Ediff should highlight
+     differences using inserted strings (as on text-only terminals) or
+     using colors and highlighting.  Normally, Ediff highlights all
+     differences, but the selected difference is highlighted more
+     visibly.  One can cycle through various modes of highlighting by
+     typing `h'.  By default, Ediff starts in the mode where all
+     difference regions are highlighted.  If you prefer to start in the
+     mode where unselected differences are not highlighted, you should
+     set `ediff-highlight-all-diffs' to `nil'.  Type `h' to restore
+     highlighting for all differences.
+
+     Ediff lets you switch between the two modes of highlighting.  That
+     is, you can switch interactively from highlighting using faces to
+     highlighting using string flags, and back.  Of course, switching
+     has effect only under a windowing system.  On a text-only terminal
+     or in an xterm window, the only available option is highlighting
+     with strings.
+
+If you want to change the default settings for `ediff-force-faces' and
+`ediff-highlight-all-diffs', you must do it *before* Ediff is loaded.
+
+   You can also change the defaults for the faces used to highlight the
+difference regions.  There are two ways to do this.  The simplest and
+the preferred way is to use the customization widget accessible from the
+menubar.  Ediff's customization group is located under "Tools", which in
+turn is under "Programming".  The faces that are used to highlight
+difference regions are located in the "Highlighting" subgroup of the
+Ediff customization group.
+
+   The second, much more arcane, method to change default faces is to
+include some Lisp code in `~/.emacs'.  For instance,
+
+     (setq ediff-current-diff-face-A
+           (copy-face 'bold-italic 'ediff-current-diff-face-A))
+
+would use the pre-defined face `bold-italic' to highlight the current
+difference region in buffer A (this face is not a good choice, by the
+way).
+
+   If you are unhappy with just _some_ of the aspects of the default
+faces, you can modify them when Ediff is being loaded using
+`ediff-load-hook'.  For instance:
+
+     (add-hook 'ediff-load-hook
+               (lambda ()
+                 (set-face-foreground
+                   ediff-current-diff-face-B "blue")
+                 (set-face-background
+                   ediff-current-diff-face-B "red")
+                 (make-face-italic
+                   ediff-current-diff-face-B)))
+
+   *Please note:* to set Ediff's faces, use only `copy-face' or
+`set/make-face-...' as shown above. Emacs's low-level face-manipulation
+functions should be avoided.
+
+
+File: ediff,  Node: Narrowing,  Next: Refinement of Difference Regions,  Prev: Highlighting Difference Regions,  Up: Customization
+
+7.6 Narrowing
+=============
+
+If buffers being compared are narrowed at the time of invocation of
+Ediff, `ediff-buffers' will preserve the narrowing range.  However, if
+`ediff-files' is invoked on the files visited by these buffers, that
+would widen the buffers, since this command is defined to compare the
+entire files.
+
+   Calling `ediff-regions-linewise' or `ediff-windows-linewise', or the
+corresponding `-wordwise' commands, narrows the variants to the
+particular regions being compared.  The original accessible ranges are
+restored when you quit Ediff.  During the command, you can toggle this
+narrowing on and off with the `%' command.
+
+   These two variables control this narrowing behavior:
+
+`ediff-start-narrowed'
+     If `t', Ediff narrows the display to the appropriate range when it
+     is invoked with an `ediff-regions...' or `ediff-windows...'
+     command.  If `nil', these commands do not automatically narrow,
+     but you can still toggle narrowing on and off by typing `%'.
+
+`ediff-quit-widened'
+     Controls whether on quitting Ediff should restore the accessible
+     range that existed before the current invocation.
+
+
+File: ediff,  Node: Refinement of Difference Regions,  Next: Patch and Diff Programs,  Prev: Narrowing,  Up: Customization
+
+7.7 Refinement of Difference Regions
+====================================
+
+Ediff has variables to control the way fine differences are
+highlighted.  This feature gives you control over the process of
+refinement.  Note that refinement ignores spaces, tabs, and newlines.
+
+`ediff-auto-refine'
+     This variable controls whether fine differences within regions are
+     highlighted automatically ("auto-refining").  The default is yes
+     (`on').
+
+     On a slow machine, automatic refinement may be painful.  In that
+     case, you can turn auto-refining on or off interactively by typing
+     `@'.  You can also turn off display of refining that has already
+     been done.
+
+     When auto-refining is off, fine differences are shown only for
+     regions for which these differences have been computed and saved
+     before.  If auto-refining and display of refining are both turned
+     off, fine differences are not shown at all.
+
+     Typing `*' computes and displays fine differences for the current
+     difference region, regardless of whether auto-refining is turned
+     on.
+
+`ediff-auto-refine-limit'
+     If auto-refining is on, this variable limits the size of the
+     regions to be auto-refined.  This guards against the possible
+     slowdown that may be caused by extraordinary large difference
+     regions.
+
+     You can always refine the current region by typing `*'.
+
+`ediff-forward-word-function'
+     This variable controls how fine differences are computed.  The
+     value must be a Lisp function that determines how the current
+     difference region should be split into words.
+
+     Fine differences are computed by first splitting the current
+     difference region into words and then passing the result to
+     `ediff-diff-program'.  For the default forward word function
+     (which is `ediff-forward-word'), a word is a string consisting of
+     letters, `-', or `_'; a string of punctuation symbols; a string of
+     digits, or a string consisting of symbols that are neither space,
+     nor a letter.
+
+     This default behavior is controlled by four variables:
+     `ediff-word-1', ..., `ediff-word-4'.  See the on-line
+     documentation for these variables and for the function
+     `ediff-forward-word' for an explanation of how to modify these
+     variables.  
+
+   Sometimes, when a region has too many differences between the
+variants, highlighting of fine differences is inconvenient, especially
+on color displays.  If that is the case, type `*' with a negative
+prefix argument.  This unhighlights fine differences for the current
+region.
+
+   To unhighlight fine differences in all difference regions, use the
+command `@'.  Repeated typing of this key cycles through three
+different states: auto-refining, no-auto-refining, and no-highlighting
+of fine differences.
+
+
+File: ediff,  Node: Patch and Diff Programs,  Next: Merging and diff3,  Prev: Refinement of Difference Regions,  Up: Customization
+
+7.8 Patch and Diff Programs
+===========================
+
+This section describes variables that specify the programs to be used
+for applying patches and for computing the main difference regions (not
+the fine difference regions):
+
+`ediff-diff-program'
+`ediff-diff3-program'
+     These variables specify the programs to use to produce differences
+     and do patching.
+
+`ediff-diff-options'
+`ediff-diff3-options'
+     These variables specify the options to pass to the above utilities.
+
+     In `ediff-diff-options', it may be useful to specify options such
+     as `-w' that ignore certain kinds of changes.  However, Ediff does
+     not let you use the option `-c', as it doesn't recognize this
+     format yet.
+
+`ediff-coding-system-for-read'
+     This variable specifies the coding system to use when reading the
+     output that the programs `diff3' and `diff' send to Emacs. The
+     default is `raw-text', and this should work fine in Unix and in
+     most cases under Windows NT/95/98/2000. There are `diff' programs
+     for which the default option doesn't work under Windows. In such
+     cases, `raw-text-dos' might work. If not, you will have to
+     experiment with other coding systems or use GNU diff.
+
+`ediff-patch-program'
+     The program to use to apply patches.  Since there are certain
+     incompatibilities between the different versions of the patch
+     program, the best way to stay out of trouble is to use a
+     GNU-compatible version.  Otherwise, you may have to tune the
+     values of the variables `ediff-patch-options',
+     `ediff-backup-specs', and `ediff-backup-extension' as described
+     below.
+
+`ediff-patch-options'
+     Options to pass to `ediff-patch-program'.
+
+     Note: the `-b' and `-z' options should be specified in
+     `ediff-backup-specs', not in `ediff-patch-options'.
+
+     It is recommended to pass the `-f' option to the patch program, so
+     it won't ask questions.  However, some implementations don't
+     accept this option, in which case the default value of this
+     variable should be changed.
+
+`ediff-backup-extension'
+     Backup extension used by the patch program.  Must be specified,
+     even if `ediff-backup-specs' is given.
+
+`ediff-backup-specs'
+     Backup directives to pass to the patch program.  Ediff requires
+     that the old version of the file (before applying the patch) is
+     saved in a file named `the-patch-file.extension'.  Usually
+     `extension' is `.orig', but this can be changed by the user, and
+     may also be system-dependent.  Therefore, Ediff needs to know the
+     backup extension used by the patch program.
+
+     Some versions of the patch program let the user specify `-b
+     backup-extension'.  Other versions only permit `-b', which
+     (usually) assumes the extension `.orig'.  Yet others force you to
+     use `-z<backup-extension>'.
+
+     Note that both `ediff-backup-extension' and `ediff-backup-specs'
+     must be properly set.  If your patch program takes the option
+     `-b', but not `-b extension', the variable
+     `ediff-backup-extension' must still be set so Ediff will know
+     which extension to use.
+
+`ediff-custom-diff-program'
+`ediff-custom-diff-options'
+     Because Ediff limits the options you may want to pass to the `diff'
+     program, it partially makes up for this drawback by letting you
+     save the output from `diff' in your preferred format, which is
+     specified via the above two variables.
+
+     The output generated by `ediff-custom-diff-program' (which doesn't
+     even have to be a standard-style `diff'!) is not used by Ediff.
+     It is provided exclusively so that you can refer to it later, send
+     it over email, etc.  For instance, after reviewing the
+     differences, you may want to send context differences to a
+     colleague.  Since Ediff ignores the `-c' option in
+     `ediff-diff-program', you would have to run `diff -c' separately
+     just to produce the list of differences.  Fortunately,
+     `ediff-custom-diff-program' and `ediff-custom-diff-options'
+     eliminate this nuisance by keeping a copy of a difference list in
+     the desired format in a buffer that can be displayed via the
+     command `D'.
+
+`ediff-patch-default-directory'
+     Specifies the default directory to look for patches.
+
+
+*Warning:* Ediff does not support the output format of VMS `diff'.
+Instead, make sure you are using some implementation of POSIX `diff',
+such as `gnudiff'.
+
+
+File: ediff,  Node: Merging and diff3,  Next: Support for Version Control,  Prev: Patch and Diff Programs,  Up: Customization
+
+7.9 Merging and diff3
+=====================
+
+Ediff supports three-way comparison via the functions `ediff-files3' and
+`ediff-buffers3'.  The interface is the same as for two-way comparison.
+In three-way comparison and merging, Ediff reports if any two difference
+regions are identical.  For instance, if the current region in buffer A
+is the same as the region in buffer C, then the mode line of buffer A
+will display `[=diff(C)]' and the mode line of buffer C will display
+`[=diff(A)]'.
+
+   Merging is done according to the following algorithm.
+
+   If a difference region in one of the buffers, say B, differs from
+the ancestor file while the region in the other buffer, A, doesn't,
+then the merge buffer, C, gets B's region.  Similarly when buffer A's
+region differs from the ancestor and B's doesn't, A's region is used.
+
+   If both regions in buffers A and B differ from the ancestor file,
+Ediff chooses the region according to the value of the variable
+`ediff-default-variant'.  If its value is `default-A' then A's region
+is chosen.  If it is `default-B' then B's region is chosen.  If it is
+`combined' then the region in buffer C will look like this:
+
+     <<<<<<< variant A
+     the difference region from buffer A
+     >>>>>>> variant B
+     the difference region from buffer B
+     ####### Ancestor
+     the difference region from the ancestor buffer, if available
+     ======= end
+
+   The above is the default template for the combined region. The user
+can customize this template using the variable
+`ediff-combination-pattern'.
+
+   The variable `ediff-combination-pattern' specifies the template that
+determines how the combined merged region looks like.  The template is
+represented as a list of the form `(STRING1 Symbol1 STRING2 Symbol2
+STRING3 Symbol3 STRING4)'. The symbols here must be atoms of the form
+`A', `B', or `Ancestor'. They determine the order in which the
+corresponding difference regions (from buffers A, B, and the ancestor
+buffer) are displayed in the merged region of buffer C.  The strings in
+the template determine the text that separates the aforesaid regions.
+The default template is
+
+     ("<<<<<<< variant A" A ">>>>>>> variant B" B
+        "####### Ancestor" Ancestor "======= end")
+
+(this is one long line) and the corresponding combined region is shown
+above. The order in which the regions are shown (and the separator
+strings) can be changed by changing the above template. It is even
+possible to add or delete region specifiers in this template (although
+the only possibly useful such modification seems to be the deletion of
+the ancestor).
+
+   In addition to the state of the difference, Ediff displays the state
+of the merge for each region.  If a difference came from buffer A by
+default (because both regions A and B were different from the ancestor
+and `ediff-default-variant' was set to `default-A') then `[=diff(A)
+default-A]' is displayed in the mode line.  If the difference in buffer
+C came, say, from buffer B because the difference region in that buffer
+differs from the ancestor, but the region in buffer A does not (if
+merging with an ancestor) then `[=diff(B) prefer-B]' is displayed.  The
+indicators default-A/B and prefer-A/B are inspired by Emerge and have
+the same meaning.
+
+   Another indicator of the state of merge is `combined'.  It appears
+with any difference region in buffer C that was obtained by combining
+the difference regions in buffers A and B as explained above.
+
+   In addition to the state of merge and state of difference
+indicators, while merging with an ancestor file or buffer, Ediff
+informs the user when the current difference region in the (normally
+invisible) ancestor buffer is empty via the _AncestorEmpty_ indicator.
+This helps determine if the changes made to the original in variants A
+and B represent pure insertion or deletion of text: if the mode line
+shows _AncestorEmpty_ and the corresponding region in buffers A or B is
+not empty, this means that new text was inserted.  If this indicator is
+not present and the difference regions in buffers A or B are non-empty,
+this means that text was modified.  Otherwise, the original text was
+deleted.
+
+   Although the ancestor buffer is normally invisible, Ediff maintains
+difference regions there and advances the current difference region
+accordingly.  All highlighting of difference regions is provided in the
+ancestor buffer, except for the fine differences.  Therefore, if
+desired, the user can put the ancestor buffer in a separate frame and
+watch it there.  However, on a TTY, only one frame can be visible at
+any given time, and Ediff doesn't support any single-frame window
+configuration where all buffers, including the ancestor buffer, would
+be visible.  However, the ancestor buffer can be displayed by typing
+`/' to the control window.  (Type `C-l' to hide it again.)
+
+   Note that the state-of-difference indicators `=diff(A)' and
+`=diff(B)' above are not redundant, even in the presence of a
+state-of-merge indicator.  In fact, the two serve different purposes.
+
+   For instance, if the mode line displays `=diff(B) prefer(B)' and you
+copy a difference region from buffer A to buffer C then `=diff(B)' will
+change to `diff-A' and the mode line will display `=diff(A) prefer-B'.
+This indicates that the difference region in buffer C is identical to
+that in buffer A, but originally buffer C's region came from buffer B.
+This is useful to know because you can recover the original difference
+region in buffer C by typing `r'.
+
+   Ediff never changes the state-of-merge indicator, except in response
+to the `!' command (see below), in which case the indicator is lost.
+On the other hand, the state-of-difference indicator is changed
+automatically by the copying/recovery commands, `a', `b', `r', `+'.
+
+   The `!' command loses the information about origins of the regions
+in the merge buffer (default-A, prefer-B, or combined).  This is because
+recomputing differences in this case means running `diff3' on buffers
+A, B, and the merge buffer, not on the ancestor buffer.  (It makes no
+sense to recompute differences using the ancestor file, since in the
+merging mode Ediff assumes that you have not edited buffers A and B,
+but that you may have edited buffer C, and these changes are to be
+preserved.)  Since some difference regions may disappear as a result of
+editing buffer C and others may arise, there is generally no simple way
+to tell where the various regions in the merge buffer came from.
+
+   In three-way comparison, Ediff tries to disregard regions that
+consist entirely of white space.  For instance, if, say, the current
+region in buffer A consists of the white space only (or if it is
+empty), Ediff will not take it into account for the purpose of
+computing fine differences.  The result is that Ediff can provide a
+better visual information regarding the actual fine differences in the
+non-white regions in buffers B and C.  Moreover, if the regions in
+buffers B and C differ in the white space only, then a message to this
+effect will be displayed.
+
+   In the merge mode, the share of the split between window C (the
+window displaying the merge-buffer) and the windows displaying buffers
+A and B is controlled by the variable `ediff-merge-window-share'.  Its
+default value is 0.5.  To make the merge-buffer window smaller, reduce
+this amount.
+
+   We don't recommend increasing the size of the merge-window to more
+than half the frame (i.e., to increase the value of
+`ediff-merge-window-share') to more than 0.5, since it would be hard to
+see the contents of buffers A and B.
+
+   You can temporarily shrink the merge window to just one line by
+typing `s'.  This change is temporary, until Ediff finds a reason to
+redraw the screen.  Typing `s' again restores the original window size.
+
+   With a positive prefix argument, the `s' command will make the merge
+window slightly taller.  This change is persistent.  With ``-'' or with
+a negative prefix argument, the command `s' makes the merge window
+slightly shorter.  This change also persistent.
+
+   Ediff lets you automatically ignore the regions where only one of the
+buffers A and B disagrees with the ancestor.  To do this, set the
+variable `ediff-show-clashes-only' to non-`nil'.
+
+   You can toggle this feature interactively by typing `$$'.
+
+   Note that this variable affects only the show next/previous
+difference commands.  You can still jump directly to any difference
+region directly using the command `j' (with a prefix argument
+specifying the difference number).
+
+   The variable `ediff-autostore-merges' controls what happens to the
+merge buffer when Ediff quits.  If the value is `nil', nothing is done
+to the merge buffer--it will be the user's responsibility to save it.
+If the value is `t', the user will be asked where to save the buffer
+and whether to delete it afterwards.  It the value is neither `nil' nor
+`t', the merge buffer is saved _only_ if this merge session was invoked
+from a group of related Ediff session, such as those that result from
+`ediff-merge-directories', `ediff-merge-directory-revisions', etc.
+*Note Session Groups::.  This behavior is implemented in the function
+`ediff-maybe-save-and-delete-merge', which is a hook in
+`ediff-quit-merge-hook'.  The user can supply a different hook, if
+necessary.
+
+   The variable `ediff-autostore-merges' is buffer-local, so it can be
+set in a per-buffer manner.  Therefore, use `setq-default' to globally
+change this variable.
+
+   When merge buffers are saved automatically as directed by
+`ediff-autostore-merges', Ediff attaches a prefix to each file, as
+specified by the variable `ediff-merge-filename-prefix'. The default is
+`merge_', but this can be changed by the user.
+
+
+File: ediff,  Node: Support for Version Control,  Next: Customizing the Mode Line,  Prev: Merging and diff3,  Up: Customization
+
+7.10 Support for Version Control
+================================
+
+Ediff supports version control and lets you compare versions of files
+visited by Emacs buffers via the function `ediff-revision'.  This
+feature is controlled by the following variables:
+
+`ediff-version-control-package'
+     A symbol.  The default is `vc'.
+
+     If you are like most Emacs users, Ediff will use VC as the version
+     control package.  This is the standard Emacs interface to RCS,
+     CVS, and SCCS.
+
+     However, if your needs are better served by other interfaces, you
+     will have to tell Ediff which version control package you are
+     using, e.g.,
+          (setq ediff-version-control-package 'rcs)
+
+     Apart from the standard `vc.el', Ediff supports three other
+     interfaces to version control: `rcs.el', `pcl-cvs.el' (recently
+     renamed pcvs.el), and `generic-sc.el'.  The package `rcs.el' is
+     written by Sebastian Kremer <sk@thp.Uni-Koeln.DE> and is available
+     as
+          `ftp.cs.buffalo.edu:pub/Emacs/rcs.tar.Z'
+          `ftp.uni-koeln.de:/pub/gnu/emacs/rcs.tar.Z'
+     
+   Ediff's interface to the above packages allows the user to compare
+the versions of the current buffer or to merge them (with or without an
+ancestor-version).  These operations can also be performed on
+directories containing files under version control.
+
+   In case of `pcl-cvs.el', Ediff can also be invoked via the function
+`run-ediff-from-cvs-buffer'--see the documentation string for this
+function.
+
+
+File: ediff,  Node: Customizing the Mode Line,  Next: Miscellaneous,  Prev: Support for Version Control,  Up: Customization
+
+7.11 Customizing the Mode Line
+==============================
+
+When Ediff is running, the mode line of `Ediff Control Panel' buffer
+shows the current difference number and the total number of difference
+regions in the two files.
+
+   The mode line of the buffers being compared displays the type of the
+buffer (`A:', `B:', or `C:') and (usually) the file name.  Ediff tries
+to be intelligent in choosing the mode line buffer identification.  In
+particular, it works well with the `uniquify.el' and `mode-line.el'
+packages (which improve on the default way in which Emacs displays
+buffer identification).  If you don't like the way Ediff changes the
+mode line, you can use `ediff-prepare-buffer-hook' to modify the mode
+line.  
+
+
+File: ediff,  Node: Miscellaneous,  Next: Notes on Heavy-duty Customization,  Prev: Customizing the Mode Line,  Up: Customization
+
+7.12 Miscellaneous
+==================
+
+Here are a few other variables for customizing Ediff:
+
+`ediff-split-window-function'
+     Controls the way you want the window be split between file-A and
+     file-B (and file-C, if applicable).  It defaults to the vertical
+     split (`split-window-vertically', but you can set it to
+     `split-window-horizontally', if you so wish.  Ediff also lets you
+     switch from vertical to horizontal split and back interactively.
+
+     Note that if Ediff detects that all the buffers it compares are
+     displayed in separate frames, it assumes that the user wants them
+     to be so displayed and stops splitting windows.  Instead, it
+     arranges for each buffer to be displayed in a separate frame.  You
+     can switch to the one-frame mode by hiding one of the buffers
+     A/B/C.
+
+     You can also swap the windows where buffers are displayed by typing
+     `~'.
+
+`ediff-merge-split-window-function'
+     Controls how windows are split between buffers A and B in the
+     merge mode.  This variable is like `ediff-split-window-function',
+     but it defaults to `split-window-horizontally' instead of
+     `split-window-vertically'.
+
+`ediff-make-wide-display-function'
+     The value is a function to be called to widen the frame for
+     displaying the Ediff buffers.  See the on-line documentation for
+     `ediff-make-wide-display-function' for details.  It is also
+     recommended to look into the source of the default function
+     `ediff-make-wide-display'.
+
+     You can toggle wide/regular display by typing `m'.  In the wide
+     display mode, buffers A, B (and C, when applicable) are displayed
+     in a single frame that is as wide as the entire workstation
+     screen.  This is useful when files are compared side-by-side.  By
+     default, the display is widened without changing its height.
+
+`ediff-use-last-dir'
+     Controls the way Ediff presents the default directory when it
+     prompts the user for files to compare.  If `nil', Ediff uses the
+     default directory of the current buffer when it prompts the user
+     for file names.  Otherwise, it will use the directories it had
+     previously used for files A, B, or C, respectively.
+
+`ediff-no-emacs-help-in-control-buffer'
+     If `t', makes `C-h' behave like the <DEL> key, i.e., it will move
+     you back to the previous difference rather than invoking help.
+     This is useful when, in an xterm window or a text-only terminal,
+     the Backspace key is bound to `C-h' and is positioned more
+     conveniently than the <DEL> key.
+
+`ediff-toggle-read-only-function'
+     This variable's value is a function that Ediff uses to toggle the
+     read-only property in its buffers.
+
+     The default function that Ediff uses simply toggles the read-only
+     property, unless the file is under version control.  For a
+     checked-in file under version control, Ediff first tries to check
+     the file out.
+
+`ediff-make-buffers-readonly-at-startup nil'
+     If `t', all variant buffers are made read-only at Ediff startup.
+
+`ediff-keep-variants'
+     The default is `t', meaning that the buffers being compared or
+     merged will be preserved when Ediff quits.  Setting this to `nil'
+     causes Ediff to offer the user a chance to delete these buffers
+     (if they are not modified).  Supplying a prefix argument to the
+     quit command (`q') temporarily reverses the meaning of this
+     variable.  This is convenient when the user prefers one of the
+     behaviors most of the time, but occasionally needs the other
+     behavior.
+
+     However, Ediff temporarily resets this variable to `t' if it is
+     invoked via one of the "buffer" jobs, such as `ediff-buffers'.
+     This is because it is all too easy to lose a day's work otherwise.
+     Besides, in a "buffer" job, the variant buffers have already been
+     loaded prior to starting Ediff, so Ediff just preserves status quo
+     here.
+
+     Using `ediff-cleanup-hook', one can make Ediff delete the variants
+     unconditionally (e.g., by making `ediff-janitor' into one of these
+     hooks).
+
+`ediff-keep-tmp-versions'
+     Default is `nil'. If `t', the versions of the files being compared
+     or merged using operations such as `ediff-revision' or
+     `ediff-merge-revisions' are not deleted on exit. The normal action
+     is to clean up and delete these version files.
+
+`ediff-grab-mouse'
+     Default is `t'.  Normally, Ediff grabs mouse and puts it in its
+     control frame.  This is useful since the user can be sure that
+     when he needs to type an Ediff command the focus will be in an
+     appropriate Ediff's frame.  However, some users prefer to move the
+     mouse by themselves.  The above variable, if set to `maybe', will
+     prevent Ediff from grabbing the mouse in many situations, usually
+     after commands that may take more time than usual.  In other
+     situation, Ediff will continue grabbing the mouse and putting it
+     where it believes is appropriate.  If the value is `nil', then
+     mouse is entirely user's responsibility.  Try different settings
+     and see which one is for you.
+
+
+File: ediff,  Node: Notes on Heavy-duty Customization,  Prev: Miscellaneous,  Up: Customization
+
+7.13 Notes on Heavy-duty Customization
+======================================
+
+Some users need to customize Ediff in rather sophisticated ways, which
+requires different defaults for different kinds of files (e.g., SGML,
+etc.).  Ediff supports this kind of customization in several ways.
+First, most customization variables are buffer-local.  Those that
+aren't are usually accessible from within Ediff Control Panel, so one
+can make them local to the panel by calling make-local-variable from
+within `ediff-startup-hook'.
+
+   Second, the function `ediff-setup' accepts an optional sixth
+argument which has the form `((VAR-NAME-1 . VAL-1) (VAR-NAME-2 . VAL-2)
+...)'.  The function `ediff-setup' sets the variables in the list to
+the respective values, locally in the Ediff control buffer.  This is an
+easy way to throw in custom variables (which usually should be
+buffer-local) that can then be tested in various hooks.
+
+   Make sure the variable `ediff-job-name' and `ediff-word-mode' are set
+properly in this case, as some things in Ediff depend on this.
+
+   Finally, if you want custom-tailored help messages, you can set the
+variables `ediff-brief-help-message-function' and
+`ediff-long-help-message-function' to functions that return help
+strings.  
+
+   When customizing Ediff, some other variables are useful, although
+they are not user-definable.  They are local to the Ediff control
+buffer, so this buffer must be current when you access these variables.
+The control buffer is accessible via the variable
+`ediff-control-buffer', which is also local to that buffer.  It is
+usually used for checking if the current buffer is also the control
+buffer.
+
+   Other variables of interest are:
+`ediff-buffer-A'
+     The first of the data buffers being compared.
+
+`ediff-buffer-B'
+     The second of the data buffers being compared.
+
+`ediff-buffer-C'
+     In three-way comparisons, this is the third buffer being compared.
+     In merging, this is the merge buffer.  In two-way comparison, this
+     variable is `nil'.
+
+`ediff-window-A'
+     The window displaying buffer A.  If buffer A is not visible, this
+     variable is `nil' or it may be a dead window.
+
+`ediff-window-B'
+     The window displaying buffer B.
+
+`ediff-window-C'
+     The window displaying buffer C, if any.
+
+`ediff-control-frame'
+     A dedicated frame displaying the control buffer, if it exists.  It
+     is non-`nil' only if Ediff uses the multiframe display, i.e., when
+     the control buffer is in its own frame.
+
+
+File: ediff,  Node: Credits,  Next: GNU Free Documentation License,  Prev: Customization,  Up: Top
+
+8 Credits
+*********
+
+Ediff was written by Michael Kifer <kifer@cs.stonybrook.edu>.  It was
+inspired by emerge.el written by Dale R. Worley <drw@math.mit.edu>.  An
+idea due to Boris Goldowsky <boris@cs.rochester.edu> made it possible
+to highlight fine differences in Ediff buffers.  Alastair Burt
+<burt@dfki.uni-kl.de> ported Ediff to XEmacs, Eric Freudenthal
+<freudent@jan.ultra.nyu.edu> made it work with VC, Marc Paquette
+<marcpa@cam.org> wrote the toolbar support package for Ediff, and
+Hrvoje Niksic <hniksic@xemacs.org> adapted it to the Emacs
+customization package.
+
+   Many people provided help with bug reports, feature suggestions, and
+advice.  Without them, Ediff would not be nearly as useful as it is
+today.  Here is a hopefully full list of contributors:
+
+     Adrian Aichner (aichner at ecf.teradyne.com),
+     Drew Adams (drew.adams at oracle.com),
+     Steve Baur (steve at xemacs.org),
+     Neal Becker (neal at ctd.comsat.com),
+     E. Jay Berkenbilt (ejb at ql.org),
+     Lennart Borgman (ennart.borgman at gmail.com)
+     Alastair Burt (burt at dfki.uni-kl.de),
+     Paul Bibilo (peb at delcam.co.uk),
+     Kevin Broadey (KevinB at bartley.demon.co.uk),
+     Harald Boegeholz (hwb at machnix.mathematik.uni-stuttgart.de),
+     Bradley A. Bosch (brad at lachman.com),
+     Michael D. Carney (carney at ltx-tr.com),
+     Jin S. Choi (jin at atype.com),
+     Scott Cummings (cummings at adc.com),
+     Albert Dvornik (bert at mit.edu),
+     Eric Eide (eeide at asylum.cs.utah.edu),
+     Paul Eggert (eggert at twinsun.com),
+     Urban Engberg (ue at cci.dk),
+     Kevin Esler (esler at ch.hp.com),
+     Robert Estes (estes at ece.ucdavis.edu),
+     Jay Finger (jayf at microsoft.com),
+     Xavier Fornari (xavier at europe.cma.fr),
+     Eric Freudenthal (freudent at jan.ultra.nyu.edu),
+     Job Ganzevoort (Job.Ganzevoort at cwi.nl),
+     Felix Heinrich Gatzemeier (felix.g at tzemeier.info),
+     Boris Goldowsky (boris at cs.rochester.edu),
+     Allan Gottlieb (gottlieb at allan.ultra.nyu.edu),
+     Aaron Gross (aaron at bfr.co.il),
+     Thorbjoern Hansen (thorbjoern.hansen at mchp.siemens.de),
+     Marcus Harnisch (marcus_harnisch at mint-tech.com),
+     Steven E. Harris (seh at panix.com),
+     Aaron S. Hawley (Aaron.Hawley at uvm.edu),
+     Xiaoli Huang (hxl at epic.com),
+     Andreas Jaeger (aj at suse.de),
+     Lars Magne Ingebrigtsen (larsi at ifi.uio.no),
+     Larry Gouge (larry at itginc.com),
+     Karl Heuer (kwzh at gnu.org),
+     (irvine at lks.csi.com),
+     (jaffe at chipmunk.cita.utoronto.ca),
+     David Karr (dkarr at nmo.gtegsc.com),
+     Norbert Kiesel (norbert at i3.informatik.rwth-aachen.de),
+     Steffen Kilb (skilb at gmx.net),
+     Leigh L Klotz (klotz at adoc.xerox.com),
+     Fritz Knabe (Fritz.Knabe at ecrc.de),
+     Heinz Knutzen (hk at informatik.uni-kiel.d400.de),
+     Andrew Koenig (ark at research.att.com),
+     Hannu Koivisto (azure at iki.fi),
+     Ken Laprade (laprade at dw3f.ess.harris.com),
+     Will C Lauer (wcl at cadre.com),
+     Richard Levitte (levitte at e.kth.se),
+     Mike Long (mike.long at analog.com),
+     Dave Love (d.love at dl.ac.uk),
+     Martin Maechler (maechler at stat.math.ethz.ch),
+     Simon Marshall (simon at gnu.org),
+     Paul C. Meuse (pmeuse at delcomsys.com),
+     Richard Mlynarik (mly at adoc.xerox.com),
+     Stefan Monnier (monnier at cs.yale.edu),
+     Chris Murphy (murphycm at sun.aston.ac.uk),
+     Erik Naggum (erik at naggum.no),
+     Eyvind Ness (Eyvind.Ness at hrp.no),
+     Ray Nickson (nickson at cs.uq.oz.au),
+     Dan Nicolaescu (dann at ics.uci.edu),
+     David Petchey (petchey_david at jpmorgan.com),
+     Benjamin Pierce (benjamin.pierce at cl.cam.ac.uk),
+     Francois Pinard (pinard at iro.umontreal.ca),
+     Tibor Polgar (tlp00 at spg.amdahl.com),
+     David Prince (dave0d at fegs.co.uk),
+     Paul Raines (raines at slac.stanford.edu),
+     Stefan Reicher (xsteve at riic.at),
+     Charles Rich (rich at merl.com),
+     Bill Richter (richter at math.nwu.edu),
+     C.S. Roberson (roberson at aur.alcatel.com),
+     Kevin Rodgers (kevin.rodgers at ihs.com),
+     Sandy Rutherford (sandy at ibm550.sissa.it),
+     Heribert Schuetz (schuetz at ecrc.de),
+     Andy Scott (ascott at pcocd2.intel.com),
+     Axel Seibert (axel at tumbolia.ppp.informatik.uni-muenchen.de),
+     Vin Shelton (acs at xemacs.org),
+     Scott O. Sherman (Scott.Sherman at mci.com),
+     Nikolaj Schumacher (n_schumacher at web.de),
+     Richard Stallman (rms at gnu.org),
+     Richard Stanton (stanton at haas.berkeley.edu),
+     Sam Steingold (sds at goems.com),
+     Ake Stenhoff (etxaksf at aom.ericsson.se),
+     Stig (stig at hackvan.com),
+     Peter Stout (Peter_Stout at cs.cmu.edu),
+     Chuck Thompson (cthomp at cs.uiuc.edu),
+     Ray Tomlinson (tomlinso at bbn.com),
+     Raymond Toy (toy at rtp.ericsson.se),
+     Stephen J. Turnbull  (stephen at xemacs.org),
+     Jan Vroonhof (vroonhof at math.ethz.ch),
+     Colin Walters (walters at cis.ohio-state.edu),
+     Philippe Waroquiers (philippe.waroquiers at eurocontrol.be),
+     Klaus Weber (gizmo at zork.north.de),
+     Ben Wing (ben at xemacs.org),
+     Tom Wurgler (twurgler at goodyear.com),
+     Steve Youngs (youngs at xemacs.org),
+     Ilya Zakharevich (ilya at math.ohio-state.edu),
+     Eli Zaretskii (eliz at is.elta.co.il)
+
+
+File: ediff,  Node: GNU Free Documentation License,  Next: Index,  Prev: Credits,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: ediff,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* !:                                     Quick Help Commands. (line 146)
+* ##:                                    Quick Help Commands. (line 223)
+* #c:                                    Quick Help Commands. (line 231)
+* #f:                                    Quick Help Commands. (line 238)
+* #h:                                    Quick Help Commands. (line 238)
+* $$:                                    Quick Help Commands. (line 337)
+* $*:                                    Quick Help Commands. (line 357)
+* %:                                     Quick Help Commands. (line 327)
+* &:                                     Quick Help Commands. (line 376)
+* *:                                     Quick Help Commands. (line 153)
+* +:                                     Quick Help Commands. (line 416)
+* /:                                     Quick Help Commands. (line 373)
+* <:                                     Quick Help Commands. (line  26)
+* =:                                     Quick Help Commands. (line 421)
+* >:                                     Quick Help Commands. (line  29)
+* ?:                                     Quick Help Commands. (line   7)
+* @:                                     Quick Help Commands. (line 181)
+* A:                                     Quick Help Commands. (line 260)
+* a:                                     Quick Help Commands. (line  51)
+* ab:                                    Quick Help Commands. (line  71)
+* ac:                                    Quick Help Commands. (line  78)
+* B:                                     Quick Help Commands. (line 265)
+* b:                                     Quick Help Commands. (line  62)
+* ba:                                    Quick Help Commands. (line  83)
+* bc:                                    Quick Help Commands. (line  88)
+* C:                                     Quick Help Commands. (line 269)
+* C-l:                                   Quick Help Commands. (line 332)
+* ca:                                    Quick Help Commands. (line  92)
+* cb:                                    Quick Help Commands. (line  96)
+* command help:                          Quick Help Commands. (line   6)
+* Comparing files and buffers:           Introduction.        (line   6)
+* D:                                     Quick Help Commands. (line 282)
+* DEL:                                   Quick Help Commands. (line 101)
+* Directory difference buffer:           Session Groups.      (line  36)
+* E:                                     Quick Help Commands. (line  14)
+* ediff:                                 Major Entry Points.  (line  23)
+* ediff-after-flag-eol:                  Highlighting Difference Regions.
+                                                              (line  13)
+* ediff-after-flag-mol:                  Highlighting Difference Regions.
+                                                              (line  13)
+* ediff-after-session-group-setup-hook:  Hooks.               (line 112)
+* ediff-after-setup-control-frame-hook:  Hooks.               (line  69)
+* ediff-after-setup-windows-hook:        Hooks.               (line  24)
+* ediff-auto-refine:                     Refinement of Difference Regions.
+                                                              (line  11)
+* ediff-auto-refine-limit:               Refinement of Difference Regions.
+                                                              (line  30)
+* ediff-autostore-merges <1>:            Merging and diff3.   (line 166)
+* ediff-autostore-merges <2>:            Hooks.               (line  62)
+* ediff-autostore-merges:                Session Groups.      (line  64)
+* ediff-backup:                          Major Entry Points.  (line  26)
+* ediff-before-flag-bol:                 Highlighting Difference Regions.
+                                                              (line  13)
+* ediff-before-flag-mol:                 Highlighting Difference Regions.
+                                                              (line  13)
+* ediff-before-session-group-setup-hook: Hooks.               (line 107)
+* ediff-before-setup-control-frame-hook: Hooks.               (line  69)
+* ediff-before-setup-hook:               Hooks.               (line  12)
+* ediff-before-setup-windows-hook:       Hooks.               (line  24)
+* ediff-brief-help-message-function:     Notes on Heavy-duty Customization.
+                                                              (line  27)
+* ediff-buffers:                         Major Entry Points.  (line  35)
+* ediff-buffers3:                        Major Entry Points.  (line  42)
+* ediff-cleanup-hook:                    Hooks.               (line  49)
+* ediff-coding-system-for-read:          Patch and Diff Programs.
+                                                              (line  25)
+* ediff-combination-pattern:             Merging and diff3.   (line  39)
+* ediff-control-buffer:                  Quick Help Customization.
+                                                              (line   6)
+* ediff-control-frame-parameters:        Window and Frame Configuration.
+                                                              (line  35)
+* ediff-control-frame-position-function: Window and Frame Configuration.
+                                                              (line  48)
+* ediff-control-frame-upward-shift:      Window and Frame Configuration.
+                                                              (line  70)
+* ediff-current-diff-face-A:             Highlighting Difference Regions.
+                                                              (line  22)
+* ediff-current-diff-face-B:             Highlighting Difference Regions.
+                                                              (line  22)
+* ediff-current-diff-face-C:             Highlighting Difference Regions.
+                                                              (line  22)
+* ediff-current-file:                    Major Entry Points.  (line  31)
+* ediff-custom-diff-options:             Patch and Diff Programs.
+                                                              (line  78)
+* ediff-custom-diff-program:             Patch and Diff Programs.
+                                                              (line  78)
+* ediff-default-variant:                 Merging and diff3.   (line  21)
+* ediff-diff-options:                    Patch and Diff Programs.
+                                                              (line  17)
+* ediff-diff-program <1>:                Patch and Diff Programs.
+                                                              (line  12)
+* ediff-diff-program:                    Refinement of Difference Regions.
+                                                              (line  42)
+* ediff-diff3-options:                   Patch and Diff Programs.
+                                                              (line  17)
+* ediff-diff3-program:                   Patch and Diff Programs.
+                                                              (line  12)
+* ediff-directories:                     Major Entry Points.  (line  46)
+* ediff-directories3:                    Major Entry Points.  (line  50)
+* ediff-directory-revisions:             Major Entry Points.  (line  54)
+* ediff-display-help-hook:               Hooks.               (line  93)
+* ediff-documentation:                   Major Entry Points.  (line 169)
+* ediff-even-diff-face-A:                Highlighting Difference Regions.
+                                                              (line  40)
+* ediff-even-diff-face-B:                Highlighting Difference Regions.
+                                                              (line  40)
+* ediff-even-diff-face-C:                Highlighting Difference Regions.
+                                                              (line  40)
+* ediff-files:                           Major Entry Points.  (line  23)
+* ediff-files3:                          Major Entry Points.  (line  39)
+* ediff-fine-diff-face-A:                Highlighting Difference Regions.
+                                                              (line  31)
+* ediff-fine-diff-face-B:                Highlighting Difference Regions.
+                                                              (line  31)
+* ediff-fine-diff-face-C:                Highlighting Difference Regions.
+                                                              (line  31)
+* ediff-force-faces:                     Highlighting Difference Regions.
+                                                              (line  47)
+* ediff-forward-word:                    Refinement of Difference Regions.
+                                                              (line  42)
+* ediff-forward-word-function:           Refinement of Difference Regions.
+                                                              (line  38)
+* ediff-grab-mouse:                      Miscellaneous.       (line  98)
+* ediff-help-message:                    Quick Help Customization.
+                                                              (line   6)
+* ediff-highlight-all-diffs:             Highlighting Difference Regions.
+                                                              (line  53)
+* ediff-ignore-case <1>:                 Selective Browsing.  (line  87)
+* ediff-ignore-case:                     Quick Help Commands. (line 231)
+* ediff-ignore-case-option <1>:          Selective Browsing.  (line  87)
+* ediff-ignore-case-option:              Quick Help Commands. (line 231)
+* ediff-ignore-case-option3 <1>:         Selective Browsing.  (line  87)
+* ediff-ignore-case-option3:             Quick Help Commands. (line 231)
+* ediff-ignore-similar-regions:          Selective Browsing.  (line  70)
+* ediff-janitor:                         Hooks.               (line  54)
+* ediff-job-name:                        Notes on Heavy-duty Customization.
+                                                              (line  27)
+* ediff-keep-tmp-versions:               Miscellaneous.       (line  92)
+* ediff-keep-variants:                   Miscellaneous.       (line  71)
+* ediff-keymap-setup-hook:               Hooks.               (line  16)
+* ediff-load-hook:                       Hooks.               (line   9)
+* ediff-long-help-message-function:      Notes on Heavy-duty Customization.
+                                                              (line  27)
+* ediff-make-buffers-readonly-at-startup: Miscellaneous.      (line  68)
+* ediff-make-frame-position:             Window and Frame Configuration.
+                                                              (line  55)
+* ediff-make-wide-display-function:      Miscellaneous.       (line  32)
+* ediff-maybe-save-and-delete-merge <1>: Merging and diff3.   (line 166)
+* ediff-maybe-save-and-delete-merge:     Hooks.               (line  62)
+* ediff-merge:                           Major Entry Points.  (line 140)
+* ediff-merge-buffers:                   Major Entry Points.  (line 147)
+* ediff-merge-buffers-with-ancestor:     Major Entry Points.  (line 150)
+* ediff-merge-directories:               Major Entry Points.  (line 154)
+* ediff-merge-directories-with-ancestor: Major Entry Points.  (line 158)
+* ediff-merge-directory-revisions:       Major Entry Points.  (line  59)
+* ediff-merge-directory-revisions-with-ancestor: Major Entry Points.
+                                                              (line  64)
+* ediff-merge-filename-prefix:           Merging and diff3.   (line 183)
+* ediff-merge-files:                     Major Entry Points.  (line 140)
+* ediff-merge-files-with-ancestor:       Major Entry Points.  (line 144)
+* ediff-merge-revisions:                 Major Entry Points.  (line 163)
+* ediff-merge-revisions-with-ancestor:   Major Entry Points.  (line 166)
+* ediff-merge-split-window-function:     Miscellaneous.       (line  26)
+* ediff-merge-window-share:              Merging and diff3.   (line 135)
+* ediff-merge-with-ancestor:             Major Entry Points.  (line 144)
+* ediff-meta-buffer-keymap-setup-hook:   Hooks.               (line 119)
+* ediff-meta-buffer-map:                 Hooks.               (line 119)
+* ediff-mode-hook:                       Hooks.               (line  98)
+* ediff-mode-map:                        Hooks.               (line  16)
+* ediff-narrow-control-frame-leftward-shift: Window and Frame Configuration.
+                                                              (line  60)
+* ediff-no-emacs-help-in-control-buffer: Miscellaneous.       (line  52)
+* ediff-odd-diff-face-A:                 Highlighting Difference Regions.
+                                                              (line  40)
+* ediff-odd-diff-face-B:                 Highlighting Difference Regions.
+                                                              (line  40)
+* ediff-odd-diff-face-C:                 Highlighting Difference Regions.
+                                                              (line  40)
+* ediff-patch-buffer:                    Major Entry Points.  (line 123)
+* ediff-patch-default-directory:         Patch and Diff Programs.
+                                                              (line  97)
+* ediff-patch-file:                      Major Entry Points.  (line  92)
+* ediff-patch-options:                   Patch and Diff Programs.
+                                                              (line  17)
+* ediff-patch-program:                   Patch and Diff Programs.
+                                                              (line  12)
+* ediff-prefer-iconified-control-frame:  Window and Frame Configuration.
+                                                              (line  74)
+* ediff-prepare-buffer-hook <1>:         Customizing the Mode Line.
+                                                              (line  17)
+* ediff-prepare-buffer-hook:             Hooks.               (line  89)
+* ediff-profile:                         Other Session Commands.
+                                                              (line  56)
+* ediff-quit-hook:                       Hooks.               (line  31)
+* ediff-quit-merge-hook <1>:             Merging and diff3.   (line 166)
+* ediff-quit-merge-hook:                 Hooks.               (line  62)
+* ediff-quit-session-group-hook:         Hooks.               (line 116)
+* ediff-quit-widened:                    Narrowing.           (line  27)
+* ediff-regions-linewise:                Major Entry Points.  (line  83)
+* ediff-regions-wordwise:                Major Entry Points.  (line  75)
+* ediff-registry-setup-hook:             Hooks.               (line 103)
+* ediff-revert-buffers-then-recompute-diffs: Other Session Commands.
+                                                              (line  46)
+* ediff-revision:                        Major Entry Points.  (line  87)
+* ediff-save-buffer:                     Patch and Diff Programs.
+                                                              (line  78)
+* ediff-select-hook:                     Hooks.               (line  82)
+* ediff-setup:                           Notes on Heavy-duty Customization.
+                                                              (line  27)
+* ediff-setup-windows:                   Window and Frame Configuration.
+                                                              (line  85)
+* ediff-setup-windows-multiframe:        Window and Frame Configuration.
+                                                              (line 103)
+* ediff-setup-windows-plain:             Window and Frame Configuration.
+                                                              (line 103)
+* ediff-show-clashes-only:               Merging and diff3.   (line 155)
+* ediff-show-registry:                   Other Session Commands.
+                                                              (line  11)
+* ediff-split-window-function:           Miscellaneous.       (line   9)
+* ediff-start-narrowed:                  Narrowing.           (line  21)
+* ediff-startup-hook <1>:                Notes on Heavy-duty Customization.
+                                                              (line  27)
+* ediff-startup-hook <2>:                Quick Help Customization.
+                                                              (line   6)
+* ediff-startup-hook:                    Hooks.               (line  79)
+* ediff-suspend-hook:                    Hooks.               (line  31)
+* ediff-toggle-multiframe <1>:           Window and Frame Configuration.
+                                                              (line 103)
+* ediff-toggle-multiframe:               Other Session Commands.
+                                                              (line  21)
+* ediff-toggle-read-only-function:       Miscellaneous.       (line  59)
+* ediff-toggle-use-toolbar:              Other Session Commands.
+                                                              (line  33)
+* ediff-unselect-hook:                   Hooks.               (line  85)
+* ediff-use-last-dir <1>:                Miscellaneous.       (line  45)
+* ediff-use-last-dir:                    Major Entry Points.  (line 184)
+* ediff-use-long-help-message:           Quick Help Customization.
+                                                              (line   6)
+* ediff-use-toolbar-p:                   Other Session Commands.
+                                                              (line  40)
+* ediff-version-control-package:         Support for Version Control.
+                                                              (line  11)
+* ediff-wide-control-frame-rightward-shift: Window and Frame Configuration.
+                                                              (line  65)
+* ediff-window-setup-function:           Window and Frame Configuration.
+                                                              (line  96)
+* ediff-windows-linewise:                Major Entry Points.  (line  72)
+* ediff-windows-wordwise:                Major Entry Points.  (line  69)
+* ediff-word-1:                          Refinement of Difference Regions.
+                                                              (line  54)
+* ediff-word-2:                          Refinement of Difference Regions.
+                                                              (line  54)
+* ediff-word-3:                          Refinement of Difference Regions.
+                                                              (line  54)
+* ediff-word-4:                          Refinement of Difference Regions.
+                                                              (line  54)
+* ediff-word-mode:                       Notes on Heavy-duty Customization.
+                                                              (line  27)
+* ediff3:                                Major Entry Points.  (line  39)
+* edir-merge-revisions:                  Major Entry Points.  (line  59)
+* edir-merge-revisions-with-ancestor:    Major Entry Points.  (line  64)
+* edir-revisions:                        Major Entry Points.  (line  54)
+* edirs:                                 Major Entry Points.  (line  46)
+* edirs-merge:                           Major Entry Points.  (line 154)
+* edirs-merge-with-ancestor:             Major Entry Points.  (line 158)
+* edirs3:                                Major Entry Points.  (line  50)
+* epatch:                                Major Entry Points.  (line  92)
+* epatch-buffer:                         Major Entry Points.  (line 123)
+* eregistry:                             Other Session Commands.
+                                                              (line  11)
+* Finding differences:                   Introduction.        (line   6)
+* G:                                     Quick Help Commands. (line  10)
+* ga:                                    Quick Help Commands. (line 117)
+* gb:                                    Quick Help Commands. (line 129)
+* gc:                                    Quick Help Commands. (line 136)
+* generic-sc.el:                         Support for Version Control.
+                                                              (line  29)
+* h:                                     Quick Help Commands. (line 191)
+* i:                                     Quick Help Commands. (line 279)
+* important commands:                    Quick Help Commands. (line   6)
+* j:                                     Quick Help Commands. (line 110)
+* M:                                     Quick Help Commands. (line 306)
+* m:                                     Quick Help Commands. (line 169)
+* Merging files and buffers:             Introduction.        (line   6)
+* mode-line.el:                          Customizing the Mode Line.
+                                                              (line  17)
+* Multi-file patches:                    Session Groups.      (line  81)
+* n:                                     Quick Help Commands. (line 105)
+* p:                                     Quick Help Commands. (line 101)
+* Patching files and buffers:            Introduction.        (line   6)
+* pcl-cvs.el:                            Support for Version Control.
+                                                              (line  29)
+* q:                                     Quick Help Commands. (line 321)
+* R:                                     Quick Help Commands. (line 290)
+* r:                                     Quick Help Commands. (line 197)
+* ra:                                    Quick Help Commands. (line 205)
+* rb:                                    Quick Help Commands. (line 211)
+* rc:                                    Quick Help Commands. (line 217)
+* rcs.el:                                Support for Version Control.
+                                                              (line  29)
+* s:                                     Quick Help Commands. (line 396)
+* SPC:                                   Quick Help Commands. (line 105)
+* uniquify.el:                           Customizing the Mode Line.
+                                                              (line  17)
+* V:                                     Quick Help Commands. (line  23)
+* v:                                     Quick Help Commands. (line  19)
+* vc.el:                                 Support for Version Control.
+                                                              (line  29)
+* wa:                                    Quick Help Commands. (line  41)
+* wb:                                    Quick Help Commands. (line  44)
+* wc:                                    Quick Help Commands. (line  47)
+* wd:                                    Quick Help Commands. (line  32)
+* z:                                     Quick Help Commands. (line 311)
+* |:                                     Quick Help Commands. (line 175)
+* ~:                                     Quick Help Commands. (line 274)
+
+
+
+Tag Table:
+Node: Top1042
+Node: Introduction2532
+Node: Major Entry Points4922
+Node: Session Commands14691
+Node: Quick Help Commands16210
+Node: Other Session Commands34659
+Node: Registry of Ediff Sessions37459
+Node: Session Groups39015
+Node: Remote and Compressed Files45180
+Node: Customization46407
+Node: Hooks48360
+Node: Quick Help Customization53659
+Node: Window and Frame Configuration54670
+Node: Selective Browsing60635
+Node: Highlighting Difference Regions65731
+Node: Narrowing70474
+Node: Refinement of Difference Regions71752
+Node: Patch and Diff Programs74687
+Node: Merging and diff379254
+Node: Support for Version Control89057
+Node: Customizing the Mode Line90682
+Node: Miscellaneous91536
+Node: Notes on Heavy-duty Customization96785
+Node: Credits99370
+Node: GNU Free Documentation License104773
+Node: Index129934
+
+End Tag Table

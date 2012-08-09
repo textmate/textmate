@@ -1,0 +1,69 @@
+Copyright (C) 2002-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+New font handling mechanism with font backend method
+----------------------------------------------------
+
+The new files are:
+	font.h -- header providing font-backend related structures
+		(most important ones are "struct font" and "struct
+		font_driver"), macros, and etc.
+	font.c -- main font handling code.
+	xfont.c -- font-driver on X for X core fonts.
+	ftfont.c -- generic font-driver for FreeType fonts providing
+		device-independent methods of struct font_driver.
+	xftfont.c -- font-driver on X using Xft for FreeType fonts
+		utilizing methods provided by ftfont.c.
+	ftxfont.c -- font-driver on X directly using FreeType fonts
+		utilizing methods provided by ftfont.c.
+	w32font.c -- font driver on w32 using Windows native fonts,
+		corresponding to xfont.c
+	w32uniscribe.c -- font driver on w32, using the uniscribe API
+	        to provide complex script support for opentype fonts on
+		Windows 2000 and later, or earlier versions of Windows
+		with uniscribe installed as an add-on.
+
+So we already have codes for X and w32.  For Mac it seems that we need
+these files:
+	atmfont.c -- font-driver on mac using ATM fonts, corresponding
+		to xfont.c
+As BDF fonts are currently used on w32, we may also implement these:
+	bdffont.c -- generic font-driver for BDF fonts, corresponding to
+		ftfont.c
+	bdfw32font.c -- font-driver on w32 using BDF fonts,
+		corresponding to ftxfont.c
+But, as FreeType already supports BDF fonts, if FreeType and
+Fontconfig are also available on w32, what we need may be:
+	ftw32font.c -- font-driver on w32 directly using FreeType fonts
+		utilizing methods provided by ftfont.c.
+
+It may be interesting if Emacs supports a frame buffer directly and
+has these font driver.
+	ftfbfont.c -- font-driver on FB for FreeType fonts.
+	bdffbfont.c -- font-driver on FB for BDF fonts.
+
+Note: The fontset related codes are not yet matured to work well with
+the font backend method.  So, for instance, even if you start Emacs
+as something like this:
+  % emacs -fn tahoma
+Non-ASCII Latin characters will not be displayed by the font "tahoma".
+In such a case, please try this:
+
+(set-fontset-font "fontset-default" 'latin '("tahoma" . "unicode-bmp"))
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

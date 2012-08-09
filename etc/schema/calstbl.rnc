@@ -1,0 +1,197 @@
+# Copyright (C) 1992-2002 HaL Computer Systems, Inc., O'Reilly &
+# Associates, Inc., ArborText, Inc., Fujitsu Software Corporation,
+# Norman Walsh, Sun Microsystems, Inc., and the Organization for the
+# Advancement of Structured Information Standards (OASIS).
+#
+# Permission to use, copy, modify and distribute the DocBook DTD and
+# its accompanying documentation for any purpose and without fee is
+# hereby granted in perpetuity, provided that the above copyright
+# notice and this paragraph appear in all copies.  The copyright
+# holders make no representation about the suitability of the DTD for
+# any purpose.  It is provided "as is" without expressed or implied
+# warranty.
+
+# This file was generated automatically by Trang, and then manually
+# edited to add back definitions for overridden parameter entities and
+# undefined elements, specifically: bodyatt, secur, paracon,
+# tbl.table.mdl, tbl.entry.mdl, caution, graphic, legend, note, para,
+# title, warning.  This makes the semantics of this module as close as
+# possible to the original DTD and also allows this schema to be used
+# independently of DocBook.
+
+# ......................................................................
+
+# DocBook CALS Table Model V4.2 ........................................
+
+# File calstblx.mod ....................................................
+
+# Copyright 1992-2002 HaL Computer Systems, Inc.,
+# O'Reilly & Associates, Inc., ArborText, Inc., Fujitsu Software
+# Corporation, Norman Walsh, Sun Microsystems, Inc., and the
+# Organization for the Advancement of Structured Information
+# Standards (OASIS).
+# 
+# This DTD is based on the CALS Table Model
+# PUBLIC "-//USA-DOD//DTD Table Model 951010//EN"
+# 
+# $Id$
+# 
+# Permission to use, copy, modify and distribute the DocBook DTD
+# and its accompanying documentation for any purpose and without fee
+# is hereby granted in perpetuity, provided that the above copyright
+# notice and this paragraph appear in all copies.  The copyright
+# holders make no representation about the suitability of the DTD for
+# any purpose.  It is provided "as is" without expressed or implied
+# warranty.
+# 
+# If you modify the DocBook DTD in any way, except for declaring and
+# referencing additional sets of general entities and declaring
+# additional notations, label your DTD as a variant of DocBook.  See
+# the maintenance documentation for more information.
+# 
+# Please direct all questions, bug reports, or suggestions for
+# changes to the docbook@lists.oasis-open.org mailing list. For more
+# information, see http://www.oasis-open.org/docbook/.
+
+# ......................................................................
+
+# This module contains the definitions for the CALS Table Model
+# converted to XML.
+
+# These definitions are not directly related to the table model, but are
+# used in the default CALS table model and are usually defined elsewhere
+# (and prior to the inclusion of this table module) in a CALS DTD.
+
+bodyatt = empty
+secur = empty
+
+# no if zero(s),
+# yes if any other digits value
+
+yesorno = string
+titles = title?
+# default for use in entry content
+paracon = text
+
+# The parameter entities as defined below provide the CALS table model
+# as published (as part of the Example DTD) in MIL-HDBK-28001.
+# 
+# These following declarations provide the CALS-compliant default definitions
+# for these entities.  However, these entities can and should be redefined
+# (by giving the appropriate parameter entity declaration(s) prior to the
+# reference to this Table Model declaration set entity) to fit the needs
+# of the current application.
+tbl.table-titles.mdl = titles
+tbl.table-main.mdl = tgroup+ | graphic+
+tbl.table.mdl = tbl.table-titles.mdl | tbl.table-main.mdl
+tbl.table.att =
+  attribute tabstyle { text }?,
+  attribute tocentry { yesorno }?,
+  attribute shortentry { yesorno }?,
+  attribute orient { "port" | "land" }?,
+  attribute pgwide { yesorno }?
+tbl.tgroup.mdl = colspec*, spanspec*, thead?, tfoot?, tbody
+tbl.tgroup.att = attribute tgroupstyle { text }?
+tbl.hdft.mdl = colspec*, row+
+tbl.row.mdl = (entry | entrytbl)+
+tbl.entrytbl.mdl = colspec*, spanspec*, thead?, tbody
+tbl.entry.mdl = paracon | para | warning | caution | note | legend
+# =====  Element and attribute declarations follow. =====
+start = table
+table = element table { table.attlist, tbl.table.mdl }
+table.attlist &=
+  attribute frame {
+    "top" | "bottom" | "topbot" | "all" | "sides" | "none"
+  }?,
+  attribute colsep { yesorno }?,
+  attribute rowsep { yesorno }?,
+  tbl.table.att,
+  bodyatt,
+  secur
+tgroup = element tgroup { tgroup.attlist, tbl.tgroup.mdl }
+tgroup.attlist &=
+  attribute cols { text },
+  tbl.tgroup.att,
+  attribute colsep { yesorno }?,
+  attribute rowsep { yesorno }?,
+  attribute align { "left" | "right" | "center" | "justify" | "char" }?,
+  attribute char { text }?,
+  attribute charoff { text }?,
+  secur
+colspec = element colspec { colspec.attlist, empty }
+colspec.attlist &=
+  attribute colnum { text }?,
+  attribute colname { text }?,
+  attribute colwidth { text }?,
+  attribute colsep { yesorno }?,
+  attribute rowsep { yesorno }?,
+  attribute align { "left" | "right" | "center" | "justify" | "char" }?,
+  attribute char { text }?,
+  attribute charoff { text }?
+spanspec = element spanspec { spanspec.attlist, empty }
+spanspec.attlist &=
+  attribute namest { text },
+  attribute nameend { text },
+  attribute spanname { text },
+  attribute colsep { yesorno }?,
+  attribute rowsep { yesorno }?,
+  attribute align { "left" | "right" | "center" | "justify" | "char" }?,
+  attribute char { text }?,
+  attribute charoff { text }?
+thead = element thead { thead.attlist, tbl.hdft.mdl }
+thead.attlist &=
+  attribute valign { "top" | "middle" | "bottom" }?,
+  secur
+tfoot = element tfoot { tfoot.attlist, tbl.hdft.mdl }
+tfoot.attlist &=
+  attribute valign { "top" | "middle" | "bottom" }?,
+  secur
+tbody = element tbody { tbody.attlist, row+ }
+tbody.attlist &=
+  attribute valign { "top" | "middle" | "bottom" }?,
+  secur
+row = element row { row.attlist, tbl.row.mdl }
+row.attlist &=
+  attribute rowsep { yesorno }?,
+  attribute valign { "top" | "middle" | "bottom" }?,
+  secur
+entrytbl = element entrytbl { entrytbl.attlist, tbl.entrytbl.mdl }
+entrytbl.attlist &=
+  attribute cols { text },
+  tbl.tgroup.att,
+  attribute colname { text }?,
+  attribute spanname { text }?,
+  attribute namest { text }?,
+  attribute nameend { text }?,
+  attribute colsep { yesorno }?,
+  attribute rowsep { yesorno }?,
+  attribute align { "left" | "right" | "center" | "justify" | "char" }?,
+  attribute char { text }?,
+  attribute charoff { text }?,
+  secur
+entry = element entry { entry.attlist, tbl.entry.mdl* }
+entry.attlist &=
+  attribute colname { text }?,
+  attribute namest { text }?,
+  attribute nameend { text }?,
+  attribute spanname { text }?,
+  attribute morerows { text }?,
+  attribute colsep { yesorno }?,
+  attribute rowsep { yesorno }?,
+  attribute align { "left" | "right" | "center" | "justify" | "char" }?,
+  attribute char { text }?,
+  attribute charoff { text }?,
+  attribute rotate { yesorno }?,
+  attribute valign { "top" | "middle" | "bottom" }?,
+  secur
+caution |= notAllowed
+graphic |= notAllowed
+legend |= notAllowed
+note |= notAllowed
+para |= notAllowed
+title |= notAllowed
+warning |= notAllowed
+
+# End of DocBook CALS Table Model V4.2 .................................
+
+# ......................................................................

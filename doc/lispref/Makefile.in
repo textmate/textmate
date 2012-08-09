@@ -1,0 +1,164 @@
+# Makefile for the GNU Emacs Lisp Reference Manual.
+
+# Copyright (C) 1990-1996, 1998-2012 Free Software Foundation, Inc.
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+SHELL = /bin/sh
+
+# Standard configure variables.
+srcdir = @srcdir@
+
+version=@version@
+
+infodir = $(srcdir)/../../info
+# Directory with the (customized) texinfo.tex file.
+texinfodir = $(srcdir)/../misc
+# Directory with emacsver.texi.
+emacsdir =  $(srcdir)/../emacs
+
+MAKEINFO = @MAKEINFO@
+MAKEINFO_OPTS = --force --enable-encoding -I $(emacsdir) -I $(srcdir)
+TEXI2DVI = texi2dvi
+TEXI2PDF = texi2pdf
+DVIPS = dvips
+
+ENVADD = TEXINPUTS="$(srcdir):$(texinfodir):$(emacsdir):$(TEXINPUTS)" \
+         MAKEINFO="$(MAKEINFO) $(MAKEINFO_OPTS)"
+
+# List of all the texinfo files in the manual:
+
+srcs = \
+  $(srcdir)/elisp.texi \
+  $(emacsdir)/emacsver.texi \
+  $(srcdir)/abbrevs.texi \
+  $(srcdir)/advice.texi \
+  $(srcdir)/anti.texi \
+  $(srcdir)/back.texi \
+  $(srcdir)/backups.texi \
+  $(srcdir)/buffers.texi \
+  $(srcdir)/commands.texi \
+  $(srcdir)/compile.texi \
+  $(srcdir)/control.texi \
+  $(srcdir)/customize.texi \
+  $(srcdir)/debugging.texi \
+  $(srcdir)/display.texi \
+  $(srcdir)/edebug.texi \
+  $(srcdir)/errors.texi \
+  $(srcdir)/eval.texi \
+  $(srcdir)/files.texi \
+  $(srcdir)/frames.texi \
+  $(srcdir)/functions.texi \
+  $(srcdir)/hash.texi \
+  $(srcdir)/help.texi \
+  $(srcdir)/hooks.texi \
+  $(srcdir)/internals.texi \
+  $(srcdir)/intro.texi \
+  $(srcdir)/keymaps.texi \
+  $(srcdir)/lists.texi \
+  $(srcdir)/loading.texi \
+  $(srcdir)/macros.texi \
+  $(srcdir)/maps.texi \
+  $(srcdir)/markers.texi \
+  $(srcdir)/minibuf.texi \
+  $(srcdir)/modes.texi \
+  $(srcdir)/nonascii.texi \
+  $(srcdir)/numbers.texi \
+  $(srcdir)/objects.texi \
+  $(srcdir)/os.texi \
+  $(srcdir)/package.texi \
+  $(srcdir)/positions.texi \
+  $(srcdir)/processes.texi \
+  $(srcdir)/searching.texi \
+  $(srcdir)/sequences.texi \
+  $(srcdir)/streams.texi \
+  $(srcdir)/strings.texi \
+  $(srcdir)/symbols.texi \
+  $(srcdir)/syntax.texi \
+  $(srcdir)/text.texi \
+  $(srcdir)/tips.texi \
+  $(srcdir)/variables.texi \
+  $(srcdir)/windows.texi \
+  $(srcdir)/index.texi \
+  $(srcdir)/gpl.texi \
+  $(srcdir)/doclicense.texi
+
+mkinfodir = @test -d ${infodir} || mkdir ${infodir} || test -d ${infodir}
+
+.PHONY: info dvi pdf ps
+
+info: $(infodir)/elisp
+dvi: elisp.dvi
+html: elisp.html
+pdf: elisp.pdf
+ps: elisp.ps
+
+## Note: "<" is not portable in ordinary make rules.
+$(infodir)/elisp: $(srcs)
+	$(mkinfodir)
+	$(MAKEINFO) $(MAKEINFO_OPTS) -o $@ $(srcdir)/elisp.texi
+
+elisp.dvi: $(srcs)
+	$(ENVADD) $(TEXI2DVI) $(srcdir)/elisp.texi
+
+elisp.html: $(srcs)
+	$(MAKEINFO) $(MAKEINFO_OPTS) --html -o $@ $(srcdir)/elisp.texi
+
+elisp.ps: elisp.dvi
+	$(DVIPS) -o $@ elisp.dvi
+
+elisp.pdf: $(srcs)
+	$(ENVADD) $(TEXI2PDF) $(srcdir)/elisp.texi
+
+.PHONY: mostlyclean clean distclean maintainer-clean infoclean
+
+## [12] stuff is from two-volume.make.
+mostlyclean:
+	rm -f *.aux *.log *.toc *.cp *.cps *.fn *.fns *.ky *.kys \
+	  *.op *.ops *.pg *.pgs *.tp *.tps *.vr *.vrs
+	rm -f elisp[12]* vol[12].tmp
+
+clean: mostlyclean
+	rm -f elisp.dvi elisp.pdf elisp.ps
+	rm -f vol[12].dvi vol[12].pdf vol[12].ps
+	rm -rf elisp.html
+	rm -f emacs-lispref-${version}.tar*
+
+distclean: clean
+
+infoclean:
+	-cd $(infodir) && rm -f elisp elisp-[1-9] elisp-[1-9][0-9]
+
+maintainer-clean: distclean infoclean
+
+.PHONY: dist
+
+## Note this excludes the two-volume stuff.
+dist:
+	rm -rf emacs-lispref-${version}
+	mkdir emacs-lispref-${version}
+	cp ${srcdir}/*.texi ${texinfodir}/texinfo.tex \
+	  $(emacsdir)/emacsver.texi ${srcdir}/ChangeLog* \
+	  ${srcdir}/README emacs-lispref-${version}/
+	sed -e 's/@sr[c]dir@/./' -e 's/^\(texinfodir *=\).*/\1 ./' \
+	  -e 's/^\(emacsdir *=\).*/\1 ./' \
+	  -e 's/^\(infodir *=\).*/\1 ./' -e 's/^\(clean:.*\)/\1 infoclean/' \
+	  -e "s/@ver[s]ion@/${version}/" \
+	  ${srcdir}/Makefile.in > emacs-lispref-${version}/Makefile
+	tar -cf emacs-lispref-${version}.tar emacs-lispref-${version}
+	rm -rf emacs-lispref-${version}
+
+### Makefile ends here

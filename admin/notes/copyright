@@ -1,0 +1,614 @@
+Copyright (C) 2007-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+
+NOTES ON COPYRIGHTS AND LICENSES
+
+Some terminology:
+
+A "copyright notice" consists of one or a few lines of this format:
+"Copyright (C) 2006, 2007 Free Software Foundation, Inc."
+
+A "license notice" is a statement of permissions, and is usually much
+longer, eg the text "GNU Emacs is free software...".
+
+
+Summary for the impatient:
+
+1. Don't add code to Emacs written by someone other than yourself
+without thinking about the legal aspect. Even if the changes are
+trivial, consider if they combine with previous changes by the same
+author to make a non-trivial total. If so, make sure they have an
+assignment. If adding a whole file adjust the copyright statements in
+the file.
+
+2. When installing code written by someone else, the ChangeLog entry
+should be in the name of the author of the code, not the person who
+installs it.  Also use bzr commit's "--author" option.
+Do not install any of your own changes in the same commit.
+
+3. With images, add the legal info to a README file in the directory
+containing the image.
+
+4. If you add a lot of text to a previously trivial file that had no
+legal notices, consider if you should add a copyright statement.
+
+5. Please don't just add an FSF copyright without checking that is the
+right thing to do.
+
+
+Every non-trivial file distributed through the Emacs repository should be
+self-explanatory in terms of copyright and license. This includes
+files that are not distributed in Emacs releases (for example, the
+admin/ directory), because the whole Emacs repository is publicly
+available.
+
+The definition of triviality is a little vague, but a rule of thumb is
+that any file with less than 15 lines of actual content is trivial. If
+a file is auto-generated (eg ldefs-boot.el) from another one in the
+repository, then it does not really matter about adding a copyright
+statement to the generated file.
+
+Legal advice says that we could, if we wished, put a license notice
+even in trivial files, because copyright law in general looks at the
+overall work as a whole. It is not _necessary_ to do so, and rms
+prefers that we do not. This means one needs to take care that trivial
+files do not grow and become non-trivial without having a license
+added. NB consequently, if you add a lot of text to a small file,
+consider whether your changes have made the file worthy of a copyright
+notice, and if so, please add one.
+
+It can be helpful to put a reminder comment at the start of a trivial
+file, eg: "add a license notice if this grows to > 10 lines of code".
+
+The years in the copyright notice should be updated every year (see
+file "years" in this directory). The PDF versions of refcards etc
+should display copyright notices (an exception to the rule about
+"generated" files), but these can just display the latest year. The
+full list of years should be kept in comments in the source file. If
+these are distributed in the repository, check in a regenerated
+version when the tex files are updated.
+
+Copyright changes should be propagated to any associated repositories
+(eg Gnus, MH-E), but I think in every case this happens automatically
+(?).
+
+All README (and other such text files) that are non-trivial should
+contain copyright statements and GPL license notices, exactly as .el
+files do (see e.g. README in the top-level directory). Before 2007,
+we used a simple, short statement permitting copying and modification
+provided legal notices were retained. In Feb 2007 we switched to the
+standard GPL text, on legal advice. Some older text files in etc/
+should, however, keep their current licenses (see below for list).
+
+For image files, the copyright and license details should be recorded
+in a README file in each directory with images. (Legal advice says
+that we need not add notices to each image file individually, if they
+allow for that.). It is recommended to use the word "convert" to
+describe the automatic process of changing an image from one format to
+another (http://lists.gnu.org/archive/html/emacs-devel/2007-02/msg00618.html).
+
+
+When installing a file with an "unusual" license (after checking first
+it is ok), put a copy of the copyright and license in the file (if
+possible. It's ok if this makes the file incompatible with its
+original format, if it can still be used by Emacs), or in a README
+file in the relevant directory.
+
+The vast majority of files are copyright FSF and distributed under the
+GPL. A few files (mainly related to language and charset support) are
+copyright AIST alone, or both AIST and FSF. (Contact Kenichi Handa
+with questions about legal issues in such files.) In all these cases,
+the copyright years in each file should be updated each year.
+
+There are some exceptions to the points in the previous paragraph, and
+these are listed below for reference, together with any files where
+the copyright needs to be updated in "unusual" ways.
+
+If you find any other such cases, please consult to check they are ok,
+and note them in this file. This includes missing copyright notices,
+and "odd" copyright holders. In most cases, individual authors should
+not appear in copyright statements. Either the copyright has been
+assigned (check copyright.list) to the FSF (in which case the original
+author should be removed and the year(s) transferred to the FSF); or
+else it is possible the file should not be in Emacs at all (please
+report!).
+
+Note that it seems painfully clear that one cannot rely on commit logs,
+or even ChangeLogs, for older changes. People often installed changes
+from others, without recording the true authorship.
+
+[For reference, most of these points were established via email with
+rms, 2007/1, "Copyright years".
+
+In March 2011, information on some files no longer included was removed.
+Consult older versions of this document if interested.]
+
+
+lisp/version.el           # emacs-copyright
+lib-src/ebrowse.c         # version
+lib-src/etags.c           # print_version
+lib-src/rcs2log           # Copyright
+Cocoa/Emacs.base/Contents/Info.plist
+Cocoa/Emacs.base/Contents/Resources/English.lproj/InfoPlist.strings
+GNUstep/Emacs.base/Resources/Info-gnustep.plist
+   `set-copyright' in admin.el will do all the above.
+
+aclocal.m4
+configure
+m4/*.m4
+ - copyright FSF, with unlimited permission to copy, distribute and modify
+
+lib/Makefile.in
+ - copyright FSF, with MIT-like license
+
+build-aux/install-sh
+ - this file is copyright MIT, which is OK. Leave the copyright alone.
+
+etc/refcards/*.tex
+  also update the \def\year macro for the latest year.
+
+etc/future-bug
+ - doesn't need a humorless disclaimer, because Karl Fogel says we
+ can consider it part of Emacs, and he has a blanker disclaimer for
+ Emacs changes. (email to rgm "[Emacs-commit] emacs/etc future-bug",
+ 2007028)
+
+etc/letter.pbm,letter.xpm
+  - trivial, no notice needed.
+<http://lists.gnu.org/archive/html/emacs-devel/2007-02/msg00324.html>
+
+etc/FTP, ORDERS
+  - trivial (at time of writing), no license needed
+
+etc/GNU, INTERVIEW, LINUX-GNU, MOTIVATION, SERVICE, THE-GNU-PROJECT,
+WHY-FREE
+  rms: "These are statements of opinion or testimony. Their licenses
+  should permit verbatim copying only. Please don't change the
+  licenses that they have. They are distributed with Emacs but they
+  are not part of Emacs."
+
+etc/HELLO
+  standard notices. Just a note that although the file itself is not
+  really copyrightable, in the wider context of it being part of
+  Emacs (and written by those with assignments), a standard notice is
+  fine.
+
+etc/MAILINGLISTS
+  rms: simple license is fine for this file
+
+leim/CXTERM-DIC/4Corner.tit, ARRAY30.tit, CCDOSPY.tit, ECDICT.tit,
+ETZY.tit, PY-b5.tit, Punct-b5.tit, Punct.tit, QJ-b5.tit, QJ.tit,
+SW.tit, TONEPY.tit, ZOZY.tit
+  - leave the copyrights alone.
+
+leim/MISC-DIC/CTLau-b5.html, CTLau.html, cangjie-table.b5, cangjie-table.cns,
+pinyin.map, ziranma.cin
+  - leave the copyright alone.
+Note that pinyin.map, ziranma.cin (and hence the generated
+leim/quail/PY.el, ZIRANMA.el) are under GPLv1 or later.
+
+leim/SKK-DIC/SKK-JISYO.L
+ja-dic/ja-dic.el
+  (the latter is auto-generated from the former). Leave the copyright alone.
+
+lib-src/etags.c
+  Copyright information is duplicated in etc/ETAGS.README. Update that
+  file too.
+
+  Until 2007 etags.c was described as being copyright FSF and Ken Arnold.
+  After some investigation in Feb 2007, then to the best of our
+  knowledge we believe that the original 1984 Emacs version was based
+  on the version in BSD4.2. See for example this 1985 post from Ken Arnold:
+  <http://groups.google.com/group/mod.sources/browse_thread/thread/ffe5c55845a640a9>
+    I have received enough requests for the current source to ctags
+    to post it. Here is the latest version (what will go out with
+    4.3, modulo any bugs fixed during the beta period). It is the
+    4.2 ctags with recognition of yacc and lex tags added.
+
+  See also a 1984 version of ctags (no copyright) posted to net.sources:
+  <http://groups.google.com/group/net.sources/msg/a21b6c21be12a98d>
+  Version of etags.c in emacs-16.56 duplicates comment typos.
+
+  Accordingly, in Feb 2007 we added a 1984 copyright for the
+  University of California and a revised BSD license. The terms of
+  this require that the full license details be available in binary
+  distributions - hence the file etc/ETAGS.README. The fact that the
+  --version output just says "Copyright <year> FSF" is apparently OK
+  from a legal point of view.
+
+lisp/cedet/semantic/imenu.el
+  - See http://lists.gnu.org/archive/html/emacs-devel/2010-03/msg00410.html
+   in which Eric Ludlam established that the remaining contributions
+   from authors other than himself were negligible.
+
+lisp/play/tetris.el
+  - no special rules about the copyright. We note here that we believe
+  (2007/1) there is no problem with our use of the name "tetris" or
+  the concept.
+  rms: "My understanding is that game rules as such are not copyrightable."
+  <http://lists.gnu.org/archive/html/emacs-devel/2007-01/msg00960.html>
+  rms: Legal advice is that we are ok and need not worry about this.
+
+
+lisp/net/tramp.el
+  - there are also copyrights in the body of the file. Update these too.
+
+
+lwlib/
+rms (2007/02/17): "lwlib is not assigned to the FSF; we don't consider
+it part of Emacs. [...] Therefore non-FSF copyrights are ok in lwlib."
+
+NB don't change the GPL version used for lwlib .c and .h files (see
+below).
+
+FSF copyrights should only appear in files which have undergone
+non-trivial cumulative changes from the original versions in the Lucid
+Widget Library. NB this means that if you make non-trivial changes to
+a file with no FSF copyright, you should add one. Also, if changes are
+reverted to the extent that a file becomes basically the same as the
+original version, the FSF copyright should be removed.
+
+In my (rgm) opinion, as of Feb 2007, all the non-trivial files differ
+significantly from the original versions, with the exception of
+lwlib-Xm.h. Most of the changes that were made to this file have
+subsequently been reverted. Therefore I removed the FSF copyright from
+this file (which is arguably too trivial to merit a notice anyway). I
+added FSF copyright to the following files which did not have them
+already: Makefile.in, lwlib-Xaw.c, lwlib-int.h (borderline),
+lwlib-utils.c (borderline), lwlib.c, lwlib.h.
+
+Copyright years before the advent of public CVS in 2001 were those
+when I judged (from the CVS logs) that non-trivial amounts of change
+had taken place. I also adjusted the existing FSF years in xlwmenu.c,
+xlwmenu.h, and xlwmenuP.h on the same basis.
+
+Note that until Feb 2007, the following files in lwlib were lacking
+notices: lwlib-int.h, lwlib.h, lwlib-Xaw.h, lwlib-Xlw.h, lwlib-utils.h
+
+The following files did not list a Lucid copyright: xlwmenu.h,
+xlwmenuP.h.
+
+To the best of our knowledge, all the code files in lwlib were
+originally part of the Lucid Widget Library, even if they did not say
+so explicitly. For example, they were all present in Lucid Emacs 19.1
+in 1992. The exceptions are the two Xaw files, which did not appear
+till Lucid Emacs 19.9 in 1994. The file lwlib-Xaw.h is too trivial to
+merit a copyright notice, but would presumably have the same one as
+lwlib-Xaw.c. We have been unable to find a true standalone version of
+LWL, if there was such a thing, to check definitively.
+
+To clarify the situation, in Feb 2007 we added Lucid copyrights and
+GPL notices to those files lacking either that were non-trivial,
+namely: lwlib-int.h, lwlib.h, xlwmenu.h, xlwmenuP.h. This represents
+our best understanding of the legal status of these files. We also
+clarified the notices in Makefile.in, which was originally the
+Makefile auto-generated from Lucid's Imakefile.
+
+As of Feb 2007, the following files are considered too trivial for
+notices: lwlib-Xaw.h, lwlib-Xlw.h, lwlib-utils.h.
+
+The version of lwlib/ first installed in Emacs seems to be the same as
+that used in Lucid Emacs 19.8 (released 6-sep-93); except the two Xaw
+files, which did not appear till Athena support was added in Lucid
+Emacs 19.9. In Lucid Emacs 19.1, all files were under GPLv1 or later,
+but by Lucid Emacs 19.8, lwlib.c and xlwmenu.c had been switched to v2
+or later. These are the versions that were first installed in Emacs.
+So in GNU Emacs, these two files have been under v2 or later since
+1994.
+
+It seems that it was the intention of Lucid to use v1 or later
+(excepting the two files mentioned previously); so this is the license
+we have used when adding notices to code that did not have notices
+originally. Although we have the legal right to switch to v2 or later,
+rms prefers that we do not do so.
+
+
+doc/*/doclicense.texi
+  - leave the copyright alone in this imported file.
+
+doc/*/*.texi - All manuals should be under GFDL (but see below), and
+should include a copy of it, so that they can be distributed
+separately. faq.texi has a different license, for some reason no-one
+can remember.
+http://lists.gnu.org/archive/html/emacs-devel/2007-04/msg00583.html
+http://lists.gnu.org/archive/html/emacs-devel/2007-04/msg00618.html
+
+doc/misc/mh-e.texi is dual-licensed (GPL and GFDL) per agreement with
+FSF (reconfirmed by rms Aug 25 2008).  Discussion with
+licensing@fsf.org starting on Thu, 07 Aug 2003 with subject:
+"[gnu.org #58812] Changing license of MH-E manual"
+
+
+msdos/is_exec.c, sigaction.c - these files are copyright DJ Delorie.
+Leave the copyrights alone. Leave the Eli Zaretskii copyright in
+is_exec.c alone. See the msdos/README file for the legal history of
+these files.
+
+msdos/sed*.inp - These files are copyright FSF and distributed under
+an MIT-like license.
+
+
+oldXMenu/
+  Keep the "copyright.h" method used by X11, rather than moving the
+  licenses into the files. Note that the original X10.h did not use
+  copyright.h, but had an explicit notice, which we retain.
+
+If you make non-trivial changes to a file which does not have an FSF
+notice, add one and a GPL notice (as per Activate.c). If changes to a
+file are reverted such that it becomes essentially the same as the
+original X11 version, remove the FSF notice and GPL.
+
+Only the files which differ significantly from the original X11
+versions should have FSF copyright and GPL notices. At time of writing
+(Feb 2007), this is: Activate.c, Create.c, Internal.c. I (rgm)
+established this by diff'ing the current files against those in X11R1,
+and when I found significant differences looking in the ChangeLog for
+the years they originated (the CVS logs are truncated before 1999). I
+therefore removed the FSF notices (added in 200x) from the other
+files. There are some borderline cases IMO: AddSel.c, InsSel.c,
+XMakeAssoc.c, XMenu.h. For these I erred on the side of NOT adding FSF
+notices.
+
+With regards to whether the files we have changed should have GPL
+added or not, rms says (2007-02-25, "oldXmenu issues"):
+
+    It does not make much difference, because oldXmenu is obsolete
+    except for use in Emacs (and it is not normally used in Emacs any
+    more either).
+
+    So, to make things simple, please put our changes under the GPL.
+
+insque.c had no copyright notice until 2005. The version of insque.c
+added to Emacs 1992-01-27 is essentially the same as insremque.c added
+to glic three days later by Roland McGrath, with an FSF copyright and
+GPL, but no ChangeLog entry:
+<http://sources.redhat.com/cgi-bin/cvsweb.cgi/~checkout~/libc/misc/insremque.c?\
+rev=1.1&cvsroot=glibc>
+To the best of his recollection, McGrath (who has a copyright
+assignment) was the author of this file (email from roland at frob.com
+to rms, 2007-02-23, "Where did insque.c come from?"). The FSF
+copyright and GPL in this file are therefore correct as far as we
+understand it.
+
+Imakefile had no legal info in Feb 2007, but was obviously based on
+the X11 version (which also had no explicit legal info). As it was
+unused, I removed it. It would have the same MIT copyright as
+Makefile.in does now.
+
+
+src/gmalloc.c
+  - contains numerous copyrights from the GNU C library. Leave them alone.
+
+src/ndir.h
+  - see comments below. This file is OK to be released with Emacs
+  22, but we may want to revisit it afterwards.
+
+
+** Some notes on resolved issues, for historical information only
+
+etc/TERMS
+rms: "surely written either by me or by ESR. (If you can figure out
+which year, I can probably tell you which.) Either way, we have papers
+for it." It was present in Emacs-16.56 (15-jul-85). rms: "Then I
+conclude it was written by me."
+
+lisp/term/README
+  - had no copyright notice till Feb 2007. ChangeLog.3 suggests it was
+  written by Eric Raymond. When asked by rms on 14 Feb 2007 he said:
+
+    I don't remember writing it, but it reads like my prose and I believe
+    I wrote the feature(s) it's describing.  So I would have been the
+    likeliest person to write it.
+
+    Odds are that I did, but I'm not certain.
+
+  Accordingly, FSF copyright was added.
+
+src/unexhp9k800.c
+  http://lists.gnu.org/archive/html/emacs-devel/2007-02/msg00138.html
+  - briefly removed due to legal uncertainly Jan-Mar 2007. The
+  relevant assignment is under "hp9k800" in copyright.list. File was
+  written by John V. Morris at HP, and disclaimed by the author and
+  HP. So this file is public domain.
+
+
+lisp/progmodes/python.el
+Dave Love alerted us to a potential legal problem:
+http://lists.gnu.org/archive/html/emacs-pretest-bug/2007-04/msg00459.html
+
+On consultation with a lawyer, we found there was no problem:
+http://lists.gnu.org/archive/html/emacs-devel/2007-05/msg00466.html
+
+
+** Issues that are "fixed" for the release of Emacs 22, but we may
+   wish to revisit later in more detail
+
+
+admin/check-doc-strings
+  File says it's in the public domain, but that might not make it so.
+
+etc/e/eterm-color.ti
+src/ndir.h
+  On legal advice from Matt Norwood, the following comment was added
+  to these files in Feb/Mar 2007:
+
+    The code here is forced by the interface, and is not subject to
+    copyright, constituting the only possible expression of the
+    algorithm in this format.
+
+  With the addition of this notice, these files are OK for the
+  upcoming Emacs-22 release. Post-release, we can revisit this issue
+  and possibly add a list of all authors who have changed these files.
+  (details in email from Matt Norwood to rms, 2007/02/03).
+
+src/s/aix3-2.h, hpux8.h, hpux9.h, irix5-0.h, netbsd.h, usg5-4-2.h
+  [note some of these have since been merged into other files]
+  - all these (not obviously trivial) files were missing copyrights
+  till Feb 2007, when FSF copyright was added. Matt Norwood advised:
+
+    For now, I think the best policy is to assume that we do have
+    assignments from the authors (I recall many of these header files
+    as having been originally written by rms), and to attach an FSF
+    copyright with GPL notice. We can amend this if and when we
+    complete the code audit. Any additions to these files by
+    non-assigned authors are arguably "de minimis" contributions to
+    Emacs: small changes or suggestions to a work that are subsumed in
+    the main authors' copyright in the entire work.
+
+Here is my (rgm) take on the details of the above files:
+
+? irix5-0.h
+  I would say started non-trivial (1993, jimb, heavily based
+  on irix4-0.h). A few borderline non-tiny changes since.
+
+usg5-4-2.h
+ started non-trivial, but was heavily based on usg5-4.h, which was and is
+ copyright FSF. only tiny changes since installed.
+
+aix3-2.h, hpux8.h, hpux9.h, netbsd.h
+  started trivial, grown in tiny changes.
+
+netbsd.h:
+Roland McGrath said to rms (2007/02/17): "I don't really remember
+anything about it. If I put it in without other comment, then probably
+I wrote it myself."
+
+
+Someone might want to tweak the copyright years (for dates before
+2001) that I used in all these files.
+
+Note: erring on the side of caution, I also added notices to some
+files I thought might be considered non-trivial (if one includes
+comment) in s/:
+  aix4-1.h hpux10.h irix6-5.h
+  sol2.h
+
+(everything with > 30 non-blank lines, which at least is _some_ kind of
+system)
+
+
+*** These are copyright issues that need not be fixed until after
+    Emacs 22 is released (though if they can be fixed before, that is
+    obviously good):
+
+
+Is it OK to just `bzr remove' a file for legal reasons, or is
+something more drastic needed? A removed file is still available from
+the repository, if suitable options are applied. (This issue obviously
+does not affect a release).
+  rms: will ask lawyer
+
+
+Make sure that all files with non-standard copyrights or licenses are
+noted in this file.
+
+
+REMOVED etc/gnu.xpm, nt/icons/emacs21.ico, nt/icons/sink.ico
+  - Restore if find legal info. emacs21.ico is not due to Davenport.
+  Geoff Voelker checked but could not find a record of where it came
+  from.
+
+
+etc/images
+  Image files from GTK, Gnome are under GPLv2 (no "or later"?). RMS will
+  contact image authors in regards to future switch to v3.
+
+
+etc/TUTORIAL* (translations)
+  switch to GPL (see english TUTORIAL)
+  rms: "We can leave the TUTORIAL translations alone until their
+  maintainers update them."
+  Can adapt short license text from end of GPL translations at:
+  http://www.gnu.org/licenses/translations.html
+  Only a few sentences around the license notice need changing from
+  previous version.
+Done: TUTORIAL.eo
+
+
+*** These are copyright issues still to be addressed:
+
+None known.
+
+
+** NOTES ON RELICENSING TO GPL3
+
+The EMACS_22_BASE branch was changed to GPLv3 (or later) 2007/07/25.
+
+Some notes:
+(see http://lists.gnu.org/archive/html/emacs-devel/2007-07/msg01431.html)
+
+1. There are some files in the Emacs tree which are not part of Emacs (eg
+those included from Gnulib). These are all copyright FSF and (at time
+of writing) GPL >= 2. rms says may as well leave the licenses of these
+alone (may import them from Gnulib again). These are:
+
+    Gnulib:
+    build-aux/compile
+    build-aux/config.guess
+    build-aux/config.sub
+    build-aux/depcomp
+    build-aux/missing
+    build-aux/move-if-change
+    build-aux/snippet/_Noreturn.h
+    build-aux/snippet/arg-nonnull.h
+    build-aux/snippet/c++defs.h
+    build-aux/snippet/warn-on-use.h
+    doc/man/texinfo.tex
+    lib/*.[ch]
+    lib/gnulib.mk
+    src/gmalloc.c
+    src/termcap.c
+    src/tparam.c
+
+Note _not_ included in the above are src/regex.{c,h} (rms: "That
+forked version is only in Emacs, so definitely relicense that."), and
+oldXMenu/insque.c (rms: "We wrote that specifically for Emacs, so
+definitely relicense that.").
+
+2. The files that are copyright FSF and AIST, or AIST alone, should be
+and were updated, ditto the oldXMenu files with FSF copyright, and
+msdos/is_exec.c and sigaction.c.
+
+3. lwlib/
+
+Files originally in Lucid Widget Library were left alone (excludes
+ChangeLog, etc), ie remain under GPL v1 or later, or v2 or later.
+(rms: "We may as well leave this alone, since we are never going to
+change it much.")
+
+4. There are some files where the FSF holds no copyright. These were
+left alone:
+
+   leim/MISC-DIC/CTLau-b5.html  >= v2
+   leim/MISC-DIC/CTLau.html     >= v2
+     (above included in lisp/international/titdic-cnv.el)
+   leim/MISC-DIC/pinyin.map     >= v1
+   leim/MISC-DIC/ziranma.cin    >= v1
+   leim/SKK-DIC/SKK-JISYO.L     >= v2
+   leim/SKK-DIC/README          >= v2
+   leim/ja-dic/ja-dic.el        >= v2
+
+5. At time of writing, some non-Emacs icons included from Gnome remain
+under GPLv2 (no "or later"). See:
+
+   etc/images/gnus/README
+   etc/images/mail/README
+   etc/images/README
+   nt/icons/README
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

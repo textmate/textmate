@@ -1,0 +1,442 @@
+
+			   GNU'S NOT UNIX
+
+		 Conducted by David Betz and Jon Edwards
+
+	      Richard Stallman discusses his public-domain
+		    UNIX-compatible software system
+			   with BYTE editors
+			      (July 1986)
+
+Copyright (C) 1986 Richard Stallman.  Permission is granted to make and
+distribute copies of this article as long as the copyright and this notice
+appear on all copies.
+
+Richard Stallman has undertaken probably the most ambitious free software
+development project to date, the GNU system.  In his GNU Manifesto,
+published in the March 1985 issue of Dr. Dobb's Journal, Stallman described
+GNU as a "complete Unix-compatible software system which I am writing so
+that I can give it away free to everyone who can use it...  Once GNU is
+written, everyone will be able to obtain good system software free, just
+like air."  (GNU is an acronym for GNU's Not UNIX; the "G" is pronounced.)
+
+   Stallman is widely known as the author of EMACS, a powerful text editor
+that he developed at the MIT Artificial Intelligence Laboratory.  It is no
+coincidence that the first piece of software produced as part of the GNU
+project was a new implementation of EMACS.  GNU EMACS has already achieved a
+reputation as one of the best implementations of EMACS currently available
+at any price.
+
+BYTE: We read your GNU Manifesto in the March 1985 issue of Dr. Dobb's.
+What has happened since?  Was that really the beginning, and how have you
+progressed since then?
+
+Stallman: The publication in Dr. Dobb's wasn't the beginning of the
+project.  I wrote the GNU Manifesto when I was getting ready to start the
+project, as a proposal to ask computer manufacturers for funding.  They
+didn't want to get involved, and I decided that rather than spend my time
+trying to pursue funds, I ought to spend it writing code.  The manifesto was
+published about a year and a half after I had written it, when I had barely
+begun distributing the GNU EMACS.  Since that time, in addition to making
+GNU EMACS more complete and making it run on many more computers, I have
+nearly finished the optimizing C compiler and all the other software that
+is needed for running C programs.  This includes a source-level debugger
+that has many features that the other source-level debuggers on UNIX don't
+have.  For example, it has convenience variables within the debugger so you
+can save values, and it also has a history of all the values that you have
+printed out, making it tremendously easier to chase around list structures.
+
+BYTE: You have finished an editor that is now widely distributed and you
+are about to finish the compiler.
+
+Stallman: I expect that it will be finished this October.
+
+BYTE: What about the kernel?
+
+Stallman: I'm currently planning to start with the kernel that was written
+at MIT and was released to the public recently with the idea that I would
+use it.  This kernel is called TRIX; it's based on remote procedure call.  I
+still need to add compatibility for a lot of the features of UNIX which it
+doesn't have currently.  I haven't started to work on that yet.  I'm
+finishing the compiler before I go to work on the kernel.  I am also going
+to have to rewrite the file system.  I intend to make it failsafe just by
+having it write blocks in the proper order so that the disk structure is
+always consistent.  Then I want to add version numbers.  I have a complicated
+scheme to reconcile version numbers with the way people usually use UNIX.
+You have to be able to specify filenames without version numbers, but you
+also have to be able to specify them with explicit version numbers, and
+these both need to work with ordinary UNIX programs that have not been
+modified in any way to deal with the existence of this feature.  I think I
+have a scheme for doing this, and only trying it will show me whether it
+really does the job.
+
+BYTE: Do you have a brief description you can give us as to how GNU as a
+system will be superior to other systems?  We know that one of your goals is
+to produce something that is compatible with UNIX.  But at least in the area
+of file systems you have already said that you are going to go beyond UNIX
+and produce something that is better.
+
+Stallman: The C compiler will produce better code and run faster.  The
+debugger is better.  With each piece I may or may not find a way to improve
+it.  But there is no one answer to this question.  To some extent I am
+getting the benefit of reimplementation, which makes many systems much
+better.  To some extent it's because I have been in the field a long time
+and worked on many other systems.  I therefore have many ideas to bring to
+bear.  One way in which it will be better is that practically everything in
+the system will work on files of any size, on lines of any size, with any
+characters appearing in them.  The UNIX system is very bad in that regard.
+It's not anything new as a principle of software engineering that you
+shouldn't have arbitrary limits.  But it just was the standard practice in
+writing UNIX to put those in all the time, possibly just because they were
+writing it for a very small computer.  The only limit in the GNU system is
+when your program runs out of memory because it tried to work on too much
+data and there is no place to keep it all.
+
+BYTE: And that isn't likely to be hit if you've got virtual memory.  You may
+just take forever to come up with the solution.
+
+Stallman: Actually these limits tend to hit in a time long before you take
+forever to come up with the solution.
+
+BYTE: Can you say something about what types of machines and environments
+GNU EMACS in particular has been made to run under?  It's now running on
+VAXes; has it migrated in any form to personal computers?
+
+Stallman: I'm not sure what you mean by personal computers.  For example, is
+a Sun a personal computer?  GNU EMACS requires at least a megabyte of
+available memory and preferably more.  It is normally used on machines that
+have virtual memory.  Except for various technical problems in a few C
+compilers, almost any machine with virtual memory and running a fairly
+recent version of UNIX will run GNU EMACS, and most of them currently do.
+
+BYTE: Has anyone tried to port it to Ataris or Macintoshes?
+
+Stallman: The Atari 1040ST still doesn't have quite enough memory.  The next
+Atari machine, I expect, will run it.  I also think that future Ataris will
+have some forms of memory mapping.  Of course, I am not designing the
+software to run on the kinds of computers that are prevalent today.  I knew
+when I started this project it was going to take a few years.  I therefore
+decided that I didn't want to make a worse system by taking on the
+additional challenge of making it run in the currently constrained
+environment.  So instead I decided I'm going to write it in the way that
+seems the most natural and best.  I am confident that in a couple of years
+machines of sufficient size will be prevalent.  In fact, increases in memory
+size are happening so fast it surprises me how slow most of the people are
+to put in virtual memory; I think it is totally essential.
+
+BYTE: I think people don't really view it as being necessary for
+single-user machines.
+
+Stallman: They don't understand that single user doesn't mean single
+program.  Certainly for any UNIX-like system it's important to be able to
+run lots of different processes at the same time even if there is only one
+of you.  You could run GNU EMACS on a nonvirtual-memory machine with enough
+memory, but you couldn't run the rest of the GNU system very well or a UNIX
+system very well.
+
+BYTE: How much of LISP is present in GNU EMACS?  It occurred to me that it
+may be useful to use that as a tool for learning LISP.
+
+Stallman: You can certainly do that.  GNU EMACS contains a complete,
+although not very powerful, LISP system.  It's powerful enough for writing
+editor commands.  It's not comparable with, say, a Common LISP System,
+something you could really use for system programming, but it has all the
+things that LISP needs to have.
+
+BYTE: Do you have any predictions about when you would be likely to
+distribute a workable environment in which, if we put it on our machines or
+workstations, we could actually get reasonable work done without using
+anything other than code that you distribute?
+
+Stallman: It's really hard to say.  That could happen in a year, but of
+course it could take longer.  It could also conceivably take less, but
+that's not too likely anymore.  I think I'll have the compiler finished in a
+month or two.  The only other large piece of work I really have to do is in
+the kernel.  I first predicted GNU would take something like two years, but
+it has now been two and a half years and I'm still not finished.  Part of
+the reason for the delay is that I spent a lot of time working on one
+compiler that turned out to be a dead end.  I had to rewrite it completely.
+Another reason is that I spent so much time on GNU EMACS.  I originally
+thought I wouldn't have to do that at all.
+
+BYTE: Tell us about your distribution scheme.
+
+Stallman: I don't put software or manuals in the public domain, and the
+reason is that I want to make sure that all the users get the freedom to
+share.  I don't want anyone making an improved version of a program I wrote
+and distributing it as proprietary.  I don't want that to ever be able to
+happen.  I want to encourage the free improvements to these programs, and
+the best way to do that is to take away any temptation for a person to make
+improvements nonfree.  Yes, a few of them will refrain from making
+improvements, but a lot of others will make the same improvements and
+they'll make them free.
+
+BYTE: And how do you go about guaranteeing that?
+
+Stallman: I do this by copyrighting the programs and putting on a notice
+giving people explicit permission to copy the programs and change them but
+only on the condition that they distribute under the same terms that I
+used, if at all.  You don't have to distribute the changes you make to any
+of my programs--you can just do it for yourself, and you don't have to give
+it to anyone or tell anyone.  But if you do give it to someone else, you
+have to do it under the same terms that I use.
+
+BYTE: Do you obtain any rights over the executable code derived from the C
+compiler?
+
+Stallman: The copyright law doesn't give me copyright on output from the
+compiler, so it doesn't give me a way to say anything about that, and in
+fact I don't try to.  I don't sympathize with people developing proprietary
+products with any compiler, but it doesn't seem especially useful to try to
+stop them from developing them with this compiler, so I am not going to.
+
+BYTE: Do your restrictions apply if people take pieces of your code to
+produce other things as well?
+
+Stallman: Yes, if they incorporate with changes any sizable piece.  If it
+were two lines of code, that's nothing; copyright doesn't apply to that.
+Essentially, I have chosen these conditions so that first there is a
+copyright, which is what all the software hoarders use to stop everybody
+from doing anything, and then I add a notice giving up part of those
+rights.  So the conditions talk only about the things that copyright applies
+to.  I don't believe that the reason you should obey these conditions is
+because of the law.  The reason you should obey is because an upright person
+when he distributes software encourages other people to share it further.
+
+BYTE: In a sense you are enticing people into this mode of thinking by
+providing all of these interesting tools that they can use but only if they
+buy into your philosophy.
+
+Stallman: Yes.  You could also see it as using the legal system that
+software hoarders have set up against them.  I'm using it to protect the
+public from them.
+
+BYTE: Given that manufacturers haven't wanted to fund the project, who do
+you think will use the GNU system when it is done?
+
+Stallman: I have no idea, but it is not an important question.  My purpose
+is to make it possible for people to reject the chains that come with
+proprietary software.  I know that there are people who want to do that.
+Now, there may be others who don't care, but they are not my concern.  I
+feel a bit sad for them and for the people that they influence.  Right now a
+person who perceives the unpleasantness of the terms of proprietary
+software feels that he is stuck and has no alternative except not to use a
+computer.  Well, I am going to give him a comfortable alternative.
+    Other people may use the GNU system simply because it is technically
+superior.  For example, my C compiler is producing about as good a code as I
+have seen from any C compiler.  And GNU EMACS is generally regarded as being
+far superior to the commercial competition.  And GNU EMACS was not funded by
+anyone either, but everyone is using it.  I therefore think that many people
+will use the rest of the GNU system because of its technical advantages.
+But I would be doing a GNU system even if I didn't know how to make it
+technically better because I want it to be socially better.  The GNU project
+is really a social project.  It uses technical means to make a change in
+society.
+
+BYTE: Then it is fairly important to you that people adopt GNU.  It is not
+just an academic exercise to produce this software to give it away to
+people.  You hope it will change the way the software industry operates.
+
+Stallman: Yes.  Some people say no one will ever use it because it doesn't
+have some attractive corporate logo on it, and other people say that they
+think it is tremendously important and everyone's going to want to use it.
+I have no way of knowing what is really going to happen.  I don't know any
+other way to try to change the ugliness of the field that I find myself in,
+so this is what I have to do.
+
+BYTE: Can you address the implications?  You obviously feel that this is an
+important political and social statement.
+
+Stallman: It is a change.  I'm trying to change the way people approach
+knowledge and information in general.  I think that to try to own knowledge,
+to try to control whether people are allowed to use it, or to try to stop
+other people from sharing it, is sabotage.  It is an activity that benefits
+the person that does it at the cost of impoverishing all of society.  One
+person gains one dollar by destroying two dollars' worth of wealth.  I think
+a person with a conscience wouldn't do that sort of thing except perhaps if
+he would otherwise die.  And of course the people who do this are fairly
+rich; I can only conclude that they are unscrupulous.  I would like to see
+people get rewards for writing free software and for encouraging other
+people to use it.  I don't want to see people get rewards for writing
+proprietary software because that is not really a contribution to society.
+The principle of capitalism is the idea that people manage to make money by
+producing things and thereby are encouraged to do what is useful,
+automatically, so to speak.  But that doesn't work when it comes to owning
+knowledge.  They are encouraged to do not really what's useful, and what
+really is useful is not encouraged.  I think it is important to say that
+information is different from material objects like cars and loaves of
+bread because people can copy it and share it on their own and, if nobody
+attempts to stop them, they can change it and make it better for
+themselves.  That is a useful thing for people to do.  This isn't true of
+loaves of bread.  If you have one loaf of bread and you want another, you
+can't just put your loaf of bread into a bread copier.  you can't make
+another one except by going through all the steps that were used to make
+the first one.  It therefore is irrelevant whether people are permitted to
+copy it--it's impossible.
+   Books were printed only on printing presses until recently.  It was
+possible to make a copy yourself by hand, but it wasn't practical because
+it took so much more work than using a printing press.  And it produced
+something so much less attractive that, for all intents and purposes, you
+could act as if it were impossible to make books except by mass producing
+them.  And therefore copyright didn't really take any freedom away from the
+reading public.  There wasn't anything that a book purchaser could do that
+was forbidden by copyright.
+   But this isn't true for computer programs.  It's also not true for tape
+cassettes.  It's partly false now for books, but it is still true that for
+most books it is more expensive and certainly a lot more work to Xerox them
+than to buy a copy, and the result is still less attractive.  Right now we
+are in a period where the situation that made copyright harmless and
+acceptable is changing to a situation where copyright will become
+destructive and intolerable.  So the people who are slandered as "pirates"
+are in fact the people who are trying to do something useful that they have
+been forbidden to do.   The copyright laws are entirely designed to help
+people take complete control over the use of some information for their own
+good.  But they aren't designed to help people who want to make sure that
+the information is accessible to the public and stop others from depriving
+the public.  I think that the law should recognize a class of works that are
+owned by the public, which is different from public domain in the same
+sense that a public park is different from something found in a garbage
+can.  It's not there for anybody to take away, it's there for everyone to
+use but for no one to impede.  Anybody in the public who finds himself being
+deprived of the derivative work of something owned by the public should be
+able to sue about it.
+
+BYTE: But aren't pirates interested in getting copies of programs because
+they want to use those programs, not because they want to use that
+knowledge to produce something better?
+
+Stallman: I don't see that that's the important distinction.  More people
+using a program means that the program contributes more to society.  You
+have a loaf of bread that could be eaten either once or a million times.
+
+BYTE: Some users buy commercial software to obtain support.  How does your
+distribution scheme provide support?
+
+Stallman: I suspect that those users are misled and are not thinking
+clearly.  It is certainly useful to have support, but when they start
+thinking about how that has something to do with selling software or with
+the software being proprietary, at that point they are confusing
+themselves.  There is no guarantee that proprietary software will receive
+good support.  Simply because sellers say that they provide support, that
+doesn't mean it will be any good.  And they may go out of business.  In fact,
+people think that GNU EMACS has better support than commercial EMACSes.  One
+of the reasons is that I'm probably a better hacker than the people who
+wrote the other EMACSes, but the other reason is that everyone has sources
+and there are so many people interested in figuring out how to do things
+with it that you don't have to get your support from me.  Even just the free
+support that consists of my fixing bugs people report to me and
+incorporating that in the next release has given people a good level of
+support.  You can always hire somebody to solve a problem for you, and when
+the software is free you have a competitive market for the support.  You can
+hire anybody.  I distribute a service list with EMACS, a list of people's
+names and phone numbers and what they charge to provide support.
+
+BYTE: Do you collect their bug fixes?
+
+Stallman: Well, they send them to me.  I asked all the people who wanted to
+be listed to promise that they would never ask any of their customers to
+keep secret whatever they were told or any changes they were given to the
+GNU software as part of that support.
+
+BYTE: So you can't have people competing to provide support based on their
+knowing the solution to some problem that somebody else doesn't know.
+
+Stallman: No.  They can compete based on their being clever and more likely
+to find the solution to your problem, or their already understanding more
+of the common problems, or knowing better how to explain to you what you
+should do.  These are all ways they can compete.  They can try to do better,
+but they cannot actively impede their competitors.
+
+BYTE: I suppose it's like buying a car.  You're not forced to go back to the
+original manufacturer for support or continued maintenance.
+
+Stallman: Or buying a house--what would it be like if the only person who
+could ever fix problems with your house was the contractor who built it
+originally?  That is the kind of imposition that's involved in proprietary
+software.  People tell me about a problem that happens in UNIX.  Because
+manufacturers sell improved versions of UNIX, they tend to collect fixes
+and not give them out except in binaries.  The result is that the bugs don't
+really get fixed.
+
+BYTE: They're all duplicating effort trying to solve bugs independently.
+
+Stallman: Yes.  Here is another point that helps put the problem of
+proprietary information in a social perspective.  Think about the liability
+insurance crisis.  In order to get any compensation from society, an injured
+person has to hire a lawyer and split the money with that lawyer.  This is a
+stupid and inefficient way of helping out people who are victims of
+accidents.  And consider all the time that people put into hustling to take
+business away from their competition.  Think of the pens that are packaged
+in large cardboard packages that cost more than the pen--just to make sure
+that the pen isn't stolen.  Wouldn't it be better if we just put free pens
+on every street corner?  And think of all the toll booths that impede the
+flow of traffic.  It's a gigantic social phenomenon.  People find ways of
+getting money by impeding society.  Once they can impede society, they can
+be paid to leave people alone.  The waste inherent in owning information
+will become more and more important and will ultimately make the difference
+between the utopia in which nobody really has to work for a living because
+it's all done by robots and a world just like ours where everyone spends
+much time replicating what the next fellow is doing.
+
+BYTE: Like typing in copyright notices on the software.
+
+Stallman: More like policing everyone to make sure that they don't have
+forbidden copies of anything and duplicating all the work people have
+already done because it is proprietary.
+
+BYTE: A cynic might wonder how you earn your living.
+
+Stallman: From consulting.  When I do consulting, I always reserve the right
+to give away what I wrote for the consulting job.  Also, I could be making
+my living by mailing copies of the free software that I wrote and some that
+other people wrote.  Lots of people send in $150 for GNU EMACS, but now this
+money goes to the Free Software Foundation that I started.  The foundation
+doesn't pay me a salary because it would be a conflict of interest.
+Instead, it hires other people to work on GNU.  As long as I can go on
+making a living by consulting I think that's the best way.
+
+BYTE: What is currently included in the official GNU distribution tape?
+
+Stallman: Right now the tape contains GNU EMACS (one version fits all
+computers); Bison, a program that replaces YACC; MIT Scheme, which is
+Professor Sussman's super-simplified dialect of LISP; and Hack, a
+dungeon-exploring game similar to Rogue.
+
+BYTE: Does the printed manual come with the tape as well?
+
+Stallman: No.  Printed manuals cost $15 each or copy them yourself.  Copy
+this interview and share it, too.
+
+BYTE: How can you get a copy of that?
+
+Stallman: Write to the Free Software Foundation, 675 Massachusetts Ave.,
+Cambridge, MA 02139.
+
+[As of April 2005, this address is:
+     Free Software Foundation
+     51 Franklin Street, Fifth Floor
+     Boston, MA  02110-1301, USA
+     Voice:  +1-617-542-5942
+     Fax:    +1-617-542-2652
+]
+
+BYTE: What are you going to do when you are done with the GNU system?
+
+Stallman: I'm not sure.  Sometimes I think that what I'll go on to do is the
+same thing in other areas of software.
+
+BYTE: So this is just the first of a whole series of assaults on the
+software industry?
+
+Stallman: I hope so.  But perhaps what I'll do is just live a life of ease
+working a little bit of the time just to live.  I don't have to live
+expensively.  The rest of the time I can find interesting people to hang
+around with or learn to do things that I don't know how to do.
+
+Editorial Note: BYTE holds the right to provide this interview on BIX but
+will not interfere with its distribution.
+
+Richard Stallman, 545 Technology Square, Room 703, Cambridge, MA 02139.
+Copyright (C) 1986 Richard Stallman.  Permission is granted to make and
+distribute copies of this article as long as the copyright and this notice
+appear on all copies.

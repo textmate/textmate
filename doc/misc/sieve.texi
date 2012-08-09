@@ -1,0 +1,361 @@
+\input texinfo                  @c -*-texinfo-*-
+
+@include gnus-overrides.texi
+
+@setfilename ../../info/sieve
+@settitle Emacs Sieve Manual
+@synindex fn cp
+@synindex vr cp
+@synindex pg cp
+
+@copying
+This file documents the Emacs Sieve package, for server-side mail filtering.
+
+Copyright @copyright{} 2001-2012  Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
+@end quotation
+@end copying
+
+@dircategory Emacs network features
+@direntry
+* Sieve: (sieve).               Managing Sieve scripts in Emacs.
+@end direntry
+@iftex
+@finalout
+@end iftex
+@setchapternewpage odd
+
+@titlepage
+@ifset WEBHACKDEVEL
+@title Emacs Sieve Manual (DEVELOPMENT VERSION)
+@end ifset
+@ifclear WEBHACKDEVEL
+@title Emacs Sieve Manual
+@end ifclear
+
+@author by Simon Josefsson
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@summarycontents
+@contents
+
+@node Top
+@top Sieve Support for Emacs
+
+This is intended as a users manual for Sieve Mode and Manage Sieve, and
+as a reference manual for the @samp{sieve-manage} protocol Emacs Lisp
+API.
+
+Sieve is a language for server-side filtering of mail.  The language
+is documented in RFC 3028.  This manual does not attempt to document
+the language, so keep RFC 3028 around.
+
+@ifnottex
+@insertcopying
+@end ifnottex
+
+@menu
+* Installation::          Getting ready to use the package.
+* Sieve Mode::            Editing Sieve scripts.
+* Managing Sieve::        Managing Sieve scripts on a remote server.
+* Examples ::             A few Sieve code snippets.
+* Manage Sieve API ::     Interfacing to the Manage Sieve Protocol API.
+* Standards::             A summary of RFCs and working documents used.
+* GNU Free Documentation License:: The license for this documentation.
+* Index::                 Function and variable index.
+@end menu
+
+
+@node Installation
+@chapter Installation
+@cindex Install
+@cindex Setup
+
+The Sieve package should come with your Emacs version, and should be
+ready for use directly.
+
+However, to manually set up the package you can put the following
+commands in your @code{~/.emacs}:
+
+@lisp
+(autoload 'sieve-mode "sieve-mode")
+@end lisp
+@lisp
+(setq auto-mode-alist (cons '("\\.s\\(v\\|iv\\|ieve\\)\\'" . sieve-mode)
+                            auto-mode-alist))
+@end lisp
+
+
+@node Sieve Mode
+@chapter Sieve Mode
+
+Sieve mode provides syntax-based indentation, font-locking support and
+other handy functions to make editing Sieve scripts easier.
+
+Use @samp{M-x sieve-mode} to switch to this major mode.  This command
+runs the hook @code{sieve-mode-hook}.
+
+@vindex sieve-mode-map
+@vindex sieve-mode-syntax-table
+Sieve mode is derived from @code{c-mode}, and is very similar except
+for the syntax of comments.  The keymap (@code{sieve-mode-map}) is
+inherited from @code{c-mode}, as are the variables for customizing
+indentation.  Sieve mode has its own abbrev table
+(@code{sieve-mode-abbrev-table}) and syntax table
+(@code{sieve-mode-syntax-table}).
+
+In addition to the editing utility functions, Sieve mode also contains
+bindings to manage Sieve scripts remotely. @xref{Managing Sieve}.
+
+@table @kbd
+
+@item C-c RET
+@kindex C-c RET
+@findex sieve-manage
+@cindex manage remote sieve script
+Open a connection to a remote server using the Managesieve protocol.
+
+@item C-c C-l
+@kindex C-c C-l
+@findex sieve-upload
+@cindex upload sieve script
+Upload the Sieve script to the currently open server.
+
+@end table
+
+
+@node Managing Sieve
+@chapter Managing Sieve
+
+Manage Sieve is a special mode used to display Sieve scripts available
+on a remote server.  It can be invoked with @kbd{M-x sieve-manage
+RET}, which queries the user for a server and if necessary, user
+credentials to use.
+
+When a server has been successfully contacted, the Manage Sieve buffer
+looks something like:
+
+@example
+Server  : mailserver:2000
+
+2 scripts on server, press RET on a script name edits it, or
+press RET on <new script> to create a new script.
+        <new script>
+ ACTIVE .sieve
+        template.siv
+@end example
+
+One of the scripts are highlighted, and standard point navigation
+commands (@kbd{<up>}, @kbd{<down>} etc) can be used to navigate the
+list.
+
+The following commands are available in the Manage Sieve buffer:
+
+@table @kbd
+
+@item m
+@kindex m
+@findex sieve-activate
+Activates the currently highlighted script.
+
+@item u
+@kindex u
+@findex sieve-deactivate
+Deactivates the currently highlighted script.
+
+@item C-M-?
+@kindex C-M-?
+@findex sieve-deactivate-all
+Deactivates all scripts.
+
+@item r
+@kindex r
+@findex sieve-remove
+Remove currently highlighted script.
+
+@item RET
+@item mouse-2
+@item f
+@kindex RET
+@kindex mouse-2
+@kindex f
+@findex sieve-edit-script
+Bury the server buffer and download the currently highlighted script
+into a new buffer for editing in Sieve mode (@pxref{Sieve Mode}).
+
+@item o
+@kindex o
+@findex sieve-edit-script-other-window
+Create a new buffer in another window containing the currently
+highlighted script for editing in Sieve mode (@pxref{Sieve Mode}).
+
+@item q
+@kindex q
+@findex sieve-bury-buffer
+Bury the Manage Sieve buffer without closing the connection.
+
+@item ?
+@item h
+@kindex ?
+@kindex h
+@findex sieve-help
+Displays help in the minibuffer. 
+
+@end table
+
+@node Examples
+@chapter Examples
+
+If you are not familiar with Sieve, this chapter contains a few simple
+code snippets that you can cut'n'paste and modify at will, until you
+feel more comfortable with the Sieve language to write the rules from
+scratch.
+
+The following complete Sieve script places all messages with a matching
+@samp{Sender:} header into the given mailbox.  Many mailing lists uses
+this format.  The first line makes sure your Sieve server understands
+the @code{fileinto} command.
+
+@example
+require "fileinto";
+
+if address "sender" "owner-w3-beta@@xemacs.org" @{
+        fileinto "INBOX.w3-beta";
+@}
+@end example
+
+A few mailing lists do not use the @samp{Sender:} header, but has a
+unique identifier in some other header.  The following is not a
+complete script, it assumes that @code{fileinto} has already been
+required.
+
+@example
+if header :contains "Delivered-To" "auc-tex@@sunsite.dk" @{
+        fileinto "INBOX.auc-tex";
+@}
+@end example
+
+At last, we have the hopeless mailing lists that does not have any
+unique identifier and you are forced to match on the @samp{To:} and
+@samp{Cc} headers.  As before, this snippet assumes that @code{fileinto}
+has been required.
+
+@example
+if address ["to", "cc"] "kerberos@@mit.edu" @{
+        fileinto "INBOX.kerberos";
+@}
+@end example
+
+@node Manage Sieve API
+@chapter Manage Sieve API
+
+The @file{sieve-manage.el} library contains low-level functionality
+for talking to a server with the @sc{managesieve} protocol.
+
+A number of user-visible variables exist, which all can be customized
+in the @code{sieve} group (@kbd{M-x customize-group RET sieve RET}):
+
+@table @code
+
+@item sieve-manage-default-port
+@vindex sieve-manage-default-port
+Sets the default port to use, the suggested port number is @code{2000}.
+
+@item sieve-manage-log
+@vindex sieve-manage-log
+If non-@code{nil}, should be a string naming a buffer where a protocol trace
+is dumped (for debugging purposes).
+
+@end table
+
+The API functions include:
+
+@table @code
+
+@item sieve-manage-open
+@findex sieve-manage-open
+Open connection to managesieve server, returning a buffer to be used
+by all other API functions.
+
+@item sieve-manage-opened
+@findex sieve-manage-opened
+Check if a server is open or not.
+
+@item sieve-manage-close
+@findex sieve-manage-close
+Close a server connection.
+
+@item sieve-manage-authenticate
+@findex sieve-manage-authenticate
+Authenticate to the server.
+
+@item sieve-manage-capability
+@findex sieve-manage-capability
+Return a list of capabilities the server supports.
+
+@item sieve-manage-listscripts
+@findex sieve-manage-listscripts
+List scripts on the server.
+
+@item sieve-manage-havespace
+@findex sieve-manage-havespace
+Return non-@code{nil} if the server has room for a script of given
+size.
+
+@item sieve-manage-getscript
+@findex sieve-manage-getscript
+Download script from server.
+
+@item sieve-manage-putscript
+@findex sieve-manage-putscript
+Upload script to server.
+
+@item sieve-manage-setactive
+@findex sieve-manage-setactive
+Indicate which script on the server should be active.
+
+@end table
+
+@node Standards
+@chapter Standards
+
+The Emacs Sieve package implements all or parts of a small but
+hopefully growing number of RFCs and drafts documents.  This chapter
+lists the relevant ones.  They can all be fetched from
+@uref{http://quimby.gnus.org/notes/}.
+
+@table @dfn
+
+@item RFC3028
+Sieve: A Mail Filtering Language.
+
+@item draft-martin-managesieve-03
+A Protocol for Remotely Managing Sieve Scripts
+
+@end table
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+@node Index
+@unnumbered Index
+@printindex cp
+
+@bye
+
+@c End:

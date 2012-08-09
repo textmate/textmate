@@ -1,0 +1,5 @@
+# Base Module
+
+base = element base { base.attlist }
+base.attlist = attribute href { URI.datatype }
+head.content &= base?

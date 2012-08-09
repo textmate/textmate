@@ -1,0 +1,1420 @@
+@c -*-texinfo-*-
+@c This is part of the GNU Emacs Lisp Reference Manual.
+@c Copyright (C) 1997-2012 Free Software Foundation, Inc.
+@c See the file elisp.texi for copying conditions.
+@setfilename ../../info/customize
+@node Customization, Loading, Macros, Top
+@chapter Customization Settings
+
+@cindex customization item
+  This chapter describes how to declare customizable variables and
+customization groups for classifying them.  We use the term
+@dfn{customization item} to include customizable variables,
+customization groups, as well as faces.
+
+  @xref{Defining Faces}, for the @code{defface} macro, which is used
+for declaring customizable faces.
+
+@menu
+* Common Keywords::         Common keyword arguments for all kinds of
+                             customization declarations.
+* Group Definitions::       Writing customization group definitions.
+* Variable Definitions::    Declaring user options.
+* Customization Types::     Specifying the type of a user option.
+* Applying Customizations:: Functions to apply customization settings.
+* Custom Themes::           Writing Custom themes.
+@end menu
+
+@node Common Keywords
+@section Common Item Keywords
+
+@cindex customization keywords
+  The customization declarations that we will describe in the next few
+sections (@code{defcustom}, @code{defgroup}, etc.) all accept keyword
+arguments for specifying various information.  This section describes
+keywords that apply to all types of customization declarations.
+
+  All of these keywords, except @code{:tag}, can be used more than once
+in a given item.  Each use of the keyword has an independent effect.
+The keyword @code{:tag} is an exception because any given item can only
+display one name.
+
+@table @code
+@item :tag @var{label}
+@kindex tag@r{, customization keyword}
+Use @var{label}, a string, instead of the item's name, to label the
+item in customization menus and buffers.  @strong{Don't use a tag
+which is substantially different from the item's real name; that would
+cause confusion.}
+
+@kindex group@r{, customization keyword}
+@item :group @var{group}
+Put this customization item in group @var{group}.  When you use
+@code{:group} in a @code{defgroup}, it makes the new group a subgroup of
+@var{group}.
+
+If you use this keyword more than once, you can put a single item into
+more than one group.  Displaying any of those groups will show this
+item.  Please don't overdo this, since the result would be annoying.
+
+@item :link @var{link-data}
+@kindex link@r{, customization keyword}
+Include an external link after the documentation string for this item.
+This is a sentence containing an active field which references some
+other documentation.
+
+There are several alternatives you can use for @var{link-data}:
+
+@table @code
+@item (custom-manual @var{info-node})
+Link to an Info node; @var{info-node} is a string which specifies the
+node name, as in @code{"(emacs)Top"}.  The link appears as
+@samp{[Manual]} in the customization buffer and enters the built-in
+Info reader on @var{info-node}.
+
+@item (info-link @var{info-node})
+Like @code{custom-manual} except that the link appears
+in the customization buffer with the Info node name.
+
+@item (url-link @var{url})
+Link to a web page; @var{url} is a string which specifies the
+@acronym{URL}.  The link appears in the customization buffer as
+@var{url} and invokes the WWW browser specified by
+@code{browse-url-browser-function}.
+
+@item (emacs-commentary-link @var{library})
+Link to the commentary section of a library; @var{library} is a string
+which specifies the library name.
+
+@item (emacs-library-link @var{library})
+Link to an Emacs Lisp library file; @var{library} is a string which
+specifies the library name.
+
+@item (file-link @var{file})
+Link to a file; @var{file} is a string which specifies the name of the
+file to visit with @code{find-file} when the user invokes this link.
+
+@item (function-link @var{function})
+Link to the documentation of a function; @var{function} is a string
+which specifies the name of the function to describe with
+@code{describe-function} when the user invokes this link.
+
+@item (variable-link @var{variable})
+Link to the documentation of a variable; @var{variable} is a string
+which specifies the name of the variable to describe with
+@code{describe-variable} when the user invokes this link.
+
+@item (custom-group-link @var{group})
+Link to another customization group.  Invoking it creates a new
+customization buffer for @var{group}.
+@end table
+
+You can specify the text to use in the customization buffer by adding
+@code{:tag @var{name}} after the first element of the @var{link-data};
+for example, @code{(info-link :tag "foo" "(emacs)Top")} makes a link to
+the Emacs manual which appears in the buffer as @samp{foo}.
+
+You can use this keyword more than once, to add multiple links.
+
+@item :load @var{file}
+@kindex load@r{, customization keyword}
+Load file @var{file} (a string) before displaying this customization
+item (@pxref{Loading}).  Loading is done with @code{load}, and only if
+the file is not already loaded.
+
+@item :require @var{feature}
+@kindex require@r{, customization keyword}
+Execute @code{(require '@var{feature})} when your saved customizations
+set the value of this item.  @var{feature} should be a symbol.
+
+The most common reason to use @code{:require} is when a variable enables
+a feature such as a minor mode, and just setting the variable won't have
+any effect unless the code which implements the mode is loaded.
+
+@item :version @var{version}
+@kindex version@r{, customization keyword}
+This keyword specifies that the item was first introduced in Emacs
+version @var{version}, or that its default value was changed in that
+version.  The value @var{version} must be a string.
+
+@item :package-version '(@var{package} . @var{version})
+@kindex package-version@r{, customization keyword}
+This keyword specifies that the item was first introduced in
+@var{package} version @var{version}, or that its meaning or default
+value was changed in that version.  This keyword takes priority over
+@code{:version}.
+
+@var{package} should be the official name of the package, as a symbol
+(e.g.@: @code{MH-E}).  @var{version} should be a string.  If the
+package @var{package} is released as part of Emacs, @var{package} and
+@var{version} should appear in the value of
+@code{customize-package-emacs-version-alist}.
+@end table
+
+Packages distributed as part of Emacs that use the
+@code{:package-version} keyword must also update the
+@code{customize-package-emacs-version-alist} variable.
+
+@defvar customize-package-emacs-version-alist
+This alist provides a mapping for the versions of Emacs that are
+associated with versions of a package listed in the
+@code{:package-version} keyword.  Its elements are:
+
+@example
+(@var{package} (@var{pversion} . @var{eversion})@dots{})
+@end example
+
+For each @var{package}, which is a symbol, there are one or more
+elements that contain a package version @var{pversion} with an
+associated Emacs version @var{eversion}.  These versions are strings.
+For example, the MH-E package updates this alist with the following:
+
+@c Must be small else too wide.
+@c FIXME obviously this is out of date (in the code).
+@smallexample
+(add-to-list 'customize-package-emacs-version-alist
+             '(MH-E ("6.0" . "22.1") ("6.1" . "22.1") ("7.0" . "22.1")
+                    ("7.1" . "22.1") ("7.2" . "22.1") ("7.3" . "22.1")
+                    ("7.4" . "22.1") ("8.0" . "22.1")))
+@end smallexample
+
+The value of @var{package} needs to be unique and it needs to match
+the @var{package} value appearing in the @code{:package-version}
+keyword.  Since the user might see the value in an error message, a good
+choice is the official name of the package, such as MH-E or Gnus.
+@end defvar
+
+@node Group Definitions
+@section Defining Customization Groups
+@cindex define customization group
+@cindex customization groups, defining
+
+  Each Emacs Lisp package should have one main customization group which
+contains all the options, faces and other groups in the package.  If the
+package has a small number of options and faces, use just one group and
+put everything in it.  When there are more than twelve or so options and
+faces, then you should structure them into subgroups, and put the
+subgroups under the package's main customization group.  It is OK to
+put some of the options and faces in the package's main group alongside
+the subgroups.
+
+  The package's main or only group should be a member of one or more of
+the standard customization groups.  (To display the full list of them,
+use @kbd{M-x customize}.)  Choose one or more of them (but not too
+many), and add your group to each of them using the @code{:group}
+keyword.
+
+  The way to declare new customization groups is with @code{defgroup}.
+
+@defmac defgroup group members doc [keyword value]@dots{}
+Declare @var{group} as a customization group containing @var{members}.
+Do not quote the symbol @var{group}.  The argument @var{doc} specifies
+the documentation string for the group.
+
+The argument @var{members} is a list specifying an initial set of
+customization items to be members of the group.  However, most often
+@var{members} is @code{nil}, and you specify the group's members by
+using the @code{:group} keyword when defining those members.
+
+If you want to specify group members through @var{members}, each element
+should have the form @code{(@var{name} @var{widget})}.  Here @var{name}
+is a symbol, and @var{widget} is a widget type for editing that symbol.
+Useful widgets are @code{custom-variable} for a variable,
+@code{custom-face} for a face, and @code{custom-group} for a group.
+
+When you introduce a new group into Emacs, use the @code{:version}
+keyword in the @code{defgroup}; then you need not use it for
+the individual members of the group.
+
+In addition to the common keywords (@pxref{Common Keywords}), you can
+also use this keyword in @code{defgroup}:
+
+@table @code
+@item :prefix @var{prefix}
+@kindex prefix@r{, @code{defgroup} keyword}
+If the name of an item in the group starts with @var{prefix}, and the
+customizable variable @code{custom-unlispify-remove-prefixes} is
+non-@code{nil}, the item's tag will omit @var{prefix}.  A group can
+have any number of prefixes.
+@end table
+@end defmac
+
+@defopt custom-unlispify-remove-prefixes
+If this variable is non-@code{nil}, the prefixes specified by a
+group's @code{:prefix} keyword are omitted from tag names, whenever
+the user customizes the group.
+
+The default value is @code{nil}, i.e.@: the prefix-discarding feature
+is disabled.  This is because discarding prefixes often leads to
+confusing names for options and faces.
+@end defopt
+
+@node Variable Definitions
+@section Defining Customization Variables
+@cindex define customization options
+@cindex customization variables, how to define
+
+@defmac defcustom option standard doc [keyword value]@dots{}
+This macro declares @var{option} as a user option (i.e.@: a
+customizable variable).  You should not quote @var{option}.
+
+The argument @var{standard} is an expression that specifies the
+standard value for @var{option}.  Evaluating the @code{defcustom} form
+evaluates @var{standard}, but does not necessarily install the
+standard value.  If @var{option} already has a default value,
+@code{defcustom} does not change it.  If the user has saved a
+customization for @var{option}, @code{defcustom} installs the user's
+customized value as @var{option}'s default value.  If neither of those
+cases applies, @code{defcustom} installs the result of evaluating
+@var{standard} as the default value.
+
+The expression @var{standard} can be evaluated at various other times,
+too---whenever the customization facility needs to know @var{option}'s
+standard value.  So be sure to use an expression which is harmless to
+evaluate at any time.
+
+The argument @var{doc} specifies the documentation string for the
+variable.
+
+Every @code{defcustom} should specify @code{:group} at least once.
+
+When you evaluate a @code{defcustom} form with @kbd{C-M-x} in Emacs Lisp
+mode (@code{eval-defun}), a special feature of @code{eval-defun}
+arranges to set the variable unconditionally, without testing whether
+its value is void.  (The same feature applies to @code{defvar}.)
+@xref{Defining Variables}.
+
+If you put a @code{defcustom} in a pre-loaded Emacs Lisp file
+(@pxref{Building Emacs}), the standard value installed at dump time
+might be incorrect, e.g.@: because another variable that it depends on
+has not been assigned the right value yet.  In that case, use
+@code{custom-reevaluate-setting}, described below, to re-evaluate the
+standard value after Emacs starts up.
+@end defmac
+
+  @code{defcustom} accepts the following additional keywords:
+
+@table @code
+@item :type @var{type}
+Use @var{type} as the data type for this option.  It specifies which
+values are legitimate, and how to display the value.
+@xref{Customization Types}, for more information.
+
+@item :options @var{value-list}
+@kindex options@r{, @code{defcustom} keyword}
+Specify the list of reasonable values for use in this
+option.  The user is not restricted to using only these values, but they
+are offered as convenient alternatives.
+
+This is meaningful only for certain types, currently including
+@code{hook}, @code{plist} and @code{alist}.  See the definition of the
+individual types for a description of how to use @code{:options}.
+
+@item :set @var{setfunction}
+@kindex set@r{, @code{defcustom} keyword}
+Specify @var{setfunction} as the way to change the value of this
+option when using the Customize interface.  The function
+@var{setfunction} should take two arguments, a symbol (the option
+name) and the new value, and should do whatever is necessary to update
+the value properly for this option (which may not mean simply setting
+the option as a Lisp variable).  The default for @var{setfunction} is
+@code{set-default}.
+
+If you specify this keyword, the variable's documentation string
+should describe how to do the same job in hand-written Lisp code.
+
+@item :get @var{getfunction}
+@kindex get@r{, @code{defcustom} keyword}
+Specify @var{getfunction} as the way to extract the value of this
+option.  The function @var{getfunction} should take one argument, a
+symbol, and should return whatever customize should use as the
+``current value'' for that symbol (which need not be the symbol's Lisp
+value).  The default is @code{default-value}.
+
+You have to really understand the workings of Custom to use
+@code{:get} correctly.  It is meant for values that are treated in
+Custom as variables but are not actually stored in Lisp variables.  It
+is almost surely a mistake to specify @var{getfunction} for a value
+that really is stored in a Lisp variable.
+
+@item :initialize @var{function}
+@kindex initialize@r{, @code{defcustom} keyword}
+@var{function} should be a function used to initialize the variable
+when the @code{defcustom} is evaluated.  It should take two arguments,
+the option name (a symbol) and the value.  Here are some predefined
+functions meant for use in this way:
+
+@table @code
+@item custom-initialize-set
+Use the variable's @code{:set} function to initialize the variable, but
+do not reinitialize it if it is already non-void.
+
+@item custom-initialize-default
+Like @code{custom-initialize-set}, but use the function
+@code{set-default} to set the variable, instead of the variable's
+@code{:set} function.  This is the usual choice for a variable whose
+@code{:set} function enables or disables a minor mode; with this choice,
+defining the variable will not call the minor mode function, but
+customizing the variable will do so.
+
+@item custom-initialize-reset
+Always use the @code{:set} function to initialize the variable.  If
+the variable is already non-void, reset it by calling the @code{:set}
+function using the current value (returned by the @code{:get} method).
+This is the default @code{:initialize} function.
+
+@item custom-initialize-changed
+Use the @code{:set} function to initialize the variable, if it is
+already set or has been customized; otherwise, just use
+@code{set-default}.
+
+@item custom-initialize-safe-set
+@itemx custom-initialize-safe-default
+These functions behave like @code{custom-initialize-set}
+(@code{custom-initialize-default}, respectively), but catch errors.
+If an error occurs during initialization, they set the variable to
+@code{nil} using @code{set-default}, and signal no error.
+
+These functions are meant for options defined in pre-loaded files,
+where the @var{standard} expression may signal an error because some
+required variable or function is not yet defined.  The value normally
+gets updated in @file{startup.el}, ignoring the value computed by
+@code{defcustom}.  After startup, if one unsets the value and
+reevaluates the @code{defcustom}, the @var{standard} expression can be
+evaluated without error.
+@end table
+
+@item :risky @var{value}
+@kindex risky@r{, @code{defcustom} keyword}
+Set the variable's @code{risky-local-variable} property to
+@var{value} (@pxref{File Local Variables}).
+
+@item :safe @var{function}
+@kindex safe@r{, @code{defcustom} keyword}
+Set the variable's @code{safe-local-variable} property to
+@var{function} (@pxref{File Local Variables}).
+
+@item :set-after @var{variables}
+@kindex set-after@r{, @code{defcustom} keyword}
+When setting variables according to saved customizations, make sure to
+set the variables @var{variables} before this one; i.e., delay
+setting this variable until after those others have been handled.  Use
+@code{:set-after} if setting this variable won't work properly unless
+those other variables already have their intended values.
+@end table
+
+  It is useful to specify the @code{:require} keyword for an option
+that ``turns on'' a certain feature.  This causes Emacs to load the
+feature, if it is not already loaded, whenever the option is set.
+@xref{Common Keywords}.  Here is an example, from the library
+@file{saveplace.el}:
+
+@example
+(defcustom save-place nil
+  "Non-nil means automatically save place in each file..."
+  :type 'boolean
+  :require 'saveplace
+  :group 'save-place)
+@end example
+
+If a customization item has a type such as @code{hook} or
+@code{alist}, which supports @code{:options}, you can add additional
+values to the list from outside the @code{defcustom} declaration by
+calling @code{custom-add-frequent-value}.  For example, if you define a
+function @code{my-lisp-mode-initialization} intended to be called from
+@code{emacs-lisp-mode-hook}, you might want to add that to the list of
+reasonable values for @code{emacs-lisp-mode-hook}, but not by editing
+its definition.  You can do it thus:
+
+@example
+(custom-add-frequent-value 'emacs-lisp-mode-hook
+   'my-lisp-mode-initialization)
+@end example
+
+@defun custom-add-frequent-value symbol value
+For the customization option @var{symbol}, add @var{value} to the
+list of reasonable values.
+
+The precise effect of adding a value depends on the customization type
+of @var{symbol}.
+@end defun
+
+Internally, @code{defcustom} uses the symbol property
+@code{standard-value} to record the expression for the standard value,
+@code{saved-value} to record the value saved by the user with the
+customization buffer, and @code{customized-value} to record the value
+set by the user with the customization buffer, but not saved.
+@xref{Property Lists}.  These properties are lists, the car of which
+is an expression that evaluates to the value.
+
+@defun custom-reevaluate-setting symbol
+This function re-evaluates the standard value of @var{symbol}, which
+should be a user option declared via @code{defcustom}.  If the
+variable was customized, this function re-evaluates the saved value
+instead.  Then it sets the user option to that value (using the
+option's @code{:set} property if that is defined).
+
+This is useful for customizable options that are defined before their
+value could be computed correctly.  For example, during startup Emacs
+calls this function for some user options that were defined in
+pre-loaded Emacs Lisp files, but whose initial values depend on
+information available only at run-time.
+@end defun
+
+@defun custom-variable-p arg
+This function returns non-@code{nil} if @var{arg} is a customizable
+variable.  A customizable variable is either a variable that has a
+@code{standard-value} or @code{custom-autoload} property (usually
+meaning it was declared with @code{defcustom}), or an alias for
+another customizable variable.
+@end defun
+
+@defun user-variable-p arg
+This function is like @code{custom-variable-p}, except it also returns
+@code{t} if the first character of the variable's documentation string
+is the character @samp{*}.  That is an obsolete way of indicating a
+user option, so for most purposes you may consider
+@code{user-variable-p} as equivalent to @code{custom-variable-p}.
+@end defun
+
+@node Customization Types
+@section Customization Types
+
+@cindex customization types
+  When you define a user option with @code{defcustom}, you must specify
+its @dfn{customization type}.  That is a Lisp object which describes (1)
+which values are legitimate and (2) how to display the value in the
+customization buffer for editing.
+
+@kindex type@r{, @code{defcustom} keyword}
+  You specify the customization type in @code{defcustom} with the
+@code{:type} keyword.  The argument of @code{:type} is evaluated, but
+only once when the @code{defcustom} is executed, so it isn't useful
+for the value to vary.  Normally we use a quoted constant.  For
+example:
+
+@example
+(defcustom diff-command "diff"
+  "The command to use to run diff."
+  :type '(string)
+  :group 'diff)
+@end example
+
+  In general, a customization type is a list whose first element is a
+symbol, one of the customization type names defined in the following
+sections.  After this symbol come a number of arguments, depending on
+the symbol.  Between the type symbol and its arguments, you can
+optionally write keyword-value pairs (@pxref{Type Keywords}).
+
+  Some type symbols do not use any arguments; those are called
+@dfn{simple types}.  For a simple type, if you do not use any
+keyword-value pairs, you can omit the parentheses around the type
+symbol.  For example just @code{string} as a customization type is
+equivalent to @code{(string)}.
+
+  All customization types are implemented as widgets; see @ref{Top, ,
+Introduction, widget, The Emacs Widget Library}, for details.
+
+@menu
+* Simple Types::            Simple customization types: sexp, integer, etc.
+* Composite Types::         Build new types from other types or data.
+* Splicing into Lists::     Splice elements into list with @code{:inline}.
+* Type Keywords::           Keyword-argument pairs in a customization type.
+* Defining New Types::      Give your type a name.
+@end menu
+
+@node Simple Types
+@subsection Simple Types
+
+  This section describes all the simple customization types.  For
+several of these customization types, the customization widget
+provides inline completion with @kbd{C-M-i} or @kbd{M-@key{TAB}}.
+
+@table @code
+@item sexp
+The value may be any Lisp object that can be printed and read back.
+You can use @code{sexp} as a fall-back for any option, if you don't
+want to take the time to work out a more specific type to use.
+
+@item integer
+The value must be an integer.
+
+@item number
+The value must be a number (floating point or integer).
+
+@item float
+The value must be a floating point number.
+
+@item string
+The value must be a string.  The customization buffer shows the string
+without delimiting @samp{"} characters or @samp{\} quotes.
+
+@item regexp
+Like @code{string} except that the string must be a valid regular
+expression.
+
+@item character
+The value must be a character code.  A character code is actually an
+integer, but this type shows the value by inserting the character in the
+buffer, rather than by showing the number.
+
+@item file
+The value must be a file name.  The widget provides completion.
+
+@item (file :must-match t)
+The value must be a file name for an existing file.  The widget
+provides completion.
+
+@item directory
+The value must be a directory name.  The widget provides completion.
+
+@item hook
+The value must be a list of functions.  This customization type is
+used for hook variables.  You can use the @code{:options} keyword in a
+hook variable's @code{defcustom} to specify a list of functions
+recommended for use in the hook; @xref{Variable Definitions}.
+
+@item symbol
+The value must be a symbol.  It appears in the customization buffer as
+the symbol name.  The widget provides completion.
+
+@item function
+The value must be either a lambda expression or a function name.  The
+widget provides completion for function names.
+
+@item variable
+The value must be a variable name.  The widget provides completion.
+
+@item face
+The value must be a symbol which is a face name.  The widget provides
+completion.
+
+@item boolean
+The value is boolean---either @code{nil} or @code{t}.  Note that by
+using @code{choice} and @code{const} together (see the next section),
+you can specify that the value must be @code{nil} or @code{t}, but also
+specify the text to describe each value in a way that fits the specific
+meaning of the alternative.
+
+@item coding-system
+The value must be a coding-system name, and you can do completion with
+@kbd{M-@key{TAB}}.
+
+@item color
+The value must be a valid color name.  The widget provides completion
+for color names, as well as a sample and a button for selecting a
+color name from a list of color names shown in a @file{*Colors*}
+buffer.
+@end table
+
+@node Composite Types
+@subsection Composite Types
+@cindex composite types (customization)
+
+  When none of the simple types is appropriate, you can use composite
+types, which build new types from other types or from specified data.
+The specified types or data are called the @dfn{arguments} of the
+composite type.  The composite type normally looks like this:
+
+@example
+(@var{constructor} @var{arguments}@dots{})
+@end example
+
+@noindent
+but you can also add keyword-value pairs before the arguments, like
+this:
+
+@example
+(@var{constructor} @r{@{}@var{keyword} @var{value}@r{@}}@dots{} @var{arguments}@dots{})
+@end example
+
+  Here is a table of constructors and how to use them to write
+composite types:
+
+@table @code
+@item (cons @var{car-type} @var{cdr-type})
+The value must be a cons cell, its @sc{car} must fit @var{car-type}, and
+its @sc{cdr} must fit @var{cdr-type}.  For example, @code{(cons string
+symbol)} is a customization type which matches values such as
+@code{("foo" . foo)}.
+
+In the customization buffer, the @sc{car} and @sc{cdr} are displayed
+and edited separately, each according to their specified type.
+
+@item (list @var{element-types}@dots{})
+The value must be a list with exactly as many elements as the
+@var{element-types} given; and each element must fit the
+corresponding @var{element-type}.
+
+For example, @code{(list integer string function)} describes a list of
+three elements; the first element must be an integer, the second a
+string, and the third a function.
+
+In the customization buffer, each element is displayed and edited
+separately, according to the type specified for it.
+
+@item (group @var{element-types}@dots{})
+This works like @code{list} except for the formatting
+of text in the Custom buffer.  @code{list} labels each
+element value with its tag; @code{group} does not.
+
+@item (vector @var{element-types}@dots{})
+Like @code{list} except that the value must be a vector instead of a
+list.  The elements work the same as in @code{list}.
+
+@item (alist :key-type @var{key-type} :value-type @var{value-type})
+The value must be a list of cons-cells, the @sc{car} of each cell
+representing a key of customization type @var{key-type}, and the
+@sc{cdr} of the same cell representing a value of customization type
+@var{value-type}.  The user can add and delete key/value pairs, and
+edit both the key and the value of each pair.
+
+If omitted, @var{key-type} and @var{value-type} default to
+@code{sexp}.
+
+The user can add any key matching the specified key type, but you can
+give some keys a preferential treatment by specifying them with the
+@code{:options} (see @ref{Variable Definitions}).  The specified keys
+will always be shown in the customize buffer (together with a suitable
+value), with a checkbox to include or exclude or disable the key/value
+pair from the alist.  The user will not be able to edit the keys
+specified by the @code{:options} keyword argument.
+
+The argument to the @code{:options} keywords should be a list of
+specifications for reasonable keys in the alist.  Ordinarily, they are
+simply atoms, which stand for themselves.  For example:
+
+@example
+:options '("foo" "bar" "baz")
+@end example
+
+@noindent
+specifies that there are three ``known'' keys, namely @code{"foo"},
+@code{"bar"} and @code{"baz"}, which will always be shown first.
+
+You may want to restrict the value type for specific keys, for
+example, the value associated with the @code{"bar"} key can only be an
+integer.  You can specify this by using a list instead of an atom in
+the list.  The first element will specify the key, like before, while
+the second element will specify the value type.  For example:
+
+@example
+:options '("foo" ("bar" integer) "baz")
+@end example
+
+Finally, you may want to change how the key is presented.  By default,
+the key is simply shown as a @code{const}, since the user cannot change
+the special keys specified with the @code{:options} keyword.  However,
+you may want to use a more specialized type for presenting the key, like
+@code{function-item} if you know it is a symbol with a function binding.
+This is done by using a customization type specification instead of a
+symbol for the key.
+
+@example
+:options '("foo" ((function-item some-function) integer)
+           "baz")
+@end example
+
+Many alists use lists with two elements, instead of cons cells.  For
+example,
+
+@example
+(defcustom list-alist '(("foo" 1) ("bar" 2) ("baz" 3))
+  "Each element is a list of the form (KEY VALUE).")
+@end example
+
+@noindent
+instead of
+
+@example
+(defcustom cons-alist '(("foo" . 1) ("bar" . 2) ("baz" . 3))
+  "Each element is a cons-cell (KEY . VALUE).")
+@end example
+
+Because of the way lists are implemented on top of cons cells, you can
+treat @code{list-alist} in the example above as a cons cell alist, where
+the value type is a list with a single element containing the real
+value.
+
+@example
+(defcustom list-alist '(("foo" 1) ("bar" 2) ("baz" 3))
+  "Each element is a list of the form (KEY VALUE)."
+  :type '(alist :value-type (group integer)))
+@end example
+
+The @code{group} widget is used here instead of @code{list} only because
+the formatting is better suited for the purpose.
+
+Similarly, you can have alists with more values associated with each
+key, using variations of this trick:
+
+@example
+(defcustom person-data '(("brian"  50 t)
+                         ("dorith" 55 nil)
+                         ("ken"    52 t))
+  "Alist of basic info about people.
+Each element has the form (NAME AGE MALE-FLAG)."
+  :type '(alist :value-type (group integer boolean)))
+@end example
+
+@item (plist :key-type @var{key-type} :value-type @var{value-type})
+This customization type is similar to @code{alist} (see above), except
+that (i) the information is stored as a property list,
+(@pxref{Property Lists}), and (ii) @var{key-type}, if omitted,
+defaults to @code{symbol} rather than @code{sexp}.
+
+@item (choice @var{alternative-types}@dots{})
+The value must fit one of @var{alternative-types}.  For example,
+@code{(choice integer string)} allows either an integer or a string.
+
+In the customization buffer, the user selects an alternative
+using a menu, and can then edit the value in the usual way for that
+alternative.
+
+Normally the strings in this menu are determined automatically from the
+choices; however, you can specify different strings for the menu by
+including the @code{:tag} keyword in the alternatives.  For example, if
+an integer stands for a number of spaces, while a string is text to use
+verbatim, you might write the customization type this way,
+
+@example
+(choice (integer :tag "Number of spaces")
+        (string :tag "Literal text"))
+@end example
+
+@noindent
+so that the menu offers @samp{Number of spaces} and @samp{Literal text}.
+
+In any alternative for which @code{nil} is not a valid value, other than
+a @code{const}, you should specify a valid default for that alternative
+using the @code{:value} keyword.  @xref{Type Keywords}.
+
+If some values are covered by more than one of the alternatives,
+customize will choose the first alternative that the value fits.  This
+means you should always list the most specific types first, and the
+most general last.  Here's an example of proper usage:
+
+@example
+(choice (const :tag "Off" nil)
+        symbol (sexp :tag "Other"))
+@end example
+
+@noindent
+This way, the special value @code{nil} is not treated like other
+symbols, and symbols are not treated like other Lisp expressions.
+
+@item (radio @var{element-types}@dots{})
+This is similar to @code{choice}, except that the choices are displayed
+using `radio buttons' rather than a menu.  This has the advantage of
+displaying documentation for the choices when applicable and so is often
+a good choice for a choice between constant functions
+(@code{function-item} customization types).
+
+@item (const @var{value})
+The value must be @var{value}---nothing else is allowed.
+
+The main use of @code{const} is inside of @code{choice}.  For example,
+@code{(choice integer (const nil))} allows either an integer or
+@code{nil}.
+
+@code{:tag} is often used with @code{const}, inside of @code{choice}.
+For example,
+
+@example
+(choice (const :tag "Yes" t)
+        (const :tag "No" nil)
+        (const :tag "Ask" foo))
+@end example
+
+@noindent
+describes a variable for which @code{t} means yes, @code{nil} means no,
+and @code{foo} means ``ask''.
+
+@item (other @var{value})
+This alternative can match any Lisp value, but if the user chooses this
+alternative, that selects the value @var{value}.
+
+The main use of @code{other} is as the last element of @code{choice}.
+For example,
+
+@example
+(choice (const :tag "Yes" t)
+        (const :tag "No" nil)
+        (other :tag "Ask" foo))
+@end example
+
+@noindent
+describes a variable for which @code{t} means yes, @code{nil} means no,
+and anything else means ``ask''.  If the user chooses @samp{Ask} from
+the menu of alternatives, that specifies the value @code{foo}; but any
+other value (not @code{t}, @code{nil} or @code{foo}) displays as
+@samp{Ask}, just like @code{foo}.
+
+@item (function-item @var{function})
+Like @code{const}, but used for values which are functions.  This
+displays the documentation string as well as the function name.
+The documentation string is either the one you specify with
+@code{:doc}, or @var{function}'s own documentation string.
+
+@item (variable-item @var{variable})
+Like @code{const}, but used for values which are variable names.  This
+displays the documentation string as well as the variable name.  The
+documentation string is either the one you specify with @code{:doc}, or
+@var{variable}'s own documentation string.
+
+@item (set @var{types}@dots{})
+The value must be a list, and each element of the list must match one of
+the @var{types} specified.
+
+This appears in the customization buffer as a checklist, so that each of
+@var{types} may have either one corresponding element or none.  It is
+not possible to specify two different elements that match the same one
+of @var{types}.  For example, @code{(set integer symbol)} allows one
+integer and/or one symbol in the list; it does not allow multiple
+integers or multiple symbols.  As a result, it is rare to use
+nonspecific types such as @code{integer} in a @code{set}.
+
+Most often, the @var{types} in a @code{set} are @code{const} types, as
+shown here:
+
+@example
+(set (const :bold) (const :italic))
+@end example
+
+Sometimes they describe possible elements in an alist:
+
+@example
+(set (cons :tag "Height" (const height) integer)
+     (cons :tag "Width" (const width) integer))
+@end example
+
+@noindent
+That lets the user specify a height value optionally
+and a width value optionally.
+
+@item (repeat @var{element-type})
+The value must be a list and each element of the list must fit the type
+@var{element-type}.  This appears in the customization buffer as a
+list of elements, with @samp{[INS]} and @samp{[DEL]} buttons for adding
+more elements or removing elements.
+
+@item (restricted-sexp :match-alternatives @var{criteria})
+This is the most general composite type construct.  The value may be
+any Lisp object that satisfies one of @var{criteria}.  @var{criteria}
+should be a list, and each element should be one of these
+possibilities:
+
+@itemize @bullet
+@item
+A predicate---that is, a function of one argument that has no side
+effects, and returns either @code{nil} or non-@code{nil} according to
+the argument.  Using a predicate in the list says that objects for which
+the predicate returns non-@code{nil} are acceptable.
+
+@item
+A quoted constant---that is, @code{'@var{object}}.  This sort of element
+in the list says that @var{object} itself is an acceptable value.
+@end itemize
+
+For example,
+
+@example
+(restricted-sexp :match-alternatives
+                 (integerp 't 'nil))
+@end example
+
+@noindent
+allows integers, @code{t} and @code{nil} as legitimate values.
+
+The customization buffer shows all legitimate values using their read
+syntax, and the user edits them textually.
+@end table
+
+  Here is a table of the keywords you can use in keyword-value pairs
+in a composite type:
+
+@table @code
+@item :tag @var{tag}
+Use @var{tag} as the name of this alternative, for user communication
+purposes.  This is useful for a type that appears inside of a
+@code{choice}.
+
+@item :match-alternatives @var{criteria}
+@kindex match-alternatives@r{, customization keyword}
+Use @var{criteria} to match possible values.  This is used only in
+@code{restricted-sexp}.
+
+@item :args @var{argument-list}
+@kindex args@r{, customization keyword}
+Use the elements of @var{argument-list} as the arguments of the type
+construct.  For instance, @code{(const :args (foo))} is equivalent to
+@code{(const foo)}.  You rarely need to write @code{:args} explicitly,
+because normally the arguments are recognized automatically as
+whatever follows the last keyword-value pair.
+@end table
+
+@node Splicing into Lists
+@subsection Splicing into Lists
+
+  The @code{:inline} feature lets you splice a variable number of
+elements into the middle of a @code{list} or @code{vector}
+customization type.  You use it by adding @code{:inline t} to a type
+specification which is contained in a @code{list} or @code{vector}
+specification.
+
+  Normally, each entry in a @code{list} or @code{vector} type
+specification describes a single element type.  But when an entry
+contains @code{:inline t}, the value it matches is merged directly
+into the containing sequence.  For example, if the entry matches a
+list with three elements, those become three elements of the overall
+sequence.  This is analogous to @samp{,@@} in a backquote construct
+(@pxref{Backquote}).
+
+  For example, to specify a list whose first element must be @code{baz}
+and whose remaining arguments should be zero or more of @code{foo} and
+@code{bar}, use this customization type:
+
+@example
+(list (const baz) (set :inline t (const foo) (const bar)))
+@end example
+
+@noindent
+This matches values such as @code{(baz)}, @code{(baz foo)}, @code{(baz bar)}
+and @code{(baz foo bar)}.
+
+  When the element-type is a @code{choice}, you use @code{:inline} not
+in the @code{choice} itself, but in (some of) the alternatives of the
+@code{choice}.  For example, to match a list which must start with a
+file name, followed either by the symbol @code{t} or two strings, use
+this customization type:
+
+@example
+(list file
+      (choice (const t)
+              (list :inline t string string)))
+@end example
+
+@noindent
+If the user chooses the first alternative in the choice, then the
+overall list has two elements and the second element is @code{t}.  If
+the user chooses the second alternative, then the overall list has three
+elements and the second and third must be strings.
+
+@node Type Keywords
+@subsection Type Keywords
+
+You can specify keyword-argument pairs in a customization type after the
+type name symbol.  Here are the keywords you can use, and their
+meanings:
+
+@table @code
+@item :value @var{default}
+Provide a default value.
+
+If @code{nil} is not a valid value for the alternative, then it is
+essential to specify a valid default with @code{:value}.
+
+If you use this for a type that appears as an alternative inside of
+@code{choice}; it specifies the default value to use, at first, if and
+when the user selects this alternative with the menu in the
+customization buffer.
+
+Of course, if the actual value of the option fits this alternative, it
+will appear showing the actual value, not @var{default}.
+
+@item :format @var{format-string}
+@kindex format@r{, customization keyword}
+This string will be inserted in the buffer to represent the value
+corresponding to the type.  The following @samp{%} escapes are available
+for use in @var{format-string}:
+
+@table @samp
+@item %[@var{button}%]
+Display the text @var{button} marked as a button.  The @code{:action}
+attribute specifies what the button will do if the user invokes it;
+its value is a function which takes two arguments---the widget which
+the button appears in, and the event.
+
+There is no way to specify two different buttons with different
+actions.
+
+@item %@{@var{sample}%@}
+Show @var{sample} in a special face specified by @code{:sample-face}.
+
+@item %v
+Substitute the item's value.  How the value is represented depends on
+the kind of item, and (for variables) on the customization type.
+
+@item %d
+Substitute the item's documentation string.
+
+@item %h
+Like @samp{%d}, but if the documentation string is more than one line,
+add an active field to control whether to show all of it or just the
+first line.
+
+@item %t
+Substitute the tag here.  You specify the tag with the @code{:tag}
+keyword.
+
+@item %%
+Display a literal @samp{%}.
+@end table
+
+@item :action @var{action}
+@kindex action@r{, customization keyword}
+Perform @var{action} if the user clicks on a button.
+
+@item :button-face @var{face}
+@kindex button-face@r{, customization keyword}
+Use the face @var{face} (a face name or a list of face names) for button
+text displayed with @samp{%[@dots{}%]}.
+
+@item :button-prefix @var{prefix}
+@itemx :button-suffix @var{suffix}
+@kindex button-prefix@r{, customization keyword}
+@kindex button-suffix@r{, customization keyword}
+These specify the text to display before and after a button.
+Each can be:
+
+@table @asis
+@item @code{nil}
+No text is inserted.
+
+@item a string
+The string is inserted literally.
+
+@item a symbol
+The symbol's value is used.
+@end table
+
+@item :tag @var{tag}
+Use @var{tag} (a string) as the tag for the value (or part of the value)
+that corresponds to this type.
+
+@item :doc @var{doc}
+@kindex doc@r{, customization keyword}
+Use @var{doc} as the documentation string for this value (or part of the
+value) that corresponds to this type.  In order for this to work, you
+must specify a value for @code{:format}, and use @samp{%d} or @samp{%h}
+in that value.
+
+The usual reason to specify a documentation string for a type is to
+provide more information about the meanings of alternatives inside a
+@code{:choice} type or the parts of some other composite type.
+
+@item :help-echo @var{motion-doc}
+@kindex help-echo@r{, customization keyword}
+When you move to this item with @code{widget-forward} or
+@code{widget-backward}, it will display the string @var{motion-doc} in
+the echo area.  In addition, @var{motion-doc} is used as the mouse
+@code{help-echo} string and may actually be a function or form evaluated
+to yield a help string.  If it is a function, it is called with one
+argument, the widget.
+
+@item :match @var{function}
+@kindex match@r{, customization keyword}
+Specify how to decide whether a value matches the type.  The
+corresponding value, @var{function}, should be a function that accepts
+two arguments, a widget and a value; it should return non-@code{nil} if
+the value is acceptable.
+
+@item :validate @var{function}
+Specify a validation function for input.  @var{function} takes a
+widget as an argument, and should return @code{nil} if the widget's
+current value is valid for the widget.  Otherwise, it should return
+the widget containing the invalid data, and set that widget's
+@code{:error} property to a string explaining the error.
+
+@ignore
+@item :indent @var{columns}
+Indent this item by @var{columns} columns.  The indentation is used for
+@samp{%n}, and automatically for group names, for checklists and radio
+buttons, and for editable lists.  It affects the whole of the
+item except for the first line.
+
+@item :offset @var{extra}
+Indent the subitems of this item @var{extra} columns more than this
+item itself.  By default, subitems are indented the same as their
+parent.
+
+@item :extra-offset @var{n}
+Add @var{n} extra spaces to this item's indentation, compared to its
+parent's indentation.
+
+@item :notify @var{function}
+Call @var{function} each time the item or a subitem is changed.  The
+function gets two or three arguments.  The first argument is the item
+itself, the second argument is the item that was changed, and the
+third argument is the event leading to the change, if any.
+
+@item :menu-tag @var{tag-string}
+Use @var{tag-string} in the menu when the widget is used as an option
+in a @code{menu-choice} widget.
+
+@item :menu-tag-get
+A function used for finding the tag when the widget is used as an option
+in a @code{menu-choice} widget.  By default, the tag used will be either the
+@code{:menu-tag} or @code{:tag} property if present, or the @code{princ}
+representation of the @code{:value} property if not.
+
+@item :tab-order
+Specify the order in which widgets are traversed with
+@code{widget-forward} or @code{widget-backward}.  This is only partially
+implemented.
+
+@enumerate a
+@item
+Widgets with tabbing order @code{-1} are ignored.
+
+@item
+(Unimplemented) When on a widget with tabbing order @var{n}, go to the
+next widget in the buffer with tabbing order @var{n+1} or @code{nil},
+whichever comes first.
+
+@item
+When on a widget with no tabbing order specified, go to the next widget
+in the buffer with a positive tabbing order, or @code{nil}
+@end enumerate
+
+@item :parent
+The parent of a nested widget (e.g., a @code{menu-choice} item or an
+element of a @code{editable-list} widget).
+
+@item :sibling-args
+This keyword is only used for members of a @code{radio-button-choice} or
+@code{checklist}.  The value should be a list of extra keyword
+arguments, which will be used when creating the @code{radio-button} or
+@code{checkbox} associated with this item.
+@end ignore
+@end table
+
+@node Defining New Types
+@subsection Defining New Types
+
+In the previous sections we have described how to construct elaborate
+type specifications for @code{defcustom}.  In some cases you may want
+to give such a type specification a name.  The obvious case is when
+you are using the same type for many user options: rather than repeat
+the specification for each option, you can give the type specification
+a name, and use that name each @code{defcustom}.  The other case is
+when a user option's value is a recursive data structure.  To make it
+possible for a datatype to refer to itself, it needs to have a name.
+
+Since custom types are implemented as widgets, the way to define a new
+customize type is to define a new widget.  We are not going to describe
+the widget interface here in details, see @ref{Top, , Introduction,
+widget, The Emacs Widget Library}, for that.  Instead we are going to
+demonstrate the minimal functionality needed for defining new customize
+types by a simple example.
+
+@example
+(define-widget 'binary-tree-of-string 'lazy
+  "A binary tree made of cons-cells and strings."
+  :offset 4
+  :tag "Node"
+  :type '(choice (string :tag "Leaf" :value "")
+                 (cons :tag "Interior"
+                       :value ("" . "")
+                       binary-tree-of-string
+                       binary-tree-of-string)))
+
+(defcustom foo-bar ""
+  "Sample variable holding a binary tree of strings."
+  :type 'binary-tree-of-string)
+@end example
+
+The function to define a new widget is called @code{define-widget}.  The
+first argument is the symbol we want to make a new widget type.  The
+second argument is a symbol representing an existing widget, the new
+widget is going to be defined in terms of difference from the existing
+widget.  For the purpose of defining new customization types, the
+@code{lazy} widget is perfect, because it accepts a @code{:type} keyword
+argument with the same syntax as the keyword argument to
+@code{defcustom} with the same name.  The third argument is a
+documentation string for the new widget.  You will be able to see that
+string with the @kbd{M-x widget-browse @key{RET} binary-tree-of-string
+@key{RET}} command.
+
+After these mandatory arguments follow the keyword arguments.  The most
+important is @code{:type}, which describes the data type we want to match
+with this widget.  Here a @code{binary-tree-of-string} is described as
+being either a string, or a cons-cell whose car and cdr are themselves
+both @code{binary-tree-of-string}.  Note the reference to the widget
+type we are currently in the process of defining.  The @code{:tag}
+attribute is a string to name the widget in the user interface, and the
+@code{:offset} argument is there to ensure that child nodes are
+indented four spaces relative to the parent node, making the tree
+structure apparent in the customization buffer.
+
+The @code{defcustom} shows how the new widget can be used as an ordinary
+customization type.
+
+The reason for the name @code{lazy} is that the other composite
+widgets convert their inferior widgets to internal form when the
+widget is instantiated in a buffer.  This conversion is recursive, so
+the inferior widgets will convert @emph{their} inferior widgets.  If
+the data structure is itself recursive, this conversion is an infinite
+recursion.  The @code{lazy} widget prevents the recursion: it convert
+its @code{:type} argument only when needed.
+
+@node Applying Customizations
+@section Applying Customizations
+
+The following functions are responsible for installing the user's
+customization settings for variables and faces, respectively.  When
+the user invokes @samp{Save for future sessions} in the Customize
+interface, that takes effect by writing a @code{custom-set-variables}
+and/or a @code{custom-set-faces} form into the custom file, to be
+evaluated the next time Emacs starts.
+
+@defun custom-set-variables &rest args
+This function installs the variable customizations specified by
+@var{args}.  Each argument in @var{args} should have the form
+
+@example
+(@var{var} @var{expression} [@var{now} [@var{request} [@var{comment}]]])
+@end example
+
+@noindent
+@var{var} is a variable name (a symbol), and @var{expression} is an
+expression which evaluates to the desired customized value.
+
+If the @code{defcustom} form for @var{var} has been evaluated prior to
+this @code{custom-set-variables} call, @var{expression} is immediately
+evaluated, and the variable's value is set to the result.  Otherwise,
+@var{expression} is stored into the variable's @code{saved-value}
+property, to be evaluated when the relevant @code{defcustom} is called
+(usually when the library defining that variable is loaded into
+Emacs).
+
+The @var{now}, @var{request}, and @var{comment} entries are for
+internal use only, and may be omitted.  @var{now}, if non-@code{nil},
+means to set the variable's value now, even if the variable's
+@code{defcustom} form has not been evaluated.  @var{request} is a list
+of features to be loaded immediately (@pxref{Named Features}).
+@var{comment} is a string describing the customization.
+@end defun
+
+@defun custom-set-faces &rest args
+This function installs the face customizations specified by
+@var{args}.  Each argument in @var{args} should have the form
+
+@example
+(@var{face} @var{spec} [@var{now} [@var{comment}]])
+@end example
+
+@noindent
+@var{face} is a face name (a symbol), and @var{spec} is the customized
+face specification for that face (@pxref{Defining Faces}).
+
+The @var{now} and @var{comment} entries are for internal use only, and
+may be omitted.  @var{now}, if non-@code{nil}, means to install the
+face specification now, even if the @code{defface} form has not been
+evaluated.  @var{comment} is a string describing the customization.
+@end defun
+
+@node Custom Themes
+@section Custom Themes
+
+  @dfn{Custom themes} are collections of settings that can be enabled
+or disabled as a unit.  @xref{Custom Themes,,, emacs, The GNU Emacs
+Manual}.  Each Custom theme is defined by an Emacs Lisp source file,
+which should follow the conventions described in this section.
+(Instead of writing a Custom theme by hand, you can also create one
+using a Customize-like interface; @pxref{Creating Custom Themes,,,
+emacs, The GNU Emacs Manual}.)
+
+  A Custom theme file should be named @file{@var{foo}-theme.el}, where
+@var{foo} is the theme name.  The first Lisp form in the file should
+be a call to @code{deftheme}, and the last form should be a call to
+@code{provide-theme}.
+
+@defmac deftheme theme &optional doc
+This macro declares @var{theme} (a symbol) as the name of a Custom
+theme.  The optional argument @var{doc} should be a string describing
+the theme; this is the description shown when the user invokes the
+@code{describe-theme} command or types @kbd{?} in the @samp{*Custom
+Themes*} buffer.
+
+Two special theme names are disallowed (using them causes an error):
+@code{user} is a ``dummy'' theme that stores the user's direct
+customization settings, and @code{changed} is a ``dummy'' theme that
+stores changes made outside of the Customize system.
+@end defmac
+
+@defmac provide-theme theme
+This macro declares that the theme named @var{theme} has been fully
+specified.
+@end defmac
+
+  In between @code{deftheme} and @code{provide-theme} are Lisp forms
+specifying the theme settings: usually a call to
+@code{custom-theme-set-variables} and/or a call to
+@code{custom-theme-set-faces}.
+
+@defun custom-theme-set-variables theme &rest args
+This function specifies the Custom theme @var{theme}'s variable
+settings.  @var{theme} should be a symbol.  Each argument in
+@var{args} should be a list of the form
+
+@example
+(@var{var} @var{expression} [@var{now} [@var{request} [@var{comment}]]])
+@end example
+
+@noindent
+where the list entries have the same meanings as in
+@code{custom-set-variables}.  @xref{Applying Customizations}.
+@end defun
+
+@defun custom-theme-set-faces theme &rest args
+This function specifies the Custom theme @var{theme}'s face settings.
+@var{theme} should be a symbol.  Each argument in @var{args} should be
+a list of the form
+
+@example
+(@var{face} @var{spec} [@var{now} [@var{comment}]])
+@end example
+
+@noindent
+where the list entries have the same meanings as in
+@code{custom-set-faces}.  @xref{Applying Customizations}.
+@end defun
+
+  In theory, a theme file can also contain other Lisp forms, which
+would be evaluated when loading the theme, but that is ``bad form''.
+To protect against loading themes containing malicious code, Emacs
+displays the source file and asks for confirmation from the user
+before loading any non-built-in theme for the first time.
+
+  The following functions are useful for programmatically enabling and
+disabling themes:
+
+@defun custom-theme-p theme
+This function return a non-@code{nil} value if @var{theme} (a symbol)
+is the name of a Custom theme (i.e.@: a Custom theme which has been
+loaded into Emacs, whether or not the theme is enabled).  Otherwise,
+it returns @code{nil}.
+@end defun
+
+@deffn Command load-theme theme &optional no-confirm no-enable
+This function loads the Custom theme named @var{theme} from its source
+file, looking for the source file in the directories specified by the
+variable @code{custom-theme-load-path}.  @xref{Custom Themes,,, emacs,
+The GNU Emacs Manual}.  It also @dfn{enables} the theme (unless the
+optional argument @var{no-enable} is non-@code{nil}), causing its
+variable and face settings to take effect.  It prompts the user for
+confirmation before loading the theme, unless the optional argument
+@var{no-confirm} is non-@code{nil}.
+@end deffn
+
+@deffn Command enable-theme theme
+This function enables the Custom theme named @var{theme}.  It signals
+an error if no such theme has been loaded.
+@end deffn
+
+@deffn Command disable-theme theme
+This function disables the Custom theme named @var{theme}.  The theme
+remains loaded, so that a subsequent call to @code{enable-theme} will
+re-enable it.
+@end deffn

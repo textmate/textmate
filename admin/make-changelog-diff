@@ -1,0 +1,29 @@
+#! /bin/bash
+
+## Author: Francesco Potorti` <pot@gnu.org>
+
+if [ $# -ne 2 ]; then
+    echo "usage: $0 TAG1 TAG2" >&2
+    exit 1
+fi
+
+if [ ! -f INSTALL -o ! -f configure -o ! -d lib-src ]; then
+    echo "this script should be run in the emacs root directory" >&2
+    exit 2
+fi
+
+cvs -q diff -b -r $1 -r $2 $(find -name ChangeLog|sort) |
+    sed -n -e 's/^=\+/======/p' -e 's/^> //p' -e 's/^diff.*//p' \
+	-e 's/^RCS file: .cvsroot.emacs.emacs.\(.*\),v/\1/p' |
+    sed -n -e "/^======$/ {
+                N
+                N
+                h
+                d
+               }
+               H
+               s/.*//
+               x
+               s/^\n//
+	       p"
+

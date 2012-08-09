@@ -1,0 +1,12 @@
+eterm-color.ti is a terminfo source file.  eterm-color is a compiled
+version produced by the terminfo compiler (tic).  The compiled files
+are binary, and depend on the version of tic, but they seem to be
+system-independent and backwardly compatible.  So there should be no
+need to recompile the distributed binary version.  If it is
+necessary, use:
+
+tic -o ../ ./eterm-color.ti
+
+The compiled file is used by lisp/term.el, so if it is moved term.el
+needs to be changed.  terminfo requires it to be stored in an `e'
+subdirectory (the first character of the file name).

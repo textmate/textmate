@@ -1,0 +1,5083 @@
+# This file was generated automatically by Trang.  The table model
+# dependent definitions have been moved into separate files.
+
+# ......................................................................
+
+# DocBook XML information pool module V4.2 .............................
+
+# File dbpoolx.mod .....................................................
+
+# Copyright 1992-2002 HaL Computer Systems, Inc.,
+# O'Reilly & Associates, Inc., ArborText, Inc., Fujitsu Software
+# Corporation, Norman Walsh, Sun Microsystems, Inc., and the
+# Organization for the Advancement of Structured Information
+# Standards (OASIS).
+# 
+# $Id: dbpool.rnc,v 1.4 2003/08/30 07:48:31 jjc Exp $
+# 
+# Permission to use, copy, modify and distribute the DocBook XML DTD
+# and its accompanying documentation for any purpose and without fee
+# is hereby granted in perpetuity, provided that the above copyright
+# notice and this paragraph appear in all copies.  The copyright
+# holders make no representation about the suitability of the DTD for
+# any purpose.  It is provided "as is" without expressed or implied
+# warranty.
+# 
+# If you modify the DocBook XML DTD in any way, except for declaring and
+# referencing additional sets of general entities and declaring
+# additional notations, label your DTD as a variant of DocBook.  See
+# the maintenance documentation for more information.
+# 
+# Please direct all questions, bug reports, or suggestions for
+# changes to the docbook@lists.oasis-open.org mailing list. For more
+# information, see http://www.oasis-open.org/docbook/.
+
+# ......................................................................
+
+# This module contains the definitions for the objects, inline
+# elements, and so on that are available to be used as the main
+# content of DocBook documents.  Some elements are useful for general
+# publishing, and others are useful specifically for computer
+# documentation.
+# 
+# This module has the following dependencies on other modules:
+# 
+# o It assumes that a %notation.class; entity is defined by the
+#   driver file or other high-level module.  This entity is
+#   referenced in the NOTATION attributes for the graphic-related and
+#   ModeSpec elements.
+# 
+# o It assumes that an appropriately parameterized table module is
+#   available for use with the table-related elements.
+# 
+# In DTD driver files referring to this module, please use an entity
+# declaration that uses the public identifier shown below:
+# 
+# <!ENTITY % dbpool PUBLIC
+# "-//OASIS//ELEMENTS DocBook XML Information Pool V4.2//EN"
+# "dbpoolx.mod">
+# %dbpool;
+# 
+# See the documentation for detailed information on the parameter
+# entity and module scheme used in DocBook, customizing DocBook and
+# planning for interchange, and changes made since the last release
+# of DocBook.
+
+# ......................................................................
+
+# General-purpose semantics entities ...................................
+
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+
+yesorno.attvals = string
+# ......................................................................
+
+# Entities for module inclusions .......................................
+
+# ......................................................................
+
+# Entities for element classes and mixtures ............................
+
+# "Ubiquitous" classes: ndxterm.class and beginpage
+local.ndxterm.class = notAllowed
+ndxterm.class = indexterm | local.ndxterm.class
+# Object-level classes .................................................
+local.list.class = notAllowed
+list.class =
+  calloutlist
+  | glosslist
+  | itemizedlist
+  | orderedlist
+  | segmentedlist
+  | simplelist
+  | variablelist
+  | local.list.class
+local.admon.class = notAllowed
+admon.class =
+  caution | important | note | tip | warning | local.admon.class
+local.linespecific.class = notAllowed
+linespecific.class =
+  literallayout
+  | programlisting
+  | programlistingco
+  | screen
+  | screenco
+  | screenshot
+  | local.linespecific.class
+local.method.synop.class = notAllowed
+method.synop.class =
+  constructorsynopsis
+  | destructorsynopsis
+  | methodsynopsis
+  | local.method.synop.class
+local.synop.class = notAllowed
+synop.class =
+  synopsis
+  | cmdsynopsis
+  | funcsynopsis
+  | classsynopsis
+  | fieldsynopsis
+  | method.synop.class
+  | local.synop.class
+local.para.class = notAllowed
+para.class = formalpara | para | simpara | local.para.class
+local.informal.class = notAllowed
+informal.class =
+  address
+  | blockquote
+  | graphic
+  | graphicco
+  | mediaobject
+  | mediaobjectco
+  | informalequation
+  | informalexample
+  | informalfigure
+  | informaltable
+  | local.informal.class
+local.formal.class = notAllowed
+formal.class = equation | example | figure | table | local.formal.class
+# The DocBook TC may produce an official EBNF module for DocBook.
+
+# This PE provides the hook by which it can be inserted into the DTD.
+ebnf.block.hook = notAllowed
+local.compound.class = notAllowed
+compound.class =
+  msgset
+  | procedure
+  | sidebar
+  | qandaset
+  | ebnf.block.hook
+  | local.compound.class
+local.genobj.class = notAllowed
+genobj.class =
+  anchor | bridgehead | remark | highlights | local.genobj.class
+local.descobj.class = notAllowed
+descobj.class = abstract | authorblurb | epigraph | local.descobj.class
+# Character-level classes ..............................................
+local.xref.char.class = notAllowed
+xref.char.class = footnoteref | xref | local.xref.char.class
+local.gen.char.class = notAllowed
+gen.char.class =
+  abbrev
+  | acronym
+  | citation
+  | citerefentry
+  | citetitle
+  | emphasis
+  | firstterm
+  | foreignphrase
+  | glossterm
+  | footnote
+  | phrase
+  | quote
+  | trademark
+  | wordasword
+  | personname
+  | local.gen.char.class
+local.link.char.class = notAllowed
+link.char.class = link | olink | ulink | local.link.char.class
+# The DocBook TC may produce an official EBNF module for DocBook.
+
+# This PE provides the hook by which it can be inserted into the DTD.
+ebnf.inline.hook = notAllowed
+local.tech.char.class = notAllowed
+tech.char.class =
+  action
+  | application
+  | classname
+  | methodname
+  | interfacename
+  | exceptionname
+  | ooclass
+  | oointerface
+  | ooexception
+  | command
+  | computeroutput
+  | database
+  | email
+  | envar
+  | errorcode
+  | errorname
+  | errortype
+  | errortext
+  | filename
+  | function
+  | guibutton
+  | guiicon
+  | guilabel
+  | guimenu
+  | guimenuitem
+  | guisubmenu
+  | hardware
+  | interface
+  | keycap
+  | keycode
+  | keycombo
+  | keysym
+  | literal
+  | constant
+  | markup
+  | medialabel
+  | menuchoice
+  | mousebutton
+  | option
+  | optional
+  | parameter
+  | prompt
+  | property
+  | replaceable
+  | returnvalue
+  | sgmltag
+  | structfield
+  | structname
+  | symbol
+  | systemitem
+  | \token
+  | type
+  | userinput
+  | varname
+  | ebnf.inline.hook
+  | local.tech.char.class
+local.base.char.class = notAllowed
+base.char.class = anchor | local.base.char.class
+local.docinfo.char.class = notAllowed
+docinfo.char.class =
+  author
+  | authorinitials
+  | corpauthor
+  | modespec
+  | othercredit
+  | productname
+  | productnumber
+  | revhistory
+  | local.docinfo.char.class
+local.other.char.class = notAllowed
+other.char.class =
+  remark | subscript | superscript | local.other.char.class
+local.inlineobj.char.class = notAllowed
+inlineobj.char.class =
+  inlinegraphic
+  | inlinemediaobject
+  | inlineequation
+  | local.inlineobj.char.class
+# ......................................................................
+
+# Entities for content models ..........................................
+formalobject.title.content = title, titleabbrev?
+# Redeclaration placeholder ............................................
+
+# For redeclaring entities that are declared after this point while
+# retaining their references to the entities that are declared before
+# this point
+
+# Object-level mixtures ................................................
+
+#                       list admn line synp para infm form cmpd gen  desc
+# Component mixture       X    X    X    X    X    X    X    X    X    X
+# Sidebar mixture         X    X    X    X    X    X    X    a    X
+# Footnote mixture        X         X    X    X    X
+# Example mixture         X         X    X    X    X
+# Highlights mixture      X    X              X
+# Paragraph mixture       X         X    X         X
+# Admonition mixture      X         X    X    X    X    X    b    c
+# Figure mixture                    X    X         X
+# Table entry mixture     X    X    X         X    d
+# Glossary def mixture    X         X    X    X    X         e
+# Legal notice mixture    X    X    X         X    f
+# 
+# a. Just Procedure; not Sidebar itself or MsgSet.
+# b. No MsgSet.
+# c. No Highlights.
+# d. Just Graphic; no other informal objects.
+# e. No Anchor, BridgeHead, or Highlights.
+# f. Just BlockQuote; no other informal objects.
+local.component.mix = notAllowed
+component.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | compound.class
+  | genobj.class
+  | descobj.class
+  | ndxterm.class
+  | beginpage
+  | local.component.mix
+local.sidebar.mix = notAllowed
+sidebar.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | procedure
+  | genobj.class
+  | ndxterm.class
+  | beginpage
+  | local.sidebar.mix
+local.qandaset.mix = notAllowed
+qandaset.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | procedure
+  | genobj.class
+  | ndxterm.class
+  | local.qandaset.mix
+local.revdescription.mix = notAllowed
+revdescription.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | procedure
+  | genobj.class
+  | ndxterm.class
+  | local.revdescription.mix
+local.footnote.mix = notAllowed
+footnote.mix =
+  list.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | local.footnote.mix
+local.example.mix = notAllowed
+example.mix =
+  list.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | ndxterm.class
+  | beginpage
+  | local.example.mix
+local.highlights.mix = notAllowed
+highlights.mix =
+  list.class
+  | admon.class
+  | para.class
+  | ndxterm.class
+  | local.highlights.mix
+# %formal.class; is explicitly excluded from many contexts in which
+# paragraphs are used
+local.para.mix = notAllowed
+para.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | informal.class
+  | formal.class
+  | local.para.mix
+local.admon.mix = notAllowed
+admon.mix =
+  list.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | procedure
+  | sidebar
+  | anchor
+  | bridgehead
+  | remark
+  | ndxterm.class
+  | beginpage
+  | local.admon.mix
+local.figure.mix = notAllowed
+figure.mix =
+  linespecific.class
+  | synop.class
+  | informal.class
+  | ndxterm.class
+  | beginpage
+  | local.figure.mix
+local.tabentry.mix = notAllowed
+tabentry.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | para.class
+  | graphic
+  | mediaobject
+  | local.tabentry.mix
+local.glossdef.mix = notAllowed
+glossdef.mix =
+  list.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | formal.class
+  | remark
+  | ndxterm.class
+  | beginpage
+  | local.glossdef.mix
+local.legalnotice.mix = notAllowed
+legalnotice.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | para.class
+  | blockquote
+  | ndxterm.class
+  | beginpage
+  | local.legalnotice.mix
+local.textobject.mix = notAllowed
+textobject.mix =
+  list.class
+  | admon.class
+  | linespecific.class
+  | para.class
+  | blockquote
+  | local.textobject.mix
+local.mediaobject.mix = notAllowed
+mediaobject.mix =
+  videoobject
+  | audioobject
+  | imageobject
+  | textobject
+  | local.mediaobject.mix
+local.listpreamble.mix = notAllowed
+listpreamble.mix =
+  admon.class
+  | linespecific.class
+  | synop.class
+  | para.class
+  | informal.class
+  | genobj.class
+  | descobj.class
+  | ndxterm.class
+  | beginpage
+  | local.listpreamble.mix
+# Character-level mixtures .............................................
+
+# sgml.features
+
+# not [sgml.features[
+
+# ]] not sgml.features
+
+#                     #PCD xref word link cptr base dnfo othr inob (synop)
+# para.char.mix         X    X    X    X    X    X    X    X    X
+# title.char.mix        X    X    X    X    X    X    X    X    X
+# ndxterm.char.mix      X    X    X    X    X    X    X    X    a
+# cptr.char.mix         X              X    X    X         X    a
+# smallcptr.char.mix    X                   b                   a
+# word.char.mix         X         c    X         X         X    a
+# docinfo.char.mix      X         d    X    b              X    a
+# 
+# a. Just InlineGraphic; no InlineEquation.
+# b. Just Replaceable; no other computer terms.
+# c. Just Emphasis and Trademark; no other word elements.
+# d. Just Acronym, Emphasis, and Trademark; no other word elements.
+
+# The DocBook TC may produce an official forms module for DocBook.
+
+# This PE provides the hook by which it can be inserted into the DTD.
+forminlines.hook = notAllowed
+local.para.char.mix = notAllowed
+para.char.mix =
+  text
+  | xref.char.class
+  | gen.char.class
+  | link.char.class
+  | tech.char.class
+  | base.char.class
+  | docinfo.char.class
+  | other.char.class
+  | inlineobj.char.class
+  | synop.class
+  | ndxterm.class
+  | beginpage
+  | forminlines.hook
+  | local.para.char.mix
+local.title.char.mix = notAllowed
+title.char.mix =
+  text
+  | xref.char.class
+  | gen.char.class
+  | link.char.class
+  | tech.char.class
+  | base.char.class
+  | docinfo.char.class
+  | other.char.class
+  | inlineobj.char.class
+  | ndxterm.class
+  | local.title.char.mix
+local.ndxterm.char.mix = notAllowed
+ndxterm.char.mix =
+  text
+  | xref.char.class
+  | gen.char.class
+  | link.char.class
+  | tech.char.class
+  | base.char.class
+  | docinfo.char.class
+  | other.char.class
+  | inlinegraphic
+  | inlinemediaobject
+  | local.ndxterm.char.mix
+local.cptr.char.mix = notAllowed
+cptr.char.mix =
+  text
+  | link.char.class
+  | tech.char.class
+  | base.char.class
+  | other.char.class
+  | inlinegraphic
+  | inlinemediaobject
+  | ndxterm.class
+  | beginpage
+  | local.cptr.char.mix
+local.smallcptr.char.mix = notAllowed
+smallcptr.char.mix =
+  text
+  | replaceable
+  | inlinegraphic
+  | inlinemediaobject
+  | ndxterm.class
+  | beginpage
+  | local.smallcptr.char.mix
+local.word.char.mix = notAllowed
+word.char.mix =
+  text
+  | acronym
+  | emphasis
+  | trademark
+  | link.char.class
+  | base.char.class
+  | other.char.class
+  | inlinegraphic
+  | inlinemediaobject
+  | ndxterm.class
+  | beginpage
+  | local.word.char.mix
+local.docinfo.char.mix = notAllowed
+docinfo.char.mix =
+  text
+  | link.char.class
+  | emphasis
+  | trademark
+  | replaceable
+  | other.char.class
+  | inlinegraphic
+  | inlinemediaobject
+  | ndxterm.class
+  | local.docinfo.char.mix
+# ENTITY % bibliocomponent.mix (see Bibliographic section, below)
+
+# ENTITY % person.ident.mix (see Bibliographic section, below)
+
+# ......................................................................
+
+# Entities for attributes and attribute components .....................
+
+# Effectivity attributes ...............................................
+
+# Arch: Computer or chip architecture to which element applies; no
+# default
+arch.attrib = attribute arch { text }?
+# Condition: General-purpose effectivity attribute
+condition.attrib = attribute condition { text }?
+# Conformance: Standards conformance characteristics
+conformance.attrib = attribute conformance { xsd:NMTOKENS }?
+# OS: Operating system to which element applies; no default
+os.attrib = attribute os { text }?
+# Revision: Editorial revision to which element belongs; no default
+revision.attrib = attribute revision { text }?
+# Security: Security classification; no default
+security.attrib = attribute security { text }?
+# UserLevel: Level of user experience to which element applies; no
+# default
+userlevel.attrib = attribute userlevel { text }?
+# Vendor: Computer vendor to which element applies; no default
+vendor.attrib = attribute vendor { text }?
+local.effectivity.attrib = empty
+effectivity.attrib =
+  arch.attrib,
+  condition.attrib,
+  conformance.attrib,
+  os.attrib,
+  revision.attrib,
+  security.attrib,
+  userlevel.attrib,
+  vendor.attrib,
+  local.effectivity.attrib
+# Common attributes ....................................................
+
+# Id: Unique identifier of element; no default
+id.attrib = attribute id { xsd:ID }?
+# Id: Unique identifier of element; a value must be supplied; no
+# default
+idreq.attrib = attribute id { xsd:ID }
+# Lang: Indicator of language in which element is written, for
+# translation, character set management, etc.; no default
+lang.attrib = attribute lang { text }?
+# Remap: Previous role of element before conversion; no default
+remap.attrib = attribute remap { text }?
+# Role: New role of element in local environment; no default
+role.attrib = attribute role { text }?
+# XRefLabel: Alternate labeling string for XRef text generation;
+# default is usually title or other appropriate label text already
+# contained in element
+xreflabel.attrib = attribute xreflabel { text }?
+# RevisionFlag: Revision status of element; default is that element
+# wasn't revised
+revisionflag.attrib =
+  attribute revisionflag { "changed" | "added" | "deleted" | "off" }?
+local.common.attrib = empty
+# Role is included explicitly on each element
+common.attrib =
+  id.attrib,
+  lang.attrib,
+  remap.attrib,
+  xreflabel.attrib,
+  revisionflag.attrib,
+  effectivity.attrib,
+  local.common.attrib
+# Role is included explicitly on each element
+idreq.common.attrib =
+  idreq.attrib,
+  lang.attrib,
+  remap.attrib,
+  xreflabel.attrib,
+  revisionflag.attrib,
+  effectivity.attrib,
+  local.common.attrib
+# Semi-common attributes and other attribute entities ..................
+local.graphics.attrib = empty
+# EntityRef: Name of an external entity containing the content
+# of the graphic
+
+# FileRef: Filename, qualified by a pathname if desired,
+# designating the file containing the content of the graphic
+
+# Format: Notation of the element content, if any
+
+# SrcCredit: Information about the source of the Graphic
+
+# Width: Same as CALS reprowid (desired width)
+
+# Depth: Same as CALS reprodep (desired depth)
+
+# Align: Same as CALS hplace with 'none' removed; #IMPLIED means
+# application-specific
+
+# Scale: Conflation of CALS hscale and vscale
+
+# Scalefit: Same as CALS scalefit
+graphics.attrib =
+  attribute entityref { xsd:ENTITY }?,
+  attribute fileref { text }?,
+  attribute format { notation.class }?,
+  attribute srccredit { text }?,
+  attribute width { text }?,
+  attribute contentwidth { text }?,
+  attribute depth { text }?,
+  attribute contentdepth { text }?,
+  attribute align { "left" | "right" | "center" }?,
+  attribute valign { "top" | "middle" | "bottom" }?,
+  attribute scale { text }?,
+  attribute scalefit { yesorno.attvals }?,
+  local.graphics.attrib
+local.keyaction.attrib = empty
+# Action: Key combination type; default is unspecified if one
+# child element, Simul if there is more than one; if value is
+# Other, the OtherAction attribute must have a nonempty value
+
+# OtherAction: User-defined key combination type
+keyaction.attrib =
+  attribute action {
+    "click" | "double-click" | "press" | "seq" | "simul" | "other"
+  }?,
+  attribute otheraction { text }?,
+  local.keyaction.attrib
+# Label: Identifying number or string; default is usually the
+# appropriate number or string autogenerated by a formatter
+label.attrib = attribute label { text }?
+# Format: whether element is assumed to contain significant white
+# space
+linespecific.attrib =
+  [ a:defaultValue = "linespecific" ]
+  attribute format { "linespecific" }?,
+  attribute linenumbering { "numbered" | "unnumbered" }?
+# Linkend: link to related information; no default
+linkend.attrib = attribute linkend { xsd:IDREF }?
+# Linkend: required link to related information
+linkendreq.attrib = attribute linkend { xsd:IDREF }
+# Linkends: link to one or more sets of related information; no
+# default
+linkends.attrib = attribute linkends { xsd:IDREFS }?
+local.mark.attrib = empty
+mark.attrib =
+  attribute mark { text }?,
+  local.mark.attrib
+# MoreInfo: whether element's content has an associated RefEntry
+moreinfo.attrib =
+  [ a:defaultValue = "none" ]
+  attribute moreinfo { "refentry" | "none" }?
+# Pagenum: number of page on which element appears; no default
+pagenum.attrib = attribute pagenum { text }?
+local.status.attrib = empty
+# Status: Editorial or publication status of the element
+# it applies to, such as "in review" or "approved for distribution"
+status.attrib =
+  attribute status { text }?,
+  local.status.attrib
+# Width: width of the longest line in the element to which it
+# pertains, in number of characters
+width.attrib = attribute width { text }?
+# ......................................................................
+
+# Title elements .......................................................
+local.title.attrib = empty
+title.role.attrib = role.attrib
+title = element title { title.attlist, title.char.mix* }
+# end of title.element
+title.attlist &=
+  pagenum.attrib, common.attrib, title.role.attrib, local.title.attrib
+# end of title.attlist
+
+# end of title.module
+local.titleabbrev.attrib = empty
+titleabbrev.role.attrib = role.attrib
+titleabbrev =
+  element titleabbrev { titleabbrev.attlist, title.char.mix* }
+# end of titleabbrev.element
+titleabbrev.attlist &=
+  common.attrib, titleabbrev.role.attrib, local.titleabbrev.attrib
+# end of titleabbrev.attlist
+
+# end of titleabbrev.module
+local.subtitle.attrib = empty
+subtitle.role.attrib = role.attrib
+subtitle = element subtitle { subtitle.attlist, title.char.mix* }
+# end of subtitle.element
+subtitle.attlist &=
+  common.attrib, subtitle.role.attrib, local.subtitle.attrib
+# end of subtitle.attlist
+
+# end of subtitle.module
+
+# ......................................................................
+
+# Bibliographic entities and elements ..................................
+
+# The bibliographic elements are typically used in the document
+# hierarchy. They do not appear in content models of information
+# pool elements.  See also the document information elements,
+# below.
+local.person.ident.mix = notAllowed
+person.ident.mix =
+  honorific
+  | firstname
+  | surname
+  | lineage
+  | othername
+  | affiliation
+  | authorblurb
+  | contrib
+  | local.person.ident.mix
+local.bibliocomponent.mix = notAllowed
+bibliocomponent.mix =
+  abbrev
+  | abstract
+  | address
+  | artpagenums
+  | author
+  | authorgroup
+  | authorinitials
+  | bibliomisc
+  | biblioset
+  | collab
+  | confgroup
+  | contractnum
+  | contractsponsor
+  | copyright
+  | corpauthor
+  | corpname
+  | date
+  | edition
+  | editor
+  | invpartnumber
+  | isbn
+  | issn
+  | issuenum
+  | orgname
+  | biblioid
+  | citebiblioid
+  | bibliosource
+  | bibliorelation
+  | bibliocoverage
+  | othercredit
+  | pagenums
+  | printhistory
+  | productname
+  | productnumber
+  | pubdate
+  | publisher
+  | publishername
+  | pubsnumber
+  | releaseinfo
+  | revhistory
+  | seriesvolnums
+  | subtitle
+  | title
+  | titleabbrev
+  | volumenum
+  | citetitle
+  | personname
+  | person.ident.mix
+  | ndxterm.class
+  | local.bibliocomponent.mix
+# I don't think this is well placed, but it needs to be here because of
+
+# the reference to bibliocomponent.mix
+local.info.class = notAllowed
+info.class =
+  graphic
+  | mediaobject
+  | legalnotice
+  | modespec
+  | subjectset
+  | keywordset
+  | itermset
+  | bibliocomponent.mix
+  | local.info.class
+local.biblioentry.attrib = empty
+biblioentry.role.attrib = role.attrib
+biblioentry =
+  element biblioentry {
+    biblioentry.attlist, (articleinfo | bibliocomponent.mix)+
+  }
+# end of biblioentry.element
+biblioentry.attlist &=
+  common.attrib, biblioentry.role.attrib, local.biblioentry.attrib
+# end of biblioentry.attlist
+
+# end of biblioentry.module
+local.bibliomixed.attrib = empty
+bibliomixed.role.attrib = role.attrib
+bibliomixed =
+  element bibliomixed {
+    bibliomixed.attlist, (text | bibliocomponent.mix | bibliomset)*
+  }
+# end of bibliomixed.element
+bibliomixed.attlist &=
+  common.attrib, bibliomixed.role.attrib, local.bibliomixed.attrib
+# end of bibliomixed.attlist
+
+# end of bibliomixed.module
+local.articleinfo.attrib = empty
+articleinfo.role.attrib = role.attrib
+articleinfo = element articleinfo { articleinfo.attlist, info.class+ }
+# end of articleinfo.element
+articleinfo.attlist &=
+  common.attrib, articleinfo.role.attrib, local.articleinfo.attrib
+# end of articleinfo.attlist
+
+# end of articleinfo.module
+local.biblioset.attrib = empty
+biblioset.role.attrib = role.attrib
+biblioset =
+  element biblioset { biblioset.attlist, bibliocomponent.mix+ }
+# end of biblioset.element
+
+# Relation: Relationship of elements contained within BiblioSet
+biblioset.attlist &=
+  attribute relation { text }?,
+  common.attrib,
+  biblioset.role.attrib,
+  local.biblioset.attrib
+# end of biblioset.attlist
+
+# end of biblioset.module
+bibliomset.role.attrib = role.attrib
+local.bibliomset.attrib = empty
+bibliomset =
+  element bibliomset {
+    bibliomset.attlist, (text | bibliocomponent.mix | bibliomset)*
+  }
+# end of bibliomset.element
+
+# Relation: Relationship of elements contained within BiblioMSet
+bibliomset.attlist &=
+  attribute relation { text }?,
+  common.attrib,
+  bibliomset.role.attrib,
+  local.bibliomset.attrib
+# end of bibliomset.attlist
+
+# end of bibliomset.module
+local.bibliomisc.attrib = empty
+bibliomisc.role.attrib = role.attrib
+bibliomisc = element bibliomisc { bibliomisc.attlist, para.char.mix* }
+# end of bibliomisc.element
+bibliomisc.attlist &=
+  common.attrib, bibliomisc.role.attrib, local.bibliomisc.attrib
+# end of bibliomisc.attlist
+
+# end of bibliomisc.module
+
+# ......................................................................
+
+# Subject, Keyword, and ITermSet elements ..............................
+local.subjectset.attrib = empty
+subjectset.role.attrib = role.attrib
+subjectset = element subjectset { subjectset.attlist, subject+ }
+# end of subjectset.element
+
+# Scheme: Controlled vocabulary employed in SubjectTerms
+subjectset.attlist &=
+  attribute scheme { xsd:NMTOKEN }?,
+  common.attrib,
+  subjectset.role.attrib,
+  local.subjectset.attrib
+# end of subjectset.attlist
+
+# end of subjectset.module
+local.subject.attrib = empty
+subject.role.attrib = role.attrib
+subject = element subject { subject.attlist, subjectterm+ }
+# end of subject.element
+
+# Weight: Ranking of this group of SubjectTerms relative
+# to others, 0 is low, no highest value specified
+subject.attlist &=
+  attribute weight { text }?,
+  common.attrib,
+  subject.role.attrib,
+  local.subject.attrib
+# end of subject.attlist
+
+# end of subject.module
+local.subjectterm.attrib = empty
+subjectterm.role.attrib = role.attrib
+subjectterm = element subjectterm { subjectterm.attlist, text }
+# end of subjectterm.element
+subjectterm.attlist &=
+  common.attrib, subjectterm.role.attrib, local.subjectterm.attrib
+# end of subjectterm.attlist
+
+# end of subjectterm.module
+
+# end of subjectset.content.module
+local.keywordset.attrib = empty
+keywordset.role.attrib = role.attrib
+keywordset = element keywordset { keywordset.attlist, keyword+ }
+# end of keywordset.element
+keywordset.attlist &=
+  common.attrib, keywordset.role.attrib, local.keywordset.attrib
+# end of keywordset.attlist
+
+# end of keywordset.module
+local.keyword.attrib = empty
+keyword.role.attrib = role.attrib
+keyword = element keyword { keyword.attlist, text }
+# end of keyword.element
+keyword.attlist &=
+  common.attrib, keyword.role.attrib, local.keyword.attrib
+# end of keyword.attlist
+
+# end of keyword.module
+
+# end of keywordset.content.module
+local.itermset.attrib = empty
+itermset.role.attrib = role.attrib
+itermset = element itermset { itermset.attlist, indexterm+ }
+# end of itermset.element
+itermset.attlist &=
+  common.attrib, itermset.role.attrib, local.itermset.attrib
+# end of itermset.attlist
+
+# end of itermset.module
+
+# Bibliographic info for "blocks"
+local.blockinfo.attrib = empty
+blockinfo.role.attrib = role.attrib
+blockinfo = element blockinfo { blockinfo.attlist, info.class+ }
+# end of blockinfo.element
+blockinfo.attlist &=
+  common.attrib, blockinfo.role.attrib, local.blockinfo.attrib
+# end of blockinfo.attlist
+
+# end of blockinfo.module
+
+# ......................................................................
+
+# Compound (section-ish) elements ......................................
+
+# Message set ......................
+local.msgset.attrib = empty
+msgset.role.attrib = role.attrib
+msgset =
+  element msgset {
+    msgset.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    (msgentry+ | simplemsgentry+)
+  }
+# end of msgset.element
+msgset.attlist &= common.attrib, msgset.role.attrib, local.msgset.attrib
+# end of msgset.attlist
+
+# end of msgset.module
+local.msgentry.attrib = empty
+msgentry.role.attrib = role.attrib
+msgentry =
+  element msgentry { msgentry.attlist, msg+, msginfo?, msgexplan* }
+# end of msgentry.element
+msgentry.attlist &=
+  common.attrib, msgentry.role.attrib, local.msgentry.attrib
+# end of msgentry.attlist
+
+# end of msgentry.module
+local.simplemsgentry.attrib = empty
+simplemsgentry.role.attrib = role.attrib
+simplemsgentry =
+  element simplemsgentry { simplemsgentry.attlist, msgtext, msgexplan+ }
+# end of simplemsgentry.element
+simplemsgentry.attlist &=
+  attribute audience { text }?,
+  attribute level { text }?,
+  attribute origin { text }?,
+  common.attrib,
+  simplemsgentry.role.attrib,
+  local.simplemsgentry.attrib
+# end of simplemsgentry.attlist
+
+# end of simplemsgentry.module
+local.msg.attrib = empty
+msg.role.attrib = role.attrib
+msg = element msg { msg.attlist, title?, msgmain, (msgsub | msgrel)* }
+# end of msg.element
+msg.attlist &= common.attrib, msg.role.attrib, local.msg.attrib
+# end of msg.attlist
+
+# end of msg.module
+local.msgmain.attrib = empty
+msgmain.role.attrib = role.attrib
+msgmain = element msgmain { msgmain.attlist, title?, msgtext }
+# end of msgmain.element
+msgmain.attlist &=
+  common.attrib, msgmain.role.attrib, local.msgmain.attrib
+# end of msgmain.attlist
+
+# end of msgmain.module
+local.msgsub.attrib = empty
+msgsub.role.attrib = role.attrib
+msgsub = element msgsub { msgsub.attlist, title?, msgtext }
+# end of msgsub.element
+msgsub.attlist &= common.attrib, msgsub.role.attrib, local.msgsub.attrib
+# end of msgsub.attlist
+
+# end of msgsub.module
+local.msgrel.attrib = empty
+msgrel.role.attrib = role.attrib
+msgrel = element msgrel { msgrel.attlist, title?, msgtext }
+# end of msgrel.element
+msgrel.attlist &= common.attrib, msgrel.role.attrib, local.msgrel.attrib
+# end of msgrel.attlist
+
+# end of msgrel.module
+
+#  MsgText (defined in the Inlines section, below)
+local.msginfo.attrib = empty
+msginfo.role.attrib = role.attrib
+msginfo =
+  element msginfo { msginfo.attlist, (msglevel | msgorig | msgaud)* }
+# end of msginfo.element
+msginfo.attlist &=
+  common.attrib, msginfo.role.attrib, local.msginfo.attrib
+# end of msginfo.attlist
+
+# end of msginfo.module
+local.msglevel.attrib = empty
+msglevel.role.attrib = role.attrib
+msglevel = element msglevel { msglevel.attlist, smallcptr.char.mix* }
+# end of msglevel.element
+msglevel.attlist &=
+  common.attrib, msglevel.role.attrib, local.msglevel.attrib
+# end of msglevel.attlist
+
+# end of msglevel.module
+local.msgorig.attrib = empty
+msgorig.role.attrib = role.attrib
+msgorig = element msgorig { msgorig.attlist, smallcptr.char.mix* }
+# end of msgorig.element
+msgorig.attlist &=
+  common.attrib, msgorig.role.attrib, local.msgorig.attrib
+# end of msgorig.attlist
+
+# end of msgorig.module
+local.msgaud.attrib = empty
+msgaud.role.attrib = role.attrib
+msgaud = element msgaud { msgaud.attlist, para.char.mix* }
+# end of msgaud.element
+msgaud.attlist &= common.attrib, msgaud.role.attrib, local.msgaud.attrib
+# end of msgaud.attlist
+
+# end of msgaud.module
+local.msgexplan.attrib = empty
+msgexplan.role.attrib = role.attrib
+msgexplan =
+  element msgexplan { msgexplan.attlist, title?, component.mix+ }
+# end of msgexplan.element
+msgexplan.attlist &=
+  common.attrib, msgexplan.role.attrib, local.msgexplan.attrib
+# end of msgexplan.attlist
+
+# end of msgexplan.module
+
+# end of msgset.content.module
+
+# QandASet ........................
+local.qandaset.attrib = empty
+qandaset.role.attrib = role.attrib
+qandaset =
+  element qandaset {
+    qandaset.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    qandaset.mix*,
+    (qandadiv+ | qandaentry+)
+  }
+# end of qandaset.element
+qandaset.attlist &=
+  attribute defaultlabel { "qanda" | "number" | "none" }?,
+  common.attrib,
+  qandaset.role.attrib,
+  local.qandaset.attrib
+# end of qandaset.attlist
+
+# end of qandaset.module
+local.qandadiv.attrib = empty
+qandadiv.role.attrib = role.attrib
+qandadiv =
+  element qandadiv {
+    qandadiv.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    qandaset.mix*,
+    (qandadiv+ | qandaentry+)
+  }
+# end of qandadiv.element
+qandadiv.attlist &=
+  common.attrib, qandadiv.role.attrib, local.qandadiv.attrib
+# end of qandadiv.attlist
+
+# end of qandadiv.module
+local.qandaentry.attrib = empty
+qandaentry.role.attrib = role.attrib
+qandaentry =
+  element qandaentry {
+    qandaentry.attlist, blockinfo?, revhistory?, question, answer*
+  }
+# end of qandaentry.element
+qandaentry.attlist &=
+  common.attrib, qandaentry.role.attrib, local.qandaentry.attrib
+# end of qandaentry.attlist
+
+# end of qandaentry.module
+local.question.attrib = empty
+question.role.attrib = role.attrib
+question = element question { question.attlist, label?, qandaset.mix+ }
+# end of question.element
+question.attlist &=
+  common.attrib, question.role.attrib, local.question.attrib
+# end of question.attlist
+
+# end of question.module
+local.answer.attrib = empty
+answer.role.attrib = role.attrib
+answer =
+  element answer { answer.attlist, label?, qandaset.mix*, qandaentry* }
+# end of answer.element
+answer.attlist &= common.attrib, answer.role.attrib, local.answer.attrib
+# end of answer.attlist
+
+# end of answer.module
+local.label.attrib = empty
+label.role.attrib = role.attrib
+label = element label { label.attlist, word.char.mix* }
+# end of label.element
+label.attlist &= common.attrib, label.role.attrib, local.label.attrib
+# end of label.attlist
+
+# end of label.module
+
+# end of qandaset.content.module
+
+# Procedure ........................
+local.procedure.attrib = empty
+procedure.role.attrib = role.attrib
+procedure =
+  element procedure {
+    procedure.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    component.mix*,
+    step+
+  }
+# end of procedure.element
+procedure.attlist &=
+  common.attrib, procedure.role.attrib, local.procedure.attrib
+# end of procedure.attlist
+
+# end of procedure.module
+local.step.attrib = empty
+step.role.attrib = role.attrib
+step =
+  element step {
+    step.attlist,
+    title?,
+    ((component.mix+, (substeps, component.mix*)?)
+     | (substeps, component.mix*))
+  }
+# end of step.element
+
+# Performance: Whether the Step must be performed
+
+# not #REQUIRED!
+step.attlist &=
+  [ a:defaultValue = "required" ]
+  attribute performance { "optional" | "required" }?,
+  common.attrib,
+  step.role.attrib,
+  local.step.attrib
+# end of step.attlist
+
+# end of step.module
+local.substeps.attrib = empty
+substeps.role.attrib = role.attrib
+substeps = element substeps { substeps.attlist, step+ }
+# end of substeps.element
+
+# Performance: whether entire set of substeps must be performed
+
+# not #REQUIRED!
+substeps.attlist &=
+  [ a:defaultValue = "required" ]
+  attribute performance { "optional" | "required" }?,
+  common.attrib,
+  substeps.role.attrib,
+  local.substeps.attrib
+# end of substeps.attlist
+
+# end of substeps.module
+
+# end of procedure.content.module
+
+# Sidebar ..........................
+local.sidebarinfo.attrib = empty
+sidebarinfo.role.attrib = role.attrib
+sidebarinfo = element sidebarinfo { sidebarinfo.attlist, info.class+ }
+# end of sidebarinfo.element
+sidebarinfo.attlist &=
+  common.attrib, sidebarinfo.role.attrib, local.sidebarinfo.attrib
+# end of sidebarinfo.attlist
+
+# end of sidebarinfo.module
+local.sidebar.attrib = empty
+sidebar.role.attrib = role.attrib
+sidebar =
+  element sidebar {
+    sidebar.attlist,
+    sidebarinfo?,
+    formalobject.title.content?,
+    sidebar.mix+
+  }
+# end of sidebar.element
+sidebar.attlist &=
+  common.attrib, sidebar.role.attrib, local.sidebar.attrib
+# end of sidebar.attlist
+
+# end of sidebar.module
+
+# end of sidebar.content.model
+
+# ......................................................................
+
+# Paragraph-related elements ...........................................
+local.abstract.attrib = empty
+abstract.role.attrib = role.attrib
+abstract = element abstract { abstract.attlist, title?, para.class+ }
+# end of abstract.element
+abstract.attlist &=
+  common.attrib, abstract.role.attrib, local.abstract.attrib
+# end of abstract.attlist
+
+# end of abstract.module
+local.authorblurb.attrib = empty
+authorblurb.role.attrib = role.attrib
+authorblurb =
+  element authorblurb { authorblurb.attlist, title?, para.class+ }
+# end of authorblurb.element
+authorblurb.attlist &=
+  common.attrib, authorblurb.role.attrib, local.authorblurb.attrib
+# end of authorblurb.attlist
+
+# end of authorblurb.module
+local.personblurb.attrib = empty
+personblurb.role.attrib = role.attrib
+personblurb =
+  element personblurb { personblurb.attlist, title?, para.class+ }
+# end of personblurb.element
+personblurb.attlist &=
+  common.attrib, personblurb.role.attrib, local.personblurb.attrib
+# end of personblurb.attlist
+
+# end of personblurb.module
+local.blockquote.attrib = empty
+blockquote.role.attrib = role.attrib
+blockquote =
+  element blockquote {
+    blockquote.attlist, title?, attribution?, component.mix+
+  }
+# end of blockquote.element
+blockquote.attlist &=
+  common.attrib, blockquote.role.attrib, local.blockquote.attrib
+# end of blockquote.attlist
+
+# end of blockquote.module
+local.attribution.attrib = empty
+attribution.role.attrib = role.attrib
+attribution =
+  element attribution { attribution.attlist, para.char.mix* }
+# end of attribution.element
+attribution.attlist &=
+  common.attrib, attribution.role.attrib, local.attribution.attrib
+# end of attribution.attlist
+
+# end of attribution.module
+local.bridgehead.attrib = empty
+bridgehead.role.attrib = role.attrib
+bridgehead = element bridgehead { bridgehead.attlist, title.char.mix* }
+# end of bridgehead.element
+
+# Renderas: Indicates the format in which the BridgeHead
+# should appear
+bridgehead.attlist &=
+  attribute renderas {
+    "other" | "sect1" | "sect2" | "sect3" | "sect4" | "sect5"
+  }?,
+  common.attrib,
+  bridgehead.role.attrib,
+  local.bridgehead.attrib
+# end of bridgehead.attlist
+
+# end of bridgehead.module
+local.remark.attrib = empty
+remark.role.attrib = role.attrib
+remark = element remark { remark.attlist, para.char.mix* }
+# end of remark.element
+remark.attlist &= common.attrib, remark.role.attrib, local.remark.attrib
+# end of remark.attlist
+
+# end of remark.module
+local.epigraph.attrib = empty
+epigraph.role.attrib = role.attrib
+epigraph =
+  element epigraph {
+    epigraph.attlist, attribution?, (para.class | literallayout)+
+  }
+# end of epigraph.element
+epigraph.attlist &=
+  common.attrib, epigraph.role.attrib, local.epigraph.attrib
+# end of epigraph.attlist
+
+#  Attribution (defined above)
+
+# end of epigraph.module
+local.footnote.attrib = empty
+footnote.role.attrib = role.attrib
+footnote = element footnote { footnote.attlist, footnote.mix+ }
+# end of footnote.element
+footnote.attlist &=
+  label.attrib,
+  common.attrib,
+  footnote.role.attrib,
+  local.footnote.attrib
+# end of footnote.attlist
+
+# end of footnote.module
+local.highlights.attrib = empty
+highlights.role.attrib = role.attrib
+highlights = element highlights { highlights.attlist, highlights.mix+ }
+# end of highlights.element
+highlights.attlist &=
+  common.attrib, highlights.role.attrib, local.highlights.attrib
+# end of highlights.attlist
+
+# end of highlights.module
+local.formalpara.attrib = empty
+formalpara.role.attrib = role.attrib
+formalpara =
+  element formalpara { formalpara.attlist, title, ndxterm.class*, para }
+# end of formalpara.element
+formalpara.attlist &=
+  common.attrib, formalpara.role.attrib, local.formalpara.attrib
+# end of formalpara.attlist
+
+# end of formalpara.module
+local.para.attrib = empty
+para.role.attrib = role.attrib
+para = element para { para.attlist, (para.char.mix | para.mix)* }
+# end of para.element
+para.attlist &= common.attrib, para.role.attrib, local.para.attrib
+# end of para.attlist
+
+# end of para.module
+local.simpara.attrib = empty
+simpara.role.attrib = role.attrib
+simpara = element simpara { simpara.attlist, para.char.mix* }
+# end of simpara.element
+simpara.attlist &=
+  common.attrib, simpara.role.attrib, local.simpara.attrib
+# end of simpara.attlist
+
+# end of simpara.module
+local.admon.attrib = empty
+admon.role.attrib = role.attrib
+caution = element caution { caution.attlist, title?, admon.mix+ }
+# end of caution.element
+caution.attlist &= common.attrib, admon.role.attrib, local.admon.attrib
+# end of caution.attlist
+important = element important { important.attlist, title?, admon.mix+ }
+# end of important.element
+important.attlist &=
+  common.attrib, admon.role.attrib, local.admon.attrib
+# end of important.attlist
+note = element note { note.attlist, title?, admon.mix+ }
+# end of note.element
+note.attlist &= common.attrib, admon.role.attrib, local.admon.attrib
+# end of note.attlist
+tip = element tip { tip.attlist, title?, admon.mix+ }
+# end of tip.element
+tip.attlist &= common.attrib, admon.role.attrib, local.admon.attrib
+# end of tip.attlist
+warning = element warning { warning.attlist, title?, admon.mix+ }
+# end of warning.element
+warning.attlist &= common.attrib, admon.role.attrib, local.admon.attrib
+# end of warning.attlist
+
+# end of admon.module
+
+# ......................................................................
+
+# Lists ................................................................
+
+# GlossList ........................
+local.glosslist.attrib = empty
+glosslist.role.attrib = role.attrib
+glosslist = element glosslist { glosslist.attlist, glossentry+ }
+# end of glosslist.element
+glosslist.attlist &=
+  common.attrib, glosslist.role.attrib, local.glosslist.attrib
+# end of glosslist.attlist
+
+# end of glosslist.module
+local.glossentry.attrib = empty
+glossentry.role.attrib = role.attrib
+glossentry =
+  element glossentry {
+    glossentry.attlist,
+    glossterm,
+    acronym?,
+    abbrev?,
+    ndxterm.class*,
+    revhistory?,
+    (glosssee | glossdef+)
+  }
+# end of glossentry.element
+
+# SortAs: String by which the GlossEntry is to be sorted
+# (alphabetized) in lieu of its proper content
+glossentry.attlist &=
+  attribute sortas { text }?,
+  common.attrib,
+  glossentry.role.attrib,
+  local.glossentry.attrib
+# end of glossentry.attlist
+
+# end of glossentry.module
+
+#  GlossTerm (defined in the Inlines section, below)
+local.glossdef.attrib = empty
+glossdef.role.attrib = role.attrib
+glossdef =
+  element glossdef { glossdef.attlist, glossdef.mix+, glossseealso* }
+# end of glossdef.element
+
+# Subject: List of subjects; keywords for the definition
+glossdef.attlist &=
+  attribute subject { text }?,
+  common.attrib,
+  glossdef.role.attrib,
+  local.glossdef.attrib
+# end of glossdef.attlist
+
+# end of glossdef.module
+local.glosssee.attrib = empty
+glosssee.role.attrib = role.attrib
+glosssee = element glosssee { glosssee.attlist, para.char.mix* }
+# end of glosssee.element
+
+# OtherTerm: Reference to the GlossEntry whose GlossTerm
+# should be displayed at the point of the GlossSee
+glosssee.attlist &=
+  attribute otherterm { xsd:IDREF }?,
+  common.attrib,
+  glosssee.role.attrib,
+  local.glosssee.attrib
+# end of glosssee.attlist
+
+# end of glosssee.module
+local.glossseealso.attrib = empty
+glossseealso.role.attrib = role.attrib
+glossseealso =
+  element glossseealso { glossseealso.attlist, para.char.mix* }
+# end of glossseealso.element
+
+# OtherTerm: Reference to the GlossEntry whose GlossTerm
+# should be displayed at the point of the GlossSeeAlso
+glossseealso.attlist &=
+  attribute otherterm { xsd:IDREF }?,
+  common.attrib,
+  glossseealso.role.attrib,
+  local.glossseealso.attrib
+# end of glossseealso.attlist
+
+# end of glossseealso.module
+
+# end of glossentry.content.module
+
+# ItemizedList and OrderedList .....
+local.itemizedlist.attrib = empty
+itemizedlist.role.attrib = role.attrib
+itemizedlist =
+  element itemizedlist {
+    itemizedlist.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    listpreamble.mix*,
+    listitem+
+  }
+# end of itemizedlist.element
+
+# Spacing: Whether the vertical space in the list should be
+# compressed
+
+# Mark: Keyword, e.g., bullet, dash, checkbox, none;
+# list of keywords and defaults are implementation specific
+itemizedlist.attlist &=
+  attribute spacing { "normal" | "compact" }?,
+  mark.attrib,
+  common.attrib,
+  itemizedlist.role.attrib,
+  local.itemizedlist.attrib
+# end of itemizedlist.attlist
+
+# end of itemizedlist.module
+local.orderedlist.attrib = empty
+orderedlist.role.attrib = role.attrib
+orderedlist =
+  element orderedlist {
+    orderedlist.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    listpreamble.mix*,
+    listitem+
+  }
+# end of orderedlist.element
+
+# Numeration: Style of ListItem numbered; default is expected
+# to be Arabic
+
+# InheritNum: Specifies for a nested list that the numbering
+# of ListItems should include the number of the item
+# within which they are nested (e.g., 1a and 1b within 1,
+# rather than a and b)
+
+# Continuation: Where list numbering begins afresh (Restarts,
+# the default) or continues that of the immediately preceding
+# list (Continues)
+
+# Spacing: Whether the vertical space in the list should be
+# compressed
+orderedlist.attlist &=
+  attribute numeration {
+    "arabic" | "upperalpha" | "loweralpha" | "upperroman" | "lowerroman"
+  }?,
+  [ a:defaultValue = "ignore" ]
+  attribute inheritnum { "inherit" | "ignore" }?,
+  [ a:defaultValue = "restarts" ]
+  attribute continuation { "continues" | "restarts" }?,
+  attribute spacing { "normal" | "compact" }?,
+  common.attrib,
+  orderedlist.role.attrib,
+  local.orderedlist.attrib
+# end of orderedlist.attlist
+
+# end of orderedlist.module
+local.listitem.attrib = empty
+listitem.role.attrib = role.attrib
+listitem = element listitem { listitem.attlist, component.mix+ }
+# end of listitem.element
+
+# Override: Indicates the mark to be used for this ListItem
+# instead of the default mark or the mark specified by
+# the Mark attribute on the enclosing ItemizedList
+listitem.attlist &=
+  attribute override { text }?,
+  common.attrib,
+  listitem.role.attrib,
+  local.listitem.attrib
+# end of listitem.attlist
+
+# end of listitem.module
+
+# SegmentedList ....................
+local.segmentedlist.attrib = empty
+segmentedlist.role.attrib = role.attrib
+segmentedlist =
+  element segmentedlist {
+    segmentedlist.attlist,
+    formalobject.title.content?,
+    segtitle+,
+    seglistitem+
+  }
+# end of segmentedlist.element
+segmentedlist.attlist &=
+  common.attrib, segmentedlist.role.attrib, local.segmentedlist.attrib
+# end of segmentedlist.attlist
+
+# end of segmentedlist.module
+local.segtitle.attrib = empty
+segtitle.role.attrib = role.attrib
+segtitle = element segtitle { segtitle.attlist, title.char.mix* }
+# end of segtitle.element
+segtitle.attlist &=
+  common.attrib, segtitle.role.attrib, local.segtitle.attrib
+# end of segtitle.attlist
+
+# end of segtitle.module
+local.seglistitem.attrib = empty
+seglistitem.role.attrib = role.attrib
+seglistitem = element seglistitem { seglistitem.attlist, seg+ }
+# end of seglistitem.element
+seglistitem.attlist &=
+  common.attrib, seglistitem.role.attrib, local.seglistitem.attrib
+# end of seglistitem.attlist
+
+# end of seglistitem.module
+local.seg.attrib = empty
+seg.role.attrib = role.attrib
+seg = element seg { seg.attlist, para.char.mix* }
+# end of seg.element
+seg.attlist &= common.attrib, seg.role.attrib, local.seg.attrib
+# end of seg.attlist
+
+# end of seg.module
+
+# end of segmentedlist.content.module
+
+# SimpleList .......................
+local.simplelist.attrib = empty
+simplelist.role.attrib = role.attrib
+simplelist = element simplelist { simplelist.attlist, member+ }
+# end of simplelist.element
+
+# Columns: The number of columns the array should contain
+
+# Type: How the Members of the SimpleList should be
+# formatted: Inline (members separated with commas etc.
+# inline), Vert (top to bottom in n Columns), or Horiz (in
+# the direction of text flow) in n Columns.  If Column
+# is 1 or implied, Type=Vert and Type=Horiz give the same
+# results.
+simplelist.attlist &=
+  attribute columns { text }?,
+  [ a:defaultValue = "vert" ]
+  attribute type { "inline" | "vert" | "horiz" }?,
+  common.attrib,
+  simplelist.role.attrib,
+  local.simplelist.attrib
+# end of simplelist.attlist
+
+# end of simplelist.module
+local.member.attrib = empty
+member.role.attrib = role.attrib
+member = element member { member.attlist, para.char.mix* }
+# end of member.element
+member.attlist &= common.attrib, member.role.attrib, local.member.attrib
+# end of member.attlist
+
+# end of member.module
+
+# end of simplelist.content.module
+
+# VariableList .....................
+local.variablelist.attrib = empty
+variablelist.role.attrib = role.attrib
+variablelist =
+  element variablelist {
+    variablelist.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    listpreamble.mix*,
+    varlistentry+
+  }
+# end of variablelist.element
+
+# TermLength: Length beyond which the presentation engine
+# may consider the Term too long and select an alternate
+# presentation of the Term and, or, its associated ListItem.
+variablelist.attlist &=
+  attribute termlength { text }?,
+  common.attrib,
+  variablelist.role.attrib,
+  local.variablelist.attrib
+# end of variablelist.attlist
+
+# end of variablelist.module
+local.varlistentry.attrib = empty
+varlistentry.role.attrib = role.attrib
+varlistentry =
+  element varlistentry { varlistentry.attlist, term+, listitem }
+# end of varlistentry.element
+varlistentry.attlist &=
+  common.attrib, varlistentry.role.attrib, local.varlistentry.attrib
+# end of varlistentry.attlist
+
+# end of varlistentry.module
+local.term.attrib = empty
+term.role.attrib = role.attrib
+term = element term { term.attlist, para.char.mix* }
+# end of term.element
+term.attlist &= common.attrib, term.role.attrib, local.term.attrib
+# end of term.attlist
+
+# end of term.module
+
+#  ListItem (defined above)
+
+# end of variablelist.content.module
+
+# CalloutList ......................
+local.calloutlist.attrib = empty
+calloutlist.role.attrib = role.attrib
+calloutlist =
+  element calloutlist {
+    calloutlist.attlist, formalobject.title.content?, callout+
+  }
+# end of calloutlist.element
+calloutlist.attlist &=
+  common.attrib, calloutlist.role.attrib, local.calloutlist.attrib
+# end of calloutlist.attlist
+
+# end of calloutlist.module
+local.callout.attrib = empty
+callout.role.attrib = role.attrib
+callout = element callout { callout.attlist, component.mix+ }
+# end of callout.element
+
+# AreaRefs: IDs of one or more Areas or AreaSets described
+# by this Callout
+callout.attlist &=
+  attribute arearefs { xsd:IDREFS },
+  common.attrib,
+  callout.role.attrib,
+  local.callout.attrib
+# end of callout.attlist
+
+# end of callout.module
+
+# end of calloutlist.content.module
+
+# ......................................................................
+
+# Objects ..............................................................
+
+# Examples etc. ....................
+local.example.attrib = empty
+example.role.attrib = role.attrib
+example =
+  element example {
+    example.attlist,
+    blockinfo?,
+    formalobject.title.content,
+    example.mix+
+  }
+# end of example.element
+example.attlist &=
+  label.attrib,
+  width.attrib,
+  common.attrib,
+  example.role.attrib,
+  local.example.attrib
+# end of example.attlist
+
+# end of example.module
+local.informalexample.attrib = empty
+informalexample.role.attrib = role.attrib
+informalexample =
+  element informalexample {
+    informalexample.attlist, blockinfo?, example.mix+
+  }
+# end of informalexample.element
+informalexample.attlist &=
+  width.attrib,
+  common.attrib,
+  informalexample.role.attrib,
+  local.informalexample.attrib
+# end of informalexample.attlist
+
+# end of informalexample.module
+local.programlistingco.attrib = empty
+programlistingco.role.attrib = role.attrib
+programlistingco =
+  element programlistingco {
+    programlistingco.attlist, areaspec, programlisting, calloutlist*
+  }
+# end of programlistingco.element
+programlistingco.attlist &=
+  common.attrib,
+  programlistingco.role.attrib,
+  local.programlistingco.attrib
+# end of programlistingco.attlist
+
+#  CalloutList (defined above in Lists)
+
+# end of informalexample.module
+local.areaspec.attrib = empty
+areaspec.role.attrib = role.attrib
+areaspec = element areaspec { areaspec.attlist, (area | areaset)+ }
+# end of areaspec.element
+
+# Units: global unit of measure in which coordinates in
+# this spec are expressed:
+# 
+# - CALSPair "x1,y1 x2,y2": lower-left and upper-right
+# coordinates in a rectangle describing repro area in which
+# graphic is placed, where X and Y dimensions are each some
+# number 0..10000 (taken from CALS graphic attributes)
+# 
+# - LineColumn "line column": line number and column number
+# at which to start callout text in "linespecific" content
+# 
+# - LineRange "startline endline": whole lines from startline
+# to endline in "linespecific" content
+# 
+# - LineColumnPair "line1 col1 line2 col2": starting and ending
+# points of area in "linespecific" content that starts at
+# first position and ends at second position (including the
+# beginnings of any intervening lines)
+# 
+# - Other: directive to look at value of OtherUnits attribute
+# to get implementation-specific keyword
+# 
+# The default is implementation-specific; usually dependent on
+# the parent element (GraphicCO gets CALSPair, ProgramListingCO
+# and ScreenCO get LineColumn)
+
+# OtherUnits: User-defined units
+areaspec.attlist &=
+  attribute units {
+    "calspair" | "linecolumn" | "linerange" | "linecolumnpair" | "other"
+  }?,
+  attribute otherunits { xsd:NMTOKEN }?,
+  common.attrib,
+  areaspec.role.attrib,
+  local.areaspec.attrib
+# end of areaspec.attlist
+
+# end of areaspec.module
+local.area.attrib = empty
+area.role.attrib = role.attrib
+area = element area { area.attlist, empty }
+# end of area.element
+
+# bug number/symbol override or initialization
+
+# to any related information
+
+# Units: unit of measure in which coordinates in this
+# area are expressed; inherits from AreaSet and AreaSpec
+
+# OtherUnits: User-defined units
+area.attlist &=
+  label.attrib,
+  linkends.attrib,
+  attribute units {
+    "calspair" | "linecolumn" | "linerange" | "linecolumnpair" | "other"
+  }?,
+  attribute otherunits { xsd:NMTOKEN }?,
+  attribute coords { text },
+  idreq.common.attrib,
+  area.role.attrib,
+  local.area.attrib
+# end of area.attlist
+
+# end of area.module
+local.areaset.attrib = empty
+areaset.role.attrib = role.attrib
+areaset = element areaset { areaset.attlist, area+ }
+# end of areaset.element
+
+# bug number/symbol override or initialization
+
+# Units: unit of measure in which coordinates in this
+# area are expressed; inherits from AreaSpec
+areaset.attlist &=
+  label.attrib,
+  attribute units {
+    "calspair" | "linecolumn" | "linerange" | "linecolumnpair" | "other"
+  }?,
+  attribute otherunits { xsd:NMTOKEN }?,
+  attribute coords { text },
+  idreq.common.attrib,
+  areaset.role.attrib,
+  local.areaset.attrib
+# end of areaset.attlist
+
+# end of areaset.module
+
+# end of areaspec.content.module
+local.programlisting.attrib = empty
+programlisting.role.attrib = role.attrib
+programlisting =
+  element programlisting {
+    programlisting.attlist,
+    (para.char.mix | co | coref | lineannotation | textobject)*
+  }
+# end of programlisting.element
+programlisting.attlist &=
+  width.attrib,
+  linespecific.attrib,
+  common.attrib,
+  programlisting.role.attrib,
+  local.programlisting.attrib
+# end of programlisting.attlist
+
+# end of programlisting.module
+local.literallayout.attrib = empty
+literallayout.role.attrib = role.attrib
+literallayout =
+  element literallayout {
+    literallayout.attlist,
+    (para.char.mix | co | coref | textobject | lineannotation)*
+  }
+# end of literallayout.element
+literallayout.attlist &=
+  width.attrib,
+  linespecific.attrib,
+  [ a:defaultValue = "normal" ]
+  attribute class { "monospaced" | "normal" }?,
+  common.attrib,
+  literallayout.role.attrib,
+  local.literallayout.attrib
+# end of literallayout.attlist
+
+#  LineAnnotation (defined in the Inlines section, below)
+
+# end of literallayout.module
+local.screenco.attrib = empty
+screenco.role.attrib = role.attrib
+screenco =
+  element screenco { screenco.attlist, areaspec, screen, calloutlist* }
+# end of screenco.element
+screenco.attlist &=
+  common.attrib, screenco.role.attrib, local.screenco.attrib
+# end of screenco.attlist
+
+#  AreaSpec (defined above)
+
+#  CalloutList (defined above in Lists)
+
+# end of screenco.module
+local.screen.attrib = empty
+screen.role.attrib = role.attrib
+screen =
+  element screen {
+    screen.attlist,
+    (para.char.mix | co | coref | textobject | lineannotation)*
+  }
+# end of screen.element
+screen.attlist &=
+  width.attrib,
+  linespecific.attrib,
+  common.attrib,
+  screen.role.attrib,
+  local.screen.attrib
+# end of screen.attlist
+
+# end of screen.module
+local.screenshot.attrib = empty
+screenshot.role.attrib = role.attrib
+screenshot =
+  element screenshot {
+    screenshot.attlist,
+    screeninfo?,
+    (graphic | graphicco | mediaobject | mediaobjectco)
+  }
+# end of screenshot.element
+screenshot.attlist &=
+  common.attrib, screenshot.role.attrib, local.screenshot.attrib
+# end of screenshot.attlist
+
+# end of screenshot.module
+local.screeninfo.attrib = empty
+screeninfo.role.attrib = role.attrib
+screeninfo = element screeninfo { screeninfo.attlist, para.char.mix* }
+# end of screeninfo.element
+screeninfo.attlist &=
+  common.attrib, screeninfo.role.attrib, local.screeninfo.attrib
+# end of screeninfo.attlist
+
+# end of screeninfo.module
+
+# end of screenshot.content.module
+
+# Figures etc. .....................
+local.figure.attrib = empty
+figure.role.attrib = role.attrib
+figure =
+  element figure {
+    figure.attlist,
+    blockinfo?,
+    formalobject.title.content,
+    (figure.mix | link.char.class)+
+  }
+# end of figure.element
+
+# Float: Whether the Figure is supposed to be rendered
+# where convenient (yes (1) value) or at the place it occurs
+# in the text (no (0) value, the default)
+figure.attlist &=
+  [ a:defaultValue = "0" ] attribute float { yesorno.attvals }?,
+  attribute pgwide { yesorno.attvals }?,
+  label.attrib,
+  common.attrib,
+  figure.role.attrib,
+  local.figure.attrib
+# end of figure.attlist
+
+# end of figure.module
+local.informalfigure.attrib = empty
+informalfigure.role.attrib = role.attrib
+informalfigure =
+  element informalfigure {
+    informalfigure.attlist, blockinfo?, (figure.mix | link.char.class)+
+  }
+# end of informalfigure.element
+
+# Float: Whether the Figure is supposed to be rendered
+# where convenient (yes (1) value) or at the place it occurs
+# in the text (no (0) value, the default)
+informalfigure.attlist &=
+  [ a:defaultValue = "0" ] attribute float { yesorno.attvals }?,
+  attribute pgwide { yesorno.attvals }?,
+  label.attrib,
+  common.attrib,
+  informalfigure.role.attrib,
+  local.informalfigure.attrib
+# end of informalfigure.attlist
+
+# end of informalfigure.module
+local.graphicco.attrib = empty
+graphicco.role.attrib = role.attrib
+graphicco =
+  element graphicco {
+    graphicco.attlist, areaspec, graphic, calloutlist*
+  }
+# end of graphicco.element
+graphicco.attlist &=
+  common.attrib, graphicco.role.attrib, local.graphicco.attrib
+# end of graphicco.attlist
+
+#  AreaSpec (defined above in Examples)
+
+#  CalloutList (defined above in Lists)
+
+# end of graphicco.module
+
+# Graphical data can be the content of Graphic, or you can reference
+# an external file either as an entity (Entitref) or a filename
+# (Fileref).
+local.graphic.attrib = empty
+graphic.role.attrib = role.attrib
+graphic = element graphic { graphic.attlist, empty }
+# end of graphic.element
+graphic.attlist &=
+  graphics.attrib,
+  common.attrib,
+  graphic.role.attrib,
+  local.graphic.attrib
+# end of graphic.attlist
+
+# end of graphic.module
+local.inlinegraphic.attrib = empty
+inlinegraphic.role.attrib = role.attrib
+inlinegraphic = element inlinegraphic { inlinegraphic.attlist, empty }
+# end of inlinegraphic.element
+inlinegraphic.attlist &=
+  graphics.attrib,
+  common.attrib,
+  inlinegraphic.role.attrib,
+  local.inlinegraphic.attrib
+# end of inlinegraphic.attlist
+
+# end of inlinegraphic.module
+local.mediaobject.attrib = empty
+mediaobject.role.attrib = role.attrib
+mediaobject =
+  element mediaobject {
+    mediaobject.attlist, objectinfo?, mediaobject.mix+, caption?
+  }
+# end of mediaobject.element
+mediaobject.attlist &=
+  common.attrib, mediaobject.role.attrib, local.mediaobject.attrib
+# end of mediaobject.attlist
+
+# end of mediaobject.module
+local.inlinemediaobject.attrib = empty
+inlinemediaobject.role.attrib = role.attrib
+inlinemediaobject =
+  element inlinemediaobject {
+    inlinemediaobject.attlist, objectinfo?, mediaobject.mix+
+  }
+# end of inlinemediaobject.element
+inlinemediaobject.attlist &=
+  common.attrib,
+  inlinemediaobject.role.attrib,
+  local.inlinemediaobject.attrib
+# end of inlinemediaobject.attlist
+
+# end of inlinemediaobject.module
+local.videoobject.attrib = empty
+videoobject.role.attrib = role.attrib
+videoobject =
+  element videoobject { videoobject.attlist, objectinfo?, videodata }
+# end of videoobject.element
+videoobject.attlist &=
+  common.attrib, videoobject.role.attrib, local.videoobject.attrib
+# end of videoobject.attlist
+
+# end of videoobject.module
+local.audioobject.attrib = empty
+audioobject.role.attrib = role.attrib
+audioobject =
+  element audioobject { audioobject.attlist, objectinfo?, audiodata }
+# end of audioobject.element
+audioobject.attlist &=
+  common.attrib, audioobject.role.attrib, local.audioobject.attrib
+# end of audioobject.attlist
+
+# end of audioobject.module
+local.imageobject.attrib = empty
+imageobject.role.attrib = role.attrib
+imageobject =
+  element imageobject { imageobject.attlist, objectinfo?, imagedata }
+# end of imageobject.element
+imageobject.attlist &=
+  common.attrib, imageobject.role.attrib, local.imageobject.attrib
+# end of imageobject.attlist
+
+# end of imageobject.module
+local.textobject.attrib = empty
+textobject.role.attrib = role.attrib
+textobject =
+  element textobject {
+    textobject.attlist,
+    objectinfo?,
+    (phrase | textdata | textobject.mix+)
+  }
+# end of textobject.element
+textobject.attlist &=
+  common.attrib, textobject.role.attrib, local.textobject.attrib
+# end of textobject.attlist
+
+# end of textobject.module
+local.objectinfo.attrib = empty
+objectinfo.role.attrib = role.attrib
+objectinfo = element objectinfo { objectinfo.attlist, info.class+ }
+# end of objectinfo.element
+objectinfo.attlist &=
+  common.attrib, objectinfo.role.attrib, local.objectinfo.attrib
+# end of objectinfo.attlist
+
+# end of objectinfo.module
+
+# EntityRef: Name of an external entity containing the content
+# of the object data
+
+# FileRef: Filename, qualified by a pathname if desired,
+# designating the file containing the content of the object data
+
+# Format: Notation of the element content, if any
+
+# SrcCredit: Information about the source of the image
+local.objectdata.attrib = empty
+objectdata.attrib =
+  attribute entityref { xsd:ENTITY }?,
+  attribute fileref { text }?,
+  attribute format { notation.class }?,
+  attribute srccredit { text }?,
+  local.objectdata.attrib
+local.videodata.attrib = empty
+videodata.role.attrib = role.attrib
+videodata = element videodata { videodata.attlist, empty }
+# end of videodata.element
+
+# Width: Same as CALS reprowid (desired width)
+
+# Depth: Same as CALS reprodep (desired depth)
+
+# Align: Same as CALS hplace with 'none' removed; #IMPLIED means
+# application-specific
+
+# Scale: Conflation of CALS hscale and vscale
+
+# Scalefit: Same as CALS scalefit
+videodata.attlist &=
+  attribute width { text }?,
+  attribute contentwidth { text }?,
+  attribute depth { text }?,
+  attribute contentdepth { text }?,
+  attribute align { "left" | "right" | "center" }?,
+  attribute valign { "top" | "middle" | "bottom" }?,
+  attribute scale { text }?,
+  attribute scalefit { yesorno.attvals }?,
+  objectdata.attrib,
+  common.attrib,
+  videodata.role.attrib,
+  local.videodata.attrib
+# end of videodata.attlist
+
+# end of videodata.module
+local.audiodata.attrib = empty
+audiodata.role.attrib = role.attrib
+audiodata = element audiodata { audiodata.attlist, empty }
+# end of audiodata.element
+audiodata.attlist &=
+  objectdata.attrib,
+  common.attrib,
+  audiodata.role.attrib,
+  local.audiodata.attrib
+# end of audiodata.attlist
+
+# end of audiodata.module
+local.imagedata.attrib = empty
+imagedata.role.attrib = role.attrib
+imagedata = element imagedata { imagedata.attlist, empty }
+# end of imagedata.element
+
+# Width: Same as CALS reprowid (desired width)
+
+# Depth: Same as CALS reprodep (desired depth)
+
+# Align: Same as CALS hplace with 'none' removed; #IMPLIED means
+# application-specific
+
+# Scale: Conflation of CALS hscale and vscale
+
+# Scalefit: Same as CALS scalefit
+imagedata.attlist &=
+  attribute width { text }?,
+  attribute contentwidth { text }?,
+  attribute depth { text }?,
+  attribute contentdepth { text }?,
+  attribute align { "left" | "right" | "center" }?,
+  attribute valign { "top" | "middle" | "bottom" }?,
+  attribute scale { text }?,
+  attribute scalefit { yesorno.attvals }?,
+  objectdata.attrib,
+  common.attrib,
+  imagedata.role.attrib,
+  local.imagedata.attrib
+# end of imagedata.attlist
+
+# end of imagedata.module
+local.textdata.attrib = empty
+textdata.role.attrib = role.attrib
+textdata = element textdata { textdata.attlist, empty }
+# end of textdata.element
+textdata.attlist &=
+  attribute encoding { text }?,
+  objectdata.attrib,
+  common.attrib,
+  textdata.role.attrib,
+  local.textdata.attrib
+# end of textdata.attlist
+
+# end of textdata.module
+local.caption.attrib = empty
+caption.role.attrib = role.attrib
+caption = element caption { caption.attlist, textobject.mix* }
+# end of caption.element
+caption.attlist &=
+  common.attrib, caption.role.attrib, local.caption.attrib
+# end of caption.attlist
+
+# end of caption.module
+local.mediaobjectco.attrib = empty
+mediaobjectco.role.attrib = role.attrib
+mediaobjectco =
+  element mediaobjectco {
+    mediaobjectco.attlist,
+    objectinfo?,
+    imageobjectco,
+    (imageobjectco | textobject)*
+  }
+# end of mediaobjectco.element
+mediaobjectco.attlist &=
+  common.attrib, mediaobjectco.role.attrib, local.mediaobjectco.attrib
+# end of mediaobjectco.attlist
+
+# end of mediaobjectco.module
+local.imageobjectco.attrib = empty
+imageobjectco.role.attrib = role.attrib
+imageobjectco =
+  element imageobjectco {
+    imageobjectco.attlist, areaspec, imageobject, calloutlist*
+  }
+# end of imageobjectco.element
+imageobjectco.attlist &=
+  common.attrib, imageobjectco.role.attrib, local.imageobjectco.attrib
+# end of imageobjectco.attlist
+
+# end of imageobjectco.module
+
+# end of mediaobject.content.module
+
+# Equations ........................
+
+# This PE provides a mechanism for replacing equation content,
+
+# perhaps adding a new or different model (e.g., MathML)
+equation.content = alt?, (graphic+ | mediaobject+)
+inlineequation.content = alt?, (graphic+ | inlinemediaobject+)
+local.equation.attrib = empty
+equation.role.attrib = role.attrib
+equation =
+  element equation {
+    equation.attlist,
+    blockinfo?,
+    formalobject.title.content?,
+    (informalequation | equation.content)
+  }
+# end of equation.element
+equation.attlist &=
+  label.attrib,
+  common.attrib,
+  equation.role.attrib,
+  local.equation.attrib
+# end of equation.attlist
+
+# end of equation.module
+local.informalequation.attrib = empty
+informalequation.role.attrib = role.attrib
+informalequation =
+  element informalequation {
+    informalequation.attlist, blockinfo?, equation.content
+  }
+# end of informalequation.element
+informalequation.attlist &=
+  common.attrib,
+  informalequation.role.attrib,
+  local.informalequation.attrib
+# end of informalequation.attlist
+
+# end of informalequation.module
+local.inlineequation.attrib = empty
+inlineequation.role.attrib = role.attrib
+inlineequation =
+  element inlineequation {
+    inlineequation.attlist, inlineequation.content
+  }
+# end of inlineequation.element
+inlineequation.attlist &=
+  common.attrib, inlineequation.role.attrib, local.inlineequation.attrib
+# end of inlineequation.attlist
+
+# end of inlineequation.module
+local.alt.attrib = empty
+alt.role.attrib = role.attrib
+alt = element alt { alt.attlist, text }
+# end of alt.element
+alt.attlist &= common.attrib, alt.role.attrib, local.alt.attrib
+# end of alt.attlist
+
+# end of alt.module
+
+# Tables ...........................
+
+tables.role.attrib = role.attrib
+
+# Note that InformalTable is dependent on some of the entity
+# declarations that customize Table.
+local.informaltable.attrib = empty
+informaltable =
+  element informaltable {
+    informaltable.attlist,
+    blockinfo?,
+    textobject*,
+    (graphic+ | mediaobject+ | tgroup+)
+  }
+# end of informaltable.element
+
+# Frame, Colsep, and Rowsep must be repeated because
+# they are not in entities in the table module.
+
+# includes TabStyle, ToCentry, ShortEntry,
+# Orient, PgWide
+
+# includes Label
+
+# includes common attributes
+informaltable.attlist &=
+  attribute frame {
+    "top" | "bottom" | "topbot" | "all" | "sides" | "none"
+  }?,
+  attribute colsep { yesorno.attvals }?,
+  attribute rowsep { yesorno.attvals }?,
+  common.table.attribs,
+  tbl.table.att,
+  local.informaltable.attrib
+# end of informaltable.attlist
+
+# end of informaltable.module
+
+# ......................................................................
+
+# Synopses .............................................................
+
+# Synopsis .........................
+local.synopsis.attrib = empty
+synopsis.role.attrib = role.attrib
+synopsis =
+  element synopsis {
+    synopsis.attlist,
+    (para.char.mix
+     | graphic
+     | mediaobject
+     | co
+     | coref
+     | textobject
+     | lineannotation)*
+  }
+# end of synopsis.element
+synopsis.attlist &=
+  label.attrib,
+  linespecific.attrib,
+  common.attrib,
+  synopsis.role.attrib,
+  local.synopsis.attrib
+# end of synopsis.attlist
+
+#  LineAnnotation (defined in the Inlines section, below)
+
+# end of synopsis.module
+
+# CmdSynopsis ......................
+local.cmdsynopsis.attrib = empty
+cmdsynopsis.role.attrib = role.attrib
+cmdsynopsis =
+  element cmdsynopsis {
+    cmdsynopsis.attlist, (command | arg | group | sbr)+, synopfragment*
+  }
+# end of cmdsynopsis.element
+
+# Sepchar: Character that should separate command and all
+# top-level arguments; alternate value might be e.g., &Delta;
+cmdsynopsis.attlist &=
+  label.attrib,
+  [ a:defaultValue = " " ] attribute sepchar { text }?,
+  attribute cmdlength { text }?,
+  common.attrib,
+  cmdsynopsis.role.attrib,
+  local.cmdsynopsis.attrib
+# end of cmdsynopsis.attlist
+
+# end of cmdsynopsis.module
+local.arg.attrib = empty
+arg.role.attrib = role.attrib
+arg =
+  element arg {
+    arg.attlist,
+    (text
+     | arg
+     | group
+     | option
+     | synopfragmentref
+     | replaceable
+     | sbr)*
+  }
+# end of arg.element
+
+# Choice: Whether Arg must be supplied: Opt (optional to
+# supply, e.g. [arg]; the default), Req (required to supply,
+# e.g. {arg}), or Plain (required to supply, e.g. arg)
+
+# Rep: whether Arg is repeatable: Norepeat (e.g. arg without
+# ellipsis; the default), or Repeat (e.g. arg...)
+arg.attlist &=
+  [ a:defaultValue = "opt" ]
+  attribute choice { "opt" | "req" | "plain" }?,
+  [ a:defaultValue = "norepeat" ]
+  attribute rep { "norepeat" | "repeat" }?,
+  common.attrib,
+  arg.role.attrib,
+  local.arg.attrib
+# end of arg.attlist
+
+# end of arg.module
+local.group.attrib = empty
+group.role.attrib = role.attrib
+group =
+  element group {
+    group.attlist,
+    (arg | group | option | synopfragmentref | replaceable | sbr)+
+  }
+# end of group.element
+
+# Choice: Whether Group must be supplied: Opt (optional to
+# supply, e.g.  [g1|g2|g3]; the default), Req (required to
+# supply, e.g.  {g1|g2|g3}), Plain (required to supply,
+# e.g.  g1|g2|g3), OptMult (can supply zero or more, e.g.
+# [[g1|g2|g3]]), or ReqMult (must supply one or more, e.g.
+# {{g1|g2|g3}})
+
+# Rep: whether Group is repeatable: Norepeat (e.g. group
+# without ellipsis; the default), or Repeat (e.g. group...)
+group.attlist &=
+  [ a:defaultValue = "opt" ]
+  attribute choice { "opt" | "req" | "plain" }?,
+  [ a:defaultValue = "norepeat" ]
+  attribute rep { "norepeat" | "repeat" }?,
+  common.attrib,
+  group.role.attrib,
+  local.group.attrib
+# end of group.attlist
+
+# end of group.module
+local.sbr.attrib = empty
+# Synopsis break
+sbr.role.attrib = role.attrib
+sbr = element sbr { sbr.attlist, empty }
+# end of sbr.element
+sbr.attlist &= common.attrib, sbr.role.attrib, local.sbr.attrib
+# end of sbr.attlist
+
+# end of sbr.module
+local.synopfragmentref.attrib = empty
+synopfragmentref.role.attrib = role.attrib
+synopfragmentref =
+  element synopfragmentref { synopfragmentref.attlist, text }
+# end of synopfragmentref.element
+
+# to SynopFragment of complex synopsis
+# material for separate referencing
+synopfragmentref.attlist &=
+  linkendreq.attrib,
+  common.attrib,
+  synopfragmentref.role.attrib,
+  local.synopfragmentref.attrib
+# end of synopfragmentref.attlist
+
+# end of synopfragmentref.module
+local.synopfragment.attrib = empty
+synopfragment.role.attrib = role.attrib
+synopfragment =
+  element synopfragment { synopfragment.attlist, (arg | group)+ }
+# end of synopfragment.element
+synopfragment.attlist &=
+  idreq.common.attrib,
+  synopfragment.role.attrib,
+  local.synopfragment.attrib
+# end of synopfragment.attlist
+
+# end of synopfragment.module
+
+#  Command (defined in the Inlines section, below)
+
+#  Option (defined in the Inlines section, below)
+
+#  Replaceable (defined in the Inlines section, below)
+
+# end of cmdsynopsis.content.module
+
+# FuncSynopsis .....................
+local.funcsynopsis.attrib = empty
+funcsynopsis.role.attrib = role.attrib
+funcsynopsis =
+  element funcsynopsis {
+    funcsynopsis.attlist, (funcsynopsisinfo | funcprototype)+
+  }
+# end of funcsynopsis.element
+funcsynopsis.attlist &=
+  label.attrib,
+  common.attrib,
+  funcsynopsis.role.attrib,
+  local.funcsynopsis.attrib
+# end of funcsynopsis.attlist
+
+# end of funcsynopsis.module
+local.funcsynopsisinfo.attrib = empty
+funcsynopsisinfo.role.attrib = role.attrib
+funcsynopsisinfo =
+  element funcsynopsisinfo {
+    funcsynopsisinfo.attlist,
+    (cptr.char.mix | textobject | lineannotation)*
+  }
+# end of funcsynopsisinfo.element
+funcsynopsisinfo.attlist &=
+  linespecific.attrib,
+  common.attrib,
+  funcsynopsisinfo.role.attrib,
+  local.funcsynopsisinfo.attrib
+# end of funcsynopsisinfo.attlist
+
+# end of funcsynopsisinfo.module
+local.funcprototype.attrib = empty
+funcprototype.role.attrib = role.attrib
+funcprototype =
+  element funcprototype {
+    funcprototype.attlist, funcdef, (void | varargs | paramdef+)
+  }
+# end of funcprototype.element
+funcprototype.attlist &=
+  common.attrib, funcprototype.role.attrib, local.funcprototype.attrib
+# end of funcprototype.attlist
+
+# end of funcprototype.module
+local.funcdef.attrib = empty
+funcdef.role.attrib = role.attrib
+funcdef =
+  element funcdef {
+    funcdef.attlist, (text | type | replaceable | function)*
+  }
+# end of funcdef.element
+funcdef.attlist &=
+  common.attrib, funcdef.role.attrib, local.funcdef.attrib
+# end of funcdef.attlist
+
+# end of funcdef.module
+local.void.attrib = empty
+void.role.attrib = role.attrib
+void = element void { void.attlist, empty }
+# end of void.element
+void.attlist &= common.attrib, void.role.attrib, local.void.attrib
+# end of void.attlist
+
+# end of void.module
+local.varargs.attrib = empty
+varargs.role.attrib = role.attrib
+varargs = element varargs { varargs.attlist, empty }
+# end of varargs.element
+varargs.attlist &=
+  common.attrib, varargs.role.attrib, local.varargs.attrib
+# end of varargs.attlist
+
+# end of varargs.module
+
+# Processing assumes that only one Parameter will appear in a
+# ParamDef, and that FuncParams will be used at most once, for
+# providing information on the "inner parameters" for parameters that
+# are pointers to functions.
+local.paramdef.attrib = empty
+paramdef.role.attrib = role.attrib
+paramdef =
+  element paramdef {
+    paramdef.attlist,
+    (text | type | replaceable | parameter | funcparams)*
+  }
+# end of paramdef.element
+paramdef.attlist &=
+  common.attrib, paramdef.role.attrib, local.paramdef.attrib
+# end of paramdef.attlist
+
+# end of paramdef.module
+local.funcparams.attrib = empty
+funcparams.role.attrib = role.attrib
+funcparams = element funcparams { funcparams.attlist, cptr.char.mix* }
+# end of funcparams.element
+funcparams.attlist &=
+  common.attrib, funcparams.role.attrib, local.funcparams.attrib
+# end of funcparams.attlist
+
+# end of funcparams.module
+
+#  LineAnnotation (defined in the Inlines section, below)
+
+#  Replaceable (defined in the Inlines section, below)
+
+#  Function (defined in the Inlines section, below)
+
+#  Parameter (defined in the Inlines section, below)
+
+# end of funcsynopsis.content.module
+
+# ClassSynopsis .....................
+local.classsynopsis.attrib = empty
+classsynopsis.role.attrib = role.attrib
+classsynopsis =
+  element classsynopsis {
+    classsynopsis.attlist,
+    (ooclass | oointerface | ooexception)+,
+    (classsynopsisinfo | fieldsynopsis | method.synop.class)*
+  }
+# end of classsynopsis.element
+classsynopsis.attlist &=
+  attribute language { text }?,
+  [ a:defaultValue = "class" ]
+  attribute class { "class" | "interface" }?,
+  common.attrib,
+  classsynopsis.role.attrib,
+  local.classsynopsis.attrib
+# end of classsynopsis.attlist
+
+# end of classsynopsis.module
+local.classsynopsisinfo.attrib = empty
+classsynopsisinfo.role.attrib = role.attrib
+classsynopsisinfo =
+  element classsynopsisinfo {
+    classsynopsisinfo.attlist,
+    (cptr.char.mix | textobject | lineannotation)*
+  }
+# end of classsynopsisinfo.element
+classsynopsisinfo.attlist &=
+  linespecific.attrib,
+  common.attrib,
+  classsynopsisinfo.role.attrib,
+  local.classsynopsisinfo.attrib
+# end of classsynopsisinfo.attlist
+
+# end of classsynopsisinfo.module
+local.ooclass.attrib = empty
+ooclass.role.attrib = role.attrib
+ooclass = element ooclass { ooclass.attlist, modifier*, classname }
+# end of ooclass.element
+ooclass.attlist &=
+  common.attrib, ooclass.role.attrib, local.ooclass.attrib
+# end of ooclass.attlist
+
+# end of ooclass.module
+local.oointerface.attrib = empty
+oointerface.role.attrib = role.attrib
+oointerface =
+  element oointerface { oointerface.attlist, modifier*, interfacename }
+# end of oointerface.element
+oointerface.attlist &=
+  common.attrib, oointerface.role.attrib, local.oointerface.attrib
+# end of oointerface.attlist
+
+# end of oointerface.module
+local.ooexception.attrib = empty
+ooexception.role.attrib = role.attrib
+ooexception =
+  element ooexception { ooexception.attlist, modifier*, exceptionname }
+# end of ooexception.element
+ooexception.attlist &=
+  common.attrib, ooexception.role.attrib, local.ooexception.attrib
+# end of ooexception.attlist
+
+# end of ooexception.module
+local.modifier.attrib = empty
+modifier.role.attrib = role.attrib
+modifier = element modifier { modifier.attlist, smallcptr.char.mix* }
+# end of modifier.element
+modifier.attlist &=
+  common.attrib, modifier.role.attrib, local.modifier.attrib
+# end of modifier.attlist
+
+# end of modifier.module
+local.interfacename.attrib = empty
+interfacename.role.attrib = role.attrib
+interfacename =
+  element interfacename { interfacename.attlist, cptr.char.mix* }
+# end of interfacename.element
+interfacename.attlist &=
+  common.attrib, interfacename.role.attrib, local.interfacename.attrib
+# end of interfacename.attlist
+
+# end of interfacename.module
+local.exceptionname.attrib = empty
+exceptionname.role.attrib = role.attrib
+exceptionname =
+  element exceptionname { exceptionname.attlist, smallcptr.char.mix* }
+# end of exceptionname.element
+exceptionname.attlist &=
+  common.attrib, exceptionname.role.attrib, local.exceptionname.attrib
+# end of exceptionname.attlist
+
+# end of exceptionname.module
+local.fieldsynopsis.attrib = empty
+fieldsynopsis.role.attrib = role.attrib
+fieldsynopsis =
+  element fieldsynopsis {
+    fieldsynopsis.attlist, modifier*, type?, varname, initializer?
+  }
+# end of fieldsynopsis.element
+fieldsynopsis.attlist &=
+  attribute language { text }?,
+  common.attrib,
+  fieldsynopsis.role.attrib,
+  local.fieldsynopsis.attrib
+# end of fieldsynopsis.attlist
+
+# end of fieldsynopsis.module
+local.initializer.attrib = empty
+initializer.role.attrib = role.attrib
+initializer =
+  element initializer { initializer.attlist, smallcptr.char.mix* }
+# end of initializer.element
+initializer.attlist &=
+  common.attrib, initializer.role.attrib, local.initializer.attrib
+# end of initializer.attlist
+
+# end of initializer.module
+local.constructorsynopsis.attrib = empty
+constructorsynopsis.role.attrib = role.attrib
+constructorsynopsis =
+  element constructorsynopsis {
+    constructorsynopsis.attlist,
+    modifier*,
+    methodname?,
+    (methodparam+ | void),
+    exceptionname*
+  }
+# end of constructorsynopsis.element
+constructorsynopsis.attlist &=
+  attribute language { text }?,
+  common.attrib,
+  constructorsynopsis.role.attrib,
+  local.constructorsynopsis.attrib
+# end of constructorsynopsis.attlist
+
+# end of constructorsynopsis.module
+local.destructorsynopsis.attrib = empty
+destructorsynopsis.role.attrib = role.attrib
+destructorsynopsis =
+  element destructorsynopsis {
+    destructorsynopsis.attlist,
+    modifier*,
+    methodname?,
+    (methodparam+ | void),
+    exceptionname*
+  }
+# end of destructorsynopsis.element
+destructorsynopsis.attlist &=
+  attribute language { text }?,
+  common.attrib,
+  destructorsynopsis.role.attrib,
+  local.destructorsynopsis.attrib
+# end of destructorsynopsis.attlist
+
+# end of destructorsynopsis.module
+local.methodsynopsis.attrib = empty
+methodsynopsis.role.attrib = role.attrib
+methodsynopsis =
+  element methodsynopsis {
+    methodsynopsis.attlist,
+    modifier*,
+    (type | void)?,
+    methodname,
+    (methodparam+ | void),
+    exceptionname*,
+    modifier*
+  }
+# end of methodsynopsis.element
+methodsynopsis.attlist &=
+  attribute language { text }?,
+  common.attrib,
+  methodsynopsis.role.attrib,
+  local.methodsynopsis.attrib
+# end of methodsynopsis.attlist
+
+# end of methodsynopsis.module
+local.methodname.attrib = empty
+methodname.role.attrib = role.attrib
+methodname =
+  element methodname { methodname.attlist, smallcptr.char.mix* }
+# end of methodname.element
+methodname.attlist &=
+  common.attrib, methodname.role.attrib, local.methodname.attrib
+# end of methodname.attlist
+
+# end of methodname.module
+local.methodparam.attrib = empty
+methodparam.role.attrib = role.attrib
+methodparam =
+  element methodparam {
+    methodparam.attlist,
+    modifier*,
+    type?,
+    ((parameter, initializer?) | funcparams),
+    modifier*
+  }
+# end of methodparam.element
+methodparam.attlist &=
+  [ a:defaultValue = "req" ]
+  attribute choice { "opt" | "req" | "plain" }?,
+  [ a:defaultValue = "norepeat" ]
+  attribute rep { "norepeat" | "repeat" }?,
+  common.attrib,
+  methodparam.role.attrib,
+  local.methodparam.attrib
+# end of methodparam.attlist
+
+# end of methodparam.module
+
+# end of classsynopsis.content.module
+
+# ......................................................................
+
+# Document information entities and elements ...........................
+
+# The document information elements include some elements that are
+# currently used only in the document hierarchy module. They are
+# defined here so that they will be available for use in customized
+# document hierarchies.
+
+# ..................................
+
+# Ackno ............................
+local.ackno.attrib = empty
+ackno.role.attrib = role.attrib
+ackno = element ackno { ackno.attlist, docinfo.char.mix* }
+# end of ackno.element
+ackno.attlist &= common.attrib, ackno.role.attrib, local.ackno.attrib
+# end of ackno.attlist
+
+# end of ackno.module
+
+# Address ..........................
+local.address.attrib = empty
+address.role.attrib = role.attrib
+address =
+  element address {
+    address.attlist,
+    (text
+     | personname
+     | person.ident.mix
+     | street
+     | pob
+     | postcode
+     | city
+     | state
+     | country
+     | phone
+     | fax
+     | email
+     | otheraddr)*
+  }
+# end of address.element
+address.attlist &=
+  linespecific.attrib,
+  common.attrib,
+  address.role.attrib,
+  local.address.attrib
+# end of address.attlist
+
+# end of address.module
+local.street.attrib = empty
+street.role.attrib = role.attrib
+street = element street { street.attlist, docinfo.char.mix* }
+# end of street.element
+street.attlist &= common.attrib, street.role.attrib, local.street.attrib
+# end of street.attlist
+
+# end of street.module
+local.pob.attrib = empty
+pob.role.attrib = role.attrib
+pob = element pob { pob.attlist, docinfo.char.mix* }
+# end of pob.element
+pob.attlist &= common.attrib, pob.role.attrib, local.pob.attrib
+# end of pob.attlist
+
+# end of pob.module
+local.postcode.attrib = empty
+postcode.role.attrib = role.attrib
+postcode = element postcode { postcode.attlist, docinfo.char.mix* }
+# end of postcode.element
+postcode.attlist &=
+  common.attrib, postcode.role.attrib, local.postcode.attrib
+# end of postcode.attlist
+
+# end of postcode.module
+local.city.attrib = empty
+city.role.attrib = role.attrib
+city = element city { city.attlist, docinfo.char.mix* }
+# end of city.element
+city.attlist &= common.attrib, city.role.attrib, local.city.attrib
+# end of city.attlist
+
+# end of city.module
+local.state.attrib = empty
+state.role.attrib = role.attrib
+state = element state { state.attlist, docinfo.char.mix* }
+# end of state.element
+state.attlist &= common.attrib, state.role.attrib, local.state.attrib
+# end of state.attlist
+
+# end of state.module
+local.country.attrib = empty
+country.role.attrib = role.attrib
+country = element country { country.attlist, docinfo.char.mix* }
+# end of country.element
+country.attlist &=
+  common.attrib, country.role.attrib, local.country.attrib
+# end of country.attlist
+
+# end of country.module
+local.phone.attrib = empty
+phone.role.attrib = role.attrib
+phone = element phone { phone.attlist, docinfo.char.mix* }
+# end of phone.element
+phone.attlist &= common.attrib, phone.role.attrib, local.phone.attrib
+# end of phone.attlist
+
+# end of phone.module
+local.fax.attrib = empty
+fax.role.attrib = role.attrib
+fax = element fax { fax.attlist, docinfo.char.mix* }
+# end of fax.element
+fax.attlist &= common.attrib, fax.role.attrib, local.fax.attrib
+# end of fax.attlist
+
+# end of fax.module
+
+#  Email (defined in the Inlines section, below)
+local.otheraddr.attrib = empty
+otheraddr.role.attrib = role.attrib
+otheraddr = element otheraddr { otheraddr.attlist, docinfo.char.mix* }
+# end of otheraddr.element
+otheraddr.attlist &=
+  common.attrib, otheraddr.role.attrib, local.otheraddr.attrib
+# end of otheraddr.attlist
+
+# end of otheraddr.module
+
+# end of address.content.module
+
+# Affiliation ......................
+local.affiliation.attrib = empty
+affiliation.role.attrib = role.attrib
+affiliation =
+  element affiliation {
+    affiliation.attlist,
+    shortaffil?,
+    jobtitle*,
+    orgname?,
+    orgdiv*,
+    address*
+  }
+# end of affiliation.element
+affiliation.attlist &=
+  common.attrib, affiliation.role.attrib, local.affiliation.attrib
+# end of affiliation.attlist
+
+# end of affiliation.module
+local.shortaffil.attrib = empty
+shortaffil.role.attrib = role.attrib
+shortaffil =
+  element shortaffil { shortaffil.attlist, docinfo.char.mix* }
+# end of shortaffil.element
+shortaffil.attlist &=
+  common.attrib, shortaffil.role.attrib, local.shortaffil.attrib
+# end of shortaffil.attlist
+
+# end of shortaffil.module
+local.jobtitle.attrib = empty
+jobtitle.role.attrib = role.attrib
+jobtitle = element jobtitle { jobtitle.attlist, docinfo.char.mix* }
+# end of jobtitle.element
+jobtitle.attlist &=
+  common.attrib, jobtitle.role.attrib, local.jobtitle.attrib
+# end of jobtitle.attlist
+
+# end of jobtitle.module
+
+#  OrgName (defined elsewhere in this section)
+local.orgdiv.attrib = empty
+orgdiv.role.attrib = role.attrib
+orgdiv = element orgdiv { orgdiv.attlist, docinfo.char.mix* }
+# end of orgdiv.element
+orgdiv.attlist &= common.attrib, orgdiv.role.attrib, local.orgdiv.attrib
+# end of orgdiv.attlist
+
+# end of orgdiv.module
+
+#  Address (defined elsewhere in this section)
+
+# end of affiliation.content.module
+
+# ArtPageNums ......................
+local.artpagenums.attrib = empty
+artpagenums.role.attrib = role.attrib
+artpagenums =
+  element artpagenums { artpagenums.attlist, docinfo.char.mix* }
+# end of artpagenums.element
+artpagenums.attlist &=
+  common.attrib, artpagenums.role.attrib, local.artpagenums.attrib
+# end of artpagenums.attlist
+
+# end of artpagenums.module
+
+# PersonName
+local.personname.attrib = empty
+personname.role.attrib = role.attrib
+personname =
+  element personname {
+    personname.attlist,
+    (honorific | firstname | surname | lineage | othername)+
+  }
+# end of personname.element
+personname.attlist &=
+  common.attrib, personname.role.attrib, local.personname.attrib
+# end of personname.attlist
+
+# end of personname.module
+
+# Author ...........................
+local.author.attrib = empty
+author.role.attrib = role.attrib
+author =
+  element author {
+    author.attlist,
+    (personname | person.ident.mix+),
+    (personblurb | email | address)*
+  }
+# end of author.element
+author.attlist &= common.attrib, author.role.attrib, local.author.attrib
+# end of author.attlist
+
+# (see "Personal identity elements" for %person.ident.mix;)
+
+# end of author.module
+
+# AuthorGroup ......................
+local.authorgroup.attrib = empty
+authorgroup.role.attrib = role.attrib
+authorgroup =
+  element authorgroup {
+    authorgroup.attlist,
+    (author | editor | collab | corpauthor | othercredit)+
+  }
+# end of authorgroup.element
+authorgroup.attlist &=
+  common.attrib, authorgroup.role.attrib, local.authorgroup.attrib
+# end of authorgroup.attlist
+
+# end of authorgroup.module
+
+#  Author (defined elsewhere in this section)
+
+#  Editor (defined elsewhere in this section)
+local.collab.attrib = empty
+collab.role.attrib = role.attrib
+collab = element collab { collab.attlist, collabname, affiliation* }
+# end of collab.element
+collab.attlist &= common.attrib, collab.role.attrib, local.collab.attrib
+# end of collab.attlist
+
+# end of collab.module
+local.collabname.attrib = empty
+collabname.role.attrib = role.attrib
+collabname =
+  element collabname { collabname.attlist, docinfo.char.mix* }
+# end of collabname.element
+collabname.attlist &=
+  common.attrib, collabname.role.attrib, local.collabname.attrib
+# end of collabname.attlist
+
+# end of collabname.module
+
+#  Affiliation (defined elsewhere in this section)
+
+# end of collab.content.module
+
+#  CorpAuthor (defined elsewhere in this section)
+
+#  OtherCredit (defined elsewhere in this section)
+
+# end of authorgroup.content.module
+
+# AuthorInitials ...................
+local.authorinitials.attrib = empty
+authorinitials.role.attrib = role.attrib
+authorinitials =
+  element authorinitials { authorinitials.attlist, docinfo.char.mix* }
+# end of authorinitials.element
+authorinitials.attlist &=
+  common.attrib, authorinitials.role.attrib, local.authorinitials.attrib
+# end of authorinitials.attlist
+
+# end of authorinitials.module
+
+# ConfGroup ........................
+local.confgroup.attrib = empty
+confgroup.role.attrib = role.attrib
+confgroup =
+  element confgroup {
+    confgroup.attlist,
+    (confdates | conftitle | confnum | address | confsponsor)*
+  }
+# end of confgroup.element
+confgroup.attlist &=
+  common.attrib, confgroup.role.attrib, local.confgroup.attrib
+# end of confgroup.attlist
+
+# end of confgroup.module
+local.confdates.attrib = empty
+confdates.role.attrib = role.attrib
+confdates = element confdates { confdates.attlist, docinfo.char.mix* }
+# end of confdates.element
+confdates.attlist &=
+  common.attrib, confdates.role.attrib, local.confdates.attrib
+# end of confdates.attlist
+
+# end of confdates.module
+local.conftitle.attrib = empty
+conftitle.role.attrib = role.attrib
+conftitle = element conftitle { conftitle.attlist, docinfo.char.mix* }
+# end of conftitle.element
+conftitle.attlist &=
+  common.attrib, conftitle.role.attrib, local.conftitle.attrib
+# end of conftitle.attlist
+
+# end of conftitle.module
+local.confnum.attrib = empty
+confnum.role.attrib = role.attrib
+confnum = element confnum { confnum.attlist, docinfo.char.mix* }
+# end of confnum.element
+confnum.attlist &=
+  common.attrib, confnum.role.attrib, local.confnum.attrib
+# end of confnum.attlist
+
+# end of confnum.module
+
+#  Address (defined elsewhere in this section)
+local.confsponsor.attrib = empty
+confsponsor.role.attrib = role.attrib
+confsponsor =
+  element confsponsor { confsponsor.attlist, docinfo.char.mix* }
+# end of confsponsor.element
+confsponsor.attlist &=
+  common.attrib, confsponsor.role.attrib, local.confsponsor.attrib
+# end of confsponsor.attlist
+
+# end of confsponsor.module
+
+# end of confgroup.content.module
+
+# ContractNum ......................
+local.contractnum.attrib = empty
+contractnum.role.attrib = role.attrib
+contractnum =
+  element contractnum { contractnum.attlist, docinfo.char.mix* }
+# end of contractnum.element
+contractnum.attlist &=
+  common.attrib, contractnum.role.attrib, local.contractnum.attrib
+# end of contractnum.attlist
+
+# end of contractnum.module
+
+# ContractSponsor ..................
+local.contractsponsor.attrib = empty
+contractsponsor.role.attrib = role.attrib
+contractsponsor =
+  element contractsponsor { contractsponsor.attlist, docinfo.char.mix* }
+# end of contractsponsor.element
+contractsponsor.attlist &=
+  common.attrib,
+  contractsponsor.role.attrib,
+  local.contractsponsor.attrib
+# end of contractsponsor.attlist
+
+# end of contractsponsor.module
+
+# Copyright ........................
+local.copyright.attrib = empty
+copyright.role.attrib = role.attrib
+copyright = element copyright { copyright.attlist, year+, holder* }
+# end of copyright.element
+copyright.attlist &=
+  common.attrib, copyright.role.attrib, local.copyright.attrib
+# end of copyright.attlist
+
+# end of copyright.module
+local.year.attrib = empty
+year.role.attrib = role.attrib
+year = element year { year.attlist, docinfo.char.mix* }
+# end of year.element
+year.attlist &= common.attrib, year.role.attrib, local.year.attrib
+# end of year.attlist
+
+# end of year.module
+local.holder.attrib = empty
+holder.role.attrib = role.attrib
+holder = element holder { holder.attlist, docinfo.char.mix* }
+# end of holder.element
+holder.attlist &= common.attrib, holder.role.attrib, local.holder.attrib
+# end of holder.attlist
+
+# end of holder.module
+
+# end of copyright.content.module
+
+# CorpAuthor .......................
+local.corpauthor.attrib = empty
+corpauthor.role.attrib = role.attrib
+corpauthor =
+  element corpauthor { corpauthor.attlist, docinfo.char.mix* }
+# end of corpauthor.element
+corpauthor.attlist &=
+  common.attrib, corpauthor.role.attrib, local.corpauthor.attrib
+# end of corpauthor.attlist
+
+# end of corpauthor.module
+
+# CorpName .........................
+local.corpname.attrib = empty
+corpname = element corpname { corpname.attlist, docinfo.char.mix* }
+# end of corpname.element
+corpname.role.attrib = role.attrib
+corpname.attlist &=
+  common.attrib, corpname.role.attrib, local.corpname.attrib
+# end of corpname.attlist
+
+# end of corpname.module
+
+# Date .............................
+local.date.attrib = empty
+date.role.attrib = role.attrib
+date = element date { date.attlist, docinfo.char.mix* }
+# end of date.element
+date.attlist &= common.attrib, date.role.attrib, local.date.attrib
+# end of date.attlist
+
+# end of date.module
+
+# Edition ..........................
+local.edition.attrib = empty
+edition.role.attrib = role.attrib
+edition = element edition { edition.attlist, docinfo.char.mix* }
+# end of edition.element
+edition.attlist &=
+  common.attrib, edition.role.attrib, local.edition.attrib
+# end of edition.attlist
+
+# end of edition.module
+
+# Editor ...........................
+local.editor.attrib = empty
+editor.role.attrib = role.attrib
+editor =
+  element editor {
+    editor.attlist,
+    (personname | person.ident.mix+),
+    (personblurb | email | address)*
+  }
+# end of editor.element
+editor.attlist &= common.attrib, editor.role.attrib, local.editor.attrib
+# end of editor.attlist
+
+# (see "Personal identity elements" for %person.ident.mix;)
+
+# end of editor.module
+
+# ISBN .............................
+local.isbn.attrib = empty
+isbn.role.attrib = role.attrib
+isbn = element isbn { isbn.attlist, docinfo.char.mix* }
+# end of isbn.element
+isbn.attlist &= common.attrib, isbn.role.attrib, local.isbn.attrib
+# end of isbn.attlist
+
+# end of isbn.module
+
+# ISSN .............................
+local.issn.attrib = empty
+issn.role.attrib = role.attrib
+issn = element issn { issn.attlist, docinfo.char.mix* }
+# end of issn.element
+issn.attlist &= common.attrib, issn.role.attrib, local.issn.attrib
+# end of issn.attlist
+
+# end of issn.module
+
+# BiblioId .................
+biblio.class.attrib =
+  attribute class {
+    "uri"
+    | "doi"
+    | "isbn"
+    | "issn"
+    | "libraryofcongress"
+    | "pubnumber"
+    | "other"
+  }?,
+  attribute otherclass { text }?
+local.biblioid.attrib = empty
+biblioid.role.attrib = role.attrib
+biblioid = element biblioid { biblioid.attlist, docinfo.char.mix* }
+# end of biblioid.element
+biblioid.attlist &=
+  biblio.class.attrib,
+  common.attrib,
+  biblioid.role.attrib,
+  local.biblioid.attrib
+# end of biblioid.attlist
+
+# end of biblioid.module
+
+# CiteBiblioId .................
+local.citebiblioid.attrib = empty
+citebiblioid.role.attrib = role.attrib
+citebiblioid =
+  element citebiblioid { citebiblioid.attlist, docinfo.char.mix* }
+# end of citebiblioid.element
+citebiblioid.attlist &=
+  biblio.class.attrib,
+  common.attrib,
+  citebiblioid.role.attrib,
+  local.citebiblioid.attrib
+# end of citebiblioid.attlist
+
+# end of citebiblioid.module
+
+# BiblioSource .................
+local.bibliosource.attrib = empty
+bibliosource.role.attrib = role.attrib
+bibliosource =
+  element bibliosource { bibliosource.attlist, docinfo.char.mix* }
+# end of bibliosource.element
+bibliosource.attlist &=
+  biblio.class.attrib,
+  common.attrib,
+  bibliosource.role.attrib,
+  local.bibliosource.attrib
+# end of bibliosource.attlist
+
+# end of bibliosource.module
+
+# BiblioRelation .................
+local.bibliorelation.attrib = empty
+local.bibliorelation.types = notAllowed
+bibliorelation.type.attrib =
+  attribute type {
+    "isversionof"
+    | "hasversion"
+    | "isreplacedby"
+    | "replaces"
+    | "isrequiredby"
+    | "requires"
+    | "ispartof"
+    | "haspart"
+    | "isreferencedby"
+    | "references"
+    | "isformatof"
+    | "hasformat"
+    | "othertype"
+    | local.bibliorelation.types
+  }?,
+  attribute othertype { text }?
+bibliorelation.role.attrib = role.attrib
+bibliorelation =
+  element bibliorelation { bibliorelation.attlist, docinfo.char.mix* }
+# end of bibliorelation.element
+bibliorelation.attlist &=
+  biblio.class.attrib,
+  bibliorelation.type.attrib,
+  common.attrib,
+  bibliorelation.role.attrib,
+  local.bibliorelation.attrib
+# end of bibliorelation.attlist
+
+# end of bibliorelation.module
+
+# BiblioCoverage .................
+local.bibliocoverage.attrib = empty
+bibliocoverage.role.attrib = role.attrib
+bibliocoverage =
+  element bibliocoverage { bibliocoverage.attlist, docinfo.char.mix* }
+# end of bibliocoverage.element
+bibliocoverage.attlist &=
+  attribute spatial {
+    "dcmipoint" | "iso3166" | "dcmibox" | "tgn" | "otherspatial"
+  }?,
+  attribute otherspatial { text }?,
+  attribute temporal { "dcmiperiod" | "w3c-dtf" | "othertemporal" }?,
+  attribute othertemporal { text }?,
+  common.attrib,
+  bibliocoverage.role.attrib,
+  local.bibliocoverage.attrib
+# end of bibliocoverage.attlist
+
+# end of bibliocoverage.module
+
+# InvPartNumber ....................
+local.invpartnumber.attrib = empty
+invpartnumber.role.attrib = role.attrib
+invpartnumber =
+  element invpartnumber { invpartnumber.attlist, docinfo.char.mix* }
+# end of invpartnumber.element
+invpartnumber.attlist &=
+  common.attrib, invpartnumber.role.attrib, local.invpartnumber.attrib
+# end of invpartnumber.attlist
+
+# end of invpartnumber.module
+
+# IssueNum .........................
+local.issuenum.attrib = empty
+issuenum.role.attrib = role.attrib
+issuenum = element issuenum { issuenum.attlist, docinfo.char.mix* }
+# end of issuenum.element
+issuenum.attlist &=
+  common.attrib, issuenum.role.attrib, local.issuenum.attrib
+# end of issuenum.attlist
+
+# end of issuenum.module
+
+# LegalNotice ......................
+local.legalnotice.attrib = empty
+legalnotice.role.attrib = role.attrib
+legalnotice =
+  element legalnotice {
+    legalnotice.attlist, blockinfo?, title?, legalnotice.mix+
+  }
+# end of legalnotice.element
+legalnotice.attlist &=
+  common.attrib, legalnotice.role.attrib, local.legalnotice.attrib
+# end of legalnotice.attlist
+
+# end of legalnotice.module
+
+# ModeSpec .........................
+local.modespec.attrib = empty
+modespec.role.attrib = role.attrib
+modespec = element modespec { modespec.attlist, docinfo.char.mix* }
+# end of modespec.element
+
+# Application: Type of action required for completion
+# of the links to which the ModeSpec is relevant (e.g.,
+# retrieval query)
+modespec.attlist &=
+  attribute application { notation.class }?,
+  common.attrib,
+  modespec.role.attrib,
+  local.modespec.attrib
+# end of modespec.attlist
+
+# end of modespec.module
+
+# OrgName ..........................
+local.orgname.attrib = empty
+orgname.role.attrib = role.attrib
+orgname = element orgname { orgname.attlist, docinfo.char.mix* }
+# end of orgname.element
+orgname.attlist &=
+  common.attrib,
+  attribute class {
+    "corporation" | "nonprofit" | "consortium" | "informal" | "other"
+  }?,
+  attribute otherclass { text }?,
+  orgname.role.attrib,
+  local.orgname.attrib
+# end of orgname.attlist
+
+# end of orgname.module
+
+# OtherCredit ......................
+local.othercredit.attrib = empty
+othercredit.role.attrib = role.attrib
+othercredit =
+  element othercredit {
+    othercredit.attlist,
+    (personname | person.ident.mix+),
+    (personblurb | email | address)*
+  }
+# end of othercredit.element
+othercredit.attlist &=
+  common.attrib, othercredit.role.attrib, local.othercredit.attrib
+# end of othercredit.attlist
+
+# (see "Personal identity elements" for %person.ident.mix;)
+
+# end of othercredit.module
+
+# PageNums .........................
+local.pagenums.attrib = empty
+pagenums.role.attrib = role.attrib
+pagenums = element pagenums { pagenums.attlist, docinfo.char.mix* }
+# end of pagenums.element
+pagenums.attlist &=
+  common.attrib, pagenums.role.attrib, local.pagenums.attrib
+# end of pagenums.attlist
+
+# end of pagenums.module
+
+# Personal identity elements .......
+
+# These elements are used only within Author, Editor, and
+# OtherCredit.
+local.contrib.attrib = empty
+contrib.role.attrib = role.attrib
+contrib = element contrib { contrib.attlist, docinfo.char.mix* }
+# end of contrib.element
+contrib.attlist &=
+  common.attrib, contrib.role.attrib, local.contrib.attrib
+# end of contrib.attlist
+
+# end of contrib.module
+local.firstname.attrib = empty
+firstname.role.attrib = role.attrib
+firstname = element firstname { firstname.attlist, docinfo.char.mix* }
+# end of firstname.element
+firstname.attlist &=
+  common.attrib, firstname.role.attrib, local.firstname.attrib
+# end of firstname.attlist
+
+# end of firstname.module
+local.honorific.attrib = empty
+honorific.role.attrib = role.attrib
+honorific = element honorific { honorific.attlist, docinfo.char.mix* }
+# end of honorific.element
+honorific.attlist &=
+  common.attrib, honorific.role.attrib, local.honorific.attrib
+# end of honorific.attlist
+
+# end of honorific.module
+local.lineage.attrib = empty
+lineage.role.attrib = role.attrib
+lineage = element lineage { lineage.attlist, docinfo.char.mix* }
+# end of lineage.element
+lineage.attlist &=
+  common.attrib, lineage.role.attrib, local.lineage.attrib
+# end of lineage.attlist
+
+# end of lineage.module
+local.othername.attrib = empty
+othername.role.attrib = role.attrib
+othername = element othername { othername.attlist, docinfo.char.mix* }
+# end of othername.element
+othername.attlist &=
+  common.attrib, othername.role.attrib, local.othername.attrib
+# end of othername.attlist
+
+# end of othername.module
+local.surname.attrib = empty
+surname.role.attrib = role.attrib
+surname = element surname { surname.attlist, docinfo.char.mix* }
+# end of surname.element
+surname.attlist &=
+  common.attrib, surname.role.attrib, local.surname.attrib
+# end of surname.attlist
+
+# end of surname.module
+
+# end of person.ident.module
+
+# PrintHistory .....................
+local.printhistory.attrib = empty
+printhistory.role.attrib = role.attrib
+printhistory =
+  element printhistory { printhistory.attlist, para.class+ }
+# end of printhistory.element
+printhistory.attlist &=
+  common.attrib, printhistory.role.attrib, local.printhistory.attrib
+# end of printhistory.attlist
+
+# end of printhistory.module
+
+# ProductName ......................
+local.productname.attrib = empty
+productname.role.attrib = role.attrib
+productname =
+  element productname { productname.attlist, para.char.mix* }
+# end of productname.element
+
+# Class: More precisely identifies the item the element names
+productname.attlist &=
+  [ a:defaultValue = "trade" ]
+  attribute class { "service" | "trade" | "registered" | "copyright" }?,
+  common.attrib,
+  productname.role.attrib,
+  local.productname.attrib
+# end of productname.attlist
+
+# end of productname.module
+
+# ProductNumber ....................
+local.productnumber.attrib = empty
+productnumber.role.attrib = role.attrib
+productnumber =
+  element productnumber { productnumber.attlist, docinfo.char.mix* }
+# end of productnumber.element
+productnumber.attlist &=
+  common.attrib, productnumber.role.attrib, local.productnumber.attrib
+# end of productnumber.attlist
+
+# end of productnumber.module
+
+# PubDate ..........................
+local.pubdate.attrib = empty
+pubdate.role.attrib = role.attrib
+pubdate = element pubdate { pubdate.attlist, docinfo.char.mix* }
+# end of pubdate.element
+pubdate.attlist &=
+  common.attrib, pubdate.role.attrib, local.pubdate.attrib
+# end of pubdate.attlist
+
+# end of pubdate.module
+
+# Publisher ........................
+local.publisher.attrib = empty
+publisher.role.attrib = role.attrib
+publisher =
+  element publisher { publisher.attlist, publishername, address* }
+# end of publisher.element
+publisher.attlist &=
+  common.attrib, publisher.role.attrib, local.publisher.attrib
+# end of publisher.attlist
+
+# end of publisher.module
+local.publishername.attrib = empty
+publishername.role.attrib = role.attrib
+publishername =
+  element publishername { publishername.attlist, docinfo.char.mix* }
+# end of publishername.element
+publishername.attlist &=
+  common.attrib, publishername.role.attrib, local.publishername.attrib
+# end of publishername.attlist
+
+# end of publishername.module
+
+#  Address (defined elsewhere in this section)
+
+# end of publisher.content.module
+
+# PubsNumber .......................
+local.pubsnumber.attrib = empty
+pubsnumber.role.attrib = role.attrib
+pubsnumber =
+  element pubsnumber { pubsnumber.attlist, docinfo.char.mix* }
+# end of pubsnumber.element
+pubsnumber.attlist &=
+  common.attrib, pubsnumber.role.attrib, local.pubsnumber.attrib
+# end of pubsnumber.attlist
+
+# end of pubsnumber.module
+
+# ReleaseInfo ......................
+local.releaseinfo.attrib = empty
+releaseinfo.role.attrib = role.attrib
+releaseinfo =
+  element releaseinfo { releaseinfo.attlist, docinfo.char.mix* }
+# end of releaseinfo.element
+releaseinfo.attlist &=
+  common.attrib, releaseinfo.role.attrib, local.releaseinfo.attrib
+# end of releaseinfo.attlist
+
+# end of releaseinfo.module
+
+# RevHistory .......................
+local.revhistory.attrib = empty
+revhistory.role.attrib = role.attrib
+revhistory = element revhistory { revhistory.attlist, revision+ }
+# end of revhistory.element
+revhistory.attlist &=
+  common.attrib, revhistory.role.attrib, local.revhistory.attrib
+# end of revhistory.attlist
+
+# end of revhistory.module
+local.revision.attrib = empty
+revision.role.attrib = role.attrib
+revision =
+  element revision {
+    revision.attlist,
+    revnumber,
+    date,
+    authorinitials*,
+    (revremark | revdescription)?
+  }
+# end of revision.element
+revision.attlist &=
+  common.attrib, revision.role.attrib, local.revision.attrib
+# end of revision.attlist
+
+# end of revision.module
+local.revnumber.attrib = empty
+revnumber.role.attrib = role.attrib
+revnumber = element revnumber { revnumber.attlist, docinfo.char.mix* }
+# end of revnumber.element
+revnumber.attlist &=
+  common.attrib, revnumber.role.attrib, local.revnumber.attrib
+# end of revnumber.attlist
+
+# end of revnumber.module
+
+#  Date (defined elsewhere in this section)
+
+#  AuthorInitials (defined elsewhere in this section)
+local.revremark.attrib = empty
+revremark.role.attrib = role.attrib
+revremark = element revremark { revremark.attlist, docinfo.char.mix* }
+# end of revremark.element
+revremark.attlist &=
+  common.attrib, revremark.role.attrib, local.revremark.attrib
+# end of revremark.attlist
+
+# end of revremark.module
+local.revdescription.attrib = empty
+revdescription.role.attrib = role.attrib
+revdescription =
+  element revdescription { revdescription.attlist, revdescription.mix+ }
+# end of revdescription.element
+revdescription.attlist &=
+  common.attrib, revdescription.role.attrib, local.revdescription.attrib
+# end of revdescription.attlist
+
+# end of revdescription.module
+
+# end of revhistory.content.module
+
+# SeriesVolNums ....................
+local.seriesvolnums.attrib = empty
+seriesvolnums.role.attrib = role.attrib
+seriesvolnums =
+  element seriesvolnums { seriesvolnums.attlist, docinfo.char.mix* }
+# end of seriesvolnums.element
+seriesvolnums.attlist &=
+  common.attrib, seriesvolnums.role.attrib, local.seriesvolnums.attrib
+# end of seriesvolnums.attlist
+
+# end of seriesvolnums.module
+
+# VolumeNum ........................
+local.volumenum.attrib = empty
+volumenum.role.attrib = role.attrib
+volumenum = element volumenum { volumenum.attlist, docinfo.char.mix* }
+# end of volumenum.element
+volumenum.attlist &=
+  common.attrib, volumenum.role.attrib, local.volumenum.attrib
+# end of volumenum.attlist
+
+# end of volumenum.module
+
+# ..................................
+
+# end of docinfo.content.module
+
+# ......................................................................
+
+# Inline, link, and ubiquitous elements ................................
+
+# Technical and computer terms .........................................
+local.accel.attrib = empty
+accel.role.attrib = role.attrib
+accel = element accel { accel.attlist, smallcptr.char.mix* }
+# end of accel.element
+accel.attlist &= common.attrib, accel.role.attrib, local.accel.attrib
+# end of accel.attlist
+
+# end of accel.module
+local.action.attrib = empty
+action.role.attrib = role.attrib
+action = element action { action.attlist, cptr.char.mix* }
+# end of action.element
+action.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  action.role.attrib,
+  local.action.attrib
+# end of action.attlist
+
+# end of action.module
+local.application.attrib = empty
+application.role.attrib = role.attrib
+application =
+  element application { application.attlist, para.char.mix* }
+# end of application.element
+application.attlist &=
+  attribute class { "hardware" | "software" }?,
+  moreinfo.attrib,
+  common.attrib,
+  application.role.attrib,
+  local.application.attrib
+# end of application.attlist
+
+# end of application.module
+local.classname.attrib = empty
+classname.role.attrib = role.attrib
+classname = element classname { classname.attlist, smallcptr.char.mix* }
+# end of classname.element
+classname.attlist &=
+  common.attrib, classname.role.attrib, local.classname.attrib
+# end of classname.attlist
+
+# end of classname.module
+local.co.attrib = empty
+# CO is a callout area of the LineColumn unit type (a single character
+# position); the position is directly indicated by the location of CO.
+co.role.attrib = role.attrib
+co = element co { co.attlist, empty }
+# end of co.element
+
+# bug number/symbol override or initialization
+
+# to any related information
+co.attlist &=
+  label.attrib,
+  linkends.attrib,
+  idreq.common.attrib,
+  co.role.attrib,
+  local.co.attrib
+# end of co.attlist
+
+# end of co.module
+local.coref.attrib = empty
+# COREF is a reference to a CO
+coref.role.attrib = role.attrib
+coref = element coref { coref.attlist, empty }
+# end of coref.element
+
+# bug number/symbol override or initialization
+
+# to any related information
+coref.attlist &=
+  label.attrib,
+  linkendreq.attrib,
+  common.attrib,
+  coref.role.attrib,
+  local.coref.attrib
+# end of coref.attlist
+
+# end of coref.module
+local.command.attrib = empty
+command.role.attrib = role.attrib
+command = element command { command.attlist, cptr.char.mix* }
+# end of command.element
+command.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  command.role.attrib,
+  local.command.attrib
+# end of command.attlist
+
+# end of command.module
+local.computeroutput.attrib = empty
+computeroutput.role.attrib = role.attrib
+computeroutput =
+  element computeroutput {
+    computeroutput.attlist, (cptr.char.mix | co)*
+  }
+# end of computeroutput.element
+computeroutput.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  computeroutput.role.attrib,
+  local.computeroutput.attrib
+# end of computeroutput.attlist
+
+# end of computeroutput.module
+local.database.attrib = empty
+database.role.attrib = role.attrib
+database = element database { database.attlist, cptr.char.mix* }
+# end of database.element
+
+# Class: Type of database the element names; no default
+database.attlist &=
+  attribute class {
+    "name" | "table" | "field" | "key1" | "key2" | "record"
+  }?,
+  moreinfo.attrib,
+  common.attrib,
+  database.role.attrib,
+  local.database.attrib
+# end of database.attlist
+
+# end of database.module
+local.email.attrib = empty
+email.role.attrib = role.attrib
+email = element email { email.attlist, docinfo.char.mix* }
+# end of email.element
+email.attlist &= common.attrib, email.role.attrib, local.email.attrib
+# end of email.attlist
+
+# end of email.module
+local.envar.attrib = empty
+envar.role.attrib = role.attrib
+envar = element envar { envar.attlist, smallcptr.char.mix* }
+# end of envar.element
+envar.attlist &= common.attrib, envar.role.attrib, local.envar.attrib
+# end of envar.attlist
+
+# end of envar.module
+local.errorcode.attrib = empty
+errorcode.role.attrib = role.attrib
+errorcode = element errorcode { errorcode.attlist, smallcptr.char.mix* }
+# end of errorcode.element
+errorcode.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  errorcode.role.attrib,
+  local.errorcode.attrib
+# end of errorcode.attlist
+
+# end of errorcode.module
+local.errorname.attrib = empty
+errorname.role.attrib = role.attrib
+errorname = element errorname { errorname.attlist, smallcptr.char.mix* }
+# end of errorname.element
+errorname.attlist &=
+  common.attrib, errorname.role.attrib, local.errorname.attrib
+# end of errorname.attlist
+
+# end of errorname.module
+local.errortext.attrib = empty
+errortext.role.attrib = role.attrib
+errortext = element errortext { errortext.attlist, smallcptr.char.mix* }
+# end of errortext.element
+errortext.attlist &=
+  common.attrib, errortext.role.attrib, local.errortext.attrib
+# end of errortext.attlist
+
+# end of errortext.module
+local.errortype.attrib = empty
+errortype.role.attrib = role.attrib
+errortype = element errortype { errortype.attlist, smallcptr.char.mix* }
+# end of errortype.element
+errortype.attlist &=
+  common.attrib, errortype.role.attrib, local.errortype.attrib
+# end of errortype.attlist
+
+# end of errortype.module
+local.filename.attrib = empty
+filename.role.attrib = role.attrib
+filename = element filename { filename.attlist, cptr.char.mix* }
+# end of filename.element
+
+# Class: Type of filename the element names; no default
+
+# Path: Search path (possibly system-specific) in which
+# file can be found
+filename.attlist &=
+  attribute class {
+    "headerfile"
+    | "partition"
+    | "devicefile"
+    | "libraryfile"
+    | "directory"
+    | "extension"
+    | "symlink"
+  }?,
+  attribute path { text }?,
+  moreinfo.attrib,
+  common.attrib,
+  filename.role.attrib,
+  local.filename.attrib
+# end of filename.attlist
+
+# end of filename.module
+local.function.attrib = empty
+function.role.attrib = role.attrib
+function = element function { function.attlist, cptr.char.mix* }
+# end of function.element
+function.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  function.role.attrib,
+  local.function.attrib
+# end of function.attlist
+
+# end of function.module
+local.guibutton.attrib = empty
+guibutton.role.attrib = role.attrib
+guibutton =
+  element guibutton { guibutton.attlist, (smallcptr.char.mix | accel)* }
+# end of guibutton.element
+guibutton.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  guibutton.role.attrib,
+  local.guibutton.attrib
+# end of guibutton.attlist
+
+# end of guibutton.module
+local.guiicon.attrib = empty
+guiicon.role.attrib = role.attrib
+guiicon =
+  element guiicon { guiicon.attlist, (smallcptr.char.mix | accel)* }
+# end of guiicon.element
+guiicon.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  guiicon.role.attrib,
+  local.guiicon.attrib
+# end of guiicon.attlist
+
+# end of guiicon.module
+local.guilabel.attrib = empty
+guilabel.role.attrib = role.attrib
+guilabel =
+  element guilabel { guilabel.attlist, (smallcptr.char.mix | accel)* }
+# end of guilabel.element
+guilabel.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  guilabel.role.attrib,
+  local.guilabel.attrib
+# end of guilabel.attlist
+
+# end of guilabel.module
+local.guimenu.attrib = empty
+guimenu.role.attrib = role.attrib
+guimenu =
+  element guimenu { guimenu.attlist, (smallcptr.char.mix | accel)* }
+# end of guimenu.element
+guimenu.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  guimenu.role.attrib,
+  local.guimenu.attrib
+# end of guimenu.attlist
+
+# end of guimenu.module
+local.guimenuitem.attrib = empty
+guimenuitem.role.attrib = role.attrib
+guimenuitem =
+  element guimenuitem {
+    guimenuitem.attlist, (smallcptr.char.mix | accel)*
+  }
+# end of guimenuitem.element
+guimenuitem.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  guimenuitem.role.attrib,
+  local.guimenuitem.attrib
+# end of guimenuitem.attlist
+
+# end of guimenuitem.module
+local.guisubmenu.attrib = empty
+guisubmenu.role.attrib = role.attrib
+guisubmenu =
+  element guisubmenu {
+    guisubmenu.attlist, (smallcptr.char.mix | accel)*
+  }
+# end of guisubmenu.element
+guisubmenu.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  guisubmenu.role.attrib,
+  local.guisubmenu.attrib
+# end of guisubmenu.attlist
+
+# end of guisubmenu.module
+local.hardware.attrib = empty
+hardware.role.attrib = role.attrib
+hardware = element hardware { hardware.attlist, cptr.char.mix* }
+# end of hardware.element
+hardware.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  hardware.role.attrib,
+  local.hardware.attrib
+# end of hardware.attlist
+
+# end of hardware.module
+local.interface.attrib = empty
+interface.role.attrib = role.attrib
+interface =
+  element interface { interface.attlist, (smallcptr.char.mix | accel)* }
+# end of interface.element
+
+# Class: Type of the Interface item; no default
+interface.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  interface.role.attrib,
+  local.interface.attrib
+# end of interface.attlist
+
+# end of interface.module
+local.keycap.attrib = empty
+keycap.role.attrib = role.attrib
+keycap = element keycap { keycap.attlist, cptr.char.mix* }
+# end of keycap.element
+keycap.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  keycap.role.attrib,
+  local.keycap.attrib
+# end of keycap.attlist
+
+# end of keycap.module
+local.keycode.attrib = empty
+keycode.role.attrib = role.attrib
+keycode = element keycode { keycode.attlist, smallcptr.char.mix* }
+# end of keycode.element
+keycode.attlist &=
+  common.attrib, keycode.role.attrib, local.keycode.attrib
+# end of keycode.attlist
+
+# end of keycode.module
+local.keycombo.attrib = empty
+keycombo.role.attrib = role.attrib
+keycombo =
+  element keycombo {
+    keycombo.attlist, (keycap | keycombo | keysym | mousebutton)+
+  }
+# end of keycombo.element
+keycombo.attlist &=
+  keyaction.attrib,
+  moreinfo.attrib,
+  common.attrib,
+  keycombo.role.attrib,
+  local.keycombo.attrib
+# end of keycombo.attlist
+
+# end of keycombo.module
+local.keysym.attrib = empty
+keysysm.role.attrib = role.attrib
+keysym = element keysym { keysym.attlist, smallcptr.char.mix* }
+# end of keysym.element
+keysym.attlist &=
+  common.attrib, keysysm.role.attrib, local.keysym.attrib
+# end of keysym.attlist
+
+# end of keysym.module
+local.lineannotation.attrib = empty
+lineannotation.role.attrib = role.attrib
+lineannotation =
+  element lineannotation { lineannotation.attlist, para.char.mix* }
+# end of lineannotation.element
+lineannotation.attlist &=
+  common.attrib, lineannotation.role.attrib, local.lineannotation.attrib
+# end of lineannotation.attlist
+
+# end of lineannotation.module
+local.literal.attrib = empty
+literal.role.attrib = role.attrib
+literal = element literal { literal.attlist, cptr.char.mix* }
+# end of literal.element
+literal.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  literal.role.attrib,
+  local.literal.attrib
+# end of literal.attlist
+
+# end of literal.module
+local.constant.attrib = empty
+constant.role.attrib = role.attrib
+constant = element constant { constant.attlist, smallcptr.char.mix* }
+# end of constant.element
+constant.attlist &=
+  attribute class { "limit" }?,
+  common.attrib,
+  constant.role.attrib,
+  local.constant.attrib
+# end of constant.attlist
+
+# end of constant.module
+local.varname.attrib = empty
+varname.role.attrib = role.attrib
+varname = element varname { varname.attlist, smallcptr.char.mix* }
+# end of varname.element
+varname.attlist &=
+  common.attrib, varname.role.attrib, local.varname.attrib
+# end of varname.attlist
+
+# end of varname.module
+local.markup.attrib = empty
+markup.role.attrib = role.attrib
+markup = element markup { markup.attlist, smallcptr.char.mix* }
+# end of markup.element
+markup.attlist &= common.attrib, markup.role.attrib, local.markup.attrib
+# end of markup.attlist
+
+# end of markup.module
+local.medialabel.attrib = empty
+medialabel.role.attrib = role.attrib
+medialabel =
+  element medialabel { medialabel.attlist, smallcptr.char.mix* }
+# end of medialabel.element
+
+# Class: Type of medium named by the element; no default
+medialabel.attlist &=
+  attribute class { "cartridge" | "cdrom" | "disk" | "tape" }?,
+  common.attrib,
+  medialabel.role.attrib,
+  local.medialabel.attrib
+# end of medialabel.attlist
+
+# end of medialabel.module
+local.menuchoice.attrib = empty
+menuchoice.role.attrib = role.attrib
+menuchoice =
+  element menuchoice {
+    menuchoice.attlist,
+    shortcut?,
+    (guibutton
+     | guiicon
+     | guilabel
+     | guimenu
+     | guimenuitem
+     | guisubmenu
+     | interface)+
+  }
+# end of menuchoice.element
+menuchoice.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  menuchoice.role.attrib,
+  local.menuchoice.attrib
+# end of menuchoice.attlist
+
+# end of menuchoice.module
+
+# See also KeyCombo
+local.shortcut.attrib = empty
+shortcut.role.attrib = role.attrib
+shortcut =
+  element shortcut {
+    shortcut.attlist, (keycap | keycombo | keysym | mousebutton)+
+  }
+# end of shortcut.element
+shortcut.attlist &=
+  keyaction.attrib,
+  moreinfo.attrib,
+  common.attrib,
+  shortcut.role.attrib,
+  local.shortcut.attrib
+# end of shortcut.attlist
+
+# end of shortcut.module
+
+# end of menuchoice.content.module
+local.mousebutton.attrib = empty
+mousebutton.role.attrib = role.attrib
+mousebutton =
+  element mousebutton { mousebutton.attlist, smallcptr.char.mix* }
+# end of mousebutton.element
+mousebutton.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  mousebutton.role.attrib,
+  local.mousebutton.attrib
+# end of mousebutton.attlist
+
+# end of mousebutton.module
+local.msgtext.attrib = empty
+msgtext.role.attrib = role.attrib
+msgtext = element msgtext { msgtext.attlist, component.mix+ }
+# end of msgtext.element
+msgtext.attlist &=
+  common.attrib, msgtext.role.attrib, local.msgtext.attrib
+# end of msgtext.attlist
+
+# end of msgtext.module
+local.option.attrib = empty
+option.role.attrib = role.attrib
+option = element option { option.attlist, cptr.char.mix* }
+# end of option.element
+option.attlist &= common.attrib, option.role.attrib, local.option.attrib
+# end of option.attlist
+
+# end of option.module
+local.optional.attrib = empty
+optional.role.attrib = role.attrib
+optional = element optional { optional.attlist, cptr.char.mix* }
+# end of optional.element
+optional.attlist &=
+  common.attrib, optional.role.attrib, local.optional.attrib
+# end of optional.attlist
+
+# end of optional.module
+local.parameter.attrib = empty
+parameter.role.attrib = role.attrib
+parameter = element parameter { parameter.attlist, cptr.char.mix* }
+# end of parameter.element
+
+# Class: Type of the Parameter; no default
+parameter.attlist &=
+  attribute class { "command" | "function" | "option" }?,
+  moreinfo.attrib,
+  common.attrib,
+  parameter.role.attrib,
+  local.parameter.attrib
+# end of parameter.attlist
+
+# end of parameter.module
+local.prompt.attrib = empty
+prompt.role.attrib = role.attrib
+prompt = element prompt { prompt.attlist, (smallcptr.char.mix | co)* }
+# end of prompt.element
+prompt.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  prompt.role.attrib,
+  local.prompt.attrib
+# end of prompt.attlist
+
+# end of prompt.module
+local.property.attrib = empty
+property.role.attrib = role.attrib
+property = element property { property.attlist, cptr.char.mix* }
+# end of property.element
+property.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  property.role.attrib,
+  local.property.attrib
+# end of property.attlist
+
+# end of property.module
+local.replaceable.attrib = empty
+replaceable.role.attrib = role.attrib
+replaceable =
+  element replaceable {
+    replaceable.attlist,
+    (text
+     | link.char.class
+     | optional
+     | base.char.class
+     | other.char.class
+     | inlinegraphic
+     | inlinemediaobject
+     | co)*
+  }
+# end of replaceable.element
+
+# Class: Type of information the element represents; no
+# default
+replaceable.attlist &=
+  attribute class { "command" | "function" | "option" | "parameter" }?,
+  common.attrib,
+  replaceable.role.attrib,
+  local.replaceable.attrib
+# end of replaceable.attlist
+
+# end of replaceable.module
+local.returnvalue.attrib = empty
+returnvalue.role.attrib = role.attrib
+returnvalue =
+  element returnvalue { returnvalue.attlist, smallcptr.char.mix* }
+# end of returnvalue.element
+returnvalue.attlist &=
+  common.attrib, returnvalue.role.attrib, local.returnvalue.attrib
+# end of returnvalue.attlist
+
+# end of returnvalue.module
+local.sgmltag.attrib = empty
+sgmltag.role.attrib = role.attrib
+sgmltag = element sgmltag { sgmltag.attlist, smallcptr.char.mix* }
+# end of sgmltag.element
+
+# Class: Type of SGML construct the element names; no default
+sgmltag.attlist &=
+  attribute class {
+    "attribute"
+    | "attvalue"
+    | "element"
+    | "endtag"
+    | "emptytag"
+    | "genentity"
+    | "numcharref"
+    | "paramentity"
+    | "pi"
+    | "xmlpi"
+    | "starttag"
+    | "sgmlcomment"
+  }?,
+  common.attrib,
+  sgmltag.role.attrib,
+  local.sgmltag.attrib
+# end of sgmltag.attlist
+
+# end of sgmltag.module
+local.structfield.attrib = empty
+structfield.role.attrib = role.attrib
+structfield =
+  element structfield { structfield.attlist, smallcptr.char.mix* }
+# end of structfield.element
+structfield.attlist &=
+  common.attrib, structfield.role.attrib, local.structfield.attrib
+# end of structfield.attlist
+
+# end of structfield.module
+local.structname.attrib = empty
+structname.role.attrib = role.attrib
+structname =
+  element structname { structname.attlist, smallcptr.char.mix* }
+# end of structname.element
+structname.attlist &=
+  common.attrib, structname.role.attrib, local.structname.attrib
+# end of structname.attlist
+
+# end of structname.module
+local.symbol.attrib = empty
+symbol.role.attrib = role.attrib
+symbol = element symbol { symbol.attlist, smallcptr.char.mix* }
+# end of symbol.element
+
+# Class: Type of symbol; no default
+symbol.attlist &=
+  attribute class { "limit" }?,
+  common.attrib,
+  symbol.role.attrib,
+  local.symbol.attrib
+# end of symbol.attlist
+
+# end of symbol.module
+local.systemitem.attrib = empty
+systemitem.role.attrib = role.attrib
+systemitem =
+  element systemitem {
+    systemitem.attlist, (cptr.char.mix | acronym | co)*
+  }
+# end of systemitem.element
+
+# Class: Type of system item the element names; no default
+systemitem.attlist &=
+  attribute class {
+    "constant"
+    | "event"
+    | "eventhandler"
+    | "domainname"
+    | "fqdomainname"
+    | "ipaddress"
+    | "netmask"
+    | "etheraddress"
+    | "groupname"
+    | "library"
+    | "macro"
+    | "osname"
+    | "filesystem"
+    | "resource"
+    | "systemname"
+    | "username"
+    | "newsgroup"
+  }?,
+  moreinfo.attrib,
+  common.attrib,
+  systemitem.role.attrib,
+  local.systemitem.attrib
+# end of systemitem.attlist
+
+# end of systemitem.module
+local.token.attrib = empty
+token.role.attrib = role.attrib
+\token = element token { token.attlist, smallcptr.char.mix* }
+# end of token.element
+token.attlist &= common.attrib, token.role.attrib, local.token.attrib
+# end of token.attlist
+
+# end of token.module
+local.type.attrib = empty
+type.role.attrib = role.attrib
+type = element type { type.attlist, smallcptr.char.mix* }
+# end of type.element
+type.attlist &= common.attrib, type.role.attrib, local.type.attrib
+# end of type.attlist
+
+# end of type.module
+local.userinput.attrib = empty
+userinput.role.attrib = role.attrib
+userinput =
+  element userinput { userinput.attlist, (cptr.char.mix | co)* }
+# end of userinput.element
+userinput.attlist &=
+  moreinfo.attrib,
+  common.attrib,
+  userinput.role.attrib,
+  local.userinput.attrib
+# end of userinput.attlist
+
+# end of userinput.module
+
+# General words and phrases ............................................
+local.abbrev.attrib = empty
+abbrev.role.attrib = role.attrib
+abbrev = element abbrev { abbrev.attlist, word.char.mix* }
+# end of abbrev.element
+abbrev.attlist &= common.attrib, abbrev.role.attrib, local.abbrev.attrib
+# end of abbrev.attlist
+
+# end of abbrev.module
+local.acronym.attrib = empty
+acronym.role.attrib = role.attrib
+acronym = element acronym { acronym.attlist, word.char.mix* }
+# end of acronym.element
+acronym.attlist &=
+  common.attrib, acronym.role.attrib, local.acronym.attrib
+# end of acronym.attlist
+
+# end of acronym.module
+local.citation.attrib = empty
+citation.role.attrib = role.attrib
+citation = element citation { citation.attlist, para.char.mix* }
+# end of citation.element
+citation.attlist &=
+  common.attrib, citation.role.attrib, local.citation.attrib
+# end of citation.attlist
+
+# end of citation.module
+local.citerefentry.attrib = empty
+citerefentry.role.attrib = role.attrib
+citerefentry =
+  element citerefentry {
+    citerefentry.attlist, refentrytitle, manvolnum?
+  }
+# end of citerefentry.element
+citerefentry.attlist &=
+  common.attrib, citerefentry.role.attrib, local.citerefentry.attrib
+# end of citerefentry.attlist
+
+# end of citerefentry.module
+local.refentrytitle.attrib = empty
+refentrytitle.role.attrib = role.attrib
+refentrytitle =
+  element refentrytitle { refentrytitle.attlist, para.char.mix* }
+# end of refentrytitle.element
+refentrytitle.attlist &=
+  common.attrib, refentrytitle.role.attrib, local.refentrytitle.attrib
+# end of refentrytitle.attlist
+
+# end of refentrytitle.module
+local.manvolnum.attrib = empty
+namvolnum.role.attrib = role.attrib
+manvolnum = element manvolnum { manvolnum.attlist, word.char.mix* }
+# end of manvolnum.element
+manvolnum.attlist &=
+  common.attrib, namvolnum.role.attrib, local.manvolnum.attrib
+# end of manvolnum.attlist
+
+# end of manvolnum.module
+local.citetitle.attrib = empty
+citetitle.role.attrib = role.attrib
+citetitle = element citetitle { citetitle.attlist, para.char.mix* }
+# end of citetitle.element
+
+# Pubwork: Genre of published work cited; no default
+citetitle.attlist &=
+  attribute pubwork {
+    "article"
+    | "book"
+    | "chapter"
+    | "part"
+    | "refentry"
+    | "section"
+    | "journal"
+    | "series"
+    | "set"
+    | "manuscript"
+  }?,
+  common.attrib,
+  citetitle.role.attrib,
+  local.citetitle.attrib
+# end of citetitle.attlist
+
+# end of citetitle.module
+local.emphasis.attrib = empty
+emphasis.role.attrib = role.attrib
+emphasis = element emphasis { emphasis.attlist, para.char.mix* }
+# end of emphasis.element
+emphasis.attlist &=
+  common.attrib, emphasis.role.attrib, local.emphasis.attrib
+# end of emphasis.attlist
+
+# end of emphasis.module
+local.firstterm.attrib = empty
+firstterm.role.attrib = role.attrib
+firstterm = element firstterm { firstterm.attlist, word.char.mix* }
+# end of firstterm.element
+
+# to GlossEntry or other explanation
+firstterm.attlist &=
+  linkend.attrib,
+  common.attrib,
+  firstterm.role.attrib,
+  local.firstterm.attrib
+# end of firstterm.attlist
+
+# end of firstterm.module
+local.foreignphrase.attrib = empty
+foreignphrase.role.attrib = role.attrib
+foreignphrase =
+  element foreignphrase { foreignphrase.attlist, para.char.mix* }
+# end of foreignphrase.element
+foreignphrase.attlist &=
+  common.attrib, foreignphrase.role.attrib, local.foreignphrase.attrib
+# end of foreignphrase.attlist
+
+# end of foreignphrase.module
+local.glossterm.attrib = empty
+glossterm.role.attrib = role.attrib
+glossterm = element glossterm { glossterm.attlist, para.char.mix* }
+# end of glossterm.element
+
+# to GlossEntry if Glossterm used in text
+
+# BaseForm: Provides the form of GlossTerm to be used
+# for indexing
+glossterm.attlist &=
+  linkend.attrib,
+  attribute baseform { text }?,
+  common.attrib,
+  glossterm.role.attrib,
+  local.glossterm.attrib
+# end of glossterm.attlist
+
+# end of glossterm.module
+local.phrase.attrib = empty
+phrase.role.attrib = role.attrib
+phrase = element phrase { phrase.attlist, para.char.mix* }
+# end of phrase.element
+phrase.attlist &= common.attrib, phrase.role.attrib, local.phrase.attrib
+# end of phrase.attlist
+
+# end of phrase.module
+local.quote.attrib = empty
+quote.role.attrib = role.attrib
+quote = element quote { quote.attlist, para.char.mix* }
+# end of quote.element
+quote.attlist &= common.attrib, quote.role.attrib, local.quote.attrib
+# end of quote.attlist
+
+# end of quote.module
+local.ssscript.attrib = empty
+ssscript.role.attrib = role.attrib
+subscript =
+  element subscript {
+    subscript.attlist,
+    (text
+     | link.char.class
+     | emphasis
+     | replaceable
+     | symbol
+     | inlinegraphic
+     | inlinemediaobject
+     | base.char.class
+     | other.char.class)*
+  }
+# end of subscript.element
+subscript.attlist &=
+  common.attrib, ssscript.role.attrib, local.ssscript.attrib
+# end of subscript.attlist
+superscript =
+  element superscript {
+    superscript.attlist,
+    (text
+     | link.char.class
+     | emphasis
+     | replaceable
+     | symbol
+     | inlinegraphic
+     | inlinemediaobject
+     | base.char.class
+     | other.char.class)*
+  }
+# end of superscript.element
+superscript.attlist &=
+  common.attrib, ssscript.role.attrib, local.ssscript.attrib
+# end of superscript.attlist
+
+# end of ssscript.module
+local.trademark.attrib = empty
+trademark.role.attrib = role.attrib
+trademark =
+  element trademark {
+    trademark.attlist,
+    (text
+     | link.char.class
+     | tech.char.class
+     | base.char.class
+     | other.char.class
+     | inlinegraphic
+     | inlinemediaobject
+     | emphasis)*
+  }
+# end of trademark.element
+
+# Class: More precisely identifies the item the element names
+trademark.attlist &=
+  [ a:defaultValue = "trade" ]
+  attribute class { "service" | "trade" | "registered" | "copyright" }?,
+  common.attrib,
+  trademark.role.attrib,
+  local.trademark.attrib
+# end of trademark.attlist
+
+# end of trademark.module
+local.wordasword.attrib = empty
+wordasword.role.attrib = role.attrib
+wordasword = element wordasword { wordasword.attlist, word.char.mix* }
+# end of wordasword.element
+wordasword.attlist &=
+  common.attrib, wordasword.role.attrib, local.wordasword.attrib
+# end of wordasword.attlist
+
+# end of wordasword.module
+
+# Links and cross-references ...........................................
+local.link.attrib = empty
+link.role.attrib = role.attrib
+link = element link { link.attlist, para.char.mix* }
+# end of link.element
+
+# Endterm: ID of element containing text that is to be
+# fetched from elsewhere in the document to appear as
+# the content of this element
+
+# to linked-to object
+
+# Type: Freely assignable parameter
+link.attlist &=
+  attribute endterm { xsd:IDREF }?,
+  linkendreq.attrib,
+  attribute type { text }?,
+  common.attrib,
+  link.role.attrib,
+  local.link.attrib
+# end of link.attlist
+
+# end of link.module
+local.olink.attrib = empty
+olink.role.attrib = role.attrib
+olink = element olink { olink.attlist, para.char.mix* }
+# end of olink.element
+
+# TargetDocEnt: Name of an entity to be the target of the link
+
+# LinkMode: ID of a ModeSpec containing instructions for
+# operating on the entity named by TargetDocEnt
+
+# LocalInfo: Information that may be passed to ModeSpec
+
+# Type: Freely assignable parameter
+olink.attlist &=
+  attribute targetdocent { xsd:ENTITY }?,
+  attribute linkmode { xsd:IDREF }?,
+  attribute localinfo { text }?,
+  attribute type { text }?,
+  attribute targetdoc { text }?,
+  attribute targetptr { text }?,
+  common.attrib,
+  olink.role.attrib,
+  local.olink.attrib
+# end of olink.attlist
+
+# end of olink.module
+local.ulink.attrib = empty
+ulink.role.attrib = role.attrib
+ulink = element ulink { ulink.attlist, para.char.mix* }
+# end of ulink.element
+
+# URL: uniform resource locator; the target of the ULink
+
+# Type: Freely assignable parameter
+ulink.attlist &=
+  attribute url { text },
+  attribute type { text }?,
+  common.attrib,
+  ulink.role.attrib,
+  local.ulink.attrib
+# end of ulink.attlist
+
+# end of ulink.module
+local.footnoteref.attrib = empty
+footnoteref.role.attrib = role.attrib
+footnoteref = element footnoteref { footnoteref.attlist, empty }
+# end of footnoteref.element
+
+# to footnote content supplied elsewhere
+footnoteref.attlist &=
+  linkendreq.attrib,
+  label.attrib,
+  common.attrib,
+  footnoteref.role.attrib,
+  local.footnoteref.attrib
+# end of footnoteref.attlist
+
+# end of footnoteref.module
+local.xref.attrib = empty
+xref.role.attrib = role.attrib
+xref = element xref { xref.attlist, empty }
+# end of xref.element
+
+# Endterm: ID of element containing text that is to be
+# fetched from elsewhere in the document to appear as
+# the content of this element
+
+# to linked-to object
+xref.attlist &=
+  attribute endterm { xsd:IDREF }?,
+  linkendreq.attrib,
+  common.attrib,
+  xref.role.attrib,
+  local.xref.attrib
+# end of xref.attlist
+
+# end of xref.module
+
+# Ubiquitous elements ..................................................
+local.anchor.attrib = empty
+anchor.role.attrib = role.attrib
+anchor = element anchor { anchor.attlist, empty }
+# end of anchor.element
+
+# required
+
+# replaces Lang
+anchor.attlist &=
+  idreq.attrib,
+  pagenum.attrib,
+  remap.attrib,
+  xreflabel.attrib,
+  revisionflag.attrib,
+  effectivity.attrib,
+  anchor.role.attrib,
+  local.anchor.attrib
+# end of anchor.attlist
+
+# end of anchor.module
+local.beginpage.attrib = empty
+beginpage.role.attrib = role.attrib
+beginpage = element beginpage { beginpage.attlist, empty }
+# end of beginpage.element
+
+# PageNum: Number of page that begins at this point
+beginpage.attlist &=
+  pagenum.attrib,
+  common.attrib,
+  beginpage.role.attrib,
+  local.beginpage.attrib
+# end of beginpage.attlist
+
+# end of beginpage.module
+
+# IndexTerms appear in the text flow for generating or linking an
+# index.
+local.indexterm.attrib = empty
+indexterm.role.attrib = role.attrib
+indexterm =
+  element indexterm {
+    indexterm.attlist,
+    primary?,
+    ((secondary,
+      ((tertiary, (see | seealso+)?)
+       | see
+       | seealso+)?)
+     | see
+     | seealso+)?
+  }
+# end of indexterm.element
+
+# Scope: Indicates which generated indices the IndexTerm
+# should appear in: Global (whole document set), Local (this
+# document only), or All (both)
+
+# Significance: Whether this IndexTerm is the most pertinent
+# of its series (Preferred) or not (Normal, the default)
+
+# Class: Indicates type of IndexTerm; default is Singular,
+# or EndOfRange if StartRef is supplied; StartOfRange value
+# must be supplied explicitly on starts of ranges
+
+# StartRef: ID of the IndexTerm that starts the indexing
+# range ended by this IndexTerm
+
+# Zone: IDs of the elements to which the IndexTerm applies,
+# and indicates that the IndexTerm applies to those entire
+# elements rather than the point at which the IndexTerm
+# occurs
+indexterm.attlist &=
+  pagenum.attrib,
+  attribute scope { "all" | "global" | "local" }?,
+  [ a:defaultValue = "normal" ]
+  attribute significance { "preferred" | "normal" }?,
+  attribute class { "singular" | "startofrange" | "endofrange" }?,
+  attribute startref { xsd:IDREF }?,
+  attribute zone { xsd:IDREFS }?,
+  common.attrib,
+  indexterm.role.attrib,
+  local.indexterm.attrib
+# end of indexterm.attlist
+
+# end of indexterm.module
+local.primsecter.attrib = empty
+primsecter.role.attrib = role.attrib
+primary = element primary { primary.attlist, ndxterm.char.mix* }
+# end of primary.element
+
+# SortAs: Alternate sort string for index sorting, e.g.,
+# "fourteen" for an element containing "14"
+primary.attlist &=
+  attribute sortas { text }?,
+  common.attrib,
+  primsecter.role.attrib,
+  local.primsecter.attrib
+# end of primary.attlist
+secondary = element secondary { secondary.attlist, ndxterm.char.mix* }
+# end of secondary.element
+
+# SortAs: Alternate sort string for index sorting, e.g.,
+# "fourteen" for an element containing "14"
+secondary.attlist &=
+  attribute sortas { text }?,
+  common.attrib,
+  primsecter.role.attrib,
+  local.primsecter.attrib
+# end of secondary.attlist
+tertiary = element tertiary { tertiary.attlist, ndxterm.char.mix* }
+# end of tertiary.element
+
+# SortAs: Alternate sort string for index sorting, e.g.,
+# "fourteen" for an element containing "14"
+tertiary.attlist &=
+  attribute sortas { text }?,
+  common.attrib,
+  primsecter.role.attrib,
+  local.primsecter.attrib
+# end of tertiary.attlist
+
+# end of primsecter.module
+local.seeseealso.attrib = empty
+seeseealso.role.attrib = role.attrib
+see = element see { see.attlist, ndxterm.char.mix* }
+# end of see.element
+see.attlist &=
+  common.attrib, seeseealso.role.attrib, local.seeseealso.attrib
+# end of see.attlist
+seealso = element seealso { seealso.attlist, ndxterm.char.mix* }
+# end of seealso.element
+seealso.attlist &=
+  common.attrib, seeseealso.role.attrib, local.seeseealso.attrib
+# end of seealso.attlist
+
+# end of seeseealso.module
+
+# end of indexterm.content.module
+
+# End of DocBook XML information pool module V4.2 ......................
+
+# ......................................................................

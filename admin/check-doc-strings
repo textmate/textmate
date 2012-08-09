@@ -1,0 +1,303 @@
+: #-*- Perl -*-
+eval 'exec perl -w -S $0 ${1+"$@"}' # Portability kludge
+    if 0;
+
+# Author: Martin Buchholz
+# This program is in the public domain.
+
+use strict;
+use POSIX;
+
+(my $myName = $0) =~ s@.*/@@; my $usage="
+Usage: $myName
+
+Finds DOCSTRING arg mismatches between
+formal parameters, docstrings, and lispref texi.
+
+This program is in the public domain.\n";
+
+die $usage if @ARGV;
+die $usage unless -r "src/alloc.c" && -d "CVS" && -d "lisp";
+
+my %texi_funtype;
+my %texi_arglist;
+
+my %code_funtype;
+my %code_arglist;
+
+sub FileContents {
+  local $/ = undef;
+  open (FILE, "< $_[0]") or die "$_[0]: $!";
+  return scalar <FILE>;
+}
+
+sub Show_details {
+  my ($show_details, $function, $parms, $docstring) = @_;
+  if ($show_details) {
+    print "function = $function $parms\n$docstring\n", "-" x 70, "\n";
+  }
+}
+
+sub Check_texi_function {
+  my ($function, $funtype, $docstring, @parms) = @_;
+  my %docstring_parm;
+  my %docstring_word;
+  my %arglist_parm;
+  my $show_details = 0;
+
+  if (exists $texi_funtype{$function}) {
+    print "duplicate texidoc: $function @parms\n";
+    return;			# later definition likely bogus package def
+  }
+
+  $texi_funtype{$function} = $funtype;
+  $texi_arglist{$function} = "@parms";
+
+  foreach my $parm (@parms) {
+    next if $parm eq '&optional' || $parm eq '&rest';
+    $arglist_parm{$parm} = 1;
+  }
+
+  foreach my $parm ($docstring =~ /\@var{([^{}]+)}/g) {
+    $docstring_parm{$parm} = 1;
+  }
+
+  foreach my $hit ($docstring =~ /[^\`]\`[A-Za-z-]+\'/g)
+    {
+      print "texi \@code missing: $function: $hit\n";
+      $show_details = 1;
+    }
+
+  #   (my $raw_docstring = $docstring) =~ s/\@var{[^{}]+}//g;
+  #   $raw_docstring =~ s/[^a-zA-Z_-]+/ /g;
+  #   foreach my $word (split (' ', $raw_docstring)) {
+  #     if ($word =~ /^[A-Z][A-Z-]+$/) {
+  #       print "Missing \@var: $function: $word\n";
+  #     }
+  #   }
+
+  foreach my $parm (keys %docstring_parm) {
+    if (! exists $arglist_parm{$parm}) {
+      print "bogus texi parm: $function: $parm\n";
+      $show_details = 1;
+    }
+  }
+
+  foreach my $parm (keys %arglist_parm) {
+    if (! exists $docstring_parm{$parm}) {
+      print "undocumented texi parm: $function: $parm\n";
+      $show_details = 1;
+    }
+  }
+
+  Show_details $show_details, $function, "@parms", $docstring;
+}
+
+sub Check_function {
+  my ($function, $funtype, $docstring, @parms) = @_;
+  my %docstring_parm;
+  my %arglist_parm;
+  my $show_details = 0;
+
+  if (exists $code_funtype{$function}) {
+    print "duplicate codedef: $function @parms\n";
+    return;			# later definition likely bogus package def
+  }
+
+  $code_funtype{$function} = $funtype;
+  $code_arglist{$function} = "@parms";
+  #foreach my $parm ($parms =~ /\b[a-z0-9-]{3,}\b/g) {
+  #  $arglist_parm{$parm} = 1;
+  #}
+  foreach my $parm (@parms) {
+    next if $parm eq '&optional' || $parm eq '&rest';
+    $arglist_parm{$parm} = 1;
+  }
+  my $doc_tmp = $docstring;
+  $doc_tmp =~ s/[^A-Za-z0-9_-]/ /g;
+  foreach my $parm (split (' ', $doc_tmp)) {
+    if ($parm =~ /^[A-Z][A-Z0-9-]*$/) {
+      next if $parm =~ /I18N/;
+      next if $parm =~ /M17N/;
+      $parm =~ tr[A-Z][a-z];
+      $docstring_parm{$parm} = 1;
+    }
+  }
+  #  foreach my $parm ($docstring =~ /\b[A-Z0-9-]{1,}\b/g) {
+  #    next if $parm =~ /-$/;
+  #    $parm =~ tr[A-Z][a-z];
+  #    $docstring_parm{$parm} = 1;
+  #  }
+  foreach my $parm (keys %docstring_parm) {
+    next if $parm eq 'tty';
+    next if $parm eq 'fsf';
+    next if $parm eq 'note';
+    next if $parm eq 'warning';
+    next if $parm eq 'bug';
+    next if $parm eq 'ascii';
+    next if $parm eq 'iso';
+    next if $parm eq 'and';
+    next if $parm eq 'absolutely';
+    next if $parm eq 'doc';
+    next if $parm eq 'user';
+    next if $parm eq 'not';
+    next if $parm eq 'must';
+    next if $parm eq 'nil';
+    next if $parm eq 'esc';
+    next if $parm eq 'lfd';
+    next if $parm eq 'gpm';
+    next if $parm eq 'primary';
+    next if $parm eq 'secondary';
+    next if $parm eq 'clipboard';
+    next if length $parm < 3;
+    if (! exists $arglist_parm{$parm}) {
+      print "bogus parm: $function: $parm\n";
+      $show_details = 1;
+    }
+  }
+  foreach my $parm (keys %arglist_parm) {
+    if (! exists $docstring_parm{$parm}) {
+      print "Undocumented parm: $function: $parm\n";
+      $show_details = 1;
+    }
+  }
+
+  if ($docstring !~ /[\]}!\)\.]\s*\Z/m &&
+      $docstring =~ /\S/ &&
+      $docstring !~ /Keywords supported/)
+    {
+      print "Missing trailing period: $function\n";
+      $show_details = 1;
+    }
+
+  if (exists $texi_arglist{$function}
+      and "@parms" ne $texi_arglist{$function}
+      and not ("@parms" eq 'int nargs Lisp-Object *args'
+	       && $texi_arglist{$function} =~ /&rest/)) {
+    my @texi_parms = split (' ', $texi_arglist{$function});
+    my @a = ("@parms" =~ /&optional/g);
+    my @b = ("@parms" =~ /&rest/g);
+    my @c = ("@texi_parms" =~ /&optional/g);
+    my @d = ("@texi_parms" =~ /&rest/g);
+    if (@parms != @texi_parms
+	|| (@a != @c) || (@b != @d)) {
+      print "serious mismatch: $function: @parms --- @texi_parms\n";
+    } else {
+      print "texi mismatch: $function: @parms --- $texi_arglist{$function}\n";
+    }
+    $show_details = 1;
+  }
+
+  if (exists $texi_funtype{$function}
+      && $texi_funtype{$function} ne $funtype) {
+    print "interactiveness mismatch: $function: $funtype --- $texi_funtype{$function}\n";
+    $show_details = 1;
+  }
+
+  Show_details $show_details, $function, "@parms", $docstring;
+}
+
+my $lisprefdir;
+if    (-d "man/lispref") { $lisprefdir = "man/lispref"; }
+elsif (-d "lispref") { $lisprefdir = "lispref"; }
+else { die "Can't find lispref texi directory.\n"; }
+
+open (FIND, "find $lisprefdir -name '*.texi' -print |") or die;
+while (my $file = <FIND>) {
+  my @matches = ((FileContents $file) =~
+		 /\@(def(?:fn|un))([^\n]+)\n(.*?)\n\@end def(?:un|fn)/sgo);
+  #		 /^\@(def(?:un|fn))\s+(.*)\n([.|\n]*?)^\@end def(?:un|fn)\n/mgo);
+  while (@matches) {
+    my ($defform, $defn, $docstring) = splice (@matches, 0, 3);
+    #print "defform = $defform\n";
+    #print "defn = $defn\n";
+    #print "docstring = $docstring\n";
+    my ($function, @parms, $funtype);
+    if ($defform eq 'defun') {
+      ($funtype, $function, @parms) = ('Function', split (' ', $defn));
+    } else {
+      die unless $defform eq 'deffn';
+      ($funtype, $function, @parms) = split (' ', $defn);
+    }
+    next if $funtype eq '{Syntax' or $funtype eq '{Prefix';
+
+    Check_texi_function $function, $funtype, $docstring, @parms;
+  }
+}
+
+open (FIND, "find src -name '*.c' -print |") or die;
+while (my $file = <FIND>) {
+  my @matches =
+    ((FileContents $file) =~
+     /\bDEFUN\s*\(\s*\"((?:[^\\\"]|\\.)+)\"\s*,\s*\S+\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*((?:0|\"(?:(?:[^\\\"]|\\.)*)\"))\s*,\s*\/\*(.*?)\*\/\s*\(([^()]*)\)\)/sgo);
+  while (@matches) {
+    my ($function, $minargs, $maxargs, $interactive, $docstring, $parms) = splice (@matches, 0, 6);
+    $docstring =~ s/^\n+//s;
+    $docstring =~ s/\n+$//s;
+    $parms =~ s/,/ /g;
+    my @parms = split (' ',$parms);
+    for (@parms) { tr/_/-/; s/-$//; }
+    if ($parms !~ /Lisp_Object/) {
+      if ($minargs < @parms) {
+	if ($maxargs =~ /^\d+$/) {
+	  die unless $maxargs eq @parms;
+	  splice (@parms, $minargs, 0, '&optional');
+	}
+      }
+    }
+    my $funtype = ($interactive =~ /\"/ ? 'Command' : 'Function');
+    Check_function $function, $funtype, $docstring, @parms;
+  }
+}
+
+my @pkgs;
+if (-d "../xemacs-packages") {
+  @pkgs = qw (libs/edebug libs/xemacs-base comm/eudc oa/edit-utils);
+} else {
+  @pkgs = ();
+}
+for (@pkgs) { s@^@../xemacs-packages/@; }
+open (FIND, "find lisp @pkgs -name '*.el' -print |") or die;
+while (my $file = <FIND>) {
+  my $contents = FileContents $file;
+  $contents =~ s/(?:\s|;);.*//mog;
+  my @matches =
+    ($contents =~
+     /\((def(?:un|subst|macro))\s+(\S+)\s+\(([^()]*)\)\s+\"((?:[^\\\"]|\\.)+)\"(.*?)\)/sgo);
+  while (@matches) {
+    my ($defform, $function, $parms, $docstring, $code_fragment) = splice (@matches, 0, 5);
+
+    my $funtype =
+      $defform eq 'defmacro' ? 'Macro' :
+	$code_fragment =~ /^\s*\(interactive\b/so ? 'Command' :
+	  'Function';
+
+    $docstring =~ s/^\n+//s;
+    $docstring =~ s/\n+$//s;
+
+    my @parms = split (' ', $parms);
+
+    Check_function $function, $funtype, $docstring, @parms;
+  }
+}
+
+open (FIND, "find lisp @pkgs -name '*.el' -print |") or die;
+while (my $file = <FIND>) {
+  my $contents = FileContents $file;
+  $contents =~ s/(?:\s|;);.*//mog;
+
+  my @matches = ($contents =~ /^\((?:defalias|fset|define-function)\s+\'([A-Za-z0-9_-]+)\s+\'([A-Za-z0-9_-]+)/mog);
+  while (@matches) {
+    my ($alias, $aliasee) = splice (@matches, 0, 2);
+    print "alias $alias aliasee $aliasee\n";
+    if (exists $code_funtype{$aliasee}) { $code_funtype{$alias} = $code_funtype{$aliasee}; }
+    if (exists $code_arglist{$aliasee}) { $code_arglist{$alias} = $code_arglist{$aliasee}; }
+  }
+}
+
+foreach my $fun (sort keys %texi_funtype) {
+  if (not exists $code_funtype{$fun}) {
+    print "nuke-this-doc: $fun $texi_funtype{$fun}\n";
+  }
+}
+

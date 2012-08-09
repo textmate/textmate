@@ -1,0 +1,224 @@
+;;; template.srt --- Templates for Semantic Recoders
+
+;; Copyright (C) 2005, 2007-2012 Free Software Foundation, Inc.
+
+;; Author: Eric Ludlam <zappo@gnu.org>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set escape_start "$"
+set escape_end "$"
+set mode "srecode-template-mode"
+set priority "70"
+
+set comment_start  ";;"
+set comment_end    ""
+set comment_prefix ";;"
+
+set SEPARATOR "----"
+
+set DOLLAR "$"
+
+context file
+
+prompt MAJORMODE "Major Mode for templates: " read srecode-read-major-mode-name
+prompt START "Escape Start Characters: " default "{{"
+prompt END "Escape End Characters: " default "}}"
+
+template empty :file :user :time :srt
+"Insert a skeleton for a template file."
+----
+$>:filecomment$
+
+set mode "$?MAJORMODE$"
+set escape_start "$?START$"
+set escape_end "$?END$"
+
+context file
+
+$^$
+
+
+;; end
+----
+
+template mode-basics :srt
+"Fill out a full template including parts for basic new mode stuff."
+sectiondictionary "E"
+set NAME "empty :file :user :time"
+set DOC "Fill out an empty file."
+set KEY "e"
+sectiondictionary "C1"
+set NAME "declaration"
+sectiondictionary "DTF"
+set NAME "function :blank :indent"
+set DOC "Template to declare a function."
+set KEY "f"
+sectiondictionary "DTV"
+set NAME "variable :blank :indent"
+set DOC "Template to declare a variable."
+set KEY "v"
+sectiondictionary "PR"
+set NAME "NAME"
+set PROMPT "Name for declaration: "
+----
+$>:declaration:commentchars$
+
+$<E:declaration:function$
+$ESCAPE_START$>:filecomment$ESCAPE_END$
+$/E$
+
+$>C1:declaration:context$
+
+$>PR:declaration:prompt$
+
+$>DTF:declaration:function$
+$>DTV:declaration:function$
+----
+bind "m"
+
+
+context declaration
+
+prompt NAME "Name of new template: "
+prompt KEY "Key Binding: " read read-char
+
+template function :blank
+"Insert a template block for Srecoder templates."
+----
+template $?NAME$$#ARG$$NAME$$/ARG$
+"$DOC$"
+$SEPARATOR$
+$^$
+$SEPARATOR$
+bind "$?KEY$"
+----
+bind "f"
+
+prompt NAME "Name of new variable: "
+
+template variable :blank
+"Inert a variable."
+----
+set $?NAME$ "$^$"
+----
+bind "v"
+
+template prompt :blank
+"Insert a prompt."
+----
+prompt $?NAME$ "$?PROMPT$"
+----
+bind "p"
+
+template priority :blank
+"Insert a priority statement."
+----
+set priority $^$
+----
+
+template application :blank
+"Insert an application statement."
+----
+set application "$^$"
+----
+
+template context :blank
+"Insert a context statement."
+----
+context $NAME$
+----
+bind "c"
+
+template commentchars :blank
+"Insert the variables for handling comments."
+----
+set comment_start  ""
+set comment_end    ""
+set comment_prefix ""
+----
+
+context code
+
+prompt NAME "Name of variable: " read srecode-read-variable-name
+
+template variable :srt
+"Insert a variable with completion from the current file."
+----
+$ESCAPE_START$$?NAME$$ESCAPE_END$
+----
+bind "v"
+
+prompt NAME "Name of macro: "
+
+template ask :srt
+"Insert a prompting variable."
+----
+$ESCAPE_START$?$?NAME$$ESCAPE_END$
+----
+bind "a"
+
+template comment :srt
+----
+$ESCAPE_START$!$^$$ESCAPE_END$
+----
+bind "c"
+
+prompt TEMPLATE "Template to include: " read srecode-read-template-name
+
+template include :srt
+----
+$ESCAPE_START$>:$?TEMPLATE$$ESCAPE_END$
+----
+bind "i"
+
+template includewrap :srt
+----
+$ESCAPE_START$<:$?TEMPLATE$$ESCAPE_END$$^$$ESCAPE_START$/$NAME$$ESCAPE_END$
+----
+bind "w"
+
+template point :srt
+----
+$ESCAPE_START$^$ESCAPE_END$
+----
+bind "p"
+
+template section :srt
+"Insert a section, or looping construct."
+----
+$ESCAPE_START$#$?NAME$$ESCAPE_END$
+$^$
+$ESCAPE_START$/$NAME$$ESCAPE_END$
+----
+bind "s"
+
+template escape-start-quoted :srt
+"Escape Start"
+----
+$ESCAPE_START$ESCAPE_START$ESCAPE_END$
+----
+bind "q"
+
+template escape-end-quoted :srt
+"Escape Start"
+----
+$ESCAPE_START$ESCAPE_END$ESCAPE_END$
+----
+bind "e"
+
+
+;; end

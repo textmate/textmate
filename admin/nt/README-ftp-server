@@ -1,0 +1,291 @@
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+See the end of the file for license conditions.
+
+		      Precompiled Distributions of
+			   Emacs for Windows
+
+			    Version 24.1
+
+			      January 1, 2011
+
+  This directory contains precompiled distributions for GNU Emacs on
+  Windows (versions before Windows 95 and NT4 are not supported).
+  This port is a part of the standard GNU Emacs distribution from the
+  Free Software Foundation; the precompiled distributions are provided
+  here for convenience since the majority of Windows users are not
+  accustomed to compiling programs themselves.  Corresponding source
+  can be found in the parent directory in emacs-24.1.tar.gz.
+
+  If you have access to the World Wide Web, I would recommend pointing
+  your favorite web browser to the following document (if you haven't
+  already):
+
+	http://www.gnu.org/software/emacs/windows/ntemacs.html
+
+* IMPORTANT LEGAL REMINDER
+
+  If you want to redistribute any of the precompiled distributions of
+  Emacs, be careful to check the implications of the GPL.  For instance,
+  if you put the emacs-24.1-bin-i386.tar.gz file from this directory on
+  an Internet site, you must arrange to distribute the source files of
+  the SAME version (i.e. ../emacs-24.1.tar.gz).
+
+  Making a link to our copy of the source is NOT sufficient, since we
+  might upgrade to a new version while you are still distributing the
+  old binaries.
+
+
+* Files in this directory
+
+  + emacs-24.1-bin-i386.zip
+    Windows binaries of Emacs-24.1, with all lisp code and documentation
+    included.
+
+    Download this file if you want a single installation package, and
+    are not interested in the C source code for Emacs. After
+    unpacking, you can optionally run the file bin/addpm.exe to have
+    Emacs add icons to the Start Menu.
+
+    If you need the C source code at a later date, it will be safe to
+    unpack the source distribution on top of this installation.
+
+  + emacs-24.1-barebin-i386.zip
+    Windows binaries of Emacs-24.1, without lisp code or documentation.
+
+    Download this file if you already have the source distribution.
+
+    Unpack this over the top of the source distribution. It contains the
+    bin subdirectory and etc/DOC file.
+
+  + libxpm-3.5.7-w32-src.zip
+    Source code required to compile libXpm-3.5.7 on Windows. Contains
+    a basic Makefile for compiling with mingw32 and a .def file for
+    generating a DLL with the appropriate exports in addition to the
+    source code to provide the subset of functionality Emacs uses from
+    libXpm. This corresponds to the libXpm.dll in emacs-24.1-bin-i386.zip
+    and emacs-24.1-barebin-i386.zip.
+
+* Prerequisites for running Emacs on Windows 9X
+
+  Using Emacs in GUI mode on Windows 95/98/Me requires the UNICOWS.DLL
+  dynamic library, which provides MSLU, the Microsoft Unicode Layer
+  for Windows 9X.  You can freely download it from the Microsoft site.
+
+* Image support
+
+  Emacs 24.1 contains support for images, however for most image
+  formats supporting libraries are required.  This distribution has
+  been tested with the libraries that are distributed with GTK for
+  Windows (http://www.gtk.org/download/win32.php), and the libraries
+  found at http://gnuwin32.sourceforge.net/. The following image
+  formats are supported:
+
+      PBM/PGM/PPM: Supported natively by Emacs. This format is used for
+      the black and white versions of the toolbar icons.
+
+      XPM: a Windows port of the XPM library corresponding to the x.org
+      release of X11R7.3 is included with the binary distribution, but
+      can be replaced by other versions with the name xpm4.dll,
+      libxpm-nox4.dll or libxpm.dll.
+
+      PNG: requires the PNG reference library 1.4 or later, which will
+      be named libpng14.dll or libpng14-14.dll.  LibPNG requires zlib,
+      which should come from the same source as you got libpng.
+      Starting with Emacs 23.3, the precompiled Emacs binaries are
+      built with libpng 1.4.x and later, and are incompatible with
+      earlier versions of libpng DLLs.  So if you have libpng 1.2.x,
+      the PNG support will not work, and you will have to download
+      newer versions.
+
+      JPEG: requires the Independent JPEG Group's libjpeg 6b or later,
+      which will be called jpeg62.dll, libjpeg.dll, jpeg-62.dll or jpeg.dll.
+
+      TIFF: requires libTIFF 3.0 or later, which will be called libtiff3.dll
+      or libtiff.dll.
+
+      GIF: requires libungif or giflib 4.1 or later, which will be
+      called giflib4.dll, libungif4.dll or libungif.dll.
+
+      SVG: not compiled into the binary release, but available if you
+      compile Emacs yourself if you have development packages for all the
+      dependencies. Requires many libraries from GTK and Gnome
+      as well as the base librsvg library. Known to crash Emacs on many
+      sample images.
+
+* Distributions in .tar.gz and .zip format
+
+  Emacs is distributed primarily as source code in a large gzipped tar
+  file (*.tar.gz).  Because Emacs is quite large and therefore
+  difficult to download over unreliable connections, the Windows
+  binaries are provided in two combinations. The complete lisp source
+  plus executables (bin), and executables only (barebin) for unpacking
+  over the top of the source distribution.  Formerly, we used the same
+  .tar.gz format but since there are no longer legal problems with
+  .zip files, and the latest versions of Windows support these
+  natively, the Windows binaries of Emacs are now distributed as .zip
+  files.
+
+* Distributions for non-x86 platforms
+
+  Distributions for non-x86 platforms are no longer supplied. Older
+  platforms supported by Windows NT no longer seem to be in demand,
+  and Emacs is yet to be ported to 64 bit Windows platforms. If you
+  are willing to help port Emacs 24 to 64 bit versions of Windows,
+  your contribution will be welcome on the emacs-devel mailing list.
+
+* Unpacking distributions
+
+  Ports of GNU gzip and GNU tar for handling the source distribution file
+  format can be found in several places that distribute ports of GNU
+  programs, for example:
+
+    Cygwin:   http://www.cygwin.com/
+    GnuWin32: http://gnuwin32.sourceforge.net/
+
+  Many other popular file compression utilities for Windows are also
+  able to handle gzipped tar files. 7zip is one free Windows graphical
+  program that is able to handle many archive formats.
+
+  Open a command prompt (MSDOS) window.  Decide on a directory in which
+  to place Emacs.  Move the distribution to that directory, and then
+  unpack it as follows.
+
+  If you have the gzipped tar version, use gunzip to uncompress the tar
+  file on the fly, and pipe the output through tar with the "xvf" flags
+  to extract the files from the tar file:
+
+    % gunzip -c some.tar.gz | tar xvf -
+
+  You may see messages from tar about not being able to change the
+  modification time on directories, and from gunzip complaining about a
+  broken pipe.  These messages are harmless and you can ignore them.  On
+  Windows NT, unpacking tarballs this way leaves them in compressed
+  form, taking up less space on disk.  Unfortunately, on Windows 95 and
+  98, a large temporary file is created, so it is better to use the
+  djtarnt.exe program, which performs the equivalent operation in one
+  step:
+
+    % djtarnt -x some.tar.gz
+
+  You may be prompted to rename or overwrite directories when using
+  djtarnt: simply type return to continue (this is harmless).
+
+  Zip files can be unpacked using unzip.exe from info-zip.org
+  if you do not already have other tools to do this.
+
+    % unzip some.zip
+
+  The precompiled binaries can be unpacked using unzip.exe from info-zip.org
+  if you do not already have other tools to do this.
+
+    % unzip some.zip
+
+  Once you have unpacked a precompiled distribution of Emacs, it should
+  have the following subdirectories:
+
+	bin	etc	info	lisp	site-lisp
+
+
+* Unpacking with other tools
+
+  If you do use other utility programs to unpack the distribution, check
+  the following to be sure the distribution was not corrupted:
+
+  + Be sure to disable the CR/LF translation or the executables will
+    be unusable.  Older versions of WinZip would enable this
+    translation by default when unpacking .tar files.  If you are
+    using WinZip, disable it.  (I don't have WinZip myself, and I do
+    not know the specific commands necessary to disable it.)
+
+  + Check that filenames were not truncated to 8.3.  For example, there
+    should be a file lisp/abbrevlist.el; if this has been truncated to
+    abbrevli.el, your distribution has been corrupted while unpacking
+    and Emacs will not start.
+
+  + Check that filenames were not changed by your web-browser.  Some
+    proprietary web-browsers save .tar.gz files as .tar.tar. You might
+    like to consider switching to a Free modern browser if your browser
+    has this bug.
+
+  + I've also had reports that some older "gnuwin32" port of tar
+    corrupts the executables.  Use the latest version from the gnuwin32
+    site or another port of tar instead.
+
+  If you believe you have unpacked the distributions correctly and are
+  still encountering problems, see the section on Further Information
+  below.
+
+
+* Compiling from source
+
+  If you would like to compile Emacs from source, download the source
+  distribution, unpack it in the same manner as a precompiled
+  distribution, and look in the file nt/INSTALL for detailed
+  directions.  It is recommended to use GCC 2.95 or later with MinGW
+  support to compile the source.  The port of GCC included in Cygwin
+  is supported, but check the nt/INSTALL file if you have trouble
+  since some builds of GNU make aren't supported.
+
+
+* Further information
+
+  If you have access to the World Wide Web, I would recommend pointing
+  your favorite web browser to following the document (if you haven't
+  already):
+
+	http://www.gnu.org/software/emacs/windows/ntemacs.html
+
+  This document serves as an FAQ and a source for further information
+  about the Windows port and related software packages. Note that as
+  most of the information in that FAQ is for earlier versions, so some
+  information may not be relevant to Emacs-24.1.
+
+  In addition to the FAQ, there is a mailing list for discussing issues
+  related to the Windows port of Emacs.  For information about the
+  list, see this Web page:
+
+	http://lists.gnu.org/mailman/listinfo/help-emacs-windows
+
+  To ask questions on the mailing list, send email to
+  help-emacs-windows@gnu.org.  (You don't need to subscribe for that.)
+  To subscribe to the list or unsubscribe from it, fill the form you
+  find at http://mail.gnu.org/mailman/listinfo/help-emacs-windows as
+  explained there.
+
+  Another valuable source of information and help which should not be
+  overlooked is the various Usenet news groups dedicated to Emacs.
+  These are particularly good for help with general issues which aren't
+  specific to the Windows port of Emacs.  The main news groups to use
+  for seeking help are:
+
+	gnu.emacs.help
+	comp.emacs
+
+  There are also fairly regular postings and announcements of new or
+  updated Emacs packages on this group:
+
+	gnu.emacs.sources
+
+  Enjoy!
+
+  Jason Rumney
+  (jasonr@gnu.org)
+
+  Most of this README was contributed by former maintainer Andrew Innes
+  (andrewi@gnu.org)
+
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

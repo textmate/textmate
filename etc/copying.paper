@@ -1,0 +1,819 @@
+(For more information about the GNU project and free software,
+look at the files `GNU', `COPYING', and `DISTRIB', in the same
+directory as this file.)
+
+
+                      Why Software Should Be Free
+
+                          by Richard Stallman
+
+                      (Version of April 24, 1992)
+
+     Copyright (C) 1991, 1992, Free Software Foundation, Inc.
+     Verbatim copying and redistribution is permitted
+     without royalty; alteration is not permitted.
+
+Introduction
+************
+
+   The existence of software inevitably raises the question of how
+decisions about its use should be made.  For example, suppose one
+individual who has a copy of a program meets another who would like a
+copy.  It is possible for them to copy the program; who should decide
+whether this is done?  The individuals involved?  Or another party,
+called the "owner"?
+
+   Software developers typically consider these questions on the
+assumption that the criterion for the answer is to maximize developers'
+profits.  The political power of business has led to the government
+adoption of both this criterion and the answer proposed by the
+developers: that the program has an owner, typically a corporation
+associated with its development.
+
+   I would like to consider the same question using a different
+criterion: the prosperity and freedom of the public in general.
+
+   This answer cannot be decided by current law--the law should conform
+to ethics, not the other way around.  Nor does current practice decide
+this question, although it may suggest possible answers.  The only way
+to judge is to see who is helped and who is hurt by recognizing owners
+of software, why, and how much.  In other words, we should perform a
+cost-benefit analysis on behalf of society as a whole, taking account of
+individual freedom as well as production of material goods.
+
+   In this essay, I will describe the effects of having owners, and show
+that the results are detrimental.  My conclusion is that programmers
+have the duty to encourage others to share, redistribute, study and
+improve the software we write: in other words, to write "free"
+software.(1)
+
+How Owners Justify Their Power
+******************************
+
+   Those who benefit from the current system where programs are property
+offer two arguments in support of their claims to own programs: the
+emotional argument and the economic argument.
+
+   The emotional argument goes like this: "I put my sweat, my heart, my
+soul into this program.  It comes from *me*, it's *mine*!"
+
+   This argument does not require serious refutation.  The feeling of
+attachment is one that programmers can cultivate when it suits them; it
+is not inevitable.  Consider, for example, how willingly the same
+programmers usually sign over all rights to a large corporation for a
+salary; the emotional attachment mysteriously vanishes.  By contrast,
+consider the great artists and artisans of medieval times, who didn't
+even sign their names to their work.  To them, the name of the artist
+was not important.  What mattered was that the work was done--and the
+purpose it would serve.  This view prevailed for hundreds of years.
+
+   The economic argument goes like this: "I want to get rich (usually
+described inaccurately as `making a living'), and if you don't allow me
+to get rich by programming, then I won't program.  Everyone else is like
+me, so nobody will ever program.  And then you'll be stuck with no
+programs at all!"  This threat is usually veiled as friendly advice
+from the wise.
+
+   I'll explain later why this threat is a bluff.  First I want to
+address an implicit assumption that is more visible in another
+formulation of the argument.
+
+   This formulation starts by comparing the social utility of a
+proprietary program with that of no program, and then concludes that
+proprietary software development is, on the whole, beneficial, and
+should be encouraged.  The fallacy here is in comparing only two
+outcomes--proprietary software vs. no software--and assuming there are
+no other possibilities.
+
+   Given a system of intellectual property, software development is
+usually linked with the existence of an owner who controls the
+software's use.  As long as this linkage exists, we are often faced
+with the choice of proprietary software or none.  However, this linkage
+is not inherent or inevitable; it is a consequence of the specific
+social/legal policy decision that we are questioning: the decision to
+have owners.  To formulate the choice as between proprietary software
+vs. no software is begging the question.
+
+The Argument against Having Owners
+**********************************
+
+   The question at hand is, "Should development of software be linked
+with having owners to restrict the use of it?"
+
+   In order to decide this, we have to judge the effect on society of
+each of those two activities *independently*: the effect of developing
+the software (regardless of its terms of distribution), and the effect
+of restricting its use (assuming the software has been developed).  If
+one of these activities is helpful and the other is harmful, we would be
+better off dropping the linkage and doing only the helpful one.
+
+   To put it another way, if restricting the distribution of a program
+already developed is harmful to society overall, then an ethical
+software developer will reject the option of doing so.
+
+   To determine the effect of restricting sharing, we need to compare
+the value to society of a restricted (i.e., proprietary) program with
+that of the same program, available to everyone.  This means comparing
+two possible worlds.
+
+   This analysis also addresses the simple counterargument sometimes
+made that "the benefit to the neighbor of giving him or her a copy of a
+program is cancelled by the harm done to the owner."  This
+counterargument assumes that the harm and the benefit are equal in
+magnitude.  The analysis involves comparing these magnitudes, and shows
+that the benefit is much greater.
+
+   To elucidate this argument, let's apply it in another area: road
+construction.
+
+   It would be possible to fund the construction of all roads with
+tolls.  This would entail having toll booths at all street corners.
+Such a system would provide a great incentive to improve roads.  It
+would also have the virtue of causing the users of any given road to
+pay for that road.  However, a toll booth is an artificial obstruction
+to smooth driving--artificial, because it is not a consequence of how
+roads or cars work.
+
+   Comparing free roads and toll roads by their usefulness, we find that
+(all else being equal) roads without toll booths are cheaper to
+construct, cheaper to run, safer, and more efficient to use.(2) In a
+poor country, tolls may make the roads unavailable to many citizens.
+The roads without toll booths thus offer more benefit to society at
+less cost; they are preferable for society.  Therefore, society should
+choose to fund roads in another way, not by means of toll booths.  Use
+of roads, once built, should be free.
+
+   When the advocates of toll booths propose them as *merely* a way of
+raising funds, they distort the choice that is available.  Toll booths
+do raise funds, but they do something else as well: in effect, they
+degrade the road.  The toll road is not as good as the free road; giving
+us more or technically superior roads may not be an improvement if this
+means substituting toll roads for free roads.
+
+   Of course, the construction of a free road does cost money, which the
+public must somehow pay.  However, this does not imply the inevitability
+of toll booths.  We who must in either case pay will get more value for
+our money by buying a free road.
+
+   I am not saying that a toll road is worse than no road at all.  That
+would be true if the toll were so great that hardly anyone used the
+road--but this is an unlikely policy for a toll collector.  However, as
+long as the toll booths cause significant waste and inconvenience, it is
+better to raise the funds in a less obstructive fashion.
+
+   To apply the same argument to software development, I will now show
+that having "toll booths" for useful software programs costs society
+dearly: it makes the programs more expensive to construct, more
+expensive to distribute, and less satisfying and efficient to use.  It
+will follow that program construction should be encouraged in some other
+way.  Then I will go on to explain other methods of encouraging and (to
+the extent actually necessary) funding software development.
+
+The Harm Done by Obstructing Software
+=====================================
+
+   Consider for a moment that a program has been developed, and any
+necessary payments for its development have been made; now society must
+choose either to make it proprietary or allow free sharing and use.
+Assume that the existence of the program and its availability is a
+desirable thing.(3)
+
+   Restrictions on the distribution and modification of the program
+cannot facilitate its use.  They can only interfere.  So the effect can
+only be negative.  But how much?  And what kind?
+
+   Three different levels of material harm come from such obstruction:
+
+   * Fewer people use the program.
+
+   * None of the users can adapt or fix the program.
+
+   * Other developers cannot learn from the program, or base new work
+     on it.
+
+   Each level of material harm has a concomitant form of psychosocial
+harm.  This refers to the effect that people's decisions have on their
+subsequent feelings, attitudes and predispositions.  These changes in
+people's ways of thinking will then have a further effect on their
+relationships with their fellow citizens, and can have material
+consequences.
+
+   The three levels of material harm waste part of the value that the
+program could contribute, but they cannot reduce it to zero.  If they
+waste nearly all the value of the program, then writing the program
+harms society by at most the effort that went into writing the program.
+Arguably a program that is profitable to sell must provide some net
+direct material benefit.
+
+   However, taking account of the concomitant psychosocial harm, there
+is no limit to the harm that proprietary software development can do.
+
+Obstructing Use of Programs
+===========================
+
+   The first level of harm impedes the simple use of a program.  A copy
+of a program has nearly zero marginal cost (and you can pay this cost by
+doing the work yourself), so in a free market, it would have nearly zero
+price.  A license fee is a significant disincentive to use the program.
+If a widely-useful program is proprietary, far fewer people will use it.
+
+   It is easy to show that the total contribution of a program to
+society is reduced by assigning an owner to it.  Each potential user of
+the program, faced with the need to pay to use it, may choose to pay,
+or may forego use of the program.  When a user chooses to pay, this is a
+zero-sum transfer of wealth between two parties.  But each time someone
+chooses to forego use of the program, this harms that person without
+benefiting anyone.  The sum of negative numbers and zeros must be
+negative.
+
+   But this does not reduce the amount of work it takes to *develop*
+the program.  As a result, the efficiency of the whole process, in
+delivered user satisfaction per hour of work, is reduced.
+
+   This reflects a crucial difference between copies of programs and
+cars, chairs, or sandwiches.  There is no copying machine for material
+objects outside of science fiction.  But programs are easy to copy;
+anyone can produce as many copies as are wanted, with very little
+effort.  This isn't true for material objects because matter is
+conserved: each new copy has to be built from raw materials in the same
+way that the first copy was built.
+
+   With material objects, a disincentive to use them makes sense,
+because fewer objects bought means less raw materials and work needed
+to make them.  It's true that there is usually also a startup cost, a
+development cost, which is spread over the production run.  But as long
+as the marginal cost of production is significant, adding a share of the
+development cost does not make a qualitative difference.  And it does
+not require restrictions on the freedom of ordinary users.
+
+   However, imposing a price on something that would otherwise be free
+is a qualitative change.  A centrally-imposed fee for software
+distribution becomes a powerful disincentive.
+
+   What's more, central production as now practiced is inefficient even
+as a means of delivering copies of software.  This system involves
+enclosing physical disks or tapes in superfluous packaging, shipping
+large numbers of them around the world, and storing them for sale.  This
+cost is presented as an expense of doing business; in truth, it is part
+of the waste caused by having owners.
+
+Damaging Social Cohesion
+========================
+
+   Suppose that both you and your neighbor would find it useful to run a
+certain program.  In ethical concern for your neighbor, you should feel
+that proper handling of the situation will enable both of you to use it.
+A proposal to permit only one of you to use the program, while
+restraining the other, is divisive; neither you nor your neighbor should
+find it acceptable.
+
+   Signing a typical software license agreement means betraying your
+neighbor: "I promise to deprive my neighbor of this program so that I
+can have a copy for myself."  People who make such choices feel
+internal psychological pressure to justify them, by downgrading the
+importance of helping one's neighbors--thus public spirit suffers.
+This is psychosocial harm associated with the material harm of
+discouraging use of the program.
+
+   Many users unconsciously recognize the wrong of refusing to share, so
+they decide to ignore the licenses and laws, and share programs anyway.
+But they often feel guilty about doing so.  They know that they must
+break the laws in order to be good neighbors, but they still consider
+the laws authoritative, and they conclude that being a good neighbor
+(which they are) is naughty or shameful.  That is also a kind of
+psychosocial harm, but one can escape it by deciding that these licenses
+and laws have no moral force.
+
+   Programmers also suffer psychosocial harm knowing that many users
+will not be allowed to use their work.  This leads to an attitude of
+cynicism or denial.  A programmer may describe enthusiastically the
+work that he finds technically exciting; then when asked, "Will I be
+permitted to use it?", his face falls, and he admits the answer is no.
+To avoid feeling discouraged, he either ignores this fact most of the
+time or adopts a cynical stance designed to minimize the importance of
+it.
+
+   Since the age of Reagan, the greatest scarcity in the United States
+is not technical innovation, but rather the willingness to work together
+for the public good.  It makes no sense to encourage the former at the
+expense of the latter.
+
+Obstructing Custom Adaptation of Programs
+=========================================
+
+   The second level of material harm is the inability to adapt programs.
+The ease of modification of software is one of its great advantages over
+older technology.  But most commercially available software isn't
+available for modification, even after you buy it.  It's available for
+you to take it or leave it, as a black box--that is all.
+
+   A program that you can run consists of a series of numbers whose
+meaning is obscure.  No one, not even a good programmer, can easily
+change the numbers to make the program do something different.
+
+   Programmers normally work with the "source code" for a program, which
+is written in a programming language such as Fortran or C.  It uses
+names to designate the data being used and the parts of the program, and
+it represents operations with symbols such as `+' for addition and `-'
+for subtraction.  It is designed to help programmers read and change
+programs.  Here is an example; a program to calculate the distance
+between two points in a plane:
+
+     float
+     distance (p0, p1)
+          struct point p0, p1;
+     {
+       float xdist = p1.x - p0.x;
+       float ydist = p1.y - p0.y;
+       return sqrt (xdist * xdist + ydist * ydist);
+     }
+
+   Here is the same program in executable form, on the computer I
+normally use:
+
+     1314258944      -232267772      -231844864      1634862
+     1411907592      -231844736      2159150         1420296208
+     -234880989      -234879837      -234879966      -232295424
+     1644167167      -3214848        1090581031      1962942495
+     572518958       -803143692      1314803317
+
+   Source code is useful (at least potentially) to every user of a
+program.  But most users are not allowed to have copies of the source
+code.  Usually the source code for a proprietary program is kept secret
+by the owner, lest anybody else learn something from it.  Users receive
+only the files of incomprehensible numbers that the computer will
+execute.  This means that only the program's owner can change the
+program.
+
+   A friend once told me of working as a programmer in a bank for about
+six months, writing a program similar to something that was commercially
+available.  She believed that if she could have gotten source code for
+that commercially available program, it could easily have been adapted
+to their needs.  The bank was willing to pay for this, but was not
+permitted to--the source code was a secret.  So she had to do six
+months of make-work, work that counts in the GNP but was actually waste.
+
+   The MIT Artificial Intelligence lab (AI lab) received a graphics
+printer as a gift from Xerox around 1977.  It was run by free software
+to which we added many convenient features.  For example, the software
+would notify a user immediately on completion of a print job.  Whenever
+the printer had trouble, such as a paper jam or running out of paper,
+the software would immediately notify all users who had print jobs
+queued.  These features facilitated smooth operation.
+
+   Later Xerox gave the AI lab a newer, faster printer, one of the first
+laser printers.  It was driven by proprietary software that ran in a
+separate dedicated computer, so we couldn't add any of our favorite
+features.  We could arrange to send a notification when a print job was
+sent to the dedicated computer, but not when the job was actually
+printed (and the delay was usually considerable).  There was no way to
+find out when the job was actually printed; you could only guess.  And
+no one was informed when there was a paper jam, so the printer often
+went for an hour without being fixed.
+
+   The system programmers at the AI lab were capable of fixing such
+problems, probably as capable as the original authors of the program.
+Xerox was uninterested in fixing them, and chose to prevent us, so we
+were forced to accept the problems.  They were never fixed.
+
+   Most good programmers have experienced this frustration.  The bank
+could afford to solve the problem by writing a new program from
+scratch, but a typical user, no matter how skilled, can only give up.
+
+   Giving up causes psychosocial harm--to the spirit of self-reliance.
+It is demoralizing to live in a house that you cannot rearrange to suit
+your needs.  It leads to resignation and discouragement, which can
+spread to affect other aspects of one's life.  People who feel this way
+are unhappy and do not do good work.
+
+   Imagine what it would be like if recipes were hoarded in the same
+fashion as software.  You might say, "How do I change this recipe to
+take out the salt?", and the great chef would respond, "How dare you
+insult my recipe, the child of my brain and my palate, by trying to
+tamper with it?  You don't have the judgment to change my recipe and
+make it work right!"
+
+   "But my doctor says I'm not supposed to eat salt!  What can I do?
+Will you take out the salt for me?"
+
+   "I would be glad to do that; my fee is only $50,000."  Since the
+owner has a monopoly on changes, the fee tends to be large.  "However,
+right now I don't have time.  I am busy with a commission to design a
+new recipe for ship's biscuit for the Navy Department.  I might get
+around to you in about two years."
+
+Obstructing Software Development
+================================
+
+   The third level of material harm affects software development.
+Software development used to be an evolutionary process, where a person
+would take an existing program and rewrite parts of it for one new
+feature, and then another person would rewrite parts to add another
+feature; in some cases, this continued over a period of twenty years.
+Meanwhile, parts of the program would be "cannibalized" to form the
+beginnings of other programs.
+
+   The existence of owners prevents this kind of evolution, making it
+necessary to start from scratch when developing a program.  It also
+prevents new practitioners from studying existing programs to learn
+useful techniques or even how large programs can be structured.
+
+   Owners also obstruct education.  I have met bright students in
+computer science who have never seen the source code of a large
+program.  They may be good at writing small programs, but they can't
+begin to learn the different skills of writing large ones if they can't
+see how others have done it.
+
+   In any intellectual field, one can reach greater heights by standing
+on the shoulders of others.  But that is no longer generally allowed in
+the software field--you can only stand on the shoulders of the other
+people *in your own company*.
+
+   The associated psychosocial harm affects the spirit of scientific
+cooperation, which used to be so strong that scientists would cooperate
+even when their countries were at war.  In this spirit, Japanese
+oceanographers abandoning their lab on an island in the Pacific
+carefully preserved their work for the invading U.S. Marines, and left a
+note asking them to take good care of it.
+
+   Conflict for profit has destroyed what international conflict spared.
+Nowadays scientists in many fields don't publish enough in their papers
+to enable others to replicate the experiment.  They publish only enough
+to let readers marvel at how much they were able to do.  This is
+certainly true in computer science, where the source code for the
+programs reported on is usually secret.
+
+It Does Not Matter How Sharing Is Restricted
+============================================
+
+   I have been discussing the effects of preventing people from copying,
+changing and building on a program.  I have not specified how this
+obstruction is carried out, because that doesn't affect the conclusion.
+Whether it is done by copy protection, or copyright, or licenses, or
+encryption, or ROM cards, or hardware serial numbers, if it *succeeds*
+in preventing use, it does harm.
+
+   Users do consider some of these methods more obnoxious than others.
+I suggest that the methods most hated are those that accomplish their
+objective.
+
+Software Should be Free
+=======================
+
+   I have shown how ownership of a program--the power to restrict
+changing or copying it--is obstructive.  Its negative effects are
+widespread and important.  It follows that society shouldn't have
+owners for programs.
+
+   Another way to understand this is that what society needs is free
+software, and proprietary software is a poor substitute.  Encouraging
+the substitute is not a rational way to get what we need.
+
+   Vaclav Havel has advised us to "Work for something because it is
+good, not just because it stands a chance to succeed."  A business
+making proprietary software stands a chance of success in its own narrow
+terms, but it is not what is good for society.
+
+Why People Will Develop Software
+********************************
+
+   If we eliminate intellectual property as a means of encouraging
+people to develop software, at first less software will be developed,
+but that software will be more useful.  It is not clear whether the
+overall delivered user satisfaction will be less; but if it is, or if
+we wish to increase it anyway, there are other ways to encourage
+development, just as there are ways besides toll booths to raise money
+for streets.  Before I talk about how that can be done, first I want to
+question how much artificial encouragement is truly necessary.
+
+Programming is Fun
+==================
+
+   There are some lines of work that few will enter except for money;
+road construction, for example.  There are other fields of study and
+art in which there is little chance to become rich, which people enter
+for their fascination or their perceived value to society.  Examples
+include mathematical logic, classical music, and archaeology; and
+political organizing among working people.  People compete, more sadly
+than bitterly, for the few funded positions available, none of which is
+funded very well.  They may even pay for the chance to work in the
+field, if they can afford to.
+
+   Such a field can transform itself overnight if it begins to offer the
+possibility of getting rich.  When one worker gets rich, others demand
+the same opportunity.  Soon all may demand large sums of money for doing
+what they used to do for pleasure.  When another couple of years go by,
+everyone connected with the field will deride the idea that work would
+be done in the field without large financial returns.  They will advise
+social planners to ensure that these returns are possible, prescribing
+special privileges, powers and monopolies as necessary to do so.
+
+   This change happened in the field of computer programming in the past
+decade.  Fifteen years ago, there were articles on "computer
+addiction": users were "onlining" and had hundred-dollar-a-week habits.
+It was generally understood that people frequently loved programming
+enough to break up their marriages.  Today, it is generally understood
+that no one would program except for a high rate of pay.  People have
+forgotten what they knew fifteen years ago.
+
+   When it is true at a given time that most people will work in a
+certain field only for high pay, it need not remain true.  The dynamic
+of change can run in reverse, if society provides an impetus.  If we
+take away the possibility of great wealth, then after a while, when the
+people have readjusted their attitudes, they will once again be eager
+to work in the field for the joy of accomplishment.
+
+   The question, "How can we pay programmers?", becomes an easier
+question when we realize that it's not a matter of paying them a
+fortune.  A mere living is easier to raise.
+
+Funding Free Software
+=====================
+
+   Institutions that pay programmers do not have to be software houses.
+Many other institutions already exist which can do this.
+
+   Hardware manufacturers find it essential to support software
+development even if they cannot control the use of the software.  In
+1970, much of their software was free because they did not consider
+restricting it.  Today, their increasing willingness to join
+consortiums shows their realization that owning the software is not
+what is really important for them.
+
+   Universities conduct many programming projects.  Today, they often
+sell the results, but in the 1970s, they did not.  Is there any doubt
+that universities would develop free software if they were not allowed
+to sell software?  These projects could be supported by the same
+government contracts and grants which now support proprietary software
+development.
+
+   It is common today for university researchers to get grants to
+develop a system, develop it nearly to the point of completion and call
+that "finished", and then start companies where they really finish the
+project and make it usable.  Sometimes they declare the unfinished
+version "free"; if they are thoroughly corrupt, they instead get an
+exclusive license from the university.  This is not a secret; it is
+openly admitted by everyone concerned.  Yet if the researchers were not
+exposed to the temptation to do these things, they would still do their
+research.
+
+   Programmers writing free software can make their living by selling
+services related to the software.  I have been hired to port the GNU C
+compiler to new hardware, and to make user-interface extensions to GNU
+Emacs.  (I offer these improvements to the public once they are done.)
+I also teach classes for which I am paid.
+
+   I am not alone in working this way; there is now a successful,
+growing corporation which does no other kind of work.  Several other
+companies also provide commercial support for the free software of the
+GNU system.  This is the beginning of the independent software support
+industry-an industry that could become quite large if free software
+becomes prevalent.  It provides users with an option generally
+unavailable for proprietary software, except to the very wealthy.
+
+   New institutions such as the Free Software Foundation can also fund
+programmers.  Most of the foundation's funds come from users buying
+tapes through the mail.  The software on the tapes is free, which means
+that every user has the freedom to copy it and change it, but many
+nonetheless pay to get copies.  (Recall that "free software" refers to
+freedom, not to price.)  Some users order tapes who already have a copy,
+as a way of making a contribution they feel we deserve.  The Foundation
+also receives sizable donations from computer manufacturers.
+
+   The Free Software Foundation is a charity, and its income is spent on
+hiring as many programmers as possible.  If it had been set up as a
+business, distributing the same free software to the public for the same
+fee, it would now provide a very good living for its founder.
+
+   Because the Foundation is a charity, programmers often work for the
+Foundation for half of what they could make elsewhere.  They do this
+because we are free of bureaucracy, and because they feel satisfaction
+in knowing that their work will not be obstructed from use.  Most of
+all, they do it because programming is fun.  In addition, volunteers
+have written many useful programs for us.  (Recently even technical
+writers have begun to volunteer.)
+
+   This confirms that programming is among the most fascinating of all
+fields, along with music and art.  We don't have to fear that no one
+will want to program.
+
+What Do Users Owe to Developers?
+================================
+
+   There is a good reason for users of software to feel a moral
+obligation to contribute to its support.  Developers of free software
+are contributing to the users' activities, and it is both fair and in
+the long term interest of the users to give them funds to continue.
+
+   However, this does not apply to proprietary software developers,
+since obstructionism deserves a punishment rather than a reward.
+
+   We thus have a paradox: the developer of useful software is entitled
+to the support of the users, but any attempt to turn this moral
+obligation into a requirement destroys the basis for the obligation.  A
+developer can either deserve a reward or demand it, but not both.
+
+   I believe that an ethical developer faced with this paradox must act
+so as to deserve the reward, but should also entreat the users for
+voluntary donations.  Eventually the users will learn to support
+developers without coercion, just as they have learned to support public
+radio and television stations.
+
+What Is Software Productivity?
+******************************
+
+   If software were free, there would still be programmers, but perhaps
+fewer of them.  Would this be bad for society?
+
+   Not necessarily.  Today the advanced nations have fewer farmers than
+in 1900, but we do not think this is bad for society, because the few
+deliver more food to the consumers than the many used to do.  We call
+this improved productivity.  Free software would require far fewer
+programmers to satisfy the demand, because of increased software
+productivity at all levels:
+
+   * Wider use of each program that is developed.
+
+   * The ability to adapt existing programs for customization instead
+     of starting from scratch.
+
+   * Better education of programmers.
+
+   * The elimination of duplicate development effort.
+
+   Those who object to cooperation because it would result in the
+employment of fewer programmers, are actually objecting to increased
+productivity.  Yet these people usually accept the widely-held belief
+that the software industry needs increased productivity.  How is this?
+
+   "Software productivity" can mean two different things: the overall
+productivity of all software development, or the productivity of
+individual projects.  Overall productivity is what society would like to
+improve, and the most straightforward way to do this is to eliminate the
+artificial obstacles to cooperation which reduce it.  But researchers
+who study the field of "software productivity" focus only on the
+second, limited, sense of the term, where improvement requires difficult
+technological advances.
+
+Is Competition Inevitable?
+**************************
+
+   Is it inevitable that people will try to compete, to surpass their
+rivals in society?  Perhaps it is.  But competition itself is not
+harmful; the harmful thing is *combat*.
+
+   There are many ways to compete.  Competition can consist of trying to
+achieve ever more, to outdo what others have done.  For example, in the
+old days, there was competition among programming wizards--competition
+for who could make the computer do the most amazing thing, or for who
+could make the shortest or fastest program for a given task.  This kind
+of competition can benefit everyone, *as long as* the spirit of good
+sportsmanship is maintained.
+
+   Constructive competition is enough competition to motivate people to
+great efforts.  A number of people are competing to be the first to have
+visited all the countries on Earth; some even spend fortunes trying to
+do this.  But they do not bribe ship captains to strand their rivals on
+desert islands.  They are content to let the best person win.
+
+   Competition becomes combat when the competitors begin trying to
+impede each other instead of advancing themselves--when "Let the best
+person win" gives way to "Let me win, best or not."  Proprietary
+software is harmful, not because it is a form of competition, but
+because it is a form of combat among the citizens of our society.
+
+   Competition in business is not necessarily combat.  For example, when
+two grocery stores compete, their entire effort is to improve their own
+operations, not to sabotage the rival.  But this does not demonstrate a
+special commitment to business ethics; rather, there is little scope for
+combat in this line of business short of physical violence.  Not all
+areas of business share this characteristic.  Withholding information
+that could help everyone advance is a form of combat.
+
+   Business ideology does not prepare people to resist the temptation to
+combat the competition.  Some forms of combat have been made banned with
+anti-trust laws, truth in advertising laws, and so on, but rather than
+generalizing this to a principled rejection of combat in general,
+executives invent other forms of combat which are not specifically
+prohibited.  Society's resources are squandered on the economic
+equivalent of factional civil war.
+
+"Why Don't You Move to Russia?"
+*******************************
+
+   In the United States, any advocate of other than the most extreme
+form of laissez-faire selfishness has often heard this accusation.  For
+example, it is leveled against the supporters of a national health care
+system, such as is found in all the other industrialized nations of the
+free world.  It is leveled against the advocates of public support for
+the arts, also universal in advanced nations.  The idea that citizens
+have any obligation to the public good is identified in America with
+Communism.  But how similar are these ideas?
+
+   Communism as was practiced in the Soviet Union was a system of
+central control where all activity was regimented, supposedly for the
+common good, but actually for the sake of the members of the Communist
+party.  And where copying equipment was closely guarded to prevent
+illegal copying.
+
+   The American system of intellectual property exercises central
+control over distribution of a program, and guards copying equipment
+with automatic copying protection schemes to prevent illegal copying.
+
+   By contrast, I am working to build a system where people are free to
+decide their own actions; in particular, free to help their neighbors,
+and free to alter and improve the tools which they use in their daily
+lives.  A system based on voluntary cooperation, and decentralization.
+
+   Thus, if we are to judge views by their resemblance to Russian
+Communism, it is the software owners who are the Communists.
+
+The Question of Premises
+************************
+
+   I make the assumption in this paper that a user of software is no
+less important than an author, or even an author's employer.  In other
+words, their interests and needs have equal weight, when we decide
+which course of action is best.
+
+   This premise is not universally accepted.  Many maintain that an
+author's employer is fundamentally more important than anyone else.
+They say, for example, that the purpose of having owners of software is
+to give the author's employer the advantage he deserves--regardless of
+how this may affect the public.
+
+   It is no use trying to prove or disprove these premises.  Proof
+requires shared premises.  So most of what I have to say is addressed
+only to those who share the premises I use, or at least are interested
+in what their consequences are.  For those who believe that the owners
+are more important than everyone else, this paper is simply irrelevant.
+
+   But why would a large number of Americans accept a premise which
+elevates certain people in importance above everyone else?  Partly
+because of the belief that this premise is part of the legal traditions
+of American society.  Some people feel that doubting the premise means
+challenging the basis of society.
+
+   It is important for these people to know that this premise is not
+part of our legal tradition.  It never has been.
+
+   Thus, the Constitution says that the purpose of copyright is to
+"promote the progress of science and the useful arts."  The Supreme
+Court has elaborated on this, stating in `Fox Film vs. Doyal' that "The
+sole interest of the United States and the primary object in conferring
+the [copyright] monopoly lie in the general benefits derived by the
+public from the labors of authors."
+
+   We are not required to agree with the Constitution or the Supreme
+Court.  (At one time, they both condoned slavery.)  So their positions
+do not disprove the owner supremacy premise.  But I hope that the
+awareness that this is a radical right-wing assumption rather than a
+traditionally recognized one will weaken its appeal.
+
+Conclusion
+**********
+
+   We like to think that our society encourages helping your neighbor;
+but each time we reward someone for obstructionism, or admire them for
+the wealth they have gained in this way, we are sending the opposite
+message.
+
+   Software hoarding is one form of our general willingness to disregard
+the welfare of society for personal gain.  We can trace this disregard
+from Ronald Reagan to Jim Bakker, from Ivan Boesky to Exxon, from
+failing banks to failing schools.  We can measure it with the size of
+the homeless population and the prison population.  The antisocial
+spirit feeds on itself, because the more we see that other people will
+not help us, the more it seems futile to help them.  Thus society decays
+into a jungle.
+
+   If we don't want to live in a jungle, we must change our attitudes.
+We must start sending the message that a good citizen is one who
+cooperates when appropriate, not one who is successful at taking from
+others.  I hope that the free software movement will contribute to
+this: at least in one area, we will replace the jungle with a more
+efficient system which encourages and runs on voluntary cooperation.
+
+   ---------- Footnotes ----------
+
+   (1)  The word "free" in "free software" refers to freedom, not to
+price; the price paid for a copy of a free program may be zero, or
+small, or (rarely) quite large.
+
+   (2)  The issues of pollution and traffic congestion do not alter
+this conclusion.  If we wish to make driving more expensive to
+discourage driving in general, it is disadvantageous to do this using
+toll booths, which contribute to both pollution and congestion.  A tax
+on gasoline is much better.  Likewise, a desire to enhance safety by
+limiting maximum speed is not relevant; a free access road enhances the
+average speed by avoiding stops and delays, for any given speed limit.
+
+   (3)  One might regard a particular computer program as a harmful
+thing that should not be available at all, like the Lotus Marketplace
+database of personal information, which was withdrawn from sale due to
+public disapproval.  Most of what I say does not apply to this case,
+but it makes little sense to argue for having an owner on the grounds
+that the owner will make the program less available.  The owner will
+not make it *completely* unavailable, as one would wish in the case of
+a program whose use is considered destructive.
+

@@ -1,0 +1,1116 @@
+Lernilo pri Emacs.  Vidu finon por kondiæoj pri kopii.
+Mallonga lernilo pri Emakso (Emacs). -- La uzokondiæojn vd æe la fino.
+
+Emaksaj ordonoj øenerale uzas aý la STIR-klavon (ofte markitan "Ctrl"
+aý "CTL"), aý la META-klavon (ofte markitan "EDIT" aý "Alt").  Prefere
+ol plene skribi tion æiufoje, ni uzos la sekvajn mallongigojn:
+
+ C-<signo> signifas "premante la STIR-klavon tajpu la signon <signo>".
+           Do, C-f estus: premtenu la STIR-klavon kaj tajpu f.
+
+ M-<signo> signifas "premante la META-klavon (aý EDIT- aý Alt-klavon)
+	   tajpu <signo>n.  Se vi havas nek META- nek EDIT- nek
+	   Alt-klavon, anstataýe premu kaj malpremu la Esc-klavon kaj
+	   poste tajpu <signo>n.  Ni skribas <ESC> por la Esc-klavo.
+
+GRAVA NOTO: por fini la Emaksan seancon, tajpu C-x C-c.  (Du signoj.)
+En æi tiu lernilo, la signoj ">>" æe la maldekstra marøeno rekomendas
+al vi tuj provi uzi ordonon.  Ekzemple:
+<<Blank lines inserted here by startup of help-with-tutorial>>
+[Mezo de paøo malplenas pro instruaj kialoj.  La teksto pluas sube.]
+>> Nun tajpu C-v (Vidu sekvantan ekranplenon) por vidigi la sekvan
+   ekranplenon.  (Procedu: tenante premita la STIR-klavon tajpu v).
+   De nun, ripetu æi tion æiun fojon kiam vi finlegos la ekranon.
+
+Notu ke estas dulinia komuna¼o inter la tujsekvaj ekranplenoj; tio
+donas kontinuecon por faciligi la legadon.
+
+Antaý æio vi bezonas scii kiel moviøi de loko al loko en la teksto.
+Vi jam povas moviøi je unu ekrano antaýen per C-v.  Por moviøi
+malantaýen je unu ekrano, tajpu M-v (premu la META-klavon kaj tajpu v,
+aý tajpu <ESC>c se vi ne havas META-, EDIT- aý Alt-klavon).
+
+>> Provu tajpi M-v kaj sekve C-v kelkfoje.
+
+
+* RESUMO
+--------
+
+La sekvaj ordonoj servas por foliumi ekranplenojn:
+
+	C-v	Moviøu antaýen je unu ekranpleno
+	M-v	Moviøu malantaýen je unu ekranpleno
+	C-l     Viþu la ekranon kaj reeligu la tutan tekston, aranøante
+		øin æirkaý la kursoro lokita centre de la ekrano.
+		(Tiu estas C-L, la stira lo; ne C-1, la stira unu.)
+
+>> Trovu la kursoron, kaj notu øian kuntekston.  Tajpu C-l.  Retrovu
+   la kursoron kaj notu ke øi restas en la sama kunteksto.
+
+
+* BAZAJ RIMEDOJ POR REGI KURSORON
+---------------------------------
+
+Foliumi per ekranplenoj estas utila afero, sed kiel oni moviøu al
+preciza loko en la teksto sur la ekrano?
+
+Estas kelkaj metodoj por fari tion.  Oni povas uzi la sagoklavojn, sed
+pli produktive estas teni la manojn en la normala pozicio kaj uzi la
+ordonojn C-p, C-b, C-f, kaj C-n.  Æiu de tiuj ordonoj movas la
+kursoron je unu vertikalo aý horizontalo en la koncerna direkto sur la
+ekrano.  Æi tiu tabelo montras tiujn kvar ordonojn kaj kien ili movas
+la kursoron:
+
+			   Al la antaýa linio, C-p
+			   (angle: Previous line)
+				   :
+				   :
+      Antaýen, C-b .... Nuna loko de la kursoro .... Sekven, C-f
+   (ang. Backward)		   :		     (ang. Forward)
+				   :
+			Al la sekva linio, C-n
+			  (angle: Next line)
+
+>> Movu la kursoron al la centra linio de la diagramo per C-n aý C-p.
+   Tajpu C-l por vidi la tutan diagramon vertikale centrigita sur la
+   ekrano.
+
+La literoj estas elektitaj laý la koncernaj anglaj vortoj: P el
+"previous", N el "next", B el "backward" kaj F el "forward".  Tiuj
+estas la bazaj ordonoj por movi la kursoron, kaj vi uzos ilin æiam, do
+utilas al vi lerni ilin nune.
+
+>> Uzu C-n kelkfoje por mallevi la kursoron al æi tiu linio.
+
+>> Uzu C-f por avanci en la linion kaj sekve C-p por movi supren.
+   Atentu kion C-p faras kiam la kursoro estas meze de la linio.
+
+Æiu teksta linio finiøas per novlinia signo, kiu disigas øin disde la
+sekva linio.  La lasta linio en via dosiero devus havi novlinion æe la
+fino (sed Emacs ne postulas øin).
+
+>> Provu uzi C-b æe linikomenco.  Øi devas movi al la fino de la
+   antaýa linio.  Tio okazas æar øi movas reen trans la novlinian
+   signon.
+
+C-f povas movi trans novlinion analogie kiel C-b
+
+>> Uzu C-b por vidi kie estas la kursoro.
+   Poste uzu C-f kelkfoje por reveni æe la linifinon.
+   Poste faru unu C-f pli por transiri en la sekvantan linion.
+
+Kiam vi pasas trans la supron aý malsupron de la ekrano, la teksto
+transranda þoviøas sur la ekranon.  Tio estas nomata "rulumado".  Øi
+ebligas movi la kursoron al specifita loko en la teksto sen perdi øin
+(la kursoron) de sur la ekrano.
+
+>> Provu uzi C-n por movi la kursoron de sur la malsupro de la ekrano,
+   kaj vidu kio okazas.
+
+Se movado per signoj estas tro malrapida, moviøu per vortoj.  M-f
+(Meta-f) movas je unu vorto posten kaj M-b movas je unu vorto reen.
+
+>> Tajpu kelkfoje M-f kaj M-b.
+
+Kiam vi estas meze de vorto, M-f movas al la fino de la vorto.  Kiam
+vi estas en intervorta spaco, M-f movas al la fino de la sekva vorto.
+M-b faras analogie en la mala direkto.
+
+>> Tajpu M-f kaj M-b kelkfoje, intermiksante kun C-f kaj C-b, por vidi
+   la efikon de M-f kaj M-b el diversaj lokoj ene kaj inter vortoj.
+
+Rimarku la analogion inter C-f kaj C-b unuflanke, kaj M-f kaj M-b
+aliflanke.  Tre ofte Meta-signoj servas por funkcioj rilataj al unuoj
+difinitaj lingve (vortoj, frazoj, alineoj), dum la stiraj C-signoj
+funkcias sur elementaj unuoj sendependaj de la enhavo (signopozicioj,
+linioj, ktp.).
+
+Tiu analogio validas ankaý por linioj kaj frazoj: C-a kaj C-e movas al
+la komenco aý fino de linio, kaj M-a kaj M-e movas al la komenco aý
+fino de frazo.
+
+>> Provu kelkajn C-a, poste kelkajn C-e.
+   Provu kelkajn M-a, poste kelkajn M-e.
+
+Observu kiel ripetaj C-a faras nenion pli ol unufoje, dum ripetaj M-a
+plu movas je unu frazo pluen.  Kvankam la analogio ne estas plena, æiu
+ordono kondutas nature.
+
+La loko de la kursoro en la teksto estas nomata "punkto" (angle
+"point").  Alidire, la kursoro montras sur la ekrano kie "punkto"
+estas en la teksto.
+
+Jen resumo de simplaj ordono por movi la kursoron, inklude la ordonojn
+por moviøi per vortoj kaj frazoj:
+
+	C-f	Moviøu sekven je unu signopozicio
+	C-b	Moviøu reen je unu signopozicio
+
+	M-f	Moviøu sekven je unu vorto
+	M-b	Moviøu antaýen je unu vorto
+
+	C-n	Moviøu en la malsuran linion
+	C-p	Moviøu en la suran linion
+
+	C-a	Moviøu al la linikomenco
+	C-e	Moviøu al la linifino
+
+	M-a	Moviøu al la komenco de la frazo
+	M-e	Moviøu al la fino de la frazo
+
+>> Provu æiujn æi ordonojn, nun po kelkfoje por praktiki.  Ili estas
+   la plej ofte uzataj ordonoj.
+
+Du aliaj kursormovaj ordonoj estas M-< (Meta Malpli-ol), kiu movas al
+la komenco de la tuta teksto, kaj M-> (Meta Pli-ol), kiu movas al la
+fino de la tuta teksto.
+
+Æe la plejmulto de terminaloj, la "<" estas super la komo, do vi devas
+uzi la majuskligan klavon por tajpi øin.  Æe tiuj terminaloj vi ankaý
+devas uzi la majuskligan klavon por tajpi M-<; sen la majuskliga klavo
+rezultus "M-," (Meta-komo).
+
+>> Provu tajpi M-< nune, por moviøi al la komenco de la lernilo.
+   Poste uzu C-v multfoje por reveni æi tien.
+
+>> Provu tajpi M-> nune, por moviøi al la fino de la lernilo.
+   Poste uzu M-v multfoje por reveni æi tien.
+
+Vi ankaý povas movi la kursoron per la sagoklavoj, se via terminalo
+havas ilin.  Ni tamen rekomendas ke vi lernu C-b, C-f, C-n kaj C-p pro
+tri kialoj.  Unue, ili funkcias æe æia terminalo.  Due, kiam vi
+kutimiøos al Emakso, vi trovos ke tajpi tiujn stirsignojn estas pli
+rapida ol tajpi la sagoklavojn (æar vi ne devas formovi viajn manojn
+de la normala tajpada pozicio).  Trie, kiam vi kutimiøos uzi tiujn
+stirajn ordonojn, vi facile lernos uzi ankaý aliajn kursormovajn
+ordonojn.
+
+La plejparto da Emaksaj ordonoj akceptas nombran argumenton; por la
+plejparto da ordonoj, øi funkcias kiel ripetilo.  Por indiki al ordono
+la nombron de ripetoj, tajpu C-u kaj sekve la ciferojn antaý ol tajpi
+la ordonon.  Se vi havas META-klavon (aý EDIT-, aý Alt-klavon), eblas
+ankaý alia metodo por doni nombran argumenton: tajpu la ciferojn
+premtenante la META-klavon.  Ni rekomendas lerni la metodon de C-u æar
+øi funkcias æe æia terminalo.  La nombra argumento ankaý estas nomata
+"prefiksa argumento", æar la argumenton oni tajpas antaý la koncerna
+ordono.
+
+Ekzemple, C-u 8 C-f movas vin al la oka signo sekvanta.
+
+>> Uzu C-n aý C-p kun nombra argumento por movi la kursoron en apudan
+   linion per sola ordono.
+
+La plejparto da ordonoj uzas la nombran argumenton kiel ripetilon, sed
+iuj ordonoj øin uzas alicele.  Kelkaj ordonoj (tamen neniu el la
+lernitaj) uzas øin kiel indikilon -- la ekzisto de prefiksa argumento,
+sendepende de øia valoro, igas la ordonon agi alimaniere.
+
+C-v kaj M-v estas alispeca escepto.  Kiam vi donas al ili argumenton,
+ili rulumas la ekranon supren aý suben je tiom da linioj, anstataý je
+ekranplenoj.  Ekzemple, C-u 8 C-v rulumas la ekranon je 8 linioj.
+
+>> Tajpu C-u 8 C-v nun.
+
+Æi tio devis rulumi la ekranon je 8 linioj supren.  Se vi deziras
+retrorulumi øin suben, vi povas doni argumenton al M-v.
+
+Se vi uzas Emakson sub grafika fenestrosistemo, ekz-e X11 aý
+MS-Windows, øi devas havi altan ortograman regionon nomatan rulumskalo
+æe la (mal)dekstra flanko de la Emaksa fenestro.  Vi povas rulumi la
+tekston klakante per la muso en la rulumskalo.
+
+>> Provu premi la mezan butonon (de la muso) æe la supro de la
+   emfazata regiono interne de la rulumskalo.  Tio devus rulumi la
+   tekston øis pozicio determinita per tio, kiom alte aý malalte vi
+   alklakis.
+
+>> Provu movi la muson supren kaj suben, tenante premita la mezan
+   musbutonon.  Vi vidos ke la teksto rulumas supren kaj suben laý
+   tio, kiel vi movas la muson.
+
+
+* SE EMAKSO SVENIS
+------------------
+
+Se Emakso æesis respondi al viaj ordonoj, vi povas sendanøere øin
+malbloki tajpante C-g.  Vi povas uzi C-g por haltigi ordonon kiu
+plenumiøas tro longe.
+
+Vi ankaý povas uzi C-g por forigi nombran argumenton aý la komencon de
+ordono kiun vi ne deziras fini.
+
+>> Tajpu C-u 100 por fari nombran argumenton 100, sekve tajpu C-g.
+   Nun tajpu C-f.  Øi devas movi je nur unu signo, æar vi forigis la
+   argumenton per C-g.
+
+Se vi erare tajpis <ESC> (la eskapklavon), vi povas vin malembarasi de
+øi per C-g.
+
+
+* MALÞALTITAJ ORDONOJ
+---------------------
+
+Iuj Emaksaj ordonoj estas malþaltitaj por ke komencantoj ne uzu ilin
+akcidente.
+
+Se vi tajpas iun el la malþaltitaj ordonoj, Emakso eligas mesaøon
+indikantan la tajpitan ordonon, kaj demandas æu vere vi volas uzi øin.
+
+Se vi intencas uzi la ordonon, tajpu spaceton responde al la demando.
+Normale, se vi ne deziras plenumi la malþaltitan ordonon, respondu per
+"n".
+
+>> Tajpu C-x C-l (kiu estas malþaltita ordono), kaj tajpu "n" responde
+   al la demando.
+
+
+* FENESTROJ
+-----------
+
+En Emakso vi povas havi plurajn fenestrojn montrantajn sian propran
+tekston.  Ni klarigos poste kiel uzi plurajn fenestrojn.  Sed nun ni
+klarigu kiel forigi nebezonatajn fenestrojn kaj reveni al la simpla
+unufenestra redaktado.  Tio estas facila:
+
+	C-x 1	Unu fenestro (t.e., forigu æiujn aliajn fenestrojn)
+
+Tio estas STIR-x kaj poste la cifero 1.  "C-x 1" pligrandigas la
+fenestron enhavantan la kursoron, tiel ke øi okupu la tutan ekranon.
+Øi malaperigas æiujn aliajn fenestrojn.
+
+>> Movu la kursoron en æi tiun linion kaj tajpu C-u 0 C-l.
+>> Tajpu C-h k C-f.
+   Vidu kiel æi tiu fenestro malkreskas, dum nova fenestro aperas por
+   montri instrukcion pri la C-f ordono.
+
+>> Tajpu C-x 1 kaj vidu la instrukcian fenestron malaperi.
+
+Tiu ordono malsimilas la aliajn ordonojn kiujn vi lernis antaýe æar øi
+konsistas el du signoj.  Øin komencas la signo STIR-x.  Ekzistas tuta
+serio da ordonoj kiuj komenciøas per STIR-x; multaj el ili koncernas
+fenestrojn, dosierojn, bufrojn, kaj rilatajn aferojn.  Tiuj ordonoj
+estas du, tri aý kvar signojn longaj.
+
+
+* ENÞOVO KAJ FORVIÞO
+--------------------
+
+Se vi deziras enþovi tekston, simple øin tajpu.  Signojn kiujn oni
+povas vidi, ekzemple A, 7, *, ktp, Emakso traktas kiel tekston kaj
+enmetas tuj.  Tajpu <Return> (la enigan klavon) por enigi linifinilon.
+
+Por forviþi la ¼us tajpitan signon tajpu <Retroviþu>.  <Retroviþu>
+estas tiu klavo de la klavaro, kiun oni ankaý ekster Emakso normale
+uzas por forigi la ¼us tajpitan signon.  Kutime øi estas granda klavo
+unu aý du vicojn super Return-klavo, kaj eble estas markita per
+"Delete", "Del" aý "Backspace".
+
+Se tiu klavo estas markita per "Backspace" (retropaþo), tiam øuste øin
+oni uzu por <Retroviþu>.  Se krome estas alia klavo, markita <Delete>,
+øi ne estas <Retroviþu>.
+
+Øenerale, <Retroviþu> estas tiu klavo kiu forviþas la signon tuj antaý
+la nuna kursorloko.
+
+>> Faru æi tion nun -- tajpu kelkajn signojn, poste forviþu ilin
+   tajpante kelkajn <Retroviþu>.  Ne timu difekti æi tiun dosieron; vi
+   ne þanøos la originalan lernilon.  Æi tio estas nur ties labora
+   kopio por vi.
+
+Kiam linio da teksto iøas pli longa ol la ekrana linio, la teksta
+linio transiras sur la sekvan ekranan linion.  Retroklino ("\") -- aý,
+en grafika fenestrosistemo, kurba sageto -- en la dekstra marøeno
+indikas tian transiron.
+
+>> Enigu tekston øis øi atingos la dekstran marøenon, kaj plu enigu.
+   Vi vidos transiron en la sekvan linion.
+
+>> Ripete <Retroviþu> por remallongigi la tekstan linion øis la longo
+   de unu ekrana linio denove.  La transiro malaperas.
+
+Vi povas forviþi linifinan signon tiel same kiel iun ajn signon.
+Forviþo de linifinilo inter du linioj kunigas ilin en unu linion.  Se
+la rezulta kunigita linio estas pli longa ol la ekrana larøo, øi
+aperos kun transiro.
+
+>> Movu la kursoron al la komenco de linio kaj tajpu <Retroviþu>.  La
+   linio kuniøos kun la ¼usa linio.
+
+>> Tajpu <Return> por reenigi la linifinilon kiun vi ¼us forviþis.
+
+Memoru ke vi povas doni ripetilon al plejparto da Emaksaj ordonoj; tio
+koncernas ankaý tekstajn signojn.  Ripetilo æe teksta signo enigas øin
+plurfoje.
+
+>> Provu tion nun -- tajpu "C-u 8 *" por enigi "********".
+
+Vi lernis la plej fundamentan metodon por tajpi en Emakso kaj por
+korekti erarojn.  Vi povas forviþi per vortoj aý per linioj.  Jen
+resumo de forviþaj ordonoj:
+
+	<Retroviþu>     forviþu la signon ¼us antaý la kursoro
+	C-d		forviþu la signon tuj post la kursoro
+
+	M-<Retroviþu>   for¼etu la vorton ¼us antaý la kursoro
+	M-d		for¼etu la vorton tuj post la kursoro
+
+	C-k		for¼etu de la kursorloko øis la linifino
+	M-k		for¼etu de la kursorloko øis la frazfino
+
+Rimarku ke <Retroviþu> kaj C-d rilate al M-<Retroviþu> kaj M-d etendas
+la analogion komencitan de C-f kaj M-f (nu, <Retroviþu> ne vere estas
+stirsigno, sed ni ne estu tro pedantaj).  C-k kaj M-k iom similas al
+C-e kaj M-e, sed rilate al linioj anstataý frazoj.
+
+Vi ankaý povas for¼eti iun ajn parton de la bufro per unu senvaria
+metodo.  Moviøu al unu ekstrema¼o de tiu parto, kaj tajpu "C-@" (aý
+"C-SPC", "SPC" simbolas spaceton).  Moviøu al la alia ekstrema¼o, kaj
+tajpu C-w.  Tio for¼etas la tutan tekston inter la du lokoj.
+
+>> Movu la kursoron al la V æe la komenco de la antaýa alineo.
+>> Tajpu C-SPC.  Emakso devas montri mesaøon: "Mark set" ("Markite")
+   æe la fundo de la ekrano.
+>> Movu la kursoron al la o en "ekstrema¼o", en la dua linio de la
+   alineo.
+>> Tajpu C-w.  Tio for¼etos la tekston komenciøantan æe la V, kaj
+   finiøantan ¼us antaý la o.
+
+La diferenco inter "for¬ETI" kaj "forVIÞI" ion konsistas en tio, ke vi
+povas re-enþovi "for¼etitajn" a¼ojn, sed ne "forviþitajn" a¼ojn.
+Re-enþovo de for¼etita teksto nomiøas "en¼eto" (angle "yanking").
+Øenerale, la ordonoj por forigi multe da teksto øin "for¼etas" (do,
+ili ankaý ebligas øin "en¼eti"); male, la ordonoj por forviþi nur unu
+signon, aý nur blankajn liniojn kaj spacetojn, ne konservas la
+forigitan tekston (kaj oni ne povas øin en¼eti).
+
+>> Movu la kursoron al la komenco de nemalplena linio.  Poste tajpu
+   C-k por for¼eti la tekston de tiu linio.
+>> Tajpu C-k duafoje.  Vi vidos ke øi for¼etas la linifinilon
+   sekvantan tiun linion.
+
+Rimarku ke unuopa C-k for¼etas la enhavon de la linio, kaj dua C-k
+for¼etas la linion mem kaj igas la postajn liniojn þoviøi supren.  C-k
+traktas nombran argumenton speciale: øi for¼etas tiom da linioj KAJ
+ilian enhava¼on.  Æi tio ne estas simpla ripetado.  C-u 2 C-k for¼etas
+du liniojn kaj iliajn linifinojn; tajpi C-k dufoje ne farus tion.
+
+Reenigi for¼etitan tekston nomiøas "en¼etado".  Vi povas en¼eti la
+for¼etitan tekston aý en la saman lokon de kie øi estis for¼etita, aý
+en alian lokon de la redaktata teksto, aý eæ en alian dosieron.  Vi
+povas en¼eti la tekston kelkfoje por fari plurajn kopiojn de øi.
+
+Por repreni la laste for¼etitan tekston kaj enigi øin tien kie la
+kursoro nune estas, tajpu "C-y" (de la angla vorto "yank").
+
+>> Provu øin: tajpu C-y por en¼eti la tekston.
+
+Atentu ke se vi tujsekve faras plurajn C-k, æiuj for¼etata¼oj
+konserviøas kune, por ke oni povu en¼eti æiujn æi liniojn per unu C-y.
+
+>> Faru æi tion nun, tajpu C-k kelkfoje.
+
+Nun, por repreni tiun for¼etitan tekston:
+
+>> Tajpu C-y.  Poste movu la kursoron je kelkaj linioj suben kaj tajpu
+   C-y denove.  Nun vi scias kiel kopii iom da teksto.
+
+Kion fari se vi, havante iom da teksto en¼etota, for¼etas ion alian?
+C-y en¼etus la pli ¼usan for¼eta¼on.  Sed la antaýa teksto ne estas
+perdita.  Vi povas re-en¼eti øin per la ordono M-y.  Farinte C-y por
+en¼eti la plej ¼usan for¼eta¼on, tajpu M-y por anstataýigi la
+en¼etitan tekston per pli frua for¼eta¼o.  Tajpadu M-y denove, kaj unu
+post la alia en¼etiøos pli fruaj for¼eta¼oj.  Trovinte la seræatan
+pecon, vi ne bezonas fari ion por konservi øin.  Simple daýrigu vian
+redaktadon, kaj lasu la en¼etitan tekston tie kie øi estas.
+
+Se vi uzos M-y sufiæe da fojoj, vi revenos al la komenca loko (la plej
+¼usa for¼eta¼o).
+
+>> For¼etu linion, moviøu ien, for¼etu alian linion.
+   Poste uzu C-y por en¼eti reen la duan for¼etitan linion.
+   Poste uzu M-y kaj la unua for¼etita linio anstataýigos øin.
+   Uzu M-y plue kaj rigardu kion vi akiras.  Daýrigu øis la reapero de
+   la dua for¼etita linio, kaj poste de kelkaj pli.  Se vi deziras, vi
+   povas doni al M-y pozitivajn kaj negativajn argumentojn.
+
+
+* MALFARADO
+-----------
+
+Se vi þanøis la tekston, kaj sekve decidas ke tio estis eraro, vi
+povas malfari la þanøon per la "malfaru"-ordono, C-x u (de la angla
+"undo").
+
+Normale, C-x u malfaras la þanøojn faritajn per unu ordono; se vi
+tujsekve ripetas la ordonon C-x u kelkfoje, æiu ripeto malfaras unu
+plian ordonon.
+
+Sed estas du esceptoj: ordonoj kiuj ne þanøas la tekston ne estas
+atentataj (tiuj inkludas kursormovajn kaj rulumadajn ordonojn), kaj
+memenigaj signoj kutime ariøas en grupojn po øis 20.  (Tio malpliigas
+la tajpadojn de C-x u necesajn por malfari tekstenigon.)
+
+>> For¼etu æi-linion per C-k, sekve tajpu C-x u kaj øi devas reaperi.
+
+C-_ estas alternativa malfara ordono; øi funkcias same kiel C-x u, sed
+øi estas pli facila por plurfoja tajpado sinsekva.  La malavantaøo de
+C-_ estas ke iuj klavaroj malhavas evidentan metodon por tajpi øin.
+Tial ni provizas ankaý C-x u.  Æe iu klavaroj vi povas ricevi C-_
+tajpante / dum vi premtenas STIR-klavon.
+
+Nombra argumento æe C-_ aý C-x u agas kiel ripetilo.
+
+Vi povas malfari forviþon de teksto egale bone kiel vi povas malfari
+for¼eton de teksto.  La diferenco inter forviþo kaj for¼eto koncernas
+la eblon en¼eti per C-y; øi ne ekzistas por malfaro.
+
+
+*  DOSIEROJ
+-----------
+
+Por persistigi la redaktatan tekston, necesas meti øin en dosieron.
+Alie, øi pereos kiam via Emaksa procezo finiøos.  Por meti vian
+tekston en dosieron, necesas "trovi" la dosieron antaý ol enigi la
+tekston.  (Tio ankaý estas nomata "viziti" la dosieron; angle "find,
+visit a file".)
+
+Trovi dosieron signifas ke vi igas la enhavon de la dosiero atingebla
+per Emakso.  Plurrilate, øi estas kvazaý vi redaktus la dosieron mem.
+Tamen, la þanøoj kiujn vi faras per Emakso ne persistiøas øis kiam vi
+"konservos" (angle "save") la dosieron.  Vi povas konservi la dosieron
+por ne lasi duonþanøitan dosieron æe la sistemo kiam vi ne deziras
+tion.  Eæ kiam vi konservas, Emakso lasas la originalan dosieron sub
+þanøita nomo por la eventualo ke vi poste decidos ke viaj þanøoj estis
+eraraj.
+
+Se vi rigardos apud la fundon de la ekrano vi vidos linion kiun
+komencas kaj finas strekoj; komence "--:-- TUTORIAL.eo" aý io simila.
+Tiu parto de la ekrano normale montras la nomon de la vizitata
+dosiero.  Øuste nun, vi vizitas dosieron nomatan "TUTORIAL.eo" kiu
+estas via propra kopio de la Emaksa lernilo.  Kiam vi trovas dosieron
+per Emakso, la nomo de tiu dosiero aperas æe tiu sama loko.
+
+Unu aparta¼o de la dosiertrova ordono estas, ke vi devas indiki kiun
+dosiernomon vi deziras.  Ni diras ke la ordono "legas argumenton de la
+terminalo" (æi-okaze la argumento estas la dosiernomo).  Post kiam vi
+tajpis la ordonon
+
+	C-x C-f   Trovu dosieron
+
+Emakso petas ke vi tajpu la dosiernomon.  La dosiernomo kiun vi tajpas
+aperas sur la plej malsupra linio de la ekrano.  Tiu linio estas
+nomata "la bufreto" (angle "minibuffer") kiam øi estas uzata por tia
+speco de enigado.  Vi povas uzi ordinarajn Emaksajn redaktajn ordonojn
+por redakti la dosiernomon.
+
+Dum vi enigas la dosiernomon (aý iun ajn bufretan enigon), vi povas
+aboli la ordonon per C-g.
+
+>> Tajpu C-x C-f, kaj sekve C-g.  Æi tio abolas la bufreton, kaj ankaý
+   abolas la ordonon "C-x C-f" kiu uzis la bufreton.  Do vi ne trovis
+   dosieron.
+
+Fininte enigi la dosiernomon, tajpu <Return>.  Tiam eklaboros la
+ordono C-x C-f, kaj trovos la dosieron kiun vi elektis.  La bufreto
+malaperos kiam la C-x C-f ordono finiøos.
+
+Post eta tempo la enhavo de la dosiero aperas sur la ekrano, kaj vi
+povas redakti la enhavon.  Kiam vi deziras persistigi viajn þanøojn,
+tajpu la ordonon
+
+	C-x C-s   konServu (angle "save") la dosieron
+
+Tio kopias la tekston el interne de Emakso en la dosieron.  Æe la unua
+konservado, Emakso renomas la originalan dosieron per nova nomo por ke
+øi ne perdiøu.  La nova nomo estas farata per aldono de "~" al la fino
+de la originala dosiernomo.
+
+Fininte la konservadon, Emakso montras la nomon de la dosiero
+skribita.  Konservu sufiæe ofte, por ne perdi multe da laboro se la
+sistemo paneos.
+
+>> Tajpu C-x C-s, por konservi vian kopion de la lernilo.
+   Emakso devas montri la mesaøon "Wrote ...TUTORIAL.eo" (Skribis
+   ...TUTORIAL.eo) æe la fundo de la ekrano.
+
+Vi povas trovi ekzistantan dosieron, por vidigi aý redakti øin.  Vi
+ankaý povas trovi dosieron kiu ankoraý ne ekzistas.  Æi tio estas la
+maniero por krei dosieron per Emakso: trovu la dosieron, komence
+malplenan, kaj sekve ekenigu la tekston por la dosiero.  Kiam vi petos
+"konservi" la dosieron, Emakso vere kreos la dosieron kun la teksto
+kiun vi enigis.  De tiam vi povos opinii ke vi redaktas jam
+ekzistantan dosieron.
+
+
+* BUFROJ
+--------
+
+Se vi trovas duan dosieron per C-x C-f, la unua dosiero restas interne
+de Emakso.  Vi povas reiri al øi retrovante øin denove per C-x C-f.
+Tio ebligas al vi meti plurajn dosierojn en Emakson.
+
+>> Kreu dosieron nomatan "umo" tajpante "C-x C-f umo <Return>".
+   Poste enigu iom da teksto, redaktu øin, kaj konservu "umo"n
+   tajpante "C-x C-s".
+   Fine, tajpu "C-x C-f TUTORIAL.eo <Return>" por reveni al la
+   lernilo.
+
+Emakso tenas la tekston de æiu dosiero en objekto nomata "bufro".
+Trovo de dosiero kreas novan bufron interne de Emakso.  Por vidi
+liston de la bufroj kiuj nune ekzistas en via Emakso-procezo, tajpu
+
+	C-x C-b   Listigu bufrojn
+
+>> Provu C-x C-b nun.
+
+Vi vidas, ke æiu bufro havas nomon, kaj ke øi ankaý eble havas
+dosiernomon por la dosiero kies enhavon øi tenas.  ÆIU teksto kiun vi
+vidas en Emaksa fenestro estas æiam parto de iu bufro.
+
+>> Tajpu C-x 1 por forigi la liston de bufroj.
+
+Se vi havas plurajn bufrojn, je æiu momento nur nur unu el ili estas
+"la kuranta": tiu, kiun vi redaktas.  Se vi volas redakti alian
+bufron, vi bezonas "transiri" en øin.  Se la celata bufro respondas al
+dosiero, vi povas transiri per vizito al øi: C-x C-f ...  Sed estas
+pli facila metodo: uzi la ordonon "C-x b", donante al øi la nomon de
+la celata bufro.
+
+>> Tajpu "C-x b umo <Return>" por transiri en la bufron "umo",
+   entenantan la tekston de la dosiero "umo".
+   Poste tajpu "C-x b TUTORIAL.eo <Return>" por reveni en la lernilon.
+
+Plej ofte, la bufronomo estas egala al la nomo de øia dosiero (sen la
+dosiera parto).  Tamen, ne æiam tio estas vera.  La listo de bufroj
+farita per "C-x C-b" æiam vidigas al vi la nomojn de æiuj bufroj.
+
+ÆIU teksto kiun vi vidas en Emaksa fenestro estas æiam parto de iu
+bufro.  Tamen iuj bufroj ne respondas al dosieroj.  Ekzemple, la bufro
+nomata "*Buffer List*" (Listo de Bufroj) ne havas dosieron.  Øi estas
+la bufro enhavanta la liston de bufroj faritaj per la ordono C-x C-b.
+Ankaý la bufro "*Messages*" respondas al neniu dosiero; øi entenas la
+mesaøojn aperintajn en la funda linio dum la Emaksa seanco.
+
+>> Tajpu "C-x b *Messages* <Return>" por vidigi la bufron de mesaøoj.
+   Poste tajpu "C-x b TUTORIAL.eo <Return>" por reveni en la lernilon.
+
+Se vi þanøas la tekston de unu dosiero, kaj sekve trovas alian
+dosieron, æi tio ne konservas la unuan dosieron.  Øiaj þanøoj restas
+interne de Emakso, en la bufro de tiu dosiero.  La kreado aý redaktado
+de la bufro de la dua dosiero ne efikas la bufron de la unua dosiero.
+Æi tio estas utilega, sed øi ankaý signifas ke vi bezonas oportunan
+metodon por konservi la bufron de la unua dosiero.  Estas øena devi
+revenadi en øin per C-x C-f nur por konservi øin per C-x C-s.  Tial ni
+havas
+
+	C-x s     Konservu iom da bufroj.
+
+C-x s demandas vin pri æiu þanøita bufro kiun vi ne konservis.  Øi
+demandas vin, pri æiu tia bufro, æu konservi la bufron.
+
+>> Enigu linion da teksto, kaj sekve tajpu C-x s.
+   Emakso devas demandi vin æu øi konservu la bufron "TUTORIAL.eo".
+   Jesu tajpante "y" (de la angla "yes").
+
+
+* ETENDI LA ORDONARON
+---------------------
+
+Ekzistas multege pli da Emaksaj ordonoj ol eblas meti sur æiuj el la
+stiraj kaj meta-aj signoj.  Emakso solvas tiun problemon per la
+X-ordonoj (de la angla eXtend, "etendo").  Estas du specoj da ili:
+
+	C-x     Signa etendo.  Sekvata de unu signo.
+	M-x	Nomhava ordona etendo.  Sekvata de plena nomo.
+
+Æi tiuj estas la ordonoj ja utilaj, sed malpli oftaj ol la ordonoj
+kiujn vi jam lernis.  Vi jam vidis du el ili: la dosierajn ordonojn
+C-x C-f por "trovi" kaj C-x C-s por "konservi".  Alia ekzemplo estas
+la ordono por fini Emaksan seancon -- la ordono C-x C-c.  (Ne timu
+perdi faritajn þanøojn; C-x C-c proponas konservi æiun þanøitan
+dosieron antaý ol æesigi Emakson.)
+
+C-z estas la ordono por eliri Emakso *provizore* -- tiel ke vi povas
+reveni en la saman Emaksan seancon poste.
+
+Sur sistemoj kiuj permesas øin, C-z "provizore æesigas" Emakson; t.e.
+øi revenas en la þelon sed ne detruas Emakson.  Je la plej komunaj
+þeloj, vi povas reaktivigi Emakson per la ordono "fg" (de la angla
+"foreground") aý per "%emacs".
+
+Sur sistemoj kiuj ne permesas provizoran æesigon, C-z kreas sub-þelon
+sub Emakso por doni al vi þancon lanæi aliajn programojn kaj reiri al
+Emakso poste; øi ne vere "eliras" el Emakso.  Æi-okaze, la þela ordono
+"exit" (eliru) estas la kutima maniero reiri al Emakso de la sub-þelo.
+
+La ordonon C-x C-c uzu por adiaýi.  Øi estas ankaý la ordono uzenda
+por eliri Emakson lanæitan per retpoþta programo aý alia simila
+utila¼o, æar tiuj eble ne scias kiel trakti provizoran æesigon de
+Emakso.  Tamen, ordinare, se vi ne estas tuj adiaýonta, preferindas
+provizore æesigi Emakson per C-z anstataý eliri Emakson.
+
+Ekzistas multe da ordonoj C-x.  Jen listo de tiuj kiujn vi jam konas:
+
+	C-x C-f		Trovu dosieron.
+	C-x C-s		Konservu dosieron.
+	C-x C-b		Listigu bufrojn.
+	C-x C-c		Æesigu Emakson.
+	C-x 1		Forigu æiujn fenestrojn krom unu.
+	C-x u		Malfaru.
+
+Nomhavajn etenditajn ordonojn oni uzas eæ malpli ofte, aý uzas ilin
+nur en kelkaj reøimoj.  Ekzemplo estas la ordono "replace-string"
+(anstataýigu-æenon), kiu anstataýigas unu æenon je alia tutbufre.
+Kiam vi tajpas M-x, Emakso demandas de vi æe la fundo de la ekrano la
+nomon de la ordono; æi-okaze, "replace-string".  Simple tajpu
+"repl s<TAB>" kaj Emakso kompletigos la nomon.  Finu la ordonnomon
+per <Return>.
+
+La ordono replace-string postulas du argumentojn -- la anstataýigOTan
+kaj la anstataýigONTan æenojn.  Æiun argumenton finu per <Return>.
+
+>> Movu la kursoron al la blanka linio du liniojn sub æi tiu.
+   Poste tajpu "M-x repl s<Return>linio<Return>peco<Return>".
+
+   Rimarku kiel tiu æi linio þanøiøis: vi anstataýigis la vorton
+   l-i-n-i-o per "peco" kie ajn øi aperis, de post la komenca loko de
+   la kursoro.
+
+
+* AÝTOMATA KONSERVADO
+---------------------
+
+Kiam vi faris þanøojn en dosiero, sed ankoraý ne konservis ilin, ili
+povus perdiøi se via komputilo paneos.  Por protekti vin de tio,
+Emakso periode "aýtokonservas" æiujn dosierojn kiun vi redaktas.  La
+nomo de aýtokonservita dosiero havas la signon "#" komence kaj fine;
+ekzemple, se via dosiero estas nomata "hello.c", øia aýtokonservita
+dosiero nomiøos "#hello.c#".  Kiam vi konservos la dosieron
+normalmaniere, Emakso malkreos øian aýtokonservitan dosieron.
+
+Por reakiri vian aýtokonservitajn redakta¼ojn post paneo,
+normalmaniere "trovu" la dosieron (per la nomo de la dosiero kiun vi
+redaktis, ne per la nomo de la aýtokonservita dosiero) kaj poste tajpu
+"yes<Return>" por konfirmi ke vi volas uzi la aýtomate konservitan
+datumon.
+
+
+* E¦A AREO
+----------
+
+Se vi tajpas plursignan ordonon malrapide, Emakso montras øin al vi æe
+la fundo de la ekrano en areo nomata la "e¶a areo".  La e¶a areo
+enhavas la plej malsupran linion de la ekrano.
+
+
+* REØIMLINIO
+-------------
+
+La linio tuj super la e¶a areo estas nomata la "reøimlinio".  La
+reøimlinio montras ion similan al æi tio:
+
+--:**  TUTORIAL.eo    63% L749    (Fundamental)-----------------------
+
+Tiu linio donas al vi utilan informon pri la stato de Emakso kaj la
+redaktata teksto.
+
+Vi jam scias kion signifas la dosiernomo -- øi estas la dosiero kiun
+vi trovis.  -NN%-- montras vian nunan lokon en la teksto; øi signifas
+ke NN elcentoj de la teksto estas supren de la supro de la ekrano.  Se
+la supro de la dosiero estas sur la ekrano, øi montras --Top--
+anstataý -- 0%--.  Se la malsupro de la teksto estas sur la ekrano, øi
+montras --Bot--.  Se vi rigardas tekston tiom malgrandan ke æiom da øi
+aperas en la ekrano, la reøimlinio montras --All--.
+
+La L kun ciferoj indikas la pozicion alimaniere: ili indikas la
+kurantan lininumeron de "punkto".
+
+La steloj æe la komenco signifas ke vi þanøis la tekston.  Antaý la
+þanøoj, kiam vi ekvizitas aý konservis dosieron, en tiu parto de la
+reøimlinio estas neniaj steloj, nur strekoj.
+
+La enkrampa parto de la reøimlinio montras al vi kiujn redaktadajn
+reøimojn vi uzas.  La defaýlta reøimo estas "Fundamental" (fundamenta)
+kiun vi uzas nun.  Øi estas ekzemplo pri "æefreøimo".
+
+Emakso havas multajn diversajn reøimojn.  Iuj el ili estas por redakti
+diversajn lingvojn kajaý specojn de teksto, ekzemple Lisp-reøimo,
+Teksta-reøimo, ktp.  Æiam unu kaj nur unu æefreøimo estas aktiva, kaj
+øia nomo æiam aperas en la reøimlinio øuste kie "Fundamental" estas
+nun.
+
+Æiu æefreøimo igas iujn ordonojn agi malsame.  Ekzemple, estas ordonoj
+por krei komentojn en programo, kaj æar æiu programlingvo havas
+malsaman ideon pri tio, kiel komento aspektu, æiu æefreøimo devas
+enigi komentojn malsame.  Æiu æefreøimo estas la nomo de etenda
+ordono, per kiu vi povas þalti tiun reøimon.  Ekzemple,
+"M-x fundamental-mode" estas ordono por þalti la Fundamentan reøimon.
+
+Se vi redaktos tekston (esperantan, anglan ktp), ekzemple æi tiun
+dosieron, al vi eble konvenos Teksta-reøimo.
+
+>> Tajpu M-x text-mode<Return>.
+
+Ne maltrankviliøu, la Emaksaj ordonoj kiujn vi jam lernis malmulte
+þanøiøas.  Sed vi povas observi ke M-f kaj M-b nun traktas apostrofojn
+kial parton de vortoj.  Antaýe, en Fundamenta reøimo, M-f kaj M-b
+traktis apostrofojn kiel vortajn disigilojn.
+
+Æefreøimoj kutime faras tiajn subtilajn þanøojn: la plejmulto da
+ordonoj faras "la saman taskon" en æiu æefreøimo, sed ili funkcias
+iomete malsame.
+
+Por vidi dokumentaron pri via nuna æefreøimo, tajpu C-h m.
+
+>> Per kelkaj C-u C-v loku æi tiun linion æe la supro de la ekrano.
+>> Tajpu C-h m, por vidi kiel la Teksta reøimo diferencas disde la
+   Fundamenta reøimo.
+>> Tajpu C-x 1 por forigi la dokumentaron for de la ekrano.
+
+Æefreøimojn oni nomas æefaj æar ekzistas ankaý "kromreøimoj".
+Kromreøimoj ne estas alternativoj kontraý la æefreøimoj, nur negravaj
+modifoj al ili.  Æiun kromreøimon oni povas þalti aý malþalti,
+sendepende de æiuj aliaj kromreøimoj, kaj sendepende de la æefreøimo.
+Do vi povas uzi neniom da kromreøimoj, aý unu kromreøimon, aý ian ajn
+kombina¼on de kelkaj kromreøimoj.
+
+Unu utilega kromreøimo, precipe por redakti homlingvan tekston
+(esperantan, anglan ktp), estas la reøimo de Aýtomata Linifaldo (Auto
+Fill mode).  Kiam øi estas þaltita, Emakso aýtomate rompas la linion
+inter vortoj æiufoje kiam la enigata tekstolinio iøas tro larøa.
+
+Por þalti la reøimon de Aýtomata Linifaldo tajpu
+"M-x auto fill mode<Return>".  Kiam la reøimo estas þaltita, vi povas
+malþalti øin denove tajpante "M-x auto fill mode<Return>".  Se la
+reøimo estas malþaltita, tiu ordono þaltas øin, kaj se øi estas
+þaltita, tiu ordono malþaltas øin.  Ni diras ke la ordono "transþaltas
+la reøimon".
+
+>> Tajpu "M-x auto file mode<Return>".  Poste enigi linion el "asdf ",
+   ripete, øis vi vidos øin dividita en du liniojn.  Vi devas enigi
+   spacetojn inter "asdf", æar la Aýtomata Linifaldo rompas liniojn
+   nur æe spacetoj.
+
+Normale la marøeno estas post 70 signoj, sed vi povas þanøi tion per
+la ordono C-x f.  Vi devus doni la marøenon kiu vi deziras por nombra
+argumento.
+
+>> Tajpu C-x f kun la argumento 20.  (C-u 2 0 C-x f).
+   Tajpu ia tekston kaj rigardu kiel Emakso faldas liniojn po 20
+   signoj.  Refiksu la marøenon al 70 per C-x f.
+
+Se vi faras þanøojn meze de alineo, la Aýtomata Linifalda reøimo ne
+refaldas øin por vi.
+Por rearanøi la alineon, tajpu M-q (Meta-q) dum la kursoro estas
+interne de la alineo.
+
+>> Movu la kursoron en la antaýan alineon kaj tajpu M-q.
+
+
+* SERÆADO
+---------
+
+Emakso povas seræi aperojn de æenoj (tiuj estas aroj da apudaj signoj
+aý vortoj), aý antaýen tra la teksto, aý malantaýen.  Seræi æenon
+estas kursormova ordono; øi movas la kursoron al la sekvanta loko kie
+la æeno aperas.
+
+La Emaksa seræa ordono diferencas de la seræaj ordonoj de la plimulto
+da redaktiloj per tio, ke øi estas "dumtajpa".  Tio signifas ke la
+seræo okazas dum vi tajpas la æenon por priseræi.
+
+La ordono por komenci seræon estas C-s por la seræo antaýen, kaj C-r
+por la seræo malantaýen.  SED ATENDU!  Ankoraý ne provu ilin nun.
+
+Kiam vi tajpos C-s, vi vidos la æenon "I-search" aperi invite en la
+e¶a areo.  Æi tio informas vin, ke Emakso estas en la dumtajpa seræo,
+atendante ke vi tajpu la æenon kies aperon vi deziras trovi.  <Return>
+finas seræon.
+
+>> Nun tajpu C-s por komenci seræon.  MALRAPIDE, unuliterope, tajpu la
+   vorton "kursoro", paýzante post æiu tajpita signo por vidi, kio
+   okazas al la kursoro.
+   Nun vi estas seræinta por "kursoro", unufoje.
+>> Tajpu C-s denove, por seræi la sekvan aperon de "kursoro".
+>> Nun tajpu <Backspace> kvarfoje kaj rigardu kiamaniere la kursoro
+   moviøas.
+>> Tajpu <Return> por fini la seræon.
+
+Æu vi vidis, kio okazis?  Emakso, en dumtajpa seræo, penas iri al la
+apero de la æeno kiun vi jam tajpis.  Por iri al la sekvanta apero de
+"kursoro" nur tajpu C-s denove.  Se nenia ajn apero ekzistas, Emakso
+pepas kaj informas vin ke la seræo æi-foje "malsukcesis".  Ankaý C-g
+finus la seræon.
+
+RIMARKU: Æe iuj sistemoj, C-s senmovigas la ekranon kaj vi vidos ne
+plu da eligo de Emakso.  Æi tio indikas ke operaciuma "trajto" nomata
+"fluregulado" interkaptis la C-s kaj ne permesas al øi trapasi al
+Emakso.  Por removebligi la ekranon, tajpu C-q.  Konsultu la sekcion
+"Spontaneous Entry to Incremental Search" en la Emaksa manlibro por
+konsilo pri tio, kiel trakti æi tiun "trajton".
+
+Se, meze de dumtajpa seræo, vi tajpos <Retroviþu>, vi rimarkos ke la
+lasta signo en la seræata æeno forviþiøas, kaj la seræo retroiras al
+la ¼usa loko de la seræo.  Ekzemple, supozu ke vi tajpis "k", por
+seræi la unuan aperon de "k".  Nun se vi tajpus "u, la kursoro moviøus
+al la unua apero de "ku".  Nun tajpu <Retroviþu>.  Æi tio forigos la
+"u" de el la seræata æeno, kaj la kursoro moviøos reen al la unua
+apero de "k".
+
+Se, meze de dumtajpa seræo, vi tajpos STIRan aý META-signon
+(esceptante kelkajn signojn, specialajn en la seræo, ekzemple C-s kaj
+C-r), la seræo iøos finita.
+
+La C-s komencas seræon kiu celas iun ajn aperon de la seræata æeno
+POST la nuna kursorloko.  Se vi deziras seræi ion supre en la teksto,
+tajpu C-r anstataýe.  Æio dirita pri C-s validas pri C-r, krom ke la
+direkto de la seræo estas inversa.
+
+
+* MULTAJ FENESTROJ
+------------------
+
+Unu el la agrablaj trajtoj de Emakso estas ke vi povas havi plurajn
+fenestrojn sur la ekrano samtempe.
+
+>> Movu la kursoron al tiu æi linio kaj tajpu "C-u 0 C-l" (kun Stira
+   lo, ne Stira unu).
+
+>> Nun tajpu "C-x 2", kio fendos la ekranon en du fenestrojn.
+   Ambaý fenestroj vidigas æi tiun lernilon.  La kursoro restas en la
+   supra fenestro.
+
+>> Tajpu C-M-v por rulumi la malsupran fenestron
+   (Se vi ne havas veran Meta-klavon, tajpu Esc C-v.)
+
+>> Tajpu "C-x o" ("o" de la angla vorto "other", "alia") por movi la
+   kursoron en la malsupran fenestron.
+>> Uzu C-v kaj M-v en la malsupra fenestro por rulumi øin.
+   Daýrigu legi æi tiun instrukcion en la supra fenestro.
+
+>> Tajpu C-x o denove por movi la kursoron reen en la supran fenestron.
+   La kursoro en la supra fenestro estas øuste kie øi estis antaýe.
+
+Vi povas plu uzi C-x o por moviøi inter fenestroj.  Æiu fenestro havas
+sian propran kursorlokon, sed nur unu fenestro ja montras la kursoron.
+Æiuj el la ordinaraj redaktaj ordonoj apartenas al la fenestro kiu
+enhavas la kursoron.  Ni nomas tiun la "elektita fenestro".
+
+La ordono C-M-v estas utilega kiam vi redaktas tekston en unu fenestro
+kaj uzas la alian fenestron nur por konsulti.  Tiel vi æiam povas havi
+la kursoron en la fenestro kie vi redaktas, kaj laýbezone rulumi tra
+la alia fenestro per C-M-v.
+
+C-M-v estas ekzemplo de STIR-META-signo.  Se vi havas veran
+META-klavon, vi povas tajpi C-M-v premante ambaý STIR kaj META, kaj
+tajpante v.  Ne gravas, æu STIR aý META "venas unue," æar ili ambaý
+funkcias kiel modifiloj de la signo kiun vi tajpas.
+
+Se vi ne havas veran META-klavon, kaj uzas <ESC> anstataýe, la ordo
+gravas: vi devas tajpi <ESC> kaj poste C-v, æar "C-ESC v" ne funkcias.
+Tiel estas æar <ESC> estas ne modifilo, sed memstara signo.
+
+>> Tajpu "C-x 1" (en la supra fenestro) por forigi la malsupran
+   fenestron.
+
+(Se vi tajpus C-x 1 en la malsupra fenestro, tio forigus la supran.
+Pensu pri tiu ordono kiel "restigu nur unu fenestron -- la fenestron
+en kiu mi jam estas.")
+
+Ne estas nepra¼o havi la saman bufron en ambaý fenestroj.  Se vi uzas
+"C-x C-f" por trovi dosieron en unu fenestro, la alia fenestro ne
+þanøiøas.  Vi povas trovi dosieron sendepende en æiu fenestro.
+
+Jen alia maniero uzi du fenestrojn por montri du malsamajn aferojn:
+
+>> Tajpu "C-x 4 C-f", kaj sekve la nomon de unu el viaj dosieroj.
+   Finu per <Return>.  Rimarku ke la elektita dosiero aperas en la
+   malsupra fenestro.  Ankaý la kursoro iras tien.
+
+>> Tajpu "C-x o" por retroiri en la supran fenestron, kaj "C-x 1" por
+   forigi la malsupran fenestron.
+
+
+* REKURSIAJ REDAKTAJ NIVELOJ
+----------------------------
+
+Iam vi eniros ion nomatan "rekursia redakta nivelo".  Tio estas
+indikata per ortaj krampoj en la reøimlinio, æirkaý la rondaj krampoj
+de la nomo de la æefreøimo.  Ekzemple, vi eble vidos [(Fundamental)]
+anstataý (Fundamental).
+
+Por eliri el la rekursia redakta nivelo, tajpu Esc Esc Esc.  Tio estas
+universala "elira" ordono.  Vi ankaý povas uzi øin por forigi kromajn
+fenestrojn, aý por eliri el la bufreto.
+
+>> Tajpu "M-x" por eniri la bufreton; kaj poste tajpu "Esc Esc Esc"
+   por eliri.
+
+Oni ne povas uzi C-g por eliri el rekursia redakta nivelo.  Tiel estas
+æar C-g estas uzata por aboli ordonojn kaj argumentojn INTERNE DE la
+rekursia redakta nivelo.
+
+
+* KIEL AKIRI PLUAN HELPON
+-------------------------
+
+En æi tiu lernilo ni penis provizi nur tiom da informo, kiom necesas
+por ebligi al vi ekuzi Emakson.  Emakso disponigas tiom da ebloj, ke
+oni ne povas prezenti æiom da ili æi tie.  Tamen, vi eble dezirus
+lerni plu pri Emakso, æar øi havas multajn aliajn utilajn trajtojn.
+Emakso provizas ordonojn por legi dokumenta¼on pri Emaksaj ordonoj.
+Æiuj el tiuj æi "helpaj" ordonoj komenciøas per la signo C-h, kiu
+estas nomata "la Help-signo".
+
+Por uzi la Helpajn ordonojn, tajpu la signon C-h, kaj sekve signon
+indikantan kian helpon vi deziras.  Se vi estas vere perdita, tajpu
+C-h ?  kaj Emakso montros al vi la specojn de helpo kiujn øi povas
+provizi.  Se vi tajpis C-h kaj decidas ke vi ne deziras helpon, simple
+tajpu C-g por aboli øin.
+
+(En iuj lokoj oni þanøas la signifon de la signo C-h.  Oni prefere ne
+faru tion por æiuj uzantoj, do vi rajtas plendi al la sistemestro.
+Dume, se C-h ne montras mesaøon pri helpo æe la fundo de la ekrano,
+provu tajpi la F1-klavon aý "M-x help <Return>" anstataýe.)
+
+La plej baza HELPA rimedo estas "C-h c".  Tajpu C-h, la signon c, kaj
+ordonan signon aý sekvencon; sekve de tio Emakso montras koncizegan
+priskribon pri la ordono.
+
+>> Tajpu C-h c C-p.
+   En la e¶a areo devas aperi proksimume tia mesaøo:
+
+	C-p runs the command previous-line
+
+Æi tio diras al vi la "nomon de la funkcio".  Funkciaj nomoj servas
+æefe por agordi kaj etendi Emakson.  Sed æar funkciaj nomoj estas
+elektitaj por indiki kion la ordono faras, ili ankaý servas kiel
+koncizega priskribo -- sufiæa por rememorigi vin pri ordonoj kiujn vi
+jam lernis.
+
+Ankaý la plursignaj ordonoj, ekzemple "C-x C-s" kaj "<ESC>v", estas
+egale eblaj post C-h c.
+
+Por akiri pli da informo pri ordono, uzu C-h k anstataý C-h c.
+
+>> Tajpu C-h k C-p.
+
+Æi tio montras la plenan priskribon de la funkcio, aldone al øia nomo,
+en Emaksa fenestro.  Fininte legi la eliga¼on, tajpu "C-x 1" por
+forigi la helptekston.  Ne nepras fari tion tuj.  Vi povas redakti
+konsultante la helptekston, kaj poste tajpi C-x 1.
+
+Jen iom da aliaj utilaj elektoj por C-h:
+
+   C-h f	Priskribu funkcion.  Vi tajpas la nomon de la funkcio.
+
+>> Provu tajpi C-h f previous-line<Return>.
+   Æi tio vidigas æiom da la informo kiun Emakso havas pri la funkcio
+   efektiviganta la C-p ordonon.
+
+   C-h a        Rilate al Ordono ("à propos").  Tajpu þlosilvorton kaj
+		Emakso listigos æiujn el la ordonoj kies nomoj enhavas
+		tiun þlosilvorton.  Vi povas alvoki tiajn ordonoj per
+		META-x.  Por iom da ordonoj, Rilate al Ordono ankaý
+		listigos unu- aý dusignan sekvencon alvokantan la
+		saman ordonon.
+
+>> Tajpu C-h a file<Return>.
+
+Sekve de æi tio vi vidos en aparta fenestro liston da æiuj M-x ordonoj
+enhavantaj "file" en sia nomo.  Vi vidos signajn ordonojn listigitaj
+apud la respondaj ordonnomoj, ekzemple "C-x C-f" kaj "C-x C-w" apud
+"find-file" kaj "write-file".
+
+>> Tajpu C-M-v por rulumi la helpfenestron.  Faru æi tion kelkfoje.
+>> Tajpu C-x 1 por forigi la helpfenestron.
+
+   C-h i	Vidigu dialogan manlibron (t.n. "Info").  Æi tiu
+		ordono transportos vin en specialan bufron, nomatan
+		"*info*", kie vi povos legi instrukciojn pri la
+		paka¼oj instalitaj en via sistemo.  Ekzemple, tajpu
+		"m emacs <Return>" por legi la manlibron pri Emakso.
+		Se vi neniam antaýe uzis Info, tajpu "?", kaj Emakso
+		gvidos vin tra la prezento de la ebloj de la informa
+		reøimo.  Finleginte æi tiun lernilon, uzu la
+		Info-manlibron kiel vian æefan dokumenta¼on.
+
+
+* KROMAJ FUNKCIOJ
+-----------------
+
+Pluajn informojn pri Emakso vi povas trovi foliumante ties manlibron,
+æu paperan (libroforman) aý dialogan (en Info -- uzu la Help-menuon aý
+tajpu "F10 h r").  Du funkcioj kiujn vi probable aparte aprezos estas
+la kompletigo, þparanta tajpadon, kaj dired, faciliganta manipuladojn
+dosierajn.
+
+Kompletigo estas rimedo por eviti redundan tajpadon.  Ekzemple, se vi
+volas transiri en la bufron *Messages*, sufiæas tajpi "C-x b *M<Tab>"
+kaj Emakso kompletigos la bufronomon per tiom da signoj, kiom øi povos
+determini surbaze de tio, kion vi jam tajpis.  La kompletigo estas
+priskribita en la Info-manlibro pri Emakso en la nodo "Completion".
+
+Dired ebligas al vi listigi dosierujon (kaj eventuale, ties
+subdosierujojn), kaj moviøi en tiu listo vizitante, alinomante,
+forigante kaj alimaniere manipulante la dosierojn.  Dired estas
+priskribita en la Info-manlibro pri Emakso en la nodo "Dired".
+
+La manlibro priskribas ankaý multajn aliajn aparta¼ojn de Emakso.
+
+
+* FINO
+------
+
+Memoru, por definitive eliri el Emakso uzu C-x C-c.  Por eliri en la
+þelon provizore, tiel ke vi povu reveni en Emakson poste, uzu C-z.
+
+Æi tiu lernilo estas farita kun la intenco esti komprenebla por æiu
+nova uzanto, do se vi trovis ion ajn malklara, ne restu kulpigante vin
+mem -- plendu!  La adreso por la Esperanta Traduka Teamo estas
+<translation-team-eo@lists.sourceforge.net>.
+
+
+* KOPIADO
+---------
+
+Æi tiu lernilo devenas el longa vico da Emaksaj instruaj dosieroj ekde
+la dosiero verkita de Stuart Cracraft por la originala Emakso.
+
+Æi tiu versio de la lernilo, same kiel GNU Emakso, estas metita sub
+kopirajton, kaj venas kun permeso por disdoni kopiojn se certaj
+kondiæoj estas observataj:
+
+   Copyright (C) 1985, 1999, 2001-2002, 2005, 2007-2012
+     Free Software Foundation, Inc.
+
+   Æi tiu dosiero estas parto de "GNU Emacs".
+ 
+   "GNU Emacs" estas libera programverko; vi povas øin pludistribui
+   kaj/aý modifi je la kondiæoj de la GNUa Øenerala Publika Permesilo,
+   eldonita de "Free Software Foundation", laý la versio 3 de tiu
+   Permesilo aý, se vi preferas, ajna posta versio.
+ 
+   Ni distribuas æi tiun programon esperante ke øi estos utila, tamen
+   SEN IA AJN GARANTIO, i.a. sen la implica garantio pri
+   SURMERKATIGEBLO aý TAÝGECO POR IU KONKRETA CELO.  Pliajn detalojn
+   vidu en la GNUa Øenerala Publika Permesilo.
+ 
+   Ekzemplero de la GNUa Øenerala Publika Permesilo devas esti
+   liverita al vi kun æi tiu programo; se vi øin ne ricevis, turnu vin
+   al: Free Software Foundation, Inc., 51 Franklin Street, Fifth
+   Floor, Boston, MA 02110-1301, USA.
+
+Bonvole legu la dosieron COPYING kaj sekve donu kopiojn de GNU Emakso
+al viaj amikoj.  Helpu ekstermi programaran obstrukcismon
+("proprietigon") per uzado, verkado kaj kunhavigo de libera
+programaro!
+  
+Æi tiun lernilon esperantigis D. Dale Gulledge; la tradukon reviziis
+kaj kompletigis Sergio B. Pokrovskij.
+
+--- end of TUTORIAL.eo ---
+
+;;; Local Variables:
+;;;   coding: latin-3
+;;; End:

@@ -1,0 +1,185 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2001-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@iftex
+@chapter Characters, Keys and Commands
+
+  This chapter explains the character sets used by Emacs for input
+commands, and the fundamental concepts of @dfn{keys} and
+@dfn{commands}, whereby Emacs interprets your keyboard and mouse
+input.
+@end iftex
+
+@ifnottex
+@raisesections
+@end ifnottex
+
+@node User Input, Keys, Screen, Top
+@section Kinds of User Input
+@cindex input with the keyboard
+@cindex keyboard input
+@cindex character set (keyboard)
+@cindex @acronym{ASCII}
+@cindex C-
+@cindex Control
+
+  GNU Emacs is primarily designed for use with the keyboard.  While it
+is possible to use the mouse to issue editing commands through the
+menu bar and tool bar, that is not as efficient as using the keyboard.
+Therefore, this manual mainly documents how to edit with the keyboard.
+
+@cindex control character
+  Keyboard input into Emacs is based on a heavily-extended version of
+@acronym{ASCII}.  Simple characters, like @samp{a}, @samp{B},
+@samp{3}, @samp{=}, and the space character (denoted as @key{SPC}),
+are entered by typing the corresponding key.  @dfn{Control
+characters}, such as @key{RET}, @key{TAB}, @key{DEL}, @key{ESC},
+@key{F1}, @key{Home}, and @key{left}, are also entered this way, as
+are certain characters found on non-English keyboards
+(@pxref{International}).
+
+@cindex modifier keys
+@cindex Control
+@cindex C-
+@cindex Meta
+@cindex M-
+  Emacs also recognizes control characters that are entered using
+@dfn{modifier keys}.  Two commonly-used modifier keys are
+@key{Control} (usually labeled @key{Ctrl}), and @key{Meta} (usually
+labeled @key{Alt})@footnote{We refer to @key{Alt} as @key{Meta} for
+historical reasons.}.  For example, @kbd{Control-a} is entered by
+holding down the @key{Ctrl} key while pressing @kbd{a}; we will refer
+to this as @kbd{C-a} for short.  Similarly @kbd{Meta-a}, or @kbd{M-a}
+for short, is entered by holding down the @key{Alt} key and pressing
+@kbd{a}.  Modifier keys can also be applied to non-alphanumerical
+characters, e.g. @kbd{C-@key{F1}} or @kbd{M-@key{left}}.
+
+@cindex @key{ESC} replacing @key{Meta} key
+  You can also type Meta characters using two-character sequences
+starting with @key{ESC}.  Thus, you can enter @kbd{M-a} by typing
+@kbd{@key{ESC} a}.  You can enter @kbd{C-M-a} by typing @kbd{@key{ESC}
+C-a}.  Unlike @key{Meta}, @key{ESC} is entered as a separate
+character.  You don't hold down @key{ESC} while typing the next
+character; instead, press @key{ESC} and release it, then enter the
+next character.  This feature is useful on certain text terminals
+where the @key{Meta} key does not function reliably.
+
+@cindex keys stolen by window manager
+@cindex window manager, keys stolen by
+  On graphical displays, the window manager might block some keyboard
+inputs, including @kbd{M-@key{TAB}}, @kbd{M-@key{SPC}}, @kbd{C-M-d}
+and @kbd{C-M-l}.  If you have this problem, you can either customize
+your window manager to not block those keys, or ``rebind'' the
+affected Emacs commands (@pxref{Customization}).
+
+@cindex input event
+  Simple characters and control characters, as well as certain
+non-keyboard inputs such as mouse clicks, are collectively referred to
+as @dfn{input events}.  For details about how Emacs internally handles
+input events, see @ref{Input Events,,, elisp, The Emacs Lisp Reference
+Manual}.
+
+@node Keys, Commands, User Input, Top
+@section Keys
+
+  Some Emacs commands are invoked by just one input event; for
+example, @kbd{C-f} moves forward one character in the buffer.  Other
+commands take two or more input events to invoke, such as @kbd{C-x
+C-f} and @kbd{C-x 4 C-f}.
+
+@cindex key
+@cindex key sequence
+@cindex complete key
+@cindex prefix key
+  A @dfn{key sequence}, or @dfn{key} for short, is a sequence of one
+or more input events that is meaningful as a unit.  If a key sequence
+invokes a command, we call it a @dfn{complete key}; for example,
+@kbd{C-f}, @kbd{C-x C-f} and @kbd{C-x 4 C-f} are all complete keys.
+If a key sequence isn't long enough to invoke a command, we call it a
+@dfn{prefix key}; from the preceding example, we see that @kbd{C-x}
+and @kbd{C-x 4} are prefix keys.  Every key sequence is either a
+complete key or a prefix key.
+
+  A prefix key combines with the following input event to make a
+longer key sequence.  For example, @kbd{C-x} is a prefix key, so
+typing @kbd{C-x} alone does not invoke a command; instead, Emacs waits
+for further input (if you pause for longer than a second, it echoes
+the @kbd{C-x} key to prompt for that input; @pxref{Echo Area}).
+@kbd{C-x} combines with the next input event to make a two-event key
+sequence, which could itself be a prefix key (such as @kbd{C-x 4}), or
+a complete key (such as @kbd{C-x C-f}).  There is no limit to the
+length of key sequences, but in practice they are seldom longer than
+three or four input events.
+
+  You can't add input events onto a complete key.  For example,
+because @kbd{C-f} is a complete key, the two-event sequence @kbd{C-f
+C-k} is two key sequences, not one.
+
+  By default, the prefix keys in Emacs are @kbd{C-c}, @kbd{C-h},
+@kbd{C-x}, @kbd{C-x @key{RET}}, @kbd{C-x @@}, @kbd{C-x a}, @kbd{C-x
+n}, @kbd{C-x r}, @kbd{C-x v}, @kbd{C-x 4}, @kbd{C-x 5}, @kbd{C-x 6},
+@key{ESC}, @kbd{M-g}, and @kbd{M-o}.  (@key{F1} and @key{F2} are
+aliases for @kbd{C-h} and @kbd{C-x 6}.)  This list is not cast in
+stone; if you customize Emacs, you can make new prefix keys.  You
+could even eliminate some of the standard ones, though this is not
+recommended for most users; for example, if you remove the prefix
+definition of @kbd{C-x 4}, then @kbd{C-x 4 C-f} becomes an invalid key
+sequence.  @xref{Key Bindings}.
+
+  Typing the help character (@kbd{C-h} or @key{F1}) after a prefix key
+displays a list of the commands starting with that prefix.  The sole
+exception to this rule is @key{ESC}: @kbd{@key{ESC} C-h} is equivalent
+to @kbd{C-M-h}, which does something else entirely.  You can, however,
+use @key{F1} to display a list of commands starting with @key{ESC}.
+
+@node Commands, Entering Emacs, Keys, Top
+@section Keys and Commands
+
+@cindex binding
+@cindex command
+  This manual is full of passages that tell you what particular keys
+do.  But Emacs does not assign meanings to keys directly.  Instead,
+Emacs assigns meanings to named @dfn{commands}, and then gives keys
+their meanings by @dfn{binding} them to commands.
+
+  Every command has a name chosen by a programmer.  The name is
+usually made of a few English words separated by dashes; for example,
+@code{next-line} or @code{forward-word}.  Internally, each command is
+a special type of Lisp @dfn{function}, and the actions associated with
+the command are performed by running the function.  @xref{What Is a
+Function,, What Is a Function, elisp, The Emacs Lisp Reference
+Manual}.
+
+  The bindings between keys and commands are recorded in tables called
+@dfn{keymaps}.  @xref{Keymaps}.
+
+  When we say that ``@kbd{C-n} moves down vertically one line'' we are
+glossing over a subtle distinction that is irrelevant in ordinary use,
+but vital for Emacs customization.  The command @code{next-line} does
+a vertical move downward.  @kbd{C-n} has this effect @emph{because} it
+is bound to @code{next-line}.  If you rebind @kbd{C-n} to the command
+@code{forward-word}, @kbd{C-n} will move forward one word instead.
+
+  In this manual, we will often speak of keys like @kbd{C-n} as
+commands, even though strictly speaking the key is bound to a command.
+Usually we state the name of the command which really does the work in
+parentheses after mentioning the key that runs it.  For example, we
+will say that ``The command @kbd{C-n} (@code{next-line}) moves point
+vertically down'', meaning that the command @code{next-line} moves
+vertically down, and the key @kbd{C-n} is normally bound to it.
+
+  Since we are discussing customization, we should tell you about
+@dfn{variables}.  Often the description of a command will say, ``To
+change this, set the variable @code{mumble-foo}.''  A variable is a
+name used to store a value.  Most of the variables documented in this
+manual are meant for customization: some command or other part of
+Emacs examines the variable and behaves differently according to the
+value that you set.  You can ignore the information about variables
+until you are interested in customizing them.  Then read the basic
+information on variables (@pxref{Variables}) and the information about
+specific variables will make sense.
+
+@ifnottex
+@lowersections
+@end ifnottex

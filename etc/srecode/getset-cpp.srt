@@ -1,0 +1,50 @@
+;;; getset-cpp.srt --- SRecode templates for C++ class getter/setters.
+
+;; Copyright (C) 2007-2012 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+set mode "c++-mode"
+set application "getset"
+
+context declaration
+
+template getset-in-class :tag :indent :blank
+----
+{{>A:classdecl:comment-function-group-start}}
+{{TYPE}} get{{NICENAME}}() const {
+   return {{NAME}};
+}
+void set{{NICENAME}}({{TYPE}} {{NICENAME}}) {
+   {{NAME}} = {{NICENAME}};
+}
+{{>A:classdecl:comment-function-group-end}}
+----
+
+template getset-field :blank :indent
+----
+{{?TYPE}} f{{?NAME}};
+----
+
+template getset-initializer :indent
+----
+f{{NAME}}(){{#NOTLAST}},{{/NOTLAST}}
+----
+
+;; end
+

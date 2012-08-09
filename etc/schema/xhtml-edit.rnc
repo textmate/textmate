@@ -1,0 +1,12 @@
+# Edit Module
+
+del = element del { del.attlist, Inline.model }
+del.attlist = Edit.attrib
+ins = element ins { ins.attlist, Inline.model }
+ins.attlist = Edit.attrib
+Edit.attrib =
+  attribute cite { URI.datatype }?,
+  attribute datetime { Datetime.datatype }?
+Edit.class = del | ins
+Inline.class |= Edit.class
+Block.class |= Edit.class

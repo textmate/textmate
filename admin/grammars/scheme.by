@@ -1,0 +1,84 @@
+;;; scheme.by -- Scheme BNF language specification
+
+;; Copyright (C) 2001-2012 Free Software Foundation, Inc.
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+%package semantic-scm-by
+
+%languagemode  scheme-mode
+%start         scheme
+
+%token DEFINE        "define"
+%token DEFINE-MODULE "define-module"
+%token LOAD          "load"
+
+%put DEFINE        summary "Function: (define symbol expression)"
+%put DEFINE-MODULE summary "Function: (define-module (name arg1 ...)) "
+%put LOAD          summary "Function: (load \"filename\")"
+
+%token <open-paren> OPENPAREN "("
+%token <close-paren> CLOSEPAREN ")"
+
+%%
+
+scheme : semantic-list
+	 (EXPAND $1 scheme-list)
+       ;
+
+scheme-list : OPENPAREN scheme-in-list CLOSEPAREN
+	      ( ,$2 )
+	    ;
+
+scheme-in-list: DEFINE symbol expression
+		(VARIABLE-TAG $2 nil $3 )
+	      | DEFINE name-args opt-doc sequence
+		(FUNCTION-TAG (car ,$2) nil (cdr ,$2) )
+	      | DEFINE-MODULE name-args
+		(PACKAGE-TAG (nth (length $2) $2 ) nil)
+	      | LOAD string
+		(INCLUDE-TAG (file-name-nondirectory (read $2)) (read $2) )
+	      | symbol
+		(CODE-TAG $1 nil)
+	      ;
+
+name-args: semantic-list
+	   (EXPAND $1 name-arg-expand)
+	 ;
+
+name-arg-expand : open-paren name-arg-expand
+		  ( ,$2 )
+		| symbol name-arg-expand
+		  ( ,(cons $1 ,$2) )
+		| ;; EMPTY
+		  (  )
+		;
+
+opt-doc : string
+	| ;; EMPTY
+	;
+
+sequence : expression sequence
+         | expression
+         ;
+
+expression : symbol
+	   | semantic-list
+	   | string
+	   | number
+	   ;
+
+;;; scheme.by ends here

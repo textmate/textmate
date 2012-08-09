@@ -1,0 +1,99 @@
+* The default GTK icons were not overridden by the GNOME theme due to
+  a bug which was fixed in GNOME 2.15. Once GNOME 2.16 is in wide
+  circulation, the GTK icons should be replaced with the equivalent
+  GNOME icons.
+
+* Recipe for Creating PBM Versions
+
+1. Edit .xpm image in GIMP.
+2. Image > Mode > Indexed. Check Use Black/White Palette and No
+   Color Dithering.
+3. File > Save As file.xbm.
+4. Run xbmtopbm < file.xbm > file.pbm.
+
+Thanks to jan.h.d@swipnet.se for the help.
+
+
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+* The following icons are part of Emacs.  All are licensed under the
+  GNU General Public License version 3 (see COPYING) or later.
+  The xpm and svg files contain copyright and license information, but
+  it is reproduced here for convenience.  
+
+File: mh-logo.xpm
+  Author: Satyaki Das
+  Copyright (C) 2003-2012  Free Software Foundation, Inc.
+
+Files: splash.pbm, splash.xpm, gnus.pbm
+  Author: Luis Fernandes <elf@ee.ryerson.ca>
+  Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+Files: splash.png, splash.svg
+  Author: Francesc Rocher <rocher@member.fsf.org>
+  Copyright (C) 2008-2012  Free Software Foundation, Inc.
+
+Files: checked.xpm, unchecked.xpm
+  Author: Chong Yidong <cyd@stupidchicken.com>
+  Copyright (C) 2010-2012  Free Software Foundation, Inc.
+
+
+* The following icons are from GTK+ 2.x. They are not part of Emacs, but
+are distributed and used by Emacs.  They are licensed under the
+GNU Library General Public License version 2 or later.  See the source
+of the gtk+ package for more information.
+
+  close.xpm copy.xpm cut.xpm help.xpm home.xpm index.xpm info.pbm
+  info.xpm jump-to.xpm left-arrow.xpm new.xpm open.xpm paste.xpm
+  preferences.xpm print.xpm refresh.xpm right-arrow.xpm save.xpm
+  saveas.xpm search.xpm sort-ascending.xpm sort-descending.xpm
+  spell.xpm undo.xpm up-arrow.xpm
+
+  back-arrow.xpm and fwd-arrow.xpm are slightly modified undo and redo.
+  diropen.xpm is file-manager.png from Gnome hicolor theme.
+
+
+* The following icons are from GNOME 2.x. They are not part of Emacs,
+but are distributed and used by Emacs.  They are licensed under the
+GNU General Public License version 2 or later.  See the source of
+the gnome-icons-theme package for more information.
+
+Emacs images and their source in the GNOME icons stock/ directory:
+
+  attach.xpm                document/stock_attach
+  bookmark_add.xpm          actions/bookmark_add
+  cancel.xpm                slightly modified generic/stock_stop
+  connect.xpm               net/stock_connect
+  contact.xpm               net/stock_contact
+  data-save.xpm             data/stock_data-save
+  delete.xpm                generic/stock_delete
+  describe.xpm              generic/stock_properties
+  disconnect.xpm            net/stock_disconnect
+  exit.xpm                  generic/stock_exit
+  lock-broken.xpm           data/stock_lock-broken
+  lock-ok.xpm               data/stock_lock-ok
+  lock.xpm                  data/stock_lock
+  redo.xpm                  generic/stock_redo
+  search-replace.xpm        slightly modified generic/stock_search-and-replace
+  next-page.xpm             navigation/stock_next-page
+  refresh.xpm               generic/stock_refresh
+  separator.xpm             ?
+  show.xpm                  slightly modified document/stock_new
+  sort-ascending.xpm        slightly modified data/stock_sort-ascending
+  sort-column-ascending.xpm data/stock_sort-column-ascending
+  sort-criteria.xpm         data/stock_sort-criteria
+  sort-descending.xpm       slightly modified data/stock_sort-descending
+  sort-row-ascending.xpm    data/stock_sort-row-ascending
+  zoom-in.xpm               navigation/stock_zoom-in
+  zoom-out.xpm              navigation/stock_zoom-out
+
+  next-node.xpm and prev-node.xpm are from gthumb version 2.0 (part of
+  GNOME 2.x) where they are called next-image-24.png and prev-image-24.png.
+  up-node.xpm is just next-node.xpm rotated 90 degrees.
+
+  Some icons in the mail/ and gnus/ subdirectories are also taken
+  from this source (see their separate README files).
+
+The images in the low-color/ subdirectory are low-color versions of
+the files of the same name in this directory, and are subject to the
+same conditions.

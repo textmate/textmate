@@ -1,0 +1,1381 @@
+This is ../../info/forms, produced by makeinfo version 4.13 from
+forms.texi.
+
+This file documents Forms mode, a form-editing major mode for GNU Emacs.
+
+   Copyright (C) 1989, 1997, 2001-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Forms: (forms).               Emacs package for editing data bases
+                                  by filling in forms.
+END-INFO-DIR-ENTRY
+
+
+File: forms,  Node: Top,  Next: Forms Example,  Up: (dir)
+
+Forms Mode
+**********
+
+Forms mode is an Emacs major mode for working with simple textual data
+bases in a forms-oriented manner.  In Forms mode, the information in
+these files is presented in an Emacs window in a user-defined format,
+one record at a time.  The user can view records or modify their
+contents.
+
+   Forms mode is not a simple major mode, but requires two files to do
+its job: a control file and a data file.  The data file holds the
+actual data to be presented.  The control file describes how to present
+it.
+
+   This file documents Forms mode, a form-editing major mode for GNU
+Emacs.
+
+   Copyright (C) 1989, 1997, 2001-2012 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover texts
+     being "A GNU Manual," and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     "GNU Free Documentation License".
+
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual.  Buying copies from the FSF supports it in
+     developing GNU and promoting software freedom."
+
+* Menu:
+
+* Forms Example::               An example: editing the password data base.
+* Entering and Exiting Forms Mode::
+                                How to visit a file in Forms mode.
+* Forms Commands::              Special commands to use while in Forms mode.
+* Data File Format::            How to format the data file.
+* Control File Format::         How to control forms mode.
+* Format Description::          How to define the forms layout.
+* Modifying Forms Contents::    How to modify.
+* Miscellaneous::               Forms mode messages and other remarks.
+* Error Messages::              List of error messages forms mode can produce.
+* Long Example::                A more complex control file example.
+* GNU Free Documentation License:: The license for this documentation.
+* Credits::                     Thanks everyone.
+* Index::                       Index to this manual.
+
+
+File: forms,  Node: Forms Example,  Next: Entering and Exiting Forms Mode,  Prev: Top,  Up: Top
+
+1 Forms Example
+***************
+
+Let's illustrate Forms mode with an example.  Suppose you are looking at
+the `/etc/passwd' file, and the screen looks like this:
+
+     ====== /etc/passwd ======
+
+     User : root   Uid: 0   Gid: 1
+
+     Name : Super User
+
+     Home : /
+
+     Shell: /bin/sh
+
+   As you can see, the familiar fields from the entry for the super user
+are all there, but instead of being colon-separated on one single line,
+they make up a forms.
+
+   The contents of the forms consist of the contents of the fields of
+the record (e.g. `root', `0', `1', `Super User') interspersed with
+normal text (e.g `User : ', `Uid: ').
+
+   If you modify the contents of the fields, Forms mode will analyze
+your changes and update the file appropriately.  You cannot modify the
+interspersed explanatory text (unless you go to some trouble about it),
+because that is marked read-only (*note Text Properties: (elisp)Text
+Properties.).
+
+   The Forms mode control file specifies the relationship between the
+format of `/etc/passwd' and what appears on the screen in Forms mode.
+*Note Control File Format::.
+
+
+File: forms,  Node: Entering and Exiting Forms Mode,  Next: Forms Commands,  Prev: Forms Example,  Up: Top
+
+2 Entering and Exiting Forms Mode
+*********************************
+
+`M-x forms-find-file <RET> CONTROL-FILE <RET>'
+     Visit a database using Forms mode.  Specify the name of the
+     *control file*, not the data file!
+
+`M-x forms-find-file-other-window <RET> CONTROL-FILE <RET>'
+     Similar, but displays the file in another window.
+
+   The command `forms-find-file' evaluates the file CONTROL-FILE, and
+also visits it in Forms mode.  What you see in its buffer is not the
+contents of this file, but rather a single record of the corresponding
+data file that is visited in its own buffer.  So there are two buffers
+involved in Forms mode: the "forms buffer" that is initially used to
+visit the control file and that shows the records being browsed, and
+the "data buffer" that holds the data file being visited.  The latter
+buffer is normally not visible.
+
+   Initially, the first record is displayed in the forms buffer.  The
+mode line displays the major mode name `Forms', followed by the minor
+mode `View' if the data base is read-only.  The number of the current
+record (N) and the total number of records in the file(T) are shown in
+the mode line as `N/T'.  For example:
+
+     --%%-Emacs: passwd-demo          (Forms View 1/54)----All-------
+
+   If the buffer is not read-only, you may change the buffer to modify
+the fields in the record.  When you move to a different record, the
+contents of the buffer are parsed using the specifications in
+`forms-format-list', and the data file is updated.  If the record has
+fields that aren't included in the display, they are not changed.
+
+   Entering Forms mode runs the normal hook `forms-mode-hooks' to
+perform user-defined customization.
+
+   To save any modified data, you can use `C-x C-s'
+(`forms-save-buffer').  This does not save the forms buffer (which would
+be rather useless), but instead saves the buffer visiting the data file.
+
+   To terminate Forms mode, you can use `C-x C-s' (`forms-save-buffer')
+and then kill the forms buffer.  However, the data buffer will still
+remain.  If this is not desired, you have to kill this buffer too.
+
+
+File: forms,  Node: Forms Commands,  Next: Data File Format,  Prev: Entering and Exiting Forms Mode,  Up: Top
+
+3 Forms Commands
+****************
+
+The commands of Forms mode belong to the `C-c' prefix, with one
+exception: <TAB>, which moves to the next field.  Forms mode uses
+different key maps for normal mode and read-only mode.  In read-only
+Forms mode, you can access most of the commands without the `C-c'
+prefix, but you must type ordinary letters instead of control
+characters; for example, type `n' instead of `C-c C-n'.
+
+   If your Emacs has been built with X-toolkit support, Forms mode will
+provide its own menu with a number of Forms mode commands.
+
+`C-c C-n'
+     Show the next record (`forms-next-record').  With a numeric
+     argument N, show the Nth next record.
+
+`C-c C-p'
+     Show the previous record (`forms-prev-record').  With a numeric
+     argument N, show the Nth previous record.
+
+`C-c C-l'
+     Jump to a record by number (`forms-jump-record').   Specify the
+     record number with a numeric argument.
+
+`C-c <'
+     Jump to the first record (`forms-first-record').
+
+`C-c >'
+     Jump to the last record (`forms-last-record').  This command also
+     recalculates the number of records in the data file.
+
+`<TAB>'
+`C-c <TAB>'
+     Jump to the next field in the current record (`forms-next-field').
+     With a numeric argument N, jump forward N fields.  If this command
+     would move past the last field, it wraps around to the first field.
+
+`C-c C-q'
+     Toggles read-only mode (`forms-toggle-read-only').  In read-only
+     Forms mode, you cannot edit the fields; most Forms mode commands
+     can be accessed without the prefix `C-c' if you use the normal
+     letter instead (for example, type `n' instead of `C-c C-n').  In
+     edit mode, you can edit the fields and thus change the contents of
+     the data base; you must begin Forms mode commands with `C-c'.
+     Switching to edit mode is allowed only if you have write access to
+     the data file.
+
+`C-c C-o'
+     Create a new record and insert it before the current record
+     (`forms-insert-record').  It starts out with empty (or default)
+     contents for its fields; you can then edit the fields.  With a
+     numeric argument, the new record is created _after_ the current
+     one.  See also `forms-modified-record-filter' in *note Modifying
+     Forms Contents::.
+
+`C-c C-k'
+     Delete the current record (`forms-delete-record').  You are
+     prompted for confirmation before the record is deleted unless a
+     numeric argument has been provided.
+
+`C-c C-s REGEXP <RET>'
+     Search forward for REGEXP in all records following this one
+     (`forms-search-forward').  If found, this record is shown.  If you
+     give an empty argument, the previous regexp is used again.
+
+`C-c C-r REGEXP <RET>'
+     Search backward for REGEXP in all records following this one
+     (`forms-search-backward').  If found, this record is shown.  If
+     you give an empty argument, the previous regexp is used again.
+
+`M-x forms-prev-field'
+     Similar to `forms-next-field' but moves backwards.
+
+`M-x forms-save-buffer'
+`C-x C-s'
+     Forms mode replacement for `save-buffer'. When executed in the
+     forms buffer it will save the contents of the (modified) data
+     buffer instead. In Forms mode this function will be bound to `C-x
+     C-s'.
+
+`M-x forms-print'
+     This command can be used to make a formatted print of the contents
+     of the data file.
+
+
+   In addition the command `M-x revert-buffer' is useful in Forms mode
+just as in other modes.
+
+   The following function key definitions are set up in Forms mode
+(whether read-only or not):
+
+`next'
+     forms-next-record
+
+`prior'
+     forms-prev-record
+
+`begin'
+     forms-first-record
+
+`end'
+     forms-last-record
+
+`S-Tab'
+     forms-prev-field
+
+
+File: forms,  Node: Data File Format,  Next: Control File Format,  Prev: Forms Commands,  Up: Top
+
+4 Data File Format
+******************
+
+Files for use with Forms mode are very simple--each "record" (usually
+one line) forms the contents of one form.  Each record consists of a
+number of "fields", which are separated by the value of the string
+`forms-field-sep', which is `"\t"' (a Tab) by default.
+
+   If the format of the data file is not suitable enough you can define
+the filter functions `forms-read-file-filter' and
+`forms-write-file-filter'. `forms-read-file-filter' is called when the
+data file is read from disk into the data buffer. It operates on the
+data buffer, ignoring read-only protections. When the data file is
+saved to disk `forms-write-file-filter' is called to cancel the effects
+of `forms-read-file-filter'. After being saved,
+`forms-read-file-filter' is called again to prepare the data buffer for
+further processing.
+
+   Fields may contain text which shows up in the forms in multiple
+lines.  These lines are separated in the field using a "pseudo-newline"
+character which is defined by the value of the string
+`forms-multi-line'.  Its default value is `"\^k"' (a Control-K
+character).  If it is set to `nil', multiple line fields are prohibited.
+
+   If the data file does not exist, it is automatically created.
+
+
+File: forms,  Node: Control File Format,  Next: Format Description,  Prev: Data File Format,  Up: Top
+
+5 Control File Format
+*********************
+
+The Forms mode "control file" serves two purposes.  First, it names the
+data file to use, and defines its format and properties.  Second, the
+Emacs buffer it occupies is used by Forms mode to display the forms.
+
+   The contents of the control file are evaluated as a Lisp program.  It
+should set the following Lisp variables to suitable values:
+
+`forms-file'
+     This variable specifies the name of the data file.  Example:
+
+          (setq forms-file "my/data-file")
+
+     If the control file doesn't set `forms-file', Forms mode reports
+     an error.
+
+`forms-format-list'
+     This variable describes the way the fields of the record are
+     formatted on the screen.  For details, see *note Format
+     Description::.
+
+`forms-number-of-fields'
+     This variable holds the number of fields in each record of the data
+     file.  Example:
+
+          (setq forms-number-of-fields 10)
+
+   If the control file does not set `forms-format-list' a default
+format is used.  In this situation, Forms mode will deduce the number of
+fields from the data file providing this file exists and
+`forms-number-of-records' has not been set in the control file.
+
+   The control file can optionally set the following additional Forms
+mode variables.  Most of them have default values that are good for most
+applications.
+
+`forms-field-sep'
+     This variable may be used to designate the string which separates
+     the fields in the records of the data file.  If not set, it
+     defaults to the string `"\t"' (a Tab character).  Example:
+
+          (setq forms-field-sep "\t")
+
+`forms-read-only'
+     If the value is non-`nil', the data file is treated read-only.
+     (Forms mode also treats the data file as read-only if you don't
+     have access to write it.)  Example:
+
+          (set forms-read-only t)
+
+`forms-multi-line'
+     This variable specifies the "pseudo newline" separator that allows
+     multi-line fields.  This separator goes between the "lines" within
+     a field--thus, the field doesn't really contain multiple lines,
+     but it appears that way when displayed in Forms mode.  If the
+     value is `nil', multi-line text fields are prohibited.  The pseudo
+     newline must not be a character contained in `forms-field-sep'.
+
+     The default value is `"\^k"', the character Control-K.  Example:
+
+          (setq forms-multi-line "\^k")
+
+`forms-read-file-filter'
+     This variable holds the name of a function to be called after the
+     data file has been read in. This can be used to transform the
+     contents of the data file into a format more suitable for forms
+     processing.  If it is `nil', no function is called.  For example,
+     to maintain a gzipped database:
+
+          (defun gzip-read-file-filter ()
+            (shell-command-on-region (point-min) (point-max)
+                                     "gzip -d" t t))
+          (setq forms-read-file-filter 'gzip-read-file-filter)
+
+`forms-write-file-filter'
+     This variable holds the name of a function to be called before
+     writing out the contents of the data file.  This can be used to
+     undo the effects of `forms-read-file-filter'.  If it is `nil', no
+     function is called.  Example:
+
+          (defun gzip-write-file-filter ()
+            (make-variable-buffer-local 'require-final-newline)
+            (setq require-final-newline nil)
+            (shell-command-on-region (point-min) (point-max)
+                                     "gzip" t t))
+          (setq forms-write-file-filter 'gzip-write-file-filter)
+
+`forms-new-record-filter'
+     This variable holds a function to be called whenever a new record
+     is created to supply default values for fields.  If it is `nil',
+     no function is called.  *Note Modifying Forms Contents::, for
+     details.
+
+`forms-modified-record-filter'
+     This variable holds a function to be called whenever a record is
+     modified, just before updating the Forms data file.  If it is
+     `nil', no function is called.  *Note Modifying Forms Contents::,
+     for details.
+
+`forms-insert-after'
+     If this variable is not `nil', new records are created _after_ the
+     current record. Also, upon visiting a file, the initial position
+     will be at the last record instead of the first one.
+
+`forms-check-number-of-fields'
+     Normally each record is checked to contain the correct number of
+     fields.  Under certain circumstances, this can be undesirable.  If
+     this variable is set to `nil', these checks will be bypassed.
+
+
+File: forms,  Node: Format Description,  Next: Modifying Forms Contents,  Prev: Control File Format,  Up: Top
+
+6 The Format Description
+************************
+
+The variable `forms-format-list' specifies the format of the data in
+the data file, and how to convert the data for display in Forms mode.
+Its value must be a list of Forms mode "formatting elements", each of
+which can be a string, a number, a Lisp list, or a Lisp symbol that
+evaluates to one of those.  The formatting elements are processed in the
+order they appear in the list.
+
+STRING
+     A string formatting element is inserted in the forms "as is," as
+     text that the user cannot alter.
+
+NUMBER
+     A number element selects a field of the record.  The contents of
+     this field are inserted in the display at this point.  Field
+     numbers count starting from 1 (one).
+
+LIST
+     A formatting element that is a list specifies a function call.
+     This function is called every time a record is displayed, and its
+     result, which must be a string, is inserted in the display text.
+     The function should do nothing but returning a string.
+
+     The function you call can access the fields of the record as a
+     list in the variable `forms-fields'.
+
+SYMBOL
+     A symbol used as a formatting element should evaluate to a string,
+     number, or list; the value is interpreted as a formatting element,
+     as described above.
+
+   If a record does not contain the number of fields as specified in
+`forms-number-of-fields', a warning message will be printed.  Excess
+fields are ignored, missing fields are set to empty.
+
+   The control file which displays `/etc/passwd' file as demonstrated
+in the beginning of this manual might look as follows:
+
+     ;; This demo visits `/etc/passwd'.
+
+     (setq forms-file "/etc/passwd")
+     (setq forms-number-of-fields 7)
+     (setq forms-read-only t)                 ; to make sure
+     (setq forms-field-sep ":")
+     ;; Don't allow multi-line fields.
+     (setq forms-multi-line nil)
+
+     (setq forms-format-list
+           (list
+            "====== /etc/passwd ======\n\n"
+            "User : "    1
+            "   Uid: "   3
+            "   Gid: "   4
+            "\n\n"
+            "Name : "    5
+            "\n\n"
+            "Home : "    6
+            "\n\n"
+            "Shell: "    7
+            "\n"))
+
+   When you construct the value of  `forms-format-list', you should
+usually either quote the whole value, like this,
+
+     (setq forms-format-list
+          '(
+            "====== " forms-file " ======\n\n"
+            "User : "    1
+            (make-string 20 ?-)
+            ...
+           ))
+
+or quote the elements which are lists, like this:
+
+     (setq forms-format-list
+           (list
+            "====== " forms-file " ======\n\n"
+            "User : "    1
+            '(make-string 20 ?-)
+            ...
+           ))
+
+   Forms mode validates the contents of `forms-format-list' when you
+visit a database.  If there are errors, processing is aborted with an
+error message which includes a descriptive text.  *Note Error
+Messages::, for a detailed list of error messages.
+
+   If no `forms-format-list' is specified, Forms mode will supply a
+default format list.  This list contains the name of the file being
+visited, and a simple label for each field indicating the field number.
+
+
+File: forms,  Node: Modifying Forms Contents,  Next: Miscellaneous,  Prev: Format Description,  Up: Top
+
+7 Modifying The Forms Contents
+******************************
+
+If `forms-read-only' is `nil', the user can modify the fields and
+records of the database.
+
+   All normal editing commands are available for editing the contents
+of the displayed record.  You cannot delete or modify the fixed,
+explanatory text that comes from string formatting elements, but you
+can modify the actual field contents.
+
+   If the variable `forms-modified-record-filter' is non-`nil', it is
+called as a function before the new data is written to the data file.
+The function receives one argument, a vector that contains the contents
+of the fields of the record.
+
+   The function can refer to fields with `aref' and modify them with
+`aset'.  The first field has number 1 (one); thus, element 0 of the
+vector is not used.  The function should return the same vector it was
+passed; the (possibly modified) contents of the vector determine what is
+actually written in the file.  Here is an example:
+
+     (defun my-modified-record-filter (record)
+       ;; Modify second field.
+       (aset record 2 (current-time-string))
+       ;; Return the field vector.
+       record)
+
+     (setq forms-modified-record-filter 'my-modified-record-filter)
+
+   If the variable `forms-new-record-filter' is non-`nil', its value is
+a function to be called to fill in default values for the fields of a
+new record.  The function is passed a vector of empty strings, one for
+each field; it should return the same vector, with the desired field
+values stored in it.  Fields are numbered starting from 1 (one).
+Example:
+
+     (defun my-new-record-filter (fields)
+       (aset fields 5 (login-name))
+       (aset fields 1 (current-time-string))
+       fields)
+
+     (setq forms-new-record-filter 'my-new-record-filter)
+
+
+File: forms,  Node: Miscellaneous,  Next: Error Messages,  Prev: Modifying Forms Contents,  Up: Top
+
+8 Miscellaneous
+***************
+
+The global variable `forms-version' holds the version information of
+the Forms mode software.
+
+   It is very convenient to use symbolic names for the fields in a
+record.  The function `forms-enumerate' provides an elegant means to
+define a series of variables whose values are consecutive integers.  The
+function returns the highest number used, so it can be used to set
+`forms-number-of-fields' also.  For example:
+
+     (setq forms-number-of-fields
+           (forms-enumerate
+            '(field1 field2 field3 ...)))
+
+   This sets `field1' to 1, `field2' to 2, and so on.
+
+   Care has been taken to keep the Forms mode variables buffer-local,
+so it is possible to visit multiple files in Forms mode simultaneously,
+even if they have different properties.
+
+   If you have visited the control file in normal fashion with
+`find-file' or a like command, you can switch to Forms mode with the
+command `M-x forms-mode'.  If you put `-*- forms -*-' in the first line
+of the control file, then visiting it enables Forms mode automatically.
+But this makes it hard to edit the control file itself, so you'd better
+think twice before using this.
+
+   The default format for the data file, using `"\t"' to separate
+fields and `"\^k"' to separate lines within a field, matches the file
+format of some popular database programs, e.g. FileMaker.  So
+`forms-mode' can decrease the need to use proprietary software.
+
+
+File: forms,  Node: Error Messages,  Next: Long Example,  Prev: Miscellaneous,  Up: Top
+
+9 Error Messages
+****************
+
+This section describes all error messages which can be generated by
+forms mode.  Error messages that result from parsing the control file
+all start with the text `Forms control file error'.  Messages generated
+while analyzing the definition of `forms-format-list' start with `Forms
+format error'.
+
+`Forms control file error: `forms-file' has not been set'
+     The variable `forms-file' was not set by the control file.
+
+`Forms control file error: `forms-number-of-fields' has not been set'
+     The variable `forms-number-of-fields' was not set by the control
+     file.
+
+`Forms control file error: `forms-number-of-fields' must be a number > 0'
+     The variable `forms-number-of-fields' did not contain a positive
+     number.
+
+`Forms control file error: `forms-field-sep' is not a string'
+`Forms control file error: `forms-multi-line' must be nil or a one-character string'
+     The variable `forms-multi-line' was set to something other than
+     `nil' or a single-character string.
+
+`Forms control file error: `forms-multi-line' is equal to 'forms-field-sep''
+     The variable `forms-multi-line' may not be equal to
+     `forms-field-sep' for this would make it impossible to distinguish
+     fields and the lines in the fields.
+
+`Forms control file error: `forms-new-record-filter' is not a function'
+`Forms control file error: `forms-modified-record-filter' is not a function'
+     The variable has been set to something else than a function.
+
+`Forms control file error: `forms-format-list' is not a list'
+     The variable `forms-format-list' was not set to a Lisp list by the
+     control file.
+
+`Forms format error: field number XX out of range 1..NN'
+     A field number was supplied in `forms-format-list' with a value of
+     XX, which was not greater than zero and smaller than or equal to
+     the number of fields in the forms, NN.
+
+`Forms format error: FUN is not a function'
+     The first element of a list which is an element of
+     `forms-format-list' was not a valid Lisp function.
+
+`Forms format error: invalid element XX'
+     A list element was supplied in `forms-format-list' which was not a
+     string, number or list.
+
+`Warning: this record has XX fields instead of YY'
+     The number of fields in this record in the data file did not match
+     `forms-number-of-fields'.  Missing fields will be made empty.
+
+`Multi-line fields in this record - update refused!'
+     The current record contains newline characters, hence can not be
+     written back to the data file, for it would corrupt it.  Probably
+     you inserted a newline in a field, while `forms-multi-line' was
+     `nil'.
+
+`Field separator occurs in record - update refused!'
+     The current record contains the field separator string inside one
+     of the fields. It can not be written back to the data file, for it
+     would corrupt it. Probably you inserted the field separator string
+     in a field.
+
+`Record number XX out of range 1..YY'
+     A jump was made to non-existing record XX.  YY denotes the number
+     of records in the file.
+
+`Stuck at record XX'
+     An internal error prevented a specific record from being retrieved.
+
+`No write access to `"'FILE`"''
+     An attempt was made to enable edit mode on a file that has been
+     write protected.
+
+`Search failed: REGEXP'
+     The REGEXP could not be found in the data file. Forward searching
+     is done from the current location until the end of the file, then
+     retrying from the beginning of the file until the current location.
+     Backward searching is done from the current location until the
+     beginning of the file, then retrying from the end of the file
+     until the current location.
+
+`Wrapped'
+     A search completed successfully after wrapping around.
+
+`Warning: number of records changed to NN'
+     Forms mode's idea of the number of records has been adjusted to the
+     number of records actually present in the data file.
+
+`Problem saving buffers?'
+     An error occurred while saving the data file buffer. Most likely,
+     Emacs did ask to confirm deleting the buffer because it had been
+     modified, and you said `no'.
+
+
+File: forms,  Node: Long Example,  Next: GNU Free Documentation License,  Prev: Error Messages,  Up: Top
+
+10 Long Example
+***************
+
+The following example exploits most of the features of Forms mode.
+This example is included in the distribution as file `forms-d2.el'.
+
+     ;; demo2 -- demo forms-mode     -*- emacs-lisp -*-
+
+     ;; This sample forms exploit most of the features of forms mode.
+
+     ;; Set the name of the data file.
+     (setq forms-file "forms-d2.dat")
+
+     ;; Use `forms-enumerate' to set field names and number thereof.
+     (setq forms-number-of-fields
+           (forms-enumerate
+            '(arch-newsgroup                 ; 1
+              arch-volume                    ; 2
+              arch-issue                     ; and ...
+              arch-article                   ; ... so
+              arch-shortname                 ; ... ... on
+              arch-parts
+              arch-from
+              arch-longname
+              arch-keywords
+              arch-date
+              arch-remarks)))
+
+     ;; The following functions are used by this form for layout purposes.
+     ;;
+     (defun arch-tocol (target &optional fill)
+       "Produces a string to skip to column TARGET.
+     Prepends newline if needed.
+     The optional FILL should be a character, used to fill to the column."
+       (if (null fill)
+           (setq fill ? ))
+       (if (< target (current-column))
+           (concat "\n" (make-string target fill))
+         (make-string (- target (current-column)) fill)))
+     ;;
+     (defun arch-rj (target field &optional fill)
+       "Produces a string to skip to column TARGET\
+      minus the width of field FIELD.
+     Prepends newline if needed.
+     The optional FILL should be a character,
+     used to fill to the column."
+       (arch-tocol (- target (length (nth field forms-fields))) fill))
+
+     ;; Record filters.
+     ;;
+     (defun new-record-filter (the-record)
+       "Form a new record with some defaults."
+       (aset the-record arch-from (user-full-name))
+       (aset the-record arch-date (current-time-string))
+       the-record)                           ; return it
+     (setq forms-new-record-filter 'new-record-filter)
+
+     ;; The format list.
+     (setq forms-format-list
+          (list
+            "====== Public Domain Software Archive ======\n\n"
+            arch-shortname
+            " - "                    arch-longname
+            "\n\n"
+            "Article: "              arch-newsgroup
+            "/"                      arch-article
+            " "
+            '(arch-tocol 40)
+            "Issue: "                arch-issue
+            " "
+            '(arch-rj 73 10)
+            "Date: "                 arch-date
+            "\n\n"
+            "Submitted by: "         arch-from
+            "\n"
+            '(arch-tocol 79 ?-)
+            "\n"
+            "Keywords: "             arch-keywords
+            "\n\n"
+            "Parts: "                arch-parts
+            "\n\n====== Remarks ======\n\n"
+            arch-remarks
+          ))
+
+     ;; That's all, folks!
+
+
+File: forms,  Node: Credits,  Next: Index,  Prev: GNU Free Documentation License,  Up: Top
+
+11 Credits
+**********
+
+Bug fixes and other useful suggestions were supplied by Harald
+Hanche-Olsen (`hanche@imf.unit.no'), `cwitty@portia.stanford.edu',
+Jonathan I. Kamens, Per Cederqvist  (`ceder@signum.se'), Michael Lipka
+(`lipka@lip.hanse.de'), Andy Piper (`ajp@eng.cam.ac.uk'), Frederic
+Pierresteguy  (`F.Pierresteguy@frcl.bull.fr'), Ignatios Souvatzis and
+Richard Stallman (`rms@gnu.org').
+
+   This documentation was slightly inspired by the documentation of
+"rolo mode" by Paul Davis at Schlumberger Cambridge Research
+(`davis%scrsu1%sdr.slb.com@relay.cs.net').
+
+   None of this would have been possible without GNU Emacs of the Free
+Software Foundation.  Thanks, Richard!
+
+
+File: forms,  Node: GNU Free Documentation License,  Next: Credits,  Prev: Long Example,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+     `http://fsf.org/'
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.
+     We recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it
+     can be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You
+     accept the license if you copy, modify or distribute the work in a
+     way requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in
+     the notice that says that the Document is released under this
+     License.  If a section does not fit the above definition of
+     Secondary then it is not allowed to be designated as Invariant.
+     The Document may contain zero Invariant Sections.  If the Document
+     does not identify any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images
+     composed of pixels) generic paint programs or (for drawings) some
+     widely available drawing editor, and that is suitable for input to
+     text formatters or for automatic translation to a variety of
+     formats suitable for input to text formatters.  A copy made in an
+     otherwise Transparent file format whose markup, or absence of
+     markup, has been arranged to thwart or discourage subsequent
+     modification by readers is not Transparent.  An image format is
+     not Transparent if used for any substantial amount of text.  A
+     copy that is not "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and
+     standard-conforming simple HTML, PostScript or PDF designed for
+     human modification.  Examples of transparent image formats include
+     PNG, XCF and JPG.  Opaque formats include proprietary formats that
+     can be read and edited only by proprietary word processors, SGML or
+     XML for which the DTD and/or processing tools are not generally
+     available, and the machine-generated HTML, PostScript or PDF
+     produced by some word processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow
+     the conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the
+     title equally prominent and visible.  You may add other material
+     on the covers in addition.  Copying with changes limited to the
+     covers, as long as they preserve the title of the Document and
+     satisfy these conditions, can be treated as verbatim copying in
+     other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a
+     machine-readable Transparent copy along with each Opaque copy, or
+     state in or with each Opaque copy a computer-network location from
+     which the general network-using public has access to download
+     using public-standard network protocols a complete Transparent
+     copy of the Document, free of added material.  If you use the
+     latter option, you must take reasonably prudent steps, when you
+     begin distribution of Opaque copies in quantity, to ensure that
+     this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you
+     distribute an Opaque copy (directly or through your agents or
+     retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of
+     copies, to give them a chance to provide you with an updated
+     version of the Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with
+     the Modified Version filling the role of the Document, thus
+     licensing distribution and modification of the Modified Version to
+     whoever possesses a copy of it.  In addition, you must do these
+     things in the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of
+          previous versions (which should, if there were any, be listed
+          in the History section of the Document).  You may use the
+          same title as a previous version if the original publisher of
+          that version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on
+          the Title Page.  If there is no section Entitled "History" in
+          the Document, create one stating the title, year, authors,
+          and publisher of the Document as given on its Title Page,
+          then add an item describing the Modified Version as stated in
+          the previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in
+          the "History" section.  You may omit a network location for a
+          work that was published at least four years before the
+          Document itself, or if the original publisher of the version
+          it refers to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the
+          section all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document,
+          unaltered in their text and in their titles.  Section numbers
+          or the equivalent are not considered part of the section
+          titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option
+     designate some or all of these sections as invariant.  To do this,
+     add their titles to the list of Invariant Sections in the Modified
+     Version's license notice.  These titles must be distinct from any
+     other section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end
+     of the list of Cover Texts in the Modified Version.  Only one
+     passage of Front-Cover Text and one of Back-Cover Text may be
+     added by (or through arrangements made by) any one entity.  If the
+     Document already includes a cover text for the same cover,
+     previously added by you or by arrangement made by the same entity
+     you are acting on behalf of, you may not add another; but you may
+     replace the old one, on explicit permission from the previous
+     publisher that added the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination
+     all of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the
+     documents in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow
+     this License in all other respects regarding verbatim copying of
+     that document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of
+     a storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
+
+ 10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     `http://www.gnu.org/copyleft/'.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If
+     the Document does not specify a version number of this License,
+     you may choose any version ever published (not as a draft) by the
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License, to
+permit their use in free software.
+
+
+File: forms,  Node: Index,  Prev: Credits,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* begin:                                 Forms Commands.      (line 101)
+* C-c <:                                 Forms Commands.      (line  28)
+* C-c >:                                 Forms Commands.      (line  31)
+* C-c C-k:                               Forms Commands.      (line  59)
+* C-c C-l:                               Forms Commands.      (line  24)
+* C-c C-n:                               Forms Commands.      (line  16)
+* C-c C-o:                               Forms Commands.      (line  51)
+* C-c C-p:                               Forms Commands.      (line  20)
+* C-c C-q:                               Forms Commands.      (line  41)
+* C-c C-r REGEXP <RET>:                  Forms Commands.      (line  69)
+* C-c C-s REGEXP <RET>:                  Forms Commands.      (line  64)
+* C-c TAB:                               Forms Commands.      (line  36)
+* C-x C-s:                               Forms Commands.      (line  78)
+* control file:                          Control File Format. (line   6)
+* end:                                   Forms Commands.      (line 104)
+* field:                                 Data File Format.    (line   6)
+* forms-check-number-of-fields:          Control File Format. (line 109)
+* forms-delete-record:                   Forms Commands.      (line  59)
+* forms-enumerate:                       Miscellaneous.       (line   9)
+* forms-field-sep <1>:                   Control File Format. (line  41)
+* forms-field-sep:                       Data File Format.    (line   6)
+* forms-fields:                          Format Description.  (line  28)
+* forms-file:                            Control File Format. (line  13)
+* forms-find-file:                       Entering and Exiting Forms Mode.
+                                                              (line   6)
+* forms-find-file-other-window:          Entering and Exiting Forms Mode.
+                                                              (line  10)
+* forms-first-record:                    Forms Commands.      (line  28)
+* forms-format-list <1>:                 Format Description.  (line   6)
+* forms-format-list:                     Control File Format. (line  21)
+* forms-insert-after:                    Control File Format. (line 104)
+* forms-insert-record:                   Forms Commands.      (line  51)
+* forms-jump-record:                     Forms Commands.      (line  24)
+* forms-last-record:                     Forms Commands.      (line  31)
+* forms-mode:                            Miscellaneous.       (line  25)
+* forms-mode-hooks:                      Entering and Exiting Forms Mode.
+                                                              (line  36)
+* forms-modified-record-filter:          Control File Format. (line  98)
+* forms-multi-line <1>:                  Control File Format. (line  55)
+* forms-multi-line:                      Data File Format.    (line  21)
+* forms-new-record-filter:               Control File Format. (line  92)
+* forms-next-field:                      Forms Commands.      (line  35)
+* forms-next-record:                     Forms Commands.      (line  16)
+* forms-number-of-fields:                Control File Format. (line  26)
+* forms-prev-field:                      Forms Commands.      (line  74)
+* forms-prev-record:                     Forms Commands.      (line  20)
+* forms-print:                           Forms Commands.      (line  84)
+* forms-read-file-filter <1>:            Control File Format. (line  67)
+* forms-read-file-filter:                Data File Format.    (line  11)
+* forms-read-only:                       Control File Format. (line  48)
+* forms-save-buffer:                     Forms Commands.      (line  77)
+* forms-search-backward:                 Forms Commands.      (line  69)
+* forms-search-forward:                  Forms Commands.      (line  64)
+* forms-toggle-read-only:                Forms Commands.      (line  41)
+* forms-version:                         Miscellaneous.       (line   6)
+* forms-write-file-filter <1>:           Control File Format. (line  79)
+* forms-write-file-filter:               Data File Format.    (line  11)
+* next:                                  Forms Commands.      (line  95)
+* prior:                                 Forms Commands.      (line  98)
+* pseudo-newline:                        Data File Format.    (line  21)
+* record:                                Data File Format.    (line   6)
+* S-Tab:                                 Forms Commands.      (line 107)
+* TAB:                                   Forms Commands.      (line  35)
+
+
+
+Tag Table:
+Node: Top1078
+Node: Forms Example3353
+Node: Entering and Exiting Forms Mode4553
+Node: Forms Commands6763
+Node: Data File Format10565
+Node: Control File Format11905
+Node: Format Description16534
+Node: Modifying Forms Contents19867
+Node: Miscellaneous21745
+Node: Error Messages23284
+Node: Long Example27528
+Node: Credits30610
+Node: GNU Free Documentation License31384
+Node: Index56552
+
+End Tag Table

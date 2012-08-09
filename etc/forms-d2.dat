@@ -1,0 +1,4 @@
+comp.sources.unix		v11i008	269	getty-enable	1	tron@sc.nsc.com (Ronald S. Karr)	Getty on/off programs for 4.[23] BSD		890505	This program can be used to dynamically enable / disable terminallines on a BSD system.
+comp.sources.unix	11	v11i022	283	syslog	1	emory!arnold (Arnold D. Robbins {EUCC})	Development version of syslog(3), for ATT, too		28/08/1987	
+comp.sources.unix	11	v11i033	290	less3	3	sun!intsc!convgt!mark	The 'less' pager		02/09/1987	
+comp.sources.unix	11	v11i036	293	test.el	3	"Mark A. Ardis" <maa@sei.cmu.edu>	Test system for GNU Emacs		10/09/1987	

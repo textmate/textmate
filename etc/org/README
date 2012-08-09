@@ -1,0 +1,36 @@
+The files OrgOdtContentTemplate.xml and OrgOdtStyles.xml have the
+following copyright information:
+
+Copyright (C) 2010-2012 Free Software Foundation, Inc.
+
+These files are part of GNU Emacs.
+
+GNU Emacs is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU Emacs is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+
+Author: Jambunathan K <kjambunathan at gmail dot com>
+Keywords: outlines, hypermedia, calendar, wp
+Homepage: http://orgmode.org
+
+Commentary:
+
+These files are part of Org-mode's OpenDocument export module.
+
+OrgOdtContentTemplate.xml provides a template within which the content
+of an exported document is enclosed.  This file contributes to
+"content.xml" file within an exported document and acts as a
+repository of automatic styles.
+
+OrgOdtStyles.xml contributes to "styles.xml" file within an exported
+document and acts as a repository of custom styles.

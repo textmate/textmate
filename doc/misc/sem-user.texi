@@ -1,0 +1,1331 @@
+@c This file is included by semantic.texi
+
+@c Copyright (C) 1999-2005, 2007, 2009-2012 Free Software Foundation, Inc.
+
+@c Permission is granted to copy, distribute and/or modify this
+@c document under the terms of the GNU Free Documentation License,
+@c Version 1.3 or any later version published by the Free Software
+@c Foundation; with no Invariant Sections, no Front-Cover Texts, and
+@c no Back-Cover Texts.  A copy of the license is included in the
+@c section entitled ``GNU Free Documentation License''.
+
+You can begin using @semantic{} by enabling Semantic mode, a global
+minor mode: type @kbd{M-x semantic-mode}, or open the @samp{Tools}
+menu and click on the menu item named @samp{Source Code Parsers
+(Semantic)}.  @xref{Semantic mode}.
+
+When Semantic mode is turned on, Emacs automatically parses each file
+you visit.  You can then use @semantic{} user commands in those
+buffers (@pxref{Semantic mode user commands}).  You can also choose to
+enable a number of ``helper'' minor modes for saving tags, displaying
+tag information, and so forth.
+
+To enable Semantic mode each time you start Emacs, add the line
+@code{(semantic-mode 1)} to your initialization file.  @xref{Init
+File,,,emacs,Emacs manual}.
+
+@menu
+* Semantic mode::       Global minor mode for @semantic{}.
+* SemanticDB::          Caching parsed buffers between sessions.
+* Idle Scheduler::      @semantic{} actions that occur when idle.
+* Analyzer::            Semantic tools for analyzing code.
+* Speedbar::            Using @semantic{} with the Speedbar.
+* SymRef::              Interface to symbol reference tools.
+* MRU Bookmarks::       Managing tag "bookmarks".
+* Sticky Func Mode::    Showing declarations in the header line.
+* Highlight Func Mode:: Highlight the current function declaration.
+* Tag Decoration Mode:: Minor mode to decorate tags.
+@end menu
+
+@node Semantic mode
+@section Semantic mode
+@cindex Semantic mode
+
+Semantic mode is a global minor mode for @semantic{} as a whole.  When
+enabled, each file you visit is automatically parsed, provided its
+major mode is specified in the variable
+@code{semantic-new-buffer-setup-functions} (the default value of this
+variable sets up parsing for all the parsers included with Emacs, but
+you may add to it if you install additional parsers).
+
+In each parser-enabled buffer, a number of @semantic{} commands are
+available for navigating, querying, and editing source code.
+@xref{Semantic mode user commands}.  Enabling Semantic mode also
+installs a @samp{Development} menu on the menu-bar, with many of these
+commands.
+
+In addition, enabling Semantic mode turns on certain auxiliary global
+minor modes.  The variable @code{semantic-default-submodes} determines
+which auxiliary modes are enabled; the defaults are SemanticDB mode
+(@pxref{SemanticDB}) and Global Semantic Idle Scheduler mode
+(@pxref{Idle Scheduler}).  You can also toggle the auxiliary minor
+modes separately, using their mode functions (e.g. @kbd{M-x
+semanticdb-minor-mode}), or via the @samp{Development} menu.  The
+various auxiliary minor modes are described in the following sections.
+
+@defvar semantic-new-buffer-setup-functions
+The value of this variable is an alist of functions to call for
+setting up @semantic{} parsing in the buffer.  Each element has the
+form @code{(@var{mode} . @var{fn})}, where @var{mode} is a value of
+@code{major-mode} for the buffer and @var{fn} is the corresponding
+function for setting up the parser.  @var{fn} is called, with no
+arguments, after the major mode is initialized (and after the mode
+hooks have been run).
+
+The default value enables @semantic{} for all supported major modes
+(i.e., C, C++, Scheme, Javascript, Java, HTML, SRecode, and Make), but
+you can remove modes from this list if you don't want to use
+@semantic{} with them.
+@end defvar
+
+@defvar semantic-default-submodes
+The value of this variable is a list of symbols, specifying the
+auxiliary minor modes to enable when enabling Semantic mode.  The
+valid mode symbols are:
+
+@itemize
+@item @code{global-semantic-idle-scheduler-mode} (@pxref{Idle Scheduler}).
+@item @code{global-semanticdb-minor-mode} (@pxref{SemanticDB}).
+@item @code{global-semantic-idle-summary-mode} (@pxref{Idle Summary Mode}).
+@item @code{global-semantic-idle-completions-mode} (@pxref{Idle Completions Mode}).
+@item @code{global-semantic-highlight-func-mode} (@pxref{Highlight Func Mode}).
+@item @code{global-semantic-decoration-mode} (@pxref{Tag Decoration Mode}).
+@item @code{global-semantic-stickyfunc-mode} (@pxref{Sticky Func Mode}).
+@item @code{global-semantic-mru-bookmark-mode} (@pxref{MRU Bookmarks}).
+@end itemize
+@end defvar
+
+@menu
+* Semantic mode user commands::
+@end menu
+
+@node Semantic mode user commands
+@subsection Semantic mode user commands
+
+Semantic mode provides a number of commands for navigating, querying,
+and editing source code in a language-aware manner.  These commands
+generally act on @dfn{tags}, which are the source-code units deemed
+``important'' by the present programming language (e.g. functions in
+the C programming language).
+
+These commands may be used in any buffer that has been parsed by
+@semantic{}.  Several of them prompt for a tag name using the
+minibuffer; here, the @kbd{TAB} key can be used to complete tag names.
+Others act on the @dfn{current tag}, meaning the tag at (or around)
+point.
+
+@table @kbd
+@item C-c , j
+Prompt for a tag defined in the current file, and move point to it
+(@code{semantic-complete-jump-local}).
+
+@item C-c , J
+Prompt for a tag defined in any file that Emacs has parsed, and move
+point to it (@code{semantic-complete-jump}).
+
+@item C-c , l
+Display a list of the possible completions of the current tag
+(@code{semantic-analyze-possible-completions}).
+
+@item C-c , g
+Prompt for a tag, and display a list of tags that call it
+(@code{semantic-symref-symbol}).  This relies on the presence of an
+external symbol reference tool.  @xref{SymRef}.
+
+@item C-c , G
+Display a list of tags that call the current tag
+(@code{semantic-symref}).  This relies on the presence of an external
+symbol reference tool.  @xref{SymRef}.
+
+@item C-c , p
+Move point to the previous tag (@code{senator-previous-tag}).
+
+@item C-c , n
+Move point to the next tag (@code{senator-next-tag}).
+
+@item C-c , u
+Move point ``up'' one reference (@code{senator-go-to-up-reference}).
+The meaning of ``up'' is language-dependent; in C++, for instance,
+this means moving to the parent of the current tag.
+
+@item C-c, @key{SPC}
+Display a list of possible completions for the symbol at point
+(@code{semantic-complete-analyze-inline}).  This also activates a
+special set of keybindings for choosing a completion: @key{RET}
+accepts the current completion, @kbd{M-n} and @kbd{M-p} cycle through
+possible completions, @key{TAB} completes as far as possible and then
+cycles, and @kbd{C-g} or any other key aborts the completion.
+@xref{Smart Completion}.
+
+@item C-c , C-w
+Kill the current tag (@code{senator-kill-tag}).  This removes the text
+for that tag, placing it in the kill ring.  You can retrieve the text
+with @kbd{C-y}.  This also places the tag in the @dfn{tag ring}, so
+that you can yank it with @kbd{\C-c,\C-y}, below.
+
+@item C-c , M-w
+Copy the current tag into the kill ring as well as the tag ring
+(@code{senator-copy-tag}).
+
+@item C-c , C-y
+Yank a tag from the tag ring (@code{senator-yank-tag}).
+
+@item C-c , r
+Copy the current tag into a register
+(@code{senator-copy-tag-to-register}).  With an optional argument,
+kill it as well.  This allows you to insert or jump to that tag with
+the usual register commands.  @xref{Registers,,,emacs,Emacs manual}.
+
+@item C-c , @kbd{up}
+Transpose the current tag with the previous one
+(@code{senator-transpose-tags-up}).
+
+@item C-c , @kbd{down}
+Transpose the current tag with the next one
+(@code{senator-transpose-tags-down}).
+@end table
+
+@node SemanticDB
+@section Semantic Database
+@cindex SemanticDB
+
+The Semantic Database (SemanticDB) caches the results of parsing
+source code files.  This data can be saved to disk when you exit
+Emacs, and reloaded automatically when you subsequently revisit the
+same source code files.  This saves time by eliminating the need to
+re-parse unmodified files.
+
+SemanticDB also provides an @acronym{API} that programs can use to
+acquire information about source code tags.  This information can be
+accessed without loading the original the source files into memory.
+It can also be used to create alternate ``back-ends'' for storing tag
+information in alternative on-disk formats.
+
+By default, SemanticDB is enabled together with Semantic mode.  To
+disable it, remove it from @code{semantic-default-submodes}
+(@pxref{Semantic mode}).  You can also enable or disable SemanticDB
+with @kbd{M-x global-semanticdb-minor-mode}.
+
+@deffn Command global-semanticdb-minor-mode
+Toggle SemanticDB mode.  When enabled, any source code parsed by
+@semantic{} is cached in a database.
+@end deffn
+
+SemanticDB offers a large number of customizable options, which are
+described in the following subsections.
+
+@menu
+* Semanticdb Tag Storage::
+* Semanticdb Search Configuration::
+* Changing Backends::
+* Create System Databases::
+@end menu
+
+@node Semanticdb Tag Storage
+@subsection Semanticdb Tag Storage
+
+Each time you exit Emacs, any data cached by SemanticDB is saved in
+the directory @file{.emacs.d/semanticdb/}, located in your home
+directory.  Within this directory, the cache data is written into a
+set of files according to a SemanticDB-specific filename convention.
+If the SemanticDB directory does not exist, Emacs first asks if you
+want to create it.
+
+You can change the name of the SemanticDB directory by customizing the
+variable @code{semanticdb-default-save-directory}.
+
+@deffn Option semanticdb-default-save-directory
+The name of the directory where SemanticDB cache files are saved.  If
+the value is @code{nil}, SemanticDB saves its data into a single file,
+in the current directory, whose filename is given by
+@code{semanticdb-default-file-name}.
+@end deffn
+
+@deffn Option semanticdb-default-file-name
+The name of a cache file in which to save SemanticDB, when
+@code{semanticdb-default-save-directory} is @code{nil}.
+@end deffn
+
+You can force SemanticDB to save the data from only certain files, or
+suppress saving altogether, by customizing
+@code{semanticdb-persistent-path}:
+
+@deffn Option semanticdb-persistent-path
+List of valid paths for SemanticDB to cache.  Each element should be a
+directory name (a string); then the parse data from any file in that
+directory is saved.
+
+As a special exception, the value of this variable can be a list
+containing a single symbol: @code{never}, @code{always}, or
+@code{project}.  The symbol @code{never} disables saving anywhere;
+@code{always} enables saving everywhere; and @code{project} enables
+saving directory based on the variable
+@code{semanticdb-project-predicate-functions}.
+
+The default value is @code{(always)}.
+@end deffn
+
+@defvar semanticdb-project-predicate-functions
+The value of this variable is a list of predicates for indicating that
+a directory belongs to a project.  This list is used when the value of
+@code{semanticdb-persistent-path} is @code{(project)}.  If the list is
+empty, all paths are considered valid.
+
+Project management packages, such as EDE (@pxref{Top,,,ede,EDE
+manual}), may add their own predicates with @dfn{add-hook} to this
+variable.  This allows SemanticDB to save tag caches in directories
+controlled by them.
+@end defvar
+
+@deffn Option semanticdb-save-database-hooks
+Abnormal hook run after a database is saved.  Each function is called
+with one argument, the object representing the database recently
+written.
+@end deffn
+
+@node Semanticdb Search Configuration
+@subsection Semanticdb Search Configuration
+
+  When another part of @semantic{} (or another Emacs package using
+@semantic{}) queries the SemanticDB library for a source code tag, the
+search need not be limited to tags defined within the current file.
+It can include tags defined elsewhere, such as @dfn{header files}
+referenced by the current file (e.g., via the C/C++ @code{#include}
+directive).  While performing the search, the SemanticDB library may
+even automatically visit other files and parse them, if necessary.
+
+  The variable @code{semanticdb-find-default-throttle} determines how
+aggressively SemanticDB searches for source code tags.  @xref{Search
+Throttle}.
+
+  The details of SemanticDB searches can vary from language to
+language.  In C/C++ code, for example, SemanticDB distinguishes
+between @dfn{project header files} and @dfn{system header files},
+based on whether the @code{#include} directive uses the @code{""} or
+@code{<>} filename delimiter.  SemanticDB looks for system header in
+the @dfn{system include path} (@pxref{Include paths}).
+
+@menu
+* Search Throttle::     Controlling how semanticdb searches occur.
+* Semanticdb Roots::    Specifying the root of different projects.
+* Include paths::       Specifying the directories to search.
+* Semanticdb search debugging commands::
+@end menu
+
+@node Search Throttle
+@subsubsection SemanticDB Search Throttle
+
+The SemanticDB @dfn{search throttle} determines how aggressive
+SemanticDB searches are.  It is controlled by the variable
+@code{semanticdb-find-default-throttle}.  The default value of this
+variable aims for maximum accuracy, at the expense of search time.
+
+Other parts of the @semantic{} package, particularly the different
+language parsers, may change the value of
+@code{semanticdb-find-default-throttle}.  You can override its value,
+for a given major mode, like this:
+
+@example
+(setq-mode-local c-mode
+                 semanticdb-find-default-throttle
+                 '(project unloaded system recursive))
+@end example
+
+@defvar semanticdb-find-default-throttle
+The default throttle for @code{semanticdb-find} routines.
+The throttle controls how detailed the list of database
+tables is for a symbol lookup.  The value is a list with
+the following keys:
+
+@table @code
+@item file
+The file the search is being performed from.  This option is here for
+completeness only, and is assumed to always be on.
+@item local
+Tables from the same local directory are included.  This includes
+files directly referenced by a file name which might be in a different
+directory.
+@item project
+Tables from the same local project are included If @code{project} is
+specified, then @code{local} is assumed.
+@item unloaded
+If a table is not in memory, load it.  If it is not cached on disk
+either, get the source, parse it, and create the table.
+@item system
+Tables from system databases.  These are specifically tables
+from system header files, or language equivalent.
+@item recursive
+For include based searches, includes tables referenced by included
+files.
+@item omniscience
+Included system databases which are omniscience, or somehow know
+everything.  Omniscience databases are found in
+@code{semanticdb-project-system-databases}.  The Emacs Lisp system
+@var{db} is an omniscience database.
+@end table
+@end defvar
+
+@node Semanticdb Roots
+@subsubsection SemanticDB project roots
+
+The @code{project} setting in the SemanticDB search throttle
+(@pxref{Search Throttle}) tells SemanticDB to search within the
+current single code project.  For @semantic{}'s point of view,
+@dfn{projects} are determined by their top-level directories, or
+@dfn{project roots}; every subdirectory of a project root is
+considered part of the same project.
+
+If you use EDE for project management, it will set the project roots
+automatically.  @xref{Top,,,ede,EDE manual}.  You can also specify
+them yourself.
+
+@deffn Option semanticdb-project-roots
+The value of this variable is a list of directories (strings) that are
+project roots.  All subdirectories of a project root are considered
+part of the same project.  This variable can be overridden by
+@code{semanticdb-project-root-functions}.
+@end deffn
+
+@defvar semanticdb-project-root-functions
+The value of this variable is a list of functions to determine a given
+directory's project root.  These functions are called, one at a time,
+with one argument (the directory name), and must return either
+@code{nil}, a string (the project root), or a list of strings
+(multiple project roots, for complex systems).  The first
+non-@code{nil} return value, if any, is taken to be the project root,
+overriding @code{semanticdb-project-roots}.
+@end defvar
+
+@node Include paths
+@subsubsection Include Paths
+
+System include paths are standard locations to find source code tags,
+such as the @dfn{header files} in @file{/usr/include} and its
+subdirectories on Unix-like operating systems.
+
+You can add and remove system include paths using the following
+commands:
+
+@deffn Command semantic-add-system-include dir &optional mode
+Prompts for a directory, @var{dir}, and add it as a system include
+path for the current major mode.  When called non-interactively, the
+major mode can be specified with the @var{mode} argument.
+@end deffn
+
+@deffn Command semantic-remove-system-include dir &optional mode
+Prompt for a directory, @var{dir}, and remove it from the system
+include path for the current major mode (or @var{mode}).
+@end deffn
+
+@deffn Command semantic-customize-system-include-path &optional mode
+Customize the system include path for the current major mode (or
+@var{mode}).
+@end deffn
+
+@defun semanticdb-implied-include-tags
+Include tags implied for all files of a given mode.  You can set this
+variable with @code{defvar-mode-local} for a particular mode so that
+any symbols that exist for all files for that mode are included.
+@end defun
+
+@c @xref{Search Optimization}, for more information on include paths.
+
+@node Semanticdb search debugging commands
+@subsubsection Semanticdb search debugging commands
+
+You can use @kbd{M-x semanticdb-dump-all-table-summary} to see the
+list of databases that will be searched from a given buffer.  You can
+follow up with @kbd{M-x semanticdb-find-test-translate-path} to then
+make sure specific tables from the path are discovered correctly.
+Alternately, you can get a list of include files @semantic{}
+encountered, but could not find on disk using @kbd{M-x
+semanticdb-find-adebug-lost-includes}.
+
+@deffn Command semanticdb-dump-all-table-summary
+Dump a list of all databases in Emacs memory.
+@end deffn
+
+@deffn Command semanticdb-find-test-translate-path &optional arg
+Call and output results of @dfn{semanticdb-find-translate-path}.  In
+the displayed buffer, you can type @key{SPC} to expand items.  With
+@var{arg} non-@code{nil}, specify a @var{brutish} translation.
+@end deffn
+
+@deffn Command semanticdb-find-adebug-lost-includes
+Translate the current path, then display the lost includes.
+Examines the variable @code{semanticdb-find-lost-includes}.
+@end deffn
+
+Lastly, you can test an explicit search term using this command:
+
+@deffn Command semantic-adebug-searchdb regex
+Search the semanticdb for @var{regex} for the current buffer.
+Display the results as a debug list.
+@end deffn
+
+@node Changing Backends
+@subsection Changing Backends
+
+If you want to use some other form of backend, you can use this
+variable to choose which back end class to use for your general tag
+storage.
+
+The default is to save databases in flat files.  Alternatively, you
+could write a new database backend that stores tags into a database,
+or other storage system.
+
+@defvar semanticdb-new-database-class
+The default type of database created for new files.  This can be
+changed on a per file basis, so that some directories are saved using
+one mechanism, and some directories via a different mechanism.
+@end defvar
+
+@node Create System Databases
+@subsection Create System Databases
+
+If your supported language stores the system libraries in readily
+available parsable source code, you can pre-generate database files
+for them once, which will be used over and over for tools such as
+summary-mode, or the analyzer.
+
+@deffn Command semanticdb-create-ebrowse-database dir
+Create an @var{ebrowse} database for directory @var{dir}.
+The database file is stored in ~/.semanticdb, or whichever directory
+is specified by @code{semanticdb-default-system-save-directory}.
+@end deffn
+
+@node Idle Scheduler
+@section Idle Scheduler
+@cindex Idle Scheduler
+
+The @dfn{Semantic Idle Scheduler} is a part of @semantic{} that
+performs various operations while Emacs is waiting for user input
+(idle time).  Its primary job is to perform buffer parsing during idle
+time.  You can also use the Idle Scheduler to display function
+prototypes (@pxref{Idle Summary Mode}) or symbol completions
+(@pxref{Idle Completions Mode}).
+
+@deffn Command global-semantic-idle-scheduler-mode &optional arg
+This command toggles Semantic Idle Scheduler mode in every
+@semantic{}-enabled buffer.  This minor mode ensures that the buffer
+is automatically reparsed whenever Emacs is idle.  If there is
+additional idle time, it runs jobs scheduled by other parts of
+@semantic{}, such as Semantic Idle Summary mode (@pxref{Idle Summary
+Mode}) and Semantic Idle Completions mode (@pxref{Idle Completions
+Mode}).
+@end deffn
+
+@deffn Option semantic-idle-scheduler-idle-time
+The value of this variable is the amount of idle time, in seconds,
+before the Semantic idle scheduler activates.  The default is 1.
+@end deffn
+
+@deffn Option semantic-idle-scheduler-verbose-flag
+If this variable is non-@code{nil}, the idle scheduler prints verbose
+messages while running, which are useful for debugging.
+@end deffn
+
+@menu
+* Reparsing Options::          Reparsing the current buffer in idle time.
+* Idle Working Options::       Options for extra work done at idle time.
+* Debugging Idle Time Issues:: How to produce good bug reports.
+* Idle Summary Mode::          Display prototype of symbol under cursor.
+* Idle Completions Mode::      Smart completion pop-up help.
+@end menu
+
+@node Reparsing Options
+@subsection Reparsing Options
+
+When activated during idle time, the Semantic idle scheduler
+automatically reparses all buffers that need it.  Any arriving user
+input cancels this, returning Emacs to its normal editing behavior.
+
+@deffn Option semantic-idle-scheduler-max-buffer-size
+Maximum size in bytes of buffers automatically reparsed.  If this
+value is less than or equal to @var{0}, buffers are automatically
+reparsed regardless of their size.
+@end deffn
+
+@deffn Option semantic-idle-scheduler-no-working-message
+If non-@code{nil}, disable display of working messages while reparsing.
+@end deffn
+
+@deffn Option semantic-idle-scheduler-working-in-modeline-flag
+If non-@code{nil}, show working messages in the mode line.  Normally,
+re-parsing shows messages in the minibuffer; this moves the parse
+message to the modeline instead.
+@end deffn
+
+@defvar semantic-before-idle-scheduler-reparse-hook
+This normal hook is run just before the idle scheduler begins
+reparsing.  If any hook function throws an error, the value of this
+variable is reset to @code{nil}.  This hook is not protected from
+lexical errors.
+@end defvar
+
+@defvar semantic-after-idle-scheduler-reparse-hook
+
+This normal hook is run after the idle scheduler finishes reparsing.
+If any hook throws an error, this variable is reset to @code{nil}.
+This hook is not protected from lexical errors.
+@end defvar
+
+@node Idle Working Options
+@subsection Idle Working Options
+
+In addition to reparsing buffers, the Semantic idle scheduler performs
+additional operations, including the following:
+
+@itemize
+@item
+Creating the include path caches required for symbol lookup.
+@item
+Create data type caches.
+@item
+Saving SemanticDB caches to disk.
+@item
+Speculatively parsing the files in the same directory as the current
+buffer.
+@end itemize
+
+Because this extra work is quite time-consuming, it is only carried
+out after a longer idle delay.  The following features control how the
+idle work is performed.
+
+@deffn Option semantic-idle-scheduler-work-idle-time
+The value of this variable is the amount of idle time, in seconds,
+before commencing idle work.  The default is 60.
+@end deffn
+
+@deffn Option semantic-idle-work-parse-neighboring-files-flag
+If the value of this variable is non-@code{nil}, the Semantic idle
+scheduler uses idle work time to parse files in the same directory as
+the current buffer.  This improves the accuracy of tag searches and
+saves time when visiting those files later, at the cost of doing a lot
+of parsing.  The default is @code{t}.
+@end deffn
+
+@node Debugging Idle Time Issues
+@subsection Debugging Idle Time Issues
+
+If you see an error signaled during idle time, it could be an
+indication of a more serious issue elsewhere.  It is not enough to
+enable @code{debug-on-error}, because the idle scheduler inhibits the
+debugger.  Instead, use the following commands to debug the error:
+
+@deffn Command semantic-debug-idle-function
+Run the Semantic idle function with debugging turned on.
+@end deffn
+
+@deffn Command semantic-debug-idle-work-function
+Run the Semantic idle work function with debugging turned on.
+@end deffn
+
+@node Idle Summary Mode
+@subsection Idle Summary Mode
+
+Semantic Idle Summary mode is a minor mode that displays a short
+summary of the symbol at point, such as its function prototype, in the
+echo area.  Its functionality is similar to what ElDoc mode provides
+for Emacs Lisp (@pxref{Lisp Doc,,,emacs,Emacs manual}).
+
+@deffn global-semantic-idle-summary-mode &optional arg
+This command toggles Semantic Idle Summary mode in all
+@semantic{}-enabled buffers.  You can also toggle it via the
+@samp{Show Tag Summaries} menu item in the @samp{Development} menu.
+@end deffn
+
+When Semantic Idle Summary mode is active, a summary of the tag at
+point is displayed in the echo area.  This display takes place during
+the idle time, as given by @code{semantic-idle-scheduler-idle-time}
+(@pxref{Idle Scheduler}).
+
+You can override the method for getting the current tag to display by
+setting @code{idle-summary-current-symbol-info}.
+
+@deffn Option semantic-idle-summary-function
+The value of this variable should be a function to call to display tag
+information during idle time.  See the variable
+@code{semantic-format-tag-functions} for a list of useful functions.
+@end deffn
+
+@defvar semantic-idle-summary-out-of-context-faces
+The value of this variable is a list of font-lock faces indicating
+useless summary contexts.  These are generally faces used to highlight
+comments or strings.  Semantic Idle Summary mode does not display its
+usual summary if the text at point has one of these faces.
+@end defvar
+
+@node Idle Completions Mode
+@subsection Idle Completions Mode
+
+Semantic Idle Completions mode is a minor mode for performing
+@dfn{code completions} during idle time.  The completions are
+displayed inline, with keybindings that allow you to cycle through
+different alternatives.
+
+Semantic Idle Completions mode performs completion based on the
+Semantic Analyzer (@pxref{Analyzer}).
+
+@deffn global-semantic-idle-completions-mode &optional arg
+This command toggles Semantic Idle Completions mode in every
+@semantic{}-enabled buffer.  You can also toggle it via the @samp{Show
+Tag Completions} menu item in the @samp{Development} menu.
+@end deffn
+
+If the tag at point has at least one completion, Semantic Idle
+Completions mode displays that completion inline---i.e., as part of
+the buffer text (you can change the display method by customizing
+@code{semantic-complete-inline-analyzer-idle-displayor-class}, as
+described below).  The completed part is highlighted, to indicate that
+it is not yet properly inserted into the buffer.  The echo area shows
+the completion, and whether there are other possible completions, like
+this:
+
+@example
+besselj [1 of 6 matches]
+@end example
+
+@noindent
+While the completion is being displayed, the following keybindings
+take effect:
+
+@table @kbd
+@item @key{RET}
+@itemx C-m
+Accept the current completion (@code{semantic-complete-inline-done}),
+placing it in the buffer and moving point to the end of the completed
+tag.
+@item M-n
+Select the next possible completion
+(@code{semantic-complete-inline-down}).  The new completion is shown
+inline, replacing the old completion.
+@item M-p
+Select the previous possible completion
+(@code{semantic-complete-inline-up}).
+@item @key{TAB}
+@item C-i
+Accept as much of the completion as possible.  If no additional
+completion can be accepted without ambiguity, select the next possible
+completion (@code{semantic-complete-inline-TAB}).
+@item C-g
+Quit without completing (@code{semantic-complete-inline-quit}).
+@end table
+
+@noindent
+You can also exit inline completion by issuing any other Emacs
+command.  The completion text then disappears from the buffer.
+
+@deffn Command semantic-complete-analyze-inline-idle
+This is the command for performing inline code completion.  It is
+called by Semantic Idle Completions mode during idle time, but you can
+also call it yourself.  It returns immediately, leaving the buffer in
+a state for inline completion.
+@end deffn
+
+@deffn Option semantic-complete-inline-analyzer-idle-displayor-class
+The value of this variable determines how
+@code{semantic-complete-analyze-inline-idle} shows its completions.
+Possible values include:
+
+@table @code
+@item semantic-displayor-ghost
+Display completions ``inline'' with the buffer text, as described
+above.  This is the default value.
+
+@item semantic-displayor-tooltip
+Display completions in a tooltip.
+
+@item semantic-displayor-traditional
+Display completions in a separate window.
+@end table
+@end deffn
+
+@node Analyzer
+@section Analyzer
+@cindex Analyzer
+
+The Semantic Analyzer is a library for performing context analysis on
+source code.  It provides user commands for displaying, completing,
+and navigating through source code.
+
+@menu
+* Smart Completion::       Performing code completion.
+* Smart Summary::          Displaying help on a symbol.
+* Smart Jump::             Jumping to the definition of a tag.
+* Analyzer Debug::         Debugging problems with the analyzer.
+@end menu
+
+@node Smart Completion
+@subsection Smart Completion
+
+The Semantic Analyzer can be used to perform code completion in a
+manner that takes the local context into account.  (In addition to the
+user commands in this section, Semantic Idle Completions mode also
+uses the Semantic Analyzer.  @xref{Idle Completions Mode}.)
+
+@deffn Command semantic-analyze-possible-completions context
+This is the most basic command for Semantic Analyzer-based completion.
+Called interactively, it displays a list of the possible completions
+for the symbol at point.
+
+When called from a Lisp program,
+@code{semantic-analyze-possible-completions} does not display a
+completions list.  The argument @var{context} should be either a
+buffer position, or a context object.  The return value is a list of
+@semantic{} tag objects that complete the symbol for @var{context},
+based on the following criteria:
+
+@itemize
+@item Elements currently in scope.
+@item Constants currently in scope.
+@item Elements matching the context's @code{:prefix}.
+@item Type of the completion matching the type of the context.
+@end itemize
+
+Most of the other commands documented in this section call
+@code{semantic-analyze-possible-completions} internally.
+@end deffn
+
+@deffn Command semantic-complete-analyze-inline
+This command is bound to @kbd{C-c , @key{SPC}} when Semantic mode is
+enabled (@pxref{Semantic mode user commands}).  It displays a list of
+possible completions for the symbol at point, and activates a special
+set of keybindings for choosing a completion.
+
+You can type @key{RET} to accept the current completion, @kbd{M-n} and
+@kbd{M-p} to cycle through the possible completions, @key{TAB} to
+complete as far as possible and then cycle through completions, and
+either @kbd{C-g} or any other key to abort the completion.
+
+This command is similar to the completion performed by Semantic Idle
+Completions mode.  The main difference is that it is called
+explicitly, whereas Semantic Idle Completions mode completes during
+idle time (@pxref{Idle Completions Mode}).
+@end deffn
+
+@deffn Option semantic-complete-inline-analyzer-idle-displayor-class
+The value of this variable determines how
+@code{semantic-complete-analyze-inline} shows its completions.
+Possible values include:
+
+@table @code
+@item semantic-displayor-traditional
+Display completions in a separate window.  This is the default value.
+
+@item semantic-displayor-ghost
+Display completions ``inline'' with the buffer text, similar to the
+default behavior of Semantic Idle Completions mode (@pxref{Idle
+Completions Mode}).
+
+@item semantic-displayor-tooltip
+Display completions in a tooltip.
+@end table
+@end deffn
+
+In addition to @code{semantic-complete-analyze-inline}, you can use
+the simpler command @code{semantic-ia-complete-symbol point}.  This
+behaves like the usual @kbd{M-@key{TAB}} (@code{complete-symbol})
+command (@pxref{Symbol Completion,,,emacs,Emacs manual}), except it
+uses the Semantic Analyzer.
+
+@deffn Command semantic-ia-complete-symbol point
+Complete the current symbol at @var{point}.
+@end deffn
+
+@node Smart Summary
+@subsection Smart Summary
+
+You can use the following commands to obtain information about the
+code at point:
+
+@deffn Command semantic-ia-show-summary pos
+Display a summary for the symbol at @var{pos}.  Called interactively,
+@var{pos} defaults to point.
+@end deffn
+
+@deffn Command semantic-ia-show-doc pos
+Display the code-level documentation for the symbol at @var{pos}.
+Called interactively, @var{pos} defaults to point.
+@end deffn
+
+@deffn Command semantic-ia-describe-class typename
+Prompt for the name of a data type, @var{typename}, and display its
+components.  For instance, if the type in question is a class, this
+displays the methods and member variables.
+@end deffn
+
+You can also use Semantic Idle Summary mode to show information about
+the current symbol in the echo area during idle time.  @xref{Idle
+Summary Mode}.
+
+@node Smart Jump
+@subsection Smart Jump
+
+The Semantic Analyzer can be used to jump directly to the definition
+for a code symbol.
+
+@deffn Command semantic-ia-fast-jump pos
+Jump to the definition for the symbol at @var{pos}.  Called
+interactively, @var{pos} defaults to point.
+@end deffn
+
+@defun semantic-ia-fast-mouse-jump event
+Jump to the definition for the symbol at the position of the mouse
+event @var{event}.  This command is meant to be bound to a mouse
+command, like this:
+
+@example
+(global-set-key '[(S-mouse-1)] semantic-ia-fast-mouse-jump)
+@end example
+@end defun
+
+These commands are often more accurate than the @code{find-tag}
+command (@pxref{Tags,,,emacs,Emacs manual}), because the Semantic
+Analyzer is context-sensitive.
+
+You can also use @kbd{C-c , j} (@code{semantic-complete-jump-local})
+and @kbd{C-c , J} (@code{semantic-complete-jump}) to navigate tags.
+@xref{Semantic mode user commands}.  Those commands do not make use of
+the Semantic Analyzer.
+
+@node Analyzer Debug
+@subsection Debugging the Semantic Analyzer
+
+If the Semantic Analyzer does not analyze your code properly, you can
+take steps to identify and solve the problem.  This section was
+written with C/C++ in mind, but should be relevant for any typed
+language.
+
+@subsubsection Step 1: Check the context
+
+To check the current context, type @kbd{M-x
+semantic-analyze-current-context}.
+
+@deffn Command semantic-analyze-current-context pos
+Analyze the context at @var{pos}.  This function is used by most of
+the other Semantic Analyzer commands to obtain the context of the code
+at a given buffer position.  The return value is an EIEIO object
+describing the context at @var{pos} (@pxref{Top,,,eieio,EIEIO
+manual}).
+
+When called interactively, this displays a @samp{*Semantic Context
+Analysis*} buffer containing a summary of the context at point.
+@end deffn
+
+@noindent
+The Prefix section of the @samp{*Semantic Context Analysis*} buffer
+lists the tags based on the text at point.  If it shows only a simple
+string, the Semantic was unable to identify what the data type was.
+
+The first item in the list of the prefix is the first lookup failure
+in the chain, and that is the item to focus debugging effort on.  For
+example:
+
+@example
+Context Type: #<semantic-analyze-context context>
+Bounds: (182 . 185)
+Prefix: Foo* bar
+        int bbb (const char* y)
+Prefix Types: class Foo @{@}
+--------
+-> Local Vars: int argc
+               char** argv
+@end example
+
+In this example you can see that the prefix has two fully found tags.
+In the following example, the symbol ``bbb'' is incomplete, and could
+not be found:
+
+@example
+Context Type: #<semantic-analyze-context context>
+Bounds: (182 . 184)
+Prefix: Foo* bar
+        "bb"
+Prefix Classes: 'function
+                'variable
+Prefix Types: class Foo @{@}
+--------
+-> Local Vars: int argc
+               char** argv
+@end example
+
+@subsubsection Step 2 : Check your include path
+
+Once you know the missing symbol, check your include path.  The header
+or include file containing the needed definition may not be in the
+list of headers @semantic{} is searching through.  To get a basic
+list, you can use @kbd{M-x semanticdb-find-test-translate-path}.
+@xref{Semanticdb search debugging commands}.
+
+If items should be loaded but aren't, or if you see some tables that
+have no tags in them, then you you may have an incorrectly-set search
+throttle (@pxref{Search Throttle}).  For example,
+
+@example
+*#<semanticdb-table main.cpp (4 tags DIRTY)>
+*#<semanticdb-table foo.hh (0 tags DIRTY)>
+@end example
+
+Here, @semantic{} found @file{foo.hh}, but there are 0 tags.  This may
+be because you had set the throttle to avoid reading and parsing files
+that Emacs has not visited.  To fix this, visit the file and let
+@semantic{} parse it.
+
+For C++, check also that the @samp{#include} statements for your
+project-level files use quotes, not angle brackets; angle brackets are
+for system files.
+
+@subsubsection Step 3: Check the local scope
+
+If your data type is somehow abbreviated based on scope, such as from
+a @code{using} statement, you should make sure that the symbol you
+want is in the local scope.  Examine the scope with @kbd{M-x
+semantic-calculate-scope}.  The scope structure is displayed in ADEBUG
+mode, so use @kbd{SPC} to expand different elements and looking for
+your symbol.
+
+If your symbol should be in the scope, but you cannot find it, then
+you may have found a language support bug in the local-variable
+parser, or using statement parser.
+
+Calling @kbd{M-x bovinte} should force a reset on the scope in case
+there is merely some bad state.
+
+@example
+ ] Name: Cache
+ ] Class: #'semantic-scope-cache
+ ] :table #<semanticdb-table testsubclass.cpp (13 tags DIRTY)>
+ ] tag createMoose : class moose
+ ] scopetypes 'nil
+ ] parents #<TAG LIST: 1 entries>
+ ] scope #<TAG LIST: 22 entries>
+ ] fullscope #<TAG LIST: 23 entries>
+ ] localvar #<TAG LIST: 6 entries>
+@end example
+
+In the above sample output, the @code{tag} slot specifies where within
+you source this scope is relevant.  @code{Parents} should contain any
+in scope parents, such as the class a method belongs to.
+@code{Localvar} should contain your local variables.  @code{Scope}
+should contain datatypes in scope due to a @code{using} statement or
+the like.
+
+@subsubsection Step 4: Check the typecache
+
+For complex typed languages like C++, @semantic{} creates a typecache,
+or an optimized search table with all the various data types in it.
+Elements in the typecache do not obey local scope.  It only contains
+fully qualified names.  You can examine the typecache with
+@kbd{M-x semanticdb-typecache-dump}.
+
+If your data types are not in the typecache, there may be some parsing
+error or other bug.  Calling @kbd{M-x bovinte} should force a reset on
+the typecache in case there is merely some bad state.
+
+@example
+]#<semanticdb-typecache /home/zappo/cedet/semantic/tests/testsubclass.cpp>
+   ] Name: /home/zappo/cedet/semantic/tests/testsubclass.cpp
+   ] Class: #'semanticdb-typecache
+   ] filestream 'nil
+   ] includestream #<TAG LIST: 84 entries>
+   ] stream 'nil
+   ] dependants 'nil
+@end example
+
+In the above example, the output of @kbd{M-x semanticdb-typecache-dump}
+was expanded one level.  The @code{filestream} slot should contain
+datatypes in the current file.  The @code{includestream} should
+contain all the datatypes in all included header files.
+
+The @code{dependants} slot will specify other files that depend on
+this one.
+
+@subsubsection Step 5: Check the parser
+
+Go to the location where your unfound tag should be.  You can call
+@kbd{M-x bovinate}, and see a dump of the raw tag structure.  To see a
+navigable tree, use @kbd{M-x semantic-adebug-bovinate} instead.  You
+can then look to make sure your tag has been properly parsed.
+
+If it has not, then you may have found a parser bug.  To get a feel
+how @semantic{} treats your file, type @kbd{M-x
+global-semantic-show-unmatched-syntax-mode}.  This causes any syntax
+it cannot parse to be underlined in red.
+
+If your type is not parsable, it could be for a couple of reasons:
+
+@enumerate
+@item
+If there is a MACRO keyword used in the definition of the type, you
+may need to update the @code{semantic-lex-c-preprocessor-symbol-map}
+to account for it.
+
+@item
+Or perhaps the parser needs to be fixed.
+@end enumerate
+
+@node Speedbar
+@section Speedbar
+@cindex speedbar
+
+You can integrate @semantic{} with the Speedbar.
+@xref{Speedbar,,,emacs,Emacs manual}.  To do this, add the following
+line to your init file:
+
+@example
+(add-hook 'speedbar-load-hook (lambda () (require 'semantic/sb)))
+@end example
+
+@noindent
+Or, alternatively:
+
+@example
+(require 'semantic/sb)
+@end example
+
+Once installed, the Speedbar will use @semantic{} to find and display
+tags.  Tags from @semantic{} are displayed with more details than
+ordinary Speedbar tags, such as function arguments and return type.
+
+In addition, you can use the Speedbar to show the output of the
+Semantic Analyzer (@pxref{Analyzer}).  To do this, go to the
+@samp{Display} menu item on the Speedbar menu and select
+@samp{Analyze}; or type @kbd{M-x semantic-speedbar-analysis}.
+
+@deffn Command semantic-speedbar-analysis
+Start the Speedbar in Semantic Analysis mode.
+@end deffn
+
+In Semantic Analysis mode, the Speedbar displays information about the
+local context, such as the current function, local arguments and
+variables, and details on the prefix (the current symbol).  Each entry
+has an @samp{<i>} button; clicking on this shows a summary of what
+@semantic{} knows about that variable or type.  The Speedbar also
+displays a list of possible completions at point.
+
+@node SymRef
+@section Symbol References
+@cindex symref
+
+@semantic{} can interface with external @dfn{symbol reference tools},
+such as GNU Global and GNU Idutils.  These tools provide information
+about where different tags or symbols appear.
+
+By default, @semantic{} tries to look for the best external symbol
+reference tool that can be used.  The supported tools are GNU Global,
+GNU Idutils, CScope, and Grep (the fallback method).  For best
+results, use GNU Global.  However, @semantic{} does not manage your
+GNU Global tables for you; you must manage them yourself.
+
+@defvar semantic-symref-tool
+The value of this variable is a symbol that determines the external
+symbol reference tool to use.  The default value, @code{detect}, says
+to look for the best available tool.  Other possible values are
+@code{global}, @code{idutils}, @code{cscope}, and @code{grep}.  Note
+that @code{grep} is much slower than the others.
+@end defvar
+
+The commands to display symbol references are @kbd{C-c , g}
+(@code{semantic-symref-symbol} and @kbd{C-c , G}
+(@code{semantic-symref}).  These keybindings are available whenever
+Semantic mode is enabled (@pxref{Semantic mode user commands}).
+
+@deffn Command semantic-symref-symbol sym
+This command (normally bound to @kbd{C-c , g}) prompts for a symbol
+name, and uses an external reference tool to find references to that
+tag.
+@end deffn
+
+@deffn Command semantic-symref
+This command (normally bound to @kbd{C-c , G}) uses an external
+reference tool to find references to the current tag.
+@end deffn
+
+Both @code{semantic-symref-symbol} and @code{semantic-symref} display
+a list of symbol references in a separate buffer.  The entries are
+organized by file, and by function name.  Typing @key{RET} on the
+@samp{[+]} next to each function name ``expands'' that entry, listing
+all references to the target symbol occurring within that function.
+Typing @kbd{RET} on a reference line jumps to that reference.
+
+@node MRU Bookmarks
+@section MRU Bookmarks mode
+@cindex semantic-mru-bookmark-mode
+
+Semantic MRU Bookmarks mode is a minor mode that keeps track of the
+tags you have edited, allowing you to quickly return to them later
+(MRU stands for ``Most Recently Used'').
+
+@deffn Command global-semantic-mru-bookmark-mode &optional arg
+Toggle Semantic MRU Bookmarks mode globally.  The minor mode can be
+turned on only if the current buffer was set up for parsing.  With
+argument @var{arg}, turn the minor mode if @var{arg} is positive, and
+off otherwise.
+@end deffn
+
+Semantic MRU Bookmarks mode takes note of each tag you edit.
+Afterwards, you can type @kbd{C-x B}
+(@code{semantic-mrub-switch-tags}) to return to a tag.  This command
+prompts for a tag name, completing with the names of edited tags; at
+the prompt, you can use @kbd{M-p} and @kbd{M-n} to cycle through tags
+in order of last modification time.
+
+@node Sticky Func Mode
+@section Sticky Function mode
+
+Semantic Sticky Function minor mode displays a header line that shows
+the declaration line of the function or tag on the topmost line in the
+text area.  This allows you to keep that declaration line in view at
+all times, even if it is scrolls off the ``top'' of the screen.
+
+In addition, clicking @kbd{Mouse-1} on the header line opens a context
+menu that contains menu items for copying, killing, or narrowing to
+that tag.
+
+@deffn Command global-semantic-stickyfunc-mode &optional arg
+Toggle Semantic Sticky Function mode in all Semantic-enabled buffers.
+With an optional argument @var{arg}, enable if @var{arg} is positive,
+and disable otherwise.
+@end deffn
+
+@defvar semantic-stickyfunc-sticky-classes
+The value of this variable is a list of tag classes that Semantic
+Sticky Function mode makes ``sticky''.  The default is
+@code{'(function type)}, meaning function declarations and type
+declarations.  Other possible tag classes are @code{variable},
+@code{include}, and @code{package}.
+@end defvar
+
+@node Highlight Func Mode
+@section Highlight Func Mode
+@cindex semantic-highlight-func-mode
+
+Semantic Highlight Function minor mode highlights the declaration line
+of the current function or tag (that is to say, the first line that
+describes the rest of the construct).
+
+In addition, clicking @kbd{Mouse-3} on the highlighted declaration
+line opens a context menu that contains menu items for copying,
+killing, or narrowing to that tag.
+
+The tag classes highlighted by Semantic Highlight Function mode are
+the same ones given by @code{semantic-stickyfunc-sticky-classes}.
+@xref{Sticky Func Mode}.
+
+@defun global-semantic-highlight-func-mode &optional arg
+Toggle Semantic Highlight Function mode in all Semantic-enabled
+buffers.  With an optional argument @var{arg}, enable if @var{arg} is
+positive, and disable otherwise.
+@end defun
+
+@deffn Face semantic-highlight-func-current-tag-face
+This face is used to highlight declaration lines in Semantic Highlight
+Func mode.
+@end deffn
+
+@node Tag Decoration Mode
+@section Tag Decoration Mode
+@cindex semantic-decoration-mode
+
+Semantic Tag Decoration mode ``decorates'' each tag based on certain
+arbitrary features of that tag.  Decorations are specified using the
+variable @code{semantic-decoration-styles}.
+
+@deffn Command global-semantic-decoration-mode &optional arg
+Toggle Semantic Tag Decoration mode in all Semantic-enabled buffers.
+With an optional argument @var{arg}, enable if @var{arg} is positive,
+and disable otherwise.
+@end deffn
+
+@defvar semantic-decoration-styles
+The value of this variable is a list of decoration styles for Semantic
+Tag Decoration mode.  Each element in this list should have the form
+@code{(@var{name} . @var{flag})}, where @var{name} is a style name (a
+symbol) and @var{flag} is non-@code{nil} if the style is enabled.
+
+The following styles are available:
+
+@table @code
+@item semantic-tag-boundary
+Place an overline in front of each long tag (excluding prototypes).
+
+@item semantic-decoration-on-private-members
+Highlight class members that are designated as private.
+
+@item semantic-decoration-on-protected-members
+Highlight class members that are designated as protected.
+
+@item semantic-decoration-on-includes
+Highlight class members that are includes.  Clicking on the
+highlighted include statements opens a context menu for configuring
+@semantic{} includes.
+@end table
+@end defvar
+
+To enable or disable specific decorations, use this function:
+
+@deffn Command semantic-toggle-decoration-style name &optional arg
+Prompt for a decoration style, @var{name}, and turn it on or off.
+With prefix argument @var{arg}, turn on if positive, otherwise off.
+Return non-@code{nil} if the decoration style is enabled.
+@end deffn
+
+@deffn Face semantic-tag-boundary-face
+Face for long tags in the @code{semantic-tag-boundary} decoration
+style.
+@end deffn
+
+@deffn Face semantic-decoration-on-private-members-face
+Face for privately-scoped tags in the
+@code{semantic-decoration-on-private-members} decoration style.
+@end deffn
+
+@deffn Face semantic-decoration-on-protected-members-face
+Face for protected tags in the
+@code{semantic-decoration-on-protected-members} decoration style.
+@end deffn
+
+@deffn Face semantic-decoration-on-includes
+Face for includes that are not in some other state, in the
+@code{semantic-decoration-on-includes} decoration style.
+@end deffn
+
+@deffn Face semantic-decoration-on-unknown-includes
+Face for includes that cannot be found, in the
+@code{semantic-decoration-on-includes} decoration style.
+@end deffn
+
+@deffn Face semantic-decoration-on-unparsed-includes
+Face for includes that have not yet been parsed, in the
+@code{semantic-decoration-on-includes} decoration style.
+@end deffn
+
+@subsection Creating New Decoration Modes
+
+You can create new types of decorations using the following function:
+
+@defun define-semantic-decoration-style name doc &rest flags
+Define a new decoration style with @var{name}.
+@var{doc} is a documentation string describing the decoration style @var{name}.
+It is appended to auto-generated doc strings.
+An Optional list of @var{flags} can also be specified.  Flags are:
+  @code{:enabled} <value>  - specify the default enabled value for @var{name}.
+
+
+This defines two new overload functions respectively called @code{NAME-p}
+and @code{NAME-highlight}, for which you must provide a default
+implementation in respectively the functions @code{NAME-p-default} and
+@code{NAME-highlight-default}.  Those functions are passed a tag.  @code{NAME-p}
+must return non-@code{nil} to indicate that the tag should be decorated by
+@code{NAME-highlight}.
+
+To put primary decorations on a tag @code{NAME-highlight}, use
+functions like @dfn{semantic-set-tag-face},
+@dfn{semantic-set-tag-intangible}, etc., found in the
+semantic-decorate library.
+
+To add other kind of decorations on a tag, @code{NAME-highlight} must use
+@dfn{semantic-decorate-tag}, and other functions of the semantic
+decoration @var{api} found in this library.
+@end defun

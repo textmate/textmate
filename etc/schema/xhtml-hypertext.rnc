@@ -1,0 +1,16 @@
+# Hypertext Module
+
+# Depends on text module.
+
+a = element a { a.attlist, Inline.model }
+a.attlist =
+  Common.attrib,
+  attribute href { URI.datatype }?,
+  attribute charset { Charset.datatype }?,
+  attribute type { ContentType.datatype }?,
+  attribute hreflang { LanguageCode.datatype }?,
+  attribute rel { LinkTypes.datatype }?,
+  attribute rev { LinkTypes.datatype }?,
+  attribute accesskey { Character.datatype }?,
+  attribute tabindex { Number.datatype }?
+Inline.class |= a

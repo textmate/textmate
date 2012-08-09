@@ -1,0 +1,244 @@
+		   Why Software Should Not Have Owners
+
+			  by Richard Stallman
+
+Digital information technology contributes to the world by making it
+easier to copy and modify information.  Computers promise to make this
+easier for all of us.
+
+Not everyone wants it to be easier.  The system of copyright gives
+software programs "owners", most of whom aim to withhold software's
+potential benefit from the rest of the public.  They would like to be
+the only ones who can copy and modify the software that we use.
+
+The copyright system grew up with printing--a technology for mass
+production copying.  Copyright fit in well with this technology
+because it restricted only the mass producers of copies.  It did not
+take freedom away from readers of books.  An ordinary reader, who did
+not own a printing press, could copy books only with pen and ink, and
+few readers were sued for that.
+
+Digital technology is more flexible than the printing press: when
+information has digital form, you can easily copy it to share it with
+others.  This very flexibility makes a bad fit with a system like
+copyright.  That's the reason for the increasingly nasty and draconian
+measures now used to enforce software copyright.  Consider these four
+practices of the Software Publishers Association (SPA):
+
+* Massive propaganda saying it is wrong to disobey the owners
+to help your friend.
+
+* Solicitation for stool pigeons to inform on their coworkers and
+colleagues.
+
+* Raids (with police help) on offices and schools, in which people are
+told they must prove they are innocent of illegal copying.
+
+* Prosecution (by the US government, at the SPA's request) of people
+such as MIT's David LaMacchia, not for copying software (he is not
+accused of copying any), but merely for leaving copying facilities
+unguarded and failing to censor their use.
+
+All four practices resemble those used in the former Soviet Union,
+where every copying machine had a guard to prevent forbidden copying,
+and where individuals had to copy information secretly and pass it
+from hand to hand as "samizdat".  There is of course a difference: the
+motive for information control in the Soviet Union was political; in
+the US the motive is profit.  But it is the actions that affect us,
+not the motive.  Any attempt to block the sharing of information, no
+matter why, leads to the same methods and the same harshness.
+
+Owners make several kinds of arguments for giving them the power
+to control how we use information:
+
+* Name calling.
+
+Owners use smear words such as "piracy" and "theft", as well as expert
+terminology such as "intellectual property" and "damage", to suggest a
+certain line of thinking to the public--a simplistic analogy between
+programs and physical objects.
+
+Our ideas and intuitions about property for material objects are about
+whether it is right to *take an object away* from someone else.  They
+don't directly apply to *making a copy* of something.  But the owners
+ask us to apply them anyway.
+
+* Exaggeration.
+
+Owners say that they suffer "harm" or "economic loss" when users copy
+programs themselves.  But the copying has no direct effect on the
+owner, and it harms no one.  The owner can lose only if the person who
+made the copy would otherwise have paid for one from the owner.
+
+A little thought shows that most such people would not have bought
+copies.  Yet the owners compute their "losses" as if each and every
+one would have bought a copy.  That is exaggeration--to put it kindly.
+
+* The law.
+
+Owners often describe the current state of the law, and the harsh
+penalties they can threaten us with.  Implicit in this approach is the
+suggestion that today's law reflects an unquestionable view of
+morality--yet at the same time, we are urged to regard these penalties
+as facts of nature that can't be blamed on anyone.
+
+This line of persuasion isn't designed to stand up to critical
+thinking; it's intended to reinforce a habitual mental pathway.
+
+It's elemental that laws don't decide right and wrong.  Every American
+should know that, forty years ago, it was against the law in many
+states for a black person to sit in the front of a bus; but only
+racists would say sitting there was wrong.
+
+* Natural rights.
+
+Authors often claim a special connection with programs they have
+written, and go on to assert that, as a result, their desires and
+interests concerning the program simply outweigh those of anyone
+else--or even those of the whole rest of the world.  (Typically
+companies, not authors, hold the copyrights on software, but we are
+expected to ignore this discrepancy.)
+
+To those who propose this as an ethical axiom--the author is more
+important than you--I can only say that I, a notable software author
+myself, call it bunk.
+
+But people in general are only likely to feel any sympathy with the
+natural rights claims for two reasons.
+
+One reason is an overstretched analogy with material objects.  When I
+cook spaghetti, I do object if someone else takes it and stops me from
+eating it.  In this case, that person and I have the same material
+interests at stake, and it's a zero-sum game.  The smallest
+distinction between us is enough to tip the ethical balance.
+
+But whether you run or change a program I wrote affects you directly
+and me only indirectly.  Whether you give a copy to your friend
+affects you and your friend much more than it affects me.  I shouldn't
+have the power to tell you not to do these things.  No one should.
+
+The second reason is that people have been told that natural rights
+for authors is the accepted and unquestioned tradition of our society.
+
+As a matter of history, the opposite is true.  The idea of natural
+rights of authors was proposed and decisively rejected when the US
+Constitution was drawn up.  That's why the Constitution only *permits*
+a system of copyright and does not *require* one; that's why it says
+that copyright must be temporary.  It also states that the purpose of
+copyright is to promote progress--not to reward authors.  Copyright
+does reward authors somewhat, and publishers more, but that is
+intended as a means of modifying their behavior.
+
+The real established tradition of our society is that copyright cuts
+into the natural rights of the public--and that this can only be
+justified for the public's sake.
+
+* Economics.
+
+The final argument made for having owners of software is that this
+leads to production of more software.
+
+Unlike the others, this argument at least takes a legitimate approach
+to the subject.  It is based on a valid goal--satisfying the users of
+software.  And it is empirically clear that people will produce more of
+something if they are well paid for doing so.
+
+But the economic argument has a flaw: it is based on the assumption
+that the difference is only a matter of how much money we have to pay.
+It assumes that "production of software" is what we want, whether the
+software has owners or not.
+
+People readily accept this assumption because it accords with our
+experiences with material objects.  Consider a sandwich, for instance.
+You might well be able to get an equivalent sandwich either free or
+for a price.  If so, the amount you pay is the only difference.
+Whether or not you have to buy it, the sandwich has the same taste,
+the same nutritional value, and in either case you can only eat it
+once.  Whether you get the sandwich from an owner or not cannot
+directly affect anything but the amount of money you have afterwards.
+
+This is true for any kind of material object--whether or not it has an
+owner does not directly affect what it *is*, or what you can do with
+it if you acquire it.
+
+But if a program has an owner, this very much affects what it is, and
+what you can do with a copy if you buy one.  The difference is not
+just a matter of money.  The system of owners of software encourages
+software owners to produce something--but not what society really
+needs.  And it causes intangible ethical pollution that affects us
+all.
+
+What does society need?  It needs information that is truly available
+to its citizens--for example, programs that people can read, fix,
+adapt, and improve, not just operate.  But what software owners
+typically deliver is a black box that we can't study or change.
+
+Society also needs freedom.  When a program has an owner, the users
+lose freedom to control part of their own lives.
+
+And above all society needs to encourage the spirit of voluntary
+cooperation in its citizens.  When software owners tell us that
+helping our neighbors in a natural way is "piracy", they pollute our
+society's civic spirit.
+
+This is why we say that free software is a matter of freedom, not
+price.
+
+The economic argument for owners is erroneous, but the economic issue
+is real.  Some people write useful software for the pleasure of
+writing it or for admiration and love; but if we want more software
+than those people write, we need to raise funds.
+
+For ten years now, free software developers have tried various methods
+of finding funds, with some success.  There's no need to make anyone
+rich; the median US family income, around $35k, proves to be enough
+incentive for many jobs that are less satisfying than programming.
+
+For years, until a fellowship made it unnecessary, I made a living
+from custom enhancements of the free software I had written.  Each
+enhancement was added to the standard released version and thus
+eventually became available to the general public.  Clients paid me so
+that I would work on the enhancements they wanted, rather than on the
+features I would otherwise have considered highest priority.
+
+The Free Software Foundation, a tax-exempt charity for free software
+development, raises funds by selling CD-ROMs, tapes and manuals (all
+of which users are free to copy and change), as well as from
+donations.  It now has a staff of five programmers, plus three
+employees who handle mail orders.
+
+Some free software developers make money by selling support services.
+Cygnus Support, with around 50 employees, estimates that about 15 per
+cent of its staff activity is free software development--a respectable
+percentage for a software company.
+
+Companies including Intel, Motorola, Texas Instruments and Analog
+Devices have combined to fund the continued development of the free
+GNU compiler for the language C.  Meanwhile, the GNU compiler for the
+Ada language is being funded by the US Air Force, which believes this
+is the most cost-effective way to get a high quality compiler.
+
+All these examples are small; the free software movement is still
+small, and still young.  But the example of listener-supported radio
+in this country shows it's possible to support a large activity
+without forcing each user to pay.
+
+As a computer user today, you may find yourself using a proprietary
+program.  If your friend asks to make a copy, it would be wrong to
+refuse.  Cooperation is more important than copyright.  But
+underground, closet cooperation does not make for a good society.  A
+person should aspire to live an upright life openly with pride, and
+this means saying "No" to proprietary software.
+
+You deserve to be able to cooperate openly and freely with other
+people who use software.  You deserve to be able to learn how the
+software works, and to teach your students with it.  You deserve to be
+able to hire your favorite programmer to fix it when it breaks.
+
+You deserve free software.
+
+
+Copyright 1994 Richard Stallman
+Verbatim copying and redistribution is permitted
+without royalty as long as this notice is preserved;
+alteration is not permitted.

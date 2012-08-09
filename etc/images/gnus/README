@@ -1,0 +1,39 @@
+COPYRIGHT AND LICENSE INFORMATION FOR IMAGE FILES
+
+* The following icons are part of Emacs.  All are licensed under the
+  GNU General Public License version 3 (see COPYING) or later.
+  The file gnus.svg contains copyright and license information, but it
+  is reproduced here for convenience.
+
+Files: important.xpm, unimportant.xpm
+Author: Simon Josefsson <simon@josefsson.org>
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+Files: catchup.pbm catchup.xpm cu-exit.pbm cu-exit.xpm
+  describe-group.pbm describe-group.xpm exit-gnus.pbm exit-gnus.xpm
+  exit-summ.pbm exit-summ.xpm followup.pbm followup.xpm fuwo.pbm
+  fuwo.xpm get-news.pbm get-news.xpm gnntg.pbm gnntg.xpm gnus.xbm
+  gnus.xpm gnus-pointer.xbm gnus-pointer.xpm mail-reply.pbm
+  mail-reply.xpm next-ur.pbm next-ur.xpm post.pbm post.xpm prev-ur.pbm
+  prev-ur.xpm preview.xbm preview.xpm receipt.xpm reply-wo.pbm
+  reply-wo.xpm reply.pbm reply.xpm save-aif.pbm save-aif.xpm
+  save-art.pbm save-art.xpm subscribe.pbm subscribe.xpm
+  unsubscribe.pbm unsubscribe.xpm uu-decode.pbm uu-decode.xpm
+  uu-post.pbm uu-post.xpm
+Author: Luis Fernandes <elf@ee.ryerson.ca>
+Copyright (C) 2001-2012  Free Software Foundation, Inc.
+
+Files: gnus.png, gnus.svg
+  Author: Francesc Rocher <rocher@member.fsf.org>
+  Copyright (C) 2008-2012  Free Software Foundation, Inc.
+
+
+* The following icons are from GNOME 2.x. They are not part of Emacs,
+but are distributed and used by Emacs.  They are licensed under the
+GNU General Public License version 2 or later.  See the source of the
+gnome-icons-theme package for more information.
+
+  toggle-subscription.xpm       (GNOME stock/document/stock_task-recurring)
+  kill-group.pbm and kill-group.xpm are converted from close.xpm
+  rot13.pbm and rot13.xpm are converted from lock.xpm
+  mail-send.xpm  ?

@@ -1,0 +1,6 @@
+  This file defines the regular expressions for etags to look for
+  in the src directory.  It is used by the w32 build to work around
+  the annoyances of quoting command-line arguments with various
+  w32 shell.
+
+/[ 	]*DEFVAR_[A-Z_ 	(]+"\([^"]+\)"/

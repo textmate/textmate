@@ -1,0 +1,42 @@
+# README file for charset mapping files in this directory.
+
+# Copyright (C) 2003-2012  Free Software Foundation, Inc.
+# Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+#   National Institute of Advanced Industrial Science and Technology (AIST)
+#   Registration Number H13PRO009
+
+# This file is part of GNU Emacs.
+
+# GNU Emacs is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# GNU Emacs is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+(1) Format of mapping files
+
+Each line contains a code point and the corresponding Unicode
+character code separated by a space.  Both code points and Unicode
+character codes are in hexadecimal preceded by "0x".  Comments may be
+used, starting with "#".  Code ranges may also be used, with
+(inclusive) start and end code points separated by "-" followed by the
+Unicode of the start of the range
+
+Examples:
+0xA0 0x00A0  # no-break space
+
+0x8141-0x8143 0x4E04 # map onto a Unicode range
+
+
+(2) Source of mapping files
+
+All mapping files are generated automatically from data files freely
+available on the Internet (e.g. glibc/localedata/charmaps").  See the
+file ../../admin/charsets/mapfiles/README for the detail.

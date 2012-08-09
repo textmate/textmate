@@ -1,0 +1,1757 @@
+2012-06-01  Chong Yidong  <cyd@gnu.org>
+
+	* Version 24.1 released.
+
+2012-03-12  David Engster  <deng@randomsample.de>
+
+	* semantic/db-find.el
+	(semanticdb-find-translate-path-brutish-default): If we don't yet
+	have a proper table for PATH, use `semanticdb-current-database'
+	instead (bug #10343).
+
+2012-03-11  David Engster  <deng@randomsample.de>
+
+	* semantic/wisent/javascript.el (js-mode): Define `js-mode' as
+	child-mode of `javascript-mode' (bug #8445).
+
+2012-02-28  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/db.el (semanticdb-search-results-table):
+	Doc fix (standardize possessive apostrophe usage).
+
+2012-02-09  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/auto.el (ede-directory-safe-p, ede-add-project-to-global-list):
+	Add declarations.
+
+2012-01-29  David Engster  <deng@randomsample.de>
+
+	Fix require error when using srecode-insert (Bug#9967).
+	* srecode/insert.el: Require srecode/filters.
+	* srecode/filters.el: Drop two requires.
+
+2012-01-09  Eric Ludlam  <zappo@gnu.org>
+
+	* ede.el (ede-project-directories): New option.
+	(ede-directory-safe-p): Check it.
+	(ede-initialize-state-current-buffer, ede, ede-new)
+	(ede-check-project-directory, ede-rescan-toplevel)
+	(ede-load-project-file, ede-parent-project, ede-current-project):
+	(ede-target-parent): Avoid loading in a project unless it is safe,
+	since it may involve malicious code.  This security flaw was
+	pointed out by Hiroshi Oota.
+
+	* ede/auto.el (ede-project-autoload): Add safe-p slot.
+	(ede-project-class-files): Projects using Project.ede are unsafe.
+	(ede-auto-load-project): New method.
+
+	* ede/simple.el (ede-project-class-files): Mark as unsafe.
+
+2011-12-19  Sam Steingold  <sds@gnu.org>
+
+	* semantic/edit.el (semantic-edits-incremental-parser): Add the
+	autoload cookie, necessary for JDEE.
+
+2011-12-06  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/bovine/c.el (semantic-tag-abstract-p): Fix typo.
+
+2011-11-26  Chong Yidong  <cyd@gnu.org>
+
+	* semantic/wisent/python-wy.el:
+	* semantic/wisent/js-wy.el:
+	* semantic/wisent/javat-wy.el:
+	* semantic/bovine/c-by.el:
+	* semantic/grammar-wy.el: Regenerate.
+
+2011-11-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/lex-spp.el (semantic-lex-spp-first-token-arg-list): Fix typo.
+
+2011-11-20  Juanma Barranquero  <lekktu@gmail.com>
+
+	* cedet-cscope.el (cedet-cscope-version-check):
+	* cedet-global.el (cedet-global-min-version)
+	(cedet-gnu-global-version-check):
+	* cedet.el (cedet-version):
+	* data-debug.el (data-debug-prev, data-debug-contract-current-line):
+	* ede.el (ede-buffer-belongs-to-project-p, ede-auto-add-to-target)
+	(ede-new, ede-invoke-method, project-edit-file-target, project-rescan)
+	(ede-add-project-to-global-list, ede-map-all-subprojects):
+	* inversion.el (inversion-check-version):
+	* mode-local.el (mode-local-map-file-buffers, define-child-mode)
+	(define-overloadable-function):
+	* pulse.el (pulse-flag, pulse):
+	* semantic.el (semantic-elapsed-time, semantic-parse-region)
+	(navigate-menu):
+	* ede/proj-comp.el (ede-compilation-program):
+	* semantic/debug.el (semantic-debug-parser-go)
+	(semantic-debug-parser-fail, semantic-debug-parser-quit)
+	(semantic-debug-parser-abort):
+	* semantic/idle.el (semantic-idle-core-handler):
+	* semantic/bovine/debug.el (semantic-bovine-debug-error-frame):
+	Fix typos.
+
+2011-11-16  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/lex.el (semantic-lex-tokens):
+	* semantic/tag-ls.el (semantic-tag-protected-p):
+	* srecode/mode.el (srecode-prefix-map): Fix typos.
+
+2011-11-15  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/project-am.el (project-compile-target-command): Fix typo.
+
+2011-11-14  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/auto.el (ede-project-autoload):
+	* ede/proj-comp.el (ede-makefile-rule):
+	* semantic/analyze.el (semantic-analyze-current-context):
+	* semantic/ctxt.el (semantic-get-local-variables):
+	* semantic/tag-ls.el (semantic-tag-calculate-parent): Fix typos.
+
+2011-11-03  David Engster  <dengste@eml.cc>
+
+	* srecode.el:
+	* srecode/texi.el:
+	* srecode/template.el:
+	* srecode/java.el:
+	* srecode/insert.el:
+	* srecode/document.el:
+	* srecode/dictionary.el:
+	* srecode/compile.el:
+	* semantic/wisent/java-tags.el:
+	* semantic/texi.el:
+	* semantic/sort.el:
+	* semantic/lex-spp.el:
+	* semantic/idle.el:
+	* semantic/html.el:
+	* semantic/db-typecache.el:
+	* semantic/analyze/complete.el:
+	* ede/generic.el:
+	* ede/custom.el:
+	* ede/cpp-root.el:
+	* ede/base.el: Fix filenames in comments and headers.
+
+	* semantic/db-find.el:
+	* srecode/insert.el (srecode-insert-include-lookup):
+	* ede/proj-comp.el (ede-compilation-program): Fix it's -> its in
+	comments and docstrings.
+
+	* semantic/ctxt.el (semantic-end-of-context-default):
+	* semantic/find.el (semantic-find-tags-by-scope-protection):
+	* semantic/java.el (semantic-documentation-for-tag): Fix typos in
+	docstrings.
+
+	* semantic/db.el (semanticdb-table, semanticdb-abstract-cache)
+	(semanticdb-abstract-db-cache):
+	* semantic/decorate/include.el
+	(semantic-decoration-unknown-include-describe): Fix filenames in
+	docstring.
+
+	* semantic/ede-grammar.el (semantic-ede-grammar-compiler-wisent):
+	(semantic-ede-grammar-compiler-bovine): Fix requires that are
+	added to the grammar-make-script.
+
+2011-10-23  Chong Yidong  <cyd@gnu.org>
+
+	* ede.el (ede-maybe-checkout): Function deleted;
+	vc-toggle-read-only does not do version control now.
+
+	* ede/util.el (ede-make-buffer-writable): Don't use
+	vc-toggle-read-only.
+
+	* ede/project-am.el (project-remove-file, project-add-file)
+	(project-new-target): Don't call ede-maybe-checkout.
+
+2011-10-19  Chong Yidong  <cyd@gnu.org>
+
+	* ede.el (ede-minor-mode,global-ede-mode):
+	* semantic.el (semantic-mode): Doc fix to reflect new
+	define-minor-mode calling behavior.
+
+2011-07-30  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/grammar.el (semantic-grammar-insert-defanalyzers):
+	Fix require.
+
+2011-07-04  Darren Hoo  <darren.hoo@gmail.com>  (tiny change)
+
+	* semantic/db.el (semanticdb-file-table-object): Don't bug out on
+	unconfigured projects if `global-ede-mode' is on (bug#8092).
+
+2011-07-01  Paul Eggert  <eggert@cs.ucla.edu>
+
+	* semantic.el (semantic-elapsed-time): Rewrite using
+	time-subtract and float-time.
+
+2011-05-11  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/wisent/javascript.el (semantic-get-local-variables):
+	Use define-mode-local-override rather than its obsolete alias.
+
+2011-05-10  Jim Meyering  <meyering@redhat.com>
+
+	Fix doubled-word typos.
+	* ede/pmake.el (ede-proj-makefile-garbage-patterns): the the -> the
+	* semantic/complete.el (semantic-complete-read-tag-local-members):
+	Likewise.
+	* ede.el (ede-auto-add-method): then then -> then
+
+2011-04-23  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/pconf.el (ede-proj-tweak-autoconf, ede-proj-flush-autoconf):
+	* ede/proj-comp.el (ede-proj-tweak-autoconf, ede-proj-flush-autoconf):
+	* ede/proj-elisp.el (ede-proj-tweak-autoconf, ede-proj-flush-autoconf)
+	(ede-proj-tweak-autoconf, ede-proj-flush-autoconf):
+	* ede/proj-scheme.el (ede-proj-tweak-autoconf): Fix typos in docstrings.
+
+2011-03-07  Chong Yidong  <cyd@stupidchicken.com>
+
+	* Version 23.3 released.
+
+2011-02-21  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* semantic/wisent/comp.el (wisent-byte-compile-grammar):
+	Macroexpand before passing to byte-compile-form.
+
+2011-01-13  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* srecode/srt-mode.el (srecode-template-mode): Use define-derived-mode.
+	* semantic/symref/list.el (semantic-symref-results-mode):
+	Use run-mode-hooks.
+
+2010-11-12  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/wisent/comp.el: Remove unnecessary eval-when-compiles.
+
+2010-11-10  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/bovine/c.el: Test system-type with memq.
+
+2010-11-09  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/lex.el (semantic-lex-ignore-comments, semantic-flex):
+	* semantic/grammar.el (semantic-grammar-epilogue):
+	* ede/speedbar.el (ede-find-nearest-file-line):
+	* ede/pmake.el (ede-proj-makefile-insert-dist-rules):
+	* ede/autoconf-edit.el (autoconf-delete-parameter):
+	Use point-at-bol and point-at-eol.
+
+2010-11-07  Glenn Morris  <rgm@gnu.org>
+
+	* ede/proj-elisp.el (ede-proj-flush-autoconf): Use point-at-bol.
+
+2010-11-01  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/bovine/c.el (semantic-analyze-split-name): Move before use.
+
+	* semantic/symref/cscope.el (ede-toplevel):
+	* semantic/symref.el (ede-toplevel):
+	* semantic/tag-file.el (ede-toplevel):
+	* ede.el (ede-toplevel): Fix declarations.
+
+2010-10-31  Glenn Morris  <rgm@gnu.org>
+
+	* ede/proj-elisp.el (project-compile-target): Fix previous change.
+	* semantic/ede-grammar.el (project-compile-target): Fix previous change.
+
+2010-10-31  Julien Danjou  <julien@danjou.info>
+
+	* ede/proj-elisp.el (project-compile-target):
+	* semantic/ede-grammar.el (project-compile-target):
+	Use `byte-recompile-file'.
+
+2010-10-31  Glenn Morris  <rgm@gnu.org>
+
+	* mode-local.el (mode-local-augment-function-help):
+	* semantic/analyze/debug.el (semantic-analyzer-debug-add-buttons):
+	* semantic/symref/list.el (semantic-symref-results-dump)
+	(semantic-symref-rb-toggle-expand-tag): Replace inappropriate uses
+	of toggle-read-only.
+
+2010-09-30  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/bovine/el.el:
+	* semantic/mru-bookmark.el (global-semantic-mru-bookmark-mode):
+	Fix require statements.
+
+2010-09-29  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/tag.el (semantic-tag-version): Bump to 2.0.
+
+	* semantic/db-typecache.el (semanticdb-typecache-find-default):
+	* semantic/imenu.el (semantic-create-imenu-index):
+	* semantic/grammar.el (semantic--grammar-macro-function-tag):
+	* semantic/fw.el (semanticdb-without-unloaded-file-searches):
+	Fix require.  Suggested by David Engster.
+
+	* semantic/bovine/c-by.el: Regenerate.
+
+2010-09-29  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/lex-spp.el (semantic-lex-spp-debug-symbol): New var.
+	(semantic-lex-spp-enable-debug-symbol): New command
+	(semantic-lex-spp-value-valid-p)
+	(semantic-lex-spp-validate-value): New functions
+	(semantic-lex-spp-symbol-set)
+	(semantic-lex-spp-symbol-push): Add call to validate value.
+	(semantic-lex-spp-table-write-slot-value): Instead of erroring on
+	invalid values during save, just save a nil.
+
+2010-09-25  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede/linux.el (ede-project-class-files):
+	* ede/generic.el (ede-generic-new-autoloader):
+	* ede/emacs.el (ede-project-class-files):
+	* ede/simple.el (ede-project-class-files):
+	* ede/cpp-root.el (ede-project-class-files): Fix require name.
+
+2010-09-25  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/lex.el (semantic-ignore-comments): Doc fix.
+
+	* semantic/symref/list.el (semantic-symref-list-rename-open-hits):
+	Fix typo in error message.
+	(semantic-symref-list-map-open-hits): Fix typo in docstring.
+
+2010-09-21  Eric Ludlam  <zappo@gnu.org>
+
+	Synch SRecode to CEDET 1.0.
+
+	* pulse.el (pulse-momentary-highlight-overlay): If pulse-flag is
+	'never, disable all pulsing.
+
+	* cedet.el (cedet-version):
+	* srecode.el (srecode-version): Bump version to 1.0.
+
+	* srecode/texi.el (srecode-texi-insert-tag-as-doc): New function.
+	(semantic-insert-foreign-tag): Use it.
+
+	* srecode/mode.el (srecode-bind-insert):
+	Call srecode-load-tables-for-mode.
+	(srecode-minor-mode-templates-menu): Do not list templates that
+	are not in the current project.
+	(srecode-menu-bar): Add binding for srecode-macro-help.
+
+	* srecode/table.el (srecode-template-table): Add :project slot.
+	(srecode-dump): Dump it.
+
+	* srecode/map.el (srecode-map-update-map): Make map loading more
+	robust.
+
+	* srecode/insert.el (srecode-insert-fcn): Merge template
+	dictionary before resolving arguments.
+	(srecode-insert-method-helper): Add error checking to make sure
+	that we only have dictionaries.
+	(srecode-insert-method): Check template nesting depth when using
+	point inserter override.
+	(srecode-insert-method): Install override with depth limit.
+
+	* srecode/getset.el (srecode-insert-getset): Force tag table
+	update.  Don't query the class if it is empty.
+
+	* srecode/find.el (srecode-template-get-table)
+	(srecode-template-get-table-for-binding)
+	(srecode-all-template-hash): Skip if not in current project.
+	(srecode-template-table-in-project-p): New method.
+
+	* srecode/fields.el (srecode-fields-exit-confirmation): New option.
+	(srecode-field-exit-ask): Use it.
+
+	* srecode/dictionary.el (srecode-dictionary-add-template-table):
+	Do not add variables in tables not for the current project.
+	(srecode-compound-toString): Handle cases where the default value
+	is another compound value.
+	(srecode-dictionary-lookup-name): New optional argument
+	NON-RECURSIVE, which inhibits visiting dictionary parents.
+	(srecode-dictionary-add-section-dictionary)
+	(srecode-dictionary-merge): New optional argument FORCE adds
+	values even if an identically named entry exists.
+	(srecode-dictionary-add-entries): New method.
+	(srecode-create-dictionaries-from-tags): New function.
+
+	* srecode/cpp.el (srecode-cpp): New defgroup.
+	(srecode-cpp-namespaces): New option.
+	(srecode-semantic-handle-:using-namespaces)
+	(srecode-cpp-apply-templates): New functions.
+	(srecode-semantic-apply-tag-to-dict): Handle template parameters
+	by calling `srecode-cpp-apply-templates'.
+
+	* srecode/compile.el (srecode-compile-templates): Fix directory
+	compare of built-in templates.  Give built-ins lower piority.
+	Support special variable "project".
+	(srecode-compile-template-table): Set :project slot of new tables.
+	(srecode-compile-one-template-tag):
+	Use srecode-create-dictionaries-from-tags.
+
+2010-09-21  Eric Ludlam  <zappo@gnu.org>
+
+	Synch EDE to CEDET 1.0.
+
+	* cedet-idutils.el (cedet-idutils-make-command): New option.
+	(cedet-idutils-mkid-call):
+	(cedet-idutils-create/update-database): New functions.
+
+	* cedet-cscope.el (cedet-cscope-create):
+	(cedet-cscope-create/update-database): New functions.
+	(cedet-cscope-support-for-directory): Make interactive.
+
+	* cedet-global.el (cedet-global-gtags-command): New option.
+	(cedet-gnu-global-gtags-call)
+	(cedet-gnu-global-create/update-database): New functions.
+
+	* ede.el (ede-save-cache): Fix recentf-exclude expression.
+	(ede-make-dist): Always use toplevel project.
+	(ede-buffer-object): If we fail to find an object in the current
+	project, loop upward looking for a match.  If no target is found,
+	use most local project.
+	(ede-buffer-belongs-to-target-p)
+	(ede-buffer-belongs-to-project-p): New functions.
+	(ede-initialize-state-current-buffer): New function.
+	(ede-target-forms-menu, ede-project-buffers): Use them.
+	(ede-minor-mode, ede-reset-all-buffers): Use it.
+	(project-interactive-select-target, project-add-file): Don't use
+	ede-project-force-load.
+	(ede-buffer-object): New arg PROJSYM.
+	(ede-minor-mode): Remove ede-directory-project-p test.
+	(ede-initialize-state-current-buffer): Don't test for
+	ede-directory-project-p if there is a matching open project.
+	(ede-customize-forms-menu): Prevent error if there is no project.
+	(ede-load-project-file): Set ede-constructing to the thing being
+	constructed, instead of t.
+	(ede-project-force-load): Deleted.
+
+	* ede/base.el:
+	* ede/auto.el:
+	* ede/custom.el: New files.
+
+	* ede/autoconf-edit.el (autoconf-find-last-macro)
+	(autoconf-parameters-for-macro): Parse multiline parameters of
+	macros.  Optionally ignore case and at bol for macro.
+	(autoconf-parameter-strip): Use greedy match for newlines.
+	(autoconf-new-automake-string): Deleted.
+	(autoconf-new-program): Use SRecode to fill an empty file.
+
+	* ede/cpp-root.el (ede-create-lots-of-projects-under-dir):
+	New function.
+
+	* ede/files.el (ede-flush-project-hash): New command.
+	(ede-convert-path): Add optional PROJECT arg.
+	(ede-directory-project-p): Obey ".ede-ignore".
+	(ede-expand-filename-local)
+	(ede-expand-filename-impl-via-subproj): New methods.
+	(ede-expand-filename-impl): Use them.
+	(ede-project-root, ede-project-root-directory): Move to
+	ede/auto.el.
+
+	* ede/locate.el (ede-locate-flush-hash):
+	(ede-locate-create/update-root-database): New methods.
+	(initialize-instance): Use ede-locate-flush-hash.
+
+	* ede/pmake.el (ede-proj-makefile-insert-variables): If this is
+	the top project and not a metasubproject, set TOP to CURDIR.
+	(ede-proj-makefile-insert-variables): Output a target's object
+	list whether or not the vars are already in the Makefile.
+	(ede-pmake-insert-variable-once): New macro.
+
+	* ede/project-am.el (project-am-with-makefile-current):
+	Add recentf-exclude.
+	(project-am-load-makefile): Obey an optional suggested name.
+	(project-am-expand-subdirlist): New function.
+	(project-am-makefile::project-rescan): Use it.  Combine SUBDIRS
+	and DIST_SUBDIRS.
+	(project-am-meta-type-alist): A list to scan better Makefile.am
+	(project-am-scan-for-targets): Scan also over
+	project-am-meta-type-alist.
+	(ede-system-include-path): Simple implementation.
+	(ede-find-target): Deleted.  EDE core takes care of this.
+	(ede-buffer-mine): Create the searched filename as relative.
+	(project-am-load): Simplify, using autoconf-edit.
+	(project-am-extract-package-info): Fix separators.
+
+	* ede/proj.el (project-run-target): New method.
+	(project-make-dist, project-compile-project):
+	Use ede-proj-automake-p to determine which kind of compile to use.
+	(project-rescan): Call ede-load-project-file.
+	(ede-buffer-mine): Add more file names that belong to the project.
+	(ede-proj-compilers): Improve error message.
+
+	* ede/proj-obj.el (ede-ld-linker): Use the LDDEPS variable.
+	(ede-source-c++): Add more C++ extensions.
+	(ede-proj-target-makefile-objectcode): Quote initforms.
+	Support lex and yacc.
+
+	* ede/proj-prog.el (ede-proj-makefile-insert-rules): Removed.
+	(ede-proj-makefile-insert-variables): New, add LDDEPS.
+	(ede-proj-makefile-insert-automake-post-variables): Add LDADD
+	variable.  Use ldlibs-local slot.  Add a -l to ldlibs strings.
+	(ede-proj-target-makefile-program): Swap order of two slots so
+	they show up in the same order as in the command line.
+	(ede-proj-target-makefile-program): Add ldlibs-local slot.
+
+	* ede/proj-shared.el (ede-g++-libtool-shared-compiler):
+	Fix inference rule to use cpp files.
+	(ede-proj-target-makefile-shared-object): Quote initforms.
+
+	* ede/proj-misc.el (ede-proj-target-makefile-miscelaneous):
+	* ede/proj-info.el (ede-proj-target-makefile-info):
+	* ede/proj-aux.el (ede-proj-target-aux):
+	* ede/proj-archive.el (ede-proj-target-makefile-archive):
+	* ede/proj-elisp.el (ede-proj-target-elisp)
+	(ede-proj-target-elisp-autoloads): Quote initforms.
+
+	* ede/srecode.el (ede-srecode-setup): Load autoconf templates.
+
+	* ede/shell.el (ede-shell-buffer): Fix buffer name.
+
+	* ede/pconf.el (ede-proj-configure-synchronize): If user events
+	occur while waiting for the compile process to finish, pull them
+	in and discard those events.
+
+2010-09-19  Eric Ludlam  <zappo@gnu.org>
+
+	Synch Semantic to CEDET 1.0.
+
+	* semantic.el (semantic-version): Update to 2.0.
+	(semantic-mode-map): Add "," and "m" bindings.
+	(navigate-menu): Update.
+
+	* semantic/symref.el (semantic-symref-calculate-rootdir):
+	New function.
+	(semantic-symref-detect-symref-tool): Use it.
+
+	* semantic/symref/grep.el (semantic-symref-grep-shell): New var.
+	(semantic-symref-perform-search): Use it.  Calculate root dir with
+	semantic-symref-calculate-rootdir.
+	(semantic-symref-derive-find-filepatterns): Improve error message.
+
+	* semantic/symref/list.el
+	(semantic-symref-results-mode-map): New bindings.
+	(semantic-symref-auto-expand-results): New option.
+	(semantic-symref-results-dump): Obey auto-expand.
+	(semantic-symref-list-expand-all, semantic-symref-regexp)
+	(semantic-symref-list-contract-all)
+	(semantic-symref-list-map-open-hits)
+	(semantic-symref-list-update-open-hits)
+	(semantic-symref-list-create-macro-on-open-hit)
+	(semantic-symref-list-call-macro-on-open-hits): New functions.
+	(semantic-symref-list-menu-entries)
+	(semantic-symref-list-menu): New vars.
+	(semantic-symref-list-map-open-hits): Move cursor to beginning of
+	match before calling the mapped function.
+
+	* semantic/doc.el
+	(semantic-documentation-comment-preceeding-tag): Do nothing if the
+	mode doesn't provide comment-start-skip.
+
+	* semantic/scope.el
+	(semantic-analyze-scope-nested-tags-default): Strip duplicates.
+	(semantic-analyze-scoped-inherited-tag-map): Take the tag we are
+	looking for as part of the scoped tags list.
+
+	* semantic/html.el (semantic-default-html-setup):
+	Add senator-step-at-tag-classes.
+
+	* semantic/decorate/include.el
+	(semantic-decoration-on-unknown-includes): Change light bgcolor.
+	(semantic-decoration-on-includes-highlight-default): Check that
+	the include tag has a position.
+
+	* semantic/complete.el (semantic-collector-local-members):
+	(semantic-complete-read-tag-local-members)
+	(semantic-complete-jump-local-members): New class and functions.
+	(semantic-complete-self-insert): Save excursion before completing.
+
+	* semantic/analyze/complete.el
+	(semantic-analyze-possible-completions-default): If no completions
+	are found, return the raw by-name-only completion list.  Add FLAGS
+	arguments.  Add support for 'no-tc (type constraint) and
+	'no-unique, or no stripping duplicates.
+	(semantic-analyze-possible-completions-default): Add FLAGS arg.
+
+	* semantic/util-modes.el
+	(semantic-stickyfunc-show-only-functions-p): New option.
+	(semantic-stickyfunc-fetch-stickyline): Don't show stickytext for
+	the very first line in a buffer.
+
+	* semantic/util.el (semantic-hack-search)
+	(semantic-recursive-find-nonterminal-by-name)
+	(semantic-current-tag-interactive): Deleted.
+	(semantic-describe-buffer): Fix expand-nonterminal.
+	Add lex-syntax-mods, type relation separator char, and command
+	separation char.
+	(semantic-sanity-check): Only message if called interactively.
+
+	* semantic/tag.el (semantic-tag-deep-copy-one-tag): Copy the
+	:filename property and the tag position.
+
+	* semantic/lex-spp.el (semantic-lex-spp-lex-text-string):
+	Add recursion limit.
+
+	* semantic/imenu.el (semantic-imenu-bucketize-type-members):
+	Make this buffer local, not the obsoleted variable.
+
+	* semantic/idle.el: Add breadcrumbs support.
+	(semantic-idle-summary-current-symbol-info-default)
+	(semantic-idle-tag-highlight)
+	(semantic-idle-completion-list-default):
+	Use semanticdb-without-unloaded-file-searches for speed, and to
+	conform to the controls that specify if the idle timer is supposed
+	to be parsing unparsed includes.
+	(semantic-idle-symbol-highlight-face)
+	(semantic-idle-symbol-maybe-highlight): Rename from *-summary-*.
+	Callers changed.
+	(semantic-idle-work-parse-neighboring-files-flag): Default to nil.
+	(semantic-idle-work-update-headers-flag): New var.
+	(semantic-idle-work-for-one-buffer): Use it.
+	(semantic-idle-local-symbol-highlight): Rename from
+	semantic-idle-tag-highlight.
+	(semantic-idle-truncate-long-summaries): New option.
+
+	* semantic/ia.el (semantic-ia-cache)
+	(semantic-ia-get-completions): Deleted.  Callers changed.
+	(semantic-ia-show-variants): New command.
+	(semantic-ia-show-doc): If doc is empty, don't make a temp buffer.
+	(semantic-ia-show-summary): If there isn't anything to show, say so.
+
+	* semantic/grammar.el (semantic-grammar-create-package):
+	Save the buffer even in batch mode.
+
+	* semantic/fw.el
+	(semanticdb-without-unloaded-file-searches): New macro.
+
+	* semantic/dep.el (semantic-dependency-find-file-on-path):
+	Fix case dereferencing ede-object when it is a list.
+
+	* semantic/db-typecache.el (semanticdb-expand-nested-tag)
+	(semanticdb-typecache-faux-namespace): New functions.
+	(semanticdb-typecache-file-tags)
+	(semanticdb-typecache-merge-streams): Use them.
+	(semanticdb-typecache-file-tags): When deriving tags from a file,
+	give the mode a chance to monkey with the tag copy.
+	(semanticdb-typecache-find-default): Wrap find in save-excursion.
+	(semanticdb-typecache-find-by-name-helper): Merge found names down.
+
+	* semantic/db-global.el
+	(semanticdb-enable-gnu-global-in-buffer): Don't show messages if
+	GNU Global is not available and we don't want to throw an error.
+
+	* semantic/db-find.el (semanticdb-find-result-nth-in-buffer):
+	When trying to normalize the tag to a buffer, don't error if
+	set-buffer method doesn't exist.
+
+	* semantic/db-file.el (semanticdb-save-db): Simplify msg.
+
+	* semantic/db.el (semanticdb-refresh-table): If forcing a
+	refresh on a file not in a buffer, use semantic-find-file-noselect
+	and delete the buffer after use.
+	(semanticdb-current-database-list): When calculating root via
+	hooks, force it through true-filename and skip the list of
+	possible roots.
+
+	* semantic/ctxt.el (semantic-ctxt-imported-packages): New.
+
+	* semantic/analyze/debug.el
+	(semantic-analyzer-debug-insert-tag): Reset standard output to
+	current buffer.
+	(semantic-analyzer-debug-global-symbol)
+	(semantic-analyzer-debug-missing-innertype): Change "prefix" to
+	"symbol" in messages.
+
+	* semantic/analyze/refs.el (semantic-analyze-refs-impl)
+	(semantic-analyze-refs-proto): When calculating value, make sure
+	the found tag is 'similar' to the originating tag.
+	(semantic--analyze-refs-find-tags-with-parent): Attempt to
+	identify matches via imported symbols of parents.
+	(semantic--analyze-refs-full-lookup-with-parents): Do a deep
+	search during the brute search.
+
+	* semantic/analyze.el
+	(semantic-analyze-find-tag-sequence-default): Be robust to
+	calculated scopes being nil.
+
+	* semantic/bovine/c.el (semantic-c-describe-environment):
+	Add project macro symbol array.
+	(semantic-c-parse-lexical-token): Add recursion limit.
+	(semantic-ctxt-imported-packages, semanticdb-expand-nested-tag):
+	New overrides.
+	(semantic-expand-c-tag-namelist): Split a full type from a typedef
+	out to its own tag.
+	(semantic-expand-c-tag-namelist): Do not split out a typedef'd
+	inline type if it is an anonymous type.
+	(semantic-c-reconstitute-token): Use the optional initializers as
+	a clue that some function is probably a constructor.
+	When defining the type of these constructors, split the parent name,
+	and use only the class part, if applicable.
+
+	* semantic/bovine/c-by.el:
+	* semantic/wisent/python-wy.el: Regenerate.
+
+2010-07-20  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/db-file.el (object-write): Fix typo in docstring.
+
+2010-06-03  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/lex-spp.el
+	(semantic-lex-spp-table-write-slot-value): Instead of erroring on
+	invalid values during save, just save a nil (Bug#6324).
+
+2010-05-31  Jonathan Marchand  <jonathlela@gmail.com>  (tiny change)
+
+	* ede/cpp-root.el (ede-set-project-variables): Fix feature name
+	(bug#6231).
+
+2010-05-02  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	Use a mode-line spec rather than a static string in Semantic.
+	* semantic/util-modes.el:
+	(semantic-minor-modes-format): New var to replace...
+	(semantic-minor-modes-status): Remove.
+	(semantic-mode-line-update): Construct a mode-line spec rather than
+	a static string so that mouse buttons can be used on individual minor
+	modes and so that semantic-mode-line-update only needs to be called
+	when global settings are changed.
+	(semantic-add-minor-mode, semantic-toggle-minor-mode-globally):
+	Call semantic-mode-line-update.
+	(semantic-toggle-minor-mode-globally): Don't assume mode is on
+	minor-mode-alist, check semantic-minor-mode-alist as well.
+	(semantic-stickyfunc-mode, semantic-show-parser-state-auto-marker)
+	(semantic-show-parser-state-marker, semantic-show-parser-state-mode)
+	(semantic-show-unmatched-syntax-mode, semantic-highlight-edits-mode):
+	* semantic/mru-bookmark.el (semantic-mru-bookmark-mode):
+	* semantic/idle.el (semantic-idle-scheduler-mode)
+	(define-semantic-idle-service, semantic-idle-summary-mode):
+	* semantic/decorate/mode.el (semantic-decoration-mode):
+	Don't call semantic-mode-line-update any more.
+
+2010-05-02  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	Use define-minor-mode in CEDET where applicable.
+
+	* srecode/mode.el (srecode-minor-mode,global-srecode-minor-mode):
+	Use define-minor-mode.
+
+	* semantic/util-modes.el (semantic-add-minor-mode):
+	Remove unused arg `keymap' and code redundant with define-minor-mode.
+	(semantic-toggle-minor-mode-globally): Only handle arg -1 and 1.
+	(semantic-stickyfunc-mode, global-semantic-show-unmatched-syntax-mode)
+	(semantic-highlight-func-mode, global-semantic-show-parser-state-mode)
+	(global-semantic-highlight-edits-mode, semantic-highlight-edits-mode)
+	(semantic-show-unmatched-syntax-mode, semantic-show-parser-state-mode)
+	(global-semantic-stickyfunc-mode, global-semantic-highlight-func-mode):
+	Use define-minor-mode.
+	(semantic-stickyfunc-mode-setup, semantic-highlight-edits-mode-setup)
+	(semantic-show-unmatched-syntax-mode-setup)
+	(semantic-show-parser-state-mode-setup)
+	(semantic-highlight-func-mode-setup): Inline into sole caller.
+
+	* semantic/mru-bookmark.el (global-semantic-mru-bookmark-mode)
+	(semantic-mru-bookmark-mode): Use define-minor-mode.
+	(semantic-mru-bookmark-mode-setup): Inline into sole caller.
+
+	* semantic/idle.el (define-semantic-idle-service):
+	Use define-minor-mode and inline setup function into its sole caller.
+	(semantic-idle-scheduler-mode-setup)
+	(semantic-idle-summary-mode-setup): Inline into sole caller.
+	(global-semantic-idle-scheduler-mode, semantic-idle-scheduler-mode):
+	Use define-minor-mode.
+
+	* semantic/decorate/mode.el (global-semantic-decoration-mode)
+	(semantic-decoration-mode): Use define-minor-mode.
+	(semantic-decoration-mode-setup): Inline into sole caller.
+
+	* ede/dired.el (ede-dired-minor-mode): Initialize in declaration.
+	(ede-dired-minor-mode): Use define-minor-mode and derived-mode-p.
+	(ede-dired-add-to-target): Use dolist.
+
+2010-04-29  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic.el (semantic-completion-at-point-function):
+	New function.
+	(semantic-mode): Use semantic-completion-at-point-function for
+	completion-at-point-functions instead.
+
+2010-04-28  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic.el (semantic-mode): When enabled, add
+	semantic-ia-complete-symbol to completion-at-point-functions.
+
+	* semantic/ia.el (semantic-ia-complete-symbol): Return nil
+	if Semantic is not active.
+
+2010-04-19  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede/pmake.el (ede-proj-makefile-insert-variables):
+	Don't destroy list before using it.
+
+2010-04-02  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/imenu.el (semantic-imenu-bucketize-type-members)
+	(semantic-create-imenu-directory-index): Fix typos in docstrings.
+	(semantic-imenu-goto-function): Reflow docstring.
+
+2010-03-24  Juanma Barranquero  <lekktu@gmail.com>
+
+	* srecode/table.el (srecode-template-table): Fix docstring typo.
+
+2010-03-24  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/bovine/c.el (semantic-c-describe-environment):
+	Consistently check ede-object is bound throughout.
+
+	* ede/project-am.el (ede-shell-run-something): Declare.
+
+2010-03-13  Eric M. Ludlam  <zappo@gnu.org>
+
+	* semantic/imenu.el: New file, from the CEDET repository
+	(Bug#5412).
+
+2010-03-06  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/grammar.el (semantic-grammar-header-template):
+	Update template copyright to GPLv3+.
+
+2010-02-28  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/db-find.el
+	(semanticdb-find-translate-path-brutish-default):
+	* ede/make.el (ede-make-check-version):
+	Use with-current-buffer instead of save-excursion.
+
+2010-02-24  Eduard Wiebe  <usenet@pusto.de>
+
+	* semantic/wisent/javascript.el (wisent-javascript-jv-expand-tag):
+	Avoid c(ad)ddr and use c(ad)r of cddr (Bug#5640).
+
+2010-02-16  Chong Yidong  <cyd@stupidchicken.com>
+
+	* data-debug.el (data-debug): Move to extensions group.
+
+	* ede.el (ede):
+	* srecode.el (srecode):
+	* semantic.el (semantic): Put in tools and extensions group.
+
+2010-02-14  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede.el (ede-run-target, project-delete-target)
+	(project-dist-files, ede-name, ede-documentation, ede-parent-project)
+	(ede-adebug-project, ede-adebug-project-parent)
+	(ede-adebug-project-root): Fix typos in docstrings.
+
+2010-01-18  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/locate.el (ede-locate-file-in-project)
+	(ede-locate-file-in-project-impl): Fix typos in docstrings.
+	(ede-enable-locate-on-project): Fix typos in error messages.
+
+	* semantic/util-modes.el (semantic-unmatched-syntax-face)
+	(semantic-stickyfunc-old-hlf, semantic-stickyfunc-header-line-format)
+	(semantic-stickyfunc-sticky-classes, semantic-highlight-func-mode-setup)
+	(semantic-stickyfunc-fetch-stickyline): Fix typos in docstrings.
+	(semantic-stickyfunc-popup-menu, semantic-highlight-func-popup-menu):
+	Fix typos in menu help.
+
+	* semantic.el (semantic-require-version, semantic--buffer-cache)
+	(semantic-unmatched-syntax-cache-check, semantic-unmatched-syntax-hook)
+	(semantic--before-fetch-tags-hook, semantic-new-buffer-fcn-was-run)
+	(semantic--umatched-syntax-needs-refresh-p, semantic-elapsed-time)
+	(semantic-parse-stream, semantic-parse-region)
+	(semantic-parse-region-default, semantic--set-buffer-cache)
+	(semantic-minimum-working-buffer-size, semantic-refresh-tags-safe)
+	(semantic-bovinate-toplevel, semantic-load-system-cache-loaded)
+	(semantic-default-submodes):
+	* semantic/db-ebrowse.el (semanticdb-table-ebrowse)
+	(semanticdb-create-ebrowse-database)
+	(semanticdb-find-tags-for-completion-method)
+	(semanticdb-find-tags-by-class-method)
+	(semanticdb-deep-find-tags-by-name-method)
+	(semanticdb-deep-find-tags-for-completion-method):
+	* semantic/db-el.el (semanticdb-elisp-mapatom-collector)
+	(semanticdb-find-tags-by-name-method, emacs-lisp-mode)
+	(semanticdb-find-tags-for-completion-method)
+	(semanticdb-find-tags-by-class-method)
+	(semanticdb-deep-find-tags-for-completion-method):
+	* semantic/db-find.el (semanticdb-find-translate-path)
+	(semanticdb-find-need-cache-update-p, semanticdb-find-result-with-nil-p)
+	(semanticdb-find-scanned-include-tags, semanticdb-find-tags-collector)
+	(semanticdb-find-tags-by-name-method)
+	(semanticdb-find-tags-by-name-regexp-method)
+	(semanticdb-find-tags-for-completion-method)
+	(semanticdb-find-tags-by-class-method)
+	(semanticdb-find-tags-external-children-of-type-method)
+	(semanticdb-find-tags-subclasses-of-type-method)
+	(semanticdb-deep-find-tags-by-name-method)
+	(semanticdb-deep-find-tags-by-name-regexp-method)
+	(semanticdb-deep-find-tags-for-completion-method):
+	* semantic/db-global.el (semanticdb-enable-gnu-global-hook)
+	(semanticdb-enable-gnu-global-in-buffer)
+	(semanticdb-find-tags-for-completion-method)
+	(semanticdb-deep-find-tags-by-name-method)
+	(semanticdb-deep-find-tags-for-completion-method):
+	* semantic/db-javascript.el (semanticdb-javascript-tags)
+	(javascript-mode, semanticdb-find-translate-path)
+	(semanticdb-find-tags-for-completion-method)
+	(semanticdb-find-tags-by-class-method)
+	(semanticdb-deep-find-tags-by-name-method)
+	(semanticdb-deep-find-tags-for-completion-method)
+	(semanticdb-find-tags-external-children-of-type-method):
+	* semantic/idle.el (semantic-idle-work-core-handler)
+	(define-semantic-idle-service, semantic-idle-summary-useful-context-p)
+	(global-semantic-idle-scheduler-mode):
+	* srecode/dictionary.el (srecode-field-value)
+	(srecode-dictionary-add-section-dictionary):
+	Fix typos in docstrings.
+
+2010-01-17  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/idle.el (semantic-idle-work-for-one-buffer): Doc fix.
+
+2010-01-17  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic.el (semantic-mode): Fix typos in docstrings.
+
+2010-01-16  Mario Lang  <mlang@delysid.org>
+
+	* ede/cpp-root.el (ede-cpp-root-project):
+	* ede/files.el (ede-expand-filename):
+	* ede/simple.el (ede-simple-project):
+	* semantic/complete.el (semantic-complete-read-tag-engine)
+	(semantic-complete-inline-tag-engine):
+	* semantic/db-el.el (semanticdb-equivalent-mode):
+	* semantic/db-global.el (semanticdb-equivalent-mode):
+	* semantic/db-javascript.el (semanticdb-equivalent-mode):
+	* semantic/db.el (semanticdb-equivalent-mode):
+	* semantic/decorate/include.el (semantic-decoration-unknown-include-describe):
+	* semantic/idle.el (semantic-idle-work-for-one-buffer):
+	Remove duplicated words in doc-strings.
+
+2010-01-14  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/edit.el (semantic-reparse-needed-change-hook)
+	(semantic-no-reparse-needed-change-hook):
+	* srecode/insert.el (srecode-resolve-argument-list)
+	(srecode-template-inserter-blank, srecode-template-inserter-variable)
+	(srecode-template-inserter-ask, srecode-template-inserter-width)
+	(srecode-template-inserter-section-start)
+	(srecode-template-inserter-section-end, srecode-insert-method):
+
+2010-01-12  Juanma Barranquero  <lekktu@gmail.com>
+
+	* data-debug.el (data-debug): Fix customization group reference.
+
+2010-01-12  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/analyze.el (semantic-analyze-push-error)
+	(semantic-analyze-context, semantic-analyze-context-assignment)
+	(semantic-analyze-find-tag-sequence, semantic-analyze-find-tag):
+	* semantic/java.el (java-mode, semantic-tag-include-filename)
+	(semantic-java-doc-keywords-map):
+	* semantic/bovine/c.el (c-mode, semantic-c-member-of-autocast)
+	(semantic-lex-c-nested-namespace-ignore-second, semantic-parse-region)
+	(semantic-c-parse-lexical-token, semantic-c-debug-mode-init-pch)
+	(semantic-c-classname, semantic-format-tag-uml-prototype)
+	(semantic-c-dereference-namespace, semantic-analyze-type-constants):
+	* semantic/bovine/el.el (semantic-elisp-form-to-doc-string)
+	(semantic-emacs-lisp-obsoleted-doc, semantic-up-context)
+	(semantic-get-local-variables, semantic-end-of-command)
+	(semantic-beginning-of-command, semantic-ctxt-current-class-list)
+	(lisp-mode):
+	* semantic/bovine/make.el (makefile-mode):
+	* semantic/wisent/python.el (wisent-python-string-re)
+	(wisent-python-implicit-line-joining-p, wisent-python-forward-string)
+	(wisent-python-lex-beginning-of-line, wisent-python-lex-end-of-line)
+	(semantic-lex, semantic-get-local-variables, python-mode):
+	* semantic/wisent/python-wy.el (wisent-python-wy--keyword-table):
+	* srecode/extract.el (srecode-extract-state-set)
+	(srecode-extract-method): Fix typos in docstrings.
+
+2010-01-10  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic.el (semantic-new-buffer-setup-functions):
+	Add python parser.
+
+2010-01-10  Richard Kim  <emacs18@gmail.com>
+
+	* semantic/wisent/python-wy.el:
+	* semantic/wisent/python.el: New files.
+
+2010-01-02  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/db-typecache.el (semanticdb-typecache-find-default):
+	Fix typo in docstring.
+
+2009-12-14  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/mru-bookmark.el (global-semantic-mru-bookmark-mode)
+	(semantic-mru-bookmark-mode): Doc fixes.
+
+	* semantic/db.el (semanticdb-cache-get): Use error instead
+	of assert.
+
+2009-12-05  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/ia.el (semantic-ia-complete-symbol):
+	Make argument optional.
+
+2009-12-05  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/bovine/c.el (semantic-c-describe-environment):
+	Describe project macro symbols.
+
+	* semantic/complete.el (semantic-complete-do-completion):
+	Don't call semantic-collector-current-exact-match.
+
+	* ede.el (ede-apply-preprocessor-map): Accept lists of
+	ede-objects as targets.
+
+	* ede/pmake.el (ede-proj-makefile-insert-variables):
+	Output a target's object list even if compiler vars are already in the
+	Makefile.
+
+	* ede/emacs.el (ede-preprocessor-map): Add config.h to the
+	list of headers producing necessary macros.
+
+2009-11-24  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/idle.el (global-semantic-idle-scheduler-mode):
+	Move after definition of global-semantic-idle-tag-highlight-mode.
+
+2009-11-22  Chong Yidong  <cyd@stupidchicken.com>
+
+	* srecode/map.el (srecode-get-maps):
+	* semantic/wisent/wisent.el (wisent-parse-toggle-verbose-flag):
+	* semantic/wisent/comp.el (wisent-toggle-verbose-flag):
+	* semantic/decorate/mode.el (semantic-decoration-mode)
+	(semantic-toggle-decoration-style):
+	* semantic/decorate/include.el
+	(semantic-decoration-include-describe)
+	(semantic-decoration-unknown-include-describe)
+	(semantic-decoration-unparsed-include-describe)
+	(semantic-decoration-all-include-summary):
+	* semantic/bovine/c.el (semantic-c-debug-mode-init):
+	* semantic/analyze/complete.el
+	(semantic-analyze-possible-completions):
+	* semantic/util-modes.el (semantic-highlight-edits-mode)
+	(semantic-show-unmatched-syntax-mode)
+	(semantic-show-parser-state-mode, semantic-stickyfunc-mode)
+	(semantic-highlight-func-mode):
+	* semantic/util.el (semantic-describe-buffer):
+	* semantic/symref.el (semantic-symref-find-references-by-name)
+	(semantic-symref-find-tags-by-name)
+	(semantic-symref-find-tags-by-regexp)
+	(semantic-symref-find-tags-by-completion)
+	(semantic-symref-find-file-references-by-name)
+	(semantic-symref-find-text):
+	* semantic/senator.el (senator-copy-tag, senator-kill-tag)
+	(senator-yank-tag):
+	* semantic/scope.el (semantic-calculate-scope):
+	* semantic/mru-bookmark.el (semantic-mru-bookmark-mode):
+	* semantic/idle.el (semantic-idle-scheduler-mode)
+	(define-semantic-idle-service):
+	* semantic/complete.el (semantic-complete-analyze-inline)
+	(semantic-complete-analyze-inline-idle):
+	* semantic/analyze.el (semantic-analyze-current-context):
+	* mode-local.el (describe-mode-local-bindings)
+	(describe-mode-local-bindings-in-mode):
+	* ede/make.el (ede-make-check-version):
+	* ede/locate.el (ede-enable-locate-on-project):
+	* cedet-idutils.el (cedet-idutils-expand-filename)
+	(cedet-idutils-version-check):
+	* cedet-global.el (cedet-gnu-global-expand-filename)
+	(cedet-gnu-global-version-check):
+	* cedet-cscope.el (cedet-cscope-expand-filename)
+	(cedet-cscope-version-check): Use called-interactively-p instead
+	of interactive-p.
+
+	* semantic/ia.el (semantic-ia-completion-format-tag-function):
+	Use semantic-format-tag-prototype.
+
+2009-11-21  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/complete.el (semantic-complete-read-tag-engine)
+	(semantic-complete-jump-local, semantic-complete-jump):
+	Improve prompt string.
+
+2009-11-20  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/complete.el (semantic-complete-inline-map): Doc fix.
+
+	* semantic/idle.el (define-semantic-idle-service)
+	(semantic-idle-summary-mode, semantic-idle-completions): Doc fix.
+
+2009-11-20  Chong Yidong  <cyd@stupidchicken.com>
+
+	* cedet.el (cedet-menu-map): Re-order menu items.
+
+	* semantic.el: Enable idle-mode menu items only if
+	global-semantic-idle-scheduler-mode is enabled.
+	(semantic-default-submodes): Doc fix.
+
+	* semantic/idle.el (global-semantic-idle-scheduler-mode):
+	When turning off, disable other idle modes.
+
+2009-11-15  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/idle.el (semantic-idle-summary-mode)
+	(semantic-idle-summary-mode): Define using define-minor-mode
+	instead of define-semantic-idle-service.
+	(semantic-idle-summary-mode): New function.
+	(semantic-idle-summary-mode-setup): Use pre-command-hook to ensure
+	that mouse motion does not reset the echo area.
+
+2009-11-08  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/ctxt.el (semantic-get-local-variables):
+	Disable the progress reporter entirely.
+
+2009-11-03  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* semantic/fw.el (semantic/loaddefs):
+	* srecode.el (srecode/loaddefs):
+	* ede.el (ede/loaddefs): Load rather than require.
+	* ede/cpp-root.el:
+	* ede/emacs.el:
+	* ede/files.el:
+	* ede/linux.el:
+	* ede/locate.el:
+	* ede/make.el:
+	* ede/shell.el:
+	* ede/speedbar.el:
+	* ede/system.el:
+	* ede/util.el:
+	* semantic/analyze.el:
+	* semantic/bovine.el:
+	* semantic/complete.el:
+	* semantic/ctxt.el:
+	* semantic/db-file.el:
+	* semantic/db-find.el:
+	* semantic/db-global.el:
+	* semantic/db-mode.el:
+	* semantic/db-typecache.el:
+	* semantic/db.el:
+	* semantic/debug.el:
+	* semantic/dep.el:
+	* semantic/doc.el:
+	* semantic/edit.el:
+	* semantic/find.el:
+	* semantic/format.el:
+	* semantic/html.el:
+	* semantic/ia-sb.el:
+	* semantic/ia.el:
+	* semantic/idle.el:
+	* semantic/lex-spp.el:
+	* semantic/lex.el:
+	* semantic/mru-bookmark.el:
+	* semantic/scope.el:
+	* semantic/senator.el:
+	* semantic/sort.el:
+	* semantic/symref.el:
+	* semantic/tag-file.el:
+	* semantic/tag-ls.el:
+	* semantic/tag-write.el:
+	* semantic/tag.el:
+	* semantic/util-modes.el:
+	* semantic/analyze/complete.el:
+	* semantic/analyze/refs.el:
+	* semantic/bovine/c.el:
+	* semantic/bovine/gcc.el:
+	* semantic/bovine/make.el:
+	* semantic/bovine/scm.el:
+	* semantic/decorate/include.el:
+	* semantic/decorate/mode.el:
+	* semantic/symref/cscope.el:
+	* semantic/symref/global.el:
+	* semantic/symref/grep.el:
+	* semantic/symref/idutils.el:
+	* semantic/symref/list.el:
+	* semantic/wisent/java-tags.el:
+	* semantic/wisent/javascript.el:
+	* srecode/compile.el:
+	* srecode/cpp.el:
+	* srecode/document.el:
+	* srecode/el.el:
+	* srecode/expandproto.el:
+	* srecode/getset.el:
+	* srecode/insert.el:
+	* srecode/java.el:
+	* srecode/map.el:
+	* srecode/mode.el:
+	* srecode/template.el:
+	* srecode/texi.el: Remove the file-local setting of
+	generated-autoload-feature.
+
+2009-11-03  Glenn Morris  <rgm@gnu.org>
+
+	* mode-local.el (with-mode-local): Doc fix.
+
+2009-10-31  Chong Yidong  <cyd@stupidchicken.com>
+
+	* cedet.el (cedet-menu-map): Remove Semantic and EDE menu
+	items.
+
+	* ede.el (ede-minor-mode):
+	* semantic.el (semantic-mode): Toggle menu separators.
+
+2009-10-31  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/tag.el (semantic--tag-link-list-to-buffer):
+	Use mapc rather than mapcar because the return value is never used.
+
+	* srecode/template.el, semantic/wisent/javascript.el:
+	* semantic/wisent/java-tags.el, semantic/texi.el:
+	* semantic/html.el:
+	Suppress harmless warnings about setting up semantic-imenu (not
+	part of Emacs) variables.
+
+2009-10-30  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* srecode/srt-mode.el (semantic-analyze-possible-completions):
+	* semantic/symref/list.el (semantic-symref-rb-toggle-expand-tag):
+	* semantic/symref/grep.el (semantic-symref-perform-search):
+	* semantic/bovine/gcc.el (semantic-gcc-query):
+	* semantic/bovine/c.el (semantic-c-parse-lexical-token):
+	* semantic/analyze/debug.el (semantic-analyzer-debug-add-buttons)
+	(semantic-analyzer-debug-global-symbol)
+	(semantic-analyzer-debug-missing-innertype)
+	(semantic-analyzer-debug-insert-include-summary):
+	* semantic/util.el (semantic-file-tag-table):
+	(semantic-describe-buffer-var-helper, semantic-something-to-tag-table)
+	(semantic-recursive-find-nonterminal-by-name):
+	* semantic/tag-ls.el (semantic-tag-calculate-parent-default):
+	* semantic/tag-file.el (semantic-prototype-file):
+	* semantic/symref.el (semantic-symref-parse-tool-output):
+	* semantic/sb.el (semantic-sb-fetch-tag-table):
+	* semantic/lex-spp.el (semantic-lex-spp-lex-text-string):
+	* semantic/idle.el (semantic-idle-work-for-one-buffer):
+	(semantic-idle-summary-maybe-highlight):
+	* semantic/ia-sb.el (semantic-ia-speedbar)
+	(semantic-ia-sb-tag-info):
+	* semantic/grammar.el (semantic-analyze-possible-completions):
+	* semantic/find.el (semantic-brute-find-tag-by-position):
+	* semantic/ede-grammar.el (project-compile-target):
+	(ede-proj-makefile-insert-variables):
+	* semantic/debug.el (semantic-debug-set-parser-location):
+	(semantic-debug-set-source-location, semantic-debug-interface-layout)
+	(semantic-debug-mode, semantic-debug):
+	* semantic/db.el (semanticdb-needs-refresh-p):
+	* semantic/db-typecache.el (semanticdb-typecache-refresh-for-buffer):
+	* semantic/db-javascript.el (semanticdb-equivalent-mode):
+	* semantic/db-find.el (semanticdb-find-log-new-search)
+	(semanticdb-find-translate-path-includes--internal)
+	(semanticdb-reset-log, semanticdb-find-log-activity):
+	* semantic/db-file.el (object-write):
+	* semantic/db-el.el (semanticdb-equivalent-mode):
+	* semantic/db-ebrowse.el (semanticdb-ebrowse-C-file-p)
+	(semanticdb-create-ebrowse-database):
+	* semantic/db-debug.el (semanticdb-table-sanity-check):
+	* semantic/complete.el (semantic-displayor-focus-request)
+	(semantic-collector-calculate-completions-raw)
+	(semantic-complete-read-tag-analyzer):
+	* semantic/analyze.el (semantic-analyze-pulse):
+	* ede/util.el (ede-update-version-in-source):
+	* ede/proj.el (project-delete-target):
+	* ede/proj-elisp.el (ede-update-version-in-source)
+	(ede-proj-flush-autoconf):
+	* ede/pconf.el (ede-proj-configure-synchronize)
+	(ede-proj-configure-synchronize):
+	* ede/locate.el (ede-locate-file-in-project-impl):
+	* ede/linux.el (ede-linux-version):
+	* ede/emacs.el (ede-emacs-version):
+	* ede/dired.el (ede-dired-add-to-target):
+	* ede.el (ede-buffer-header-file, ede-find-target)
+	(ede-buffer-documentation-files, ede-project-buffers, ede-set)
+	(ede-target-buffers, ede-buffers, ede-make-project-local-variable):
+	* cedet-idutils.el (cedet-idutils-fnid-call):
+	(cedet-idutils-lid-call, cedet-idutils-expand-filename)
+	(cedet-idutils-version-check):
+	* cedet-global.el (cedet-gnu-global-call):
+	(cedet-gnu-global-expand-filename, cedet-gnu-global-root)
+	(cedet-gnu-global-version-check, cedet-gnu-global-scan-hits):
+	* cedet-cscope.el (cedet-cscope-call)
+	(cedet-cscope-expand-filename, cedet-cscope-version-check):
+	Use with-current-buffer.
+	* ede.el (ede-make-project-local-variable)
+	(ede-set-project-variables, ede-set): Use dolist.
+
+2009-10-28  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* mode-local.el (make-obsolete-overload): Add `when' argument.
+	(overload-docstring-extension): Use that info.
+	* semantic/fw.el (semantic-alias-obsolete): Pass the `when' info.
+	* semantic/idle.el (semantic-eldoc-current-symbol-info):
+	* semantic/tag-ls.el (semantic-nonterminal-protection)
+	(semantic-nonterminal-abstract, semantic-nonterminal-leaf)
+	(semantic-nonterminal-full-name): Add the new `when' info.
+	* semantic/decorate/mode.el (semantic/decorate): Require CL for
+	`assert'.
+
+2009-10-25  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* semantic/fw.el (semantic-alias-obsolete)
+	(semantic-varalias-obsolete): Make the `when' arg mandatory.
+	(define-mode-overload-implementation):
+	* semantic/decorate/mode.el (semantic-decorate-pending-decoration-hooks):
+	* semantic/wisent.el (wisent-lex-make-token-table):
+	* semantic/util.el (semantic-file-token-stream)
+	(semantic-something-to-stream):
+	* semantic/tag.el (semantic-tag-make-assoc-list)
+	(semantic-expand-nonterminal):
+	* semantic/tag-file.el (semantic-find-nonterminal)
+	(semantic-find-dependency, semantic-find-nonterminal)
+	(semantic-find-dependency):
+	* semantic/lex.el (semantic-flex-start, semantic-flex-end)
+	(semantic-flex-text, semantic-flex-make-keyword-table)
+	(semantic-flex-keyword-p, semantic-flex-keyword-put)
+	(semantic-flex-keyword-get, semantic-flex-map-keywords)
+	(semantic-flex-keywords, semantic-flex-buffer, semantic-flex-list):
+	* semantic/java.el (semantic-java-prototype-nonterminal):
+	* semantic/idle.el (semantic-before-idle-scheduler-reparse-hooks)
+	(semantic-after-idle-scheduler-reparse-hooks):
+	* semantic/edit.el (semantic-edits-incremental-reparse-failed-hooks):
+	* semantic/db-mode.el (semanticdb-mode-hooks):
+	* semantic.el (semantic-toplevel-bovine-table)
+	(semantic-toplevel-bovine-cache)
+	(semantic-before-toplevel-bovination-hook, semantic-init-hooks)
+	(semantic-init-mode-hooks, semantic-init-db-hooks)
+	(semantic-bovination-working-type): Provide the `when' arg.
+
+2009-10-24  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic/util.el (semantic-recursive-find-nonterminal-by-name):
+	* semantic/tag.el (semantic-token-type-parent): Add WHEN
+	argument to make-obsolete.
+
+	* semantic/fw.el (semantic-alias-obsolete)
+	(semantic-varalias-obsolete): Add optional WHEN argument.
+
+2009-10-21  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/bovine/c.el (semantic-c-debug-mode-init)
+	(semantic-c-debug-mode-init-pch): New functions.
+	(semantic-c-debug-mode-init-last-mode): New var.
+	(semantic-c-parse-lexical-token): Use them.
+
+	* semantic/lex-spp.el (semantic-lex-spp-anlyzer-do-replace):
+	When extracting the argument list, limit only by point-max.
+
+2009-10-17  Chong Yidong  <cyd@stupidchicken.com>
+
+	* srecode/srt.el:
+	* srecode/compile.el:
+	* semantic/mru-bookmark.el:
+	* semantic/debug.el:
+	* semantic/complete.el:
+	* semantic/analyze.el: Require CL when compiling.
+
+2009-10-17  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/scope.el
+	(semantic-analyze-scoped-inherited-tag-map): Wrap calculation of
+	tmpscope so that the regular scope will continue to work.
+
+	* semantic/idle.el (semantic-idle-tag-highlight):
+	Use semantic-idle-summary-highlight-face as the highlighting.
+
+	* ede/project-am.el (project-run-target): New method.
+	(project-run-target): New method.
+
+	* ede.el (ede-target): Add run target menu item.
+	(ede-project, ede-minor-keymap): Add ede-run-target binding.
+	(ede-run-target): New function.
+	(ede-target::project-run-target): New method.
+
+	* ede/proj.el (project-run-target): New method.
+
+	* ede/proj-shared.el (ede-gcc-libtool-shared-compiler)
+	(ede-g++-libtool-shared-compiler): Remove SHELL.  Remove COMMANDS.
+	Add :rules.
+	(ede-proj-target-makefile-shared-object): Only libtool compilers
+	now available.  Add linkers for libtool.
+	(ede-cc-linker-libtool, ede-g++-linker-libtool): New.
+	(ede-proj-makefile-target-name): Always use .la extension.
+
+	* ede/proj-prog.el (project-run-target): New method.
+
+	* ede/proj-obj.el (ede-cc-linker): Rename from ede-gcc-linker.
+	(ede-g++-linker): Change Change link lines.
+
+	* ede/pmake.el (ede-pmake-insert-variable-shared):
+	When searching for old variables, go to the end of the buffer and
+	search backward from there.
+	(ede-proj-makefile-automake-insert-subdirs)
+	(ede-proj-makefile-automake-insert-extradist): New methods.
+	(ede-proj-makefile-create): Use them.
+
+	* ede/pconf.el (ede-proj-configure-test-required-file):
+	Force FILE to expand to the current target.  Use file-exists-p to
+	check that it exists.
+
+	* ede/linux.el (ede-linux-version): Don't call "head".
+	(ede-linux-load): Wrap dir in file-name-as-directory.
+	Set :version slot.
+
+	* ede/files.el (ede-get-locator-object): When enabling
+	locate, do so on "top".
+
+	* ede/emacs.el (ede-emacs-file-existing): Wrap "dir" in
+	file-name-as-directory during compare.
+	(ede-emacs-version): Return Emacs/XEmacs differentiator.
+	Get version number from different places.  Don't call egrep.
+	(ede-emacs-load): Set :version slot.  Call file-name-as-directory
+	to set the directory.
+
+	* ede/shell.el: New file.
+
+	* inversion.el (inversion-decoders): Allow for stray . in
+	alpha/beta variants.
+
+2009-10-17  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/grammar.el (semantic-grammar--lex-delim-spec):
+	All errors should have messages.
+
+2009-10-10  Sascha Wilde  <wilde@sha-bang.de>
+
+	* ede/proj-shared.el (ede-proj-makefile-target-name):
+	Use .la for Automake.
+
+2009-10-09  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede/pconf.el (ede-proj-configure-synchronize):
+	Use "autoreconf -i".  Suggested by Andreas Schwab.
+
+2009-10-08  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede/proj.el (project-make-dist, project-compile-project):
+	Fix filename test.
+	(ede-proj-dist-makefile): Use expand-file-name instead of concat
+	to expand file names.
+
+2009-10-08  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede/proj-obj.el (ede-gcc-linker): New var.
+	(ede-proj-target-makefile-objectcode): Use it.
+
+	* ede/source.el (ede-want-any-source-files-p)
+	(ede-want-any-auxiliary-files-p, ede-want-any-files-p):
+	Return search result.  This error was introduced while merging.
+
+2009-10-04  Chong Yidong  <cyd@stupidchicken.com>
+
+	* semantic.el (semantic-new-buffer-setup-functions): New option.
+	(semantic-new-buffer-fcn): Call parser setup functions here.
+	(semantic-mode): Don't call parser setup functions here, it's done
+	in semantic-new-buffer-fcn now.
+	(semantic-mode): Parse all existing buffers when enabled.
+
+	* srecode/compile.el (srecode-compile-file):
+	Call semantic-new-buffer-fcn if the buffer has not been parsed.
+
+2009-10-04  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede/pmake.el (ede-pmake-insert-variable-once): Delete.
+
+	* ede/proj-comp.el: Don't require ede/pmake at toplevel.
+	(proj-comp-insert-variable-once): New macro, renamed from
+	ede-pmake-insert-variable-once in ede/pmake.edl.
+	(ede-proj-makefile-insert-variables): Use it.
+
+2009-10-04  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/makefile-edit.el (makefile-beginning-of-command)
+	(makefile-end-of-command):
+	* srecode/srt-mode.el (semantic-beginning-of-context)
+	(semantic-end-of-context): Fix previous change.  Doc fixes.
+
+2009-10-04  Juanma Barranquero  <lekktu@gmail.com>
+
+	* ede/makefile-edit.el (makefile-beginning-of-command)
+	(makefile-end-of-command):
+	* semantic/lex.el (semantic-lex-token):
+	* semantic/analyze/fcn.el
+	(semantic-analyze-dereference-metatype-1):
+	* semantic/bovine/c.el (semantic-lex-cpp-define)
+	(semantic-lex-cpp-undef):
+	* semantic/wisent/wisent.el (wisent-skip-block):
+	* srecode/srt-mode.el (semantic-beginning-of-context)
+	(semantic-end-of-context): Fix typos in docstrings.
+
+2009-10-04  Chong Yidong  <cyd@stupidchicken.com>
+
+	* ede.el (ede-project-placeholder-cache-file):
+	* semantic/db-file.el (semanticdb-default-save-directory):
+	* srecode/map.el (srecode-map-save-file):
+	Use locate-user-emacs-file.  Suggested by Juanma Barranquero.
+
+2009-10-03  Chong Yidong  <cyd@stupidchicken.com>
+
+	* srecode/insert.el: Require srecode/args.
+
+	* srecode/args.el: Require srecode/dictionary instead of
+	srecode/insert.
+
+	* srecode/srt-mode.el (srecode-template-mode): Doc fix.
+
+	* files.el (auto-mode-alist): Add .srt and Project.ede.
+
+	* semantic.el (semantic-mode):
+	Handle srecode-template-mode-hook as well.
+	(semantic-mode): Use js-mode-hook for Javascript hook.
+
+	* srecode/template.el: Remove hook variable.
+
+	* ede/proj-comp.el: Require ede/pmake when compiling.
+
+	* ede.el (ede-target-forms-menu): Don't enable if no
+	projects exist.
+	(ede-project-placeholder-cache-file): Default to a file in
+	user-emacs-directory.
+
+	* srecode/map.el (srecode-map-base-template-dir): Look for
+	templates in data-directory.
+	(srecode-map-save-file): Default to a file in user-emacs-directory.
+
+	* ede/srecode.el (ede-srecode-setup): Use default templates
+	directory.
+
+2009-09-30  Eric Ludlam  <zappo@gnu.org>
+
+	* semantic/util-modes.el (semantic-highlight-func-mode):
+	Doc fix.
+
+	* ede/proj-comp.el (ede-proj-makefile-insert-variables):
+	Only insert each variable once.
+
+	* ede/pmake.el (ede-pmake-insert-variable-once): New macro.
+	(ede-pmake-insert-variable-shared): Use it.
+
+	* ede/cpp-root.el (ede-preprocessor-map): Do not deref table
+	for lexical table iff table is nil.
+
+2009-10-01  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/bovine/gcc.el
+	(semantic-c-reset-preprocessor-symbol-map): Fix declaration.
+	(semantic-gcc-get-include-paths, semantic-gcc-setup-data): Doc fixes.
+
+2009-10-03  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/db-find.el (data-debug-insert-tag-list): Comment out
+	declaration, currently false.
+
+2009-10-01  Glenn Morris  <rgm@gnu.org>
+
+	* cedet-files.el (cedet-directory-name-to-file-name):
+	* cedet-idutils.el (cedet-idutils-search)
+	(cedet-idutils-expand-filename, cedet-idutils-support-for-directory)
+	(cedet-idutils-version-check):
+	* cedet.el (cedet-version):
+	* data-debug.el (data-debug-insert-overlay-button)
+	(data-debug-insert-overlay-list-button)
+	(data-debug-insert-buffer-button)
+	(data-debug-insert-buffer-list-button)
+	(data-debug-insert-process-button, data-debug-insert-ring-button)
+	(data-debug-insert-widget, data-debug-insert-stuff-list-button)
+	(data-debug-insert-stuff-vector-button)
+	(data-debug-insert-symbol-button, data-debug-insert-string)
+	(data-debug-insert-number, data-debug-insert-lambda-expression)
+	(data-debug-insert-nil, data-debug-insert-simple-thing)
+	(data-debug-insert-custom, data-debug-edebug-expr):
+	* ede.el (ede-auto-add-method, ede-project-class-files)
+	(global-ede-mode-map, ede-new, ede-debug-target)
+	(ede-customize-current-target, ede-buffers, ede-map-buffers, ede-set):
+	* semantic.el (semantic-minimum-working-buffer-size)
+	(semantic-fetch-tags, semantic-submode-list)
+	(semantic-default-submodes):
+	* ede/source.el (ede-source-match):
+	* ede/project-am.el (project-am-type-alist, project-add-file)
+	(project-am-package-info):
+	* ede/proj.el (ede-proj-target, project-new-target):
+	* ede/proj-elisp.el (ede-proj-tweak-autoconf):
+	* ede/proj-comp.el (ede-current-build-list):
+	* ede/makefile-edit.el (makefile-move-to-macro):
+	* ede/files.el (ede-toplevel-project-or-nil):
+	* ede/cpp-root.el (initialize-instance):
+	* ede/autoconf-edit.el (autoconf-find-last-macro)
+	(autoconf-parameter-strip, autoconf-insert-new-macro):
+	* semantic/wisent.el (wisent-lex-eoi):
+	* semantic/util-modes.el (global-semantic-show-parser-state-mode)
+	(semantic-show-parser-state-mode):
+	* semantic/texi.el (semantic-texi-environment-regexp):
+	* semantic/tag.el (semantic-tag-new-variable)
+	(semantic-tag-class, semantic-tag-new-variable, semantic-tag-copy)
+	(semantic--tag-deep-copy-attributes, semantic--tag-deep-copy-value)
+	(semantic--tag-deep-copy-tag-list)
+	(semantic-tag-components-with-overlays-default):
+	* semantic/symref.el (semantic-symref-find-text):
+	* semantic/senator.el (senator-yank-tag)
+	(senator-transpose-tags-up):
+	* semantic/scope.el (semantic-analyze-scoped-tags-default)
+	(semantic-analyze-scoped-inherited-tags, semantic-scope-find):
+	* semantic/sb.el (semantic-sb-autoexpand-length):
+	* semantic/lex.el (semantic-lex-comment-regex)
+	(semantic-lex-maximum-depth, define-lex, semantic-lex-token)
+	(semantic-lex-unterminated-syntax-protection, define-lex-analyzer):
+	* semantic/lex-spp.el
+	(semantic-lex-spp-dynamic-macro-symbol-obarray-stack)
+	(semantic-lex-spp-symbol, semantic-lex-spp-one-token-to-txt):
+	* semantic/idle.el
+	(semantic-idle-summary-current-symbol-info-brutish)
+	(semantic-idle-summary-current-symbol-info-default):
+	* semantic/grammar.el (semantic-grammar-recreate-package)
+	(semantic--grammar-macro-compl-dict):
+	* semantic/grammar-wy.el (semantic-grammar-wy--parse-table):
+	* semantic/format.el (semantic-format-tag-custom-list)
+	(semantic-format-tag-canonical-name-default):
+	* semantic/find.el (semantic-find-tag-by-overlay-in-region)
+	(semantic-find-tags-for-completion)
+	(semantic-find-tags-by-scope-protection-default)
+	(semantic-deep-find-tags-for-completion):
+	* semantic/edit.el
+	(semantic-edits-incremental-reparse-failed-hook)
+	(semantic-edits-verbose-flag, semantic-edits-assert-valid-region)
+	(semantic-edits-splice-remove, semantic-edits-splice-replace):
+	* semantic/doc.el (semantic-documentation-comment-preceeding-tag):
+	* semantic/dep.el (semantic-dependency-include-path):
+	* semantic/db.el (semanticdb-default-find-index-class)
+	(semanticdb-match-any-mode, semanticdb-with-match-any-mode)
+	(semanticdb-project-roots):
+	* semantic/db-find.el (semanticdb-implied-include-tags)
+	(semanticdb-find-adebug-insert-scanned-tag-cons)
+	(semanticdb-find-log-buffer-name, semanticdb-find-result-mapc)
+	(semanticdb-brute-deep-find-tags-for-completion):
+	* semantic/db-ebrowse.el (semanticdb-ebrowse-add-tree-to-table):
+	* semantic/ctxt.el (semantic-beginning-of-context-default)
+	(semantic-end-of-context-default)
+	(semantic-ctxt-current-function-default)
+	(semantic-ctxt-scoped-types-default):
+	* semantic/complete.el (semantic-complete-read-tag-engine)
+	(semantic-complete-inline-tag-engine)
+	(semantic-complete-inline-custom-type)
+	(semantic-complete-read-tag-analyzer):
+	* semantic/chart.el (semantic-chart-tags-by-class)
+	(semantic-chart-database-size):
+	* semantic/analyze.el (semantic-analyze-current-symbol)
+	(semantic-analyze-current-context):
+	* semantic/symref/list.el (semantic-symref)
+	(semantic-symref-hide-buffer, semantic-symref-symbol):
+	* semantic/symref/grep.el (semantic-symref-grep-use-template):
+	* semantic/symref/filter.el (semantic-symref-hits-in-region):
+	* semantic/bovine/el.el (semantic-elisp-form-to-doc-string):
+	* semantic/bovine/c.el (semantic-lex-c-preprocessor-symbol-map)
+	(semantic-c-parse-token-hack-depth, semantic-c--template-name-1)
+	(semantic-c-dereference-template):
+	* semantic/analyze/refs.el (semantic--analyze-refs-full-lookup)
+	(semantic--analyze-refs-full-lookup-with-parents)
+	(semantic--analyze-refs-full-lookup-simple):
+	* semantic/analyze/complete.el
+	(semantic-analyze-possible-completions):
+	* srecode/table.el (srecode-mode-table-new):
+	* srecode/srt.el (srecode-read-variable-name):
+	* srecode/srt-mode.el (srecode-macro-help, srecode-in-macro-p):
+	* srecode/semantic.el (srecode-semantic-handle-:tag)
+	(srecode-semantic-handle-:tagtype, srecode-semantic-insert-tag):
+	* srecode/map.el (srecode-current-map):
+	* srecode/insert.el (srecode-insert)
+	(srecode-insert-variable-secondname-handler, srecode-insert-method)
+	(srecode-template-inserter-point-override)
+	(srecode-insert-include-lookup):
+	* srecode/getset.el (srecode-auto-choose-class):
+	* srecode/extract.el (srecode-inserter-extract):
+	* srecode/document.el
+	(srecode-document-autocomment-return-last-alist)
+	(srecode-document-autocomment-param-type-alist)
+	(srecode-document-insert-function-comment)
+	(srecode-document-insert-variable-one-line-comment)
+	(srecode-document-function-name-comment):
+	* srecode/dictionary.el (srecode-create-dictionary)
+	(srecode-compound-toString):
+	* srecode/compile.el (srecode-flush-active-templates):
+	* srecode/args.el (srecode-semantic-handle-:blank):
+	Doc/message fixes.
+
+2009-10-01  Juanma Barranquero  <lekktu@gmail.com>
+
+	* semantic/wisent/javat-wy.el
+	(wisent-java-tags-wy--keyword-table): Use \000 instead of literal ^@.
+
+2009-09-30  Juanma Barranquero  <lekktu@gmail.com>
+
+	* srecode/expandproto.el: Fix provide statement.
+
+2009-09-30  Sascha Wilde  <wilde@sha-bang.de>
+
+	* ede/srecode.el: Fix provide statement.
+
+2009-09-30  Glenn Morris  <rgm@gnu.org>
+
+	* ede/proj.el (ede-proj-target-makefile-miscelaneous):
+	* ede/proj-aux.el (ede-aux-source):
+	* ede/proj-misc.el (ede-proj-target-makefile-miscelaneous)
+	(ede-misc-source):
+	* semantic/mru-bookmark.el (semantic-mrub-completing-read)
+	(semantic-mrub-switch-tags): Fix doc typos.
+
+	* semantic/db-global.el (data-debug-new-buffer)
+	(data-debug-insert-thing): Remove unneeded declarations (one broken).
+	(semanticdb-enable-gnu-global-databases): Fix prompt typo.
+
+	* semantic/analyze/fcn.el (semantic-scope-find): Fix declaration.
+
+	* semantic/bovine/gcc.el (semantic-gcc-setup): Replace runtime
+	use of CL function `remove-if-not'.
+
+2009-09-29  Glenn Morris  <rgm@gnu.org>
+
+	* semantic/symref/idutils.el:
+	* semantic/symref/list.el: Relicense under GPLv3+.
+
+	* ede/srecode.el (srecode-resolve-arguments): Fix declaration.
+
+	* semantic/complete.el (semantic-displayor-focus-abstract-child-p):
+	* semantic/tag-file.el (semanticdb-table-child-p):
+	* srecode/compile.el (srecode-template-inserter-newline-child-p):
+	Mark declarations not understood by check-declare.
+
+2009-09-28  Eric Ludlam  <zappo@gnu.org>
+
+	CEDET (development tools) package merged.
+
+	* *.el:
+	* ede/*.el:
+	* semantic/*.el:
+	* srecode/*.el: New files.
+
+2009-09-28  Eric Ludlam  <zappo@gnu.org>
+
+	* cedet-cscope.el:
+	* cedet-files.el:
+	* cedet-global.el:
+	* cedet-idutils.el:
+	* data-debug.el:
+	* inversion.el:
+	* mode-local.el:
+	* pulse.el: New files.
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
+
+	Copyright (C) 2009-2012  Free Software Foundation, Inc.
+
+  This file is part of GNU Emacs.
+
+  GNU Emacs is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  GNU Emacs is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,113 @@
+# -*- coding: cn-big5 -*-
+# HANZI input table for cxterm
+# To be used by cxterm, convert me to .cit format first
+# .cit version 2
+ENCODE:	BIG5
+AUTOSELECT:	YES
+PROMPT:	º~¦r¿é¤J::¥þ¨¤::
+#
+COMMENT Copyright 1991 by Yongguang Zhang.      (ygz@cs.purdue.edu)
+COMMENT Permission to use/modify/copy for any purpose is hereby granted.
+COMMENT Absolutely no warranties.
+# define keys
+VALIDINPUTKEY:	\040!"\043$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMN
+VALIDINPUTKEY:	OPQRSTUVWXYZ[\134]^_`abcdefghijklmnopqrstuvwxyz{|}~
+# the following line must not be removed
+BEGINDICTIONARY
+#
+\040	¡@
+!	¡I
+"	¡²
+\043	¡­
+$	¢L
+%	¢H
+&	¡®
+'	¡¬
+(	¡]
+)	¡^
+*	¡Î
++	¡Ï
+,	¡A
+-	¡Ð
+.	¡D
+/	¡þ
+0	¢¯
+1	¢°
+2	¢±
+3	¢²
+4	¢³
+5	¢´
+6	¢µ
+7	¢¶
+8	¢·
+9	¢¸
+:	¡G
+;	¡F
+<	¡q
+=	¡×
+>	¡r
+?	¡H
+@	¢I
+A	¢Ï
+B	¢Ð
+C	¢Ñ
+D	¢Ò
+E	¢Ó
+F	¢Ô
+G	¢Õ
+H	¢Ö
+I	¢×
+J	¢Ø
+K	¢Ù
+L	¢Ú
+M	¢Û
+N	¢Ü
+O	¢Ý
+P	¢Þ
+Q	¢ß
+R	¢à
+S	¢á
+T	¢â
+U	¢ã
+V	¢ä
+W	¢å
+X	¢æ
+Y	¢ç
+Z	¢è
+[	¡i
+\134	¢@
+]	¡j
+^	¡s
+_	¡Z
+`	¡«
+a	¢é
+b	¢ê
+c	¢ë
+d	¢ì
+e	¢í
+f	¢î
+g	¢ï
+h	¢ð
+i	¢ñ
+j	¢ò
+k	¢ó
+l	¢ô
+m	¢õ
+n	¢ö
+o	¢÷
+p	¢ø
+q	¢ù
+r	¢ú
+s	¢û
+t	¢ü
+u	¢ý
+v	¢þ
+w	£@
+x	£A
+y	£B
+z	£C
+{	¡a
+|	¡U
+}	¡b
+~	¡ã
+

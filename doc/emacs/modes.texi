@@ -1,0 +1,450 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985-1987, 1993-1995, 1997, 2000-2012
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Modes, Indentation, International, Top
+@chapter Major and Minor Modes
+
+  Emacs contains many @dfn{editing modes} that alter its basic
+behavior in useful ways.  These are divided into @dfn{major modes} and
+@dfn{minor modes}.
+
+  Major modes provide specialized facilities for working on a
+particular file type, such as a C source file (@pxref{Programs}), or a
+particular type of non-file buffer, such as a shell buffer
+(@pxref{Shell}).  Major modes are mutually exclusive; each buffer has
+one and only one major mode at any time.
+
+  Minor modes are optional features which you can turn on or off, not
+necessarily specific to a type of file or buffer.  For example, Auto
+Fill mode is a minor mode in which @key{SPC} breaks lines between
+words as you type (@pxref{Auto Fill}).  Minor modes are independent of
+one another, and of the selected major mode.
+
+@menu
+* Major Modes::         Text mode vs. Lisp mode vs. C mode...
+* Minor Modes::         Each minor mode is a feature you can turn on
+                          independently of any others.
+* Choosing Modes::      How modes are chosen when visiting files.
+@end menu
+
+@node Major Modes
+@section Major Modes
+@cindex major modes
+@cindex mode, major
+@kindex TAB @r{(and major modes)}
+@kindex DEL @r{(and major modes)}
+@kindex C-j @r{(and major modes)}
+
+  Every buffer possesses a major mode, which determines the editing
+behavior of Emacs while that buffer is current.  The mode line
+normally shows the name of the current major mode, in parentheses
+(@pxref{Mode Line}).
+
+  The least specialized major mode is called @dfn{Fundamental mode}.
+This mode has no mode-specific redefinitions or variable settings, so
+that each Emacs command behaves in its most general manner, and each
+user option variable is in its default state.
+
+  For editing text of a specific type that Emacs knows about, such as
+Lisp code or English text, you typically use a more specialized major
+mode, such as Lisp mode or Text mode.  Most major modes fall into
+three major groups.  The first group contains modes for normal text,
+either plain or with mark-up.  It includes Text mode, HTML mode, SGML
+mode, @TeX{} mode and Outline mode.  The second group contains modes
+for specific programming languages.  These include Lisp mode (which
+has several variants), C mode, Fortran mode, and others.  The third
+group consists of major modes that are not associated directly with
+files; they are used in buffers created for specific purposes by
+Emacs, such as Dired mode for buffers made by Dired (@pxref{Dired}),
+Message mode for buffers made by @kbd{C-x m} (@pxref{Sending Mail}),
+and Shell mode for buffers used to communicate with an inferior shell
+process (@pxref{Interactive Shell}).
+
+  Usually, the major mode is automatically set by Emacs, when you
+first visit a file or create a buffer (@pxref{Choosing Modes}).  You
+can explicitly select a new major mode by using an @kbd{M-x} command.
+Take the name of the mode and add @code{-mode} to get the name of the
+command to select that mode (e.g., @kbd{M-x lisp-mode} enters Lisp mode).
+
+@vindex major-mode
+  The value of the buffer-local variable @code{major-mode} is a symbol
+with the same name as the major mode command (e.g. @code{lisp-mode}).
+This variable is set automatically; you should not change it yourself.
+
+  The default value of @code{major-mode} determines the major mode to
+use for files that do not specify a major mode, and for new buffers
+created with @kbd{C-x b}.  Normally, this default value is the symbol
+@code{fundamental-mode}, which specifies Fundamental mode.  You can
+change this default value via the Customization interface (@pxref{Easy
+Customization}), or by adding a line like this to your init file
+(@pxref{Init File}):
+
+@example
+(setq-default major-mode 'text-mode)
+@end example
+
+@noindent
+If the default value of @code{major-mode} is @code{nil}, the major
+mode is taken from the previously current buffer.
+
+  Specialized major modes often change the meanings of certain keys to
+do something more suitable for the mode.  For instance, programming
+language modes bind @key{TAB} to indent the current line according to
+the rules of the language (@pxref{Indentation}).  The keys that are
+commonly changed are @key{TAB}, @key{DEL}, and @kbd{C-j}.  Many modes
+also define special commands of their own, usually bound in the prefix
+key @kbd{C-c}.  Major modes can also alter user options and variables;
+for instance, programming language modes typically set a buffer-local
+value for the variable @code{comment-start}, which determines how
+source code comments are delimited (@pxref{Comments}).
+
+@findex describe-mode
+@kindex C-h m
+  To view the documentation for the current major mode, including a
+list of its key bindings, type @code{C-h m} (@code{describe-mode}).
+
+@cindex mode hook
+@vindex text-mode-hook
+@vindex prog-mode-hook
+  Every major mode, apart from Fundamental mode, defines a @dfn{mode
+hook}, a customizable list of Lisp functions to run each time the mode
+is enabled in a buffer.  @xref{Hooks}, for more information about
+hooks.  Each mode hook is named after its major mode, e.g. Fortran
+mode has @code{fortran-mode-hook}.  Furthermore, all text-based major
+modes run @code{text-mode-hook}, and all programming language modes
+run @code{prog-mode-hook}, prior to running their own mode hooks.
+Hook functions can look at the value of the variable @code{major-mode}
+to see which mode is actually being entered.
+
+  Mode hooks are commonly used to enable minor modes (@pxref{Minor
+Modes}).  For example, you can put the following lines in your init
+file to enable Flyspell minor mode in all text-based major modes
+(@pxref{Spelling}), and Eldoc minor mode in Emacs Lisp mode
+(@pxref{Lisp Doc}):
+
+@example
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
+@end example
+
+@node Minor Modes
+@section Minor Modes
+@cindex minor modes
+@cindex mode, minor
+
+  A minor mode is an optional editing mode that alters the behavior of
+Emacs in some well-defined way.  Unlike major modes, any number of
+minor modes can be in effect at any time.  Some minor modes are
+@dfn{buffer-local}, and can be turned on (enabled) in certain buffers
+and off (disabled) in others.  Other minor modes are @dfn{global}:
+while enabled, they affect everything you do in the Emacs session, in
+all buffers.  Most minor modes are disabled by default, but a few are
+enabled by default.
+
+  Most buffer-local minor modes say in the mode line when they are
+enabled, just after the major mode indicator.  For example,
+@samp{Fill} in the mode line means that Auto Fill mode is enabled.
+@xref{Mode Line}.
+
+@cindex mode commands for minor modes
+  Like major modes, each minor mode is associated with a @dfn{mode
+command}, whose name consists of the mode name followed by
+@samp{-mode}.  For instance, the mode command for Auto Fill mode is
+@code{auto-fill-mode}.  But unlike a major mode command, which simply
+enables the mode, the mode command for a minor mode can either enable
+or disable it:
+
+@itemize
+@item
+If you invoke the mode command directly with no prefix argument
+(either via @kbd{M-x}, or by binding it to a key and typing that key;
+@pxref{Key Bindings}), that @dfn{toggles} the minor mode.  The minor
+mode is turned on if it was off, and turned off if it was on.
+
+@item
+If you invoke the mode command with a prefix argument, the minor mode
+is unconditionally turned off if that argument is zero or negative;
+otherwise, it is unconditionally turned on.
+
+@item
+If the mode command is called via Lisp, the minor mode is
+unconditionally turned on if the argument is omitted or @code{nil}.
+This makes it easy to turn on a minor mode from a major mode's mode
+hook (@pxref{Major Modes}).  A non-@code{nil} argument is handled like
+an interactive prefix argument, as described above.
+@end itemize
+
+  Most minor modes also have a @dfn{mode variable}, with the same name
+as the mode command.  Its value is non-@code{nil} if the mode is
+enabled, and @code{nil} if it is disabled.  In general, you should not
+try to enable or disable the mode by changing the value of the mode
+variable directly in Lisp; you should run the mode command instead.
+However, setting the mode variable through the Customize interface
+(@pxref{Easy Customization}) will always properly enable or disable
+the mode, since Customize automatically runs the mode command for you.
+
+  The following is a list of some buffer-local minor modes:
+
+@itemize @bullet
+@item
+Abbrev mode automatically expands text based on pre-defined
+abbreviation definitions.  @xref{Abbrevs}.
+
+@item
+Auto Fill mode inserts newlines as you type to prevent lines from
+becoming too long.  @xref{Filling}.
+
+@item
+Auto Save mode saves the buffer contents periodically to reduce the
+amount of work you can lose in case of a crash.  @xref{Auto Save}.
+
+@item
+Enriched mode enables editing and saving of formatted text.
+@xref{Enriched Text}.
+
+@item
+Flyspell mode automatically highlights misspelled words.
+@xref{Spelling}.
+
+@item
+Font-Lock mode automatically highlights certain textual units found in
+programs.  It is enabled globally by default, but you can disable it
+in individual buffers.  @xref{Faces}.
+
+@findex linum-mode
+@cindex Linum mode
+@item
+Linum mode displays each line's line number in the window's left margin.
+
+@item
+Outline minor mode provides similar facilities to the major mode
+called Outline mode.  @xref{Outline Mode}.
+
+@cindex Overwrite mode
+@cindex mode, Overwrite
+@findex overwrite-mode
+@kindex INSERT
+@item
+Overwrite mode causes ordinary printing characters to replace existing
+text instead of shoving it to the right.  For example, if point is in
+front of the @samp{B} in @samp{FOOBAR}, then in Overwrite mode typing
+a @kbd{G} changes it to @samp{FOOGAR}, instead of producing
+@samp{FOOGBAR} as usual.  In Overwrite mode, the command @kbd{C-q}
+inserts the next character whatever it may be, even if it is a
+digit---this gives you a way to insert a character instead of
+replacing an existing character.  The mode command,
+@code{overwrite-mode}, is bound to the @key{Insert} key.
+
+@findex binary-overwrite-mode
+@item
+Binary Overwrite mode is a variant of Overwrite mode for editing
+binary files; it treats newlines and tabs like other characters, so
+that they overwrite other characters and can be overwritten by them.
+In Binary Overwrite mode, digits after @kbd{C-q} specify an octal
+character code, as usual.
+
+@item
+Visual Line mode performs ``word wrapping'', causing long lines to be
+wrapped at word boundaries.  @xref{Visual Line Mode}.
+@end itemize
+
+@noindent
+And here are some useful global minor modes:
+
+@itemize @bullet
+@item
+Column Number mode enables display of the current column number in the
+mode line.  @xref{Mode Line}.
+
+@item
+Delete Selection mode causes text insertion to first delete the text
+in the region, if the region is active.  @xref{Using Region}.
+
+@item
+Icomplete mode displays an indication of available completions when
+you are in the minibuffer and completion is active.  @xref{Completion
+Options}.
+
+@item
+Line Number mode enables display of the current line number in the
+mode line.  It is enabled by default.  @xref{Mode Line}.
+
+@item
+Menu Bar mode gives each frame a menu bar.  It is enabled by default.
+@xref{Menu Bars}.
+
+@item
+Scroll Bar mode gives each window a scroll bar.  It is enabled by
+default, but the scroll bar is only displayed on graphical terminals.
+@xref{Scroll Bars}.
+
+@item
+Tool Bar mode gives each frame a tool bar.  It is enabled by default,
+but the tool bar is only displayed on graphical terminals.  @xref{Tool
+Bars}.
+
+@item
+Transient Mark mode highlights the region, and makes many Emacs
+commands operate on the region when the mark is active.  It is enabled
+by default.  @xref{Mark}.
+@end itemize
+
+@node Choosing Modes
+@section Choosing File Modes
+
+@cindex choosing a major mode
+@cindex choosing a minor mode
+@vindex auto-mode-alist
+  When you visit a file, Emacs chooses a major mode automatically.
+Normally, it makes the choice based on the file name---for example,
+files whose names end in @samp{.c} are normally edited in C mode---but
+sometimes it chooses the major mode based on special text in the file.
+This special text can also be used to enable buffer-local minor modes.
+
+  Here is the exact procedure:
+
+  First, Emacs checks whether the file contains file-local mode
+variables.  @xref{File Variables}.  If there is a file-local variable
+that specifies a major mode, then Emacs uses that major mode, ignoring
+all other criteria.  There are several methods to specify a major mode
+using a file-local variable; the simplest is to put the mode name in
+the first nonblank line, preceded and followed by @samp{-*-}.  Other
+text may appear on the line as well.  For example,
+
+@example
+; -*-Lisp-*-
+@end example
+
+@noindent
+tells Emacs to use Lisp mode.  Note how the semicolon is used to make
+Lisp treat this line as a comment.  You could equivalently write
+
+@example
+; -*- mode: Lisp;-*-
+@end example
+
+@noindent
+You can also use file-local variables to specify buffer-local minor
+modes, by using @code{eval} specifications.  For example, this first
+nonblank line puts the buffer in Lisp mode and enables Auto-Fill mode:
+
+@example
+; -*- mode: Lisp; eval: (auto-fill-mode 1); -*-
+@end example
+
+@noindent
+Note, however, that it is usually inappropriate to enable minor modes
+this way, since most minor modes represent individual user
+preferences.  If you personally want to use a minor mode for a
+particular file type, it is better to enable the minor mode via a
+major mode hook (@pxref{Major Modes}).
+
+@vindex interpreter-mode-alist
+  Second, if there is no file variable specifying a major mode, Emacs
+checks whether the file's contents begin with @samp{#!}.  If so, that
+indicates that the file can serve as an executable shell command,
+which works by running an interpreter named on the file's first line
+(the rest of the file is used as input to the interpreter).
+Therefore, Emacs tries to use the interpreter name to choose a mode.
+For instance, a file that begins with @samp{#!/usr/bin/perl} is opened
+in Perl mode.  The variable @code{interpreter-mode-alist} specifies
+the correspondence between interpreter program names and major modes.
+
+  When the first line starts with @samp{#!}, you usually cannot use
+the @samp{-*-} feature on the first line, because the system would get
+confused when running the interpreter.  So Emacs looks for @samp{-*-}
+on the second line in such files as well as on the first line.  The
+same is true for man pages which start with the magic string
+@samp{'\"} to specify a list of troff preprocessors.
+
+@vindex magic-mode-alist
+  Third, Emacs tries to determine the major mode by looking at the
+text at the start of the buffer, based on the variable
+@code{magic-mode-alist}.  By default, this variable is @code{nil} (an
+empty list), so Emacs skips this step; however, you can customize it
+in your init file (@pxref{Init File}).  The value should be a list of
+elements of the form
+
+@example
+(@var{regexp} . @var{mode-function})
+@end example
+
+@noindent
+where @var{regexp} is a regular expression (@pxref{Regexps}), and
+@var{mode-function} is a major mode command.  If the text at the
+beginning of the file matches @var{regexp}, Emacs chooses the major
+mode specified by @var{mode-function}.
+
+Alternatively, an element of @code{magic-mode-alist} may have the form
+
+@example
+(@var{match-function} . @var{mode-function})
+@end example
+
+@noindent
+where @var{match-function} is a Lisp function that is called at the
+beginning of the buffer; if the function returns non-@code{nil}, Emacs
+set the major mode with @var{mode-function}.
+
+  Fourth---if Emacs still hasn't found a suitable major mode---it
+looks at the file's name.  The correspondence between file names and
+major modes is controlled by the variable @code{auto-mode-alist}.  Its
+value is a list in which each element has this form,
+
+@example
+(@var{regexp} . @var{mode-function})
+@end example
+
+@noindent
+or this form,
+
+@example
+(@var{regexp} @var{mode-function} @var{flag})
+@end example
+
+@noindent
+For example, one element normally found in the list has the form
+@code{(@t{"\\.c\\'"} . c-mode)}, and it is responsible for selecting C
+mode for files whose names end in @file{.c}.  (Note that @samp{\\} is
+needed in Lisp syntax to include a @samp{\} in the string, which must
+be used to suppress the special meaning of @samp{.} in regexps.)  If
+the element has the form @code{(@var{regexp} @var{mode-function}
+@var{flag})} and @var{flag} is non-@code{nil}, then after calling
+@var{mode-function}, Emacs discards the suffix that matched
+@var{regexp} and searches the list again for another match.
+
+@vindex auto-mode-case-fold
+  On GNU/Linux and other systems with case-sensitive file names, Emacs
+performs a case-sensitive search through @code{auto-mode-alist}; if
+this search fails, it performs a second case-insensitive search
+through the alist.  To suppress the second search, change the variable
+@code{auto-mode-case-fold} to @code{nil}.  On systems with
+case-insensitive file names, such as Microsoft Windows, Emacs performs
+a single case-insensitive search through @code{auto-mode-alist}.
+
+@vindex magic-fallback-mode-alist
+  Finally, if Emacs @emph{still} hasn't found a major mode to use, it
+compares the text at the start of the buffer to the variable
+@code{magic-fallback-mode-alist}.  This variable works like
+@code{magic-mode-alist}, described above, except that is consulted
+only after @code{auto-mode-alist}.  By default,
+@code{magic-fallback-mode-alist} contains forms that check for image
+files, HTML/XML/SGML files, and PostScript files.
+
+@findex normal-mode
+  If you have changed the major mode of a buffer, you can return to
+the major mode Emacs would have chosen automatically, by typing
+@kbd{M-x normal-mode}.  This is the same function that
+@code{find-file} calls to choose the major mode.  It also processes
+the file's @samp{-*-} line or local variables list (if any).
+@xref{File Variables}.
+
+@vindex change-major-mode-with-file-name
+  The commands @kbd{C-x C-w} and @code{set-visited-file-name} change to
+a new major mode if the new file name implies a mode (@pxref{Saving}).
+(@kbd{C-x C-s} does this too, if the buffer wasn't visiting a file.)
+However, this does not happen if the buffer contents specify a major
+mode, and certain ``special'' major modes do not allow the mode to
+change.  You can turn off this mode-changing feature by setting
+@code{change-major-mode-with-file-name} to @code{nil}.
