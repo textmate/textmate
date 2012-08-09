@@ -46,6 +46,11 @@ To install using [MacPorts][]:
 
 	sudo port install clang-3.2 clang_select proctools
 	sudo port select clang mp-clang-3.2
+	
+Or using [homebrew][]:
+
+	brew install ragel boost pgrep multimarkdown hg
+	brew install --HEAD https://raw.github.com/adamv/homebrew-alt/master/head-only/ninja.rb
 
 ## Building from within TextMate
 
