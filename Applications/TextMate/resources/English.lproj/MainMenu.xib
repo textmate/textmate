@@ -1487,6 +1487,14 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
+								<object class="NSMenuItem" id="142010387">
+									<reference key="NSMenu" ref="377204242"/>
+									<string key="NSTitle">Enter Full Screen</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
 							</object>
 						</object>
 					</object>
@@ -3623,6 +3631,14 @@
 					<int key="connectionID">780</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleFullScreen:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="142010387"/>
+					</object>
+					<int key="connectionID">783</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">goToLinePanel</string>
 						<reference key="source" ref="585298010"/>
@@ -4325,6 +4341,7 @@
 							<reference ref="465625478"/>
 							<reference ref="53103184"/>
 							<reference ref="701544362"/>
+							<reference ref="142010387"/>
 						</object>
 						<reference key="parent" ref="412091230"/>
 					</object>
@@ -5471,6 +5488,11 @@
 						<reference key="object" ref="701544362"/>
 						<reference key="parent" ref="377204242"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">782</int>
+						<reference key="object" ref="142010387"/>
+						<reference key="parent" ref="377204242"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5743,6 +5765,7 @@
 					<string>776.IBShouldRemoveOnLegacySave</string>
 					<string>778.IBPluginDependency</string>
 					<string>78.IBPluginDependency</string>
+					<string>782.IBPluginDependency</string>
 					<string>79.IBPluginDependency</string>
 					<string>80.IBPluginDependency</string>
 					<string>81.IBPluginDependency</string>
@@ -6022,6 +6045,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6036,7 +6060,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">780</int>
+			<int key="maxID">783</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
