@@ -943,6 +943,23 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("\n"););
 	ASSERT([sender isKindOfClass:[OakTabBarView class]]);
+
+	if(documentTabs.size() == 1 && !fileBrowserHidden)
+	{
+		document::document_ptr document = *documentTabs[0];
+		if(!document->is_modified())
+		{
+			if(document->path() == NULL_STR)
+			{
+				return [[self window] performClose:self];
+			}
+			else
+			{
+				[self newDocumentInTab:nil];
+				scratchDocument = [self selectedDocument]->identifier();
+			}
+		}
+	}
 	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[sender tag]] quiet:NO];
 }
 
