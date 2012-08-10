@@ -6,8 +6,9 @@ require 'base64'
 require 'openssl'
 require 'digest/sha1'
 
-KEYFILE = File.join(File.dirname(__FILE__), "../../TextMate/etc/sign_key.pem")
-PW_INFO = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
+KEYFILE    = File.join(File.dirname(__FILE__), "../../TextMate/etc/sign_key.pem")
+PW_INFO    = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
+REPOSITORY = 'textmate/textmate'
 
 def sign(path)
   # %x{openssl dgst -dss1 -sign '#{KEYFILE}' -passin 'pass:#{PW_INFO.password}' '#{path}'|openssl enc -base64}.chomp
@@ -18,14 +19,40 @@ def sign(path)
   Base64.encode64(signature).gsub("\n", '')
 end
 
+def aws_upload(path, url, key, acl, filename, content_type, access_key, policy, signature)
+  rc = %x{curl -sw'%{http_code}' --show-error -o/dev/null \
+     -F "key=#{key}" \
+     -F "acl=#{acl}" \
+     -F "success_action_status=201" \
+     -F "Filename=#{filename}" \
+     -F "Content-Type=#{content_type}" \
+     -F "AWSAccessKeyId=#{access_key}" \
+     -F "Policy=#{policy}" \
+     -F "Signature=#{signature}" \
+     -F "file=@#{path}" \
+     #{url}
+  }
+  abort "aws error: #{rc}" unless rc == '201'
+end
+
+def create_download(path, repository, name, description, content_type)
+  payload = { 'name' => name || File::basename(path), 'size' => File::size(path), 'content_type' => content_type || 'application/octet-stream' }
+  payload['description'] = description unless description.nil?
+
+  open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/downloads") do |io|
+    github = JSON.parse(io.read)
+    abort "github error: #{github['errors'].inspect}" if github.include? 'errors'
+    aws_upload(path, github['s3_url'], github['path'], github['acl'], payload['name'], payload['content_type'], github['accesskeyid'], github['policy'], github['signature'])
+  end
+end
+
 if path = ARGV.shift
   if File.basename(path) =~ /(.+)_r(\d+)\.tbz$/
     base, name, version = $&, $1, $2
+    description = ''
 
-    cmd = "s3cmd >/dev/null put --acl-public -m 'application/x-bzip2' --add-header='x-amz-meta-x-signee:#{PW_INFO.login}' --add-header='x-amz-meta-x-signature:#{sign(path)}' '#{path}' 's3://s3.textmate.org/Application/#{base}'"
-    url = "http://dl.textmate.org/Application/#{base}"
-
-    system(cmd) or abort "*** upload failed: #{cmd}"
+    create_download(path, REPOSITORY, base, description, 'application/x-bzip2')
+    url = "https://github.com/downloads/#{REPOSITORY}/#{base}"
 
     info = {
       'url'       => url,
