@@ -1,5 +1,5 @@
 #!/bin/sh
-set -u
+# set -u
 function error () { printf >&2 "%s\n\nPlease see README.md for build instructions.\n" "$1"; exit; }
 
 # =================================================
@@ -24,28 +24,32 @@ rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 )) || \
 		rev=$(git log --oneline master | wc -l)
 	fi
 
-# ===============================================================
-# = Prefer clang (3.2-trunk) from MacPorts over Apple’s version =
-# ===============================================================
+# ===============================================
+# = Find clang via xcrun, MacPorts, or Homebrew =
+# ===============================================
 
-: "${CC:=/opt/local/bin/clang}"
-: "${CXX:=/opt/local/bin/clang++}"
-
-if ! [[ -x "$CC" && -x "$CXX" ]]; then
-	if which -s xcrun; then
-		CC=$(xcrun -find clang)
-		CXX=$(xcrun -find clang++)
-	else
-		CC='/usr/bin/clang'
-		CXX='/usr/bin/clang++'
-	fi
+if which -s xcrun; then
+	: ${CC:=$(xcrun -find clang)}
+	: ${CXX:=$(xcrun -find clang++)}
 fi
 
+for cc in /{opt,usr}/local/bin/clang /usr/bin/clang; do
+	if [[ ! -x "$CC" || ! -x "$CXX" ]]; then
+		CC="${cc}"
+		CXX="${cc}++"
+	fi
+done
+
+test -x "$CC" || error "*** clang not installed."
 "$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "$CC is too old to build this project."
 
 # ===============================
 # = Check if boost is installed =
 # ===============================
+
+if which -s brew && [[ -z "$boostdir" && ! -d /usr/local/include/boost ]]; then
+	boostdir=$(brew --prefix boost)/include/boost
+fi
 
 for dir in "${boostdir:-/usr/include/boost}" /{opt,usr}/local/include/boost; do
 	if [[ ! -L "${builddir}/include/boost" && -d "${dir}" ]]; then
