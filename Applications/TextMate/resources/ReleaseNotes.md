@@ -1,5 +1,29 @@
 # Release Notes
 
+## 2012-08-10
+
+The source for TextMate 2 is now [available at GitHub][1] under a GPL 3 license. There is an [interview at Ars Technica][2] that gives some background about what motivated this decision.
+
+[1]: https://github.com/textmate/textmate
+[2]: http://arstechnica.com/apple/2012/08/odgaard-i-will-continue-working-on-textmate-as-long-as-i-am-a-mac-user/
+
+* TextMate 2 now require 10.7
+* When opening an already open folder (e.g. `mate .`) the window with that folder is brought to front *[Adam Strzelecki]*
+* When no URL is given in a `txmt` URL then current document is used (this affected e.g. clicking errors in a ruby stack dump when running untitled files) *[Gerd Knops]*
+* Opening `txmt` URLs with escaped spaces no longer fail *[Gerd Knops]*
+* git: If a folder contains files with mixed status, the folder itself now gets a badge *[Gerd Knops]*
+* SCM badges are now enabled for disk images *[Gerd Knops]*
+* Scope selectors now support anchoring matches by using `^`, `$`, and `>` to anchor to either the first, last, or previous scope element *[Joachim Mårtensson]*
+* Subversion support (badges) has been disabled. The `libsvn.a` used was an older version which didn’t support the most recent repository format, and building the latest version gave rise to a few problems. Moving forward, I think subversion support should be re-added by calling the `svn` shell command to obtain status (this is the approach taken for both git and mercurial).
+* Absolute paths in the “Find in Folder” results now use the name of the disk instead of `/` as first element
+* git: Updated driver to work with the new way submodules have their metadata in the super project.
+* Tab triggers are no longer rendered in the menu. This is caused by the switch to the 10.7 SDK which no longer allow the old way of rendering these items. Replacement code is of course planned.
+* Projects with a `*.ninja` file now get the `attr.project.ninja` scope.
+* Sections in `.tm_properties` files can now target multiple globs/scopes by separating them with a semi-colon, e.g.:
+	
+		[ source.ruby; *.rb ]
+		tabSize = 2
+
 ## 2012-07-09
 
 * Signed for Gatekeeper.
