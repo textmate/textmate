@@ -24,21 +24,27 @@ rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 )) || \
 		rev=$(git log --oneline master | wc -l)
 	fi
 
-# ===============================================
-# = Find clang via xcrun, MacPorts, or Homebrew =
-# ===============================================
-
-if which -s xcrun; then
-	: ${CC:=$(xcrun -find clang)}
-	: ${CXX:=$(xcrun -find clang++)}
-fi
+# ========================================================================
+# = Find clang via MacPorts, Homebrew or Xcode CLI Tools (in that order) =
+# ========================================================================
 
 for cc in /{opt,usr}/local/bin/clang /usr/bin/clang; do
-	if [[ ! -x "$CC" || ! -x "$CXX" ]]; then
+	if [[ -x "${cc}" && -x "${cc}++" ]]; then
 		CC="${cc}"
 		CXX="${cc}++"
+		break
 	fi
 done
+
+# =====================================
+# = Find clang via Xcode if necessary =
+# =====================================
+if [[ "${CC}" = "" || "${CXX}" = "" ]]; then
+  if which -s xcrun; then
+	  CC=$(xcrun -find clang)}
+	  CXX=$(xcrun -find clang++)}
+  fi
+fi
 
 test -x "$CC" || error "*** clang not installed."
 "$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "$CC is too old to build this project."
