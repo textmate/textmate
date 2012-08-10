@@ -11,7 +11,12 @@ To bootstrap the build you need to run `./configure` (in the root of the source 
 
 In the simplest case you would run:
 
+	git clone https://github.com/textmate/textmate.git
+	cd textmate
+	git submodule update --init
 	./configure && ninja
+
+Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefor fail.
 
 ## Prerequisites
 

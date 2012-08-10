@@ -92,11 +92,9 @@ for dep in ninja ragel pgrep pkill "$CC" "$CXX"; do
 	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
 done
 
-# =========================================================================
-# = Update/initialize submodules, generate build files and build fixtures =
-# =========================================================================
-
-test -d .git && git submodule update --init
+# =====================================
+# = Generate fixtures and build files =
+# =====================================
 
 DST="$builddir/Frameworks/SoftwareUpdate/fixtures" make -C Frameworks/SoftwareUpdate/fixtures
 
