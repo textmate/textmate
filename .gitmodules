@@ -1,21 +1,21 @@
 [submodule "bin/CxxTest"]
 	path = bin/CxxTest
-	url = git://github.com/textmate/cxxtest.git
+	url = https://github.com/textmate/cxxtest.git
 [submodule "vendor/MASPreferences/vendor"]
 	path = vendor/MASPreferences/vendor
-	url = git://github.com/textmate/MASPreferences.git
+	url = https://github.com/textmate/MASPreferences.git
 [submodule "rmate"]
 	path = rmate
-	url = git://github.com/textmate/rmate.git
+	url = https://github.com/textmate/rmate.git
 [submodule "vendor/MGScopeBar/vendor"]
 	path = vendor/MGScopeBar/vendor
-	url = git://github.com/textmate/MGScopeBar.git
+	url = https://github.com/textmate/MGScopeBar.git
 [submodule "Applications/TextMate/icons"]
 	path = Applications/TextMate/icons
-	url = git://github.com/textmate/document-icons.git
+	url = https://github.com/textmate/document-icons.git
 [submodule "PlugIns/dialog-1.x"]
 	path = PlugIns/dialog-1.x
-	url = git://github.com/textmate/dialog-1.x.git
+	url = https://github.com/textmate/dialog-1.x.git
 [submodule "PlugIns/dialog"]
 	path = PlugIns/dialog
-	url = git://github.com/textmate/dialog.git
+	url = https://github.com/textmate/dialog.git
