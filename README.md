@@ -25,6 +25,7 @@ To build the source the following must first be installed on your system:
 
 To install using [MacPorts][] run:
 
+	sudo port selfupdate
 	sudo port install ninja ragel boost multimarkdown mercurial
 
 If `port` fails with a build error then likely you need to agree (system-wide) to Apple’s Xcode license:
