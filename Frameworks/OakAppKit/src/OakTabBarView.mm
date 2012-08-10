@@ -545,7 +545,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 {
 	D(DBF_TabBarView, bug("\n"););
 	tag = selectedTab; // performCloseTab: asks for [sender tag]
-	if([tabTitles count] > 1)
+	if([tabTitles count] >= 1)
 			[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
 	else	[[self nextResponder] tryToPerform:_cmd with:sender];
 }
