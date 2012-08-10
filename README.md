@@ -51,7 +51,7 @@ If you are on OS X 10.7 you need `pgrep` and `pkill` (used by the “relaunch”
 
 Or using [homebrew][]:
 
-	brew install pgrep
+	brew install proctools
 
 ### Clang 3.2 / 4.0
 
