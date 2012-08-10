@@ -40,16 +40,24 @@ In practice `hg` ([mercurial][]) is only required for the SCM library’s tests 
 
 ### OS X 10.7 (Lion)
 
-If you are on OS X 10.7 you need [clang 3.2][] and the [proctools][] package (contains `pgrep` and `pkill` used by the “relaunch” build targets).
+If you are on OS X 10.7 you need `pgrep` and `pkill` (used by the “relaunch” build targets). To install using [MacPorts][]:
 
-To install using [MacPorts][]:
+	sudo port install proctools
 
-	sudo port install clang-3.2 clang_select proctools
-	sudo port select clang mp-clang-3.2
-
-Or (for `pgrep` and `pkill`) using [homebrew][]:
+Or using [homebrew][]:
 
 	brew install pgrep
+
+### Clang 3.2 / 4.0
+
+You also need a recent version of clang. This should be included with Xcode 4.4+ (available for both Lion and Mountain Lion). If don’t have it, you can build [clang 3.2][] from [MacPorts][]:
+
+	sudo port install clang-3.2 clang_select
+	sudo port select clang mp-clang-3.2
+
+Or using [homebrew][]:
+ 
+	brew install --HEAD llvm --with-clang
 
 ## Building from within TextMate
 
@@ -122,7 +130,6 @@ TextMate is a trademark of Allan Odgaard.
 [ragel]:         http://www.complang.org/ragel/
 [mercurial]:     http://mercurial.selenic.com/
 [clang 3.2]:     http://clang.llvm.org/
-[proctools]:     http://proctools.sourceforge.net/
 [MacPorts]:      http://www.macports.org/
 [homebrew]:      http://mxcl.github.com/homebrew/
 [NinjaBundle]:   https://github.com/avian/ninja.tmbundle
