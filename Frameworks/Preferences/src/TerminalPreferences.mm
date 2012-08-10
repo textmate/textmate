@@ -171,7 +171,7 @@ static bool uninstall_mate (std::string const& path)
 - (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)path contextInfo:(void*)info
 {
 	if(path)
-			[self updatePopUp:[path stringByAbbreviatingWithTildeInPath]];
+			[self updatePopUp:path];
 	else	[installPathPopUp selectItemAtIndex:0];
 	[self updateUI:self];
 }
@@ -181,6 +181,7 @@ static bool uninstall_mate (std::string const& path)
 	NSMenu* menu = [installPathPopUp menu];
 	[menu removeAllItems];
 
+	path = [path stringByAbbreviatingWithTildeInPath];
 	if(path && ![path isEqualToString:@"~/bin/mate"] && ![path isEqualToString:@"/usr/local/bin/mate"])
 		[menu addItemWithTitle:path action:@selector(updateUI:) keyEquivalent:@""];
 	[menu addItemWithTitle:@"/usr/local/bin/mate" action:@selector(updateUI:) keyEquivalent:@""];
@@ -194,40 +195,46 @@ static bool uninstall_mate (std::string const& path)
 
 - (void)updateUI:(id)sender
 {
-	NSString* path = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey];
+	BOOL isInstalled = self.mateInstallPath ? YES : NO;
 
 	std::map<std::string, std::string> variables;
-	if(path)
+	if(isInstalled)
 		variables["installed"] = "installed";
-	variables["mate_path"] = to_s(path ?: [installPathPopUp titleOfSelectedItem]);
+	variables["mate_path"] = to_s([self.mateInstallPath stringByAbbreviatingWithTildeInPath] ?: [installPathPopUp titleOfSelectedItem]);
 
 	[installStatusText setStringValue:[NSString stringWithCxxString:format_string::expand(statusTextFormat, variables)]];
 	[installSummaryText setStringValue:[NSString stringWithCxxString:format_string::expand(summaryTextFormat, variables)]];
-	self.installIndicaitorImage = [NSImage imageNamed:(path ? @"Light-on" : @"Light-off") inSameBundleAsClass:[self class]];
+	self.installIndicaitorImage = [NSImage imageNamed:(isInstalled ? @"Light-on" : @"Light-off") inSameBundleAsClass:[self class]];
 
-	[installPathPopUp setEnabled:path ? NO : YES];
-	[installButton setAction:path ? @selector(performUninstallMate:) : @selector(performInstallMate:)];
-	[installButton setState:path ? NSOnState : NSOffState];
+	[installPathPopUp setEnabled:isInstalled ? NO : YES];
+	[installButton setAction:isInstalled ? @selector(performUninstallMate:) : @selector(performInstallMate:)];
+	[installButton setState:isInstalled ? NSOnState : NSOffState];
 }
 
 - (void)loadView
 {
 	[super loadView];
 
-	if(NSString* path = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey])
+	if(NSString* path = self.mateInstallPath)
 	{
-		if(access([[path stringByExpandingTildeInPath] fileSystemRepresentation], F_OK) != 0)
+		if(access([path fileSystemRepresentation], F_OK) != 0)
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallPathKey];
 	}
 
 	installPathPopUp.target = self;
 	statusTextFormat  = to_s([installStatusText stringValue]);
 	summaryTextFormat = to_s([installSummaryText stringValue]);
-	[self updatePopUp:[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey]];
+	[self updatePopUp:self.mateInstallPath];
 	[self updateUI:self];
 
 	CreateHyperLink(rmateSummaryText, @"rmate", [NSString stringWithFormat:@"txmt://open?url=%@", [[NSURL fileURLWithPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"rmate" ofType:@""]] absoluteString]]);
 	LSSetDefaultHandlerForURLScheme(CFSTR("txmt"), (CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
+}
+
+- (NSString*)mateInstallPath
+{
+	NSString* path = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey];
+	return [path stringByExpandingTildeInPath];
 }
 
 - (void)setMateInstallPath:(NSString*)aPath
@@ -235,74 +242,64 @@ static bool uninstall_mate (std::string const& path)
 	if(aPath)
 			[[NSUserDefaults standardUserDefaults] setObject:aPath forKey:kUserDefaultsMateInstallPathKey];
 	else	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallPathKey];
+}
 
+- (void)installMateAs:(NSString*)dstPath
+{
+	if(NSString* srcPath = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil])
+	{
+		if(install_mate(to_s(srcPath), to_s(dstPath)))
+			[self setMateInstallPath:dstPath];
+	}
+	else
+	{
+		NSRunAlertPanel(@"Unable to find ‘mate’", @"The ‘mate’ binary is missing from the application bundle. We recommend that you re-download the application.", @"OK", nil, nil);
+	}
 	[self updateUI:self];
 }
 
 - (void)replaceWarningDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)stack
 {
 	if(returnCode == NSAlertFirstButtonReturn)
-	{
-		auto env = bundles::environment(scope::scope_t());
-		auto it = env.find("TM_SUPPORT_PATH");
-		if(it != env.end())
-		{
-			std::string src = path::join(it->second, "bin/mate");
-			std::string dst = to_s([[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]);
-
-			if(install_mate(src, dst))
-			{
-				[self setMateInstallPath:[installPathPopUp titleOfSelectedItem]];
-				[self updateUI:self];
-			}
-		}
-	}
-
+		[self installMateAs:[[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]];
 	[alert release];
 }
 
 - (IBAction)performInstallMate:(id)sender
 {
-	auto env = bundles::environment(scope::scope_t());
-	auto it = env.find("TM_SUPPORT_PATH");
-	if(it != env.end())
+	NSString* dstObjPath = [[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath];
+
+	struct stat buf;
+	std::string dstPath = to_s(dstObjPath);
+	if(lstat(dstPath.c_str(), &buf) == 0)
 	{
-		std::string srcPath = path::join(it->second, "bin/mate");
-		std::string dstPath = to_s([[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]);
+		char const* itemType = "An item";
+		if(S_ISREG(buf.st_mode))
+			itemType = "A file";
+		else if(S_ISDIR(buf.st_mode))
+			itemType = "A folder";
+		else if(S_ISLNK(buf.st_mode))
+			itemType = "A link";
 
-		struct stat buf;
-		if(lstat(dstPath.c_str(), &buf) == 0)
-		{
-			char const* itemType = "An item";
-			if(S_ISREG(buf.st_mode))
-				itemType = "A file";
-			else if(S_ISDIR(buf.st_mode))
-				itemType = "A folder";
-			else if(S_ISLNK(buf.st_mode))
-				itemType = "A link";
+		std::string summary = text::format("%s with the name “mate” already exists in the folder %s. Do you want to replace it?", itemType, path::with_tilde(path::parent(dstPath)).c_str());
 
-			std::string summary = text::format("%s with the name “mate” already exists in the folder %s. Do you want to replace it?", itemType, path::with_tilde(path::parent(dstPath)).c_str());
-
-			NSAlert* alert = [[NSAlert alloc] init]; // released in didEndSelector
-			[alert setAlertStyle:NSWarningAlertStyle];
-			[alert setMessageText:@"File Already Exists"];
-			[alert setInformativeText:[NSString stringWithCxxString:summary]];
-			[alert addButtons:@"Replace", @"Cancel", nil];
-			[alert beginSheetModalForWindow:[self.view window] modalDelegate:self didEndSelector:@selector(replaceWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-		}
-		else
-		{
-			if(install_mate(srcPath, dstPath))
-				[self setMateInstallPath:[installPathPopUp titleOfSelectedItem]];
-		}
+		NSAlert* alert = [[NSAlert alloc] init]; // released in didEndSelector
+		[alert setAlertStyle:NSWarningAlertStyle];
+		[alert setMessageText:@"File Already Exists"];
+		[alert setInformativeText:[NSString stringWithCxxString:summary]];
+		[alert addButtons:@"Replace", @"Cancel", nil];
+		[alert beginSheetModalForWindow:[self.view window] modalDelegate:self didEndSelector:@selector(replaceWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	}
+	else
+	{
+		[self installMateAs:dstObjPath];
 	}
 	[self updateUI:self];
 }
 
 - (IBAction)performUninstallMate:(id)sender
 {
-	NSString* path = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey];
-	if(uninstall_mate(to_s([path stringByExpandingTildeInPath])))
+	if(uninstall_mate(to_s(self.mateInstallPath)))
 		[self setMateInstallPath:nil];
 	[self updateUI:self];
 }
