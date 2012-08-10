@@ -47,7 +47,7 @@ fi
 # = Check if boost is installed =
 # ===============================
 
-for dir in "${boostdir:-/usr/include/boost}" /{opt,usr}/local/include/boost; do
+for dir in "${boostdir:-/usr/include/boost}" /{opt,usr}/local/include/boost ${CPATH//:/ }; do
 	if [[ ! -L "${builddir}/include/boost" && -d "${dir}" ]]; then
 		mkdir -p "${builddir}/include" && ln -fs "${dir}" "${builddir}/include/boost"
 	fi
