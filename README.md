@@ -122,6 +122,24 @@ You can send pull requests via GitHub. Patches should:
 
 There is both the [textmate-dev][] mailing list and [##textmate][] IRC channel at [freenode.net][] where this project can be discussed.
 
+## Changing a xib File
+
+When you change a `xib` file then please look at the diff before you push. If the diff seems to have a lot of changes unrelated to what actually did change, please revert back to `HEAD` and open the pristine `xib` in Xcode and save that (without changing anything).
+
+Commit this saved `xib` with a commit message of `Save xib file with Xcode «version»`. Here version is the version of Xcode you are using, but be sure you don’t downgrade the format. To check the version that `resources/English.lproj/MainMenu.xib` was last saved with, you can run (add appropriate grep if desired):
+
+	git log --oneline resources/English.lproj/MainMenu.xib
+
+You can safely assume that all `xib` files without such message are saved with Xcode 4.4 or earlier (i.e. you won’t downgrade them).
+
+After this, re-apply your change and commit. If the change is non-trivial it is a good idea to write how you made the change in the commit body. E.g. a commit message could be:
+
+	Only enable install button when we can install
+	
+	The install button’s “enabled” property
+	has been bound to the “canInstall”
+	property of File’s Owner.
+
 # Legal
 
 The source for TextMate is released under the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
