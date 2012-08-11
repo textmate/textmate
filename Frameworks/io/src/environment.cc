@@ -7,7 +7,7 @@ namespace oak
 {
 	static bool exclude_variable (std::string const& variable)
 	{
-		static std::string const BlackListedPrefixes[] = { "TM_", "OAK_", "DIALOG", "MAKE", "MFLAGS" };
+		static std::string const BlackListedPrefixes[] = { "TM_", "OAK_", "DIALOG", "MAKE", "MFLAGS", "GIT_" };
 		iterate(prefix, BlackListedPrefixes)
 		{
 			if(variable.find(*prefix) == 0)
