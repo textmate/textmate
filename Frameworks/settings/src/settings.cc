@@ -3,7 +3,6 @@
 #include "track_paths.h"
 #include <OakSystem/application.h>
 #include <plist/plist.h>
-#include <OakSystem/process.h>
 #include <plist/uuid.h>
 #include <oak/oak.h>
 #include <regexp/format_string.h>

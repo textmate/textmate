@@ -6,7 +6,6 @@
 
 namespace oak
 {
-	PUBLIC std::map<std::string, std::string> const& basic_environment ();
 	PUBLIC void kill_process_group_in_background (pid_t groupId);
 
 	struct PUBLIC process_t

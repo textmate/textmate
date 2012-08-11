@@ -3,7 +3,6 @@
 #include <oak/oak.h>
 #include <text/parse.h>
 #include <io/io.h>
-#include <OakSystem/process.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(SCM_Hg);
