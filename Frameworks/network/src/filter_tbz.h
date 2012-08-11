@@ -4,7 +4,7 @@
 #include "download.h" // filter_t
 #include <io/io.h>
 #include <OakSystem/application.h>
-#include <OakSystem/process.h>
+#include <oak/datatypes.h>
 #include <text/format.h>
 #include <text/trim.h>
 

@@ -1,6 +1,7 @@
 #include "process.h"
 #include <io/io.h>
 #include <oak/oak.h>
+#include <oak/datatypes.h>
 #include <oak/compat.h>
 #include <oak/server.h>
 #include <text/format.h>
@@ -96,23 +97,6 @@ namespace oak
 	void kill_process_group_in_background (pid_t groupId)
 	{
 		new kill_process_group_in_background_t(groupId);
-	}
-
-	c_array::c_array (std::map<std::string, std::string> const& map)
-	{
-		char** p = new char* [map.size() + 1];
-		_array = p;
-		iterate(pair, map)
-			*p++ = strdup((pair->first + "=" + pair->second).c_str());
-		*p = NULL;
-	}
-
-	c_array::~c_array ()
-	{
-		char* const* p = _array;
-		while(p && *p)
-			free(*p++);
-		delete[] _array;
 	}
 
 	struct process_server_t

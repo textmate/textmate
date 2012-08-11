@@ -1,9 +1,9 @@
 #include "application.h"
-#include "process.h"
 #include <io/io.h>
 #include <cf/cf.h>
 #include <text/format.h>
 #include <oak/compat.h>
+#include <oak/datatypes.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(Application);
