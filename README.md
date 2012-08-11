@@ -40,6 +40,13 @@ You can also install the above using [homebrew][]:
 
 	brew install ragel boost multimarkdown hg ninja
 
+Note for ninja:  
+It isn`t in brew repositories by default, you have to add it the list by doing:
+	
+	brew tap adamv/alt/
+	brew install adamv/alt/ninja --HEAD
+
+
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
 ### OS X 10.7 (Lion)
@@ -51,6 +58,10 @@ If you are on OS X 10.7 you need `pgrep` and `pkill` (used by the “relaunch”
 Or using [homebrew][]:
 
 	brew install proctools
+
+### OS X 10.8 (Mountain Lion)
+
+Update Xcode Command Line Tools!!!
 
 ### Clang 3.2 / 4.0
 
