@@ -95,6 +95,7 @@ namespace ng
 		kCopy,
 		kCopySelectionToFindPboard,
 		kCopySelectionToReplacePboard,
+		kCopySelectionToYankPboard,
 		kPaste,
 		kPastePrevious,
 		kPasteNext,
@@ -179,13 +180,15 @@ namespace ng
 		// = Clipboards =
 		// ==============
 
-		clipboard_ptr clipboard () const              { ASSERT(_clipboard);         return _clipboard; }
-		clipboard_ptr find_clipboard () const         { ASSERT(_find_clipboard);    return _find_clipboard; }
-		clipboard_ptr replace_clipboard () const      { ASSERT(_replace_clipboard); return _replace_clipboard; }
+		clipboard_ptr clipboard () const              { ASSERT(_clipboard);           return _clipboard; }
+		clipboard_ptr find_clipboard () const         { ASSERT(_find_clipboard);      return _find_clipboard; }
+		clipboard_ptr replace_clipboard () const      { ASSERT(_replace_clipboard);   return _replace_clipboard; }
+		clipboard_ptr yank_line_clipboard () const    { ASSERT(_yank_line_clipboard); return _yank_line_clipboard; }
 
-		void set_clipboard (clipboard_ptr cb)         { _clipboard = cb; }
-		void set_find_clipboard (clipboard_ptr cb)    { _find_clipboard = cb; }
-		void set_replace_clipboard (clipboard_ptr cb) { _replace_clipboard = cb; }
+		void set_clipboard (clipboard_ptr cb)           { _clipboard = cb; }
+		void set_find_clipboard (clipboard_ptr cb)      { _find_clipboard = cb; }
+		void set_replace_clipboard (clipboard_ptr cb)   { _replace_clipboard = cb; }
+		void set_yank_line_clipboard (clipboard_ptr cb) { _yank_line_clipboard = cb; }
 
 	private:
 		void setup ();
@@ -262,6 +265,7 @@ namespace ng
 		clipboard_ptr _clipboard;
 		clipboard_ptr _find_clipboard;
 		clipboard_ptr _replace_clipboard;
+		clipboard_ptr _yank_line_clipboard;
 
 		document::document_ptr _document;
 	};

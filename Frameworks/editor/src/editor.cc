@@ -231,6 +231,7 @@ namespace ng
 		set_clipboard(create_simple_clipboard());
 		set_find_clipboard(create_simple_clipboard());
 		set_replace_clipboard(create_simple_clipboard());
+		set_yank_line_clipboard(create_simple_clipboard());
 	}
 
 	editor_t::editor_t () : _buffer(dummy)
@@ -736,9 +737,12 @@ namespace ng
 			case kShiftRight:                                   _selections = ng::extend(_buffer, _selections, kSelectionExtendToLineExclLF,                layout); break;
 		}
 
-		static action_t const deleteActions[] = { kDeleteBackward, kDeleteForward, kDeleteSubWordLeft, kDeleteSubWordRight, kDeleteWordBackward, kDeleteWordForward, kDeleteToBeginningOfLine, kDeleteToEndOfLine, kDeleteToBeginningOfParagraph, kDeleteToEndOfParagraph };
+		static action_t const deleteActions[] = { kDeleteBackward, kDeleteForward };
+		static action_t const yankActions[]   = { kDeleteSubWordLeft, kDeleteSubWordRight, kDeleteWordBackward, kDeleteWordForward, kDeleteToBeginningOfLine, kDeleteToEndOfLine, kDeleteToBeginningOfParagraph, kDeleteToEndOfParagraph };
 		if(oak::contains(beginof(deleteActions), endof(deleteActions), action))
 			action = kDeleteSelection;
+		else if(oak::contains(beginof(yankActions), endof(yankActions), action))
+			action = kCopySelectionToYankPboard;
 
 		switch(action)
 		{
@@ -837,6 +841,12 @@ namespace ng
 			}
 			break;
 
+			case kCopySelectionToYankPboard:
+			{
+				yank_line_clipboard()->push_back(copy(_buffer, _selections));
+			}
+			// continue
+         
 			case kDeleteSelection:
 			{
 				indent_helper_t indent_helper(*this, _buffer);
@@ -894,7 +904,12 @@ namespace ng
 			case kPasteNext:                                    _selections = paste(_buffer, _selections, _snippets, clipboard()->next());                                                  break;
 			case kPasteWithoutReindent:                         insert(clipboard()->current()->content());                                                                                  break;
 
-			case kYank:                                         insert("TODO");               break;
+			case kYank:
+			{
+				if(clipboard_t::entry_ptr findEntry = yank_line_clipboard()->current())
+					insert(findEntry->content());
+			} 
+			break;
 
 			case kInsertTab:
 			{
