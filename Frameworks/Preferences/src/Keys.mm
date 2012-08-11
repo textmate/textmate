@@ -119,6 +119,7 @@ NSString* const kUserDefaultsLastBundleUpdateCheckKey   = @"lastBundleUpdateChec
 // ============
 
 NSString* const kUserDefaultsMateInstallPathKey         = @"mateInstallPath";
+NSString* const kUserDefaultsMateInstallVersionKey      = @"mateInstallVersion";
 
 NSString* const kUserDefaultsDisableRMateServerKey      = @"rmateServerDisabled";
 NSString* const kUserDefaultsRMateServerListenKey       = @"rmateServerListen"; // localhost (default), remote

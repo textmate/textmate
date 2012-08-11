@@ -7,6 +7,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <io/path.h>
+#import <io/exec.h>
 #import <ns/ns.h>
 #import <regexp/format_string.h>
 #import <bundles/bundles.h>
@@ -218,7 +219,10 @@ static bool uninstall_mate (std::string const& path)
 	if(NSString* path = self.mateInstallPath)
 	{
 		if(access([path fileSystemRepresentation], F_OK) != 0)
+		{
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallPathKey];
+			[[NSUserDefaults standardUserDefaults] removeObjectForKey:kUserDefaultsMateInstallVersionKey];
+		}
 	}
 
 	installPathPopUp.target = self;
@@ -249,7 +253,12 @@ static bool uninstall_mate (std::string const& path)
 	if(NSString* srcPath = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil])
 	{
 		if(install_mate(to_s(srcPath), to_s(dstPath)))
+		{
 			[self setMateInstallPath:dstPath];
+			std::string res = io::exec(to_s(srcPath), "--version", NULL);
+			if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res.data(), res.data() + res.size()))
+				[[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithUTF8String:res.data() + m.begin(1) length:m.end(1) - m.begin(1)] forKey:kUserDefaultsMateInstallVersionKey];
+		}
 	}
 	else
 	{
