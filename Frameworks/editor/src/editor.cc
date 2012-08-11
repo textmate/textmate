@@ -231,6 +231,7 @@ namespace ng
 		set_clipboard(create_simple_clipboard());
 		set_find_clipboard(create_simple_clipboard());
 		set_replace_clipboard(create_simple_clipboard());
+		set_yank_line_clipboard(create_simple_clipboard());
 	}
 
 	editor_t::editor_t () : _buffer(dummy)
@@ -718,10 +719,8 @@ namespace ng
 			case kDeleteWordBackward:                           _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfWord,      layout); break;
 			case kDeleteWordForward:                            _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfWord,        layout); break;
 			case kDeleteToBeginningOfLine:                      _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfSoftLine,  layout); break;
-			case kDeleteToEndOfLine:                            _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfSoftLine,    layout); break;
 			case kDeleteToBeginningOfParagraph:                 _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfParagraph, layout); break;
 			case kDeleteToEndOfParagraph:                       _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfParagraph,   layout); break;
-
 			case kChangeCaseOfWord:                             _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfWord,        layout); break;
 			case kChangeCaseOfLetter:                           _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendRight,              layout); break;
 			case kUppercaseWord:                                _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToWord,             layout); break;
@@ -736,7 +735,7 @@ namespace ng
 			case kShiftRight:                                   _selections = ng::extend(_buffer, _selections, kSelectionExtendToLineExclLF,                layout); break;
 		}
 
-		static action_t const deleteActions[] = { kDeleteBackward, kDeleteForward, kDeleteSubWordLeft, kDeleteSubWordRight, kDeleteWordBackward, kDeleteWordForward, kDeleteToBeginningOfLine, kDeleteToEndOfLine, kDeleteToBeginningOfParagraph, kDeleteToEndOfParagraph };
+		static action_t const deleteActions[] = { kDeleteBackward, kDeleteForward, kDeleteSubWordLeft, kDeleteSubWordRight, kDeleteWordBackward, kDeleteWordForward, kDeleteToBeginningOfLine, kDeleteToBeginningOfParagraph, kDeleteToEndOfParagraph };
 		if(oak::contains(beginof(deleteActions), endof(deleteActions), action))
 			action = kDeleteSelection;
 
@@ -894,7 +893,19 @@ namespace ng
 			case kPasteNext:                                    _selections = paste(_buffer, _selections, _snippets, clipboard()->next());                                                  break;
 			case kPasteWithoutReindent:                         insert(clipboard()->current()->content());                                                                                  break;
 
-			case kYank:                                         insert("TODO");               break;
+			case kDeleteToEndOfLine:
+         {
+            _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfSoftLine,    layout);
+            yank_line_clipboard()->push_back(copy(_buffer, _selections));
+            _selections = apply(_buffer, _selections, _snippets, &transform::null);
+            break;
+         }
+         
+			case kYank:
+         {
+            if(clipboard_t::entry_ptr findEntry = yank_line_clipboard()->current()) insert(findEntry->content());
+            break;
+         } 
 
 			case kInsertTab:
 			{

@@ -28,6 +28,7 @@
 
 	"$\033"    = "previousCompletion:";
 	"@\UF728"  = "deleteToEndOfLine:";
+	"^k"  = "deleteToEndOfLine:";
 	"~\UF705"  = "showContextMenu:";
 
 	"^s"       = "incrementalSearch:";
