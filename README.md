@@ -2,6 +2,8 @@
 
 This repository contains the source code for TextMate 2, a text editor for OS X 10.7+.
 
+![textmate](https://raw.github.com/jtmkrueger/textmate/master/screenshot.png)
+
 # Building
 
 To bootstrap the build you need to run `./configure` (in the root of the source tree). You can set a few (environment) variables read by this script that change the generated build file:
