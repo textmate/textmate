@@ -1,5 +1,4 @@
 #include "api.h"
-#include "utility.h"
 #include <oak/oak.h>
 #include <text/parse.h>
 #include <io/io.h>
@@ -52,7 +51,7 @@ static void collect_all_paths (std::string const& hg, scm::status_map_t& entries
 	std::map<std::string, std::string> env = oak::basic_environment();
 	env["PWD"] = dir;
 
-	parse_status_output(entries, run_cmd(env, hg, "status", "--all", "-0", NULL));
+	parse_status_output(entries, io::exec(env, hg, "status", "--all", "-0", NULL));
 }
 
 namespace scm
@@ -69,7 +68,7 @@ namespace scm
 			std::map<std::string, std::string> env = oak::basic_environment();
 			env["PWD"] = wcPath;
 
-			std::string branchName = run_cmd(env, executable(), "branch", NULL);
+			std::string branchName = io::exec(env, executable(), "branch", NULL);
 			return branchName.substr(0, branchName.find("\n"));
 		}
 
