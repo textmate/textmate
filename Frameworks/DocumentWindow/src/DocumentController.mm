@@ -943,7 +943,21 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("\n"););
 	ASSERT([sender isKindOfClass:[OakTabBarView class]]);
-	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[sender tag]] quiet:NO];
+
+	if(documentTabs.size() != 1) {
+		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[sender tag]] quiet:NO];
+	} else {
+		document::document_ptr document = *documentTabs[0];
+		if(fileBrowserHidden ||
+			document->identifier() == scratchDocument && !document->is_modified()) {
+			return [self close];
+		}
+		if (!(document->identifier() == scratchDocument)) {
+			[self newDocumentInTab:nil];
+			scratchDocument = [self selectedDocument]->identifier();
+		}
+		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[sender tag]] quiet:NO];
+	}
 }
 
 - (void)closeSplitWarningDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)stack
