@@ -948,10 +948,11 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 		[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[sender tag]] quiet:NO];
 	} else {
 		document::document_ptr document = *documentTabs[0];
-		if(fileBrowserHidden || (document->path() == NULL_STR && !document->is_modified())) {
+		if(fileBrowserHidden ||
+			document->identifier() == scratchDocument && !document->is_modified()) {
 			return [self close];
 		}
-		if (!(document->path() == NULL_STR)) {
+		if (!(document->identifier() == scratchDocument)) {
 			[self newDocumentInTab:nil];
 			scratchDocument = [self selectedDocument]->identifier();
 		}
