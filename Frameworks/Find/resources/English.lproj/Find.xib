@@ -310,15 +310,19 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">134217728</int>
 								<string key="NSContents">▼</string>
-								<object class="NSFont" key="NSSupport" id="26">
+								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
-									<double key="NSSize">11</double>
-									<int key="NSfFlags">3100</int>
+									<double key="NSSize">9</double>
+									<int key="NSfFlags">3614</int>
 								</object>
 								<reference key="NSControlView" ref="633627597"/>
 								<int key="NSButtonFlags">-930725888</int>
 								<int key="NSButtonFlags2">6</int>
-								<reference key="NSAlternateImage" ref="26"/>
+								<object class="NSFont" key="NSAlternateImage">
+									<string key="NSName">LucidaGrande</string>
+									<double key="NSSize">9</double>
+									<int key="NSfFlags">16</int>
+								</object>
 								<string key="NSAlternateContents">▲</string>
 								<object class="NSMutableString" key="NSKeyEquivalent">
 									<characters key="NS.bytes"/>
@@ -799,7 +803,11 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 								<int key="NSCellFlags">67108928</int>
 								<int key="NSCellFlags2">272632320</int>
 								<string key="NSContents">Status Message…</string>
-								<reference key="NSSupport" ref="26"/>
+								<object class="NSFont" key="NSSupport" id="26">
+									<string key="NSName">LucidaGrande</string>
+									<double key="NSSize">11</double>
+									<int key="NSfFlags">3100</int>
+								</object>
 								<reference key="NSControlView" ref="895229632"/>
 								<reference key="NSBackgroundColor" ref="1045126479"/>
 								<reference key="NSTextColor" ref="179383910"/>
