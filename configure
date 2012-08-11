@@ -41,7 +41,7 @@ for cc in /{opt,usr}/local/bin/clang /usr/bin/clang; do
 done
 
 test -x "$CC" || error "*** clang not installed."
-"$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /tmp/dummy - <<< 'int main () { id str = @("str"); return 0; }' || error "$CC is too old to build this project."
+"$CC" &>/dev/null -x objective-c -include Foundation/Foundation.h -c -o /dev/null - <<< 'int main () { id str = @("str"); return 0; }' || error "$CC is too old to build this project."
 
 # ===============================
 # = Check if boost is installed =
