@@ -1,5 +1,5 @@
 SOURCES      = src/**/*.cc
 TEST_SOURCES = tests/t_*.cc
 EXPORT       = src/{scm,snapshot}.h
-LINK        += text cf io settings OakSystem
+LINK        += text cf io settings
 FRAMEWORKS   = Carbon Security

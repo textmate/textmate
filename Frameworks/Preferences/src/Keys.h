@@ -52,6 +52,7 @@ PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
 // ============
 
 PUBLIC extern NSString* const kUserDefaultsMateInstallPathKey;
+PUBLIC extern NSString* const kUserDefaultsMateInstallVersionKey;
 
 PUBLIC extern NSString* const kUserDefaultsDisableRMateServerKey;
 PUBLIC extern NSString* const kUserDefaultsRMateServerListenKey;

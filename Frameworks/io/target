@@ -2,4 +2,4 @@ SOURCES      = src/*.cc
 TEST_SOURCES = tests/*
 LINK        += text cf regexp
 FRAMEWORKS   = Carbon Security
-EXPORT       = src/io.h src/path.h src/entries.h src/events.h src/intermediate.h src/pipe.h src/move_path.h src/icon.h src/resource.h src/socket.h src/swap_file_data.h
+EXPORT       = src/*.h

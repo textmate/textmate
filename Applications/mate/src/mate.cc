@@ -5,10 +5,8 @@
 #include <cf/cf.h>
 #include <io/path.h>
 
-static double const AppVersion  = 2.0;
+static double const AppVersion  = 2.1;
 static size_t const AppRevision = APP_REVISION;
-
-#define SOCKET_PATH "/tmp/avian.sock"
 
 // mate returns when all files specified has been opened.
 // If - is used for filename, stdin is read and opened as a new buffer.
@@ -261,7 +259,8 @@ int main (int argc, char* argv[])
 		files.push_back("-");
 
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-	struct sockaddr_un addr = { 0, AF_UNIX, SOCKET_PATH };
+	struct sockaddr_un addr = { 0, AF_UNIX };
+	strcpy(addr.sun_path, path::join(path::temp(), "textmate.sock").c_str());
 	addr.sun_len = SUN_LEN(&addr);
 
 	bool didLaunch = false;

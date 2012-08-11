@@ -1,8 +1,6 @@
 #include "api.h"
-#include "utility.h"
 #include <text/parse.h>
 #include <text/format.h>
-#include <OakSystem/process.h> // oak::basic_environment()
 #include <io/io.h>
 #include <oak/oak.h>
 #include <oak/debug.h>
@@ -97,29 +95,29 @@ static void collect_all_paths (std::string const& git, std::map<std::string, scm
 	std::map<std::string, std::string> env = oak::basic_environment();
 	env["PWD"] = dir;
 
-	bool haveHead = run_cmd(env, git, "show-ref", "-qh", NULL) != NULL_STR;
+	bool haveHead = io::exec(env, git, "show-ref", "-qh", NULL) != NULL_STR;
 
 	std::string const tmpIndex = copy_git_index(dir);
 	if(tmpIndex != NULL_STR)
 	{
 		env["GIT_INDEX_FILE"] = tmpIndex;
-		run_cmd(env, git, "update-index", "-q", "--unmerged", "--ignore-missing", "--refresh", NULL);
+		io::exec(env, git, "update-index", "-q", "--unmerged", "--ignore-missing", "--refresh", NULL);
 
 		// All files part of the repository (index)
 		if(haveHead)
-				parse_ls(entries, run_cmd(env, git, "ls-files", "--exclude-standard", "-zt", NULL));
-		else	parse_ls(entries, run_cmd(env, git, "ls-files", "--exclude-standard", "-zt", NULL), scm::status::added);
+				parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", NULL));
+		else	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zt", NULL), scm::status::added);
 
 		// Modified, Deleted (on disk, not staged)
-		parse_diff(entries, run_cmd(env, git, "diff-files", "--name-status", "--ignore-submodules=dirty", "-z", NULL));
+		parse_diff(entries, io::exec(env, git, "diff-files", "--name-status", "--ignore-submodules=dirty", "-z", NULL));
 
 		// Added (to index), Deleted (from index)
 		if(haveHead)
-			parse_diff(entries, run_cmd(env, git, "diff-index", "--name-status", "--ignore-submodules=dirty", "-z", "--cached", "HEAD", NULL));
+			parse_diff(entries, io::exec(env, git, "diff-index", "--name-status", "--ignore-submodules=dirty", "-z", "--cached", "HEAD", NULL));
 	}
 
 	// All files with ‘other’ status
-	parse_ls(entries, run_cmd(env, git, "ls-files", "--exclude-standard", "-zto", NULL));
+	parse_ls(entries, io::exec(env, git, "ls-files", "--exclude-standard", "-zto", NULL));
 
 	path::remove(tmpIndex);
 }
@@ -230,11 +228,11 @@ namespace scm
 			std::map<std::string, std::string> env = oak::basic_environment();
 			env["PWD"] = wcPath;
 
-			bool haveHead = run_cmd(env, executable(), "show-ref", "-qh", NULL) != NULL_STR;
+			bool haveHead = io::exec(env, executable(), "show-ref", "-qh", NULL) != NULL_STR;
 			if(!haveHead)
 				return NULL_STR;
 
-			std::string branchName = run_cmd(env, executable(), "symbolic-ref", "HEAD");
+			std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD");
 			branchName = branchName.substr(0, branchName.find("\n"));
 			if(branchName.find("refs/heads/") == 0)
 				branchName = branchName.substr(11);

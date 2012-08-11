@@ -1,62 +1,16 @@
 #include "process.h"
 #include <io/io.h>
 #include <oak/oak.h>
+#include <oak/datatypes.h>
 #include <oak/compat.h>
 #include <oak/server.h>
 #include <text/format.h>
 #include <cf/callback.h>
-#include <crt_externs.h>
 
 OAK_DEBUG_VAR(Process);
 
 namespace oak
 {
-	static bool exclude_variable (std::string const& variable)
-	{
-		static std::string const BlackListedPrefixes[] = { "TM_", "OAK_", "DIALOG", "MAKE", "MFLAGS" };
-		iterate(prefix, BlackListedPrefixes)
-		{
-			if(variable.find(*prefix) == 0)
-				return true;
-		}
-		return false;
-	}
-
-	std::map<std::string, std::string> setup_basic_environment ()
-	{
-		passwd* entry = path::passwd_entry();
-
-		int mib[2] = { CTL_USER, USER_CS_PATH };
-		size_t len = 0;
-		sysctl(mib, 2, NULL, &len, NULL, 0);
-		char* path = new char[len];
-		sysctl(mib, 2, path, &len, NULL, 0);
-
-		std::map<std::string, std::string> res;
-
-		char*** envPtr = _NSGetEnviron();
-		for(char** pair = *envPtr; pair && *pair; ++pair)
-		{
-			char* value = strchr(*pair, '=');
-			if(value && *value == '=' && !exclude_variable(std::string(*pair, value)))
-				res[std::string(*pair, value)] = value + 1;
-		}
-
-		res["HOME"]     = entry->pw_dir;
-		res["PATH"]     = path;
-		res["TMPDIR"]   = path::temp();
-		res["LOGNAME"]  = entry->pw_name;
-		res["USER"]     = entry->pw_name;
-
-		return res;
-	}
-
-	std::map<std::string, std::string> const& basic_environment ()
-	{
-		static std::map<std::string, std::string> environment = setup_basic_environment();
-		return environment;
-	}
-
 	struct kill_process_group_in_background_t
 	{
 		kill_process_group_in_background_t (pid_t groupId)
@@ -96,23 +50,6 @@ namespace oak
 	void kill_process_group_in_background (pid_t groupId)
 	{
 		new kill_process_group_in_background_t(groupId);
-	}
-
-	c_array::c_array (std::map<std::string, std::string> const& map)
-	{
-		char** p = new char* [map.size() + 1];
-		_array = p;
-		iterate(pair, map)
-			*p++ = strdup((pair->first + "=" + pair->second).c_str());
-		*p = NULL;
-	}
-
-	c_array::~c_array ()
-	{
-		char* const* p = _array;
-		while(p && *p)
-			free(*p++);
-		delete[] _array;
 	}
 
 	struct process_server_t
