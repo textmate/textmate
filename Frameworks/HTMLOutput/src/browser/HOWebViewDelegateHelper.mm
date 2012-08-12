@@ -49,8 +49,9 @@
 - (void)webView:(WebView*)sender runOpenPanelForFileButtonWithResultListener:(id <WebOpenPanelResultListener>)resultListener
 {
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
-	if([panel runModalForDirectory:NSHomeDirectory() file:nil types:nil] == NSOKButton)
-		[resultListener chooseFilename:[[panel filenames] objectAtIndex:0]];
+	[panel setDirectoryURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
+	if([panel runModal] == NSOKButton)
+		[resultListener chooseFilename:[[[[panel URLs] objectAtIndex:0] fileURL] path]];
 }
 
 - (WebView*)webView:(WebView*)sender createWebViewWithRequest:(NSURLRequest*)request
