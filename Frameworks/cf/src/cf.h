@@ -8,6 +8,7 @@
 namespace cf
 {
 	PUBLIC std::string to_s (CFStringRef aString);
+	PUBLIC std::string to_s (CFErrorRef error);
 
 	struct PUBLIC string_t
 	{
