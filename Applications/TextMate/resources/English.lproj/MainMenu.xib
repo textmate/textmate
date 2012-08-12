@@ -892,8 +892,8 @@
 											<object class="NSMenuItem" id="446919429">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Replace &amp; Find</string>
-												<string key="NSKeyEquiv">f</string>
-												<int key="NSKeyEquivModMask">1572864</int>
+												<string key="NSKeyEquiv">F</string>
+												<int key="NSKeyEquivModMask">262144</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
 												<reference key="NSMixedImage" ref="596846250"/>
