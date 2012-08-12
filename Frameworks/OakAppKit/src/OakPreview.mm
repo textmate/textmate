@@ -1,23 +1,5 @@
 #import "OakPreview.h"
-
-@class QLPreviewPanel;
-@protocol QLPreviewItem;
-
-static id SharedQuickLookPanel ()
-{
-	Class cl = NSClassFromString(@"QLPreviewPanel");
-	if(!cl)
-	{
-		NSString* qlPath = @"/System/Library/Frameworks/Quartz.framework/Frameworks/QuickLookUI.framework";
-		if([[NSFileManager defaultManager] fileExistsAtPath:qlPath])
-		{
-			static NSBundle* QuickLookBundle = [[NSBundle bundleWithPath:qlPath] retain];
-			if([QuickLookBundle load])
-				cl = NSClassFromString(@"QLPreviewPanel");
-		}
-	}
-	return [cl performSelector:@selector(sharedPreviewPanel)];
-}
+#import <Quartz/Quartz.h>
 
 @interface OakPreviewItemHelper : NSObject//<QLPreviewItem>
 {
@@ -43,7 +25,7 @@ static id SharedQuickLookPanel ()
 }
 @end
 
-@interface OakPreviewDelegateHelper : NSObject//<QLPreviewItem,QLPreviewDataSource>
+@interface OakPreviewDelegateHelper : NSObject <QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 {
 	NSArray* items;
 }
@@ -87,7 +69,7 @@ static id SharedQuickLookPanel ()
 
 PUBLIC void OakShowPreviewForURLs (NSArray* someURLs)
 {
-	if(id panel = SharedQuickLookPanel())
+	if(QLPreviewPanel* panel = [QLPreviewPanel sharedPreviewPanel])
 	{
 		// FIXME one is not allowed to set datasource/delegate — instead we need to be “first responder” when the QL preview panel opens
 		OakPreviewDelegateHelper* helper = [[OakPreviewDelegateHelper alloc] initWithItems:someURLs];
