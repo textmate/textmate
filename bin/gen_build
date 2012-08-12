@@ -632,7 +632,7 @@ open("#{builddir}/build.ninja", "w") do |io|
     end
     targets[target[:name]] = target
   end
-  dag = open('|tsort -q', 'r+') { |tsort| tsort << dag; tsort.close_write; tsort.read }
+  dag = open('|/usr/bin/tsort -q', 'r+') { |tsort| tsort << dag; tsort.close_write; tsort.read }
 
   # =========================================================================
   # = Now iterate the targets (in the sorted order) to generate build rules =
