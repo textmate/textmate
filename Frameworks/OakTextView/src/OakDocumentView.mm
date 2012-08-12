@@ -14,6 +14,7 @@
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/NSMenuItem Additions.h>
+#import <BundleMenu/BundleMenuDelegate.h>
 
 OAK_DEBUG_VAR(OakDocumentView);
 
@@ -468,7 +469,27 @@ private:
 
 - (IBAction)showBundleItemSelector:(id)sender
 {
-	NSRunAlertPanel(@"Bundle Item Popup", @"Bundle Item Popup", @"OK", nil, nil);
+	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
+	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
+		ordered.insert(std::make_pair((*item)->name(), *item));
+	
+	NSMenu* menu = [NSMenu new];
+	iterate(pair, ordered)
+	{
+		if(pair->second->menu().empty())
+			continue;
+
+		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
+		menuItem.submenu = [[NSMenu new] autorelease];
+		menuItem.submenu.delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:pair->second] autorelease];
+		menuItem.submenu.autoenablesItems = NO;
+	}
+	
+	if(ordered.empty())
+		[menu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
+
+	[statusBar showMenu:menu withSelectedIndex:0 forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
+	[menu release];
 }
 
 - (IBAction)showTabSizeSelector:(id)sender
