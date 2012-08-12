@@ -10,20 +10,31 @@ static proxy_settings_t user_pw_settings (std::string const& server, UInt32 port
 	D(DBF_Proxy, bug("%s:%zu\n", server.c_str(), (size_t)port););
 	std::string user = NULL_STR, pw = NULL_STR;
 
-	FourCharCode protocol = kSecProtocolTypeHTTPProxy;
-	SecKeychainAttribute attrs[3] = {
-		{ kSecProtocolItemAttr, sizeof(protocol), &protocol,            },
-		{ kSecPortItemAttr,     sizeof(port),     &port,                },
-		{ kSecServerItemAttr,   server.size(),    (void*)server.data(), }
+	CFTypeRef keys[] = {
+		kSecMatchLimit, kSecReturnRef,
+		kSecClass,
+		kSecAttrProtocol,
+		kSecAttrPort,
+		kSecAttrServer
 	};
-	SecKeychainAttributeList attrList = { sizeofA(attrs), attrs };
-
-	SecKeychainSearchRef searchRef = NULL;
-	if(SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &attrList, &searchRef) == noErr)
+	CFTypeRef vals[] = {
+		kSecMatchLimitAll, kCFBooleanTrue,
+		kSecClassInternetPassword,
+		kSecAttrProtocolHTTPProxy,
+		cf::wrap(port),
+		cf::wrap(server)
+	};
+	CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL);
+	
+	CFArrayRef results = NULL;
+	OSStatus err;
+	if(err = SecItemCopyMatching(query, (CFTypeRef*)&results) == errSecSuccess)
 	{
-		SecKeychainItemRef item;
-		while(user == NULL_STR && SecKeychainSearchCopyNext(searchRef, &item) == noErr)
+		CFIndex numResults = CFArrayGetCount(results);
+		for(CFIndex i = 0; user == NULL_STR && i < numResults; ++i)
 		{
+			SecKeychainItemRef item = (SecKeychainItemRef)CFArrayGetValueAtIndex(results, i);
+			
 			UInt32 tag    = kSecAccountItemAttr;
 			UInt32 format = CSSM_DB_ATTRIBUTE_FORMAT_STRING;
 			SecKeychainAttributeInfo info = { 1, &tag, &format };
@@ -41,18 +52,20 @@ static proxy_settings_t user_pw_settings (std::string const& server, UInt32 port
 				D(DBF_Proxy, bug("found user ‘%s’\n", user.c_str()););
 			}
 			else
-			{
 				D(DBF_Proxy, bug("unable to obtain attributes from key chain entry\n"););
-			}
-
-			CFRelease(item);
 		}
-		CFRelease(searchRef);
+		
+		CFRelease(results);
 	}
 	else
 	{
-		D(DBF_Proxy, bug("failed creating key chain search\n"););
+		CFStringRef message = SecCopyErrorMessageString(err, NULL);
+		D(DBF_Proxy, bug("failed to copy matching items from keychain: ‘%s’\n", cf::to_s(message).c_str()););
+		CFRelease(message);
 	}
+
+	if(query)
+		CFRelease(query);
 
 	return proxy_settings_t(true, server, port, user, pw);
 }
