@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2012-08-12
+
+* Fix problem with pressing return, tab, or escape after inserting CJK.
+* Add bundle menu to the status bar. *[Elia Schito]*
+* Changed Find/Replace combobox height to 21, to be aligned with other controls. *[Bo Xiao]*
+
 ## 2012-08-11
 
 * Implement ⌃Y for yanking last deletion. *[Nathaniel Tagg]*
