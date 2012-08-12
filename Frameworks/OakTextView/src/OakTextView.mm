@@ -619,23 +619,20 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(!markedRanges.empty())
 		editor->set_selections(markedRanges);
 	markedRanges = ng::ranges_t();
-	if([[aString description] length] != 0)
-	{
-		editor->insert(to_s([aString description]), true);
-		pendingMarkedRanges = editor->ranges();
-		markedRanges = pendingMarkedRanges;
+	editor->insert(to_s([aString description]), true);
+	pendingMarkedRanges = editor->ranges();
+	markedRanges = pendingMarkedRanges;
 
-		ng::ranges_t sel;
-		citerate(range, editor->ranges())
-		{
-			std::string const str = document->buffer().substr(range->min().index, range->max().index);
-			char const* base = str.data();
-			size_t from = utf16::advance(base, aRange.location) - base;
-			size_t to   = utf16::advance(base, aRange.location + aRange.length) - base;
-			sel.push_back(ng::range_t(range->min() + from, range->min() + to));
-		}
-		editor->set_selections(sel);
+	ng::ranges_t sel;
+	citerate(range, editor->ranges())
+	{
+		std::string const str = document->buffer().substr(range->min().index, range->max().index);
+		char const* base = str.data();
+		size_t from = utf16::advance(base, aRange.location) - base;
+		size_t to   = utf16::advance(base, aRange.location + aRange.length) - base;
+		sel.push_back(ng::range_t(range->min() + from, range->min() + to));
 	}
+	editor->set_selections(sel);
 }
 
 - (NSRange)selectedRange
@@ -1008,6 +1005,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (void)interpretKeyEvents:(NSArray*)someEvents
 {
 	AUTO_REFRESH;
+	if([self hasMarkedText])
+		return [super interpretKeyEvents:someEvents];
+
 	for(NSEvent* event in someEvents)
 	{
 		plist::dictionary_t::const_iterator pair = KeyEventContext->find(to_s(event));
