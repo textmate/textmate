@@ -56,7 +56,7 @@ Or using [homebrew][]:
 
 ### Clang 3.2 / 4.0
 
-You also need a recent version of clang. This should be included with Xcode 4.4+ (available for both Lion and Mountain Lion). If don’t have it, you can build [clang 3.2][] from [MacPorts][]:
+You also need a recent version of clang. This should be included with Xcode 4.4+ (available for both Lion and Mountain Lion). If you don’t have it, you can build [clang 3.2][] from [MacPorts][]:
 
 	sudo port install clang-3.2 clang_select
 	sudo port select clang mp-clang-3.2
