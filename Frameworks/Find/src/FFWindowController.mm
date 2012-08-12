@@ -450,8 +450,8 @@ struct operation_t
 	openPanel.title = @"Find in Folder";
 	openPanel.canChooseFiles = NO;
 	openPanel.canChooseDirectories = YES;
-	NSString* startPath = self.isSearchingFolders ? self.searchFolder : nil;
-	openPanel.directoryURL = [NSURL fileURLWithPath:startPath];
+	if(self.isSearchingFolders && self.searchFolder)
+		openPanel.directoryURL = [NSURL fileURLWithPath:self.searchFolder];
 	if([[self window] isVisible])
 	{
 		[openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result) {

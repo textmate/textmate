@@ -13,7 +13,8 @@
 
 		NSSavePanel* savePanel = [NSSavePanel savePanel];
 		[savePanel setTreatsFilePackagesAsDirectories:YES];
-		[savePanel setDirectoryURL:[NSURL fileURLWithPath:aDirectorySuggestion]];
+		if(aDirectorySuggestion)
+			[savePanel setDirectoryURL:[NSURL fileURLWithPath:aDirectorySuggestion]];
 		[savePanel setNameFieldStringValue:[aPathSuggestion lastPathComponent]];
 		[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
 			NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
