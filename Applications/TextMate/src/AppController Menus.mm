@@ -51,6 +51,13 @@ OAK_DEBUG_VAR(AppController_Menus);
 	{
 		if([[aMenu itemAtIndex:i] isSeparatorItem])
 			break;
+
+		NSMenuItem* item = [aMenu itemAtIndex:i];
+		if([[[item submenu] delegate] isKindOfClass:[BundleMenuDelegate class]])
+		{
+			[[[item submenu] delegate] release];
+			[[item submenu] setDelegate:nil];
+		}
 		[aMenu removeItemAtIndex:i];
 	}
 

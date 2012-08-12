@@ -10,8 +10,17 @@ OAK_DEBUG_VAR(BundleMenu);
 - (id)initWithBundleItem:(bundles::item_ptr const&)aBundleItem
 {
 	if(self = [super init])
+	{
 		umbrellaItem = aBundleItem;
+		subdelegates = [NSMutableArray new];
+	}
 	return self;
+}
+
+- (void)dealloc
+{
+	[subdelegates release];
+	[super dealloc];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
@@ -23,6 +32,7 @@ OAK_DEBUG_VAR(BundleMenu);
 {
 	D(DBF_BundleMenu, bug("\n"););
 	[aMenu removeAllItems];
+	[subdelegates removeAllObjects];
 
 	citerate(item, umbrellaItem->menu())
 	{
@@ -34,8 +44,9 @@ OAK_DEBUG_VAR(BundleMenu);
 
 				menuItem.submenu = [[NSMenu new] autorelease];
 				menuItem.submenu.autoenablesItems = NO;
-				BundleMenuDelegate* delegate = [[BundleMenuDelegate alloc] initWithBundleItem:*item];
+				BundleMenuDelegate* delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:*item] autorelease];
 				menuItem.submenu.delegate = delegate;
+				[subdelegates addObject:delegate];
 			}
 			break;
 
@@ -70,5 +81,6 @@ OAK_DEBUG_VAR(BundleMenu);
 {
 	// After a menu has been up, the system will cache all its key equivalents. Even if we set all the key equivalents to the empty string, the system will still remember. The only workaround seems to be to delete all the entries in the menu.
 	[aMenu removeAllItems];
+	[subdelegates removeAllObjects];
 }
 @end
