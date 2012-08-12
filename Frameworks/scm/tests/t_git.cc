@@ -20,7 +20,7 @@ class git_tests : public CxxTest::TestSuite
 	{
 		setup_t (std::string const& cmd)
 		{
-			std::string const script = text::format("{ cd '%1$s' && git init && touch .dummy && git add .dummy && git commit .dummy -mGetHead && %2$s ; } >/dev/null", jail.path().c_str(), cmd.c_str());
+			std::string const script = text::format("{ cd '%1$s' && git init && git config user.email 'test@example.com' && git config user.name 'Test Test' && touch .dummy && git add .dummy && git commit .dummy -mGetHead && %2$s ; } >/dev/null", jail.path().c_str(), cmd.c_str());
 			if(system(script.c_str()) != 0 || !(info = scm::info(jail.path(".dummy"))))
 				TS_FAIL(("error in setup: " + script).c_str());
 		}
