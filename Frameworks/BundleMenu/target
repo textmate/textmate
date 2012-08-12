@@ -1,0 +1,4 @@
+SOURCES      = src/*.mm
+LINK        += OakAppKit OakFoundation bundles
+EXPORT       = src/BundleMenuDelegate.h
+FRAMEWORKS   = AppKit
