@@ -13,7 +13,13 @@
 
 		NSSavePanel* savePanel = [NSSavePanel savePanel];
 		[savePanel setTreatsFilePackagesAsDirectories:YES];
-		[savePanel beginSheetForDirectory:aDirectorySuggestion file:aPathSuggestion modalForWindow:aWindow modalDelegate:self didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+		[savePanel setDirectoryURL:[NSURL fileURLWithPath:aDirectorySuggestion]];
+		[savePanel setNameFieldStringValue:[aPathSuggestion lastPathComponent]];
+		[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
+			NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
+			[delegate savePanelDidEnd:self path:path contextInfo:contextInfo];
+			[self release];
+		}];
 		[savePanel deselectExtension];
 	}
 	return self;
@@ -24,10 +30,4 @@
 	[[OakSavePanel alloc] initWithPath:aPathSuggestion directory:aDirectorySuggestion fowWindow:aWindow delegate:aDelegate contextInfo:info];
 }
 
-- (void)savePanelDidEnd:(NSSavePanel*)sheet returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	NSString* path = returnCode == NSOKButton ? sheet.filename : nil;
-	[delegate savePanelDidEnd:self path:path contextInfo:contextInfo];
-	[self release];
-}
 @end

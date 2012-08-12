@@ -116,6 +116,7 @@ NSString* const FFSearchInOpenFiles     = @"FFSearchInOpenFiles";
 
 @interface FFWindowController ()
 - (BOOL)outlineView:(NSOutlineView*)outlineView isGroupItem:(id)item;
+- (void)openPanelDidEnd:(NSOpenPanel*)panel returnCode:(NSInteger)returnCode;
 
 @property (nonatomic, assign) BOOL canSetFileTypes;
 @property (nonatomic, assign) BOOL canSetWrapAround;
@@ -445,14 +446,24 @@ struct operation_t
 
 - (IBAction)showFolderSelectionPanel:(id)sender
 {
-	NSOpenPanel* openPanel = [[NSOpenPanel openPanel] retain];
+	NSOpenPanel* openPanel = [NSOpenPanel openPanel];
 	openPanel.title = @"Find in Folder";
 	openPanel.canChooseFiles = NO;
 	openPanel.canChooseDirectories = YES;
 	NSString* startPath = self.isSearchingFolders ? self.searchFolder : nil;
+	openPanel.directoryURL = [NSURL fileURLWithPath:startPath];
 	if([[self window] isVisible])
-			[openPanel beginSheetForDirectory:startPath file:nil types:nil modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-	else	[openPanel beginForDirectory:startPath file:nil types:nil modelessDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	{
+		[openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result) {
+			[self openPanelDidEnd:openPanel returnCode:result];
+		}];
+	}
+	else
+	{
+		[openPanel beginWithCompletionHandler:^(NSInteger result) {
+			[self openPanelDidEnd:openPanel returnCode:result];
+		}];
+	}
 }
 
 /*
@@ -1096,19 +1107,18 @@ Any other string:
 	return res;
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel*)panel returnCode:(NSInteger)returnCode contextInfo:(void*)contextInfo
+- (void)openPanelDidEnd:(NSOpenPanel*)panel returnCode:(NSInteger)returnCode
 {
 	[self.window performSelector:@selector(makeKeyWindow) withObject:nil afterDelay:0.0];
 	if(returnCode == NSOKButton)
 	{
-		self.searchIn = [[panel filenames] lastObject];
+		self.searchIn = [[[[panel URLs] lastObject] filePathURL] path];
 		[self showWindow:self];
 	}
 	else
 	{
 		self.searchIn = self.searchIn; // Restore previously selected menu item
 	}
-	[panel release];
 }
 
 - (IBAction)performFindAction:(id)sender

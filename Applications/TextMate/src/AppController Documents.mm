@@ -43,8 +43,14 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 	openPanel.title                           = [NSString stringWithFormat:@"%@: Open", [[[NSBundle mainBundle] localizedInfoDictionary] valueForKey: @"CFBundleName"] ?: [[NSProcessInfo processInfo] processName]];
 
 	[openPanel setShowsHiddenFilesCheckBox:YES];
-	if([openPanel runModalForTypes:nil] == NSOKButton)
-		OakOpenDocuments([openPanel filenames]);
+	if([openPanel runModal] == NSOKButton)
+	{
+		NSMutableArray* filenames = [NSMutableArray array];
+		for(NSURL* url in [openPanel URLs])
+			[filenames addObject:[[url filePathURL] path]];
+
+		OakOpenDocuments(filenames);
+	}
 }
 
 - (BOOL)application:(NSApplication*)theApplication openFile:(NSString*)aPath

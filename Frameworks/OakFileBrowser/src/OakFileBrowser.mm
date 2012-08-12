@@ -847,25 +847,17 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	[self pushURL:ParentForURL(url)];
 }
 
-- (void)goToSheetDidEnd:(NSOpenPanel*)panel returnCode:(NSInteger)returnCode contextInfo:(void*)contextInfo
-{
-	if(returnCode == NSOKButton)
-		[self showURL:[[panel URLs] lastObject]];
-}
-
 - (IBAction)orderFrontGoToFolder:(id)sender
 {
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
 	[panel setCanChooseFiles:NO];
 	[panel setCanChooseDirectories:YES];
 	[panel setAllowsMultipleSelection:NO];
-	[panel beginSheetForDirectory:self.location
-                            file:nil
-                           types:nil
-                  modalForWindow:view.window
-                   modalDelegate:self
-                  didEndSelector:@selector(goToSheetDidEnd:returnCode:contextInfo:)
-                     contextInfo:NULL];
+	[panel setDirectoryURL:[NSURL fileURLWithPath:self.location]];
+	[panel beginSheetModalForWindow:view.window completionHandler:^(NSInteger result) {
+		if(result == NSOKButton)
+			[self showURL:[[panel URLs] lastObject]];
+	}];
 }
 
 - (void)takeURLFrom:(id)sender
