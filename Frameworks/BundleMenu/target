@@ -1,0 +1,4 @@
+SOURCES      = src/*.mm
+LINK        += bundles cf command document editor io network ns plist settings text
+EXPORT       = src/BundleMenuDelegate.h
+FRAMEWORKS   = Foundation
