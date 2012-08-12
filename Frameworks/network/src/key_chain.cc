@@ -1,4 +1,5 @@
 #include "key_chain.h"
+#include <cf/cf.h>
 #include <oak/oak.h>
 #include <plist/plist.h>
 
@@ -19,57 +20,49 @@ key_chain_t::key_t::~key_t ()
 
 void key_chain_t::key_t::init () const
 {
-	_ssl_key  = NULL;
-	_ssl_bio  = NULL;
-	_ssl_data = NULL;
+	_sec_key = NULL;
 }
 
 bool key_chain_t::key_t::setup () const
 {
-	if(_ssl_key)
+	if(_sec_key)
 		return true;
-
+	
 	bool res = false;
-	if(_ssl_key = EVP_PKEY_new())
+	
+	SecItemImportExportKeyParameters params = { .keyUsage = NULL, .keyAttributes = NULL };
+	SecExternalItemType type = kSecItemTypePublicKey;
+	SecExternalFormat format = kSecFormatPEMSequence;
+
+	CFDataRef data = CFDataCreateWithBytesNoCopy(NULL, (const UInt8*)_key_data.data(), _key_data.size(), kCFAllocatorNull);
+	CFArrayRef items = NULL;
+	OSStatus err;
+	if(err = SecItemImport(data, NULL, &type, &format, 0, &params, NULL, &items) == errSecSuccess)
 	{
-		if(_ssl_bio = BIO_new_mem_buf((char*)_key_data.data(), _key_data.size()))
+		_sec_key = (SecKeyRef)CFArrayGetValueAtIndex(items, 0);
+		if(_sec_key != NULL)
 		{
-			if(_ssl_data = PEM_read_bio_DSA_PUBKEY(_ssl_bio, NULL, NULL, NULL))
-			{
-				if(res = EVP_PKEY_assign_DSA(_ssl_key, _ssl_data) == 1)
-					_ssl_data = NULL;
-			}
-			else
-			{
-				fprintf(stderr, "*** error reading key\n");
-			}
+			CFRetain(_sec_key);
+			res = true;
 		}
-		else
-		{
-			fprintf(stderr, "*** error creating BIO\n");
-		}
+		CFRelease(items);
 	}
 	else
 	{
-		fprintf(stderr, "*** error creating PKEY\n");
+		CFStringRef message = SecCopyErrorMessageString(err, NULL);
+		fprintf(stderr, "*** error importing key: %s\n", cf::to_s(message).c_str());
+		CFRelease(message);
 	}
-
-	if(!res)
-		cleanup();
+	
+	CFRelease(data);
 
 	return res;
 }
 
 void key_chain_t::key_t::cleanup () const
 {
-	if(_ssl_data)
-		DSA_free(_ssl_data);
-
-	if(_ssl_bio)
-		BIO_free(_ssl_bio);
-
-	if(_ssl_key)
-		EVP_PKEY_free(_ssl_key);
+	if(_sec_key)
+		CFRelease(_sec_key);
 
 	init();
 }
