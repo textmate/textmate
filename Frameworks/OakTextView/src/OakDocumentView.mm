@@ -473,22 +473,27 @@ private:
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
 		ordered.insert(std::make_pair((*item)->name(), *item));
 	
+	NSInteger index = 0, selectedGrammarIndex = 0;
 	NSMenu* menu = [NSMenu new];
 	iterate(pair, ordered)
 	{
-		if(pair->second->menu().empty())
+		bool selectedGrammar = document->file_type() == pair->second->value_for_field(bundles::kFieldGrammarScope);
+		if(!selectedGrammar && pair->second->hidden_from_user() || pair->second->menu().empty())
 			continue;
+		if(selectedGrammar)
+			selectedGrammarIndex = index;
 
 		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
 		menuItem.submenu = [[NSMenu new] autorelease];
 		menuItem.submenu.delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:pair->second] autorelease];
 		menuItem.submenu.autoenablesItems = NO;
+		++index;
 	}
 	
 	if(ordered.empty())
 		[menu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
 
-	[statusBar showMenu:menu withSelectedIndex:0 forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
+	[statusBar showMenu:menu withSelectedIndex:selectedGrammarIndex forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
 	[menu release];
 }
 
