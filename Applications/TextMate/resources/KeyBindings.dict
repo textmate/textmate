@@ -30,6 +30,7 @@
 	"@\UF728"  = "deleteToEndOfLine:";
 	"~\UF705"  = "showContextMenu:";
 
+	"~\UF704"  = "showBundleItem:";
 	"^s"       = "incrementalSearch:";
 
 	"^w"       = "selectWord:";
