@@ -1,4 +1,5 @@
 #import "BundleMenuDelegate.h"
+#import "BundleItemMenuItem.h"
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -33,6 +34,9 @@ OAK_DEBUG_VAR(BundleMenu);
 	D(DBF_BundleMenu, bug("\n"););
 	[aMenu removeAllItems];
 	[subdelegates removeAllObjects];
+	
+	BundleItemMenuItemAlignment alignmentData;
+	NSMutableArray* menuItems = [NSMutableArray array];
 
 	citerate(item, umbrellaItem->menu())
 	{
@@ -56,14 +60,18 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			default:
 			{
-				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(doBundleItem:) keyEquivalent:@""];
-				[menuItem setKeyEquivalentCxxString:(*item)->value_for_field(bundles::kFieldKeyEquivalent)];
-				[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
+				BundleItemMenuItem* menuItem = [BundleItemMenuItem menuItemWithBundleItem:*item alignmentData:alignmentData];
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
+				[aMenu addItem:menuItem];
+				
+				[menuItems addObject:menuItem];
 			}
 			break;
 		}
 	}
+	
+	for(BundleItemMenuItem* menuItem in menuItems)
+		[menuItem updateAlignment:alignmentData];
 }
 
 - (void)menuWillOpen:(NSMenu*)aMenu
