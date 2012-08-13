@@ -75,7 +75,7 @@ namespace io
 			error.insert(error.end(), error_buf, error_buf + len);
 		}
 		close(error_fd);
-		D(DBF_SCM_RunCommand, if(!error.empty()) bug("error from command: “%s”\n", error.c_str()););
+		D(DBF_IO_Exec, if(!error.empty()) bug("error from command: “%s”\n", error.c_str()););
 
 		int status = 0;
 		bool didTerminate = waitpid(process_id, &status, 0) == process_id;
