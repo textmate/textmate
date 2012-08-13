@@ -96,6 +96,8 @@ namespace ng
 		kCopySelectionToFindPboard,
 		kCopySelectionToReplacePboard,
 		kCopySelectionToYankPboard,
+		kAppendSelectionToYankPboard,
+		kPrependSelectionToYankPboard,
 		kPaste,
 		kPastePrevious,
 		kPasteNext,
@@ -266,6 +268,7 @@ namespace ng
 		clipboard_ptr _find_clipboard;
 		clipboard_ptr _replace_clipboard;
 		clipboard_ptr _yank_clipboard;
+		bool _extend_yank_clipboard = false;
 
 		document::document_ptr _document;
 	};

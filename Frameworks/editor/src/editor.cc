@@ -737,12 +737,16 @@ namespace ng
 			case kShiftRight:                                   _selections = ng::extend(_buffer, _selections, kSelectionExtendToLineExclLF,                layout); break;
 		}
 
-		static action_t const deleteActions[] = { kDeleteBackward, kDeleteForward };
-		static action_t const yankActions[]   = { kDeleteSubWordLeft, kDeleteSubWordRight, kDeleteWordBackward, kDeleteWordForward, kDeleteToBeginningOfLine, kDeleteToEndOfLine, kDeleteToBeginningOfParagraph, kDeleteToEndOfParagraph };
+		static action_t const deleteActions[]      = { kDeleteBackward, kDeleteForward };
+		static action_t const yankAppendActions[]  = { kDeleteSubWordRight, kDeleteWordForward,  kDeleteToEndOfLine,       kDeleteToEndOfParagraph       };
+		static action_t const yankPrependActions[] = { kDeleteSubWordLeft,  kDeleteWordBackward, kDeleteToBeginningOfLine, kDeleteToBeginningOfParagraph };
 		if(oak::contains(beginof(deleteActions), endof(deleteActions), action))
 			action = kDeleteSelection;
-		else if(oak::contains(beginof(yankActions), endof(yankActions), action))
-			action = kCopySelectionToYankPboard;
+		else if(oak::contains(beginof(yankAppendActions), endof(yankAppendActions), action))
+			action = _extend_yank_clipboard ? kAppendSelectionToYankPboard : kCopySelectionToYankPboard;
+		else if(oak::contains(beginof(yankPrependActions), endof(yankPrependActions), action))
+			action = _extend_yank_clipboard ? kPrependSelectionToYankPboard : kCopySelectionToYankPboard;
+		_extend_yank_clipboard = false;
 
 		switch(action)
 		{
@@ -842,8 +846,22 @@ namespace ng
 			break;
 
 			case kCopySelectionToYankPboard:
+			case kAppendSelectionToYankPboard:
+			case kPrependSelectionToYankPboard:
 			{
-				yank_clipboard()->push_back(copy(_buffer, _selections));
+				clipboard_t::entry_ptr entry = copy(_buffer, _selections);
+				if(action != kCopySelectionToYankPboard && !yank_clipboard()->empty())
+				{
+					if(clipboard_t::entry_ptr oldEntry = yank_clipboard()->current())
+					{
+						if(action == kAppendSelectionToYankPboard)
+							entry.reset(new my_clipboard_entry_t(oldEntry->content() + entry->content(), "", false, 1, false));
+						else if(action == kPrependSelectionToYankPboard)
+							entry.reset(new my_clipboard_entry_t(entry->content() + oldEntry->content(), "", false, 1, false));
+					}
+				}
+				yank_clipboard()->push_back(entry);
+				_extend_yank_clipboard = true;
 			}
 			// continue
          
