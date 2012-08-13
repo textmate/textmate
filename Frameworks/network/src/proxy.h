@@ -15,6 +15,6 @@ struct proxy_settings_t
 	std::string password;
 };
 
-PUBLIC proxy_settings_t get_proxy_settings ();
+PUBLIC proxy_settings_t get_proxy_settings (std::string const& url);
 
 #endif /* end of include guard: PROXY_H_S8ZWZPU8 */

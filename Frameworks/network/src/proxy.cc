@@ -1,5 +1,6 @@
 #include "proxy.h"
 #include <plist/plist.h>
+#include <regexp/regexp.h>
 #include <oak/debug.h>
 #include <cf/cf.h>
 
@@ -106,9 +107,11 @@ static void pac_proxy_callback (void* client, CFArrayRef proxyList, CFErrorRef e
 }
 #endif
 
-proxy_settings_t get_proxy_settings ()
+proxy_settings_t get_proxy_settings (std::string const& url)
 {
 	proxy_settings_t res(false);
+	if(regexp::search("^https?://localhost[:/]", url.data(), url.data() + url.size()))
+		return res;
 
 	CFDictionaryRef tmp = SCDynamicStoreCopyProxies(NULL);
 	plist::dictionary_t const& plist = plist::convert(tmp);
@@ -133,7 +136,7 @@ proxy_settings_t get_proxy_settings ()
 			CFStreamClientContext context    = { 0, &res, NULL, NULL, NULL };
 
 			CFURLRef pacURL                  = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(pacString), NULL);
-			CFURLRef targetURL               = CFURLCreateWithString(kCFAllocatorDefault, CFSTR("http://macromates.com/"), NULL);
+			CFURLRef targetURL               = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), NULL);
 			CFRunLoopSourceRef runLoopSource = CFNetworkExecuteProxyAutoConfigurationURL(pacURL, targetURL, &pac_proxy_callback, &context);
 			CFRelease(targetURL);
 			CFRelease(pacURL);

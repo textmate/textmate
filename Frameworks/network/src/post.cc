@@ -58,7 +58,7 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 		// curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION,    &receive_data);
 		// curl_easy_setopt(handle, CURLOPT_WRITEDATA,        &body);
 
-		if(proxy_settings_t const& proxySettings = get_proxy_settings())
+		if(proxy_settings_t const& proxySettings = get_proxy_settings(url))
 		{
 			curl_easy_setopt(handle, CURLOPT_PROXY,     proxySettings.server.c_str());
 			curl_easy_setopt(handle, CURLOPT_PROXYPORT, proxySettings.port);

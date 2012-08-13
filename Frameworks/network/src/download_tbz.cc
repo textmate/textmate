@@ -148,7 +148,7 @@ namespace network
 				curl_easy_setopt(handle, CURLOPT_HTTPHEADER,    headers);
 			}
 
-			if(auto proxySettings = get_proxy_settings())
+			if(auto proxySettings = get_proxy_settings(url))
 			{
 				curl_easy_setopt(handle, CURLOPT_PROXY,     proxySettings.server.c_str());
 				curl_easy_setopt(handle, CURLOPT_PROXYPORT, proxySettings.port);
