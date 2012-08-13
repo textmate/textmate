@@ -617,22 +617,29 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	AUTO_REFRESH;
 	if(!markedRanges.empty())
-		editor->set_selections(markedRanges);
-	markedRanges = ng::ranges_t();
-	editor->insert(to_s([aString description]), true);
-	pendingMarkedRanges = editor->ranges();
-	markedRanges = pendingMarkedRanges;
-
-	ng::ranges_t sel;
-	citerate(range, editor->ranges())
 	{
-		std::string const str = document->buffer().substr(range->min().index, range->max().index);
-		char const* base = str.data();
-		size_t from = utf16::advance(base, aRange.location) - base;
-		size_t to   = utf16::advance(base, aRange.location + aRange.length) - base;
-		sel.push_back(ng::range_t(range->min() + from, range->min() + to));
+		editor->set_selections(markedRanges);
+		if(aRange.length == 0 && [aString length] == 0)
+			[self delete:nil];
 	}
-	editor->set_selections(sel);
+	markedRanges = ng::ranges_t();
+	if([[aString description] length] != 0)
+	{
+		editor->insert(to_s([aString description]), true);
+		pendingMarkedRanges = editor->ranges();
+		markedRanges = pendingMarkedRanges;
+
+		ng::ranges_t sel;
+		citerate(range, editor->ranges())
+		{
+			std::string const str = document->buffer().substr(range->min().index, range->max().index);
+			char const* base = str.data();
+			size_t from = utf16::advance(base, aRange.location) - base;
+			size_t to   = utf16::advance(base, aRange.location + aRange.length) - base;
+			sel.push_back(ng::range_t(range->min() + from, range->min() + to));
+		}
+		editor->set_selections(sel);
+	}
 }
 
 - (NSRange)selectedRange
