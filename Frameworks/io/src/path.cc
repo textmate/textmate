@@ -178,6 +178,17 @@ namespace path
 		return !path.empty() && path[0] == '/' ? normalize(path) : normalize(base + "/" + path);
 	}
 
+	bool is_absolute (std::string const& path)
+	{
+		if(!path.empty() && path[0] == '/')
+		{
+			std::string p = normalize(path);
+			if(p != "/.." && p.find("/../") != 0)
+				return true;
+		}
+		return false;
+	}
+
 	std::string with_tilde (std::string const& p)
 	{
 		std::string const& base = home();

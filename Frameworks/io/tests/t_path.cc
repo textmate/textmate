@@ -93,6 +93,26 @@ public:
 		TS_ASSERT_EQUALS(path::join("foo/bar", "fud"),   "foo/bar/fud");
 	}
 
+	void test_is_absolute ()
+	{
+		TS_ASSERT_EQUALS(path::is_absolute("../"),         false);
+		TS_ASSERT_EQUALS(path::is_absolute("../foo"),      false);
+		TS_ASSERT_EQUALS(path::is_absolute("./"),          false);
+		TS_ASSERT_EQUALS(path::is_absolute("/."),          true);
+		TS_ASSERT_EQUALS(path::is_absolute("/.."),         false);
+		TS_ASSERT_EQUALS(path::is_absolute("/../"),        false);
+		TS_ASSERT_EQUALS(path::is_absolute("/../tmp"),     false); // this path is actually valid, so might revise path::normalize()
+		TS_ASSERT_EQUALS(path::is_absolute("/./.."),       false);
+		TS_ASSERT_EQUALS(path::is_absolute("/./../tmp"),   false); // this path is actually valid, so might revise path::normalize()
+		TS_ASSERT_EQUALS(path::is_absolute("/./foo"),      true);
+		TS_ASSERT_EQUALS(path::is_absolute("//."),         true);
+		TS_ASSERT_EQUALS(path::is_absolute("//../../foo"), false);
+		TS_ASSERT_EQUALS(path::is_absolute("//./foo"),     true);
+		TS_ASSERT_EQUALS(path::is_absolute("/foo/.."),     true);
+		TS_ASSERT_EQUALS(path::is_absolute("/foo/../.."),  false);
+		TS_ASSERT_EQUALS(path::is_absolute("foo"),         false);
+	}
+
 	void test_with_tilde ()
 	{
 		using namespace path;
