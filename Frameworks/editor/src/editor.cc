@@ -231,7 +231,7 @@ namespace ng
 		set_clipboard(create_simple_clipboard());
 		set_find_clipboard(create_simple_clipboard());
 		set_replace_clipboard(create_simple_clipboard());
-		set_yank_line_clipboard(create_simple_clipboard());
+		set_yank_clipboard(create_simple_clipboard());
 	}
 
 	editor_t::editor_t () : _buffer(dummy)
@@ -843,7 +843,7 @@ namespace ng
 
 			case kCopySelectionToYankPboard:
 			{
-				yank_line_clipboard()->push_back(copy(_buffer, _selections));
+				yank_clipboard()->push_back(copy(_buffer, _selections));
 			}
 			// continue
          
@@ -906,9 +906,9 @@ namespace ng
 
 			case kYank:
 			{
-				if(clipboard_t::entry_ptr findEntry = yank_line_clipboard()->current())
-					insert(findEntry->content());
-			} 
+				if(clipboard_t::entry_ptr entry = yank_clipboard()->current())
+					insert(entry->content());
+			}
 			break;
 
 			case kInsertTab:
