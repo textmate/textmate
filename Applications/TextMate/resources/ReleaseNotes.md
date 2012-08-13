@@ -1,5 +1,14 @@
 # Release Notes
 
+## 2012-08-13
+
+* Consecutive deletes extend the yank clipboard.
+* Tab triggers are once again rendered in the menu (though presently without the rounded rectangle) and all key equivalents are now shown menu (e.g. `⌃!` would previously not show). Also several legacy APis have been updated to the latest from Apple *[jtbandes]*
+* When clearing the “CJK edit buffer” (e.g. via escape) then the following key press would be treated literally, e.g. pressing escape or delete would insert the character code for this key.
+* Fixed crash when setting a non-path for `projectDirectory` and then doing a project folder search.
+* For users of proxy auto-configuration (PAC) scripts, the actual URL TextMate needs to connect to (for software and bundle updates plus crash reporting) is now given to the PAC script.
+* Fix crash for proxy users (introduced in last build).
+
 ## 2012-08-12
 
 * Fix problem with pressing return, tab, or escape after inserting CJK.
