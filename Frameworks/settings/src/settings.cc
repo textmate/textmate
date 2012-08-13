@@ -57,7 +57,7 @@ namespace
 	static std::vector<std::string> paths (std::string const& directory)
 	{
 		std::vector<std::string> res;
-		for(std::string cwd = directory; true; cwd = cwd == "/" ? path::home() : path::parent(cwd))
+		for(std::string cwd = (directory.empty() || directory[0] != '/' ? path::home() : directory); true; cwd = cwd == "/" ? path::home() : path::parent(cwd))
 		{
 			res.push_back(path::join(cwd, ".tm_properties"));
 			if(cwd == path::home())
