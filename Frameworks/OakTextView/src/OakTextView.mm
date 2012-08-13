@@ -1507,6 +1507,12 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	[self setShowLiveSearch:YES];
 }
 
+- (IBAction)showBundlesMenu:(id)sender
+{
+	OakDocumentView* documentView = (OakDocumentView*)[[self enclosingScrollView] superview];
+	[documentView performSelector:@selector(showBundleItemSelector:) withObject:nil];
+}
+
 - (IBAction)findNext:(id)sender
 {
 	if(liveSearchViewController)
