@@ -40,7 +40,7 @@ If `port` fails with a build error then likely you need to agree (system-wide) t
 
 You can also install the above using [homebrew][]:
 
-	brew install ragel boost multimarkdown hg ninja
+	brew install ragel boost multimarkdown hg ninja pgrep
 
 In practice `hg` ([mercurial][]) is only required for the SCM library’s tests so you can skip this dependency if you don’t mind a failing test.
 
