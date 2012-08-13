@@ -33,7 +33,7 @@ if which -s xcrun; then
 	: ${CXX:=$(xcrun -find clang++)}
 fi
 
-for cc in /{opt,usr}/local/bin/clang /usr/bin/clang; do
+for cc in /usr/bin/clang /{opt,usr}/local/bin/clang ; do
 	if [[ ! -x "$CC" || ! -x "$CXX" ]]; then
 		CC="${cc}"
 		CXX="${cc}++"
