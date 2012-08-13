@@ -69,7 +69,12 @@ sdk="/Developer/SDKs/${sdk:-MacOSX10.7}.sdk"
 if which -s xcode-select; then
 	xcodedir=$(xcode-select -print-path)
 	if ! [[ -e "$sdk" ]]; then
-		sdk="$xcodedir/Platforms/MacOSX.platform$sdk"
+		if [[ -d $xcodedir/Platforms/MacOSX.platform$sdk ]]; then
+			sdk="$xcodedir/Platforms/MacOSX.platform$sdk"
+		else
+			sdk=""
+			echo 2>&1 "WARNING: Building without platform-specific SDK."
+		fi
 	fi
 fi
 
