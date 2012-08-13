@@ -73,6 +73,11 @@ if which -s xcode-select; then
 	fi
 fi
 
+if ! [[ -e "$sdk" ]]; then
+	sdk=""
+	echo 2>&1 "WARNING: Building without platform-specific SDK."
+fi
+
 # ===============================================
 # = Check if we can use pbzip2 instead of bzip2 =
 # ===============================================
