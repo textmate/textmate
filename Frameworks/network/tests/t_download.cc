@@ -84,8 +84,7 @@ public:
 			char fileContent[fileSize];
 			if(read(fd, fileContent, fileSize) == fileSize)
 			{
-				// GlimmerBlocker.org might cause a "HTTP/1.1" response
-				TS_ASSERT(strcmp(status.c_str(),"HTTP/1.0 200 OK")==0 || strcmp(status.c_str(),"HTTP/1.1 200 OK")==0);
+				TS_ASSERT_EQUALS(status, "HTTP/1.0 200 OK");
 				TS_ASSERT(headers.find("content-length") != headers.end());
 				TS_ASSERT_EQUALS(headers.find("content-length")->second, text::format("%zu", fileSize));
 				TS_ASSERT_EQUALS(body, std::string(fileContent, fileContent + fileSize));
