@@ -620,8 +620,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		editor->set_selections(markedRanges);
 	markedRanges = ng::ranges_t();
 	editor->insert(to_s([aString description]), true);
-	pendingMarkedRanges = editor->ranges();
-	markedRanges = pendingMarkedRanges;
+	if([aString length] != 0)
+		markedRanges = editor->ranges();
+	pendingMarkedRanges = markedRanges;
 
 	ng::ranges_t sel;
 	citerate(range, editor->ranges())
