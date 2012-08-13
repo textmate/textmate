@@ -407,7 +407,6 @@ private:
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
 		grammars.insert(std::make_pair((*item)->name(), *item));
 
-	NSUInteger currentGrammarIndex = 0;
 	NSMenu* menu = [[NSMenu new] autorelease];
 	iterate(pair, grammars)
 	{
@@ -421,16 +420,13 @@ private:
 		[item setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
 
 		if(selectedGrammar)
-		{
 			[item setState:NSOnState];
-			currentGrammarIndex = [menu numberOfItems]-1;
-		}
 	}
 
 	if(grammars.empty())
 		[menu addItemWithTitle:@"No Grammars Loaded" action:@selector(nop:) keyEquivalent:@""];
 
-	[statusBar showMenu:menu withSelectedIndex:currentGrammarIndex forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
+	[statusBar showMenu:menu withSelectedIndex:-1 forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
 }
 
 - (void)goToSymbol:(id)sender
@@ -473,27 +469,28 @@ private:
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
 		ordered.insert(std::make_pair((*item)->name(), *item));
 	
-	NSInteger index = 0, selectedGrammarIndex = 0;
 	NSMenu* menu = [NSMenu new];
 	iterate(pair, ordered)
 	{
-		bool selectedGrammar = document->file_type() == pair->second->value_for_field(bundles::kFieldGrammarScope);
+		bool selectedGrammar = false;
+		citerate(item, bundles::query(bundles::kFieldGrammarScope, document->file_type(), scope::wildcard, bundles::kItemTypeGrammar, pair->second->uuid(), true, true))
+			selectedGrammar = true;
 		if(!selectedGrammar && pair->second->hidden_from_user() || pair->second->menu().empty())
 			continue;
-		if(selectedGrammar)
-			selectedGrammarIndex = index;
 
 		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
 		menuItem.submenu = [[NSMenu new] autorelease];
 		menuItem.submenu.delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:pair->second] autorelease];
 		menuItem.submenu.autoenablesItems = NO;
-		++index;
+
+		if(selectedGrammar)
+			[menuItem setState:NSOnState];
 	}
 	
 	if(ordered.empty())
 		[menu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
 
-	[statusBar showMenu:menu withSelectedIndex:selectedGrammarIndex forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
+	[statusBar showMenu:menu withSelectedIndex:-1 forCellWithTag:sender ? [sender tag] : 1 font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
 	[menu release];
 }
 
