@@ -96,7 +96,7 @@
 		]];
 	}
 	
-	NSMutableAttributedString* title = [[self attributedTitle] mutableCopy];
+	NSMutableAttributedString* title = [[[self attributedTitle] mutableCopy] autorelease];
 	[title addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, [title length])];
 	
 	[self setAttributedTitle:title];
