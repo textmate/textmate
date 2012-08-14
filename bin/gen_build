@@ -660,7 +660,9 @@ open("#{builddir}/build.ninja", "w") do |io|
   end
 
   io << "\n"
-  io << "default #{variables.find { |k, _| k == 'APP_NAME' }.last}/run\n"
+  io << "build run:    phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/run\n"
+  io << "build deploy: phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/deploy\n"
+  io << "default run\n"
 end
 
 # =======================
