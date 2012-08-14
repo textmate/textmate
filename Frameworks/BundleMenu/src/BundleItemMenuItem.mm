@@ -3,28 +3,44 @@
 #import <ns/ns.h>
 
 @interface BundleItemMenuItem ()
-- (BundleItemMenuItem*)initWithBundleItem:(bundles::item_ptr const&)bundleItem alignmentData:(BundleItemMenuItemAlignment&)alignment;
+- (BundleItemMenuItem*)initWithName:(std::string const&)name
+                      keyEquivalent:(std::string const&)keyEquiv
+                         tabTrigger:(std::string const&)tabTrigger
+                             action:(SEL)action
+                      alignmentData:(BundleItemMenuItemAlignment&)alignment;
 - (void)setAttributedTitleWithTitle:(NSAttributedString*)itemTitle equivLeft:(NSAttributedString*)equivLeft equivRight:(NSAttributedString*)equivRight alignmentData:(BundleItemMenuItemAlignment&)alignment;
 @end
 
 @implementation BundleItemMenuItem
-+ (BundleItemMenuItem*)menuItemWithBundleItem:(bundles::item_ptr const&)bundleItem alignmentData:(BundleItemMenuItemAlignment&)alignment
++ (BundleItemMenuItem*)menuItemWithName:(std::string const&)name
+                          keyEquivalent:(std::string const&)keyEquiv
+                             tabTrigger:(std::string const&)tabTrigger
+                                 action:(SEL)action
+                          alignmentData:(BundleItemMenuItemAlignment&)alignment
 {
-	return [[[self alloc] initWithBundleItem:bundleItem alignmentData:alignment] autorelease];
+	return [[[self alloc] initWithName:name
+                        keyEquivalent:keyEquiv
+                           tabTrigger:tabTrigger
+                               action:action
+                        alignmentData:alignment] autorelease];
 }
 
-- (BundleItemMenuItem*)initWithBundleItem:(bundles::item_ptr const&)bundleItem alignmentData:(BundleItemMenuItemAlignment&)alignment
+
+- (BundleItemMenuItem*)initWithName:(std::string const&)name
+                      keyEquivalent:(std::string const&)keyEquiv
+                         tabTrigger:(std::string const&)tabTrigger
+                             action:(SEL)action
+                      alignmentData:(BundleItemMenuItemAlignment&)alignment
 {
 	if ((self = [super init]))
 	{
+		[self setAction:action];
+		
 		NSDictionary* fontAttrs = @{ NSFontAttributeName : [NSFont menuFontOfSize:14] /* passing 0 should return the default size, but it doesn’t */ };
 		NSDictionary* smallFontAttrs = @{ NSFontAttributeName : [NSFont menuFontOfSize:11] };
-		NSAttributedString* title = [[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:bundleItem->name()] attributes:fontAttrs];
+		NSAttributedString* title = [[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:name] attributes:fontAttrs];
 		NSAttributedString* equivLeft = nil;
 		NSAttributedString* equivRight = nil;
-	
-		std::string const tabTrigger(bundleItem->value_for_field(bundles::kFieldTabTrigger));
-		std::string const keyEquiv(bundleItem->value_for_field(bundles::kFieldKeyEquivalent));
 	
 		if(tabTrigger != NULL_STR)
 		{
