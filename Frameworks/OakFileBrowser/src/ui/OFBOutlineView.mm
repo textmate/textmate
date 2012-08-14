@@ -34,6 +34,32 @@
 	[super dealloc];
 }
 
+- (void)showContextMenu:(id)sender
+{
+	if(NSMenu* menu = [menuDelegate menuForOutlineView:self])
+	{
+		NSInteger row = [self selectedRow] != -1 ? [self selectedRow] : 0;
+		NSRect rect = [self convertRect:[self rectOfRow:row] toView:nil];
+		NSPoint pos = rect.origin;
+		pos.x += 10;
+
+		NSWindow* win = [self window];
+		NSEvent* anEvent = [NSApp currentEvent];
+		NSEvent* fakeEvent = [NSEvent
+			mouseEventWithType:NSLeftMouseDown
+			location:pos
+			modifierFlags:0
+			timestamp:[anEvent timestamp]
+			windowNumber:[win windowNumber]
+			context:[anEvent context]
+			eventNumber:0
+			clickCount:1
+			pressure:1];
+
+		[NSMenu popUpContextMenu:menu withEvent:fakeEvent forView:self];
+	}
+}
+
 - (NSMenu*)menuForEvent:(NSEvent*)theEvent
 {
 	if(!menuDelegate)
@@ -108,6 +134,7 @@
 		{ "@d",                                      @selector(duplicateSelectedEntries:) },
 		{ "@G",                                      @selector(orderFrontGoToFolder:)     },
 		{ " ",                                       @selector(quickLookSelectedEntries:) },
+		{ "~\uF705",                                 @selector(showContextMenu:)          },
 	};
 
 	std::string const key = to_s(theEvent);
