@@ -60,7 +60,12 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			default:
 			{
-				BundleItemMenuItem* menuItem = [BundleItemMenuItem menuItemWithBundleItem:*item alignmentData:alignmentData];
+				BundleItemMenuItem* menuItem = [BundleItemMenuItem menuItemWithName:(*item)->name()
+				                                                      keyEquivalent:(*item)->value_for_field(bundles::kFieldKeyEquivalent)
+				                                                         tabTrigger:(*item)->value_for_field(bundles::kFieldTabTrigger)
+				                                                             action:@selector(doBundleItem:)
+				                                                      alignmentData:alignmentData];
+				
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
 				[aMenu addItem:menuItem];
 				

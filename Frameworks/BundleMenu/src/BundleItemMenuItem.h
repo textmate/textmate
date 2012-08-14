@@ -1,5 +1,3 @@
-#import <bundles/bundles.h>
-
 struct BundleItemMenuItemAlignment
 {
 	BundleItemMenuItemAlignment () : maxAlignmentWidth(0), maxRightWidth(0) {}
@@ -11,6 +9,10 @@ struct BundleItemMenuItemAlignment
 {
 	BOOL hasRightPart;
 }
-+ (BundleItemMenuItem*)menuItemWithBundleItem:(bundles::item_ptr const&)bundleItem alignmentData:(BundleItemMenuItemAlignment&)alignment;
++ (BundleItemMenuItem*)menuItemWithName:(std::string const&)name
+                          keyEquivalent:(std::string const&)keyEquiv
+                             tabTrigger:(std::string const&)tabTrigger
+                                 action:(SEL)action
+                          alignmentData:(BundleItemMenuItemAlignment&)alignment;
 - (void)updateAlignment:(BundleItemMenuItemAlignment&)alignment;
 @end
