@@ -1949,14 +1949,26 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	if(allHandlers.empty())
 	{
+		bool binary = false;
 		std::string merged = "";
 		for(NSString* path in someFiles)
 		{
 			D(DBF_OakTextView_DragNDrop, bug("insert as text: %s\n", [path UTF8String]););
 			std::string const& content = path::content(to_s(path));
-			if(content.size() < SQ(1024) || NSAlertDefaultReturn == NSRunAlertPanel(@"Inserting Large File", @"The file “%@” has a size of %.1f MB. Are you sure you want to insert this as a text file?", @"Insert File", @"Cancel", nil, [path stringByAbbreviatingWithTildeInPath], content.size() / SQ(1024.0))) // larger than 1 MB?
+			if(!utf8::is_valid(content.begin(), content.end()))
+				binary = true;
+			else if(content.size() < SQ(1024) || NSAlertDefaultReturn == NSRunAlertPanel(@"Inserting Large File", @"The file “%@” has a size of %.1f MB. Are you sure you want to insert this as a text file?", @"Insert File", @"Cancel", nil, [path stringByAbbreviatingWithTildeInPath], content.size() / SQ(1024.0))) // larger than 1 MB?
 				merged += content;
 		}
+
+		if(binary)
+		{
+			std::vector<std::string> paths;
+			for(NSString* path in someFiles)
+				paths.push_back(to_s(path));
+			merged = text::join(paths, "\n");
+		}
+
 		AUTO_REFRESH;
 		editor->insert(merged, true);
 	}
