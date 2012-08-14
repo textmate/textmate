@@ -1,5 +1,16 @@
 # Release Notes
 
+## 2012-08-14
+
+* Pressing ⌥F2 with focus in the file browser now show the context menu.
+* The `TM_DROPPED_FILE` variable had a path relative to project directory instead of current file. This would make some drop commands insert wrong path.
+* Dropping binary files onto the text view for which there is no drop command will now insert the path for the file dropped. Hint: You can hold down control (⌃) when dropping text files to get the “insert path” behavior.
+* The `--host=auto` option to `rmate` didn’t work. *[Timothy Andrew]*
+* Added simplified Chinese localization for interface files. *[Bo Xiao]*
+* Bundle items with both a tab trigger and key equivalent now show both. *[Adam Strzelecki]*
+* The bundle menu in the status bar can now be opened via ⌥F1 and will default to select the bundle for the current language. *[Adam Strzelecki]*
+* Further fixes to handling of txmt: URLs without a file argument.
+
 ## 2012-08-13
 
 * Consecutive deletes extend the yank clipboard.
