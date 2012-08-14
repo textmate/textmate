@@ -66,11 +66,6 @@ OAK_DEBUG_VAR(BundleMenu);
 	}
 }
 
-- (void)menuWillOpen:(NSMenu*)aMenu
-{
-	[aMenu enableTabTriggers];
-}
-
 - (void)menuDidClose:(NSMenu*)aMenu
 {
 	// We are not allowed to modify ‘aMenu’ here so we do it “afterDelay” — I really wish we didn’t have to do this at all…
