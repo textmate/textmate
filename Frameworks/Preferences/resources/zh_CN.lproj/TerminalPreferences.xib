@@ -61,7 +61,7 @@
 						<object class="NSTextFieldCell" key="NSCell" id="228771503">
 							<int key="NSCellFlags">67108864</int>
 							<int key="NSCellFlags2">272891904</int>
-							<string key="NSContents">如果您希望从 ssh 会话中激活 TextMate，您可以将 rmate 脚本拷贝到您登入的服务器。该脚本会回连 TextMate，因此，您需要允许远程客户访问（并设置好您的路由器接受特定的端口）或者创建一个 ssh 隧道。如需获取更多信息，请使用角落里的帮助按钮。</string>
+							<string key="NSContents">如果您希望从 ssh 会话中激活 TextMate，请将 rmate 脚本拷贝到您登入的服务器。该脚本会回连 TextMate，因此您需要允许远程客户的访问（并设置好您的路由器接受特定端口的连接）或者创建一个 ssh 隧道。如需获取更多信息，请使用左下角的帮助按钮。</string>
 							<object class="NSFont" key="NSSupport" id="109378036">
 								<string key="NSName">LucidaGrande</string>
 								<double key="NSSize">11</double>
@@ -178,11 +178,11 @@
 						<object class="NSTextFieldCell" key="NSCell" id="570156712">
 							<int key="NSCellFlags">69206017</int>
 							<int key="NSCellFlags2">272896000</int>
-							<string type="base64-UTF8" key="NSContents">5aaC5oKo6ZyA6KaB5L2/55SoIFRleHRNYXRlIOS9nOS4uiBzdWJ2ZXJzaW9u44CBIGdpdCDmiJblhbbk
-u5blt6XlhbfnmoTnvJbovpHlmajvvIzmgqjpnIDopoHlronoo4UgbWF0ZSBTaGVsbCDlkb3ku6TvvIzl
-ubYg5bCG5Lul5LiL5ZG95Luk5Yqg5YWlIH4vLmJhc2hyYzoKCglleHBvcnQgRURJVE9SPSIke21hdGVf
-cGF0aC9efi9cJEhPTUUvfSAtdyIKCuWmgumcgOiOt+WPluabtOWkmuS/oeaBr++8jOivt+S9v+eUqOin
-kuiQvemHjOeahOW4ruWKqeaMiemSruOAgg</string>
+							<string type="base64-UTF8" key="NSContents">5aaC5p6c5oKo5biM5pyb5bCGIFRleHRNYXRlIOS9nOS4uiBTdWJ2ZXJzaW9u44CBR2l0IOaIluWFtuS7
+luW3peWFt+eahOe8lui+keWZqO+8jOivt+WuieijhSBtYXRlIFNoZWxsIOWRveS7pO+8jOW5tuWwhuS7
+peS4i+iEmuacrOWKoOWFpSB+Ly5iYXNocmM6CgoJZXhwb3J0IEVESVRPUj0iJHttYXRlX3BhdGgvXn4v
+XCRIT01FL30gLXciCgrlpoLpnIDojrflj5bmm7TlpJrkv6Hmga/vvIzor7fkvb/nlKjlt6bkuIvop5Ln
+moTluK7liqnmjInpkq7jgII</string>
 							<reference key="NSSupport" ref="109378036"/>
 							<reference key="NSControlView" ref="417314558"/>
 							<reference key="NSBackgroundColor" ref="523885069"/>
