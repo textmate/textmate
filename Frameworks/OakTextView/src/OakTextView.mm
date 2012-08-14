@@ -1980,7 +1980,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 			void update_environment (std::map<std::string, std::string>& env)
 			{
-				env["PWD"] = format_string::expand("${TM_PROJECT_DIRECTORY:-${TM_DIRECTORY:-$TMPDIR}}", env);
+				env["PWD"] = format_string::expand("${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$TMPDIR}}", env);
 				env["TM_MODIFIER_FLAGS"] = _modifier_flags;
 
 				std::vector<std::string> files;
