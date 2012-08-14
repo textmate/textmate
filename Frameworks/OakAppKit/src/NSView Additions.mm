@@ -10,7 +10,8 @@
 	[cell setFont:font];
 	[cell setAltersStateOfSelectedItem:NO];
 	[cell setMenu:menu];
-	[cell selectItemAtIndex:index];
+	if(index >= 0)
+		[cell selectItemAtIndex:index];
 	[cell performClickWithFrame:rect inView:self];
 }
 @end
