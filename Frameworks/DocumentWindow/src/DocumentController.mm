@@ -1409,8 +1409,8 @@ static std::string file_chooser_glob (std::string const& path)
 			[layoutView addView:fileBrowser.view atEdge:(placeOnRight ? NSMaxXEdge : NSMinXEdge) ofView:documentView];
 			[layoutView setLocked:YES forView:fileBrowser.view];
 			if(placeOnRight)
-					[layoutView addResizeInfo:(OakResizeInfo){  11, 15, OakResizeInfo::kTopLeft,  OakResizeInfo::kWidth } forView:fileBrowser.view];
-			else	[layoutView addResizeInfo:(OakResizeInfo){ -11, 15, OakResizeInfo::kTopRight, OakResizeInfo::kWidth } forView:fileBrowser.view];
+					[layoutView addResizeInfo:(OakResizeInfo){  11, -15, OakResizeInfo::kBottomLeft,  OakResizeInfo::kWidth } forView:fileBrowser.view];
+			else	[layoutView addResizeInfo:(OakResizeInfo){ -11, -15, OakResizeInfo::kBottomRight, OakResizeInfo::kWidth } forView:fileBrowser.view];
 		}
 	}
 	document::schedule_session_backup();

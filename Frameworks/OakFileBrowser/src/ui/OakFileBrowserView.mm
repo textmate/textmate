@@ -53,7 +53,7 @@ OAK_DEBUG_VAR(FileBrowser_View);
 	scrollView.documentView              = outlineView;
 
 	headerView             = [[[OakStatusBar alloc] initWithFrame:NSZeroRect] autorelease];
-	headerView.borderEdges = sb::border::bottom;
+	headerView.borderEdges = sb::border::top;
 	[self addSubview:headerView];
 
 	NSCell* cell       = [[OFBPathInfoCell new] autorelease];
@@ -92,8 +92,8 @@ OAK_DEBUG_VAR(FileBrowser_View);
 
 - (void)resizeSubviewsWithOldSize:(NSSize)oldSize
 {
-	headerView.frame                      = NSMakeRect(0, NSHeight(self.frame) - OakStatusBarHeight, NSWidth(self.frame), OakStatusBarHeight);
-	outlineView.enclosingScrollView.frame = NSMakeRect(0, 0, NSWidth(self.frame), NSHeight(self.frame) - NSHeight(headerView.frame));
+	headerView.frame                      = NSMakeRect(0, 0, NSWidth(self.frame), OakStatusBarHeight);
+	outlineView.enclosingScrollView.frame = NSMakeRect(0, OakStatusBarHeight, NSWidth(self.frame), NSHeight(self.frame) - NSHeight(headerView.frame));
 }
 
 - (BOOL)isOpaque
