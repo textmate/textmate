@@ -101,7 +101,12 @@ done
 # = Generate fixtures and build files =
 # =====================================
 
-DST="$builddir/Frameworks/SoftwareUpdate/fixtures" make -C Frameworks/SoftwareUpdate/fixtures
+fixtures="$builddir/Frameworks/SoftwareUpdate/fixtures"
+case "$builddir" in
+	/*) ;;
+	 *) fixtures="$PWD/$fixtures" ;;
+esac
+DST="$fixtures" make -C Frameworks/SoftwareUpdate/fixtures
 
 # # Necessary if you do distribution builds (which should include some default bundles)
 # builddir="$builddir" bin/create_default_bundles_tbz
