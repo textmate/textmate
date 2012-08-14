@@ -259,12 +259,4 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 	self.attributedTitle = attributedTitle;
 }
 
-- (void)setModifiedState:(BOOL)flag
-{
-	if(MenuRef menu = _NSGetCarbonMenu([self menu]))
-	{
-		MenuItemIndex itemIndex = [[self menu] indexOfItem:self] + 1;
-		SetItemMark(menu, itemIndex, flag ? 0xA5 : noMark);
-	}
-}
 @end
