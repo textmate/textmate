@@ -44,17 +44,6 @@ namespace oak
 	{
 		disable_interactive_input(); // this is only relevant when we launch TM from a TM command that uses interactive input (like make) — each relaunch will allocate two new file descriptors, so eventually we’ll run out of them
 
-		// When upgrading from r9110 or earlier.
-		static char const* LegacyVariables[] = { "RELAUNCH", "ACTIVATE", "DISABLE_UNTITLED_FILE" };
-		iterate(variable, LegacyVariables)
-		{
-			if(getenv(*variable))
-			{
-				setenv((std::string("OAK_") + *variable).c_str(), getenv(*variable), 1);
-				unsetenv(*variable);
-			}
-		}
-
 		_app_name      = getenv("OAK_APP_NAME") ?: path::name(argv[0]);
 		_full_app_path = path::join(path::cwd(), argv[0]);
 		_app_path      = _full_app_path;
@@ -65,9 +54,6 @@ namespace oak
 			_app_path.erase(_app_path.end() - appBinary.size(), _app_path.end());
 
 		std::string content = path::content(_pid_path);
-		if(content == NULL_STR && strcmp(getenv("OAK_RELAUNCH") ?: "0", "1") == 0)
-			content = path::content(support(_app_name + ".pid"));
-
 		long pid = content != NULL_STR ? strtol(content.c_str(), NULL, 10) : 0;
 		if(pid != 0 && process_name(pid) == _app_name)
 		{
