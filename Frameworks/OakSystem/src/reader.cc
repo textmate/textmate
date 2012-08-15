@@ -111,6 +111,7 @@ namespace io
 
 		iterate(it, tmp)
 		{
+			// required check as we may receive a post-EOF “bytes available” with ‘it->length == 0’
 			if(clients_consumed_eof.find(it->client_key) == clients_consumed_eof.end())
 			{
 				std::map<size_t, reader_t*>::iterator client = client_to_callback.find(it->client_key);
@@ -118,10 +119,6 @@ namespace io
 					client->second->receive_data(it->bytes, it->length);
 				if(it->length == 0)
 					clients_consumed_eof.insert(it->client_key);
-			}
-			else
-			{
-				fprintf(stderr, "*** got %zu bytes for client which already received EOF\n", it->length);
 			}
 			delete it->bytes;
 		}
