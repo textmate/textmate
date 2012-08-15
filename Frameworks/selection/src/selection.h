@@ -43,6 +43,13 @@ namespace ng
 
 	PUBLIC ranges_t dissect_columnar (buffer_t const& buffer, ranges_t const& selection);
 
+	PUBLIC extern std::string const kCharacterClassWord;
+	PUBLIC extern std::string const kCharacterClassSpace;
+	PUBLIC extern std::string const kCharacterClassOther;
+	PUBLIC extern std::string const kCharacterClassUnknown;
+
+	PUBLIC std::string character_class (buffer_t const& buffer, size_t index);
+
 	PUBLIC ranges_t from_string (buffer_t const& buffer, std::string const& str);
 	PUBLIC std::string to_s (buffer_t const& buffer, ranges_t const& ranges);
 
