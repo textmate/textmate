@@ -444,10 +444,12 @@ def static_executable(target)
    libs = prepend('-l', all_values_for_key(target, 'LIBS'))
    res << "  RAVE_FLAGS = #{fws} #{libs}\n"
 
-   res << "build #{dst}.run: run_executable #{dst}\n"
+   res << "build #{dst}.run:   run_executable #{dst}\n"
+   res << "build #{dst}.debug: debug_executable #{dst}\n"
 
-   res << "build #{target[:name]}:     phony #{dst}\n"
-   res << "build #{target[:name]}/run: phony #{dst}.run\n"
+   res << "build #{target[:name]}:       phony #{dst}\n"
+   res << "build #{target[:name]}/run:   phony #{dst}.run\n"
+   res << "build #{target[:name]}/debug: phony #{dst}.debug\n"
 
    res
 end
@@ -510,12 +512,14 @@ def app_bundle(target)
 
   res << "build #{dst}: phony | #{deps.join(' ')}\n"
 
-  res << "build #{dst}.sign: sign_executable #{dst}\n"
-  res << "build #{dst}.run: run_application #{dst} | #{dst}.sign\n"
+  res << "build #{dst}.sign:  sign_executable #{dst}\n"
+  res << "build #{dst}.run:   run_application #{dst} | #{dst}.sign\n"
   res << "  appname = #{target[:name]}\n"
+  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]}\n"
 
-  res << "build #{target[:name]}:     phony #{dst}.sign\n"
-  res << "build #{target[:name]}/run: phony #{dst}.run\n"
+  res << "build #{target[:name]}:       phony #{dst}.sign\n"
+  res << "build #{target[:name]}/run:   phony #{dst}.run\n"
+  res << "build #{target[:name]}/debug: phony #{dst}.debug\n"
 
   target[:rsrc_info] = all_files
 
@@ -662,6 +666,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << "\n"
   io << "build run:    phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/run\n"
   io << "build deploy: phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/deploy\n"
+  io << "build debug:  phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/debug\n"
   io << "default run\n"
 end
 
@@ -711,6 +716,10 @@ rule link_executable
 rule run_executable
   command = $in
   description = Run ‘$in’…
+
+rule debug_executable
+  command = osascript >/dev/null -e $$'tell app "Terminal" \n activate \n do script "gdb $in" \n end tell'
+  description = Debug ‘$in’…
 
 rule run_application
   command = {                        $
