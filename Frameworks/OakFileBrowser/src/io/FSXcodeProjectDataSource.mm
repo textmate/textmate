@@ -14,7 +14,7 @@
 #import <oak/debug.h>
 
 @interface FSXcodeProjectDataSource (Private)
-- (NSArray*)itemsForGroup:(XCGroup *) group;
+- (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath;
 @end
 
 @implementation FSXcodeProjectDataSource
