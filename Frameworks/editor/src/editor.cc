@@ -470,7 +470,11 @@ namespace ng
 				if(indent != NULL_STR)
 					str = indent + str;
 				if(complete)
-					str += '\n';
+				{
+					std::string const& rightOfCaret = buffer.substr(index, buffer.eol(line));
+					if(!text::is_blank(rightOfCaret.data(), rightOfCaret.data() + rightOfCaret.size()))
+						str += '\n';
+				}
 
 				int minIndent = INT_MAX;
 
