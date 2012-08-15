@@ -219,7 +219,7 @@ namespace oak
 		return NULL;
 	}
 
-	void application_t::relaunch ()
+	void application_t::relaunch (bool disableUserInteraction)
 	{
 		ASSERT(_full_app_path != NULL_STR);
 		D(DBF_Application, bug("%s\n", _full_app_path.c_str()););
@@ -227,7 +227,7 @@ namespace oak
 		create_pid_file(); // we create this during startup, but incase there was no support folder it would have failed
 
 		std::map<std::string, std::string> envMap = oak::basic_environment();
-		envMap["OAK_RELAUNCH"] = "1";
+		envMap["OAK_RELAUNCH"] = disableUserInteraction ? "QUICK" : "1";
 		oak::c_array env(envMap);
 
 		pid_t pid = vfork();
