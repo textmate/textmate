@@ -470,7 +470,11 @@ namespace ng
 				if(indent != NULL_STR)
 					str = indent + str;
 				if(complete)
-					str += '\n';
+				{
+					std::string const& rightOfCaret = buffer.substr(index, buffer.eol(line));
+					if(!text::is_blank(rightOfCaret.data(), rightOfCaret.data() + rightOfCaret.size()))
+						str += '\n';
+				}
 
 				int minIndent = INT_MAX;
 
@@ -481,7 +485,9 @@ namespace ng
 						minIndent = std::min(indent::leading_whitespace(it->first, it->second, tabSize), minIndent);
 				}
 
-				if(plist::is_true(bundles::value_for_setting("disableIndentCorrections", buffer.scope(index))))
+				plist::any_t pasteBehaviorValue = bundles::value_for_setting("indentOnPaste", buffer.scope(index));
+				std::string const* pasteBehavior = boost::get<std::string>(&pasteBehaviorValue);
+				if(pasteBehavior && *pasteBehavior == "simple")
 				{
 					int currentIndent = indent::leading_whitespace(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size(), tabSize);
 					if(currentIndent)
@@ -495,7 +501,7 @@ namespace ng
 							str += leftOfCaret;
 					}
 				} 
-				else
+				else if(!pasteBehavior || *pasteBehavior != "disable")
 				{
 					indent::fsm_t fsm = indent::create_fsm(buffer, indent::patterns_for_scope(buffer.scope(index)), line, indentSize, tabSize);
 					iterate(it, v)

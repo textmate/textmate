@@ -14,6 +14,8 @@ TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" -I"${builddir:-
 TM_NINJA_FILE        = '${CWD}/build.ninja'
 TM_NINJA_TARGET      = 'TextMate/run'
 
+TM_ISSUE_URL         = 'https://github.com/textmate/textmate/issues/%s'
+
 [ "source.c++, source.objc++" ]
 tabSize          = 3
 

@@ -3,7 +3,7 @@ set -u
 
 builddir="${builddir:-$HOME/build/TextMate}"
 bl="$builddir/Applications/bl/bl"
-TBZ_DST="Applications/TextMate/resources/DefaultBundles.tbz"
+TBZ_DST=$1
 BUNDLES_DST="$(mktemp -dt bundles)"
 BZIP2_FLAG="-j"
 

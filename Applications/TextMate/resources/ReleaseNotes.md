@@ -1,5 +1,32 @@
 # Release Notes
 
+## 2012-08-15
+
+* Minor tweak to how pasting works. Previously if you did a multiline selection and on the last line selected to the end of the line but excluded the actual newline, copy and pasted that somewhere else, it would treat it as you had also copied the newline. This is now only the case when you are pasting on a line that is not empty.
+
+* Unless you disable session restore, relaunching as part of software update no longer ask you about unsaved documents.
+
+* Preferences icons updated for HiDPI displays. *[Paul Wilde]*
+
+* rmate: Better file saving strategy. *[OZAWA Sakuro]*
+
+* rmate: You can now store options in `/etc/rmate.rc` or `~/.rmate.rc`. Example below. *[Nicolas Ledez]*
+
+		host: localhost
+		port: 52698
+
+* Improve tab trigger boundary checks. Previously a tab trigger had to be preceded by a non-word character (where underscore is considered a word character). Now we instead require that the previous character belong to a different character class (as defined by scoped settings) or has another “is alpha numeric”-state.
+
+* Split `disableIndentCorrections` into two settings:
+
+	The `disableIndentCorrections` setting disables the (aggressive) indent corrections that TextMate does while you type.
+    
+	An additional `indentOnPaste` setting controls how to indent when pasting and can be set to:
+    
+	1. `simple` — this is the indent behavior which was previously implied when setting `disableIndentCorrections`. It indents the paste to the position of the caret and works well for Python.
+	2. `disable` — the text is inserted as-is without indenting it.
+	3. «unset» — indent the paste based on the indent patterns of the current scope.
+
 ## 2012-08-14
 
 * Pressing ⌥F2 with focus in the file browser now show the context menu.

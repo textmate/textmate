@@ -38,27 +38,27 @@ namespace ng
 		return index_t(caret + str.size(), column - len);
 	}
 
-	static std::string const kTypeWord    = "word";
-	static std::string const kTypeSpace   = "space";
-	static std::string const kTypeOther   = "other";
-	static std::string const kTypeUnknown = "unknown";
+	std::string const kCharacterClassWord    = "word";
+	std::string const kCharacterClassSpace   = "space";
+	std::string const kCharacterClassOther   = "other";
+	std::string const kCharacterClassUnknown = "unknown";
 
-	static std::string character_class (buffer_t const& buffer, size_t index)
+	std::string character_class (buffer_t const& buffer, size_t index)
 	{
 		bundles::item_ptr match;
 		plist::any_t value = bundles::value_for_setting("characterClass", buffer.scope(index), &match);
 		if(match)
 			return boost::get<std::string>(value);
 		else if(text::is_word_char(buffer[index]))
-			return kTypeWord;
+			return kCharacterClassWord;
 		else if(text::is_whitespace(buffer[index]))
-			return kTypeSpace;
-		return kTypeOther;
+			return kCharacterClassSpace;
+		return kCharacterClassOther;
 	}
 
 	static bool is_part_of_word (buffer_t const& buffer, size_t index)
 	{
-		return character_class(buffer, index) != kTypeSpace && character_class(buffer, index) != kTypeOther;
+		return character_class(buffer, index) != kCharacterClassSpace && character_class(buffer, index) != kCharacterClassOther;
 	}
 
 	static size_t extend_scope_left (buffer_t const& buffer, size_t caret, scope::scope_t const& scope)
@@ -426,7 +426,7 @@ namespace ng
 				while(bol < i && character_class(buffer, i-1) == charType)
 					i -= buffer[i-1].size();
 
-				if((charType == kTypeSpace || charType == kTypeOther) && bol < i && i + buffer[i].size() == caret)
+				if((charType == kCharacterClassSpace || charType == kCharacterClassOther) && bol < i && i + buffer[i].size() == caret)
 				{
 					std::string charType = character_class(buffer, i-1);
 					while(bol < i && character_class(buffer, i-1) == charType)
@@ -449,7 +449,7 @@ namespace ng
 				while(i < eol && character_class(buffer, i) == charType)
 					i += buffer[i].size();
 
-				if((charType == kTypeSpace || charType == kTypeOther) && i < eol && i == caret + buffer[caret].size())
+				if((charType == kCharacterClassSpace || charType == kCharacterClassOther) && i < eol && i == caret + buffer[caret].size())
 				{
 					charType = character_class(buffer, i);
 					while(i < eol && character_class(buffer, i) == charType)
@@ -700,10 +700,10 @@ namespace ng
 				size_t bol = buffer.begin(buffer.convert(from).line);
 				size_t eol = buffer.eol(buffer.convert(to).line);
 
-				std::string outerLeftType  = from == bol ? kTypeUnknown : character_class(buffer, from-1);
-				std::string innerLeftType  = from == eol ? kTypeUnknown : character_class(buffer, from);
-				std::string innerRightType = to == bol   ? kTypeUnknown : character_class(buffer, to-1);
-				std::string outerRightType = to == eol   ? kTypeUnknown : character_class(buffer, to);
+				std::string outerLeftType  = from == bol ? kCharacterClassUnknown : character_class(buffer, from-1);
+				std::string innerLeftType  = from == eol ? kCharacterClassUnknown : character_class(buffer, from);
+				std::string innerRightType = to == bol   ? kCharacterClassUnknown : character_class(buffer, to-1);
+				std::string outerRightType = to == eol   ? kCharacterClassUnknown : character_class(buffer, to);
 
 				bool extendLeft = false, extendRight = false;
 
@@ -711,7 +711,7 @@ namespace ng
 				{
 					if(outerLeftType == outerRightType)
 						extendLeft = extendRight = true;
-					else if(outerRightType == kTypeWord || outerLeftType == kTypeSpace || outerLeftType == kTypeUnknown || (outerLeftType == kTypeOther && outerRightType != kTypeSpace && outerRightType != kTypeUnknown))
+					else if(outerRightType == kCharacterClassWord || outerLeftType == kCharacterClassSpace || outerLeftType == kCharacterClassUnknown || (outerLeftType == kCharacterClassOther && outerRightType != kCharacterClassSpace && outerRightType != kCharacterClassUnknown))
 						extendRight = true;
 					else
 						extendLeft = true;
@@ -1107,14 +1107,14 @@ namespace ng
 	{
 		ranges_t res;
 
-		std::string charType = kTypeOther;
+		std::string charType = kCharacterClassOther;
 		size_t from = 0;
 		for(size_t i = 0; i < buffer.size(); )
 		{
 			std::string newCharType = character_class(buffer, i);
 			if(charType != newCharType)
 			{
-				if(charType != kTypeSpace && charType != kTypeOther && from != i)
+				if(charType != kCharacterClassSpace && charType != kCharacterClassOther && from != i)
 					res.push_back(range_t(from, i));
 				charType = newCharType;
 				from = i;
@@ -1122,7 +1122,7 @@ namespace ng
 			i += buffer[i].size();
 		}
 
-		if(charType != kTypeSpace && charType != kTypeOther && from != buffer.size())
+		if(charType != kCharacterClassSpace && charType != kCharacterClassOther && from != buffer.size())
 			res.push_back(range_t(from, buffer.size()));
 
 		return res;
