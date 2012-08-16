@@ -31,6 +31,10 @@
 		for (XCGroup *group in [_project rootGroups])
 		{
 			FSItem *item = [FSItem itemWithURL:[NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[group pathRelativeToProjectRoot]]]];
+			if (group.displayName)
+			{
+				item.name = group.displayName;
+			}
 			item.children = [self itemsForGroup:group withBasePath:basePath];
 
 			[results addObject:item];
@@ -48,6 +52,10 @@
 	{
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]]];
 		item.icon = [OakFileIconImage fileIconImageWithPath:[[item url] path] size:NSMakeSize(16, 16)];
+		if (member.displayName)
+		{
+			item.name = member.displayName;
+		}
 		if ([member groupMemberType] == PBXGroup)
 		{
 			item.children = [self itemsForGroup:member withBasePath:basePath];
