@@ -143,20 +143,21 @@ namespace transform
 
 	std::string reformat::operator() (std::string const& src) const
 	{
-		std::string res;
+		std::string res, tmp;
 		size_t from = 0;
 		std::string const unwrapped = unwrap(src);
 		std::string const fillStr = fill_string(unwrapped);
 		citerate(offset, text::soft_breaks(unwrapped, wrap, tabSize, fillStr.size()))
 		{
-			res += unwrapped.substr(from, *offset - from);
-			res += "\n";
+			tmp = unwrapped.substr(from, *offset - from);
+			tmp = tmp.substr(0, tmp.size() - 1);
+			res += tmp + "\n";
 			if(*offset != unwrapped.size())
 				res += fillStr;
 			from = *offset;
 		}
 		res += unwrapped.substr(from);
-		return newline ? res + "\n" : res;
+		return res;
 	}
 
 	std::string justify::operator() (std::string const& src) const
