@@ -149,7 +149,11 @@ namespace transform
 		std::string const fillStr = fill_string(unwrapped);
 		citerate(offset, text::soft_breaks(unwrapped, wrap, tabSize, fillStr.size()))
 		{
-			res += unwrapped.substr(from, *offset - from);
+			size_t len = *offset - from;
+			while(len > 0 && unwrapped[from + len - 1] == ' ')
+				--len;
+
+			res += unwrapped.substr(from, len);
 			res += "\n";
 			if(*offset != unwrapped.size())
 				res += fillStr;
