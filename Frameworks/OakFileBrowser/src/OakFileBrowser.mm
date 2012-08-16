@@ -237,7 +237,7 @@ static NSURL* ParentForURL (NSURL* url)
 
 		switch(type)
 		{
-			case FSItemURLTypeFolder:
+			// case FSItemURLTypeFolder:
 			case FSItemURLTypeUnknown:
 				return [self pushURL:itemURL];
 			break;
@@ -684,7 +684,7 @@ static NSURL* ParentForURL (NSURL* url)
 			outlineViewDelegate.outlineView = view.outlineView;
 
 			view.outlineView.target       = self;
-			view.outlineView.action       = @selector(didSingleClickOutlineView:);
+			view.outlineView.action       = @selector(didDoubleClickOutlineView:);
 			view.outlineView.doubleAction = @selector(didDoubleClickOutlineView:);
 			view.outlineView.menuDelegate = self;
 
