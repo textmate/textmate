@@ -175,6 +175,11 @@ static NSURL* ParentForURL (NSURL* url)
 	}
 }
 
+- (void)deselectAll:(id)sender
+{
+	[view.outlineView deselectAll:sender];
+}
+
 - (NSArray*)openURLs
 {
 	return outlineViewDelegate.openURLs;
