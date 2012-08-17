@@ -25,7 +25,7 @@
 	if((self = [super init])) {
 		_projects = [[NSMutableDictionary alloc] init];
 
-		XCProject *project = [XCProject projectWithFilePath:[anURL path]];
+		XCProject* project = [XCProject projectWithFilePath:[anURL path]];
 
 		[_projects setObject:project forKey:anURL];
 
@@ -38,22 +38,25 @@
 
 - (FSItem*)itemForProject:(XCProject*)project atURL:(NSURL*)anURL
 {
-	FSItem *item = [FSItem itemWithURL:anURL];
+	FSItem* item = [FSItem itemWithURL:anURL];
 	item.icon     = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
 	item.name     = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
 
-	NSMutableArray *results = [NSMutableArray array];
-	NSString *basePath = [[project filePath] stringByDeletingLastPathComponent];
-	for (XCGroup *group in [project rootGroups])
+	NSMutableArray* results = [NSMutableArray array];
+	NSString* basePath = [[project filePath] stringByDeletingLastPathComponent];
+	for (XCGroup* group in [project rootGroups])
 	{
-		FSItem *item = [FSItem itemWithURL:[NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[group pathRelativeToProjectRoot]]]];
-		if (group.displayName)
+		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[group pathRelativeToProjectRoot]]]];
+		if (group.displayName.length)
 		{
 			item.name = group.displayName;
 		}
 		item.children = [self itemsForGroup:group withBasePath:basePath];
 
-		[results addObject:item];
+		if (item.name.length || item.children.count)
+		{
+			[results addObject:item];
+		}
 	}
 	item.children = results;
 	return item;
@@ -64,10 +67,10 @@
 	NSMutableArray* results = [NSMutableArray new];
 	for (id<XcodeGroupMember> member in [[group members] arrayByReversingOrder])
 	{
-		NSURL *itemURL = [NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]];
+		NSURL* itemURL = [NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]];
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
-			XCProject *project = [XCProject projectWithFilePath:[itemURL path]];
+			XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
 			[results addObject:[self itemForProject:project atURL:itemURL]];
 		}
 		else
