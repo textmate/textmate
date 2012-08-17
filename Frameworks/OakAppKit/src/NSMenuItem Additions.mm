@@ -261,10 +261,10 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 
 - (void)setModifiedState:(BOOL)flag
 {
-	if(MenuRef menu = _NSGetCarbonMenu([self menu]))
+	if(NSImage* image = [NSImage imageNamed:@"NSMenuItemBullet"])
 	{
-		MenuItemIndex itemIndex = [[self menu] indexOfItem:self] + 1;
-		SetItemMark(menu, itemIndex, flag ? 0xA5 : noMark);
+		[self setMixedStateImage:image];
+		[self setState:NSMixedState];
 	}
 }
 @end
