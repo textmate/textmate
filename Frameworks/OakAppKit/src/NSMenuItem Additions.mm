@@ -153,7 +153,7 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 
 - (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(int)row column:(int)column;
 {
-	CGSize stringSize = [string sizeWithAttributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName : font }];
 
 	NSTextTableBlock* block = [[[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1] autorelease];
 
@@ -163,7 +163,7 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 	block.verticalAlignment = verticalAlignment;
 
 	NSMutableParagraphStyle* paragraphStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
-	[paragraphStyle setTextBlocks:[NSArray arrayWithObjects:block, nil]];
+	[paragraphStyle setTextBlocks:@[ block ]];
 	[paragraphStyle setAlignment:textAlignment];
 
 	string = [string stringByAppendingString:@"\n"];
