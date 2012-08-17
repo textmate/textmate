@@ -831,12 +831,21 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 - (IBAction)goToSCMDataSource:(id)sender
 {
-	for(NSURL* selectedURL in self.selectedURLs)
+	if([url.scheme isEqualToString:@"scm"])
 	{
-		if([selectedURL isFileURL] && path::is_directory([[selectedURL path] fileSystemRepresentation]))
-			return [self pushURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
+		if(historyController.previousURL)
+				[self goBack:sender];
+		else	[self goToParentFolder:sender];
 	}
-	[self pushURL:[FSSCMDataSource scmURLWithPath:[url path]]];
+	else
+	{
+		for(NSURL* selectedURL in self.selectedURLs)
+		{
+			if([selectedURL isFileURL] && path::is_directory([[selectedURL path] fileSystemRepresentation]))
+				return [self pushURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
+		}
+		[self pushURL:[FSSCMDataSource scmURLWithPath:[url path]]];
+	}
 }
 
 - (IBAction)goBack:(id)sender             { if(historyController.previousURL) { [self setURL:historyController.previousURL]; [historyController retreat:self]; [outlineViewDelegate scrollToOffset:historyController.currentURLScrollOffset]; [self updateView]; } }
