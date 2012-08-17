@@ -7,7 +7,7 @@
 
 @interface FSXcodeProjectDataSource : FSDataSource
 {
-	XCProject *_project;
+	NSMutableDictionary *_projects;
 }
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions;
 @end
