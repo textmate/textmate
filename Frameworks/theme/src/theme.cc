@@ -1,6 +1,19 @@
 #include "theme.h"
 #include <cf/cf.h>
 
+static theme_t::color_info_t read_color (std::string const& str_color );
+static void get_set_key_path(plist::dictionary_t const& plist, std::string const& setting, theme_t::color_info_t&  color) {
+	std::string temp_str;
+	plist::get_key_path(plist, setting, temp_str);
+	color = read_color(temp_str);
+}
+static CGFloat read_font_size (std::string const& str_font_size );
+static void get_set_key_path(plist::dictionary_t const& plist, std::string const& setting, CGFloat& font_size) {
+	std::string temp_str = NULL_STR;
+	plist::get_key_path(plist, setting, temp_str);
+	font_size = read_font_size(temp_str);
+}
+
 theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& plist)
 {
 	decomposed_style_t res;
@@ -10,12 +23,12 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 		res.scope_selector = scopeSelector;
 
 	plist::get_key_path(plist, "settings.fontName",   res.font_name);
-	plist::get_key_path(plist, "settings.fontSize",   res.font_size);
-	plist::get_key_path(plist, "settings.foreground", res.foreground);
-	plist::get_key_path(plist, "settings.background", res.background);
-	plist::get_key_path(plist, "settings.caret",      res.caret);
-	plist::get_key_path(plist, "settings.selection",  res.selection);
-	plist::get_key_path(plist, "settings.invisibles", res.invisibles);
+	get_set_key_path(plist, "settings.fontSize",   res.absolute_font_size);
+	get_set_key_path(plist, "settings.foreground", res.foreground);
+	get_set_key_path(plist, "settings.background", res.background);
+	get_set_key_path(plist, "settings.caret",      res.caret);
+	get_set_key_path(plist, "settings.selection",  res.selection);
+	get_set_key_path(plist, "settings.invisibles", res.invisibles);
 
 	bool flag;
 	res.misspelled = plist::get_key_path(plist, "settings.misspelled", flag) ? (flag ? bool_true : bool_false) : bool_unset;
@@ -41,16 +54,26 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 
 std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_t const& scope)
 {
-	static struct { std::string name; std::string decomposed_style_t::*field; } const stringKeys[] =
+	static struct { std::string name; theme_t::color_info_t decomposed_style_t::*field; } const colorKeys[] =
 	{
 		{ "foreground", &decomposed_style_t::foreground },
 		{ "background", &decomposed_style_t::background },
 		{ "caret",      &decomposed_style_t::caret      },
 		{ "selection",  &decomposed_style_t::selection  },
 		{ "invisibles", &decomposed_style_t::invisibles },
-		{ "fontName",   &decomposed_style_t::font_name  },
-		{ "fontSize",   &decomposed_style_t::font_size  },
+
 	};
+
+	static struct { std::string name; std::string decomposed_style_t::*field; } const stringKeys[] =
+	{
+		{ "fontName",   &decomposed_style_t::font_name  },
+	};
+	
+	static struct { std::string name; CGFloat decomposed_style_t::*field; } const doubleKeys[] =
+	{
+		{ "fontSize",   &decomposed_style_t::absolute_font_size  },
+	};
+	
 
 	static struct { std::string name; bool_t decomposed_style_t::*field; } const booleanKeys[] =
 	{
@@ -62,6 +85,17 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_
 
 	std::vector<decomposed_style_t> res;
 
+	for(size_t i = 0; i < sizeofA(colorKeys); ++i)
+	{
+		bundles::item_ptr item;
+		plist::any_t const& value = bundles::value_for_setting(stringKeys[i].name, scope, &item);
+		if(item)
+		{
+			res.push_back(decomposed_style_t(item->scope_selector()));
+			res.back().*(colorKeys[i].field) = read_color(plist::get<std::string>(value));
+		}
+	}
+
 	for(size_t i = 0; i < sizeofA(stringKeys); ++i)
 	{
 		bundles::item_ptr item;
@@ -70,6 +104,17 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_
 		{
 			res.push_back(decomposed_style_t(item->scope_selector()));
 			res.back().*(stringKeys[i].field) = plist::get<std::string>(value);
+		}
+	}
+
+	for(size_t i = 0; i < sizeofA(doubleKeys); ++i)
+	{
+		bundles::item_ptr item;
+		plist::any_t const& value = bundles::value_for_setting(doubleKeys[i].name, scope, &item);
+		if(item)
+		{
+			res.push_back(decomposed_style_t(item->scope_selector()));
+			res.back().*(doubleKeys[i].field) = read_font_size(plist::get<std::string>(value));
 		}
 	}
 
@@ -121,7 +166,7 @@ void theme_t::setup_styles ()
 			if(plist::dictionary_t const* styles = boost::get<plist::dictionary_t>(&*it))
 			{
 				_styles.push_back(parse_styles(*styles));
-				if(_styles.back().invisibles != NULL_STR)
+				if(!_styles.back().invisibles.is_blank())
 				{
 					decomposed_style_t invisbleStyle("deco.invisible");
 					invisbleStyle.foreground = _styles.back().invisibles;
@@ -130,6 +175,7 @@ void theme_t::setup_styles ()
 			}
 		}
 	}
+
 }
 
 oak::uuid_t const& theme_t::uuid () const
@@ -145,25 +191,25 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 	std::map<key_t, styles_t>::iterator styles = _cache.find(key_t(scope, fontName, fontSize));
 	if(styles == _cache.end())
 	{
+
 		std::multimap<double, decomposed_style_t> ordering;
 		citerate(it, global_styles(scope))
 		{
-			double rank = 0;
-			if(it->scope_selector.does_match(scope, &rank))
-				ordering.insert(std::make_pair(rank, *it));
+		        double rank = 0;
+		        if(it->scope_selector.does_match(scope, &rank))
+		                ordering.insert(std::make_pair(rank, *it));
 		}
-
+		
 		iterate(it, _styles)
 		{
-			double rank = 0;
-			if(it->scope_selector.does_match(scope, &rank))
-				ordering.insert(std::make_pair(rank, *it));
+		        double rank = 0;
+		        if(it->scope_selector.does_match(scope, &rank))
+		                ordering.insert(std::make_pair(rank, *it));
 		}
 
 		decomposed_style_t base(scope::selector_t(), fontName, fontSize);
 		iterate(it, ordering)
 			base += it->second;
-
 		CTFontPtr font(CTFontCreateWithName(cf::wrap(base.font_name), round(base.absolute_font_size), NULL), CFRelease);
 		if(CTFontSymbolicTraits traits = (base.bold == bool_true ? kCTFontBoldTrait : 0) + (base.italic == bool_true ? kCTFontItalicTrait : 0))
 		{
@@ -171,13 +217,14 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 				font.reset(newFont, CFRelease);
 		}
 
-		base.foreground = base.foreground == NULL_STR ? "#000000"   : base.foreground;
-		base.background = base.background == NULL_STR ? "#FFFFFF"   : base.background;
-		base.caret      = base.caret      == NULL_STR ? "#000000"   : base.caret;
-		base.selection  = base.selection  == NULL_STR ? "#4D97FF54" : base.selection;
-		base.invisibles = base.invisibles == NULL_STR ? "#BFBFBF"   : base.invisibles;
+		cf::color_t foreground = base.foreground.is_blank() ? cf::color_t("#000000"  ) : base.foreground;
+		cf::color_t background = base.background.is_blank() ? cf::color_t("#FFFFFF"  ) : base.background;
+		cf::color_t selection  = base.selection.is_blank()  ? cf::color_t("#4D97FF54") : base.selection;
+		cf::color_t caret      = base.caret.is_blank()      ? cf::color_t("#000000"  ) : base.caret;
+	//	base.invisibles = base.invisibles == NULL_STR ? "#BFBFBF"   : base.invisibles;
 
-		styles_t res(base.foreground, base.background, base.selection, base.caret, font, base.underlined == bool_true, base.misspelled == bool_true);
+		styles_t res(foreground, background, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
+		
 		styles = _cache.insert(std::make_pair(key_t(scope, fontName, fontSize), res)).first;
 	}
 	return styles->second;
@@ -206,6 +253,45 @@ static std::string alpha_blend (std::string const& lhs, std::string const& rhs)
 	return text::format("#%02lX%02lX%02lX%02lX", lround(255 * red), lround(255 * green), lround(255 * blue), lround(255 * alpha));
 }
 
+static theme_t::color_info_t read_color (std::string const& str_color ) 
+{
+	enum { R, G, B, A };
+	unsigned int col[4] = { 0x00, 0x00, 0x00, 0xFF } ;
+	
+	int res = sscanf(str_color.c_str(), "#%02x%02x%02x%02x", &col[R], &col[G], &col[B], &col[A]);// < 4 || col[1][A] == 0xFF);
+	if(res < 3) { // R G B was not parsed, or color is 100% transparent
+		return theme_t::color_info_t::color_info_t(); // color is not set
+	}
+	
+	return theme_t::color_info_t::color_info_t(col[R]/255.0, col[G]/255.0, col[B]/255.0, col[A]/255.0);
+}
+
+static void alpha_blend (theme_t::color_info_t& lhs, theme_t::color_info_t const& rhs)
+{
+	if (rhs.is_blank()) {
+		return;
+	}
+   else if (rhs.is_opaque() || lhs.is_blank())
+	{	  
+		lhs = rhs;
+	} 
+	else 
+	{
+		double alpha = rhs.alpha;
+		lhs.red   = (1.0 - alpha) * lhs.red + alpha * rhs.red;
+		lhs.green = (1.0 - alpha) * lhs.green + alpha * rhs.green;
+		lhs.blue  = (1.0 - alpha) * lhs.blue + alpha * rhs.blue;
+	}
+}
+
+static void calculate_font_size (CGFloat& absolute_font_size, CGFloat font_size ) 
+{
+	if(font_size > 0)
+		absolute_font_size = font_size;
+	else 
+		absolute_font_size = absolute_font_size * fabs(font_size);	
+}
+
 static double my_strtod (char const* str, char const** last) // problem with strtod() is that it uses LC_NUMERIC for point separator.
 {
 	double res = atof(str);
@@ -218,13 +304,13 @@ static double my_strtod (char const* str, char const** last) // problem with str
 	return res;
 }
 
-theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::decomposed_style_t const& rhs)
+static CGFloat read_font_size (std::string const& str_font_size ) 
 {
-	font_name = rhs.font_name == NULL_STR ? font_name : rhs.font_name;
-
-	if(rhs.font_size != NULL_STR)
+	// Treat positive values as absolute font
+	// and negative as relative, that way we don't have to use a bool as a flag :)
+	if(str_font_size != NULL_STR)
 	{
-		char const* first = rhs.font_size.c_str();
+		char const* first = str_font_size.c_str();
 		char const* last;
 		double size = my_strtod(first, &last);
 		if(first != last)
@@ -233,25 +319,34 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 				++last;
 
 			if(strcmp(last, "pt") == 0 || *last == '\0')
-				absolute_font_size = size;
+				return size;
 			else if(strcmp(last, "em") == 0)
-				absolute_font_size = absolute_font_size * size;
+				return -size;
 			else if(strcmp(last, "%") == 0)
-				absolute_font_size = absolute_font_size * size / 100;
+				 return -size / 100;
 			else
-				fprintf(stderr, "*** unsupported font size unit: %s (%s)\n", last, rhs.font_size.c_str());
+				fprintf(stderr, "*** unsupported font size unit: %s (%s)\n", last, str_font_size.c_str());
 		}
 		else
 		{
-			fprintf(stderr, "*** unsupported font size format: %s\n", rhs.font_size.c_str());
+			fprintf(stderr, "*** unsupported font size format: %s\n", str_font_size.c_str());
 		}
 	}
+	return -1.0;
+}
 
-	foreground = alpha_blend(foreground, rhs.foreground);
-	background = alpha_blend(background, rhs.background);
-	caret      = alpha_blend(caret,      rhs.caret);
-	selection  = alpha_blend(selection,  rhs.selection);
-	invisibles = alpha_blend(invisibles, rhs.invisibles);
+
+theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::decomposed_style_t const& rhs)
+{
+	font_name = rhs.font_name == NULL_STR ? font_name : rhs.font_name;
+
+	calculate_font_size(absolute_font_size, rhs.absolute_font_size);
+
+	alpha_blend(foreground, rhs.foreground);
+	alpha_blend(background, rhs.background);
+	alpha_blend(caret,      rhs.caret);
+	alpha_blend(selection,  rhs.selection);
+	alpha_blend(invisibles, rhs.invisibles);
 
 	bold       = rhs.bold       == bool_unset ? bold       : rhs.bold;
 	italic     = rhs.italic     == bool_unset ? italic     : rhs.italic;
@@ -275,4 +370,8 @@ theme_ptr parse_theme (bundles::item_ptr const& themeItem)
 	if(theme == Cache.end())
 		theme = Cache.insert(std::make_pair(uuid, theme_ptr(new theme_t(themeItem)))).first;
 	return theme->second;
+}
+
+std::string to_s (styles_t const& s) {
+	return "style! fg:" + to_s(s._foreground) + " bg:" + to_s(s._background) + " cr:"+to_s(s._caret) + " sel:"+to_s(s._selection);
 }
