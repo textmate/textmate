@@ -92,6 +92,8 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 		{
 			XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
 			[results addObject:[self itemForProject:project atURL:itemURL]];
+
+			[_projects setObject:project forKey:itemURL];
 		}
 		else
 		{
