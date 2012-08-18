@@ -24,7 +24,7 @@ static void usage (FILE* io = stdout)
 
 static void scmls (std::string const& dir)
 {
-	citerate(pair, scm::tracked_files(dir, scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted))
+	citerate(pair, scm::tracked_files(dir, ~scm::status::versioned))
 		fprintf(stderr, "%s %s\n", to_s(pair->second).c_str(), pair->first.c_str());
 }
 
