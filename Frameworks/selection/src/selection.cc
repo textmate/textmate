@@ -379,7 +379,7 @@ namespace ng
 			case kSelectionMoveToBeginOfDocument:     return 0; 
 			case kSelectionMoveToEndOfDocument:       return buffer.size();
 			case kSelectionMoveToBeginOfParagraph:    return buffer.begin(line);
-			case kSelectionMoveToEndOfParagraph:      return buffer.eol(line);    // TODO Better definition of kSelectionMoveToEndOfParagraph.
+			case kSelectionMoveToEndOfParagraph:      return buffer.eol(line);
 			case kSelectionMoveToBeginOfLine:         return buffer.begin(line);
 			case kSelectionMoveToEndOfLine:           return buffer.eol(line);
 			case kSelectionMoveToBeginOfSoftLine:     return layout ? layout->index_at_bol_for(caret) : buffer.begin(line);
@@ -392,6 +392,33 @@ namespace ng
 			case kSelectionMoveToEndOfTypingPair:     return end_of_typing_pair(buffer, caret, false);
 			case kSelectionMovePageUp:                return layout ? layout->page_up_for(index)   : index;
 			case kSelectionMovePageDown:              return layout ? layout->page_down_for(index) : index;
+
+			case kSelectionMoveToBeginOfHardParagraph:
+			{
+				if(line == 0)
+					return 0;
+
+				for(size_t n = line-1; n > 0; --n)
+				{
+					std::string const& line = buffer.substr(buffer.begin(n), buffer.end(n));
+					if(text::is_blank(line.data(), line.data() + line.size()))
+						return buffer.begin(n+1);
+				}
+				return 0;
+			}
+			break;
+
+			case kSelectionMoveToEndOfHardParagraph:
+			{
+				for(size_t n = line+1; n < buffer.lines(); ++n)
+				{
+					std::string const& line = buffer.substr(buffer.begin(n), buffer.end(n));
+					if(text::is_blank(line.data(), line.data() + line.size()))
+						return buffer.begin(n);
+				}
+				return buffer.size();
+			}
+			break;
 
 			case kSelectionMoveFreehandedLeft:
 			{
@@ -692,7 +719,7 @@ namespace ng
 			case kSelectionExtendToSoftLine:           return range_t(move(buffer, min, kSelectionMoveToBeginOfSoftLine,          layout), min.index != max.index && max.index == move(buffer, max, kSelectionMoveToBeginOfSoftLine, layout).index ? max : move(buffer, move(buffer, max, kSelectionMoveToEndOfSoftLine, layout), kSelectionMoveRight, layout), false, false, true);
 			case kSelectionExtendToLine:               return range_t(move(buffer, min, kSelectionMoveToBeginOfLine,              layout), min.index != max.index && buffer.convert(max.index).column == 0 ? max : move(buffer, move(buffer, max, kSelectionMoveToEndOfLine, layout), kSelectionMoveRight, layout), false, false, true);
 			case kSelectionExtendToLineExclLF:         return range_t(move(buffer, min, kSelectionMoveToBeginOfLine,              layout), min.index != max.index && buffer.convert(max.index).column == 0 ? max : move(buffer, max, kSelectionMoveToEndOfLine, layout), false, false, true);
-			case kSelectionExtendToParagraph:          return range_t(move(buffer, min, kSelectionMoveToBeginOfParagraph,         layout), move(buffer, max, kSelectionMoveToEndOfParagraph, layout), false, false, true);
+			case kSelectionExtendToParagraph:          return range_t(move(buffer, min, kSelectionMoveToBeginOfHardParagraph,     layout), move(buffer, max, kSelectionMoveToEndOfHardParagraph, layout), false, false, true);
 			case kSelectionExtendToAll:                return range_t(move(buffer, min, kSelectionMoveToBeginOfDocument,          layout), move(buffer, max, kSelectionMoveToEndOfDocument,  layout), false, false, true);
 
 			case kSelectionExtendToWord:
