@@ -256,7 +256,9 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 	[attributedTitle appendTableCellWithString:[NSString stringWithCxxString:(" "+aTabTrigger+"\u21E5")] table:table textAlignment:NSRightTextAlignment
 		verticalAlignment:font.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment
 		font:[NSFont menuBarFontOfSize:floor(font.pointSize * 0.85)] row:0 column:1];
+	NSString* plainTitle = self.title;
 	self.attributedTitle = attributedTitle;
+	self.title = plainTitle;
 }
 
 - (void)setModifiedState:(BOOL)flag
