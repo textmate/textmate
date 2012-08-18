@@ -921,8 +921,8 @@ namespace ng
 
 			case kCut:                                          clipboard()->push_back(copy(_buffer, _selections)); _selections = apply(_buffer, _selections, _snippets, &transform::null); break;
 			case kCopy:                                         clipboard()->push_back(copy(_buffer, _selections));                                                                         break;
-			case kCopySelectionToFindPboard:                    find_clipboard()->push_back(copy(_buffer, _selections));                                                                    break;
-			case kCopySelectionToReplacePboard:                 replace_clipboard()->push_back(copy(_buffer, _selections));                                                                 break;
+			case kCopySelectionToFindPboard:                    find_clipboard()->push_back(copy(_buffer, dissect_columnar(_buffer, _selections).first()));                                                                    break;
+			case kCopySelectionToReplacePboard:                 replace_clipboard()->push_back(copy(_buffer, dissect_columnar(_buffer, _selections).first()));                                                                 break;
 			case kPaste:                                        _selections = paste(_buffer, _selections, _snippets, clipboard()->current());                                               break;
 			case kPastePrevious:                                _selections = paste(_buffer, _selections, _snippets, clipboard()->previous());                                              break;
 			case kPasteNext:                                    _selections = paste(_buffer, _selections, _snippets, clipboard()->next());                                                  break;
