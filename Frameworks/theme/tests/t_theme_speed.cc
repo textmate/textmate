@@ -73,8 +73,7 @@ public:
 		bundleIndex.commit();
 
 		theme_t theme(TestGrammarItem);
-		std::vector<theme_t::decomposed_style_t> list = theme._styles; 
-		scope::compile::compiled_t<theme_t::decomposed_style_t> compiled = scope::compile::compile(list);
+		theme_t::test_hook_t compiled = theme_t::test_hook_t::get_hook(theme);
 		std::vector<std::string> _scopes = scopes();
 		std::vector<scope::context_t::context_t> contexts;
 
@@ -85,7 +84,6 @@ public:
 		for(int i = 0; i < repeat ; i++)
 			iterate(textScope, contexts)
 			{	
-				//std::multimap<double, const theme_t::decomposed_style_t&> ordered;
 				compiled.styles_for_scope(*textScope, "", 1.0);
 			}
 		
