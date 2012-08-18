@@ -53,6 +53,7 @@ namespace scm
 				case modified:     return "M";
 				case ignored:      return "I";
 				case deleted:      return "D";
+				case mixed:        return "X";
 				case unversioned:  return "U";
 				default:           return text::format("unknown (%d)", status);
 			}
