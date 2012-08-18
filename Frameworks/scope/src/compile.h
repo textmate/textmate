@@ -125,17 +125,16 @@ namespace scope
 				return ordered.size() - before != 0;
 			}
 
-			T styles_for_scope (context_t const& scope, std::string const& fontName, CGFloat fontSize) const
+			T styles_for_scope (context_t const& scope, T base_style) const
 			{
 				std::multimap<double, int> ordered;
 				std::map<int, double> matched = matcher.match(scope, l_compressor, r_compressor);
 				iterate(it, matched)
 					ordered.insert(std::make_pair(it->second, it->first));
-				T style(scope::selector_t(), fontName, fontSize);
 				iterate(it, ordered) 
-					style+= rules[it->second];
+					base_style+= rules[it->second];
 				
-				return style;
+				return base_style;
 			}
 		};
 		
