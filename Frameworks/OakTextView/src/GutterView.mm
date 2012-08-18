@@ -332,20 +332,17 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 - (void)drawRect:(NSRect)aRect
 {
 	[self.enclosingScrollView.backgroundColor set];
-	NSRectFill(NSIntersectionRect(aRect, NSOffsetRect(self.frame, -1, 0)));
-
-	[[NSColor grayColor] set];
-	NSRectFill(NSIntersectionRect(aRect, NSOffsetRect(self.frame, NSWidth(self.frame)-1, 0)));
+	NSRectFill(NSIntersectionRect(aRect, self.frame));
 
 	[self setupSelectionRects];
 
 	[[self.enclosingScrollView.backgroundColor highlightWithLevel:0.5] set];
 	iterate(rect, backgroundRects)
-		NSRectFill(NSIntersectionRect(*rect, NSIntersectionRect(aRect, NSOffsetRect(self.frame, -1, 0))));
+		NSRectFill(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)));
 
 	[[NSColor grayColor] set];
 	iterate(rect, borderRects)
-		NSRectFill(NSIntersectionRect(*rect, NSIntersectionRect(aRect, NSOffsetRect(self.frame, -1, 0))));
+		NSRectFill(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)));
 
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
@@ -387,7 +384,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 	static const CGFloat columnPadding = 1;
 
-	CGFloat currentX = 0, totalWidth = 1; // we start at 1 to account for the right border
+	CGFloat currentX = 0, totalWidth = 0;
 	iterate(it, columnDataSources)
 	{
 		it->x0 = currentX;

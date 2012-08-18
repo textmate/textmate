@@ -1,12 +1,12 @@
 # Settings
-projectDirectory     = "$CWD"
-windowTitle          = "$TM_DISPLAYNAME — ${CWD/^.*\///} ($TM_SCM_BRANCH)"
-excludeInFileChooser = "{$exclude,*.xib}"
+projectDirectory     = '$CWD'
+windowTitle          = '$TM_DISPLAYNAME — ${CWD/^.*\///} ($TM_SCM_BRANCH)'
+excludeInFileChooser = '{$exclude,*.xib}'
 
 # Variables
 TM_ORGANIZATION_NAME = 'MacroMates'
 
-TM_TODO_IGNORE       = '/(disabled(-src)?|onig-.*|build|cache|CxxTest|(FScript|BWToolkitFramework).framework)/'
+TM_TODO_IGNORE       = '/disabled(-src)?|onig-.*|build|CxxTest/'
 
 TM_CXX_FLAGS         = '$TM_CXX_FLAGS    -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
 TM_OBJCXX_FLAGS      = '$TM_OBJCXX_FLAGS -I"$CWD/Shared/include" -I"${builddir:-$HOME/build/TextMate}/include"'
@@ -16,27 +16,21 @@ TM_NINJA_TARGET      = 'TextMate/run'
 
 TM_ISSUE_URL         = 'https://github.com/textmate/textmate/issues/%s'
 
-[ "source.c++, source.objc++" ]
+[ 'source.c++, source.objc++' ]
 tabSize          = 3
 
 [ target ]
-fileType         = "source.tm-properties"
+fileType         = 'source.tm-properties'
 
-[ *.{h,pch} ]
-fileType         = "source.objc++"
-
-[ Makefile.* ]
-fileType         = "source.makefile"
+[ *.h ]
+fileType         = 'source.objc++'
 
 [ attr.untitled ]
 fileType         = 'source.c++'
 
-[ "tests/*.{cc,mm}" ]
-scopeAttributes  = 'attr.project.ninja attr.test.cxxtest'
-TM_NINJA_TARGET  = '${TM_FILEPATH/^.*?([^\/]*)\/tests\/.*$/$1/}'
+[ tests/*.{cc,mm} ]
+scopeAttributes  = 'attr.test.cxxtest'
+TM_NINJA_TARGET  = '${TM_FILEPATH/^.*?([^\/]*)\/tests\/.*$/$1\/test/}'
 
-[ "tests/t_*.mm" ]
+[ tests/t_*.mm ]
 GUI_TESTS        = '${TM_FILENAME/^t_(.*)\.mm$/$1/}'
-
-[ "rmate/*" ]
-TM_MAKE_TARGET   = rmate

@@ -7,7 +7,7 @@
 namespace bundles_db
 {
 	key_chain_t key_chain ();
-	std::string download_etag (std::string const& url, std::string* etag, double* progress, double min, double max);
+	std::string download_etag (std::string const& url, key_chain_t const& keyChain, std::string* etag, double* progress, double min, double max);
 
 } /* bundles_db */
 

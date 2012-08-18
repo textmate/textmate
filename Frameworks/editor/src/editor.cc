@@ -921,8 +921,8 @@ namespace ng
 
 			case kCut:                                          clipboard()->push_back(copy(_buffer, _selections)); _selections = apply(_buffer, _selections, _snippets, &transform::null); break;
 			case kCopy:                                         clipboard()->push_back(copy(_buffer, _selections));                                                                         break;
-			case kCopySelectionToFindPboard:                    find_clipboard()->push_back(copy(_buffer, _selections));                                                                    break;
-			case kCopySelectionToReplacePboard:                 replace_clipboard()->push_back(copy(_buffer, _selections));                                                                 break;
+			case kCopySelectionToFindPboard:                    find_clipboard()->push_back(copy(_buffer, dissect_columnar(_buffer, _selections).first()));                                                                    break;
+			case kCopySelectionToReplacePboard:                 replace_clipboard()->push_back(copy(_buffer, dissect_columnar(_buffer, _selections).first()));                                                                 break;
 			case kPaste:                                        _selections = paste(_buffer, _selections, _snippets, clipboard()->current());                                               break;
 			case kPastePrevious:                                _selections = paste(_buffer, _selections, _snippets, clipboard()->previous());                                              break;
 			case kPasteNext:                                    _selections = paste(_buffer, _selections, _snippets, clipboard()->next());                                                  break;
@@ -1059,7 +1059,7 @@ namespace ng
 			case kReformatText:
 			case kReformatTextAndJustify:
 			{
-				size_t const kDefaultWrapColumn = 80;
+				size_t wrapColumn = layout ? layout->effective_wrap_column() : 80;
 
 				if(_selections.last().columnar)
 				{
@@ -1073,7 +1073,7 @@ namespace ng
 					else if(fromCol == toCol && toCol != 0)
 						fromCol = 0;
 					else if(fromCol == toCol)
-						toCol = std::max(fromCol + 10, kDefaultWrapColumn);
+						toCol = std::max(fromCol + 10, wrapColumn);
 
 					size_t const from = _buffer.begin(fromPos.line);
 					size_t const to   = _buffer.eol(toPos.line);
@@ -1096,8 +1096,8 @@ namespace ng
 				else
 				{
 					if(action == kReformatTextAndJustify)
-							_selections = apply(_buffer, _selections, _snippets, transform::justify(kDefaultWrapColumn, _buffer.indent().tab_size()));
-					else	_selections = apply(_buffer, _selections, _snippets, transform::reformat(kDefaultWrapColumn, _buffer.indent().tab_size()));
+							_selections = apply(_buffer, _selections, _snippets, transform::justify(wrapColumn, _buffer.indent().tab_size()));
+					else	_selections = apply(_buffer, _selections, _snippets, transform::reformat(wrapColumn, _buffer.indent().tab_size()));
 				}
 			}
 			break;

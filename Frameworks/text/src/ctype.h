@@ -1,6 +1,8 @@
 #ifndef TEXT_CDEF_H_GWU81P7L
 #define TEXT_CDEF_H_GWU81P7L
 
+#include <oak/misc.h>
+
 namespace text
 {
 	inline bool is_word_char (uint32_t ch)
@@ -28,6 +30,8 @@ namespace text
 		last = it != last && last[-1] == '\n' ? last-1 : last;
 		return std::find_if(it, last, &is_not_space) == last;
 	}
+
+	PUBLIC bool is_east_asian_width (uint32_t ch);
 
 	struct less_t
 	{

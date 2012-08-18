@@ -13,7 +13,7 @@ static size_t count_columns (std::string const& str, size_t tabSize)
 {
 	size_t col = 0;
 	citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
-		col += (*ch == '\t' ? tabSize - (col % tabSize) : 1);
+		col += (*ch == '\t' ? tabSize - (col % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1));
 	return col;
 }
 
@@ -141,6 +141,14 @@ namespace transform
 		return "";
 	}
 
+	static size_t length_excl_whitespace (std::string const& buffer, size_t bol, size_t eol)
+	{
+		size_t len = eol - bol;
+		while(len > 0 && strchr(" \n", buffer[bol + len - 1]))
+			--len;
+		return len;
+	}
+
 	std::string reformat::operator() (std::string const& src) const
 	{
 		std::string res;
@@ -149,13 +157,13 @@ namespace transform
 		std::string const fillStr = fill_string(unwrapped);
 		citerate(offset, text::soft_breaks(unwrapped, wrap, tabSize, fillStr.size()))
 		{
-			res += unwrapped.substr(from, *offset - from);
+			res += unwrapped.substr(from, length_excl_whitespace(unwrapped, from, *offset));
 			res += "\n";
 			if(*offset != unwrapped.size())
 				res += fillStr;
 			from = *offset;
 		}
-		res += unwrapped.substr(from);
+		res += unwrapped.substr(from, length_excl_whitespace(unwrapped, from, unwrapped.size()));
 		return newline ? res + "\n" : res;
 	}
 
@@ -169,15 +177,11 @@ namespace transform
 			std::string const str = std::string(it->first, it->second);
 			citerate(offset, text::soft_breaks(str, wrap, tabSize))
 			{
-				size_t len = *offset - from;
-				while(len > 0 && unwrapped[from + len - 1] == ' ')
-					--len;
-
-				res += justify_line(unwrapped.substr(from, len), wrap, tabSize);
+				res += justify_line(unwrapped.substr(from, length_excl_whitespace(str, from, *offset)), wrap, tabSize);
 				res += "\n";
 				from = *offset;
 			}
-			res += str.substr(from);
+			res += str.substr(from, length_excl_whitespace(str, from, str.size()));
 		}
 		return newline ? res + "\n" : res;
 	}

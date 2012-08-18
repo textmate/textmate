@@ -124,7 +124,11 @@ namespace
 		mate_server_t () : _socket_path(path::join(path::temp(), "textmate.sock"))
 		{
 			D(DBF_RMateServer, bug("%s\n", _socket_path.c_str()););
-			unlink(_socket_path.c_str());
+			if(unlink(_socket_path.c_str()) == -1 && errno != ENOENT)
+			{
+				OakRunIOAlertPanel("Unable to delete socket left from old instance:\n%s", _socket_path.c_str());
+				return;
+			}
 
 			socket_t fd(socket(AF_UNIX, SOCK_STREAM, 0));
 			fcntl(fd, F_SETFD, 1);

@@ -86,7 +86,7 @@ private:
 
 		CGFloat gutterViewWidth = 40;
 
-		NSRect textScrollViewFrame = NSMakeRect(gutterViewWidth, OakStatusBarHeight, NSWidth(aRect)-gutterViewWidth, NSHeight(aRect)-OakStatusBarHeight);
+		NSRect textScrollViewFrame = NSMakeRect(gutterViewWidth+1, OakStatusBarHeight, NSWidth(aRect)-gutterViewWidth-1, NSHeight(aRect)-OakStatusBarHeight);
 		NSSize textViewSize = [NSScrollView contentSizeForFrameSize:textScrollViewFrame.size hasHorizontalScroller:YES hasVerticalScroller:YES borderType:NSNoBorder];
 
 		textScrollView = [[NSScrollView alloc] initWithFrame:textScrollViewFrame];
@@ -372,6 +372,11 @@ private:
 		[[NSColor grayColor] set];
 		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), NSHeight(self.frame) - height, NSWidth(aRect), 1), aRect));
 	}
+	
+	// Draw the border between gutter and text views
+	[[NSColor grayColor] set];
+	NSRect gutterFrame = gutterView.frame;
+	NSRectFill(NSMakeRect(NSMaxX(gutterFrame), OakStatusBarHeight, 1, NSHeight(self.frame)-OakStatusBarHeight));
 }
 
 // ======================

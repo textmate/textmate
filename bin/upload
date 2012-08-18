@@ -41,9 +41,12 @@ def create_download(path, repository, name, description, content_type)
 
   open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/downloads") do |io|
     github = JSON.parse(io.read)
-    abort "github error: #{github['errors'].inspect}" if github.include? 'errors'
+    abort "github error: #{github['errors'].inspect} for #{repository}"     if github.include?('errors')
+    abort "github unexpected response: #{github.inspect} for #{repository}" unless github.include?('html_url')
     aws_upload(path, github['s3_url'], github['path'], github['acl'], payload['name'], payload['content_type'], github['accesskeyid'], github['policy'], github['signature'])
+    return github['html_url']
   end
+  nil
 end
 
 if path = ARGV.shift
@@ -51,11 +54,8 @@ if path = ARGV.shift
     base, name, version = $&, $1, $2
     description = ''
 
-    create_download(path, REPOSITORY, base, description, 'application/x-bzip2')
-    url = "https://github.com/downloads/#{REPOSITORY}/#{base}"
-
     info = {
-      'url'       => url,
+      'url'       => create_download(path, REPOSITORY, base, description, 'application/x-bzip2'),
       'version'   => version,
       'signature' => sign(path),
       'signee'    => PW_INFO.login

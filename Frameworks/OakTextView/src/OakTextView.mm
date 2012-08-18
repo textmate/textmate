@@ -2160,12 +2160,20 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (NSCursor*)IBeamCursor
 {
+	NSCursor* ibeamRegular = [NSCursor IBeamCursor];
+	
 	if(cf::color_is_dark(theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background()))
 	{
-		static NSCursor* ibeamCursor = [[NSCursor alloc] initWithImage:[NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]] hotSpot:NSMakePoint(7, 7)];
+		static NSCursor* ibeamCursor = nil;
+		if(!ibeamCursor)
+		{
+			NSImage* ibeamWhite = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
+			[ibeamWhite setSize:[[ibeamRegular image] size]];
+			ibeamCursor = [[NSCursor alloc] initWithImage:ibeamWhite hotSpot:NSMakePoint(4, 9)];
+		}
 		return ibeamCursor;
 	}
-	return [NSCursor IBeamCursor];
+	return ibeamRegular;
 }
 
 - (void)resetCursorRects

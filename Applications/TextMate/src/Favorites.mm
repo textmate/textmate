@@ -74,7 +74,21 @@
 		citerate(entry, path::entries(favoritesPath))
 		{
 			if((*entry)->d_type == DT_LNK)
-				favorites.insert(std::make_pair((*entry)->d_name, path::resolve(path::join(favoritesPath, (*entry)->d_name))));
+			{
+				std::string const& path = path::resolve(path::join(favoritesPath, (*entry)->d_name));
+				if(strncmp("[DIR] ", (*entry)->d_name, 6) == 0)
+				{
+					citerate(subentry, path::entries(path))
+					{
+						if((*subentry)->d_type == DT_DIR)
+							favorites.insert(std::make_pair(text::format("%s — %s", (*subentry)->d_name, (*entry)->d_name + 6), path::join(path, (*subentry)->d_name)));
+					}
+				}
+				else
+				{
+					favorites.insert(std::make_pair((*entry)->d_name, path));
+				}
+			}
 		}
 	}
 	return self;

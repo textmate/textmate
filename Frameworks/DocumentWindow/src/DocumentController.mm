@@ -908,7 +908,10 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("%s\n", [self selectedDocument]->path().c_str()););
 	self.fileBrowserHidden = NO;
-	[fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]]];
+	NSURL* currentDocumentURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]];
+	if([fileBrowser.selectedURLs count] == 1 && [currentDocumentURL isEqualTo:[fileBrowser.selectedURLs lastObject]])
+			[fileBrowser deselectAll:self];
+	else	[fileBrowser showURL:currentDocumentURL];
 }
 
 - (IBAction)goToProjectFolder:(id)sender
