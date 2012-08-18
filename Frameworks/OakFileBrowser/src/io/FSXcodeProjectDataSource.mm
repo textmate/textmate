@@ -14,6 +14,10 @@
 #import <oak/oak.h>
 #import <oak/debug.h>
 
+static BOOL isFaultyProductGroup(XCGroup *group) {
+	return ([group groupMemberType] == PBXGroup && [[group alias] isEqualToString:@"Products"]);
+}
+
 @interface FSXcodeProjectDataSource (Private)
 - (FSItem*)itemForProject:(XCProject*)project atURL:(NSURL*)anURL;
 - (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath;
@@ -46,13 +50,17 @@
 	NSString* basePath = [[project filePath] stringByDeletingLastPathComponent];
 	for (XCGroup* group in [project rootGroups])
 	{
+		if (isFaultyProductGroup(group))
+		{
+			continue;
+		}
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[group pathRelativeToProjectRoot]]]];
+		item.children = [self itemsForGroup:group withBasePath:basePath];
+
 		if (group.displayName.length)
 		{
 			item.name = group.displayName;
 		}
-		item.children = [self itemsForGroup:group withBasePath:basePath];
-
 		if (item.name.length || item.children.count)
 		{
 			[results addObject:item];
@@ -65,7 +73,7 @@
 - (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath
 {
 	NSMutableArray* results = [NSMutableArray new];
-	for (id<XcodeGroupMember> member in [[group members] arrayByReversingOrder])
+	for (id<XcodeGroupMember> member in [group members])
 	{
 		NSURL* itemURL = [NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]];
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
@@ -83,7 +91,11 @@
 			}
 			if ([member groupMemberType] == PBXGroup)
 			{
-				item.children = [[self itemsForGroup:member withBasePath:basePath] arrayByReversingOrder];
+				if (isFaultyProductGroup(group))
+				{
+					continue;
+				}
+				item.children = [self itemsForGroup:member withBasePath:basePath];
 			}
 			[results addObject:item];
 		}
