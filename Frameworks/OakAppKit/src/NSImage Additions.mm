@@ -6,19 +6,6 @@
 	return [[NSBundle bundleForClass:aClass] imageForResource:aName];
 }
 
-+ (NSImage*)imageWithCGImage:(CGImageRef)cgImage
-{
-	NSImage* res = nil;
-	if(cgImage)
-	{
-		res = [[NSImage alloc] init];
-		NSBitmapImageRep* bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-		[res addRepresentation:bitmapRep];
-		[bitmapRep release];
-	}
-	return res;
-}
-
 // ===================================================
 // = Gracefully draw in potentially flipped contexts =
 // ===================================================
