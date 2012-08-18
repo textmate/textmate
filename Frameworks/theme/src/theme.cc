@@ -290,7 +290,8 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 	{
 
 		std::multimap<double, const theme_t::decomposed_style_t&> ordered;
-		decomposed_style_t base = compiled.styles_for_scope(scope, fontName, fontSize);
+		decomposed_style_t style(scope::selector_t(), fontName, fontSize);
+		decomposed_style_t base = compiled.styles_for_scope(scope, style);
 
 		CTFontPtr font(CTFontCreateWithName(cf::wrap(base.font_name), round(base.font_size), NULL), CFRelease);
 		if(CTFontSymbolicTraits traits = (base.bold == bool_true ? kCTFontBoldTrait : 0) + (base.italic == bool_true ? kCTFontItalicTrait : 0))
@@ -388,15 +389,6 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	misspelled = rhs.misspelled == bool_unset ? misspelled : rhs.misspelled;
 
 	return *this;
-}
-
-std::string theme_t::decomposed_style_t::to_s () const{
-	return "decomposed! " +font_name +
-		     foreground.to_s() +
-		     background.to_s() +
-		     caret.to_s() +
-		     selection.to_s() +
-			  invisibles.to_s() + scope::to_s(scope_selector);		
 }
 
 // ==============
