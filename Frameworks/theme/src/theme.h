@@ -55,7 +55,7 @@ private:
 
 	struct decomposed_style_t
 	{
-		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = 0) : scope_selector(scopeSelector), font_name(fontName), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset), absolute_font_size(fontSize) { }
+		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = -1) : scope_selector(scopeSelector), font_name(fontName), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset), absolute_font_size(fontSize) { }
 		decomposed_style_t& operator+= (decomposed_style_t const& rhs);
 
 		scope::selector_t scope_selector;

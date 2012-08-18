@@ -11,7 +11,7 @@ static void get_key_path (plist::dictionary_t const& plist, std::string const& s
 	color = read_color(temp_str);
 }
 
-static void get_key_path(plist::dictionary_t const& plist, std::string const& setting, CGFloat &font_size)
+static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, CGFloat& font_size)
 {
 	std::string temp_str = NULL_STR;
 	plist::get_key_path(plist, setting, temp_str);
