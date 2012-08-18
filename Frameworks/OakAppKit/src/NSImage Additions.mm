@@ -3,35 +3,7 @@
 @implementation NSImage (ImageFromBundle)
 + (NSImage*)imageNamed:(NSString*)aName inSameBundleAsClass:(id)aClass
 {
-	if(!aName)
-		return nil;
-
-	NSBundle* bundle = [NSBundle bundleForClass:aClass];
-	NSString* name   = [NSString stringWithFormat:@"%@.%@", [bundle bundleIdentifier], aName];
-
-	static NSMutableDictionary* cache = [NSMutableDictionary new];
-	if(NSImage* res = [cache objectForKey:name])
-		return res;
-
-	NSString* resourcePath = bundle.resourcePath;
-	for(NSString* resource in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:resourcePath error:nil])
-	{
-		static NSSet* imageTypes = [[NSSet alloc] initWithArray:[NSImage imageFileTypes]];
-		if([aName isEqualToString:[resource stringByDeletingPathExtension]] && [imageTypes containsObject:[resource pathExtension]])
-		{
-			NSString* imagePath = [resourcePath stringByAppendingPathComponent:resource];
-			if(NSImage* image = [[[NSImage alloc] initWithContentsOfFile:imagePath] autorelease])
-			{
-				[cache setObject:image forKey:name];
-				return image;
-			}
-		}
-	}
-
-	NSBeep();
-	NSLog(@"*** could not find image named ‘%@’ in %@", aName, resourcePath);
-
-	return nil;
+	return [[NSBundle bundleForClass:aClass] imageForResource:aName];
 }
 
 + (NSImage*)imageWithCGImage:(CGImageRef)cgImage
