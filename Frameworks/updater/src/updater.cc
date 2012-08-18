@@ -43,6 +43,38 @@ namespace bundles_db
 	oak::date_t source_t::last_check () const                                       { return path::get_attr(path(), "last-check"); }
 	static bool source_rank_less (source_ptr const& lhs, source_ptr const& rhs)     { return lhs->rank() > rhs->rank(); }
 
+	key_chain_t source_t::key_chain () const
+	{
+		key_chain_t res;
+
+		plist::array_t keys;
+		if(plist::get_key_path(plist::load(_path), "keys", keys))
+		{
+			iterate(key, keys)
+			{
+				std::string identity, name, publicKey;
+				if(plist::get_key_path(*key, "identity", identity) && plist::get_key_path(*key, "name", name) && plist::get_key_path(*key, "publicKey", publicKey))
+						res.add(key_chain_t::key_t(identity, name, publicKey));
+				else	fprintf(stderr, "bad public key entry:\n%s\n", to_s(*key).c_str());
+			}
+		}
+		else
+		{
+			static std::string const KeyChainPath = path::join(path::home(), "Library/Application Support/TextMate/Managed/KeyChain.plist");
+			if(path::exists(KeyChainPath))
+			{
+				res.load(KeyChainPath);
+			}
+			else
+			{
+				res.add(key_chain_t::key_t("org.textmate.duff",    "Allan Odgaard",  "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n"));
+				res.add(key_chain_t::key_t("org.textmate.msheets", "Michael Sheets", "-----BEGIN PUBLIC KEY-----\nMIIDOzCCAi4GByqGSM44BAEwggIhAoIBAQDfYsqBc18uL7yYb/bDrrEtVTBG8tML\nmMtNFyU8XhlVKWdQJwBGG/fV2Wjc0hVYSeTWv3VueITZbuuVZEePXlem6Dki1DEL\nsMNeDvE/l0MKHXi1+sr1cht7QvuTi/c1UK4I6QNWDJWi7KmqJg3quLCwJfMef1x5\n/qgLUln5cU6+pAj43Vp62bzHJBjAnrC432yD7F4Mxu4oV/PEm5QC6pU7RcvUwAox\np7m7c8+CxX7Aq4dH6Jd8Jt6XuYIktlfcFivvvF60CvxhABDBdGMra4roO0wlJmID\n91oQ3PLxFBsDmbluPJlkmTp4YetsF8/Zd9P3WwBQUArtNdiqKZIQ4uHXAhUAvNZ5\ntZkzuUiblIxZKmOCBN/JeMsCggEBAK9jUiC98+hwY5XcDQjDSLPE4uvv+dHZ29Bx\n8KevX+qzd6shIhp6urvyBXrM+h8l7iB6Jh4Wm3WhqKMBjquRqyGogQDGxJr7QBVk\nQSOiyaKDT4Ue/Nhg1MFsrt3PtS1/nscZ6GGWswrCfQ1t4m/wXDasUSfz2smae+Jd\nZ6UGBzWQMRawyU/O/LX0PlJkBOMHopecAUcxHc2G02P2QwAMKPavwksQ4tWCJvIr\n7ZELfCcVQtG2UnpTRWqLZQaVwSYMHoNK9/reu099sdv9CQ+trH2Q5LlBXJmHloFK\nafiuQPjTmaJVf/piiQ79xJB6VmwoEpOJJG4NYNt7f+I7YCk07xwDggEFAAKCAQA5\nSBwWJouMKUI6Hi0EZ4/Yh98qQmItx4uWTYFdjcUVVYCKK7GIuXu67rfkbCJUrvT9\nID1vw2eyTmbuW2TPuRDsxUcB7WRyyLekl67vpUgMgLBLgYMXQf6RF4HM2tW7UWg7\noNQHkZKWbhDgXdumKzKf/qZPB/LT2Yndv/zqkQ+YXIu08j0RGkxJaAjB7nEv1XGq\nL2VJf8aEi+MnihAtMPCHcW34qswqO1kOCbOWNShlfWHGjKlfdsPYv87RcalHNqps\nk1r60kyEkeZvKGM+FDT80N7cafX286v8n9L4IvvnLr/FDOH4XXzEjXB9Vr5Ffvj1\ndxNPRmDZOo6JNKA8Uvki\n-----END PUBLIC KEY-----\n"));
+				res.save(KeyChainPath);
+			}
+		}
+		return res;
+	}
+
 	std::vector<source_ptr> sources (std::string const& installDir)
 	{
 		static plist::any_t const DefaultIndex = plist::parse_ascii(
@@ -115,7 +147,7 @@ namespace bundles_db
 	bool update (source_ptr source, double* progress, double min, double max)
 	{
 		std::string etag = path::get_attr(source->path(), "org.w3.http.etag");
-		std::string path = download_etag(source->url(), &etag, progress, min, max);
+		std::string path = download_etag(source->url(), source->key_chain(), &etag, progress, min, max);
 		if(path != NULL_STR)
 		{
 			if(path::swap_and_unlink(path, source->path()))
@@ -506,7 +538,7 @@ namespace bundles_db
 		std::string const path   = path::join(folder, safe_basename(path::strip_extension(name)) + suffix + path::extension(name));
 
 		std::string error = NULL_STR;
-		std::string const src = network::download_tbz(bundle->url(), key_chain(), path, error, progress, min, max);
+		std::string const src = network::download_tbz(bundle->url(), bundle->key_chain(), path, error, progress, min, max);
 		if(src != NULL_STR)
 		{
 			std::string const dst = bundle->_path == NULL_STR ? path::join(local_bundle_path(installDir), text::format("Bundles/%s.tmbundle", safe_basename(bundle->name()).c_str())) : bundle->_path;
