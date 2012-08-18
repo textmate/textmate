@@ -39,11 +39,18 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	if((self = [super init])) {
 		_projects = [[NSMutableDictionary alloc] init];
 
-		XCProject* project = [XCProject projectWithFilePath:[anURL path]];
+		if ([[NSFileManager defaultManager] fileExistsAtPath:[anURL path]])
+		{
+			XCProject* project = [XCProject projectWithFilePath:[anURL path]];
 
-		self.rootItem = [self itemForProject:project atURL:anURL];
+			self.rootItem = [self itemForProject:project atURL:anURL];
 
-		[_projects setObject:project forKey:anURL];
+			[_projects setObject:project forKey:anURL];
+		}
+		else
+		{
+			self.rootItem = [FSItem itemWithURL:anURL];
+		}
 	}
 	return self;
 }
@@ -82,10 +89,17 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]);
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
-			XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
-			[results addObject:[self itemForProject:project atURL:itemURL]];
+			if ([[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])
+			{
+				XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
+				[results addObject:[self itemForProject:project atURL:itemURL]];
 
-			[_projects setObject:project forKey:itemURL];
+				[_projects setObject:project forKey:itemURL];
+			}
+			else
+			{
+				[results addObject:[FSItem itemWithURL:itemURL]];
+			}
 		}
 		else
 		{
