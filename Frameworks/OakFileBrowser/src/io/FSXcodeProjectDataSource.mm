@@ -59,19 +59,14 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	for (XCGroup* group in [project rootGroups])
 	{
 		if (isFaultyProductGroup(group))
-		{
 			continue;
-		}
+
 		FSItem* item = [FSItem itemWithURL:pathURLWithBaseAndRelativePath(basePath, [group pathRelativeToProjectRoot])];
 		item.children = [self itemsForGroup:group withBasePath:basePath];
 		if (group.displayName.length)
-		{
 			item.name = group.displayName;
-		}
 		if (item.name.length || item.children.count)
-		{
 			[results addObject:item];
-		}
 	}
 	item.children = results;
 	return item;
@@ -84,9 +79,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	{
 		NSURL* itemURL = pathURLWithBaseAndRelativePath(basePath, [member pathRelativeToProjectRoot]);
 		if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])
-		{
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]);
-		}
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
 			XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
@@ -99,15 +92,11 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			FSItem* item = [FSItem itemWithURL:itemURL];
 			item.icon = [OakFileIconImage fileIconImageWithPath:[[item url] path] size:NSMakeSize(16, 16)];
 			if (member.displayName.length)
-			{
 				item.name = member.displayName;
-			}
 			if ([member groupMemberType] == PBXGroup)
 			{
 				if (isFaultyProductGroup(group))
-				{
 					continue;
-				}
 				item.children = [self itemsForGroup:member withBasePath:basePath];
 			}
 			[results addObject:item];
