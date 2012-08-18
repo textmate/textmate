@@ -456,11 +456,21 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(NSBrowserCell* cell = [aCell isKindOfClass:[NSBrowserCell class]] ? aCell : nil)
 	{
 		be::entry_ptr entry = parent_for_column(aBrowser, aColumn, bundles)->children()[aRow];
-		[cell setStringValue:[NSString stringWithCxxString:entry->name()]];
+		
+		NSAttributedString	*as=[[NSAttributedString alloc]
+			initWithString:[NSString stringWithCxxString:entry->name()]
+			attributes:[NSDictionary
+				dictionaryWithObject:(entry->disabled())?[NSColor grayColor]:[NSColor blackColor]
+				forKey:NSForegroundColorAttributeName
+			]
+		];
+		
+		[cell setAttributedStringValue:as];
 		[cell setLeaf:!entry->has_children()];
-		[cell setEnabled:!entry->disabled()];
 		[cell setLoaded:YES];
-
+		
+		[as release];
+		
 		if(bundles::item_ptr item = entry->represented_item())
 		{
 			[cell setImage:[NSImage imageNamed:info_for(item->kind()).file inSameBundleAsClass:[self class]]];
