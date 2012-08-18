@@ -21,8 +21,7 @@ static BOOL isFaultyProductGroup(XCGroup* group)
 
 static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relativePath)
 {
-	NSString* path = [basePath stringByAppendingPathComponent:[relativePath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-	return [NSURL fileURLWithPath:[path stringByResolvingSymlinksInPath]];
+	return [NSURL fileURLWithPath:[[basePath stringByAppendingPathComponent:relativePath] stringByResolvingSymlinksInPath]];
 }
 
 #pragma mark -
