@@ -4,6 +4,7 @@
 #include <regexp/find.h>
 #include <text/classification.h>
 #include <text/utf8.h>
+#include <text/ctype.h>
 #include <text/types.h>
 #include <text/tokenize.h>
 
@@ -15,7 +16,7 @@ namespace ng
 		std::string const str = buffer.substr(buffer.begin(buffer.convert(caret.index).line), caret.index);
 		size_t len = 0;
 		citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
-			len += *ch == '\t' ? tabSize - (len % tabSize) : 1;
+			len += *ch == '\t' ? tabSize - (len % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1);
 		return len + caret.carry;
 	}
 
@@ -29,7 +30,7 @@ namespace ng
 			if(len == column)
 				return caret + (&ch - str.data());
 
-			size_t chWidth = *ch == '\t' ? tabSize - (len % tabSize) : 1;
+			size_t chWidth = *ch == '\t' ? tabSize - (len % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1);
 			if(len + chWidth > column || *ch == '\n')
 				return index_t(caret + (&ch - str.data()), column - len);
 

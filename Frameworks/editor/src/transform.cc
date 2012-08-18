@@ -13,7 +13,7 @@ static size_t count_columns (std::string const& str, size_t tabSize)
 {
 	size_t col = 0;
 	citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
-		col += (*ch == '\t' ? tabSize - (col % tabSize) : 1);
+		col += (*ch == '\t' ? tabSize - (col % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1));
 	return col;
 }
 
