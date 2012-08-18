@@ -14,14 +14,25 @@
 #import <oak/oak.h>
 #import <oak/debug.h>
 
-static BOOL isFaultyProductGroup(XCGroup *group) {
+static BOOL isFaultyProductGroup(XCGroup* group)
+{
 	return ([group groupMemberType] == PBXGroup && [[group alias] isEqualToString:@"Products"]);
 }
+
+static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relativePath)
+{
+	NSString* path = [basePath stringByAppendingPathComponent:[relativePath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	return [NSURL fileURLWithPath:[path stringByResolvingSymlinksInPath]];
+}
+
+#pragma mark -
 
 @interface FSXcodeProjectDataSource (Private)
 - (FSItem*)itemForProject:(XCProject*)project atURL:(NSURL*)anURL;
 - (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath;
 @end
+
+#pragma mark -
 
 @implementation FSXcodeProjectDataSource
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
@@ -31,9 +42,9 @@ static BOOL isFaultyProductGroup(XCGroup *group) {
 
 		XCProject* project = [XCProject projectWithFilePath:[anURL path]];
 
-		[_projects setObject:project forKey:anURL];
-
 		self.rootItem = [self itemForProject:project atURL:anURL];
+
+		[_projects setObject:project forKey:anURL];
 	}
 	return self;
 }
@@ -43,8 +54,6 @@ static BOOL isFaultyProductGroup(XCGroup *group) {
 - (FSItem*)itemForProject:(XCProject*)project atURL:(NSURL*)anURL
 {
 	FSItem* item = [FSItem itemWithURL:anURL];
-	item.icon     = [OakFileIconImage fileIconImageWithPath:[anURL path] size:NSMakeSize(16, 16)];
-	item.name     = [NSString stringWithCxxString:path::display_name([[anURL path] fileSystemRepresentation])];
 
 	NSMutableArray* results = [NSMutableArray array];
 	NSString* basePath = [[project filePath] stringByDeletingLastPathComponent];
@@ -54,9 +63,8 @@ static BOOL isFaultyProductGroup(XCGroup *group) {
 		{
 			continue;
 		}
-		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[group pathRelativeToProjectRoot]]]];
+		FSItem* item = [FSItem itemWithURL:pathURLWithBaseAndRelativePath(basePath, [group pathRelativeToProjectRoot])];
 		item.children = [self itemsForGroup:group withBasePath:basePath];
-
 		if (group.displayName.length)
 		{
 			item.name = group.displayName;
@@ -75,7 +83,11 @@ static BOOL isFaultyProductGroup(XCGroup *group) {
 	NSMutableArray* results = [NSMutableArray new];
 	for (id<XcodeGroupMember> member in [group members])
 	{
-		NSURL* itemURL = [NSURL fileURLWithPath:[basePath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]];
+		NSURL* itemURL = pathURLWithBaseAndRelativePath(basePath, [member pathRelativeToProjectRoot]);
+		if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])
+		{
+			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]);
+		}
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
 			XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
@@ -85,7 +97,7 @@ static BOOL isFaultyProductGroup(XCGroup *group) {
 		{
 			FSItem* item = [FSItem itemWithURL:itemURL];
 			item.icon = [OakFileIconImage fileIconImageWithPath:[[item url] path] size:NSMakeSize(16, 16)];
-			if (member.displayName)
+			if (member.displayName.length)
 			{
 				item.name = member.displayName;
 			}
