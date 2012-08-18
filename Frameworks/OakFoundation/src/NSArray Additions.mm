@@ -8,9 +8,4 @@
 {
 	return [self count] ? [self objectAtIndex:0] : nil;
 }
-
-- (NSArray*)arrayByReversingOrder
-{
-	return [[self reverseObjectEnumerator] allObjects];
-}
 @end
