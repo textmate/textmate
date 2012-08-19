@@ -34,6 +34,7 @@
 @property (nonatomic, retain)   NSArray*      openURLs;
 @property (nonatomic, retain)   NSArray*      modifiedURLs;
 @property (nonatomic, readonly) NSDictionary* sessionState;
+@property (nonatomic, readonly) NSURL*        rootURL;
 
 - (void)setupViewWithSize:(NSSize)viewSize resizeIndicatorOnRight:(BOOL)flag state:(NSDictionary*)fileBrowserState;
 - (void)showURL:(NSURL*)aPath;

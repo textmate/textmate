@@ -104,6 +104,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 {
 	FSItem* item = [FSItem itemWithURL:anURL];
 	item.name = [[project filePath] lastPathComponent];
+	item.url = [anURL URLByDeletingLastPathComponent];
 
 	NSMutableArray* results = [NSMutableArray array];
 	NSString* basePath = [[project filePath] stringByDeletingLastPathComponent];

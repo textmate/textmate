@@ -1333,7 +1333,7 @@ static std::string file_chooser_glob (std::string const& path)
 {
 	self.filterWindowController = [OakFilterWindowController filterWindow];
 
-	OakFileChooser* dataSource = [OakFileChooser fileChooserWithPath:(self.fileBrowserPath ?: self.documentPath) projectPath:self.projectPath];
+	OakFileChooser* dataSource = [OakFileChooser fileChooserWithPath:(self.fileBrowserPath ?: self.documentPath) projectPath:fileBrowser.rootURL.path];
 	dataSource.excludeDocumentWithIdentifier = [NSString stringWithCxxString:[self selectedDocument]->identifier()];
 	dataSource.sourceIndex                   = fileChooserSourceIndex;
 	dataSource.globString                    = [NSString stringWithCxxString:file_chooser_glob(to_s(dataSource.path))];
