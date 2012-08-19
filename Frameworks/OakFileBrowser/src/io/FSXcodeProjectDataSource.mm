@@ -8,10 +8,10 @@
 #import <XcodeprojEditor/XcodeGroupMember.h>
 #import <XcodeprojEditor/XcodeSourceFileType.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/NSArray Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <plist/plist.h>
 #import <io/path.h>
+#import <io/exec.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
 #import <oak/oak.h>
@@ -35,6 +35,8 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 
 - (FSItem*)itemForProject:(XCProject*)project atURL:(NSURL*)anURL;
 - (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath inProject:(XCProject*)project;
+
+- (NSString*)frameworkPathForSDKRoot:(NSString*)SDKRoot withBasePath:(NSString*)basePath;
 @end
 
 #pragma mark -
@@ -74,10 +76,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			continue;
 
 		NSString* workingPath = [path stringByAppendingPathComponent:file];
-		BOOL isDirectory = NO;
-		[[NSFileManager defaultManager] fileExistsAtPath:workingPath isDirectory:&isDirectory];
-
-		if (!isDirectory)
+		if (![workingPath isDirectory])
 			continue;
 
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:workingPath]];
@@ -147,9 +146,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 				[_projects setObject:project forKey:itemURL];
 			}
 			else
-			{
 				[results addObject:[FSItem itemWithURL:itemURL]];
-			}
 		}
 		else
 		{
@@ -170,25 +167,14 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 					if (![targets count])
 						continue;
 
-					if (![[NSFileManager defaultManager] fileExistsAtPath:@"/usr/bin/xcode-select"])
-						continue;
+					// find code that searches $PATH
+					if (![_developerDirectoryPath length])
+					{
+						std::string xcodePath = io::exec("/usr/bin/xcode-select", "--print-path", NULL);
+						xcodePath = xcodePath.substr(0, (xcodePath.length() - 1));
 
-					NSTask* findXcodeTask = [[NSTask alloc] init];
-					[findXcodeTask setLaunchPath:@"/usr/bin/xcode-select"];
-					[findXcodeTask setArguments:[NSArray arrayWithObject:@"--print-path"]];
-
-					NSPipe* outputPipe = [NSPipe pipe];
-					[findXcodeTask setStandardOutput:outputPipe];
-
-					[findXcodeTask launch];
-					[findXcodeTask waitUntilExit];
-
-					NSData* results = [[outputPipe fileHandleForReading] readDataToEndOfFile];
-					[findXcodeTask release];
-
-					// Strip out null terminator from the results
-					NSString* xcodePath = [[[NSString alloc] initWithData:[results subdataWithRange:NSMakeRange(0, [results length] - 1)] encoding:NSUTF8StringEncoding] autorelease];
-					NSString* frameworkPath = nil;
+						_developerDirectoryPath = [NSString stringWithCxxString:xcodePath];
+					}
 
 					XCTarget* target = [targets objectAtIndex:0];
 					XCBuildConfigurationList* targetBuildConfiguration = [target defaultConfiguration];
@@ -198,24 +184,13 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 					if (!SDKRoot.length)
 						SDKRoot = [projectBuildConfiguration valueForKey:@"SDKROOT"];
 
-					if ([SDKRoot rangeOfString:@"iphone" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
-					{
-						// TODO: iphoneos6.0
-						frameworkPath = [xcodePath stringByAppendingPathComponent:@"/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk/"];
-					}
-					else if ([SDKRoot rangeOfString:@"mac" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
-					{
-						// TODO: macosx10.8
-						frameworkPath = [xcodePath stringByAppendingPathComponent:@"/Platforms/MacOSX.platform/Developer/SDKs/iPhoneOS6.0.sdk/"];
-					}
+					NSString* frameworkPath = [self frameworkPathForSDKRoot:SDKRoot withBasePath:_developerDirectoryPath];
 
 					frameworkPath = [frameworkPath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]];
 					if ([frameworkPath hasSuffix:@"framework"])
 						item = [self itemForFrameworkAtPath:frameworkPath];
 					else
-					{
 						item.url = [NSURL fileURLWithPath:frameworkPath];
-					}
 				}
 			}
 			item.icon = [OakFileIconImage fileIconImageWithPath:[[item url] path] size:NSMakeSize(16, 16)];
@@ -223,5 +198,45 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 		}
 	}
 	return [results copy];
+}
+
+#pragma mark -
+
+- (NSString*)frameworkPathForSDKRoot:(NSString*)SDKRoot withBasePath:(NSString*)basePath
+{
+	NSString *frameworkPath = nil;
+	if ([SDKRoot rangeOfString:@"iphoneos" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
+		frameworkPath = [basePath stringByAppendingPathComponent:@"/Platforms/iPhoneOS.platform/Developer/SDKs/"];
+	else if ([SDKRoot rangeOfString:@"mac" options:(NSCaseInsensitiveSearch | NSAnchoredSearch) range:NSMakeRange(0, SDKRoot.length)].location != NSNotFound)
+		frameworkPath = [basePath stringByAppendingPathComponent:@"/Platforms/MacOSX.platform/Developer/SDKs/"];
+
+	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:frameworkPath error:nil];
+	NSString *workingSDKRoot = [files caseSensitiveMatchForString:SDKRoot];
+
+	// if an SDK version was specified directly, use it
+	NSInteger index = NSNotFound;
+
+	if (workingSDKRoot)
+		return [frameworkPath stringByAppendingPathComponent:workingSDKRoot];
+
+	if ([SDKRoot isEqualToString:@"iphoneos"])
+		index = @"iphoneos".length;
+	else if ([SDKRoot isEqualToString:@"macosx"])
+		index = @"macosx".length;
+
+	if (index == NSNotFound)
+		return nil;
+
+	files = [files sortedArrayUsingComparator:^(id one, id two) {
+		CGFloat oneFloat = [[one substringFromIndex:index] floatValue];
+		CGFloat twoFloat = [[two substringFromIndex:index] floatValue];
+		if (oneFloat > twoFloat)
+			return (NSComparisonResult)NSOrderedAscending;
+		if (oneFloat < twoFloat)
+			return (NSComparisonResult)NSOrderedDescending;
+		return (NSComparisonResult)NSOrderedSame;
+	}];
+
+	return [frameworkPath stringByAppendingPathComponent:[files lastObject]];
 }
 @end
