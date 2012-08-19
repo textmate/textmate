@@ -28,6 +28,7 @@
 * When TextMate launches it creates a socket for `mate` to connect to. There have been [a few reports][1] of TextMate reporting a problem creating this socket. We now also show an error if an old socket exist and we are unable to delete this old socket. If you are seeing an issue, please don’t just add “it fails for me too”. Instead provide as much information as possible, and if e.g. it says it failed to delete the socket, fire up Terminal and check the file flags (`ls -l`) and try to delete it from Terminal.
 * Fixed: Keys on the numeric keypad can be used to trigger bundle actions (not explicitly bound to the numeric keypad). This fix removes the distinction between regular keys and the numeric keypad so it is no longer possible to bind (only) to numeric keypad keys.
 * Include high resolution (white) I-Beam cursor. *[jtbandes]*
+* Several HiDPI assets added. *[Paul Wilde]*
 * Border between text view and gutter is now “fixed” (when invoking the elastic “scroll beyond the document bounds”). *[jtbandes]*
 * Fix bundle menu items' appearance in the Help menu. *[jtbandes]*
 * Bundle Editor: If you disable an item, you can now actually enable it again. Disabled items are rendered in grey. *[Gerd Knops]*
