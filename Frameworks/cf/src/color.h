@@ -8,26 +8,29 @@ namespace cf
 	struct PUBLIC color_t
 	{
 		color_t (std::string const& str = NULL_STR);
+		color_t (CGFloat r, CGFloat g, CGFloat b, CGFloat a) : _red(r), _green(g), _blue(b), _alpha(a) { }
 
-		CGFloat alpha () const;
-		void set_alpha (CGFloat newAlpha);
+		bool operator== (color_t const& rhs) const;
+		bool operator!= (color_t const& rhs) const;
 
-		bool operator== (color_t const& rhs) const { return string_value == rhs.string_value; }
-		bool operator!= (color_t const& rhs) const { return string_value != rhs.string_value; }
+		operator CGColorRef () const;
 
-		operator CGColorRef () const    { return value.get(); }
-		EXPLICIT operator bool () const { return value.get(); }
+		CGFloat red () const   { return _red;   }
+		CGFloat green () const { return _green; }
+		CGFloat blue () const  { return _blue;  }
+		CGFloat alpha () const { return _alpha; }
 
 	private:
+		CGFloat _red, _green, _blue, _alpha;
+		mutable std::tr1::shared_ptr<struct CGColor> cachedValue;
+
 		friend std::string to_s (color_t const& c);
-		typedef std::tr1::shared_ptr<struct CGColor> CGColorPtr;
-		CGColorPtr parse (std::string const& color);
-		CGColorPtr value;
-		std::string string_value;
+		friend bool color_is_dark (color_t const& color);
 	};
 
 	PUBLIC std::string to_s (color_t const& c);
-	PUBLIC bool color_is_dark (CGColorRef color);
+	PUBLIC bool color_is_dark (color_t const& color);
+	PUBLIC bool color_is_dark (CGColorRef const color);
 
 } /* cf */
 
