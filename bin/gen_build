@@ -575,12 +575,14 @@ manifest = ARGV[0]
 TARGETS = Targets.new(manifest)
 
 open(outfile, "w") do |io|
+  userfile = "#{ENV['USER']}.ninja"
   io << "###########################################\n"
   io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
   io << "###########################################\n"
   io << "\n"
   io << "builddir = #{builddir}\n"
-  io << "subninja $builddir/build.ninja\n"
+  io << "include #{userfile}\n" if File.exists?(File.join(File.dirname(outfile), userfile))
+  io << "include $builddir/build.ninja\n"
 end
 
 open("#{builddir}/build.ninja.d", "w") do |io|
