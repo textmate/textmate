@@ -562,8 +562,12 @@ private:
 
 - (IBAction)takeThemeUUIDFrom:(id)sender
 {
-	NSString* themeUUID = [sender representedObject];
-	if(bundles::item_ptr themeItem = bundles::lookup(to_s(themeUUID)))
+	[self setThemeWithUUID:[sender representedObject]];
+}
+
+- (void)setThemeWithUUID:(NSString*)themeUUID
+{
+	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
 	{
 		[[NSUserDefaults standardUserDefaults] setObject:themeUUID forKey:kUserDefaultsThemeUUIDKey];
 		[[NSUserDefaults standardUserDefaults] synchronize];

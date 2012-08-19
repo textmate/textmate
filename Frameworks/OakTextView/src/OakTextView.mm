@@ -800,7 +800,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		case bundles::kItemTypeTheme:
 		{
-			[self setTheme:parse_theme(item)];
+			OakDocumentView* documentView = (OakDocumentView*)[[self enclosingScrollView] superview];
+			[documentView setThemeWithUUID:[NSString stringWithCxxString:item->uuid()]];
 		}
 		break;
 	}
