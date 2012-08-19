@@ -162,7 +162,6 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 					if (![targets count])
 						continue;
 
-					// find code that searches $PATH
 					if (![_developerDirectoryPath length])
 					{
 						std::string xcodePath = io::exec("/usr/bin/xcode-select", "--print-path", NULL);
