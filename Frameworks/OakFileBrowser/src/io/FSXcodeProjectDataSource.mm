@@ -120,6 +120,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			continue;
 
 		FSItem* item = [FSItem itemWithURL:pathURLWithBaseAndRelativePath(basePath, [group pathRelativeToProjectRoot])];
+		item.name = [anURL lastPathComponent];
 		item.children = [self itemsForGroup:group withBasePath:basePath inProject:project];
 		if (item.name.length || item.children.count)
 			[results addObject:item];
@@ -153,8 +154,8 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 		else
 		{
 			FSItem* item = [FSItem itemWithURL:itemURL];
-			if (member.displayName.length)
-				item.name = member.displayName;
+			item.name = member.displayName;
+
 			if ([member groupMemberType] == PBXGroup)
 			{
 				if (isFaultyProductGroup(group))
