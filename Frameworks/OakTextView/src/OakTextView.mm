@@ -437,15 +437,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		settings_t const& settings = settings_for_path();
 
-		std::string themeUUID = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsThemeUUIDKey]);
-		if(themeUUID == NULL_STR)
-			themeUUID = settings.get("theme", "71D40D9D-AE48-11D9-920A-000D93589AF6");
-
 		NSFont* defaultFont       = [NSFont userFixedPitchFontOfSize:0];
 		NSString* defaultFontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFontNameKey] ?: [defaultFont fontName];
 		CGFloat defaultFontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsFontSizeKey] ?: [defaultFont pointSize];
 
-		theme          = parse_theme(bundles::lookup(themeUUID));
 		fontName       = settings.get("fontName", to_s(defaultFontName));
 		fontSize       = settings.get("fontSize", (int32_t)defaultFontSize);
 		showInvisibles = settings.get("showInvisibles", false);

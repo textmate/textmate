@@ -11,6 +11,7 @@
 
 	NSScrollView* gutterScrollView;
 	GutterView* gutterView;
+	NSColor* gutterDividerColor;
 
 	NSScrollView* textScrollView;
 	OakTextView* textView;
