@@ -9,13 +9,8 @@
 #import <XcodeprojEditor/XcodeSourceFileType.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
-#import <plist/plist.h>
 #import <io/path.h>
 #import <io/exec.h>
-#import <cf/cf.h>
-#import <ns/ns.h>
-#import <oak/oak.h>
-#import <oak/debug.h>
 
 static BOOL isFaultyProductGroup(XCGroup* group)
 {

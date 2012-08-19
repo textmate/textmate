@@ -1,7 +1,4 @@
 #import "FSDataSource.h"
-#import <io/events.h>
-#import <scm/scm.h>
-#import <oak/CocoaSTL.h>
 
 @class XCProject;
 
