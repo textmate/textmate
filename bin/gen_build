@@ -755,7 +755,7 @@ rule tbz_archive
   description = Archive ‘$in’…
 
 rule upload
-  command = bin/upload $in > $out~ && mv $out~ $out
+  command = bin/upload -k$upload_keyfile -d$upload_destination $in > $out~ && mv $out~ $out
   description = Upload ‘$in’…
 
 rule deploy
