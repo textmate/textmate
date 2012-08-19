@@ -8,15 +8,16 @@ static NSDictionary* default_environment ()
 {
 	static std::string const DefaultVariables =
 		"{ variables = ("
+		"	{ enabled = :false; name = 'PATH';            value = '$PATH:/opt/local/bin:/usr/local/bin:/usr/texbin'; },"
+
 		"	{ enabled = :false; name = 'TM_C_POINTER';    value = '* ';                               },"
-		"	{ enabled = :false; name = 'TM_CXX_FLAGS';    value = '-framework Carbon -liconv -include vector -include string -include map -include cstdio -I\"$HOME/build/public/include\" -funsigned-char -Wall -Wwrite-strings -Wformat=2 -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch'; },"
+		"	{ enabled = :false; name = 'TM_CXX_FLAGS';    value = '-framework Carbon -liconv -include vector -include string -include map -include cstdio -funsigned-char -Wall -Wwrite-strings -Wformat=2 -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch'; },"
 		"	{ enabled = :false; name = 'TM_FULLNAME';     value = 'Scrooge McDuck';                   },"
 		"	{ enabled = :false; name = 'TM_ORGANIZATION'; value = 'The Billionaires Club';            },"
-		"	{ enabled = :false; name = 'TM_SYS_HEADER_PATH'; value = '/usr/include/c++/4.0.0:/usr/include:/System/Library/Frameworks'; },"
 		"	{ enabled = :false; name = 'TM_XHTML';        value = ' /';                               },"
 
-		"	{ enabled = :true;  name = 'TM_GIT';          value = '/opt/local/bin/git';               },"
-		"	{ enabled = :true;  name = 'TM_HG';           value = '/opt/local/bin/hg';                },"
+		"	{ enabled = :false; name = 'TM_GIT';          value = '/opt/local/bin/git';               },"
+		"	{ enabled = :false; name = 'TM_HG';           value = '/opt/local/bin/hg';                },"
 		"	{ enabled = :false; name = 'TM_MAKE_FLAGS';   value = 'rj8';                              },"
 		"); }";
 

@@ -66,7 +66,7 @@ static bool is_ascii (std::string const& str)
 		end if
 */
 
-std::string to_s (NSEvent* anEvent)
+std::string to_s (NSEvent* anEvent, bool preserveNumPadFlag)
 {
 	CGEventRef cgEvent = [anEvent CGEvent];
 	CGKeyCode key      = (CGKeyCode)[anEvent keyCode];
@@ -81,7 +81,7 @@ std::string to_s (NSEvent* anEvent)
 	if(flags & kCGEventFlagMaskNumericPad)
 	{
 		static std::string const numPadKeys = "0123456789=/*-+.,";
-		if(numPadKeys.find(keyStringNoFlags) != std::string::npos)
+		if(preserveNumPadFlag && numPadKeys.find(keyStringNoFlags) != std::string::npos)
 			newFlags |= kCGEventFlagMaskNumericPad;
 		flags &= ~kCGEventFlagMaskControl;
 	}
