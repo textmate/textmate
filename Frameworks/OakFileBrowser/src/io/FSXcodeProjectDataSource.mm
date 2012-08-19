@@ -51,9 +51,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			[_projects setObject:project forKey:anURL];
 		}
 		else
-		{
 			self.rootItem = [FSItem itemWithURL:anURL];
-		}
 	}
 	return self;
 }
@@ -233,5 +231,12 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	}];
 
 	return [frameworkPath stringByAppendingPathComponent:[files lastObject]];
+}
+
+#pragma mark -
+
+- (BOOL)outlineView:(NSOutlineView*)anOutlineView acceptDrop:(id <NSDraggingInfo>)info item:(FSItem*)item childIndex:(NSInteger)childIndex
+{
+	return NO;
 }
 @end
