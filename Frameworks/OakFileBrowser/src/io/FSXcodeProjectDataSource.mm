@@ -231,9 +231,9 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 		CGFloat oneFloat = [[one substringFromIndex:index] floatValue];
 		CGFloat twoFloat = [[two substringFromIndex:index] floatValue];
 		if (oneFloat > twoFloat)
-			return (NSComparisonResult)NSOrderedAscending;
-		if (oneFloat < twoFloat)
 			return (NSComparisonResult)NSOrderedDescending;
+		if (oneFloat < twoFloat)
+			return (NSComparisonResult)NSOrderedAscending;
 		return (NSComparisonResult)NSOrderedSame;
 	}];
 
