@@ -24,7 +24,7 @@ namespace ng
 	ng::range_t snippet_controller_t::current () const
 	{
 		snippet::range_t const& range = stack.current();
-		return ng::range_t(range.from.offset + anchor, range.to.offset + anchor, false, false, true);
+		return ng::range_t(range.from.offset + anchor, range.to.offset + anchor, false, false, range.from.offset != range.to.offset ? true : false);
 	}
 
 	std::vector<std::string> const& snippet_controller_t::choices () const
