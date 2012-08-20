@@ -70,7 +70,9 @@ class Targets
   end
 
   def target_named(name)
-    self.find { |target| target[:name] == name }
+    res = self.find { |target| target[:name] == name }
+    return res unless res.nil?
+    abort "*** no target named ‘#{name}’. Did you update submodules?\n"
   end
 
   def each(&block)
@@ -292,7 +294,6 @@ def resources_helper(target, key, symbol)
   target[key].to_a.each do |path|
     if path =~ /^@/
       src = TARGETS.target_named($')
-      abort "*** target does not exist: ‘#{path}’.\nKnown targets:\n - #{TARGETS.map { |target| target[:name] }.join("\n - ")}\n" if src.nil?
       abort "*** no resources in target: ‘#{path}’ (from target: #{target[:name]}).\n" unless src.has_key?(:rsrc_info)
       src[:rsrc_info].each do |info|
         rsrc << { :src => info[:src], :dst => esc_path(info[:install_name]) }
@@ -630,15 +631,12 @@ open("#{builddir}/build.ninja", "w") do |io|
   # = Do a topological sort based on the dependency graph =
   # =======================================================
 
-  targets = { } # name → target
-
   dag = ''
   TARGETS.each do |target|
     target['LINK'].each { |dep| dag << "#{target[:name]}\t#{dep}\n" } unless target['LINK'].nil?
     target.each do |key, value|
       value.each { |rsrc| dag << "#{target[:name]}\t#$'\n" if rsrc =~ /^@/ } if key =~ /^CP_/
     end
-    targets[target[:name]] = target
   end
   dag = open('|/usr/bin/tsort -q', 'r+') { |tsort| tsort << dag; tsort.close_write; tsort.read }
 
@@ -647,7 +645,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   # =========================================================================
 
   dag.scan(/.+/).reverse_each do |name|
-    target = targets[name]
+    target = TARGETS.target_named(name)
 
     io << clean(target)
     io << sources(target)
