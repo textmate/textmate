@@ -3,7 +3,6 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
-#import <OakAppKit/OakSavePanel.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <io/path.h>
@@ -166,15 +165,14 @@ static bool uninstall_mate (std::string const& path)
 
 - (void)selectInstallPath:(id)sender
 {
-	[OakSavePanel showWithPath:@"mate" directory:nil fowWindow:[self view].window delegate:self contextInfo:NULL];
-}
-
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)path contextInfo:(void*)info
-{
-	if(path)
-			[self updatePopUp:path];
-	else	[installPathPopUp selectItemAtIndex:0];
-	[self updateUI:self];
+	NSSavePanel* savePanel = [NSSavePanel savePanel];
+	[savePanel setNameFieldStringValue:@"mate"];
+	[savePanel beginSheetModalForWindow:[self view].window completionHandler:^(NSInteger result) {
+		if(result == NSOKButton)
+				[self updatePopUp:[[savePanel.URL filePathURL] path]];
+		else	[installPathPopUp selectItemAtIndex:0];
+		[self updateUI:self];
+	}];
 }
 
 - (void)updatePopUp:(NSString*)path
