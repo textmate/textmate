@@ -74,12 +74,7 @@ namespace
 			{
 				// TODO transliteration / BOM check box
 				NSAlert* alert = [[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", encoding.c_str())] defaultButton:@"Retry" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose another encoding:"] retain];
-				OakEncodingPopUpButton* encodingChooser = [[[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO] autorelease];
-				[encodingChooser sizeToFit];
-				NSRect frame = [encodingChooser frame];
-				if(NSWidth(frame) > 200)
-					[encodingChooser setFrameSize:NSMakeSize(200, NSHeight(frame))];
-				[alert setAccessoryView:encodingChooser];
+				[alert setAccessoryView:[[OakEncodingPopUpButton new] autorelease]];
 				[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(encodingSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 				[[alert window] recalculateKeyViewLoop];
 			}
