@@ -1,6 +1,6 @@
 # Settings
 projectDirectory     = '$CWD'
-windowTitle          = '$TM_DISPLAYNAME — ${CWD/^.*\///} ($TM_SCM_BRANCH)'
+windowTitle          = '$TM_DISPLAYNAME${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/} — ${CWD/^.*\///} ($TM_SCM_BRANCH)'
 excludeInFileChooser = '{$exclude,*.xib}'
 
 # Variables
