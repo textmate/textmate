@@ -402,7 +402,7 @@ namespace find
 
 				onig_region_free(region, 1);
 			}
-			else
+			else if(buffer.size() < 5 * SQ(1024))
 			{
 				buffer.insert(buffer.end(), buf, buf + len);
 				if(options & backwards)
