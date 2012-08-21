@@ -35,7 +35,7 @@
 
 - (void)dealloc
 {
-	[stringList dealloc];
+	[stringList release];
 	[super dealloc];
 }
 
