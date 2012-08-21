@@ -1,5 +1,29 @@
 # Release Notes
 
+## 2012-08-21
+
+* Save dialogs now have controls for setting encoding, line endings, and whether or not to use a byte order mark (for unicode encodings).
+
+* When the find window is active (with find in folder results) one can use one of the View → Toggle Foldings At Level actions to collapse/expand the results. This was done to allow collapsing using the keyboard (e.g. use ⌥⌘1).
+
+* When in a snippet placeholder field, deleting the content and pressing tab will advance to next field even if the word to the left of the caret is a tab trigger. An example of this is `div⇥` in HTML mode, if pressing ⌫ after expanding it, pressing ⇥ would expand another `div` snippet. When at the end of a snippet, it will allow the word to the left of the caret to trigger a tab expansion, as this is used to chain snippets.
+
+*	Colors used in the gutter can now be set in the theme using the following 3 keys:
+
+	* `gutterBackground`
+	* `gutterForeground`
+	* `gutterDivider`
+
+	Default colors are calculated, but might not be ideal for all themes (e.g. solarized) *[Jacob Bandes-Storch]*
+
+* Icons in the gutter has been updated for retina and images changed so the bookmark indicator is a bookmark and the “found a match here” (for search in folder) is now a magnify glass. *[Dennis Vennink]*
+
+* Last version of `rmate` didn’t preserve file permissions when editing existing files. This has now been addressed.
+
+* Several users reported a socket error during startup. This happened after we moved the socket into `TMPDIR` so it has now been moved back to `/tmp` but the name include the user ID to avoid clashes on multi-user systems.
+
+* TextMate will now update the installed version of `mate` if TextMate.app includes a newer version. This might result in prompting for admin password after updating TextMate.
+
 ## 2012-08-19
 
 * Various improvements in paragraph definition and wrapping:
@@ -27,12 +51,12 @@
 
 * When TextMate launches it creates a socket for `mate` to connect to. There have been [a few reports][1] of TextMate reporting a problem creating this socket. We now also show an error if an old socket exist and we are unable to delete this old socket. If you are seeing an issue, please don’t just add “it fails for me too”. Instead provide as much information as possible, and if e.g. it says it failed to delete the socket, fire up Terminal and check the file flags (`ls -l`) and try to delete it from Terminal.
 * Fixed: Keys on the numeric keypad can be used to trigger bundle actions (not explicitly bound to the numeric keypad). This fix removes the distinction between regular keys and the numeric keypad so it is no longer possible to bind (only) to numeric keypad keys.
-* Include high resolution (white) I-Beam cursor. *[jtbandes]*
+* Include high resolution (white) I-Beam cursor. *[Jacob Bandes-Storch]*
 * Several HiDPI assets added. *[Paul Wilde]*
-* Border between text view and gutter is now “fixed” (when invoking the elastic “scroll beyond the document bounds”). *[jtbandes]*
-* Fix bundle menu items' appearance in the Help menu. *[jtbandes]*
+* Border between text view and gutter is now “fixed” (when invoking the elastic “scroll beyond the document bounds”). *[Jacob Bandes-Storch]*
+* Fix bundle menu items' appearance in the Help menu. *[Jacob Bandes-Storch]*
 * Bundle Editor: If you disable an item, you can now actually enable it again. Disabled items are rendered in grey. *[Gerd Knops]*
-* Bundle Editor: Columns are now resiable. *[Elia Schito]*
+* Bundle Editor: Columns are now resizable. *[Elia Schito]*
 
 [1]: https://github.com/textmate/textmate/issues/183
 
@@ -77,7 +101,7 @@
 ## 2012-08-13
 
 * Consecutive deletes extend the yank clipboard.
-* Tab triggers are once again rendered in the menu (though presently without the rounded rectangle) and all key equivalents are now shown menu (e.g. `⌃!` would previously not show). Also several legacy APis have been updated to the latest from Apple *[jtbandes]*
+* Tab triggers are once again rendered in the menu (though presently without the rounded rectangle) and all key equivalents are now shown menu (e.g. `⌃!` would previously not show). Also several legacy APis have been updated to the latest from Apple *[Jacob Bandes-Storch]*
 * When clearing the “CJK edit buffer” (e.g. via escape) then the following key press would be treated literally, e.g. pressing escape or delete would insert the character code for this key.
 * Fixed crash when setting a non-path for `projectDirectory` and then doing a project folder search.
 * For users of proxy auto-configuration (PAC) scripts, the actual URL TextMate needs to connect to (for software and bundle updates plus crash reporting) is now given to the PAC script.
