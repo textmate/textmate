@@ -77,9 +77,6 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
 {
-	if(ranges.last().unanchored)
-		return std::vector<bundles::item_ptr>();
-
 	size_t caret = ranges.last().min().index;
 	size_t line  = buffer.convert(caret).line;
 	size_t bol   = buffer.begin(line);
@@ -1593,6 +1590,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)expandTabTrigger:(id)sender
 {
+	if(editor->disallow_tab_expansion())
+		return NO;
+
 	AUTO_REFRESH;
 	ng::range_t range;
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), editor->ranges(), document->path_attributes(), &range);

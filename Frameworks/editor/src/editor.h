@@ -152,6 +152,8 @@ namespace ng
 
 		void perform (action_t action, layout_t const* layout = NULL);
 
+		bool disallow_tab_expansion () const;
+
 		void insert (std::string const& str, bool selectInsertion = false);
 		void insert_with_pairing (std::string const& str);
 		void move_selection_to (ng::index_t const& index, bool selectInsertion = true);
