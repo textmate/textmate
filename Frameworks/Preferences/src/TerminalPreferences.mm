@@ -110,7 +110,7 @@ static bool rm_path (std::string const& path, AuthorizationRef& auth)
 
 static bool cp_path (std::string const& src, std::string const& dst, AuthorizationRef& auth)
 {
-	if(access(path::parent(dst).c_str(), W_OK) == 0)
+	if(access(dst.c_str(), W_OK) == 0 || access(dst.c_str(), X_OK) != 0 && access(path::parent(dst).c_str(), W_OK) == 0)
 	{
 		if(copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) == 0)
 			return true;
@@ -131,7 +131,7 @@ static bool install_mate (std::string const& src, std::string const& dst)
 	if(mk_dir(path::parent(dst), auth))
 	{
 		struct stat buf;
-		if(lstat(dst.c_str(), &buf) == 0 && !rm_path(dst, auth))
+		if(lstat(dst.c_str(), &buf) == 0 && !S_ISREG(buf.st_mode) && !rm_path(dst, auth))
 			return false;
 		return cp_path(src, dst, auth);
 	}
