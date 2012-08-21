@@ -307,7 +307,7 @@ namespace ng
 
 	bool editor_t::disallow_tab_expansion () const
 	{
-		if(!_snippets.empty() && _snippets.current() == ranges().last() || ranges().last().unanchored)
+		if(!_snippets.empty() && _snippets.current() == ranges().last() && !_snippets.in_last_placeholder() || ranges().last().unanchored)
 			return true;
 		return false;
 	}
