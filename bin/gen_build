@@ -518,7 +518,7 @@ def app_bundle(target)
   res << "build #{dst}.sign:  sign_executable #{dst}\n"
   res << "build #{dst}.run:   run_application #{dst} | #{dst}.sign\n"
   res << "  appname = #{target[:name]}\n"
-  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]}\n"
+  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]} | #{dst}.sign\n"
 
   res << "build #{target[:name]}:       phony #{dst}.sign\n"
   res << "build #{target[:name]}/run:   phony #{dst}.run\n"
