@@ -5,6 +5,7 @@
 #import "TMPlugInController.h"
 #import "RMateServer.h"
 #import <Preferences/Keys.h>
+#import <Preferences/TerminalPreferences.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakFoundation/OakFoundation.h>
@@ -138,6 +139,7 @@ OAK_DEBUG_VAR(AppStartup);
 	unsetenv("OAK_DISABLE_UNTITLED_FILE");
 
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+	[TerminalPreferences updateMateIfRequired];
 
 	[appController setup];
 }

@@ -15,4 +15,6 @@
 @property (nonatomic, retain) NSImage* installIndicaitorImage;
 - (IBAction)performInstallMate:(id)sender;
 - (IBAction)performUninstallMate:(id)sender;
+
++ (void)updateMateIfRequired;
 @end
