@@ -13,6 +13,9 @@
 
 + (void)createTransformerWithName:(NSString*)aName andObjectsArray:(NSArray*)aList
 {
+	if([NSValueTransformer valueTransformerForName:aName])
+		return;
+
 	OakStringListTransformer* transformer = [[OakStringListTransformer new] autorelease];
 	transformer.stringList = aList;
 	[NSValueTransformer setValueTransformer:transformer forName:aName];
@@ -35,7 +38,7 @@
 
 - (void)dealloc
 {
-	[stringList dealloc];
+	[stringList release];
 	[super dealloc];
 }
 

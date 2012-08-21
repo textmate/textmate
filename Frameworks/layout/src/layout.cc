@@ -8,6 +8,7 @@
 #include <cf/cgrect.h>
 #include <text/parse.h>
 #include <text/utf8.h>
+#include <text/ctype.h>
 
 // ====================
 // = Helper Functions =
@@ -24,7 +25,7 @@ static size_t count_columns (ng::buffer_t const& buf, size_t from, size_t to)
 	size_t col = 0;
 	std::string const str = buf.substr(from, to);
 	citerate(ch, diacritics::make_range(str.data(), str.data() + str.size()))
-		col += (*ch == '\t' ? tabSize - (col % tabSize) : 1);
+		col += (*ch == '\t' ? tabSize - (col % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1));
 	return col;
 }
 
@@ -620,7 +621,7 @@ namespace ng
 			if(len == column)
 				return caret + (&ch - str.data());
 
-			size_t chWidth = *ch == '\t' ? tabSize - (len % tabSize) : 1;
+			size_t chWidth = *ch == '\t' ? tabSize - (len % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1);
 			if(len + chWidth > column || *ch == '\n')
 				return index_t(caret + (&ch - str.data()), column - len);
 

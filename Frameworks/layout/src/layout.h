@@ -46,6 +46,7 @@ namespace ng
 		size_t tab_size () const                { return _tab_size; }
 		margin_t const& margin () const         { return _margin; }
 		bool wrapping () const                  { return _wrapping; }
+		size_t effective_wrap_column () const;
 
 		// ======================
 		// = Display Attributes =
@@ -135,7 +136,6 @@ namespace ng
 		CGRect full_width (CGRect const& rect) const;
 		CGRect full_height (CGRect const& rect) const;
 		bool effective_soft_wrap (row_tree_t::iterator rowIter) const;
-		size_t effective_wrap_column () const;
 
 		void set_tab_size (size_t tabSize);
 		void did_insert (size_t first, size_t last);

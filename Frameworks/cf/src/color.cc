@@ -1,48 +1,46 @@
 #include "color.h"
 #include <oak/debug.h>
+#include <text/format.h>
 
 namespace cf
 {
-	color_t::color_t (std::string const& str) : string_value(str)
+	color_t::color_t (std::string const& str)
 	{
-		if(str != NULL_STR)
-			value = parse(str) ?: parse("#FFFFFF");
+		unsigned int r = 0, g = 0, b = 0, a = 0xFF;
+		if(str == NULL_STR || sscanf(str.c_str(), "#%02x%02x%02x%02x", &r, &g, &b, &a) < 3)
+			*this = color_t(0, 0, 0, 1);
+		
+		*this = color_t(r/255.0, g/255.0, b/255.0, a/255.0);
 	}
 
-	CGFloat color_t::alpha () const
+	color_t::operator CGColorRef () const
 	{
-		return CGColorGetAlpha(value.get());
+		if(!cachedValue)
+		{
+			CGFloat components[4] = { _red, _green, _blue, _alpha };
+			CGColorSpaceRef colorspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+			cachedValue.reset(CGColorCreate(colorspace, components), CGColorRelease);
+			CGColorSpaceRelease(colorspace);
+		}
+		return cachedValue.get();
 	}
-
-	void color_t::set_alpha (CGFloat newAlpha)
-	{
-		ASSERT(value.get());
-		value.reset(CGColorCreateCopyWithAlpha(value.get(), newAlpha), CFRelease);
-	}
-
-	color_t::CGColorPtr color_t::parse (std::string const& color)
-	{
-		CGColorPtr res;
-		unsigned int red = 0, green = 0, blue = 0, alpha = 0xFF;
-		if(sscanf(color.c_str(), "#%02x%02x%02x%02x", &red, &green, &blue, &alpha) < 3)
-			return res;
-
-		CGFloat components[4] = { red/255.0f, green/255.0f, blue/255.0f, alpha/255.0f };
-		CGColorSpaceRef colorspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-		res.reset(CGColorCreate(colorspace, components), CGColorRelease);
-		CGColorSpaceRelease(colorspace);
-		return res;
-	}
+	
+	bool color_t::operator== (color_t const& rhs) const { return _red == rhs._red && _blue == rhs._blue && _green == rhs._green && _alpha == rhs._alpha; }
+	bool color_t::operator!= (color_t const& rhs) const { return _red != rhs._red || _blue != rhs._blue || _green != rhs._green || _alpha != rhs._alpha; }
 
 	std::string to_s (color_t const& c)
 	{
-		return c.string_value == NULL_STR ? "(undefined)" : c.string_value;
+		return text::format("#%02lX%02lX%02lX%02lX", lround(c._red*0xFF), lround(c._green*0xFF), lround(c._blue*0xFF), lround(c._alpha*0xFF));
 	}
 
-	bool color_is_dark (CGColorRef color)
+	bool color_is_dark (color_t const& color)
+	{
+		return 0.30*color._red + 0.59*color._green + 0.11*color._blue < 0.5;
+	}
+
+	bool color_is_dark (CGColorRef const color)
 	{
 		size_t componentsCount = CGColorGetNumberOfComponents(color);
-		CGFloat intensity = 1.0;
 		if(componentsCount == 4)
 		{
 			CGFloat const* components = CGColorGetComponents(color);
@@ -51,9 +49,9 @@ namespace cf
 			CGFloat const& green = components[1];
 			CGFloat const& blue  = components[2];
 
-			intensity = 0.30*SQ(red) + 0.59*SQ(green) + 0.11*SQ(blue);
+			return 0.30*red + 0.59*green + 0.11*blue < 0.5;
 		}
-		return intensity < 0.5;
+		return false;
 	}
 
 } /* cf */

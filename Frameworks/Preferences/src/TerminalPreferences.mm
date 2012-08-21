@@ -3,7 +3,6 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
-#import <OakAppKit/OakSavePanel.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <io/path.h>
@@ -111,7 +110,7 @@ static bool rm_path (std::string const& path, AuthorizationRef& auth)
 
 static bool cp_path (std::string const& src, std::string const& dst, AuthorizationRef& auth)
 {
-	if(access(path::parent(dst).c_str(), W_OK) == 0)
+	if(access(dst.c_str(), W_OK) == 0 || access(dst.c_str(), X_OK) != 0 && access(path::parent(dst).c_str(), W_OK) == 0)
 	{
 		if(copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) == 0)
 			return true;
@@ -132,7 +131,7 @@ static bool install_mate (std::string const& src, std::string const& dst)
 	if(mk_dir(path::parent(dst), auth))
 	{
 		struct stat buf;
-		if(lstat(dst.c_str(), &buf) == 0 && !rm_path(dst, auth))
+		if(lstat(dst.c_str(), &buf) == 0 && !S_ISREG(buf.st_mode) && !rm_path(dst, auth))
 			return false;
 		return cp_path(src, dst, auth);
 	}
@@ -166,15 +165,14 @@ static bool uninstall_mate (std::string const& path)
 
 - (void)selectInstallPath:(id)sender
 {
-	[OakSavePanel showWithPath:@"mate" directory:nil fowWindow:[self view].window delegate:self contextInfo:NULL];
-}
-
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)path contextInfo:(void*)info
-{
-	if(path)
-			[self updatePopUp:path];
-	else	[installPathPopUp selectItemAtIndex:0];
-	[self updateUI:self];
+	NSSavePanel* savePanel = [NSSavePanel savePanel];
+	[savePanel setNameFieldStringValue:@"mate"];
+	[savePanel beginSheetModalForWindow:[self view].window completionHandler:^(NSInteger result) {
+		if(result == NSOKButton)
+				[self updatePopUp:[[savePanel.URL filePathURL] path]];
+		else	[installPathPopUp selectItemAtIndex:0];
+		[self updateUI:self];
+	}];
 }
 
 - (void)updatePopUp:(NSString*)path
@@ -311,5 +309,26 @@ static bool uninstall_mate (std::string const& path)
 	if(uninstall_mate(to_s(self.mateInstallPath)))
 		[self setMateInstallPath:nil];
 	[self updateUI:self];
+}
+
++ (void)updateMateIfRequired
+{
+	NSString* oldMate = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey];
+	double oldVersion = [[NSUserDefaults standardUserDefaults] doubleForKey:kUserDefaultsMateInstallVersionKey];
+	NSString* newMate = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil];
+
+	if(oldMate && newMate)
+	{
+		std::string res = io::exec(to_s(newMate), "--version", NULL);
+		if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res.data(), res.data() + res.size()))
+		{
+			NSString* newVersion = [NSString stringWithUTF8String:res.data() + m.begin(1) length:m.end(1) - m.begin(1)];
+			if(oldVersion < [newVersion doubleValue])
+			{
+				if(install_mate(to_s(newMate), to_s(oldMate)))
+					[[NSUserDefaults standardUserDefaults] setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+			}
+		}
+	}
 }
 @end

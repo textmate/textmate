@@ -457,19 +457,10 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	{
 		be::entry_ptr entry = parent_for_column(aBrowser, aColumn, bundles)->children()[aRow];
 		
-		NSAttributedString	*as=[[NSAttributedString alloc]
-			initWithString:[NSString stringWithCxxString:entry->name()]
-			attributes:[NSDictionary
-				dictionaryWithObject:(entry->disabled())?[NSColor grayColor]:[NSColor blackColor]
-				forKey:NSForegroundColorAttributeName
-			]
-		];
-		
-		[cell setAttributedStringValue:as];
+		NSDictionary* attrs = @{ NSForegroundColorAttributeName : entry->disabled() ? [NSColor grayColor] : [NSColor blackColor] };
+		[cell setAttributedStringValue:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:entry->name()] attributes:attrs] autorelease]];
 		[cell setLeaf:!entry->has_children()];
 		[cell setLoaded:YES];
-		
-		[as release];
 		
 		if(bundles::item_ptr item = entry->represented_item())
 		{

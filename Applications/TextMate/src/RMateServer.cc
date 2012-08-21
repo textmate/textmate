@@ -9,8 +9,6 @@
 
 OAK_DEBUG_VAR(RMateServer);
 
-#define OLD_SOCKET_PATH "/tmp/avian.sock"
-
 /*
 	open
 	path: [«path»|-]
@@ -119,42 +117,45 @@ static bool rmate_connection_handler_t (socket_t const& socket);
 
 namespace
 {
+	static char const* socket_path ()
+	{
+		static std::string const str = text::format("/tmp/textmate-%d.sock", getuid());
+		return str.c_str();
+	}
+
 	struct mate_server_t
 	{
-		mate_server_t () : _socket_path(path::join(path::temp(), "textmate.sock"))
+		mate_server_t ()
 		{
-			D(DBF_RMateServer, bug("%s\n", _socket_path.c_str()););
-			if(unlink(_socket_path.c_str()) == -1 && errno != ENOENT)
+			_socket_path = socket_path();
+			D(DBF_RMateServer, bug("%s\n", _socket_path););
+			if(unlink(_socket_path) == -1 && errno != ENOENT)
 			{
-				OakRunIOAlertPanel("Unable to delete socket left from old instance:\n%s", _socket_path.c_str());
+				OakRunIOAlertPanel("Unable to delete socket left from old instance:\n%s", _socket_path);
 				return;
 			}
 
 			socket_t fd(socket(AF_UNIX, SOCK_STREAM, 0));
 			fcntl(fd, F_SETFD, 1);
 			struct sockaddr_un addr = { 0, AF_UNIX };
-			strcpy(addr.sun_path, _socket_path.c_str());
+			strcpy(addr.sun_path, _socket_path);
 			addr.sun_len = SUN_LEN(&addr);
 			if(bind(fd, (sockaddr*)&addr, sizeof(addr)) == -1)
-				OakRunIOAlertPanel("Could not bind to socket:\n%s", _socket_path.c_str());
+				OakRunIOAlertPanel("Could not bind to socket:\n%s", _socket_path);
 			else if(listen(fd, 5) == -1)
 				OakRunIOAlertPanel("Could not listen to socket");
-
-			unlink(OLD_SOCKET_PATH);
-			link(_socket_path.c_str(), OLD_SOCKET_PATH);
 
 			_callback.reset(new socket_callback_t(&rmate_connection_handler_t, fd));
 		}
 
 		~mate_server_t ()
 		{
-			D(DBF_RMateServer, bug("%s\n", _socket_path.c_str()););
-			unlink(_socket_path.c_str());
-			unlink(OLD_SOCKET_PATH);
+			D(DBF_RMateServer, bug("%s\n", _socket_path););
+			unlink(_socket_path);
 		}
 
 	private:
-		std::string _socket_path;
+		char const* _socket_path;
 		socket_callback_ptr _callback;
 	};
 

@@ -837,7 +837,7 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 // = Document Action Methods =
 // ===========================
 
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath contextInfo:(void*)info
+- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(std::string const&)encoding newlines:(std::string const&)newlines useBOM:(BOOL)useBOM
 {
 	if(!aPath)
 		return;
@@ -849,6 +849,10 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 	ASSERT_LT(0, paths.size());
 
 	[self selectedDocument]->set_path(paths[0]); // FIXME check if document already exists (overwrite)
+	[self selectedDocument]->set_disk_encoding(encoding);
+	[self selectedDocument]->set_disk_newlines(newlines);
+	[self selectedDocument]->set_disk_bom(useBOM);
+
 	[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
 
 	if(paths.size() > 1)
@@ -858,6 +862,9 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 		{
 			documents.push_back(document::create(paths[i]));
 			documents.back()->open(); // so that we find this when going to counterpart
+			documents.back()->set_disk_encoding(encoding);
+			documents.back()->set_disk_newlines(newlines);
+			documents.back()->set_disk_bom(useBOM);
 		}
 
 		[self addDocuments:documents andSelect:kSelectDocumentNone closeOther:NO pruneTabBar:NO];
@@ -870,18 +877,20 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 - (IBAction)saveDocument:(id)sender
 {
 	D(DBF_DocumentController, bug("%s\n", [self selectedDocument]->path().c_str()););
-	if([self selectedDocument]->path() != NULL_STR)
-			[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
-	else	[OakSavePanel showWithPath:DefaultSaveNameForDocument([self selectedDocument]) directory:self.untitledSavePath fowWindow:self.window delegate:self contextInfo:NULL];
+	document::document_ptr doc = [self selectedDocument];
+	if(doc->path() != NULL_STR)
+			[DocumentSaveHelper trySaveDocument:doc forWindow:self.window defaultDirectory:nil andCallback:NULL];
+	else	[OakSavePanel showWithPath:DefaultSaveNameForDocument(doc) directory:self.untitledSavePath fowWindow:self.window delegate:self encoding:doc->disk_encoding() newlines:doc->disk_newlines() useBOM:doc->disk_bom()];
 }
 
 - (IBAction)saveDocumentAs:(id)sender
 {
 	D(DBF_DocumentController, bug("%s\n", [self selectedDocument]->path().c_str()););
-	std::string const documentPath = [self selectedDocument]->path();
+	document::document_ptr doc = [self selectedDocument];
+	std::string const documentPath = doc->path();
 	NSString* documentFolder = [NSString stringWithCxxString:path::parent(documentPath)];
 	NSString* documentName   = [NSString stringWithCxxString:path::name(documentPath)];
-	[OakSavePanel showWithPath:(documentName ?: DefaultSaveNameForDocument([self selectedDocument])) directory:(documentFolder ?: self.untitledSavePath) fowWindow:self.window delegate:self contextInfo:NULL];
+	[OakSavePanel showWithPath:(documentName ?: DefaultSaveNameForDocument(doc)) directory:(documentFolder ?: self.untitledSavePath) fowWindow:self.window delegate:self encoding:doc->disk_encoding() newlines:doc->disk_newlines() useBOM:doc->disk_bom()];
 }
 
 - (IBAction)saveAllDocuments:(id)sender

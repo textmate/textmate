@@ -9,19 +9,25 @@ typedef std::tr1::shared_ptr<struct __CTFont const> CTFontPtr;
 
 struct PUBLIC styles_t
 {
-	styles_t (cf::color_t const& foreground, cf::color_t const& background, cf::color_t const& selection, cf::color_t const& caret, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _selection(selection), _caret(caret), _font(font), _underlined(underlined), _misspelled(misspelled) { }
+	styles_t (cf::color_t const& foreground, cf::color_t const& background, cf::color_t const& gutterForeground, cf::color_t const& gutterBackground, cf::color_t const& gutterDivider, cf::color_t const& selection, cf::color_t const& caret, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _gutterForeground(gutterForeground), _gutterBackground(gutterBackground), _gutterDivider(gutterDivider), _selection(selection), _caret(caret), _font(font), _underlined(underlined), _misspelled(misspelled) { }
 
-	CGColorRef foreground () const { return _foreground; }
-	CGColorRef background () const { return _background; }
-	CGColorRef caret () const      { return _caret; }
-	CGColorRef selection () const  { return _selection; }
-	CTFontRef font () const        { return _font.get(); }
-	bool underlined () const       { return _underlined; }
-	bool misspelled () const       { return _misspelled; }
+	CGColorRef foreground () const       { return _foreground; }
+	CGColorRef background () const       { return _background; }
+	CGColorRef gutterForeground () const { return _gutterForeground; }
+	CGColorRef gutterBackground () const { return _gutterBackground; }
+	CGColorRef gutterDivider () const    { return _gutterDivider; }
+	CGColorRef caret () const            { return _caret; }
+	CGColorRef selection () const        { return _selection; }
+	CTFontRef font () const              { return _font.get(); }
+	bool underlined () const             { return _underlined; }
+	bool misspelled () const             { return _misspelled; }
 
 private:
 	cf::color_t _foreground;
 	cf::color_t _background;
+	cf::color_t _gutterForeground;
+	cf::color_t _gutterBackground;
+	cf::color_t _gutterDivider;
 	cf::color_t _selection;
 	cf::color_t _caret;
 	CTFontPtr _font;
@@ -55,14 +61,18 @@ private:
 
 	struct decomposed_style_t
 	{
-		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = 0) : scope_selector(scopeSelector), font_name(fontName), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset), absolute_font_size(fontSize) { }
+		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = -1) : scope_selector(scopeSelector), font_name(fontName), font_size(fontSize), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset) { }
 		decomposed_style_t& operator+= (decomposed_style_t const& rhs);
 
 		scope::selector_t scope_selector;
 
 		std::string font_name;
+		CGFloat font_size;
 		color_info_t foreground;
 		color_info_t background;
+		color_info_t gutterForeground;
+		color_info_t gutterBackground;
+		color_info_t gutterDivider;
 		color_info_t caret;
 		color_info_t selection;
 		color_info_t invisibles;
@@ -70,8 +80,6 @@ private:
 		bool_t italic;
 		bool_t underlined;
 		bool_t misspelled;
-
-		CGFloat absolute_font_size;
 	};
 
 	struct callback_t : bundles::callback_t

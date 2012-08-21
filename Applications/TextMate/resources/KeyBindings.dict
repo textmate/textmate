@@ -35,7 +35,7 @@
 
 	"^w"       = "selectWord:";
 	"@L"       = "selectHardLine:";
-	"@P"       = "selectParagraph:";
+	"^~p"      = "selectParagraph:";
 	"^~b"      = "selectCurrentScope:";
 
 	"^T"       = "transposeWords:";

@@ -13,38 +13,13 @@
 	if(NSImage* res = [cache objectForKey:name])
 		return res;
 
-	NSString* resourcePath = bundle.resourcePath;
-	for(NSString* resource in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:resourcePath error:nil])
+	if(NSImage* image = [[NSBundle bundleForClass:aClass] imageForResource:aName])
 	{
-		static NSSet* imageTypes = [[NSSet alloc] initWithArray:[NSImage imageFileTypes]];
-		if([aName isEqualToString:[resource stringByDeletingPathExtension]] && [imageTypes containsObject:[resource pathExtension]])
-		{
-			NSString* imagePath = [resourcePath stringByAppendingPathComponent:resource];
-			if(NSImage* image = [[[NSImage alloc] initWithContentsOfFile:imagePath] autorelease])
-			{
-				[cache setObject:image forKey:name];
-				return image;
-			}
-		}
+		[cache setObject:image forKey:name];
+		return image;
 	}
-
-	NSBeep();
-	NSLog(@"*** could not find image named ‘%@’ in %@", aName, resourcePath);
 
 	return nil;
-}
-
-+ (NSImage*)imageWithCGImage:(CGImageRef)cgImage
-{
-	NSImage* res = nil;
-	if(cgImage)
-	{
-		res = [[NSImage alloc] init];
-		NSBitmapImageRep* bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-		[res addRepresentation:bitmapRep];
-		[bitmapRep release];
-	}
-	return res;
 }
 
 // ===================================================

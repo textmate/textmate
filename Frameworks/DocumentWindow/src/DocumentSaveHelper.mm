@@ -44,7 +44,7 @@ namespace
 			D(DBF_DocumentController_SaveHelper, bug("\n"););
 			init(context);
 
-			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window delegate:_self contextInfo:NULL];
+			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window delegate:_self encoding:_document->disk_encoding() newlines:_document->disk_newlines() useBOM:_document->disk_bom()];
 		}
 
 		void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
@@ -74,12 +74,7 @@ namespace
 			{
 				// TODO transliteration / BOM check box
 				NSAlert* alert = [[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", encoding.c_str())] defaultButton:@"Retry" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose another encoding:"] retain];
-				OakEncodingPopUpButton* encodingChooser = [[[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO] autorelease];
-				[encodingChooser sizeToFit];
-				NSRect frame = [encodingChooser frame];
-				if(NSWidth(frame) > 200)
-					[encodingChooser setFrameSize:NSMakeSize(200, NSHeight(frame))];
-				[alert setAccessoryView:encodingChooser];
+				[alert setAccessoryView:[[OakEncodingPopUpButton new] autorelease]];
 				[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(encodingSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 				[[alert window] recalculateKeyViewLoop];
 			}
@@ -202,12 +197,15 @@ namespace
 // = Sheet Callbacks =
 // ===================
 
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath contextInfo:(void*)info
+- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(std::string const&)encoding newlines:(std::string const&)newlines useBOM:(BOOL)useBOM
 {
 	D(DBF_DocumentController_SaveHelper, bug("%s\n", to_s(aPath).c_str()););
 	if(aPath)
 	{
 		documents.back()->set_path(to_s(aPath));
+		documents.back()->set_disk_encoding(encoding);
+		documents.back()->set_disk_newlines(newlines);
+		documents.back()->set_disk_bom(useBOM);
 		context->set_path(to_s(aPath));
 	}
 	else

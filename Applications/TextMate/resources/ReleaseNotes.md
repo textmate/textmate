@@ -1,5 +1,41 @@
 # Release Notes
 
+## 2012-08-19
+
+* Various improvements in paragraph definition and wrapping:
+
+    - A paragraph (the input for reformat/justify and select paragraph) is now extended up and down until there are blank lines (previously only the current (hard) line was considered part of the paragraph).
+    - Paragraphs can now be selected with ⌃⌥P
+    - Reformat/justify a paragraph (⌃Q or ⌃J) no longer leave trailing whitespace after the lines.
+    - Wrap column is no longer hardcoded to 80 characters.
+    - Characters with the _East Asian Width_ (unicode) property set now count as two columns wide.
+
+* Selecting _Use Selection for Find/Replace_ with a discontinuous or column selection now use just the first range/row.
+* Go to Current Document (⌃⌘R) is now a toggle.
+* Go to SCM Status (⇧⌘Y) is now a toggle.
+* When showing SCM Status (⇧⌘Y), we no longer show folders in the _Uncommitted Changes_ if items from these are also shown. In the _Untracked Items_ we don’t show items as untracked if an ancestor folder is also included.
+* Find in Folder: Pressing ⌘1-9 will select first match of the n’th file in the results list. Previously it only selected the n’th file (and you had to use arrow down to actually get to the match).
+* Favorites prefixed with ‘[DIR]’ show folders within.
+
+	For example if you have all your projects under `~/Projects` then you can do:
+    
+	    mkdir -p ~/Library/Application\ Support/TextMate/Favorites
+	    cd ~/Library/Application\ Support/TextMate/Favorites
+	    ln -s ~/Projects "[DIR] My Projects"
+    
+	This will then have all the folders inside `~/Projects` show when you choose Open Favorites… (⇧⌘O).
+
+* When TextMate launches it creates a socket for `mate` to connect to. There have been [a few reports][1] of TextMate reporting a problem creating this socket. We now also show an error if an old socket exist and we are unable to delete this old socket. If you are seeing an issue, please don’t just add “it fails for me too”. Instead provide as much information as possible, and if e.g. it says it failed to delete the socket, fire up Terminal and check the file flags (`ls -l`) and try to delete it from Terminal.
+* Fixed: Keys on the numeric keypad can be used to trigger bundle actions (not explicitly bound to the numeric keypad). This fix removes the distinction between regular keys and the numeric keypad so it is no longer possible to bind (only) to numeric keypad keys.
+* Include high resolution (white) I-Beam cursor. *[jtbandes]*
+* Several HiDPI assets added. *[Paul Wilde]*
+* Border between text view and gutter is now “fixed” (when invoking the elastic “scroll beyond the document bounds”). *[jtbandes]*
+* Fix bundle menu items' appearance in the Help menu. *[jtbandes]*
+* Bundle Editor: If you disable an item, you can now actually enable it again. Disabled items are rendered in grey. *[Gerd Knops]*
+* Bundle Editor: Columns are now resiable. *[Elia Schito]*
+
+[1]: https://github.com/textmate/textmate/issues/183
+
 ## 2012-08-15
 
 * Minor tweak to how pasting works. Previously if you did a multiline selection and on the last line selected to the end of the line but excluded the actual newline, copy and pasted that somewhere else, it would treat it as you had also copied the newline. This is now only the case when you are pasting on a line that is not empty.
@@ -306,3 +342,5 @@ Notable changes since to TextMate 1.5.10:
 * **Foreign Input Modes**
 
 	Display of CJK and “advanced” input modes is now be supported (although only limited testing has been done).
+
+

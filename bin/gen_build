@@ -70,7 +70,9 @@ class Targets
   end
 
   def target_named(name)
-    self.find { |target| target[:name] == name }
+    res = self.find { |target| target[:name] == name }
+    return res unless res.nil?
+    abort "*** no target named ‘#{name}’. Did you update submodules?\n"
   end
 
   def each(&block)
@@ -292,7 +294,6 @@ def resources_helper(target, key, symbol)
   target[key].to_a.each do |path|
     if path =~ /^@/
       src = TARGETS.target_named($')
-      abort "*** target does not exist: ‘#{path}’.\nKnown targets:\n - #{TARGETS.map { |target| target[:name] }.join("\n - ")}\n" if src.nil?
       abort "*** no resources in target: ‘#{path}’ (from target: #{target[:name]}).\n" unless src.has_key?(:rsrc_info)
       src[:rsrc_info].each do |info|
         rsrc << { :src => info[:src], :dst => esc_path(info[:install_name]) }
@@ -517,7 +518,7 @@ def app_bundle(target)
   res << "build #{dst}.sign:  sign_executable #{dst}\n"
   res << "build #{dst}.run:   run_application #{dst} | #{dst}.sign\n"
   res << "  appname = #{target[:name]}\n"
-  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]}\n"
+  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]} | #{dst}.sign\n"
 
   res << "build #{target[:name]}:       phony #{dst}.sign\n"
   res << "build #{target[:name]}/run:   phony #{dst}.run\n"
@@ -575,12 +576,14 @@ manifest = ARGV[0]
 TARGETS = Targets.new(manifest)
 
 open(outfile, "w") do |io|
+  userfile = "#{ENV['USER']}.ninja"
   io << "###########################################\n"
   io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
   io << "###########################################\n"
   io << "\n"
   io << "builddir = #{builddir}\n"
-  io << "subninja $builddir/build.ninja\n"
+  io << "include #{userfile}\n" if File.exists?(File.join(File.dirname(outfile), userfile))
+  io << "include $builddir/build.ninja\n"
 end
 
 open("#{builddir}/build.ninja.d", "w") do |io|
@@ -628,15 +631,12 @@ open("#{builddir}/build.ninja", "w") do |io|
   # = Do a topological sort based on the dependency graph =
   # =======================================================
 
-  targets = { } # name → target
-
   dag = ''
   TARGETS.each do |target|
     target['LINK'].each { |dep| dag << "#{target[:name]}\t#{dep}\n" } unless target['LINK'].nil?
     target.each do |key, value|
       value.each { |rsrc| dag << "#{target[:name]}\t#$'\n" if rsrc =~ /^@/ } if key =~ /^CP_/
     end
-    targets[target[:name]] = target
   end
   dag = open('|/usr/bin/tsort -q', 'r+') { |tsort| tsort << dag; tsort.close_write; tsort.read }
 
@@ -645,7 +645,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   # =========================================================================
 
   dag.scan(/.+/).reverse_each do |name|
-    target = targets[name]
+    target = TARGETS.target_named(name)
 
     io << clean(target)
     io << sources(target)
@@ -755,7 +755,7 @@ rule tbz_archive
   description = Archive ‘$in’…
 
 rule upload
-  command = bin/upload $in > $out~ && mv $out~ $out
+  command = bin/upload -k$upload_keyfile -d$upload_destination $in > $out~ && mv $out~ $out
   description = Upload ‘$in’…
 
 rule deploy
