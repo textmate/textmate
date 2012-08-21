@@ -221,6 +221,14 @@ namespace document
 		std::string backup_path () const;
 		std::string display_name () const;
 
+		void set_disk_encoding (std::string const& encoding) { _disk_encoding = encoding; }
+		void set_disk_newlines (std::string const& newlines) { _disk_newlines = newlines; }
+		void set_disk_bom (bool const& bom)                  { _disk_bom = bom; }
+
+		std::string disk_encoding () const                   { return _disk_encoding; }
+		std::string disk_newlines () const                   { return _disk_newlines; }
+		bool disk_bom () const                               { return _disk_bom; }
+
 		bool recent_tracking () const         { return _recent_tracking && _path != NULL_STR; }
 		void set_recent_tracking (bool flag)  { _recent_tracking = flag; }
 
