@@ -305,6 +305,13 @@ namespace ng
 	// = Snippets =
 	// ============
 
+	bool editor_t::disallow_tab_expansion () const
+	{
+		if(!_snippets.empty() && _snippets.current() == ranges().last() && !_snippets.in_last_placeholder() || ranges().last().unanchored)
+			return true;
+		return false;
+	}
+
 	ranges_t editor_t::replace (std::multimap<range_t, std::string> const& replacements, bool selectInsertions)
 	{
 		ranges_t res = replace_helper(_buffer, _snippets, replacements);

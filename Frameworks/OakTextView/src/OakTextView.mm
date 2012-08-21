@@ -77,9 +77,6 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
 {
-	if(ranges.last().unanchored)
-		return std::vector<bundles::item_ptr>();
-
 	size_t caret = ranges.last().min().index;
 	size_t line  = buffer.convert(caret).line;
 	size_t bol   = buffer.begin(line);
@@ -437,15 +434,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		settings_t const& settings = settings_for_path();
 
-		std::string themeUUID = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsThemeUUIDKey]);
-		if(themeUUID == NULL_STR)
-			themeUUID = settings.get("theme", "71D40D9D-AE48-11D9-920A-000D93589AF6");
-
 		NSFont* defaultFont       = [NSFont userFixedPitchFontOfSize:0];
 		NSString* defaultFontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFontNameKey] ?: [defaultFont fontName];
 		CGFloat defaultFontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsFontSizeKey] ?: [defaultFont pointSize];
 
-		theme          = parse_theme(bundles::lookup(themeUUID));
 		fontName       = settings.get("fontName", to_s(defaultFontName));
 		fontSize       = settings.get("fontSize", (int32_t)defaultFontSize);
 		showInvisibles = settings.get("showInvisibles", false);
@@ -800,7 +792,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		case bundles::kItemTypeTheme:
 		{
-			[self setTheme:parse_theme(item)];
+			OakDocumentView* documentView = (OakDocumentView*)[[self enclosingScrollView] superview];
+			[documentView setThemeWithUUID:[NSString stringWithCxxString:item->uuid()]];
 		}
 		break;
 	}
@@ -1597,6 +1590,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)expandTabTrigger:(id)sender
 {
+	if(editor->disallow_tab_expansion())
+		return NO;
+
 	AUTO_REFRESH;
 	ng::range_t range;
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), editor->ranges(), document->path_attributes(), &range);

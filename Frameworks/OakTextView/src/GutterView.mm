@@ -41,6 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
+@synthesize foregroundColor, backgroundColor, selectionColor;
 
 // ==================
 // = Setup/Teardown =
@@ -95,8 +96,11 @@ struct data_source_t
 - (void)dealloc
 {
 	D(DBF_GutterView, bug("\n"););
-	self.partnerView    = nil;
-	self.lineNumberFont = nil;
+	self.partnerView     = nil;
+	self.lineNumberFont  = nil;
+	self.foregroundColor = nil;
+	self.backgroundColor = nil;
+	self.selectionColor  = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
@@ -301,9 +305,9 @@ struct data_source_t
 	[self updateWidthWithAnimation:NO];
 }
 
-static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font)
+static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
 {
-	return CTLineCreateWithAttributedString(ns::attr_string_t(font) << [NSColor grayColor] << text);
+	return CTLineCreateWithAttributedString(ns::attr_string_t(font) << (color ?: [NSColor grayColor]) << text);
 }
 
 static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)
@@ -314,12 +318,12 @@ static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)
 	return ceil(width);
 }
 
-static void DrawText (std::string const& text, CGRect const& rect, CGFloat baseline, NSFont* font)
+static void DrawText (std::string const& text, CGRect const& rect, CGFloat baseline, NSFont* font, NSColor* color)
 {
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	CGContextSaveGState(context);
 
-	CTLineRef line = CTCreateLineFromText(text, font);
+	CTLineRef line = CTCreateLineFromText(text, font, color);
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 	CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * baseline));
 	CGContextSetTextPosition(context, CGRectGetMaxX(rect) - CTLineGetTypographicBounds(line, NULL, NULL, NULL), baseline);
@@ -331,18 +335,18 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (void)drawRect:(NSRect)aRect
 {
-	[self.enclosingScrollView.backgroundColor set];
+	[self.backgroundColor set];
 	NSRectFill(NSIntersectionRect(aRect, self.frame));
 
 	[self setupSelectionRects];
 
-	[[self.enclosingScrollView.backgroundColor highlightWithLevel:0.5] set];
+	[self.selectionColor set];
 	iterate(rect, backgroundRects)
-		NSRectFill(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)));
+		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
-	[[NSColor grayColor] set];
+	[[self.foregroundColor colorWithAlphaComponent:0.75] set];
 	iterate(rect, borderRects)
-		NSRectFill(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)));
+		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
@@ -357,7 +361,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
 			if(dataSource->identifier == GVLineNumbersColumnIdentifier.UTF8String)
 			{
-				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont);
+				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, self.foregroundColor);
 			}
 			else if(record.softlineOffset == 0)
 			{

@@ -344,6 +344,11 @@ namespace snippet
 		return range + offset;
 	}
 
+	bool stack_t::in_last_placeholder () const
+	{
+		return !records.empty() && records.back().snippet.current_field == 0;
+	}
+
 	std::vector<std::string> const& stack_t::choices () const
 	{
 		static std::vector<std::string> const empty;

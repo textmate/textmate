@@ -187,6 +187,17 @@ namespace // PopulateMenu{Flat,Hierarchical}
 	return self;
 }
 
+- (id)init
+{
+	if(self = [self initWithFrame:NSZeroRect pullsDown:NO])
+	{
+		[self sizeToFit];
+		if(NSWidth([self frame]) > 200)
+			[self setFrameSize:NSMakeSize(200, NSHeight([self frame]))];
+	}
+	return self;
+}
+
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];

@@ -10,6 +10,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakPasteboard.h>
@@ -23,6 +24,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 @interface OakDocumentView ()
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
+@property (nonatomic, retain) NSColor* gutterDividerColor;
+- (void)updateStyle;
 @end
 
 // ===========================================
@@ -72,7 +75,7 @@ private:
 };
 
 @implementation OakDocumentView
-@synthesize textView, statusBar;
+@synthesize textView, statusBar, gutterDividerColor;
 
 - (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
 - (void)setShowResizeThumb:(BOOL)flag { statusBar.showResizeThumb = flag; }
@@ -111,7 +114,6 @@ private:
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
 
 		gutterScrollView = [[NSScrollView alloc] initWithFrame:gutterScrollViewFrame];
-		gutterScrollView.backgroundColor  = [NSColor colorWithCalibratedWhite:0.87 alpha:1.0];
 		gutterScrollView.borderType       = NSNoBorder;
 		gutterScrollView.autoresizingMask = NSViewHeightSizable;
 		gutterScrollView.documentView     = gutterView;
@@ -120,6 +122,14 @@ private:
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[[gutterScrollView documentView] setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+		
+		settings_t const& settings = settings_for_path();
+		
+		std::string themeUUID = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsThemeUUIDKey]);
+		if(themeUUID == NULL_STR)
+			themeUUID = settings.get("theme", "71D40D9D-AE48-11D9-920A-000D93589AF6");
+		
+		[self setThemeWithUUID:[NSString stringWithCxxString:themeUUID]];
 
 		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(aRect), OakStatusBarHeight);
 		statusBar = [[OTVStatusBar alloc] initWithFrame:statusBarFrame];
@@ -200,6 +210,7 @@ private:
 
 	[gutterScrollView release];
 	[gutterView release];
+	[gutterDividerColor release];
 	[textScrollView release];
 	[textView release];
 	[statusBar release];
@@ -237,14 +248,32 @@ private:
 	}
 
 	[textView setDocument:document];
-
-	if(aDocument)
-		[self setFont:textView.font]; // trigger update of gutter view’s line number font
+	[self updateStyle];
 
 	if(oldDocument)
 	{
 		oldDocument->hide();
 		oldDocument->close();
+	}
+}
+
+- (void)updateStyle
+{
+	if(document && [textView theme])
+	{
+		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
+		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
+		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
+		
+		gutterView.foregroundColor = [NSColor colorWithCGColor:styles.gutterForeground()];
+		gutterView.backgroundColor = [NSColor colorWithCGColor:styles.gutterBackground()];
+		gutterScrollView.backgroundColor = gutterView.backgroundColor;
+		NSColor* selColor = [NSColor colorWithCGColor:styles.selection()];
+		gutterView.selectionColor = [selColor colorWithAlphaComponent:[selColor alphaComponent] * 0.5];
+		
+		[self setNeedsDisplay:YES];
+		[textView setNeedsDisplay:YES];
+		[gutterView setNeedsDisplay:YES];
 	}
 }
 
@@ -374,7 +403,7 @@ private:
 	}
 	
 	// Draw the border between gutter and text views
-	[[NSColor grayColor] set];
+	[gutterDividerColor set];
 	NSRect gutterFrame = gutterView.frame;
 	NSRectFill(NSMakeRect(NSMaxX(gutterFrame), OakStatusBarHeight, 1, NSHeight(self.frame)-OakStatusBarHeight));
 }
@@ -562,12 +591,17 @@ private:
 
 - (IBAction)takeThemeUUIDFrom:(id)sender
 {
-	NSString* themeUUID = [sender representedObject];
-	if(bundles::item_ptr themeItem = bundles::lookup(to_s(themeUUID)))
+	[self setThemeWithUUID:[sender representedObject]];
+}
+
+- (void)setThemeWithUUID:(NSString*)themeUUID
+{
+	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
 	{
 		[[NSUserDefaults standardUserDefaults] setObject:themeUUID forKey:kUserDefaultsThemeUUIDKey];
 		[[NSUserDefaults standardUserDefaults] synchronize];
 		[textView setTheme:parse_theme(themeItem)];
+		[self updateStyle];
 	}
 }
 

@@ -115,6 +115,7 @@ namespace snippet
 
 		bool next ();
 		bool previous ();
+		bool in_last_placeholder () const;
 
 		void clear ()       { records.clear(); }
 		bool empty () const { return records.empty(); }

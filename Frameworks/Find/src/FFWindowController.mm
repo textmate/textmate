@@ -368,6 +368,13 @@ struct operation_t
 	[self updateResultsHeader];
 }
 
+- (IBAction)takeLevelToFoldFrom:(id)sender
+{
+	if(expandCollapseAllIsExpanding)
+			[self expandFindAllResults:sender];
+	else	[self collapseFindAllResults:sender];
+}
+
 - (void)windowDidLoad
 {
 	findAllResultsOutlineView.action          = @selector(didSingleClickFindAllResults:);

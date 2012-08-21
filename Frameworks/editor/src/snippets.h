@@ -21,6 +21,8 @@ namespace ng
 		void clear ()       { return stack.clear(); }
 		bool empty () const { return stack.empty(); }
 
+		bool in_last_placeholder () const { return stack.in_last_placeholder(); }
+
 	private:
 		size_t anchor;
 		snippet::stack_t stack;
