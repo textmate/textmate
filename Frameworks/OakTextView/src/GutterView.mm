@@ -41,7 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, selectionColor;
+@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor;
 
 // ==================
 // = Setup/Teardown =
@@ -100,7 +100,8 @@ struct data_source_t
 	self.lineNumberFont  = nil;
 	self.foregroundColor = nil;
 	self.backgroundColor = nil;
-	self.selectionColor  = nil;
+	self.selectionForegroundColor = nil;
+	self.selectionBackgroundColor = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
@@ -115,6 +116,7 @@ struct data_source_t
 {
 	backgroundRects.clear();
 	borderRects.clear();
+	selectedLines.clear();
 
 	citerate(range, text::selection_t(highlightedRange))
 	{
@@ -122,6 +124,12 @@ struct data_source_t
 		CGFloat firstY = [delegate lineFragmentForLine:from.line column:from.column].firstY;
 		auto fragment = [delegate lineFragmentForLine:to.line column:to.column];
 		CGFloat lastY = to.column == 0 && from.line != to.line ? fragment.firstY : fragment.lastY;
+
+		for(size_t i = from.line; i < to.line; ++i)
+			selectedLines.insert(i);
+
+		if(!(to.column == 0 && from.line != to.line))
+			selectedLines.insert(to.line);
 
 		backgroundRects.push_back(CGRectMake(0, firstY+1, self.frame.size.width, lastY - firstY - 2));
 		borderRects.push_back(CGRectMake(0, firstY, self.frame.size.width, 1));
@@ -340,7 +348,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 	[self setupSelectionRects];
 
-	[self.selectionColor set];
+	[self.selectionBackgroundColor set];
 	iterate(rect, backgroundRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
@@ -356,12 +364,17 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
+		NSColor* textColor;
+		if(selectedLines.find(record.lineNumber) != selectedLines.end())
+				textColor = self.selectionForegroundColor;
+		else	textColor = self.foregroundColor;
+
 		citerate(dataSource, [self visibleColumnDataSources])
 		{
 			NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
 			if(dataSource->identifier == GVLineNumbersColumnIdentifier.UTF8String)
 			{
-				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, self.foregroundColor);
+				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
 			}
 			else if(record.softlineOffset == 0)
 			{
