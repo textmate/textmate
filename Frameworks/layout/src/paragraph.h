@@ -69,7 +69,7 @@ namespace ng
 			void layout (CGFloat x, CGFloat tabWidth, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, std::string const& fillStr);
 			void reset_font_metrics (ct::metrics_t const& metrics);
 			void draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const;
-			void draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const;
+			void draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, bool leadingSpace, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const;
 
 			node_type_t type () const                      { return _type; }
 			size_t length () const                         { return _length; }
