@@ -529,6 +529,19 @@ def app_bundle(target)
   res
 end
 
+def upload(target)
+  res = ''
+  exe = target[:static_executable]
+  base = "#{exe}_r${APP_REVISION}"
+
+  res << "build #{exe}.sign:    sign_executable #{exe}\n"
+  res << "build #{base}.tbz:    tbz_archive #{exe} | #{exe}.sign\n"
+  res << "build #{base}.upload: upload #{base}.tbz\n"
+  res << "build #{base}.bump:   bump_revision $builddir/build.ninja | #{base}.upload\n"
+
+  res << "build #{target[:name]}/deploy: phony #{base}.bump\n"
+end
+
 def deploy(target)
   res = ''
   base = target[:bundle].sub(/\.[^.]+$/, '_r${APP_REVISION}')
@@ -658,6 +671,7 @@ open("#{builddir}/build.ninja", "w") do |io|
       io << dynamic_lib(target)
     elsif target[:type] == :executable
       io << static_executable(target)
+      io << upload(target)
     else
       io << dynamic_executable(target)
       io << app_bundle(target)
