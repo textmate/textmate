@@ -840,6 +840,7 @@ Any other string:
 {
 	int first = [findAllResultsOutlineView numberOfRows];
 	[findAllResultsOutlineView reloadData];
+	[findAllResultsOutlineView sizeLastColumnToFit];
 	int last = [findAllResultsOutlineView numberOfRows];
 	while(last-- != first)
 		[findAllResultsOutlineView expandItem:[findAllResultsOutlineView itemAtRow:last]];
