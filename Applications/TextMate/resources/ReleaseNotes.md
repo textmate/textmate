@@ -1,5 +1,20 @@
 # Release Notes
 
+## News
+
+Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
+
+## 2012-08-22
+
+* You can now ⌘-click icons in the file browser for “Show in Finder” *[Jacob Bandes-Storch]*
+* Bundle editor now remember column widths and item titles are truncated with ellipsis *[Gerd Knops]*
+* File browser now remember it’s width *[Gerd Knops]*
+* You can now also set `gutterSelectionBackground` in a theme (or as a global style) to affect gutter rendering *[David Howden]*
+* Suppress borders and disallow horizontal scroll for Find in Folder results *[Jacob Bandes-Storch]*
+* Add missing retina images *[Paul Wilde]*
+* Fix issue with gutter’s border being drawn behind incremental search (and disappearing).
+* Yesterday’s build was missing “double-click bundles and bundle items to install” functionality.
+
 ## 2012-08-21
 
 * Save dialogs now have controls for setting encoding, line endings, and whether or not to use a byte order mark (for unicode encodings).
