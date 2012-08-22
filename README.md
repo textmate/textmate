@@ -124,6 +124,35 @@ You can send pull requests via GitHub. Patches should:
 
 There is both the [textmate-dev][] mailing list and [#textmate][] IRC channel at [freenode.net][] where this project can be discussed.
 
+
+## GitHub workflow
+
+Developing patches should follow this workflow:
+
+### Initial setup
+
+1.	Fork on GitHub (click Fork button)
+2.	Clone to computer: `git clone git@github.com:YOU/textmate.git`
+3.	cd into your repo: `cd textmate`
+4.	Set up remote upstream: `git remote add upstream git://github.com/textmate/textmate.git`
+
+### Adding a feature
+
+1.	Create a branch for the new feature: `git checkout -b my_new_feature`
+2.	Work on your feature, add and commit as usual
+
+### Resync with main textmate repository
+
+4.	Fetch upstream: `git fetch upstream`
+5.	Update local master: `git checkout master; git pull upstream master`
+7.	Rebase feature branch: `git checkout my_new_feature; git rebase master`
+
+### Pushing feature branch to GitHub, request pull
+
+8.	Push branch to GitHub: `git push origin my_new_feature`
+9.	Issue pull request: Click Pull Request button on GitHub
+
+
 ## Changing a xib File
 
 When you change a `xib` file then please look at the diff before you push. If the diff seems to have a lot of changes unrelated to what actually did change, please revert back to `HEAD` and open the pristine `xib` in Xcode and save that (without changing anything).
