@@ -4,6 +4,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakStatusBar.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakFileBrowser/OakFileBrowser.h>
 
 @interface OakFileBrowserView ()
 - (void)setupViews;
@@ -94,6 +95,8 @@ OAK_DEBUG_VAR(FileBrowser_View);
 {
 	headerView.frame                      = NSMakeRect(0, NSHeight(self.frame) - OakStatusBarHeight, NSWidth(self.frame), OakStatusBarHeight);
 	outlineView.enclosingScrollView.frame = NSMakeRect(0, 0, NSWidth(self.frame), NSHeight(self.frame) - NSHeight(headerView.frame));
+	
+	[[NSUserDefaults standardUserDefaults]setInteger:NSWidth(self.frame) forKey:kUserDefaultsFileBrowserDefaultWidthKey];
 }
 
 - (BOOL)isOpaque
