@@ -272,9 +272,11 @@ static NSURL* ParentForURL (NSURL* url)
 	col = row != -1 && col == -1 ? 0 : col; // Clicking a row which participates in multi-row selection causes clickedColumn to return -1 <rdar://10382268>
 	OFBPathInfoCell* cell = (OFBPathInfoCell*)[view.outlineView preparedCellAtColumn:col row:row];
 	NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[view.outlineView frameOfCellAtColumn:col row:row] ofView:view.outlineView];
-	if((hit & OakImageAndTextCellHitImage) && !([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask))
+	if(hit & OakImageAndTextCellHitImage)
 	{
-		[self didDoubleClickOutlineView:sender];
+		if([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask)
+				[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ ((FSItem*)[view.outlineView itemAtRow:row]).url ]];
+		else	[self didDoubleClickOutlineView:sender];
 	}
 	else if(hit & OFBPathInfoCellHitCloseButton)
 	{
