@@ -13,7 +13,7 @@ namespace render
 
 	void draw_spelling_dot (CGContextRef context, CGRect const& rect)
 	{
-		static cf::image_t image("SpellingDot.tiff", "com.macromates.TextMate.OakAppKit");
+		static cf::image_t image("SpellingDot.png", "com.macromates.TextMate.OakAppKit");
 		if(!image)
 			return;
 
