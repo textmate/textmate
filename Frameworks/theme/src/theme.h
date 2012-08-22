@@ -53,7 +53,7 @@ struct PUBLIC theme_t
 		bool is_blank () const  { return red < 0; }
 		bool is_opaque () const { return alpha == 1; };
 
-		operator cf::color_t () { return cf::color_t(text::format("#%02lX%02lX%02lX%02lX", lround(255 * red), lround(255 * green), lround(255 * blue), lround(255 * alpha))); }
+		operator cf::color_t () { ASSERT(!is_opaque()); return cf::color_t(red, green, blue, alpha); }
 
 		double red, green, blue, alpha;
 	};
