@@ -338,8 +338,8 @@ static NSURL* ParentForURL (NSURL* url)
 
 - (void)showSelectedEntriesInFinder:(id)sender
 {
-	for(NSString* aPath in self.selectedPaths)
-		[[NSWorkspace sharedWorkspace] selectFile:aPath inFileViewerRootedAtPath:[aPath stringByDeletingLastPathComponent]];
+	for(FSItem* item in self.selectedItems)
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
 }
 
 - (NSString*)parentForNewFolder
