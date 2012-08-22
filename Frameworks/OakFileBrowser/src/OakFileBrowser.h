@@ -1,5 +1,7 @@
 #import <oak/debug.h>
 
+PUBLIC extern NSString* const kUserDefaultsFileBrowserWidthKey;
+
 @class OakFileBrowser;
 @class OakFileBrowserView;
 @class OakHistoryController;

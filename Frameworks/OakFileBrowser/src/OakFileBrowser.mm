@@ -30,6 +30,8 @@
 #import <text/ctype.h>
 #import <regexp/format_string.h>
 
+NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
+
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
 @interface OakFileBrowser ()
