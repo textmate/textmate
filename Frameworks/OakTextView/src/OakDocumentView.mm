@@ -264,13 +264,12 @@ private:
 		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
 		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
-		
+
 		gutterView.foregroundColor = [NSColor colorWithCGColor:styles.gutterForeground()];
 		gutterView.backgroundColor = [NSColor colorWithCGColor:styles.gutterBackground()];
 		gutterScrollView.backgroundColor = gutterView.backgroundColor;
-		NSColor* selColor = [NSColor colorWithCGColor:styles.selection()];
-		gutterView.selectionColor = [selColor colorWithAlphaComponent:[selColor alphaComponent] * 0.5];
-		
+		gutterView.selectionColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
+
 		[self setNeedsDisplay:YES];
 		[textView setNeedsDisplay:YES];
 		[gutterView setNeedsDisplay:YES];
