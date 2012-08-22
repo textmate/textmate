@@ -359,6 +359,22 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 }
 
++ (void)initialize {
+	
+	if(self!=[DocumentController class]) return;
+	
+	//  
+	// Register initial defaults
+	// 
+	NSMutableDictionary *defaults=[[NSMutableDictionary alloc]init];
+	
+	[defaults setObject:@250 forKey:kUserDefaultsFileBrowserDefaultWidthKey];
+	
+	[[NSUserDefaults standardUserDefaults]registerDefaults:defaults];
+	[defaults release];
+}
+
+
 + (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
 {
 	for(NSWindow* window in [NSApp orderedWindows])
@@ -1408,9 +1424,17 @@ static std::string file_chooser_glob (std::string const& path)
 
 			fileBrowser = [OakFileBrowser new];
 			fileBrowser.delegate = self;
-			[fileBrowser setupViewWithSize:NSMakeSize(fileBrowserWidth ?: 250, 100) resizeIndicatorOnRight:!placeOnRight state:fileBrowserState];
+			[fileBrowser
+				setupViewWithSize:NSMakeSize(fileBrowserWidth ?:
+					[[NSUserDefaults standardUserDefaults]integerForKey:kUserDefaultsFileBrowserDefaultWidthKey],
+					100
+				)
+				resizeIndicatorOnRight:!placeOnRight state:fileBrowserState
+			];
 			[self updateFileBrowserStatus:self];
 		}
+			
+			
 
 		if(fileBrowserHidden)
 		{

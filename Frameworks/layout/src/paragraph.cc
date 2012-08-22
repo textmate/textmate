@@ -187,12 +187,12 @@ namespace ng
 		}
 	}
 
-	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
+	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, bool leadingSpace, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
 	{
 		if(_line)
 			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled);
 
-		if(showInvisibles || (_type != kNodeTypeTab && _type != kNodeTypeNewline))
+		if(showInvisibles || (_type != kNodeTypeTab && _type != kNodeTypeNewline) || (leadingSpace && _type == kNodeTypeTab))
 		{
 			std::string str = NULL_STR;
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
@@ -203,8 +203,16 @@ namespace ng
 					scope = scope.append("deco.folding");
 				break;
 				case kNodeTypeTab:
-					str = "‣";
-					scope = scope.append("deco.invisible.tab");
+					if(showInvisibles)
+					{
+						str = "‣";
+						scope = scope.append("deco.invisible.tab");
+					}
+					else
+					{
+						str = "│";
+						scope = scope.append("deco.indent.guide");
+					}
 				break;
 				case kNodeTypeNewline:
 					str = "¬";
@@ -691,6 +699,7 @@ namespace ng
 	{
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 
+		bool leadingSpace = true;
 		auto lines = softlines(metrics, false);
 		for(size_t i = 0; i < lines.size(); ++i)
 		{
@@ -718,8 +727,11 @@ namespace ng
 						}
 					}
 				}
+				
+				if(node->type() != kNodeTypeTab)
+					leadingSpace = false;
 
-				node->draw_foreground(theme, fontName, fontSize, context, isFlipped, visibleRect, showInvisibles, textColor, buffer, offset, misspelled, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
+				node->draw_foreground(theme, fontName, fontSize, context, isFlipped, visibleRect, showInvisibles, leadingSpace, textColor, buffer, offset, misspelled, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
 				x += node->width();
 				offset += node->length();
 			}

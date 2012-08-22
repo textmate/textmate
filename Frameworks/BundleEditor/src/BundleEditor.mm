@@ -201,6 +201,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	bundles = be::bundle_entries();
 
 	[browser setDelegate:self];
+	[browser setDefaultColumnWidth:256];
 	[browser loadColumnZero];
 	if([browser respondsToSelector:@selector(setAutohidesScroller:)])
 		[browser setAutohidesScroller:YES];
@@ -461,7 +462,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 		[cell setAttributedStringValue:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:entry->name()] attributes:attrs] autorelease]];
 		[cell setLeaf:!entry->has_children()];
 		[cell setLoaded:YES];
-
+		
 		if(bundles::item_ptr item = entry->represented_item())
 		{
 			[cell setImage:[NSImage imageNamed:info_for(item->kind()).file inSameBundleAsClass:[self class]]];
