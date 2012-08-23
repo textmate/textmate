@@ -386,9 +386,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		settings_t const& settings = document->settings();
 
 		editor = ng::editor_for_document(document);
-		wrapColumn = settings.get("wrapColumn", wrapColumn);
-		layout.reset(new ng::layout_t(document->buffer(), theme, fontName, fontSize, settings.get("softWrap", false), wrapColumn, document->folded()));
-		if(settings.get("showWrapColumn", false))
+		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
+		layout.reset(new ng::layout_t(document->buffer(), theme, fontName, fontSize, settings.get(kSettingsSoftWrapKey, false), wrapColumn, document->folded()));
+		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
@@ -439,9 +439,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		CGFloat defaultFontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsFontSizeKey] ?: [defaultFont pointSize];
 
 		theme          = parse_theme(bundles::item_ptr()); // set a fallback theme, OakDocumentView will call setThemeWithUUID: later
-		fontName       = settings.get("fontName", to_s(defaultFontName));
-		fontSize       = settings.get("fontSize", (int32_t)defaultFontSize);
-		showInvisibles = settings.get("showInvisibles", false);
+		fontName       = settings.get(kSettingsFontNameKey, to_s(defaultFontName));
+		fontSize       = settings.get(kSettingsFontSizeKey, (int32_t)defaultFontSize);
+		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
 		[self registerForDraggedTypes:[[self class] dropTypes]];

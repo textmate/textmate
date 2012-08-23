@@ -127,7 +127,7 @@ private:
 		
 		std::string themeUUID = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsThemeUUIDKey]);
 		if(themeUUID == NULL_STR)
-			themeUUID = settings.get("theme", "71D40D9D-AE48-11D9-920A-000D93589AF6");
+			themeUUID = settings.get(kSettingsThemeKey, "71D40D9D-AE48-11D9-920A-000D93589AF6");
 		
 		[self setThemeWithUUID:[NSString stringWithCxxString:themeUUID]];
 

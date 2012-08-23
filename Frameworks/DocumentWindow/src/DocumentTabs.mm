@@ -42,7 +42,7 @@ namespace
 
 	// This is also set after open succeeds
 	settings_t const& settings = [self selectedDocument]->settings();
-	self.windowTitle      = [NSString stringWithCxxString:settings.get("windowTitle", [self selectedDocument]->display_name())];
+	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
 	self.isDocumentEdited = [self selectedDocument]->is_modified();
 
@@ -77,7 +77,7 @@ namespace
 	if(*aDocument == *[self selectedDocument])
 	{
 		settings_t const& settings = [self selectedDocument]->settings();
-		self.windowTitle      = [NSString stringWithCxxString:settings.get("windowTitle", [self selectedDocument]->display_name())];
+		self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
 		self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
 		self.isDocumentEdited = [self selectedDocument]->is_modified();
 	}
@@ -284,7 +284,7 @@ namespace
 	}
 
 	settings_t const& settings = aDocument->settings();
-	self.windowTitle      = [NSString stringWithCxxString:settings.get("windowTitle", aDocument->display_name())];
+	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, aDocument->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:aDocument->path()];
 	self.isDocumentEdited = aDocument->is_modified();
 

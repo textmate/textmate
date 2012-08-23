@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H_F99MMG5F
 #define SETTINGS_H_F99MMG5F
 
+#include "keys.h"
 #include <io/io.h>
 #include <oak/oak.h>
 #include <text/format.h>
