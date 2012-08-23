@@ -67,7 +67,7 @@ namespace filter
 	{
 		_client_key = write_server().register_client(this);
 		int newFd = dup(fd);
-		fcntl(newFd, F_SETFD, 1);
+		fcntl(newFd, F_SETFD, FD_CLOEXEC);
 		write_server().send_request(_client_key, (request_t){ newFd, bytes });
 	}
 

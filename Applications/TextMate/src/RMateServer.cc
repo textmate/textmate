@@ -136,7 +136,7 @@ namespace
 			}
 
 			socket_t fd(socket(AF_UNIX, SOCK_STREAM, 0));
-			fcntl(fd, F_SETFD, 1);
+			fcntl(fd, F_SETFD, FD_CLOEXEC);
 			struct sockaddr_un addr = { 0, AF_UNIX };
 			strcpy(addr.sun_path, _socket_path);
 			addr.sun_len = SUN_LEN(&addr);
@@ -169,7 +169,7 @@ namespace
 			socket_t fd(socket(AF_INET, SOCK_STREAM, 0));
 			setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
-			fcntl(fd, F_SETFD, 1);
+			fcntl(fd, F_SETFD, FD_CLOEXEC);
 			struct sockaddr_in iaddr = { sizeof(sockaddr_in), AF_INET, htons(_port), { htonl(_ip) } };
 			if(-1 == bind(fd, (sockaddr*)&iaddr, sizeof(iaddr)))
 				fprintf(stderr, "bind(): %s\n", strerror(errno));

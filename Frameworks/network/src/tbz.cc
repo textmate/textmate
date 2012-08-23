@@ -48,8 +48,8 @@ namespace network
 			}
 			else
 			{
-				fcntl(input  = in[1],  F_SETFD, 1);
-				fcntl(output = out[0], F_SETFD, 1);
+				fcntl(input  = in[1],  F_SETFD, FD_CLOEXEC);
+				fcntl(output = out[0], F_SETFD, FD_CLOEXEC);
 			}
 		}
 		return pid;

@@ -17,7 +17,7 @@ private:
 	{
 		WATCH_LEAKS(helper_t);
 
-		helper_t (int fd) : fd(fd) { if(fd != -1) fcntl(fd, F_SETFD, 1); }
+		helper_t (int fd) : fd(fd) { if(fd != -1) fcntl(fd, F_SETFD, FD_CLOEXEC); }
 		~helper_t ()               { if(fd != -1) close(fd); }
 		int fd;
 	};
