@@ -270,6 +270,7 @@ private:
 		gutterScrollView.backgroundColor = gutterView.backgroundColor;
 		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
 		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
+		gutterView.selectionDividerColor = [NSColor colorWithCGColor:styles.gutterSelectionDivider()];
 
 		[self setNeedsDisplay:YES];
 		[textView setNeedsDisplay:YES];
@@ -670,7 +671,7 @@ static std::string const kBookmarkType = "bookmark";
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top Hoover", "Folding Collapsed Hoover", "Folding Bottom Hoover" };
+		static retained_image_t images[] = { NULL, "Folding Top Hover", "Folding Collapsed Hover", "Folding Bottom Hover" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;
