@@ -209,12 +209,9 @@ namespace document
 	void watch_server_t::observe (watch_info_t& info, size_t client_id)
 	{
 		info.path_watched = existing_parent(info.path);
-		info.fd = open(info.path_watched.c_str(), O_EVTONLY, 0);
-		if(info.fd == -1)
+		info.fd = open(info.path_watched.c_str(), O_EVTONLY|O_CLOEXEC, 0);
+		if(info.fd == -1) // TODO we need to actually handle this error @allan
 			fprintf(stderr, "error observing path, open(\"%s\"): %s\n", info.path_watched.c_str(), strerror(errno));
-
-		// TODO we need to actually handle this error @allan
-		fcntl(info.fd, F_SETFD, 1);
 
 		struct kevent changeList;
 		struct timespec timeout = { };
