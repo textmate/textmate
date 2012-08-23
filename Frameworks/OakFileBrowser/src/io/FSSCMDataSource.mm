@@ -54,10 +54,10 @@ _Iter prune_path_children (_Iter it, _Iter last)
 {
 	_Iter out = it;
 	std::sort(it, last);
-	for(std::string parent = NULL_STR; it != last; parent = *it++)
+	for(std::string parent = NULL_STR; it != last; ++it)
 	{
 		if(it->size() <= parent.size() || it->at(parent.size()) != '/' || it->find(parent) != 0)
-			*out++ = *it;
+			*out++ = parent = *it;
 	}
 	return out;
 }

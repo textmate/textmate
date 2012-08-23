@@ -518,7 +518,7 @@ def app_bundle(target)
   res << "build #{dst}.sign:  sign_executable #{dst}\n"
   res << "build #{dst}.run:   run_application #{dst} | #{dst}.sign\n"
   res << "  appname = #{target[:name]}\n"
-  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]}\n"
+  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]} | #{dst}.sign\n"
 
   res << "build #{target[:name]}:       phony #{dst}.sign\n"
   res << "build #{target[:name]}/run:   phony #{dst}.run\n"
@@ -527,6 +527,19 @@ def app_bundle(target)
   target[:rsrc_info] = all_files
 
   res
+end
+
+def upload(target)
+  res = ''
+  exe = target[:static_executable]
+  base = "#{exe}_r${APP_REVISION}"
+
+  res << "build #{exe}.sign:    sign_executable #{exe}\n"
+  res << "build #{base}.tbz:    tbz_archive #{exe} | #{exe}.sign\n"
+  res << "build #{base}.upload: upload #{base}.tbz\n"
+  res << "build #{base}.bump:   bump_revision $builddir/build.ninja | #{base}.upload\n"
+
+  res << "build #{target[:name]}/deploy: phony #{base}.bump\n"
 end
 
 def deploy(target)
@@ -658,6 +671,7 @@ open("#{builddir}/build.ninja", "w") do |io|
       io << dynamic_lib(target)
     elsif target[:type] == :executable
       io << static_executable(target)
+      io << upload(target)
     else
       io << dynamic_executable(target)
       io << app_bundle(target)

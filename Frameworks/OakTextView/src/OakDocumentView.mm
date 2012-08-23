@@ -89,7 +89,7 @@ private:
 
 		CGFloat gutterViewWidth = 40;
 
-		NSRect textScrollViewFrame = NSMakeRect(gutterViewWidth+1, OakStatusBarHeight, NSWidth(aRect)-gutterViewWidth-1, NSHeight(aRect)-OakStatusBarHeight);
+		NSRect textScrollViewFrame = NSMakeRect(gutterViewWidth, OakStatusBarHeight, NSWidth(aRect)-gutterViewWidth, NSHeight(aRect)-OakStatusBarHeight);
 		NSSize textViewSize = [NSScrollView contentSizeForFrameSize:textScrollViewFrame.size hasHorizontalScroller:YES hasVerticalScroller:YES borderType:NSNoBorder];
 
 		textScrollView = [[NSScrollView alloc] initWithFrame:textScrollViewFrame];
@@ -104,7 +104,7 @@ private:
 
 		[self addSubview:textScrollView];
 
-		NSRect gutterScrollViewFrame = NSMakeRect(0, OakStatusBarHeight, gutterViewWidth, NSHeight(aRect)-OakStatusBarHeight);
+		NSRect gutterScrollViewFrame = NSMakeRect(0, OakStatusBarHeight, gutterViewWidth - 1, NSHeight(aRect)-OakStatusBarHeight);
 		NSSize gutterViewSize = [NSScrollView contentSizeForFrameSize:gutterScrollViewFrame.size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:NSNoBorder];
 
 		gutterView = [[GutterView alloc] initWithFrame:NSMakeRect(0, 0, gutterViewSize.width, gutterViewSize.height)];
@@ -264,13 +264,12 @@ private:
 		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
 		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
-		
+
 		gutterView.foregroundColor = [NSColor colorWithCGColor:styles.gutterForeground()];
 		gutterView.backgroundColor = [NSColor colorWithCGColor:styles.gutterBackground()];
 		gutterScrollView.backgroundColor = gutterView.backgroundColor;
-		NSColor* selColor = [NSColor colorWithCGColor:styles.selection()];
-		gutterView.selectionColor = [selColor colorWithAlphaComponent:[selColor alphaComponent] * 0.5];
-		
+		gutterView.selectionColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
+
 		[self setNeedsDisplay:YES];
 		[textView setNeedsDisplay:YES];
 		[gutterView setNeedsDisplay:YES];
@@ -333,7 +332,7 @@ private:
 
 	CGFloat totalHeight = NSHeight(self.frame);
 	CGFloat docHeight   = totalHeight - NSHeight(statusBar.frame) - topHeight - bottomHeight;
-	CGFloat gutterWidth = NSWidth(gutterScrollView.frame);
+	CGFloat gutterWidth = NSWidth(gutterScrollView.frame) + 1;
 
 	CGFloat y = NSHeight(statusBar.frame);
 	for(NSView* view in bottomAuxiliaryViews)
@@ -342,7 +341,7 @@ private:
 		y += NSHeight(view.frame);
 	}
 
-	[gutterScrollView setFrame:NSMakeRect(0, y, gutterWidth, docHeight)];
+	[gutterScrollView setFrame:NSMakeRect(0, y, gutterWidth - 1, docHeight)];
 	[textScrollView setFrame:NSMakeRect(gutterWidth, y, NSWidth(textScrollView.frame), docHeight)];
 
 	y += docHeight;
@@ -401,11 +400,11 @@ private:
 		[[NSColor grayColor] set];
 		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), NSHeight(self.frame) - height, NSWidth(aRect), 1), aRect));
 	}
-	
+
 	// Draw the border between gutter and text views
 	[gutterDividerColor set];
-	NSRect gutterFrame = gutterView.frame;
-	NSRectFill(NSMakeRect(NSMaxX(gutterFrame), OakStatusBarHeight, 1, NSHeight(self.frame)-OakStatusBarHeight));
+	NSRect gutterFrame = gutterScrollView.frame;
+	NSRectFill(NSMakeRect(NSMaxX(gutterFrame), NSMinY(gutterFrame), 1, NSHeight(gutterFrame)));
 }
 
 // ======================

@@ -438,6 +438,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		NSString* defaultFontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFontNameKey] ?: [defaultFont fontName];
 		CGFloat defaultFontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsFontSizeKey] ?: [defaultFont pointSize];
 
+		theme          = parse_theme(bundles::item_ptr()); // set a fallback theme, OakDocumentView will call setThemeWithUUID: later
 		fontName       = settings.get("fontName", to_s(defaultFontName));
 		fontSize       = settings.get("fontSize", (int32_t)defaultFontSize);
 		showInvisibles = settings.get("showInvisibles", false);

@@ -843,6 +843,7 @@ Any other string:
 	int last = [findAllResultsOutlineView numberOfRows];
 	while(last-- != first)
 		[findAllResultsOutlineView expandItem:[findAllResultsOutlineView itemAtRow:last]];
+	[findAllResultsOutlineView sizeLastColumnToFit];
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)notification
