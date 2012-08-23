@@ -7,6 +7,7 @@
 #include <oak/oak.h>
 #include <regexp/format_string.h>
 #include <regexp/glob.h>
+#include <text/tokenize.h>
 #include <oak/debug.h>
 #include <io/io.h>
 
@@ -14,6 +15,12 @@ OAK_DEBUG_VAR(Settings);
 
 namespace
 {
+	static std::string global_settings_path ()
+	{
+		static std::string const res = path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties");
+		return res;
+	}
+
 	static std::vector< std::pair<std::string, std::string> > global_variables ()
 	{
 		std::vector< std::pair<std::string, std::string> > res;
@@ -63,6 +70,7 @@ namespace
 			if(cwd == path::home())
 				break;
 		}
+		res.push_back(global_settings_path());
 		res.push_back(oak::application_t::path("Contents/Resources/Default.tmProperties"));
 		std::reverse(res.begin(), res.end());
 		return res;
@@ -188,4 +196,66 @@ std::map<std::string, std::string> variables_for_path (std::string const& path, 
 	}
 
 	return variables;
+}
+
+// ===================
+// = Saving Settings =
+// ===================
+
+void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
+{
+	ini_file_t iniFile(global_settings_path());
+	std::string content = path::content(global_settings_path());
+	if(content != NULL_STR)
+		parse_ini(content.data(), content.data() + content.size(), iniFile);
+
+	std::map<std::string, std::map<std::string, std::string>> sections;
+	iterate(section, iniFile.sections)
+	{
+		std::vector<std::string> names = section->names.empty() ? std::vector<std::string>(1, "") : section->names;
+		iterate(name, names)
+		{
+			iterate(pair, section->values)
+				sections[*name].insert(std::make_pair(pair->name, pair->value));
+		}
+	}
+
+	std::vector<std::string> sectionNames(1, "");
+	if(fileType != NULL_STR)
+	{
+		std::string sectionName = "";
+		citerate(it, text::tokenize(fileType.begin(), fileType.end(), '.'))
+		{
+			sectionName.append(*it);
+			sectionNames.push_back(sectionName);
+			sectionName.append(".");
+		}
+	}
+
+	if(path != NULL_STR)
+		sectionNames.push_back(path);
+
+	iterate(sectionName, sectionNames)
+	{
+		if(value != NULL_STR)
+				sections[*sectionName][key] = value;
+		else	sections[*sectionName].erase(key);
+	}
+
+	if(FILE* fp = fopen(global_settings_path().c_str(), "w"))
+	{
+		fprintf(fp, "# Version 1.0 -- Generated content!\n");
+		iterate(section, sections)
+		{
+			if(section->second.empty())
+				continue;
+
+			if(!section->first.empty())
+				fprintf(fp, "\n[ %s ]\n", section->first.c_str());
+
+			iterate(pair, section->second)
+				fprintf(fp, "%-16s = '%s'\n", pair->first.c_str(), pair->second.c_str());
+		}
+		fclose(fp);
+	}
 }
