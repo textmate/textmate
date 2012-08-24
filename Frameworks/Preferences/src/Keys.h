@@ -72,27 +72,11 @@ PUBLIC extern NSString* const kUserDefaultsLicenseOwnerKey;
 // ==============
 
 PUBLIC extern NSString* const kUserDefaultsWindowTitleKey;
-
-PUBLIC extern NSString* const kUserDefaultsThemeUUIDKey;
-PUBLIC extern NSString* const kUserDefaultsFontNameKey;
-PUBLIC extern NSString* const kUserDefaultsFontSizeKey;
 PUBLIC extern NSString* const kUserDefaultsAntiAliasKey;
-PUBLIC extern NSString* const kUserDefaultsShowInvisiblesKey;
-
 PUBLIC extern NSString* const kUserDefaultsLineNumbersKey;
-
-PUBLIC extern NSString* const kUserDefaultsSoftWrapKey;
-PUBLIC extern NSString* const kUserDefaultsWrapMarginKey;
-
-PUBLIC extern NSString* const kUserDefaultsTabSizeKey;
-PUBLIC extern NSString* const kUserDefaultsSoftTabsKey;
 
 // =========
 // = Other =
 // =========
 
-PUBLIC extern NSString* const kUserDefaultsSpellCheckingKey;
-PUBLIC extern NSString* const kUserDefaultsSpellingLanguageKey;
-
 PUBLIC extern NSString* const kUserDefaultsFolderSearchFollowLinksKey;
-PUBLIC extern NSString* const kUserDefaultsScopeAttributesKey;
