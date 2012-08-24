@@ -24,6 +24,12 @@ tabSize          = 2
 softTabs         = true
 tabSize          = 4
 
+[ source.makefile; Makefile ]
+softTabs         = false
+
+[ source.ninja; *.ninja ]
+softTabs         = true
+
 [ "/System/Library/Frameworks/**/Headers/**/*" ]
 encoding         = "MACROMAN"
 
