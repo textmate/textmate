@@ -23,6 +23,7 @@ std::string const kSettingsScopeAttributesKey             = "scopeAttributes";
 std::string const kSettingsBinaryKey                      = "binary";
 std::string const kSettingsEncodingKey                    = "encoding";
 std::string const kSettingsUseBOMKey                      = "useBOM";
+std::string const kSettingsLineEndingsKey                 = "lineEndings";
 std::string const kSettingsStoreEncodingPerFileKey        = "storeEncodingPerFile";
 
 std::string const kSettingsIncludeKey                     = "include";
