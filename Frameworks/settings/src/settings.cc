@@ -268,7 +268,11 @@ std::string settings_t::raw_get (std::string const& key, std::string const& sect
 void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
 {
 	std::vector<std::string> sectionNames(1, "");
-	if(fileType != NULL_STR)
+	if(fileType.find("attr.") == 0)
+	{
+		sectionNames = std::vector<std::string>(1, fileType);
+	}
+	else if(fileType != NULL_STR)
 	{
 		std::string sectionName = "";
 		citerate(it, text::tokenize(fileType.begin(), fileType.end(), '.'))
