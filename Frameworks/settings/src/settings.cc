@@ -208,6 +208,22 @@ std::map<std::string, std::string> variables_for_path (std::string const& path, 
 // = Helper Funtions for raw get/set =
 // ===================================
 
+static std::string quote_string (std::string const& src)
+{
+	if(src.find_first_of("'\n\\ ") == std::string::npos)
+		return src;
+
+	std::string res = "'";
+	for(size_t i = 0; i < src.size(); ++i)
+	{
+		if(strchr("'\n", src[i]) || i+1 != src.size() && src[i] == '\\' && strchr("\\'\n", src[i+1]))
+			res.append("\\");
+		res += src[i];
+	}
+	res.append("'");
+	return res;
+}
+
 static std::map<std::string, std::map<std::string, std::string>> read_file (std::string const& path)
 {
 	ini_file_t iniFile(path);
@@ -266,13 +282,11 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 	if(path != NULL_STR)
 		sectionNames.push_back(path);
 
+	auto sections = read_file(global_settings_path());
 	iterate(sectionName, sectionNames)
-	{
-		if(value != NULL_STR)
-				sections[*sectionName][key] = value;
-		else	sections[*sectionName].erase(key);
-	}
+		sections[*sectionName][key] = value;
 
+	auto defaults = read_file(default_settings_path());
 	if(FILE* fp = fopen(global_settings_path().c_str(), "w"))
 	{
 		fprintf(fp, "# Version 1.0 -- Generated content!\n");
@@ -284,8 +298,17 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 			if(!section->first.empty())
 				fprintf(fp, "\n[ %s ]\n", section->first.c_str());
 
+			auto defaultsSection = defaults.find(section->first);
 			iterate(pair, section->second)
-				fprintf(fp, "%-16s = '%s'\n", pair->first.c_str(), pair->second.c_str());
+			{
+				if(defaultsSection != defaults.end())
+				{
+					auto it = defaultsSection->second.find(pair->first);
+					if(it != defaultsSection->second.end() && it->second == pair->second)
+						continue;
+				}
+				fprintf(fp, "%-16s = %s\n", pair->first.c_str(), quote_string(pair->second).c_str());
+			}
 		}
 		fclose(fp);
 	}
