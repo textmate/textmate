@@ -3,6 +3,7 @@
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
+#import <settings/settings.h>
 #import <bundles/bundles.h>
 #import <ns/ns.h>
 #import <text/ctype.h>
@@ -15,13 +16,16 @@
 	{
 		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
 
-		self.defaultsProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-			kUserDefaultsDisableSessionRestoreKey,            @"disableSessionRestore",
-			kUserDefaultsDisableNewDocumentAtStartupKey,      @"disableDocumentAtStartup",
-			kUserDefaultsDisableNewDocumentAtReactivationKey, @"disableDocumentAtReactivation",
-			kUserDefaultsEncodingKey,                         @"encoding",
-			kUserDefaultsLineEndingsKey,                      @"lineEndings",
-		nil];
+		self.defaultsProperties = @{
+			@"disableSessionRestore"         : kUserDefaultsDisableSessionRestoreKey,
+			@"disableDocumentAtStartup"      : kUserDefaultsDisableNewDocumentAtStartupKey,
+			@"disableDocumentAtReactivation" : kUserDefaultsDisableNewDocumentAtReactivationKey,
+		};
+
+		self.tmProperties = @{
+			@"encoding"       : [NSString stringWithCxxString:kSettingsEncodingKey],
+			@"lineEndings"    : [NSString stringWithCxxString:kSettingsLineEndingsKey],
+		};
 	}
 	return self;
 }
@@ -57,13 +61,6 @@
 		}
 	}
 
-	encodingPopUp.encoding = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsEncodingKey];
-	[encodingPopUp addObserver:self forKeyPath:@"encoding" options:NSKeyValueObservingOptionInitial context:NULL];
-}
-
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
-{
-	if([keyPath isEqualToString:@"encoding"] && object == encodingPopUp)
-		[[NSUserDefaults standardUserDefaults] setObject:[object valueForKey:keyPath] forKey:kUserDefaultsEncodingKey];
+	[self bind:@"encoding" toObject:encodingPopUp withKeyPath:@"encoding" options:nil];
 }
 @end

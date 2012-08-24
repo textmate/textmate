@@ -26,20 +26,10 @@ static NSDictionary* default_environment ()
 
 static NSDictionary* default_settings ()
 {
-	NSString* excludeGlob = @"{*.{o,pyc},Icon\\r,CVS,_darcs,_MTN,\\{arch\\},blib,*~.nib}";
-	NSString* includeGlob = @"{.tm_properties,.htaccess}";
-	NSString* binaryGlob  = @"*.{icns,ico,jpg,jpeg,m4v,nib,pdf,png,psd,pyc,rtf,tif,tiff,xib}";
-
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 		@"3130E4FA-B10E-11D9-9F75-000D93589AF6",            kUserDefaultsNewDocumentTypeKey,
-		@"UTF-8",                                           kUserDefaultsEncodingKey,
-		NO_obj,                                             kUserDefaultsUseBOMKey,
-		@"\n",                                              kUserDefaultsLineEndingsKey,
 		YES_obj,                                            kUserDefaultsFoldersOnTopKey,
 		NO_obj,                                             kUserDefaultsShowFileExtensionsKey,
-		excludeGlob,                                        kUserDefaultsExcludePatternKey,
-		includeGlob,                                        kUserDefaultsIncludePatternKey,
-		binaryGlob,                                         kUserDefaultsBinaryPatternKey,
 		default_environment(),                              kUserDefaultsEnvironmentVariablesKey,
 		NO_obj,                                             kUserDefaultsDisableBundleUpdatesKey,
 		[NSDate distantPast],                               kUserDefaultsLastBundleUpdateCheckKey,
@@ -47,7 +37,6 @@ static NSDictionary* default_settings ()
 		kRMateServerListenLocalhost,                        kUserDefaultsRMateServerListenKey,
 		@52698,                                             kUserDefaultsRMateServerPortKey,
 		NSFullUserName(),                                   kUserDefaultsLicenseOwnerKey,
-		@"$TM_DISPLAYNAME",                                 kUserDefaultsWindowTitleKey,
 		YES_obj,                                            kUserDefaultsAntiAliasKey,
 		YES_obj,                                            kUserDefaultsLineNumbersKey,
 	nil];
@@ -73,9 +62,6 @@ NSString* const kUserDefaultsDisableNewDocumentAtStartupKey      = @"disableNewD
 NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey = @"disableNewDocumentAtReactivation";
 
 NSString* const kUserDefaultsNewDocumentTypeKey                  = @"fileType";
-NSString* const kUserDefaultsEncodingKey                         = @"encoding";
-NSString* const kUserDefaultsUseBOMKey                           = @"useBOM"; // only when encoding = UTF-8
-NSString* const kUserDefaultsLineEndingsKey                      = @"lineEndings";
 
 // ============
 // = Projects =
@@ -84,9 +70,6 @@ NSString* const kUserDefaultsLineEndingsKey                      = @"lineEndings
 NSString* const kUserDefaultsFoldersOnTopKey            = @"foldersOnTop";
 NSString* const kUserDefaultsShowFileExtensionsKey      = @"showFileExtensions";
 NSString* const kUserDefaultsInitialFileBrowserURLKey   = @"initialFileBrowserURL";
-NSString* const kUserDefaultsExcludePatternKey          = @"excludePattern";
-NSString* const kUserDefaultsIncludePatternKey          = @"includePattern";
-NSString* const kUserDefaultsBinaryPatternKey           = @"binaryPattern";
 
 // ===========
 // = Bundles =
@@ -129,7 +112,6 @@ NSString* const kUserDefaultsLicenseOwnerKey            = @"licenseOwnerName";
 // = Appearance =
 // ==============
 
-NSString* const kUserDefaultsWindowTitleKey             = @"windowTitle";
 NSString* const kUserDefaultsAntiAliasKey               = @"antiAlias";
 NSString* const kUserDefaultsLineNumbersKey             = @"lineNumbers";
 
