@@ -123,14 +123,6 @@ private:
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[[gutterScrollView documentView] setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 		
-		settings_t const& settings = settings_for_path();
-		
-		std::string themeUUID = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsThemeUUIDKey]);
-		if(themeUUID == NULL_STR)
-			themeUUID = settings.get(kSettingsThemeKey, "71D40D9D-AE48-11D9-920A-000D93589AF6");
-		
-		[self setThemeWithUUID:[NSString stringWithCxxString:themeUUID]];
-
 		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(aRect), OakStatusBarHeight);
 		statusBar = [[OTVStatusBar alloc] initWithFrame:statusBarFrame];
 		statusBar.delegate = self;
@@ -158,8 +150,8 @@ private:
 {
 	if(NSFont* newFont = [sender convertFont:textView.font])
 	{
-		[[NSUserDefaults standardUserDefaults] setObject:[newFont fontName] forKey:kUserDefaultsFontNameKey];
-		[[NSUserDefaults standardUserDefaults] setFloat:[newFont pointSize] forKey:kUserDefaultsFontSizeKey];
+		settings_t::set(kSettingsFontNameKey, to_s([newFont fontName]));
+		settings_t::set(kSettingsFontSizeKey, (size_t)[newFont pointSize]);
 		[self setFont:newFont];
 	}
 }
@@ -295,7 +287,9 @@ private:
 
 - (void)toggleContinuousSpellChecking:(id)sender
 {
-	document->buffer().set_live_spelling(!document->buffer().live_spelling());
+	bool flag = !document->buffer().live_spelling();
+	document->buffer().set_live_spelling(flag);
+	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
 }
 
 - (void)takeSpellingLanguageFrom:(id)sender
@@ -563,19 +557,24 @@ private:
 	D(DBF_OakDocumentView, bug("\n"););
 	ASSERT([sender respondsToSelector:@selector(tag)]);
 	if([sender tag] > 0)
+	{
 		textView.tabSize = [sender tag];
+		settings_t::set(kSettingsTabSizeKey, (size_t)[sender tag], document->file_type());
+	}
 }
 
 - (IBAction)setIndentWithSpaces:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	textView.softTabs = YES;
+	settings_t::set(kSettingsSoftTabsKey, true, document->file_type());
 }
 
 - (IBAction)setIndentWithTabs:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	textView.softTabs = NO;
+	settings_t::set(kSettingsSoftTabsKey, false, document->file_type());
 }
 
 - (IBAction)showTabSizeSelectorPanel:(id)sender
@@ -598,9 +597,8 @@ private:
 {
 	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
 	{
-		[[NSUserDefaults standardUserDefaults] setObject:themeUUID forKey:kUserDefaultsThemeUUIDKey];
-		[[NSUserDefaults standardUserDefaults] synchronize];
 		[textView setTheme:parse_theme(themeItem)];
+		settings_t::set(kSettingsThemeKey, to_s(themeUUID));
 		[self updateStyle];
 	}
 }

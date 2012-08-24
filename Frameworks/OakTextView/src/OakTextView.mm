@@ -40,9 +40,6 @@ OAK_DEBUG_VAR(OakTextView_Macros);
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
-NSString* const kUserDefaultsThemeUUIDKey        = @"themeUUID";
-NSString* const kUserDefaultsFontNameKey         = @"fontName";
-NSString* const kUserDefaultsFontSizeKey         = @"fontSize";
 NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 
 @interface OakTextView ()
@@ -434,13 +431,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		settings_t const& settings = settings_for_path();
 
-		NSFont* defaultFont       = [NSFont userFixedPitchFontOfSize:0];
-		NSString* defaultFontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFontNameKey] ?: [defaultFont fontName];
-		CGFloat defaultFontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsFontSizeKey] ?: [defaultFont pointSize];
-
-		theme          = parse_theme(bundles::item_ptr()); // set a fallback theme, OakDocumentView will call setThemeWithUUID: later
-		fontName       = settings.get(kSettingsFontNameKey, to_s(defaultFontName));
-		fontSize       = settings.get(kSettingsFontSizeKey, (int32_t)defaultFontSize);
+		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
+		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
+		fontSize       = settings.get(kSettingsFontSizeKey, 11);
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
@@ -1771,6 +1764,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	// 	;
 
 	wrapColumn = [sender tag];
+	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
 	if(layout)
 	{
 		AUTO_REFRESH;
@@ -1783,15 +1777,26 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (BOOL)freehandedEditing     { return NO; }
 - (BOOL)overwriteMode         { return NO; }
 
-- (IBAction)toggleShowInvisibles:(id)sender { self.showInvisibles = !self.showInvisibles; }
-- (IBAction)toggleSoftWrap:(id)sender       { self.softWrap = !self.softWrap; }
+- (IBAction)toggleShowInvisibles:(id)sender
+{
+	self.showInvisibles = !self.showInvisibles;
+	settings_t::set(kSettingsShowInvisiblesKey, (bool)self.showInvisibles, document->file_type());
+}
+
+- (IBAction)toggleSoftWrap:(id)sender
+{
+	self.softWrap = !self.softWrap;
+	settings_t::set(kSettingsSoftWrapKey, (bool)self.softWrap, document->file_type());
+}
 
 - (IBAction)toggleShowWrapColumn:(id)sender
 {
 	if(layout)
 	{
 		AUTO_REFRESH;
-		layout->set_draw_wrap_column(!layout->draw_wrap_column());
+		bool flag = !layout->draw_wrap_column();
+		layout->set_draw_wrap_column(flag);
+		settings_t::set(kSettingsShowWrapColumnKey, flag);
 	}
 }
 
