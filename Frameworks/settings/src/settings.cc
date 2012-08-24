@@ -15,6 +15,12 @@ OAK_DEBUG_VAR(Settings);
 
 namespace
 {
+	static std::string default_settings_path ()
+	{
+		static std::string const res = oak::application_t::path("Contents/Resources/Default.tmProperties");
+		return res;
+	}
+
 	static std::string global_settings_path ()
 	{
 		static std::string const res = path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties");
@@ -71,7 +77,7 @@ namespace
 				break;
 		}
 		res.push_back(global_settings_path());
-		res.push_back(oak::application_t::path("Contents/Resources/Default.tmProperties"));
+		res.push_back(default_settings_path());
 		std::reverse(res.begin(), res.end());
 		return res;
 	}
@@ -198,14 +204,14 @@ std::map<std::string, std::string> variables_for_path (std::string const& path, 
 	return variables;
 }
 
-// ===================
-// = Saving Settings =
-// ===================
+// ===================================
+// = Helper Funtions for raw get/set =
+// ===================================
 
-void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
+static std::map<std::string, std::map<std::string, std::string>> read_file (std::string const& path)
 {
-	ini_file_t iniFile(global_settings_path());
-	std::string content = path::content(global_settings_path());
+	ini_file_t iniFile(path);
+	std::string content = path::content(path);
 	if(content != NULL_STR)
 		parse_ini(content.data(), content.data() + content.size(), iniFile);
 
@@ -219,7 +225,32 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 				sections[*name].insert(std::make_pair(pair->name, pair->value));
 		}
 	}
+	return sections;
+}
 
+// ================================================
+// = Get setting without expanding format strings =
+// ================================================
+
+std::string settings_t::raw_get (std::string const& key, std::string const& section)
+{
+	auto globalSettings = read_file(global_settings_path())[section];
+	if(globalSettings.find(key) != globalSettings.end())
+		return globalSettings[key];
+
+	auto defaultSettings = read_file(default_settings_path())[section];
+	if(defaultSettings.find(key) != defaultSettings.end())
+		return defaultSettings[key];
+
+	return NULL_STR;
+}
+
+// ===================
+// = Saving Settings =
+// ===================
+
+void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
+{
 	std::vector<std::string> sectionNames(1, "");
 	if(fileType != NULL_STR)
 	{
