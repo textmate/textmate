@@ -156,7 +156,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			}
 			else
 			{
-				if ([(XCSourceFile* )member type] == Framework || [[member pathRelativeToProjectRoot] hasSuffix:@"dylib"])
+				if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]] && ([(XCSourceFile* )member type] == Framework || [[member pathRelativeToProjectRoot] hasSuffix:@"dylib"]))
 				{
 					NSArray* targets = [project targets];
 					if (![targets count])
