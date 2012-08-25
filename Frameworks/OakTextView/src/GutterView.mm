@@ -41,7 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, dividerColor, selectionForegroundColor, selectionBackgroundColor;
+@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor, selectionBorderColor, iconColor;
 
 // ==================
 // = Setup/Teardown =
@@ -100,9 +100,10 @@ struct data_source_t
 	self.lineNumberFont  = nil;
 	self.foregroundColor = nil;
 	self.backgroundColor = nil;
-	self.dividerColor    = nil;
 	self.selectionForegroundColor = nil;
 	self.selectionBackgroundColor = nil;
+	self.selectionBorderColor = nil;
+	self.iconColor = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
@@ -346,7 +347,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	iterate(rect, backgroundRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
-	[self.dividerColor set];
+	[self.selectionBorderColor set];
 	iterate(rect, borderRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
@@ -381,6 +382,10 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
 				CGFloat y = round((NSHeight(columnRect) - [image size].height) / 2);
 				CGFloat x = round((NSWidth(columnRect) - [image size].width) / 2);
+				[image lockFocus];
+				[self.iconColor set];
+				NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
+				[image unlockFocus];
 				[image drawAdjustedAtPoint:NSMakePoint(NSMinX(columnRect) + x, NSMinY(columnRect) + y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 			}
 		}
