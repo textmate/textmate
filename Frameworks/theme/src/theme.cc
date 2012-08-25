@@ -37,6 +37,7 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 	get_key_path(plist, "settings.gutterSelectionForeground", res.gutterSelectionForeground);
 	get_key_path(plist, "settings.gutterSelectionBackground", res.gutterSelectionBackground);
 	get_key_path(plist, "settings.gutterSelectionDivider",    res.gutterSelectionDivider);
+	get_key_path(plist, "settings.gutterIcons",               res.gutterIcons);
 	get_key_path(plist, "settings.caret",                     res.caret);
 	get_key_path(plist, "settings.selection",                 res.selection);
 	get_key_path(plist, "settings.invisibles",                res.invisibles);
@@ -216,11 +217,12 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 		cf::color_t gutterDivider = base.gutterDivider.is_blank()                         ? soften(foreground, 0.4 ) : base.gutterDivider;
 		cf::color_t gutterSelectionForeground = base.gutterSelectionForeground.is_blank() ? soften(foreground, 0.95) : base.gutterSelectionForeground;
 		cf::color_t gutterSelectionBackground = base.gutterSelectionBackground.is_blank() ? soften(background, 0.95) : base.gutterSelectionBackground;
-		cf::color_t gutterSelectionDivider = base.gutterSelectionDivider.is_blank()       ? soften(foreground, 0.95) : base.gutterSelectionDivider;
+		cf::color_t gutterSelectionDivider = base.gutterSelectionDivider.is_blank()       ? soften(background, 0.95) : base.gutterSelectionDivider;
+		cf::color_t gutterIcons = base.gutterIcons.is_blank()                             ? cf::color_t("#000000"  ) : base.gutterIcons;
 		cf::color_t selection  = base.selection.is_blank()                                ? cf::color_t("#4D97FF54") : base.selection;
 		cf::color_t caret      = base.caret.is_blank()                                    ? cf::color_t("#000000"  ) : base.caret;
 
-		styles_t res(foreground, background, gutterForeground, gutterBackground, gutterDivider, gutterSelectionForeground, gutterSelectionBackground, gutterSelectionDivider, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
+		styles_t res(foreground, background, gutterForeground, gutterBackground, gutterDivider, gutterSelectionForeground, gutterSelectionBackground, gutterSelectionDivider, gutterIcons, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
 		styles = _cache.insert(std::make_pair(key_t(scope, fontName, fontSize), res)).first;
 	}
 	return styles->second;
@@ -333,6 +335,7 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	alpha_blend(gutterSelectionForeground, rhs.gutterSelectionForeground);
 	alpha_blend(gutterSelectionBackground, rhs.gutterSelectionBackground);
 	alpha_blend(gutterSelectionDivider,    rhs.gutterSelectionDivider);
+	alpha_blend(gutterIcons,               rhs.gutterIcons);
 	alpha_blend(caret,                     rhs.caret);
 	alpha_blend(selection,                 rhs.selection);
 	alpha_blend(invisibles,                rhs.invisibles);
