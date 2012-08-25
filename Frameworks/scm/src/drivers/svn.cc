@@ -2,6 +2,7 @@
 #include <oak/oak.h>
 #include <text/parse.h>
 #include <text/trim.h>
+#include <text/tokenize.h>
 #include <io/io.h>
 #include <oak/debug.h>
 
@@ -54,6 +55,18 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 	}
 }
 
+static std::map<std::string, std::string> parse_info_output (std::string const& str)
+{
+	std::map<std::string, std::string> res;
+	citerate(line, text::tokenize(str.begin(), str.end(), '\n'))
+	{
+		std::string::size_type n = (*line).find(':');
+		if(n != std::string::npos)
+			res.insert(std::make_pair((*line).substr(0, n), (*line).substr(n+2)));
+	}
+	return res;
+}
+
 static void collect_all_paths (std::string const& svn, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(svn, NULL_STR);
@@ -79,10 +92,9 @@ namespace scm
 			std::map<std::string, std::string> env = oak::basic_environment();
 			env["PWD"] = wcPath;
 
-			std::string info_output = io::exec(env, executable(), "info", NULL);
-			std::vector<std::string> v = text::split(info_output, "\n");
-
-			return text::split(v[2], ": ")[1];
+			auto info = parse_info_output(io::exec(env, executable(), "info", NULL));
+			auto urlInfo = info.find("URL");
+			return urlInfo != info.end() ? urlInfo->second : NULL_STR;
 		}
 
 		status_map_t status (std::string const& wcPath) const
