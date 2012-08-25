@@ -294,8 +294,10 @@ private:
 
 - (void)takeSpellingLanguageFrom:(id)sender
 {
-	[[NSSpellChecker sharedSpellChecker] setLanguage:[sender representedObject]];
-	document->buffer().set_spelling_language(to_s((NSString*)[sender representedObject]));
+	NSString* lang = (NSString*)[sender representedObject];
+	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
+	document->buffer().set_spelling_language(to_s(lang));
+	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
