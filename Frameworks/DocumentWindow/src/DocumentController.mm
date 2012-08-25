@@ -38,6 +38,7 @@ namespace find_tags
 #import <OakFilterList/OakFilterList.h>
 #import <OakFilterList/OakFileChooser.h>
 #import <OakFilterList/SymbolChooser.h>
+#import <Preferences/Keys.h>
 #import <ns/ns.h>
 #import <plist/stl.h>
 #import <io/entries.h>
@@ -47,9 +48,6 @@ namespace find_tags
 #import <file/path_info.h>
 
 OAK_DEBUG_VAR(DocumentController);
-
-NSString* const kUserDefaultsHTMLOutputPlacementKey  = @"htmlOutputPlacement";
-NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 
 // ============================
 // = Document Binding Support =
