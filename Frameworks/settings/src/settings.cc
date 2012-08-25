@@ -16,15 +16,15 @@ OAK_DEBUG_VAR(Settings);
 
 namespace
 {
-	static std::string default_settings_path ()
+	static std::string& default_settings_path ()
 	{
-		static std::string const res = oak::application_t::path("Contents/Resources/Default.tmProperties");
+		static std::string res = NULL_STR;
 		return res;
 	}
 
-	static std::string global_settings_path ()
+	static std::string& global_settings_path ()
 	{
-		static std::string const res = path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties");
+		static std::string res = NULL_STR;
 		return res;
 	}
 
@@ -77,8 +77,10 @@ namespace
 			if(cwd == path::home())
 				break;
 		}
-		res.push_back(global_settings_path());
-		res.push_back(default_settings_path());
+		if(global_settings_path() != NULL_STR)
+			res.push_back(global_settings_path());
+		if(default_settings_path() != NULL_STR)
+			res.push_back(default_settings_path());
 		std::reverse(res.begin(), res.end());
 		return res;
 	}
@@ -185,6 +187,16 @@ namespace
 	}
 }
 
+void settings_t::set_default_settings_path (std::string const& path)
+{
+	default_settings_path() = path;
+}
+
+void settings_t::set_global_settings_path (std::string const& path)
+{
+	global_settings_path() = path;
+}
+
 settings_t settings_for_path (std::string const& path, scope::scope_t const& scope, std::string const& directory, oak::uuid_t const& uuid, std::map<std::string, std::string> variables)
 {
 	return expanded_variables_for(directory != NULL_STR ? directory : (path != NULL_STR ? path::parent(path) : path::home()), path, scope, variables);
@@ -251,6 +263,9 @@ static std::map<std::string, std::map<std::string, std::string>> read_file (std:
 
 std::string settings_t::raw_get (std::string const& key, std::string const& section)
 {
+	ASSERT_NE(default_settings_path(), NULL_STR);
+	ASSERT_NE(global_settings_path(), NULL_STR);
+
 	auto globalSettings = read_file(global_settings_path())[section];
 	if(globalSettings.find(key) != globalSettings.end())
 		return globalSettings[key];
@@ -268,6 +283,9 @@ std::string settings_t::raw_get (std::string const& key, std::string const& sect
 
 void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
 {
+	ASSERT_NE(default_settings_path(), NULL_STR);
+	ASSERT_NE(global_settings_path(), NULL_STR);
+
 	std::vector<std::string> sectionNames(fileType == NULL_STR ? 0 : 1, fileType);
 	if(fileType != NULL_STR && fileType.find("attr.") != 0)
 	{

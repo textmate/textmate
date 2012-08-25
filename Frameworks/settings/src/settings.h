@@ -38,6 +38,9 @@ struct PUBLIC settings_t
 	static void set (std::string const& key, bool flag,       std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, std::string(flag ? "true" : "false"), fileType, path); }
 	static void set (std::string const& key, char const* str, std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, std::string(str),                     fileType, path); }
 
+	static void set_default_settings_path (std::string const& path);
+	static void set_global_settings_path (std::string const& path);
+
 private:
 	std::map<std::string, std::string> settings;
 

@@ -35,6 +35,9 @@ OAK_DEBUG_VAR(AppStartup);
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
 {
 	D(DBF_AppStartup, bug("\n"););
+	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
+	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
 		NO_obj, @"ApplePressAndHoldEnabled",
 		@25,    @"NSRecentDocumentsLimit",
