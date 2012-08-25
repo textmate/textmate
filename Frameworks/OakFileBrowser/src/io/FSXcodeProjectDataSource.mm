@@ -178,6 +178,9 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 					if (!SDKRoot.length)
 						SDKRoot = [projectBuildConfiguration valueForKey:@"SDKROOT"];
 
+					if (!SDKRoot.length)
+						SDKRoot = @"macosx";
+
 					NSString* frameworkPath = [self frameworkPathForSDKRoot:SDKRoot withBasePath:_developerDirectoryPath];
 
 					frameworkPath = [frameworkPath stringByAppendingPathComponent:[member pathRelativeToProjectRoot]];
