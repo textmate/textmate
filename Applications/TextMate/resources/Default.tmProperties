@@ -1,6 +1,6 @@
 theme    = '71D40D9D-AE48-11D9-920A-000D93589AF6'
 fontName = 'Menlo-Regular'
-fontSize = 11
+fontSize = 12
 
 exclude  = "{*.{o,pyc},Icon\r,CVS,_darcs,_MTN,\{arch\},blib,*~.nib}"
 include  = "{.tm_properties,.htaccess}"
