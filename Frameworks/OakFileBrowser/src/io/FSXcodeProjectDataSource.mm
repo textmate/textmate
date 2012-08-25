@@ -66,7 +66,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	NSMutableArray* results = [NSMutableArray array];
 	for (NSString* file in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
 	{
-		if ([file hasPrefix:@"_"])
+		if ([file hasPrefix:@"_CodeSignature"])
 			continue;
 
 		NSString* workingPath = [path stringByAppendingPathComponent:file];
