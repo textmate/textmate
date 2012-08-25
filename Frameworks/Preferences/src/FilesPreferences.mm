@@ -32,7 +32,7 @@
 
 - (void)selectFileType:(NSMenuItem*)sender
 {
-	[[NSUserDefaults standardUserDefaults] setObject:[sender representedObject] forKey:kUserDefaultsNewDocumentTypeKey];
+	settings_t::set(kSettingsFileTypeKey, to_s((NSString*)[sender representedObject]), "attr.untitled");
 }
 
 - (void)loadView
@@ -48,15 +48,17 @@
 
 	if(!grammars.empty())
 	{
-		std::string const currentGrammar = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsNewDocumentTypeKey]);
+		std::string const defaultFileType = settings_t::raw_get(kSettingsFileTypeKey, "attr.untitled");
 		[documentTypesMenu removeAllItems];
 		iterate(pair, grammars)
 		{
+			std::string const& fileType = pair->second->value_for_field(bundles::kFieldGrammarScope);
+
 			NSMenuItem* item = [documentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectFileType:) keyEquivalent:@""];
-			[item setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
+			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];
 			[item setTarget:self];
 
-			if(pair->second->uuid() == currentGrammar)
+			if(fileType == defaultFileType)
 				[documentTypesPopUp selectItem:item];
 		}
 	}

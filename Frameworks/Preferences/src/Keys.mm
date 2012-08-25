@@ -27,7 +27,6 @@ static NSDictionary* default_environment ()
 static NSDictionary* default_settings ()
 {
 	return [NSDictionary dictionaryWithObjectsAndKeys:
-		@"3130E4FA-B10E-11D9-9F75-000D93589AF6",            kUserDefaultsNewDocumentTypeKey,
 		YES_obj,                                            kUserDefaultsFoldersOnTopKey,
 		NO_obj,                                             kUserDefaultsShowFileExtensionsKey,
 		default_environment(),                              kUserDefaultsEnvironmentVariablesKey,
@@ -60,8 +59,6 @@ void RegisterDefaults ()
 NSString* const kUserDefaultsDisableSessionRestoreKey            = @"disableSessionRestore";
 NSString* const kUserDefaultsDisableNewDocumentAtStartupKey      = @"disableNewDocumentAtStartup";
 NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey = @"disableNewDocumentAtReactivation";
-
-NSString* const kUserDefaultsNewDocumentTypeKey                  = @"fileType";
 
 // ============
 // = Projects =
