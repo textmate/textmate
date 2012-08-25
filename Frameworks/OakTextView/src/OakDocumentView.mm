@@ -259,6 +259,7 @@ private:
 
 		gutterView.foregroundColor = [NSColor colorWithCGColor:styles.gutterForeground()];
 		gutterView.backgroundColor = [NSColor colorWithCGColor:styles.gutterBackground()];
+		gutterView.dividerColor = [NSColor colorWithCGColor:styles.gutterDivider()];
 		gutterScrollView.backgroundColor = gutterView.backgroundColor;
 		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
 		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
