@@ -87,7 +87,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	NSMutableArray* results = [NSMutableArray array];
 	for (NSString* file in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
 	{
-		file = [[path stringByAppendingPathComponent:file] stringByResolvingSymlinksInPath];
+		file = [path stringByAppendingPathComponent:file];
 
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:file]];
 		NSDictionary* attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:file error:nil];
