@@ -42,7 +42,6 @@ struct GVLineRecord
 	NSMutableSet* hiddenColumns;
 	std::string highlightedRange;
 	std::vector<CGRect> backgroundRects, borderRects;
-	std::set<size_t> selectedLines;
 
 	NSPoint mouseDownAtPoint;
 	NSPoint mouseHoveringAtPoint;
