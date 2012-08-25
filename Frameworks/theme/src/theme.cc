@@ -256,23 +256,10 @@ static cf::color_t soften (cf::color_t color, CGFloat factor)
 	return cf::color_t(r, g, b, a);
 }
 
-static void alpha_blend (theme_t::color_info_t& lhs, theme_t::color_info_t const& rhs)
+static theme_t::color_info_t blend (theme_t::color_info_t const& lhs, theme_t::color_info_t const& rhs)
 {
-	if(rhs.is_blank())
-	{
-		return;
-	}
-	else if(rhs.is_opaque() || lhs.is_blank())
-	{
-		lhs = rhs;
-	}
-	else
-	{
-		double alpha = rhs.alpha;
-		lhs.red   = (1.0 - alpha) * lhs.red + alpha * rhs.red;
-		lhs.green = (1.0 - alpha) * lhs.green + alpha * rhs.green;
-		lhs.blue  = (1.0 - alpha) * lhs.blue + alpha * rhs.blue;
-	}
+	double a = rhs.alpha, ia = 1.0 - rhs.alpha;
+	return lhs.is_blank() ? rhs : theme_t::color_info_t(ia * lhs.red + a * rhs.red, ia * lhs.green + a * rhs.green, ia * lhs.blue + a * rhs.blue, lhs.alpha);
 }
 
 static double my_strtod (char const* str, char const** last) // problem with strtod() is that it uses LC_NUMERIC for point separator.
@@ -324,7 +311,7 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	font_size = rhs.font_size > 0 ? rhs.font_size : font_size * fabs(rhs.font_size);
 
 	foreground                = rhs.foreground.is_blank()                ? foreground                : rhs.foreground;
-	alpha_blend(background, rhs.background);
+	background                = rhs.background.is_blank()                ? background                : blend(background, rhs.background);
 	gutterForeground          = rhs.gutterForeground.is_blank()          ? gutterForeground          : rhs.gutterForeground;
 	gutterBackground          = rhs.gutterBackground.is_blank()          ? gutterBackground          : rhs.gutterBackground;
 	gutterDivider             = rhs.gutterDivider.is_blank()             ? gutterDivider             : rhs.gutterDivider;
