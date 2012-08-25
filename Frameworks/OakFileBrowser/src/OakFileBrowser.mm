@@ -276,8 +276,10 @@ static NSURL* ParentForURL (NSURL* url)
 	NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[view.outlineView frameOfCellAtColumn:col row:row] ofView:view.outlineView];
 	if(hit & OakImageAndTextCellHitImage)
 	{
-		if([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask)
-				[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ ((FSItem*)[view.outlineView itemAtRow:row]).url ]];
+		NSURL* itemURL = ((FSItem*)[view.outlineView itemAtRow:row]).url;
+		
+		if(([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask) && [itemURL isFileURL])
+			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ itemURL ]];
 		else	[self didDoubleClickOutlineView:sender];
 	}
 	else if(hit & OFBPathInfoCellHitCloseButton)
