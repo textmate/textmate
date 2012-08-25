@@ -247,11 +247,6 @@ OAK_DEBUG_VAR(OakControl);
 	}
 }
 
-- (void)rightMouseDown:(NSEvent*)theEvent
-{
-	[self mouseDown:theEvent];
-}
-
 - (void)mouseDown:(NSEvent*)event
 {
 	D(DBF_OakControl, bug("\n"););
