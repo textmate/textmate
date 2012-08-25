@@ -18,7 +18,7 @@ In the simplest case you would run:
 	git submodule update --init
 	./configure && ninja
 
-Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefor fail.
+Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefore fail.
 
 ## Prerequisites
 
