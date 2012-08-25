@@ -73,7 +73,7 @@ struct layout_metrics_t
 	double minTabSize;
 	double maxTabSize;
 
-	std::vector<layer_t> layers_for (std::string const& layer_id, CGRect const& rect = CGRectZero, int tag = 0, NSString* label = nil, NSString* toolTip = nil, uint32_t requisiteFilter = layer_t::no_requisite) const;
+	std::vector<layer_t> layers_for (std::string const& layer_id, CGRect const& rect, int tag, NSString* label = nil, NSString* toolTip = nil, uint32_t requisiteFilter = layer_t::no_requisite) const;
 	static layout_metrics_ptr parse (NSDictionary* dict);
 
 private:
@@ -411,10 +411,10 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 	D(DBF_TabBarView, bug("\n"););
 	if(!isExpanded)
-		return [self setLayout:metrics->layers_for("backgroundCollapsed", rect)];
+		return [self setLayout:metrics->layers_for("backgroundCollapsed", rect, -1)];
 
 	std::vector<layer_t> newLayout, selectedTabLayers;
-	newLayout = metrics->layers_for("background", rect);
+	newLayout = metrics->layers_for("background", rect, -1);
 
 	// ==========
 
@@ -546,6 +546,15 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	D(DBF_TabBarView, bug("\n"););
 	tag = selectedTab; // performCloseTab: asks for [sender tag]
 	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
+}
+
+- (NSMenu*)menuForEvent:(NSEvent*)anEvent
+{
+	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
+	tag = [self tagForLayerContainingPoint:pos];
+	if(tag != NSNotFound && [delegate respondsToSelector:@selector(menuForTabBarView:)])
+		return [delegate menuForTabBarView:self];
+	return [super menuForEvent:anEvent];
 }
 
 - (void)setSelectedTab:(NSUInteger)anIndex
