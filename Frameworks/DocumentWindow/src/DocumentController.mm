@@ -1147,7 +1147,7 @@ OAK_DEBUG_VAR(DocumentController);
 	[menu addItemWithTitle:@"Close Other Tabs"        action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
 	[menu addItemWithTitle:@"Close Tabs to the Right" action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
 	[menu addItem:[NSMenuItem separatorItem]];
-	[menu addItemWithTitle:@"Move tab to new Window"  action:@selector(takeTabsToTearOffFrom:) keyEquivalent:@""];
+	[menu addItemWithTitle:@"Move Tab to New Window"  action:@selector(takeTabsToTearOffFrom:) keyEquivalent:@""];
 
 	NSIndexSet* indexSets[] = { newTabAtTab, nil, clickedTab, otherTabs, rightSideTabs, nil, clickedTab };
 	for(size_t i = 0; i < sizeofA(indexSets); ++i)
