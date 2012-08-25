@@ -35,6 +35,7 @@ struct GVLineRecord
 	NSFont* lineNumberFont;
 	NSColor* foregroundColor;
 	NSColor* backgroundColor;
+	NSColor* dividerColor;
 	NSColor* selectionForegroundColor;
 	NSColor* selectionBackgroundColor;
 	id <GutterViewDelegate> delegate;
@@ -51,6 +52,7 @@ struct GVLineRecord
 @property (nonatomic, assign) id <GutterViewDelegate> delegate;
 @property (nonatomic, retain) NSColor* foregroundColor;
 @property (nonatomic, retain) NSColor* backgroundColor;
+@property (nonatomic, retain) NSColor* dividerColor;
 @property (nonatomic, retain) NSColor* selectionForegroundColor;
 @property (nonatomic, retain) NSColor* selectionBackgroundColor;
 - (void)setHighlightedRange:(std::string const&)str;

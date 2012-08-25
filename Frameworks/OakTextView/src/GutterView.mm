@@ -41,7 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor;
+@synthesize foregroundColor, backgroundColor, dividerColor, selectionForegroundColor, selectionBackgroundColor;
 
 // ==================
 // = Setup/Teardown =
@@ -100,6 +100,7 @@ struct data_source_t
 	self.lineNumberFont  = nil;
 	self.foregroundColor = nil;
 	self.backgroundColor = nil;
+	self.dividerColor    = nil;
 	self.selectionForegroundColor = nil;
 	self.selectionBackgroundColor = nil;
 	iterate(it, columnDataSources)
@@ -345,7 +346,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	iterate(rect, backgroundRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
-	[[self.foregroundColor colorWithAlphaComponent:0.75] set];
+	[self.dividerColor set];
 	iterate(rect, borderRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
