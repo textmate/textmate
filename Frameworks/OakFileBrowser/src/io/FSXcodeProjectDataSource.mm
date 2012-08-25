@@ -43,7 +43,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	if((self = [super init])) {
 		_projects = [[NSMutableDictionary alloc] init];
 
-		if ([[NSFileManager defaultManager] fileExistsAtPath:[anURL path]])
+		if ([[anURL path] existsAsPath])
 		{
 			XCProject* project = [XCProject projectWithFilePath:[anURL path]];
 
@@ -129,11 +129,11 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	for (id<XcodeGroupMember> member in [group members])
 	{
 		NSURL* itemURL = pathURLWithBaseAndRelativePath(basePath, [member pathRelativeToProjectRoot]);
-		if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])
+		if (![[itemURL path] existsAsPath])
 			itemURL = pathURLWithBaseAndRelativePath(basePath, [[group pathRelativeToProjectRoot] stringByAppendingPathComponent:[member pathRelativeToProjectRoot]]);
 		if ([[[member pathRelativeToProjectRoot] pathExtension] isEqualToString:@"xcodeproj"])
 		{
-			if ([[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])
+			if ([[itemURL path] existsAsPath])
 			{
 				XCProject* project = [XCProject projectWithFilePath:[itemURL path]];
 				[results addObject:[self itemForProject:project atURL:itemURL]];
@@ -156,7 +156,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			}
 			else
 			{
-				if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]] && ([(XCSourceFile* )member type] == Framework || [[member pathRelativeToProjectRoot] hasSuffix:@"dylib"]))
+				if (![[itemURL path] existsAsPath] && ([(XCSourceFile* )member type] == Framework || [[member pathRelativeToProjectRoot] hasSuffix:@"dylib"]))
 				{
 					NSArray* targets = [project targets];
 					if (![targets count])
