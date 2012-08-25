@@ -42,11 +42,15 @@ namespace find_tags
 - (IBAction)showPreferences:(id)sender;
 - (IBAction)showBundleEditor:(id)sender;
 
+- (IBAction)newDocumentAndActivate:(id)sender;
+- (IBAction)openDocumentAndActivate:(id)sender;
+
 - (void)setup;
 @end
 
 @interface AppController (Documents)
 - (void)newDocument:(id)sender;
+- (void)openDocument:(id)sender;
 - (BOOL)loadSession:(id)sender;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 @end

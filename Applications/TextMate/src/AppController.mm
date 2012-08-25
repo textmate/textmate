@@ -55,6 +55,18 @@ void OakOpenDocuments (NSArray* paths)
 	[NSApp setDelegate:self];
 }
 
+- (IBAction)newDocumentAndActivate:(id)sender
+{
+	[NSApp activateIgnoringOtherApps:YES];
+	[self newDocument:sender];
+}
+
+- (IBAction)openDocumentAndActivate:(id)sender
+{
+	[NSApp activateIgnoringOtherApps:YES];
+	[self openDocument:sender];
+}
+
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	D(DBF_AppController, bug("\n"););
