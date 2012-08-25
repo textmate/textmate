@@ -34,6 +34,7 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 	get_key_path(plist, "settings.gutterForeground",          res.gutterForeground);
 	get_key_path(plist, "settings.gutterBackground",          res.gutterBackground);
 	get_key_path(plist, "settings.gutterDivider",             res.gutterDivider);
+	get_key_path(plist, "settings.gutterSelectionForeground", res.gutterSelectionForeground);
 	get_key_path(plist, "settings.gutterSelectionBackground", res.gutterSelectionBackground);
 	get_key_path(plist, "settings.caret",                     res.caret);
 	get_key_path(plist, "settings.selection",                 res.selection);
@@ -212,11 +213,12 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 		cf::color_t gutterForeground = base.gutterForeground.is_blank()                   ? soften(foreground, 0.5 ) : base.gutterForeground;
 		cf::color_t gutterBackground = base.gutterBackground.is_blank()                   ? soften(background, 0.87) : base.gutterBackground;
 		cf::color_t gutterDivider = base.gutterDivider.is_blank()                         ? soften(foreground, 0.4 ) : base.gutterDivider;
+		cf::color_t gutterSelectionForeground = base.gutterSelectionForeground.is_blank() ? soften(foreground, 0.95) : base.gutterSelectionForeground;
 		cf::color_t gutterSelectionBackground = base.gutterSelectionBackground.is_blank() ? soften(background, 0.95) : base.gutterSelectionBackground;
 		cf::color_t selection  = base.selection.is_blank()                                ? cf::color_t("#4D97FF54") : base.selection;
 		cf::color_t caret      = base.caret.is_blank()                                    ? cf::color_t("#000000"  ) : base.caret;
 
-		styles_t res(foreground, background, gutterForeground, gutterBackground, gutterDivider, gutterSelectionBackground, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
+		styles_t res(foreground, background, gutterForeground, gutterBackground, gutterDivider, gutterSelectionForeground, gutterSelectionBackground, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
 		styles = _cache.insert(std::make_pair(key_t(scope, fontName, fontSize), res)).first;
 	}
 	return styles->second;
@@ -254,23 +256,10 @@ static cf::color_t soften (cf::color_t color, CGFloat factor)
 	return cf::color_t(r, g, b, a);
 }
 
-static void alpha_blend (theme_t::color_info_t& lhs, theme_t::color_info_t const& rhs)
+static theme_t::color_info_t blend (theme_t::color_info_t const& lhs, theme_t::color_info_t const& rhs)
 {
-	if(rhs.is_blank())
-	{
-		return;
-	}
-	else if(rhs.is_opaque() || lhs.is_blank())
-	{
-		lhs = rhs;
-	}
-	else
-	{
-		double alpha = rhs.alpha;
-		lhs.red   = (1.0 - alpha) * lhs.red + alpha * rhs.red;
-		lhs.green = (1.0 - alpha) * lhs.green + alpha * rhs.green;
-		lhs.blue  = (1.0 - alpha) * lhs.blue + alpha * rhs.blue;
-	}
+	double a = rhs.alpha, ia = 1.0 - rhs.alpha;
+	return lhs.is_blank() ? rhs : theme_t::color_info_t(ia * lhs.red + a * rhs.red, ia * lhs.green + a * rhs.green, ia * lhs.blue + a * rhs.blue, lhs.alpha);
 }
 
 static double my_strtod (char const* str, char const** last) // problem with strtod() is that it uses LC_NUMERIC for point separator.
@@ -321,15 +310,16 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	font_name = rhs.font_name == NULL_STR ? font_name : rhs.font_name;
 	font_size = rhs.font_size > 0 ? rhs.font_size : font_size * fabs(rhs.font_size);
 
-	alpha_blend(foreground,                rhs.foreground);
-	alpha_blend(background,                rhs.background);
-	alpha_blend(gutterForeground,          rhs.gutterForeground);
-	alpha_blend(gutterBackground,          rhs.gutterBackground);
-	alpha_blend(gutterDivider,             rhs.gutterDivider);
-	alpha_blend(gutterSelectionBackground, rhs.gutterSelectionBackground);
-	alpha_blend(caret,                     rhs.caret);
-	alpha_blend(selection,                 rhs.selection);
-	alpha_blend(invisibles,                rhs.invisibles);
+	foreground                = rhs.foreground.is_blank()                ? foreground                : rhs.foreground;
+	background                = rhs.background.is_blank()                ? background                : blend(background, rhs.background);
+	gutterForeground          = rhs.gutterForeground.is_blank()          ? gutterForeground          : rhs.gutterForeground;
+	gutterBackground          = rhs.gutterBackground.is_blank()          ? gutterBackground          : rhs.gutterBackground;
+	gutterDivider             = rhs.gutterDivider.is_blank()             ? gutterDivider             : rhs.gutterDivider;
+	gutterSelectionForeground = rhs.gutterSelectionForeground.is_blank() ? gutterSelectionForeground : rhs.gutterSelectionForeground;
+	gutterSelectionBackground = rhs.gutterSelectionBackground.is_blank() ? gutterSelectionBackground : rhs.gutterSelectionBackground;
+	caret                     = rhs.caret.is_blank()                     ? caret                     : rhs.caret;
+	selection                 = rhs.selection.is_blank()                 ? selection                 : rhs.selection;
+	invisibles                = rhs.invisibles.is_blank()                ? invisibles                : rhs.invisibles;
 
 	bold       = rhs.bold       == bool_unset ? bold       : rhs.bold;
 	italic     = rhs.italic     == bool_unset ? italic     : rhs.italic;

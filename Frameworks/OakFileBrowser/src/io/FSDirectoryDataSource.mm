@@ -91,10 +91,10 @@ namespace
 		{
 			request_t (std::string const& path = NULL_STR, NSUInteger options = 0) : _path(path), _options(options), _include_file_glob(""), _include_folder_glob(""), _exclude_file_glob(""), _exclude_folder_glob("")
 			{
-				static std::string const includeFileKeys[]   = { "includeFilesInBrowser",       "includeInBrowser", "includeFiles",       "include" };
-				static std::string const includeFolderKeys[] = { "includeDirectoriesInBrowser", "includeInBrowser", "includeDirectories", "include" };
-				static std::string const excludeFileKeys[]   = { "excludeFilesInBrowser",       "excludeInBrowser", "excludeFiles",       "exclude" };
-				static std::string const excludeFolderKeys[] = { "excludeDirectoriesInBrowser", "excludeInBrowser", "excludeDirectories", "exclude" };
+				static std::string const includeFileKeys[]   = { kSettingsIncludeFilesInBrowserKey,       kSettingsIncludeInBrowserKey, kSettingsIncludeFilesKey,       kSettingsIncludeKey };
+				static std::string const includeFolderKeys[] = { kSettingsIncludeDirectoriesInBrowserKey, kSettingsIncludeInBrowserKey, kSettingsIncludeDirectoriesKey, kSettingsIncludeKey };
+				static std::string const excludeFileKeys[]   = { kSettingsExcludeFilesInBrowserKey,       kSettingsExcludeInBrowserKey, kSettingsExcludeFilesKey,       kSettingsExcludeKey };
+				static std::string const excludeFolderKeys[] = { kSettingsExcludeDirectoriesInBrowserKey, kSettingsExcludeInBrowserKey, kSettingsExcludeDirectoriesKey, kSettingsExcludeKey };
 
 				settings_t const& settings = settings_for_path(NULL_STR, "", path);
 

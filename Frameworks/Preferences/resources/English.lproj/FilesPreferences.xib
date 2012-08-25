@@ -515,7 +515,7 @@
 							<string key="NSKeyPath">lineEndings</string>
 							<object class="NSDictionary" key="NSOptions">
 								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">OakLineEndingsTransformer</string>
+								<string key="NS.object.0">OakLineEndingsSettingsTransformer</string>
 							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>

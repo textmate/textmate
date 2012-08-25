@@ -41,7 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, selectionColor;
+@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor;
 
 // ==================
 // = Setup/Teardown =
@@ -100,7 +100,8 @@ struct data_source_t
 	self.lineNumberFont  = nil;
 	self.foregroundColor = nil;
 	self.backgroundColor = nil;
-	self.selectionColor  = nil;
+	self.selectionForegroundColor = nil;
+	self.selectionBackgroundColor = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
@@ -340,7 +341,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 	[self setupSelectionRects];
 
-	[self.selectionColor set];
+	[self.selectionBackgroundColor set];
 	iterate(rect, backgroundRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
@@ -356,12 +357,20 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
+		NSRect rowRect = NSMakeRect(0, record.firstY, CGRectGetWidth(self.frame), record.lastY - record.firstY);
+		NSColor* textColor = self.foregroundColor;
+		iterate(rect, backgroundRects)
+		{
+			if(NSIntersectsRect(*rect, rowRect))
+				textColor = self.selectionForegroundColor;
+		}
+
 		citerate(dataSource, [self visibleColumnDataSources])
 		{
 			NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
 			if(dataSource->identifier == GVLineNumbersColumnIdentifier.UTF8String)
 			{
-				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, self.foregroundColor);
+				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
 			}
 			else if(record.softlineOffset == 0)
 			{

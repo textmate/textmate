@@ -436,7 +436,7 @@ namespace
 						break;
 
 						case kEstimateEncodingStatePathSettings:
-							_encoding = settings_for_path(_path, "attr.file.unknown-encoding " + file::path_attributes(_path)).get("encoding", kCharsetUnknown);
+							_encoding = settings_for_path(_path, "attr.file.unknown-encoding " + file::path_attributes(_path)).get(kSettingsEncodingKey, kCharsetUnknown);
 						break;
 
 						case kEstimateEncodingStateAskUser:

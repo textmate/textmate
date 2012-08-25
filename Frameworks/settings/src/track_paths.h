@@ -161,7 +161,7 @@ struct track_paths_t
 private:
 	static int open_file (std::string const& path, bool* exists)
 	{
-		int fd = open(path.c_str(), O_EVTONLY/*|O_CLOEXEC*/, 0);
+		int fd = open(path.c_str(), O_EVTONLY|O_CLOEXEC, 0);
 		return fd == -1 && errno == ENOENT ? (*exists = false), open_file(path::parent(path), exists) : fd;
 	}
 

@@ -332,11 +332,11 @@ namespace
 						_select_encoding_state = kSelectEncodingStateAskUser;
 
 						settings_t const& settings = settings_for_path(_path);
-						std::string encoding = settings.get("encoding", kCharsetNoEncoding);
+						std::string encoding = settings.get(kSettingsEncodingKey, kCharsetNoEncoding);
 						if(encoding != kCharsetNoEncoding)
 						{
 							_encoding = encoding;
-							_bom      = settings.get("useBOM", false);
+							_bom      = settings.get(kSettingsUseBOMKey, false);
 						}
 						else if(_encoding == kCharsetNoEncoding)
 						{
@@ -469,7 +469,7 @@ namespace file
 	// ==============
 
 	// bool hasEncoding   = path::get_attr(path, "com.apple.TextEncoding") != NULL_STR;
-	// bool storeEncoding = dstSettings.get("storeEncodingPerFile", hasEncoding);
+	// bool storeEncoding = dstSettings.get(kSettingsStoreEncodingPerFileKey, hasEncoding);
 	// if(storeEncoding || hasEncoding)
 	// 	path::set_attr(path, "com.apple.TextEncoding", storeEncoding ? encoding : NULL_STR);
 

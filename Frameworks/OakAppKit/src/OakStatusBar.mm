@@ -334,4 +334,9 @@ static std::vector<cell_layout_t> layout (CGFloat frameWidth, std::vector<sb::ce
 
 	[self showMenu:menu inRect:rect withSelectedIndex:index font:font popup:isPopup];
 }
+
+- (void)rightMouseDown:(NSEvent*)theEvent
+{
+	[self mouseDown:theEvent];
+}
 @end

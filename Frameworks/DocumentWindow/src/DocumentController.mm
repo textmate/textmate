@@ -601,7 +601,7 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("\n"););
 	scratchDocument = oak::uuid_t();
-	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get("fileType", "text.plain"))) atIndex:documentTabs.size() andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
+	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) atIndex:documentTabs.size() andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
 }
 
 // =========================
@@ -612,7 +612,7 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("\n"););
 	scratchDocument = oak::uuid_t();
-	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get("fileType", "text.plain"))) andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
+	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
 }
 
 - (BOOL)openFile:(NSString*)aPath
@@ -651,8 +651,8 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 	}
 
 	settings_t const settings = [self selectedDocument]->settings();
-	path::glob_t const excludeGlob(settings.get("exclude", ""));
-	path::glob_t const binaryGlob(settings.get("binary", ""));
+	path::glob_t const excludeGlob(settings.get(kSettingsExcludeKey, ""));
+	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 
 	std::vector<std::string> v;
 	iterate(path, candidates)
@@ -1092,6 +1092,83 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 	[self autorelease];
 }
 
+// ========================
+// = Tab Bar Context Menu =
+// ========================
+
+- (NSIndexSet*)tryObtainIndexSetFrom:(id)sender
+{
+	id res = nil;
+	if([sender respondsToSelector:@selector(representedObject)])
+		res = [sender representedObject];
+	return [res isKindOfClass:[NSIndexSet class]] ? res : nil;
+}
+
+- (void)takeNewTabIndexFrom:(id)sender
+{
+	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
+		[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) atIndex:[indexSet firstIndex] andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
+}
+
+- (void)takeTabsToCloseFrom:(id)sender
+{
+	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
+		[self closeTabsAtIndexes:indexSet quiet:NO];
+}
+
+- (void)takeTabsToTearOffFrom:(id)sender
+{
+	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
+	{
+		std::vector<document::document_ptr> documents;
+		iterate(index, indexSet)
+			documents.push_back(*documentTabs[*index]);
+		DocumentController* delegate = [[DocumentController alloc] initWithDocuments:documents];
+		[delegate showWindow:self];
+		[self closeTabsAtIndexes:indexSet quiet:YES];
+	}
+}
+
+- (NSMenu*)menuForTabBarView:(OakTextView*)aTabBarView
+{
+	NSInteger tabIndex = aTabBarView.tag;
+
+	NSMutableIndexSet* newTabAtTab   = tabIndex == -1 ? [NSMutableIndexSet indexSetWithIndex:documentTabs.size()] : [NSMutableIndexSet indexSetWithIndex:tabIndex + 1];
+	NSMutableIndexSet* clickedTab    = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndex:tabIndex];
+	NSMutableIndexSet* otherTabs     = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, documentTabs.size())];
+	NSMutableIndexSet* rightSideTabs = tabIndex == -1 ? [NSMutableIndexSet indexSet] : [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, documentTabs.size())];
+
+	if(tabIndex != -1)
+	{
+		[otherTabs removeIndex:tabIndex];
+		[rightSideTabs removeIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, tabIndex + 1)]];
+	}
+
+	NSMenu* menu = [[NSMenu new] autorelease];
+	[menu setAutoenablesItems:NO];
+
+	[menu addItemWithTitle:@"New Tab"                 action:@selector(takeNewTabIndexFrom:)  keyEquivalent:@""];
+	[menu addItem:[NSMenuItem separatorItem]];
+	[menu addItemWithTitle:@"Close Tab"               action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
+	[menu addItemWithTitle:@"Close Other Tabs"        action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
+	[menu addItemWithTitle:@"Close Tabs to the Right" action:@selector(takeTabsToCloseFrom:)  keyEquivalent:@""];
+	[menu addItem:[NSMenuItem separatorItem]];
+	[menu addItemWithTitle:@"Move tab to new Window"  action:@selector(takeTabsToTearOffFrom:) keyEquivalent:@""];
+
+	NSIndexSet* indexSets[] = { newTabAtTab, nil, clickedTab, otherTabs, rightSideTabs, nil, clickedTab };
+	for(size_t i = 0; i < sizeofA(indexSets); ++i)
+	{
+		if(NSIndexSet* indexSet = indexSets[i])
+		{
+			if([indexSet count] == 0)
+					[[menu itemAtIndex:i] setEnabled:NO];
+			else	[[menu itemAtIndex:i] setRepresentedObject:indexSet];
+		}
+	}
+
+	return menu;
+}
+
 // ================
 // = Tab Dragging =
 // ================
@@ -1220,7 +1297,7 @@ static std::string parent_or_home (std::string const& path)
 - (NSString*)projectPath
 {
 	settings_t const& settings = documentTabs.empty() || [self selectedDocument]->path() == NULL_STR ? settings_for_path(NULL_STR, "", to_s(self.fileBrowserPath)) : [self selectedDocument]->settings();
-	return [NSString stringWithCxxString:settings.get("projectDirectory", NULL_STR)] ?: self.fileBrowserPath ?: self.documentPath;
+	return [NSString stringWithCxxString:settings.get(kSettingsProjectDirectoryKey, NULL_STR)] ?: self.fileBrowserPath ?: self.documentPath;
 }
 
 - (NSString*)fileBrowserPath
@@ -1335,7 +1412,7 @@ static std::string parent_or_home (std::string const& path)
 static std::string file_chooser_glob (std::string const& path)
 {
 	settings_t const& settings = settings_for_path(NULL_STR, "", path);
-	std::string const propertyKeys[] = { "includeFilesInFileChooser", "includeInFileChooser", "includeFiles", "include" };
+	std::string const propertyKeys[] = { kSettingsIncludeFilesInFileChooserKey, kSettingsIncludeInFileChooserKey, kSettingsIncludeFilesKey, kSettingsIncludeKey };
 	iterate(key, propertyKeys)
 	{
 		if(settings.has(*key))

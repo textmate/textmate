@@ -31,7 +31,7 @@ namespace
 	{
 		client_key = server().register_client(this);
 		int newFd = dup(fd);
-		fcntl(newFd, F_SETFD, 1);
+		fcntl(newFd, F_SETFD, FD_CLOEXEC);
 		server().send_request(client_key, (request_t){ newFd, str });
 	}
 

@@ -245,7 +245,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 				std::string excludeGlob = "";
 				if(![controller.searchIn isEqualToString:FFSearchInOpenFiles])
 				{
-					static std::string const excludeKeys[] = { "excludeInFolderSearch", "exclude" };
+					static std::string const excludeKeys[] = { kSettingsExcludeInFolderSearchKey, kSettingsExcludeKey };
 					for(size_t i = 0; i < sizeofA(excludeKeys) && excludeGlob == ""; ++i)
 						excludeGlob = settings_for_path(NULL_STR, "", to_s(controller.searchFolder)).get(excludeKeys[i], "");
 				}

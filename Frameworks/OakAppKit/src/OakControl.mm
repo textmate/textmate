@@ -126,6 +126,17 @@ OAK_DEBUG_VAR(OakControl);
 	return YES;
 }
 
+- (NSInteger)tagForLayerContainingPoint:(NSPoint)aPoint
+{
+	NSInteger res = NSNotFound;
+	iterate(it, layout)
+	{
+		if(NSMouseInRect(aPoint, it->rect, [self isFlipped]))
+			res = it->tag;
+	}
+	return res;
+}
+
 - (BOOL)shouldDelayWindowOrderingForEvent:(NSEvent*)event
 {
 	// This code is copy/paste from mouseDown: and should ideally be de-duplicated.
@@ -245,11 +256,6 @@ OAK_DEBUG_VAR(OakControl);
 			return (void)[[candidate performSelector:@selector(delegate)] performSelector:action withObject:self];
 		candidate = [candidate nextResponder];
 	}
-}
-
-- (void)rightMouseDown:(NSEvent*)theEvent
-{
-	[self mouseDown:theEvent];
 }
 
 - (void)mouseDown:(NSEvent*)event

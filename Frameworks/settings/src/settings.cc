@@ -7,6 +7,8 @@
 #include <oak/oak.h>
 #include <regexp/format_string.h>
 #include <regexp/glob.h>
+#include <text/parse.h>
+#include <text/format.h>
 #include <oak/debug.h>
 #include <io/io.h>
 
@@ -14,6 +16,18 @@ OAK_DEBUG_VAR(Settings);
 
 namespace
 {
+	static std::string default_settings_path ()
+	{
+		static std::string const res = oak::application_t::path("Contents/Resources/Default.tmProperties");
+		return res;
+	}
+
+	static std::string global_settings_path ()
+	{
+		static std::string const res = path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties");
+		return res;
+	}
+
 	static std::vector< std::pair<std::string, std::string> > global_variables ()
 	{
 		std::vector< std::pair<std::string, std::string> > res;
@@ -63,7 +77,8 @@ namespace
 			if(cwd == path::home())
 				break;
 		}
-		res.push_back(oak::application_t::path("Contents/Resources/Default.tmProperties"));
+		res.push_back(global_settings_path());
+		res.push_back(default_settings_path());
 		std::reverse(res.begin(), res.end());
 		return res;
 	}
@@ -188,4 +203,110 @@ std::map<std::string, std::string> variables_for_path (std::string const& path, 
 	}
 
 	return variables;
+}
+
+// ===================================
+// = Helper Funtions for raw get/set =
+// ===================================
+
+static std::string quote_string (std::string const& src)
+{
+	if(src.find_first_of("'\n\\ ") == std::string::npos)
+		return src;
+
+	std::string res = "'";
+	for(size_t i = 0; i < src.size(); ++i)
+	{
+		if(strchr("'\n", src[i]) || i+1 != src.size() && src[i] == '\\' && strchr("\\'\n", src[i+1]))
+			res.append("\\");
+		res += src[i];
+	}
+	res.append("'");
+	return res;
+}
+
+static std::map<std::string, std::map<std::string, std::string>> read_file (std::string const& path)
+{
+	ini_file_t iniFile(path);
+	std::string content = path::content(path);
+	if(content != NULL_STR)
+		parse_ini(content.data(), content.data() + content.size(), iniFile);
+
+	std::map<std::string, std::map<std::string, std::string>> sections;
+	iterate(section, iniFile.sections)
+	{
+		std::vector<std::string> names = section->names.empty() ? std::vector<std::string>(1, "") : section->names;
+		iterate(name, names)
+		{
+			iterate(pair, section->values)
+				sections[*name].insert(std::make_pair(pair->name, pair->value));
+		}
+	}
+	return sections;
+}
+
+// ================================================
+// = Get setting without expanding format strings =
+// ================================================
+
+std::string settings_t::raw_get (std::string const& key, std::string const& section)
+{
+	auto globalSettings = read_file(global_settings_path())[section];
+	if(globalSettings.find(key) != globalSettings.end())
+		return globalSettings[key];
+
+	auto defaultSettings = read_file(default_settings_path())[section];
+	if(defaultSettings.find(key) != defaultSettings.end())
+		return defaultSettings[key];
+
+	return NULL_STR;
+}
+
+// ===================
+// = Saving Settings =
+// ===================
+
+void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
+{
+	std::vector<std::string> sectionNames(fileType == NULL_STR ? 0 : 1, fileType);
+	if(fileType != NULL_STR && fileType.find("attr.") != 0)
+	{
+		std::vector<std::string> parts = text::split(fileType, ".");
+		for(size_t i = 0; i < parts.size(); ++i)
+			sectionNames.push_back(text::join(std::vector<std::string>(parts.begin(), parts.begin() + i), "."));
+	}
+
+	if(path != NULL_STR)
+		sectionNames.push_back(path);
+
+	auto sections = read_file(global_settings_path());
+	iterate(sectionName, sectionNames)
+		sections[*sectionName][key] = value;
+
+	auto defaults = read_file(default_settings_path());
+	if(FILE* fp = fopen(global_settings_path().c_str(), "w"))
+	{
+		fprintf(fp, "# Version 1.0 -- Generated content!\n");
+		iterate(section, sections)
+		{
+			if(section->second.empty())
+				continue;
+
+			if(!section->first.empty())
+				fprintf(fp, "\n[ %s ]\n", quote_string(section->first).c_str());
+
+			auto defaultsSection = defaults.find(section->first);
+			iterate(pair, section->second)
+			{
+				if(defaultsSection != defaults.end())
+				{
+					auto it = defaultsSection->second.find(pair->first);
+					if(it != defaultsSection->second.end() && it->second == pair->second)
+						continue;
+				}
+				fprintf(fp, "%-16s = %s\n", pair->first.c_str(), quote_string(pair->second).c_str());
+			}
+		}
+		fclose(fp);
+	}
 }

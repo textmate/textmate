@@ -485,10 +485,10 @@ namespace document
 			return false;
 
 		settings_t const& settings = settings_for_path(path);
-		if(settings.has("binary"))
+		if(settings.has(kSettingsBinaryKey))
 		{
-			D(DBF_Document_Binary, bug(".tm_properties reports it as binary: %s\n", BSTR(path::glob_t(settings.get("binary", "")).does_match(path))););
-			return path::glob_t(settings.get("binary", "")).does_match(path);
+			D(DBF_Document_Binary, bug(".tm_properties reports it as binary: %s\n", BSTR(path::glob_t(settings.get(kSettingsBinaryKey, "")).does_match(path))););
+			return path::glob_t(settings.get(kSettingsBinaryKey, "")).does_match(path);
 		}
 
 		return false;
@@ -546,9 +546,9 @@ namespace document
 		}
 
 		settings_t const& settings = this->settings();
-		_buffer->indent() = text::indent_t(settings.get("tabSize", 4), SIZE_T_MAX, settings.get("softTabs", false));
-		_buffer->set_spelling_language(settings.get("spellingLanguage", "en"));
-		_buffer->set_live_spelling(settings.get("spellChecking", false));
+		_buffer->indent() = text::indent_t(settings.get(kSettingsTabSizeKey, 4), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false));
+		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, "en"));
+		_buffer->set_live_spelling(settings.get(kSettingsSpellCheckingKey, false));
 
 		const_cast<document_t*>(this)->broadcast(callback_t::did_change_indent_settings);
 
