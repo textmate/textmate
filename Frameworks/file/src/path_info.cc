@@ -144,7 +144,7 @@ namespace file
 			}
 		}
 
-		res.push_back(settings_for_path(path, text::join(res, " ")).get("scopeAttributes", ""));
+		res.push_back(settings_for_path(path, text::join(res, " ")).get(kSettingsScopeAttributesKey, ""));
 		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
 		return text::join(res, " ");
 	}

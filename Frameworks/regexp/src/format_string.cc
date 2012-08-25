@@ -296,6 +296,32 @@ namespace format_string
 		return format_string_t(format).expand(variables);
 	}
 
+	std::string escape (std::string const& format)
+	{
+		std::string res = "";
+		for(size_t i = 0; i < format.size(); ++i)
+		{
+			switch(format[i])
+			{
+				case '\t': res.append("\\t"); break;
+				case '\r': res.append("\\r"); break;
+				case '\n': res.append("\\n"); break;
+
+				case '$': case '(': case '\\':
+				{
+					if(format[i] != '\\' || i+1 != format.size() && strchr("\\$(trn", format[i+1]))
+						res.append("\\");
+				}
+				/* continue */
+
+				default:
+					res += format[i];
+				break;
+			}
+		}
+		return res;
+	}
+
 } /* format_string */
 
 namespace snippet

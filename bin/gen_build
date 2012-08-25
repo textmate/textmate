@@ -620,6 +620,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
   io << "  depfile = $builddir/$out.d\n"
   io << "  generator = 1\n"
+  io << "  description = Generate ‘$out’…\n"
   io << "\n"
   io << "build build.ninja: configure #{manifest} | bin/gen_build\n"
   io << "\n"

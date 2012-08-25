@@ -10,8 +10,8 @@ namespace io
 		write_pipe = pipes[1];
 		if(close_on_exec)
 		{
-			fcntl(pipes[0], F_SETFD, 1);
-			fcntl(pipes[1], F_SETFD, 1);
+			fcntl(pipes[0], F_SETFD, FD_CLOEXEC);
+			fcntl(pipes[1], F_SETFD, FD_CLOEXEC);
 		}
 	}
 

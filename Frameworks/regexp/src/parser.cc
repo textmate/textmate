@@ -162,6 +162,10 @@ bool parse_context_t::parse_variable (bool(parse_context_t::*parse_content)(char
 									res.change |= options[i].change;
 							}
 						}
+						else
+						{
+							break;
+						}
 					}
 
 					if(it[-1] == '}')

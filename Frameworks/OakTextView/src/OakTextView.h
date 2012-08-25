@@ -7,9 +7,6 @@
 
 extern int32_t const NSWrapColumnWindowWidth;
 extern int32_t const NSWrapColumnAskUser;
-extern NSString* const kUserDefaultsThemeUUIDKey;
-extern NSString* const kUserDefaultsFontNameKey;
-extern NSString* const kUserDefaultsFontSizeKey;
 extern NSString* const kUserDefaultsDisableAntiAliasKey;
 
 namespace bundles { struct item_t; typedef std::tr1::shared_ptr<item_t> item_ptr; }

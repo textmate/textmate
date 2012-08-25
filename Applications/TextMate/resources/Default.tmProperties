@@ -1,10 +1,17 @@
-exclude = "{*.{o,pyc},Icon\r,CVS,_darcs,_MTN,\{arch\},blib,*~.nib}"
-include = "{.tm_properties,.htaccess}"
-binary  = "{*.{icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,tif,tiff,xib},Icon\r}"
+theme    = '71D40D9D-AE48-11D9-920A-000D93589AF6'
+fontName = 'Menlo-Regular'
+fontSize = 11
+
+exclude  = "{*.{o,pyc},Icon\r,CVS,_darcs,_MTN,\{arch\},blib,*~.nib}"
+include  = "{.tm_properties,.htaccess}"
+binary   = "{*.{icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,tif,tiff,xib},Icon\r}"
 
 LANG        = "en_US.UTF-8"
 LC_CTYPE    = "en_US.UTF-8"
 TM_APP_PATH = "${CWD/\/Contents\/Resources$//}"
+
+[ attr.untitled ]
+fileType         = text.plain
 
 [ "/usr/include/{**/,}*" ]
 tabSize          = 8
@@ -23,6 +30,12 @@ tabSize          = 2
 [ source.python ]
 softTabs         = true
 tabSize          = 4
+
+[ source.makefile; Makefile ]
+softTabs         = false
+
+[ source.ninja; *.ninja ]
+softTabs         = true
 
 [ "/System/Library/Frameworks/**/Headers/**/*" ]
 encoding         = "MACROMAN"

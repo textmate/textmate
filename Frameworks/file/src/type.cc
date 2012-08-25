@@ -136,7 +136,7 @@ static std::string file_type_from_bytes (io::bytes_ptr const& bytes)
 static std::string find_file_type (std::string const& path, io::bytes_ptr const& bytes, std::string const& virtualPath = NULL_STR)
 {
 	// FIXME we need to use “current” folder when getting (fileType) settings
-	std::string res = settings_for_path(path, file::path_attributes(path)).get("fileType", NULL_STR);
+	std::string res = settings_for_path(path, file::path_attributes(path)).get(kSettingsFileTypeKey, NULL_STR);
 
 	if(res == NULL_STR && (virtualPath != NULL_STR || path != NULL_STR))
 		res = user_bindings().grammar_for(virtualPath != NULL_STR ? virtualPath : path);
@@ -148,7 +148,7 @@ static std::string find_file_type (std::string const& path, io::bytes_ptr const&
 		res = file_type_from_path(virtualPath != NULL_STR ? virtualPath : path);
 
 	if(res == NULL_STR)
-		res = settings_for_path(path, "attr.file.unknown-type " + file::path_attributes(path)).get("fileType", NULL_STR);
+		res = settings_for_path(path, "attr.file.unknown-type " + file::path_attributes(path)).get(kSettingsFileTypeKey, NULL_STR);
 
 	return res;
 }

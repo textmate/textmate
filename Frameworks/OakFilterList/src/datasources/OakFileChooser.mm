@@ -177,7 +177,7 @@ void file_chooser_t::set_path (std::string const& path)
 	_ranked_items.clear();
 
 	std::string excludeGlob = "";
-	static std::string const excludeKeys[] = { "excludeInFileChooser", "exclude" };
+	static std::string const excludeKeys[] = { kSettingsExcludeInFileChooserKey, kSettingsExcludeKey };
 	for(size_t i = 0; i < sizeofA(excludeKeys) && excludeGlob == ""; ++i)
 		excludeGlob = settings_for_path(NULL_STR, "", path).get(excludeKeys[i], "");
 

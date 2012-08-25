@@ -601,7 +601,7 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("\n"););
 	scratchDocument = oak::uuid_t();
-	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get("fileType", "text.plain"))) atIndex:documentTabs.size() andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
+	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) atIndex:documentTabs.size() andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
 }
 
 // =========================
@@ -612,7 +612,7 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 {
 	D(DBF_DocumentController, bug("\n"););
 	scratchDocument = oak::uuid_t();
-	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get("fileType", "text.plain"))) andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
+	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
 }
 
 - (BOOL)openFile:(NSString*)aPath
@@ -651,8 +651,8 @@ NSString* const kUserDefaultsFileBrowserPlacementKey = @"fileBrowserPlacement";
 	}
 
 	settings_t const settings = [self selectedDocument]->settings();
-	path::glob_t const excludeGlob(settings.get("exclude", ""));
-	path::glob_t const binaryGlob(settings.get("binary", ""));
+	path::glob_t const excludeGlob(settings.get(kSettingsExcludeKey, ""));
+	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 
 	std::vector<std::string> v;
 	iterate(path, candidates)
@@ -1220,7 +1220,7 @@ static std::string parent_or_home (std::string const& path)
 - (NSString*)projectPath
 {
 	settings_t const& settings = documentTabs.empty() || [self selectedDocument]->path() == NULL_STR ? settings_for_path(NULL_STR, "", to_s(self.fileBrowserPath)) : [self selectedDocument]->settings();
-	return [NSString stringWithCxxString:settings.get("projectDirectory", NULL_STR)] ?: self.fileBrowserPath ?: self.documentPath;
+	return [NSString stringWithCxxString:settings.get(kSettingsProjectDirectoryKey, NULL_STR)] ?: self.fileBrowserPath ?: self.documentPath;
 }
 
 - (NSString*)fileBrowserPath
@@ -1335,7 +1335,7 @@ static std::string parent_or_home (std::string const& path)
 static std::string file_chooser_glob (std::string const& path)
 {
 	settings_t const& settings = settings_for_path(NULL_STR, "", path);
-	std::string const propertyKeys[] = { "includeFilesInFileChooser", "includeInFileChooser", "includeFiles", "include" };
+	std::string const propertyKeys[] = { kSettingsIncludeFilesInFileChooserKey, kSettingsIncludeInFileChooserKey, kSettingsIncludeFilesKey, kSettingsIncludeKey };
 	iterate(key, propertyKeys)
 	{
 		if(settings.has(*key))
