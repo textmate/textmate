@@ -300,7 +300,7 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 				continue;
 
 			if(!section->first.empty())
-				fprintf(fp, "\n[ %s ]\n", section->first.c_str());
+				fprintf(fp, "\n[ %s ]\n", quote_string(section->first).c_str());
 
 			auto defaultsSection = defaults.find(section->first);
 			iterate(pair, section->second)
