@@ -7,7 +7,8 @@
 #include <oak/oak.h>
 #include <regexp/format_string.h>
 #include <regexp/glob.h>
-#include <text/tokenize.h>
+#include <text/parse.h>
+#include <text/format.h>
 #include <oak/debug.h>
 #include <io/io.h>
 
@@ -267,20 +268,12 @@ std::string settings_t::raw_get (std::string const& key, std::string const& sect
 
 void settings_t::set (std::string const& key, std::string const& value, std::string const& fileType, std::string const& path)
 {
-	std::vector<std::string> sectionNames(1, "");
-	if(fileType.find("attr.") == 0)
+	std::vector<std::string> sectionNames(fileType == NULL_STR ? 0 : 1, fileType);
+	if(fileType != NULL_STR && fileType.find("attr.") != 0)
 	{
-		sectionNames = std::vector<std::string>(1, fileType);
-	}
-	else if(fileType != NULL_STR)
-	{
-		std::string sectionName = "";
-		citerate(it, text::tokenize(fileType.begin(), fileType.end(), '.'))
-		{
-			sectionName.append(*it);
-			sectionNames.push_back(sectionName);
-			sectionName.append(".");
-		}
+		std::vector<std::string> parts = text::split(fileType, ".");
+		for(size_t i = 0; i < parts.size(); ++i)
+			sectionNames.push_back(text::join(std::vector<std::string>(parts.begin(), parts.begin() + i), "."));
 	}
 
 	if(path != NULL_STR)
