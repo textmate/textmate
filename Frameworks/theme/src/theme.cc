@@ -323,16 +323,16 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	font_name = rhs.font_name == NULL_STR ? font_name : rhs.font_name;
 	font_size = rhs.font_size > 0 ? rhs.font_size : font_size * fabs(rhs.font_size);
 
-	alpha_blend(foreground,                rhs.foreground);
-	alpha_blend(background,                rhs.background);
-	alpha_blend(gutterForeground,          rhs.gutterForeground);
-	alpha_blend(gutterBackground,          rhs.gutterBackground);
-	alpha_blend(gutterDivider,             rhs.gutterDivider);
-	alpha_blend(gutterSelectionForeground, rhs.gutterSelectionForeground);
-	alpha_blend(gutterSelectionBackground, rhs.gutterSelectionBackground);
-	alpha_blend(caret,                     rhs.caret);
-	alpha_blend(selection,                 rhs.selection);
-	alpha_blend(invisibles,                rhs.invisibles);
+	foreground                = rhs.foreground.is_blank()                ? foreground                : rhs.foreground;
+	alpha_blend(background, rhs.background);
+	gutterForeground          = rhs.gutterForeground.is_blank()          ? gutterForeground          : rhs.gutterForeground;
+	gutterBackground          = rhs.gutterBackground.is_blank()          ? gutterBackground          : rhs.gutterBackground;
+	gutterDivider             = rhs.gutterDivider.is_blank()             ? gutterDivider             : rhs.gutterDivider;
+	gutterSelectionForeground = rhs.gutterSelectionForeground.is_blank() ? gutterSelectionForeground : rhs.gutterSelectionForeground;
+	gutterSelectionBackground = rhs.gutterSelectionBackground.is_blank() ? gutterSelectionBackground : rhs.gutterSelectionBackground;
+	caret                     = rhs.caret.is_blank()                     ? caret                     : rhs.caret;
+	selection                 = rhs.selection.is_blank()                 ? selection                 : rhs.selection;
+	invisibles                = rhs.invisibles.is_blank()                ? invisibles                : rhs.invisibles;
 
 	bold       = rhs.bold       == bool_unset ? bold       : rhs.bold;
 	italic     = rhs.italic     == bool_unset ? italic     : rhs.italic;
