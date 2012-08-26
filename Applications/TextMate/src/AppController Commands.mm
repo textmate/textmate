@@ -22,16 +22,7 @@ static CGPoint MenuPosition ()
 	NSPoint pos = [NSEvent mouseLocation];
 	pos.y -= 16;
 
-	NSRect mainScreen = [[NSScreen mainScreen] frame];
-	for(NSScreen* candidate in [NSScreen screens])
-	{
-		if(NSMinX([candidate frame]) == 0 && NSMinY([candidate frame]) == 0)
-			mainScreen = [candidate frame];
-	}
-
-	CGFloat top = round(NSMaxY(mainScreen) - pos.y);
-	CGFloat left = round(pos.x - NSMinX(mainScreen));
-	return CGPointMake(top, left);
+	return NSPointToCGPoint(pos);
 }
 
 @implementation AppController (Commands)
