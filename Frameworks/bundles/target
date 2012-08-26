@@ -1,4 +1,4 @@
-SOURCES      = src/**/*.cc
+SOURCES      = src/**/*.{cc,mm}
 TEST_SOURCES = tests/*.cc
 LINK        += text cf io plist OakSystem regexp scope
 FRAMEWORKS   = CoreFoundation Carbon
