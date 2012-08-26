@@ -57,6 +57,13 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	return self;
 }
 
+- (void) dealloc {
+	[_projects release];
+	[_developerDirectoryPath release];
+
+	[super dealloc];
+}
+
 #pragma mark -
 
 - (FSItem*)itemForFrameworkAtPath:(NSString*)path
@@ -95,7 +102,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			item.children = [self itemsForDirectoryAtPath:file];
 		[results addObject:item];
 	}
-	return results;
+	return [[results copy] autorelease];
 }
 
 #pragma mark -
@@ -125,7 +132,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 
 - (NSArray*)itemsForGroup:(XCGroup*)group withBasePath:(NSString*)basePath inProject:(XCProject*)project
 {
-	NSMutableArray* results = [NSMutableArray new];
+	NSMutableArray* results = [NSMutableArray array];
 	for (id<XcodeGroupMember> member in [group members])
 	{
 		NSURL* itemURL = pathURLWithBaseAndRelativePath(basePath, [member pathRelativeToProjectRoot]);
@@ -167,7 +174,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 						std::string xcodePath = io::exec("/usr/bin/xcode-select", "--print-path", NULL);
 						xcodePath = xcodePath.substr(0, (xcodePath.length() - 1));
 
-						_developerDirectoryPath = [NSString stringWithCxxString:xcodePath];
+						_developerDirectoryPath = [[NSString stringWithCxxString:xcodePath] copy];
 					}
 
 					XCTarget* target = [targets objectAtIndex:0];
@@ -194,7 +201,7 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 			[results addObject:item];
 		}
 	}
-	return [results copy];
+	return [[results copy] autorelease];
 }
 
 #pragma mark -
