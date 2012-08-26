@@ -73,7 +73,7 @@ OAK_DEBUG_VAR(DocumentController);
 
 	res["windowFrame"]        = to_s(NSStringFromRect([self.window frame]));
 	res["miniaturized"]       = [self.window isMiniaturized];
-	res["htmlOutputHeight"]   = htmlOutputView ? (int32_t)NSHeight(htmlOutputView.frame) : htmlOutputHeight;
+	res["htmlOutputHeight"]   = htmlOutputView ? (int32_t)NSHeight(htmlOutputView.frame) > 0 ? (int32_t)NSHeight(htmlOutputView.frame) : 0 : htmlOutputHeight;
 	res["fileBrowserVisible"] = !self.fileBrowserHidden;
 	res["fileBrowserWidth"]   = fileBrowser.view ? (int32_t)NSWidth(fileBrowser.view.frame) : fileBrowserWidth;
 
