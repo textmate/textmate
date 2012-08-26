@@ -8,3 +8,22 @@ pre {
 	padding: 10px 20px 10px 20px;
 	overflow: auto;
 }
+
+.keyEquivalent {
+	background-color: #E2E2E2;
+	border: 1px dotted #919699;
+}
+
+.tabTrigger {
+	background-color: #E2E2E2;
+	border: 1px dotted #919699;
+}
+
+.credit:before { content: "("; }
+.credit:after  { content: ")"; }
+
+.credit {
+	font: "Trebuchet MS";
+	font-style: italic;
+	color: gray;
+}
