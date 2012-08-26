@@ -12,12 +12,12 @@ class OpenTests : public CxxTest::TestSuite
 	{
 		stall_t (std::string const& encoding = NULL_STR, std::string const& fileType = NULL_STR) : _error(false), _run_loop(CFSTR("OakThreadSignalsRunLoopMode")), _bom(false), _encoding(encoding), _file_type(fileType), _line_feeds(NULL_STR) { }
 
-		void select_encoding (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
+		void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
 		{
 			std::string encoding = _encoding;
 			_encoding = NULL_STR;
 			if(encoding != NULL_STR)
-				context->set_encoding(encoding);
+				context->set_charset(encoding);
 		}
 
 		void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
@@ -33,12 +33,12 @@ class OpenTests : public CxxTest::TestSuite
 			_run_loop.stop();
 		}
 
-		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& lineFeeds, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+		void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 		{
-			_bom        = bom;
-			_encoding   = encoding;
+			_bom        = encoding.byte_order_mark();
+			_encoding   = encoding.charset();
 			_file_type  = fileType;
-			_line_feeds = lineFeeds;
+			_line_feeds = encoding.newlines();
 			_content    = content;
 
 			_run_loop.stop();

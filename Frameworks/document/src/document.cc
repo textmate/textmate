@@ -566,7 +566,7 @@ namespace document
 		_pristine_buffer = _buffer->substr(0, _buffer->size()); // TODO We should use a cheap ng::detail::storage_t copy
 	}
 
-	void document_t::post_load (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& newlines)
+	void document_t::post_load (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding)
 	{
 		_open_callback.reset();
 		if(!content)
@@ -577,9 +577,9 @@ namespace document
 
 		_path_attributes = pathAttributes;
 
-		_disk_encoding = encoding;
-		_disk_newlines = newlines;
-		_disk_bom      = bom;
+		_disk_encoding = encoding.charset();
+		_disk_newlines = encoding.newlines();
+		_disk_bom      = encoding.byte_order_mark();
 
 		if(_file_type == NULL_STR)
 			_file_type = fileType;
@@ -828,7 +828,7 @@ namespace document
 			if(_backup_path != NULL_STR)
 			{
 				bool modified = _modified;
-				post_load(_path, io::bytes_ptr(new io::bytes_t(path::content(_backup_path))), path::attributes(_backup_path), _file_type, file::path_attributes(_path), _disk_encoding, _disk_bom, _disk_newlines);
+				post_load(_path, io::bytes_ptr(new io::bytes_t(path::content(_backup_path))), path::attributes(_backup_path), _file_type, file::path_attributes(_path), encoding::type(_disk_newlines, _disk_encoding, _disk_bom));
 				if(modified)
 					set_revision(buffer().bump_revision());
 				return true;
@@ -940,12 +940,12 @@ namespace document
 			{
 				open_callback_t (document::document_ptr doc, bool async) : _document(doc), _wait(!async) { }
 
-				void select_encoding (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)   { context->set_encoding(_document->_disk_encoding); }
+				void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)    { context->set_charset(_document->_disk_encoding); }
 				void select_line_feeds (std::string const& path, io::bytes_ptr content, file::open_context_ptr context) { context->set_line_feeds(_document->_disk_newlines); }
 				void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)  { context->set_file_type(_document->_file_type); }
 				void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)        { fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str()); }
 
-				void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& lineFeeds, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+				void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 				{
 					if(!_document->is_open())
 						return;
