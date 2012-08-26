@@ -34,6 +34,24 @@ def find_exe(cmd)
   dir ? "#{dir}/#{cmd}" : nil
 end
 
+def wrap_key_equivalents(src)
+  src.gsub(/ `([^`]+⇥)` | \( ([⌃⌥⇧⌘↓↑←→]+) \) | ( [⎋⇥↩⌅⌫⌦] | [⌃⌥⇧⌘]+ ( (?=[ ]|-\w+) | F\d+ | . ) ) /x) do
+    if $1
+      "<kbd class='tabTrigger'>#$1</kbd>"
+    elsif $2
+      "(<kbd class='keyEquivalent'>#$2</kbd>)"
+    else
+      "<kbd class='keyEquivalent'>#$&</kbd>"
+    end
+  end
+end
+
+def wrap_authors(src)
+  src.gsub(/ \*\[ (.+?) \]\* /x) do
+    "<span class='credit'>#$1</span>"
+  end
+end
+
 opts = GetoptLong.new(
   [ '--title',  '-t', GetoptLong::REQUIRED_ARGUMENT ],
   [ '--header', '-h', GetoptLong::REQUIRED_ARGUMENT ],
@@ -54,17 +72,19 @@ opts.each do |opt, arg|
   end
 end
 
-MARKDOWN_COMPILERS = %w[ multimarkdown maruku Markdown.pl ]
+MARKDOWN_COMPILERS = %w[ multimarkdown ]
 
 filter = MARKDOWN_COMPILERS.find { |exe| find_exe exe }
 abort "Unable to find a markdown compiler" if filter.nil?
 
-filters    = "|#{filter}"
+filters    = "|#{filter} --nosmart"
 
 document   = ARGF.read
+document   = wrap_authors(wrap_key_equivalents(document))
 head, body = document.scan(/\A((?:^\w+:\s+.*$\n)*)\n?((?m:.*))\z/).flatten
 tmp        = head.scan(/^(\w+):\s+(.*)$/).collect { |pair| [pair[0].downcase, pair[1].strip] }
 headers    = Hash[*tmp.flatten]
+
 
 page_title = headers['title'] || title
 css_files  = headers['css'].to_s.split(/,\s*/)
