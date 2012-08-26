@@ -253,16 +253,17 @@ private:
 {
 	if(document && [textView theme])
 	{
-		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
+		[self setFont:textView.font]; // trigger update of gutter view’s line number font
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
 		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
 
 		gutterView.foregroundColor          = [NSColor colorWithCGColor:styles.gutterForeground()];
 		gutterView.backgroundColor          = [NSColor colorWithCGColor:styles.gutterBackground()];
-		gutterView.dividerColor             = self.gutterDividerColor;
 		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
 		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
+		gutterView.selectionBorderColor     = [NSColor colorWithCGColor:styles.gutterSelectionBorder()];
+		gutterView.iconColor                = [NSColor colorWithCGColor:styles.gutterIcons()];
 
 		[self setNeedsDisplay:YES];
 		[textView setNeedsDisplay:YES];
@@ -651,12 +652,12 @@ static std::string const kBookmarkType = "bookmark";
 {
 	if([identifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Bookmark", "Search Mark" };
+		static retained_image_t images[] = { NULL, "Bookmark Template", "Search Mark Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top", "Folding Collapsed", "Folding Bottom" };
+		static retained_image_t images[] = { NULL, "Folding Top Template", "Folding Collapsed Template", "Folding Bottom Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;
@@ -666,12 +667,12 @@ static std::string const kBookmarkType = "bookmark";
 {
 	if([identifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		static retained_image_t images[] = { "Bookmark Hover Add", "Bookmark Hover Remove", "Bookmark Hover Add" };
+		static retained_image_t images[] = { "Bookmark Hover Add Template", "Bookmark Hover Remove Template", "Bookmark Hover Add Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top Hoover", "Folding Collapsed Hoover", "Folding Bottom Hoover" };
+		static retained_image_t images[] = { NULL, "Folding Top Hover Template", "Folding Collapsed Hover Template", "Folding Bottom Hover Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;
@@ -681,12 +682,12 @@ static std::string const kBookmarkType = "bookmark";
 {
 	if([identifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		static retained_image_t images[] = { "Bookmark Pressed", "Bookmark Pressed", "Bookmark Pressed" };
+		static retained_image_t images[] = { "Bookmark Pressed Template", "Bookmark Pressed Template", "Bookmark Pressed Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top Pressed", "Folding Collapsed Pressed", "Folding Bottom Pressed" };
+		static retained_image_t images[] = { NULL, "Folding Top Pressed Template", "Folding Collapsed Pressed Template", "Folding Bottom Pressed Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;

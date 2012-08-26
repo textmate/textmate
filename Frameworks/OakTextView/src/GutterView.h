@@ -35,9 +35,10 @@ struct GVLineRecord
 	NSFont* lineNumberFont;
 	NSColor* foregroundColor;
 	NSColor* backgroundColor;
-	NSColor* dividerColor;
 	NSColor* selectionForegroundColor;
 	NSColor* selectionBackgroundColor;
+	NSColor* selectionBorderColor;
+	NSColor* iconColor;
 	id <GutterViewDelegate> delegate;
 	std::vector<struct data_source_t> columnDataSources;
 	NSMutableSet* hiddenColumns;
@@ -52,9 +53,10 @@ struct GVLineRecord
 @property (nonatomic, assign) id <GutterViewDelegate> delegate;
 @property (nonatomic, retain) NSColor* foregroundColor;
 @property (nonatomic, retain) NSColor* backgroundColor;
-@property (nonatomic, retain) NSColor* dividerColor;
 @property (nonatomic, retain) NSColor* selectionForegroundColor;
 @property (nonatomic, retain) NSColor* selectionBackgroundColor;
+@property (nonatomic, retain) NSColor* selectionBorderColor;
+@property (nonatomic, retain) NSColor* iconColor;
 - (void)setHighlightedRange:(std::string const&)str;
 - (void)reloadData:(id)sender;
 - (void)insertColumnWithIdentifier:(NSString*)columnIdentifier atPosition:(NSUInteger)index dataSource:(id <GutterViewColumnDataSource>)columnDataSource delegate:(id <GutterViewColumnDelegate>)columnDelegate;
