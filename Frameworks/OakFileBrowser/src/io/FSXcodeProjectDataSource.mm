@@ -57,7 +57,8 @@ static NSURL* pathURLWithBaseAndRelativePath(NSString* basePath, NSString* relat
 	return self;
 }
 
-- (void) dealloc {
+- (void) dealloc
+{
 	[_projects release];
 	[_developerDirectoryPath release];
 
