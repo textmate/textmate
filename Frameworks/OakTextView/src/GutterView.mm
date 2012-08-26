@@ -41,7 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor, selectionBorderColor, iconColor;
+@synthesize foregroundColor, backgroundColor, iconColor, selectionForegroundColor, selectionBackgroundColor, selectionIconColor, selectionBorderColor;
 
 // ==================
 // = Setup/Teardown =
@@ -96,14 +96,15 @@ struct data_source_t
 - (void)dealloc
 {
 	D(DBF_GutterView, bug("\n"););
-	self.partnerView     = nil;
-	self.lineNumberFont  = nil;
-	self.foregroundColor = nil;
-	self.backgroundColor = nil;
+	self.partnerView              = nil;
+	self.lineNumberFont           = nil;
+	self.foregroundColor          = nil;
+	self.backgroundColor          = nil;
+	self.iconColor                = nil;
 	self.selectionForegroundColor = nil;
 	self.selectionBackgroundColor = nil;
-	self.selectionBorderColor = nil;
-	self.iconColor = nil;
+	self.selectionIconColor       = nil;
+	self.selectionBorderColor     = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
@@ -359,19 +360,16 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
-		NSRect rowRect = NSMakeRect(0, record.firstY, CGRectGetWidth(self.frame), record.lastY - record.firstY);
-		NSColor* textColor = self.foregroundColor;
+		BOOL selectedRow = NO;
 		iterate(rect, backgroundRects)
-		{
-			if(NSIntersectsRect(*rect, rowRect))
-				textColor = self.selectionForegroundColor;
-		}
+			selectedRow = selectedRow || NSIntersectsRect(*rect, NSMakeRect(0, record.firstY, CGRectGetWidth(self.frame), record.lastY - record.firstY));
 
 		citerate(dataSource, [self visibleColumnDataSources])
 		{
 			NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
 			if(dataSource->identifier == GVLineNumbersColumnIdentifier.UTF8String)
 			{
+				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
 				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
 			}
 			else if(record.softlineOffset == 0)
@@ -379,11 +377,12 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				BOOL isHoveringRect = NSMouseInRect(mouseHoveringAtPoint, columnRect, [self isFlipped]);
 				BOOL isDownInRect   = NSMouseInRect(mouseDownAtPoint,     columnRect, [self isFlipped]);
 
+				NSColor* imageColor = selectedRow ? self.selectionIconColor : self.iconColor;
 				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
 				CGFloat y = round((NSHeight(columnRect) - [image size].height) / 2);
 				CGFloat x = round((NSWidth(columnRect) - [image size].width) / 2);
 				[image lockFocus];
-				[self.iconColor set];
+				[imageColor set];
 				NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
 				[image unlockFocus];
 				[image drawAdjustedAtPoint:NSMakePoint(NSMinX(columnRect) + x, NSMinY(columnRect) + y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];

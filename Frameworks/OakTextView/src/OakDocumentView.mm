@@ -259,11 +259,13 @@ private:
 
 		gutterView.foregroundColor          = [NSColor colorWithCGColor:styles.gutterForeground()];
 		gutterView.backgroundColor          = [NSColor colorWithCGColor:styles.gutterBackground()];
-		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
+		gutterView.iconColor                = [NSColor colorWithCGColor:styles.gutterIcons()];
 		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
 		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
+		gutterView.selectionIconColor       = [NSColor colorWithCGColor:styles.gutterSelectionIcons()];
 		gutterView.selectionBorderColor     = [NSColor colorWithCGColor:styles.gutterSelectionBorder()];
-		gutterView.iconColor                = [NSColor colorWithCGColor:styles.gutterIcons()];
+
+		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 
 		[self setNeedsDisplay:YES];
 		[textView setNeedsDisplay:YES];
