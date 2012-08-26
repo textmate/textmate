@@ -257,9 +257,10 @@ private:
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
 		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
 
-		gutterView.foregroundColor = [NSColor colorWithCGColor:styles.gutterForeground()];
-		gutterView.backgroundColor = [NSColor colorWithCGColor:styles.gutterBackground()];
-		gutterScrollView.backgroundColor = gutterView.backgroundColor;
+		gutterView.foregroundColor          = [NSColor colorWithCGColor:styles.gutterForeground()];
+		gutterView.backgroundColor          = [NSColor colorWithCGColor:styles.gutterBackground()];
+		gutterView.dividerColor             = self.gutterDividerColor;
+		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
 		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
 
