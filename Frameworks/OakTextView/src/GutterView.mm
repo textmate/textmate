@@ -354,7 +354,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	iterate(rect, backgroundRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
-	[[self.SelectionBorderColor colorWithAlphaComponent:0.75] set];
+	[self.SelectionBorderColor set];
 	iterate(rect, borderRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
@@ -386,6 +386,10 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
 				CGFloat y = round((NSHeight(columnRect) - [image size].height) / 2);
 				CGFloat x = round((NSWidth(columnRect) - [image size].width) / 2);
+				[image lockFocus];
+				[self.iconColor set];
+				NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
+				[image unlockFocus];
 				[image drawAdjustedAtPoint:NSMakePoint(NSMinX(columnRect) + x, NSMinY(columnRect) + y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 			}
 		}

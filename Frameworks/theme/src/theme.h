@@ -18,7 +18,7 @@ struct PUBLIC styles_t
 	CGColorRef gutterDivider () const            { return _gutterDivider; }
 	CGColorRef gutterSelectionForeground() const { return _gutterSelectionForeground; }
 	CGColorRef gutterSelectionBackground() const { return _gutterSelectionBackground; }
-	CGColorRef gutterSelectionBorder() const    { return _gutterSelectionBorder; }
+	CGColorRef gutterSelectionBorder() const     { return _gutterSelectionBorder; }
 	CGColorRef gutterIcons() const               { return _gutterIcons; }
 	CGColorRef caret () const                    { return _caret; }
 	CGColorRef selection () const                { return _selection; }
