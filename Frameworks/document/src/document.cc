@@ -647,14 +647,17 @@ namespace document
 	encoding::type document_t::encoding_for_save_as_path (std::string const& path)
 	{
 		encoding::type res = disk_encoding();
-		if(res.charset() != kCharsetNoEncoding && res.newlines() != NULL_STR)
-			return res;
 
 		settings_t const& settings = settings_for_path(path);
-		if(res.charset() == kCharsetNoEncoding)
+		if(!is_on_disk() || res.charset() == kCharsetNoEncoding)
+		{
 			res.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
-		if(res.newlines() == NULL_STR)
+			res.set_byte_order_mark(settings.get(kSettingsUseBOMKey, res.byte_order_mark()));
+		}
+
+		if(!is_on_disk() || res.newlines() == NULL_STR)
 			res.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
+
 		return res;
 	}
 
