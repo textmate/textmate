@@ -326,14 +326,14 @@ def resources_helper(target, key, symbol)
         rsrc << { :src => dst, :dst => esc_path("#$1.mom") }
       when /\bInfo\.plist$/ then
         dst = build_path(File.join(path, file))
-        res << "build #{dst}: process_plist #{esc_path src}\n"
+        res << "build #{dst}: process_plist #{esc_path src} | bin/process_plist\n"
         res << "  RAVE_FLAGS = -dTARGET_NAME='#{target[:name]}'\n"
         res << flags_for_target(target)
         target[:info_plist] = dst
       when /(.+)\.md(own)?$/ then
         dst = build_path(File.join(path, "#$1.html"))
         prefix, suffix = target['MARKDOWN_HEADER'].to_a, target['MARKDOWN_FOOTER'].to_a
-        res << "build #{dst}: markdown #{prefix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} #{esc_path src} #{suffix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')}\n"
+        res << "build #{dst}: markdown #{prefix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} #{esc_path src} #{suffix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} | bin/gen_html\n"
         header, footer = target['HTML_HEADER'], target['HTML_FOOTER']
         flags = ''
         flags << " -h #{esc_path(File.join(target[:path], header.first))}" if header.to_a.size == 1
