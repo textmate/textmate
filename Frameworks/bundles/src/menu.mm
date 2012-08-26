@@ -1,7 +1,36 @@
-#include "menu.h"
-#include <text/ctype.h>
-#include <cf/cf.h>
-#include <oak/oak.h>
+#import "menu.h"
+#import <OakFoundation/NSString Additions.h>
+#import <text/ctype.h>
+#import <cf/cf.h>
+#import <oak/oak.h>
+
+@interface BundlePopupMenuTarget : NSObject
+{
+	NSInteger selectedIndex;
+}
+@property NSInteger selectedIndex;
+@end
+
+@implementation BundlePopupMenuTarget
+@synthesize selectedIndex;
+- (id)init
+{
+	if((self = [super init]))
+		self.selectedIndex = NSNotFound;
+	return self;
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem
+{
+	return [menuItem action] == @selector(takeSelectedItemIndexFrom:);
+}
+
+- (void)takeSelectedItemIndexFrom:(id)sender
+{
+	ASSERT([sender isKindOfClass:[NSMenuItem class]]);
+	self.selectedIndex = [(NSMenuItem*)sender tag];
+}
+@end
 
 namespace bundles
 {
@@ -37,9 +66,9 @@ namespace bundles
 		else if(items.size() == 1)
 			return items.front();
 
-		MenuRef menuRef;
-		CreateNewMenu(0 /* menu id */, kMenuAttrDoNotCacheImage, &menuRef);
-		SetMenuFont(menuRef, 0, 12);
+		NSMenu* menu = [[[NSMenu alloc] init] autorelease];
+		[menu setFont:[NSFont menuFontOfSize:[NSFont smallSystemFontSize]]];
+		BundlePopupMenuTarget* menuTarget = [[[BundlePopupMenuTarget alloc] init] autorelease];
 		
 		int key = 0;
 		std::vector<item_ptr> res;
@@ -56,13 +85,15 @@ namespace bundles
 
 			iterate(pair, ordering)
 			{
-				MenuItemIndex index;
-				AppendMenuItemTextWithCFString(menuRef, cf::wrap(pair->first), 0, res.size(), &index);
+				NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeSelectedItemIndexFrom:) keyEquivalent:@""];
+				[menuItem setTarget:menuTarget];
+				[menuItem setTag:key];
+				
 				res.push_back(pair->second);
 				if(++key <= 10)
 				{
-					SetMenuItemCommandKey(menuRef, index, false, (key % 10) + '0');
-					SetMenuItemModifiers(menuRef, index, kMenuNoCommandModifier);
+					[menuItem setKeyEquivalent:[NSString stringWithFormat:@"%d", key % 10]];
+					[menuItem setKeyEquivalentModifierMask:0];
 				}
 			}
 		}
@@ -95,7 +126,7 @@ namespace bundles
 			iterate(pair, menus)
 			{
 				if(showBundleHeadings)
-					AppendMenuItemTextWithCFString(menuRef, cf::wrap(pair->first), kMenuItemAttrSectionHeader, 0, NULL);
+					[menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
 
 				bool suppressSeparator = true;
 				bool pendingSeparator  = false;
@@ -109,19 +140,21 @@ namespace bundles
 					else
 					{
 						if(pendingSeparator)
-							AppendMenuItemTextWithCFString(menuRef, CFSTR(""), kMenuItemAttrSeparator, 0, NULL);
+							[menu addItem:[NSMenuItem separatorItem]];
 						pendingSeparator = false;
 
-						MenuItemIndex index;
-						AppendMenuItemTextWithCFString(menuRef, cf::wrap((*item)->name()), 0, res.size(), &index);
+						NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(takeSelectedItemIndexFrom:) keyEquivalent:@""];
+						[menuItem setTarget:menuTarget];
+						[menuItem setTag:key];
+
 						res.push_back(*item);
 						if(++key <= 10)
 						{
-							SetMenuItemCommandKey(menuRef, index, false, (key % 10) + '0');
-							SetMenuItemModifiers(menuRef, index, kMenuNoCommandModifier);
+							[menuItem setKeyEquivalent:[NSString stringWithFormat:@"%d", key % 10]];
+							[menuItem setKeyEquivalentModifierMask:0];
 						}
 						if(showBundleHeadings)
-							SetMenuItemIndent(menuRef, index, 1);
+							[menuItem setIndentationLevel:1];
 
 						suppressSeparator = false;
 					}
@@ -130,15 +163,9 @@ namespace bundles
 		}
 
 		item_ptr selectedItem;
-		SInt32 selectedIndex = PopUpMenuSelect(menuRef, pos.x, pos.y, 0 /* pop-up item */);
-		if(selectedIndex)
-		{
-			MenuCommand cmd = 0;
-			GetMenuItemCommandID(menuRef, selectedIndex, &cmd);
-			selectedItem = res[cmd];
-		}
+		if([menu popUpMenuPositioningItem:nil atLocation:NSPointFromCGPoint(pos) inView:nil] && menuTarget.selectedIndex != NSNotFound)
+			selectedItem = res[menuTarget.selectedIndex];
 
-		DisposeMenu(menuRef);
 		return selectedItem;
 	}
 

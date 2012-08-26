@@ -101,7 +101,6 @@ enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBot
 - (GVLineRecord const&)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
 
-- (CGPoint)globalPositionForWindowUnderCaret;
 - (NSPoint)positionForWindowUnderCaret;
 - (scope::context_t const&)scope;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;
