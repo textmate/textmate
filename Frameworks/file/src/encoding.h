@@ -20,7 +20,7 @@ namespace encoding
 	struct type
 	{
 		type () { }
-		type (std::string const& newlines, std::string const& charset, bool byte_order_mark) : _newlines(newlines), _charset(charset), _byte_order_mark(byte_order_mark) { }
+		type (std::string const& newlines, std::string const& charset, bool byte_order_mark = false) : _newlines(newlines), _charset(charset), _byte_order_mark(byte_order_mark) { }
 
 		std::string const& newlines () const { return _newlines; }
 		std::string const& charset () const  { return _charset; }

@@ -615,7 +615,7 @@ namespace document
 		broadcast(callback_t::did_change_open_status);
 	}
 
-	void document_t::post_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& lineFeeds, bool success)
+	void document_t::post_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success)
 	{
 		if(success)
 		{
@@ -624,9 +624,9 @@ namespace document
 
 			_path_attributes = pathAttributes;
 
-			_disk_encoding = encoding;
-			_disk_bom      = bom;
-			_disk_newlines = lineFeeds;
+			_disk_encoding = encoding.charset();
+			_disk_bom      = encoding.byte_order_mark();
+			_disk_newlines = encoding.newlines();
 
 			check_modified(revision(), revision());
 			mark_pristine();
@@ -644,6 +644,20 @@ namespace document
 			_file_watcher.reset(new watch_t(_path, shared_from_this()));
 	}
 
+	encoding::type document_t::encoding_for_save_as_path (std::string const& path)
+	{
+		encoding::type res = disk_encoding();
+		if(res.charset() != kCharsetNoEncoding && res.newlines() != NULL_STR)
+			return res;
+
+		settings_t const& settings = settings_for_path(path);
+		if(res.charset() == kCharsetNoEncoding)
+			res.set_charset(settings.get(kSettingsEncodingKey, kCharsetUTF8));
+		if(res.newlines() == NULL_STR)
+			res.set_newlines(settings.get(kSettingsLineEndingsKey, "\n"));
+		return res;
+	}
+
 	void document_t::try_save (document::save_callback_ptr callback)
 	{
 		struct save_callback_wrapper_t : file::save_callback_t
@@ -653,11 +667,11 @@ namespace document
 			void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                                     { _callback->select_path(path, content, context); }
 			void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                            { _callback->select_make_writable(path, content, context); }
 			void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context) { _callback->obtain_authorization(path, content, auth, context); }
-			void select_encoding (std::string const& path, io::bytes_ptr content, std::string const& encoding, file::save_context_ptr context)    { _callback->select_encoding(path, content, encoding, context); }
+			void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, file::save_context_ptr context)      { _callback->select_charset(path, content, charset, context); }
 
-			void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& lineFeeds, bool success, std::string const& message, oak::uuid_t const& filter)
+			void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
 			{
-				_document->post_save(path, content, pathAttributes, encoding, bom, lineFeeds, success);
+				_document->post_save(path, content, pathAttributes, encoding, success);
 				_callback->did_save_document(_document, path, success, message, filter);
 				if(_close)
 					_document->close();
@@ -675,7 +689,7 @@ namespace document
 		if(!is_open())
 		{
 			if(!_content && _backup_path == NULL_STR)
-				return callback->did_save(_path, io::bytes_ptr(), _path_attributes, _disk_encoding, _disk_bom, _disk_newlines, false, NULL_STR, oak::uuid_t());
+				return callback->did_save(_path, io::bytes_ptr(), _path_attributes, encoding::type(_disk_newlines, _disk_encoding, _disk_bom), false, NULL_STR, oak::uuid_t());
 			open();
 			closeAfterSave = true;
 		}
@@ -695,7 +709,9 @@ namespace document
 
 		save_callback_wrapper_t* cb = new save_callback_wrapper_t(shared_from_this(), callback, closeAfterSave);
 		save_callback_ptr sharedPtr((save_callback_t*)cb);
-		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, _disk_encoding, _disk_bom, _disk_newlines, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
+
+		encoding::type const encoding = encoding_for_save_as_path(_path);
+		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
 	}
 
 	bool document_t::save ()

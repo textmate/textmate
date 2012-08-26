@@ -841,7 +841,7 @@ OAK_DEBUG_VAR(DocumentController);
 // = Document Action Methods =
 // ===========================
 
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(std::string const&)encoding newlines:(std::string const&)newlines useBOM:(BOOL)useBOM
+- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(encoding::type const&)encoding
 {
 	if(!aPath)
 		return;
@@ -854,8 +854,6 @@ OAK_DEBUG_VAR(DocumentController);
 
 	[self selectedDocument]->set_path(paths[0]); // FIXME check if document already exists (overwrite)
 	[self selectedDocument]->set_disk_encoding(encoding);
-	[self selectedDocument]->set_disk_newlines(newlines);
-	[self selectedDocument]->set_disk_bom(useBOM);
 
 	[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
 
@@ -867,8 +865,6 @@ OAK_DEBUG_VAR(DocumentController);
 			documents.push_back(document::create(paths[i]));
 			documents.back()->open(); // so that we find this when going to counterpart
 			documents.back()->set_disk_encoding(encoding);
-			documents.back()->set_disk_newlines(newlines);
-			documents.back()->set_disk_bom(useBOM);
 		}
 
 		[self addDocuments:documents andSelect:kSelectDocumentNone closeOther:NO pruneTabBar:NO];
@@ -884,7 +880,7 @@ OAK_DEBUG_VAR(DocumentController);
 	document::document_ptr doc = [self selectedDocument];
 	if(doc->path() != NULL_STR)
 			[DocumentSaveHelper trySaveDocument:doc forWindow:self.window defaultDirectory:nil andCallback:NULL];
-	else	[OakSavePanel showWithPath:DefaultSaveNameForDocument(doc) directory:self.untitledSavePath fowWindow:self.window delegate:self encoding:doc->disk_encoding() newlines:doc->disk_newlines() useBOM:doc->disk_bom()];
+	else	[OakSavePanel showWithPath:DefaultSaveNameForDocument(doc) directory:self.untitledSavePath fowWindow:self.window delegate:self encoding:doc->encoding_for_save_as_path(to_s([(self.untitledSavePath ?: @"") stringByAppendingPathComponent:DefaultSaveNameForDocument(doc)]))];
 }
 
 - (IBAction)saveDocumentAs:(id)sender
@@ -894,7 +890,7 @@ OAK_DEBUG_VAR(DocumentController);
 	std::string const documentPath = doc->path();
 	NSString* documentFolder = [NSString stringWithCxxString:path::parent(documentPath)];
 	NSString* documentName   = [NSString stringWithCxxString:path::name(documentPath)];
-	[OakSavePanel showWithPath:(documentName ?: DefaultSaveNameForDocument(doc)) directory:(documentFolder ?: self.untitledSavePath) fowWindow:self.window delegate:self encoding:doc->disk_encoding() newlines:doc->disk_newlines() useBOM:doc->disk_bom()];
+	[OakSavePanel showWithPath:(documentName ?: DefaultSaveNameForDocument(doc)) directory:(documentFolder ?: self.untitledSavePath) fowWindow:self.window delegate:self encoding:doc->encoding_for_save_as_path(doc->path() != NULL_STR ? doc->path() : to_s([(self.untitledSavePath ?: @"") stringByAppendingPathComponent:DefaultSaveNameForDocument(doc)]))];
 }
 
 - (IBAction)saveAllDocuments:(id)sender

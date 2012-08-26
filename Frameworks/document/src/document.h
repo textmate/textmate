@@ -12,6 +12,7 @@
 #include <file/bytes.h>
 #include <file/open.h>
 #include <file/save.h>
+#include <file/encoding.h>
 #include <scope/scope.h>
 #include <oak/debug.h>
 
@@ -39,7 +40,7 @@ namespace document
 	{
 		virtual ~save_callback_t () { }
 		virtual void did_save_document (document_ptr document, std::string const& path, bool success, std::string const& message, oak::uuid_t const& filter) = 0;
-		virtual void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& lineFeeds, bool success, std::string const& message, oak::uuid_t const& filter) { }
+		virtual void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) { }
 	};
 
 	typedef std::tr1::shared_ptr<save_callback_t> save_callback_ptr;
@@ -196,7 +197,7 @@ namespace document
 		typedef std::tr1::shared_ptr<open_callback_wrapper_t> open_callback_wrapper_ptr;
 		open_callback_wrapper_ptr _open_callback;
 
-		void post_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, std::string const& encoding, bool bom, std::string const& lineFeeds, bool succes);
+		void post_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool succes);
 
 	public:
 		bool try_open (document::open_callback_ptr callback);
@@ -221,13 +222,10 @@ namespace document
 		std::string backup_path () const;
 		std::string display_name () const;
 
-		void set_disk_encoding (std::string const& encoding) { _disk_encoding = encoding; }
-		void set_disk_newlines (std::string const& newlines) { _disk_newlines = newlines; }
-		void set_disk_bom (bool const& bom)                  { _disk_bom = bom; }
+		void set_disk_encoding (encoding::type const& encoding) { _disk_newlines = encoding.newlines(); _disk_encoding = encoding.charset(); _disk_bom = encoding.byte_order_mark(); }
+		encoding::type disk_encoding () const                   { return encoding::type(_disk_newlines, _disk_encoding, _disk_bom); }
 
-		std::string disk_encoding () const                   { return _disk_encoding; }
-		std::string disk_newlines () const                   { return _disk_newlines; }
-		bool disk_bom () const                               { return _disk_bom; }
+		encoding::type encoding_for_save_as_path (std::string const& path);
 
 		bool recent_tracking () const         { return _recent_tracking && _path != NULL_STR; }
 		void set_recent_tracking (bool flag)  { _recent_tracking = flag; }

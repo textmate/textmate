@@ -9,20 +9,20 @@
 {
 	IBOutlet OakEncodingPopUpButton* encodingPopUpButton;
 
-	NSString* encoding;
-	NSString* lineEndings;
-	BOOL useByteOrderMark;
+	encoding::type encodingOptions;
 }
 @property (nonatomic, retain) NSString* lineEndings;
 @property (nonatomic, retain) NSString* encoding;
 @property (nonatomic, assign) BOOL useByteOrderMark;
 @property (nonatomic, readonly) BOOL canUseByteOrderMark;
+@property (nonatomic, readonly) encoding::type const& encodingOptions;
 @end
 
 @implementation OakEncodingSaveOptionsViewController
-@synthesize encoding, lineEndings, useByteOrderMark;
+@synthesize encodingOptions;
 
 + (NSSet*)keyPathsForValuesAffectingCanUseByteOrderMark { return [NSSet setWithObject:@"encoding"]; }
++ (NSSet*)keyPathsForValuesAffectingUseByteOrderMark    { return [NSSet setWithObject:@"encoding"]; }
 
 + (void)initialize
 {
@@ -30,13 +30,10 @@
 	[OakStringListTransformer createTransformerWithName:@"OakLineEndingsListTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
 }
 
-- (id)init
+- (id)initWithEncodingOptions:(encoding::type const&)someEncodingOptions
 {
 	if(self = [super initWithNibName:@"EncodingSaveOptions" bundle:[NSBundle bundleForClass:[self class]]])
-	{
-		self.encoding    = @"UTF-8";
-		self.lineEndings = @"\n";
-	}
+		encodingOptions = someEncodingOptions;
 	return self;
 }
 
@@ -49,42 +46,32 @@
 - (void)loadView
 {
 	[super loadView];
-	encodingPopUpButton.encoding = encoding;
+	encodingPopUpButton.encoding = self.encoding;
 	[self bind:@"encoding" toObject:encodingPopUpButton withKeyPath:@"encoding" options:nil];
 }
 
-- (BOOL)canUseByteOrderMark
-{
-	return [self.encoding hasPrefix:@"UTF-"];
-}
+- (BOOL)canUseByteOrderMark { return encodingOptions.supports_byte_order_mark(encodingOptions.charset()); }
 
-- (void)setEncoding:(NSString*)newEncoding
-{
-	if(encoding != newEncoding && ![encoding isEqualToString:newEncoding])
-	{
-		[encoding autorelease];
-		encoding = [newEncoding retain];
+- (NSString*)lineEndings    { return [NSString stringWithCxxString:encodingOptions.newlines()]; }
+- (NSString*)encoding       { return [NSString stringWithCxxString:encodingOptions.charset()]; }
+- (BOOL)useByteOrderMark    { return encodingOptions.byte_order_mark(); }
 
-		self.useByteOrderMark = [self canUseByteOrderMark] && ![encoding isEqualToString:@"UTF-8"];
-	}
-}
+- (void)setLineEndings:(NSString*)newLineEndings      { encodingOptions.set_newlines(to_s(newLineEndings)); }
+- (void)setEncoding:(NSString*)newEncoding            { encodingOptions.set_charset(to_s(newEncoding)); }
+- (void)setUseByteOrderMark:(BOOL)newUseByteOrderMark { encodingOptions.set_byte_order_mark(newUseByteOrderMark); }
 @end
 
 @implementation OakSavePanel
-- (id)initWithPath:(NSString*)aPathSuggestion directory:(NSString*)aDirectorySuggestion fowWindow:(NSWindow*)aWindow delegate:(id)aDelegate encoding:(std::string const&)encoding newlines:(std::string const&)newlines useBOM:(BOOL)useBOM
+- (id)initWithPath:(NSString*)aPathSuggestion directory:(NSString*)aDirectorySuggestion fowWindow:(NSWindow*)aWindow delegate:(id)aDelegate encoding:(encoding::type const&)encoding
 {
 	if((self = [super init]))
 	{
-		optionsViewController = [OakEncodingSaveOptionsViewController new];
+		optionsViewController = [[OakEncodingSaveOptionsViewController alloc] initWithEncodingOptions:encoding];
 		if(!optionsViewController)
 		{
 			[self release];
 			return nil;
 		}
-
-		optionsViewController.encoding         = [NSString stringWithCxxString:encoding] ?: @"UTF-8";
-		optionsViewController.lineEndings      = [NSString stringWithCxxString:newlines] ?: @"\n";
-		optionsViewController.useByteOrderMark = useBOM;
 
 		[[aWindow attachedSheet] orderOut:self]; // incase there already is a sheet showing (like “Do you want to save?”)
 
@@ -96,7 +83,7 @@
 		[savePanel setAccessoryView:optionsViewController.view];
 		[savePanel beginSheetModalForWindow:aWindow completionHandler:^(NSInteger result) {
 			NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
-			[aDelegate savePanelDidEnd:self path:path encoding:to_s(optionsViewController.encoding) newlines:to_s(optionsViewController.lineEndings) useBOM:optionsViewController.useByteOrderMark];
+			[aDelegate savePanelDidEnd:self path:path encoding:optionsViewController.encodingOptions];
 			[self release];
 		}];
 		[savePanel deselectExtension];
@@ -110,8 +97,8 @@
 	[super dealloc];
 }
 
-+ (void)showWithPath:(NSString*)aPathSuggestion directory:(NSString*)aDirectorySuggestion fowWindow:(NSWindow*)aWindow delegate:(id)aDelegate encoding:(std::string const&)encoding newlines:(std::string const&)newlines useBOM:(BOOL)useBOM
++ (void)showWithPath:(NSString*)aPathSuggestion directory:(NSString*)aDirectorySuggestion fowWindow:(NSWindow*)aWindow delegate:(id)aDelegate encoding:(encoding::type const&)encoding
 {
-	[[OakSavePanel alloc] initWithPath:aPathSuggestion directory:aDirectorySuggestion fowWindow:aWindow delegate:aDelegate encoding:encoding newlines:newlines useBOM:useBOM];
+	[[OakSavePanel alloc] initWithPath:aPathSuggestion directory:aDirectorySuggestion fowWindow:aWindow delegate:aDelegate encoding:encoding];
 }
 @end
