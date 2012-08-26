@@ -92,7 +92,7 @@ Not only are we back to frequent updates, but I have also started blogging about
 * Go to Current Document (⌃⌘R) is now a toggle.
 * Go to SCM Status (⇧⌘Y) is now a toggle.
 * When showing SCM Status (⇧⌘Y), we no longer show folders in the _Uncommitted Changes_ if items from these are also shown. In the _Untracked Items_ we don’t show items as untracked if an ancestor folder is also included.
-* Find in Folder: Pressing ⌘1-9 will select first match of the n’th file in the results list. Previously it only selected the n’th file (and you had to use arrow down to actually get to the match).
+* Find in Folder: Pressing ⌘1-⌘9 will select first match of the n’th file in the results list. Previously it only selected the n’th file (and you had to use arrow down to actually get to the match).
 * Favorites prefixed with ‘[DIR]’ show folders within.
 
 	For example if you have all your projects under `~/Projects` then you can do:
