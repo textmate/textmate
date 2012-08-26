@@ -21,7 +21,7 @@ namespace
 {
 	struct file_context_t : file::save_context_t
 	{
-		file_context_t (file::save_callback_ptr callback, std::string const& path, osx::authorization_t authorization, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& encoding, bool bom, std::string const& lineFeeds, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) : _state(kStateIdle), _next_state(kStateStart), _select_encoding_state(kSelectEncodingStateConsultSettings), _make_writable(false), _saved(false), _callback(callback), _path(path), _authorization(authorization), _content(content), _attributes(attributes), _file_type(fileType), _path_attributes(NULL_STR), _encoding(encoding), _bom(bom), _line_feeds(lineFeeds), _error(NULL_STR), _binary_import_filters(binaryImportFilters), _text_import_filters(textImportFilters) { }
+		file_context_t (file::save_callback_ptr callback, std::string const& path, osx::authorization_t authorization, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& encoding, bool bom, std::string const& lineFeeds, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) : _state(kStateIdle), _next_state(kStateStart), _make_writable(false), _saved(false), _callback(callback), _path(path), _authorization(authorization), _content(content), _attributes(attributes), _file_type(fileType), _path_attributes(NULL_STR), _encoding(encoding), _bom(bom), _line_feeds(lineFeeds), _error(NULL_STR), _binary_import_filters(binaryImportFilters), _text_import_filters(textImportFilters) { }
 
 		~file_context_t ()
 		{
@@ -72,14 +72,8 @@ namespace
 			kStateDone
 		};
 
-		enum select_encoding_state_t {
-			kSelectEncodingStateConsultSettings,
-			kSelectEncodingStateAskUser
-		};
-
 		state_t                              _state;
 		state_t                              _next_state;
-		int                                  _select_encoding_state;
 		bool                                 _make_writable;
 		bool                                 _saved;
 
@@ -327,33 +321,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateEncodeContent;
 
-					if(_select_encoding_state == kSelectEncodingStateConsultSettings)
-					{
-						_select_encoding_state = kSelectEncodingStateAskUser;
-
-						settings_t const& settings = settings_for_path(_path);
-						std::string encoding = settings.get(kSettingsEncodingKey, kCharsetNoEncoding);
-						if(encoding != kCharsetNoEncoding)
-						{
-							_encoding = encoding;
-							_bom      = settings.get(kSettingsUseBOMKey, false);
-						}
-						else if(_encoding == kCharsetNoEncoding)
-						{
-							_encoding = kCharsetUTF8;
-							_bom      = false;
-						}
-						else
-						{
-							_next_state = kStateSelectEncoding;
-						}
-
-						proceed();
-					}
-					else if(_select_encoding_state == kSelectEncodingStateAskUser)
-					{
-						_callback->select_encoding(_path, _content, _encoding, shared_from_this());
-					}
+					_callback->select_encoding(_path, _content, _encoding, shared_from_this());
 				}
 				break;
 
