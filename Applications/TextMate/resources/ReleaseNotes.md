@@ -4,6 +4,45 @@
 
 Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
 
+## 2012-08-26
+
+* Add context menu to tab bar. Actions include creating new tab (can also be done by double-clicking empty space in a tab bar), tearing off tabs (can also be done by double-clicking a tab), closing other tabs (can be done by option-clicking the tab’s close button), and closing tabs to the right.
+
+* Added badges for Subversion status. This is based on the `svn` executable rather than `libsvn`. Set `TM_SVN` to a version of `svn` compatible with your repository format. Note that if your Mac username is “long” then the driver currently fails to parse the output from `svn`. *[Jeremy Whitlock]*
+
+* Add a few new options to Project Preferences (previously these could only be enabled via `defaults write`).
+
+* All items in the Preferences now work, well, except for _Projects → Display → All filename extensions_.
+
+* When changing settings, we now save them to `~/Library/Application Support/TextMate/Global.tmProperties`. This is a regular properties file (like `~/.tm_properties`) and it will try to be “smart” about how to record your preferences:
+
+	 - If you change theme, font, wrap column, or whether or not to show the wrap column, then we store it at the root of this properties file, so it applies to all files.
+	 - If you change tab size, soft tabs, soft wrap, or show invisibles, then we save it for the current file type, potential parent types (e.g. `text` is a parent type of `text.plain`), and globally. This makes it easy to set different tab sizes for different languages, or enable soft wrap for text files.
+	 - If you change spell checking or spelling language, we store this for the current file’s path, its type, parent types, and globally.
+
+	Some of the settings in the Preferences window are also stored in `Global.tmProperties` and if you switch file type for an open file, we also record that in this file (by adding a section for a file glob matching the current file’s extension, and setting the file type in this section).
+
+	We encourage you to tweak your settings and then inspect this file, as it’ll give you a feel for the possibilities.
+
+* Theme colors are now transparent against the background. Previously colors with alpha would be blended with a previous color setting for the same element, which was rarely desired. This mainly applies to color of invisibles and selection (which now should match the rendering done by TextMate 1.x).
+
+* Further improvements to theming the gutter. There are now the following keys which can be set to change the color of gutter elements: *[Dennis Vennink]*
+
+	- `gutterDivider`: Border between text view and gutter.
+	- `gutterForeground`: Text color.
+	- `gutterBackground`: Background color.
+	- `gutterIcons`: Color of the images in the gutter.
+	- `gutterSelectionForeground`: Text color for lines containing caret / part of a selection.
+	- `gutterSelectionBackground`: Background color for lines containing caret / part of a selection.
+	- `gutterSelectionIcons`: Color of images on lines containing caret / part of a selection.
+	- `gutterSelectionBorder`: Border between selected and non-selected lines.
+
+* Changed default font to Menlo, 12 pt. Although this has been on the system for quite some time, applications which don’t use the 10.8 SDK will still receive Monaco as the default monospaced font. Unfortunately this means by default users wont see bold and italic text, as Monaco has no such variants, and CoreText will not synthesize these styles.
+
+* If shrinking HTML output view to (below) zero points, the view is now back again after relaunch (temporary fix for the lack of constraints on sizing views in the main window) *[Lukasz Czekaj]*
+
+* Add scope attributes for Ant, CMake, Maven and Scons projects. *[Michael Sheets]*
+
 ## 2012-08-22
 
 * You can now ⌘-click icons in the file browser for “Show in Finder” *[Jacob Bandes-Storch]*
