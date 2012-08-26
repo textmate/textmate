@@ -257,13 +257,13 @@ private:
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
 		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
 
-		gutterView.foregroundColor = [NSColor colorWithCGColor:styles.gutterForeground()];
-		gutterView.backgroundColor = [NSColor colorWithCGColor:styles.gutterBackground()];
-		gutterScrollView.backgroundColor = gutterView.backgroundColor;
+		gutterView.foregroundColor          = [NSColor colorWithCGColor:styles.gutterForeground()];
+		gutterView.backgroundColor          = [NSColor colorWithCGColor:styles.gutterBackground()];
+		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
 		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
-		gutterView.SelectionBorderColor = [NSColor colorWithCGColor:styles.gutterSelectionBorder()];
-		gutterView.iconColor = [NSColor colorWithCGColor:styles.gutterIcons()];
+		gutterView.selectionBorderColor     = [NSColor colorWithCGColor:styles.gutterSelectionBorder()];
+		gutterView.iconColor                = [NSColor colorWithCGColor:styles.gutterIcons()];
 
 		[self setNeedsDisplay:YES];
 		[textView setNeedsDisplay:YES];
@@ -296,8 +296,10 @@ private:
 
 - (void)takeSpellingLanguageFrom:(id)sender
 {
-	[[NSSpellChecker sharedSpellChecker] setLanguage:[sender representedObject]];
-	document->buffer().set_spelling_language(to_s((NSString*)[sender representedObject]));
+	NSString* lang = (NSString*)[sender representedObject];
+	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
+	document->buffer().set_spelling_language(to_s(lang));
+	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem

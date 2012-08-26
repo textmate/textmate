@@ -41,7 +41,7 @@ struct data_source_t
 
 @implementation GutterView
 @synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor, SelectionBorderColor, iconColor;
+@synthesize foregroundColor, backgroundColor, selectionForegroundColor, selectionBackgroundColor, selectionBorderColor, iconColor;
 
 // ==================
 // = Setup/Teardown =
@@ -102,7 +102,7 @@ struct data_source_t
 	self.backgroundColor = nil;
 	self.selectionForegroundColor = nil;
 	self.selectionBackgroundColor = nil;
-	self.SelectionBorderColor = nil;
+	self.selectionBorderColor = nil;
 	self.iconColor = nil;
 	iterate(it, columnDataSources)
 	{
@@ -118,7 +118,6 @@ struct data_source_t
 {
 	backgroundRects.clear();
 	borderRects.clear();
-	selectedLines.clear();
 
 	citerate(range, text::selection_t(highlightedRange))
 	{
@@ -126,12 +125,6 @@ struct data_source_t
 		CGFloat firstY = [delegate lineFragmentForLine:from.line column:from.column].firstY;
 		auto fragment = [delegate lineFragmentForLine:to.line column:to.column];
 		CGFloat lastY = to.column == 0 && from.line != to.line ? fragment.firstY : fragment.lastY;
-
-		for(size_t i = from.line; i < to.line; ++i)
-			selectedLines.insert(i);
-
-		if(!(to.column == 0 && from.line != to.line))
-			selectedLines.insert(to.line);
 
 		backgroundRects.push_back(CGRectMake(0, firstY+1, self.frame.size.width, lastY - firstY - 2));
 		borderRects.push_back(CGRectMake(0, firstY, self.frame.size.width, 1));
@@ -354,7 +347,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	iterate(rect, backgroundRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
-	[self.SelectionBorderColor set];
+	[self.selectionBorderColor set];
 	iterate(rect, borderRects)
 		NSRectFillUsingOperation(NSIntersectionRect(*rect, NSIntersectionRect(aRect, self.frame)), NSCompositeSourceOver);
 
@@ -366,10 +359,13 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
-		NSColor* textColor;
-		if(selectedLines.find(record.lineNumber) != selectedLines.end())
+		NSRect rowRect = NSMakeRect(0, record.firstY, CGRectGetWidth(self.frame), record.lastY - record.firstY);
+		NSColor* textColor = self.foregroundColor;
+		iterate(rect, backgroundRects)
+		{
+			if(NSIntersectsRect(*rect, rowRect))
 				textColor = self.selectionForegroundColor;
-		else	textColor = self.foregroundColor;
+		}
 
 		citerate(dataSource, [self visibleColumnDataSources])
 		{

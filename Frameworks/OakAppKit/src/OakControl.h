@@ -90,6 +90,7 @@ struct layer_t
 - (uint32_t)currentState;
 - (void)setLayout:(std::vector<layer_t> const&)aLayout;
 - (void)sendAction:(SEL)action fromLayer:(layer_t const&)aLayer;
+- (NSInteger)tagForLayerContainingPoint:(NSPoint)aPoint;
 @property (nonatomic, readonly) NSInteger tag; // tag of the most recent layer causing an action
 @property (nonatomic, assign) BOOL mouseTrackingDisabled;
 @end

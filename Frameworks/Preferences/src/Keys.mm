@@ -67,6 +67,9 @@ NSString* const kUserDefaultsDisableNewDocumentAtReactivationKey = @"disableNewD
 NSString* const kUserDefaultsFoldersOnTopKey            = @"foldersOnTop";
 NSString* const kUserDefaultsShowFileExtensionsKey      = @"showFileExtensions";
 NSString* const kUserDefaultsInitialFileBrowserURLKey   = @"initialFileBrowserURL";
+NSString* const kUserDefaultsFileBrowserPlacementKey    = @"fileBrowserPlacement";
+NSString* const kUserDefaultsDisableTabBarCollapsingKey = @"disableTabBarCollapsing";
+NSString* const kUserDefaultsHTMLOutputPlacementKey     = @"htmlOutputPlacement";
 
 // ===========
 // = Bundles =
