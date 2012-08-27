@@ -27,6 +27,7 @@
 #include <vector>
 #include <memory>
 #include <numeric>
+#include <thread>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <boost/bimap/bimap.hpp>
