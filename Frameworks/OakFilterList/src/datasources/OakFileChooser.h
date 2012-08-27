@@ -5,6 +5,7 @@
 #endif
 #import <OakFoundation/OakTimer.h>
 #import <document/document.h>
+#import <oak/misc.h>
 
 struct file_chooser_t
 {
@@ -54,7 +55,7 @@ private:
 	std::vector<item_t> _ranked_items;
 };
 
-@interface OakFileChooser : NSObject <FilterListDataSource>
+PUBLIC @interface OakFileChooser : NSObject <FilterListDataSource>
 {
 	OBJC_WATCH_LEAKS(OakFileChooser)
 	NSString* _path;

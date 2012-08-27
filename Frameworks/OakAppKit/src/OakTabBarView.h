@@ -22,7 +22,7 @@ typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
 
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
-@interface OakTabBarView : OakControl
+PUBLIC @interface OakTabBarView : OakControl
 {
 	OBJC_WATCH_LEAKS(OakTabBarView);
 

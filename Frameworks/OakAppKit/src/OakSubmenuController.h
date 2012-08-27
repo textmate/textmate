@@ -1,4 +1,6 @@
-@interface OakSubmenuController : NSObject <NSMenuDelegate>
+#import <oak/misc.h>
+
+PUBLIC @interface OakSubmenuController : NSObject <NSMenuDelegate>
 {
 	IBOutlet NSMenu* goToMenu;
 	IBOutlet NSMenu* marksMenu;

@@ -5,7 +5,7 @@ PUBLIC extern NSUInteger const OakViewWindowIsMainMask;
 PUBLIC extern NSUInteger const OakViewWindowIsKeyMask;
 PUBLIC extern NSUInteger const OakViewViewIsFirstResponderMask;
 
-@interface OakView : NSView
+PUBLIC @interface OakView : NSView
 {
 	BOOL isFirstResponder;
 	NSUInteger keyState;

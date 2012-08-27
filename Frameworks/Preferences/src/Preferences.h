@@ -1,6 +1,8 @@
+#import <oak/misc.h>
+
 @class MASPreferencesWindowController;
 
-@interface Preferences : NSResponder
+PUBLIC @interface Preferences : NSResponder
 {
 	MASPreferencesWindowController* windowController;
 	NSArray* viewControllers;

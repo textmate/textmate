@@ -11,7 +11,7 @@ extern PUBLIC NSString* const OakFindIgnoreWhitespaceOption;
 extern PUBLIC NSString* const OakFindFullWordsOption;
 extern PUBLIC NSString* const OakFindRegularExpressionOption;
 
-@interface OakPasteboardEntry : NSObject
+PUBLIC @interface OakPasteboardEntry : NSObject
 {
 	NSString* string;
 	NSMutableDictionary* options;
@@ -30,7 +30,7 @@ extern PUBLIC NSString* const OakFindRegularExpressionOption;
 - (void)setFindOptions:(find::options_t)findOptions;
 @end
 
-@interface OakPasteboard : NSObject
+PUBLIC @interface OakPasteboard : NSObject
 {
 @private
 	NSString* pasteboardName;

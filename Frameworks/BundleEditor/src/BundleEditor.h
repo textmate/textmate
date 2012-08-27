@@ -6,7 +6,7 @@
 
 namespace be { struct entry_t; typedef std::shared_ptr<entry_t> entry_ptr; } /* be */
 
-@interface BundleEditor : NSWindowController <NSBrowserDelegate>
+PUBLIC @interface BundleEditor : NSWindowController <NSBrowserDelegate>
 {
 	IBOutlet NSBrowser* browser;
 	IBOutlet OakDocumentView* documentView;

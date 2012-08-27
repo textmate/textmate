@@ -7,7 +7,7 @@ namespace find
 	namespace in { enum { document, selection, folder, open_files }; }
 }
 
-@interface Find : NSResponder <OakFindServerProtocol>
+PUBLIC @interface Find : NSResponder <OakFindServerProtocol>
 {
 	FFWindowController* windowController;
 

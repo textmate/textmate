@@ -2,7 +2,7 @@
 
 @class OakFilterListView;
 
-@interface OakFilterWindowController : NSWindowController
+PUBLIC @interface OakFilterWindowController : NSWindowController
 {
 	OBJC_WATCH_LEAKS(OakFilterWindowController);
 	IBOutlet OakFilterListView* filterView;

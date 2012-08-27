@@ -20,7 +20,7 @@ struct buffer_refresh_callback_t;
 
 enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBottom };
 
-@interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
+PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 {
 	document::document_ptr document;
 	theme_ptr theme;

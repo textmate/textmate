@@ -2,7 +2,7 @@
 
 extern PUBLIC NSString* const BundlesManagerBundlesDidChangeNotification;
 
-@interface BundlesManager : NSObject
+PUBLIC @interface BundlesManager : NSObject
 {
 	std::vector<bundles_db::source_ptr> sourceList;
 	std::vector<bundles_db::bundle_ptr> bundlesIndex;

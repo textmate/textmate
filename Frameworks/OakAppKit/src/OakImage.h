@@ -1,4 +1,6 @@
-@interface OakImage : NSImage
+#import <oak/misc.h>
+
+PUBLIC @interface OakImage : NSImage
 {
 	NSImage* base;
 	NSImage* badge;

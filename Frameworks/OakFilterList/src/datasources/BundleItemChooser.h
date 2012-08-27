@@ -6,6 +6,7 @@
 #import <plist/uuid.h>
 #import <scope/scope.h>
 #import <bundles/bundles.h>
+#import <oak/misc.h>
 
 namespace search
 {
@@ -17,7 +18,7 @@ namespace search
 	};
 }
 
-@interface BundleItemChooser : NSObject <FilterListDataSource>
+PUBLIC @interface BundleItemChooser : NSObject <FilterListDataSource>
 {
 	OBJC_WATCH_LEAKS(BundleItemChooser);
 	scope::context_t scope;

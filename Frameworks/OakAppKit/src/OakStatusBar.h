@@ -128,7 +128,7 @@ namespace sb
 	namespace border { enum { top = 1, bottom = 2 }; }
 }
 
-@interface OakStatusBar : OakControl
+PUBLIC @interface OakStatusBar : OakControl
 {
 	std::vector<sb::cell_t> cells;
 	NSInteger borderEdges;

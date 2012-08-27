@@ -2,7 +2,7 @@
 
 @class OakTimerHelper;
 
-@interface OakTimer : NSObject
+PUBLIC @interface OakTimer : NSObject
 {
 	OBJC_WATCH_LEAKS(OakTimer);
 

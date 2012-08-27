@@ -1,6 +1,6 @@
 #import <oak/debug.h>
 
-@interface OakWindowFrameHelper : NSObject
+PUBLIC @interface OakWindowFrameHelper : NSObject
 {
 	OBJC_WATCH_LEAKS(OakWindowFrameHelper);
 

@@ -5,7 +5,7 @@
 
 @class OTVStatusBar;
 
-@interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate>
+PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate>
 {
 	OBJC_WATCH_LEAKS(OakDocumentView);
 
