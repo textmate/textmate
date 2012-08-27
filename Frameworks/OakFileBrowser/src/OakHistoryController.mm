@@ -31,6 +31,7 @@
 		NSMutableDictionary* dict = [entry mutableCopy];
 		[dict setObject:[[dict objectForKey:@"url"] absoluteString] forKey:@"url"];
 		[history addObject:dict];
+		[dict release];
 	}
 	return @{ @"history" : history, @"historyIndex" : @(historyIndex) };
 }
@@ -55,6 +56,7 @@
 			[dict removeObjectForKey:@"path"];
 			[dict setObject:value forKey:@"url"];
 			[historyArray addObject:dict];
+			[dict release];
 		}
 	}
 	historyIndex = oak::cap<NSInteger>(-1, [[newState objectForKey:@"historyIndex"] intValue], [historyArray count]-1);
