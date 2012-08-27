@@ -11,7 +11,7 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 @end
 
 @implementation OakHTMLOutputView
-@synthesize runningCommand, webView;
+@synthesize runningCommand;
 
 - (id)initWithFrame:(NSRect)frame
 {

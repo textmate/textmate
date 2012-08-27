@@ -10,5 +10,4 @@ PUBLIC @interface OakHTMLOutputView : HOBrowserView
 	BOOL runningCommand;
 }
 @property (nonatomic, readonly) BOOL runningCommand;
-@property (nonatomic, readonly) WebView* webView;
 @end

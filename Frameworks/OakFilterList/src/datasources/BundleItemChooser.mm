@@ -476,7 +476,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	return items;
 }
 
-- (NSAttributedString*)displayStringForItem:(id)item
+- (NSAttributedString*)displayStringForItem:(BundleItemChooserItem*)item
 {
 	NSUInteger index = [item index];
 	std::string const& itemName = all_items[index]->full_name();
@@ -498,7 +498,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	}
 }
 
-- (void)willDisplayCell:(NSTextFieldCell*)aCell forItem:(id)anItem
+- (void)willDisplayCell:(NSTextFieldCell*)aCell forItem:(BundleItemChooserItem*)anItem
 {
 	NSUInteger index = [anItem index];
 	[(OakBundleItemCell*)aCell setKeyEquivalent:[NSString stringWithCxxString:all_items[index]->value_for_field(bundles::kFieldKeyEquivalent)]];
