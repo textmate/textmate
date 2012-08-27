@@ -7,6 +7,7 @@ FLAGS += -DNS_BUILD_32_LIKE_64 -D'NULL_STR="\uFFFF"'
 FLAGS += -Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch
 FLAGS += -Wno-address-of-temporary
 FLAGS += -IShared/include
+FLAGS += -fcolor-diagnostics
 
 # FLAGS += -D_GLIBCXX_DEBUG
 FLAGS += -DNDEBUG -Os
