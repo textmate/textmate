@@ -1,9 +1,9 @@
 #import <OakFoundation/OakFindProtocol.h>
+#import "scan_path.h" // for find::folder_scan_settings_t used in std::map
 @class FFWindowController;
 
 namespace find
 {
-	struct folder_scan_settings_t;
 	namespace in { enum { document, selection, folder, open_files }; }
 }
 

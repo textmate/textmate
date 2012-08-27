@@ -5,7 +5,17 @@
 PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 
 struct binding_info_t;
-struct value_t;
+struct value_t
+{
+	value_t (double v = 0);
+	double current (double t) const;
+	double set_time (double t);
+	void set_new_target (double target, double now, double duration = 1);
+
+private:
+	struct record_t { double start, duration, source, target; };
+	std::vector<record_t> records;
+};
 
 struct layout_metrics_t;
 typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
