@@ -313,7 +313,7 @@ static bool uninstall_mate (std::string const& path)
 
 + (void)updateMateIfRequired
 {
-	NSString* oldMate = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey];
+	NSString* oldMate = [[[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsMateInstallPathKey] stringByExpandingTildeInPath];
 	double oldVersion = [[NSUserDefaults standardUserDefaults] doubleForKey:kUserDefaultsMateInstallVersionKey];
 	NSString* newMate = [[NSBundle mainBundle] pathForResource:@"mate" ofType:nil];
 
