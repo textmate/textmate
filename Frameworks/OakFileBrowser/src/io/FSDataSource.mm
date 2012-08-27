@@ -5,6 +5,7 @@
 // #import "FSBundlesDataSource.h"
 #import "FSSCMDataSource.h"
 #import "FSSearchDataSource.h"
+#import "FSXcodeProjectDataSource.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakFoundation/OakFoundation.h>
@@ -19,7 +20,9 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 {
 	FSDataSource* res = nil;
 	NSString* scheme = [anURL scheme];
-	if([scheme isEqualToString:@"file"])
+	if([scheme isEqualToString:@"xcodeproj"])
+		res = [[[FSXcodeProjectDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+	else if([scheme isEqualToString:@"file"])
 		res = [[[FSDirectoryDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
 	else if([scheme isEqualToString:@"computer"])
 		res = [[[FSVolumesDataSource alloc] initWithURL:anURL options:someOptions] autorelease];

@@ -59,6 +59,9 @@ namespace
 				sort_as_directory  = !(flags & path::flag::package);
 				treat_as_directory = !(flags & (path::flag::package|path::flag::hidden_volume));
 				target             = "file://localhost" + encode::url_part(path, "/") + "/";
+
+				if(path::extension(path) == ".xcodeproj")
+					target = "xcodeproj://localhost" + encode::url_part(path, "/") + "/";
 			}
 			else if(entry->d_type == DT_REG)
 			{
