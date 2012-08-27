@@ -268,7 +268,7 @@ namespace ng
 	std::string buffer_t::symbol_at (size_t i) const            { return _symbols->symbol_at(this, i); }
 
 	void buffer_t::set_live_spelling (bool flag)                                   { remove_meta_data(_spelling.get()); _spelling.reset(flag ? new spelling_t : NULL); add_meta_data(_spelling.get()); }
-	bool buffer_t::live_spelling () const                                          { return _spelling; }
+	bool buffer_t::live_spelling () const                                          { return _spelling ? true : false; }
 	void buffer_t::set_spelling_language (std::string const& lang)                 { _spelling_language = lang; }
 	std::string const& buffer_t::spelling_language () const                        { return _spelling_language; }
 	std::map<size_t, bool> buffer_t::misspellings (size_t from, size_t to) const   { return _spelling ? _spelling->misspellings(this, from, to) : std::map<size_t, bool>(); }
