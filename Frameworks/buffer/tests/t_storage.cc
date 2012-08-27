@@ -60,7 +60,7 @@ public:
 	{
 #ifdef ENABLE_BM
 		buffer = std::string(0x7F - 0x20, '\0');
-		ext::iota(buffer.begin(), buffer.end(), 0x20);
+		std::iota(buffer.begin(), buffer.end(), 0x20);
 		while(buffer.size() < 32 * 1024*1024)
 			buffer.insert(buffer.end(), buffer.begin(), buffer.end());
 		std::random_shuffle(buffer.begin(), buffer.end());
