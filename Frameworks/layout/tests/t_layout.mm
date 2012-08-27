@@ -393,7 +393,7 @@ private:
 
 - (void)rightMouseDown:(NSEvent*)anEvent
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 }
 @end
 

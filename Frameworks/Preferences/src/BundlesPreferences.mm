@@ -29,7 +29,7 @@ static std::string textify (std::string str)
 		bundles_db::bundle_ptr bundle = [bundlesManager bundleAtIndex:i];
 		if(bundle->category() != NULL_STR)
 				set.insert(bundle->category());
-		else	NSLog(@"%s No category for bundle: %s", SELNAME(_cmd), bundle->name().c_str());;
+		else	NSLog(@"%s No category for bundle: %s", sel_getName(_cmd), bundle->name().c_str());;
 	}
 
 	if(categories != std::vector<std::string>(set.begin(), set.end()))

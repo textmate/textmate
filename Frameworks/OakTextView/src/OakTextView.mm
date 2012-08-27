@@ -740,7 +740,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)doCommandBySelector:(SEL)aSelector
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", SELNAME(aSelector)););
+	D(DBF_OakTextView_TextInput, bug("%s\n", sel_getName(aSelector)););
 	AUTO_REFRESH;
 	[self tryToPerform:aSelector with:self];
 }
