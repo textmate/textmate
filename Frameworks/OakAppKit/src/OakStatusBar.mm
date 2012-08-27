@@ -313,7 +313,7 @@ static std::vector<cell_layout_t> layout (CGFloat frameWidth, std::vector<sb::ce
 	}
 }
 
-- (void)showMenu:(NSMenu*)menu withSelectedIndex:(NSUInteger)index forCellWithTag:(int)cellTag font:(NSFont*)font popup:(BOOL)isPopup
+- (void)showMenu:(NSMenu*)menu withSelectedIndex:(NSUInteger)index forCellWithTag:(NSInteger)cellTag font:(NSFont*)font popup:(BOOL)isPopup
 {
 	NSRect rect = [self bounds];
 

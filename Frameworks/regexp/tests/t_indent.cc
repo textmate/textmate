@@ -72,7 +72,7 @@ public:
 		indent::fsm_t fsm(patterns(), indentSize, tabSize);
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%d: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
 		}
 	}
 
@@ -100,7 +100,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%d: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
 		}
 	}
 
@@ -128,7 +128,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%d: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
 		}
 	}
 
@@ -156,7 +156,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%d: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
 		}
 	}
 
@@ -182,7 +182,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%d: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
 		}
 	}
 
@@ -200,7 +200,7 @@ public:
 		indent::fsm_t fsm(patterns(), indentSize, tabSize);
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%d: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - beginof(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
 		}
 	}
 };
