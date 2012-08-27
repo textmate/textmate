@@ -25,6 +25,6 @@ namespace oak
 }
 
 #define BENCHMARK(DBF, message) \
-	if(oak::benchmark_t<typeof(DBF)>::ptr _benchmark = oak::benchmark_t<typeof(DBF)>::ptr(new oak::benchmark_t<typeof(DBF)>(DBF, message)))
+	if(oak::benchmark_t<decltype(DBF)>::ptr _benchmark = oak::benchmark_t<decltype(DBF)>::ptr(new oak::benchmark_t<decltype(DBF)>(DBF, message)))
 
 #endif /* end of include guard: OAKBENCHMARK_H_RNPP99KX */

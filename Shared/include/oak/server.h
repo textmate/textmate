@@ -8,7 +8,7 @@
 
 namespace oak
 {
-	template <typename T, typename ARG = typename T::request_t, typename RESULT = typeof(T::handle_request(ARG()))>
+	template <typename T, typename ARG = typename T::request_t, typename RESULT = decltype(T::handle_request(ARG()))>
 	struct server_t
 	{
 		server_t (size_t threadStackSize = 0);

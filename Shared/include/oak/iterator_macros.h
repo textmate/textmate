@@ -27,11 +27,11 @@
 #include "stl_iterator_constructors.h"
 
 #ifndef foreach
-#define foreach(v,f,l) for(__typeof__(f) v = (f), _end = (l); v != _end; ++v)
+#define foreach(v,f,l) for(decltype(f) v = (f), _end = (l); v != _end; ++v)
 #endif
 
 #ifndef rforeach
-#define rforeach(v,f,l) for(__typeof__(f) v = (l), _begin = (f); v-- != _begin; )
+#define rforeach(v,f,l) for(decltype(f) v = (l), _begin = (f); v-- != _begin; )
 #endif
 
 #ifdef iterate
@@ -41,7 +41,7 @@
 
 #ifndef uiterate
 #define uiterate(v,c,u) \
-__typeof__(c) u = (c); foreach(v, beginof(u), endof(u))
+decltype(c) u = (c); foreach(v, beginof(u), endof(u))
 #endif
 
 #define OAK_UNIQUE          __COUNTER__
