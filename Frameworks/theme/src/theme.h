@@ -5,7 +5,7 @@
 #include <scope/scope.h>
 #include <cf/color.h>
 
-typedef std::tr1::shared_ptr<struct __CTFont const> CTFontPtr;
+typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
 
 struct PUBLIC styles_t
 {
@@ -118,7 +118,7 @@ private:
 	mutable std::map<key_t, styles_t> _cache;
 };
 
-typedef std::tr1::shared_ptr<theme_t> theme_ptr;
+typedef std::shared_ptr<theme_t> theme_ptr;
 PUBLIC theme_ptr parse_theme (bundles::item_ptr const& themeItem);
 
 #endif /* end of include guard: THEME_H_T0VVCP8F */

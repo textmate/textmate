@@ -97,6 +97,6 @@ namespace find
 	
 } /* find */ 
 
-typedef std::tr1::shared_ptr<find::scan_path_t> scan_path_ptr;
+typedef std::shared_ptr<find::scan_path_t> scan_path_ptr;
 
 #endif /* end of include guard: SCAN_PATH_H_RRYJZFKK */

@@ -15,7 +15,7 @@ struct PUBLIC clipboard_t
 		std::string _content;
 	};
 
-	typedef std::tr1::shared_ptr<entry_t> entry_ptr;
+	typedef std::shared_ptr<entry_t> entry_ptr;
 
 	clipboard_t ()          { }
 	virtual ~clipboard_t () { }
@@ -29,7 +29,7 @@ struct PUBLIC clipboard_t
 	void push_back (std::string const& content) { push_back(entry_ptr(new entry_t(content))); }
 };
 
-typedef std::tr1::shared_ptr<clipboard_t> clipboard_ptr;
+typedef std::shared_ptr<clipboard_t> clipboard_ptr;
 
 PUBLIC clipboard_ptr create_simple_clipboard ();
 

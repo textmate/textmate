@@ -8,7 +8,7 @@ struct binding_info_t;
 struct value_t;
 
 struct layout_metrics_t;
-typedef std::tr1::shared_ptr<layout_metrics_t> layout_metrics_ptr;
+typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
 
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 

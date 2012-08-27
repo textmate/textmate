@@ -9,10 +9,10 @@ namespace parse
 {
 	struct rule_t;
 
-	typedef std::tr1::shared_ptr<rule_t> rule_ptr;
-	typedef std::tr1::weak_ptr<rule_t> rule_weak_ptr;
+	typedef std::shared_ptr<rule_t> rule_ptr;
+	typedef std::weak_ptr<rule_t> rule_weak_ptr;
 	typedef std::map<std::string, rule_ptr> repository_t;
-	typedef std::tr1::shared_ptr<repository_t> repository_ptr;
+	typedef std::shared_ptr<repository_t> repository_ptr;
 
 	struct rule_t
 	{

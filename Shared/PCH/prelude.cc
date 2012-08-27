@@ -25,8 +25,8 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <tr1/memory>
 #include <ext/numeric>
+#include <memory>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <boost/bimap/bimap.hpp>

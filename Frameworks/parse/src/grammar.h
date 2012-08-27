@@ -8,8 +8,8 @@ namespace parse
 {
 	struct rule_t;
 	struct stack_t;
-	typedef std::tr1::shared_ptr<rule_t> rule_ptr;
-	typedef std::tr1::shared_ptr<stack_t> stack_ptr;
+	typedef std::shared_ptr<rule_t> rule_ptr;
+	typedef std::shared_ptr<stack_t> stack_ptr;
 
 	struct PUBLIC grammar_t
 	{
@@ -50,7 +50,7 @@ namespace parse
 		rule_ptr _rule;
 	};
 
-	typedef std::tr1::shared_ptr<grammar_t> grammar_ptr;
+	typedef std::shared_ptr<grammar_t> grammar_ptr;
 	PUBLIC grammar_ptr parse_grammar (bundles::item_ptr const& grammarItem);
 
 } /* parse */ 

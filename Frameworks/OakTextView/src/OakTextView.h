@@ -9,7 +9,7 @@ extern int32_t const NSWrapColumnWindowWidth;
 extern int32_t const NSWrapColumnAskUser;
 extern NSString* const kUserDefaultsDisableAntiAliasKey;
 
-namespace bundles { struct item_t; typedef std::tr1::shared_ptr<item_t> item_ptr; }
+namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 namespace ng      { struct layout_t; }
 
 @class OakTextView;
@@ -29,7 +29,7 @@ enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBot
 	BOOL antiAlias;
 	BOOL showInvisibles;
 	ng::editor_ptr editor;
-	std::tr1::shared_ptr<ng::layout_t> layout;
+	std::shared_ptr<ng::layout_t> layout;
 	NSUInteger refreshNestCount;
 	buffer_refresh_callback_t* callback;
 

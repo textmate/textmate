@@ -8,7 +8,7 @@
 namespace bundles
 {
 	struct item_t;
-	typedef std::tr1::shared_ptr<item_t> item_ptr;
+	typedef std::shared_ptr<item_t> item_ptr;
 
 	typedef std::map<std::string, std::string> string_map_t; // kludge to support empty map as a default argument
 	PUBLIC std::map<std::string, std::string> environment (scope::context_t const& scope, std::map<std::string, std::string> const& base = string_map_t());

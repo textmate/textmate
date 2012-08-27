@@ -6,7 +6,7 @@ struct shared_state_t
 	bool stop = false;
 };
 
-typedef std::tr1::shared_ptr<shared_state_t> shared_state_ptr;
+typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 @interface DownloadWindowController : NSWindowController
 {

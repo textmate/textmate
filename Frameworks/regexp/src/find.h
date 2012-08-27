@@ -26,7 +26,7 @@ namespace find
 	PUBLIC options_t& operator&= (options_t& lhs, unsigned rhs);
 
 	struct find_implementation_t;
-	typedef std::tr1::shared_ptr<find_implementation_t> find_implementation_ptr;
+	typedef std::shared_ptr<find_implementation_t> find_implementation_ptr;
 
 	struct PUBLIC find_t
 	{

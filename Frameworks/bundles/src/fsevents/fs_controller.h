@@ -12,7 +12,7 @@ namespace fs
 	};
 
 	struct watch_info_t;
-	typedef std::tr1::shared_ptr<watch_info_t> watch_info_ptr;
+	typedef std::shared_ptr<watch_info_t> watch_info_ptr;
 
 	watch_info_ptr watch_paths (std::set<std::string> rootPaths, callback_t* callback, path::glob_t const& dirGlob = "*", path::glob_t const& fileGlob = "*", std::string const& cacheFile = NULL_STR);
 

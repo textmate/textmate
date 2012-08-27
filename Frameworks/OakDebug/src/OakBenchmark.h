@@ -9,7 +9,7 @@ namespace oak
 	template <typename DBF>
 	struct benchmark_t
 	{
-		typedef std::tr1::shared_ptr< benchmark_t<DBF> > ptr;
+		typedef std::shared_ptr< benchmark_t<DBF> > ptr;
 
 		benchmark_t (DBF flag, std::string const& message) : flag(flag), message(message), timer() { }
 		~benchmark_t ()

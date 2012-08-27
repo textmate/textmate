@@ -112,7 +112,7 @@ namespace
 		std::vector<oak::uuid_t> _text_import_filters;
 	};
 
-	typedef std::tr1::shared_ptr<open_file_context_t> file_context_ptr;
+	typedef std::shared_ptr<open_file_context_t> file_context_ptr;
 }
 
 // =================
@@ -366,7 +366,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateExecuteBinaryImportFilter;
 
-					new file::read_t(_path, _authorization, std::tr1::static_pointer_cast<open_file_context_t>(shared_from_this()));
+					new file::read_t(_path, _authorization, std::static_pointer_cast<open_file_context_t>(shared_from_this()));
 				}
 				break;
 
@@ -396,7 +396,7 @@ namespace
 					else // FIXME we need to show dialog incase of multiple import hooks
 					{
 						_next_state = kStateExecuteBinaryImportFilter;
-						filter::run(filters.back(), _path, _content, std::tr1::static_pointer_cast<open_file_context_t>(shared_from_this()));
+						filter::run(filters.back(), _path, _content, std::static_pointer_cast<open_file_context_t>(shared_from_this()));
 					}
 				}
 				break;
@@ -517,7 +517,7 @@ namespace
 					else // FIXME we need to show dialog incase of multiple import hooks
 					{
 						_next_state = kStateExecuteTextImportFilter;
-						filter::run(filters.back(), _path, _content, std::tr1::static_pointer_cast<open_file_context_t>(shared_from_this()));
+						filter::run(filters.back(), _path, _content, std::static_pointer_cast<open_file_context_t>(shared_from_this()));
 					}
 				}
 				break;
@@ -559,7 +559,7 @@ namespace file
 	void open (std::string const& path, osx::authorization_t auth, open_callback_ptr cb, io::bytes_ptr existingContent, std::string const& virtualPath)
 	{
 		open_context_ptr context(new open_file_context_t(path, existingContent, auth, cb, virtualPath));
-		std::tr1::static_pointer_cast<open_file_context_t>(context)->proceed();
+		std::static_pointer_cast<open_file_context_t>(context)->proceed();
 	}
 
 } /* file */

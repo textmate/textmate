@@ -60,7 +60,7 @@ namespace ng
 	struct marks_t;
 	struct lines_t;
 	struct buffer_parser_t;
-	typedef std::tr1::shared_ptr<buffer_parser_t> buffer_parser_ptr;
+	typedef std::shared_ptr<buffer_parser_t> buffer_parser_ptr;
 
 	struct PUBLIC buffer_t
 	{
@@ -179,10 +179,10 @@ namespace ng
 		indexed_map_t<scope::scope_t>    _scopes;
 		indexed_map_t<parse::stack_ptr>  _parser_states;
 
-		std::tr1::shared_ptr<spelling_t> _spelling;
-		std::tr1::shared_ptr<symbols_t>  _symbols;
-		std::tr1::shared_ptr<marks_t>    _marks;
-		std::tr1::shared_ptr<pairs_t>    _pairs;
+		std::shared_ptr<spelling_t> _spelling;
+		std::shared_ptr<symbols_t>  _symbols;
+		std::shared_ptr<marks_t>    _marks;
+		std::shared_ptr<pairs_t>    _pairs;
 
 		friend struct spelling_t; // _scopes
 		friend struct symbols_t;  // _scopes

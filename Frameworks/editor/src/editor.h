@@ -275,7 +275,7 @@ namespace ng
 		document::document_ptr _document;
 	};
 
-	typedef std::tr1::shared_ptr<editor_t> editor_ptr;
+	typedef std::shared_ptr<editor_t> editor_ptr;
 
 	PUBLIC editor_ptr editor_for_document (document::document_ptr document);
 

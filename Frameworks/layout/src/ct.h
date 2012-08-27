@@ -41,8 +41,8 @@ namespace ct
 		CGFloat offset_for_index (size_t index) const;
 
 	private:
-		typedef std::tr1::shared_ptr<struct __CTLine const> CTLinePtr;
-		typedef std::tr1::shared_ptr<struct CGColor> CGColorPtr;
+		typedef std::shared_ptr<struct __CTLine const> CTLinePtr;
+		typedef std::shared_ptr<struct CGColor> CGColorPtr;
 
 		std::string _text;
 		CTLinePtr _line;

@@ -97,7 +97,7 @@ namespace osx
 			bool _valid;
 		};
 
-		std::tr1::shared_ptr<helper_t> helper;
+		std::shared_ptr<helper_t> helper;
 	};
 
 } /* osx */

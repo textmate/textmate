@@ -7,7 +7,7 @@
 OAK_DEBUG_VAR(ODBEditorSuite);
 
 struct ae_record_t;
-typedef std::tr1::shared_ptr<ae_record_t> ae_record_ptr;
+typedef std::shared_ptr<ae_record_t> ae_record_ptr;
 
 struct ae_record_t
 {

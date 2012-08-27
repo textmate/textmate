@@ -6,8 +6,8 @@
 
 namespace regexp
 {
-	typedef std::tr1::shared_ptr<regex_t> regex_ptr;
-	typedef std::tr1::shared_ptr<OnigRegion> region_ptr;
+	typedef std::shared_ptr<regex_t> regex_ptr;
+	typedef std::shared_ptr<OnigRegion> region_ptr;
 
 	struct match_t;
 	struct pattern_t;
@@ -20,8 +20,8 @@ namespace regexp
 		regex_ptr compiled_pattern;
 		char const* buf;
 
-		mutable std::tr1::shared_ptr< std::map<std::string, std::string> > captured_variables;
-		mutable std::tr1::shared_ptr< std::multimap<std::string, std::pair<size_t, size_t> > > captured_indices;
+		mutable std::shared_ptr< std::map<std::string, std::string> > captured_variables;
+		mutable std::shared_ptr< std::multimap<std::string, std::pair<size_t, size_t> > > captured_indices;
 
 		friend match_t search (pattern_t const& ptrn, char const* first, char const* last, char const* from, char const* to, OnigOptionType options);
 		match_t (region_ptr const& region, regex_ptr const& compiled_pattern, char const* buf) : region(region), compiled_pattern(compiled_pattern), buf(buf) { }

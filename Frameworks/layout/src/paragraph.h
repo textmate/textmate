@@ -73,7 +73,7 @@ namespace ng
 
 			node_type_t type () const                      { return _type; }
 			size_t length () const                         { return _length; }
-			std::tr1::shared_ptr<ct::line_t> line () const { return _line; }
+			std::shared_ptr<ct::line_t> line () const { return _line; }
 			CGFloat width () const;
 			void update_tab_width (CGFloat x, CGFloat tabWidth, ct::metrics_t const& metrics);
 
@@ -82,7 +82,7 @@ namespace ng
 			size_t _length;
 			CGFloat _width;
 
-			std::tr1::shared_ptr<ct::line_t> _line;
+			std::shared_ptr<ct::line_t> _line;
 		};
 
 		std::vector<node_t>::iterator iterator_at (size_t i);

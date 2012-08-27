@@ -24,7 +24,7 @@ namespace format_string
 		friend std::set<std::string> get_variables (format_string_t const&);
 
 		void init (std::string const& str);
-		std::tr1::shared_ptr<parser::nodes_t> nodes;
+		std::shared_ptr<parser::nodes_t> nodes;
 	};
 
 	PUBLIC std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat = true, string_map_t const& variables = string_map_t());

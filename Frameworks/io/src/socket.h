@@ -22,7 +22,7 @@ private:
 		int fd;
 	};
 
-	std::tr1::shared_ptr<helper_t> helper;
+	std::shared_ptr<helper_t> helper;
 };
 
 #endif /* end of include guard: IO_SOCKET_H_TNW4NXOL */

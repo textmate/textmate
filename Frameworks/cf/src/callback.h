@@ -82,7 +82,7 @@ namespace cf
 		T* obj;
 	};
 
-	typedef std::tr1::shared_ptr<callback_base_t> callback_ptr;
+	typedef std::shared_ptr<callback_base_t> callback_ptr;
 
 	template <typename T>
 	callback_ptr create_callback (void(T::*f)(), T* obj) { return callback_ptr(new member_callback_t<T>(f, obj)); }

@@ -156,7 +156,7 @@ namespace ng
 		static std::string row_to_s (row_tree_t::value_type const& info);
 
 		mutable row_tree_t _rows;
-		std::tr1::shared_ptr<folds_t> _folds;
+		std::shared_ptr<folds_t> _folds;
 
 		ng::buffer_t&      _buffer;
 		ng::callback_t*    _buffer_callback;
@@ -175,7 +175,7 @@ namespace ng
 		bool               _draw_caret = false;
 		ng::index_t        _drop_marker;
 
-		std::tr1::shared_ptr<ct::metrics_t> _metrics;
+		std::shared_ptr<ct::metrics_t> _metrics;
 
 		size_t _pre_refresh_revision;
 		size_t _pre_refresh_caret;

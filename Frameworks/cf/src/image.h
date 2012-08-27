@@ -12,7 +12,7 @@ namespace cf
 		operator CGImageRef () const    { return _value.get(); }
 		EXPLICIT operator bool () const { return _value.get() ? true : false; }
 	private:
-		typedef std::tr1::shared_ptr<struct CGImage> CGImagePtr;
+		typedef std::shared_ptr<struct CGImage> CGImagePtr;
 		CGImagePtr _value;
 	};
 

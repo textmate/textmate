@@ -20,10 +20,10 @@ namespace document
 {
 	struct watch_t;
 	struct document_t;
-	typedef std::tr1::shared_ptr<watch_t>          watch_ptr;
-	typedef std::tr1::shared_ptr<document_t>       document_ptr;
-	typedef std::tr1::shared_ptr<document_t const> document_const_ptr;
-	typedef std::tr1::weak_ptr<document_t>         document_weak_ptr;
+	typedef std::shared_ptr<watch_t>          watch_ptr;
+	typedef std::shared_ptr<document_t>       document_ptr;
+	typedef std::shared_ptr<document_t const> document_const_ptr;
+	typedef std::weak_ptr<document_t>         document_weak_ptr;
 
 	struct PUBLIC open_callback_t : file::open_callback_t
 	{
@@ -34,7 +34,7 @@ namespace document
 		virtual void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter) { }
 	};
 
-	typedef std::tr1::shared_ptr<open_callback_t> open_callback_ptr;
+	typedef std::shared_ptr<open_callback_t> open_callback_ptr;
 
 	struct PUBLIC save_callback_t : file::save_callback_t
 	{
@@ -43,9 +43,9 @@ namespace document
 		virtual void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) { }
 	};
 
-	typedef std::tr1::shared_ptr<save_callback_t> save_callback_ptr;
+	typedef std::shared_ptr<save_callback_t> save_callback_ptr;
 
-	struct PUBLIC document_t : std::tr1::enable_shared_from_this<document_t>
+	struct PUBLIC document_t : std::enable_shared_from_this<document_t>
 	{
 		WATCH_LEAKS(document_t);
 
@@ -60,7 +60,7 @@ namespace document
 		// ============================================================
 
 		struct reader_t { virtual io::bytes_ptr next () = 0; virtual ~reader_t () { } };
-		typedef std::tr1::shared_ptr<reader_t> reader_ptr;
+		typedef std::shared_ptr<reader_t> reader_ptr;
 		reader_ptr create_reader () const;
 
 		// ======================================================
@@ -194,7 +194,7 @@ namespace document
 			std::vector<document::open_callback_ptr> _callbacks;
 		};
 
-		typedef std::tr1::shared_ptr<open_callback_wrapper_t> open_callback_wrapper_ptr;
+		typedef std::shared_ptr<open_callback_wrapper_t> open_callback_wrapper_ptr;
 		open_callback_wrapper_ptr _open_callback;
 
 		void post_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool succes);
@@ -317,9 +317,9 @@ namespace document
 		mutable std::string _path_attributes;
 		// oak::uuid_t _grammar_uuid;
 
-		std::tr1::shared_ptr<ng::buffer_t> _buffer;
+		std::shared_ptr<ng::buffer_t> _buffer;
 		std::string _pristine_buffer = NULL_STR;
-		std::tr1::shared_ptr<ng::undo_manager_t> _undo_manager;
+		std::shared_ptr<ng::undo_manager_t> _undo_manager;
 		void mark_pristine ();
 
 		// std::string _folder;                   // when there is no path, this value is where the document will likely end up, i.e, used for retrieving settings and default save location
@@ -379,7 +379,7 @@ namespace document
 		std::set< std::pair<dev_t, ino_t> > seen_paths;
 	};
 
-	typedef std::tr1::shared_ptr<scanner_t> scanner_ptr;
+	typedef std::shared_ptr<scanner_t> scanner_ptr;
 	
 } /* document */
 

@@ -124,7 +124,7 @@ namespace
 			bool _replay;
 		};
 
-		typedef std::tr1::shared_ptr<stream_t> stream_ptr;
+		typedef std::shared_ptr<stream_t> stream_ptr;
 		std::vector<stream_ptr> streams;
 
 		void watch (std::string const& path, fs::event_callback_t* cb, uint64_t eventId, CFTimeInterval latency)

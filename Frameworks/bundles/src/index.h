@@ -34,7 +34,7 @@ namespace bundles
 	PUBLIC extern std::string const kFieldAny;
 
 	struct item_t;
-	typedef std::tr1::shared_ptr<item_t> item_ptr;
+	typedef std::shared_ptr<item_t> item_ptr;
 
 	struct PUBLIC item_t
 	{
@@ -106,7 +106,7 @@ namespace bundles
 		std::vector<std::string> _paths;
 		std::multimap<std::string, std::string> _fields;
 
-		mutable std::tr1::shared_ptr<plist::dictionary_t> _plist;
+		mutable std::shared_ptr<plist::dictionary_t> _plist;
 		mutable std::string _full_name;
 		std::vector<required_bundle_t> _required_bundles;
 		std::vector<required_executable_t> _required_executables;

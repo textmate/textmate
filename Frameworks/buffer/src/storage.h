@@ -27,7 +27,7 @@ namespace ng
 				size_t _size;
 			};
 
-			typedef std::tr1::shared_ptr<helper_t> helper_ptr;
+			typedef std::shared_ptr<helper_t> helper_ptr;
 
 			template <typename _InputIter>
 			memory_t (_InputIter first, _InputIter last);

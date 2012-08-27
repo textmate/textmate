@@ -21,7 +21,7 @@ namespace filter
 		virtual void filter_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) = 0;
 	};
 
-	typedef std::tr1::shared_ptr<callback_t> callback_ptr;
+	typedef std::shared_ptr<callback_t> callback_ptr;
 
 	std::vector<bundles::item_ptr> find (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, std::string const& event);
 	void run (bundles::item_ptr filter, std::string const& path, io::bytes_ptr content, callback_ptr callback);

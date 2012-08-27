@@ -33,7 +33,7 @@ namespace path
 			int _actual;
 		};
 
-		typedef std::tr1::shared_ptr<helper_t> helper_ptr;
+		typedef std::shared_ptr<helper_t> helper_ptr;
 		helper_ptr _helper;
 	};
 

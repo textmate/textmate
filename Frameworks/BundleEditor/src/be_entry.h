@@ -7,7 +7,7 @@
 namespace be
 {
 	struct entry_t;
-	typedef std::tr1::shared_ptr<entry_t> entry_ptr;
+	typedef std::shared_ptr<entry_t> entry_ptr;
 
 	struct entry_t
 	{
@@ -33,7 +33,7 @@ namespace be
 
 	private:
 		static std::vector<entry_ptr> kNoChildren;
-		mutable std::tr1::shared_ptr< std::vector<entry_ptr> > _children;
+		mutable std::shared_ptr< std::vector<entry_ptr> > _children;
 
 		bool setup_children () const
 		{

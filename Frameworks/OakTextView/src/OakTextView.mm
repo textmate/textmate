@@ -113,7 +113,7 @@ static ng::ranges_t merge (ng::ranges_t lhs, ng::ranges_t const& rhs)
 
 struct refresh_helper_t
 {
-	typedef std::tr1::shared_ptr<ng::layout_t> layout_ptr;
+	typedef std::shared_ptr<ng::layout_t> layout_ptr;
 
 	refresh_helper_t (OakTextView* self, document::document_ptr document, ng::editor_ptr editor, layout_ptr theLayout) : _self(self), _document(document), _editor(editor), _layout(theLayout)
 	{
@@ -201,7 +201,7 @@ private:
 	size_t _revision;
 	ng::editor_ptr _editor;
 	ng::ranges_t _selection;
-	std::tr1::weak_ptr<ng::layout_t> _layout;
+	std::weak_ptr<ng::layout_t> _layout;
 };
 
 #define AUTO_REFRESH refresh_helper_t _dummy(self, document, editor, layout)

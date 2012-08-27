@@ -41,7 +41,7 @@ struct file_chooser_t
 private:
 	void add_documents (std::vector<document::document_ptr> const& documents);
 
-	std::tr1::shared_ptr<document::scanner_t> _scanner;
+	std::shared_ptr<document::scanner_t> _scanner;
 
 	std::string _path        = NULL_STR;
 	std::string _glob_string = NULL_STR;

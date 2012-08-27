@@ -67,7 +67,7 @@ struct document_tab_t
 		DocumentController* _self;
 	};
 
-	typedef std::tr1::shared_ptr<callback_t> callback_ptr;
+	typedef std::shared_ptr<callback_t> callback_ptr;
 
 	void add_callback (DocumentController* self)
 	{

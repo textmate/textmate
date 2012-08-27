@@ -22,8 +22,8 @@ class document_tests : public CxxTest::TestSuite
 	{
 		document::open_callback_ptr cb(new callback_t(enc));
 		doc->try_open(cb);
-		std::tr1::static_pointer_cast<callback_t>(cb)->wait();
-		return !std::tr1::static_pointer_cast<callback_t>(cb)->_success;
+		std::static_pointer_cast<callback_t>(cb)->wait();
+		return !std::static_pointer_cast<callback_t>(cb)->_success;
 	}
 
 	void compare_content (std::string const& path, std::string const& content) const

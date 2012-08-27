@@ -33,7 +33,7 @@ namespace scm
 #endif
 
 	struct info_t;
-	typedef std::tr1::shared_ptr<info_t> info_ptr;
+	typedef std::shared_ptr<info_t> info_ptr;
 
 	struct PUBLIC callback_t
 	{
@@ -64,7 +64,7 @@ namespace scm
 		fs::snapshot_t _snapshot;
 
 		friend struct scm::watcher_t;
-		std::tr1::shared_ptr<scm::watcher_t> _watcher;
+		std::shared_ptr<scm::watcher_t> _watcher;
 		void callback (std::set<std::string> const& pathsChangedOnDisk);
 		oak::callbacks_t<callback_t> _callbacks;
 

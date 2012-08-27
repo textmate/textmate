@@ -17,10 +17,10 @@ namespace command
 	struct delegate_t;
 	struct runner_t;
 
-	typedef std::tr1::shared_ptr<delegate_t>     delegate_ptr;
-	typedef std::tr1::shared_ptr<runner_t>       runner_ptr;
+	typedef std::shared_ptr<delegate_t>     delegate_ptr;
+	typedef std::shared_ptr<runner_t>       runner_ptr;
 
-	struct PUBLIC delegate_t : std::tr1::enable_shared_from_this<delegate_t>
+	struct PUBLIC delegate_t : std::enable_shared_from_this<delegate_t>
 	{
 		virtual ~delegate_t () { }
 
@@ -47,7 +47,7 @@ namespace command
 
 	PUBLIC runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate);
 
-	struct PUBLIC runner_t : std::tr1::enable_shared_from_this<runner_t>
+	struct PUBLIC runner_t : std::enable_shared_from_this<runner_t>
 	{
 		friend runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate);
 
@@ -88,7 +88,7 @@ namespace command
 			bool _is_error;
 		};
 
-		typedef std::tr1::shared_ptr<my_reader_t> my_reader_ptr;
+		typedef std::shared_ptr<my_reader_t> my_reader_ptr;
 
 		friend struct my_reader_t;
 		void receive_data (char const* bytes, size_t len, bool is_error);

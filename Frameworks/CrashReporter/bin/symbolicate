@@ -144,8 +144,8 @@ Thread 4:  server (N2ng15buffer_parser_tE)
 0   libSystem.B.dylib             	0x90073aa2 __semwait_signal + 10
 1   libSystem.B.dylib             	0x9007375e _pthread_cond_wait + 1191
 2   libSystem.B.dylib             	0x900753f8 pthread_cond_wait$UNIX2003 + 73
-3   libbuffer.dylib               	0x006416df oak::server_t<ng::buffer_parser_t, std::tr1::shared_ptr<ng::buffer_t>, ng::buffer_parser_t::result_t>::server_run() + 203 (stl_vector.h:343)
-4   libbuffer.dylib               	0x0063f7ed oak::server_t<ng::buffer_parser_t, std::tr1::shared_ptr<ng::buffer_t>, ng::buffer_parser_t::result_t>::server_t(unsigned long)::runner_t::server(void*) + 17 (server.h:55)
+3   libbuffer.dylib               	0x006416df oak::server_t<ng::buffer_parser_t, std::shared_ptr<ng::buffer_t>, ng::buffer_parser_t::result_t>::server_run() + 203 (stl_vector.h:343)
+4   libbuffer.dylib               	0x0063f7ed oak::server_t<ng::buffer_parser_t, std::shared_ptr<ng::buffer_t>, ng::buffer_parser_t::result_t>::server_t(unsigned long)::runner_t::server(void*) + 17 (server.h:55)
 5   libSystem.B.dylib             	0x90073259 _pthread_start + 345
 6   libSystem.B.dylib             	0x900730de thread_start + 34
 
