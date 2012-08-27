@@ -12,10 +12,11 @@ FLAGS += -IShared/include
 FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
-CXX_FLAGS    += -std=gnu++11
+CXX_FLAGS    += -std=c++11 -stdlib=libc++
 OBJC_FLAGS   += -std=c99
-OBJCXX_FLAGS += -std=gnu++11
+OBJCXX_FLAGS += -std=c++11 -stdlib=libc++
 OBJCXX_FLAGS += -fobjc-call-cxx-cdtors
+LIBS         += c++
 
 LN_FLAGS += -m32 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
 LN_FLAGS += -fvisibility=hidden
