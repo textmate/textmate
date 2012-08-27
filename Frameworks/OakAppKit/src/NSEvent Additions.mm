@@ -3,7 +3,6 @@
 
 #if !defined(MAC_OS_X_VERSION_10_6) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6)
 @interface NSEvent (SnowLeopard)
-+ (NSTimeInterval)doubleClickInterval;
 + (NSUInteger)pressedMouseButtons;
 + (NSUInteger)modifierFlags;
 @end
@@ -18,16 +17,9 @@ static struct conversion_t { UInt32 oldValue; NSUInteger newValue; } const Conve
 };
 
 @implementation NSEvent (SnowLeopardCompatibilityWrappers)
-+ (NSTimeInterval)slDoubleClickInterval
-{
-	if(![self respondsToSelector:@selector(doubleClickInterval)])
-		return GetDblTime() / 60.0;
-	return [self doubleClickInterval];
-}
-
 + (NSTimeInterval)caretBlinkInterval
 {
-	return GetCaretTime() / 60.0; // There is no modern replacement for this one <rdar://7260524>
+	return [([[NSUserDefaults standardUserDefaults] objectForKey:@"NSTextInsertionPointBlinkPeriod"] ?: @567) doubleValue] / 1000.0;
 }
 
 + (NSUInteger)slPressedMouseButtons
