@@ -4,6 +4,16 @@
 
 Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
 
+## 2012-08-27
+
+* While recording a macro, several actions would cause TM to misbehave/freeze (uncaught exception).
+* Using projects outside user’s home folder with symbolic links into the user’s home folder could cause a crash from the file chooser (⌘T) if doing full path search.
+* Hopefully fix crash (for some people) related to file browser actions like New Folder.
+* If `mate` was installed in `~/bin` then TextMate wouldn’t properly update it, but prompt for admin password on each launch (until manually updated).
+* The bundle disambiguation menu now use Cocoa API with the small system font *[Jacob Bandes-Storch]*
+* ⌘-clicking file browser icons (to show in Finder) now only acts on actual files *[Jacob Bandes-Storch]*
+* Add New File and Open… actions to the dock menu *[Jacob Bandes-Storch]*
+
 ## 2012-08-26
 
 * Add context menu to tab bar. Actions include creating new tab (can also be done by double-clicking empty space in a tab bar), tearing off tabs (can also be done by double-clicking a tab), closing other tabs (can be done by option-clicking the tab’s close button), and closing tabs to the right.
