@@ -5,12 +5,14 @@ namespace
 {
 	template <int T> class width_tag_t { };
 
-	template <typename T> T to_network (T value, width_tag_t<2>)   { return htons(value); }
-	template <typename T> T to_network (T value, width_tag_t<4>)   { return htonl(value); }
+	template <typename T> T to_network (T value, width_tag_t<2>)   { return CFSwapInt16HostToBig(value); }
+	template <typename T> T to_network (T value, width_tag_t<4>)   { return CFSwapInt32HostToBig(value); }
+	template <typename T> T to_network (T value, width_tag_t<8>)   { return CFSwapInt64HostToBig(value); }
 	template <typename T> T to_network (T value)                   { return to_network(value, width_tag_t<sizeof(T)>()); }
 
-	template <typename T> T from_network (T value, width_tag_t<2>) { return ntohs(value); }
-	template <typename T> T from_network (T value, width_tag_t<4>) { return ntohl(value); }
+	template <typename T> T from_network (T value, width_tag_t<2>) { return CFSwapInt16BigToHost(value); }
+	template <typename T> T from_network (T value, width_tag_t<4>) { return CFSwapInt32BigToHost(value); }
+	template <typename T> T from_network (T value, width_tag_t<8>) { return CFSwapInt64BigToHost(value); }
 	template <typename T> T from_network (T value)                 { return from_network(value, width_tag_t<sizeof(T)>()); }
 }
 
