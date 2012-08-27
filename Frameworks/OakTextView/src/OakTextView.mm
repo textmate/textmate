@@ -1902,7 +1902,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		return;
 
 	D(DBF_OakTextView_Macros, bug("%s, %s\n", (char*)aSelector, [[anArgument description] UTF8String]););
-	[macroRecordingArray addObject:@{ @"command" : NSStringFromSelector(aSelector), @"argument" : anArgument }];
+	[macroRecordingArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:NSStringFromSelector(aSelector), @"command", anArgument, @"argument", nil]];
 }
 
 // ================
