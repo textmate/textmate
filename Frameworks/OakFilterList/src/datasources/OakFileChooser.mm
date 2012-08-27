@@ -326,8 +326,12 @@ void file_chooser_t::wait () const
 - (NSAttributedString*)infoString
 {
 	std::string const& name = data._match_name;
-	std::string const& path = data._document->path() == NULL_STR ? name : path::with_tilde(data._document->path());
-	return AttributedStringWithMarkedUpRanges(path, data._match_ranges, path.size() - name.size());
+	std::string const& path = data._document->path() == NULL_STR ? name : data._document->path();
+	std::string::size_type prefixLen = path.rfind(name);
+	if(prefixLen == std::string::npos || prefixLen + name.size() != path.size() || prefixLen != 0 && path[prefixLen-1] != '/')
+		prefixLen = 0;
+	std::string const prefix = prefixLen ? path::with_tilde(path.substr(0, prefixLen)) : "";
+	return AttributedStringWithMarkedUpRanges(prefix.empty() ? path : prefix + name, data._match_ranges, prefix.size());
 }
 @end
 
