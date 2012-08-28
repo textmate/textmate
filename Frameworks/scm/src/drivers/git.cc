@@ -232,7 +232,7 @@ namespace scm
 			if(!haveHead)
 				return NULL_STR;
 
-			std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD");
+			std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
 			branchName = branchName.substr(0, branchName.find("\n"));
 			if(branchName.find("refs/heads/") == 0)
 				branchName = branchName.substr(11);
