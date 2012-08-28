@@ -1,1 +1,87 @@
-../TextMate Help/css/stylesheet.css
+html {
+  font-size: 13px; }
+
+body {
+  font-family: Helvetica,Arial,sans-serif;
+  line-height: 1.6;
+  padding: 0;
+  margin: 1.15rem;
+  background-color: #f1f1f1;
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: #000; }
+
+@media screen and (-webkit-max-device-pixel-ratio: 1.999) {
+  body {
+    background-image: url("flower.png"); } }
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  body {
+    background-image: url("flower@2x.png");
+    background-size: 50%; } }
+body > h1, body > h2, body > p {
+  text-shadow: 0 0 1px white, 0 1px 0 rgba(255, 255, 255, 0.75); }
+
+h1, h2, h3, h4, h5, h6, p, ul, ol {
+  margin: 0 0 1.6rem 0; }
+
+h1, h2, h3, h4, h5, h6, p {
+  padding: 0; }
+
+h1 {
+  font-size: 2.4rem; }
+
+h2 {
+  font-size: 1.6rem; }
+
+article {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  margin-bottom: 2rem;
+  padding: 1.15rem;
+  overflow: hidden; }
+
+article:last-child {
+  margin-bottom: 0; }
+
+a, a:visited, a:hover {
+  color: #7f00a4;
+  font-weight: bold; }
+
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
+  margin: 1.6rem 0; }
+
+pre {
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  padding: 0.8rem 1.6rem 0.8rem 1.6rem;
+  overflow: auto; }
+
+kbd.keyEquivalent, kbd.tabTrigger {
+  padding: 0 0.15em;
+  margin: 0 0.15em;
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.35); }
+
+kbd.keyEquivalent {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  border-radius: 2px; }
+
+kbd.tabTrigger {
+  border-radius: 1em;
+  padding: 0.15em 0.5em; }
+
+span.credit::before {
+  content: "("; }
+
+span.credit::after {
+  content: ")"; }
+
+span.credit {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.5); }
