@@ -28,7 +28,7 @@
 	NSMutableArray* history = [NSMutableArray array];
 	for(NSDictionary* entry in historyArray)
 	{
-		NSMutableDictionary* dict = [entry mutableCopy];
+		NSMutableDictionary* dict = [[entry mutableCopy] autorelease];
 		[dict setObject:[[dict objectForKey:@"url"] absoluteString] forKey:@"url"];
 		[history addObject:dict];
 	}
@@ -51,7 +51,7 @@
 
 		if(value)
 		{
-			NSMutableDictionary* dict = [entry mutableCopy];
+			NSMutableDictionary* dict = [[entry mutableCopy] autorelease];
 			[dict removeObjectForKey:@"path"];
 			[dict setObject:value forKey:@"url"];
 			[historyArray addObject:dict];
