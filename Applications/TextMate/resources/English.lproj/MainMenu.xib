@@ -2,10 +2,10 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1070</int>
-		<string key="IBDocument.SystemVersion">12A269</string>
+		<string key="IBDocument.SystemVersion">11E53</string>
 		<string key="IBDocument.InterfaceBuilderVersion">2549</string>
-		<string key="IBDocument.AppKitVersion">1187</string>
-		<string key="IBDocument.HIToolboxVersion">624.00</string>
+		<string key="IBDocument.AppKitVersion">1138.47</string>
+		<string key="IBDocument.HIToolboxVersion">569.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">2549</string>
@@ -892,8 +892,8 @@
 											<object class="NSMenuItem" id="446919429">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Replace &amp; Find</string>
-												<string key="NSKeyEquiv">f</string>
-												<int key="NSKeyEquivModMask">1572864</int>
+												<string key="NSKeyEquiv">F</string>
+												<int key="NSKeyEquivModMask">262144</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
 												<reference key="NSMixedImage" ref="596846250"/>
@@ -2320,7 +2320,6 @@
 									</object>
 								</object>
 							</object>
-							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 						</object>
 						<object class="NSButton" id="343643022">
 							<reference key="NSNextResponder" ref="448031146"/>
@@ -2344,7 +2343,6 @@
 								<int key="NSPeriodicDelay">200</int>
 								<int key="NSPeriodicInterval">25</int>
 							</object>
-							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 						</object>
 						<object class="NSButton" id="570517942">
 							<reference key="NSNextResponder" ref="448031146"/>
@@ -2368,7 +2366,6 @@
 								<int key="NSPeriodicDelay">200</int>
 								<int key="NSPeriodicInterval">25</int>
 							</object>
-							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 						</object>
 						<object class="NSTextField" id="240907648">
 							<reference key="NSNextResponder" ref="448031146"/>
@@ -2402,7 +2399,6 @@
 									<reference key="NSColor" ref="65904941"/>
 								</object>
 							</object>
-							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 						</object>
 					</object>
 					<string key="NSFrameSize">{269, 102}</string>

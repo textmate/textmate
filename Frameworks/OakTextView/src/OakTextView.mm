@@ -1533,7 +1533,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (IBAction)replace:(id)sender               { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplace            options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions]]; }
 - (IBAction)replaceAll:(id)sender            { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplace            options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
 - (IBAction)replaceAllInSelection:(id)sender { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplaceInSelection options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
-- (IBAction)replaceAndFind:(id)sender        { /* TODO replaceAndFind: */ }
+- (IBAction)replaceAndFind:(id)sender        { [self replaceAllInSelection: sender]; [self findNext: sender]; }
 
 - (void)findWithOptions:(NSDictionary*)someOptions
 {
