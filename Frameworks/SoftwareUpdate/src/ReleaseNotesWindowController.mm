@@ -51,9 +51,9 @@ static NSData* Digest (NSString* someString)
 
 - (void)windowDidLoad
 {
-	[self.window setLevel:NSFloatingWindowLevel];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:releaseNotesURL cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
 	[webView setPolicyDelegate:self];
+	[self.window makeKeyAndOrderFront:self];
 }
 
 - (void)webView:(WebView*)sender decidePolicyForNavigationAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
