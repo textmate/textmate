@@ -369,7 +369,12 @@ OAK_DEBUG_VAR(DocumentController);
 	{
 		DocumentController* controller = (DocumentController*)[window delegate];
 		if([controller isKindOfClass:[DocumentController class]] && !controller->documentTabs.empty())
+		{
 			[controller->textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
+
+			settings_t const& settings = [controller selectedDocument]->settings();
+			controller.windowTitle = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [controller selectedDocument]->display_name())];
+		}
 	}
 }
 
