@@ -372,7 +372,7 @@ OAK_DEBUG_VAR(DocumentController);
 		{
 			[controller->textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
 
-			settings_t const& settings = [controller selectedDocument]->settings();
+			settings_t const& settings = [controller selectedDocument]->settings(to_s([controller.untitledSavePath stringByAppendingPathComponent:DefaultSaveNameForDocument([controller selectedDocument])]));
 			controller.windowTitle = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [controller selectedDocument]->display_name())];
 		}
 	}
