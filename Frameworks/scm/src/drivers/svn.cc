@@ -1,5 +1,6 @@
 #include "api.h"
 #include <oak/oak.h>
+#include <text/format.h>
 #include <text/parse.h>
 #include <text/trim.h>
 #include <text/tokenize.h>
@@ -8,29 +9,28 @@
 
 OAK_DEBUG_VAR(SCM_Svn);
 
-static scm::status::type parse_status_flag (char flag)
+static scm::status::type parse_status_string (std::string const& status)
 {
-	static struct { scm::status::type constant; char flag; } const StatusLetterConversionMap[] =
+	// Based on subversion/svn/status.c (generate_status_desc)
+	static std::map<std::string, scm::status::type> const StatusMap
 	{
-		{ scm::status::added,       'A' },
-		{ scm::status::conflicted,  'C' },
-		{ scm::status::deleted,     'D' },
-		{ scm::status::ignored,     'I' },
-		{ scm::status::modified,    'M' },
-		{ scm::status::modified,    'R' }, // replaced with other version on server (uncommitted)
-		{ scm::status::unversioned, '?' },
-		{ scm::status::versioned,   ' ' }, // really means none but it implies it's an unchanged, versioned file
-		{ scm::status::deleted,     '!' }, // missing on disk
+		{ "none",        scm::status::versioned   },
+		{ "normal",      scm::status::versioned   },
+		{ "added",       scm::status::added       },
+		{ "missing",     scm::status::deleted     },
+		{ "incomplete",  scm::status::deleted     },
+		{ "deleted",     scm::status::deleted     },
+		{ "replaced",    scm::status::modified    },
+		{ "modified",    scm::status::modified    },
+		{ "conflicted",  scm::status::conflicted  },
+		{ "obstructed",  scm::status::conflicted  },
+		{ "ignored",     scm::status::ignored     },
+		{ "external",    scm::status::none        }, // No good way to represent external status so default to 'none'
+		{ "unversioned", scm::status::unversioned },
 	};
 
-	for(size_t i = 0; i < sizeofA(StatusLetterConversionMap); ++i)
-	{
-		if(flag == StatusLetterConversionMap[i].flag)
-			return StatusLetterConversionMap[i].constant;
-	}
-
-	ASSERT_EQ(flag, '\0'); // we use ‘flag’ in the assertion to output the unrecognized status flag
-	return scm::status::none;
+	auto it = StatusMap.find(status);
+	return it != StatusMap.end() ? it->second : scm::status::none;
 }
 
 static void parse_status_output (scm::status_map_t& entries, std::string const& output)
@@ -43,15 +43,18 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 	v.pop_back();
 	iterate(line, v)
 	{
-		// Subversion's status output uses the first 7 characters for status
-		ASSERT((*line).length() > 7);
+		// Massaged Subversion output is as follows: 'FILE_PATH\0FILE_STATUS\0FILE_PROPS_STATUS'
+		std::vector<std::string> v2 = text::split((*line), std::string(1, '\0'));
+		ASSERT_EQ(v2.size(), 3);
+		std::string file_path         = v2[0];
+		std::string file_status       = v2[1];
+		std::string file_props_status = v2[2];
 
-		std::string rel_path = text::trim(text::split((*line), "   ").back(), " \t\n");
-
-		if((*line)[1] != ' ')
-			entries[rel_path] = parse_status_flag((*line)[1]);
+		// If the file's status is not normal/none, use the file's status, otherwise use the file's property status
+		if(file_status != "normal" || file_status != "none")
+			entries[file_path] = parse_status_string(file_status);
 		else
-			entries[rel_path] = parse_status_flag((*line)[0]);
+			entries[file_path] = parse_status_string(file_props_status);
 	}
 }
 
@@ -72,10 +75,18 @@ static void collect_all_paths (std::string const& svn, scm::status_map_t& entrie
 	ASSERT_NE(svn, NULL_STR);
 
 	std::map<std::string, std::string> env = oak::basic_environment();
+	// Parses Subversion's response XML and outputs 'FILE_PATH\0FILE_STATUS\0FILE_PROPS_STATUS'
+	std::string python_cmd = "import sys, xml.dom.minidom\n"
+		"for node in xml.dom.minidom.parse(sys.stdin).getElementsByTagName('entry'):\n"
+		"  path = node.getAttribute('path')\n"
+		"  wc_status = node.getElementsByTagName('wc-status')[0]\n"
+		"  print('%s\\0%s\\0%s' % (path, wc_status.getAttribute('item'), wc_status.getAttribute('props')))";
+	// Subversion status command that is verbose (necessary to get status for unchanged paths) and as XML
+	std::string svn_status_cmd = text::format("%s status --no-ignore --xml -v", svn.c_str());
+
 	env["PWD"] = dir;
 
-	// This does not return unmodified, versioned paths
-	parse_status_output(entries, io::exec(env, svn, "status", "--no-ignore", "-v", NULL));
+	parse_status_output(entries, io::exec(env, "/bin/bash", "-c", text::format("%s | python -c \"%s\"", svn_status_cmd.c_str(), python_cmd.c_str()).c_str(), NULL));
 }
 
 namespace scm
