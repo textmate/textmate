@@ -484,10 +484,12 @@ namespace document
 		return _file_type;
 	}
 
-	std::map<std::string, std::string> document_t::variables (std::map<std::string, std::string> map, bool sourceFileSystem) const
+	std::map<std::string, std::string> document_t::variables (std::map<std::string, std::string> map, bool sourceFileSystem, std::string const& untitledPath) const
 	{
 		map["TM_DISPLAYNAME"]   = display_name();
 		map["TM_DOCUMENT_UUID"] = to_s(identifier());
+
+		scm::info_ptr info;
 
 		if(path() != NULL_STR)
 		{
@@ -496,16 +498,20 @@ namespace document
 			map["TM_DIRECTORY"] = path::parent(path());
 			map["PWD"]          = path::parent(path());
 
-			if(scm::info_ptr info = scm::info(path()))
-			{
-				std::string const& branch = info->branch();
-				if(branch != NULL_STR)
-					map["TM_SCM_BRANCH"] = branch;
+			info = scm::info(path());
+		}
+		else if(untitledPath != NULL_STR)
+			info = scm::info(untitledPath);
 
-				std::string const& name = info->scm_name();
-				if(name != NULL_STR)
-					map["TM_SCM_NAME"] = name;
-			}
+		if(info)
+		{
+			std::string const& branch = info->branch();
+			if(branch != NULL_STR)
+				map["TM_SCM_BRANCH"] = branch;
+
+			std::string const& name = info->scm_name();
+			if(name != NULL_STR)
+				map["TM_SCM_NAME"] = name;
 		}
 
 		return sourceFileSystem ? variables_for_path(path(), scope(), map) : map;
