@@ -7,9 +7,6 @@
 
 extern int32_t const NSWrapColumnWindowWidth;
 extern int32_t const NSWrapColumnAskUser;
-extern NSString* const kUserDefaultsThemeUUIDKey;
-extern NSString* const kUserDefaultsFontNameKey;
-extern NSString* const kUserDefaultsFontSizeKey;
 extern NSString* const kUserDefaultsDisableAntiAliasKey;
 
 namespace bundles { struct item_t; typedef std::tr1::shared_ptr<item_t> item_ptr; }
@@ -104,7 +101,6 @@ enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBot
 - (GVLineRecord const&)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
 
-- (CGPoint)globalPositionForWindowUnderCaret;
 - (NSPoint)positionForWindowUnderCaret;
 - (scope::context_t const&)scope;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;

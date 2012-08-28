@@ -36,7 +36,7 @@ namespace text
 		{
 			size_t prevLen = len, prevCol = col;
 			len += ch.length();
-			col += (*ch == '\t' ? tabSize - (col % tabSize) : 1);
+			col += (*ch == '\t' ? tabSize - (col % tabSize) : (text::is_east_asian_width(*ch) ? 2 : 1));
 
 			if(*ch == '\n')
 			{

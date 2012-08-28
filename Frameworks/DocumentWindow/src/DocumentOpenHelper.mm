@@ -29,7 +29,7 @@ namespace
 			ASSERT(_window);
 		}
 
-		void select_encoding (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
+		void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)
 		{
 			[_window.attachedSheet orderOut:_self];
 
@@ -102,7 +102,7 @@ namespace
 - (void)selectEncodingSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(info_t*)info
 {
 	if(returnCode == NSAlertDefaultReturn)
-		info->context->set_encoding(text::split(to_s(info->controller.currentEncoding), " ")[0]);
+		info->context->set_charset(text::split(to_s(info->controller.currentEncoding), " ")[0]);
 	[alert release];
 	[info->controller release];
 	delete info;

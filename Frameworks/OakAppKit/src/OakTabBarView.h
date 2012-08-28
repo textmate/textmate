@@ -48,6 +48,7 @@ typedef std::tr1::shared_ptr<layout_metrics_t> layout_metrics_ptr;
 - (BOOL)tabBarView:(OakTabBarView*)aTabBarView shouldSelectIndex:(NSUInteger)anIndex;
 - (void)tabBarView:(OakTabBarView*)aTabBarView didDoubleClickIndex:(NSUInteger)anIndex;
 - (void)tabBarViewDidDoubleClick:(OakTabBarView*)aTabBarView;
+- (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView;
 
 // Methods sent to the delegate which the tab was dragged from
 // When called, the delegate should set up the drag pasteboard using -addTypes:owner: with the data it requires

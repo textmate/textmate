@@ -41,14 +41,18 @@ namespace
 	{
 		static std::string const DefaultScopeAttributes =
 			"{ rules = ("
-			"	{ attribute = 'attr.scm.svn';       glob = '.svn';        group = 'scm';   },"
-			"	{ attribute = 'attr.scm.hg';        glob = '.hg';         group = 'scm';   },"
-			"	{ attribute = 'attr.scm.git';       glob = '.git';        group = 'scm';   },"
-			"	{ attribute = 'attr.scm.p4';        glob = '.p4config';   group = 'scm';   },"
-			"	{ attribute = 'attr.project.ninja'; glob = 'build.ninja'; group = 'build'; },"
-			"	{ attribute = 'attr.project.make';  glob = 'Makefile';    group = 'build'; },"
-			"	{ attribute = 'attr.project.xcode'; glob = '*.xcodeproj'; group = 'build'; },"
-			"	{ attribute = 'attr.project.rake';  glob = 'Rakefile';    group = 'build'; },"
+			"	{ attribute = 'attr.scm.svn';       glob = '.svn';           group = 'scm';   },"
+			"	{ attribute = 'attr.scm.hg';        glob = '.hg';            group = 'scm';   },"
+			"	{ attribute = 'attr.scm.git';       glob = '.git';           group = 'scm';   },"
+			"	{ attribute = 'attr.scm.p4';        glob = '.p4config';      group = 'scm';   },"
+			"	{ attribute = 'attr.project.ninja'; glob = 'build.ninja';    group = 'build'; },"
+			"	{ attribute = 'attr.project.make';  glob = 'Makefile';       group = 'build'; },"
+			"	{ attribute = 'attr.project.xcode'; glob = '*.xcodeproj';    group = 'build'; },"
+			"	{ attribute = 'attr.project.rake';  glob = 'Rakefile';       group = 'build'; },"
+			"	{ attribute = 'attr.project.ant';   glob = 'build.xml';      group = 'build'; },"
+			"	{ attribute = 'attr.project.cmake'; glob = 'CMakeLists.txt'; group = 'build'; },"
+			"	{ attribute = 'attr.project.maven'; glob = 'pom.xml';        group = 'build'; },"
+			"	{ attribute = 'attr.project.scons'; glob = 'SConstruct';     group = 'build'; },"
 			"); }";
 
 		std::vector<attribute_rule_t> res;
@@ -140,7 +144,7 @@ namespace file
 			}
 		}
 
-		res.push_back(settings_for_path(path, text::join(res, " ")).get("scopeAttributes", ""));
+		res.push_back(settings_for_path(path, text::join(res, " ")).get(kSettingsScopeAttributesKey, ""));
 		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
 		return text::join(res, " ");
 	}

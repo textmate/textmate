@@ -329,7 +329,8 @@ struct operation_t
 			if([match.path isEqualToString:path])
 			{
 				NSUInteger row = [findAllResultsOutlineView rowForItem:match];
-				[findAllResultsOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+				NSUInteger firstMatch = row + ([findAllResultsOutlineView isItemExpanded:match] ? 1 : 0);
+				[findAllResultsOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:firstMatch] byExtendingSelection:NO];
 				[[findAllResultsOutlineView window] makeFirstResponder:findAllResultsOutlineView];
 				[findAllResultsOutlineView scrollRowToVisible:findAllResultsOutlineView.numberOfRows-1];
 				[findAllResultsOutlineView scrollRowToVisible:row];
@@ -365,6 +366,13 @@ struct operation_t
 	[findAllResultsOutlineView setNeedsDisplay:YES];
 	expandCollapseAllIsExpanding = NO;
 	[self updateResultsHeader];
+}
+
+- (IBAction)takeLevelToFoldFrom:(id)sender
+{
+	if(expandCollapseAllIsExpanding)
+			[self expandFindAllResults:sender];
+	else	[self collapseFindAllResults:sender];
 }
 
 - (void)windowDidLoad
@@ -835,6 +843,7 @@ Any other string:
 	int last = [findAllResultsOutlineView numberOfRows];
 	while(last-- != first)
 		[findAllResultsOutlineView expandItem:[findAllResultsOutlineView itemAtRow:last]];
+	[findAllResultsOutlineView sizeLastColumnToFit];
 }
 
 - (void)folderSearchDidFinish:(NSNotification*)notification

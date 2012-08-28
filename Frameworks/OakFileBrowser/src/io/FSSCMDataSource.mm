@@ -5,6 +5,7 @@
 #import <OakAppKit/OakFileIconImage.h>
 #import <io/path.h>
 #import <text/encode.h>
+#import <text/ctype.h>
 #import <oak/oak.h>
 
 static NSImage* SCMFolderIcon ()
@@ -34,6 +35,33 @@ static NSArray* convert (std::vector<std::string> const& paths, std::string cons
 	return [FSDataSource sortArray:res usingOptions:options];
 }
 
+template <typename _Iter>
+_Iter prune_path_parents (_Iter it, _Iter last)
+{
+	_Iter out = it;
+	std::sort(it, last);
+	std::reverse(it, last);
+	for(std::string child = NULL_STR; it != last; child = *it++)
+	{
+		if(child.size() <= it->size() || child.at(it->size()) != '/' || child.find(*it) != 0)
+			*out++ = *it;
+	}
+	return out;
+}
+
+template <typename _Iter>
+_Iter prune_path_children (_Iter it, _Iter last)
+{
+	_Iter out = it;
+	std::sort(it, last);
+	for(std::string parent = NULL_STR; it != last; ++it)
+	{
+		if(it->size() <= parent.size() || it->at(parent.size()) != '/' || it->find(parent) != 0)
+			*out++ = parent = *it;
+	}
+	return out;
+}
+
 @implementation FSSCMDataSource
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
@@ -51,6 +79,12 @@ static NSArray* convert (std::vector<std::string> const& paths, std::string cons
 				untrackedPaths.push_back(pair->first);
 		else	unstagedPaths.push_back(pair->first);
 	}
+
+	unstagedPaths.erase(prune_path_parents(unstagedPaths.begin(), unstagedPaths.end()), unstagedPaths.end());
+	untrackedPaths.erase(prune_path_children(untrackedPaths.begin(), untrackedPaths.end()), untrackedPaths.end());
+
+	std::sort(unstagedPaths.begin(), unstagedPaths.end(), text::less_t());
+	std::sort(untrackedPaths.begin(), untrackedPaths.end(), text::less_t());
 
 	FSItem* unstagedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @".unstaged/")];
 	unstagedItem.icon     = SCMFolderIcon();

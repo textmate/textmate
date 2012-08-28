@@ -5,7 +5,6 @@ class ScopeSelectorTests : public CxxTest::TestSuite
 public:
 	void test_child_selector ()
 	{
-		TS_WARN("TODO: Child and anchor selectors");
 		TS_ASSERT_EQUALS(scope::selector_t("foo fud").does_match("foo bar fud"),   true);
 		TS_ASSERT_EQUALS(scope::selector_t("foo > fud").does_match("foo bar fud"), false);
 		TS_ASSERT_EQUALS(scope::selector_t("foo > foo > fud").does_match("foo foo fud"), true);
@@ -13,7 +12,6 @@ public:
 		TS_ASSERT_EQUALS(scope::selector_t("foo > foo > fud").does_match("foo foo fud baz"), true);
 
 		TS_ASSERT_EQUALS(scope::selector_t("foo > foo fud > fud").does_match("foo foo bar fud fud"), true);
-
 	}
 
 	void test_mixed ()

@@ -18,7 +18,7 @@ In the simplest case you would run:
 	git submodule update --init
 	./configure && ninja
 
-Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefor fail.
+Please note that if you downloaded the source code (rather than cloned via git) you likely miss the submodules and the build will therefore fail.
 
 ## Prerequisites
 
@@ -124,6 +124,44 @@ You can send pull requests via GitHub. Patches should:
 
 There is both the [textmate-dev][] mailing list and [#textmate][] IRC channel at [freenode.net][] where this project can be discussed.
 
+## GitHub Workflow
+
+Developing patches should follow this workflow:
+
+### Initial Setup
+
+1.	Fork on GitHub (click Fork button)
+2.	Clone to computer: `git clone git@github.com:«github account»/textmate.git`
+3.	cd into your repo: `cd textmate`
+4.	Set up remote upstream: `git remote add -f upstream git://github.com/textmate/textmate.git`
+
+### Adding a Feature
+
+1.	Create a branch for the new feature: `git checkout -b my_new_feature`
+2.	Work on your feature, add and commit as usual
+
+Creating a branch is not strictly necessary, but it makes it easy to delete your branch when the feature has been merged into upstream, diff your branch with the version that actually ended in upstream, and to submit pull requests for multiple features (branches).
+
+### Pushing to GitHub
+
+8.	Push branch to GitHub: `git push origin my_new_feature`
+9.	Issue pull request: Click Pull Request button on GitHub
+
+### Useful Commands
+
+If a lot of changes has happened upstream you can replay your local changes on top of these, this is done with `rebase`, e.g.:
+
+	git fetch upstream
+	git rebase upstream/master
+
+This will fetch changes and re-apply your commits on top of these.
+
+This is generally better than merge, as it will give a clear picture of which commits are local to your branch. It will also “prune” any of your local commits if the same changes have been applied upstream.
+
+You can use `-i` with `rebase` for an “interactive” rebase. This allows you to drop, re-arrange, merge, and reword commits, e.g.:
+
+	git rebase -i upstream/master
+
 ## Changing a xib File
 
 When you change a `xib` file then please look at the diff before you push. If the diff seems to have a lot of changes unrelated to what actually did change, please revert back to `HEAD` and open the pristine `xib` in Xcode and save that (without changing anything).
@@ -156,8 +194,8 @@ TextMate is a trademark of Allan Odgaard.
 [clang 3.2]:     http://clang.llvm.org/
 [MacPorts]:      http://www.macports.org/
 [homebrew]:      http://mxcl.github.com/homebrew/
-[NinjaBundle]:   https://github.com/avian/ninja.tmbundle
-[CxxTest]:       https://github.com/sorbits/cxxtest.tmbundle
+[NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
+[CxxTest]:       https://github.com/textmate/cxxtest.tmbundle
 [GPL 3]:         http://www.gnu.org/copyleft/gpl.html
 [textmate-dev]:  http://lists.macromates.com/listinfo/textmate-dev
 [#textmate]:     irc://irc.freenode.net/#textmate

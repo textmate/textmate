@@ -5,6 +5,7 @@
 #import "TMPlugInController.h"
 #import "RMateServer.h"
 #import <Preferences/Keys.h>
+#import <Preferences/TerminalPreferences.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakFoundation/OakFoundation.h>
@@ -34,6 +35,9 @@ OAK_DEBUG_VAR(AppStartup);
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
 {
 	D(DBF_AppStartup, bug("\n"););
+	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
+	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
 		NO_obj, @"ApplePressAndHoldEnabled",
 		@25,    @"NSRecentDocumentsLimit",
@@ -138,6 +142,7 @@ OAK_DEBUG_VAR(AppStartup);
 	unsetenv("OAK_DISABLE_UNTITLED_FILE");
 
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+	[TerminalPreferences updateMateIfRequired];
 
 	[appController setup];
 }

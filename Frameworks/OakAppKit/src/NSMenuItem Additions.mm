@@ -153,7 +153,7 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 
 - (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(int)row column:(int)column;
 {
-	CGSize stringSize = [string sizeWithAttributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName : font }];
 
 	NSTextTableBlock* block = [[[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1] autorelease];
 
@@ -163,7 +163,7 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 	block.verticalAlignment = verticalAlignment;
 
 	NSMutableParagraphStyle* paragraphStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
-	[paragraphStyle setTextBlocks:[NSArray arrayWithObjects:block, nil]];
+	[paragraphStyle setTextBlocks:@[ block ]];
 	[paragraphStyle setAlignment:textAlignment];
 
 	string = [string stringByAppendingString:@"\n"];
@@ -256,15 +256,17 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 	[attributedTitle appendTableCellWithString:[NSString stringWithCxxString:(" "+aTabTrigger+"\u21E5")] table:table textAlignment:NSRightTextAlignment
 		verticalAlignment:font.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment
 		font:[NSFont menuBarFontOfSize:floor(font.pointSize * 0.85)] row:0 column:1];
+	NSString* plainTitle = self.title;
 	self.attributedTitle = attributedTitle;
+	self.title = plainTitle;
 }
 
 - (void)setModifiedState:(BOOL)flag
 {
-	if(MenuRef menu = _NSGetCarbonMenu([self menu]))
+	if(NSImage* image = [NSImage imageNamed:@"NSMenuItemBullet"])
 	{
-		MenuItemIndex itemIndex = [[self menu] indexOfItem:self] + 1;
-		SetItemMark(menu, itemIndex, flag ? 0xA5 : noMark);
+		[self setMixedStateImage:image];
+		[self setState:NSMixedState];
 	}
 }
 @end

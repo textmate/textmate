@@ -1,5 +1,7 @@
 #import <oak/debug.h>
 
+PUBLIC extern NSString* const kUserDefaultsFileBrowserWidthKey;
+
 @class OakFileBrowser;
 @class OakFileBrowserView;
 @class OakHistoryController;
@@ -37,6 +39,7 @@
 
 - (void)setupViewWithSize:(NSSize)viewSize resizeIndicatorOnRight:(BOOL)flag state:(NSDictionary*)fileBrowserState;
 - (void)showURL:(NSURL*)aPath;
+- (void)deselectAll:(id)sender;
 - (void)updateVariables:(std::map<std::string, std::string>&)env;
 
 - (IBAction)goBack:(id)sender;

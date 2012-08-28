@@ -6,9 +6,6 @@
 #import <command/runner.h>
 #import <scm/scm.h>
 
-extern NSString* const kUserDefaultsHTMLOutputPlacementKey;
-extern NSString* const kUserDefaultsFileBrowserPlacementKey;
-
 @class OakLayoutView;
 @class OakDocumentView;
 @class OakTextView;

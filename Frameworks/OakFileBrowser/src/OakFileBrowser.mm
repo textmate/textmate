@@ -30,6 +30,8 @@
 #import <text/ctype.h>
 #import <regexp/format_string.h>
 
+NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
+
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
 @interface OakFileBrowser ()
@@ -175,6 +177,11 @@ static NSURL* ParentForURL (NSURL* url)
 	}
 }
 
+- (void)deselectAll:(id)sender
+{
+	[view.outlineView deselectAll:sender];
+}
+
 - (NSArray*)openURLs
 {
 	return outlineViewDelegate.openURLs;
@@ -267,9 +274,13 @@ static NSURL* ParentForURL (NSURL* url)
 	col = row != -1 && col == -1 ? 0 : col; // Clicking a row which participates in multi-row selection causes clickedColumn to return -1 <rdar://10382268>
 	OFBPathInfoCell* cell = (OFBPathInfoCell*)[view.outlineView preparedCellAtColumn:col row:row];
 	NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[view.outlineView frameOfCellAtColumn:col row:row] ofView:view.outlineView];
-	if((hit & OakImageAndTextCellHitImage) && !([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask))
+	if(hit & OakImageAndTextCellHitImage)
 	{
-		[self didDoubleClickOutlineView:sender];
+		NSURL* itemURL = ((FSItem*)[view.outlineView itemAtRow:row]).url;
+		
+		if(([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask) && [itemURL isFileURL])
+			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ itemURL ]];
+		else	[self didDoubleClickOutlineView:sender];
 	}
 	else if(hit & OFBPathInfoCellHitCloseButton)
 	{
@@ -331,8 +342,8 @@ static NSURL* ParentForURL (NSURL* url)
 
 - (void)showSelectedEntriesInFinder:(id)sender
 {
-	for(NSString* aPath in self.selectedPaths)
-		[[NSWorkspace sharedWorkspace] selectFile:aPath inFileViewerRootedAtPath:[aPath stringByDeletingLastPathComponent]];
+	for(FSItem* item in self.selectedItems)
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
 }
 
 - (NSString*)parentForNewFolder
@@ -831,12 +842,21 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 - (IBAction)goToSCMDataSource:(id)sender
 {
-	for(NSURL* selectedURL in self.selectedURLs)
+	if([url.scheme isEqualToString:@"scm"])
 	{
-		if([selectedURL isFileURL] && path::is_directory([[selectedURL path] fileSystemRepresentation]))
-			return [self pushURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
+		if(historyController.previousURL)
+				[self goBack:sender];
+		else	[self goToParentFolder:sender];
 	}
-	[self pushURL:[FSSCMDataSource scmURLWithPath:[url path]]];
+	else
+	{
+		for(NSURL* selectedURL in self.selectedURLs)
+		{
+			if([selectedURL isFileURL] && path::is_directory([[selectedURL path] fileSystemRepresentation]))
+				return [self pushURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
+		}
+		[self pushURL:[FSSCMDataSource scmURLWithPath:[url path]]];
+	}
 }
 
 - (IBAction)goBack:(id)sender             { if(historyController.previousURL) { [self setURL:historyController.previousURL]; [historyController retreat:self]; [outlineViewDelegate scrollToOffset:historyController.currentURLScrollOffset]; [self updateView]; } }

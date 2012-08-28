@@ -29,6 +29,7 @@ namespace format_string
 
 	PUBLIC std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat = true, string_map_t const& variables = string_map_t());
 	PUBLIC std::string expand (std::string const& format, string_map_t const& variables = string_map_t());
+	PUBLIC std::string escape (std::string const& format);
 
 } /* format_string */
 

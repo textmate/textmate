@@ -40,9 +40,6 @@ OAK_DEBUG_VAR(OakTextView_Macros);
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
-NSString* const kUserDefaultsThemeUUIDKey        = @"themeUUID";
-NSString* const kUserDefaultsFontNameKey         = @"fontName";
-NSString* const kUserDefaultsFontSizeKey         = @"fontSize";
 NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 
 @interface OakTextView ()
@@ -58,7 +55,6 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 - (void)updateMarkedRanges;
 - (void)redisplayFrom:(size_t)from to:(size_t)to;
 - (void)recordSelector:(SEL)aSelector withArgument:(id)anArgument;
-- (NSPoint)globalPositionForWindowUnderCaret;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
 - (void)highlightRanges:(ng::ranges_t const&)ranges;
 @property (nonatomic, assign) ng::ranges_t const& markedRanges;
@@ -77,9 +73,6 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
 {
-	if(ranges.last().unanchored)
-		return std::vector<bundles::item_ptr>();
-
 	size_t caret = ranges.last().min().index;
 	size_t line  = buffer.convert(caret).line;
 	size_t bol   = buffer.begin(line);
@@ -389,9 +382,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		settings_t const& settings = document->settings();
 
 		editor = ng::editor_for_document(document);
-		wrapColumn = settings.get("wrapColumn", wrapColumn);
-		layout.reset(new ng::layout_t(document->buffer(), theme, fontName, fontSize, settings.get("softWrap", false), wrapColumn, document->folded()));
-		if(settings.get("showWrapColumn", false))
+		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
+		layout.reset(new ng::layout_t(document->buffer(), theme, fontName, fontSize, settings.get(kSettingsSoftWrapKey, false), wrapColumn, document->folded()));
+		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
 		BOOL hasFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
@@ -437,18 +430,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		settings_t const& settings = settings_for_path();
 
-		std::string themeUUID = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsThemeUUIDKey]);
-		if(themeUUID == NULL_STR)
-			themeUUID = settings.get("theme", "71D40D9D-AE48-11D9-920A-000D93589AF6");
-
-		NSFont* defaultFont       = [NSFont userFixedPitchFontOfSize:0];
-		NSString* defaultFontName = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsFontNameKey] ?: [defaultFont fontName];
-		CGFloat defaultFontSize   = [[NSUserDefaults standardUserDefaults] floatForKey:kUserDefaultsFontSizeKey] ?: [defaultFont pointSize];
-
-		theme          = parse_theme(bundles::lookup(themeUUID));
-		fontName       = settings.get("fontName", to_s(defaultFontName));
-		fontSize       = settings.get("fontSize", (int32_t)defaultFontSize);
-		showInvisibles = settings.get("showInvisibles", false);
+		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
+		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
+		fontSize       = settings.get(kSettingsFontSizeKey, 11);
+		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
 		[self registerForDraggedTypes:[[self class] dropTypes]];
@@ -800,7 +785,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		case bundles::kItemTypeTheme:
 		{
-			[self setTheme:parse_theme(item)];
+			OakDocumentView* documentView = (OakDocumentView*)[[self enclosingScrollView] superview];
+			[documentView setThemeWithUUID:[NSString stringWithCxxString:item->uuid()]];
 		}
 		break;
 	}
@@ -981,7 +967,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, editor->scope());
 	if(!items.empty())
 	{
-		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self globalPositionForWindowUnderCaret]))
+		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
 			[self performBundleItem:item];
 		return YES;
 	}
@@ -1037,7 +1023,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (void)oldKeyDown:(NSEvent*)anEvent
 {
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), editor->scope());
-	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self globalPositionForWindowUnderCaret]))
+	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
 		[self performBundleItem:item];
 	else if(items.empty())
 		[self interpretKeyEvents:@[ anEvent ]];
@@ -1206,22 +1192,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	else	{ p = [NSEvent mouseLocation]; p.y -= 16; }
 
 	return p;
-}
-
-- (NSPoint)globalPositionForWindowUnderCaret
-{
-	NSPoint pos = [self positionForWindowUnderCaret];
-
-	NSRect mainScreen = [[NSScreen mainScreen] frame];
-	for(NSScreen* candidate in [NSScreen screens])
-	{
-		if(NSMinX([candidate frame]) == 0 && NSMinY([candidate frame]) == 0)
-			mainScreen = [candidate frame];
-	}
-
-	CGFloat top = round(NSMaxY(mainScreen) - pos.y);
-	CGFloat left = round(pos.x - NSMinX(mainScreen));
-	return NSMakePoint(top, left);
 }
 
 - (NSString*)selectAndReturnMisspelledWordAtIndex:(size_t)currnetIndex
@@ -1597,10 +1567,13 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)expandTabTrigger:(id)sender
 {
+	if(editor->disallow_tab_expansion())
+		return NO;
+
 	AUTO_REFRESH;
 	ng::range_t range;
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), editor->ranges(), document->path_attributes(), &range);
-	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self globalPositionForWindowUnderCaret]))
+	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
 	{
 		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:editor->as_string(range.first.index, range.last.index)]];
 		editor->delete_tab_trigger(editor->as_string(range.first.index, range.last.index));
@@ -1774,6 +1747,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	// 	;
 
 	wrapColumn = [sender tag];
+	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
 	if(layout)
 	{
 		AUTO_REFRESH;
@@ -1786,15 +1760,26 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (BOOL)freehandedEditing     { return NO; }
 - (BOOL)overwriteMode         { return NO; }
 
-- (IBAction)toggleShowInvisibles:(id)sender { self.showInvisibles = !self.showInvisibles; }
-- (IBAction)toggleSoftWrap:(id)sender       { self.softWrap = !self.softWrap; }
+- (IBAction)toggleShowInvisibles:(id)sender
+{
+	self.showInvisibles = !self.showInvisibles;
+	settings_t::set(kSettingsShowInvisiblesKey, (bool)self.showInvisibles, document->file_type());
+}
+
+- (IBAction)toggleSoftWrap:(id)sender
+{
+	self.softWrap = !self.softWrap;
+	settings_t::set(kSettingsSoftWrapKey, (bool)self.softWrap, document->file_type());
+}
 
 - (IBAction)toggleShowWrapColumn:(id)sender
 {
 	if(layout)
 	{
 		AUTO_REFRESH;
-		layout->set_draw_wrap_column(!layout->draw_wrap_column());
+		bool flag = !layout->draw_wrap_column();
+		layout->set_draw_wrap_column(flag);
+		settings_t::set(kSettingsShowWrapColumnKey, flag);
 	}
 }
 
@@ -1917,7 +1902,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		return;
 
 	D(DBF_OakTextView_Macros, bug("%s, %s\n", (char*)aSelector, [[anArgument description] UTF8String]););
-	[macroRecordingArray addObject:@{ @"command" : NSStringFromSelector(aSelector), @"argument" : anArgument }];
+	[macroRecordingArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:NSStringFromSelector(aSelector), @"command", anArgument, @"argument", nil]];
 }
 
 // ================
@@ -1982,7 +1967,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		AUTO_REFRESH;
 		editor->insert(merged, true);
 	}
-	else if(bundles::item_ptr handler = bundles::show_menu_for_items(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self globalPositionForWindowUnderCaret]))
+	else if(bundles::item_ptr handler = bundles::show_menu_for_items(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self positionForWindowUnderCaret]))
 	{
 		struct callback_t : document::run_callback_t
 		{
@@ -2160,12 +2145,20 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (NSCursor*)IBeamCursor
 {
+	NSCursor* ibeamRegular = [NSCursor IBeamCursor];
+	
 	if(cf::color_is_dark(theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background()))
 	{
-		static NSCursor* ibeamCursor = [[NSCursor alloc] initWithImage:[NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]] hotSpot:NSMakePoint(7, 7)];
+		static NSCursor* ibeamCursor = nil;
+		if(!ibeamCursor)
+		{
+			NSImage* ibeamWhite = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
+			[ibeamWhite setSize:[[ibeamRegular image] size]];
+			ibeamCursor = [[NSCursor alloc] initWithImage:ibeamWhite hotSpot:NSMakePoint(4, 9)];
+		}
 		return ibeamCursor;
 	}
-	return [NSCursor IBeamCursor];
+	return ibeamRegular;
 }
 
 - (void)resetCursorRects
@@ -2362,7 +2355,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(document->buffer(), layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), document->path_attributes()), [anEvent modifierFlags]));
 	if(!items.empty())
 	{
-		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self globalPositionForWindowUnderCaret]))
+		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
 		{
 			AUTO_REFRESH;
 			editor->set_selections(ng::range_t(layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]).index));

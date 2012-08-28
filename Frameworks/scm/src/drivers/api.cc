@@ -53,6 +53,7 @@ namespace scm
 				case modified:     return "M";
 				case ignored:      return "I";
 				case deleted:      return "D";
+				case mixed:        return "X";
 				case unversioned:  return "U";
 				default:           return text::format("unknown (%d)", status);
 			}
@@ -70,13 +71,14 @@ namespace scm
 	driver_t* git_driver ();
 	driver_t* hg_driver ();
 	driver_t* p4_driver ();
+	driver_t* svn_driver ();
 
 	driver_t const* driver_for_path (std::string const& path, std::string* wcPath)
 	{
 		if(path == NULL_STR || path == "" || path[0] != '/')
 			return NULL;
 
-		static driver_t* const drivers[] = { git_driver(), hg_driver(), p4_driver() };
+		static driver_t* const drivers[] = { git_driver(), hg_driver(), p4_driver(), svn_driver() };
 		for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
 		{
 			iterate(driver, drivers)

@@ -1,4 +1,20 @@
 #!/usr/bin/env ruby -wKU
+# == Synopsis
+#
+# upload [-k «keyfile»] [-d «destination»] «file»
+#
+# == Usage
+#
+# --help:
+#    show help.
+#
+# --keyfile/-k:
+#    Keyfile used for signing.
+#
+# --destination/-d:
+#    Which GitHub ‘«user»/«repository»’ we should upload to.
+#
+require 'getoptlong'
 require "rubygems"
 require "net/netrc"
 require "json"
@@ -6,14 +22,10 @@ require 'base64'
 require 'openssl'
 require 'digest/sha1'
 
-KEYFILE    = File.join(File.dirname(__FILE__), "../../TextMate/etc/sign_key.pem")
-PW_INFO    = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
-REPOSITORY = 'textmate/textmate'
+def sign_file(path, keyfile, password)
+  # %x{openssl dgst -dss1 -sign '#{keyfile}' -passin 'pass:#{password}' '#{path}'|openssl enc -base64}.chomp
 
-def sign(path)
-  # %x{openssl dgst -dss1 -sign '#{KEYFILE}' -passin 'pass:#{PW_INFO.password}' '#{path}'|openssl enc -base64}.chomp
-
-  key       = OpenSSL::PKey::DSA.new(File.read(KEYFILE), PW_INFO.password) or abort "*** error reading keyfile: ‘#{KEYFILE}’."
+  key       = OpenSSL::PKey::DSA.new(File.read(keyfile), password) or abort "*** error reading keyfile: ‘#{keyfile}’."
   digest    = Digest::SHA1.digest(File.read(path))
   signature = key.syssign(digest)
   Base64.encode64(signature).gsub("\n", '')
@@ -41,26 +53,48 @@ def create_download(path, repository, name, description, content_type)
 
   open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/downloads") do |io|
     github = JSON.parse(io.read)
-    abort "github error: #{github['errors'].inspect}" if github.include? 'errors'
+    abort "github error: #{github['errors'].inspect} for #{repository}"     if github.include?('errors')
+    abort "github unexpected response: #{github.inspect} for #{repository}" unless github.include?('html_url')
     aws_upload(path, github['s3_url'], github['path'], github['acl'], payload['name'], payload['content_type'], github['accesskeyid'], github['policy'], github['signature'])
+    return github['html_url']
   end
+  nil
 end
 
-if path = ARGV.shift
-  if File.basename(path) =~ /(.+)_r(\d+)\.tbz$/
-    base, name, version = $&, $1, $2
-    description = ''
+if __FILE__ == $PROGRAM_NAME
+  opts = GetoptLong.new(
+    [ '--help',        '-h', GetoptLong::NO_ARGUMENT       ],
+    [ '--keyfile',     '-k', GetoptLong::REQUIRED_ARGUMENT ],
+    [ '--destination', '-d', GetoptLong::REQUIRED_ARGUMENT ]
+  )
 
-    create_download(path, REPOSITORY, base, description, 'application/x-bzip2')
-    url = "https://github.com/downloads/#{REPOSITORY}/#{base}"
+  keyfile     = nil
+  destination = 'textmate/textmate'
+  netinfo     = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
 
-    info = {
-      'url'       => url,
-      'version'   => version,
-      'signature' => sign(path),
-      'signee'    => PW_INFO.login
-    }
+  opts.each do |opt, arg|
+    case opt
+      when '--help'        then RDoc::usage
+      when '--keyfile'     then keyfile     = arg
+      when '--destination' then destination = arg
+    end
+  end
 
-    STDOUT << info.to_json
+  abort 'No signing key provided' if keyfile.nil?
+
+  if path = ARGV.shift
+    if File.basename(path) =~ /(.+)_r(\d+)\.tbz$/
+      base, name, version = $&, $1, $2
+      description = ''
+
+      info = {
+        'url'       => create_download(path, destination, base, description, 'application/x-bzip2'),
+        'version'   => version,
+        'signature' => sign_file(path, keyfile, netinfo.password),
+        'signee'    => netinfo.login
+      }
+
+      STDOUT << info.to_json
+    end
   end
 end

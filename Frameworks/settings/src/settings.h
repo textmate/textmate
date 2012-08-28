@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H_F99MMG5F
 #define SETTINGS_H_F99MMG5F
 
+#include "keys.h"
 #include <io/io.h>
 #include <oak/oak.h>
 #include <text/format.h>
@@ -28,8 +29,19 @@ struct PUBLIC settings_t
 		return get<std::string>(key, defaultValue);
 	}
 
+	static std::string raw_get (std::string const& key, std::string const& section = "");
+
+	static void set (std::string const& key, std::string const& value, std::string const& fileType = "", std::string const& path = NULL_STR);
+	static void set (std::string const& key, double decimal,  std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, text::format("%f", decimal),          fileType, path); }
+	static void set (std::string const& key, size_t number,   std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, text::format("%zu", number),          fileType, path); }
+	static void set (std::string const& key, int32_t number,  std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, text::format("%d", number),           fileType, path); }
+	static void set (std::string const& key, bool flag,       std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, std::string(flag ? "true" : "false"), fileType, path); }
+	static void set (std::string const& key, char const* str, std::string const& fileType = "", std::string const& path = NULL_STR) { settings_t::set(key, std::string(str),                     fileType, path); }
+
+	static void set_default_settings_path (std::string const& path);
+	static void set_global_settings_path (std::string const& path);
+
 private:
-	friend settings_t settings_for_path (std::string const& documentPath, std::map<std::string, std::string> const& variables);
 	std::map<std::string, std::string> settings;
 
 	static bool convert (std::string const& value, bool)                             { return value != "0" && value != "false" ? true : false; }

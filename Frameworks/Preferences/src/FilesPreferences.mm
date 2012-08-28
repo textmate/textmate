@@ -3,6 +3,7 @@
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
+#import <settings/settings.h>
 #import <bundles/bundles.h>
 #import <ns/ns.h>
 #import <text/ctype.h>
@@ -13,22 +14,25 @@
 {
 	if(self = [super initWithNibName:@"FilesPreferences" label:@"Files" image:[NSImage imageNamed:NSImageNameMultipleDocuments]])
 	{
-		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsTransformer" andObjectsArray:@[ @"\n", @"\r", @"\r\n" ]];
+		[OakStringListTransformer createTransformerWithName:@"OakLineEndingsSettingsTransformer" andObjectsArray:@[ @"\\n", @"\\r", @"\\r\\n" ]];
 
-		self.defaultsProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-			kUserDefaultsDisableSessionRestoreKey,            @"disableSessionRestore",
-			kUserDefaultsDisableNewDocumentAtStartupKey,      @"disableDocumentAtStartup",
-			kUserDefaultsDisableNewDocumentAtReactivationKey, @"disableDocumentAtReactivation",
-			kUserDefaultsEncodingKey,                         @"encoding",
-			kUserDefaultsLineEndingsKey,                      @"lineEndings",
-		nil];
+		self.defaultsProperties = @{
+			@"disableSessionRestore"         : kUserDefaultsDisableSessionRestoreKey,
+			@"disableDocumentAtStartup"      : kUserDefaultsDisableNewDocumentAtStartupKey,
+			@"disableDocumentAtReactivation" : kUserDefaultsDisableNewDocumentAtReactivationKey,
+		};
+
+		self.tmProperties = @{
+			@"encoding"       : [NSString stringWithCxxString:kSettingsEncodingKey],
+			@"lineEndings"    : [NSString stringWithCxxString:kSettingsLineEndingsKey],
+		};
 	}
 	return self;
 }
 
 - (void)selectFileType:(NSMenuItem*)sender
 {
-	[[NSUserDefaults standardUserDefaults] setObject:[sender representedObject] forKey:kUserDefaultsNewDocumentTypeKey];
+	settings_t::set(kSettingsFileTypeKey, to_s((NSString*)[sender representedObject]), "attr.untitled");
 }
 
 - (void)loadView
@@ -44,26 +48,21 @@
 
 	if(!grammars.empty())
 	{
-		std::string const currentGrammar = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsNewDocumentTypeKey]);
+		std::string const defaultFileType = settings_t::raw_get(kSettingsFileTypeKey, "attr.untitled");
 		[documentTypesMenu removeAllItems];
 		iterate(pair, grammars)
 		{
+			std::string const& fileType = pair->second->value_for_field(bundles::kFieldGrammarScope);
+
 			NSMenuItem* item = [documentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectFileType:) keyEquivalent:@""];
-			[item setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
+			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];
 			[item setTarget:self];
 
-			if(pair->second->uuid() == currentGrammar)
+			if(fileType == defaultFileType)
 				[documentTypesPopUp selectItem:item];
 		}
 	}
 
-	encodingPopUp.encoding = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsEncodingKey];
-	[encodingPopUp addObserver:self forKeyPath:@"encoding" options:NSKeyValueObservingOptionInitial context:NULL];
-}
-
-- (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
-{
-	if([keyPath isEqualToString:@"encoding"] && object == encodingPopUp)
-		[[NSUserDefaults standardUserDefaults] setObject:[object valueForKey:keyPath] forKey:kUserDefaultsEncodingKey];
+	[self bind:@"encoding" toObject:encodingPopUp withKeyPath:@"encoding" options:nil];
 }
 @end

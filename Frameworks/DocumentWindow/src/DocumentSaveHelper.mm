@@ -44,7 +44,7 @@ namespace
 			D(DBF_DocumentController_SaveHelper, bug("\n"););
 			init(context);
 
-			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window delegate:_self contextInfo:NULL];
+			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window delegate:_self encoding:_document->encoding_for_save_as_path(to_s([_self.saveFolder stringByAppendingPathComponent:DefaultSaveNameForDocument(_document)]))];
 		}
 
 		void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
@@ -65,27 +65,22 @@ namespace
 			else	_self.userAbort = YES;
 		}
 
-		void select_encoding (std::string const& path, io::bytes_ptr content, std::string const& encoding, file::save_context_ptr context)
+		void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, file::save_context_ptr context)
 		{
 			D(DBF_DocumentController_SaveHelper, bug("\n"););
 			init(context);
 
-			if(encoding != kCharsetNoEncoding)
+			if(charset != kCharsetNoEncoding)
 			{
 				// TODO transliteration / BOM check box
-				NSAlert* alert = [[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", encoding.c_str())] defaultButton:@"Retry" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose another encoding:"] retain];
-				OakEncodingPopUpButton* encodingChooser = [[[OakEncodingPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO] autorelease];
-				[encodingChooser sizeToFit];
-				NSRect frame = [encodingChooser frame];
-				if(NSWidth(frame) > 200)
-					[encodingChooser setFrameSize:NSMakeSize(200, NSHeight(frame))];
-				[alert setAccessoryView:encodingChooser];
+				NSAlert* alert = [[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", charset.c_str())] defaultButton:@"Retry" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose another encoding:"] retain];
+				[alert setAccessoryView:[[OakEncodingPopUpButton new] autorelease]];
 				[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(encodingSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 				[[alert window] recalculateKeyViewLoop];
 			}
 			else
 			{
-				context->set_encoding(kCharsetUTF8);
+				context->set_charset(kCharsetUTF8);
 			}
 		}
 
@@ -202,12 +197,13 @@ namespace
 // = Sheet Callbacks =
 // ===================
 
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath contextInfo:(void*)info
+- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(encoding::type const&)encoding
 {
 	D(DBF_DocumentController_SaveHelper, bug("%s\n", to_s(aPath).c_str()););
 	if(aPath)
 	{
 		documents.back()->set_path(to_s(aPath));
+		documents.back()->set_disk_encoding(encoding);
 		context->set_path(to_s(aPath));
 	}
 	else
@@ -237,9 +233,7 @@ namespace
 	if(!userAbort)
 	{
 		OakEncodingPopUpButton* popUp = (OakEncodingPopUpButton*)[alert accessoryView];
-		std::string encoding = to_s(popUp.encoding);
-		bool bom = encoding != "UTF-8" && encoding.find("UTF-") == 0;
-		ctxt->set_encoding(encoding, bom);
+		ctxt->set_charset(to_s(popUp.encoding));
 	}
 	[alert release];
 }

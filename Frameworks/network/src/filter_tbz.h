@@ -99,8 +99,8 @@ namespace network
 			{
 				close(input[0]);
 				close(output[1]);
-				fcntl(input[1], F_SETFD, 1);
-				fcntl(output[0], F_SETFD, 1);
+				fcntl(input[1], F_SETFD, FD_CLOEXEC);
+				fcntl(output[0], F_SETFD, FD_CLOEXEC);
 			}
 			return true;
 		}

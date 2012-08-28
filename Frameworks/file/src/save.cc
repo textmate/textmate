@@ -21,7 +21,7 @@ namespace
 {
 	struct file_context_t : file::save_context_t
 	{
-		file_context_t (file::save_callback_ptr callback, std::string const& path, osx::authorization_t authorization, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& encoding, bool bom, std::string const& lineFeeds, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) : _state(kStateIdle), _next_state(kStateStart), _select_encoding_state(kSelectEncodingStateConsultSettings), _make_writable(false), _saved(false), _callback(callback), _path(path), _authorization(authorization), _content(content), _attributes(attributes), _file_type(fileType), _path_attributes(NULL_STR), _encoding(encoding), _bom(bom), _line_feeds(lineFeeds), _error(NULL_STR), _binary_import_filters(binaryImportFilters), _text_import_filters(textImportFilters) { }
+		file_context_t (file::save_callback_ptr callback, std::string const& path, osx::authorization_t authorization, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) : _state(kStateIdle), _next_state(kStateStart), _make_writable(false), _saved(false), _callback(callback), _path(path), _authorization(authorization), _content(content), _attributes(attributes), _file_type(fileType), _path_attributes(NULL_STR), _encoding(encoding), _error(NULL_STR), _binary_import_filters(binaryImportFilters), _text_import_filters(textImportFilters) { }
 
 		~file_context_t ()
 		{
@@ -29,7 +29,7 @@ namespace
 			if(_state != kStateDone)
 			{
 				ASSERT(!_saved);
-				_callback->did_save(_path, _content, _path_attributes, _encoding, _bom, _line_feeds, _saved, _error, _filter);
+				_callback->did_save(_path, _content, _path_attributes, _encoding, _saved, _error, _filter);
 			}
 		}
 
@@ -37,7 +37,7 @@ namespace
 		void set_make_writable (bool flag)                        { _make_writable = flag;            proceed(); }
 		void set_authorization (osx::authorization_t auth)        { _authorization = auth;            proceed(); }
 		void set_content (io::bytes_ptr content)                  { _content = content;               proceed(); }
-		void set_encoding (std::string const& encoding, bool bom) { _encoding = encoding; _bom = bom; proceed(); }
+		void set_charset (std::string const& charset)             { _encoding.set_charset(charset);   proceed(); }
 		void set_saved (bool flag, std::string const& error)      { _saved = flag; _error = error;    proceed(); }
 
 		void filter_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err)
@@ -72,14 +72,8 @@ namespace
 			kStateDone
 		};
 
-		enum select_encoding_state_t {
-			kSelectEncodingStateConsultSettings,
-			kSelectEncodingStateAskUser
-		};
-
 		state_t                              _state;
 		state_t                              _next_state;
-		int                                  _select_encoding_state;
 		bool                                 _make_writable;
 		bool                                 _saved;
 
@@ -93,9 +87,7 @@ namespace
 
 		std::string                          _file_type;
 		std::string                          _path_attributes;
-		std::string                          _encoding;
-		bool                                 _bom;
-		std::string                          _line_feeds;
+		encoding::type                       _encoding;
 
 		std::string                          _error;
 		oak::uuid_t                          _filter; // this filter failed
@@ -311,10 +303,10 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateEncodeContent;
 
-					if(_line_feeds != kLF)
+					if(_encoding.newlines() != kLF)
 					{
 						std::string tmp;
-						oak::replace_copy(_content->begin(), _content->end(), kLF.begin(), kLF.end(), _line_feeds.begin(), _line_feeds.end(), back_inserter(tmp));
+						oak::replace_copy(_content->begin(), _content->end(), kLF.begin(), kLF.end(), _encoding.newlines().begin(), _encoding.newlines().end(), back_inserter(tmp));
 						_content->set_string(tmp);
 					}
 
@@ -327,33 +319,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateEncodeContent;
 
-					if(_select_encoding_state == kSelectEncodingStateConsultSettings)
-					{
-						_select_encoding_state = kSelectEncodingStateAskUser;
-
-						settings_t const& settings = settings_for_path(_path);
-						std::string encoding = settings.get("encoding", kCharsetNoEncoding);
-						if(encoding != kCharsetNoEncoding)
-						{
-							_encoding = encoding;
-							_bom      = settings.get("useBOM", false);
-						}
-						else if(_encoding == kCharsetNoEncoding)
-						{
-							_encoding = kCharsetUTF8;
-							_bom      = false;
-						}
-						else
-						{
-							_next_state = kStateSelectEncoding;
-						}
-
-						proceed();
-					}
-					else if(_select_encoding_state == kSelectEncodingStateAskUser)
-					{
-						_callback->select_encoding(_path, _content, _encoding, shared_from_this());
-					}
+					_callback->select_charset(_path, _content, _encoding.charset(), shared_from_this());
 				}
 				break;
 
@@ -362,7 +328,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateExecuteBinaryExportFilter;
 
-					if(_encoding == kCharsetNoEncoding)
+					if(_encoding.charset() == kCharsetNoEncoding)
 					{
 						_next_state = kStateSelectEncoding;
 					}
@@ -370,14 +336,14 @@ namespace
 					{
 						io::bytes_ptr encodedContent = _content;
 
-						if(_bom && _encoding.find("UTF-") == 0)
+						if(_encoding.byte_order_mark())
 						{
 							std::string tmp("\uFEFF");
 							tmp.insert(tmp.end(), encodedContent->begin(), encodedContent->end());
 							encodedContent->set_string(tmp);
 						}
 
-						if(encodedContent = encoding::convert(_content, kCharsetUTF8, _encoding))
+						if(encodedContent = encoding::convert(_content, kCharsetUTF8, _encoding.charset()))
 								_content = encodedContent;
 						else	_next_state = kStateSelectEncoding;
 					}
@@ -428,7 +394,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateDone;
 
-					_callback->did_save(_path, _content, file::path_attributes(_path), _encoding, _bom, _line_feeds, _saved, _error, _filter);
+					_callback->did_save(_path, _content, file::path_attributes(_path), _encoding, _saved, _error, _filter);
 					proceed();
 				}
 				break;
@@ -459,9 +425,9 @@ namespace file
 			context->set_authorization(auth);
 	}
 
-	void save_callback_t::select_encoding (std::string const& path, io::bytes_ptr content, std::string const& encoding, save_context_ptr context)
+	void save_callback_t::select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, save_context_ptr context)
 	{
-		context->set_encoding(kCharsetUTF8);
+		context->set_charset(kCharsetUTF8);
 	}
 
 	// ==============
@@ -469,13 +435,13 @@ namespace file
 	// ==============
 
 	// bool hasEncoding   = path::get_attr(path, "com.apple.TextEncoding") != NULL_STR;
-	// bool storeEncoding = dstSettings.get("storeEncodingPerFile", hasEncoding);
+	// bool storeEncoding = dstSettings.get(kSettingsStoreEncodingPerFileKey, hasEncoding);
 	// if(storeEncoding || hasEncoding)
 	// 	path::set_attr(path, "com.apple.TextEncoding", storeEncoding ? encoding : NULL_STR);
 
-	void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& encoding, bool bom, std::string const& lineFeeds, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+	void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 	{
-		save_context_ptr context(new file_context_t(cb, path, auth, content, attributes, fileType, encoding, bom, lineFeeds, binaryImportFilters, textImportFilters));
+		save_context_ptr context(new file_context_t(cb, path, auth, content, attributes, fileType, encoding, binaryImportFilters, textImportFilters));
 		std::tr1::static_pointer_cast<file_context_t>(context)->proceed();
 	}
 

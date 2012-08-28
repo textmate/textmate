@@ -63,6 +63,7 @@
 									<string key="NSFrameSize">{680, 344}</string>
 									<reference key="NSSuperview" ref="734036802"/>
 									<reference key="NSWindow"/>
+									<reference key="NSNextKeyView" ref="755399982"/>
 									<bool key="NSEnabled">YES</bool>
 									<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 									<bool key="NSControlAllowsExpansionToolTips">YES</bool>
@@ -78,8 +79,9 @@
 									</object>
 									<string key="NSPathSeparator">/</string>
 									<int key="NSMinColumnWidth">150</int>
-									<int key="NSNumberOfVisibleColumns">4</int>
-									<int key="NSColumnResizingType">1</int>
+									<int key="NSNumberOfVisibleColumns">5</int>
+									<int key="NSColumnResizingType">2</int>
+									<string key="NSColumnsAutosaveName">OakBundleEditorBrowserColumnWidths</string>
 									<double key="NSPreferedColumnWidth">150</double>
 									<bool key="NSAllowsTypeSelect">YES</bool>
 									<int key="NSBrFlags">201408512</int>
@@ -91,18 +93,21 @@
 									<string key="NSFrame">{{0, 354}, {680, 281}}</string>
 									<reference key="NSSuperview" ref="734036802"/>
 									<reference key="NSWindow"/>
+									<reference key="NSNextKeyView"/>
 									<string key="NSClassName">OakDocumentView</string>
 								</object>
 							</object>
 							<string key="NSFrameSize">{680, 635}</string>
 							<reference key="NSSuperview" ref="1006"/>
 							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView" ref="943192380"/>
 							<int key="NSDividerStyle">3</int>
 						</object>
 					</object>
 					<string key="NSFrameSize">{680, 635}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
+					<reference key="NSNextKeyView" ref="734036802"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>

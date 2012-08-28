@@ -11,6 +11,7 @@
 
 	NSScrollView* gutterScrollView;
 	GutterView* gutterView;
+	NSColor* gutterDividerColor;
 
 	NSScrollView* textScrollView;
 	OakTextView* textView;
@@ -28,6 +29,8 @@
 @property (nonatomic, assign) BOOL showResizeThumb;
 - (IBAction)toggleLineNumbers:(id)sender;
 - (IBAction)takeThemeUUIDFrom:(id)sender;
+
+- (void)setThemeWithUUID:(NSString*)themeUUID;
 
 - (void)addAuxiliaryView:(NSView*)aView atEdge:(NSRectEdge)anEdge;
 - (void)removeAuxiliaryView:(NSView*)aView;

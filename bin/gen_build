@@ -70,7 +70,9 @@ class Targets
   end
 
   def target_named(name)
-    self.find { |target| target[:name] == name }
+    res = self.find { |target| target[:name] == name }
+    return res unless res.nil?
+    abort "*** no target named ‘#{name}’. Did you update submodules?\n"
   end
 
   def each(&block)
@@ -271,10 +273,12 @@ def tests(target)
     res << "  RAVE_FLAGS = #{fws} #{libs}\n"
 
     res << "build #{dst}.run: run_test #{dst}\n"
+    res << "build #{dst}.always-run: always_run_test #{dst}\n"
     res << "build #{dst}.coerce: skip_test #{dst}\n"
     res << "  seal = #{dst}.run\n"
 
     res << "build #{target[:name]}:        phony #{dst}.run\n"
+    res << "build #{target[:name]}/test:   phony #{dst}.always-run\n"
     res << "build #{target[:name]}/coerce: phony #{dst}.coerce\n"
 
     target[:test] = "#{dst}.run"
@@ -290,7 +294,6 @@ def resources_helper(target, key, symbol)
   target[key].to_a.each do |path|
     if path =~ /^@/
       src = TARGETS.target_named($')
-      abort "*** target does not exist: ‘#{path}’.\nKnown targets:\n - #{TARGETS.map { |target| target[:name] }.join("\n - ")}\n" if src.nil?
       abort "*** no resources in target: ‘#{path}’ (from target: #{target[:name]}).\n" unless src.has_key?(:rsrc_info)
       src[:rsrc_info].each do |info|
         rsrc << { :src => info[:src], :dst => esc_path(info[:install_name]) }
@@ -323,14 +326,14 @@ def resources_helper(target, key, symbol)
         rsrc << { :src => dst, :dst => esc_path("#$1.mom") }
       when /\bInfo\.plist$/ then
         dst = build_path(File.join(path, file))
-        res << "build #{dst}: process_plist #{esc_path src}\n"
+        res << "build #{dst}: process_plist #{esc_path src} | bin/process_plist\n"
         res << "  RAVE_FLAGS = -dTARGET_NAME='#{target[:name]}'\n"
         res << flags_for_target(target)
         target[:info_plist] = dst
       when /(.+)\.md(own)?$/ then
         dst = build_path(File.join(path, "#$1.html"))
         prefix, suffix = target['MARKDOWN_HEADER'].to_a, target['MARKDOWN_FOOTER'].to_a
-        res << "build #{dst}: markdown #{prefix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} #{esc_path src} #{suffix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')}\n"
+        res << "build #{dst}: markdown #{prefix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} #{esc_path src} #{suffix.map { |path| esc_path(File.join(target[:path], path))}.join(' ')} | bin/gen_html\n"
         header, footer = target['HTML_HEADER'], target['HTML_FOOTER']
         flags = ''
         flags << " -h #{esc_path(File.join(target[:path], header.first))}" if header.to_a.size == 1
@@ -515,7 +518,7 @@ def app_bundle(target)
   res << "build #{dst}.sign:  sign_executable #{dst}\n"
   res << "build #{dst}.run:   run_application #{dst} | #{dst}.sign\n"
   res << "  appname = #{target[:name]}\n"
-  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]}\n"
+  res << "build #{dst}.debug: debug_executable #{dst}/Contents/MacOS/#{target[:name]} | #{dst}.sign\n"
 
   res << "build #{target[:name]}:       phony #{dst}.sign\n"
   res << "build #{target[:name]}/run:   phony #{dst}.run\n"
@@ -524,6 +527,19 @@ def app_bundle(target)
   target[:rsrc_info] = all_files
 
   res
+end
+
+def upload(target)
+  res = ''
+  exe = target[:static_executable]
+  base = "#{exe}_r${APP_REVISION}"
+
+  res << "build #{exe}.sign:    sign_executable #{exe}\n"
+  res << "build #{base}.tbz:    tbz_archive #{exe} | #{exe}.sign\n"
+  res << "build #{base}.upload: upload #{base}.tbz\n"
+  res << "build #{base}.bump:   bump_revision $builddir/build.ninja | #{base}.upload\n"
+
+  res << "build #{target[:name]}/deploy: phony #{base}.bump\n"
 end
 
 def deploy(target)
@@ -573,12 +589,14 @@ manifest = ARGV[0]
 TARGETS = Targets.new(manifest)
 
 open(outfile, "w") do |io|
+  userfile = "#{ENV['USER']}.ninja"
   io << "###########################################\n"
   io << "# AUTOMATICALLY GENERATED -- DO NOT EDIT! #\n"
   io << "###########################################\n"
   io << "\n"
   io << "builddir = #{builddir}\n"
-  io << "subninja $builddir/build.ninja\n"
+  io << "include #{userfile}\n" if File.exists?(File.join(File.dirname(outfile), userfile))
+  io << "include $builddir/build.ninja\n"
 end
 
 open("#{builddir}/build.ninja.d", "w") do |io|
@@ -602,6 +620,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
   io << "  depfile = $builddir/$out.d\n"
   io << "  generator = 1\n"
+  io << "  description = Generate ‘$out’…\n"
   io << "\n"
   io << "build build.ninja: configure #{manifest} | bin/gen_build\n"
   io << "\n"
@@ -626,15 +645,12 @@ open("#{builddir}/build.ninja", "w") do |io|
   # = Do a topological sort based on the dependency graph =
   # =======================================================
 
-  targets = { } # name → target
-
   dag = ''
   TARGETS.each do |target|
     target['LINK'].each { |dep| dag << "#{target[:name]}\t#{dep}\n" } unless target['LINK'].nil?
     target.each do |key, value|
       value.each { |rsrc| dag << "#{target[:name]}\t#$'\n" if rsrc =~ /^@/ } if key =~ /^CP_/
     end
-    targets[target[:name]] = target
   end
   dag = open('|/usr/bin/tsort -q', 'r+') { |tsort| tsort << dag; tsort.close_write; tsort.read }
 
@@ -643,7 +659,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   # =========================================================================
 
   dag.scan(/.+/).reverse_each do |name|
-    target = targets[name]
+    target = TARGETS.target_named(name)
 
     io << clean(target)
     io << sources(target)
@@ -656,6 +672,7 @@ open("#{builddir}/build.ninja", "w") do |io|
       io << dynamic_lib(target)
     elsif target[:type] == :executable
       io << static_executable(target)
+      io << upload(target)
     else
       io << dynamic_executable(target)
       io << app_bundle(target)
@@ -695,6 +712,10 @@ rule link_test
 
 rule run_test
   command = $in && touch $out
+  description = Run test ‘$in’…
+
+rule always_run_test
+  command = $in
   description = Run test ‘$in’…
 
 rule skip_test
@@ -749,7 +770,7 @@ rule tbz_archive
   description = Archive ‘$in’…
 
 rule upload
-  command = bin/upload $in > $out~ && mv $out~ $out
+  command = bin/upload -k$upload_keyfile -d$upload_destination $in > $out~ && mv $out~ $out
   description = Upload ‘$in’…
 
 rule deploy

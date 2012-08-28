@@ -10,6 +10,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakPasteboard.h>
@@ -23,6 +24,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 @interface OakDocumentView ()
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
+@property (nonatomic, retain) NSColor* gutterDividerColor;
+- (void)updateStyle;
 @end
 
 // ===========================================
@@ -72,7 +75,7 @@ private:
 };
 
 @implementation OakDocumentView
-@synthesize textView, statusBar;
+@synthesize textView, statusBar, gutterDividerColor;
 
 - (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
 - (void)setShowResizeThumb:(BOOL)flag { statusBar.showResizeThumb = flag; }
@@ -101,7 +104,7 @@ private:
 
 		[self addSubview:textScrollView];
 
-		NSRect gutterScrollViewFrame = NSMakeRect(0, OakStatusBarHeight, gutterViewWidth, NSHeight(aRect)-OakStatusBarHeight);
+		NSRect gutterScrollViewFrame = NSMakeRect(0, OakStatusBarHeight, gutterViewWidth - 1, NSHeight(aRect)-OakStatusBarHeight);
 		NSSize gutterViewSize = [NSScrollView contentSizeForFrameSize:gutterScrollViewFrame.size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:NSNoBorder];
 
 		gutterView = [[GutterView alloc] initWithFrame:NSMakeRect(0, 0, gutterViewSize.width, gutterViewSize.height)];
@@ -111,7 +114,6 @@ private:
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
 
 		gutterScrollView = [[NSScrollView alloc] initWithFrame:gutterScrollViewFrame];
-		gutterScrollView.backgroundColor  = [NSColor colorWithCalibratedWhite:0.87 alpha:1.0];
 		gutterScrollView.borderType       = NSNoBorder;
 		gutterScrollView.autoresizingMask = NSViewHeightSizable;
 		gutterScrollView.documentView     = gutterView;
@@ -120,7 +122,7 @@ private:
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[[gutterScrollView documentView] setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-
+		
 		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(aRect), OakStatusBarHeight);
 		statusBar = [[OTVStatusBar alloc] initWithFrame:statusBarFrame];
 		statusBar.delegate = self;
@@ -148,8 +150,8 @@ private:
 {
 	if(NSFont* newFont = [sender convertFont:textView.font])
 	{
-		[[NSUserDefaults standardUserDefaults] setObject:[newFont fontName] forKey:kUserDefaultsFontNameKey];
-		[[NSUserDefaults standardUserDefaults] setFloat:[newFont pointSize] forKey:kUserDefaultsFontSizeKey];
+		settings_t::set(kSettingsFontNameKey, to_s([newFont fontName]));
+		settings_t::set(kSettingsFontSizeKey, (size_t)[newFont pointSize]);
 		[self setFont:newFont];
 	}
 }
@@ -200,6 +202,7 @@ private:
 
 	[gutterScrollView release];
 	[gutterView release];
+	[gutterDividerColor release];
 	[textScrollView release];
 	[textView release];
 	[statusBar release];
@@ -237,14 +240,36 @@ private:
 	}
 
 	[textView setDocument:document];
-
-	if(aDocument)
-		[self setFont:textView.font]; // trigger update of gutter view’s line number font
+	[self updateStyle];
 
 	if(oldDocument)
 	{
 		oldDocument->hide();
 		oldDocument->close();
+	}
+}
+
+- (void)updateStyle
+{
+	if(document && [textView theme])
+	{
+		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
+		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
+		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
+
+		gutterView.foregroundColor          = [NSColor colorWithCGColor:styles.gutterForeground()];
+		gutterView.backgroundColor          = [NSColor colorWithCGColor:styles.gutterBackground()];
+		gutterView.iconColor                = [NSColor colorWithCGColor:styles.gutterIcons()];
+		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
+		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
+		gutterView.selectionIconColor       = [NSColor colorWithCGColor:styles.gutterSelectionIcons()];
+		gutterView.selectionBorderColor     = [NSColor colorWithCGColor:styles.gutterSelectionBorder()];
+
+		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
+
+		[self setNeedsDisplay:YES];
+		[textView setNeedsDisplay:YES];
+		[gutterView setNeedsDisplay:YES];
 	}
 }
 
@@ -266,13 +291,17 @@ private:
 
 - (void)toggleContinuousSpellChecking:(id)sender
 {
-	document->buffer().set_live_spelling(!document->buffer().live_spelling());
+	bool flag = !document->buffer().live_spelling();
+	document->buffer().set_live_spelling(flag);
+	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
 }
 
 - (void)takeSpellingLanguageFrom:(id)sender
 {
-	[[NSSpellChecker sharedSpellChecker] setLanguage:[sender representedObject]];
-	document->buffer().set_spelling_language(to_s((NSString*)[sender representedObject]));
+	NSString* lang = (NSString*)[sender representedObject];
+	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
+	document->buffer().set_spelling_language(to_s(lang));
+	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
@@ -304,7 +333,7 @@ private:
 
 	CGFloat totalHeight = NSHeight(self.frame);
 	CGFloat docHeight   = totalHeight - NSHeight(statusBar.frame) - topHeight - bottomHeight;
-	CGFloat gutterWidth = NSWidth(gutterScrollView.frame);
+	CGFloat gutterWidth = NSWidth(gutterScrollView.frame) + 1;
 
 	CGFloat y = NSHeight(statusBar.frame);
 	for(NSView* view in bottomAuxiliaryViews)
@@ -313,7 +342,7 @@ private:
 		y += NSHeight(view.frame);
 	}
 
-	[gutterScrollView setFrame:NSMakeRect(0, y, gutterWidth, docHeight)];
+	[gutterScrollView setFrame:NSMakeRect(0, y, gutterWidth - 1, docHeight)];
 	[textScrollView setFrame:NSMakeRect(gutterWidth, y, NSWidth(textScrollView.frame), docHeight)];
 
 	y += docHeight;
@@ -372,6 +401,11 @@ private:
 		[[NSColor grayColor] set];
 		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), NSHeight(self.frame) - height, NSWidth(aRect), 1), aRect));
 	}
+
+	// Draw the border between gutter and text views
+	[gutterDividerColor set];
+	NSRect gutterFrame = gutterScrollView.frame;
+	NSRectFill(NSMakeRect(NSMaxX(gutterFrame), NSMinY(gutterFrame), 1, NSHeight(gutterFrame)));
 }
 
 // ======================
@@ -529,19 +563,24 @@ private:
 	D(DBF_OakDocumentView, bug("\n"););
 	ASSERT([sender respondsToSelector:@selector(tag)]);
 	if([sender tag] > 0)
+	{
 		textView.tabSize = [sender tag];
+		settings_t::set(kSettingsTabSizeKey, (size_t)[sender tag], document->file_type());
+	}
 }
 
 - (IBAction)setIndentWithSpaces:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	textView.softTabs = YES;
+	settings_t::set(kSettingsSoftTabsKey, true, document->file_type());
 }
 
 - (IBAction)setIndentWithTabs:(id)sender
 {
 	D(DBF_OakDocumentView, bug("\n"););
 	textView.softTabs = NO;
+	settings_t::set(kSettingsSoftTabsKey, false, document->file_type());
 }
 
 - (IBAction)showTabSizeSelectorPanel:(id)sender
@@ -557,12 +596,16 @@ private:
 
 - (IBAction)takeThemeUUIDFrom:(id)sender
 {
-	NSString* themeUUID = [sender representedObject];
-	if(bundles::item_ptr themeItem = bundles::lookup(to_s(themeUUID)))
+	[self setThemeWithUUID:[sender representedObject]];
+}
+
+- (void)setThemeWithUUID:(NSString*)themeUUID
+{
+	if(bundles::item_ptr const& themeItem = bundles::lookup(to_s(themeUUID)))
 	{
-		[[NSUserDefaults standardUserDefaults] setObject:themeUUID forKey:kUserDefaultsThemeUUIDKey];
-		[[NSUserDefaults standardUserDefaults] synchronize];
 		[textView setTheme:parse_theme(themeItem)];
+		settings_t::set(kSettingsThemeKey, to_s(themeUUID));
+		[self updateStyle];
 	}
 }
 
@@ -611,12 +654,12 @@ static std::string const kBookmarkType = "bookmark";
 {
 	if([identifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Bookmark", "Search Mark" };
+		static retained_image_t images[] = { NULL, "Bookmark Template", "Search Mark Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top", "Folding Collapsed", "Folding Bottom" };
+		static retained_image_t images[] = { NULL, "Folding Top Template", "Folding Collapsed Template", "Folding Bottom Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;
@@ -626,12 +669,12 @@ static std::string const kBookmarkType = "bookmark";
 {
 	if([identifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		static retained_image_t images[] = { "Bookmark Hover Add", "Bookmark Hover Remove", "Bookmark Hover Add" };
+		static retained_image_t images[] = { "Bookmark Hover Add Template", "Bookmark Hover Remove Template", "Bookmark Hover Add Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top Hoover", "Folding Collapsed Hoover", "Folding Bottom Hoover" };
+		static retained_image_t images[] = { NULL, "Folding Top Hover Template", "Folding Collapsed Hover Template", "Folding Bottom Hover Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;
@@ -641,12 +684,12 @@ static std::string const kBookmarkType = "bookmark";
 {
 	if([identifier isEqualToString:kBookmarksColumnIdentifier])
 	{
-		static retained_image_t images[] = { "Bookmark Pressed", "Bookmark Pressed", "Bookmark Pressed" };
+		static retained_image_t images[] = { "Bookmark Pressed Template", "Bookmark Pressed Template", "Bookmark Pressed Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	else if([identifier isEqualToString:kFoldingsColumnIdentifier])
 	{
-		static retained_image_t images[] = { NULL, "Folding Top Pressed", "Folding Collapsed Pressed", "Folding Bottom Pressed" };
+		static retained_image_t images[] = { NULL, "Folding Top Pressed Template", "Folding Collapsed Pressed Template", "Folding Bottom Pressed Template" };
 		return state < sizeofA(images) ? images[state] : nil;
 	}
 	return nil;

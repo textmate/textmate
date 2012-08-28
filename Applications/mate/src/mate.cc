@@ -5,8 +5,14 @@
 #include <cf/cf.h>
 #include <io/path.h>
 
-static double const AppVersion  = 2.1;
+static double const AppVersion  = 2.2;
 static size_t const AppRevision = APP_REVISION;
+
+static char const* socket_path ()
+{
+	static std::string const str = text::format("/tmp/textmate-%d.sock", getuid());
+	return str.c_str();
+}
 
 // mate returns when all files specified has been opened.
 // If - is used for filename, stdin is read and opened as a new buffer.
@@ -260,7 +266,7 @@ int main (int argc, char* argv[])
 
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	struct sockaddr_un addr = { 0, AF_UNIX };
-	strcpy(addr.sun_path, path::join(path::temp(), "textmate.sock").c_str());
+	strcpy(addr.sun_path, socket_path());
 	addr.sun_len = SUN_LEN(&addr);
 
 	bool didLaunch = false;

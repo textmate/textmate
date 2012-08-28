@@ -8,7 +8,7 @@ class document_tests : public CxxTest::TestSuite
 	{
 		callback_t (std::string const& encoding) : _run_loop(CFSTR("OakThreadSignalsRunLoopMode")), _success(false), _encoding(encoding) { }
 
-		void select_encoding (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)                             { std::string encoding = _encoding; _encoding = NULL_STR; if(encoding != NULL_STR) context->set_encoding(encoding); }
+		void select_charset (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)                              { std::string encoding = _encoding; _encoding = NULL_STR; if(encoding != NULL_STR) context->set_charset(encoding); }
 		void show_document (std::string const& path, document::document_ptr document)                                                     { _success = true; _run_loop.stop(); }
 		void show_error (std::string const& path, document::document_ptr document, std::string const& message, oak::uuid_t const& filter) { _run_loop.stop(); }
 		void wait ()                                                                                                                      { _run_loop.start(); }

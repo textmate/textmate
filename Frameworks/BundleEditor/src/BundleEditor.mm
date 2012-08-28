@@ -455,10 +455,21 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 {
 	if(NSBrowserCell* cell = [aCell isKindOfClass:[NSBrowserCell class]] ? aCell : nil)
 	{
+		static NSMutableParagraphStyle* paragraphStyle = nil;
+		if(!paragraphStyle)
+		{
+			paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+			[paragraphStyle setLineBreakMode:NSLineBreakByTruncatingTail];
+		}
+
 		be::entry_ptr entry = parent_for_column(aBrowser, aColumn, bundles)->children()[aRow];
-		[cell setStringValue:[NSString stringWithCxxString:entry->name()]];
+
+		NSDictionary* attrs = @{
+			NSForegroundColorAttributeName : entry->disabled() ? [NSColor grayColor] : [NSColor blackColor],
+			NSParagraphStyleAttributeName  : paragraphStyle
+		};
+		[cell setAttributedStringValue:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:entry->name()] attributes:attrs] autorelease]];
 		[cell setLeaf:!entry->has_children()];
-		[cell setEnabled:!entry->disabled()];
 		[cell setLoaded:YES];
 
 		if(bundles::item_ptr item = entry->represented_item())

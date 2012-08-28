@@ -343,7 +343,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	{
 		OFBPathInfoCell* cell = (OFBPathInfoCell*)[anOutlineView preparedCellAtColumn:col row:row];
 		NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[anOutlineView frameOfCellAtColumn:col row:row] ofView:anOutlineView];
-		if((hit & OakImageAndTextCellHitImage) && !([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask))
+		if(hit & OakImageAndTextCellHitImage)
 			return NO;
 		else if(hit & NSCellHitTrackableArea)
 			return NO;
