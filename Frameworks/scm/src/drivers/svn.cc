@@ -5,6 +5,7 @@
 #include <text/trim.h>
 #include <text/tokenize.h>
 #include <io/io.h>
+#include <cf/cf.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(SCM_Svn);
@@ -65,9 +66,9 @@ static std::map<std::string, std::string> parse_info_output (std::string const& 
 	return res;
 }
 
-static void collect_all_paths (std::string const& svn, scm::status_map_t& entries, std::string const& dir)
+static void collect_all_paths (std::string const& svn, std::string const& xsltPath, scm::status_map_t& entries, std::string const& dir)
 {
-	ASSERT_NE(svn, NULL_STR);
+	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
 
 	std::map<std::string, std::string> env = oak::basic_environment();
 	// Parses Subversion's response XML and outputs 'FILE_PATH\0FILE_STATUS\0FILE_PROPS_STATUS'
@@ -88,7 +89,29 @@ namespace scm
 {
 	struct svn_driver_t : driver_t
 	{
-		svn_driver_t () : driver_t("svn", "%s/.svn", "svn") { }
+		svn_driver_t () : driver_t("svn", "%s/.svn", "svn")
+		{
+			if(CFBundleRef bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.macromates.TextMate.scm")))
+			{
+				if(CFURLRef xsltURL = CFBundleCopyResourceURL(bundle, CFSTR("svn_status"), CFSTR("xslt"), NULL))
+				{
+					if(CFStringRef path = CFURLCopyFileSystemPath(xsltURL, kCFURLPOSIXPathStyle))
+					{
+						_xslt_path = cf::to_s(path);
+						CFRelease(path);
+					}
+					CFRelease(xsltURL);
+				}
+			}
+
+			// TODO Tests should be linked against the full framework bundle.
+			static std::string const SourceTreePath = path::join(path::cwd(), path::join(__FILE__, "../../../resources/svn_status.xslt"));
+			if(_xslt_path == NULL_STR && path::exists(SourceTreePath))
+				_xslt_path = SourceTreePath;
+
+			if(_xslt_path == NULL_STR)
+				fprintf(stderr, "TextMate/svn: Unable to locate ‘svn_status.xslt’.\n");
+		}
 
 		std::string branch_name (std::string const& wcPath) const
 		{
@@ -106,15 +129,18 @@ namespace scm
 		status_map_t status (std::string const& wcPath) const
 		{
 			D(DBF_SCM_Svn, bug("%s\n", wcPath.c_str()););
-			if(executable() == NULL_STR)
+			if(executable() == NULL_STR || _xslt_path == NULL_STR)
 				return status_map_t();
 
 			status_map_t relativePaths, res;
-			collect_all_paths(executable(), relativePaths, wcPath);
+			collect_all_paths(executable(), _xslt_path, relativePaths, wcPath);
 			iterate(pair, relativePaths)
 				res.insert(std::make_pair(path::join(wcPath, pair->first), pair->second));
 			return res;
 		}
+
+	private:
+		std::string _xslt_path = NULL_STR;
 	};
 
 	driver_t* svn_driver () { return new svn_driver_t; }
