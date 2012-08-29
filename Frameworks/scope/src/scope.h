@@ -32,7 +32,7 @@ namespace scope
 		bool operator!= (scope_t const& rhs) const;
 		bool operator< (scope_t const& rhs) const;
 
-		EXPLICIT operator bool () const;
+		explicit operator bool () const;
 
 	private:
 		void setup (std::string const& str);

@@ -112,7 +112,7 @@ namespace
 				}
 			}
 
-			EXPLICIT operator bool () const    { return _stream; }
+			explicit operator bool () const    { return _stream; }
 			operator FSEventStreamRef () const { return _stream; }
 
 			std::string _mount_point;

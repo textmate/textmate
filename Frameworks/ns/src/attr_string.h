@@ -215,7 +215,7 @@ namespace ns
 		operator NSAttributedString* () const   { return get(); }
 		operator CFAttributedStringRef () const { return (CFAttributedStringRef)get(); }
 
-		EXPLICIT operator bool () const { return !is_empty(); };
+		explicit operator bool () const { return !is_empty(); };
 		bool is_empty () const { return _string.size() == 0; };
 	};
 

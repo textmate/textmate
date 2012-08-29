@@ -20,7 +20,7 @@ namespace oak
 		bool operator== (uuid_t const& rhs) const;
 		bool operator!= (uuid_t const& rhs) const;
 
-		EXPLICIT operator bool () const;
+		explicit operator bool () const;
 		operator std::string () const;
 
 		static bool is_valid (std::string const& str);

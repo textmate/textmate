@@ -11,7 +11,7 @@ namespace ng
 		index_t () : index(SIZE_T_MAX), carry(SIZE_T_MAX) { }
 		index_t (size_t index, size_t carry = 0) : index(index), carry(carry) { }
 
-		EXPLICIT operator bool () const            { return index != SIZE_T_MAX; }
+		explicit operator bool () const            { return index != SIZE_T_MAX; }
 		bool operator== (index_t const& rhs) const { return index == rhs.index && carry == rhs.carry; }
 		bool operator!= (index_t const& rhs) const { return !(*this == rhs); }
 		bool operator< (index_t const& rhs) const  { return index < rhs.index || index == rhs.index && carry < rhs.carry; }
@@ -33,7 +33,7 @@ namespace ng
 		index_t const& max () const                { return first < last ? last  : first; }
 		range_t sorted () const                    { return range_t(min(), max(), columnar, freehanded); }
 		bool empty () const                        { return freehanded ? first == last : first.index == last.index; }
-		EXPLICIT operator bool () const            { return first ? true : false; }
+		explicit operator bool () const            { return first ? true : false; }
 		bool operator== (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first == rhs.first && lhs.last == rhs.last && lhs.columnar == rhs.columnar && lhs.freehanded == rhs.freehanded; }
 		bool operator!= (range_t const& tmp) const { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first != rhs.first || lhs.last != rhs.last || lhs.columnar != rhs.columnar || lhs.freehanded != rhs.freehanded; }
 		bool operator< (range_t const& tmp) const  { auto lhs = normalized(), rhs = tmp.normalized(); return lhs.first < rhs.first || lhs.first == rhs.first && lhs.last < rhs.last; }
@@ -67,7 +67,7 @@ namespace ng
 
 		bool empty () const                     { return ranges.empty(); }
 		size_t size () const                    { return ranges.size(); }
-		EXPLICIT operator bool () const         { return !empty(); }
+		explicit operator bool () const         { return !empty(); }
 		void push_back (range_t const& r)       { ranges.push_back(r); }
 		void push_back (index_t const& index)   { push_back(range_t(index, index)); }
 

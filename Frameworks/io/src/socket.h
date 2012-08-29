@@ -10,7 +10,7 @@ struct socket_t
 	socket_t ()                     { }
 	socket_t (int fd)               { helper.reset(new helper_t(fd)); }
 	operator int () const           { ASSERT(helper); return helper->fd; }
-	EXPLICIT operator bool () const { return helper ? helper->fd != -1 : false; }
+	explicit operator bool () const { return helper ? helper->fd != -1 : false; }
 
 private:
 	struct helper_t

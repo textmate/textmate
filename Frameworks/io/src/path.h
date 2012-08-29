@@ -37,7 +37,7 @@ namespace path
 		bool operator< (identifier_t const& rhs) const;
 		bool operator== (identifier_t const& rhs) const;
 		bool operator!= (identifier_t const& rhs) const;
-		EXPLICIT operator bool () const { return exists || path != NULL_STR; }
+		explicit operator bool () const { return exists || path != NULL_STR; }
 	private:
 		bool exists;
 		dev_t device;

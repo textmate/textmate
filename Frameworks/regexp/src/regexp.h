@@ -34,7 +34,7 @@ namespace regexp
 
 		bool did_match (int i = 0) const	{ return i < size() && region->beg[i] != -1; }
 
-		EXPLICIT operator bool () const	{ return did_match(); }
+		explicit operator bool () const	{ return did_match(); }
 
 		char const* buffer () const		{ return buf; }
 
@@ -62,7 +62,7 @@ namespace regexp
 		pattern_t (char const* pattern, OnigOptionType options = ONIG_OPTION_NONE);
 		pattern_t (std::string const& pattern, OnigOptionType options = ONIG_OPTION_NONE);
 		pattern_t (std::string const& pattern, std::string const& str_options);
-		EXPLICIT operator bool () const { return compiled_pattern ? true : false; }
+		explicit operator bool () const { return compiled_pattern ? true : false; }
 
 		bool operator== (pattern_t const& rhs) const { return pattern_string == rhs.pattern_string; }
 		bool operator!= (pattern_t const& rhs) const { return !(*this == rhs); }

@@ -10,7 +10,7 @@ namespace cf
 		image_t (std::string const& path, std::string const& bundleId = NULL_STR);
 		image_t ()                      { }
 		operator CGImageRef () const    { return _value.get(); }
-		EXPLICIT operator bool () const { return _value.get() ? true : false; }
+		explicit operator bool () const { return _value.get() ? true : false; }
 	private:
 		typedef std::shared_ptr<struct CGImage> CGImagePtr;
 		CGImagePtr _value;

@@ -12,7 +12,7 @@ struct PUBLIC connection_t
 	connection_t (int socket = -1);
 	connection_t (std::string const& socketPath);
 
-	EXPLICIT operator bool () const { return _socket; }
+	explicit operator bool () const { return _socket; }
 
 	connection_t& operator<< (bool value);
 	connection_t& operator<< (int value);
