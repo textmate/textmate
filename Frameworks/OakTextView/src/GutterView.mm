@@ -377,15 +377,22 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				BOOL isHoveringRect = NSMouseInRect(mouseHoveringAtPoint, columnRect, [self isFlipped]);
 				BOOL isDownInRect   = NSMouseInRect(mouseDownAtPoint,     columnRect, [self isFlipped]);
 
-				NSColor* imageColor = selectedRow ? self.selectionIconColor : self.iconColor;
 				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
-				CGFloat y = round((NSHeight(columnRect) - [image size].height) / 2);
-				CGFloat x = round((NSWidth(columnRect) - [image size].width) / 2);
-				[image lockFocus];
-				[imageColor set];
-				NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
-				[image unlockFocus];
-				[image drawAdjustedAtPoint:NSMakePoint(NSMinX(columnRect) + x, NSMinY(columnRect) + y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+				if([image size].height > 0 && [image size].width > 0)
+				{
+					CGFloat x = round((NSWidth(columnRect)  - [image size].width)  / 2);
+					CGFloat y = round((NSHeight(columnRect) - [image size].height) / 2);
+
+					NSImage* overlayImage = [[[NSImage alloc] initWithSize:[image size]] autorelease];
+
+					[overlayImage lockFocus];
+					[image drawAdjustedAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+					[(selectedRow ? self.selectionIconColor : self.iconColor) set];
+					NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
+					[overlayImage unlockFocus];
+
+					[overlayImage drawAdjustedAtPoint:NSMakePoint(NSMinX(columnRect) + x, NSMinY(columnRect) + y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+				}
 			}
 		}
 
