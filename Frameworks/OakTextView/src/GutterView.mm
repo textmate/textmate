@@ -28,9 +28,6 @@ struct data_source_t
 };
 
 @interface GutterView ()
-- (void)frameDidChange:(NSNotification*)aNotification;
-- (void)updateWidthWithAnimation:(BOOL)animate;
-- (void)setGutterWidth:(CGFloat)newWidth animate:(BOOL)animate;
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
 
 - (void)clearTrackingRects;
@@ -68,11 +65,6 @@ struct data_source_t
 	D(DBF_GutterView, bug("\n"););
 	[super updateTrackingAreas];
 	[self setupTrackingRects];
-}
-
-- (void)viewDidMoveToSuperview
-{
-	[self frameDidChange:nil];
 }
 
 - (void)removeFromSuperview
@@ -160,7 +152,6 @@ struct data_source_t
 	{
 		[lineNumberFont release];
 		lineNumberFont = [font retain];
-		[self frameDidChange:nil];
 	}
 }
 
@@ -175,11 +166,7 @@ struct data_source_t
 	}
 
 	if(partnerView = [aView retain])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(frameDidChange:) name:NSViewFrameDidChangeNotification object:partnerView];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[partnerView enclosingScrollView] contentView]];
-		[self frameDidChange:nil];
-	}
 }
 
 - (void)setDelegate:(id <GutterViewDelegate>)aDelegate
@@ -204,23 +191,6 @@ struct data_source_t
 - (BOOL)isOpaque
 {
 	return YES;
-}
-
-- (void)setGutterWidth:(CGFloat)newWidth animate:(BOOL)animate
-{
-	NSRect frame = self.frame;
-	CGFloat widthDifference = newWidth - frame.size.width;
-	frame.size.width = newWidth;
-	[(animate ? self.animator : self) setFrame:frame];
-
-	frame = self.enclosingScrollView.frame;
-	frame.size.width += widthDifference;
-	[(animate ? self.enclosingScrollView.animator : self.enclosingScrollView) setFrame:frame];
-
-	frame = partnerView.enclosingScrollView.frame;
-	frame.size.width -= widthDifference;
-	frame.origin.x   += widthDifference;
-	[(animate ? partnerView.enclosingScrollView.animator : partnerView.enclosingScrollView) setFrame:frame];
 }
 
 - (BOOL)visibilityForColumnWithIdentifier:(NSString*)identifier
@@ -300,13 +270,6 @@ struct data_source_t
 - (void)boundsDidChange:(NSNotification*)aNotification
 {
 	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(partnerView.enclosingScrollView.contentView.bounds))];
-}
-
-- (void)frameDidChange:(NSNotification*)aNotification
-{
-	[self setFrameSize:NSMakeSize(NSWidth(self.enclosingScrollView.documentVisibleRect), NSHeight(partnerView.frame) + NSHeight([self.enclosingScrollView documentVisibleRect]) - NSHeight([partnerView.enclosingScrollView documentVisibleRect]))];
-	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(partnerView.enclosingScrollView.contentView.bounds))];
-	[self updateWidthWithAnimation:NO];
 }
 
 static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
@@ -400,13 +363,8 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	}
 }
 
-- (void)updateWidthWithAnimation:(BOOL)animate
+- (void)sizeToFit
 {
-	// Don’t perform any sizing until the view is set up,
-	// to avoid the width becoming out of sync with the partnerView
-	if(!partnerView || !self.superview)
-		return;
-
 	static const CGFloat columnPadding = 1;
 
 	CGFloat currentX = 0, totalWidth = 0;
@@ -424,13 +382,12 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			it->width = 0;
 		}
 	}
-	[self setGutterWidth:totalWidth animate:animate];
+	[self setFrameSize:NSMakeSize(totalWidth, NSHeight([self frame]))];
 }
 
 - (void)reloadData:(id)sender
 {
 	D(DBF_GutterView, bug("\n"););
-	[self updateWidthWithAnimation:NO];
 	[self setNeedsDisplay:YES];
 }
 
@@ -510,7 +467,6 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	if(visible)
 			[hiddenColumns removeObject:columnIdentifier];
 	else	[hiddenColumns addObject:columnIdentifier];
-	[self updateWidthWithAnimation:NO];
 }
 
 // ==================
