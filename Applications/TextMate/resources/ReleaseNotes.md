@@ -4,6 +4,15 @@
 
 Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
 
+## 2012-08-28
+
+* TextMate is now built with [`libc++`](http://libcxx.llvm.org/index.html) and as a 64 bit application using the new Objective-C run-time. Ideally no changes affecting the user, but a lot has changed under the hood. *[Jacob Bandes-Storch]*
+* New `TM_SCM_NAME` variable giving the name of the SCM system used for the current file (git, svn, or hg) which can be used when setting `windowTitle`. *[Adam Strzelecki]*
+* Untitled documents now get their `TM_SCM_BRANCH` and `TM_SCM_NAME` variables based on the current project. *[Adam Strzelecki]*
+* Update window title when application is activated for the case where the current branch (SCM) is part of the title. *[Adam Strzelecki]*
+* Update look of release notes and make it a normal window (instead of floating). *[Dustin Wilson]*
+* Fix crash when using Find All in the Find dialog for an untitled file (introduced in last release).
+
 ## 2012-08-27
 
 * While recording a macro, several actions would cause TM to misbehave/freeze (uncaught exception).
