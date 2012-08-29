@@ -9,23 +9,21 @@ OAK_DEBUG_VAR(SCM_Git);
 
 static scm::status::type parse_status_flag (std::string const& str)
 {
-	static struct { scm::status::type flag; std::string string; } const StatusLetterConversionMap[] =
+	static std::map<std::string, scm::status::type> const StatusLetterConversionMap
 	{
-		{ scm::status::unversioned, "?" },
-		{ scm::status::ignored,     "I" },
-		{ scm::status::versioned,   "H" },
-		{ scm::status::modified,    "M" },
-		{ scm::status::added,       "A" },
-		{ scm::status::deleted,     "D" },
-		{ scm::status::conflicted,  "U" },
-		{ scm::status::modified,    "T" }, // type change, e.g. symbolic link → regular file
+		{ "?", scm::status::unversioned },
+		{ "I", scm::status::ignored     },
+		{ "H", scm::status::versioned   },
+		{ "M", scm::status::modified    },
+		{ "A", scm::status::added       },
+		{ "D", scm::status::deleted     },
+		{ "U", scm::status::conflicted  },
+		{ "T", scm::status::modified    }  // type change, e.g. symbolic link → regular file
 	};
 
-	for(size_t i = 0; i < sizeofA(StatusLetterConversionMap); ++i)
-	{
-		if(str == StatusLetterConversionMap[i].string)
-			return StatusLetterConversionMap[i].flag;
-	}
+	auto it = StatusLetterConversionMap.find(str);
+	if(it != StatusLetterConversionMap.end())
+		return it->second;
 
 	ASSERT_EQ(str, NULL_STR); // we use ‘str’ in the assertion to output the unrecognized status flag
 	return scm::status::none;
