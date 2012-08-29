@@ -71,6 +71,11 @@ private:
 - (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
 - (void)setShowResizeThumb:(BOOL)flag { statusBar.showResizeThumb = flag; }
 
+- (NSRect)gutterDividerRect
+{
+	return NSMakeRect(NSMaxX(gutterScrollView.frame), NSMinY(gutterScrollView.frame), 1, NSHeight(gutterScrollView.frame));
+}
+
 - (id)initWithFrame:(NSRect)aRect
 {
 	D(DBF_OakDocumentView, bug("%s\n", [NSStringFromRect(aRect) UTF8String]););
@@ -284,8 +289,7 @@ private:
 
 		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 
-		[self setNeedsDisplay:YES];
-		[textView setNeedsDisplay:YES];
+		[self setNeedsDisplayInRect:[self gutterDividerRect]];
 		[gutterView setNeedsDisplay:YES];
 	}
 }
@@ -421,8 +425,7 @@ private:
 
 	// Draw the border between gutter and text views
 	[gutterDividerColor set];
-	NSRect gutterFrame = gutterScrollView.frame;
-	NSRectFill(NSMakeRect(NSMaxX(gutterFrame), NSMinY(gutterFrame), 1, NSHeight(gutterFrame)));
+	NSRectFill(NSIntersectionRect([self gutterDividerRect], aRect));
 }
 
 // ======================
