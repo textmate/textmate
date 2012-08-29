@@ -319,7 +319,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
 	{
 		GVLineRecord record = [delegate lineRecordForPosition:y];
-		if(prevLine == std::make_pair(record.lineNumber, record.softlineOffset))
+		if(record.lastY <= y || prevLine == std::make_pair(record.lineNumber, record.softlineOffset))
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
 
