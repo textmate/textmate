@@ -331,7 +331,7 @@ void file_chooser_t::wait () const
 	if(prefixLen == std::string::npos || prefixLen + name.size() != path.size() || prefixLen != 0 && path[prefixLen-1] != '/')
 		prefixLen = 0;
 	std::string const prefix = prefixLen ? path::with_tilde(path.substr(0, prefixLen)) : "";
-	return AttributedStringWithMarkedUpRanges(prefix.empty() ? path : prefix + name, data._match_ranges, prefix.size());
+	return AttributedStringWithMarkedUpRanges(prefix.empty() ? path : prefix + "/" + name, data._match_ranges, prefix.size());
 }
 @end
 
