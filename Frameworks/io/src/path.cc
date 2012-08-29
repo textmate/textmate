@@ -266,12 +266,18 @@ namespace path
 			{
 				char buf[PATH_MAX];
 				ssize_t len = readlink(path.c_str(), buf, sizeof(buf));
-				if(len == -1)
+				if(0 < len && len < PATH_MAX)
 				{
-					fprintf(stderr, "*** error reading link ‘%s’\n", path.c_str());
-					return NULL_STR;
+					path = resolve_links(join(resolvedParent, std::string(buf, buf + len)), resolveParent, seen);
 				}
-				path = resolve_links(join(resolvedParent, std::string(buf, buf + len)), resolveParent, seen);
+				else
+				{
+					std::string errStr = len == -1 ? strerror(errno) : text::format("Result outside allowed range %zd", len);
+					std::string message = text::format("Failure calling readlink(‘%s’):\n\n\u2003%s\n\nPlease submit a bug report quoting the above:\nhttps://github.com/textmate/textmate/issues", path.c_str(), errStr.c_str());
+
+					CFOptionFlags responseFlags;
+					CFUserNotificationDisplayAlert(0 /* timeout */, kCFUserNotificationStopAlertLevel, NULL /* iconURL */, NULL /* soundURL */, NULL /* localizationURL */, CFSTR("Read Link Failed"), cf::wrap(message), CFSTR("Continue"), NULL /* alternateButtonTitle */, NULL /* otherButtonTitle */, &responseFlags);
+				}
 			}
 			else if(S_ISREG(buf.st_mode))
 			{
