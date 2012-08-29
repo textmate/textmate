@@ -5,6 +5,7 @@
 #include <text/trim.h>
 #include <text/tokenize.h>
 #include <io/io.h>
+#include <cf/cf.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(SCM_Svn);
@@ -88,7 +89,26 @@ namespace scm
 {
 	struct svn_driver_t : driver_t
 	{
-		svn_driver_t () : driver_t("svn", "%s/.svn", "svn") { }
+		svn_driver_t () : driver_t("svn", "%s/.svn", "svn")
+		{
+			if(CFBundleRef bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.macromates.TextMate.scm")))
+			{
+				if(CFURLRef xsltURL = CFBundleCopyResourceURL(bundle, CFSTR("svn_status"), CFSTR("xslt"), NULL))
+				{
+					if(CFStringRef path = CFURLCopyFileSystemPath(xsltURL, kCFURLPOSIXPathStyle))
+					{
+						_xslt_path = cf::to_s(path);
+						CFRelease(path);
+					}
+					CFRelease(xsltURL);
+				}
+			}
+
+			// TODO Tests should be linked against the full framework bundle.
+			static std::string const SourceTreePath = path::join(__FILE__, "../../../resources/svn_status.xslt");
+			if(_xslt_path == NULL_STR && path::exists(SourceTreePath))
+				_xslt_path = SourceTreePath;
+		}
 
 		std::string branch_name (std::string const& wcPath) const
 		{
@@ -106,7 +126,7 @@ namespace scm
 		status_map_t status (std::string const& wcPath) const
 		{
 			D(DBF_SCM_Svn, bug("%s\n", wcPath.c_str()););
-			if(executable() == NULL_STR)
+			if(executable() == NULL_STR || _xslt_path == NULL_STR)
 				return status_map_t();
 
 			status_map_t relativePaths, res;
@@ -115,6 +135,9 @@ namespace scm
 				res.insert(std::make_pair(path::join(wcPath, pair->first), pair->second));
 			return res;
 		}
+
+	private:
+		std::string _xslt_path = NULL_STR;
 	};
 
 	driver_t* svn_driver () { return new svn_driver_t; }
