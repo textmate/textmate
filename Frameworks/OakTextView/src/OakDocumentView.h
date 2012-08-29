@@ -25,6 +25,8 @@ PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumn
 	NSMutableArray* topAuxiliaryViews;
 	NSMutableArray* bottomAuxiliaryViews;
 
+	NSInteger isResizingTextView;
+
 	IBOutlet NSPanel* tabSizeSelectorPanel;
 }
 @property (nonatomic, readonly) OakTextView* textView;

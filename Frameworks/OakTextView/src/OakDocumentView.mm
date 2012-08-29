@@ -71,9 +71,43 @@ private:
 - (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
 - (void)setShowResizeThumb:(BOOL)flag { statusBar.showResizeThumb = flag; }
 
+- (void)updateGutterWidth
+{
+	++isResizingTextView;
+
+	CGFloat currentWidth = NSWidth(gutterScrollView.frame);
+	CGFloat desiredWidth = NSWidth(gutterView.frame);
+	// To avoid problems where width never stabilizes, we only allow size to grow if called recursively
+	CGFloat gutterWidth  = isResizingTextView == 1 ? desiredWidth : std::max(currentWidth, desiredWidth);
+
+	NSRect gutterRect = gutterScrollView.frame;
+	gutterRect.size.width = gutterWidth++; // Increment as we draw the divider
+	[gutterScrollView setFrame:gutterRect];
+
+	NSRect textViewRect = textScrollView.frame;
+	textViewRect.size.width = NSMaxX(textViewRect) - gutterWidth;
+	textViewRect.origin.x   = gutterWidth;
+	[textScrollView setFrame:textViewRect];
+
+	--isResizingTextView;
+}
+
+- (void)updateGutterHeight
+{
+	[gutterView setFrameSize:NSMakeSize(NSWidth(gutterView.frame), NSHeight(textView.frame))];
+	[gutterView sizeToFit];
+	[self updateGutterWidth];
+}
+
 - (NSRect)gutterDividerRect
 {
 	return NSMakeRect(NSMaxX(gutterScrollView.frame), NSMinY(gutterScrollView.frame), 1, NSHeight(gutterScrollView.frame));
+}
+
+- (void)textViewFrameDidChange:(NSNotification*)aNotification;
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
+	[self updateGutterHeight];
 }
 
 - (id)initWithFrame:(NSRect)aRect
@@ -125,6 +159,8 @@ private:
 		statusBar.autoresizingMask = NSViewWidthSizable;
 		[self addSubview:statusBar];
 
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewFrameDidChange:) name:NSViewFrameDidChangeNotification object:textView];
+
 		[self setDocument:document::from_content("", "text.plain")]; // file type is only to avoid potential “no grammar” warnings in console
 
 		iterate(keyPath, ObservedTextViewKeyPaths)
@@ -160,6 +196,8 @@ private:
 		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Pressed Template"], [self gutterImage:@"Bookmark Pressed Template"], [self gutterImage:@"Bookmark Pressed Template"] ],
 		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Pressed Template"], [self gutterImage:@"Folding Collapsed Pressed Template"], [self gutterImage:@"Folding Bottom Pressed Template"] ],
 	};
+
+	[self updateGutterHeight];
 }
 
 - (IBAction)makeTextLarger:(id)sender       { [self setFont:[NSFont fontWithName:[textView.font fontName] size:[textView.font pointSize] + 1]]; }
@@ -262,6 +300,7 @@ private:
 	}
 
 	[textView setDocument:document];
+	[self updateGutterHeight];
 	[self updateStyle];
 
 	if(oldDocument)
@@ -304,6 +343,8 @@ private:
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
 	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+	[gutterView sizeToFit];
+	[self updateGutterWidth];
 
 	if(isVisibleFlag)
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DocumentView Disable Line Numbers"];
