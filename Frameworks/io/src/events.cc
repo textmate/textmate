@@ -1,5 +1,3 @@
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
-
 #include "events.h"
 #include "path.h"
 #include <cf/cf.h>
@@ -245,5 +243,3 @@ namespace fs
 	}
 
 } /* fs */
-
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5 */

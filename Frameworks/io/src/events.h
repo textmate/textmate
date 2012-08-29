@@ -1,8 +1,6 @@
 #ifndef FS_EVENTS_H_E5F4DSTS
 #define FS_EVENTS_H_E5F4DSTS
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
-
 #include <oak/misc.h>
 
 namespace fs
@@ -18,7 +16,5 @@ namespace fs
 	PUBLIC void unwatch (std::string const& path, event_callback_t* callback);
 
 } /* fs */
-
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5 */
 
 #endif /* end of include guard: FS_EVENTS_H_E5F4DSTS */

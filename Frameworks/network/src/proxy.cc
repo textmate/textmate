@@ -74,7 +74,6 @@ static proxy_settings_t user_pw_settings (std::string const& server, UInt32 port
 	return proxy_settings_t(true, server, port, user, pw);
 }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
 static void pac_proxy_callback (void* client, CFArrayRef proxyList, CFErrorRef error)
 {
 	proxy_settings_t& settings = *(proxy_settings_t*)client;
@@ -105,7 +104,6 @@ static void pac_proxy_callback (void* client, CFArrayRef proxyList, CFErrorRef e
 		}
 	}
 }
-#endif
 
 proxy_settings_t get_proxy_settings (std::string const& url)
 {
@@ -128,7 +126,7 @@ proxy_settings_t get_proxy_settings (std::string const& url)
 	else if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoConfigEnable), enabled) && enabled)
 	{
 		D(DBF_Proxy, bug("pac enabled: %s\n", BSTR(enabled)););
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
+
 		std::string pacString;
 		if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoConfigURLString), pacString))
 		{
@@ -153,7 +151,6 @@ proxy_settings_t get_proxy_settings (std::string const& url)
 			if(res.server == NULL_STR)
 				res.enabled = false;
 		}
-#endif
 	}
 	else if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoDiscoveryEnable), enabled) && enabled)
 	{

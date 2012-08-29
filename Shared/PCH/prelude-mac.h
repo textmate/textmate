@@ -3,10 +3,6 @@
 
 #import "prelude.c"
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-typedef float CGFloat;
-#endif
-
 #import <AudioToolbox/AudioToolbox.h>
 #import <Carbon/Carbon.h>
 #import <CommonCrypto/CommonDigest.h>

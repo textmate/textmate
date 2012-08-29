@@ -504,10 +504,9 @@ namespace path
 				res |= flag::symlink_bsd;
 			if(S_ISFIFO(buf.st_mode))
 				res |= flag::socket_bsd;
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
 			if(buf.st_flags & UF_HIDDEN)
 				res |= flag::hidden_bsd;
-#endif
+
 			if((res & flag::directory_bsd) && hide_volume(buf.st_dev, path))
 				res |= flag::hidden_volume;
 		}
@@ -902,7 +901,7 @@ namespace path
 		errno = EEXIST;
 		return false;
 	}
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
+
 	std::string move_to_trash (std::string const& path)
 	{
 		fsref_t result;
@@ -910,7 +909,7 @@ namespace path
 			return NULL_STR;
 		return result.path();
 	}
-#endif
+
 	std::string duplicate (std::string const& src, std::string dst, bool overwrite)
 	{
 		if(dst == NULL_STR)
@@ -938,7 +937,6 @@ namespace path
 		return path == NULL_STR ? false : make_dir(parent(path)) && mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == 0;
 	}
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
 	void touch_tree (std::string const& basePath)
 	{
 		lutimes(basePath.c_str(), NULL);
@@ -953,7 +951,6 @@ namespace path
 				lutimes(path.c_str(), NULL);
 		}
 	}
-#endif
 
 	// ===============
 	// = Global Info =
@@ -1032,14 +1029,11 @@ namespace path
 	std::string temp (std::string const& file)
 	{
 		std::string str(128, ' ');
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
 		size_t len = confstr(_CS_DARWIN_USER_TEMP_DIR, &str[0], str.size());
 		if(0 < len && len < 128) // if length is 128 the path was truncated and unusable
 				str.resize(len - 1);
 		else	str = getenv("TMPDIR") ?: "/tmp";
-#else
-		str = getenv("TMPDIR") ?: "/tmp";
-#endif
+
 		if(file != NULL_STR)
 		{
 			str = path::join(str, std::string(getprogname() ?: "untitled") + "_" + file + ".XXXXXX");

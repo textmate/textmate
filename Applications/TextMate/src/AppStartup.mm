@@ -44,7 +44,7 @@ OAK_DEBUG_VAR(AppStartup);
 		nil]];
 	RegisterDefaults();
 	[[NSUserDefaults standardUserDefaults] setObject:NO_obj forKey:@"NSQuitAlwaysKeepsWindows"];
-	disableSessionRestore = ([NSEvent slModifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;
+	disableSessionRestore = ([NSEvent modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;
 
 	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
 	if(!path::exists(dest))
