@@ -112,7 +112,7 @@ private:
 		[self addSubview:gutterScrollView];
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
-			[[gutterScrollView documentView] setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 		
 		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(aRect), OakStatusBarHeight);
 		statusBar = [[OTVStatusBar alloc] initWithFrame:statusBarFrame];
@@ -297,9 +297,9 @@ private:
 
 - (IBAction)toggleLineNumbers:(id)sender
 {
-	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([[gutterScrollView documentView] visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
-	BOOL isVisibleFlag = ![[gutterScrollView documentView] visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-	[[gutterScrollView documentView] setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
+	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
+	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 
 	if(isVisibleFlag)
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DocumentView Disable Line Numbers"];
@@ -324,7 +324,7 @@ private:
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	if([aMenuItem action] == @selector(toggleLineNumbers:))
-		[aMenuItem setState:[[gutterScrollView documentView] visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? NSOffState : NSOnState];
+		[aMenuItem setState:[gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier] ? NSOffState : NSOnState];
 	else if([aMenuItem action] == @selector(takeThemeUUIDFrom:))
 		[aMenuItem setState:[textView theme]->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
