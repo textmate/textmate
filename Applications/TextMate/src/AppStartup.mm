@@ -114,6 +114,9 @@ OAK_DEBUG_VAR(AppStartup);
 {
 	D(DBF_AppStartup, bug("\n"););
 
+	NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+	dict[@3] = @4;
+
 	OakSubmitNewCrashReportsInBackground(REST_API @"/crashes");
 
 	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
