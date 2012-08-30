@@ -127,6 +127,18 @@ struct refresh_helper_t
 		}
 	}
 
+	static NSView* find_gutter_view (NSView* view)
+	{
+		for(NSView* candidate in [view subviews])
+		{
+			if([candidate isKindOfClass:NSClassFromString(@"GutterView")])
+				return candidate;
+			else if(NSView* res = find_gutter_view(candidate))
+				return res;
+		}
+		return nil;
+	}
+
 	~refresh_helper_t ()
 	{
 		if(--_self.refreshNestCount == 0)
@@ -156,8 +168,18 @@ struct refresh_helper_t
 				if(!NSEqualSizes([_self frame].size, newSize))
 					[_self setFrameSize:newSize];
 
+				NSView* gutterView = find_gutter_view([[_self enclosingScrollView] superview]);
 				iterate(rect, damagedRects)
+				{
 					[_self setNeedsDisplayInRect:*rect];
+					if(gutterView)
+					{
+						NSRect r = *rect;
+						r.origin.x = 0;
+						r.size.width = NSWidth([gutterView frame]);
+						[gutterView setNeedsDisplayInRect:r];
+					}
+				}
 
 				if(_revision != _document->buffer().revision() || _selection != _editor->ranges())
 				{
