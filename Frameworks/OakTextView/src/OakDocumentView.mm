@@ -171,10 +171,16 @@ private:
 
 - (NSImage*)gutterImage:(NSString*)aName
 {
-	NSImage* res = [[[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy] autorelease];
-	if(!res)
-		NSLog(@"%s no image named ‘%@’", sel_getName(_cmd), aName);
-	return res;
+	if(NSImage* res = [[[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy] autorelease])
+	{
+		CGFloat height = [textView.font xHeight] * ([aName hasPrefix:@"Bookmark"] ? 0.9 : 1.2);
+		CGFloat width = [res size].width * height / [res size].height;
+		[res setSize:NSMakeSize(width, height)];
+
+		return res;
+	}
+	NSLog(@"%s no image named ‘%@’", sel_getName(_cmd), aName);
+	return nil;
 }
 
 - (void)setFont:(NSFont*)newFont
