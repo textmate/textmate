@@ -4,6 +4,15 @@
 
 Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
 
+## 2012-08-30
+
+* Fix random crash mainly when bringing focus back to TextMate or opening a new window.
+* If TextMate fails to read a link (`readlink`) it will show an alert with some diagnostics that you should submit to us (more info in the dialog). This is an attempt to track down another random crash that has been frequent (but has been in decline in recent versions, though not because it is fixed).
+* The Go to File window (⌘T) would lack the last path separator for the path shown in the status bar.
+* Key equivalent field now use the normal system font (instead of Menlo and previously Monaco).
+* Fix missing svn status for long committer names. *[Jeremy Whitlock]*
+* WIP: Updated gutter images, presently not aligned/sized optimally. *[Dennis Vennink]*
+
 ## 2012-08-28
 
 * TextMate is now built with [`libc++`](http://libcxx.llvm.org/index.html) and as a 64 bit application using the new Objective-C run-time. Ideally no changes affecting the user, but a lot has changed under the hood. *[Jacob Bandes-Storch]*
@@ -66,7 +75,7 @@ Not only are we back to frequent updates, but I have also started blogging about
 
 * You can now ⌘-click icons in the file browser for “Show in Finder” *[Jacob Bandes-Storch]*
 * Bundle editor now remember column widths and item titles are truncated with ellipsis *[Gerd Knops]*
-* File browser now remember it’s width *[Gerd Knops]*
+* File browser now remember its width *[Gerd Knops]*
 * You can now also set `gutterSelectionBackground` in a theme (or as a global style) to affect gutter rendering *[David Howden]*
 * Suppress borders and disallow horizontal scroll for Find in Folder results *[Jacob Bandes-Storch]*
 * Add missing retina images *[Paul Wilde]*
