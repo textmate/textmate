@@ -159,7 +159,8 @@ namespace oak
 		output_fd = outputPipe[0];
 		error_fd = errorPipe[0];
 
-		char const* workingDir = (environment.find("PWD") != environment.end() ? environment["PWD"] : path::temp()).c_str();
+		std::string const wdString = environment.find("PWD") != environment.end() ? environment["PWD"] : path::temp();
+		char const* workingDir = wdString.c_str();
 		oak::c_array env(environment);
 
 		process_id = vfork();
