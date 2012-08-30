@@ -260,7 +260,7 @@ namespace
 		documentTabs.erase(documentTabs.begin() + i);
 	}
 
-	if(documentTabs.empty())
+	if(documentTabs.empty() && self.fileBrowserHidden)
 		return [self close];
 
 	[tabBarView reloadData];
