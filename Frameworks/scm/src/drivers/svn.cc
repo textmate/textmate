@@ -35,26 +35,21 @@ static scm::status::type parse_status_string (std::string const& status)
 
 static void parse_status_output (scm::status_map_t& entries, std::string const& output)
 {
-	if(output == NULL_STR)
-		return;
-
-	std::vector<std::string> v = text::split(output, "\n");
-	ASSERT_EQ(v.back(), "");
-	v.pop_back();
-	iterate(line, v)
+	citerate(line, text::tokenize(output.begin(), output.end(), '\n'))
 	{
 		// Massaged Subversion output is as follows: 'FILE_PATH\0FILE_STATUS\0FILE_PROPS_STATUS'
-		std::vector<std::string> v2 = text::split((*line), std::string(1, '\0'));
-		ASSERT_EQ(v2.size(), 3);
-		std::string file_path         = v2[0];
-		std::string file_status       = v2[1];
-		std::string file_props_status = v2[2];
+		std::vector<std::string> cols = text::split((*line), std::string(1, '\0'));
+		if(cols.size() == 3)
+		{
+			std::string const& file_path         = cols[0];
+			std::string const& file_status       = cols[1];
+			std::string const& file_props_status = cols[2];
 
-		// If the file's status is not normal/none, use the file's status, otherwise use the file's property status
-		if(file_status != "normal" || file_status != "none")
-			entries[file_path] = parse_status_string(file_status);
-		else
-			entries[file_path] = parse_status_string(file_props_status);
+			// If the file's status is not normal/none, use the file's status, otherwise use the file's property status
+			if(file_status != "normal" || file_status != "none")
+					entries[file_path] = parse_status_string(file_status);
+			else	entries[file_path] = parse_status_string(file_props_status);
+		}
 	}
 }
 
