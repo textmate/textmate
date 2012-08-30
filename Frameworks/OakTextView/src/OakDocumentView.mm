@@ -173,10 +173,9 @@ private:
 {
 	if(NSImage* res = [[[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy] autorelease])
 	{
-		CGFloat height = [textView.font xHeight] * ([aName hasPrefix:@"Bookmark"] ? 0.9 : 1.2);
+		CGFloat height = [gutterView.lineNumberFont xHeight] * ([aName hasPrefix:@"Bookmark"] ? 1.125 : 1.5);
 		CGFloat width = [res size].width * height / [res size].height;
-		[res setSize:NSMakeSize(width, height)];
-
+		[res setSize:NSMakeSize(round(width), round(height))];
 		return res;
 	}
 	NSLog(@"%s no image named ‘%@’", sel_getName(_cmd), aName);
