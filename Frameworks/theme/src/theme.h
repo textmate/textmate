@@ -114,7 +114,7 @@ private:
 	std::vector<decomposed_style_t> _styles;
 	callback_t _callback;
 
-	typedef boost::tuple<scope::context_t, std::string, CGFloat> key_t; // scope, font name, font size
+	typedef std::tuple<scope::context_t, std::string, CGFloat> key_t; // scope, font name, font size
 	mutable std::map<key_t, styles_t> _cache;
 };
 
