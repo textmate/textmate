@@ -1,6 +1,8 @@
 #include "server.h"
 #include "constants.h"
 #include <io/path.h>
+#include <io/exec.h>
+#include <regexp/regexp.h>
 #include <OakSystem/application.h>
 #include <oak/debug.h>
 
@@ -34,9 +36,28 @@ static bool install_auth_tool (osx::authorization_t const& auth)
 	return res;
 }
 
+static double version_of_tool (std::string const& toolPath)
+{
+	std::string res = io::exec(toolPath, "--version", NULL);
+	if(regexp::match_t const& m = regexp::search("\\A[^\\s]+ ([\\d.]+)", res.data(), res.data() + res.size()))
+		return strtod(res.c_str() + m.begin(1), NULL);
+	return 0;
+}
+
+static bool auth_server_too_old ()
+{
+	if(path::exists(kAuthToolPath))
+	{
+		double oldVersion = version_of_tool(kAuthToolPath);
+		double newVersion = version_of_tool(oak::application_t::path("Contents/Resources/PrivilegedTool"));
+		return oldVersion < newVersion;
+	}
+	return true;
+}
+
 connection_t connect_to_auth_server (osx::authorization_t const& auth, bool retry)
 {
-	if(!path::exists(kAuthToolPath) || !path::exists(kAuthPlistPath))
+	if(!path::exists(kAuthToolPath) || !path::exists(kAuthPlistPath) || auth_server_too_old())
 	{
 		if(!install_auth_tool(auth))
 			return connection_t();
