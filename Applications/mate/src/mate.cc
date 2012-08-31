@@ -5,12 +5,16 @@
 #include <cf/cf.h>
 #include <io/path.h>
 
-static double const AppVersion  = 2.2;
+static double const AppVersion  = 2.3;
 static size_t const AppRevision = APP_REVISION;
 
 static char const* socket_path ()
 {
-	static std::string const str = text::format("/tmp/textmate-%d.sock", getuid());
+	int uid = getuid();
+	if(getenv("SUDO_UID"))
+		uid = atoi(getenv("SUDO_UID"));
+
+	static std::string const str = text::format("/tmp/textmate-%d.sock", uid);
 	return str.c_str();
 }
 
