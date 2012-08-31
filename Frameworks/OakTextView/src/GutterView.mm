@@ -343,8 +343,12 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
 				if([image size].height > 0 && [image size].width > 0)
 				{
-					CGFloat x = round((NSWidth(columnRect)  - [image size].width)  / 2);
-					CGFloat y = round((NSHeight(columnRect) - [image size].height) / 2);
+					// The placement of the center of image is aligned with the center of
+					// the '1' glyph.
+					CGFloat center = round(record.baseline - ([self.lineNumberFont boundingRectForGlyph:49].size.height / 2));
+
+					CGFloat x = round((NSWidth(columnRect) - [image size].width) / 2);
+					CGFloat y = round(center - ([image size].height / 2));
 
 					NSImage* overlayImage = [[[NSImage alloc] initWithSize:[image size]] autorelease];
 
