@@ -154,7 +154,7 @@ bool DidHandleODBEditorEvent (AppleEvent const* event)
 			documents.back()->set_recent_tracking(false);
 
 			if(displayNames && i < displayNames->array_size())
-				documents.back()->set_custom_name(displayNames->record_at_index(i)->data());
+				documents.back()->set_custom_name(displayNames->record_at_index(i, typeUTF8Text)->data());
 
 			if(positions && i < positions->array_size())
 			{
