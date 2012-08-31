@@ -173,9 +173,22 @@ private:
 {
 	if(NSImage* res = [[[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy] autorelease])
 	{
-		CGFloat height = [gutterView.lineNumberFont xHeight] * ([aName hasPrefix:@"Bookmark"] ? 1.125 : 1.5);
-		CGFloat width = [res size].width * height / [res size].height;
-		[res setSize:NSMakeSize(round(width), round(height))];
+		// First, make sure all images match the height of the '1' glyph. We can't
+		// use the x-height, because the height of the numbers in most fonts is
+		// larger in size.
+		CGFloat height = round([gutterView.lineNumberFont boundingRectForGlyph:49].size.height);
+		CGFloat width = round([res size].width * height / [res size].height);
+
+		CGFloat scaleFactor = 1.0;
+
+		// Since all images are vector based and don't contain any spacing to align
+		// it, we need to set the individual scaleFactor per image.
+		if ([aName hasPrefix:@"Bookmark"]) scaleFactor = 1.0;
+		if ([aName hasPrefix:@"Folding"])  scaleFactor = 1.2;
+		if ([aName hasPrefix:@"Search"])   scaleFactor = 1.2;
+
+		[res setSize:NSMakeSize(width * scaleFactor, height * scaleFactor)];
+
 		return res;
 	}
 	NSLog(@"%s no image named ‘%@’", sel_getName(_cmd), aName);
