@@ -4,6 +4,17 @@
 
 Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
 
+## 2012-08-31
+
+* Doing authenticated saves would fail (out of memory) if you had an older (32 bit) version of the “auth server” installed. TextMate now ensures the installed version is up-to-date.
+* Running `sudo mate` would fail to establish connection with TextMate (bug introduced when socket name was changed to include user ID).
+* The tab size dialog (Other…) now allow you to set a tab size of 1. *[Dennis Vennink]*
+* Improved alignment of the gutter images and made them adjust to font size. *[Dennis Vennink]*
+* Calling TextMate via QuickCursor would show wrong display name or in worst case cause a crash.
+* Improved subversion status parser so unexpected output doesn’t cause a crash.
+* Running commands from TextMate wouldn’t always set the working directory to that of the current document (introduced in r9292 / 2012-08-28).
+* Gutter line numbers wouldn’t always update (introduced in last nightly).
+
 ## 2012-08-30
 
 * Fix random crash mainly when bringing focus back to TextMate or opening a new window.
