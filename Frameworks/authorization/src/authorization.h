@@ -53,8 +53,6 @@ namespace osx
 				if(myStatus == errAuthorizationSuccess)
 				{
 					res = true;
-					for(size_t i = 0; i < myAuthorizedRights->count; ++i)
-						fprintf(stderr, "authorization (pid %d): got ‘%s’\n", getpid(), myAuthorizedRights->items[i].name);
 					AuthorizationFreeItemSet(myAuthorizedRights);
 				}
 				else if(myStatus == errAuthorizationCanceled)
