@@ -144,7 +144,7 @@ namespace scm
 		background_status(_wc_path, _driver, _updated, _snapshot, &update_status);
 	}
 
-	void info_t::update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status)
+	void info_t::update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& newStatus)
 	{
 		if(!didUpdate)
 			return;
@@ -152,17 +152,38 @@ namespace scm
 		auto it = cache().find(path);
 		if(it != cache().end())
 		{
-			// TODO deleted paths
 			std::set<std::string> changedPaths;
-			iterate(pair, status)
+
+			auto const oldStatus = it->second->_file_status;
+			auto oldStatusIter = oldStatus.begin();
+			auto newStatusIter = newStatus.begin();
+
+			while(oldStatusIter != oldStatus.end() && newStatusIter != newStatus.end())
 			{
-				if(it->second->_file_status[pair->first] != pair->second)
-					changedPaths.insert(pair->first);
+				if(newStatusIter == newStatus.end() || oldStatusIter->first < newStatusIter->first)
+				{
+					changedPaths.insert(oldStatusIter->first);
+					++oldStatusIter;
+					continue;
+				}
+
+				if(oldStatusIter == oldStatus.end() || newStatusIter->first < oldStatusIter->first)
+				{
+					changedPaths.insert(newStatusIter->first);
+					++newStatusIter;
+					continue;
+				}
+
+				if(oldStatusIter->second != newStatusIter->second)
+					changedPaths.insert(newStatusIter->first);
+
+				++oldStatusIter;
+				++newStatusIter;
 			}
 
 			it->second->_updated     = oak::date_t::now();
 			it->second->_snapshot    = snapshot;
-			it->second->_file_status = status;
+			it->second->_file_status = newStatus;
 
 			it->second->_callbacks(&callback_t::status_changed, *it->second, changedPaths);
 		}
