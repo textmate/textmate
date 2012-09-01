@@ -7,6 +7,7 @@
 #import <OakAppKit/NSAlert Additions.h>
 #import <document/collection.h>
 #import <document/session.h>
+#import <ns/ns.h>
 
 OAK_DEBUG_VAR(DocumentController_Tabs);
 
@@ -41,7 +42,7 @@ namespace
 	document::schedule_session_backup();
 
 	// This is also set after open succeeds
-	settings_t const& settings = [self selectedDocument]->settings();
+	settings_t const& settings = [self selectedDocument]->settings(to_s([self.untitledSavePath stringByAppendingPathComponent:DefaultSaveNameForDocument([self selectedDocument])]));
 	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
 	self.isDocumentEdited = [self selectedDocument]->is_modified();
@@ -76,7 +77,7 @@ namespace
 	D(DBF_DocumentController_Tabs, bug("\n"););
 	if(*aDocument == *[self selectedDocument])
 	{
-		settings_t const& settings = [self selectedDocument]->settings();
+		settings_t const& settings = [self selectedDocument]->settings(to_s([self.untitledSavePath stringByAppendingPathComponent:DefaultSaveNameForDocument([self selectedDocument])]));
 		self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
 		self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
 		self.isDocumentEdited = [self selectedDocument]->is_modified();
@@ -283,7 +284,7 @@ namespace
 		}
 	}
 
-	settings_t const& settings = aDocument->settings();
+	settings_t const& settings = aDocument->settings(to_s([self.untitledSavePath stringByAppendingPathComponent:DefaultSaveNameForDocument(aDocument)]));
 	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, aDocument->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:aDocument->path()];
 	self.isDocumentEdited = aDocument->is_modified();
