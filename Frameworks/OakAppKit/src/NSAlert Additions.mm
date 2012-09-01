@@ -1,13 +1,32 @@
 #import "NSAlert Additions.h"
 
 @implementation NSAlert (Other)
-- (void)addButtons:(NSString*)firstTitle, ...
+- (void)vAddButtons:(NSString*)firstTitle fromList:(va_list)list
 {
-	va_list ap;
-	va_start(ap, firstTitle);
 	do {
 		[self addButtonWithTitle:firstTitle];
-	} while(firstTitle = va_arg(ap, NSString*));
-	va_end(ap);
+	} while(firstTitle = va_arg(list, NSString*));
+	va_end(list);
+}
+
+- (void)addButtons:(NSString*)firstTitle, ...
+{
+	va_list list;
+	va_start(list, firstTitle);
+	[self vAddButtons:firstTitle fromList:list];
+}
+
++ (NSAlert*)tmAlertWithMessageText:(NSString*)messageText informativeText:(NSString*)informativeText buttons:(NSString*)firstTitle, ...
+{
+	NSAlert* alert = [[[NSAlert alloc] init] autorelease];
+
+	alert.messageText     = messageText;
+	alert.informativeText = informativeText;
+
+	va_list list;
+	va_start(list, firstTitle);
+	[alert vAddButtons:firstTitle fromList:list];
+
+	return alert;
 }
 @end

@@ -1,5 +1,6 @@
 #import "HOWebViewDelegateHelper.h"
 #import "HOBrowserView.h"
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/NSString Additions.h>
 
 @implementation HOWebViewDelegateHelper
@@ -33,11 +34,7 @@
 
 - (void)webView:(WebView*)sender runJavaScriptAlertPanelWithMessage:(NSString*)message initiatedByFrame:(WebFrame*)frame
 {
-	NSAlert* alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Script Message", @"JavaScript alert title")
-	                                 defaultButton:NSLocalizedString(@"OK", @"JavaScript alert confirmation")
-	                               alternateButton:nil
-	                                   otherButton:nil
-	                     informativeTextWithFormat:message];
+	NSAlert* alert = [NSAlert tmAlertWithMessageText:NSLocalizedString(@"Script Message", @"JavaScript alert title") informativeText:message buttons:NSLocalizedString(@"OK", @"JavaScript alert confirmation"), nil];
 	[alert beginSheetModalForWindow:[sender window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 }
 
