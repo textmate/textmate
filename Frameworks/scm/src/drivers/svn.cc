@@ -38,18 +38,22 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 {
 	citerate(line, text::tokenize(output.begin(), output.end(), '\n'))
 	{
-		// Massaged Subversion output is as follows: 'FILE_PATH\0FILE_STATUS\0FILE_PROPS_STATUS'
-		std::vector<std::string> cols = text::split((*line), std::string(1, '\0'));
+		// Massaged Subversion output is as follows: 'FILE_STATUS    FILE_PROPS_STATUS    FILE_PATH'
+		std::vector<std::string> cols = text::split((*line), "    ");
 		if(cols.size() == 3)
 		{
-			std::string const& file_path         = cols[0];
-			std::string const& file_status       = cols[1];
-			std::string const& file_props_status = cols[2];
+			std::string const& file_status       = cols[0];
+			std::string const& file_props_status = cols[1];
+			std::string const& file_path         = cols[2];
 
 			// If the file's status is not normal/none, use the file's status, otherwise use the file's property status
 			if(file_status != "normal" || file_status != "none")
 					entries[file_path] = parse_status_string(file_status);
 			else	entries[file_path] = parse_status_string(file_props_status);
+		}
+		else if((*line).size())
+		{
+			fprintf(stderr, "TextMate/svn: Unexected line: ‘%s’\n", (*line).c_str());
 		}
 	}
 }
@@ -71,18 +75,10 @@ static void collect_all_paths (std::string const& svn, std::string const& xsltPa
 	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
 
 	std::map<std::string, std::string> env = oak::basic_environment();
-	// Parses Subversion's response XML and outputs 'FILE_PATH\0FILE_STATUS\0FILE_PROPS_STATUS'
-	std::string python_cmd = "import sys, xml.dom.minidom\n"
-		"for node in xml.dom.minidom.parse(sys.stdin).getElementsByTagName('entry'):\n"
-		"  path = node.getAttribute('path')\n"
-		"  wc_status = node.getElementsByTagName('wc-status')[0]\n"
-		"  print('%s\\0%s\\0%s' % (path, wc_status.getAttribute('item'), wc_status.getAttribute('props')))";
-	// Subversion status command that is verbose (necessary to get status for unchanged paths) and as XML
-	std::string svn_status_cmd = text::format("%s status --no-ignore --xml -v", svn.c_str());
-
 	env["PWD"] = dir;
 
-	parse_status_output(entries, io::exec(env, "/bin/bash", "-c", text::format("%s | python -c \"%s\"", svn_status_cmd.c_str(), python_cmd.c_str()).c_str(), NULL));
+	std::string const cmd = text::format("'%s' status --no-ignore --xml -v|/usr/bin/xsltproc '%s' -", svn.c_str(), xsltPath.c_str());
+	parse_status_output(entries, io::exec(env, "/bin/sh", "-c", cmd.c_str(), NULL));
 }
 
 namespace scm
