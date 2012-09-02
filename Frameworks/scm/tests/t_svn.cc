@@ -39,7 +39,7 @@ public:
 
 			TS_ASSERT_EQUALS(expectedBranch, info->branch());
 
-			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "clean.txt"))),     scm::status::versioned);
+			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "clean.txt"))),     scm::status::none);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "ignored.txt"))),   scm::status::ignored);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "modified.txt"))),  scm::status::modified);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "added.txt"))),     scm::status::added);

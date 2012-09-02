@@ -15,8 +15,8 @@ static scm::status::type parse_status_string (std::string const& status)
 	// Based on subversion/svn/status.c (generate_status_desc)
 	static std::map<std::string, scm::status::type> const StatusMap
 	{
-		{ "none",        scm::status::versioned   },
-		{ "normal",      scm::status::versioned   },
+		{ "none",        scm::status::none        },
+		{ "normal",      scm::status::none        },
 		{ "added",       scm::status::added       },
 		{ "missing",     scm::status::deleted     },
 		{ "incomplete",  scm::status::deleted     },

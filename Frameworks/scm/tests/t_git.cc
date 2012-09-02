@@ -13,7 +13,6 @@ CXXTEST_ENUM_TRAITS(scm::status::type,
 	CXXTEST_ENUM_MEMBER(scm::status::conflicted);
 	CXXTEST_ENUM_MEMBER(scm::status::ignored);
 	CXXTEST_ENUM_MEMBER(scm::status::mixed);
-	CXXTEST_ENUM_MEMBER(scm::status::versioned);
 );
 
 class git_tests : public CxxTest::TestSuite
@@ -104,8 +103,8 @@ public:
 	void test_folder_with_tracked_file ()
 	{
 		setup_t wc("mkdir folder && touch folder/a && git add folder/a && git commit -mInitial");
-		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::versioned);
-		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::none);
+		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::none);
 	}
 
 	void test_folder_with_modified_file ()
@@ -119,7 +118,7 @@ public:
 	{
 		setup_t wc("mkdir folder && touch folder/{a,b} && git add folder/a && git commit -mInitial");
 		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::mixed);
-		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::none);
 		TS_ASSERT_EQUALS(wc.status("folder/b"), scm::status::unversioned);
 	}
 
@@ -147,8 +146,8 @@ public:
 	void test_ignored_folder_with_tracked_file ()
 	{
 		setup_t wc("mkdir folder && touch folder/a && git add folder/a && git commit -mInitial && echo folder > .git/info/exclude");
-		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::versioned);
-		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("folder"),   scm::status::none);
+		TS_ASSERT_EQUALS(wc.status("folder/a"), scm::status::none);
 	}
 
 	void test_ignored_folder_with_missing_tracked_file ()
@@ -184,7 +183,7 @@ public:
 	void test_tracked_file ()
 	{
 		setup_t wc("touch file && git add file && git commit -mInitial");
-		TS_ASSERT_EQUALS(wc.status("file"), scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("file"), scm::status::none);
 	}
 
 	void test_modified_file ()
@@ -218,7 +217,7 @@ public:
 	void test_ignored_tracked_file ()
 	{
 		setup_t wc("touch file && git add file && git commit -mInitial && echo file > .git/info/exclude");
-		TS_ASSERT_EQUALS(wc.status("file"), scm::status::versioned);
+		TS_ASSERT_EQUALS(wc.status("file"), scm::status::none);
 	}
 
 	void test_ignored_modified_file ()

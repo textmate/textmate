@@ -18,7 +18,6 @@ namespace scm
 			conflicted  = 32,  // File has conflicts that the user should resolve
 			ignored     = 64,  // File is being ignored by the version control system
 			mixed       = 128, // Directory contains files with mixed state
-			versioned   = 256, // Legacy
 		};
 		PUBLIC std::string to_s (type status);
 	};

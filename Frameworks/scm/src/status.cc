@@ -18,7 +18,6 @@ namespace scm
 				case conflicted:   return "conflicted";
 				case ignored:      return "ignored";
 				case mixed:        return "mixed";
-				case versioned:    return "clean";
 				default:           return text::format("unknown (%d)", status);
 			}
 		}

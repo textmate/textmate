@@ -21,7 +21,7 @@ public:
 
 		if(scm::info_ptr info = scm::info(jail.path("clean.txt")))
 		{
-			TS_ASSERT_EQUALS(info->status(jail.path("clean.txt")),     scm::status::versioned);
+			TS_ASSERT_EQUALS(info->status(jail.path("clean.txt")),     scm::status::none);
 			TS_ASSERT_EQUALS(info->status(jail.path("ignored.txt")),   scm::status::ignored);
 			TS_ASSERT_EQUALS(info->status(jail.path("modified.txt")),  scm::status::modified);
 			TS_ASSERT_EQUALS(info->status(jail.path("added.txt")),     scm::status::added);

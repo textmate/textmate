@@ -13,7 +13,7 @@ static scm::status::type parse_status_flag (std::string const& str)
 	{
 		{ "?", scm::status::unversioned },
 		{ "I", scm::status::ignored     },
-		{ "H", scm::status::versioned   },
+		{ "H", scm::status::none        },
 		{ "M", scm::status::modified    },
 		{ "A", scm::status::added       },
 		{ "D", scm::status::deleted     },
@@ -177,7 +177,7 @@ static scm::status::type status_for (entry_t const& root)
 		{
 			case scm::status::unversioned:  ++untracked; break;
 			case scm::status::ignored:      ++ignored;   break;
-			case scm::status::versioned:    ++tracked;   break;
+			case scm::status::none:         ++tracked;   break;
 			case scm::status::modified:     ++modified;  break;
 			case scm::status::added:        ++added;     break;
 			case scm::status::deleted:      ++deleted;   break;
@@ -191,7 +191,7 @@ static scm::status::type status_for (entry_t const& root)
 	
 	if(total == untracked) return scm::status::unversioned;
 	if(total == ignored)   return scm::status::none;
-	if(total == tracked)   return scm::status::versioned;
+	if(total == tracked)   return scm::status::none;
 	if(total == modified)  return scm::status::modified;
 	if(total == added)     return scm::status::added;
 	if(total == deleted)   return scm::status::deleted;

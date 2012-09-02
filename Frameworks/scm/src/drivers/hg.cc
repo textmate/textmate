@@ -12,7 +12,7 @@ static scm::status::type parse_status_flag (char flag)
 	{
 		{ scm::status::unversioned, '?' },
 		{ scm::status::ignored,     'I' },
-		{ scm::status::versioned,   'C' },
+		{ scm::status::none,        'C' },
 		{ scm::status::modified,    'M' },
 		{ scm::status::added,       'A' },
 		{ scm::status::deleted,     'R' },
