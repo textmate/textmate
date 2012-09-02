@@ -77,7 +77,7 @@ static void collect_all_paths (std::string const& svn, std::string const& xsltPa
 	std::map<std::string, std::string> env = oak::basic_environment();
 	env["PWD"] = dir;
 
-	std::string const cmd = text::format("'%s' status --no-ignore --xml -v|/usr/bin/xsltproc '%s' -", svn.c_str(), xsltPath.c_str());
+	std::string const cmd = text::format("'%s' status --no-ignore --xml|/usr/bin/xsltproc '%s' -", svn.c_str(), xsltPath.c_str());
 	parse_status_output(entries, io::exec(env, "/bin/sh", "-c", cmd.c_str(), NULL));
 }
 
