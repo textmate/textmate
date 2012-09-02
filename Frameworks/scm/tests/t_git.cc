@@ -4,14 +4,16 @@
 #include <test/jail.h>
 
 CXXTEST_ENUM_TRAITS(scm::status::type,
+	CXXTEST_ENUM_MEMBER(scm::status::unknown);
 	CXXTEST_ENUM_MEMBER(scm::status::none);
 	CXXTEST_ENUM_MEMBER(scm::status::unversioned);
-	CXXTEST_ENUM_MEMBER(scm::status::versioned);
 	CXXTEST_ENUM_MEMBER(scm::status::modified);
 	CXXTEST_ENUM_MEMBER(scm::status::added);
 	CXXTEST_ENUM_MEMBER(scm::status::deleted);
 	CXXTEST_ENUM_MEMBER(scm::status::conflicted);
 	CXXTEST_ENUM_MEMBER(scm::status::ignored);
+	CXXTEST_ENUM_MEMBER(scm::status::mixed);
+	CXXTEST_ENUM_MEMBER(scm::status::versioned);
 );
 
 class git_tests : public CxxTest::TestSuite

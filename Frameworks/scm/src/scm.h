@@ -1,6 +1,7 @@
 #ifndef OAKSCM_H_SUWJ53QQ
 #define OAKSCM_H_SUWJ53QQ
 
+#include "status.h"
 #include "snapshot.h"
 #include <plist/date.h>
 #include <oak/debug.h>
@@ -10,27 +11,7 @@
 
 namespace scm
 {
-#ifndef SCM_DRIVERS_API_H_5RTC8RYO
-	namespace status
-	{
-		enum type
-		{
-			none        = 0,
-			unversioned = 1,
-			versioned   = 2,
-			modified    = 4,
-			added       = 8,
-			deleted     = 16,
-			conflicted  = 32,
-			ignored     = 64,
-			mixed       = 128,
-		};
-		PUBLIC std::string to_s (type status);
-	};
-	typedef std::map<std::string, scm::status::type> status_map_t;
-
 	struct driver_t;
-#endif
 
 	struct info_t;
 	typedef std::shared_ptr<info_t> info_ptr;

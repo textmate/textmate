@@ -1,28 +1,11 @@
 #ifndef SCM_DRIVERS_API_H_5RTC8RYO
 #define SCM_DRIVERS_API_H_5RTC8RYO
 
+#include "../status.h"
 #include <oak/misc.h>
 
 namespace scm
 {
-	namespace status
-	{
-		enum type
-		{
-			none        = 0,
-			unversioned = 1,
-			versioned   = 2,
-			modified    = 4,
-			added       = 8,
-			deleted     = 16,
-			conflicted  = 32,
-			ignored     = 64,
-			mixed       = 128,
-		};
-		PUBLIC std::string to_s (type status);
-	};
-	typedef std::map<std::string, scm::status::type> status_map_t;
-
 	struct driver_t
 	{
 		driver_t (std::string const& name, std::string const& wcRootFormatString, std::string const& requiredExecutable = NULL_STR);
