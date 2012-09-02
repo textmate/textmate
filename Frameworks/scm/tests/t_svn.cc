@@ -50,5 +50,9 @@ public:
 		{
 			TS_FAIL(("error getting wc: " + jailPath).c_str());
 		}
+
+		jail.set_content(".tm_properties", "scmStatus = false\n");
+		scm::info_ptr info = scm::info(jail.path(path::join(wcName, "clean.txt")));
+		TS_ASSERT_EQUALS(info ? true : false, false);
 	}
 };

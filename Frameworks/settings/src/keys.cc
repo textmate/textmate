@@ -17,6 +17,7 @@ std::string const kSettingsShowWrapColumnKey              = "showWrapColumn";
 std::string const kSettingsShowInvisiblesKey              = "showInvisibles";
 
 std::string const kSettingsProjectDirectoryKey            = "projectDirectory";
+std::string const kSettingsSCMStatusKey                   = "scmStatus";
 std::string const kSettingsWindowTitleKey                 = "windowTitle";
 std::string const kSettingsScopeAttributesKey             = "scopeAttributes";
 

@@ -5,6 +5,7 @@
 #include <cf/cf.h>
 #include <oak/oak.h>
 #include <text/format.h>
+#include <settings/settings.h>
 
 OAK_DEBUG_VAR(SCM);
 
@@ -195,6 +196,9 @@ namespace scm
 
 	info_ptr info (std::string const& path)
 	{
+		if(!settings_for_path(path).get(kSettingsSCMStatusKey, true))
+			return info_ptr();
+
 		std::string wcPath;
 		if(driver_t const* driver = driver_for_path(path::parent(path), &wcPath))
 		{
