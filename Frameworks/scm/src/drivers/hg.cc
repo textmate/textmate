@@ -26,7 +26,7 @@ static scm::status::type parse_status_flag (char flag)
 	}
 
 	ASSERT_EQ(flag, '\0'); // we use ‘flag’ in the assertion to output the unrecognized status flag
-	return scm::status::none;
+	return scm::status::unknown;
 }
 
 static void parse_status_output (scm::status_map_t& entries, std::string const& output)

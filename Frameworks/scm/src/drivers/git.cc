@@ -26,7 +26,7 @@ static scm::status::type parse_status_flag (std::string const& str)
 		return it->second;
 
 	ASSERT_EQ(str, NULL_STR); // we use ‘str’ in the assertion to output the unrecognized status flag
-	return scm::status::none;
+	return scm::status::unknown;
 }
 
 static void parse_diff (std::map<std::string, scm::status::type>& entries, std::string const& output)
@@ -41,7 +41,7 @@ static void parse_diff (std::map<std::string, scm::status::type>& entries, std::
 		entries[v[i+1]] = parse_status_flag(v[i]);
 }
 
-static void parse_ls (std::map<std::string, scm::status::type>& entries, std::string const& output, scm::status::type state = scm::status::none)
+static void parse_ls (std::map<std::string, scm::status::type>& entries, std::string const& output, scm::status::type state = scm::status::unknown)
 {
 	if(output == NULL_STR)
 		return;
@@ -52,7 +52,7 @@ static void parse_ls (std::map<std::string, scm::status::type>& entries, std::st
 	iterate(str, v)
 	{
 		ASSERT_EQ((*str)[1], ' ');
-		entries[str->substr(2)] = state != scm::status::none ? state : parse_status_flag(str->substr(0, 1));
+		entries[str->substr(2)] = state != scm::status::unknown ? state : parse_status_flag(str->substr(0, 1));
 	}
 }
 
@@ -170,31 +170,31 @@ static scm::status::type status_for (entry_t const& root)
 	if(!root.is_dir())
 		return root.status();
 
-	size_t unknown = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0;
+	size_t untracked = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0;
 	citerate(entry, root.entries())
 	{
 		switch(status_for(*entry))
 		{
-			case scm::status::unversioned:  ++unknown;  break;
-			case scm::status::ignored:      ++ignored;  break;
-			case scm::status::versioned:    ++tracked;  break;
-			case scm::status::modified:     ++modified; break;
-			case scm::status::added:        ++added;    break;
-			case scm::status::deleted:      ++deleted;  break;
-			case scm::status::mixed:        ++mixed;    break;
+			case scm::status::unversioned:  ++untracked; break;
+			case scm::status::ignored:      ++ignored;   break;
+			case scm::status::versioned:    ++tracked;   break;
+			case scm::status::modified:     ++modified;  break;
+			case scm::status::added:        ++added;     break;
+			case scm::status::deleted:      ++deleted;   break;
+			case scm::status::mixed:        ++mixed;     break;
 		}
 	}
 	
 	if(mixed > 0) return scm::status::mixed;
 	
-	size_t	total=unknown + ignored + tracked + modified + added + deleted;
+	size_t total = untracked + ignored + tracked + modified + added + deleted;
 	
-	if(total == unknown)  return scm::status::unversioned;
-	if(total == ignored)  return scm::status::none;
-	if(total == tracked)  return scm::status::versioned;
-	if(total == modified) return scm::status::modified;
-	if(total == added)    return scm::status::added;
-	if(total == deleted)  return scm::status::deleted;
+	if(total == untracked) return scm::status::unversioned;
+	if(total == ignored)   return scm::status::none;
+	if(total == tracked)   return scm::status::versioned;
+	if(total == modified)  return scm::status::modified;
+	if(total == added)     return scm::status::added;
+	if(total == deleted)   return scm::status::deleted;
 	
 	if(total > 0) return scm::status::mixed;
 	

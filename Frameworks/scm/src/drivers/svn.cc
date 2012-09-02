@@ -31,7 +31,7 @@ static scm::status::type parse_status_string (std::string const& status)
 	};
 
 	auto it = StatusMap.find(status);
-	return it != StatusMap.end() ? it->second : scm::status::none;
+	return it != StatusMap.end() ? it->second : scm::status::unknown;
 }
 
 static void parse_status_output (scm::status_map_t& entries, std::string const& output)

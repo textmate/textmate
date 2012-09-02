@@ -139,7 +139,7 @@ namespace file
 				if(branch != NULL_STR)
 					res.push_back("attr.scm.branch." + branch);
 				scm::status::type status = info->status(path);
-				if(status != scm::status::none)
+				if(status != scm::status::unknown)
 					res.push_back("attr.scm.status." + to_s(status));
 			}
 		}
