@@ -1,6 +1,7 @@
 #import "DocumentSaveHelper.h"
 #import "DocumentCommand.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <ns/ns.h>
@@ -53,7 +54,7 @@ namespace
 			init(context);
 
 			// TODO “unlock file” checkbox (presently implied)
-			NSAlert* alert = [[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("The file “%s” is locked.", _document->display_name().c_str())] defaultButton:@"Overwrite" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Do you want to overwrite it anyway?"] retain];
+			NSAlert* alert = [[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The file “%s” is locked.", _document->display_name().c_str())] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil] retain];
 			[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(makeWritableSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 		}
 
@@ -73,7 +74,7 @@ namespace
 			if(charset != kCharsetNoEncoding)
 			{
 				// TODO transliteration / BOM check box
-				NSAlert* alert = [[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", charset.c_str())] defaultButton:@"Retry" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose another encoding:"] retain];
+				NSAlert* alert = [[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", charset.c_str())] informativeText:@"Please choose another encoding:" buttons:@"Retry", @"Cancel", nil] retain];
 				[alert setAccessoryView:[[OakEncodingPopUpButton new] autorelease]];
 				[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(encodingSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 				[[alert window] recalculateKeyViewLoop];
@@ -178,7 +179,7 @@ namespace
 		[window.attachedSheet orderOut:self];
 		if(aFilter)
 				show_command_error(aMessage, aFilter, window);
-		else	[[NSAlert alertWithMessageText:[NSString stringWithCxxString:text::format("The document “%s” could not be saved.", aDocument->display_name().c_str())] defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:[NSString stringWithCxxString:aMessage] ?: @"Please check Console output for reason."] beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+		else	[[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The document “%s” could not be saved.", aDocument->display_name().c_str())] informativeText:[NSString stringWithCxxString:aMessage] ?: @"Please check Console output for reason.", buttons:@"OK", nil] beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	}
 
 	if(callback)

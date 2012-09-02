@@ -130,6 +130,11 @@ static NSURL* ParentForURL (NSURL* url)
 	return res;
 }
 
+- (NSURL*)rootURL
+{
+	return outlineViewDelegate.dataSource.rootItem.url;
+}
+
 - (void)reload:(id)sender
 {
 	[historyController setCurrentURLScrollOffset:NSMinY([view.outlineView visibleRect])];
