@@ -9,7 +9,7 @@
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
 	std::string const keyString = to_s(anEvent);
-	for(NSMenuItem* menuItem in [self itemArray])
+	for(NSMenuItem* menuItem in [[self itemArray] reverseObjectEnumerator])
 	{
 		if([[menuItem title] isEqualToString:@"Bundles"])
 		{
