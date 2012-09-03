@@ -1736,22 +1736,50 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		document->buffer().indent().set_soft_tabs(flag);
 }
 
+- (void)setWrapColumn:(NSInteger)newWrapColumn
+{
+	if(wrapColumn == newWrapColumn)
+		return;
+
+	wrapColumn = newWrapColumn;
+	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
+	if(layout)
+	{
+		AUTO_REFRESH;
+		layout->set_wrapping(self.softWrap, wrapColumn);
+	}
+}
+
+- (void)setWrapColumnSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
+{
+	if(returnCode == NSAlertDefaultReturn)
+	{
+		NSTextField* textField = (NSTextField*)[alert accessoryView];
+		[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
+	}
+	[alert release];
+}
+
 - (void)takeWrapColumnFrom:(id)sender
 {
 	ASSERT([sender respondsToSelector:@selector(tag)]);
 	if(wrapColumn == [sender tag])
 		return;
 
-	// TODO Soft wrap
-	// if(wrapColumn == NSWrapColumnAskUser)
-	// 	;
-
-	wrapColumn = [sender tag];
-	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
-	if(layout)
+	if([sender tag] == NSWrapColumnAskUser)
 	{
-		AUTO_REFRESH;
-		layout->set_wrapping(self.softWrap, wrapColumn);
+		NSTextField* textField = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+		[textField setIntegerValue:wrapColumn == NSWrapColumnWindowWidth ? 80 : wrapColumn];
+		[textField sizeToFit];
+		[textField setFrameSize:NSMakeSize(200, NSHeight([textField frame]))];
+
+		NSAlert* alert = [[NSAlert alertWithMessageText:@"Set Wrap Column" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Specify what column text should wrap at:"] retain];
+		[alert setAccessoryView:textField];
+		[alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(setWrapColumnSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	}
+	else
+	{
+		[self setWrapColumn:[sender tag]];
 	}
 }
 
