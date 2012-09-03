@@ -39,6 +39,7 @@ static BundleEditor* SharedInstance;
 namespace
 {
 	static bundles::kind_t const PlistItemKinds[] = { bundles::kItemTypeSettings, bundles::kItemTypeMacro, bundles::kItemTypeTheme };
+	static std::vector<std::string> const PlistKeySortOrder { "shellVariables", "disabled", "name", "value", "comment", "match", "begin", "while", "end", "applyEndPatternLast", "captures", "beginCaptures", "whileCaptures", "endCaptures", "contentName", "injections", "patterns", "repository", "include", "increaseIndentPattern", "decreaseIndentPattern", "indentNextLinePattern", "unIndentedLinePattern", "disableIndentCorrections", "indentedSoftWrap", "format", "foldingStartMarker", "foldingStopMarker", "foldingIndentedBlockStart", "foldingIndentedBlockIgnore", "characterClass", "smartTypingPairs", "highlightPairs", "showInSymbolList", "symbolTransformation", "disableDefaultCompletion", "completions", "completionCommand", "spellChecking", "softWrap", "fontName", "fontStyle", "fontSize", "foreground", "background", "bold", "caret", "invisibles", "italic", "misspelled", "selection", "underline" };
 
 	static struct item_info_t { bundles::kind_t kind; std::string plist_key; std::string grammar; std::string file_type; std::string kind_string; NSString* view_controller; NSString* file; } item_infos[] =
 	{
@@ -629,12 +630,12 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 			if(plist.find(*key) != plist.end())
 				grammarPlist[*key] = plist.find(*key)->second;
 		}
-		bundleItemContent = document::from_content(to_s(grammarPlist, plist::kPreferSingleQuotedStrings), info.grammar);
+		bundleItemContent = document::from_content(to_s(grammarPlist, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
 	}
 	else if(oak::contains(beginof(PlistItemKinds), endof(PlistItemKinds), info.kind))
 	{
 		if(plist.find(info.plist_key) != plist.end())
-			bundleItemContent = document::from_content(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings), info.grammar);
+			bundleItemContent = document::from_content(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
 	}
 	else
 	{
