@@ -39,6 +39,9 @@ namespace scm
 		void remove_callback (callback_t* cb);
 
 	private:
+		void setup ();
+		bool _did_setup = false;
+
 		std::string _wc_path;
 		driver_t const* _driver;
 		status_map_t _file_status;

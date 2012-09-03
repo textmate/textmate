@@ -94,26 +94,28 @@ namespace scm
 	std::string info_t::branch () const      { return _driver->branch_name(_wc_path); }
 	bool info_t::tracks_directories () const { return _driver->tracks_directories(); }
 
+	void info_t::setup ()
+	{
+		if(_did_setup)
+			return;
+
+		_file_status = _driver->status(_wc_path);
+		_watcher.reset(new scm::watcher_t(_wc_path, this));
+		_did_setup = true;
+	}
+
+
 	status::type info_t::status (std::string const& path)
 	{
 		D(DBF_SCM, bug("%s\n", path.c_str()););
-		if(_file_status.empty())
-			_file_status = _driver->status(_wc_path);
-
-		if(!_watcher)
-			_watcher.reset(new scm::watcher_t(_wc_path, this));
-
+		setup();
 		status_map_t::const_iterator res = _file_status.find(path);
 		return res != _file_status.end() ? res->second : status::none;
 	}
 
 	status_map_t info_t::files_with_status (int mask)
 	{
-		if(_file_status.empty())
-			_file_status = _driver->status(path());
-
-		if(!_watcher)
-			_watcher.reset(new scm::watcher_t(_wc_path, this));
+		setup();
 
 		status_map_t res;
 		iterate(status, _file_status)
