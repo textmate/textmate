@@ -162,16 +162,16 @@ namespace scm
 			auto oldStatusIter = oldStatus.begin();
 			auto newStatusIter = newStatus.begin();
 
-			while(oldStatusIter != oldStatus.end() && newStatusIter != newStatus.end())
+			while(oldStatusIter != oldStatus.end() || newStatusIter != newStatus.end())
 			{
-				if(newStatusIter == newStatus.end() || oldStatusIter->first < newStatusIter->first)
+				if(newStatusIter == newStatus.end() || oldStatusIter != oldStatus.end() && oldStatusIter->first < newStatusIter->first)
 				{
 					changedPaths.insert(oldStatusIter->first);
 					++oldStatusIter;
 					continue;
 				}
 
-				if(oldStatusIter == oldStatus.end() || newStatusIter->first < oldStatusIter->first)
+				if(oldStatusIter == oldStatus.end() || newStatusIter != newStatus.end() && newStatusIter->first < oldStatusIter->first)
 				{
 					changedPaths.insert(newStatusIter->first);
 					++newStatusIter;
