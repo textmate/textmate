@@ -92,7 +92,7 @@ static NSURL* ParentForURL (NSURL* url)
 		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
 	else if([[url scheme] isEqualToString:@"scm"])
 		return [NSURL fileURLWithPath:[url path] isDirectory:YES];
-	else if([[url scheme] isEqualToString:@"xcodeproj"])
+	else if([@[ @"xcodeproj", @"search" ] containsObject:[url scheme]])
 		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
 	else
 		return [[[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:parentPath] autorelease];
