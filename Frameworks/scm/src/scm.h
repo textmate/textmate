@@ -31,6 +31,7 @@ namespace scm
 		std::string scm_name () const;
 		std::string path () const;
 		std::string branch () const;
+		bool tracks_directories () const;
 		status::type status (std::string const& path);
 		status_map_t files_with_status (int mask);
 

@@ -89,9 +89,10 @@ namespace scm
 		ASSERTF(path::is_directory(_wc_path) || !path::exists(_wc_path) || _wc_path == NULL_STR, "Path: %s\n", _wc_path.c_str());
 	}
 
-	std::string info_t::scm_name () const   { return _driver->name(); }
-	std::string info_t::path () const       { return _wc_path; }
-	std::string info_t::branch () const     { return _driver->branch_name(_wc_path); }
+	std::string info_t::scm_name () const    { return _driver->name(); }
+	std::string info_t::path () const        { return _wc_path; }
+	std::string info_t::branch () const      { return _driver->branch_name(_wc_path); }
+	bool info_t::tracks_directories () const { return _driver->tracks_directories(); }
 
 	status::type info_t::status (std::string const& path)
 	{
