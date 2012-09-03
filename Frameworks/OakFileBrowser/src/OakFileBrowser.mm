@@ -340,6 +340,12 @@ static NSURL* ParentForURL (NSURL* url)
 		if([item.target isFileURL])
 			return (void)[self showURL:item.target];
 	}
+
+	for(FSItem* item in self.selectedItems)
+	{
+		if([item.target path] && path::is_directory([[item.target path] fileSystemRepresentation]))
+			return (void)[self showURL:[NSURL fileURLWithPath:[item.target path]]];
+	}
 }
 
 - (void)showSelectedEntriesInFinder:(id)sender
