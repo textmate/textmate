@@ -80,8 +80,11 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		else	unstagedPaths.push_back(pair->first);
 	}
 
-	unstagedPaths.erase(prune_path_parents(unstagedPaths.begin(), unstagedPaths.end()), unstagedPaths.end());
-	untrackedPaths.erase(prune_path_children(untrackedPaths.begin(), untrackedPaths.end()), untrackedPaths.end());
+	if(!scmInfo->tracks_directories())
+	{
+		unstagedPaths.erase(prune_path_parents(unstagedPaths.begin(), unstagedPaths.end()), unstagedPaths.end());
+		untrackedPaths.erase(prune_path_children(untrackedPaths.begin(), untrackedPaths.end()), untrackedPaths.end());
+	}
 
 	std::sort(unstagedPaths.begin(), unstagedPaths.end(), text::less_t());
 	std::sort(untrackedPaths.begin(), untrackedPaths.end(), text::less_t());
