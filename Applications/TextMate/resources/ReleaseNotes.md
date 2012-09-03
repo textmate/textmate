@@ -4,6 +4,17 @@
 
 Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
 
+## 2012-09-03
+
+* Wrap Column → Other… now show a sheet where you can enter wrap column.
+* We now search the menus “right to left” when searching for a key equivaelnt. The problem is that on some key maps the 
+* When editing property lists in the bundle editor, the dicitonary keys are now ordered more naturally.
+* Drag-selecting beyond visible document no longer leaves tears in the selection.
+* When viewing a saved search (spotlight query) in the file browser, going to parent now correctly goes to the folder containing the saved search.
+* Fix slow performance with subversion repositories (introduced in last build, only present when all files were “clean”). Also fix issue where badges wouldn’t always update instantly (also introduced recently).
+* When showing SCM Status for subversion repositories in the file browser, we no longer remove parent folders for uncommitted items nor child items (reported by `svn status`) for untracked folders.
+* It is now possible to “open” an Xcode project file inside TextMate. This “descends” into the project descriebed by the project file. *[Zach Drayer]*
+
 ## 2012-09-02
 
 * You can now disable SCM badges by adding this to `.tm_properties`:
