@@ -135,6 +135,8 @@ namespace scm
 			return res;
 		}
 
+		bool tracks_directories () const { return true; }
+
 	private:
 		std::string _xslt_path = NULL_STR;
 	};
