@@ -17,14 +17,6 @@
 
 OAK_DEBUG_VAR(AppController_Commands);
 
-static CGPoint MenuPosition ()
-{
-	NSPoint pos = [NSEvent mouseLocation];
-	pos.y -= 16;
-
-	return NSPointToCGPoint(pos);
-}
-
 @implementation AppController (Commands)
 - (void)performBundleItemWithUUIDString:(NSString*)uuidString
 {
@@ -62,18 +54,5 @@ static CGPoint MenuPosition ()
 			break;
 		}
 	}
-}
-
-- (BOOL)canHandleMenuKeyEquivalent:(NSEvent*)anEvent
-{
-	if([[[NSApp keyWindow] delegate] isKindOfClass:[DocumentController class]])
-		return NO;
-	return !bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), "").empty();
-}
-
-- (void)handleMenuKeyEquivalent:(id)sender
-{
-	if(bundles::item_ptr item = bundles::show_menu_for_items(bundles::query(bundles::kFieldKeyEquivalent, to_s([NSApp currentEvent]), ""), MenuPosition()))
-		[self performBundleItemWithUUIDString:[NSString stringWithCxxString:item->uuid()]];
 }
 @end
