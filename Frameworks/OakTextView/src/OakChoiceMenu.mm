@@ -75,6 +75,21 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	return choiceIndex == NSNotFound ? nil : [choices objectAtIndex:choiceIndex];
 }
 
+- (void)setChoices:(NSArray*)newChoices
+{
+	if([choices isEqualToArray:newChoices])
+		return;
+
+	id oldSelection = self.selectedChoice;
+	self.choiceIndex = NSNotFound;
+	[choices autorelease];
+	choices = [newChoices retain];
+	[tableView reloadData];
+	self.choiceIndex = [choices indexOfObject:oldSelection];
+
+	[self sizeToFit];
+}
+
 - (void)setChoiceIndex:(NSUInteger)newIndex
 {
 	if(choiceIndex != newIndex)
