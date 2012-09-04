@@ -96,7 +96,16 @@ namespace ct
 		return CTLineGetOffsetForStringIndex(_line.get(), utf16::distance(_text.begin(), _text.begin() + index), NULL);
 	}
 
-	void line_t::draw_foreground (CGPoint pos, CGContextRef context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled) const
+	static void draw_spelling_dot (ng::context_t const& context, CGRect const& rect)
+	{
+		if(context.spelling_dot)
+		{
+			for(CGFloat x = rect.origin.x; x < rect.origin.x + rect.size.width - 0.5; x += 4)
+				CGContextDrawImage(context, CGRectMake(x, rect.origin.y, 4, 3), context.spelling_dot);
+		}
+	}
+
+	void line_t::draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled) const
 	{
 		iterate(pair, _underlines) // Draw our own underline since CoreText does an awful job <rdar://5845224>
 		{
@@ -111,7 +120,7 @@ namespace ct
 			CFIndex length   = utf16::distance(_text.begin() + pair->first, _text.begin() + pair->second);
 			CGFloat x1 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), location, NULL));
 			CGFloat x2 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), location + length, NULL));
-			render::draw_spelling_dot(context, CGRectMake(x1, pos.y + 1, x2 - x1, 3));
+			draw_spelling_dot(context, CGRectMake(x1, pos.y + 1, x2 - x1, 3));
 		}
 
 		CGContextSaveGState(context);
@@ -122,7 +131,7 @@ namespace ct
 		CGContextRestoreGState(context);
 	}
 
-	void line_t::draw_background (CGPoint pos, CGFloat height, CGContextRef context, bool isFlipped, CGColorRef currentBackground) const
+	void line_t::draw_background (CGPoint pos, CGFloat height, ng::context_t const& context, bool isFlipped, CGColorRef currentBackground) const
 	{
 		iterate(pair, _backgrounds)
 		{
