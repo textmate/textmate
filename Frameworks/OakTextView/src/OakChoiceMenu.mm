@@ -36,6 +36,24 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	[super dealloc];
 }
 
+- (void)sizeToFit
+{
+	CGFloat width = 60;
+	NSCell* dataCell = [[tableView.tableColumns lastObject] dataCell];
+	for(size_t i = 0; i < [choices count]; ++i)
+	{
+		[dataCell setStringValue:[choices objectAtIndex:i]];
+		width = std::max(width, [dataCell cellSize].width + 4);
+	}
+
+	if([choices count] > 10)
+		width += 15;
+
+	CGFloat height = std::min<NSUInteger>([choices count], 10) * ([tableView rowHeight]+[tableView intercellSpacing].height);
+	NSRect frame   = { { NSMinX(window.frame), NSMaxY(window.frame) - height }, { std::min<CGFloat>(ceil(width), 400), height } };
+	[window setFrame:frame display:YES];
+}
+
 - (void)setWindow:(NSWindow*)aWindow
 {
 	if(aWindow == window)
@@ -90,7 +108,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView
 {
-	window = [[NSPanel alloc] initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
+	window = [[NSPanel alloc] initWithContentRect:NSMakeRect(aPoint.x, aPoint.y, 0, 0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
 	[window setReleasedWhenClosed:NO];
 	[window setOpaque:NO];
 	window.alphaValue         = 0.97;
@@ -111,17 +129,6 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	// tableView.delegate                           = self;
 	[tableView reloadData];
 
-	CGFloat width = 60;
-	NSCell* dataCell = [[tableView.tableColumns lastObject] dataCell];
-	for(size_t i = 0; i < [choices count]; ++i)
-	{
-		[dataCell setStringValue:[choices objectAtIndex:i]];
-		width = std::max(width, [dataCell cellSize].width + 4);
-	}
-	
-	if([choices count] > 10)
-		width += 15;
-
 	NSScrollView* scrollView         = [[[NSScrollView alloc] initWithFrame:NSZeroRect] autorelease];
 	scrollView.hasVerticalScroller   = YES;
 	scrollView.hasHorizontalScroller = NO;
@@ -135,9 +142,7 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	if(choiceIndex != NSNotFound)
 		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:choiceIndex] byExtendingSelection:NO];
 
-	CGFloat height = std::min<NSUInteger>([choices count], 10) * ([tableView rowHeight]+[tableView intercellSpacing].height);
-	NSRect frame   = { { aPoint.x, aPoint.y - height }, { std::min<CGFloat>(ceil(width), 400.0), height } };
-	[window setFrame:frame display:NO];
+	[self sizeToFit];
 
 	topLeftPosition = [aView convertPointFromBase:[[aView window] convertScreenToBase:aPoint]];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[aView enclosingScrollView] contentView]];
@@ -181,8 +186,8 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	if(res == OakChoiceMenuKeyMovement)
 		self.choiceIndex = oak::cap<NSInteger>(0, (choiceIndex == NSNotFound ? (offset > 0 ? -1 : [choices count]) : choiceIndex) + offset, [choices count] - 1);;
 
-	return res;           
-}                                            
+	return res;
+}
 
 - (void)doCommandBySelector:(SEL)aSelector
 {
