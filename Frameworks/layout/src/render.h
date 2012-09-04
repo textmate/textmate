@@ -7,7 +7,6 @@
 namespace render
 {
 	void fill_rect (CGContextRef context, CGColorRef color, CGRect const& rect);
-	void draw_spelling_dot (CGContextRef context, CGRect const& rect);
 
 } /* render */
 

@@ -748,7 +748,7 @@ namespace ng
 		};
 	}
 
-	void layout_t::draw (CGContextRef context, CGRect visibleRect, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawBackground, CGColorRef textColor)
+	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawBackground, CGColorRef textColor)
 	{
 		update_metrics(visibleRect);
 

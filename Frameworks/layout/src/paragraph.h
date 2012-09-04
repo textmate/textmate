@@ -32,8 +32,8 @@ namespace ng
 		void did_update_scopes (size_t from, size_t to, ng::buffer_t const& buffer, size_t bufferOffset);
 		bool layout (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset);
 
-		void draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
-		void draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const;
+		void draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
+		void draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const;
 
 		ng::index_t index_at_point (CGPoint point, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
 		CGRect rect_at_index (ng::index_t const& index, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const;
@@ -68,8 +68,8 @@ namespace ng
 
 			void layout (CGFloat x, CGFloat tabWidth, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, std::string const& fillStr);
 			void reset_font_metrics (ct::metrics_t const& metrics);
-			void draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const;
-			void draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const;
+			void draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const;
+			void draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const;
 
 			node_type_t type () const                      { return _type; }
 			size_t length () const                         { return _length; }
