@@ -1,13 +1,13 @@
 # Release Notes
 
-## 2012-09-04
+## 2012-09-04 (r9300)
 
 * The underline drawn for misspelled words now use high-DPI artwork on retina macs.
 * Bundle item names using “«unit» / Selection” in their title now display either “«unit»” or “Selection” depending on whether or not there is a selection.
 * The pop-up menu used for multiple choices (in snippets) now filter items based on the prefix typed (rather than just changing selection). It also no longer pin the selected item at the first visible row.
 * The various filter lists (⌘T, ⇧⌘T, and ⌃⌘T) are now positioned relative to the current document window.
 
-## 2012-09-03
+## 2012-09-03 (r9298)
 
 * Wrap Column → Other… now show a sheet where you can enter wrap column.
 * We now search the menus “right to left” when searching for a key equivalent. The problem is that on some key maps the keys used to Toggle Foldings at Level (⌥⌘1-n) clash with modifier + bracket used in the Text menu for shift left/right.
@@ -18,7 +18,7 @@
 * When showing SCM Status for subversion repositories in the file browser, we no longer remove parent folders for uncommitted items nor child items (reported by `svn status`) for untracked folders.
 * It is now possible to “open” an Xcode project file inside TextMate. This “descends” into the project descriebed by the project file. *[Zach Drayer]*
 
-## 2012-09-02
+## 2012-09-02 (r9296)
 
 * You can now disable SCM badges by adding this to `.tm_properties`:
 
@@ -30,7 +30,7 @@
 
 * Fix issue with bundle item key equivalents sometimes eclipsing regular menu items even when the bundle item in question should not be enabled (due to scope selector).
 
-## 2012-08-31
+## 2012-08-31 (r9294)
 
 * Doing authenticated saves would fail (out of memory) if you had an older (32 bit) version of the “auth server” installed. TextMate now ensures the installed version is up-to-date.
 * Running `sudo mate` would fail to establish connection with TextMate (bug introduced when socket name was changed to include user ID).
@@ -41,7 +41,7 @@
 * Running commands from TextMate wouldn’t always set the working directory to that of the current document (introduced in r9292 / 2012-08-28).
 * Gutter line numbers wouldn’t always update (introduced in last nightly).
 
-## 2012-08-30
+## 2012-08-30 (r9293)
 
 * Fix random crash mainly when bringing focus back to TextMate or opening a new window.
 * If TextMate fails to read a link (`readlink`) it will show an alert with some diagnostics that you should submit to us (more info in the dialog). This is an attempt to track down another random crash that has been frequent (but has been in decline in recent versions, though not because it is fixed).
@@ -50,7 +50,7 @@
 * Fix missing svn status for long committer names. *[Jeremy Whitlock]*
 * WIP: Updated gutter images, presently not aligned/sized optimally. *[Dennis Vennink]*
 
-## 2012-08-28
+## 2012-08-28 (r9292)
 
 * TextMate is now built with [`libc++`](http://libcxx.llvm.org/index.html) and as a 64 bit application using the new Objective-C run-time. Ideally no changes affecting the user, but a lot has changed under the hood. *[Jacob Bandes-Storch]*
 * New `TM_SCM_NAME` variable giving the name of the SCM system used for the current file (git, svn, or hg) which can be used when setting `windowTitle`. *[Adam Strzelecki]*
@@ -59,7 +59,7 @@
 * Update look of release notes and make it a normal window (instead of floating). *[Dustin Wilson]*
 * Fix crash when using Find All in the Find dialog for an untitled file (introduced in last release).
 
-## 2012-08-27
+## 2012-08-27 (r9291)
 
 * While recording a macro, several actions would cause TM to misbehave/freeze (uncaught exception).
 * Using projects outside user’s home folder with symbolic links into the user’s home folder could cause a crash from the file chooser (⌘T) if doing full path search.
@@ -69,7 +69,7 @@
 * ⌘-clicking file browser icons (to show in Finder) now only acts on actual files *[Jacob Bandes-Storch]*
 * Add New File and Open… actions to the dock menu *[Jacob Bandes-Storch]*
 
-## 2012-08-26
+## 2012-08-26 (r9290)
 
 * Add context menu to tab bar. Actions include creating new tab (can also be done by double-clicking empty space in a tab bar), tearing off tabs (can also be done by double-clicking a tab), closing other tabs (can be done by option-clicking the tab’s close button), and closing tabs to the right.
 
@@ -108,7 +108,7 @@
 
 * Add scope attributes for Ant, CMake, Maven and Scons projects. *[Michael Sheets]*
 
-## 2012-08-22
+## 2012-08-22 (r9289)
 
 * You can now ⌘-click icons in the file browser for “Show in Finder” *[Jacob Bandes-Storch]*
 * Bundle editor now remember column widths and item titles are truncated with ellipsis *[Gerd Knops]*
@@ -179,7 +179,7 @@
 
 [1]: https://github.com/textmate/textmate/issues/183
 
-## 2012-08-15
+## 2012-08-15 (r9283)
 
 * Minor tweak to how pasting works. Previously if you did a multiline selection and on the last line selected to the end of the line but excluded the actual newline, copy and pasted that somewhere else, it would treat it as you had also copied the newline. This is now only the case when you are pasting on a line that is not empty.
 
@@ -206,7 +206,7 @@
 	2. `disable` — the text is inserted as-is without indenting it.
 	3. «unset» — indent the paste based on the indent patterns of the current scope.
 
-## 2012-08-14
+## 2012-08-14 (r9281)
 
 * Pressing ⌥F2 with focus in the file browser now show the context menu.
 * The `TM_DROPPED_FILE` variable had a path relative to project directory instead of current file. This would make some drop commands insert wrong path.
@@ -217,7 +217,7 @@
 * The bundle menu in the status bar can now be opened via ⌥F1 and will default to select the bundle for the current language. *[Adam Strzelecki]*
 * Further fixes to handling of txmt: URLs without a file argument.
 
-## 2012-08-13
+## 2012-08-13 (r9278)
 
 * Consecutive deletes extend the yank clipboard.
 * Tab triggers are once again rendered in the menu (though presently without the rounded rectangle) and all key equivalents are now shown menu (e.g. `⌃!` would previously not show). Also several legacy APis have been updated to the latest from Apple *[Jacob Bandes-Storch]*
@@ -240,7 +240,7 @@
 * If TextMate was launched via `git commit` then the Git bundle would have issues (since it would inherit a wrong `GIT_DIR` environment variables)
 * Preliminary support for installing bundles and bundle items (including themes) via double-click (from Finder). You can hold down option (⌥) if you wish to open them as folders/property lists.
 
-## 2012-08-10
+## 2012-08-10 (r2269)
 
 The source for TextMate 2 is now [available at GitHub][1] under a GPL 3 license. There is an [interview at Ars Technica][2] that gives some background about what motivated this decision.
 
