@@ -1,8 +1,11 @@
 # Release Notes
 
-## News
+## 2012-09-04
 
-Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
+* The underline drawn for misspelled words now use high-DPI artwork on retina macs.
+* Bundle item names using “«unit» / Selection” in their title now display either “«unit»” or “Selection” depending on whether or not there is a selection.
+* The pop-up menu used for multiple choices (in snippets) now filter items based on the prefix typed (rather than just changing selection). It also no longer pin the selected item at the first visible row.
+* The various filter lists (⌘T, ⇧⌘T, and ⌃⌘T) are now positioned relative to the current document window.
 
 ## 2012-09-03
 
