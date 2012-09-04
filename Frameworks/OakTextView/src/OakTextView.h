@@ -38,6 +38,8 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	BOOL hideCaret;
 	NSTimer* blinkCaretTimer;
 
+	NSImage* spellingDotImage;
+
 	// =================
 	// = Mouse Support =
 	// =================
