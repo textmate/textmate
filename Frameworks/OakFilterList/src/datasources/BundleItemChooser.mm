@@ -299,9 +299,9 @@ static NSString* const AllScopes    = @"AllScopes";
 @end
 
 @implementation BundleItemChooser
-@synthesize keyEquivalentSearch, searchAllScopes, searchType;
+@synthesize keyEquivalentSearch, textViewHasSelection = hasSelection, searchAllScopes, searchType;
 
-static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type searchType, scope::context_t const& scope)
+static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type searchType, scope::context_t const& scope, bool hasSelection)
 {
 	int kindMask = 0;
 	if(searchType == search::actions)
@@ -313,7 +313,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> sorted;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
-		sorted.insert(std::make_pair((*item)->full_name(), *item));
+		sorted.insert(std::make_pair(full_name_with_selection(*item, hasSelection), *item));
 
 	std::vector<bundles::item_ptr> res;
 	std::transform(sorted.begin(), sorted.end(), back_inserter(res), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
@@ -357,9 +357,9 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	if(newType != searchType || all_items.empty())
 	{
 		searchType = newType;
-		all_items = relevant_items_in_scope(searchType, scope::wildcard);
+		all_items = relevant_items_in_scope(searchType, scope::wildcard, hasSelection);
 
-		citerate(item, relevant_items_in_scope(searchType, scope))
+		citerate(item, relevant_items_in_scope(searchType, scope, hasSelection))
 			items_filtered_by_scope.insert((*item)->uuid());
 		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
 	}
@@ -455,7 +455,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 			}
 			else if(!filterString.empty())
 			{
-				double nameRank    = oak::rank(filterString, all_items[index]->full_name());
+				double nameRank    = oak::rank(filterString, full_name_with_selection(all_items[index], hasSelection));
 				double triggerRank = oak::rank(filterString, all_items[index]->value_for_field(bundles::kFieldTabTrigger));
 				if(nameRank == 0 && triggerRank == 0)
 					continue;
@@ -479,10 +479,10 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 - (NSAttributedString*)displayStringForItem:(BundleItemChooserItem*)item
 {
 	NSUInteger index = [item index];
-	std::string const& itemName = all_items[index]->full_name();
+	std::string const itemName = full_name_with_selection(all_items[index], hasSelection);
 
 	std::vector< std::pair<size_t, size_t> > ranges;
-	double nameRank    = oak::rank(filterString, all_items[index]->full_name());
+	double nameRank    = oak::rank(filterString, full_name_with_selection(all_items[index], hasSelection));
 	double triggerRank = oak::rank(filterString, all_items[index]->value_for_field(bundles::kFieldTabTrigger));
 	if(nameRank > triggerRank)
 		oak::rank(text::lowercase(filterString), itemName, &ranges);
@@ -506,7 +506,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	std::string const& tabTrigger = all_items[index]->value_for_field(bundles::kFieldTabTrigger);
 	if(tabTrigger != NULL_STR)
 	{
-		double nameRank    = oak::rank(filterString, all_items[index]->full_name());
+		double nameRank    = oak::rank(filterString, full_name_with_selection(all_items[index], hasSelection));
 		double triggerRank = oak::rank(filterString, tabTrigger);
 		if(triggerRank > nameRank)
 		{

@@ -10,6 +10,8 @@ namespace bundles
 
 	PUBLIC std::vector<item_ptr> query (std::string const& field, std::string const& value, scope::context_t const& scope = scope::wildcard, int kind = kItemTypeCommand|kItemTypeDragCommand|kItemTypeGrammar|kItemTypeMacro|kItemTypeSnippet|kItemTypeProxy|kItemTypeTheme, oak::uuid_t const& bundle = oak::uuid_t(), bool filter = true, bool includeDisabledItems = false);
 	PUBLIC item_ptr lookup (oak::uuid_t const& uuid);
+	PUBLIC std::string name_with_selection (item_ptr const& item, bool hasSelection);
+	PUBLIC std::string full_name_with_selection (item_ptr const& item, bool hasSelection);
 
 } /* bundles */
 

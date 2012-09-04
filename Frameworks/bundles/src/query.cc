@@ -263,4 +263,32 @@ namespace bundles
 		return res;
 	}
 
+	static std::string format_bundle_item_title (std::string title, bool hasSelection)
+	{
+		static std::string const kSelectionSubString = " / Selection";
+
+		std::string::size_type pos = title.find(kSelectionSubString);
+		if(pos == 0 || pos == std::string::npos)
+			return title;
+
+		if(hasSelection)
+		{
+			std::string::size_type from = title.rfind(' ', pos - 1);
+			if(from == std::string::npos)
+				return title.erase(0, pos + 3);
+			return title.erase(from + 1, pos + 3 - from - 1);
+		}
+		return title.erase(pos, kSelectionSubString.size());
+	}
+
+	std::string name_with_selection (item_ptr const& item, bool hasSelection)
+	{
+		return format_bundle_item_title(item->name(), hasSelection);
+	}
+
+	std::string full_name_with_selection (item_ptr const& item, bool hasSelection)
+	{
+		return format_bundle_item_title(item->full_name(), hasSelection);
+	}
+
 } /* bundles */

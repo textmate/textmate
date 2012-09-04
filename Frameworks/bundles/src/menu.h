@@ -6,7 +6,7 @@
 
 namespace bundles
 {
-	PUBLIC item_ptr show_menu_for_items (std::vector<item_ptr> const& items, CGPoint const& pos);
+	PUBLIC item_ptr show_menu_for_items (std::vector<item_ptr> const& items, CGPoint const& pos, bool hasSelection = false);
 
 } /* bundles */
 
