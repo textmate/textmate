@@ -63,7 +63,6 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 @property (nonatomic, retain) OakTimer* dragScrollTimer;
 @property (nonatomic, assign) BOOL showDragCursor;
 @property (nonatomic, assign) BOOL showColumnSelectionCursor;
-@property (nonatomic, readonly) BOOL hasSelection;
 @property (nonatomic, retain) OakChoiceMenu* choiceMenu;
 @property (nonatomic, assign) NSUInteger refreshNestCount;
 @property (nonatomic, retain) NSViewController* liveSearchViewController;
