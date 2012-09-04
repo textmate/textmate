@@ -6,6 +6,10 @@
 
 OAK_DEBUG_VAR(BundleMenu);
 
+@interface NSObject (HasSelection)
+- (BOOL)hasSelection;
+@end
+
 @implementation BundleMenuDelegate
 - (id)initWithBundleItem:(bundles::item_ptr const&)aBundleItem
 {
@@ -34,6 +38,10 @@ OAK_DEBUG_VAR(BundleMenu);
 	[aMenu removeAllItems];
 	[subdelegates removeAllObjects];
 
+	BOOL hasSelection = NO;
+	if(id textView = [NSApp targetForAction:@selector(hasSelection)])
+		hasSelection = [textView hasSelection];
+
 	citerate(item, umbrellaItem->menu())
 	{
 		switch((*item)->kind())
@@ -56,7 +64,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			default:
 			{
-				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(doBundleItem:) keyEquivalent:@""];
+				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(doBundleItem:) keyEquivalent:@""];
 				[menuItem setKeyEquivalentCxxString:(*item)->value_for_field(bundles::kFieldKeyEquivalent)];
 				[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
