@@ -1052,21 +1052,25 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		std::string const& newContent = editor->placeholder_content(&newSelection);
 		std::string const newPrefix   = newSelection ? newContent.substr(0, newSelection.min().index) : "";
 
+		std::vector<std::string> newChoices = editor->choices();
+		newChoices.erase(std::remove_if(newChoices.begin(), newChoices.end(), [&newPrefix](std::string const& str) { return str.find(newPrefix) != 0; }), newChoices.end());
+		choiceMenu.choices = (NSArray*)((CFArrayRef)cf::wrap(newChoices));
+
 		bool didEdit   = oldPrefix != newPrefix;
 		bool didDelete = didEdit && oldPrefix.find(newPrefix) == 0;
 
 		if(didEdit && !didDelete)
 		{
-			NSInteger choiceIndex = NSNotFound;
-			if(std::find(choiceVector.begin(), choiceVector.end(), oldContent) != choiceVector.end() && oldContent.find(newContent) == 0)
+			NSUInteger choiceIndex = NSNotFound;
+			if(std::find(newChoices.begin(), newChoices.end(), oldContent) != newChoices.end() && oldContent.find(newContent) == 0)
 			{
-				choiceIndex = std::find(choiceVector.begin(), choiceVector.end(), oldContent) - choiceVector.begin();
+				choiceIndex = std::find(newChoices.begin(), newChoices.end(), oldContent) - newChoices.begin();
 			}
 			else
 			{
-	 			for(size_t i = 0; i < choiceVector.size(); ++i)
+	 			for(size_t i = 0; i < newChoices.size(); ++i)
 				{
-					if(choiceVector[i].find(newContent) != 0)
+					if(newChoices[i].find(newContent) != 0)
 						continue;
 					choiceIndex = i;
 					break;
@@ -1074,8 +1078,12 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			}
 
 			choiceMenu.choiceIndex = choiceIndex;
-			if(choiceIndex != NSNotFound && newContent != choiceVector[choiceIndex])
-				editor->set_placeholder_content(choiceVector[choiceIndex], newPrefix.size());
+			if(choiceIndex != NSNotFound && newContent != newChoices[choiceIndex])
+				editor->set_placeholder_content(newChoices[choiceIndex], newPrefix.size());
+		}
+		else if(oldContent != newContent)
+		{
+			choiceMenu.choiceIndex = NSNotFound;
 		}
 	}
 	else if(event == OakChoiceMenuKeyMovement)
