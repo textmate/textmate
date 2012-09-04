@@ -97,16 +97,12 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 		choiceIndex = newIndex;
 		if(choiceIndex == NSNotFound)
 		{
-			NSInteger selectedRow = [tableView selectedRow];
-			if(selectedRow != -1)
-				[tableView deselectRow:selectedRow];
+			[tableView deselectAll:self];
 		}
 		else
 		{
 			[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:choiceIndex] byExtendingSelection:NO];
-			NSRect rowRect = [tableView rectOfRow:choiceIndex];
-			rowRect.size.height = NSHeight([tableView visibleRect]);
-			[tableView scrollRectToVisible:NSIntersectionRect(rowRect, [tableView bounds])];
+			[tableView scrollRectToVisible:[tableView rectOfRow:choiceIndex]];
 		}
 	}
 }
