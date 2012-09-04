@@ -65,17 +65,4 @@ OAK_DEBUG_VAR(BundleMenu);
 		}
 	}
 }
-
-- (void)menuDidClose:(NSMenu*)aMenu
-{
-	// We are not allowed to modify ‘aMenu’ here so we do it “afterDelay” — I really wish we didn’t have to do this at all…
-	[self performSelector:@selector(zapMenu:) withObject:aMenu afterDelay:0.0];
-}
-
-- (void)zapMenu:(NSMenu*)aMenu
-{
-	// After a menu has been up, the system will cache all its key equivalents. Even if we set all the key equivalents to the empty string, the system will still remember. The only workaround seems to be to delete all the entries in the menu.
-	[aMenu removeAllItems];
-	[subdelegates removeAllObjects];
-}
 @end
