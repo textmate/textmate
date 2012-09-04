@@ -435,6 +435,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
+		spellingDotImage = [[NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]] retain];
+
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:@"OakDocumentNotificationWillSave" object:nil];
@@ -448,6 +450,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[liveSearchString release];
 	[self setDocument:document::document_ptr()];
+	[spellingDotImage release];
 	[super dealloc];
 }
 
@@ -579,7 +582,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!antiAlias)
 		CGContextSetShouldAntialias(context, false);
-	layout->draw(context, aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
+	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil]), aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
 // ===============
