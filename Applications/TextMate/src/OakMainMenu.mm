@@ -46,6 +46,7 @@ static CGPoint MenuPosition ()
 
 @interface OakMainMenu : NSMenu
 {
+	IBOutlet NSMenuItem* bundlesMenuItem;
 }
 @end
 
@@ -64,7 +65,7 @@ static CGPoint MenuPosition ()
 
 	for(NSMenuItem* menuItem in [[self itemArray] reverseObjectEnumerator])
 	{
-		if([[menuItem title] isEqualToString:@"Bundles"])
+		if(menuItem == bundlesMenuItem)
 		{
 			for(NSMenuItem* subMenuItem in [[menuItem submenu] itemArray])
 			{
