@@ -181,7 +181,7 @@ void OakOpenDocuments (NSArray* paths)
 	filterWindowController.dataSource      = dataSource;
 	filterWindowController.action          = @selector(bundleItemChooserDidSelectItems:);
 	filterWindowController.accessoryAction = @selector(editBundleItem:);
-	[filterWindowController showWindow:self];
+	[filterWindowController showWindowRelativeToWindow:[textView window]];
 }
 
 - (void)bundleItemChooserDidSelectItems:(id)sender

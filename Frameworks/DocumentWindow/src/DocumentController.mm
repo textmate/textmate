@@ -1399,7 +1399,7 @@ static std::string parent_or_home (std::string const& path)
 	filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocument:[self selectedDocument]];
 	filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
 	filterWindowController.sendActionOnSingleClick = YES;
-	[filterWindowController.window makeKeyAndOrderFront:self];
+	[filterWindowController showWindowRelativeToWindow:self.window];
 }
 
 - (void)symbolChooserDidSelectItems:(id)sender
@@ -1442,7 +1442,7 @@ static std::string file_chooser_glob (std::string const& path)
 	filterWindowController.action                  = @selector(fileChooserDidSelectItems:);
 	filterWindowController.accessoryAction         = @selector(fileChooserDidDescend:);
 	fileChooserSourceIndex = NSNotFound;
-	[filterWindowController showWindow:self];
+	[filterWindowController showWindowRelativeToWindow:self.window];
 }
 
 - (void)setFilterWindowController:(OakFilterWindowController*)controller
