@@ -14,6 +14,7 @@ PUBLIC @interface OakFilterWindowController : NSWindowController
 	BOOL retainedSelf;
 }
 + (id)filterWindow;
+- (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
 @property (nonatomic, retain) id dataSource;
 @property (nonatomic, retain) id target;
 @property (nonatomic, assign) SEL action;
