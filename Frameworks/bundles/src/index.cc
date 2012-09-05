@@ -531,7 +531,7 @@ namespace bundles
 		bool local = true;
 		iterate(path, locations())
 		{
-			std::string const cwd = path::join(*path, "Bundles");
+			std::string cwd = path::join(*path, "Bundles");
 			std::map<std::string, fs::node_t>::const_iterator node = heads.find(cwd);
 			if(node == heads.end() || node->second.type() == fs::node_t::kNodeTypeMissing)
 			{
@@ -539,7 +539,14 @@ namespace bundles
 				continue;
 			}
 
-			citerate(fsBundle, *node->second.entries())
+			fs::node_t bundlesNode = resolve(cwd, node->second, heads);
+			if(bundlesNode.type() != fs::node_t::kNodeTypeDirectory || !bundlesNode.entries())
+			{
+				fprintf(stderr, "*** no bundles for path ‘%s’\n", bundlesNode.real_path(cwd).c_str());
+				continue;
+			}
+
+			citerate(fsBundle, *bundlesNode.entries())
 			{
 				if(text::lowercase(path::extension(fsBundle->name())) != ".tmbundle")
 				{
