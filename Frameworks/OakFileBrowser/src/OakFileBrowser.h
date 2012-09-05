@@ -16,7 +16,7 @@ PUBLIC extern NSString* const kUserDefaultsFileBrowserWidthKey;
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView;
 @end
 
-@interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
+PUBLIC @interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
 

@@ -148,11 +148,38 @@ static std::string pretty_key (std::string const& key, int flags)
 
 namespace
 {
+	struct key_less_than_t
+	{
+		key_less_than_t (std::vector<std::string> const& order)
+		{
+			for(size_t i = 0; i < order.size(); ++i)
+				_key_ranks.insert(std::make_pair(order[i], i));
+		}
+
+		bool operator() (std::pair<std::string, plist::any_t> const& lhs, std::pair<std::string, plist::any_t> const& rhs) const
+		{
+			auto lhsIter = _key_ranks.find(lhs.first);
+			auto rhsIter = _key_ranks.find(rhs.first);
+			if(lhsIter != _key_ranks.end() && rhsIter != _key_ranks.end())
+				return lhsIter->second < rhsIter->second;
+			else if(lhsIter != _key_ranks.end())
+				return true;
+			else if(rhsIter != _key_ranks.end())
+				return false;
+			else
+				return lhs.first < rhs.first;
+		}
+
+	private:
+		std::map<std::string, size_t> _key_ranks;
+	};
+
 	struct pretty : boost::static_visitor<std::string>
 	{
-		pretty (int flags, size_t indent = 0, bool single_line = true, bool is_key = false) : flags(flags), indent(indent), single_line(single_line), is_key(is_key) { }
+		pretty (int flags, key_less_than_t const& keyCompare, size_t indent = 0, bool single_line = true, bool is_key = false) : flags(flags), key_compare(keyCompare), indent(indent), single_line(single_line), is_key(is_key) { }
 
 		int flags;
+		key_less_than_t const& key_compare;
 		size_t indent;
 		bool single_line;
 		bool is_key;
@@ -187,7 +214,7 @@ namespace
 						wrap = res.size();
 					}
 
-					res += boost::apply_visitor(pretty(flags), *it);
+					res += boost::apply_visitor(pretty(flags, key_compare), *it);
 				}
 
 				res = " " + res + " ";
@@ -205,7 +232,7 @@ namespace
 					if(!res.empty())
 						res += "\n";
 					res += indent_string() + '\t';
-					res += boost::apply_visitor(pretty(flags, indent+1, false), *it);
+					res += boost::apply_visitor(pretty(flags, key_compare, indent+1, false), *it);
 					res += ",";
 				}
 				res = "\n" + res + "\n" + indent_string();
@@ -223,17 +250,20 @@ namespace
 			else if(fits_single_line()(dict))
 			{
 				std::string const& key = pretty_key(dict.begin()->first, flags);
-				std::string const& value = boost::apply_visitor(pretty(flags), dict.begin()->second);
+				std::string const& value = boost::apply_visitor(pretty(flags, key_compare), dict.begin()->second);
 				res = text::format("%c%s = %s; ", single_line || is_key ? ' ' : '\t', key.c_str(), value.c_str());
 			}
 			else
 			{
-				iterate(it, dict)
+				std::vector<std::pair<std::string, plist::any_t>> values(dict.begin(), dict.end());
+				std::sort(values.begin(), values.end(), key_compare);
+
+				iterate(it, values)
 				{
 					if(!res.empty())
 						res += indent_string();
 					std::string const& key = pretty_key(it->first, flags);
-					std::string const& value = boost::apply_visitor(pretty(flags, indent+1, false, true), it->second);
+					std::string const& value = boost::apply_visitor(pretty(flags, key_compare, indent+1, false, true), it->second);
 					res += text::format("\t%s = %s;\n", key.c_str(), value.c_str());
 				}
 				res = (is_key ? "\n" + indent_string() : "") + res + indent_string();
@@ -245,9 +275,9 @@ namespace
 
 namespace boost
 {
-	std::string to_s (plist::any_t const& plist, int flags)
+	std::string to_s (plist::any_t const& plist, int flags, std::vector<std::string> const& keySortOrder)
 	{
-		return boost::apply_visitor(pretty(flags), plist);
+		return boost::apply_visitor(pretty(flags, key_less_than_t(keySortOrder)), plist);
 	}
 
 } /* boost */

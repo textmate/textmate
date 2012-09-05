@@ -139,7 +139,7 @@ namespace file
 				if(branch != NULL_STR)
 					res.push_back("attr.scm.branch." + branch);
 				scm::status::type status = info->status(path);
-				if(status != scm::status::none)
+				if(status != scm::status::unknown)
 					res.push_back("attr.scm.status." + to_s(status));
 			}
 		}
@@ -166,6 +166,10 @@ namespace file
 				std::string const& branch = info->branch();
 				if(branch != NULL_STR)
 					map["TM_SCM_BRANCH"] = branch;
+
+				std::string const& name = info->scm_name();
+				if(name != NULL_STR)
+					map["TM_SCM_NAME"] = name;
 			}
 		}
 		else

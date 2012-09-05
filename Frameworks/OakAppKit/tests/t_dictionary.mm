@@ -32,7 +32,7 @@
 
 - (void)keyDown:(NSEvent*)anEvent
 {
-	NSLog(@"%s %@", SELNAME(_cmd), anEvent);
+	NSLog(@"%s %@", sel_getName(_cmd), anEvent);
 	[self interpretKeyEvents:@[ anEvent ]];
 }
 
@@ -47,7 +47,7 @@
 {
 	SEL ignore[] = { @selector(isEditable), @selector(inputContext), @selector(_acceptsMarkedText) };
 	if(std::find(ignore, ignore + 3, aSelector) == ignore + 3)
-		NSLog(@"%s %@", SELNAME(_cmd), NSStringFromSelector(aSelector));
+		NSLog(@"%s %@", sel_getName(_cmd), NSStringFromSelector(aSelector));
 	return [super respondsToSelector:aSelector];
 }
 #endif
@@ -63,28 +63,28 @@
 
 - (void)insertText:(id)aString
 {
-	NSLog(@"%s %@", SELNAME(_cmd), aString);
+	NSLog(@"%s %@", sel_getName(_cmd), aString);
 }
 
 - (void)doCommandBySelector:(SEL)aSelector
 {
-	NSLog(@"%s %@", SELNAME(_cmd), NSStringFromSelector(aSelector));
+	NSLog(@"%s %@", sel_getName(_cmd), NSStringFromSelector(aSelector));
 	[self tryToPerform:aSelector with:self];
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selRange
 {
-	NSLog(@"%s %@ %@", SELNAME(_cmd), aString, NSStringFromRange(selRange));
+	NSLog(@"%s %@ %@", sel_getName(_cmd), aString, NSStringFromRange(selRange));
 }
 
 - (void)unmarkText
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 }
 
 - (BOOL)hasMarkedText
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 	return NO;
 }
 
@@ -96,19 +96,19 @@
 - (NSAttributedString*)attributedSubstringFromRange:(NSRange)theRange
 {
 	NSAttributedString* res = [[[NSAttributedString alloc] initWithString:[myTextStorage substringWithRange:theRange] attributes:[self stringAttributes]] autorelease];
-	NSLog(@"%s %@ %@", SELNAME(_cmd), NSStringFromRange(theRange), res);
+	NSLog(@"%s %@ %@", sel_getName(_cmd), NSStringFromRange(theRange), res);
 	return res;
 }
 
 - (NSRange)markedRange
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 	return NSMakeRange(NSNotFound, 0);
 }
 
 - (NSRange)selectedRange
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 	return NSMakeRange(0, 0);
 }
 
@@ -116,20 +116,20 @@
 {
 	NSRect rect = [self convertRect:NSMakeRect(7.0f * theRange.location, 0, 7.0f * theRange.length, 20.0f) toView:nil];
 	rect.origin = [[self window] convertBaseToScreen:rect.origin];
-	NSLog(@"%s %@ (%@)", SELNAME(_cmd), NSStringFromRange(theRange), NSStringFromRect(rect));
+	NSLog(@"%s %@ (%@)", sel_getName(_cmd), NSStringFromRange(theRange), NSStringFromRect(rect));
 	return rect;
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)thePoint
 {
 	NSUInteger index = floorf([self convertPoint:[[self window] convertScreenToBase:thePoint] fromView:nil].x / 7.0f);
-	NSLog(@"%s %@ (%lu)", SELNAME(_cmd), NSStringFromPoint(thePoint), index);
+	NSLog(@"%s %@ (%lu)", sel_getName(_cmd), NSStringFromPoint(thePoint), index);
 	return index;
 }
 
 - (NSArray*)validAttributesForMarkedText
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 	return [[self stringAttributes] allKeys];
 }
 @end

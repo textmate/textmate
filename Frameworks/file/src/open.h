@@ -11,7 +11,7 @@ struct bundle_command_t;
 
 namespace file
 {
-	struct PUBLIC open_context_t : std::tr1::enable_shared_from_this<open_context_t>
+	struct PUBLIC open_context_t : std::enable_shared_from_this<open_context_t>
 	{
 		virtual ~open_context_t () { }
 		virtual void set_authorization (osx::authorization_t auth) = 0;
@@ -21,7 +21,7 @@ namespace file
 		virtual void filter_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) = 0;
 	};
 
-	typedef std::tr1::shared_ptr<open_context_t> open_context_ptr;
+	typedef std::shared_ptr<open_context_t> open_context_ptr;
 
 	struct PUBLIC open_callback_t
 	{
@@ -34,7 +34,7 @@ namespace file
 		virtual void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) = 0;
 	};
 
-	typedef std::tr1::shared_ptr<open_callback_t> open_callback_ptr;
+	typedef std::shared_ptr<open_callback_t> open_callback_ptr;
 
 	PUBLIC void open (std::string const& path, osx::authorization_t auth, open_callback_ptr cb, io::bytes_ptr existingContent = io::bytes_ptr(), std::string const& virtualPath = NULL_STR);
 

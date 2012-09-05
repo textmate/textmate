@@ -23,7 +23,7 @@ OAK_DEBUG_VAR(FilterList_OakFileChooser);
 
 bool file_chooser_t::item_t::operator< (item_t const& rhs) const
 {
-	boost::tuple<double, double, std::string> lhsValue(_rank, -_document->lru().value(), _match_name), rhsValue(rhs._rank, -rhs._document->lru().value(), rhs._match_name);
+	std::tuple<double, double, std::string> lhsValue(_rank, -_document->lru().value(), _match_name), rhsValue(rhs._rank, -rhs._document->lru().value(), rhs._match_name);
 	return lhsValue < rhsValue;
 }
 

@@ -33,7 +33,7 @@ namespace op_queue
 		}
 	};
 
-	typedef std::tr1::shared_ptr<task_t> task_ptr;
+	typedef std::shared_ptr<task_t> task_ptr;
 
 	struct manager_t
 	{

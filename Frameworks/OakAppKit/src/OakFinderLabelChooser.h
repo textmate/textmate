@@ -1,6 +1,6 @@
 #import <oak/debug.h>
 
-@interface OakFinderLabelChooser : NSView
+PUBLIC @interface OakFinderLabelChooser : NSView
 {
 	OBJC_WATCH_LEAKS(OakFinderLabelChooser);
 

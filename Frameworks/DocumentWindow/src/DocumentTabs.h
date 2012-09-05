@@ -46,7 +46,8 @@ struct document_tab_t
 			_document->close();
 	}
 
-	operator document::document_ptr const& () const { return _document; }
+	operator document::document_ptr const& () const           { return _document; }
+	bool operator== (document::document_ptr const& rhs) const { return _document == rhs; }
 
 	struct callback_t : document::document_t::callback_t
 	{
@@ -67,7 +68,7 @@ struct document_tab_t
 		DocumentController* _self;
 	};
 
-	typedef std::tr1::shared_ptr<callback_t> callback_ptr;
+	typedef std::shared_ptr<callback_t> callback_ptr;
 
 	void add_callback (DocumentController* self)
 	{

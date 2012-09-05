@@ -176,12 +176,13 @@ void OakOpenDocuments (NSArray* paths)
 	BundleItemChooser* dataSource          = [BundleItemChooser bundleItemChooserForScope:textView ? [textView scope] : scope::wildcard];
 	dataSource.searchType                  = search::type(bundleItemSearch.search_type);
 	dataSource.keyEquivalentSearch         = bundleItemSearch.key_equivalent;
+	dataSource.textViewHasSelection        = [textView hasSelection];
 	dataSource.searchAllScopes             = bundleItemSearch.all_scopes;
 	dataSource.filterString                = [NSString stringWithCxxString:bundleItemSearch.filter_string];
 	filterWindowController.dataSource      = dataSource;
 	filterWindowController.action          = @selector(bundleItemChooserDidSelectItems:);
 	filterWindowController.accessoryAction = @selector(editBundleItem:);
-	[filterWindowController showWindow:self];
+	[filterWindowController showWindowRelativeToWindow:[textView window]];
 }
 
 - (void)bundleItemChooserDidSelectItems:(id)sender

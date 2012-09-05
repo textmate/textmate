@@ -1,8 +1,63 @@
 # Release Notes
 
-## News
+## 2012-09-04
 
-Not only are we back to frequent updates, but I have also started blogging about TextMate features again, so if you aren’t watching [the blog](http://blog.macromates.com/) then I recommend you do.
+* The underline drawn for misspelled words now use high-DPI artwork on retina macs.
+* Bundle item names using “«unit» / Selection” in their title now display either “«unit»” or “Selection” depending on whether or not there is a selection.
+* The pop-up menu used for multiple choices (in snippets) now filter items based on the prefix typed (rather than just changing selection). It also no longer pin the selected item at the first visible row.
+* The various filter lists (⌘T, ⇧⌘T, and ⌃⌘T) are now positioned relative to the current document window.
+
+## 2012-09-03
+
+* Wrap Column → Other… now show a sheet where you can enter wrap column.
+* We now search the menus “right to left” when searching for a key equivalent. The problem is that on some key maps the keys used to Toggle Foldings at Level (⌥⌘1-n) clash with modifier + bracket used in the Text menu for shift left/right.
+* When editing property lists in the bundle editor, the dictionary keys are now ordered more naturally.
+* Drag-selecting beyond visible document no longer leaves tears in the selection.
+* When viewing a saved search (spotlight query) in the file browser, going to parent now correctly goes to the folder containing the saved search.
+* Fix slow performance with subversion repositories (introduced in last build, only present when all files were “clean”). Also fix issue where badges wouldn’t always update instantly (also introduced recently).
+* When showing SCM Status for subversion repositories in the file browser, we no longer remove parent folders for uncommitted items nor child items (reported by `svn status`) for untracked folders.
+* It is now possible to “open” an Xcode project file inside TextMate. This “descends” into the project descriebed by the project file. *[Zach Drayer]*
+
+## 2012-09-02
+
+* You can now disable SCM badges by adding this to `.tm_properties`:
+
+		scmStatus = false
+
+	This can be set either globally (`~/.tm_properties`) or for specific projects. If you see file browser performance issues then you should try to disable SCM badges.
+
+* Improve performance of obtaining subversion status by using `xsltproc` to process the XML (instead of `python`) and by skipping status parsing for clean files. *[Jeremy Whitlock]*
+
+* Fix issue with bundle item key equivalents sometimes eclipsing regular menu items even when the bundle item in question should not be enabled (due to scope selector).
+
+## 2012-08-31
+
+* Doing authenticated saves would fail (out of memory) if you had an older (32 bit) version of the “auth server” installed. TextMate now ensures the installed version is up-to-date.
+* Running `sudo mate` would fail to establish connection with TextMate (bug introduced when socket name was changed to include user ID).
+* The tab size dialog (Other…) now allow you to set a tab size of 1. *[Dennis Vennink]*
+* Improved alignment of the gutter images and made them adjust to font size. *[Dennis Vennink]*
+* Calling TextMate via QuickCursor would show wrong display name or in worst case cause a crash.
+* Improved subversion status parser so unexpected output doesn’t cause a crash.
+* Running commands from TextMate wouldn’t always set the working directory to that of the current document (introduced in r9292 / 2012-08-28).
+* Gutter line numbers wouldn’t always update (introduced in last nightly).
+
+## 2012-08-30
+
+* Fix random crash mainly when bringing focus back to TextMate or opening a new window.
+* If TextMate fails to read a link (`readlink`) it will show an alert with some diagnostics that you should submit to us (more info in the dialog). This is an attempt to track down another random crash that has been frequent (but has been in decline in recent versions, though not because it is fixed).
+* The Go to File window (⌘T) would lack the last path separator for the path shown in the status bar.
+* Key equivalent field now use the normal system font (instead of Menlo and previously Monaco).
+* Fix missing svn status for long committer names. *[Jeremy Whitlock]*
+* WIP: Updated gutter images, presently not aligned/sized optimally. *[Dennis Vennink]*
+
+## 2012-08-28
+
+* TextMate is now built with [`libc++`](http://libcxx.llvm.org/index.html) and as a 64 bit application using the new Objective-C run-time. Ideally no changes affecting the user, but a lot has changed under the hood. *[Jacob Bandes-Storch]*
+* New `TM_SCM_NAME` variable giving the name of the SCM system used for the current file (git, svn, or hg) which can be used when setting `windowTitle`. *[Adam Strzelecki]*
+* Untitled documents now get their `TM_SCM_BRANCH` and `TM_SCM_NAME` variables based on the current project. *[Adam Strzelecki]*
+* Update window title when application is activated for the case where the current branch (SCM) is part of the title. *[Adam Strzelecki]*
+* Update look of release notes and make it a normal window (instead of floating). *[Dustin Wilson]*
+* Fix crash when using Find All in the Find dialog for an untitled file (introduced in last release).
 
 ## 2012-08-27
 
@@ -57,7 +112,7 @@ Not only are we back to frequent updates, but I have also started blogging about
 
 * You can now ⌘-click icons in the file browser for “Show in Finder” *[Jacob Bandes-Storch]*
 * Bundle editor now remember column widths and item titles are truncated with ellipsis *[Gerd Knops]*
-* File browser now remember it’s width *[Gerd Knops]*
+* File browser now remember its width *[Gerd Knops]*
 * You can now also set `gutterSelectionBackground` in a theme (or as a global style) to affect gutter rendering *[David Howden]*
 * Suppress borders and disallow horizontal scroll for Find in Folder results *[Jacob Bandes-Storch]*
 * Add missing retina images *[Paul Wilde]*

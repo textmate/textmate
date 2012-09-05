@@ -21,7 +21,7 @@ namespace cf
 			}
 		}
 
-		EXPLICIT operator bool () const { return cf_value != NULL; }
+		explicit operator bool () const { return cf_value != NULL; }
 		operator T () const { return cf_value; }
 		operator T () { return cf_value; }
 

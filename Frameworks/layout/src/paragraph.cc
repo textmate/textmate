@@ -162,7 +162,7 @@ namespace ng
 			_width += tabWidth;
 	}
 
-	void paragraph_t::node_t::draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
+	void paragraph_t::node_t::draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
 	{
 		if(_line)
 			_line->draw_background(CGPointMake(anchor.x, anchor.y), lineHeight, context, isFlipped, backgroundColor);
@@ -187,7 +187,7 @@ namespace ng
 		}
 	}
 
-	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
+	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
 	{
 		if(_line)
 			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled);
@@ -668,7 +668,7 @@ namespace ng
 		return index;
 	}
 
-	void paragraph_t::draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
+	void paragraph_t::draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
 	{
 		// render::fill_rect(context, cf::color_t("#FFAAAA"), CGRectInset(CGRectMake(anchor.x, anchor.y, width(), height(metrics)), -1, 0));
 		// render::fill_rect(context, backgroundColor, CGRectMake(anchor.x, anchor.y, width(), height(metrics)));
@@ -687,7 +687,7 @@ namespace ng
 		}
 	}
 
-	void paragraph_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, CGContextRef context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
+	void paragraph_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
 	{
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 

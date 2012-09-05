@@ -70,6 +70,8 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 static NSArray* ImageStackForPath (NSString* path)
 {
 	NSMutableArray* res = [NSMutableArray array];
+	if(!path)
+		return @[ SystemIconForHFSType(kUnknownFSObjectIcon) ];
 
 	struct stat buf;
 	if(lstat([path fileSystemRepresentation], &buf) == 0)

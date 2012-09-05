@@ -4,9 +4,9 @@
 @class OakDocumentView;
 @class PropertiesViewController;
 
-namespace be { struct entry_t; typedef std::tr1::shared_ptr<entry_t> entry_ptr; } /* be */
+namespace be { struct entry_t; typedef std::shared_ptr<entry_t> entry_ptr; } /* be */
 
-@interface BundleEditor : NSWindowController <NSBrowserDelegate>
+PUBLIC @interface BundleEditor : NSWindowController <NSBrowserDelegate>
 {
 	IBOutlet NSBrowser* browser;
 	IBOutlet OakDocumentView* documentView;

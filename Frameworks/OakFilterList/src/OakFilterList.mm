@@ -37,6 +37,21 @@
 	}
 }
 
+- (void)showWindowRelativeToWindow:(NSWindow*)parentWindow
+{
+	if(parentWindow && ![self.window isVisible])
+	{
+		NSRect frame  = [self.window frame];
+		NSRect parent = [parentWindow frame];
+
+		frame.origin.x = round(NSMidX(parent) - 0.5 * NSWidth(frame));
+		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
+		[self.window setFrame:frame display:NO];
+	}
+
+	[self.window makeKeyAndOrderFront:self];
+}
+
 - (BOOL)shouldCascadeWindows
 {
 	return NO;

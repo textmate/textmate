@@ -26,7 +26,7 @@ namespace plist
 			virtual bool handle (plist::any_t const& value, OBJ_TYPE* obj) const = 0;
 		};
 
-		typedef std::tr1::shared_ptr<field_t> field_ptr;
+		typedef std::shared_ptr<field_t> field_ptr;
 		std::map<std::string, field_ptr> _fields;
 	};
 

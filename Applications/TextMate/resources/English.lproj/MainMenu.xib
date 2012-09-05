@@ -2,7 +2,7 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1070</int>
-		<string key="IBDocument.SystemVersion">12A269</string>
+		<string key="IBDocument.SystemVersion">12B19</string>
 		<string key="IBDocument.InterfaceBuilderVersion">2549</string>
 		<string key="IBDocument.AppKitVersion">1187</string>
 		<string key="IBDocument.HIToolboxVersion">624.00</string>
@@ -2407,7 +2407,7 @@
 					</object>
 					<string key="NSFrameSize">{269, 102}</string>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
+				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
 				<string key="NSMinSize">{269, 124}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<string key="NSFrameAutosaveName">Go to Line</string>
@@ -3671,6 +3671,14 @@
 						<reference key="destination" ref="613273090"/>
 					</object>
 					<int key="connectionID">782</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">bundlesMenuItem</string>
+						<reference key="source" ref="261397727"/>
+						<reference key="destination" ref="581855603"/>
+					</object>
+					<int key="connectionID">794</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -5637,6 +5645,7 @@
 					<string>284.IBPluginDependency</string>
 					<string>286.IBPluginDependency</string>
 					<string>288.IBPluginDependency</string>
+					<string>29.CustomClassName</string>
 					<string>29.IBPluginDependency</string>
 					<string>290.IBPluginDependency</string>
 					<string>291.IBPluginDependency</string>
@@ -5915,6 +5924,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>OakMainMenu</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -6137,7 +6147,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">792</int>
+			<int key="maxID">794</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6149,8 +6159,8 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>loadSession:</string>
-							<string>newDocument:</string>
+							<string>newDocumentAndActivate:</string>
+							<string>openDocumentAndActivate:</string>
 							<string>orderFrontFindPanel:</string>
 							<string>orderFrontGoToLinePanel:</string>
 							<string>performGoToLine:</string>
@@ -6174,8 +6184,8 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>loadSession:</string>
-							<string>newDocument:</string>
+							<string>newDocumentAndActivate:</string>
+							<string>openDocumentAndActivate:</string>
 							<string>orderFrontFindPanel:</string>
 							<string>orderFrontGoToLinePanel:</string>
 							<string>performGoToLine:</string>
@@ -6186,11 +6196,11 @@
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
-								<string key="name">loadSession:</string>
+								<string key="name">newDocumentAndActivate:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">newDocument:</string>
+								<string key="name">openDocumentAndActivate:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -6281,42 +6291,14 @@
 					<string key="className">AppStartupController</string>
 					<string key="superclassName">NSObject</string>
 					<object class="NSMutableDictionary" key="outlets">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSArray" key="dict.sortedKeys">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>appController</string>
-							<string>registrationMenu</string>
-							<string>softwareUpdateMenu</string>
-						</object>
-						<object class="NSArray" key="dict.values">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>AppController</string>
-							<string>NSMenu</string>
-							<string>NSMenu</string>
-						</object>
+						<string key="NS.key.0">appController</string>
+						<string key="NS.object.0">AppController</string>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSArray" key="dict.sortedKeys">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>appController</string>
-							<string>registrationMenu</string>
-							<string>softwareUpdateMenu</string>
-						</object>
-						<object class="NSArray" key="dict.values">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBToOneOutletInfo">
-								<string key="name">appController</string>
-								<string key="candidateClassName">AppController</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">registrationMenu</string>
-								<string key="candidateClassName">NSMenu</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">softwareUpdateMenu</string>
-								<string key="candidateClassName">NSMenu</string>
-							</object>
+						<string key="NS.key.0">appController</string>
+						<object class="IBToOneOutletInfo" key="NS.object.0">
+							<string key="name">appController</string>
+							<string key="candidateClassName">AppController</string>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
@@ -6917,86 +6899,20 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">NSObject</string>
+					<string key="className">NSDocument</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>capitalizeWord:</string>
-							<string>changeCaseOfLetter:</string>
-							<string>changeCaseOfWord:</string>
-							<string>deleteSubWordLeft:</string>
-							<string>deleteSubWordRight:</string>
-							<string>executeSelectionInsertingOutput:</string>
-							<string>executeSelectionReplacingSelection:</string>
-							<string>goBack:</string>
-							<string>goForward:</string>
-							<string>goToComputer:</string>
-							<string>goToDesktop:</string>
-							<string>goToFavorites:</string>
-							<string>goToHome:</string>
-							<string>goToParentFolder:</string>
-							<string>goToSCMDataSource:</string>
-							<string>indent:</string>
-							<string>lowercaseWord:</string>
-							<string>moveSelectionDown:</string>
-							<string>moveSelectionLeft:</string>
-							<string>moveSelectionRight:</string>
-							<string>moveSelectionUp:</string>
-							<string>moveSubWordLeft:</string>
-							<string>moveSubWordLeftAndModifySelection:</string>
-							<string>moveSubWordRight:</string>
-							<string>moveSubWordRightAndModifySelection:</string>
-							<string>moveToBeginningOfColumn:</string>
-							<string>moveToBeginningOfColumnAndModifySelection:</string>
-							<string>moveToEndOfColumn:</string>
-							<string>moveToEndOfColumnAndModifySelection:</string>
-							<string>orderFrontGoToFolder:</string>
-							<string>reformatText:</string>
-							<string>reformatTextAndJustify:</string>
-							<string>selectCurrentScope:</string>
-							<string>shiftLeft:</string>
-							<string>shiftRight:</string>
-							<string>transpose:</string>
-							<string>transposeWords:</string>
-							<string>unwrapText:</string>
-							<string>uppercaseWord:</string>
+							<string>printDocument:</string>
+							<string>revertDocumentToSaved:</string>
+							<string>runPageLayout:</string>
+							<string>saveDocument:</string>
+							<string>saveDocumentAs:</string>
+							<string>saveDocumentTo:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -7009,256 +6925,63 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>capitalizeWord:</string>
-							<string>changeCaseOfLetter:</string>
-							<string>changeCaseOfWord:</string>
-							<string>deleteSubWordLeft:</string>
-							<string>deleteSubWordRight:</string>
-							<string>executeSelectionInsertingOutput:</string>
-							<string>executeSelectionReplacingSelection:</string>
-							<string>goBack:</string>
-							<string>goForward:</string>
-							<string>goToComputer:</string>
-							<string>goToDesktop:</string>
-							<string>goToFavorites:</string>
-							<string>goToHome:</string>
-							<string>goToParentFolder:</string>
-							<string>goToSCMDataSource:</string>
-							<string>indent:</string>
-							<string>lowercaseWord:</string>
-							<string>moveSelectionDown:</string>
-							<string>moveSelectionLeft:</string>
-							<string>moveSelectionRight:</string>
-							<string>moveSelectionUp:</string>
-							<string>moveSubWordLeft:</string>
-							<string>moveSubWordLeftAndModifySelection:</string>
-							<string>moveSubWordRight:</string>
-							<string>moveSubWordRightAndModifySelection:</string>
-							<string>moveToBeginningOfColumn:</string>
-							<string>moveToBeginningOfColumnAndModifySelection:</string>
-							<string>moveToEndOfColumn:</string>
-							<string>moveToEndOfColumnAndModifySelection:</string>
-							<string>orderFrontGoToFolder:</string>
-							<string>reformatText:</string>
-							<string>reformatTextAndJustify:</string>
-							<string>selectCurrentScope:</string>
-							<string>shiftLeft:</string>
-							<string>shiftRight:</string>
-							<string>transpose:</string>
-							<string>transposeWords:</string>
-							<string>unwrapText:</string>
-							<string>uppercaseWord:</string>
+							<string>printDocument:</string>
+							<string>revertDocumentToSaved:</string>
+							<string>runPageLayout:</string>
+							<string>saveDocument:</string>
+							<string>saveDocumentAs:</string>
+							<string>saveDocumentTo:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
-								<string key="name">capitalizeWord:</string>
+								<string key="name">printDocument:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">changeCaseOfLetter:</string>
+								<string key="name">revertDocumentToSaved:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">changeCaseOfWord:</string>
+								<string key="name">runPageLayout:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">deleteSubWordLeft:</string>
+								<string key="name">saveDocument:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">deleteSubWordRight:</string>
+								<string key="name">saveDocumentAs:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">executeSelectionInsertingOutput:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">executeSelectionReplacingSelection:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goBack:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goForward:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goToComputer:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goToDesktop:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goToFavorites:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goToHome:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goToParentFolder:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">goToSCMDataSource:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">indent:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">lowercaseWord:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSelectionDown:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSelectionLeft:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSelectionRight:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSelectionUp:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSubWordLeft:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSubWordLeftAndModifySelection:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSubWordRight:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveSubWordRightAndModifySelection:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveToBeginningOfColumn:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveToBeginningOfColumnAndModifySelection:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveToEndOfColumn:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">moveToEndOfColumnAndModifySelection:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">orderFrontGoToFolder:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">reformatText:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">reformatTextAndJustify:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">selectCurrentScope:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">shiftLeft:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">shiftRight:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">transpose:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">transposeWords:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">unwrapText:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">uppercaseWord:</string>
+								<string key="name">saveDocumentTo:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/NSObject.h</string>
+						<string key="minorKey">./Classes/NSDocument.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">OakSubmenuController</string>
-					<string key="superclassName">NSObject</string>
+					<string key="className">OakMainMenu</string>
+					<string key="superclassName">NSMenu</string>
 					<object class="NSMutableDictionary" key="outlets">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSArray" key="dict.sortedKeys">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>goToMenu</string>
-							<string>marksMenu</string>
-							<string>representedObject</string>
-						</object>
-						<object class="NSArray" key="dict.values">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>NSMenu</string>
-							<string>NSMenu</string>
-							<string>id</string>
-						</object>
+						<string key="NS.key.0">bundlesMenuItem</string>
+						<string key="NS.object.0">NSMenuItem</string>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSArray" key="dict.sortedKeys">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>goToMenu</string>
-							<string>marksMenu</string>
-							<string>representedObject</string>
-						</object>
-						<object class="NSArray" key="dict.values">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBToOneOutletInfo">
-								<string key="name">goToMenu</string>
-								<string key="candidateClassName">NSMenu</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">marksMenu</string>
-								<string key="candidateClassName">NSMenu</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">representedObject</string>
-								<string key="candidateClassName">id</string>
-							</object>
+						<string key="NS.key.0">bundlesMenuItem</string>
+						<object class="IBToOneOutletInfo" key="NS.object.0">
+							<string key="name">bundlesMenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/OakSubmenuController.h</string>
+						<string key="minorKey">./Classes/OakMainMenu.h</string>
 					</object>
 				</object>
 			</object>

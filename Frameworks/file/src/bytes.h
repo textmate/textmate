@@ -29,7 +29,7 @@ namespace io
 		bool _dispose;
 	};
 
-	typedef std::tr1::shared_ptr<bytes_t> bytes_ptr;
+	typedef std::shared_ptr<bytes_t> bytes_ptr;
 
 } /* io */
 

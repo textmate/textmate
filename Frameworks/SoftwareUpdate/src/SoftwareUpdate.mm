@@ -84,7 +84,7 @@ static SoftwareUpdate* SharedInstance;
 
 		[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(scheduleVersionCheck:) name:NSWorkspaceDidWakeNotification object:[NSWorkspace sharedWorkspace]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[ReleaseNotesWindowController showPathIfUpdated:[[NSBundle mainBundle] pathForResource:@"ReleaseNotes" ofType:@"html"]];
+		[ReleaseNotesWindowController performSelector:@selector(showPathIfUpdated:) withObject:[[NSBundle mainBundle] pathForResource:@"ReleaseNotes" ofType:@"html"] afterDelay:0];
 		[self installReleaseNotesMenuItem:self];
 	}
 	return SharedInstance;

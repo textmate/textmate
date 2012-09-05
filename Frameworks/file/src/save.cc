@@ -99,7 +99,7 @@ namespace
 		std::vector<oak::uuid_t>             _text_export_filters;
 	};
 
-	typedef std::tr1::shared_ptr<file_context_t> file_context_ptr;
+	typedef std::shared_ptr<file_context_t> file_context_ptr;
 }
 
 // ==================
@@ -293,7 +293,7 @@ namespace
 					else // FIXME we need to show dialog incase of multiple import hooks
 					{
 						_next_state = kStateExecuteTextExportFilter;
-						filter::run(filters.back(), _path, _content, std::tr1::static_pointer_cast<file_context_t>(shared_from_this()));
+						filter::run(filters.back(), _path, _content, std::static_pointer_cast<file_context_t>(shared_from_this()));
 					}
 				}
 				break;
@@ -375,7 +375,7 @@ namespace
 					else // FIXME we need to show dialog incase of multiple import hooks
 					{
 						_next_state = kStateExecuteBinaryExportFilter;
-						filter::run(filters.back(), _path, _content, std::tr1::static_pointer_cast<file_context_t>(shared_from_this()));
+						filter::run(filters.back(), _path, _content, std::static_pointer_cast<file_context_t>(shared_from_this()));
 					}
 				}
 				break;
@@ -385,7 +385,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateNotifyCallback;
 
-					new file::write_t(_path, _content, _attributes, _authorization, std::tr1::static_pointer_cast<file_context_t>(shared_from_this()));
+					new file::write_t(_path, _content, _attributes, _authorization, std::static_pointer_cast<file_context_t>(shared_from_this()));
 				}
 				break;
 
@@ -442,7 +442,7 @@ namespace file
 	void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 	{
 		save_context_ptr context(new file_context_t(cb, path, auth, content, attributes, fileType, encoding, binaryImportFilters, textImportFilters));
-		std::tr1::static_pointer_cast<file_context_t>(context)->proceed();
+		std::static_pointer_cast<file_context_t>(context)->proceed();
 	}
 
 } /* file */

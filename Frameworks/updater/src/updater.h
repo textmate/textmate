@@ -9,13 +9,13 @@ namespace bundles_db
 	struct source_t;
 	struct bundle_t;
 	struct grammar_info_t;
-	typedef std::tr1::shared_ptr<source_t> source_ptr;
-	typedef std::tr1::shared_ptr<bundle_t> bundle_ptr;
-	typedef std::tr1::shared_ptr<grammar_info_t> grammar_info_ptr;
+	typedef std::shared_ptr<source_t> source_ptr;
+	typedef std::shared_ptr<bundle_t> bundle_ptr;
+	typedef std::shared_ptr<grammar_info_t> grammar_info_ptr;
 
 	// internal (private) type
 	struct dependency_info_t;
-	typedef std::tr1::shared_ptr<dependency_info_t> dependency_info_ptr;
+	typedef std::shared_ptr<dependency_info_t> dependency_info_ptr;
 
 	struct PUBLIC source_t
 	{

@@ -1,8 +1,9 @@
 #include <file/encoding.h>
+#import <oak/misc.h>
 
 @class OakEncodingSaveOptionsViewController;
 
-@interface OakSavePanel : NSObject
+PUBLIC @interface OakSavePanel : NSObject
 {
 	OakEncodingSaveOptionsViewController* optionsViewController;
 }

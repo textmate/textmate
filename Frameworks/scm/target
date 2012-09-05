@@ -1,5 +1,6 @@
 SOURCES      = src/**/*.cc
 TEST_SOURCES = tests/t_*.cc
-EXPORT       = src/{scm,snapshot}.h
+CP_Resources = resources/*
+EXPORT       = src/{scm,status,snapshot}.h
 LINK        += text cf io settings
 FRAMEWORKS   = Carbon Security

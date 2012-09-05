@@ -62,7 +62,7 @@ namespace ng
 
 		// ======================
 
-		void draw (CGContextRef context, CGRect rectangle, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true, CGColorRef textColor = NULL);
+		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true, CGColorRef textColor = NULL);
 		ng::index_t index_at_point (CGPoint point) const;
 		CGRect rect_at_index (ng::index_t const& index) const;
 		CGRect rect_for_range (size_t first, size_t last) const;
@@ -156,7 +156,7 @@ namespace ng
 		static std::string row_to_s (row_tree_t::value_type const& info);
 
 		mutable row_tree_t _rows;
-		std::tr1::shared_ptr<folds_t> _folds;
+		std::shared_ptr<folds_t> _folds;
 
 		ng::buffer_t&      _buffer;
 		ng::callback_t*    _buffer_callback;
@@ -175,7 +175,7 @@ namespace ng
 		bool               _draw_caret = false;
 		ng::index_t        _drop_marker;
 
-		std::tr1::shared_ptr<ct::metrics_t> _metrics;
+		std::shared_ptr<ct::metrics_t> _metrics;
 
 		size_t _pre_refresh_revision;
 		size_t _pre_refresh_caret;

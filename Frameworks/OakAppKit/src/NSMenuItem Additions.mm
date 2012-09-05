@@ -5,84 +5,6 @@
 #import <text/case.h>
 #import <text/utf8.h>
 
-extern "C" MenuRef _NSGetCarbonMenu (NSMenu* aMenu);
-
-static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::string keyStr, NSUInteger nsModifiers)
-{
-	std::string const uppercaseKeyStr = text::uppercase(keyStr);
-	if(keyStr != text::lowercase(keyStr))
-		nsModifiers |= NSShiftKeyMask;
-	if(keyStr != uppercaseKeyStr)
-		keyStr = uppercaseKeyStr;
-
-	UInt8 modifiers = kMenuNoCommandModifier;
-	if(nsModifiers & NSShiftKeyMask)     modifiers |= kMenuShiftModifier;
-	if(nsModifiers & NSControlKeyMask)   modifiers |= kMenuControlModifier;
-	if(nsModifiers & NSAlternateKeyMask) modifiers |= kMenuOptionModifier;
-	if(nsModifiers & NSCommandKeyMask)   modifiers &= ~kMenuNoCommandModifier;
-
-	uint32_t keyCode = utf8::to_ch(keyStr);
-	if(keyCode == NSDeleteFunctionKey)
-	{
-		SetMenuItemKeyGlyph(aMenu, anIndex, kMenuDeleteRightGlyph);
-	}
-	else if(keyCode == NSDeleteCharacter)
-	{
-		SetMenuItemKeyGlyph(aMenu, anIndex, kMenuDeleteLeftGlyph);
-	}
-	else
-	{
-		uint16_t code = 0;
-		if(nsModifiers & NSNumericPadKeyMask)
-		{
-			switch(keyCode)
-			{
-				case '0': code = 82; break;
-				case '1': code = 83; break;
-				case '2': code = 84; break;
-				case '3': code = 85; break;
-				case '4': code = 86; break;
-				case '5': code = 87; break;
-				case '6': code = 88; break;
-				case '7': code = 89; break;
-				case '8': code = 91; break;
-				case '9': code = 92; break;
-				case '=': code = 81; break;
-				case '/': code = 75; break;
-				case '*': code = 67; break;
-				case '+': code = 69; break;
-				case '-': code = 78; break;
-				case ',': code = 65; break;
-				case '.': code = 65; break;
-				case NSEnterCharacter: code = 76; break; // could also use kMenuEnterGlyph
-			}
-		}
-
-		if(code)
-		{
-			SetMenuItemCommandKey(aMenu, anIndex, true, code);
-		}
-		else
-		{
-			if(keyCode > 0x7F)
-			{
-				NSString* key = [NSString stringWithCxxString:keyStr];
-				if([key canBeConvertedToEncoding:NSMacOSRomanStringEncoding])
-				{
-					if(NSData* data = [key dataUsingEncoding:NSMacOSRomanStringEncoding])
-					{
-						if([data length] == 1)
-							keyCode = *(char const*)[data bytes];
-					}
-				}
-			}
-
-			SetMenuItemCommandKey(aMenu, anIndex, false, keyCode);
-		}
-	}
-	SetMenuItemModifiers(aMenu, anIndex, modifiers);
-}
-
 @interface MenuMutableAttributedString : NSMutableAttributedString
 {
 	NSMutableAttributedString* contents;
@@ -231,15 +153,8 @@ static void set_legacy_key_equivalent (MenuRef aMenu, UInt16 anIndex, std::strin
 		}
 	}
 
-	if(MenuRef menu = _NSGetCarbonMenu([self menu]))
-	{
-		set_legacy_key_equivalent(menu, [[self menu] indexOfItem:self] + 1, aKeyEquivalent.substr(i), modifiers);
-	}
-	else
-	{
-		[self setKeyEquivalent:[NSString stringWithCxxString:aKeyEquivalent.substr(i)]];
-		[self setKeyEquivalentModifierMask:modifiers];
-	}
+	[self setKeyEquivalent:[NSString stringWithCxxString:aKeyEquivalent.substr(i)]];
+	[self setKeyEquivalentModifierMask:modifiers];
 }
 
 - (void)setTabTriggerCxxString:(std::string const&)aTabTrigger

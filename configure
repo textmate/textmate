@@ -15,14 +15,9 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 # ========================================================
 
 name=TextMate
-ver=2.0
-rev=1
+ver=2.0${tag:--git}
+rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 ))
 min_os=10.7
-
-rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 )) || \
-	if test -d .git && which -s git; then
-		rev=$(git log --oneline master | wc -l)
-	fi
 
 # ===============================================
 # = Find clang via xcrun, MacPorts, or Homebrew =
@@ -71,7 +66,7 @@ test -L "${builddir}/include/boost" || error "*** boost not installed."
 # ==================================
 
 xcodedir=/Developer
-sdk="/Developer/SDKs/${sdk:-MacOSX10.7}.sdk"
+sdk="/Developer/SDKs/${sdk:-MacOSX10.8}.sdk"
 
 if which -s xcode-select; then
 	xcodedir=$(xcode-select -print-path)
@@ -98,9 +93,7 @@ fi
 # = Check various dependencies =
 # ==============================
 
-which -s multimarkdown || which -s maruku || which -s Markdown.pl || error "*** no markdown converter installed."
-
-for dep in ninja ragel pgrep pkill "$CC" "$CXX"; do
+for dep in ninja ragel multimarkdown pgrep pkill "$CC" "$CXX"; do
 	which -s "$dep" || error "*** dependency missing: ‘${dep}’."
 done
 

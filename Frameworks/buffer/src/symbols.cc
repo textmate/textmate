@@ -36,7 +36,7 @@ namespace
 
 					if(!parse_char(it, last, '/'))
 					{
-						fprintf(stderr, "malformed symbol transformation at offset %d (expected ‘/’): %s\n", it - src.data(), src.c_str());
+						fprintf(stderr, "malformed symbol transformation at offset %td (expected ‘/’): %s\n", it - src.data(), src.c_str());
 						return;
 					}
 
@@ -50,7 +50,7 @@ namespace
 
 					if(!parse_char(it, last, '/'))
 					{
-						fprintf(stderr, "malformed symbol transformation at offset %d (expected ‘/’): %s\n", it - src.data(), src.c_str());
+						fprintf(stderr, "malformed symbol transformation at offset %td (expected ‘/’): %s\n", it - src.data(), src.c_str());
 						return;
 					}
 
@@ -64,7 +64,7 @@ namespace
 				}
 				else
 				{
-					fprintf(stderr, "malformed symbol transformation at offset %d (expected ‘s’, ‘#’, or space, found %c (0x%02x)): %s\n", it - src.data(), *it, *it, src.c_str());
+					fprintf(stderr, "malformed symbol transformation at offset %td (expected ‘s’, ‘#’, or space, found %c (0x%02x)): %s\n", it - src.data(), *it, *it, src.c_str());
 					return;
 				}
 			}

@@ -1,6 +1,6 @@
 #import <oak/debug.h>
 
-@interface OakZoomingIcon : NSWindow
+PUBLIC @interface OakZoomingIcon : NSWindow
 {
 	OBJC_WATCH_LEAKS(OakZoomingIcon);
 @private

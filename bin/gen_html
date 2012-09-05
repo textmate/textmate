@@ -52,6 +52,12 @@ def wrap_authors(src)
   end
 end
 
+def wrap_in_article(html)
+  html.gsub(/<h2\b.*>[\d\-]+.*<\/h2>(?m:.*?)(?=\s*<h2|\z)/) do
+    "<article>\n#$&\n</article>\n"
+  end
+end
+
 opts = GetoptLong.new(
   [ '--title',  '-t', GetoptLong::REQUIRED_ARGUMENT ],
   [ '--header', '-h', GetoptLong::REQUIRED_ARGUMENT ],
@@ -85,12 +91,11 @@ head, body = document.scan(/\A((?:^\w+:\s+.*$\n)*)\n?((?m:.*))\z/).flatten
 tmp        = head.scan(/^(\w+):\s+(.*)$/).collect { |pair| [pair[0].downcase, pair[1].strip] }
 headers    = Hash[*tmp.flatten]
 
-
 page_title = headers['title'] || title
 css_files  = headers['css'].to_s.split(/,\s*/)
 js_files   = headers['js'].to_s.split(/,\s*/)
 meta_data  = Hash[*headers['meta'].to_s.scan(/(.*?)="(.*?)"(?:,\s*)?/).flatten]
 
 STDOUT << expand_tpl(header, binding) unless header.nil?
-STDOUT << open(filters, 'r+') { |io| io << document; io.close_write; io.read }
+STDOUT << open(filters, 'r+') { |io| io << document; io.close_write; wrap_in_article(io.read) }
 STDOUT << expand_tpl(footer, binding) unless footer.nil?

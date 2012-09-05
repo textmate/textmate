@@ -369,7 +369,12 @@ OAK_DEBUG_VAR(DocumentController);
 	{
 		DocumentController* controller = (DocumentController*)[window delegate];
 		if([controller isKindOfClass:[DocumentController class]] && !controller->documentTabs.empty())
+		{
 			[controller->textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
+
+			settings_t const& settings = [controller selectedDocument]->settings();
+			controller.windowTitle = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [controller selectedDocument]->display_name())];
+		}
 	}
 }
 
@@ -1394,7 +1399,7 @@ static std::string parent_or_home (std::string const& path)
 	filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocument:[self selectedDocument]];
 	filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
 	filterWindowController.sendActionOnSingleClick = YES;
-	[filterWindowController.window makeKeyAndOrderFront:self];
+	[filterWindowController showWindowRelativeToWindow:self.window];
 }
 
 - (void)symbolChooserDidSelectItems:(id)sender
@@ -1437,7 +1442,7 @@ static std::string file_chooser_glob (std::string const& path)
 	filterWindowController.action                  = @selector(fileChooserDidSelectItems:);
 	filterWindowController.accessoryAction         = @selector(fileChooserDidDescend:);
 	fileChooserSourceIndex = NSNotFound;
-	[filterWindowController showWindow:self];
+	[filterWindowController showWindowRelativeToWindow:self.window];
 }
 
 - (void)setFilterWindowController:(OakFilterWindowController*)controller

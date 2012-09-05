@@ -37,7 +37,7 @@
 
 - (void)keyDown:(NSEvent*)anEvent
 {
-	NSLog(@"%s %@", SELNAME(_cmd), anEvent);
+	NSLog(@"%s %@", sel_getName(_cmd), anEvent);
 	std::string eventString = to_s(anEvent);
 	std::string glyphString = ns::glyphs_for_event_string(eventString);
 	self.keyString = [NSString stringWithCxxString:glyphString + " — " + eventString];

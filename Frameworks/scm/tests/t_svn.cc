@@ -39,7 +39,7 @@ public:
 
 			TS_ASSERT_EQUALS(expectedBranch, info->branch());
 
-			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "clean.txt"))),     scm::status::versioned);
+			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "clean.txt"))),     scm::status::none);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "ignored.txt"))),   scm::status::ignored);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "modified.txt"))),  scm::status::modified);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "added.txt"))),     scm::status::added);
@@ -50,5 +50,9 @@ public:
 		{
 			TS_FAIL(("error getting wc: " + jailPath).c_str());
 		}
+
+		jail.set_content(".tm_properties", "scmStatus = false\n");
+		scm::info_ptr info = scm::info(jail.path(path::join(wcName, "clean.txt")));
+		TS_ASSERT_EQUALS(info ? true : false, false);
 	}
 };

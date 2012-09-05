@@ -201,10 +201,9 @@ namespace oak
 		return "???";
 	}
 
-	static void* relaunch_thread (void* userdata)
+	static void relaunch_thread (pid_t pid)
 	{
 		oak::set_thread_name("application_t::relaunch");
-		pid_t pid = (pid_t)userdata;
 
 		int status = 0;
 		if(waitpid(pid, &status, 0) != pid)
@@ -215,8 +214,6 @@ namespace oak
 			fprintf(stderr, "*** relaunch failed: process terminated abnormally %d.\n", status);
 		else
 			fprintf(stderr, "*** relaunch failed: process terminated with status %d.\n", status);
-
-		return NULL;
 	}
 
 	void application_t::relaunch (bool disableUserInteraction)
@@ -240,10 +237,7 @@ namespace oak
 		}
 		else
 		{
-			pthread_t thread;
-			if(pthread_create(&thread, NULL, &relaunch_thread, (void*)pid) == 0)
-					pthread_detach(thread);
-			else	perror("pthread_create()");
+			std::thread(relaunch_thread, pid).detach();
 		}
 	}
 

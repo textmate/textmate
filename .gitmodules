@@ -19,3 +19,6 @@
 [submodule "PlugIns/dialog"]
 	path = PlugIns/dialog
 	url = https://github.com/textmate/dialog.git
+[submodule "vendor/XcodeEditor/vendor"]
+	path = vendor/XcodeEditor/vendor
+	url = https://github.com/textmate/xcode-editor.git

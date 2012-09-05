@@ -22,7 +22,7 @@ namespace cf
 
 	private:
 		CGFloat _red, _green, _blue, _alpha;
-		mutable std::tr1::shared_ptr<struct CGColor> cachedValue;
+		mutable std::shared_ptr<struct CGColor> cachedValue;
 
 		friend std::string to_s (color_t const& c);
 		friend bool color_is_dark (color_t const& color);

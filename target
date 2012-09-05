@@ -1,26 +1,29 @@
 PLIST_FLAGS = -d'APP_NAME=$APP_NAME' -d'APP_VERSION=$APP_VERSION' -d'APP_REVISION=$APP_REVISION' -d'APP_MIN_OS=$APP_MIN_OS'
 
 FLAGS += -c -pipe -fPIC -gdwarf-2
-FLAGS += -m32 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
+FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
 FLAGS += -funsigned-char -fvisibility=hidden
-FLAGS += -DNS_BUILD_32_LIKE_64 -D'NULL_STR="\uFFFF"'
+FLAGS += -D'NULL_STR="\uFFFF"'
 FLAGS += -Wall -Wwrite-strings -Wformat -Winit-self -Wmissing-include-dirs -Wno-parentheses -Wno-sign-compare -Wno-switch
 FLAGS += -Wno-address-of-temporary
 FLAGS += -IShared/include
+FLAGS += -fcolor-diagnostics
 
 # FLAGS += -D_GLIBCXX_DEBUG
 FLAGS += -DNDEBUG -Os
 # LINK   = OakDebug
 
-CXX_FLAGS    += -std=gnu++11
-OBJC_FLAGS   += -std=c99
-OBJCXX_FLAGS += -std=gnu++11
+CXX_FLAGS    += -std=c++11 -stdlib=libc++
+OBJC_FLAGS   += -std=c99 -fobjc-abi-version=3
+OBJCXX_FLAGS += -std=c++11 -stdlib=libc++ -fobjc-abi-version=3
 OBJCXX_FLAGS += -fobjc-call-cxx-cdtors
+LIBS         += c++
 
-LN_FLAGS += -m32 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
+LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
 LN_FLAGS += -fvisibility=hidden
 LN_FLAGS += -Wl,-dead_strip
 # LN_FLAGS += -Wl,-dead_strip_dylibs
+LN_FLAGS += -fobjc-link-runtime
 
 PRELUDE = Shared/PCH/prelude.*
 

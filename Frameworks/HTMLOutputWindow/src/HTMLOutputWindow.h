@@ -2,7 +2,7 @@
 #import <command/runner.h>
 #import <oak/debug.h>
 
-@interface HTMLOutputWindowController : NSObject <NSWindowDelegate>
+PUBLIC @interface HTMLOutputWindowController : NSObject <NSWindowDelegate>
 {
 	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
 

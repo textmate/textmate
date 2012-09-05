@@ -16,7 +16,7 @@
 // Long line: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 // No spaces: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-typedef std::tr1::shared_ptr<ng::layout_t> layout_ptr;
+typedef std::shared_ptr<ng::layout_t> layout_ptr;
 
 @interface MyView : NSView
 {
@@ -43,7 +43,7 @@ static void random_insert (ng::buffer_t& dst, std::string const& src)
 	}
 
 	std::vector<size_t> ordering(lengths.size());
-	ext::iota(ordering.begin(), ordering.end(), 0);
+	std::iota(ordering.begin(), ordering.end(), 0);
 	std::random_shuffle(ordering.begin(), ordering.end());
 
 	std::vector<size_t> srcOffsets(lengths.size(), 0);
@@ -393,7 +393,7 @@ private:
 
 - (void)rightMouseDown:(NSEvent*)anEvent
 {
-	NSLog(@"%s", SELNAME(_cmd));
+	NSLog(@"%s", sel_getName(_cmd));
 }
 @end
 

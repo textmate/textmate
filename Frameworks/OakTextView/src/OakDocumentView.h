@@ -5,13 +5,16 @@
 
 @class OTVStatusBar;
 
-@interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate>
+PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate>
 {
 	OBJC_WATCH_LEAKS(OakDocumentView);
 
 	NSScrollView* gutterScrollView;
 	GutterView* gutterView;
 	NSColor* gutterDividerColor;
+	NSDictionary* gutterImages;
+	NSDictionary* gutterHoverImages;
+	NSDictionary* gutterPressedImages;
 
 	NSScrollView* textScrollView;
 	OakTextView* textView;
@@ -21,6 +24,8 @@
 
 	NSMutableArray* topAuxiliaryViews;
 	NSMutableArray* bottomAuxiliaryViews;
+
+	NSInteger isResizingTextView;
 
 	IBOutlet NSPanel* tabSizeSelectorPanel;
 }

@@ -7,7 +7,6 @@
 
 PUBLIC std::string OakStackDump (int linesToSkip)
 {
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
 	void* callstack[256];
 	int frames = backtrace(callstack, sizeofA(callstack));
 
@@ -69,9 +68,6 @@ PUBLIC std::string OakStackDump (int linesToSkip)
 			return res;
 		}
 	}
-#else
-	return "sorry, no stack dumps on 10.4";
-#endif
 	return "error";
 }
 

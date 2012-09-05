@@ -3,7 +3,6 @@
 
 class EventsTests : public CxxTest::TestSuite
 {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 	struct callback_t : fs::event_callback_t
 	{
 		callback_t (test::jail_t const& jail, bool log = false) : _jail(jail), _in_replay(false), _log(log) { }
@@ -70,12 +69,10 @@ class EventsTests : public CxxTest::TestSuite
 		std::set<std::string> _must_see, _allowed;
 		bool _in_replay, _log;
 	};
-#endif
 
 public:
 	void test_simple ()
 	{
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 		test::jail_t jail;
 		callback_t cb(jail/*, true*/);
 		cb.must_see("foo/bar", "foo/bar/baz/fud", NULL);
@@ -87,12 +84,10 @@ public:
 		cb.event_loop("");
 
 		fs::unwatch(jail.path(), &cb);
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5 */
 	}
 
 	void test_file_watch ()
 	{
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 		test::jail_t jail;
 		callback_t cb(jail/*, true*/);
 		cb.must_see("foo/bar/dummy.txt", NULL);
@@ -107,12 +102,10 @@ public:
 		cb.event_loop("foo/bar/dummy.txt");
 
 		fs::unwatch(jail.path("foo/bar/dummy.txt"), &cb);
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5 */
 	}
 
 	void test_initially_missing ()
 	{
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 		test::jail_t jail;
 		callback_t cb(jail/*, true*/);
 		cb.must_see("foo/bar", "foo/bar/baz", "foo/bar/fud", NULL);
@@ -132,12 +125,10 @@ public:
 		cb.event_loop("foo/bar");
 
 		fs::unwatch(jail.path("foo/bar"), &cb);
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5 */
 	}
 
 	void test_initially_missing_file ()
 	{
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 		test::jail_t jail;
 		callback_t cb(jail/*, true*/);
 		cb.must_see("foo/bar/dummy.txt", NULL);
@@ -160,6 +151,5 @@ public:
 		cb.event_loop("foo/bar/dummy.txt");
 
 		fs::unwatch(jail.path("foo/bar/dummy.txt"), &cb);
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5 */
 	}
 };

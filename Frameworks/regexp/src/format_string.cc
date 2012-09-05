@@ -156,7 +156,7 @@ struct expand_visitor : boost::static_visitor<void>
 			size_t dstSize = buffer.size() - buffer_contains;
 			size_t srcSize = last - first;
 
-			size_t rc = iconv_compat(cd, (char**)&first, &srcSize, &dst, &dstSize);
+			size_t rc = iconv(cd, (char**)&first, &srcSize, &dst, &dstSize);
 			if(rc == (size_t)(-1) && errno != E2BIG && (errno != EINVAL || buffer.size() - buffer_contains - dstSize == 0))
 				return src; // error
 

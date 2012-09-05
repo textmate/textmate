@@ -53,8 +53,6 @@ namespace osx
 				if(myStatus == errAuthorizationSuccess)
 				{
 					res = true;
-					for(size_t i = 0; i < myAuthorizedRights->count; ++i)
-						fprintf(stderr, "authorization (pid %d): got ‘%s’\n", getpid(), myAuthorizedRights->items[i].name);
 					AuthorizationFreeItemSet(myAuthorizedRights);
 				}
 				else if(myStatus == errAuthorizationCanceled)
@@ -97,7 +95,7 @@ namespace osx
 			bool _valid;
 		};
 
-		std::tr1::shared_ptr<helper_t> helper;
+		std::shared_ptr<helper_t> helper;
 	};
 
 } /* osx */

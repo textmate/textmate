@@ -128,7 +128,7 @@ namespace sb
 	namespace border { enum { top = 1, bottom = 2 }; }
 }
 
-@interface OakStatusBar : OakControl
+PUBLIC @interface OakStatusBar : OakControl
 {
 	std::vector<sb::cell_t> cells;
 	NSInteger borderEdges;
@@ -136,7 +136,7 @@ namespace sb
 @property (nonatomic, readonly) CGFloat minimumWidth;
 @property (nonatomic, assign) NSInteger borderEdges;
 - (void)setCells:(std::vector<sb::cell_t> const&)newCells;
-- (void)showMenu:(NSMenu*)menu withSelectedIndex:(NSUInteger)index forCellWithTag:(int)cellTag font:(NSFont*)font popup:(BOOL)isPopup;
+- (void)showMenu:(NSMenu*)menu withSelectedIndex:(NSUInteger)index forCellWithTag:(NSInteger)cellTag font:(NSFont*)font popup:(BOOL)isPopup;
 @end
 
 template <size_t cellCount> void SetCells (OakStatusBar* statusBar, sb::cell_t const (&cellList)[cellCount])

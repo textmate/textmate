@@ -11,7 +11,7 @@ struct bundle_command_t;
 
 namespace file
 {
-	struct PUBLIC save_context_t : std::tr1::enable_shared_from_this<save_context_t>
+	struct PUBLIC save_context_t : std::enable_shared_from_this<save_context_t>
 	{
 		virtual ~save_context_t () { }
 		virtual void set_path (std::string const& path) = 0;
@@ -21,7 +21,7 @@ namespace file
 		virtual void filter_error (bundle_command_t const& command, int rc, std::string const& out, std::string const& err) = 0;
 	};
 
-	typedef std::tr1::shared_ptr<save_context_t> save_context_ptr;
+	typedef std::shared_ptr<save_context_t> save_context_ptr;
 
 	struct PUBLIC save_callback_t
 	{
@@ -33,7 +33,7 @@ namespace file
 		virtual void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) = 0;
 	};
 
-	typedef std::tr1::shared_ptr<save_callback_t> save_callback_ptr;
+	typedef std::shared_ptr<save_callback_t> save_callback_ptr;
 
 	PUBLIC void save (std::string const& path, save_callback_ptr cb, osx::authorization_t auth, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters);
 

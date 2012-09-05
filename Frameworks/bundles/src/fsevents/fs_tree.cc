@@ -59,7 +59,7 @@ namespace fs
 		if(_type != kNodeTypeDirectory)
 			return *this;
 
-		typedef boost::tuple<std::string, std::string, node_type_t> key_t;
+		typedef std::tuple<std::string, std::string, node_type_t> key_t;
 		std::map<key_t, value_t> entries;
 		iterate(entry, *_entries)
 			entries.insert(std::make_pair(key_t(entry->_name, entry->_resolved, entry->_type), value_t(entry->_modified, entry->_entries)));
@@ -87,21 +87,21 @@ namespace fs
 		_entries->clear();
 		iterate(pair, entries)
 		{
-			if(pair->second.new_date == 0)                          { D(DBF_FS_Tree, bug("--- %s\n", path::join(basePath, pair->first.get<0>()).c_str());); }
-			else if(pair->second.old_date == 0)                     { D(DBF_FS_Tree, bug("+++ %s\n", path::join(basePath, pair->first.get<0>()).c_str());); }
-			else if(pair->second.old_date != pair->second.new_date) { D(DBF_FS_Tree, bug("    %s\n", path::join(basePath, pair->first.get<0>()).c_str());); }
+			if(pair->second.new_date == 0)                          { D(DBF_FS_Tree, bug("--- %s\n", path::join(basePath, std::get<0>(pair->first)).c_str());); }
+			else if(pair->second.old_date == 0)                     { D(DBF_FS_Tree, bug("+++ %s\n", path::join(basePath, std::get<0>(pair->first)).c_str());); }
+			else if(pair->second.old_date != pair->second.new_date) { D(DBF_FS_Tree, bug("    %s\n", path::join(basePath, std::get<0>(pair->first)).c_str());); }
 
 			if(changes)
 			{
-				if(pair->second.new_date == 0)                          { (*changes)["deleted"].push_back(path::join(basePath, pair->first.get<0>())); }
-				else if(pair->second.old_date == 0)                     { (*changes)["created"].push_back(path::join(basePath, pair->first.get<0>())); }
-				else if(pair->second.old_date != pair->second.new_date) { (*changes)["changed"].push_back(path::join(basePath, pair->first.get<0>())); }
+				if(pair->second.new_date == 0)                          { (*changes)["deleted"].push_back(path::join(basePath, std::get<0>(pair->first))); }
+				else if(pair->second.old_date == 0)                     { (*changes)["created"].push_back(path::join(basePath, std::get<0>(pair->first))); }
+				else if(pair->second.old_date != pair->second.new_date) { (*changes)["changed"].push_back(path::join(basePath, std::get<0>(pair->first))); }
 			}
 
 			if(pair->second.new_date == 0)
 				continue;
 
-			_entries->push_back(node_t(pair->first.get<0>(), pair->first.get<1>(), pair->first.get<2>(), pair->second.new_date, pair->second.entries));
+			_entries->push_back(node_t(std::get<0>(pair->first), std::get<1>(pair->first), std::get<2>(pair->first), pair->second.new_date, pair->second.entries));
 			if(pair->second.old_date != pair->second.new_date)
 				_entries->back().rescan(basePath, dirGlob, fileGlob, changes);
 		}

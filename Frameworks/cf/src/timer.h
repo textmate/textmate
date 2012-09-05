@@ -34,7 +34,7 @@ namespace cf
 		}
 	};
 
-	typedef std::tr1::shared_ptr<timer_t> timer_ptr;
+	typedef std::shared_ptr<timer_t> timer_ptr;
 
 	inline timer_ptr setup_timer (CFAbsoluteTime delay, callback_ptr callback)
 	{

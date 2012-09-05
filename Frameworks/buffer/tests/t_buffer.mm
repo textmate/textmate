@@ -212,7 +212,7 @@ public:
 	void test_speed ()
 	{
 		std::string tmp = std::string(0x7F - 0x20, '\0');
-		ext::iota(tmp.begin(), tmp.end(), 0x20);
+		std::iota(tmp.begin(), tmp.end(), 0x20);
 		tmp.append("\n");
 		while(tmp.size() < 32*1024)
 			tmp.insert(tmp.end(), tmp.begin(), tmp.end());

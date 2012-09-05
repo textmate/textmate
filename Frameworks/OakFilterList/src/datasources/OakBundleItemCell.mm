@@ -48,7 +48,7 @@
 		CFTypeRef str = (CFAttributedStringRef)attrStr;
 
 		HIThemeTextInfo textInfo = { kHIThemeTextInfoVersionZero, kThemeStateActive, kThemeSmallSystemFont, kHIThemeTextHorizontalFlushRight, kHIThemeTextVerticalFlushCenter, 0, kHIThemeTextTruncationNone, 1, 0 };
-		float width = 0.0;
+		CGFloat width = 0.0;
 		HIThemeGetTextDimensions(str, 0, &textInfo, &width, NULL, NULL);
 
 		NSRect triggerFrame;

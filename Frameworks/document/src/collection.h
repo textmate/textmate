@@ -14,7 +14,7 @@ namespace document
 		virtual void update_environment (std::map<std::string, std::string>& env) { }
 	};
 
-	typedef std::tr1::shared_ptr<run_callback_t> run_callback_ptr;
+	typedef std::shared_ptr<run_callback_t> run_callback_ptr;
 
 	PUBLIC extern oak::uuid_t const kCollectionNew;
 	PUBLIC extern oak::uuid_t const kCollectionCurrent;

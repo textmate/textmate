@@ -123,7 +123,7 @@ static bool parse_line (char const*& p, char const* pe, ini_file_t& res, int n =
 
 	std::string trailing;
 	parse_until(p, pe, "\n", trailing);
-	fprintf(stderr, "%s:%d: error: incorrect syntax ‘%.*s’\n", res.path.c_str(), n, (strchr(bt, '\n') ?: pe) - bt, bt);
+	fprintf(stderr, "%s:%d: error: incorrect syntax ‘%.*s’\n", res.path.c_str(), n, (int)((strchr(bt, '\n') ?: pe) - bt), bt);
 	parse_char(p, pe, "\n");
 	return false;
 }

@@ -11,14 +11,4 @@ namespace render
 		CGContextFillRect(context, rect);
 	}
 
-	void draw_spelling_dot (CGContextRef context, CGRect const& rect)
-	{
-		static cf::image_t image("SpellingDot.png", "com.macromates.TextMate.OakAppKit");
-		if(!image)
-			return;
-
-		for(CGFloat x = rect.origin.x; x < rect.origin.x + rect.size.width - 0.5; x += 4)
-			CGContextDrawImage(context, CGRectMake(x, rect.origin.y, 4, 3), image);
-	}
-
 } /* render */

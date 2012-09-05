@@ -9,7 +9,7 @@ namespace oak
 	template <typename DBF>
 	struct benchmark_t
 	{
-		typedef std::tr1::shared_ptr< benchmark_t<DBF> > ptr;
+		typedef std::shared_ptr< benchmark_t<DBF> > ptr;
 
 		benchmark_t (DBF flag, std::string const& message) : flag(flag), message(message), timer() { }
 		~benchmark_t ()
@@ -25,6 +25,6 @@ namespace oak
 }
 
 #define BENCHMARK(DBF, message) \
-	if(oak::benchmark_t<typeof(DBF)>::ptr _benchmark = oak::benchmark_t<typeof(DBF)>::ptr(new oak::benchmark_t<typeof(DBF)>(DBF, message)))
+	if(oak::benchmark_t<decltype(DBF)>::ptr _benchmark = oak::benchmark_t<decltype(DBF)>::ptr(new oak::benchmark_t<decltype(DBF)>(DBF, message)))
 
 #endif /* end of include guard: OAKBENCHMARK_H_RNPP99KX */

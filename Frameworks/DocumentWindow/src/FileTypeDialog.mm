@@ -189,7 +189,7 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 
 static bool is_installed (oak::uuid_t const& uuid)
 {
-	return bundles::lookup(uuid);
+	return bundles::lookup(uuid) ? true : false;
 }
 
 - (void)checkIfBundleIsInstalled:(NSTimer*)aTimer

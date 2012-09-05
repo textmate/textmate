@@ -155,7 +155,7 @@ namespace ng
 		{
 			character_pair_t () { }
 			character_pair_t (std::string const& first, std::string const& second, bool matchedFirst) : first(first), second(second), matched_first(matchedFirst), initialized(true) { }
-			EXPLICIT operator bool () const { return initialized; }
+			explicit operator bool () const { return initialized; }
 
 			std::string first, second;
 			bool matched_first, initialized = false;

@@ -57,7 +57,7 @@ namespace find
 	// ==============
 	
 	struct dfa_node_t;
-	typedef std::tr1::shared_ptr<dfa_node_t> dfa_node_ptr;
+	typedef std::shared_ptr<dfa_node_t> dfa_node_ptr;
 
 	struct dfa_node_t
 	{

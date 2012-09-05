@@ -13,5 +13,5 @@ extern NSString* const kCommandRunnerURLScheme;
 @property (nonatomic, readonly) WebView* webView;
 @end
 
-namespace command { struct runner_t; typedef std::tr1::shared_ptr<runner_t> runner_ptr; }
+namespace command { struct runner_t; typedef std::shared_ptr<runner_t> runner_ptr; }
 PUBLIC NSURLRequest* URLRequestForCommandRunner (command::runner_ptr aRunner);

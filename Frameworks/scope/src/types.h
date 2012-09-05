@@ -18,7 +18,7 @@ namespace scope
 			virtual std::string to_s () const = 0;
 		};
 
-		typedef std::tr1::shared_ptr<any_t> any_ptr;
+		typedef std::shared_ptr<any_t> any_ptr;
 
 		typedef std::string atom_t;
 		extern atom_t const atom_any;

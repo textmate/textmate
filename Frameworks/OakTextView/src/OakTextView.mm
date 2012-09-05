@@ -63,7 +63,6 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 @property (nonatomic, retain) OakTimer* dragScrollTimer;
 @property (nonatomic, assign) BOOL showDragCursor;
 @property (nonatomic, assign) BOOL showColumnSelectionCursor;
-@property (nonatomic, readonly) BOOL hasSelection;
 @property (nonatomic, retain) OakChoiceMenu* choiceMenu;
 @property (nonatomic, assign) NSUInteger refreshNestCount;
 @property (nonatomic, retain) NSViewController* liveSearchViewController;
@@ -113,7 +112,7 @@ static ng::ranges_t merge (ng::ranges_t lhs, ng::ranges_t const& rhs)
 
 struct refresh_helper_t
 {
-	typedef std::tr1::shared_ptr<ng::layout_t> layout_ptr;
+	typedef std::shared_ptr<ng::layout_t> layout_ptr;
 
 	refresh_helper_t (OakTextView* self, document::document_ptr document, ng::editor_ptr editor, layout_ptr theLayout) : _self(self), _document(document), _editor(editor), _layout(theLayout)
 	{
@@ -201,7 +200,7 @@ private:
 	size_t _revision;
 	ng::editor_ptr _editor;
 	ng::ranges_t _selection;
-	std::tr1::weak_ptr<ng::layout_t> _layout;
+	std::weak_ptr<ng::layout_t> _layout;
 };
 
 #define AUTO_REFRESH refresh_helper_t _dummy(self, document, editor, layout)
@@ -436,6 +435,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
+		spellingDotImage = [[NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]] retain];
+
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:@"OakDocumentNotificationWillSave" object:nil];
@@ -449,6 +450,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[liveSearchString release];
 	[self setDocument:document::document_ptr()];
+	[spellingDotImage release];
 	[super dealloc];
 }
 
@@ -580,7 +582,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!antiAlias)
 		CGContextSetShouldAntialias(context, false);
-	layout->draw(context, aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
+	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil]), aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
 // ===============
@@ -740,7 +742,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)doCommandBySelector:(SEL)aSelector
 {
-	D(DBF_OakTextView_TextInput, bug("%s\n", SELNAME(aSelector)););
+	D(DBF_OakTextView_TextInput, bug("%s\n", sel_getName(aSelector)););
 	AUTO_REFRESH;
 	[self tryToPerform:aSelector with:self];
 }
@@ -967,7 +969,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, editor->scope());
 	if(!items.empty())
 	{
-		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
+		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret], [self hasSelection]))
 			[self performBundleItem:item];
 		return YES;
 	}
@@ -1023,7 +1025,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (void)oldKeyDown:(NSEvent*)anEvent
 {
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), editor->scope());
-	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
+	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret], [self hasSelection]))
 		[self performBundleItem:item];
 	else if(items.empty())
 		[self interpretKeyEvents:@[ anEvent ]];
@@ -1052,21 +1054,25 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		std::string const& newContent = editor->placeholder_content(&newSelection);
 		std::string const newPrefix   = newSelection ? newContent.substr(0, newSelection.min().index) : "";
 
+		std::vector<std::string> newChoices = editor->choices();
+		newChoices.erase(std::remove_if(newChoices.begin(), newChoices.end(), [&newPrefix](std::string const& str) { return str.find(newPrefix) != 0; }), newChoices.end());
+		choiceMenu.choices = (NSArray*)((CFArrayRef)cf::wrap(newChoices));
+
 		bool didEdit   = oldPrefix != newPrefix;
 		bool didDelete = didEdit && oldPrefix.find(newPrefix) == 0;
 
 		if(didEdit && !didDelete)
 		{
-			NSInteger choiceIndex = NSNotFound;
-			if(std::find(choiceVector.begin(), choiceVector.end(), oldContent) != choiceVector.end() && oldContent.find(newContent) == 0)
+			NSUInteger choiceIndex = NSNotFound;
+			if(std::find(newChoices.begin(), newChoices.end(), oldContent) != newChoices.end() && oldContent.find(newContent) == 0)
 			{
-				choiceIndex = std::find(choiceVector.begin(), choiceVector.end(), oldContent) - choiceVector.begin();
+				choiceIndex = std::find(newChoices.begin(), newChoices.end(), oldContent) - newChoices.begin();
 			}
 			else
 			{
-	 			for(size_t i = 0; i < choiceVector.size(); ++i)
+	 			for(size_t i = 0; i < newChoices.size(); ++i)
 				{
-					if(choiceVector[i].find(newContent) != 0)
+					if(newChoices[i].find(newContent) != 0)
 						continue;
 					choiceIndex = i;
 					break;
@@ -1074,8 +1080,12 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			}
 
 			choiceMenu.choiceIndex = choiceIndex;
-			if(choiceIndex != NSNotFound && newContent != choiceVector[choiceIndex])
-				editor->set_placeholder_content(choiceVector[choiceIndex], newPrefix.size());
+			if(choiceIndex != NSNotFound && newContent != newChoices[choiceIndex])
+				editor->set_placeholder_content(newChoices[choiceIndex], newPrefix.size());
+		}
+		else if(oldContent != newContent)
+		{
+			choiceMenu.choiceIndex = NSNotFound;
 		}
 	}
 	else if(event == OakChoiceMenuKeyMovement)
@@ -1105,7 +1115,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	BOOL isHoldingOption      = modifiers & NSAlternateKeyMask ? YES : NO;
 	BOOL didPressOption       = modifiers == NSAlternateKeyMask;
 	BOOL didReleaseOption     = modifiers == 0 && optionDownDate && [optionDownDate timeIntervalSinceNow] > -0.18;
-	BOOL isSelectingWithMouse = ([NSEvent slPressedMouseButtons] & 1) && editor->has_selection();
+	BOOL isSelectingWithMouse = ([NSEvent pressedMouseButtons] & 1) && editor->has_selection();
 
 	D(DBF_OakTextView_TextInput, bug("press option %s, release option %s, is selecting with mouse %s\n", BSTR(didPressOption), BSTR(didReleaseOption), BSTR(isSelectingWithMouse)););
 	self.showColumnSelectionCursor = isHoldingOption;
@@ -1573,7 +1583,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	AUTO_REFRESH;
 	ng::range_t range;
 	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), editor->ranges(), document->path_attributes(), &range);
-	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
+	if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret], [self hasSelection]))
 	{
 		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:editor->as_string(range.first.index, range.last.index)]];
 		editor->delete_tab_trigger(editor->as_string(range.first.index, range.last.index));
@@ -1736,22 +1746,50 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		document->buffer().indent().set_soft_tabs(flag);
 }
 
+- (void)setWrapColumn:(NSInteger)newWrapColumn
+{
+	if(wrapColumn == newWrapColumn)
+		return;
+
+	wrapColumn = newWrapColumn;
+	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
+	if(layout)
+	{
+		AUTO_REFRESH;
+		layout->set_wrapping(self.softWrap, wrapColumn);
+	}
+}
+
+- (void)setWrapColumnSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
+{
+	if(returnCode == NSAlertDefaultReturn)
+	{
+		NSTextField* textField = (NSTextField*)[alert accessoryView];
+		[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
+	}
+	[alert release];
+}
+
 - (void)takeWrapColumnFrom:(id)sender
 {
 	ASSERT([sender respondsToSelector:@selector(tag)]);
 	if(wrapColumn == [sender tag])
 		return;
 
-	// TODO Soft wrap
-	// if(wrapColumn == NSWrapColumnAskUser)
-	// 	;
-
-	wrapColumn = [sender tag];
-	settings_t::set(kSettingsWrapColumnKey, wrapColumn);
-	if(layout)
+	if([sender tag] == NSWrapColumnAskUser)
 	{
-		AUTO_REFRESH;
-		layout->set_wrapping(self.softWrap, wrapColumn);
+		NSTextField* textField = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+		[textField setIntegerValue:wrapColumn == NSWrapColumnWindowWidth ? 80 : wrapColumn];
+		[textField sizeToFit];
+		[textField setFrameSize:NSMakeSize(200, NSHeight([textField frame]))];
+
+		NSAlert* alert = [[NSAlert alertWithMessageText:@"Set Wrap Column" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Specify what column text should wrap at:"] retain];
+		[alert setAccessoryView:textField];
+		[alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(setWrapColumnSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	}
+	else
+	{
+		[self setWrapColumn:[sender tag]];
 	}
 }
 
@@ -1967,7 +2005,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		AUTO_REFRESH;
 		editor->insert(merged, true);
 	}
-	else if(bundles::item_ptr handler = bundles::show_menu_for_items(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self positionForWindowUnderCaret]))
+	else if(bundles::item_ptr handler = bundles::show_menu_for_items(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self positionForWindowUnderCaret], [self hasSelection]))
 	{
 		struct callback_t : document::run_callback_t
 		{
@@ -2007,7 +2045,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			{ NSCommandKeyMask,   "COMMAND"  }
 		};
 
-		NSUInteger state = [NSEvent slModifierFlags];
+		NSUInteger state = [NSEvent modifierFlags];
 		std::vector<std::string> flagNames;
 		for(size_t i = 0; i != sizeofA(qualNames); ++i)
 		{
@@ -2355,7 +2393,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(document->buffer(), layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), document->path_attributes()), [anEvent modifierFlags]));
 	if(!items.empty())
 	{
-		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret]))
+		if(bundles::item_ptr item = bundles::show_menu_for_items(items, [self positionForWindowUnderCaret], [self hasSelection]))
 		{
 			AUTO_REFRESH;
 			editor->set_selections(ng::range_t(layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]).index));
@@ -2411,6 +2449,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)dragScrollTimerFired:(id)sender
 {
+	AUTO_REFRESH;
 	[self actOnMouseDragged:[NSApp currentEvent]];
 }
 

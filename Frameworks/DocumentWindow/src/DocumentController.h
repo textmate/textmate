@@ -13,11 +13,11 @@
 @class OakHTMLOutputView;
 
 struct document_tab_t;
-typedef std::tr1::shared_ptr<document_tab_t> document_tab_ptr;
+typedef std::shared_ptr<document_tab_t> document_tab_ptr;
 
-namespace bundles { struct item_t; typedef std::tr1::shared_ptr<item_t> item_ptr; }
+namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
-@interface DocumentController : NSWindowController <OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, DocumentOpenHelperDelegate>
+PUBLIC @interface DocumentController : NSWindowController <OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, DocumentOpenHelperDelegate>
 {
 	OBJC_WATCH_LEAKS(DocumentController);
 

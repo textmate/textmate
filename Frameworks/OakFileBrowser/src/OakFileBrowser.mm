@@ -92,6 +92,8 @@ static NSURL* ParentForURL (NSURL* url)
 		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
 	else if([[url scheme] isEqualToString:@"scm"])
 		return [NSURL fileURLWithPath:[url path] isDirectory:YES];
+	else if([@[ @"xcodeproj", @"search" ] containsObject:[url scheme]])
+		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
 	else
 		return [[[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:parentPath] autorelease];
 }
@@ -337,6 +339,12 @@ static NSURL* ParentForURL (NSURL* url)
 	{
 		if([item.target isFileURL])
 			return (void)[self showURL:item.target];
+	}
+
+	for(FSItem* item in self.selectedItems)
+	{
+		if([item.target path] && path::is_directory([[item.target path] fileSystemRepresentation]))
+			return (void)[self showURL:[NSURL fileURLWithPath:[item.target path]]];
 	}
 }
 

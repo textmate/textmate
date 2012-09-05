@@ -1,4 +1,6 @@
-@interface OakStringListTransformer : NSValueTransformer
+#import <oak/misc.h>
+
+PUBLIC @interface OakStringListTransformer : NSValueTransformer
 {
 	NSArray* stringList;
 }

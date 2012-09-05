@@ -12,7 +12,7 @@ struct OakResizeHandle
 	edge_t edge;
 	int distance;
 
-	EXPLICIT operator bool () const { return box; }
+	explicit operator bool () const { return box; }
 };
 
 static void add_cursors (box_t* box, NSView* view)

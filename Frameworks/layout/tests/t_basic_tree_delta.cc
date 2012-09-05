@@ -41,7 +41,7 @@ class DeltaTreeTests : public CxxTest::TestSuite
 		}
 
 		std::vector<size_t> ordering(lengths.size());
-		ext::iota(ordering.begin(), ordering.end(), 0);
+		std::iota(ordering.begin(), ordering.end(), 0);
 		std::random_shuffle(ordering.begin(), ordering.end());
 
 		std::vector<size_t> srcOffsets(lengths.size(), 0);

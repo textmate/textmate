@@ -117,11 +117,16 @@ public:
 	{
 		using namespace path;
 
-		TS_ASSERT_EQUALS(path::with_tilde(home()),               "~");
-		TS_ASSERT_EQUALS(path::with_tilde(join(home(), "foo")),  "~/foo");
-		TS_ASSERT_EQUALS(path::with_tilde("foo" + home()),       "foo" + home());
-		TS_ASSERT_EQUALS(path::with_tilde("/dummy"),             "/dummy");
-		TS_ASSERT_EQUALS(path::with_tilde(NULL_STR),             NULL_STR);
+		TS_ASSERT_EQUALS(path::with_tilde(home()),                    "~");
+		TS_ASSERT_EQUALS(path::with_tilde(home() + "/"),              "~/");
+		TS_ASSERT_EQUALS(path::with_tilde(home() + "//"),             "~/");
+		TS_ASSERT_EQUALS(path::with_tilde(home() + "/./"),            "~/");
+		TS_ASSERT_EQUALS(path::with_tilde(home() + "./"),             home() + "./");
+		TS_ASSERT_EQUALS(path::with_tilde(join(home(), "foo")),       "~/foo");
+		TS_ASSERT_EQUALS(path::with_tilde(join(home(), "foo") + "/"), "~/foo/");
+		TS_ASSERT_EQUALS(path::with_tilde("foo" + home()),            "foo" + home());
+		TS_ASSERT_EQUALS(path::with_tilde("/dummy"),                  "/dummy");
+		TS_ASSERT_EQUALS(path::with_tilde(NULL_STR),                  NULL_STR);
 	}
 
 	void test_resolve ()

@@ -51,7 +51,7 @@ static TMPlugInController* SharedInstance;
 	}
 	else
 	{
-		NSLog(@"%s couldn't load plugIn %@", SELNAME(_cmd), aPath);
+		NSLog(@"%s couldn't load plugIn %@", sel_getName(_cmd), aPath);
 		[self dealloc];
 		self = nil;
 	}
@@ -92,11 +92,11 @@ static TMPlugInController* SharedInstance;
 		[plugInBundle load];
 		id obj = [[plugInBundle principalClass] alloc];
 		if(!obj)
-			NSLog(@"%s %@ plug-in has no principal class", SELNAME(_cmd), [self name]);
+			NSLog(@"%s %@ plug-in has no principal class", sel_getName(_cmd), [self name]);
 		else if([obj respondsToSelector:@selector(initWithPlugInController:)])
 			instance = [obj initWithPlugInController:[TMPlugInController sharedInstance]];
 		else
-			NSLog(@"%s %@ plug-in doesn't have proper initializer", SELNAME(_cmd), [self name]);
+			NSLog(@"%s %@ plug-in doesn't have proper initializer", sel_getName(_cmd), [self name]);
 	}
 	D(DBF_PlugInController, bug("%s\n", [[instance description] UTF8String]););
 	return instance;
@@ -156,12 +156,12 @@ static TMPlugInController* SharedInstance;
 		}
 		else
 		{
-			NSLog(@"%s %@ plug-in was not loaded as it relies on version %d", SELNAME(_cmd), [plugIn name], [plugIn undocumentedRelianceVersion]);
+			NSLog(@"%s %@ plug-in was not loaded as it relies on version %d", sel_getName(_cmd), [plugIn name], [plugIn undocumentedRelianceVersion]);
 		}
 	}
 	else
 	{
-		NSLog(@"%s failed to load %@", SELNAME(_cmd), aPath);
+		NSLog(@"%s failed to load %@", sel_getName(_cmd), aPath);
 	}
 }
 #if 0

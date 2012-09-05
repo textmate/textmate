@@ -16,11 +16,6 @@
 
 OAK_DEBUG_VAR(AppController_Menus);
 
-@interface NSObject (BundleMenuDelegate)
-- (BOOL)canHandleMenuKeyEquivalent:(NSEvent*)anEvent;
-- (void)handleMenuKeyEquivalent:(id)sender;
-@end
-
 @implementation AppController (BundlesMenu)
 - (void)doBundleItem:(id)anArgument
 {
@@ -30,17 +25,6 @@ OAK_DEBUG_VAR(AppController_Menus);
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
 {
 	D(DBF_AppController_Menus, bug("%s (%s)\n", ns::glyphs_for_event_string(to_s(theEvent)).c_str(), to_s(theEvent).c_str()););
-	if(aMenu != bundlesMenu)
-		return NO;
-
-	*anAction = @selector(handleMenuKeyEquivalent:);
-	*aTarget = self;
-
-	if(id target = [NSApp targetForAction:@selector(canHandleMenuKeyEquivalent:)])
-	{
-		*aTarget = target;
-		return [target canHandleMenuKeyEquivalent:theEvent];
-	}
 	return NO;
 }
 

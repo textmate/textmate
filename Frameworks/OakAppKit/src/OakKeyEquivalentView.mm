@@ -268,10 +268,10 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	NSFrameRect(frame);
 	NSEraseRect(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
-	NSDictionary* stringAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-		recording ? [NSColor grayColor] : [NSColor blackColor],                 NSForegroundColorAttributeName,
-		[NSFont userFixedPitchFontOfSize:12], NSFontAttributeName,
-		nil];
+	NSDictionary* stringAttributes = @{
+		NSForegroundColorAttributeName : recording ? [NSColor grayColor] : [NSColor blackColor],
+		NSFontAttributeName            : [NSFont controlContentFontOfSize:0]
+	};
 
 	NSSize size = [displayString sizeWithAttributes:stringAttributes];
 	[displayString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height /2 ) withAttributes:stringAttributes];

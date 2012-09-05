@@ -1,4 +1,6 @@
-@interface OakFileIconImage : NSImage
+#import <oak/misc.h>
+
+PUBLIC @interface OakFileIconImage : NSImage
 {
 }
 + (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag size:(NSSize)aSize;

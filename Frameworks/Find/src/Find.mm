@@ -11,7 +11,6 @@
 #import <text/utf8.h>
 #import <regexp/format_string.h>
 #import <editor/editor.h>
-#import "scan_path.h"
 #import "Strings.h"
 
 OAK_DEBUG_VAR(Find_Base);

@@ -9,26 +9,24 @@ OAK_DEBUG_VAR(SCM_Git);
 
 static scm::status::type parse_status_flag (std::string const& str)
 {
-	static struct { scm::status::type flag; std::string string; } const StatusLetterConversionMap[] =
+	static std::map<std::string, scm::status::type> const StatusLetterConversionMap
 	{
-		{ scm::status::unversioned, "?" },
-		{ scm::status::ignored,     "I" },
-		{ scm::status::versioned,   "H" },
-		{ scm::status::modified,    "M" },
-		{ scm::status::added,       "A" },
-		{ scm::status::deleted,     "D" },
-		{ scm::status::conflicted,  "U" },
-		{ scm::status::modified,    "T" }, // type change, e.g. symbolic link → regular file
+		{ "?", scm::status::unversioned },
+		{ "I", scm::status::ignored     },
+		{ "H", scm::status::none        },
+		{ "M", scm::status::modified    },
+		{ "A", scm::status::added       },
+		{ "D", scm::status::deleted     },
+		{ "U", scm::status::conflicted  },
+		{ "T", scm::status::modified    }  // type change, e.g. symbolic link → regular file
 	};
 
-	for(size_t i = 0; i < sizeofA(StatusLetterConversionMap); ++i)
-	{
-		if(str == StatusLetterConversionMap[i].string)
-			return StatusLetterConversionMap[i].flag;
-	}
+	auto it = StatusLetterConversionMap.find(str);
+	if(it != StatusLetterConversionMap.end())
+		return it->second;
 
 	ASSERT_EQ(str, NULL_STR); // we use ‘str’ in the assertion to output the unrecognized status flag
-	return scm::status::none;
+	return scm::status::unknown;
 }
 
 static void parse_diff (std::map<std::string, scm::status::type>& entries, std::string const& output)
@@ -43,7 +41,7 @@ static void parse_diff (std::map<std::string, scm::status::type>& entries, std::
 		entries[v[i+1]] = parse_status_flag(v[i]);
 }
 
-static void parse_ls (std::map<std::string, scm::status::type>& entries, std::string const& output, scm::status::type state = scm::status::none)
+static void parse_ls (std::map<std::string, scm::status::type>& entries, std::string const& output, scm::status::type state = scm::status::unknown)
 {
 	if(output == NULL_STR)
 		return;
@@ -54,7 +52,7 @@ static void parse_ls (std::map<std::string, scm::status::type>& entries, std::st
 	iterate(str, v)
 	{
 		ASSERT_EQ((*str)[1], ' ');
-		entries[str->substr(2)] = state != scm::status::none ? state : parse_status_flag(str->substr(0, 1));
+		entries[str->substr(2)] = state != scm::status::unknown ? state : parse_status_flag(str->substr(0, 1));
 	}
 }
 
@@ -132,7 +130,7 @@ namespace
 			helper_t (std::map<std::string, scm::status::type> const& entries) : _entries(entries) { }
 			std::map<std::string, scm::status::type> _entries;
 		};
-		typedef std::tr1::shared_ptr<helper_t> helper_ptr;
+		typedef std::shared_ptr<helper_t> helper_ptr;
 		helper_ptr _helper;
 		std::string _key;
 		bool _is_dir;
@@ -172,31 +170,31 @@ static scm::status::type status_for (entry_t const& root)
 	if(!root.is_dir())
 		return root.status();
 
-	size_t unknown = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0;
+	size_t untracked = 0, ignored = 0, tracked = 0, modified = 0, added = 0, deleted = 0, mixed = 0;
 	citerate(entry, root.entries())
 	{
 		switch(status_for(*entry))
 		{
-			case scm::status::unversioned:  ++unknown;  break;
-			case scm::status::ignored:      ++ignored;  break;
-			case scm::status::versioned:    ++tracked;  break;
-			case scm::status::modified:     ++modified; break;
-			case scm::status::added:        ++added;    break;
-			case scm::status::deleted:      ++deleted;  break;
-			case scm::status::mixed:        ++mixed;    break;
+			case scm::status::unversioned:  ++untracked; break;
+			case scm::status::ignored:      ++ignored;   break;
+			case scm::status::none:         ++tracked;   break;
+			case scm::status::modified:     ++modified;  break;
+			case scm::status::added:        ++added;     break;
+			case scm::status::deleted:      ++deleted;   break;
+			case scm::status::mixed:        ++mixed;     break;
 		}
 	}
 	
 	if(mixed > 0) return scm::status::mixed;
 	
-	size_t	total=unknown + ignored + tracked + modified + added + deleted;
+	size_t total = untracked + ignored + tracked + modified + added + deleted;
 	
-	if(total == unknown)  return scm::status::unversioned;
-	if(total == ignored)  return scm::status::none;
-	if(total == tracked)  return scm::status::versioned;
-	if(total == modified) return scm::status::modified;
-	if(total == added)    return scm::status::added;
-	if(total == deleted)  return scm::status::deleted;
+	if(total == untracked) return scm::status::unversioned;
+	if(total == ignored)   return scm::status::none;
+	if(total == tracked)   return scm::status::none;
+	if(total == modified)  return scm::status::modified;
+	if(total == added)     return scm::status::added;
+	if(total == deleted)   return scm::status::deleted;
 	
 	if(total > 0) return scm::status::mixed;
 	
@@ -232,7 +230,7 @@ namespace scm
 			if(!haveHead)
 				return NULL_STR;
 
-			std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD");
+			std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
 			branchName = branchName.substr(0, branchName.find("\n"));
 			if(branchName.find("refs/heads/") == 0)
 				branchName = branchName.substr(11);

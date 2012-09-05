@@ -1,9 +1,11 @@
+#import <oak/misc.h>
+
 enum {
 	OakImageAndTextCellHitImage = (1 << 10),
 	OakImageAndTextCellHitText  = (1 << 11),
 };
 
-@interface OakImageAndTextCell : NSTextFieldCell
+PUBLIC @interface OakImageAndTextCell : NSTextFieldCell
 {
 	NSImage* image;
 }

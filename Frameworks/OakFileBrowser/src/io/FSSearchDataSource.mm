@@ -13,7 +13,7 @@ OAK_DEBUG_VAR(FileBrowser_Spotlight);
 
 namespace
 {
-	typedef std::tr1::shared_ptr<__MDQuery> MDQueryPtr;
+	typedef std::shared_ptr<__MDQuery> MDQueryPtr;
 
 	struct result_t
 	{

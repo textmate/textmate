@@ -9,7 +9,7 @@
 namespace fs
 {
 	struct node_t;
-	typedef std::tr1::shared_ptr< std::vector<node_t> > nodes_ptr;
+	typedef std::shared_ptr< std::vector<node_t> > nodes_ptr;
 
 	struct PUBLIC node_t
 	{

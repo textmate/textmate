@@ -8,7 +8,7 @@
 namespace parse
 {
 	struct stack_t;
-	typedef std::tr1::shared_ptr<stack_t> stack_ptr;
+	typedef std::shared_ptr<stack_t> stack_ptr;
 
 	PUBLIC stack_ptr parse (char const* first, char const* last, stack_ptr stack, std::map<size_t, scope::scope_t>& scopes, bool firstLine, size_t i = 0);
 	PUBLIC bool equal (stack_ptr lhs, stack_ptr rhs);

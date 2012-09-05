@@ -21,37 +21,31 @@ struct binding_info_t
 	std::string key_path;
 };
 
-struct value_t
+value_t::value_t (double v)
 {
-	value_t (double v = 0)
-	{
-		records.push_back((record_t){ 0, 0, v, v });
-	}
+	records.push_back((record_t){ 0, 0, v, v });
+}
 
-	double current (double t) const
-	{
-		double target = records.back().target;
-		riterate(it, records)
-			target = it->source + (target - it->source) * oak::slow_in_out((t - it->start) / it->duration);
-		return round(target);
-	}
+double value_t::current (double t) const
+{
+	double target = records.back().target;
+	riterate(it, records)
+		target = it->source + (target - it->source) * oak::slow_in_out((t - it->start) / it->duration);
+	return round(target);
+}
 
-	double set_time (double t)
-	{
-		while(records.size() > 1 && records.front().start + records.front().duration < t)
-			records.erase(records.begin());
-		return current(t);
-	}
+double value_t::set_time (double t)
+{
+	while(records.size() > 1 && records.front().start + records.front().duration < t)
+		records.erase(records.begin());
+	return current(t);
+}
 
-	void set_new_target (double target, double now, double duration = 1)
-	{
-		if(records.back().target != target)
-			records.push_back((record_t){ now, duration, records.back().target, target });
-	}
-private:
-	struct record_t { double start, duration, source, target; };
-	std::vector<record_t> records;
-};
+void value_t::set_new_target (double target, double now, double duration)
+{
+	if(records.back().target != target)
+		records.push_back((record_t){ now, duration, records.back().target, target });
+}
 
 namespace tab_bar_requisites
 {

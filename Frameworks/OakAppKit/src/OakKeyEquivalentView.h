@@ -1,6 +1,7 @@
 #import "OakView.h"
+#import <oak/misc.h>
 
-@interface OakKeyEquivalentView : OakView
+PUBLIC @interface OakKeyEquivalentView : OakView
 {
 	NSString* eventString;
 	NSString* displayString;

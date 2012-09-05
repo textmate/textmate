@@ -3,6 +3,19 @@
 
 #include <theme/theme.h>
 
+namespace ng
+{
+	struct PUBLIC context_t
+	{
+		context_t (CGContextRef context, CGImageRef spellingDot = nil) : context(context), spelling_dot(spellingDot) { }
+		operator CGContextRef () const { return context; }
+
+		CGContextRef context;
+		CGImageRef spelling_dot;
+	};
+
+} /* ng */
+
 namespace ct
 {
 	struct metrics_t
@@ -32,8 +45,8 @@ namespace ct
 	{
 		line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, std::string fontName, CGFloat fontSize, CGColorRef textColor = NULL);
 
-		void draw_foreground (CGPoint pos, CGContextRef context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled) const;
-		void draw_background (CGPoint pos, CGFloat height, CGContextRef context, bool isFlipped, CGColorRef currentBackground) const;
+		void draw_foreground (CGPoint pos, ng::context_t const& context, bool isFlipped, std::vector< std::pair<size_t, size_t> > const& misspelled) const;
+		void draw_background (CGPoint pos, CGFloat height, ng::context_t const& context, bool isFlipped, CGColorRef currentBackground) const;
 
 		CGFloat width (CGFloat* ascent = NULL, CGFloat* descent = NULL, CGFloat* leading = NULL) const;
 
@@ -41,8 +54,8 @@ namespace ct
 		CGFloat offset_for_index (size_t index) const;
 
 	private:
-		typedef std::tr1::shared_ptr<struct __CTLine const> CTLinePtr;
-		typedef std::tr1::shared_ptr<struct CGColor> CGColorPtr;
+		typedef std::shared_ptr<struct __CTLine const> CTLinePtr;
+		typedef std::shared_ptr<struct CGColor> CGColorPtr;
 
 		std::string _text;
 		CTLinePtr _line;

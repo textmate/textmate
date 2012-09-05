@@ -7,6 +7,6 @@
 #define kAuthPlistPath   "/Library/LaunchDaemons/com.macromates.auth_server.plist"
 #define kAuthRightName   "com.macromates.textmate.openfile"
 #define kAuthServerMajor 3
-#define kAuthServerMinor 0
+#define kAuthServerMinor 1
 
 #endif /* end of include guard: AUTH_CONSTANTS_H_7R7B65WN */

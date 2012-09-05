@@ -6,6 +6,10 @@
 
 OAK_DEBUG_VAR(BundleMenu);
 
+@interface NSObject (HasSelection)
+- (BOOL)hasSelection;
+@end
+
 @implementation BundleMenuDelegate
 - (id)initWithBundleItem:(bundles::item_ptr const&)aBundleItem
 {
@@ -34,6 +38,10 @@ OAK_DEBUG_VAR(BundleMenu);
 	[aMenu removeAllItems];
 	[subdelegates removeAllObjects];
 
+	BOOL hasSelection = NO;
+	if(id textView = [NSApp targetForAction:@selector(hasSelection)])
+		hasSelection = [textView hasSelection];
+
 	citerate(item, umbrellaItem->menu())
 	{
 		switch((*item)->kind())
@@ -56,7 +64,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			default:
 			{
-				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(doBundleItem:) keyEquivalent:@""];
+				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(doBundleItem:) keyEquivalent:@""];
 				[menuItem setKeyEquivalentCxxString:(*item)->value_for_field(bundles::kFieldKeyEquivalent)];
 				[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
@@ -64,18 +72,5 @@ OAK_DEBUG_VAR(BundleMenu);
 			break;
 		}
 	}
-}
-
-- (void)menuDidClose:(NSMenu*)aMenu
-{
-	// We are not allowed to modify ‘aMenu’ here so we do it “afterDelay” — I really wish we didn’t have to do this at all…
-	[self performSelector:@selector(zapMenu:) withObject:aMenu afterDelay:0.0];
-}
-
-- (void)zapMenu:(NSMenu*)aMenu
-{
-	// After a menu has been up, the system will cache all its key equivalents. Even if we set all the key equivalents to the empty string, the system will still remember. The only workaround seems to be to delete all the entries in the menu.
-	[aMenu removeAllItems];
-	[subdelegates removeAllObjects];
 }
 @end

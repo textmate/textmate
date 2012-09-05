@@ -65,7 +65,7 @@ static OakSubmenuController* SharedInstance = nil;
 	{
 		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))
 		{
-			D(DBF_OakSubmenuController, bug("%s%ld\n", SELNAME(item.action), item.tag););
+			D(DBF_OakSubmenuController, bug("%s%ld\n", sel_getName(item.action), item.tag););
 			*anId                  = item.target;
 			*aSEL                  = item.action;
 			tag                    = item.tag;

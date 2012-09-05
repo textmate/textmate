@@ -37,7 +37,7 @@ namespace path
 		bool operator< (identifier_t const& rhs) const;
 		bool operator== (identifier_t const& rhs) const;
 		bool operator!= (identifier_t const& rhs) const;
-		EXPLICIT operator bool () const { return exists || path != NULL_STR; }
+		explicit operator bool () const { return exists || path != NULL_STR; }
 	private:
 		bool exists;
 		dev_t device;
@@ -87,10 +87,10 @@ namespace path
 	// ===========
 
 	struct walker_t;
-	typedef std::tr1::shared_ptr<walker_t>       walker_ptr;
-	typedef std::tr1::shared_ptr<walker_t const> walker_const_ptr;
+	typedef std::shared_ptr<walker_t>       walker_ptr;
+	typedef std::shared_ptr<walker_t const> walker_const_ptr;
 
-	struct PUBLIC walker_t : std::tr1::enable_shared_from_this<walker_t>
+	struct PUBLIC walker_t : std::enable_shared_from_this<walker_t>
 	{
 		struct iterator_t
 		{

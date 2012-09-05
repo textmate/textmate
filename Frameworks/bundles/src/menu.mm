@@ -1,4 +1,5 @@
 #import "menu.h"
+#import "query.h"
 #import <OakFoundation/NSString Additions.h>
 #import <text/ctype.h>
 #import <cf/cf.h>
@@ -59,7 +60,7 @@ namespace bundles
 		return res;
 	}
 
-	item_ptr show_menu_for_items (std::vector<item_ptr> const& items, CGPoint const& pos)
+	item_ptr show_menu_for_items (std::vector<item_ptr> const& items, CGPoint const& pos, bool hasSelection)
 	{
 		if(items.empty())
 			return item_ptr();
@@ -116,7 +117,7 @@ namespace bundles
 
 				std::multimap<std::string, item_ptr, text::less_t> ordering;
 				iterate(item, includedItems)
-					ordering.insert(std::make_pair((*item)->name(), *item));
+					ordering.insert(std::make_pair(name_with_selection(*item, hasSelection), *item));
 				std::transform(ordering.begin(), ordering.end(), back_inserter(menuItems), [](std::pair<std::string, item_ptr> const& p){ return p.second; });
 
 				menus.insert(std::make_pair(bundle->name(), menuItems));
@@ -143,7 +144,7 @@ namespace bundles
 							[menu addItem:[NSMenuItem separatorItem]];
 						pendingSeparator = false;
 
-						NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(takeSelectedItemIndexFrom:) keyEquivalent:@""];
+						NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(takeSelectedItemIndexFrom:) keyEquivalent:@""];
 						[menuItem setTarget:menuTarget];
 						[menuItem setTag:key];
 

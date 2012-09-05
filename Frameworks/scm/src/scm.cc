@@ -5,6 +5,7 @@
 #include <cf/cf.h>
 #include <oak/oak.h>
 #include <text/format.h>
+#include <settings/settings.h>
 
 OAK_DEBUG_VAR(SCM);
 
@@ -88,30 +89,33 @@ namespace scm
 		ASSERTF(path::is_directory(_wc_path) || !path::exists(_wc_path) || _wc_path == NULL_STR, "Path: %s\n", _wc_path.c_str());
 	}
 
-	std::string info_t::scm_name () const   { return _driver->name(); }
-	std::string info_t::path () const       { return _wc_path; }
-	std::string info_t::branch () const     { return _driver->branch_name(_wc_path); }
+	std::string info_t::scm_name () const    { return _driver->name(); }
+	std::string info_t::path () const        { return _wc_path; }
+	std::string info_t::branch () const      { return _driver->branch_name(_wc_path); }
+	bool info_t::tracks_directories () const { return _driver->tracks_directories(); }
+
+	void info_t::setup ()
+	{
+		if(_did_setup)
+			return;
+
+		_file_status = _driver->status(_wc_path);
+		_watcher.reset(new scm::watcher_t(_wc_path, this));
+		_did_setup = true;
+	}
+
 
 	status::type info_t::status (std::string const& path)
 	{
 		D(DBF_SCM, bug("%s\n", path.c_str()););
-		if(_file_status.empty())
-			_file_status = _driver->status(_wc_path);
-
-		if(!_watcher)
-			_watcher.reset(new scm::watcher_t(_wc_path, this));
-
+		setup();
 		status_map_t::const_iterator res = _file_status.find(path);
 		return res != _file_status.end() ? res->second : status::none;
 	}
 
 	status_map_t info_t::files_with_status (int mask)
 	{
-		if(_file_status.empty())
-			_file_status = _driver->status(path());
-
-		if(!_watcher)
-			_watcher.reset(new scm::watcher_t(_wc_path, this));
+		setup();
 
 		status_map_t res;
 		iterate(status, _file_status)
@@ -144,7 +148,7 @@ namespace scm
 		background_status(_wc_path, _driver, _updated, _snapshot, &update_status);
 	}
 
-	void info_t::update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status)
+	void info_t::update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& newStatus)
 	{
 		if(!didUpdate)
 			return;
@@ -152,17 +156,38 @@ namespace scm
 		auto it = cache().find(path);
 		if(it != cache().end())
 		{
-			// TODO deleted paths
 			std::set<std::string> changedPaths;
-			iterate(pair, status)
+
+			auto const oldStatus = it->second->_file_status;
+			auto oldStatusIter = oldStatus.begin();
+			auto newStatusIter = newStatus.begin();
+
+			while(oldStatusIter != oldStatus.end() || newStatusIter != newStatus.end())
 			{
-				if(it->second->_file_status[pair->first] != pair->second)
-					changedPaths.insert(pair->first);
+				if(newStatusIter == newStatus.end() || oldStatusIter != oldStatus.end() && oldStatusIter->first < newStatusIter->first)
+				{
+					changedPaths.insert(oldStatusIter->first);
+					++oldStatusIter;
+					continue;
+				}
+
+				if(oldStatusIter == oldStatus.end() || newStatusIter != newStatus.end() && newStatusIter->first < oldStatusIter->first)
+				{
+					changedPaths.insert(newStatusIter->first);
+					++newStatusIter;
+					continue;
+				}
+
+				if(oldStatusIter->second != newStatusIter->second)
+					changedPaths.insert(newStatusIter->first);
+
+				++oldStatusIter;
+				++newStatusIter;
 			}
 
 			it->second->_updated     = oak::date_t::now();
 			it->second->_snapshot    = snapshot;
-			it->second->_file_status = status;
+			it->second->_file_status = newStatus;
 
 			it->second->_callbacks(&callback_t::status_changed, *it->second, changedPaths);
 		}
@@ -174,6 +199,9 @@ namespace scm
 
 	info_ptr info (std::string const& path)
 	{
+		if(!settings_for_path(path).get(kSettingsSCMStatusKey, true))
+			return info_ptr();
+
 		std::string wcPath;
 		if(driver_t const* driver = driver_for_path(path::parent(path), &wcPath))
 		{

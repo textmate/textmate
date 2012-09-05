@@ -41,29 +41,6 @@ static std::string find_executable (std::string const& name, std::string const& 
 
 namespace scm
 {
-	namespace status
-	{
-		std::string to_s (type status)
-		{
-			switch(status)
-			{
-				case none:         return "N";
-				case added:        return "A";
-				case versioned:    return "H";
-				case modified:     return "M";
-				case ignored:      return "I";
-				case deleted:      return "D";
-				case mixed:        return "X";
-				case unversioned:  return "U";
-				default:           return text::format("unknown (%d)", status);
-			}
-		}
-	}
-
-	// ============
-	// = driver_t =
-	// ============
-
 	driver_t::driver_t (std::string const& name, std::string const& wcRootFormatString, std::string const& requiredExecutable) : _name(name), _wc_root_format_string(wcRootFormatString), _required_executable(requiredExecutable), _resolved_executable(NULL_STR)
 	{
 	}

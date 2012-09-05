@@ -90,7 +90,6 @@ namespace path
 		ASSERTF(path::exists(src), "%s\n", src.c_str());
 		ASSERTF(!path::exists(dst), "%s\n", dst.c_str());
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
 		if(copyfile(src.c_str(), dst.c_str(), NULL, COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC) != 0)
 		{
 			D(DBF_IO_Failure, bug("copyfile(\"%s\", \"%s\"): %s\n", src.c_str(), dst.c_str(), strerror(errno)););
@@ -121,9 +120,6 @@ namespace path
 			}
 		}
 		return res;
-#else
-		return false;
-#endif
 	}
 
 	bool move (std::string const& src, std::string const& dst, bool overwrite)

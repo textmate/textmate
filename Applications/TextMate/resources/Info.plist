@@ -542,5 +542,9 @@
 			CFBundleTypeRole       = Editor;
 			LSItemContentTypes     = ( public.data );
 		},
+
+		{	CFBundleTypeRole       = "Editor";
+			LSItemContentTypes     = ( "public.directory", "com.apple.bundle", "com.apple.resolvable" );
+		},
 	);
 }

@@ -19,7 +19,7 @@ bool DidHandleODBEditorEvent (AppleEvent const* event);
 // optional paramter to kAEModifiedFile/kAEClosedFile
 #define keySenderToken             'Tokn'
 
-#pragma options align=mac68k
+#pragma pack(2)
 struct PBX_SelectionRange
 {
 	short unused1;		// 0 (not used)

@@ -39,7 +39,7 @@ namespace plist
 
 namespace boost // we place this in the boost namespace to support ADL
 {
-	PUBLIC std::string to_s (plist::any_t const& plist, int flags = plist::kStandard);
+	PUBLIC std::string to_s (plist::any_t const& plist, int flags = plist::kStandard, std::vector<std::string> const& keySortOrder = std::vector<std::string>());
 }
 
 #endif /* end of include guard: PLIST_H_34L7NUFO */

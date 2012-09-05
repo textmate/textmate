@@ -88,14 +88,14 @@ private:
 		socket_callback_t* parent;
 	};
 
-	typedef std::tr1::shared_ptr<helper_base_t> helper_ptr;
+	typedef std::shared_ptr<helper_base_t> helper_ptr;
 
 	helper_ptr helper;
 	CFSocketRef socket;
 	CFRunLoopSourceRef run_loop_source;
 };
 
-typedef std::tr1::shared_ptr<socket_callback_t> socket_callback_ptr;
+typedef std::shared_ptr<socket_callback_t> socket_callback_ptr;
 
 // ======================
 // = Return system info =
@@ -198,7 +198,7 @@ void setup_rmate_server (bool enabled, uint32_t ip, uint16_t port)
 {
 	static mate_server_t mate_server;
 
-	static std::tr1::shared_ptr<rmate_server_t> rmate_server;
+	static std::shared_ptr<rmate_server_t> rmate_server;
 	if(!enabled || !rmate_server || ip != rmate_server->ip() || port != rmate_server->port())
 	{
 		rmate_server.reset();
@@ -224,7 +224,7 @@ private:
 	std::string path;
 };
 
-typedef std::tr1::shared_ptr<temp_file_t> temp_file_ptr;
+typedef std::shared_ptr<temp_file_t> temp_file_ptr;
 
 struct record_t
 {
@@ -360,7 +360,7 @@ namespace // wrap in anonymous namespace to avoid clashing with other callbacks 
 		WATCH_LEAKS(reactivate_callback_t);
 
 		struct helper_t { helper_t () : open_documents(0) { } size_t open_documents; WATCH_LEAKS(reactivate_callback_t); };
-		typedef std::tr1::shared_ptr<helper_t> helper_ptr;
+		typedef std::shared_ptr<helper_t> helper_ptr;
 
 		reactivate_callback_t () : helper(helper_ptr(new helper_t))
 		{

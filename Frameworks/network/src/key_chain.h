@@ -35,7 +35,7 @@ struct PUBLIC key_chain_t
 		void cleanup () const;
 	};
 
-	typedef std::tr1::shared_ptr<key_t> key_ptr;
+	typedef std::shared_ptr<key_t> key_ptr;
 
 	void load (std::string const& path);
 	void save (std::string const& path) const;

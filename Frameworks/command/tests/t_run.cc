@@ -69,7 +69,7 @@ struct delegate_t : command::delegate_t
 	void done ()   { }
 };
 
-typedef std::tr1::shared_ptr<delegate_t> delegate_ptr;
+typedef std::shared_ptr<delegate_t> delegate_ptr;
 
 class run_tests : public CxxTest::TestSuite
 {

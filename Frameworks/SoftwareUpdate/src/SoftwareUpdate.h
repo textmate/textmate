@@ -11,7 +11,7 @@ PUBLIC extern NSString* const kSoftwareUpdateChannelRelease;
 PUBLIC extern NSString* const kSoftwareUpdateChannelBeta;
 PUBLIC extern NSString* const kSoftwareUpdateChannelNightly;
 
-@interface SoftwareUpdate : NSObject
+PUBLIC @interface SoftwareUpdate : NSObject
 {
 	NSDictionary* channels;
 	key_chain_t keyChain;

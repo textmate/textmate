@@ -1,7 +1,7 @@
 #import <bundles/bundles.h>
 #import <oak/debug.h>
 
-@interface BundleMenuDelegate : NSObject <NSMenuDelegate>
+PUBLIC @interface BundleMenuDelegate : NSObject <NSMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(BundleMenuDelegate);
 	bundles::item_ptr umbrellaItem;
