@@ -102,6 +102,13 @@ namespace parse
 	{
 		bundles::add_callback(&_bundles_callback);
 		_rule = parse_rule(_item->plist());
+
+		if(!_rule)
+		{
+			fprintf(stderr, "*** grammar missing for ‘%s’\n", _item->name().c_str());
+			_rule.reset(new rule_t);
+		}
+
 		_old_plist = _item->plist();
 	}
 
@@ -118,7 +125,7 @@ namespace parse
 
 	stack_ptr grammar_t::seed () const
 	{
-		return stack_ptr(new stack_t(_rule, _rule->scope_string));
+		return stack_ptr(new stack_t(_rule, _rule ? _rule->scope_string : ""));
 	}
 
 	void grammar_t::bundles_did_change ()
@@ -146,6 +153,9 @@ namespace parse
 
 	void grammar_t::resolve_includes (rule_ptr rule, std::vector<rule_ptr>& stack)
 	{
+		if(!rule)
+			return;
+
 		std::string const& inc = rule->include_string;
 		if(inc != NULL_STR && inc != "$base")
 		{
