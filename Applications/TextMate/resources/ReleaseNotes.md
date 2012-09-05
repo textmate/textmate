@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2012-09-05
+
+* Fix crash for when one of the `Bundles` folders (under `Library/Application Support`) was a symbolic link.
+* Fix crash related to trying to use a grammar that no-longer exists on disk, i.e. before the bundle index had a chance to catch up with disk changes.
+
 ## 2012-09-04
 
 * The underline drawn for misspelled words now use high-DPI artwork on retina macs.
