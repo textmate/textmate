@@ -405,7 +405,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		}
 
 		auto bgColor = theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background();
-		[[self enclosingScrollView] setBackgroundColor:[NSColor colorWithCGColor:bgColor]];
+		[[self enclosingScrollView] setBackgroundColor:[NSColor tmColorWithCGColor:bgColor]];
 		SetLionScrollerKnobStyle([self enclosingScrollView], cf::color_is_dark(bgColor) ? NSScrollerKnobStyleLight : NSScrollerKnobStyleDark);
 		[[self window] setOpaque:CGColorGetAlpha(bgColor) == 1];
 
@@ -1692,7 +1692,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(document)
 	{
 		auto bgColor = theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background();
-		[[self enclosingScrollView] setBackgroundColor:[NSColor colorWithCGColor:bgColor]];
+		[[self enclosingScrollView] setBackgroundColor:[NSColor tmColorWithCGColor:bgColor]];
 		SetLionScrollerKnobStyle([self enclosingScrollView], cf::color_is_dark(bgColor) ? NSScrollerKnobStyleLight : NSScrollerKnobStyleDark);
 		[[self window] setOpaque:CGColorGetAlpha(bgColor) == 1];
 	}

@@ -17,8 +17,10 @@
 	return nil;
 }
 
-+ (NSColor*)colorWithCGColor:(CGColorRef)aColor
++ (NSColor*)tmColorWithCGColor:(CGColorRef)aColor
 {
+	if([self respondsToSelector:@selector(colorWithCGColor:)])
+		return [self colorWithCGColor:aColor];
 	return [NSColor colorWithColorSpace:[[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] autorelease] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
 }
 @end

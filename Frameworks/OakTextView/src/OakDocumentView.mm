@@ -333,15 +333,15 @@ private:
 	{
 		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
-		self.gutterDividerColor = [NSColor colorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
+		self.gutterDividerColor = [NSColor tmColorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
 
-		gutterView.foregroundColor          = [NSColor colorWithCGColor:styles.gutterForeground()];
-		gutterView.backgroundColor          = [NSColor colorWithCGColor:styles.gutterBackground()];
-		gutterView.iconColor                = [NSColor colorWithCGColor:styles.gutterIcons()];
-		gutterView.selectionForegroundColor = [NSColor colorWithCGColor:styles.gutterSelectionForeground()];
-		gutterView.selectionBackgroundColor = [NSColor colorWithCGColor:styles.gutterSelectionBackground()];
-		gutterView.selectionIconColor       = [NSColor colorWithCGColor:styles.gutterSelectionIcons()];
-		gutterView.selectionBorderColor     = [NSColor colorWithCGColor:styles.gutterSelectionBorder()];
+		gutterView.foregroundColor          = [NSColor tmColorWithCGColor:styles.gutterForeground()];
+		gutterView.backgroundColor          = [NSColor tmColorWithCGColor:styles.gutterBackground()];
+		gutterView.iconColor                = [NSColor tmColorWithCGColor:styles.gutterIcons()];
+		gutterView.selectionForegroundColor = [NSColor tmColorWithCGColor:styles.gutterSelectionForeground()];
+		gutterView.selectionBackgroundColor = [NSColor tmColorWithCGColor:styles.gutterSelectionBackground()];
+		gutterView.selectionIconColor       = [NSColor tmColorWithCGColor:styles.gutterSelectionIcons()];
+		gutterView.selectionBorderColor     = [NSColor tmColorWithCGColor:styles.gutterSelectionBorder()];
 
 		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 

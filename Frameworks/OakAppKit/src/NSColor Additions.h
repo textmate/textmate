@@ -1,6 +1,6 @@
 @interface NSColor (Creation)
 + (NSColor*)colorWithString:(NSString*)aString;
-+ (NSColor*)colorWithCGColor:(CGColorRef)aColor;
++ (NSColor*)tmColorWithCGColor:(CGColorRef)aColor;
 @end
 
 @interface NSColor (OakColor)
