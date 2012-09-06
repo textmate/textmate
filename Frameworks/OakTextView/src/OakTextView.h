@@ -105,7 +105,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 - (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
 
 - (NSPoint)positionForWindowUnderCaret;
-- (scope::context_t const&)scope;
+- (scope::context_t const&)scopeContext;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;
 
 - (IBAction)toggleMacroRecording:(id)sender;

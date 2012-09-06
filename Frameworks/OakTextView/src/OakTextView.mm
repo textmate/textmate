@@ -1839,7 +1839,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 }
 
-- (scope::context_t const&)scope
+- (scope::context_t const&)scopeContext
 {
 	static scope::context_t res;
 	return res = editor->scope();
