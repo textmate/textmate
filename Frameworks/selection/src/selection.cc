@@ -1083,7 +1083,7 @@ namespace ng
 		if(searchFor == NULL_STR || searchFor == "")
 			return res;
 
-		if(selection.size() == 1 && (options & (find::regular_expression|find::wrap_around|find::all_matches)) == find::regular_expression)
+		if(selection.size() == 1 && (options & (find::regular_expression|find::wrap_around|find::all_matches|find::extend_selection)) == find::regular_expression)
 		{
 			size_t first = (options & find::backwards) ? selection.last().min().index : selection.last().max().index;
 			size_t last  = (options & find::backwards) ?                            0 :                buffer.size();
@@ -1093,6 +1093,31 @@ namespace ng
 		auto tmp = find_all(buffer, searchFor, options, searchRanges);
 		if(options & find::all_matches)
 			return tmp;
+
+		if(options & find::extend_selection)
+		{
+			ng::index_t anchor(options & find::backwards ? buffer.size() : 0);
+			iterate(range, selection)
+			{
+				anchor = options & find::backwards ? std::min(range->min(), anchor) : std::max(range->max(), anchor);
+				res.insert(std::make_pair(*range, std::map<std::string, std::string>()));
+			}
+
+			if(options & find::backwards)
+			{
+				auto it = tmp.lower_bound(anchor);
+				if(it != tmp.begin())
+					res.insert(*--it);
+			}
+			else
+			{
+				auto it = tmp.upper_bound(anchor);
+				if(it != tmp.end())
+					res.insert(*it);
+			}
+
+			return res;
+		}
 
 		citerate(range, dissect_columnar(buffer, selection))
 		{

@@ -21,6 +21,24 @@ public:
 		TS_ASSERT_EQUALS(matches("this (is (a test)).", "is", find::backwards, ng::ranges_t(4)), "1:3-1:5");
 	}
 
+	void test_find_forward_extend ()
+	{
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "foo", find::extend_selection, ng::range_t(4, 7)), "1:5-1:8&1:9-1:12");
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "foo", find::extend_selection, ng::ranges_t{ ng::range_t(4, 7), ng::range_t(8, 11) }), "1:5-1:8&1:9-1:12&1:13-1:16");
+
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "\\b", find::extend_selection|find::regular_expression, ng::range_t(4)), "1:5&1:8");
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "\\b", find::extend_selection|find::regular_expression, ng::ranges_t{ ng::range_t(4), ng::range_t(7) }), "1:5&1:8&1:9");
+	}
+
+	void test_find_backward_extend ()
+	{
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "foo", find::extend_selection|find::backwards, ng::range_t(4, 7)), "1-1:4&1:5-1:8");
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "foo", find::extend_selection|find::backwards, ng::ranges_t{ ng::range_t(4, 7), ng::range_t(8, 11) }), "1-1:4&1:5-1:8&1:9-1:12");
+
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "\\b", find::extend_selection|find::backwards|find::regular_expression, ng::range_t(4)), "1:4&1:5");
+		TS_ASSERT_EQUALS(matches("foo foo foo foo", "\\b", find::extend_selection|find::backwards|find::regular_expression, ng::ranges_t{ ng::range_t(3), ng::range_t(4) }), "1&1:4&1:5");
+	}
+
 	void test_tricky_regexp ()
 	{
 		TS_ASSERT_EQUALS(matches("abcdef", "\\h+", find::regular_expression,                 ng::ranges_t(0)),   "1-1:7");

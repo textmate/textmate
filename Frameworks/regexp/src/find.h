@@ -17,6 +17,7 @@ namespace find
 		not_eol            = (1 << 6),
 		wrap_around        = (1 << 7),
 		all_matches        = (1 << 8),
+		extend_selection   = (1 << 9),
 	};
 
 	PUBLIC options_t operator| (options_t lhs, options_t rhs);
