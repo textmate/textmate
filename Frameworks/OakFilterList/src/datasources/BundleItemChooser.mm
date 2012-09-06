@@ -430,7 +430,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 			if(!searchAllScopes && items_filtered_by_scope.find(all_items[index]->uuid()) == items_filtered_by_scope.end())
 				continue;
 
-			if(!filterString.empty() && all_items[index]->value_for_field(bundles::kFieldKeyEquivalent) != originalFilterString)
+			if(!filterString.empty() && key_equivalent(all_items[index]) != originalFilterString)
 				continue;
 
 			BundleItemChooserItem* item = [[BundleItemChooserItem new] autorelease];
@@ -501,7 +501,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 - (void)willDisplayCell:(NSTextFieldCell*)aCell forItem:(BundleItemChooserItem*)anItem
 {
 	NSUInteger index = [anItem index];
-	[(OakBundleItemCell*)aCell setKeyEquivalent:[NSString stringWithCxxString:all_items[index]->value_for_field(bundles::kFieldKeyEquivalent)]];
+	[(OakBundleItemCell*)aCell setKeyEquivalent:[NSString stringWithCxxString:key_equivalent(all_items[index])]];
 
 	std::string const& tabTrigger = all_items[index]->value_for_field(bundles::kFieldTabTrigger);
 	if(tabTrigger != NULL_STR)

@@ -77,7 +77,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 	iterate(pair, ordered)
 	{
 		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeThemeUUIDFrom:) keyEquivalent:@""];
-		[menuItem setKeyEquivalentCxxString:pair->second->value_for_field(bundles::kFieldKeyEquivalent)];
+		[menuItem setKeyEquivalentCxxString:key_equivalent(pair->second)];
 		[menuItem setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
 	}
 

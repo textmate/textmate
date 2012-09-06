@@ -291,4 +291,9 @@ namespace bundles
 		return format_bundle_item_title(item->full_name(), hasSelection);
 	}
 
+	std::string key_equivalent (item_ptr const& item)
+	{
+		return item->value_for_field(kFieldKeyEquivalent);
+	}
+
 } /* bundles */

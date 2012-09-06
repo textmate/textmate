@@ -65,7 +65,7 @@ OAK_DEBUG_VAR(BundleMenu);
 			default:
 			{
 				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(doBundleItem:) keyEquivalent:@""];
-				[menuItem setKeyEquivalentCxxString:(*item)->value_for_field(bundles::kFieldKeyEquivalent)];
+				[menuItem setKeyEquivalentCxxString:key_equivalent(*item)];
 				[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
 			}

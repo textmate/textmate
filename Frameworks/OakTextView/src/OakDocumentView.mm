@@ -527,7 +527,7 @@ private:
 			continue;
 
 		NSMenuItem* item = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeGrammarUUIDFrom:) keyEquivalent:@""];
-		[item setKeyEquivalentCxxString:pair->second->value_for_field(bundles::kFieldKeyEquivalent)];
+		[item setKeyEquivalentCxxString:key_equivalent(pair->second)];
 		[item setTarget:self];
 		[item setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
 
