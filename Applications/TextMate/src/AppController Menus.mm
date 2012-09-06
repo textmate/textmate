@@ -12,7 +12,7 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
-#import <BundleMenu/BundleMenuDelegate.h>
+#import <BundleMenu/BundleMenu.h>
 
 OAK_DEBUG_VAR(AppController_Menus);
 

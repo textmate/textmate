@@ -1,4 +1,4 @@
-#import "BundleMenuDelegate.h"
+#import "BundleMenu.h"
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/NSString Additions.h>

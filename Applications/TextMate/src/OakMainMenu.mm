@@ -1,6 +1,7 @@
 #include <ns/ns.h>
 #include <bundles/bundles.h>
 #include <OakFoundation/NSString Additions.h>
+#include <BundleMenu/BundleMenu.h>
 
 /*
 
@@ -58,7 +59,7 @@ static CGPoint MenuPosition ()
 	auto const bundleItems = bundles::query(bundles::kFieldKeyEquivalent, keyString, "", bundles::kItemTypeCommand|bundles::kItemTypeGrammar|bundles::kItemTypeSnippet);
 	if(!bundleItems.empty())
 	{
-		if(bundles::item_ptr item = bundles::show_menu_for_items(bundleItems, MenuPosition()))
+		if(bundles::item_ptr item = OakShowMenuForBundleItems(bundleItems, MenuPosition()))
 			[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:item->uuid()]];
 		return YES;
 	}

@@ -1,5 +1,5 @@
-SOURCES      = src/**/*.{cc,mm}
+SOURCES      = src/**/*.cc
 TEST_SOURCES = tests/*.cc
-LINK        += text cf io plist OakSystem OakFoundation regexp scope
+LINK        += text cf io plist OakSystem regexp scope
 FRAMEWORKS   = CoreFoundation
 EXPORT       = src/*.h src/fsevents/fs_tree.h

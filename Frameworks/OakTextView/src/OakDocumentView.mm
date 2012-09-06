@@ -15,7 +15,7 @@
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/NSMenuItem Additions.h>
-#import <BundleMenu/BundleMenuDelegate.h>
+#import <BundleMenu/BundleMenu.h>
 
 OAK_DEBUG_VAR(OakDocumentView);
 
