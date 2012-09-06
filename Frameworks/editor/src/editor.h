@@ -69,6 +69,8 @@ namespace ng
 
 		kFindNext,
 		kFindPrevious,
+		kFindNextAndModifySelection,
+		kFindPreviousAndModifySelection,
 		kFindAll,
 		kFindAllInSelection,
 

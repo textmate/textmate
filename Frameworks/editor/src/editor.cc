@@ -818,13 +818,17 @@ namespace ng
 
 			case kFindNext:
 			case kFindPrevious:
+			case kFindNextAndModifySelection:
+			case kFindPreviousAndModifySelection:
 			case kFindAll:
 			case kFindAllInSelection:
 			{
 				if(clipboard_t::entry_ptr findEntry = find_clipboard()->current())
 				{
 					find::options_t options = convert(findEntry->options());
-					if(action == kFindPrevious)
+					if(action == kFindNextAndModifySelection || action == kFindPreviousAndModifySelection)
+						options = options | find::extend_selection;
+					if(action == kFindPrevious || action == kFindPreviousAndModifySelection)
 						options = options | find::backwards;
 					else if(action == kFindAll || action == kFindAllInSelection)
 						options = options | find::all_matches;

@@ -74,6 +74,8 @@ namespace ng
 
 			{ "findNext:",                                          kFindNext                                     },
 			{ "findPrevious:",                                      kFindPrevious                                 },
+			{ "findNextAndModifySelection:",                        kFindNextAndModifySelection                   },
+			{ "findPreviousAndModifySelection:",                    kFindPreviousAndModifySelection               },
 			{ "findAll:",                                           kFindAll                                      },
 			{ "findAllInSelection:",                                kFindAllInSelection                           },
 

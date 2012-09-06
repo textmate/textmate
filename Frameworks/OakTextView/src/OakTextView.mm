@@ -1552,6 +1552,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 }
 
+- (IBAction)findNextAndModifySelection:(id)sender     { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::extend_selection]]; }
+- (IBAction)findPreviousAndModifySelection:(id)sender { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::extend_selection | find::backwards]]; }
+
 - (IBAction)findAll:(id)sender               { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind            options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
 - (IBAction)findAllInSelection:(id)sender    { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFindInSelection options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
 
