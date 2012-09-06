@@ -1,4 +1,4 @@
-#import "BundleMenu.h"
+#import "Private.h"
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -8,6 +8,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 @interface NSObject (HasSelection)
 - (BOOL)hasSelection;
+- (scope::context_t const&)scopeContext;
 @end
 
 @implementation BundleMenuDelegate
@@ -42,6 +43,10 @@ OAK_DEBUG_VAR(BundleMenu);
 	if(id textView = [NSApp targetForAction:@selector(hasSelection)])
 		hasSelection = [textView hasSelection];
 
+	scope::context_t scope = "";
+	if(id textView = [NSApp targetForAction:@selector(scopeContext)])
+		scope = [textView scopeContext];
+
 	citerate(item, umbrellaItem->menu())
 	{
 		switch((*item)->kind())
@@ -59,6 +64,14 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			case bundles::kItemTypeMenuItemSeparator:
 				[aMenu addItem:[NSMenuItem separatorItem]];
+			break;
+
+			case bundles::kItemTypeProxy:
+			{
+				std::string actionClass;
+				if(plist::get_key_path((*item)->plist(), "content", actionClass))
+					OakAddBundlesToMenu(bundles::query(bundles::kFieldSemanticClass, actionClass, scope), hasSelection, true, aMenu, @selector(doBundleItem:));
+			}
 			break;
 
 			default:
