@@ -1,38 +1,39 @@
-#import "BundleMenu.h"
+#import "Private.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/NSMenuItem Additions.h>
 #import <text/ctype.h>
 #import <cf/cf.h>
+#import <ns/ns.h>
 #import <oak/oak.h>
 
 @interface BundlePopupMenuTarget : NSObject
 {
-	NSInteger selectedIndex;
+	NSString* selectedItemUUID;
 }
-@property NSInteger selectedIndex;
+@property (nonatomic, retain) NSString* selectedItemUUID;
 @end
 
 @implementation BundlePopupMenuTarget
-@synthesize selectedIndex;
-- (id)init
+@synthesize selectedItemUUID;
+- (void)dealloc
 {
-	if((self = [super init]))
-		self.selectedIndex = NSNotFound;
-	return self;
+	self.selectedItemUUID = nil;
+	[super dealloc];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
-	return [menuItem action] == @selector(takeSelectedItemIndexFrom:);
+	return [menuItem action] == @selector(takeItemUUIDFrom:);
 }
 
-- (void)takeSelectedItemIndexFrom:(id)sender
+- (void)takeItemUUIDFrom:(id)sender
 {
 	ASSERT([sender isKindOfClass:[NSMenuItem class]]);
-	self.selectedIndex = [(NSMenuItem*)sender tag];
+	self.selectedItemUUID = [(NSMenuItem*)sender representedObject];
 }
 @end
 
-static std::vector<bundles::bundles::item_ptr> filtered_menu (bundles::item_ptr menuItem, std::set<bundles::item_ptr>* includedItems)
+static std::vector<bundles::item_ptr> filtered_menu (bundles::item_ptr menuItem, std::set<bundles::item_ptr>* includedItems)
 {
 	std::vector<bundles::item_ptr> res;
 	citerate(item, menuItem->menu())
@@ -57,20 +58,8 @@ static std::vector<bundles::bundles::item_ptr> filtered_menu (bundles::item_ptr 
 	return res;
 }
 
-bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> const& items, CGPoint const& pos, bool hasSelection)
+void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasSelection, bool setKeys, NSMenu* menu, SEL menuAction, id menuTarget)
 {
-	if(items.empty())
-		return bundles::item_ptr();
-	else if(items.size() == 1)
-		return items.front();
-
-	NSMenu* menu = [[[NSMenu alloc] init] autorelease];
-	[menu setFont:[NSFont menuFontOfSize:[NSFont smallSystemFontSize]]];
-	BundlePopupMenuTarget* menuTarget = [[[BundlePopupMenuTarget alloc] init] autorelease];
-	
-	int key = 0;
-	std::vector<bundles::item_ptr> res;
-
 	bool onlyGrammars = true;
 	iterate(item, items)
 		onlyGrammars = onlyGrammars && (*item)->kind() == bundles::kItemTypeGrammar;
@@ -83,15 +72,14 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 
 		iterate(pair, ordering)
 		{
-			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeSelectedItemIndexFrom:) keyEquivalent:@""];
+			NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:menuAction keyEquivalent:@""];
 			[menuItem setTarget:menuTarget];
-			[menuItem setTag:key];
-			
-			res.push_back(pair->second);
-			if(++key <= 10)
+			[menuItem setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
+
+			if(setKeys)
 			{
-				[menuItem setKeyEquivalent:[NSString stringWithFormat:@"%d", key % 10]];
-				[menuItem setKeyEquivalentModifierMask:0];
+				[menuItem setKeyEquivalentCxxString:key_equivalent(pair->second)];
+				[menuItem setTabTriggerCxxString:pair->second->value_for_field(bundles::kFieldTabTrigger)];
 			}
 		}
 	}
@@ -141,16 +129,16 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 						[menu addItem:[NSMenuItem separatorItem]];
 					pendingSeparator = false;
 
-					NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(takeSelectedItemIndexFrom:) keyEquivalent:@""];
+					NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:menuAction keyEquivalent:@""];
 					[menuItem setTarget:menuTarget];
-					[menuItem setTag:key];
+					[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
 
-					res.push_back(*item);
-					if(++key <= 10)
+					if(setKeys)
 					{
-						[menuItem setKeyEquivalent:[NSString stringWithFormat:@"%d", key % 10]];
-						[menuItem setKeyEquivalentModifierMask:0];
+						[menuItem setKeyEquivalentCxxString:key_equivalent(*item)];
+						[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 					}
+
 					if(showBundleHeadings)
 						[menuItem setIndentationLevel:1];
 
@@ -159,10 +147,34 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 			}
 		}
 	}
+}
 
-	bundles::item_ptr selectedItem;
-	if([menu popUpMenuPositioningItem:nil atLocation:NSPointFromCGPoint(pos) inView:nil] && menuTarget.selectedIndex != NSNotFound)
-		selectedItem = res[menuTarget.selectedIndex];
+bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> const& items, CGPoint const& pos, bool hasSelection)
+{
+	if(items.empty())
+		return bundles::item_ptr();
+	else if(items.size() == 1)
+		return items.front();
 
-	return selectedItem;
+	BundlePopupMenuTarget* menuTarget = [[[BundlePopupMenuTarget alloc] init] autorelease];
+	NSMenu* menu = [[[NSMenu alloc] init] autorelease];
+	[menu setFont:[NSFont menuFontOfSize:[NSFont smallSystemFontSize]]];
+	OakAddBundlesToMenu(items, hasSelection, false, menu, @selector(takeItemUUIDFrom:), menuTarget);
+
+	int key = 1;
+	for(NSMenuItem* menuItem in [menu itemArray])
+	{
+		if(menuItem.action)
+		{
+			[menuItem setKeyEquivalent:[NSString stringWithFormat:@"%d", key % 10]];
+			[menuItem setKeyEquivalentModifierMask:0];
+			if(++key == 10)
+				break;
+		}
+	}
+
+	if([menu popUpMenuPositioningItem:nil atLocation:NSPointFromCGPoint(pos) inView:nil])
+		return bundles::lookup(to_s(menuTarget.selectedItemUUID));
+
+	return bundles::item_ptr();
 }
