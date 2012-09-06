@@ -159,7 +159,10 @@ struct refresh_helper_t
 				}
 
 				if(_revision != _document->buffer().revision() || _selection != _editor->ranges())
+				{
 					[_self updateMarkedRanges];
+					[_self updateSelection];
+				}
 
 				auto damagedRects = layout->end_refresh_cycle(merge(_editor->ranges(), [_self markedRanges]), [_self visibleRect], [_self liveSearchRanges]);
 
@@ -186,7 +189,6 @@ struct refresh_helper_t
 					if(_revision != _document->buffer().revision()) // FIXME document_t needs to skip work in set_revision if nothing changed.
 						_document->set_revision(_document->buffer().revision());
 
-					[_self updateSelection];
 					[_self ensureSelectionIsInVisibleArea:nil];
 					[_self resetBlinkCaretTimer];
 					[_self updateChoiceMenu:nil];
