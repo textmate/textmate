@@ -48,6 +48,10 @@ void* signal_handler_thread (void* userdata)
 
 int main (int argc, char const* argv[])
 {
+	std::string const logFile = path::join(path::home(), "Library/Logs/TextMate.log");
+	FILE* fp = freopen(logFile.c_str(), "w+", stderr);
+	setlinebuf(fp);
+
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	oak::application_t::set_support(path::join(path::home(), "Library/Application Support/TextMate"));
