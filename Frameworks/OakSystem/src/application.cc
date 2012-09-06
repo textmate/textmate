@@ -33,6 +33,16 @@ namespace oak
 		_app_path      = _full_app_path;
 		_pid_path      = support(((CFBundleGetMainBundle() && CFBundleGetIdentifier(CFBundleGetMainBundle())) ? cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle())) : _app_name) + ".pid");
 
+		if(char const* logPath = getenv("LOG_PATH"))
+		{
+			if(path::is_absolute(logPath) && path::make_dir(logPath))
+			{
+				std::string const logFile = path::join(logPath, _app_name + ".log");
+				if(FILE* fp = freopen(logFile.c_str(), "w+", stderr))
+					setlinebuf(fp);
+			}
+		}
+
 		std::string const appBinary = path::join("Contents/MacOS", _app_name);
 		if(_app_path.size() > appBinary.size() && _app_path.find(appBinary) == _app_path.size() - appBinary.size())
 			_app_path.erase(_app_path.end() - appBinary.size(), _app_path.end());
