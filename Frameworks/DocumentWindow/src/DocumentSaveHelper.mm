@@ -219,7 +219,7 @@ namespace
 	D(DBF_DocumentController_SaveHelper, bug("%s\n", BSTR(returnCode == NSAlertDefaultReturn)););
 	file::save_context_ptr ctxt = context;
 	[self setContext:file::save_context_ptr()];
-	if(returnCode == NSAlertDefaultReturn)
+	if(returnCode == NSAlertFirstButtonReturn)
 			ctxt->set_make_writable(true);
 	else	userAbort = YES;
 	[alert release];
@@ -230,7 +230,7 @@ namespace
 	D(DBF_DocumentController_SaveHelper, bug("\n"););
 	file::save_context_ptr ctxt = context;
 	[self setContext:file::save_context_ptr()];
-	userAbort = returnCode != NSAlertDefaultReturn;
+	userAbort = returnCode != NSAlertFirstButtonReturn;
 	if(!userAbort)
 	{
 		OakEncodingPopUpButton* popUp = (OakEncodingPopUpButton*)[alert accessoryView];
