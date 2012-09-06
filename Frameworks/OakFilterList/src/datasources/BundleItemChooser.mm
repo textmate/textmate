@@ -311,7 +311,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 	else if(searchType == search::themes)
 		kindMask = bundles::kItemTypeTheme;
 
-	std::multimap<std::string, bundles::item_ptr, text::less_t> sorted;
+	std::map<std::string, bundles::item_ptr, text::less_t> sorted;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope, kindMask, oak::uuid_t(), false))
 		sorted.insert(std::make_pair(full_name_with_selection(*item, hasSelection), *item));
 
