@@ -293,7 +293,28 @@ namespace bundles
 
 	std::string key_equivalent (item_ptr const& item)
 	{
-		return item->value_for_field(kFieldKeyEquivalent);
+		std::string const res = item->value_for_field(kFieldKeyEquivalent);
+		if(res != NULL_STR || item->kind() == kItemTypeProxy)
+			return res;
+
+		std::string const sClass = item->value_for_field(kFieldSemanticClass);
+		if(sClass == NULL_STR)
+			return res;
+
+		iterate(proxyItem, AllItems)
+		{
+			if((*proxyItem)->kind() != kItemTypeProxy)
+				continue;
+
+			std::string actionClass;
+			if(plist::get_key_path((*proxyItem)->plist(), "content", actionClass))
+			{
+				if(sClass.find(actionClass) == 0)
+					return key_equivalent(*proxyItem);
+			}
+		}
+
+		return res;
 	}
 
 } /* bundles */
