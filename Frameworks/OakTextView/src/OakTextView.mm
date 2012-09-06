@@ -1391,15 +1391,30 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 				}
 			}
 
-			[aFindServer didFind:res.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined];
 			if(isCounting)
-				break;
-
-			[self recordSelector:(options & find::all_matches) ? (aFindServer.findOperation == kFindOperationFind ? @selector(findAll:) : @selector(findAllInSelection:)) : ((options & find::backwards) ? @selector(findPrevious:) : @selector(findNext:)) withArgument:nil];
-			if(!res.empty())
 			{
-				editor->set_selections(res);
-				[self highlightRanges:res];
+				[aFindServer didFind:res.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined];
+			}
+			else
+			{
+				[self recordSelector:(options & find::all_matches) ? (aFindServer.findOperation == kFindOperationFind ? @selector(findAll:) : @selector(findAllInSelection:)) : ((options & find::backwards) ? @selector(findPrevious:) : @selector(findNext:)) withArgument:nil];
+
+				std::set<ng::range_t> alreadySelected;
+				citerate(range, editor->ranges())
+					alreadySelected.insert(*range);
+
+				ng::ranges_t newSelection;
+				iterate(range, res)
+				{
+					if(alreadySelected.find(range->sorted()) == alreadySelected.end())
+						newSelection.push_back(range->sorted());
+				}
+
+				if(!res.empty())
+					editor->set_selections(res);
+
+				[self highlightRanges:newSelection];
+				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined];
 			}
 		}
 		break;
