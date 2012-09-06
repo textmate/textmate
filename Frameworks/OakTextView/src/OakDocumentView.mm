@@ -593,7 +593,6 @@ private:
 		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
 		menuItem.submenu = [[NSMenu new] autorelease];
 		menuItem.submenu.delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:pair->second] autorelease];
-		menuItem.submenu.autoenablesItems = NO;
 
 		if(selectedGrammar)
 			[menuItem setState:NSOnState];

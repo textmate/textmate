@@ -51,7 +51,6 @@ OAK_DEBUG_VAR(BundleMenu);
 				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:NULL keyEquivalent:@""];
 
 				menuItem.submenu = [[NSMenu new] autorelease];
-				menuItem.submenu.autoenablesItems = NO;
 				BundleMenuDelegate* delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:*item] autorelease];
 				menuItem.submenu.delegate = delegate;
 				[subdelegates addObject:delegate];
