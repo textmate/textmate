@@ -106,7 +106,7 @@ namespace ng
 
 	static range_t cap (buffer_t const& buf, text::range_t const& range)
 	{
-		return range_t(cap(buf, range.from), cap(buf, range.to), range.columnar);
+		return range_t(cap(buf, range.from), cap(buf, range.to), range.columnar, false, true);
 	}
 
 	ranges_t convert (buffer_t const& buf, text::selection_t const& sel)
