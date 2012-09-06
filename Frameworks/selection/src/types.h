@@ -61,6 +61,7 @@ namespace ng
 		ranges_t () { }
 		ranges_t (index_t const& first) : ranges(1, range_t(first, first)) { }
 		ranges_t (range_t const& range) : ranges(1, range) { }
+		ranges_t (std::initializer_list<range_t> const& list) : ranges(list) { }
 
 		bool operator== (ranges_t const& rhs) const { return ranges == rhs.ranges; }
 		bool operator!= (ranges_t const& rhs) const { return ranges != rhs.ranges; }
