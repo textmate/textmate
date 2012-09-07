@@ -68,9 +68,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			case bundles::kItemTypeProxy:
 			{
-				std::string actionClass;
-				if(plist::get_key_path((*item)->plist(), "content", actionClass))
-					OakAddBundlesToMenu(bundles::query(bundles::kFieldSemanticClass, actionClass, scope), hasSelection, true, aMenu, @selector(doBundleItem:));
+				OakAddBundlesToMenu(bundles::items_for_proxy(*item, scope), hasSelection, true, aMenu, @selector(doBundleItem:));
 			}
 			break;
 

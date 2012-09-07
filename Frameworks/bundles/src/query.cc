@@ -241,6 +241,14 @@ namespace bundles
 		return res;
 	}
 
+	std::vector<item_ptr> items_for_proxy (item_ptr proxyItem, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool filter, bool includeDisabledItems)
+	{
+		std::string actionClass;
+		if(plist::get_key_path(proxyItem->plist(), "content", actionClass))
+			return query(kFieldSemanticClass, actionClass, scope, kind, bundle, filter, includeDisabledItems);
+		return std::vector<item_ptr>();
+	}
+
 	item_ptr lookup (oak::uuid_t const& uuid)
 	{
 		iterate(item, AllItems)
