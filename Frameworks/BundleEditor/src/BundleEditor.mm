@@ -50,8 +50,8 @@ namespace
 		{ bundles::kItemTypeSettings,     "settings",    "source.plist.textmate.settings", "tmPreferences",  "settings",       nil,                     @"Settings"     },
 		{ bundles::kItemTypeGrammar,      NULL_STR,      "source.plist.textmate.grammar",  "tmLanguage",     "grammar",        @"GrammarProperties",    @"Grammar"      },
 		{ bundles::kItemTypeProxy,        "content",     "text.plain",                     "tmProxy",        "proxy",          nil,                     @"Proxy"        },
-		{ bundles::kItemTypeTheme,        "settings",    "meta.plist",                     "tmTheme",        "theme",          @"ThemeProperties",      @"Theme"        },
-		{ bundles::kItemTypeMacro,        "commands",    "meta.plist",                     "tmMacro",        "macro",          @"MacroProperties",      @"Macro"        },
+		{ bundles::kItemTypeTheme,        NULL_STR,      "source.plist",                   "tmTheme",        "theme",          @"ThemeProperties",      @"Theme"        },
+		{ bundles::kItemTypeMacro,        "commands",    "source.plist",                   "tmMacro",        "macro",          @"MacroProperties",      @"Macro"        },
 	};
 
 	item_info_t const& info_for (bundles::kind_t kind)
@@ -390,13 +390,18 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(info.plist_key == NULL_STR)
 	{
 		plist::any_t any = plist::parse_ascii(content);
-		if(plist::dictionary_t const* grammarPlist = boost::get<plist::dictionary_t>(&any))
+		if(plist::dictionary_t const* plistSubset = boost::get<plist::dictionary_t>(&any))
 		{
-			static std::string const keys[] = { "comment", "patterns", "repository", "injections" };
+			std::vector<std::string> keys;
+			if(info.kind == bundles::kItemTypeGrammar)
+				keys = { "comment", "patterns", "repository", "injections" };
+			else if(info.kind == bundles::kItemTypeTheme)
+				keys = { "gutterSettings", "settings" };
+
 			iterate(key, keys)
 			{
-				if(grammarPlist->find(*key) != grammarPlist->end())
-						plist[*key] = grammarPlist->find(*key)->second;
+				if(plistSubset->find(*key) != plistSubset->end())
+						plist[*key] = plistSubset->find(*key)->second;
 				else	plist.erase(*key);
 			}
 		}
@@ -623,14 +628,19 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	plist::dictionary_t const& plist = it != changes.end() ? it->second : bundleItem->plist();
 	if(info.plist_key == NULL_STR)
 	{
-		plist::dictionary_t grammarPlist;
-		static std::string const keys[] = { "comment", "patterns", "repository", "injections" };
+		std::vector<std::string> keys;
+		if(info.kind == bundles::kItemTypeGrammar)
+			keys = { "comment", "patterns", "repository", "injections" };
+		else if(info.kind == bundles::kItemTypeTheme)
+			keys = { "gutterSettings", "settings" };
+
+		plist::dictionary_t plistSubset;
 		iterate(key, keys)
 		{
 			if(plist.find(*key) != plist.end())
-				grammarPlist[*key] = plist.find(*key)->second;
+				plistSubset[*key] = plist.find(*key)->second;
 		}
-		bundleItemContent = document::from_content(to_s(grammarPlist, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
+		bundleItemContent = document::from_content(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
 	}
 	else if(oak::contains(beginof(PlistItemKinds), endof(PlistItemKinds), info.kind))
 	{
