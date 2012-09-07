@@ -82,15 +82,15 @@ static std::string file_type_from_bytes (io::bytes_ptr const& bytes)
 static std::string find_file_type (std::string const& path, io::bytes_ptr const& bytes, std::string const& virtualPath = NULL_STR)
 {
 	// FIXME we need to use “current” folder when getting (fileType) settings
-	std::string const effectivePath  = virtualPath != NULL_STR ? virtualPath : path;
-	std::string const settingsPath   = virtualPath != NULL_STR ? virtualPath.substr(1) : path;
-	std::string const pathAttributes = file::path_attributes(effectivePath);
+	std::string const effectivePath     = virtualPath != NULL_STR ? virtualPath : path;
+	std::string const settingsDirectory = path == NULL_STR && virtualPath != NULL_STR ? path::home() : path::parent(path);
+	std::string const pathAttributes    = file::path_attributes(effectivePath);
 
 	std::string res = NULL_STR;
 
 	// check if user has an explicit binding for this path (e.g. *.md → Markdown)
 	if(res == NULL_STR && effectivePath != NULL_STR)
-		res = settings_for_path(settingsPath, pathAttributes).get(kSettingsFileTypeKey, NULL_STR);
+		res = settings_for_path(effectivePath, pathAttributes, settingsDirectory).get(kSettingsFileTypeKey, NULL_STR);
 
 	// check if a grammar recognize the content (e.g. #!/usr/bin/ruby → Ruby)
 	if(res == NULL_STR && bytes)
@@ -102,11 +102,11 @@ static std::string find_file_type (std::string const& path, io::bytes_ptr const&
 
 	// check if there is a setting for untitled files (pathAttributes include ‘attr.untitled’)
 	if(res == NULL_STR && effectivePath == NULL_STR)
-		res = settings_for_path(settingsPath, pathAttributes).get(kSettingsFileTypeKey, NULL_STR);
+		res = settings_for_path(effectivePath, pathAttributes, settingsDirectory).get(kSettingsFileTypeKey, NULL_STR);
 
 	// check if user has a fallback for unrecognized files (to override the “What is the file type of XXX?” prompt)
 	if(res == NULL_STR && effectivePath != NULL_STR)
-		res = settings_for_path(effectivePath, "attr.file.unknown-type " + pathAttributes).get(kSettingsFileTypeKey, NULL_STR);
+		res = settings_for_path(effectivePath, "attr.file.unknown-type " + pathAttributes, settingsDirectory).get(kSettingsFileTypeKey, NULL_STR);
 
 	return res;
 }
