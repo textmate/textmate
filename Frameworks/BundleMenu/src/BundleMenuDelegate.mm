@@ -68,7 +68,15 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			case bundles::kItemTypeProxy:
 			{
-				OakAddBundlesToMenu(bundles::items_for_proxy(*item, scope), hasSelection, true, aMenu, @selector(doBundleItem:));
+				auto const items = bundles::items_for_proxy(*item, scope);
+				OakAddBundlesToMenu(items, hasSelection, true, aMenu, @selector(doBundleItem:));
+
+				if(items.empty())
+				{
+					NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(nop:) keyEquivalent:@""];
+					[menuItem setKeyEquivalentCxxString:key_equivalent(*item)];
+					[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
+				}
 			}
 			break;
 
