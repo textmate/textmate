@@ -36,9 +36,13 @@ struct GVLineRecord
 	NSColor* foregroundColor;
 	NSColor* backgroundColor;
 	NSColor* iconColor;
+	NSColor* iconHoverColor;
+	NSColor* iconPressedColor;
 	NSColor* selectionForegroundColor;
 	NSColor* selectionBackgroundColor;
 	NSColor* selectionIconColor;
+	NSColor* selectionIconHoverColor;
+	NSColor* selectionIconPressedColor;
 	NSColor* selectionBorderColor;
 	id <GutterViewDelegate> delegate;
 	std::vector<struct data_source_t> columnDataSources;
@@ -55,9 +59,13 @@ struct GVLineRecord
 @property (nonatomic, retain) NSColor* foregroundColor;
 @property (nonatomic, retain) NSColor* backgroundColor;
 @property (nonatomic, retain) NSColor* iconColor;
+@property (nonatomic, retain) NSColor* iconHoverColor;
+@property (nonatomic, retain) NSColor* iconPressedColor;
 @property (nonatomic, retain) NSColor* selectionForegroundColor;
 @property (nonatomic, retain) NSColor* selectionBackgroundColor;
 @property (nonatomic, retain) NSColor* selectionIconColor;
+@property (nonatomic, retain) NSColor* selectionIconHoverColor;
+@property (nonatomic, retain) NSColor* selectionIconPressedColor;
 @property (nonatomic, retain) NSColor* selectionBorderColor;
 - (void)setHighlightedRange:(std::string const&)str;
 - (void)reloadData:(id)sender;

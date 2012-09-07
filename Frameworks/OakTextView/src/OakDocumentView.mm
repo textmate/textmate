@@ -335,13 +335,17 @@ private:
 		auto styles = [textView theme]->styles_for_scope(document->buffer().scope(0).left, NULL_STR, 0);
 		self.gutterDividerColor = [NSColor tmColorWithCGColor:styles.gutterDivider()] ?: [NSColor grayColor];
 
-		gutterView.foregroundColor          = [NSColor tmColorWithCGColor:styles.gutterForeground()];
-		gutterView.backgroundColor          = [NSColor tmColorWithCGColor:styles.gutterBackground()];
-		gutterView.iconColor                = [NSColor tmColorWithCGColor:styles.gutterIcons()];
-		gutterView.selectionForegroundColor = [NSColor tmColorWithCGColor:styles.gutterSelectionForeground()];
-		gutterView.selectionBackgroundColor = [NSColor tmColorWithCGColor:styles.gutterSelectionBackground()];
-		gutterView.selectionIconColor       = [NSColor tmColorWithCGColor:styles.gutterSelectionIcons()];
-		gutterView.selectionBorderColor     = [NSColor tmColorWithCGColor:styles.gutterSelectionBorder()];
+		gutterView.foregroundColor           = [NSColor tmColorWithCGColor:styles.gutterForeground()];
+		gutterView.backgroundColor           = [NSColor tmColorWithCGColor:styles.gutterBackground()];
+		gutterView.iconColor                 = [NSColor tmColorWithCGColor:styles.gutterIcons()];
+		gutterView.iconHoverColor            = [NSColor tmColorWithCGColor:styles.gutterIconsHover()];
+		gutterView.iconPressedColor          = [NSColor tmColorWithCGColor:styles.gutterIconsPressed()];
+		gutterView.selectionForegroundColor  = [NSColor tmColorWithCGColor:styles.gutterSelectionForeground()];
+		gutterView.selectionBackgroundColor  = [NSColor tmColorWithCGColor:styles.gutterSelectionBackground()];
+		gutterView.selectionIconColor        = [NSColor tmColorWithCGColor:styles.gutterSelectionIcons()];
+		gutterView.selectionIconHoverColor   = [NSColor tmColorWithCGColor:styles.gutterSelectionIconsHover()];
+		gutterView.selectionIconPressedColor = [NSColor tmColorWithCGColor:styles.gutterSelectionIconsPressed()];
+		gutterView.selectionBorderColor      = [NSColor tmColorWithCGColor:styles.gutterSelectionBorder()];
 
 		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
 
