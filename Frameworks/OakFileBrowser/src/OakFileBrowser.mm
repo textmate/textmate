@@ -40,6 +40,7 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic, retain, readwrite) NSView* view;
 @property (nonatomic, readonly)          NSArray* selectedItems;
 @property (nonatomic, readonly)          NSArray* selectedPaths;
+@property (nonatomic, retain)            id showURLfromObserver;
 - (void)updateView;
 - (void)loadFileBrowserOptions;
 @end
@@ -99,7 +100,7 @@ static NSURL* ParentForURL (NSURL* url)
 }
 
 @implementation OakFileBrowser
-@synthesize url, historyController, delegate, view;
+@synthesize url, historyController, delegate, view, showURLfromObserver;
 
 - (BOOL)acceptsFirstResponder { return NO; }
 - (NSString*)location
@@ -177,6 +178,79 @@ static NSURL* ParentForURL (NSURL* url)
 
 		[outlineViewDelegate selectURLs:@[ aURL ]];
 	}
+}
+
+- (void)showURL:(NSURL*)aURL from:(NSURL*)rootURL
+{
+	NSURL *parentURL = aURL;
+	NSMutableArray *parentURLs=[[NSMutableArray alloc]init];
+
+	NSLog(@"root: %@",rootURL);
+	NSLog(@"target: %@",aURL);
+
+	while(![parentURL isEqualTo:rootURL]) {
+		NSLog(@"parent: %@",parentURL);
+		[parentURLs addObject: parentURL];
+		parentURL = ParentForURL(parentURL);
+	}
+
+	[self pushURL:rootURL];
+
+	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+
+	[center removeObserver: self.showURLfromObserver];
+	self.showURLfromObserver = [center addObserverForName:FSItemDidReloadNotification
+					object:outlineViewDelegate.dataSource
+				   queue:nil
+					usingBlock:^(NSNotification *note) {
+						NSLog(@"THE ITEM DID RELOAD: %@", note);
+
+						FSItem *baseItem = [[note userInfo] objectForKey:@"item"];
+						FSItem *item = baseItem;
+
+						for(parentURL in parentURLs) {
+							if ([parentURL isEqualTo:[item url]])
+								[view.outlineView expandItem:item];
+
+							for(item in baseItem.children) {
+								if ([parentURL isEqualTo:[item url]]) {
+									baseItem = item;
+									NSLog(@"FFFFOUND!   >>  %@",item);
+									[view.outlineView expandItem:item];
+									[view.outlineView reloadItem:item reloadChildren:YES];
+								}
+								if (baseItem == item)
+									break;
+							}
+						}
+
+						// Stop the observer if we're done
+						BOOL alreadyVisible = NO;
+						for(NSInteger row = 0; !alreadyVisible && row < [view.outlineView numberOfRows]; ++row) {
+							alreadyVisible = [aURL isEqualTo:[[view.outlineView itemAtRow:row] url]];
+							if(alreadyVisible) {
+								NSLog(@"Remove observer: %@", self.showURLfromObserver);
+								[center removeObserver: self.showURLfromObserver];
+								break;
+							}
+						}
+
+					}];
+
+	FSItem *item = nil;
+	[view.outlineView reloadItem:outlineViewDelegate.dataSource.rootItem reloadChildren:YES];
+	[view.outlineView expandItem:outlineViewDelegate.dataSource.rootItem];
+	for(item in outlineViewDelegate.dataSource.rootItem.children) {
+		for(parentURL in parentURLs) {
+			if ([parentURL isEqualTo:[item url]]) {
+				NSLog(@"Reload!                            %@",item);
+				[view.outlineView expandItem:item];
+				[view.outlineView reloadItem:item reloadChildren:YES];
+			}
+		}
+	}
+
+	[outlineViewDelegate selectURLs:@[ aURL ]];
 }
 
 - (void)deselectAll:(id)sender

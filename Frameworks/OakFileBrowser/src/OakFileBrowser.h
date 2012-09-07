@@ -39,6 +39,7 @@ PUBLIC @interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
 
 - (void)setupViewWithSize:(NSSize)viewSize resizeIndicatorOnRight:(BOOL)flag state:(NSDictionary*)fileBrowserState;
 - (void)showURL:(NSURL*)aPath;
+- (void)showURL:(NSURL*)aPath from:(NSURL*)rootPath;
 - (void)deselectAll:(id)sender;
 - (void)updateVariables:(std::map<std::string, std::string>&)env;
 
