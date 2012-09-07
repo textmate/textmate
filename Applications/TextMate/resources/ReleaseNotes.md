@@ -1,4 +1,63 @@
+# TextMate Hackathon
+
+If there is some feature you would like to add to TextMate but need a little guidance on how to go about it, we are holding a TextMate Hackathon Saturday the **22nd of September 2012** starting at 2 pm, the address is:
+
+	SHAPE
+	Gothersgade 8B, 3rd floor
+	1123 København K
+
+We can fit 20-25 people so please let us know in advance if you wish to attend, either using the [facebook event][] or by emailing [Allan Odgaard](mailto:hackathon@textmate.org?subject=TextMate%20Hackathon) (me).
+
+We also welcome people who just want to drop by and say hello, share a pizza, or have some other project they want to hack on, in the company of fellow Mac/TextMate devotees.
+
+[facebook event]: http://www.facebook.com/events/399041873494929
+[SHAPE]: http://shapehq.com/
+
 # Release Notes
+
+## 2012-09-07 (r9302)
+
+### Proxy Items
+
+Proxy items are bundle items with a regular scope selector, key equivalent and/or tab trigger. Their body is a “query” which will find bundle items with a semantic class matching this (simple) query string.
+
+Until now we have only used this for the SCM items. None of the actions (in Git, Mercurial, Subversion, and other SCM bundles) actually have a key binding, but they all have a semantic class which start with `action.scm`.
+
+There is an SCM bundle with a single proxy item bound to ⌘Y which does a query for `action.scm` so if the user press ⌘Y, it will map to the SCM actions valid in the current scope (e.g. `attr.scm.git`).
+
+A few improvements has been done with respect to how proxy items appear in the interface:
+
+* Proxy items in the menu now show the items matched by the query. E.g. if you look in _Bundles_ → _SCM_ you will see the SCM actions available. Previously you saw the proxy item. If no items are matched by the query, the proxy item itself is shown but as disabled. The idea is that we can have _Run_, _Documentation for Word_, _Validate Syntax_, and similar common actions appear in e.g. the Source bundle or (in the future) a toolbar/palette, and the user can go via these actions to run the action relevant for the current context.
+* In the bundle item chooser (⌃⌘T) duplicates no longer appear (items matched would appear as a duplicate for each proxy item matching that item).
+* Items without a key equivalent but matched by a proxy item will now show the key equivalent of the proxy item. E.g. looking in the Git menu you will now see that (most of) the actions can be triggered with ⌘Y.
+* The query string in proxy items now support the `||` operator for “fallback”, e.g. we can make a proxy item with a query like: `action.build || format.strong` which will find a build action for the current context (scope) and if none is found, it will instead search for a `format.strong` (bold) action.
+
+I plan to expand the query string to also support unions, so that we can e.g. bind ⌘D to a query on `diff + scm.diff` (to show Diff actions including those for the current version control system) and additionally put a scope assertion on the class query, for example my ideal ⌘B binding would likely be a query for:
+
+	action.build[-dyn.selection] || format.strong || action.build || action.run
+
+So the first term (`action.build`) only match items if there is no selection, if there is a selection, we would instead search for a `format.strong` item, and if there isn’t any **then** we would look for a build action (this time even when there is a selection) and finally fallback on a run item.
+
+If you have any comments on the above, please share on the [mailing list](http://lists.macromates.com/listinfo/textmate).
+
+### Other Changes
+
+* Add two new action methods:
+
+		findNextAndModifySelection:
+		findPreviousAndModifySelection:
+
+	These find the next/previous occurrence of what’s on the find clipboard and selects that, but preserves the existing selection. One could e.g. add this to `Keybindings.dict`:
+
+		"@d" = ( "copySelectionToFindPboard:", "findNextAndModifySelection:" );
+
+	This binding will likely be default in an upcoming build, but bound to ⌃W (Select Word) and scoped to `dyn.selection` (so only when a word is already selected).
+
+* During save, the potential dialogs asking to unlock files or change encoding would not accept the user’s choice (bug recently introduced).
+* Fix out of range assertion in some cases when switching files (gutter was querying the new document using the selection used in the old one).
+* When extending a selection we now only highlight the new ranges selected rather than all of them (e.g. Find All (⌥⌘F) when there already is one instance selected or the new `find{Next,Previous}AndModifySelection:`).
+* Jumping files with ⌘G (after a Find in Folder) would lead to an anchored selection, a few other cases would also cause the selection to be anchored. This is no longer the case (the subtle difference here is that unanchored selections will always extend for the initial shift (⇧) + movement action).
+* Add revision numbers to release notes. *[Elia Schito]*
 
 ## 2012-09-05 (r9301)
 
