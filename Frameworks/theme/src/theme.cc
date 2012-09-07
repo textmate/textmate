@@ -201,17 +201,10 @@ void theme_t::setup_styles ()
 		cf::color_t background = _styles[0].background;
 
 		_gutter_styles.divider               = soften(foreground, 0.4);
-		_gutter_styles.selectionBorder       = soften(foreground, 0.4);
 		_gutter_styles.foreground            = soften(foreground, 0.5);
 		_gutter_styles.background            = soften(background, 0.87);
-		_gutter_styles.icons                 = soften(foreground, 0.5);
-		_gutter_styles.iconsHover            = soften(foreground, 0.5);
-		_gutter_styles.iconsPressed          = soften(foreground, 0.5);
 		_gutter_styles.selectionForeground   = soften(foreground, 0.95);
 		_gutter_styles.selectionBackground   = soften(background, 0.95);
-		_gutter_styles.selectionIcons        = soften(foreground, 0.95);
-		_gutter_styles.selectionIconsHover   = soften(foreground, 0.95);
-		_gutter_styles.selectionIconsPressed = soften(foreground, 0.95);
 	}
 
 	plist::dictionary_t gutterSettings;
@@ -236,6 +229,14 @@ void theme_t::setup_styles ()
 		iterate(gutterKey, gutterKeys)
 			get_key_path(gutterSettings, gutterKey->key, _gutter_styles.*(gutterKey->field));
 	}
+
+	_gutter_styles.selectionBorder       = _gutter_styles.selectionBorder       ? _gutter_styles.selectionBorder       : _gutter_styles.divider;
+	_gutter_styles.icons                 = _gutter_styles.icons                 ? _gutter_styles.icons                 : _gutter_styles.foreground;
+	_gutter_styles.iconsHover            = _gutter_styles.iconsHover            ? _gutter_styles.iconsHover            : _gutter_styles.icons;
+	_gutter_styles.iconsPressed          = _gutter_styles.iconsPressed          ? _gutter_styles.iconsPressed          : _gutter_styles.icons;
+	_gutter_styles.selectionIcons        = _gutter_styles.selectionIcons        ? _gutter_styles.selectionIcons        : _gutter_styles.selectionForeground;
+	_gutter_styles.selectionIconsHover   = _gutter_styles.selectionIconsHover   ? _gutter_styles.selectionIconsHover   : _gutter_styles.selectionIcons;
+	_gutter_styles.selectionIconsPressed = _gutter_styles.selectionIconsPressed ? _gutter_styles.selectionIconsPressed : _gutter_styles.selectionIcons;
 }
 
 oak::uuid_t const& theme_t::uuid () const
