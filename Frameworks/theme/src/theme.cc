@@ -19,6 +19,13 @@ static void get_key_path (plist::dictionary_t const& plist, std::string const& s
 	font_size = read_font_size(temp_str);
 }
 
+static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, cf::color_t& color)
+{
+	std::string temp_str;
+	if(plist::get_key_path(plist, setting, temp_str))
+		color = read_color(temp_str);
+}
+
 theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& plist)
 {
 	decomposed_style_t res;
@@ -27,25 +34,13 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 	if(plist::get_key_path(plist, "scope", scopeSelector))
 		res.scope_selector = scopeSelector;
 
-	plist::get_key_path(plist, "settings.fontName",             res.font_name);
-	get_key_path(plist, "settings.fontSize",                    res.font_size);
-	get_key_path(plist, "settings.foreground",                  res.foreground);
-	get_key_path(plist, "settings.background",                  res.background);
-	get_key_path(plist, "settings.gutterForeground",            res.gutterForeground);
-	get_key_path(plist, "settings.gutterBackground",            res.gutterBackground);
-	get_key_path(plist, "settings.gutterIcons",                 res.gutterIcons);
-	get_key_path(plist, "settings.gutterIconsHover",            res.gutterIconsHover);
-	get_key_path(plist, "settings.gutterIconsPressed",          res.gutterIconsPressed);
-	get_key_path(plist, "settings.gutterDivider",               res.gutterDivider);
-	get_key_path(plist, "settings.gutterSelectionForeground",   res.gutterSelectionForeground);
-	get_key_path(plist, "settings.gutterSelectionBackground",   res.gutterSelectionBackground);
-	get_key_path(plist, "settings.gutterSelectionIcons",        res.gutterSelectionIcons);
-	get_key_path(plist, "settings.gutterSelectionIconsHover",   res.gutterSelectionIconsHover);
-	get_key_path(plist, "settings.gutterSelectionIconsPressed", res.gutterSelectionIconsPressed);
-	get_key_path(plist, "settings.gutterSelectionBorder",       res.gutterSelectionBorder);
-	get_key_path(plist, "settings.caret",                       res.caret);
-	get_key_path(plist, "settings.selection",                   res.selection);
-	get_key_path(plist, "settings.invisibles",                  res.invisibles);
+	plist::get_key_path(plist, "settings.fontName", res.font_name);
+	get_key_path(plist, "settings.fontSize",        res.font_size);
+	get_key_path(plist, "settings.foreground",      res.foreground);
+	get_key_path(plist, "settings.background",      res.background);
+	get_key_path(plist, "settings.caret",           res.caret);
+	get_key_path(plist, "settings.selection",       res.selection);
+	get_key_path(plist, "settings.invisibles",      res.invisibles);
 
 	bool flag;
 	res.misspelled = plist::get_key_path(plist, "settings.misspelled", flag) ? (flag ? bool_true : bool_false) : bool_unset;
@@ -146,6 +141,26 @@ theme_t::~theme_t ()
 	bundles::remove_callback(&_callback);
 }
 
+static cf::color_t soften (cf::color_t color, CGFloat factor)
+{
+	CGFloat r = color.red(), g = color.green(), b = color.blue(), a = color.alpha();
+	
+	if(color_is_dark(color))
+	{
+		r = 1 - factor*(1 - r);
+		g = 1 - factor*(1 - g);
+		b = 1 - factor*(1 - b);
+	}
+	else
+	{
+		r *= factor;
+		g *= factor;
+		b *= factor;
+	}
+	
+	return cf::color_t(r, g, b, a);
+}
+
 void theme_t::setup_styles ()
 {
 	_styles.clear();
@@ -174,12 +189,64 @@ void theme_t::setup_styles ()
 			}
 		}
 	}
+
+	// =========================
+	// = Default Gutter Styles =
+	// =========================
+
+	if(!_styles.empty())
+	{
+		// We assume that the first style is the unscoped root style
+		cf::color_t foreground = _styles[0].foreground;
+		cf::color_t background = _styles[0].background;
+
+		_gutter_styles.divider               = soften(foreground, 0.4);
+		_gutter_styles.selectionBorder       = soften(foreground, 0.4);
+		_gutter_styles.foreground            = soften(foreground, 0.5);
+		_gutter_styles.background            = soften(background, 0.87);
+		_gutter_styles.icons                 = soften(foreground, 0.5);
+		_gutter_styles.iconsHover            = soften(foreground, 0.5);
+		_gutter_styles.iconsPressed          = soften(foreground, 0.5);
+		_gutter_styles.selectionForeground   = soften(foreground, 0.95);
+		_gutter_styles.selectionBackground   = soften(background, 0.95);
+		_gutter_styles.selectionIcons        = soften(foreground, 0.95);
+		_gutter_styles.selectionIconsHover   = soften(foreground, 0.95);
+		_gutter_styles.selectionIconsPressed = soften(foreground, 0.95);
+	}
+
+	plist::dictionary_t gutterSettings;
+	if(plist::get_key_path(_item->plist(), "gutterSettings", gutterSettings))
+	{
+		static struct { std::string const key; cf::color_t gutter_styles_t::*field; } const gutterKeys[] =
+		{
+			{ "divider",               &gutter_styles_t::divider               },
+			{ "selectionBorder",       &gutter_styles_t::selectionBorder       },
+			{ "foreground",            &gutter_styles_t::foreground            },
+			{ "background",            &gutter_styles_t::background            },
+			{ "icons",                 &gutter_styles_t::icons                 },
+			{ "iconsHover",            &gutter_styles_t::iconsHover            },
+			{ "iconsPressed",          &gutter_styles_t::iconsPressed          },
+			{ "selectionForeground",   &gutter_styles_t::selectionForeground   },
+			{ "selectionBackground",   &gutter_styles_t::selectionBackground   },
+			{ "selectionIcons",        &gutter_styles_t::selectionIcons        },
+			{ "selectionIconsHover",   &gutter_styles_t::selectionIconsHover   },
+			{ "selectionIconsPressed", &gutter_styles_t::selectionIconsPressed },
+		};
+
+		iterate(gutterKey, gutterKeys)
+			get_key_path(gutterSettings, gutterKey->key, _gutter_styles.*(gutterKey->field));
+	}
 }
 
 oak::uuid_t const& theme_t::uuid () const
 {
 	static oak::uuid_t const FallbackThemeUUID = oak::uuid_t().generate();
 	return _item ? _item->uuid() : FallbackThemeUUID;
+}
+
+gutter_styles_t const& theme_t::gutter_styles () const
+{
+	return _gutter_styles;
 }
 
 styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::string fontName, CGFloat fontSize) const
@@ -215,24 +282,12 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 				font.reset(newFont, CFRelease);
 		}
 
-		cf::color_t foreground                  = base.foreground.is_blank()                  ? cf::color_t("#000000")   : base.foreground;
-		cf::color_t background                  = base.background.is_blank()                  ? cf::color_t("#FFFFFF")   : base.background;
-		cf::color_t gutterForeground            = base.gutterForeground.is_blank()            ? soften(foreground, 0.5)  : base.gutterForeground;
-		cf::color_t gutterBackground            = base.gutterBackground.is_blank()            ? soften(background, 0.87) : base.gutterBackground;
-		cf::color_t gutterIcons                 = base.gutterIcons.is_blank()                 ? soften(foreground, 0.5)  : base.gutterIcons;
-		cf::color_t gutterIconsHover            = base.gutterIconsHover.is_blank()            ? soften(foreground, 0.5)  : base.gutterIconsHover;
-		cf::color_t gutterIconsPressed          = base.gutterIconsPressed.is_blank()          ? soften(foreground, 0.5)  : base.gutterIconsPressed;
-		cf::color_t gutterDivider               = base.gutterDivider.is_blank()               ? soften(foreground, 0.4)  : base.gutterDivider;
-		cf::color_t gutterSelectionForeground   = base.gutterSelectionForeground.is_blank()   ? soften(foreground, 0.95) : base.gutterSelectionForeground;
-		cf::color_t gutterSelectionBackground   = base.gutterSelectionBackground.is_blank()   ? soften(background, 0.95) : base.gutterSelectionBackground;
-		cf::color_t gutterSelectionIcons        = base.gutterSelectionIcons.is_blank()        ? soften(foreground, 0.95) : base.gutterSelectionIcons;
-		cf::color_t gutterSelectionIconsHover   = base.gutterSelectionIconsHover.is_blank()   ? soften(foreground, 0.95) : base.gutterSelectionIconsHover;
-		cf::color_t gutterSelectionIconsPressed = base.gutterSelectionIconsPressed.is_blank() ? soften(foreground, 0.95) : base.gutterSelectionIconsPressed;
-		cf::color_t gutterSelectionBorder       = base.gutterSelectionBorder.is_blank()       ? soften(foreground, 0.4)  : base.gutterSelectionBorder;
-		cf::color_t selection                   = base.selection.is_blank()                   ? cf::color_t("#4D97FF54") : base.selection;
-		cf::color_t caret                       = base.caret.is_blank()                       ? cf::color_t("#000000")   : base.caret;
+		cf::color_t foreground = base.foreground.is_blank()                  ? cf::color_t("#000000")   : base.foreground;
+		cf::color_t background = base.background.is_blank()                  ? cf::color_t("#FFFFFF")   : base.background;
+		cf::color_t caret      = base.caret.is_blank()                       ? cf::color_t("#000000")   : base.caret;
+		cf::color_t selection  = base.selection.is_blank()                   ? cf::color_t("#4D97FF54") : base.selection;
 
-		styles_t res(foreground, background, gutterForeground, gutterBackground, gutterIcons, gutterIconsHover, gutterIconsPressed, gutterDivider, gutterSelectionForeground, gutterSelectionBackground, gutterSelectionIcons, gutterSelectionIconsHover, gutterSelectionIconsPressed, gutterSelectionBorder, selection, caret, font, base.underlined == bool_true, base.misspelled == bool_true);
+		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
 		styles = _cache.insert(std::make_pair(key_t(scope, fontName, fontSize), res)).first;
 	}
 	return styles->second;
@@ -248,26 +303,6 @@ static theme_t::color_info_t read_color (std::string const& str_color )
 		return theme_t::color_info_t::color_info_t(); // color is not set
 
 	return theme_t::color_info_t::color_info_t(col[R]/255.0, col[G]/255.0, col[B]/255.0, col[A]/255.0);
-}
-
-static cf::color_t soften (cf::color_t color, CGFloat factor)
-{
-	CGFloat r = color.red(), g = color.green(), b = color.blue(), a = color.alpha();
-	
-	if(color_is_dark(color))
-	{
-		r = 1 - factor*(1 - r);
-		g = 1 - factor*(1 - g);
-		b = 1 - factor*(1 - b);
-	}
-	else
-	{
-		r *= factor;
-		g *= factor;
-		b *= factor;
-	}
-	
-	return cf::color_t(r, g, b, a);
 }
 
 static theme_t::color_info_t blend (theme_t::color_info_t const& lhs, theme_t::color_info_t const& rhs)
@@ -321,26 +356,14 @@ static CGFloat read_font_size (std::string const& str_font_size)
 
 theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::decomposed_style_t const& rhs)
 {
-	font_name = rhs.font_name == NULL_STR ? font_name : rhs.font_name;
-	font_size = rhs.font_size > 0 ? rhs.font_size : font_size * fabs(rhs.font_size);
+	font_name  = rhs.font_name != NULL_STR    ? rhs.font_name : font_name;
+	font_size  = rhs.font_size > 0            ? rhs.font_size : font_size * fabs(rhs.font_size);
 
-	foreground                  = rhs.foreground.is_blank()                  ? foreground                  : rhs.foreground;
-	background                  = rhs.background.is_blank()                  ? background                  : blend(background, rhs.background);
-	gutterForeground            = rhs.gutterForeground.is_blank()            ? gutterForeground            : rhs.gutterForeground;
-	gutterBackground            = rhs.gutterBackground.is_blank()            ? gutterBackground            : rhs.gutterBackground;
-	gutterIcons                 = rhs.gutterIcons.is_blank()                 ? gutterIcons                 : rhs.gutterIcons;
-	gutterIconsHover            = rhs.gutterIconsHover.is_blank()            ? gutterIconsHover            : rhs.gutterIconsHover;
-	gutterIconsPressed          = rhs.gutterIconsPressed.is_blank()          ? gutterIconsPressed          : rhs.gutterIconsPressed;
-	gutterDivider               = rhs.gutterDivider.is_blank()               ? gutterDivider               : rhs.gutterDivider;
-	gutterSelectionForeground   = rhs.gutterSelectionForeground.is_blank()   ? gutterSelectionForeground   : rhs.gutterSelectionForeground;
-	gutterSelectionBackground   = rhs.gutterSelectionBackground.is_blank()   ? gutterSelectionBackground   : rhs.gutterSelectionBackground;
-	gutterSelectionIcons        = rhs.gutterSelectionIcons.is_blank()        ? gutterSelectionIcons        : rhs.gutterSelectionIcons;
-	gutterSelectionIconsHover   = rhs.gutterSelectionIconsHover.is_blank()   ? gutterSelectionIconsHover   : rhs.gutterSelectionIconsHover;
-	gutterSelectionIconsPressed = rhs.gutterSelectionIconsPressed.is_blank() ? gutterSelectionIconsPressed : rhs.gutterSelectionIconsPressed;
-	gutterSelectionBorder       = rhs.gutterSelectionBorder.is_blank()       ? gutterSelectionBorder       : rhs.gutterSelectionBorder;
-	caret                       = rhs.caret.is_blank()                       ? caret                       : rhs.caret;
-	selection                   = rhs.selection.is_blank()                   ? selection                   : rhs.selection;
-	invisibles                  = rhs.invisibles.is_blank()                  ? invisibles                  : rhs.invisibles;
+	foreground = rhs.foreground.is_blank()    ? foreground : rhs.foreground;
+	background = rhs.background.is_blank()    ? background : blend(background, rhs.background);
+	caret      = rhs.caret.is_blank()         ? caret      : rhs.caret;
+	selection  = rhs.selection.is_blank()     ? selection  : rhs.selection;
+	invisibles = rhs.invisibles.is_blank()    ? invisibles : rhs.invisibles;
 
 	bold       = rhs.bold       == bool_unset ? bold       : rhs.bold;
 	italic     = rhs.italic     == bool_unset ? italic     : rhs.italic;
