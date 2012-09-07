@@ -1,0 +1,9 @@
+{	commands = (
+		{	command = "copySelectionToFindPboard:"; },
+		{	command = "findNextAndModifySelection:"; },
+	);
+	keyEquivalent = "^w";
+	name = "Select Next";
+	scope = "dyn.selection";
+	uuid = "1A4F855F-0B0A-4C26-BCFF-1C4D0DE96318";
+}

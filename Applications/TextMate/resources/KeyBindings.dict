@@ -26,6 +26,8 @@
 	"^~\U007F"  = "deleteSubWordLeft:";
 	"^~\UF728"  = "deleteSubWordRight:";
 
+	"@d"       = ( "copySelectionToFindPboard:", "findNextAndModifySelection:" );
+
 	"$\033"    = "previousCompletion:";
 	"@\UF728"  = "deleteToEndOfLine:";
 	"~\UF705"  = "showContextMenu:";
