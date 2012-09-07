@@ -9,7 +9,6 @@ enum {
 
 @interface OFBPathInfoCell : OakImageAndTextCell
 {
-	OBJC_WATCH_LEAKS(OFBPathInfoCell);
 	NSUInteger labelIndex;
 	BOOL mouseDownInCloseButton;
 	BOOL isOpen;
