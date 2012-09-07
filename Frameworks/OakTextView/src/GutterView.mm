@@ -88,15 +88,19 @@ struct data_source_t
 - (void)dealloc
 {
 	D(DBF_GutterView, bug("\n"););
-	self.partnerView              = nil;
-	self.lineNumberFont           = nil;
-	self.foregroundColor          = nil;
-	self.backgroundColor          = nil;
-	self.iconColor                = nil;
-	self.selectionForegroundColor = nil;
-	self.selectionBackgroundColor = nil;
-	self.selectionIconColor       = nil;
-	self.selectionBorderColor     = nil;
+	self.partnerView               = nil;
+	self.lineNumberFont            = nil;
+	self.foregroundColor           = nil;
+	self.backgroundColor           = nil;
+	self.iconColor                 = nil;
+	self.iconHoverColor            = nil;
+	self.iconPressedColor          = nil;
+	self.selectionForegroundColor  = nil;
+	self.selectionBackgroundColor  = nil;
+	self.selectionIconColor        = nil;
+	self.selectionIconHoverColor   = nil;
+	self.selectionIconPressedColor = nil;
+	self.selectionBorderColor      = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
@@ -353,7 +357,18 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 					[overlayImage lockFocus];
 					[image drawAdjustedAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-					[(selectedRow ? self.selectionIconColor : self.iconColor) set];
+					if(selectedRow)
+					{
+						if(isHoveringRect && !isDownInRect) [self.selectionIconHoverColor set];
+						else if(isHoveringRect && isDownInRect) [self.selectionIconPressedColor set];
+						else [self.selectionIconColor set];
+					}
+					else
+					{
+						if(isHoveringRect && !isDownInRect) [self.iconHoverColor set];
+						else if(isHoveringRect && isDownInRect) [self.iconPressedColor set];
+						else [self.iconColor set];
+					}
 					NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
 					[overlayImage unlockFocus];
 
