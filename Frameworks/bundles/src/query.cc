@@ -1,5 +1,7 @@
 #include "query.h"
 #include <text/ctype.h>
+#include <text/parse.h>
+#include <text/trim.h>
 #include <oak/callbacks.h>
 
 namespace bundles
@@ -187,7 +189,15 @@ namespace bundles
 	{
 		std::string actionClass;
 		if(plist::get_key_path(item->plist(), "content", actionClass))
-			search(kFieldSemanticClass, actionClass, scope, kind, bundle, includeDisabledItems, ordered);
+		{
+			citerate(aClass, text::split(actionClass, "||"))
+			{
+				size_t oldSize = ordered.size();
+				search(kFieldSemanticClass, text::trim(*aClass), scope, kind, bundle, includeDisabledItems, ordered);
+				if(ordered.size() != oldSize)
+					break;
+			}
+		}
 	}
 
  	static void cache_search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
@@ -245,7 +255,14 @@ namespace bundles
 	{
 		std::string actionClass;
 		if(plist::get_key_path(proxyItem->plist(), "content", actionClass))
-			return query(kFieldSemanticClass, actionClass, scope, kind, bundle, filter, includeDisabledItems);
+		{
+			citerate(aClass, text::split(actionClass, "||"))
+			{
+				auto const res = query(kFieldSemanticClass, text::trim(*aClass), scope, kind, bundle, filter, includeDisabledItems);
+				if(!res.empty())
+					return res;
+			}
+		}
 		return std::vector<item_ptr>();
 	}
 
