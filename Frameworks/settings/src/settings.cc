@@ -169,6 +169,8 @@ namespace
 
 	std::map<std::string, std::string> expanded_variables_for (std::string const& directory, std::string const& path, scope::scope_t const& scope, std::map<std::string, std::string> variables)
 	{
+		ASSERT_NE(directory.find("/home"), 0);
+
 		D(DBF_Settings, bug("%s, %s, %s\n", directory.c_str(), path.c_str(), to_s(scope).c_str()););
 		citerate(pair, global_variables())
 			expand_variable(pair->first, pair->second, variables);
