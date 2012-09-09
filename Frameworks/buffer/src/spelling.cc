@@ -82,4 +82,9 @@ namespace ng
 		return res;
 	}
 
+	void spelling_t::recheck (buffer_t const* buffer, size_t from, size_t to)
+	{
+		did_parse(buffer, from, to);
+	}
+
 } /* ng */

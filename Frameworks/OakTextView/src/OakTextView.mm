@@ -1859,6 +1859,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	bool flag = !document->buffer().live_spelling();
 	document->buffer().set_live_spelling(flag);
 	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
+
+	[self setNeedsDisplay:YES];
 }
 
 - (void)takeSpellingLanguageFrom:(id)sender
@@ -1867,6 +1869,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
 	document->buffer().set_spelling_language(to_s(lang));
 	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
+
+	[self setNeedsDisplay:YES];
 }
 
 - (scope::context_t const&)scopeContext
