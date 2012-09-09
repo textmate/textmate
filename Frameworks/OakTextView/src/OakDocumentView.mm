@@ -31,7 +31,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 - (void)updateStyle;
 @end
 
-static NSString* const ObservedTextViewKeyPaths[] = { @"selectionString", @"tabSize", @"softTabs", @"freehandedEditing", @"overwriteMode", @"isMacroRecording"};
+static NSString* const ObservedTextViewKeyPaths[] = { @"selectionString", @"tabSize", @"softTabs", @"isMacroRecording"};
 
 struct document_view_callback_t : document::document_t::callback_t
 {
@@ -671,8 +671,6 @@ private:
 	[tabSizeSelectorPanel makeKeyAndOrderFront:self];
 }
 
-- (IBAction)toggleOverwriteMode:(id)sender     { /*[textView toggleOverwriteMode:sender];*/ }
-- (IBAction)toggleFreehandedEditing:(id)sender { /*[textView toggleFreehandedEditing:sender];*/ }
 - (IBAction)toggleMacroRecording:(id)sender    { [textView toggleMacroRecording:sender]; }
 
 - (IBAction)takeThemeUUIDFrom:(id)sender

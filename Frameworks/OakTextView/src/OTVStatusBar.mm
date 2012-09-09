@@ -10,7 +10,7 @@
 const NSInteger BundleItemSelector = 1;
 
 @implementation OTVStatusBar
-@synthesize recordingTimer, pulsedRecordingIndicator, grammarName, symbolName, overwriteMode, isMacroRecording, freehandedEditing, tabSize, softTabs, showResizeThumb;
+@synthesize recordingTimer, pulsedRecordingIndicator, grammarName, symbolName, isMacroRecording, tabSize, softTabs, showResizeThumb;
 @synthesize delegate;
 
 - (void)update
@@ -30,8 +30,6 @@ const NSInteger BundleItemSelector = 1;
 		sb::cell_t::popup(gearImage,                           @selector(showBundleItemSelector:),  self.delegate).set_tag(BundleItemSelector),
 		sb::cell_t::popup(tabSizeText,                         @selector(showTabSizeSelector:),     self.delegate),
 		sb::cell_t::popup([symbolName UTF8String] ?: "Symbol", @selector(showSymbolSelector:),      self.delegate).size(200, CGFLOAT_MAX),
-		sb::cell_t::button(overwriteMode     ? "OW"  : "",     @selector(toggleOverwriteMode:),     self.delegate).no_padding().size(18),
-		sb::cell_t::button(freehandedEditing ? "FE"  : "",     @selector(toggleFreehandedEditing:), self.delegate).no_padding().size(18),
 		sb::cell_t::button(pulsedRecordingIndicator,           @selector(toggleMacroRecording:),    self.delegate).no_padding().size(17),
 		showResizeThumb ? sb::cell_t::button(splitViewThumb, NULL, nil).no_padding().size(15) : sb::cell_t::info().size(15),
 	};
@@ -70,12 +68,6 @@ const NSInteger BundleItemSelector = 1;
 	[self update];
 }
 
-- (void)setOverwriteMode:(BOOL)flag
-{
-	overwriteMode = flag;
-	[self update];
-}
-
 - (void)setRecordingTimer:(NSTimer*)aTimer
 {
 	if(aTimer != recordingTimer)
@@ -99,12 +91,6 @@ const NSInteger BundleItemSelector = 1;
 		self.pulsedRecordingIndicator = nil;
 		self.recordingTimer = nil;
 	}
-	[self update];
-}
-
-- (void)setFreehandedEditing:(BOOL)flag
-{
-	freehandedEditing = flag;
 	[self update];
 }
 

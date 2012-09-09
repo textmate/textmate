@@ -1827,9 +1827,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)hasMultiLineSelection { return multiline(document->buffer(), editor->ranges()); }
 
-- (BOOL)freehandedEditing     { return NO; }
-- (BOOL)overwriteMode         { return NO; }
-
 - (IBAction)toggleShowInvisibles:(id)sender
 {
 	self.showInvisibles = !self.showInvisibles;

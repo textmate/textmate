@@ -551,24 +551,6 @@
 										<string key="NSTitle">Mode</string>
 										<object class="NSMutableArray" key="NSMenuItems">
 											<bool key="EncodedWithXMLCoder">YES</bool>
-											<object class="NSMenuItem" id="1012679922">
-												<reference key="NSMenu" ref="218343808"/>
-												<string key="NSTitle">Freehanded Editing</string>
-												<string key="NSKeyEquiv">e</string>
-												<int key="NSKeyEquivModMask">1572864</int>
-												<int key="NSMnemonicLoc">2147483647</int>
-												<reference key="NSOnImage" ref="944637517"/>
-												<reference key="NSMixedImage" ref="596846250"/>
-											</object>
-											<object class="NSMenuItem" id="891743585">
-												<reference key="NSMenu" ref="218343808"/>
-												<string key="NSTitle">Overwrite Mode</string>
-												<string key="NSKeyEquiv">o</string>
-												<int key="NSKeyEquivModMask">1572864</int>
-												<int key="NSMnemonicLoc">2147483647</int>
-												<reference key="NSOnImage" ref="944637517"/>
-												<reference key="NSMixedImage" ref="596846250"/>
-											</object>
 											<object class="NSMenuItem" id="822810231">
 												<reference key="NSMenu" ref="218343808"/>
 												<string key="NSTitle">Soft Tabs (Use Spaces Instead of Tabs)</string>
@@ -3290,14 +3272,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">toggleFreehandedEditing:</string>
-						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="1012679922"/>
-					</object>
-					<int key="connectionID">542</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
 						<string key="label">goForward:</string>
 						<reference key="source" ref="51167417"/>
 						<reference key="destination" ref="305143071"/>
@@ -3359,14 +3333,6 @@
 						<reference key="destination" ref="904154124"/>
 					</object>
 					<int key="connectionID">580</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">toggleOverwriteMode:</string>
-						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="891743585"/>
-					</object>
-					<int key="connectionID">583</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -4361,8 +4327,6 @@
 						<reference key="object" ref="218343808"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="1012679922"/>
-							<reference ref="891743585"/>
 							<reference ref="822810231"/>
 						</object>
 						<reference key="parent" ref="272970472"/>
@@ -5028,16 +4992,6 @@
 						<int key="objectID">487</int>
 						<reference key="object" ref="1005346662"/>
 						<reference key="parent" ref="1104"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">488</int>
-						<reference key="object" ref="1012679922"/>
-						<reference key="parent" ref="218343808"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">489</int>
-						<reference key="object" ref="891743585"/>
-						<reference key="parent" ref="218343808"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">490</int>
@@ -5745,8 +5699,6 @@
 					<string>485.IBPluginDependency</string>
 					<string>486.IBPluginDependency</string>
 					<string>487.IBPluginDependency</string>
-					<string>488.IBPluginDependency</string>
-					<string>489.IBPluginDependency</string>
 					<string>490.IBPluginDependency</string>
 					<string>495.IBPluginDependency</string>
 					<string>496.IBPluginDependency</string>
@@ -6002,8 +5954,6 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
