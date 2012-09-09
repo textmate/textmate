@@ -183,7 +183,7 @@ private:
 		// Since all images are vector based and don’t contain any spacing to
 		// align it, we need to set the individual scaleFactor per image.
 		if([aName hasPrefix:@"Bookmark"]) scaleFactor = 1.0;
-		if([aName hasPrefix:@"Folding"])  scaleFactor = 1.2;
+		if([aName hasPrefix:@"Folding"])  scaleFactor = 1.5;
 		if([aName hasPrefix:@"Search"])   scaleFactor = 1.2;
 
 		[res setSize:NSMakeSize(round(width * scaleFactor), round(height * scaleFactor))];
