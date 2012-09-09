@@ -210,8 +210,8 @@ private:
 	};
 
 	self.gutterPressedImages = @{
-		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Pressed"], [self gutterImage:@"Bookmark Pressed"], [self gutterImage:@"Bookmark Pressed"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Pressed"], [self gutterImage:@"Folding Collapsed Pressed"], [self gutterImage:@"Folding Bottom Pressed"] ],
+		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark"], [self gutterImage:@"Bookmark"], [self gutterImage:@"Bookmark"] ],
+		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Hover"], [self gutterImage:@"Folding Collapsed Hover"], [self gutterImage:@"Folding Bottom Hover"] ],
 	};
 
 	[self updateGutterHeight];
