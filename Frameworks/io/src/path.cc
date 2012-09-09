@@ -273,10 +273,7 @@ namespace path
 				else
 				{
 					std::string errStr = len == -1 ? strerror(errno) : text::format("Result outside allowed range %zd", len);
-					std::string message = text::format("Failure calling readlink(‘%s’):\n\n\u2003%s\n\nPlease submit a bug report quoting the above:\nhttps://github.com/textmate/textmate/issues", path.c_str(), errStr.c_str());
-
-					CFOptionFlags responseFlags;
-					CFUserNotificationDisplayAlert(0 /* timeout */, kCFUserNotificationStopAlertLevel, NULL /* iconURL */, NULL /* soundURL */, NULL /* localizationURL */, CFSTR("Read Link Failed"), cf::wrap(message), CFSTR("Continue"), NULL /* alternateButtonTitle */, NULL /* otherButtonTitle */, &responseFlags);
+					fprintf(stderr, "*** readlink(‘%s’) failed: %s\n", path.c_str(), errStr.c_str());
 				}
 			}
 			else if(S_ISREG(buf.st_mode))
