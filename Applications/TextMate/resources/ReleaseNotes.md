@@ -15,6 +15,11 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 # Release Notes
 
+## 2012-09-09 (r9304)
+
+* Escape PAC URL strings when they are invalid. Using “Choose File” in network settings could lead to a file URL with spaces which would cause a crash when TextMate needed to do network requests (for software update and crash report submissions).
+* Default host for rmate is now ‘auto’ (when using ssh).
+
 ## 2012-09-09 (r9303)
 
 * When toggling _Check Spelling as You Type_ (⌥⌘;) or changing spelling language, we now recheck/refresh the document.
