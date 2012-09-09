@@ -1,6 +1,7 @@
 #include "proxy.h"
 #include <plist/plist.h>
 #include <regexp/regexp.h>
+#include <text/encode.h>
 #include <oak/debug.h>
 #include <cf/cf.h>
 
@@ -131,22 +132,39 @@ proxy_settings_t get_proxy_settings (std::string const& url)
 		if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoConfigURLString), pacString))
 		{
 			D(DBF_Proxy, bug("pac script: %s\n", pacString.c_str()););
-			CFStreamClientContext context    = { 0, &res, NULL, NULL, NULL };
 
-			CFURLRef pacURL                  = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(pacString), NULL);
-			CFURLRef targetURL               = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), NULL);
-			CFRunLoopSourceRef runLoopSource = CFNetworkExecuteProxyAutoConfigurationURL(pacURL, targetURL, &pac_proxy_callback, &context);
-			CFRelease(targetURL);
-			CFRelease(pacURL);
+			CFURLRef pacURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(pacString), NULL);
+			if(!pacURL)
+				pacURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(encode::url_part(pacString, ":/")), NULL);
 
-			CFStringRef runLoopMode = CFSTR("OakRunPACScriptRunLoopMode");
-			CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, runLoopMode);
-			while(!res.enabled)
-				CFRunLoopRunInMode(runLoopMode, 0.1, TRUE);
+			if(pacURL)
+			{
+				if(CFURLRef targetURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), NULL))
+				{
+					CFStreamClientContext context = { 0, &res, NULL, NULL, NULL };
+					CFRunLoopSourceRef runLoopSource = CFNetworkExecuteProxyAutoConfigurationURL(pacURL, targetURL, &pac_proxy_callback, &context);
+					CFRelease(targetURL);
 
-			if(CFRunLoopSourceIsValid(runLoopSource))
-				CFRunLoopSourceInvalidate(runLoopSource);
-			CFRelease(runLoopSource);
+					CFStringRef runLoopMode = CFSTR("OakRunPACScriptRunLoopMode");
+					CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, runLoopMode);
+					while(!res.enabled)
+						CFRunLoopRunInMode(runLoopMode, 0.1, TRUE);
+
+					if(CFRunLoopSourceIsValid(runLoopSource))
+						CFRunLoopSourceInvalidate(runLoopSource);
+					CFRelease(runLoopSource);
+				}
+				else
+				{
+					fprintf(stderr, "*** invalid target URL: ‘%s’\n", url.c_str());
+				}
+
+				CFRelease(pacURL);
+			}
+			else
+			{
+				fprintf(stderr, "*** unable to create URL for PAC script: ‘%s’\n", pacString.c_str());
+			}
 
 			if(res.server == NULL_STR)
 				res.enabled = false;
