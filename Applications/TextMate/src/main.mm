@@ -5,13 +5,13 @@
 #import <document/collection.h>
 #import <io/path.h>
 
-static void sig_int_handler (void* arg)
+static void sig_int_handler ()
 {
 	fprintf(stderr, "%s received SIGINT: Regular shutdown.\n", getprogname());
 	[NSApp terminate:nil];
 }
 
-static void sig_term_handler (void* arg)
+static void sig_term_handler ()
 {
 	fprintf(stderr, "%s received SIGTERM: Quick shutdown.\n", getprogname());
 	document::save_session(true);
@@ -21,8 +21,8 @@ static void sig_term_handler (void* arg)
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-static cf::callback_ptr SigIntSource  = cf::create_callback<void*>(&sig_int_handler, NULL);
-static cf::callback_ptr SigTermSource = cf::create_callback<void*>(&sig_term_handler, NULL);
+static cf::callback_ptr SigIntSource  = cf::create_callback(&sig_int_handler);
+static cf::callback_ptr SigTermSource = cf::create_callback(&sig_term_handler);
 
 void* signal_handler_thread (void* userdata)
 {

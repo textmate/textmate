@@ -56,7 +56,7 @@ namespace oak
 		};
 
 		should_terminate = false;
-		run_loop_source = cf::create_callback(&server_t::master_run, this);
+		run_loop_source = cf::create_callback(std::bind(&server_t::master_run, this));
 
 		pthread_mutex_init(&requests_mutex, NULL);
 		pthread_mutex_init(&results_mutex, NULL);

@@ -73,7 +73,7 @@ namespace io
 		};
 
 		io::create_pipe(read_from_master, write_to_server, true);
-		run_loop_source = cf::create_callback(&reader_server_t::master_run, this);
+		run_loop_source = cf::create_callback(std::bind(&reader_server_t::master_run, this));
 
 		pthread_mutex_init(&data_received_mutex, NULL);
 		pthread_create(&server_thread, NULL, &runner_t::server, this);
