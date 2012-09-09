@@ -200,18 +200,18 @@ private:
 	gutterView.lineNumberFont = [NSFont fontWithName:[newFont fontName] size:round(0.8 * [newFont pointSize])];
 
 	self.gutterImages = @{
-		kBookmarksColumnIdentifier : @[ [NSNull null], [self gutterImage:@"Bookmark Template"], [self gutterImage:@"Search Mark Template"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Template"], [self gutterImage:@"Folding Collapsed Template"], [self gutterImage:@"Folding Bottom Template"] ],
+		kBookmarksColumnIdentifier : @[ [NSNull null], [self gutterImage:@"Bookmark"], [self gutterImage:@"Search Mark"] ],
+		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top"], [self gutterImage:@"Folding Collapsed"], [self gutterImage:@"Folding Bottom"] ],
 	};
 
 	self.gutterHoverImages = @{
-		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Hover Add Template"], [self gutterImage:@"Bookmark Hover Remove Template"], [self gutterImage:@"Bookmark Hover Add Template"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Hover Template"], [self gutterImage:@"Folding Collapsed Hover Template"], [self gutterImage:@"Folding Bottom Hover Template"] ],
+		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Hover Add"], [self gutterImage:@"Bookmark Hover Remove"], [self gutterImage:@"Bookmark Hover Add"] ],
+		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Hover"], [self gutterImage:@"Folding Collapsed Hover"], [self gutterImage:@"Folding Bottom Hover"] ],
 	};
 
 	self.gutterPressedImages = @{
-		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Pressed Template"], [self gutterImage:@"Bookmark Pressed Template"], [self gutterImage:@"Bookmark Pressed Template"] ],
-		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Pressed Template"], [self gutterImage:@"Folding Collapsed Pressed Template"], [self gutterImage:@"Folding Bottom Pressed Template"] ],
+		kBookmarksColumnIdentifier : @[ [self gutterImage:@"Bookmark Pressed"], [self gutterImage:@"Bookmark Pressed"], [self gutterImage:@"Bookmark Pressed"] ],
+		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Pressed"], [self gutterImage:@"Folding Collapsed Pressed"], [self gutterImage:@"Folding Bottom Pressed"] ],
 	};
 
 	[self updateGutterHeight];
