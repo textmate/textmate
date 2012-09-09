@@ -235,12 +235,7 @@ private:
 	if(observableController != textView || ![[NSArray arrayWithObjects:&ObservedTextViewKeyPaths[0] count:sizeofA(ObservedTextViewKeyPaths)] containsObject:aKeyPath])
 		return;
 
-	// if([aKeyPath isEqualToString:@"document.grammarUUID"])
-	// {
-	// 	NSString* uuidString = document.grammarUUID;
-	// 	statusBar.grammarName = uuidString ? [NSString stringWithCxxString:bundles::lookup([uuidString UTF8String])->name()] : nil;
-	// }
-	/*else*/ if([aKeyPath isEqualToString:@"selectionString"])
+	if([aKeyPath isEqualToString:@"selectionString"])
 	{
 		char const* str = [[textView valueForKey:@"selectionString"] UTF8String] ?: "1";
 		[gutterView setHighlightedRange:str];
