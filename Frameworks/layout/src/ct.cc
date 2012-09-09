@@ -4,6 +4,40 @@
 #include <text/utf8.h>
 #include <text/utf16.h>
 
+namespace ng
+{
+	// =============
+	// = context_t =
+	// =============
+
+	context_t::context_t (CGContextRef context, CGImageRef spellingDot, std::function<CGImageRef(double, double)> foldingDotsFactory) : _context(context), _spelling_dot(spellingDot), _folding_dots_create(foldingDotsFactory)
+	{
+		if(_spelling_dot)
+			CFRetain(_spelling_dot);
+	}
+
+	context_t::~context_t ()
+	{
+		if(_spelling_dot)
+			CFRelease(_spelling_dot);
+		iterate(pair, _folding_dots_cache)
+			CFRelease(pair->second);
+	}
+
+	CGImageRef context_t::folding_dots (double width, double height) const
+	{
+		if(!_folding_dots_create)
+			return NULL;
+
+		auto size = std::make_pair(width, height);
+		auto it = _folding_dots_cache.find(size);
+		if(it == _folding_dots_cache.end())
+			it = _folding_dots_cache.insert(std::make_pair(size, _folding_dots_create(width, height))).first;
+		return it->second;
+	}
+
+} /* ng */
+
 namespace ct
 {
 	// =============
@@ -100,10 +134,10 @@ namespace ct
 
 	static void draw_spelling_dot (ng::context_t const& context, CGRect const& rect)
 	{
-		if(context.spelling_dot)
+		if(CGImageRef spellingDot = context.spelling_dot())
 		{
 			for(CGFloat x = rect.origin.x; x < rect.origin.x + rect.size.width - 0.5; x += 4)
-				CGContextDrawImage(context, CGRectMake(x, rect.origin.y, 4, 3), context.spelling_dot);
+				CGContextDrawImage(context, CGRectMake(x, rect.origin.y, 4, 3), spellingDot);
 		}
 	}
 

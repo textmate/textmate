@@ -7,11 +7,18 @@ namespace ng
 {
 	struct PUBLIC context_t
 	{
-		context_t (CGContextRef context, CGImageRef spellingDot = nil) : context(context), spelling_dot(spellingDot) { }
-		operator CGContextRef () const { return context; }
+		context_t (CGContextRef context, CGImageRef spellingDot = nil, std::function<CGImageRef(double, double)> foldingDotsFactory = std::function<CGImageRef(double, double)>());
+		~context_t ();
 
-		CGContextRef context;
-		CGImageRef spelling_dot;
+		operator CGContextRef () const      { return _context; }
+		CGImageRef spelling_dot () const    { return _spelling_dot; }
+		CGImageRef folding_dots (double, double) const;
+
+	private:
+		CGContextRef _context;
+		CGImageRef _spelling_dot;
+		std::function<CGImageRef(double, double)> _folding_dots_create;
+		mutable std::map<std::pair<double, double>, CGImageRef> _folding_dots_cache;
 	};
 
 } /* ng */
