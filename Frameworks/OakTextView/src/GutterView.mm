@@ -344,35 +344,37 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 				BOOL isHoveringRect = NSMouseInRect(mouseHoveringAtPoint, columnRect, [self isFlipped]);
 				BOOL isDownInRect   = NSMouseInRect(mouseDownAtPoint,     columnRect, [self isFlipped]);
 
+				if(selectedRow && isDownInRect)        [self.selectionIconPressedColor set];
+				else if(selectedRow && isHoveringRect) [self.selectionIconHoverColor   set];
+				else if(selectedRow)                   [self.selectionIconColor        set];
+				else if(isDownInRect)                  [self.iconPressedColor          set];
+				else if(isHoveringRect)                [self.iconHoverColor            set];
+				else                                   [self.iconColor                 set];
+
 				NSImage* image = [self imageForColumn:dataSource->identifier atLine:record.lineNumber hovering:isHoveringRect && NSEqualPoints(mouseDownAtPoint, NSMakePoint(-1, -1)) pressed:isHoveringRect && isDownInRect];
 				if([image size].height > 0 && [image size].width > 0)
 				{
 					// The placement of the center of image is aligned with the center of the capHeight.
 					CGFloat center = record.baseline - ([self.lineNumberFont capHeight] / 2);
-
 					CGFloat x = round((NSWidth(columnRect) - [image size].width) / 2);
 					CGFloat y = round(center - ([image size].height / 2));
+					NSRect imageRect = NSMakeRect(NSMinX(columnRect) + x, NSMinY(columnRect) + y, [image size].width, [image size].height);
 
-					NSImage* overlayImage = [[[NSImage alloc] initWithSize:[image size]] autorelease];
+					[NSGraphicsContext saveGraphicsState];
 
-					[overlayImage lockFocus];
-					[image drawAdjustedAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-					if(selectedRow)
-					{
-						if(isHoveringRect && !isDownInRect) [self.selectionIconHoverColor set];
-						else if(isHoveringRect && isDownInRect) [self.selectionIconPressedColor set];
-						else [self.selectionIconColor set];
-					}
-					else
-					{
-						if(isHoveringRect && !isDownInRect) [self.iconHoverColor set];
-						else if(isHoveringRect && isDownInRect) [self.iconPressedColor set];
-						else [self.iconColor set];
-					}
-					NSRectFillUsingOperation(NSMakeRect(0, 0, [image size].width, [image size].height), NSCompositeSourceAtop);
-					[overlayImage unlockFocus];
+					NSAffineTransform* transform = [NSAffineTransform transform];
+					[transform translateXBy:0 yBy:NSMaxY(imageRect)];
+					[transform scaleXBy:1 yBy:-1];
+					[transform concat];
+					imageRect.origin.y = 0;
 
-					[overlayImage drawAdjustedAtPoint:NSMakePoint(NSMinX(columnRect) + x, NSMinY(columnRect) + y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+					CGImageRef cgImage = [image CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil];
+					CGImageRef imageMask = CGImageMaskCreate(NSWidth(imageRect), NSHeight(imageRect), CGImageGetBitsPerComponent(cgImage), CGImageGetBitsPerPixel(cgImage), CGImageGetBytesPerRow(cgImage), CGImageGetDataProvider(cgImage), NULL, false);
+					CGContextClipToMask((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], imageRect, imageMask);
+					CFRelease(imageMask);
+
+					NSRectFillUsingOperation(imageRect, NSCompositeSourceOver);
+					[NSGraphicsContext restoreGraphicsState];
 				}
 			}
 		}
