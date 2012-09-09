@@ -33,6 +33,8 @@ namespace ct
 		_ascent       = CTFontGetAscent(font);
 		_descent      = CTFontGetDescent(font);
 		_leading      = CTFontGetLeading(font);
+		_x_height     = CTFontGetXHeight(font);
+		_cap_height   = CTFontGetCapHeight(font);
 		_column_width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
 
 		_ascent_delta  = read_double_from_defaults(CFSTR("fontAscentDelta"), 1);

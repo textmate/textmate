@@ -25,6 +25,8 @@ namespace ct
 		CGFloat ascent () const       { return _ascent;       }
 		CGFloat descent () const      { return _descent;      }
 		CGFloat leading () const      { return _leading;      }
+		CGFloat x_height () const     { return _x_height;     }
+		CGFloat cap_height () const   { return _cap_height;   }
 		CGFloat column_width () const { return _column_width; }
 
 		CGFloat baseline (CGFloat minAscent = 0) const { return round(std::max(minAscent, _ascent) + _ascent_delta); }
@@ -35,6 +37,8 @@ namespace ct
 		CGFloat _ascent;
 		CGFloat _descent;
 		CGFloat _leading;
+		CGFloat _x_height;
+		CGFloat _cap_height;
 		CGFloat _column_width;
 
 		CGFloat _ascent_delta  = 1;
