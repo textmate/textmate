@@ -1645,6 +1645,10 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[aMenuItem setState:[self softWrap] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
 		[aMenuItem setState:(layout && layout->draw_wrap_column()) ? NSOnState : NSOffState];
+	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
+		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
+	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
+		[aMenuItem setState:[[NSString stringWithCxxString:document->buffer().spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
 	{
 		static NSInteger const Presets[] = { NSWrapColumnWindowWidth, 40, 80 };
@@ -1848,6 +1852,21 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		layout->set_draw_wrap_column(flag);
 		settings_t::set(kSettingsShowWrapColumnKey, flag);
 	}
+}
+
+- (void)toggleContinuousSpellChecking:(id)sender
+{
+	bool flag = !document->buffer().live_spelling();
+	document->buffer().set_live_spelling(flag);
+	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
+}
+
+- (void)takeSpellingLanguageFrom:(id)sender
+{
+	NSString* lang = (NSString*)[sender representedObject];
+	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
+	document->buffer().set_spelling_language(to_s(lang));
+	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
 }
 
 - (scope::context_t const&)scopeContext

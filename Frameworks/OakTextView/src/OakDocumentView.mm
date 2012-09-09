@@ -367,21 +367,6 @@ private:
 	else	[[NSUserDefaults standardUserDefaults] setObject:YES_obj forKey:@"DocumentView Disable Line Numbers"];
 }
 
-- (void)toggleContinuousSpellChecking:(id)sender
-{
-	bool flag = !document->buffer().live_spelling();
-	document->buffer().set_live_spelling(flag);
-	settings_t::set(kSettingsSpellCheckingKey, flag, document->file_type(), document->path());
-}
-
-- (void)takeSpellingLanguageFrom:(id)sender
-{
-	NSString* lang = (NSString*)[sender representedObject];
-	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
-	document->buffer().set_spelling_language(to_s(lang));
-	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
-}
-
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
 	if([aMenuItem action] == @selector(toggleLineNumbers:))
@@ -390,10 +375,6 @@ private:
 		[aMenuItem setState:[textView theme]->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
 		[aMenuItem setState:textView.tabSize == [aMenuItem tag] ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
-		[aMenuItem setState:document->buffer().live_spelling() ? NSOnState : NSOffState];
-	else if([aMenuItem action] == @selector(takeSpellingLanguageFrom:))
-		[aMenuItem setState:[[NSString stringWithCxxString:document->buffer().spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
 	return YES;
 }
 
