@@ -439,6 +439,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
 		spellingDotImage = [[NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]] retain];
+		foldingDotsImage = [[NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]] retain];
 
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
@@ -454,6 +455,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	[liveSearchString release];
 	[self setDocument:document::document_ptr()];
 	[spellingDotImage release];
+	[foldingDotsImage release];
 	[super dealloc];
 }
 
@@ -585,7 +587,16 @@ static std::string shell_quote (std::vector<std::string> paths)
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!antiAlias)
 		CGContextSetShouldAntialias(context, false);
-	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil]), aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
+
+	NSImage* pdfImage = foldingDotsImage;
+	auto foldingDotsFactory = [&pdfImage](double width, double height) -> CGImageRef
+	{
+		NSRect rect = NSMakeRect(0, 0, width, height);
+		CGImageRef img = [pdfImage CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:nil];
+		return CGImageMaskCreate(width, height, CGImageGetBitsPerComponent(img), CGImageGetBitsPerPixel(img), CGImageGetBytesPerRow(img), CGImageGetDataProvider(img), NULL, false);
+	};
+
+	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
 // ===============

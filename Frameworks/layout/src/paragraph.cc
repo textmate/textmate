@@ -6,6 +6,8 @@
 #include <text/utf8.h>
 #include <regexp/format_string.h>
 
+static double const kFoldingDotsRatio = 16.0 / 10.0; // FIXME Folding dots ratio should be obtained from the image and given to layout_t
+
 namespace ng
 {
 	namespace
@@ -128,9 +130,7 @@ namespace ng
 
 			case kNodeTypeFolding:
 			{
-				std::map<size_t, scope::scope_t> scopes;
-				scopes[0] = buffer.scope(bufferOffset).right.append("deco.folding");
-				_line.reset(new ct::line_t("…", scopes, theme, fontName, fontSize, NULL));
+				_width = round(metrics.cap_height() * kFoldingDotsRatio);
 			}
 			break;
 
@@ -198,10 +198,6 @@ namespace ng
 			scope::scope_t scope = buffer.scope(bufferOffset).right;
 			switch(_type)
 			{
-				case kNodeTypeFolding:
-					str = "…";
-					scope = scope.append("deco.folding");
-				break;
 				case kNodeTypeTab:
 					str = "‣";
 					scope = scope.append("deco.invisible.tab");
@@ -216,6 +212,25 @@ namespace ng
 			{
 				styles_t const styles = theme->styles_for_scope(scope, fontName, fontSize);
 				draw_line(CGPointMake(anchor.x, anchor.y + baseline), str, styles.foreground(), styles.font(), context, isFlipped);
+			}
+
+			if(_type == kNodeTypeFolding)
+			{
+				styles_t const styles = theme->styles_for_scope(scope.append("deco.folding"), fontName, fontSize);
+
+				CGFloat x1 = round(anchor.x);
+				CGFloat x2 = round(anchor.x + _width);
+				CGFloat y2 = round(anchor.y + baseline);
+				CGFloat y1 = y2 - round(_width / kFoldingDotsRatio);
+
+				CGRect rect = CGRectMake(x1, y1, x2 - x1, y2 - y1);
+				if(CGImageRef imageMask = context.folding_dots(CGRectGetWidth(rect), CGRectGetHeight(rect)))
+				{
+					CGContextSaveGState(context);
+					CGContextClipToMask(context, rect, imageMask);
+					render::fill_rect(context, styles.foreground(), rect);
+					CGContextRestoreGState(context);
+				}
 			}
 		}
 	}

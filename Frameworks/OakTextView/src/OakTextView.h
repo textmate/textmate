@@ -39,6 +39,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	NSTimer* blinkCaretTimer;
 
 	NSImage* spellingDotImage;
+	NSImage* foldingDotsImage;
 
 	// =================
 	// = Mouse Support =
