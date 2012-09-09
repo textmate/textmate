@@ -89,7 +89,7 @@ static void schedule_backup (oak::uuid_t const& docId)
 	CFAbsoluteTime backupAt = std::min(CFAbsoluteTimeGetCurrent() + 2, record.upper_limit);
 	if(!record.timer || record.backup_at < backupAt)
 	{
-		record.timer = cf::setup_timer(backupAt - CFAbsoluteTimeGetCurrent(), cf::create_callback(&perform_backup, docId));
+		record.timer = cf::setup_timer(backupAt - CFAbsoluteTimeGetCurrent(), std::bind(&perform_backup, docId));
 		record.backup_at = backupAt;
 	}
 }

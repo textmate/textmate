@@ -18,7 +18,7 @@ namespace document
 		static cf::timer_ptr SessionBackupTimer;
 
 		D(DBF_Session, bug("\n"););
-		SessionBackupTimer = cf::setup_timer(0.5, cf::create_callback<void*>(&perform_session_backup, NULL));
+		SessionBackupTimer = cf::setup_timer(0.5, std::bind(&perform_session_backup, nullptr));
 	}
 
 } /* document */

@@ -225,7 +225,7 @@ namespace fs
 
 		void schedule_save ()
 		{
-			_save_timer = cf::setup_timer(1, cf::create_callback(&watch_info_t::save, this));
+			_save_timer = cf::setup_timer(1, std::bind(&watch_info_t::save, this));
 		}
 
 		void rescan (std::string cwd, std::string const& path, fs::node_t& node)

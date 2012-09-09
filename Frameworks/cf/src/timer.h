@@ -10,7 +10,7 @@ namespace cf
 	{
 		WATCH_LEAKS(cf::timer_t);
 
-		timer_t (CFAbsoluteTime fireAt, callback_ptr callback) : _callback(callback)
+		timer_t (CFAbsoluteTime fireAt, std::function<void()> const& callback) : _callback(callback)
 		{
 			CFRunLoopTimerContext context = { 0, this, NULL, NULL, NULL };
 			_timer = CFRunLoopTimerCreate(NULL, fireAt, 0, 0, 0, &timer_t::fire, &context);
@@ -25,18 +25,18 @@ namespace cf
 		}
 
 	private:
-		callback_ptr _callback;
+		std::function<void()> _callback;
 		CFRunLoopTimerRef _timer;
 
 		static void fire (CFRunLoopTimerRef timer, void* info)
 		{
-			((timer_t*)info)->_callback->signal();
+			((timer_t*)info)->_callback();
 		}
 	};
 
 	typedef std::shared_ptr<timer_t> timer_ptr;
 
-	inline timer_ptr setup_timer (CFAbsoluteTime delay, callback_ptr callback)
+	inline timer_ptr setup_timer (CFAbsoluteTime delay, std::function<void()> const& callback)
 	{
 		return timer_ptr(new timer_t(CFAbsoluteTimeGetCurrent() + delay, callback));
 	}
