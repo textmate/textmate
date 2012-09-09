@@ -15,6 +15,33 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 # Release Notes
 
+## 2012-09-09 (r9303)
+
+* When toggling _Check Spelling as You Type_ (⌥⌘;) or changing spelling language, we now recheck/refresh the document.
+* Remove overwrite and freehanded toggles from the UI (_Edit_ → _Mode_ and status bar). If you wish to edit “freehanded” you can ⌥-click to get a caret that moves unrestrained.
+* An image is now used as placeholder for folded text. It defaults to the color of the text’s color but you can add a theme style scoped to `deco.folding` to change it.
+* A few updates to gutter theming, the colors now need to go in their own dictionary in the theme with a key of `gutterSettings`, e.g.:
+
+		gutterSettings = {
+			divider             = '#1A3853';
+			foreground          = '#111111';
+			background          = '#888888';
+			selectionForeground = '#FFFFFF';
+			selectionBackground = '#3A68A3';
+		};
+
+	In addition to the above keys you can now also set:
+
+	- `icons`
+	- `iconsHover`
+	- `iconsPressed`
+	- `selectionIcons`
+	- `selectionIconsHover`
+	- `selectionIconsPressed`
+	- `selectionBorder`
+
+	If unset, the icon colors default to the colors used for text and selection border defaults to the divider color.
+
 ## 2012-09-07 (r9302)
 
 ### Proxy Items
