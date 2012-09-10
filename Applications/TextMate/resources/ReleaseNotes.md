@@ -15,6 +15,10 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 # Release Notes
 
+## 2012-09-10 (r9305)
+
+* Fix crash introduced in r9303.
+
 ## 2012-09-09 (r9304)
 
 * Escape PAC URL strings when they are invalid. Using “Choose File” in network settings could lead to a file URL with spaces which would cause a crash when TextMate needed to do network requests (for software update and crash report submissions).
