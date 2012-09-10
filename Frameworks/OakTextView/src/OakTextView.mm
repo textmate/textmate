@@ -407,11 +407,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 				layout->remove_enclosing_folds(range->min().index, range->max().index);
 		}
 
-		auto bgColor = theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background();
-		[[self enclosingScrollView] setBackgroundColor:[NSColor tmColorWithCGColor:bgColor]];
-		SetLionScrollerKnobStyle([self enclosingScrollView], cf::color_is_dark(bgColor) ? NSScrollerKnobStyleLight : NSScrollerKnobStyleDark);
-		[[self window] setOpaque:CGColorGetAlpha(bgColor) == 1];
-
 		[self reflectDocumentSize];
 		[self updateSelection];
 
@@ -1727,15 +1722,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (void)setTheme:(theme_ptr const&)newTheme
 {
 	theme = newTheme;
-
-	if(document)
-	{
-		auto bgColor = theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background();
-		[[self enclosingScrollView] setBackgroundColor:[NSColor tmColorWithCGColor:bgColor]];
-		SetLionScrollerKnobStyle([self enclosingScrollView], cf::color_is_dark(bgColor) ? NSScrollerKnobStyleLight : NSScrollerKnobStyleDark);
-		[[self window] setOpaque:CGColorGetAlpha(bgColor) == 1];
-	}
-
 	if(layout)
 	{
 		AUTO_REFRESH;

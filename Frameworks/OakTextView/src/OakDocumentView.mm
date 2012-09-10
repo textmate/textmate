@@ -326,8 +326,26 @@ private:
 {
 	if(document && [textView theme])
 	{
+		auto theme = [textView theme];
+
+		[[self window] setOpaque:!theme->is_transparent()];
+		[textScrollView setBackgroundColor:[NSColor tmColorWithCGColor:theme->background(document->file_type())]];
+
+		if(theme->is_dark())
+		{
+			NSImage* whiteIBeamImage = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
+			[whiteIBeamImage setSize:[[[NSCursor IBeamCursor] image] size]];
+			[textView setIbeamCursor:[[[NSCursor alloc] initWithImage:whiteIBeamImage hotSpot:NSMakePoint(4, 9)] autorelease]];
+			[textScrollView setScrollerKnobStyle:NSScrollerKnobStyleLight];
+		}
+		else
+		{
+			[textView setIbeamCursor:[NSCursor IBeamCursor]];
+			[textScrollView setScrollerKnobStyle:NSScrollerKnobStyleDark];
+		}
+
 		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
-		auto styles = [textView theme]->gutter_styles();
+		auto styles = theme->gutter_styles();
 		self.gutterDividerColor = [NSColor tmColorWithCGColor:styles.divider];
 
 		gutterView.foregroundColor           = [NSColor tmColorWithCGColor:styles.foreground];
