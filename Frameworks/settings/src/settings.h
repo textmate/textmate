@@ -6,7 +6,6 @@
 #include <oak/oak.h>
 #include <text/format.h>
 #include <scope/scope.h>
-#include <plist/uuid.h>
 
 struct PUBLIC settings_t
 {
@@ -57,7 +56,7 @@ private:
 	static std::string to_str (char const* value)               { return value;                     }
 };
 
-PUBLIC settings_t settings_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR, oak::uuid_t const& uuid = oak::uuid_t(), std::map<std::string, std::string> variables = std::map<std::string, std::string>());
+PUBLIC settings_t settings_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR, std::map<std::string, std::string> variables = std::map<std::string, std::string>());
 PUBLIC std::map<std::string, std::string> variables_for_path (std::string const& documentPath = NULL_STR, scope::scope_t const& scope = "", std::map<std::string, std::string> existingVariables = std::map<std::string, std::string>());
 
 #endif /* end of include guard: SETTINGS_H_F99MMG5F */

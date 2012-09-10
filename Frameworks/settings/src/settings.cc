@@ -3,7 +3,6 @@
 #include "track_paths.h"
 #include <OakSystem/application.h>
 #include <plist/plist.h>
-#include <plist/uuid.h>
 #include <oak/oak.h>
 #include <regexp/format_string.h>
 #include <regexp/glob.h>
@@ -197,7 +196,7 @@ void settings_t::set_global_settings_path (std::string const& path)
 	global_settings_path() = path;
 }
 
-settings_t settings_for_path (std::string const& path, scope::scope_t const& scope, std::string const& directory, oak::uuid_t const& uuid, std::map<std::string, std::string> variables)
+settings_t settings_for_path (std::string const& path, scope::scope_t const& scope, std::string const& directory, std::map<std::string, std::string> variables)
 {
 	return expanded_variables_for(directory != NULL_STR ? directory : (path != NULL_STR ? path::parent(path) : path::home()), path, scope, variables);
 }
