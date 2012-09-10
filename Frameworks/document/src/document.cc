@@ -478,22 +478,6 @@ namespace document
 		return _backup_path;
 	}
 
-	bool is_binary (std::string const& path)
-	{
-		D(DBF_Document_Binary, bug("%s\n", path.c_str()););
-		if(path == NULL_STR)
-			return false;
-
-		settings_t const& settings = settings_for_path(path);
-		if(settings.has(kSettingsBinaryKey))
-		{
-			D(DBF_Document_Binary, bug(".tm_properties reports it as binary: %s\n", BSTR(path::glob_t(settings.get(kSettingsBinaryKey, "")).does_match(path))););
-			return path::glob_t(settings.get(kSettingsBinaryKey, "")).does_match(path);
-		}
-
-		return false;
-	}
-
 	std::string document_t::file_type () const
 	{
 		D(DBF_Document, bug("%s, %s\n", display_name().c_str(), _file_type.c_str()););

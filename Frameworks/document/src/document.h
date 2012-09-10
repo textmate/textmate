@@ -341,7 +341,6 @@ namespace document
 	PUBLIC document_ptr create (std::string const& path = NULL_STR);
 	PUBLIC document_ptr find (oak::uuid_t const& uuid, bool searchBackups = true);
 	PUBLIC document_ptr from_content (std::string const& content, std::string const& fileType = NULL_STR);
-	PUBLIC bool is_binary (std::string const& path);
 
 	// ====================
 	// = Document scanner =

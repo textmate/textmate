@@ -29,6 +29,8 @@
 #import <ns/ns.h>
 #import <text/ctype.h>
 #import <regexp/format_string.h>
+#import <regexp/glob.h>
+#import <settings/settings.h>
 
 NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
 
@@ -96,6 +98,18 @@ static NSURL* ParentForURL (NSURL* url)
 		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
 	else
 		return [[[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:parentPath] autorelease];
+}
+
+static bool is_binary (std::string const& path)
+{
+	if(path == NULL_STR)
+		return false;
+
+	settings_t const& settings = settings_for_path(path);
+	if(settings.has(kSettingsBinaryKey))
+		return path::glob_t(settings.get(kSettingsBinaryKey, "")).does_match(path);
+
+	return false;
 }
 
 @implementation OakFileBrowser
@@ -235,7 +249,7 @@ static NSURL* ParentForURL (NSURL* url)
 		FSItemURLType type = item.urlType;
 		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
 			type = FSItemURLTypeFolder;
-		else if(type == FSItemURLTypeFile && document::is_binary([itemURL.path fileSystemRepresentation]))
+		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]))
 			type = FSItemURLTypePackage;
 		else if(type == FSItemURLTypeAlias)
 		{
