@@ -132,12 +132,16 @@ namespace ct
 		return CTLineGetOffsetForStringIndex(_line.get(), utf16::distance(_text.begin(), _text.begin() + index), NULL);
 	}
 
-	static void draw_spelling_dot (ng::context_t const& context, CGRect const& rect)
+	static void draw_spelling_dot (ng::context_t const& context, CGRect const& rect, bool isFlipped)
 	{
 		if(CGImageRef spellingDot = context.spelling_dot())
 		{
+			CGContextSaveGState(context);
+			if(isFlipped)
+				CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * rect.origin.y + 3));
 			for(CGFloat x = rect.origin.x; x < rect.origin.x + rect.size.width - 0.5; x += 4)
 				CGContextDrawImage(context, CGRectMake(x, rect.origin.y, 4, 3), spellingDot);
+			CGContextRestoreGState(context);
 		}
 	}
 
@@ -156,7 +160,7 @@ namespace ct
 			CFIndex length   = utf16::distance(_text.begin() + pair->first, _text.begin() + pair->second);
 			CGFloat x1 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), location, NULL));
 			CGFloat x2 = round(pos.x + CTLineGetOffsetForStringIndex(_line.get(), location + length, NULL));
-			draw_spelling_dot(context, CGRectMake(x1, pos.y + 1, x2 - x1, 3));
+			draw_spelling_dot(context, CGRectMake(x1, pos.y + 1, x2 - x1, 3), isFlipped);
 		}
 
 		CGContextSaveGState(context);
