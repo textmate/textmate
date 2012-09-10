@@ -581,8 +581,11 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)drawRect:(NSRect)aRect
 {
-	[[NSColor clearColor] set];
-	NSRectFill(aRect); // Only necessary when theme uses a transparent background.
+	if(theme && theme->is_transparent())
+	{
+		[[NSColor clearColor] set];
+		NSRectFill(aRect);
+	}
 
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!antiAlias)
