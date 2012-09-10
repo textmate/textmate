@@ -1741,8 +1741,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		AUTO_REFRESH;
 		layout->set_theme(newTheme);
 	}
-
-	[[self window] invalidateCursorRectsForView:self];
 }
 
 - (void)setFont:(NSFont*)newFont
@@ -2236,28 +2234,25 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 // = Cursor Support =
 // ==================
 
-- (NSCursor*)IBeamCursor
+- (NSCursor*)ibeamCursor
 {
-	NSCursor* ibeamRegular = [NSCursor IBeamCursor];
-	
-	if(cf::color_is_dark(theme->styles_for_scope(document->buffer().scope(0).left, fontName, fontSize).background()))
+	return ibeamCursor;
+}
+
+- (void)setIbeamCursor:(NSCursor*)aCursor
+{
+	if(ibeamCursor != aCursor)
 	{
-		static NSCursor* ibeamCursor = nil;
-		if(!ibeamCursor)
-		{
-			NSImage* ibeamWhite = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
-			[ibeamWhite setSize:[[ibeamRegular image] size]];
-			ibeamCursor = [[NSCursor alloc] initWithImage:ibeamWhite hotSpot:NSMakePoint(4, 9)];
-		}
-		return ibeamCursor;
+		[ibeamCursor release];
+		ibeamCursor = [aCursor retain];
+		[[self window] invalidateCursorRectsForView:self];
 	}
-	return ibeamRegular;
 }
 
 - (void)resetCursorRects
 {
 	D(DBF_OakTextView_MouseEvents, bug("drag: %s, column selection: %s\n", BSTR(showDragCursor), BSTR(showColumnSelectionCursor)););
-	[self addCursorRect:[self visibleRect] cursor:showDragCursor ? [NSCursor arrowCursor] : (showColumnSelectionCursor ? [NSCursor crosshairCursor] : [self IBeamCursor])];
+	[self addCursorRect:[self visibleRect] cursor:showDragCursor ? [NSCursor arrowCursor] : (showColumnSelectionCursor ? [NSCursor crosshairCursor] : [self ibeamCursor])];
 }
 
 - (void)setShowDragCursor:(BOOL)flag

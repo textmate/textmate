@@ -45,6 +45,8 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	// = Mouse Support =
 	// =================
 
+	NSCursor* ibeamCursor;
+
 	NSPoint mouseDownPos;
 	ng::index_t mouseDownIndex;
 	NSInteger mouseDownModifierFlags;
@@ -89,6 +91,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 }
 @property (nonatomic, assign) document::document_ptr const& document;
 @property (nonatomic, assign) theme_ptr const&              theme;
+@property (nonatomic, retain) NSCursor*                     ibeamCursor;
 @property (nonatomic, retain) NSFont*                       font;
 @property (nonatomic, assign) BOOL                          antiAlias;
 @property (nonatomic, assign) size_t                        tabSize;
