@@ -15,6 +15,11 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 # Release Notes
 
+## 2012-09-10 (r9306)
+
+* Spelling dot was drawn upside down.
+* Gutter and folded text images were drawn using wrong dimensions on retina Macs.
+
 ## 2012-09-10 (r9305)
 
 * Fix crash introduced in r9303.
