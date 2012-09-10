@@ -10,12 +10,6 @@
 
 OAK_DEBUG_VAR(DocumentController_Tabs);
 
-@interface DocumentController ()
-@property (nonatomic, retain) NSString* windowTitle;
-@property (nonatomic, retain) NSString* representedFile;
-@property (nonatomic, assign) BOOL isDocumentEdited;
-@end
-
 namespace
 {
 	struct callback_info_t
@@ -41,10 +35,7 @@ namespace
 	document::schedule_session_backup();
 
 	// This is also set after open succeeds
-	settings_t const& settings = [self selectedDocument]->settings();
-	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
-	self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
-	self.isDocumentEdited = [self selectedDocument]->is_modified();
+	[self synchronizeWindowTitle];
 
 	if(windowHasLoaded)
 		[[DocumentOpenHelper new] tryOpenDocument:self.selectedDocument forWindow:self.window delegate:self];
@@ -75,12 +66,7 @@ namespace
 {
 	D(DBF_DocumentController_Tabs, bug("\n"););
 	if(*aDocument == *[self selectedDocument])
-	{
-		settings_t const& settings = [self selectedDocument]->settings();
-		self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
-		self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
-		self.isDocumentEdited = [self selectedDocument]->is_modified();
-	}
+		[self synchronizeWindowTitle];
 	[tabBarView reloadData];
 	[self updateFileBrowserStatus:self];
 	document::schedule_session_backup();
@@ -283,10 +269,7 @@ namespace
 		}
 	}
 
-	settings_t const& settings = aDocument->settings();
-	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, aDocument->display_name())];
-	self.representedFile  = [NSString stringWithCxxString:aDocument->path()];
-	self.isDocumentEdited = aDocument->is_modified();
+	[self synchronizeWindowTitle];
 
 	[documentView setDocument:aDocument];
 	[self makeTextViewFirstResponder:self];

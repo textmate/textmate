@@ -77,6 +77,7 @@ PUBLIC @interface DocumentController : NSWindowController <OakFileBrowserDelegat
 + (DocumentController*)controllerForUUID:(oak::uuid_t const&)aUUID;
 
 - (id)init;
+- (void)synchronizeWindowTitle;
 
 - (IBAction)goToFileCounterpart:(id)sender;
 - (IBAction)selectNextTab:(id)sender;

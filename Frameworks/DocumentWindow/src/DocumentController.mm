@@ -387,8 +387,7 @@ OAK_DEBUG_VAR(DocumentController);
 {
 	if(!documentTabs.empty())
 		[textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
-	settings_t const& settings = [self selectedDocument]->settings();
-	self.windowTitle = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
+	[self synchronizeWindowTitle];
 }
 
 - (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
@@ -494,6 +493,14 @@ OAK_DEBUG_VAR(DocumentController);
 
 	self.selectedTabIndex = selectedTabIndex;
 	[self updateProxyIcon];
+}
+
+- (void)synchronizeWindowTitle
+{
+	settings_t const& settings = [self selectedDocument]->settings();
+	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
+	self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
+	self.isDocumentEdited = [self selectedDocument]->is_modified();
 }
 
 - (void)windowDidBecomeMain:(NSNotification*)aNotification
