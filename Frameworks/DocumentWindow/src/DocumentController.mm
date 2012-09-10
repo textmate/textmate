@@ -368,13 +368,8 @@ OAK_DEBUG_VAR(DocumentController);
 	for(NSWindow* window in [NSApp orderedWindows])
 	{
 		DocumentController* controller = (DocumentController*)[window delegate];
-		if([controller isKindOfClass:[DocumentController class]] && !controller->documentTabs.empty())
-		{
-			[controller->textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
-
-			settings_t const& settings = [controller selectedDocument]->settings();
-			controller.windowTitle = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [controller selectedDocument]->display_name())];
-		}
+		if([controller isKindOfClass:[DocumentController class]])
+			[controller performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
 	}
 }
 
@@ -384,8 +379,21 @@ OAK_DEBUG_VAR(DocumentController);
 	{
 		DocumentController* controller = (DocumentController*)[window delegate];
 		if([controller isKindOfClass:[DocumentController class]] && !controller->documentTabs.empty())
-			[controller->textView performSelector:@selector(applicationDidResignActiveNotification:) withObject:aNotification];
+			[controller performSelector:@selector(applicationDidResignActiveNotification:) withObject:aNotification];
 	}
+}
+
+- (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
+{
+	if(!documentTabs.empty())
+		[textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
+	settings_t const& settings = [self selectedDocument]->settings();
+	self.windowTitle = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
+}
+
+- (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
+{
+	[textView performSelector:@selector(applicationDidResignActiveNotification:) withObject:aNotification];
 }
 
 // =========
