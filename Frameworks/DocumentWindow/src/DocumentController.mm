@@ -847,9 +847,16 @@ OAK_DEBUG_VAR(DocumentController);
 
 - (void)performBundleItem:(bundles::item_ptr const&)anItem
 {
-	[self.window makeFirstResponder:textView];
-	[self.window makeKeyAndOrderFront:self];
-	[textView performBundleItem:anItem];
+	if(anItem->kind() == bundles::kItemTypeTheme)
+	{
+		[documentView setThemeWithUUID:[NSString stringWithCxxString:anItem->uuid()]];
+	}
+	else
+	{
+		[self.window makeFirstResponder:textView];
+		[self.window makeKeyAndOrderFront:self];
+		[textView performBundleItem:anItem];
+	}
 }
 
 - (NSPoint)positionForWindowUnderCaret

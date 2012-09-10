@@ -796,13 +796,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 			file::set_type(document->virtual_path(), item->value_for_field(bundles::kFieldGrammarScope));
 		}
 		break;
-
-		case bundles::kItemTypeTheme:
-		{
-			OakDocumentView* documentView = (OakDocumentView*)[[self enclosingScrollView] superview];
-			[documentView setThemeWithUUID:[NSString stringWithCxxString:item->uuid()]];
-		}
-		break;
 	}
 }
 
