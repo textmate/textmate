@@ -53,6 +53,10 @@ struct PUBLIC theme_t
 	~theme_t ();
 
 	oak::uuid_t const& uuid () const;
+	CGColorRef foreground () const;
+	CGColorRef background (std::string const& fileType = NULL_STR) const;
+	bool is_dark () const;
+	bool is_transparent () const;
 	gutter_styles_t const& gutter_styles () const;
 	styles_t const& styles_for_scope (scope::context_t const& scope, std::string fontName, CGFloat fontSize) const;
 
@@ -108,6 +112,10 @@ private:
 	bundles::item_ptr _item;
 	std::vector<decomposed_style_t> _styles;
 	gutter_styles_t _gutter_styles;
+	cf::color_t _foreground;
+	cf::color_t _background;
+	bool _is_dark;
+	bool _is_transparent;
 	callback_t _callback;
 
 	typedef std::tuple<scope::context_t, std::string, CGFloat> key_t; // scope, font name, font size

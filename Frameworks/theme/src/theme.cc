@@ -190,22 +190,25 @@ void theme_t::setup_styles ()
 		}
 	}
 
+	// =======================================
+	// = Find “global” foreground/background =
+	// =======================================
+
+	// We assume that the first style is the unscoped root style
+	_foreground     = _styles.empty() ? cf::color_t("#FFFFFF") : _styles[0].foreground;
+	_background     = _styles.empty() ? cf::color_t("#000000") : _styles[0].background;
+	_is_dark        = color_is_dark(_background);
+	_is_transparent = _background.alpha() < 1;
+
 	// =========================
 	// = Default Gutter Styles =
 	// =========================
 
-	if(!_styles.empty())
-	{
-		// We assume that the first style is the unscoped root style
-		cf::color_t foreground = _styles[0].foreground;
-		cf::color_t background = _styles[0].background;
-
-		_gutter_styles.divider               = soften(foreground, 0.4);
-		_gutter_styles.foreground            = soften(foreground, 0.5);
-		_gutter_styles.background            = soften(background, 0.87);
-		_gutter_styles.selectionForeground   = soften(foreground, 0.95);
-		_gutter_styles.selectionBackground   = soften(background, 0.95);
-	}
+	_gutter_styles.divider             = soften(_foreground, 0.4);
+	_gutter_styles.foreground          = soften(_foreground, 0.5);
+	_gutter_styles.background          = soften(_background, 0.87);
+	_gutter_styles.selectionForeground = soften(_foreground, 0.95);
+	_gutter_styles.selectionBackground = soften(_background, 0.95);
 
 	plist::dictionary_t gutterSettings;
 	if(plist::get_key_path(_item->plist(), "gutterSettings", gutterSettings))
@@ -243,6 +246,28 @@ oak::uuid_t const& theme_t::uuid () const
 {
 	static oak::uuid_t const FallbackThemeUUID = oak::uuid_t().generate();
 	return _item ? _item->uuid() : FallbackThemeUUID;
+}
+
+CGColorRef theme_t::foreground () const
+{
+	return _foreground;
+}
+
+CGColorRef theme_t::background (std::string const& fileType) const
+{
+	if(fileType != NULL_STR)
+		return styles_for_scope(fileType, NULL_STR, 0).background();
+	return _background;
+}
+
+bool theme_t::is_dark () const
+{
+	return _is_dark;
+}
+
+bool theme_t::is_transparent () const
+{
+	return _is_transparent;
 }
 
 gutter_styles_t const& theme_t::gutter_styles () const
