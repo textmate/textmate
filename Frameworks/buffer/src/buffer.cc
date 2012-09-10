@@ -282,7 +282,7 @@ namespace ng
 		_spelling.reset(flag ? new spelling_t : NULL);
 		add_meta_data(_spelling.get());
 
-		if(flag)
+		if(flag && _spelling)
 			_spelling->recheck(this, 0, size());
 	}
 
@@ -291,7 +291,8 @@ namespace ng
 		if(lang != _spelling_language)
 		{
 			_spelling_language = lang;
-			_spelling->recheck(this, 0, size());
+			if(_spelling)
+				_spelling->recheck(this, 0, size());
 		}
 	}
 
