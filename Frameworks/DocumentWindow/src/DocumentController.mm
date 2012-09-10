@@ -497,10 +497,29 @@ OAK_DEBUG_VAR(DocumentController);
 
 - (void)synchronizeWindowTitle
 {
-	settings_t const& settings = [self selectedDocument]->settings();
-	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, [self selectedDocument]->display_name())];
-	self.representedFile  = [NSString stringWithCxxString:[self selectedDocument]->path()];
-	self.isDocumentEdited = [self selectedDocument]->is_modified();
+	document::document_ptr doc = [self selectedDocument];
+	std::string docDirectory = doc->path() != NULL_STR ? path::parent(doc->path()) : to_s(self.untitledSavePath);
+
+	std::map<std::string, std::string> map;
+	if(doc->path() == NULL_STR)
+	{
+		if(scm::info_ptr info = scm::info(path::join(docDirectory, ".scm-kludge")))
+		{
+			std::string const& branch = info->branch();
+			if(branch != NULL_STR)
+				map["TM_SCM_BRANCH"] = branch;
+
+			std::string const& name = info->scm_name();
+			if(name != NULL_STR)
+				map["TM_SCM_NAME"] = name;
+		}
+	}
+
+	auto settings = settings_for_path(doc->virtual_path(), doc->scope(), docDirectory, doc->variables(map, false));
+
+	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, doc->display_name())];
+	self.representedFile  = [NSString stringWithCxxString:doc->path()];
+	self.isDocumentEdited = doc->is_modified();
 }
 
 - (void)windowDidBecomeMain:(NSNotification*)aNotification
