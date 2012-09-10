@@ -953,18 +953,22 @@ namespace document
 					else if(!_document->is_modified())
 					{
 						D(DBF_Document_WatchFS, bug("changed on disk and we have no local changes, so reverting to that\n"););
+						_document->undo_manager().begin_undo_group(ng::ranges_t(0));
 						_document->_buffer->replace(0, _document->_buffer->size(), yours);
 						_document->_buffer->bump_revision();
 						_document->check_modified(_document->_buffer->revision(), _document->_buffer->revision());
 						_document->mark_pristine();
+						_document->undo_manager().end_undo_group(ng::ranges_t(0));
 					}
 					else
 					{
 						bool conflict = false;
 						std::string const& merged = merge(_document->_pristine_buffer, mine, yours, &conflict);
 						D(DBF_Document_WatchFS, bug("changed on disk and we have local changes, merge conflict %s.\n%s\n", BSTR(conflict), merged.c_str()););
+						_document->undo_manager().begin_undo_group(ng::ranges_t(0));
 						_document->_buffer->replace(0, _document->_buffer->size(), merged);
 						_document->set_revision(_document->_buffer->bump_revision());
+						_document->undo_manager().end_undo_group(ng::ranges_t(0));
 						// TODO if there was a conflict, we shouldn’t take the merged content (but ask user what to do)
 						// TODO mark_pristine() but using ‘yours’
 					}
