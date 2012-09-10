@@ -1651,6 +1651,10 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			[aMenuItem setState:custom ? NSOnState : NSOffState];
 		}
 	}
+	else if([aMenuItem action] == @selector(undo:))
+		return document->undo_manager().can_undo();
+	else if([aMenuItem action] == @selector(redo:))
+		return document->undo_manager().can_redo();
 	return YES;
 }
 
