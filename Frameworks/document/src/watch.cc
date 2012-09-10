@@ -270,6 +270,21 @@ namespace document
 						if(does_exist && (changed.fflags & (NOTE_DELETE | NOTE_WRITE)) == NOTE_DELETE)
 							flags ^= (NOTE_DELETE | NOTE_WRITE);
 
+						if((flags & NOTE_RENAME) == NOTE_RENAME)
+						{
+							for(size_t i = 0; i < 100; ++i)
+							{
+								if(path::exists(it->second->path))
+								{
+									flags ^= NOTE_RENAME | (~flags & NOTE_WRITE);
+									close(it->second->fd);
+									observe(*it->second, it->first);
+									break;
+								}
+								usleep(10);
+							}
+						}
+
 						std::string path = (flags & NOTE_RENAME) == NOTE_RENAME ? path::for_fd(it->second->fd) : NULL_STR;
 						struct { size_t client_id; int flags; std::string* path; } packet = { client_id, flags, path == NULL_STR ? NULL : new std::string(path) };
 						if(write(write_to_master_pipe, &packet, sizeof(packet)) == -1)
