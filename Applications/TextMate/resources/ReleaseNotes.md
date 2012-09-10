@@ -15,6 +15,12 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 # Release Notes
 
+## 2012-09-10 (r9307)
+
+* If an open file is renamed on disk, TextMate will wait up to one second for a new file to appear before updating the document’s path. This is to work with programs that renames the existing file and saves a new in its place, instead of saving a new file and using [exchangedata(2)](x-man-page:///exchangedata/2).
+* When a file was externally modified, using undo followed by redo would freeze TextMate.
+* The undo/redo menu items are now disabled when the action is unavailable.
+
 ## 2012-09-10 (r9306)
 
 * Spelling dot was drawn upside down.
