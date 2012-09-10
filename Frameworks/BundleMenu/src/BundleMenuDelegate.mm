@@ -69,7 +69,7 @@ OAK_DEBUG_VAR(BundleMenu);
 			case bundles::kItemTypeProxy:
 			{
 				auto const items = bundles::items_for_proxy(*item, scope);
-				OakAddBundlesToMenu(items, hasSelection, true, aMenu, @selector(doBundleItem:));
+				OakAddBundlesToMenu(items, hasSelection, true, aMenu, @selector(performBundleItemWithUUIDStringFrom:));
 
 				if(items.empty())
 				{
@@ -82,7 +82,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			default:
 			{
-				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(doBundleItem:) keyEquivalent:@""];
+				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(performBundleItemWithUUIDStringFrom:) keyEquivalent:@""];
 				[menuItem setKeyEquivalentCxxString:key_equivalent(*item)];
 				[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];

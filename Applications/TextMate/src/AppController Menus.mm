@@ -17,7 +17,7 @@
 OAK_DEBUG_VAR(AppController_Menus);
 
 @implementation AppController (BundlesMenu)
-- (void)doBundleItem:(id)anArgument
+- (void)performBundleItemWithUUIDStringFrom:(id)anArgument
 {
 	[NSApp sendAction:@selector(performBundleItemWithUUIDString:) to:nil from:[anArgument representedObject]];
 }
