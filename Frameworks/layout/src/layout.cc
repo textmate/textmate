@@ -754,7 +754,7 @@ namespace ng
 
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 
-		CGColorRef background = _theme->styles_for_scope(_buffer.scope(0).left, _font_name, _font_size).background();
+		CGColorRef background = _theme->background(scope::to_s(_buffer.scope(0).left));
 		if(drawBackground)
 			render::fill_rect(context, background, visibleRect);
 
@@ -771,7 +771,7 @@ namespace ng
 				row->value.draw_background(_theme, _font_name, _font_size, *_metrics, context, isFlipped, visibleRect, showInvisibles, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		}
 
-		base_colors_t baseColors(cf::color_is_dark(background));
+		base_colors_t baseColors(_theme->is_dark());
 		if(_draw_wrap_column)
 			render::fill_rect(context, baseColors.margin_indicator, OakRectMake(_margin.left + _metrics->column_width() * effective_wrap_column(), CGRectGetMinY(visibleRect), 1, CGRectGetHeight(visibleRect)));
 
