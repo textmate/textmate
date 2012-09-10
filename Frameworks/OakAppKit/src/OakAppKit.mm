@@ -17,8 +17,3 @@ BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 {
 	return ([anEvent type] == NSLeftMouseUp || [anEvent type] == NSKeyDown) && (([anEvent modifierFlags] & flags) == flags);
 }
-
-void SetLionScrollerKnobStyle (NSScrollView* scrollView, NSScrollerKnobStyle style)
-{
-	[scrollView setScrollerKnobStyle:style];
-}
