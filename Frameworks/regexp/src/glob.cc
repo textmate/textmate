@@ -8,20 +8,9 @@
 OAK_DEBUG_VAR(Glob);
 OAK_DEBUG_VAR(Glob_Parser);
 
-/*
-	We do a simple transformation of the glob into a regexp using these rules:
-
-		\\.              → $0
-		\*\* /?          → ([^/.].*(?=/|$) /? )?
-		\*               → ([^/.][^/]*)?
-		\?               → .
-		\[.*?\]          → $0
-		[\\|[().?*+{^$]  → \\$0
-*/
-
 namespace path
 {
-	void glob_t::setup (std::string const& glob)
+	void glob_t::setup (std::string const& glob, bool matchDotFiles)
 	{
 		static regexp::pattern_t const glob_matcher = "(?:"
 			"(\\\\.)"                     "|"
@@ -34,8 +23,17 @@ namespace path
 
 		static std::string const glob_formater = ""
 			"${1}"
-			"${2:+([^/.].*(?=/|$)$3)?}"
-			"${4:+([^/.][^/]*)?}"
+			"${2:+(((?!\\.)|(?<!^|/))[^/]*(/(?!\\.)[^/]*)*$3)?}"
+			"${4:+((?!\\.)|(?<!^|/))[^/]*}"
+			"${5:+.}"
+			"${6}"
+			"${7:+\\\\$7}"
+		;
+
+		static std::string const glob_formater_match_dot_files = ""
+			"${1}"
+			"${2:+(.*$3)?}"
+			"${4:+[^/]*}"
 			"${5:+.}"
 			"${6}"
 			"${7:+\\\\$7}"
@@ -45,7 +43,7 @@ namespace path
 
 		std::vector<std::string> expanded;
 		citerate(str, expand_braces(_negate ? glob.substr(1) : glob))
-			expanded.push_back(format_string::replace(*str, glob_matcher, glob_formater));
+			expanded.push_back(format_string::replace(*str, glob_matcher, (matchDotFiles || _negate) ? glob_formater_match_dot_files : glob_formater));
 
 		std::string ptrn = "^(.*/)?(" + text::join(expanded, "|") + ")$";
 		_compiled = regexp::pattern_t(ptrn);

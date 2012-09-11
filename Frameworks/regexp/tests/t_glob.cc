@@ -59,6 +59,32 @@ public:
 		TS_ASSERT(!path::glob_t("*" ).does_match(".htaccess"));
 		TS_ASSERT( path::glob_t("{,.}*").does_match("test"));
 		TS_ASSERT( path::glob_t("{,.}*").does_match(".htaccess"));
+
+		TS_ASSERT( path::glob_t("*"        ).does_match("foo.txt"));
+		TS_ASSERT( path::glob_t("foo*"     ).does_match("foo.txt"));
+		TS_ASSERT( path::glob_t("foo/*"    ).does_match("foo/bar.txt"));
+		TS_ASSERT( path::glob_t("foo/bar*" ).does_match("foo/bar.txt"));
+		TS_ASSERT(!path::glob_t("*"        ).does_match(".txt"));
+		TS_ASSERT(!path::glob_t("foo/*"    ).does_match("foo/.txt"));
+		TS_ASSERT(!path::glob_t("foo/bar/*").does_match("foo/bar/.txt"));
+
+		TS_ASSERT( path::glob_t("cache/*"   ).does_match("cache/test.cc"));
+		TS_ASSERT( path::glob_t("cache/**"  ).does_match("cache/test.cc"));
+		TS_ASSERT( path::glob_t("cache/**"  ).does_match("cache/foo/test.cc"));
+		TS_ASSERT( path::glob_t("cache/**/*").does_match("cache/foo/test.cc"));
+		TS_ASSERT(!path::glob_t("cache/*"   ).does_match("cache/.htaccess"));
+		TS_ASSERT(!path::glob_t("cache/**"  ).does_match("cache/.htaccess"));
+		TS_ASSERT(!path::glob_t("cache/**"  ).does_match("cache/foo/.htaccess"));
+		TS_ASSERT(!path::glob_t("cache/**/*").does_match("cache/foo/.htaccess"));
+
+		TS_ASSERT(!path::glob_t("!cache/*"   ).does_match("cache/test.cc"));
+		TS_ASSERT(!path::glob_t("!cache/**"  ).does_match("cache/test.cc"));
+		TS_ASSERT(!path::glob_t("!cache/**"  ).does_match("cache/foo/test.cc"));
+		TS_ASSERT(!path::glob_t("!cache/**/*").does_match("cache/foo/test.cc"));
+		TS_ASSERT(!path::glob_t("!cache/*"   ).does_match("cache/.htaccess"));
+		TS_ASSERT(!path::glob_t("!cache/**"  ).does_match("cache/.htaccess"));
+		TS_ASSERT(!path::glob_t("!cache/**"  ).does_match("cache/foo/.htaccess"));
+		TS_ASSERT(!path::glob_t("!cache/**/*").does_match("cache/foo/.htaccess"));
 	}
 
 	void test_glob_anchoring ()
@@ -92,8 +118,14 @@ public:
 		TS_ASSERT( path::glob_t("foo/**"      ).does_match("foo/bar/fud.txt"));
 		TS_ASSERT( path::glob_t("foo/**/*.txt").does_match("foo/fud.txt"));
 		TS_ASSERT( path::glob_t("foo/**/*.txt").does_match("foo/bar/fud.txt"));
-		TS_ASSERT(!path::glob_t("**.txt"      ).does_match("foo/bar/fud.txt"));
-		TS_ASSERT(!path::glob_t("f**.txt"     ).does_match("foo/bar/fud.txt"));
+		TS_ASSERT( path::glob_t("**.txt"      ).does_match("fud.txt"));
+		TS_ASSERT( path::glob_t("**.txt"      ).does_match("foo/bar/fud.txt"));
+		TS_ASSERT( path::glob_t("**/*.txt"    ).does_match("fud.txt"));
+		TS_ASSERT( path::glob_t("f**.txt"     ).does_match("foo/bar.txt"));
+		TS_ASSERT(!path::glob_t("f*.txt"      ).does_match("foo/bar.txt"));
+		TS_ASSERT( path::glob_t("f**bar.txt"  ).does_match("fbar.txt"));
+		TS_ASSERT( path::glob_t("f**bar.txt"  ).does_match("foo/bar.txt"));
+		TS_ASSERT(!path::glob_t("f**bar.txt"  ).does_match("foo/.bar.txt"));
 	}
 
 	void test_brace_expansion ()
