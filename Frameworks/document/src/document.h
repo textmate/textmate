@@ -14,6 +14,7 @@
 #include <file/save.h>
 #include <file/encoding.h>
 #include <scope/scope.h>
+#include <regexp/glob.h>
 #include <oak/debug.h>
 
 namespace document
@@ -350,7 +351,7 @@ namespace document
 	{
 		WATCH_LEAKS(scanner_t);
 
-		scanner_t (std::string const& path, std::string const& glob = "*", std::string const& excludeGlob = "", bool follow_links = false, bool follow_hidden_folders = false, bool depth_first = false);
+		scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links = false, bool depth_first = false);
 		~scanner_t ();
 
 		bool is_running () const { return is_running_flag; }
@@ -363,8 +364,9 @@ namespace document
 		std::string get_current_path () const;
 
 	private:
-		std::string path, glob, exclude_glob;
-		bool follow_links, follow_hidden_folders, depth_first;
+		std::string path;
+		path::glob_list_t glob;
+		bool follow_links, depth_first;
 
 		pthread_t thread;
 		mutable pthread_mutex_t mutex;

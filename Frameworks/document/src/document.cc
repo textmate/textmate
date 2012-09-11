@@ -1231,9 +1231,9 @@ namespace document
 		return res;
 	}
 
-	scanner_t::scanner_t (std::string const& path, std::string const& glob, std::string const& excludeGlob, bool follow_links, bool follow_hidden_folders, bool depth_first) : path(path), glob(glob), exclude_glob(excludeGlob), follow_links(follow_links), follow_hidden_folders(follow_hidden_folders), depth_first(depth_first), is_running_flag(true), should_stop_flag(false)
+	scanner_t::scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links, bool depth_first) : path(path), glob(glob), follow_links(follow_links), depth_first(depth_first), is_running_flag(true), should_stop_flag(false)
 	{
-		D(DBF_Document_Scanner, bug("%s / %s (excl. %s), links %s, include hidden %s\n", path.c_str(), glob.c_str(), excludeGlob.c_str(), BSTR(follow_links), BSTR(follow_hidden_folders)););
+		D(DBF_Document_Scanner, bug("%s, links %s\n", path.c_str(), BSTR(follow_links)););
 
 		document_tracker_t::lock_t lock(&document::documents);
 		iterate(pair, document::documents.documents)
@@ -1286,7 +1286,6 @@ namespace document
 	{
 		D(DBF_Document_Scanner, bug("%s, running %s\n", initialPath.c_str(), BSTR(is_running_flag)););
 
-		path::glob_t ptrn(glob), exclPtrn(exclude_glob);
 		std::deque<std::string> dirs(1, initialPath);
 		std::vector<std::string> links;
 		while(!dirs.empty())
@@ -1312,12 +1311,9 @@ namespace document
 					break;
 
 				std::string const& path = path::join(dir, (*it)->d_name);
-				if(exclPtrn.does_match(path))
-					continue;
-
 				if((*it)->d_type == DT_DIR)
 				{
-					if((*it)->d_name[0] == '.' && !follow_hidden_folders)
+					if(glob.exclude(path, path::kPathItemDirectory))
 						continue;
 
 					if(seen_paths.insert(std::make_pair(buf.st_dev, (*it)->d_ino)).second)
@@ -1326,7 +1322,7 @@ namespace document
 				}
 				else if((*it)->d_type == DT_REG)
 				{
-					if(!ptrn.does_match(path))
+					if(glob.exclude(path, path::kPathItemFile))
 						continue;
 
 					if(seen_paths.insert(std::make_pair(buf.st_dev, (*it)->d_ino)).second)
@@ -1351,12 +1347,15 @@ namespace document
 					{
 						if(S_ISDIR(buf.st_mode) && follow_links && seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)
 						{
+							if(glob.exclude(path, path::kPathItemDirectory))
+								continue;
+
 							D(DBF_Document_Scanner, bug("follow link: %s → %s\n", link->c_str(), path.c_str()););
 							dirs.push_back(path);
 						}
 						else if(S_ISREG(buf.st_mode))
 						{
-							if(!ptrn.does_match(path::name(*link)))
+							if(glob.exclude(path, path::kPathItemFile))
 								continue;
 
 							if(seen_paths.insert(std::make_pair(buf.st_dev, buf.st_ino)).second)

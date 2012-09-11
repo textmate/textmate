@@ -53,9 +53,13 @@ public:
 		jail.set_content("text.y", "text");
 		jail.set_content("text.z", "text");
 
+		path::glob_list_t globs;
+		globs.add_exclude_glob("*.y");
+		globs.add_include_glob("*");
+
 		scan_path_t scanner;
 		scanner.set_string("text");
-		scanner.set_folder_options(folder_scan_settings_t(jail.path(), "*", "*.y"));
+		scanner.set_folder_options(folder_scan_settings_t(jail.path(), globs));
 		run_scanner(scanner);
 
 		scan_path_matches_t matches = scanner.accept_matches();
@@ -85,7 +89,7 @@ public:
 
 		scan_path_t hidden_scanner;
 		hidden_scanner.set_string("text");
-		search.skip_hidden_folders = false;
+		search.globs.add_include_glob(".*", path::kPathItemDirectory);
 		hidden_scanner.set_folder_options(search);
 		run_scanner(hidden_scanner);
 

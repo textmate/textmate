@@ -12,14 +12,11 @@ namespace find
 	{
 		static std::string open_files;
 
-		folder_scan_settings_t (std::string const& path = "/", std::string const& glob = "*", std::string const& exclude_glob = "", bool follow_links = false, bool skip_hidden_folders = true)
-		: path(path), glob(glob), exclude_glob(exclude_glob), follow_links(follow_links), skip_hidden_folders(skip_hidden_folders) {}
+		folder_scan_settings_t (std::string const& path = "/", path::glob_list_t const& globs = path::glob_list_t("*"), bool follow_links = false) : path(path), globs(globs), follow_links(follow_links) { }
 
 		std::string path;
-		std::string glob;
-		std::string exclude_glob;
+		path::glob_list_t globs;
 		bool follow_links;
-		bool skip_hidden_folders; // REVIEW we probably also want skip_hidden_files, e.g. .svn versus .htaccess
 	};
 
 	struct match_t

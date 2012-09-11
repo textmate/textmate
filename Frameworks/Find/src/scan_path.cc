@@ -166,7 +166,7 @@ namespace find
 			return;
 		}
 
-		document::scanner_t scanner(search.path, search.glob, search.exclude_glob, search.follow_links, !search.skip_hidden_folders, true /* depth first */);
+		document::scanner_t scanner(search.path, search.globs, search.follow_links, true /* depth first */);
 
 		bool isRunning = true;
 		while(isRunning && !should_stop_flag)
