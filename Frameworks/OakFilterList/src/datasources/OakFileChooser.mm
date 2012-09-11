@@ -176,12 +176,16 @@ void file_chooser_t::set_path (std::string const& path)
 	_filtered_documents.clear();
 	_ranked_items.clear();
 
-	std::string excludeGlob = "";
-	static std::string const excludeKeys[] = { kSettingsExcludeInFileChooserKey, kSettingsExcludeKey };
-	for(size_t i = 0; i < sizeofA(excludeKeys) && excludeGlob == ""; ++i)
-		excludeGlob = settings_for_path(NULL_STR, "", path).get(excludeKeys[i], "");
+	auto const settings = settings_for_path(NULL_STR, "", path);
+	path::glob_list_t globs;
+	globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInFileChooserKey, NULL_STR), path::kPathItemDirectory);
+	globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInFileChooserKey,       NULL_STR), path::kPathItemFile);
+	for(auto key : { kSettingsExcludeInFileChooserKey, kSettingsExcludeKey, kSettingsBinaryKey })
+		globs.add_exclude_glob(settings.get(key, NULL_STR));
+	globs.add_include_glob("*", path::kPathItemDirectory);
+	globs.add_include_glob("{,.}*", path::kPathItemFile);
 
-	_scanner.reset(new document::scanner_t(_path, "{,.}*", excludeGlob));
+	_scanner.reset(new document::scanner_t(_path, globs));
 }
 
 void file_chooser_t::add_documents (std::vector<document::document_ptr> const& documents)

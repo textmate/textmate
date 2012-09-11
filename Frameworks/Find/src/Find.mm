@@ -233,18 +233,6 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 		{
 			case FindActionFindAll:
 			{
-				NSString* glob = controller.globString;
-				if([glob isEqualToString:@"*"])
-					glob = @"{.,}*";
-
-				std::string excludeGlob = "";
-				if(![controller.searchIn isEqualToString:FFSearchInOpenFiles])
-				{
-					static std::string const excludeKeys[] = { kSettingsExcludeInFolderSearchKey, kSettingsExcludeKey };
-					for(size_t i = 0; i < sizeofA(excludeKeys) && excludeGlob == ""; ++i)
-						excludeGlob = settings_for_path(NULL_STR, "", to_s(controller.searchFolder)).get(excludeKeys[i], "");
-				}
-
 				FFDocumentSearch* folderSearch = [[FFDocumentSearch new] autorelease];
 				folderSearch.searchString      = controller.findString;
 				folderSearch.options           = findOptions;
@@ -255,7 +243,19 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 				}
 				else
 				{
-					find::folder_scan_settings_t search([controller.searchIn isEqualToString:FFSearchInOpenFiles] ? find::folder_scan_settings_t::open_files : to_s(controller.searchFolder), [glob UTF8String], excludeGlob, controller.followLinks, !controller.searchHiddenFolders);
+					path::glob_list_t globs;
+					if(![controller.searchIn isEqualToString:FFSearchInOpenFiles])
+					{
+						auto const settings = settings_for_path(NULL_STR, "", to_s(controller.searchFolder));
+						globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInFolderSearchKey, NULL_STR), path::kPathItemDirectory);
+						globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInFolderSearchKey,       NULL_STR), path::kPathItemFile);
+						for(auto key : { kSettingsExcludeInFolderSearchKey, kSettingsExcludeKey, kSettingsBinaryKey })
+							globs.add_exclude_glob(settings.get(key, NULL_STR));
+						globs.add_include_glob(controller.searchHiddenFolders ? "{,.}*" : "*", path::kPathItemDirectory);
+						globs.add_include_glob(to_s(controller.globString), path::kPathItemFile);
+					}
+
+					find::folder_scan_settings_t search([controller.searchIn isEqualToString:FFSearchInOpenFiles] ? find::folder_scan_settings_t::open_files : to_s(controller.searchFolder), globs, controller.followLinks);
 					[folderSearch setFolderOptions:search];
 					folderSettings[controller.searchFolder.UTF8String] = search;
 				}
