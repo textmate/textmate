@@ -228,7 +228,7 @@ OAK_DEBUG_VAR(DocumentController);
 				delegate.fileBrowserHidden = NO;
 				[delegate->fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
 				bring_to_front(delegate);
-				[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]]; 
+				[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
 			}
 		}
 
@@ -1580,6 +1580,8 @@ static std::string file_chooser_glob (std::string const& path)
 	BOOL active = YES;
 	if([menuItem action] == @selector(toggleFileBrowser:))
 		[menuItem setTitle:self.fileBrowserHidden ? @"Show File Browser" : @"Hide File Browser"];
+	else if([menuItem action] == @selector(toggleHTMLOutput:))
+		[menuItem setState:[self htmlOutputIsVisible] ? NSOnState : NSOffState];
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = documentTabs.size() > 1;
 	else if([menuItem action] == @selector(revealFileInProject:))
