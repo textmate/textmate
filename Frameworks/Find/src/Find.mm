@@ -125,11 +125,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 			std::string const& path = self.windowController.searchFolder.UTF8String;
 			std::map<std::string, find::folder_scan_settings_t>::const_iterator const& it = folderSettings.find(path);
 			if(it != folderSettings.end())
-			{
-				find::folder_scan_settings_t const& settings = it->second;
-				self.windowController.followLinks            = settings.follow_links;
-				self.windowController.searchHiddenFolders    = !settings.skip_hidden_folders;
-			}
+				self.windowController.followLinks = it->second.follow_links;
 		}
 	}
 }
