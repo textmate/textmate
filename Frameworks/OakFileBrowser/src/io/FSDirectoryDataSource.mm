@@ -92,49 +92,37 @@ namespace
 
 		struct request_t
 		{
-			request_t (std::string const& path = NULL_STR, NSUInteger options = 0) : _path(path), _options(options), _include_file_glob(""), _include_folder_glob(""), _exclude_file_glob(""), _exclude_folder_glob("")
+			request_t (std::string const& path = NULL_STR, NSUInteger options = 0) : _path(path), _options(options)
 			{
-				static std::string const includeFileKeys[]   = { kSettingsIncludeFilesInBrowserKey,       kSettingsIncludeInBrowserKey, kSettingsIncludeFilesKey,       kSettingsIncludeKey };
-				static std::string const includeFolderKeys[] = { kSettingsIncludeDirectoriesInBrowserKey, kSettingsIncludeInBrowserKey, kSettingsIncludeDirectoriesKey, kSettingsIncludeKey };
-				static std::string const excludeFileKeys[]   = { kSettingsExcludeFilesInBrowserKey,       kSettingsExcludeInBrowserKey, kSettingsExcludeFilesKey,       kSettingsExcludeKey };
-				static std::string const excludeFolderKeys[] = { kSettingsExcludeDirectoriesInBrowserKey, kSettingsExcludeInBrowserKey, kSettingsExcludeDirectoriesKey, kSettingsExcludeKey };
-
 				settings_t const& settings = settings_for_path(NULL_STR, "", path);
 
-				_include_file_glob   = first_setting(settings, includeFileKeys);
-				_include_folder_glob = first_setting(settings, includeFolderKeys);
-				_exclude_file_glob   = first_setting(settings, excludeFileKeys);
-				_exclude_folder_glob = first_setting(settings, excludeFolderKeys);
+				_globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesInBrowserKey), path::kPathItemDirectory);
+				_globs.add_exclude_glob(settings.get(kSettingsExcludeDirectoriesKey),          path::kPathItemDirectory);
+				_globs.add_exclude_glob(settings.get(kSettingsExcludeFilesInBrowserKey),       path::kPathItemFile);
+				_globs.add_exclude_glob(settings.get(kSettingsExcludeFilesKey),                path::kPathItemFile);
+				_globs.add_exclude_glob(settings.get(kSettingsExcludeInBrowserKey),            path::kPathItemAny);
+				_globs.add_exclude_glob(settings.get(kSettingsExcludeKey),                     path::kPathItemAny);
+
+				_globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesInBrowserKey), path::kPathItemDirectory);
+				_globs.add_include_glob(settings.get(kSettingsIncludeDirectoriesKey),          path::kPathItemDirectory);
+				_globs.add_include_glob(settings.get(kSettingsIncludeFilesInBrowserKey),       path::kPathItemFile);
+				_globs.add_include_glob(settings.get(kSettingsIncludeFilesKey),                path::kPathItemFile);
+				_globs.add_include_glob(settings.get(kSettingsIncludeInBrowserKey),            path::kPathItemAny);
+				_globs.add_include_glob(settings.get(kSettingsIncludeKey),                     path::kPathItemAny);
 			}
 
 			bool exclude_path (std::string const& path, bool isDirectory) const
 			{
 				if(_options & kFSDataSourceOptionIncludeHidden)
 					return false;
-
-				bool mustInclude = (isDirectory ? _include_folder_glob : _include_file_glob).does_match(path);
-				bool mustExclude = (isDirectory ? _exclude_folder_glob : _exclude_file_glob).does_match(path);
-				return (path::info(path) & path::flag::hidden) || !mustInclude && (mustExclude || path::name(path).find('.') == 0);
+				return (path::info(path) & path::flag::hidden) || _globs.exclude(path);
 			}
 
 			std::string _path;
 			NSUInteger _options;
 
 		private:
-			std::string first_setting (settings_t const& settings, std::string const (&keys)[4])
-			{
-				iterate(key, keys)
-				{
-					if(settings.has(*key))
-						return settings.get(*key, NULL_STR);
-				}
-				return "";
-			}
-
-			path::glob_t _include_file_glob;
-			path::glob_t _include_folder_glob;
-			path::glob_t _exclude_file_glob;
-			path::glob_t _exclude_folder_glob;
+			path::glob_list_t _globs;
 		};
 
 		static std::vector<fs_item_t> handle_request (request_t const& dir);
