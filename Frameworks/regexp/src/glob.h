@@ -19,6 +19,35 @@ namespace path
 		regexp::pattern_t _compiled;
 	};
 
+	enum kPathItemType { kPathItemAny, kPathItemFile, kPathItemDirectory };
+
+	struct PUBLIC glob_list_t
+	{
+		glob_list_t (const char* glob = NULL)
+		{
+			if(glob)
+				add_include_glob(glob);
+		}
+
+		void add_include_glob (std::string const& glob, kPathItemType itemType = kPathItemAny);
+		void add_exclude_glob (std::string const& glob, kPathItemType itemType = kPathItemAny);
+
+		bool include (std::string const& path, kPathItemType itemType = kPathItemAny, bool defaultResult = false) const;
+		bool exclude (std::string const& path, kPathItemType itemType = kPathItemAny, bool defaultResult = true) const;
+
+	private:
+		struct record_t
+		{
+			record_t (bool negate, glob_t const& glob, kPathItemType itemType) : negate(negate), glob(glob), item_type(itemType) { }
+
+			bool negate;
+			glob_t glob;
+			kPathItemType item_type;
+		};
+
+		std::vector<record_t> _globs;
+	};
+
 	PUBLIC std::vector<std::string> expand_braces (std::string const& glob);
 	PUBLIC std::string to_s (glob_t const& glob);
 
