@@ -32,7 +32,8 @@ OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 @end
 
 @implementation FSFileItem
-@synthesize key;
+- (std::pair<dev_t, ino_t> const&)key                 { return key; }
+- (void)setKey:(std::pair<dev_t, ino_t> const&)newKey { key = newKey; }
 @end
 
 namespace
