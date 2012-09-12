@@ -10,6 +10,7 @@
 #include <text/format.h>
 #include <oak/debug.h>
 #include <io/io.h>
+#include <cf/cf.h>
 
 OAK_DEBUG_VAR(Settings);
 
@@ -40,6 +41,7 @@ namespace
 
 		res.push_back(std::make_pair("TM_PID", text::format("%d", getpid())));
 		res.push_back(std::make_pair("TM_FULLNAME", getpwuid(getuid())->pw_gecos ?: "John Doe"));
+		res.push_back(std::make_pair("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle()))));
 		citerate(pair, oak::basic_environment())
 			res.push_back(*pair);
 
