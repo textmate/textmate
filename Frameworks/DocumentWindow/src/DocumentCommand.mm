@@ -58,6 +58,15 @@
 		env["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
 		env["TM_PROJECT_UUID"]      = to_s(identifier);
 	}
+
+	if(auto theme = documentView.textView.theme)
+	{
+		if(auto themeItem = bundles::lookup(theme->uuid()))
+		{
+			if(!themeItem->paths().empty())
+				env["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
+		}
+	}
 }
 @end
 
