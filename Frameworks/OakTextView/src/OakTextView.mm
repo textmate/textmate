@@ -58,7 +58,7 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 - (void)recordSelector:(SEL)aSelector withArgument:(id)anArgument;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
 - (void)highlightRanges:(ng::ranges_t const&)ranges;
-@property (nonatomic, assign) ng::ranges_t const& markedRanges;
+@property (nonatomic, readonly) ng::ranges_t const& markedRanges;
 @property (nonatomic, retain) NSDate* optionDownDate;
 @property (nonatomic, retain) OakTimer* initiateDragTimer;
 @property (nonatomic, retain) OakTimer* dragScrollTimer;
