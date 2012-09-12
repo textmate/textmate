@@ -66,12 +66,12 @@ OAK_DEBUG_VAR(OakControl);
 @implementation OakControl
 @synthesize tag, mouseTrackingDisabled;
 
-- (std::vector<layer_t> const&)layout
+- (std::vector<layer_t> const&)layers
 {
 	return layout;
 }
 
-- (void)setLayout:(std::vector<layer_t> const&)aLayout
+- (void)setLayers:(std::vector<layer_t> const&)aLayout
 {
 	// Remove views that are no longer in the layout
 	iterate(oldLayer, layout)

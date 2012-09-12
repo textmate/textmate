@@ -284,7 +284,7 @@ static std::vector<cell_layout_t> layout (CGFloat frameWidth, std::vector<sb::ce
 		}
 	}
 
-	[self setLayout:newLayout];
+	[self setLayers:newLayout];
 	[self setNeedsDisplay:YES];
 }
 
@@ -318,7 +318,7 @@ static std::vector<cell_layout_t> layout (CGFloat frameWidth, std::vector<sb::ce
 	NSRect rect = [self bounds];
 
 	// Find the layer with the provided tag
-	iterate(it, [self layout])
+	iterate(it, [self layers])
 	{
 		if(it->tag == cellTag)
 		{

@@ -405,7 +405,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 	D(DBF_TabBarView, bug("\n"););
 	if(!isExpanded)
-		return [self setLayout:metrics->layers_for("backgroundCollapsed", rect, -1)];
+		return [self setLayers:metrics->layers_for("backgroundCollapsed", rect, -1)];
 
 	std::vector<layer_t> newLayout, selectedTabLayers;
 	newLayout = metrics->layers_for("background", rect, -1);
@@ -471,7 +471,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		rect.origin.x += rect.size.width + metrics->tabSpacing;
 	}
 	newLayout.insert(newLayout.end(), selectedTabLayers.begin(), selectedTabLayers.end());
-	[self setLayout:newLayout];
+	[self setLayers:newLayout];
 }
 
 - (void)viewFrameChanged:(NSNotification*)aNotification

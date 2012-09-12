@@ -86,9 +86,9 @@ struct layer_t
 	NSPoint mouseDownPos;
 }
 - (void)drawLayer:(layer_t const&)aLayer;
-- (std::vector<layer_t> const&)layout;
+- (std::vector<layer_t> const&)layers;
 - (uint32_t)currentState;
-- (void)setLayout:(std::vector<layer_t> const&)aLayout;
+- (void)setLayers:(std::vector<layer_t> const&)aLayout;
 - (void)sendAction:(SEL)action fromLayer:(layer_t const&)aLayer;
 - (NSInteger)tagForLayerContainingPoint:(NSPoint)aPoint;
 @property (nonatomic, readonly) NSInteger tag; // tag of the most recent layer causing an action
