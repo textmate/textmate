@@ -296,7 +296,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 @synthesize antiAlias;
 @synthesize initiateDragTimer, dragScrollTimer, optionDownDate, showColumnSelectionCursor, showDragCursor, choiceMenu;
 @synthesize markedRanges;
-@synthesize document;
 @synthesize refreshNestCount;
 @synthesize liveSearchViewController, liveSearchString, liveSearchRanges;
 

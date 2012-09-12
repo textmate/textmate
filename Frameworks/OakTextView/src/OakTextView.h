@@ -89,7 +89,8 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	OakChoiceMenu* choiceMenu;
 	std::vector<std::string> choiceVector;
 }
-@property (nonatomic, assign) document::document_ptr const& document;
+- (void)setDocument:(document::document_ptr const&)aDocument;
+
 @property (nonatomic, assign) theme_ptr const&              theme;
 @property (nonatomic, retain) NSCursor*                     ibeamCursor;
 @property (nonatomic, retain) NSFont*                       font;
