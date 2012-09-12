@@ -24,7 +24,6 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
 @interface OakDocumentView ()
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
-@property (nonatomic, retain) NSColor* gutterDividerColor;
 @property (nonatomic, retain) NSDictionary* gutterImages;
 @property (nonatomic, retain) NSDictionary* gutterHoverImages;
 @property (nonatomic, retain) NSDictionary* gutterPressedImages;
@@ -65,7 +64,7 @@ private:
 };
 
 @implementation OakDocumentView
-@synthesize textView, statusBar, gutterDividerColor;
+@synthesize textView, statusBar;
 @synthesize gutterImages, gutterHoverImages, gutterPressedImages;
 
 - (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
@@ -83,6 +82,8 @@ private:
 	NSRect gutterRect = gutterScrollView.frame;
 	gutterRect.size.width = gutterWidth++; // Increment as we draw the divider
 	[gutterScrollView setFrame:gutterRect];
+
+	[gutterDividerView setFrame:NSMakeRect(NSMaxX(gutterRect), NSMinY(gutterRect), 1, NSHeight(gutterRect))];
 
 	NSRect textViewRect = textScrollView.frame;
 	textViewRect.size.width = NSMaxX(textViewRect) - gutterWidth;
@@ -152,7 +153,13 @@ private:
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-		
+
+		gutterDividerView = [[NSBox alloc] initWithFrame:NSMakeRect(NSMaxX(gutterScrollViewFrame), NSMinY(gutterScrollViewFrame), 1, NSHeight(gutterScrollViewFrame))];
+		gutterDividerView.boxType          = NSBoxCustom;
+		gutterDividerView.borderType       = NSLineBorder;
+		gutterDividerView.autoresizingMask = NSViewHeightSizable;
+		[self addSubview:gutterDividerView];
+
 		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(aRect), OakStatusBarHeight);
 		statusBar = [[OTVStatusBar alloc] initWithFrame:statusBarFrame];
 		statusBar.delegate = self;
@@ -271,7 +278,7 @@ private:
 
 	[gutterScrollView release];
 	[gutterView release];
-	[gutterDividerColor release];
+	[gutterDividerView release];
 	[gutterImages release];
 	[gutterHoverImages release];
 	[gutterPressedImages release];
@@ -346,7 +353,6 @@ private:
 
 		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
 		auto styles = theme->gutter_styles();
-		self.gutterDividerColor = [NSColor tmColorWithCGColor:styles.divider];
 
 		gutterView.foregroundColor           = [NSColor tmColorWithCGColor:styles.foreground];
 		gutterView.backgroundColor           = [NSColor tmColorWithCGColor:styles.background];
@@ -359,17 +365,16 @@ private:
 		gutterView.selectionIconHoverColor   = [NSColor tmColorWithCGColor:styles.selectionIconsHover];
 		gutterView.selectionIconPressedColor = [NSColor tmColorWithCGColor:styles.selectionIconsPressed];
 		gutterView.selectionBorderColor      = [NSColor tmColorWithCGColor:styles.selectionBorder];
+		gutterScrollView.backgroundColor     = gutterView.backgroundColor;
+		gutterDividerView.borderColor        = [NSColor tmColorWithCGColor:styles.divider];
 
-		gutterScrollView.backgroundColor    = gutterView.backgroundColor;
-
-		[self setNeedsDisplayInRect:[self gutterDividerRect]];
 		[gutterView setNeedsDisplay:YES];
 	}
 }
 
 - (BOOL)isOpaque
 {
-	return YES; // this is not entirely true as this view only draws the separator between gutter and text view, but we know all the other areas are completely drawn by subviews, so we return ‘YES’ to avoid our parent view (window) having to fill the entire area each time the separator needs to be redrawn
+	return YES;
 }
 
 - (IBAction)toggleLineNumbers:(id)sender
@@ -420,6 +425,7 @@ private:
 	}
 
 	[gutterScrollView setFrame:NSMakeRect(0, y, gutterWidth - 1, docHeight)];
+	[gutterDividerView setFrame:NSMakeRect(gutterWidth - 1, y, 1, docHeight)];
 	[textScrollView setFrame:NSMakeRect(gutterWidth, y, NSWidth(textScrollView.frame), docHeight)];
 
 	y += docHeight;
@@ -478,10 +484,6 @@ private:
 		[[NSColor grayColor] set];
 		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), NSHeight(self.frame) - height, NSWidth(aRect), 1), aRect));
 	}
-
-	// Draw the border between gutter and text views
-	[gutterDividerColor set];
-	NSRectFill(NSIntersectionRect([self gutterDividerRect], aRect));
 }
 
 // ======================
