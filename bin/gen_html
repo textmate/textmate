@@ -53,7 +53,7 @@ def wrap_authors(src)
 end
 
 def wrap_in_article(html)
-  html.gsub(/<h2\b.*>[\d\-]+.*<\/h2>(?m:.*?)(?=\s*<h2|\z)/) do
+  html.gsub(/<h2\b.*>.*<\/h2>(?m:.*?)(?=\s*<h2|\z)/) do
     "<article>\n#$&\n</article>\n"
   end
 end
