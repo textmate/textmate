@@ -5,8 +5,8 @@ namespace cf
 	std::string to_s (CFStringRef aString)
 	{
 		CFIndex byteCount;
-		if(!CFStringGetBytes(aString, CFRangeMake(0, CFStringGetLength(aString)), kCFStringEncodingUTF8, 0, false, NULL, 0, &byteCount))
-			return "";
+		if(!aString || !CFStringGetBytes(aString, CFRangeMake(0, CFStringGetLength(aString)), kCFStringEncodingUTF8, 0, false, NULL, 0, &byteCount))
+			return NULL_STR;
 
 		std::string res(byteCount, ' ');
 		CFStringGetBytes(aString, CFRangeMake(0, CFStringGetLength(aString)), kCFStringEncodingUTF8, 0, false, (UInt8*)&res[0], byteCount, NULL);
