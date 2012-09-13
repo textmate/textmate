@@ -53,7 +53,7 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 		}
 		else if((*line).size())
 		{
-			fprintf(stderr, "TextMate/svn: Unexected line: ‘%s’\n", (*line).c_str());
+			fprintf(stderr, "TextMate/svn: Unexpected line: ‘%s’\n", (*line).c_str());
 		}
 	}
 }
