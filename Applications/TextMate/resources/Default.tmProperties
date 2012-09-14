@@ -6,6 +6,9 @@ exclude  = "{*.{o,pyc},Icon\r,CVS,_darcs,_MTN,\{arch\},blib,*~.nib}"
 include  = "{*,.tm_properties,.htaccess}"
 binary   = "{*.{icns,ico,jpg,jpeg,m4v,nib,o,pdf,png,psd,pyc,rtf,tif,tiff,xib},Icon\r}"
 
+windowTitleSCM = '${TM_SCM_BRANCH:+ ($TM_SCM_NAME: $TM_SCM_BRANCH)}'
+windowTitle    = '$TM_DISPLAYNAME$windowTitleSCM'
+
 LANG        = "en_US.UTF-8"
 LC_CTYPE    = "en_US.UTF-8"
 TM_APP_PATH = "${CWD/\/Contents\/Resources$//}"
