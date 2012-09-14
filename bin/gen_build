@@ -557,6 +557,23 @@ def deploy(target)
   res << "build #{target[:name]}/deploy: phony #{base}.bump\n"
 end
 
+def all_targets(buildfile, builddir)
+  res = Set.new
+  return res unless File.exists? buildfile
+
+  Dir.chdir(File.dirname(buildfile)) do
+    targets = %x{ ninja -f #{[ buildfile ].shelljoin } -t targets all }
+    targets.each do |line|
+      if line =~ /.*(?=:(?! phony))/
+        path = $&
+        res << path if path =~ /^#{Regexp.escape(builddir)}/ # ignore targets outside builddir
+      end
+    end
+  end
+
+  res
+end
+
 # =======================
 # = Program Starts Here =
 # =======================
@@ -587,6 +604,8 @@ end
 abort "No root target file specified" if ARGV.empty?
 manifest = ARGV[0]
 TARGETS = Targets.new(manifest)
+
+all_old_targets = all_targets(outfile, builddir)
 
 open(outfile, "w") do |io|
   userfile = "#{ENV['USER']}.ninja"
@@ -685,6 +704,16 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << "build deploy: phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/deploy\n"
   io << "build debug:  phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/debug\n"
   io << "default run\n"
+end
+
+all_new_targets = all_targets(outfile, builddir)
+
+targets_lost = all_old_targets - all_new_targets
+targets_lost.each do |path|
+  if File.exists?(path)
+    STDERR << "Remove old target ‘#{path.sub(/#{Regexp.escape(builddir)}/, '$builddir')}’…\n"
+    File.unlink(path)
+  end
 end
 
 # =======================
