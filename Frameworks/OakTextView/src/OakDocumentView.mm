@@ -70,47 +70,6 @@ private:
 - (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
 - (void)setShowResizeThumb:(BOOL)flag { statusBar.showResizeThumb = flag; }
 
-- (void)updateGutterWidth
-{
-	++isResizingTextView;
-
-	CGFloat currentWidth = NSWidth(gutterScrollView.frame);
-	CGFloat desiredWidth = NSWidth(gutterView.frame);
-	// To avoid problems where width never stabilizes, we only allow size to grow if called recursively
-	CGFloat gutterWidth  = isResizingTextView == 1 ? desiredWidth : std::max(currentWidth, desiredWidth);
-
-	NSRect gutterRect = gutterScrollView.frame;
-	gutterRect.size.width = gutterWidth++; // Increment as we draw the divider
-	[gutterScrollView setFrame:gutterRect];
-
-	[gutterDividerView setFrame:NSMakeRect(NSMaxX(gutterRect), NSMinY(gutterRect), 1, NSHeight(gutterRect))];
-
-	NSRect textViewRect = textScrollView.frame;
-	textViewRect.size.width = NSMaxX(textViewRect) - gutterWidth;
-	textViewRect.origin.x   = gutterWidth;
-	[textScrollView setFrame:textViewRect];
-
-	--isResizingTextView;
-}
-
-- (void)updateGutterHeight
-{
-	[gutterView setFrameSize:NSMakeSize(NSWidth(gutterView.frame), NSHeight(textView.frame))];
-	[gutterView sizeToFit];
-	[self updateGutterWidth];
-}
-
-- (NSRect)gutterDividerRect
-{
-	return NSMakeRect(NSMaxX(gutterScrollView.frame), NSMinY(gutterScrollView.frame), 1, NSHeight(gutterScrollView.frame));
-}
-
-- (void)textViewFrameDidChange:(NSNotification*)aNotification;
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
-	[self updateGutterHeight];
-}
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	D(DBF_OakDocumentView, bug("%s\n", [NSStringFromRect(aRect) UTF8String]););
@@ -118,55 +77,41 @@ private:
 	{
 		callback = new document_view_callback_t(self);
 
-		CGFloat gutterViewWidth = 40;
+		textView = [[OakTextView alloc] initWithFrame:NSZeroRect];
+		textView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
-		NSRect textScrollViewFrame = NSMakeRect(gutterViewWidth, OakStatusBarHeight, NSWidth(aRect)-gutterViewWidth, NSHeight(aRect)-OakStatusBarHeight);
-		NSSize textViewSize = [NSScrollView contentSizeForFrameSize:textScrollViewFrame.size hasHorizontalScroller:YES hasVerticalScroller:YES borderType:NSNoBorder];
-
-		textScrollView = [[NSScrollView alloc] initWithFrame:textScrollViewFrame];
-		textView = [[OakTextView alloc] initWithFrame:NSMakeRect(0, 0, textViewSize.width, textViewSize.height)];
-		textView.autoresizingMask        = NSViewWidthSizable|NSViewHeightSizable;
-
+		textScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 		textScrollView.hasVerticalScroller   = YES;
 		textScrollView.hasHorizontalScroller = YES;
 		textScrollView.borderType            = NSNoBorder;
-		textScrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
 		textScrollView.documentView          = textView;
-
 		[self addSubview:textScrollView];
 
-		NSRect gutterScrollViewFrame = NSMakeRect(0, OakStatusBarHeight, gutterViewWidth - 1, NSHeight(aRect)-OakStatusBarHeight);
-		NSSize gutterViewSize = [NSScrollView contentSizeForFrameSize:gutterScrollViewFrame.size hasHorizontalScroller:NO hasVerticalScroller:NO borderType:NSNoBorder];
-
-		gutterView = [[GutterView alloc] initWithFrame:NSMakeRect(0, 0, gutterViewSize.width, gutterViewSize.height)];
-		gutterView.partnerView      = textView;
-		gutterView.delegate         = self;
+		gutterView = [[GutterView alloc] initWithFrame:NSZeroRect];
+		gutterView.partnerView = textView;
+		gutterView.delegate    = self;
 		[gutterView insertColumnWithIdentifier:kBookmarksColumnIdentifier atPosition:0 dataSource:self delegate:self];
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
 
-		gutterScrollView = [[NSScrollView alloc] initWithFrame:gutterScrollViewFrame];
-		gutterScrollView.borderType       = NSNoBorder;
-		gutterScrollView.autoresizingMask = NSViewHeightSizable;
-		gutterScrollView.documentView     = gutterView;
-
+		gutterScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		gutterScrollView.borderType   = NSNoBorder;
+		gutterScrollView.documentView = gutterView;
 		[self addSubview:gutterScrollView];
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 
-		gutterDividerView = [[NSBox alloc] initWithFrame:NSMakeRect(NSMaxX(gutterScrollViewFrame), NSMinY(gutterScrollViewFrame), 1, NSHeight(gutterScrollViewFrame))];
-		gutterDividerView.boxType          = NSBoxCustom;
-		gutterDividerView.borderType       = NSLineBorder;
-		gutterDividerView.autoresizingMask = NSViewHeightSizable;
+		gutterDividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
+		gutterDividerView.boxType    = NSBoxCustom;
+		gutterDividerView.borderType = NSLineBorder;
 		[self addSubview:gutterDividerView];
 
-		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(aRect), OakStatusBarHeight);
-		statusBar = [[OTVStatusBar alloc] initWithFrame:statusBarFrame];
+		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		statusBar.delegate = self;
-		statusBar.autoresizingMask = NSViewWidthSizable;
 		[self addSubview:statusBar];
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewFrameDidChange:) name:NSViewFrameDidChangeNotification object:textView];
+		for(NSView* view in @[ gutterScrollView, gutterView, gutterDividerView, textScrollView, statusBar ])
+			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		[self setDocument:document::from_content("", "text.plain")]; // file type is only to avoid potential “no grammar” warnings in console
 
@@ -174,6 +119,39 @@ private:
 			[textView addObserver:self forKeyPath:*keyPath options:NSKeyValueObservingOptionInitial context:NULL];
 	}
 	return self;
+}
+
++ (BOOL)requiresConstraintBasedLayout
+{
+	return YES;
+}
+
+- (void)updateConstraints
+{
+	[self removeConstraints:[self constraints]];
+	[super updateConstraints];
+
+	NSDictionary* views = NSDictionaryOfVariableBindings(gutterScrollView, gutterView, gutterDividerView, textScrollView, statusBar);
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[gutterScrollView(==gutterView)][gutterDividerView(==1)][textScrollView(>=100)]|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[statusBar]|"                                                                     options:0 metrics:nil views:views]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[gutterView(==textView)]"                                                          options:0 metrics:nil views:NSDictionaryOfVariableBindings(gutterView, textView)]];
+
+	NSMutableArray* stackedViews = [NSMutableArray array];
+	[stackedViews addObjectsFromArray:topAuxiliaryViews];
+	[stackedViews addObject:gutterScrollView];
+	[stackedViews addObjectsFromArray:bottomAuxiliaryViews];
+	[stackedViews addObject:statusBar];
+
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topView]" options:0 metrics:nil views:@{ @"topView" : stackedViews[0] }]];
+	for(size_t i = 0; i < [stackedViews count]-1; ++i)
+		[self addConstraint:[NSLayoutConstraint constraintWithItem:stackedViews[i] attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:stackedViews[i+1] attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomView]|" options:0 metrics:nil views:@{ @"bottomView" : stackedViews.lastObject }]];
+
+	for(NSArray* views : { topAuxiliaryViews, bottomAuxiliaryViews })
+	{
+		for(NSView* view in views)
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(view)]];
+	}
 }
 
 - (NSImage*)gutterImage:(NSString*)aName
@@ -221,7 +199,7 @@ private:
 		kFoldingsColumnIdentifier  : @[ [NSNull null], [self gutterImage:@"Folding Top Hover"], [self gutterImage:@"Folding Collapsed Hover"], [self gutterImage:@"Folding Bottom Hover"] ],
 	};
 
-	[self updateGutterHeight];
+	[gutterView reloadData:self];
 }
 
 - (IBAction)makeTextLarger:(id)sender       { [self setFont:[NSFont fontWithName:[textView.font fontName] size:[textView.font pointSize] + 1]]; }
@@ -319,7 +297,7 @@ private:
 	}
 
 	[textView setDocument:document];
-	[self updateGutterHeight];
+	[gutterView reloadData:self];
 	[self updateStyle];
 
 	if(oldDocument)
@@ -382,9 +360,6 @@ private:
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
 	BOOL isVisibleFlag = ![gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 	[gutterView setVisibility:isVisibleFlag forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
-	[gutterView sizeToFit];
-	[self updateGutterWidth];
-
 	if(isVisibleFlag)
 			[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"DocumentView Disable Line Numbers"];
 	else	[[NSUserDefaults standardUserDefaults] setObject:YES_obj forKey:@"DocumentView Disable Line Numbers"];
@@ -405,46 +380,17 @@ private:
 // = Auxiliary Views =
 // ===================
 
-- (void)layoutAuxiliaryViews
-{
-	CGFloat topHeight = 0, bottomHeight = 0;
-	for(NSView* view in topAuxiliaryViews)
-		topHeight += NSHeight(view.frame);
-	for(NSView* view in bottomAuxiliaryViews)
-		bottomHeight += NSHeight(view.frame);
-
-	CGFloat totalHeight = NSHeight(self.frame);
-	CGFloat docHeight   = totalHeight - NSHeight(statusBar.frame) - topHeight - bottomHeight;
-	CGFloat gutterWidth = NSWidth(gutterScrollView.frame) + 1;
-
-	CGFloat y = NSHeight(statusBar.frame);
-	for(NSView* view in bottomAuxiliaryViews)
-	{
-		[view setFrame:NSMakeRect(0, y, NSWidth(self.frame), NSHeight(view.frame))];
-		y += NSHeight(view.frame);
-	}
-
-	[gutterScrollView setFrame:NSMakeRect(0, y, gutterWidth - 1, docHeight)];
-	[gutterDividerView setFrame:NSMakeRect(gutterWidth - 1, y, 1, docHeight)];
-	[textScrollView setFrame:NSMakeRect(gutterWidth, y, NSWidth(textScrollView.frame), docHeight)];
-
-	y += docHeight;
-	for(NSView* view in topAuxiliaryViews)
-	{
-		[view setFrame:NSMakeRect(0, y, NSWidth(self.frame), NSHeight(view.frame))];
-		y += NSHeight(view.frame);
-	}
-}
-
 - (void)addAuxiliaryView:(NSView*)aView atEdge:(NSRectEdge)anEdge
 {
+	[aView setTranslatesAutoresizingMaskIntoConstraints:NO];
+
 	topAuxiliaryViews    = topAuxiliaryViews    ?: [NSMutableArray new];
 	bottomAuxiliaryViews = bottomAuxiliaryViews ?: [NSMutableArray new];
 	if(anEdge == NSMinYEdge)
 			[bottomAuxiliaryViews addObject:aView];
 	else	[topAuxiliaryViews addObject:aView];
 	[self addSubview:aView];
-	[self layoutAuxiliaryViews];
+	[self setNeedsUpdateConstraints:YES];
 }
 
 - (void)removeAuxiliaryView:(NSView*)aView
@@ -456,7 +402,7 @@ private:
 	else
 		return;
 	[aView removeFromSuperview];
-	[self layoutAuxiliaryViews];
+	[self setNeedsUpdateConstraints:YES];
 }
 
 - (void)drawRect:(NSRect)aRect

@@ -1448,7 +1448,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		if(!liveSearchViewController)
 		{
 			self.liveSearchViewController = [[NSViewController alloc] initWithNibName:@"SearchField" bundle:[NSBundle bundleForClass:[self class]]];
-			[liveSearchViewController.view setAutoresizingMask:NSViewWidthSizable|NSViewMaxYMargin];
 			[documentView addAuxiliaryView:liveSearchViewController.view atEdge:NSMinYEdge];
 		}
 

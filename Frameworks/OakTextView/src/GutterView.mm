@@ -385,7 +385,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	}
 }
 
-- (void)sizeToFit
+- (CGFloat)updateWidth
 {
 	static const CGFloat columnPadding = 1;
 
@@ -404,13 +404,21 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			it->width = 0;
 		}
 	}
-	[self setFrameSize:NSMakeSize(totalWidth, NSHeight([self frame]))];
+
+	return totalWidth;
+}
+
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize([self updateWidth], NSViewNoInstrinsicMetric);
 }
 
 - (void)reloadData:(id)sender
 {
 	D(DBF_GutterView, bug("\n"););
 	[self setNeedsDisplay:YES];
+	if([self updateWidth] != NSWidth(self.frame))
+		[self invalidateIntrinsicContentSize];
 }
 
 - (NSRect)columnRectForPoint:(NSPoint)aPoint
@@ -489,6 +497,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	if(visible)
 			[hiddenColumns removeObject:columnIdentifier];
 	else	[hiddenColumns addObject:columnIdentifier];
+	[self invalidateIntrinsicContentSize];
 }
 
 // ==================
