@@ -325,6 +325,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		tabModifiedStates = [NSMutableArray new];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewFrameChanged:) name:NSViewFrameDidChangeNotification object:self];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[self registerForDraggedTypes:@[ OakTabBarViewTabType ]];
 	}
 	return self;
@@ -334,7 +335,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 {
 	self.slideAroundAnimationTimer = nil;
 
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:self];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	iterate(it, bindings)
 	{
@@ -346,6 +347,11 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	[tabToolTips release];
 	[tabModifiedStates release];
 	[super dealloc];
+}
+
+- (void)userDefaultsDidChange:(NSNotification*)aNotification
+{
+	self.isExpanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey] ? YES : [tabTitles count] > 1;
 }
 
 - (void)viewDidMoveToWindow
@@ -489,26 +495,9 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	if(isExpanded == flag)
 		return;
 
-	CGFloat delta = isExpanded ? 1-NSHeight(self.frame) : 23-NSHeight(self.frame);
 	isExpanded = flag;
-
-	BOOL visible = NO/*[[self window] isVisible]*/;
-	for(NSView* view in [[self superview] subviews])
-	{
-		D(DBF_TabBarView, bug("%s: %s\n", view.description.UTF8String, NSStringFromRect(view.frame).UTF8String););
-		NSRect frame = view.frame;
-		if(view == self)
-		{
-			frame.origin.y -= delta;
-			frame.size.height += delta;
-		}
-		else
-		{
-			frame.size.height -= delta;
-		}
-		[(visible ? [view animator] : view) setFrame:frame];
-	}
 	self.layoutNeedsUpdate = YES;
+	[self invalidateIntrinsicContentSize];
 }
 
 - (void)selectTab:(id)sender
