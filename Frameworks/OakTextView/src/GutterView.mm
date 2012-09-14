@@ -205,6 +205,8 @@ struct data_source_t
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier
 {
 	CGFloat width = 0;
+	if(!delegate)
+		return 5;
 
 	if(identifier == [GVLineNumbersColumnIdentifier UTF8String])
 	{
