@@ -5,6 +5,11 @@
 @implementation HOBrowserView
 @synthesize webView;
 
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
+}
+
 - (id)initWithFrame:(NSRect)frame
 {
 	if(self = [super initWithFrame:frame])

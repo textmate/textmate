@@ -474,6 +474,11 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	[self setLayers:newLayout];
 }
 
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, isExpanded ? 23 : 1);
+}
+
 - (void)viewFrameChanged:(NSNotification*)aNotification
 {
 	self.layoutNeedsUpdate = YES;

@@ -35,6 +35,11 @@ OAK_DEBUG_VAR(FileBrowser_View);
 	[super dealloc];
 }
 
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
+}
+
 - (void)setupViews
 {
 	ASSERT(!outlineView);

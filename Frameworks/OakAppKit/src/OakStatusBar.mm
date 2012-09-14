@@ -29,6 +29,11 @@
 	[self updateLayout];
 }
 
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, OakStatusBarHeight);
+}
+
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
