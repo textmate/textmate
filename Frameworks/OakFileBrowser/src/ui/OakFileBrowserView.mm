@@ -71,6 +71,12 @@ OAK_DEBUG_VAR(FileBrowser_View);
 	[outlineView addTableColumn:tableColumn];
 	[outlineView setOutlineTableColumn:tableColumn];
 	[outlineView sizeLastColumnToFit];
+
+	NSDictionary* views = NSDictionaryOfVariableBindings(headerView, scrollView);
+	for(id key in views)
+		[views[key] setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[headerView(==scrollView)]|" options:0 metrics:nil views:views]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[headerView][scrollView]|"   options:0 metrics:nil views:views]];
 }
 
 // ========
@@ -94,14 +100,6 @@ OAK_DEBUG_VAR(FileBrowser_View);
 	if(aResponder != self.persistentNextResponder)
 		self.persistentNextResponder.nextResponder = aResponder;
 	[super setNextResponder:self.persistentNextResponder];
-}
-
-- (void)resizeSubviewsWithOldSize:(NSSize)oldSize
-{
-	headerView.frame                      = NSMakeRect(0, NSHeight(self.frame) - OakStatusBarHeight, NSWidth(self.frame), OakStatusBarHeight);
-	outlineView.enclosingScrollView.frame = NSMakeRect(0, 0, NSWidth(self.frame), NSHeight(self.frame) - NSHeight(headerView.frame));
-
-	[[NSUserDefaults standardUserDefaults] setInteger:NSWidth(self.frame) forKey:kUserDefaultsFileBrowserWidthKey];
 }
 
 - (BOOL)isOpaque

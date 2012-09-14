@@ -5,6 +5,11 @@
 @implementation HOBrowserView
 @synthesize webView;
 
++ (BOOL)requiresConstraintBasedLayout
+{
+	return YES;
+}
+
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
@@ -14,16 +19,11 @@
 {
 	if(self = [super initWithFrame:frame])
 	{
-		NSRect webViewFrame   = NSMakeRect(0, OakStatusBarHeight, NSWidth(frame), NSHeight(frame) - OakStatusBarHeight);
-		NSRect statusBarFrame = NSMakeRect(0, 0, NSWidth(frame), OakStatusBarHeight);
-
-		webView                  = [[WebView alloc] initWithFrame:webViewFrame];
-		webView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
+		webView = [[WebView alloc] initWithFrame:NSZeroRect];
 		[self addSubview:webView];
 
-		statusBar                  = [[HOStatusBar alloc] initWithFrame:statusBarFrame];
-		statusBar.autoresizingMask = NSViewWidthSizable;
-		statusBar.delegate         = webView;
+		statusBar = [[HOStatusBar alloc] initWithFrame:NSZeroRect];
+		statusBar.delegate = webView;
 		[self addSubview:statusBar];
 
 		webViewDelegateHelper          = [HOWebViewDelegateHelper new];
@@ -32,6 +32,12 @@
 		webView.resourceLoadDelegate   = webViewDelegateHelper;
 		webView.UIDelegate             = webViewDelegateHelper;
 		webView.frameLoadDelegate      = self;
+
+		NSDictionary* views = NSDictionaryOfVariableBindings(webView, statusBar);
+		for(id key in views)
+			[views[key] setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView][statusBar]|"   options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 	}
 	return self;
 }
