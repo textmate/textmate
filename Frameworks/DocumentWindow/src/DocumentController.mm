@@ -2,6 +2,7 @@
 #import "DocumentTabs.h"
 #import "DocumentSaveHelper.h"
 #import "DocumentCommand.h"
+#import "ProjectLayoutView.h"
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 
 // #import "AppController.h" // find_tags
@@ -17,7 +18,6 @@ namespace find_tags
 }
 
 #import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakLayoutView.h>
 #import <OakAppKit/OakSubmenuController.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakTextView/OakDocumentView.h>
@@ -357,12 +357,6 @@ OAK_DEBUG_VAR(DocumentController);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 }
 
-+ (void)initialize
-{
-	if(self == [DocumentController class])
-		[[NSUserDefaults standardUserDefaults] registerDefaults:@{ kUserDefaultsFileBrowserWidthKey : @250 }];
-}
-
 + (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
 {
 	for(NSWindow* window in [NSApp orderedWindows])
@@ -402,11 +396,25 @@ OAK_DEBUG_VAR(DocumentController);
 - (id)initWithDocuments:(std::vector<document::document_ptr> const&)someDocuments
 {
 	D(DBF_DocumentController, bug("%zu documents\n", someDocuments.size()););
-	if(self = [super initWithWindowNibName:@"Document"])
+	if(self = [super initWithWindow:[[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO] autorelease]])
 	{
 		identifier.generate();
 		fileBrowserHidden = YES;
 		[self addDocuments:someDocuments andSelect:kSelectDocumentFirst closeOther:YES pruneTabBar:YES];
+
+		layoutView = [[[ProjectLayoutView alloc] initWithFrame:NSZeroRect] autorelease];
+
+		[self.window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+		[self.window setContentView:layoutView];
+		[self.window setDelegate:self];
+		[self.window bind:@"title" toObject:self withKeyPath:@"windowTitle" options:nil];
+		[self.window bind:@"documentEdited" toObject:self withKeyPath:@"isDocumentEdited" options:nil];
+
+		tabBarView = [[[OakTabBarView alloc] initWithFrame:NSZeroRect] autorelease];
+		layoutView.tabBarView = tabBarView;
+
+		[self windowDidLoad];
+		[self windowDidBecomeMain:nil];
 	}
 	return self;
 }
@@ -476,7 +484,7 @@ OAK_DEBUG_VAR(DocumentController);
 	[OakWindowFrameHelper windowFrameHelperWithWindow:[self window]];
 
 	documentView = [[OakDocumentView alloc] init];
-	[layoutView addView:documentView];
+	layoutView.documentView = documentView;
 
 	textView = documentView.textView;
 
@@ -815,22 +823,16 @@ OAK_DEBUG_VAR(DocumentController);
 {
 	if([self htmlOutputIsVisible])
 	{
-		[layoutView removeView:htmlOutputView];
-		[layoutView removeResizeInfoForView:documentView];
+		layoutView.htmlOutputView = nil;
 		[self.window makeFirstResponder:textView];
 	}
 	else
 	{
-		BOOL placeRight = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
 		if(!htmlOutputView)
-			htmlOutputView = [[OakHTMLOutputView alloc] initWithFrame:NSMakeRect(0, 0, 100, htmlOutputHeight ?: (int)round(NSHeight(layoutView.frame) / 3))];
+			htmlOutputView = [[OakHTMLOutputView alloc] initWithFrame:NSZeroRect];
 
-		if(![htmlOutputView superview])
-		{
-			[layoutView addView:htmlOutputView atEdge:(placeRight ? NSMaxXEdge : NSMaxYEdge) ofView:nil];
-			[layoutView removeResizeInfoForView:documentView];
-			[layoutView addResizeInfo:(OakResizeInfo){ -15, -15, OakResizeInfo::kBottomRight, (placeRight ? OakResizeInfo::kWidth : OakResizeInfo::kHeight) } forView:documentView];
-		}
+		if(![self htmlOutputIsVisible])
+			layoutView.htmlOutputView = htmlOutputView;
 	}
 }
 
@@ -1026,8 +1028,7 @@ OAK_DEBUG_VAR(DocumentController);
 		runner.reset();
 
 		[htmlOutputView stopLoading];
-		[layoutView removeView:htmlOutputView];
-		[self.window makeFirstResponder:textView];
+		[self toggleHTMLOutput:self];
 	}
 	[alert release];
 }
@@ -1043,8 +1044,7 @@ OAK_DEBUG_VAR(DocumentController);
 		}
 		else
 		{
-			[layoutView removeView:htmlOutputView];
-			[self.window makeFirstResponder:textView];
+			[self toggleHTMLOutput:self];
 		}
 	}
 	else
@@ -1520,8 +1520,6 @@ static std::string file_chooser_glob (std::string const& path)
 {
 	if(flag != self.fileBrowserHidden)
 	{
-		BOOL placeOnRight = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"];
-
 		fileBrowserHidden = flag;
 		if(!fileBrowser && !fileBrowserHidden)
 		{
@@ -1529,22 +1527,11 @@ static std::string file_chooser_glob (std::string const& path)
 
 			fileBrowser = [OakFileBrowser new];
 			fileBrowser.delegate = self;
-			[fileBrowser setupViewWithSize:NSMakeSize(fileBrowserWidth ?: [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey], 100) state:fileBrowserState];
+			[fileBrowser setupViewWithState:fileBrowserState];
 			[self updateFileBrowserStatus:self];
 		}
 
-		if(fileBrowserHidden)
-		{
-			[layoutView removeView:fileBrowser.view];
-		}
-		else
-		{
-			[layoutView addView:fileBrowser.view atEdge:(placeOnRight ? NSMaxXEdge : NSMinXEdge) ofView:documentView];
-			[layoutView setLocked:YES forView:fileBrowser.view];
-			if(placeOnRight)
-					[layoutView addResizeInfo:(OakResizeInfo){  11, 15, OakResizeInfo::kTopLeft,  OakResizeInfo::kWidth } forView:fileBrowser.view];
-			else	[layoutView addResizeInfo:(OakResizeInfo){ -11, 15, OakResizeInfo::kTopRight, OakResizeInfo::kWidth } forView:fileBrowser.view];
-		}
+		layoutView.fileBrowserView = fileBrowserHidden ? nil : fileBrowser.view;
 	}
 	document::schedule_session_backup();
 }

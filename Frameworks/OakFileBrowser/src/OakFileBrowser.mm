@@ -32,8 +32,6 @@
 #import <regexp/glob.h>
 #import <settings/settings.h>
 
-NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
-
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
 @interface OakFileBrowser ()
@@ -730,9 +728,9 @@ static bool is_binary (std::string const& path)
 	}
 }
 
-- (void)setupViewWithSize:(NSSize)viewSize state:(NSDictionary*)fileBrowserState
+- (void)setupViewWithState:(NSDictionary*)fileBrowserState
 {
-	self.view = [[[OakFileBrowserView alloc] initWithFrame:(NSRect){ NSZeroPoint, viewSize }] autorelease];
+	self.view = [[[OakFileBrowserView alloc] initWithFrame:NSZeroRect] autorelease];
 	historyController.state = fileBrowserState;
 	if(!historyController.currentURL)
 		[historyController addURLToHistory:url];

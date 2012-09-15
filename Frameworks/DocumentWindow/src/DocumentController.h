@@ -6,7 +6,7 @@
 #import <command/runner.h>
 #import <scm/scm.h>
 
-@class OakLayoutView;
+@class ProjectLayoutView;
 @class OakDocumentView;
 @class OakTextView;
 @class OakFilterWindowController;
@@ -17,12 +17,12 @@ typedef std::shared_ptr<document_tab_t> document_tab_ptr;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
-PUBLIC @interface DocumentController : NSWindowController <OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, DocumentOpenHelperDelegate>
+PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, DocumentOpenHelperDelegate>
 {
 	OBJC_WATCH_LEAKS(DocumentController);
 
 	IBOutlet OakTabBarView* tabBarView;
-	IBOutlet OakLayoutView* layoutView;
+	IBOutlet ProjectLayoutView* layoutView;
 
 	OakFileBrowser* fileBrowser;
 	OakDocumentView* documentView;
