@@ -31,7 +31,6 @@ PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumn
 }
 @property (nonatomic, readonly) OakTextView* textView;
 @property (nonatomic, assign) document::document_ptr const& document;
-@property (nonatomic, assign) BOOL showResizeThumb;
 - (IBAction)toggleLineNumbers:(id)sender;
 - (IBAction)takeThemeUUIDFrom:(id)sender;
 

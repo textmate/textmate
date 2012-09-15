@@ -32,9 +32,6 @@ namespace fb
 
 	NSString* titleText;
 	NSImage*  titleImage;
-
-	BOOL showResizeIndicator;
-	BOOL resizeIndicatorOnRight;
 }
 // Initial setup
 @property (nonatomic, assign) id           delegate;
@@ -49,7 +46,6 @@ namespace fb
 // Outline view
 @property (nonatomic, readonly) OFBOutlineView* outlineView;
 
-- (void)setShowsResizeIndicator:(BOOL)flag onRight:(BOOL)onRight;
 - (void)displayMenu:(NSMenu*)aMenu fromHeaderColumn:(fb::header_column)columnTag selectedIndex:(NSUInteger)index popup:(BOOL)popup;
 - (NSRect)iconFrameForEntry:(id)anEntry;
 @end

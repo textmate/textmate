@@ -730,10 +730,9 @@ static bool is_binary (std::string const& path)
 	}
 }
 
-- (void)setupViewWithSize:(NSSize)viewSize resizeIndicatorOnRight:(BOOL)flag state:(NSDictionary*)fileBrowserState
+- (void)setupViewWithSize:(NSSize)viewSize state:(NSDictionary*)fileBrowserState
 {
 	self.view = [[[OakFileBrowserView alloc] initWithFrame:(NSRect){ NSZeroPoint, viewSize }] autorelease];
-	[view setShowsResizeIndicator:YES onRight:flag];
 	historyController.state = fileBrowserState;
 	if(!historyController.currentURL)
 		[historyController addURLToHistory:url];

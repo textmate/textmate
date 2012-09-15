@@ -10,7 +10,7 @@
 const NSInteger BundleItemSelector = 1;
 
 @implementation OTVStatusBar
-@synthesize recordingTimer, pulsedRecordingIndicator, grammarName, symbolName, isMacroRecording, tabSize, softTabs, showResizeThumb;
+@synthesize recordingTimer, pulsedRecordingIndicator, grammarName, symbolName, isMacroRecording, tabSize, softTabs;
 @synthesize delegate;
 
 - (void)update
@@ -21,7 +21,6 @@ const NSInteger BundleItemSelector = 1;
 	std::string const tabSizeText    = std::string(softTabs ? "Soft Tabs:" : "Tab Size:") + "\u2003" /* Em Space */ + text::pad(tabSize, 4);
 	static NSImage* gearImage        = [[NSImage imageNamed:@"Statusbar Gear" inSameBundleAsClass:[self class]] retain];
 	static NSImage* languageIcon     = [[NSImage imageNamed:@"Languages" inSameBundleAsClass:[self class]] retain];
-	static NSImage* splitViewThumb   = [[NSImage imageNamed:@"Horizontal SplitView Thumb" inSameBundleAsClass:[self class]] retain];
 
 	struct sb::cell_t const cellList[] =
 	{
@@ -31,7 +30,7 @@ const NSInteger BundleItemSelector = 1;
 		sb::cell_t::popup(tabSizeText,                         @selector(showTabSizeSelector:),     self.delegate),
 		sb::cell_t::popup([symbolName UTF8String] ?: "Symbol", @selector(showSymbolSelector:),      self.delegate).size(200, CGFLOAT_MAX),
 		sb::cell_t::button(pulsedRecordingIndicator,           @selector(toggleMacroRecording:),    self.delegate).no_padding().size(17),
-		showResizeThumb ? sb::cell_t::button(splitViewThumb, NULL, nil).no_padding().size(15) : sb::cell_t::info().size(15),
+		sb::cell_t::info().size(15),
 	};
 	SetCells(self, cellList);
 }
@@ -109,12 +108,6 @@ const NSInteger BundleItemSelector = 1;
 - (void)setSoftTabs:(BOOL)flag
 {
 	softTabs = flag;
-	[self update];
-}
-
-- (void)setShowResizeThumb:(BOOL)flag
-{
-	showResizeThumb = flag;
 	[self update];
 }
 

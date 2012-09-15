@@ -37,7 +37,7 @@ PUBLIC @interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
 @property (nonatomic, retain)   NSArray*      modifiedURLs;
 @property (nonatomic, readonly) NSDictionary* sessionState;
 
-- (void)setupViewWithSize:(NSSize)viewSize resizeIndicatorOnRight:(BOOL)flag state:(NSDictionary*)fileBrowserState;
+- (void)setupViewWithSize:(NSSize)viewSize state:(NSDictionary*)fileBrowserState;
 - (void)showURL:(NSURL*)aPath;
 - (void)deselectAll:(id)sender;
 - (void)updateVariables:(std::map<std::string, std::string>&)env;

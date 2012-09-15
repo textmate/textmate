@@ -67,9 +67,6 @@ private:
 @synthesize textView, statusBar;
 @synthesize gutterImages, gutterHoverImages, gutterPressedImages;
 
-- (BOOL)showResizeThumb               { return statusBar.showResizeThumb; }
-- (void)setShowResizeThumb:(BOOL)flag { statusBar.showResizeThumb = flag; }
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	D(DBF_OakDocumentView, bug("%s\n", [NSStringFromRect(aRect) UTF8String]););

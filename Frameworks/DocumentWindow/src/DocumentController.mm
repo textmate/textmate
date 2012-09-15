@@ -817,7 +817,6 @@ OAK_DEBUG_VAR(DocumentController);
 	{
 		[layoutView removeView:htmlOutputView];
 		[layoutView removeResizeInfoForView:documentView];
-		documentView.showResizeThumb = NO;
 		[self.window makeFirstResponder:textView];
 	}
 	else
@@ -831,7 +830,6 @@ OAK_DEBUG_VAR(DocumentController);
 			[layoutView addView:htmlOutputView atEdge:(placeRight ? NSMaxXEdge : NSMaxYEdge) ofView:nil];
 			[layoutView removeResizeInfoForView:documentView];
 			[layoutView addResizeInfo:(OakResizeInfo){ -15, -15, OakResizeInfo::kBottomRight, (placeRight ? OakResizeInfo::kWidth : OakResizeInfo::kHeight) } forView:documentView];
-			documentView.showResizeThumb = YES;
 		}
 	}
 }
@@ -1531,7 +1529,7 @@ static std::string file_chooser_glob (std::string const& path)
 
 			fileBrowser = [OakFileBrowser new];
 			fileBrowser.delegate = self;
-			[fileBrowser setupViewWithSize:NSMakeSize(fileBrowserWidth ?: [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey], 100) resizeIndicatorOnRight:!placeOnRight state:fileBrowserState];
+			[fileBrowser setupViewWithSize:NSMakeSize(fileBrowserWidth ?: [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey], 100) state:fileBrowserState];
 			[self updateFileBrowserStatus:self];
 		}
 

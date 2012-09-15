@@ -151,26 +151,7 @@ static inline NSImage* Pressed (NSString* name) { return Image([NSString stringW
 		sb::cell_t::button(Image(@"Home"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Home")).tool_tip("Home").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::home),
 		sb::cell_t::button(Image(@"Computer"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Computer")).tool_tip("Computer").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::computer),
 	};
-
-	std::vector<sb::cell_t> cellList = std::vector<sb::cell_t>(newCells, newCells+sizeofA(newCells));
-
-	if(showResizeIndicator)
-	{
-		NSImage* thumbImage = [NSImage imageNamed:@"SplitViewThumb" inSameBundleAsClass:[self class]];
-		sb::cell_t thumb    = sb::cell_t::info(thumbImage).no_padding();
-		if(resizeIndicatorOnRight)
-				cellList.push_back(thumb);
-		else	cellList.insert(cellList.begin(), thumb);
-	}
-
-	[headerView setCells:cellList];
-}
-
-- (void)setShowsResizeIndicator:(BOOL)flag onRight:(BOOL)onRight
-{
-	showResizeIndicator = flag;
-	resizeIndicatorOnRight = onRight;
-	[self updateHeaderView];
+	[headerView setCells:std::vector<sb::cell_t>(newCells, newCells+sizeofA(newCells))];
 }
 
 - (void)setCanGoBackward:(BOOL)flag      { canGoBackward = flag; [self updateHeaderView]; }

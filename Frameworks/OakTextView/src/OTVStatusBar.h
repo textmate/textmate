@@ -9,7 +9,6 @@
 	BOOL isMacroRecording;
 	BOOL softTabs;
 	int32_t tabSize;
-	BOOL showResizeThumb;
 
 	id delegate;
 
@@ -23,7 +22,6 @@
 @property (nonatomic, assign) BOOL isMacroRecording;
 @property (nonatomic, assign) BOOL softTabs;
 @property (nonatomic, assign) int32_t tabSize;
-@property (nonatomic, assign) BOOL showResizeThumb;
 
 @property (nonatomic, assign) id delegate;
 @end
