@@ -1,7 +1,6 @@
 #import "OakFileBrowserView.h"
 #import "OFBPathInfoCell.h"
 #import "OFBOutlineView.h"
-#import "../OakFileBrowser.h" // kUserDefaultsFileBrowserWidthKey
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/OakStatusBar.h>
 #import <OakAppKit/OakFileIconImage.h>
