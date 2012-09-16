@@ -6,10 +6,23 @@ This repository contains the source code for TextMate 2, a text editor for OS X 
 
 # Building
 
+## Important
+
+If you just want to run TextMate 2 then download a [prebuilt binary][]. For 10.6 support you can try a [10.6 build][] (from the [10.6 fork][]) but it comes with no guarantee of actually working!
+
+If you have problems building please **don’t** open an issue! Instead write the [textmate-dev][] mailing list or use the [#textmate][] IRC channel on [freenode.net][] where people might be able to help you.
+
+[prebuilt binary]: https://github.com/textmate/textmate/downloads
+[10.6 build]: https://github.com/nanoant/textmate/downloads
+[10.6 fork]: https://github.com/nanoant/textmate/tree/10.6_32bit
+
+## Bootstrap
+
 To bootstrap the build you need to run `./configure` (in the root of the source tree). You can set a few (environment) variables read by this script that change the generated build file:
 
 * `builddir` — location of built files. Defaults to `~/build/TextMate`.
 * `identity` — for Apple’s `codesign`. Defaults to ad-hoc signing, which does not use an identity at all.
+* `boostdir` — location of boost includes. By default it will search various locations including MacPorts and Homebrew.
 
 In the simplest case you would run:
 
@@ -56,14 +69,13 @@ Or using [homebrew][]:
 
 ### Clang 3.2 / 4.0
 
-You also need a recent version of clang. This should be included with Xcode 4.4+ (available for both Lion and Mountain Lion). If you don’t have it, you can build [clang 3.2][] from [MacPorts][]:
+You also need a recent version of clang. This should be included with Xcode 4.4+ available for both Lion and Mountain Lion.
 
-	sudo port install clang-3.2 clang_select
-	sudo port select clang mp-clang-3.2
+If you have multiple versions of Xcode installed, be sure to run `sudo xcode-select -switch` so that `./configure` finds the most recent.
 
-Or using [homebrew][]:
- 
-	brew install --HEAD llvm --with-clang
+We also require the [libc++][] library, so while you can install clang from MacPorts or Homebrew, you’d need to also install this library (or make it use the one from Xcode).
+
+[libc++]: http://libcxx.llvm.org/
 
 ## Building from within TextMate
 
@@ -174,7 +186,7 @@ You can safely assume that all `xib` files without such message are saved with X
 
 After this, re-apply your change and commit. If the change is non-trivial it is a good idea to write how you made the change in the commit body. E.g. a commit message could be:
 
-	Only enable install button when we can install
+	Disable install button when we can’t install
 	
 	The install button’s “enabled” property
 	has been bound to the “canInstall”
