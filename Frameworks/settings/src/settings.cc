@@ -100,6 +100,12 @@ namespace
 	struct section_t
 	{
 		section_t (path::glob_t const& fileGlob, scope::selector_t const& scopeSelector, std::vector< std::pair<std::string, std::string> > const& variables) : file_glob(fileGlob), scope_selector(scopeSelector), variables(variables) { }
+		section_t (std::vector< std::pair<std::string, std::string> > const& variables) : section_t("", scope::selector_t(), variables) { }
+		section_t (path::glob_t const& fileGlob, std::vector< std::pair<std::string, std::string> > const& variables) : section_t(fileGlob, scope::selector_t(), variables) { has_file_glob = true; }
+		section_t (scope::selector_t const& scopeSelector, std::vector< std::pair<std::string, std::string> > const& variables) : section_t("", scopeSelector, variables) { has_scope_selector = true; }
+
+		bool has_file_glob      = false;
+		bool has_scope_selector = false;
 
 		path::glob_t                                       file_glob;
 		scope::selector_t                                  scope_selector;
@@ -123,14 +129,15 @@ namespace
 
 			if(section->names.empty())
 			{
-				res.push_back(section_t("{,.}*", scope::selector_t(), variables));
+				res.push_back(section_t(variables));
 			}
 			else
 			{
 				iterate(name, section->names)
 				{
-					bool scope = is_scope_selector(*name);
-					res.push_back(section_t(scope ? "{,.}*" : *name, scope ? *name : scope::selector_t(), variables));
+					if(is_scope_selector(*name))
+							res.push_back(section_t(scope::selector_t(*name), variables));
+					else	res.push_back(section_t(path::glob_t(*name), variables));
 				}
 			}
 		}
@@ -169,16 +176,29 @@ namespace
 		static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 		pthread_mutex_lock(&mutex);
 
+		std::multimap<double, std::vector<section_t>::const_iterator> orderScopeMatches;
 		citerate(file, paths(directory))
 		{
 			citerate(section, sections(*file))
 			{
-				if(section->file_glob.does_match(path) && section->scope_selector.does_match(scope))
+				if(section->has_scope_selector)
+				{
+					double rank = 0;
+					if(section->scope_selector.does_match(scope, &rank))
+						orderScopeMatches.insert(std::make_pair(rank, section));
+				}
+				else if(!section->has_file_glob || section->file_glob.does_match(path))
 				{
 					iterate(pair, section->variables)
 						expand_variable(pair->first, pair->second, variables);
 				}
 			}
+		}
+
+		iterate(section, orderScopeMatches)
+		{
+			iterate(pair, section->second->variables)
+				expand_variable(pair->first, pair->second, variables);
 		}
 
 		pthread_mutex_unlock(&mutex);
