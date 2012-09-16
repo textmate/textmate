@@ -415,7 +415,6 @@ OAK_DEBUG_VAR(DocumentController);
 		layoutView.tabBarView = tabBarView;
 
 		[self windowDidLoad];
-		[self windowDidBecomeMain:nil];
 	}
 	return self;
 }
@@ -542,15 +541,6 @@ OAK_DEBUG_VAR(DocumentController);
 	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, doc->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:doc->path()];
 	self.isDocumentEdited = doc->is_modified();
-}
-
-- (void)windowDidBecomeMain:(NSNotification*)aNotification
-{
-	if(!windowHasLoaded)
-	{
-		windowHasLoaded = YES;
-		self.selectedTabIndex = selectedTabIndex;
-	}
 }
 
 - (void)updateProxyIcon

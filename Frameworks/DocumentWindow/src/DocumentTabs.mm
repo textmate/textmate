@@ -37,8 +37,7 @@ namespace
 	// This is also set after open succeeds
 	[self synchronizeWindowTitle];
 
-	if(windowHasLoaded)
-		[[DocumentOpenHelper new] tryOpenDocument:self.selectedDocument forWindow:self.window delegate:self];
+	[[DocumentOpenHelper new] tryOpenDocument:self.selectedDocument forWindow:self.window delegate:self];
 }
 
 - (document::document_ptr const&)selectedDocument
