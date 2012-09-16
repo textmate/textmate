@@ -1,10 +1,59 @@
-# TextMate Hackathon
+# Release Notes
+
+## 2012-09-16 (r9309)
+
+* Minimum dimensions are enforced when resizing the file browser or HTML output. The explicit resize buttons have been removed but dragging the dividers should now be easier, as the hot zone has been increased.
+
+* Setting a file type for a dot file wouldn’t stick.
+
+* Sections (in `.tm_properties` files) which use a scope selector now apply according to their rank (when matched against current scope) so e.g. a setting for `source.ruby` in `Global.tmProperties` will win over a setting for just `source` in a more local `.tm_properties` file.
+
+* Added two new variables:
+
+	1. `TM_APP_IDENTIFIER` — bundles which need to read settings from TextMate should use this instead of hardcoding `com.macromates.TextMate.preview`. Normally though bundles should **not** need to read TextMate settings except those they write themselves, for example the Preferences dialogs for various bundles are bound to TextMate’s user defaults.
+	2. `TM_CURRENT_THEME_PATH` — this is the path of the current theme. Incase the theme is in delta format, it points to the base theme, long-term TextMate may store a non-delta version in a temporary folder and let it point to that, so that bundles can always assume the theme is in non-delta format.
+
+* Various improvements to glob matching:
+
+	1. `**` can now be followed by something other than `/`, e.g.: `src/**.{cc,mm,h}`.
+	2. `*` and `**` now match leading dot when they are not followed by `/` or at the beginning of the glob, e.g. `main*` will match `main.cc`.
+	3. Negating a glob (by prefixing with `!`) now also rejects dot files, e.g. `!cache/**` will exclude `cache/.DS_Store` even though `cache/**` (non-negated) would not have matched that path.
+
+* Find in Folder (⇧⌘F) and File Chooser (⌘T) now exclude files matched by the “Non-text files” glob setup in _Preferences → Projects_.
+
+* The various include/exclude globs you can set in `.tm_properties` are now aggregated. So setting `exclude` and `excludeDirectories` will exclude directories matched by either of the two globs (rather than the “most specific”).
+
+* Include SCM info in window title by default. This is done by having the following in `Default.tmProperties`:
+
+		windowTitleSCM = '${TM_SCM_BRANCH:+ ($TM_SCM_NAME: $TM_SCM_BRANCH)}'
+		windowTitle    = '$TM_DISPLAYNAME$windowTitleSCM'
+
+	Incase you want to set a custom window title but keep the SCM info you can use the `windowTitleSCM` variable, e.g.:
+
+		windowTitle     = '$TM_DISPLAYNAME — ${CWD/^.*\///}$windowTitleSCM'
+
+	Exploiting the way sections with scope selectors are now evaluated last, it is possible to set a global window title based on a potential `projectDirectory` variable. E.g. put the following in `~/Library/Application Support/TextMate/Global.tmProperties`:
+
+		[ 'attr, ' ]
+		windowTitleProject = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
+		windowTitle        = '$TM_DISPLAYNAME$windowTitleProject$windowTitleSCM'
+	
+	Normally we can’t use `projectDirectory` in a default/global setting, because that variable is set later, and we have no way to specify “late binding”. However, by setting it in a scope selector section we evaluate the variable after a potential `projectDirectory` has been set in a more local `.tm_properties` file. The scope selector used here is `attr, ` which means all `attr` scopes or (the comma operator) the empty scope selector (which matches everything).
+
+	The above is just a “hack” until better solutions have been implemented.
+
+* Removed Chinese translation. Since the translated interface files contain more than just strings, outdated translations affect program behavior. We’ll soon move fully to constraint-based layout which should allow translations to be purely string-based (on 10.8).
+
+* r9307 accidentally included a “Select Next” macro bound to ⌃W for when there was a selection. This interfered with using ⌃W with multiple carets (as presently multiple carets trigger the `dyn.selection.discontinuous` scope even if they are all zero-width).
+
+## TextMate Hackathon
 
 If there is some feature you would like to add to TextMate but need a little guidance on how to go about it, we are holding a TextMate Hackathon Saturday the **22nd of September 2012** starting at 2 pm, the address is:
 
 	SHAPE
 	Gothersgade 8B, 3rd floor
 	1123 København K
+	Denmark
 
 We can fit 20-25 people so please let us know in advance if you wish to attend, either using the [facebook event][] or by emailing [Allan Odgaard](mailto:hackathon@textmate.org?subject=TextMate%20Hackathon) (me).
 
@@ -12,8 +61,6 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 [facebook event]: http://www.facebook.com/events/399041873494929
 [SHAPE]: http://shapehq.com/
-
-# Release Notes
 
 ## 2012-09-10 (r9307)
 
