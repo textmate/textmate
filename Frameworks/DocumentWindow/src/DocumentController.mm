@@ -506,7 +506,20 @@ OAK_DEBUG_VAR(DocumentController);
 
 - (void)synchronizeWindowTitle
 {
+	if(selectedTabIndex >= documentTabs.size())
+	{
+		fprintf(stderr, "*** error: selected tab out of bounds: %zu >= %zu\n", selectedTabIndex, documentTabs.size());
+		return;
+	}
+
 	document::document_ptr doc = [self selectedDocument];
+
+	if(!doc)
+	{
+		fprintf(stderr, "*** error: no document (synchronizeWindowTitle)\n");
+		return;
+	}
+
 	std::string docDirectory = doc->path() != NULL_STR ? path::parent(doc->path()) : to_s(self.untitledSavePath);
 
 	std::map<std::string, std::string> map;
