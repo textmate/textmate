@@ -492,8 +492,6 @@ OAK_DEBUG_VAR(DocumentController);
 	tabBarView.dataSource = self;
 	[tabBarView reloadData]; // FIXME this should be implicit
 
-	[self.window setPrivateBottomCornerRounded:NO];
-
 	// Move up the tab bar view in the responder chain so that it is next responder for its siblings. This is so that performClose: goes through the tab bar view, at least when one of the view’s siblings is first responder
 	NSResponder* contentView = [tabBarView nextResponder];
 	[tabBarView setNextResponder:[contentView nextResponder]];

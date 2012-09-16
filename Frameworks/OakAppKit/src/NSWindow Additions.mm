@@ -1,9 +1,5 @@
 #import "NSWindow Additions.h"
 
-@interface NSWindow (Private)
-- (void)setBottomCornerRounded:(BOOL)flag;
-@end
-
 @implementation NSWindow (Other)
 - (void)toggleVisibility
 {
@@ -18,11 +14,5 @@
 		[self makeFirstResponder:nil];
 		[self makeKeyAndOrderFront:self];
 	}
-}
-
-- (void)setPrivateBottomCornerRounded:(BOOL)flag
-{
-	if([self respondsToSelector:@selector(setBottomCornerRounded:)])
-		[self setBottomCornerRounded:flag];
 }
 @end
