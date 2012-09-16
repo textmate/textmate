@@ -91,7 +91,7 @@ namespace
 		static std::string const RootScopes[] = { "text", "source", "attr" };
 		iterate(scope, RootScopes)
 		{
-			if(str.find(*scope) == 0 && (str.size() == scope->size() || str[scope->size()] == '.' || str[scope->size()] == ' '))
+			if(str.find(*scope) == 0 && (str.size() == scope->size() || str.find_first_of("., ", scope->size()) == scope->size()))
 				return true;
 		}
 		return str == "";
