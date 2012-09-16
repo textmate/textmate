@@ -366,7 +366,7 @@ namespace
 	{
 		document::document_ptr document = someDocuments.front();
 		[alert setMessageText:[NSString stringWithCxxString:text::format("Do you want to save the changes you made in the document “%s”?", document->display_name().c_str())]];
-		[alert setInformativeText:@"Your changes will be lost if you don't save them."];
+		[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
 	}
 	else
 	{
