@@ -257,14 +257,9 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 - (void)performClose:(id)sender
 {
 	NSView* view = (NSView*)[[self window] firstResponder];
-	if(![view isKindOfClass:[NSView class]])
-		return;
-
-	while(view && [view superview] != self)
-		view = [view superview];
-
-	if(view)
-			[NSApp sendAction:@selector(performCloseSplit:) to:nil from:view];
-	else	[[self nextResponder] tryToPerform:_cmd with:sender];
+	if([view isKindOfClass:[NSView class]] && [view isDescendantOf:htmlOutputView])
+		[NSApp sendAction:@selector(performCloseSplit:) to:nil from:htmlOutputView];
+	else if(tabBarView)
+		[tabBarView tryToPerform:_cmd with:sender];
 }
 @end
