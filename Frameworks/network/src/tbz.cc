@@ -5,13 +5,6 @@
 
 namespace network
 {
-	static char const* strip_components_flag ()
-	{
-		SInt32 osVersion = 0;
-		Gestalt(gestaltSystemVersion, &osVersion);
-		return osVersion >= 0x1050 ? "--strip-components" : "--strip-path";
-	}
-
 	pid_t launch_tbz (std::string const& dest, int& input, int& output, std::string& error)
 	{
 		signal(SIGPIPE, SIG_IGN);
@@ -20,7 +13,7 @@ namespace network
 		pipe(&in[0]);
 		pipe(&out[0]);
 
-		char const* argv[] = { "/usr/bin/tar", "-jxmkC", dest.c_str(), strip_components_flag(), "1", NULL };
+		char const* argv[] = { "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1", NULL };
 		oak::c_array env(oak::basic_environment());
 		pid_t pid = vfork();
 		if(pid == 0)
