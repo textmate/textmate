@@ -407,6 +407,7 @@ OAK_DEBUG_VAR(DocumentController);
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 		[self.window setContentView:layoutView];
 		[self.window setDelegate:self];
+		[self.window setAutorecalculatesKeyViewLoop:YES];
 		[self.window bind:@"title" toObject:self withKeyPath:@"windowTitle" options:nil];
 		[self.window bind:@"documentEdited" toObject:self withKeyPath:@"isDocumentEdited" options:nil];
 
