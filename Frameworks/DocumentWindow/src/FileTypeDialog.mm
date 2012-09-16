@@ -139,8 +139,9 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 	std::string const ext = path::extensions(to_s(path));;
 	if(ext != "")
 	{
-		variables["X"] = ext;
 		self.persistentSetting = YES;
+		if(ext != path::name(to_s(path)))
+			variables["X"] = ext;
 	}
 
 	std::string const alert  = format_string::expand(to_s(alertFormatString), variables);
