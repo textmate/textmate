@@ -1104,7 +1104,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 		if(event != OakChoiceMenuKeyCancel)
 		{
-			editor->perform(ng::kInsertTab);
+			editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections]);
 			choiceVector.clear();
 		}
 	}
@@ -1164,7 +1164,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 
 	[self recordSelector:_cmd withArgument:[aString copy]];
-	editor->insert_with_pairing([aString UTF8String]);
+	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections]);
 }
 
 - (IBAction)toggleCurrentFolding:(id)sender
@@ -1619,7 +1619,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(![self expandTabTrigger:sender])
 	{
 		[self recordSelector:_cmd withArgument:nil];
-		editor->perform(ng::kInsertTab);
+		editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections]);
 	}
 }
 
@@ -1717,6 +1717,11 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (BOOL)softTabs              { return document ? document->buffer().indent().soft_tabs() : NO; }
 - (BOOL)showInvisibles        { return showInvisibles; }
 - (BOOL)softWrap              { return layout && layout->wrapping(); }
+
+- (BOOL)continuousIndentCorrections
+{
+	return !plist::is_true(bundles::value_for_setting("disableIndentCorrections", editor->scope()));
+}
 
 - (void)setTheme:(theme_ptr const&)newTheme
 {
@@ -2545,7 +2550,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 {
 	AUTO_REFRESH;
 	[self recordSelector:aSelector withArgument:nil];
-	editor->perform(anAction, layout.get());
+	editor->perform(anAction, layout.get(), [self continuousIndentCorrections]);
 }
 
 #define ACTION(NAME)      (void)NAME:(id)sender { [self handleAction:ng::to_action(#NAME ":") forSelector:@selector(NAME:)]; }

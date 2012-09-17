@@ -539,9 +539,9 @@ namespace ng
 
 	struct indent_helper_t : ng::callback_t
 	{
-		indent_helper_t (editor_t& editor, buffer_t& buffer) : _disabled(false), _editor(editor), _buffer(buffer)
+		indent_helper_t (editor_t& editor, buffer_t& buffer, bool indentCorrections) : _disabled(!indentCorrections), _editor(editor), _buffer(buffer)
 		{
-			_disabled = editor._selections.size() != 1 || editor._selections.last().columnar || plist::is_true(bundles::value_for_setting("disableIndentCorrections", editor.scope()));
+			_disabled = _disabled || editor._selections.size() != 1 || editor._selections.last().columnar;
 			if(_disabled)
 				return;
 
@@ -627,7 +627,7 @@ namespace ng
 		return NULL_STR;
 	}
 
-	void editor_t::insert_with_pairing (std::string const& str)
+	void editor_t::insert_with_pairing (std::string const& str, bool indentCorrections)
 	{
 		if(!has_selection())
 		{
@@ -640,7 +640,7 @@ namespace ng
 			}
 		}
 
-		indent_helper_t indent_helper(*this, _buffer);
+		indent_helper_t indent_helper(*this, _buffer, indentCorrections);
 		std::string const autoInsert = find_paired(str, scope());
 		if(autoInsert != NULL_STR && has_selection())
 		{
@@ -693,7 +693,7 @@ namespace ng
 		_selections = this->snippet(from, to, str, variables);
 	}
 
-	void editor_t::perform (action_t action, layout_t const* layout)
+	void editor_t::perform (action_t action, layout_t const* layout, bool indentCorrections)
 	{
 		static std::string const kSingleMarkType = "•";
 		preserve_selection_helper_t selectionHelper(_buffer, _selections);
@@ -884,7 +884,7 @@ namespace ng
          
 			case kDeleteSelection:
 			{
-				indent_helper_t indent_helper(*this, _buffer);
+				indent_helper_t indent_helper(*this, _buffer, indentCorrections);
 				_selections = apply(_buffer, _selections, _snippets, &transform::null);
 			}
 			break;

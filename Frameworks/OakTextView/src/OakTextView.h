@@ -99,6 +99,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic, assign) BOOL                          showInvisibles;
 @property (nonatomic, assign) BOOL                          softWrap;
 @property (nonatomic, assign) BOOL                          softTabs;
+@property (nonatomic, readonly) BOOL                        continuousIndentCorrections;
 
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;

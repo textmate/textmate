@@ -152,12 +152,12 @@ namespace ng
 		editor_t (buffer_t& buffer);
 		editor_t (document::document_ptr document);
 
-		void perform (action_t action, layout_t const* layout = NULL);
+		void perform (action_t action, layout_t const* layout = NULL, bool indentCorrections = false);
 
 		bool disallow_tab_expansion () const;
 
 		void insert (std::string const& str, bool selectInsertion = false);
-		void insert_with_pairing (std::string const& str);
+		void insert_with_pairing (std::string const& str, bool indentCorrections = false);
 		void move_selection_to (ng::index_t const& index, bool selectInsertion = true);
 		ranges_t replace (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false);
 		void delete_tab_trigger (std::string const& str);
