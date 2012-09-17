@@ -1160,7 +1160,7 @@ OAK_DEBUG_VAR(DocumentController);
 	}
 }
 
-- (NSMenu*)menuForTabBarView:(OakTextView*)aTabBarView
+- (NSMenu*)menuForTabBarView:(OakTabBarView*)aTabBarView
 {
 	NSInteger tabIndex = aTabBarView.tag;
 
