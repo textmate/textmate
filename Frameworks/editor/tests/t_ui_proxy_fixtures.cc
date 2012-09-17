@@ -51,7 +51,7 @@ public:
 				env = item ? item->environment(baseEnv) : baseEnv;
 
 				if(document && document->is_open())
-						env = ng::editor_for_document(document)->variables(env);
+						env = ng::editor_for_document(document)->variables(env, document->path_attributes());
 				else	env = variables_for_path(NULL_STR, "", env);
 				command::runner_ptr runner = command::runner(command, buffer, selection, env, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
 				runner->launch();

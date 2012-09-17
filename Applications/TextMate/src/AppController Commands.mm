@@ -35,7 +35,7 @@ OAK_DEBUG_VAR(AppController_Commands);
 				document::document_ptr doc = document::create();
 				doc->open();
 				ng::editor_ptr editor = ng::editor_for_document(doc);
-				editor->snippet_dispatch(item->plist(), editor->variables(item->environment()));
+				editor->snippet_dispatch(item->plist(), editor->variables(item->environment(), doc->path_attributes()));
 				document::show(doc);
 				doc->close();
 			}

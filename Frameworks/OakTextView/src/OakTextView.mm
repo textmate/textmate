@@ -784,7 +784,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		case bundles::kItemTypeSnippet:
 		{
 			[self recordSelector:@selector(insertSnippetWithOptions:) withArgument:ns::to_dictionary(item->plist())];
-			editor->snippet_dispatch(item->plist(), editor->variables(item->environment()));
+			editor->snippet_dispatch(item->plist(), editor->variables(item->environment(), to_s([self scopeAttributes])));
 		}
 		break;
 
@@ -798,7 +798,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		case bundles::kItemTypeMacro:
 		{
 			[self recordSelector:@selector(playMacroWithOptions:) withArgument:ns::to_dictionary(item->plist())];
-			editor->macro_dispatch(item->plist(), editor->variables(item->environment()));
+			editor->macro_dispatch(item->plist(), editor->variables(item->environment(), to_s([self scopeAttributes])));
 		}
 		break;
 
@@ -813,13 +813,13 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
 {
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-activate", editor->scope()))
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-activate", editor->scope(to_s([self scopeAttributes]))))
 		[self performBundleItem:*item];
 }
 
 - (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
 {
-	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-deactivate", editor->scope()))
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-deactivate", editor->scope(to_s([self scopeAttributes]))))
 		[self performBundleItem:*item];
 }
 
@@ -983,7 +983,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			return [self handleKeyBindingAction:pair->second], YES;
 	}
 
-	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, editor->scope());
+	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, eventString, editor->scope(to_s([self scopeAttributes])));
 	if(!items.empty())
 	{
 		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret], [self hasSelection]))
@@ -1041,7 +1041,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)oldKeyDown:(NSEvent*)anEvent
 {
-	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), editor->scope());
+	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldKeyEquivalent, to_s(anEvent), editor->scope(to_s([self scopeAttributes])));
 	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret], [self hasSelection]))
 		[self performBundleItem:item];
 	else if(items.empty())
@@ -1117,7 +1117,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 		if(event != OakChoiceMenuKeyCancel)
 		{
-			editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections]);
+			editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
 			choiceVector.clear();
 		}
 	}
@@ -1177,7 +1177,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 
 	[self recordSelector:_cmd withArgument:[aString copy]];
-	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections]);
+	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections], to_s([self scopeAttributes]));
 }
 
 - (IBAction)toggleCurrentFolding:(id)sender
@@ -1244,7 +1244,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	else
 	{
 		typedef std::map<std::string, std::string> env;
-		env const& vars = editor->variables(env());
+		env const& vars = editor->variables(env(), to_s([self scopeAttributes]));
 		env::const_iterator it = vars.find("TM_SELECTED_TEXT");
 		if(it != vars.end() && it->second.find_first_of(" \n\t") == std::string::npos && ns::is_misspelled(it->second, document->buffer().spelling_language(), document->buffer().spelling_tag()))
 			word = [NSString stringWithCxxString:it->second];
@@ -1590,7 +1590,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	AUTO_REFRESH;
 	[self recordSelector:_cmd withArgument:someOptions];
-	editor->snippet_dispatch(plist::convert(someOptions), editor->variables(std::map<std::string, std::string>()));
+	editor->snippet_dispatch(plist::convert(someOptions), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 }
 
 - (void)undo:(id)anArgument // MACRO?
@@ -1616,7 +1616,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	AUTO_REFRESH;
 	ng::range_t range;
-	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), editor->ranges(), document->path_attributes(), &range);
+	std::vector<bundles::item_ptr> const& items = items_for_tab_expansion(document->buffer(), editor->ranges(), to_s([self scopeAttributes]), &range);
 	if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret], [self hasSelection]))
 	{
 		[self recordSelector:@selector(deleteTabTrigger:) withArgument:[NSString stringWithCxxString:editor->as_string(range.first.index, range.last.index)]];
@@ -1632,7 +1632,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(![self expandTabTrigger:sender])
 	{
 		[self recordSelector:_cmd withArgument:nil];
-		editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections]);
+		editor->perform(ng::kInsertTab, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
 	}
 }
 
@@ -1733,7 +1733,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)continuousIndentCorrections
 {
-	return !plist::is_true(bundles::value_for_setting("disableIndentCorrections", editor->scope()));
+	return !plist::is_true(bundles::value_for_setting("disableIndentCorrections", editor->scope(to_s([self scopeAttributes]))));
 }
 
 - (void)setTheme:(theme_ptr const&)newTheme
@@ -1880,7 +1880,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (scope::context_t const&)scopeContext
 {
 	static scope::context_t res;
-	return res = editor->scope();
+	return res = editor->scope(to_s([self scopeAttributes]));
 }
 
 - (void)setSelectionString:(NSString*)aSelectionString
@@ -1986,7 +1986,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert([[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
-			editor->macro_dispatch(plist::convert(@{ @"commands" : scratchMacro }), editor->variables(std::map<std::string, std::string>()));
+			editor->macro_dispatch(plist::convert(@{ @"commands" : scratchMacro }), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 	else	NSBeep();
 }
 
@@ -2025,7 +2025,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	std::set<bundles::item_ptr> allHandlers;
 	std::map<oak::uuid_t, std::vector<std::string> > handlerToFiles;
 
-	scope::context_t scope = editor->scope();
+	scope::context_t scope = editor->scope(to_s([self scopeAttributes]));
 	for(NSString* path in someFiles)
 	{
 		citerate(item, bundles::drag_commands_for_path(to_s(path), scope))
@@ -2443,7 +2443,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 	if(macroRecordingArray && [anEvent type] == NSLeftMouseDown)
 		return (void)NSRunAlertPanel(@"You are recording a macro", @"While recording macros it is not possible to select text or reposition the caret using your mouse.\nYou can stop macro recording from the Edit → Macros menu.", @"Continue", nil, nil);
 
-	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(document->buffer(), layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), document->path_attributes()), [anEvent modifierFlags]));
+	std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.mouse-click", add_modifiers_to_scope(ng::scope(document->buffer(), layout->index_at_point([self convertPoint:[anEvent locationInWindow] fromView:nil]), to_s([self scopeAttributes])), [anEvent modifierFlags]));
 	if(!items.empty())
 	{
 		if(bundles::item_ptr item = OakShowMenuForBundleItems(items, [self positionForWindowUnderCaret], [self hasSelection]))
@@ -2563,7 +2563,7 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 {
 	AUTO_REFRESH;
 	[self recordSelector:aSelector withArgument:nil];
-	editor->perform(anAction, layout.get(), [self continuousIndentCorrections]);
+	editor->perform(anAction, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
 }
 
 #define ACTION(NAME)      (void)NAME:(id)sender { [self handleAction:ng::to_action(#NAME ":") forSelector:@selector(NAME:)]; }

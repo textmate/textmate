@@ -51,9 +51,10 @@ namespace ng
 
 	typedef std::shared_ptr<completion_command_delegate_t> completion_command_delegate_ptr;
 
-	std::vector<std::string> editor_t::completions (size_t bow, size_t eow, std::string const& prefix, std::string const& suffix, scope::context_t const& scope)
+	std::vector<std::string> editor_t::completions (size_t bow, size_t eow, std::string const& prefix, std::string const& suffix, std::string const& scopeAttributes)
 	{
 		std::string const currentWord = _buffer.substr(bow, eow);
+		scope::context_t const scope = this->scope(scopeAttributes);
 
 		std::vector< std::pair<size_t, std::string> > tmp;
 		std::vector<std::string> commandResult;
@@ -75,7 +76,7 @@ namespace ng
 			cmd.output        = output::replace_selection;
 			cmd.output_format = output_format::completion_list;
 
-			std::map<std::string, std::string> env = variables(item->environment(), NULL_STR);
+			std::map<std::string, std::string> env = variables(item->environment(), scopeAttributes);
 			env["TM_CURRENT_WORD"] = prefix;
 			completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));
 			command::runner_ptr runner = command::runner(cmd, _buffer, _selections, env, delegate);
@@ -151,7 +152,7 @@ namespace ng
 		return res;
 	}
 
-	bool editor_t::setup_completion (scope::context_t const& scope)
+	bool editor_t::setup_completion (std::string const& scopeAttributes)
 	{
 		completion_info_t& info = _completion_info;
 		if(info.revision() != _buffer.revision() || info.ranges() != _selections)
@@ -165,14 +166,14 @@ namespace ng
 			r = ng::extend(_buffer, r, kSelectionExtendToWord).last();
 			size_t bow = r.min().index, eow = r.max().index;
 
-			info.set_suggestions(completions(bow, eow, _buffer.substr(bow, from), _buffer.substr(to, eow), scope));
+			info.set_suggestions(completions(bow, eow, _buffer.substr(bow, from), _buffer.substr(to, eow), scopeAttributes));
 		}
 		return !info.suggestions().empty();
 	}
 
-	void editor_t::next_completion (scope::context_t const& scope)
+	void editor_t::next_completion (std::string const& scopeAttributes)
 	{
-		if(setup_completion(scope))
+		if(setup_completion(scopeAttributes))
 		{
 			completion_info_t& info = _completion_info;
 			info.advance();
@@ -187,9 +188,9 @@ namespace ng
 		}
 	}
 
-	void editor_t::previous_completion (scope::context_t const& scope)
+	void editor_t::previous_completion (std::string const& scopeAttributes)
 	{
-		if(setup_completion(scope))
+		if(setup_completion(scopeAttributes))
 		{
 			completion_info_t& info = _completion_info;
 			info.retreat();

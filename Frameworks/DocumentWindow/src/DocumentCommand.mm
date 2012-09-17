@@ -288,7 +288,7 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 	else
 	{
 		if(document && document->is_open())
-			baseEnv = ng::editor_for_document(document)->variables(baseEnv);
+			baseEnv = ng::editor_for_document(document)->variables(baseEnv, document->path_attributes());
 		else if(document)
 			baseEnv = document->variables(baseEnv);
 		else

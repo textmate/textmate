@@ -152,12 +152,12 @@ namespace ng
 		editor_t (buffer_t& buffer);
 		editor_t (document::document_ptr document);
 
-		void perform (action_t action, layout_t const* layout = NULL, bool indentCorrections = false);
+		void perform (action_t action, layout_t const* layout = NULL, bool indentCorrections = false, std::string const& scopeAttributes = NULL_STR);
 
 		bool disallow_tab_expansion () const;
 
 		void insert (std::string const& str, bool selectInsertion = false);
-		void insert_with_pairing (std::string const& str, bool indentCorrections = false);
+		void insert_with_pairing (std::string const& str, bool indentCorrections = false, std::string const& scopeAttributes = NULL_STR);
 		void move_selection_to (ng::index_t const& index, bool selectInsertion = true);
 		ranges_t replace (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false);
 		void delete_tab_trigger (std::string const& str);
@@ -167,8 +167,8 @@ namespace ng
 		void snippet_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables);
 		void execute_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables);
 
-		scope::context_t scope () const;
-		std::map<std::string, std::string> variables (std::map<std::string, std::string> map) const;
+		scope::context_t scope (std::string const& scopeAttributes) const;
+		std::map<std::string, std::string> variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const;
 
 		std::vector<std::string> const& choices () const;
 		std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const;
@@ -242,10 +242,10 @@ namespace ng
 			ssize_t _index = 0;
 		};
 
-		std::vector<std::string> completions (size_t bow, size_t eow, std::string const& prefix, std::string const& suffix, scope::context_t const& scope);
-		bool setup_completion (scope::context_t const& scope);
-		void next_completion (scope::context_t const& scope);
-		void previous_completion (scope::context_t const& scope);
+		std::vector<std::string> completions (size_t bow, size_t eow, std::string const& prefix, std::string const& suffix, std::string const& scopeAttributes);
+		bool setup_completion (std::string const& scopeAttributes);
+		void next_completion (std::string const& scopeAttributes);
+		void previous_completion (std::string const& scopeAttributes);
 
 		// ============
 		// = Snippets =

@@ -627,7 +627,7 @@ namespace ng
 		return NULL_STR;
 	}
 
-	void editor_t::insert_with_pairing (std::string const& str, bool indentCorrections)
+	void editor_t::insert_with_pairing (std::string const& str, bool indentCorrections, std::string const& scopeAttributes)
 	{
 		if(!has_selection())
 		{
@@ -641,7 +641,7 @@ namespace ng
 		}
 
 		indent_helper_t indent_helper(*this, _buffer, indentCorrections);
-		std::string const autoInsert = find_paired(str, scope());
+		std::string const autoInsert = find_paired(str, scope(scopeAttributes));
 		if(autoInsert != NULL_STR && has_selection())
 		{
 			_selections = replace_helper(_buffer, _snippets, map(_buffer, _selections, transform::surround(str, autoInsert)));
@@ -693,7 +693,7 @@ namespace ng
 		_selections = this->snippet(from, to, str, variables);
 	}
 
-	void editor_t::perform (action_t action, layout_t const* layout, bool indentCorrections)
+	void editor_t::perform (action_t action, layout_t const* layout, bool indentCorrections, std::string const& scopeAttributes)
 	{
 		static std::string const kSingleMarkType = "•";
 		preserve_selection_helper_t selectionHelper(_buffer, _selections);
@@ -857,8 +857,8 @@ namespace ng
 
 			case kReplaceAndFind:
 			{
-				perform(kReplace, layout, indentCorrections);
-				perform(kFindNext, layout, indentCorrections);
+				perform(kReplace, layout, indentCorrections, scopeAttributes);
+				perform(kFindNext, layout, indentCorrections, scopeAttributes);
 			}
 			break;
 
@@ -1116,8 +1116,8 @@ namespace ng
 			case kUnwrapText:              _selections = apply(_buffer, _selections, _snippets, &transform::unwrap); break;
 
 			case kComplete:
-			case kNextCompletion:          next_completion(scope());      break;
-			case kPreviousCompletion:      previous_completion(scope());  break;
+			case kNextCompletion:          next_completion(scopeAttributes);      break;
+			case kPreviousCompletion:      previous_completion(scopeAttributes);  break;
 
 			case kMoveSelectionUp:         move_selection( 0, -1); break;
 			case kMoveSelectionDown:       move_selection( 0, +1); break;
@@ -1324,12 +1324,12 @@ namespace ng
 		_selections = apply(_buffer, ranges, _snippets, &transform::null);
 	}
 
-	scope::context_t editor_t::scope () const
+	scope::context_t editor_t::scope (std::string const& scopeAttributes) const
 	{
-		return ng::scope(_buffer, _selections, _document->path_attributes());
+		return ng::scope(_buffer, _selections, scopeAttributes);
 	}
 
-	std::map<std::string, std::string> editor_t::variables (std::map<std::string, std::string> map) const
+	std::map<std::string, std::string> editor_t::variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const
 	{
 		if(_document)
 				map = _document->variables(map);
@@ -1364,7 +1364,7 @@ namespace ng
 			}
 		}
 
-		scope::context_t const& s = scope();
+		scope::context_t const& s = scope(scopeAttributes);
 		map.insert(std::make_pair("TM_SCOPE", to_s(s.right)));
 		return bundles::environment(s, map);
 	}
