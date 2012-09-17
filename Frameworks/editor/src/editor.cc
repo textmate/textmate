@@ -1116,8 +1116,8 @@ namespace ng
 			case kUnwrapText:              _selections = apply(_buffer, _selections, _snippets, &transform::unwrap); break;
 
 			case kComplete:
-			case kNextCompletion:          next_completion();      break;
-			case kPreviousCompletion:      previous_completion();  break;
+			case kNextCompletion:          next_completion(scope());      break;
+			case kPreviousCompletion:      previous_completion(scope());  break;
 
 			case kMoveSelectionUp:         move_selection( 0, -1); break;
 			case kMoveSelectionDown:       move_selection( 0, +1); break;

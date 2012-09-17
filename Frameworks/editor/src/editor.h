@@ -242,10 +242,10 @@ namespace ng
 			ssize_t _index = 0;
 		};
 
-		std::vector<std::string> completions (size_t bow, size_t eow, std::string const& prefix, std::string const& suffix);
-		bool setup_completion ();
-		void next_completion ();
-		void previous_completion ();
+		std::vector<std::string> completions (size_t bow, size_t eow, std::string const& prefix, std::string const& suffix, scope::context_t const& scope);
+		bool setup_completion (scope::context_t const& scope);
+		void next_completion (scope::context_t const& scope);
+		void previous_completion (scope::context_t const& scope);
 
 		// ============
 		// = Snippets =
