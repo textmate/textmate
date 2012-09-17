@@ -14,6 +14,8 @@ namespace ng
 			parse::stack_ptr state;
 			std::string line;
 			std::pair<size_t, size_t> range;
+			size_t batch_start;
+			size_t limit_redraw;
 		};
 
 		struct result_t
@@ -21,9 +23,11 @@ namespace ng
 			parse::stack_ptr state;
 			std::map<size_t, scope::scope_t> scopes;
 			std::pair<size_t, size_t> range;
+			size_t batch_start;
+			size_t limit_redraw;
 		};
 
-		buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range);
+		buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range, size_t const& batch_start, size_t limit_redraw);
 		~buffer_parser_t ();
 		static result_t handle_request (request_t const& request);
 		void handle_reply (result_t const& result);
@@ -44,11 +48,11 @@ namespace ng
 	// = buffer_parser_t =
 	// ===================
 
-	buffer_parser_t::buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range) : _buffer(buffer)
+	buffer_parser_t::buffer_parser_t (buffer_t& buffer, parse::stack_ptr const& parserState, std::string const& line, std::pair<size_t, size_t> const& range, size_t const& batch_start, size_t limit_redraw) : _buffer(buffer)
 	{
 		_client_key = server().register_client(this);
 		_revision = buffer.revision();
-		server().send_request(_client_key, (request_t){ parserState, line, range });
+		server().send_request(_client_key, (request_t){ parserState, line, range, batch_start, limit_redraw });
 	}
 
 	buffer_parser_t::~buffer_parser_t ()
@@ -61,13 +65,15 @@ namespace ng
 		result_t result;
 		result.state = parse::parse(request.line.data(), request.line.data() + request.line.size(), request.state, result.scopes, request.range.first == 0);
 		result.range = request.range;
+		result.batch_start = request.batch_start;
+		result.limit_redraw = request.limit_redraw;
 		return result;
 	}
 
 	void buffer_parser_t::handle_reply (result_t const& result)
 	{
 		if(_buffer.revision() == _revision)
-				_buffer.update_scopes(result.range, result.scopes, result.state);
+				_buffer.update_scopes(result.limit_redraw, result.batch_start, result.range, result.scopes, result.state);
 		else	_buffer.initiate_repair();
 	}
 
@@ -75,7 +81,7 @@ namespace ng
 	// = buffer_t =
 	// ============
 
-	void buffer_t::initiate_repair ()
+	void buffer_t::initiate_repair (size_t limit_redraw, size_t batch_start)
 	{
 		if(!_dirty.empty() && !_parser_states.empty())
 		{
@@ -85,12 +91,12 @@ namespace ng
 			auto state  = from == 0 ? _parser_states.begin() : _parser_states.find(from);
 			D(DBF_Buffer_Parsing, bug("line %zu dirty, offset %zu → %zu-%zu\n", n, _dirty.begin()->first, from, to););
 			if(state != _parser_states.end())
-					parser.reset(new buffer_parser_t(*this, state->second, substr(from, to), std::make_pair(from, to)));
+					parser.reset(new buffer_parser_t(*this, state->second, substr(from, to), std::make_pair(from, to), batch_start ==-1? from : batch_start, limit_redraw));
 			else	fprintf(stderr, "no parser state for %zu-%zu (%p)\n%s\n%s\n", from, to, this, substr(0, size()).c_str(), to_s(*this).c_str());
 		}
 	}
 
-	void buffer_t::update_scopes (std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState)
+	void buffer_t::update_scopes (size_t limit_redraw, size_t const& batch_start, std::pair<size_t, size_t> const& range, std::map<size_t, scope::scope_t> const& newScopes, parse::stack_ptr parserState)
 	{
 		bool atEOF = convert(range.first).line+1 == lines();
 		D(DBF_Buffer_Parsing, bug("did parse %zu-%zu (revision %zu), at EOL %s\n", range.first, range.second, revision(), BSTR(atEOF)););
@@ -103,16 +109,27 @@ namespace ng
 		}
 
 		_dirty.remove(_dirty.lower_bound(range.first), atEOF ? _dirty.end() : _dirty.lower_bound(range.second));
+		bool next_line_needs_update = false;
 		if((_parser_states.find(range.second) == _parser_states.end() || !parse::equal(parserState, (_parser_states.find(range.second)->second))))
 		{
 			_parser_states.set(range.second, parserState);
 			if(!atEOF)
+			{
+				next_line_needs_update = true;
 				_dirty.set(range.second, true);
+			}
 		}
 
 		parser.reset();
-		did_parse(range.first, range.second);
-		initiate_repair();
+		if(!next_line_needs_update || limit_redraw == 0)
+		{
+			did_parse(batch_start, range.second);
+			initiate_repair(10);
+		}
+		else
+		{
+			initiate_repair(limit_redraw == 0 ? 0 : limit_redraw-1, batch_start);
+		}
 	}
 
 	void buffer_t::wait_for_repair ()
@@ -133,7 +150,7 @@ namespace ng
 			std::string const line = substr(from, to);
 			std::map<size_t, scope::scope_t> newScopes;
 			auto newState = parse::parse(line.data(), line.data() + line.size(), state->second, newScopes, from == 0);
-			update_scopes(std::make_pair(from, to), newScopes, newState);
+			update_scopes(0, from, std::make_pair(from, to), newScopes, newState);
 		}
 	}
 
