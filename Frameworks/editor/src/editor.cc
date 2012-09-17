@@ -857,8 +857,8 @@ namespace ng
 
 			case kReplaceAndFind:
 			{
-				perform(kReplace);
-				perform(kFindNext);
+				perform(kReplace, layout, indentCorrections);
+				perform(kFindNext, layout, indentCorrections);
 			}
 			break;
 
