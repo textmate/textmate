@@ -5,6 +5,38 @@
 
 namespace network
 {
+	PUBLIC char* create_c_string (std::string const& key, std::string const& value);
+	PUBLIC void copy_map_to_c_string_array (std::map<std::string, std::string> const& map, char** dst);
+	PUBLIC char** create_c_string_array (std::map<std::string, std::string> const& map);
+	PUBLIC void delete_c_string_array (char** array);
+
+	char** create_c_string_array (std::map<std::string, std::string> const& map)
+	{
+		char** res = new char* [map.size() + 1];
+		copy_map_to_c_string_array(map, res);
+		return res;
+	}
+
+	void copy_map_to_c_string_array (std::map<std::string, std::string> const& map, char** dst)
+	{
+		for(auto const pair : map)
+			*dst++ = create_c_string(pair.first, pair.second);
+		*dst = NULL;
+	}
+
+	char* create_c_string (std::string const& key, std::string const& value)
+	{
+		std::string const tmp = key + "=" + value;
+		return strdup(tmp.c_str());
+	}
+
+	void delete_c_string_array (char** array)
+	{
+		for(char** p = array; p && *p; ++p)
+			free(*p);
+		delete[] array;
+	}
+
 	pid_t launch_tbz (std::string const& dest, int& input, int& output, std::string& error)
 	{
 		signal(SIGPIPE, SIG_IGN);
@@ -14,7 +46,8 @@ namespace network
 		pipe(&out[0]);
 
 		char const* argv[] = { "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1", NULL };
-		oak::c_array env(oak::basic_environment());
+		auto const map = oak::basic_environment();
+		char** env = create_c_string_array(map);
 		pid_t pid = vfork();
 		if(pid == 0)
 		{
@@ -44,6 +77,8 @@ namespace network
 				fcntl(input  = in[1],  F_SETFD, FD_CLOEXEC);
 				fcntl(output = out[0], F_SETFD, FD_CLOEXEC);
 			}
+
+			delete_c_string_array(env);
 		}
 		return pid;
 	}
