@@ -175,7 +175,7 @@ namespace ng
 			_dirty.clear();
 			_dirty.set(0, true);
 
-			initiate_repair();
+			initiate_repair(10);
 
 			return true;
 		}
