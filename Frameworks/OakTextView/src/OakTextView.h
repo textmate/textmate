@@ -20,6 +20,11 @@ struct buffer_refresh_callback_t;
 
 enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBottom };
 
+@protocol OakTextViewDelegate <NSObject>
+@optional
+- (NSString*)scopeAttributes;
+@end
+
 PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 {
 	document::document_ptr document;
@@ -91,6 +96,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 }
 - (void)setDocument:(document::document_ptr const&)aDocument;
 
+@property (nonatomic, assign) id <OakTextViewDelegate>      delegate;
 @property (nonatomic, assign) theme_ptr const&              theme;
 @property (nonatomic, retain) NSCursor*                     ibeamCursor;
 @property (nonatomic, retain) NSFont*                       font;

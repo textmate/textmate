@@ -299,6 +299,19 @@ static std::string shell_quote (std::vector<std::string> paths)
 @synthesize refreshNestCount;
 @synthesize liveSearchViewController, liveSearchString, liveSearchRanges;
 
+// =================================
+// = OakTextView Delegate Wrappers =
+// =================================
+
+- (NSString*)scopeAttributes
+{
+	if([self.delegate respondsToSelector:@selector(scopeAttributes)])
+		return [self.delegate scopeAttributes];
+	return nil;
+}
+
+// =================================
+
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect
 {
 	NSRect srcRect = NSZeroRect, visibleRect = [self visibleRect];

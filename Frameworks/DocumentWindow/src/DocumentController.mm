@@ -20,7 +20,6 @@ namespace find_tags
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakSubmenuController.h>
 #import <OakAppKit/OakSavePanel.h>
-#import <OakTextView/OakDocumentView.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -487,6 +486,7 @@ OAK_DEBUG_VAR(DocumentController);
 	layoutView.documentView = documentView;
 
 	textView = documentView.textView;
+	textView.delegate = self;
 
 	tabBarView.delegate   = self;
 	tabBarView.dataSource = self;
@@ -612,6 +612,22 @@ OAK_DEBUG_VAR(DocumentController);
 		[self selectPreviousTab:self];
 	else if([anEvent deltaY] == +1)
 		[self goToFileCounterpart:self];
+}
+
+// ========================
+// = OakTextView Delegate =
+// ========================
+
+- (NSString*)scopeAttributes
+{
+	if(selectedTabIndex >= documentTabs.size())
+	{
+		fprintf(stderr, "*** error: selected tab out of bounds: %zu >= %zu\n", selectedTabIndex, documentTabs.size());
+		return nil;
+	}
+
+	document::document_ptr doc = [self selectedDocument];
+	return doc ? [NSString stringWithCxxString:doc->path_attributes()] : nil;
 }
 
 // =============================
