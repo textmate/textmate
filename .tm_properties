@@ -1,8 +1,9 @@
 # Settings
-projectDirectory   = '$CWD'
+projectDirectory     = '$CWD'
 
-windowTitleProject = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
-windowTitle        = '$TM_DISPLAYNAME$windowTitleProject$windowTitleSCM'
+windowTitleProject   = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
+windowTitleFramework = '${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/}'
+windowTitle          = '$TM_DISPLAYNAME$windowTitleFramework$windowTitleProject$windowTitleSCM'
 
 # Variables
 TM_ORGANIZATION_NAME = 'MacroMates'
