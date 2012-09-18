@@ -119,6 +119,8 @@ struct refresh_helper_t
 	{
 		if(++_self.refreshNestCount == 1)
 		{
+			_document->open();
+
 			_revision  = document->buffer().revision();
 			_selection = editor->ranges();
 			_document->undo_manager().begin_undo_group(_editor->ranges());
@@ -194,6 +196,8 @@ struct refresh_helper_t
 					[_self updateChoiceMenu:nil];
 				}
 			}
+
+			_document->close();
 		}
 	}
 
