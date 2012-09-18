@@ -412,6 +412,9 @@ namespace ng
 			res += regexp::search(indentPattern, line.data(), line.data() + line.size()) ?  8 : 0;
 			res += regexp::search(ignorePattern, line.data(), line.data() + line.size()) ? 16 : 0;
 
+			if(res & 6) // if start/stop marker we ignore indent patterns
+				res &= ~24;
+
 			auto type  = (res & 1) ? kLineTypeEmpty : kLineTypeRegular;
 			switch(res)
 			{
