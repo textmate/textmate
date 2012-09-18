@@ -61,13 +61,13 @@ namespace
 		return res;
 	}
 
-	static void scm_and_project_attriutes (std::string const& path, std::vector<std::string>& res)
+	static void directory_attributes (std::string const& dir, std::vector<std::string>& res)
 	{
-		if(path == NULL_STR || path == "" || path[0] != '/')
+		if(dir == NULL_STR || dir == "" || dir[0] != '/')
 			return;
 
 		std::set<std::string> groups;
-		for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
+		for(std::string cwd = dir; cwd != "/"; cwd = path::parent(cwd))
 		{
 			auto entries = path::entries(cwd);
 
@@ -92,11 +92,28 @@ namespace
 			}
 		}
 	}
+
+	static void scm_attributes (std::string const& path, std::string const& dir, std::vector<std::string>& res)
+	{
+		if(scm::info_ptr info = scm::info(dir))
+		{
+			std::string const branch = info->branch();
+			if(branch != NULL_STR)
+				res.push_back("attr.scm.branch." + branch);
+
+			if(path != NULL_STR)
+			{
+				scm::status::type status = info->status(path);
+				if(status != scm::status::unknown)
+					res.push_back("attr.scm.status." + to_s(status));
+			}
+		}
+	}
 }
 
 namespace file
 {
-	std::string path_attributes (std::string const& path)
+	std::string path_attributes (std::string const& path, std::string const& dir)
 	{
 		std::vector<std::string> res;
 		if(path != NULL_STR)
@@ -129,22 +146,11 @@ namespace file
 		Gestalt(gestaltSystemVersionBugFix, &bugFix);
 		res.push_back(text::format("attr.os-version.%zd.%zd.%zd", (ssize_t)major, (ssize_t)minor, (ssize_t)bugFix));
 
-		if(path != NULL_STR)
-		{
-			scm_and_project_attriutes(path, res);
+		std::string const parentDir = dir == NULL_STR ? path::parent(path) : dir;
+		directory_attributes(parentDir, res);
+		scm_attributes(path, parentDir, res);
 
-			if(scm::info_ptr info = scm::info(path::parent(path)))
-			{
-				std::string const& branch = info->branch();
-				if(branch != NULL_STR)
-					res.push_back("attr.scm.branch." + branch);
-				scm::status::type status = info->status(path);
-				if(status != scm::status::unknown)
-					res.push_back("attr.scm.status." + to_s(status));
-			}
-		}
-
-		res.push_back(settings_for_path(path, text::join(res, " ")).get(kSettingsScopeAttributesKey, ""));
+		res.push_back(settings_for_path(path, text::join(res, " "), parentDir).get(kSettingsScopeAttributesKey, ""));
 		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
 		return text::join(res, " ");
 	}
