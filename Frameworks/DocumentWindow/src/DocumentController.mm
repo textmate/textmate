@@ -227,6 +227,7 @@ OAK_DEBUG_VAR(DocumentController);
 				[delegate window];
 				delegate.fileBrowserHidden = NO;
 				[delegate->fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
+				[delegate synchronizeWindowTitle];
 				bring_to_front(delegate);
 				[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]]; 
 			}
