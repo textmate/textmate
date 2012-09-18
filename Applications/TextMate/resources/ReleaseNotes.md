@@ -1,5 +1,18 @@
 # Release Notes
 
+## 2012-09-18 (r9311)
+
+* Untitled documents now base their scope attributes on the file browser’s location. This mean things like ⌘B or ⌘Y will call the proper build / SCM action(s) when used in untitled documents (e.g. the initial document showing after opening a project folder via ⇧⌘O or `mate .`).
+* Previous build changed the semantics of the include/exclude patterns for the file browser: Now a file **must** be matched by the include pattern in order to be shown. The default patterns have been updated, but if you have edited them, or have your own include pattern in a `.tm_properties` file, then you should add the asterisk to your set of included files, e.g. `{*,.tm_properties,.htaccess,.gitignore}`.
+* I also forgot to mention that previous build is WIP with respect to the main window, presently you can size splits larger than the window, which trigger a resize, and the HTML output view can only go at the bottom. If you wish to “downgrade” an easy way is to hold down shift (⇧) when clicking “Check Now” (with the type set to “Normal Releases”).
+* The start/stop fold marker patterns are still used for a line even if that line is also matched by the fold indented block ignore pattern.
+* Fix crash which would often happen when closing document while a tool tip was showing.
+* Fix wrong document (sometimes) showing after session restore and in theory if quickly cycling through tabs of documents that hasn’t been loaded yet.
+* Previous build introduced a bug that affected bundle items with “empty” strings as values for their property list keys.
+* Column selection cursor (crosshair) should be less likely to stick (e.g. after ⌥F2).
+* Fix `x-insert` dialog command to work even when the text view doesn’t have focus. *[Hans-Jörg Bibiko]*
+* Fix missing curly quotes in a few dialog texts. *[Ryan Maxwell]*
+
 ## 2012-09-16 (r9309)
 
 * Minimum dimensions are enforced when resizing the file browser or HTML output. The explicit resize buttons have been removed but dragging the dividers should now be easier, as the hot zone has been increased.
