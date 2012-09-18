@@ -47,7 +47,7 @@ namespace oak
 
 	std::map<std::string, std::string> const& basic_environment ()
 	{
-		static std::map<std::string, std::string> environment = setup_basic_environment();
+		static std::map<std::string, std::string> const environment = setup_basic_environment();
 		return environment;
 	}
 
