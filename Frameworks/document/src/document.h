@@ -247,8 +247,7 @@ namespace document
 		bool is_open () const                 { return _open_count != 0 && !_open_callback; }
 
 		std::string file_type () const;
-		std::string path_attributes () const  { return _path_attributes; }
-		scope::scope_t scope () const         { return file_type() + " " + path_attributes(); }
+		scope::scope_t scope () const         { return file_type() + " " + _path_attributes; }
 		settings_t const settings () const    { return settings_for_path(virtual_path(), scope(), path::parent(_path), variables(std::map<std::string, std::string>(), false)); }
 
 		std::map<std::string, std::string> variables (std::map<std::string, std::string> map, bool sourceFileSystem = true) const;
