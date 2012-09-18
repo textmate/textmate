@@ -232,7 +232,8 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 
 	if(!didDrag)
 	{
-		if(NSView* view = [super hitTest:[[self superview] convertPoint:[mouseDownEvent locationInWindow] fromView:nil]])
+		NSView* view = [super hitTest:[[self superview] convertPoint:[mouseDownEvent locationInWindow] fromView:nil]];
+		if(view && view != self)
 		{
 			[NSApp postEvent:anEvent atStart:NO];
 			[view mouseDown:mouseDownEvent];
