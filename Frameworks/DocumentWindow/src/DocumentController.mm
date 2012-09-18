@@ -118,6 +118,7 @@ OAK_DEBUG_VAR(DocumentController);
 
 @interface DocumentController ()
 @property (nonatomic, retain) OakFilterWindowController* filterWindowController;
+@property (nonatomic, retain) NSString* pathAttributes;
 @end
 
 @interface OakUnhideHelper : NSObject
@@ -534,6 +535,7 @@ OAK_DEBUG_VAR(DocumentController);
 	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, doc->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:doc->path()];
 	self.isDocumentEdited = doc->is_modified();
+	self.pathAttributes   = [NSString stringWithCxxString:file::path_attributes(doc->path(), docDirectory)];
 }
 
 - (void)updateProxyIcon
@@ -620,14 +622,7 @@ OAK_DEBUG_VAR(DocumentController);
 
 - (NSString*)scopeAttributes
 {
-	if(selectedTabIndex >= documentTabs.size())
-	{
-		fprintf(stderr, "*** error: selected tab out of bounds: %zu >= %zu\n", selectedTabIndex, documentTabs.size());
-		return nil;
-	}
-
-	document::document_ptr doc = [self selectedDocument];
-	return doc ? [NSString stringWithCxxString:doc->path_attributes()] : nil;
+	return self.pathAttributes;
 }
 
 // =============================
