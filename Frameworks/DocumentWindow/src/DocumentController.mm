@@ -517,7 +517,7 @@ OAK_DEBUG_VAR(DocumentController);
 	std::map<std::string, std::string> map;
 	if(doc->path() == NULL_STR)
 	{
-		if(scm::info_ptr info = scm::info(path::join(docDirectory, ".scm-kludge")))
+		if(scm::info_ptr info = scm::info(docDirectory))
 		{
 			std::string const& branch = info->branch();
 			if(branch != NULL_STR)
@@ -580,7 +580,7 @@ OAK_DEBUG_VAR(DocumentController);
 		callback_t* cb = new callback_t(self);
 		cb->update();
 
-		if(scmInfo = scm::info(to_s(representedFile)))
+		if(scmInfo = scm::info(path::parent(to_s(representedFile))))
 		{
 			scmInfo->add_callback(cb);
 			scmCallback = cb;

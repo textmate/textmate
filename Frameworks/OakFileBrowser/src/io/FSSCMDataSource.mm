@@ -65,7 +65,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 @implementation FSSCMDataSource
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
-	if(scm::info_ptr info = scm::info(path::join([aPath fileSystemRepresentation], ".scm-kludge")))
+	if(scm::info_ptr info = scm::info([aPath fileSystemRepresentation]))
 		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(info->path(), "/") + "/"]];
 	return [NSURL fileURLWithPath:aPath];
 }
@@ -118,7 +118,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	{
 		options = someOptions;
 
-		if(scmInfo = scm::info(path::join([[anURL path] fileSystemRepresentation], ".scm-kludge")))
+		if(scmInfo = scm::info([[anURL path] fileSystemRepresentation]))
 		{
 			struct scm_callback_t : scm::callback_t
 			{

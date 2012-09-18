@@ -496,7 +496,7 @@ namespace document
 			map["TM_DIRECTORY"] = path::parent(path());
 			map["PWD"]          = path::parent(path());
 
-			if(scm::info_ptr info = scm::info(path()))
+			if(scm::info_ptr info = scm::info(path::parent(path())))
 			{
 				std::string const& branch = info->branch();
 				if(branch != NULL_STR)

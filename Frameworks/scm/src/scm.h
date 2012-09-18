@@ -56,7 +56,7 @@ namespace scm
 		static void update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status);
 	};
 
-	PUBLIC info_ptr info (std::string const& path);
+	PUBLIC info_ptr info (std::string const& dir);
 	PUBLIC status_map_t tracked_files (std::string const& dir, int mask);
 
 } /* scm */

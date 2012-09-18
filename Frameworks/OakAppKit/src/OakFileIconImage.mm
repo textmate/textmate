@@ -91,7 +91,7 @@ static NSArray* ImageStackForPath (NSString* path)
 	if([res count] == 0)
 		[res addObject:SystemIconForHFSType(kUnknownFSObjectIcon)];
 
-	if(auto scmDriver = scm::info([path fileSystemRepresentation]))
+	if(auto scmDriver = scm::info(path::parent([path fileSystemRepresentation])))
 	{
 		if(NSImage* scmStatusImage = BadgeForSCMStatus(scmDriver->status([path fileSystemRepresentation])))
 			[res addObject:scmStatusImage];

@@ -197,13 +197,13 @@ namespace scm
 	// = Public API =
 	// ==============
 
-	info_ptr info (std::string const& path)
+	info_ptr info (std::string const& dir)
 	{
-		if(!settings_for_path(path).get(kSettingsSCMStatusKey, true))
+		if(!settings_for_path(NULL_STR, scope::scope_t(), dir).get(kSettingsSCMStatusKey, true))
 			return info_ptr();
 
 		std::string wcPath;
-		if(driver_t const* driver = driver_for_path(path::parent(path), &wcPath))
+		if(driver_t const* driver = driver_for_path(dir, &wcPath))
 		{
 			if(wcPath == NULL_STR || wcPath == "/" || wcPath == path::home() || !path::is_local(wcPath))
 				return info_ptr();

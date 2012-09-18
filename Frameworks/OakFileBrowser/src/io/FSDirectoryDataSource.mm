@@ -240,7 +240,7 @@ namespace
 
 static void ensure_callback (scm::callback_t* cb, std::string const& path, std::map<std::string, scm::info_ptr>& drivers, std::map<std::string, size_t>& refCounts)
 {
-	if(scm::info_ptr const& info = scm::info(path::join(path, ".scm-kludge")))
+	if(scm::info_ptr const& info = scm::info(path))
 	{
 		if(drivers.insert(std::make_pair(path, info)).second == false)
 			return; // we already added a callback to this path
