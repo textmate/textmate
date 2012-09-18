@@ -530,7 +530,7 @@ OAK_DEBUG_VAR(DocumentController);
 		}
 	}
 
-	auto settings = settings_for_path(doc->virtual_path(), doc->scope(), docDirectory, doc->variables(map, false));
+	auto settings = settings_for_path(doc->virtual_path(), doc->file_type() + " " + to_s([self scopeAttributes]), docDirectory, doc->variables(map, false));
 
 	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, doc->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:doc->path()];

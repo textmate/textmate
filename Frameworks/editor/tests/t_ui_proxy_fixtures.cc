@@ -1,6 +1,7 @@
 #include <document/collection.h>
 #include <bundles/bundles.h>
 #include <settings/settings.h>
+#include <file/path_info.h>
 #include <command/runner.h>
 
 class UIProxyFixture : public CxxTest::GlobalFixture
@@ -51,7 +52,7 @@ public:
 				env = item ? item->environment(baseEnv) : baseEnv;
 
 				if(document && document->is_open())
-						env = ng::editor_for_document(document)->variables(env, document->path_attributes());
+						env = ng::editor_for_document(document)->variables(env, file::path_attributes(document->path()));
 				else	env = variables_for_path(NULL_STR, "", env);
 				command::runner_ptr runner = command::runner(command, buffer, selection, env, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
 				runner->launch();
