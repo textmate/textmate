@@ -32,12 +32,9 @@ OAK_DEBUG_VAR(AppController_Commands);
 			{
 				// TODO set language according to snippet’s scope selector
 				// TODO mark document as “not modified”
-				document::document_ptr doc = document::create();
-				doc->open();
-				ng::editor_ptr editor = ng::editor_for_document(doc);
-				editor->snippet_dispatch(item->plist(), editor->variables(item->environment(), doc->path_attributes()));
-				document::show(doc);
-				doc->close();
+				DocumentController* controller = [[DocumentController alloc] init];
+				[[controller window] makeKeyAndOrderFront:self];
+				[controller performBundleItem:item];
 			}
 			break;
 
