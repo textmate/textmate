@@ -31,8 +31,6 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 	OakHTMLOutputView* htmlOutputView;
 	command::runner_ptr runner;
 
-	BOOL windowHasLoaded;
-
 	BOOL fileBrowserHidden;
 	NSDictionary* fileBrowserState;
 

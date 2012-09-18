@@ -148,7 +148,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="804020513">
 								<int key="NSCellFlags">67108864</int>
 								<int key="NSCellFlags2">272629760</int>
-								<string key="NSContents">There is no default file type for documents ${Extension:?with extension “${Extension}”:named “${DisplayName}”}. Please pick one from the list below. Some file types require installing a new bundle.</string>
+								<string key="NSContents">There is no default file type for documents ${X:?with extension “${X}”:named “${DisplayName}”}. Please pick one from the list below. Some file types require installing a new bundle.</string>
 								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">13</double>

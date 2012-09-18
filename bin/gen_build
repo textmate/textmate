@@ -37,14 +37,14 @@ class Targets
   include Enumerable
 
   attr_reader :root
-  attr_reader :dependencies
 
   def initialize(path)
     targets = all_targets(path)
     linked  = Set.new(targets.collect { |target| target['LINK'].to_a }.flatten)
 
     @root = targets.first
-    @all, @dependencies = [ ], [ ]
+    @all_targets = targets
+    @all = [ ]
 
     targets.each do |target|
       next if target['SOURCES'].to_a.empty?
@@ -56,17 +56,6 @@ class Targets
         target[:type] = has_info_plist ? :bundle : :executable
       end
     end
-
-    paths = [ ]
-    targets.each do |target|
-      paths << target[:full_path]
-      target.each do |key, value|
-        paths << value.reject { |path| path =~ /^@/ }.map do |path|
-          File.dirname(File.join(target[:base], path))
-        end if GLOB_KEYS.include?(key) && key != 'PRELUDE'
-      end
-    end
-    @dependencies = paths.flatten.sort.uniq
   end
 
   def target_named(name)
@@ -77,6 +66,20 @@ class Targets
 
   def each(&block)
     @all.each(&block)
+  end
+
+  def dependencies
+    paths = [ ]
+    @all_targets.each do |target|
+      paths << target[:full_path] << target[:depeends_on_directories].to_a
+      target.each do |key, value|
+        paths << value.reject { |path| path =~ /^@/ }.map do |path|
+          File.dirname(File.join(target[:base], path))
+        end if GLOB_KEYS.include?(key) && key != 'PRELUDE'
+      end
+    end
+
+    paths.flatten.sort.uniq
   end
 
   private
@@ -291,6 +294,8 @@ def resources_helper(target, key, symbol)
   rsrc = [ ]
   all_resources = [ ]
 
+  depeends_on_directories = Array.new(target[:depeends_on_directories].to_a)
+
   target[key].to_a.each do |path|
     if path =~ /^@/
       src = TARGETS.target_named($')
@@ -302,14 +307,21 @@ def resources_helper(target, key, symbol)
       src = File.join(target[:path], path)
       abs = File.join(target[:base], path)
       if File.directory?(abs) && !File.symlink?(abs) && abs !~ /\.xcdatamodeld$/
+        depeends_on_directories << abs
         Dir.chdir(abs) { Dir.glob("**/*") }.each do |file|
-          all_resources << { :path => File.dirname(src), :file => File.join(File.basename(src), file) } unless File.directory?(File.join(abs, file))
+          if File.directory?(File.join(abs, file))
+            depeends_on_directories << File.join(abs, file)
+          else
+            all_resources << { :path => File.dirname(src), :file => File.join(File.basename(src), file) }
+          end
         end
       else
         all_resources << { :path => File.dirname(src), :file => File.basename(src) }
       end
     end
   end
+
+  target[:depeends_on_directories] = depeends_on_directories.sort.uniq
 
   all_resources.each do |dict|
     path, file = dict[:path], dict[:file]
@@ -618,11 +630,6 @@ open(outfile, "w") do |io|
   io << "include $builddir/build.ninja\n"
 end
 
-open("#{builddir}/build.ninja.d", "w") do |io|
-  deps = TARGETS.dependencies.map { |path| path.gsub(/ /, '\\ ') }
-  io << outfile << ": " << deps.join(" \\\n  ") << "\n"
-end
-
 open("#{builddir}/build.ninja", "w") do |io|
   user_variables = TARGETS.root.to_a.reject { |arr| arr[0].class != String || GLOB_KEYS.include?(arr[0]) }.sort { |lhs, rhs| lhs[0] <=> rhs[0] }
   tmp = variables.dup.concat(user_variables) 
@@ -704,6 +711,11 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << "build deploy: phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/deploy\n"
   io << "build debug:  phony #{variables.find { |k, _| k == 'APP_NAME' }.last}/debug\n"
   io << "default run\n"
+end
+
+open("#{builddir}/build.ninja.d", "w") do |io|
+  deps = TARGETS.dependencies.map { |path| path.gsub(/ /, '\\ ') }
+  io << outfile << ": " << deps.join(" \\\n  ") << "\n"
 end
 
 all_new_targets = all_targets(outfile, builddir)

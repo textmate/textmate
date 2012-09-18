@@ -12,15 +12,17 @@ namespace oak
 				char** p = new char* [map.size() + 1];
 				_array = p;
 				iterate(pair, map)
-					*p++ = strdup((pair->first + "=" + pair->second).c_str());
+				{
+					std::string const tmp = pair->first + "=" + pair->second;
+					*p++ = strdup(tmp.c_str());
+				}
 				*p = NULL;
 			}
 
 			~c_array ()
 			{
-				char* const* p = _array;
-				while(p && *p)
-					free(*p++);
+				for(char* const* p = _array; p && *p; ++p)
+					free(*p);
 				delete[] _array;
 			}
 

@@ -407,6 +407,7 @@ OAK_DEBUG_VAR(DocumentController);
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 		[self.window setContentView:layoutView];
 		[self.window setDelegate:self];
+		[self.window setAutorecalculatesKeyViewLoop:YES];
 		[self.window bind:@"title" toObject:self withKeyPath:@"windowTitle" options:nil];
 		[self.window bind:@"documentEdited" toObject:self withKeyPath:@"isDocumentEdited" options:nil];
 
@@ -414,7 +415,6 @@ OAK_DEBUG_VAR(DocumentController);
 		layoutView.tabBarView = tabBarView;
 
 		[self windowDidLoad];
-		[self windowDidBecomeMain:nil];
 	}
 	return self;
 }
@@ -492,20 +492,26 @@ OAK_DEBUG_VAR(DocumentController);
 	tabBarView.dataSource = self;
 	[tabBarView reloadData]; // FIXME this should be implicit
 
-	[self.window setPrivateBottomCornerRounded:NO];
-
-	// Move up the tab bar view in the responder chain so that it is next responder for its siblings. This is so that performClose: goes through the tab bar view, at least when one of the view’s siblings is first responder
-	NSResponder* contentView = [tabBarView nextResponder];
-	[tabBarView setNextResponder:[contentView nextResponder]];
-	[contentView setNextResponder:tabBarView];
-
 	self.selectedTabIndex = selectedTabIndex;
 	[self updateProxyIcon];
 }
 
 - (void)synchronizeWindowTitle
 {
+	if(selectedTabIndex >= documentTabs.size())
+	{
+		fprintf(stderr, "*** error: selected tab out of bounds: %zu >= %zu\n", selectedTabIndex, documentTabs.size());
+		return;
+	}
+
 	document::document_ptr doc = [self selectedDocument];
+
+	if(!doc)
+	{
+		fprintf(stderr, "*** error: no document (synchronizeWindowTitle)\n");
+		return;
+	}
+
 	std::string docDirectory = doc->path() != NULL_STR ? path::parent(doc->path()) : to_s(self.untitledSavePath);
 
 	std::map<std::string, std::string> map;
@@ -528,15 +534,6 @@ OAK_DEBUG_VAR(DocumentController);
 	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, doc->display_name())];
 	self.representedFile  = [NSString stringWithCxxString:doc->path()];
 	self.isDocumentEdited = doc->is_modified();
-}
-
-- (void)windowDidBecomeMain:(NSNotification*)aNotification
-{
-	if(!windowHasLoaded)
-	{
-		windowHasLoaded = YES;
-		self.selectedTabIndex = selectedTabIndex;
-	}
 }
 
 - (void)updateProxyIcon
@@ -1046,10 +1043,6 @@ OAK_DEBUG_VAR(DocumentController);
 		{
 			[self toggleHTMLOutput:self];
 		}
-	}
-	else
-	{
-		[[layoutView nextResponder] tryToPerform:@selector(performClose:) with:sender];
 	}
 }
 

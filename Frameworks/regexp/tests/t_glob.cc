@@ -60,6 +60,13 @@ public:
 		TS_ASSERT( path::glob_t("{,.}*").does_match("test"));
 		TS_ASSERT( path::glob_t("{,.}*").does_match(".htaccess"));
 
+		TS_ASSERT( path::glob_t("*file").does_match("file"));
+		TS_ASSERT( path::glob_t("fi*le").does_match("file"));
+		TS_ASSERT( path::glob_t("file*").does_match("file"));
+		TS_ASSERT(!path::glob_t("*.ext").does_match(".ext"));
+		TS_ASSERT( path::glob_t(".*ext").does_match(".ext"));
+		TS_ASSERT( path::glob_t(".ext*").does_match(".ext"));
+
 		TS_ASSERT( path::glob_t("*"        ).does_match("foo.txt"));
 		TS_ASSERT( path::glob_t("foo*"     ).does_match("foo.txt"));
 		TS_ASSERT( path::glob_t("foo/*"    ).does_match("foo/bar.txt"));

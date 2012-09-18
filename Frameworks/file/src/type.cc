@@ -122,8 +122,9 @@ namespace file
 	{
 		if(path != NULL_STR && fileType != NULL_STR)
 		{
-			std::string const ext = path::extensions(path);
-			settings_t::set(kSettingsFileTypeKey, fileType, NULL_STR, ext.empty() ? path::name(path) : "*." + ext.substr(1));
+			std::string const name = path::name(path);
+			std::string const ext  = path::extensions(name);
+			settings_t::set(kSettingsFileTypeKey, fileType, NULL_STR, ext.empty() || ext == name ? name : "*." + ext.substr(1));
 		}
 	}
 
