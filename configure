@@ -15,7 +15,7 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 # ========================================================
 
 name=TextMate
-ver=2.0${tag:--git}
+ver=2.0.0-alpha.\$APP_REVISION${tag:-+git.$(git rev-parse --short HEAD)}
 rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 ))
 min_os=10.7
 
@@ -104,7 +104,7 @@ done
 mkdir -p "$builddir/Frameworks/SoftwareUpdate/fixtures"
 DST=$(cd >/dev/null "$builddir/Frameworks/SoftwareUpdate/fixtures"; pwd) make -C Frameworks/SoftwareUpdate/fixtures
 
-bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_VERSION="$ver" -dAPP_REVISION="$rev" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dsdk="$sdk" -dbzip2_flag="$bzip2_flag" target
+bin/gen_build -o build.ninja -C "$builddir" -dAPP_NAME="$name" -dAPP_REVISION="$rev" -dAPP_VERSION="$ver" -dAPP_MIN_OS="$min_os" -dCC="$CC" -dCXX="$CXX" -dxcodedir="$xcodedir" -didentity="$identity" -drest_api="$rest_api" -dsdk="$sdk" -dbzip2_flag="$bzip2_flag" target
 
 BUNDLES_TBZ=Applications/TextMate/resources/DefaultBundles.tbz
 test -e "$BUNDLES_TBZ" || builddir="$builddir" bin/create_default_bundles_tbz "$BUNDLES_TBZ"
