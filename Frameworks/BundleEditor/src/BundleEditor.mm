@@ -747,7 +747,7 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 	NSAlert* alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSWarningAlertStyle];
 	[alert setMessageText:DescriptionForChanges(changes)];
-	[alert setInformativeText:@"Your changes will be lost if you don't save them."];
+	[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
 	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
 	[alert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(closeWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	return NO;
