@@ -259,6 +259,10 @@ namespace
 
 - (void)documentOpenHelper:(DocumentOpenHelper*)documentOpenHelper didOpenDocument:(document::document_ptr const&)aDocument
 {
+	[documentOpenHelper autorelease];
+	if(aDocument != [self selectedDocument])
+		return;
+
 	iterate(tab, documentTabs)
 	{
 		if(**tab == aDocument && !(*tab)->_did_open)
@@ -273,7 +277,6 @@ namespace
 	[documentView setDocument:aDocument];
 	[self makeTextViewFirstResponder:self];
 
-	[documentOpenHelper release];
 }
 
 - (void)documentOpenHelper:(DocumentOpenHelper*)documentOpenHelper failedToOpenDocument:(document::document_ptr const&)aDocument error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)filterUUID
