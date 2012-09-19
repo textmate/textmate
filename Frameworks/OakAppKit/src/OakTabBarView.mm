@@ -151,8 +151,8 @@ id layout_metrics_t::ExpandVariables (id obj, std::map<std::string, std::string>
 	else if([obj isKindOfClass:[NSDictionary class]])
 	{
 		NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-		iterate(it, (NSDictionary*)obj)
-			[dict setObject:ExpandVariables(it->second, someVariables) forKey:it->first];
+		for(NSString* key in obj)
+			[dict setObject:ExpandVariables(obj[key], someVariables) forKey:key];
 		obj = dict;
 	}
 	else if([obj isKindOfClass:[NSString class]])
@@ -169,8 +169,9 @@ void layout_metrics_t::AddItemsForKeyToArray (NSDictionary* dict, NSString* key,
 		if(NSString* includeKey = [item objectForKey:@"include"])
 		{
 			std::map<std::string, std::string> tmp = values;
-			iterate(it, (NSDictionary*)[item objectForKey:@"values"])
-				tmp[[it->first UTF8String]] = format_string::expand([it->second UTF8String], tmp);
+			NSDictionary* values = [item objectForKey:@"values"];
+			for(NSString* key in values)
+				tmp[[key UTF8String]] = format_string::expand([values[key] UTF8String], tmp);
 			AddItemsForKeyToArray(dict, includeKey, tmp, array);
 		}
 		else
@@ -190,21 +191,21 @@ layout_metrics_ptr layout_metrics_t::parse (NSDictionary* dict)
 	r.maxTabSize     = [[dict objectForKey:@"maxTabSize"] floatValue] ?: DBL_MAX;
 
 	std::map<std::string, std::string> variables;
-	iterate(it, dict)
+	for(NSString* key in dict)
 	{
-		if([it->second isKindOfClass:[NSString class]])
-			variables[[it->first UTF8String]] = [it->second UTF8String];
+		if([dict[key] isKindOfClass:[NSString class]])
+			variables[[key UTF8String]] = [dict[key] UTF8String];
 	}
 
-	iterate(it, dict)
+	for(NSString* key in dict)
 	{
-		if(![it->second isKindOfClass:[NSArray class]])
+		if(![dict[key] isKindOfClass:[NSArray class]])
 			continue;
 
 		NSMutableArray* array = [NSMutableArray array];
-		AddItemsForKeyToArray(dict, it->first, variables, array);
+		AddItemsForKeyToArray(dict, key, variables, array);
 		for(NSDictionary* item in array)
-			r.layers[[it->first UTF8String]].push_back(parse_layer(item));
+			r.layers[[key UTF8String]].push_back(parse_layer(item));
 	}
 
 	return layout_metrics_ptr(new layout_metrics_t(r));

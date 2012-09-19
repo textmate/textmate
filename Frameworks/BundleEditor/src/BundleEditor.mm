@@ -78,8 +78,8 @@ static NSMutableArray* wrap_array (std::vector<std::string> const& array, NSStri
 static plist::array_t unwrap_array (NSArray* array, NSString* key)
 {
 	plist::array_t res;
-	iterate(dict, array)
-		res.push_back(to_s((NSString*)[*dict objectForKey:key]));
+	for(NSDictionary* dict in array)
+		res.push_back(to_s((NSString*)[dict objectForKey:key]));
 	return res;
 }
 
