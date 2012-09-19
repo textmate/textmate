@@ -35,7 +35,7 @@ _OutputIter entity_escape (_InputIter first, _InputIter const& last, _OutputIter
 	ASSERT(!(last < first));
 
 	static typename std::iterator_traits<_InputIter>::value_type const special[] = { '<', '>', '&' };
-	static char const* const escaped[] = { "&lt;", "&gt;", "&amp;" };
+	static std::string const escaped[] = { "&lt;", "&gt;", "&amp;" };
 
 	while(first != last)
 	{
@@ -46,7 +46,7 @@ _OutputIter entity_escape (_InputIter first, _InputIter const& last, _OutputIter
 		if(first != last)
 		{
 			size_t idx = std::find(special, special + sizeofA(special), *first) - special;
-			out = std::copy(beginof(escaped[idx]), endof(escaped[idx]), out);
+			out = std::copy(escaped[idx].begin(), escaped[idx].end(), out);
 			++first;
 		}
 	}
