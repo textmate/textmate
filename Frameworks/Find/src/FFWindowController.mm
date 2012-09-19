@@ -186,23 +186,6 @@ NSString* const FFSearchInOpenFiles     = @"FFSearchInOpenFiles";
 	[super dealloc];
 }
 
-- (void)copy:(id)sender
-{
-	NSIndexSet* selectedRows = [findAllResultsOutlineView selectedRowIndexes];
-	int rowCount             = [selectedRows count];
-	NSMutableArray* rows     = [NSMutableArray arrayWithCapacity:rowCount];
-
-	iterate(it, selectedRows)
-	{
-		FFMatch* item = [findAllResultsOutlineView itemAtRow:*it];
-		if([self outlineView:findAllResultsOutlineView isGroupItem:item])
-				[rows addObject:[NSString stringWithFormat:@"%@:%lu\n", item.path, [item match].range.from.line + 1]];
-		else	[rows addObject:[NSString stringWithFormat:@"%@:%lu\t%@", item.path, [item match].range.from.line + 1, [NSString stringWithCxxString:[item matchText]]]];
-	}
-	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-	[[NSPasteboard generalPasteboard] setString:[rows componentsJoinedByString:@""] forType:NSStringPboardType];
-}
-
 - (IBAction)showWindow:(id)sender
 {
 	[super showWindow:sender];
@@ -340,15 +323,62 @@ struct operation_t
 	}
 }
 
+- (void)copyEntireLines:(BOOL)entireLines withFilename:(BOOL)withFilename
+{
+	std::vector<std::string> res;
+
+	NSIndexSet* selectedRows = [findAllResultsOutlineView numberOfSelectedRows] == 0 ? [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [findAllResultsOutlineView numberOfRows])] : [findAllResultsOutlineView selectedRowIndexes];
+	iterate(it, selectedRows)
+	{
+		FFMatch* item = [findAllResultsOutlineView itemAtRow:*it];
+		if([self outlineView:findAllResultsOutlineView isGroupItem:item])
+			continue;
+
+		find::match_t const& m = [item match];
+		std::string str = [item matchText];
+		size_t from = std::min<size_t>(m.first - m.bol_offset, str.size());
+		size_t to   = std::min<size_t>(m.last  - m.bol_offset, str.size());
+
+		if(!entireLines)
+			str = str.substr(from, to - from);
+		else if(str.size() && str[str.size()-1] == '\n')
+			str.erase(str.size()-1);
+
+		if(withFilename)
+			str = text::format("%s:%lu\t", [item.path UTF8String], m.range.from.line + 1) + str;
+
+		res.push_back(str);
+	}
+
+	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
+	[[NSPasteboard generalPasteboard] setString:[NSString stringWithCxxString:text::join(res, "\n")] forType:NSStringPboardType];
+}
+
+- (void)copy:(id)sender                          { [self copyEntireLines:YES withFilename:NO ]; }
+- (void)copyMatchingParts:(id)sender             { [self copyEntireLines:NO  withFilename:NO ]; }
+- (void)copyMatchingPartsWithFilename:(id)sender { [self copyEntireLines:NO  withFilename:YES]; }
+- (void)copyEntireLines:(id)sender               { [self copyEntireLines:YES withFilename:NO ]; }
+- (void)copyEntireLinesWithFilename:(id)sender   { [self copyEntireLines:YES withFilename:YES]; }
+
 - (IBAction)showFindInFolderOptionsDropdown:(id)sender
 {
 	NSMenu* menu = [[[NSMenu alloc] initWithTitle:@"Options"] autorelease];
-	NSMenuItem* linksItem = [menu addItemWithTitle:@"Symbolic Links" action:NULL keyEquivalent:@""];
-	[linksItem bind:@"value" toObject:self withKeyPath:@"followLinks" options:nil];
-	NSMenuItem* hidddenItem = [menu addItemWithTitle:@"Hidden Folders" action:NULL keyEquivalent:@""];
-	[hidddenItem bind:@"value" toObject:self withKeyPath:@"searchHiddenFolders" options:nil];
+
+	[menu addItemWithTitle:@"Copy Matching Parts"                action:@selector(copyMatchingParts:)             keyEquivalent:@""];
+	[menu addItemWithTitle:@"Copy Matching Parts With Filenames" action:@selector(copyMatchingPartsWithFilename:) keyEquivalent:@""];
+	[menu addItemWithTitle:@"Copy Entire Lines"                  action:@selector(copyEntireLines:)               keyEquivalent:@""];
+	[menu addItemWithTitle:@"Copy Entire Lines With Filenames"   action:@selector(copyEntireLinesWithFilename:)   keyEquivalent:@""];
+
+	[menu addItem:[NSMenuItem separatorItem]];
+
+	NSMenuItem* linksItem          = [menu addItemWithTitle:@"Symbolic Links"  action:NULL keyEquivalent:@""];
+	NSMenuItem* hidddenItem        = [menu addItemWithTitle:@"Hidden Folders"  action:NULL keyEquivalent:@""];
 	NSMenuItem* showCheckboxesItem = [menu addItemWithTitle:@"Show Checkboxes" action:NULL keyEquivalent:@""];
+
+	[linksItem          bind:@"value" toObject:self withKeyPath:@"followLinks"                          options:nil];
+	[hidddenItem        bind:@"value" toObject:self withKeyPath:@"searchHiddenFolders"                  options:nil];
 	[showCheckboxesItem bind:@"value" toObject:self withKeyPath:@"enableReplacementSelectionCheckboxes" options:nil];
+
 	[findAllResultsHeaderView showMenu:menu withSelectedIndex:0 forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:NO];
 }
 
