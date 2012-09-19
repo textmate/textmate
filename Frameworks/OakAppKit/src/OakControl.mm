@@ -361,9 +361,9 @@ struct rect_cmp_t
 {
 	bool operator() (NSRect const& a, NSRect const& b) const
 	{
-		CGFloat aValues[] = { NSMinX(a), NSMinY(a), NSMaxX(a), NSMaxY(a) };
-		CGFloat bValues[] = { NSMinX(b), NSMinY(b), NSMaxX(b), NSMaxY(b) };
-		return std::lexicographical_compare(beginof(aValues), endof(aValues), beginof(bValues), endof(bValues));
+		auto lhs = std::make_tuple(NSMinX(a), NSMinY(a), NSMaxX(a), NSMaxY(a));
+		auto rhs = std::make_tuple(NSMinX(b), NSMinY(b), NSMaxX(b), NSMaxY(b));
+		return lhs < rhs;
 	}
 };
 
