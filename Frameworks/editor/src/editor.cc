@@ -1360,7 +1360,9 @@ namespace ng
 			}
 			else
 			{
-				map.insert(std::make_pair("TM_SELECTED_TEXT", _buffer.substr(range.min().index, range.max().index)));
+				if(32 + range.max().index - range.min().index < ARG_MAX)
+						map.insert(std::make_pair("TM_SELECTED_TEXT", _buffer.substr(range.min().index, range.max().index)));
+				else	map.insert(std::make_pair("TM_SELECTED_TEXT", text::format("Error: Selection exceeds %s. Command should read selection from stdin.", text::format_size(ARG_MAX-32).c_str())));
 			}
 		}
 
