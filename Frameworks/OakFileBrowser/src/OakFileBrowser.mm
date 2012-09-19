@@ -123,8 +123,9 @@ static bool is_binary (std::string const& path)
 - (NSArray*)selectedItems
 {
 	NSMutableArray* res = [NSMutableArray array];
-	citerate(index, [view.outlineView selectedRowIndexes])
-		[res addObject:[view.outlineView itemAtRow:*index]];
+	NSIndexSet* indexSet = [view.outlineView selectedRowIndexes];
+	for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
+		[res addObject:[view.outlineView itemAtRow:index]];
 	return res;
 }
 

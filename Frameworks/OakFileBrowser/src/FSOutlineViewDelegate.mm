@@ -63,8 +63,9 @@ static NSSet* ExpandedURLs (NSOutlineView* outlineView, FSItem* root, NSMutableS
 static NSSet* SelectedURLs (NSOutlineView* outlineView, FSItem* root)
 {
 	NSMutableSet* selectedURLs = [NSMutableSet set];
-	citerate(index, [outlineView selectedRowIndexes])
-		[selectedURLs addObject:[[outlineView itemAtRow:*index] url]];
+	NSIndexSet* indexSet = [outlineView selectedRowIndexes];
+	for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
+		[selectedURLs addObject:[[outlineView itemAtRow:index] url]];
 	[selectedURLs intersectSet:VisibleURLs(outlineView, root)];
 
 	return selectedURLs;
