@@ -20,6 +20,7 @@
 #import <ns/ns.h>
 #import <ns/attr_string.h>
 #import <OakAppKit/OakStatusBar.h>
+#import <text/utf8.h>
 #import "scan_path.h"
 #import "Strings.h"
 
