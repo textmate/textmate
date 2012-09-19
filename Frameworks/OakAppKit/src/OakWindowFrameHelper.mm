@@ -1,6 +1,5 @@
 #import "OakWindowFrameHelper.h"
 #import "NSScreen Additions.h"
-#import <oak/CocoaSTL.h>
 
 OAK_DEBUG_VAR(WindowFrameHelper);
 

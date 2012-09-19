@@ -2,7 +2,6 @@
 #import "OakFoundation.h"
 #import "NSArray Additions.h"
 #import "NSString Additions.h"
-#import <oak/CocoaSTL.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(Find_HistoryList);

@@ -1,5 +1,4 @@
 #import "AppController.h"
-#import <oak/CocoaSTL.h>
 #import <oak/oak.h>
 #import <text/ctype.h>
 #import <bundles/bundles.h>

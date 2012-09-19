@@ -4,7 +4,6 @@
 #import "ui/OFBPathInfoCell.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
-#import <oak/CocoaSTL.h>
 #import <ns/ns.h>
 #import <io/path.h>
 #import <text/utf8.h>

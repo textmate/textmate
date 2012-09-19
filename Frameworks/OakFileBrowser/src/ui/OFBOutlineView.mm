@@ -5,7 +5,6 @@
 #import <text/utf8.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
-#import <oak/CocoaSTL.h>
 
 @protocol OFBOutlineViewMenuDelegate
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView;

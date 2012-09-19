@@ -1,5 +1,4 @@
 #import "FFWindowController.h"
-#import <oak/CocoaSTL.h>
 #import <oak/oak.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakAppKit/OakAppKit.h>

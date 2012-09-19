@@ -3,7 +3,6 @@
 #import "NSMenu Additions.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
-#import <oak/CocoaSTL.h>
 #import <text/ctype.h>
 #import <io/path.h>
 

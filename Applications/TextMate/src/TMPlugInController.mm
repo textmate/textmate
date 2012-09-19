@@ -1,5 +1,4 @@
 #import "TMPlugInController.h"
-#import <oak/CocoaSTL.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(PlugInController);

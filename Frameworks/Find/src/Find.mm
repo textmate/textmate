@@ -6,7 +6,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <ns/ns.h>
-#import <oak/CocoaSTL.h>
 #import <text/types.h>
 #import <text/utf8.h>
 #import <regexp/format_string.h>

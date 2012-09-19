@@ -1,5 +1,4 @@
 #import "NSScreen Additions.h"
-#import <oak/CocoaSTL.h>
 
 @implementation NSScreen (RestrainFrames)
 + (NSScreen*)screenWithFrame:(NSRect)rect

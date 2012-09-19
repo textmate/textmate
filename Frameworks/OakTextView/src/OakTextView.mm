@@ -27,7 +27,6 @@
 #import <text/format.h>
 #import <text/utf16.h>
 #import <text/utf8.h>
-#import <oak/CocoaSTL.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(OakTextView_TextInput);

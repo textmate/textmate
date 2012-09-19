@@ -7,7 +7,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <ns/ns.h>
-#import <oak/CocoaSTL.h>
 #import <document/collection.h>
 #import <document/session.h>
 

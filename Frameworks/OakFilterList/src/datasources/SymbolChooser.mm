@@ -3,7 +3,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <text/ranker.h>
-#import <oak/CocoaSTL.h>
 #import <text/case.h>
 #import "../highlight_ranges.h"
 

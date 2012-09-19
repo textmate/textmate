@@ -7,7 +7,6 @@
 #import <ns/ns.h>
 #import <scope/scope.h>
 #import <oak/oak.h>
-#import <oak/CocoaSTL.h>
 
 NSString* const FFDocumentSearchDidReceiveResultsNotification = @"FFDocumentSearchDidReceiveResultsNotification";
 NSString* const FFDocumentSearchDidFinishNotification         = @"FFDocumentSearchDidFinishNotification";

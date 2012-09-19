@@ -2,7 +2,6 @@
 #import "NSImage Additions.h"
 #import <io/path.h>
 #import <scm/scm.h>
-#import <oak/CocoaSTL.h>
 
 // ========================
 // = Obtain Various Icons =

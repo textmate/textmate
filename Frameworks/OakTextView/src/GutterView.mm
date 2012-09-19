@@ -5,7 +5,6 @@
 #import <ns/attr_string.h>
 #import <text/types.h>
 #import <cf/cgrect.h>
-#import <oak/CocoaSTL.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
 

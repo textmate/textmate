@@ -4,7 +4,6 @@
 #import <bundles/bundles.h>
 #import <ns/ns.h>
 #import <scope/scope.h>
-#import <oak/CocoaSTL.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/OakSubmenuController.h>

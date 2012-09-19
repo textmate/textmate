@@ -16,7 +16,6 @@
 #import <cf/cf.h>
 #import <ns/ns.h>
 #import <oak/debug.h>
-#import <oak/CocoaSTL.h>
 
 OAK_DEBUG_VAR(BundleEditor);
 

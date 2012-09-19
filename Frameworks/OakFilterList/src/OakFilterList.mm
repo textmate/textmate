@@ -1,7 +1,6 @@
 #import "OakFilterList.h"
 #import "OakFilterListView.h"
 #import <oak/oak.h>
-#import <oak/CocoaSTL.h>
 
 @interface OakFilterWindowController ()
 - (void)sendAction:(id)sender;

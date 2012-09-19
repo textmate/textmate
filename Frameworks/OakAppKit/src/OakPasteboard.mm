@@ -4,7 +4,6 @@
 
 #import "OakPasteboard.h"
 #import "OakPasteboardSelector.h"
-#import <oak/CocoaSTL.h>
 #import <oak/oak.h>
 #import <OakFoundation/OakFoundation.h>
 #import <oak/debug.h>

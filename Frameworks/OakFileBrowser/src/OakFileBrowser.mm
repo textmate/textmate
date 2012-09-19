@@ -9,7 +9,6 @@
 #import "FSOutlineViewDelegate.h"
 #import <Preferences/Keys.h>
 #import <io/io.h>
-#import <oak/CocoaSTL.h>
 #import <oak/oak.h>
 #import <io/entries.h>
 #import <OakFoundation/NSString Additions.h>

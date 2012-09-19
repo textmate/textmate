@@ -32,7 +32,6 @@ namespace find_tags
 #import <OakAppKit/OakPasteboard.h>
 #import <HTMLOutput/HTMLOutput.h>
 #import <Find/Find.h>
-#import <oak/CocoaSTL.h>
 #import <text/utf8.h>
 #import <OakFilterList/OakFilterList.h>
 #import <OakFilterList/OakFileChooser.h>

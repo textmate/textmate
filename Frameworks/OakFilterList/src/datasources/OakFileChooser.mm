@@ -5,7 +5,6 @@
 #import <OakAppKit/OakSubmenuController.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakHistoryList.h>
-#import <oak/CocoaSTL.h>
 #import <text/case.h>
 #import <io/path.h>
 #import <regexp/glob.h>

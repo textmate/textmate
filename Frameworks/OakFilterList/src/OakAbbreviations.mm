@@ -1,5 +1,4 @@
 #import "OakAbbreviations.h"
-#import <oak/CocoaSTL.h>
 #import <OakFoundation/OakFoundation.h>
 #import <oak/debug.h>
 

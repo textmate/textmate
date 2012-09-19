@@ -1,7 +1,6 @@
 #import "OakDebug.h"
 #import "OakDebugMenu.h"
 #import <oak/oak.h>
-#import <oak/CocoaSTL.h>
 #import <malloc/malloc.h>
 
 namespace

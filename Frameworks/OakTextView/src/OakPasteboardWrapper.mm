@@ -4,7 +4,6 @@
 #import <plist/plist.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
-#import <oak/CocoaSTL.h>
 
 struct my_entry_t : clipboard_t::entry_t
 {

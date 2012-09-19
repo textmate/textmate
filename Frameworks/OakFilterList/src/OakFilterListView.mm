@@ -4,7 +4,6 @@
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
-#import <oak/CocoaSTL.h>
 #import "highlight_ranges.h"
 
 OAK_DEBUG_VAR(FilterList_View);

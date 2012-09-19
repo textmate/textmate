@@ -1,7 +1,6 @@
 #import "AppController.h"
 #import "Favorites.h"
 #import "CreditsWindowController.h"
-#import <oak/CocoaSTL.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <Find/Find.h>

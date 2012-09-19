@@ -2,7 +2,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakSystem/application.h>
 #import <text/ranker.h>
-#import <oak/CocoaSTL.h>
 #import <io/entries.h>
 #import <text/case.h>
 #import <io/path.h>

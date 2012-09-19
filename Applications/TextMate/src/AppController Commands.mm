@@ -13,7 +13,6 @@
 #import <OakSystem/application.h>
 #import <plist/uuid.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
-#import <oak/CocoaSTL.h>
 
 OAK_DEBUG_VAR(AppController_Commands);
 

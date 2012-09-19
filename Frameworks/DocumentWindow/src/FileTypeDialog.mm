@@ -10,7 +10,6 @@
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundlesManager/BundlesManager.h>
-#import <oak/CocoaSTL.h>
 
 namespace
 {

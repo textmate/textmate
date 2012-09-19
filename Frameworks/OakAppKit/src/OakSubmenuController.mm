@@ -3,7 +3,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <oak/debug.h>
 #import <ns/ns.h>
-#import <oak/CocoaSTL.h>
 
 OAK_DEBUG_VAR(OakSubmenuController);
 

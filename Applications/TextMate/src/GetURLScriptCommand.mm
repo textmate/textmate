@@ -1,5 +1,4 @@
 #import <document/collection.h>
-#import <oak/CocoaSTL.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <io/path.h>
 
