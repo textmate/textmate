@@ -112,7 +112,7 @@ namespace parse
 		static char const* special = "\\|([{}]).?*+^$";
 		while(it != last)
 		{
-			if(std::find(beginof(special), endof(special), *it) != endof(special))
+			if(strchr(special, *it))
 			{
 				DB(tmp += '\\');
 				*out++ = '\\';
