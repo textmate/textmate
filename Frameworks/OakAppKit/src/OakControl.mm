@@ -1,5 +1,6 @@
 #import "OakControl.h"
 #import "NSView Additions.h"
+#import <oak/oak.h>
 #import <ns/attr_string.h>
 
 // The lineBreakMode parameter is here to work around a crash in CoreText <rdar://6940427> — fixed in 10.6

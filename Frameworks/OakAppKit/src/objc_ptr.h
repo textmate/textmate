@@ -1,9 +1,6 @@
 #ifndef OAK_COCOASTL_H_MGEOT7R7
 #define OAK_COCOASTL_H_MGEOT7R7
 
-#import "misc.h"
-#import "iterator_macros.h"
-
 /* ============================= */
 /* = Objective-C smart pointer = */
 /* ============================= */
