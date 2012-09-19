@@ -750,14 +750,14 @@ namespace ng
 			case kShiftRight:                                   _selections = ng::extend(_buffer, _selections, kSelectionExtendToLineExclLF,                layout); break;
 		}
 
-		static action_t const deleteActions[]      = { kDeleteBackward, kDeleteForward };
-		static action_t const yankAppendActions[]  = { kDeleteSubWordRight, kDeleteWordForward,  kDeleteToEndOfLine,       kDeleteToEndOfParagraph       };
-		static action_t const yankPrependActions[] = { kDeleteSubWordLeft,  kDeleteWordBackward, kDeleteToBeginningOfLine, kDeleteToBeginningOfParagraph };
-		if(oak::contains(beginof(deleteActions), endof(deleteActions), action))
+		static std::set<action_t> const deleteActions      = { kDeleteBackward, kDeleteForward };
+		static std::set<action_t> const yankAppendActions  = { kDeleteSubWordRight, kDeleteWordForward,  kDeleteToEndOfLine,       kDeleteToEndOfParagraph       };
+		static std::set<action_t> const yankPrependActions = { kDeleteSubWordLeft,  kDeleteWordBackward, kDeleteToBeginningOfLine, kDeleteToBeginningOfParagraph };
+		if(deleteActions.find(action) != deleteActions.end())
 			action = kDeleteSelection;
-		else if(oak::contains(beginof(yankAppendActions), endof(yankAppendActions), action))
+		else if(yankAppendActions.find(action) != yankAppendActions.end())
 			action = _extend_yank_clipboard ? kAppendSelectionToYankPboard : kCopySelectionToYankPboard;
-		else if(oak::contains(beginof(yankPrependActions), endof(yankPrependActions), action))
+		else if(yankPrependActions.find(action) != yankPrependActions.end())
 			action = _extend_yank_clipboard ? kPrependSelectionToYankPboard : kCopySelectionToYankPboard;
 		_extend_yank_clipboard = false;
 
@@ -1125,8 +1125,8 @@ namespace ng
 			case kMoveSelectionRight:      move_selection(+1,  0); break;
 		}
 
-		static action_t const preserveSelectionActions[] = { kCapitalizeWord, kUppercaseWord, kLowercaseWord, kChangeCaseOfLetter, kIndent, kShiftLeft, kShiftRight, kReformatText, kReformatTextAndJustify, kUnwrapText };
-		if(oak::contains(beginof(preserveSelectionActions), endof(preserveSelectionActions), action))
+		static std::set<action_t> const preserveSelectionActions = { kCapitalizeWord, kUppercaseWord, kLowercaseWord, kChangeCaseOfLetter, kIndent, kShiftLeft, kShiftRight, kReformatText, kReformatTextAndJustify, kUnwrapText };
+		if(preserveSelectionActions.find(action) != preserveSelectionActions.end())
 			_selections = selectionHelper.get(action == kChangeCaseOfLetter || action == kChangeCaseOfWord);
 	}
 

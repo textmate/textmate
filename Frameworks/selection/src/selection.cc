@@ -590,11 +590,11 @@ namespace ng
 
 	ranges_t move (buffer_t const& buffer, ranges_t const& selection, move_unit_type const orgUnit, layout_movement_t const* layout)
 	{
-		static move_unit_type const leftward[]   = { kSelectionMoveLeft,  kSelectionMoveFreehandedRight, kSelectionMoveToBeginOfLine, kSelectionMoveToBeginOfParagraph, kSelectionMoveToBeginOfTypingPair, kSelectionMoveToBeginOfSoftLine, kSelectionMoveToBeginOfSubWord, kSelectionMoveToBeginOfWord };
-		static move_unit_type const rightward[]  = { kSelectionMoveRight, kSelectionMoveFreehandedLeft, kSelectionMoveToEndOfLine, kSelectionMoveToEndOfParagraph, kSelectionMoveToEndOfTypingPair, kSelectionMoveToEndOfSoftLine, kSelectionMoveToEndOfSubWord, kSelectionMoveToEndOfWord            };
+		static std::set<move_unit_type> const leftward  = { kSelectionMoveLeft,  kSelectionMoveFreehandedRight, kSelectionMoveToBeginOfLine, kSelectionMoveToBeginOfParagraph, kSelectionMoveToBeginOfTypingPair, kSelectionMoveToBeginOfSoftLine, kSelectionMoveToBeginOfSubWord, kSelectionMoveToBeginOfWord };
+		static std::set<move_unit_type> const rightward = { kSelectionMoveRight, kSelectionMoveFreehandedLeft, kSelectionMoveToEndOfLine, kSelectionMoveToEndOfParagraph, kSelectionMoveToEndOfTypingPair, kSelectionMoveToEndOfSoftLine, kSelectionMoveToEndOfSubWord, kSelectionMoveToEndOfWord            };
 
-		bool isLeftward  = oak::contains(beginof(leftward),  endof(leftward),  orgUnit);
-		bool isRightward = oak::contains(beginof(rightward), endof(rightward), orgUnit);
+		bool isLeftward  = leftward.find(orgUnit)  != leftward.end();
+		bool isRightward = rightward.find(orgUnit) != rightward.end();
 
 		ranges_t res;
 		citerate(range, isLeftward || isRightward ? dissect_columnar(buffer, selection) : selection)
@@ -609,8 +609,8 @@ namespace ng
 				{
 					index = isLeftward ? range->min() : range->max();
 
-					static move_unit_type const left_right[] = { kSelectionMoveLeft,  kSelectionMoveRight, kSelectionMoveFreehandedRight, kSelectionMoveFreehandedLeft                                                                                                           };
-					if(oak::contains(beginof(left_right), endof(left_right), unit))
+					static std::set<move_unit_type> const left_right = { kSelectionMoveLeft,  kSelectionMoveRight, kSelectionMoveFreehandedRight, kSelectionMoveFreehandedLeft                                                                                                           };
+					if(left_right.find(unit) != left_right.end())
 						unit = kSelectionMoveNowhere;
 				}
 				else if(!range->columnar && (unit == kSelectionMoveUp || unit == kSelectionMoveDown) && buffer.convert(range->first.index).line != buffer.convert(range->last.index).line)
@@ -672,12 +672,12 @@ namespace ng
 
 		if(range.unanchored)
 		{
-			static select_unit_type towardBegin[] = { kSelectionExtendLeft, kSelectionExtendFreehandedLeft, kSelectionExtendUp, kSelectionExtendToBeginOfWord, kSelectionExtendToBeginOfSubWord, kSelectionExtendToBeginOfSoftLine, kSelectionExtendToBeginOfLine, kSelectionExtendToBeginOfParagraph, kSelectionExtendToBeginOfColumn, kSelectionExtendToBeginOfDocument, kSelectionExtendPageUp };
-			static select_unit_type towardEnd[]   = { kSelectionExtendRight, kSelectionExtendFreehandedRight, kSelectionExtendDown, kSelectionExtendToEndOfWord, kSelectionExtendToEndOfSubWord, kSelectionExtendToEndOfSoftLine, kSelectionExtendToEndOfLine, kSelectionExtendToEndOfParagraph, kSelectionExtendToEndOfColumn, kSelectionExtendToEndOfDocument, kSelectionExtendPageDown };
+			static std::set<select_unit_type> towardBegin = { kSelectionExtendLeft, kSelectionExtendFreehandedLeft, kSelectionExtendUp, kSelectionExtendToBeginOfWord, kSelectionExtendToBeginOfSubWord, kSelectionExtendToBeginOfSoftLine, kSelectionExtendToBeginOfLine, kSelectionExtendToBeginOfParagraph, kSelectionExtendToBeginOfColumn, kSelectionExtendToBeginOfDocument, kSelectionExtendPageUp };
+			static std::set<select_unit_type> towardEnd   = { kSelectionExtendRight, kSelectionExtendFreehandedRight, kSelectionExtendDown, kSelectionExtendToEndOfWord, kSelectionExtendToEndOfSubWord, kSelectionExtendToEndOfSoftLine, kSelectionExtendToEndOfLine, kSelectionExtendToEndOfParagraph, kSelectionExtendToEndOfColumn, kSelectionExtendToEndOfDocument, kSelectionExtendPageDown };
 
-			if(first < last && oak::contains(beginof(towardBegin), endof(towardBegin), unit))
+			if(first < last && towardBegin.find(unit) != towardBegin.end())
 				std::swap(first, last);
-			else if(last < first && oak::contains(beginof(towardEnd), endof(towardEnd), unit))
+			else if(last < first && towardEnd.find(unit) != towardEnd.end())
 				std::swap(first, last);
 		}
 

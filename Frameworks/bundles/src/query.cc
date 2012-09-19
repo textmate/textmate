@@ -234,8 +234,8 @@ namespace bundles
 
  	static void search (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, bool includeDisabledItems, std::multimap<double, item_ptr>& ordered)
 	{
-		static std::string CachedFields[] = { kFieldKeyEquivalent, kFieldTabTrigger, kFieldSemanticClass, kFieldGrammarScope, kFieldSettingName };
-		if(!includeDisabledItems && !bundle && oak::contains(beginof(CachedFields), endof(CachedFields), field))
+		static std::set<std::string> CachedFields = { kFieldKeyEquivalent, kFieldTabTrigger, kFieldSemanticClass, kFieldGrammarScope, kFieldSettingName };
+		if(!includeDisabledItems && !bundle && CachedFields.find(field) != CachedFields.end())
 				cache_search(field, value, scope, kind, bundle, includeDisabledItems, ordered);
 		else	linear_search(field, value, scope, kind, bundle, includeDisabledItems, ordered);
 	}

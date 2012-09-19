@@ -83,21 +83,21 @@ namespace bundles
 
 		iterate(pair, plist)
 		{
-			static std::string const stringKeys[]     = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector };
-			static std::string const arrayKeys[]      = { kFieldDropExtension, kFieldGrammarExtension };
-			static std::string const dictionaryKeys[] = { kFieldSettingName };
+			static std::set<std::string> const stringKeys     = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector };
+			static std::set<std::string> const arrayKeys      = { kFieldDropExtension, kFieldGrammarExtension };
+			static std::set<std::string> const dictionaryKeys = { kFieldSettingName };
 
 			if(pair->first == kFieldScopeSelector)
 			{
 				if(std::string const* str = boost::get<std::string>(&pair->second))
 					_scope_selector = *str;
 			}
-			else if(oak::contains(beginof(stringKeys), endof(stringKeys), pair->first))
+			else if(stringKeys.find(pair->first) != stringKeys.end())
 			{
 				if(std::string const* str = boost::get<std::string>(&pair->second))
 					_fields.insert(std::make_pair(pair->first, *str));
 			}
-			else if(oak::contains(beginof(arrayKeys), endof(arrayKeys), pair->first))
+			else if(arrayKeys.find(pair->first) != arrayKeys.end())
 			{
 				if(plist::array_t const* array = boost::get<plist::array_t>(&pair->second))
 				{
@@ -108,7 +108,7 @@ namespace bundles
 					}
 				}
 			}
-			else if(oak::contains(beginof(dictionaryKeys), endof(dictionaryKeys), pair->first))
+			else if(dictionaryKeys.find(pair->first) != dictionaryKeys.end())
 			{
 				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair->second))
 				{
@@ -478,8 +478,7 @@ namespace bundles
 		private:
 			static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist)
 			{
-				static std::string const DesiredKeysArray[] = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldDeletedItems, kFieldChangedItems };
-				static std::set<std::string> const DesiredKeys(beginof(DesiredKeysArray), endof(DesiredKeysArray));
+				static std::set<std::string> const DesiredKeys = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldDeletedItems, kFieldChangedItems };
 
 				plist::dictionary_t res;
 				citerate(pair, plist)

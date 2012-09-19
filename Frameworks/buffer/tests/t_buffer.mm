@@ -115,8 +115,7 @@ public:
 
 		std::map<size_t, bool> bad = buf.misspellings(9, 23);
 		TS_ASSERT_EQUALS(bad.size(), 2);
-		static std::pair<size_t, bool> const preset[] = { std::make_pair(5, true), std::make_pair(8, false) };
-		static std::map<size_t, bool> const expected(beginof(preset), endof(preset));
+		static std::map<size_t, bool> const expected = { { 5, true }, { 8, false } };
 		TS_ASSERT(bad == expected);
 	}
 
@@ -131,8 +130,7 @@ public:
 
 		std::map<size_t, bool> bad = buf.misspellings(0, buf.size());
 		TS_ASSERT_EQUALS(bad.size(), 3);
-		static std::pair<size_t, bool> const preset[] = { std::make_pair(3, true), std::make_pair(5, false), std::make_pair(6, true) };
-		static std::map<size_t, bool> const expected(beginof(preset), endof(preset));
+		static std::map<size_t, bool> const expected = { { 3, true }, { 5, false }, { 6, true } };
 		TS_ASSERT(bad == expected);
 	}
 
@@ -147,8 +145,7 @@ public:
 
 		std::map<size_t, bool> bad = buf.misspellings(4, 7);
 		TS_ASSERT_EQUALS(bad.size(), 3);
-		static std::pair<size_t, bool> const preset[] = { std::make_pair(0, true), std::make_pair(1, false), std::make_pair(2, true) };
-		static std::map<size_t, bool> const expected(beginof(preset), endof(preset));
+		static std::map<size_t, bool> const expected = { { 0, true }, { 1, false }, { 2, true } };
 		TS_ASSERT(bad == expected);
 	}
 

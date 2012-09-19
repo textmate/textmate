@@ -142,8 +142,8 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	{
 		[NSApp sendEvent:event];
 
-		static NSEventType const orderOutEvents[] = { NSLeftMouseDown, NSRightMouseDown, NSOtherMouseDown, NSKeyDown, NSScrollWheel };
-		if(oak::contains(beginof(orderOutEvents), endof(orderOutEvents), [event type]))
+		static std::set<NSEventType> const orderOutEvents = { NSLeftMouseDown, NSRightMouseDown, NSOtherMouseDown, NSKeyDown, NSScrollWheel };
+		if(orderOutEvents.find([event type]) != orderOutEvents.end())
 		{
 			D(DBF_OakToolTip, bug("close because of key/mouse down event\n"););
 			break;

@@ -87,8 +87,8 @@ public:
 
 	static void test_child_count ()
 	{
-		static ssize_t const TestKeys[] = { 10, 20, 30, 40, 50 };
-		std::vector<ssize_t> keys(beginof(TestKeys), endof(TestKeys));
+		static std::vector<ssize_t> const TestKeys = { 10, 20, 30, 40, 50 };
+		std::vector<ssize_t> keys = TestKeys;
 		do {
 
 			std::next_permutation(keys.begin(), keys.end());
@@ -135,13 +135,13 @@ public:
 			TS_ASSERT_EQUALS(map.find(40).index(), 2);
 			TS_ASSERT_EQUALS(map.find(50).index(), 3);
 
-		} while(!std::equal(keys.begin(), keys.end(), beginof(TestKeys)));
+		} while(keys != TestKeys);
 	}
 
 	static void test_find ()
 	{
-		static ssize_t const TestKeys[] = { 10, 20, 30, 40, 50 };
-		std::vector<ssize_t> keys(beginof(TestKeys), endof(TestKeys));
+		static std::vector<ssize_t> const TestKeys = { 10, 20, 30, 40, 50 };
+		std::vector<ssize_t> keys = TestKeys;
 		do {
 
 			std::next_permutation(keys.begin(), keys.end());
@@ -167,13 +167,13 @@ public:
 			TS_ASSERT_EQUALS(map.find(40+1).index(), 5);
 			TS_ASSERT_EQUALS(map.find(50+1).index(), 5);
 
-		} while(!std::equal(keys.begin(), keys.end(), beginof(TestKeys)));
+		} while(keys != TestKeys);
 	}
 
 	static void test_lower_bound ()
 	{
-		static ssize_t const TestKeys[] = { 10, 20, 30, 40, 50 };
-		std::vector<ssize_t> keys(beginof(TestKeys), endof(TestKeys));
+		static std::vector<ssize_t> const TestKeys = { 10, 20, 30, 40, 50 };
+		std::vector<ssize_t> keys = TestKeys;
 		do {
 
 			std::next_permutation(keys.begin(), keys.end());
@@ -199,13 +199,13 @@ public:
 			TS_ASSERT_EQUALS(map.lower_bound(40+1).index(), 4);
 			TS_ASSERT_EQUALS(map.lower_bound(50+1).index(), 5);
 
-		} while(!std::equal(keys.begin(), keys.end(), beginof(TestKeys)));
+		} while(keys != TestKeys);
 	}
 
 	static void test_upper_bound ()
 	{
-		static ssize_t const TestKeys[] = { 10, 20, 30, 40, 50 };
-		std::vector<ssize_t> keys(beginof(TestKeys), endof(TestKeys));
+		static std::vector<ssize_t> const TestKeys = { 10, 20, 30, 40, 50 };
+		std::vector<ssize_t> keys = TestKeys;
 		do {
 
 			std::next_permutation(keys.begin(), keys.end());
@@ -231,7 +231,7 @@ public:
 			TS_ASSERT_EQUALS(map.upper_bound(40+1).index(), 4);
 			TS_ASSERT_EQUALS(map.upper_bound(50+1).index(), 5);
 
-		} while(!std::equal(keys.begin(), keys.end(), beginof(TestKeys)));
+		} while(keys != TestKeys);
 	}
 
 	void test_preserve ()

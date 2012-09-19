@@ -23,8 +23,7 @@ public:
 	void test_utf8_iterate ()
 	{
 		static std::string const str = "“Æblegrød…” — 𠻵";
-		static uint32_t const codepoints[] = { 0x201C, 0xC6, 0x62, 0x6C, 0x65, 0x67, 0x72, 0xF8, 0x64, 0x2026, 0x201D, 0x20, 0x2014, 0x20, 0x20EF5 };
-		static std::vector<uint32_t> const expected(beginof(codepoints), endof(codepoints));
+		static std::vector<uint32_t> const expected = { 0x201C, 0xC6, 0x62, 0x6C, 0x65, 0x67, 0x72, 0xF8, 0x64, 0x2026, 0x201D, 0x20, 0x2014, 0x20, 0x20EF5 };
 
 		std::vector<uint32_t> chars;
 		foreach(ch, utf8::make(str.data()), utf8::make(str.data() + str.size()))

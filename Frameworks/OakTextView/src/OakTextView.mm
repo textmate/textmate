@@ -1001,7 +1001,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	static std::string const kRightArrow     = "\uF703";
 
 	// these never reach ‘keyDown:’ (tested on 10.5.8)
-	static std::string const SpecialKeys[] =
+	static std::set<std::string> const SpecialKeys =
 	{
 		"^" + kBackwardDelete, "^" + kForwardDelete,
 		"^"   + kUpArrow, "^"   + kDownArrow, "^"   + kLeftArrow, "^"   + kRightArrow,
@@ -1010,7 +1010,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		"^~$" + kUpArrow, "^~$" + kDownArrow, "^~$" + kLeftArrow, "^~$" + kRightArrow,
 	};
 
-	if(oak::contains(beginof(SpecialKeys), endof(SpecialKeys), eventString))
+	if(SpecialKeys.find(eventString) != SpecialKeys.end())
 	{
 		plist::dictionary_t::const_iterator pair = KeyEventContext->find(eventString);
 		if(pair != KeyEventContext->end())
@@ -1640,8 +1640,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
-	static SEL const RequiresSelection[] = { @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
-	if(oak::contains(beginof(RequiresSelection), endof(RequiresSelection), [aMenuItem action]))
+	static std::set<SEL> const RequiresSelection = { @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
+	if(RequiresSelection.find([aMenuItem action]) != RequiresSelection.end())
 		return [self hasSelection];
 	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
 		[aMenuItem setState:[self showInvisibles] ? NSOnState : NSOffState];
@@ -1655,11 +1655,11 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[aMenuItem setState:[[NSString stringWithCxxString:document->buffer().spelling_language()] isEqualToString:[aMenuItem representedObject]] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeWrapColumnFrom:))
 	{
-		static NSInteger const Presets[] = { NSWrapColumnWindowWidth, 40, 80 };
+		static std::set<NSInteger> const Presets = { NSWrapColumnWindowWidth, 40, 80 };
 		[aMenuItem setState:wrapColumn == [aMenuItem tag] ? NSOnState : NSOffState];
 		if([aMenuItem tag] == NSWrapColumnAskUser)
 		{
-			bool custom = !oak::contains(beginof(Presets), endof(Presets), wrapColumn);
+			bool custom = Presets.find(wrapColumn) == Presets.end();
 			[aMenuItem setTitle:custom ? [NSString stringWithFormat:@"Other (%d)…", wrapColumn] : @"Other…"];
 			[aMenuItem setState:custom ? NSOnState : NSOffState];
 		}

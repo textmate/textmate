@@ -161,15 +161,15 @@ int main (int argc, char const* argv[])
 	for(int i = optind + 1; i < argc; ++i)
 		bundleNames.push_back(text::lowercase(argv[i]));
 
-	static std::string const CommandsNeedingBundleList[] = { "install", "uninstall", "show", "dependents" };
-	if(bundleNames.empty() && oak::contains(beginof(CommandsNeedingBundleList), endof(CommandsNeedingBundleList), command))
+	static std::set<std::string> const CommandsNeedingBundleList = { "install", "uninstall", "show", "dependents" };
+	if(bundleNames.empty() && CommandsNeedingBundleList.find(command) != CommandsNeedingBundleList.end())
 	{
 		fprintf(stderr, "no bundles specified\n");
 		return 1;
 	}
 
-	static std::string const CommandsNeedingUpdatedSources[] = { "update", "install", "list", "show" };
-	if(oak::contains(beginof(CommandsNeedingUpdatedSources), endof(CommandsNeedingUpdatedSources), command))
+	static std::set<std::string> const CommandsNeedingUpdatedSources = { "update", "install", "list", "show" };
+	if(CommandsNeedingUpdatedSources.find(command) != CommandsNeedingUpdatedSources.end())
 		bundles_db::update_sources(installDir);
 
 	std::vector<bundles_db::bundle_ptr> index = bundles_db::index(installDir);

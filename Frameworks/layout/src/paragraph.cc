@@ -14,7 +14,7 @@ namespace ng
 	{
 		static std::string representation_for (uint32_t ch)
 		{
-			static uint32_t const SpaceCharacters[] = {
+			static std::set<uint32_t> const SpaceCharacters = {
 				0x200B, // ZERO WIDTH SPACE
 				0x200C, // ZERO WIDTH NON-JOINER
 				0x200D, // ZERO WIDTH JOINER
@@ -46,7 +46,7 @@ namespace ng
 						return "^" + std::string(1, ch-1+'A');
 					else if(ch < 0x20 || (0x7E < ch && ch < 0xA0))
 						return "◆";
-					else if(0xE000 <= ch && ch <= 0xF8FF && ch != utf8::to_ch("") || oak::contains(beginof(SpaceCharacters), endof(SpaceCharacters), ch))
+					else if(0xE000 <= ch && ch <= 0xF8FF && ch != utf8::to_ch("") || SpaceCharacters.find(ch) != SpaceCharacters.end())
 						return text::format("<U+%04X>", ch);
 					else if(0x0F0000 <= ch && ch <= 0x0FFFFD || 0x100000 <= ch && ch <= 0x10FFFD)
 						return text::format("<U+%06X>", ch);

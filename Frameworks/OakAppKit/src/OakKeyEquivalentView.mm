@@ -236,12 +236,12 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	}
 	else
 	{
-		static std::string const ClearKeys[] = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
-		static std::string const RecordingKeys[] = { " ", "\n", "\r" };
+		static std::set<std::string> const ClearKeys     = { utf8::to_s(NSDeleteCharacter), utf8::to_s(NSDeleteFunctionKey) };
+		static std::set<std::string> const RecordingKeys = { " ", "\n", "\r" };
 		std::string const keyString = to_s(anEvent);
-		if(oak::contains(beginof(ClearKeys), endof(ClearKeys), keyString))
+		if(ClearKeys.find(keyString) != ClearKeys.end())
 			[self clearKeyEquivalent:self];
-		else if(oak::contains(beginof(RecordingKeys), endof(RecordingKeys), keyString))
+		else if(RecordingKeys.find(keyString) != RecordingKeys.end())
 			self.recording = YES;
 		else
 			[self interpretKeyEvents:@[ anEvent ]];

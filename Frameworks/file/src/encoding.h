@@ -32,8 +32,8 @@ namespace encoding
 
 		static bool supports_byte_order_mark (std::string const& charset)
 		{
-			static std::string const Encodings[] = { kCharsetUTF8, kCharsetUTF16BE, kCharsetUTF16LE, kCharsetUTF32BE, kCharsetUTF32LE };
-			return oak::contains(beginof(Encodings), endof(Encodings), charset);
+			static std::set<std::string> const Encodings = { kCharsetUTF8, kCharsetUTF16BE, kCharsetUTF16LE, kCharsetUTF32BE, kCharsetUTF32LE };
+			return Encodings.find(charset) != Encodings.end();
 		}
 
 	private:

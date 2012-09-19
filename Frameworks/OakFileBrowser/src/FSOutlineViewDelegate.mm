@@ -374,11 +374,11 @@ static BOOL MyEvent (NSEvent* anEvent, NSView* aView)
 {
 	if([anEvent window] == [aView window])
 	{
-		static std::string const ArrowLeftRight[] = { "~" + utf8::to_s(NSLeftArrowFunctionKey), "~" + utf8::to_s(NSRightArrowFunctionKey) };
+		static std::set<std::string> const ArrowLeftRight = { "~" + utf8::to_s(NSLeftArrowFunctionKey), "~" + utf8::to_s(NSRightArrowFunctionKey) };
 		if([anEvent type] == NSLeftMouseUp)
 			return NSMouseInRect([aView convertPoint:[anEvent locationInWindow] fromView:nil], [aView frame], [aView isFlipped]);
 		else if([anEvent type] == NSKeyDown && [[aView window] firstResponder] == aView)
-			return oak::contains(beginof(ArrowLeftRight), endof(ArrowLeftRight), to_s(anEvent));
+			return ArrowLeftRight.find(to_s(anEvent)) != ArrowLeftRight.end();
 	}
 	return NO;
 }
