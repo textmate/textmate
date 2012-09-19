@@ -18,6 +18,7 @@
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 
 @interface FSDirectoryDataSource ()
+@property (nonatomic, retain) NSMutableDictionary* visible;
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag;
 - (void)lostItems:(NSArray*)someItems;
 @end
@@ -278,22 +279,21 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 - (void)fsEvent:(std::string const&)aPath
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s\n", aPath.c_str()););
-	auto it = visible.find(aPath);
-	if(it != visible.end())
-		new scanner_t(self, it->second, dataSourceOptions, false);
+	if(FSItem* item = visible[[NSString stringWithCxxString:aPath]])
+		new scanner_t(self, item, dataSourceOptions, false);
 }
 
 - (void)lostItems:(NSArray*)someItems
 {
-	std::vector<std::string> toDelete;
-	iterate(pair, visible)
+	NSMutableArray* toDelete = [NSMutableArray array];
+	for(NSString* path in visible)
 	{
-		if([someItems containsObject:pair->second])
-			toDelete.push_back(pair->first);
+		if([someItems containsObject:visible[path]])
+			[toDelete addObject:path];
 	}
 
-	iterate(path, toDelete)
-		visible.erase(*path);
+	for(NSString* path in toDelete)
+		[visible removeObjectForKey:path];
 }
 
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
@@ -301,6 +301,7 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 	if((self = [super init]))
 	{
 		dataSourceOptions = someOptions;
+		self.visible  = [NSMutableDictionary dictionary];
 		self.rootItem = [FSFileItem itemWithURL:anURL];
 
 		struct event_callback_t : fs::event_callback_t
@@ -357,13 +358,14 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 
 	fs::unwatch([[self.rootItem.url path] fileSystemRepresentation], callback);
 	delete callback;
+	self.visible = nil;
 	[super dealloc];
 }
 
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s %s\n", [[[anItem url] path] UTF8String], BSTR(flag)););
-	visible.insert(std::make_pair([[anItem.url path] fileSystemRepresentation], anItem));
+	visible[[anItem.url path]] = anItem;
 	new scanner_t(self, anItem, dataSourceOptions, flag);
 	ensure_callback(scmCallback, [[anItem.url path] fileSystemRepresentation], scmDrivers, scmReferenceCounts);
 }
@@ -379,7 +381,7 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s\n", [[[anItem url] path] UTF8String]););
 	remove_callbacks(scmCallback, [[anItem.url path] fileSystemRepresentation], scmDrivers, scmReferenceCounts);
-	visible.erase([[anItem.url path] fileSystemRepresentation]);
+	[visible removeObjectForKey:[anItem.url path]];
 	anItem.children = nil;
 	return YES;
 }
