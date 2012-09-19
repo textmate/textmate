@@ -28,7 +28,7 @@ namespace oak
 	void command_t::sanitize_data (std::string& data)
 	{
 		std::string tmp;
-		oak::replace_copy(data.begin(), data.end(), temp_path, temp_path + strlen(temp_path), beginof(display_name), endof(display_name), back_inserter(tmp));
+		oak::replace_copy(data.begin(), data.end(), temp_path, temp_path + strlen(temp_path), display_name.begin(), display_name.end(), back_inserter(tmp));
 		data.swap(tmp);
 
 		if(!utf8::is_valid(data.begin(), data.end()))

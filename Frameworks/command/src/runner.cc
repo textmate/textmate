@@ -122,8 +122,8 @@ namespace command
 	void runner_t::finish ()
 	{
 		std::string newOut, newErr;
-		oak::replace_copy(_out.begin(), _out.end(), beginof(_process.temp_path), endof(_process.temp_path), beginof(_command.name), endof(_command.name), back_inserter(newOut));
-		oak::replace_copy(_err.begin(), _err.end(), beginof(_process.temp_path), endof(_process.temp_path), beginof(_command.name), endof(_command.name), back_inserter(newErr));
+		oak::replace_copy(_out.begin(), _out.end(), _process.temp_path, _process.temp_path + strlen(_process.temp_path), _command.name.begin(), _command.name.end(), back_inserter(newOut));
+		oak::replace_copy(_err.begin(), _err.end(), _process.temp_path, _process.temp_path + strlen(_process.temp_path), _command.name.begin(), _command.name.end(), back_inserter(newErr));
 		newOut.swap(_out);
 		newErr.swap(_err);
 
