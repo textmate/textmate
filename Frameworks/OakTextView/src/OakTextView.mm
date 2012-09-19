@@ -2313,7 +2313,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	if(commandDown && mouseDownClickCount == 1)
 	{
-		if(s.size() > 1 && std::find(beginof(s), endof(s), range.last()) != endof(s))
+		if(s.size() > 1 && std::find(s.begin(), s.end(), range.last()) != s.end())
 		{
 			ng::ranges_t newSel;
 			citerate(cur, s)
