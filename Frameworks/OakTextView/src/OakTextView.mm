@@ -653,8 +653,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 	{
 		std::string const str = document->buffer().substr(range->min().index, range->max().index);
 		char const* base = str.data();
-		size_t from = utf16::advance(base, aRange.location) - base;
-		size_t to   = utf16::advance(base, aRange.location + aRange.length) - base;
+		size_t from = utf16::advance(base, aRange.location, base + str.size()) - base;
+		size_t to   = utf16::advance(base, aRange.location + aRange.length, base + str.size()) - base;
 		sel.push_back(ng::range_t(range->min() + from, range->min() + to));
 	}
 	editor->set_selections(sel);
@@ -760,7 +760,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 {
 	std::string const text = editor->as_string();
 
-	size_t index = utf16::advance(text.data(), theRange.location) - text.data();
+	size_t index = utf16::advance(text.data(), theRange.location, text.data() + text.size()) - text.data();
 	NSRect rect = [self convertRect:layout->rect_at_index(index) toView:nil];
 	rect.origin = [[self window] convertBaseToScreen:rect.origin];
 	D(DBF_OakTextView_TextInput, bug("%s → %s\n", [NSStringFromRange(theRange) UTF8String], [NSStringFromRect(rect) UTF8String]););
