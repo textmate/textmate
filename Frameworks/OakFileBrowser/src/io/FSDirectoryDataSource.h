@@ -7,7 +7,6 @@
 	NSUInteger dataSourceOptions;
 
 	fs::event_callback_t* callback;
-	NSMutableDictionary* visible;
 
 	scm::callback_t* scmCallback;
 	std::map<std::string, scm::info_ptr> scmDrivers;
