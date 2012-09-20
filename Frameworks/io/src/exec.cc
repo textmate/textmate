@@ -39,7 +39,7 @@ namespace io
 			setpgid(0, getpid());
 
 			int const oldOutErr[] = { 0, 1, 2, output_fd };
-			std::for_each(beginof(oldOutErr), endof(oldOutErr), close);
+			for(int fd : oldOutErr) close(fd);
 
 			open("/dev/null", O_RDONLY); // stdin
 			dup(outputPipe[1]);

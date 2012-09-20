@@ -171,11 +171,11 @@ namespace oak
 
 			int const oldOutErr[] = { 0, 1, 2, outputPipe[0], errorPipe[0] };
 			int const newOutErr[] = { inputPipe[0], outputPipe[1], errorPipe[1] };
-			std::for_each(beginof(oldOutErr), endof(oldOutErr), close);
+			for(int fd : oldOutErr) close(fd);
 			if(input_fd == -1)
 				close(inputPipe[1]);
-			std::for_each(beginof(newOutErr), endof(newOutErr), dup);
-			std::for_each(beginof(newOutErr), endof(newOutErr), close);
+			for(int fd : newOutErr) dup(fd);
+			for(int fd : newOutErr) close(fd);
 
 			chdir(workingDir);
 			fcntl(0, F_SETOWN, getppid());
@@ -196,7 +196,7 @@ namespace oak
 		client_key = server().add(process_id, this);
 
 		int const fds[] = { inputPipe[0], outputPipe[1], errorPipe[1] };
-		std::for_each(beginof(fds), endof(fds), close);
+		for(int fd : fds) close(fd);
 
 		if(input_fd == -1)
 			input_fd = inputPipe[1];
