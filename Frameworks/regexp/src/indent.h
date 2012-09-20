@@ -17,7 +17,7 @@ namespace indent
 	{
 		fsm_t (regexp::pattern_t const (&patterns)[4], size_t indentSize, size_t tabSize) : _indent_size(indentSize), _tab_size(tabSize), _level(0), _carry(0), _seen(0)
 		{
-			std::copy(beginof(patterns), endof(patterns), beginof(_patterns));
+			std::copy(std::begin(patterns), std::end(patterns), std::begin(_patterns));
 		}
 
 		bool is_seeded (std::string const& line);

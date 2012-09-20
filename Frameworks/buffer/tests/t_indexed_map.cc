@@ -49,7 +49,7 @@ public:
 			tmp.insert((random() & 0xFFFFFF) - 0x7FFFFF);
 
 		std::vector<ssize_t> keys(tmp.begin(), tmp.end());
-		std::random_shuffle(beginof(keys), endof(keys));
+		std::random_shuffle(keys.begin(), keys.end());
 		iterate(key, keys)
 			map.set(*key, true);
 
@@ -58,7 +58,7 @@ public:
 		TS_ASSERT_EQUALS(tmp.size(), sorted.size());
 		TS_ASSERT(std::equal(tmp.begin(), tmp.end(), sorted.begin()));
 	
-		std::random_shuffle(beginof(keys), endof(keys));
+		std::random_shuffle(keys.begin(), keys.end());
 		for(size_t i = keys.size() >> 1; i < keys.size(); ++i)
 		{
 			map.remove(keys[i]);
@@ -79,7 +79,7 @@ public:
 		TS_ASSERT_EQUALS(keys.size(), sorted.size());
 		TS_ASSERT(std::equal(keys.begin(), keys.end(), sorted.begin()));
 
-		std::random_shuffle(beginof(sorted), endof(sorted));
+		std::random_shuffle(sorted.begin(), sorted.end());
 		iterate(key, sorted)
 			map.remove(*key);
 		TS_ASSERT(map.empty());
@@ -253,7 +253,7 @@ public:
 	{
 		iterate(row, TestKeys)
 		{
-			std::vector<ssize_t> keys(beginof(*row), endof(*row));
+			std::vector<ssize_t> keys(std::begin(*row), std::end(*row));
 			do {
 
 				indexed_map_t<bool> map;
@@ -274,7 +274,7 @@ public:
 
 				std::next_permutation(keys.begin(), keys.end());
 
-			} while(!std::equal(keys.begin(), keys.end(), beginof(*row)));
+			} while(!std::equal(keys.begin(), keys.end(), std::begin(*row)));
 		}
 	}
 
@@ -282,7 +282,7 @@ public:
 	{
 		iterate(row, TestKeys)
 		{
-			std::vector<ssize_t> keys(beginof(*row), endof(*row));
+			std::vector<ssize_t> keys(std::begin(*row), std::end(*row));
 			do {
 
 				indexed_map_t<bool> map;
@@ -303,7 +303,7 @@ public:
 
 				std::next_permutation(keys.begin(), keys.end());
 
-			} while(!std::equal(keys.begin(), keys.end(), beginof(*row)));
+			} while(!std::equal(keys.begin(), keys.end(), std::begin(*row)));
 		}
 	}
 

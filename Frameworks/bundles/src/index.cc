@@ -683,7 +683,7 @@ namespace bundles
 						std::string const extensions[] = { dirs[i].extension, ".tmDelta", ".plist" };
 						citerate(fsItem, *dirNode.entries())
 						{
-							if(!oak::contains(beginof(extensions), endof(extensions), path::extension(fsItem->name())))
+							if(!oak::contains(std::begin(extensions), std::end(extensions), path::extension(fsItem->name())))
 							{
 								fprintf(stderr, "wrong item type: %s\n", fsItem->name().c_str());
 								continue;

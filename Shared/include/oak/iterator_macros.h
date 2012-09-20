@@ -24,8 +24,6 @@
 // 
 // Using the regular iterate macro is not safe since we would call create_vector() twice and (likely) get incompatible begin/end iterators.
 
-#include "stl_iterator_constructors.h"
-
 #ifndef foreach
 #define foreach(v,f,l) for(decltype(f) v = (f), _end = (l); v != _end; ++v)
 #endif
@@ -37,11 +35,11 @@
 #ifdef iterate
 #undef iterate
 #endif
-#define iterate(v,c) foreach(v, beginof(c), endof(c))
+#define iterate(v,c) foreach(v, std::begin(c), std::end(c))
 
 #ifndef uiterate
 #define uiterate(v,c,u) \
-decltype(c) u = (c); foreach(v, beginof(u), endof(u))
+decltype(c) u = (c); foreach(v, std::begin(u), std::end(u))
 #endif
 
 #define OAK_UNIQUE          __COUNTER__
@@ -53,7 +51,7 @@ decltype(c) u = (c); foreach(v, beginof(u), endof(u))
 #endif
 
 #ifndef riterate
-#define riterate(v,c) foreach(v, rbeginof(c), rendof(c))
+#define riterate(v,c) foreach(v, std::reverse_iterator<decltype(std::end(c))>(std::end(c)), std::reverse_iterator<decltype(std::begin(c))>(std::begin(c)))
 #endif
 
 #endif /* end of include guard: OAK_ITERATOR_MACROS_H_1SQFE1YN */

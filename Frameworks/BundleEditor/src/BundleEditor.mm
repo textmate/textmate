@@ -407,7 +407,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	}
 	else
 	{
-		if(oak::contains(beginof(PlistItemKinds), endof(PlistItemKinds), info.kind))
+		if(oak::contains(std::begin(PlistItemKinds), std::end(PlistItemKinds), info.kind))
 				plist[info.plist_key] = plist::parse_ascii(content);
 		else	plist[info.plist_key] = content;
 	}
@@ -641,7 +641,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 		}
 		bundleItemContent = document::from_content(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
 	}
-	else if(oak::contains(beginof(PlistItemKinds), endof(PlistItemKinds), info.kind))
+	else if(oak::contains(std::begin(PlistItemKinds), std::end(PlistItemKinds), info.kind))
 	{
 		if(plist.find(info.plist_key) != plist.end())
 			bundleItemContent = document::from_content(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);

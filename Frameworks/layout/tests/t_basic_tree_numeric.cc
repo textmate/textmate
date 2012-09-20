@@ -21,7 +21,7 @@ public:
 			tmp.insert((random() & 0xFFFFFF) - 0x7FFFFF);
 
 		keys.insert(keys.end(), tmp.begin(), tmp.end());
-		std::random_shuffle(beginof(keys), endof(keys));
+		std::random_shuffle(keys.begin(), keys.end());
 		iterate(key, keys)
 			tree.insert(tree.lower_bound(*key, &numeric_comp), *key);
 	}
