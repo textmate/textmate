@@ -353,6 +353,15 @@ namespace ng
 		return res;
 	}
 
+	static size_t end_of_leading_indent (buffer_t const& buffer, size_t line)
+	{
+		size_t bol = buffer.begin(line);
+		size_t eol = buffer.eol(line);
+		while(bol < eol && isspace(utf8::to_ch(buffer[bol])))
+			++bol;
+		return bol;
+	}
+
 	static index_t move (buffer_t const& buffer, index_t const& index, move_unit_type unit, layout_movement_t const* layout)
 	{
 		size_t const caret = index.index;
@@ -392,6 +401,22 @@ namespace ng
 			case kSelectionMoveToEndOfTypingPair:     return end_of_typing_pair(buffer, caret, false);
 			case kSelectionMovePageUp:                return layout ? layout->page_up_for(index)   : index;
 			case kSelectionMovePageDown:              return layout ? layout->page_down_for(index) : index;
+
+			case kSelectionMoveToBeginOfIndentedLine:
+			{
+				size_t bol = buffer.begin(line);
+				size_t eoi = end_of_leading_indent(buffer, line);
+				return eoi < caret ? eoi : bol;
+			}
+			break;
+
+			case kSelectionMoveToEndOfIndentedLine:
+			{
+				size_t eoi = end_of_leading_indent(buffer, line);
+				size_t eol = buffer.eol(line);
+				return caret < eoi ? eoi : eol;
+			}
+			break;
 
 			case kSelectionMoveToBeginOfHardParagraph:
 			{
@@ -672,8 +697,8 @@ namespace ng
 
 		if(range.unanchored)
 		{
-			static std::set<select_unit_type> towardBegin = { kSelectionExtendLeft, kSelectionExtendFreehandedLeft, kSelectionExtendUp, kSelectionExtendToBeginOfWord, kSelectionExtendToBeginOfSubWord, kSelectionExtendToBeginOfSoftLine, kSelectionExtendToBeginOfLine, kSelectionExtendToBeginOfParagraph, kSelectionExtendToBeginOfColumn, kSelectionExtendToBeginOfDocument, kSelectionExtendPageUp };
-			static std::set<select_unit_type> towardEnd   = { kSelectionExtendRight, kSelectionExtendFreehandedRight, kSelectionExtendDown, kSelectionExtendToEndOfWord, kSelectionExtendToEndOfSubWord, kSelectionExtendToEndOfSoftLine, kSelectionExtendToEndOfLine, kSelectionExtendToEndOfParagraph, kSelectionExtendToEndOfColumn, kSelectionExtendToEndOfDocument, kSelectionExtendPageDown };
+			static std::set<select_unit_type> towardBegin = { kSelectionExtendLeft, kSelectionExtendFreehandedLeft, kSelectionExtendUp, kSelectionExtendToBeginOfWord, kSelectionExtendToBeginOfSubWord, kSelectionExtendToBeginOfSoftLine, kSelectionExtendToBeginOfIndentedLine, kSelectionExtendToBeginOfLine, kSelectionExtendToBeginOfParagraph, kSelectionExtendToBeginOfColumn, kSelectionExtendToBeginOfDocument, kSelectionExtendPageUp };
+			static std::set<select_unit_type> towardEnd   = { kSelectionExtendRight, kSelectionExtendFreehandedRight, kSelectionExtendDown, kSelectionExtendToEndOfWord, kSelectionExtendToEndOfSubWord, kSelectionExtendToEndOfSoftLine, kSelectionExtendToEndOfIndentedLine, kSelectionExtendToEndOfLine, kSelectionExtendToEndOfParagraph, kSelectionExtendToEndOfColumn, kSelectionExtendToEndOfDocument, kSelectionExtendPageDown };
 
 			if(first < last && towardBegin.find(unit) != towardBegin.end())
 				std::swap(first, last);
@@ -701,6 +726,8 @@ namespace ng
 			case kSelectionExtendToEndOfWord:          return range_t(first, move(buffer, last, kSelectionMoveToEndOfWord,        layout), range.columnar, range.freehanded);
 			case kSelectionExtendToBeginOfSubWord:     return range_t(first, move(buffer, last, kSelectionMoveToBeginOfSubWord,   layout), range.columnar, range.freehanded);
 			case kSelectionExtendToEndOfSubWord:       return range_t(first, move(buffer, last, kSelectionMoveToEndOfSubWord,     layout), range.columnar, range.freehanded);
+			case kSelectionExtendToBeginOfIndentedLine: return range_t(first, move(buffer, last, kSelectionMoveToBeginOfIndentedLine, layout), range.columnar, range.freehanded);
+			case kSelectionExtendToEndOfIndentedLine:  return range_t(first, move(buffer, last, kSelectionMoveToEndOfIndentedLine, layout), range.columnar, range.freehanded);
 			case kSelectionExtendToBeginOfSoftLine:    return range_t(first, move(buffer, last, kSelectionMoveToBeginOfSoftLine,  layout), range.columnar, range.freehanded);
 			case kSelectionExtendToEndOfSoftLine:      return range_t(first, move(buffer, last, kSelectionMoveToEndOfSoftLine,    layout), range.columnar, range.freehanded);
 			case kSelectionExtendToBeginOfLine:        return range_t(first, move(buffer, last, kSelectionMoveToBeginOfLine,      layout), range.columnar, range.freehanded);

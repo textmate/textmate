@@ -2600,6 +2600,8 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - ACTION(moveToBeginningOfColumnAndModifySelection);
 - ACTION(moveToBeginningOfDocument);
 - ACTION(moveToBeginningOfDocumentAndModifySelection);
+- ACTION(moveToBeginningOfIndentedLine);
+- ACTION(moveToBeginningOfIndentedLineAndModifySelection);
 - ACTION(moveToBeginningOfLine);
 - ACTION(moveToBeginningOfLineAndModifySelection);
 - ACTION(moveToBeginningOfParagraph);
@@ -2610,6 +2612,8 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - ACTION(moveToEndOfColumnAndModifySelection);
 - ACTION(moveToEndOfDocument);
 - ACTION(moveToEndOfDocumentAndModifySelection);
+- ACTION(moveToEndOfIndentedLine);
+- ACTION(moveToEndOfIndentedLineAndModifySelection);
 - ACTION(moveToEndOfLine);
 - ACTION(moveToEndOfLineAndModifySelection);
 - ACTION(moveToEndOfParagraph);
@@ -2662,8 +2666,10 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 - ACTION(deleteForward);
 - ACTION(deleteSubWordLeft);
 - ACTION(deleteSubWordRight);
+- ACTION(deleteToBeginningOfIndentedLine);
 - ACTION(deleteToBeginningOfLine);
 - ACTION(deleteToBeginningOfParagraph);
+- ACTION(deleteToEndOfIndentedLine);
 - ACTION(deleteToEndOfLine);
 - ACTION(deleteToEndOfParagraph);
 - ACTION(deleteWordBackward);

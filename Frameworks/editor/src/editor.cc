@@ -728,6 +728,8 @@ namespace ng
 			case kDeleteSubWordRight:                           _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfSubWord,     layout); break;
 			case kDeleteWordBackward:                           _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfWord,      layout); break;
 			case kDeleteWordForward:                            _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfWord,        layout); break;
+			case kDeleteToBeginningOfIndentedLine:              _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfIndentedLine, layout); break;
+			case kDeleteToEndOfIndentedLine:                    _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfIndentedLine, layout); break;
 			case kDeleteToBeginningOfLine:                      _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfSoftLine,  layout); break;
 			case kDeleteToEndOfLine:                            _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToEndOfSoftLine,    layout); break;
 			case kDeleteToBeginningOfParagraph:                 _selections = ng::extend_if_empty(_buffer, _selections, kSelectionExtendToBeginOfParagraph, layout); break;
@@ -748,8 +750,8 @@ namespace ng
 		}
 
 		static std::set<action_t> const deleteActions      = { kDeleteBackward, kDeleteForward };
-		static std::set<action_t> const yankAppendActions  = { kDeleteSubWordRight, kDeleteWordForward,  kDeleteToEndOfLine,       kDeleteToEndOfParagraph       };
-		static std::set<action_t> const yankPrependActions = { kDeleteSubWordLeft,  kDeleteWordBackward, kDeleteToBeginningOfLine, kDeleteToBeginningOfParagraph };
+		static std::set<action_t> const yankAppendActions  = { kDeleteSubWordRight, kDeleteWordForward,  kDeleteToEndOfIndentedLine,       kDeleteToEndOfLine,       kDeleteToEndOfParagraph };
+		static std::set<action_t> const yankPrependActions = { kDeleteSubWordLeft,  kDeleteWordBackward, kDeleteToBeginningOfIndentedLine, kDeleteToBeginningOfLine, kDeleteToBeginningOfParagraph };
 		if(deleteActions.find(action) != deleteActions.end())
 			action = kDeleteSelection;
 		else if(yankAppendActions.find(action) != yankAppendActions.end())
@@ -768,6 +770,8 @@ namespace ng
 			case kMoveSubWordRight:                             _selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfSubWord,    layout); break;
 			case kMoveWordBackward:                             _selections = ng::move(_buffer, _selections, kSelectionMoveToBeginOfWord,     layout); break;
 			case kMoveWordForward:                              _selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfWord,       layout); break;
+			case kMoveToBeginningOfIndentedLine:                _selections = ng::move(_buffer, _selections, kSelectionMoveToBeginOfIndentedLine, layout); break;
+			case kMoveToEndOfIndentedLine:                      _selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfIndentedLine, layout); break;
 			case kMoveToBeginningOfLine:                        _selections = ng::move(_buffer, _selections, kSelectionMoveToBeginOfSoftLine, layout); break;
 			case kMoveToEndOfLine:                              _selections = ng::move(_buffer, _selections, kSelectionMoveToEndOfSoftLine,   layout); break;
 			case kMoveToBeginningOfParagraph:                   _selections = ng::move(_buffer, _selections, kSelectionMoveToBeginOfLine,     layout); break;
@@ -789,6 +793,8 @@ namespace ng
 			case kMoveSubWordRightAndModifySelection:           _selections = ng::extend(_buffer, _selections, kSelectionExtendToEndOfSubWord,     layout); break;
 			case kMoveWordBackwardAndModifySelection:           _selections = ng::extend(_buffer, _selections, kSelectionExtendToBeginOfWord,      layout); break;
 			case kMoveWordForwardAndModifySelection:            _selections = ng::extend(_buffer, _selections, kSelectionExtendToEndOfWord,        layout); break;
+			case kMoveToBeginningOfIndentedLineAndModifySelection: _selections = ng::extend(_buffer, _selections, kSelectionExtendToBeginOfIndentedLine, layout); break;
+			case kMoveToEndOfIndentedLineAndModifySelection:    _selections = ng::extend(_buffer, _selections, kSelectionExtendToEndOfIndentedLine, layout); break;
 			case kMoveToBeginningOfLineAndModifySelection:      _selections = ng::extend(_buffer, _selections, kSelectionExtendToBeginOfSoftLine,  layout); break;
 			case kMoveToEndOfLineAndModifySelection:            _selections = ng::extend(_buffer, _selections, kSelectionExtendToEndOfSoftLine,    layout); break;
 			case kMoveToBeginningOfParagraphAndModifySelection: _selections = ng::extend(_buffer, _selections, kSelectionExtendToBeginOfParagraph, layout); break;
