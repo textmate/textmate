@@ -185,20 +185,17 @@ namespace ng
 		ssize_t adjustment = 0;
 		iterate(p1, replacements)
 		{
-			range_t orgRange   = p1->first.sorted();
-			std::string orgStr = p1->second;
-
-			if(orgRange.first.index == orgRange.last.index && orgStr.empty())
+			range_t orgRange = p1->first.sorted();
+			if(orgRange.first.index == orgRange.last.index && p1->second.empty())
 			{
 				res.push_back(orgRange + adjustment);
 				continue;
 			}
 
-			if(orgRange.freehanded && orgRange.first.carry)
-				orgStr = std::string(orgRange.first.carry, ' ') + orgStr;
+			std::string const pad = orgRange.freehanded && orgRange.first.carry ? std::string(orgRange.first.carry, ' ') : "";
 			orgRange.first.carry = orgRange.last.carry = 0;
 
-			std::vector< std::pair<range_t, std::string> > const& real = snippets.replace(orgRange.first.index, orgRange.last.index, orgStr);
+			std::vector< std::pair<range_t, std::string> > const& real = snippets.replace(orgRange.first.index, orgRange.last.index, pad + p1->second);
 			iterate(p2, real)
 			{
 				range_t const& range   = p2->first;
