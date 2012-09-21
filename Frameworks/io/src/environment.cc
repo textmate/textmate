@@ -5,15 +5,10 @@
 
 namespace oak
 {
-	static bool exclude_variable (std::string const& variable)
+	static bool include_variable (std::string const& variable)
 	{
-		static std::string const BlackListedPrefixes[] = { "TM_", "OAK_", "DIALOG", "MAKE", "MFLAGS", "GIT_" };
-		iterate(prefix, BlackListedPrefixes)
-		{
-			if(variable.find(*prefix) == 0)
-				return true;
-		}
-		return false;
+		static std::set<std::string> const WhiteListedVariables = { "COMMAND_MODE", "SHELL", "SHLVL", "SSH_AUTH_SOCK", "__CF_USER_TEXT_ENCODING" };
+		return variable.find("Apple") == 0 || WhiteListedVariables.find(variable) != WhiteListedVariables.end();
 	}
 
 	std::map<std::string, std::string> setup_basic_environment ()
@@ -32,7 +27,7 @@ namespace oak
 		for(char** pair = *envPtr; pair && *pair; ++pair)
 		{
 			char* value = strchr(*pair, '=');
-			if(value && *value == '=' && !exclude_variable(std::string(*pair, value)))
+			if(value && *value == '=' && include_variable(std::string(*pair, value)))
 				res[std::string(*pair, value)] = value + 1;
 		}
 
