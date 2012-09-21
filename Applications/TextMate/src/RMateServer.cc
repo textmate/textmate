@@ -560,6 +560,9 @@ struct socket_observer_t
 			if(!args["selection"].empty())
 				doc->set_selection(args["selection"]);
 
+			if(args["add-to-recents"] != "yes")
+				doc->set_recent_tracking(false);
+
 			if(wait || writeBackOnSave || writeBackOnClose)
 				doc->add_callback(new save_close_callback_t(doc->path(), socket, writeBackOnSave, writeBackOnClose, token));
 
@@ -571,7 +574,6 @@ struct socket_observer_t
 
 			// std::string folder;         // when there is no path we still may provide a default folder
 			// enum fallback_t { must_share_path, should_share_path, frontmost, create_new } project_fallback;
-			// bool add_to_recents;
 			// bool bring_to_front;
 
 			if(args.find("authorization") != args.end())
