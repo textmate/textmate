@@ -1,5 +1,45 @@
 # Release Notes
 
+## 2012-09-21 (r9313)
+
+* Add indent aware begin/end of line action methods.
+
+	The methods going to “begin of indented line” will go to the first non-whitespace character on the line, unless the caret is already there or to the left of this character, in which case it will go to the actual beginning of the line.
+
+	The “end of indented line” methods work similarly.
+
+	If you want (⇧)⌘⇠/⌘⇢ and ⌘⌫/⌘⌦ to use this behavior, you can add the following to your key bindings file:
+
+		"@\UF702"  = "moveToBeginningOfIndentedLine:";
+		"$@\UF702" = "moveToBeginningOfIndentedLineAndModifySelection:";
+		"@\UF703"  = "moveToEndOfIndentedLine:";
+		"$@\UF703" = "moveToEndOfIndentedLineAndModifySelection:";
+		"@\U007F"  = "deleteToBeginningOfIndentedLine:";
+		"@\UF728"  = "deleteToEndOfIndentedLine:";
+
+* If you create a set of local key bindings then they no longer eclipse the default set. For the records, key bindings are consulted in the following order:
+
+		~/Library/Application Support/TextMate/KeyBindings.dict
+		/path/to/TextMate.app/Contents/Resources/KeyBindings.dict
+		~/Library/KeyBindings/DefaultKeyBinding.dict
+		/Library/KeyBindings/DefaultKeyBinding.dict
+		/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict
+
+	If you edit any of the above files you will need to relaunch TextMate (⌃⌘Q) before the changes take effect.
+
+* The gear icon in the Find in Folder status bar (above the results view) now have four flavors of copying the results to the clipboard. These work on the selected items falling back to all matches, if there is no selection (here selection means actual list view selection, not “checked” via the check boxes).
+* Launching commands from TextMate now only inherit a few whitelisted variables from the process that launched TextMate. This should fix inconsistencies between running TextMate from the shell versus Finder, and in the former case, avoid problems if you set `RUBYOPT` or similar.
+* When moving the selection and padding is inserted, we no longer extend the selection to include this padding.
+* Moving selection left/right with an east asian character on left/right side would insert a space rather than move the selection.
+* Creating new files via New Tab no longer have the file show up in the Open Recent menu.
+* Opening files via `mate` no longer have the item show up in the Open Recent menu. Though you can call `mate --recent` to force the file to appear (or make an alias). The rationale is that `mate` is often used to edit temporary files like commit messages and that the shell history serves as an alternative to “Open Recent”.
+* If more than 256 KB of text was selected, running commands would fail, as the `TM_SELECTED_TEXT` variable exceeded `ARG_MAX` which would cause `execve` to fail. If more than 256 KB of text is selected we now set the `TM_SELECTED_TEXT` variable to a placeholder.
+* Add some checks that should prevent a crash when system ask about text metrics (with a bogus text index). Unsure exactly under which circumstance the crash happens, but likely related to the system-wide dictionary service or multi-lingual input.
+* Update `rmate`: Saving would fail if editing `file` and `file~` already existed.
+* If ⌘-clicking a single caret two times, TextMate would crash, as ⌘-clicking an existing caret normally removes that caret, except when there is only a single one, in that case, it would (wrongly) add a caret leaving two carets at the same position, and make the second click remove both of these two carets, leaving the editor with no carets.
+* Fix crash when clicking exactly on the split view dividers.
+* Fix potential crash when quitting TextMate (in `network::launch_tbz`).
+
 ## 2012-09-18 (r9311)
 
 * Untitled documents now base their scope attributes on the file browser’s location. This mean things like ⌘B or ⌘Y will call the proper build / SCM action(s) when used in untitled documents (e.g. the initial document showing after opening a project folder via ⇧⌘O or `mate .`).
