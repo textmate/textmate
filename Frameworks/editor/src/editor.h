@@ -200,8 +200,8 @@ namespace ng
 		void setup ();
 		friend struct indent_helper_t;
 
-		static size_t visual_distance (ng::buffer_t const& buffer, index_t first, index_t last);
-		static index_t visual_advance (ng::buffer_t const& buffer, index_t caret, size_t distance);
+		static size_t visual_distance (ng::buffer_t const& buffer, index_t first, index_t last, bool eastAsianWidth = true);
+		static index_t visual_advance (ng::buffer_t const& buffer, index_t caret, size_t distance, bool eastAsianWidth = true);
 
 		static ng::ranges_t insert_tab_with_indent (ng::buffer_t& buffer, ng::ranges_t const& selections, snippet_controller_t& snippets);
 		static ng::ranges_t insert_newline_with_indent (ng::buffer_t& buffer, ng::ranges_t const& selections, snippet_controller_t& snippets);
