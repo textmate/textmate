@@ -867,11 +867,10 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	{
 		didLoad = true;
 
-		static std::string const localKeyBindings   = oak::application_t::support("KeyBindings.dict");
-		static std::string const defaultKeyBindings = oak::application_t::path("Contents/Resources/KeyBindings.dict");
 		static std::string const KeyBindingLocations[] =
 		{
-			path::exists(localKeyBindings) ? localKeyBindings : defaultKeyBindings,
+			oak::application_t::support("KeyBindings.dict"),
+			oak::application_t::path("Contents/Resources/KeyBindings.dict"),
 			path::join(path::home(), "Library/KeyBindings/DefaultKeyBinding.dict"),
 			"/Library/KeyBindings/DefaultKeyBinding.dict",
 			"/System/Library/Frameworks/AppKit.framework/Resources/StandardKeyBinding.dict",
