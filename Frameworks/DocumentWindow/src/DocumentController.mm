@@ -155,6 +155,13 @@ OAK_DEBUG_VAR(DocumentController);
 }
 @end
 
+static document::document_ptr create_document (NSString* fileBrowserPath)
+{
+	document::document_ptr doc = document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"));
+	doc->set_recent_tracking(false);
+	return doc;
+}
+
 @implementation DocumentController
 @synthesize fileBrowserState;
 @synthesize filterWindowController;
@@ -654,7 +661,7 @@ OAK_DEBUG_VAR(DocumentController);
 {
 	D(DBF_DocumentController, bug("\n"););
 	scratchDocument = oak::uuid_t();
-	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) atIndex:documentTabs.size() andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
+	[self addDocuments:std::vector<document::document_ptr>(1, create_document(self.fileBrowserPath)) atIndex:documentTabs.size() andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
 }
 
 // =========================
@@ -665,7 +672,7 @@ OAK_DEBUG_VAR(DocumentController);
 {
 	D(DBF_DocumentController, bug("\n"););
 	scratchDocument = oak::uuid_t();
-	[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
+	[self addDocuments:std::vector<document::document_ptr>(1, create_document(self.fileBrowserPath)) andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:YES];
 }
 
 - (BOOL)openFile:(NSString*)aPath
@@ -1149,7 +1156,7 @@ OAK_DEBUG_VAR(DocumentController);
 - (void)takeNewTabIndexFrom:(id)sender
 {
 	if(NSIndexSet* indexSet = [self tryObtainIndexSetFrom:sender])
-		[self addDocuments:std::vector<document::document_ptr>(1, document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(self.fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"))) atIndex:[indexSet firstIndex] andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
+		[self addDocuments:std::vector<document::document_ptr>(1, create_document(self.fileBrowserPath)) atIndex:[indexSet firstIndex] andSelect:kSelectDocumentFirst closeOther:NO pruneTabBar:NO];
 }
 
 - (void)takeTabsToCloseFrom:(id)sender
