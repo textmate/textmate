@@ -54,7 +54,4 @@
 	"^q"       = "reformatText:";
 	"^j"       = "reformatTextAndJustify:";
 	"^~q"      = "unwrapText:";
-
-	"^r"       = "executeSelectionInsertingOutput:";
-	"^~r"      = "executeSelectionReplacingSelection:";
 }

@@ -1753,33 +1753,6 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
-								<object class="NSMenuItem" id="991009465">
-									<reference key="NSMenu" ref="564325342"/>
-									<bool key="NSIsDisabled">YES</bool>
-									<bool key="NSIsSeparator">YES</bool>
-									<string key="NSTitle"/>
-									<string key="NSKeyEquiv"/>
-									<int key="NSKeyEquivModMask">1048576</int>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="944637517"/>
-									<reference key="NSMixedImage" ref="596846250"/>
-								</object>
-								<object class="NSMenuItem" id="503818095">
-									<reference key="NSMenu" ref="564325342"/>
-									<string key="NSTitle">Execute Line / Selection Inserting Result</string>
-									<string key="NSKeyEquiv"/>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="944637517"/>
-									<reference key="NSMixedImage" ref="596846250"/>
-								</object>
-								<object class="NSMenuItem" id="706070952">
-									<reference key="NSMenu" ref="564325342"/>
-									<string key="NSTitle">Execute Line / Selection Replacing Result</string>
-									<string key="NSKeyEquiv"/>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="944637517"/>
-									<reference key="NSMixedImage" ref="596846250"/>
-								</object>
 								<object class="NSMenuItem" id="146710475">
 									<reference key="NSMenu" ref="564325342"/>
 									<bool key="NSIsDisabled">YES</bool>
@@ -2861,22 +2834,6 @@
 						<reference key="destination" ref="178641753"/>
 					</object>
 					<int key="connectionID">371</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">executeSelectionInsertingOutput:</string>
-						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="503818095"/>
-					</object>
-					<int key="connectionID">372</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">executeSelectionReplacingSelection:</string>
-						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="706070952"/>
-					</object>
-					<int key="connectionID">373</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -4465,8 +4422,6 @@
 							<reference ref="577163704"/>
 							<reference ref="239906738"/>
 							<reference ref="178641753"/>
-							<reference ref="503818095"/>
-							<reference ref="706070952"/>
 							<reference ref="629619515"/>
 							<reference ref="655643905"/>
 							<reference ref="829740363"/>
@@ -4475,7 +4430,6 @@
 							<reference ref="535081544"/>
 							<reference ref="41406662"/>
 							<reference ref="973710509"/>
-							<reference ref="991009465"/>
 							<reference ref="146710475"/>
 							<reference ref="1050316824"/>
 							<reference ref="788847861"/>
@@ -4520,16 +4474,6 @@
 						<reference key="parent" ref="564325342"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">352</int>
-						<reference key="object" ref="503818095"/>
-						<reference key="parent" ref="564325342"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">353</int>
-						<reference key="object" ref="706070952"/>
-						<reference key="parent" ref="564325342"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">354</int>
 						<reference key="object" ref="629619515"/>
 						<reference key="parent" ref="564325342"/>
@@ -4567,11 +4511,6 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">361</int>
 						<reference key="object" ref="973710509"/>
-						<reference key="parent" ref="564325342"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">362</int>
-						<reference key="object" ref="991009465"/>
 						<reference key="parent" ref="564325342"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -5626,8 +5565,6 @@
 					<string>349.IBPluginDependency</string>
 					<string>350.IBPluginDependency</string>
 					<string>351.IBPluginDependency</string>
-					<string>352.IBPluginDependency</string>
-					<string>353.IBPluginDependency</string>
 					<string>354.IBPluginDependency</string>
 					<string>355.IBPluginDependency</string>
 					<string>356.IBPluginDependency</string>
@@ -5636,7 +5573,6 @@
 					<string>359.IBPluginDependency</string>
 					<string>360.IBPluginDependency</string>
 					<string>361.IBPluginDependency</string>
-					<string>362.IBPluginDependency</string>
 					<string>363.IBPluginDependency</string>
 					<string>364.IBPluginDependency</string>
 					<string>365.IBPluginDependency</string>
@@ -5877,9 +5813,6 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>OakMainMenu</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
