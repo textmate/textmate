@@ -2313,20 +2313,18 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	if(commandDown && mouseDownClickCount == 1)
 	{
-		if(s.size() > 1 && std::find(s.begin(), s.end(), range.last()) != s.end())
+		bool didToggle = false;
+		ng::ranges_t newSel;
+		citerate(cur, s)
 		{
-			ng::ranges_t newSel;
-			citerate(cur, s)
-			{
-				if(*cur != range.last())
+			if(*cur != range.last())
 					newSel.push_back(*cur);
-			}
-			s = newSel;
+			else	didToggle = true;
 		}
-		else
-		{
+		s = newSel;
+
+		if(s.empty() || !didToggle)
 			s.push_back(range.last());
-		}
 	}
 	else if(shiftDown || (commandDown && mouseDownClickCount != 1))
 		s.last() = range.last();
