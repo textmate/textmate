@@ -1237,11 +1237,11 @@ namespace ng
 		{
 			text::pos_t pos = _buffer.convert(pair->first);
 			int line        = pos.line;
-			int col         = visual_distance(_buffer, _buffer.begin(line), pair->first);
+			int col         = visual_distance(_buffer, _buffer.begin(line), pair->first, false);
 
 			line = oak::cap(0, line + deltaY, int(_buffer.lines()-1));
 			col  = std::max(col + deltaX, 0);
-			replacements.insert(std::make_pair(visual_advance(_buffer, _buffer.begin(line), col), pair->second));
+			replacements.insert(std::make_pair(visual_advance(_buffer, _buffer.begin(line), col, false), pair->second));
 		}
 		_selections = this->replace(replacements, true);
 	}
