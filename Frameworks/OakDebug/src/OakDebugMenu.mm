@@ -57,8 +57,8 @@ namespace
 
 	if(NSArray* debugEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakDebug Enabled"])
 	{
-		iterate(it, debugEnabled)
-			OakDebugBaseClass::registry()[[(NSString*)*it UTF8String]] = true;
+		for(NSString* flag in debugEnabled)
+			OakDebugBaseClass::registry()[[flag UTF8String]] = true;
 	}
 	[pool release];
 }
