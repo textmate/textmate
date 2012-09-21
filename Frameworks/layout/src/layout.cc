@@ -349,10 +349,11 @@ namespace ng
 
 	ng::line_record_t layout_t::line_record_for (text::pos_t const& pos) const
 	{
-		size_t index = _buffer.convert(text::pos_t(pos.line, 0)) + pos.column;
+		size_t n = std::min(pos.line, _buffer.lines()-1);
+		size_t index = _buffer.convert(text::pos_t(n, 0)) + std::min(pos.column, _buffer.end(n) - _buffer.begin(n));
 		auto row = row_for_offset(index);
 		if(row != _rows.end())
-			return row->value.line_record_for(pos.line, index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			return row->value.line_record_for(n, index, *_metrics, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		return ng::line_record_t(0, 0, 0, 0, 0);
 	}
 
