@@ -204,7 +204,7 @@ namespace ng
 				size_t from = range.first.index + adjustment, to = range.last.index + adjustment;
 				size_t caret = buffer.replace(from, to, str);
 				if(range == ng::range_t(orgRange.first.index, orgRange.last.index))
-					res.push_back(range_t(from, caret, false, orgRange.freehanded, true));
+					res.push_back(range_t(from + pad.size(), caret, false, orgRange.freehanded, true));
 				adjustment += str.size() - (to - from);
 			}
 		}
