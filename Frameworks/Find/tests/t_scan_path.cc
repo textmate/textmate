@@ -162,4 +162,23 @@ public:
 		TS_ASSERT_EQUALS(matches.size(), 1);
 		TS_ASSERT_EQUALS(scanner.get_scanned_file_count(), 1);
 	}
+
+	void test_file_encoding ()
+	{
+		test::jail_t jail;
+		jail.set_content("match", "line 1\r\nline 2\r\nline 3\r\nline 4\r\n");
+
+		scan_path_t scanner;
+		scanner.set_string("line ");
+		scanner.set_folder_options(folder_scan_settings_t(jail.path()));
+		run_scanner(scanner);
+
+		scan_path_matches_t matches = scanner.accept_matches();
+		TS_ASSERT_EQUALS(matches.size(), 4);
+
+		TS_ASSERT_EQUALS(matches[0].second.range.min().line, 0);
+		TS_ASSERT_EQUALS(matches[1].second.range.min().line, 1);
+		TS_ASSERT_EQUALS(matches[2].second.range.min().line, 2);
+		TS_ASSERT_EQUALS(matches[3].second.range.min().line, 3);
+	}
 };
