@@ -61,6 +61,13 @@ int main (int argc, char* const* argv)
 	{
 		std::string file = path::join(path::cwd(), argv[i]);
 		
+		if(char const* appPath = getenv("TM_APP_PATH"))
+		{
+			std::string defaultSettings = path::join(appPath, "Contents/Resources/Default.tmProperties");
+			settings_t::set_default_settings_path(defaultSettings);
+		}
+		settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+
 		settings_t settings = settings_for_path(file);
 		std::map<std::string, std::string> variables_map = variables_for_path(file);
 		
