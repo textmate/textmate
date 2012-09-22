@@ -326,9 +326,9 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 
 	if(self.scannerProbeTimer)
 	{
-		OakTimer* probeTimer = [[self.scannerProbeTimer retain] autorelease];
+		[self.scannerProbeTimer invalidate];
 		self.scannerProbeTimer = nil;
-		[probeTimer fire];
+		[self updateMatches:nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:FFDocumentSearchDidFinishNotification object:self];
 	}
 }

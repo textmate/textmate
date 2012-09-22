@@ -57,7 +57,13 @@ OAK_DEBUG_VAR(OakTimer);
 - (void)dealloc
 {
 	D(DBF_OakTimer, bug("\n"););
+	[self invalidate];
+}
+
+- (void)invalidate
+{
 	[self.timer invalidate];
+	self.timer = nil;
 }
 
 - (void)fire
@@ -73,6 +79,6 @@ OAK_DEBUG_VAR(OakTimer);
 	D(DBF_OakTimer, bug("target: %p, action: %s\n", self.target, sel_getName(selector)););
 	if(self.target)
 			[self fire];
-	else	[self.timer invalidate];
+	else	[self invalidate];
 }
 @end
