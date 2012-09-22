@@ -33,7 +33,6 @@
 	"~\UF705"  = "showContextMenu:";
 
 	"~\UF704"  = "showBundlesMenu:";
-	"^s"       = "incrementalSearch:";
 
 	"^w"       = "selectWord:";
 	"@L"       = "selectHardLine:";
