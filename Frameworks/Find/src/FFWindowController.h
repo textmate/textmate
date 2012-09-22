@@ -113,6 +113,7 @@ enum FindActionTag
 	FindActionCountMatches,
 	FindActionFindAll,
 	FindActionReplaceAll,
+	FindActionReplaceSelected,
 };
 
 @protocol FFWindowControllerDelegate
