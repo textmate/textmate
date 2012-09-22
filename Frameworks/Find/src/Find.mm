@@ -226,7 +226,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	else if(action == FindActionCountMatches || action == FindActionFindAll || action == FindActionReplaceAll)
 		findOptions |= find::all_matches;
 
-	if(controller.isSearchingFolders || (self.documentIdentifier && action == FindActionFindAll))
+	if(controller.isSearchingFolders || (self.documentIdentifier && action == FindActionFindAll) || action == FindActionReplaceSelected)
 	{
 		switch(action)
 		{
@@ -263,6 +263,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 			break;
 
 			case FindActionReplaceAll:
+			case FindActionReplaceSelected:
 			{
 				NSUInteger replaceCount = 0, fileCount = 0;
 				std::string replaceString = to_s(controller.replaceString);
