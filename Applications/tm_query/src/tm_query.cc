@@ -69,7 +69,6 @@ int main (int argc, char* const* argv)
 		settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
 
 		settings_t settings = settings_for_path(file);
-		std::map<std::string, std::string> variables_map = variables_for_path(file);
 		
 		// new line before additional files
 		if (i > 0) {
@@ -81,15 +80,7 @@ int main (int argc, char* const* argv)
 		}
 		
 		if (key != NULL_STR) {
-			std::map<std::string, std::string>::const_iterator variable_it = variables_map.find(key);
-			std::string variable_value = (variable_it == variables_map.end()) ? NULL_STR : variable_it->second;
-			
-			// first find settings, else try variable
 			std::string value = settings.get(key, NULL_STR);
-			if (value == NULL_STR) {
-				value = variable_value;
-			}
-			
 			// if key not found, print error
 			if (value == NULL_STR) {
 				fprintf(stderr, "Setting or variable '%s' not found\n", key.c_str());
@@ -101,7 +92,6 @@ int main (int argc, char* const* argv)
 			// no key specified. Print all keys and values
 			std::map<std::string, std::string> settings_map = settings.all_settings();
 			print_map(settings_map);
-			print_map(variables_map);
 		}
 	}
 	if (0 == argc) {
