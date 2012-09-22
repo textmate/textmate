@@ -169,8 +169,14 @@ def compiler_for(source)
 end
 
 def pch_for(src, target)
+  srcExt = src[/\b[a-z]+$/]
   target['PRELUDE'].each do |pch|
-    return "#{build_path(pch)}" if src[/\b[a-z]+$/] == pch[/\b[a-z]+$/]
+    if srcExt == pch[/\b[a-z]+$/]
+      res = build_path(pch)
+      res << "-arc" if srcExt == 'm'  && target['OBJ_FLAGS'] =~ /-fobjc-arc/
+      res << "-arc" if srcExt == 'mm' && target['OBJCXX_FLAGS'] =~ /-fobjc-arc/
+      return res
+    end
   end
   abort "*** no pre-compiled header for #{src} (target: #{target[:name]})"
 end
@@ -662,9 +668,17 @@ open("#{builddir}/build.ninja", "w") do |io|
 
   TARGETS.root['PRELUDE'].each do |src|
     type = { 'c' => '-x c-header', 'm' => '-x objective-c-header', 'cc' => '-x c++-header', 'mm' => '-x objective-c++-header' }
+    ext = src[/\b[a-z]+$/]
+
     io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src}\n"
     io << "  depfile = #{pch_for(src, TARGETS.root)}.gch.d\n"
-    io << "  RAVE_FLAGS = #{type[src[/\b[a-z]+$/]]}\n\n"
+    io << "  RAVE_FLAGS = #{type[ext]}\n\n"
+
+    if ext =~ /^mm?$/
+      io << "build #{pch_for(src, TARGETS.root)}-arc.gch: #{compiler_for(src)} #{src}\n"
+      io << "  depfile = #{pch_for(src, TARGETS.root)}-arc.gch.d\n"
+      io << "  RAVE_FLAGS = #{type[ext]} -fobjc-arc\n\n"
+    end
   end
 
   # =======================================================
