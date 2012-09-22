@@ -27,6 +27,10 @@ struct PUBLIC settings_t
 	{
 		return get<std::string>(key, defaultValue);
 	}
+	
+	std::map<std::string, std::string> all_settings() const {
+		return settings;
+	}
 
 	static std::string raw_get (std::string const& key, std::string const& section = "");
 
