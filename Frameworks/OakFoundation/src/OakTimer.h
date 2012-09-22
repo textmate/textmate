@@ -1,21 +1,11 @@
 #import <oak/debug.h>
 
-@class OakTimerHelper;
+// Unline NSTimer this class does not retain ‘target’.
+// Additionally if you release an instance from this class, it will invalidate the timer.
 
 PUBLIC @interface OakTimer : NSObject
-{
-	OBJC_WATCH_LEAKS(OakTimer);
-
-	OakTimerHelper* helper;
-	NSTimer* timer;
-	id target;
-	SEL selector;
-	id userInfo;
-}
 + (id)scheduledTimerWithTimeInterval:(NSTimeInterval)seconds target:(id)target selector:(SEL)aSelector repeats:(BOOL)repeats;
 + (id)scheduledTimerWithTimeInterval:(NSTimeInterval)seconds target:(id)target selector:(SEL)aSelector userInfo:(id)userInfo repeats:(BOOL)repeats;
-- (void)fire;
-@property (nonatomic, assign) id target;
-@property (nonatomic, assign) SEL selector;
 @property (nonatomic, retain) id userInfo;
+- (void)fire;
 @end

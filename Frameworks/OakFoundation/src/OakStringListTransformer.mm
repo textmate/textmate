@@ -6,8 +6,6 @@
 @end
 
 @implementation OakStringListTransformer
-@synthesize stringList;
-
 + (Class)transformedValueClass         { return [NSNumber class]; }
 + (BOOL)allowsReverseTransformation    { return YES; }
 
@@ -16,7 +14,7 @@
 	if([NSValueTransformer valueTransformerForName:aName])
 		return;
 
-	OakStringListTransformer* transformer = [[OakStringListTransformer new] autorelease];
+	OakStringListTransformer* transformer = [OakStringListTransformer new];
 	transformer.stringList = aList;
 	[NSValueTransformer setValueTransformer:transformer forName:aName];
 }
@@ -36,21 +34,15 @@
 	[self createTransformerWithName:aName andObjectsArray:list];
 }
 
-- (void)dealloc
-{
-	[stringList release];
-	[super dealloc];
-}
-
 - (id)transformedValue:(id)value
 {
-	NSUInteger i = value ? [stringList indexOfObject:value] : NSNotFound;
+	NSUInteger i = value ? [self.stringList indexOfObject:value] : NSNotFound;
 	return i != NSNotFound ? @(i) : nil;
 }
 
 - (id)reverseTransformedValue:(id)value
 {
 	NSUInteger i = value ? [value unsignedIntValue] : NSNotFound;
-	return i < [stringList count] ? [stringList objectAtIndex:i] : nil;
+	return i < [self.stringList count] ? [self.stringList objectAtIndex:i] : nil;
 }
 @end

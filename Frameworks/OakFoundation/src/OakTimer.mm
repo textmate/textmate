@@ -3,41 +3,37 @@
 OAK_DEBUG_VAR(OakTimer);
 
 @interface OakTimer ()
-@property (nonatomic, retain) NSTimer* timer;
 - (void)timerDidFire:(NSTimer*)timer;
 @end
 
-@interface OakTimerHelper : NSObject
-{
-	OBJC_WATCH_LEAKS(OakTimerHelper);
-	OakTimer* timerProxy; // non-retained
-}
-- (id)initWithOakTimer:(OakTimer*)aTimer;
+@interface OakRetainedTimerTarget : NSObject
+@property (nonatomic, weak) OakTimer* owner;
+- (void)timerDidFire:(NSTimer*)timer;
 @end
 
-@implementation OakTimerHelper
-- (id)initWithOakTimer:(OakTimer*)aTimer
-{
-	if((self = [super init]))
-		timerProxy = aTimer;
-	return self;
-}
-
+@implementation OakRetainedTimerTarget
 - (void)timerDidFire:(NSTimer*)timer
 {
-	[timerProxy timerDidFire:timer];
+	[self.owner timerDidFire:timer];
 }
+@end
+
+@interface OakTimer ()
+@property (nonatomic, weak) id target;
+@property (nonatomic, assign) SEL selector;
+
+@property (nonatomic, retain) OakRetainedTimerTarget* timerTarget;
+@property (nonatomic, retain) NSTimer* timer;
 @end
 
 @implementation OakTimer
-@synthesize timer, target, selector, userInfo;
-
 - (id)initWithTimeInterval:(NSTimeInterval)seconds repeats:(BOOL)repeats
 {
 	if(self = [super init])
 	{
-		helper     = [[OakTimerHelper alloc] initWithOakTimer:self];
-		self.timer = [NSTimer scheduledTimerWithTimeInterval:seconds target:helper selector:@selector(timerDidFire:) userInfo:nil repeats:repeats];
+		self.timerTarget = [OakRetainedTimerTarget new];
+		self.timerTarget.owner = self;
+		self.timer = [NSTimer scheduledTimerWithTimeInterval:seconds target:self.timerTarget selector:@selector(timerDidFire:) userInfo:nil repeats:repeats];
 	}
 	return self;
 }
@@ -45,40 +41,38 @@ OAK_DEBUG_VAR(OakTimer);
 + (id)scheduledTimerWithTimeInterval:(NSTimeInterval)seconds target:(id)target selector:(SEL)aSelector userInfo:(id)userInfo repeats:(BOOL)repeats
 {
 	D(DBF_OakTimer, bug("%f %s (%p), %s\n", seconds, [[target description] UTF8String], target, (char const*)aSelector););
-	id timer = [[[self alloc] initWithTimeInterval:seconds repeats:repeats] autorelease];
-	[timer setTarget:target];
-	[timer setSelector:aSelector];
-	[timer setUserInfo:userInfo];
+	OakTimer* timer = [[self alloc] initWithTimeInterval:seconds repeats:repeats];
+	timer.target   = target;
+	timer.selector = aSelector;
+	timer.userInfo = userInfo;
 	return timer;
 }
 
 + (id)scheduledTimerWithTimeInterval:(NSTimeInterval)seconds target:(id)target selector:(SEL)aSelector repeats:(BOOL)repeats
 {
 	D(DBF_OakTimer, bug("%f %s (%p), %s\n", seconds, [[target description] UTF8String], target, (char const*)aSelector););
-	id timer = [[[self alloc] initWithTimeInterval:seconds repeats:repeats] autorelease];
-	[timer setTarget:target];
-	[timer setSelector:aSelector];
-	return timer;
+	return [self scheduledTimerWithTimeInterval:seconds target:target selector:aSelector userInfo:NULL repeats:repeats];
 }
 
 - (void)dealloc
 {
 	D(DBF_OakTimer, bug("\n"););
-	[timer invalidate];
-	self.timer = nil;
-	[helper release];
-	[userInfo release];
-	[super dealloc];
-}
-
-- (void)timerDidFire:(NSTimer*)timer
-{
-	D(DBF_OakTimer, bug("target: %p, action: %s\n", target, (char const*)selector););
-	[target performSelector:selector withObject:self];
+	[self.timer invalidate];
 }
 
 - (void)fire
 {
-	[self.timer fire];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+	[self.target performSelector:self.selector withObject:self];
+#pragma clang diagnostic pop
+}
+
+- (void)timerDidFire:(NSTimer*)timer
+{
+	D(DBF_OakTimer, bug("target: %p, action: %s\n", self.target, sel_getName(selector)););
+	if(self.target)
+			[self fire];
+	else	[self.timer invalidate];
 }
 @end

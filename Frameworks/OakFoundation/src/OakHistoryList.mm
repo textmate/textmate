@@ -41,28 +41,25 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 	return [[defaults dictionaryForKey:primary] objectForKey:secondary];
 }
 
+@interface OakHistoryList ()
+@property (nonatomic, copy) NSString* name;
+@property (nonatomic, retain) NSMutableArray* list;
+@property (nonatomic, assign) NSUInteger stackSize;
+@end
+
 @implementation OakHistoryList
-@synthesize stackSize;
-
-+ (void)load
-{
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	[self exposeBinding:@"currentObject"];
-	[pool release];
-}
-
 - (id)initWithName:(NSString*)defaultsName stackSize:(NSUInteger)size defaultItems:(id)firstItem, ...
 {
 	D(DBF_Find_HistoryList, bug("Creating list with name %s and %zu items\n", [defaultsName UTF8String], (size_t)size););
 	if(self = [self init])
 	{
-		stackSize = size;
-		name      = [defaultsName copy];
-		list      = [[NSMutableArray alloc] initWithCapacity:size];
+		self.stackSize = size;
+		self.name      = defaultsName;
+		self.list      = [[NSMutableArray alloc] initWithCapacity:size];
 
-		if(NSArray* array = RetrieveObjectAtKeyPath([name UTF8String]))
+		if(NSArray* array = RetrieveObjectAtKeyPath([self.name UTF8String]))
 		{
-			[list setArray:array];
+			[self.list setArray:array];
 		}
 		else
 		{
@@ -70,14 +67,14 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 			va_start(ap, firstItem);
 			while(firstItem)
 			{
-				[list addObject:firstItem];
+				[self.list addObject:firstItem];
 				firstItem = va_arg(ap, id);
 			}
 			va_end(ap);
 		}
 
-		while([list count] > stackSize)
-			[list removeLastObject];
+		while([self.list count] > self.stackSize)
+			[self.list removeLastObject];
 	}
 	return self;
 }
@@ -89,57 +86,50 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 
 - (void)addObject:(id)newItem;
 {
-	D(DBF_Find_HistoryList, bug("adding %s to list %s\n", [[newItem description] UTF8String], [name UTF8String]););
-	if(NSIsEmptyString(newItem) || [newItem isEqual:[list firstObject]])
+	D(DBF_Find_HistoryList, bug("adding %s to list %s\n", [[newItem description] UTF8String], [self.name UTF8String]););
+	if(NSIsEmptyString(newItem) || [newItem isEqual:[self.list firstObject]])
 		return;
 
 	[self willChangeValueForKey:@"head"];
 	[self willChangeValueForKey:@"currentObject"];
 	[self willChangeValueForKey:@"list"];
 
-	[list removeObject:newItem];
+	[self.list removeObject:newItem];
 
-	if([list count] == stackSize)
-		[list removeLastObject];
+	if([self.list count] == self.stackSize)
+		[self.list removeLastObject];
 
-	[list insertObject:newItem atIndex:0];
+	[self.list insertObject:newItem atIndex:0];
 
 	[self didChangeValueForKey:@"list"];
 	[self didChangeValueForKey:@"currentObject"];
 	[self didChangeValueForKey:@"head"];
 
-	StoreObjectAtKeyPath(list, [name UTF8String]);
+	StoreObjectAtKeyPath(self.list, [self.name UTF8String]);
 }
 
 - (NSEnumerator*)objectEnumerator;
 {
-	return [list objectEnumerator];
+	return [self.list objectEnumerator];
 }
 
 - (id)objectAtIndex:(NSUInteger)index;
 {
-	return [list objectAtIndex:index];
+	return [self.list objectAtIndex:index];
 }
 
 - (NSUInteger)count;
 {
-	return [list count];
+	return [self.list count];
 }
 
 - (id)head
 {
-	return [list firstObject];
+	return [self.list firstObject];
 }
 
 - (void)setHead:(id)newHead
 {
 	[self addObject:newHead];
-}
-
-- (void)dealloc
-{
-	[name release];
-	[list release];
-	[super dealloc];
 }
 @end
