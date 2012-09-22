@@ -1526,7 +1526,16 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (IBAction)incrementalSearch:(id)sender
 {
-	[self setShowLiveSearch:YES];
+	if(liveSearchViewController)
+			[self findNext:self];
+	else	[self setShowLiveSearch:YES];	
+}
+
+- (IBAction)incrementalSearchPrevious:(id)sender
+{
+	if(liveSearchViewController)
+			[self findPrevious:self];
+	else	[self setShowLiveSearch:YES];	
 }
 
 - (IBAction)showBundlesMenu:(id)sender
