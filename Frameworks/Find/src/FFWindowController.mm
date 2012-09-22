@@ -1166,7 +1166,12 @@ Any other string:
 	if(self.isDirty)
 		return [self displayUnsavedChangesSheetForOperation:new operation_t(operation_t::perform_find, sender)];
 	[self commitEditing];
-	[self.delegate performFindAction:(FindActionTag)[sender tag] withWindowController:self];
+	
+	FindActionTag tag = (FindActionTag)[sender tag];
+	if ([self isShowingFindAllResults] && tag == FindActionReplaceAll)
+		tag = FindActionReplaceSelected;
+	
+	[self.delegate performFindAction:tag withWindowController:self];
 }
 
 - (IBAction)saveAll:(id)sender
