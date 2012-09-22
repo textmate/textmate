@@ -22,7 +22,7 @@ namespace scan
 		{
 			for(ssize_t i = 0; i < len; i++)
 			{
-				if(last_character == '\n' && first[i] == '\r')
+				if(last_character == '\r' && first[i] == '\n')
 				{
 					bol_offsets.push_back(offset + i+1);
 					last_character = '\0';
