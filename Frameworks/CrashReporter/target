@@ -1,5 +1,8 @@
 SOURCES       = src/*.{mm,cc}
 EXPORT        = src/CrashReporter.h
-LINK         += cf ns io plist network
+LINK         += cf ns io plist network OakFoundation
 FRAMEWORKS    = Foundation AddressBook
 LIBS         += z
+
+OBJCXX_FLAGS += -fobjc-arc
+LN_FLAGS     += -fobjc-arc-cxxlib=libc++

@@ -1,5 +1,6 @@
 #import "CrashReporter.h"
 #import "find_reports.h"
+#import <OakFoundation/NSString Additions.h>
 #import <network/post.h>
 #import <plist/date.h>
 #import <io/path.h>
@@ -101,7 +102,11 @@ namespace
 			_has_sent.insert(reportsSent.begin(), reportsSent.end());
 			std::vector<std::string> updatedHasSent;
 			std::set_intersection(_could_send.begin(), _could_send.end(), _has_sent.begin(), _has_sent.end(), back_inserter(updatedHasSent));
-			CFPreferencesSetAppValue((CFStringRef)kUserDefaultsCrashReportsSent, cf::wrap(updatedHasSent), kCFPreferencesCurrentApplication);
+
+			NSMutableArray* array = [NSMutableArray array];
+			for(auto path : updatedHasSent)
+				[array addObject:[NSString stringWithCxxString:path]];
+			[[NSUserDefaults standardUserDefaults] setObject:array forKey:kUserDefaultsCrashReportsSent];
 
 			delete this;
 		}
