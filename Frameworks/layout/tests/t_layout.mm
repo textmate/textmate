@@ -139,12 +139,6 @@ private:
 	return self;
 }
 
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
-}
-
 - (BOOL)acceptsFirstResponder
 {
 	return YES;
@@ -399,12 +393,10 @@ private:
 
 static NSScrollView* CreateTextView (NSRect aRect = NSMakeRect(0, 0, 600, 800))
 {
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-
 	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:aRect];
 	NSSize textViewSize = [NSScrollView contentSizeForFrameSize:aRect.size hasHorizontalScroller:NO hasVerticalScroller:YES borderType:NSNoBorder];
 
-	MyView* textView = [[[MyView alloc] initWithFrame:NSMakeRect(0, 0, textViewSize.width, textViewSize.height)] autorelease];
+	MyView* textView = [[MyView alloc] initWithFrame:NSMakeRect(0, 0, textViewSize.width, textViewSize.height)];
 	textView.autoresizingMask = NSViewWidthSizable;
 
 	scrollView.hasVerticalScroller   = YES;
@@ -414,7 +406,6 @@ static NSScrollView* CreateTextView (NSRect aRect = NSMakeRect(0, 0, 600, 800))
 	scrollView.autoresizingMask      = NSViewWidthSizable|NSViewHeightSizable;
 	scrollView.documentView          = textView;
 
-	[pool drain];
 	return scrollView;
 }
 
