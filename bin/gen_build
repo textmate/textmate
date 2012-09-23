@@ -274,6 +274,7 @@ def tests(target)
     res << "build #{dst}.o: #{compiler_for("#{dst}.#{ext}")} #{dst}.#{ext} | #{pch_for(src, target)}.gch || #{target[:name]}/headers\n"
     res << "  depfile = #{dst}.o.d\n"
     res << "  RAVE_FLAGS = -Ibin/CxxTest -include #{pch_for(src, target)}\n"
+    res << flags_for_target(target)
     res << "build #{dst}: link_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
     res << flags_for_target(target)
 
