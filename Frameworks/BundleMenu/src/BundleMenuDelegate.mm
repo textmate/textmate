@@ -11,21 +11,23 @@ OAK_DEBUG_VAR(BundleMenu);
 - (scope::context_t const&)scopeContext;
 @end
 
+@interface BundleMenuDelegate ()
+@property (nonatomic, retain) NSMutableArray* subdelegates;
+@end
+
 @implementation BundleMenuDelegate
+{
+	bundles::item_ptr umbrellaItem;
+}
+
 - (id)initWithBundleItem:(bundles::item_ptr const&)aBundleItem
 {
 	if(self = [super init])
 	{
 		umbrellaItem = aBundleItem;
-		subdelegates = [NSMutableArray new];
+		self.subdelegates = [NSMutableArray new];
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[subdelegates release];
-	[super dealloc];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
@@ -37,7 +39,7 @@ OAK_DEBUG_VAR(BundleMenu);
 {
 	D(DBF_BundleMenu, bug("\n"););
 	[aMenu removeAllItems];
-	[subdelegates removeAllObjects];
+	[self.subdelegates removeAllObjects];
 
 	BOOL hasSelection = NO;
 	if(id textView = [NSApp targetForAction:@selector(hasSelection)])
@@ -55,10 +57,10 @@ OAK_DEBUG_VAR(BundleMenu);
 			{
 				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:NULL keyEquivalent:@""];
 
-				menuItem.submenu = [[NSMenu new] autorelease];
-				BundleMenuDelegate* delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:*item] autorelease];
+				menuItem.submenu = [NSMenu new];
+				BundleMenuDelegate* delegate = [[BundleMenuDelegate alloc] initWithBundleItem:*item];
 				menuItem.submenu.delegate = delegate;
-				[subdelegates addObject:delegate];
+				[self.subdelegates addObject:delegate];
 			}
 			break;
 

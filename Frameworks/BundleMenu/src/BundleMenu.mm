@@ -7,20 +7,10 @@
 #import <oak/oak.h>
 
 @interface BundlePopupMenuTarget : NSObject
-{
-	NSString* selectedItemUUID;
-}
 @property (nonatomic, retain) NSString* selectedItemUUID;
 @end
 
 @implementation BundlePopupMenuTarget
-@synthesize selectedItemUUID;
-- (void)dealloc
-{
-	self.selectedItemUUID = nil;
-	[super dealloc];
-}
-
 - (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
 	return [menuItem action] == @selector(takeItemUUIDFrom:);
@@ -156,8 +146,8 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 	else if(items.size() == 1)
 		return items.front();
 
-	BundlePopupMenuTarget* menuTarget = [[[BundlePopupMenuTarget alloc] init] autorelease];
-	NSMenu* menu = [[[NSMenu alloc] init] autorelease];
+	BundlePopupMenuTarget* menuTarget = [BundlePopupMenuTarget new];
+	NSMenu* menu = [NSMenu new];
 	[menu setFont:[NSFont menuFontOfSize:[NSFont smallSystemFontSize]]];
 	OakAddBundlesToMenu(items, hasSelection, false, menu, @selector(takeItemUUIDFrom:), menuTarget);
 
