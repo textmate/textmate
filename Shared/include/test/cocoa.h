@@ -16,8 +16,6 @@ static BOOL IsGUITestsEnabled (std::string const& testName)
 
 static void OakSetupApplicationWithView (NSView* aView, std::string testName = NULL_STR)
 {
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-
 	if(testName == NULL_STR)
 	{
 		testName = [[[NSProcessInfo processInfo] processName] UTF8String];
@@ -35,13 +33,13 @@ static void OakSetupApplicationWithView (NSView* aView, std::string testName = N
 	NSString* appName = [[NSProcessInfo processInfo] processName];
 	appName = [[[appName componentsSeparatedByString:@"_"] componentsJoinedByString:@" "] capitalizedString];
 
-	NSMenu* appMenu = [[NSMenu new] autorelease];
-	[appMenu addItem:[[[NSMenuItem alloc] initWithTitle:[@"Quit " stringByAppendingString:appName] action:@selector(terminate:) keyEquivalent:@"q"] autorelease]];
+	NSMenu* appMenu = [NSMenu new];
+	[appMenu addItem:[[NSMenuItem alloc] initWithTitle:[@"Quit " stringByAppendingString:appName] action:@selector(terminate:) keyEquivalent:@"q"]];
 
-	NSMenuItem* appMenuItem = [[NSMenuItem new] autorelease];
+	NSMenuItem* appMenuItem = [NSMenuItem new];
 	[appMenuItem setSubmenu:appMenu];
 
-	NSMenu* mainMenu = [[NSMenu new] autorelease];
+	NSMenu* mainMenu = [NSMenu new];
 	[mainMenu addItem:appMenuItem];
 	[NSApp setMainMenu:mainMenu];
 
@@ -57,7 +55,6 @@ static void OakSetupApplicationWithView (NSView* aView, std::string testName = N
 	[window makeKeyAndOrderFront:nil];
 
 	[NSApp run];
-	[pool drain];
 }
 
 #endif /* end of include guard: COCOA_P0XQO9KO */
