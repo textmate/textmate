@@ -1,5 +1,7 @@
 #include <settings/settings.h>
 
+extern char** environ;
+
 static double const AppVersion  = 1.0;
 static size_t const AppRevision = APP_REVISION;
 
@@ -26,6 +28,25 @@ static void print_map(std::map<std::string, std::string> map) {
 	for (it = map.begin(); it != map.end(); it++) {
 		fprintf(stdout, "%s=%s\n", it->first.c_str(), it->second.c_str());
 	}
+}
+
+static void initialize_environment () {
+	if(char const* appPath = getenv("TM_APP_PATH"))
+	{
+		std::string defaultSettings = path::join(appPath, "Contents/Resources/Default.tmProperties");
+		settings_t::set_default_settings_path(defaultSettings);
+	}
+
+	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+
+	std::map<std::string, std::string> env;
+	for(char** pair = environ; *pair; ++pair)
+	{
+		char* value = strchr(*pair, '=');
+		if(value && *value == '=')
+			env.insert(std::make_pair(std::string(*pair, value), value + 1));
+	}
+	oak::set_basic_environment(env);
 }
 
 int main (int argc, char* const* argv)
@@ -57,17 +78,12 @@ int main (int argc, char* const* argv)
 	argc -= optind;
 	argv += optind;
 
+	initialize_environment();
+
 	for(int i = 0; i < argc; ++i)
 	{
 		std::string file = path::join(path::cwd(), argv[i]);
 		
-		if(char const* appPath = getenv("TM_APP_PATH"))
-		{
-			std::string defaultSettings = path::join(appPath, "Contents/Resources/Default.tmProperties");
-			settings_t::set_default_settings_path(defaultSettings);
-		}
-		settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
-
 		settings_t settings = settings_for_path(file);
 		
 		// new line before additional files
