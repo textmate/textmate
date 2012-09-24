@@ -1,5 +1,5 @@
 SOURCES          = src/*.{cc,mm}
-CP_Resources     = resources/* icons/*.icns @PrivilegedTool @mate
+CP_Resources     = resources/* icons/*.icns @PrivilegedTool @mate @tm_query
 CP_SharedSupport = support/*
 CP_PlugIns       = @Dialog @Dialog2
 FLAGS           += -DREST_API='@"$rest_api"'
