@@ -556,9 +556,8 @@ def upload(target)
   res << "build #{exe}.sign:    sign_executable #{exe}\n"
   res << "build #{base}.tbz:    tbz_archive #{exe} | #{exe}.sign\n"
   res << "build #{base}.upload: upload #{base}.tbz\n"
-  res << "build #{base}.bump:   bump_revision $builddir/build.ninja | #{base}.upload\n"
 
-  res << "build #{target[:name]}/deploy: phony #{base}.bump\n"
+  res << "build #{target[:name]}/deploy: phony #{base}.upload\n"
 end
 
 def deploy(target)
@@ -569,11 +568,10 @@ def deploy(target)
   res << "build #{base}.tbz:      tbz_archive #{target[:bundle]} | #{target[:bundle]}.sign\n"
   res << "build #{base}.upload:   upload #{base}.tbz\n"
   res << "build #{base}.deploy:   deploy #{base}.upload | #{base}-dSYM.tbz\n"
-  res << "build #{base}.bump:     bump_revision $builddir/build.ninja | #{base}.deploy\n"
 
   res << "build #{target[:name]}/dsym:   phony #{base}-dSYM.tbz\n"
   res << "build #{target[:name]}/tbz:    phony #{base}.tbz\n"
-  res << "build #{target[:name]}/deploy: phony #{base}.bump\n"
+  res << "build #{target[:name]}/deploy: phony #{base}.deploy\n"
 end
 
 def all_targets(buildfile, builddir)
@@ -633,8 +631,8 @@ open(outfile, "w") do |io|
   io << "###########################################\n"
   io << "\n"
   io << "builddir = #{builddir}\n"
-  io << "include #{userfile}\n" if File.exists?(File.join(File.dirname(outfile), userfile))
   io << "include $builddir/build.ninja\n"
+  io << "include #{userfile}\n" if File.exists?(File.join(File.dirname(outfile), userfile))
 end
 
 open("#{builddir}/build.ninja", "w") do |io|
@@ -648,7 +646,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << user_variables.map { |arr| format("%-#{width}s = %s\n", *arr) }
   io << "\n"
 
-  args = variables.map { |key, _| "-d#{key}='$#{key}'" }.join(' ')
+  args = variables.map { |key, value| "-d'#{key}=#{value.gsub(/\$/, '$\&')}'" }.join(' ')
   io << "rule configure\n"
   io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
   io << "  depfile = $builddir/$out.d\n"
@@ -835,8 +833,10 @@ rule deploy
   description = Deploy…
 
 rule bump_revision
-  command = ruby -pe '$$_.gsub!(/^(APP_REVISION\s*=\s*)(\d+)(\s*)$$/) { "#$$1#{$$2.to_i + 1}#$$3" }' $in > $in~ && mv $in~ $in && touch $out
+  command = ruby -pe '$$_.gsub!(/(APP_REVISION\s*=\s*)(\d+)/) { newRev = $$2.to_i + 1; STDERR << "r#$$2 → r#{newRev}\n"; "#$$1#{newRev}#$$3" }' $in > $in~ && mv $in~ $in && touch $out
   description = Increment version number…
+build $builddir/revision.$APP_REVISION: bump_revision $builddir/build.ninja
+build bump: phony $builddir/revision.$APP_REVISION
 
 rule clean
   command = rm -r '$path'
