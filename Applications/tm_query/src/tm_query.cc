@@ -23,13 +23,6 @@ static void usage (FILE* io = stdout)
 	);
 }
 
-static void print_map(std::map<std::string, std::string> map) {
-	std::map<std::string, std::string>::iterator it;
-	for (it = map.begin(); it != map.end(); it++) {
-		fprintf(stdout, "%s=%s\n", it->first.c_str(), it->second.c_str());
-	}
-}
-
 static void initialize_environment () {
 	if(char const* appPath = getenv("TM_APP_PATH"))
 	{
@@ -61,8 +54,10 @@ static bool print_settings (settings_t const& settings, std::string const& key) 
 		}
 	} else {
 		// no key specified. Print all keys and values
-		std::map<std::string, std::string> settings_map = settings.all_settings();
-		print_map(settings_map);
+		for(auto pair : settings.all_settings()) {
+			if(!pair.first.empty() && islower(pair.first[0]))
+				fprintf(stdout, "%s=%s\n", pair.first.c_str(), pair.second.c_str());
+		}
 	}
 	return true;
 }
