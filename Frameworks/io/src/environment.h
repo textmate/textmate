@@ -6,6 +6,7 @@
 namespace oak
 {
 	PUBLIC std::map<std::string, std::string> const& basic_environment ();
+	PUBLIC void set_basic_environment (std::map<std::string, std::string> const& newEnvironment);
 
 } /* io */
 

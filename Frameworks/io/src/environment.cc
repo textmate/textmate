@@ -40,10 +40,20 @@ namespace oak
 		return res;
 	}
 
+	std::map<std::string, std::string>& rw_environment ()
+	{
+		static std::map<std::string, std::string>* environment = new std::map<std::string, std::string>(setup_basic_environment());
+		return *environment;
+	}
+
 	std::map<std::string, std::string> const& basic_environment ()
 	{
-		static std::map<std::string, std::string> const* environment = new std::map<std::string, std::string>(setup_basic_environment());
-		return *environment;
+		return rw_environment();
+	}
+
+	void set_basic_environment (std::map<std::string, std::string> const& newEnvironment)
+	{
+		rw_environment() = newEnvironment;
 	}
 
 } /* io */
