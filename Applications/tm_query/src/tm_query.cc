@@ -92,7 +92,7 @@ int main (int argc, char* const* argv)
 		}
 		// if more than one file print its name
 		if (argc > 1) {
-			fprintf(stdout, "%s:\n", file.c_str());
+			fprintf(stdout, "%s:\n", argv[i]);
 		}
 		
 		if (key != NULL_STR) {
