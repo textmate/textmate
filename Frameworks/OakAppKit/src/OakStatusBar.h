@@ -8,12 +8,11 @@ namespace sb
 {
 	namespace cell { enum type { info, popup, dropdown, button }; }
 
-	struct cell_t
+	struct PUBLIC cell_t
 	{
 		WATCH_LEAKS(cell_t);
 
-		cell_t (cell::type type = cell::info) : type(type), text(), toolTip(), image(), disabledImage(), action(), menuAction(), tag(0), min(0), max(0), skipTrailingSeparator(NO), state(NSOnState), padding(0)
-		{}
+		cell_t (cell::type type = cell::info);
 
 		cell::type type;
 		std::string text;
@@ -33,23 +32,18 @@ namespace sb
 		NSCellStateValue state;
 		BOOL allowsHold;
 
-		cell_t& size (CGFloat minSize, CGFloat maxSize = 0)
-		{
-			min = minSize;
-			max = maxSize ?: minSize;
-			return *this;
-		}
+		cell_t& size (CGFloat minSize, CGFloat maxSize = 0);
 
-		cell_t& set_tag (NSInteger newTag) { tag = newTag; return *this; }
-		cell_t& set_image (NSImage* img) { image = img; return *this; }
-		cell_t& set_view (NSView* aView) { view = aView; return *this; }
-		cell_t& pressed_image (NSImage* img) { pressedImage = img; return *this; }
-		cell_t& disabled_image (NSImage* img) { disabledImage = img; return *this; }
-		cell_t& tool_tip (std::string const& str) { toolTip = str; return *this; }
-		cell_t& enabled (BOOL enabled) { state = enabled ? NSOnState : NSOffState; return *this; }
-		cell_t& no_padding () { padding = -1; return *this; }
-		cell_t& no_separator () { skipTrailingSeparator = YES; return *this; }
-		cell_t& set_menu_action (SEL anAction) { menuAction = anAction; return *this; }
+		cell_t& set_tag (NSInteger newTag);
+		cell_t& set_image (NSImage* img);
+		cell_t& set_view (NSView* aView);
+		cell_t& pressed_image (NSImage* img);
+		cell_t& disabled_image (NSImage* img);
+		cell_t& tool_tip (std::string const& str);
+		cell_t& enabled (BOOL enabled);
+		cell_t& no_padding ();
+		cell_t& no_separator ();
+		cell_t& set_menu_action (SEL anAction);
 
 		static cell_t info () { return cell_t(cell::info); }
 
@@ -103,26 +97,11 @@ namespace sb
 		};
 
 	private:
-		void set_content (template_image const& tpl)
-		{
-			NSImage* templateImage = [NSImage imageNamed:tpl.name];
-			ASSERT(templateImage);
-			NSImage* standardImage = [[[NSImage alloc] initWithSize:templateImage.size] autorelease];
-			[standardImage lockFocus];
-			[templateImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.5];
-			[standardImage unlockFocus];
-			set_image(standardImage);
-			pressed_image(templateImage);
-		}
-		void set_content (NSView* aView) { view = aView; }
-		void set_content (NSString* str) { text = [str UTF8String]; }
-		void set_content (std::string const& str) { text = str; }
-		void set_content (NSImage* img)
-		{
-			image = img;
-			if(type == cell::button)
-				no_padding();
-		}
+		void set_content (template_image const& tpl);
+		void set_content (NSView* aView);
+		void set_content (NSString* str);
+		void set_content (std::string const& str);
+		void set_content (NSImage* img);
 	};
 
 	namespace border { enum { top = 1, bottom = 2 }; }
