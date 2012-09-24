@@ -1,5 +1,17 @@
 # Release Notes
 
+## 2012-09-24 (r9315)
+
+* Files which use CRLF no longer cause problems for Find in Folder. *[Rasmus Abrahamsen]*
+* One can now use ⌃S and ⌃⇧S for Find Next/Previous when incremental search is active. Also improved the look of the incremental search control. *[Mads Hartmann Jensen]*
+* It’s now possible to use “replace selected” after Find All for a single document (previously the selection was not respected). *[Rasmus Abrahamsen]*
+* Added a `TM_QUERY` command that can be used to query (project specific) settings for bundle commands. For example if a bundle command wish to use the current document’s font settings it can be obtained via these two (shell) commands:
+
+		"$TM_QUERY" --setting fontName
+		"$TM_QUERY" --setting fontSize
+
+	If no `--setting` is given then all settings are returned. *[Ole Gammelgaard Poulsen]*
+
 ## 2012-09-21 (r9313)
 
 * Add indent aware begin/end of line action methods.
