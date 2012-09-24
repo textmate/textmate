@@ -28,16 +28,22 @@ struct data_source_t
 
 @interface GutterView ()
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
+- (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
 
 - (void)clearTrackingRects;
 - (void)setupTrackingRects;
-
-- (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
 @end
 
 @implementation GutterView
-@synthesize partnerView, lineNumberFont, delegate;
-@synthesize foregroundColor, backgroundColor, iconColor, selectionForegroundColor, selectionBackgroundColor, selectionIconColor, selectionBorderColor;
+{
+	std::vector<data_source_t> columnDataSources;
+	NSMutableSet* hiddenColumns;
+	std::string highlightedRange;
+	std::vector<CGRect> backgroundRects, borderRects;
+
+	NSPoint mouseDownAtPoint;
+	NSPoint mouseHoveringAtPoint;
+}
 
 // ==================
 // = Setup/Teardown =
@@ -118,8 +124,8 @@ struct data_source_t
 	citerate(range, text::selection_t(highlightedRange))
 	{
 		auto from = range->min(), to = range->max();
-		CGFloat firstY = [delegate lineFragmentForLine:from.line column:from.column].firstY;
-		auto fragment = [delegate lineFragmentForLine:to.line column:to.column];
+		CGFloat firstY = [self.delegate lineFragmentForLine:from.line column:from.column].firstY;
+		auto fragment = [self.delegate lineFragmentForLine:to.line column:to.column];
 		CGFloat lastY = to.column == 0 && from.line != to.line ? fragment.firstY : fragment.lastY;
 
 		backgroundRects.push_back(CGRectMake(0, firstY+1, self.frame.size.width, lastY - firstY - 2));
@@ -149,32 +155,18 @@ struct data_source_t
 		[self setNeedsDisplayInRect:*rect];
 }
 
-- (void)setLineNumberFont:(NSFont*)font
-{
-	if(font && font != self.lineNumberFont)
-	{
-		[lineNumberFont release];
-		lineNumberFont = [font retain];
-	}
-}
-
 - (void)setPartnerView:(NSView*)aView
 {
 	D(DBF_GutterView, bug("%s (%p)\n", [[[aView class] description] UTF8String], aView););
 
-	if(partnerView)
+	if(_partnerView)
 	{
 		[[NSNotificationCenter defaultCenter] removeObserver:self];
-		[partnerView release];
+		[_partnerView release];
 	}
 
-	if(partnerView = [aView retain])
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[partnerView enclosingScrollView] contentView]];
-}
-
-- (void)setDelegate:(id <GutterViewDelegate>)aDelegate
-{
-	delegate = aDelegate;
+	if(_partnerView = [aView retain])
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[_partnerView enclosingScrollView] contentView]];
 }
 
 - (void)insertColumnWithIdentifier:(NSString*)columnIdentifier atPosition:(NSUInteger)index dataSource:(id <GutterViewColumnDataSource>)columnDataSource delegate:(id <GutterViewColumnDelegate>)columnDelegate
@@ -204,12 +196,12 @@ struct data_source_t
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier
 {
 	CGFloat width = 0;
-	if(!delegate)
+	if(!self.delegate)
 		return 5;
 
 	if(identifier == [GVLineNumbersColumnIdentifier UTF8String])
 	{
-		NSUInteger lastLineNumber = [delegate lineRecordForPosition:NSHeight([partnerView frame])].lineNumber;
+		NSUInteger lastLineNumber = [self.delegate lineRecordForPosition:NSHeight([_partnerView frame])].lineNumber;
 		CGFloat newWidth = WidthOfLineNumbers(lastLineNumber == NSNotFound ? 0 : lastLineNumber + 1, self.lineNumberFont);
 
 		width = [self columnWithIdentifier:identifier]->width;
@@ -274,7 +266,7 @@ struct data_source_t
 
 - (void)boundsDidChange:(NSNotification*)aNotification
 {
-	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(partnerView.enclosingScrollView.contentView.bounds))];
+	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(_partnerView.enclosingScrollView.contentView.bounds))];
 }
 
 static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
@@ -323,7 +315,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	std::pair<NSUInteger, NSUInteger> prevLine(NSNotFound, 0);
 	for(CGFloat y = NSMinY(aRect); y < NSMaxY(aRect); )
 	{
-		GVLineRecord record = [delegate lineRecordForPosition:y];
+		GVLineRecord record = [self.delegate lineRecordForPosition:y];
 		if(record.lastY <= y || prevLine == std::make_pair(record.lineNumber, record.softlineOffset))
 			break;
 		prevLine = std::make_pair(record.lineNumber, record.softlineOffset);
@@ -422,7 +414,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (NSRect)columnRectForPoint:(NSPoint)aPoint
 {
-	GVLineRecord record = [delegate lineRecordForPosition:aPoint.y];
+	GVLineRecord record = [self.delegate lineRecordForPosition:aPoint.y];
 	if(record.lineNumber != NSNotFound && record.softlineOffset == 0)
 	{
 		citerate(dataSource, [self visibleColumnDataSources])
@@ -457,7 +449,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 		if(NSEqualRects(columnRect, [self columnRectForPoint:mouseHoveringAtPoint]))
 		{
-			GVLineRecord record = [delegate lineRecordForPosition:mouseDownAtPoint.y];
+			GVLineRecord record = [self.delegate lineRecordForPosition:mouseDownAtPoint.y];
 			citerate(dataSource, [self visibleColumnDataSources])
 			{
 				NSRect columnRect = NSMakeRect(dataSource->x0, record.firstY, dataSource->width, record.lastY - record.firstY);
@@ -475,14 +467,14 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	}
 	else
 	{
-		[partnerView mouseDown:event];
+		[_partnerView mouseDown:event];
 		while([event type] != NSLeftMouseUp)
 		{
 			event = [NSApp nextEventMatchingMask:(NSLeftMouseUpMask|NSMouseMovedMask|NSLeftMouseDraggedMask|NSMouseEnteredMask|NSMouseExitedMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
 			if([event type] == NSMouseMoved || [event type] == NSLeftMouseDragged)
-				[partnerView mouseDragged:event];
+				[_partnerView mouseDragged:event];
 		}
-		[partnerView mouseUp:event];
+		[_partnerView mouseUp:event];
 	}
 }
 
@@ -522,7 +514,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 
 - (void)scrollWheel:(NSEvent*)event
 {
-	[partnerView scrollWheel:event];
+	[_partnerView scrollWheel:event];
 	[self mouseMoved:event];
 }
 
