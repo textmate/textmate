@@ -14,9 +14,9 @@ static void usage (FILE* io = stdout)
 {
 	fprintf(io,
 		"%1$s %2$.1f (" COMPILE_DATE " revision %3$zu)\n"
-		"Usage: %1$s [-hv] ...\n"
+		"Usage: %1$s [-s<key>hv] ...\n"
 		"Options:\n"
-		" -k, --key <key>				 Print variable or setting value for a key.\n"
+		" -s, --setting <key>       Print setting value for a key.\n"
 		" -h, --help                Show this information.\n"
 		" -v, --version             Print version information.\n"
 		"\n", getprogname(), AppVersion, AppRevision
@@ -73,7 +73,7 @@ int main (int argc, char* const* argv)
 	extern int optind;
 
 	static struct option const longopts[] = {
-		{ "key",              required_argument,   0,      'k'   },
+		{ "setting",          required_argument,   0,      's'   },
 		{ "help",             no_argument,         0,      'h'   },
 		{ "version",          no_argument,         0,      'v'   },
 		{ 0,                  0,                   0,      0     }
@@ -82,11 +82,11 @@ int main (int argc, char* const* argv)
 	std::string key = NULL_STR;
 
 	int ch;
-	while((ch = getopt_long(argc, argv, "k:hv", longopts, NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "s:hv", longopts, NULL)) != -1)
 	{
 		switch(ch)
 		{
-			case 'k': key = optarg;        break;
+			case 's': key = optarg;        break;
 			case 'h': usage();             return 0;
 			case 'v': version();           return 0;
 			default:  usage(stderr);       return 1;
