@@ -49,6 +49,24 @@ static void initialize_environment () {
 	oak::set_basic_environment(env);
 }
 
+static bool print_settings (settings_t const& settings, std::string const& key) {
+	if (key != NULL_STR) {
+		std::string value = settings.get(key, NULL_STR);
+		// if key not found, print error
+		if (value == NULL_STR) {
+			fprintf(stderr, "Setting or variable '%s' not found\n", key.c_str());
+			return false;
+		} else {
+			fprintf(stdout, "%s\n", value.c_str());
+		}
+	} else {
+		// no key specified. Print all keys and values
+		std::map<std::string, std::string> settings_map = settings.all_settings();
+		print_map(settings_map);
+	}
+	return true;
+}
+
 int main (int argc, char* const* argv)
 {
 	// extern char* optarg;
@@ -82,10 +100,6 @@ int main (int argc, char* const* argv)
 
 	for(int i = 0; i < argc; ++i)
 	{
-		std::string file = path::join(path::cwd(), argv[i]);
-		
-		settings_t settings = settings_for_path(file);
-		
 		// new line before additional files
 		if (i > 0) {
 			fprintf(stdout, "\n");
@@ -94,24 +108,17 @@ int main (int argc, char* const* argv)
 		if (argc > 1) {
 			fprintf(stdout, "%s:\n", argv[i]);
 		}
-		
-		if (key != NULL_STR) {
-			std::string value = settings.get(key, NULL_STR);
-			// if key not found, print error
-			if (value == NULL_STR) {
-				fprintf(stderr, "Setting or variable '%s' not found\n", key.c_str());
-				continue;
-			} else {
-				fprintf(stdout, "%s\n", value.c_str());
-			}
-		} else {
-			// no key specified. Print all keys and values
-			std::map<std::string, std::string> settings_map = settings.all_settings();
-			print_map(settings_map);
-		}
+
+		settings_t const settings = settings_for_path(path::join(path::cwd(), argv[i]));
+		print_settings(settings, key);
 	}
 	if (0 == argc) {
-		fprintf(stderr, "No files specified. Run %s -h for help.\n", getprogname());
+		std::string path  = getenv("TM_FILEPATH")  ?: NULL_STR;
+		std::string scope = getenv("TM_SCOPE")     ?: NULL_STR;
+		std::string dir   = getenv("TM_DIRECTORY") ?: getenv("TM_PROJECT_DIRECTORY") ?: NULL_STR;
+
+		settings_t const settings = settings_for_path(path, scope, dir);
+		print_settings(settings, key);
 	}
 
 	return 0;
