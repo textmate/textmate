@@ -4,11 +4,11 @@
 @end
 
 @interface HOStatusBar : NSView
-@property (nonatomic, assign) BOOL isBusy;
-@property (nonatomic, assign) CGFloat progress;
-@property (nonatomic, retain) NSString* statusText;
-@property (nonatomic, assign) BOOL canGoBack;
-@property (nonatomic, assign) BOOL canGoForward;
+@property (nonatomic, weak) id  delegate;
 
-@property (nonatomic, assign) id delegate;
+@property (nonatomic) NSString* statusText;
+@property (nonatomic) CGFloat   progress;
+@property (nonatomic) BOOL      isBusy;
+@property (nonatomic) BOOL      canGoBack;
+@property (nonatomic) BOOL      canGoForward;
 @end

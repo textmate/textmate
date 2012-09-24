@@ -3,12 +3,12 @@
 
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
-	NSButton* res = [[NSButton new] autorelease];
+	NSButton* res = [NSButton new];
 	[res setButtonType:NSMomentaryChangeButton];
 	[res setBezelStyle:NSSmallSquareBezelStyle];
 	[res setBordered:NO];
 
-	NSImage* image = [[[NSImage imageNamed:imageName] copy] autorelease];
+	NSImage* image = [[NSImage imageNamed:imageName] copy];
 	[image setSize:NSMakeSize(13, 13)];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
@@ -18,7 +18,7 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 
 static NSTextField* OakCreateTextField ()
 {
-	NSTextField* res = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
 	[res setBordered:NO];
 	[res setEditable:NO];
 	[res setSelectable:NO];
@@ -30,22 +30,22 @@ static NSTextField* OakCreateTextField ()
 
 static NSImageView* OakCreateImageView (NSImage* image)
 {
-	NSImageView* res = [[[NSImageView alloc] initWithFrame:NSZeroRect] autorelease];
+	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
 	[res setImage:image];
 	return res;
 }
 
 @interface HOStatusBar ()
-@property (nonatomic, retain) NSImage*             backgroundImage;
-@property (nonatomic, retain) NSImageView*         firstSeparatorImageView;
-@property (nonatomic, retain) NSImageView*         secondSeparatorImageView;
-@property (nonatomic, retain) NSButton*            goBackButton;
-@property (nonatomic, retain) NSButton*            goForwardButton;
-@property (nonatomic, retain) NSTextField*         statusTextField;
-@property (nonatomic, retain) NSProgressIndicator* progressIndicator;
-@property (nonatomic, retain) NSProgressIndicator* spinner;
-@property (nonatomic, retain) NSMutableArray*      layoutConstraints;
-@property (nonatomic, assign) BOOL                 indeterminateProgress;
+@property (nonatomic) NSImage*             backgroundImage;
+@property (nonatomic) NSImageView*         firstSeparatorImageView;
+@property (nonatomic) NSImageView*         secondSeparatorImageView;
+@property (nonatomic) NSButton*            goBackButton;
+@property (nonatomic) NSButton*            goForwardButton;
+@property (nonatomic) NSTextField*         statusTextField;
+@property (nonatomic) NSProgressIndicator* progressIndicator;
+@property (nonatomic) NSProgressIndicator* spinner;
+@property (nonatomic) NSMutableArray*      layoutConstraints;
+@property (nonatomic) BOOL                 indeterminateProgress;
 @end
 
 @implementation HOStatusBar
@@ -55,25 +55,25 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	{
 		_indeterminateProgress = YES;
 
-		self.backgroundImage          = [NSImage imageNamed:@"Statusbar Background" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")];
-		self.firstSeparatorImageView  = OakCreateImageView([NSImage imageNamed:@"Statusbar Separator" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")]);
-		self.secondSeparatorImageView = OakCreateImageView([NSImage imageNamed:@"Statusbar Separator" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")]);
+		_backgroundImage          = [NSImage imageNamed:@"Statusbar Background" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")];
+		_firstSeparatorImageView  = OakCreateImageView([NSImage imageNamed:@"Statusbar Separator" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")]);
+		_secondSeparatorImageView = OakCreateImageView([NSImage imageNamed:@"Statusbar Separator" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")]);
 
-		self.goBackButton             = OakCreateImageButton(NSImageNameGoLeftTemplate);
-		self.goBackButton.toolTip     = @"Show the previous page";
-		self.goBackButton.enabled     = NO;
-		self.goBackButton.target      = self;
-		self.goBackButton.action      = @selector(goBack:);
+		_goBackButton             = OakCreateImageButton(NSImageNameGoLeftTemplate);
+		_goBackButton.toolTip     = @"Show the previous page";
+		_goBackButton.enabled     = NO;
+		_goBackButton.target      = self;
+		_goBackButton.action      = @selector(goBack:);
 
-		self.goForwardButton          = OakCreateImageButton(NSImageNameGoRightTemplate);
-		self.goForwardButton.toolTip  = @"Show the next page";
-		self.goForwardButton.enabled  = NO;
-		self.goForwardButton.target   = self;
-		self.goForwardButton.action   = @selector(goForward:);
+		_goForwardButton          = OakCreateImageButton(NSImageNameGoRightTemplate);
+		_goForwardButton.toolTip  = @"Show the next page";
+		_goForwardButton.enabled  = NO;
+		_goForwardButton.target   = self;
+		_goForwardButton.action   = @selector(goForward:);
 
-		self.statusTextField          = OakCreateTextField();
-		[self.statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
+		_statusTextField          = OakCreateTextField();
+		[_statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[_statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
 		_progressIndicator = [NSProgressIndicator new];
 		_progressIndicator.controlSize          = NSSmallControlSize;
@@ -99,31 +99,16 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	return self;
 }
 
-- (void)dealloc
-{
-	self.backgroundImage          = nil;
-	self.firstSeparatorImageView  = nil;
-	self.secondSeparatorImageView = nil;
-	self.goBackButton             = nil;
-	self.goForwardButton          = nil;
-	self.statusTextField          = nil;
-	self.progressIndicator        = nil;
-	self.spinner                  = nil;
-	self.layoutConstraints        = nil;
-
-	[super dealloc];
-}
-
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, self.backgroundImage.size.height);
+	return NSMakeSize(NSViewNoInstrinsicMetric, _backgroundImage.size.height);
 }
 
 - (void)updateConstraints
 {
-	if(self.layoutConstraints)
-		[self removeConstraints:self.layoutConstraints];
-	self.layoutConstraints = [NSMutableArray array];
+	if(_layoutConstraints)
+		[self removeConstraints:_layoutConstraints];
+	_layoutConstraints = [NSMutableArray array];
 
 	[super updateConstraints];
 

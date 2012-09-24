@@ -4,26 +4,18 @@
 #import <OakFoundation/NSString Additions.h>
 
 @implementation HOWebViewDelegateHelper
-@synthesize delegate, projectUUID;
-
-- (void)dealloc
-{
-	[projectUUID release];
-	[super dealloc];
-}
-
 // =====================
 // = WebViewUIDelegate =
 // =====================
 
 - (void)webView:(WebView*)sender setStatusText:(NSString*)text
 {
-	[delegate setStatusText:(text ?: @"")];
+	[_delegate setStatusText:(text ?: @"")];
 }
 
 - (NSString*)webViewStatusText:(WebView*)sender
 {
-	return [delegate statusText];
+	return [_delegate statusText];
 }
 
 - (void)webView:(WebView*)sender mouseDidMoveOverElement:(NSDictionary*)elementInformation modifierFlags:(NSUInteger)modifierFlags
@@ -56,7 +48,7 @@
 	NSPoint origin = [sender.window cascadeTopLeftFromPoint:NSMakePoint(NSMinX(sender.window.frame), NSMaxY(sender.window.frame))];
 	origin.y -= NSHeight(sender.window.frame);
 
-	HOBrowserView* view = [[HOBrowserView new] autorelease];
+	HOBrowserView* view = [HOBrowserView new];
 	NSWindow* window = [[NSWindow alloc] initWithContentRect:(NSRect){origin, NSMakeSize(750, 800)}
 																  styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask)
 																	 backing:NSBackingStoreBuffered
@@ -96,8 +88,8 @@
 		NSURL* url = request.URL;
 		if([[url scheme] isEqualToString:@"txmt"])
 		{
-			if(projectUUID)
-				url = [NSURL URLWithString:[[url absoluteString] stringByAppendingFormat:@"&project=%@", projectUUID]];
+			if(_projectUUID)
+				url = [NSURL URLWithString:[[url absoluteString] stringByAppendingFormat:@"&project=%@", _projectUUID]];
 			[NSApp sendAction:@selector(handleTxMtURL:) to:nil from:url];
 		}
 		else

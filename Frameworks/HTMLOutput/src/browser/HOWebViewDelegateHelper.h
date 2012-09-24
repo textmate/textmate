@@ -1,13 +1,8 @@
 @protocol HOWebViewDelegateHelperProtocol
-- (NSString*)statusText;
-- (void)setStatusText:(NSString*)text;
+@property (nonatomic, retain) NSString* statusText;
 @end
 
 @interface HOWebViewDelegateHelper : NSObject
-{
-	id delegate;
-	NSString* projectUUID;
-}
-@property (nonatomic, assign) id delegate;
+@property (nonatomic, weak) id /*<HOWebViewDelegateHelperProtocol>*/ delegate;
 @property (nonatomic, retain) NSString* projectUUID;
 @end

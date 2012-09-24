@@ -156,7 +156,7 @@ namespace
 
 - (void)startLoading
 {
-	NSURLResponse* response = [[[NSURLResponse alloc] initWithURL:[[self request] URL] MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:@"utf-8"] autorelease];
+	NSURLResponse* response = [[NSURLResponse alloc] initWithURL:[[self request] URL] MIMEType:@"text/html" expectedContentLength:-1 textEncodingName:@"utf-8"];
 	[[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
 
 	// WebView seems to stall until it has received at least 1024 bytes

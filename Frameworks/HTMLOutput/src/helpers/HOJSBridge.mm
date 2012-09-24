@@ -20,8 +20,6 @@
 	std::vector<char> outputData, errorData;
 	int status;
 
-	id outputHandler, errorHandler, exitHandler;
-
 	oak::process_t* process;
 	bool didCloseInput;
 	io::reader_t* outputReader;
@@ -56,6 +54,14 @@
 OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 @implementation HOJSBridge
+{
+	std::map<std::string, std::string> environment;
+
+	// unused dummy keys to get them exposed to javascript
+	BOOL isBusy;
+	float progress;
+}
+
 - (std::map<std::string, std::string> const&)environment;
 {
 	return environment;
@@ -94,22 +100,17 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 - (void)setIsBusy:(BOOL)flag
 {
-	[delegate setIsBusy:flag];
+	[_delegate setIsBusy:flag];
 }
 
 - (void)setProgress:(id)newProgress;
 {
-	[delegate setProgress:[newProgress floatValue]];
+	[(id <HOJSBridgeDelegate>)_delegate setProgress:[newProgress floatValue]];
 }
 
 - (double)progress
 {
-	return [delegate progress];
-}
-
-- (void)setDelegate:(id)aDelegate
-{
-	delegate = aDelegate;
+	return [_delegate progress];
 }
 
 - (void)log:(NSString*)aMessage
@@ -180,8 +181,6 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 @end
 
 @implementation HOJSShellCommand
-@synthesize outputHandler, errorHandler, exitHandler;
-
 - (id)initWithCommand:(NSString*)aCommand andEnvironment:(const std::map<std::string, std::string>&)someEnvironment
 {
 	if(self = [super init])
@@ -198,8 +197,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 {
 	if(++completeCounter == 3)
 	{
-		if(exitHandler)
-				[exitHandler callWebScriptMethod:@"call" withArguments:@[ exitHandler, self ]];
+		if(_exitHandler)
+				[_exitHandler callWebScriptMethod:@"call" withArguments:@[ _exitHandler, self ]];
 		else	runLoop.stop();
 	}
 }
@@ -207,27 +206,27 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 - (void)outputDataReceived:(char const*)bytes length:(size_t)len
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%zu bytes\n", len););
-	if(exitHandler)
+	if(_exitHandler)
 		outputData.erase(outputData.begin(), utf8::find_safe_end(outputData.begin(), outputData.end()));
 	outputData.insert(outputData.end(), bytes, bytes + len);
 
 	if(len == 0)
 		[self increaseCompleteCounter];
-	else if(outputHandler)
-		[outputHandler callWebScriptMethod:@"call" withArguments:@[ outputHandler, [self valueForKey:@"outputString"] ]];
+	else if(_outputHandler)
+		[_outputHandler callWebScriptMethod:@"call" withArguments:@[ _outputHandler, [self valueForKey:@"outputString"] ]];
 }
 
 - (void)errorDataReceived:(char const*)bytes length:(size_t)len
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%zu bytes\n", len););
-	if(exitHandler)
+	if(_exitHandler)
 		errorData.erase(errorData.begin(), utf8::find_safe_end(errorData.begin(), errorData.end()));
 	errorData.insert(errorData.end(), bytes, bytes + len);
 
 	if(len == 0)
 		[self increaseCompleteCounter];
-	else if(errorHandler)
-		[errorHandler callWebScriptMethod:@"call" withArguments:@[ errorHandler, [self valueForKey:@"errorString"] ]];
+	else if(_errorHandler)
+		[_errorHandler callWebScriptMethod:@"call" withArguments:@[ _errorHandler, [self valueForKey:@"errorString"] ]];
 }
 
 - (void)processDidExit:(int)rc
@@ -340,7 +339,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 + (HOJSShellCommand*)runShellCommand:(NSString*)aCommand withEnvironment:(const std::map<std::string, std::string>&)someEnvironment andExitHandler:(id)aHandler
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s (handler: %s)\n", [aCommand UTF8String], [[aHandler description] UTF8String]););
-	HOJSShellCommand* res = [[[self alloc] initWithCommand:aCommand andEnvironment:someEnvironment] autorelease];
+	HOJSShellCommand* res = [[self alloc] initWithCommand:aCommand andEnvironment:someEnvironment];
 	res.exitHandler = aHandler;
 	[res launchAndWait:aHandler == nil];
 	return res;
@@ -349,9 +348,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 - (void)dealloc
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("\n"););
-
 	[self cancelCommand];
-	[super dealloc];
 }
 
 // =========================
@@ -402,14 +399,14 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", [[aHandler description] UTF8String]););
 	self.outputHandler = aHandler;
-	[outputHandler callWebScriptMethod:@"call" withArguments:@[ outputHandler, [self outputString] ]];
+	[_outputHandler callWebScriptMethod:@"call" withArguments:@[ _outputHandler, [self outputString] ]];
 }
 
 - (void)setOnreaderror:(id)aHandler
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", [[aHandler description] UTF8String]););
 	self.errorHandler = aHandler;
-	[errorHandler callWebScriptMethod:@"call" withArguments:@[ errorHandler, [self errorString] ]];
+	[_errorHandler callWebScriptMethod:@"call" withArguments:@[ _errorHandler, [self errorString] ]];
 }
 
 - (void)finalizeForWebScript
