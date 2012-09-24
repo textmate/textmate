@@ -110,7 +110,8 @@ int main (int argc, char* const* argv)
 		}
 
 		settings_t const settings = settings_for_path(path::join(path::cwd(), argv[i]));
-		print_settings(settings, key);
+		if(!print_settings(settings, key))
+			return 1;
 	}
 	if (0 == argc) {
 		std::string path  = getenv("TM_FILEPATH")  ?: NULL_STR;
@@ -118,7 +119,8 @@ int main (int argc, char* const* argv)
 		std::string dir   = getenv("TM_DIRECTORY") ?: getenv("TM_PROJECT_DIRECTORY") ?: NULL_STR;
 
 		settings_t const settings = settings_for_path(path, scope, dir);
-		print_settings(settings, key);
+		if(!print_settings(settings, key))
+			return 1;
 	}
 
 	return 0;
