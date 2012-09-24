@@ -670,13 +670,14 @@ open("#{builddir}/build.ninja", "w") do |io|
   TARGETS.root['PRELUDE'].each do |src|
     type = { 'c' => '-x c-header', 'm' => '-x objective-c-header', 'cc' => '-x c++-header', 'mm' => '-x objective-c++-header' }
     ext = src[/\b[a-z]+$/]
+    cc = COMPILER_INFO[ext][:compiler]
 
-    io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src}\n"
+    io << "build #{pch_for(src, TARGETS.root)}.gch: #{compiler_for(src)} #{src} | #{cc}\n"
     io << "  depfile = #{pch_for(src, TARGETS.root)}.gch.d\n"
     io << "  RAVE_FLAGS = #{type[ext]}\n\n"
 
     if ext =~ /^mm?$/
-      io << "build #{pch_for(src, TARGETS.root)}-arc.gch: #{compiler_for(src)} #{src}\n"
+      io << "build #{pch_for(src, TARGETS.root)}-arc.gch: #{compiler_for(src)} #{src} | #{cc}\n"
       io << "  depfile = #{pch_for(src, TARGETS.root)}-arc.gch.d\n"
       io << "  RAVE_FLAGS = #{type[ext]} -fobjc-arc\n\n"
     end
