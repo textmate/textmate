@@ -4,7 +4,6 @@
 
 PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 
-struct binding_info_t;
 struct value_t
 {
 	value_t (double v = 0);
@@ -26,12 +25,12 @@ PUBLIC @interface OakTabBarView : OakControl
 {
 	OBJC_WATCH_LEAKS(OakTabBarView);
 
-	NSMutableArray* tabTitles;         // bindable as ‘value’
-	NSMutableArray* tabToolTips;       // bindable as ‘toolTip’
-	NSMutableArray* tabModifiedStates; // bindable as ‘isEdited’
+	NSMutableArray* tabTitles;
+	NSMutableArray* tabToolTips;
+	NSMutableArray* tabModifiedStates;
 
 	BOOL layoutNeedsUpdate;
-	NSUInteger selectedTab;            // bindable as ‘selectionIndexes’ (NSIndexSet)
+	NSUInteger selectedTab;
 	NSUInteger hiddenTab;
 
 	BOOL isExpanded;
@@ -43,7 +42,6 @@ PUBLIC @interface OakTabBarView : OakControl
 
 	id <OakTabBarViewDelegate> delegate;
 	id <OakTabBarViewDataSource> dataSource;
-	std::vector<binding_info_t> bindings;
 }
 @property (nonatomic, assign) BOOL isExpanded;
 @property (nonatomic, assign) id <OakTabBarViewDelegate> delegate;

@@ -12,15 +12,6 @@ OAK_DEBUG_VAR(TabBarView);
 NSString* const kUserDefaultsDisableTabBarCollapsingKey = @"disableTabBarCollapsing";
 NSString* const OakTabBarViewTabType                    = @"OakTabBarViewTabType";
 
-struct binding_info_t
-{
-	binding_info_t (std::string const& property, id controller, std::string const& key_path) : property(property), controller(controller), key_path(key_path) { }
-
-	std::string property;
-	id controller;
-	std::string key_path;
-};
-
 value_t::value_t (double v)
 {
 	records.push_back((record_t){ 0, 0, v, v });
@@ -338,12 +329,6 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	iterate(it, bindings)
-	{
-		[it->controller removeObserver:self forKeyPath:[NSString stringWithCxxString:it->key_path]];
-		[it->controller release];
-	}
-
 	[tabTitles release];
 	[tabToolTips release];
 	[tabModifiedStates release];
@@ -509,11 +494,6 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 			return;
 
 		selectedTab = self.tag;
-		iterate(it, bindings)
-		{
-			if(it->property == "selectionIndexes")
-				[it->controller setValue:[NSIndexSet indexSetWithIndex:selectedTab] forKey:[NSString stringWithCxxString:it->key_path]];
-		}
 		self.layoutNeedsUpdate = YES;
 	}
 }
@@ -731,53 +711,5 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
 	[self setDropAreaWidth:0 beforeTabAtIndex:NSNotFound animate:YES];
-}
-
-// ============
-// = Bindings =
-// ============
-
-- (void)bind:(NSString*)aBinding toObject:(id)observableController withKeyPath:(NSString*)aKeyPath options:(NSDictionary*)someOptions
-{
-	bindings.push_back(binding_info_t([aBinding UTF8String], [observableController retain], [aKeyPath UTF8String]));
-	[observableController addObserver:self forKeyPath:aKeyPath options:NSKeyValueObservingOptionInitial context:NULL];
-}
-
-- (void)unbind:(NSString*)aBinding
-{
-	for(size_t i = bindings.size(); i > 0; --i)
-	{
-		binding_info_t const& info = bindings[i-1];
-		if(info.property != [aBinding UTF8String])
-			continue;
-
-		[info.controller removeObserver:self forKeyPath:[NSString stringWithCxxString:info.key_path]];
-		[info.controller release];
-		bindings.erase(bindings.begin() + (i-1));
-	}
-}
-
-- (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)observableController change:(NSDictionary*)changeDictionary context:(void*)userData
-{
-	iterate(it, bindings)
-	{
-		if(it->controller != observableController || it->key_path != [aKeyPath UTF8String])
-			continue;
-
-		if(it->property == "value")
-			[tabTitles setArray:[observableController valueForKeyPath:aKeyPath]];
-		else if(it->property == "toolTip")
-			[tabToolTips setArray:[observableController valueForKeyPath:aKeyPath]];
-		else if(it->property == "selectionIndexes")
-			selectedTab = [[observableController valueForKeyPath:aKeyPath] firstIndex];
-		else if(it->property == "isEdited")
-			[tabModifiedStates setArray:[observableController valueForKeyPath:aKeyPath]];
-	}
-
-	BOOL newIsExpanded = [tabTitles count] > 1;
-	if(newIsExpanded != self.isExpanded)
-		self.isExpanded = newIsExpanded;
-	else
-		self.layoutNeedsUpdate = YES;
 }
 @end
