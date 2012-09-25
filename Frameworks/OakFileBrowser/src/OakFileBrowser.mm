@@ -203,6 +203,9 @@ static bool is_binary (std::string const& path)
 
 - (void)setOpenURLs:(NSArray*)newOpenURLs
 {
+	if([outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
+		return;
+
 	outlineViewDelegate.openURLs = newOpenURLs;
 	[view.outlineView reloadData];
 }
@@ -214,6 +217,9 @@ static bool is_binary (std::string const& path)
 
 - (void)setModifiedURLs:(NSArray*)newModifiedURLs
 {
+	if([outlineViewDelegate.modifiedURLs isEqualToArray:newModifiedURLs])
+		return;
+
 	outlineViewDelegate.modifiedURLs = newModifiedURLs;
 	[view.outlineView reloadData];
 }
