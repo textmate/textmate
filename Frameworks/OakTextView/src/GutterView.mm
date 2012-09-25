@@ -267,6 +267,8 @@ struct data_source_t
 - (void)boundsDidChange:(NSNotification*)aNotification
 {
 	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(_partnerView.enclosingScrollView.contentView.bounds))];
+	if([self updateWidth] != NSWidth(self.frame))
+		[self invalidateIntrinsicContentSize];
 }
 
 static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
