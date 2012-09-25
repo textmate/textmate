@@ -290,10 +290,11 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (void)updateLayout;
 @property (nonatomic, retain) OakTimer* slideAroundAnimationTimer;
 @property (nonatomic, assign) BOOL layoutNeedsUpdate;
+@property (nonatomic, assign) BOOL shouldCollapse;
 @end
 
 @implementation OakTabBarView
-@synthesize isExpanded, delegate, dataSource, slideAroundAnimationTimer, layoutNeedsUpdate;
+@synthesize delegate, dataSource, slideAroundAnimationTimer, layoutNeedsUpdate;
 
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
@@ -316,6 +317,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		tabToolTips       = [NSMutableArray new];
 		tabModifiedStates = [NSMutableArray new];
 
+		[self userDefaultsDidChange:nil];
+
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewFrameChanged:) name:NSViewFrameDidChangeNotification object:self];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[self registerForDraggedTypes:@[ OakTabBarViewTabType ]];
@@ -337,7 +340,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
-	self.isExpanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey] ? YES : [tabTitles count] > 1;
+	self.shouldCollapse = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey];
+	self.expanded       = self.shouldCollapse ? [tabTitles count] > 1 : YES;
 }
 
 - (void)viewDidMoveToWindow
@@ -396,7 +400,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	tabRects.clear();
 
 	D(DBF_TabBarView, bug("\n"););
-	if(!isExpanded)
+	if(!self.isExpanded)
 		return [self setLayers:metrics->layers_for("backgroundCollapsed", rect, -1)];
 
 	std::vector<layer_t> newLayout, selectedTabLayers;
@@ -468,7 +472,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, isExpanded ? 23 : 1);
+	return NSMakeSize(NSViewNoInstrinsicMetric, self.isExpanded ? 23 : 1);
 }
 
 - (void)viewFrameChanged:(NSNotification*)aNotification
@@ -476,12 +480,12 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	self.layoutNeedsUpdate = YES;
 }
 
-- (void)setIsExpanded:(BOOL)flag
+- (void)setExpanded:(BOOL)flag
 {
-	if(isExpanded == flag)
+	if(_expanded == flag)
 		return;
 
-	isExpanded = flag;
+	_expanded = flag;
 	self.layoutNeedsUpdate = YES;
 	[self invalidateIntrinsicContentSize];
 }
@@ -557,9 +561,9 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 	selectedTab = [tabToolTips count] && selectedTab != NSNotFound ? std::min(selectedTab, [tabToolTips count]-1) : NSNotFound;
 
-	BOOL newIsExpanded = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTabBarCollapsingKey] ? YES : [tabTitles count] > 1;
-	if(newIsExpanded != self.isExpanded)
-			self.isExpanded = newIsExpanded;
+	BOOL shouldBeExpanded = self.shouldCollapse ? [tabTitles count] > 1 : YES;
+	if(shouldBeExpanded != self.isExpanded)
+			self.expanded = shouldBeExpanded;
 	else	self.layoutNeedsUpdate = YES;
 }
 

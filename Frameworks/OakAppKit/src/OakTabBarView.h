@@ -33,8 +33,6 @@ PUBLIC @interface OakTabBarView : OakControl
 	NSUInteger selectedTab;
 	NSUInteger hiddenTab;
 
-	BOOL isExpanded;
-
 	layout_metrics_ptr metrics;
 	std::vector<NSRect> tabRects;
 	std::map<NSUInteger, value_t> tabDropSpacing;
@@ -43,7 +41,7 @@ PUBLIC @interface OakTabBarView : OakControl
 	id <OakTabBarViewDelegate> delegate;
 	id <OakTabBarViewDataSource> dataSource;
 }
-@property (nonatomic, assign) BOOL isExpanded;
+@property (nonatomic, assign, getter = isExpanded) BOOL expanded;
 @property (nonatomic, assign) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, assign) id <OakTabBarViewDataSource> dataSource;
 @property (nonatomic, readonly) NSUInteger countOfVisibleTabs;
