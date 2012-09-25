@@ -88,5 +88,5 @@
 	else if(NSMouseInRect(point, textRect, controlView.isFlipped))
 		res = NSCellHitContentArea|NSCellHitEditableTextArea|OakImageAndTextCellHitText;
 	return res;
-}	
+}
 @end

@@ -75,7 +75,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (void)setStringValue:(NSString*)aString
 {
-	D(DBF_OakToolTip, bug("%s\n", [aString UTF8String]););	
+	D(DBF_OakToolTip, bug("%s\n", [aString UTF8String]););
 	ASSERT(aString != nil);
 	[field setStringValue:aString];
 }

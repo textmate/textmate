@@ -326,7 +326,7 @@ private:
 			[textScrollView setScrollerKnobStyle:NSScrollerKnobStyleDark];
 		}
 
-		[self setFont:textView.font]; // trigger update of gutter view’s line number font	
+		[self setFont:textView.font]; // trigger update of gutter view’s line number font
 		auto styles = theme->gutter_styles();
 
 		gutterView.foregroundColor           = [NSColor tmColorWithCGColor:styles.foreground];

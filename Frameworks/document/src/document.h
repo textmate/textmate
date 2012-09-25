@@ -187,7 +187,7 @@ namespace document
 
 				_document->post_load(path, io::bytes_ptr(), std::map<std::string, std::string>(), NULL_STR, NULL_STR, encoding::type());
 				iterate(cb, callbacks)
-					(*cb)->show_error(path, doc, message, filter);				
+					(*cb)->show_error(path, doc, message, filter);
 			}
 
 		private:

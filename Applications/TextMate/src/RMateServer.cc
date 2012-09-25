@@ -68,7 +68,7 @@ struct socket_callback_t
 		(*(helper_base_t*)info)();
 	}
 
-private:	
+private:
 	struct helper_base_t
 	{
 		WATCH_LEAKS(helper_base_t);

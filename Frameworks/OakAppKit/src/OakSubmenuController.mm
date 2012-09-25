@@ -40,7 +40,7 @@ static OakSubmenuController* SharedInstance = nil;
 	if(id delegate = [NSApp targetForAction:aSelector])
 			[delegate performSelector:aSelector withObject:aMenu];
 	else	[aMenu addItemWithTitle:@"no items" action:NULL keyEquivalent:@""];
-	D(DBF_OakSubmenuController, bug("%s\n", [[aMenu description] UTF8String]););	
+	D(DBF_OakSubmenuController, bug("%s\n", [[aMenu description] UTF8String]););
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
@@ -50,7 +50,7 @@ static OakSubmenuController* SharedInstance = nil;
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
-	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););	
+	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););
 
 	if(aMenu != goToMenu)
 		return NO;

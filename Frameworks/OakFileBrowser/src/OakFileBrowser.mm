@@ -790,7 +790,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 - (void)saveFileBrowserOptions
 {
-	NSMutableArray* array = [NSMutableArray array];	
+	NSMutableArray* array = [NSMutableArray array];
 	iterate(it, DataSourceOptionsMap)
 	{
 		if((dataSourceOptions & it->flag) == it->flag)

@@ -1,4 +1,4 @@
-{	
+{
 	blank                = (  );
 	
 	text                 = ( mail, eml, man, txt, text, utf8, README, INSTALL, LICENSE, AUTHORS, ChangeLog );

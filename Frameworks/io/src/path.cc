@@ -326,7 +326,7 @@ namespace path
 		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (UInt8 const*)path.data(), path.size(), is_directory(path));
 		if(!url) return false;
 		CFBooleanRef pathIsLocal;
-		bool ok = CFURLCopyResourcePropertyForKey(url, kCFURLVolumeIsLocalKey, &pathIsLocal, NULL);		
+		bool ok = CFURLCopyResourcePropertyForKey(url, kCFURLVolumeIsLocalKey, &pathIsLocal, NULL);
 		CFRelease(url);
 		if(!ok) return false;
 		return (pathIsLocal == kCFBooleanTrue);

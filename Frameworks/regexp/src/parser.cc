@@ -44,7 +44,7 @@
 
 */
 
-OnigOptionType convert (parser::regexp_options::type const& options)	
+OnigOptionType convert (parser::regexp_options::type const& options)
 {
 	OnigOptionType res = ONIG_OPTION_NONE;
 	if(options & parser::regexp_options::i)

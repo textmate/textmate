@@ -173,7 +173,7 @@ namespace file
 				error = text::format("Setting extended attributes: %s", strerror(errno));
 		}
 		else if(status == kFileTestWritableByRoot || status == kFileTestNotWritable)
-		{	
+		{
 			if(connection_t conn = connect_to_auth_server(request.authorization))
 			{
 				conn << "write" << request.path << std::string(request.bytes->begin(), request.bytes->end()) << request.attributes;

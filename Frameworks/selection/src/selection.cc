@@ -307,7 +307,7 @@ namespace ng
 				size_t fromLine = std::min(lineA, lineB), fromCol = std::min(colA, colB);
 				size_t toLine   = std::max(lineA, lineB), toCol   = std::max(colA, colB);
 
-				for(size_t n = fromLine; n <= toLine; ++n)				
+				for(size_t n = fromLine; n <= toLine; ++n)
 				{
 					index_t from = at_column(buffer, n, fromCol), to = at_column(buffer, n, toCol);
 					res.push_back(range_t(from, to, false, from.carry || to.carry));
