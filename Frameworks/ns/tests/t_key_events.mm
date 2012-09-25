@@ -57,8 +57,8 @@ class KeyEventsTests : public CxxTest::TestSuite
 public:
 	void test_key_events ()
 	{
-		NSAutoreleasePool* pool = [NSAutoreleasePool new];
-		OakSetupApplicationWithView([[[MyEventView alloc] initWithFrame:NSMakeRect(0, 0, 200, 100)] autorelease], "key_events");
-		[pool drain];
+		@autoreleasepool {
+			OakSetupApplicationWithView([[[MyEventView alloc] initWithFrame:NSMakeRect(0, 0, 200, 100)] autorelease], "key_events");
+		}
 	}
 };

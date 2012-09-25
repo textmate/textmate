@@ -139,8 +139,8 @@ class DictionaryTests : public CxxTest::TestSuite
 public:
 	void test_dictionary ()
 	{
-		NSAutoreleasePool* pool = [NSAutoreleasePool new];
-		OakSetupApplicationWithView([[[MyTextView alloc] initWithFrame:NSMakeRect(0, 0, 400, 60)] autorelease], "dictionary");
-		[pool drain];
+		@autoreleasepool {
+			OakSetupApplicationWithView([[[MyTextView alloc] initWithFrame:NSMakeRect(0, 0, 400, 60)] autorelease], "dictionary");
+		}
 	}
 };

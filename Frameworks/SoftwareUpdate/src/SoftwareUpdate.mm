@@ -147,25 +147,24 @@ static SoftwareUpdate* SharedInstance;
 
 - (void)performBackgroundVersionCheck:(NSDictionary*)someOptions
 {
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
+	@autoreleasepool {
+		NSURL* url = [someOptions objectForKey:@"infoURL"];
+		std::string error = NULL_STR;
+		auto info = sw_update::download_info(to_s([url absoluteString]), &error);
 
-	NSURL* url = [someOptions objectForKey:@"infoURL"];
-	std::string error = NULL_STR;
-	auto info = sw_update::download_info(to_s([url absoluteString]), &error);
+		NSMutableDictionary* res = [[someOptions mutableCopy] autorelease];
+		if(error != NULL_STR)
+		{
+			[res setObject:[NSString stringWithCxxString:error] forKey:@"error"];
+		}
+		else
+		{
+			[res setObject:[NSString stringWithCxxString:info.url] forKey:@"url"];
+			[res setObject:@(info.version) forKey:@"version"];
+		}
 
-	NSMutableDictionary* res = [[someOptions mutableCopy] autorelease];
-	if(error != NULL_STR)
-	{
-		[res setObject:[NSString stringWithCxxString:error] forKey:@"error"];
+		[self performSelectorOnMainThread:@selector(didPerformBackgroundVersionCheck:) withObject:res waitUntilDone:NO];
 	}
-	else
-	{
-		[res setObject:[NSString stringWithCxxString:info.url] forKey:@"url"];
-		[res setObject:@(info.version) forKey:@"version"];
-	}
-
-	[self performSelectorOnMainThread:@selector(didPerformBackgroundVersionCheck:) withObject:res waitUntilDone:NO];
-	[pool drain];
 }
 
 - (void)didPerformBackgroundVersionCheck:(NSDictionary*)info

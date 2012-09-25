@@ -102,10 +102,10 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 	// An autorelease pool is required here because the default pool will not be destroyed before termination,
 	// so objects cleaned up here would not be properly destroyed, and would report as leaking.
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	[windowController invalidate];
-	self.windowController = nil;
-	[pool drain];
+	@autoreleasepool {
+		[windowController invalidate];
+		self.windowController = nil;
+	}
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context

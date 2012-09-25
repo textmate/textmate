@@ -203,13 +203,13 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 - (void)closeAllWindows:(id)sender
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	for(NSWindow* window in [NSApp windows])
-	{
-		if(window.isVisible)
-			[window close];
+	@autoreleasepool {
+		for(NSWindow* window in [NSApp windows])
+		{
+			if(window.isVisible)
+				[window close];
+		}
 	}
-	[pool release];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender

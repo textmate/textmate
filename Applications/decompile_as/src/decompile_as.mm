@@ -11,11 +11,11 @@ int main (int argc, char const* argv[])
 		return 0;
 	}
 
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	NSDictionary* errorInfo = nil;
-	OSAScript* script       = [[OSAScript alloc] initWithCompiledData:[[NSFileHandle fileHandleWithStandardInput] readDataToEndOfFile] error:&errorInfo];
-	std::string str         = [[script source] UTF8String];
-	[pool drain];
+	@autoreleasepool {
+		NSDictionary* errorInfo = nil;
+		OSAScript* script       = [[OSAScript alloc] initWithCompiledData:[[NSFileHandle fileHandleWithStandardInput] readDataToEndOfFile] error:&errorInfo];
+		std::string str         = [[script source] UTF8String];
+	}
 
 	std::replace(str.begin(), str.end(), '\r', '\n');
 	write(STDOUT_FILENO, str.data(), str.size());

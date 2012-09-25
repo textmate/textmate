@@ -48,20 +48,18 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 
 - (void)performBackgroundDownload:(id)sender
 {
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
+	@autoreleasepool {
+		shared_state_ptr state = sharedState;
+		std::string error = NULL_STR;
+		std::string path = sw_update::download_update(to_s(self.url), keyChain, &error, &state->progress, &state->stop);
 
-	shared_state_ptr state = sharedState;
-	std::string error = NULL_STR;
-	std::string path = sw_update::download_update(to_s(self.url), keyChain, &error, &state->progress, &state->stop);
-
-	NSDictionary* arg = [NSDictionary dictionary];
-	if(path != NULL_STR)
-		arg = @{ @"path" : [NSString stringWithCxxString:path] };
-	else if(error != NULL_STR)
-		arg = @{ @"error" : [NSString stringWithCxxString:error] };
-	[self performSelectorOnMainThread:@selector(didPerformBackgroundDownload:) withObject:arg waitUntilDone:NO];
-
-	[pool drain];
+		NSDictionary* arg = [NSDictionary dictionary];
+		if(path != NULL_STR)
+			arg = @{ @"path" : [NSString stringWithCxxString:path] };
+		else if(error != NULL_STR)
+			arg = @{ @"error" : [NSString stringWithCxxString:error] };
+		[self performSelectorOnMainThread:@selector(didPerformBackgroundDownload:) withObject:arg waitUntilDone:NO];
+	}
 }
 
 - (void)updateProgress:(NSTimer*)aTimer

@@ -12,9 +12,9 @@ namespace ns
 
 	spelling_tag_t::helper_t::~helper_t ()
 	{
-		NSAutoreleasePool* pool = [NSAutoreleasePool new];
-		[[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:_tag];
-		[pool drain];
+		@autoreleasepool {
+			[[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:_tag];
+		}
 	}
 
 	template <typename _OutputIter>
@@ -37,21 +37,21 @@ namespace ns
 
 	std::vector<ns::range_t> spellcheck (char const* first, char const* last, std::string const& language, spelling_tag_t const& tag)
 	{
-		NSAutoreleasePool* pool = [NSAutoreleasePool new];
 		std::vector<ns::range_t> res;
 		size_t offset = 0;
 
-		while(first != last)
-		{
-			char const* eol = std::find(first, last, '\n');
-			spellcheck(first, eol, language, tag, offset, back_inserter(res));
-			while(eol != last && *eol == '\n')
-				++eol;
-			offset += eol - first;
-			first = eol;
+		@autoreleasepool {
+			while(first != last)
+			{
+				char const* eol = std::find(first, last, '\n');
+				spellcheck(first, eol, language, tag, offset, back_inserter(res));
+				while(eol != last && *eol == '\n')
+					++eol;
+				offset += eol - first;
+				first = eol;
+			}
 		}
 
-		[pool drain];
 		return res;
 	}
 

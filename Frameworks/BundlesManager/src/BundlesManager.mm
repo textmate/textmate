@@ -65,40 +65,38 @@ namespace
 
 	bool background_task_t::handle_request (request_t const& request)
 	{
-		NSAutoreleasePool* pool = [NSAutoreleasePool new];
+		@autoreleasepool {
+			std::vector<bundles_db::source_ptr> const& sources = request.sources;
+			std::vector<bundles_db::bundle_ptr> const& bundles = request.bundles;
+			BundlesManager* self = request.bundles_manager;
 
-		std::vector<bundles_db::source_ptr> const& sources = request.sources;
-		std::vector<bundles_db::bundle_ptr> const& bundles = request.bundles;
-		BundlesManager* self = request.bundles_manager;
+			for(size_t i = 0; i < sources.size(); ++i)
+			{
+				self.threadProgress     = i / (double)sources.size();
+				self.threadActivityText = [NSString stringWithFormat:@"Updating ‘%s’…", sources[i]->name().c_str()];
+				bundles_db::update(sources[i], request.thread_progress, i / (double)sources.size(), (i + 1) / (double)sources.size());
+			}
 
-		for(size_t i = 0; i < sources.size(); ++i)
-		{
-			self.threadProgress     = i / (double)sources.size();
-			self.threadActivityText = [NSString stringWithFormat:@"Updating ‘%s’…", sources[i]->name().c_str()];
-			bundles_db::update(sources[i], request.thread_progress, i / (double)sources.size(), (i + 1) / (double)sources.size());
+			double totalSize = 0;
+			iterate(bundle, bundles)
+				totalSize += (*bundle)->size();
+
+			for(size_t size = 0, i = 0; i < bundles.size(); ++i)
+			{
+				self.threadProgress     = size / totalSize;
+				self.threadActivityText = [NSString stringWithFormat:@"%@Installing ‘%s’…", (bundles.size() > 1 ? [NSString stringWithFormat:@"%zu/%zu: ", i+1, bundles.size()] : @""), bundles[i]->name().c_str()];
+				bundles_db::update(bundles[i], kInstallDirectory, request.thread_progress, size / totalSize, (size + bundles[i]->size()) / totalSize);
+				size += bundles[i]->size();
+			}
+
+			self.threadProgress = 1;
+			if(bundles.size() == 0)
+				self.threadActivityText = @"";
+			else if(bundles.size() == 1)
+				self.threadActivityText = [NSString stringWithFormat:@"Installed ‘%s’.", bundles.back()->name().c_str()];
+			else
+				self.threadActivityText = [NSString stringWithFormat:@"Installed %zu bundles.", bundles.size()];
 		}
-
-		double totalSize = 0;
-		iterate(bundle, bundles)
-			totalSize += (*bundle)->size();
-
-		for(size_t size = 0, i = 0; i < bundles.size(); ++i)
-		{
-			self.threadProgress     = size / totalSize;
-			self.threadActivityText = [NSString stringWithFormat:@"%@Installing ‘%s’…", (bundles.size() > 1 ? [NSString stringWithFormat:@"%zu/%zu: ", i+1, bundles.size()] : @""), bundles[i]->name().c_str()];
-			bundles_db::update(bundles[i], kInstallDirectory, request.thread_progress, size / totalSize, (size + bundles[i]->size()) / totalSize);
-			size += bundles[i]->size();
-		}
-
-		self.threadProgress = 1;
-		if(bundles.size() == 0)
-			self.threadActivityText = @"";
-		else if(bundles.size() == 1)
-			self.threadActivityText = [NSString stringWithFormat:@"Installed ‘%s’.", bundles.back()->name().c_str()];
-		else
-			self.threadActivityText = [NSString stringWithFormat:@"Installed %zu bundles.", bundles.size()];
-
-		[pool drain];
 		return true;
 	}
 

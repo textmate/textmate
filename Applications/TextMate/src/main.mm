@@ -68,13 +68,13 @@ int main (int argc, char const* argv[])
 			pthread_detach(thread);
 	else	perror("pthread_create()");
 
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	for(NSString* variable in [[[NSProcessInfo processInfo] environment] allKeys])
-	{
-		if([variable hasPrefix:@"TM_"])
-			unsetenv([variable UTF8String]);
+	@autoreleasepool {
+		for(NSString* variable in [[[NSProcessInfo processInfo] environment] allKeys])
+		{
+			if([variable hasPrefix:@"TM_"])
+				unsetenv([variable UTF8String]);
+		}
 	}
-	[pool release];
 
 	return NSApplicationMain(argc, argv);
 }

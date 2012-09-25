@@ -52,15 +52,15 @@ namespace
 @implementation OakDebugMenu
 + (void)load
 {
-	NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(installDebugMenu:) name:NSApplicationDidFinishLaunchingNotification object:NSApp];
+	@autoreleasepool {
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(installDebugMenu:) name:NSApplicationDidFinishLaunchingNotification object:NSApp];
 
-	if(NSArray* debugEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakDebug Enabled"])
-	{
-		for(NSString* flag in debugEnabled)
-			OakDebugBaseClass::registry()[[flag UTF8String]] = true;
+		if(NSArray* debugEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:@"OakDebug Enabled"])
+		{
+			for(NSString* flag in debugEnabled)
+				OakDebugBaseClass::registry()[[flag UTF8String]] = true;
+		}
 	}
-	[pool release];
 }
 
 + (void)toggleDebugOption:(id)menuItem
