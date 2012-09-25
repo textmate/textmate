@@ -1,4 +1,5 @@
 #import "OakTabBarView.h"
+#import "OakControl Private.h"
 #import "NSColor Additions.h"
 #import "NSImage Additions.h"
 #import <OakFoundation/NSString Additions.h>
@@ -11,6 +12,18 @@ OAK_DEBUG_VAR(TabBarView);
 
 NSString* const kUserDefaultsDisableTabBarCollapsingKey = @"disableTabBarCollapsing";
 NSString* const OakTabBarViewTabType                    = @"OakTabBarViewTabType";
+
+struct value_t
+{
+	value_t (double v = 0);
+	double current (double t) const;
+	double set_time (double t);
+	void set_new_target (double target, double now, double duration = 1);
+
+private:
+	struct record_t { double start, duration, source, target; };
+	std::vector<record_t> records;
+};
 
 value_t::value_t (double v)
 {
@@ -50,6 +63,9 @@ namespace tab_bar_requisites
 // ==================
 // = Layout Metrics =
 // ==================
+
+struct layout_metrics_t;
+typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
 
 struct layout_metrics_t
 {
@@ -294,6 +310,25 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 @end
 
 @implementation OakTabBarView
+{
+	OBJC_WATCH_LEAKS(OakTabBarView);
+
+	NSMutableArray* tabTitles;
+	NSMutableArray* tabToolTips;
+	NSMutableArray* tabModifiedStates;
+
+	BOOL layoutNeedsUpdate;
+	NSUInteger selectedTab;
+	NSUInteger hiddenTab;
+
+	layout_metrics_ptr metrics;
+	std::vector<NSRect> tabRects;
+	std::map<NSUInteger, value_t> tabDropSpacing;
+	OakTimer* slideAroundAnimationTimer;
+
+	id <OakTabBarViewDelegate> delegate;
+	id <OakTabBarViewDataSource> dataSource;
+}
 @synthesize delegate, dataSource, slideAroundAnimationTimer, layoutNeedsUpdate;
 
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
@@ -517,15 +552,15 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (void)performClose:(id)sender
 {
 	D(DBF_TabBarView, bug("\n"););
-	tag = selectedTab; // performCloseTab: asks for [sender tag]
+	self.tag = selectedTab; // performCloseTab: asks for [sender tag]
 	[NSApp sendAction:@selector(performCloseTab:) to:nil from:self];
 }
 
 - (NSMenu*)menuForEvent:(NSEvent*)anEvent
 {
 	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-	tag = [self tagForLayerContainingPoint:pos];
-	if(tag != NSNotFound && [delegate respondsToSelector:@selector(menuForTabBarView:)])
+	self.tag = [self tagForLayerContainingPoint:pos];
+	if(self.tag != NSNotFound && [delegate respondsToSelector:@selector(menuForTabBarView:)])
 		return [delegate menuForTabBarView:self];
 	return [super menuForEvent:anEvent];
 }

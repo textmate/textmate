@@ -1,4 +1,5 @@
 #import "OakStatusBar.h"
+#import "OakControl Private.h"
 #import "NSColor Additions.h"
 #import "NSImage Additions.h"
 #import "NSView Additions.h"
@@ -360,7 +361,7 @@ static std::vector<cell_layout_t> layout (CGFloat frameWidth, std::vector<sb::ce
 	{
 		if(it->tag == aLayer.tag)
 		{
-			tag = aLayer.tag;
+			self.tag = aLayer.tag;
 			[NSApp sendAction:action to:it->target from:self];
 			return;
 		}

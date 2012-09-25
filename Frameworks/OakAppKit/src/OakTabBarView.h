@@ -4,43 +4,9 @@
 
 PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 
-struct value_t
-{
-	value_t (double v = 0);
-	double current (double t) const;
-	double set_time (double t);
-	void set_new_target (double target, double now, double duration = 1);
-
-private:
-	struct record_t { double start, duration, source, target; };
-	std::vector<record_t> records;
-};
-
-struct layout_metrics_t;
-typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
-
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
 PUBLIC @interface OakTabBarView : OakControl
-{
-	OBJC_WATCH_LEAKS(OakTabBarView);
-
-	NSMutableArray* tabTitles;
-	NSMutableArray* tabToolTips;
-	NSMutableArray* tabModifiedStates;
-
-	BOOL layoutNeedsUpdate;
-	NSUInteger selectedTab;
-	NSUInteger hiddenTab;
-
-	layout_metrics_ptr metrics;
-	std::vector<NSRect> tabRects;
-	std::map<NSUInteger, value_t> tabDropSpacing;
-	OakTimer* slideAroundAnimationTimer;
-
-	id <OakTabBarViewDelegate> delegate;
-	id <OakTabBarViewDataSource> dataSource;
-}
 @property (nonatomic, assign, getter = isExpanded) BOOL expanded;
 @property (nonatomic, assign) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, assign) id <OakTabBarViewDataSource> dataSource;

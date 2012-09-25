@@ -1,4 +1,6 @@
 #import "OakControl.h"
+#import "objc_ptr.h"
+#import <oak/debug.h>
 
 @class OakStatusBar;
 
