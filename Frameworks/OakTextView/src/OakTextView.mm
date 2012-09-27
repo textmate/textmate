@@ -475,6 +475,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(window != self.window)
 		return;
 
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.will-save", editor->scope(to_s([self scopeAttributes]))))
+		[self performBundleItem:*item];
+
 	if(document && layout)
 		document->set_folded(layout->folded_as_string());
 }
