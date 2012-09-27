@@ -44,7 +44,7 @@
 												nil];
 		HighlightRangesWithAttribute(attrStr, FLMatchingTextAttributeName, highlightAttributes);
 
-		[attrStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\u21E5" attributes:nil] autorelease]];
+		[attrStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@"⇥" attributes:nil] autorelease]];
 		CFTypeRef str = (CFAttributedStringRef)attrStr;
 
 		HIThemeTextInfo textInfo = { kHIThemeTextInfoVersionZero, kThemeStateActive, kThemeSmallSystemFont, kHIThemeTextHorizontalFlushRight, kHIThemeTextVerticalFlushCenter, 0, kHIThemeTextTruncationNone, 1, 0 };

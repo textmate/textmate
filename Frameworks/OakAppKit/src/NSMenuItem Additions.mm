@@ -168,7 +168,7 @@
 
 	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
 	[attributedTitle appendTableCellWithString:self.title table:table textAlignment:NSLeftTextAlignment verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:0];
-	[attributedTitle appendTableCellWithString:[NSString stringWithCxxString:(" "+aTabTrigger+"\u21E5")] table:table textAlignment:NSRightTextAlignment
+	[attributedTitle appendTableCellWithString:[NSString stringWithCxxString:(" "+aTabTrigger+"⇥")] table:table textAlignment:NSRightTextAlignment
 		verticalAlignment:font.pointSize >= 13 ? NSTextBlockBottomAlignment : NSTextBlockMiddleAlignment
 		font:[NSFont menuBarFontOfSize:floor(font.pointSize * 0.85)] row:0 column:1];
 	NSString* plainTitle = self.title;
