@@ -167,7 +167,7 @@ namespace
 	saveFolder = [aFolder retain];
 	callback   = aCallback;
 	std::reverse(documents.begin(), documents.end());
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationWillSave" object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationWillSave" object:self userInfo:@{ @"window" : window }];
 	[self saveNextDocument];
 }
 

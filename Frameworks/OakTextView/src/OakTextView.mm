@@ -471,6 +471,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)documentWillSave:(NSNotification*)aNotification
 {
+	NSWindow* window = [[aNotification userInfo] objectForKey:@"window"];
+	if(window != self.window)
+		return;
+
 	if(document && layout)
 		document->set_folded(layout->folded_as_string());
 }
