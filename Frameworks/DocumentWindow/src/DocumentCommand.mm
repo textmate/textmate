@@ -311,7 +311,12 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 
 			std::string exe = find_first_executable(it->locations, baseEnv);
 			if(exe == NULL_STR)
-				return show_command_error(text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched: %2$s.\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", it->command.c_str(), text::join(search_paths(baseEnv), ", ").c_str(), it->variable.c_str()), command.uuid, [controller window]);
+			{
+				std::vector<std::string> paths;
+				for(auto path : search_paths(baseEnv))
+					paths.push_back(path::with_tilde(path));
+				return show_command_error(text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", it->command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), it->variable.c_str()), command.uuid, [controller window]);
+			}
 
 			if(it->variable != NULL_STR)
 					baseEnv[it->variable] = exe;
