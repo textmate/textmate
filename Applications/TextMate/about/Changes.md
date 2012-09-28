@@ -1,5 +1,12 @@
 # Changes
 
+## 2012-09-29 (r9317)
+
+* New semantic class: `callback.document.will-save`. This can be used to have a command called prior to saving a document, the command could e.g. strip trailing whitespace or ensure the document has a `LF` character on last line. Two minor issues is that selection is currently lost after running a “did save” command (when it replaces entire document) and caret is scrolled into the visible area.
+* The about window has been combined with credits, release notes, and a new option allows you to see changes for installed bundles, although presently not much is showing, as you’ll need updated bundles before version information is available (so a lot of info should show in a few days when the various bundles have auto-updated). *[Rasmus Abrahamsen]*
+* If the file browser was showing a lot of items, editor speed would be affected. There still is an issue opening/closing files or when a document goes from modified to non-modified or vice versa.
+* Fix issues with lack of resizing the gutter.
+
 ## 2012-09-24 (r9315)
 
 * Files which use CRLF no longer cause problems for Find in Folder. *[Rasmus Abrahamsen]*
