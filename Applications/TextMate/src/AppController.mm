@@ -133,12 +133,6 @@ void OakOpenDocuments (NSArray* paths)
 	OakOpenDocuments(paths);
 }
 
-- (IBAction)showCredits:(id)sender
-{
-	D(DBF_AppController, bug("\n"););
-	[CreditsWindowController showPath:[[NSBundle mainBundle] pathForResource:@"Credits" ofType:@"html"]];
-}
-
 // =======================
 // = Bundle Item Chooser =
 // =======================
