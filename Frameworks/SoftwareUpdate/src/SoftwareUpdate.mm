@@ -1,6 +1,5 @@
 #import "SoftwareUpdate.h"
 #import "DownloadWindowController.h"
-#import "ReleaseNotesWindowController.h"
 #import "sw_update.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSMenu Additions.h>
@@ -13,7 +12,6 @@
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(SoftwareUpdate_Check);
-OAK_DEBUG_VAR(SoftwareUpdate_ReleaseNotes);
 
 NSString* const kUserDefaultsDisableSoftwareUpdatesKey     = @"SoftwareUpdateDisablePolling";
 NSString* const kUserDefaultsSoftwareUpdateChannelKey      = @"SoftwareUpdateChannel"; // release (default), beta, nightly
@@ -53,24 +51,6 @@ static SoftwareUpdate* SharedInstance;
 			nil]];
 }
 
-- (void)showReleaseNotes:(id)sender
-{
-	D(DBF_SoftwareUpdate_ReleaseNotes, bug("\n"););
-	[ReleaseNotesWindowController showPath:[[NSBundle mainBundle] pathForResource:@"ReleaseNotes" ofType:@"html"]];
-}
-
-- (void)installReleaseNotesMenuItem:(id)sender
-{
-	for(NSMenuItem* item in [[[NSApp mainMenu] itemArray] reverseObjectEnumerator])
-	{
-		if([[item submenu] indexOfItemWithTarget:nil andAction:@selector(showHelp:)] != -1)
-		{
-			[[[item submenu] addItemWithTitle:@"Release Notes" action:@selector(showReleaseNotes:) keyEquivalent:@""] setTarget:self];
-			break;
-		}
-	}
-}
-
 - (id)init
 {
 	if(SharedInstance)
@@ -84,8 +64,6 @@ static SoftwareUpdate* SharedInstance;
 
 		[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(scheduleVersionCheck:) name:NSWorkspaceDidWakeNotification object:[NSWorkspace sharedWorkspace]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
-		[ReleaseNotesWindowController performSelector:@selector(showPathIfUpdated:) withObject:[[NSBundle mainBundle] pathForResource:@"ReleaseNotes" ofType:@"html"] afterDelay:0];
-		[self installReleaseNotesMenuItem:self];
 	}
 	return SharedInstance;
 }
@@ -134,7 +112,7 @@ static SoftwareUpdate* SharedInstance;
 
 - (IBAction)checkForUpdates:(id)sender
 {
-	D(DBF_SoftwareUpdate_ReleaseNotes, bug("\n"););
+	D(DBF_SoftwareUpdate_Check, bug("\n"););
 	if(!isChecking)
 	{
 		self.isChecking = YES;
