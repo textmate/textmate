@@ -587,6 +587,18 @@ namespace bundles_db
 		return false;
 	}
 
+	std::vector<std::string> release_notes (std::string const& installDir)
+	{
+		std::vector<std::string> res;
+		for(auto bundle : bundle_t::local_bundles(installDir))
+		{
+			std::string changes = path::join(bundle->path(), "Changes.json");
+			if(path::exists(changes))
+				res.push_back(changes);
+		}
+		return res;
+	}
+
 	// ===========================
 	// = Bundle Dependency Logic =
 	// ===========================

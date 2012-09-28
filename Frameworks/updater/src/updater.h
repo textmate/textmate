@@ -75,6 +75,7 @@ namespace bundles_db
 		friend std::vector<bundle_ptr> index (std::string const& installDir);
 		friend bool update (bundle_ptr bundle, std::string const& installDir, double* progress, double min, double max);
 		friend bool uninstall (bundle_ptr bundle, std::string const& installDir);
+		friend std::vector<std::string> release_notes (std::string const& installDir);
 
 		oak::uuid_t _uuid;
 
@@ -134,6 +135,8 @@ namespace bundles_db
 	PUBLIC bool update (bundle_ptr bundle, std::string const& installDir = NULL_STR, double* progress = NULL, double min = 0, double max = 1);
 	PUBLIC bool install (bundle_ptr bundle, std::string const& installDir = NULL_STR, double* progress = NULL, double min = 0, double max = 1);
 	PUBLIC bool uninstall (bundle_ptr bundle, std::string const& installDir = NULL_STR);
+
+	PUBLIC std::vector<std::string> release_notes (std::string const& installDir = NULL_STR);
 
 } /* bundles_db */
 
