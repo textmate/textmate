@@ -2,6 +2,16 @@
 #import <OakFoundation/NSString Additions.h>
 #import <updater/updater.h>
 
+static NSString* const kUserDefaultsReleaseNotesDigestKey = @"releaseNotesDigest";
+
+static NSData* Digest (NSString* someString)
+{
+	char const* str = [someString UTF8String];
+	char md[SHA_DIGEST_LENGTH];
+	CC_SHA1((unsigned char*)str, strlen(str), (unsigned char*)md);
+	return [NSData dataWithBytes:md length:sizeof(md)];
+}
+
 // ============================
 // = JavaScript Bridge Object =
 // ============================
@@ -33,6 +43,23 @@
 @end
 
 @implementation AboutWindowController
++ (BOOL)shouldShowChangesWindow
+{
+	NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"];
+	if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
+	{
+		NSData* lastDigest    = [[NSUserDefaults standardUserDefaults] dataForKey:kUserDefaultsReleaseNotesDigestKey];
+		NSData* currentDigest = Digest(releaseNotes);
+		if(lastDigest)
+		{
+			if(![lastDigest isEqualToData:currentDigest])
+				return YES;
+		}
+		[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
+	}
+	return NO;
+}
+
 - (id)init
 {
 	NSRect visibleRect = [[NSScreen mainScreen] visibleFrame];
@@ -86,6 +113,16 @@
 {
 	[self didClickToolbarItem:@"About"];
 	[self showWindow:self];
+}
+
+- (void)showChangesWindow:(id)sender
+{
+	[self didClickToolbarItem:@"Changes"];
+	[self showWindow:self];
+
+	NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"];
+	if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
+		[[NSUserDefaults standardUserDefaults] setObject:Digest(releaseNotes) forKey:kUserDefaultsReleaseNotesDigestKey];
 }
 
 // ====================

@@ -53,6 +53,12 @@ void OakOpenDocuments (NSArray* paths)
 	spellingMenu.delegate = self;
 
 	[NSApp setDelegate:self];
+
+	if([AboutWindowController shouldShowChangesWindow])
+	{
+		self.aboutWindowController = [[[AboutWindowController alloc] init] autorelease];
+		[self.aboutWindowController performSelector:@selector(showChangesWindow:) withObject:self afterDelay:0];
+	}
 }
 
 - (IBAction)newDocumentAndActivate:(id)sender
