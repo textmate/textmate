@@ -579,7 +579,7 @@ def all_targets(buildfile, builddir)
   return res unless File.exists? buildfile
 
   Dir.chdir(File.dirname(buildfile)) do
-    targets = %x{ ninja -f #{[ buildfile ].shelljoin } -t targets all }
+    targets = %x{ ${TM_NINJA:-ninja} -f #{[ buildfile ].shelljoin } -t targets all }
     targets.each do |line|
       if line =~ /.*(?=:(?! phony))/
         path = $&
