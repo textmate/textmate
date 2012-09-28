@@ -2389,7 +2389,7 @@
 					<string key="NSFrameSize">{269, 102}</string>
 					<reference key="NSNextKeyView" ref="240907648"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
+				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
 				<string key="NSMinSize">{269, 124}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<string key="NSFrameAutosaveName">Go to Line</string>
@@ -2430,14 +2430,6 @@
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<object class="NSMutableArray" key="connectionRecords">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">orderFrontStandardAboutPanel:</string>
-						<reference key="source" ref="25255706"/>
-						<reference key="destination" ref="799402673"/>
-					</object>
-					<int key="connectionID">142</int>
-				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
 						<string key="label">hideOtherApplications:</string>
@@ -3629,6 +3621,14 @@
 						<reference key="destination" ref="274118566"/>
 					</object>
 					<int key="connectionID">800</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">orderFrontAboutPanel:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="799402673"/>
+					</object>
+					<int key="connectionID">802</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -6081,7 +6081,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">801</int>
+			<int key="maxID">802</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

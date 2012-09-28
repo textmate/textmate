@@ -1,6 +1,6 @@
 #import "AppController.h"
 #import "Favorites.h"
-#import "CreditsWindowController.h"
+#import "AboutWindowController.h"
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <Find/Find.h>
@@ -40,6 +40,7 @@ void OakOpenDocuments (NSArray* paths)
 
 @interface AppController ()
 @property (nonatomic, retain) OakFilterWindowController* filterWindowController;
+@property (nonatomic, retain) AboutWindowController* aboutWindowController;
 @end
 
 @implementation AppController
@@ -64,6 +65,13 @@ void OakOpenDocuments (NSArray* paths)
 {
 	[NSApp activateIgnoringOtherApps:YES];
 	[self openDocument:sender];
+}
+
+- (IBAction)orderFrontAboutPanel:(id)sender
+{
+	if(!self.aboutWindowController)
+		self.aboutWindowController = [[[AboutWindowController alloc] init] autorelease];
+	[self.aboutWindowController showAboutWindow:self];
 }
 
 - (IBAction)orderFrontFindPanel:(id)sender
