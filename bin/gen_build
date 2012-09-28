@@ -799,12 +799,12 @@ rule debug_executable
 
 rule run_application
   command = {                        $
-    if pgrep -q "$appname"; then     $
+    if pgrep >/dev/null "$appname"; then $
       if [[ -x "$$DIALOG" && $$("$$DIALOG" < /dev/null alert --title "Relaunch $appname?" --body "Would you like to quit $appname and start the newly built version?" --button1 Relaunch --button2 Cancel|pl) != *"buttonClicked = 0"* ]]; $
         then exit;                   $
       fi;                            $
       pkill "$appname";              $
-      while pgrep -q "$appname"; do  $
+      while pgrep >/dev/null "$appname"; do $
         if (( ++n == 10 )); then     $
           test -x "$$DIALOG" && "$$DIALOG" </dev/null alert --title "Relaunch Timed Out" --body "Unable to exit $appname." --button1 OK; $
           exit;                      $
