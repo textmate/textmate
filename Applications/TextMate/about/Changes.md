@@ -1,4 +1,4 @@
-# Release Notes
+# Changes
 
 ## 2012-09-24 (r9315)
 
@@ -102,7 +102,7 @@
 		[ 'attr, ' ]
 		windowTitleProject = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 		windowTitle        = '$TM_DISPLAYNAME$windowTitleProject$windowTitleSCM'
-	
+
 	Normally we can’t use `projectDirectory` in a default/global setting, because that variable is set later, and we have no way to specify “late binding”. However, by setting it in a scope selector section we evaluate the variable after a potential `projectDirectory` has been set in a more local `.tm_properties` file. The scope selector used here is `attr, ` which means all `attr` scopes or (the comma operator) the empty scope selector (which matches everything).
 
 	The above is just a “hack” until better solutions have been implemented.
@@ -384,11 +384,11 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Favorites prefixed with ‘[DIR]’ show folders within.
 
 	For example if you have all your projects under `~/Projects` then you can do:
-    
+
 	    mkdir -p ~/Library/Application\ Support/TextMate/Favorites
 	    cd ~/Library/Application\ Support/TextMate/Favorites
 	    ln -s ~/Projects "[DIR] My Projects"
-    
+
 	This will then have all the folders inside `~/Projects` show when you choose Open Favorites… (⇧⌘O).
 
 * When TextMate launches it creates a socket for `mate` to connect to. There have been [a few reports][1] of TextMate reporting a problem creating this socket. We now also show an error if an old socket exist and we are unable to delete this old socket. If you are seeing an issue, please don’t just add “it fails for me too”. Instead provide as much information as possible, and if e.g. it says it failed to delete the socket, fire up Terminal and check the file flags (`ls -l`) and try to delete it from Terminal.
@@ -422,9 +422,9 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Split `disableIndentCorrections` into two settings:
 
 	The `disableIndentCorrections` setting disables the (aggressive) indent corrections that TextMate does while you type.
-    
+
 	An additional `indentOnPaste` setting controls how to indent when pasting and can be set to:
-    
+
 	1. `simple` — this is the indent behavior which was previously implied when setting `disableIndentCorrections`. It indents the paste to the position of the caret and works well for Python.
 	2. `disable` — the text is inserted as-is without indenting it.
 	3. «unset» — indent the paste based on the indent patterns of the current scope.
@@ -483,7 +483,7 @@ The source for TextMate 2 is now [available at GitHub][1] under a GPL 3 license.
 * Tab triggers are no longer rendered in the menu. This is caused by the switch to the 10.7 SDK which no longer allow the old way of rendering these items. Replacement code is of course planned.
 * Projects with a `*.ninja` file now get the `attr.project.ninja` scope.
 * Sections in `.tm_properties` files can now target multiple globs/scopes by separating them with a semi-colon, e.g.:
-	
+
 		[ source.ruby; *.rb ]
 		tabSize = 2
 

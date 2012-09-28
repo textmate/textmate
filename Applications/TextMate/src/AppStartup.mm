@@ -1,5 +1,6 @@
 #import "AppStartup.h"
 #import "AppController.h"
+#import "BundlesReleaseNotes.h"
 #import <DocumentWindow/DocumentController.h>
 #import "ODBEditorSuite.h"
 #import "TMPlugInController.h"
@@ -120,6 +121,7 @@ OAK_DEBUG_VAR(AppStartup);
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
 
 	[BundlesManager sharedInstance]; // trigger periodic polling of remote bundle index
+	[BundlesReleaseNotes installReleaseNotesMenuItem:self];
 
 	BOOL disableSessionRestorePrefs    = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
 	BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
