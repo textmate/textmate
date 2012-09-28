@@ -1,4 +1,5 @@
 #import "AboutWindowController.h"
+#import <OakAppKit/OakSubmenuController.h>
 #import <OakFoundation/NSString Additions.h>
 #import <updater/updater.h>
 
@@ -136,6 +137,8 @@ static NSData* Digest (NSString* someString)
 		identifier = [sender itemIdentifier];
 	else if([sender respondsToSelector:@selector(representedObject)])
 		identifier = [sender representedObject];
+	else if([sender isKindOfClass:[NSMenu class]])
+		identifier = [[OakSubmenuController sharedInstance] representedObjectForSender:sender];
 	else if([sender respondsToSelector:@selector(description)])
 		identifier = [sender description];
 
