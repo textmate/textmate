@@ -11,7 +11,6 @@
 #import <Security/Security.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
-#import <asl.h>
 #import <libkern/OSAtomic.h>
 #import <machine/byte_order.h>
 

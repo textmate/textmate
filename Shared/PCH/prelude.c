@@ -4,17 +4,14 @@
 #import <AvailabilityMacros.h>
 #import <sys/types.h>
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
-#import <copyfile.h>
-#import <execinfo.h>
-#endif
-
 #import <aio.h>
 #import <assert.h>
+#import <copyfile.h>
 #import <ctype.h>
 #import <curl/curl.h>
 #import <dirent.h>
 #import <errno.h>
+#import <execinfo.h> // stack trace for debug
 #import <fcntl.h>
 #import <float.h>
 #import <fnmatch.h>
@@ -26,11 +23,9 @@
 #import <math.h>
 #import <netdb.h>
 #import <netinet/in.h>
-#import <poll.h>
 #import <pthread.h>
 #import <pwd.h>
 #import <signal.h>
-#import <sqlite3.h>
 #import <stdarg.h>
 #import <stdio.h>
 #import <stdlib.h>
@@ -51,13 +46,6 @@
 #import <sys/xattr.h>
 #import <unistd.h>
 #import <uuid/uuid.h>
-
-#import <openssl/bio.h>
-#import <openssl/evp.h>
-#import <openssl/pem.h>
-#import <openssl/rsa.h>
-#import <openssl/sha.h>
-#import <openssl/err.h>
 
 #import <zlib.h>
 
