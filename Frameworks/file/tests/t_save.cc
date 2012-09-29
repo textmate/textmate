@@ -43,7 +43,7 @@ class SaveTests : public CxxTest::TestSuite
 
 	static std::string sha1 (std::string const& src)
 	{
-		char md[SHA_DIGEST_LENGTH];
+		char md[CC_SHA1_DIGEST_LENGTH];
 		CC_SHA1((unsigned char*)src.data(), src.size(), (unsigned char*)md);
 		return std::string(md, md + sizeof(md));
 	}

@@ -8,7 +8,7 @@ static NSString* const kUserDefaultsReleaseNotesDigestKey = @"releaseNotesDigest
 static NSData* Digest (NSString* someString)
 {
 	char const* str = [someString UTF8String];
-	char md[SHA_DIGEST_LENGTH];
+	char md[CC_SHA1_DIGEST_LENGTH];
 	CC_SHA1((unsigned char*)str, strlen(str), (unsigned char*)md);
 	return [NSData dataWithBytes:md length:sizeof(md)];
 }
