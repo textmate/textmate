@@ -5,13 +5,13 @@
 #import <document/collection.h>
 #import <io/path.h>
 
-static void sig_int_handler ()
+static void sig_int_handler (void* unused)
 {
 	fprintf(stderr, "%s received SIGINT: Regular shutdown.\n", getprogname());
 	[NSApp terminate:nil];
 }
 
-static void sig_term_handler ()
+static void sig_term_handler (void* unused)
 {
 	fprintf(stderr, "%s received SIGTERM: Quick shutdown.\n", getprogname());
 	document::save_session(true);
@@ -21,52 +21,24 @@ static void sig_term_handler ()
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-static cf::callback_ptr SigIntSource  = cf::create_callback(&sig_int_handler);
-static cf::callback_ptr SigTermSource = cf::create_callback(&sig_term_handler);
-
-void* signal_handler_thread (void* userdata)
-{
-	oak::set_thread_name("main::signal_handler");
-
-	sigset_t sigs;
-	sigemptyset(&sigs);
-	sigaddset(&sigs, SIGINT);
-	sigaddset(&sigs, SIGTERM);
-
-	int receivedSignal;
-	while(sigwait(&sigs, &receivedSignal) != -1)
-	{
-		switch(receivedSignal)
-		{
-			case SIGINT:  SigIntSource->signal();  break;
-			case SIGTERM: SigTermSource->signal(); break;
-		}
-	}
-	perror("sigwait()");
-	return NULL;
-}
-
 int main (int argc, char const* argv[])
 {
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	oak::application_t::set_support(path::join(path::home(), "Library/Application Support/TextMate"));
 	oak::application_t app(argc, argv);
-	signal(SIGINT,  SIG_DFL);
-	signal(SIGTERM, SIG_DFL);
+
+	signal(SIGINT,  SIG_IGN);
+	signal(SIGTERM, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
 
-	sigset_t sigs;
-	sigemptyset(&sigs);
-	sigaddset(&sigs, SIGINT);
-	sigaddset(&sigs, SIGTERM);
-	if(pthread_sigmask(SIG_BLOCK, &sigs, NULL) == -1)
-		perror("pthread_sigmask()");
+	dispatch_source_t sigTermSrc = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGTERM, 0, dispatch_get_main_queue());
+	dispatch_source_set_event_handler_f(sigTermSrc, &sig_term_handler);
+	dispatch_resume(sigTermSrc);
 
-	pthread_t thread;
-	if(pthread_create(&thread, NULL, &signal_handler_thread, NULL) == 0)
-			pthread_detach(thread);
-	else	perror("pthread_create()");
+	dispatch_source_t sigIntSrc = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGINT, 0, dispatch_get_main_queue());
+	dispatch_source_set_event_handler_f(sigIntSrc, &sig_int_handler);
+	dispatch_resume(sigIntSrc);
 
 	@autoreleasepool {
 		for(NSString* variable in [[[NSProcessInfo processInfo] environment] allKeys])
