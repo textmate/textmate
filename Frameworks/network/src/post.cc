@@ -18,21 +18,21 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 
 	iterate(pair, payload)
 	{
-		if(pair->second.size() < 2 || pair->second[0] != '@')
+		if(pair->second.find('@') == 0)
+		{
+			curl_formadd(&formpost, &lastptr,
+				CURLFORM_PTRNAME,    pair->first.data(),
+				CURLFORM_NAMELENGTH, pair->first.size(),
+				CURLFORM_FILE,       pair->second.substr(1).c_str(),
+				CURLFORM_END);
+		}
+		else if(pair->second != NULL_STR)
 		{
 			curl_formadd(&formpost, &lastptr,
 				CURLFORM_PTRNAME,        pair->first.data(),
 				CURLFORM_NAMELENGTH,     pair->first.size(),
 				CURLFORM_PTRCONTENTS,    pair->second.data(),
 				CURLFORM_CONTENTSLENGTH, pair->second.size(),
-				CURLFORM_END);
-		}
-		else
-		{
-			curl_formadd(&formpost, &lastptr,
-				CURLFORM_PTRNAME,    pair->first.data(),
-				CURLFORM_NAMELENGTH, pair->first.size(),
-				CURLFORM_FILE,       pair->second.substr(1).c_str(),
 				CURLFORM_END);
 		}
 	}
