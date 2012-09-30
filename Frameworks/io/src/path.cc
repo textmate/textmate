@@ -935,9 +935,12 @@ namespace path
 	bool make_dir (std::string const& path)
 	{
 		D(DBF_IO_Path, bug("%s\n", path.c_str()););
-		if(exists(path))
-			return info(resolve(path)) & flag::directory;
-		return path == NULL_STR ? false : make_dir(parent(path)) && mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH) == 0;
+		if(path != NULL_STR && !exists(path))
+		{
+			make_dir(parent(path));
+			mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH);
+		}
+		return exists(path) && info(resolve(path)) & flag::directory;
 	}
 
 	void touch_tree (std::string const& basePath)
