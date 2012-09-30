@@ -30,7 +30,22 @@ static std::string hardware_info (int field, bool integer = false)
 	return "???";
 }
 
-static std::string ContactInfo;
+static std::string create_gzipped_file (std::string const& path)
+{
+	std::string res = path::temp("gzipped_crash_log");
+	if(gzFile fp = gzopen(res.c_str(), "wb"))
+	{
+		std::string const text = path::content(path);;
+		gzwrite(fp, text.data(), text.size());
+		gzclose(fp);
+	}
+	else
+	{
+		unlink(res.c_str());
+		res = NULL_STR;
+	}
+	return res;
+}
 
 namespace
 {
@@ -72,26 +87,21 @@ namespace
 
 		static std::set<std::string> handle_request (request_t const& request)
 		{
-			std::map<std::string, std::string> map;
-			map["hardware"] = hardware_info(HW_MODEL) + "/" + hardware_info(HW_MACHINE) + "/" + hardware_info(HW_NCPU, true);
-			if(ContactInfo != NULL_STR)
-				map["contact"] = ContactInfo;
+			std::map<std::string, std::string> payload;
+			payload["hardware"] = hardware_info(HW_MODEL) + "/" + hardware_info(HW_MACHINE) + "/" + hardware_info(HW_NCPU, true);
+			payload["contact"]  = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
 
 			std::set<std::string> res;
-			iterate(report, request.reports)
+			for(std::string const report : request.reports)
 			{
-				std::string file = path::temp("gzipped_crash_log");
-				if(gzFile fp = gzopen(file.c_str(), "wb"))
+				std::string gzippedReport = create_gzipped_file(report);
+				if(gzippedReport != NULL_STR)
 				{
-					std::string const text = path::content(*report);;
-					gzwrite(fp, text.data(), text.size());
-					gzclose(fp);
-
-					map["report"] = "@" + file;
-					long rc = post_to_server(request.url, map);
+					payload["report"] = "@" + gzippedReport;
+					long rc = post_to_server(request.url, payload);
 					if(200 <= rc && rc < 300 || 400 <= rc && rc < 500) // we don’t resend reports on a 4xx failure.
-						res.insert(*report);
-					unlink(file.c_str());
+						res.insert(report);
+					unlink(gzippedReport.c_str());
 				}
 			}
 			return res;
@@ -133,6 +143,5 @@ void OakSubmitNewCrashReportsInBackground (NSString* url, NSString* processName)
 	if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableCrashReportingKey])
 		return;
 
-	ContactInfo = to_s([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsCrashReportsContactInfoKey]);
 	new post_reports_in_background_t(to_s(url), to_s(processName ?: [[NSProcessInfo processInfo] processName]));
 }
