@@ -968,19 +968,36 @@ namespace ng
 			}
 		}
 
-		if(selection.size() > 1 || selection.size() == 1 && !selection.last().empty())
+		if(selection.size() > 1)
 		{
-			std::string scopeAtom = "dyn.selection";
+			res.left  = res.left.append("dyn.caret.mixed");
+			res.right = res.right.append("dyn.caret.mixed");
+		}
+		else if(selection.last().columnar)
+		{
+			res.left  = res.left.append("dyn.caret.mixed.columnar");
+			res.right = res.right.append("dyn.caret.mixed.columnar");
+		}
+		else
+		{
+			size_t const leftCaret  = selection.last().min().index;
+			size_t const rightCaret = selection.last().max().index;
 
-			if(selection.size() > 1)
-				scopeAtom += ".discontinuous";
-			else if(selection.last().columnar)
-				scopeAtom += ".columnar";
-			else
-				scopeAtom += ".continuous";
+			if(leftCaret == 0)
+				res.left = res.left.append("dyn.caret.begin.document");
+			else if(leftCaret == buffer.begin(buffer.convert(leftCaret).line))
+				res.left = res.left.append("dyn.caret.begin.line");
 
-			res.left  = res.left.append(scopeAtom);
-			res.right = res.right.append(scopeAtom);
+			if(rightCaret == buffer.size())
+				res.right = res.right.append("dyn.caret.end.document");
+			else if(rightCaret == buffer.eol(buffer.convert(rightCaret).line))
+				res.right = res.right.append("dyn.caret.end.line");
+		}
+
+		if(not_empty(buffer, selection))
+		{
+			res.left  = res.left.append("dyn.selection");
+			res.right = res.right.append("dyn.selection");
 		}
 
 		return res;
