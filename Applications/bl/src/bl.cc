@@ -183,21 +183,54 @@ int main (int argc, char const* argv[])
 	}
 	else if(command == "install")
 	{
+		std::vector<bundles_db::bundle_ptr> toInstall;
 		citerate(bundle, filtered_bundles(index, sourceNames, bundleNames))
 		{
 			if(!(*bundle)->installed())
-			{
-				fprintf(stderr, "Installing ‘%s’...", (*bundle)->name().c_str());
-				if(install(*bundle, installDir))
-						fprintf(stderr, "ok!\n");
-				else	fprintf(stderr, " *** failed!\n");
-			}
-			else
-			{
-				fprintf(stderr, "skip ‘%s’ (%s) -- already installed\n", (*bundle)->name().c_str(), (*bundle)->origin().c_str());
-			}
+					toInstall.push_back(*bundle);
+			else	fprintf(stderr, "skip ‘%s’ (%s) -- already installed\n", (*bundle)->name().c_str(), (*bundle)->origin().c_str());
 		}
-		save_index(index, installDir);
+
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			size_t n = toInstall.size();
+			__block std::vector<bundles_db::bundle_ptr> failed;
+			__block std::vector<double> progress(n);
+
+			if(dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue()))
+			{
+				dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, NSEC_PER_SEC / 10, NSEC_PER_SEC / 5);
+				dispatch_source_set_event_handler(timer, ^{
+					double current = 0, total = 0;
+					for(size_t i = 0; i < n; ++i)
+					{
+						current += toInstall[i]->size() * progress[i];
+						total   += toInstall[i]->size();
+					}
+					fprintf(stderr, "\rDownloading... %4.1f%%", 100 * current / total);
+				});
+				dispatch_resume(timer);
+			}
+
+			dispatch_apply(n, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+				if(!install(toInstall[i], installDir, &progress[i]))
+					failed.push_back(toInstall[i]);
+			});
+
+			dispatch_async(dispatch_get_main_queue(), ^{
+				fprintf(stderr, "\rDownloading... Done!   \n");
+				if(!failed.empty())
+				{
+					std::vector<std::string> names;
+					std::transform(failed.begin(), failed.end(), back_inserter(names), [](bundles_db::bundle_ptr const& bundle){ return bundle->name(); });
+					fprintf(stderr, "*** failed to install %s.\n", text::join(names, ", ").c_str());
+				}
+				save_index(index, installDir);
+				if(!failed.empty())
+					exit(1);
+				exit(0);
+			});
+		});
+		dispatch_main();
 	}
 	else if(command == "uninstall")
 	{
