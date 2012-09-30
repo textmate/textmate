@@ -119,7 +119,6 @@ namespace bundles_db
 	};
 
 	PUBLIC bool update (source_ptr source, double* progress = NULL, double min = 0, double max = 1);
-	PUBLIC bool update_sources (std::string const& installDir = NULL_STR);
 	PUBLIC std::vector<source_ptr> sources (std::string const& installDir = NULL_STR);
 	PUBLIC bool save_sources (std::vector<source_ptr> const& sources, std::string const& installDir = NULL_STR);
 

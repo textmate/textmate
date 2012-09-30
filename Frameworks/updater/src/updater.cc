@@ -163,17 +163,6 @@ namespace bundles_db
 		return path != NULL_STR;
 	}
 
-	bool update_sources (std::string const& installDir)
-	{
-		bool res = true;
-		citerate(source, sources(installDir))
-		{
-			if(!(*source)->disabled() && (*source)->needs_update())
-				res = update(*source) || res;
-		}
-		return res;
-	}
-
 	// ===========
 
 	static bool grammar_name_less (grammar_info_ptr lhs, grammar_info_ptr const& rhs)
