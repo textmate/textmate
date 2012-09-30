@@ -68,6 +68,59 @@ namespace ng
 		return res;
 	}
 
+	template <typename _OutputIter>
+	_OutputIter transpose_selections (buffer_t const& _buffer, ranges_t const& _selections, _OutputIter out)
+	{
+		ranges_t sel;
+		iterate(range, _selections)
+		{
+			size_t from = range->min().index, to = range->max().index;
+			if(from == to)
+			{
+				text::pos_t const& pos = _buffer.convert(from);
+
+				if(from == 0 || from == _buffer.size())
+				{
+				}
+				else if(pos.column == 0)
+				{
+					from = _buffer.begin(pos.line - 1);
+					to = pos.line+1 == _buffer.lines() ? _buffer.size() : _buffer.begin(pos.line + 1);
+				}
+				else if(from == _buffer.eol(pos.line))
+				{
+					from = _buffer.begin(pos.line);
+					to = pos.line+2 == _buffer.lines() ? _buffer.size() : _buffer.begin(pos.line + 2);
+				}
+				else
+				{
+					from = from - _buffer[from-1].size();
+					to   = to + _buffer[to].size();
+				}
+				*out++ = std::make_pair(range_t(from, to), transform::transpose(_buffer.substr(from, to)));
+			}
+			else if(range->columnar) // TODO from.line != to.line
+			{
+				std::vector<std::string> strings;
+				std::vector<range_t> ranges;
+
+				citerate(r, dissect_columnar(_buffer, *range))
+				{
+					strings.push_back(_buffer.substr(r->min().index, r->max().index));
+					ranges.push_back(*r);
+				}
+
+				for(size_t i = 0; i < ranges.size(); ++i)
+					*out++ = std::make_pair(ranges[i], strings[ranges.size()-1 - i]);
+			}
+			else
+			{
+				*out++ = std::make_pair(range_t(from, to), transform::transpose(_buffer.substr(from, to)));
+			}
+		}
+		return out;
+	}
+
 	// =============================
 	// = Preserve Selection Helper =
 	// =============================
@@ -973,56 +1026,20 @@ namespace ng
 			case kTranspose:
 			{
 				std::multimap<range_t, std::string> replacements;
-
-				ranges_t sel;
-				iterate(range, _selections)
+				auto inserter = std::insert_iterator<decltype(replacements)>(replacements, replacements.begin());
+				if(_selections.size() > 1 && not_empty(_buffer, _selections))
 				{
-					size_t from = range->min().index, to = range->max().index;
-					if(from == to)
-					{
-						text::pos_t const& pos = _buffer.convert(from);
-
-						if(from == 0 || from == _buffer.size())
-						{
-						}
-						else if(pos.column == 0)
-						{
-							from = _buffer.begin(pos.line - 1);
-							to = pos.line+1 == _buffer.lines() ? _buffer.size() : _buffer.begin(pos.line + 1);
-						}
-						else if(from == _buffer.eol(pos.line))
-						{
-							from = _buffer.begin(pos.line);
-							to = pos.line+2 == _buffer.lines() ? _buffer.size() : _buffer.begin(pos.line + 2);
-						}
-						else
-						{
-							from = from - _buffer[from-1].size();
-							to   = to + _buffer[to].size();
-						}
-						replacements.insert(std::make_pair(range_t(from, to), transform::transpose(_buffer.substr(from, to))));
-					}
-					else if(range->columnar) // TODO from.line != to.line
-					{
-						std::vector<std::string> strings;
-						std::vector<range_t> ranges;
-
-						citerate(r, dissect_columnar(_buffer, *range))
-						{
-							strings.push_back(_buffer.substr(r->min().index, r->max().index));
-							ranges.push_back(*r);
-						}
-
-						for(size_t i = 0; i < ranges.size(); ++i)
-							replacements.insert(std::make_pair(ranges[i], strings[ranges.size()-1 - i]));
-					}
-					else
-					{
-						replacements.insert(std::make_pair(range_t(from, to), transform::transpose(_buffer.substr(from, to))));
-					}
+					std::multiset<range_t> ranges(_selections.begin(), _selections.end());
+					std::vector<std::string> strings;
+					std::transform(ranges.begin(), ranges.end(), back_inserter(strings), [this](range_t const& r){ return _buffer.substr(r.min().index, r.max().index); });
+					std::next_permutation(strings.begin(), strings.end());
+					std::transform(ranges.begin(), ranges.end(), strings.begin(), inserter, [](range_t const& r, std::string const& str){ return std::make_pair(r, str); });
 				}
-
-				_selections = this->replace(replacements);
+				else
+				{
+					transpose_selections(_buffer, _selections, inserter);
+				}
+				_selections = this->replace(replacements, not_empty(_buffer, _selections));
 			}
 			break;
 
