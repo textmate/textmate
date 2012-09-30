@@ -170,7 +170,27 @@ int main (int argc, char const* argv[])
 
 	static std::set<std::string> const CommandsNeedingUpdatedSources = { "update", "install", "list", "show" };
 	if(CommandsNeedingUpdatedSources.find(command) != CommandsNeedingUpdatedSources.end())
-		bundles_db::update_sources(installDir);
+	{
+		std::vector<bundles_db::source_ptr> toUpdate;
+		citerate(source, bundles_db::sources(installDir))
+		{
+			if(!(*source)->disabled() && (*source)->needs_update())
+				toUpdate.push_back(*source);
+		}
+
+		__block std::vector<bundles_db::source_ptr> failedUpdate;
+		dispatch_apply(toUpdate.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+			fprintf(stderr, "Downloading ‘%s’…\n", toUpdate[i]->url().c_str());
+			if(!update(toUpdate[i]))
+				failedUpdate.push_back(toUpdate[i]);
+		});
+
+		for(auto source : failedUpdate)
+			fprintf(stderr, "*** failed to update source: ‘%s’ (%s)\n", source->name().c_str(), source->url().c_str());
+
+		if(!failedUpdate.empty())
+			exit(1);
+	}
 
 	std::vector<bundles_db::bundle_ptr> index = bundles_db::index(installDir);
 	if(command == "list")
