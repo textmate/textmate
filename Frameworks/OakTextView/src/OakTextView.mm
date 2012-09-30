@@ -79,6 +79,7 @@ static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t cons
 	bool lastWasWordChar           = false;
 	std::string lastCharacterClass = ng::kCharacterClassUnknown;
 
+	scope::scope_t const rightScope = ng::scope(buffer, ng::ranges_t(caret), scopeAttributes).right;
 	for(size_t i = bol; i < caret; i += buffer[i].size())
 	{
 		// we don’t use text::is_word_char because that function treats underscores as word characters, which is undesired, see <issue://157>.
@@ -87,7 +88,7 @@ static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t cons
 
 		if(i == bol || lastWasWordChar != isWordChar || lastCharacterClass != characterClass)
 		{
-			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, buffer.substr(i, caret), ng::scope(buffer, ng::ranges_t(i), scopeAttributes));
+			std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldTabTrigger, buffer.substr(i, caret), scope::context_t(ng::scope(buffer, ng::ranges_t(i), scopeAttributes).left, rightScope));
 			if(!items.empty())
 			{
 				if(range)
