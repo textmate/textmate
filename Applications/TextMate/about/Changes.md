@@ -1,5 +1,21 @@
 # Changes
 
+## 2012-10-01 (r9319)
+
+* Using “Transpose” (⌃T) with a discontinuous selection will now swap the selected strings. If pressed repeatedly, and more than two strings are selected, it will cycle through all possible permutations.
+
+* The scope now contains `dyn.selection` and/or `dyn.caret.*` based on the following rules:
+
+	- If there is one or more selections: `dyn.selection`.
+	- If there is a single zero-width selection: `dyn.caret.mixed.columnar`.
+	- If there are multiple carets and/or selections: `dyn.caret.mixed`.
+	- When there is only a single caret or a single continuous selection the left scope may contain: `dyn.caret.begin.line` or `dyn.caret.begin.document`.
+	- Likewise the right scope may contain: `dyn.caret.end.line` or `dyn.caret.end.document`.
+
+* When expanding tab triggers the left scope is the scope to the left of the start of the potential tab trigger and the right scope is likewise that to the right of the potential tab trigger.
+
+* `rmate`: Overwriting an existing file now preserve the existing file’s group and owner.
+
 ## 2012-09-29 (r9317)
 
 * New semantic class: `callback.document.will-save`. This can be used to have a command called prior to saving a document, the command could e.g. strip trailing whitespace or ensure the document has a `LF` character on last line. Two minor issues is that selection is currently lost after running a “did save” command (when it replaces entire document) and caret is scrolled into the visible area.
