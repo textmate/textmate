@@ -188,7 +188,7 @@ static BundlesManager* SharedInstance;
 
 	if(!sources.empty())
 	{
-		if(network::can_reach_host("updates.textmate.org"))
+		if(network::can_reach_host("api.textmate.org"))
 			new background_task_t(sources, std::vector<bundles_db::bundle_ptr>(), self, &threadProgress);
 	}
 	else
