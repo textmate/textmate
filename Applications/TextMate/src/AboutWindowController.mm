@@ -2,6 +2,7 @@
 #import <OakAppKit/OakSubmenuController.h>
 #import <OakFoundation/NSString Additions.h>
 #import <updater/updater.h>
+#import <license/license.h>
 
 static NSString* const kUserDefaultsReleaseNotesDigestKey = @"releaseNotesDigest";
 
@@ -19,19 +20,31 @@ static NSData* Digest (NSString* someString)
 
 @interface AboutWindowJSBridge : NSObject
 {
+	std::map<std::string, std::string> currentLicense;
+
 	NSString* version;
+	NSString* licensees;
 }
 @end
 
 @implementation AboutWindowJSBridge
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector { return YES; }
-+ (BOOL)isKeyExcludedFromWebScript:(char const*)name   { return strcmp(name, "version") != 0; }
++ (BOOL)isKeyExcludedFromWebScript:(char const*)name   { return strcmp(name, "version") != 0 && strcmp(name, "licensees") != 0; }
 + (NSString*)webScriptNameForSelector:(SEL)aSelector   { return nil; }
 + (NSString*)webScriptNameForKey:(char const*)name     { return @(name); }
 
 - (NSString*)version
 {
 	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+}
+
+- (NSString*)licensees
+{
+	if(currentLicense.empty())
+		currentLicense = license::current();
+
+	auto it = currentLicense.find("owner");
+	return it != currentLicense.end() ? [NSString stringWithCxxString:it->second] : nil;
 }
 @end
 
