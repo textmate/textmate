@@ -136,7 +136,7 @@ void OakOpenDocuments (NSArray* paths)
 	controller.dataSource              = [FavoritesDataSource favoritesDataSource];
 	controller.action                  = @selector(didSelectFavorite:);
 	controller.allowsMultipleSelection = YES;
-	[controller showWindow:self];
+	[controller showWindowRelativeToWindow:controller.window];
 }
 
 - (void)didSelectFavorite:(id)sender
