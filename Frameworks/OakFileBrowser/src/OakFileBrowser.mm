@@ -839,7 +839,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	if([url isFileURL])
 	{
 		[menu addItem:[NSMenuItem separatorItem]];
-		NSMenuItem* menuItem = [menu addItemWithTitle:@"Preferences…" action:@selector(showFolderSpecificPreferences:) keyEquivalent:@""];
+		NSMenuItem* menuItem = [menu addItemWithTitle:@"Properties…" action:@selector(showFolderSpecificPreferences:) keyEquivalent:@""];
 		[menuItem setTarget:self];
 	}
 
