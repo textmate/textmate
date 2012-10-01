@@ -15,7 +15,7 @@
 		[OakStringListTransformer createTransformerWithName:@"OakHTMLOutputPlacementSettingsTransformer" andObjectsArray:@[ @"bottom", @"right", @"window" ]];
 
 		self.defaultsProperties = @{
-			@"foldersOnTop"            : kUserDefaultsFoldersOnTopKey,      
+			@"foldersOnTop"            : kUserDefaultsFoldersOnTopKey,
 			@"showFileExtensions"      : kUserDefaultsShowFileExtensionsKey,
 			@"disableTabBarCollapsing" : kUserDefaultsDisableTabBarCollapsingKey,
 			@"fileBrowserPlacement"    : kUserDefaultsFileBrowserPlacementKey,
@@ -51,7 +51,7 @@
 
 - (NSMenuItem*)menuItemForURL:(NSURL*)aURL
 {
-	NSMenuItem* res = [[[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:[aURL path]] action:@selector(takeFileBrowserPathFrom:) keyEquivalent:@""] autorelease];
+	NSMenuItem* res = [[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:[aURL path]] action:@selector(takeFileBrowserPathFrom:) keyEquivalent:@""];
 	[res setTarget:self];
 	[res setRepresentedObject:aURL];
 	if([aURL isFileURL])

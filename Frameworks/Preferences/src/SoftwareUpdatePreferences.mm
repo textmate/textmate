@@ -13,12 +13,13 @@
 @property (nonatomic, assign) BOOL isChecking;
 @property (nonatomic, retain) NSDate* lastPoll;
 @property (nonatomic, retain) NSString* errorString;
+
+@property (nonatomic, retain) NSString* lastPollString;
+@property (nonatomic, retain) NSTimer* updateLastPollStringTimer;
 @end
 
 @implementation SoftwareUpdatePreferences
-@synthesize isChecking, lastPoll, errorString;
-
-+ (NSSet*)keyPathsForValuesAffectingLastCheck { return [NSSet setWithObjects:@"isChecking", @"lastPoll", @"errorString", nil]; }
++ (NSSet*)keyPathsForValuesAffectingLastCheck { return [NSSet setWithObjects:@"isChecking", @"lastPollString", @"errorString", nil]; }
 
 - (id)init
 {
@@ -49,25 +50,29 @@
 
 - (NSString*)lastCheck
 {
-	return isChecking ? @"Checking…" : (errorString ?: ([lastPoll humanReadableTimeElapsed] ?: @"Never"));
+	return _isChecking ? @"Checking…" : (_errorString ?: (_lastPollString ?: @"Never"));
 }
 
-- (void)updateLastCheck:(id)sender
+- (void)updateLastPollString:(id)sender
 {
-	[self willChangeValueForKey:@"lastCheck"];
-	[self didChangeValueForKey:@"lastCheck"];
+	self.lastPollString = [self.lastPoll humanReadableTimeElapsed];
+}
+
+- (void)setLastPoll:(NSDate*)aDate
+{
+	_lastPoll = aDate;
+	[self updateLastPollString:self];
 }
 
 - (void)viewWillAppear
 {
-	[self updateLastCheck:nil];
-	updateLastCheckTimer = [[NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(updateLastCheck:) userInfo:nil repeats:YES] retain];
+	[self updateLastPollString:nil];
+	self.updateLastPollStringTimer = [NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(updateLastPollString:) userInfo:nil repeats:YES];
 }
 
 - (void)viewDidDisappear
 {
-	[updateLastCheckTimer invalidate];
-	[updateLastCheckTimer release];
-	updateLastCheckTimer = nil;
+	[self.updateLastPollStringTimer invalidate];
+	self.updateLastPollStringTimer = nil;
 }
 @end

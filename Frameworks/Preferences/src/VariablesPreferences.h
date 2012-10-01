@@ -3,7 +3,6 @@
 @interface VariablesPreferences : NSViewController <MASPreferencesViewController>
 {
 	IBOutlet NSTableView* variablesTableView;
-	NSMutableArray* variables;
 	BOOL canRemove;
 }
 @property (nonatomic, readonly) NSString* identifier;

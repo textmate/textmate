@@ -17,61 +17,52 @@ OAK_DEBUG_VAR(Preferences);
 - (IBAction)selectPreviousTab:(id)sender  { [self goPreviousTab:sender]; }
 @end
 
-static Preferences* SharedInstance;
+@interface Preferences ()
+@property (nonatomic, retain) MASPreferencesWindowController* windowController;
+@property (nonatomic, retain) NSArray* viewControllers;
+@end
 
 @implementation Preferences
 + (Preferences*)sharedInstance
 {
-	return SharedInstance ?: [[Preferences new] autorelease];
-}
-
-- (id)init
-{
-	if(SharedInstance)
-	{
-		[self release];
-	}
-	else if(self = SharedInstance = [[super init] retain])
-	{
-		D(DBF_Preferences, bug("My bundle %s\n", [[[NSBundle bundleForClass:[self class]] bundlePath] UTF8String]););
-	}
+	static Preferences* SharedInstance = [Preferences new];
 	return SharedInstance;
 }
 
 - (void)showWindow:(id)sender
 {
-	if(!windowController)
+	if(!_windowController)
 	{
-		NSMutableArray* array = [NSMutableArray array];
-		[array addObject:[[[FilesPreferences alloc] init] autorelease]];
-		[array addObject:[[[ProjectsPreferences alloc] init] autorelease]];
-		[array addObject:[[[BundlesPreferences alloc] init] autorelease]];
-		[array addObject:[[[VariablesPreferences alloc] init] autorelease]];
-		[array addObject:[[[SoftwareUpdatePreferences alloc] init] autorelease]];
-		[array addObject:[[[TerminalPreferences alloc] init] autorelease]];
-		viewControllers = [array retain];
+		self.viewControllers = @[
+			[FilesPreferences new],
+			[ProjectsPreferences new],
+			[BundlesPreferences new],
+			[VariablesPreferences new],
+			[SoftwareUpdatePreferences new],
+			[TerminalPreferences new]
+		];
 
-		windowController = [[MASPreferencesWindowController alloc] initWithViewControllers:viewControllers];
-		[windowController setNextResponder:self];
+		self.windowController = [[MASPreferencesWindowController alloc] initWithViewControllers:self.viewControllers];
+		[_windowController setNextResponder:self];
 	}
-	[windowController showWindow:self];
+	[_windowController showWindow:self];
 }
 
 - (void)takeSelectedViewControllerIndexFrom:(id)sender
 {
 	NSUInteger index = [[OakSubmenuController sharedInstance] tagForSender:sender];
-	[windowController selectControllerAtIndex:index];
+	[_windowController selectControllerAtIndex:index];
 }
 
 - (void)updateGoToMenu:(NSMenu*)aMenu
 {
-	if(![windowController.window isKeyWindow])
+	if(![_windowController.window isKeyWindow])
 		return;
 
-	NSString* const selectedIdentifier = [windowController selectedViewController].identifier;
+	NSString* const selectedIdentifier = [_windowController selectedViewController].identifier;
 
 	int i = 0;
-	for(NSViewController <MASPreferencesViewController>* viewController in viewControllers)
+	for(NSViewController <MASPreferencesViewController>* viewController in _viewControllers)
 	{
 		NSMenuItem* item = [aMenu addItemWithTitle:viewController.toolbarItemLabel action:@selector(takeSelectedViewControllerIndexFrom:) keyEquivalent:i < 10 ? [NSString stringWithFormat:@"%c", '0' + ((i+1) % 10)] : @""];
 		item.tag = i;

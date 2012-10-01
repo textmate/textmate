@@ -19,7 +19,7 @@ static void CreateHyperLink (NSTextField* textField, NSString* text, NSString* u
 	NSAttributedString* str = [textField attributedStringValue];
 	NSRange range = [[str string] rangeOfString:text];
 
-	NSMutableAttributedString* attrString = [[str mutableCopy] autorelease];
+	NSMutableAttributedString* attrString = [str mutableCopy];
 	[attrString beginEditing];
 	[attrString addAttribute:NSLinkAttributeName value:url range:range];
 	[attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
@@ -230,7 +230,7 @@ static bool uninstall_mate (std::string const& path)
 	[self updateUI:self];
 
 	CreateHyperLink(rmateSummaryText, @"rmate", [NSString stringWithFormat:@"txmt://open?url=%@", [[NSURL fileURLWithPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"rmate" ofType:@""]] absoluteString]]);
-	LSSetDefaultHandlerForURLScheme(CFSTR("txmt"), (CFStringRef)[[NSBundle mainBundle] bundleIdentifier]);
+	LSSetDefaultHandlerForURLScheme(CFSTR("txmt"), CFBundleGetIdentifier(CFBundleGetMainBundle()));
 }
 
 - (NSString*)mateInstallPath
@@ -269,7 +269,6 @@ static bool uninstall_mate (std::string const& path)
 {
 	if(returnCode == NSAlertFirstButtonReturn)
 		[self installMateAs:[[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]];
-	[alert release];
 }
 
 - (IBAction)performInstallMate:(id)sender
@@ -290,7 +289,7 @@ static bool uninstall_mate (std::string const& path)
 
 		std::string summary = text::format("%s with the name “mate” already exists in the folder %s. Do you want to replace it?", itemType, path::with_tilde(path::parent(dstPath)).c_str());
 
-		NSAlert* alert = [[NSAlert alloc] init]; // released in didEndSelector
+		NSAlert* alert = [[NSAlert alloc] init];
 		[alert setAlertStyle:NSWarningAlertStyle];
 		[alert setMessageText:@"File Already Exists"];
 		[alert setInformativeText:[NSString stringWithCxxString:summary]];

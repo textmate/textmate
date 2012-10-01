@@ -2,6 +2,7 @@
 #import <BundlesManager/BundlesManager.h>
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <MGScopeBar/MGScopeBar.h>
 #import <ns/ns.h>
 #import <regexp/format_string.h>
 #import <text/ctype.h>
@@ -15,6 +16,10 @@ static std::string textify (std::string str)
 	return str;
 }
 
+@interface BundlesPreferences ()
+@property (nonatomic, retain) BundlesManager* bundlesManager;
+@end
+
 @implementation BundlesPreferences
 - (NSString*)identifier            { return @"Bundles"; }
 - (NSImage*)toolbarItemImage       { return [[NSWorkspace sharedWorkspace] iconForFileType:@"tmbundle"]; }
@@ -24,9 +29,9 @@ static std::string textify (std::string str)
 - (void)bundlesDidChange:(id)sender
 {
 	std::set<std::string, text::less_t> set;
-	for(size_t i = 0; i < [bundlesManager numberOfBundles]; ++i)
+	for(size_t i = 0; i < [_bundlesManager numberOfBundles]; ++i)
 	{
-		bundles_db::bundle_ptr bundle = [bundlesManager bundleAtIndex:i];
+		bundles_db::bundle_ptr bundle = [_bundlesManager bundleAtIndex:i];
 		if(bundle->category() != NULL_STR)
 				set.insert(bundle->category());
 		else	NSLog(@"%s No category for bundle: %s", sel_getName(_cmd), bundle->name().c_str());;
@@ -39,9 +44,9 @@ static std::string textify (std::string str)
 	}
 
 	bundles.clear();
-	for(size_t i = 0; i < [bundlesManager numberOfBundles]; ++i)
+	for(size_t i = 0; i < [_bundlesManager numberOfBundles]; ++i)
 	{
-		bundles_db::bundle_ptr bundle = [bundlesManager bundleAtIndex:i];
+		bundles_db::bundle_ptr bundle = [_bundlesManager bundleAtIndex:i];
 		if(enabledCategories.empty() || enabledCategories.find(bundle->category()) != enabledCategories.end())
 			bundles.push_back(bundle);
 	}
@@ -52,8 +57,8 @@ static std::string textify (std::string str)
 {
 	if(self = [super initWithNibName:@"BundlesPreferences" bundle:[NSBundle bundleForClass:[self class]]])
 	{
-		bundlesManager = [BundlesManager sharedInstance];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bundlesDidChange:) name:BundlesManagerBundlesDidChangeNotification object:bundlesManager];
+		self.bundlesManager = [BundlesManager sharedInstance];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bundlesDidChange:) name:BundlesManagerBundlesDidChangeNotification object:_bundlesManager];
 		[self bundlesDidChange:self];
 	}
 	return self;
@@ -62,7 +67,6 @@ static std::string textify (std::string str)
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 // =======================
@@ -116,7 +120,7 @@ static std::string textify (std::string str)
 {
 	if([[aTableColumn identifier] isEqualToString:@"installed"])
 	{
-		if([bundlesManager installStateForBundle:bundles[rowIndex]] != NSMixedState)
+		if([_bundlesManager installStateForBundle:bundles[rowIndex]] != NSMixedState)
 			return YES;
 	}
 	return NO;
@@ -141,7 +145,7 @@ static std::string textify (std::string str)
 	bundles_db::bundle_ptr bundle = bundles[rowIndex];
 	if([[aTableColumn identifier] isEqualToString:@"installed"])
 	{
-		return @([bundlesManager installStateForBundle:bundle]);
+		return @([_bundlesManager installStateForBundle:bundle]);
 	}
 	else if([[aTableColumn identifier] isEqualToString:@"name"])
 	{
@@ -150,8 +154,7 @@ static std::string textify (std::string str)
 	else if([[aTableColumn identifier] isEqualToString:@"date"])
 	{
 		oak::date_t updated = bundle->installed() ? bundle->path_updated() : bundle->url_updated();
-		NSDate* date = [(id)CFDateCreate(kCFAllocatorDefault, updated.value()) autorelease];
-		return [date humanReadableTimeElapsed];
+		return [[NSDate dateWithTimeIntervalSinceReferenceDate:updated.value()] humanReadableTimeElapsed];
 	}
 	else if([[aTableColumn identifier] isEqualToString:@"description"])
 	{
@@ -166,8 +169,8 @@ static std::string textify (std::string str)
 	{
 		bundles_db::bundle_ptr bundle = bundles[rowIndex];
 		if([anObject boolValue])
-				[bundlesManager installBundle:bundle];
-		else	[bundlesManager uninstallBundle:bundle];
+				[_bundlesManager installBundle:bundle];
+		else	[_bundlesManager uninstallBundle:bundle];
 	}
 }
 @end
