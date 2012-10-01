@@ -12,7 +12,7 @@
 	- When there is only a single caret or a single continuous selection the left scope may contain: `dyn.caret.begin.line` or `dyn.caret.begin.document`.
 	- Likewise the right scope may contain: `dyn.caret.end.line` or `dyn.caret.end.document`.
 
-* When expanding tab triggers the left scope is the scope to the left of the start of the potential tab trigger and the right scope is likewise that to the right of the potential tab trigger.
+* When expanding tab triggers, the left scope is the scope to the left of the start of the potential tab trigger and the right scope is likewise that to the right of the potential tab trigger.
 
 * `rmate`: Overwriting an existing file now preserve the existing file’s group and owner.
 
