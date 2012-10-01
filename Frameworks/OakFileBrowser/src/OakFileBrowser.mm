@@ -962,11 +962,8 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	{
 		case fb::goBack:           return [self goBack:sender];
 		case fb::goForward:        return [self goForward:sender];
-		case fb::scmDataSource:    return [self goToSCMDataSource:sender];
-		case fb::favorites:        return [self goToFavorites:sender];
-		case fb::home:             return [self goToHome:sender];
-		case fb::computer:         return [self goToComputer:sender];
 		case fb::title:            return [self showFolderPopUpMenu:sender];
+		case fb::favorites:        return [self goToFavorites:sender];
 		case fb::options:          return [self showOptionsPopUpMenu:sender];
 	}
 }
@@ -1055,8 +1052,6 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 		case fb::goBack:      return [self showBackMenu:sender];
 		case fb::goForward:   return [self showForwardMenu:sender];
 		case fb::favorites:   return [self showFolderContents:kURLLocationFavorites inMenuFromCell:fb::header_column([sender tag])];
-		case fb::home:        return [self showFolderContents:kURLLocationHome      inMenuFromCell:fb::header_column([sender tag])];
-		case fb::computer:    return [self showFolderContents:kURLLocationComputer  inMenuFromCell:fb::header_column([sender tag])];
 	}
 }
 
