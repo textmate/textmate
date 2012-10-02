@@ -20,7 +20,7 @@ namespace scope
 			virtual bool does_match (path_t const& lhs, path_t const& rhs, double* rank) const = 0;
 		};
 
-		typedef std::tr1::shared_ptr<any_t> any_ptr;
+		typedef std::shared_ptr<any_t> any_ptr;
 
 		struct scope_t
 		{

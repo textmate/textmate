@@ -34,7 +34,7 @@ public:
 		std::vector<selector_container_t> vec;
 		iterate(s, matchingSelectors)
 			vec.push_back(*s);
-		auto list = scope::compile::compile(vec);
+		scope::compile::compile(vec);
 		//TS_ASSERT(list);
 	}
 };

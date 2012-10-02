@@ -23,7 +23,7 @@ const scope::compile::compressor_t* scope::compile::compressor_t::next(std::stri
 	iterator it = this->path.find(str);
 	iterator last = this->path.end();
 	if(it != last) 
-		return &it->second;
+		return it->second;
 	assert('*' == 42);
 	assert(*scope::types::atom_any.c_str() == 42);
 	assert(*scope::types::atom_any.c_str() < 'a');
@@ -31,7 +31,7 @@ const scope::compile::compressor_t* scope::compile::compressor_t::next(std::stri
 	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str())
 	// We use the fact that '*' is sorted before alphabetical letters 
 	if(this->path.size() > 0 && this->path.begin()->first == scope::types::atom_any)
-		return &this->path.begin()->second;
+		return &*this->path.begin()->second;
 	
 	return NULL; 
 }

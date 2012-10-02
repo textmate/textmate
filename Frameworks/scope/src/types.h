@@ -14,7 +14,7 @@ namespace scope
 	namespace compressed
 	{
 		struct any_t;
-		typedef std::tr1::shared_ptr<any_t> any_ptr;
+		typedef std::shared_ptr<any_t> any_ptr;
 	}
 	namespace types
 	{

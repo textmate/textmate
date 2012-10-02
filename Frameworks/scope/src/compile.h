@@ -45,8 +45,9 @@ namespace scope
 				right.clear();
 			}
 		};
+		struct interim_t;
 		struct PUBLIC interim_t {
-			std::map<std::string, interim_t> path;
+			std::map<std::string, interim_t* > path;
 
 			std::set<int> simple;
 			std::map<int, int> multi_part;
@@ -61,7 +62,7 @@ namespace scope
 		
 		struct sub_rule_t
 		{
-			typedef std::tr1::shared_ptr<compressed::composite_t> composite_ptr;
+			typedef std::shared_ptr<compressed::composite_t> composite_ptr;
 			composite_ptr composite;
 			int rule_id;
 		};
@@ -78,18 +79,19 @@ namespace scope
 			std::map<int, double> match (context_t const& scope, const compressor_t& compressor, const compressor_t& r_compressor) const;
 		};
 
+		class compressor_t;
 		class PUBLIC compressor_t
 		{
 			struct converter
 			{
 				size_t sz;
-	         typedef std::pair<std::string, compressor_t> result_type;				
+	         typedef std::pair<std::string, compressor_t* > result_type;				
 				converter(size_t sz):sz(sz) {}
-				result_type operator()(std::pair<std::string, interim_t> pair) const
-					{ return std::make_pair(pair.first, compressor_t(pair.second, sz));}
+				result_type operator()(std::pair<std::string, interim_t* > pair) const
+					{ return std::make_pair(pair.first, new compressor_t(*pair.second, sz));}
 			};
 			//typedef immutable_map<std::string, scope::compile::compressor_t::compressor_t> map_type;
-			typedef std::map<std::string, scope::compile::compressor_t::compressor_t> map_type; 			
+			typedef std::map<std::string, compressor_t*> map_type; 			
 			std::vector<int> simple;
 			std::vector<bits_t> possible;
 			int hash;
