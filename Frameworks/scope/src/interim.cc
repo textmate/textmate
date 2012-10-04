@@ -131,7 +131,7 @@ scope::compile::interim_t* traverse (scope::compile::interim_t* wc, scope::compi
 		auto iter = wc->path.find(*atom);
 		if(iter == wc->path.end())
 			iter = wc->path.insert(std::make_pair(*atom, new scope::compile::interim_t())).first;
-		wc = iter->second;
+		wc = &*iter->second;
 	}
 	return wc;
 }

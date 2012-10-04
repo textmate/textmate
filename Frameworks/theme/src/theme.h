@@ -126,7 +126,7 @@ public:
 public:
 	struct test_hook_t
 	{
-		test_hook_t(scope::compile::compiled_t<decomposed_style_t> compiled) : compiled(compiled) {}
+		test_hook_t(scope::compile::compiled_t<decomposed_style_t>&& compiled) : compiled(std::move(compiled)) {}
 		scope::compile::compiled_t<decomposed_style_t> compiled;
 		static test_hook_t get_hook(theme_t const& theme)
 		{

@@ -17,7 +17,8 @@ scope::compile::compressor_t::compressor_t (interim_t const& interim, size_t sz)
 	hash = interim.hash;
 	needs_right = interim.needs_right;
 }
-const scope::compile::compressor_t* scope::compile::compressor_t::next(std::string const& str) const{
+static scope::compile::compressor_unique_ptr EMPTY;
+scope::compile::compressor_unique_ptr const& scope::compile::compressor_t::next(std::string const& str) const{
 	typedef map_type::const_iterator iterator;
 	
 	iterator it = this->path.find(str);
@@ -31,9 +32,9 @@ const scope::compile::compressor_t* scope::compile::compressor_t::next(std::stri
 	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str())
 	// We use the fact that '*' is sorted before alphabetical letters 
 	if(this->path.size() > 0 && this->path.begin()->first == scope::types::atom_any)
-		return &*this->path.begin()->second;
+		return this->path.begin()->second;
 	
-	return NULL; 
+	return EMPTY; 
 }
 
 scope::compressed::path_t scope::compile::matcher_t::lookup (scope::types::path_ptr const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank, bool& needs_right) const
@@ -52,7 +53,7 @@ scope::compressed::path_t scope::compile::matcher_t::lookup (scope::types::path_
 		int sz = path[s].atoms.size();
 		power += sz;
 		const scope::compile::compressor_t* current;
-		while(j < sz && (current = comp->next(path[s].atoms[j])))
+		while(j < sz && (current = comp->next(path[s].atoms[j]).get() ))
 		{
 			j++;
 			comp = current;

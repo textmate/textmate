@@ -46,8 +46,9 @@ namespace scope
 			}
 		};
 		struct interim_t;
+		typedef std::unique_ptr<interim_t> interim_unique_ptr;
 		struct PUBLIC interim_t {
-			std::map<std::string, interim_t* > path;
+			std::map<std::string, interim_unique_ptr > path;
 
 			std::set<int> simple;
 			std::map<int, int> multi_part;
@@ -58,6 +59,7 @@ namespace scope
 			void calculate_bit_fields ();
 			bool has_any ();
 			std::string to_s (int indent=0) const;
+			
 		};
 		
 		struct sub_rule_t
@@ -76,33 +78,48 @@ namespace scope
 			matcher_t () {}
 			matcher_t (std::vector<sub_rule_t> expressions, size_t blocks_needed): expressions(expressions), blocks_needed(blocks_needed), palette(blocks_needed) {}
 			scope::compressed::path_t lookup (scope::types::path_ptr const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank, bool& needs_right) const;
-			std::map<int, double> match (context_t const& scope, const compressor_t& compressor, const compressor_t& r_compressor) const;
+			std::map<int, double> match (context_t const& scope, compressor_t const& compressor, compressor_t const& r_compressor) const;
 		};
 
 		class compressor_t;
+		typedef std::unique_ptr<compressor_t> compressor_unique_ptr;
 		class PUBLIC compressor_t
 		{
 			struct converter
 			{
 				size_t sz;
-	         typedef std::pair<std::string, compressor_t* > result_type;				
+	         typedef std::pair<std::string, compressor_unique_ptr> result_type;				
 				converter(size_t sz):sz(sz) {}
-				result_type operator()(std::pair<std::string, interim_t* > pair) const
-					{ return std::make_pair(pair.first, new compressor_t(*pair.second, sz));}
+				result_type operator()(std::pair<std::string, interim_unique_ptr const&> const& pair) const
+				{ 
+					return std::make_pair(std::move(pair.first), compressor_unique_ptr(new compressor_t(*pair.second, sz)));
+				}
 			};
 			//typedef immutable_map<std::string, scope::compile::compressor_t::compressor_t> map_type;
-			typedef std::map<std::string, compressor_t*> map_type; 			
+			typedef std::map<std::string, compressor_unique_ptr> map_type; 			
 			std::vector<int> simple;
 			std::vector<bits_t> possible;
 			int hash;
 			bool match;
 			bool needs_right;
 			friend class matcher_t;
-		public:
 			map_type path;
-			const compressor_t* next (std::string const& str) const;
+			
+		public:
+			compressor_unique_ptr const& next (std::string const& str) const;
 			compressor_t (interim_t const& analyze, size_t sz);
-			compressor_t () {}
+			compressor_t (){}
+			compressor_t (compressor_t&& rhs) = default;
+			compressor_t& operator=(compressor_t&& rhs) = default;
+			//compressor_t (compressor_t&& rhs) : simple(rhs.simple), possible(rhs.possible), hash(rhs.hash), match(rhs.match), needs_right(rhs.needs_right), path(std::move(rhs.path)){}
+
+			//~compressor_t()
+			//{
+			//	fprintf(stderr, "delete!!!!!!!!!!!!!!!!!!!!!!,");
+			//	
+			//	for(auto pair : path) {
+			//		delete pair.second;}
+			//}
 		};
 
 		template<typename T>
@@ -112,11 +129,12 @@ namespace scope
 
 			matcher_t matcher;
 			std::vector<T> rules;
-
 		public:
-			compiled_t() {}
+			compiled_t<T>& operator=(compiled_t<T>&& rhs) = default;
+			compiled_t(compiled_t<T>&& rhs) : l_compressor(std::move(rhs.l_compressor)), r_compressor(std::move(rhs.r_compressor)), matcher(rhs.matcher), rules(std::move(rhs.rules)) {}
 			compiled_t (const interim_t& interim, const interim_t& r_interim, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): l_compressor(interim, blocks_needed), r_compressor(r_interim, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
 				{}
+			compiled_t() {}
 
 			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
 			{
@@ -167,7 +185,7 @@ namespace scope
 		// +, scope::selector_t scope_selector
 
 		template<typename T>
-		const compiled_t<T> compile (std::vector<T> const& rules)
+		compiled_t<T> compile (std::vector<T> const& rules)
 		{
 			compiler_t compiler;
 			int rule_id = 0;
