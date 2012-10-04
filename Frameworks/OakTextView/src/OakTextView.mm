@@ -30,6 +30,7 @@
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(OakTextView_TextInput);
+OAK_DEBUG_VAR(OakTextView_Accessibility);
 OAK_DEBUG_VAR(OakTextView_Spelling);
 OAK_DEBUG_VAR(OakTextView_ViewRect);
 OAK_DEBUG_VAR(OakTextView_NSView);
@@ -218,6 +219,7 @@ struct buffer_refresh_callback_t : ng::callback_t
 {
 	buffer_refresh_callback_t (OakTextView* textView) : textView(textView) { }
 	void did_parse (size_t from, size_t to);
+	void did_replace (size_t from, size_t to, std::string const& str);
 private:
 	OakTextView* textView;
 };
@@ -225,6 +227,11 @@ private:
 void buffer_refresh_callback_t::did_parse (size_t from, size_t to)
 {
 	[textView redisplayFrom:from to:to];
+}
+
+void buffer_refresh_callback_t::did_replace (size_t, size_t, std::string const&)
+{
+	NSAccessibilityPostNotification(textView, NSAccessibilityValueChangedNotification);
 }
 
 static std::string shell_quote (std::vector<std::string> paths)
@@ -436,6 +443,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		[self resetBlinkCaretTimer];
 		[self setNeedsDisplay:YES];
+		NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
 	}
 }
 
@@ -797,6 +805,191 @@ static std::string shell_quote (std::vector<std::string> paths)
 	AUTO_REFRESH;
 	[self tryToPerform:aSelector with:self];
 }
+
+// =================
+// = Accessibility =
+// =================
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+#define ATTR(attr) NSAccessibility##attr##Attribute
+#define PATTR(attr) NSAccessibility##attr##ParameterizedAttribute
+#define ATTREQ_(attribute_) [attribute isEqualToString:attribute_]
+#define HANDLE_ATTR(attr) else if(ATTREQ_(ATTR(attr)))
+#define HANDLE_PATTR(attr) else if(ATTREQ_(PATTR(attr)))
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray* attributes = nil;
+	if(!attributes)
+	{
+		NSSet* set = [NSSet setWithArray:@[
+			ATTR(Role),
+			ATTR(Value),
+			ATTR(InsertionPointLineNumber),
+			ATTR(NumberOfCharacters),
+			ATTR(SelectedText),
+			ATTR(SelectedTextRange),
+			ATTR(SelectedTextRanges),
+			// ATTR(VisibleCharacterRange),
+		]];
+
+		set = [set setByAddingObjectsFromArray:[super accessibilityAttributeNames]];
+		attributes = [[set allObjects] retain];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	D(DBF_OakTextView_Accessibility, bug("%s\n", to_s(attribute).c_str()););
+	id ret = nil;
+	ng::buffer_t const& buffer = document->buffer();
+
+	if(false) {
+	} HANDLE_ATTR(Role) {
+		ret = NSAccessibilityTextAreaRole;
+	} HANDLE_ATTR(Value) {
+		ret = [NSString stringWithCxxString:editor->as_string()];
+	} HANDLE_ATTR(InsertionPointLineNumber) {
+		ret = [NSNumber numberWithUnsignedLong:buffer.convert(editor->ranges().last().min().index).line];
+	} HANDLE_ATTR(NumberOfCharacters) {
+		ret = [NSNumber numberWithUnsignedInteger:[self nsRangeForRange:ng::range_t(0, buffer.size())].length];
+	} HANDLE_ATTR(SelectedText) {
+		ng::range_t const& selection = editor->ranges().last();
+		std::string const& text = buffer.substr(selection.min().index, selection.max().index);
+		ret = [NSString stringWithCxxString:text];
+	} HANDLE_ATTR(SelectedTextRange) {
+		ret = [NSValue valueWithRange:[self nsRangeForRange:editor->ranges().last()]];
+	} HANDLE_ATTR(SelectedTextRanges) {
+		ng::ranges_t const ranges = editor->ranges();
+		NSMutableArray* nsRanges = [NSMutableArray arrayWithCapacity:ranges.size()];
+		iterate(range, ranges)
+			[nsRanges addObject:[NSValue valueWithRange:[self nsRangeForRange:(*range)]]];
+		ret = nsRanges;
+	// } HANDLE_ATTR(VisibleCharacterRange) { //TODO
+	} else {
+		ret = [super accessibilityAttributeValue:attribute];
+	}
+	return ret;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
+{
+	NSArray* settable = @[ ATTR(Value), ATTR(SelectedText), ATTR(SelectedTextRange), ATTR(SelectedTextRanges) ];
+	if([settable containsObject:attribute])
+		return YES;
+	return [super accessibilityIsAttributeSettable:attribute];
+}
+
+- (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute
+{
+	D(DBF_OakTextView_Accessibility, bug("%s <- %s\n", to_s(attribute).c_str(), to_s([value description]).c_str()););
+	if(false) {
+	} HANDLE_ATTR(Value) {
+		AUTO_REFRESH;
+		document->buffer().replace(0, document->buffer().size(), to_s((NSString*)value));
+	} HANDLE_ATTR(SelectedText) {
+		AUTO_REFRESH;
+		editor->insert(to_s((NSString*)value));
+	} HANDLE_ATTR(SelectedTextRange) {
+		[self accessibilitySetValue:@[ value ] forAttribute:NSAccessibilitySelectedTextRangesAttribute];
+	} HANDLE_ATTR(SelectedTextRanges) {
+		NSArray* nsRanges = (NSArray*)value;
+		ng::ranges_t ranges;
+		for(NSValue* nsRangeValue in nsRanges)
+			ranges.push_back([self rangeForNSRange:[nsRangeValue rangeValue]]);
+		AUTO_REFRESH;
+		editor->set_selections(ranges);
+	} else {
+		[super accessibilitySetValue:value forAttribute:attribute];
+	}
+}
+
+- (NSArray*)accessibilityParameterizedAttributeNames
+{
+	static NSArray* attributes = nil;
+	if(!attributes)
+	{
+		NSSet* set = [NSSet setWithArray:@[
+			PATTR(LineForIndex),
+			PATTR(RangeForLine),
+			PATTR(StringForRange),
+			PATTR(RangeForPosition),
+			PATTR(RangeForIndex),
+			PATTR(BoundsForRange),
+			// PATTR(RTFForRange),
+			// PATTR(StyleRangeForIndex),
+			// PATTR(AttributedStringForRange),
+		]];
+
+		set = [set setByAddingObjectsFromArray:[super accessibilityParameterizedAttributeNames]];
+		attributes = [[set allObjects] retain];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute forParameter:(id)parameter
+{
+	D(DBF_OakTextView_Accessibility, bug("%s(%s)\n", to_s(attribute).c_str(), to_s([parameter description]).c_str()););
+	id ret = nil;
+	if(false) {
+	} HANDLE_PATTR(LineForIndex) {
+		size_t index = [((NSNumber*)parameter) unsignedLongValue];
+		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
+		text::pos_t pos = document->buffer().convert(index);
+		ret = [NSNumber numberWithUnsignedLong:pos.line];
+	} HANDLE_PATTR(RangeForLine) {
+		size_t line = [((NSNumber*)parameter) unsignedLongValue];
+		size_t begin = document->buffer().begin(line), end = document->buffer().end(line);
+		ng::range_t const range(begin, end);
+		ret = [NSValue valueWithRange:[self nsRangeForRange:range]];
+	} HANDLE_PATTR(StringForRange) {
+		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
+		ret = [NSString stringWithCxxString:editor->as_string(range.min().index, range.max().index)];
+	} HANDLE_PATTR(RangeForPosition) {
+		NSPoint point = [((NSValue*)parameter) pointValue];
+		point = [[self window] convertScreenToBase:point];
+		point = [self convertPoint:point fromView:nil];
+		size_t index = layout->index_at_point(point).index;
+		index = document->buffer().sanitize_index(index);
+		size_t const length = document->buffer()[index].length();
+		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
+	} HANDLE_PATTR(RangeForIndex) {
+		size_t index = [((NSNumber*)parameter) unsignedLongValue];
+		index = [self rangeForNSRange:NSMakeRange(index, 0)].min().index;
+		index = document->buffer().sanitize_index(index);
+		size_t const length = document->buffer()[index].length();
+		ret = [NSValue valueWithRange:[self nsRangeForRange:ng::range_t(index, index + length)]];
+	} HANDLE_PATTR(BoundsForRange) {
+		ng::range_t range = [self rangeForNSRange:[((NSValue*)parameter) rangeValue]];
+		if(!range.empty()) // TODO ask accessibility-dev@lists.apple.com if there is a better approach for dealing with newlines
+		{
+			size_t const max = range.max().index;
+			if(editor->as_string(max - 1, max) == "\n")
+				range.max().index -= 1;
+		}
+		NSRect rect = layout->rect_for_range(range.min().index, range.max().index);
+		rect = [self convertRect:rect toView:nil];
+		rect = [[self window] convertRectToScreen:rect];
+		ret = [NSValue valueWithRect:rect];
+	// } HANDLE_PATTR(RTFForRange) { // TODO
+	// } HANDLE_PATTR(StyleRangeForIndex) { // TODO
+	// } HANDLE_PATTR(AttributedStringForRange) { // TODO
+	} else {
+		ret = [super accessibilityAttributeValue:attribute forParameter:parameter];
+	}
+	return ret;
+}
+
+#undef ATTR
+#undef PATTR
+#undef ATTREQ_
+#undef HANDLE_ATTR
+#undef HANDLE_PATTR
 
 // ================
 // = Bundle Items =
@@ -1924,6 +2117,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	[selectionString release];
 	selectionString = [aSelectionString copy];
+	NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
 	if(isUpdatingSelection)
 		return;
 
