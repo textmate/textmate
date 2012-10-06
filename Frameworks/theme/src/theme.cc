@@ -166,25 +166,25 @@ void theme_t::setup_styles ()
 	_styles.clear();
 	_cache.clear();
 
-	if(!_item)
-		return;
-
-	if(bundles::item_ptr newItem = bundles::lookup(_item->uuid()))
-		_item = newItem;
-
-	plist::array_t items;
-	if(plist::get_key_path(_item->plist(), "settings", items))
+	if(_item)
 	{
-		iterate(it, items)
+		if(bundles::item_ptr newItem = bundles::lookup(_item->uuid()))
+			_item = newItem;
+
+		plist::array_t items;
+		if(plist::get_key_path(_item->plist(), "settings", items))
 		{
-			if(plist::dictionary_t const* styles = boost::get<plist::dictionary_t>(&*it))
+			iterate(it, items)
 			{
-				_styles.push_back(parse_styles(*styles));
-				if(!_styles.back().invisibles.is_blank())
+				if(plist::dictionary_t const* styles = boost::get<plist::dictionary_t>(&*it))
 				{
-					decomposed_style_t invisbleStyle("deco.invisible");
-					invisbleStyle.foreground = _styles.back().invisibles;
-					_styles.push_back(invisbleStyle);
+					_styles.push_back(parse_styles(*styles));
+					if(!_styles.back().invisibles.is_blank())
+					{
+						decomposed_style_t invisbleStyle("deco.invisible");
+						invisbleStyle.foreground = _styles.back().invisibles;
+						_styles.push_back(invisbleStyle);
+					}
 				}
 			}
 		}
@@ -211,7 +211,7 @@ void theme_t::setup_styles ()
 	_gutter_styles.selectionBackground = soften(_background, 0.95);
 
 	plist::dictionary_t gutterSettings;
-	if(plist::get_key_path(_item->plist(), "gutterSettings", gutterSettings))
+	if(_item && plist::get_key_path(_item->plist(), "gutterSettings", gutterSettings))
 	{
 		static struct { std::string const key; cf::color_t gutter_styles_t::*field; } const gutterKeys[] =
 		{
