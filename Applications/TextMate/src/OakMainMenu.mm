@@ -11,7 +11,7 @@ The route of an event seems to be:
  - OakMainMenu performKeyEquivalent:
  - OakTextView keyDown:
 
-Handling keys in keyDown: (and trusting NSMneu to handle menu items) leads to a
+Handling keys in keyDown: (and trusting NSMenu to handle menu items) leads to a
 few problems:
 
  - If multiple menu items share key, NSMenu will pick one at random. We can
