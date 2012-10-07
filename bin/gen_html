@@ -25,8 +25,12 @@ require 'getoptlong'
 require 'rdoc/usage'
 require 'erb'
 
-def expand_tpl(path, binding)
-  ERB.new(File.read(path), 0, '%-<>').result(binding)
+def expand_tpl(str, binding)
+  ERB.new(str, 0, '%-<>').result(binding)
+end
+
+def expand_tpl_file(path, binding)
+  expand_tpl(File.read(path), binding)
 end
 
 def find_exe(cmd)
@@ -96,6 +100,6 @@ css_files  = headers['css'].to_s.split(/,\s*/)
 js_files   = headers['js'].to_s.split(/,\s*/)
 meta_data  = Hash[*headers['meta'].to_s.scan(/(.*?)="(.*?)"(?:,\s*)?/).flatten]
 
-STDOUT << expand_tpl(header, binding) unless header.nil?
-STDOUT << open(filters, 'r+') { |io| io << body; io.close_write; wrap_in_article(io.read) }
-STDOUT << expand_tpl(footer, binding) unless footer.nil?
+STDOUT << expand_tpl_file(header, binding) unless header.nil?
+STDOUT << open(filters, 'r+') { |io| io << body; io.close_write; wrap_in_article(expand_tpl(io.read, binding)) }
+STDOUT << expand_tpl_file(footer, binding) unless footer.nil?
