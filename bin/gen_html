@@ -97,5 +97,5 @@ js_files   = headers['js'].to_s.split(/,\s*/)
 meta_data  = Hash[*headers['meta'].to_s.scan(/(.*?)="(.*?)"(?:,\s*)?/).flatten]
 
 STDOUT << expand_tpl(header, binding) unless header.nil?
-STDOUT << open(filters, 'r+') { |io| io << document; io.close_write; wrap_in_article(io.read) }
+STDOUT << open(filters, 'r+') { |io| io << body; io.close_write; wrap_in_article(io.read) }
 STDOUT << expand_tpl(footer, binding) unless footer.nil?
