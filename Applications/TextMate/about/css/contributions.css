@@ -1,0 +1,183 @@
+body {
+    font-family: Helvetica, arial, freesans, clean, sans-serif;
+    font-size: 13px;
+}
+img {
+    border: 0;
+}
+a {
+    color: #4183c4;
+    text-decoration: none;
+}
+.commit-group {
+    list-style-type: none;
+    margin: 0 0 15px 0;
+    background: #f7fbfc;
+    border: 1px solid #c5d5dd;
+    padding: 0;
+    border-top: none;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+h3.commit-group-heading {
+    margin: 15px 0 0 0;
+    padding: 5px 8px;
+    font-size: 13px;
+    color:  #3a505b;
+    text-shadow: 0 1px white;
+    background: #e6f1f6;
+    border: 1px solid #c5d5dd;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+}
+.commit-group-item.navigation-focus {
+    background: #fcfce2;
+}
+.commit-group-item {
+    position: relative;
+    padding: 8px 8px 8px 52px;
+}
+.commit-group-item:first-child {
+    border-top: none;
+}
+.commit-group-item .commit-title {
+    margin: 1px 0 1px 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+.commit-group-item .gravatar {
+    float: left;
+    margin-left: -44px;
+    border-radius: 4px;
+}
+.commit-group-item .commit-links {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+}
+.commit-group-item.navigation-focus .gobutton {
+    border-color: #e7e86d;
+    background: #f9fac9;
+    background: -webkit-linear-gradient(#f9fac9, #f3f494);
+}
+.commit-group-item:nth-child(2n+1) {
+	background: #fff;
+}
+.commit-group-item:nth-child(2n+1) .gobutton {
+    border-color: #d5dcdf;
+    background: #f2f5f6;
+    background: -webkit-linear-gradient(#f2f5f6, #e3eaed);
+}
+.commit-group-item.navigation-focus .gobutton {
+    color: #5a5b4e;
+}
+.commit-group-item .gobutton {
+    float: left;
+    height: 22px;
+    padding: 0 7px;
+    line-height: 22px;
+    font-size: 11px;
+    color: #4e575b;
+    text-shadow: 0 1px rgba(255,255,255,0.5);
+    background: #eff6f9;
+    background: -webkit-linear-gradient(#eff6f9, #ddecf3);
+    border: 1px solid #cedee5;
+    border-radius: 3px;
+}
+.hidden-text-expander a:hover {
+	background: #bbb;
+}
+.commit-group-item .commit-desc pre {
+	margin-top: 5px;
+	margin-bottom: 10px;
+	font-size: 12px;
+	color: #596063;
+	border: none;
+	background-color: transparent;
+	border-left: 1px solid #e5e5e5;
+	padding-left: 8px;
+}
+.commit .commit-desc pre {
+	white-space: pre-wrap;
+	font-family: Monaco, "Liberation Mono", Courier, monospace;
+	font-size: 14px;
+	color: #596063;
+}
+.hidden-text-expander a {
+	background: #ddd;
+	color: #555;
+	padding: 0 5px;
+	line-height: 6px;
+	height: 12px;
+	font-size: 12px;
+	font-weight: bold;
+	vertical-align: middle;
+	display: inline-block;
+	border-radius: 1px;
+	text-decoration: none;
+}
+.commit .sha-block, .commit .sha {
+    font-size: 11px;
+    font-family: Monaco, "Liberation Mono", Courier, monospace;
+}
+.commit-group-item .gobutton > .sha, .commit-group-item.navigation-focus .gobutton:hover > .sha {
+    display: inline-block;
+    height: 22px;
+    margin-right: -3px;
+}
+.commit-group-item .gobutton > .sha .mini-icon, .commit-group-item.navigation-focus .gobutton:hover > .sha .mini-icon {
+    position: relative;
+    top: 2px;
+    border-radius: 30px;
+    border: 1px solid #CFDEE5;
+    background-color: rgba(255,255,255,0.5);
+    color: #91a6b1;
+    margin-left: 5px;
+    width: 16px;
+}
+.commit-group-item .browse-button .mini-icon {
+    position: relative;
+    top: 2px;
+}
+.mini-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+.mini-icon-arr-right::before {
+    content: "\27a1";
+}
+.mini-icon-arr-right-mini::before {
+    content: "\27a1";
+}
+.mini-icon, .mega-icon {
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block;
+    text-decoration: inherit;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -webkit-transition: color 0.15s ease-in 0;
+    line-height: 1;
+    text-decoration: none;
+}
+.commit-group-item .browse-button {
+    float: right;
+    clear: left;
+    margin-top: 1px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: right;
+    color: #999;
+}
+.commit-group-item .authorship {
+    font-size: 12px;
+    color: #888;
+}
+.commit .commit-desc {
+    display: none;
+}
+.mini-icon-clippy {
+    display: none;
+}
