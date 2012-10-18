@@ -109,6 +109,15 @@ static bool is_binary (std::string const& path)
 	return false;
 }
 
+static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anotherSet)
+{
+	NSMutableSet* unionSet = [[aSet mutableCopy] autorelease];
+	[unionSet unionSet:anotherSet];
+	[anotherSet intersectSet:aSet];
+	[unionSet minusSet:anotherSet];
+	return unionSet;
+}
+
 @implementation OakFileBrowser
 @synthesize url, historyController, delegate, view;
 
@@ -205,12 +214,35 @@ static bool is_binary (std::string const& path)
 {
 	if(!settings_for_path(NULL_STR, "", to_s(self.location)).get(kSettingsFileBrowserDocumentStatusKey, true))
 		return;
-	
+
 	if([outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
 		return;
 
+	NSSet* symmetricDifference = SymmetricDifference([NSMutableSet setWithArray:outlineViewDelegate.openURLs], [NSMutableSet setWithArray:newOpenURLs]);
+
+	// make a note of files in view, with changed open state
+	NSMutableIndexSet* updateRows = [NSMutableIndexSet indexSet];
+	NSInteger len = [view.outlineView numberOfRows];
+	for(int rowIndex = 0; rowIndex < len ; rowIndex++)
+	{
+		NSURL* file = [[view.outlineView itemAtRow:rowIndex] url];
+		if( [symmetricDifference containsObject:file])
+		{
+			[updateRows addIndex:rowIndex];
+		}
+	}
 	outlineViewDelegate.openURLs = newOpenURLs;
-	[view.outlineView reloadData];
+
+	// make sure all items are accounted for
+	// if the counts are equal, all items are in view and no need re-index folders
+	if([updateRows count] == [symmetricDifference count])
+	{
+		[view.outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
+	}
+	else
+	{
+		[view.outlineView reloadData];
+	}
 }
 
 - (NSArray*)modifiedURLs
