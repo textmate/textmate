@@ -189,7 +189,6 @@ void theme_t::setup_styles ()
 			}
 		}
 	}
-
 	// =======================================
 	// = Find “global” foreground/background =
 	// =======================================
