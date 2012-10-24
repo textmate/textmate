@@ -1,4 +1,5 @@
 #import "PropertiesViewController.h"
+#import <OakAppKit/OakKeyEquivalentView.h>
 
 @implementation PropertiesViewController
 @synthesize properties;

@@ -119,16 +119,15 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 + (BundleEditor*)sharedInstance
 {
-	return SharedInstance ?: [[self new] autorelease];
+	return SharedInstance ?: [self new];
 }
 
 - (id)init
 {
 	if(SharedInstance)
 	{
-		[self release];
 	}
-	else if(self = SharedInstance = [[super initWithWindowNibName:@"BundleEditor"] retain])
+	else if(self = SharedInstance = [super initWithWindowNibName:@"BundleEditor"])
 	{
 		D(DBF_BundleEditor, bug("\n"););
 
@@ -171,12 +170,6 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(bundleItemContent)
 		bundleItemContent->remove_callback(documentCallback);
 	delete documentCallback;
-
-	[sharedPropertiesViewController release];
-	[extraPropertiesViewController release];
-	self.bundleItemProperties = nil;
-	[drawer release];
-	[super dealloc];
 }
 
 - (void)windowDidLoad
@@ -282,14 +275,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 {
 	if(returnCode == NSAlertDefaultReturn)
 		[self createItemOfType:(bundles::kind_t)[[(NSPopUpButton*)[alert accessoryView] selectedItem] tag]];
-	[alert release];
 }
 
 - (void)newDocument:(id)sender
 {
 	// kItemTypeMacro, kItemTypeMenu, kItemTypeMenuItemSeparator
 
-	NSMenu* menu = [[[NSMenu alloc] initWithTitle:@"Item Types"] autorelease];
+	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"Item Types"];
 	iterate(it, item_infos)
 	{
 		static int const types = bundles::kItemTypeBundle|bundles::kItemTypeCommand|bundles::kItemTypeDragCommand|bundles::kItemTypeSnippet|bundles::kItemTypeSettings|bundles::kItemTypeGrammar|bundles::kItemTypeProxy|bundles::kItemTypeTheme;
@@ -297,8 +289,8 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			[[menu addItemWithTitle:it->file action:NULL keyEquivalent:@""] setTag:it->kind];
 	}
 
-	NSAlert* alert = [[NSAlert alertWithMessageText:@"Create New Item" defaultButton:@"Create" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose what you want to create:"] retain];
-	NSPopUpButton* typeChooser = [[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO] autorelease];
+	NSAlert* alert = [NSAlert alertWithMessageText:@"Create New Item" defaultButton:@"Create" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Please choose what you want to create:"];
+	NSPopUpButton* typeChooser = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	[typeChooser setMenu:menu];
 	[typeChooser sizeToFit];
 	[alert setAccessoryView:typeChooser];
@@ -382,7 +374,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	if(!propertiesChanged && !bundleItemContent->is_modified())
 		return YES;
 
-	plist::dictionary_t plist = plist::convert((CFPropertyListRef)bundleItemProperties);
+	plist::dictionary_t plist = plist::convert((__bridge CFPropertyListRef)bundleItemProperties);
 
 	std::string const& content = bundleItemContent->buffer().substr(0, bundleItemContent->buffer().size());
 	item_info_t const& info = info_for(bundleItem->kind());
@@ -473,7 +465,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			NSForegroundColorAttributeName : entry->disabled() ? [NSColor grayColor] : [NSColor blackColor],
 			NSParagraphStyleAttributeName  : paragraphStyle
 		};
-		[cell setAttributedStringValue:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:entry->name()] attributes:attrs] autorelease]];
+		[cell setAttributedStringValue:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:entry->name()] attributes:attrs]];
 		[cell setLeaf:!entry->has_children()];
 		[cell setLoaded:YES];
 
@@ -523,14 +515,13 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	static std::string const BindingKeys[] = { bundles::kFieldIsDisabled, bundles::kFieldName, bundles::kFieldKeyEquivalent, bundles::kFieldTabTrigger, bundles::kFieldScopeSelector, bundles::kFieldSemanticClass, bundles::kFieldContentMatch, bundles::kFieldHideFromUser, bundles::kFieldDropExtension, bundles::kFieldGrammarExtension, bundles::kFieldGrammarFirstLineMatch, bundles::kFieldGrammarScope, bundles::kFieldGrammarInjectionSelector, "beforeRunningCommand", "input", "inputFormat", "outputLocation", "outputFormat", "outputCaret", "autoScrollOutput", "contactName", "contactEmailRot13", "description", "disableAutoIndent", "useGlobalClipboard", "author", "comment" };
 
 	NSMutableDictionary* oldProperties = bundleItemProperties;
-	bundleItemProperties = [someProperties retain];
+	bundleItemProperties = someProperties;
 	iterate(str, BindingKeys)
 	{
 		NSString* key = [NSString stringWithCxxString:*str];
 		[oldProperties removeObserver:self forKeyPath:key];
 		[someProperties addObserver:self forKeyPath:key options:0 context:NULL];
 	}
-	[oldProperties release];
 	propertiesChanged = NO;
 }
 
@@ -661,7 +652,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	bundleItemContent->add_callback(documentCallback);
 	[documentView setDocument:bundleItemContent];
 
-	self.sharedPropertiesViewController = [[[PropertiesViewController alloc] initWithName:@"SharedProperties"] autorelease];
+	self.sharedPropertiesViewController = [[PropertiesViewController alloc] initWithName:@"SharedProperties"];
 	self.extraPropertiesViewController  = nil;
 	[sharedPropertiesViewController setProperties:bundleItemProperties];
 
@@ -671,7 +662,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	NSView* sharedView = [sharedPropertiesViewController view];
 	if(info.view_controller)
 	{
-		self.extraPropertiesViewController = [[[PropertiesViewController alloc] initWithName:info.view_controller] autorelease];
+		self.extraPropertiesViewController = [[PropertiesViewController alloc] initWithName:info.view_controller];
 		[extraPropertiesViewController setProperties:bundleItemProperties];
 		NSView* extraView = [extraPropertiesViewController view];
 
@@ -680,7 +671,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 				[sharedView setFrame:NSOffsetRect(sharedView.frame, delta, 0)];
 		else	[extraView setFrame:NSOffsetRect(extraView.frame, -delta, 0)];
 
-		NSView* contentView = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, std::max(NSMaxX(sharedView.frame) + 1, NSMaxX(extraView.frame) + 1), NSHeight(sharedView.frame) + NSHeight(extraView.frame))] autorelease];
+		NSView* contentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, std::max(NSMaxX(sharedView.frame) + 1, NSMaxX(extraView.frame) + 1), NSHeight(sharedView.frame) + NSHeight(extraView.frame))];
 		[sharedView setAutoresizingMask:NSViewMinXMargin|NSViewMinYMargin];
 		[extraView setAutoresizingMask:NSViewMinXMargin|NSViewMinYMargin];
 
@@ -688,7 +679,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 		[contentView addSubview:sharedView];
 		[contentView addSubview:extraView];
 
-		[drawer setContentView:[[[NSView alloc] initWithFrame:NSZeroRect] autorelease]];
+		[drawer setContentView:[[NSView alloc] initWithFrame:NSZeroRect]];
 		[drawer setContentSize:contentView.frame.size];
 		[drawer setContentView:contentView];
 		[drawer open:self];
@@ -713,7 +704,6 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 			changes.clear();
 		[self close];
 	}
-	[alert release];
 }
 
 static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dictionary_t> const& changes)
