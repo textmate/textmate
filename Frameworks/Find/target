@@ -3,4 +3,4 @@ TEST_SOURCES = tests/*.cc
 EXPORT       = src/Find.h src/scan_path.h
 CP_Resources = resources/*
 LINK        += text editor io ns OakAppKit OakFoundation regexp scope
-FRAMEWORKS   = Cocoa QuartzCore
+FRAMEWORKS   = Cocoa
