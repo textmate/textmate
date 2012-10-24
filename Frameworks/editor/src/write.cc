@@ -82,9 +82,16 @@ namespace ng
 
 		if(!r.empty())
 		{
-			if(format == input_format::xml)
-					new write_t(fd, to_xml(buffer, r.min().index, r.max().index));
-			else	new write_t(fd, buffer.substr(r.min().index, r.max().index));
+			std::string str = "";
+			bool first = true;
+			citerate(range, dissect_columnar(buffer, r))
+			{
+				if(!first)
+					str += "\n";
+				str += format == input_format::xml ? to_xml(buffer, range->min().index, range->max().index) : buffer.substr(range->min().index, range->max().index);
+				first = false;
+			}
+			new write_t(fd, str);
 		}
 		close(fd);
 

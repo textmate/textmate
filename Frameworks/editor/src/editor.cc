@@ -1381,8 +1381,21 @@ namespace ng
 			else
 			{
 				if(32 + range.max().index - range.min().index < ARG_MAX)
-						map.insert(std::make_pair("TM_SELECTED_TEXT", _buffer.substr(range.min().index, range.max().index)));
-				else	map.insert(std::make_pair("TM_SELECTED_TEXT", text::format("Error: Selection exceeds %s. Command should read selection from stdin.", text::format_size(ARG_MAX-32).c_str())));
+				{
+					bool first = true;
+					citerate(r, dissect_columnar(_buffer, range))
+					{
+						if(first)
+								map["TM_SELECTED_TEXT"] = "";
+						else	map["TM_SELECTED_TEXT"] += "\n";
+						map["TM_SELECTED_TEXT"] += _buffer.substr(r->min().index, r->max().index);
+						first = false;
+					}
+				}
+				else
+				{
+					map.insert(std::make_pair("TM_SELECTED_TEXT", text::format("Error: Selection exceeds %s. Command should read selection from stdin.", text::format_size(ARG_MAX-32).c_str())));
+				}
 			}
 		}
 
