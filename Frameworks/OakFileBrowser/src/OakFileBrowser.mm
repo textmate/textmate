@@ -401,17 +401,48 @@ static bool is_binary (std::string const& path)
 
 - (void)delete:(id)anArgument
 {
-	BOOL didTrashSomething = NO;
-	for(NSString* aPath in self.selectedPaths)
+	[self doDelete:[NSArray arrayWithArray:self.selectedPaths]];
+}
+
+- (void)doDelete:(NSArray *)paths
+{
+    BOOL didTrashSomething = NO;
+    
+	for(NSString* aPath in paths)
 	{
 		std::string const trashPath = path::move_to_trash([aPath fileSystemRepresentation]);
 		if(trashPath != NULL_STR)
-				didTrashSomething = YES;
+            didTrashSomething = YES;
 		else	OakRunIOAlertPanel("Failed to move the file at “%s” to the trash.", [aPath fileSystemRepresentation]);
 	}
-
-	if(didTrashSomething)
+    
+	if(didTrashSomething) {
 		OakPlayUISound(OakSoundDidTrashItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] undoDelete:paths];
+    }
+}
+
+- (void)undoDelete:(NSArray *)paths
+{
+    BOOL noErrorsSoFar = YES;
+    NSString * trashFolder = [NSSearchPathForDirectoriesInDomains(NSTrashDirectory, NSUserDomainMask, YES) lastObject];
+    
+    for (NSString * path in paths) {
+        NSString * fileName = [path lastPathComponent];
+        NSURL * src  = [NSURL fileURLWithPath:[[trashFolder stringByAppendingString:@"/"] stringByAppendingString:fileName]];
+        NSURL * dest = [NSURL fileURLWithPath:path];
+        
+        NSError *copyError = nil;
+        if (![[NSFileManager defaultManager] moveItemAtURL:src toURL:dest error:&copyError]) {
+            OakRunIOAlertPanel("There was an error undoing the deletion of %s: %s", [path fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+            noErrorsSoFar = NO;
+        }
+    }
+    
+    if (noErrorsSoFar) {
+        OakPlayUISound(OakSoundDidMoveItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] doDelete:paths];
+    }
 }
 
 - (void)changeColor:(OakFinderLabelChooser*)labelChooser
