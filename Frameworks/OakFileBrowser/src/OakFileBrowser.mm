@@ -447,10 +447,38 @@ static bool is_binary (std::string const& path)
 	if(NSString* folder = [self parentForNewFolder])
 	{
 		std::string const dst = path::unique(path::join([folder fileSystemRepresentation], "untitled folder"));
-		if(path::make_dir(dst))
-				[outlineViewDelegate editURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
-		else	OakRunIOAlertPanel("Failed to create new folder in “%s”.", path::parent([folder fileSystemRepresentation]).c_str());
+        if([self doNewFolder:[NSString stringWithUTF8String:dst.c_str()] inParentFolder:folder])
+            [outlineViewDelegate editURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
 	}
+}
+
+- (BOOL)doNewFolder:(NSString *)path inParentFolder:(NSString *)folder
+{
+    std::string dst ([path UTF8String]);
+    
+    if(path::make_dir(dst))
+    {
+        [[[self undoManager] prepareWithInvocationTarget:self] undoNewFolder:path inParentFolder:folder];
+        return YES;
+    }
+    else
+    {
+        OakRunIOAlertPanel("Failed to create new folder in “%s”.", path::parent([folder fileSystemRepresentation]).c_str());
+        return NO;
+    }
+}
+
+- (void)undoNewFolder:(NSString *)path inParentFolder:(NSString *)folder
+{
+    NSError *removeError = nil;
+    if (![[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:path] error:&removeError])
+    {
+        OakRunIOAlertPanel("There was an error undoing the creation of new folder %s: %s", [path fileSystemRepresentation], [[removeError localizedDescription] UTF8String]);
+    }
+    else
+    {
+        [[[self undoManager] prepareWithInvocationTarget:self] doNewFolder:path inParentFolder:folder];
+    }
 }
 
 - (void)delete:(id)anArgument
