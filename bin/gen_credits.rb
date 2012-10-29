@@ -26,6 +26,27 @@ class GitHubLookup
 
   def self.initialize(dbm_file)
     @db = DBM.new(dbm_file)
+    # seed with some contributors that don't have an email
+    # address assigned publicly in their account
+    @db['1178ce2f664a6cee9a05a3e11af5d8d2'] = 'aaronbrethorst'
+    @db['3b0ef5e2a5f1aa3ccf3f23a20adf8873'] = 'Hoverbear'
+    @db['ff3502050b3b1b00cb6c810d5c41ffc9'] = 'bradchoate'
+    @db['ee646002e51a3c83e01db85ae42187ff'] = 'dmcdougall'
+    @db['85af9ad71af2dc0166b7c0c5780fa086'] = 'caldwell'
+    @db['fa64968e4a3c8e20364bb92ba7511ff9'] = 'dvennink'
+    @db['0669ff1e3ada91e7f1e7714f6f9a67f6'] = 'etienne'
+    @db['49ed289f3de94dbcd7c10392bcc40b53'] = 'fernando82'
+    @db['7b3ae2214891a47b26b4db98949c1bb0'] = 'gknops'
+    @db['34820bca697fbf1598774b393c5ca4fe'] = 'whitlockjc'
+    @db['ec9254734cd341f1b104d558dc4fc36a'] = 'joachimm'
+    @db['09c16a631eeba332147a8d620e1369cc'] = 'muellerj'
+    @db['6890db3146e20bfb99be3bc7bc3bfeec'] = 'lczekaj'
+    @db['e34425c11547a48a4701c9d1720dadf8'] = 'infininight'
+    @db['65efe3355478c8db96bc82f22fd3aa20'] = 'nathanieltagg'
+    @db['4e89e196a1f8fa34a6bdc6d165f75e5e'] = 'Ralle'
+    @db['ccc5b318408880a67eeebf0d18177fb5'] = 'rhencke'
+    @db['4cf620221f7e622260f8424b8142451f'] = 'ryanmaxwell'
+    @db['5780111eb4b5565816d9388b091e1057'] = 'youngrok'
     ObjectSpace.define_finalizer(@db, proc {|id| db.close })
   end
 
