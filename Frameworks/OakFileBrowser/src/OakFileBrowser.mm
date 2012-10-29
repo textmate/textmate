@@ -39,6 +39,7 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic, retain, readwrite) NSView* view;
 @property (nonatomic, readonly)          NSArray* selectedItems;
 @property (nonatomic, readonly)          NSArray* selectedPaths;
+@property (nonatomic, retain)            NSMutableString * oldFSItemForRename;
 - (void)updateView;
 - (void)loadFileBrowserOptions;
 @end
@@ -316,7 +317,49 @@ static bool is_binary (std::string const& path)
 - (BOOL)canUndo { return NO; }
 - (BOOL)canRedo { return NO; }
 
-- (void)editSelectedEntries:(id)sender { [view.outlineView performEditSelectedRow:self]; }
+- (void)editSelectedEntries:(id)sender  { [view.outlineView performEditSelectedRow:self]; }
+
+- (void)queueRename:(NSNotification *)aNotification
+{
+    FSItem * item = (FSItem *)[aNotification object];
+    self.oldFSItemForRename = [NSMutableString stringWithString:[[item url] absoluteString]];
+}
+
+- (void)finalizeRename:(NSNotification *)aNotification
+{
+    FSItem * newFSItem = (FSItem *)[aNotification object];
+    
+    NSString * oldPathName = [NSString stringWithString:self.oldFSItemForRename];
+    NSString * newPathName = [[newFSItem url] absoluteString];
+    
+    [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
+}
+
+- (void)doRename:(NSString *)oldPathName withNewName:(NSString *)newPathName
+{
+    NSURL * oldLocation = [NSURL URLWithString:oldPathName];
+    NSURL * newLocation = [NSURL URLWithString:newPathName];
+    
+    NSError *copyError = nil;
+    if (![[NSFileManager defaultManager] moveItemAtURL:oldLocation toURL:newLocation error:&copyError])
+        OakRunIOAlertPanel("There was an error renaming %s: %s", [oldPathName fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+
+    else
+        [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
+}
+
+- (void)undoRename:(NSString *)newPathName withOldName:(NSString *)oldPathName
+{
+    NSURL * newLocation = [NSURL URLWithString:newPathName];
+    NSURL * oldLocation = [NSURL URLWithString:oldPathName];
+    
+    NSError *copyError = nil;
+    if (![[NSFileManager defaultManager] moveItemAtURL:newLocation toURL:oldLocation error:&copyError])
+        OakRunIOAlertPanel("There was an error undoing the rename of %s: %s", [newPathName fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+
+    else
+        [[[self undoManager] prepareWithInvocationTarget:self] doRename:oldPathName withNewName:newPathName];
+}
 
 - (void)duplicateSelectedEntries:(id)sender
 {
@@ -694,6 +737,10 @@ static bool is_binary (std::string const& path)
 		dataSourceOptions |= (showExtensions ? kFSDataSourceOptionShowExtension : 0);
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+        
+        self.oldFSItemForRename = [NSMutableString new];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(queueRename:) name:@"OFBOutlineViewRenameActionQueued" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finalizeRename:) name:@"OFBOutlineViewRenameActionFinalized" object:nil];
 	}
 	return self;
 }

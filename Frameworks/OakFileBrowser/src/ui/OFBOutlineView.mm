@@ -110,8 +110,17 @@
 
 - (void)performEditSelectedRow:(id)sender
 {
-	if([self numberOfSelectedRows] == 1)
+	if([self numberOfSelectedRows] == 1) {
+        
+        //Notify the OakFileBrowser controller that an item is about
+        //to be renamed, for undo logic.
+        id selectedItem = [self itemAtRow:[self selectedRow]];
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:@"OFBOutlineViewRenameActionQueued"
+         object:selectedItem];
+        
 		[self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+    }
 }
 
 - (void)keyDown:(NSEvent*)theEvent
@@ -186,6 +195,14 @@
 	int movement = [[[aNotification userInfo] objectForKey:@"NSTextMovement"] intValue];
 	[super textDidEndEditing:aNotification];
 	NSInteger row = [self selectedRow];
+    
+    //Notify the OakFileBrowser controller that an item was
+    //successfully renamed, for undo logic.
+    id selectedItem = [self itemAtRow:row];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"OFBOutlineViewRenameActionFinalized"
+     object:selectedItem];
+    
 	if(movement == NSReturnTextMovement)
 	{
 		[self abortEditing];
@@ -209,7 +226,7 @@
 		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 		[self editColumn:0 row:row withEvent:nil select:YES];
 	}
-
+    
 	fieldEditorWasUp = YES;
 	[self performSelector:@selector(setFieldEditorWasUp:) withObject:0 afterDelay:0.0];
 }
