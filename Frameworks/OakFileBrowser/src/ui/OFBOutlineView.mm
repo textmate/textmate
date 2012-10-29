@@ -110,17 +110,8 @@
 
 - (void)performEditSelectedRow:(id)sender
 {
-	if([self numberOfSelectedRows] == 1) {
-        
-        //Notify the OakFileBrowser controller that an item is about
-        //to be renamed, for undo logic.
-        id selectedItem = [self itemAtRow:[self selectedRow]];
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:@"OFBOutlineViewRenameActionQueued"
-         object:selectedItem];
-        
+	if([self numberOfSelectedRows] == 1)
 		[self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
-    }
 }
 
 - (void)keyDown:(NSEvent*)theEvent
@@ -186,8 +177,21 @@
 
 - (void)cancelOperation:(id)sender
 {
-	if([self abortEditing])
+	if([self abortEditing]) {
 		[[self window] makeFirstResponder:self]; // Restore focus
+    }
+}
+
+- (void)editColumn:(NSInteger)columnIndex row:(NSInteger)rowIndex withEvent:(NSEvent *)theEvent select:(BOOL)flag
+{
+    [super editColumn:columnIndex row:rowIndex withEvent:theEvent select:flag];
+    
+    //Notify the OakFileBrowser controller that an item is about
+    //to be renamed, for undo logic.
+    id selectedItem = [self itemAtRow:[self selectedRow]];
+    [[NSNotificationCenter defaultCenter]
+     postNotificationName:@"OFBOutlineViewRenameActionQueued"
+     object:selectedItem];
 }
 
 - (void)textDidEndEditing:(NSNotification *)aNotification
