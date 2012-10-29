@@ -155,7 +155,7 @@ static bool is_binary (std::string const& path)
 - (void)cancelEditAndReload:(id)sender
 {
     [((OakFileBrowserView *)self.view).outlineView cancelOperation:sender];
-    [self reload:sender];
+    [((OakFileBrowserView *)self.view).outlineView reloadData];
 }
 
 - (void)setURL:(NSURL*)aURL
@@ -351,9 +351,9 @@ static bool is_binary (std::string const& path)
     NSURL * oldLocation = [NSURL URLWithString:oldPathName];
     NSURL * newLocation = [NSURL URLWithString:newPathName];
     
-    NSError *copyError = nil;
-    if (![[NSFileManager defaultManager] moveItemAtURL:oldLocation toURL:newLocation error:&copyError])
-        OakRunIOAlertPanel("There was an error renaming %s: %s", [oldPathName fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+    NSError *moveError = nil;
+    if (![[NSFileManager defaultManager] moveItemAtURL:oldLocation toURL:newLocation error:&moveError])
+        OakRunIOAlertPanel("There was an error renaming %s: %s", [oldPathName fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
 
     else
         [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
@@ -364,9 +364,9 @@ static bool is_binary (std::string const& path)
     NSURL * newLocation = [NSURL URLWithString:newPathName];
     NSURL * oldLocation = [NSURL URLWithString:oldPathName];
     
-    NSError *copyError = nil;
-    if (![[NSFileManager defaultManager] moveItemAtURL:newLocation toURL:oldLocation error:&copyError])
-        OakRunIOAlertPanel("There was an error undoing the rename of %s: %s", [newPathName fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+    NSError *moveError = nil;
+    if (![[NSFileManager defaultManager] moveItemAtURL:newLocation toURL:oldLocation error:&moveError])
+        OakRunIOAlertPanel("There was an error undoing the rename of %s: %s", [newPathName fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
 
     else
         [[[self undoManager] prepareWithInvocationTarget:self] doRename:oldPathName withNewName:newPathName];
@@ -530,10 +530,10 @@ static bool is_binary (std::string const& path)
             NSURL * src  = [NSURL fileURLWithPath:trashPath];
             NSURL * dest = [NSURL fileURLWithPath:path];
             
-            NSError *copyError = nil;
-            if (![[NSFileManager defaultManager] moveItemAtURL:src toURL:dest error:&copyError])
+            NSError *moveError = nil;
+            if (![[NSFileManager defaultManager] moveItemAtURL:src toURL:dest error:&moveError])
             {
-                OakRunIOAlertPanel("There was an error undoing the deletion of %s: %s", [path fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+                OakRunIOAlertPanel("There was an error undoing the deletion of %s: %s", [path fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
             }
             else
             {
@@ -648,17 +648,21 @@ static bool is_binary (std::string const& path)
 
 - (void)paste:(id)sender
 {
+    NSMutableArray* itemsToPaste = [NSMutableArray array];
 	NSMutableArray* created = [NSMutableArray array];
+    BOOL cut;
 	if(NSString* folder = [self parentForNewFolder])
 	{
 		NSPasteboard* pboard = [NSPasteboard generalPasteboard];
-		BOOL cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
+        cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
 		for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : nil)
 		{
 			std::string const src = [path fileSystemRepresentation];
 			std::string const dst = path::unique(path::join([folder fileSystemRepresentation], path::name(src)));
-			if(cut ? path::rename(src, dst) : path::copy(src, dst))
+			if(cut ? path::rename(src, dst) : path::copy(src, dst)) {
+                [itemsToPaste addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]]];
 				[created addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
+            }
 		}
 	}
 
@@ -666,14 +670,65 @@ static bool is_binary (std::string const& path)
 	{
 		OakPlayUISound(OakSoundDidMoveItemUISound);
 		[outlineViewDelegate selectURLs:created];
-        //[[[self undoManager] prepareWithInvocationTarget:self] undoPaste:pboard];
+        [[[self undoManager] prepareWithInvocationTarget:self] undoPaste:itemsToPaste withCreatedArray:created itemsWereCut:cut];
 	}
 }
 
-//- (void)undoPaste:(NSPasteboard *)sender
-//{
-//    
-//}
+- (void)doPaste:(NSMutableArray *)urls withCreatedArray:(NSMutableArray *)created itemsWereCut:(BOOL)cut
+{
+    int successfulPasteCount = 0;
+    if (cut)
+    {
+        for (int i = 0; i < [urls count]; i++) {
+            NSError *moveError = nil;
+            if (![[NSFileManager defaultManager] moveItemAtURL:[urls objectAtIndex:i] toURL:[created objectAtIndex:i] error:&moveError])
+                OakRunIOAlertPanel("There was an error pasting %s: %s", [[created objectAtIndex:i] fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < [urls count]; i++) {
+            NSError * copyError = nil;
+            if (![[NSFileManager defaultManager] copyItemAtURL:[urls objectAtIndex:i] toURL:[created objectAtIndex:i] error:&copyError])
+                OakRunIOAlertPanel("There was an error pasting %s: %s", [[urls objectAtIndex:i] fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    
+    if (successfulPasteCount >= 1) {
+        OakPlayUISound(OakSoundDidMoveItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] undoPaste:urls withCreatedArray:created itemsWereCut:cut];
+    }
+}
+
+- (void)undoPaste:(NSMutableArray *)urls withCreatedArray:(NSMutableArray *)created itemsWereCut:(BOOL)cut
+{
+    int successfulPasteCount = 0;
+    if (cut)
+    {
+        for (int i = 0; i < [created count]; i++) {
+            NSError *moveError = nil;
+            if (![[NSFileManager defaultManager] moveItemAtURL:[created objectAtIndex:i] toURL:[urls objectAtIndex:i] error:&moveError])
+                OakRunIOAlertPanel("There was an error undoing the paste of %s: %s", [[created objectAtIndex:i] fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < [created count]; i++) {
+            NSError *removeError = nil;
+            if (![[NSFileManager defaultManager] removeItemAtURL:[created objectAtIndex:i] error:&removeError])
+                OakRunIOAlertPanel("There was an error undoing the paste of %s: %s", [[created objectAtIndex:i] fileSystemRepresentation], [[removeError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    
+    if (successfulPasteCount >= 1) {
+        OakPlayUISound(OakSoundDidMoveItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] doPaste:urls withCreatedArray:created itemsWereCut:cut];
+    }
+}
 
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
 {
