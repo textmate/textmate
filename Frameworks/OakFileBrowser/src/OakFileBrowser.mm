@@ -39,7 +39,7 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic, retain, readwrite) NSView* view;
 @property (nonatomic, readonly)          NSArray* selectedItems;
 @property (nonatomic, readonly)          NSArray* selectedPaths;
-@property (nonatomic, retain)            NSMutableString * oldFSItemForRename;
+@property (nonatomic, copy)              NSString * oldFSItemForRename;
 - (void)updateView;
 - (void)loadFileBrowserOptions;
 @end
@@ -150,6 +150,12 @@ static bool is_binary (std::string const& path)
 	[historyController setCurrentURLScrollOffset:NSMinY([view.outlineView visibleRect])];
 	outlineViewDelegate.dataSource = DataSourceForURL(url, dataSourceOptions);
 	[outlineViewDelegate scrollToOffset:historyController.currentURLScrollOffset];
+}
+
+- (void)cancelEditAndReload:(id)sender
+{
+    [((OakFileBrowserView *)self.view).outlineView cancelOperation:sender];
+    [self reload:sender];
 }
 
 - (void)setURL:(NSURL*)aURL
@@ -322,17 +328,22 @@ static bool is_binary (std::string const& path)
 - (void)queueRename:(NSNotification *)aNotification
 {
     FSItem * item = (FSItem *)[aNotification object];
-    self.oldFSItemForRename = [NSMutableString stringWithString:[[item url] absoluteString]];
+    self.oldFSItemForRename = [NSString stringWithString:[[item url] absoluteString]];
 }
 
 - (void)finalizeRename:(NSNotification *)aNotification
 {
-    FSItem * newFSItem = (FSItem *)[aNotification object];
+    if (self.oldFSItemForRename != nil) {
+        FSItem * newFSItem = (FSItem *)[aNotification object];
+        
+        NSString * oldPathName = [NSString stringWithString:self.oldFSItemForRename];
+        NSString * newPathName = [[newFSItem url] absoluteString];
+        
+        if (![oldPathName isEqualToString:newPathName])
+            [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
+    }
     
-    NSString * oldPathName = [NSString stringWithString:self.oldFSItemForRename];
-    NSString * newPathName = [[newFSItem url] absoluteString];
-    
-    [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
+    self.oldFSItemForRename = nil;
 }
 
 - (void)doRename:(NSString *)oldPathName withNewName:(NSString *)newPathName
@@ -451,7 +462,6 @@ static bool is_binary (std::string const& path)
 {
     BOOL didTrashSomething = NO;
     NSMutableArray *trashPaths = [[NSMutableArray alloc] init];
-    NSLog(@"test");
 	for(int i = 0; i < [paths count]; i++)
 	{
         NSString *aPath = [paths objectAtIndex:i];
@@ -484,8 +494,8 @@ static bool is_binary (std::string const& path)
     BOOL didUndeleteSomething = NO;
     
     for (int i = 0; i < [paths count]; i++) {
-        NSString *path = [paths objectAtIndex:i];
-        NSString *trashPath = [trashPaths objectAtIndex:i];
+        NSString * path = [paths objectAtIndex:i];
+        NSString * trashPath = [trashPaths objectAtIndex:i];
         
         if (trashPath != nil)
         {
@@ -628,8 +638,14 @@ static bool is_binary (std::string const& path)
 	{
 		OakPlayUISound(OakSoundDidMoveItemUISound);
 		[outlineViewDelegate selectURLs:created];
+        //[[[self undoManager] prepareWithInvocationTarget:self] undoPaste:pboard];
 	}
 }
+
+//- (void)undoPaste:(NSPasteboard *)sender
+//{
+//    
+//}
 
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
 {
@@ -763,9 +779,12 @@ static bool is_binary (std::string const& path)
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
         
-        self.oldFSItemForRename = [NSMutableString new];
+        self.oldFSItemForRename = nil;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(queueRename:) name:@"OFBOutlineViewRenameActionQueued" object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finalizeRename:) name:@"OFBOutlineViewRenameActionFinalized" object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelEditAndReload:) name:NSUndoManagerWillRedoChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelEditAndReload:) name:NSUndoManagerWillUndoChangeNotification object:nil];
 	}
 	return self;
 }
