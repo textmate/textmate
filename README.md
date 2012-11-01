@@ -8,7 +8,7 @@ This repository contains the source code for TextMate 2, a text editor for OS X 
 
 ## Important
 
-If you just want to run TextMate 2 then download a [prebuilt binary][]. For 10.6 support you can try a [10.6 build][] (from the [10.6 fork][]) but it comes with no guarantee of actually working!
+If you just want to run TextMate 2 then use [this link to download a prebuilt binary][prebuilt binary]. For 10.6 support you can try a [10.6 build][] (from the [10.6 fork][]) but it comes with no guarantee of actually working!
 
 If you have problems building please **don’t** open an issue! Instead write the [textmate-dev][] mailing list or use the [#textmate][] IRC channel on [freenode.net][] where people might be able to help you.
 
