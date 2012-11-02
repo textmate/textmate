@@ -203,6 +203,9 @@ static bool is_binary (std::string const& path)
 
 - (void)setOpenURLs:(NSArray*)newOpenURLs
 {
+	if(!settings_for_path(NULL_STR, "", [self.location UTF8String]).get(kSettingsFileBrowserDocumentStatusKey, true))
+		return;
+	
 	if([outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
 		return;
 
@@ -217,6 +220,9 @@ static bool is_binary (std::string const& path)
 
 - (void)setModifiedURLs:(NSArray*)newModifiedURLs
 {
+	if(!settings_for_path(NULL_STR, "", [self.location UTF8String]).get(kSettingsFileBrowserDocumentStatusKey, true))
+		return;
+	
 	if([outlineViewDelegate.modifiedURLs isEqualToArray:newModifiedURLs])
 		return;
 
