@@ -1,5 +1,23 @@
 # Changes
 
+## 2012-11-12 (r9321)
+
+* Add `filepanel` dialog command. For details use ⌃R (execute current line) on a line containing: `"$DIALOG" help filepanel`. *[Hans-Jörg Bibiko]*
+
+* The contributions page in the About window now list the commits from contributors. *[Brad Choate]*
+
+* When the file browser is showing a lot of items, delays can happen when opening, closing, saving, or changing a file (when it goes from unmodified to modified) so as a temporary workaround you can now disable the file browser status by adding the following to `.tm_properties`:
+
+		fileBrowserDocumentStatus = false
+
+	Long-term the goal is of course to improve the slow file browser refreshing. *[Josh Goebel]*
+
+* Command input and the `TM_SELECTED_TEXT` variable now work correctly with column selections.
+
+* If no theme is selected, the gutter now get a default set of colors. *[Robert Hencke]*
+
+* The command properties drawer in the bundle editor has been made less wide by wrapping a few lines. *[Adam Strzelecki]*
+
 ## 2012-10-01 (r9319)
 
 * Using “Transpose” (⌃T) with a discontinuous selection will now swap the selected strings. If pressed repeatedly, and more than two strings are selected, it will cycle through all possible permutations.
