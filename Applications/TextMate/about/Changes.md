@@ -1,5 +1,9 @@
 # Changes
 
+## 2012-11-14 (r9323)
+
+* Fix crash bug introduced in last build.
+
 ## 2012-11-12 (r9321)
 
 * Add `filepanel` dialog command. For details use ⌃R (execute current line) on a line containing: `"$DIALOG" help filepanel`. *[Hans-Jörg Bibiko]*
