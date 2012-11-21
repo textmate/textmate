@@ -122,6 +122,19 @@ namespace scm
 			return urlInfo != info.end() ? urlInfo->second : NULL_STR;
 		}
 
+		std::string repo_url (std::string const& wcPath) const
+		{
+			if(executable() == NULL_STR)
+				return NULL_STR;
+
+			std::map<std::string, std::string> env = oak::basic_environment();
+			env["PWD"] = wcPath;
+
+			auto info = parse_info_output(io::exec(env, executable(), "info", NULL));
+			auto urlInfo = info.find("URL");
+			return urlInfo != info.end() ? urlInfo->second : NULL_STR;
+		}
+
 		status_map_t status (std::string const& wcPath) const
 		{
 			D(DBF_SCM_Svn, bug("%s\n", wcPath.c_str()););

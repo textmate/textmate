@@ -14,6 +14,11 @@ namespace scm
 			return NULL_STR;
 		}
 
+		std::string repo_url (std::string const& wcPath) const
+		{
+			return NULL_STR;
+		}
+
 		status_map_t status (std::string const& wcPath) const
 		{
 			D(DBF_SCM_Perforce, bug("%s\n", wcPath.c_str()););

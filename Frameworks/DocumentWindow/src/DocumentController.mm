@@ -531,6 +531,10 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 			if(branch != NULL_STR)
 				map["TM_SCM_BRANCH"] = branch;
 
+			std::string const& repoUrl = info->repo_url();
+			if(repoUrl != NULL_STR)
+				map["TM_SCM_URL"] = repoUrl;
+
 			std::string const& name = info->scm_name();
 			if(name != NULL_STR)
 				map["TM_SCM_NAME"] = name;
