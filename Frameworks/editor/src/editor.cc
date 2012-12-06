@@ -1357,7 +1357,8 @@ namespace ng
 
 		map.insert(std::make_pair("TM_TAB_SIZE", text::format("%zu", _buffer.indent().tab_size())));
 		if(_buffer.indent().soft_tabs())
-			map.insert(std::make_pair("TM_SOFT_TABS", "YES"));
+				map.insert(std::make_pair("TM_SOFT_TABS", "YES"));
+		else	map.insert(std::make_pair("TM_SOFT_TABS", "NO"));
 		map.insert(std::make_pair("TM_SELECTION", to_s(_buffer, _selections)));
 
 		if(_selections.size() == 1)
