@@ -54,6 +54,35 @@ static size_t line_count (std::string text)
 	}
 }
 
+- (NSArray *)accessibilityAttributeNames
+{
+	static NSArray* attributes = nil;
+	if(!attributes)
+	{
+		NSSet* set = [NSSet setWithArray:[super accessibilityAttributeNames]];
+
+		set = [set setByAddingObjectsFromArray:@[
+			NSAccessibilityRoleAttribute,
+			NSAccessibilityValueAttribute,
+		]];
+		attributes = [[set allObjects] retain];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString *)attribute
+{
+	id value = nil;
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
+		value = NSAccessibilityStaticTextRole;
+	} else if([attribute isEqualToString:NSAccessibilityValueAttribute]) {
+		value = [self objectValue];
+	} else {
+		value = [super accessibilityAttributeValue:attribute];
+	}
+	return value;
+}
+
 - (size_t)lineCountForText:(NSString*)text
 {
 	return oak::cap((size_t)1, line_count([text UTF8String]), maxLines);
