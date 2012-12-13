@@ -221,14 +221,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSSet* symmetricDifference = SymmetricDifference([NSMutableSet setWithArray:outlineViewDelegate.openURLs], [NSMutableSet setWithArray:newOpenURLs]);
 
 	// make a note of files in view, with changed open state
-	NSMutableIndexSet* updateRows = [NSMutableIndexSet indexSet];
-	NSInteger len = [view.outlineView numberOfRows];
-	for(NSInteger rowIndex = 0; rowIndex < len; ++rowIndex)
-	{
-		NSURL* file = [[view.outlineView itemAtRow:rowIndex] url];
-		if([symmetricDifference containsObject:file])
-			[updateRows addIndex:rowIndex];
-	}
+	NSIndexSet* updateRows = [self indexSetforURLs:symmetricDifference];
+
 	outlineViewDelegate.openURLs = newOpenURLs;
 
 	// make sure all items are accounted for
@@ -255,6 +249,21 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[view.outlineView reloadData];
 }
 
+- (NSIndexSet*)indexSetforURLs:(NSSet*)urls
+{
+	// make a note of files in view, with changed open state
+	NSMutableIndexSet* updateRows = [NSMutableIndexSet indexSet];
+	NSInteger len = [view.outlineView numberOfRows];
+	for(int rowIndex = 0; rowIndex < len ; rowIndex++)
+	{
+		NSURL* file = [[view.outlineView itemAtRow:rowIndex] url];
+		if([urls containsObject:file])
+		{
+			[updateRows addIndex:rowIndex];
+		}
+	}
+	return updateRows;
+}
 // ======================
 // = History Controller =
 // ======================
