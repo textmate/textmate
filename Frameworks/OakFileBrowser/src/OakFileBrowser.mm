@@ -266,7 +266,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(int rowIndex = 0; rowIndex < len ; rowIndex++)
 	{
 		NSURL* file = [[view.outlineView itemAtRow:rowIndex] url];
-		if( [urls containsObject:file])
+		if([urls containsObject:file])
 		{
 			[updateRows addIndex:rowIndex];
 		}
