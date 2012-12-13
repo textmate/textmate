@@ -245,8 +245,17 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if([outlineViewDelegate.modifiedURLs isEqualToArray:newModifiedURLs])
 		return;
 
+	NSSet* symmetricDifference = SymmetricDifference([NSMutableSet setWithArray:outlineViewDelegate.modifiedURLs], [NSMutableSet setWithArray:newModifiedURLs]);
+
+	// make a note of files in view, with changed open state
+	NSIndexSet* updateRows = [self indexSetforURLs:symmetricDifference];
 	outlineViewDelegate.modifiedURLs = newModifiedURLs;
-	[view.outlineView reloadData];
+
+	// make sure all items are accounted for
+	// if the counts are equal, all items are in view and no need re-index folders
+	if([updateRows count] == [symmetricDifference count])
+			[view.outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
+	else	[view.outlineView reloadData];
 }
 
 - (NSIndexSet*)indexSetforURLs:(NSSet*)urls
