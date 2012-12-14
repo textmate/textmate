@@ -12,11 +12,7 @@ require 'uri'
 require 'cgi'
 require 'dbm'
 require 'date'
-
-# built using json 1.7.5 gem
-require 'rubygems'
-require 'json'
-
+require 'yaml'
 
 # Helper class to handle searching for GitHub users
 # by their email address. Caches mappings to a file
@@ -71,7 +67,7 @@ class GitHubLookup
       return @db[emailhash] = nil
     end
 
-    user = JSON.parse(response.body)
+    user = YAML.load(response.body)
     # save result to k/v store
     return @db[emailhash] = user['user']['login']
   end
