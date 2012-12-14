@@ -57,6 +57,8 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 - (void)recordSelector:(SEL)aSelector withArgument:(id)anArgument;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
 - (void)highlightRanges:(ng::ranges_t const&)ranges;
+- (NSRange)nsRangeForRange:(ng::range_t const&)range;
+- (ng::range_t const&)rangeForNSRange:(NSRange)nsRange;
 @property (nonatomic, readonly) ng::ranges_t const& markedRanges;
 @property (nonatomic, retain) NSDate* optionDownDate;
 @property (nonatomic, retain) OakTimer* initiateDragTimer;
@@ -633,6 +635,29 @@ static std::string shell_quote (std::vector<std::string> paths)
 // = Accented input =
 // ==================
 
+- (NSRange)nsRangeForRange:(ng::range_t const&)range
+{
+	//TODO this and the next method could use some optimization using an interval tree
+	//     similar to basic_tree_t for conversion between UTF-8 and UTF-16 indexes.
+	//     Currently poor performance for large documents (O(N)) would then get to O(log(N))
+	//     Also currently copy of whole text is created here, which is not optimal
+	std::string const text = document->buffer().substr(0, range.max().index);
+	char const* base = text.data();
+	NSUInteger location = utf16::distance(base, base + range.min().index);
+	NSUInteger length   = utf16::distance(base + range.min().index, base + range.max().index);
+	return NSMakeRange(location, length);
+}
+
+- (ng::range_t const&)rangeForNSRange:(NSRange)nsRange
+{
+	std::string const text = editor->as_string();
+	char const* base = text.data();
+	ng::index_t from = utf16::advance(base, nsRange.location, base + text.size()) - base;
+	ng::index_t to   = utf16::advance(base + from.index, nsRange.length, base + text.size()) - base;
+	static ng::range_t res;
+	return res = ng::range_t(from, to);
+}
+
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)aRange
 {
 	D(DBF_OakTextView_TextInput, bug("‘%s’ %s\n", to_s([aString description]).c_str(), [NSStringFromRange(aRange) UTF8String]););
@@ -670,9 +695,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (NSRange)selectedRange
 {
-	std::string const text = editor->as_string();
-	ng::range_t const r = editor->ranges().last();
-	NSRange res = NSMakeRange(utf16::distance(text.data(), text.data() + r.min().index), utf16::distance(text.data() + r.min().index, text.data() + r.max().index));
+	NSRange res = [self nsRangeForRange:editor->ranges().last()];
 	D(DBF_OakTextView_TextInput, bug("%s\n", [NSStringFromRange(res) UTF8String]););
 	return res;
 }
@@ -682,10 +705,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	D(DBF_OakTextView_TextInput, bug("%s\n", to_s(markedRanges).c_str()););
 	if(markedRanges.empty())
 		return NSMakeRange(NSNotFound, 0);
-
-	ng::range_t const r = markedRanges.last();
-	std::string const text = document->buffer().substr(0, r.max().index);
-	return NSMakeRange(utf16::distance(text.data(), text.data() + r.min().index), utf16::distance(text.data() + r.min().index, text.data() + r.max().index));
+	return [self nsRangeForRange:markedRanges.last()];
 }
 
 - (void)unmarkText
@@ -737,10 +757,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (NSAttributedString*)attributedSubstringFromRange:(NSRange)theRange
 {
-	std::string const text = editor->as_string();
-	char const* const base = text.data();
-	size_t from = utf16::advance(base, theRange.location, base + text.size()) - base;
-	size_t to   = utf16::advance(base + from, theRange.length, base + text.size()) - base;
+	ng::range_t const& r = [self rangeForNSRange:theRange];
+	size_t from = r.min().index, to = r.max().index;
 
 	CFMutableAttributedStringRef res = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
 	std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
@@ -752,7 +770,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		size_t j = ++pair != scopes.end() ? from + pair->first : to;
 
 		CFMutableAttributedStringRef str = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
-		CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(text.substr(i, j - i)));
+		CFAttributedStringReplaceString(str, CFRangeMake(0, 0), cf::wrap(document->buffer().substr(i, j)));
 		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTFontAttributeName, styles.font());
 		CFAttributedStringSetAttribute(str, CFRangeMake(0, CFAttributedStringGetLength(str)), kCTForegroundColorAttributeName, styles.foreground());
 		if(styles.underlined())
@@ -766,10 +784,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (NSRect)firstRectForCharacterRange:(NSRange)theRange
 {
-	std::string const text = editor->as_string();
-
-	size_t index = utf16::advance(text.data(), theRange.location, text.data() + text.size()) - text.data();
-	NSRect rect = [self convertRect:layout->rect_at_index(index) toView:nil];
+	ng::range_t const& r = [self rangeForNSRange:theRange];
+	NSRect rect = [self convertRect:layout->rect_at_index(r.min()) toView:nil];
 	rect.origin = [[self window] convertBaseToScreen:rect.origin];
 	D(DBF_OakTextView_TextInput, bug("%s → %s\n", [NSStringFromRange(theRange) UTF8String], [NSStringFromRect(rect) UTF8String]););
 	return rect;
