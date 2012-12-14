@@ -1,5 +1,12 @@
 # Changes
 
+## 2012-12-14 (r9325)
+
+* Add support for VoiceOver/accessibility. *[Boris Dušek]*
+* Add support for “Zoom follows the keyboard focus”. *[Boris Dušek]*
+* Always set the `TM_SOFT_TABS` variable. *[Michael Sheets]*
+* Limit file browser refresh. *[Joachim Mårtensson]*
+
 ## 2012-11-14 (r9323)
 
 * Fix crash bug introduced in last build.
