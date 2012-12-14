@@ -214,7 +214,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	if(!settings_for_path(NULL_STR, "", to_s(self.location)).get(kSettingsFileBrowserDocumentStatusKey, true))
 		return;
-	
+
 	if([outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
 		return;
 
