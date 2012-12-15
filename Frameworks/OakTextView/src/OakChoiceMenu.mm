@@ -126,7 +126,6 @@ enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMov
 	window.backgroundColor    = [NSColor colorWithCalibratedRed:1.0 green:0.96 blue:0.76 alpha:1.0];
 	window.hasShadow          = YES;
 	window.level              = NSStatusWindowLevel;
-	window.hidesOnDeactivate  = YES;
 	window.ignoresMouseEvents = YES;
 
 	tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
