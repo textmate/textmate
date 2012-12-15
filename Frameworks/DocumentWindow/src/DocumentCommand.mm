@@ -21,25 +21,30 @@
 #import <text/trim.h>
 #import <text/tokenize.h>
 
-@interface OakShowCommandErrorDelegate : NSObject
-{
-	oak::uuid_t commandUUID;
-}
+@interface OakAlertBlockWrapper : NSObject
+@property (nonatomic, retain) NSAlert* alert;
+@property (nonatomic, retain) NSString* info;
+@property (nonatomic, retain) void(^completionHandler)(OakAlertBlockWrapper*, NSInteger);
 @end
 
-@implementation OakShowCommandErrorDelegate
-- (id)initWithCommandUUID:(oak::uuid_t const&)anUUID
+@implementation OakAlertBlockWrapper
+- (void)showAlert:(NSAlert*)anAlert forWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakAlertBlockWrapper*, NSInteger))aCallback
 {
-	if(self = [super init])
-		commandUUID = anUUID;
-	return self;
+	self.completionHandler = aCallback;
+	self.alert = anAlert;
+	[self retain];
+
+	if(aWindow)
+			[anAlert beginSheetModalForWindow:aWindow modalDelegate:self didEndSelector:@selector(alertSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	else	[self alertSheetDidEnd:anAlert returnCode:[anAlert runModal] contextInfo:NULL];
 }
 
-- (void)commandErrorDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
+- (void)alertSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
 {
-	if(returnCode == NSAlertSecondButtonReturn)
-		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(commandUUID)];
-	[alert release];
+	self.completionHandler(self, returnCode);
+	self.completionHandler = nil;
+	self.alert = nil;
+	self.info = nil;
 	[self release];
 }
 @end
@@ -341,8 +346,10 @@ void show_command_error (std::string const& message, oak::uuid_t const& uuid, NS
 	[alert setInformativeText:[NSString stringWithCxxString:message] ?: @"No output"];
 	[alert addButtons:@"OK", @"Edit Command", nil];
 
-	OakShowCommandErrorDelegate* delegate = [[OakShowCommandErrorDelegate alloc] initWithCommandUUID:uuid];
-	if(window)
-			[alert beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:@selector(commandErrorDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-	else	[delegate commandErrorDidEnd:alert returnCode:[alert runModal] contextInfo:NULL];
+	OakAlertBlockWrapper* wrapper = [[OakAlertBlockWrapper new] autorelease];
+	wrapper.info = [NSString stringWithCxxString:uuid];
+	[wrapper showAlert:alert forWindow:window completionHandler:^(OakAlertBlockWrapper* aWrapper, NSInteger button){
+		if(button == NSAlertSecondButtonReturn)
+			[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(aWrapper.info))];
+	}];
 }
