@@ -4,13 +4,13 @@
 <html>
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<%- meta_data.each do |key, value| -%>
-	<meta name="<%= key %>" content="<%= value %>">
+	<meta name="<%= key %>" content="<%= value %>" />
 	<%- end -%>
-	<link href="css/stylesheet.css" rel="stylesheet" type="text/css">
+	<link href="css/stylesheet.css" rel="stylesheet" type="text/css" />
 	<%- css_files.each do |css| -%>
-	<link rel="stylesheet" type="text/css" href="<%= css %>" charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="<%= css %>" charset="utf-8" />
 	<%- end -%>
 	<%- js_files.each do |js| -%>
 	<script type="text/javascript" src="<%= js %>" charset="utf-8"></script>
