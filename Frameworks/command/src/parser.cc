@@ -108,13 +108,14 @@ static std::vector<bundle_command_t::shell_command_t> convert_requirements (plis
 	std::vector<bundle_command_t::shell_command_t> res;
 	iterate(info, array)
 	{
-		std::string command, variable = NULL_STR; plist::array_t locations;
+		std::string command, moreInfoURL = NULL_STR, variable = NULL_STR; plist::array_t locations;
 		if(plist::get_key_path(*info, "command", command))
 		{
+			plist::get_key_path(*info, "moreInfoURL", moreInfoURL);
 			plist::get_key_path(*info, "variable", variable);
 			if(plist::get_key_path(*info, "locations", locations))
-					res.push_back(bundle_command_t::shell_command_t(command, variable, convert_locations(locations)));
-			else	res.push_back(bundle_command_t::shell_command_t(command));
+					res.push_back(bundle_command_t::shell_command_t(command, moreInfoURL, variable, convert_locations(locations)));
+			else	res.push_back(bundle_command_t::shell_command_t(command, moreInfoURL));
 		}
 	}
 	return res;

@@ -320,7 +320,26 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 				std::vector<std::string> paths;
 				for(auto path : search_paths(baseEnv))
 					paths.push_back(path::with_tilde(path));
-				return show_command_error(text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", it->command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), it->variable.c_str()), command.uuid, [controller window]);
+
+				std::string const title = text::format("Unable to run “%.*s”.", (int)command.name.size(), command.name.data());
+				std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", it->command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), it->variable.c_str());
+
+				NSAlert* alert = [[NSAlert alloc] init]; // released in didEndSelector
+				[alert setAlertStyle:NSCriticalAlertStyle];
+				[alert setMessageText:[NSString stringWithCxxString:title]];
+				[alert setInformativeText:[NSString stringWithCxxString:message]];
+				[alert addButtonWithTitle:@"OK"];
+				if(it->more_info_url != NULL_STR)
+					[alert addButtonWithTitle:@"More Info…"];
+
+				OakAlertBlockWrapper* wrapper = [[OakAlertBlockWrapper new] autorelease];
+				wrapper.info = [NSString stringWithCxxString:it->more_info_url];
+				[wrapper showAlert:alert forWindow:[controller window] completionHandler:^(OakAlertBlockWrapper* aWrapper, NSInteger button){
+					if(button == NSAlertSecondButtonReturn)
+						[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:aWrapper.info]];
+				}];
+
+				return;
 			}
 
 			if(it->variable != NULL_STR)
