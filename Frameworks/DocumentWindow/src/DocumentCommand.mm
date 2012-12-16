@@ -21,34 +21,6 @@
 #import <text/trim.h>
 #import <text/tokenize.h>
 
-@interface OakAlertBlockWrapper : NSObject
-@property (nonatomic, retain) NSAlert* alert;
-@property (nonatomic, retain) NSString* info;
-@property (nonatomic, retain) void(^completionHandler)(OakAlertBlockWrapper*, NSInteger);
-@end
-
-@implementation OakAlertBlockWrapper
-- (void)showAlert:(NSAlert*)anAlert forWindow:(NSWindow*)aWindow completionHandler:(void(^)(OakAlertBlockWrapper*, NSInteger))aCallback
-{
-	self.completionHandler = aCallback;
-	self.alert = anAlert;
-	[self retain];
-
-	if(aWindow)
-			[anAlert beginSheetModalForWindow:aWindow modalDelegate:self didEndSelector:@selector(alertSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-	else	[self alertSheetDidEnd:anAlert returnCode:[anAlert runModal] contextInfo:NULL];
-}
-
-- (void)alertSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	self.completionHandler(self, returnCode);
-	self.completionHandler = nil;
-	self.alert = nil;
-	self.info = nil;
-	[self release];
-}
-@end
-
 @interface DocumentController (Variables)
 - (void)updateVariables:(std::map<std::string, std::string>&)env;
 @end
@@ -332,12 +304,11 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 				if(it->more_info_url != NULL_STR)
 					[alert addButtonWithTitle:@"More Info…"];
 
-				OakAlertBlockWrapper* wrapper = [[OakAlertBlockWrapper new] autorelease];
-				wrapper.info = [NSString stringWithCxxString:it->more_info_url];
-				[wrapper showAlert:alert forWindow:[controller window] completionHandler:^(OakAlertBlockWrapper* aWrapper, NSInteger button){
+				NSString* moreInfo = [NSString stringWithCxxString:it->more_info_url];
+				OakShowAlert(alert, [controller window], ^(NSAlert* alert, NSInteger button){
 					if(button == NSAlertSecondButtonReturn)
-						[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:aWrapper.info]];
-				}];
+						[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:moreInfo]];
+				});
 
 				return;
 			}
@@ -365,10 +336,8 @@ void show_command_error (std::string const& message, oak::uuid_t const& uuid, NS
 	[alert setInformativeText:[NSString stringWithCxxString:message] ?: @"No output"];
 	[alert addButtons:@"OK", @"Edit Command", nil];
 
-	OakAlertBlockWrapper* wrapper = [[OakAlertBlockWrapper new] autorelease];
-	wrapper.info = [NSString stringWithCxxString:uuid];
-	[wrapper showAlert:alert forWindow:window completionHandler:^(OakAlertBlockWrapper* aWrapper, NSInteger button){
+	OakShowAlert(alert, window, ^(NSAlert* alert, NSInteger button){
 		if(button == NSAlertSecondButtonReturn)
-			[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(aWrapper.info))];
-	}];
+			[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(uuid)];
+	});
 }
