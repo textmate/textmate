@@ -76,7 +76,7 @@ OAK_DEBUG_VAR(OakTimer);
 
 - (void)timerDidFire:(NSTimer*)timer
 {
-	D(DBF_OakTimer, bug("target: %p, action: %s\n", self.target, sel_getName(selector)););
+	D(DBF_OakTimer, bug("target: %p, action: %s\n", self.target, sel_getName(self.selector)););
 	if(self.target)
 			[self fire];
 	else	[self invalidate];
