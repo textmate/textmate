@@ -22,12 +22,12 @@ bool DidHandleODBEditorEvent (AppleEvent const* event);
 #pragma pack(2)
 struct PBX_SelectionRange
 {
-	short unused1;		// 0 (not used)
-	short lineNum;		// line to select (<0 to specify range)
-	long startRange;	// start of selection range (if line < 0)
-	long endRange;		// end of selection range (if line < 0)
-	long unused2;		// 0 (not used)
-	long theDate;		// modification date/time
+	int16_t unused1;    // 0 (not used)
+	int16_t lineNum;    // line to select (<0 to specify range)
+	int32_t startRange; // start of selection range (if line < 0)
+	int32_t endRange;   // end of selection range (if line < 0)
+	int32_t unused2;    // 0 (not used)
+	int32_t theDate;    // modification date/time
 };
 #pragma options align=reset
 
