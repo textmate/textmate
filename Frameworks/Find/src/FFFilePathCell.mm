@@ -4,7 +4,7 @@
 #import <text/tokenize.h>
 #import <cf/cf.h>
 #import <ns/ns.h>
-#import <ns/attr_string.h>
+#import "attr_string.h"
 #import <io/path.h>
 
 static NSImage* ImageForBadgeCounter (NSInteger count)
