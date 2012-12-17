@@ -981,7 +981,10 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	NSURL* currentDocumentURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]];
 	if([fileBrowser.selectedURLs count] == 1 && [currentDocumentURL isEqualTo:[fileBrowser.selectedURLs lastObject]])
 			[fileBrowser deselectAll:self];
-	else	[fileBrowser showURL:currentDocumentURL];
+	else {
+		// [fileBrowser showURL:currentDocumentURL];
+		[fileBrowser showURL:currentDocumentURL from:[NSURL fileURLWithPath:self.projectPath]];
+	}
 }
 
 - (IBAction)goToProjectFolder:(id)sender
