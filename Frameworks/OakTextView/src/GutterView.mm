@@ -2,8 +2,8 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSString Additions.h>
-#import <ns/attr_string.h>
 #import <text/types.h>
+#import <cf/cf.h>
 #import <cf/cgrect.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
@@ -273,7 +273,27 @@ struct data_source_t
 
 static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
 {
-	return CTLineCreateWithAttributedString(ns::attr_string_t(font) << (color ?: [NSColor grayColor]) << text);
+	CTLineRef res = NULL;
+	if(CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
+	{
+		if(CGColorRef cgColor = [color CGColor])
+			CFDictionaryAddValue(dict, kCTForegroundColorAttributeName, cgColor);
+			
+		if(CTFontRef ctFont = CTFontCreateWithName((CFStringRef)[font fontName], [font pointSize], NULL))
+		{
+			CFDictionaryAddValue(dict, kCTFontAttributeName, ctFont);
+			CFRelease(ctFont);
+		}
+
+		if(CFAttributedStringRef str = CFAttributedStringCreate(kCFAllocatorDefault, cf::wrap(text), dict))
+		{
+			res = CTLineCreateWithAttributedString(str);
+			CFRelease(str);
+		}
+
+		CFRelease(dict);
+	}
+	return res;
 }
 
 static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)

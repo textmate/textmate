@@ -1,24 +1,28 @@
 #import "OakControl Private.h"
 #import "NSView Additions.h"
 #import <oak/oak.h>
-#import <ns/attr_string.h>
 
 // The lineBreakMode parameter is here to work around a crash in CoreText <rdar://6940427> — fixed in 10.6
 static CFAttributedStringRef AttributedStringWithOptions (NSString* string, uint32_t options, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingTail)
 {
-	ns::attr_string_t text;
-	text.add([NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]);
-	text.add(ns::style::line_break(lineBreakMode));
+	NSMutableDictionary* attr = [NSMutableDictionary dictionary];
+	attr[NSFontAttributeName] = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+
+	NSMutableParagraphStyle* paragraph = [[NSMutableParagraphStyle new] autorelease];
+	[paragraph setLineBreakMode:lineBreakMode];
+	attr[NSParagraphStyleAttributeName] = paragraph;
+
 	if(options & layer_t::shadow)
 	{
 		NSShadow* shadow = [[[NSShadow alloc] init] autorelease];
 		[shadow setShadowOffset:NSMakeSize(0, -1)];
 		[shadow setShadowBlurRadius:1.0];
 		[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1.0 alpha:0.8]];
-		text.add(shadow);
+		attr[NSShadowAttributeName] = shadow;
 	}
-	text.add(string);
-	return text;
+
+	NSAttributedString* res = [[[NSAttributedString alloc] initWithString:string attributes:attr] autorelease];
+	return (CFAttributedStringRef)res;
 }
 
 double WidthOfText (NSString* string)
