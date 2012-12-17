@@ -179,7 +179,7 @@ void OakOpenDocuments (NSArray* paths)
 - (IBAction)showBundleItemChooser:(id)sender
 {
 	self.filterWindowController            = [OakFilterWindowController filterWindow];
-	OakTextView* textView                  = [NSApp targetForAction:@selector(scope)];
+	OakTextView* textView                  = [NSApp targetForAction:@selector(scopeContext)];
 	BundleItemChooser* dataSource          = [BundleItemChooser bundleItemChooserForScope:textView ? [textView scopeContext] : scope::wildcard];
 	dataSource.searchType                  = search::type(bundleItemSearch.search_type);
 	dataSource.keyEquivalentSearch         = bundleItemSearch.key_equivalent;
