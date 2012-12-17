@@ -862,7 +862,7 @@ rule markdown
   description = Generate ‘$out’…
 
 rule index_help
-  command = /usr/bin/hiutil -Caf $out "$HELP_BOOK"
+  command = /usr/bin/hiutil -Cvaf $out "$HELP_BOOK"
   description = Index help book ‘$HELP_BOOK’…
 
 rule compile_mom
