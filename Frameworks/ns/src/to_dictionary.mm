@@ -44,8 +44,8 @@ namespace ns
 	NSDictionary* to_dictionary (plist::any_t const& plist)
 	{
 		CFPropertyListRef res = plist::create_cf_property_list(plist);
-		NSDictionary* dict = (NSDictionary*)res;
-		return [dict autorelease];
+		NSDictionary* dict = (NSDictionary*)CFBridgingRelease(res);
+		return dict;
 	}
 
 	NSMutableDictionary* to_mutable_dictionary (plist::any_t const& plist)

@@ -28,11 +28,10 @@
 
 - (NSDictionary*)stringAttributes
 {
-	static NSDictionary* attrs = [[NSDictionary dictionaryWithObjectsAndKeys:
-		[NSColor blackColor],                 NSForegroundColorAttributeName,
-		[NSFont userFixedPitchFontOfSize:12], NSFontAttributeName,
-		nil] retain];
-	return attrs;
+	return @{
+		NSFontAttributeName:            [NSFont userFixedPitchFontOfSize:12],
+		NSForegroundColorAttributeName: [NSColor blackColor]
+	};
 }
 
 - (void)keyDown:(NSEvent*)anEvent
@@ -58,7 +57,7 @@ public:
 	void test_key_events ()
 	{
 		@autoreleasepool {
-			OakSetupApplicationWithView([[[MyEventView alloc] initWithFrame:NSMakeRect(0, 0, 200, 100)] autorelease], "key_events");
+			OakSetupApplicationWithView([[MyEventView alloc] initWithFrame:NSMakeRect(0, 0, 200, 100)], "key_events");
 		}
 	}
 };
