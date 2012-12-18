@@ -10,9 +10,18 @@
 
 OAK_DEBUG_VAR(SoftwareUpdate_Download);
 
+struct shared_state_t
+{
+	double progress = 0;
+	bool stop = false;
+};
+
+typedef std::shared_ptr<shared_state_t> shared_state_ptr;
+
 @interface DownloadWindowController ()
 - (void)notifyUserAboutUpdate;
 
+@property (nonatomic, retain) NSDate* downloadStartDate;
 @property (nonatomic, retain) NSTimer* progressTimer;
 @property (nonatomic, assign) BOOL isDownloading;
 @property (nonatomic, assign) BOOL showUpdateBadge;
@@ -21,8 +30,11 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 @end
 
 @implementation DownloadWindowController
-@synthesize versionOfDownload, progressTimer, activityText, progress, statusText, isDownloading, canInstall, isInstalling, showUpdateBadge;
-@synthesize url, archive;
+{
+	shared_state_ptr sharedState;
+	CGFloat secondsLeft;
+	key_chain_t keyChain;
+}
 
 - (id)initWithURL:(NSString*)aURL displayString:(NSString*)aDisplayString keyChain:(key_chain_t const&)aKeyChain
 {
@@ -30,8 +42,8 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 	if(self = [super initWithWindowNibName:@"DownloadProgress"])
 	{
 		sharedState.reset(new shared_state_t);
-		downloadStartDate = [NSDate new];
-		secondsLeft       = CGFLOAT_MAX;
+		self.downloadStartDate = [NSDate date];
+		secondsLeft            = CGFLOAT_MAX;
 
 		self.activityText  = aDisplayString;
 		self.progress      = 0;
@@ -66,7 +78,7 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 {
 	self.progress = sharedState->progress;
 
-	NSTimeInterval secondsElapsed = -[downloadStartDate timeIntervalSinceNow];
+	NSTimeInterval secondsElapsed = -[self.downloadStartDate timeIntervalSinceNow];
 	if(secondsElapsed < 1.0 || self.progress < 0.01)
 		return;
 
@@ -133,9 +145,9 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 	self.url     = nil;
 	self.archive = nil;
 
-	[activityText release];
-	[statusText release];
-	[downloadStartDate release];
+	self.activityText      = nil;
+	self.statusText        = nil;
+	self.downloadStartDate = nil;
 
 	[super dealloc];
 }
@@ -144,7 +156,7 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 
 - (BOOL)isWorking
 {
-	return isDownloading || isInstalling;
+	return self.isDownloading || self.isInstalling;
 }
 
 - (void)windowDidLoad
@@ -161,10 +173,10 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 - (void)setShowUpdateBadge:(BOOL)flag
 {
 	D(DBF_SoftwareUpdate_Download, bug("%s\n", BSTR(flag)););
-	if(self.showUpdateBadge == flag)
+	if(_showUpdateBadge == flag)
 		return;
 
-	if(showUpdateBadge = flag)
+	if(_showUpdateBadge = flag)
 	{
 		D(DBF_SoftwareUpdate_Download, bug("alter application icon\n"););
 		NSImage* appIcon = [NSApp applicationIconImage];
@@ -188,7 +200,7 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 {
 	D(DBF_SoftwareUpdate_Download, bug("\n"););
 
-	self.activityText = [NSString stringWithFormat:@"Installing %@…", versionOfDownload ?: @"app"];
+	self.activityText = [NSString stringWithFormat:@"Installing %@…", self.versionOfDownload ?: @"app"];
 	self.isInstalling = YES;
 
 	std::string err = sw_update::install_update(to_s(self.archive));

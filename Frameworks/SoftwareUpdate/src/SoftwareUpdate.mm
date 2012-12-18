@@ -36,7 +36,10 @@ NSString* const kSoftwareUpdateChannelNightly              = @"nightly";
 static SoftwareUpdate* SharedInstance;
 
 @implementation SoftwareUpdate
-@synthesize channels, isChecking, errorString, pollTimer, downloadWindowController;
+{
+	key_chain_t keyChain;
+	NSTimeInterval pollInterval;
+}
 
 + (SoftwareUpdate*)sharedInstance
 {
@@ -78,7 +81,7 @@ static SoftwareUpdate* SharedInstance;
 	BOOL readOnlyFileSystem = statfs(oak::application_t::path().c_str(), &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
 	BOOL disablePolling = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisableSoftwareUpdatesKey] boolValue];
 	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(downloadWindowController.isVisible), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!downloadWindowController.isVisible && !disablePolling && !readOnlyFileSystem)););
-	if(downloadWindowController.isVisible || disablePolling || readOnlyFileSystem)
+	if(self.downloadWindowController.isVisible || disablePolling || readOnlyFileSystem)
 		return;
 
 	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) addTimeInterval:pollInterval];
@@ -101,11 +104,11 @@ static SoftwareUpdate* SharedInstance;
 - (void)performVersionCheck:(NSTimer*)aTimer
 {
 	D(DBF_SoftwareUpdate_Check, bug("last check was %.1f hours ago\n", -[self.lastPoll timeIntervalSinceNow] / (60*60)););
-	if(!isChecking)
+	if(!self.isChecking)
 	{
 		self.isChecking = YES;
 
-		NSURL* url = [channels objectForKey:[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+		NSURL* url = [self.channels objectForKey:[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 		[self performSelectorInBackground:@selector(performBackgroundVersionCheck:) withObject:@{ @"infoURL" : url, @"timer" : YES_obj }];
 	}
 }
@@ -113,11 +116,11 @@ static SoftwareUpdate* SharedInstance;
 - (IBAction)checkForUpdates:(id)sender
 {
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
-	if(!isChecking)
+	if(!self.isChecking)
 	{
 		self.isChecking = YES;
 
-		NSURL* url = [channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+		NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 		BOOL force = OakIsAlternateKeyOrMouseEvent(NSShiftKeyMask);
 		[self performSelectorInBackground:@selector(performBackgroundVersionCheck:) withObject:@{ @"infoURL" : url, @"force" : @(force) }];
 	}
@@ -170,10 +173,10 @@ static SoftwareUpdate* SharedInstance;
 			if(choice == NSAlertDefaultReturn) // "Download & Install"
 			{
 				self.downloadWindowController = [[DownloadWindowController alloc] initWithURL:downloadURL displayString:[NSString stringWithFormat:@"Downloading %@ %ld…", appName, version] keyChain:keyChain];
-				downloadWindowController.versionOfDownload = [NSString stringWithFormat:@"%ld", version];
+				self.downloadWindowController.versionOfDownload = [NSString stringWithFormat:@"%ld", version];
 				if(!interactive && [NSApp isActive])
-						[[downloadWindowController window] orderFront:self];
-				else	[downloadWindowController showWindow:self];
+						[[self.downloadWindowController window] orderFront:self];
+				else	[self.downloadWindowController showWindow:self];
 			}
 			else if(choice == NSAlertOtherReturn) // "Later"
 			{
@@ -198,8 +201,8 @@ static SoftwareUpdate* SharedInstance;
 
 - (void)setChannels:(NSDictionary*)someChannels
 {
-	[channels autorelease];
-	channels = [someChannels retain];
+	[_channels autorelease];
+	_channels = [someChannels retain];
 	[self scheduleVersionCheck:nil];
 }
 
