@@ -23,7 +23,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 @property (nonatomic, retain) NSDate* downloadStartDate;
 @property (nonatomic, retain) NSTimer* progressTimer;
-@property (nonatomic, assign) BOOL isDownloading;
 @property (nonatomic, assign) BOOL showUpdateBadge;
 @property (retain) NSString* url;
 @property (retain) NSString* archive;
@@ -42,17 +41,24 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	if(self = [super initWithWindowNibName:@"DownloadProgress"])
 	{
 		sharedState.reset(new shared_state_t);
-		self.downloadStartDate = [NSDate date];
-		secondsLeft            = CGFLOAT_MAX;
+		secondsLeft = CGFLOAT_MAX;
 
-		self.activityText  = aDisplayString;
-		self.progress      = 0;
-		self.statusText    = @"";
-		self.isDownloading = YES;
-		self.progressTimer = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
+		self.downloadStartDate = [NSDate date];
+		self.progressTimer     = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
+
+		self.activityText      = aDisplayString;
+		self.statusText        = @"";
+
+		self.isIndeterminate   = NO;
+		self.progress          = 0;
+		self.isWorking         = YES;
+
+		self.canInstall        = NO;
+		self.canCancel         = YES;
 
 		self.url = aURL;
 		keyChain = aKeyChain;
+
 		[self performSelectorInBackground:@selector(performBackgroundDownload:) withObject:self];
 	}
 	return self;
@@ -114,7 +120,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	self.progressTimer = nil;
 	self.progress      = 1;
 	self.statusText    = @"";
-	self.isDownloading = NO;
+	self.isWorking     = NO;
 
 	if(sharedState->stop)
 		return;
@@ -150,13 +156,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	self.downloadStartDate = nil;
 
 	[super dealloc];
-}
-
-+ (NSSet*)keyPathsForValuesAffectingIsWorking { return [NSSet setWithObjects:@"isDownloading", @"isInstalling", nil]; }
-
-- (BOOL)isWorking
-{
-	return self.isDownloading || self.isInstalling;
 }
 
 - (void)windowDidLoad
@@ -200,8 +199,10 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 {
 	D(DBF_SoftwareUpdate_Download, bug("\n"););
 
-	self.activityText = [NSString stringWithFormat:@"Installing %@…", self.versionOfDownload ?: @"app"];
-	self.isInstalling = YES;
+	self.activityText    = [NSString stringWithFormat:@"Installing %@…", self.versionOfDownload ?: @"app"];
+	self.isIndeterminate = YES;
+	self.isWorking       = YES;
+	self.canInstall      = NO;
 
 	std::string err = sw_update::install_update(to_s(self.archive));
 	if(err == NULL_STR)
@@ -218,6 +219,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	else
 	{
 		self.activityText = [NSString stringWithCxxString:err];
+		self.isWorking    = NO;
 		OakRunIOAlertPanel("%s", err.c_str());
 	}
 }
@@ -233,7 +235,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 	D(DBF_SoftwareUpdate_Download, bug("\n"););
 	[self.progressTimer invalidate];
 	self.progressTimer = nil;
-	self.isDownloading = NO;
 	self.showUpdateBadge = NO;
 
 	sharedState->stop = true;
