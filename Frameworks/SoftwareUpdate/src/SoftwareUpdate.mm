@@ -63,7 +63,7 @@ static SoftwareUpdate* SharedInstance;
 
 + (SoftwareUpdate*)sharedInstance
 {
-	return SharedInstance ?: [[self new] autorelease];
+	return SharedInstance ?: [self new];
 }
 
 + (void)initialize
@@ -78,9 +78,8 @@ static SoftwareUpdate* SharedInstance;
 {
 	if(SharedInstance)
 	{
-		[self release];
 	}
-	else if(self = SharedInstance = [[super init] retain])
+	else if(self = SharedInstance = [super init])
 	{
 		D(DBF_SoftwareUpdate_Check, bug("\n"););
 		pollInterval = 60*60;
@@ -153,7 +152,7 @@ static SoftwareUpdate* SharedInstance;
 		std::string error = NULL_STR;
 		auto info = sw_update::download_info(to_s([url absoluteString]), &error);
 
-		NSMutableDictionary* res = [[someOptions mutableCopy] autorelease];
+		NSMutableDictionary* res = [someOptions mutableCopy];
 		if(error != NULL_STR)
 		{
 			[res setObject:[NSString stringWithCxxString:error] forKey:@"error"];
@@ -222,7 +221,7 @@ static SoftwareUpdate* SharedInstance;
 	sharedState.reset(new shared_state_t);
 	secondsLeft = CGFLOAT_MAX;
 
-	self.downloadWindow = [[[DownloadWindowController alloc] init] autorelease];
+	self.downloadWindow = [DownloadWindowController new];
 	self.downloadWindow.delegate     = self;
 	self.downloadWindow.activityText = [NSString stringWithFormat:@"Downloading %@ %ld…", appName, version];
 	self.downloadWindow.statusText   = @"";
@@ -384,8 +383,7 @@ static SoftwareUpdate* SharedInstance;
 
 - (void)setChannels:(NSDictionary*)someChannels
 {
-	[_channels autorelease];
-	_channels = [someChannels retain];
+	_channels = someChannels;
 	[self scheduleVersionCheck:nil];
 }
 

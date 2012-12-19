@@ -8,7 +8,7 @@
 @end
 
 @interface DownloadWindowController : NSWindowController
-@property (nonatomic, assign) id <DownloadWindowControllerDelegate> delegate;
+@property (nonatomic, weak)   id <DownloadWindowControllerDelegate> delegate;
 @property (nonatomic, assign) BOOL showUpdateBadge;
 
 @property (nonatomic, retain) NSString* activityText;      // Text binding: “Downlading ‘TextMate_r1589.tbz’…”

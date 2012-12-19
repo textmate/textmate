@@ -14,14 +14,6 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 	return [super initWithWindowNibName:@"DownloadProgress"];
 }
 
-- (void)dealloc
-{
-	D(DBF_SoftwareUpdate_Download, bug("\n"););
-	self.activityText = nil;
-	self.statusText   = nil;
-	[super dealloc];
-}
-
 - (void)windowDidLoad
 {
 	self.window.hidesOnDeactivate = YES;
@@ -38,7 +30,7 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 	{
 		D(DBF_SoftwareUpdate_Download, bug("alter application icon\n"););
 		NSImage* appIcon = [NSApp applicationIconImage];
-		NSImage* dlBadge = [[[NSImage imageNamed:@"Update Badge" inSameBundleAsClass:[self class]] copy] autorelease];
+		NSImage* dlBadge = [[NSImage imageNamed:@"Update Badge" inSameBundleAsClass:[self class]] copy];
 		[dlBadge setSize:NSMakeSize(appIcon.size.width / 4, appIcon.size.height / 4)];
 		[NSApp setApplicationIconImage:[OakImage imageWithBase:appIcon badge:dlBadge edge:CGRectMaxXEdge]];
 	}
