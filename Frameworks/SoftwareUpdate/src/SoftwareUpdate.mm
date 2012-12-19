@@ -38,11 +38,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 @property (nonatomic, assign) BOOL isChecking;
 @property (nonatomic, retain) NSString* errorString;
 @property (nonatomic, retain) NSTimer* pollTimer;
-
 @property (nonatomic, retain) DownloadWindowController* downloadWindow;
-@property (nonatomic, retain) NSDate* downloadStartDate;
-@property (nonatomic, retain) NSTimer* progressTimer;
-
 @property (retain) NSString* archive;
 
 - (void)scheduleVersionCheck:(id)sender;
@@ -228,8 +224,7 @@ static SoftwareUpdate* SharedInstance;
 			[self.downloadWindow.window orderFront:self];
 	else	[self.downloadWindow showWindow:self];
 
-	self.downloadStartDate = [NSDate date];
-	self.progressTimer     = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
+	NSTimer* updateProgressTimer = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:[NSDate date] repeats:YES];
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		shared_state_ptr state = sharedState;
@@ -237,12 +232,11 @@ static SoftwareUpdate* SharedInstance;
 		std::string path = sw_update::download_update(to_s(downloadURL), keyChain, &error, &state->progress, &state->stop);
 
 		dispatch_async(dispatch_get_main_queue(), ^{
+			[updateProgressTimer invalidate];
+
 			self.downloadWindow.progress   = 1;
 			self.downloadWindow.statusText = @"";
 			self.downloadWindow.isWorking  = NO;
-
-			[self.progressTimer invalidate];
-			self.progressTimer = nil;
 
 			if(sharedState->stop)
 				return;
@@ -272,7 +266,8 @@ static SoftwareUpdate* SharedInstance;
 {
 	self.downloadWindow.progress = sharedState->progress;
 
-	NSTimeInterval secondsElapsed = -[self.downloadStartDate timeIntervalSinceNow];
+	NSDate* downloadStartDate = [aTimer userInfo];
+	NSTimeInterval secondsElapsed = -[downloadStartDate timeIntervalSinceNow];
 	if(secondsElapsed < 1.0 || self.downloadWindow.progress < 0.01)
 		return;
 
@@ -344,12 +339,9 @@ static SoftwareUpdate* SharedInstance;
 - (void)windowWillClose:(DownloadWindowController*)sender
 {
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
-	[self.progressTimer invalidate];
-	self.progressTimer = nil;
-	self.downloadWindow.showUpdateBadge = NO;
-
 	sharedState->stop = true;
 
+	self.downloadWindow.showUpdateBadge = NO;
 	self.downloadWindow = nil;
 }
 
