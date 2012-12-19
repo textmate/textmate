@@ -47,6 +47,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 @property (retain) NSString* archive;
 
 - (void)scheduleVersionCheck:(id)sender;
+- (void)checkVersionAtURL:(NSURL*)anURL inBackground:(BOOL)backgroundFlag allowDowngrade:(BOOL)downgradeFlag;
 - (void)downloadVersion:(long)version atURL:(NSString*)downloadURL interactively:(BOOL)interactive;
 @end
 
@@ -123,91 +124,66 @@ static SoftwareUpdate* SharedInstance;
 - (void)performVersionCheck:(NSTimer*)aTimer
 {
 	D(DBF_SoftwareUpdate_Check, bug("last check was %.1f hours ago\n", -[self.lastPoll timeIntervalSinceNow] / (60*60)););
-	if(!self.isChecking)
-	{
-		self.isChecking = YES;
 
-		NSURL* url = [self.channels objectForKey:[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
-		[self performSelectorInBackground:@selector(performBackgroundVersionCheck:) withObject:@{ @"infoURL" : url, @"timer" : YES_obj }];
-	}
+	NSURL* url = [self.channels objectForKey:[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+	[self checkVersionAtURL:url inBackground:YES allowDowngrade:NO];
 }
 
 - (IBAction)checkForUpdates:(id)sender
 {
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
-	if(!self.isChecking)
-	{
-		self.isChecking = YES;
 
-		NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
-		BOOL force = OakIsAlternateKeyOrMouseEvent(NSShiftKeyMask);
-		[self performSelectorInBackground:@selector(performBackgroundVersionCheck:) withObject:@{ @"infoURL" : url, @"force" : @(force) }];
-	}
+	BOOL isShiftDown = OakIsAlternateKeyOrMouseEvent(NSShiftKeyMask);
+	NSURL* url = [self.channels objectForKey:OakIsAlternateKeyOrMouseEvent(NSAlternateKeyMask) ? kSoftwareUpdateChannelNightly : [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
+	[self checkVersionAtURL:url inBackground:NO allowDowngrade:isShiftDown];
 }
 
-- (void)performBackgroundVersionCheck:(NSDictionary*)someOptions
+- (void)checkVersionAtURL:(NSURL*)anURL inBackground:(BOOL)backgroundFlag allowDowngrade:(BOOL)downgradeFlag
 {
-	@autoreleasepool {
-		NSURL* url = [someOptions objectForKey:@"infoURL"];
+	if(self.isChecking)
+		return;
+	self.isChecking = YES;
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		std::string error = NULL_STR;
-		auto info = sw_update::download_info(to_s([url absoluteString]), &error);
+		auto info = sw_update::download_info(to_s([anURL absoluteString]), &error);
 
-		NSMutableDictionary* res = [someOptions mutableCopy];
-		if(error != NULL_STR)
-		{
-			[res setObject:[NSString stringWithCxxString:error] forKey:@"error"];
-		}
-		else
-		{
-			[res setObject:[NSString stringWithCxxString:info.url] forKey:@"url"];
-			[res setObject:@(info.version) forKey:@"version"];
-		}
+		dispatch_async(dispatch_get_main_queue(), ^{
+			self.errorString = [NSString stringWithCxxString:error];
+			self.lastPoll    = [NSDate date];
 
-		[self performSelectorOnMainThread:@selector(didPerformBackgroundVersionCheck:) withObject:res waitUntilDone:NO];
-	}
-}
-
-- (void)didPerformBackgroundVersionCheck:(NSDictionary*)info
-{
-	long version          = [[info objectForKey:@"version"] longValue];
-	NSString* downloadURL = [info objectForKey:@"url"];
-	NSString* error       = [info objectForKey:@"error"];
-	BOOL timer            = [[info objectForKey:@"timer"] boolValue];
-	BOOL force            = [[info objectForKey:@"force"] boolValue];
-	BOOL ask              = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey];
-
-	if(version && downloadURL)
-	{
-		NSString* appName     = [NSString stringWithCxxString:oak::application_t::name()];
-		NSInteger thisVersion = force ? 0 : strtol(oak::application_t::revision().c_str(), NULL, 10);
-		if(version <= thisVersion)
-		{
-			if(!timer)
-				NSRunInformationalAlertPanel(@"Up To Date", @"%@ %ld is the latest version available—you have %ld.", @"Continue", nil, nil, appName, version, thisVersion);
-		}
-		else
-		{
-			bool interactive = ask || !timer;
-			int choice = interactive ? NSRunInformationalAlertPanel(@"New Version Available", @"%@ %ld is now available—you have %ld. Would you like to download it now?", @"Download & Install", nil, @"Later", appName, version, thisVersion) : NSAlertDefaultReturn;
-			if(choice == NSAlertDefaultReturn) // "Download & Install"
+			if(self.errorString)
 			{
-				[self downloadVersion:version atURL:downloadURL interactively:interactive];
+				if(!backgroundFlag)
+					NSRunInformationalAlertPanel(@"Error checking for new version", @"%@", @"Continue", nil, nil, self.errorString);
 			}
-			else if(choice == NSAlertOtherReturn) // "Later"
+			else if(info.version && info.url != NULL_STR)
 			{
-				[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] addTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
+				NSString* appName     = [NSString stringWithCxxString:oak::application_t::name()];
+				NSInteger thisVersion = downgradeFlag ? 0 : strtol(oak::application_t::revision().c_str(), NULL, 10);
+				if(info.version <= thisVersion)
+				{
+					if(!backgroundFlag)
+						NSRunInformationalAlertPanel(@"Up To Date", @"%@ %ld is the latest version available—you have %ld.", @"Continue", nil, nil, appName, info.version, thisVersion);
+				}
+				else
+				{
+					BOOL interactive = !backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey];
+					int choice = interactive ? NSRunInformationalAlertPanel(@"New Version Available", @"%@ %ld is now available—you have %ld. Would you like to download it now?", @"Download & Install", nil, @"Later", appName, info.version, thisVersion) : NSAlertDefaultReturn;
+					if(choice == NSAlertDefaultReturn) // "Download & Install"
+					{
+						[self downloadVersion:info.version atURL:[NSString stringWithCxxString:info.url] interactively:interactive];
+					}
+					else if(choice == NSAlertOtherReturn) // "Later"
+					{
+						[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] addTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
+					}
+				}
 			}
-		}
-	}
-	else if(error && !timer)
-	{
-		NSRunInformationalAlertPanel(@"Error checking for new version", @"%@", @"Continue", nil, nil, error);
-		error = nil;
-	}
 
-	self.isChecking  = NO;
-	self.lastPoll    = [NSDate date];
-	self.errorString = error;
+			self.isChecking = NO;
+		});
+	});
 }
 
 // ===================
