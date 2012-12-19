@@ -43,7 +43,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 @property (nonatomic, retain) NSDate* downloadStartDate;
 @property (nonatomic, retain) NSTimer* progressTimer;
 
-@property (retain) NSString* url;
 @property (retain) NSString* archive;
 
 - (void)scheduleVersionCheck:(id)sender;
@@ -216,24 +215,41 @@ static SoftwareUpdate* SharedInstance;
 	self.downloadStartDate = [NSDate date];
 	self.progressTimer     = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
 
-	self.url = downloadURL;
-	[self performSelectorInBackground:@selector(performBackgroundDownload:) withObject:self];
-}
-
-- (void)performBackgroundDownload:(id)sender
-{
-	@autoreleasepool {
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 		shared_state_ptr state = sharedState;
 		std::string error = NULL_STR;
-		std::string path = sw_update::download_update(to_s(self.url), keyChain, &error, &state->progress, &state->stop);
+		std::string path = sw_update::download_update(to_s(downloadURL), keyChain, &error, &state->progress, &state->stop);
 
-		NSDictionary* arg = [NSDictionary dictionary];
-		if(path != NULL_STR)
-			arg = @{ @"path" : [NSString stringWithCxxString:path] };
-		else if(error != NULL_STR)
-			arg = @{ @"error" : [NSString stringWithCxxString:error] };
-		[self performSelectorOnMainThread:@selector(didPerformBackgroundDownload:) withObject:arg waitUntilDone:NO];
-	}
+		dispatch_async(dispatch_get_main_queue(), ^{
+			self.downloadWindow.progress   = 1;
+			self.downloadWindow.statusText = @"";
+			self.downloadWindow.isWorking  = NO;
+
+			[self.progressTimer invalidate];
+			self.progressTimer = nil;
+
+			if(sharedState->stop)
+				return;
+
+			if(path != NULL_STR)
+			{
+				self.archive = [NSString stringWithCxxString:path];
+
+				self.downloadWindow.activityText    = @"Download Completed";
+				self.downloadWindow.canInstall      = YES;
+				self.downloadWindow.showUpdateBadge = YES;
+
+				if([NSApp isActive])
+					OakPlayUISound(OakSoundDidCompleteSomethingUISound);
+
+				[NSApp requestUserAttention:NSInformationalRequest];
+			}
+			else if(error != NULL_STR)
+			{
+				self.downloadWindow.activityText = [NSString stringWithFormat:@"Failed: %@", [NSString stringWithCxxString:error]];
+			}
+		});
+	});
 }
 
 - (void)updateProgress:(NSTimer*)aTimer
@@ -267,38 +283,6 @@ static SoftwareUpdate* SharedInstance;
 				self.downloadWindow.statusText = [NSString stringWithFormat:@"Time remaining: hours"];
 			secondsLeft = roundedSecondsLeft;
 		}
-	}
-}
-
-- (void)didPerformBackgroundDownload:(NSDictionary*)info
-{
-	self.downloadWindow.progress   = 1;
-	self.downloadWindow.statusText = @"";
-	self.downloadWindow.isWorking  = NO;
-
-	[self.progressTimer invalidate];
-	self.progressTimer = nil;
-
-	if(sharedState->stop)
-		return;
-
-	if(NSString* path = [info objectForKey:@"path"])
-	{
-		self.archive = path;
-
-		self.downloadWindow.activityText    = @"Download Completed";
-		self.downloadWindow.canInstall      = YES;
-		self.downloadWindow.showUpdateBadge = YES;
-
-		if([NSApp isActive])
-			OakPlayUISound(OakSoundDidCompleteSomethingUISound);
-
-		[NSApp requestUserAttention:NSInformationalRequest];
-	}
-	else
-	{
-		NSString* error = [info objectForKey:@"error"];
-		self.downloadWindow.activityText = [NSString stringWithFormat:@"Failed: %@", error];
 	}
 }
 
