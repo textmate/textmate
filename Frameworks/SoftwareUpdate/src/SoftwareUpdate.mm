@@ -162,7 +162,7 @@ static SoftwareUpdate* SharedInstance;
 				NSInteger thisVersion = strtol(oak::application_t::revision().c_str(), NULL, 10);
 				BOOL downloadAndInstall = NO;
 
-				NSString* appName = [NSString stringWithCxxString:oak::application_t::name()];
+				NSString* appName = [[NSRunningApplication currentApplication] localizedName];
 				if(info.version == thisVersion && !backgroundFlag)
 				{
 					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ %ld is the latest version available—you have %ld.", @"Continue", nil, redownloadFlag ? @"Redownload" : nil, appName, info.version, thisVersion);
@@ -207,7 +207,7 @@ static SoftwareUpdate* SharedInstance;
 
 - (void)downloadVersion:(long)version atURL:(NSString*)downloadURL interactively:(BOOL)interactive
 {
-	NSString* appName = [NSString stringWithCxxString:oak::application_t::name()];
+	NSString* appName = [[NSRunningApplication currentApplication] localizedName];
 
 	sharedState.reset(new shared_state_t);
 	secondsLeft = CGFLOAT_MAX;
