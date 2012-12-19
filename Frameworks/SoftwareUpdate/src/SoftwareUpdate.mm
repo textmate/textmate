@@ -2,6 +2,7 @@
 #import "DownloadWindowController.h"
 #import "sw_update.h"
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakSound.h>
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSDate Additions.h>
@@ -24,13 +25,29 @@ NSString* const kSoftwareUpdateChannelRelease              = @"release";
 NSString* const kSoftwareUpdateChannelBeta                 = @"beta";
 NSString* const kSoftwareUpdateChannelNightly              = @"nightly";
 
+struct shared_state_t
+{
+	double progress = 0;
+	bool stop = false;
+};
+
+typedef std::shared_ptr<shared_state_t> shared_state_ptr;
+
 @interface SoftwareUpdate ()
 @property (nonatomic, retain) NSDate* lastPoll;
 @property (nonatomic, assign) BOOL isChecking;
 @property (nonatomic, retain) NSString* errorString;
 @property (nonatomic, retain) NSTimer* pollTimer;
-@property (nonatomic, retain) DownloadController* downloadController;
+
+@property (nonatomic, retain) DownloadWindowController* downloadWindow;
+@property (nonatomic, retain) NSDate* downloadStartDate;
+@property (nonatomic, retain) NSTimer* progressTimer;
+
+@property (retain) NSString* url;
+@property (retain) NSString* archive;
+
 - (void)scheduleVersionCheck:(id)sender;
+- (void)downloadVersion:(long)version atURL:(NSString*)downloadURL interactively:(BOOL)interactive;
 @end
 
 static SoftwareUpdate* SharedInstance;
@@ -39,6 +56,9 @@ static SoftwareUpdate* SharedInstance;
 {
 	key_chain_t keyChain;
 	NSTimeInterval pollInterval;
+
+	shared_state_ptr sharedState;
+	CGFloat secondsLeft;
 }
 
 + (SoftwareUpdate*)sharedInstance
@@ -80,8 +100,8 @@ static SoftwareUpdate* SharedInstance;
 	struct statfs sfsb;
 	BOOL readOnlyFileSystem = statfs(oak::application_t::path().c_str(), &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
 	BOOL disablePolling = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisableSoftwareUpdatesKey] boolValue];
-	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(downloadController.isVisible), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!downloadController.isVisible && !disablePolling && !readOnlyFileSystem)););
-	if(self.downloadController.isVisible || disablePolling || readOnlyFileSystem)
+	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(self.downloadWindow), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!self.downloadWindow && !disablePolling && !readOnlyFileSystem)););
+	if(self.downloadWindow || disablePolling || readOnlyFileSystem)
 		return;
 
 	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) addTimeInterval:pollInterval];
@@ -172,9 +192,7 @@ static SoftwareUpdate* SharedInstance;
 			int choice = interactive ? NSRunInformationalAlertPanel(@"New Version Available", @"%@ %ld is now available—you have %ld. Would you like to download it now?", @"Download & Install", nil, @"Later", appName, version, thisVersion) : NSAlertDefaultReturn;
 			if(choice == NSAlertDefaultReturn) // "Download & Install"
 			{
-				self.downloadController = [[DownloadController alloc] initWithURL:downloadURL displayString:[NSString stringWithFormat:@"Downloading %@ %ld…", appName, version] keyChain:keyChain];
-				self.downloadController.versionOfDownload = [NSString stringWithFormat:@"%ld", version];
-				[self.downloadController startDownloadBackgroundUI:!interactive && [NSApp isActive]];
+				[self downloadVersion:version atURL:downloadURL interactively:interactive];
 			}
 			else if(choice == NSAlertOtherReturn) // "Later"
 			{
@@ -191,6 +209,173 @@ static SoftwareUpdate* SharedInstance;
 	self.isChecking  = NO;
 	self.lastPoll    = [NSDate date];
 	self.errorString = error;
+}
+
+// ===================
+// = Download Update =
+// ===================
+
+- (void)downloadVersion:(long)version atURL:(NSString*)downloadURL interactively:(BOOL)interactive
+{
+	NSString* appName = [NSString stringWithCxxString:oak::application_t::name()];
+
+	sharedState.reset(new shared_state_t);
+	secondsLeft = CGFLOAT_MAX;
+
+	self.downloadWindow = [[[DownloadWindowController alloc] init] autorelease];
+	self.downloadWindow.delegate     = self;
+	self.downloadWindow.activityText = [NSString stringWithFormat:@"Downloading %@ %ld…", appName, version];
+	self.downloadWindow.statusText   = @"";
+
+	self.downloadWindow.isIndeterminate = NO;
+	self.downloadWindow.progress        = 0;
+	self.downloadWindow.isWorking       = YES;
+
+	self.downloadWindow.canInstall      = NO;
+	self.downloadWindow.canCancel       = YES;
+
+	if(!interactive && [NSApp isActive])
+			[self.downloadWindow.window orderFront:self];
+	else	[self.downloadWindow showWindow:self];
+
+	self.downloadStartDate = [NSDate date];
+	self.progressTimer     = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:nil repeats:YES];
+
+	self.url = downloadURL;
+	[self performSelectorInBackground:@selector(performBackgroundDownload:) withObject:self];
+}
+
+- (void)performBackgroundDownload:(id)sender
+{
+	@autoreleasepool {
+		shared_state_ptr state = sharedState;
+		std::string error = NULL_STR;
+		std::string path = sw_update::download_update(to_s(self.url), keyChain, &error, &state->progress, &state->stop);
+
+		NSDictionary* arg = [NSDictionary dictionary];
+		if(path != NULL_STR)
+			arg = @{ @"path" : [NSString stringWithCxxString:path] };
+		else if(error != NULL_STR)
+			arg = @{ @"error" : [NSString stringWithCxxString:error] };
+		[self performSelectorOnMainThread:@selector(didPerformBackgroundDownload:) withObject:arg waitUntilDone:NO];
+	}
+}
+
+- (void)updateProgress:(NSTimer*)aTimer
+{
+	self.downloadWindow.progress = sharedState->progress;
+
+	NSTimeInterval secondsElapsed = -[self.downloadStartDate timeIntervalSinceNow];
+	if(secondsElapsed < 1.0 || self.downloadWindow.progress < 0.01)
+		return;
+
+	NSTimeInterval left = secondsElapsed / self.downloadWindow.progress - secondsElapsed;
+	if(left < 2.6)
+	{
+		self.downloadWindow.statusText = @"Time remaining: a few seconds";
+	}
+	else
+	{
+		NSTimeInterval roundedSecondsLeft = 5 * round(left / 5);
+		if(roundedSecondsLeft < secondsLeft || roundedSecondsLeft - secondsLeft > 10)
+		{
+			NSTimeInterval const kMinute = 60;
+			NSTimeInterval const kHour   = 60*60;
+
+			if(roundedSecondsLeft < kMinute)
+				self.downloadWindow.statusText = [NSString stringWithFormat:@"Time remaining: about %.0f seconds", roundedSecondsLeft];
+			else if(roundedSecondsLeft < 2*kMinute)
+				self.downloadWindow.statusText = [NSString stringWithFormat:@"Time remaining: a few minutes"];
+			else if(roundedSecondsLeft < kHour)
+				self.downloadWindow.statusText = [NSString stringWithFormat:@"Time remaining: about %.0f minutes", roundedSecondsLeft / kMinute];
+			else
+				self.downloadWindow.statusText = [NSString stringWithFormat:@"Time remaining: hours"];
+			secondsLeft = roundedSecondsLeft;
+		}
+	}
+}
+
+- (void)didPerformBackgroundDownload:(NSDictionary*)info
+{
+	self.downloadWindow.progress   = 1;
+	self.downloadWindow.statusText = @"";
+	self.downloadWindow.isWorking  = NO;
+
+	[self.progressTimer invalidate];
+	self.progressTimer = nil;
+
+	if(sharedState->stop)
+		return;
+
+	if(NSString* path = [info objectForKey:@"path"])
+	{
+		self.archive = path;
+
+		self.downloadWindow.activityText    = @"Download Completed";
+		self.downloadWindow.canInstall      = YES;
+		self.downloadWindow.showUpdateBadge = YES;
+
+		if([NSApp isActive])
+			OakPlayUISound(OakSoundDidCompleteSomethingUISound);
+
+		[NSApp requestUserAttention:NSInformationalRequest];
+	}
+	else
+	{
+		NSString* error = [info objectForKey:@"error"];
+		self.downloadWindow.activityText = [NSString stringWithFormat:@"Failed: %@", error];
+	}
+}
+
+// ====================
+// = Delegate Methods =
+// ====================
+
+- (void)install:(DownloadWindowController*)sender
+{
+	D(DBF_SoftwareUpdate_Check, bug("\n"););
+
+	self.downloadWindow.activityText    = @"Installing…";
+	self.downloadWindow.isIndeterminate = YES;
+	self.downloadWindow.isWorking       = YES;
+	self.downloadWindow.canInstall      = NO;
+
+	std::string err = sw_update::install_update(to_s(self.archive));
+	if(err == NULL_STR)
+	{
+		// FIXME Copy/paste from <Preferences/Keys.h>
+		static NSString* const kUserDefaultsDisableSessionRestoreKey = @"disableSessionRestore";
+
+		BOOL isSessionRestoreDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+		BOOL skipUserInteraction      = isSessionRestoreDisabled == NO;
+
+		self.downloadWindow.activityText = @"Relaunching…";
+		oak::application_t::relaunch(skipUserInteraction);
+	}
+	else
+	{
+		self.downloadWindow.activityText = [NSString stringWithCxxString:err];
+		self.downloadWindow.isWorking    = NO;
+		OakRunIOAlertPanel("%s", err.c_str());
+	}
+}
+
+- (void)cancel:(DownloadWindowController*)sender
+{
+	D(DBF_SoftwareUpdate_Check, bug("\n"););
+	[sender.window performClose:self];
+}
+
+- (void)windowWillClose:(DownloadWindowController*)sender
+{
+	D(DBF_SoftwareUpdate_Check, bug("\n"););
+	[self.progressTimer invalidate];
+	self.progressTimer = nil;
+	self.downloadWindow.showUpdateBadge = NO;
+
+	sharedState->stop = true;
+
+	self.downloadWindow = nil;
 }
 
 // ==============

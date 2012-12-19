@@ -1,5 +1,3 @@
-#import <network/key_chain.h>
-
 @class DownloadWindowController;
 
 @protocol DownloadWindowControllerDelegate <NSObject>
@@ -11,6 +9,7 @@
 
 @interface DownloadWindowController : NSWindowController
 @property (nonatomic, assign) id <DownloadWindowControllerDelegate> delegate;
+@property (nonatomic, assign) BOOL showUpdateBadge;
 
 @property (nonatomic, retain) NSString* activityText;      // Text binding: “Downlading ‘TextMate_r1589.tbz’…”
 @property (nonatomic, retain) NSString* statusText;        // Text binding: “Less than one minute”
@@ -24,12 +23,4 @@
 
 - (IBAction)install:(id)sender;
 - (IBAction)cancel:(id)sender;
-@end
-
-@interface DownloadController : NSObject <DownloadWindowControllerDelegate>
-- (id)initWithURL:(NSString*)aURL displayString:(NSString*)aDisplayString keyChain:(key_chain_t const&)aKeyChain;
-- (void)startDownloadBackgroundUI:(BOOL)backgroundUIFlag;
-
-@property (nonatomic, retain) NSString* versionOfDownload; // API
-@property (nonatomic, readonly) BOOL isVisible;            // API
 @end
