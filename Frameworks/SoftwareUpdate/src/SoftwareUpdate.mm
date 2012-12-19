@@ -29,7 +29,7 @@ NSString* const kSoftwareUpdateChannelNightly              = @"nightly";
 @property (nonatomic, assign) BOOL isChecking;
 @property (nonatomic, retain) NSString* errorString;
 @property (nonatomic, retain) NSTimer* pollTimer;
-@property (nonatomic, retain) DownloadWindowController* downloadWindowController;
+@property (nonatomic, retain) DownloadController* downloadController;
 - (void)scheduleVersionCheck:(id)sender;
 @end
 
@@ -80,8 +80,8 @@ static SoftwareUpdate* SharedInstance;
 	struct statfs sfsb;
 	BOOL readOnlyFileSystem = statfs(oak::application_t::path().c_str(), &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
 	BOOL disablePolling = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisableSoftwareUpdatesKey] boolValue];
-	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(downloadWindowController.isVisible), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!downloadWindowController.isVisible && !disablePolling && !readOnlyFileSystem)););
-	if(self.downloadWindowController.isVisible || disablePolling || readOnlyFileSystem)
+	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(downloadController.isVisible), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!downloadController.isVisible && !disablePolling && !readOnlyFileSystem)););
+	if(self.downloadController.isVisible || disablePolling || readOnlyFileSystem)
 		return;
 
 	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) addTimeInterval:pollInterval];
@@ -172,11 +172,9 @@ static SoftwareUpdate* SharedInstance;
 			int choice = interactive ? NSRunInformationalAlertPanel(@"New Version Available", @"%@ %ld is now available—you have %ld. Would you like to download it now?", @"Download & Install", nil, @"Later", appName, version, thisVersion) : NSAlertDefaultReturn;
 			if(choice == NSAlertDefaultReturn) // "Download & Install"
 			{
-				self.downloadWindowController = [[DownloadWindowController alloc] initWithURL:downloadURL displayString:[NSString stringWithFormat:@"Downloading %@ %ld…", appName, version] keyChain:keyChain];
-				self.downloadWindowController.versionOfDownload = [NSString stringWithFormat:@"%ld", version];
-				if(!interactive && [NSApp isActive])
-						[[self.downloadWindowController window] orderFront:self];
-				else	[self.downloadWindowController showWindow:self];
+				self.downloadController = [[DownloadController alloc] initWithURL:downloadURL displayString:[NSString stringWithFormat:@"Downloading %@ %ld…", appName, version] keyChain:keyChain];
+				self.downloadController.versionOfDownload = [NSString stringWithFormat:@"%ld", version];
+				[self.downloadController startDownloadBackgroundUI:!interactive && [NSApp isActive]];
 			}
 			else if(choice == NSAlertOtherReturn) // "Later"
 			{
