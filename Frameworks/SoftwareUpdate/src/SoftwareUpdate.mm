@@ -211,7 +211,7 @@ static SoftwareUpdate* SharedInstance;
 	self.downloadWindow = [DownloadWindowController new];
 	self.downloadWindow.delegate     = self;
 	self.downloadWindow.activityText = [NSString stringWithFormat:@"Downloading %@ %ld…", appName, version];
-	self.downloadWindow.statusText   = @"";
+	self.downloadWindow.statusText   = @"Estimating time remaining";
 
 	self.downloadWindow.isIndeterminate = NO;
 	self.downloadWindow.progress        = 0;
