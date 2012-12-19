@@ -173,8 +173,8 @@ def pch_for(src, target)
   target['PRELUDE'].each do |pch|
     if srcExt == pch[/\b[a-z]+$/]
       res = build_path(pch)
-      res << "-arc" if srcExt == 'm'  && target['OBJC_FLAGS'] =~ /-fobjc-arc/
-      res << "-arc" if srcExt == 'mm' && target['OBJCXX_FLAGS'] =~ /-fobjc-arc/
+      res << "-no-arc" if srcExt == 'm'  && target['OBJC_FLAGS'] =~ /-fno-objc-arc/
+      res << "-no-arc" if srcExt == 'mm' && target['OBJCXX_FLAGS'] =~ /-fno-objc-arc/
       return res
     end
   end
@@ -675,9 +675,9 @@ open("#{builddir}/build.ninja", "w") do |io|
     io << "  RAVE_FLAGS = #{type[ext]}\n\n"
 
     if ext =~ /^mm?$/
-      io << "build #{pch_for(src, TARGETS.root)}-arc.gch: #{compiler_for(src)} #{src} | #{cc}\n"
-      io << "  depfile = #{pch_for(src, TARGETS.root)}-arc.gch.d\n"
-      io << "  RAVE_FLAGS = #{type[ext]} -fobjc-arc\n\n"
+      io << "build #{pch_for(src, TARGETS.root)}-no-arc.gch: #{compiler_for(src)} #{src} | #{cc}\n"
+      io << "  depfile = #{pch_for(src, TARGETS.root)}-no-arc.gch.d\n"
+      io << "  RAVE_FLAGS = #{type[ext]} -fno-objc-arc\n\n"
     end
   end
 

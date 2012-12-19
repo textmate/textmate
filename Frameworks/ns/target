@@ -3,6 +3,3 @@ TEST_SOURCES = tests/*.{cc,mm}
 LINK        += text OakFoundation plist
 FRAMEWORKS   = Cocoa
 EXPORT       = src/*.h
-
-OBJCXX_FLAGS += -fobjc-arc
-LN_FLAGS     += -fobjc-arc-cxxlib=libc++

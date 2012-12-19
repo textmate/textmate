@@ -2,6 +2,3 @@ SOURCES      = src/*.cc
 EXPORT       = src/{layout,paragraph,ct}.h
 LINK        += text buffer selection bundles theme cf ns
 TEST_SOURCES = tests/*.{cc,mm}
-
-OBJCXX_FLAGS += -fobjc-arc
-LN_FLAGS     += -fobjc-arc-cxxlib=libc++

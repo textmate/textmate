@@ -4,6 +4,3 @@ EXPORT       = src/*.h
 CP_Resources = resources/*
 LINK        += OakAppKit OakFoundation OakSystem network ns cf plist
 FRAMEWORKS   = Cocoa WebKit
-
-OBJCXX_FLAGS += -fobjc-arc
-LN_FLAGS     += -fobjc-arc-cxxlib=libc++

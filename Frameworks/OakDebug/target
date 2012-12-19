@@ -2,3 +2,5 @@ SOURCES      = src/*.{cc,mm}
 LINK         =
 FRAMEWORKS   = Cocoa ExceptionHandling
 EXPORT       = src/*.h
+
+OBJCXX_FLAGS += -fno-objc-arc

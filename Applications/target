@@ -1,3 +1,4 @@
-BUILD   = app
-FLAGS  += -D'APP_REVISION=$APP_REVISION' -DCOMPILE_DATE=\"`date +%Y-%m-%d`\"
-TARGETS = */target
+BUILD         = app
+FLAGS        += -D'APP_REVISION=$APP_REVISION' -DCOMPILE_DATE=\"`date +%Y-%m-%d`\"
+OBJCXX_FLAGS += -fno-objc-arc
+TARGETS       = */target

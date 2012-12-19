@@ -2,6 +2,3 @@ SOURCES      = src/*.mm
 EXPORT       = src/HTMLOutputWindow.h
 LINK        += HTMLOutput command
 FRAMEWORKS   = Cocoa
-
-OBJCXX_FLAGS += -fobjc-arc
-LN_FLAGS     += -fobjc-arc-cxxlib=libc++

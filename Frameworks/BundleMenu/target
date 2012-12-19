@@ -2,6 +2,3 @@ SOURCES      = src/*.mm
 LINK        += OakAppKit OakFoundation bundles text cf ns
 EXPORT       = src/BundleMenu.h
 FRAMEWORKS   = AppKit
-
-OBJCXX_FLAGS += -fobjc-arc
-LN_FLAGS     += -fobjc-arc-cxxlib=libc++

@@ -3,3 +3,5 @@ EXPORT        = src/OakFileBrowser.h
 CP_Resources  = resources/* gfx/**/*
 LINK         += text cf document editor io regexp settings ns plist OakAppKit OakFoundation scm OakSystem Preferences XcodeEditor
 FRAMEWORKS    = Cocoa Carbon SystemConfiguration
+
+OBJCXX_FLAGS += -fno-objc-arc

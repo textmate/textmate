@@ -3,3 +3,5 @@ EXPORT        = src/OakFilterList.h src/datasources/*.h
 CP_Resources  = resources/*
 LINK         += text bundles document io plist MGScopeBar ns OakAppKit OakFoundation OakSystem OakTextView regexp scope
 FRAMEWORKS    = Cocoa Carbon
+
+OBJCXX_FLAGS += -fno-objc-arc
