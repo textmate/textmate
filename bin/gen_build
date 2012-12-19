@@ -660,7 +660,7 @@ open("#{builddir}/build.ninja", "w") do |io|
 
   COMPILER_INFO.each do |key, value|
     io << "rule #{value[:rule]}\n"
-    io << "  command = '#{value[:compiler]}' $FLAGS $RAVE_FLAGS #{value[:flags]} -o $out -MMD -MF $out.d -I$builddir/include $in\n"
+    io << "  command = '#{value[:compiler]}' $FLAGS #{value[:flags]} $RAVE_FLAGS -o $out -MMD -MF $out.d -I$builddir/include $in\n"
     io << "  depfile = $depfile\n"
     io << "  description = Compile ‘$in’…\n\n"
   end
