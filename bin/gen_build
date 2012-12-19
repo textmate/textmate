@@ -173,7 +173,7 @@ def pch_for(src, target)
   target['PRELUDE'].each do |pch|
     if srcExt == pch[/\b[a-z]+$/]
       res = build_path(pch)
-      res << "-arc" if srcExt == 'm'  && target['OBJ_FLAGS'] =~ /-fobjc-arc/
+      res << "-arc" if srcExt == 'm'  && target['OBJC_FLAGS'] =~ /-fobjc-arc/
       res << "-arc" if srcExt == 'mm' && target['OBJCXX_FLAGS'] =~ /-fobjc-arc/
       return res
     end
