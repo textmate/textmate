@@ -1,5 +1,15 @@
 # Changes
 
+## 2012-12-20 (r9327)
+
+* Commands which fail due to unsatisfied requirements will no longer show “Edit Command” but instead will optionally show a “More Info…” button when the command includes a URL for more info.
+* When manually checking for updates and your version is newer than what’s found on the server (e.g. you’re running a nightly build but checking for regular builds), you’ll be offered to downgrade (generally though the nightly builds are safe to run as they contain more fixes than the regular builds :) ).
+* TextMate no longer ignores line/selection from programs opening files via the ODBEditor protocol (64 bit issue).
+* Fix help book indexing (so the link in Preferences → Terminal now work).
+* The “Select Bundle Item” window didn’t filter based on current scope.
+* Fix potential crash when closing document window.
+* When a snippet pop-up menu was showing, and TextMate was not the active application, the window would be hidden.
+
 ## 2012-12-14 (r9325)
 
 * Add support for VoiceOver/accessibility. *[Boris Dušek]*
