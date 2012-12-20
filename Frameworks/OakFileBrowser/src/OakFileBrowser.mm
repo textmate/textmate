@@ -39,6 +39,7 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic, retain, readwrite) NSView* view;
 @property (nonatomic, readonly)          NSArray* selectedItems;
 @property (nonatomic, readonly)          NSArray* selectedPaths;
+@property (nonatomic, copy)              NSString * oldFSItemForRename;
 - (void)updateView;
 - (void)loadFileBrowserOptions;
 @end
@@ -158,6 +159,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[historyController setCurrentURLScrollOffset:NSMinY([view.outlineView visibleRect])];
 	outlineViewDelegate.dataSource = DataSourceForURL(url, dataSourceOptions);
 	[outlineViewDelegate scrollToOffset:historyController.currentURLScrollOffset];
+}
+
+- (void)cancelEditAndReload:(id)sender
+{
+    [((OakFileBrowserView *)self.view).outlineView cancelOperation:sender];
+    [((OakFileBrowserView *)self.view).outlineView reloadData];
 }
 
 - (void)setURL:(NSURL*)aURL
@@ -365,7 +372,54 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (BOOL)canUndo { return NO; }
 - (BOOL)canRedo { return NO; }
 
-- (void)editSelectedEntries:(id)sender { [view.outlineView performEditSelectedRow:self]; }
+- (void)editSelectedEntries:(id)sender  { [view.outlineView performEditSelectedRow:self]; }
+
+- (void)queueRename:(NSNotification *)aNotification
+{
+    FSItem * item = (FSItem *)[aNotification object];
+    self.oldFSItemForRename = [NSString stringWithString:[[item url] absoluteString]];
+}
+
+- (void)finalizeRename:(NSNotification *)aNotification
+{
+    if (self.oldFSItemForRename != nil) {
+        FSItem * newFSItem = (FSItem *)[aNotification object];
+        
+        NSString * oldPathName = [NSString stringWithString:self.oldFSItemForRename];
+        NSString * newPathName = [[newFSItem url] absoluteString];
+        
+        if (![oldPathName isEqualToString:newPathName])
+            [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
+    }
+    
+    self.oldFSItemForRename = nil;
+}
+
+- (void)doRename:(NSString *)oldPathName withNewName:(NSString *)newPathName
+{
+    NSURL * oldLocation = [NSURL URLWithString:oldPathName];
+    NSURL * newLocation = [NSURL URLWithString:newPathName];
+    
+    NSError *moveError = nil;
+    if (![[NSFileManager defaultManager] moveItemAtURL:oldLocation toURL:newLocation error:&moveError])
+        OakRunIOAlertPanel("There was an error renaming %s: %s", [oldPathName fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+
+    else
+        [[[self undoManager] prepareWithInvocationTarget:self] undoRename:newPathName withOldName:oldPathName];
+}
+
+- (void)undoRename:(NSString *)newPathName withOldName:(NSString *)oldPathName
+{
+    NSURL * newLocation = [NSURL URLWithString:newPathName];
+    NSURL * oldLocation = [NSURL URLWithString:oldPathName];
+    
+    NSError *moveError = nil;
+    if (![[NSFileManager defaultManager] moveItemAtURL:newLocation toURL:oldLocation error:&moveError])
+        OakRunIOAlertPanel("There was an error undoing the rename of %s: %s", [newPathName fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+
+    else
+        [[[self undoManager] prepareWithInvocationTarget:self] doRename:oldPathName withNewName:newPathName];
+}
 
 - (void)duplicateSelectedEntries:(id)sender
 {
@@ -442,25 +496,108 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(NSString* folder = [self parentForNewFolder])
 	{
 		std::string const dst = path::unique(path::join([folder fileSystemRepresentation], "untitled folder"));
-		if(path::make_dir(dst))
-				[outlineViewDelegate editURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
-		else	OakRunIOAlertPanel("Failed to create new folder in “%s”.", path::parent([folder fileSystemRepresentation]).c_str());
+        if([self doNewFolder:[NSString stringWithUTF8String:dst.c_str()] inParentFolder:folder])
+            [outlineViewDelegate editURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
 	}
+}
+
+- (BOOL)doNewFolder:(NSString *)path inParentFolder:(NSString *)folder
+{
+    std::string dst ([path UTF8String]);
+    
+    if(path::make_dir(dst))
+    {
+        [[[self undoManager] prepareWithInvocationTarget:self] undoNewFolder:path inParentFolder:folder];
+        return YES;
+    }
+    else
+    {
+        OakRunIOAlertPanel("Failed to create new folder in “%s”.", path::parent([folder fileSystemRepresentation]).c_str());
+        return NO;
+    }
+}
+
+- (void)undoNewFolder:(NSString *)path inParentFolder:(NSString *)folder
+{
+    NSError *removeError = nil;
+    if (![[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:path] error:&removeError])
+    {
+        OakRunIOAlertPanel("There was an error undoing the creation of new folder %s: %s", [path fileSystemRepresentation], [[removeError localizedDescription] UTF8String]);
+    }
+    else
+    {
+        [[[self undoManager] prepareWithInvocationTarget:self] doNewFolder:path inParentFolder:folder];
+    }
 }
 
 - (void)delete:(id)anArgument
 {
-	BOOL didTrashSomething = NO;
-	for(NSString* aPath in self.selectedPaths)
+	[self doDelete:[NSArray arrayWithArray:self.selectedPaths]];
+}
+
+- (void)doDelete:(NSArray *)paths
+{
+    BOOL didTrashSomething = NO;
+    NSMutableArray *trashPaths = [[NSMutableArray alloc] init];
+	for(int i = 0; i < [paths count]; i++)
 	{
+        NSString *aPath = [paths objectAtIndex:i];
 		std::string const trashPath = path::move_to_trash([aPath fileSystemRepresentation]);
 		if(trashPath != NULL_STR)
-				didTrashSomething = YES;
-		else	OakRunIOAlertPanel("Failed to move the file at “%s” to the trash.", [aPath fileSystemRepresentation]);
+        {
+            didTrashSomething = YES;
+            [trashPaths insertObject:[NSString stringWithUTF8String:trashPath.c_str()] atIndex:i];
+        }
+        else
+        {
+            [trashPaths insertObject:nil atIndex:i];
+            OakRunIOAlertPanel("Failed to move the file at “%s” to the trash.", [aPath fileSystemRepresentation]);
+        }
 	}
-
+    
 	if(didTrashSomething)
+    {
 		OakPlayUISound(OakSoundDidTrashItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] undoDelete:paths trashPaths:trashPaths];
+    }
+    else
+    {
+        [trashPaths release];
+    }
+}
+
+- (void)undoDelete:(NSArray *)paths trashPaths:(NSArray *)trashPaths
+{
+    BOOL didUndeleteSomething = NO;
+    
+    for (int i = 0; i < [paths count]; i++) {
+        NSString * path = [paths objectAtIndex:i];
+        NSString * trashPath = [trashPaths objectAtIndex:i];
+        
+        if (trashPath != nil)
+        {
+            NSURL * src  = [NSURL fileURLWithPath:trashPath];
+            NSURL * dest = [NSURL fileURLWithPath:path];
+            
+            NSError *moveError = nil;
+            if (![[NSFileManager defaultManager] moveItemAtURL:src toURL:dest error:&moveError])
+            {
+                OakRunIOAlertPanel("There was an error undoing the deletion of %s: %s", [path fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+            }
+            else
+            {
+                didUndeleteSomething = YES;
+            }
+        }
+    }
+    
+    if (didUndeleteSomething)
+    {
+        OakPlayUISound(OakSoundDidMoveItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] doDelete:paths];
+    }
+    
+    [trashPaths release];
 }
 
 - (void)changeColor:(OakFinderLabelChooser*)labelChooser
@@ -560,17 +697,21 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)paste:(id)sender
 {
+    NSMutableArray* itemsToPaste = [NSMutableArray array];
 	NSMutableArray* created = [NSMutableArray array];
+    BOOL cut;
 	if(NSString* folder = [self parentForNewFolder])
 	{
 		NSPasteboard* pboard = [NSPasteboard generalPasteboard];
-		BOOL cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
+        cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
 		for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : nil)
 		{
 			std::string const src = [path fileSystemRepresentation];
 			std::string const dst = path::unique(path::join([folder fileSystemRepresentation], path::name(src)));
-			if(cut ? path::rename(src, dst) : path::copy(src, dst))
+			if(cut ? path::rename(src, dst) : path::copy(src, dst)) {
+                [itemsToPaste addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]]];
 				[created addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
+            }
 		}
 	}
 
@@ -578,7 +719,64 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		OakPlayUISound(OakSoundDidMoveItemUISound);
 		[outlineViewDelegate selectURLs:created];
+        [[[self undoManager] prepareWithInvocationTarget:self] undoPaste:itemsToPaste withCreatedArray:created itemsWereCut:cut];
 	}
+}
+
+- (void)doPaste:(NSMutableArray *)urls withCreatedArray:(NSMutableArray *)created itemsWereCut:(BOOL)cut
+{
+    int successfulPasteCount = 0;
+    if (cut)
+    {
+        for (int i = 0; i < [urls count]; i++) {
+            NSError *moveError = nil;
+            if (![[NSFileManager defaultManager] moveItemAtURL:[urls objectAtIndex:i] toURL:[created objectAtIndex:i] error:&moveError])
+                OakRunIOAlertPanel("There was an error pasting %s: %s", [[created objectAtIndex:i] fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < [urls count]; i++) {
+            NSError * copyError = nil;
+            if (![[NSFileManager defaultManager] copyItemAtURL:[urls objectAtIndex:i] toURL:[created objectAtIndex:i] error:&copyError])
+                OakRunIOAlertPanel("There was an error pasting %s: %s", [[urls objectAtIndex:i] fileSystemRepresentation], [[copyError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    
+    if (successfulPasteCount >= 1) {
+        OakPlayUISound(OakSoundDidMoveItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] undoPaste:urls withCreatedArray:created itemsWereCut:cut];
+    }
+}
+
+- (void)undoPaste:(NSMutableArray *)urls withCreatedArray:(NSMutableArray *)created itemsWereCut:(BOOL)cut
+{
+    int successfulPasteCount = 0;
+    if (cut)
+    {
+        for (int i = 0; i < [created count]; i++) {
+            NSError *moveError = nil;
+            if (![[NSFileManager defaultManager] moveItemAtURL:[created objectAtIndex:i] toURL:[urls objectAtIndex:i] error:&moveError])
+                OakRunIOAlertPanel("There was an error undoing the paste of %s: %s", [[created objectAtIndex:i] fileSystemRepresentation], [[moveError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < [created count]; i++) {
+            NSError *removeError = nil;
+            if (![[NSFileManager defaultManager] removeItemAtURL:[created objectAtIndex:i] error:&removeError])
+                OakRunIOAlertPanel("There was an error undoing the paste of %s: %s", [[created objectAtIndex:i] fileSystemRepresentation], [[removeError localizedDescription] UTF8String]);
+            else successfulPasteCount++;
+        }
+    }
+    
+    if (successfulPasteCount >= 1) {
+        OakPlayUISound(OakSoundDidMoveItemUISound);
+        [[[self undoManager] prepareWithInvocationTarget:self] doPaste:urls withCreatedArray:created itemsWereCut:cut];
+    }
 }
 
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
@@ -712,6 +910,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		dataSourceOptions |= (showExtensions ? kFSDataSourceOptionShowExtension : 0);
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+        
+        self.oldFSItemForRename = nil;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(queueRename:) name:@"OFBOutlineViewRenameActionQueued" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finalizeRename:) name:@"OFBOutlineViewRenameActionFinalized" object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelEditAndReload:) name:NSUndoManagerWillRedoChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cancelEditAndReload:) name:NSUndoManagerWillUndoChangeNotification object:nil];
 	}
 	return self;
 }
