@@ -1,8 +1,6 @@
-@interface NSColor (Creation)
+@interface NSColor (TMColorAdditions)
 + (NSColor*)colorWithString:(NSString*)aString;
 + (NSColor*)tmColorWithCGColor:(CGColorRef)aColor;
-@end
-
-@interface NSColor (OakColor)
+- (CGColorRef)tmCGColor;
 - (BOOL)isDark;
 @end

@@ -1,6 +1,7 @@
 #import "GutterView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <text/types.h>
 #import <cf/cf.h>
@@ -276,9 +277,9 @@ static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NS
 	CTLineRef res = NULL;
 	if(CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
 	{
-		if(CGColorRef cgColor = [color CGColor])
+		if(CGColorRef cgColor = [color tmCGColor])
 			CFDictionaryAddValue(dict, kCTForegroundColorAttributeName, cgColor);
-			
+
 		if(CTFontRef ctFont = CTFontCreateWithName((CFStringRef)[font fontName], [font pointSize], NULL))
 		{
 			CFDictionaryAddValue(dict, kCTFontAttributeName, ctFont);

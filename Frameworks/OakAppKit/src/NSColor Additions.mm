@@ -1,7 +1,7 @@
 #import "NSColor Additions.h"
 #import <OakFoundation/OakFoundation.h>
 
-@implementation NSColor (Creation)
+@implementation NSColor (TMColorAdditions)
 + (NSColor*)colorWithString:(NSString*)aString
 {
 	if(NSIsEmptyString(aString))
@@ -23,9 +23,21 @@
 		return [self colorWithCGColor:aColor];
 	return [NSColor colorWithColorSpace:[[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] autorelease] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
 }
-@end
 
-@implementation NSColor (OakColor)
+- (CGColorRef)tmCGColor
+{
+	if([self respondsToSelector:@selector(CGColor)])
+		return [self CGColor];
+
+	NSColor* rgbColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+	CGFloat rgba[4];
+	[rgbColor getRed:&rgba[0] green:&rgba[1] blue:&rgba[2] alpha:&rgba[3]];
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+	CGColorRef res = CGColorCreate(colorSpace, rgba);
+	CGColorSpaceRelease(colorSpace);
+	return (CGColorRef)[(id)res autorelease];
+}
+
 - (BOOL)isDark
 {
 	uint32_t r(lroundf(255 * [self redComponent]));
