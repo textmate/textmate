@@ -1,6 +1,7 @@
 #include "api.h"
 #include <oak/oak.h>
 #include <text/parse.h>
+#include <text/tokenize.h>
 #include <io/io.h>
 #include <oak/debug.h>
 
@@ -44,6 +45,18 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 	}
 }
 
+static std::map<std::string, std::string> parse_config (std::string const& str)
+{
+	std::map<std::string, std::string> res;
+	citerate(line, text::tokenize(str.begin(), str.end(), '\n'))
+	{
+		std::string::size_type n = (*line).find('=');
+		if(n != std::string::npos)
+			res.insert(std::make_pair((*line).substr(0, n), (*line).substr(n+1)));
+	}
+	return res;
+}
+
 static void collect_all_paths (std::string const& hg, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(hg, NULL_STR);
@@ -70,6 +83,36 @@ namespace scm
 
 			std::string branchName = io::exec(env, executable(), "branch", NULL);
 			return branchName.substr(0, branchName.find("\n"));
+		}
+
+		std::string repo_url (std::string const& wcPath) const
+		{
+			if(executable() == NULL_STR)
+				return NULL_STR;
+
+			std::map<std::string, std::string> env = oak::basic_environment();
+			env["PWD"] = wcPath;
+
+			std::string repoUrl = "";
+			std::string branchName = branch_name(wcPath);
+
+			if (branchName != "")
+			{
+				std::map<std::string, std::string> config = parse_config(io::exec(env, executable(), "showconfig", NULL));
+				std::map<std::string, std::string>::iterator branchPaths = config.find("paths." + branchName);
+
+				if (branchPaths != config.end())
+				{
+					repoUrl = branchPaths->second;
+				}
+			}
+
+			if (repoUrl == "") {
+				repoUrl = io::exec(env, executable(), "root", NULL);
+				repoUrl = "file://" + repoUrl.substr(0, repoUrl.find("\n"));
+			}
+
+			return repoUrl;
 		}
 
 		status_map_t status (std::string const& wcPath) const

@@ -38,6 +38,7 @@ public:
 			std::string expectedBranch = text::format("file://%s/%s", jailPath.c_str(), repoName.c_str());
 
 			TS_ASSERT_EQUALS(expectedBranch, info->branch());
+			TS_ASSERT_EQUALS(expectedBranch, info->repo_url());
 
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "clean.txt"))),     scm::status::none);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "ignored.txt"))),   scm::status::ignored);

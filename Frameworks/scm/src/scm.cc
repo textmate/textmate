@@ -92,6 +92,7 @@ namespace scm
 	std::string info_t::scm_name () const    { return _driver->name(); }
 	std::string info_t::path () const        { return _wc_path; }
 	std::string info_t::branch () const      { return _driver->branch_name(_wc_path); }
+	std::string info_t::repo_url () const    { return _driver->repo_url(_wc_path); }
 	bool info_t::tracks_directories () const { return _driver->tracks_directories(); }
 
 	void info_t::setup ()

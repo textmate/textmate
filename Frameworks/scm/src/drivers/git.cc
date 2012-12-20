@@ -1,6 +1,7 @@
 #include "api.h"
 #include <text/parse.h>
 #include <text/format.h>
+#include <text/tokenize.h>
 #include <io/io.h>
 #include <oak/oak.h>
 #include <oak/debug.h>
@@ -54,6 +55,18 @@ static void parse_ls (std::map<std::string, scm::status::type>& entries, std::st
 		ASSERT_EQ((*str)[1], ' ');
 		entries[str->substr(2)] = state != scm::status::unknown ? state : parse_status_flag(str->substr(0, 1));
 	}
+}
+
+static std::map<std::string, std::string> parse_config (std::string const& str)
+{
+	std::map<std::string, std::string> res;
+	citerate(line, text::tokenize(str.begin(), str.end(), '\n'))
+	{
+		std::string::size_type n = (*line).find('=');
+		if(n != std::string::npos)
+			res.insert(std::make_pair((*line).substr(0, n), (*line).substr(n+1)));
+	}
+	return res;
 }
 
 static std::string copy_git_index (std::string const& dir)
@@ -235,6 +248,53 @@ namespace scm
 			if(branchName.find("refs/heads/") == 0)
 				branchName = branchName.substr(11);
 			return branchName;
+		}
+
+		std::string repo_url (std::string const& wcPath) const
+		{
+			if(executable() == NULL_STR)
+				return NULL_STR;
+
+			std::map<std::string, std::string> env = oak::basic_environment();
+			env["PWD"] = wcPath;
+
+			std::string repoUrl = "";
+			std::string branchName = branch_name(wcPath);
+
+			// If there is no branch name, assume it's local
+			if (branchName != "")
+			{
+				std::map<std::string, std::string> config = parse_config(io::exec(env, executable(), "config", "--list", NULL));
+				std::map<std::string, std::string>::iterator branchRemote = config.find("branch." + branchName + ".remote");
+				std::map<std::string, std::string>::iterator remoteUrl;
+
+				if (branchRemote != config.end())
+				{
+					remoteUrl = config.find("remote." + branchRemote->second + ".url");
+
+					if (remoteUrl != config.end())
+					{
+						repoUrl = remoteUrl->second;
+					}
+				}
+				else
+				{
+					// If there is no remote, it must be a local branch so default to origin
+					remoteUrl = config.find("remote.origin.url");
+
+					if (remoteUrl != config.end())
+					{
+						repoUrl = remoteUrl->second;
+					}
+				}
+			}
+
+			if (repoUrl == "") {
+				repoUrl = io::exec(env, executable(), "rev-parse", "--show-toplevel", NULL);
+				repoUrl = "file://" + repoUrl.substr(0, repoUrl.find("\n"));
+			}
+
+			return repoUrl;
 		}
 
 		status_map_t status (std::string const& wcPath) const
