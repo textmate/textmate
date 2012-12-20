@@ -244,6 +244,10 @@ private:
 
 - (void)dealloc
 {
+	gutterView.partnerView = nil;
+	gutterView.delegate    = nil;
+	statusBar.delegate     = nil;
+
 	iterate(keyPath, ObservedTextViewKeyPaths)
 		[textView removeObserver:self forKeyPath:*keyPath];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
