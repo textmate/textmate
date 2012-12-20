@@ -139,7 +139,7 @@ static SoftwareUpdate* SharedInstance;
 		return;
 	self.isChecking = YES;
 
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 		std::string error = NULL_STR;
 		auto info = sw_update::download_info(to_s([anURL absoluteString]), &error);
 
@@ -226,7 +226,7 @@ static SoftwareUpdate* SharedInstance;
 
 	NSTimer* updateProgressTimer = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateProgress:) userInfo:[NSDate date] repeats:YES];
 
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 		shared_state_ptr state = sharedState;
 		std::string error = NULL_STR;
 		std::string path = sw_update::download_update(to_s(downloadURL), keyChain, &error, &state->progress, &state->stop);
