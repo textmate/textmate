@@ -272,7 +272,7 @@ struct data_source_t
 		[self invalidateIntrinsicContentSize];
 }
 
-static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
+static CTLineRef CreateCTLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
 {
 	CTLineRef res = NULL;
 	if(CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks))
@@ -302,7 +302,7 @@ static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NS
 
 static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)
 {
-	CTLineRef line = CTCreateLineFromText(text::format("%ld", std::max<NSUInteger>(10, lineNumber)), font);
+	CTLineRef line = CreateCTLineFromText(text::format("%ld", std::max<NSUInteger>(10, lineNumber)), font);
 	CGFloat width  = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
 	CFRelease(line);
 	return ceil(width);
@@ -313,7 +313,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	CGContextSaveGState(context);
 
-	CTLineRef line = CTCreateLineFromText(text, font, color);
+	CTLineRef line = CreateCTLineFromText(text, font, color);
 	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 	CGContextConcatCTM(context, CGAffineTransformMake(1, 0, 0, -1, 0, 2 * baseline));
 	CGContextSetTextPosition(context, CGRectGetMaxX(rect) - CTLineGetTypographicBounds(line, NULL, NULL, NULL), baseline);
