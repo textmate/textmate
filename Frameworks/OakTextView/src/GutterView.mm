@@ -280,10 +280,13 @@ static CTLineRef CTCreateLineFromText (std::string const& text, NSFont* font, NS
 		if(CGColorRef cgColor = [color tmCGColor])
 			CFDictionaryAddValue(dict, kCTForegroundColorAttributeName, cgColor);
 
-		if(CTFontRef ctFont = CTFontCreateWithName((CFStringRef)[font fontName], [font pointSize], NULL))
+		if(CFStringRef fontName = (CFStringRef)[font fontName])
 		{
-			CFDictionaryAddValue(dict, kCTFontAttributeName, ctFont);
-			CFRelease(ctFont);
+			if(CTFontRef ctFont = CTFontCreateWithName(fontName, [font pointSize], NULL))
+			{
+				CFDictionaryAddValue(dict, kCTFontAttributeName, ctFont);
+				CFRelease(ctFont);
+			}
 		}
 
 		if(CFAttributedStringRef str = CFAttributedStringCreate(kCFAllocatorDefault, cf::wrap(text), dict))
