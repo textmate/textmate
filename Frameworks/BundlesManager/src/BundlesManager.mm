@@ -11,7 +11,7 @@ static std::string const kInstallDirectory = NULL_STR;
 @property (nonatomic, retain) NSString* activityText;
 @property (nonatomic, assign) double    progress;
 @property (atomic, retain)    NSString* threadActivityText;
-@property (atomic, assign)    double    threadProgress;
+@property (nonatomic, assign) double    threadProgress;
 @property (nonatomic, retain) NSTimer*  progressTimer;
 
 - (void)didStartThreadActivity:(id)sender;
@@ -109,21 +109,25 @@ namespace
 static BundlesManager* SharedInstance;
 
 @implementation BundlesManager
-@synthesize isBusy, activityText, progress;
-@synthesize threadActivityText, threadProgress, progressTimer;
+{
+	std::vector<bundles_db::source_ptr> sourceList;
+	std::vector<bundles_db::bundle_ptr> bundlesIndex;
+
+	NSUInteger scheduledTasks;
+	std::set<oak::uuid_t> installing;
+}
 
 + (BundlesManager*)sharedInstance
 {
-	return SharedInstance ?: [[self new] autorelease];
+	return SharedInstance ?: [self new];
 }
 
 - (id)init
 {
 	if(SharedInstance)
 	{
-		[self release];
 	}
-	else if(self = SharedInstance = [[super init] retain])
+	else if(self = SharedInstance = [super init])
 	{
 		sourceList   = bundles_db::sources();
 		bundlesIndex = bundles_db::index(kInstallDirectory);
@@ -189,14 +193,14 @@ static BundlesManager* SharedInstance;
 	if(!sources.empty())
 	{
 		if(network::can_reach_host("api.textmate.org"))
-			new background_task_t(sources, std::vector<bundles_db::bundle_ptr>(), self, &threadProgress);
+			new background_task_t(sources, std::vector<bundles_db::bundle_ptr>(), self, &_threadProgress);
 	}
 	else
 	{
 		NSDate* earliest = [NSDate distantFuture];
 		iterate(source, sourceList)
 		{
-			NSDate* date = [(id)CFDateCreate(kCFAllocatorDefault, (*source)->last_check().value()) autorelease];
+			NSDate* date = (NSDate*)CFBridgingRelease(CFDateCreate(kCFAllocatorDefault, (*source)->last_check().value()));
 			earliest = [date earlierDate:earliest];
 		}
 		self.activityText = [NSString stringWithFormat:@"Last check: %@", [earliest humanReadableTimeElapsed]];
@@ -219,7 +223,7 @@ static BundlesManager* SharedInstance;
 	}
 
 	if(!bundles.empty())
-		new background_task_t(std::vector<bundles_db::source_ptr>(), std::vector<bundles_db::bundle_ptr>(bundles.begin(), bundles.end()), self, &threadProgress);
+		new background_task_t(std::vector<bundles_db::source_ptr>(), std::vector<bundles_db::bundle_ptr>(bundles.begin(), bundles.end()), self, &_threadProgress);
 }
 
 - (void)installBundle:(bundles_db::bundle_ptr const&)aBundle
@@ -237,7 +241,7 @@ static BundlesManager* SharedInstance;
 	if(!bundles.empty())
 	{
 		[[NSNotificationCenter defaultCenter] postNotificationName:BundlesManagerBundlesDidChangeNotification object:self];
-		new background_task_t(std::vector<bundles_db::source_ptr>(), bundles, self, &threadProgress);
+		new background_task_t(std::vector<bundles_db::source_ptr>(), bundles, self, &_threadProgress);
 	}
 }
 

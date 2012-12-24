@@ -3,21 +3,6 @@
 extern PUBLIC NSString* const BundlesManagerBundlesDidChangeNotification;
 
 PUBLIC @interface BundlesManager : NSObject
-{
-	std::vector<bundles_db::source_ptr> sourceList;
-	std::vector<bundles_db::bundle_ptr> bundlesIndex;
-
-	BOOL isBusy;
-	NSString* activityText;
-	double progress;
-
-	NSUInteger scheduledTasks;
-	NSString* threadActivityText;
-	double threadProgress;
-	NSTimer* progressTimer;
-
-	std::set<oak::uuid_t> installing;
-}
 @property (nonatomic, readonly)         BOOL      isBusy;
 @property (nonatomic, retain, readonly) NSString* activityText;
 @property (nonatomic, readonly)         double    progress;
