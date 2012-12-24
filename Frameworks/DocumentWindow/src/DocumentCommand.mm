@@ -326,18 +326,19 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 
 void show_command_error (std::string const& message, oak::uuid_t const& uuid, NSWindow* window)
 {
-	std::string commandName = "(unknown)";
-	if(bundles::item_ptr item = bundles::lookup(uuid))
-		commandName = item->name();
+	bundles::item_ptr bundleItem = bundles::lookup(uuid);
+	std::string commandName = bundleItem ? bundleItem->name() : "(unknown)";
 
 	NSAlert* alert = [[[NSAlert alloc] init] autorelease];
 	[alert setAlertStyle:NSCriticalAlertStyle];
 	[alert setMessageText:[NSString stringWithCxxString:text::format("Failure running “%.*s”.", (int)commandName.size(), commandName.data())]];
 	[alert setInformativeText:[NSString stringWithCxxString:message] ?: @"No output"];
-	[alert addButtons:@"OK", @"Edit Command", nil];
+	[alert addButtonWithTitle:@"OK"];
+	if(bundleItem)
+		[alert addButtonWithTitle:@"Edit Command"];
 
 	OakShowAlert(alert, window, ^(NSAlert* alert, NSInteger button){
 		if(button == NSAlertSecondButtonReturn)
-			[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(uuid)];
+			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
 	});
 }
