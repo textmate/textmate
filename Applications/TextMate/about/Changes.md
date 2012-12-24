@@ -1,5 +1,11 @@
 # Changes
 
+## 2012-12-24 (r9331)
+
+* When syntax-highlighting a file, do batch redraw instead of line-by-line (should improve perceived performance). *[Joachim Mårtensson]*
+* The “Edit Command…” button in error dialogs would often cause a crash.
+* Fix another potential crash, memory leak, and restore 10.7 compatibility.
+
 ## 2012-12-20 (r9327)
 
 * Commands which fail due to unsatisfied requirements will no longer show “Edit Command” but instead will optionally show a “More Info…” button when the command includes a URL for more info.
