@@ -126,7 +126,7 @@ namespace
 			NSString* title   = sectionName.size() == it->first.size() ? @"Base" : @(it->first.substr(sectionName.size() + 1).c_str());
 			if(![[submenu title] isEqualToString:section])
 			{
-				submenu = [[[NSMenu alloc] initWithTitle:section] autorelease];
+				submenu = [[NSMenu alloc] initWithTitle:section];
 				[[aMenu addItemWithTitle:section action:NULL keyEquivalent:@""] setSubmenu:submenu];
 			}
 			item = [submenu addItemWithTitle:title action:@selector(toggleDebugOption:) keyEquivalent:@""];
@@ -143,10 +143,10 @@ namespace
 
 + (void)installDebugMenu:(id)sender
 {
-	NSMenuItem* menuItem = [[[NSMenuItem alloc] init] autorelease];
+	NSMenuItem* menuItem = [[NSMenuItem alloc] init];
 	[menuItem setTitle:@"Debug"];
 
-	NSMenu* debugMenu = [[[NSMenu alloc] initWithTitle:@"Debug"] autorelease];
+	NSMenu* debugMenu = [[NSMenu alloc] initWithTitle:@"Debug"];
 	[debugMenu setDelegate:self];
 	[menuItem setSubmenu:debugMenu];
 
