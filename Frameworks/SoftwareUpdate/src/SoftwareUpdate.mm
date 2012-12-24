@@ -173,7 +173,7 @@ static SoftwareUpdate* SharedInstance;
 				}
 				else if(info.version > thisVersion)
 				{
-					if(!backgroundFlag && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey])
+					if(!backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey])
 					{
 						NSInteger choice = NSRunInformationalAlertPanel(@"New Version Available", @"%@ %ld is now available—you have %ld. Would you like to download it now?", @"Download & Install", nil, @"Later", appName, info.version, thisVersion);
 						if(choice == NSAlertDefaultReturn) // “Download & Install”
