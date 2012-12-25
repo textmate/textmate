@@ -12,10 +12,8 @@
 // ===================
 
 @interface FavoritesViewController : NSViewController
-{
-	NSSearchField* searchField;
-	FavoritesDataSource* favoritesDataSource;
-}
+@property (nonatomic, retain) NSSearchField* searchField;
+@property (nonatomic, retain) FavoritesDataSource* favoritesDataSource;
 @end
 
 @implementation FavoritesViewController
@@ -23,31 +21,30 @@
 {
 	if(self = [super init])
 	{
-		favoritesDataSource          = aDataSource;
+		self.favoritesDataSource          = aDataSource;
 
-		searchField                  = [[[NSSearchField alloc] initWithFrame:NSMakeRect(10, 10, 180, 22)] autorelease];
-		searchField.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
-		searchField.target           = favoritesDataSource;
-		searchField.action           = @selector(search:);
-		[searchField.cell setScrollable:YES];
+		self.searchField                  = [[NSSearchField alloc] initWithFrame:NSMakeRect(10, 10, 180, 22)];
+		self.searchField.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
+		self.searchField.target           = self.favoritesDataSource;
+		self.searchField.action           = @selector(search:);
+		[self.searchField.cell setScrollable:YES];
 
-		self.view                  = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, 200, NSMaxY(searchField.frame) + 8)] autorelease];
+		self.view                  = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 200, NSMaxY(self.searchField.frame) + 8)];
 		self.view.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
-		[self.view addSubview:searchField];
+		[self.view addSubview:self.searchField];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	searchField.target = nil;
-	searchField.action = NULL;
-	[super dealloc];
+	self.searchField.target = nil;
+	self.searchField.action = NULL;
 }
 
 - (void)setSearchFieldDelegate:(id)aDelegate
 {
-	searchField.delegate = aDelegate;
+	self.searchField.delegate = aDelegate;
 }
 @end
 
@@ -56,6 +53,13 @@
 // ===============
 
 @implementation FavoritesDataSource
+{
+	std::string favoritesPath;
+	std::multimap<std::string, std::string, text::less_t> favorites;
+	std::string filterString;
+	FavoritesViewController* viewController;
+}
+
 - (NSViewController*)viewController
 {
 	if(!viewController)
@@ -95,7 +99,7 @@
 
 + (FavoritesDataSource*)favoritesDataSource
 {
-	return [[[self alloc] initWithCxxPath:oak::application_t::support("Favorites")] autorelease];
+	return [[self alloc] initWithCxxPath:oak::application_t::support("Favorites")];
 }
 
 - (NSString*)title
@@ -140,12 +144,10 @@
 	NSMutableArray* items = [NSMutableArray array];
 	iterate(pair, ranked)
 	{
-		[items addObject:
-			[NSDictionary dictionaryWithObjectsAndKeys:
-				[NSString stringWithCxxString:pair->second.first],  @"title",
-				[NSString stringWithCxxString:pair->second.second], @"path",
-			nil]
-		];
+		[items addObject:@{
+			@"title" : [NSString stringWithCxxString:pair->second.first],
+			@"path"  : [NSString stringWithCxxString:pair->second.second],
+		}];
 	}
 	return items;
 }
@@ -153,18 +155,12 @@
 - (NSAttributedString*)displayStringForItem:(id)anItem
 {
 	std::string str = to_s((NSString*)[anItem objectForKey:@"title"]);
-	return [[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:str]] autorelease];
+	return [[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:str]];
 }
 
 - (NSAttributedString*)infoStringForItem:(id)anItem
 {
 	std::string str = path::with_tilde(to_s((NSString*)[anItem objectForKey:@"path"]));
-	return [[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:str]] autorelease];
-}
-
-- (void)dealloc
-{
-	[viewController release];
-	[super dealloc];
+	return [[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:str]];
 }
 @end

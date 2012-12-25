@@ -22,8 +22,6 @@
 OAK_DEBUG_VAR(AppStartup);
 
 @implementation AppStartupController
-@synthesize openEvent, openDocumentsArray;
-
 - (void)userDefaultsDidChange:(id)sender
 {
 	BOOL disableRmate        = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableRMateServerKey];

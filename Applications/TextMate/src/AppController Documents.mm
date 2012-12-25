@@ -129,7 +129,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 				BOOL foundTextView = [[win firstResponder] tryToPerform:@selector(setSelectionString:) with:[NSString stringWithCxxString:range]];
 				if(!foundTextView)
 				{
-					NSMutableArray* allViews = [[[[win contentView] subviews] mutableCopy] autorelease];
+					NSMutableArray* allViews = [[[win contentView] subviews] mutableCopy];
 					for(NSUInteger i = 0; i < [allViews count]; ++i)
 						[allViews addObjectsFromArray:[[allViews objectAtIndex:i] subviews]];
 

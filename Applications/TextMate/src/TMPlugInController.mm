@@ -32,10 +32,8 @@ static TMPlugInController* SharedInstance;
 @end
 
 @interface TMPlugIn : NSObject
-{
-	NSBundle* plugInBundle;
-	id instance;
-}
+@property (nonatomic, retain) NSBundle* plugInBundle;
+@property (nonatomic, retain) id instance;
 + (TMPlugIn*)plugInWithPath:(NSString*)aPath;
 @end
 
@@ -43,15 +41,14 @@ static TMPlugInController* SharedInstance;
 - (TMPlugIn*)initWithPath:(NSString*)aPath
 {
 	D(DBF_PlugInController, bug("%s\n", [aPath UTF8String]););
-	if(plugInBundle = [NSBundle bundleWithPath:aPath])
+	if(NSBundle* bundle = [NSBundle bundleWithPath:aPath])
 	{
 		if(self = [super init])
-			[plugInBundle retain];
+			self.plugInBundle = bundle;
 	}
 	else
 	{
 		NSLog(@"%s couldn't load plugIn %@", sel_getName(_cmd), aPath);
-		[self dealloc];
 		self = nil;
 	}
 	return self;
@@ -59,62 +56,60 @@ static TMPlugInController* SharedInstance;
 
 + (TMPlugIn*)plugInWithPath:(NSString*)aPath
 {
-	return [[[self alloc] initWithPath:aPath] autorelease];
-}
-
-- (void)dealloc
-{
-	D(DBF_PlugInController, bug("\n"););
-	[plugInBundle release];
-	[super dealloc];
+	return [[self alloc] initWithPath:aPath];
 }
 
 - (NSString*)name
 {
-	return [plugInBundle objectForInfoDictionaryKey:@"CFBundleName"];
+	return [self.plugInBundle objectForInfoDictionaryKey:@"CFBundleName"];
 }
 
 - (NSString*)bundleIdentifier
 {
-	return [plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
+	return [self.plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
 }
 
 - (int)undocumentedRelianceVersion
 {
-	return [[plugInBundle objectForInfoDictionaryKey:@"ReliesOnClassesFromVersion"] intValue];
+	return [[self.plugInBundle objectForInfoDictionaryKey:@"ReliesOnClassesFromVersion"] intValue];
 }
 
 - (id)instance
 {
-	if(!instance)
+	if(!_instance)
 	{
-		[plugInBundle load];
-		id obj = [[plugInBundle principalClass] alloc];
+		[self.plugInBundle load];
+		id obj = [[self.plugInBundle principalClass] alloc];
 		if(!obj)
 			NSLog(@"%s %@ plug-in has no principal class", sel_getName(_cmd), [self name]);
 		else if([obj respondsToSelector:@selector(initWithPlugInController:)])
-			instance = [obj initWithPlugInController:[TMPlugInController sharedInstance]];
+			_instance = [obj initWithPlugInController:[TMPlugInController sharedInstance]];
 		else
 			NSLog(@"%s %@ plug-in doesn't have proper initializer", sel_getName(_cmd), [self name]);
 	}
-	D(DBF_PlugInController, bug("%s\n", [[instance description] UTF8String]););
-	return instance;
+	D(DBF_PlugInController, bug("%s\n", [[_instance description] UTF8String]););
+	return _instance;
 }
 @end
 
 @implementation TMPlugInController
+{
+	NSMutableArray* loadedPlugIns;
+	NSMutableSet* plugInBundleIdentifiers;
+	BOOL didLoadAllPlugIns;
+}
+
 + (TMPlugInController*)sharedInstance
 {
-	return SharedInstance ?: [[TMPlugInController new] autorelease];
+	return SharedInstance ?: [TMPlugInController new];
 }
 
 - (id)init
 {
 	if(SharedInstance)
 	{
-		[self release];
 	}
-	else if(self = SharedInstance = [[super init] retain])
+	else if(self = SharedInstance = [super init])
 	{
 		D(DBF_PlugInController, bug("\n"););
 		loadedPlugIns = [NSMutableArray new];

@@ -44,8 +44,6 @@ void OakOpenDocuments (NSArray* paths)
 @end
 
 @implementation AppController
-@synthesize filterWindowController;
-
 - (void)setup
 {
 	bundlesMenu.delegate  = self;
@@ -56,7 +54,7 @@ void OakOpenDocuments (NSArray* paths)
 
 	if([AboutWindowController shouldShowChangesWindow])
 	{
-		self.aboutWindowController = [[[AboutWindowController alloc] init] autorelease];
+		self.aboutWindowController = [[AboutWindowController alloc] init];
 		[self.aboutWindowController performSelector:@selector(showChangesWindow:) withObject:self afterDelay:0];
 	}
 }
@@ -76,7 +74,7 @@ void OakOpenDocuments (NSArray* paths)
 - (IBAction)orderFrontAboutPanel:(id)sender
 {
 	if(!self.aboutWindowController)
-		self.aboutWindowController = [[[AboutWindowController alloc] init] autorelease];
+		self.aboutWindowController = [[AboutWindowController alloc] init];
 	[self.aboutWindowController showAboutWindow:self];
 }
 
@@ -153,26 +151,26 @@ void OakOpenDocuments (NSArray* paths)
 
 - (void)setFilterWindowController:(OakFilterWindowController*)controller
 {
-	if(controller != filterWindowController)
+	if(controller != _filterWindowController)
 	{
-		if(filterWindowController)
+		if(_filterWindowController)
 		{
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:filterWindowController.window];
-			filterWindowController.target = nil;
-			[filterWindowController close];
-			[filterWindowController release];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
+			_filterWindowController.target = nil;
+			[_filterWindowController close];
 		}
-		if(filterWindowController = [controller retain])
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:filterWindowController.window];
+
+		if(_filterWindowController = controller)
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:_filterWindowController.window];
 	}
 }
 
 - (void)filterWindowWillClose:(NSNotification*)notification
 {
-	bundleItemSearch.filter_string  = [[[filterWindowController dataSource] filterString] UTF8String];
-	bundleItemSearch.key_equivalent = [[filterWindowController dataSource] keyEquivalentSearch];
-	bundleItemSearch.all_scopes     = [[filterWindowController dataSource] searchAllScopes];
-	bundleItemSearch.search_type    = [[filterWindowController dataSource] searchType];
+	bundleItemSearch.filter_string  = [[[_filterWindowController dataSource] filterString] UTF8String];
+	bundleItemSearch.key_equivalent = [[_filterWindowController dataSource] keyEquivalentSearch];
+	bundleItemSearch.all_scopes     = [[_filterWindowController dataSource] searchAllScopes];
+	bundleItemSearch.search_type    = [[_filterWindowController dataSource] searchType];
 	self.filterWindowController     = nil;
 }
 
@@ -180,16 +178,18 @@ void OakOpenDocuments (NSArray* paths)
 {
 	self.filterWindowController            = [OakFilterWindowController filterWindow];
 	OakTextView* textView                  = [NSApp targetForAction:@selector(scopeContext)];
+
 	BundleItemChooser* dataSource          = [BundleItemChooser bundleItemChooserForScope:textView ? [textView scopeContext] : scope::wildcard];
 	dataSource.searchType                  = search::type(bundleItemSearch.search_type);
 	dataSource.keyEquivalentSearch         = bundleItemSearch.key_equivalent;
 	dataSource.textViewHasSelection        = [textView hasSelection];
 	dataSource.searchAllScopes             = bundleItemSearch.all_scopes;
 	dataSource.filterString                = [NSString stringWithCxxString:bundleItemSearch.filter_string];
-	filterWindowController.dataSource      = dataSource;
-	filterWindowController.action          = @selector(bundleItemChooserDidSelectItems:);
-	filterWindowController.accessoryAction = @selector(editBundleItem:);
-	[filterWindowController showWindowRelativeToWindow:[textView window]];
+
+	_filterWindowController.dataSource      = dataSource;
+	_filterWindowController.action          = @selector(bundleItemChooserDidSelectItems:);
+	_filterWindowController.accessoryAction = @selector(editBundleItem:);
+	[_filterWindowController showWindowRelativeToWindow:[textView window]];
 }
 
 - (void)bundleItemChooserDidSelectItems:(id)sender

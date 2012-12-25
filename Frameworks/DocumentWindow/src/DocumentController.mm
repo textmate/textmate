@@ -217,7 +217,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 				else
 				{
 					close_scratch_project();
-					bring_to_front([[DocumentController alloc] initWithDocuments:documents]);
+					bring_to_front([[[DocumentController alloc] initWithDocuments:documents] autorelease]);
 				}
 			}
 			else if(DocumentController* delegate = [DocumentController controllerForPath:browserPath])
@@ -229,7 +229,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 			else // if(browserPath != NULL_STR)
 			{
 				close_scratch_project();
-				delegate = documents.empty() ? [[DocumentController alloc] init] : [[DocumentController alloc] initWithDocuments:documents];
+				delegate = documents.empty() ? [[[DocumentController alloc] init] autorelease] : [[[DocumentController alloc] initWithDocuments:documents] autorelease];
 				[delegate window];
 				delegate.fileBrowserHidden = NO;
 				[delegate->fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
@@ -259,7 +259,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 			else
 			{
 				close_scratch_project();
-				delegate = [[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, document)];
+				delegate = [[[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, document)] autorelease];
 				[delegate showWindow:nil];
 			}
 		}
@@ -310,7 +310,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 					if(documents.empty())
 						documents.push_back(document::create());
 
-					DocumentController* controller = [[DocumentController alloc] initWithDocuments:documents];
+					DocumentController* controller = [[[DocumentController alloc] initWithDocuments:documents] autorelease];
 					controller.selectedTabIndex = selectedTabIndex;
 
 					plist::dictionary_t fileBrowserState;
@@ -502,6 +502,8 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 	self.selectedTabIndex = selectedTabIndex;
 	[self updateProxyIcon];
+
+	[self retain];
 }
 
 - (void)synchronizeWindowTitle
@@ -993,7 +995,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 - (IBAction)moveDocumentToNewWindow:(id)sender
 {
 	ASSERT(documentTabs.size() > 1);
-	DocumentController* delegate = [[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, [self selectedDocument])];
+	DocumentController* delegate = [[[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, [self selectedDocument])] autorelease];
 	[delegate showWindow:self];
 	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:selectedTabIndex] quiet:YES];
 }
@@ -1172,7 +1174,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		std::vector<document::document_ptr> documents;
 		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
 			documents.push_back(*documentTabs[index]);
-		DocumentController* delegate = [[DocumentController alloc] initWithDocuments:documents];
+		DocumentController* delegate = [[[DocumentController alloc] initWithDocuments:documents] autorelease];
 		[delegate showWindow:self];
 		[self closeTabsAtIndexes:indexSet quiet:YES];
 	}

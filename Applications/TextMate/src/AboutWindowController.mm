@@ -52,8 +52,8 @@ static NSData* Digest (NSString* someString)
 
 @interface AboutWindowController ()
 - (void)didClickToolbarItem:(id)sender;
-@property (nonatomic, assign) NSToolbar* toolbar;
-@property (nonatomic, assign) WebView* webView;
+@property (nonatomic, strong) NSToolbar* toolbar;
+@property (nonatomic, strong) WebView* webView;
 @end
 
 @implementation AboutWindowController
@@ -84,17 +84,16 @@ static NSData* Digest (NSString* someString)
 	rect.origin.y = round(NSMinY(visibleRect) + dy*3/4);
 	rect.origin.x = NSMaxY(visibleRect) - NSMaxY(rect);
 
-	NSWindow* win = [[[NSWindow alloc] initWithContentRect:rect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO] autorelease];
+	NSWindow* win = [[NSWindow alloc] initWithContentRect:rect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
 	if((self = [super initWithWindow:win]))
 	{
-		NSToolbar* toolbar = [[[NSToolbar alloc] initWithIdentifier:@"About TextMate"] autorelease];
-		self.toolbar = toolbar;
-		[toolbar setAllowsUserCustomization:NO];
-		[toolbar setDisplayMode:NSToolbarDisplayModeLabelOnly];
-		[toolbar setDelegate:self];
-		[win setToolbar:toolbar];
+		self.toolbar = [[NSToolbar alloc] initWithIdentifier:@"About TextMate"];
+		[self.toolbar setAllowsUserCustomization:NO];
+		[self.toolbar setDisplayMode:NSToolbarDisplayModeLabelOnly];
+		[self.toolbar setDelegate:self];
+		[win setToolbar:self.toolbar];
 
-		NSView* contentView = [[[NSView alloc] initWithFrame:NSZeroRect] autorelease];
+		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
 		[win setTitle:@"About TextMate"];
 		[win setContentView:contentView];
 		[win setFrameAutosaveName:@"BundlesReleaseNotes"];
@@ -102,14 +101,13 @@ static NSData* Digest (NSString* someString)
 		[win setAutorecalculatesKeyViewLoop:YES];
 		[win setReleasedWhenClosed:NO];
 
-		WebView* webView = [[[WebView alloc] initWithFrame:[contentView bounds]] autorelease];
-		self.webView = webView;
-		webView.translatesAutoresizingMaskIntoConstraints = NO;
-		webView.frameLoadDelegate = self;
-		webView.policyDelegate = self;
-		[contentView addSubview:webView];
+		self.webView = [[WebView alloc] initWithFrame:[contentView bounds]];
+		self.webView.translatesAutoresizingMaskIntoConstraints = NO;
+		self.webView.frameLoadDelegate = self;
+		self.webView.policyDelegate = self;
+		[contentView addSubview:self.webView];
 
-		NSDictionary* views = NSDictionaryOfVariableBindings(webView);
+		NSDictionary* views = @{ @"webView" : self.webView };
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(>=200)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=200)]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 	}
@@ -120,7 +118,6 @@ static NSData* Digest (NSString* someString)
 {
 	[self.webView setFrameLoadDelegate:nil];
 	[[self.webView mainFrame] stopLoading];
-	[super dealloc];
 }
 
 - (void)showAboutWindow:(id)sender
@@ -180,7 +177,7 @@ static NSData* Digest (NSString* someString)
 
 - (NSToolbarItem*)toolbar:(NSToolbar*)aToolbar itemForItemIdentifier:(NSString*)anIdentifier willBeInsertedIntoToolbar:(BOOL)flag
 {
-	NSToolbarItem* res = [[[NSToolbarItem alloc] initWithItemIdentifier:anIdentifier] autorelease];
+	NSToolbarItem* res = [[NSToolbarItem alloc] initWithItemIdentifier:anIdentifier];
 	[res setLabel:anIdentifier];
 	[res setTarget:self];
 	[res setAction:@selector(didClickToolbarItem:)];
@@ -256,7 +253,7 @@ static NSData* Digest (NSString* someString)
 
 - (void)webView:(WebView*)sender didClearWindowObject:(WebScriptObject*)windowScriptObject forFrame:(WebFrame*)frame
 {
-	AboutWindowJSBridge* bridge = [[[AboutWindowJSBridge alloc] init] autorelease];
+	AboutWindowJSBridge* bridge = [[AboutWindowJSBridge alloc] init];
 	[windowScriptObject setValue:bridge forKey:@"TextMate"];
 }
 

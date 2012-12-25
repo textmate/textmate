@@ -34,15 +34,11 @@ OAK_DEBUG_VAR(AppController_Menus);
 	{
 		if([[aMenu itemAtIndex:i] isSeparatorItem])
 			break;
-
-		NSMenuItem* item = [aMenu itemAtIndex:i];
-		if([[[item submenu] delegate] isKindOfClass:[BundleMenuDelegate class]])
-		{
-			[[[item submenu] delegate] release];
-			[[item submenu] setDelegate:nil];
-		}
 		[aMenu removeItemAtIndex:i];
 	}
+
+	static NSMutableArray* bundleItemDelegates = [NSMutableArray new];
+	[bundleItemDelegates removeAllObjects];
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
@@ -53,9 +49,11 @@ OAK_DEBUG_VAR(AppController_Menus);
 		if(pair->second->menu().empty())
 			continue;
 
-		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
-		menuItem.submenu = [[NSMenu new] autorelease];
 		BundleMenuDelegate* delegate = [[BundleMenuDelegate alloc] initWithBundleItem:pair->second];
+		[bundleItemDelegates addObject:delegate];
+
+		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
+		menuItem.submenu = [NSMenu new];
 		menuItem.submenu.delegate = delegate;
 	}
 
@@ -91,10 +89,7 @@ OAK_DEBUG_VAR(AppController_Menus);
 	{
 		NSMenuItem* item = [aMenu itemAtIndex:i];
 		if([item action] == @selector(takeSpellingLanguageFrom:))
-		{
-			[[item retain] autorelease];
 			[aMenu removeItemAtIndex:i];
-		}
 	}
 
 	std::multimap<std::string, NSString*, text::less_t> ordered;
@@ -103,11 +98,9 @@ OAK_DEBUG_VAR(AppController_Menus);
 	for(NSString* lang in [spellChecker availableLanguages])
 	{
 		D(DBF_AppController_Menus, bug("%s\n", [lang UTF8String]););
-		CFStringRef str = CFLocaleCopyDisplayNameForPropertyValue(CFLocaleGetSystem(), kCFLocaleIdentifier, (CFStringRef)lang);
-		D(DBF_AppController_Menus, bug("→ %s\n", cf::to_s(str ?: (CFStringRef)lang).c_str()););
-		ordered.insert(std::make_pair(cf::to_s(str ?: (CFStringRef)lang), lang));
-		if(str)
-			CFRelease(str);
+		NSString* str = (NSString*)CFBridgingRelease(CFLocaleCopyDisplayNameForPropertyValue(CFLocaleGetSystem(), kCFLocaleIdentifier, (__bridge CFStringRef)lang));
+		D(DBF_AppController_Menus, bug("→ %s\n", [(str ?: lang) UTF8String]););
+		ordered.insert(std::make_pair(to_s(str ?: lang), lang));
 	}
 
 	iterate(it, ordered)

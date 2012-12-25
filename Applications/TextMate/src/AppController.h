@@ -29,7 +29,6 @@ namespace find_tags
 		BOOL all_scopes;
 		int search_type;
 	} bundleItemSearch;
-	OakFilterWindowController* filterWindowController;
 }
 
 - (IBAction)orderFrontFindPanel:(id)sender;
