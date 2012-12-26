@@ -52,6 +52,9 @@ static std::string glyph_named (std::string const& name)
 
 static std::string glyphs_for_key (std::string const& key, bool numpad = false)
 {
+	if(key == "")
+		return key;
+
 	static struct { unsigned short code; std::string name; } const Keys[] =
 	{
 		{ NSUpArrowFunctionKey,          "up"        },
