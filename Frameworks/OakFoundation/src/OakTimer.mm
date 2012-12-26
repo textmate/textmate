@@ -68,10 +68,7 @@ OAK_DEBUG_VAR(OakTimer);
 
 - (void)fire
 {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-	[self.target performSelector:self.selector withObject:self];
-#pragma clang diagnostic pop
+	[NSApp sendAction:self.selector to:self.target from:self];
 }
 
 - (void)timerDidFire:(NSTimer*)timer
