@@ -12,6 +12,14 @@
 @implementation OFBPathInfoCell
 @synthesize isOpen, isVisible, labelIndex, isLoading, spinTimer, mouseDownInCloseButton;
 
+- (id)copyWithZone:(NSZone*)aZone
+{
+	OFBPathInfoCell* res = [super copyWithZone:aZone];
+	DB(new(&res->_instance_counter_helper) watch_leaks_OFBPathInfoCell(_instance_counter_helper));
+	res->spinTimer = nil;
+	return res;
+}
+
 - (void)drawLabelIndex:(NSUInteger)labelColorIndex inFrame:(NSRect)cellFrame
 {
 	if(labelColorIndex == 0)
