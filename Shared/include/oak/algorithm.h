@@ -32,7 +32,7 @@ namespace oak
 	{
 		while(it != srcLast)
 		{
-			_InputIter1 const& next = search(it, srcLast, findFirst, findLast);
+			_InputIter1 const& next = std::search(it, srcLast, findFirst, findLast);
 			out = std::copy(it, next, out);
 			if((it = next) != srcLast)
 			{
