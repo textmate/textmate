@@ -1305,7 +1305,7 @@ namespace ng
 			{
 				if(range)
 					_selections = range;
-				insert(out);
+				insert(out, outputCaret == output_caret::select_output);
 				if(range && outputCaret == output_caret::interpolate_by_char)
 				{
 					offset = utf8::find_safe_end(out.begin(), out.begin() + std::min(offset, out.size())) - out.begin();
