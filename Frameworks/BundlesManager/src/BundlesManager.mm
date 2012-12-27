@@ -161,10 +161,11 @@ static BundlesManager* SharedInstance;
 	if(--scheduledTasks == 0)
 	{
 		[self.progressTimer invalidate];
+		[self updateProgress:nil];
 		self.progressTimer = nil;
+		self.progress      = 0;
 		self.isBusy        = NO;
 
-		[self updateProgress:nil];
 		[self performSelector:@selector(setActivityText:) withObject:nil afterDelay:5];
 	}
 
