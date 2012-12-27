@@ -16,6 +16,9 @@ static std::string const kInstallDirectory = NULL_STR;
 
 - (void)didStartThreadActivity:(id)sender;
 - (void)didFinishActivityForSources:(std::vector<bundles_db::source_ptr> const&)someSources bundles:(std::vector<bundles_db::bundle_ptr> const&)someBundles;
+
+- (void)updateSources:(id)sender;
+- (void)updateBundles:(id)sender;
 @end
 
 namespace

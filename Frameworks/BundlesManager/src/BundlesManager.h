@@ -14,9 +14,6 @@ PUBLIC @interface BundlesManager : NSObject
 - (void)installBundle:(bundles_db::bundle_ptr const&)aBundle;
 - (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle;
 
-- (void)updateSources:(id)sender;
-- (void)updateBundles:(id)sender;
-
 + (BundlesManager*)sharedInstance;
 @end
 
