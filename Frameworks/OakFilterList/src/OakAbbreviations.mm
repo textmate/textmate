@@ -8,6 +8,8 @@ static NSString* const FCAbbreviationKey		= @"short";
 static NSString* const FCExpandedStringKey	= @"long";
 
 @interface OakAbbreviations ()
+@property (nonatomic, copy)   NSString* name;
+@property (nonatomic, retain) NSMutableArray* bindings;
 - (id)initWithName:(NSString*)aName;
 @end
 
@@ -15,18 +17,18 @@ static NSString* const FCExpandedStringKey	= @"long";
 + (OakAbbreviations*)abbreviationsForName:(NSString*)aName
 {
 	static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
-	if(![SharedInstances objectForKey:aName])
-		[SharedInstances setObject:[[[self alloc] initWithName:aName] autorelease] forKey:aName];
-	return [SharedInstances objectForKey:aName];
+	if(!SharedInstances[aName])
+		SharedInstances[aName] = [[self alloc] initWithName:aName];
+	return SharedInstances[aName];
 }
 
 - (id)initWithName:(NSString*)aName
 {
 	if(self = [self init])
 	{
-		name = [aName copy];
-		bindings = [[[NSUserDefaults standardUserDefaults] arrayForKey:name] mutableCopy] ?: [NSMutableArray new];
-		D(DBF_FilterList_Abbreviations, bug("%s\n", [[bindings description] UTF8String]););
+		self.name     = aName;
+		self.bindings = [[[NSUserDefaults standardUserDefaults] arrayForKey:self.name] mutableCopy] ?: [NSMutableArray new];
+		D(DBF_FilterList_Abbreviations, bug("%s\n", [[self.bindings description] UTF8String]););
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
 	return self;
@@ -36,17 +38,14 @@ static NSString* const FCExpandedStringKey	= @"long";
 {
 	[self applicationWillTerminate:nil];
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
-	[bindings release];
-	[name release];
-	[super dealloc];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
 {
-	D(DBF_FilterList_Abbreviations, bug("%s\n", [[bindings description] UTF8String]););
-	if([bindings count] > 50)
-		[bindings setArray:[bindings subarrayWithRange:NSMakeRange(0, 50)]];
-	[[NSUserDefaults standardUserDefaults] setObject:bindings forKey:name];
+	D(DBF_FilterList_Abbreviations, bug("%s\n", [[self.bindings description] UTF8String]););
+	if([self.bindings count] > 50)
+		[self.bindings setArray:[self.bindings subarrayWithRange:NSMakeRange(0, 50)]];
+	[[NSUserDefaults standardUserDefaults] setObject:self.bindings forKey:self.name];
 }
 
 - (NSArray*)stringsForAbbreviation:(NSString*)anAbbreviation
@@ -57,10 +56,10 @@ static NSString* const FCExpandedStringKey	= @"long";
 	if(NSIsEmptyString(anAbbreviation))
 		return exactMatches;
 
-	for(NSDictionary* binding in bindings)
+	for(NSDictionary* binding in self.bindings)
 	{
-		NSString* abbr = [binding objectForKey:FCAbbreviationKey];
-		NSString* path = [binding objectForKey:FCExpandedStringKey];
+		NSString* abbr = binding[FCAbbreviationKey];
+		NSString* path = binding[FCExpandedStringKey];
 
 		if([abbr isEqualToString:anAbbreviation])
 			[exactMatches addObject:path];
@@ -80,12 +79,8 @@ static NSString* const FCExpandedStringKey	= @"long";
 	if(NSIsEmptyString(anAbbreviation) || NSIsEmptyString(aString))
 		return;
 
-	NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
-		anAbbreviation,   FCAbbreviationKey,
-		aString,          FCExpandedStringKey,
-		nil];
-
-	[bindings removeObject:dict];
-	[bindings insertObject:dict atIndex:0];
+	NSDictionary* dict = @{ FCAbbreviationKey : anAbbreviation, FCExpandedStringKey : aString };
+	[self.bindings removeObject:dict];
+	[self.bindings insertObject:dict atIndex:0];
 }
 @end

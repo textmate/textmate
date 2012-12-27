@@ -22,13 +22,13 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 	{
 		symbolChooser = chooser;
 
-		searchField                  = [[[NSSearchField alloc] initWithFrame:NSMakeRect(10, 10, 180, 22)] autorelease];
+		searchField                  = [[NSSearchField alloc] initWithFrame:NSMakeRect(10, 10, 180, 22)];
 		searchField.target           = symbolChooser;
 		searchField.action           = @selector(search:);
 		searchField.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
 		[searchField.cell setScrollable:YES];
 
-		self.view                  = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, 200, NSMaxY(searchField.frame) + 8)] autorelease];
+		self.view                  = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 200, NSMaxY(searchField.frame) + 8)];
 		self.view.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
 		[self.view addSubview:searchField];
 	}
@@ -39,8 +39,6 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 {
 	searchField.delegate = nil;
 	searchField.target   = nil;
-	searchField.action   = NULL;
-	[super dealloc];
 }
 
 - (void)setSearchFieldDelegate:(id)aDelegate
@@ -92,7 +90,7 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 + (id)symbolChooserForDocument:(document::document_ptr)aDocument
 {
-	return [[[self alloc] initWithDocument:aDocument] autorelease];
+	return [[self alloc] initWithDocument:aDocument];
 }
 
 - (NSString*)title
@@ -139,7 +137,5 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 - (void)dealloc
 {
 	document->close();
-	[viewController release];
-	[super dealloc];
 }
 @end

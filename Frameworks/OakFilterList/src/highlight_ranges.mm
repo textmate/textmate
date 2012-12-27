@@ -7,7 +7,7 @@ NSString* const FLMatchingTextAttributeName = @"FLMatchingTextAttributeName";
 
 NSAttributedString* AttributedStringWithMarkedUpRanges (std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset)
 {
-	NSMutableAttributedString* res = [[[NSMutableAttributedString alloc] init] autorelease];
+	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 	NSDictionary* highlightAttrs = @{ FLMatchingTextAttributeName : [NSNull null] };
 	ASSERT(offset >= 0 && offset < in.size());
 
@@ -21,12 +21,12 @@ NSAttributedString* AttributedStringWithMarkedUpRanges (std::string const& in, s
 	size_t from = 0;
 	iterate(it, ranges)
 	{
-		[res appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.begin() + it->first)] attributes:nil] autorelease]];
-		[res appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + it->first, text.begin() + it->second)] attributes:highlightAttrs] autorelease]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.begin() + it->first)] attributes:nil]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + it->first, text.begin() + it->second)] attributes:highlightAttrs]];
 		from = it->second;
 	}
 	if(from < text.size())
-		[res appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.end())] attributes:nil] autorelease]];
+		[res appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:std::string(text.begin() + from, text.end())] attributes:nil]];
 
 	return res;
 }

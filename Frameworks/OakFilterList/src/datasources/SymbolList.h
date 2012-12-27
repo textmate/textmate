@@ -2,13 +2,6 @@
 #import <document/document.h>
 
 @interface FileChooserSymbolItem : NSObject
-{
-	NSString* path;
-	NSString* selectionString;
-	NSString* identifier;
-	NSAttributedString* displayString;
-	NSAttributedString* infoString;
-}
 @property (nonatomic, retain) NSString* path;
 @property (nonatomic, retain) NSString* selectionString;
 @property (nonatomic, retain) NSString* identifier;

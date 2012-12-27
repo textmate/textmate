@@ -80,30 +80,20 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 	OakKeyEquivalentView* keyEquivField;
 	NSSegmentedControl* sourceSelector;
 	MGScopeBar* scopeBar;
-	BundleItemChooser* itemChooser;
 }
-@property (nonatomic, assign) BundleItemChooser* itemChooser;
+@property (nonatomic, weak) BundleItemChooser* itemChooser;
 @end
 
 @interface BundleItemChooserView : NSView
-{
-	BundleItemChooserViewController* viewController;
-}
-@property (nonatomic, assign) BundleItemChooserViewController* viewController;
+@property (nonatomic, weak) BundleItemChooserViewController* viewController;
 @end
 
 @implementation BundleItemChooserView
-@synthesize viewController;
-
 - (void)viewDidMoveToWindow
 {
 	[self.window makeFirstResponder:[self.viewController valueForKey:self.viewController.itemChooser.keyEquivalentSearch ? @"keyEquivField" : @"searchField"]];
-	self.viewController = nil;
 }
 @end
-
-@implementation BundleItemChooserViewController
-@synthesize itemChooser;
 
 static NSString* const TitleSearchMode         = @"TitleSearchMode";
 static NSString* const KeyEquivalentSearchMode = @"KeyEquivalentSearchMode";
@@ -111,6 +101,7 @@ static NSString* const KeyEquivalentSearchMode = @"KeyEquivalentSearchMode";
 static NSString* const CurrentScope = @"CurrentScope";
 static NSString* const AllScopes    = @"AllScopes";
 
+@implementation BundleItemChooserViewController
 - (id)initWithBundleItemChooser:(BundleItemChooser*)chooser
 {
 	if((self = [super init]))
@@ -119,21 +110,21 @@ static NSString* const AllScopes    = @"AllScopes";
 
 		static const CGFloat initialViewWidth = 1200;
 
-		searchField                  = [[[NSSearchField alloc] initWithFrame:NSMakeRect(7, 8, initialViewWidth-14, 22)] autorelease];
+		searchField                  = [[NSSearchField alloc] initWithFrame:NSMakeRect(7, 8, initialViewWidth-14, 22)];
 		searchField.action           = @selector(didChangeFilterString:);
 		searchField.target           = self;
 		searchField.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
 		[searchField.cell setScrollable:YES];
 
-		keyEquivField                      = [[[OakKeyEquivalentView alloc] initWithFrame:searchField.frame] autorelease];
+		keyEquivField                      = [[OakKeyEquivalentView alloc] initWithFrame:searchField.frame];
 		keyEquivField.autoresizingMask     = NSViewWidthSizable|NSViewMinYMargin;
 		keyEquivField.disableGlobalHotkeys = NO;
 		[keyEquivField setHidden:YES];
 
-		scopeBar                  = [[[OakScopeBar alloc] initWithFrame:NSMakeRect(0, NSMaxY(searchField.frame) + 6, initialViewWidth, 25)] autorelease];
+		scopeBar                  = [[OakScopeBar alloc] initWithFrame:NSMakeRect(0, NSMaxY(searchField.frame) + 6, initialViewWidth, 25)];
 		scopeBar.autoresizingMask = NSViewWidthSizable|NSViewMinYMargin;
 
-		self.view = [[[BundleItemChooserView alloc] initWithFrame:NSMakeRect(0, 0, initialViewWidth, NSMaxY(scopeBar.frame))] autorelease];
+		self.view = [[BundleItemChooserView alloc] initWithFrame:NSMakeRect(0, 0, initialViewWidth, NSMaxY(scopeBar.frame))];
 		((BundleItemChooserView*)self.view).viewController = self;
 		self.view.autoresizingMask = NSViewWidthSizable;
 		[self.view addSubview:searchField];
@@ -141,10 +132,10 @@ static NSString* const AllScopes    = @"AllScopes";
 
 		[self.view addSubview:scopeBar];
 
-		BOOL searchAllScopes     = itemChooser.searchAllScopes;
-		BOOL keyEquivalentSearch = itemChooser.keyEquivalentSearch;
-		search::type searchType  = itemChooser.searchType;
-		NSString* filterString   = itemChooser.filterString;
+		BOOL searchAllScopes     = chooser.searchAllScopes;
+		BOOL keyEquivalentSearch = chooser.keyEquivalentSearch;
+		search::type searchType  = chooser.searchType;
+		NSString* filterString   = chooser.filterString;
 
 		scopeBar.delegate = self;
 		[scopeBar reloadData];
@@ -159,9 +150,9 @@ static NSString* const AllScopes    = @"AllScopes";
 			case search::themes:   [scopeBar setSelected:YES forItem:@"Themes" inGroup:2];   break;
 		}
 
-		itemChooser.filterString = filterString;
+		chooser.filterString = filterString;
 
-		if(itemChooser.keyEquivalentSearch)
+		if(chooser.keyEquivalentSearch)
 				keyEquivField.eventString = filterString;
 		else	searchField.stringValue = filterString;
 
@@ -174,11 +165,8 @@ static NSString* const AllScopes    = @"AllScopes";
 - (void)dealloc
 {
 	searchField.target = nil;
-	searchField.action = NULL;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[keyEquivField unbind:@"value"];
-	self.itemChooser = nil;
-	[super dealloc];
 }
 
 - (int)numberOfGroupsInScopeBar:(MGScopeBar*)theScopeBar
@@ -228,26 +216,26 @@ static NSString* const AllScopes    = @"AllScopes";
 			[searchField setHidden:NO];
 			[keyEquivField setHidden:YES];
 			[self.view.window makeFirstResponder:searchField];
-			itemChooser.keyEquivalentSearch = NO;
+			self.itemChooser.keyEquivalentSearch = NO;
 		}
 		else if(identifier == KeyEquivalentSearchMode)
 		{
 			[searchField setHidden:YES];
 			[keyEquivField setHidden:NO];
 			[self.view.window makeFirstResponder:keyEquivField];
-			itemChooser.keyEquivalentSearch = YES;
+			self.itemChooser.keyEquivalentSearch = YES;
 			keyEquivField.recording = YES;
 		}
 	}
 	else if(groupNumber == 0)
 	{
-		itemChooser.searchAllScopes = identifier == AllScopes;
+		self.itemChooser.searchAllScopes = identifier == AllScopes;
 	}
 	else if(groupNumber == 2)
 	{
-		if([identifier isEqualToString:@"Actions"])       itemChooser.searchType = search::actions;
-		else if([identifier isEqualToString:@"Grammars"]) itemChooser.searchType = search::grammars;
-		else if([identifier isEqualToString:@"Themes"])   itemChooser.searchType = search::themes;
+		if([identifier isEqualToString:@"Actions"])       self.itemChooser.searchType = search::actions;
+		else if([identifier isEqualToString:@"Grammars"]) self.itemChooser.searchType = search::grammars;
+		else if([identifier isEqualToString:@"Themes"])   self.itemChooser.searchType = search::themes;
 	}
 }
 
@@ -286,7 +274,7 @@ static NSString* const AllScopes    = @"AllScopes";
 	[scopeBar setSelected:YES forItem:identifier inGroup:groupIndex];
 }
 
-- (void)didChangeFilterString:(NSSearchField*)sender { itemChooser.filterString = sender.stringValue; }
+- (void)didChangeFilterString:(NSSearchField*)sender { self.itemChooser.filterString = sender.stringValue; }
 - (void)setSearchFieldDelegate:(id)aDelegate         { searchField.delegate = aDelegate; }
 
 - (void)viewFrameDidChange:(NSNotification*)notification
@@ -298,6 +286,19 @@ static NSString* const AllScopes    = @"AllScopes";
 @end
 
 @implementation BundleItemChooser
+{
+	OBJC_WATCH_LEAKS(BundleItemChooser);
+	scope::context_t scope;
+	BOOL hasSelection;
+	std::vector<bundles::item_ptr> all_items;
+	std::set<oak::uuid_t> items_filtered_by_scope;
+	BOOL searchAllScopes;
+	std::string originalFilterString;
+	std::string filterString;
+	NSViewController* viewController;
+	BOOL keyEquivalentSearch;
+	search::type searchType;
+}
 @synthesize keyEquivalentSearch, textViewHasSelection = hasSelection, searchAllScopes, searchType;
 
 static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type searchType, scope::context_t const& scope, bool hasSelection)
@@ -332,13 +333,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 
 + (id)bundleItemChooserForScope:(scope::context_t const&)aScope
 {
-	return [[[self alloc] initWithScope:aScope] autorelease];
-}
-
-- (void)dealloc
-{
-	[viewController release];
-	[super dealloc];
+	return [[self alloc] initWithScope:aScope];
 }
 
 - (NSString*)title
@@ -348,7 +343,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 
 - (NSTextFieldCell*)itemDataCell
 {
-	return [[[OakBundleItemCell alloc] initTextCell:@""] autorelease];
+	return [[OakBundleItemCell alloc] initTextCell:@""];
 }
 
 - (void)setSearchType:(search::type)newType
@@ -408,7 +403,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 
 - (NSButtonCell*)accessoryButton
 {
-	NSButtonCell* button = [[NSButtonCell new] autorelease];
+	NSButtonCell* button = [NSButtonCell new];
 	[button setButtonType:NSSwitchButton];
 	[button setBezelStyle:NSSmallSquareBezelStyle];
 	[button setImagePosition:NSImageOnly];
@@ -432,7 +427,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 			if(!filterString.empty() && key_equivalent(all_items[index]) != originalFilterString)
 				continue;
 
-			BundleItemChooserItem* item = [[BundleItemChooserItem new] autorelease];
+			BundleItemChooserItem* item = [BundleItemChooserItem new];
 			[item setIndex:index];
 			[item setUuid:all_items[index]->uuid()];
 			rankedItems.insert(std::make_pair(0, item));
@@ -461,7 +456,7 @@ static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type sear
 				rank = 1 - std::max(nameRank, triggerRank);
 			}
 
-			BundleItemChooserItem* item = [[BundleItemChooserItem new] autorelease];
+			BundleItemChooserItem* item = [BundleItemChooserItem new];
 			[item setIndex:index];
 			[item setUuid:all_items[index]->uuid()];
 			rankedItems.insert(std::make_pair(rank, item));

@@ -23,12 +23,6 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 @end
 
 @implementation OakFilterListView
-@synthesize filterDataSource, isWaitingForItems, items, infoString, sourceIndex;
-
-// ==================
-// = Setup/Teardown =
-// ==================
-
 - (void)setup
 {
 	self.dataSource              = self;
@@ -54,15 +48,12 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 
 - (void)dealloc
 {
-	self.filterDataSource = nil;
-	self.items            = nil;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 - (void)awakeFromNib
 {
-	self.infoString = [[[NSAttributedString alloc] initWithString:@""] autorelease];
+	self.infoString = [[NSAttributedString alloc] initWithString:@""];
 }
 
 - (void)viewFrameDidChange:(NSNotification*)notification
@@ -76,31 +67,32 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 
 - (void)setFilterDataSource:(id <FilterListDataSource>)aDataSource
 {
-	if(aDataSource != filterDataSource)
+	if(aDataSource != _filterDataSource)
 	{
-		if(filterDataSource)
+		if(_filterDataSource)
 		{
-			if([filterDataSource respondsToSelector:@selector(stopLoading)])
-				[filterDataSource stopLoading];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsDidChangeNotification object:filterDataSource];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsShouldDescendNotification object:filterDataSource];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsShouldAscendNotification object:filterDataSource];
-			[filterDataSource autorelease];
+			if([_filterDataSource respondsToSelector:@selector(stopLoading)])
+				[_filterDataSource stopLoading];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsDidChangeNotification object:_filterDataSource];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsShouldDescendNotification object:_filterDataSource];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsShouldAscendNotification object:_filterDataSource];
+
 		}
-		if(filterDataSource = [aDataSource retain])
+
+		if(_filterDataSource = aDataSource)
 		{
-			ASSERT([filterDataSource conformsToProtocol:@protocol(FilterListDataSource)]);
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataSourceHasMoreData:) name:FLDataSourceItemsDidChangeNotification object:filterDataSource];
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataSourceShouldDescend:) name:FLDataSourceItemsShouldDescendNotification object:filterDataSource];
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataSourceShouldAscend:) name:FLDataSourceItemsShouldAscendNotification object:filterDataSource];
+			ASSERT([_filterDataSource conformsToProtocol:@protocol(FilterListDataSource)]);
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataSourceHasMoreData:) name:FLDataSourceItemsDidChangeNotification object:_filterDataSource];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataSourceShouldDescend:) name:FLDataSourceItemsShouldDescendNotification object:_filterDataSource];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataSourceShouldAscend:) name:FLDataSourceItemsShouldAscendNotification object:_filterDataSource];
 
 			NSTextFieldCell* dataCell = nil;
-			if([filterDataSource respondsToSelector:@selector(itemDataCell)])
-				dataCell = [filterDataSource itemDataCell];
+			if([_filterDataSource respondsToSelector:@selector(itemDataCell)])
+				dataCell = [_filterDataSource itemDataCell];
 			if(!dataCell)
-				dataCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
+				dataCell = [[NSTextFieldCell alloc] initTextCell:@""];
 			[[self.tableColumns objectAtIndex:0] setDataCell:dataCell];
-			self.allowsMultipleSelection = [filterDataSource respondsToSelector:@selector(allowsMultipleSelection)] && [filterDataSource allowsMultipleSelection];
+			self.allowsMultipleSelection = [_filterDataSource respondsToSelector:@selector(allowsMultipleSelection)] && [_filterDataSource allowsMultipleSelection];
 		}
 		[self reloadData];
 	}
@@ -130,12 +122,12 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 
 - (void)dataSourceShouldDescend:(NSNotification*)aNotification
 {
-	[filterDataSource descendIntoItem:[self.selectedItems lastObject]];
+	[_filterDataSource descendIntoItem:[self.selectedItems lastObject]];
 }
 
 - (void)dataSourceShouldAscend:(NSNotification*)aNotification
 {
-	[filterDataSource descendIntoItem:nil];
+	[_filterDataSource descendIntoItem:nil];
 }
 
 - (void)dataSourceHasMoreData:(NSNotification*)notification
@@ -146,15 +138,18 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 - (void)reloadData
 {
 	NSArray* selectedItems = nil;
-	if([filterDataSource respondsToSelector:@selector(preservesSelectionWhenFiltering)] && [filterDataSource preservesSelectionWhenFiltering])
+	if([_filterDataSource respondsToSelector:@selector(preservesSelectionWhenFiltering)] && [_filterDataSource preservesSelectionWhenFiltering])
 		selectedItems = [self.items objectsAtIndexes:self.selectedRowIndexes];
-	self.items = [filterDataSource items];
-	if(![filterDataSource respondsToSelector:@selector(infoStringForItem:)])
+	self.items = [_filterDataSource items];
+	if(![_filterDataSource respondsToSelector:@selector(infoStringForItem:)])
 	{
-		NSMutableParagraphStyle* style = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+		NSMutableParagraphStyle* style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[style setAlignment:NSCenterTextAlignment];
-		NSAttributedString* text = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu items", self.items.count]
-                                                                    attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor darkGrayColor], NSForegroundColorAttributeName, [NSFont controlContentFontOfSize:11], NSFontAttributeName, style, NSParagraphStyleAttributeName, nil]] autorelease];
+		NSAttributedString* text = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu items", self.items.count] attributes:@{
+			NSForegroundColorAttributeName    : [NSColor darkGrayColor],
+			NSFontAttributeName               : [NSFont controlContentFontOfSize:11],
+			NSParagraphStyleAttributeName     : style
+		}];
 		self.infoString = text;
 	}
 	[super reloadData];
@@ -173,7 +168,7 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 	[self selectRowIndexes:indexesToSelect byExtendingSelection:NO];
 	[self scrollRowToVisible:indexesToSelect.firstIndex];
 	[self tableViewSelectionDidChange:nil];
-	self.isWaitingForItems = [filterDataSource respondsToSelector:@selector(moreItemsToCome)] && [filterDataSource moreItemsToCome];
+	self.isWaitingForItems = [_filterDataSource respondsToSelector:@selector(moreItemsToCome)] && [_filterDataSource moreItemsToCome];
 }
 
 // ======================
@@ -182,55 +177,61 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView*)tableView
 {
-	return [items count];
+	return [_items count];
 }
 
 - (id)tableView:(NSTableView*)tableView objectValueForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)rowIndex
 {
 	if([tableColumn.identifier isEqualToString:@"accessoryColumn"])
-		return [items objectAtIndex:rowIndex];
-	if([filterDataSource respondsToSelector:@selector(displayStringForItem:)])
+		return [_items objectAtIndex:rowIndex];
+
+	if([_filterDataSource respondsToSelector:@selector(displayStringForItem:)])
 	{
-		NSMutableParagraphStyle* pStyle = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[pStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
-		NSMutableAttributedString* text = [[[filterDataSource displayStringForItem:[items objectAtIndex:rowIndex]] mutableCopy] autorelease];
-		[text addAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor darkGrayColor], NSForegroundColorAttributeName, [NSFont controlContentFontOfSize:13], NSFontAttributeName, pStyle, NSParagraphStyleAttributeName, nil] range:NSMakeRange(0, [text length])];
-		NSDictionary* highlightAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-												@1,                   NSUnderlineStyleAttributeName,
-												[NSColor blackColor], NSForegroundColorAttributeName,
-												[[NSFontManager sharedFontManager] convertFont:[NSFont controlContentFontOfSize:13] toHaveTrait:NSBoldFontMask], NSFontAttributeName,
-												nil];
+
+		NSFont* baseFont = [NSFont controlContentFontOfSize:13];
+		NSFont* boldFont = [[NSFontManager sharedFontManager] convertFont:baseFont toHaveTrait:NSBoldFontMask];
+
+		NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor], NSFontAttributeName : baseFont, NSParagraphStyleAttributeName : pStyle };
+		NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : [NSColor blackColor],    NSFontAttributeName : boldFont, NSUnderlineStyleAttributeName : @1 };
+
+		NSMutableAttributedString* text = [[_filterDataSource displayStringForItem:[_items objectAtIndex:rowIndex]] mutableCopy];
+		[text addAttributes:baseAttributes range:NSMakeRange(0, [text length])];
 		HighlightRangesWithAttribute(text, FLMatchingTextAttributeName, highlightAttributes);
 		return text;
 	}
 	else
-		return [items objectAtIndex:rowIndex];
+	{
+		return [_items objectAtIndex:rowIndex];
+	}
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification*)notification
 {
-	if([filterDataSource respondsToSelector:@selector(infoStringForItem:)])
+	if([_filterDataSource respondsToSelector:@selector(infoStringForItem:)])
 	{
-		if(self.selectedRow != -1 && [items count] > 0)
+		if(self.selectedRow != -1 && [_items count] > 0)
 		{
-			NSMutableAttributedString* text = [[[filterDataSource infoStringForItem:[items objectAtIndex:self.selectedRow]] mutableCopy] autorelease];
-			NSMutableParagraphStyle* style = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
-			[style setLineBreakMode:NSLineBreakByTruncatingHead];
-			[text addAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor darkGrayColor], NSForegroundColorAttributeName, [NSFont controlContentFontOfSize:11], NSFontAttributeName, style, NSParagraphStyleAttributeName, nil]
-                       range:NSMakeRange(0, [text length])];
-			NSDictionary* highlightAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-													@1,                   NSUnderlineStyleAttributeName,
-													[NSColor blackColor], NSForegroundColorAttributeName,
-													[[NSFontManager sharedFontManager] convertFont:[NSFont controlContentFontOfSize:11] toHaveTrait:NSBoldFontMask], NSFontAttributeName,
-													nil];
+			NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+			[pStyle setLineBreakMode:NSLineBreakByTruncatingHead];
+
+			NSFont* baseFont = [NSFont controlContentFontOfSize:11];
+			NSFont* boldFont = [[NSFontManager sharedFontManager] convertFont:baseFont toHaveTrait:NSBoldFontMask];
+
+			NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor], NSFontAttributeName : baseFont, NSParagraphStyleAttributeName : pStyle };
+			NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : [NSColor blackColor],    NSFontAttributeName : boldFont, NSUnderlineStyleAttributeName : @1 };
+
+			NSMutableAttributedString* text = [[_filterDataSource infoStringForItem:[_items objectAtIndex:self.selectedRow]] mutableCopy];
+			[text addAttributes:baseAttributes range:NSMakeRange(0, [text length])];
 			HighlightRangesWithAttribute(text, FLMatchingTextAttributeName, highlightAttributes);
 
 			NSUInteger tabIndex = [text.mutableString rangeOfString:@"\t"].location;
 			if(tabIndex != NSNotFound)
 			{
 				CGFloat width = self.window.frame.size.width - [text attributedSubstringFromRange:NSMakeRange(tabIndex, text.length - tabIndex)].size.width - 10;
-				NSMutableParagraphStyle* rightAlignStyle = [[[text attribute:NSParagraphStyleAttributeName atIndex:tabIndex effectiveRange:NULL] mutableCopy] autorelease];
-				[rightAlignStyle setTabStops:@[ [[[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + 1.0] autorelease] ]];
+				NSMutableParagraphStyle* rightAlignStyle = [[text attribute:NSParagraphStyleAttributeName atIndex:tabIndex effectiveRange:NULL] mutableCopy];
+				[rightAlignStyle setTabStops:@[ [[NSTextTab alloc] initWithType:NSLeftTabStopType location:width + 1.0] ]];
 				[text addAttribute:NSParagraphStyleAttributeName value:rightAlignStyle range:NSMakeRange(0, text.length)];
 			}
 
@@ -238,15 +239,15 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 		}
 		else
 		{
-			self.infoString = [[[NSAttributedString alloc] initWithString:@""] autorelease];
+			self.infoString = [[NSAttributedString alloc] initWithString:@""];
 		}
 	}
 }
 
 - (void)tableView:(NSTableView*)tableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)rowIndex
 {
-	if([filterDataSource respondsToSelector:@selector(willDisplayCell:forItem:)] && ![tableColumn.identifier isEqualToString:@"accessoryColumn"])
-		[filterDataSource willDisplayCell:aCell forItem:[self.items objectAtIndex:rowIndex]];
+	if([_filterDataSource respondsToSelector:@selector(willDisplayCell:forItem:)] && ![tableColumn.identifier isEqualToString:@"accessoryColumn"])
+		[_filterDataSource willDisplayCell:aCell forItem:[self.items objectAtIndex:rowIndex]];
 }
 
 // ===========
@@ -260,14 +261,14 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 
 - (void)waitForAllItems
 {
-	if([filterDataSource respondsToSelector:@selector(waitForAllItems)])
-		[filterDataSource waitForAllItems];
+	if([_filterDataSource respondsToSelector:@selector(waitForAllItems)])
+		[_filterDataSource waitForAllItems];
 }
 
 - (void)makeSelectedItemsBestMatch
 {
-	if([filterDataSource respondsToSelector:@selector(makeItemsBestFitForCurrentSearch:)])
-		[filterDataSource makeItemsBestFitForCurrentSearch:self.selectedItems];
+	if([_filterDataSource respondsToSelector:@selector(makeItemsBestFitForCurrentSearch:)])
+		[_filterDataSource makeItemsBestFitForCurrentSearch:self.selectedItems];
 }
 
 - (BOOL)acceptsFirstResponder

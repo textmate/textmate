@@ -7,20 +7,13 @@
 - (IBAction)accept:(id)sender;
 - (IBAction)cancel:(id)sender;
 @property (nonatomic, retain) NSView* filterControls;
+@property (nonatomic, retain) OakFilterWindowController* retainedSelf;
 @end
 
 @implementation OakFilterWindowController
-@synthesize target, action, accessoryAction, sendActionOnSingleClick;
-
 + (id)filterWindow
 {
-	return [[[self alloc] initWithWindowNibName:@"FilterWindow"] autorelease];
-}
-
-- (void)dealloc
-{
-	self.dataSource = nil;
-	[super dealloc];
+	return [[self alloc] initWithWindowNibName:@"FilterWindow"];
 }
 
 - (void)windowDidLoad
@@ -29,11 +22,7 @@
 	filterView.action       = @selector(singleClick:);
 	filterView.doubleAction = @selector(accept:);
 
-	if(!retainedSelf)
-	{
-		[self retain];
-		retainedSelf = YES;
-	}
+	self.retainedSelf = self;
 }
 
 - (void)showWindowRelativeToWindow:(NSWindow*)parentWindow
@@ -93,7 +82,7 @@
 	NSWindow* window = [self window]; // loads filterView from nib
 
 	filterView.filterDataSource = dataSource;
-	self.accessoryAction        = self.accessoryAction; // trigger accessory button creation if necessary
+	self.accessoryAction        = _accessoryAction; // trigger accessory button creation if necessary
 
 	if(dataSource)
 		[window setFrameAutosaveName:[NSString stringWithFormat:@"Filter Window %@ Saved Frame", [dataSource className]]];
@@ -115,8 +104,8 @@
 
 - (void)setSendActionOnSingleClick:(BOOL)newSendActionOnSingleClick
 {
-	sendActionOnSingleClick = newSendActionOnSingleClick;
-	[(NSPanel*)self.window setBecomesKeyOnlyIfNeeded:sendActionOnSingleClick];
+	_sendActionOnSingleClick = newSendActionOnSingleClick;
+	[(NSPanel*)self.window setBecomesKeyOnlyIfNeeded:_sendActionOnSingleClick];
 }
 
 - (BOOL)allowsMultipleSelection
@@ -136,21 +125,20 @@
 
 - (void)setTarget:(id)newTarget
 {
-	if(newTarget != target)
+	if(_target != newTarget)
 	{
-		[target release];
-		target = [newTarget retain];
-		self.accessoryAction = self.accessoryAction; // update accessory button target
+		_target = newTarget;
+		self.accessoryAction = _accessoryAction; // update accessory button target
 	}
 }
 
 - (void)setAccessoryAction:(SEL)selector
 {
-	accessoryAction = selector;
-	if(accessoryAction && [filterView.filterDataSource respondsToSelector:@selector(accessoryButton)])
+	_accessoryAction = selector;
+	if(_accessoryAction && [filterView.filterDataSource respondsToSelector:@selector(accessoryButton)])
 	{
 		NSButtonCell* button = [filterView.filterDataSource accessoryButton];
-		[button setAction:accessoryAction];
+		[button setAction:_accessoryAction];
 		[button setTarget:self.target];
 		filterView.accessoryButton = button;
 	}
@@ -206,7 +194,7 @@
 {
 	static std::set<SEL> const forward = { @selector(moveUp:), @selector(moveDown:), @selector(moveUpAndModifySelection:), @selector(moveDownAndModifySelection:), @selector(pageUp:), @selector(pageDown:), @selector(movePageUp:), @selector(movePageDown:), @selector(scrollPageUp:), @selector(scrollPageDown:), @selector(moveToBeginningOfDocument:), @selector(moveToEndOfDocument:), @selector(insertNewline:), @selector(insertNewlineIgnoringFieldEditor:), @selector(cancelOperation:) };
 	if(forward.find(aCommand) != forward.end() && [self respondsToSelector:aCommand])
-		return [self performSelector:aCommand withObject:aControl], YES;
+		return [NSApp sendAction:aCommand to:self from:aControl];
 	return NO;
 }
 
@@ -216,11 +204,9 @@
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	if(retainedSelf)
-	{
-		retainedSelf = NO;
-		[self autorelease];
-	}
+	filterView.target = nil;
+	filterView.accessoryButton.target = nil;
+	self.retainedSelf = nil;
 }
 
 - (IBAction)cancel:(id)sender
@@ -259,7 +245,7 @@
 
 - (IBAction)singleClick:(id)sender
 {
-	if(!sendActionOnSingleClick)
+	if(!_sendActionOnSingleClick)
 		return;
 
 	if([[[filterView.tableColumns objectAtIndex:filterView.clickedColumn] identifier] isEqualToString:@"accessoryColumn"])

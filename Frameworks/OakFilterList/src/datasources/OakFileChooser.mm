@@ -20,6 +20,54 @@ OAK_DEBUG_VAR(FilterList_OakFileChooser);
 // = Helper =
 // ==========
 
+struct file_chooser_t
+{
+	struct item_t
+	{
+		item_t () { }
+		item_t (document::document_ptr document, std::string const& matchName, double rank, std::vector< std::pair<size_t, size_t> > const& matchRanges) : _document(document), _match_name(matchName), _rank(rank), _match_ranges(matchRanges) { }
+		bool operator< (item_t const& rhs) const;
+
+		document::document_ptr _document;
+		std::string _match_name;
+		double _rank;
+		std::vector< std::pair<size_t, size_t> > _match_ranges;
+		size_t _parents = 0;
+	};
+
+	void setup (std::string const& path, std::string const& globString, std::string const& rankString);
+	void set_excluded_document (oak::uuid_t const& uuid);
+	void set_path (std::string const& path);
+	void set_filtering (std::string const& globString, std::string const& rankString);
+
+	void set_documents (std::vector<document::document_ptr> const& documents);
+
+	bool running () const;
+	bool poll_scanner ();
+	void wait () const;
+	void stop_scanner ();
+
+	std::string const& glob_string () const { return _glob_string; }
+	std::string const& rank_string () const { return _rank_string; }
+
+	std::vector<item_t> const& items () const { return _ranked_items; }
+
+private:
+	void add_documents (std::vector<document::document_ptr> const& documents);
+
+	std::shared_ptr<document::scanner_t> _scanner;
+
+	std::string _path        = NULL_STR;
+	std::string _glob_string = NULL_STR;
+	std::string _rank_string = NULL_STR;
+
+	oak::uuid_t _excluded_document;
+
+	std::vector<document::document_ptr> _all_documents;
+	std::vector<document::document_ptr> _filtered_documents;
+	std::vector<item_t> _ranked_items;
+};
+
 bool file_chooser_t::item_t::operator< (item_t const& rhs) const
 {
 	std::tuple<double, double, std::string> lhsValue(_rank, -_document->lru().value(), _match_name), rhsValue(rhs._rank, -rhs._document->lru().value(), rhs._match_name);
@@ -288,7 +336,7 @@ void file_chooser_t::wait () const
 @implementation FileChooserItem
 @synthesize selectionString;
 
-+ (FileChooserItem*)fileChooserItemWithItem:(file_chooser_t::item_t const&)someItem selection:(NSString*)aSelection { return [[[FileChooserItem alloc] initWithItem:someItem selection:aSelection] autorelease]; }
++ (FileChooserItem*)fileChooserItemWithItem:(file_chooser_t::item_t const&)someItem selection:(NSString*)aSelection { return [[FileChooserItem alloc] initWithItem:someItem selection:aSelection]; }
 - (id)copyWithZone:(NSZone*)zone              { return [[FileChooserItem alloc] initWithItem:data selection:selectionString]; }
 - (BOOL)isEqual:(FileChooserItem*)anotherItem { return [self.identifier isEqualToString:anotherItem.identifier]; }
 - (id)objectForKey:(id)key                    { return [self valueForKey:key]; }
@@ -298,15 +346,9 @@ void file_chooser_t::wait () const
 	if(self = [super init])
 	{
 		data = someItem;
-		selectionString = [aSelection retain];
+		selectionString = aSelection;
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[selectionString release];
-	[super dealloc];
 }
 
 - (NSString*)path                         { return [NSString stringWithCxxString:data._document->path()]; }
@@ -318,8 +360,8 @@ void file_chooser_t::wait () const
 	NSAttributedString* res = AttributedStringWithMarkedUpRanges(data._match_name, data._match_ranges);
 	if(data._parents)
 	{
-		NSMutableAttributedString* prefix = [[res mutableCopy] autorelease];
-		NSAttributedString* suffix = [[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:parents(data._document->path(), data._parents)] attributes:nil] autorelease];
+		NSMutableAttributedString* prefix = [res mutableCopy];
+		NSAttributedString* suffix = [[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:parents(data._document->path(), data._parents)] attributes:nil];
 		[prefix appendAttributedString:suffix];
 		res = prefix;
 	}
@@ -368,7 +410,7 @@ void file_chooser_t::wait () const
 		globHistoryList = [[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", fileChooser.projectPath] stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
 		fileChooser.globString = globHistoryList.head;
 
-		globComboBox = [[[NSComboBox alloc] initWithFrame:NSMakeRect(0, 0, 35, 26)] autorelease];
+		globComboBox = [[NSComboBox alloc] initWithFrame:NSMakeRect(0, 0, 35, 26)];
 		globComboBox.font             = [NSFont userFixedPitchFontOfSize:12];
 		globComboBox.delegate         = self;
 		globComboBox.autoresizingMask = NSViewWidthSizable;
@@ -376,14 +418,14 @@ void file_chooser_t::wait () const
 		[globComboBox bind:@"value" toObject:globHistoryList withKeyPath:@"head" options:nil];
 		[globComboBox bind:@"contentValues" toObject:globHistoryList withKeyPath:@"list" options:nil];
 
-		searchField                  = [[[NSSearchField alloc] initWithFrame:NSMakeRect(0, 0, splitViewWidth - NSWidth(globComboBox.frame), 0)] autorelease];
+		searchField                  = [[NSSearchField alloc] initWithFrame:NSMakeRect(0, 0, splitViewWidth - NSWidth(globComboBox.frame), 0)];
 		searchField.action           = @selector(didChangeFilterString:);
 		searchField.target           = self;
 		searchField.stringValue      = fileChooser.filterString;
 		searchField.autoresizingMask = NSViewWidthSizable;
 		[searchField.cell setScrollable:YES];
 
-		NSSplitView* splitView     = [[[NSSplitView alloc] initWithFrame:NSMakeRect((viewWidth-splitViewWidth)/2, 8, splitViewWidth, 26)] autorelease];
+		NSSplitView* splitView     = [[NSSplitView alloc] initWithFrame:NSMakeRect((viewWidth-splitViewWidth)/2, 8, splitViewWidth, 26)];
 		splitView.delegate         = self;
 		splitView.autoresizingMask = NSViewWidthSizable;
 		[splitView setVertical:YES];
@@ -391,7 +433,7 @@ void file_chooser_t::wait () const
 		[splitView addSubview:globComboBox];
 		splitView.autosaveName = @"File Chooser Splitter Position";
 
-		sourceSelector                       = [[[NSSegmentedControl alloc] initWithFrame:NSMakeRect(-1, NSMaxY(splitView.frame) + 5, viewWidth+2, 23)] autorelease];
+		sourceSelector                       = [[NSSegmentedControl alloc] initWithFrame:NSMakeRect(-1, NSMaxY(splitView.frame) + 5, viewWidth+2, 23)];
 		sourceSelector.refusesFirstResponder = YES;
 		sourceSelector.target                = self;
 		sourceSelector.action                = @selector(takeSourceIndexFrom:);
@@ -401,7 +443,7 @@ void file_chooser_t::wait () const
 		sourceSelector.selectedSegment       = fileChooser.sourceIndex;
 		[sourceSelector setLabel:@"Open Files" forSegment:2];
 
-		self.view                  = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, viewWidth, NSMaxY(sourceSelector.frame)-3)] autorelease];
+		self.view                  = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, viewWidth, NSMaxY(sourceSelector.frame)-3)];
 		self.view.autoresizingMask = NSViewWidthSizable;
 		[self.view addSubview:splitView];
 		[self.view addSubview:sourceSelector];
@@ -469,19 +511,31 @@ void file_chooser_t::wait () const
 - (void)dealloc
 {
 	searchField.target = nil;
-	searchField.action = NULL;
 
 	[globComboBox unbind:@"value"];
 	[globComboBox unbind:@"contentValues"];
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
-	[globHistoryList dealloc];
-	[super dealloc];
 }
 @end
 
 @implementation OakFileChooser
+{
+	OBJC_WATCH_LEAKS(OakFileChooser)
+	NSString* _path;
+	NSString* projectPath;
+
+	NSViewController* viewController;
+
+	file_chooser_t helper;
+	document::document_ptr document;
+
+	OakTimer* scannerProbeTimer;
+	double pollInterval;
+	NSUInteger sourceIndex;
+
+	NSString* title;
+}
 @synthesize scannerProbeTimer, path = _path, projectPath, sourceIndex, title;
 
 - (NSString*)effectivePath
@@ -529,8 +583,8 @@ void file_chooser_t::wait () const
 {
 	if((self = [super init]))
 	{
-		_path                = [aPath retain];
-		projectPath          = [project retain];
+		_path                = aPath;
+		projectPath          = project;
 		[self updateTitle];
 
 		helper.setup([[self effectivePath] fileSystemRepresentation], "*", "");
@@ -541,7 +595,7 @@ void file_chooser_t::wait () const
 
 + (id)fileChooserWithPath:(NSString*)aPath projectPath:(NSString*)project
 {
-	return [[[self alloc] initWithPath:aPath projectPath:project] autorelease];
+	return [[self alloc] initWithPath:aPath projectPath:project];
 }
 
 - (NSViewController*)viewController
@@ -553,7 +607,7 @@ void file_chooser_t::wait () const
 
 - (NSButtonCell*)accessoryButton
 {
-	NSButtonCell* button = [[NSButtonCell new] autorelease];
+	NSButtonCell* button = [NSButtonCell new];
 	[button setButtonType:NSSwitchButton];
 	[button setBezelStyle:NSSmallSquareBezelStyle];
 	[button setImagePosition:NSImageOnly];
@@ -565,15 +619,9 @@ void file_chooser_t::wait () const
 
 - (void)dealloc
 {
-	[viewController release];
 	[self stopProbing];
-	[projectPath release];
-	[_path release];
-
 	if(document)
 		document->close();
-
-	[super dealloc];
 }
 
 // ===========================
@@ -614,8 +662,7 @@ void file_chooser_t::wait () const
 {
 	if(newPath != _path)
 	{
-		[_path release];
-		_path = [newPath retain];
+		_path = newPath;
 		if(sourceIndex == 1)
 		{
 			helper.set_path([[self effectivePath] fileSystemRepresentation]);
@@ -721,8 +768,8 @@ void file_chooser_t::wait () const
 
 - (NSAttributedString*)infoStringForItem:(id)item
 {
-	NSMutableAttributedString* str = [[[item infoString] mutableCopy] autorelease];
-	[str appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"\t%zu item%s", helper.items().size(), helper.items().size() != 1 ? "s" : ""] attributes:nil] autorelease]];
+	NSMutableAttributedString* str = [[item infoString] mutableCopy];
+	[str appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"\t%zu item%s", helper.items().size(), helper.items().size() != 1 ? "s" : ""] attributes:nil]];
 	return str;
 }
 

@@ -4,8 +4,6 @@
 #import <text/ranker.h>
 
 @implementation FileChooserSymbolItem
-@synthesize path, selectionString, identifier, displayString, infoString;
-
 - (id)initWithPath:(NSString*)aPath selectionString:(NSString*)aSelectionString identifier:(NSString*)anIdentifier displayString:(NSAttributedString*)aDisplayString infoString:(NSAttributedString*)anInfoString
 {
 	if((self = [super init]))
@@ -20,17 +18,6 @@
 }
 
 - (id)objectForKey:(id)key { return [self valueForKey:key]; }
-
-- (void)dealloc
-{
-	self.path            = nil;
-	self.identifier      = nil;
-	self.selectionString = nil;
-	self.displayString   = nil;
-	self.infoString      = nil;
-
-	[super dealloc];
-}
 @end
 
 static FileChooserSymbolItem* CreateItem (document::document_ptr const& document, text::pos_t const& pos, std::string const& candidate, std::vector< std::pair<size_t, size_t> > const& ranges)
@@ -40,7 +27,7 @@ static FileChooserSymbolItem* CreateItem (document::document_ptr const& document
 	NSString* identifier        = [NSString stringWithCxxString:document->identifier()];
 	NSAttributedString* display = AttributedStringWithMarkedUpRanges(candidate, ranges);
 	NSAttributedString* info    = [[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:document->display_name() + ":" + (std::string)pos]];
-	return [[[FileChooserSymbolItem alloc] initWithPath:path selectionString:selection identifier:identifier displayString:display infoString:info] autorelease];
+	return [[FileChooserSymbolItem alloc] initWithPath:path selectionString:selection identifier:identifier displayString:display infoString:info];
 }
 
 NSArray* SymbolListForDocument (document::document_ptr const& document, std::string const& filter)
