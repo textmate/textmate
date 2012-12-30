@@ -2,6 +2,7 @@
 #import "Favorites.h"
 #import "AboutWindowController.h"
 #import "InstallBundleItems.h"
+#import "TMPlugInController.h"
 #import <oak/oak.h>
 #import <oak/debug.h>
 #import <Find/Find.h>
@@ -25,6 +26,7 @@ void OakOpenDocuments (NSArray* paths)
 {
 	std::vector<document::document_ptr> documents;
 	NSMutableArray* itemsToInstall = [NSMutableArray array];
+	NSMutableArray* plugInsToInstall = [NSMutableArray array];
 	BOOL enableInstallHandler = ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
 	for(NSString* path in paths)
 	{
@@ -33,6 +35,10 @@ void OakOpenDocuments (NSArray* paths)
 		if(enableInstallHandler && tmItemExtensions.find(pathExt) != tmItemExtensions.end())
 		{
 			[itemsToInstall addObject:path];
+		}
+		else if(enableInstallHandler && pathExt == "tmplugin")
+		{
+			[plugInsToInstall addObject:path];
 		}
 		else if(path::is_directory(to_s(path)))
 		{
@@ -46,6 +52,9 @@ void OakOpenDocuments (NSArray* paths)
 
 	if([itemsToInstall count])
 		InstallBundleItems(itemsToInstall);
+
+	for(NSString* path in plugInsToInstall)
+		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
 
 	document::show(documents);
 }
