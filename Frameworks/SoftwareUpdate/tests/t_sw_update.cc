@@ -21,24 +21,13 @@ static std::string fixtures_path ()
 
 static class WebServerFixture : public CxxTest::GlobalFixture
 {
-	static void* main (void* arg)
-	{
-		web::run_server(fixtures_path());
-		return NULL;
-	}
-
-	pthread_t _thread;
-
 public:
 	bool setUpWorld()
 	{
 		if(web::setup_server(WEB_SERVER_PORT))
 		{
-			if(pthread_create(&_thread, NULL, &main, this) == 0)
-			{
-				pthread_detach(_thread);
-				return true;
-			}
+			std::thread([]{ web::run_server(fixtures_path()); }).detach();
+			return true;
 		}
 		return false;
 	}
