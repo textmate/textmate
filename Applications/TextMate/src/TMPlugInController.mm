@@ -1,104 +1,29 @@
 #import "TMPlugInController.h"
+#import <OakSystem/application.h>
+#import <Preferences/Keys.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(PlugInController);
 
 static TMPlugInController* SharedInstance;
+static NSInteger const kPlugInAPIVersion = 2;
 
-@protocol TMWindow
-- (BOOL)addStatusBarCell:(NSCell*)aCell;
-- (BOOL)removeStatusBarCell:(NSCell*)aCell;
+@interface TMPlugInController ()
+@property (nonatomic) NSMutableDictionary* loadedPlugIns;
 @end
 
-@interface NSObject (TMFileOperationProtocol)
-- (void)willOpenURL:(NSURL*)anURL inWindow:(id <TMWindow>)aWindow;
-- (void)didOpenURL:(NSURL*)anURL inWindow:(id <TMWindow>)aWindow;
-
-- (void)willSaveToURL:(NSURL*)anURL inWindow:(id <TMWindow>)aWindow;
-- (void)didSaveToURL:(NSURL*)anURL inWindow:(id <TMWindow>)aWindow;
-
-- (void)willCloseURL:(NSURL*)anURL inWindow:(id <TMWindow>)aWindow;
-- (void)didCloseURL:(NSURL*)anURL inWindow:(id <TMWindow>)aWindow;
-@end
-
-@protocol TMPlugInController
-- (float)version;
-- (void)registerFileOperationObserver:(id)anObserver;
-- (void)unregisterFileOperationObserver:(id)anObserver;
-@end
-
-@interface NSObject (TMPlugInClass)
-- (id)initWithPlugInController:(TMPlugInController*)aController;
-@end
-
-@interface TMPlugIn : NSObject
-@property (nonatomic, retain) NSBundle* plugInBundle;
-@property (nonatomic, retain) id instance;
-+ (TMPlugIn*)plugInWithPath:(NSString*)aPath;
-@end
-
-@implementation TMPlugIn
-- (TMPlugIn*)initWithPath:(NSString*)aPath
+static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 {
-	D(DBF_PlugInController, bug("%s\n", [aPath UTF8String]););
-	if(NSBundle* bundle = [NSBundle bundleWithPath:aPath])
+	if(id instance = [cl alloc])
 	{
-		if(self = [super init])
-			self.plugInBundle = bundle;
+		if([instance respondsToSelector:@selector(initWithPlugInController:)])
+				return [instance initWithPlugInController:controller];
+		else	return [instance init];
 	}
-	else
-	{
-		NSLog(@"%s couldn't load plugIn %@", sel_getName(_cmd), aPath);
-		self = nil;
-	}
-	return self;
+	return nil;
 }
-
-+ (TMPlugIn*)plugInWithPath:(NSString*)aPath
-{
-	return [[self alloc] initWithPath:aPath];
-}
-
-- (NSString*)name
-{
-	return [self.plugInBundle objectForInfoDictionaryKey:@"CFBundleName"];
-}
-
-- (NSString*)bundleIdentifier
-{
-	return [self.plugInBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
-}
-
-- (int)undocumentedRelianceVersion
-{
-	return [[self.plugInBundle objectForInfoDictionaryKey:@"ReliesOnClassesFromVersion"] intValue];
-}
-
-- (id)instance
-{
-	if(!_instance)
-	{
-		[self.plugInBundle load];
-		id obj = [[self.plugInBundle principalClass] alloc];
-		if(!obj)
-			NSLog(@"%s %@ plug-in has no principal class", sel_getName(_cmd), [self name]);
-		else if([obj respondsToSelector:@selector(initWithPlugInController:)])
-			_instance = [obj initWithPlugInController:[TMPlugInController sharedInstance]];
-		else
-			NSLog(@"%s %@ plug-in doesn't have proper initializer", sel_getName(_cmd), [self name]);
-	}
-	D(DBF_PlugInController, bug("%s\n", [[_instance description] UTF8String]););
-	return _instance;
-}
-@end
 
 @implementation TMPlugInController
-{
-	NSMutableArray* loadedPlugIns;
-	NSMutableSet* plugInBundleIdentifiers;
-	BOOL didLoadAllPlugIns;
-}
-
 + (TMPlugInController*)sharedInstance
 {
 	return SharedInstance ?: [TMPlugInController new];
@@ -112,129 +37,138 @@ static TMPlugInController* SharedInstance;
 	else if(self = SharedInstance = [super init])
 	{
 		D(DBF_PlugInController, bug("\n"););
-		loadedPlugIns = [NSMutableArray new];
-		plugInBundleIdentifiers = [NSMutableSet new];
+		self.loadedPlugIns = [NSMutableDictionary dictionary];
 	}
 	return SharedInstance;
 }
 
-- (float)version
+- (CGFloat)version
 {
 	return 2.0;
 }
 
-- (int)lastMajorInternalChange
+- (void)loadPlugInAtPath:(NSString*)aPath
 {
-	return 1700;
-}
-
-- (void)loadPlugIn:(NSString*)aPath
-{
-	if(TMPlugIn* plugIn = [TMPlugIn plugInWithPath:aPath])
+	if(NSBundle* bundle = [NSBundle bundleWithPath:aPath])
 	{
-		if(![[plugIn bundleIdentifier] hasPrefix:@"com.macromates"])
-		{
-			NSLog(@"Skip loading plug-in: %@ (%@)", [plugIn bundleIdentifier], aPath);
-			return;
-		}
+		NSString* identifier = [bundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
+		NSString* name = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
 
-		if(![plugIn undocumentedRelianceVersion] || [plugIn undocumentedRelianceVersion] >= [self lastMajorInternalChange])
+		if(![self.loadedPlugIns objectForKey:identifier])
 		{
-			NSString* bundleIdentifier = [plugIn bundleIdentifier];
-			if(bundleIdentifier && ![plugInBundleIdentifiers containsObject:bundleIdentifier])
+			if([[bundle objectForInfoDictionaryKey:@"TMPlugInAPIVersion"] intValue] == kPlugInAPIVersion)
 			{
-				[loadedPlugIns addObject:plugIn];
-				[plugInBundleIdentifiers addObject:bundleIdentifier];
-				[plugIn instance];
+				if([bundle load])
+				{
+					if(id instance = CreateInstanceOfPlugInClass([bundle principalClass], self))
+					{
+						self.loadedPlugIns[identifier] = instance;
+					}
+					else
+					{
+						NSLog(@"Failed to instantiate plug-in class: %@, path %@", [bundle principalClass], aPath);
+					}
+				}
+				else
+				{
+					NSLog(@"Failed to load plug-in: %@, path %@", name ?: identifier, aPath);
+				}
+			}
+			else
+			{
+				NSLog(@"Skip incompatible plug-in: %@, path %@", name ?: identifier, aPath);
 			}
 		}
 		else
 		{
-			NSLog(@"%s %@ plug-in was not loaded as it relies on version %d", sel_getName(_cmd), [plugIn name], [plugIn undocumentedRelianceVersion]);
+			NSLog(@"Skip plug-in at path: %@ (already loaded %@)", identifier, [self.loadedPlugIns[identifier] bundlePath]);
 		}
 	}
 	else
 	{
-		NSLog(@"%s failed to load %@", sel_getName(_cmd), aPath);
+		NSLog(@"Failed to create NSBundle for path: %@", aPath);
 	}
 }
-#if 0
-- (NSString*)installPath
-{
-	NSArray* libraryPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-	return [NSString pathWithComponents:@[ [libraryPaths firstObject], [[NSProcessInfo processInfo] processName], @"PlugIns" ]];
-}
 
-- (void)installPlugIn:(NSString*)aPath
-{
-	NSString* installAs = [[self installPath] stringByAppendingPathComponent:[aPath lastPathComponent]];
-	if([aPath isEqualToString:installAs])
-		return;
-
-	id plugInName = [[NSBundle bundleWithPath:aPath] objectForInfoDictionaryKey:@"CFBundleName"] ?: [[installAs lastPathComponent] stringByDeletingPathExtension];
-	if([installAs existsAsPath])
-	{
-		id newVersion = [[NSBundle bundleWithPath:aPath] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:aPath] objectForInfoDictionaryKey:@"CFBundleVersion"];
-		id oldVersion = [[NSBundle bundleWithPath:installAs] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:installAs] objectForInfoDictionaryKey:@"CFBundleVersion"];
-		int choice = NSRunAlertPanel(@"Plug-in Already Installed", @"Version %@ of “%@” is already installed.\nDo you want to replace it with version %@?\n\nUpgrading a plug-in will require TextMate to be relaunched.", @"Replace", @"Cancel", nil, oldVersion ?: @"???", plugInName, newVersion ?: @"???");
-		if(choice == NSAlertDefaultReturn) // "Replace"
-		{
-			if(![installAs moveFileToTrash])
-			{
-				NSRunAlertPanel(@"Install Failed", @"Couldn't remove old plug-in (“%@”)", @"Continue", nil, nil, [installAs stringByAbbreviatingWithTildeInPath]);
-				installAs = nil;
-			}
-		}
-		else if(choice == NSAlertAlternateReturn) // "Cancel"
-		{
-			installAs = nil;
-		}
-	}
-
-	if(installAs)
-	{
-		if([[self installPath] canCreateAsDirectory])
-		{
-			NSFileManager* fm = [NSFileManager defaultManager];
-			BOOL res = [fm isDeletableFileAtPath:aPath] ? [fm movePath:aPath toPath:installAs handler:nil] : [fm copyPath:aPath toPath:installAs handler:nil];
-			if(res && didLoadAllPlugIns)
-			{
-				int choice = NSRunAlertPanel(@"Plug-in Installed", @"To activate “%@” you will need to relaunch TextMate.", @"Relaunch", @"Cancel", nil, plugInName);
-				if(choice == NSAlertDefaultReturn) // "Relaunch"
-					[OakSelfUpdate restart];
-			}
-			else if(!res)
-			{
-				NSRunAlertPanel(@"Install Failed", @"The plug-in has not been installed.", @"Continue", nil, nil);
-			}
-		}
-		else
-		{
-			NSRunAlertPanel(@"Install Failed", @"It was not possible to create the plug-in folder (“%@”)", @"Continue", nil, nil, [[self installPath] stringByAbbreviatingWithTildeInPath]);
-		}
-	}
-}
-#endif
 - (void)loadAllPlugIns:(id)sender
 {
-	NSMutableArray* array = [NSMutableArray array];
+	NSMutableArray* paths = [NSMutableArray array];
+	for(NSString* path in NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES))
+		[paths addObject:[NSString pathWithComponents:@[ path, @"TextMate", @"PlugIns" ]]];
+	[paths addObject:[[NSBundle mainBundle] builtInPlugInsPath]];
 
-	NSArray* appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
-	NSString* subPath = [NSString pathWithComponents:@[ @"TextMate", @"PlugIns" ]];
-	for(NSString* path in appSupportPaths)
-		[array addObject:[path stringByAppendingPathComponent:subPath]];
-	[array addObject:[[NSBundle mainBundle] builtInPlugInsPath]];
-
-	for(NSString* path in array)
+	for(NSString* path in paths)
 	{
 		D(DBF_PlugInController, bug("scan %s\n", [path UTF8String]););
 		for(NSString* plugInName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
 		{
 			if([[[plugInName pathExtension] lowercaseString] isEqualToString:@"tmplugin"])
-				[self loadPlugIn:[path stringByAppendingPathComponent:plugInName]];
+				[self loadPlugInAtPath:[path stringByAppendingPathComponent:plugInName]];
+		}
+	}
+}
+
+- (void)installPlugInAtPath:(NSString*)src
+{
+	NSFileManager* fm = [NSFileManager defaultManager];
+
+	NSArray* libraryPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSAllDomainsMask, YES);
+	NSString* dst = [NSString pathWithComponents:@[ libraryPaths[0], @"TextMate", @"PlugIns", [src lastPathComponent] ]];
+	if([src isEqualToString:dst])
+		return;
+
+	NSBundle* plugInBundle = [NSBundle bundleWithPath:src];
+	NSString* plugInName   = [plugInBundle objectForInfoDictionaryKey:@"CFBundleName"] ?: [[src lastPathComponent] stringByDeletingPathExtension];
+
+	if([[plugInBundle objectForInfoDictionaryKey:@"TMPlugInAPIVersion"] intValue] != kPlugInAPIVersion)
+	{
+		NSRunAlertPanel(@"Cannot Install Plug-in", @"The %@ plug-in is not compatible with this version of TextMate.", @"Continue", nil, nil, plugInName);
+		return;
+	}
+
+	if([fm fileExistsAtPath:dst])
+	{
+		NSString* newVersion = [[NSBundle bundleWithPath:src] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:src] objectForInfoDictionaryKey:@"CFBundleVersion"];
+		NSString* oldVersion = [[NSBundle bundleWithPath:dst] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: [[NSBundle bundleWithPath:dst] objectForInfoDictionaryKey:@"CFBundleVersion"];
+		NSInteger choice = NSRunAlertPanel(@"Plug-in Already Installed", @"Version %@ of “%@” is already installed.\nDo you want to replace it with version %@?\n\nUpgrading a plug-in will require TextMate to be relaunched.", @"Replace", @"Cancel", nil, oldVersion ?: @"???", plugInName, newVersion ?: @"???");
+		if(choice == NSAlertDefaultReturn) // "Replace"
+		{
+			if(![fm removeItemAtPath:dst error:NULL])
+			{
+				NSRunAlertPanel(@"Install Failed", @"Couldn't remove old plug-in (“%@”)", @"Continue", nil, nil, [dst stringByAbbreviatingWithTildeInPath]);
+				dst = nil;
+			}
+		}
+		else if(choice == NSAlertAlternateReturn) // "Cancel"
+		{
+			dst = nil;
 		}
 	}
 
-	didLoadAllPlugIns = YES;
+	if(!dst)
+		return;
+
+	NSString* dstDir = [dst stringByDeletingLastPathComponent];
+	if([fm createDirectoryAtPath:dstDir withIntermediateDirectories:YES attributes:nil error:NULL])
+	{
+		if([fm copyItemAtPath:src toPath:dst error:NULL])
+		{
+			NSInteger choice = NSRunAlertPanel(@"Plug-in Installed", @"To activate “%@” you will need to relaunch TextMate.", @"Relaunch", @"Cancel", nil, plugInName);
+			if(choice == NSAlertDefaultReturn) // "Relaunch"
+			{
+				BOOL isSessionRestoreDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+				BOOL skipUserInteraction      = isSessionRestoreDisabled == NO;
+				oak::application_t::relaunch(skipUserInteraction);
+			}
+		}
+		else
+		{
+			NSRunAlertPanel(@"Install Failed", @"The plug-in has not been installed.", @"Continue", nil, nil);
+		}
+	}
+	else
+	{
+		NSRunAlertPanel(@"Install Failed", @"It was not possible to create the plug-in folder (“%@”)", @"Continue", nil, nil, [dstDir stringByAbbreviatingWithTildeInPath]);
+	}
 }
 @end
