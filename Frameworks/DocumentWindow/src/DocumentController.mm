@@ -120,41 +120,6 @@ OAK_DEBUG_VAR(DocumentController);
 @property (nonatomic, retain) NSString* pathAttributes;
 @end
 
-@interface OakUnhideHelper : NSObject
-{
-	DocumentController* controller;
-}
-@end
-
-@implementation OakUnhideHelper
-- (id)initWithController:(DocumentController*)aController
-{
-	if(self = [super init])
-	{
-		D(DBF_DocumentController, bug("unhide\n"););
-		controller = [aController retain];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp];
-		[NSApp unhideWithoutActivation];
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[controller release];
-	[super dealloc];
-}
-
-- (void)applicationDidUnhide:(NSNotification*)aNotification
-{
-	D(DBF_DocumentController, bug("\n"););
-	[[controller window] makeKeyAndOrderFront:nil];
-	SetFrontProcessWithOptions(&(ProcessSerialNumber){ 0, kCurrentProcess }, kSetFrontProcessFrontWindowOnly);
-	[self release];
-}
-@end
-
 static document::document_ptr create_document (NSString* fileBrowserPath)
 {
 	document::document_ptr doc = document::from_content("", settings_for_path(NULL_STR, file::path_attributes(NULL_STR), to_s(fileBrowserPath)).get(kSettingsFileTypeKey, "text.plain"));
@@ -176,7 +141,12 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		{
 			if([NSApp isHidden])
 			{
-				[[OakUnhideHelper alloc] initWithController:aController];
+				__block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidUnhideNotification object:NSApp queue:nil usingBlock:^(NSNotification*){
+					[[aController window] makeKeyAndOrderFront:nil];
+					SetFrontProcessWithOptions(&(ProcessSerialNumber){ 0, kCurrentProcess }, kSetFrontProcessFrontWindowOnly);
+					[[NSNotificationCenter defaultCenter] removeObserver:observerId];
+				}];
+				[NSApp unhideWithoutActivation];
 			}
 			else
 			{
