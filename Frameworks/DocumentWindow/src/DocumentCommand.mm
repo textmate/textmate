@@ -3,7 +3,7 @@
 #import "DocumentTabs.h"
 #import "DocumentSaveHelper.h"
 #import <OakAppKit/OakToolTip.h>
-#import <OakAppKit/NSAlert Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundleEditor/BundleEditor.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
@@ -305,7 +305,7 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 					[alert addButtonWithTitle:@"More Info…"];
 
 				NSString* moreInfo = [NSString stringWithCxxString:it->more_info_url];
-				OakShowAlert(alert, [controller window], ^(NSAlert* alert, NSInteger button){
+				OakShowAlertForWindow(alert, [controller window], ^(NSInteger button){
 					if(button == NSAlertSecondButtonReturn)
 						[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:moreInfo]];
 				});
@@ -337,7 +337,7 @@ void show_command_error (std::string const& message, oak::uuid_t const& uuid, NS
 	if(bundleItem)
 		[alert addButtonWithTitle:@"Edit Command"];
 
-	OakShowAlert(alert, window, ^(NSAlert* alert, NSInteger button){
+	OakShowAlertForWindow(alert, window, ^(NSInteger button){
 		if(button == NSAlertSecondButtonReturn)
 			[[BundleEditor sharedInstance] revealBundleItem:bundleItem];
 	});
