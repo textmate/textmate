@@ -2,6 +2,7 @@
 #import "DocumentCommand.h"
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSAlert Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/OakEncodingPopUpButton.h>
 #import <ns/ns.h>
@@ -55,7 +56,12 @@ namespace
 
 			// TODO “unlock file” checkbox (presently implied)
 			NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The file “%s” is locked.", _document->display_name().c_str())] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil];
-			[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(makeWritableSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+			OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+				if(returnCode == NSAlertFirstButtonReturn)
+						context->set_make_writable(true);
+				else	_self.userAbort = YES;
+				[_self setContext:file::save_context_ptr()];
+			});
 		}
 
 		void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context)
@@ -73,10 +79,15 @@ namespace
 
 			if(charset != kCharsetNoEncoding)
 			{
-				// TODO transliteration / BOM check box
 				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", charset.c_str())] informativeText:@"Please choose another encoding:" buttons:@"Retry", @"Cancel", nil];
-				[alert setAccessoryView:[OakEncodingPopUpButton new]];
-				[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(encodingSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+				OakEncodingPopUpButton* encodingPopUp = [OakEncodingPopUpButton new];
+				[alert setAccessoryView:encodingPopUp];
+				OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+					if(returnCode == NSAlertFirstButtonReturn)
+							context->set_charset(to_s(encodingPopUp.encoding));
+					else	_self.userAbort = YES;
+					[_self setContext:file::save_context_ptr()];
+				});
 				[[alert window] recalculateKeyViewLoop];
 			}
 			else
@@ -205,28 +216,5 @@ namespace
 		userAbort = YES;
 	}
 	context.reset();
-}
-
-- (void)makeWritableSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	D(DBF_DocumentController_SaveHelper, bug("%s\n", BSTR(returnCode == NSAlertDefaultReturn)););
-	file::save_context_ptr ctxt = context;
-	[self setContext:file::save_context_ptr()];
-	if(returnCode == NSAlertFirstButtonReturn)
-			ctxt->set_make_writable(true);
-	else	userAbort = YES;
-}
-
-- (void)encodingSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	D(DBF_DocumentController_SaveHelper, bug("\n"););
-	file::save_context_ptr ctxt = context;
-	[self setContext:file::save_context_ptr()];
-	userAbort = returnCode != NSAlertFirstButtonReturn;
-	if(!userAbort)
-	{
-		OakEncodingPopUpButton* popUp = (OakEncodingPopUpButton*)[alert accessoryView];
-		ctxt->set_charset(to_s(popUp.encoding));
-	}
 }
 @end

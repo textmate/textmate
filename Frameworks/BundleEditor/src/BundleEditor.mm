@@ -7,6 +7,7 @@
 #import <OakFoundation/OakStringListTransformer.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
@@ -271,12 +272,6 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	}
 }
 
-- (void)createItemSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	if(returnCode == NSAlertDefaultReturn)
-		[self createItemOfType:(bundles::kind_t)[[(NSPopUpButton*)[alert accessoryView] selectedItem] tag]];
-}
-
 - (void)newDocument:(id)sender
 {
 	// kItemTypeMacro, kItemTypeMenu, kItemTypeMenuItemSeparator
@@ -294,7 +289,10 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	[typeChooser setMenu:menu];
 	[typeChooser sizeToFit];
 	[alert setAccessoryView:typeChooser];
-	[alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(createItemSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+		if(returnCode == NSAlertDefaultReturn)
+			[self createItemOfType:(bundles::kind_t)[[(NSPopUpButton*)[alert accessoryView] selectedItem] tag]];
+	});
 	[[alert window] recalculateKeyViewLoop];
 	[[alert window] makeFirstResponder:typeChooser];
 }
@@ -694,18 +692,6 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 	[[[drawer contentView] window] recalculateKeyViewLoop];
 }
 
-- (void)closeWarningDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	if(returnCode != NSAlertSecondButtonReturn) // Not "Cancel"
-	{
-		if(returnCode == NSAlertFirstButtonReturn) // "Save"
-			[self saveDocument:self];
-		else if(returnCode == NSAlertThirdButtonReturn) // "Don’t Save"
-			changes.clear();
-		[self close];
-	}
-}
-
 static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dictionary_t> const& changes)
 {
 	NSString* res = [NSString stringWithCxxString:text::format("Do you want to save the changes made to %zu items?", changes.size())];
@@ -738,7 +724,16 @@ static NSString* DescriptionForChanges (std::map<bundles::item_ptr, plist::dicti
 	[alert setMessageText:DescriptionForChanges(changes)];
 	[alert setInformativeText:@"Your changes will be lost if you don’t save them."];
 	[alert addButtons:@"Save", @"Cancel", @"Don’t Save", nil];
-	[alert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(closeWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+	OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+		if(returnCode != NSAlertSecondButtonReturn) // Not "Cancel"
+		{
+			if(returnCode == NSAlertFirstButtonReturn) // "Save"
+				[self saveDocument:self];
+			else if(returnCode == NSAlertThirdButtonReturn) // "Don’t Save"
+				changes.clear();
+			[self close];
+		}
+	});
 	return NO;
 }
 @end

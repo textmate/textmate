@@ -1,5 +1,6 @@
 #import "DocumentOpenHelper.h"
 #import "EncodingView.h"
+#import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 #import <text/parse.h>
@@ -36,7 +37,10 @@ namespace
 			NSAlert* alert = [NSAlert alertWithMessageText:@"Unknown Encoding" defaultButton:@"Continue" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"This file is not UTF-8 nor does it have any encoding information stored."];
 			EncodingViewController* controller = [[EncodingViewController alloc] initWithFirst:content->begin() last:content->end()];
 			[alert setAccessoryView:controller.view];
-			[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(selectEncodingSheetDidEnd:returnCode:contextInfo:) contextInfo:new info_t(controller, context)];
+			OakShowAlertForWindow(alert, _window, ^(NSInteger returnCode){
+				if(returnCode == NSAlertDefaultReturn)
+					context->set_charset(text::split(to_s(controller.currentEncoding), " ")[0]);
+			});
 			[[alert window] recalculateKeyViewLoop];
 		}
 
@@ -91,13 +95,6 @@ namespace
 		[self didOpenDocument:aDocument];
 		aDocument->close();
 	}
-}
-
-- (void)selectEncodingSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(info_t*)info
-{
-	if(returnCode == NSAlertDefaultReturn)
-		info->context->set_charset(text::split(to_s(info->controller.currentEncoding), " ")[0]);
-	delete info;
 }
 
 - (void)fileTypeDialog:(FileTypeDialog*)fileTypeDialog didSelectFileType:(NSString*)aFileType contextInfo:(void*)info

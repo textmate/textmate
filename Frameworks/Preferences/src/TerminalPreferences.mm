@@ -1,5 +1,6 @@
 #import "TerminalPreferences.h"
 #import "Keys.h"
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
@@ -265,12 +266,6 @@ static bool uninstall_mate (std::string const& path)
 	[self updateUI:self];
 }
 
-- (void)replaceWarningDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)stack
-{
-	if(returnCode == NSAlertFirstButtonReturn)
-		[self installMateAs:[[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]];
-}
-
 - (IBAction)performInstallMate:(id)sender
 {
 	NSString* dstObjPath = [[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath];
@@ -294,7 +289,10 @@ static bool uninstall_mate (std::string const& path)
 		[alert setMessageText:@"File Already Exists"];
 		[alert setInformativeText:[NSString stringWithCxxString:summary]];
 		[alert addButtons:@"Replace", @"Cancel", nil];
-		[alert beginSheetModalForWindow:[self.view window] modalDelegate:self didEndSelector:@selector(replaceWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+		OakShowAlertForWindow(alert, [self.view window], ^(NSInteger returnCode){
+			if(returnCode == NSAlertFirstButtonReturn)
+				[self installMateAs:[[installPathPopUp titleOfSelectedItem] stringByExpandingTildeInPath]];
+		});
 	}
 	else
 	{
