@@ -33,7 +33,7 @@ namespace
 		{
 			[_window.attachedSheet orderOut:_self];
 
-			NSAlert* alert = [[NSAlert alertWithMessageText:@"Unknown Encoding" defaultButton:@"Continue" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"This file is not UTF-8 nor does it have any encoding information stored."] retain];
+			NSAlert* alert = [NSAlert alertWithMessageText:@"Unknown Encoding" defaultButton:@"Continue" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"This file is not UTF-8 nor does it have any encoding information stored."];
 			EncodingViewController* controller = [[EncodingViewController alloc] initWithFirst:content->begin() last:content->end()];
 			[alert setAccessoryView:controller.view];
 			[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(selectEncodingSheetDidEnd:returnCode:contextInfo:) contextInfo:new info_t(controller, context)];
@@ -73,8 +73,6 @@ namespace
 }
 
 @implementation DocumentOpenHelper
-@synthesize delegate;
-
 - (id)init
 {
 	if(self = [super init])
@@ -83,15 +81,11 @@ namespace
 	return self;
 }
 
-- (void)setDelegate:(id <DocumentOpenHelperDelegate>)aDelegate { delegate = aDelegate; }
-- (id <DocumentOpenHelperDelegate>)delegate                    { return delegate; }
-
 - (void)tryOpenDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow delegate:(id <DocumentOpenHelperDelegate>)aDelegate
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s, already open %s\n", aDocument->display_name().c_str(), BSTR(aDocument->is_open())););
-	[self retain]; // keep us retained until document is opened
 
-	delegate = aDelegate;
+	self.delegate = aDelegate;
 	if(aDocument->try_open(document::open_callback_ptr((document::open_callback_t*)new open_callback_t(self, aWindow))))
 	{
 		[self didOpenDocument:aDocument];
@@ -103,8 +97,6 @@ namespace
 {
 	if(returnCode == NSAlertDefaultReturn)
 		info->context->set_charset(text::split(to_s(info->controller.currentEncoding), " ")[0]);
-	[alert release];
-	[info->controller release];
 	delete info;
 }
 
@@ -112,7 +104,6 @@ namespace
 {
 	if(aFileType)
 		((info_t*)info)->context->set_file_type(to_s(aFileType));
-	[fileTypeDialog release];
 	delete (info_t*)info;
 }
 
@@ -121,16 +112,14 @@ namespace
 	D(DBF_DocumentController_OpenHelper, bug("%s\n", aDocument->display_name().c_str()););
 	if(aDocument->recent_tracking() && aDocument->path() != NULL_STR)
 		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:aDocument->path()]]]; 
-	if([delegate respondsToSelector:@selector(documentOpenHelper:didOpenDocument:)])
-		[delegate documentOpenHelper:self didOpenDocument:aDocument];
-	[self release];
+	if([self.delegate respondsToSelector:@selector(documentOpenHelper:didOpenDocument:)])
+		[self.delegate documentOpenHelper:self didOpenDocument:aDocument];
 }
 
 - (void)failedToOpenDocument:(document::document_ptr const&)aDocument error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)filterUUID
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s\n", aDocument->display_name().c_str()););
-	if([delegate respondsToSelector:@selector(documentOpenHelper:failedToOpenDocument:error:usingFilter:)])
-		[delegate documentOpenHelper:self failedToOpenDocument:aDocument error:aMessage usingFilter:filterUUID];
-	[self release];
+	if([self.delegate respondsToSelector:@selector(documentOpenHelper:failedToOpenDocument:error:usingFilter:)])
+		[self.delegate documentOpenHelper:self failedToOpenDocument:aDocument error:aMessage usingFilter:filterUUID];
 }
 @end

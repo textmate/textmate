@@ -7,6 +7,7 @@
 #import <file/type.h>
 #import <ns/ns.h>
 #import <network/network.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundlesManager/BundlesManager.h>
@@ -59,24 +60,6 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 		firstLine = std::string(firstPointer, std::find(firstPointer, lastPointer, '\n'));
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	self.path                   = nil;
-
-	self.recommendedGrammars    = nil;
-	self.installedGrammars      = nil;
-	self.allGrammars            = nil;
-
-	self.grammars               = nil;
-	self.selectedGrammarIndexes = nil;
-
-	self.alertFormatString      = nil;
-	self.infoFormatString       = nil;
-	self.useForAllFormatString  = nil;
-
-	[super dealloc];
 }
 
 - (void)setupGrammars
@@ -184,7 +167,10 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 	mainWindow  = aWindow;
 	delegate    = aDelegate;
 	contextInfo = info;
-	[NSApp beginSheet:self.window modalForWindow:aWindow modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+
+	OakShowSheetForWindow(self.window, aWindow, ^(NSInteger returnCode){
+		[self sheetDidEnd:self.window returnCode:returnCode contextInfo:NULL];
+	});
 }
 
 static bool is_installed (oak::uuid_t const& uuid)
@@ -204,7 +190,6 @@ static bool is_installed (oak::uuid_t const& uuid)
 		[installingBundleActivityTextField unbind:@"value"];
 		[NSApp endSheet:installingBundleWindow];
 		[installingBundleWindow orderOut:self];
-		[delegate fileTypeDialog:self didSelectFileType:self.fileType contextInfo:contextInfo];
 	}
 }
 
@@ -235,7 +220,9 @@ static bool is_installed (oak::uuid_t const& uuid)
 			[installingBundleActivityTextField bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
 			[installingBundleProgressIndicator bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
 			[installingBundleProgressIndicator startAnimation:self];
-			[NSApp beginSheet:installingBundleWindow modalForWindow:mainWindow modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+			OakShowSheetForWindow(installingBundleWindow, mainWindow, ^(NSInteger returnCode){
+				[delegate fileTypeDialog:self didSelectFileType:self.fileType contextInfo:contextInfo];
+			});
 			return;
 		}
 	}

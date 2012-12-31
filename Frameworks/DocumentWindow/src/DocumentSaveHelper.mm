@@ -54,7 +54,7 @@ namespace
 			init(context);
 
 			// TODO “unlock file” checkbox (presently implied)
-			NSAlert* alert = [[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The file “%s” is locked.", _document->display_name().c_str())] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil] retain];
+			NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The file “%s” is locked.", _document->display_name().c_str())] informativeText:@"Do you want to overwrite it anyway?" buttons:@"Overwrite", @"Cancel", nil];
 			[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(makeWritableSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 		}
 
@@ -74,8 +74,8 @@ namespace
 			if(charset != kCharsetNoEncoding)
 			{
 				// TODO transliteration / BOM check box
-				NSAlert* alert = [[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", charset.c_str())] informativeText:@"Please choose another encoding:" buttons:@"Retry", @"Cancel", nil] retain];
-				[alert setAccessoryView:[[OakEncodingPopUpButton new] autorelease]];
+				NSAlert* alert = [NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("Unable to save document using “%s” as encoding.", charset.c_str())] informativeText:@"Please choose another encoding:" buttons:@"Retry", @"Cancel", nil];
+				[alert setAccessoryView:[OakEncodingPopUpButton new]];
 				[alert beginSheetModalForWindow:_window modalDelegate:_self didEndSelector:@selector(encodingSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 				[[alert window] recalculateKeyViewLoop];
 			}
@@ -129,7 +129,7 @@ namespace
 
 + (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback
 {
-	[[[[DocumentSaveHelper alloc] init] autorelease] trySaveDocuments:someDocuments forWindow:aWindow defaultDirectory:aFolder andCallback:aCallback];
+	[[[DocumentSaveHelper alloc] init] trySaveDocuments:someDocuments forWindow:aWindow defaultDirectory:aFolder andCallback:aCallback];
 }
 
 + (void)trySaveDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback
@@ -140,9 +140,6 @@ namespace
 - (void)dealloc
 {
 	D(DBF_DocumentController_SaveHelper, bug("\n"););
-	[window release];
-	[saveFolder release];
-	[super dealloc];
 }
 
 - (file::save_context_ptr const&)context                         { return context; }
@@ -153,8 +150,6 @@ namespace
 	if(documents.empty())
 		return;
 
-	[self retain]; // keep us retained until document is saved
-
 	document::document_ptr document = documents.back();
 	D(DBF_DocumentController_SaveHelper, bug("%s (%zu total)\n", document->display_name().c_str(), documents.size()););
 	document->try_save(document::save_callback_ptr((document::save_callback_t*)new save_callback_t(document, self, window)));
@@ -163,8 +158,8 @@ namespace
 - (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback
 {
 	documents  = someDocuments;
-	window     = [aWindow retain];
-	saveFolder = [aFolder retain];
+	window     = aWindow;
+	saveFolder = aFolder;
 	callback   = aCallback;
 	std::reverse(documents.begin(), documents.end());
 	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationWillSave" object:self userInfo:@{ @"window" : window }];
@@ -190,8 +185,6 @@ namespace
 
 	if(flag && [[window delegate] respondsToSelector:@selector(updateProxyIcon)])
 		[[window delegate] performSelector:@selector(updateProxyIcon)]; // FIXME The delegate needs to update proxy icon based on “exists on disk” notifications from document_t
-
-	[self release];
 }
 
 // ===================
@@ -222,7 +215,6 @@ namespace
 	if(returnCode == NSAlertFirstButtonReturn)
 			ctxt->set_make_writable(true);
 	else	userAbort = YES;
-	[alert release];
 }
 
 - (void)encodingSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
@@ -236,6 +228,5 @@ namespace
 		OakEncodingPopUpButton* popUp = (OakEncodingPopUpButton*)[alert accessoryView];
 		ctxt->set_charset(to_s(popUp.encoding));
 	}
-	[alert release];
 }
 @end

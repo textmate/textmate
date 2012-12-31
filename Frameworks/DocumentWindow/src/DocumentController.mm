@@ -23,6 +23,7 @@ namespace find_tags
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSWindow Additions.h>
@@ -56,6 +57,7 @@ OAK_DEBUG_VAR(DocumentController);
 @property (nonatomic, retain) NSString* windowTitle;
 @property (nonatomic, retain) NSString* representedFile;
 @property (nonatomic, assign) BOOL isDocumentEdited;
+@property (nonatomic, retain) DocumentController* retainedSelf;
 - (id)initWithDocuments:(std::vector<document::document_ptr> const&)someDocuments;
 - (void)updateProxyIcon;
 @end
@@ -76,7 +78,11 @@ OAK_DEBUG_VAR(DocumentController);
 	res["fileBrowserWidth"]   = fileBrowser.view ? (int32_t)NSWidth(fileBrowser.view.frame) : fileBrowserWidth;
 
 	if(fileBrowser)
-		res["fileBrowserState"] = plist::convert((CFDictionaryRef)fileBrowser.sessionState);
+	{
+		CFDictionaryRef fbState = (CFDictionaryRef)CFBridgingRetain(fileBrowser.sessionState);
+		res["fileBrowserState"] = plist::convert(fbState);
+		CFRelease(fbState);
+	}
 
 	plist::array_t docs;
 	iterate(tab, documentTabs)
@@ -187,7 +193,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 				else
 				{
 					close_scratch_project();
-					bring_to_front([[[DocumentController alloc] initWithDocuments:documents] autorelease]);
+					bring_to_front([[DocumentController alloc] initWithDocuments:documents]);
 				}
 			}
 			else if(DocumentController* delegate = [DocumentController controllerForPath:browserPath])
@@ -199,7 +205,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 			else // if(browserPath != NULL_STR)
 			{
 				close_scratch_project();
-				delegate = documents.empty() ? [[[DocumentController alloc] init] autorelease] : [[[DocumentController alloc] initWithDocuments:documents] autorelease];
+				delegate = documents.empty() ? [[DocumentController alloc] init] : [[DocumentController alloc] initWithDocuments:documents];
 				[delegate window];
 				delegate.fileBrowserHidden = NO;
 				[delegate->fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
@@ -229,7 +235,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 			else
 			{
 				close_scratch_project();
-				delegate = [[[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, document)] autorelease];
+				delegate = [[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, document)];
 				[delegate showWindow:nil];
 			}
 		}
@@ -280,12 +286,12 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 					if(documents.empty())
 						documents.push_back(document::create());
 
-					DocumentController* controller = [[[DocumentController alloc] initWithDocuments:documents] autorelease];
+					DocumentController* controller = [[DocumentController alloc] initWithDocuments:documents];
 					controller.selectedTabIndex = selectedTabIndex;
 
 					plist::dictionary_t fileBrowserState;
 					if(plist::get_key_path(*project, "fileBrowserState", fileBrowserState))
-						controller->fileBrowserState = [ns::to_dictionary(fileBrowserState) retain];
+						controller->fileBrowserState = ns::to_dictionary(fileBrowserState);
 
 					plist::get_key_path(*project, "fileBrowserWidth", controller->fileBrowserWidth);
 					plist::get_key_path(*project, "htmlOutputHeight", controller->htmlOutputHeight);
@@ -373,13 +379,13 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 - (id)initWithDocuments:(std::vector<document::document_ptr> const&)someDocuments
 {
 	D(DBF_DocumentController, bug("%zu documents\n", someDocuments.size()););
-	if(self = [super initWithWindow:[[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO] autorelease]])
+	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO]])
 	{
 		identifier.generate();
 		fileBrowserHidden = YES;
 		[self addDocuments:someDocuments andSelect:kSelectDocumentFirst closeOther:YES pruneTabBar:YES];
 
-		layoutView = [[[ProjectLayoutView alloc] initWithFrame:NSZeroRect] autorelease];
+		layoutView = [[ProjectLayoutView alloc] initWithFrame:NSZeroRect];
 
 		[self.window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 		[self.window setContentView:layoutView];
@@ -388,7 +394,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		[self.window bind:@"title" toObject:self withKeyPath:@"windowTitle" options:nil];
 		[self.window bind:@"documentEdited" toObject:self withKeyPath:@"isDocumentEdited" options:nil];
 
-		tabBarView = [[[OakTabBarView alloc] initWithFrame:NSZeroRect] autorelease];
+		tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
 		layoutView.tabBarView = tabBarView;
 
 		[self windowDidLoad];
@@ -473,7 +479,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	self.selectedTabIndex = selectedTabIndex;
 	[self updateProxyIcon];
 
-	[self retain];
+	self.retainedSelf = self;
 }
 
 - (void)synchronizeWindowTitle
@@ -579,9 +585,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (void)setRepresentedFile:(NSString*)aPath
 {
-	NSString* oldRepresentedFile = representedFile;
-	representedFile = [aPath retain];
-	[oldRepresentedFile release];
+	representedFile = aPath;
 	[self updateProxyIcon]; // FIXME Skip for unchanged path. Problem is updateProxyIcon not being called for file appearing/disappearing on disk.
 }
 
@@ -965,7 +969,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 - (IBAction)moveDocumentToNewWindow:(id)sender
 {
 	ASSERT(documentTabs.size() > 1);
-	DocumentController* delegate = [[[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, [self selectedDocument])] autorelease];
+	DocumentController* delegate = [[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, [self selectedDocument])];
 	[delegate showWindow:self];
 	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:selectedTabIndex] quiet:YES];
 }
@@ -1008,18 +1012,6 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[sender tag]] quiet:NO];
 }
 
-- (void)closeSplitWarningDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)stack
-{
-	if(returnCode == NSAlertDefaultReturn) /* "Stop" */
-	{
-		runner.reset();
-
-		[htmlOutputView stopLoading];
-		[self toggleHTMLOutput:self];
-	}
-	[alert release];
-}
-
 - (void)performCloseSplit:(id)sender
 {
 	D(DBF_DocumentController, bug("\n"););
@@ -1027,7 +1019,15 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	{
 		if(runner && runner->running())
 		{
-			[[[NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."] retain] beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(closeSplitWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+			NSAlert* alert = [NSAlert alertWithMessageText:@"Stop task before closing?" defaultButton:@"Stop Task" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"The job that the task is performing will not be completed."];
+			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+				if(returnCode == NSAlertDefaultReturn) /* "Stop" */
+				{
+					runner.reset();
+					[htmlOutputView stopLoading];
+					[self toggleHTMLOutput:self];
+				}
+			});
 		}
 		else
 		{
@@ -1080,8 +1080,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	{
 		struct callback_t : close_warning_callback_t
 		{
-			callback_t (NSWindow* aWindow) { _window = [aWindow retain]; }
-			~callback_t ()                 { [_window release];          }
+			callback_t (NSWindow* aWindow) : _window(aWindow) { }
 
 			void can_close_documents (bool flag)
 			{
@@ -1100,17 +1099,28 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	D(DBF_DocumentController, bug("retain count: %d\n", (int)[[aNotification object] retainCount]););
+	D(DBF_DocumentController, bug("\n"););
+
+	if(scmInfo && scmCallback)
+	{
+		scmInfo->remove_callback(scmCallback);
+		delete scmCallback;
+		scmCallback = NULL;
+		scmInfo.reset();
+	}
+
+	[self.window unbind:@"title"];
+	[self.window unbind:@"documentEdited"];
 
 	tabBarView.delegate   = nil;
 	tabBarView.dataSource = nil;
+	fileBrowser.delegate  = nil;
 
 	self.filterWindowController = nil;
 
-	[documentView release];
 	documentView = nil;
 
-	[self autorelease];
+	self.retainedSelf = nil;
 }
 
 // ========================
@@ -1144,7 +1154,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		std::vector<document::document_ptr> documents;
 		for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
 			documents.push_back(*documentTabs[index]);
-		DocumentController* delegate = [[[DocumentController alloc] initWithDocuments:documents] autorelease];
+		DocumentController* delegate = [[DocumentController alloc] initWithDocuments:documents];
 		[delegate showWindow:self];
 		[self closeTabsAtIndexes:indexSet quiet:YES];
 	}
@@ -1165,7 +1175,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		[rightSideTabs removeIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, tabIndex + 1)]];
 	}
 
-	NSMenu* menu = [[NSMenu new] autorelease];
+	NSMenu* menu = [NSMenu new];
 	[menu setAutoenablesItems:NO];
 
 	[menu addItemWithTitle:@"New Tab"                 action:@selector(takeNewTabIndexFrom:)  keyEquivalent:@""];
@@ -1245,19 +1255,7 @@ static NSString* const OakDocumentPboardType = @"OakDocumentPboardType";
 {
 	D(DBF_DocumentController, bug("\n"););
 	// TODO remove document callbacks (not added at time of writing)
-
-	[windowTitle release];
-	self.representedFile = nil;
-
-	fileBrowser.delegate = nil;
-	[fileBrowser release];
-
-	[htmlOutputView release];
-
-	[fileBrowserState release];
-
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 // ===============================
@@ -1478,9 +1476,9 @@ static std::string file_chooser_glob (std::string const& path)
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:filterWindowController.window];
 			filterWindowController.target = nil;
 			[filterWindowController close];
-			[filterWindowController release];
 		}
-		if(filterWindowController = [controller retain])
+
+		if(filterWindowController = controller)
 			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:filterWindowController.window];
 	}
 }
@@ -1528,16 +1526,16 @@ static std::string file_chooser_glob (std::string const& path)
 // = Forward to file browser =
 // ===========================
 
-- (IBAction)goBack:(id)sender               { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)goForward:(id)sender            { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)goToParentFolder:(id)sender     { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
+- (IBAction)goBack:(id)sender               { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goForward:(id)sender            { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToParentFolder:(id)sender     { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
 
-- (IBAction)goToComputer:(id)sender         { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)goToHome:(id)sender             { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)goToDesktop:(id)sender          { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)goToFavorites:(id)sender        { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)goToSCMDataSource:(id)sender    { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
-- (IBAction)orderFrontGoToFolder:(id)sender { self.fileBrowserHidden = NO; [fileBrowser performSelector:_cmd withObject:sender]; }
+- (IBAction)goToComputer:(id)sender         { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToHome:(id)sender             { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToDesktop:(id)sender          { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToFavorites:(id)sender        { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToSCMDataSource:(id)sender    { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)orderFrontGoToFolder:(id)sender { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
 
 // ====================
 // = NSMenuValidation =

@@ -296,7 +296,7 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 				std::string const title = text::format("Unable to run “%.*s”.", (int)command.name.size(), command.name.data());
 				std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", it->command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), it->variable.c_str());
 
-				NSAlert* alert = [[[NSAlert alloc] init] autorelease];
+				NSAlert* alert = [[NSAlert alloc] init];
 				[alert setAlertStyle:NSCriticalAlertStyle];
 				[alert setMessageText:[NSString stringWithCxxString:title]];
 				[alert setInformativeText:[NSString stringWithCxxString:message]];
@@ -329,7 +329,7 @@ void show_command_error (std::string const& message, oak::uuid_t const& uuid, NS
 	bundles::item_ptr bundleItem = bundles::lookup(uuid);
 	std::string commandName = bundleItem ? bundleItem->name() : "(unknown)";
 
-	NSAlert* alert = [[[NSAlert alloc] init] autorelease];
+	NSAlert* alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSCriticalAlertStyle];
 	[alert setMessageText:[NSString stringWithCxxString:text::format("Failure running “%.*s”.", (int)commandName.size(), commandName.data())]];
 	[alert setInformativeText:[NSString stringWithCxxString:message] ?: @"No output"];

@@ -37,16 +37,6 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
-	self.tabBarView      = nil;
-	self.documentView    = nil;
-	self.fileBrowserView = nil;
-	self.htmlOutputView  = nil;
-
-	self.fileBrowserWidthConstraint = nil;
-	self.htmlOutputHeightConstraint = nil;
-
-	[super dealloc];
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
@@ -55,36 +45,32 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 	self.htmlOutputOnRight  = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
 }
 
-- (void)replaceView:(NSView**)oldView withView:(NSView*)newView
+- (NSView*)replaceView:(NSView*)oldView withView:(NSView*)newView
 {
-	if(newView == *oldView)
-		return;
+	if(newView == oldView)
+		return oldView;
 
-	if(NSView* view = *oldView)
-	{
-		[view removeFromSuperview];
-		[view release];
-		*oldView = nil;
-	}
+	[oldView removeFromSuperview];
 
 	if(newView)
 	{
 		[newView setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[self addSubview:newView];
-		*oldView = [newView retain];
 	}
 
 	[self setNeedsUpdateConstraints:YES];
 	[[self window] invalidateCursorRectsForView:self];
+
+	return newView;
 }
 
-- (void)setTabBarView:(NSView*)aTabBarView           { [self replaceView:&_tabBarView      withView:aTabBarView];      }
-- (void)setDocumentView:(NSView*)aDocumentView       { [self replaceView:&_documentView    withView:aDocumentView];    }
-- (void)setHtmlOutputView:(NSView*)aHtmlOutputView   { [self replaceView:&_htmlOutputView  withView:aHtmlOutputView];  }
+- (void)setTabBarView:(NSView*)aTabBarView           { _tabBarView     = [self replaceView:_tabBarView      withView:aTabBarView];      }
+- (void)setDocumentView:(NSView*)aDocumentView       { _documentView   = [self replaceView:_documentView    withView:aDocumentView];    }
+- (void)setHtmlOutputView:(NSView*)aHtmlOutputView   { _htmlOutputView = [self replaceView:_htmlOutputView  withView:aHtmlOutputView];  }
 
 - (void)setFileBrowserView:(NSView*)aFileBrowserView
 {
-	[self replaceView:&_fileBrowserView withView:aFileBrowserView];
+	_fileBrowserView = [self replaceView:_fileBrowserView withView:aFileBrowserView];
 }
 
 - (void)setFileBrowserOnRight:(BOOL)flag
@@ -196,7 +182,7 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 	if(!view || [anEvent type] != NSLeftMouseDown)
 		return [super mouseDown:anEvent];
 
-	NSEvent* mouseDownEvent = [anEvent retain];
+	NSEvent* mouseDownEvent = anEvent;
 	NSRect initialFrame = view.frame;
 
 	BOOL didDrag = NO;
@@ -239,8 +225,6 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 			[view mouseDown:mouseDownEvent];
 		}
 	}
-
-	[mouseDownEvent release];
 }
 
 - (BOOL)isOpaque

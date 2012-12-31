@@ -213,14 +213,8 @@ namespace
 			{
 				callback_t (DocumentController* controller, NSIndexSet* indexSet)
 				{
-					_self = [controller retain];
-					_indexSet = [indexSet retain];
-				}
-
-				~callback_t ()
-				{
-					[_self release];
-					[_indexSet release];
+					_self = controller;
+					_indexSet = indexSet;
 				}
 
 				void can_close_documents (bool flag)
@@ -259,7 +253,6 @@ namespace
 
 - (void)documentOpenHelper:(DocumentOpenHelper*)documentOpenHelper didOpenDocument:(document::document_ptr const&)aDocument
 {
-	[documentOpenHelper autorelease];
 	if(aDocument != [self selectedDocument])
 		return;
 
@@ -292,8 +285,6 @@ namespace
 			[set addIndex:i];
 	}
 	[self closeTabsAtIndexes:set quiet:YES];
-
-	[documentOpenHelper release];
 }
 
 // =======================
@@ -346,7 +337,6 @@ namespace
 		break;
 	}
 	delete info;
-	[alert release];
 }
 
 - (void)showCloseWarningUIForDocuments:(std::vector<document::document_ptr> const&)someDocuments andCallback:(close_warning_callback_t*)aCallback
