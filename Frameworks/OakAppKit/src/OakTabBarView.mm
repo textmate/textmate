@@ -2,6 +2,7 @@
 #import "OakControl Private.h"
 #import "NSColor Additions.h"
 #import "NSImage Additions.h"
+#import "NSView Additions.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
 #import <text/format.h>
@@ -304,10 +305,187 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 @interface OakTabBarView ()
 - (void)updateLayout;
+- (void)selectTab:(id)sender;
 @property (nonatomic, retain) OakTimer* slideAroundAnimationTimer;
 @property (nonatomic, assign) BOOL layoutNeedsUpdate;
 @property (nonatomic, assign) BOOL shouldCollapse;
 @end
+
+// =================
+// = Accessibility =
+// =================
+
+@interface OakTabFauxUIElement : NSObject
+- (id)initWithTabBarView:(OakTabBarView*)tabBarView index:(NSUInteger)index rect:(NSRect)rect title:(NSString*)title toolTip:(NSString*)toolTip modified:(BOOL)modified selected:(BOOL)selected;
+@property (nonatomic, assign) OakTabBarView *tabBarView;
+@property (nonatomic, assign) NSUInteger index;
+@property (nonatomic, assign) NSRect rect;
+@property (nonatomic, retain) NSString *title;
+@property (nonatomic, retain) NSString *toolTip;
+@property (nonatomic, assign) BOOL modified;
+@property (nonatomic, assign) BOOL selected;
+@end
+
+@implementation OakTabFauxUIElement
+- (id)initWithTabBarView:(OakTabBarView*)tabBarView index:(NSUInteger)index rect:(NSRect)rect title:(NSString*)title toolTip:(NSString*)toolTip modified:(BOOL)modified selected:(BOOL)selected
+{
+	if((self = [super init]))
+	{
+		_tabBarView = tabBarView;
+		_index = index;
+		_rect = rect;
+		_title = [title retain];
+		_toolTip = [toolTip retain];
+		_modified = modified;
+		_selected = selected;
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	self.title = nil;
+	self.toolTip = nil;
+	[super dealloc];
+}
+
+- (NSString*)description
+{
+	return [NSString stringWithFormat:@"<%@: parent=%@, title=\"%@\", index=%ld, rect=%@>", [self class], self.tabBarView, self.title, self.index, NSStringFromRect(self.rect)];
+}
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray *attributes = nil;
+	if(!attributes)
+	{
+		attributes = @[
+			// generic
+			NSAccessibilityParentAttribute,
+			NSAccessibilityPositionAttribute,
+			NSAccessibilityRoleAttribute,
+			NSAccessibilityRoleDescriptionAttribute,
+			NSAccessibilitySizeAttribute,
+			NSAccessibilityTopLevelUIElementAttribute,
+			NSAccessibilityWindowAttribute,
+			// radio button
+			NSAccessibilityEnabledAttribute,
+			NSAccessibilityFocusedAttribute,
+			NSAccessibilityTitleAttribute,
+			NSAccessibilityValueAttribute,
+			NSAccessibilityHelpAttribute,
+		];
+		[attributes retain];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	// generic attributes
+	if([attribute isEqualToString:NSAccessibilityParentAttribute])
+		return self.tabBarView;
+	else if([attribute isEqualToString:NSAccessibilityPositionAttribute] || [attribute isEqualToString:NSAccessibilitySizeAttribute])
+	{
+		NSRect rect = [self screenRect];
+		if([attribute isEqualToString:NSAccessibilityPositionAttribute])
+			return [NSValue valueWithPoint:rect.origin];
+		else
+			return [NSValue valueWithSize:rect.size];
+	}
+	else if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+		return NSAccessibilityRadioButtonRole;
+	else if([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute])
+		return NSAccessibilityRoleDescription([self accessibilityAttributeValue:NSAccessibilityRoleAttribute], nil);
+	else if([attribute isEqualToString:NSAccessibilityTopLevelUIElementAttribute])
+		return [self.tabBarView accessibilityAttributeValue:NSAccessibilityTopLevelUIElementAttribute];
+	else if([attribute isEqualToString:NSAccessibilityWindowAttribute])
+		return [self.tabBarView accessibilityAttributeValue:NSAccessibilityWindowAttribute];
+	// radio button attributes
+	else if([attribute isEqualToString:NSAccessibilityEnabledAttribute])
+		return [NSNumber numberWithBool:YES];
+	else if([attribute isEqualToString:NSAccessibilityFocusedAttribute])
+		return [NSNumber numberWithBool:NO];
+	else if([attribute isEqualToString:NSAccessibilityTitleAttribute])
+	{
+		NSString *title = self.title;
+		if(self.modified)
+			title = [title stringByAppendingString:@" (modified)"];
+		return title;
+	}
+	else if([attribute isEqualToString:NSAccessibilityValueAttribute])
+		return [NSNumber numberWithBool:self.selected];
+	else if([attribute isEqualToString:NSAccessibilityHelpAttribute])
+		return self.toolTip;
+	else
+		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility attribute %@ not supported", attribute] userInfo:nil];
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString*)attribute
+{
+	return NO;
+}
+
+- (void)accessibilitySetValue:(id)value forAttribute:(NSString*)attribute
+{
+	@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility attribute %@ not settable", attribute] userInfo:nil];
+}
+
+- (NSArray*)accessibilityActionNames
+{
+	static NSArray *actions = nil;
+	if(!actions)
+	{
+		actions = @[
+			NSAccessibilityPressAction,
+			NSAccessibilityShowMenuAction,
+		];
+		[actions retain];
+	}
+	return actions;
+}
+
+- (NSString*)accessibilityActionDescription:(NSString*)action
+{
+	return NSAccessibilityActionDescription(action);
+}
+
+- (void)accessibilityPerformAction:(NSString*)action
+{
+	if([action isEqualToString:NSAccessibilityPressAction])
+	{
+		self.tabBarView.tag = self.index;
+		[self.tabBarView selectTab:self.tabBarView];
+	}
+	else if([action isEqualToString:NSAccessibilityShowMenuAction])
+	{
+		self.tabBarView.tag = self.index;
+		NSRect rect = [self screenRect];
+		[self.tabBarView showMenu:[self.tabBarView.delegate menuForTabBarView:self.tabBarView] inRect:rect withSelectedIndex:-1 font:[NSFont menuFontOfSize:[NSFont systemFontSize]] popup:NO];
+	}
+	else
+	{
+		@throw [NSException exceptionWithName:NSAccessibilityException reason:[NSString stringWithFormat:@"Accessibility action %@ not supported", action] userInfo:nil];
+	}
+}
+
+- (NSRect)windowRect
+{
+	return [self.tabBarView convertRect:self.rect toView:nil];
+}
+
+- (NSRect)screenRect
+{
+	return [[self.tabBarView window] convertRectToScreen:[self windowRect]];
+}
+@end
+
+// ==========================
 
 @implementation OakTabBarView
 {
@@ -750,5 +928,112 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
 	[self setDropAreaWidth:0 beforeTabAtIndex:NSNotFound animate:YES];
+}
+
+// =================
+// = Accessibility =
+// =================
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray *attributes = nil;
+	if(!attributes)
+	{
+		NSSet *set = [NSSet setWithArray:[super accessibilityAttributeNames]];
+		set = [set setByAddingObjectsFromArray:@[
+			// generic
+			NSAccessibilityRoleAttribute,
+			// tab group
+			NSAccessibilityChildrenAttribute,
+			NSAccessibilityContentsAttribute,
+			NSAccessibilityFocusedAttribute,
+			NSAccessibilityTabsAttribute,
+			NSAccessibilityValueAttribute,
+		]];
+		attributes = [[set allObjects] retain];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	// generic attributes
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+		return NSAccessibilityTabGroupRole;
+	// tab group attributes
+	else if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
+		return [self accessibilityArrayAttributeValues:attribute index:0 maxCount:[self accessibilityArrayAttributeCount:attribute]];
+	else if([attribute isEqualToString:NSAccessibilityFocusedAttribute])
+		return [NSNumber numberWithBool:NO];
+	else if([attribute isEqualToString:NSAccessibilityValueAttribute])
+		return [self accessibilityChildAtIndex:selectedTab];
+	else
+		return [super accessibilityAttributeValue:attribute];
+}
+
+- (NSUInteger)accessibilityArrayAttributeCount:(NSString*)attribute
+{
+	if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
+	{
+		return [self.dataSource numberOfRowsInTabBarView:self];
+	}
+	else
+		return [super accessibilityArrayAttributeCount:attribute];
+}
+
+- (NSArray*)accessibilityArrayAttributeValues:(NSString*)attribute index:(NSUInteger)index maxCount:(NSUInteger)maxCount
+{
+	if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
+	{
+		NSUInteger count = [self accessibilityArrayAttributeCount:attribute];
+		if(index + maxCount < count)
+			count = index + maxCount;
+		NSMutableArray *children = [NSMutableArray arrayWithCapacity:count - index];
+		for(; index < count; ++index)
+		{
+			[children addObject:[self accessibilityChildAtIndex:index]];
+		}
+		return children;
+	}
+	else
+		return [super accessibilityArrayAttributeValues:attribute index:index maxCount:maxCount];
+}
+
+- (NSUInteger)accessibilityIndexOfChild:(id)child
+{
+	OakTabFauxUIElement *element = (OakTabFauxUIElement*)child;
+	if ([child isMemberOfClass:[OakTabFauxUIElement class]] && element.tabBarView == self)
+		return element.index;
+	return NSNotFound;
+}
+
+- (OakTabFauxUIElement*)accessibilityChildAtIndex:(NSUInteger)index
+{
+	NSRect rect = index < tabRects.size() ? tabRects[index] : [self bounds];
+	NSString *title = SafeObjectAtIndex(tabTitles, index);
+	NSString *toolTip = SafeObjectAtIndex(tabToolTips, index);
+	BOOL modified = [((NSNumber*)SafeObjectAtIndex(tabModifiedStates, index)) boolValue];
+	return [[[OakTabFauxUIElement alloc] initWithTabBarView:self index:index rect:rect title:title toolTip:toolTip modified:modified selected:selectedTab==index] autorelease];
+}
+
+- (id)accessibilityHitTest:(NSPoint)point
+{
+	point = [self convertRect:[[self window] convertRectFromScreen:NSMakeRect(point.x, point.y, 0, 0)] fromView:nil].origin;
+	if(!NSPointInRect(point, [self bounds]))
+		return self;
+	iterate(rect, tabRects)
+	{
+		if(NSPointInRect(point, *rect))
+		{
+			NSUInteger index = rect - tabRects.begin();
+			return [self accessibilityChildAtIndex:index];
+		};
+	}
+	return self;
 }
 @end
