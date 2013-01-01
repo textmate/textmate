@@ -55,7 +55,7 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 	// =================
 
 	oak::uuid_t identifier;
-@public // FIXME
+@package // FIXME
 	std::vector<document_tab_ptr> documentTabs;
 @protected
 	size_t selectedTabIndex;
