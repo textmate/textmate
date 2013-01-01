@@ -7,7 +7,6 @@
 #import <oak/debug.h>
 #import <Find/Find.h>
 #import <io/path.h>
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <BundleEditor/BundleEditor.h>
 #import <OakAppKit/OakAppKit.h>

@@ -1,6 +1,5 @@
 #import "FSSCMDataSource.h"
 #import "FSItem.h"
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <io/path.h>
@@ -109,7 +108,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 
 - (void)postReloadNotification
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : self.rootItem, @"children" : [FSDataSource sortArray:[self repositoryStatus] usingOptions:options], @"recursive" : YES_obj }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : self.rootItem, @"children" : [FSDataSource sortArray:[self repositoryStatus] usingOptions:options], @"recursive" : @YES }];
 }
 
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions

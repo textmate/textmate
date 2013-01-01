@@ -8,7 +8,6 @@
 #import <Preferences/TerminalPreferences.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSEvent Additions.h>
-#import <OakFoundation/OakFoundation.h>
 #import <CrashReporter/CrashReporter.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
 #import <BundlesManager/BundlesManager.h>
@@ -37,11 +36,11 @@ OAK_DEBUG_VAR(AppStartup);
 	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
 
 	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-		NO_obj, @"ApplePressAndHoldEnabled",
-		@25,    @"NSRecentDocumentsLimit",
+		@NO, @"ApplePressAndHoldEnabled",
+		@25, @"NSRecentDocumentsLimit",
 		nil]];
 	RegisterDefaults();
-	[[NSUserDefaults standardUserDefaults] setObject:NO_obj forKey:@"NSQuitAlwaysKeepsWindows"];
+	[[NSUserDefaults standardUserDefaults] setObject:@NO forKey:@"NSQuitAlwaysKeepsWindows"];
 	disableSessionRestore = ([NSEvent modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;
 
 	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");

@@ -2,7 +2,6 @@
 #import "PropertiesViewController.h"
 #import "OakRot13Transformer.h"
 #import "be_entry.h"
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 #import <OakAppKit/NSAlert Additions.h>
@@ -546,7 +545,7 @@ static NSMutableDictionary* DictionaryForBundleItem (bundles::item_ptr const& aB
 			[res removeObjectForKey:@"dontFollowNewOutput"];
 			[res setObject:@2 forKey:@"version"];
 			if(cmd.auto_scroll_output)
-				[res setObject:YES_obj forKey:@"autoScrollOutput"];
+				[res setObject:@YES forKey:@"autoScrollOutput"];
 			for(size_t i = 0; i != sizeofA(popups); ++i)
 				[res setObject:[popups[i].array objectAtIndex:popups[i].index] forKey:popups[i].key];
 		}

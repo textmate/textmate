@@ -1,6 +1,5 @@
 #import "Find.h"
 #import "FFWindowController.h"
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
@@ -95,9 +94,9 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 {
 	NSMutableDictionary* options = [NSMutableDictionary dictionary];
 	if(self.windowController.followLinks)
-		[options setObject:YES_obj forKey:@"followLinks"];
+		[options setObject:@YES forKey:@"followLinks"];
 	if(self.windowController.searchHiddenFolders)
-		[options setObject:YES_obj forKey:@"searchHiddenFolders"];
+		[options setObject:@YES forKey:@"searchHiddenFolders"];
 	[[NSUserDefaults standardUserDefaults] setObject:options forKey:FolderOptionsDefaultsKey];
 
 	// An autorelease pool is required here because the default pool will not be destroyed before termination,
@@ -153,9 +152,9 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	NSString* newReplacement = windowController.replaceString;
 
 	NSMutableDictionary* newOptions = [NSMutableDictionary dictionary];
-	if(windowController.findIgnoreWhitespace)  [newOptions setObject:YES_obj forKey:OakFindIgnoreWhitespaceOption];
-	if(windowController.findFullWords)         [newOptions setObject:YES_obj forKey:OakFindFullWordsOption];
-	if(windowController.findRegularExpression) [newOptions setObject:YES_obj forKey:OakFindRegularExpressionOption];
+	if(windowController.findIgnoreWhitespace)  [newOptions setObject:@YES forKey:OakFindIgnoreWhitespaceOption];
+	if(windowController.findFullWords)         [newOptions setObject:@YES forKey:OakFindFullWordsOption];
+	if(windowController.findRegularExpression) [newOptions setObject:@YES forKey:OakFindRegularExpressionOption];
 
 	OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
 	if(!oldEntry || ![oldEntry.string isEqualToString:newString])
@@ -433,9 +432,9 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	switch(option)
 	{
 		case find::ignore_whitespace:  windowController.findIgnoreWhitespace  = !windowController.findIgnoreWhitespace;  break;
-		case find::ignore_case:        [[NSUserDefaults standardUserDefaults] setObject:([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? NO_obj : YES_obj) forKey:kUserDefaultsFindIgnoreCase]; break;
+		case find::ignore_case:        [[NSUserDefaults standardUserDefaults] setObject:([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? @NO : @YES) forKey:kUserDefaultsFindIgnoreCase]; break;
 		case find::full_words:         windowController.findFullWords         = !windowController.findFullWords;         break;
-		case find::wrap_around:        [[NSUserDefaults standardUserDefaults] setObject:([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround] ? NO_obj : YES_obj) forKey:kUserDefaultsFindWrapAround]; break;
+		case find::wrap_around:        [[NSUserDefaults standardUserDefaults] setObject:([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround] ? @NO : @YES) forKey:kUserDefaultsFindWrapAround]; break;
 		case find::regular_expression: windowController.findRegularExpression = !windowController.findRegularExpression; break;
 		default:
 			ASSERTF(false, "Unknown find option tag %d\n", option);

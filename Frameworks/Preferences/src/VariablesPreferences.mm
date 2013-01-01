@@ -1,7 +1,6 @@
 #import "VariablesPreferences.h"
 #import "Keys.h"
 #import <OakAppKit/NSImage Additions.h>
-#import <OakFoundation/OakFoundation.h>
 #import <ns/ns.h>
 
 @interface VariablesPreferences ()
@@ -27,7 +26,7 @@
 - (IBAction)addVariable:(id)sender
 {
 	NSDictionary* entry = @{
-		@"enabled" : YES_obj,
+		@"enabled" : @YES,
 		@"name"    : @"VARIABLE_NAME",
 		@"value"   : @"variable value",
 	};

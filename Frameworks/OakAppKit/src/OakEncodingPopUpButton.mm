@@ -1,6 +1,5 @@
 #import "OakEncodingPopUpButton.h"
 #import "NSMenu Additions.h"
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <ns/ns.h>

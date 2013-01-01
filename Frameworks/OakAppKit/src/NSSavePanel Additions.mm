@@ -1,6 +1,5 @@
 #import "NSSavePanel Additions.h"
 #import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
 
 @implementation NSSavePanel (DeselectExtension)
 - (void)deselectExtension
@@ -17,7 +16,7 @@
 @implementation NSSavePanel (HiddenFiles)
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSOpenPanelShowHiddenFiles" : NO_obj }];
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSOpenPanelShowHiddenFiles" : @NO }];
 }
 
 - (void)setShowsHiddenFilesCheckBox:(BOOL)flag

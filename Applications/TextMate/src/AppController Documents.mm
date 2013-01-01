@@ -5,7 +5,6 @@
 #import <OakAppKit/NSSavePanel Additions.h>
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
 #import <ns/ns.h>
 #import <document/collection.h>
 #import <document/session.h>

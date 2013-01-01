@@ -1,7 +1,6 @@
 #import "OakFilterList.h"
 #import "OakFilterListView.h"
 #import <oak/debug.h>
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
 #import "highlight_ranges.h"

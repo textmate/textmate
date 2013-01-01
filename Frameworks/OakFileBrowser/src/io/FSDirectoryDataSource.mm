@@ -1,7 +1,6 @@
 #import "FSDirectoryDataSource.h"
 #import "FSItem.h"
 #import <OakFoundation/NSArray Additions.h>
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <oak/server.h>
@@ -233,7 +232,7 @@ namespace
 			add_item_and_children(pair->second, lostItems);
 		[_data_source lostItems:lostItems];
 
-		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : _item, @"children" : [FSDataSource sortArray:array usingOptions:_options], @"recursive" : YES_obj, @"requested" : @(_requested_reload) }];
+		[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : _item, @"children" : [FSDataSource sortArray:array usingOptions:_options], @"recursive" : @YES, @"requested" : @(_requested_reload) }];
 
 		delete this;
 	}

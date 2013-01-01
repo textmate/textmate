@@ -1,6 +1,5 @@
 #import "FSVolumesDataSource.h"
 #import "FSItem.h"
-#import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <oak/oak.h>
@@ -22,7 +21,7 @@
 
 - (void)workspaceDidChangeVolumeList:(NSNotification*)aNotification
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : self.rootItem, @"children" : [self volumeList], @"recursive" : YES_obj }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:self userInfo:@{ @"item" : self.rootItem, @"children" : [self volumeList], @"recursive" : @YES }];
 }
 
 - (id)initWithURL:(NSURL*)anURL options:(NSUInteger)someOptions
