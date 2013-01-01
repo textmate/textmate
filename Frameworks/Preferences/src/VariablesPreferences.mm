@@ -2,7 +2,6 @@
 #import "Keys.h"
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakFoundation.h>
-#import <plist/ascii.h>
 #import <ns/ns.h>
 
 @interface VariablesPreferences ()
