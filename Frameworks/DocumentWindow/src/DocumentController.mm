@@ -60,10 +60,7 @@ OAK_DEBUG_VAR(DocumentController);
 @property (nonatomic, retain) DocumentController* retainedSelf;
 - (id)initWithDocuments:(std::vector<document::document_ptr> const&)someDocuments;
 - (void)updateProxyIcon;
-@end
-
-@interface DocumentController (UpdateDocumentBindings)
-- (void)addSessionInfoTo:(plist::array_t&)anArray includeUntitled:(BOOL)includeUntitled;
+- (void)takeTabsToTearOffFrom:(id)sender;
 @end
 
 @implementation DocumentController (UpdateDocumentBindingsPartOne)
@@ -968,10 +965,8 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (IBAction)moveDocumentToNewWindow:(id)sender
 {
-	ASSERT(documentTabs.size() > 1);
-	DocumentController* delegate = [[DocumentController alloc] initWithDocuments:std::vector<document::document_ptr>(1, [self selectedDocument])];
-	[delegate showWindow:self];
-	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:selectedTabIndex] quiet:YES];
+	if(documentTabs.size() > 1)
+		[self takeTabsToTearOffFrom:[NSIndexSet indexSetWithIndex:selectedTabIndex]];
 }
 
 // =========================
@@ -1129,7 +1124,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (NSIndexSet*)tryObtainIndexSetFrom:(id)sender
 {
-	id res = nil;
+	id res = sender;
 	if([sender respondsToSelector:@selector(representedObject)])
 		res = [sender representedObject];
 	return [res isKindOfClass:[NSIndexSet class]] ? res : nil;

@@ -71,7 +71,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 - (BOOL)applicationOpenUntitledFile:(NSApplication*)theApplication
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	[[[DocumentController alloc] init] showWindow:nil];
+	[self newDocument:self];
 	return YES;
 }
 
