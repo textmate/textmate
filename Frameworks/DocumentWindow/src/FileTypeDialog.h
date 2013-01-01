@@ -1,7 +1,5 @@
 enum enabled_grammar_t { kEnabledGrammarsRecommended = 0, kEnabledGrammarsInstalled = 1, kEnabledGrammarsAll = 2 };
 
-@protocol FileTypeDialogDelegate;
-
 @interface FileTypeDialog : NSWindowController
 {
 	IBOutlet NSTextField* alertTextField;
@@ -30,10 +28,6 @@ enum enabled_grammar_t { kEnabledGrammarsRecommended = 0, kEnabledGrammarsInstal
 	NSString* alertFormatString;
 	NSString* infoFormatString;
 	NSString* useForAllFormatString;
-
-	NSWindow* mainWindow;
-	id <FileTypeDialogDelegate> delegate;
-	void* contextInfo;
 }
 @property (nonatomic, retain) NSString* path;
 @property (nonatomic, assign) NSInteger enabledGrammars;
@@ -55,12 +49,8 @@ enum enabled_grammar_t { kEnabledGrammarsRecommended = 0, kEnabledGrammarsInstal
 @property (nonatomic, readonly) NSString* fileType;
 
 - (id)initWithPath:(NSString*)aPath first:(char const*)firstPointer last:(char const*)lastPointer;
-- (void)beginSheetModalForWindow:(NSWindow*)aWindow modalDelegate:(id <FileTypeDialogDelegate>)aDelegate contextInfo:(void*)info;
+- (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSString* fileType))aCompletionHandler;
 
 - (IBAction)performOpenDocument:(id)sender;
 - (IBAction)performCancelOperation:(id)sender;
-@end
-
-@protocol FileTypeDialogDelegate
-- (void)fileTypeDialog:(FileTypeDialog*)fileTypeDialog didSelectFileType:(NSString*)aFileType contextInfo:(void*)info;
 @end

@@ -1,9 +1,8 @@
-#import "FileTypeDialog.h"
 #import <document/document.h>
 
 @protocol DocumentOpenHelperDelegate;
 
-@interface DocumentOpenHelper : NSObject <FileTypeDialogDelegate>
+@interface DocumentOpenHelper : NSObject
 @property (nonatomic, weak) id <DocumentOpenHelperDelegate> delegate;
 - (void)tryOpenDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow delegate:(id <DocumentOpenHelperDelegate>)aDelegate;
 @end

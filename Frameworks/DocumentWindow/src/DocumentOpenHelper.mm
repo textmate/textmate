@@ -1,5 +1,6 @@
 #import "DocumentOpenHelper.h"
 #import "EncodingView.h"
+#import "FileTypeDialog.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
@@ -15,14 +16,6 @@ OAK_DEBUG_VAR(DocumentController_OpenHelper);
 
 namespace
 {
-	struct info_t
-	{
-		info_t (EncodingViewController* controller, file::open_context_ptr context) : controller(controller), context(context) { }
-
-		EncodingViewController* controller;
-		file::open_context_ptr context;
-	};
-
 	struct open_callback_t : document::open_callback_t
 	{
 		open_callback_t (DocumentOpenHelper* self, NSWindow* window) : _self(self), _window(window)
@@ -55,7 +48,10 @@ namespace
 				[_window.attachedSheet orderOut:_self];
 
 				FileTypeDialog* controller = [[FileTypeDialog alloc] initWithPath:[NSString stringWithCxxString:path] first:(content ? content->begin() : NULL) last:(content ? content->end() : NULL)];
-				[controller beginSheetModalForWindow:_window modalDelegate:_self contextInfo:new info_t(nil, context)];
+				[controller beginSheetModalForWindow:_window completionHandler:^(NSString* fileType){
+					if(fileType)
+						context->set_file_type(to_s(fileType));
+				}];
 			}
 		}
 
@@ -95,13 +91,6 @@ namespace
 		[self didOpenDocument:aDocument];
 		aDocument->close();
 	}
-}
-
-- (void)fileTypeDialog:(FileTypeDialog*)fileTypeDialog didSelectFileType:(NSString*)aFileType contextInfo:(void*)info
-{
-	if(aFileType)
-		((info_t*)info)->context->set_file_type(to_s(aFileType));
-	delete (info_t*)info;
 }
 
 - (void)didOpenDocument:(document::document_ptr const&)aDocument

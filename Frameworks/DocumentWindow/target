@@ -1,5 +1,5 @@
 SOURCES          = src/*.mm
 CP_Resources     = resources/*
 LINK            += command text authorization scm bundles cf Find HTMLOutputWindow io ns OakAppKit OakFileBrowser OakFilterList OakFoundation OakSystem OakTextView BundleEditor network Preferences
-EXPORT           = src/DocumentController.h src/DocumentOpenHelper.h src/FileTypeDialog.h
+EXPORT           = src/DocumentController.h src/DocumentOpenHelper.h
 FRAMEWORKS       = Cocoa

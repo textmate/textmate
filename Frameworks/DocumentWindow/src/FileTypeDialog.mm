@@ -46,6 +46,11 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 	return res;
 }
 
+static bool is_installed (oak::uuid_t const& uuid)
+{
+	return bundles::lookup(uuid) ? true : false;
+}
+
 @implementation FileTypeDialog
 @synthesize path, enabledGrammars, persistentSetting, canOpenDocument;
 @synthesize recommendedGrammars, installedGrammars, allGrammars;
@@ -157,25 +162,49 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 	return [self.grammar objectForKey:@"scope"];
 }
 
-- (void)beginSheetModalForWindow:(NSWindow*)aWindow modalDelegate:(id <FileTypeDialogDelegate>)aDelegate contextInfo:(void*)info
+- (void)beginSheetModalForWindow:(NSWindow*)aWindow completionHandler:(void(^)(NSString* fileType))aCompletionHandler
 {
 	[self setupGrammars];
 	self.grammars               = self.recommendedGrammars;
 	self.selectedGrammarIndexes = [self.grammars count] == 0 ? [NSIndexSet indexSet] : [NSIndexSet indexSetWithIndex:0];
 
 	self.canOpenDocument = YES;
-	mainWindow  = aWindow;
-	delegate    = aDelegate;
-	contextInfo = info;
 
 	OakShowSheetForWindow(self.window, aWindow, ^(NSInteger returnCode){
-		[self sheetDidEnd:self.window returnCode:returnCode contextInfo:NULL];
-	});
-}
+		self.canOpenDocument = NO;
+		if(returnCode == NSRunAbortedResponse)
+			return aCompletionHandler(nil);
 
-static bool is_installed (oak::uuid_t const& uuid)
-{
-	return bundles::lookup(uuid) ? true : false;
+		NSDictionary* grammar = self.grammar;
+		std::string scope      = to_s((NSString*)[grammar objectForKey:@"scope"]);
+		oak::uuid_t uuid       = to_s((NSString*)[grammar objectForKey:@"uuid"]);
+		oak::uuid_t bundleUUID = to_s((NSString*)[grammar objectForKey:@"bundleUUID"]);
+
+		if(is_installed(uuid))
+		{
+			if(self.persistentSetting)
+				file::set_type(to_s(path), scope);
+			return aCompletionHandler(self.fileType);
+		}
+
+		citerate(bundle, bundles_db::index())
+		{
+			if(bundleUUID == (*bundle)->uuid())
+			{
+				[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(checkIfBundleIsInstalled:) userInfo:[grammar objectForKey:@"uuid"] repeats:YES];
+				[[BundlesManager sharedInstance] installBundle:*bundle];
+				[installingBundleActivityTextField bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
+				[installingBundleProgressIndicator bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
+				[installingBundleProgressIndicator startAnimation:self];
+				OakShowSheetForWindow(installingBundleWindow, aWindow, ^(NSInteger returnCode){
+					aCompletionHandler(self.fileType);
+				});
+				return;
+			}
+		}
+
+		aCompletionHandler(nil);
+	});
 }
 
 - (void)checkIfBundleIsInstalled:(NSTimer*)aTimer
@@ -191,43 +220,6 @@ static bool is_installed (oak::uuid_t const& uuid)
 		[NSApp endSheet:installingBundleWindow];
 		[installingBundleWindow orderOut:self];
 	}
-}
-
-- (void)sheetDidEnd:(NSWindow*)aSheet returnCode:(NSInteger)returnCode contextInfo:(void*)unused;
-{
-	self.canOpenDocument = NO;
-	if(returnCode == NSRunAbortedResponse)
-		return [delegate fileTypeDialog:self didSelectFileType:nil contextInfo:contextInfo];
-
-	NSDictionary* grammar = self.grammar;
-	std::string scope      = to_s((NSString*)[grammar objectForKey:@"scope"]);
-	oak::uuid_t uuid       = to_s((NSString*)[grammar objectForKey:@"uuid"]);
-	oak::uuid_t bundleUUID = to_s((NSString*)[grammar objectForKey:@"bundleUUID"]);
-
-	if(is_installed(uuid))
-	{
-		if(self.persistentSetting)
-			file::set_type(to_s(path), scope);
-		return [delegate fileTypeDialog:self didSelectFileType:self.fileType contextInfo:contextInfo];
-	}
-
-	citerate(bundle, bundles_db::index())
-	{
-		if(bundleUUID == (*bundle)->uuid())
-		{
-			[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(checkIfBundleIsInstalled:) userInfo:[grammar objectForKey:@"uuid"] repeats:YES];
-			[[BundlesManager sharedInstance] installBundle:*bundle];
-			[installingBundleActivityTextField bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
-			[installingBundleProgressIndicator bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
-			[installingBundleProgressIndicator startAnimation:self];
-			OakShowSheetForWindow(installingBundleWindow, mainWindow, ^(NSInteger returnCode){
-				[delegate fileTypeDialog:self didSelectFileType:self.fileType contextInfo:contextInfo];
-			});
-			return;
-		}
-	}
-
-	return [delegate fileTypeDialog:self didSelectFileType:nil contextInfo:contextInfo];
 }
 
 - (IBAction)performOpenDocument:(id)sender
