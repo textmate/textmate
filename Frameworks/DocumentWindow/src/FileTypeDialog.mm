@@ -51,11 +51,25 @@ static bool is_installed (oak::uuid_t const& uuid)
 	return bundles::lookup(uuid) ? true : false;
 }
 
+@interface FileTypeDialog ()
+@property (nonatomic, retain) NSString* path;
+
+@property (nonatomic, retain) NSArray* recommendedGrammars;
+@property (nonatomic, retain) NSArray* installedGrammars;
+@property (nonatomic, retain) NSArray* allGrammars;
+
+@property (nonatomic, retain) NSString* alertFormatString;
+@property (nonatomic, retain) NSString* infoFormatString;
+@property (nonatomic, retain) NSString* useForAllFormatString;
+
+@property (nonatomic, readonly) NSDictionary* grammar;
+@property (nonatomic, readonly) NSString* fileType;
+@end
+
 @implementation FileTypeDialog
-@synthesize path, enabledGrammars, persistentSetting, canOpenDocument;
-@synthesize recommendedGrammars, installedGrammars, allGrammars;
-@synthesize grammars, selectedGrammarIndexes;
-@synthesize alertFormatString, infoFormatString, useForAllFormatString;
+{
+	std::string firstLine;
+}
 
 - (id)initWithPath:(NSString*)aPath first:(char const*)firstPointer last:(char const*)lastPointer
 {
@@ -93,7 +107,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 				{
 					iterate(ext, (*grammar)->file_types())
 					{
-						if(path::rank(to_s(path), *ext))
+						if(path::rank(to_s(self.path), *ext))
 							recommended.insert(info);
 					}
 				}
@@ -122,18 +136,18 @@ static bool is_installed (oak::uuid_t const& uuid)
 	self.useForAllFormatString = [useForAllCheckBox title];
 
 	std::map<std::string, std::string> variables;
-	variables["DisplayName"] = path::display_name(to_s(path));
-	std::string const ext = path::extensions(to_s(path));;
+	variables["DisplayName"] = path::display_name(to_s(self.path));
+	std::string const ext = path::extensions(to_s(self.path));;
 	if(ext != "")
 	{
 		self.persistentSetting = YES;
-		if(ext != path::name(to_s(path)))
+		if(ext != path::name(to_s(self.path)))
 			variables["X"] = ext;
 	}
 
-	std::string const alert  = format_string::expand(to_s(alertFormatString), variables);
-	std::string const info   = format_string::expand(to_s(infoFormatString), variables);
-	std::string const choice = format_string::expand(to_s(useForAllFormatString), variables);
+	std::string const alert  = format_string::expand(to_s(self.alertFormatString), variables);
+	std::string const info   = format_string::expand(to_s(self.infoFormatString), variables);
+	std::string const choice = format_string::expand(to_s(self.useForAllFormatString), variables);
 
 	[alertTextField setStringValue:[NSString stringWithCxxString:alert]];
 	[infoTextField setStringValue:[NSString stringWithCxxString:info]];
@@ -142,8 +156,8 @@ static bool is_installed (oak::uuid_t const& uuid)
 
 - (void)setEnabledGrammars:(NSInteger)newFilter
 {
-	enabledGrammars = newFilter;
-	switch(enabledGrammars)
+	_enabledGrammars = newFilter;
+	switch(_enabledGrammars)
 	{
 		case kEnabledGrammarsRecommended: self.grammars = self.recommendedGrammars; break;
 		case kEnabledGrammarsInstalled:   self.grammars = self.installedGrammars;   break;
@@ -154,7 +168,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 
 - (NSDictionary*)grammar
 {
-	return [selectedGrammarIndexes count] == 0 ? nil : [grammars objectAtIndex:[selectedGrammarIndexes firstIndex]];
+	return [_selectedGrammarIndexes count] == 0 ? nil : [_grammars objectAtIndex:[_selectedGrammarIndexes firstIndex]];
 }
 
 - (NSString*)fileType
@@ -183,7 +197,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 		if(is_installed(uuid))
 		{
 			if(self.persistentSetting)
-				file::set_type(to_s(path), scope);
+				file::set_type(to_s(self.path), scope);
 			return aCompletionHandler(self.fileType);
 		}
 
