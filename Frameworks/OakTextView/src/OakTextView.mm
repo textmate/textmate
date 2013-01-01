@@ -11,7 +11,7 @@
 #import <OakAppKit/OakPopOutAnimation.h>
 #import <OakAppKit/OakToolTip.h>
 #import <OakFoundation/NSString Additions.h>
-#import <OakFoundation/OakFoundation.h>
+#import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
 #import <BundleMenu/BundleMenu.h>

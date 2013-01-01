@@ -1,5 +1,6 @@
 #import <OakAppKit/OakPasteboard.h>
 #import <OakFoundation/OakFoundation.h>
+#import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/NSString Additions.h>
 #import <document/collection.h>
 #import <ns/ns.h>
