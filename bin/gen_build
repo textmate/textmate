@@ -339,6 +339,10 @@ def resources_helper(target, key, symbol)
         dst = build_path(File.join(path, "#$1.nib"))
         res << "build #{dst}: compile_xib #{esc_path src}\n"
         rsrc << { :src => dst, :dst => esc_path("#$1.nib") }
+      when /(.+)\.strings$/ then
+        dst = build_path(File.join(path, file))
+        res << "build #{dst}: cp_as_utf16 #{esc_path src}\n"
+        rsrc << { :src => dst, :dst => esc_path(file) }
       when /(.+)\.xcdatamodeld$/ then
         dst = build_path(File.join(path, "#$1.mom"))
         res << "build #{dst}: compile_mom #{esc_path src}\n"
@@ -748,6 +752,10 @@ __END__
 rule cp
   command = cp -p $in $out
   description = Copy ‘$in’…
+
+rule cp_as_utf16
+  command = if [[ $$(head -c2 $in) == $$'\xFF\xFE' || $$(head -c2 $in) == $$'\xFE\xFF' ]]; then cp -p $in $out; else iconv -f utf-8 -t utf-16 < $in > $out~ && mv $out~ $out; fi
+  description = Copy ‘$in’ as UTF-16…
 
 rule ln
   command = ln -fs $link $out
