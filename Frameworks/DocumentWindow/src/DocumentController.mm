@@ -522,9 +522,10 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (void)updateProxyIcon
 {
-	struct callback_t : scm::callback_t
+	struct scm_callback_t : scm::callback_t
 	{
-		callback_t (DocumentController* controller) : controller(controller) { }
+		scm_callback_t (DocumentController* controller) : controller(controller) { D(DBF_DocumentController, bug("%p\n", controller);); }
+		~scm_callback_t ()                                                       { D(DBF_DocumentController, bug("%p\n", controller);); }
 
 		void status_changed (scm::info_t const& info, std::set<std::string> const& changedPaths)
 		{
@@ -561,7 +562,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 	if(representedFile)
 	{
-		callback_t* cb = new callback_t(self);
+		scm_callback_t* cb = new scm_callback_t(self);
 		cb->update();
 
 		if(scmInfo = scm::info(path::parent(to_s(representedFile))))
