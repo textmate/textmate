@@ -58,6 +58,8 @@ OAK_DEBUG_VAR(DocumentController);
 @property (nonatomic, retain) NSString* representedFile;
 @property (nonatomic, assign) BOOL isDocumentEdited;
 @property (nonatomic, retain) DocumentController* retainedSelf;
+@property (nonatomic, retain) OakFilterWindowController* filterWindowController;
+@property (nonatomic, retain) NSString* pathAttributes;
 - (id)initWithDocuments:(std::vector<document::document_ptr> const&)someDocuments;
 - (void)updateProxyIcon;
 - (void)takeTabsToTearOffFrom:(id)sender;
@@ -117,11 +119,6 @@ OAK_DEBUG_VAR(DocumentController);
 @end
 
 // ============================
-
-@interface DocumentController ()
-@property (nonatomic, retain) OakFilterWindowController* filterWindowController;
-@property (nonatomic, retain) NSString* pathAttributes;
-@end
 
 static document::document_ptr create_document (NSString* fileBrowserPath)
 {
