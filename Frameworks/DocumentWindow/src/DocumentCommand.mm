@@ -33,7 +33,7 @@
 	if(NSString* projectDir = self.projectPath)
 	{
 		env["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
-		env["TM_PROJECT_UUID"]      = to_s(identifier);
+		env["TM_PROJECT_UUID"]      = to_s(self.identifier);
 	}
 
 	if(auto theme = documentView.textView.theme)

@@ -133,7 +133,6 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 @implementation DocumentController
 @synthesize fileBrowserState;
 @synthesize filterWindowController;
-@synthesize windowTitle, representedFile, isDocumentEdited;
 
 + (void)load
 {
@@ -378,7 +377,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	D(DBF_DocumentController, bug("%zu documents\n", someDocuments.size()););
 	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO]])
 	{
-		identifier.generate();
+		_identifier = [NSString stringWithCxxString:oak::uuid_t().generate()];
 		fileBrowserHidden = YES;
 		[self addDocuments:someDocuments andSelect:kSelectDocumentFirst closeOther:YES pruneTabBar:YES];
 
@@ -560,12 +559,12 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		scmInfo.reset();
 	}
 
-	if(representedFile)
+	if(self.representedFile)
 	{
 		scm_callback_t* cb = new scm_callback_t(self);
 		cb->update();
 
-		if(scmInfo = scm::info(path::parent(to_s(representedFile))))
+		if(scmInfo = scm::info(path::parent(to_s(self.representedFile))))
 		{
 			scmInfo->add_callback(cb);
 			scmCallback = cb;
@@ -583,7 +582,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (void)setRepresentedFile:(NSString*)aPath
 {
-	representedFile = aPath;
+	_representedFile = aPath;
 	[self updateProxyIcon]; // FIXME Skip for unchanged path. Problem is updateProxyIcon not being called for file appearing/disappearing on disk.
 }
 
@@ -1221,11 +1220,12 @@ static NSString* const OakDocumentPboardType = @"OakDocumentPboardType";
 
 - (BOOL)performTabDropFromTabBar:(OakTabBarView*)aTabBar atIndex:(NSUInteger)droppedIndex fromPasteboard:(NSPasteboard*)aPasteboard operation:(NSDragOperation)operation
 {
-	NSDictionary* plist   = [aPasteboard propertyListForType:OakDocumentPboardType];
+	NSDictionary* plist    = [aPasteboard propertyListForType:OakDocumentPboardType];
 
-	NSUInteger index      = [[plist objectForKey:@"index"] unsignedIntValue];
-	oak::uuid_t docId     = to_s((NSString*)[plist objectForKey:@"document"]);
-	oak::uuid_t projectId = to_s((NSString*)[plist objectForKey:@"collection"]);
+	NSUInteger index       = [[plist objectForKey:@"index"] unsignedIntValue];
+	oak::uuid_t docId      = to_s((NSString*)[plist objectForKey:@"document"]);
+	oak::uuid_t projectId  = to_s((NSString*)[plist objectForKey:@"collection"]);
+	oak::uuid_t identifier = to_s(self.identifier);
 
 	NSInteger selectionConstant = (identifier == projectId && [self selectedDocument]->identifier() == docId) ? kSelectDocumentFirst : kSelectDocumentNone;
 	[self addDocuments:std::vector<document::document_ptr>(1, document::find(docId)) atIndex:droppedIndex andSelect:selectionConstant closeOther:NO pruneTabBar:NO];
@@ -1352,11 +1352,6 @@ static std::string parent_or_home (std::string const& path)
 		return self.fileBrowserPath;
 	}
 	return nil;
-}
-
-- (NSString*)identifier
-{
-	return [NSString stringWithCxxString:identifier];
 }
 
 // =============================

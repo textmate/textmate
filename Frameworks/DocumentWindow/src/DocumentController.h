@@ -39,14 +39,6 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 	OakFilterWindowController* filterWindowController;
 	NSUInteger fileChooserSourceIndex;
 
-	// =====================
-	// = Document Bindings =
-	// =====================
-
-	NSString* windowTitle;
-	NSString* representedFile;
-	BOOL isDocumentEdited;
-
 	scm::info_ptr scmInfo;
 	scm::callback_t* scmCallback;
 
@@ -54,7 +46,6 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 	// = Document Tabs =
 	// =================
 
-	oak::uuid_t identifier;
 @package // FIXME
 	std::vector<document_tab_ptr> documentTabs;
 @protected
