@@ -3,11 +3,11 @@
 #import <oak/misc.h>
 
 NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
-NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
+NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 @interface ProjectLayoutView ()
 @property (nonatomic, retain) NSLayoutConstraint* fileBrowserWidthConstraint;
-@property (nonatomic, retain) NSLayoutConstraint* htmlOutputHeightConstraint;
+@property (nonatomic, retain) NSLayoutConstraint* htmlOutputSizeConstraint;
 @end
 
 @implementation ProjectLayoutView
@@ -15,7 +15,7 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
 		kUserDefaultsFileBrowserWidthKey : @250,
-		kUserDefaultsHTMLOutputHeightKey : @200
+		kUserDefaultsHTMLOutputSizeKey   : NSStringFromSize(NSMakeSize(200, 200))
 	}];
 }
 
@@ -26,7 +26,7 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 		_fileBrowserWidth   = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey];
 		_fileBrowserOnRight = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"];
 
-		_htmlOutputHeight   = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsHTMLOutputHeightKey];
+		_htmlOutputSize     = NSSizeFromString([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputSizeKey]);
 		_htmlOutputOnRight  = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
@@ -108,34 +108,55 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tabBarView]|" options:0 metrics:nil views:views]];
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tabBarView][documentView(>=40)]" options:0 metrics:nil views:views]];
 
+	if(!_fileBrowserView && (!_htmlOutputView || !_htmlOutputOnRight))
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]|" options:0 metrics:nil views:views]];
+
+	if(!_htmlOutputView || _htmlOutputOnRight)
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView]|" options:0 metrics:nil views:views]];
+
 	if(_fileBrowserView)
 	{
-		NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]|" : @"H:|[fileBrowserView]-(1)-[documentView]|";
-
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][fileBrowserView(==documentView)]" options:0 metrics:nil views:views]];
 
-		self.fileBrowserWidthConstraint = [NSLayoutConstraint constraintWithItem:_fileBrowserView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_fileBrowserWidth];
-		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityRequired-1;
-		[self addConstraint:self.fileBrowserWidthConstraint];
-	}
-	else
-	{
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]|" options:0 metrics:nil views:views]];
+		if(_htmlOutputView && _htmlOutputOnRight)
+		{
+			NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]-(1)-[htmlOutputView]|" : @"H:|[fileBrowserView]-(1)-[documentView]-(1)-[htmlOutputView]|";
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+		}
+		else
+		{
+			NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]|" : @"H:|[fileBrowserView]-(1)-[documentView]|";
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+		}
 	}
 
 	if(_htmlOutputView)
 	{
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[htmlOutputView]|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView]-(1)-[htmlOutputView]|" options:0 metrics:nil views:views]];
-
-		self.htmlOutputHeightConstraint = [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputHeight];
-		self.htmlOutputHeightConstraint.priority = NSLayoutPriorityRequired-1;
-		[self addConstraint:self.htmlOutputHeightConstraint];
+		if(_htmlOutputOnRight)
+		{
+			if(!_fileBrowserView)
+				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]-(1)-[htmlOutputView]|" options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][htmlOutputView(==documentView)]" options:0 metrics:nil views:views]];
+		}
+		else
+		{
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[htmlOutputView]|" options:0 metrics:nil views:views]];
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView]-(1)-[htmlOutputView]|" options:0 metrics:nil views:views]];
+		}
 	}
-	else
+
+	if(_fileBrowserView)
 	{
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView]|" options:0 metrics:nil views:views]];
+		self.fileBrowserWidthConstraint = [NSLayoutConstraint constraintWithItem:_fileBrowserView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_fileBrowserWidth];
+		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityRequired-1;
+		[self addConstraint:self.fileBrowserWidthConstraint];
+	}
+
+	if(_htmlOutputView)
+	{
+		self.htmlOutputSizeConstraint = _htmlOutputOnRight ? [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.width] : [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.height];
+		self.htmlOutputSizeConstraint.priority = NSLayoutPriorityRequired-1;
+		[self addConstraint:self.htmlOutputSizeConstraint];
 	}
 }
 
@@ -152,7 +173,7 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 	if(!_htmlOutputView)
 		return NSZeroRect;
 	NSRect r = _htmlOutputView.frame;
-	return NSMakeRect(NSMinX(r), NSMaxY(r)-4, NSWidth(r), 10);
+	return _htmlOutputOnRight ? NSMakeRect(NSMinX(r)-3, NSMinY(r), 10, NSHeight(r)) : NSMakeRect(NSMinX(r), NSMaxY(r)-4, NSWidth(r), 10);
 }
 
 - (void)resetCursorRects
@@ -198,11 +219,20 @@ NSString* const kUserDefaultsHTMLOutputHeightKey = @"htmlOutputHeight";
 
 		if(view == _htmlOutputView)
 		{
-			CGFloat height = NSHeight(initialFrame) + (mouseCurrentPos.y - mouseDownPos.y);
-			_htmlOutputHeight = std::max<CGFloat>(50, round(height));
-			self.htmlOutputHeightConstraint.constant = _htmlOutputHeight;
+			if(_htmlOutputOnRight)
+			{
+				CGFloat width = NSWidth(initialFrame) + (mouseCurrentPos.x - mouseDownPos.x) * (_htmlOutputOnRight ? -1 : +1);
+				_htmlOutputSize.width = std::max<CGFloat>(50, round(width));
+				self.htmlOutputSizeConstraint.constant = width;
+			}
+			else
+			{
+				CGFloat height = NSHeight(initialFrame) + (mouseCurrentPos.y - mouseDownPos.y);
+				_htmlOutputSize.height = std::max<CGFloat>(50, round(height));
+				self.htmlOutputSizeConstraint.constant = height;
+			}
 
-			[[NSUserDefaults standardUserDefaults] setInteger:_htmlOutputHeight forKey:kUserDefaultsHTMLOutputHeightKey];
+			[[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(_htmlOutputSize) forKey:kUserDefaultsHTMLOutputSizeKey];
 		}
 		else if(view == _fileBrowserView)
 		{

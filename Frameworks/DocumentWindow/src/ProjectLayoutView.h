@@ -7,6 +7,6 @@
 @property (nonatomic, assign) CGFloat fileBrowserWidth;
 @property (nonatomic, assign) BOOL fileBrowserOnRight;
 
-@property (nonatomic, assign) CGFloat htmlOutputHeight;
+@property (nonatomic, assign) NSSize htmlOutputSize;
 @property (nonatomic, assign) BOOL htmlOutputOnRight;
 @end
