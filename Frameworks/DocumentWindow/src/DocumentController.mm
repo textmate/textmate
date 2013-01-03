@@ -53,7 +53,6 @@ OAK_DEBUG_VAR(DocumentController);
 // ============================
 
 @interface DocumentController ()
-@property (nonatomic, retain) NSDictionary* fileBrowserState;
 @property (nonatomic, retain) NSString* windowTitle;
 @property (nonatomic, retain) NSString* representedFile;
 @property (nonatomic, assign) BOOL isDocumentEdited;
@@ -72,13 +71,12 @@ OAK_DEBUG_VAR(DocumentController);
 
 	res["windowFrame"]        = to_s(NSStringFromRect([self.window frame]));
 	res["miniaturized"]       = [self.window isMiniaturized];
-	res["htmlOutputHeight"]   = htmlOutputView ? (int32_t)NSHeight(htmlOutputView.frame) > 0 ? (int32_t)NSHeight(htmlOutputView.frame) : 0 : htmlOutputHeight;
-	res["fileBrowserVisible"] = !self.fileBrowserHidden;
-	res["fileBrowserWidth"]   = fileBrowser.view ? (int32_t)NSWidth(fileBrowser.view.frame) : fileBrowserWidth;
+	res["htmlOutputSize"]     = to_s(NSStringFromSize(self.htmlOutputSize));
+	res["fileBrowserVisible"] = self.fileBrowserVisible;
+	res["fileBrowserWidth"]   = (int32_t)self.fileBrowserWidth;
 
-	if(fileBrowser)
+	if(CFDictionaryRef fbState = (CFDictionaryRef)CFBridgingRetain(self.fileBrowserHistory))
 	{
-		CFDictionaryRef fbState = (CFDictionaryRef)CFBridgingRetain(fileBrowser.sessionState);
 		res["fileBrowserState"] = plist::convert(fbState);
 		CFRelease(fbState);
 	}
@@ -128,7 +126,6 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 }
 
 @implementation DocumentController
-@synthesize fileBrowserState;
 @synthesize filterWindowController;
 
 + (void)load
@@ -162,7 +159,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 				if([window isMiniaturized] || ![delegate isKindOfClass:[DocumentController class]])
 					continue;
 
-				if(delegate->documentTabs.size() == 1 && delegate.fileBrowserHidden)
+				if(delegate->documentTabs.size() == 1 && !delegate.fileBrowserVisible)
 				{
 					document::document_ptr document = *delegate->documentTabs[0];
 					if(document->identifier() == delegate->scratchDocument && !document->is_modified() && document->path() == NULL_STR)
@@ -200,7 +197,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 				close_scratch_project();
 				delegate = documents.empty() ? [[DocumentController alloc] init] : [[DocumentController alloc] initWithDocuments:documents];
 				[delegate window];
-				delegate.fileBrowserHidden = NO;
+				delegate.fileBrowserVisible = YES;
 				[delegate->fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve(browserPath)]]];
 				[delegate synchronizeWindowTitle];
 				bring_to_front(delegate);
@@ -284,10 +281,15 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 					plist::dictionary_t fileBrowserState;
 					if(plist::get_key_path(*project, "fileBrowserState", fileBrowserState))
-						controller->fileBrowserState = ns::to_dictionary(fileBrowserState);
+						controller.fileBrowserHistory = ns::to_dictionary(fileBrowserState);
 
-					plist::get_key_path(*project, "fileBrowserWidth", controller->fileBrowserWidth);
-					plist::get_key_path(*project, "htmlOutputHeight", controller->htmlOutputHeight);
+					CGFloat size;
+					if(plist::get_key_path(*project, "fileBrowserWidth", size))
+						controller.fileBrowserWidth = size;
+
+					std::string str;
+					if(plist::get_key_path(*project, "htmlOutputSize", str))
+						controller.htmlOutputSize = NSSizeFromString([NSString stringWithCxxString:str]);
 
 					std::string windowFrame = NULL_STR;
 					if(plist::get_key_path(*project, "windowFrame", windowFrame))
@@ -295,7 +297,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 					bool fileBrowserVisible = false;
 					if(plist::get_key_path(*project, "fileBrowserVisible", fileBrowserVisible) && fileBrowserVisible)
-						controller.fileBrowserHidden = NO;
+						controller.fileBrowserVisible = YES;
 
 					[controller showWindow:nil];
 
@@ -375,7 +377,6 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	if(self = [super initWithWindow:[[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO]])
 	{
 		_identifier = [NSString stringWithCxxString:oak::uuid_t().generate()];
-		fileBrowserHidden = YES;
 		[self addDocuments:someDocuments andSelect:kSelectDocumentFirst closeOther:YES pruneTabBar:YES];
 
 		layoutView = [[ProjectLayoutView alloc] initWithFrame:NSZeroRect];
@@ -414,7 +415,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		DocumentController* delegate = (DocumentController*)[window delegate];
 		if([delegate isKindOfClass:self])
 		{
-			if(!delegate.fileBrowserHidden && aDocument->path() != NULL_STR && aDocument->path().find(to_s(delegate.projectPath)) == 0)
+			if(delegate.fileBrowserVisible && aDocument->path() != NULL_STR && aDocument->path().find(to_s(delegate.projectPath)) == 0)
 				return delegate;
 
 			iterate(tab, delegate->documentTabs)
@@ -437,7 +438,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		DocumentController* delegate = (DocumentController*)[window delegate];
 		if([delegate isKindOfClass:self])
 		{
-			if(!delegate.fileBrowserHidden && [path isEqualToString:delegate.fileBrowserPath])
+			if(delegate.fileBrowserVisible && [path isEqualToString:delegate.fileBrowserPath])
 				return delegate;
 		}
 	}
@@ -947,7 +948,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 - (IBAction)revealFileInProject:(id)sender
 {
 	D(DBF_DocumentController, bug("%s\n", [self selectedDocument]->path().c_str()););
-	self.fileBrowserHidden = NO;
+	self.fileBrowserVisible = YES;
 	NSURL* currentDocumentURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]];
 	if([fileBrowser.selectedURLs count] == 1 && [currentDocumentURL isEqualTo:[fileBrowser.selectedURLs lastObject]])
 			[fileBrowser deselectAll:self];
@@ -956,7 +957,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 - (IBAction)goToProjectFolder:(id)sender
 {
-	self.fileBrowserHidden = NO;
+	self.fileBrowserVisible = YES;
 	[fileBrowser showURL:[NSURL fileURLWithPath:self.projectPath]];
 }
 
@@ -985,7 +986,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	D(DBF_DocumentController, bug("\n"););
 	ASSERT([sender isKindOfClass:[OakTabBarView class]]);
 
-	if(documentTabs.size() == 1 && !fileBrowserHidden)
+	if(documentTabs.size() == 1 && self.fileBrowserVisible)
 	{
 		document::document_ptr document = *documentTabs[0];
 		if(!document->is_modified())
@@ -1480,50 +1481,52 @@ static std::string file_chooser_glob (std::string const& path)
 // = Split view =
 // ==============
 
-- (BOOL)fileBrowserHidden
+- (void)setFileBrowserVisible:(BOOL)flag
 {
-	return fileBrowserHidden;
-}
-
-- (void)setFileBrowserHidden:(BOOL)flag
-{
-	if(flag != self.fileBrowserHidden)
+	if(flag != _fileBrowserVisible)
 	{
-		fileBrowserHidden = flag;
-		if(!fileBrowser && !fileBrowserHidden)
+		_fileBrowserVisible = flag;
+		if(!fileBrowser && flag)
 		{
 			D(DBF_DocumentController, bug("%s\n", [self.fileBrowserPath UTF8String]););
 
 			fileBrowser = [OakFileBrowser new];
 			fileBrowser.delegate = self;
-			[fileBrowser setupViewWithState:fileBrowserState];
+			[fileBrowser setupViewWithState:_fileBrowserHistory];
 			[self updateFileBrowserStatus:self];
 		}
 
-		layoutView.fileBrowserView = fileBrowserHidden ? nil : fileBrowser.view;
+		layoutView.fileBrowserView = flag ? fileBrowser.view : nil;
 	}
 	document::schedule_session_backup();
 }
 
 - (IBAction)toggleFileBrowser:(id)sender
 {
-	self.fileBrowserHidden = !self.fileBrowserHidden;
+	self.fileBrowserVisible = !self.fileBrowserVisible;
 }
+
+- (NSDictionary*)fileBrowserHistory { return fileBrowser.sessionState ?: _fileBrowserHistory; }
+
+- (CGFloat)fileBrowserWidth                 { return layoutView.fileBrowserWidth;   }
+- (NSSize)htmlOutputSize                    { return layoutView.htmlOutputSize;     }
+- (void)setFileBrowserWidth:(CGFloat)aWidth { layoutView.fileBrowserWidth = aWidth; }
+- (void)setHtmlOutputSize:(NSSize)aSize     { layoutView.htmlOutputSize = aSize;    }
 
 // ===========================
 // = Forward to file browser =
 // ===========================
 
-- (IBAction)goBack:(id)sender               { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)goForward:(id)sender            { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)goToParentFolder:(id)sender     { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goBack:(id)sender               { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goForward:(id)sender            { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToParentFolder:(id)sender     { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
 
-- (IBAction)goToComputer:(id)sender         { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)goToHome:(id)sender             { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)goToDesktop:(id)sender          { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)goToFavorites:(id)sender        { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)goToSCMDataSource:(id)sender    { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
-- (IBAction)orderFrontGoToFolder:(id)sender { self.fileBrowserHidden = NO; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToComputer:(id)sender         { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToHome:(id)sender             { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToDesktop:(id)sender          { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToFavorites:(id)sender        { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)goToSCMDataSource:(id)sender    { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
+- (IBAction)orderFrontGoToFolder:(id)sender { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:fileBrowser from:sender]; }
 
 // ====================
 // = NSMenuValidation =
@@ -1533,7 +1536,7 @@ static std::string file_chooser_glob (std::string const& path)
 {
 	BOOL active = YES;
 	if([menuItem action] == @selector(toggleFileBrowser:))
-		[menuItem setTitle:self.fileBrowserHidden ? @"Show File Browser" : @"Hide File Browser"];
+		[menuItem setTitle:self.fileBrowserVisible ? @"Hide File Browser" : @"Show File Browser"];
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = documentTabs.size() > 1;
 	else if([menuItem action] == @selector(revealFileInProject:))

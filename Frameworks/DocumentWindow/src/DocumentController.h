@@ -30,12 +30,6 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 	OakHTMLOutputView* htmlOutputView;
 	command::runner_ptr runner;
 
-	BOOL fileBrowserHidden;
-	NSDictionary* fileBrowserState;
-
-	int32_t fileBrowserWidth;
-	int32_t htmlOutputHeight;
-
 	OakFilterWindowController* filterWindowController;
 	NSUInteger fileChooserSourceIndex;
 
@@ -54,11 +48,16 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 	oak::uuid_t scratchDocument;
 }
 @property (nonatomic, readonly) NSString* identifier;
-@property (nonatomic, assign) BOOL fileBrowserHidden;
 @property (nonatomic, readonly) NSString* documentPath;
 @property (nonatomic, readonly) NSString* fileBrowserPath;
 @property (nonatomic, readonly) NSString* projectPath;
 @property (nonatomic, readonly) NSString* untitledSavePath;
+
+// Session restore
+@property (nonatomic) BOOL fileBrowserVisible;
+@property (nonatomic) NSDictionary* fileBrowserHistory;
+@property (nonatomic) CGFloat fileBrowserWidth;
+@property (nonatomic) NSSize htmlOutputSize;
 
 + (DocumentController*)controllerForDocument:(document::document_ptr const&)aDocument;
 + (DocumentController*)controllerForPath:(std::string const&)aPath;

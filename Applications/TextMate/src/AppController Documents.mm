@@ -25,7 +25,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 	D(DBF_AppController_Documents, bug("\n"););
 	DocumentController* controller = [[DocumentController alloc] init];
 	[controller window];
-	controller.fileBrowserHidden = NO;
+	controller.fileBrowserVisible = YES;
 	[controller showWindow:self];
 }
 
