@@ -112,4 +112,9 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 	[alert beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(closeWarningDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	return NO;
 }
+
+- (void)dealloc
+{
+	self.window.delegate = nil;
+}
 @end

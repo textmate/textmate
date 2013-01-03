@@ -1104,6 +1104,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 
 	[self.window unbind:@"title"];
 	[self.window unbind:@"documentEdited"];
+	self.window.delegate = nil;
 
 	tabBarView.delegate   = nil;
 	tabBarView.dataSource = nil;
