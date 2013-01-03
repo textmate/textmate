@@ -65,7 +65,7 @@ struct document_tab_t
 			}
 		}
 	private:
-		__weak DocumentController* _self;
+		__unsafe_unretained DocumentController* _self;
 	};
 
 	typedef std::shared_ptr<callback_t> callback_ptr;

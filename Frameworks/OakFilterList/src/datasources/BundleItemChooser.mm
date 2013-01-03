@@ -85,7 +85,7 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 @end
 
 @interface BundleItemChooserView : NSView
-@property (nonatomic, weak) BundleItemChooserViewController* viewController;
+@property (nonatomic, assign) BundleItemChooserViewController* viewController;
 @end
 
 @implementation BundleItemChooserView
