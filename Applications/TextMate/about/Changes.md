@@ -1,5 +1,16 @@
 # Changes
 
+## 2013-01-03 (r9335)
+
+* Assign ⇧⌘P to the _Go → Project Folder_ menu item.
+* Support HTML output placed on right side (again). This can be set in Preferences → Project.
+* Opening a `*.tmPlugIn` file will now install it (hold down ⌥ to open as folder). It’s no longer required that the bundle identifier of the plug-in starts with `com.macromates` but instead the plug-in’s `Info.plist` **must** have `TMPlugInAPIVersion` set to `2`. Despite this change, there is still no formal support for plug-ins and the internal API hasn’t stabilized, if you wish to extend TextMate (beyond what can be done via bundles) then the current way is to dig into the source.
+* Support “Select Output” as caret placement for commands.
+* When activating an already open _Find_ or _Go to Line_ window, it will move the window to the current space (instead of switching to the space containing the window).
+* When restoring session (after relaunch), file browser width and HTML output size is now restored individually for each window (previously there were just a global value).
+* Remove the _Edit → Mode_ submenu as the menu item wasn’t hooked up. Currently you can use the tab size pop-up in the status bar to select between tabs and soft tabs.
+* Improve stability.
+
 ## 2012-12-24 (r9331)
 
 * When syntax-highlighting a file, do batch redraw instead of line-by-line (should improve perceived performance). *[Joachim Mårtensson]*
