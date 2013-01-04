@@ -145,8 +145,20 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		if(!alreadyVisible)
 			[self pushURL:ParentForURL(aURL)];
 
-		[outlineViewDelegate selectURLs:@[ aURL ]];
+		[outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:NO];
 	}
+}
+- (void)revealURL:(NSURL*)aURL
+{
+	for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
+	{
+		if([self.url isEqual:currentURL])
+		{
+			[outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:YES];
+			return;
+		}
+	}
+	[self showURL:aURL];
 }
 
 - (void)deselectAll:(id)sender
@@ -332,7 +344,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		OakPlayUISound(OakSoundDidMoveItemUISound);
 		if([duplicatedURLs count] == 1)
 				[outlineViewDelegate editURL:[duplicatedURLs lastObject]];
-		else	[outlineViewDelegate selectURLs:duplicatedURLs];
+		else	[outlineViewDelegate selectURLs:duplicatedURLs byExpandingAncestors:NO];
 	}
 }
 
@@ -343,7 +355,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		if([item.target isFileURL])
 		{
 			[self pushURL:ParentForURL(item.target)];
-			[outlineViewDelegate selectURLs:@[ item.target ]];
+			[outlineViewDelegate selectURLs:@[ item.target ] byExpandingAncestors:NO];
 			return;
 		}
 	}
@@ -526,7 +538,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if([created count] > 0)
 	{
 		OakPlayUISound(OakSoundDidMoveItemUISound);
-		[outlineViewDelegate selectURLs:created];
+		[outlineViewDelegate selectURLs:created byExpandingAncestors:NO];
 	}
 }
 
