@@ -1,4 +1,5 @@
 #import "OakFileBrowser.h"
+#import "OakFSUtilities.h"
 #import "OakHistoryController.h"
 #import "ui/OakFileBrowserView.h"
 #import "ui/OFBOutlineView.h"
@@ -44,58 +45,6 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @end
 
 static NSString* const kUserDefaultsFileBrowserDataSourceOptions = @"FileBrowser DataSourceOptions";
-
-static NSURL* kURLLocationComputer;
-static NSURL* kURLLocationHome;
-static NSURL* kURLLocationDesktop;
-static NSURL* kURLLocationFavorites;
-static NSURL* kURLLocationBundles;
-
-static NSString* DisplayName (NSURL* url, size_t numberOfParents = 0)
-{
-	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
-		return [(NSString*)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
-	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
-		return @"Bundles";
-	else // if([url isFileURL])
-		return [NSString stringWithCxxString:path::display_name([[url path] fileSystemRepresentation], numberOfParents)];
-}
-
-static NSImage* IconImage (NSURL* url, NSSize size = (NSSize){16, 16})
-{
-	NSImage* iconImage = nil;
-	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
-		iconImage = [NSImage imageNamed:NSImageNameComputer];
-	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
-		iconImage = [NSImage imageNamed:NSImageNameFolderSmart];
-	else if([[url scheme] isEqualToString:@"scm"])
-		iconImage = [NSImage imageNamed:NSImageNameFolderSmart];
-	else // if([url isFileURL])
-		iconImage = [OakFileIconImage fileIconImageWithPath:[url path] size:size];
-
-	[iconImage setSize:size];
-	return iconImage;
-}
-
-static NSURL* ParentForURL (NSURL* url)
-{
-	struct statfs buf;
-	NSString* currentPath = [url path];
-	NSString* parentPath  = [currentPath stringByDeletingLastPathComponent];
-
-	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
-		return nil;
-	else if([currentPath isEqualToString:parentPath] || [url isFileURL] && statfs([currentPath fileSystemRepresentation], &buf) == 0 && path::normalize(buf.f_mntonname) == path::normalize([currentPath fileSystemRepresentation]))
-		return kURLLocationComputer;
-	else if([url isFileURL])
-		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
-	else if([[url scheme] isEqualToString:@"scm"])
-		return [NSURL fileURLWithPath:[url path] isDirectory:YES];
-	else if([@[ @"xcodeproj", @"search" ] containsObject:[url scheme]])
-		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
-	else
-		return [[[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:parentPath] autorelease];
-}
 
 static bool is_binary (std::string const& path)
 {
@@ -802,12 +751,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 + (void)initialize
 {
 	[[NSApplication sharedApplication] registerServicesMenuSendTypes:@[ NSFilenamesPboardType, NSURLPboardType ] returnTypes:nil];
-
-	kURLLocationComputer  = [[NSURL alloc] initWithString:@"computer:///"];
-	kURLLocationHome      = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
-	kURLLocationDesktop   = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:path::desktop()] isDirectory:YES];
-	kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:oak::application_t::support("Favorites")] isDirectory:YES];
-	kURLLocationBundles   = [[NSURL alloc] initWithString:@"bundles:///"];
 }
 
 - (id)validRequestorForSendType:(NSString*)sendType returnType:(NSString*)returnType
