@@ -46,7 +46,20 @@ namespace
 			D(DBF_DocumentController_SaveHelper, bug("\n"););
 			init(context);
 
-			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window delegate:_self encoding:_document->encoding_for_save_as_path(to_s([_self.saveFolder stringByAppendingPathComponent:DefaultSaveNameForDocument(_document)]))];
+			[OakSavePanel showWithPath:DefaultSaveNameForDocument(_document) directory:_self.saveFolder fowWindow:_window encoding:_document->encoding_for_save_as_path(to_s([_self.saveFolder stringByAppendingPathComponent:DefaultSaveNameForDocument(_document)])) completionHandler:^(NSString* path, encoding::type const& encoding){
+				D(DBF_DocumentController_SaveHelper, bug("%s\n", to_s(path).c_str()););
+				if(path)
+				{
+					_document->set_path(to_s(path));
+					_document->set_disk_encoding(encoding);
+					context->set_path(to_s(path));
+				}
+				else
+				{
+					_self.userAbort = YES;
+				}
+				[_self setContext:file::save_context_ptr()];
+			}];
 		}
 
 		void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
@@ -196,25 +209,5 @@ namespace
 
 	if(flag && [[window delegate] respondsToSelector:@selector(updateProxyIcon)])
 		[[window delegate] performSelector:@selector(updateProxyIcon)]; // FIXME The delegate needs to update proxy icon based on “exists on disk” notifications from document_t
-}
-
-// ===================
-// = Sheet Callbacks =
-// ===================
-
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(encoding::type const&)encoding
-{
-	D(DBF_DocumentController_SaveHelper, bug("%s\n", to_s(aPath).c_str()););
-	if(aPath)
-	{
-		documents.back()->set_path(to_s(aPath));
-		documents.back()->set_disk_encoding(encoding);
-		context->set_path(to_s(aPath));
-	}
-	else
-	{
-		userAbort = YES;
-	}
-	context.reset();
 }
 @end

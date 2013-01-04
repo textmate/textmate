@@ -873,7 +873,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 // = Document Action Methods =
 // ===========================
 
-- (void)savePanelDidEnd:(OakSavePanel*)sheet path:(NSString*)aPath encoding:(encoding::type const&)encoding
+- (void)saveDocumentAsPath:(NSString*)aPath encoding:(encoding::type const&)encoding
 {
 	if(!aPath)
 		return;
@@ -911,8 +911,15 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	D(DBF_DocumentController, bug("%s\n", [self selectedDocument]->path().c_str()););
 	document::document_ptr doc = [self selectedDocument];
 	if(doc->path() != NULL_STR)
-			[DocumentSaveHelper trySaveDocument:doc forWindow:self.window defaultDirectory:nil andCallback:NULL];
-	else	[OakSavePanel showWithPath:DefaultSaveNameForDocument(doc) directory:self.untitledSavePath fowWindow:self.window delegate:self encoding:doc->encoding_for_save_as_path(to_s([(self.untitledSavePath ?: @"") stringByAppendingPathComponent:DefaultSaveNameForDocument(doc)]))];
+	{
+		[DocumentSaveHelper trySaveDocument:doc forWindow:self.window defaultDirectory:nil andCallback:NULL];
+	}
+	else
+	{
+		[OakSavePanel showWithPath:DefaultSaveNameForDocument(doc) directory:self.untitledSavePath fowWindow:self.window encoding:doc->encoding_for_save_as_path(to_s([(self.untitledSavePath ?: @"") stringByAppendingPathComponent:DefaultSaveNameForDocument(doc)])) completionHandler:^(NSString* path, encoding::type const& encoding){
+			[self saveDocumentAsPath:path encoding:encoding];
+		}];
+	}
 }
 
 - (IBAction)saveDocumentAs:(id)sender
@@ -922,7 +929,9 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 	std::string const documentPath = doc->path();
 	NSString* documentFolder = [NSString stringWithCxxString:path::parent(documentPath)];
 	NSString* documentName   = [NSString stringWithCxxString:path::name(documentPath)];
-	[OakSavePanel showWithPath:(documentName ?: DefaultSaveNameForDocument(doc)) directory:(documentFolder ?: self.untitledSavePath) fowWindow:self.window delegate:self encoding:doc->encoding_for_save_as_path(doc->path() != NULL_STR ? doc->path() : to_s([(self.untitledSavePath ?: @"") stringByAppendingPathComponent:DefaultSaveNameForDocument(doc)]))];
+	[OakSavePanel showWithPath:(documentName ?: DefaultSaveNameForDocument(doc)) directory:(documentFolder ?: self.untitledSavePath) fowWindow:self.window encoding:doc->encoding_for_save_as_path(doc->path() != NULL_STR ? doc->path() : to_s([(self.untitledSavePath ?: @"") stringByAppendingPathComponent:DefaultSaveNameForDocument(doc)])) completionHandler:^(NSString* path, encoding::type const& encoding){
+		[self saveDocumentAsPath:path encoding:encoding];
+	}];
 }
 
 - (IBAction)saveAllDocuments:(id)sender
