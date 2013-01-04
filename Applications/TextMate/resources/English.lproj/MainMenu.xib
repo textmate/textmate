@@ -1957,8 +1957,18 @@
 								<object class="NSMenuItem" id="929454160">
 									<reference key="NSMenu" ref="423205485"/>
 									<string key="NSTitle">Current Document</string>
-									<string key="NSKeyEquiv">r</string>
-									<int key="NSKeyEquivModMask">1310720</int>
+									<string key="NSKeyEquiv">J</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
+								<object class="NSMenuItem" id="765164125">
+									<reference key="NSMenu" ref="423205485"/>
+									<bool key="NSIsAlternate">YES</bool>
+									<string key="NSTitle">Reveal Current Document</string>
+									<string key="NSKeyEquiv">J</string>
+									<int key="NSKeyEquivModMask">1572864</int>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
@@ -3472,14 +3482,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">revealFileInProject:</string>
-						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="929454160"/>
-					</object>
-					<int key="connectionID">756</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
 						<string key="label">goToSCMDataSource:</string>
 						<reference key="source" ref="51167417"/>
 						<reference key="destination" ref="733524002"/>
@@ -3597,6 +3599,22 @@
 						<reference key="destination" ref="799402673"/>
 					</object>
 					<int key="connectionID">802</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">revealFileInProject:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="765164125"/>
+					</object>
+					<int key="connectionID">806</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">navigateToFileInProject:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="929454160"/>
+					</object>
+					<int key="connectionID">807</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -4374,6 +4392,7 @@
 							<reference ref="637553303"/>
 							<reference ref="922821419"/>
 							<reference ref="398863048"/>
+							<reference ref="765164125"/>
 						</object>
 						<reference key="parent" ref="818899021"/>
 					</object>
@@ -5456,6 +5475,11 @@
 						<reference key="object" ref="660477192"/>
 						<reference key="parent" ref="558062756"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">803</int>
+						<reference key="object" ref="765164125"/>
+						<reference key="parent" ref="423205485"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5729,6 +5753,7 @@
 					<string>798.IBPluginDependency</string>
 					<string>80.IBPluginDependency</string>
 					<string>801.IBPluginDependency</string>
+					<string>803.IBPluginDependency</string>
 					<string>81.IBPluginDependency</string>
 					<string>82.IBPluginDependency</string>
 					<string>83.IBPluginDependency</string>
@@ -6005,6 +6030,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6019,7 +6045,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">802</int>
+			<int key="maxID">807</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6209,6 +6235,7 @@
 							<string>moveSelectionLeft:</string>
 							<string>moveSelectionRight:</string>
 							<string>moveSelectionUp:</string>
+							<string>navigateToFileInProject:</string>
 							<string>newDocumentInTab:</string>
 							<string>newFileBrowser:</string>
 							<string>openFavorites:</string>
@@ -6353,6 +6380,7 @@
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
+							<string>id</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
@@ -6384,6 +6412,7 @@
 							<string>moveSelectionLeft:</string>
 							<string>moveSelectionRight:</string>
 							<string>moveSelectionUp:</string>
+							<string>navigateToFileInProject:</string>
 							<string>newDocumentInTab:</string>
 							<string>newFileBrowser:</string>
 							<string>openFavorites:</string>
@@ -6543,6 +6572,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">moveSelectionUp:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">navigateToFileInProject:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

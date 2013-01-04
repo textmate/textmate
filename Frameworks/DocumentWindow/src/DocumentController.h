@@ -71,6 +71,7 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 - (IBAction)selectPreviousTab:(id)sender;
 - (IBAction)takeSelectedTabIndexFrom:(id)sender;
 
+- (IBAction)navigateToFileInProject:(id)sender;
 - (IBAction)revealFileInProject:(id)sender;
 - (IBAction)toggleFileBrowser:(id)sender;
 
