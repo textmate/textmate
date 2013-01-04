@@ -72,6 +72,7 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 - (IBAction)takeSelectedTabIndexFrom:(id)sender;
 
 - (IBAction)revealFileInProject:(id)sender;
+- (IBAction)revealFileInProjectByExpandingAncestors:(id)sender;
 - (IBAction)toggleFileBrowser:(id)sender;
 
 - (void)performBundleItem:(bundles::item_ptr const&)anItem;
