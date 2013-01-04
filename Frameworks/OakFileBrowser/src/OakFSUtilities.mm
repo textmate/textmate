@@ -24,12 +24,14 @@ static void initializeConstants ()
 
 NSString* DisplayName (NSURL* url, size_t numberOfParents)
 {
+	NSString* res = nil;
 	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
-		return [(NSString*)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
+		res = [(NSString*)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
 	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
-		return @"Bundles";
+		res = @"Bundles";
 	else // if([url isFileURL])
-		return [NSString stringWithCxxString:path::display_name([[url path] fileSystemRepresentation], numberOfParents)];
+		res = [NSString stringWithCxxString:path::display_name([[url path] fileSystemRepresentation], numberOfParents)];
+	return res ?: [url absoluteString] ?: @"«nil»";
 }
 
 NSImage* IconImage (NSURL* url, NSSize size)
