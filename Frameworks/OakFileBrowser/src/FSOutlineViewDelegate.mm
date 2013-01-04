@@ -1,4 +1,5 @@
 #import "FSOutlineViewDelegate.h"
+#import "OakFSUtilities.h"
 #import "io/FSDataSource.h"
 #import "io/FSItem.h"
 #import "ui/OFBPathInfoCell.h"
@@ -95,11 +96,12 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 @property (nonatomic, retain) NSSet* pendingSelectURLs;
 @property (nonatomic, retain) NSURL* pendingEditURL;
 @property (nonatomic, retain) NSURL* pendingMakeVisibleURL;
+@property (nonatomic, retain) NSMutableSet* pendingExpandURLs;
 @property (nonatomic, assign) CGFloat pendingScrollOffset;
 @end
 
 @implementation FSOutlineViewDelegate
-@synthesize outlineView, dataSource, openURLs, modifiedURLs, pendingSelectURLs, pendingEditURL, pendingMakeVisibleURL, pendingScrollOffset;
+@synthesize outlineView, dataSource, openURLs, modifiedURLs, pendingSelectURLs, pendingEditURL, pendingMakeVisibleURL, pendingExpandURLs, pendingScrollOffset;
 
 - (id)init
 {
@@ -122,6 +124,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	self.pendingSelectURLs = nil;
 	self.pendingEditURL = nil;
 	self.pendingMakeVisibleURL = nil;
+	self.pendingExpandURLs = nil;
 	self.dataSource = nil;
 	self.outlineView = nil;
 
@@ -176,6 +179,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	self.pendingSelectURLs = nil;
 	self.pendingEditURL = nil;
 	self.pendingMakeVisibleURL = nil;
+	self.pendingExpandURLs = nil;
 	self.pendingScrollOffset = 0;
 
 	if(dataSource)
@@ -244,13 +248,55 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 
 		self.pendingMakeVisibleURL = nil;
 	}
+	
+	for(NSInteger i = 0; i < [outlineView numberOfRows] && [pendingExpandURLs count]; ++i)
+	{
+		id item = [outlineView itemAtRow:i];
+		
+		if(![pendingExpandURLs containsObject:[item url]])
+			continue;
+		
+		[outlineView expandItem:item];
+		
+		[pendingExpandURLs removeObject:[item url]];
+	}
+	if([pendingExpandURLs count] == 0)
+		self.pendingExpandURLs = nil;
 }
 
-- (void)selectURLs:(NSArray*)someURLs
+- (void)selectURLs:(NSArray*)someURLs byExpandingAncestors:(BOOL)expandAncestors
 {
 	self.pendingSelectURLs = [NSSet setWithArray:someURLs];
 	if([someURLs count] == 1)
 		self.pendingMakeVisibleURL = [someURLs lastObject];
+	
+	if(expandAncestors)
+	{
+		NSMutableSet* ancestors = [NSMutableSet set];
+		NSURL* rootURL = dataSource.rootItem.url;
+		
+		for(NSURL* targetURL in someURLs)
+		{
+			NSMutableSet* currentAncestors = [[NSMutableSet alloc] init];
+			NSURL* currentURL;
+			
+			for(currentURL = ParentForURL(targetURL); currentURL; currentURL = ParentForURL(currentURL))
+			{
+				if([currentURL isEqual:rootURL])
+					break;
+				
+				[currentAncestors addObject:currentURL];
+			}
+			
+			if(currentURL)
+				[ancestors unionSet:currentAncestors];
+			
+			[currentAncestors release];
+		}
+		
+		self.pendingExpandURLs = ancestors;
+	}
+	
 	[self checkPendingSelectAndEditURLs];
 }
 
@@ -388,7 +434,7 @@ static BOOL MyEvent (NSEvent* anEvent, NSView* aView)
 	if(suppressAutoExpansion && ![expandedURLs containsObject:item.url])
 		return NO;
 
-	if(MyEvent([NSApp currentEvent], anOutlineView) && OakIsAlternateKeyOrMouseEvent())
+	if(![pendingExpandURLs containsObject:item.url] && MyEvent([NSApp currentEvent], anOutlineView) && OakIsAlternateKeyOrMouseEvent())
 		[recursiveExpandPaths addObject:item.url];
 
 	if([dataSource reloadItem:item])

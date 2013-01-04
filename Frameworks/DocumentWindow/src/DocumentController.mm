@@ -947,6 +947,12 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 #endif
 - (IBAction)revealFileInProject:(id)sender
 {
+	self.fileBrowserVisible = YES;
+	[fileBrowser revealURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]]];
+}
+
+- (IBAction)revealFileInProjectByExpandingAncestors:(id)sender
+{
 	D(DBF_DocumentController, bug("%s\n", [self selectedDocument]->path().c_str()););
 	self.fileBrowserVisible = YES;
 	NSURL* currentDocumentURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]];
@@ -1540,7 +1546,7 @@ static std::string file_chooser_glob (std::string const& path)
 		[menuItem setTitle:self.fileBrowserVisible ? @"Hide File Browser" : @"Show File Browser"];
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = documentTabs.size() > 1;
-	else if([menuItem action] == @selector(revealFileInProject:))
+	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
 		active = [self selectedDocument]->path() != NULL_STR;
 	else if([menuItem action] == @selector(goToParentFolder:))
 		active = [[self window] firstResponder] != textView;

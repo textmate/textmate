@@ -25,7 +25,7 @@
 @property (nonatomic, retain) NSArray* openURLs;
 @property (nonatomic, retain) NSArray* modifiedURLs;
 
-- (void)selectURLs:(NSArray*)someURLs;
+- (void)selectURLs:(NSArray*)someURLs byExpandingAncestors:(BOOL)expandAncestors;
 - (void)editURL:(NSURL*)anURL;
 - (void)scrollToOffset:(CGFloat)anOffset;
 @end
