@@ -59,7 +59,7 @@ class GitHubLookup
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
     # issue request
-    request = Net::HTTP::Get.new(uri.request_uri)
+    request = Net::HTTP::Get.new(uri.request_uri, {'User-Agent' => 'curl'})
     response = http.request(request)
 
     # could be a 404, return nil if so
