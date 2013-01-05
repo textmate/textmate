@@ -986,11 +986,6 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 // = Close Window Warnings =
 // =========================
 
-- (void)performCloseTabsAtIndexes:(NSIndexSet*)indexes
-{
-	[self closeTabsAtIndexes:indexes quiet:NO];
-}
-
 - (void)performCloseTab:(id)sender
 {
 	D(DBF_DocumentController, bug("\n"););
