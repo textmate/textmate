@@ -83,7 +83,6 @@ PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, Oak
 
 - (void)makeTextViewFirstResponder:(id)sender;
 
-- (void)closeTabAtIndex:(NSUInteger)tabIndex;
 - (void)closeDocumentWithPath:(NSString*)aPath;
 
 - (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner;
