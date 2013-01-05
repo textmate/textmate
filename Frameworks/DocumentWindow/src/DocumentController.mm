@@ -986,11 +986,6 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 // = Close Window Warnings =
 // =========================
 
-- (void)closeTabAtIndex:(NSUInteger)tabIndex
-{
-	[self closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:tabIndex] quiet:NO];
-}
-
 - (void)performCloseTabsAtIndexes:(NSIndexSet*)indexes
 {
 	[self closeTabsAtIndexes:indexes quiet:NO];
