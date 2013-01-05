@@ -1,4 +1,3 @@
-#import "DocumentOpenHelper.h"
 #import <OakFileBrowser/OakFileBrowser.h>
 #import <OakAppKit/OakTabBarView.h>
 #import <OakTextView/OakDocumentView.h>
@@ -16,7 +15,7 @@ typedef std::shared_ptr<document_tab_t> document_tab_ptr;
 
 namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
-PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, DocumentOpenHelperDelegate, OakTextViewDelegate>
+PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate>
 {
 	OBJC_WATCH_LEAKS(DocumentController);
 

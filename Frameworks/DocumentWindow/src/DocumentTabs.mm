@@ -1,4 +1,5 @@
 #import "DocumentTabs.h"
+#import "DocumentOpenHelper.h"
 #import "DocumentSaveHelper.h"
 #import "DocumentCommand.h"
 #import <document/document.h>
@@ -37,7 +38,42 @@ namespace
 	// This is also set after open succeeds
 	[self synchronizeWindowTitle];
 
-	[[DocumentOpenHelper new] tryOpenDocument:self.selectedDocument forWindow:self.window delegate:self];
+	document::document_ptr documentToOpen = self.selectedDocument;
+	[[DocumentOpenHelper new] tryOpenDocument:documentToOpen forWindow:self.window completionHandler:^(std::string const& error, oak::uuid_t const& filterUUID){
+		if(error == NULL_STR)
+		{
+			if(documentToOpen != self.selectedDocument)
+				return;
+
+			iterate(tab, documentTabs)
+			{
+				if(**tab == documentToOpen && !(*tab)->_did_open)
+				{
+					(*tab)->_document->open();
+					(*tab)->_did_open = true;
+				}
+			}
+
+			[self synchronizeWindowTitle];
+
+			[documentView setDocument:documentToOpen];
+			[self makeTextViewFirstResponder:self];
+		}
+		else
+		{
+			if(filterUUID)
+				show_command_error(error, filterUUID);
+
+			NSMutableIndexSet* set = [NSMutableIndexSet indexSet];
+			for(size_t i = 0; i < documentTabs.size(); ++i)
+			{
+				document::document_ptr document = *documentTabs[i];
+				if(*document == *documentToOpen)
+					[set addIndex:i];
+			}
+			[self closeTabsAtIndexes:set quiet:YES];
+		}
+	}];
 }
 
 - (document::document_ptr const&)selectedDocument
@@ -245,46 +281,6 @@ namespace
 	[tabBarView reloadData];
 	[self updateFileBrowserStatus:self];
 	self.selectedTabIndex = newSelectedIndex;
-}
-
-// ==============================
-// = DocumentOpenHelperDelegate =
-// ==============================
-
-- (void)documentOpenHelper:(DocumentOpenHelper*)documentOpenHelper didOpenDocument:(document::document_ptr const&)aDocument
-{
-	if(aDocument != [self selectedDocument])
-		return;
-
-	iterate(tab, documentTabs)
-	{
-		if(**tab == aDocument && !(*tab)->_did_open)
-		{
-			(*tab)->_document->open();
-			(*tab)->_did_open = true;
-		}
-	}
-
-	[self synchronizeWindowTitle];
-
-	[documentView setDocument:aDocument];
-	[self makeTextViewFirstResponder:self];
-
-}
-
-- (void)documentOpenHelper:(DocumentOpenHelper*)documentOpenHelper failedToOpenDocument:(document::document_ptr const&)aDocument error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)filterUUID
-{
-	if(filterUUID)
-		show_command_error(aMessage, filterUUID);
-
-	NSMutableIndexSet* set = [NSMutableIndexSet indexSet];
-	for(size_t i = 0; i < documentTabs.size(); ++i)
-	{
-		document::document_ptr document = *documentTabs[i];
-		if(*document == *aDocument)
-			[set addIndex:i];
-	}
-	[self closeTabsAtIndexes:set quiet:YES];
 }
 
 // =======================
