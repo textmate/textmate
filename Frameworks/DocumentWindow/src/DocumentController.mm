@@ -171,7 +171,7 @@ static document::document_ptr create_document (NSString* fileBrowserPath)
 		}
 
 	public:
-		void show_documents (std::vector<document::document_ptr> const& documents, std::string const& browserPath)
+		void show_documents (std::vector<document::document_ptr> const& documents, std::string const& browserPath) const
 		{
 			if(browserPath == NULL_STR && !documents.empty())
 			{

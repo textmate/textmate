@@ -32,7 +32,7 @@ namespace document
 	{
 		virtual ~ui_proxy_t () { }
 		virtual void show_document (oak::uuid_t const& collection, document_ptr document, text::range_t const& range, bool bringToFront) const = 0;
-		virtual void show_documents (std::vector<document_ptr> const& documents, std::string const& browserPath) = 0;
+		virtual void show_documents (std::vector<document_ptr> const& documents, std::string const& browserPath) const = 0;
 		virtual void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env, run_callback_ptr callback) = 0;
 		virtual bool load_session (std::string const& path) const = 0;
 		virtual bool save_session (std::string const& path, bool includeUntitled) const = 0;
