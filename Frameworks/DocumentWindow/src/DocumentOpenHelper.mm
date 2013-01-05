@@ -10,6 +10,8 @@
 OAK_DEBUG_VAR(DocumentController_OpenHelper);
 
 @interface DocumentOpenHelper ()
+@property (nonatomic, copy) void(^callback)(std::string const&, oak::uuid_t const&);
+
 - (void)didOpenDocument:(document::document_ptr const&)aDocument;
 - (void)failedToOpenDocument:(document::document_ptr const&)aDocument error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)filterUUID;
 @end
@@ -73,19 +75,10 @@ namespace
 }
 
 @implementation DocumentOpenHelper
-- (id)init
-{
-	if(self = [super init])
-	{
-	}
-	return self;
-}
-
-- (void)tryOpenDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow delegate:(id <DocumentOpenHelperDelegate>)aDelegate
+- (void)tryOpenDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow completionHandler:(void(^)(std::string const& error, oak::uuid_t const& filterUUID))aCompletionHandler
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s, already open %s\n", aDocument->display_name().c_str(), BSTR(aDocument->is_open())););
-
-	self.delegate = aDelegate;
+	self.callback = aCompletionHandler;
 	if(aDocument->try_open(document::open_callback_ptr((document::open_callback_t*)new open_callback_t(self, aWindow))))
 	{
 		[self didOpenDocument:aDocument];
@@ -98,14 +91,12 @@ namespace
 	D(DBF_DocumentController_OpenHelper, bug("%s\n", aDocument->display_name().c_str()););
 	if(aDocument->recent_tracking() && aDocument->path() != NULL_STR)
 		[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:aDocument->path()]]]; 
-	if([self.delegate respondsToSelector:@selector(documentOpenHelper:didOpenDocument:)])
-		[self.delegate documentOpenHelper:self didOpenDocument:aDocument];
+	self.callback(NULL_STR, oak::uuid_t());
 }
 
 - (void)failedToOpenDocument:(document::document_ptr const&)aDocument error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)filterUUID
 {
 	D(DBF_DocumentController_OpenHelper, bug("%s\n", aDocument->display_name().c_str()););
-	if([self.delegate respondsToSelector:@selector(documentOpenHelper:failedToOpenDocument:error:usingFilter:)])
-		[self.delegate documentOpenHelper:self failedToOpenDocument:aDocument error:aMessage usingFilter:filterUUID];
+	self.callback(aMessage == NULL_STR ? "unknown error" : aMessage, filterUUID);
 }
 @end
