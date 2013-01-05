@@ -22,7 +22,6 @@ PUBLIC extern NSString* const kUserDefaultsFoldersOnTopKey;
 PUBLIC extern NSString* const kUserDefaultsShowFileExtensionsKey;
 PUBLIC extern NSString* const kUserDefaultsInitialFileBrowserURLKey;
 PUBLIC extern NSString* const kUserDefaultsFileBrowserPlacementKey;
-PUBLIC extern NSString* const kUserDefaultsDisableTabBarCollapsingKey;
 PUBLIC extern NSString* const kUserDefaultsHTMLOutputPlacementKey;
 
 // ===========

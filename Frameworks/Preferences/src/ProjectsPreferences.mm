@@ -3,6 +3,7 @@
 #import <settings/settings.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
+#import <OakAppKit/OakTabBarView.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakStringListTransformer.h>
 
