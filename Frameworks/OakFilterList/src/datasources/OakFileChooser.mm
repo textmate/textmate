@@ -394,8 +394,8 @@ void file_chooser_t::wait () const
 @implementation FileChooserViewController
 - (void)updateTitles
 {
-	[sourceSelector setLabel:[NSString stringWithCxxString:path::display_name(fileChooser.projectPath.UTF8String)] forSegment:0];
-	[sourceSelector setLabel:[NSString stringWithCxxString:path::display_name(fileChooser.path.UTF8String)] forSegment:1];
+	[sourceSelector setLabel:[NSString stringWithCxxString:path::display_name(to_s(fileChooser.projectPath))] forSegment:0];
+	[sourceSelector setLabel:[NSString stringWithCxxString:path::display_name(to_s(fileChooser.path))] forSegment:1];
 }
 
 - (id)initWithFileChooser:(OakFileChooser*)chooser
