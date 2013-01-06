@@ -1120,17 +1120,17 @@ Any other string:
 
 - (void)didSingleClickFindAllResults:(id)sender
 {
+	// This is implicitly handled by outlineViewSelectionDidChange:
+}
+
+- (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
+{
 	if([findAllResultsOutlineView numberOfSelectedRows] == 1)
 	{
 		NSUInteger selectionIndex = [[findAllResultsOutlineView selectedRowIndexes] firstIndex];
 		FFMatch* selectedMatch    = [findAllResultsOutlineView itemAtRow:selectionIndex];
 		document::show([selectedMatch match].document, searcher.projectIdentifier ? oak::uuid_t(to_s(searcher.projectIdentifier)) : document::kCollectionNew, [selectedMatch match].range, false);
 	}
-}
-
-- (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
-{
-	[self didSingleClickFindAllResults:self];
 }
 
 - (BOOL)commitEditing
