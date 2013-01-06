@@ -11,6 +11,7 @@
 #import <CrashReporter/CrashReporter.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
 #import <BundlesManager/BundlesManager.h>
+#import <document/collection.h>
 #import <io/path.h>
 #import <bundles/bundles.h>
 #import <ns/ns.h>
@@ -124,7 +125,7 @@ OAK_DEBUG_VAR(AppStartup);
 	BOOL didRestoreSession = !disableSessionRestorePrefs && !disableSessionRestore && [appController loadSession:self];
 	BOOL didOpenDocuments  = DidHandleODBEditorEvent([self.openEvent aeDesc]) || ([self.openDocumentsArray count] && (OakOpenDocuments(self.openDocumentsArray), YES));
 	if(!disableUntitledAtStartupPrefs && !didRestoreSession && !didOpenDocuments && getenv("OAK_DISABLE_UNTITLED_FILE") == NULL)
-		[[[DocumentController alloc] init] showWindow:nil];
+		document::show(document::create());
 
 	SoftwareUpdate* swUpdate = [SoftwareUpdate sharedInstance];
 	[swUpdate setSignee:key_chain_t::key_t("org.textmate.duff", "Allan Odgaard", "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n")];

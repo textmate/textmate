@@ -17,16 +17,16 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 - (void)newDocument:(id)sender
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	[[[DocumentController alloc] init] showWindow:nil];
+	document::show(document::create(), document::kCollectionNew);
 }
 
 - (void)newFileBrowser:(id)sender
 {
 	D(DBF_AppController_Documents, bug("\n"););
-	DocumentController* controller = [[DocumentController alloc] init];
-	[controller window];
-	controller.fileBrowserVisible = YES;
-	[controller showWindow:self];
+	NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
+	NSURL* url          = urlString ? [NSURL URLWithString:urlString] : nil;
+	NSString* path      = [url isFileURL] ? [url path] : NSHomeDirectory();
+	document::show_browser(to_s(path));
 }
 
 - (void)openDocument:(id)sender
