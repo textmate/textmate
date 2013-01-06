@@ -1,6 +1,7 @@
 #import "ProjectLayoutView.h"
 #import <Preferences/Keys.h>
 #import <oak/misc.h>
+#import <oak/debug.h>
 
 NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
 NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
@@ -10,7 +11,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 @property (nonatomic, retain) NSLayoutConstraint* htmlOutputSizeConstraint;
 @end
 
-@implementation ProjectLayoutView
+@implementation ProjectLayoutView { OBJC_WATCH_LEAKS(ProjectLayoutView); }
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
