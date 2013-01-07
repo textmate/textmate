@@ -21,7 +21,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 {
 	if(self = [super init])
 	{
-		self.window         = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 100, 100, 100) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		self.window         = [[NSPanel alloc] initWithContentRect:NSMakeRect(100, 100, 100, 100) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		self.htmlOutputView = [[OakHTMLOutputView alloc] init];
 
 		[self.window setFrameAutosaveName:@"Command Output (HTML)"];
