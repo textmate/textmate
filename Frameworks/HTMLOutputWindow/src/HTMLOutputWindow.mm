@@ -8,7 +8,6 @@ OAK_DEBUG_VAR(HTMLOutputWindow);
 static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 
 @interface HTMLOutputWindowController ()
-@property (nonatomic, retain) NSWindow* window;
 @property (nonatomic, retain) OakHTMLOutputView* htmlOutputView;
 @property (nonatomic, readonly) BOOL running;
 @end
