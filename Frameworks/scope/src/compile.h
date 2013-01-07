@@ -136,25 +136,11 @@ namespace scope
 				{}
 			compiled_t() {}
 
-			bool match (context_t const& scope, std::multimap<double, const T&>& ordered) const
+			void styles_for_scope (context_t const& scope, std::multimap<double, T>& ordered) const
 			{
-				size_t before = ordered.size();
 				std::map<int, double> matched = matcher.match(scope, l_compressor, r_compressor);
 				iterate(it, matched)
-					ordered.insert(std::make_pair<double, const T&>(it->second, rules[it->first]));
-				return ordered.size() - before != 0;
-			}
-
-			T styles_for_scope (context_t const& scope, T base_style) const
-			{
-				std::multimap<double, int> ordered;
-				std::map<int, double> matched = matcher.match(scope, l_compressor, r_compressor);
-				iterate(it, matched)
-					ordered.insert(std::make_pair(it->second, it->first));
-				iterate(it, ordered) 
-					base_style+= rules[it->second];
-				
-				return base_style;
+					ordered.insert(std::make_pair(it->second, rules[it->first]));
 			}
 		};
 		

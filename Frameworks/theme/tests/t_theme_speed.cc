@@ -63,32 +63,4 @@ public:
 	 	printf ("%.4f seconds to classic theme\n", timer1.duration());
 		
 	}
-	
-	void test_theme_speed2 ()
-	{
-		test::bundle_index_t bundleIndex;
-		bundles::item_ptr TestGrammarItem;
-		//printf("grammar:%s", grammar().c_str());
-		TestGrammarItem = bundleIndex.add(bundles::kItemTypeTheme, grammar());
-		bundleIndex.commit();
-
-		theme_t theme(TestGrammarItem);
-		theme_t::test_hook_t compiled = theme_t::test_hook_t::get_hook(theme);
-		std::vector<std::string> _scopes = scopes();
-		std::vector<scope::context_t::context_t> contexts;
-
-		iterate(textScope, _scopes)
-			contexts.push_back(scope::context_t::context_t(*textScope));
-		
-		oak::duration_t timer2;
-		for(int i = 0; i < repeat ; i++)
-			iterate(textScope, contexts)
-			{	
-				compiled.styles_for_scope(*textScope, "", 1.0);
-			}
-		
-	 	printf ("%.4f seconds to new theme\n", timer2.duration());
-	}
-	
-	
 };

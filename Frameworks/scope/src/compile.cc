@@ -28,6 +28,7 @@ scope::compile::compressor_unique_ptr const& scope::compile::compressor_t::next(
 	assert('*' == 42);
 	assert(*scope::types::atom_any.c_str() == 42);
 	assert(*scope::types::atom_any.c_str() < 'a');
+	assert(*scope::types::atom_any.c_str() < '0');
 	
 	//if(path.path.begin() != last && *path.path.begin()->first.c_str() == *scope::types::atom_any.c_str())
 	// We use the fact that '*' is sorted before alphabetical letters 

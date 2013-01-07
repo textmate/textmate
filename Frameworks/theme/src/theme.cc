@@ -1,6 +1,8 @@
 #include "theme.h"
 #include <cf/cf.h>
-
+#include <bundles/query.h>
+#include <functional>
+CGFloat const theme_t::decomposed_style_t::defaultFontSize = -1;
 static theme_t::color_info_t read_color (std::string const& str_color);
 static cf::color_t soften (cf::color_t color, CGFloat factor = 0.5);
 static CGFloat read_font_size (std::string const& str_font_size);
@@ -64,6 +66,18 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 	return res;
 }
 
+void values_for_setting (std::string const& setting, scope::context_t const& scope, std::function<void (plist::any_t, bundles::item_ptr)> func)
+{
+	citerate(item, query(bundles::kFieldSettingName, setting, scope, bundles::kItemTypeSettings))
+	{
+		plist::any_t value;
+		if(plist::get_key_path((*item)->plist(), "settings." + setting, value))
+		{
+			func(value, *item);
+		}
+	}
+}
+
 std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_t const& scope)
 {
 	static struct { std::string name; theme_t::color_info_t decomposed_style_t::*field; } const colorKeys[] =
@@ -87,41 +101,34 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_
 
 	for(size_t i = 0; i < sizeofA(colorKeys); ++i)
 	{
-		bundles::item_ptr item;
-		plist::any_t const& value = bundles::value_for_setting(colorKeys[i].name, scope, &item);
-		if(item)
+		values_for_setting(colorKeys[i].name, scope, [&](plist::any_t value, bundles::item_ptr item)
 		{
 			res.push_back(decomposed_style_t(item->scope_selector()));
 			res.back().*(colorKeys[i].field) = read_color(plist::get<std::string>(value));
-		}
+		});
 	}
 
 	for(size_t i = 0; i < sizeofA(booleanKeys); ++i)
 	{
 		bundles::item_ptr item;
-		plist::any_t const& value = bundles::value_for_setting(booleanKeys[i].name, scope, &item);
-		if(item)
+		values_for_setting(booleanKeys[i].name, scope, [&](plist::any_t value, bundles::item_ptr item)
 		{
 			res.push_back(decomposed_style_t(item->scope_selector()));
 			res.back().*(booleanKeys[i].field) = plist::is_true(value) ? bool_true : bool_false;
-		}
+		});
 	}
 
-	bundles::item_ptr fontNameItem;
-	plist::any_t const& fontNameValue = bundles::value_for_setting("fontName", scope, &fontNameItem);
-	if(fontNameItem)
+	values_for_setting("fontName", scope, [&](plist::any_t value, bundles::item_ptr item)
 	{
-		res.push_back(decomposed_style_t(fontNameItem->scope_selector()));
-		res.back().font_name = plist::get<std::string>(fontNameValue);
-	}
+		res.push_back(decomposed_style_t(item->scope_selector()));
+		res.back().font_name = plist::get<std::string>(value);
+	});
 
-	bundles::item_ptr fontSizeItem;
-	plist::any_t const& fontSizeValue = bundles::value_for_setting("fontSize", scope, &fontSizeItem);
-	if(fontSizeItem)
+	values_for_setting("fontSize", scope, [&](plist::any_t value, bundles::item_ptr item)
 	{
-		res.push_back(decomposed_style_t(fontSizeItem->scope_selector()));
-		res.back().font_size = read_font_size(plist::get<std::string>(fontSizeValue));
-	}
+		res.push_back(decomposed_style_t(item->scope_selector()));
+		res.back().font_size = read_font_size(plist::get<std::string>(value));
+	});
 
 	return res;
 }
@@ -241,10 +248,9 @@ void theme_t::setup_styles ()
 	_gutter_styles.selectionIconsHover   = _gutter_styles.selectionIconsHover   ? _gutter_styles.selectionIconsHover   : _gutter_styles.selectionIcons;
 	_gutter_styles.selectionIconsPressed = _gutter_styles.selectionIconsPressed ? _gutter_styles.selectionIconsPressed : _gutter_styles.selectionIcons;
 
-	citerate(it, global_styles(scope::wildcard))
-		_styles.push_back(*it);
+	other_styles = scope::compile::compile(global_styles(scope::wildcard));
 	
-	compiled = scope::compile::compile(_styles);
+	theme_styles = scope::compile::compile(_styles);
 
 }
 
@@ -289,9 +295,25 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 	if(styles == _cache.end())
 	{
 
-		std::multimap<double, const theme_t::decomposed_style_t&> ordered;
-		decomposed_style_t style(scope::selector_t(), fontName, fontSize);
-		decomposed_style_t base = compiled.styles_for_scope(scope, style);
+		std::multimap<double, theme_t::decomposed_style_t> ordered;
+		decomposed_style_t base(scope::selector_t(), fontName, fontSize);
+		other_styles.styles_for_scope(scope, ordered);
+		
+		bool clear_font_size = false, clear_background_color = false;
+		riterate(it, ordered)
+		{
+			if(clear_font_size)
+				it->second.font_size = decomposed_style_t::defaultFontSize;
+			if(clear_background_color)
+				it->second.background = theme_t::color_info_t();
+			clear_background_color = clear_background_color || !it->second.background.is_blank();
+			clear_font_size = clear_font_size || it->second.font_size != decomposed_style_t::defaultFontSize;
+		}
+
+		theme_styles.styles_for_scope(scope, ordered);
+		
+		iterate(it, ordered)
+			base+= it->second;
 
 		CTFontPtr font(CTFontCreateWithName(cf::wrap(base.font_name), round(base.font_size), NULL), CFRelease);
 		if(CTFontSymbolicTraits traits = (base.bold == bool_true ? kCTFontBoldTrait : 0) + (base.italic == bool_true ? kCTFontItalicTrait : 0))
