@@ -80,16 +80,13 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 	if([[aURL host] isEqualToString:@"open"])
 	{
 		std::map<std::string, std::string> parameters;
-
-		NSArray* components = [[aURL query] componentsSeparatedByString:@"&"];
-		for(NSString* part in components)
+		for(NSString* part in [[aURL query] componentsSeparatedByString:@"&"])
 		{
 			NSArray* keyValue = [part componentsSeparatedByString:@"="];
 			if([keyValue count] == 2)
 			{
 				std::string key = to_s([[keyValue firstObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
-				NSURL* fileURL = key == "url" ? [NSURL URLWithString:[keyValue lastObject]] : nil;
-				parameters[key] = to_s([fileURL isFileURL] ? [fileURL path] : [[keyValue lastObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+				parameters[key] = to_s([[keyValue lastObject] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
 			}
 		}
 
@@ -106,7 +103,24 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 
 		if(url != parameters.end())
 		{
-			std::string const& path = url->second;
+			static std::string const kTildeURLPrefixes[] = { "file://localhost/~/", "file:///~/", "file://~/" };
+			static std::string const kRootURLPrefixes[]  = { "file://localhost/", "file:///" };
+
+			std::string const& urlStr = url->second;
+			std::string path = NULL_STR;
+
+			for(auto root : kRootURLPrefixes)
+			{
+				if(urlStr.find(root) == 0)
+					path = path::join("/", urlStr.substr(root.size()));
+			}
+
+			for(auto tilde : kTildeURLPrefixes)
+			{
+				if(urlStr.find(tilde) == 0)
+					path = path::join(path::home(), urlStr.substr(tilde.size()));
+			}
+
 			if(path::is_directory(path))
 			{
 				document::show_browser(path);
