@@ -8,10 +8,10 @@ class immutable_map {
 	backing_type backing;
 	struct pair_less
 	{
-	   bool operator() ( const std::pair<K, V>& lhs, const K& rhs ) const 
-	   { return lhs.first < rhs; }
-	   bool operator() ( const K& lhs, const std::pair<K, V >& rhs ) const 
-		{ return (*this)(rhs, lhs); }
+		bool operator() ( const std::pair<K, V>& lhs, const K& rhs ) const 
+		{ return lhs.first < rhs; }
+		bool operator() ( const K& lhs, const std::pair<K, V >& rhs ) const 
+		{ return lhs < rhs.first; }
 	};
 	
 public:
@@ -47,8 +47,8 @@ private:
 
 	  while (imax >= imin)
 	    {
-	      signed int imid = (imin + imax) / 2;
- 	      if (comp(backing.at(imid), key))
+			 signed int imid = (imin + imax) / 2;
+			if (comp(backing.at(imid), key))
 				imin = imid + 1;
 	      else if (comp(key, backing.at(imid)))
 				imax = imid - 1;
@@ -56,9 +56,9 @@ private:
 				assert(0 <= imid && imid < backing.size());
 				return backing.begin() + imid;
 			}
-	  }
-	  // key not found
-	  return backing.end();
+		}
+		// key not found
+		return backing.end();
 	}
 public:
 
