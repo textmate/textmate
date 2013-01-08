@@ -1,96 +1,90 @@
-#import <OakFileBrowser/OakFileBrowser.h>
-#import <OakAppKit/OakTabBarView.h>
-#import <OakTextView/OakDocumentView.h>
-#import <oak/debug.h>
-#import <plist/uuid.h>
+#import <document/document.h>
 #import <command/runner.h>
-#import <scm/scm.h>
 
-@class ProjectLayoutView;
-@class OakFilterWindowController;
-@class OakHTMLOutputView;
+PUBLIC extern NSString* const OakDocumentWindowWillCloseNotification;
 
-struct document_tab_t;
-typedef std::shared_ptr<document_tab_t> document_tab_ptr;
+PUBLIC @interface DocumentController : NSObject
+@property (nonatomic) NSWindow*                                  window;
 
-namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
+@property (nonatomic) NSString*                                  identifier;
+@property (nonatomic) NSString*                                  defaultProjectPath;
+@property (nonatomic, readonly) NSString*                        projectPath; // effectiveProjectPath
 
-PUBLIC @interface DocumentController : NSWindowController <NSWindowDelegate, OakFileBrowserDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate>
-{
-	OBJC_WATCH_LEAKS(DocumentController);
+@property (nonatomic) std::vector<document::document_ptr> const& documents;
+@property (nonatomic) document::document_ptr              const& selectedDocument;
+@property (nonatomic) NSUInteger                                 selectedTabIndex;
 
-	IBOutlet OakTabBarView* tabBarView;
-	IBOutlet ProjectLayoutView* layoutView;
+@property (nonatomic) BOOL                                       fileBrowserVisible;
+@property (nonatomic) NSDictionary*                              fileBrowserHistory;
+@property (nonatomic) CGFloat                                    fileBrowserWidth;
 
-	OakFileBrowser* fileBrowser;
-	OakDocumentView* documentView;
-	OakTextView* textView;
+@property (nonatomic) BOOL                                       htmlOutputVisible;
+@property (nonatomic) NSSize                                     htmlOutputSize;
 
-	OakHTMLOutputView* htmlOutputView;
-	command::runner_ptr runner;
+- (void)showWindow:(id)sender;
+- (void)openAndSelectDocument:(document::document_ptr const&)aDocument;
+- (void)close;
 
-	OakFilterWindowController* filterWindowController;
-	NSUInteger fileChooserSourceIndex;
-
-	scm::info_ptr scmInfo;
-	scm::callback_t* scmCallback;
-
-	// =================
-	// = Document Tabs =
-	// =================
-
-@package // FIXME
-	std::vector<document_tab_ptr> documentTabs;
-@protected
-	size_t selectedTabIndex;
-
-	oak::uuid_t scratchDocument;
-}
-@property (nonatomic, readonly) NSString* identifier;
-@property (nonatomic, readonly) NSString* documentPath;
-@property (nonatomic, readonly) NSString* fileBrowserPath;
-@property (nonatomic, readonly) NSString* projectPath;
-@property (nonatomic, readonly) NSString* untitledSavePath;
-
-// Session restore
-@property (nonatomic) BOOL fileBrowserVisible;
-@property (nonatomic) NSDictionary* fileBrowserHistory;
-@property (nonatomic) CGFloat fileBrowserWidth;
-@property (nonatomic) NSSize htmlOutputSize;
-
-+ (DocumentController*)controllerForDocument:(document::document_ptr const&)aDocument;
-+ (DocumentController*)controllerForPath:(std::string const&)aPath;
-+ (DocumentController*)controllerForUUID:(oak::uuid_t const&)aUUID;
-
-- (id)init;
-- (void)synchronizeWindowTitle;
+- (IBAction)newDocumentInTab:(id)sender;
+- (IBAction)moveDocumentToNewWindow:(id)sender; // TODO Move to AppController
+- (IBAction)mergeAllWindows:(id)sender;         // TODO Move to AppController
 
 - (IBAction)goToFileCounterpart:(id)sender;
 - (IBAction)selectNextTab:(id)sender;
 - (IBAction)selectPreviousTab:(id)sender;
 - (IBAction)takeSelectedTabIndexFrom:(id)sender;
 
-- (IBAction)revealFileInProject:(id)sender;
-- (IBAction)revealFileInProjectByExpandingAncestors:(id)sender;
-- (IBAction)toggleFileBrowser:(id)sender;
-
-- (void)performBundleItem:(bundles::item_ptr const&)anItem;
 - (NSPoint)positionForWindowUnderCaret;
-
-- (void)performCloseWindow:(id)sender;
-- (void)performCloseOtherTabs:(id)sender;
-
-- (void)makeTextViewFirstResponder:(id)sender;
-
-- (void)closeDocumentWithPath:(NSString*)aPath;
-
+- (void)performBundleItem:(bundles::item_ptr const&)anItem;
 - (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner;
+- (IBAction)toggleHTMLOutput:(id)sender;
+
+- (IBAction)performCloseTab:(id)sender;
+- (IBAction)performCloseSplit:(id)sender;
+- (IBAction)performCloseWindow:(id)sender;
+- (IBAction)performCloseOtherTabs:(id)sender;
 
 - (IBAction)saveDocument:(id)sender;
 - (IBAction)saveDocumentAs:(id)sender;
 - (IBAction)saveAllDocuments:(id)sender;
-@end
+// - (IBAction)revertDocumentToSaved:(id)sender;
 
-@interface DocumentController (ApplicationTermination)
+// =============================
+// = Opening Auxiliary Windows =
+// =============================
+
+- (IBAction)orderFrontFindPanel:(id)sender;
+- (IBAction)showSymbolChooser:(id)sender;
+- (IBAction)goToFile:(id)sender;
+
+// ==================
+// = OakFileBrowser =
+// ==================
+
+- (IBAction)toggleFileBrowser:(id)sender;
+- (IBAction)revealFileInProject:(id)sender;
+- (IBAction)revealFileInProjectByExpandingAncestors:(id)sender;
+- (IBAction)goToProjectFolder:(id)sender;
+
+- (IBAction)goBack:(id)sender;
+- (IBAction)goForward:(id)sender;
+- (IBAction)goToParentFolder:(id)sender;
+- (IBAction)goToComputer:(id)sender;
+- (IBAction)goToHome:(id)sender;
+- (IBAction)goToDesktop:(id)sender;
+- (IBAction)goToFavorites:(id)sender;
+- (IBAction)goToSCMDataSource:(id)sender;
+- (IBAction)orderFrontGoToFolder:(id)sender;
+
+// ==============
+// = Legacy API =
+// ==============
+
++ (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
+- (void)updateVariables:(std::map<std::string, std::string>&)env;
+
+// Private (used by DocumentCommand.mm)
+@property (nonatomic, readonly) NSString* scopeAttributes;
+- (NSString*)untitledSavePath;
 @end

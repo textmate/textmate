@@ -1,6 +1,5 @@
 #import "DocumentCommand.h"
 #import "DocumentController.h"
-#import "DocumentTabs.h"
 #import "DocumentSaveHelper.h"
 #import <OakAppKit/OakToolTip.h>
 #import <OakAppKit/OakAppKit.h>
@@ -8,6 +7,7 @@
 #import <BundleEditor/BundleEditor.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakTextView/OakDocumentView.h>
+#import <OakFileBrowser/OakFileBrowser.h>
 #import <OakSystem/application.h>
 #import <OakSystem/process.h>
 #import <command/runner.h>
@@ -20,32 +20,6 @@
 #import <io/path.h>
 #import <text/trim.h>
 #import <text/tokenize.h>
-
-@interface DocumentController (Variables)
-- (void)updateVariables:(std::map<std::string, std::string>&)env;
-@end
-
-@implementation DocumentController (Variables)
-- (void)updateVariables:(std::map<std::string, std::string>&)env
-{
-	[fileBrowser updateVariables:env];
-
-	if(NSString* projectDir = self.projectPath)
-	{
-		env["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
-		env["TM_PROJECT_UUID"]      = to_s(self.identifier);
-	}
-
-	if(auto theme = documentView.textView.theme)
-	{
-		if(auto themeItem = bundles::lookup(theme->uuid()))
-		{
-			if(!themeItem->paths().empty())
-				env["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
-		}
-	}
-}
-@end
 
 namespace
 {
@@ -224,11 +198,10 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 		{
 			if(controller)
 			{
-				iterate(tab, controller->documentTabs)
+				citerate(document, controller.documents)
 				{
-					document::document_ptr doc = **tab;
-					if(doc->is_modified() && doc->path() != NULL_STR)
-						documentsToSave.push_back(doc);
+					if((*document)->is_modified() && (*document)->path() != NULL_STR)
+						documentsToSave.push_back((*document));
 				}
 			}
 		}
