@@ -1,4 +1,4 @@
 TEST_SOURCES = tests/*.cc
 SOURCES      = src/*.cc
 LINK        += text
-EXPORT       = src/scope.h
+EXPORT       = src/scope.h src/compile.h src/immutable_map.h

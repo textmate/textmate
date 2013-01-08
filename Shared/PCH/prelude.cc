@@ -18,5 +18,7 @@
 #include <numeric>
 #include <thread>
 #include <boost/variant.hpp>
+#include <boost/iterator/transform_iterator.hpp>
+
 
 #endif /* end of include guard: PRELUDE_CC_PCH_U5CKEP2N */

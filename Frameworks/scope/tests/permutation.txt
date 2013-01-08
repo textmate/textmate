@@ -1,0 +1,50 @@
+bar|foo&hax&delta:
+ 
+delta - hax - [1] / bar \
+   |              \ foo /
+    \ / bar \ _ [2] hax
+      \ foo /  
+      
+hax     - delta - [1]
+     \  - bar \ _ [3] delta
+	   \ - foo /
+	  
+/ bar \ / hax   - [3]          
+\ foo / \ delta - [2]
+
+bar | foo & delta & hax & kyr:
+[a]                 
+kyr delta - [4]hax - [1] / bar \
+  | |                    \ foo /
+  |  \ [5] / bar \
+  |        \ foo / - [2] hax
+  + hax - delta - [1]
+  |    \- bar \ _ [3] delta
+  |     \- foo /
+  |/ bar \ [6] / hax   - [3]          
+   \ foo /     \ delta - [2]
+[b]
+delta - kyr- [4] 
+         |             
+          \  [5] 
+
+hax- kyr - delta - [1]
+      \  - bar \ _ [3] delta
+	    \ - foo /
+
+/ bar \ kyr - [6]         
+\ foo /     
+  
+[c]      
+hax     - delta - kyr -[1]
+     \  - bar \ _ kyr -[3]
+	   \ - foo /
+	  
+/ bar \ / hax   - [3]          
+\ foo / \ delta - [2]
+       |
+       |          / delta - kyr 
+        \/ hax   -  kyr - [3]          
+         \ delta -  kyr - [2]
+                  \ hax - kyr
+

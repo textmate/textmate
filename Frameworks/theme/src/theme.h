@@ -3,6 +3,7 @@
 
 #include <bundles/bundles.h>
 #include <scope/scope.h>
+#include <scope/compile.h>
 #include <cf/color.h>
 
 typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
@@ -73,12 +74,13 @@ struct PUBLIC theme_t
 		double red, green, blue, alpha;
 	};
 
-private:
+public:
 	enum bool_t { bool_true, bool_false, bool_unset };
 
 	struct decomposed_style_t
 	{
-		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = -1) : scope_selector(scopeSelector), font_name(fontName), font_size(fontSize), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset) { }
+		static CGFloat const defaultFontSize;
+		decomposed_style_t (scope::selector_t const& scopeSelector = scope::selector_t(), std::string const& fontName = NULL_STR, CGFloat fontSize = defaultFontSize) : scope_selector(scopeSelector), font_name(fontName), font_size(fontSize), bold(bool_unset), italic(bool_unset), underlined(bool_unset), misspelled(bool_unset) { }
 		decomposed_style_t& operator+= (decomposed_style_t const& rhs);
 
 		scope::selector_t scope_selector;
@@ -117,6 +119,9 @@ private:
 	bool _is_dark;
 	bool _is_transparent;
 	callback_t _callback;
+
+	scope::compile::compiled_t<decomposed_style_t> theme_styles;
+	scope::compile::compiled_t<decomposed_style_t> other_styles;
 
 	typedef std::tuple<scope::context_t, std::string, CGFloat> key_t; // scope, font name, font size
 	mutable std::map<key_t, styles_t> _cache;
