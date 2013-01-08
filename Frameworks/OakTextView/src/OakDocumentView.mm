@@ -109,7 +109,9 @@ private:
 		for(NSView* view in @[ gutterScrollView, gutterView, gutterDividerView, textScrollView, statusBar ])
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-		[self setDocument:document::from_content("", "text.plain")]; // file type is only to avoid potential “no grammar” warnings in console
+		document::document_ptr doc = document::from_content("", "text.plain"); // file type is only to avoid potential “no grammar” warnings in console
+		doc->set_custom_name("null document"); // without a name it grabs an ‘untitled’ token
+		[self setDocument:doc];
 
 		iterate(keyPath, ObservedTextViewKeyPaths)
 			[textView addObserver:self forKeyPath:*keyPath options:NSKeyValueObservingOptionInitial context:NULL];
