@@ -288,7 +288,7 @@ namespace document
 			{
 				if(document_ptr doc = pair->second.lock())
 				{
-					if(doc->path() == NULL_STR)
+					if(doc->path() == NULL_STR && doc->custom_name() == NULL_STR)
 						reserved.insert(doc->untitled_count());
 				}
 			}

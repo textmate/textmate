@@ -220,6 +220,7 @@ namespace document
 
 		std::string path () const             { return _path; }
 		std::string virtual_path () const     { return _virtual_path == NULL_STR ? _path : _virtual_path; }
+		std::string custom_name () const      { return _custom_name; }
 		std::string backup_path () const;
 		std::string display_name () const;
 
