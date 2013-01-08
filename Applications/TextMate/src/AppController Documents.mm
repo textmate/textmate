@@ -94,6 +94,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 		}
 
 		std::map<std::string, std::string>::const_iterator const& url     = parameters.find("url");
+		std::map<std::string, std::string>::const_iterator const& uuid    = parameters.find("uuid");
 		std::map<std::string, std::string>::const_iterator const& line    = parameters.find("line");
 		std::map<std::string, std::string>::const_iterator const& column  = parameters.find("column");
 		std::map<std::string, std::string>::const_iterator const& project = parameters.find("project");
@@ -119,6 +120,18 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 			else
 			{
 				NSRunAlertPanel(@"File Does not Exist", @"The item “%@” does not exist.", @"Continue", nil, nil, [NSString stringWithCxxString:path]);
+			}
+		}
+		else if(uuid != parameters.end())
+		{
+			if(document::document_ptr doc = document::find(uuid->second))
+			{
+				doc->set_recent_tracking(false);
+				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionCurrent, range);
+			}
+			else
+			{
+				NSRunAlertPanel(@"File Does not Exist", @"No document found for UUID %@.", @"Continue", nil, nil, [NSString stringWithCxxString:uuid->second]);
 			}
 		}
 		else if(range != text::range_t::undefined)
