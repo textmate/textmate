@@ -67,6 +67,9 @@ namespace ng
 
 	std::string buffer_t::operator[] (size_t i) const
 	{
+		if(i == size())
+			return "";
+
 		size_t from     = i;
 		size_t totalLen = 1;
 		uint32_t ch     = code_point(from, totalLen);
