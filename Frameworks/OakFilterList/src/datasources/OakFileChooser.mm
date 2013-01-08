@@ -387,7 +387,7 @@ void file_chooser_t::wait () const
 	NSComboBox* globComboBox;
 	OakHistoryList* globHistoryList;
 	NSSegmentedControl* sourceSelector;
-	OakFileChooser* fileChooser;
+	__weak OakFileChooser* fileChooser;
 }
 @end
 
