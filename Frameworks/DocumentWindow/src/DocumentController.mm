@@ -216,7 +216,6 @@ namespace
 	self.tabBarView.dataSource  = nil;
 	self.tabBarView.delegate    = nil;
 	self.textView.delegate      = nil;
-	self.fileBrowser.delegate   = nil;
 	self.filterWindowController = nil; // ensures we removeObserver: and set target to nil
 }
 

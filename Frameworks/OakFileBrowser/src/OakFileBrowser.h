@@ -26,7 +26,7 @@ PUBLIC @interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
 	OakFileBrowserView* view;
 	FSOutlineViewDelegate* outlineViewDelegate;
 }
-@property (nonatomic, assign) id <OakFileBrowserDelegate> delegate;
+@property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
 @property (nonatomic, retain, readonly) NSView* view;
 
 @property (nonatomic, readonly) NSString*     location;
