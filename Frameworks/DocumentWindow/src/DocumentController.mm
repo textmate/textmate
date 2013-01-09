@@ -28,10 +28,7 @@
 #import <text/utf8.h>
 #import <ns/ns.h>
 
-// TODO Prune tab bar
-
-// #import "AppController.h" // find_tags
-namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; }
+namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
 
 NSString* const OakDocumentWindowWillCloseNotification = @"OakDocumentWindowWillCloseNotification";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
