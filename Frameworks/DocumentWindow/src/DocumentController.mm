@@ -1491,6 +1491,8 @@ static std::string file_chooser_glob (std::string const& path)
 		active = self.documents.size() > 1;
 	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
 		active = [self selectedDocument]->path() != NULL_STR;
+	else if([menuItem action] == @selector(goToProjectFolder:))
+		active = self.projectPath != nil;
 	else if([menuItem action] == @selector(goToParentFolder:))
 		active = [self.window firstResponder] != self.textView;
 	return active;
