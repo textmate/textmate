@@ -10,6 +10,11 @@ namespace scope
 		typedef std::string atom_t;
 	}
 
+	namespace compressed
+	{
+		struct composite_t;
+	}
+
 	namespace compile
 	{
 		struct interim_t;
@@ -52,13 +57,23 @@ namespace scope
 			}
 		};
 
+		struct sub_rule_t
+		{
+			typedef std::shared_ptr<compressed::composite_t> composite_ptr;
+			composite_ptr composite;
+			int rule_id;
+		};
+		
 		class PUBLIC compiler_factory_t
 		{
 			analyze_t _analyzer;
 			interim_t root;
 			interim_t right_root;
 			std::multimap<int, int> sub_rule_mapping;
+			std::vector<sub_rule_t> _expressions;
+
 		public:
+			void compress (const selector_t& selector, int rule_id, int composite_index);
 			void expand_wildcards () { root.expand_wildcards(); right_root.expand_wildcards(); }
 			void graph (const selector_t& selector, int& rule_id, int& sub_rule_id);
 			std::multimap<int, int>& sub_rule_mappings () { return sub_rule_mapping;}
@@ -71,6 +86,7 @@ namespace scope
 		private:
 			void expand_wildcards (interim_t& analyzer);
 		};
+
 
 		// T must support:
 		// scope::selector_t scope_selector
@@ -92,6 +108,13 @@ namespace scope
 			// populate bit fields
 			compiler.calculate_bit_fields();
 
+			// break out all selectors into its compressed composites
+			iterate(r_id, compiler.sub_rule_mappings())
+			{
+				//printf("rule :%d sub:%d\n", r_id->first, r_id->second);
+				//auto selector = rules[r_id->first].scope_selector;
+				compiler.compress(rules[r_id->first].scope_selector, r_id->first, r_id->second);
+			}
 		}
 	}
 }
