@@ -1,5 +1,20 @@
 # Changes
 
+## 2013-01-09 (r9339)
+
+* When you open a folder or some document(s), a default project folder will be based on the path(s) opened. This means that as long as you always open the root of your project (via `mate`, `open -a TextMate`, dragging the folder to TextMate, using the favorites (⇧⌘O), open dialog, `txmt:` URL scheme, or what have you), your project no longer requires a `.tm_properties` file setting `projectDirectory` for Find in Folder (⇧⌘F), Go to File (⌘T), and similar to work as desired. Additionally the default properties now set a window title that includes the project folder’s name (and SCM branch when available), so most projects can now also drop setting `windowTitle`. Note that windows restored from a session created prior to r9339 will not have a default project folder, so you should close and re-open the project folder, after this, the project folder will be preserved in the session save data.
+* The file browser now defaults to the project folder rather than the folder set in Preferences (the latter is still used if there is no document, e.g. after ⌘N or ⌃⌘N).
+* Since opening a single document now assigns a project folder to the window, opening more documents from the same folder (or descendent folders) will have the documents open as tabs in the existing window. I _think_ this takes care of the common request of having all documents opened appear in new tabs of the frontmost window.
+* The ‘Merge All Windows’ action now ignores minimized windows. This means that if you wish to only merge a few windows then you can minimize all but those you wish to merge and then perform the action.
+* Closing last tab via file browser or similar no longer close the entire window. Likewise with canceling a file open, though there’s still some work to do in this department (actually backtracking to previous state, which could mean closing the window if the window was opened only to show this document).
+* Automatic pruning of the tab bar is temporarily suspended.
+* Render glyphs in Unicode’s “private use area”.
+* The `open` command used with the `txmt:` URL scheme now supports an `uuid` parameter. This is for command runners that work with untitled documents (the current document’s UUID is available as the `TM_DOCUMENT_UUID` environment variable).
+* Fix some unsupported edge-cases with percent-escaping the `url` parameter used with the `txmt` URL scheme. Also allow tilde to be used in the URL (mainly to be 100% compatible with TextMate 1.x).
+* Clicking a ‘find all’ result would be handled twice, meaning it would open two document windows, if the project window had been closed.
+* Fix potential crash when activating the OS dictionary on an empty document.
+* The file chooser window (⌘T) was leaking in r9337 and wouldn’t terminate its scanner thread if the window was closed w/o making a selection (although it would terminate when scanning had finished).
+
 ## 2013-01-03 (r9337)
 
 * Restore 10.7 compatibility.
