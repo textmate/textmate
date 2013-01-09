@@ -63,6 +63,39 @@ namespace scope
 			composite_ptr composite;
 			int rule_id;
 		};
+
+		typedef unsigned long long bits_t;
+
+		class compressor_t;
+		typedef std::unique_ptr<compressor_t> compressor_unique_ptr;
+		class PUBLIC compressor_t
+		{
+			struct converter
+			{
+				size_t sz;
+				typedef std::pair<std::string, compressor_unique_ptr> result_type;
+				converter(size_t sz):sz(sz) {}
+				result_type operator()(std::pair<std::string, interim_unique_ptr const&> const& pair) const
+				{ 
+					return std::make_pair(std::move(pair.first), compressor_unique_ptr(new compressor_t(*pair.second, sz)));
+				}
+			};
+
+			typedef std::map<std::string, compressor_unique_ptr> map_type; 			
+			std::vector<int> simple;
+			std::vector<bits_t> possible;
+			int hash;
+			bool match;
+			bool needs_right;
+			map_type path;
+
+		public:
+			compressor_unique_ptr const& next (std::string const& str) const;
+			compressor_t (interim_t const& analyze, size_t sz);
+			compressor_t (){}
+			compressor_t (compressor_t&& rhs) = default;
+			compressor_t& operator=(compressor_t&& rhs) = default;
+		};
 		
 		class PUBLIC compiler_factory_t
 		{
