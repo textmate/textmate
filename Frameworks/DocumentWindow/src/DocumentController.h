@@ -1,8 +1,6 @@
 #import <document/document.h>
 #import <command/runner.h>
 
-PUBLIC extern NSString* const OakDocumentWindowWillCloseNotification;
-
 PUBLIC @interface DocumentController : NSObject
 @property (nonatomic) NSWindow*                                  window;
 

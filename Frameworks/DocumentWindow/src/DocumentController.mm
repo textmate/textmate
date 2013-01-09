@@ -30,7 +30,6 @@
 
 namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
 
-NSString* const OakDocumentWindowWillCloseNotification = @"OakDocumentWindowWillCloseNotification";
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 
 @interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate>
@@ -70,6 +69,38 @@ static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag
 
 namespace
 {
+	// ==========================================
+	// = tracking document controller instances =
+	// ==========================================
+
+	static NSMutableDictionary* AllControllers ()
+	{
+		static NSMutableDictionary* res = [NSMutableDictionary new];
+		return res;
+	}
+
+	static NSArray* SortedControllers ()
+	{
+		NSMutableArray* res = [NSMutableArray array];
+		for(NSNumber* flag in @[ @NO, @YES ])
+		{
+			for(NSWindow* window in [NSApp orderedWindows])
+			{
+				if([window isMiniaturized] == [flag boolValue] && [window.delegate respondsToSelector:@selector(identifier)])
+				{
+					DocumentController* delegate = (DocumentController*)window.delegate;
+					if(id controller = AllControllers()[delegate.identifier])
+						[res addObject:controller];
+				}
+			}
+		}
+		return res;
+	}
+
+	// ======================
+	// = document_t helpers =
+	// ======================
+
 	struct tracking_info_t : document::document_t::callback_t
 	{
 		tracking_info_t (DocumentController* self, document::document_ptr const& document) : _self(self), _document(document) { }
@@ -225,7 +256,7 @@ namespace
 	[self.window unbind:@"documentEdited"];
 	self.window.delegate = nil;
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakDocumentWindowWillCloseNotification object:self];
+	self.identifier = nil; // This removes us from AllControllers and causes a release
 }
 
 - (void)showWindow:(id)sender                 { [self.window makeKeyAndOrderFront:sender]; }
@@ -892,6 +923,17 @@ namespace
 {
 	_selectedTabIndex = newSelectedTabIndex;
 	[self.tabBarView setSelectedTab:newSelectedTabIndex];
+}
+
+- (void)setIdentifier:(NSString*)newIdentifier
+{
+	if(_identifier == newIdentifier || [_identifier isEqualToString:newIdentifier])
+		return;
+
+	if(_identifier)
+		[AllControllers() removeObjectForKey:_identifier];
+	if(_identifier = newIdentifier)
+		[AllControllers() setObject:self forKey:newIdentifier];
 }
 
 // ===========================
@@ -1612,38 +1654,6 @@ static std::string file_chooser_glob (std::string const& path)
 				SetFrontProcessWithOptions(&(ProcessSerialNumber){ 0, kCurrentProcess }, kSetFrontProcessFrontWindowOnly);
 			}
 		}
-
-		mutable NSMutableDictionary* _controllers = [NSMutableDictionary new];
-
-		NSArray* sorted_controllers () const
-		{
-			NSMutableArray* res = [NSMutableArray array];
-			for(NSNumber* flag in @[ @NO, @YES ])
-			{
-				for(NSWindow* window in [NSApp orderedWindows])
-				{
-					if([window isMiniaturized] == [flag boolValue] && [window.delegate respondsToSelector:@selector(identifier)])
-					{
-						DocumentController* delegate = (DocumentController*)window.delegate;
-						if(id controller = _controllers[delegate.identifier])
-							[res addObject:controller];
-					}
-				}
-			}
-			return res;
-		}
-
-		void monitor_controller (DocumentController* controller) const
-		{
-			NSString* identifier = controller.identifier;
-			_controllers[identifier] = controller;
-
-			__block id observerId = [[NSNotificationCenter defaultCenter] addObserverForName:OakDocumentWindowWillCloseNotification object:controller queue:nil usingBlock:^(NSNotification* notification){
-				[_controllers removeObjectForKey:identifier];
-				[[NSNotificationCenter defaultCenter] removeObserver:observerId];
-			}];
-		}
-
 	public:
 		void show_documents (std::vector<document::document_ptr> const& documents, std::string const& browserPath) const
 		{
@@ -1653,13 +1663,13 @@ static std::string file_chooser_glob (std::string const& path)
 				ASSERT(documents.empty());
 				std::string const folder = path::resolve(browserPath);
 
-				for(DocumentController* candidate in sorted_controllers())
+				for(DocumentController* candidate in SortedControllers())
 				{
 					if(folder == to_s(candidate.projectPath))
 						return bring_to_front(candidate);
 				}
 
-				for(DocumentController* candidate in sorted_controllers())
+				for(DocumentController* candidate in SortedControllers())
 				{
 					if(candidate.fileBrowserVisible || candidate.documents.size() != 1 || !is_disposable(candidate.selectedDocument))
 						continue;
@@ -1671,7 +1681,6 @@ static std::string file_chooser_glob (std::string const& path)
 				if(!controller)
 				{
 					controller = [DocumentController new];
-					monitor_controller(controller);
 				}
 				else if(controller.selectedDocument)
 				{
@@ -1685,7 +1694,7 @@ static std::string file_chooser_glob (std::string const& path)
 			}
 			else if(!documents.empty())
 			{
-				for(DocumentController* candidate in sorted_controllers())
+				for(DocumentController* candidate in SortedControllers())
 				{
 					std::string const projectPath     = to_s(candidate.projectPath);
 					std::string const fileBrowserPath = candidate.fileBrowserVisible ? to_s(candidate.fileBrowser.location) : NULL_STR;
@@ -1727,7 +1736,6 @@ static std::string file_chooser_glob (std::string const& path)
 				else
 				{
 					controller = [DocumentController new];
-					monitor_controller(controller);
 					controller.documents = documents;
 
 					std::string projectPath = NULL_STR;
@@ -1758,9 +1766,9 @@ static std::string file_chooser_glob (std::string const& path)
 				document->set_selection(range);
 
 			NSString* projectId = [NSString stringWithCxxString:collection];
-			DocumentController* controller = _controllers[projectId];
+			DocumentController* controller = AllControllers()[projectId];
 			if(collection == document::kCollectionCurrent)
-				controller = [sorted_controllers() firstObject];
+				controller = [SortedControllers() firstObject];
 
 			if(controller)
 			{
@@ -1782,7 +1790,6 @@ static std::string file_chooser_glob (std::string const& path)
 				controller.documents = make_vector(document);
 				if(collection != document::kCollectionCurrent && collection != document::kCollectionNew)
 					controller.identifier = projectId;
-				monitor_controller(controller);
 			}
 
 			if(bringToFront)
@@ -1840,7 +1847,6 @@ static std::string file_chooser_glob (std::string const& path)
 						documents.push_back(document::create());
 
 					DocumentController* controller = [DocumentController new];
-					monitor_controller(controller);
 
 					std::string projectPath = NULL_STR;
 					if(plist::get_key_path(*project, "projectPath", projectPath))
