@@ -450,6 +450,33 @@ namespace
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
+- (void)pruneExcessTabs:(id)sender // TODO Enable tab pruning
+{
+	std::set<oak::uuid_t> newDocs;
+
+	NSInteger excessTabs = self.documents.size() - self.tabBarView.countOfVisibleTabs;
+	if(self.tabBarView && excessTabs > 0)
+	{
+		std::multimap<oak::date_t, size_t> ranked;
+		for(size_t i = 0; i < self.documents.size(); ++i)
+		{
+			document::document_ptr doc = [self documents][i];
+			if(!doc->is_modified() && doc->is_on_disk() && newDocs.find(doc->identifier()) == newDocs.end())
+				ranked.insert(std::make_pair(doc->lru(), i));
+		}
+
+		NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
+		iterate(pair, ranked)
+		{
+			[indexSet addIndex:pair->second];
+			if([indexSet count] == excessTabs)
+				break;
+		}
+
+		[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:NO];
+	}
+}
+
 - (BOOL)windowShouldClose:(id)sender
 {
 	[self.htmlOutputView stopLoading];
