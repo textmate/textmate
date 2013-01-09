@@ -117,7 +117,7 @@ namespace scope
 			filter_t filter;
 			char side;
 			if(parse_char("LRB", &side) && parse_char(":") && ws() && (parse_group(filter.selector) || parse_path(filter.selector)))
-				return filter.filter = filter_t::side_t(side), res.reset(new filter_t(filter)), true;
+				return filter.filter = side_t(side), res.reset(new filter_t(filter)), true;
 			return it = bt, false;
 		}
 
