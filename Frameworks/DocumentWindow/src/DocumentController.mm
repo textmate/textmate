@@ -1276,7 +1276,7 @@ namespace
 {
 	Find* find              = [Find sharedInstance];
 	find.documentIdentifier = [NSString stringWithCxxString:[self selectedDocument]->identifier()];
-	find.projectFolder      = self.projectPath;
+	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 	find.projectIdentifier  = self.identifier;
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
