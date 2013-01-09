@@ -30,6 +30,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		[self.window setContentView:self.htmlOutputView];
 		[self.window setDelegate:self];
 		[self.window setReleasedWhenClosed:NO];
+		[self.window setHidesOnDeactivate:NO];
 
 		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
 
