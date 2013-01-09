@@ -1522,6 +1522,27 @@ static std::string file_chooser_glob (std::string const& path)
 	return active;
 }
 
+// ======================
+// = Session Management =
+// ======================
+
++ (void)windowNotificationActual:(id)sender
+{
+	document::schedule_session_backup();
+}
+
++ (void)windowNotification:(NSNotification*)aNotification
+{
+	[self performSelector:@selector(windowNotificationActual:) withObject:nil afterDelay:0]; // A deadlock happens if we receive a notification while a sheet is closing and we save session (since session saving schedules a timer with the run loop, and the run loop is in a special state when a sheet is up, or something like that --Allan)
+}
+
++ (void)initialize
+{
+	static NSString* const WindowNotifications[] = { NSWindowDidBecomeKeyNotification, NSWindowDidDeminiaturizeNotification, NSWindowDidExposeNotification, NSWindowDidMiniaturizeNotification, NSWindowDidMoveNotification, NSWindowDidResizeNotification, NSWindowWillCloseNotification };
+	iterate(notification, WindowNotifications)
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowNotification:) name:*notification object:nil];
+}
+
 // ==========
 // = Legacy =
 // ==========

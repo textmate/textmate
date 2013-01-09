@@ -7,7 +7,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <ns/ns.h>
 #import <document/collection.h>
-#import <document/session.h>
 
 OAK_DEBUG_VAR(AppController_Documents);
 
@@ -200,26 +199,9 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 // = Load/Save Session =
 // =====================
 
-- (void)windowNotificationActual:(id)sender
-{
-	document::schedule_session_backup();
-}
-
-- (void)windowNotification:(NSNotification*)aNotification
-{
-	D(DBF_AppController_Documents, bug("%s\n", [[aNotification description] UTF8String]););
-	[self performSelector:@selector(windowNotificationActual:) withObject:nil afterDelay:0]; // A deadlock happens if we receive a notification while a sheet is closing and we save session (since session saving schedules a timer with the run loop, and the run loop is in a special state when a sheet is up, or something like that --Allan)
-}
-
 - (BOOL)loadSession:(id)sender
 {
-	BOOL res = document::load_session();
-
-	static NSString* const WindowNotifications[] = { NSWindowDidBecomeKeyNotification, NSWindowDidDeminiaturizeNotification, NSWindowDidExposeNotification, NSWindowDidMiniaturizeNotification, NSWindowDidMoveNotification, NSWindowDidResizeNotification, NSWindowWillCloseNotification };
-	iterate(notification, WindowNotifications)
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowNotification:) name:*notification object:nil];
-
-	return res;
+	return document::load_session();
 }
 
 // ===========================
