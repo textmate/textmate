@@ -2,6 +2,8 @@
 #include "types.h"
 #include <sstream>
 
+void analyze (scope::types::composite_t const& composite, scope::compile::analyze_t& analyzer, scope::types::side_t right_side=scope::types::side_t::unset, bool negate = false);
+
 int map_acc(int sum, const std::pair<int, int> & rhs)
 {
 	return sum + rhs.second;
@@ -60,7 +62,8 @@ void scope::compile::interim_t::calculate_bit_fields()
 	// we use a map, since [] constructs a default element
 	std::map<int, int> bits_needed_for_level;
 	compute_hash_sizes(*this, bits_needed_for_level, 0);
-	const int sum = std::accumulate(bits_needed_for_level.begin(), bits_needed_for_level.end(), 0, map_acc);
+	// TODO assert that the hash is big enough to contain all the bits
+	//const int sum = std::accumulate(bits_needed_for_level.begin(), bits_needed_for_level.end(), 0, map_acc);
 	hash = 0;
 	mask = 0;
 	compute_hashes(*this, bits_needed_for_level);
@@ -120,5 +123,78 @@ void scope::compile::interim_t::expand_wildcards ()
 			if(child->first != scope::types::atom_any ) 
 				propagate(*child->second, *path[scope::types::atom_any]);
 		}
+	}
+}
+
+scope::compile::interim_t* traverse (scope::compile::interim_t* wc, scope::compile::scopex& scope)
+{
+	iterate(atom, scope) {
+		auto iter = wc->path.find(*atom);
+		if(iter == wc->path.end())
+			iter = wc->path.insert(std::make_pair(*atom, new scope::compile::interim_t())).first;
+		wc = &*iter->second;
+	}
+	return wc;
+}
+
+void set_sub_rule (scope::compile::interim_t& root, scope::compile::scopesx& scopes, int rule_id, int sub_rule_id)
+{
+	scope::compile::interim_t* wc = &root;	
+	iterate(o, scopes)
+	{
+		wc = &root;
+		wc = traverse(wc, *o);
+		if(sub_rule_id == -1)
+		{
+			wc->simple.insert(rule_id);
+		}
+		else
+		{
+			wc->multi_part[sub_rule_id]=rule_id;
+		}
+	}
+}
+
+void scope::compile::compiler_factory_t::graph ( const scope::selector_t& selector, int& rule_id, int& sub_rule_id)
+{
+	size_t index = 0;
+	if(!selector.selector)
+	{
+		// rules without selectors always match and needs to be treated as having rank = 0
+		root.simple.insert(rule_id);
+		return;
+	}
+	iterate(iter2, selector.selector->composites)
+	{
+		// for every composite we want to know if it is simple i.e. just one non-negative path
+		// or multi-part
+		// after we know this, we can traverse the tree again, this time setting rule_ids
+		analyze(*iter2, _analyzer);
+
+		// multi part
+		if((_analyzer.left.or_paths.size() + _analyzer.right.or_paths.size()) > 1 || (_analyzer.left.not_paths.size() + _analyzer.left.not_paths.size()) > 0)
+		{
+			set_sub_rule(root, _analyzer.left.or_paths, rule_id, sub_rule_id);
+			set_sub_rule(root, _analyzer.left.not_paths, rule_id, sub_rule_id);			
+			set_sub_rule(right_root, _analyzer.right.or_paths, rule_id, sub_rule_id);
+			set_sub_rule(right_root, _analyzer.right.not_paths, rule_id, sub_rule_id);				
+
+			// currently the analysis of the rules is so crude that we can not be more fine-grained than this.
+			// ideally root.needs_right should only be set if the rule has no part that is on the left side.
+			// e.g. 'r:source.c' would need to be set like this. But 'punctuation.something.open r:punctuation.something.close'
+			// would only need to set needs_right on the punctuation.something.open node,
+			root.needs_right = root.needs_right || (_analyzer.right.or_paths.size() + _analyzer.right.not_paths.size()) > 0;
+
+			sub_rule_mapping.insert(std::make_pair(rule_id, index));
+			sub_rule_id++;
+		// simple case				
+		} else {
+			set_sub_rule(root, _analyzer.left.or_paths, rule_id, -1);
+			set_sub_rule(right_root, _analyzer.right.or_paths, rule_id, -1);
+			root.needs_right = root.needs_right || _analyzer.right.or_paths.size() > 0;
+			
+		}  
+		_analyzer.clear();
+		index++;
 	}
 }

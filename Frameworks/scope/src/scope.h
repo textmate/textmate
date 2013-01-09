@@ -6,6 +6,11 @@
 
 namespace scope
 {
+	namespace compile
+	{
+		class compiler_factory_t;
+	}
+
 	namespace types
 	{
 		struct path_t;
@@ -79,6 +84,7 @@ namespace scope
 	private:
 		void setup (std::string const& str);
 
+		friend class compile::compiler_factory_t;
 		friend std::string to_s (selector_t const& s);
 		types::selector_ptr selector;
 	};

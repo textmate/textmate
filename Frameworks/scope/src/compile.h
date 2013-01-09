@@ -51,6 +51,48 @@ namespace scope
 				right.clear();
 			}
 		};
+
+		class PUBLIC compiler_factory_t
+		{
+			analyze_t _analyzer;
+			interim_t root;
+			interim_t right_root;
+			std::multimap<int, int> sub_rule_mapping;
+		public:
+			void expand_wildcards () { root.expand_wildcards(); right_root.expand_wildcards(); }
+			void graph (const selector_t& selector, int& rule_id, int& sub_rule_id);
+			std::multimap<int, int>& sub_rule_mappings () { return sub_rule_mapping;}
+			analyze_t& analyzer () { return _analyzer;}
+			interim_t& interim () { return root;}
+			interim_t& right_interim () { return right_root;}
+			void calculate_bit_fields () { root.calculate_bit_fields();}
+			std::string to_s () { return root.to_s(); }
+			
+		private:
+			void expand_wildcards (interim_t& analyzer);
+		};
+
+		// T must support:
+		// scope::selector_t scope_selector
+
+		template<typename T>
+		void compile (std::vector<T> const& rules)
+		{
+			compiler_factory_t compiler;
+			int rule_id = 0;
+			int sub_rule_id=0;
+			iterate(iter, rules)
+			{
+				//auto selector = iter->scope_selector;
+				compiler.graph(iter->scope_selector, rule_id, sub_rule_id);
+				rule_id++;
+			}
+			// add *.<path_name> to all paths
+			compiler.expand_wildcards();
+			// populate bit fields
+			compiler.calculate_bit_fields();
+
+		}
 	}
 }
 
