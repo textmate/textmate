@@ -1585,6 +1585,111 @@ static std::string file_chooser_glob (std::string const& path)
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowNotification:) name:*notification object:nil];
 }
 
++ (BOOL)readSessionFromFile:(NSString*)aPath
+{
+	BOOL res = NO;
+	NSDictionary* session = [NSDictionary dictionaryWithContentsOfFile:aPath];
+	for(NSDictionary* project in session[@"projects"])
+	{
+		DocumentController* controller = [DocumentController new];
+
+		if(NSString* windowFrame = project[@"windowFrame"])
+			[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
+		if(NSString* fileBrowserWidth = project[@"fileBrowserWidth"])
+			controller.fileBrowserWidth = [fileBrowserWidth floatValue];
+		if(NSString* htmlOutputSize = project[@"htmlOutputSize"])
+			controller.htmlOutputSize = NSSizeFromString(htmlOutputSize);
+
+		controller.defaultProjectPath = project[@"projectPath"];
+		controller.fileBrowserHistory = project[@"fileBrowserState"];
+		controller.fileBrowserVisible = [project[@"fileBrowserVisible"] boolValue];
+
+		std::vector<document::document_ptr> documents;
+		NSInteger selectedTabIndex = 0;
+
+		for(NSDictionary* info in project[@"documents"])
+		{
+			document::document_ptr doc;
+			NSString* identifier = info[@"identifier"];
+			if(!identifier || !(doc = document::find(to_s(identifier))))
+			{
+				NSString* path = info[@"path"];
+				doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(controller.untitledSavePath));
+				if(NSString* displayName = info[@"displayName"])
+					doc->set_custom_name(to_s(displayName));
+			}
+
+			doc->set_recent_tracking(false);
+			documents.push_back(doc);
+
+			if([info[@"selected"] boolValue])
+				selectedTabIndex = documents.size() - 1;
+		}
+
+		if(documents.empty())
+			documents.push_back(create_untitled_document_in_folder(to_s(controller.untitledSavePath)));
+
+		controller.documents        = documents;
+		controller.selectedTabIndex = selectedTabIndex;
+
+		[controller openAndSelectDocument:documents[selectedTabIndex]];
+		[controller showWindow:nil];
+
+		if([project[@"miniaturized"] boolValue])
+			[controller.window miniaturize:nil];
+
+		res = YES;
+	}
+	return res;
+}
+
++ (BOOL)writeSessionToFile:(NSString*)aPath includeUntitledDocuments:(BOOL)includeUntitled
+{
+	NSMutableArray* projects = [NSMutableArray array];
+	for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
+	{
+		NSMutableDictionary* res = [NSMutableDictionary dictionary];
+
+		if(controller.defaultProjectPath)
+			res[@"projectPath"] = controller.defaultProjectPath;
+		if(controller.fileBrowserHistory)
+			res[@"fileBrowserState"] = controller.fileBrowserHistory;
+
+		res[@"windowFrame"]        = NSStringFromRect([controller.window frame]);
+		res[@"miniaturized"]       = @([controller.window isMiniaturized]);
+		res[@"htmlOutputSize"]     = NSStringFromSize(controller.htmlOutputSize);
+		res[@"fileBrowserVisible"] = @(controller.fileBrowserVisible);
+		res[@"fileBrowserWidth"]   = @(controller.fileBrowserWidth);
+
+		NSMutableArray* docs = [NSMutableArray array];
+		citerate(document, controller.documents)
+		{
+			if(!includeUntitled && ((*document)->path() == NULL_STR || !path::exists((*document)->path())))
+				continue;
+
+			NSMutableDictionary* doc = [NSMutableDictionary dictionary];
+			if((*document)->is_modified() || (*document)->path() == NULL_STR)
+			{
+				doc[@"identifier"] = [NSString stringWithCxxString:(*document)->identifier()];
+				if((*document)->is_open())
+					(*document)->backup();
+			}
+			if((*document)->path() != NULL_STR)
+				doc[@"path"] = [NSString stringWithCxxString:(*document)->path()];
+			if((*document)->display_name() != NULL_STR)
+				doc[@"displayName"] = [NSString stringWithCxxString:(*document)->display_name()];
+			if(*document == controller.selectedDocument)
+				doc[@"selected"] = @YES;
+			[docs addObject:doc];
+		}
+		res[@"documents"] = docs;
+		[projects addObject:res];
+	}
+
+	NSDictionary* session = @{ @"projects" : projects };
+	return [session writeToFile:aPath atomically:YES];
+}
+
 // ==========
 // = Legacy =
 // ==========
@@ -1807,142 +1912,12 @@ static std::string file_chooser_glob (std::string const& path)
 
 		bool load_session (std::string const& path) const
 		{
-			bool res = false;
-			plist::dictionary_t session = plist::load(path);
-			plist::array_t projects;
-			if(plist::get_key_path(session, "projects", projects))
-			{
-				iterate(project, projects)
-				{
-					NSInteger selectedTabIndex = 0;
-					std::vector<document::document_ptr> documents;
-					plist::array_t docsArray;
-					if(plist::get_key_path(*project, "documents", docsArray))
-					{
-						iterate(document, docsArray)
-						{
-							document::document_ptr doc;
-							std::string str;
-							if(plist::get_key_path(*document, "identifier", str) && (doc = document::find(oak::uuid_t(str))))
-								documents.push_back(doc);
-							else if(plist::get_key_path(*document, "path", str))
-								documents.push_back(document::create(str));
-							else if(plist::get_key_path(*document, "displayName", str))
-							{
-								documents.push_back(document::create()); // TODO Should use create_untitled_document_in_folder(«projectFolder»)
-								documents.back()->set_custom_name(str);
-							}
-							else
-								continue;
-
-							documents.back()->set_recent_tracking(false);
-
-							bool flag;
-							if(plist::get_key_path(*document, "selected", flag) && flag)
-								selectedTabIndex = documents.size() - 1;
-						}
-					}
-
-					if(documents.empty())
-						documents.push_back(document::create());
-
-					DocumentController* controller = [DocumentController new];
-
-					std::string projectPath = NULL_STR;
-					if(plist::get_key_path(*project, "projectPath", projectPath))
-						controller.defaultProjectPath = [NSString stringWithCxxString:projectPath];
-
-					controller.documents = documents;
-					controller.selectedTabIndex = selectedTabIndex;
-					[controller openAndSelectDocument:documents[selectedTabIndex]];
-
-					plist::dictionary_t fileBrowserState;
-					if(plist::get_key_path(*project, "fileBrowserState", fileBrowserState))
-						controller.fileBrowserHistory = ns::to_dictionary(fileBrowserState);
-
-					CGFloat size;
-					if(plist::get_key_path(*project, "fileBrowserWidth", size))
-						controller.fileBrowserWidth = size;
-
-					std::string str;
-					if(plist::get_key_path(*project, "htmlOutputSize", str))
-						controller.htmlOutputSize = NSSizeFromString([NSString stringWithCxxString:str]);
-
-					std::string windowFrame = NULL_STR;
-					if(plist::get_key_path(*project, "windowFrame", windowFrame))
-						[controller.window setFrame:NSRectFromString([NSString stringWithCxxString:windowFrame]) display:NO];
-
-					bool fileBrowserVisible = false;
-					if(plist::get_key_path(*project, "fileBrowserVisible", fileBrowserVisible) && fileBrowserVisible)
-						controller.fileBrowserVisible = YES;
-
-					[controller showWindow:nil];
-
-					bool isMiniaturized = false;
-					if(plist::get_key_path(*project, "miniaturized", isMiniaturized) && isMiniaturized)
-						[controller.window miniaturize:nil];
-
-					res = true;
-				}
-			}
-
-			return res;
+			return [DocumentController readSessionFromFile:[NSString stringWithCxxString:path]];
 		}
 
 		bool save_session (std::string const& path, bool includeUntitled) const
 		{
-			plist::array_t projects;
-			for(NSWindow* window in [[[NSApp orderedWindows] reverseObjectEnumerator] allObjects])
-			{
-				DocumentController* controller = (DocumentController*)[window delegate];
-				if([controller isKindOfClass:[DocumentController class]])
-				{
-					plist::dictionary_t res;
-
-					res["projectPath"]        = to_s(controller.defaultProjectPath);
-					res["windowFrame"]        = to_s(NSStringFromRect([controller.window frame]));
-					res["miniaturized"]       = [controller.window isMiniaturized];
-					res["htmlOutputSize"]     = to_s(NSStringFromSize(controller.htmlOutputSize));
-					res["fileBrowserVisible"] = controller.fileBrowserVisible;
-					res["fileBrowserWidth"]   = (int32_t)controller.fileBrowserWidth;
-
-					if(CFDictionaryRef fbState = (CFDictionaryRef)CFBridgingRetain(controller.fileBrowserHistory))
-					{
-						res["fileBrowserState"] = plist::convert(fbState);
-						CFRelease(fbState);
-					}
-
-					plist::array_t docs;
-					citerate(document, controller.documents)
-					{
-						if(!includeUntitled && ((*document)->path() == NULL_STR || !path::exists((*document)->path())))
-							continue;
-
-						plist::dictionary_t doc;
-						if((*document)->is_modified() || (*document)->path() == NULL_STR)
-						{
-							doc["identifier"] = std::string((*document)->identifier());
-							if((*document)->is_open())
-								(*document)->backup();
-						}
-						if((*document)->path() != NULL_STR)
-							doc["path"] = (*document)->path();
-						if((*document)->display_name() != NULL_STR)
-							doc["displayName"] = (*document)->display_name();
-						if(*document == controller.selectedDocument)
-							doc["selected"] = true;
-						docs.push_back(doc);
-					}
-					res["documents"] = docs;
-
-					if(!docs.empty())
-						projects.push_back(res);
-				}
-			}
-
-			plist::dictionary_t session;
-			session["projects"] = projects;
-			return plist::save(path, session);
+			return [DocumentController writeSessionToFile:[NSString stringWithCxxString:path] includeUntitledDocuments:includeUntitled];
 		}
 
 	} proxy;

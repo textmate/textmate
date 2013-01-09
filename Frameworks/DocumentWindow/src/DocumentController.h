@@ -19,6 +19,9 @@ PUBLIC @interface DocumentController : NSObject
 @property (nonatomic) BOOL                                       htmlOutputVisible;
 @property (nonatomic) NSSize                                     htmlOutputSize;
 
++ (BOOL)readSessionFromFile:(NSString*)aPath;
++ (BOOL)writeSessionToFile:(NSString*)aPath includeUntitledDocuments:(BOOL)includeUntitled;
+
 - (void)showWindow:(id)sender;
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument;
 - (void)close;
