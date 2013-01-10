@@ -2,23 +2,6 @@
 
 @class OakFilterListView;
 
-PUBLIC @interface OakFilterWindowController : NSWindowController
-{
-	OBJC_WATCH_LEAKS(OakFilterWindowController);
-	IBOutlet OakFilterListView* filterView;
-	IBOutlet NSView* filterControlsView;
-}
-+ (id)filterWindow;
-- (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
-@property (nonatomic, retain) id dataSource;
-@property (nonatomic, retain) id target;
-@property (nonatomic, assign) SEL action;
-@property (nonatomic, assign) SEL accessoryAction;
-@property (nonatomic, assign) BOOL sendActionOnSingleClick;
-@property (nonatomic, assign) BOOL allowsMultipleSelection;
-@property (nonatomic, readonly) NSArray* selectedItems;
-@end
-
 extern PUBLIC NSString* const FLDataSourceItemsDidChangeNotification;
 extern PUBLIC NSString* const FLDataSourceItemsShouldDescendNotification;
 extern PUBLIC NSString* const FLDataSourceItemsShouldAscendNotification;
@@ -72,4 +55,21 @@ extern PUBLIC NSString* const FLDataSourceItemsShouldAscendNotification;
 - (void)makeItemsBestFitForCurrentSearch:(NSArray*)items;
 
 - (void)descendIntoItem:(id)anItem;
+@end
+
+PUBLIC @interface OakFilterWindowController : NSWindowController
+{
+	OBJC_WATCH_LEAKS(OakFilterWindowController);
+	IBOutlet OakFilterListView* filterView;
+	IBOutlet NSView* filterControlsView;
+}
++ (id)filterWindow;
+- (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
+@property (nonatomic, retain) id <FilterListDataSource> dataSource;
+@property (nonatomic, retain) id target;
+@property (nonatomic, assign) SEL action;
+@property (nonatomic, assign) SEL accessoryAction;
+@property (nonatomic, assign) BOOL sendActionOnSingleClick;
+@property (nonatomic, assign) BOOL allowsMultipleSelection;
+@property (nonatomic, readonly) NSArray* selectedItems;
 @end

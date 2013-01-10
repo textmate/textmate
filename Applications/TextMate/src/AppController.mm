@@ -187,10 +187,11 @@ void OakOpenDocuments (NSArray* paths)
 
 - (void)filterWindowWillClose:(NSNotification*)notification
 {
-	bundleItemSearch.filter_string  = [[[_filterWindowController dataSource] filterString] UTF8String];
-	bundleItemSearch.key_equivalent = [[_filterWindowController dataSource] keyEquivalentSearch];
-	bundleItemSearch.all_scopes     = [[_filterWindowController dataSource] searchAllScopes];
-	bundleItemSearch.search_type    = [[_filterWindowController dataSource] searchType];
+	BundleItemChooser* dataSource = [_filterWindowController dataSource];
+	bundleItemSearch.filter_string  = to_s([dataSource filterString]);
+	bundleItemSearch.key_equivalent = [dataSource keyEquivalentSearch];
+	bundleItemSearch.all_scopes     = [dataSource searchAllScopes];
+	bundleItemSearch.search_type    = [dataSource searchType];
 	self.filterWindowController     = nil;
 }
 

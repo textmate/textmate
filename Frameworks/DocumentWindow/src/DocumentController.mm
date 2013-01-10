@@ -1295,7 +1295,7 @@ namespace
 		if(_filterWindowController)
 		{
 			if(self.fileChooserSourceIndex == NSNotFound)
-				self.fileChooserSourceIndex = [self.filterWindowController.dataSource sourceIndex];
+				self.fileChooserSourceIndex = [(OakFileChooser*)self.filterWindowController.dataSource sourceIndex];
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
 			_filterWindowController.target = nil;
 			[_filterWindowController close];
@@ -1415,7 +1415,7 @@ static std::string file_chooser_glob (std::string const& path)
 	ASSERT([[sender selectedItems] count] == 1);
 
 	NSString* documentIdentifier = [[[sender selectedItems] lastObject] objectForKey:@"identifier"];
-	self.fileChooserSourceIndex = [self.filterWindowController.dataSource sourceIndex];
+	self.fileChooserSourceIndex = [(OakFileChooser*)self.filterWindowController.dataSource sourceIndex];
 	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocument:document::find(to_s(documentIdentifier))];
 	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
 	self.filterWindowController.sendActionOnSingleClick = YES;
