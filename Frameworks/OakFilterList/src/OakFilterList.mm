@@ -205,6 +205,7 @@
 {
 	filterView.target = nil;
 	filterView.accessoryButton.target = nil;
+	self.dataSource = nil;
 	self.retainedSelf = nil;
 }
 
