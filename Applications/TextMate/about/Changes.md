@@ -1,5 +1,10 @@
 # Changes
 
+## 2013-01-10 (r9343)
+
+* Save All with more than one modified document would crash (r9341).
+* Merge All windows would double the current window’s tabs (r9341).
+
 ## 2013-01-10 (r9341)
 
 * When you open a folder or some document(s), a default project folder will be based on the path(s) opened. This means that as long as you always open the root of your project (via `mate`, `open -a TextMate`, dragging the folder to TextMate, using the favorites (⇧⌘O), open dialog, `txmt:` URL scheme, or what have you), your project no longer requires a `.tm_properties` file setting `projectDirectory` for Find in Folder (⇧⌘F), Go to File (⌘T), and similar to work as desired. Additionally the default properties now set a window title that includes the project folder’s name (and SCM branch when available), so most projects can now also drop setting `windowTitle`. Note that windows restored from a session created prior to r9339 will not have a default project folder, so you should close and re-open the project folder, after this, the project folder will be preserved in the session save data.
