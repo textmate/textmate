@@ -260,7 +260,17 @@ namespace
 	self.identifier = nil; // This removes us from AllControllers and causes a release
 }
 
-- (void)showWindow:(id)sender                 { [self.window makeKeyAndOrderFront:sender]; }
+- (void)showWindow:(id)sender
+{
+	if(self.documents.empty())
+	{
+		document::document_ptr defaultDocument = create_untitled_document_in_folder(to_s(self.untitledSavePath));
+		self.documents = make_vector(defaultDocument);
+		[self openAndSelectDocument:defaultDocument];
+	}
+	[self.window makeKeyAndOrderFront:sender];
+}
+
 - (void)makeTextViewFirstResponder:(id)sender { [self.window makeFirstResponder:self.textView]; }
 - (void)close                                 { [self.window close]; }
 
@@ -987,7 +997,10 @@ namespace
 
 		if(documents.size() == 1)
 		{
-			document::show(documents[0], document::kCollectionNew);
+			DocumentController* controller = [DocumentController new];
+			controller.documents = make_vector(documents[0]);
+			[controller openAndSelectDocument:documents[0]];
+			[controller showWindow:self];
 			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES];
 		}
 	}
