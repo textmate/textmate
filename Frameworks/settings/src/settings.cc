@@ -40,7 +40,7 @@ namespace
 		}
 
 		res.push_back(std::make_pair("TM_PID", text::format("%d", getpid())));
-		res.push_back(std::make_pair("TM_FULLNAME", getpwuid(getuid())->pw_gecos ?: "John Doe"));
+		res.push_back(std::make_pair("TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe"));
 		res.push_back(std::make_pair("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle()))));
 		citerate(pair, oak::basic_environment())
 			res.push_back(*pair);
