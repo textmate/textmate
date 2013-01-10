@@ -169,7 +169,7 @@ namespace
 		size_t res = out.size();
 		std::copy(newDocuments.begin(), newDocuments.end(), back_inserter(out));	
 		std::copy_if(oldDocuments.begin() + splitAt, oldDocuments.end(), back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
-		return res;
+		return out.empty() ? 0 : std::min(res, out.size()-1);
 	}
 
 	static std::vector<document::document_ptr> make_vector (document::document_ptr const& document)
