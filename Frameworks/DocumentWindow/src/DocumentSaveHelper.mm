@@ -206,8 +206,5 @@ namespace
 	documents.pop_back();
 	if(flag)
 		[self saveNextDocument];
-
-	if(flag && [[window delegate] respondsToSelector:@selector(updateProxyIcon)])
-		[[window delegate] performSelector:@selector(updateProxyIcon)]; // FIXME The delegate needs to update proxy icon based on “exists on disk” notifications from document_t
 }
 @end
