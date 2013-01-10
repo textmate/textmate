@@ -11,8 +11,7 @@ namespace document
 {
 	ui_proxy_t*& ui_proxy ();
 
-	oak::uuid_t const kCollectionNew     = oak::uuid_t().generate();
-	oak::uuid_t const kCollectionCurrent = oak::uuid_t().generate();
+	oak::uuid_t const kCollectionAny = oak::uuid_t().generate();
 
 	void show (document_ptr document, oak::uuid_t const& collection, text::range_t const& selection, bool bringToFront)
 	{

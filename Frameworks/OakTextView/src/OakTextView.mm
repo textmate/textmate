@@ -1619,7 +1619,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 						if(doc)
 						{
 							NSString* range = [info objectForKey:(options & find::backwards) ? @"lastMatchRange" : @"firstMatchRange"];
-							document::show(doc, document::kCollectionCurrent, to_s(range));
+							document::show(doc, document::kCollectionAny, to_s(range));
 							return;
 						}
 					}

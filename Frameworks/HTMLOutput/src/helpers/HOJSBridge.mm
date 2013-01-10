@@ -124,7 +124,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 		range = text::pos_t([options intValue]-1, 0);
 	else if([options isKindOfClass:[NSString class]])
 		range = to_s((NSString*)options);
-	document::show(document::create(to_s(path)), document::kCollectionCurrent, range);
+	document::show(document::create(to_s(path)), document::kCollectionAny, range);
 }
 
 - (id)system:(NSString*)aCommand handler:(id)aHandler

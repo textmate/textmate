@@ -16,13 +16,11 @@ namespace document
 
 	typedef std::shared_ptr<run_callback_t> run_callback_ptr;
 
-	PUBLIC extern oak::uuid_t const kCollectionNew;
-	PUBLIC extern oak::uuid_t const kCollectionCurrent;
+	PUBLIC extern oak::uuid_t const kCollectionAny;
 
-	PUBLIC void show (document_ptr document, oak::uuid_t const& collection = kCollectionCurrent, text::range_t const& selection = text::range_t::undefined, bool bringToFront = true);
+	PUBLIC void show (document_ptr document, oak::uuid_t const& collection = kCollectionAny, text::range_t const& selection = text::range_t::undefined, bool bringToFront = true);
 	PUBLIC void show (std::vector<document_ptr> const& documents);
 	PUBLIC void show_browser (std::string const& path);
-	PUBLIC std::map<std::string, std::string> variables (document_ptr document, oak::uuid_t const& collection = kCollectionCurrent, std::map<std::string, std::string> env = std::map<std::string, std::string>());
 	PUBLIC void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env = std::map<std::string, std::string>(), run_callback_ptr callback = run_callback_ptr());
 
 	struct PUBLIC ui_proxy_t

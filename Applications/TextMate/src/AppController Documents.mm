@@ -131,7 +131,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 			{
 				document::document_ptr doc = document::create(path);
 				doc->set_recent_tracking(false);
-				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionCurrent, range);
+				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionAny, range);
 			}
 			else
 			{
@@ -143,7 +143,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 			if(document::document_ptr doc = document::find(uuid->second))
 			{
 				doc->set_recent_tracking(false);
-				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionCurrent, range);
+				document::show(doc, project != parameters.end() ? oak::uuid_t(project->second) : document::kCollectionAny, range);
 			}
 			else
 			{

@@ -1890,7 +1890,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 			NSString* projectId = [NSString stringWithCxxString:collection];
 			DocumentController* controller = AllControllers()[projectId];
-			if(collection == document::kCollectionCurrent)
+			if(collection == document::kCollectionAny)
 				controller = [SortedControllers() firstObject];
 
 			if(controller)
@@ -1911,7 +1911,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			{
 				controller = [DocumentController new];
 				controller.documents = make_vector(document);
-				if(collection != document::kCollectionCurrent && collection != document::kCollectionNew)
+				if(collection != document::kCollectionAny)
 					controller.identifier = projectId;
 			}
 

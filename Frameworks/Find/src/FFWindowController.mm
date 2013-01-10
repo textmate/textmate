@@ -1129,7 +1129,7 @@ Any other string:
 	{
 		NSUInteger selectionIndex = [[findAllResultsOutlineView selectedRowIndexes] firstIndex];
 		FFMatch* selectedMatch    = [findAllResultsOutlineView itemAtRow:selectionIndex];
-		document::show([selectedMatch match].document, searcher.projectIdentifier ? oak::uuid_t(to_s(searcher.projectIdentifier)) : document::kCollectionNew, [selectedMatch match].range, false);
+		document::show([selectedMatch match].document, searcher.projectIdentifier ? oak::uuid_t(to_s(searcher.projectIdentifier)) : document::kCollectionAny, [selectedMatch match].range, false);
 	}
 }
 
