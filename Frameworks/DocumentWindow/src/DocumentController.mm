@@ -640,12 +640,23 @@ namespace
 		std::string const uuid  = to_s((NSString*)[item objectForKey:@"identifier"]);
 		std::string const range = to_s((NSString*)[item objectForKey:@"selectionString"]);
 
-		document::document_ptr doc = path == NULL_STR && oak::uuid_t::is_valid(uuid) ? document::find(uuid) : document::create(path);
-		doc->set_recent_tracking(false);
-		if(range != NULL_STR)
-			doc->set_selection(range);
-		documents.push_back(doc);
+		document::document_ptr doc;
+		if(path == NULL_STR && oak::uuid_t::is_valid(uuid))
+			doc = document::find(uuid);
+		if(!doc && path != NULL_STR)
+			doc = document::create(path);
+
+		if(doc)
+		{
+			doc->set_recent_tracking(false);
+			if(range != NULL_STR)
+				doc->set_selection(range);
+			documents.push_back(doc);
+		}
 	}
+
+	if(documents.empty())
+		return;
 
 	std::vector<document::document_ptr> oldDocuments = self.documents;
 	NSUInteger split = self.selectedTabIndex;
