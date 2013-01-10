@@ -11,7 +11,8 @@ public:
 	{
 		static struct proxy_t : document::ui_proxy_t
 		{
-			void show_documents (std::vector<document::document_ptr> const& documents, std::string const& browserPath) const { }
+			void show_browser (std::string const& path) const { }
+			void show_documents (std::vector<document::document_ptr> const& documents) const { }
 			void show_document (oak::uuid_t const& collection, document::document_ptr document, text::range_t const& range, bool bringToFront) const { }
 
 			void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& baseEnv, document::run_callback_ptr callback)

@@ -1769,106 +1769,101 @@ static NSUInteger DisableSessionSavingCount = 0;
 				SetFrontProcessWithOptions(&(ProcessSerialNumber){ 0, kCurrentProcess }, kSetFrontProcessFrontWindowOnly);
 			}
 		}
+
 	public:
-		void show_documents (std::vector<document::document_ptr> const& documents, std::string const& browserPath) const
+		void show_browser (std::string const& path) const
 		{
-			DocumentController* controller = nil;
-			if(browserPath != NULL_STR)
+			std::string const folder = path::resolve(path);
+
+			for(DocumentController* candidate in SortedControllers())
 			{
-				ASSERT(documents.empty());
-				std::string const folder = path::resolve(browserPath);
+				if(folder == to_s(candidate.projectPath))
+					return bring_to_front(candidate);
+			}
 
-				for(DocumentController* candidate in SortedControllers())
+			DocumentController* controller = nil;
+			for(DocumentController* candidate in SortedControllers())
+			{
+				if(!candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
 				{
-					if(folder == to_s(candidate.projectPath))
-						return bring_to_front(candidate);
-				}
-
-				for(DocumentController* candidate in SortedControllers())
-				{
-					if(candidate.fileBrowserVisible || candidate.documents.size() != 1 || !is_disposable(candidate.selectedDocument))
-						continue;
-
 					controller = candidate;
 					break;
 				}
-
-				if(!controller)
-				{
-					controller = [DocumentController new];
-				}
-				else if(controller.selectedDocument)
-				{
-					[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
-				}
-
-				controller.defaultProjectPath = [NSString stringWithCxxString:folder];
-				controller.fileBrowserVisible = YES;
-				controller.documents          = make_vector(create_untitled_document_in_folder(folder));
-				[controller.fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]];
 			}
-			else if(!documents.empty())
+
+			if(!controller)
+				controller = [DocumentController new];
+			else if(controller.selectedDocument)
+				[controller selectedDocument]->set_custom_name("not untitled"); // release potential untitled token used
+
+			controller.defaultProjectPath = [NSString stringWithCxxString:folder];
+			controller.fileBrowserVisible = YES;
+			controller.documents          = make_vector(create_untitled_document_in_folder(folder));
+			[controller.fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]];
+
+			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
+			bring_to_front(controller);
+		}
+
+		void show_documents (std::vector<document::document_ptr> const& documents) const
+		{
+			ASSERT(!documents.empty());
+
+			DocumentController* controller = nil;
+			for(DocumentController* candidate in SortedControllers())
 			{
-				for(DocumentController* candidate in SortedControllers())
+				std::string const projectPath     = to_s(candidate.projectPath);
+				std::string const fileBrowserPath = candidate.fileBrowserVisible ? to_s(candidate.fileBrowser.location) : NULL_STR;
+
+				iterate(document, documents)
 				{
-					std::string const projectPath     = to_s(candidate.projectPath);
-					std::string const fileBrowserPath = candidate.fileBrowserVisible ? to_s(candidate.fileBrowser.location) : NULL_STR;
-
-					iterate(document, documents)
-					{
-						std::string const docPath = (*document)->path();
-						if(docPath.find(projectPath) == 0 || (fileBrowserPath != NULL_STR && docPath.find(fileBrowserPath) == 0))
-							controller = candidate;
-
-						citerate(projectDoc, candidate.documents)
-						{
-							if((*document)->identifier() == (*projectDoc)->identifier())
-								controller = candidate;
-						}
-					}
-
-					if(!controller && !candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
+					std::string const docPath = (*document)->path();
+					if(docPath.find(projectPath) == 0 || (fileBrowserPath != NULL_STR && docPath.find(fileBrowserPath) == 0))
 						controller = candidate;
 
-					if(controller)
-						break;
+					citerate(projectDoc, candidate.documents)
+					{
+						if((*document)->identifier() == (*projectDoc)->identifier())
+							controller = candidate;
+					}
 				}
+
+				if(!controller && !candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
+					controller = candidate;
 
 				if(controller)
-				{
-					std::vector<document::document_ptr> oldDocuments = controller.documents;
-					NSUInteger split = controller.selectedTabIndex;
+					break;
+			}
 
-					if(!oldDocuments.empty() && is_disposable(oldDocuments[split]))
-							oldDocuments.erase(oldDocuments.begin() + split);
-					else	++split;
+			if(controller)
+			{
+				std::vector<document::document_ptr> oldDocuments = controller.documents;
+				NSUInteger split = controller.selectedTabIndex;
 
-					std::vector<document::document_ptr> newDocuments;
-					split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments);
-					controller.documents = newDocuments;
-					controller.selectedTabIndex = split;
-				}
-				else
-				{
-					controller = [DocumentController new];
-					controller.documents = documents;
+				if(!oldDocuments.empty() && is_disposable(oldDocuments[split]))
+						oldDocuments.erase(oldDocuments.begin() + split);
+				else	++split;
 
-					std::string projectPath = NULL_STR;
-					iterate(document, documents)
-					{
-						std::string const path = path::parent((*document)->path());
-						if(path != NULL_STR && (projectPath == NULL_STR || path.size() < projectPath.size()))
-							projectPath = path;
-					}
-
-					if(projectPath != NULL_STR)
-						controller.defaultProjectPath = [NSString stringWithCxxString:projectPath];
-				}
+				std::vector<document::document_ptr> newDocuments;
+				split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments);
+				controller.documents = newDocuments;
+				controller.selectedTabIndex = split;
 			}
 			else
 			{
-				ASSERT(browserPath != NULL_STR || !documents.empty());
-				return;
+				controller = [DocumentController new];
+				controller.documents = documents;
+
+				std::string projectPath = NULL_STR;
+				iterate(document, documents)
+				{
+					std::string const path = path::parent((*document)->path());
+					if(path != NULL_STR && (projectPath == NULL_STR || path.size() < projectPath.size()))
+						projectPath = path;
+				}
+
+				if(projectPath != NULL_STR)
+					controller.defaultProjectPath = [NSString stringWithCxxString:projectPath];
 			}
 
 			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];

@@ -22,12 +22,12 @@ namespace document
 	void show (std::vector<document_ptr> const& documents)
 	{
 		if(!documents.empty())
-			ui_proxy()->show_documents(documents, NULL_STR);
+			ui_proxy()->show_documents(documents);
 	}
 
 	void show_browser (std::string const& path)
 	{
-		ui_proxy()->show_documents(std::vector<document_ptr>(), path);
+		ui_proxy()->show_browser(path);
 	}
 
 	void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env, run_callback_ptr callback)
