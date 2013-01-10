@@ -13,6 +13,7 @@ namespace scope
 	namespace compressed
 	{
 		struct composite_t;
+		struct path_t;
 	}
 
 	namespace compile
@@ -89,6 +90,8 @@ namespace scope
 			bool needs_right;
 			map_type path;
 
+			friend class matcher_t;
+
 		public:
 			compressor_unique_ptr const& next (std::string const& str) const;
 			compressor_t (interim_t const& analyze, size_t sz);
@@ -113,6 +116,7 @@ namespace scope
 			analyze_t& analyzer () { return _analyzer;}
 			interim_t& interim () { return root;}
 			interim_t& right_interim () { return right_root;}
+			std::vector<sub_rule_t> expressions () { return _expressions; }
 			void calculate_bit_fields () { root.calculate_bit_fields();}
 			std::string to_s () { return root.to_s(); }
 			
@@ -120,12 +124,45 @@ namespace scope
 			void expand_wildcards (interim_t& analyzer);
 		};
 
+		class PUBLIC matcher_t
+		{
+			std::vector<sub_rule_t> expressions;
+			size_t blocks_needed;
+			mutable std::vector<scope::compile::bits_t> palette;
+		public:
+			matcher_t () {}
+			matcher_t (std::vector<sub_rule_t> expressions, size_t blocks_needed): expressions(expressions), blocks_needed(blocks_needed), palette(blocks_needed) {}
+			scope::compressed::path_t lookup (scope::types::path_ptr const& scope, const scope::compile::compressor_t& compressor, std::vector<scope::compile::bits_t>& palette, std::map<int, double>& ruleToRank, bool& needs_right) const;
+			std::map<int, double> match (context_t const& scope, compressor_t const& compressor, compressor_t const& r_compressor) const;
+		};
+
+		template<typename T>
+		class PUBLIC compiled_t {
+			compressor_t l_compressor;
+			compressor_t r_compressor;
+
+			matcher_t matcher;
+			std::vector<T> rules;
+		public:
+			compiled_t<T>& operator=(compiled_t<T>&& rhs) = default;
+			compiled_t(compiled_t<T>&& rhs) : l_compressor(std::move(rhs.l_compressor)), r_compressor(std::move(rhs.r_compressor)), matcher(rhs.matcher), rules(std::move(rhs.rules)) {}
+			compiled_t (const interim_t& interim, const interim_t& r_interim, std::vector<T> const& rules, const std::vector<sub_rule_t>& expressions, size_t blocks_needed): l_compressor(interim, blocks_needed), r_compressor(r_interim, blocks_needed), matcher(expressions, blocks_needed), rules(rules) 
+				{}
+			compiled_t() {}
+
+			void styles_for_scope (context_t const& scope, std::multimap<double, T>& ordered) const
+			{
+				std::map<int, double> matched = matcher.match(scope, l_compressor, r_compressor);
+				iterate(it, matched)
+					ordered.insert(std::make_pair(it->second, rules[it->first]));
+			}
+		};
 
 		// T must support:
 		// scope::selector_t scope_selector
 
 		template<typename T>
-		void compile (std::vector<T> const& rules)
+		compiled_t<T> compile (std::vector<T> const& rules)
 		{
 			compiler_factory_t compiler;
 			int rule_id = 0;
@@ -148,6 +185,11 @@ namespace scope
 				//auto selector = rules[r_id->first].scope_selector;
 				compiler.compress(rules[r_id->first].scope_selector, r_id->first, r_id->second);
 			}
+
+			//printf("root:\n");
+			//printf("%s\n", compiler.to_s().c_str());
+			size_t sz = sizeof(bits_t)*CHAR_BIT;
+			return compiled_t<T>(compiler.interim(), compiler.right_interim(), rules, compiler.expressions(), sub_rule_id/sz + (sub_rule_id%sz > 0 ? 1 :0));
 		}
 	}
 }
