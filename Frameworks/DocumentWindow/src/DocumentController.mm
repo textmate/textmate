@@ -606,22 +606,18 @@ namespace
 - (IBAction)mergeAllWindows:(id)sender
 {
 	std::vector<document::document_ptr> documents = self.documents;
-	for(NSWindow* window in [NSApp orderedWindows])
+	for(DocumentController* delegate in SortedControllers())
 	{
-		if([window isMiniaturized])
-			continue;
-
-		DocumentController* delegate = (DocumentController*)[window delegate];
-		if(delegate != self && [delegate isKindOfClass:[DocumentController class]])
+		if(![delegate.window isMiniaturized])
 			documents.insert(documents.end(), delegate.documents.begin(), delegate.documents.end());
 	}
 
 	self.documents = documents;
 
-	for(NSWindow* window in [NSApp orderedWindows])
+	for(DocumentController* delegate in SortedControllers())
 	{
-		if(![window isMiniaturized] && window != self.window && [window.delegate isKindOfClass:[DocumentController class]])
-			[window close];
+		if(delegate != self && ![delegate.window isMiniaturized])
+			[delegate.window close];
 	}
 }
 
@@ -1100,10 +1096,9 @@ namespace
 	oak::uuid_t srcProjectId = to_s((NSString*)plist[@"collection"]);
 	if(operation == NSDragOperationMove && srcProjectId != to_s(self.identifier))
 	{
-		for(NSWindow* window in [NSApp orderedWindows])
+		for(DocumentController* delegate in SortedControllers())
 		{
-			DocumentController* delegate = (DocumentController*)[window delegate];
-			if([delegate isKindOfClass:[DocumentController class]] && srcProjectId == oak::uuid_t(to_s(delegate.identifier)))
+			if(srcProjectId == oak::uuid_t(to_s(delegate.identifier)))
 				return [delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[plist[@"index"] unsignedIntValue]] askToSaveChanges:NO createDocumentIfEmpty:YES], YES;
 		}
 	}
@@ -1738,19 +1733,15 @@ static NSUInteger DisableSessionSavingCount = 0;
 	if(!aDocument)
 		return nil;
 
-	for(NSWindow* window in [NSApp orderedWindows])
+	for(DocumentController* delegate in SortedControllers())
 	{
-		DocumentController* controller = (DocumentController*)[window delegate];
-		if([controller isKindOfClass:self])
-		{
-			if(controller.fileBrowserVisible && aDocument->path() != NULL_STR && aDocument->path().find(to_s(controller.projectPath)) == 0)
-				return controller;
+		if(delegate.fileBrowserVisible && aDocument->path() != NULL_STR && aDocument->path().find(to_s(delegate.projectPath)) == 0)
+			return delegate;
 
-			citerate(document, controller.documents)
-			{
-				if(**document == *aDocument)
-					return controller;
-			}
+		citerate(document, delegate.documents)
+		{
+			if(**document == *aDocument)
+				return delegate;
 		}
 	}
 	return nil;
