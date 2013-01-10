@@ -21,6 +21,7 @@ PUBLIC @interface DocumentController : NSObject
 
 + (BOOL)restoreSession;
 + (BOOL)saveSessionIncludingUntitledDocuments:(BOOL)includeUntitled;
++ (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 
 - (void)showWindow:(id)sender;
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument;
@@ -82,7 +83,6 @@ PUBLIC @interface DocumentController : NSObject
 // ==============
 
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 - (void)updateVariables:(std::map<std::string, std::string>&)env;
 
 // Private (used by DocumentCommand.mm)

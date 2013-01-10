@@ -214,14 +214,6 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
 	D(DBF_AppController_Documents, bug("%s\n", [NSApp windows].description.UTF8String););
-	for(NSWindow* window in [NSApp orderedWindows])
-	{
-		DocumentController* delegate = (DocumentController*)[window delegate];
-		if([delegate isKindOfClass:[DocumentController class]])
-			return [delegate applicationShouldTerminate:sender];
-	}
-
-	[DocumentController saveSessionIncludingUntitledDocuments:NO];
-	return NSTerminateNow;
+	return [DocumentController applicationShouldTerminate:sender];
 }
 @end

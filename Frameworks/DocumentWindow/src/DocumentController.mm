@@ -31,6 +31,7 @@
 namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
 
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
+static BOOL IsInShouldTerminateEventLoop = NO;
 
 @interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate>
 @property (nonatomic) ProjectLayoutView*          layoutView;
@@ -52,8 +53,6 @@ static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag
 
 @property (nonatomic) OakFilterWindowController*  filterWindowController;
 @property (nonatomic) NSUInteger                  fileChooserSourceIndex;
-
-@property (nonatomic) BOOL                        applicationTerminationEventLoopRunning;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -365,9 +364,9 @@ namespace
 					size_t _count;
 				};
 
-				if(self.applicationTerminationEventLoopRunning)
+				if(IsInShouldTerminateEventLoop)
 				{
-					self.applicationTerminationEventLoopRunning = NO;
+					IsInShouldTerminateEventLoop = NO;
 					[NSApp replyToApplicationShouldTerminate:NO];
 				}
 
@@ -525,30 +524,31 @@ namespace
 	return NO;
 }
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
++ (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
 	std::vector<document::document_ptr> documents;
-	for(NSWindow* window in [NSApp orderedWindows])
-	{
-		DocumentController* delegate = (DocumentController*)[window delegate];
-		if([delegate isKindOfClass:[DocumentController class]])
-			std::copy_if(delegate.documents.begin(), delegate.documents.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
-	}
+	for(DocumentController* delegate in SortedControllers())
+		std::copy_if(delegate.documents.begin(), delegate.documents.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
 
 	if(documents.empty())
+	{
+		[DocumentController saveSessionIncludingUntitledDocuments:NO];
 		return NSTerminateNow;
+	}
 
-	self.applicationTerminationEventLoopRunning = YES;
-	[self showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
+	IsInShouldTerminateEventLoop = YES;
+
+	DocumentController* controller = [SortedControllers() firstObject];
+	[controller showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
 			[DocumentController saveSessionIncludingUntitledDocuments:NO];
 
-		if(self.applicationTerminationEventLoopRunning)
+		if(IsInShouldTerminateEventLoop)
 			[NSApp replyToApplicationShouldTerminate:canClose];
 		else if(canClose)
 			[NSApp terminate:self];
 
-		self.applicationTerminationEventLoopRunning = NO;
+		IsInShouldTerminateEventLoop = NO;
 	}];
 
 	return NSTerminateLater;
