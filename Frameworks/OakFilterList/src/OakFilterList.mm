@@ -11,9 +11,13 @@
 @end
 
 @implementation OakFilterWindowController
-+ (id)filterWindow
+- (id)init
 {
-	return [[self alloc] initWithWindowNibName:@"FilterWindow"];
+	if(self = [super initWithWindowNibName:@"FilterWindow"])
+	{
+		self.shouldCascadeWindows = NO;
+	}
+	return self;
 }
 
 - (void)windowDidLoad
@@ -38,11 +42,6 @@
 	}
 
 	[self.window makeKeyAndOrderFront:self];
-}
-
-- (BOOL)shouldCascadeWindows
-{
-	return NO;
 }
 
 - (id)dataSource

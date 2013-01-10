@@ -1,6 +1,5 @@
 #import "OakFilterList.h"
 #import "OakFilterListView.h"
-#import <oak/debug.h>
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
 #import "highlight_ranges.h"
@@ -10,10 +9,6 @@ OAK_DEBUG_VAR(FilterList_View);
 NSString* const FLDataSourceItemsDidChangeNotification     = @"FLDataSourceItemsDidChangeNotification";
 NSString* const FLDataSourceItemsShouldDescendNotification = @"FLDataSourceItemsShouldDescendNotification";
 NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItemsShouldAscendNotification";
-
-@interface OakFilterWindowController (Private)
-- (void)sendAction:(id)sender;
-@end
 
 @interface OakFilterListView ()
 @property (nonatomic, assign) BOOL isWaitingForItems;

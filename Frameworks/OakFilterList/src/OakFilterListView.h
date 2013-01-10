@@ -1,5 +1,4 @@
 #import <oak/debug.h>
-#import <text/ranker.h>
 
 @interface OakFilterListView : NSTableView <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, retain) id <FilterListDataSource> filterDataSource;

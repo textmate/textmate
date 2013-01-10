@@ -150,7 +150,7 @@ void OakOpenDocuments (NSArray* paths)
 
 - (IBAction)openFavorites:(id)sender
 {
-	OakFilterWindowController* controller = [OakFilterWindowController filterWindow];
+	OakFilterWindowController* controller = [OakFilterWindowController new];
 	controller.dataSource              = [FavoritesDataSource favoritesDataSource];
 	controller.action                  = @selector(didSelectFavorite:);
 	controller.allowsMultipleSelection = YES;
@@ -197,7 +197,7 @@ void OakOpenDocuments (NSArray* paths)
 
 - (IBAction)showBundleItemChooser:(id)sender
 {
-	self.filterWindowController            = [OakFilterWindowController filterWindow];
+	self.filterWindowController            = [OakFilterWindowController new];
 	OakTextView* textView                  = [NSApp targetForAction:@selector(scopeContext)];
 
 	BundleItemChooser* dataSource          = [BundleItemChooser bundleItemChooserForScope:textView ? [textView scopeContext] : scope::wildcard];

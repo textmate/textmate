@@ -63,7 +63,6 @@ PUBLIC @interface OakFilterWindowController : NSWindowController
 	IBOutlet OakFilterListView* filterView;
 	IBOutlet NSView* filterControlsView;
 }
-+ (id)filterWindow;
 - (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
 @property (nonatomic, retain) id <FilterListDataSource> dataSource;
 @property (nonatomic, retain) id target;

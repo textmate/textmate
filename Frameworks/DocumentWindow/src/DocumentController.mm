@@ -1351,7 +1351,7 @@ namespace
 
 - (IBAction)showSymbolChooser:(id)sender
 {
-	self.filterWindowController                         = [OakFilterWindowController filterWindow];
+	self.filterWindowController                         = [OakFilterWindowController new];
 	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocument:[self selectedDocument]];
 	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
 	self.filterWindowController.sendActionOnSingleClick = YES;
@@ -1381,7 +1381,7 @@ static std::string file_chooser_glob (std::string const& path)
 
 - (IBAction)goToFile:(id)sender
 {
-	self.filterWindowController = [OakFilterWindowController filterWindow];
+	self.filterWindowController = [OakFilterWindowController new];
 
 	OakFileChooser* dataSource = [OakFileChooser fileChooserWithPath:(self.fileBrowser.location ?: [NSString stringWithCxxString:[self selectedDocument]->path()] ?: self.projectPath ?: NSHomeDirectory()) projectPath:self.projectPath ?: NSHomeDirectory()];
 	dataSource.excludeDocumentWithIdentifier = [NSString stringWithCxxString:[self selectedDocument]->identifier()];
