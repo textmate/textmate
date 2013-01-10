@@ -1,0 +1,320 @@
+{
+    author = "Michael Sheets";
+    name = Twilight;
+    settings =     (
+                {
+            settings =             {
+                background = "#141414";
+                caret = "#A7A7A7";
+                foreground = "#F8F8F8";
+                invisibles = "#FFFFFF40";
+                lineHighlight = "#FFFFFF08";
+                selection = "#DDF0FF33";
+            };
+        },
+                {
+            name = Comment;
+            scope = comment;
+            settings =             {
+                fontStyle = italic;
+                foreground = "#5F5A60";
+            };
+        },
+                {
+            name = Constant;
+            scope = constant;
+            settings =             {
+                foreground = "#CF6A4C";
+            };
+        },
+                {
+            name = Entity;
+            scope = entity;
+            settings =             {
+                fontStyle = "";
+                foreground = "#9B703F";
+            };
+        },
+                {
+            name = Keyword;
+            scope = keyword;
+            settings =             {
+                fontStyle = "";
+                foreground = "#CDA869";
+            };
+        },
+                {
+            name = Storage;
+            scope = storage;
+            settings =             {
+                fontStyle = "";
+                foreground = "#F9EE98";
+            };
+        },
+                {
+            name = String;
+            scope = string;
+            settings =             {
+                fontStyle = "";
+                foreground = "#8F9D6A";
+            };
+        },
+                {
+            name = Support;
+            scope = support;
+            settings =             {
+                fontStyle = "";
+                foreground = "#9B859D";
+            };
+        },
+                {
+            name = Variable;
+            scope = variable;
+            settings =             {
+                foreground = "#7587A6";
+            };
+        },
+                {
+            name = "Invalid \U2013 Deprecated";
+            scope = "invalid.deprecated";
+            settings =             {
+                fontStyle = "italic underline";
+                foreground = "#D2A8A1";
+            };
+        },
+                {
+            name = "Invalid \U2013 Illegal";
+            scope = "invalid.illegal";
+            settings =             {
+                background = "#562D56BF";
+                foreground = "#F8F8F8";
+            };
+        },
+                {
+            name = "-----------------------------------";
+            settings =             {
+            };
+        },
+                {
+            name = "\U2666 Embedded Source";
+            scope = "meta.embedded.block, punctuation.whitespace.embedded";
+            settings =             {
+                background = "#B0B3BA14";
+            };
+        },
+                {
+            name = "\U2666 Embedded Source (Bright)";
+            scope = "meta.embedded.line";
+            settings =             {
+                background = "#B1B3BA21";
+            };
+        },
+                {
+            name = "\U2666 Entity inherited-class";
+            scope = "entity.other.inherited-class";
+            settings =             {
+                fontStyle = italic;
+                foreground = "#9B5C2E";
+            };
+        },
+                {
+            name = "\U2666 String embedded-source";
+            scope = "string meta.embedded";
+            settings =             {
+                fontStyle = "";
+                foreground = "#DAEFA3";
+            };
+        },
+                {
+            name = "\U2666 String constant";
+            scope = "string constant";
+            settings =             {
+                foreground = "#DDF2A4";
+            };
+        },
+                {
+            name = "\U2666 String.regexp";
+            scope = "string.regexp";
+            settings =             {
+                fontStyle = "";
+                foreground = "#E9C062";
+            };
+        },
+                {
+            name = "\U2666 String.regexp.\U00abspecial\U00bb";
+            scope = "string.regexp constant.character.escape, string.regexp source.ruby.embedded, string.regexp string.regexp.arbitrary-repitition";
+            settings =             {
+                foreground = "#CF7D34";
+            };
+        },
+                {
+            name = "\U2666 String variable";
+            scope = "string variable";
+            settings =             {
+                foreground = "#8A9A95";
+            };
+        },
+                {
+            name = "\U2666 Support.function";
+            scope = "support.function";
+            settings =             {
+                fontStyle = "";
+                foreground = "#DAD085";
+            };
+        },
+                {
+            name = "\U2666 Support.constant";
+            scope = "support.constant";
+            settings =             {
+                fontStyle = "";
+                foreground = "#CF6A4C";
+            };
+        },
+                {
+            name = "c C/C++ Preprocessor Line";
+            scope = "meta.preprocessor.c";
+            settings =             {
+                foreground = "#8996A8";
+            };
+        },
+                {
+            name = "c C/C++ Preprocessor Directive";
+            scope = "meta.preprocessor.c keyword";
+            settings =             {
+                foreground = "#AFC4DB";
+            };
+        },
+                {
+            name = "\U2718 Doctype/XML Processing";
+            scope = "meta.tag.sgml.doctype, meta.tag.sgml.doctype entity, meta.tag.sgml.doctype string, meta.tag.preprocessor.xml, meta.tag.preprocessor.xml entity, meta.tag.preprocessor.xml string";
+            settings =             {
+                foreground = "#494949";
+            };
+        },
+                {
+            name = "\U2718 Meta.tag.\U00aball\U00bb";
+            scope = "declaration.tag, declaration.tag entity, meta.tag, meta.tag entity";
+            settings =             {
+                foreground = "#AC885B";
+            };
+        },
+                {
+            name = "\U2718 Meta.tag.inline";
+            scope = "declaration.tag.inline, declaration.tag.inline entity, source entity.name.tag, source entity.other.attribute-name, meta.tag.inline, meta.tag.inline entity";
+            settings =             {
+                foreground = "#E0C589";
+            };
+        },
+                {
+            name = "\U00a7 css tag-name";
+            scope = "meta.selector.css entity.name.tag";
+            settings =             {
+                foreground = "#CDA869";
+            };
+        },
+                {
+            name = "\U00a7 css:pseudo-class";
+            scope = "meta.selector.css entity.other.attribute-name.tag.pseudo-class";
+            settings =             {
+                foreground = "#8F9D6A";
+            };
+        },
+                {
+            name = "\U00a7 css#id";
+            scope = "meta.selector.css entity.other.attribute-name.id";
+            settings =             {
+                foreground = "#8B98AB";
+            };
+        },
+                {
+            name = "\U00a7 css.class";
+            scope = "meta.selector.css entity.other.attribute-name.class";
+            settings =             {
+                foreground = "#9B703F";
+            };
+        },
+                {
+            name = "\U00a7 css property-name:";
+            scope = "support.type.property-name.css";
+            settings =             {
+                foreground = "#C5AF75";
+            };
+        },
+                {
+            name = "\U00a7 css property-value;";
+            scope = "meta.property-group support.constant.property-value.css, meta.property-value support.constant.property-value.css";
+            settings =             {
+                foreground = "#F9EE98";
+            };
+        },
+                {
+            name = "\U00a7 css @at-rule";
+            scope = "meta.preprocessor.at-rule keyword.control.at-rule";
+            settings =             {
+                foreground = "#8693A5";
+            };
+        },
+                {
+            name = "\U00a7 css additional-constants";
+            scope = "meta.property-value support.constant.named-color.css, meta.property-value constant";
+            settings =             {
+                foreground = "#CA7840";
+            };
+        },
+                {
+            name = "\U00a7 css constructor.argument";
+            scope = "meta.constructor.argument.css";
+            settings =             {
+                foreground = "#8F9D6A";
+            };
+        },
+                {
+            name = "\U2387 diff.header";
+            scope = "meta.diff, meta.diff.header, meta.separator, meta.diff.range";
+            settings =             {
+                background = "#0E2231";
+                fontStyle = italic;
+                foreground = "#F8F8F8";
+            };
+        },
+                {
+            name = "\U2387 diff.deleted";
+            scope = "markup.deleted";
+            settings =             {
+                background = "#420E09";
+                foreground = "#F8F8F8";
+            };
+        },
+                {
+            name = "\U2387 diff.changed";
+            scope = "markup.changed";
+            settings =             {
+                background = "#4A410D";
+                foreground = "#F8F8F8";
+            };
+        },
+                {
+            name = "\U2387 diff.inserted";
+            scope = "markup.inserted";
+            settings =             {
+                background = "#253B22";
+                foreground = "#F8F8F8";
+            };
+        },
+                {
+            name = "Markup: List";
+            scope = "markup.list";
+            settings =             {
+                foreground = "#F9EE98";
+            };
+        },
+                {
+            name = "Markup: Heading";
+            scope = "markup.heading";
+            settings =             {
+                foreground = "#CF6A4C";
+            };
+        }
+    );
+    uuid = "766026CB-703D-4610-B070-8DE07D967C5F";
+}
