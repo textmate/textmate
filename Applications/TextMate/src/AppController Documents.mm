@@ -195,15 +195,6 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 	return !disableUntitledAtReactivationPrefs;
 }
 
-// =====================
-// = Load/Save Session =
-// =====================
-
-- (BOOL)loadSession:(id)sender
-{
-	return document::load_session();
-}
-
 // ===========================
 // = Application Termination =
 // ===========================
@@ -230,7 +221,7 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 			return [delegate applicationShouldTerminate:sender];
 	}
 
-	document::save_session(false);
+	[DocumentController saveSessionIncludingUntitledDocuments:NO];
 	return NSTerminateNow;
 }
 @end

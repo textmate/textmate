@@ -1,5 +1,4 @@
 #include "collection.h"
-#include "session.h"
 #include <OakSystem/application.h>
 #include <plist/plist.h>
 #include <regexp/format_string.h>
@@ -49,32 +48,6 @@ namespace document
 	void set_ui_proxy (ui_proxy_t* proxy)
 	{
 		ui_proxy() = proxy;
-	}
-
-	// ===================
-	// = Session Restore =
-	// ===================
-
-	static size_t DisableSessionSavingCount = 0;
-
-	static std::string session_path ()
-	{
-		static std::string const path = path::join(oak::application_t::support("Session"), "Info.plist");
-		return path;
-	}
-
-	bool load_session ()
-	{
-		++DisableSessionSavingCount;
-		bool res = ui_proxy()->load_session(session_path());
-		--DisableSessionSavingCount;
-		return res;
-	}
-
-	void save_session (bool includeUntitled)
-	{
-		if(DisableSessionSavingCount == 0)
-			ui_proxy()->save_session(session_path(), includeUntitled);
 	}
 
 } /* document */

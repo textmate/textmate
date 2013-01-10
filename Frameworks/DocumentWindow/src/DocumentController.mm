@@ -20,8 +20,8 @@
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakFilterList/OakFileChooser.h>
 #import <OakFilterList/SymbolChooser.h>
+#import <OakSystem/application.h>
 #import <Find/Find.h>
-#import <document/session.h>
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
@@ -54,6 +54,8 @@ static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag
 @property (nonatomic) NSUInteger                  fileChooserSourceIndex;
 
 @property (nonatomic) BOOL                        applicationTerminationEventLoopRunning;
+
++ (void)scheduleSessionBackup:(id)sender;
 
 - (void)makeTextViewFirstResponder:(id)sender;
 - (void)updatePathDependentProperties;
@@ -539,7 +541,7 @@ namespace
 	self.applicationTerminationEventLoopRunning = YES;
 	[self showCloseWarningUIForDocuments:documents completionHandler:^(BOOL canClose){
 		if(canClose)
-			document::save_session(false);
+			[DocumentController saveSessionIncludingUntitledDocuments:NO];
 
 		if(self.applicationTerminationEventLoopRunning)
 			[NSApp replyToApplicationShouldTerminate:canClose];
@@ -583,7 +585,7 @@ namespace
 	[self updatePathDependentProperties];
 	[self updateFileBrowserStatus:self];
 	[self.tabBarView reloadData];
-	document::schedule_session_backup();
+	[[self class] scheduleSessionBackup:self];
 }
 
 // ====================
@@ -897,7 +899,7 @@ namespace
 		[self.tabBarView reloadData];
 
 	[self updateFileBrowserStatus:self];
-	document::schedule_session_backup();
+	[[self class] scheduleSessionBackup:self];
 }
 
 - (void)setSelectedDocument:(document::document_ptr const&)newSelectedDocument
@@ -916,7 +918,7 @@ namespace
 		[self.documentView setDocument:_selectedDocument];
 
 	[self updatePathDependentProperties];
-	document::schedule_session_backup();
+	[[self class] scheduleSessionBackup:self];
 }
 
 - (void)setSelectedTabIndex:(NSUInteger)newSelectedTabIndex
@@ -1160,7 +1162,7 @@ namespace
 		}
 		self.layoutView.fileBrowserView = makeVisibleFlag ? self.fileBrowser.view : nil;
 	}
-	document::schedule_session_backup();
+	[[self class] scheduleSessionBackup:self];
 }
 
 - (IBAction)toggleFileBrowser:(id)sender    { self.fileBrowserVisible = !self.fileBrowserVisible; }
@@ -1568,27 +1570,39 @@ static std::string file_chooser_glob (std::string const& path)
 // = Session Management =
 // ======================
 
-+ (void)windowNotificationActual:(id)sender
-{
-	document::schedule_session_backup();
-}
-
-+ (void)windowNotification:(NSNotification*)aNotification
-{
-	[self performSelector:@selector(windowNotificationActual:) withObject:nil afterDelay:0]; // A deadlock happens if we receive a notification while a sheet is closing and we save session (since session saving schedules a timer with the run loop, and the run loop is in a special state when a sheet is up, or something like that --Allan)
-}
-
 + (void)initialize
 {
 	static NSString* const WindowNotifications[] = { NSWindowDidBecomeKeyNotification, NSWindowDidDeminiaturizeNotification, NSWindowDidExposeNotification, NSWindowDidMiniaturizeNotification, NSWindowDidMoveNotification, NSWindowDidResizeNotification, NSWindowWillCloseNotification };
 	iterate(notification, WindowNotifications)
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowNotification:) name:*notification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleSessionBackup:) name:*notification object:nil];
 }
 
-+ (BOOL)readSessionFromFile:(NSString*)aPath
++ (void)backupSessionFiredTimer:(NSTimer*)aTimer
+{
+	[self saveSessionIncludingUntitledDocuments:YES];
+}
+
++ (void)scheduleSessionBackup:(id)sender
+{
+	static NSTimer* saveTimer;
+	[saveTimer invalidate];
+	saveTimer = [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(backupSessionFiredTimer:) userInfo:nil repeats:NO];
+}
+
++ (NSString*)sessionPath
+{
+	static NSString* const res = [NSString stringWithCxxString:path::join(oak::application_t::support("Session"), "Info.plist")];
+	return res;
+}
+
+static NSUInteger DisableSessionSavingCount = 0;
+
++ (BOOL)restoreSession
 {
 	BOOL res = NO;
-	NSDictionary* session = [NSDictionary dictionaryWithContentsOfFile:aPath];
+	++DisableSessionSavingCount;
+
+	NSDictionary* session = [NSDictionary dictionaryWithContentsOfFile:[self sessionPath]];
 	for(NSDictionary* project in session[@"projects"])
 	{
 		DocumentController* controller = [DocumentController new];
@@ -1640,11 +1654,16 @@ static std::string file_chooser_glob (std::string const& path)
 
 		res = YES;
 	}
+
+	--DisableSessionSavingCount;
 	return res;
 }
 
-+ (BOOL)writeSessionToFile:(NSString*)aPath includeUntitledDocuments:(BOOL)includeUntitled
++ (BOOL)saveSessionIncludingUntitledDocuments:(BOOL)includeUntitled
 {
+	if(DisableSessionSavingCount)
+		return NO;
+
 	NSMutableArray* projects = [NSMutableArray array];
 	for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
 	{
@@ -1687,7 +1706,7 @@ static std::string file_chooser_glob (std::string const& path)
 	}
 
 	NSDictionary* session = @{ @"projects" : projects };
-	return [session writeToFile:aPath atomically:YES];
+	return [session writeToFile:[self sessionPath] atomically:YES];
 }
 
 // ==========
@@ -1908,16 +1927,6 @@ static std::string file_chooser_glob (std::string const& path)
 		void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env, document::run_callback_ptr callback)
 		{
 			::run(command, buffer, selection, document, env, callback);
-		}
-
-		bool load_session (std::string const& path) const
-		{
-			return [DocumentController readSessionFromFile:[NSString stringWithCxxString:path]];
-		}
-
-		bool save_session (std::string const& path, bool includeUntitled) const
-		{
-			return [DocumentController writeSessionToFile:[NSString stringWithCxxString:path] includeUntitledDocuments:includeUntitled];
 		}
 
 	} proxy;

@@ -14,9 +14,6 @@ public:
 			void show_documents (std::vector<document::document_ptr> const& documents, std::string const& browserPath) const { }
 			void show_document (oak::uuid_t const& collection, document::document_ptr document, text::range_t const& range, bool bringToFront) const { }
 
-			bool load_session (std::string const& path) const { return false; }
-			bool save_session (std::string const& path, bool includeUntitled) const { return false; }
-
 			void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& baseEnv, document::run_callback_ptr callback)
 			{
 				struct delegate_t : command::delegate_t

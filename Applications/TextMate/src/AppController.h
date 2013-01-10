@@ -50,7 +50,6 @@ namespace find_tags
 @interface AppController (Documents)
 - (void)newDocument:(id)sender;
 - (void)openDocument:(id)sender;
-- (BOOL)loadSession:(id)sender;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender;
 @end
 

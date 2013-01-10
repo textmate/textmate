@@ -122,7 +122,7 @@ OAK_DEBUG_VAR(AppStartup);
 	BOOL disableSessionRestorePrefs    = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
 	BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
 
-	BOOL didRestoreSession = !disableSessionRestorePrefs && !disableSessionRestore && [appController loadSession:self];
+	BOOL didRestoreSession = !disableSessionRestorePrefs && !disableSessionRestore && [DocumentController restoreSession];
 	BOOL didOpenDocuments  = DidHandleODBEditorEvent([self.openEvent aeDesc]) || ([self.openDocumentsArray count] && (OakOpenDocuments(self.openDocumentsArray), YES));
 	if(!disableUntitledAtStartupPrefs && !didRestoreSession && !didOpenDocuments && getenv("OAK_DISABLE_UNTITLED_FILE") == NULL)
 		document::show(document::create());
