@@ -618,7 +618,7 @@ namespace
 	std::vector<document::document_ptr> documents = self.documents;
 	for(DocumentController* delegate in SortedControllers())
 	{
-		if(![delegate.window isMiniaturized])
+		if(delegate != self && ![delegate.window isMiniaturized])
 			documents.insert(documents.end(), delegate.documents.begin(), delegate.documents.end());
 	}
 
