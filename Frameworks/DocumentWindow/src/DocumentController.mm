@@ -1783,6 +1783,113 @@ static NSUInteger DisableSessionSavingCount = 0;
 			}
 		}
 
+		static DocumentController* find_or_create_controller (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID)
+		{
+			ASSERT(!documents.empty());
+
+			// =========================================
+			// = Return requested window, if it exists =
+			// =========================================
+
+			if(projectUUID != document::kCollectionAny)
+			{
+				if(DocumentController* res = AllControllers()[[NSString stringWithCxxString:projectUUID]])
+					return res;
+			}
+
+			// =========================================
+			// = Find window with one of our documents =
+			// =========================================
+
+			std::set<oak::uuid_t> uuids;
+			std::transform(documents.begin(), documents.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+
+			for(DocumentController* candidate in SortedControllers())
+			{
+				citerate(document, candidate.documents)
+				{
+					if(uuids.find((*document)->identifier()) != uuids.end())
+						return candidate;
+				}
+			}
+
+			// ================================================================
+			// = Find window with project folder closest to document’s parent =
+			// ================================================================
+
+			std::vector<document::document_ptr> documentsWithPath;
+			std::copy_if(documents.begin(), documents.end(), back_inserter(documentsWithPath), [](document::document_ptr const& doc){ return doc->path() != NULL_STR; });
+
+			std::set<std::string> parents;
+			std::transform(documentsWithPath.begin(), documentsWithPath.end(), std::insert_iterator<decltype(parents)>(parents, parents.begin()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
+
+			std::map<size_t, DocumentController*> candidates;
+			for(DocumentController* candidate in SortedControllers())
+			{
+				if(candidate.projectPath)
+				{
+					std::string const projectPath = to_s(candidate.projectPath);
+					iterate(parent, parents)
+					{
+						if(parent->find(projectPath) == 0 && (parent->size() == projectPath.size() || (*parent)[projectPath.size()] == '/'))
+							candidates.insert(std::make_pair(parent->size() - projectPath.size(), candidate));
+					}
+				}
+			}
+
+			if(!candidates.empty())
+				return candidates.begin()->second;
+
+			// ==============================================
+			// = Use frontmost window if a “scratch” window =
+			// ==============================================
+
+			if(DocumentController* candidate = [SortedControllers() firstObject])
+			{
+				if(!candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
+					return candidate;
+			}
+
+			// ===================================
+			// = Give up and create a new window =
+			// ===================================
+
+			DocumentController* res = [DocumentController new];
+
+			if(!parents.empty()) // setup project folder for new window
+			{
+				std::vector<std::string> rankedParents(parents.begin(), parents.end());
+				std::sort(rankedParents.begin(), rankedParents.end(), [](std::string const& lhs, std::string const& rhs){ return lhs.size() < rhs.size(); });
+				res.defaultProjectPath = [NSString stringWithCxxString:rankedParents.front()];
+			}
+
+			return res;
+		}
+
+		static DocumentController* controller_with_documents (std::vector<document::document_ptr> const& documents, oak::uuid_t const& projectUUID = document::kCollectionAny)
+		{
+			DocumentController* controller = find_or_create_controller(documents, projectUUID);
+			if(controller.documents.empty())
+			{
+				controller.documents = documents;
+			}
+			else
+			{
+				std::vector<document::document_ptr> oldDocuments = controller.documents;
+				NSUInteger split = controller.selectedTabIndex;
+
+				if(is_disposable(oldDocuments[split]))
+						oldDocuments.erase(oldDocuments.begin() + split);
+				else	++split;
+
+				std::vector<document::document_ptr> newDocuments;
+				split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments);
+				controller.documents = newDocuments;
+				controller.selectedTabIndex = split;
+			}
+			return controller;
+		}
+
 	public:
 		void show_browser (std::string const& path) const
 		{
@@ -1820,67 +1927,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		void show_documents (std::vector<document::document_ptr> const& documents) const
 		{
-			ASSERT(!documents.empty());
-
-			DocumentController* controller = nil;
-			for(DocumentController* candidate in SortedControllers())
-			{
-				std::string const projectPath     = to_s(candidate.projectPath);
-				std::string const fileBrowserPath = candidate.fileBrowserVisible ? to_s(candidate.fileBrowser.location) : NULL_STR;
-
-				iterate(document, documents)
-				{
-					std::string const docPath = (*document)->path();
-					if(docPath.find(projectPath) == 0 || (fileBrowserPath != NULL_STR && docPath.find(fileBrowserPath) == 0))
-						controller = candidate;
-
-					citerate(projectDoc, candidate.documents)
-					{
-						if((*document)->identifier() == (*projectDoc)->identifier())
-							controller = candidate;
-					}
-				}
-
-				if(!controller && !candidate.fileBrowserVisible && candidate.documents.size() == 1 && is_disposable(candidate.selectedDocument))
-					controller = candidate;
-
-				if(controller)
-					break;
-			}
-
-			if(controller)
-			{
-				std::vector<document::document_ptr> oldDocuments = controller.documents;
-				NSUInteger split = controller.selectedTabIndex;
-
-				if(!oldDocuments.empty() && is_disposable(oldDocuments[split]))
-						oldDocuments.erase(oldDocuments.begin() + split);
-				else	++split;
-
-				std::vector<document::document_ptr> newDocuments;
-				split = merge_documents_splitting_at(oldDocuments, documents, split, newDocuments);
-				controller.documents = newDocuments;
-				controller.selectedTabIndex = split;
-			}
-			else
-			{
-				controller = [DocumentController new];
-				controller.documents = documents;
-
-				std::string projectPath = NULL_STR;
-				iterate(document, documents)
-				{
-					std::string const path = path::parent((*document)->path());
-					if(path != NULL_STR && (projectPath == NULL_STR || path.size() < projectPath.size()))
-						projectPath = path;
-				}
-
-				if(projectPath != NULL_STR)
-					controller.defaultProjectPath = [NSString stringWithCxxString:projectPath];
-			}
-
-			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
+			DocumentController* controller = controller_with_documents(documents);
 			bring_to_front(controller);
+			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
 		}
 
 		void show_document (oak::uuid_t const& collection, document::document_ptr document, text::range_t const& range, bool bringToFront) const
@@ -1888,38 +1937,11 @@ static NSUInteger DisableSessionSavingCount = 0;
 			if(range != text::range_t::undefined)
 				document->set_selection(range);
 
-			NSString* projectId = [NSString stringWithCxxString:collection];
-			DocumentController* controller = AllControllers()[projectId];
-			if(collection == document::kCollectionAny)
-				controller = [SortedControllers() firstObject];
-
-			if(controller)
-			{
-				std::vector<document::document_ptr> oldDocuments = controller.documents;
-				NSUInteger split = controller.selectedTabIndex;
-
-				if(!oldDocuments.empty() && is_disposable(oldDocuments[split]))
-						oldDocuments.erase(oldDocuments.begin() + split);
-				else	++split;
-
-				std::vector<document::document_ptr> newDocuments;
-				split = merge_documents_splitting_at(oldDocuments, make_vector(document), split, newDocuments);
-				controller.documents = newDocuments;
-				controller.selectedTabIndex = split;
-			}
-			else
-			{
-				controller = [DocumentController new];
-				controller.documents = make_vector(document);
-				if(collection != document::kCollectionAny)
-					controller.identifier = projectId;
-			}
-
+			DocumentController* controller = controller_with_documents(make_vector(document), collection);
 			if(bringToFront)
 				bring_to_front(controller);
 			else if(![controller.window isVisible])
 				[controller.window orderWindow:NSWindowBelow relativeTo:[([NSApp keyWindow] ?: [NSApp mainWindow]) windowNumber]];
-
 			[controller openAndSelectDocument:document];
 		}
 
