@@ -705,17 +705,19 @@ namespace
 {
 	struct save_callback_t : document_save_callback_t
 	{
-		save_callback_t (DocumentController* self) : _self(self) { }
+		save_callback_t (DocumentController* self, size_t count) : _self(self), _count(count) { }
 
 		void did_save_document (document::document_ptr document, bool flag, std::string const& message, oak::uuid_t const& filter)
 		{
 			if(flag)
 				[_self documentDidChange:document];
-			delete this;
+			if(--_count == 0 || !flag)
+				delete this;
 		}
 
 	private:
 		__weak DocumentController* _self;
+		size_t _count;
 	};
 }
 
@@ -723,7 +725,7 @@ namespace
 {
 	if([self selectedDocument]->path() != NULL_STR)
 	{
-		[DocumentSaveHelper trySaveDocument:[self selectedDocument] forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self)];
+		[DocumentSaveHelper trySaveDocument:[self selectedDocument] forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self, 1)];
 	}
 	else
 	{
@@ -758,7 +760,7 @@ namespace
 				self.documents = newDocuments;
 			}
 
-			[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self)];
+			[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self, 1)];
 			[self updatePathDependentProperties];
 		}];
 	}
@@ -775,7 +777,7 @@ namespace
 			return;
 		[self selectedDocument]->set_path(to_s(path));
 		[self selectedDocument]->set_disk_encoding(encoding);
-		[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self)];
+		[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self, 1)];
 		[self updatePathDependentProperties];
 	}];
 }
@@ -788,7 +790,7 @@ namespace
 		if((*document)->is_modified())
 			documentsToSave.push_back(*document);
 	}
-	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:new save_callback_t(self)];
+	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:new save_callback_t(self, documentsToSave.size())];
 }
 
 // ================
