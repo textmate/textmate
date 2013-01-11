@@ -1,7 +1,7 @@
 #import "OakFileBrowser.h"
 #import "OakFSUtilities.h"
 #import "OakHistoryController.h"
-#import "ui/OakFileBrowserView.h"
+#import "ui/OFBHeaderView.h"
 #import "ui/OFBOutlineView.h"
 #import "ui/OFBPathInfoCell.h"
 #import "io/FSDataSource.h"
@@ -40,12 +40,15 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic)                    OakHistoryController* historyController;
 @property (nonatomic, readwrite, copy)   NSURL* url;
 @property (nonatomic)                    FSOutlineViewDelegate* outlineViewDelegate;
-@property (nonatomic, readwrite)         OakFileBrowserView* view;
+@property (nonatomic, readwrite)         NSView* view;
+@property (nonatomic)                    OFBHeaderView* headerView;
+@property (nonatomic)                    OFBOutlineView* outlineView;
 @property (nonatomic)                    NSUInteger dataSourceOptions;
 @property (nonatomic, readonly)          NSArray* selectedItems;
 @property (nonatomic, readonly)          NSArray* selectedPaths;
 - (void)updateView;
 - (void)loadFileBrowserOptions;
+- (NSRect)iconFrameForEntry:(id)anEntry;
 @end
 
 static NSString* const kUserDefaultsFileBrowserDataSourceOptions = @"FileBrowser DataSourceOptions";
@@ -82,9 +85,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (NSArray*)selectedItems
 {
 	NSMutableArray* res = [NSMutableArray array];
-	NSIndexSet* indexSet = [_view.outlineView selectedRowIndexes];
+	NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
 	for(NSUInteger index = [indexSet firstIndex]; index != NSNotFound; index = [indexSet indexGreaterThanIndex:index])
-		[res addObject:[_view.outlineView itemAtRow:index]];
+		[res addObject:[_outlineView itemAtRow:index]];
 	return res;
 }
 
@@ -106,7 +109,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)reload:(id)sender
 {
-	[_historyController setCurrentURLScrollOffset:NSMinY([_view.outlineView visibleRect])];
+	[_historyController setCurrentURLScrollOffset:NSMinY([_outlineView visibleRect])];
 	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
 	[_outlineViewDelegate scrollToOffset:_historyController.currentURLScrollOffset];
 }
@@ -116,7 +119,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(_outlineViewDelegate.dataSource && [_url isEqualTo:aURL])
 		return;
 
-	[_historyController setCurrentURLScrollOffset:NSMinY([_view.outlineView visibleRect])];
+	[_historyController setCurrentURLScrollOffset:NSMinY([_outlineView visibleRect])];
 	_url = aURL;
 	_outlineViewDelegate.dataSource = DataSourceForURL(aURL, _dataSourceOptions);
 	[self updateView];
@@ -142,8 +145,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	else
 	{
 		BOOL alreadyVisible = NO;
-		for(NSInteger row = 0; !alreadyVisible && row < [_view.outlineView numberOfRows]; ++row)
-			alreadyVisible = [aURL isEqualTo:[[_view.outlineView itemAtRow:row] url]];
+		for(NSInteger row = 0; !alreadyVisible && row < [_outlineView numberOfRows]; ++row)
+			alreadyVisible = [aURL isEqualTo:[[_outlineView itemAtRow:row] url]];
 		if(!alreadyVisible)
 			[self pushURL:ParentForURL(aURL)];
 
@@ -166,7 +169,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)deselectAll:(id)sender
 {
-	[_view.outlineView deselectAll:sender];
+	[_outlineView deselectAll:sender];
 }
 
 - (NSArray*)openURLs
@@ -192,8 +195,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	// make sure all items are accounted for
 	// if the counts are equal, all items are in view and no need re-index folders
 	if([updateRows count] == [symmetricDifference count])
-			[_view.outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-	else	[_view.outlineView reloadData];
+			[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
+	else	[_outlineView reloadData];
 }
 
 - (NSArray*)modifiedURLs
@@ -218,18 +221,18 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	// make sure all items are accounted for
 	// if the counts are equal, all items are in view and no need re-index folders
 	if([updateRows count] == [symmetricDifference count])
-			[_view.outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-	else	[_view.outlineView reloadData];
+			[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
+	else	[_outlineView reloadData];
 }
 
 - (NSIndexSet*)indexSetforURLs:(NSSet*)urls
 {
 	// make a note of files in view, with changed open state
 	NSMutableIndexSet* updateRows = [NSMutableIndexSet indexSet];
-	NSInteger len = [_view.outlineView numberOfRows];
+	NSInteger len = [_outlineView numberOfRows];
 	for(int rowIndex = 0; rowIndex < len ; rowIndex++)
 	{
-		NSURL* file = [[_view.outlineView itemAtRow:rowIndex] url];
+		NSURL* file = [[_outlineView itemAtRow:rowIndex] url];
 		if([urls containsObject:file])
 		{
 			[updateRows addIndex:rowIndex];
@@ -243,8 +246,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (NSDictionary*)sessionState
 {
-	if(_view.outlineView)
-		[_historyController setCurrentURLScrollOffset:NSMinY([_view.outlineView visibleRect])];
+	if(_outlineView)
+		[_historyController setCurrentURLScrollOffset:NSMinY([_outlineView visibleRect])];
 	return _historyController.state;
 }
 
@@ -254,7 +257,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (IBAction)didDoubleClickOutlineView:(id)sender
 {
-	NSArray* items = _view.outlineView.clickedRow != -1 ? @[ [_view.outlineView itemAtRow:_view.outlineView.clickedRow] ] : self.selectedItems;
+	NSArray* items = _outlineView.clickedRow != -1 ? @[ [_outlineView itemAtRow:_outlineView.clickedRow] ] : self.selectedItems;
 
 	NSMutableArray* urlsToOpen     = [NSMutableArray array];
 	NSMutableArray* itemsToAnimate = [NSMutableArray array];
@@ -295,21 +298,21 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 
 	for(FSItem* item in itemsToAnimate)
-		[OakZoomingIcon zoomIcon:[OakFileIconImage fileIconImageWithPath:item.path size:NSMakeSize(128, 128)] fromRect:[_view iconFrameForEntry:item]];
+		[OakZoomingIcon zoomIcon:[OakFileIconImage fileIconImageWithPath:item.path size:NSMakeSize(128, 128)] fromRect:[self iconFrameForEntry:item]];
 	if([urlsToOpen count])
 		[_delegate fileBrowser:self openURLs:urlsToOpen];
 }
 
 - (IBAction)didSingleClickOutlineView:(id)sender
 {
-	NSInteger row = [_view.outlineView clickedRow];
-	NSInteger col = [_view.outlineView clickedColumn];
+	NSInteger row = [_outlineView clickedRow];
+	NSInteger col = [_outlineView clickedColumn];
 	col = row != -1 && col == -1 ? 0 : col; // Clicking a row which participates in multi-row selection causes clickedColumn to return -1 <rdar://10382268>
-	OFBPathInfoCell* cell = (OFBPathInfoCell*)[_view.outlineView preparedCellAtColumn:col row:row];
-	NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[_view.outlineView frameOfCellAtColumn:col row:row] ofView:_view.outlineView];
+	OFBPathInfoCell* cell = (OFBPathInfoCell*)[_outlineView preparedCellAtColumn:col row:row];
+	NSInteger hit = [cell hitTestForEvent:[NSApp currentEvent] inRect:[_outlineView frameOfCellAtColumn:col row:row] ofView:_outlineView];
 	if(hit & OakImageAndTextCellHitImage)
 	{
-		NSURL* itemURL = ((FSItem*)[_view.outlineView itemAtRow:row]).url;
+		NSURL* itemURL = ((FSItem*)[_outlineView itemAtRow:row]).url;
 		
 		if(([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask) && [itemURL isFileURL])
 			[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ itemURL ]];
@@ -317,7 +320,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 	else if(hit & OFBPathInfoCellHitCloseButton)
 	{
-		FSItem* item = [_view.outlineView itemAtRow:row];
+		FSItem* item = [_outlineView itemAtRow:row];
 		[_delegate fileBrowser:self closeURL:item.url];
 	}
 }
@@ -329,7 +332,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (BOOL)canUndo { return NO; }
 - (BOOL)canRedo { return NO; }
 
-- (void)editSelectedEntries:(id)sender { [_view.outlineView performEditSelectedRow:self]; }
+- (void)editSelectedEntries:(id)sender { [_outlineView performEditSelectedRow:self]; }
 
 - (void)duplicateSelectedEntries:(id)sender
 {
@@ -393,7 +396,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		if(![item.url isFileURL])
 			continue; // Perhaps we shouldn’t consider the selection if we encounter a non-file URL
 
-		if(!item.leaf && [_view.outlineView isItemExpanded:item])
+		if(!item.leaf && [_outlineView isItemExpanded:item])
 			[folders addObject:item.path];
 		else if([_url isFileURL]) // TODO Test if parent folder is actually shown by current data source
 			[folders addObject:[item.path stringByDeletingLastPathComponent]];
@@ -488,7 +491,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(FSItem* item in self.selectedItems)
 	{
 		if([item.url isEqual:aURL])
-			return [_view iconFrameForEntry:item];
+			return [self iconFrameForEntry:item];
 	}
 	return NSZeroRect;
 }
@@ -702,45 +705,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)setView:(OakFileBrowserView*)aView
-{
-	if(aView != _view)
-	{
-		if(_view)
-		{
-			_outlineViewDelegate = nil;
-
-			if(_view.delegate == self)
-				_view.delegate = nil;
-			if(_view.persistentNextResponder == self)
-				_view.persistentNextResponder = nil;
-		}
-
-		if(_view = aView)
-		{
-			_view.delegate = self;
-			_view.persistentNextResponder = self;
-
-			_outlineViewDelegate = [FSOutlineViewDelegate new];
-			_outlineViewDelegate.outlineView = _view.outlineView;
-
-			_view.outlineView.target       = self;
-			_view.outlineView.action       = @selector(didSingleClickOutlineView:);
-			_view.outlineView.doubleAction = @selector(didDoubleClickOutlineView:);
-			_view.outlineView.menuDelegate = self;
-
-			[_view.outlineView setDraggingSourceOperationMask:NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink forLocal:YES];
-			[_view.outlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
-			[_view.outlineView registerForDraggedTypes:@[ NSFilenamesPboardType ]];
-
-			[self updateView];
-		}
-	}
-}
-
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
 {
-	self.view = [[OakFileBrowserView alloc] initWithFrame:NSZeroRect];
+	[self createViews];
 	_historyController.state = fileBrowserState;
 	if(!_historyController.currentURL)
 		[_historyController addURLToHistory:_url];
@@ -768,7 +735,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (BOOL)writeSelectionToPasteboard:(NSPasteboard*)pboard types:(NSArray*)types
 {
-	return [_view.outlineView.dataSource outlineView:_view.outlineView writeItems:self.selectedItems toPasteboard:pboard];
+	return [_outlineView.dataSource outlineView:_outlineView writeItems:self.selectedItems toPasteboard:pboard];
 }
 
 // ================
@@ -791,7 +758,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 			_dataSourceOptions |= it->flag;
 	}
 }
-
+#if 0
 - (void)saveFileBrowserOptions
 {
 	NSMutableArray* array = [NSMutableArray array];
@@ -812,11 +779,6 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	_dataSourceOptions ^= [sender tag];
 	[self saveFileBrowserOptions];
 	[self reload:self];
-}
-
-- (IBAction)showFolderSpecificPreferences:(id)sender
-{
-	[_delegate fileBrowser:self openURLs:@[ [NSURL fileURLWithPath:[[_url path] stringByAppendingPathComponent:@".tm_properties"] isDirectory:NO]] ];
 }
 
 - (IBAction)showOptionsPopUpMenu:(id)sender
@@ -843,18 +805,58 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 	[_view displayMenu:menu fromHeaderColumn:fb::options selectedIndex:0 popup:NO];
 }
-
+#endif
 // =======================
 // = Header View Actions =
 // =======================
 
 - (void)updateView
 {
-	_view.titleText          = _outlineViewDelegate.dataSource.rootItem.name;
-	_view.titleImage         = _outlineViewDelegate.dataSource.rootItem.icon;
-	_view.canGoBackward      = _historyController.previousURL ? YES : NO;
-	_view.canGoForward       = _historyController.nextURL     ? YES : NO;
-	[_view setNeedsDisplay:YES];
+	_headerView.goBackButton.enabled    = _historyController.previousURL ? YES : NO;
+	_headerView.goForwardButton.enabled = _historyController.nextURL ? YES : NO;
+
+	NSMenu* menu = [NSMenu new];
+	NSMutableSet* visibleLocations = [NSMutableSet setWithObjects:kURLLocationComputer, kURLLocationHome, kURLLocationFavorites, nil];
+
+	// Add path hierarchy
+	for(NSURL* currentURL = _url; currentURL; currentURL = ParentForURL(currentURL))
+	{
+		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
+		[menuItem setTarget:self];
+		[menuItem setRepresentedObject:currentURL];
+		[menuItem setImage:IconImage(currentURL)];
+		[visibleLocations addObject:currentURL];
+	}
+
+	// Add recent locations
+	NSMutableArray* recentURLs = [NSMutableArray array];
+	for(NSUInteger index = 0; index < _historyController.recentLocations.count && index < 10; ++index)
+	{
+		NSURL* recentURL = [_historyController.recentLocations objectAtIndex:index];
+		if(![visibleLocations containsObject:recentURL])
+			[recentURLs addObject:recentURL];
+	}
+
+	if([recentURLs count])
+	{
+		[menu addItem:[NSMenuItem separatorItem]];
+		[[menu addItemWithTitle:@"Recent Places" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
+
+		// TODO Disambiguate paths
+		// std::vector<size_t> const& parents = path::disambiguate(recentPaths);
+		for(NSURL* recentURL in recentURLs)
+		{
+			NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(recentURL/*, parents[index]*/) action:@selector(takeURLFrom:) keyEquivalent:@""];
+			[menuItem setTarget:self];
+			[menuItem setRepresentedObject:recentURL];
+			[menuItem setImage:IconImage(recentURL)];
+		}
+	}
+
+	[menu addItem:[NSMenuItem separatorItem]];
+	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
+
+	_headerView.folderPopUpButton.menu = menu;
 }
 
 - (IBAction)goToComputer:(id)sender       { [self pushURL:kURLLocationComputer];  }
@@ -908,154 +910,87 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 		[self pushURL:[sender representedObject]];
 }
 
-- (IBAction)showFolderPopUpMenu:(id)sender
+// ===============
+// = Setup Views =
+// ===============
+
+- (void)createViews
 {
-	NSMenu* menu                   = [NSMenu new];
-	NSMutableSet* visibleLocations = [NSMutableSet setWithObjects:kURLLocationComputer, kURLLocationHome, kURLLocationFavorites, nil];
+	_outlineView = [[OFBOutlineView alloc] initWithFrame:NSZeroRect];
+	_outlineView.focusRingType            = NSFocusRingTypeNone;
+	_outlineView.allowsMultipleSelection  = YES;
+	_outlineView.autoresizesOutlineColumn = NO;
+	_outlineView.headerView               = nil;
+	_outlineView.target                   = self;
+	_outlineView.action                   = @selector(didSingleClickOutlineView:);
+	_outlineView.doubleAction             = @selector(didDoubleClickOutlineView:);
+	_outlineView.menuDelegate             = self;
 
-	// Add path hierarchy
-	for(NSURL* currentURL = _url; currentURL; currentURL = ParentForURL(currentURL))
-	{
-		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
-		[menuItem setTarget:self];
-		[menuItem setRepresentedObject:currentURL];
-		[menuItem setImage:IconImage(currentURL)];
-		[visibleLocations addObject:currentURL];
-	}
+	[_outlineView setDraggingSourceOperationMask:NSDragOperationCopy|NSDragOperationMove|NSDragOperationLink forLocal:YES];
+	[_outlineView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:NO];
+	[_outlineView registerForDraggedTypes:@[ NSFilenamesPboardType ]];
 
-	// Add recent locations
-	NSMutableArray* recentURLs = [NSMutableArray array];
-	for(NSUInteger index = 0; index < _historyController.recentLocations.count && index < 10; ++index)
-	{
-		NSURL* recentURL = [_historyController.recentLocations objectAtIndex:index];
-		if(![visibleLocations containsObject:recentURL])
-			[recentURLs addObject:recentURL];
-	}
+	NSScrollView* scrollView = [NSScrollView new];
+	scrollView.hasVerticalScroller   = YES;
+	scrollView.hasHorizontalScroller = NO;
+	scrollView.borderType            = NSNoBorder;
+	scrollView.documentView          = _outlineView;
 
-	if([recentURLs count])
-	{
-		[menu addItem:[NSMenuItem separatorItem]];
-		[[menu addItemWithTitle:@"Recent Places" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
+	_headerView = [[OFBHeaderView alloc] initWithFrame:NSZeroRect];
+	_headerView.goBackButton.target = self;
+	_headerView.goBackButton.action = @selector(goBack:);
+	_headerView.goForwardButton.target = self;
+	_headerView.goForwardButton.action = @selector(goForward:);
 
-		// TODO Disambiguate paths
-		// std::vector<size_t> const& parents = path::disambiguate(recentPaths);
-		for(NSURL* recentURL in recentURLs)
-		{
-			NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(recentURL/*, parents[index]*/) action:@selector(takeURLFrom:) keyEquivalent:@""];
-			[menuItem setTarget:self];
-			[menuItem setRepresentedObject:recentURL];
-			[menuItem setImage:IconImage(recentURL)];
-		}
-	}
+	NSBox* bottomDividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
+	bottomDividerView.boxType     = NSBoxCustom;
+	bottomDividerView.borderType  = NSLineBorder;
+	bottomDividerView.borderColor = [NSColor blackColor];
 
-	[menu addItem:[NSMenuItem separatorItem]];
-	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
+	_view = [NSView new];
+	[_view addSubview:_headerView];
+	[_view addSubview:bottomDividerView];
+	[_view addSubview:scrollView];
 
-	[_view displayMenu:menu fromHeaderColumn:fb::title selectedIndex:0 popup:YES];
+	NSCell* cell = [OFBPathInfoCell new];
+	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
+	[cell setEditable:YES];
+
+	NSTableColumn* tableColumn = [NSTableColumn new];
+	[tableColumn setDataCell:cell];
+	[_outlineView addTableColumn:tableColumn];
+	[_outlineView setOutlineTableColumn:tableColumn];
+	[_outlineView sizeLastColumnToFit];
+
+	_outlineViewDelegate = [FSOutlineViewDelegate new];
+	_outlineViewDelegate.outlineView = _outlineView;
+
+	NSDictionary* views = @{
+		@"parent"  : _view,
+		@"header"  : _headerView,
+		@"divider" : bottomDividerView,
+		@"browser" : scrollView,
+	};
+
+	for(NSView* view in [views allValues])
+		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[header(==browser,==divider)]|"   options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][divider(==1)][browser]|" options:0 metrics:nil views:views]];
 }
 
-- (IBAction)didClickHeaderColumn:(id)sender
+- (NSRect)iconFrameForEntry:(id)anEntry
 {
-	switch([sender tag])
-	{
-		case fb::goBack:           return [self goBack:sender];
-		case fb::goForward:        return [self goForward:sender];
-		case fb::scmDataSource:    return [self goToSCMDataSource:sender];
-		case fb::favorites:        return [self goToFavorites:sender];
-		case fb::home:             return [self goToHome:sender];
-		case fb::computer:         return [self goToComputer:sender];
-		case fb::title:            return [self showFolderPopUpMenu:sender];
-		case fb::options:          return [self showOptionsPopUpMenu:sender];
-	}
-}
-
-- (IBAction)takeHistoryIndexFrom:(id)sender
-{
-	ASSERT([sender respondsToSelector:@selector(tag)]);
-	[self setURL:[_historyController urlAtIndex:[sender tag]]];
-	_historyController.historyIndex = [sender tag];
-	[_outlineViewDelegate scrollToOffset:_historyController.currentURLScrollOffset];
-	[self updateView];
-}
-
-- (void)showHistoryItems:(NSArray*)urls fromHeaderColumn:(fb::header_column)columnTag
-{
-	// TODO DisplayName paths
-	NSMutableSet* seenPaths = [NSMutableSet set];
-	NSMenu* menu = [NSMenu new];
-	for(NSURL* aURL in urls)
-	{
-		if([seenPaths containsObject:[aURL path]])
-			continue;
-		if([aURL isFileURL])
-			[seenPaths addObject:[aURL path]];
-
-		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(aURL) action:@selector(takeHistoryIndexFrom:) keyEquivalent:@""];
-		[menuItem setTag:[[aURL fragment] intValue]];
-		[menuItem setTarget:self];
-		[menuItem setImage:IconImage(aURL)];
-	}
-	[_view displayMenu:menu fromHeaderColumn:columnTag selectedIndex:0 popup:NO];
-}
-
-- (IBAction)showBackMenu:(id)sender
-{
-	NSMutableArray* urls = [NSMutableArray array];
-	for(NSInteger historyIndex = _historyController.historyIndex - 1; historyIndex >= 0 && _historyController.historyIndex - historyIndex <= 10; --historyIndex)
-		[urls addObject:[NSURL URLWithString:[[[_historyController urlAtIndex:historyIndex] absoluteString] stringByAppendingFormat:@"#%ld", historyIndex]]];
-	[self showHistoryItems:urls fromHeaderColumn:fb::goBack];
-}
-
-- (IBAction)showForwardMenu:(id)sender
-{
-	NSMutableArray* urls = [NSMutableArray array];
-	for(NSInteger historyIndex = _historyController.historyIndex + 1; historyIndex < _historyController.historyCount && historyIndex - _historyController.historyIndex <= 10; ++historyIndex)
-		[urls addObject:[NSURL URLWithString:[[[_historyController urlAtIndex:historyIndex] absoluteString] stringByAppendingFormat:@"#%ld", historyIndex]]];
-	[self showHistoryItems:urls fromHeaderColumn:fb::goForward];
-}
-
-- (void)showFolderContents:(NSURL*)aURL inMenuFromCell:(fb::header_column)column
-{
-	std::multimap<std::string, NSURL*, text::less_t> urls;
-	if([[aURL scheme] isEqualToString:[kURLLocationComputer scheme]])
-	{
-		citerate(volume, path::volumes())
-			urls.insert(std::make_pair(path::display_name(*volume), [NSURL fileURLWithPath:[NSString stringWithCxxString:*volume] isDirectory:YES]));
-	}
-	else if([aURL isFileURL])
-	{
-		std::string const dir = [[aURL path] fileSystemRepresentation];
-		citerate(entry, path::entries(dir, "*"))
-		{
-			std::string const& path = path::join(dir, (*entry)->d_name);
-			uint32_t flags = path::info(path);
-			std::string const& resolved = (flags & path::flag::symlink) ? path::resolve(path) : path;
-			if((flags & path::flag::directory) || ((flags & path::flag::symlink) && (path::info(resolved) & path::flag::directory)))
-				urls.insert(std::make_pair(path::display_name(path), [NSURL fileURLWithPath:[NSString stringWithCxxString:resolved] isDirectory:YES]));
-		}
-	}
-
-	NSMenu* menu = [NSMenu new];
-	iterate(pair, urls)
-	{
-		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeURLFrom:) keyEquivalent:@""];
-		[menuItem setTarget:self];
-		[menuItem setRepresentedObject:pair->second];
-		[menuItem setImage:IconImage(pair->second)];
-	}
-	[_view displayMenu:menu fromHeaderColumn:column selectedIndex:0 popup:NO];
-}
-
-- (IBAction)didTriggerMenuForHeaderColumn:(id)sender
-{
-	switch([sender tag])
-	{
-		case fb::goBack:      return [self showBackMenu:sender];
-		case fb::goForward:   return [self showForwardMenu:sender];
-		case fb::favorites:   return [self showFolderContents:kURLLocationFavorites inMenuFromCell:fb::header_column([sender tag])];
-		case fb::home:        return [self showFolderContents:kURLLocationHome      inMenuFromCell:fb::header_column([sender tag])];
-		case fb::computer:    return [self showFolderContents:kURLLocationComputer  inMenuFromCell:fb::header_column([sender tag])];
-	}
+	NSInteger rowIndex = [_outlineView rowForItem:anEntry];
+	if(rowIndex == -1)
+		return NSZeroRect;
+	NSRect r = [_outlineView frameOfCellAtColumn:0 row:rowIndex];
+	r.origin.x += 7.0; // FIXME some hard-coded values here
+	r.origin.y -= 1.0;
+	r.size = NSMakeSize(16, 16);
+	r = [_outlineView convertRect:r toView:nil];
+	r.origin = [_outlineView.window convertBaseToScreen:r.origin];
+	return r;
 }
 
 // ===================
@@ -1071,7 +1006,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	else if([item action] == @selector(goForward:))
 			return _historyController.nextURL ? YES : NO;
 	else if([item action] == @selector(delete:))
-			return [_view.outlineView numberOfSelectedRows] > 0;
+			return [_outlineView numberOfSelectedRows] > 0;
 	else if([item action] == @selector(undo:))
 			return [self canUndo];
 	else if([item action] == @selector(redo:))

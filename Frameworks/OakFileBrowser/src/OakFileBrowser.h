@@ -9,6 +9,7 @@
 
 PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
+@property (nonatomic, readonly) NSView*       view;
 @property (nonatomic, readonly) NSString*     location;
 @property (nonatomic, readonly) NSArray*      selectedURLs;
 @property (nonatomic)           NSArray*      openURLs;
@@ -31,8 +32,4 @@ PUBLIC @interface OakFileBrowser : NSResponder
 - (IBAction)goToFavorites:(id)sender;
 - (IBAction)goToSCMDataSource:(id)sender;
 - (IBAction)orderFrontGoToFolder:(id)sender;
-@end
-
-@interface OakFileBrowser (WorkaroundForUsingNSViewSubclassInImplementation)
-@property (nonatomic, readonly) NSView* view;
 @end
