@@ -1,8 +1,8 @@
 #import "OakFileBrowserView.h"
 #import "OFBPathInfoCell.h"
 #import "OFBOutlineView.h"
+#import "OFBHeaderView.h"
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakStatusBar.h>
 #import <OakAppKit/OakFileIconImage.h>
 
 @interface OakFileBrowserView ()
@@ -11,7 +11,7 @@
 
 	// These two properties are retained only as subviews
 	OFBOutlineView* outlineView;
-	OakStatusBar* headerView;
+	OFBHeaderView* headerView;
 
 	id delegate;
 	NSResponder* persistentNextResponder;
@@ -74,8 +74,7 @@ OAK_DEBUG_VAR(FileBrowser_View);
 
 	scrollView.documentView              = outlineView;
 
-	headerView             = [[[OakStatusBar alloc] initWithFrame:NSZeroRect] autorelease];
-	headerView.borderEdges = sb::border::bottom;
+	headerView = [[[OFBHeaderView alloc] initWithFrame:NSZeroRect] autorelease];
 	[self addSubview:headerView];
 
 	NSCell* cell       = [[OFBPathInfoCell new] autorelease];
@@ -130,7 +129,6 @@ OAK_DEBUG_VAR(FileBrowser_View);
 
 - (void)displayMenu:(NSMenu*)aMenu fromHeaderColumn:(fb::header_column)columnTag selectedIndex:(NSUInteger)index popup:(BOOL)popup
 {
-	[headerView showMenu:aMenu withSelectedIndex:index forCellWithTag:columnTag font:[NSFont controlContentFontOfSize:12.0] popup:popup];
 }
 
 - (NSRect)iconFrameForEntry:(id)anEntry
@@ -156,18 +154,8 @@ static inline NSImage* Pressed (NSString* name) { return Image([NSString stringW
 
 - (void)updateHeaderView
 {
-	sb::cell_t const newCells[] =
-	{
-		sb::cell_t::button(Image(@"Left Arrow"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Left Arrow")).enabled(self.canGoBackward).tool_tip("Go Back").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::goBack),
-		sb::cell_t::button(Image(@"Right Arrow"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Right Arrow")).enabled(self.canGoForward).tool_tip("Go Forward").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::goForward),
-		sb::cell_t::popup((NSString*)(self.titleText ?: @""), @selector(clickHeaderCell:), self).set_image(self.titleImage).size(32, CGFLOAT_MAX).set_tag(fb::title),
-		sb::cell_t::dropdown(Image(@"Gear"), @selector(clickHeaderCell:), self).tool_tip("Options").set_tag(fb::options),
-		sb::cell_t::button(Image(@"SmartFolder"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"SmartFolder")).tool_tip("SmartFolder").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::scmDataSource),
-		sb::cell_t::button(Image(@"Favorites"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Favorites")).tool_tip("Favorites").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::favorites),
-		sb::cell_t::button(Image(@"Home"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Home")).tool_tip("Home").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::home),
-		sb::cell_t::button(Image(@"Computer"), @selector(clickHeaderCell:), self).pressed_image(Pressed(@"Computer")).tool_tip("Computer").set_menu_action(@selector(holdHeaderCell:)).set_tag(fb::computer),
-	};
-	[headerView setCells:std::vector<sb::cell_t>(newCells, newCells+sizeofA(newCells))];
+	headerView.goBackButton.enabled    = self.canGoBackward;
+	headerView.goForwardButton.enabled = self.canGoForward;
 }
 
 - (void)setCanGoBackward:(BOOL)flag      { canGoBackward = flag; [self updateHeaderView]; }

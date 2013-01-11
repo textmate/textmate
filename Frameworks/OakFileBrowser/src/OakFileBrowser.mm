@@ -14,7 +14,6 @@
 #import <io/entries.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakStatusBar.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakFinderLabelChooser.h>
 #import <OakAppKit/OakOpenWithMenu.h>
