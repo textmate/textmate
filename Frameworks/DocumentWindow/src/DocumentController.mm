@@ -951,10 +951,12 @@ namespace
 	if(_identifier == newIdentifier || [_identifier isEqualToString:newIdentifier])
 		return;
 
-	if(_identifier)
-		[AllControllers() removeObjectForKey:_identifier];
+	NSString* oldIdentifier = _identifier;
 	if(_identifier = newIdentifier)
 		[AllControllers() setObject:self forKey:newIdentifier];
+
+	if(oldIdentifier)
+		[AllControllers() removeObjectForKey:oldIdentifier]; // This may release our object
 }
 
 // ===========================
