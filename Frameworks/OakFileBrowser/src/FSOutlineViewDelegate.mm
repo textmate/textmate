@@ -120,6 +120,8 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 - (void)dealloc
 {
 	[self applicationWillTerminate:nil];
+	[outlineView setDataSource:nil];
+	[outlineView setDelegate:nil];
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
 }
 
