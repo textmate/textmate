@@ -1,6 +1,5 @@
 #import <oak/debug.h>
 
-@class OakStatusBar;
 @class OFBOutlineView;
 
 namespace fb
@@ -16,23 +15,6 @@ namespace fb
 @end
 
 @interface OakFileBrowserView : NSView
-{
-	OBJC_WATCH_LEAKS(OakFileBrowserView);
-
-	// These two properties are retained only as subviews
-	OFBOutlineView* outlineView;
-	OakStatusBar* headerView;
-
-	id delegate;
-	NSResponder* persistentNextResponder;
-
-	// Header view
-	BOOL canGoBackward;
-	BOOL canGoForward;
-
-	NSString* titleText;
-	NSImage*  titleImage;
-}
 // Initial setup
 @property (nonatomic, assign) id           delegate;
 @property (nonatomic, assign) NSResponder* persistentNextResponder;
