@@ -15,7 +15,3 @@
 @property (nonatomic, readonly) NSInteger historyCount;
 - (NSURL*)urlAtIndex:(NSInteger)index;
 @end
-
-@interface OakHistoryController (WorkaroundForBeingBackedByNSMutableArray)
-@property (nonatomic, readonly) NSArray* recentLocations;
-@end

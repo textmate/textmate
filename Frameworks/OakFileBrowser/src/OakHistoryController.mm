@@ -3,7 +3,6 @@
 #import <oak/debug.h>
 
 @interface OakHistoryController ()
-@property (nonatomic) NSMutableArray* recentLocations;
 @property (nonatomic) NSMutableArray* history;
 @end
 
@@ -14,7 +13,6 @@
 	{
 		_history         = [NSMutableArray new];
 		_historyIndex    = -1;
-		_recentLocations = [NSMutableArray new];
 	}
 	return self;
 }
@@ -33,7 +31,6 @@
 
 - (void)setState:(NSDictionary*)newState
 {
-	[_recentLocations removeAllObjects];
 	[_history removeAllObjects];
 	for(NSDictionary* entry in newState[@"history"])
 	{
@@ -64,9 +61,6 @@
 - (void)addURLToHistory:(NSURL*)url
 {
 	ASSERT(url);
-	[_recentLocations removeObject:url];
-	[_recentLocations addObject:url];
-
 	if(++_historyIndex < [_history count])
 		[_history removeObjectsInRange:NSMakeRange(_historyIndex, [_history count] - _historyIndex)];
 
