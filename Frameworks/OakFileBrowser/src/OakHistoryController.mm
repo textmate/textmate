@@ -2,109 +2,100 @@
 #import <oak/algorithm.h>
 #import <oak/debug.h>
 
-@implementation OakHistoryController
-@synthesize historyIndex;
+@interface OakHistoryController ()
+@property (nonatomic) NSMutableArray* recentLocations;
+@property (nonatomic) NSMutableArray* history;
+@end
 
+@implementation OakHistoryController { OBJC_WATCH_LEAKS(OakHistoryController); }
 - (id)init
 {
 	if(self = [super init])
 	{
-		historyArray = [NSMutableArray new];
-		historyIndex = -1;
-		recentLocationsArray = [NSMutableArray new];
+		_history         = [NSMutableArray new];
+		_historyIndex    = -1;
+		_recentLocations = [NSMutableArray new];
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[historyArray release];
-	[recentLocationsArray release];
-	[super dealloc];
 }
 
 - (NSDictionary*)state
 {
 	NSMutableArray* history = [NSMutableArray array];
-	for(NSDictionary* entry in historyArray)
+	for(NSDictionary* entry in _history)
 	{
-		NSMutableDictionary* dict = [[entry mutableCopy] autorelease];
-		[dict setObject:[[dict objectForKey:@"url"] absoluteString] forKey:@"url"];
+		NSMutableDictionary* dict = [entry mutableCopy];
+		dict[@"url"] = [dict[@"url"] absoluteString];
 		[history addObject:dict];
 	}
-	return @{ @"history" : history, @"historyIndex" : @(historyIndex) };
+	return @{ @"history" : history, @"historyIndex" : @(_historyIndex) };
 }
 
 - (void)setState:(NSDictionary*)newState
 {
-	[recentLocationsArray removeAllObjects];
-	[historyArray removeAllObjects];
-	for(NSDictionary* entry in [newState objectForKey:@"history"])
+	[_recentLocations removeAllObjects];
+	[_history removeAllObjects];
+	for(NSDictionary* entry in newState[@"history"])
 	{
 		id value = nil;
-		if((value = [entry objectForKey:@"path"]) && [value isKindOfClass:[NSString class]])
+		if((value = entry[@"path"]) && [value isKindOfClass:[NSString class]])
 			value = [NSURL fileURLWithPath:value isDirectory:YES];
-		else if((value = [entry objectForKey:@"url"]) && [value isKindOfClass:[NSString class]])
+		else if((value = entry[@"url"]) && [value isKindOfClass:[NSString class]])
 			value = [NSURL URLWithString:value];
 		else
 			continue;
 
 		if(value)
 		{
-			NSMutableDictionary* dict = [[entry mutableCopy] autorelease];
+			NSMutableDictionary* dict = [entry mutableCopy];
 			[dict removeObjectForKey:@"path"];
-			[dict setObject:value forKey:@"url"];
-			[historyArray addObject:dict];
+			dict[@"url"] = value;
+			[_history addObject:dict];
 		}
 	}
-	historyIndex = oak::cap<NSInteger>(-1, [[newState objectForKey:@"historyIndex"] intValue], [historyArray count]-1);
+	_historyIndex = oak::cap<NSInteger>(-1, [newState[@"historyIndex"] intValue], [_history count]-1);
 }
 
-- (NSURL*)previousURL             { return historyIndex > 0                      ? [[historyArray objectAtIndex:historyIndex-1] objectForKey:@"url"] : nil; }
-- (NSURL*)nextURL                 { return historyIndex+1 < [historyArray count] ? [[historyArray objectAtIndex:historyIndex+1] objectForKey:@"url"] : nil; }
-- (NSURL*)currentURL              { return historyIndex != -1                    ? [[historyArray objectAtIndex:historyIndex] objectForKey:@"url"] : nil; }
-- (CGFloat)currentURLScrollOffset { return historyIndex != -1 ? [[[historyArray objectAtIndex:historyIndex] objectForKey:@"scrollOffset"] floatValue] : 0; }
+- (NSURL*)previousURL             { return _historyIndex > 0                      ? _history[_historyIndex-1][@"url"] : nil; }
+- (NSURL*)nextURL                 { return _historyIndex+1 < [_history count]     ? _history[_historyIndex+1][@"url"] : nil; }
+- (NSURL*)currentURL              { return _historyIndex != -1                    ? _history[_historyIndex][@"url"]   : nil; }
+- (CGFloat)currentURLScrollOffset { return _historyIndex != -1 ? [_history[_historyIndex][@"scrollOffset"] floatValue] : 0; }
 
 - (void)addURLToHistory:(NSURL*)url
 {
 	ASSERT(url);
-	[recentLocationsArray removeObject:url];
-	[recentLocationsArray addObject:url];
+	[_recentLocations removeObject:url];
+	[_recentLocations addObject:url];
 
-	if(++historyIndex < [historyArray count])
-		[historyArray removeObjectsInRange:NSMakeRange(historyIndex, [historyArray count] - historyIndex)];
+	if(++_historyIndex < [_history count])
+		[_history removeObjectsInRange:NSMakeRange(_historyIndex, [_history count] - _historyIndex)];
 
-	[historyArray addObject:@{ @"url" : url }];
+	[_history addObject:@{ @"url" : url }];
 }
 
-- (BOOL)advance:(id)sender { return historyIndex+1 < [historyArray count] ? (++historyIndex, YES) : NO; }
-- (BOOL)retreat:(id)sender { return historyIndex > 0                      ? (--historyIndex, YES) : NO; }
+- (BOOL)advance:(id)sender { return _historyIndex+1 < [_history count] ? (++_historyIndex, YES) : NO; }
+- (BOOL)retreat:(id)sender { return _historyIndex > 0                  ? (--_historyIndex, YES) : NO; }
 
 - (void)setCurrentURLScrollOffset:(CGFloat)offset
 {
-	if(historyIndex != -1)
+	if(_historyIndex != -1)
 	{
-		NSMutableDictionary* dict = [[[historyArray objectAtIndex:historyIndex] mutableCopy] autorelease];
+		NSMutableDictionary* dict = [_history[_historyIndex] mutableCopy];
 		if(offset)
-				[dict setObject:@(offset) forKey:@"scrollOffset"];
+				dict[@"scrollOffset"] = @(offset);
 		else	[dict removeObjectForKey:@"scrollOffset"];
-		[historyArray replaceObjectAtIndex:historyIndex withObject:dict];
+		_history[_historyIndex] = dict;
 	}
-}
-
-- (NSArray*)recentLocations
-{
-	return recentLocationsArray;
 }
 
 - (NSInteger)historyCount
 {
-	return historyArray.count;
+	return [_history count];
 }
 
 - (NSURL*)urlAtIndex:(NSInteger)index
 {
-	ASSERT(index >= 0 && index < historyArray.count);
-	return [[historyArray objectAtIndex:index] objectForKey:@"url"];
+	ASSERT(index >= 0 && index < [_history count]);
+	return _history[index][@"url"];
 }
 @end

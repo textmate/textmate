@@ -13,6 +13,7 @@
 #import <io/path.h>
 #import <io/move_path.h>
 #import <io/resource.h>
+#import <oak/debug.h>
 
 NSString* const FSItemDidReloadNotification = @"FSItemDidReloadNotification";
 
@@ -21,38 +22,32 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	FSDataSource* res = nil;
 	NSString* scheme = [anURL scheme];
 	if([scheme isEqualToString:@"xcodeproj"])
-		res = [[[FSXcodeProjectDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+		res = [[FSXcodeProjectDataSource alloc] initWithURL:anURL options:someOptions];
 	else if([scheme isEqualToString:@"file"])
-		res = [[[FSDirectoryDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+		res = [[FSDirectoryDataSource alloc] initWithURL:anURL options:someOptions];
 	else if([scheme isEqualToString:@"computer"])
-		res = [[[FSVolumesDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+		res = [[FSVolumesDataSource alloc] initWithURL:anURL options:someOptions];
 	else if([scheme isEqualToString:@"search"])
-		res = [[[FSSearchDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+		res = [[FSSearchDataSource alloc] initWithURL:anURL options:someOptions];
 	// else if([scheme isEqualToString:@"bundles"])
-	// 	res = [[[FSBundlesDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+	// 	res = [[FSBundlesDataSource alloc] initWithURL:anURL options:someOptions];
 	else if([scheme isEqualToString:@"scm"])
-		res = [[[FSSCMDataSource alloc] initWithURL:anURL options:someOptions] autorelease];
+		res = [[FSSCMDataSource alloc] initWithURL:anURL options:someOptions];
 	return res;
 }
 
-@implementation FSDataSource
+@implementation FSDataSource { OBJC_WATCH_LEAKS(FSDataSource); }
 @synthesize rootItem;
 
 + (NSArray*)sortArray:(NSArray*)anArray usingOptions:(NSUInteger)someOptions
 {
 	NSMutableArray* descriptors = [NSMutableArray array];
 	if(someOptions & kFSDataSourceOptionGroupsFirst)
-		[descriptors addObject:[[[NSSortDescriptor alloc] initWithKey:@"sortAsFolder" ascending:NO] autorelease]];
+		[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"sortAsFolder" ascending:NO]];
 	if(someOptions & kFSDataSourceOptionSortByType)
-		[descriptors addObject:[[[NSSortDescriptor alloc] initWithKey:@"name.pathExtensions" ascending:YES selector:@selector(displayNameCompare:)] autorelease]];
-	[descriptors addObject:[[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(displayNameCompare:)] autorelease]];
+		[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name.pathExtensions" ascending:YES selector:@selector(displayNameCompare:)]];
+	[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(displayNameCompare:)]];
 	return [anArray sortedArrayUsingDescriptors:descriptors];
-}
-
-- (void)dealloc
-{
-	[rootItem release];
-	[super dealloc];
 }
 
 - (BOOL)reloadItem:(FSItem*)anItem

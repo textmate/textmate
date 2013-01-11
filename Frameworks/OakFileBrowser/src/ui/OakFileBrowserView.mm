@@ -9,12 +9,8 @@
 {
 	OBJC_WATCH_LEAKS(OakFileBrowserView);
 
-	// These two properties are retained only as subviews
 	OFBOutlineView* outlineView;
 	OFBHeaderView* headerView;
-
-	id delegate;
-	NSResponder* persistentNextResponder;
 
 	// Header view
 	BOOL canGoBackward;
@@ -30,8 +26,7 @@ OAK_DEBUG_VAR(FileBrowser_View);
 
 @implementation OakFileBrowserView
 @synthesize outlineView;
-@synthesize persistentNextResponder;
-@synthesize delegate, canGoBackward, canGoForward, titleText, titleImage;
+@synthesize canGoBackward, canGoForward, titleText, titleImage;
 
 // ==================
 // = Setup/Teardown =
@@ -46,11 +41,6 @@ OAK_DEBUG_VAR(FileBrowser_View);
 	return self;
 }
 
-- (void)dealloc
-{
-	[super dealloc];
-}
-
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
@@ -60,13 +50,13 @@ OAK_DEBUG_VAR(FileBrowser_View);
 {
 	ASSERT(!outlineView);
 
-	NSScrollView* scrollView         = [[[NSScrollView alloc] initWithFrame:NSZeroRect] autorelease];
+	NSScrollView* scrollView         = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 	scrollView.hasVerticalScroller   = YES;
 	scrollView.hasHorizontalScroller = NO;
 	scrollView.borderType            = NSNoBorder;
 	[self addSubview:scrollView];
 
-	outlineView                          = [[[OFBOutlineView alloc] initWithFrame:NSMakeRect(10, 10, scrollView.contentSize.width, scrollView.contentSize.height)] autorelease];
+	outlineView                          = [[OFBOutlineView alloc] initWithFrame:NSMakeRect(10, 10, scrollView.contentSize.width, scrollView.contentSize.height)];
 	outlineView.focusRingType            = NSFocusRingTypeNone;
 	outlineView.allowsMultipleSelection  = YES;
 	outlineView.autoresizesOutlineColumn = NO;
@@ -74,14 +64,14 @@ OAK_DEBUG_VAR(FileBrowser_View);
 
 	scrollView.documentView              = outlineView;
 
-	headerView = [[[OFBHeaderView alloc] initWithFrame:NSZeroRect] autorelease];
+	headerView = [[OFBHeaderView alloc] initWithFrame:NSZeroRect];
 	[self addSubview:headerView];
 
-	NSCell* cell       = [[OFBPathInfoCell new] autorelease];
+	NSCell* cell       = [OFBPathInfoCell new];
 	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
 	[cell setEditable:YES];
 
-	NSTableColumn* tableColumn = [[NSTableColumn new] autorelease];
+	NSTableColumn* tableColumn = [NSTableColumn new];
 	[tableColumn setDataCell:cell];
 	[outlineView addTableColumn:tableColumn];
 	[outlineView setOutlineTableColumn:tableColumn];
@@ -100,9 +90,9 @@ OAK_DEBUG_VAR(FileBrowser_View);
 
 - (void)setPersistentNextResponder:(NSResponder*)aResponder
 {
-	if(aResponder != persistentNextResponder)
+	if(_persistentNextResponder != aResponder)
 	{
-		persistentNextResponder = aResponder;
+		_persistentNextResponder = aResponder;
 		[self viewDidMoveToSuperview];
 	}
 }
@@ -160,10 +150,9 @@ static inline NSImage* Pressed (NSString* name) { return Image([NSString stringW
 
 - (void)setCanGoBackward:(BOOL)flag      { canGoBackward = flag; [self updateHeaderView]; }
 - (void)setCanGoForward:(BOOL)flag       { canGoForward = flag; [self updateHeaderView]; }
-- (void)setTitleText:(NSString*)text     { [titleText autorelease]; titleText = [text retain]; [self updateHeaderView]; }
+- (void)setTitleText:(NSString*)text     { titleText = text; [self updateHeaderView]; }
 - (void)setTitleImage:(NSImage*)image
 {
-	[titleImage release];
 	titleImage = [[NSImage alloc] initWithSize:NSMakeSize(15, 15)];
 	[titleImage lockFocus];
 	[image drawInRect:NSMakeRect(1, 1, 13, 13) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
@@ -171,16 +160,16 @@ static inline NSImage* Pressed (NSString* name) { return Image([NSString stringW
 	[self updateHeaderView];
 }
 
-- (IBAction)clickHeaderCell:(id)sender { [delegate didClickHeaderColumn:sender]; }
-- (IBAction)holdHeaderCell:(id)sender  { [delegate didTriggerMenuForHeaderColumn:sender]; }
+- (IBAction)clickHeaderCell:(id)sender { [_delegate didClickHeaderColumn:sender]; }
+- (IBAction)holdHeaderCell:(id)sender  { [_delegate didTriggerMenuForHeaderColumn:sender]; }
 
 - (void)swipeWithEvent:(NSEvent*)anEvent
 {
-	if([anEvent deltaX] == +1 && [delegate respondsToSelector:@selector(goBack:)])
-		[delegate performSelector:@selector(goBack:) withObject:self];
-	else if([anEvent deltaX] == -1 && [delegate respondsToSelector:@selector(goForward:)])
-		[delegate performSelector:@selector(goForward:) withObject:self];
-	else if([anEvent deltaY] == +1 && [delegate respondsToSelector:@selector(goToParentFolder:)])
-		[delegate performSelector:@selector(goToParentFolder:) withObject:self];
+	if([anEvent deltaX] == +1 && [_delegate respondsToSelector:@selector(goBack:)])
+		[_delegate performSelector:@selector(goBack:) withObject:self];
+	else if([anEvent deltaX] == -1 && [_delegate respondsToSelector:@selector(goForward:)])
+		[_delegate performSelector:@selector(goForward:) withObject:self];
+	else if([anEvent deltaY] == +1 && [_delegate respondsToSelector:@selector(goToParentFolder:)])
+		[_delegate performSelector:@selector(goToParentFolder:) withObject:self];
 }
 @end

@@ -28,7 +28,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 	for (NSString *possibleString in array)
 	{
 		if (![stringToMatch caseInsensitiveCompare:possibleString])
-			return [[possibleString copy] autorelease];
+			return [possibleString copy];
 	}
 	return nil;
 }
@@ -68,14 +68,6 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 	return self;
 }
 
-- (void) dealloc
-{
-	[_projects release];
-	[_developerDirectoryPath release];
-
-	[super dealloc];
-}
-
 #pragma mark -
 
 - (FSItem*)itemForFrameworkAtPath:(NSString*)path
@@ -104,16 +96,16 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 - (NSArray*)itemsForDirectoryAtPath:(NSString*)path
 {
 	NSMutableArray* results = [NSMutableArray array];
-	for (NSString* file in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
+	for (NSString* name in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:nil])
 	{
-		file = [path stringByAppendingPathComponent:file];
+		NSString* file = [path stringByAppendingPathComponent:name];
 
 		FSItem* item = [FSItem itemWithURL:[NSURL fileURLWithPath:file]];
 		if ([file isDirectory])
 			item.children = [self itemsForDirectoryAtPath:file];
 		[results addObject:item];
 	}
-	return [[results copy] autorelease];
+	return [results copy];
 }
 
 #pragma mark -
@@ -216,7 +208,7 @@ static NSString *caseSensitiveMatchInArrayForString(NSArray *array, NSString *st
 			[results addObject:item];
 		}
 	}
-	return [[results copy] autorelease];
+	return [results copy];
 }
 
 #pragma mark -

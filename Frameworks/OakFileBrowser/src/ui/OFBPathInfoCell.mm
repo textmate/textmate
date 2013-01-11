@@ -34,8 +34,7 @@
 	if([self isHighlighted])
 		r.size.height = r.size.width = 16;
 
-	NSGradient* gradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithString:startCol[labelColorIndex-1]]
-                                                         endingColor:[NSColor colorWithString:stopCol[labelColorIndex-1]]] autorelease];
+	NSGradient* gradient = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithString:startCol[labelColorIndex-1]] endingColor:[NSColor colorWithString:stopCol[labelColorIndex-1]]];
 	NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:r xRadius:8.0 yRadius:8.0];
 	[gradient drawInBezierPath:path angle:90];
 }
@@ -157,12 +156,6 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 		return NSCellHitContentArea | NSCellHitTrackableArea | OFBPathInfoCellHitCloseButton;
 
 	return [super hitTestForEvent:event inRect:cellFrame ofView:controlView];
-}
-
-- (void)dealloc
-{
-	self.spinTimer = nil;
-	[super dealloc];
 }
 
 - (BOOL)trackMouse:(NSEvent*)theEvent inRect:(NSRect)cellFrame ofView:(NSView*)controlView untilMouseUp:(BOOL)untilMouseUp

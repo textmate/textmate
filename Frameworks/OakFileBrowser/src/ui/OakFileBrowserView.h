@@ -16,8 +16,8 @@ namespace fb
 
 @interface OakFileBrowserView : NSView
 // Initial setup
-@property (nonatomic, assign) id           delegate;
-@property (nonatomic, assign) NSResponder* persistentNextResponder;
+@property (nonatomic, weak) id           delegate;
+@property (nonatomic, weak) NSResponder* persistentNextResponder;
 
 // Header info
 @property (nonatomic, assign) BOOL      canGoBackward;

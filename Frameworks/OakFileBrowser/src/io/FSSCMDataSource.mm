@@ -61,7 +61,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	return out;
 }
 
-@implementation FSSCMDataSource
+@implementation FSSCMDataSource { OBJC_WATCH_LEAKS(FSSCMDataSource); }
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
 	if(scm::info_ptr info = scm::info([aPath fileSystemRepresentation]))
@@ -129,7 +129,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 				}
 
 			private:
-				FSSCMDataSource* _self;
+				__weak FSSCMDataSource* _self;
 			};
 
 			std::string name = path::display_name(scmInfo->path());
@@ -155,7 +155,5 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		scmInfo->remove_callback(scmCallback);
 		delete scmCallback;
 	}
-
-	[super dealloc];
 }
 @end

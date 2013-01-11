@@ -3,8 +3,9 @@
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 #import <oak/oak.h>
+#import <oak/debug.h>
 
-@implementation FSVolumesDataSource
+@implementation FSVolumesDataSource { OBJC_WATCH_LEAKS(FSVolumesDataSource); }
 - (NSArray*)volumeList
 {
 	NSMutableArray* volumes = [NSMutableArray new];
@@ -34,7 +35,7 @@
 
 		self.rootItem = [FSItem itemWithURL:anURL];
 		self.rootItem.icon     = [NSImage imageNamed:NSImageNameComputer];
-		self.rootItem.name     = [(NSString*)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
+		self.rootItem.name     = CFBridgingRelease(SCDynamicStoreCopyComputerName(NULL, NULL));
 		self.rootItem.children = [self volumeList];
 	}
 	return self;
@@ -43,6 +44,5 @@
 - (void)dealloc
 {
 	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
-	[super dealloc];
 }
 @end

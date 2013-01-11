@@ -16,7 +16,7 @@
 
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 
-@interface FSDirectoryDataSource ()
+@interface FSDirectoryDataSource () { OBJC_WATCH_LEAKS(FSDirectoryDataSource); }
 @property (nonatomic, retain) NSMutableDictionary* visible;
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag;
 - (void)lostItems:(NSArray*)someItems;
@@ -147,8 +147,8 @@ namespace
 	{
 		D(DBF_FileBrowser_DSDirectory, bug("%s\n", [[[item url] path] UTF8String]););
 
-		_data_source = [dataSource retain];
-		_item        = [item retain];
+		_data_source = dataSource;
+		_item        = item;
 		_client_key  = server().register_client(this);
 		server().send_request(_client_key, request_t([[item.url path] fileSystemRepresentation], options));
 	}
@@ -156,8 +156,6 @@ namespace
 	scanner_t::~scanner_t ()
 	{
 		server().unregister_client(_client_key);
-		[_item release];
-      [_data_source release];
 	}
 
 	std::vector<fs_item_t> scanner_t::handle_request (request_t const& request)
@@ -313,7 +311,7 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 			}
 
 		private:
-			FSDirectoryDataSource* _self;
+			__weak FSDirectoryDataSource* _self;
 		};
 
 		callback = new event_callback_t(self);
@@ -334,7 +332,7 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 			}
 
 		private:
-			FSDirectoryDataSource* _self;
+			__weak FSDirectoryDataSource* _self;
 		};
 
 		scmCallback = new scm_callback_t(self);
@@ -357,8 +355,6 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 
 	fs::unwatch([[self.rootItem.url path] fileSystemRepresentation], callback);
 	delete callback;
-	self.visible = nil;
-	[super dealloc];
 }
 
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag

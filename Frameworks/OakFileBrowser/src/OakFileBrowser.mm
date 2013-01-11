@@ -59,7 +59,7 @@ static bool is_binary (std::string const& path)
 
 static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anotherSet)
 {
-	NSMutableSet* unionSet = [[aSet mutableCopy] autorelease];
+	NSMutableSet* unionSet = [aSet mutableCopy];
 	[unionSet unionSet:anotherSet];
 	[anotherSet intersectSet:aSet];
 	[unionSet minusSet:anotherSet];
@@ -544,7 +544,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
 {
-	NSMenu* menu = [[NSMenu new] autorelease];
+	NSMenu* menu = [NSMenu new];
 	[menu setAutoenablesItems:NO];
 
 	NSInteger numberOfSelectedRows = [anOutlineView numberOfSelectedRows];
@@ -634,7 +634,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			}
 		}
 
-		OakFinderLabelChooser* swatch = [[[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 37)] autorelease];
+		OakFinderLabelChooser* swatch = [[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 37)];
 		swatch.selectedIndex          = numberOfSelectedRows == 1 ? [[self.selectedItems lastObject] labelIndex] : 0;
 		swatch.target                 = self;
 		swatch.action                 = @selector(changeColor:);
@@ -663,7 +663,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
 
 		self.url                = urlString ? [NSURL URLWithString:urlString] : kURLLocationHome;
-		self.historyController  = [[OakHistoryController new] autorelease];
+		self.historyController  = [OakHistoryController new];
 		[self loadFileBrowserOptions];
 
 		BOOL foldersOnTop   = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFoldersOnTopKey];
@@ -697,12 +697,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
-	self.view              = nil;
-	self.url               = nil;
-	self.historyController = nil;
-
-	[super dealloc];
 }
 
 - (void)setView:(OakFileBrowserView*)aView
@@ -711,18 +705,15 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		if(view)
 		{
-			[outlineViewDelegate release];
 			outlineViewDelegate = nil;
 
 			if(view.delegate == self)
 				view.delegate = nil;
 			if(view.persistentNextResponder == self)
 				view.persistentNextResponder = nil;
-
-			[view release];
 		}
 
-		if(view = [aView retain])
+		if(view = aView)
 		{
 			view.delegate = self;
 			view.persistentNextResponder = self;
@@ -746,7 +737,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
 {
-	self.view = [[[OakFileBrowserView alloc] initWithFrame:NSZeroRect] autorelease];
+	self.view = [[OakFileBrowserView alloc] initWithFrame:NSZeroRect];
 	historyController.state = fileBrowserState;
 	if(!historyController.currentURL)
 		[historyController addURLToHistory:url];
@@ -827,7 +818,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 - (IBAction)showOptionsPopUpMenu:(id)sender
 {
-	NSMenu* menu = [[NSMenu new] autorelease];
+	NSMenu* menu = [NSMenu new];
 	iterate(it, DataSourceOptionsMap)
 	{
 		NSMenuItem* item = [menu addItemWithTitle:it->name action:@selector(toggleViewOption:) keyEquivalent:@""];
@@ -916,7 +907,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 - (IBAction)showFolderPopUpMenu:(id)sender
 {
-	NSMenu* menu                   = [[NSMenu new] autorelease];
+	NSMenu* menu                   = [NSMenu new];
 	NSMutableSet* visibleLocations = [NSMutableSet setWithObjects:kURLLocationComputer, kURLLocationHome, kURLLocationFavorites, nil];
 
 	// Add path hierarchy
@@ -988,7 +979,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 {
 	// TODO DisplayName paths
 	NSMutableSet* seenPaths = [NSMutableSet set];
-	NSMenu* menu = [[NSMenu new] autorelease];
+	NSMenu* menu = [NSMenu new];
 	for(NSURL* aURL in urls)
 	{
 		if([seenPaths containsObject:[aURL path]])
@@ -1041,7 +1032,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 		}
 	}
 
-	NSMenu* menu = [[NSMenu new] autorelease];
+	NSMenu* menu = [NSMenu new];
 	iterate(pair, urls)
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeURLFrom:) keyEquivalent:@""];

@@ -25,17 +25,11 @@
 @end
 
 @implementation OFBOutlineView
-@synthesize menuDelegate, draggedRows;
-
-- (void)dealloc
-{
-	self.draggedRows = nil;
-	[super dealloc];
-}
+@synthesize draggedRows;
 
 - (void)showContextMenu:(id)sender
 {
-	if(NSMenu* menu = [menuDelegate menuForOutlineView:self])
+	if(NSMenu* menu = [self.menuDelegate menuForOutlineView:self])
 	{
 		NSInteger row = [self selectedRow] != -1 ? [self selectedRow] : 0;
 		NSRect rect = [self convertRect:[self rectOfRow:row] toView:nil];
@@ -61,7 +55,7 @@
 
 - (NSMenu*)menuForEvent:(NSEvent*)theEvent
 {
-	if(!menuDelegate)
+	if(!self.menuDelegate)
 		return [super menuForEvent:theEvent];
 
 	int row = [self rowAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
@@ -69,7 +63,7 @@
 		[self selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
 	else if(![self.selectedRowIndexes containsIndex:row])
 		[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-	return [menuDelegate menuForOutlineView:self];
+	return [self.menuDelegate menuForOutlineView:self];
 }
 
 // =============================
@@ -105,7 +99,7 @@
 
 - (void)performDoubleClick:(id)sender
 {
-	[[self target] performSelector:[self doubleAction] withObject:self];
+	[NSApp sendAction:[self doubleAction] to:[self target] from:self];
 }
 
 - (void)performEditSelectedRow:(id)sender
@@ -244,14 +238,10 @@
 		NSRect imageFrame = [[[[self tableColumns] lastObject] dataCell] imageFrameWithFrame:cellFrame inControlView:self];
 		imageFrame.origin.y    = cellFrame.origin.y;
 		imageFrame.size.height = cellFrame.size.height + self.intercellSpacing.height;
-		NSTrackingArea* cursorRect = [[NSTrackingArea alloc] initWithRect:imageFrame options:NSTrackingCursorUpdate|NSTrackingActiveInKeyWindow owner:self userInfo:NULL];
-		[self addTrackingArea:cursorRect];
-		[cursorRect release];
+		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:imageFrame options:NSTrackingCursorUpdate|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
 	}
 
-	NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:NULL];
-	[self addTrackingArea:trackingArea];
-	[trackingArea release];
+	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
 }
 
 // ===============

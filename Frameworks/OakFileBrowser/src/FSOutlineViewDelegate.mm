@@ -109,8 +109,8 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	{
 		recursiveExpandPaths = [NSMutableSet new];
 
-		expandedURLs = [ConvertURLArrayToSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"]) retain];
-		selectedURLs = [ConvertURLArrayToSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"SelectedURLs"]) retain];
+		expandedURLs = ConvertURLArrayToSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"]);
+		selectedURLs = ConvertURLArrayToSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"SelectedURLs"]);
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
@@ -120,19 +120,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 - (void)dealloc
 {
 	[self applicationWillTerminate:nil];
-
-	self.pendingSelectURLs = nil;
-	self.pendingEditURL = nil;
-	self.pendingMakeVisibleURL = nil;
-	self.pendingExpandURLs = nil;
-	self.dataSource = nil;
-	self.outlineView = nil;
-
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
-	[recursiveExpandPaths release];
-	[expandedURLs release];
-	[selectedURLs release];
-	[super dealloc];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification
@@ -147,8 +135,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	if(outlineView != anOutlineView)
 	{
 		[outlineView setDelegate:nil];
-		[outlineView release];
-		outlineView = [anOutlineView retain];
+		outlineView = anOutlineView;
 		[outlineView setDelegate:self];
 	}
 }
@@ -189,12 +176,11 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		[outlineView deselectAll:self];
 		[outlineView setDataSource:nil];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:FSItemDidReloadNotification object:dataSource];
-		[dataSource release];
 	}
 
 	itemsReloading = 0;
 
-	if(dataSource = [aDataSource retain])
+	if(dataSource = aDataSource)
 	{
 		[outlineView setDataSource:dataSource];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidReload:) name:FSItemDidReloadNotification object:dataSource];
@@ -277,7 +263,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		
 		for(NSURL* targetURL in someURLs)
 		{
-			NSMutableSet* currentAncestors = [[NSMutableSet alloc] init];
+			NSMutableSet* currentAncestors = [NSMutableSet set];
 			NSURL* currentURL;
 			
 			for(currentURL = ParentForURL(targetURL); currentURL; currentURL = ParentForURL(currentURL))
@@ -290,8 +276,6 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 			
 			if(currentURL)
 				[ancestors unionSet:currentAncestors];
-			
-			[currentAncestors release];
 		}
 		
 		self.pendingExpandURLs = ancestors;
@@ -362,7 +346,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		NSImage* icon = item.icon;
 		if([modifiedURLs containsObject:item.url])
 		{
-			NSImage* tmp = [[[NSImage alloc] initWithSize:[icon size]] autorelease];
+			NSImage* tmp = [[NSImage alloc] initWithSize:[icon size]];
 			[tmp lockFocus];
 			[icon drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.4];
 			[tmp unlockFocus];

@@ -22,7 +22,7 @@ PUBLIC @interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
 	NSUInteger dataSourceOptions;
 	OakHistoryController* historyController;
 
-	id <OakFileBrowserDelegate> delegate;
+	__weak id <OakFileBrowserDelegate> delegate;
 	OakFileBrowserView* view;
 	FSOutlineViewDelegate* outlineViewDelegate;
 }

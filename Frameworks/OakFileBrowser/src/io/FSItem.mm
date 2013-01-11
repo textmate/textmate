@@ -3,8 +3,9 @@
 #import <OakAppKit/OakFileIconImage.h>
 #import <io/path.h>
 #import <oak/oak.h>
+#import <oak/debug.h>
 
-@implementation FSItem
+@implementation FSItem { OBJC_WATCH_LEAKS(FSItem); }
 @synthesize icon, name, toolTip, labelIndex, url, urlType, target, children, leaf, group, sortAsFolder;
 
 - (FSItem*)initWithURL:(NSURL*)anURL
@@ -26,23 +27,12 @@
 
 + (FSItem*)itemWithURL:(NSURL*)anURL
 {
-	return [[[self alloc] initWithURL:anURL] autorelease];
+	return [[self alloc] initWithURL:anURL];
 }
 
 - (id)copyWithZone:(NSZone*)zone
 {
-	return [self retain];
-}
-
-- (void)dealloc
-{
-	[icon release];
-	[name release];
-	[toolTip release];
-	[url release];
-	[target release];
-	[children release];
-	[super dealloc];
+	return self;
 }
 
 - (BOOL)isEqual:(id)otherObject

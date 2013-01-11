@@ -26,7 +26,7 @@ NSString* DisplayName (NSURL* url, size_t numberOfParents)
 {
 	NSString* res = nil;
 	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
-		res = [(NSString*)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
+		res = CFBridgingRelease(SCDynamicStoreCopyComputerName(NULL, NULL));
 	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
 		res = @"Bundles";
 	else // if([url isFileURL])
@@ -67,5 +67,5 @@ NSURL* ParentForURL (NSURL* url)
 	else if([@[ @"xcodeproj", @"search" ] containsObject:[url scheme]])
 		return [NSURL fileURLWithPath:parentPath isDirectory:YES];
 	else
-		return [[[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:parentPath] autorelease];
+		return [[NSURL alloc] initWithScheme:[url scheme] host:[url host] path:parentPath];
 }

@@ -8,7 +8,7 @@
 
 static NSButton* ImageButton (NSString* imageName)
 {
-	NSButton* res = [[NSButton new] autorelease];
+	NSButton* res = [NSButton new];
 
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
@@ -16,7 +16,7 @@ static NSButton* ImageButton (NSString* imageName)
 	[res setBordered:NO];
 	[res setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-	NSImage* image = [[[NSImage imageNamed:imageName] copy] autorelease];
+	NSImage* image = [[NSImage imageNamed:imageName] copy];
 	[image setSize:NSMakeSize(13, 13)];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
@@ -26,17 +26,17 @@ static NSButton* ImageButton (NSString* imageName)
 
 static NSPopUpButton* PopUpButton ()
 {
-	NSPopUpButton* res = [[NSPopUpButton new] autorelease];
+	NSPopUpButton* res = [NSPopUpButton new];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setBordered:NO];
 	[res setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-	NSMenu* menu = [[NSMenu new] autorelease];
+	NSMenu* menu = [NSMenu new];
 	[menu setAutoenablesItems:NO];
 
 	NSString* path = NSHomeDirectory();
 
-	NSMenuItem* menuItem = [[[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:@selector(nop:) keyEquivalent:@""] autorelease];
+	NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:@selector(nop:) keyEquivalent:@""];
 	[menuItem setIconForFile:path];
 	[menu addItem:menuItem];
 
@@ -60,16 +60,6 @@ static NSPopUpButton* PopUpButton ()
 			[self addSubview:view];
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	self.folderPopUpButton = nil;
-	self.goBackButton      = nil;
-	self.goForwardButton   = nil;
-	self.buttonConstraints = nil;
-
-	[super dealloc];
 }
 
 - (void)updateConstraints
