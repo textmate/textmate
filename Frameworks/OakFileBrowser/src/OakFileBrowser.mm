@@ -813,46 +813,16 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 - (void)updateView
 {
 	_headerView.goBackButton.enabled    = _historyController.previousURL ? YES : NO;
-	_headerView.goForwardButton.enabled = _historyController.nextURL ? YES : NO;
+	_headerView.goForwardButton.enabled = _historyController.nextURL     ? YES : NO;
 
 	NSMenu* menu = [NSMenu new];
-	NSMutableSet* visibleLocations = [NSMutableSet setWithObjects:kURLLocationComputer, kURLLocationHome, kURLLocationFavorites, nil];
-
-	// Add path hierarchy
 	for(NSURL* currentURL = _url; currentURL; currentURL = ParentForURL(currentURL))
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
 		[menuItem setTarget:self];
 		[menuItem setRepresentedObject:currentURL];
 		[menuItem setImage:IconImage(currentURL)];
-		[visibleLocations addObject:currentURL];
 	}
-
-	// Add recent locations
-	NSMutableArray* recentURLs = [NSMutableArray array];
-	for(NSUInteger index = 0; index < _historyController.recentLocations.count && index < 10; ++index)
-	{
-		NSURL* recentURL = [_historyController.recentLocations objectAtIndex:index];
-		if(![visibleLocations containsObject:recentURL])
-			[recentURLs addObject:recentURL];
-	}
-
-	if([recentURLs count])
-	{
-		[menu addItem:[NSMenuItem separatorItem]];
-		[[menu addItemWithTitle:@"Recent Places" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
-
-		// TODO Disambiguate paths
-		// std::vector<size_t> const& parents = path::disambiguate(recentPaths);
-		for(NSURL* recentURL in recentURLs)
-		{
-			NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(recentURL/*, parents[index]*/) action:@selector(takeURLFrom:) keyEquivalent:@""];
-			[menuItem setTarget:self];
-			[menuItem setRepresentedObject:recentURL];
-			[menuItem setImage:IconImage(recentURL)];
-		}
-	}
-
 	[menu addItem:[NSMenuItem separatorItem]];
 	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
 
