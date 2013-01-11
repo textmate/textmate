@@ -6,10 +6,6 @@
 #import <oak/debug.h>
 #import <oak/oak.h>
 
-@protocol OFBOutlineViewMenuDelegate
-- (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView;
-@end
-
 @protocol FSDataSourceDragSource
 - (void)outlineView:(NSOutlineView*)anOutlineView draggedItems:(NSArray*)someItems endedWithOperation:(NSDragOperation)aDragOperation;
 @end

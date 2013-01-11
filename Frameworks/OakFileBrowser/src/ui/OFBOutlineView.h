@@ -1,6 +1,8 @@
 #import <oak/debug.h>
 
-@protocol OFBOutlineViewMenuDelegate;
+@protocol OFBOutlineViewMenuDelegate
+- (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView;
+@end
 
 @interface OFBOutlineView : NSOutlineView
 {
