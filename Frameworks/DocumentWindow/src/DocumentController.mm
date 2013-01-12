@@ -1648,7 +1648,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		{
 			document::document_ptr doc;
 			NSString* identifier = info[@"identifier"];
-			if(!identifier || !(doc = document::find(to_s(identifier))))
+			if(!identifier || !(doc = document::find(to_s(identifier), true)))
 			{
 				NSString* path = info[@"path"];
 				doc = path ? document::create(to_s(path)) : create_untitled_document_in_folder(to_s(controller.untitledSavePath));

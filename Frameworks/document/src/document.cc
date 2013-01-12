@@ -76,7 +76,7 @@ static void cancel_backup (oak::uuid_t const& docId)
 static void perform_backup (oak::uuid_t const& docId)
 {
 	D(DBF_Document_Backup, bug("%s\n", to_s(docId).c_str()););
-	if(document::document_ptr document = document::find(docId, false))
+	if(document::document_ptr document = document::find(docId))
 		document->backup();
 	records.erase(docId);
 }
