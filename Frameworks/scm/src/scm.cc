@@ -169,12 +169,12 @@ namespace scm
 			if(elapsed < 3)
 				usleep((3 - elapsed) * 1000000);
 
-			bool shouldCheck = _snapshot != fs::snapshot_t(_wc_path);
+			bool shouldCheck = !_driver->may_touch_filesystem() || _snapshot != fs::snapshot_t(_wc_path);
 			test_and_set(_wc_path, false);
 			if(shouldCheck)
 			{
-				scm::status_map_t status = _driver->status(_wc_path);
-				fs::snapshot_t snapshot(_wc_path);
+				scm::status_map_t const status = _driver->status(_wc_path);
+				fs::snapshot_t const snapshot = _driver->may_touch_filesystem() ? fs::snapshot_t(_wc_path) : fs::snapshot_t();
 				dispatch_async(dispatch_get_main_queue(), ^{
 					update_status(_wc_path, snapshot, status);
 				});

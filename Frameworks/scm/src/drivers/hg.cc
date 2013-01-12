@@ -60,6 +60,8 @@ namespace scm
 	{
 		hg_driver_t () : driver_t("hg", "%s/.hg", "hg") { }
 
+		bool may_touch_filesystem () const { return true; }
+
 		std::string branch_name (std::string const& wcPath) const
 		{
 			if(executable() == NULL_STR)

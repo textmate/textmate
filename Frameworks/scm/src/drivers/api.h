@@ -13,8 +13,9 @@ namespace scm
 		virtual std::string branch_name (std::string const& wcPath) const = 0;
 		virtual status_map_t status (std::string const& wcPath) const = 0;
 
-		std::string const& name () const         { return _name; }
-		virtual bool tracks_directories () const { return false; }
+		std::string const& name () const           { return _name; }
+		virtual bool tracks_directories () const   { return false; }
+		virtual bool may_touch_filesystem () const { return false; }
 
 	protected:
 		std::string const& executable () const { return _resolved_executable; }
