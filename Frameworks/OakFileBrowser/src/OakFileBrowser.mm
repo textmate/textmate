@@ -127,36 +127,37 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[self updateView];
 }
 
+- (void)selectURL:(NSURL*)aURL withParentURL:(NSURL*)parentURL
+{
+	BOOL alreadyVisible = NO;
+	for(NSInteger row = 0; !alreadyVisible && row < [_outlineView numberOfRows]; ++row)
+		alreadyVisible = alreadyVisible || [aURL isEqualTo:[[_outlineView itemAtRow:row] url]];
+
+	if(!alreadyVisible)
+	{
+		BOOL isChild = NO;
+		for(NSURL* currentURL = ParentForURL(aURL); currentURL && !isChild; currentURL = ParentForURL(currentURL))
+		{
+			if([parentURL isEqual:currentURL])
+				isChild = YES;
+		}
+		[self goToURL:isChild ? parentURL : ParentForURL(aURL)];
+	}
+
+	[_outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:YES];
+}
+
 - (void)showURL:(NSURL*)aURL
 {
 	D(DBF_FileBrowser_Controller, bug("url: %s\n", [[aURL absoluteString] UTF8String]););
 	if(![aURL isFileURL] || [[aURL path] isDirectory])
-	{
-		[self goToURL:aURL];
-	}
-	else
-	{
-		BOOL alreadyVisible = NO;
-		for(NSInteger row = 0; !alreadyVisible && row < [_outlineView numberOfRows]; ++row)
-			alreadyVisible = [aURL isEqualTo:[[_outlineView itemAtRow:row] url]];
-		if(!alreadyVisible)
-			[self goToURL:ParentForURL(aURL)];
-
-		[_outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:NO];
-	}
+			[self goToURL:aURL];
+	else	[self selectURL:aURL withParentURL:nil];
 }
 
 - (void)revealURL:(NSURL*)aURL
 {
-	for(NSURL* currentURL = ParentForURL(aURL); currentURL; currentURL = ParentForURL(currentURL))
-	{
-		if([_url isEqual:currentURL])
-		{
-			[_outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:YES];
-			return;
-		}
-	}
-	[self showURL:aURL];
+	[self selectURL:aURL withParentURL:_url];
 }
 
 - (void)deselectAll:(id)sender
