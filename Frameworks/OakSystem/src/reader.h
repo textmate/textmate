@@ -5,6 +5,9 @@
 
 namespace io
 {
+	struct reader_server_t;
+	typedef std::shared_ptr<reader_server_t> reader_server_ptr;
+
 	struct PUBLIC reader_t
 	{
 		reader_t (int fd = -1);
@@ -16,6 +19,7 @@ namespace io
 		int fd;
 	private:
 		size_t client_key;
+		reader_server_ptr reader_server;
 	};
 
 } /* oak */ 

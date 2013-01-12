@@ -77,9 +77,9 @@ namespace oak
 		pthread_mutex_t process_exit_mutex;
 	};
 
-	static process_server_t& server ()
+	static process_server_ptr server ()
 	{
-		static process_server_t instance;
+		static process_server_ptr instance(new process_server_t);
 		return instance;
 	}
 
@@ -102,9 +102,9 @@ namespace oak
 		std::set<std::string> _paths;
 	};
 
-	static cleanup_server_t& paths_to_unline ()
+	static cleanup_server_ptr cleaner ()
 	{
-		static cleanup_server_t instance;
+		static cleanup_server_ptr instance(new cleanup_server_t);
 		return instance;
 	}
 
@@ -118,6 +118,8 @@ namespace oak
 
 		temp_path = strdup(path::join(path::temp(), "textmate_command.XXXXXX").c_str());
 		client_key = 0;
+		process_server = server();
+		cleanup_server = cleaner();
 	}
 
 	process_t::~process_t ()
@@ -125,9 +127,9 @@ namespace oak
 		D(DBF_Process, bug("\n"););
 
 		if(client_key)
-			server().remove(client_key);
+			process_server->remove(client_key);
 
-		paths_to_unline().erase(temp_path);
+		cleanup_server->erase(temp_path);
 		unlink(temp_path);
 		free(temp_path);
 	}
@@ -143,7 +145,7 @@ namespace oak
 		ASSERT(command.find("#!") == 0);
 
 		int cmd_fd = mkstemp(temp_path);
-		paths_to_unline().insert(temp_path);
+		cleanup_server->insert(temp_path);
 		fchmod(cmd_fd, S_IRWXU);
 		write(cmd_fd, command.data(), command.size());
 		close(cmd_fd);
@@ -193,7 +195,7 @@ namespace oak
 		}
 
 		is_running = true;
-		client_key = server().add(process_id, this);
+		client_key = process_server->add(process_id, this);
 
 		int const fds[] = { inputPipe[0], outputPipe[1], errorPipe[1] };
 		for(int fd : fds) close(fd);

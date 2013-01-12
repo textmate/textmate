@@ -8,6 +8,11 @@ namespace oak
 {
 	PUBLIC void kill_process_group_in_background (pid_t groupId);
 
+	struct process_server_t;
+	struct cleanup_server_t;
+	typedef std::shared_ptr<process_server_t> process_server_ptr;
+	typedef std::shared_ptr<cleanup_server_t> cleanup_server_ptr;
+
 	struct PUBLIC process_t
 	{
 		WATCH_LEAKS(oak::process_t);
@@ -29,6 +34,8 @@ namespace oak
 		char* temp_path; // unlink in destructor
 	private:
 		size_t client_key;
+		process_server_ptr process_server;
+		cleanup_server_ptr cleanup_server;
 	};
 
 } /* oak */ 

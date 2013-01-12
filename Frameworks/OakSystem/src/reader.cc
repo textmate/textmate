@@ -31,9 +31,9 @@ namespace io
 		pthread_mutex_t data_received_mutex;
 	};
 
-	static reader_server_t& server ()
+	static reader_server_ptr server ()
 	{
-		static reader_server_t instance;
+		static reader_server_ptr instance(new reader_server_t);
 		return instance;
 	}
 
@@ -43,6 +43,7 @@ namespace io
 
 	reader_t::reader_t (int fd) : fd(-1)
 	{
+		reader_server = server();
 		if(fd != -1)
 			set_fd(fd);
 	}
@@ -50,16 +51,16 @@ namespace io
 	reader_t::~reader_t ()
 	{
 		if(fd != -1)
-			server().remove(fd, client_key);
+			reader_server->remove(fd, client_key);
 	}
 
 	void reader_t::set_fd (int fd)
 	{
 		if(this->fd != -1)
-			server().remove(this->fd, client_key);
+			reader_server->remove(this->fd, client_key);
 
 		this->fd = fd;
-		client_key = server().add(fd, this);
+		client_key = reader_server->add(fd, this);
 	}
 	
 	// ===================
