@@ -1204,6 +1204,12 @@ namespace
 			[self updateFileBrowserStatus:self];
 		}
 		self.layoutView.fileBrowserView = makeVisibleFlag ? self.fileBrowser.view : nil;
+
+		if(makeVisibleFlag)
+		{
+			self.fileBrowser.nextResponder = self.fileBrowser.view.nextResponder;
+			self.fileBrowser.view.nextResponder = self.fileBrowser;
+		}
 	}
 	[[self class] scheduleSessionBackup:self];
 }
