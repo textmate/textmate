@@ -292,7 +292,7 @@ namespace
 	static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	if(![SharedInstances objectForKey:aName])
 	{
-		[SharedInstances setObject:[[[self alloc] initWithName:aName] autorelease] forKey:aName];
+		[SharedInstances setObject:[[[OakPasteboard alloc] initWithName:aName] autorelease] forKey:aName];
 		if(![aName isEqualToString:NSGeneralPboard])
 			[[SharedInstances objectForKey:aName] setAvoidsDuplicates:YES];
 	}

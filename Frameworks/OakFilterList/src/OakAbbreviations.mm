@@ -18,7 +18,7 @@ static NSString* const FCExpandedStringKey	= @"long";
 {
 	static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	if(!SharedInstances[aName])
-		SharedInstances[aName] = [[self alloc] initWithName:aName];
+		SharedInstances[aName] = [[OakAbbreviations alloc] initWithName:aName];
 	return SharedInstances[aName];
 }
 

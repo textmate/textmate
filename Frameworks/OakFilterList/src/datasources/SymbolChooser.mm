@@ -90,7 +90,7 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 + (id)symbolChooserForDocument:(document::document_ptr)aDocument
 {
-	return [[self alloc] initWithDocument:aDocument];
+	return [[SymbolChooser alloc] initWithDocument:aDocument];
 }
 
 - (NSString*)title
