@@ -10,7 +10,7 @@
 PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
 @property (nonatomic, readonly) NSView*       view;
-@property (nonatomic, readonly) NSString*     location;
+@property (nonatomic, readonly) NSString*     path;
 @property (nonatomic, readonly) NSArray*      selectedURLs;
 @property (nonatomic)           NSArray*      openURLs;
 @property (nonatomic)           NSArray*      modifiedURLs;

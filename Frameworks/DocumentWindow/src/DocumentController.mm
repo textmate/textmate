@@ -881,7 +881,7 @@ namespace
 		}
 	}
 
-	if(NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.location ?: [NSString stringWithCxxString:path::parent(doc->path())])
+	if(NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(doc->path())])
 		map["projectDirectory"] = to_s(projectPath);
 
 	settings_t const settings = settings_for_path(doc->virtual_path(), doc->file_type() + " " + to_s(self.scopeAttributes), docDirectory, doc->variables(map, false));
@@ -1411,7 +1411,7 @@ static std::string file_chooser_glob (std::string const& path)
 {
 	self.filterWindowController = [OakFilterWindowController new];
 
-	OakFileChooser* dataSource = [OakFileChooser fileChooserWithPath:(self.fileBrowser.location ?: [NSString stringWithCxxString:[self selectedDocument]->path()] ?: self.projectPath ?: NSHomeDirectory()) projectPath:self.projectPath ?: NSHomeDirectory()];
+	OakFileChooser* dataSource = [OakFileChooser fileChooserWithPath:(self.fileBrowser.path ?: [NSString stringWithCxxString:[self selectedDocument]->path()] ?: self.projectPath ?: NSHomeDirectory()) projectPath:self.projectPath ?: NSHomeDirectory()];
 	dataSource.excludeDocumentWithIdentifier = [NSString stringWithCxxString:[self selectedDocument]->identifier()];
 	dataSource.sourceIndex                   = self.fileChooserSourceIndex;
 	dataSource.globString                    = [NSString stringWithCxxString:file_chooser_glob(to_s(dataSource.path))];
@@ -1461,7 +1461,7 @@ static std::string file_chooser_glob (std::string const& path)
 		NSArray* selectedURLs = self.fileBrowser.selectedURLs;
 		if([selectedURLs count] == 1 && [[selectedURLs lastObject] isFileURL] && path::is_directory([[[selectedURLs lastObject] path] fileSystemRepresentation]))
 			res = [[selectedURLs lastObject] path];
-		else if(NSString* folder = self.fileBrowser.location)
+		else if(NSString* folder = self.fileBrowser.path)
 			res = folder;
 	}
 	return res;

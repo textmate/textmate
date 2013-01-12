@@ -78,7 +78,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 @implementation OakFileBrowser
 - (BOOL)acceptsFirstResponder { return NO; }
-- (NSString*)location
+
+- (NSString*)path
 {
 	NSURL* tmp = [[_url scheme] isEqualToString:@"scm"] ? ParentForURL(_url) : _url;
 	return [tmp isFileURL] ? [tmp path] : nil;
@@ -170,7 +171,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)setOpenURLs:(NSArray*)newOpenURLs
 {
-	if(!settings_for_path(NULL_STR, "", to_s(self.location)).get(kSettingsFileBrowserDocumentStatusKey, true))
+	if(!settings_for_path(NULL_STR, "", to_s(self.path)).get(kSettingsFileBrowserDocumentStatusKey, true))
 		return;
 	
 	if([_outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
@@ -197,7 +198,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)setModifiedURLs:(NSArray*)newModifiedURLs
 {
-	if(!settings_for_path(NULL_STR, "", to_s(self.location)).get(kSettingsFileBrowserDocumentStatusKey, true))
+	if(!settings_for_path(NULL_STR, "", to_s(self.path)).get(kSettingsFileBrowserDocumentStatusKey, true))
 		return;
 	
 	if([_outlineViewDelegate.modifiedURLs isEqualToArray:newModifiedURLs])
@@ -549,7 +550,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		env["TM_SELECTED_FILES"] = text::join(quoted, " ");
 	}
 
-	if(NSString* dir = self.location)
+	if(NSString* dir = self.path)
 		env["PWD"] = [dir fileSystemRepresentation];
 }
 
@@ -940,7 +941,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	[panel setCanChooseFiles:NO];
 	[panel setCanChooseDirectories:YES];
 	[panel setAllowsMultipleSelection:NO];
-	[panel setDirectoryURL:[NSURL fileURLWithPath:self.location]];
+	[panel setDirectoryURL:[NSURL fileURLWithPath:self.path]];
 	[panel beginSheetModalForWindow:_view.window completionHandler:^(NSInteger result) {
 		if(result == NSOKButton)
 			[self showURL:[[panel URLs] lastObject]];
