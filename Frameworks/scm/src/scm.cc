@@ -1,6 +1,5 @@
 #include "drivers/api.h"
 #include "scm.h"
-#include "server.h"
 #include <io/path.h>
 #include <cf/cf.h>
 #include <oak/oak.h>
@@ -104,7 +103,6 @@ namespace scm
 		_did_setup = true;
 	}
 
-
 	status::type info_t::status (std::string const& path)
 	{
 		D(DBF_SCM, bug("%s\n", path.c_str()););
@@ -142,17 +140,50 @@ namespace scm
 		_callbacks.remove(cb);
 	}
 
+	static bool test_and_set (std::string const& key, bool flag)
+	{
+		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.coordination", DISPATCH_QUEUE_SERIAL);
+		static std::set<std::string> keys;
+
+		__block bool foundKey = false;
+		dispatch_sync(queue, ^{
+			auto it = keys.find(key);
+			foundKey = it != keys.end();
+			if(flag && !foundKey)
+				keys.insert(key);
+			else if(!flag && foundKey)
+				keys.erase(it);
+		});
+		return foundKey;
+	}
+
 	void info_t::callback (std::set<std::string> const& pathsChangedOnDisk)
 	{
 		D(DBF_SCM, bug("( %s )\n", text::join(pathsChangedOnDisk, ", ").c_str()););
-		background_status(_wc_path, _driver, _updated, _snapshot, &update_status);
-	}
-
-	void info_t::update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& newStatus)
-	{
-		if(!didUpdate)
+		if(test_and_set(_wc_path, true))
 			return;
 
+		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
+		dispatch_async(queue, ^{
+			double elapsed = oak::date_t::now() - _updated;
+			if(elapsed < 3)
+				usleep((3 - elapsed) * 1000000);
+
+			bool shouldCheck = _snapshot != fs::snapshot_t(_wc_path);
+			test_and_set(_wc_path, false);
+			if(shouldCheck)
+			{
+				scm::status_map_t status = _driver->status(_wc_path);
+				fs::snapshot_t snapshot(_wc_path);
+				dispatch_async(dispatch_get_main_queue(), ^{
+					update_status(_wc_path, snapshot, status);
+				});
+			}
+		});
+	}
+
+	void info_t::update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& newStatus)
+	{
 		auto it = cache().find(path);
 		if(it != cache().end())
 		{

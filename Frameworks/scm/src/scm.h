@@ -53,7 +53,7 @@ namespace scm
 		void callback (std::set<std::string> const& pathsChangedOnDisk);
 		oak::callbacks_t<callback_t> _callbacks;
 
-		static void update_status (bool didUpdate, std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status);
+		static void update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status);
 	};
 
 	PUBLIC info_ptr info (std::string const& dir);
