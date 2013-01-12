@@ -122,7 +122,7 @@
 		{ "@N",                                      @selector(newFolderInSelectedFolder:)},
 		{ "@d",                                      @selector(duplicateSelectedEntries:) },
 		{ "@G",                                      @selector(orderFrontGoToFolder:)     },
-		{ " ",                                       @selector(quickLookSelectedEntries:) },
+		{ " ",                                       @selector(toggleQuickLookPreview:)   },
 		{ "~\uF705",                                 @selector(showContextMenu:)          },
 	};
 

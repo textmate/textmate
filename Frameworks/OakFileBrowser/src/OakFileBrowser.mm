@@ -17,7 +17,6 @@
 #import <OakAppKit/OakFinderLabelChooser.h>
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakZoomingIcon.h>
-#import <OakAppKit/OakPreview.h>
 #import <OakAppKit/NSView Additions.h>
 #import <OakAppKit/OakSound.h>
 #import <OakSystem/application.h>
@@ -477,31 +476,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	return res;
 }
 
-// =============
-// = QuickLook =
-// =============
-
-- (NSRect)previewPanel:(NSPanel*)panel frameForURL:(NSURL*)aURL
-{
-	for(FSItem* item in self.selectedItems)
-	{
-		if([item.url isEqual:aURL])
-			return [self iconFrameForEntry:item];
-	}
-	return NSZeroRect;
-}
-
-- (void)quickLookSelectedEntries:(id)sender
-{
-	NSMutableArray* urls = [NSMutableArray array];
-	for(NSURL* aURL in self.selectedURLs)
-	{
-		if([aURL isFileURL])
-			[urls addObject:aURL];
-	}
-	OakShowPreviewForURLs(urls);
-}
-
 // ============
 // = Services =
 // ============
@@ -742,7 +716,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		{
 			{ @"Open",                    @selector(didDoubleClickOutlineView:),                  pathsExist, YES },
 			{ @"Open With",               NULL,                                                   pathsExist, showOpenWith },
-			{ @"Show Preview",            @selector(quickLookSelectedEntries:),     singleItem && pathsExist, YES },
+			{ @"Show Preview",            @selector(toggleQuickLookPreview:),                     pathsExist, YES },
 			{ nil,                        NULL,                                                          YES, YES },
 			{ @"Open Enclosing Folder",   @selector(revealSelectedItem:),                                YES, showEnclosingFolder }, // scm://, search://
 			{ @"Show Package Contents",   @selector(showPackageContents:),                               YES, showPackageContents }, // .app, .tmBundle, …
@@ -769,8 +743,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			if(NSString* label = menuLabels[i].label)
 			{
 				NSMenuItem* menuItem = [menu addItemWithTitle:label action:menuLabels[i].action keyEquivalent:@""];
-				[menuItem setTarget:self];
-				if(!menuLabels[i].enable || menuLabels[i].action && ![self respondsToSelector:menuLabels[i].action])
+				if([self respondsToSelector:menuLabels[i].action])
+					[menuItem setTarget:self];
+				if(!menuLabels[i].enable)
 					[menuItem setEnabled:NO];
 			}
 			else

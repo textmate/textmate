@@ -40,3 +40,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 - (IBAction)goToSCMDataSource:(id)sender;
 - (IBAction)orderFrontGoToFolder:(id)sender;
 @end
+
+@interface OakFileBrowser (ForQuickLookKeyEventForwarding)
+@property (nonatomic, readonly) NSView* outlineView;
+@end

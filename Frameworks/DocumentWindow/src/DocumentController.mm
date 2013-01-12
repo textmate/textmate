@@ -33,7 +33,25 @@ namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folde
 static NSString* const OakDocumentPboardType = @"OakDocumentPboardType"; // drag’n’drop of tabs
 static BOOL IsInShouldTerminateEventLoop = NO;
 
-@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate>
+@interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
+@property (nonatomic) NSURL* url;
+@end
+
+@implementation QuickLookNSURLWrapper
+- (id)initWithURL:(NSURL*)aURL
+{
+	if((self = [super init]))
+		self.url = aURL;
+	return self;
+}
+
+- (NSURL*)previewItemURL
+{
+	return self.url;
+}
+@end
+
+@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -53,6 +71,8 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 
 @property (nonatomic) OakFilterWindowController*  filterWindowController;
 @property (nonatomic) NSUInteger                  fileChooserSourceIndex;
+
+@property (nonatomic) NSArray*                    urlArrayForQuickLook;
 
 + (void)scheduleSessionBackup:(id)sender;
 
@@ -1585,6 +1605,67 @@ static std::string file_chooser_glob (std::string const& path)
 	else if([menuItem action] == @selector(goToParentFolder:))
 		active = [self.window firstResponder] != self.textView;
 	return active;
+}
+
+// =============
+// = QuickLook =
+// =============
+
+- (void)toggleQuickLookPreview:(id)sender
+{
+	if([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+			[[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+	else	[[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
+}
+
+// QLPreviewPanelController
+
+- (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel*)panel
+{
+	return self.fileBrowserVisible && [self.fileBrowser.selectedURLs count];
+}
+
+- (void)beginPreviewPanelControl:(QLPreviewPanel*)panel
+{
+	[QLPreviewPanel sharedPreviewPanel].delegate   = self;
+	[QLPreviewPanel sharedPreviewPanel].dataSource = self;
+
+	self.urlArrayForQuickLook = self.fileBrowser.selectedURLs;
+}
+
+- (void)endPreviewPanelControl:(QLPreviewPanel*)panel
+{
+	self.urlArrayForQuickLook = nil;
+}
+
+// QLPreviewPanelDelegate
+
+- (BOOL)previewPanel:(QLPreviewPanel*)panel handleEvent:(NSEvent*)event
+{
+	if([event type] == NSKeyDown)
+	{
+		[self.fileBrowser.outlineView keyDown:event];
+		NSArray* newSelection = self.fileBrowser.selectedURLs;
+		if(![newSelection isEqualToArray:self.urlArrayForQuickLook])
+		{
+			self.urlArrayForQuickLook = newSelection;
+			[panel reloadData];
+		}
+		return YES;
+	}
+	return NO;
+}
+
+// QLPreviewPanelDataSource
+
+- (NSInteger)numberOfPreviewItemsInPreviewPanel:(QLPreviewPanel*)panel
+{
+	return self.urlArrayForQuickLook.count;
+}
+
+- (id <QLPreviewItem>)previewPanel:(QLPreviewPanel*)panel previewItemAtIndex:(NSInteger)index
+{
+	return [[QuickLookNSURLWrapper alloc] initWithURL:self.urlArrayForQuickLook[index]];
 }
 
 // ======================
