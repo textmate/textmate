@@ -50,6 +50,7 @@ namespace command
 	struct PUBLIC runner_t : std::enable_shared_from_this<runner_t>
 	{
 		friend runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate);
+		runner_t () = delete;
 
 		void launch ();
 		void wait (bool alsoForDetached = false);
@@ -64,7 +65,6 @@ namespace command
 		std::map<std::string, std::string> const& environment () const { return _environment; }
 
 	private:
-		runner_t (); // not supported
 		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate);
 
 		struct PUBLIC my_process_t : oak::process_t
