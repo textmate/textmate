@@ -4,6 +4,7 @@
 #include "query.h" // set_index
 #include <plist/delta.h>
 #include <text/case.h>
+#include <text/format.h>
 #include <regexp/glob.h>
 #include <regexp/format_string.h>
 
@@ -755,7 +756,7 @@ namespace bundles
 			item_ptr item = items[i];
 			if(deltaItems.find(item->bundle_uuid()) != deltaItems.end())
 			{
-				fprintf(stderr, "Orphaned item: ‘%s’\n", item->name().c_str());
+				fprintf(stderr, "Warning: Bundle item ‘%s’ at path %s has no (non-delta) parent\n", item->name().c_str(), text::join(item->paths(), ", ").c_str());
 				items.erase(items.begin() + i);
 			}
 			else
