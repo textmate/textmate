@@ -132,7 +132,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	D(DBF_FileBrowser_Controller, bug("url: %s\n", [[aURL absoluteString] UTF8String]););
 	if(![aURL isFileURL] || [[aURL path] isDirectory])
 	{
-		[self pushURL:aURL];
+		[self goToURL:aURL];
 	}
 	else
 	{
@@ -140,7 +140,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		for(NSInteger row = 0; !alreadyVisible && row < [_outlineView numberOfRows]; ++row)
 			alreadyVisible = [aURL isEqualTo:[[_outlineView itemAtRow:row] url]];
 		if(!alreadyVisible)
-			[self pushURL:ParentForURL(aURL)];
+			[self goToURL:ParentForURL(aURL)];
 
 		[_outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:NO];
 	}
@@ -275,7 +275,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	};
 }
 
-- (void)pushURL:(NSURL*)aURL
+- (void)goToURL:(NSURL*)aURL
 {
 	ASSERT(_historyIndex != NSNotFound);
 	if([_url isEqualTo:aURL])
@@ -359,7 +359,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		{
 			case FSItemURLTypeFolder:
 			case FSItemURLTypeUnknown:
-				return [self pushURL:itemURL];
+				return [self goToURL:itemURL];
 			break;
 
 			case FSItemURLTypePackage:
@@ -437,7 +437,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		if([item.target isFileURL])
 		{
-			[self pushURL:ParentForURL(item.target)];
+			[self goToURL:ParentForURL(item.target)];
 			[_outlineViewDelegate selectURLs:@[ item.target ] byExpandingAncestors:NO];
 			return;
 		}
@@ -449,13 +449,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(FSItem* item in self.selectedItems)
 	{
 		if([item.target isFileURL])
-			return (void)[self showURL:item.target];
+			return (void)[self goToURL:item.target];
 	}
 
 	for(FSItem* item in self.selectedItems)
 	{
 		if([item.target path] && path::is_directory([[item.target path] fileSystemRepresentation]))
-			return (void)[self showURL:[NSURL fileURLWithPath:[item.target path]]];
+			return (void)[self goToURL:[NSURL fileURLWithPath:[item.target path]]];
 	}
 }
 
@@ -903,10 +903,11 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	_headerView.folderPopUpButton.menu = menu;
 }
 
-- (IBAction)goToComputer:(id)sender       { [self pushURL:kURLLocationComputer];  }
-- (IBAction)goToHome:(id)sender           { [self pushURL:kURLLocationHome];      }
-- (IBAction)goToDesktop:(id)sender        { [self pushURL:kURLLocationDesktop];   }
-- (IBAction)goToFavorites:(id)sender      { [self pushURL:kURLLocationFavorites]; }
+- (IBAction)goToParentFolder:(id)sender   { [self goToURL:ParentForURL(_url)];    }
+- (IBAction)goToComputer:(id)sender       { [self goToURL:kURLLocationComputer];  }
+- (IBAction)goToHome:(id)sender           { [self goToURL:kURLLocationHome];      }
+- (IBAction)goToDesktop:(id)sender        { [self goToURL:kURLLocationDesktop];   }
+- (IBAction)goToFavorites:(id)sender      { [self goToURL:kURLLocationFavorites]; }
 
 - (IBAction)goToSCMDataSource:(id)sender
 {
@@ -921,19 +922,14 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 		for(NSURL* selectedURL in self.selectedURLs)
 		{
 			if([selectedURL isFileURL] && path::is_directory([[selectedURL path] fileSystemRepresentation]))
-				return [self pushURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
+				return [self goToURL:[FSSCMDataSource scmURLWithPath:[selectedURL path]]];
 		}
-		[self pushURL:[FSSCMDataSource scmURLWithPath:[_url path]]];
+		[self goToURL:[FSSCMDataSource scmURLWithPath:[_url path]]];
 	}
 }
 
 - (IBAction)goBack:(id)sender             { if(self.historyIndex > 0)                    self.historyIndex = self.historyIndex - 1; }
 - (IBAction)goForward:(id)sender          { if(self.historyIndex < self.history.count-1) self.historyIndex = self.historyIndex + 1; }
-
-- (IBAction)goToParentFolder:(id)sender
-{
-	[self pushURL:ParentForURL(_url)];
-}
 
 - (IBAction)orderFrontGoToFolder:(id)sender
 {
@@ -944,14 +940,14 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	[panel setDirectoryURL:[NSURL fileURLWithPath:self.path]];
 	[panel beginSheetModalForWindow:_view.window completionHandler:^(NSInteger result) {
 		if(result == NSOKButton)
-			[self showURL:[[panel URLs] lastObject]];
+			[self goToURL:[[panel URLs] lastObject]];
 	}];
 }
 
 - (void)takeURLFrom:(id)sender
 {
-	if([sender representedObject])
-		[self pushURL:[sender representedObject]];
+	if(NSURL* url = [sender representedObject])
+		[self goToURL:url];
 }
 
 // ===============
