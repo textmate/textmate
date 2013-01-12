@@ -252,7 +252,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		self.pendingExpandURLs = nil;
 }
 
-- (void)selectURLs:(NSArray*)someURLs byExpandingAncestors:(BOOL)expandAncestors
+- (void)selectURLs:(NSArray*)someURLs expandChildren:(BOOL)expandAncestors
 {
 	self.pendingSelectURLs = [NSSet setWithArray:someURLs];
 	if([someURLs count] == 1)
