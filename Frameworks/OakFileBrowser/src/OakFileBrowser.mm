@@ -1,6 +1,5 @@
 #import "OakFileBrowser.h"
 #import "OakFSUtilities.h"
-#import "OakHistoryController.h"
 #import "ui/OFBHeaderView.h"
 #import "ui/OFBOutlineView.h"
 #import "ui/OFBPathInfoCell.h"
@@ -36,9 +35,9 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @interface OakFileBrowser () <OFBOutlineViewMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
+	NSUInteger _historyIndex;
 }
-@property (nonatomic)                    OakHistoryController* historyController;
-@property (nonatomic, readwrite, copy)   NSURL* url;
+@property (nonatomic, readwrite)         NSURL* url;
 @property (nonatomic)                    FSOutlineViewDelegate* outlineViewDelegate;
 @property (nonatomic, readwrite)         NSView* view;
 @property (nonatomic)                    OFBHeaderView* headerView;
@@ -46,6 +45,9 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic)                    NSUInteger dataSourceOptions;
 @property (nonatomic, readonly)          NSArray* selectedItems;
 @property (nonatomic, readonly)          NSArray* selectedPaths;
+@property (nonatomic)                    NSMutableArray* history;
+@property (nonatomic)                    NSUInteger historyIndex;
+@property (nonatomic, readwrite)         NSDictionary* sessionState;
 - (void)updateView;
 - (void)loadFileBrowserOptions;
 - (NSRect)iconFrameForEntry:(id)anEntry;
@@ -109,9 +111,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)reload:(id)sender
 {
-	[_historyController setCurrentURLScrollOffset:NSMinY([_outlineView visibleRect])];
+	CGFloat scrollOffset = NSMinY([_outlineView visibleRect]);
 	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
-	[_outlineViewDelegate scrollToOffset:_historyController.currentURLScrollOffset];
+	[_outlineViewDelegate scrollToOffset:scrollOffset];
 }
 
 - (void)setURL:(NSURL*)aURL
@@ -119,19 +121,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(_outlineViewDelegate.dataSource && [_url isEqualTo:aURL])
 		return;
 
-	[_historyController setCurrentURLScrollOffset:NSMinY([_outlineView visibleRect])];
 	_url = aURL;
-	_outlineViewDelegate.dataSource = DataSourceForURL(aURL, _dataSourceOptions);
-	[self updateView];
-}
-
-- (void)pushURL:(NSURL*)aURL
-{
-	if(_outlineViewDelegate.dataSource && [_url isEqualTo:aURL])
-		return;
-
-	[self setURL:aURL];
-	[_historyController addURLToHistory:aURL];
+	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
 	[self updateView];
 }
 
@@ -240,16 +231,101 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 	return updateRows;
 }
+
 // ======================
 // = History Controller =
 // ======================
 
+- (void)setHistory:(NSArray*)newHistory
+{
+	_history      = [newHistory mutableCopy];
+	_historyIndex = NSNotFound;
+}
+
+- (NSUInteger)historyIndex
+{
+	ASSERT(_historyIndex != NSNotFound);
+	return _historyIndex;
+}
+
+- (void)setHistoryIndex:(NSUInteger)newIndex
+{
+	ASSERT_LT(newIndex, _history.count);
+	if(_historyIndex == newIndex)
+		return;
+
+	[self syncHistoryState];
+	_historyIndex = newIndex;
+
+	NSDictionary* entry = _history[newIndex];
+	[self setURL:entry[@"url"]];
+	[_outlineViewDelegate scrollToOffset:[entry[@"scrollOffset"] floatValue]];
+}
+
+- (void)syncHistoryState
+{
+	ASSERT(_url);
+	if(_historyIndex == NSNotFound)
+		return;
+
+	_history[_historyIndex] = @{
+		@"url"          : _url,
+		@"scrollOffset" : @(NSMinY([_outlineView visibleRect]))
+	};
+}
+
+- (void)pushURL:(NSURL*)aURL
+{
+	ASSERT(_historyIndex != NSNotFound);
+	if([_url isEqualTo:aURL])
+		return;
+
+	if(_historyIndex + 1 < _history.count)
+		[_history removeObjectsInRange:NSMakeRange(_historyIndex + 1, _history.count - (_historyIndex + 1))];
+	[_history addObject:@{ @"url" : aURL }];
+	self.historyIndex = self.historyIndex + 1;
+}
+
 - (NSDictionary*)sessionState
 {
-	if(_outlineView)
-		[_historyController setCurrentURLScrollOffset:NSMinY([_outlineView visibleRect])];
-	return _historyController.state;
+	[self syncHistoryState];
+
+	NSMutableArray* history = [NSMutableArray array];
+	for(NSDictionary* entry in self.history)
+	{
+		NSMutableDictionary* dict = [entry mutableCopy];
+		dict[@"url"] = [dict[@"url"] absoluteString];
+		if([dict[@"scrollOffset"] floatValue] == 0)
+			[dict removeObjectForKey:@"scrollOffset"];
+		[history addObject:dict];
+	}
+	return @{ @"history" : history, @"historyIndex" : @(self.historyIndex) };
 }
+
+- (void)setSessionState:(NSDictionary*)newState
+{
+	NSMutableArray* newHistory = [NSMutableArray array];
+	for(NSDictionary* entry in newState[@"history"])
+	{
+		if(NSString* urlString = entry[@"url"])
+		{
+			NSMutableDictionary* dict = [entry mutableCopy];
+			dict[@"url"] = [NSURL URLWithString:urlString];
+			[newHistory addObject:dict];
+		}
+	}
+
+	if([newHistory count])
+	{
+		self.history      = newHistory;
+		self.historyIndex = oak::cap<NSUInteger>(0, [newState[@"historyIndex"] unsignedIntValue], newHistory.count);
+
+		[self updateView];
+	}
+}
+
+- (BOOL)canGoBack    { return self.historyIndex > 0; }
+- (BOOL)canGoForward { return self.historyIndex < self.history.count-1; }
 
 // ====================
 // = Browsing Actions =
@@ -667,9 +743,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(self = [super init])
 	{
 		NSString* urlString = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsInitialFileBrowserURLKey];
+		_url     = urlString ? [NSURL URLWithString:urlString] : kURLLocationHome;
+		_history = [NSMutableArray arrayWithObject:@{ @"url" : _url }];
 
-		self.url                = urlString ? [NSURL URLWithString:urlString] : kURLLocationHome;
-		self.historyController  = [OakHistoryController new];
 		[self loadFileBrowserOptions];
 
 		BOOL foldersOnTop   = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFoldersOnTopKey];
@@ -708,13 +784,10 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
 {
 	[self createViews];
-	_historyController.state = fileBrowserState;
-	if(!_historyController.currentURL)
-		[_historyController addURLToHistory:_url];
-	CGFloat scrollOffset = _historyController.currentURLScrollOffset;
-	[self setURL:_historyController.currentURL];
-	[_historyController setCurrentURLScrollOffset:scrollOffset];
-	[_outlineViewDelegate scrollToOffset:_historyController.currentURLScrollOffset];
+	self.sessionState = fileBrowserState;
+	[self updateView];
+	if(!_outlineViewDelegate.dataSource)
+		_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
 }
 
 // ============
@@ -812,8 +885,8 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 
 - (void)updateView
 {
-	_headerView.goBackButton.enabled    = _historyController.previousURL ? YES : NO;
-	_headerView.goForwardButton.enabled = _historyController.nextURL     ? YES : NO;
+	_headerView.goBackButton.enabled    = self.canGoBack;
+	_headerView.goForwardButton.enabled = self.canGoForward;
 
 	NSMenu* menu = [NSMenu new];
 	for(NSURL* currentURL = _url; currentURL; currentURL = ParentForURL(currentURL))
@@ -838,7 +911,7 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 {
 	if([_url.scheme isEqualToString:@"scm"])
 	{
-		if(_historyController.previousURL)
+		if(self.canGoBack)
 				[self goBack:sender];
 		else	[self goToParentFolder:sender];
 	}
@@ -853,8 +926,8 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	}
 }
 
-- (IBAction)goBack:(id)sender             { if(_historyController.previousURL) { [self setURL:_historyController.previousURL]; [_historyController retreat:self]; [_outlineViewDelegate scrollToOffset:_historyController.currentURLScrollOffset]; [self updateView]; } }
-- (IBAction)goForward:(id)sender          { if(_historyController.nextURL)     { [self setURL:_historyController.nextURL];     [_historyController advance:self]; [_outlineViewDelegate scrollToOffset:_historyController.currentURLScrollOffset]; [self updateView]; } }
+- (IBAction)goBack:(id)sender             { if(self.historyIndex > 0)                    self.historyIndex = self.historyIndex - 1; }
+- (IBAction)goForward:(id)sender          { if(self.historyIndex < self.history.count-1) self.historyIndex = self.historyIndex + 1; }
 
 - (IBAction)goToParentFolder:(id)sender
 {
@@ -972,9 +1045,9 @@ static struct data_source_options_map_t { NSString* const name; NSUInteger flag;
 	if([item action] == @selector(goToParentFolder:))
 			return ParentForURL(_url) != nil;
 	else if([item action] == @selector(goBack:))
-			return _historyController.previousURL ? YES : NO;
+			return self.canGoBack;
 	else if([item action] == @selector(goForward:))
-			return _historyController.nextURL ? YES : NO;
+			return self.canGoForward;
 	else if([item action] == @selector(delete:))
 			return [_outlineView numberOfSelectedRows] > 0;
 	else if([item action] == @selector(undo:))
