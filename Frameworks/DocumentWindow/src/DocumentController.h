@@ -65,7 +65,6 @@ PUBLIC @interface DocumentController : NSObject
 
 - (IBAction)toggleFileBrowser:(id)sender;
 - (IBAction)revealFileInProject:(id)sender;
-- (IBAction)revealFileInProjectByExpandingAncestors:(id)sender;
 - (IBAction)goToProjectFolder:(id)sender;
 
 - (IBAction)goBack:(id)sender;

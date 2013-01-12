@@ -37,7 +37,6 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 	OBJC_WATCH_LEAKS(OakFileBrowser);
 	NSUInteger _historyIndex;
 }
-@property (nonatomic, readwrite)         NSURL* url;
 @property (nonatomic)                    FSOutlineViewDelegate* outlineViewDelegate;
 @property (nonatomic, readwrite)         NSView* view;
 @property (nonatomic)                    OFBHeaderView* headerView;
@@ -117,7 +116,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[_outlineViewDelegate scrollToOffset:scrollOffset];
 }
 
-- (void)setURL:(NSURL*)aURL
+- (void)setUrl:(NSURL*)aURL
 {
 	if(_outlineViewDelegate.dataSource && [_url isEqualTo:aURL])
 		return;
@@ -145,19 +144,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 
 	[_outlineViewDelegate selectURLs:@[ aURL ] byExpandingAncestors:YES];
-}
-
-- (void)showURL:(NSURL*)aURL
-{
-	D(DBF_FileBrowser_Controller, bug("url: %s\n", [[aURL absoluteString] UTF8String]););
-	if(![aURL isFileURL] || [[aURL path] isDirectory])
-			[self goToURL:aURL];
-	else	[self selectURL:aURL withParentURL:nil];
-}
-
-- (void)revealURL:(NSURL*)aURL
-{
-	[self selectURL:aURL withParentURL:_url];
 }
 
 - (void)deselectAll:(id)sender
@@ -260,7 +246,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_historyIndex = newIndex;
 
 	NSDictionary* entry = _history[newIndex];
-	[self setURL:entry[@"url"]];
+	[self setUrl:entry[@"url"]];
 	[_outlineViewDelegate scrollToOffset:[entry[@"scrollOffset"] floatValue]];
 }
 

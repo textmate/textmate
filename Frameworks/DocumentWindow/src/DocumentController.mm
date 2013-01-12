@@ -1180,7 +1180,7 @@ namespace
 			self.fileBrowser.delegate = self;
 			[self.fileBrowser setupViewWithState:_fileBrowserHistory];
 			if(self.projectPath && !_fileBrowserHistory)
-				[self.fileBrowser showURL:[NSURL fileURLWithPath:self.projectPath]];
+				self.fileBrowser.url = [NSURL fileURLWithPath:self.projectPath];
 			[self updateFileBrowserStatus:self];
 		}
 		self.layoutView.fileBrowserView = makeVisibleFlag ? self.fileBrowser.view : nil;
@@ -1209,10 +1209,8 @@ namespace
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
-- (IBAction)revealFileInProject:(id)sender                     { self.fileBrowserVisible = YES; [self.fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]]]; }
-- (IBAction)revealFileInProjectByExpandingAncestors:(id)sender { self.fileBrowserVisible = YES; [self.fileBrowser revealURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]]]; }
-
-- (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser showURL:[NSURL fileURLWithPath:self.projectPath]]; }
+- (IBAction)revealFileInProject:(id)sender  { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]] withParentURL:[NSURL fileURLWithPath:self.projectPath]]; }
+- (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
 
 - (IBAction)goBack:(id)sender               { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 - (IBAction)goForward:(id)sender            { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
@@ -1934,7 +1932,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			controller.defaultProjectPath = [NSString stringWithCxxString:folder];
 			controller.fileBrowserVisible = YES;
 			controller.documents          = make_vector(create_untitled_document_in_folder(folder));
-			[controller.fileBrowser showURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]];
+			controller.fileBrowser.url    = [NSURL fileURLWithPath:[NSString stringWithCxxString:folder]];
 
 			[controller openAndSelectDocument:[controller documents][controller.selectedTabIndex]];
 			bring_to_front(controller);

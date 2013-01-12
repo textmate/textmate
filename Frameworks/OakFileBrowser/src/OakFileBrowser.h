@@ -10,6 +10,7 @@
 PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic, weak) id <OakFileBrowserDelegate> delegate;
 @property (nonatomic, readonly) NSView*       view;
+@property (nonatomic)           NSURL*        url;
 @property (nonatomic, readonly) NSString*     path;
 @property (nonatomic, readonly) NSArray*      selectedURLs;
 @property (nonatomic)           NSArray*      openURLs;
@@ -17,9 +18,11 @@ PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic, readonly) NSDictionary* sessionState;
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState;
-- (void)showURL:(NSURL*)aPath;
-- (void)revealURL:(NSURL*)aURL;
+
+- (void)goToURL:(NSURL*)aURL;
+- (void)selectURL:(NSURL*)aURL withParentURL:(NSURL*)parentURL;
 - (void)deselectAll:(id)sender;
+
 - (void)updateVariables:(std::map<std::string, std::string>&)env;
 
 - (IBAction)goBack:(id)sender;
