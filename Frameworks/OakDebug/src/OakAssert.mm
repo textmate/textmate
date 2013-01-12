@@ -10,13 +10,10 @@ PUBLIC std::string OakStackDump (int linesToSkip)
 	void* callstack[256];
 	int frames = backtrace(callstack, sizeofA(callstack));
 
-	int n = 0, t;
+	int n = 0;
 	char trace[1024];
-	for(int i = 0; i < frames; ++i)
-	{
-		snprintf(trace + n, sizeof(trace) - n, "%p, %n", callstack[i], &t);
-		n += t;
-	}
+	for(int i = 0; i < frames && n < sizeof(trace); ++i)
+		n += snprintf(trace + n, sizeof(trace) - n, "%p, ", callstack[i]);
 
 	if(n > 2)
 		trace[n - 2] = '\0';
