@@ -15,7 +15,7 @@
 - (void)setLabelIndex:(NSInteger)anInteger;
 @end
 
-static NSArray* ConvertURLSetToArray (NSSet* aSet)
+static NSArray* ConvertURLSetToStringArray (NSSet* aSet)
 {
 	NSMutableArray* res = [NSMutableArray array];
 	for(NSURL* url in aSet)
@@ -24,7 +24,7 @@ static NSArray* ConvertURLSetToArray (NSSet* aSet)
 	return res;
 }
 
-static NSMutableSet* ConvertURLArrayToSet (NSArray* anArray)
+static NSMutableSet* ConvertURLArrayToStringSet (NSArray* anArray)
 {
 	NSMutableSet* res = [NSMutableSet set];
 	for(NSString* urlString in anArray)
@@ -109,8 +109,8 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	{
 		recursiveExpandPaths = [NSMutableSet new];
 
-		expandedURLs = ConvertURLArrayToSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"]);
-		selectedURLs = ConvertURLArrayToSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"SelectedURLs"]);
+		expandedURLs = ConvertURLArrayToStringSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"]);
+		selectedURLs = ConvertURLArrayToStringSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"SelectedURLs"]);
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
@@ -128,8 +128,8 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 - (void)applicationWillTerminate:(NSNotification*)aNotification
 {
 	Snapshot(outlineView, dataSource.rootItem, expandedURLs, selectedURLs);
-	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToArray(expandedURLs) forKey:@"ExpandedURLs"];
-	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToArray(selectedURLs) forKey:@"SelectedURLs"];
+	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToStringArray(expandedURLs) forKey:@"ExpandedURLs"];
+	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToStringArray(selectedURLs) forKey:@"SelectedURLs"];
 }
 
 - (void)setOutlineView:(NSOutlineView*)anOutlineView
