@@ -41,7 +41,6 @@ namespace bundles_db
 	std::string source_t::path () const                                             { return _path; }
 	bool source_t::needs_update (double pollInterval) const                         { return oak::date_t::now() - last_check() > pollInterval; }
 	oak::date_t source_t::last_check () const                                       { return path::get_attr(path(), "last-check"); }
-	static bool source_rank_less (source_ptr const& lhs, source_ptr const& rhs)     { return lhs->rank() > rhs->rank(); }
 
 	key_chain_t source_t::key_chain () const
 	{
@@ -121,7 +120,7 @@ namespace bundles_db
 			}
 		}
 
-		std::sort(res.begin(), res.end(), &source_rank_less);
+		std::sort(res.begin(), res.end(), [](source_ptr const& lhs, source_ptr const& rhs){ return lhs->rank() > rhs->rank(); });
 		return res;
 	}
 
@@ -165,12 +164,6 @@ namespace bundles_db
 
 	// ===========
 
-	static bool grammar_name_less (grammar_info_ptr lhs, grammar_info_ptr const& rhs)
-	{
-		static text::less_t _helper;
-		return _helper(lhs->name(), rhs->name());
-	}
-
 	static bool bundle_name_less_ptr (bundle_t const* lhs, bundle_t const* rhs)
 	{
 		static text::less_t _helper;
@@ -182,11 +175,6 @@ namespace bundles_db
 	static bool bundle_name_less (bundles_db::bundle_ptr const& lhs, bundles_db::bundle_ptr const& rhs)
 	{
 		return bundle_name_less_ptr(lhs.get(), rhs.get());
-	}
-
-	static bool bundle_uninstalled_with_disabled_source (bundles_db::bundle_ptr const& bundle)
-	{
-		return !bundle->installed() && bundle->source() && bundle->source()->disabled();
 	}
 
 	// =======================
@@ -347,7 +335,7 @@ namespace bundles_db
 				if(plist::get_key_path(*item, "grammars", grammars))
 				{
 					parse_grammars_array(grammars, back_inserter(bundle->_grammars));
-					std::sort(bundle->_grammars.begin(), bundle->_grammars.end(), &grammar_name_less);
+					std::sort(bundle->_grammars.begin(), bundle->_grammars.end(), [](grammar_info_ptr lhs, grammar_info_ptr const& rhs){ return text::less_t()(lhs->name(), rhs->name()); });
 				}
 
 				plist::array_t dependencies;
@@ -445,12 +433,10 @@ namespace bundles_db
 		return res;
 	}
 
-	static bool bundle_rank_less (bundle_ptr const& lhs, bundle_ptr const& rhs)     { return lhs->source()->rank() > rhs->source()->rank(); }
-
 	std::vector<bundle_ptr> index (std::string const& installDir)
 	{
 		std::vector<bundle_ptr> bundlesByRank = remote_bundles(installDir);
-		std::sort(bundlesByRank.begin(), bundlesByRank.end(), &bundle_rank_less);
+		std::sort(bundlesByRank.begin(), bundlesByRank.end(), [](bundle_ptr const& lhs, bundle_ptr const& rhs){ return lhs->source()->rank() > rhs->source()->rank(); });
 
 		std::map<oak::uuid_t, bundle_ptr> bundles;
 		iterate(bundle, bundlesByRank)
@@ -475,7 +461,7 @@ namespace bundles_db
 
 		std::vector<bundle_ptr> res;
 		std::transform(bundles.begin(), bundles.end(), back_inserter(res), [](std::pair<oak::uuid_t, bundle_ptr> const& p){ return p.second; });
-		res.erase(std::remove_if(res.begin(), res.end(), &bundle_uninstalled_with_disabled_source), res.end());
+		res.erase(std::remove_if(res.begin(), res.end(), [](bundles_db::bundle_ptr const& bundle){ return !bundle->installed() && bundle->source() && bundle->source()->disabled(); }), res.end());
 		std::sort(res.begin(), res.end(), &bundle_name_less);
 		return res;
 	}
