@@ -85,6 +85,7 @@ namespace command
 
 	void runner_t::send_html_data (char const* bytes, size_t len)
 	{
+		_did_send_html = true;
 		_delegate->accept_html_data(shared_from_this(), bytes, len);
 		_callbacks(&callback_t::output, shared_from_this(), bytes, len);
 	}
@@ -197,6 +198,10 @@ namespace command
 			}
 
 			_delegate->accept_result(_out, placement, format, outputCaret, _input_range, _environment);
+		}
+		else if(_did_send_html)
+		{
+			_delegate->discard_html();
 		}
 
 		_delegate->done();

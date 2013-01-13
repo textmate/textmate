@@ -35,6 +35,7 @@ namespace
 
 		bool accept_html_data (command::runner_ptr runner, char const* data, size_t len);
 		bool accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t inputRange, std::map<std::string, std::string> const& environment);
+		void discard_html ();
 
 		void show_tool_tip (std::string const& str);
 		void show_document (std::string const& str);
@@ -136,6 +137,12 @@ bool delegate_t::accept_html_data (command::runner_ptr runner, char const* data,
 		}
 	}
 	return true;
+}
+
+void delegate_t::discard_html ()
+{
+	if(_did_open_html_window && _controller.htmlOutputVisible)
+		_controller.htmlOutputVisible = NO;
 }
 
 bool delegate_t::accept_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t inputRange, std::map<std::string, std::string> const& environment)
