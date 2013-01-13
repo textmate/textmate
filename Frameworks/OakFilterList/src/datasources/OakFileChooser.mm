@@ -191,7 +191,7 @@ _OutputIter rank (std::vector<document::document_ptr> const& documents, std::str
 			else if(currentDocument == (*doc)->identifier())
 				*out++ = file_chooser_t::item_t(*doc, candidate, 1, ranges);
 			else if(bindingIndex != NSNotFound)
-				*out++ = file_chooser_t::item_t(*doc, candidate, -1 + (bindingIndex+1), ranges);
+				*out++ = file_chooser_t::item_t(*doc, candidate, -1.0 * ([previousBindings count] - bindingIndex), ranges);
 			else
 				*out++ = file_chooser_t::item_t(*doc, candidate, 1 - rank, ranges);
 		}
