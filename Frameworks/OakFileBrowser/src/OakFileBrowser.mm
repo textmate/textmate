@@ -874,7 +874,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[_outlineView deselectAll:sender];
 }
 
-- (IBAction)goToParentFolder:(id)sender   { [self goToURL:ParentForURL(_url)];    }
+- (IBAction)goToParentFolder:(id)sender   { [self selectURL:_url withParentURL:ParentForURL(_url)]; }
 - (IBAction)goToComputer:(id)sender       { [self goToURL:kURLLocationComputer];  }
 - (IBAction)goToHome:(id)sender           { [self goToURL:kURLLocationHome];      }
 - (IBAction)goToDesktop:(id)sender        { [self goToURL:kURLLocationDesktop];   }
