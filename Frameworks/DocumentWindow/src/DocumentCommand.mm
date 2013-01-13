@@ -247,9 +247,9 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 		if(document && document->is_open())
 			baseEnv = ng::editor_for_document(document)->variables(baseEnv, to_s([controller scopeAttributes]));
 		else if(document)
-			baseEnv = document->variables(baseEnv);
+			baseEnv = bundles::environment(document->file_type(), document->variables(baseEnv));
 		else
-			baseEnv = variables_for_path(NULL_STR, "", baseEnv);
+			baseEnv = bundles::environment(scope::scope_t(), variables_for_path(NULL_STR, "", baseEnv));
 
 		if(controller)
 			[controller updateVariables:baseEnv];
