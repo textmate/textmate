@@ -387,7 +387,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	if(!settings_for_path(NULL_STR, "", to_s(self.path)).get(kSettingsFileBrowserDocumentStatusKey, true))
 		return;
-	
+
 	if([_outlineViewDelegate.openURLs isEqualToArray:newOpenURLs])
 		return;
 
@@ -395,14 +395,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	// make a note of files in view, with changed open state
 	NSIndexSet* updateRows = [self indexSetforURLs:symmetricDifference];
-
 	_outlineViewDelegate.openURLs = newOpenURLs;
-
-	// make sure all items are accounted for
-	// if the counts are equal, all items are in view and no need re-index folders
-	if([updateRows count] == [symmetricDifference count])
-			[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-	else	[_outlineView reloadData];
+	[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
 }
 
 - (NSArray*)modifiedURLs
@@ -414,35 +408,28 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	if(!settings_for_path(NULL_STR, "", to_s(self.path)).get(kSettingsFileBrowserDocumentStatusKey, true))
 		return;
-	
+
 	if([_outlineViewDelegate.modifiedURLs isEqualToArray:newModifiedURLs])
 		return;
 
 	NSSet* symmetricDifference = SymmetricDifference([NSMutableSet setWithArray:_outlineViewDelegate.modifiedURLs], [NSMutableSet setWithArray:newModifiedURLs]);
 
-	// make a note of files in view, with changed open state
+	// make a note of files in view, with changed modified state
 	NSIndexSet* updateRows = [self indexSetforURLs:symmetricDifference];
 	_outlineViewDelegate.modifiedURLs = newModifiedURLs;
-
-	// make sure all items are accounted for
-	// if the counts are equal, all items are in view and no need re-index folders
-	if([updateRows count] == [symmetricDifference count])
-			[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-	else	[_outlineView reloadData];
+	[_outlineView reloadDataForRowIndexes:updateRows columnIndexes:[NSIndexSet indexSetWithIndex:0]];
 }
 
 - (NSIndexSet*)indexSetforURLs:(NSSet*)urls
 {
-	// make a note of files in view, with changed open state
+	// make a note of files in view, with changed state
 	NSMutableIndexSet* updateRows = [NSMutableIndexSet indexSet];
 	NSInteger len = [_outlineView numberOfRows];
-	for(int rowIndex = 0; rowIndex < len ; rowIndex++)
+	for(NSInteger rowIndex = 0; rowIndex < len; ++rowIndex)
 	{
 		NSURL* file = [[_outlineView itemAtRow:rowIndex] url];
 		if([urls containsObject:file])
-		{
 			[updateRows addIndex:rowIndex];
-		}
 	}
 	return updateRows;
 }
