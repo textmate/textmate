@@ -1,5 +1,31 @@
 # Changes
 
+## 2013-01-13 (r9345)
+
+* File browser has a new navigation bar. This is work in progress. You can find most actions of the old bar in the Go menu (where you can also see the key equivalents). Presently missing is “Show Hidden Items”, a toolbar below the file browser will soon appear.
+
+* Improve QuickLook support: When the preview panel is showing (activated by pressing space with focus in the file browser or using a file’s context menu to select Show Preview) then you can use arrow up/down to move between the files in the file browser.
+
+* Improve full screen support: If you quit with windows in full screen mode, these are restored in that mode. Opening windows while a window is in full screen mode no longer re-uses the (huge) dimensions of the full screen window, likewise windows opened directly in full screen mode will have a more useful size when leaving full screen mode.
+
+* Fixed file chooser’s abbreviation matcher (⌘T): If you had multiple “corrections” stored for an abbreviation, all but the first of these would actually go to the bottom of the list, the opposite of what was desired.
+
+* Using _Go → Current Document_ (⌃⌘R) will no longer have the file browser switch away from your project folder but instead expand folders to make the current document visible. *[Jacob Bandes-Storch]*
+
+* Using _Go → Enclosing Folder_ will select the item we came from (like Finder).
+
+* Previously the file browser would remember the selection state of all visited folders. This is now cleared during relaunch (except the folder currently showing) and also when using various actions that request a selection, e.g. the two previous items mentioned.
+
+* Using `exit_discard` in a command with HTML output will now close the output view (like 1.x did).
+
+* Find in Folder will now (also) use `excludeDirectories` and `excludeFiles` settings (it previously would only use those with an `InFolderSearch`-prefix).
+
+* Running commands with no document windows open (or in the responder chain) would miss a few essential variables from the environment (such as `TM_SUPPORT_PATH`).
+
+* Tweaked the SCM status gathering code so there should hopefully be less overhead. People who have previously disabled SCM badges because of poor performance may wish to give them another try.
+
+* Various fixes to improve stability.
+
 ## 2013-01-10 (r9343)
 
 * Save All with more than one modified document would crash (r9341).
