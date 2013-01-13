@@ -1759,6 +1759,8 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		if([project[@"miniaturized"] boolValue])
 			[controller.window miniaturize:nil];
+		else if([project[@"fullScreen"] boolValue])
+			[controller.window toggleFullScreen:self];
 
 		res = YES;
 	}
@@ -1782,7 +1784,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 		if(NSDictionary* history = controller.fileBrowserHistory)
 			res[@"fileBrowserState"] = history;
 
-		res[@"windowFrame"]        = NSStringFromRect([controller.window frame]);
+		if(([controller.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
+				res[@"fullScreen"] = @YES;
+		else	res[@"windowFrame"] = NSStringFromRect([controller.window frame]);
+
 		res[@"miniaturized"]       = @([controller.window isMiniaturized]);
 		res[@"htmlOutputSize"]     = NSStringFromSize(controller.htmlOutputSize);
 		res[@"fileBrowserVisible"] = @(controller.fileBrowserVisible);

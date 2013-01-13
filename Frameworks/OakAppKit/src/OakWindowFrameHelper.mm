@@ -87,12 +87,20 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 
 - (void)snapshotWindowFrame
 {
-	[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([window frame]) forKey:self.autosaveName];
+	if((([window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask))
+		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([window frame]) forKey:self.autosaveName];
 }
 
 - (BOOL)ignoreWindow:(NSWindow*)aWindow
 {
-	return !([aWindow isVisible] && [[aWindow delegate] isKindOfClass:windowDelegateClass]);
+	if(![aWindow isVisible] || ![aWindow isOnActiveSpace])
+		return YES;
+	if(![[aWindow delegate] isKindOfClass:windowDelegateClass])
+		return YES;
+	if(([aWindow styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)
+		return YES;
+
+	return NO;
 }
 
 - (void)placeAndSizeWindow:(NSWindow*)aWindow
