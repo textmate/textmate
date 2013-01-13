@@ -258,6 +258,9 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 
 - (void)selectURLs:(NSArray*)someURLs expandChildren:(BOOL)expandAncestors
 {
+	selectedURLs = [NSMutableSet new];
+	[outlineView deselectAll:self];
+
 	self.pendingSelectURLs = [NSSet setWithArray:someURLs];
 	if([someURLs count] == 1)
 		self.pendingMakeVisibleURL = [someURLs lastObject];
