@@ -10,8 +10,8 @@
 #include <text/ctype.h>
 #include <text/decode.h>
 
-static std::string const kBundleAttributeOrigin  = "org.textmate.bundle.origin";
-static std::string const kBundleAttributeUpdated = "org.textmate.bundle.updated";
+static char const* kBundleAttributeOrigin  = "org.textmate.bundle.origin";
+static char const* kBundleAttributeUpdated = "org.textmate.bundle.updated";
 
 namespace plist
 {
@@ -19,8 +19,8 @@ namespace plist
 	{
 		if(plist::array_t const* array = boost::get<plist::array_t>(&any))
 			return *array;
-		static plist::array_t const dummy;
-		return dummy;
+		static plist::array_t const* dummy = new plist::array_t;
+		return *dummy;
 	}
 
 } /* plist */
@@ -59,16 +59,16 @@ namespace bundles_db
 		}
 		else
 		{
-			static std::string const KeyChainPath = path::join(path::home(), "Library/Application Support/TextMate/Managed/KeyChain.plist");
-			if(path::exists(KeyChainPath))
+			std::string const key_chain_path = path::join(path::home(), "Library/Application Support/TextMate/Managed/KeyChain.plist");
+			if(path::exists(key_chain_path))
 			{
-				res.load(KeyChainPath);
+				res.load(key_chain_path);
 			}
 			else
 			{
 				res.add(key_chain_t::key_t("org.textmate.duff",    "Allan Odgaard",  "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n"));
 				res.add(key_chain_t::key_t("org.textmate.msheets", "Michael Sheets", "-----BEGIN PUBLIC KEY-----\nMIIDOzCCAi4GByqGSM44BAEwggIhAoIBAQDfYsqBc18uL7yYb/bDrrEtVTBG8tML\nmMtNFyU8XhlVKWdQJwBGG/fV2Wjc0hVYSeTWv3VueITZbuuVZEePXlem6Dki1DEL\nsMNeDvE/l0MKHXi1+sr1cht7QvuTi/c1UK4I6QNWDJWi7KmqJg3quLCwJfMef1x5\n/qgLUln5cU6+pAj43Vp62bzHJBjAnrC432yD7F4Mxu4oV/PEm5QC6pU7RcvUwAox\np7m7c8+CxX7Aq4dH6Jd8Jt6XuYIktlfcFivvvF60CvxhABDBdGMra4roO0wlJmID\n91oQ3PLxFBsDmbluPJlkmTp4YetsF8/Zd9P3WwBQUArtNdiqKZIQ4uHXAhUAvNZ5\ntZkzuUiblIxZKmOCBN/JeMsCggEBAK9jUiC98+hwY5XcDQjDSLPE4uvv+dHZ29Bx\n8KevX+qzd6shIhp6urvyBXrM+h8l7iB6Jh4Wm3WhqKMBjquRqyGogQDGxJr7QBVk\nQSOiyaKDT4Ue/Nhg1MFsrt3PtS1/nscZ6GGWswrCfQ1t4m/wXDasUSfz2smae+Jd\nZ6UGBzWQMRawyU/O/LX0PlJkBOMHopecAUcxHc2G02P2QwAMKPavwksQ4tWCJvIr\n7ZELfCcVQtG2UnpTRWqLZQaVwSYMHoNK9/reu099sdv9CQ+trH2Q5LlBXJmHloFK\nafiuQPjTmaJVf/piiQ79xJB6VmwoEpOJJG4NYNt7f+I7YCk07xwDggEFAAKCAQA5\nSBwWJouMKUI6Hi0EZ4/Yh98qQmItx4uWTYFdjcUVVYCKK7GIuXu67rfkbCJUrvT9\nID1vw2eyTmbuW2TPuRDsxUcB7WRyyLekl67vpUgMgLBLgYMXQf6RF4HM2tW7UWg7\noNQHkZKWbhDgXdumKzKf/qZPB/LT2Yndv/zqkQ+YXIu08j0RGkxJaAjB7nEv1XGq\nL2VJf8aEi+MnihAtMPCHcW34qswqO1kOCbOWNShlfWHGjKlfdsPYv87RcalHNqps\nk1r60kyEkeZvKGM+FDT80N7cafX286v8n9L4IvvnLr/FDOH4XXzEjXB9Vr5Ffvj1\ndxNPRmDZOo6JNKA8Uvki\n-----END PUBLIC KEY-----\n"));
-				res.save(KeyChainPath);
+				res.save(key_chain_path);
 			}
 		}
 		return res;
@@ -76,7 +76,7 @@ namespace bundles_db
 
 	std::vector<source_ptr> sources (std::string const& installDir)
 	{
-		static plist::any_t const DefaultIndex = plist::parse_ascii(
+		plist::any_t default_index = plist::parse_ascii(
 			"{	version = 3;"
 			"	sources = {"
 			"		org.textmate.updates.themes   = { rank =  0; name = 'Themes';           url = '" REST_API "/bundles/themes'; };"
@@ -89,15 +89,15 @@ namespace bundles_db
 
 		std::string const path = sources_index_path(installDir);
 		if(!path::exists(path))
-			plist::save(path, DefaultIndex);
+			plist::save(path, default_index);
 
 		plist::any_t plist = plist::load(path);
 
 		int32_t version = 0, minVersion = 0;
-		plist::get_key_path(DefaultIndex, "version", minVersion);
+		plist::get_key_path(default_index, "version", minVersion);
 		if(!plist::get_key_path(plist, "version", version) || version < minVersion)
 		{
-			plist = DefaultIndex;
+			plist = default_index;
 			plist::save(path, plist);
 		}
 
@@ -166,10 +166,9 @@ namespace bundles_db
 
 	static bool bundle_name_less_ptr (bundle_t const* lhs, bundle_t const* rhs)
 	{
-		static text::less_t _helper;
 		if(lhs->uuid() == rhs->uuid())
 			return lhs->installed() == rhs->installed() ? lhs->rank() > rhs->rank() : lhs->installed();
-		return _helper(lhs->name(), rhs->name());
+		return text::less_t()(lhs->name(), rhs->name());
 	}
 
 	static bool bundle_name_less (bundles_db::bundle_ptr const& lhs, bundles_db::bundle_ptr const& rhs)
