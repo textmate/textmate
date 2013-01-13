@@ -1777,10 +1777,10 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		NSMutableDictionary* res = [NSMutableDictionary dictionary];
 
-		if(controller.defaultProjectPath)
-			res[@"projectPath"] = controller.defaultProjectPath;
-		if(controller.fileBrowserHistory)
-			res[@"fileBrowserState"] = controller.fileBrowserHistory;
+		if(NSString* projectPath = controller.defaultProjectPath)
+			res[@"projectPath"] = projectPath;
+		if(NSDictionary* history = controller.fileBrowserHistory)
+			res[@"fileBrowserState"] = history;
 
 		res[@"windowFrame"]        = NSStringFromRect([controller.window frame]);
 		res[@"miniaturized"]       = @([controller.window isMiniaturized]);
