@@ -346,7 +346,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			[dict removeObjectForKey:@"scrollOffset"];
 		[history addObject:dict];
 	}
-	return @{ @"history" : history, @"historyIndex" : @(self.historyIndex) };
+
+	return @{
+		@"history"      : history,
+		@"historyIndex" : @(self.historyIndex),
+		@"selection"    : [self.selectedURLs valueForKey:@"absoluteString"],
+	};
 }
 
 - (void)setSessionState:(NSDictionary*)newState
@@ -366,6 +371,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		self.history      = newHistory;
 		self.historyIndex = oak::cap<NSUInteger>(0, [newState[@"historyIndex"] unsignedIntValue], newHistory.count);
+
+		NSMutableArray* selection = [NSMutableArray array];
+		for(NSString* urlString in newState[@"selection"])
+			[selection addObject:[NSURL URLWithString:urlString]];
+		[_outlineViewDelegate selectURLs:selection expandChildren:NO];
 
 		[self updateHeaderView];
 	}
