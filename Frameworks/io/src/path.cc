@@ -387,6 +387,9 @@ namespace path
 
 	bool identifier_t::operator< (identifier_t const& rhs) const
 	{
+		if(path == rhs.path)
+			return false;
+
 		if(exists == rhs.exists)
 		{
 			if(exists)
@@ -398,7 +401,7 @@ namespace path
 
 	bool identifier_t::operator== (identifier_t const& rhs) const
 	{
-		return exists && rhs.exists ? device == rhs.device && inode == rhs.inode : path == rhs.path;
+		return path == rhs.path || (exists && rhs.exists && device == rhs.device && inode == rhs.inode);
 	}
 
 	bool identifier_t::operator!= (identifier_t const& rhs) const
