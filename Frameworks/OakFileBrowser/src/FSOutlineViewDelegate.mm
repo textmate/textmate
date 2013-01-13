@@ -103,6 +103,11 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 @implementation FSOutlineViewDelegate
 @synthesize outlineView, dataSource, openURLs, modifiedURLs, pendingSelectURLs, pendingEditURL, pendingMakeVisibleURL, pendingExpandURLs, pendingScrollOffset;
 
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey:@"SelectedURLs"];
+}
+
 - (id)init
 {
 	if((self = [super init]))
@@ -110,7 +115,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		recursiveExpandPaths = [NSMutableSet new];
 
 		expandedURLs = ConvertURLArrayToStringSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"ExpandedURLs"]);
-		selectedURLs = ConvertURLArrayToStringSet([[NSUserDefaults standardUserDefaults] arrayForKey:@"SelectedURLs"]);
+		selectedURLs = [NSMutableSet new];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:NSApplicationWillTerminateNotification object:NSApp];
 	}
@@ -129,7 +134,6 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 {
 	Snapshot(outlineView, dataSource.rootItem, expandedURLs, selectedURLs);
 	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToStringArray(expandedURLs) forKey:@"ExpandedURLs"];
-	[[NSUserDefaults standardUserDefaults] setObject:ConvertURLSetToStringArray(selectedURLs) forKey:@"SelectedURLs"];
 }
 
 - (void)setOutlineView:(NSOutlineView*)anOutlineView
