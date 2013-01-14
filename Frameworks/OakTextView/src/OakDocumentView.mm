@@ -97,9 +97,7 @@ private:
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 
-		gutterDividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
-		gutterDividerView.boxType    = NSBoxCustom;
-		gutterDividerView.borderType = NSLineBorder;
+		gutterDividerView = [OakCreateViewWithColor() retain];
 		[self addSubview:gutterDividerView];
 
 		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
