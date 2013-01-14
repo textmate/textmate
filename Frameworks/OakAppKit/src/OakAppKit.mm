@@ -2,6 +2,16 @@
 
 NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 
+NSBox* OakCreateViewWithColor (NSColor* color)
+{
+	NSBox* box = [[[NSBox alloc] initWithFrame:NSZeroRect] autorelease];
+	box.boxType    = NSBoxCustom;
+	box.borderType = NSLineBorder;
+	if(color)
+		box.borderColor = color;
+	return box;
+}
+
 void OakRunIOAlertPanel (char const* format, ...)
 {
 	va_list ap;
