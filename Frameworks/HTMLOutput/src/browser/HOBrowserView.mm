@@ -1,6 +1,8 @@
 #import "HOBrowserView.h"
 #import "HOWebViewDelegateHelper.h"
 #import "HOStatusBar.h"
+#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSColor Additions.h>
 
 @implementation HOBrowserView
 @synthesize webView;
@@ -20,11 +22,9 @@
 	if(self = [super initWithFrame:frame])
 	{
 		webView = [[WebView alloc] initWithFrame:NSZeroRect];
-		[self addSubview:webView];
 
 		statusBar = [[HOStatusBar alloc] initWithFrame:NSZeroRect];
 		statusBar.delegate = webView;
-		[self addSubview:statusBar];
 
 		webViewDelegateHelper          = [HOWebViewDelegateHelper new];
 		webViewDelegateHelper.delegate = statusBar;
@@ -33,11 +33,17 @@
 		webView.UIDelegate             = webViewDelegateHelper;
 		webView.frameLoadDelegate      = self;
 
-		NSDictionary* views = NSDictionaryOfVariableBindings(webView, statusBar);
-		for(id key in views)
-			[views[key] setTranslatesAutoresizingMaskIntoConstraints:NO];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar)]|" options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView][statusBar]|"   options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+		NSBox* divider = OakCreateViewWithColor([NSColor colorWithString:@"#9d9d9d"]);
+
+		NSDictionary* views = NSDictionaryOfVariableBindings(webView, divider, statusBar);
+		for(NSView* view in [views allValues])
+		{
+			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[self addSubview:view];
+		}
+
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar,==divider)]|"   options:NSLayoutFormatAlignAllTop     metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=10)][divider(==1)][statusBar]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 	}
 	return self;
 }
