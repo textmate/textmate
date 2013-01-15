@@ -509,33 +509,6 @@ namespace
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
-- (void)pruneExcessTabs:(id)sender // TODO Enable tab pruning
-{
-	std::set<oak::uuid_t> newDocs;
-
-	NSInteger excessTabs = self.documents.size() - self.tabBarView.countOfVisibleTabs;
-	if(self.tabBarView && excessTabs > 0)
-	{
-		std::multimap<oak::date_t, size_t> ranked;
-		for(size_t i = 0; i < self.documents.size(); ++i)
-		{
-			document::document_ptr doc = [self documents][i];
-			if(!doc->is_modified() && doc->is_on_disk() && newDocs.find(doc->identifier()) == newDocs.end())
-				ranked.insert(std::make_pair(doc->lru(), i));
-		}
-
-		NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
-		iterate(pair, ranked)
-		{
-			[indexSet addIndex:pair->second];
-			if([indexSet count] == excessTabs)
-				break;
-		}
-
-		[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:NO];
-	}
-}
-
 - (BOOL)windowShouldClose:(id)sender
 {
 	[self.htmlOutputView stopLoading];
@@ -706,6 +679,33 @@ namespace
 				[indexSet addIndex:i];
 		}
 		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:NO];
+	}
+	else
+	{
+		NSInteger excessTabs = self.documents.size() - self.tabBarView.countOfVisibleTabs;
+		if(self.tabBarView && excessTabs > 0)
+		{
+			std::set<oak::uuid_t> uuids;
+			std::transform(documents.begin(), documents.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+
+			std::multimap<oak::date_t, size_t> ranked;
+			for(size_t i = 0; i < newDocuments.size(); ++i)
+			{
+				document::document_ptr doc = newDocuments[i];
+				if(!doc->is_modified() && doc->is_on_disk() && uuids.find(doc->identifier()) == uuids.end())
+					ranked.insert(std::make_pair(doc->lru(), i));
+			}
+
+			NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
+			iterate(pair, ranked)
+			{
+				[indexSet addIndex:pair->second];
+				if([indexSet count] == excessTabs)
+					break;
+			}
+
+			[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:NO];
+		}
 	}
 }
 
