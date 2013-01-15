@@ -9,6 +9,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 @interface ProjectLayoutView ()
 @property (nonatomic, retain) NSLayoutConstraint* fileBrowserWidthConstraint;
 @property (nonatomic, retain) NSLayoutConstraint* htmlOutputSizeConstraint;
+@property (nonatomic) BOOL mouseDownRecursionGuard;
 @end
 
 @implementation ProjectLayoutView { OBJC_WATCH_LEAKS(ProjectLayoutView); }
@@ -194,6 +195,10 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)mouseDown:(NSEvent*)anEvent
 {
+	if(_mouseDownRecursionGuard)
+		return;
+	_mouseDownRecursionGuard = YES;
+
 	NSView* view = nil;
 	NSPoint mouseDownPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
 	if(NSMouseInRect(mouseDownPos, [self fileBrowserResizeRect], [self isFlipped]))
@@ -202,60 +207,66 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		view = _htmlOutputView;
 
 	if(!view || [anEvent type] != NSLeftMouseDown)
-		return [super mouseDown:anEvent];
-
-	NSEvent* mouseDownEvent = anEvent;
-	NSRect initialFrame = view.frame;
-
-	BOOL didDrag = NO;
-	while([anEvent type] != NSLeftMouseUp)
 	{
-		anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseUpMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
-		if([anEvent type] != NSLeftMouseDragged)
-			break;
+		[super mouseDown:anEvent];
+	}
+	else
+	{
+		NSEvent* mouseDownEvent = anEvent;
+		NSRect initialFrame = view.frame;
 
-		NSPoint mouseCurrentPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-		if(!didDrag && SQ(fabs(mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(mouseDownPos.y - mouseCurrentPos.y)) < SQ(1))
-			continue; // we didn't even drag a pixel
-
-		if(view == _htmlOutputView)
+		BOOL didDrag = NO;
+		while([anEvent type] != NSLeftMouseUp)
 		{
-			if(_htmlOutputOnRight)
+			anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseDraggedMask|NSLeftMouseDown|NSLeftMouseUpMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+			if([anEvent type] != NSLeftMouseDragged)
+				break;
+
+			NSPoint mouseCurrentPos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
+			if(!didDrag && SQ(fabs(mouseDownPos.x - mouseCurrentPos.x)) + SQ(fabs(mouseDownPos.y - mouseCurrentPos.y)) < SQ(1))
+				continue; // we didn't even drag a pixel
+
+			if(view == _htmlOutputView)
 			{
-				CGFloat width = NSWidth(initialFrame) + (mouseCurrentPos.x - mouseDownPos.x) * (_htmlOutputOnRight ? -1 : +1);
-				_htmlOutputSize.width = std::max<CGFloat>(50, round(width));
-				self.htmlOutputSizeConstraint.constant = width;
+				if(_htmlOutputOnRight)
+				{
+					CGFloat width = NSWidth(initialFrame) + (mouseCurrentPos.x - mouseDownPos.x) * (_htmlOutputOnRight ? -1 : +1);
+					_htmlOutputSize.width = std::max<CGFloat>(50, round(width));
+					self.htmlOutputSizeConstraint.constant = width;
+				}
+				else
+				{
+					CGFloat height = NSHeight(initialFrame) + (mouseCurrentPos.y - mouseDownPos.y);
+					_htmlOutputSize.height = std::max<CGFloat>(50, round(height));
+					self.htmlOutputSizeConstraint.constant = height;
+				}
+
+				[[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(_htmlOutputSize) forKey:kUserDefaultsHTMLOutputSizeKey];
 			}
-			else
+			else if(view == _fileBrowserView)
 			{
-				CGFloat height = NSHeight(initialFrame) + (mouseCurrentPos.y - mouseDownPos.y);
-				_htmlOutputSize.height = std::max<CGFloat>(50, round(height));
-				self.htmlOutputSizeConstraint.constant = height;
+				CGFloat width = NSWidth(initialFrame) + (mouseCurrentPos.x - mouseDownPos.x) * (_fileBrowserOnRight ? -1 : +1);
+				_fileBrowserWidth = std::max<CGFloat>(50, round(width));
+				self.fileBrowserWidthConstraint.constant = _fileBrowserWidth;
+
+				[[NSUserDefaults standardUserDefaults] setInteger:_fileBrowserWidth forKey:kUserDefaultsFileBrowserWidthKey];
 			}
 
-			[[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(_htmlOutputSize) forKey:kUserDefaultsHTMLOutputSizeKey];
+			didDrag = YES;
 		}
-		else if(view == _fileBrowserView)
+
+		if(!didDrag)
 		{
-			CGFloat width = NSWidth(initialFrame) + (mouseCurrentPos.x - mouseDownPos.x) * (_fileBrowserOnRight ? -1 : +1);
-			_fileBrowserWidth = std::max<CGFloat>(50, round(width));
-			self.fileBrowserWidthConstraint.constant = _fileBrowserWidth;
-
-			[[NSUserDefaults standardUserDefaults] setInteger:_fileBrowserWidth forKey:kUserDefaultsFileBrowserWidthKey];
+			NSView* view = [super hitTest:[[self superview] convertPoint:[mouseDownEvent locationInWindow] fromView:nil]];
+			if(view && view != self)
+			{
+				[NSApp postEvent:anEvent atStart:NO];
+				[view mouseDown:mouseDownEvent];
+			}
 		}
-
-		didDrag = YES;
 	}
 
-	if(!didDrag)
-	{
-		NSView* view = [super hitTest:[[self superview] convertPoint:[mouseDownEvent locationInWindow] fromView:nil]];
-		if(view && view != self)
-		{
-			[NSApp postEvent:anEvent atStart:NO];
-			[view mouseDown:mouseDownEvent];
-		}
-	}
+	_mouseDownRecursionGuard = NO;
 }
 
 - (BOOL)isOpaque
