@@ -1,8 +1,27 @@
 #!/usr/bin/env ruby -wKU
 #
 # http://developer.apple.com/library/mac/#technotes/tn2004/tn2123.html
+require "fileutils"
+require "shellwords"
+
+DSYM_ARCHIVE_DIR = "#{ENV['HOME']}/build/TextMate/Applications/TextMate"
+DSYM_CACHE_DIR   = "#{ENV['HOME']}/Library/Caches/com.macromates.TextMate-dsym"
 
 BinaryImage = Struct.new(:first, :last, :name, :file)
+
+def find_dsym(process, version)
+  path = File.expand_path("#{process}_r#{version}", DSYM_CACHE_DIR)
+  return path if File.directory?(path)
+
+  archive = File.expand_path("#{process}_r#{version}-dSYM.tbz", DSYM_ARCHIVE_DIR)
+  return nil unless File.file?(archive)
+
+  FileUtils.mkdir_p(path)
+  STDERR << "Extracting dsym to ‘#{path}’…\n"
+  %x{ tar -jxf #{Shellwords.shellescape archive} -C #{Shellwords.shellescape path} }
+
+  path
+end
 
 class BinaryImages
   def initialize(files, report)
@@ -39,8 +58,8 @@ report = STDIN.read
 
 process = $1 if report =~ /^Process:\s+(\w+)\s+\[\d+\]$/
 version = $1 if report =~ /^Version:.*\((.*?)\)$/
-dsym_dir = "#{ENV['HOME']}/Oak/Archives/dSYM/#{process}_r#{version}"
-abort "Directory does not exist: ‘#{dsym_dir}’." unless File.exists? dsym_dir
+dsym_dir = find_dsym(process, version)
+abort "No dsym information for version #{version} of #{process}." if dsym_dir.nil?
 
 images = BinaryImages.new(Dir["#{dsym_dir}/*"], report)
 
