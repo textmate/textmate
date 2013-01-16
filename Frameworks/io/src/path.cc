@@ -620,47 +620,47 @@ namespace path
 		return res;
 	}
 
-	static std::string folder_with_n_parents (std::string const& path, size_t components)
+	static size_t count_slashes (std::string const& s1, std::string const& s2)
 	{
-		std::string::const_reverse_iterator const& last = path.rend();
-		std::string::const_reverse_iterator from        = std::find(path.rbegin(), last, '/');
-		for(; components > 0 && from != last; --components)
-			from = std::find(++from, last, '/');
-		return std::string(from.base(), path.end());
+		auto s1First = s1.rbegin(), s1Last = s1.rend();
+		auto s2First = s2.rbegin(), s2Last = s2.rend();
+		while(s1First != s1Last && s2First != s2Last)
+		{
+			if(*s1First != *s2First)
+				break;
+			++s1First, ++s2First;
+		}
+		return std::count(s1.rbegin(), s1First, '/');
 	}
 
 	std::vector<size_t> disambiguate (std::vector<std::string> const& paths)
 	{
-		std::map<std::string, size_t> unique;
-		iterate(it, paths)
-			++unique[*it];
+		std::vector<size_t> v(paths.size());
+		std::iota(v.begin(), v.end(), 0);
 
-		std::vector<size_t> redo;
-		for(size_t i = 0; i < paths.size(); ++i)
-			redo.push_back(i);
-
-		std::vector<size_t> levels(paths.size(), 0);
-		while(!redo.empty())
-		{
-			std::map< std::string, std::vector<size_t> > map;
-			iterate(it, redo)
-				map[folder_with_n_parents(paths[*it], levels[*it])].push_back(*it);
-			redo.clear();
-
-			iterate(it, map)
+		std::sort(v.begin(), v.end(), [&paths](size_t const& lhs, size_t const& rhs) -> bool {
+			auto s1First = paths[lhs].rbegin(), s1Last = paths[lhs].rend();
+			auto s2First = paths[rhs].rbegin(), s2Last = paths[rhs].rend();
+			while(s1First != s1Last && s2First != s2Last)
 			{
-				if(it->second.size() > 1)
-				{
-					if(it->second.size() == unique[paths[it->second.back()]])
-						continue;
-
-					iterate(innerIter, it->second)
-					{
-						++levels[*innerIter];
-						redo.push_back(*innerIter);
-					}
-				}
+				if(*s1First < *s2First)
+					return true;
+				else if(*s1First != *s2First)
+					return false;
+				++s1First, ++s2First;
 			}
+			return s1First == s1Last && s2First != s2Last;
+		});
+
+		std::vector<size_t> levels(paths.size());
+		for(size_t i = 0; i < v.size(); ++i)
+		{
+			size_t above = 0, below = 0;
+			if(i != 0)
+				above = count_slashes(paths[v[i]], paths[v[i-1]]);
+			if(i != v.size()-1)
+				below = count_slashes(paths[v[i]], paths[v[i+1]]);
+			levels[v[i]] = std::max(above, below);
 		}
 
 		return levels;
