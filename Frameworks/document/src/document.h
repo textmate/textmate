@@ -212,6 +212,7 @@ namespace document
 		void try_save (document::save_callback_ptr callback);
 		bool save ();
 		bool backup ();
+		void detach_backup () { _backup_path = NULL_STR; }
 
 		void set_path (std::string const& newPath);
 		void set_virtual_path (std::string const& virtualPath)    { _virtual_path = virtualPath; }
