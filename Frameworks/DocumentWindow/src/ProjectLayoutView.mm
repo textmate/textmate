@@ -150,14 +150,14 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	if(_fileBrowserView)
 	{
 		self.fileBrowserWidthConstraint = [NSLayoutConstraint constraintWithItem:_fileBrowserView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_fileBrowserWidth];
-		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityRequired-1;
+		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
 		[self addConstraint:self.fileBrowserWidthConstraint];
 	}
 
 	if(_htmlOutputView)
 	{
 		self.htmlOutputSizeConstraint = _htmlOutputOnRight ? [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.width] : [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.height];
-		self.htmlOutputSizeConstraint.priority = NSLayoutPriorityRequired-1;
+		self.htmlOutputSizeConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
 		[self addConstraint:self.htmlOutputSizeConstraint];
 	}
 }
