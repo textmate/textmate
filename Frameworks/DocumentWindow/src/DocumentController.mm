@@ -529,13 +529,23 @@ namespace
 
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
+	BOOL restoresSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
 	std::vector<document::document_ptr> documents;
 	for(DocumentController* delegate in SortedControllers())
-		std::copy_if(delegate.documents.begin(), delegate.documents.end(), back_inserter(documents), [](document::document_ptr const& doc){ return doc->is_modified(); });
+		std::copy_if(delegate.documents.begin(), delegate.documents.end(), back_inserter(documents), [&restoresSession](document::document_ptr const& doc){ return doc->is_modified() && (doc->path() != NULL_STR || !restoresSession); });
 
 	if(documents.empty())
 	{
-		[DocumentController saveSessionIncludingUntitledDocuments:NO];
+		[DocumentController saveSessionIncludingUntitledDocuments:restoresSession];
+		if(restoresSession)
+		{
+			// Ensure we do not remove backup files, as they are used to restore untitled documents
+			for(DocumentController* controller in [SortedControllers() reverseObjectEnumerator])
+			{
+				for(auto document : controller.documents)
+					document->detach_backup();
+			}
+		}
 		return NSTerminateNow;
 	}
 
