@@ -904,6 +904,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (IBAction)orderFrontGoToFolder:(id)sender
 {
+	if(_headerView.folderPopUpButton.selectedItem.action == _cmd)
+		[_headerView.folderPopUpButton selectItemAtIndex:0];
+
 	NSOpenPanel* panel = [NSOpenPanel openPanel];
 	[panel setCanChooseFiles:NO];
 	[panel setCanChooseDirectories:YES];
