@@ -551,6 +551,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 }
 
+- (void)openCurrentFolderInFinder:(id)sender
+{
+	[[NSWorkspace sharedWorkspace] openURL:_url];
+}
+
 - (void)showSelectedEntriesInFinder:(id)sender
 {
 	for(FSItem* item in self.selectedItems)
@@ -687,6 +692,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		if([_url isFileURL])
 		{
+			[menu addItemWithTitle:@"Open in Finder" action:@selector(openCurrentFolderInFinder:) keyEquivalent:@""];
+			[menu addItem:[NSMenuItem separatorItem]];
 			[menu addItemWithTitle:@"New Folder" action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
 			[menu addItemWithTitle:@"Add to Favorites" action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
 		}
