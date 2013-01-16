@@ -241,6 +241,9 @@ namespace path
 
 	bool glob_list_t::exclude (std::string const& path, kPathItemType itemType, bool defaultResult) const
 	{
+		if(_globs.empty())
+			return false;
+
 		for(auto record : _globs)
 		{
 			if((itemType == kPathItemAny || record.item_type == kPathItemAny || itemType == record.item_type) && record.glob.does_match(path))

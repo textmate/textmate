@@ -3,6 +3,24 @@
 class GlobListTests : public CxxTest::TestSuite
 {
 public:
+	void test_empty_glob_list ()
+	{
+		path::glob_list_t globs;
+		TS_ASSERT(globs.include("foo"));
+		TS_ASSERT(globs.include("bar"));
+		TS_ASSERT(globs.include(".foo"));
+		TS_ASSERT(globs.include(".bar"));
+	}
+
+	void test_non_empty_glob_list ()
+	{
+		path::glob_list_t globs("*");
+		TS_ASSERT(globs.include("foo"));
+		TS_ASSERT(globs.include("bar"));
+		TS_ASSERT(globs.exclude(".foo"));
+		TS_ASSERT(globs.exclude(".bar"));
+	}
+
 	void test_glob_list ()
 	{
 		path::glob_list_t globs;
