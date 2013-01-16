@@ -1245,6 +1245,8 @@ namespace
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
+- (IBAction)reload:(id)sender               { [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+
 - (IBAction)revealFileInProject:(id)sender  { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:[self selectedDocument]->path()]] withParentURL:[NSURL fileURLWithPath:self.projectPath]]; }
 - (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
 
@@ -1620,6 +1622,8 @@ static std::string file_chooser_glob (std::string const& path)
 		active = self.projectPath != nil;
 	else if([menuItem action] == @selector(goToParentFolder:))
 		active = [self.window firstResponder] != self.textView;
+	else if([menuItem action] == @selector(reload:))
+		active = self.fileBrowserVisible;
 	return active;
 }
 
