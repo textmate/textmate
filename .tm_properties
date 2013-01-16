@@ -29,7 +29,7 @@ fileType         = 'source.tm-properties'
 fileType         = 'source.objc++'
 
 [ attr.untitled ]
-fileType         = 'source.c++'
+fileType         = 'source.objc++'
 
 [ tests/*.{cc,mm} ]
 scopeAttributes  = 'attr.test.cxxtest'
