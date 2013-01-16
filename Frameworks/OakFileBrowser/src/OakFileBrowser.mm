@@ -553,8 +553,10 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)showSelectedEntriesInFinder:(id)sender
 {
-	for(FSItem* item in self.selectedItems)
-		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[ item.url ]];
+	NSArray* urls = self.selectedURLs;
+	if(urls.count == 0 && [_url isFileURL])
+		urls = @[ _url ];
+	[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:urls];
 }
 
 - (NSString*)parentForNewFolder
@@ -687,6 +689,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		if([_url isFileURL])
 		{
+			[menu addItemWithTitle:@"Show in Finder" action:@selector(showSelectedEntriesInFinder:) keyEquivalent:@""];
+			[menu addItem:[NSMenuItem separatorItem]];
 			[menu addItemWithTitle:@"New Folder" action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
 			[menu addItemWithTitle:@"Add to Favorites" action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
 		}
