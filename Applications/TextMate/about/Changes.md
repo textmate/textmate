@@ -1,5 +1,15 @@
 # Changes
 
+## 2013-01-17 (r9347)
+
+* If you have “open documents from last session” enabled in preferences then TextMate will no longer ask you to save untitled documents when you quit, as these will be restored next time you launch it, and as they are untitled, no other program can edit them (causing a conflict, as would be the case if the document had a location on disk).
+* If the ‘inode’ of an open file changed (e.g. because of `git stash`/`rebase`) and you opened the file again (e.g. via `mate`) then TextMate would open a new tab, even though the file was already open.
+* Add “Show in Finder” context menu when no items are selected. *[Caleb Land]*
+* Make OakTabBarView and OakPasteboardSelector accessible. *[Boris Dušek]*
+* The tab bar will again close excess tabs to keeping it from overflowing.
+* The _Go → Reload_ menu item was disabled unless file browser was active.
+* Other minor fixes and improvements.
+
 ## 2013-01-13 (r9345)
 
 * File browser has a new navigation bar. This is work in progress. You can find most actions of the old bar in the Go menu (where you can also see the key equivalents). Presently missing is “Show Hidden Items”, a toolbar below the file browser will soon appear.
