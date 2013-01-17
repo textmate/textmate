@@ -12,7 +12,7 @@ If you just want to run TextMate 2 then use [this link to download a prebuilt bi
 
 If you have problems building please **don’t** open an issue! Instead write the [textmate-dev][] mailing list or use the [#textmate][] IRC channel on [freenode.net][] where people might be able to help you.
 
-[prebuilt binary]: https://github.com/textmate/textmate/downloads
+[prebuilt binary]: https://api.textmate.org/downloads/beta
 [10.6 build]: https://github.com/nanoant/textmate/downloads
 [10.6 fork]: https://github.com/nanoant/textmate/tree/10.6_32bit
 
