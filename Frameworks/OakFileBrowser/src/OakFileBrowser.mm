@@ -689,10 +689,10 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		if([_url isFileURL])
 		{
-			[menu addItemWithTitle:@"Show in Finder" action:@selector(showSelectedEntriesInFinder:) keyEquivalent:@""];
+			[menu addItemWithTitle:[NSString stringWithFormat:@"Show “%@” in Finder", DisplayName(_url)] action:@selector(showSelectedEntriesInFinder:) keyEquivalent:@""];
 			[menu addItem:[NSMenuItem separatorItem]];
 			[menu addItemWithTitle:@"New Folder" action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
-			[menu addItemWithTitle:@"Add to Favorites" action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
+			[menu addItemWithTitle:[NSString stringWithFormat:@"Add “%@” to Favorites", DisplayName(_url)] action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
 		}
 	}
 	else
