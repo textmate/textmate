@@ -722,7 +722,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			{ @"Open Enclosing Folder",   @selector(revealSelectedItem:),                                YES, showEnclosingFolder }, // scm://, search://
 			{ @"Show Package Contents",   @selector(showPackageContents:),                               YES, showPackageContents }, // .app, .tmBundle, …
 			{ @"Show Original",           @selector(revealSelectedItem:),                                YES, showOriginal        }, // symbolic links, aliases
-			{ @"Show in Finder",          @selector(showSelectedEntriesInFinder:),  singleItem && pathsExist, YES },
+			{ @"Show in Finder",          @selector(showSelectedEntriesInFinder:),                pathsExist, YES },
 			{ nil,                        NULL,                                                          YES, YES },
 			{ @"Rename",                  @selector(editSelectedEntries:),          singleItem && pathsExist, YES },
 			{ @"Duplicate",               @selector(duplicateSelectedEntries:),                   pathsExist, YES },
