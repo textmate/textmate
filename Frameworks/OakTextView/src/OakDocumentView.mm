@@ -21,6 +21,16 @@ OAK_DEBUG_VAR(OakDocumentView);
 static NSString* const kBookmarksColumnIdentifier = @"bookmarks";
 static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 
+@interface OakDisableAccessibilityScrollView : NSScrollView
+@end
+
+@implementation OakDisableAccessibilityScrollView
+- (BOOL)accessibilityIsIgnored
+{
+	return YES;
+}
+@end
+
 @interface OakDocumentView ()
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
 @property (nonatomic, retain) NSDictionary* gutterImages;
@@ -89,7 +99,7 @@ private:
 		[gutterView insertColumnWithIdentifier:kBookmarksColumnIdentifier atPosition:0 dataSource:self delegate:self];
 		[gutterView insertColumnWithIdentifier:kFoldingsColumnIdentifier atPosition:2 dataSource:self delegate:self];
 
-		gutterScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		gutterScrollView = [[OakDisableAccessibilityScrollView alloc] initWithFrame:NSZeroRect];
 		gutterScrollView.borderType   = NSNoBorder;
 		gutterScrollView.documentView = gutterView;
 		[self addSubview:gutterScrollView];
