@@ -353,7 +353,7 @@ namespace document
 	{
 		WATCH_LEAKS(scanner_t);
 
-		scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links = false, bool depth_first = false);
+		scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links = false, bool depth_first = false, bool includeUntitled = true);
 		~scanner_t ();
 
 		bool is_running () const { return is_running_flag; }

@@ -1231,16 +1231,19 @@ namespace document
 		return res;
 	}
 
-	scanner_t::scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links, bool depth_first) : path(path), glob(glob), follow_links(follow_links), depth_first(depth_first), is_running_flag(true), should_stop_flag(false)
+	scanner_t::scanner_t (std::string const& path, path::glob_list_t const& glob, bool follow_links, bool depth_first, bool includeUntitled) : path(path), glob(glob), follow_links(follow_links), depth_first(depth_first), is_running_flag(true), should_stop_flag(false)
 	{
 		D(DBF_Document_Scanner, bug("%s, links %s\n", path.c_str(), BSTR(follow_links)););
 
-		document_tracker_t::lock_t lock(&document::documents);
-		iterate(pair, document::documents.documents)
+		if(includeUntitled)
 		{
-			document_ptr doc = pair->second.lock();
-			if(doc && doc->path() == NULL_STR)
-				documents.push_back(doc);
+			document_tracker_t::lock_t lock(&document::documents);
+			iterate(pair, document::documents.documents)
+			{
+				document_ptr doc = pair->second.lock();
+				if(doc && doc->path() == NULL_STR)
+					documents.push_back(doc);
+			}
 		}
 
 		struct bootstrap_t { static void* main (void* arg) { ((scanner_t*)arg)->thread_main(); return NULL; } };
