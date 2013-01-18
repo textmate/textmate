@@ -18,7 +18,7 @@
 #import <OakTextView/OakDocumentView.h>
 #import <OakFileBrowser/OakFileBrowser.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
-#import <OakFilterList/OakFileChooser.h>
+#import <OakFilterList/FileChooser.h>
 #import <OakFilterList/SymbolChooser.h>
 #import <OakSystem/application.h>
 #import <Find/Find.h>
@@ -70,7 +70,6 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) NSString*                   projectPath;
 
 @property (nonatomic) OakFilterWindowController*  filterWindowController;
-@property (nonatomic) NSUInteger                  fileChooserSourceIndex;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 
@@ -1358,8 +1357,6 @@ namespace
 	{
 		if(_filterWindowController)
 		{
-			if(self.fileChooserSourceIndex == NSNotFound)
-				self.fileChooserSourceIndex = [(OakFileChooser*)self.filterWindowController.dataSource sourceIndex];
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
 			_filterWindowController.target = nil;
 			[_filterWindowController close];
@@ -1431,26 +1428,9 @@ namespace
 // = OakFileChooser =
 // ==================
 
-static std::string file_chooser_glob (std::string const& path)
-{
-	settings_t const& settings = settings_for_path(NULL_STR, "", path);
-	std::string const propertyKeys[] = { kSettingsIncludeFilesInFileChooserKey, kSettingsIncludeInFileChooserKey, kSettingsIncludeFilesKey, kSettingsIncludeKey };
-	iterate(key, propertyKeys)
-	{
-		if(settings.has(*key))
-			return settings.get(*key, NULL_STR);
-	}
-	return "*";
-}
-
 - (IBAction)goToFile:(id)sender
 {
-	self.filterWindowController = [OakFilterWindowController new];
-
-	OakFileChooser* dataSource = [OakFileChooser fileChooserWithPath:(self.fileBrowser.path ?: [NSString stringWithCxxString:[self selectedDocument]->path()] ?: self.projectPath ?: NSHomeDirectory()) projectPath:self.projectPath ?: NSHomeDirectory()];
-	dataSource.excludeDocumentWithIdentifier = [NSString stringWithCxxString:[self selectedDocument]->identifier()];
-	dataSource.sourceIndex                   = self.fileChooserSourceIndex;
-	dataSource.globString                    = [NSString stringWithCxxString:file_chooser_glob(to_s(dataSource.path))];
+	FileChooser* fc = [FileChooser new];
 
 	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
 	{
@@ -1459,30 +1439,19 @@ static std::string file_chooser_glob (std::string const& path)
 			dataSource.filterString = entry.string;
 	}
 
-	self.filterWindowController.dataSource              = dataSource;
-	self.filterWindowController.target                  = self;
-	self.filterWindowController.allowsMultipleSelection = YES;
-	self.filterWindowController.action                  = @selector(fileChooserDidSelectItems:);
-	self.filterWindowController.accessoryAction         = @selector(fileChooserDidDescend:);
-	self.fileChooserSourceIndex = NSNotFound;
-	[self.filterWindowController showWindowRelativeToWindow:self.window];
+	fc.openDocuments   = _documents;
+	fc.currentDocument = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
+	fc.target          = self;
+	fc.action          = @selector(fileChooserDidSelectItems:);
+	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
+
+	[fc showWindowRelativeToWindow:self.window];
 }
 
-- (void)fileChooserDidSelectItems:(OakFilterWindowController*)sender
-{
-	[self openItems:[sender selectedItems] closingOtherTabs:OakIsAlternateKeyOrMouseEvent()];
-}
-
-- (void)fileChooserDidDescend:(id)sender
+- (void)fileChooserDidSelectItems:(FileChooser*)sender
 {
 	ASSERT([sender respondsToSelector:@selector(selectedItems)]);
-	ASSERT([[sender selectedItems] count] == 1);
-
-	NSString* documentIdentifier = [[[sender selectedItems] lastObject] objectForKey:@"identifier"];
-	self.fileChooserSourceIndex = [(OakFileChooser*)self.filterWindowController.dataSource sourceIndex];
-	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocument:document::find(to_s(documentIdentifier))];
-	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
-	self.filterWindowController.sendActionOnSingleClick = YES;
+	[self openItems:[sender selectedItems] closingOtherTabs:OakIsAlternateKeyOrMouseEvent()];
 }
 
 // ===========
