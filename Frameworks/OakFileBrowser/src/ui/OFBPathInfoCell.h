@@ -1,7 +1,7 @@
 #import <OakAppKit/OakImageAndTextCell.h>
 
 enum {
-	OFBPathInfoCellHitCloseButton = (12 << 1),
+	OFBPathInfoCellHitCloseButton = (1 << 12),
 };
 
 @interface OFBPathInfoCell : OakImageAndTextCell
