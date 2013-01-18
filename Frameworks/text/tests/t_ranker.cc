@@ -18,6 +18,11 @@ public:
 		TS_ASSERT_LESS_THAN(oak::rank("paste", "Encrypt With Password — Text"), oak::rank("paste", "Paste Selection Online — TextMate"));
 	}
 
+	void test_fullmatch ()
+	{
+		TS_ASSERT_LESS_THAN(oak::rank("rmate", "RMateServer.cc"), oak::rank("rmate", "rmate"));
+	}
+
 	void test_ranker ()
 	{
 		static std::string const files[] =

@@ -210,6 +210,12 @@ namespace oak
 			return 1;
 		else if(!is_subset(filter, candidate))
 			return 0;
+		else if(filter == candidate)
+		{
+			if(out)
+				out->push_back(std::make_pair(0, filter.size()));
+			return 1;
+		}
 		return calculate_rank(filter, candidate, out);
 	}
 
