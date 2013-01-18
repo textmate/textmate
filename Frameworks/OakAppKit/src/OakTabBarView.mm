@@ -465,8 +465,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	else if([action isEqualToString:NSAccessibilityShowMenuAction])
 	{
 		self.tabBarView.tag = self.index;
-		NSRect rect = [self screenRect];
-		[self.tabBarView showMenu:[self.tabBarView.delegate menuForTabBarView:self.tabBarView] inRect:rect withSelectedIndex:-1 font:[NSFont menuFontOfSize:[NSFont systemFontSize]] popup:NO];
+		if([self.tabBarView.delegate respondsToSelector:@selector(menuForTabBarView:)])
+			[[self.tabBarView.delegate menuForTabBarView:self.tabBarView] popUpMenuPositioningItem:nil atLocation:self.rect.origin inView:self.tabBarView];
 	}
 	else
 	{
