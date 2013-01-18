@@ -1434,9 +1434,9 @@ namespace
 
 	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
 	{
-		std::string str = [entry.string UTF8String] ?: "";
-		if(regexp::search("\\A.*?\\..*?:\\d+\\z", str.data(), str.data() + str.size()))
-			dataSource.filterString = entry.string;
+		std::string str = to_s(entry.string);
+		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str.data(), str.data() + str.size()))
+			fc.filterString = entry.string;
 	}
 
 	fc.openDocuments   = _documents;
