@@ -1,7 +1,9 @@
 #import "FileChooser.h"
 #import "OakAbbreviations.h"
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakFileIconImage.h>
 #import <OakFoundation/NSString Additions.h>
+#import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
 #import <text/format.h>
 #import <text/parse.h>
@@ -111,6 +113,7 @@ namespace
 
 		std::vector<std::pair<size_t, size_t>> cover;
 		NSNumber* tableview_item = nil;
+		NSImage* image = nil;
 	};
 }
 
@@ -170,8 +173,14 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_searchField.delegate = self;
 		[_searchField.cell setScrollable:YES];
 
+		NSCell* cell = [OFBPathInfoCell new];
+		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
+
+		NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"name"];
+		[tableColumn setDataCell:cell];
+
 		_tableView = [[OakNonActivatingTableView alloc] initWithFrame:NSZeroRect];
-		[_tableView addTableColumn:[[NSTableColumn alloc] initWithIdentifier:@"name"]];
+		[_tableView addTableColumn:tableColumn];
 		_tableView.headerView              = nil;
 		_tableView.focusRingType           = NSFocusRingTypeNone;
 		_tableView.allowsEmptySelection    = NO;
@@ -651,6 +660,30 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		[res addObject:item];
 	}
 	return res;
+}
+
+- (void)tableView:(NSTableView*)aTableView willDisplayCell:(OFBPathInfoCell*)cell forTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
+{
+	if(![aTableColumn.identifier isEqualToString:@"name"])
+		return;
+
+	NSNumber* index = _items[rowIndex];
+	document_record_t& record = _records[index.unsignedIntValue];
+
+	cell.objectValue = [self tableView:aTableView objectValueForTableColumn:aTableColumn row:rowIndex];
+	if([cell respondsToSelector:@selector(setImage:)])
+	{
+		if(!record.image)
+			record.image = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:record.full_path] isModified:NO];
+		[cell setImage:record.image];
+	}
+
+	if([cell respondsToSelector:@selector(setIsOpen:)])
+	{
+		std::set<oak::uuid_t> uuids;
+		std::transform(_openDocuments.begin(), _openDocuments.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+		cell.isOpen = uuids.find(record.identifier) != uuids.end();
+	}
 }
 
 // =================
