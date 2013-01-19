@@ -498,13 +498,8 @@ namespace document
 
 			if(scm::info_ptr info = scm::info(path::parent(path())))
 			{
-				std::string const& branch = info->branch();
-				if(branch != NULL_STR)
-					map["TM_SCM_BRANCH"] = branch;
-
-				std::string const& name = info->scm_name();
-				if(name != NULL_STR)
-					map["TM_SCM_NAME"] = name;
+				for(auto pair : info->variables())
+					map.insert(pair);
 			}
 		}
 

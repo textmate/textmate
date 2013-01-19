@@ -97,9 +97,9 @@ namespace
 	{
 		if(scm::info_ptr info = scm::info(dir))
 		{
-			std::string const branch = info->branch();
-			if(branch != NULL_STR)
-				res.push_back("attr.scm.branch." + branch);
+			auto scmVariables = info->variables();
+			if(scmVariables.find("TM_SCM_BRANCH") != scmVariables.end())
+				res.push_back("attr.scm.branch." + scmVariables["TM_SCM_BRANCH"]);
 
 			if(path != NULL_STR)
 			{
@@ -158,25 +158,16 @@ namespace file
 	std::map<std::string, std::string> variables (std::string const& path)
 	{
 		std::map<std::string, std::string> map;
-		// map["TM_DOCUMENT_UUID"] = to_s(identifier());
 		if(path != NULL_STR)
 		{
+			if(scm::info_ptr info = scm::info(path::parent(path)))
+				map = info->variables();
+
 			map["TM_DISPLAYNAME"] = path::display_name(path);
 			map["TM_FILEPATH"]    = path;
 			map["TM_FILENAME"]    = path::name(path);
 			map["TM_DIRECTORY"]   = path::parent(path);
 			map["PWD"]            = path::parent(path);
-
-			if(scm::info_ptr info = scm::info(path::parent(path)))
-			{
-				std::string const& branch = info->branch();
-				if(branch != NULL_STR)
-					map["TM_SCM_BRANCH"] = branch;
-
-				std::string const& name = info->scm_name();
-				if(name != NULL_STR)
-					map["TM_SCM_NAME"] = name;
-			}
 		}
 		else
 		{

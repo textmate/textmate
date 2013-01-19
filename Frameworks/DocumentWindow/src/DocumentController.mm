@@ -901,15 +901,7 @@ namespace
 	if(doc->path() == NULL_STR)
 	{
 		if(scm::info_ptr info = scm::info(docDirectory))
-		{
-			std::string const& branch = info->branch();
-			if(branch != NULL_STR)
-				map["TM_SCM_BRANCH"] = branch;
-
-			std::string const& name = info->scm_name();
-			if(name != NULL_STR)
-				map["TM_SCM_NAME"] = name;
-		}
+			map = info->variables();
 	}
 
 	if(NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(doc->path())])
