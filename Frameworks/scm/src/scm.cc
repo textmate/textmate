@@ -111,6 +111,15 @@ namespace scm
 		return res != _file_status.end() ? res->second : status::none;
 	}
 
+	std::map<std::string, std::string> info_t::variables () const
+	{
+		auto res = std::map<std::string, std::string>{ { "TM_SCM_NAME", scm_name() } };
+		std::string const branchName = branch();
+		if(branchName != NULL_STR)
+			res.insert(std::make_pair("TM_SCM_BRANCH", branchName));
+		return res;
+	}
+
 	status_map_t info_t::files_with_status (int mask)
 	{
 		setup();

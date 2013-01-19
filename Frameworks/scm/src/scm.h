@@ -6,7 +6,6 @@
 #include <plist/date.h>
 #include <oak/debug.h>
 #include <oak/callbacks.h>
-#include <oak/server.h>
 #include <oak/duration.h>
 
 namespace scm
@@ -33,6 +32,7 @@ namespace scm
 		std::string branch () const;
 		bool tracks_directories () const;
 		status::type status (std::string const& path);
+		std::map<std::string, std::string> variables () const;
 		status_map_t files_with_status (int mask);
 
 		void add_callback (callback_t* cb);

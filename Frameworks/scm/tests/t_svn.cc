@@ -39,6 +39,10 @@ public:
 
 			TS_ASSERT_EQUALS(expectedBranch, info->branch());
 
+			auto vars = info->variables();
+			TS_ASSERT_EQUALS(vars["TM_SCM_NAME"],   "svn");
+			TS_ASSERT_EQUALS(vars["TM_SCM_BRANCH"], expectedBranch);
+
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "clean.txt"))),     scm::status::none);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "ignored.txt"))),   scm::status::ignored);
 			TS_ASSERT_EQUALS(info->status(jail.path(path::join(wcName, "modified.txt"))),  scm::status::modified);

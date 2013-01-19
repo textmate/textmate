@@ -21,6 +21,10 @@ public:
 
 		if(scm::info_ptr info = scm::info(jail.path("clean.txt")))
 		{
+			auto vars = info->variables();
+			TS_ASSERT_EQUALS(vars["TM_SCM_NAME"],   "hg");
+			TS_ASSERT_EQUALS(vars["TM_SCM_BRANCH"], "default");
+
 			TS_ASSERT_EQUALS(info->status(jail.path("clean.txt")),     scm::status::none);
 			TS_ASSERT_EQUALS(info->status(jail.path("ignored.txt")),   scm::status::ignored);
 			TS_ASSERT_EQUALS(info->status(jail.path("modified.txt")),  scm::status::modified);

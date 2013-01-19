@@ -31,6 +31,12 @@ class git_tests : public CxxTest::TestSuite
 			return info->status(jail.path(path));
 		}
 
+		std::string variable (std::string const& var) const
+		{
+			auto vars = info->variables();
+			return vars.find(var) != vars.end() ? vars[var] : NULL_STR;
+		}
+
 	private:
 		test::jail_t jail;
 		scm::info_ptr info;
@@ -40,6 +46,13 @@ public:
 	// =================
 	// = Folder Status =
 	// =================
+
+	void test_variables ()
+	{
+		setup_t wc("true");
+		TS_ASSERT_EQUALS(wc.variable("TM_SCM_NAME"),   "git");
+		TS_ASSERT_EQUALS(wc.variable("TM_SCM_BRANCH"), "master");
+	}
 
 	void test_empty_folder ()
 	{
