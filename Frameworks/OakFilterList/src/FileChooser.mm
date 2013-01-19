@@ -141,10 +141,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 @interface FileChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
-	std::vector<document::document_ptr> _openDocuments;
-	oak::uuid_t                         _currentDocument;
-	std::vector<document_record_t>      _records;
-	document::scanner_ptr               _scanner;
+	std::vector<document::document_ptr>           _openDocuments;
+	std::map<oak::uuid_t, document::document_ptr> _openDocumentsMap;
+	oak::uuid_t                                   _currentDocument;
+	std::vector<document_record_t>                _records;
+	document::scanner_ptr                         _scanner;
 }
 @property (nonatomic) NSWindow*            window;
 @property (nonatomic) NSSearchField*       searchField;
@@ -301,11 +302,21 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (BOOL)allowsMultipleSelection               { return _tableView.allowsMultipleSelection; }
 - (void)setAllowsMultipleSelection:(BOOL)flag { _tableView.allowsMultipleSelection = flag; }
 
-- (std::vector<document::document_ptr> const&)openDocuments                       { return _openDocuments; }
-- (void)setOpenDocuments:(std::vector<document::document_ptr> const&)newDocuments { _openDocuments = newDocuments; [self reload]; }
-
 - (oak::uuid_t const&)currentDocument                                             { return _currentDocument; }
 - (void)setCurrentDocument:(oak::uuid_t const&)newDocument                        { _currentDocument = newDocument; [self reload]; }
+
+- (std::vector<document::document_ptr> const&)openDocuments
+{
+	return _openDocuments;
+}
+
+- (void)setOpenDocuments:(std::vector<document::document_ptr> const&)newDocuments
+{
+	_openDocuments = newDocuments;
+	_openDocumentsMap.clear();
+	std::transform(_openDocuments.begin(), _openDocuments.end(), inserter(_openDocumentsMap, _openDocumentsMap.end()), [](document::document_ptr const& doc){ return std::make_pair(doc->identifier(), doc); });
+	[self reload];
+}
 
 // =================
 // = Filter String =
@@ -324,20 +335,16 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)addRecordsForDocuments:(std::vector<document::document_ptr> const&)documents
 {
 	std::string const path = to_s(_path);
+	std::set<std::string> openPaths;
+	std::transform(_openDocuments.begin(), _openDocuments.end(), inserter(openPaths, openPaths.end()), [](document::document_ptr const& doc){ return doc->path(); });
 
-	std::set<oak::uuid_t> uuids;
-	std::set<std::string> paths;
-	if(!_records.empty())
-	{
-		std::transform(_openDocuments.begin(), _openDocuments.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
-		std::transform(_openDocuments.begin(), _openDocuments.end(), std::insert_iterator<decltype(paths)>(paths, paths.begin()), [](document::document_ptr const& doc){ return doc->path(); });
-	}
+	bool insertAll = _records.empty();
 
 	NSUInteger firstDirty = _records.size();
 	NSUInteger index      = _records.size();
 	for(auto doc : documents)
 	{
-		if(uuids.find(doc->identifier()) == uuids.end() && paths.find(doc->path()) == paths.end())
+		if(insertAll || (_openDocumentsMap.find(doc->identifier()) == _openDocumentsMap.end() && openPaths.find(doc->path()) == openPaths.end()))
 		{
 			document_record_t record(doc);
 			record.place_last     = doc->identifier() == _currentDocument;
@@ -670,20 +677,20 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	NSNumber* index = _items[rowIndex];
 	document_record_t& record = _records[index.unsignedIntValue];
 
+	auto docIter = _openDocumentsMap.find(record.identifier);
+	BOOL isOpen = docIter != _openDocumentsMap.end();
+	BOOL isModified = isOpen && docIter->second->is_modified();
+
 	cell.objectValue = [self tableView:aTableView objectValueForTableColumn:aTableColumn row:rowIndex];
 	if([cell respondsToSelector:@selector(setImage:)])
 	{
 		if(!record.image)
-			record.image = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:record.full_path] isModified:NO];
+			record.image = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:record.full_path] isModified:isModified];
 		[cell setImage:record.image];
 	}
 
 	if([cell respondsToSelector:@selector(setIsOpen:)])
-	{
-		std::set<oak::uuid_t> uuids;
-		std::transform(_openDocuments.begin(), _openDocuments.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
-		cell.isOpen = uuids.find(record.identifier) != uuids.end();
-	}
+		cell.isOpen = isOpen;
 }
 
 // =================
