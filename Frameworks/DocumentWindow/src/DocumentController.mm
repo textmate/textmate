@@ -921,7 +921,24 @@ namespace
 
 - (NSString*)scopeAttributes
 {
-	return self.pathAttributes;
+	if(!_scmInfo)
+		return self.pathAttributes;
+
+	NSMutableString* res = [self.pathAttributes mutableCopy];
+
+	auto vars = _scmInfo->variables();
+	auto iter = vars.find("TM_SCM_BRANCH");
+	if(iter != vars.end())
+		[res appendFormat:@" attr.scm.branch.%s", iter->second.c_str()];
+
+	if(self.representedFile)
+	{
+		scm::status::type status = _scmInfo->status(to_s(self.representedFile));
+		if(status != scm::status::unknown)
+			[res appendFormat:@" attr.scm.status.%s", to_s(status).c_str()];
+	}
+
+	return res;
 }
 
 // ==============

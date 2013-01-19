@@ -92,23 +92,6 @@ namespace
 			}
 		}
 	}
-
-	static void scm_attributes (std::string const& path, std::string const& dir, std::vector<std::string>& res)
-	{
-		if(scm::info_ptr info = scm::info(dir))
-		{
-			auto scmVariables = info->variables();
-			if(scmVariables.find("TM_SCM_BRANCH") != scmVariables.end())
-				res.push_back("attr.scm.branch." + scmVariables["TM_SCM_BRANCH"]);
-
-			if(path != NULL_STR)
-			{
-				scm::status::type status = info->status(path);
-				if(status != scm::status::unknown)
-					res.push_back("attr.scm.status." + to_s(status));
-			}
-		}
-	}
 }
 
 namespace file
@@ -148,7 +131,6 @@ namespace file
 
 		std::string const parentDir = dir == NULL_STR ? path::parent(path) : dir;
 		directory_attributes(parentDir, res);
-		scm_attributes(path, parentDir, res);
 
 		res.push_back(settings_for_path(path, text::join(res, " "), parentDir).get(kSettingsScopeAttributesKey, ""));
 		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
