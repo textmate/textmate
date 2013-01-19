@@ -181,7 +181,7 @@ namespace
 	static size_t merge_documents_splitting_at (std::vector<document::document_ptr> const& oldDocuments, std::vector<document::document_ptr> const& newDocuments, size_t splitAt, std::vector<document::document_ptr>& out)
 	{
 		std::set<oak::uuid_t> uuids;
-		std::transform(newDocuments.begin(), newDocuments.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+		std::transform(newDocuments.begin(), newDocuments.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 		splitAt = std::min(splitAt, oldDocuments.size());
 		std::copy_if(oldDocuments.begin(), oldDocuments.begin() + splitAt, back_inserter(out), [&uuids](document::document_ptr const& doc){ return uuids.find(doc->identifier()) == uuids.end(); });
@@ -359,7 +359,7 @@ namespace
 	else
 	{
 		std::set<oak::uuid_t> uuids;
-		std::transform(self.documents.begin(), self.documents.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+		std::transform(self.documents.begin(), self.documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 		iterate(document, someDocuments)
 		{
@@ -456,7 +456,7 @@ namespace
 	}
 
 	std::set<oak::uuid_t> uuids;
-	std::transform(documentsToClose.begin(), documentsToClose.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+	std::transform(documentsToClose.begin(), documentsToClose.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 	std::vector<document::document_ptr> newDocuments;
 	NSUInteger newSelectedTabIndex = self.selectedTabIndex;
@@ -679,7 +679,7 @@ namespace
 	if(closeOtherTabsFlag)
 	{
 		std::set<oak::uuid_t> uuids;
-		std::transform(documents.begin(), documents.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+		std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 		NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
 		for(size_t i = 0; i < newDocuments.size(); ++i)
@@ -695,7 +695,7 @@ namespace
 		if(self.tabBarView && excessTabs > 0)
 		{
 			std::set<oak::uuid_t> uuids;
-			std::transform(documents.begin(), documents.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+			std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 			std::multimap<oak::date_t, size_t> ranked;
 			for(size_t i = 0; i < newDocuments.size(); ++i)
@@ -1890,7 +1890,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			// =========================================
 
 			std::set<oak::uuid_t> uuids;
-			std::transform(documents.begin(), documents.end(), std::insert_iterator<decltype(uuids)>(uuids, uuids.begin()), [](document::document_ptr const& doc){ return doc->identifier(); });
+			std::transform(documents.begin(), documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
 			for(DocumentController* candidate in SortedControllers())
 			{
@@ -1909,7 +1909,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 			std::copy_if(documents.begin(), documents.end(), back_inserter(documentsWithPath), [](document::document_ptr const& doc){ return doc->path() != NULL_STR; });
 
 			std::set<std::string> parents;
-			std::transform(documentsWithPath.begin(), documentsWithPath.end(), std::insert_iterator<decltype(parents)>(parents, parents.begin()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
+			std::transform(documentsWithPath.begin(), documentsWithPath.end(), inserter(parents, parents.end()), [](document::document_ptr const& doc){ return path::parent(doc->path()); });
 
 			std::map<size_t, DocumentController*> candidates;
 			for(DocumentController* candidate in SortedControllers())

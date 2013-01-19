@@ -1026,7 +1026,7 @@ namespace ng
 			case kTranspose:
 			{
 				std::multimap<range_t, std::string> replacements;
-				auto inserter = std::insert_iterator<decltype(replacements)>(replacements, replacements.begin());
+				auto inserter = std::inserter(replacements, replacements.end());
 				if(_selections.size() > 1 && not_empty(_buffer, _selections))
 				{
 					std::multiset<range_t> ranges(_selections.begin(), _selections.end());
