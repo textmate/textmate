@@ -337,8 +337,8 @@ namespace
 	else
 	{
 		std::string body = "";
-		iterate(document, someDocuments)
-			body += text::format("• “%s”\n", (*document)->display_name().c_str());
+		for(auto document : someDocuments)
+			body += text::format("• “%s”\n", document->display_name().c_str());
 		[alert setMessageText:@"Do you want to save documents with changes?"];
 		[alert setInformativeText:[NSString stringWithCxxString:body]];
 	}
@@ -346,14 +346,16 @@ namespace
 	bool windowModal = true;
 	if(someDocuments.size() == 1)
 	{
-		citerate(document, self.documents)
+		NSUInteger index = 0;
+		for(auto document : self.documents)
 		{
-			if((*document)->identifier() == someDocuments.front()->identifier())
+			if(*document == *someDocuments.front())
 			{
-				self.selectedTabIndex = document - self.documents.begin();
-				[self openAndSelectDocument:*document];
+				self.selectedTabIndex = index;
+				[self openAndSelectDocument:document];
 				break;
 			}
+			++index;
 		}
 	}
 	else
@@ -361,9 +363,9 @@ namespace
 		std::set<oak::uuid_t> uuids;
 		std::transform(self.documents.begin(), self.documents.end(), inserter(uuids, uuids.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
 
-		iterate(document, someDocuments)
+		for(auto document : someDocuments)
 		{
-			if(uuids.find((*document)->identifier()) == uuids.end())
+			if(uuids.find(document->identifier()) == uuids.end())
 				windowModal = false;
 		}
 	}
@@ -461,11 +463,11 @@ namespace
 	std::vector<document::document_ptr> newDocuments;
 	NSUInteger newSelectedTabIndex = self.selectedTabIndex;
 	oak::uuid_t const selectedUUID = [self documents][self.selectedTabIndex]->identifier();
-	citerate(document, self.documents)
+	for(auto document : self.documents)
 	{
-		oak::uuid_t const& uuid = (*document)->identifier();
+		oak::uuid_t const& uuid = document->identifier();
 		if(uuids.find(uuid) == uuids.end())
-			newDocuments.push_back((*document));
+			newDocuments.push_back(document);
 		if(selectedUUID == uuid)
 			newSelectedTabIndex = newDocuments.empty() ? 0 : newDocuments.size() - 1;
 	}
@@ -825,10 +827,10 @@ namespace
 - (IBAction)saveAllDocuments:(id)sender
 {
 	std::vector<document::document_ptr> documentsToSave;
-	citerate(document, self.documents)
+	for(auto document : self.documents)
 	{
-		if((*document)->is_modified())
-			documentsToSave.push_back(*document);
+		if(document->is_modified())
+			documentsToSave.push_back(document);
 	}
 	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:new save_callback_t(self, documentsToSave.size())];
 }
@@ -936,10 +938,10 @@ namespace
 
 - (void)setDocuments:(std::vector<document::document_ptr> const&)newDocuments
 {
-	iterate(doc, newDocuments)
-		[self trackDocument:*doc];
-	iterate(doc, _documents)
-		[self untrackDocument:*doc];
+	for(auto document : newDocuments)
+		[self trackDocument:document];
+	for(auto document : _documents)
+		[self untrackDocument:document];
 
 	_documents = newDocuments;
 
@@ -1229,12 +1231,12 @@ namespace
 {
 	NSMutableArray* openURLs     = [NSMutableArray array];
 	NSMutableArray* modifiedURLs = [NSMutableArray array];
-	citerate(document, self.documents)
+	for(auto document : self.documents)
 	{
-		if((*document)->path() != NULL_STR)
-			[openURLs addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:(*document)->path()]]];
-		if((*document)->path() != NULL_STR && (*document)->is_modified())
-			[modifiedURLs addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:(*document)->path()]]];
+		if(document->path() != NULL_STR)
+			[openURLs addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:document->path()]]];
+		if(document->path() != NULL_STR && document->is_modified())
+			[modifiedURLs addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:document->path()]]];
 	}
 	self.fileBrowser.openURLs     = openURLs;
 	self.fileBrowser.modifiedURLs = modifiedURLs;
@@ -1502,10 +1504,10 @@ namespace
 	std::string const documentBase = path::strip_extensions(documentName);
 
 	std::set<std::string> candidates(&documentName, &documentName + 1);
-	citerate(doc, self.documents)
+	for(auto document : self.documents)
 	{
-		if(documentDir == path::parent((*doc)->path()) && documentBase == path::strip_extensions(path::name((*doc)->path())))
-			candidates.insert(path::name((*doc)->path()));
+		if(documentDir == path::parent(document->path()) && documentBase == path::strip_extensions(path::name(document->path())))
+			candidates.insert(path::name(document->path()));
 	}
 
 	citerate(entry, path::entries(documentDir))
@@ -1553,14 +1555,14 @@ namespace
 	}
 
 	int i = 0;
-	citerate(document, self.documents)
+	for(auto document : self.documents)
 	{
-		NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*document)->display_name()] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:i < 10 ? [NSString stringWithFormat:@"%c", '0' + ((i+1) % 10)] : @""];
+		NSMenuItem* item = [aMenu addItemWithTitle:[NSString stringWithCxxString:document->display_name()] action:@selector(takeSelectedTabIndexFrom:) keyEquivalent:i < 10 ? [NSString stringWithFormat:@"%c", '0' + ((i+1) % 10)] : @""];
 		item.tag = i;
-		item.toolTip = [[NSString stringWithCxxString:(*document)->path()] stringByAbbreviatingWithTildeInPath];
+		item.toolTip = [[NSString stringWithCxxString:document->path()] stringByAbbreviatingWithTildeInPath];
 		if(i == self.selectedTabIndex)
 			[item setState:NSOnState];
-		else if((*document)->is_modified())
+		else if(document->is_modified())
 			[item setModifiedState:YES];
 		++i;
 	}
@@ -1777,23 +1779,23 @@ static NSUInteger DisableSessionSavingCount = 0;
 		res[@"fileBrowserWidth"]   = @(controller.fileBrowserWidth);
 
 		NSMutableArray* docs = [NSMutableArray array];
-		citerate(document, controller.documents)
+		for(auto document : controller.documents)
 		{
-			if(!includeUntitled && ((*document)->path() == NULL_STR || !path::exists((*document)->path())))
+			if(!includeUntitled && (document->path() == NULL_STR || !path::exists(document->path())))
 				continue;
 
 			NSMutableDictionary* doc = [NSMutableDictionary dictionary];
-			if((*document)->is_modified() || (*document)->path() == NULL_STR)
+			if(document->is_modified() || document->path() == NULL_STR)
 			{
-				doc[@"identifier"] = [NSString stringWithCxxString:(*document)->identifier()];
-				if((*document)->is_open())
-					(*document)->backup();
+				doc[@"identifier"] = [NSString stringWithCxxString:document->identifier()];
+				if(document->is_open())
+					document->backup();
 			}
-			if((*document)->path() != NULL_STR)
-				doc[@"path"] = [NSString stringWithCxxString:(*document)->path()];
-			if((*document)->display_name() != NULL_STR)
-				doc[@"displayName"] = [NSString stringWithCxxString:(*document)->display_name()];
-			if(*document == controller.selectedDocument)
+			if(document->path() != NULL_STR)
+				doc[@"path"] = [NSString stringWithCxxString:document->path()];
+			if(document->display_name() != NULL_STR)
+				doc[@"displayName"] = [NSString stringWithCxxString:document->display_name()];
+			if(document == controller.selectedDocument)
 				doc[@"selected"] = @YES;
 			[docs addObject:doc];
 		}
@@ -1839,9 +1841,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 		if(delegate.fileBrowserVisible && aDocument->path() != NULL_STR && aDocument->path().find(to_s(delegate.projectPath)) == 0)
 			return delegate;
 
-		citerate(document, delegate.documents)
+		for(auto document : delegate.documents)
 		{
-			if(**document == *aDocument)
+			if(*document == *aDocument)
 				return delegate;
 		}
 	}
@@ -1894,9 +1896,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 			for(DocumentController* candidate in SortedControllers())
 			{
-				citerate(document, candidate.documents)
+				for(auto document : candidate.documents)
 				{
-					if(uuids.find((*document)->identifier()) != uuids.end())
+					if(uuids.find(document->identifier()) != uuids.end())
 						return candidate;
 				}
 			}
