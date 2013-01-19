@@ -45,6 +45,7 @@ namespace scm
 		std::string _wc_path;
 		driver_t const* _driver;
 		status_map_t _file_status;
+		std::map<std::string, std::string> _variables;
 		oak::date_t _updated;
 		fs::snapshot_t _snapshot;
 
@@ -53,7 +54,7 @@ namespace scm
 		void callback (std::set<std::string> const& pathsChangedOnDisk);
 		oak::callbacks_t<callback_t> _callbacks;
 
-		static void update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status);
+		static void update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status, std::map<std::string, std::string> const& variables);
 	};
 
 	PUBLIC info_ptr info (std::string const& dir);

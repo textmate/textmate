@@ -88,9 +88,9 @@ namespace scm
 		ASSERTF(path::is_directory(_wc_path) || !path::exists(_wc_path) || _wc_path == NULL_STR, "Path: %s\n", _wc_path.c_str());
 	}
 
-	std::string info_t::scm_name () const    { return _driver->name(); }
+	std::string info_t::scm_name () const    { auto vars = variables(); auto iter = vars.find("TM_SCM_NAME"); return iter != vars.end() ? iter->second : NULL_STR; }
 	std::string info_t::path () const        { return _wc_path; }
-	std::string info_t::branch () const      { return _driver->branch_name(_wc_path); }
+	std::string info_t::branch () const      { auto vars = variables(); auto iter = vars.find("TM_SCM_BRANCH"); return iter != vars.end() ? iter->second : NULL_STR; }
 	bool info_t::tracks_directories () const { return _driver->tracks_directories(); }
 
 	void info_t::setup ()
@@ -99,6 +99,10 @@ namespace scm
 			return;
 
 		_file_status = _driver->status(_wc_path);
+		_variables = std::map<std::string, std::string>{
+			{ "TM_SCM_NAME",   _driver->name() },
+			{ "TM_SCM_BRANCH", _driver->branch_name(_wc_path) }
+		};
 		_watcher.reset(new scm::watcher_t(_wc_path, this));
 		_did_setup = true;
 	}
@@ -113,11 +117,8 @@ namespace scm
 
 	std::map<std::string, std::string> info_t::variables () const
 	{
-		auto res = std::map<std::string, std::string>{ { "TM_SCM_NAME", scm_name() } };
-		std::string const branchName = branch();
-		if(branchName != NULL_STR)
-			res.insert(std::make_pair("TM_SCM_BRANCH", branchName));
-		return res;
+		const_cast<info_t*>(this)->setup();
+		return _variables;
 	}
 
 	status_map_t info_t::files_with_status (int mask)
@@ -183,15 +184,19 @@ namespace scm
 			if(shouldCheck)
 			{
 				scm::status_map_t const status = _driver->status(_wc_path);
+				std::map<std::string, std::string> const variables{
+					{ "TM_SCM_NAME",   _driver->name() },
+					{ "TM_SCM_BRANCH", _driver->branch_name(_wc_path) }
+				};
 				fs::snapshot_t const snapshot = _driver->may_touch_filesystem() ? fs::snapshot_t(_wc_path) : fs::snapshot_t();
 				dispatch_async(dispatch_get_main_queue(), ^{
-					update_status(_wc_path, snapshot, status);
+					update_status(_wc_path, snapshot, status, variables);
 				});
 			}
 		});
 	}
 
-	void info_t::update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& newStatus)
+	void info_t::update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& newStatus, std::map<std::string, std::string> const& newVariables)
 	{
 		auto it = cache().find(path);
 		if(it != cache().end())
@@ -228,6 +233,7 @@ namespace scm
 			it->second->_updated     = oak::date_t::now();
 			it->second->_snapshot    = snapshot;
 			it->second->_file_status = newStatus;
+			it->second->_variables   = newVariables;
 
 			it->second->_callbacks(&callback_t::status_changed, *it->second, changedPaths);
 		}
