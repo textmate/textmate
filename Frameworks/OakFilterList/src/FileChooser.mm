@@ -595,9 +595,16 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		document_record_t const& record = _records[index.unsignedIntValue];
 
 		std::string prefix = record.full_path;
-		prefix = path::with_tilde(prefix.substr(0, prefix.size() - record.display.size()));
-		if(prefix.size() && prefix[prefix.size()-1] != '/')
-			prefix += '/';
+		if(prefix != NULL_STR)
+		{
+			prefix = path::with_tilde(prefix.substr(0, prefix.size() - record.display.size()));
+			if(prefix.size() && prefix[prefix.size()-1] != '/')
+				prefix += '/';
+		}
+		else // untitled file
+		{
+			prefix = "";
+		}
 
 		std::string path = prefix + record.display;
 		size_t offset = prefix.size();
