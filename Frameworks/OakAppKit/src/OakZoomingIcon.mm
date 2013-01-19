@@ -6,6 +6,8 @@
 	if(self = [super initWithContentRect:aRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO])
 	{
 		NSImageView* imageView = [[[NSImageView alloc] initWithFrame:aRect] autorelease];
+		icon = [[icon copy] autorelease];
+		[icon setSize:NSMakeSize(128, 128)];
 		[imageView setImage:icon];
 		[imageView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 		[self setContentView:imageView];

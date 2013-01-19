@@ -839,7 +839,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 
 	for(FSItem* item in itemsToAnimate)
-		[OakZoomingIcon zoomIcon:[OakFileIconImage fileIconImageWithPath:item.path size:NSMakeSize(128, 128)] fromRect:[self iconFrameForEntry:item]];
+		[OakZoomingIcon zoomIcon:item.icon fromRect:[self iconFrameForEntry:item]];
 	if([urlsToOpen count])
 		[_delegate fileBrowser:self openURLs:urlsToOpen];
 }
