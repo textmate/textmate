@@ -653,14 +653,22 @@ namespace path
 		});
 
 		std::vector<size_t> levels(paths.size());
-		for(size_t i = 0; i < v.size(); ++i)
+		for(size_t i = 0; i < v.size(); )
 		{
+			std::string const& current = paths[v[i]];
 			size_t above = 0, below = 0;
+
 			if(i != 0)
-				above = count_slashes(paths[v[i]], paths[v[i-1]]);
-			if(i != v.size()-1)
-				below = count_slashes(paths[v[i]], paths[v[i+1]]);
-			levels[v[i]] = std::max(above, below);
+				above = count_slashes(current, paths[v[i-1]]);
+
+			size_t j = i;
+			while(j < v.size() && current == paths[v[j]])
+				++j;
+			if(j < v.size())
+				below = count_slashes(current, paths[v[j]]);
+
+			for(; i < j; ++i)
+				levels[v[i]] = std::max(above, below);
 		}
 
 		return levels;

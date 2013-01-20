@@ -40,6 +40,34 @@ public:
 		run_test(paths3, "qux — a/baz");
 	}
 
+	void test_disambiguate_paths_duplicates ()
+	{
+		std::vector<std::string> paths{
+			"/Users/duff/Projects/Avian",
+			"/Users/duff/Projects/TextMate",
+			"/Users/duff/public/macromates_com",
+			"/Users/duff/Projects/macromates_com",
+			"/Users/duff/public/macromates_com",
+			"/Users/duff/Projects/api_textmate_org",
+			"/Users/duff/Library/Application Support/TextMate",
+			"/Users/duff/Projects/Avian",
+			"/Users/duff/build/public/macromates_com",
+		};
+
+		std::vector<size_t> parents = path::disambiguate(paths);
+		TS_ASSERT_EQUALS(parents.size(), paths.size());
+
+		TS_ASSERT_EQUALS(parents[0], 0);
+		TS_ASSERT_EQUALS(parents[1], 1);
+		TS_ASSERT_EQUALS(parents[2], 2);
+		TS_ASSERT_EQUALS(parents[3], 1);
+		TS_ASSERT_EQUALS(parents[4], 2);
+		TS_ASSERT_EQUALS(parents[5], 0);
+		TS_ASSERT_EQUALS(parents[6], 1);
+		TS_ASSERT_EQUALS(parents[7], 0);
+		TS_ASSERT_EQUALS(parents[8], 2);
+	}
+
 	void test_localisation ()
 	{
 		test::jail_t jail;
