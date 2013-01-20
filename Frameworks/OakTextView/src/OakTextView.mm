@@ -1446,16 +1446,11 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	ng::buffer_t const& buf = document->buffer();
 	if(!editor->has_selection())
 	{
-		size_t from = currnetIndex, to = currnetIndex;
-		while(0 < from && text::is_word_char(buf[from-1]))
-			from -= buf[from-1].size();
-		while(to < buf.size() && text::is_word_char(buf[to]))
-			to += buf[to].size();
-
-		if(from != to && ns::is_misspelled(buf.substr(from, to), buf.spelling_language(), buf.spelling_tag()))
+		ng::range_t wordRange = ng::extend(buf, ng::index_t(currnetIndex), kSelectionExtendToWord).last();
+		if(ns::is_misspelled(buf.substr(wordRange.min().index, wordRange.max().index), buf.spelling_language(), buf.spelling_tag()))
 		{
-			editor->set_selections(ng::range_t(from, to));
-			word = [NSString stringWithCxxString:buf.substr(from, to)];
+			editor->set_selections(wordRange);
+			word = [NSString stringWithCxxString:buf.substr(wordRange.min().index, wordRange.max().index)];
 		}
 	}
 	else
