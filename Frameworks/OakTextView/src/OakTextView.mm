@@ -1443,10 +1443,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	AUTO_REFRESH;
 	NSString* word = nil;
+	ng::buffer_t const& buf = document->buffer();
 	if(!editor->has_selection())
 	{
-		ng::buffer_t const& buf = document->buffer();
-
 		size_t from = currnetIndex, to = currnetIndex;
 		while(0 < from && text::is_word_char(buf[from-1]))
 			from -= buf[from-1].size();
@@ -1461,11 +1460,13 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 	else
 	{
-		typedef std::map<std::string, std::string> env;
-		env const& vars = editor->variables(env(), to_s([self scopeAttributes]));
-		env::const_iterator it = vars.find("TM_SELECTED_TEXT");
-		if(it != vars.end() && it->second.find_first_of(" \n\t") == std::string::npos && ns::is_misspelled(it->second, document->buffer().spelling_language(), document->buffer().spelling_tag()))
-			word = [NSString stringWithCxxString:it->second];
+		ng::ranges_t ranges = editor->ranges();
+		if(ranges.size() == 1)
+		{
+			std::string const str = buf.substr(ranges.first().min().index, ranges.first().max().index);
+			if(str.find_first_of(" \n\t") == std::string::npos && ns::is_misspelled(str, document->buffer().spelling_language(), document->buffer().spelling_tag()))
+				word = [NSString stringWithCxxString:str];
+		}
 	}
 	return word;
 }
