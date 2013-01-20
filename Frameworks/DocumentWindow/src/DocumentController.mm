@@ -1458,6 +1458,7 @@ namespace
 
 	fc.openDocuments   = _documents;
 	fc.currentDocument = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
+	fc.scmInfo         = _scmInfo;
 	fc.target          = self;
 	fc.action          = @selector(fileChooserDidSelectItems:);
 	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
