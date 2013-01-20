@@ -45,14 +45,7 @@ public:
 					document::document_ptr _document;
 				};
 
-				std::map<std::string, std::string> env;
-				bundles::item_ptr item = bundles::lookup(command.uuid);
-				env = item ? item->environment(baseEnv) : baseEnv;
-
-				if(document && document->is_open())
-						env = ng::editor_for_document(document)->variables(env, file::path_attributes(document->path()));
-				else	env = variables_for_path(NULL_STR, "", env);
-				command::runner_ptr runner = command::runner(command, buffer, selection, env, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
+				command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(document)));
 				runner->launch();
 				runner->wait();
 			}
