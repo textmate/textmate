@@ -12,17 +12,41 @@ static NSImage* CustomIconForPath (NSString* path, struct stat const& buf)
 	if(!S_ISREG(buf.st_mode) && !S_ISLNK(buf.st_mode))
 		return nil;
 
-	std::multimap<ssize_t, NSString*> ordering;
-	NSDictionary* bindings = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle bundleForClass:[OakFileIconImage class]] pathForResource:@"bindings" ofType:@"plist"]];
-	for(NSString* key in bindings)
-	{
-		for(NSString* ext in bindings[key])
+	static NSMutableDictionary* bindings = [NSMutableDictionary new];
+
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+		NSDictionary* map = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle bundleForClass:[OakFileIconImage class]] pathForResource:@"bindings" ofType:@"plist"]];
+		for(NSString* key in map)
 		{
-			if(ssize_t rank = path::rank([path UTF8String], [ext UTF8String]))
-				ordering.insert(std::make_pair(rank, key));
+			for(NSString* ext in map[key])
+				bindings[ext] = key;
+		}
+	});
+
+	NSString* pathName = [[path lastPathComponent] lowercaseString];
+	NSString* imageName = bindings[pathName];
+
+	NSRange range = [pathName rangeOfString:@"."];
+	if(range.location != NSNotFound)
+	{
+		imageName = bindings[[pathName substringFromIndex:NSMaxRange(range)]];
+		imageName = imageName ?: bindings[[pathName pathExtension]];
+	}
+
+	NSImage* res = nil;
+	if(imageName)
+	{
+		static NSMutableDictionary* images = [NSMutableDictionary new];
+		@synchronized(images) {
+			if(!(res = images[imageName]))
+			{
+				if(res = [NSImage imageNamed:imageName inSameBundleAsClass:[OakFileIconImage class]])
+					images[imageName] = res;
+			}
 		}
 	}
-	return ordering.empty() ? nil : [NSImage imageNamed:ordering.begin()->second inSameBundleAsClass:[OakFileIconImage class]];
+	return res;
 }
 
 static NSImage* IconBadgeForPath (NSString* path, struct stat const& buf)
