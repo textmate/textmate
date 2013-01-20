@@ -113,7 +113,7 @@ namespace
 
 		std::vector<std::pair<size_t, size_t>> cover;
 		NSNumber* tableview_item = nil;
-		NSImage* image = nil;
+		OakFileIconImage* image = nil;
 	};
 }
 
@@ -685,14 +685,20 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	document_record_t& record = _records[index.unsignedIntValue];
 
 	auto docIter = _openDocumentsMap.find(record.identifier);
-	BOOL isOpen = docIter != _openDocumentsMap.end();
+	BOOL isOpen     = docIter != _openDocumentsMap.end();
 	BOOL isModified = isOpen && docIter->second->is_modified();
+	BOOL isOnDisk   = isOpen ? docIter->second->is_on_disk() : YES;
 
 	cell.objectValue = [self tableView:aTableView objectValueForTableColumn:aTableColumn row:rowIndex];
 	if([cell respondsToSelector:@selector(setImage:)])
 	{
 		if(!record.image)
-			record.image = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:record.full_path] isModified:isModified];
+			record.image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+
+		record.image.path     = [NSString stringWithCxxString:record.full_path];
+		record.image.exists   = isOnDisk;
+		record.image.modified = isModified;
+
 		[cell setImage:record.image];
 	}
 
