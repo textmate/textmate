@@ -665,7 +665,12 @@ namespace
 	std::vector<document::document_ptr> oldDocuments = self.documents;
 	NSUInteger split = self.selectedTabIndex;
 
-	if(!oldDocuments.empty() && is_disposable(oldDocuments[split]))
+	std::set<oak::uuid_t> oldUUIDs, newUUIDs, actualNewUUIDs;
+	std::transform(oldDocuments.begin(), oldDocuments.end(), inserter(oldUUIDs, oldUUIDs.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
+	std::transform(documents.begin(), documents.end(), inserter(newUUIDs, newUUIDs.end()), [](document::document_ptr const& doc){ return doc->identifier(); });
+	std::set_difference(newUUIDs.begin(), newUUIDs.end(), oldUUIDs.begin(), oldUUIDs.end(), inserter(actualNewUUIDs, actualNewUUIDs.end()));
+
+	if(!actualNewUUIDs.empty() && !oldDocuments.empty() && is_disposable(oldDocuments[split]))
 			oldDocuments.erase(oldDocuments.begin() + split);
 	else	++split;
 
