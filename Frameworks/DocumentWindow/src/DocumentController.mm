@@ -686,7 +686,8 @@ namespace
 		NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
 		for(size_t i = 0; i < newDocuments.size(); ++i)
 		{
-			if(uuids.find(newDocuments[i]->identifier()) == uuids.end())
+			document::document_ptr doc = newDocuments[i];
+			if(!doc->is_modified() && uuids.find(doc->identifier()) == uuids.end())
 				[indexSet addIndex:i];
 		}
 		[self closeTabsAtIndexes:indexSet askToSaveChanges:YES createDocumentIfEmpty:NO];
