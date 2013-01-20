@@ -141,6 +141,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 @interface FileChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
+	scm::info_ptr                                 _scmInfo;
 	std::vector<document::document_ptr>           _openDocuments;
 	std::map<oak::uuid_t, document::document_ptr> _openDocumentsMap;
 	oak::uuid_t                                   _currentDocument;
@@ -299,11 +300,14 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_retainedSelf         = nil;
 }
 
-- (BOOL)allowsMultipleSelection               { return _tableView.allowsMultipleSelection; }
-- (void)setAllowsMultipleSelection:(BOOL)flag { _tableView.allowsMultipleSelection = flag; }
+- (BOOL)allowsMultipleSelection                             { return _tableView.allowsMultipleSelection; }
+- (void)setAllowsMultipleSelection:(BOOL)flag               { _tableView.allowsMultipleSelection = flag; }
 
-- (oak::uuid_t const&)currentDocument                                             { return _currentDocument; }
-- (void)setCurrentDocument:(oak::uuid_t const&)newDocument                        { _currentDocument = newDocument; [self reload]; }
+- (scm::info_ptr const&)scmInfo                             { return _scmInfo; }
+- (void)setScmInfo:(scm::info_ptr const&)scmInfo            { _scmInfo = scmInfo; [self reload]; }
+
+- (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
+- (void)setCurrentDocument:(oak::uuid_t const&)newDocument  { _currentDocument = newDocument; [self reload]; }
 
 - (std::vector<document::document_ptr> const&)openDocuments
 {
@@ -698,6 +702,9 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		record.image.path     = [NSString stringWithCxxString:record.full_path];
 		record.image.exists   = isOnDisk;
 		record.image.modified = isModified;
+
+		if(_scmInfo && record.full_path != NULL_STR)
+			record.image.scmStatus = _scmInfo->status(record.full_path);
 
 		[cell setImage:record.image];
 	}

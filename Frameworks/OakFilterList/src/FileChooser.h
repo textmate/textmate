@@ -1,7 +1,9 @@
 #import <document/document.h>
+#import <scm/scm.h>
 
 PUBLIC @interface FileChooser : NSObject
 @property (nonatomic) NSString* path;
+@property (nonatomic) scm::info_ptr const& scmInfo;
 
 @property (nonatomic) std::vector<document::document_ptr> const& openDocuments;
 @property (nonatomic) oak::uuid_t const& currentDocument;
