@@ -6,6 +6,13 @@
 
 namespace scope
 {
+	namespace compile
+	{
+		class compiler_factory_t;
+		class matcher_t;
+
+	}
+
 	namespace types
 	{
 		struct path_t;
@@ -37,6 +44,7 @@ namespace scope
 	private:
 		void setup (std::string const& str);
 
+		friend class compile::matcher_t;
 		friend struct selector_t;
 		friend scope::scope_t shared_prefix (scope_t const& a, scope_t const& b);
 		friend std::string xml_difference (scope_t const& from, scope_t const& to, std::string const& open, std::string const& close);
@@ -79,6 +87,7 @@ namespace scope
 	private:
 		void setup (std::string const& str);
 
+		friend class compile::compiler_factory_t;
 		friend std::string to_s (selector_t const& s);
 		types::selector_ptr selector;
 	};
