@@ -141,14 +141,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_headerView.goForwardButton.target = self;
 	_headerView.goForwardButton.action = @selector(goForward:);
 
-	NSBox* bottomDividerView = [[NSBox alloc] initWithFrame:NSZeroRect];
-	bottomDividerView.boxType     = NSBoxCustom;
-	bottomDividerView.borderType  = NSLineBorder;
-	bottomDividerView.borderColor = [NSColor blackColor];
-
 	_view = [NSView new];
 	[_view addSubview:_headerView];
-	[_view addSubview:bottomDividerView];
 	[_view addSubview:scrollView];
 
 	NSCell* cell = [OFBPathInfoCell new];
@@ -167,15 +161,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSDictionary* views = @{
 		@"parent"  : _view,
 		@"header"  : _headerView,
-		@"divider" : bottomDividerView,
 		@"browser" : scrollView,
 	};
 
 	for(NSView* view in [views allValues])
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[header(==browser,==divider)]|"   options:0 metrics:nil views:views]];
-	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][divider(==1)][browser]|" options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[header(==browser)]|" options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][browser]|"   options:0 metrics:nil views:views]];
 }
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
