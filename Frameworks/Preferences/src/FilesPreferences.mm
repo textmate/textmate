@@ -63,6 +63,7 @@
 		}
 	}
 
+	encodingPopUp.encoding = [self valueForKey:@"encoding"];
 	[self bind:@"encoding" toObject:encodingPopUp withKeyPath:@"encoding" options:nil];
 }
 @end
