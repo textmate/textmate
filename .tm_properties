@@ -1,6 +1,4 @@
 # Settings
-projectDirectory     = '$CWD'
-
 windowTitleProject   = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitleFramework = '${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/}'
 windowTitle          = '$TM_DISPLAYNAME$windowTitleFramework$windowTitleProject$windowTitleSCM'
