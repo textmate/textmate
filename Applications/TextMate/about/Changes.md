@@ -1,5 +1,29 @@
 # Changes
 
+## 2013-01-21 (r9349)
+
+ *	Rework file chooser (⌘T):
+	It now show document icons (with potential SCM status) and close buttons for open documents. Filtering has also seen some minor improvements, mainly related to “full path” filtering (which you activate by putting a slash in the filter string). Performance should be better when dealing with large directories (try e.g. ⌘↑ to move to the parent of your current folder), this mainly relates to not stalling the application (the scanning itself could likely be a little faster).
+	Presently though a few things are missing:
+	* You can no longer use `@` to descend into a file and see its symbols (will be added back).
+	* The close buttons are not yet hooked up.
+	* There is no UI for switching “source” but you can use ⌘1 and ⌘2 to switch between all files and open files, where the latter now actually works.
+	* The look is provisional.
+
+ *	Opening multiple documents at once will now select the last one so that ⌘W can be used to go through them. Try e.g. holding down shift when using arrow keys in the file chooser.
+
+ *	When you open documents and select to “close other” then it leaves modified documents open rather than ask about saving them. Try e.g. holding down option (⌥) when you hit ↩ in the file chooser.
+
+ *	When you open the file chooser, we look at the find clipboard to see if it contains something of the form `«file»:«line»` and if so, uses that as the default filter string. This “matching” now also works if the file contains slashes. The idea is that when you have “error output” e.g. in your terminal, you can select it, hit ⌘E and switch to TextMate where you hit ⌘T + ↩ to go directly to the file + line. If you find yourself doing it a lot, you may like the automator workflow described in [issue #665](https://github.com/textmate/textmate/issues/665).
+
+ *	Restyle navigation bar to be more in line with Lion. *[Michael Sheets]*
+
+ *	We now download software updates to the system’s cache folder (instead of temporary folder). This should hopefully fix the problem some ware having with the “temp cleaner” waking up before the update got installed. If you still get this warning, let me know.
+
+ *	The encoding pop-up in _Preferences → Files_ would reset itself to UTF-8 after a relaunch (which really should have been viewed as a feature :) ).
+
+ *	Fix crash introduced in r9345.
+
 ## 2013-01-17 (r9347)
 
 * If you have “open documents from last session” enabled in preferences then TextMate will no longer ask you to save untitled documents when you quit, as these will be restored next time you launch it, and as they are untitled, no other program can edit them (causing a conflict, as would be the case if the document had a location on disk).
