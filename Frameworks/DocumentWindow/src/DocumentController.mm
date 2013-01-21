@@ -875,7 +875,7 @@ namespace
 			_scmInfo.reset();
 		}
 
-		if(aPath && ![aPath isEqualToString:@""])
+		if(aPath)
 		{
 			if(!_scmCallback)
 				_scmCallback = new scm_callback_t(self);
@@ -895,7 +895,7 @@ namespace
 	if(!doc)
 	{
 		self.windowTitle      = @"«no documents»";
-		self.representedFile  = @"";
+		self.representedFile  = nil;
 		self.isDocumentEdited = NO;
 		return;
 	}
