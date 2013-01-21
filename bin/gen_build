@@ -691,6 +691,7 @@ open("#{builddir}/build.ninja", "w") do |io|
 
   dag = ''
   TARGETS.each do |target|
+    dag << "#{target[:name]}\t#{target[:name]}\n" if target['LINK'].nil?
     target['LINK'].each { |dep| dag << "#{target[:name]}\t#{dep}\n" } unless target['LINK'].nil?
     target.each do |key, value|
       value.each { |rsrc| dag << "#{target[:name]}\t#$'\n" if rsrc =~ /^@/ } if key =~ /^CP_/
