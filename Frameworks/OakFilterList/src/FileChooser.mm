@@ -222,13 +222,14 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_progressIndicator.controlSize          = NSSmallControlSize;
 		_progressIndicator.displayedWhenStopped = NO;
 
-		NSView* contentView = [[NSView alloc] initWithFrame:NSZeroRect];
-
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(593, 782, 434, 383) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 600) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
+		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
+		[_window setContentBorderThickness:30 forEdge: NSMinYEdge];
+		[_window setContentBorderThickness:31 forEdge: NSMaxYEdge];
 		_window.autorecalculatesKeyViewLoop = YES;
 		_window.delegate                    = self;
 		_window.releasedWhenClosed          = NO;
-		_window.contentView                 = contentView;
 
 		NSDictionary* views = @{
 			@"searchField"        : _searchField,
@@ -240,6 +241,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			@"progressIndicator"  : _progressIndicator,
 		};
 
+		NSView* contentView = _window.contentView;
 		for(NSView* view in [views allValues])
 		{
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -253,7 +255,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[searchField(>=50)]-|"                              options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[statusTextField]-[itemCountTextField]-(4)-[progressIndicator]-(4)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-[topDivider(==1)][scrollView(>=50)][bottomDivider(==1)]-[statusTextField]-(8)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[topDivider(==1)][scrollView(>=50)][bottomDivider(==1)]-[statusTextField]-(8)-|" options:0 metrics:nil views:views]];
 
 		self.onlyShowOpenDocuments = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey];
 
