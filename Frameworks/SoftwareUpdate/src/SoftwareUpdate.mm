@@ -332,6 +332,7 @@ static SoftwareUpdate* SharedInstance;
 - (void)cancel:(DownloadWindowController*)sender
 {
 	D(DBF_SoftwareUpdate_Check, bug("\n"););
+	path::remove(to_s(self.archive));
 	[sender.window performClose:self];
 }
 

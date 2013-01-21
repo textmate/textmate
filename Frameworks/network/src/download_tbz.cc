@@ -112,7 +112,7 @@ namespace network
 		std::string res = NULL_STR;
 		if(CURL* handle = curl_easy_init())
 		{
-			std::string tbzDestination = path::temp("dl_archive_contents");
+			std::string tbzDestination = path::cache("dl_archive_contents");
 			mkdir(tbzDestination.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH);
 			int tbzInput, tbzOutput;
 			pid_t tbzPid = launch_tbz(tbzDestination, tbzInput, tbzOutput, error);
