@@ -7,7 +7,7 @@
 #import "FSSearchDataSource.h"
 #import "FSXcodeProjectDataSource.h"
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/OakSound.h>
+#import <OakAppKit/OakFileManager.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
@@ -111,14 +111,11 @@ static ino_t inode (std::string const& path)
 		}
 		else
 		{
-			if(rename(src.c_str(), dst.c_str()) == 0)
+			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
+			if([[OakFileManager sharedInstance] renameItemAtURL:item.url toURL:dstURL window:anOutlineView.window])
 			{
-				item.url  = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
+				item.url  = dstURL;
 				item.name = [NSString stringWithCxxString:path::display_name(dst)];
-			}
-			else
-			{
-				OakRunIOAlertPanel("Failed to rename the file at “%s”.", path::name(src).c_str());
 			}
 		}
 	}
@@ -264,14 +261,14 @@ static NSDragOperation filter (NSDragOperation mask)
 				continue;
 		}
 
-		switch(op)
-		{
-			case NSDragOperationMove: path::rename(src, dst);                            break;
-			case NSDragOperationCopy: path::copy(src, dst);                              break;
-			case NSDragOperationLink: path::link(path::relative_to(src, dropPath), dst); break;
-		}
+		OakFileManager* fm = [OakFileManager sharedInstance];
+		if(op == NSDragOperationMove)
+			[fm moveItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] toURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] window:anOutlineView.window];
+		else if(op == NSDragOperationCopy)
+			[fm copyItemAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] toURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] window:anOutlineView.window];
+		else if(op == NSDragOperationLink)
+			[fm createSymbolicLinkAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] withDestinationURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:src]] window:anOutlineView.window];
 	}
-	OakPlayUISound(OakSoundDidMoveItemUISound);
 	return YES;
 }
 
@@ -279,20 +276,11 @@ static NSDragOperation filter (NSDragOperation mask)
 {
 	if(aDragOperation == NSDragOperationDelete)
 	{
-		BOOL didTrashSomething = NO;
 		for(FSItem* item in someItems)
 		{
 			if([item.url isFileURL])
-			{
-				std::string const trashPath = path::move_to_trash([item.path fileSystemRepresentation]);
-				if(trashPath != NULL_STR)
-						didTrashSomething = YES;
-				else	OakRunIOAlertPanel("Failed to move the file at “%s” to the trash.", [item.path fileSystemRepresentation]);
-			}
+				[[OakFileManager sharedInstance] trashItemAtURL:item.url window:anOutlineView.window];
 		}
-
-		if(didTrashSomething)
-			OakPlayUISound(OakSoundDidTrashItemUISound);
 	}
 }
 @end

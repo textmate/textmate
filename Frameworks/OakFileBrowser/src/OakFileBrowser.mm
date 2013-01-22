@@ -14,11 +14,11 @@
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakFileManager.h>
 #import <OakAppKit/OakFinderLabelChooser.h>
 #import <OakAppKit/OakOpenWithMenu.h>
 #import <OakAppKit/OakZoomingIcon.h>
 #import <OakAppKit/NSView Additions.h>
-#import <OakAppKit/OakSound.h>
 #import <OakSystem/application.h>
 #import <bundles/bundles.h>
 #import <document/document.h>
@@ -496,21 +496,19 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (void)duplicateSelectedEntries:(id)sender
 {
 	NSMutableArray* duplicatedURLs = [NSMutableArray array];
-	for(NSString* aPath in self.selectedPaths)
+	for(NSURL* url in self.selectedURLs)
 	{
-		std::string const& dupPath = path::duplicate([aPath fileSystemRepresentation]);
-		if(dupPath != NULL_STR)
-				[duplicatedURLs addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:dupPath]]];
-		else	OakRunIOAlertPanel("Failed to duplicate the file at “%s”.", [aPath fileSystemRepresentation]);
+		if([url isFileURL])
+		{
+			if(NSURL* res = [[OakFileManager sharedInstance] createDuplicateOfURL:url window:_view.window])
+				[duplicatedURLs addObject:res];
+		}
 	}
 
-	if([duplicatedURLs count])
-	{
-		OakPlayUISound(OakSoundDidMoveItemUISound);
-		if([duplicatedURLs count] == 1)
-				[_outlineViewDelegate editURL:[duplicatedURLs lastObject]];
-		else	[_outlineViewDelegate selectURLs:duplicatedURLs expandChildren:NO];
-	}
+	if([duplicatedURLs count] == 1)
+		[_outlineViewDelegate editURL:[duplicatedURLs lastObject]];
+	else if([duplicatedURLs count] > 1)
+		[_outlineViewDelegate selectURLs:duplicatedURLs expandChildren:NO];
 }
 
 - (void)revealSelectedItem:(id)sender
@@ -569,26 +567,18 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	if(NSString* folder = [self parentForNewFolder])
 	{
-		std::string const dst = path::unique(path::join([folder fileSystemRepresentation], "untitled folder"));
-		if(path::make_dir(dst))
-				[_outlineViewDelegate editURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
-		else	OakRunIOAlertPanel("Failed to create new folder in “%s”.", path::parent([folder fileSystemRepresentation]).c_str());
+		if(NSURL* res = [[OakFileManager sharedInstance] createUntitledDirectoryAtURL:[NSURL fileURLWithPath:folder] window:_view.window])
+			[_outlineViewDelegate editURL:res];
 	}
 }
 
 - (void)delete:(id)anArgument
 {
-	BOOL didTrashSomething = NO;
-	for(NSString* aPath in self.selectedPaths)
+	for(NSURL* url in self.selectedURLs)
 	{
-		std::string const trashPath = path::move_to_trash([aPath fileSystemRepresentation]);
-		if(trashPath != NULL_STR)
-				didTrashSomething = YES;
-		else	OakRunIOAlertPanel("Failed to move the file at “%s” to the trash.", [aPath fileSystemRepresentation]);
+		if([url isFileURL])
+			[[OakFileManager sharedInstance] trashItemAtURL:url window:_view.window];
 	}
-
-	if(didTrashSomething)
-		OakPlayUISound(OakSoundDidTrashItemUISound);
 }
 
 - (void)changeColor:(OakFinderLabelChooser*)labelChooser
@@ -607,15 +597,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(!path::make_dir(favFolder))
 		return (void)OakRunIOAlertPanel("Failed to create Favorites folder.");
 
-	NSArray* paths = self.selectedPaths;
-	if(![paths count] && [_url isFileURL])
-		paths = @[ [_url path] ];
+	NSArray* urls = self.selectedURLs;
+	if(![urls count] && [_url isFileURL])
+		urls = @[ _url ];
 
-	for(NSString* aPath in paths)
+	for(NSURL* url in urls)
 	{
-		std::string const src = [aPath fileSystemRepresentation];
-		std::string const dst = path::join(favFolder, path::name(src));
-		path::link(src, dst);
+		std::string const dst = path::join(favFolder, path::name(to_s([url path])));
+		[[OakFileManager sharedInstance] createSymbolicLinkAtURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]] withDestinationURL:url window:_view.window];
 	}
 }
 
@@ -646,18 +635,17 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		BOOL cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
 		for(NSString* path in [pboard availableTypeFromArray:@[ NSFilenamesPboardType ]] ? [pboard propertyListForType:NSFilenamesPboardType] : nil)
 		{
-			std::string const src = [path fileSystemRepresentation];
-			std::string const dst = path::unique(path::join([folder fileSystemRepresentation], path::name(src)));
-			if(cut ? path::rename(src, dst) : path::copy(src, dst))
-				[created addObject:[NSURL fileURLWithPath:[NSString stringWithCxxString:dst]]];
+			std::string const dst = path::unique(path::join([folder fileSystemRepresentation], path::name([path fileSystemRepresentation])));
+			NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
+			if(cut)
+					[[OakFileManager sharedInstance] moveItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL window:_view.window];
+			else	[[OakFileManager sharedInstance] copyItemAtURL:[NSURL fileURLWithPath:path] toURL:dstURL window:_view.window];
+			[created addObject:dstURL];
 		}
 	}
 
 	if([created count] > 0)
-	{
-		OakPlayUISound(OakSoundDidMoveItemUISound);
 		[_outlineViewDelegate selectURLs:created expandChildren:NO];
-	}
 }
 
 - (void)executeBundleCommand:(id)sender
@@ -682,6 +670,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			[menu addItem:[NSMenuItem separatorItem]];
 			[menu addItemWithTitle:@"New Folder" action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
 			[menu addItemWithTitle:[NSString stringWithFormat:@"Add “%@” to Favorites", DisplayName(_url)] action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
+			[menu addItem:[NSMenuItem separatorItem]];
 		}
 	}
 	else
@@ -763,8 +752,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 		if(NSMenuItem* openWithMenuItem = [menu itemWithTitle:@"Open With"])
 			[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:self.selectedPaths] toMenuItem:openWithMenuItem];
+
+		[menu addItem:[NSMenuItem separatorItem]];
 	}
 
+	[[menu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@""] setTarget:_view.window];
+	[[menu addItemWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:@""] setTarget:_view.window];
 	return menu;
 }
 
