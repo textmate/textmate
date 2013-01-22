@@ -920,13 +920,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
 	if([item action] == @selector(goToParentFolder:))
-			return ParentForURL(_url) != nil;
+		return ParentForURL(_url) != nil;
 	else if([item action] == @selector(goBack:))
-			return self.canGoBack;
+		return self.canGoBack;
 	else if([item action] == @selector(goForward:))
-			return self.canGoForward;
+		return self.canGoForward;
 	else if([item action] == @selector(delete:))
-			return [_outlineView numberOfSelectedRows] > 0;
-	else	return YES;
+		return [_outlineView numberOfSelectedRows] > 0;
+	else
+		return YES;
 }
 @end
