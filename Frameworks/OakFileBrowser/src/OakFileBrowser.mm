@@ -491,9 +491,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 // = Menu Actions =
 // ================
 
-- (BOOL)canUndo { return NO; }
-- (BOOL)canRedo { return NO; }
-
 - (void)editSelectedEntries:(id)sender { [_outlineView performEditSelectedRow:self]; }
 
 - (void)duplicateSelectedEntries:(id)sender
@@ -777,11 +774,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:self.selectedPaths] toMenuItem:openWithMenuItem];
 	}
 
-	// [menu addItem:[NSMenuItem separatorItem]];
-	// if([self canUndo] || [self canRedo])
-	// 		[[menu addItemWithTitle:[NSString stringWithCxxString:title_for_operation(/**undoOperation*/)] action:([self canUndo] ? @selector(undo:) : @selector(redo:)) keyEquivalent:@""] setTarget:self];
-	// else	[[menu addItemWithTitle:@"Can’t Undo" action:@selector(nop:) keyEquivalent:@""] setEnabled:NO];
-
 	return menu;
 }
 
@@ -935,10 +927,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			return self.canGoForward;
 	else if([item action] == @selector(delete:))
 			return [_outlineView numberOfSelectedRows] > 0;
-	else if([item action] == @selector(undo:))
-			return [self canUndo];
-	else if([item action] == @selector(redo:))
-			return [self canRedo];
 	else	return YES;
 }
 @end
