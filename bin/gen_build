@@ -750,6 +750,10 @@ end
 # =======================
 
 __END__
+rule touch
+  command = touch $out
+  description = Touch ‘$out’…
+
 rule cp
   command = cp -p $in $out
   description = Copy ‘$in’…
@@ -842,10 +846,12 @@ rule deploy
   description = Deploy…
 
 rule bump_revision
-  command = ruby -pe '$$_.gsub!(/(APP_REVISION\s*=\s*)(\d+)/) { newRev = $$2.to_i + 1; STDERR << "r#$$2 → r#{newRev}\n"; "#$$1#{newRev}#$$3" }' $in > $in~ && mv $in~ $in && touch $out
+  command = ruby -pe '$$_.gsub!(/(APP_REVISION\s*=\s*)(\d+)/) { newRev = $$2.to_i + 1; STDERR << "r#$$2 → r#{newRev}\n"; "#$$1#{newRev}#$$3" }' $in > $in~ && mv $in~ $in
   description = Increment version number…
-build $builddir/revision.$APP_REVISION: bump_revision $builddir/build.ninja
-build bump: phony $builddir/revision.$APP_REVISION
+build $builddir/revision.next: bump_revision $builddir/build.ninja
+build bump: phony $builddir/revision.next
+build $builddir/revision.$APP_REVISION: touch
+build after_bump: phony $builddir/revision.$APP_REVISION
 
 rule clean
   command = rm -r '$path'
