@@ -672,7 +672,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
 {
 	NSMenu* menu = [NSMenu new];
-	[menu setAutoenablesItems:NO];
 
 	NSInteger numberOfSelectedRows = [anOutlineView numberOfSelectedRows];
 	if(numberOfSelectedRows == 0)
@@ -687,43 +686,37 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 	else
 	{
-		BOOL pathsExist   = YES;
 		BOOL showOpenWith = YES;
 		for(FSItem* item in self.selectedItems)
-		{
-			pathsExist   = pathsExist   && !([item.url isFileURL] && !path::exists([[item.url path] fileSystemRepresentation]));
 			showOpenWith = showOpenWith && !([(item.target ?: item.url) isFileURL] && (path::info([[(item.target ?: item.url) path] fileSystemRepresentation]) & path::flag::application));
-		}
 
-		BOOL singleItem = [self.selectedItems count] == 1;
-		FSItem* item = singleItem ? [self.selectedItems lastObject] : nil;
+		FSItem* item = [self.selectedItems count] == 1 ? [self.selectedItems lastObject] : nil;
 
 		BOOL showEnclosingFolder = item && [item.url isFileURL] && [@[ @"search", @"scm" ] containsObject:[_url scheme]];
 		BOOL showPackageContents = item && [item.url isFileURL] && (path::info([item.path fileSystemRepresentation]) & path::flag::package);
 		BOOL showOriginal        = item && [item.url isFileURL] && (path::info([item.path fileSystemRepresentation]) & (path::flag::symlink|path::flag::alias));
-		BOOL canCreateFolder     = [self parentForNewFolder] ? YES : NO;
 
-		struct { NSString* label; SEL action; BOOL enable; BOOL include; } const menuLabels[] =
+		struct { NSString* label; SEL action; BOOL include; } const menuLabels[] =
 		{
-			{ @"Open",                    @selector(didDoubleClickOutlineView:),                  pathsExist, YES },
-			{ @"Open With",               NULL,                                                   pathsExist, showOpenWith },
-			{ @"Show Preview",            @selector(toggleQuickLookPreview:),                     pathsExist, YES },
-			{ nil,                        NULL,                                                          YES, YES },
-			{ @"Open Enclosing Folder",   @selector(revealSelectedItem:),                                YES, showEnclosingFolder }, // scm://, search://
-			{ @"Show Package Contents",   @selector(showPackageContents:),                               YES, showPackageContents }, // .app, .tmBundle, …
-			{ @"Show Original",           @selector(revealSelectedItem:),                                YES, showOriginal        }, // symbolic links, aliases
-			{ @"Show in Finder",          @selector(showSelectedEntriesInFinder:),                pathsExist, YES },
-			{ nil,                        NULL,                                                          YES, YES },
-			{ @"Rename",                  @selector(editSelectedEntries:),          singleItem && pathsExist, YES },
-			{ @"Duplicate",               @selector(duplicateSelectedEntries:),                   pathsExist, YES },
-			{ @"New Folder",              @selector(newFolderInSelectedFolder:),             canCreateFolder, YES },
-			{ nil,                        NULL,                                                          YES, YES },
-			{ @"Move to Trash",           @selector(delete:),                                     pathsExist, YES },
-			{ nil,                        NULL,                                                          YES, YES },
-			{ @"Copy",                    @selector(copy:),                                              YES, YES },
-			{ nil,                        NULL,                                                          YES, YES },
-			{ @"Color Label",             NULL,                                                   pathsExist, YES },
-			{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:),              pathsExist, YES },
+			{ @"Open",                    @selector(didDoubleClickOutlineView:),     YES },
+			{ @"Open With",               NULL,                                      showOpenWith },
+			{ @"Show Preview",            @selector(toggleQuickLookPreview:),        YES },
+			{ nil,                        NULL,                                      YES },
+			{ @"Open Enclosing Folder",   @selector(revealSelectedItem:),            showEnclosingFolder }, // scm://, search://
+			{ @"Show Package Contents",   @selector(showPackageContents:),           showPackageContents }, // .app, .tmBundle, …
+			{ @"Show Original",           @selector(revealSelectedItem:),            showOriginal        }, // symbolic links, aliases
+			{ @"Show in Finder",          @selector(showSelectedEntriesInFinder:),   YES },
+			{ nil,                        NULL,                                      YES },
+			{ @"Rename",                  @selector(editSelectedEntries:),           YES },
+			{ @"Duplicate",               @selector(duplicateSelectedEntries:),      YES },
+			{ @"New Folder",              @selector(newFolderInSelectedFolder:),     YES },
+			{ nil,                        NULL,                                      YES },
+			{ @"Move to Trash",           @selector(delete:),                        YES },
+			{ nil,                        NULL,                                      YES },
+			{ @"Copy",                    @selector(copy:),                          YES },
+			{ nil,                        NULL,                                      YES },
+			{ @"Color Label",             NULL,                                      YES },
+			{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:), YES },
 		};
 
 		for(size_t i = 0; i < sizeofA(menuLabels); i++)
@@ -736,8 +729,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 				NSMenuItem* menuItem = [menu addItemWithTitle:label action:menuLabels[i].action keyEquivalent:@""];
 				if([self respondsToSelector:menuLabels[i].action])
 					[menuItem setTarget:self];
-				if(!menuLabels[i].enable)
-					[menuItem setEnabled:NO];
 			}
 			else
 			{
@@ -919,14 +910,24 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
+	std::set<SEL> requireSelection{ @selector(didDoubleClickOutlineView:), @selector(editSelectedEntries:), @selector(duplicateSelectedEntries:), @selector(delete:) };
+
+	NSUInteger selectedFiles = 0;
+	for(FSItem* item in self.selectedItems)
+		selectedFiles += [item.url isFileURL] && path::exists([[item.url path] fileSystemRepresentation]) ? 1 : 0;
+
 	if([item action] == @selector(goToParentFolder:))
 		return ParentForURL(_url) != nil;
 	else if([item action] == @selector(goBack:))
 		return self.canGoBack;
 	else if([item action] == @selector(goForward:))
 		return self.canGoForward;
-	else if([item action] == @selector(delete:))
-		return [_outlineView numberOfSelectedRows] > 0;
+	else if([item action] == @selector(newFolderInSelectedFolder:))
+		return [self parentForNewFolder] != nil;
+	else if(selectedFiles == 0 && requireSelection.find([item action]) != requireSelection.end())
+		return NO;
+	else if([item action] == @selector(editSelectedEntries:))
+		return selectedFiles == 1;
 	else
 		return YES;
 }
