@@ -14,6 +14,21 @@
 
 static NSString* const kUserDefaultsShowOpenFilesInFileChooserKey = @"showOpenFilesInFileChooser";
 
+static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger tag)
+{
+	NSButton* res = [NSButton new];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[[res cell] setControlSize:NSSmallControlSize];
+	res.bezelStyle                      = NSRecessedBezelStyle;
+	res.buttonType                      = NSPushOnPushOffButton;
+	res.title                           = label;
+	res.tag                             = tag;
+	res.action                          = action;
+	res.showsBorderOnlyWhileMouseInside = YES;
+
+	return res;
+}
+
 @interface OakNonActivatingTableView : NSTableView
 @end
 
@@ -150,11 +165,15 @@ static path::glob_list_t globs_for_path (std::string const& path)
 }
 @property (nonatomic) NSWindow*            window;
 @property (nonatomic) NSSearchField*       searchField;
+@property (nonatomic) NSButton*            allButton;
+@property (nonatomic) NSButton*            openDocumentsButton;
+@property (nonatomic) NSButton*            scmChangesButton;
 @property (nonatomic) NSTableView*         tableView;
 @property (nonatomic) NSTextField*         statusTextField;
 @property (nonatomic) NSTextField*         itemCountTextField;
 @property (nonatomic) NSProgressIndicator* progressIndicator;
 
+@property (nonatomic) NSUInteger           sourceIndex;
 @property (nonatomic) NSArray*             items;
 
 @property (nonatomic) BOOL                 polling;
@@ -174,6 +193,12 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
 		_searchField.delegate = self;
 		[_searchField.cell setScrollable:YES];
+
+		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
+		_openDocumentsButton = OakCreateScopeButton(@"Open Documents",        @selector(takeSourceIndexFrom:), 1);
+		_scmChangesButton    = OakCreateScopeButton(@"Uncommitted Documents", @selector(takeSourceIndexFrom:), 2);
+		[_allButton setState:NSOnState];
+		[_scmChangesButton setEnabled:NO];
 
 		NSCell* cell = [OFBPathInfoCell new];
 		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
@@ -230,9 +255,15 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_window.autorecalculatesKeyViewLoop = YES;
 		_window.delegate                    = self;
 		_window.releasedWhenClosed          = NO;
+		_window.title                       = @"Open Document";
 
 		NSDictionary* views = @{
 			@"searchField"        : _searchField,
+			@"aboveScopeBarDark"  : OakCreateViewWithColor([NSColor grayColor]),
+			@"aboveScopeBarLight" : OakCreateViewWithColor([NSColor lightGrayColor]),
+			@"allButton"          : _allButton,
+			@"openFilesButton"    : _openDocumentsButton,
+			@"scmChangesButton"   : _scmChangesButton,
 			@"topDivider"         : OakCreateViewWithColor([NSColor grayColor]),
 			@"scrollView"         : scrollView,
 			@"bottomDivider"      : OakCreateViewWithColor([NSColor grayColor]),
@@ -253,11 +284,14 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[searchField(>=50)]-|"                              options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[allButton]-[openFilesButton]-[scmChangesButton]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[statusTextField]-[itemCountTextField]-(4)-[progressIndicator]-(4)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[topDivider(==1)][scrollView(>=50)][bottomDivider(==1)]-[statusTextField]-(8)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[aboveScopeBarDark(==1)][aboveScopeBarLight(==1)]-(4)-[allButton]-(4)-[topDivider(==1)][scrollView(>=50)][bottomDivider(==1)]-[statusTextField]-(8)-|" options:0 metrics:nil views:views]];
 
-		self.onlyShowOpenDocuments = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey];
+		if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey])
+			self.sourceIndex = 1;
 
 		_retainedSelf = self;
 	}
@@ -322,6 +356,26 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_openDocumentsMap.clear();
 	std::transform(_openDocuments.begin(), _openDocuments.end(), inserter(_openDocumentsMap, _openDocumentsMap.end()), [](document::document_ptr const& doc){ return std::make_pair(doc->identifier(), doc); });
 	[self reload];
+}
+
+- (void)takeSourceIndexFrom:(id)sender
+{
+	if([sender respondsToSelector:@selector(tag)])
+		self.sourceIndex = [sender tag];
+}
+
+- (void)setSourceIndex:(NSUInteger)newIndex
+{
+	_sourceIndex = newIndex;
+	switch(newIndex)
+	{
+		case 0: self.onlyShowOpenDocuments = NO;  break;
+		case 1: self.onlyShowOpenDocuments = YES; break;
+		case 2: break;
+	}
+
+	for(NSButton* button in @[ _allButton, _openDocumentsButton, _scmChangesButton ])
+		[button setState:[button tag] == _sourceIndex ? NSOnState : NSOffState];
 }
 
 // =================
@@ -517,7 +571,6 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 	[self shutdownScanner];
 
-	_window.title = [aString stringByAbbreviatingWithTildeInPath];
 	self.items = @[ ];
 
 	_records.clear();
@@ -547,7 +600,6 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 		_records.clear();
 		[self addRecordsForDocuments:_openDocuments];
-		_window.title = @"Open Documents";
 	}
 	else
 	{
@@ -757,8 +809,8 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 {
 	if(_window.isKeyWindow)
 	{
-		[aMenu addItemWithTitle:@"Project Folder" action:@selector(showProjectFolder:) keyEquivalent:@"1"];
-		[aMenu addItemWithTitle:@"Open Documents" action:@selector(showOpenDocuments:) keyEquivalent:@"2"];
+		[[aMenu addItemWithTitle:@"All" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"1"] setTag:0];
+		[[aMenu addItemWithTitle:@"Open Documents" action:@selector(takeSourceIndexFrom:) keyEquivalent:@"2"] setTag:1];
 	}
 	else
 	{
@@ -766,18 +818,13 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	}
 }
 
-- (void)showProjectFolder:(id)sender { self.onlyShowOpenDocuments = NO; }
-- (void)showOpenDocuments:(id)sender { self.onlyShowOpenDocuments = YES; }
-
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
 	BOOL activate = YES;
 	if([item action] == @selector(goToParentFolder:))
 		activate = _onlyShowOpenDocuments == NO && to_s(_path) != path::parent(to_s(_path));
-	else if([item action] == @selector(showProjectFolder:))
-		[item setState:_onlyShowOpenDocuments == NO];
-	else if([item action] == @selector(showOpenDocuments:))
-		[item setState:_onlyShowOpenDocuments == YES];
+	else if([item action] == @selector(takeSourceIndexFrom:))
+		[item setState:[item tag] == self.sourceIndex ? NSOnState : NSOffState];
 	return activate;
 }
 
