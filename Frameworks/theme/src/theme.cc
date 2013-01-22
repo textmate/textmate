@@ -279,7 +279,7 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 {
 	ASSERT(scope.left && scope.right);
 
-	std::map<key_t, styles_t>::iterator styles = _cache.find(key_t(scope, fontName, fontSize));
+	std::map<scope::scope_t, styles_t>::iterator styles = _cache.find(scope.right);
 	if(styles == _cache.end())
 	{
 		std::multimap<double, decomposed_style_t> ordering;
@@ -314,7 +314,7 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 		cf::color_t selection  = base.selection.is_blank()                   ? cf::color_t("#4D97FF54") : base.selection;
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
-		styles = _cache.insert(std::make_pair(key_t(scope, fontName, fontSize), res)).first;
+		styles = _cache.insert(std::make_pair(scope.right, res)).first;
 	}
 	return styles->second;
 }

@@ -91,6 +91,8 @@ namespace ng
 	{
 		if(fontName == _font_name && fontSize == _font_size)
 			return;
+		if(_theme)
+			_theme->clear_cache();
 		_font_name = fontName;
 		_font_size = fontSize;
 		setup_font_metrics();

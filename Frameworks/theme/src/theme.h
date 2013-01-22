@@ -59,6 +59,7 @@ struct PUBLIC theme_t
 	bool is_transparent () const;
 	gutter_styles_t const& gutter_styles () const;
 	styles_t const& styles_for_scope (scope::context_t const& scope, std::string fontName, CGFloat fontSize) const;
+	void clear_cache () { _cache.clear(); }
 
 	struct color_info_t
 	{
@@ -118,8 +119,7 @@ private:
 	bool _is_transparent;
 	callback_t _callback;
 
-	typedef std::tuple<scope::context_t, std::string, CGFloat> key_t; // scope, font name, font size
-	mutable std::map<key_t, styles_t> _cache;
+	mutable std::map<scope::scope_t, styles_t> _cache;
 };
 
 typedef std::shared_ptr<theme_t> theme_ptr;
