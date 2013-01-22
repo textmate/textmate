@@ -64,41 +64,33 @@ static CGPoint MenuPosition ()
 		return YES;
 	}
 
-	for(NSMenuItem* menuItem in [[self itemArray] reverseObjectEnumerator])
+	NSArray* bundleMenuItems = [[bundlesMenuItem submenu] itemArray];
+	for(NSUInteger i = 0; i < [bundleMenuItems count]; ++i)
 	{
-		if(menuItem == bundlesMenuItem)
+		static struct { NSUInteger mask; std::string symbol; } const EventFlags[] =
 		{
-			for(NSMenuItem* subMenuItem in [[menuItem submenu] itemArray])
-			{
-				static struct { NSUInteger mask; std::string symbol; } const EventFlags[] =
-				{
-					{ NSNumericPadKeyMask, "#" },
-					{ NSControlKeyMask,    "^" },
-					{ NSAlternateKeyMask,  "~" },
-					{ NSShiftKeyMask,      "$" },
-					{ NSCommandKeyMask,    "@" }
-				};
+			{ NSNumericPadKeyMask, "#" },
+			{ NSControlKeyMask,    "^" },
+			{ NSAlternateKeyMask,  "~" },
+			{ NSShiftKeyMask,      "$" },
+			{ NSCommandKeyMask,    "@" }
+		};
 
-				NSUInteger flags = [subMenuItem keyEquivalentModifierMask];
+		NSMenuItem* menuItem = [bundleMenuItems objectAtIndex:i];
+		NSUInteger flags = [menuItem keyEquivalentModifierMask];
 
-				std::string res = "";
-				iterate(flag, EventFlags)
-					res += (flags & flag->mask) ? flag->symbol : "";
-				res += to_s([subMenuItem keyEquivalent]);
+		std::string res = "";
+		iterate(flag, EventFlags)
+			res += (flags & flag->mask) ? flag->symbol : "";
+		res += to_s([menuItem keyEquivalent]);
 
-				if(keyString == res)
-				{
-					[NSApp sendAction:[subMenuItem action] to:[subMenuItem target] from:subMenuItem];
-					return YES;
-				}
-			}
-		}
-		else if([[menuItem submenu] performKeyEquivalent:anEvent])
+		if(keyString == res)
 		{
+			[[bundlesMenuItem submenu] performActionForItemAtIndex:i];
 			return YES;
 		}
 	}
 
-	return NO;
+	return [super performKeyEquivalent:anEvent];
 }
 @end
