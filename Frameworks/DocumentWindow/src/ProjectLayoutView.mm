@@ -157,7 +157,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	if(_htmlOutputView)
 	{
 		self.htmlOutputSizeConstraint = _htmlOutputOnRight ? [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.width] : [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.height];
-		self.htmlOutputSizeConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
+		self.htmlOutputSizeConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow-1;
 		[self addConstraint:self.htmlOutputSizeConstraint];
 	}
 }
@@ -212,6 +212,20 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	}
 	else
 	{
+		if(_fileBrowserView)
+		{
+			self.fileBrowserWidthConstraint.constant = NSWidth(_fileBrowserView.frame);
+			self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
+		}
+
+		if(_htmlOutputView)
+		{
+			if(_htmlOutputOnRight)
+					self.htmlOutputSizeConstraint.constant = NSWidth(_htmlOutputView.frame);
+			else	self.htmlOutputSizeConstraint.constant = NSHeight(_htmlOutputView.frame);
+			self.htmlOutputSizeConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
+		}
+
 		NSEvent* mouseDownEvent = anEvent;
 		NSRect initialFrame = view.frame;
 
@@ -240,6 +254,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 					_htmlOutputSize.height = std::max<CGFloat>(50, round(height));
 					self.htmlOutputSizeConstraint.constant = height;
 				}
+				self.htmlOutputSizeConstraint.priority   = NSLayoutPriorityDragThatCannotResizeWindow-1;
 
 				[[NSUserDefaults standardUserDefaults] setObject:NSStringFromSize(_htmlOutputSize) forKey:kUserDefaultsHTMLOutputSizeKey];
 			}
@@ -248,6 +263,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 				CGFloat width = NSWidth(initialFrame) + (mouseCurrentPos.x - mouseDownPos.x) * (_fileBrowserOnRight ? -1 : +1);
 				_fileBrowserWidth = std::max<CGFloat>(50, round(width));
 				self.fileBrowserWidthConstraint.constant = _fileBrowserWidth;
+				self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow-1;
 
 				[[NSUserDefaults standardUserDefaults] setInteger:_fileBrowserWidth forKey:kUserDefaultsFileBrowserWidthKey];
 			}
@@ -264,6 +280,9 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 				[view mouseDown:mouseDownEvent];
 			}
 		}
+
+		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
+		self.htmlOutputSizeConstraint.priority   = NSLayoutPriorityDragThatCannotResizeWindow-1;
 	}
 
 	_mouseDownRecursionGuard = NO;
