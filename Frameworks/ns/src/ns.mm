@@ -7,7 +7,13 @@ OAK_DEBUG_VAR(NSEvent);
 
 std::string to_s (NSString* aString)
 {
-	return aString ? [aString UTF8String] : NULL_STR;
+	if(!aString)
+		return NULL_STR;
+
+	NSData* data = [aString dataUsingEncoding:NSUTF8StringEncoding];
+	std::string res([data length], ' ');
+	memcpy(&res[0], [data bytes], [data length]);
+	return res;
 }
 
 std::string to_s (NSData* someData)
