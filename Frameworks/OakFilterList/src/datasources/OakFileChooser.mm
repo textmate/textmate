@@ -2,7 +2,6 @@
 #import "SymbolList.h"
 #import "../OakAbbreviations.h"
 #import "../highlight_ranges.h"
-#import <OakAppKit/OakSubmenuController.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakHistoryList.h>
 #import <text/case.h>
@@ -466,7 +465,7 @@ void file_chooser_t::wait () const
 
 - (IBAction)takeSourceIndexFrom:(id)sender
 {
-	sourceSelector.selectedSegment = [sender respondsToSelector:@selector(selectedSegment)] ? [sender selectedSegment] : [[OakSubmenuController sharedInstance] tagForSender:sender];
+	sourceSelector.selectedSegment = [sender respondsToSelector:@selector(selectedSegment)] ? [sender selectedSegment] : [sender tag];
 	fileChooser.sourceIndex        = sourceSelector.selectedSegment;
 	[self updateTitles];
 }

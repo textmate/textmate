@@ -9,7 +9,6 @@
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
-#import <OakAppKit/OakSubmenuController.h>
 #import <OakAppKit/OakTabBarView.h>
 #import <OakAppKit/OakWindowFrameHelper.h>
 #import <OakFoundation/NSArray Additions.h>
@@ -1182,7 +1181,7 @@ namespace
 
 - (IBAction)selectNextTab:(id)sender            { self.selectedTabIndex = (_selectedTabIndex + 1) % _documents.size();                     [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
 - (IBAction)selectPreviousTab:(id)sender        { self.selectedTabIndex = (_selectedTabIndex + _documents.size() - 1) % _documents.size(); [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
-- (IBAction)takeSelectedTabIndexFrom:(id)sender { self.selectedTabIndex = [[OakSubmenuController sharedInstance] tagForSender:sender];     [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
+- (IBAction)takeSelectedTabIndexFrom:(id)sender { self.selectedTabIndex = [sender tag];                                                    [self openAndSelectDocument:_documents[_selectedTabIndex]]; }
 
 // ==================
 // = OakFileBrowser =

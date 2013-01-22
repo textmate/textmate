@@ -7,7 +7,6 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
-#import <OakAppKit/OakSubmenuController.h>
 #import <OakFoundation/NSString Additions.h>
 #import <document/collection.h>
 #import <io/path.h>
@@ -305,7 +304,7 @@ struct operation_t
 
 - (IBAction)selectMatchingPath:(id)sender
 {
-	if(NSString* path = [[OakSubmenuController sharedInstance] representedObjectForSender:sender])
+	if(NSString* path = [sender representedObject])
 	{
 		for(FFMatch* match in self.searcher.allDocumentsWithMatches)
 		{

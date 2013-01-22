@@ -7,7 +7,6 @@
 #import "TerminalPreferences.h"
 #import "Keys.h"
 #import <MASPreferences/MASPreferencesWindowController.h>
-#import <OakAppKit/OakSubmenuController.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(Preferences);
@@ -50,7 +49,7 @@ OAK_DEBUG_VAR(Preferences);
 
 - (void)takeSelectedViewControllerIndexFrom:(id)sender
 {
-	NSUInteger index = [[OakSubmenuController sharedInstance] tagForSender:sender];
+	NSUInteger index = [sender tag];
 	[_windowController selectControllerAtIndex:index];
 }
 

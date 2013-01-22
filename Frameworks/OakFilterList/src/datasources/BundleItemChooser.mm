@@ -6,7 +6,6 @@
 #import <scope/scope.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
-#import <OakAppKit/OakSubmenuController.h>
 #import <text/case.h>
 #import <text/ctype.h>
 #import <text/ranker.h>
@@ -269,8 +268,8 @@ static NSString* const AllScopes    = @"AllScopes";
 
 - (void)takeSelectedItemFrom:(NSMenuItem*)item
 {
-	NSString* identifier  = [[OakSubmenuController sharedInstance] representedObjectForSender:item];
-	NSUInteger groupIndex = [[OakSubmenuController sharedInstance] tagForSender:item];
+	NSString* identifier  = [item representedObject];
+	NSUInteger groupIndex = [item tag];
 	[scopeBar setSelected:YES forItem:identifier inGroup:groupIndex];
 }
 
