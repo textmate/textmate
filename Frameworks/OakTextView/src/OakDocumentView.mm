@@ -31,7 +31,7 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 }
 @end
 
-@interface OakDocumentView ()
+@interface OakDocumentView () <OTVStatusBarDelegate>
 @property (nonatomic, readonly) OTVStatusBar* statusBar;
 @property (nonatomic, retain) NSDictionary* gutterImages;
 @property (nonatomic, retain) NSDictionary* gutterHoverImages;
@@ -469,7 +469,7 @@ private:
 	}
 }
 
-- (IBAction)showLanguageSelector:(id)sender
+- (void)showLanguageSelector:(id)sender
 {
 	std::multimap<std::string, bundles::item_ptr, text::less_t> grammars;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
@@ -502,7 +502,7 @@ private:
 	[textView setSelectionString:[sender representedObject]];
 }
 
-- (IBAction)showSymbolSelector:(id)sender
+- (void)showSymbolSelector:(id)sender
 {
 	ng::buffer_t const& buf = document->buffer();
 	text::selection_t sel([textView.selectionString UTF8String]);
@@ -531,7 +531,7 @@ private:
 	[statusBar showMenu:menu withSelectedIndex:(index ? index-1 : 0) forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
 }
 
-- (IBAction)showBundleItemSelector:(id)sender
+- (void)showBundleItemSelector:(id)sender
 {
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
@@ -561,7 +561,7 @@ private:
 	[menu release];
 }
 
-- (IBAction)showTabSizeSelector:(id)sender
+- (void)showTabSizeSelector:(id)sender
 {
 	NSInteger index = 0;
 	NSInteger sizes[] = { 2, 3, 4, 8 };
@@ -623,7 +623,7 @@ private:
 	[tabSizeSelectorPanel makeKeyAndOrderFront:self];
 }
 
-- (IBAction)toggleMacroRecording:(id)sender    { [textView toggleMacroRecording:sender]; }
+- (void)toggleMacroRecording:(id)sender    { [textView toggleMacroRecording:sender]; }
 
 - (IBAction)takeThemeUUIDFrom:(id)sender
 {

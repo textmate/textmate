@@ -2,6 +2,20 @@
 #import <OakAppKit/NSImage Additions.h>
 
 @interface OTVStatusBar ()
+{
+	text::range_t caretPosition;
+	NSString* grammarName;
+	NSString* symbolName;
+	BOOL isMacroRecording;
+	BOOL softTabs;
+	int32_t tabSize;
+
+	id <OTVStatusBarDelegate> delegate;
+
+	NSImage* pulsedRecordingIndicator;
+	NSTimer* recordingTimer;
+	CGFloat recordingTime;
+}
 - (void)update;
 @property (nonatomic, retain) NSTimer* recordingTimer;
 @property (nonatomic, retain) NSImage* pulsedRecordingIndicator;
