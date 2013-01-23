@@ -30,14 +30,27 @@
 	return self;
 }
 
-- (void)selectFileType:(NSMenuItem*)sender
+- (void)selectNewFileType:(NSMenuItem*)sender
 {
 	settings_t::set(kSettingsFileTypeKey, to_s((NSString*)[sender representedObject]), "attr.untitled");
+}
+
+- (void)selectUnknownFileType:(NSMenuItem*)sender
+{
+	settings_t::set(kSettingsFileTypeKey, to_s((NSString*)[sender representedObject]), "attr.file.unknown-type");
 }
 
 - (void)loadView
 {
 	[super loadView];
+
+	[newDocumentTypesMenu removeAllItems];
+	[unknownDocumentTypesMenu removeAllItems];
+
+	NSMenuItem* item = [unknownDocumentTypesMenu addItemWithTitle:@"Prompt for type" action:@selector(selectUnknownFileType:) keyEquivalent:@""];
+	[item setRepresentedObject:nil];
+	[item setTarget:self];
+	[unknownDocumentTypesMenu addItem:[NSMenuItem separatorItem]];
 
 	std::multimap<std::string, bundles::item_ptr, text::less_t> grammars;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
@@ -48,18 +61,26 @@
 
 	if(!grammars.empty())
 	{
-		std::string const defaultFileType = settings_t::raw_get(kSettingsFileTypeKey, "attr.untitled");
-		[documentTypesMenu removeAllItems];
+		std::string const defaultNewFileType     = settings_t::raw_get(kSettingsFileTypeKey, "attr.untitled");
+		std::string const defaultUnknownFileType = settings_t::raw_get(kSettingsFileTypeKey, "attr.file.unknown-type");
+
 		iterate(pair, grammars)
 		{
 			std::string const& fileType = pair->second->value_for_field(bundles::kFieldGrammarScope);
 
-			NSMenuItem* item = [documentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectFileType:) keyEquivalent:@""];
+			NSMenuItem* item = [newDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectNewFileType:) keyEquivalent:@""];
 			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];
 			[item setTarget:self];
 
-			if(fileType == defaultFileType)
-				[documentTypesPopUp selectItem:item];
+			if(fileType == defaultNewFileType)
+				[newDocumentTypesPopUp selectItem:item];
+
+			item = [unknownDocumentTypesMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(selectUnknownFileType:) keyEquivalent:@""];
+			[item setRepresentedObject:[NSString stringWithCxxString:fileType]];
+			[item setTarget:self];
+
+			if(fileType == defaultUnknownFileType)
+				[unknownDocumentTypesPopUp selectItem:item];
 		}
 	}
 
