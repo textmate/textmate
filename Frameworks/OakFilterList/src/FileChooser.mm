@@ -34,14 +34,34 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 
 @implementation OakNonActivatingTableView
 - (BOOL)acceptsFirstResponder { return NO; }
+
+- (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
+{
+	OFBPathInfoCell* res = (OFBPathInfoCell*)[super preparedCellAtColumn:column row:row];
+	res.disableHighlight = YES;
+	return res;
+}
+
+- (void)highlightSelectionInClipRect:(NSRect)clipRect
+{
+	[[NSColor alternateSelectedControlColor] set];
+	[[self selectedRowIndexes] enumerateRangesInRange:[self rowsInRect:clipRect] options:0 usingBlock:^(NSRange range, BOOL* stop){
+		for(NSUInteger row = range.location; row < NSMaxRange(range); ++row)
+		{
+			NSRect rect = [self rectOfRow:row];
+			rect.size.height -= 1;
+			NSRectFill(rect);
+		}
+	}];
+}
 @end
 
-static NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (NSFont* baseFont, std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0)
+static NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (NSFont* baseFont, NSColor* textColor, NSColor* matchedTextColor, std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0)
 {
 	NSFont* boldFont = [[NSFontManager sharedFontManager] convertFont:baseFont toHaveTrait:NSBoldFontMask];
 
-	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor], NSFontAttributeName : baseFont };
-	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : [NSColor blackColor],    NSFontAttributeName : boldFont, NSUnderlineStyleAttributeName : @1 };
+	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : textColor,        NSFontAttributeName : baseFont };
+	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : matchedTextColor, NSFontAttributeName : boldFont, NSUnderlineStyleAttributeName : @1 };
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 
@@ -672,7 +692,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		std::string path = prefix + record.display;
 		size_t offset = prefix.size();
 
-		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(_statusTextField.font, path, record.cover, offset);
+		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(_statusTextField.font, [NSColor darkGrayColor], [NSColor blackColor], path, record.cover, offset);
 		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[pStyle setLineBreakMode:NSLineBreakByTruncatingHead];
 		[str addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, str.length)];
@@ -704,7 +724,15 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 			path += " — " + text::join(v, "/");
 		}
 
-		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(_tableView.font ?: [NSFont controlContentFontOfSize:13], path, record.cover);
+		NSColor* textColor        = [NSColor darkGrayColor];
+		NSColor* matchedTextColor = [NSColor blackColor];
+		if([aTableView isRowSelected:rowIndex])
+		{
+			textColor        = [NSColor alternateSelectedControlTextColor];
+			matchedTextColor = [NSColor alternateSelectedControlTextColor];
+		}
+
+		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(_tableView.font ?: [NSFont controlContentFontOfSize:13], textColor, matchedTextColor, path, record.cover);
 		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[pStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		[str addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, str.length)];

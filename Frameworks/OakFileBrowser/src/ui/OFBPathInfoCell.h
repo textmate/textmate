@@ -11,6 +11,7 @@ PUBLIC @interface OFBPathInfoCell : OakImageAndTextCell
 @property (nonatomic, assign) BOOL isOpen;
 @property (nonatomic, assign) BOOL isVisible;
 @property (nonatomic, assign) BOOL isLoading;
+@property (nonatomic, assign) BOOL disableHighlight;
 
 - (NSRect)closeButtonRectInFrame:(NSRect)cellFrame;
 @end

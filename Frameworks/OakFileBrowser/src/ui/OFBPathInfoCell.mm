@@ -93,6 +93,15 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 	return NSMouseInRect(mousePoint, [self closeButtonRectInFrame:cellFrame], controlView.isFlipped);
 }
 
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView*)controlView
+{
+	BOOL wasHighlighted = self.isHighlighted;
+	if(self.disableHighlight)
+		self.highlighted = NO;
+	[super drawInteriorWithFrame:cellFrame inView:controlView];
+	self.highlighted = wasHighlighted;
+}
+
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView*)controlView
 {
 	if([controlView respondsToSelector:@selector(indentationPerLevel)])
