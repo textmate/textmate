@@ -17,6 +17,7 @@
 
 		self.defaultsProperties = @{
 			@"foldersOnTop"            : kUserDefaultsFoldersOnTopKey,
+			@"tabsAboveDocument"       : kUserDefaultsTabsAboveDocumentKey,
 			@"showFileExtensions"      : kUserDefaultsShowFileExtensionsKey,
 			@"disableTabBarCollapsing" : kUserDefaultsDisableTabBarCollapsingKey,
 			@"fileBrowserPlacement"    : kUserDefaultsFileBrowserPlacementKey,

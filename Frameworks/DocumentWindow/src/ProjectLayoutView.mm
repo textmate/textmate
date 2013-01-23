@@ -30,6 +30,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 		_htmlOutputSize     = NSSizeFromString([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputSizeKey]);
 		_htmlOutputOnRight  = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
+		_tabsAboveDocument  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
@@ -45,6 +46,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 {
 	self.fileBrowserOnRight = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"];
 	self.htmlOutputOnRight  = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
+	self.tabsAboveDocument  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
 }
 
 - (NSView*)replaceView:(NSView*)oldView withView:(NSView*)newView
@@ -95,6 +97,15 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	}
 }
 
+- (void)setTabsAboveDocument:(BOOL)flag
+{
+	if(_tabsAboveDocument != flag)
+	{
+		_tabsAboveDocument = flag;
+		[self setNeedsUpdateConstraints:YES];
+	}
+}
+
 - (void)updateConstraints
 {
 	[self removeConstraints:[self constraints]];
@@ -107,7 +118,8 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		@"htmlOutputView"   : _htmlOutputView  ?: [NSNull null]
 	};
 
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tabBarView]|" options:0 metrics:nil views:views]];
+	if(!_tabsAboveDocument)
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tabBarView]|" options:0 metrics:nil views:views]];
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tabBarView][documentView(>=40)]" options:0 metrics:nil views:views]];
 
 	if(!_fileBrowserView && (!_htmlOutputView || !_htmlOutputOnRight))
@@ -118,27 +130,39 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 	if(_fileBrowserView)
 	{
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][fileBrowserView(==documentView)]" options:0 metrics:nil views:views]];
-
-		if(_htmlOutputView && _htmlOutputOnRight)
+		if(_tabsAboveDocument)
 		{
-			NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]-(1)-[htmlOutputView]|" : @"H:|[fileBrowserView]-(1)-[documentView]-(1)-[htmlOutputView]|";
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
+			NSString* tabBarLayout = _fileBrowserOnRight ? @"H:|[tabBarView(==documentView)]" : @"H:|[fileBrowserView]-(1)-[tabBarView(==documentView)]";
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:tabBarLayout options:0 metrics:nil views:views]];
+			if(!_htmlOutputView || _htmlOutputOnRight)
+				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[fileBrowserView]|" options:0 metrics:nil views:views]];
+			else
+				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[fileBrowserView]-(1)-[htmlOutputView]|" options:0 metrics:nil views:views]];
 		}
 		else
-		{
-			NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]|" : @"H:|[fileBrowserView]-(1)-[documentView]|";
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-		}
+			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][fileBrowserView(==documentView)]" options:0 metrics:nil views:views]];
+
+		NSString* fileBrowserLayout;
+		if(_htmlOutputView && _htmlOutputOnRight)
+			fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]-(1)-[htmlOutputView]|" : @"H:|[fileBrowserView]-(1)-[documentView]-(1)-[htmlOutputView]|";
+		else
+			fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]|" : @"H:|[fileBrowserView]-(1)-[documentView]|";
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:0 metrics:nil views:views]];
 	}
+	else if(_tabsAboveDocument)
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tabBarView(==documentView)]" options:0 metrics:nil views:views]];
 
 	if(_htmlOutputView)
 	{
 		if(_htmlOutputOnRight)
 		{
 			if(!_fileBrowserView)
-				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]-(1)-[htmlOutputView]|" options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][htmlOutputView(==documentView)]" options:0 metrics:nil views:views]];
+				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]-(1)-[htmlOutputView]|" options:0 metrics:nil views:views]];
+
+			if(!_tabsAboveDocument)
+				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][htmlOutputView(==documentView)]" options:0 metrics:nil views:views]];
+			else
+				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[htmlOutputView]|" options:0 metrics:nil views:views]];
 		}
 		else
 		{
