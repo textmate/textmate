@@ -476,7 +476,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 		// split the extensions out
 		if(record.full_path != NULL_STR)
-			boost::split(extensions, record.full_path, boost::is_any_of("."));
+			boost::split(extensions, record.name, boost::is_any_of("."));
 
 		// we know we don't match if the query has more extensions than the candidate file
 		if(extensions.size() < filter.extensions.size())
@@ -488,15 +488,17 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 							  extensions.end());
 
 		// make sure the candidate file contains extensions that match each query extension
+		std::vector<std::string>::iterator begin_i = extensions.begin();
 		for(auto query_extension : filter.extensions)
 		{
 			bool extension_found = false;
-			for(auto candidate_extension : extensions)
+			for(std::vector<std::string>::iterator candidate_extension = begin_i; candidate_extension != extensions.end(); ++candidate_extension)
 			{
 				// extensions match if the candidate extension contains the query extension from the beginning
 				// query: .c matches: .cpp, .css, etc.
-				if(candidate_extension.find(query_extension) == 0)
+				if((*candidate_extension).find(query_extension) == 0)
 				{
+					begin_i = candidate_extension;
 					extension_found = true;
 					break;
 				}
