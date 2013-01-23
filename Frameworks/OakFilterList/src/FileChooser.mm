@@ -11,6 +11,7 @@
 #import <regexp/regexp.h>
 #import <oak/algorithm.h>
 #import <oak/duration.h>
+#include <boost/algorithm/string.hpp>
 
 static NSString* const kUserDefaultsShowOpenFilesInFileChooserKey = @"showOpenFilesInFileChooser";
 
@@ -91,13 +92,14 @@ namespace
 		std::string selection = NULL_STR;
 		std::string symbol    = NULL_STR;
 		std::string raw_path  = NULL_STR;
+		std::vector<std::string> extensions;
 
 		filter_string_t (std::string const& str)
 		{
 			if(str == NULL_STR || str.empty())
 				return;
 
-			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^./]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
+			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^:@/]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
 			{
 				_initialized = true;
 
@@ -106,6 +108,15 @@ namespace
 				extension = !m.did_match(3) ? NULL_STR : std::string(m.buffer() + m.begin(3), m.buffer() + m.end(3));
 				selection = !m.did_match(4) ? NULL_STR : std::string(m.buffer() + m.begin(4), m.buffer() + m.end(4));
 				symbol    = !m.did_match(5) ? NULL_STR : std::string(m.buffer() + m.begin(5), m.buffer() + m.end(5));
+
+				// split the extensions out
+				if(extension != NULL_STR)
+					boost::split(extensions, extension, boost::is_any_of("."));
+
+				// strip empty elements
+				extensions.erase(std::remove_if(extensions.begin(), extensions.end(),
+									                 [](const std::string& s) { return s.empty(); }),
+									  extensions.end());
 
 				raw_path = full_path();
 
@@ -459,8 +470,44 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	record.matched = false;
 	if(glob.exclude(record.full_path))
 		return;
-	if(filter.extension != NULL_STR && filter.extension != path::extensions(record.full_path))
-		return;
+	if(filter.extensions.size() > 0)
+	{
+		std::vector<std::string> extensions;
+
+		// split the extensions out
+		if(record.full_path != NULL_STR)
+			boost::split(extensions, record.name, boost::is_any_of("."));
+
+		// we know we don't match if the query has more extensions than the candidate file
+		if(extensions.size() < filter.extensions.size())
+			return;
+
+		// strip empty extensions
+		extensions.erase(std::remove_if(extensions.begin(), extensions.end(),
+							                 [](const std::string& s) { return s.empty(); }),
+							  extensions.end());
+
+		// make sure the candidate file contains extensions that match each query extension
+		std::vector<std::string>::iterator begin_i = extensions.begin();
+		for(auto query_extension : filter.extensions)
+		{
+			bool extension_found = false;
+			for(std::vector<std::string>::iterator candidate_extension = begin_i; candidate_extension != extensions.end(); ++candidate_extension)
+			{
+				// extensions match if the candidate extension contains the query extension from the beginning
+				// query: .c matches: .cpp, .css, etc.
+				if((*candidate_extension).find(query_extension) == 0)
+				{
+					begin_i = candidate_extension;
+					extension_found = true;
+					break;
+				}
+			}
+
+			if(! extension_found)
+				return;
+		}
+	}
 
 	record.cover.clear();
 	record.display         = record.name;
