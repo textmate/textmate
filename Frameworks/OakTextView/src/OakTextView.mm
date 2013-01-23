@@ -529,11 +529,31 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)ensureSelectionIsInVisibleArea:(id)sender
 {
-	CGRect r = layout->rect_at_index(editor->ranges().last().last);
-	CGRect s  = [self visibleRect];
+	ng::range_t range = editor->ranges().last();
+	CGRect r = layout->rect_at_index(range.last);
+	CGRect s = [self visibleRect];
 
 	CGFloat x = NSMinX(s), w = NSWidth(s);
 	CGFloat y = NSMinY(s), h = NSHeight(s);
+
+	if(range.unanchored)
+	{
+		CGRect a = layout->rect_at_index(range.first);
+		CGFloat top = NSMinY(a), bottom = NSMaxY(r);
+		if(bottom < top)
+		{
+			top = NSMinY(r);
+			bottom = NSMaxY(a);
+		}
+
+		// If top or bottom of selection is outside viewport we center selection
+		if(bottom - top < h && (top < y || y + h < bottom))
+		{
+			y = top - 0.5 * (h - (bottom - top));
+			goto doScroll;
+		}
+		return;
+	}
 
 	if(x + w - 2*r.size.width < r.origin.x)
 	{
@@ -561,6 +581,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		y = r.origin.y - (h-r.size.height)/2;
 	}
 
+doScroll:
 	CGRect b = [self bounds];
 	x = oak::cap(NSMinX(b), x, NSMaxX(b) - w);
 	y = oak::cap(NSMinY(b), y, NSMaxY(b) - h);
