@@ -11,6 +11,7 @@
 #import <regexp/regexp.h>
 #import <oak/algorithm.h>
 #import <oak/duration.h>
+#include <boost/algorithm/string.hpp>
 
 static NSString* const kUserDefaultsShowOpenFilesInFileChooserKey = @"showOpenFilesInFileChooser";
 
@@ -91,13 +92,14 @@ namespace
 		std::string selection = NULL_STR;
 		std::string symbol    = NULL_STR;
 		std::string raw_path  = NULL_STR;
+		std::vector<std::string> extensions;
 
 		filter_string_t (std::string const& str)
 		{
 			if(str == NULL_STR || str.empty())
 				return;
 
-			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^./]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
+			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^:@/]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
 			{
 				_initialized = true;
 
@@ -106,6 +108,10 @@ namespace
 				extension = !m.did_match(3) ? NULL_STR : std::string(m.buffer() + m.begin(3), m.buffer() + m.end(3));
 				selection = !m.did_match(4) ? NULL_STR : std::string(m.buffer() + m.begin(4), m.buffer() + m.end(4));
 				symbol    = !m.did_match(5) ? NULL_STR : std::string(m.buffer() + m.begin(5), m.buffer() + m.end(5));
+
+				// split the extensions out
+				if(extension != NULL_STR)
+					boost::split(extensions, extension, boost::is_any_of("."));
 
 				raw_path = full_path();
 
@@ -459,8 +465,30 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	record.matched = false;
 	if(glob.exclude(record.full_path))
 		return;
-	if(filter.extension != NULL_STR && filter.extension != path::extensions(record.full_path))
-		return;
+	if(filter.extension != NULL_STR && filter.extensions.size() > 0)
+	{
+		std::vector<std::string> extensions;
+
+		// split the extensions out
+		if(record.full_path != NULL_STR)
+			boost::split(extensions, record.full_path, boost::is_any_of("."));
+
+		if(extensions.size() == 0)
+			return;
+
+		// NSLog(@"\n\n");
+		// for(auto ext : filter.extensions)
+		// 	NSLog(@"query ext: %s", ext.c_str());
+		// NSLog(@"\n\n");
+		// for(auto ext : extensions)
+		// 	NSLog(@"file's ext: %s", ext.c_str());
+		// NSLog(@"\n\n");
+
+		// if all of the vectors in the filter's extension list are not found, return
+		if(! std::includes(++extensions.begin(), extensions.end(),
+			                ++filter.extensions.begin(), filter.extensions.end()))
+			return;
+	}
 
 	record.cover.clear();
 	record.display         = record.name;
