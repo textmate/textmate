@@ -17,6 +17,7 @@ PUBLIC @interface FileChooser : NSObject
 @property (nonatomic) NSString* filterString;
 @property (nonatomic, readonly) NSArray* selectedItems;
 
++ (FileChooser*)sharedInstance;
 - (void)showWindow:(id)sender;
 - (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
 - (void)close;

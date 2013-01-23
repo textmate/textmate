@@ -1446,7 +1446,7 @@ namespace
 
 - (IBAction)goToFile:(id)sender
 {
-	FileChooser* fc = [FileChooser new];
+	FileChooser* fc = [FileChooser sharedInstance];
 
 	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
 	{

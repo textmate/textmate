@@ -207,6 +207,12 @@ static path::glob_list_t globs_for_path (std::string const& path)
 @end
 
 @implementation FileChooser
++ (FileChooser*)sharedInstance
+{
+	static FileChooser* sharedInstance = [FileChooser new];
+	return sharedInstance;
+}
+
 - (id)init
 {
 	if((self = [super init]))
@@ -325,8 +331,19 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	return self;
 }
 
+- (void)dealloc
+{
+	_window.delegate      = nil;
+	_searchField.delegate = nil;
+	_tableView.target     = nil;
+	_tableView.dataSource = nil;
+	_tableView.delegate   = nil;
+}
+
 - (void)showWindow:(id)sender
 {
+	_retainedSelf = self;
+
 	[_window makeKeyAndOrderFront:self];
 	[_window makeFirstResponder:_searchField];
 }
@@ -354,13 +371,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self shutdownScanner];
-
-	_window.delegate      = nil;
-	_searchField.delegate = nil;
-	_tableView.target     = nil;
-	_tableView.dataSource = nil;
-	_tableView.delegate   = nil;
-	_retainedSelf         = nil;
+	_retainedSelf = nil;
 }
 
 - (BOOL)allowsMultipleSelection                             { return _tableView.allowsMultipleSelection; }
