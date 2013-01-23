@@ -115,9 +115,8 @@ namespace
 
 				// strip empty elements
 				extensions.erase(std::remove_if(extensions.begin(), extensions.end(),
-								  [](const std::string& s) { return !s.empty(); }), extensions.end());
-
-				NSLog(@"size: %d", extensions.size());
+									                 [](const std::string& s) { return s.empty(); }),
+									  extensions.end());
 
 				raw_path = full_path();
 
@@ -471,7 +470,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	record.matched = false;
 	if(glob.exclude(record.full_path))
 		return;
-	if(filter.extension != NULL_STR && filter.extensions.size() > 0)
+	if(filter.extensions.size() > 0)
 	{
 		std::vector<std::string> extensions;
 
@@ -479,22 +478,33 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		if(record.full_path != NULL_STR)
 			boost::split(extensions, record.full_path, boost::is_any_of("."));
 
-		if(extensions.size() == 0)
+		// we know we don't match if the query has more extensions than the candidate file
+		if(extensions.size() < filter.extensions.size())
 			return;
 
-		// NSLog(@"\n\n");
-		// for(auto ext : filter.extensions)
-		// 	NSLog(@"query ext: %s", ext.c_str());
-		// NSLog(@"\n\n");
-		// for(auto ext : extensions)
-		// 	NSLog(@"type: %s", ext(0));
-		// 	NSLog(@"file's ext: %s", ext.c_str());
-		// NSLog(@"\n\n");
+		// strip empty extensions
+		extensions.erase(std::remove_if(extensions.begin(), extensions.end(),
+							                 [](const std::string& s) { return s.empty(); }),
+							  extensions.end());
 
-		// if all of the vectors in the filter's extension list are not found, return
-		if(! std::includes(++extensions.begin(), extensions.end(),
-			                ++filter.extensions.begin(), filter.extensions.end()))
-			return;
+		// make sure the candidate file contains extensions that match each query extension
+		for(auto query_extension : filter.extensions)
+		{
+			bool extension_found = false;
+			for(auto candidate_extension : extensions)
+			{
+				// extensions match if the candidate extension contains the query extension from the beginning
+				// query: .c matches: .cpp, .css, etc.
+				if(candidate_extension.find(query_extension) == 0)
+				{
+					extension_found = true;
+					break;
+				}
+			}
+
+			if(! extension_found)
+				return;
+		}
 	}
 
 	record.cover.clear();
