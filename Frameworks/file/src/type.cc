@@ -108,6 +108,10 @@ static std::string find_file_type (std::string const& path, io::bytes_ptr const&
 	if(res == NULL_STR && effectivePath != NULL_STR)
 		res = settings_for_path(effectivePath, "attr.file.unknown-type " + pathAttributes, settingsDirectory).get(kSettingsFileTypeKey, NULL_STR);
 
+	// check if file has no extension, if so, treat it as plain text
+	if(res == NULL_STR && path::extension(effectivePath).empty())
+		res = "text.plain";
+
 	return res;
 }
 
