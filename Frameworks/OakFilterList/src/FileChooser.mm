@@ -97,7 +97,7 @@ namespace
 			if(str == NULL_STR || str.empty())
 				return;
 
-			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^./]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
+			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^:@/]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
 			{
 				_initialized = true;
 
@@ -456,11 +456,24 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 inline void rank_record (document_record_t& record, filter_string_t const& filter, std::string const& basePath, path::glob_list_t const& glob, std::vector<std::string> const& bindings)
 {
+	static auto extension_regex = regexp::pattern_t("(?x)  \\A ([^\\.]+)  (\\..+) \\z");
+
 	record.matched = false;
 	if(glob.exclude(record.full_path))
 		return;
-	if(filter.extension != NULL_STR && filter.extension != path::extensions(record.full_path))
-		return;
+	if(filter.extension != NULL_STR && filter.extension.size() > 0)
+	{
+		if(regexp::match_t const& m = regexp::search(extension_regex, record.name.data(), record.name.data() + record.name.size()))
+		{
+			std::string extension;
+			extension = !m.did_match(2) ? NULL_STR : std::string(m.buffer() + m.begin(2), m.buffer() + m.end(2));
+
+			if(extension.find(filter.extension) == std::string::npos)
+				return;
+		}
+		else
+			return;
+	}
 
 	record.cover.clear();
 	record.display         = record.name;
