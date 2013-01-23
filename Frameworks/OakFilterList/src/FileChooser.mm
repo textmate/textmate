@@ -58,10 +58,8 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 
 static NSMutableAttributedString* CreateAttributedStringWithMarkedUpRanges (NSFont* baseFont, NSColor* textColor, NSColor* matchedTextColor, std::string const& in, std::vector< std::pair<size_t, size_t> > const& ranges, size_t offset = 0)
 {
-	NSFont* boldFont = [[NSFontManager sharedFontManager] convertFont:baseFont toHaveTrait:NSBoldFontMask];
-
-	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : textColor,        NSFontAttributeName : baseFont };
-	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : matchedTextColor, NSFontAttributeName : boldFont, NSUnderlineStyleAttributeName : @1 };
+	NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : textColor,        };
+	NSDictionary* highlightAttributes = @{ NSForegroundColorAttributeName : matchedTextColor, NSUnderlineStyleAttributeName : @1 };
 
 	NSMutableAttributedString* res = [[NSMutableAttributedString alloc] init];
 
@@ -690,13 +688,8 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		}
 
 		std::string path = prefix + record.display;
-		size_t offset = prefix.size();
-
-		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(_statusTextField.font, [NSColor darkGrayColor], [NSColor blackColor], path, record.cover, offset);
-		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-		[pStyle setLineBreakMode:NSLineBreakByTruncatingHead];
-		[str addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, str.length)];
-		_statusTextField.attributedStringValue = str;
+		[_statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingHead];
+		_statusTextField.stringValue = [NSString stringWithCxxString:path];
 	}
 }
 
@@ -724,8 +717,8 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 			path += " — " + text::join(v, "/");
 		}
 
-		NSColor* textColor        = [NSColor darkGrayColor];
-		NSColor* matchedTextColor = [NSColor blackColor];
+		NSColor* textColor        = [NSColor controlTextColor];
+		NSColor* matchedTextColor = [NSColor controlTextColor];
 		if([aTableView isRowSelected:rowIndex])
 		{
 			textColor        = [NSColor alternateSelectedControlTextColor];
