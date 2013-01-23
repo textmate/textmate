@@ -1,7 +1,7 @@
 #import "OFBHeaderView.h"
 #import <OakAppKit/OakAppKit.h>
 
-static NSButton* ImageButton (NSString* imageName)
+static NSButton* OakCreateImageButton (NSString* imageName)
 {
 	NSButton* res = [NSButton new];
 
@@ -18,7 +18,7 @@ static NSButton* ImageButton (NSString* imageName)
 	return res;
 }
 
-static NSPopUpButton* PopUpButton ()
+static NSPopUpButton* OakCreatePopUpButton ()
 {
 	NSPopUpButton* res = [NSPopUpButton new];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
@@ -39,10 +39,10 @@ static NSPopUpButton* PopUpButton ()
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		self.folderPopUpButton       = PopUpButton();
-		self.goBackButton            = ImageButton(NSImageNameGoLeftTemplate);
+		self.folderPopUpButton       = OakCreatePopUpButton();
+		self.goBackButton            = OakCreateImageButton(NSImageNameGoLeftTemplate);
 		self.goBackButton.toolTip    = @"Go Back";
-		self.goForwardButton         = ImageButton(NSImageNameGoRightTemplate);
+		self.goForwardButton         = OakCreateImageButton(NSImageNameGoRightTemplate);
 		self.goForwardButton.toolTip = @"Go Forward";
 
 		self.darkDividerView   = OakCreateViewWithColor([NSColor colorWithCalibratedWhite:0.551 alpha:1.000]);

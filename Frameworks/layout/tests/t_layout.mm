@@ -391,7 +391,7 @@ private:
 }
 @end
 
-static NSScrollView* CreateTextView (NSRect aRect = NSMakeRect(0, 0, 600, 800))
+static NSScrollView* OakCreateTextView (NSRect aRect = NSMakeRect(0, 0, 600, 800))
 {
 	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:aRect];
 	NSSize textViewSize = [NSScrollView contentSizeForFrameSize:aRect.size hasHorizontalScroller:NO hasVerticalScroller:YES borderType:NSNoBorder];
@@ -425,6 +425,6 @@ class LayoutTests : public CxxTest::TestSuite
 public:
 	void test_layout ()
 	{
-		OakSetupApplicationWithView(CreateTextView());
+		OakSetupApplicationWithView(OakCreateTextView());
 	}
 };
