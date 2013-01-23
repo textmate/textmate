@@ -67,24 +67,8 @@ static CGPoint MenuPosition ()
 	NSArray* bundleMenuItems = [[bundlesMenuItem submenu] itemArray];
 	for(NSUInteger i = 0; i < [bundleMenuItems count]; ++i)
 	{
-		static struct { NSUInteger mask; std::string symbol; } const EventFlags[] =
-		{
-			{ NSNumericPadKeyMask, "#" },
-			{ NSControlKeyMask,    "^" },
-			{ NSAlternateKeyMask,  "~" },
-			{ NSShiftKeyMask,      "$" },
-			{ NSCommandKeyMask,    "@" }
-		};
-
 		NSMenuItem* menuItem = [bundleMenuItems objectAtIndex:i];
-		NSUInteger flags = [menuItem keyEquivalentModifierMask];
-
-		std::string res = "";
-		iterate(flag, EventFlags)
-			res += (flags & flag->mask) ? flag->symbol : "";
-		res += to_s([menuItem keyEquivalent]);
-
-		if(keyString == res)
+		if(keyString == ns::create_event_string(menuItem.keyEquivalent, menuItem.keyEquivalentModifierMask))
 		{
 			[[bundlesMenuItem submenu] performActionForItemAtIndex:i];
 			return YES;
