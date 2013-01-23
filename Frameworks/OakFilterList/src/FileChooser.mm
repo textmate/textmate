@@ -38,12 +38,15 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 - (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
 {
 	OFBPathInfoCell* res = (OFBPathInfoCell*)[super preparedCellAtColumn:column row:row];
-	res.disableHighlight = YES;
+	res.disableHighlight = [self.window isKeyWindow];
 	return res;
 }
 
 - (void)highlightSelectionInClipRect:(NSRect)clipRect
 {
+	if(![self.window isKeyWindow])
+		return [super highlightSelectionInClipRect:clipRect];
+
 	[[NSColor alternateSelectedControlColor] set];
 	[[self selectedRowIndexes] enumerateRangesInRange:[self rowsInRect:clipRect] options:0 usingBlock:^(NSRange range, BOOL* stop){
 		for(NSUInteger row = range.location; row < NSMaxRange(range); ++row)
@@ -277,6 +280,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.autorecalculatesKeyViewLoop = YES;
 		_window.delegate                    = self;
+		_window.level                       = NSFloatingWindowLevel;
 		_window.releasedWhenClosed          = NO;
 		_window.title                       = @"Go to File…";
 
@@ -719,7 +723,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 		NSColor* textColor        = [NSColor controlTextColor];
 		NSColor* matchedTextColor = [NSColor controlTextColor];
-		if([aTableView isRowSelected:rowIndex])
+		if([aTableView isRowSelected:rowIndex] && [self.window isKeyWindow])
 		{
 			textColor        = [NSColor alternateSelectedControlTextColor];
 			matchedTextColor = [NSColor alternateSelectedControlTextColor];
