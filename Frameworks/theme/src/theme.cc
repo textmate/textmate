@@ -64,7 +64,7 @@ theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& pl
 	return res;
 }
 
-std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::context_t const& scope)
+std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t const& scope)
 {
 	static struct { std::string name; theme_t::color_info_t decomposed_style_t::*field; } const colorKeys[] =
 	{
@@ -275,11 +275,11 @@ gutter_styles_t const& theme_t::gutter_styles () const
 	return _gutter_styles;
 }
 
-styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::string fontName, CGFloat fontSize) const
+styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope, std::string fontName, CGFloat fontSize) const
 {
-	ASSERT(scope.left && scope.right);
+	ASSERT(scope);
 
-	std::map<scope::scope_t, styles_t>::iterator styles = _cache.find(scope.right);
+	std::map<scope::scope_t, styles_t>::iterator styles = _cache.find(scope);
 	if(styles == _cache.end())
 	{
 		std::multimap<double, decomposed_style_t> ordering;
@@ -314,7 +314,7 @@ styles_t const& theme_t::styles_for_scope (scope::context_t const& scope, std::s
 		cf::color_t selection  = base.selection.is_blank()                   ? cf::color_t("#4D97FF54") : base.selection;
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
-		styles = _cache.insert(std::make_pair(scope.right, res)).first;
+		styles = _cache.insert(std::make_pair(scope, res)).first;
 	}
 	return styles->second;
 }

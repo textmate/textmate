@@ -58,7 +58,7 @@ struct PUBLIC theme_t
 	bool is_dark () const;
 	bool is_transparent () const;
 	gutter_styles_t const& gutter_styles () const;
-	styles_t const& styles_for_scope (scope::context_t const& scope, std::string fontName, CGFloat fontSize) const;
+	styles_t const& styles_for_scope (scope::scope_t const& scope, std::string fontName, CGFloat fontSize) const;
 	void clear_cache () { _cache.clear(); }
 
 	struct color_info_t
@@ -108,7 +108,7 @@ private:
 	void setup_styles ();
 
 	static decomposed_style_t parse_styles (plist::dictionary_t const& plist);
-	static std::vector<decomposed_style_t> global_styles (scope::context_t const& scope);
+	static std::vector<decomposed_style_t> global_styles (scope::scope_t const& scope);
 
 	bundles::item_ptr _item;
 	std::vector<decomposed_style_t> _styles;
