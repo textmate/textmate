@@ -190,8 +190,9 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	{
 		_items = @[ ];
 
-		_searchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
-		_searchField.delegate = self;
+		_searchField               = [[NSSearchField alloc] initWithFrame:NSZeroRect];
+		_searchField.delegate      = self;
+		_searchField.focusRingType = NSFocusRingTypeNone;
 		[_searchField.cell setScrollable:YES];
 
 		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
@@ -247,24 +248,26 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_progressIndicator.controlSize          = NSSmallControlSize;
 		_progressIndicator.displayedWhenStopped = NO;
 
-		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 600) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
-		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+		_window = [[NSPanel alloc] initWithContentRect:NSMakeRect(600, 700, 400, 500) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
-		[_window setContentBorderThickness:30 forEdge: NSMinYEdge];
-		[_window setContentBorderThickness:31 forEdge: NSMaxYEdge];
+		[_window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+		[_window setContentBorderThickness:57 forEdge: NSMaxYEdge];
+		[_window setContentBorderThickness:23 forEdge: NSMinYEdge];
+		[[_window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
+		[[_window standardWindowButton:NSWindowZoomButton] setHidden:YES];
 		_window.autorecalculatesKeyViewLoop = YES;
 		_window.delegate                    = self;
 		_window.releasedWhenClosed          = NO;
-		_window.title                       = @"Open Document";
+		_window.title                       = @"Go to File…";
 
 		NSDictionary* views = @{
 			@"searchField"        : _searchField,
 			@"aboveScopeBarDark"  : OakCreateViewWithColor([NSColor grayColor]),
-			@"aboveScopeBarLight" : OakCreateViewWithColor([NSColor lightGrayColor]),
+			@"aboveScopeBarLight" : OakCreateViewWithColor([NSColor colorWithCalibratedWhite:1.000 alpha:0.300]),
 			@"allButton"          : _allButton,
 			@"openFilesButton"    : _openDocumentsButton,
 			@"scmChangesButton"   : _scmChangesButton,
-			@"topDivider"         : OakCreateViewWithColor([NSColor grayColor]),
+			@"topDivider"         : OakCreateViewWithColor([NSColor darkGrayColor]),
 			@"scrollView"         : scrollView,
 			@"bottomDivider"      : OakCreateViewWithColor([NSColor grayColor]),
 			@"statusTextField"    : _statusTextField,
@@ -283,12 +286,12 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		[_statusTextField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[_itemCountTextField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[searchField(>=50)]-|"                              options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[allButton]-[openFilesButton]-[scmChangesButton]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[statusTextField]-[itemCountTextField]-(4)-[progressIndicator]-(4)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(8)-[searchField]-(8)-[aboveScopeBarDark(==1)][aboveScopeBarLight(==1)]-(4)-[allButton]-(4)-[topDivider(==1)][scrollView(>=50)][bottomDivider(==1)]-[statusTextField]-(8)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark(==1)][aboveScopeBarLight(==1)]-(3)-[allButton]-(4)-[topDivider(==1)][scrollView(>=50)][bottomDivider(==1)]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey])
 			self.sourceIndex = 1;
