@@ -1,5 +1,16 @@
 # Changes
 
+## 2013-01-23 (r9351)
+
+* Actions performed in the file browser now support undo. The context menu of the file browser contains undo/redo menu items, alternatively the Edit menu’s Undo and Redo actions work on the file browser, when it has focus.
+* You can now delete items on network drives but will get a warning dialog informing you that the items will be permanently deleted.
+* When you open files without extension nor identifying content (like a shebang) then they now open as plain text (instead of asking you to pick a type).
+* When you select units, e.g. via the _Edit → Select_ submenu, TextMate does a more intelligent job of making the selection visible, and if only a subset can be shown, it no longer scrolls to the bottom of the selection.
+* Add scope bar to file chooser (⌘T) and do various visual improvements. The _Uncommitted Documents_ source is currently unavailable.
+* Improve speed of rendering styled text. *[Joachim Mårtensson]*
+* If your clipboard data contains `<NUL>` characters then these can now be pasted into TextMate.
+* Default theme has been changed to Twilight, default location for (HTML) command output is set to new window, and the position of the file browser now defaults to the right side. As for the latter, it takes some getting used to, but give it a chance, as it means your text doesn’t “move” depending on wether or not the file browser is visible.
+
 ## 2013-01-21 (r9349)
 
  *	Rework file chooser (⌘T):
