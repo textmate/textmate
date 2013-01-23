@@ -98,7 +98,7 @@ namespace ng
 		_line.reset();
 	}
 
-	void paragraph_t::node_t::layout (CGFloat x, CGFloat tabWidth, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, std::string const& fillStr)
+	void paragraph_t::node_t::layout (CGFloat x, CGFloat tabWidth, theme_ptr const& theme, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, ng::buffer_t const& buffer, size_t bufferOffset, std::string const& fillStr)
 	{
 		if(_line)
 			return;
@@ -107,7 +107,7 @@ namespace ng
 		{
 			case kNodeTypeText:
 			{
-				_line.reset(new ct::line_t(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, fontName, fontSize, NULL));
+				_line.reset(new ct::line_t(buffer.substr(bufferOffset, bufferOffset + _length), buffer.scopes(bufferOffset, bufferOffset + _length), theme, NULL));
 			}
 			break;
 
@@ -116,7 +116,7 @@ namespace ng
 				std::string str = representation_for(utf8::to_ch(buffer.substr(bufferOffset, bufferOffset + _length)));
 				std::map<size_t, scope::scope_t> scopes;
 				scopes[0] = buffer.scope(bufferOffset).right.append("deco.unprintable");
-				_line.reset(new ct::line_t(str, scopes, theme, fontName, fontSize, NULL));
+				_line.reset(new ct::line_t(str, scopes, theme, NULL));
 			}
 			break;
 
@@ -136,7 +136,7 @@ namespace ng
 			{
 				std::map<size_t, scope::scope_t> scopes;
 				scopes[0] = buffer.scope(bufferOffset).right.append("deco.indented-wrap");
-				_line.reset(new ct::line_t(fillStr, scopes, theme, fontName, fontSize, NULL));
+				_line.reset(new ct::line_t(fillStr, scopes, theme, NULL));
 			}
 			break;
 		}
@@ -160,7 +160,7 @@ namespace ng
 			_width += tabWidth;
 	}
 
-	void paragraph_t::node_t::draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
+	void paragraph_t::node_t::draw_background (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor, CGFloat lineHeight) const
 	{
 		if(_line)
 			_line->draw_background(CGPointMake(anchor.x, anchor.y), lineHeight, context, isFlipped, backgroundColor);
@@ -175,7 +175,7 @@ namespace ng
 				case kNodeTypeSoftBreak:   scope = scope.append("deco.indented-wrap"); break;
 			}
 
-			styles_t const styles = theme->styles_for_scope(scope, fontName, fontSize);
+			styles_t const styles = theme->styles_for_scope(scope);
 			if(!CFEqual(backgroundColor, styles.background()))
 			{
 				CGFloat x1 = round(anchor.x);
@@ -185,7 +185,7 @@ namespace ng
 		}
 	}
 
-	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
+	void paragraph_t::node_t::draw_foreground (theme_ptr const& theme, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, std::vector< std::pair<size_t, size_t> > const& misspelled, CGPoint anchor, CGFloat baseline) const
 	{
 		if(_line)
 			_line->draw_foreground(CGPointMake(anchor.x, anchor.y + baseline), context, isFlipped, misspelled);
@@ -208,13 +208,13 @@ namespace ng
 
 			if(str != NULL_STR)
 			{
-				styles_t const styles = theme->styles_for_scope(scope, fontName, fontSize);
+				styles_t const styles = theme->styles_for_scope(scope);
 				draw_line(CGPointMake(anchor.x, anchor.y + baseline), str, styles.foreground(), styles.font(), context, isFlipped);
 			}
 
 			if(_type == kNodeTypeFolding)
 			{
-				styles_t const styles = theme->styles_for_scope(scope.append("deco.folding"), fontName, fontSize);
+				styles_t const styles = theme->styles_for_scope(scope.append("deco.folding"));
 
 				CGFloat x1 = round(anchor.x);
 				CGFloat x2 = round(anchor.x + _width);
@@ -317,7 +317,7 @@ namespace ng
 		_dirty = true;
 	}
 
-	bool paragraph_t::layout (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset)
+	bool paragraph_t::layout (theme_ptr const& theme, bool softWrap, size_t wrapColumn, ct::metrics_t const& metrics, CGRect visibleRect, ng::buffer_t const& buffer, size_t bufferOffset)
 	{
 		if(!_dirty)
 			return false;
@@ -378,7 +378,7 @@ namespace ng
 		size_t i = bufferOffset;
 		iterate(node, _nodes)
 		{
-			node->layout(x, tabSize * metrics.column_width(), theme, fontName, fontSize, softWrap, wrapColumn, metrics, buffer, i, fillStr);
+			node->layout(x, tabSize * metrics.column_width(), theme, softWrap, wrapColumn, metrics, buffer, i, fillStr);
 			x += node->width();
 			i += node->length();
 		}
@@ -681,7 +681,7 @@ namespace ng
 		return index;
 	}
 
-	void paragraph_t::draw_background (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
+	void paragraph_t::draw_background (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
 	{
 		// render::fill_rect(context, cf::color_t("#FFAAAA"), CGRectInset(CGRectMake(anchor.x, anchor.y, width(), height(metrics)), -1, 0));
 		// render::fill_rect(context, backgroundColor, CGRectMake(anchor.x, anchor.y, width(), height(metrics)));
@@ -693,14 +693,14 @@ namespace ng
 			size_t offset = lines[i].offset;
 			foreach(node, _nodes.begin() + lines[i].first, _nodes.begin() + lines[i].last)
 			{
-				node->draw_background(theme, fontName, fontSize, context, isFlipped, visibleRect, showInvisibles, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height);
+				node->draw_background(theme, context, isFlipped, visibleRect, showInvisibles, backgroundColor, buffer, bufferOffset + offset, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].height);
 				x += node->width();
 				offset += node->length();
 			}
 		}
 	}
 
-	void paragraph_t::draw_foreground (theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
+	void paragraph_t::draw_foreground (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef textColor, ng::buffer_t const& buffer, size_t bufferOffset, ng::ranges_t const& selection, CGPoint anchor) const
 	{
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 
@@ -732,7 +732,7 @@ namespace ng
 					}
 				}
 
-				node->draw_foreground(theme, fontName, fontSize, context, isFlipped, visibleRect, showInvisibles, textColor, buffer, offset, misspelled, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
+				node->draw_foreground(theme, context, isFlipped, visibleRect, showInvisibles, textColor, buffer, offset, misspelled, CGPointMake(anchor.x + x, anchor.y + lines[i].y), lines[i].baseline);
 				x += node->width();
 				offset += node->length();
 			}

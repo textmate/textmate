@@ -49,17 +49,20 @@ struct PUBLIC gutter_styles_t
 
 struct PUBLIC theme_t
 {
-	theme_t (bundles::item_ptr const& themeItem);
+	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = "Menlo-Regular", CGFloat fontSize = 12);
 	~theme_t ();
 
+	void set_font_name_and_size (std::string const& fontName, CGFloat fontSize);
+
 	oak::uuid_t const& uuid () const;
+	std::string const& font_name () const;
+	CGFloat font_size () const;
 	CGColorRef foreground () const;
 	CGColorRef background (std::string const& fileType = NULL_STR) const;
 	bool is_dark () const;
 	bool is_transparent () const;
 	gutter_styles_t const& gutter_styles () const;
-	styles_t const& styles_for_scope (scope::scope_t const& scope, std::string fontName, CGFloat fontSize) const;
-	void clear_cache () { _cache.clear(); }
+	styles_t const& styles_for_scope (scope::scope_t const& scope) const;
 
 	struct color_info_t
 	{
@@ -111,6 +114,8 @@ private:
 	static std::vector<decomposed_style_t> global_styles (scope::scope_t const& scope);
 
 	bundles::item_ptr _item;
+	std::string _font_name;
+	CGFloat _font_size;
 	std::vector<decomposed_style_t> _styles;
 	gutter_styles_t _gutter_styles;
 	cf::color_t _foreground;

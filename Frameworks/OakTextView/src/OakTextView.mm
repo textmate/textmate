@@ -410,7 +410,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
-		layout.reset(new ng::layout_t(document->buffer(), theme, fontName, fontSize, settings.get(kSettingsSoftWrapKey, false), wrapColumn, document->folded()));
+		layout.reset(new ng::layout_t(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), wrapColumn, document->folded()));
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
@@ -458,6 +458,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		fontSize       = settings.get(kSettingsFontSizeKey, 11);
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+
+		theme->set_font_name_and_size(fontName, fontSize);
 
 		spellingDotImage = [[NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]] retain];
 		foldingDotsImage = [[NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]] retain];
@@ -772,7 +774,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	std::map<size_t, scope::scope_t> scopes = document->buffer().scopes(from, to);
 	for(auto pair = scopes.begin(); pair != scopes.end(); )
 	{
-		styles_t const& styles = theme->styles_for_scope(pair->second, fontName, fontSize);
+		styles_t const& styles = theme->styles_for_scope(pair->second);
 
 		size_t i = from + pair->first;
 		size_t j = ++pair != scopes.end() ? from + pair->first : to;

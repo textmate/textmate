@@ -35,7 +35,7 @@ namespace ng
 	// = layout_t =
 	// ============
 
-	layout_t::layout_t (ng::buffer_t& buffer, theme_ptr const& theme, std::string const& fontName, CGFloat fontSize, bool softWrap, size_t wrapColumn, std::string const& folded, ng::layout_t::margin_t const& margin) : _folds(new folds_t(buffer)), _buffer(buffer), _theme(theme), _font_name(fontName), _font_size(fontSize), _tab_size(buffer.indent().tab_size()), _wrapping(softWrap), _wrap_column(wrapColumn), _margin(margin)
+	layout_t::layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap, size_t wrapColumn, std::string const& folded, ng::layout_t::margin_t const& margin) : _folds(new folds_t(buffer)), _buffer(buffer), _theme(theme), _tab_size(buffer.indent().tab_size()), _wrapping(softWrap), _wrap_column(wrapColumn), _margin(margin)
 	{
 		struct parser_callback_t : ng::callback_t
 		{
@@ -64,7 +64,7 @@ namespace ng
 
 	void layout_t::setup_font_metrics ()
 	{
-		_metrics.reset(new ct::metrics_t(_font_name, _font_size));
+		_metrics.reset(new ct::metrics_t(_theme->font_name(), _theme->font_size()));
 	}
 
 	void layout_t::clear_text_widths ()
@@ -89,12 +89,9 @@ namespace ng
 
 	void layout_t::set_font (std::string const& fontName, CGFloat fontSize)
 	{
-		if(fontName == _font_name && fontSize == _font_size)
+		if(fontName == _theme->font_name() && fontSize == _theme->font_size())
 			return;
-		if(_theme)
-			_theme->clear_cache();
-		_font_name = fontName;
-		_font_size = fontSize;
+		_theme->set_font_name_and_size(fontName, fontSize);
 		setup_font_metrics();
 		clear_text_widths();
 	}
@@ -388,7 +385,7 @@ namespace ng
 
 		foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
 		{
-			if(row->value.layout(_theme, _font_name, _font_size, effective_soft_wrap(row), effective_wrap_column(), *_metrics, visibleRect, _buffer, row->offset._length))
+			if(row->value.layout(_theme, effective_soft_wrap(row), effective_wrap_column(), *_metrics, visibleRect, _buffer, row->offset._length))
 			{
 				bool didUpdateHeight = update_row(row);
 				if(_refresh_counter)
@@ -771,7 +768,7 @@ namespace ng
 		if(drawBackground)
 		{
 			foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-				row->value.draw_background(_theme, _font_name, _font_size, *_metrics, context, isFlipped, visibleRect, showInvisibles, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
+				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, showInvisibles, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		}
 
 		base_colors_t baseColors(_theme->is_dark());
@@ -782,7 +779,7 @@ namespace ng
 		{
 			citerate(rect, rects_for_ranges(*range, kRectsIncludeSelections))
 			{
-				CGColorRef selColor = _theme->styles_for_scope(_buffer.scope(range->min().index).right, _font_name, _font_size).selection();
+				CGColorRef selColor = _theme->styles_for_scope(_buffer.scope(range->min().index).right).selection();
 				if(!_is_key)
 					selColor = CGColorCreateCopyWithAlpha(selColor, 0.5 * CGColorGetAlpha(selColor));
 				render::fill_rect(context, selColor, *rect);
@@ -799,14 +796,14 @@ namespace ng
 		}
 
 		foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
-			row->value.draw_foreground(_theme, _font_name, _font_size, *_metrics, context, isFlipped, visibleRect, showInvisibles, textColor, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
+			row->value.draw_foreground(_theme, *_metrics, context, isFlipped, visibleRect, showInvisibles, textColor, _buffer, row->offset._length, selection, CGPointMake(_margin.left, _margin.top + row->offset._height));
 
 		if(_draw_caret && !_drop_marker)
 		{
 			citerate(range, selection)
 			{
 				citerate(rect, rects_for_ranges(*range, kRectsIncludeCarets))
-					render::fill_rect(context, _theme->styles_for_scope(_buffer.scope(range->min().index).right, _font_name, _font_size).caret(), *rect);
+					render::fill_rect(context, _theme->styles_for_scope(_buffer.scope(range->min().index).right).caret(), *rect);
 			}
 		}
 

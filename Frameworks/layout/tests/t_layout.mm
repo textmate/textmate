@@ -133,7 +133,8 @@ private:
 			buffer.set_grammar(*item);
 
 		theme_ptr theme = parse_theme(bundles::lookup("71D40D9D-AE48-11D9-920A-000D93589AF6"));
-		layout.reset(new ng::layout_t(buffer, theme, "Gill Sans", 14, true));
+		theme->set_font_name_and_size("Gill Sans", 14);
+		layout.reset(new ng::layout_t(buffer, theme, true));
 		layout->set_viewport_size([[self enclosingScrollView] documentVisibleRect].size);
 	}
 	return self;

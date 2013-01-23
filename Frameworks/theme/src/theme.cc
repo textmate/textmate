@@ -130,7 +130,7 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 // = theme_t =
 // ===========
 
-theme_t::theme_t (bundles::item_ptr const& themeItem) : _item(themeItem), _callback(*this)
+theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) : _item(themeItem), _font_name(fontName), _font_size(fontSize), _callback(*this)
 {
 	setup_styles();
 	bundles::add_callback(&_callback);
@@ -139,6 +139,15 @@ theme_t::theme_t (bundles::item_ptr const& themeItem) : _item(themeItem), _callb
 theme_t::~theme_t ()
 {
 	bundles::remove_callback(&_callback);
+}
+
+void theme_t::set_font_name_and_size (std::string const& fontName, CGFloat fontSize)
+{
+	if(_font_name == fontName && _font_size == fontSize)
+		return;
+	_font_name = fontName;
+	_font_size = fontSize;
+	_cache.clear();
 }
 
 static cf::color_t soften (cf::color_t color, CGFloat factor)
@@ -248,6 +257,16 @@ oak::uuid_t const& theme_t::uuid () const
 	return _item ? _item->uuid() : FallbackThemeUUID;
 }
 
+std::string const& theme_t::font_name () const
+{
+	return _font_name;
+}
+
+CGFloat theme_t::font_size () const
+{
+	return _font_size;
+}
+
 CGColorRef theme_t::foreground () const
 {
 	return _foreground;
@@ -256,7 +275,7 @@ CGColorRef theme_t::foreground () const
 CGColorRef theme_t::background (std::string const& fileType) const
 {
 	if(fileType != NULL_STR)
-		return styles_for_scope(fileType, NULL_STR, 0).background();
+		return styles_for_scope(fileType).background();
 	return _background;
 }
 
@@ -275,7 +294,7 @@ gutter_styles_t const& theme_t::gutter_styles () const
 	return _gutter_styles;
 }
 
-styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope, std::string fontName, CGFloat fontSize) const
+styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 {
 	ASSERT(scope);
 
@@ -297,7 +316,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope, std::str
 				ordering.insert(std::make_pair(rank, *it));
 		}
 
-		decomposed_style_t base(scope::selector_t(), fontName, fontSize);
+		decomposed_style_t base(scope::selector_t(), _font_name, _font_size);
 		iterate(it, ordering)
 			base += it->second;
 

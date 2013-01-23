@@ -91,14 +91,14 @@ namespace ct
 	// = line_t =
 	// ==========
 
-	line_t::line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, std::string fontName, CGFloat fontSize, CGColorRef textColor) : _text(text)
+	line_t::line_t (std::string const& text, std::map<size_t, scope::scope_t> const& scopes, theme_ptr const& theme, CGColorRef textColor) : _text(text)
 	{
 		ASSERT(utf8::is_valid(text.begin(), text.end()));
 
 		CFMutableAttributedStringRef toDraw = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
 		for(auto pair = scopes.begin(); pair != scopes.end(); )
 		{
-			styles_t const& styles = theme->styles_for_scope(pair->second, fontName, fontSize);
+			styles_t const& styles = theme->styles_for_scope(pair->second);
 			size_t i = pair->first;
 			size_t j = ++pair != scopes.end() ? pair->first : text.size();
 

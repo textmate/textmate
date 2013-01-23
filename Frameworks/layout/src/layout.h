@@ -24,7 +24,7 @@ namespace ng
 			size_t left, top, right, bottom;
 		};
 
-		layout_t (ng::buffer_t& buffer, theme_ptr const& theme, std::string const& fontName = "Menlo", CGFloat fontSize = 12, bool softWrap = false, size_t wrapColumn = 0, std::string const& folded = NULL_STR, margin_t const& margin = margin_t(8));
+		layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap = false, size_t wrapColumn = 0, std::string const& folded = NULL_STR, margin_t const& margin = margin_t(8));
 		~layout_t ();
 
 		// _buffer_callback is managed with new/delete so can’t be copied
@@ -41,8 +41,8 @@ namespace ng
 		void set_wrapping (bool softWrap, size_t wrapColumn);
 
 		theme_ptr const& theme () const         { return _theme; }
-		std::string const& font_name () const   { return _font_name; }
-		CGFloat font_size () const              { return _font_size; }
+		std::string const& font_name () const   { return _theme->font_name(); }
+		CGFloat font_size () const              { return _theme->font_size(); }
 		size_t tab_size () const                { return _tab_size; }
 		margin_t const& margin () const         { return _margin; }
 		bool wrapping () const                  { return _wrapping; }
@@ -162,8 +162,6 @@ namespace ng
 		ng::callback_t*    _buffer_callback;
 
 		theme_ptr          _theme;
-		std::string        _font_name;
-		CGFloat            _font_size;
 		size_t             _tab_size;
 		bool               _wrapping;
 		bool               _draw_wrap_column = false;
