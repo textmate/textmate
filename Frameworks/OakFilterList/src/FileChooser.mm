@@ -108,11 +108,13 @@ namespace
 	{
 		document_record_t (document::document_ptr const& doc)
 		{
-			identifier = doc->identifier();
 			full_path  = doc->path();
 			name       = full_path == NULL_STR ? doc->display_name() : path::name(full_path);
 			display    = name;
 			lru_rank   = -doc->lru().value();
+
+			if(full_path == NULL_STR)
+				identifier = doc->identifier();
 		}
 
 		oak::uuid_t identifier;
