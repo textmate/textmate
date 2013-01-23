@@ -113,6 +113,12 @@ namespace
 				if(extension != NULL_STR)
 					boost::split(extensions, extension, boost::is_any_of("."));
 
+				// strip empty elements
+				extensions.erase(std::remove_if(extensions.begin(), extensions.end(),
+								  [](const std::string& s) { return !s.empty(); }), extensions.end());
+
+				NSLog(@"size: %d", extensions.size());
+
 				raw_path = full_path();
 
 				path = oak::normalize_filter(path);
@@ -481,6 +487,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		// 	NSLog(@"query ext: %s", ext.c_str());
 		// NSLog(@"\n\n");
 		// for(auto ext : extensions)
+		// 	NSLog(@"type: %s", ext(0));
 		// 	NSLog(@"file's ext: %s", ext.c_str());
 		// NSLog(@"\n\n");
 
