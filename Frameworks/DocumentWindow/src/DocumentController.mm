@@ -1448,19 +1448,20 @@ namespace
 {
 	FileChooser* fc = [FileChooser sharedInstance];
 
-	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
-	{
-		std::string str = to_s(entry.string);
-		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str.data(), str.data() + str.size()))
-			fc.filterString = entry.string;
-	}
-
+	fc.filterString    = @"";
 	fc.openDocuments   = _documents;
 	fc.currentDocument = _selectedDocument ? _selectedDocument->identifier() : oak::uuid_t();
 	fc.scmInfo         = _scmInfo;
 	fc.target          = self;
 	fc.action          = @selector(fileChooserDidSelectItems:);
 	fc.path            = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
+
+	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
+	{
+		std::string str = to_s(entry.string);
+		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str.data(), str.data() + str.size()))
+			fc.filterString = entry.string;
+	}
 
 	[fc showWindowRelativeToWindow:self.window];
 }
