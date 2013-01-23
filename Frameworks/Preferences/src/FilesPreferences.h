@@ -3,8 +3,10 @@
 
 @interface FilesPreferences : PreferencesPane
 {
-	IBOutlet NSPopUpButton* documentTypesPopUp;
+	IBOutlet NSPopUpButton* newDocumentTypesPopUp;
+	IBOutlet NSPopUpButton* unknownDocumentTypesPopUp;
 	IBOutlet OakEncodingPopUpButton* encodingPopUp;
-	IBOutlet NSMenu* documentTypesMenu;
+	IBOutlet NSMenu* newDocumentTypesMenu;
+	IBOutlet NSMenu* unknownDocumentTypesMenu;
 }
 @end
