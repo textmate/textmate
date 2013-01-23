@@ -6,6 +6,22 @@
 
 OAK_DEBUG_VAR(OakSubmenuController);
 
+@interface OakProxyMenuItem : NSMenuItem
+@end
+
+@implementation OakProxyMenuItem
+- (void)tmSendAction:(id)sender
+{
+	[NSApp sendAction:self.action to:self.target from:self];
+	self.target = nil;
+	self.representedObject = nil;
+}
+@end
+
+@interface OakSubmenuController ()
+@property (nonatomic, retain) OakProxyMenuItem* proxyMenuItem;
+@end
+
 @implementation OakSubmenuController
 - (void)awakeFromNib
 {
@@ -25,5 +41,38 @@ OAK_DEBUG_VAR(OakSubmenuController);
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
 	[self updateMenu:aMenu withSelector:aMenu == goToMenu ? @selector(updateGoToMenu:) : @selector(updateBookmarksMenu:)];
+}
+
+- (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
+{
+	D(DBF_OakSubmenuController, bug("%s %s\n", to_s(anEvent).c_str(), [[aMenu description] UTF8String]););
+
+	if(aMenu != goToMenu)
+		return NO;
+
+	std::string const eventString = to_s(anEvent);
+
+	NSMenu* dummy = [[NSMenu new] autorelease];
+	[self updateMenu:dummy withSelector:@selector(updateGoToMenu:)];
+	for(NSMenuItem* item in [dummy itemArray])
+	{
+		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))
+		{
+			D(DBF_OakSubmenuController, bug("%s%ld\n", sel_getName(item.action), item.tag););
+			if(!self.proxyMenuItem)
+				self.proxyMenuItem = [[OakProxyMenuItem new] autorelease];
+
+			self.proxyMenuItem.action            = item.action;
+			self.proxyMenuItem.target            = item.target;
+			self.proxyMenuItem.tag               = item.tag;
+			self.proxyMenuItem.representedObject = item.representedObject;
+
+			*anId = self.proxyMenuItem;
+			*aSEL = @selector(tmSendAction:);
+
+			return YES;
+		}
+	}
+	return NO;
 }
 @end
