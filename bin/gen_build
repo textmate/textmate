@@ -483,16 +483,33 @@ end
 def dynamic_executable(target)
    res = ''
 
-   link_with = all_values_for_key(target, 'LINK').map { |name| TARGETS.target_named(name)[:dylib] }
+   if target[:name] == 'TextMate'
+     dst = build_path("#{target[:path]}/#{target[:name]}.dyn")
+     target[:dynamic_executable] = dst
 
-   dst = build_path("#{target[:path]}/#{target[:name]}.dyn")
-   target[:dynamic_executable] = dst
+     objects = [ ]
+     all_values_for_key(target, 'LINK').each do |name|
+       objects << TARGETS.target_named(name)[:objects]
+     end
+     objects << target[:objects]
 
-   res << "build #{dst}: link_executable #{target[:objects].join(' ')} | #{link_with.join(' ')}\n"
-   res << flags_for_target(target)
-   fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
-   libs = prepend('-l', all_values_for_key(target, 'LIBS'))
-   res << "  RAVE_FLAGS = #{link_with.join(' ')} #{fws} #{libs}\n"
+     res << "build #{dst}: link_executable #{objects.flatten.join(' ')}\n"
+     res << flags_for_target(target)
+     fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
+     libs = prepend('-l', all_values_for_key(target, 'LIBS'))
+     res << "  RAVE_FLAGS = #{fws} #{libs}\n"
+   else
+     link_with = all_values_for_key(target, 'LINK').map { |name| TARGETS.target_named(name)[:dylib] }
+
+     dst = build_path("#{target[:path]}/#{target[:name]}.dyn")
+     target[:dynamic_executable] = dst
+
+     res << "build #{dst}: link_executable #{target[:objects].join(' ')} | #{link_with.join(' ')}\n"
+     res << flags_for_target(target)
+     fws  = prepend('-framework ', all_values_for_key(target, 'FRAMEWORKS'))
+     libs = prepend('-l', all_values_for_key(target, 'LIBS'))
+     res << "  RAVE_FLAGS = #{link_with.join(' ')} #{fws} #{libs}\n"
+   end
 
    res
 end
@@ -505,15 +522,31 @@ def app_bundle(target)
   dst = build_path("#{target[:path]}/#{target[:name]}.#{ext}")
   target[:bundle] = dst
 
-  fw_dst = File.join(dst, "Contents/Frameworks")
-  all_values_for_key(target, 'LINK').each do |name|
-    tmp = TARGETS.target_named(name)
-    if tmp[:CP_Resources].to_a.empty?
-      res << "build #{fw_dst}/#{tmp[:name]}.dylib: cp #{tmp[:dylib]}\n"
-      deps << "#{fw_dst}/#{tmp[:name]}.dylib"
-    else
-      res << framework_bundle(tmp, fw_dst)
-      deps << "#{fw_dst}/#{tmp[:name]}.framework"
+  if target[:name] == 'TextMate'
+    contents_dst = File.join(dst, "Contents")
+    all_values_for_key(target, 'LINK').each do |name|
+      tmp = TARGETS.target_named(name)
+      tmp.each do |key, files|
+        if key.class == Symbol && key.to_s =~ /^CP_(.+)$/
+          install_dir = $1
+          files.each do |rsrc|
+            deps << "#{contents_dst}/#{install_dir}/#{rsrc[:dst]}"
+            res << "build #{deps.last}: cp #{rsrc[:src]}\n"
+          end
+        end
+      end
+    end
+  else
+    fw_dst = File.join(dst, "Contents/Frameworks")
+    all_values_for_key(target, 'LINK').each do |name|
+      tmp = TARGETS.target_named(name)
+      if tmp[:CP_Resources].to_a.empty?
+        res << "build #{fw_dst}/#{tmp[:name]}.dylib: cp #{tmp[:dylib]}\n"
+        deps << "#{fw_dst}/#{tmp[:name]}.dylib"
+      else
+        res << framework_bundle(tmp, fw_dst)
+        deps << "#{fw_dst}/#{tmp[:name]}.framework"
+      end
     end
   end
 
