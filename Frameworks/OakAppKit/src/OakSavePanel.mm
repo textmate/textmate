@@ -80,6 +80,14 @@
 		NSString* path = result == NSOKButton ? [[savePanel.URL filePathURL] path] : nil;
 		aCompletionHandler(path, optionsViewController.encodingOptions);
 	}];
-	[savePanel deselectExtension];
+
+	// Deselect Extension
+	if([savePanel.firstResponder isKindOfClass:[NSTextView class]])
+	{
+		NSTextView* tw = (NSTextView*)savePanel.firstResponder;
+		NSRange extRange = [tw.textStorage.string rangeOfString:@"."];
+		if(extRange.location != NSNotFound)
+			[tw setSelectedRange:NSMakeRange(0, extRange.location)];
+	}
 }
 @end
