@@ -636,7 +636,7 @@ open(outfile, "w") do |io|
   io << "\n"
   io << "builddir = #{builddir}\n"
   io << "include $builddir/build.ninja\n"
-  io << "include #{userfile}\n" if File.exists?(File.join(File.dirname(outfile), userfile))
+  io << "include #{userfile}\n" if userfile != 'build.ninja' && File.exists?(File.join(File.dirname(outfile), userfile))
 end
 
 open("#{builddir}/build.ninja", "w") do |io|
