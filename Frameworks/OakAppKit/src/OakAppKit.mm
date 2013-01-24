@@ -2,13 +2,56 @@
 
 NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 
-NSBox* OakCreateViewWithColor (NSColor* color)
+@interface OakDividerLineView : NSBox
+@property (nonatomic, retain) NSColor* primaryColor;
+@property (nonatomic, retain) NSColor* secondaryColor;
+@property (nonatomic)         BOOL usePrimaryColor;
+@end
+
+@implementation OakDividerLineView
+- (void)viewWillMoveToWindow:(NSWindow*)newWindow
 {
-	NSBox* box = [[[NSBox alloc] initWithFrame:NSZeroRect] autorelease];
-	box.boxType    = NSBoxCustom;
-	box.borderType = NSLineBorder;
-	if(color)
-		box.borderColor = color;
+	if(!self.secondaryColor)
+		return;
+
+	if(self.window)
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.window];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:self.window];
+	}
+
+	if(newWindow)
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMain:) name:NSWindowDidBecomeMainNotification object:newWindow];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMain:) name:NSWindowDidResignMainNotification object:newWindow];
+	}
+
+	self.usePrimaryColor = [newWindow isMainWindow];
+}
+
+- (void)windowDidChangeMain:(NSNotification*)aNotification
+{
+	self.usePrimaryColor = [self.window isMainWindow];
+}
+
+- (void)setUsePrimaryColor:(BOOL)flag
+{
+	if(_usePrimaryColor != flag)
+	{
+		_usePrimaryColor = flag;
+		self.borderColor = flag ? self.primaryColor : self.secondaryColor;
+	}
+}
+@end
+
+NSBox* OakCreateViewWithColor (NSColor* color, NSColor* secondaryColor)
+{
+	OakDividerLineView* box = [[[OakDividerLineView alloc] initWithFrame:NSZeroRect] autorelease];
+	box.boxType        = NSBoxCustom;
+	box.borderType     = NSLineBorder;
+	box.borderColor    = color;
+	box.primaryColor   = color;
+	box.secondaryColor = secondaryColor;
 	return box;
 }
 

@@ -3,7 +3,7 @@
 
 PUBLIC extern NSString* const OakCursorDidHideNotification;
 
-PUBLIC NSBox* OakCreateViewWithColor (NSColor* color = nil);
+PUBLIC NSBox* OakCreateViewWithColor (NSColor* color = nil, NSColor* secondaryColor = nil);
 
 PUBLIC BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags = NSAlternateKeyMask, NSEvent* anEvent = [NSApp currentEvent]);
 PUBLIC void OakShowSheetForWindow (NSWindow* sheet, NSWindow* window, void(^callback)(NSInteger));
