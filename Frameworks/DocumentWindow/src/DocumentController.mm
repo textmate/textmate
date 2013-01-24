@@ -2000,6 +2000,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 		void show_browser (std::string const& path) const
 		{
 			std::string const folder = path::resolve(path);
+			[[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:folder]]]; 
 
 			for(DocumentController* candidate in SortedControllers())
 			{
