@@ -777,16 +777,17 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		NSURL* itemURL = item.target ?: item.url;
 
 		FSItemURLType type = item.urlType;
-		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
-			type = FSItemURLTypeFolder;
-		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]))
-			type = FSItemURLTypePackage;
-		else if(type == FSItemURLTypeAlias)
+		if(type == FSItemURLTypeAlias)
 		{
 			FSItem* tmp = [FSItem itemWithURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:path::resolve([itemURL.path fileSystemRepresentation])]]];
 			type    = tmp.urlType;
 			itemURL = tmp.target ?: tmp.url;
 		}
+		
+		if(type == FSItemURLTypePackage && OakIsAlternateKeyOrMouseEvent())
+			type = FSItemURLTypeFolder;
+		else if(type == FSItemURLTypeFile && is_binary([itemURL.path fileSystemRepresentation]) && !OakIsAlternateKeyOrMouseEvent())
+			type = FSItemURLTypePackage;
 
 		switch(type)
 		{
