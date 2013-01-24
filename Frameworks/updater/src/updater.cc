@@ -323,6 +323,7 @@ namespace bundles_db
 
 				plist::get_key_path(*item, "name",              bundle->_name);
 				plist::get_key_path(*item, "category",          bundle->_category);
+				plist::get_key_path(*item, "html_url",          bundle->_html_url);
 				plist::get_key_path(*item, "contactName",       bundle->_contact_name);
 				plist::get_key_path(*item, "contactEmailRot13", bundle->_contact_email);
 				plist::get_key_path(*item, "description",       bundle->_description);

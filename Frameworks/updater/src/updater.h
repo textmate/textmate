@@ -44,12 +44,13 @@ namespace bundles_db
 
 	struct PUBLIC bundle_t
 	{
-		bundle_t () : _name(NULL_STR), _category(NULL_STR), _origin(NULL_STR), _description(NULL_STR), _contact_name(NULL_STR), _contact_email(NULL_STR), _url(NULL_STR), _size(0), _path(NULL_STR) { }
+		bundle_t () : _name(NULL_STR), _category(NULL_STR), _html_url(NULL_STR), _origin(NULL_STR), _description(NULL_STR), _contact_name(NULL_STR), _contact_email(NULL_STR), _url(NULL_STR), _size(0), _path(NULL_STR) { }
 
 		oak::uuid_t uuid () const              { return _uuid; }
 		std::string origin () const            { return _origin; }
 		std::string name () const              { return _name; }
 		std::string category () const          { return _category; }
+		std::string html_url () const          { return _html_url; }
 		std::string description () const       { return _description; }
 		std::string contact_name () const      { return _contact_name; }
 		std::string contact_email () const     { return _contact_email; }
@@ -81,6 +82,7 @@ namespace bundles_db
 
 		std::string _name;
 		std::string _category;
+		std::string _html_url;
 		std::string _origin;
 		std::string _description;
 		std::string _contact_name;
