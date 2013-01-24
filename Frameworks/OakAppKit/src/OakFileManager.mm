@@ -100,14 +100,15 @@
 	else	[window presentError:error];
 }
 
-- (BOOL)doMove:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window
+- (BOOL)doMove:(NSURL*)srcURL toURL:(NSURL*)dstURL withSound:(BOOL)playSoundFlag window:(NSWindow*)window
 {
 	BOOL res;
 	NSError* error;
 	if(res = [[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
 	{
-		[[[window undoManager] prepareWithInvocationTarget:self] doMove:dstURL toURL:srcURL window:window];
-		[self playSound:OakSoundDidMoveItemUISound];
+		[[[window undoManager] prepareWithInvocationTarget:self] doMove:dstURL toURL:srcURL withSound:playSoundFlag window:window];
+		if(playSoundFlag)
+			[self playSound:OakSoundDidMoveItemUISound];
 	}
 	else
 	{
@@ -203,7 +204,7 @@
 
 - (BOOL)renameItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window
 {
-	if([self doMove:srcURL toURL:dstURL window:window])
+	if([self doMove:srcURL toURL:dstURL withSound:NO window:window])
 	{
 		[[window undoManager] setActionName:@"Rename"];
 		return YES;
@@ -219,7 +220,7 @@
 
 - (void)moveItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window
 {
-	if([self doMove:srcURL toURL:dstURL window:window])
+	if([self doMove:srcURL toURL:dstURL withSound:YES window:window])
 		[[window undoManager] setActionName:[self expandFormat:@"Move of “%@”" withURL:srcURL]];
 }
 
