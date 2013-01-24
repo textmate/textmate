@@ -1,18 +1,6 @@
 #import "NSSavePanel Additions.h"
 #import <OakFoundation/NSString Additions.h>
 
-@implementation NSSavePanel (DeselectExtension)
-- (void)deselectExtension
-{
-	NSTextView* tw = (NSTextView*)self.firstResponder;
-	if([tw isKindOfClass:[NSTextView class]])
-	{
-		NSString* str = [tw.textStorage.string stringByDeletingPathExtensions];
-		[tw setSelectedRange:NSMakeRange(0, str.length)];
-	}
-}
-@end
-
 @implementation NSSavePanel (HiddenFiles)
 + (void)initialize
 {

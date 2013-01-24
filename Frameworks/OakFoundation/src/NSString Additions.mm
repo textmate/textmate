@@ -15,16 +15,6 @@
 	return aString == NULL_STR ? nil : [[NSString alloc] initWithBytes:aString.data() length:aString.size() encoding:NSUTF8StringEncoding];
 }
 
-- (NSString*)pathExtensions
-{
-	return [NSString stringWithCxxString:path::extensions(self.UTF8String)];
-}
-
-- (NSString*)stringByDeletingPathExtensions
-{
-	return [NSString stringWithCxxString:path::strip_extensions(self.UTF8String)];
-}
-
 - (BOOL)existsAsPath
 {
 	return [[NSFileManager defaultManager] fileExistsAtPath:self];
