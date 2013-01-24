@@ -337,6 +337,9 @@ void settings_t::set (std::string const& key, std::string const& value, std::str
 			auto defaultsSection = defaults.find(section->first);
 			iterate(pair, section->second)
 			{
+				if(pair->second == NULL_STR)
+					continue;
+
 				if(defaultsSection != defaults.end())
 				{
 					auto it = defaultsSection->second.find(pair->first);
