@@ -1,4 +1,5 @@
 #import "Keys.h"
+#import <OakAppKit/OakTabBarView.h>
 
 static NSArray* default_environment ()
 {
@@ -18,19 +19,20 @@ static NSArray* default_environment ()
 static NSDictionary* default_settings ()
 {
 	return @{
-		kUserDefaultsHTMLOutputPlacementKey   : @"window",
-		kUserDefaultsFileBrowserPlacementKey  : @"right",
-		kUserDefaultsFoldersOnTopKey          : @YES,
-		kUserDefaultsShowFileExtensionsKey    : @NO,
-		kUserDefaultsEnvironmentVariablesKey  : default_environment(),
-		kUserDefaultsDisableBundleUpdatesKey  : @NO,
-		kUserDefaultsLastBundleUpdateCheckKey : [NSDate distantPast],
-		kUserDefaultsDisableRMateServerKey    : @NO,
-		kUserDefaultsRMateServerListenKey     : kRMateServerListenLocalhost,
-		kUserDefaultsRMateServerPortKey       : @52698,
-		kUserDefaultsLicenseOwnerKey          : NSFullUserName(),
-		kUserDefaultsAntiAliasKey             : @YES,
-		kUserDefaultsLineNumbersKey           : @YES,
+		kUserDefaultsHTMLOutputPlacementKey     : @"window",
+		kUserDefaultsDisableTabBarCollapsingKey : @YES,
+		kUserDefaultsFileBrowserPlacementKey    : @"right",
+		kUserDefaultsFoldersOnTopKey            : @YES,
+		kUserDefaultsShowFileExtensionsKey      : @NO,
+		kUserDefaultsEnvironmentVariablesKey    : default_environment(),
+		kUserDefaultsDisableBundleUpdatesKey    : @NO,
+		kUserDefaultsLastBundleUpdateCheckKey   : [NSDate distantPast],
+		kUserDefaultsDisableRMateServerKey      : @NO,
+		kUserDefaultsRMateServerListenKey       : kRMateServerListenLocalhost,
+		kUserDefaultsRMateServerPortKey         : @52698,
+		kUserDefaultsLicenseOwnerKey            : NSFullUserName(),
+		kUserDefaultsAntiAliasKey               : @YES,
+		kUserDefaultsLineNumbersKey             : @YES,
 	};
 }
 
