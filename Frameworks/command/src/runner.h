@@ -59,6 +59,7 @@ namespace command
 		void add_callback (callback_t* callback)    { _callbacks.add(callback); }
 		void remove_callback (callback_t* callback) { _callbacks.remove(callback); }
 
+		std::string const& name () const                               { return _command.name; }
 		oak::uuid_t const& uuid () const                               { return _command.uuid; }
 		bool auto_scroll_output () const                               { return _command.auto_scroll_output; }
 		bool running () const                                          { return _process.is_running; }

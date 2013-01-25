@@ -1,5 +1,6 @@
 #import "HTMLOutputWindow.h"
 #import <OakAppKit/OakWindowFrameHelper.h>
+#import <OakFoundation/NSString Additions.h>
 #import <command/runner.h>
 #import <oak/debug.h>
 
@@ -64,6 +65,8 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 
 	runner = aRunner;
 	Windows.insert(std::make_pair(runner->uuid(), self));
+
+	self.window.title = [NSString stringWithCxxString:runner->name()];
 
 	[self.htmlOutputView setEnvironment:runner->environment()];
 	[self.htmlOutputView loadRequest:URLRequestForCommandRunner(runner) autoScrolls:runner->auto_scroll_output()];
