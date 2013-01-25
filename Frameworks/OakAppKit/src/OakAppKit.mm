@@ -5,7 +5,8 @@ NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 @interface OakDividerLineView : NSBox
 @property (nonatomic, retain) NSColor* primaryColor;
 @property (nonatomic, retain) NSColor* secondaryColor;
-@property (nonatomic)         BOOL usePrimaryColor;
+@property (nonatomic)         BOOL     usePrimaryColor;
+@property (nonatomic)         NSSize   intrinsicContentSize;
 @end
 
 @implementation OakDividerLineView
@@ -48,7 +49,7 @@ NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 }
 @end
 
-NSBox* OakCreateViewWithColor (NSColor* color, NSColor* secondaryColor)
+static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColor* secondaryColor)
 {
 	OakDividerLineView* box = [[[OakDividerLineView alloc] initWithFrame:NSZeroRect] autorelease];
 	box.boxType        = NSBoxCustom;
@@ -57,6 +58,27 @@ NSBox* OakCreateViewWithColor (NSColor* color, NSColor* secondaryColor)
 	box.primaryColor   = color;
 	box.secondaryColor = secondaryColor;
 	return box;
+}
+
+NSBox* OakCreateViewWithColor (NSColor* color, NSColor* secondaryColor)
+{
+	OakDividerLineView* res = OakCreateDividerLineWithColor(color, secondaryColor);
+	res.intrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, NSViewNoInstrinsicMetric);
+	return res;
+}
+
+NSBox* OakCreateVerticalLine (NSColor* primaryColor, NSColor* secondaryColor)
+{
+	OakDividerLineView* res = OakCreateDividerLineWithColor(primaryColor, secondaryColor);
+	res.intrinsicContentSize = NSMakeSize(1, NSViewNoInstrinsicMetric);
+	return res;
+}
+
+NSBox* OakCreateHorizontalLine (NSColor* primaryColor, NSColor* secondaryColor)
+{
+	OakDividerLineView* res = OakCreateDividerLineWithColor(primaryColor, secondaryColor);
+	res.intrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, 1);
+	return res;
 }
 
 void OakRunIOAlertPanel (char const* format, ...)
