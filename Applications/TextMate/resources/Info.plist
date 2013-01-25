@@ -428,7 +428,7 @@
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "XML document";
-			CFBundleTypeExtensions = (xml, rss, tld, pt, cpt, dtml);
+			CFBundleTypeExtensions = (xml, xsd, xib, rss, tld, pt, cpt, dtml);
 			CFBundleTypeIconFile   = XML;
 			CFBundleTypeRole       = Editor;
 		},
