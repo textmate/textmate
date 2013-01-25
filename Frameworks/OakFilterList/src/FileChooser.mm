@@ -221,8 +221,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		_searchField               = [[NSSearchField alloc] initWithFrame:NSZeroRect];
 		_searchField.delegate      = self;
-		_searchField.focusRingType = NSFocusRingTypeNone;
 		[_searchField.cell setScrollable:YES];
+		if(![NSApp isFullKeyboardAccessEnabled])
+		{
+			_searchField.focusRingType = NSFocusRingTypeNone;
+		}
 
 		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
 		_openDocumentsButton = OakCreateScopeButton(@"Open Documents",        @selector(takeSourceIndexFrom:), 1);
