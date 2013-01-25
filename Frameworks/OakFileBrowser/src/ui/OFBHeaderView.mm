@@ -29,9 +29,6 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 @interface OFBHeaderView ()
 @property (nonatomic) BOOL renderEnabled;
-@property (nonatomic) NSBox* lightDividerView;
-@property (nonatomic) NSBox* darkDividerView;
-@property (nonatomic) NSBox* bottomDividerView;
 @end
 
 @implementation OFBHeaderView
@@ -45,17 +42,13 @@ static NSPopUpButton* OakCreatePopUpButton ()
 		self.goForwardButton         = OakCreateImageButton(NSImageNameGoRightTemplate);
 		self.goForwardButton.toolTip = @"Go Forward";
 
-		self.darkDividerView   = OakCreateViewWithColor([NSColor colorWithCalibratedWhite:0.551 alpha:1.000]);
-		self.lightDividerView  = OakCreateViewWithColor([NSColor colorWithCalibratedWhite:0.869 alpha:1.000]);
-		self.bottomDividerView = OakCreateViewWithColor([NSColor colorWithCalibratedWhite:0.750 alpha:1.000]);
-
 		NSDictionary* views = @{
 			@"folder"   : self.folderPopUpButton,
-			@"shadow"   : self.darkDividerView,
-			@"divider"  : self.lightDividerView,
+			@"shadow"   : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.551 alpha:1], [NSColor colorWithCalibratedWhite:0.801 alpha:1]),
+			@"divider"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
 			@"back"     : self.goBackButton,
 			@"forward"  : self.goForwardButton,
-			@"bottom"   : self.bottomDividerView,
+			@"bottom"   : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
 		};
 
 		for(NSView* view in [views allValues])
@@ -64,10 +57,10 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[shadow(==1)][divider(==1)]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[shadow][divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottom]|"                  options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[folder(==26)]-(0)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[shadow][bottom(==1)]|"     options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[shadow][bottom]|"          options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[divider(==shadow)]"        options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[back(==25)]"         options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[forward(==back)]"    options:0 metrics:nil views:views]];
@@ -115,20 +108,6 @@ static NSPopUpButton* OakCreatePopUpButton ()
 	if(_renderEnabled != flag)
 	{
 		_renderEnabled = flag;
-
-		if(flag)
-		{
-			self.darkDividerView.borderColor   = [NSColor colorWithCalibratedWhite:0.551 alpha:1.000];
-			self.lightDividerView.borderColor  = [NSColor colorWithCalibratedWhite:0.869 alpha:1.000];
-			self.bottomDividerView.borderColor = [NSColor colorWithCalibratedWhite:0.500 alpha:1.000];
-		}
-		else
-		{
-			self.darkDividerView.borderColor   = [NSColor colorWithCalibratedWhite:0.801 alpha:1.000];
-			self.lightDividerView.borderColor  = [NSColor colorWithCalibratedWhite:0.869 alpha:0.000];
-			self.bottomDividerView.borderColor = [NSColor colorWithCalibratedWhite:0.750 alpha:1.000];
-		}
-
 		[self setNeedsDisplay:YES];
 	}
 }
