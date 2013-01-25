@@ -1439,6 +1439,17 @@ namespace
 	[find showFindPanel:self];
 }
 
+- (IBAction)orderFrontFindPanelForFileBrowser:(id)sender
+{
+	Find* find              = [Find sharedInstance];
+	find.documentIdentifier = [NSString stringWithCxxString:[self selectedDocument]->identifier()];
+	find.projectIdentifier  = self.identifier;
+	find.projectFolder      = self.projectPath ?: self.untitledSavePath;
+	find.searchFolder       = self.untitledSavePath;
+	find.searchScope        = find::in::folder;
+	[find showFindPanel:self];
+}
+
 - (IBAction)showSymbolChooser:(id)sender
 {
 	self.filterWindowController                         = [OakFilterWindowController new];
