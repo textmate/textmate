@@ -292,6 +292,19 @@ namespace
 - (void)makeTextViewFirstResponder:(id)sender { [self.window makeFirstResponder:self.textView]; }
 - (void)close                                 { [self.window close]; }
 
+- (IBAction)moveFocus:(id)sender
+{
+	if([self.window firstResponder] == self.textView)
+	{
+		self.fileBrowserVisible = YES;
+		[self.window makeFirstResponder:self.fileBrowser.outlineView];
+	}
+	else
+	{
+		[self makeTextViewFirstResponder:sender];
+	}
+}
+
 // ==========================
 // = Notification Callbacks =
 // ==========================
@@ -1621,6 +1634,8 @@ namespace
 		active = [self.window firstResponder] != self.textView;
 	else if([menuItem action] == @selector(reload:))
 		active = self.fileBrowserVisible;
+	else if([menuItem action] == @selector(moveFocus:))
+		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
 	return active;
 }
 

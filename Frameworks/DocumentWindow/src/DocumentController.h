@@ -41,6 +41,8 @@ PUBLIC @interface DocumentController : NSObject
 - (BOOL)setCommandRunner:(command::runner_ptr const&)aRunner;
 - (IBAction)toggleHTMLOutput:(id)sender;
 
+- (IBAction)moveFocus:(id)sender;
+
 - (IBAction)performCloseTab:(id)sender;
 - (IBAction)performCloseSplit:(id)sender;
 - (IBAction)performCloseWindow:(id)sender;

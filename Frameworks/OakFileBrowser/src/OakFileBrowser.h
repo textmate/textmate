@@ -43,6 +43,6 @@ PUBLIC @interface OakFileBrowser : NSResponder
 - (IBAction)orderFrontGoToFolder:(id)sender;
 @end
 
-@interface OakFileBrowser (ForQuickLookKeyEventForwarding)
+@interface OakFileBrowser (ForQuickLookKeyEventForwardingAndMoveFocus)
 @property (nonatomic, readonly) NSView* outlineView;
 @end
