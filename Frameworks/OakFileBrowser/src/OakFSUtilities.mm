@@ -17,7 +17,7 @@ static void initializeConstants ()
 		kURLLocationComputer  = [[NSURL alloc] initWithString:@"computer:///"];
 		kURLLocationHome      = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
 		kURLLocationDesktop   = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:path::desktop()] isDirectory:YES];
-		kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:oak::application_t::support("Favorites")] isDirectory:YES];
+		kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:path::join(path::home(), "Library/Application Support/TextMate/Favorites")] isDirectory:YES];
 		kURLLocationBundles   = [[NSURL alloc] initWithString:@"bundles:///"];
 	}
 }
