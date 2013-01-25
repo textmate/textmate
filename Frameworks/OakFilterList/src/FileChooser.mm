@@ -221,8 +221,11 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		_searchField               = [[NSSearchField alloc] initWithFrame:NSZeroRect];
 		_searchField.delegate      = self;
-		_searchField.focusRingType = NSFocusRingTypeNone;
 		[_searchField.cell setScrollable:YES];
+		if(![NSApp isFullKeyboardAccessEnabled])
+		{
+			_searchField.focusRingType = NSFocusRingTypeNone;
+		}
 
 		_allButton           = OakCreateScopeButton(@"All",                   @selector(takeSourceIndexFrom:), 0);
 		_openDocumentsButton = OakCreateScopeButton(@"Open Documents",        @selector(takeSourceIndexFrom:), 1);
@@ -292,14 +295,14 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		NSDictionary* views = @{
 			@"searchField"        : _searchField,
-			@"aboveScopeBarDark"  : OakCreateViewWithColor([NSColor grayColor]),
+			@"aboveScopeBarDark"  : OakCreateViewWithColor([NSColor grayColor], [NSColor lightGrayColor]),
 			@"aboveScopeBarLight" : OakCreateViewWithColor([NSColor colorWithCalibratedWhite:1.000 alpha:0.300]),
 			@"allButton"          : _allButton,
 			@"openFilesButton"    : _openDocumentsButton,
 			@"scmChangesButton"   : _scmChangesButton,
-			@"topDivider"         : OakCreateViewWithColor([NSColor darkGrayColor]),
+			@"topDivider"         : OakCreateViewWithColor([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1.000]),
 			@"scrollView"         : scrollView,
-			@"bottomDivider"      : OakCreateViewWithColor([NSColor grayColor]),
+			@"bottomDivider"      : OakCreateViewWithColor([NSColor grayColor], [NSColor lightGrayColor]),
 			@"statusTextField"    : _statusTextField,
 			@"itemCountTextField" : _itemCountTextField,
 			@"progressIndicator"  : _progressIndicator,
