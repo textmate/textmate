@@ -18,20 +18,24 @@ NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 	{
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.window];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:self.window];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:self.window];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:self.window];
 	}
 
 	if(newWindow)
 	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMain:) name:NSWindowDidBecomeMainNotification object:newWindow];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMain:) name:NSWindowDidResignMainNotification object:newWindow];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidBecomeMainNotification object:newWindow];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidResignMainNotification object:newWindow];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidBecomeKeyNotification object:newWindow];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMainOrKey:) name:NSWindowDidResignKeyNotification object:newWindow];
 	}
 
-	self.usePrimaryColor = [newWindow isMainWindow];
+	self.usePrimaryColor = [newWindow isMainWindow] || [newWindow isKeyWindow];
 }
 
-- (void)windowDidChangeMain:(NSNotification*)aNotification
+- (void)windowDidChangeMainOrKey:(NSNotification*)aNotification
 {
-	self.usePrimaryColor = [self.window isMainWindow];
+	self.usePrimaryColor = [self.window isMainWindow] || [self.window isKeyWindow];
 }
 
 - (void)setUsePrimaryColor:(BOOL)flag
