@@ -1647,6 +1647,11 @@ namespace
 
 // QLPreviewPanelDelegate
 
+- (NSRect)previewPanel:(QLPreviewPanel*)panel sourceFrameOnScreenForPreviewItem:(id <QLPreviewItem>)item
+{
+	return [_fileBrowser iconFrameForURL:item.previewItemURL];
+}
+
 - (BOOL)previewPanel:(QLPreviewPanel*)panel handleEvent:(NSEvent*)event
 {
 	if([event type] == NSKeyDown)

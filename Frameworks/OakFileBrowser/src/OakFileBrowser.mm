@@ -213,6 +213,18 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	return r;
 }
 
+- (NSRect)iconFrameForURL:(NSURL*)aURL
+{
+	NSRange visibleRange = [_outlineView rowsInRect:[_outlineView visibleRect]];
+	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
+	{
+		FSItem* item = [_outlineView itemAtRow:row];
+		if([item.url isEqualTo:aURL])
+			return [self iconFrameForEntry:item];
+	}
+	return NSZeroRect;
+}
+
 // =============
 // = Basic API =
 // =============
