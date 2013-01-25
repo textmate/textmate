@@ -188,6 +188,8 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 
 	if(dataSource = aDataSource)
 	{
+		if(NSArray* expandedByDefault = [dataSource expandedURLs])
+			[expandedURLs addObjectsFromArray:expandedByDefault];
 		[outlineView setDataSource:dataSource];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidReload:) name:FSItemDidReloadNotification object:dataSource];
 		[self expandAndSelectChildren:dataSource.rootItem expandAll:NO];

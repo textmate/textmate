@@ -148,6 +148,11 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	return self;
 }
 
+- (NSArray*)expandedURLs
+{
+	return @[ URLAppend(self.rootItem.url, @".unstaged/"), URLAppend(self.rootItem.url, @".untracked/") ];
+}
+
 - (void)dealloc
 {
 	if(scmInfo && scmCallback)

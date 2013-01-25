@@ -60,6 +60,11 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	return NO;
 }
 
+- (NSArray*)expandedURLs
+{
+	return nil;
+}
+
 // =====================================
 // = NSOutlineView Data Source Methods =
 // =====================================
