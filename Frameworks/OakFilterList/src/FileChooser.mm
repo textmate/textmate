@@ -480,11 +480,11 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	std::vector<std::pair<size_t, size_t>> path_cover;
 	if(filter.path != NULL_STR)
 	{
-		std::string prefix = path::relative_to(path::parent(record.full_path), basePath);
+		std::string prefix = (record.full_path == NULL_STR) ? "" : path::relative_to(path::parent(record.full_path), basePath);
 		if(double rank = oak::rank(filter.path, prefix, &path_cover))
 		{
 			path_rank = 1 - rank;
-			record.display = prefix + (prefix.empty() ? "" : "/");
+			record.display = (record.full_path == NULL_STR) ? "" : prefix + (prefix.empty() ? "" : "/");
 		}
 		else
 		{
