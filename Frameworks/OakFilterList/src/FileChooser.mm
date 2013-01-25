@@ -186,7 +186,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	std::vector<document_record_t>                _records;
 	document::scanner_ptr                         _scanner;
 }
-@property (nonatomic) NSWindow*            window;
 @property (nonatomic) NSSearchField*       searchField;
 @property (nonatomic) NSButton*            allButton;
 @property (nonatomic) NSButton*            openDocumentsButton;
@@ -349,21 +348,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 	[_window makeKeyAndOrderFront:self];
 	[_window makeFirstResponder:_searchField];
-}
-
-- (void)showWindowRelativeToWindow:(NSWindow*)parentWindow
-{
-	if(parentWindow && ![_window isVisible])
-	{
-		NSRect frame  = [_window frame];
-		NSRect parent = [parentWindow frame];
-
-		frame.origin.x = round(NSMidX(parent) - 0.5 * NSWidth(frame));
-		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
-		[_window setFrame:frame display:NO];
-	}
-
-	[self showWindow:self];
 }
 
 - (void)close

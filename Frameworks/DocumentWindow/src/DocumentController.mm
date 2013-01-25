@@ -1463,7 +1463,17 @@ namespace
 			fc.filterString = entry.string;
 	}
 
-	[fc showWindowRelativeToWindow:self.window];
+	if(![fc.window isVisible])
+	{
+		NSRect frame  = [fc.window frame];
+		NSRect parent = [_window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]];
+
+		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
+		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
+		[fc.window setFrame:frame display:NO];
+	}
+
+	[fc showWindow:self];
 }
 
 - (void)fileChooserDidSelectItems:(FileChooser*)sender

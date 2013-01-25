@@ -2,6 +2,8 @@
 #import <scm/scm.h>
 
 PUBLIC @interface FileChooser : NSObject
+@property (nonatomic) NSWindow* window;
+
 @property (nonatomic) NSString* path;
 @property (nonatomic) scm::info_ptr const& scmInfo;
 
@@ -19,6 +21,5 @@ PUBLIC @interface FileChooser : NSObject
 
 + (FileChooser*)sharedInstance;
 - (void)showWindow:(id)sender;
-- (void)showWindowRelativeToWindow:(NSWindow*)parentWindow;
 - (void)close;
 @end
