@@ -267,6 +267,8 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	
 	if(expandAncestors)
 	{
+		[expandedURLs removeAllObjects];
+
 		NSMutableSet* ancestors = [NSMutableSet set];
 		NSURL* rootURL = dataSource.rootItem.url;
 		
