@@ -1,4 +1,6 @@
 #import "ProjectLayoutView.h"
+#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <Preferences/Keys.h>
 #import <oak/misc.h>
 #import <oak/debug.h>
@@ -7,8 +9,14 @@ NSString* const kUserDefaultsFileBrowserWidthKey = @"fileBrowserWidth";
 NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 @interface ProjectLayoutView ()
+@property (nonatomic, retain) NSView* fileBrowserDivider;
+@property (nonatomic, retain) NSView* htmlOutputDivider;
+@property (nonatomic, retain) NSView* fileBrowserTopLightDivider;
+@property (nonatomic, retain) NSView* fileBrowserTopDarkDivider;
 @property (nonatomic, retain) NSLayoutConstraint* fileBrowserWidthConstraint;
 @property (nonatomic, retain) NSLayoutConstraint* htmlOutputSizeConstraint;
+@property (nonatomic, retain) NSMutableArray* myConstraints;
+@property (nonatomic) BOOL tabsAboveDocument;
 @property (nonatomic) BOOL mouseDownRecursionGuard;
 @end
 
@@ -25,12 +33,11 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 {
 	if(self = [super initWithFrame:aRect])
 	{
-		_fileBrowserWidth   = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey];
-		_fileBrowserOnRight = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"];
+		_myConstraints    = [NSMutableArray array];
+		_fileBrowserWidth = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFileBrowserWidthKey];
+		_htmlOutputSize   = NSSizeFromString([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputSizeKey]);
 
-		_htmlOutputSize     = NSSizeFromString([[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsHTMLOutputSizeKey]);
-		_htmlOutputOnRight  = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
-
+		[self userDefaultsDidChange:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
@@ -45,6 +52,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 {
 	self.fileBrowserOnRight = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"];
 	self.htmlOutputOnRight  = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"right"];
+	self.tabsAboveDocument  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
 }
 
 - (NSView*)replaceView:(NSView*)oldView withView:(NSView*)newView
@@ -68,11 +76,17 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)setTabBarView:(NSView*)aTabBarView           { _tabBarView     = [self replaceView:_tabBarView      withView:aTabBarView];      }
 - (void)setDocumentView:(NSView*)aDocumentView       { _documentView   = [self replaceView:_documentView    withView:aDocumentView];    }
-- (void)setHtmlOutputView:(NSView*)aHtmlOutputView   { _htmlOutputView = [self replaceView:_htmlOutputView  withView:aHtmlOutputView];  }
+
+- (void)setHtmlOutputView:(NSView*)aHtmlOutputView
+{
+	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine([NSColor controlShadowColor]) : OakCreateHorizontalLine([NSColor controlShadowColor])) : nil)];
+	_htmlOutputView    = [self replaceView:_htmlOutputView withView:aHtmlOutputView];
+}
 
 - (void)setFileBrowserView:(NSView*)aFileBrowserView
 {
-	_fileBrowserView = [self replaceView:_fileBrowserView withView:aFileBrowserView];
+	_fileBrowserDivider = [self replaceView:_fileBrowserDivider withView:aFileBrowserView ? OakCreateVerticalLine([NSColor controlShadowColor]) : nil];
+	_fileBrowserView    = [self replaceView:_fileBrowserView withView:aFileBrowserView];
 }
 
 - (void)setFileBrowserOnRight:(BOOL)flag
@@ -90,77 +104,199 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	if(_htmlOutputOnRight != flag)
 	{
 		_htmlOutputOnRight = flag;
-		if(_htmlOutputView)
-			[self setNeedsUpdateConstraints:YES];
+		self.htmlOutputView = _htmlOutputView; // recreate divider line, required due to <rdar://13093498>
 	}
 }
+
+- (void)setTabsAboveDocument:(BOOL)flag
+{
+	if(_tabsAboveDocument != flag)
+	{
+		_tabsAboveDocument = flag;
+		_fileBrowserTopLightDivider = [self replaceView:_fileBrowserTopLightDivider withView:flag ? OakCreateHorizontalLine([NSColor colorWithString:@"#AEAEAE"], [NSColor colorWithString:@"#C9C9C9"]) : nil];
+		_fileBrowserTopDarkDivider  = [self replaceView:_fileBrowserTopDarkDivider withView:flag ? OakCreateHorizontalLine([NSColor colorWithString:@"#3F3F3F"], [NSColor colorWithString:@"#878787"]) : nil];
+		[self setNeedsUpdateConstraints:YES];
+	}
+}
+
+#ifndef CONSTRAINT
+#define CONSTRAINT(str, align) [_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:str options:align metrics:nil views:views]]
+#endif
 
 - (void)updateConstraints
 {
-	[self removeConstraints:[self constraints]];
+	[self removeConstraints:_myConstraints];
+	[_myConstraints removeAllObjects];
 	[super updateConstraints];
 
 	NSDictionary* views = @{
-		@"tabBarView"       : _tabBarView,
-		@"documentView"     : _documentView,
-		@"fileBrowserView"  : _fileBrowserView ?: [NSNull null],
-		@"htmlOutputView"   : _htmlOutputView  ?: [NSNull null]
+		@"tabBarView"                 : _tabBarView,
+		@"documentView"               : _documentView,
+		@"fileBrowserView"            : _fileBrowserView            ?: [NSNull null],
+		@"fileBrowserDivider"         : _fileBrowserDivider         ?: [NSNull null],
+		@"fileBrowserTopDarkDivider"  : _fileBrowserTopDarkDivider  ?: [NSNull null],
+		@"fileBrowserTopLightDivider" : _fileBrowserTopLightDivider ?: [NSNull null],
+		@"htmlOutputView"             : _htmlOutputView             ?: [NSNull null],
+		@"htmlOutputDivider"          : _htmlOutputDivider          ?: [NSNull null],
 	};
 
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tabBarView]|" options:0 metrics:nil views:views]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tabBarView][documentView(>=40)]" options:0 metrics:nil views:views]];
+	// =======================
+	// = Anchor Tab Bar View =
+	// =======================
 
-	if(!_fileBrowserView && (!_htmlOutputView || !_htmlOutputOnRight))
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]|" options:0 metrics:nil views:views]];
+	// top
+	CONSTRAINT(@"V:|[tabBarView]", 0);
 
-	if(!_htmlOutputView || _htmlOutputOnRight)
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView]|" options:0 metrics:nil views:views]];
+	// left + right
+	if(_tabsAboveDocument && _fileBrowserView && _fileBrowserOnRight)
+		CONSTRAINT(@"H:|[tabBarView][fileBrowserDivider]", 0);
+	else if(_tabsAboveDocument && _fileBrowserView)
+		CONSTRAINT(@"H:[fileBrowserDivider][tabBarView]|", 0);
+	else
+		CONSTRAINT(@"H:|[tabBarView]|", 0);
+
+	// ========================
+	// = Anchor Document View =
+	// ========================
+
+	// top
+	CONSTRAINT(@"V:[tabBarView][documentView]", 0);
+
+	// bottom
+	if(_htmlOutputView && !_htmlOutputOnRight)
+		CONSTRAINT(@"V:[documentView][htmlOutputDivider]", 0);
+	else
+		CONSTRAINT(@"V:[documentView]|", 0);
+
+	// left
+	if(_fileBrowserView && !_fileBrowserOnRight)
+		CONSTRAINT(@"H:[fileBrowserDivider][documentView]", 0);
+	else
+		CONSTRAINT(@"H:|[documentView]", 0);
+
+	// right
+	if(_htmlOutputView && _htmlOutputOnRight)
+		CONSTRAINT(@"H:[documentView][htmlOutputDivider]", 0);
+	else if(_fileBrowserView && _fileBrowserOnRight)
+		CONSTRAINT(@"H:[documentView][fileBrowserDivider]", 0);
+	else
+		CONSTRAINT(@"H:[documentView]|", 0);
+
+	// =======================
+	// = Anchor File Browser =
+	// =======================
 
 	if(_fileBrowserView)
 	{
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][fileBrowserView(==documentView)]" options:0 metrics:nil views:views]];
-
-		if(_htmlOutputView && _htmlOutputOnRight)
-		{
-			NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]-(1)-[htmlOutputView]|" : @"H:|[fileBrowserView]-(1)-[documentView]-(1)-[htmlOutputView]|";
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-		}
-		else
-		{
-			NSString* fileBrowserLayout = _fileBrowserOnRight ? @"H:|[documentView]-(1)-[fileBrowserView]|" : @"H:|[fileBrowserView]-(1)-[documentView]|";
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:fileBrowserLayout options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-		}
-	}
-
-	if(_htmlOutputView)
-	{
-		if(_htmlOutputOnRight)
-		{
-			if(!_fileBrowserView)
-				[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[documentView]-(1)-[htmlOutputView]|" options:NSLayoutFormatAlignAllTop metrics:nil views:views]];
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[tabBarView][htmlOutputView(==documentView)]" options:0 metrics:nil views:views]];
-		}
-		else
-		{
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[htmlOutputView]|" options:0 metrics:nil views:views]];
-			[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[documentView]-(1)-[htmlOutputView]|" options:0 metrics:nil views:views]];
-		}
-	}
-
-	if(_fileBrowserView)
-	{
+		// width
 		self.fileBrowserWidthConstraint = [NSLayoutConstraint constraintWithItem:_fileBrowserView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_fileBrowserWidth];
 		self.fileBrowserWidthConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow;
-		[self addConstraint:self.fileBrowserWidthConstraint];
+		[_myConstraints addObject:self.fileBrowserWidthConstraint];
+
+		// top
+		if(_tabsAboveDocument)
+		{
+			CONSTRAINT(@"V:|[fileBrowserTopLightDivider][fileBrowserTopDarkDivider][fileBrowserView]", 0);
+			CONSTRAINT(@"V:|[fileBrowserTopLightDivider][fileBrowserTopDarkDivider][fileBrowserDivider]", 0);
+
+			// left
+			if(_fileBrowserOnRight && _htmlOutputView && _htmlOutputOnRight)
+			{
+				CONSTRAINT(@"H:[htmlOutputView][fileBrowserTopLightDivider]", 0);
+				CONSTRAINT(@"H:[htmlOutputView][fileBrowserTopDarkDivider]", 0);
+			}
+			else if(_fileBrowserOnRight)
+			{
+				CONSTRAINT(@"H:[documentView][fileBrowserTopLightDivider]", 0);
+				CONSTRAINT(@"H:[documentView][fileBrowserTopDarkDivider]", 0);
+			}
+			else
+			{
+				CONSTRAINT(@"H:|[fileBrowserTopLightDivider]", 0);
+				CONSTRAINT(@"H:|[fileBrowserTopDarkDivider]", 0);
+			}
+
+			// right
+			if(_fileBrowserOnRight)
+			{
+				CONSTRAINT(@"H:[fileBrowserTopLightDivider(==fileBrowserTopDarkDivider)]|", 0);
+			}
+			else
+			{
+				CONSTRAINT(@"H:[fileBrowserTopLightDivider(==fileBrowserTopDarkDivider)][documentView]", 0);
+			}
+		}
+		else
+		{
+			CONSTRAINT(@"V:|[tabBarView][fileBrowserView]", 0);
+			CONSTRAINT(@"V:|[tabBarView][fileBrowserDivider]", 0);
+		}
+
+		// bottom
+		if(_htmlOutputView && !_htmlOutputOnRight)
+		{
+			CONSTRAINT(@"V:[fileBrowserView][htmlOutputDivider]", 0);
+			CONSTRAINT(@"V:[fileBrowserDivider][htmlOutputDivider]", 0);
+		}
+		else
+		{
+			CONSTRAINT(@"V:[fileBrowserView]|", 0);
+			CONSTRAINT(@"V:[fileBrowserDivider]|", 0);
+		}
+
+		// left
+		if(_fileBrowserOnRight && _htmlOutputView && _htmlOutputOnRight)
+			CONSTRAINT(@"H:[htmlOutputView][fileBrowserDivider][fileBrowserView]", 0);
+		else if(_fileBrowserOnRight)
+			CONSTRAINT(@"H:[documentView][fileBrowserDivider][fileBrowserView]", 0);
+		else
+			CONSTRAINT(@"H:|[fileBrowserView][fileBrowserDivider]", 0);
+
+		// right
+		if(_fileBrowserOnRight)
+			CONSTRAINT(@"H:[fileBrowserView]|", 0);
+		else
+			CONSTRAINT(@"H:[fileBrowserDivider][documentView]", 0);
 	}
+
+	// ===========================
+	// = Anchor HTML Output View =
+	// ===========================
 
 	if(_htmlOutputView)
 	{
+		// size (either width or height)
 		self.htmlOutputSizeConstraint = _htmlOutputOnRight ? [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.width] : [NSLayoutConstraint constraintWithItem:_htmlOutputView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:_htmlOutputSize.height];
 		self.htmlOutputSizeConstraint.priority = NSLayoutPriorityDragThatCannotResizeWindow-1;
-		[self addConstraint:self.htmlOutputSizeConstraint];
+		[_myConstraints addObject:self.htmlOutputSizeConstraint];
+
+		if(_htmlOutputOnRight)
+		{
+			// top + bottom
+			CONSTRAINT(@"V:[tabBarView][htmlOutputView]|", 0);
+			CONSTRAINT(@"V:[tabBarView][htmlOutputDivider]|", 0);
+
+			// left + right
+			if(_fileBrowserView && _fileBrowserOnRight)
+				CONSTRAINT(@"H:[documentView][htmlOutputDivider][htmlOutputView][fileBrowserDivider]", 0);
+			else
+				CONSTRAINT(@"H:[documentView][htmlOutputDivider][htmlOutputView]|", 0);
+		}
+		else
+		{
+			// top + bottom
+			CONSTRAINT(@"V:[documentView][htmlOutputDivider][htmlOutputView]|", 0);
+
+			// left + right
+			CONSTRAINT(@"H:|[htmlOutputView]|", 0);
+			CONSTRAINT(@"H:|[htmlOutputDivider]|", 0);
+		}
 	}
+
+	[self addConstraints:_myConstraints];
 }
+
+#undef CONSTRAINT
 
 - (NSRect)fileBrowserResizeRect
 {
@@ -286,18 +422,6 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	}
 
 	_mouseDownRecursionGuard = NO;
-}
-
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
-- (void)drawRect:(NSRect)aRect
-{
-	[[NSColor lightGrayColor] set];
-	for(NSRect dividerRect : { [self htmlOutputResizeRect], [self fileBrowserResizeRect] })
-		NSRectFill(NSIntersectionRect(dividerRect, aRect));
 }
 
 - (void)performClose:(id)sender
