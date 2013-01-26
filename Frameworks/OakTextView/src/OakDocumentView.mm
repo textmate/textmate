@@ -114,11 +114,14 @@ private:
 		gutterDividerView = [OakCreateViewWithColor() retain];
 		[self addSubview:gutterDividerView];
 
+		statusDividerView = [OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]) retain];
+		[self addSubview:statusDividerView];
+
 		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
 		statusBar.delegate = self;
 		[self addSubview:statusBar];
 
-		for(NSView* view in @[ gutterScrollView, gutterView, gutterDividerView, textScrollView, statusBar ])
+		for(NSView* view in @[ gutterScrollView, gutterView, gutterDividerView, textScrollView, statusDividerView, statusBar ])
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		document::document_ptr doc = document::from_content("", "text.plain"); // file type is only to avoid potential “no grammar” warnings in console
@@ -141,21 +144,21 @@ private:
 	[self removeConstraints:[self constraints]];
 	[super updateConstraints];
 
-	NSDictionary* views = NSDictionaryOfVariableBindings(gutterScrollView, gutterView, gutterDividerView, textScrollView, statusBar);
+	NSDictionary* views = NSDictionaryOfVariableBindings(gutterScrollView, gutterView, gutterDividerView, textScrollView, statusDividerView, statusBar);
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[gutterScrollView(==gutterView)][gutterDividerView(==1)][textScrollView(>=100)]|" options:NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom metrics:nil views:views]];
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[statusBar]|"                                                                     options:0 metrics:nil views:views]];
+	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[statusDividerView][statusBar]|"                                                   options:NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight metrics:nil views:views]];
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[gutterView(==textView)]"                                                          options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(gutterView, textView)]];
 
 	NSMutableArray* stackedViews = [NSMutableArray array];
 	[stackedViews addObjectsFromArray:topAuxiliaryViews];
 	[stackedViews addObject:gutterScrollView];
 	[stackedViews addObjectsFromArray:bottomAuxiliaryViews];
-	[stackedViews addObject:statusBar];
+	[stackedViews addObject:statusDividerView];
 
 	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topView]" options:0 metrics:nil views:@{ @"topView" : stackedViews[0] }]];
 	for(size_t i = 0; i < [stackedViews count]-1; ++i)
 		[self addConstraint:[NSLayoutConstraint constraintWithItem:stackedViews[i] attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:stackedViews[i+1] attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
-	[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[bottomView]|" options:0 metrics:nil views:@{ @"bottomView" : stackedViews.lastObject }]];
 
 	for(NSArray* views : { topAuxiliaryViews, bottomAuxiliaryViews })
 	{
@@ -389,6 +392,33 @@ private:
 		[aMenuItem setState:[textView theme]->uuid() == [[aMenuItem representedObject] UTF8String] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(takeTabSizeFrom:))
 		[aMenuItem setState:textView.tabSize == [aMenuItem tag] ? NSOnState : NSOffState];
+	else if([aMenuItem action] == @selector(showTabSizeSelectorPanel:))
+	{
+		static NSInteger const predefined[] = { 2, 3, 4, 8 };
+		if(oak::contains(std::begin(predefined), std::end(predefined), textView.tabSize))
+		{
+			[aMenuItem setTitle:@"Other…"];
+			[aMenuItem setState:NSOffState];
+		}
+		else
+		{
+			[aMenuItem setTitle:[NSString stringWithFormat:@"Other (%zd)…", textView.tabSize]];
+			[aMenuItem setState:NSOnState];
+		}
+	}
+	else if([aMenuItem action] == @selector(setIndentWithTabs:))
+		[aMenuItem setState:textView.softTabs ? NSOffState : NSOnState];
+	else if([aMenuItem action] == @selector(setIndentWithSpaces:))
+		[aMenuItem setState:textView.softTabs ? NSOnState : NSOffState];
+	else if([aMenuItem action] == @selector(takeGrammarUUIDFrom:))
+	{
+		NSString* uuidString = [aMenuItem representedObject];
+		if(bundles::item_ptr bundleItem = bundles::lookup(to_s(uuidString)))
+		{
+			bool selectedGrammar = document && document->file_type() == bundleItem->value_for_field(bundles::kFieldGrammarScope);
+			[aMenuItem setState:selectedGrammar ? NSOnState : NSOffState];
+		}
+	}
 	return YES;
 }
 
@@ -419,33 +449,6 @@ private:
 		return;
 	[aView removeFromSuperview];
 	[self setNeedsUpdateConstraints:YES];
-}
-
-- (void)drawRect:(NSRect)aRect
-{
-	if([bottomAuxiliaryViews count])
-	{
-		CGFloat y = NSHeight(statusBar.frame), height = 0;
-		for(NSView* view in bottomAuxiliaryViews)
-			height += NSHeight(view.frame);
-
-		[[NSColor lightGrayColor] set];
-		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), y, NSWidth(aRect), height - 1), aRect));
-		[[NSColor grayColor] set];
-		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), y + height - 1, NSWidth(aRect), 1), aRect));
-	}
-
-	if([topAuxiliaryViews count])
-	{
-		CGFloat height = 0;
-		for(NSView* view in topAuxiliaryViews)
-			height += NSHeight(view.frame);
-
-		[[NSColor lightGrayColor] set];
-		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), NSHeight(self.frame) - height + 1, NSWidth(aRect), height - 1), aRect));
-		[[NSColor grayColor] set];
-		NSRectFill(NSIntersectionRect(NSMakeRect(NSMinX(aRect), NSHeight(self.frame) - height, NSWidth(aRect), 1), aRect));
-	}
 }
 
 // ======================
@@ -525,125 +528,83 @@ private:
 	}
 }
 
-- (void)showLanguageSelector:(id)sender
-{
-	std::multimap<std::string, bundles::item_ptr, text::less_t> grammars;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeGrammar))
-		grammars.insert(std::make_pair((*item)->name(), *item));
-
-	NSMenu* menu = [[NSMenu new] autorelease];
-	iterate(pair, grammars)
-	{
-		bool selectedGrammar = document->file_type() == pair->second->value_for_field(bundles::kFieldGrammarScope);
-		if(!selectedGrammar && pair->second->hidden_from_user())
-			continue;
-
-		NSMenuItem* item = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(takeGrammarUUIDFrom:) keyEquivalent:@""];
-		[item setKeyEquivalentCxxString:key_equivalent(pair->second)];
-		[item setTarget:self];
-		[item setRepresentedObject:[NSString stringWithCxxString:pair->second->uuid()]];
-
-		if(selectedGrammar)
-			[item setState:NSOnState];
-	}
-
-	if(grammars.empty())
-		[menu addItemWithTitle:@"No Grammars Loaded" action:@selector(nop:) keyEquivalent:@""];
-
-	[statusBar showMenu:menu withSelectedIndex:-1 forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
-}
-
 - (void)goToSymbol:(id)sender
 {
 	[textView setSelectionString:[sender representedObject]];
 }
 
-- (void)showSymbolSelector:(id)sender
+- (void)showSymbolSelector:(NSPopUpButton*)symbolPopUp
 {
+	NSMenu* symbolMenu = symbolPopUp.menu;
+	[symbolMenu removeAllItems];
+
 	ng::buffer_t const& buf = document->buffer();
 	text::selection_t sel([textView.selectionString UTF8String]);
 	size_t i = buf.convert(sel.last().max());
 
 	NSInteger index = 0;
-	NSMenu* menu = [[NSMenu new] autorelease];
-	citerate(pair, buf.symbols())
+	for(auto pair : buf.symbols())
 	{
-		if(pair->second == "-")
+		if(pair.second == "-")
 		{
-			[menu addItem:[NSMenuItem separatorItem]];
+			[symbolMenu addItem:[NSMenuItem separatorItem]];
 		}
 		else
 		{
-			NSMenuItem* item = [menu addItemWithTitle:[NSString stringWithCxxString:pair->second] action:@selector(goToSymbol:) keyEquivalent:@""];
+			NSMenuItem* item = [symbolMenu addItemWithTitle:[NSString stringWithCxxString:pair.second] action:@selector(goToSymbol:) keyEquivalent:@""];
 			[item setTarget:self];
-			[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair->first)]];
+			[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair.first)]];
 		}
 
-		if(pair->first <= i)
+		if(pair.first <= i)
 			++index;
 	}
-	if(menu.numberOfItems == 0)
-		[[menu addItemWithTitle:@"No symbols to show for current document." action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
-	[statusBar showMenu:menu withSelectedIndex:(index ? index-1 : 0) forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
+
+	if(symbolMenu.numberOfItems == 0)
+		[symbolMenu addItemWithTitle:@"No symbols to show for current document." action:@selector(nop:) keyEquivalent:@""];
+
+	[symbolPopUp selectItemAtIndex:(index ? index-1 : 0)];
 }
 
-- (void)showBundleItemSelector:(id)sender
+- (void)showBundlesMenu:(id)sender
 {
+	[NSApp sendAction:_cmd to:self.statusBar from:self];
+}
+
+- (void)showBundleItemSelector:(NSPopUpButton*)bundleItemsPopUp
+{
+	NSMenu* bundleItemsMenu = bundleItemsPopUp.menu;
+	[bundleItemsMenu removeAllItems];
+
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
-		ordered.insert(std::make_pair((*item)->name(), *item));
-	
-	NSMenu* menu = [[NSMenu new] autorelease];
-	iterate(pair, ordered)
+	for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
+		ordered.insert(std::make_pair(item->name(), item));
+
+	NSMenuItem* selectedItem = nil;
+	for(auto pair : ordered)
 	{
 		bool selectedGrammar = false;
-		citerate(item, bundles::query(bundles::kFieldGrammarScope, document->file_type(), scope::wildcard, bundles::kItemTypeGrammar, pair->second->uuid(), true, true))
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, document->file_type(), scope::wildcard, bundles::kItemTypeGrammar, pair.second->uuid(), true, true))
 			selectedGrammar = true;
-		if(!selectedGrammar && pair->second->hidden_from_user() || pair->second->menu().empty())
+		if(!selectedGrammar && pair.second->hidden_from_user() || pair.second->menu().empty())
 			continue;
 
-		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
-		menuItem.submenu = [[[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair->second->uuid()]] autorelease];
+		NSMenuItem* menuItem = [bundleItemsMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
+		menuItem.submenu = [[[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair.second->uuid()]] autorelease];
 		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
 
 		if(selectedGrammar)
-			[menuItem setState:NSOnState];
-	}
-	
-	if(ordered.empty())
-		[menu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
-
-	[statusBar showMenu:menu withSelectedIndex:-1 forCellWithTag:sender ? [sender tag] : 1 font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
-}
-
-- (void)showTabSizeSelector:(id)sender
-{
-	NSInteger index = 0;
-	NSInteger sizes[] = { 2, 3, 4, 8 };
-	NSMenu* menu = [[NSMenu new] autorelease];
-	[[menu addItemWithTitle:@"Indent Size" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
-	iterate(size, sizes)
-	{
-		NSMenuItem* item = [menu addItemWithTitle:[NSString stringWithFormat:@"\u2003%ld", *size] action:@selector(takeTabSizeFrom:) keyEquivalent:@""];
-		[item setTarget:self];
-		[item setTag:*size];
-		if(*size == textView.tabSize)
 		{
-			[item setState:NSOnState];
-			index = menu.numberOfItems - 1;
+			[menuItem setState:NSOnState];
+			selectedItem = menuItem;
 		}
 	}
-	[[menu addItemWithTitle:@"\u2003Other…" action:@selector(showTabSizeSelectorPanel:) keyEquivalent:@""] setTarget:self];
-	[menu addItem:[NSMenuItem separatorItem]];
-	[[menu addItemWithTitle:@"Indent Using" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
-	NSMenuItem* item = nil;
-	item = [menu addItemWithTitle:@"\u2003Tabs" action:@selector(setIndentWithTabs:) keyEquivalent:@""];
-	[item setTarget:self];
-	[item setState:(textView.softTabs ? NSOffState : NSOnState)];
-	item = [menu addItemWithTitle:@"\u2003Spaces" action:@selector(setIndentWithSpaces:) keyEquivalent:@""];
-	[item setTarget:self];
-	[item setState:(textView.softTabs ? NSOnState : NSOffState)];
-	[statusBar showMenu:menu withSelectedIndex:index forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
+
+	if(ordered.empty())
+		[bundleItemsMenu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
+
+	if(selectedItem)
+		[bundleItemsPopUp selectItem:selectedItem];
 }
 
 - (IBAction)takeTabSizeFrom:(id)sender

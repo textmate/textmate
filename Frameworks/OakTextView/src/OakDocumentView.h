@@ -17,6 +17,7 @@ PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumn
 	NSDictionary* gutterPressedImages;
 
 	NSBox* gutterDividerView;
+	NSBox* statusDividerView;
 
 	NSScrollView* textScrollView;
 	OakTextView* textView;
