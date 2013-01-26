@@ -52,11 +52,12 @@ NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColor* secondaryColor)
 {
 	OakDividerLineView* box = [[[OakDividerLineView alloc] initWithFrame:NSZeroRect] autorelease];
-	box.boxType        = NSBoxCustom;
-	box.borderType     = NSLineBorder;
-	box.borderColor    = color;
-	box.primaryColor   = color;
-	box.secondaryColor = secondaryColor;
+	box.boxType         = NSBoxCustom;
+	box.borderType      = NSLineBorder;
+	box.borderColor     = color;
+	box.primaryColor    = color;
+	box.secondaryColor  = secondaryColor;
+	box.usePrimaryColor = YES;
 	return box;
 }
 
