@@ -770,10 +770,16 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	NSNumber* index = _items[rowIndex];
 	document_record_t& record = _records[index.unsignedIntValue];
 
-	auto docIter = _openDocumentsMap.find(record.identifier);
-	BOOL isOpen     = docIter != _openDocumentsMap.end();
-	BOOL isModified = isOpen && docIter->second->is_modified();
-	BOOL isOnDisk   = isOpen ? docIter->second->is_on_disk() : YES;
+	BOOL isOpen = NO, isModified = NO, isOnDisk = YES;
+	for(document::document_ptr const& doc : _openDocuments)
+	{
+		if(doc->path() != NULL_STR ? doc->path() == record.full_path : doc->identifier() == record.identifier)
+		{
+			isOpen     = YES;
+			isModified = doc->is_modified();
+			isOnDisk   = doc->is_on_disk();
+		}
+	}
 
 	cell.objectValue = [self tableView:aTableView objectValueForTableColumn:aTableColumn row:rowIndex];
 	if([cell respondsToSelector:@selector(setImage:)])
