@@ -23,6 +23,7 @@ static NSDictionary* default_settings ()
 		kUserDefaultsDisableTabBarCollapsingKey : @YES,
 		kUserDefaultsFileBrowserPlacementKey    : @"right",
 		kUserDefaultsFoldersOnTopKey            : @YES,
+		kUserDefaultsTabsAboveDocumentKey       : @NO,
 		kUserDefaultsShowFileExtensionsKey      : @NO,
 		kUserDefaultsEnvironmentVariablesKey    : default_environment(),
 		kUserDefaultsDisableBundleUpdatesKey    : @NO,
@@ -64,6 +65,7 @@ NSString* const kUserDefaultsShowFileExtensionsKey      = @"showFileExtensions";
 NSString* const kUserDefaultsInitialFileBrowserURLKey   = @"initialFileBrowserURL";
 NSString* const kUserDefaultsFileBrowserPlacementKey    = @"fileBrowserPlacement";
 NSString* const kUserDefaultsHTMLOutputPlacementKey     = @"htmlOutputPlacement";
+NSString* const kUserDefaultsTabsAboveDocumentKey       = @"tabsAboveDocument";
 
 // ===========
 // = Bundles =

@@ -1,4 +1,5 @@
 #import "OFBHeaderView.h"
+#import <Preferences/Keys.h>
 #import <OakAppKit/OakAppKit.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)
@@ -29,6 +30,7 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 @interface OFBHeaderView ()
 @property (nonatomic) BOOL renderEnabled;
+@property (nonatomic) NSBox* topDividerView;
 @end
 
 @implementation OFBHeaderView
@@ -48,8 +50,12 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			@"divider"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
 			@"back"     : self.goBackButton,
 			@"forward"  : self.goForwardButton,
+			@"top"      : self.topDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
 			@"bottom"   : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
 		};
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+		self.topDividerView.hidden = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
 
 		for(NSView* view in [views allValues])
 		{
@@ -57,13 +63,14 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[shadow][divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottom]|"                  options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[folder(==26)]-(0)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[shadow][bottom]|"          options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[divider(==shadow)]"        options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[back(==25)]"         options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[forward(==back)]"    options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[shadow(==1)][divider(==1)]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[top]|"                           options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[bottom]|"                        options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[folder(==24)]-(0)-|"       options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[top(==1)][shadow][bottom(==1)]|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[top(==1)][divider(==shadow)]"    options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[back(==23)]"               options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[forward(==back)]"          options:0 metrics:nil views:views]];
 	}
 	return self;
 }
@@ -71,6 +78,11 @@ static NSPopUpButton* OakCreatePopUpButton ()
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)userDefaultsDidChange:(NSNotification*)aNotification
+{
+	self.topDividerView.hidden = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
 }
 
 - (BOOL)isOpaque
