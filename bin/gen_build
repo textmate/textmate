@@ -584,6 +584,7 @@ def all_targets(buildfile, builddir)
 
   Dir.chdir(File.dirname(buildfile)) do
     targets = %x{ ${TM_NINJA:-ninja} -f #{[ buildfile ].shelljoin } -t targets all }
+    return nil if $? != 0
     targets.each do |line|
       if line =~ /.*(?=:(?! phony))/
         path = $&
@@ -739,11 +740,13 @@ end
 
 all_new_targets = all_targets(outfile, builddir)
 
-targets_lost = all_old_targets - all_new_targets
-targets_lost.each do |path|
-  if File.exists?(path)
-    STDERR << "Remove old target ‘#{path.sub(/#{Regexp.escape(builddir)}/, '$builddir')}’…\n"
-    File.unlink(path)
+if all_old_targets && all_new_targets
+  targets_lost = all_old_targets - all_new_targets
+  targets_lost.each do |path|
+    if File.exists?(path)
+      STDERR << "Remove old target ‘#{path.sub(/#{Regexp.escape(builddir)}/, '$builddir')}’…\n"
+      File.unlink(path)
+    end
   end
 end
 
