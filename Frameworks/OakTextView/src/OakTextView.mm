@@ -552,7 +552,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 			y = top - 0.5 * (h - (bottom - top));
 			goto doScroll;
 		}
-		return;
+
+		// If selection is taller than viewport then we don’t do anything
+		if(bottom - top > h)
+			return;
 	}
 
 	if(x + w - 2*r.size.width < r.origin.x)
