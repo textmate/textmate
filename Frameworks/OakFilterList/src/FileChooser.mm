@@ -97,7 +97,7 @@ namespace
 			if(str == NULL_STR || str.empty())
 				return;
 
-			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^./]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
+			if(regexp::match_t const& m = regexp::search("(?x)  \\A  (?: (?:/(?=.*/))? (.*) / )?  ([^/]*?)  (\\.[^/]+?)?  (?: :([\\d+:-x\\+]*) | @(.*) )?  \\z", str.data(), str.data() + str.size()))
 			{
 				_initialized = true;
 
@@ -446,8 +446,15 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	record.matched = false;
 	if(glob.exclude(record.full_path))
 		return;
-	if(filter.extension != NULL_STR && filter.extension != path::extensions(record.full_path))
-		return;
+
+	if(filter.extension != NULL_STR)
+	{
+		// Check if filter string’s extension is a subset and that the
+		// subset match is followed by a period or is end of string.
+		std::string::size_type ext = record.name.find(filter.extension);
+		if(ext == std::string::npos || ext + filter.extension.size() < record.name.size() && record.name[ext + filter.extension.size()] != '.')
+			return;
+	}
 
 	record.cover.clear();
 	record.display         = record.name;
