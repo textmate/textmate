@@ -490,7 +490,7 @@ namespace ng
 					{
 						// we special-case this to ensure we do not insert at last line with carry, as that will cause potential following insertions to have a lower index, since those will be at EOB w/o a carry
 						index_t pos = visual_advance(buffer, buffer.begin(n), col);
-						insertions.insert(std::make_pair(pos.index, std::string(pos.carry, ' ') + *line));
+						insertions.insert(std::make_pair(index_t(pos.index), std::string(pos.carry, ' ') + *line));
 					}
 					else
 					{
