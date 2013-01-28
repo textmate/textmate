@@ -2,6 +2,7 @@
 #import "OakPasteboardWrapper.h"
 #import "OakChoiceMenu.h"
 #import "OakDocumentView.h" // addAuxiliaryView:atEdge: signature
+#import "LiveSearchView.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSEvent Additions.h>
 #import <OakAppKit/NSColor Additions.h>
@@ -68,7 +69,7 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 @property (nonatomic, assign) BOOL showColumnSelectionCursor;
 @property (nonatomic, retain) OakChoiceMenu* choiceMenu;
 @property (nonatomic, assign) NSUInteger refreshNestCount;
-@property (nonatomic, retain) NSViewController* liveSearchViewController;
+@property (nonatomic, retain) LiveSearchView* liveSearchView;
 @property (nonatomic, copy) NSString* liveSearchString;
 @property (nonatomic, assign) ng::ranges_t const& liveSearchRanges;
 @end
@@ -310,7 +311,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 @synthesize initiateDragTimer, dragScrollTimer, optionDownDate, showColumnSelectionCursor, showDragCursor, choiceMenu;
 @synthesize markedRanges;
 @synthesize refreshNestCount;
-@synthesize liveSearchViewController, liveSearchString, liveSearchRanges;
+@synthesize liveSearchString, liveSearchRanges;
 
 // =================================
 // = OakTextView Delegate Wrappers =
@@ -1701,27 +1702,27 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	{
 		liveSearchAnchor = editor->ranges();
 
-		if(!liveSearchViewController)
+		if(!self.liveSearchView)
 		{
-			self.liveSearchViewController = [[NSViewController alloc] initWithNibName:@"SearchField" bundle:[NSBundle bundleForClass:[self class]]];
-			[documentView addAuxiliaryView:liveSearchViewController.view atEdge:NSMinYEdge];
+			self.liveSearchView = [[[LiveSearchView alloc] initWithFrame:NSZeroRect] autorelease];
+			[documentView addAuxiliaryView:self.liveSearchView atEdge:NSMinYEdge];
+			self.liveSearchView.nextResponder = self;
 		}
 
-		NSTextField* textField = [[liveSearchViewController.view subviews] lastObject];
+		NSTextField* textField = self.liveSearchView.textField;
 		[textField setDelegate:self];
 		[textField setStringValue:@""];
 
 		liveSearchAnchor = editor->ranges();
 		self.liveSearchString = nil;
 
-		[[self window] makeFirstResponder:[[liveSearchViewController.view subviews] lastObject]];
-		[[[self window] firstResponder] setNextResponder:self];
+		[[self window] makeFirstResponder:textField];
 	}
-	else if(liveSearchViewController)
+	else if(self.liveSearchView)
 	{
-		[documentView removeAuxiliaryView:liveSearchViewController.view];
+		[documentView removeAuxiliaryView:self.liveSearchView];
 		[[self window] makeFirstResponder:self];
-		self.liveSearchViewController = nil;
+		self.liveSearchView = nil;
 		liveSearchRanges = ng::ranges_t();
 	}
 }
@@ -1768,14 +1769,14 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (IBAction)incrementalSearch:(id)sender
 {
-	if(liveSearchViewController)
+	if(self.liveSearchView)
 			[self findNext:self];
 	else	[self setShowLiveSearch:YES];
 }
 
 - (IBAction)incrementalSearchPrevious:(id)sender
 {
-	if(liveSearchViewController)
+	if(self.liveSearchView)
 			[self findPrevious:self];
 	else	[self setShowLiveSearch:YES];
 }
@@ -1788,7 +1789,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (IBAction)findNext:(id)sender
 {
-	if(liveSearchViewController)
+	if(self.liveSearchView)
 	{
 		ng::ranges_t tmp;
 		citerate(pair, ng::find(document->buffer(), ng::move(document->buffer(), liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToEndOfSelection), to_s(liveSearchString), find::ignore_case|find::ignore_whitespace))
@@ -1805,7 +1806,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (IBAction)findPrevious:(id)sender
 {
-	if(liveSearchViewController)
+	if(self.liveSearchView)
 	{
 		ng::ranges_t tmp;
 		citerate(pair, ng::find(document->buffer(), ng::move(document->buffer(), liveSearchRanges.empty() ? liveSearchAnchor : liveSearchRanges, kSelectionMoveToBeginOfSelection), to_s(liveSearchString), find::backwards|find::ignore_case|find::ignore_whitespace))

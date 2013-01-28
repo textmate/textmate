@@ -82,7 +82,6 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	// = Incremental Search =
 	// ======================
 
-	NSViewController* liveSearchViewController;
 	NSString* liveSearchString;
 	ng::ranges_t liveSearchAnchor;
 	ng::ranges_t liveSearchRanges;
