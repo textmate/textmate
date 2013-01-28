@@ -3,6 +3,7 @@
 #else
 #import "../OakFilterList.h"
 #endif
+#import <OakTextView/OakDocumentView.h>
 #import <document/document.h>
 #import <oak/misc.h>
 
@@ -12,9 +13,10 @@ PUBLIC @interface SymbolChooser : NSObject <FilterListDataSource>
 {
 	OBJC_WATCH_LEAKS(SymbolChooser);
 	document::document_ptr document;
+	OakDocumentView* documentView;
 	std::string filterString;
 	SymbolChooserViewController* viewController;
 }
-+ (id)symbolChooserForDocument:(document::document_ptr)aDocument;
++ (id)symbolChooserForDocumentView:(OakDocumentView *)aDocumentView;
 @property (nonatomic, readonly) NSString* filterString;
 @end

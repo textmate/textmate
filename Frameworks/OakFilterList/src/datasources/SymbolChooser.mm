@@ -59,7 +59,7 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 	return viewController;
 }
 
-- (id)initWithDocument:(document::document_ptr)aDocument
+- (id)initWithDocumentView:(OakDocumentView *)aDocumentView
 {
 	if(self = [super init])
 	{
@@ -81,16 +81,17 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 			SymbolChooser* _self;
 		};
 
-		document = aDocument;
+		document = [aDocumentView document];
+		documentView = aDocumentView;
 		if(document->try_open(document::open_callback_ptr((document::open_callback_t*)new callback_t(self))))
 			[self updateSymbols];
 	}
 	return self;
 }
 
-+ (id)symbolChooserForDocument:(document::document_ptr)aDocument
++ (id)symbolChooserForDocumentView:(OakDocumentView *)aDocumentView
 {
-	return [[SymbolChooser alloc] initWithDocument:aDocument];
+	return [[SymbolChooser alloc] initWithDocumentView:aDocumentView];
 }
 
 - (NSString*)title
