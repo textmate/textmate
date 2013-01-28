@@ -187,7 +187,7 @@ namespace
 					if(section->scope_selector.does_match(scope, &rank))
 						orderScopeMatches.insert(std::make_pair(rank, section));
 				}
-				else if(!section->has_file_glob || section->file_glob.does_match(path))
+				else if(!section->has_file_glob || section->file_glob.does_match(path == NULL_STR ? directory : path))
 				{
 					iterate(pair, section->variables)
 						expand_variable(pair->first, pair->second, variables);

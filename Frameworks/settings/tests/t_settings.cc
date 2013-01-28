@@ -25,6 +25,14 @@ public:
 		TS_ASSERT_EQUALS(settings_for_path(jail.path("file.mm")).get("testSetting", 3), 5);
 	}
 
+	void test_sections_with_only_directory ()
+	{
+		test::jail_t jail;
+		jail.set_content(".tm_properties", "testSetting = parent\n[ folder ]\ntestSetting = child\n");
+		TS_ASSERT_EQUALS(settings_for_path(NULL_STR, "", jail.path()).get("testSetting"), "parent");
+		TS_ASSERT_EQUALS(settings_for_path(NULL_STR, "", jail.path("folder")).get("testSetting"), "child");
+	}
+
 	void test_conversions ()
 	{
 		test::jail_t jail;
