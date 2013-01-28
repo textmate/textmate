@@ -588,7 +588,7 @@ doScroll:
 
 	NSClipView* contentView = [[self enclosingScrollView] contentView];
 	if([contentView respondsToSelector:@selector(_extendNextScrollRelativeToCurrentPosition)])
-		[contentView performSelector:@selector(_extendNextScrollRelativeToCurrentPosition)];
+		[contentView performSelector:@selector(_extendNextScrollRelativeToCurrentPosition)]; // Workaround for <rdar://9295929>
 	[self scrollRectToVisible:CGRectMake(round(x), round(y), w, h)];
 }
 
