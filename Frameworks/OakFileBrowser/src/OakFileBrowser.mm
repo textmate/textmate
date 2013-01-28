@@ -586,11 +586,26 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)delete:(id)anArgument
 {
+	NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
+	if([indexSet count] == 0)
+		return;
+
+	NSUInteger rowToSelect = [indexSet lastIndex];
+	while(rowToSelect < [_outlineView numberOfRows] && [indexSet containsIndex:rowToSelect])
+		++rowToSelect;
+
+	if(rowToSelect == [_outlineView numberOfRows])
+		do { --rowToSelect; } while(rowToSelect > 0 && [indexSet containsIndex:rowToSelect]);
+
+	FSItem* itemToSelect = [indexSet containsIndex:rowToSelect] ? nil : [_outlineView itemAtRow:rowToSelect];
+
 	for(NSURL* url in self.selectedURLs)
 	{
 		if([url isFileURL])
 			[[OakFileManager sharedInstance] trashItemAtURL:url window:_view.window];
 	}
+
+	[_outlineViewDelegate selectURLs:@[ itemToSelect.url ] expandChildren:NO];
 }
 
 - (void)changeColor:(OakFinderLabelChooser*)labelChooser
