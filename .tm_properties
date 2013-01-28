@@ -3,6 +3,9 @@ windowTitleProject   = '${projectDirectory:+ — ${projectDirectory/^.*\///}}'
 windowTitleFramework = '${TM_DIRECTORY/.*\/Frameworks\/([^\/]+)\/.*|.*/${1:+ ($1)}/}'
 windowTitle          = '$TM_DISPLAYNAME$windowTitleFramework$windowTitleProject$windowTitleSCM'
 
+excludeDirectoriesInFileChooser  = 'bin/CxxTest'
+excludeDirectoriesInFolderSearch = 'bin/CxxTest'
+
 # Variables
 TM_ORGANIZATION_NAME = 'MacroMates'
 
