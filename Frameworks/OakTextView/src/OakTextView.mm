@@ -529,6 +529,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 - (void)ensureSelectionIsInVisibleArea:(id)sender
 {
+	if(([NSEvent pressedMouseButtons] & 1) == 1) // User is drag-selecting
+		return;
+
 	ng::range_t range = editor->ranges().last();
 	CGRect r = layout->rect_at_index(range.last);
 	CGRect s = [self visibleRect];
@@ -2611,6 +2614,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	ng::ranges_t s = editor->ranges();
 	s.last() = range.last();
 	editor->set_selections(s);
+
+	[self autoscroll:anEvent];
 }
 
 - (void)startDragForEvent:(NSEvent*)anEvent
