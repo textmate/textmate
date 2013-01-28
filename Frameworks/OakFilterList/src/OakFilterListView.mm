@@ -133,8 +133,13 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 {
 	NSArray* selectedItems = nil;
 	if([_filterDataSource respondsToSelector:@selector(preservesSelectionWhenFiltering)] && [_filterDataSource preservesSelectionWhenFiltering])
-		selectedItems = [self.items objectsAtIndexes:self.selectedRowIndexes];
+	{
+		if(self.selectedRowIndexes.count != 1 || self.selectedRowIndexes.firstIndex != 0)
+			selectedItems = [self.items objectsAtIndexes:self.selectedRowIndexes];
+	}
 	self.items = [_filterDataSource items];
+	if([_filterDataSource respondsToSelector:@selector(selectedItems)])
+		selectedItems = [_filterDataSource selectedItems];
 	if(![_filterDataSource respondsToSelector:@selector(infoStringForItem:)])
 	{
 		NSMutableParagraphStyle* style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -148,14 +153,11 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 	}
 	[super reloadData];
 	NSMutableIndexSet* indexesToSelect = [NSMutableIndexSet indexSet];
-	if(self.selectedRowIndexes.count != 1 || self.selectedRowIndexes.firstIndex != 0)
+	for(id item in selectedItems)
 	{
-		for(id item in selectedItems)
-		{
-			NSUInteger index = [self.items indexOfObject:item];
-			if(index != NSNotFound)
-				[indexesToSelect addIndex:index];
-		}
+		NSUInteger index = [self.items indexOfObject:item];
+		if(index != NSNotFound)
+			[indexesToSelect addIndex:index];
 	}
 	if(indexesToSelect.count == 0)
 		[indexesToSelect addIndex:0];
