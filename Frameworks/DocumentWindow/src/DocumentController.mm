@@ -1453,7 +1453,7 @@ namespace
 - (IBAction)showSymbolChooser:(id)sender
 {
 	self.filterWindowController                         = [OakFilterWindowController new];
-	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocument:[self selectedDocument]];
+	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocumentView:[self documentView]];
 	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
 	self.filterWindowController.sendActionOnSingleClick = YES;
 	[self.filterWindowController showWindowRelativeToWindow:self.window];
