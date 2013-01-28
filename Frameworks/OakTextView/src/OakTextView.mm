@@ -1711,10 +1711,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 		NSTextField* textField = self.liveSearchView.textField;
 		[textField setDelegate:self];
-		[textField setStringValue:@""];
-
-		liveSearchAnchor = editor->ranges();
-		self.liveSearchString = nil;
+		[textField setStringValue:self.liveSearchString ?: @""];
 
 		[[self window] makeFirstResponder:textField];
 	}
