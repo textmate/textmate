@@ -83,6 +83,7 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 		document = [aDocumentView document];
 		documentView = aDocumentView;
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateSymbols) name:FLDataSourceItemsDidChangeNotification object:documentView];
 		if(document->try_open(document::open_callback_ptr((document::open_callback_t*)new callback_t(self))))
 			[self updateSymbols];
 	}
@@ -122,7 +123,8 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 - (NSArray*)items
 {
-	return SymbolListForDocument(document, filterString);
+	_items = SymbolListForDocument(document, filterString);
+	return _items;
 }
 
 - (NSAttributedString*)displayStringForItem:(id)item
@@ -135,8 +137,43 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 	return [item infoString];
 }
 
+- (NSArray*)selectedItems
+{
+	text::selection_t sel([[documentView textView].selectionString UTF8String]);
+	ng::buffer_t const& buf = document->buffer();
+	size_t min = buf.convert(sel.last().min());
+	size_t max = buf.convert(sel.last().max());
+	BOOL past_selection = NO;
+	NSUInteger last_index;
+	NSUInteger index = 0;
+	NSMutableIndexSet* indexesToSelect = [NSMutableIndexSet indexSet];
+	for (id item in _items)
+	{
+		text::selection_t pos([[item selectionString] UTF8String]);
+		size_t start = buf.convert(pos.last().min());
+		size_t end = buf.convert(pos.last().max());
+		last_index = index;
+		index = [_items indexOfObject:item];
+		if (start > min)
+		{
+			if (!past_selection && last_index != NSNotFound)
+				[indexesToSelect addIndex:last_index];
+			past_selection = YES;
+			if (end <= max)
+			{
+				if(index != NSNotFound)
+					[indexesToSelect addIndex:index];
+			}
+		}
+	}
+	if (!past_selection)
+		[indexesToSelect addIndex:index];
+	return [_items objectsAtIndexes:indexesToSelect];
+}
+
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsDidChangeNotification object:documentView];
 	document->close();
 }
 @end

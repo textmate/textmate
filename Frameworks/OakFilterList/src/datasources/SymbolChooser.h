@@ -16,6 +16,7 @@ PUBLIC @interface SymbolChooser : NSObject <FilterListDataSource>
 	OakDocumentView* documentView;
 	std::string filterString;
 	SymbolChooserViewController* viewController;
+	NSArray* _items;
 }
 + (id)symbolChooserForDocumentView:(OakDocumentView *)aDocumentView;
 @property (nonatomic, readonly) NSString* filterString;
