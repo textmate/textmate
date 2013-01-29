@@ -30,6 +30,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 
 - (IBAction)reload:(id)sender;
 - (IBAction)deselectAll:(id)sender;
+- (IBAction)toggleShowInvisibles:(id)sender;
 
 - (IBAction)goBack:(id)sender;
 - (IBAction)goForward:(id)sender;

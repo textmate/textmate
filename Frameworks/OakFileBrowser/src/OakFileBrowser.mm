@@ -296,6 +296,23 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		env["PWD"] = [dir fileSystemRepresentation];
 }
 
+- (BOOL)showExcludedItems
+{
+	return (_dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
+}
+
+- (void)setShowExcludedItems:(BOOL)flag
+{
+	if(self.showExcludedItems == flag)
+		return;
+
+	if(flag)
+			_dataSourceOptions |= kFSDataSourceOptionIncludeHidden;
+	else	_dataSourceOptions &= ~kFSDataSourceOptionIncludeHidden;
+
+	[self reload:self];
+}
+
 // ===================
 // = History support =
 // ===================
@@ -875,6 +892,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[_outlineView deselectAll:sender];
 }
 
+- (IBAction)toggleShowInvisibles:(id)sender
+{
+	self.showExcludedItems = !self.showExcludedItems;
+}
+
 - (IBAction)goToParentFolder:(id)sender   { [self selectURL:_url withParentURL:ParentForURL(_url)]; }
 - (IBAction)goToComputer:(id)sender       { [self goToURL:kURLLocationComputer];  }
 - (IBAction)goToHome:(id)sender           { [self goToURL:kURLLocationHome];      }
@@ -949,7 +971,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		return NO;
 	else if([item action] == @selector(editSelectedEntries:))
 		return selectedFiles == 1;
-	else
-		return YES;
+	else if([item action] == @selector(toggleShowInvisibles:))
+		[item setState:self.showExcludedItems ? NSOnState : NSOffState];
+
+	return YES;
 }
 @end
