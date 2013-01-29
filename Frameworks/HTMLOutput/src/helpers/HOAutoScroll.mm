@@ -73,7 +73,7 @@ OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 	
 	if(view == _webFrame)
 	{
-		D(DBF_HTMLOutput_AutoScroll, bug("vislble rect changed: %s → %s\n", NSStringFromRect(_lastVisibleRect).UTF8String, NSStringFromRect([[webFrame documentView] visibleRect]).UTF8String););
+		D(DBF_HTMLOutput_AutoScroll, bug("vislble rect changed: %s → %s\n", NSStringFromRect(_lastVisibleRect).UTF8String, NSStringFromRect([[_webFrame documentView] visibleRect]).UTF8String););
 		if(NSMaxY(_lastVisibleRect) >= NSMaxY(_lastFrame))
 		{
 			D(DBF_HTMLOutput_AutoScroll, bug("scroll to bottom\n"););
