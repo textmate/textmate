@@ -2374,6 +2374,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 				flagNames.push_back(qualNames[i].name);
 		}
 
+		AUTO_REFRESH;
 		document::run(parse_drag_command(handler), document->buffer(), editor->ranges(), document, std::map<std::string, std::string>(), document::run_callback_ptr((document::run_callback_t*)new callback_t(handlerToFiles[handler->uuid()], text::join(flagNames, "|"))));
 	}
 }
