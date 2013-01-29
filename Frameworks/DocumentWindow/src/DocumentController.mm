@@ -1456,7 +1456,10 @@ namespace
 	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocumentView:[self documentView]];
 	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
 	self.filterWindowController.sendActionOnSingleClick = YES;
-	[self.filterWindowController showWindowRelativeToWindow:self.window];
+	if (sender == nil)
+		[self.filterWindowController.window makeKeyAndOrderFront:self.window];
+	else
+		[self.filterWindowController showWindowRelativeToWindow:self.window];
 }
 
 - (void)symbolChooserDidSelectItems:(id)sender

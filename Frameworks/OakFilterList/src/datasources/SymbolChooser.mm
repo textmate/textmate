@@ -1,5 +1,6 @@
 #import "SymbolChooser.h"
 #import "SymbolList.h"
+#import <DocumentWindow/DocumentController.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
 #import <text/ranker.h>
@@ -123,6 +124,12 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 - (NSArray*)items
 {
+	DocumentController *controller = [documentView window].delegate;
+	if ([controller selectedDocument] != document)
+	{
+		[controller showSymbolChooser:nil];
+		[[documentView window] makeKeyWindow];
+	}
 	_items = SymbolListForDocument(document, filterString);
 	return _items;
 }
