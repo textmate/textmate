@@ -413,6 +413,11 @@ namespace ng
 		return _snippets.current();
 	}
 
+	void editor_t::clear_snippets ()
+	{
+		_snippets.clear();
+	}
+
 	std::vector<std::string> const& editor_t::choices () const
 	{
 		return _snippets.choices();

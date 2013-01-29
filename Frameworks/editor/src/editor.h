@@ -188,6 +188,8 @@ namespace ng
 		void perform_replacements (std::multimap<text::range_t, std::string> const& replacements);
 		bool handle_result (std::string const& out, output::type placement, output_format::type format, output_caret::type outputCaret, text::range_t input_range, std::map<std::string, std::string> environment);
 
+		void clear_snippets ();
+
 		// ==============
 		// = Clipboards =
 		// ==============

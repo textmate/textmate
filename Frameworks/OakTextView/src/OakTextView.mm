@@ -1848,6 +1848,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	AUTO_REFRESH;
 	if(!document->undo_manager().can_undo())
 		return;
+	editor->clear_snippets();
 	editor->set_selections(document->undo_manager().undo());
 }
 
@@ -1856,6 +1857,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	AUTO_REFRESH;
 	if(!document->undo_manager().can_redo())
 		return;
+	editor->clear_snippets();
 	editor->set_selections(document->undo_manager().redo());
 }
 
