@@ -94,10 +94,19 @@ static void submit_crash_reports (std::string const& url, std::string const& pro
 
 static NSString* contact_info ()
 {
-	ABMutableMultiValue* value = [[[ABAddressBook sharedAddressBook] me] valueForProperty:kABEmailProperty];
-	NSString* email = [value valueAtIndex:[value indexForIdentifier:[value primaryIdentifier]]];
 	NSString* name = NSFullUserName();
-	return (name && email) ? [NSString stringWithFormat:@"%@ <%@>", name, email] : (email ?: name);
+	@try {
+		if(ABAddressBook* ab = [ABAddressBook sharedAddressBook])
+		{
+			ABMutableMultiValue* value = [[ab me] valueForProperty:kABEmailProperty];
+			if(NSString* email = [value valueAtIndex:[value indexForIdentifier:[value primaryIdentifier]]])
+				name = name ? [NSString stringWithFormat:@"%@ <%@>", name, email] : email;
+		}
+	}
+	@catch (NSException* e) {
+		NSLog(@"%@", e);
+	}
+	return name ?: @"Anonymous";
 }
 
 void OakSubmitNewCrashReportsInBackground (NSString* url, NSString* processName)
