@@ -22,6 +22,7 @@ TM_ISSUE_URL         = 'https://github.com/textmate/textmate/issues/%s'
 [ 'source.c++, source.objc++' ]
 tabSize          = 3
 softTabs         = false
+TM_C_POINTER     = "* "
 
 [ target ]
 fileType         = 'source.tm-properties'
