@@ -79,7 +79,7 @@ public:
 		std::string url("http://localhost:" STRINGIFY(WEB_SERVER_PORT) "/bad_bzip.tbz");
 		std::string err = NULL_STR;
 		std::string archive = sw_update::download_update(url, key_chain(), &err);
-		TS_ASSERT_EQUALS(err, "Corrupt archive.");
+		TS_ASSERT_EQUALS(err, "Extracting archive.");
 		TS_ASSERT_EQUALS(archive, NULL_STR);
 	}
 
@@ -88,7 +88,7 @@ public:
 		std::string url("http://localhost:" STRINGIFY(WEB_SERVER_PORT) "/bad_tar.tbz");
 		std::string err = NULL_STR;
 		std::string archive = sw_update::download_update(url, key_chain(), &err);
-		TS_ASSERT_EQUALS(err, "Corrupt archive.");
+		TS_ASSERT_EQUALS(err, "Extracting archive.");
 		TS_ASSERT_EQUALS(archive, NULL_STR);
 	}
 

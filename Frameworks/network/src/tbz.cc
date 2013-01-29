@@ -1,5 +1,6 @@
 #include "tbz.h"
 #include <text/format.h>
+#include <text/trim.h>
 #include <oak/datatypes.h>
 #include <io/environment.h>
 
@@ -64,8 +65,8 @@ namespace network
 		{
 			if(WEXITSTATUS(status) == 0 && tbzOut.empty())
 				return true;
-			error = "Corrupt archive.";
-			// error = text::format("Unexpected exit code from tar (%d)\n%s\n", WEXITSTATUS(status), text::trim(tbzOut).c_str());
+			error = "Extracting archive.";
+			fprintf(stderr, "TextMate: Unexpected exit code from tar %d: %s\n", WEXITSTATUS(status), text::trim(tbzOut).c_str());
 		}
 		else
 		{
