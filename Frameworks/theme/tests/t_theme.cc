@@ -5,7 +5,8 @@ class ThemeTests : public CxxTest::TestSuite
 public:
 	void test_missing_theme_item_still_sets_gutter_colors ()
 	{
-		theme_t theme(NULL);
+		bundles::item_ptr themeItem;
+		theme_t theme(themeItem);
 		auto gutter = theme.gutter_styles();
 		TS_ASSERT_EQUALS(to_s(gutter.divider),               "#666666FF");
 		TS_ASSERT_EQUALS(to_s(gutter.selectionBorder),       "#666666FF");
