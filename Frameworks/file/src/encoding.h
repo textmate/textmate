@@ -30,11 +30,7 @@ namespace encoding
 		void set_charset (std::string const& charset)   { _charset = charset; _byte_order_mark = charset != kCharsetUTF8 && supports_byte_order_mark(charset); }
 		void set_byte_order_mark (bool flag)            { _byte_order_mark = flag; }
 
-		static bool supports_byte_order_mark (std::string const& charset)
-		{
-			static std::set<std::string> const Encodings = { kCharsetUTF8, kCharsetUTF16BE, kCharsetUTF16LE, kCharsetUTF32BE, kCharsetUTF32LE };
-			return Encodings.find(charset) != Encodings.end();
-		}
+		static bool supports_byte_order_mark (std::string const& charset);
 
 	private:
 		std::string _newlines = NULL_STR;

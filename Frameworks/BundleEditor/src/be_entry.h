@@ -16,11 +16,11 @@ namespace be
 		virtual ~entry_t () { }
 
 		std::string name () const                        { return _name != NULL_STR ? _name : (_path != NULL_STR ? path::display_name(_path) : (_item ? _item->name() : NULL_STR)); }
-		bundles::item_ptr represented_item () const   { return _item; }
+		bundles::item_ptr represented_item () const      { return _item; }
 		std::string represented_path () const            { return _path; }
 		bool disabled () const                           { return _item ? (_item->kind() == bundles::kItemTypeMenuItemSeparator ? true : _item->disabled()) : false; }
 		bool has_children () const                       { return setup_children(); }
-		std::vector<entry_ptr> const& children () const  { static std::vector<entry_ptr> const EmptyVector; return setup_children() ? *_children : EmptyVector; }
+		std::vector<entry_ptr> const& children () const;
 
 		virtual std::string identifier () const          { return _item ? to_s(_item->uuid()) : (_path != NULL_STR ? _path : _name); }
 
