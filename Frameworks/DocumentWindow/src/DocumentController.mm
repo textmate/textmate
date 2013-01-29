@@ -240,6 +240,10 @@ namespace
 		self.window.contentView                 = self.layoutView;
 		self.window.delegate                    = self;
 		self.window.releasedWhenClosed          = NO;
+		[self.window setContentBorderThickness:0 forEdge:NSMaxYEdge]; // top border
+		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
+		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
+		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 		[self.window bind:@"title" toObject:self withKeyPath:@"windowTitle" options:nil];
 		[self.window bind:@"documentEdited" toObject:self withKeyPath:@"isDocumentEdited" options:nil];
 
