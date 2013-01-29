@@ -17,7 +17,7 @@ namespace encoding
 {
 	PUBLIC io::bytes_ptr convert (io::bytes_ptr content, std::string const& from, std::string const& to);
 
-	struct type
+	struct PUBLIC type
 	{
 		type () { }
 		type (std::string const& newlines, std::string const& charset, bool byte_order_mark = false) : _newlines(newlines), _charset(charset), _byte_order_mark(byte_order_mark) { }
