@@ -142,8 +142,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_headerView.goForwardButton.action = @selector(goForward:);
 
 	_view = [NSView new];
-	[_view addSubview:_headerView];
-	[_view addSubview:scrollView];
 
 	NSCell* cell = [OFBPathInfoCell new];
 	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
@@ -159,16 +157,19 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_outlineViewDelegate.outlineView = _outlineView;
 
 	NSDictionary* views = @{
-		@"parent"  : _view,
-		@"header"  : _headerView,
-		@"browser" : scrollView,
+		@"header"         : _headerView,
+		@"headerDivider"  : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+		@"browser"        : scrollView,
 	};
 
 	for(NSView* view in [views allValues])
+	{
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[_view addSubview:view];
+	}
 
-	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[header(==browser)]|" options:0 metrics:nil views:views]];
-	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][browser]|"   options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[browser(==header,==headerDivider)]|" options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][headerDivider][browser]|"    options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 }
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
