@@ -1,5 +1,48 @@
 # Changes
 
+## 2013-01-29 (r9353)
+
+### Settings
+
+* You can now set a default file type for documents with unknown extension using _Preferences → Files → Unknown document type_. *[Steven Clukey]*
+* You can now set *Preferences → Projects → Tab bar above document* if you dislike that the file browser is placed below the tab bar. *[Adam Strzelecki]*
+* Tab bar collapsing is now disabled by default.
+
+### File browser
+
+* Added _Navigate → Move Focus_ (⌥⌘⇥). This moves focus between file browser and document.
+* With focus in file browser _View → Show Invisibles_ (⌥⌘I) toggles the include/exclude patterns (and thus show everything when enabled).
+* By holding option when opening a file, it will now open in TextMate, even if TextMate is not the default application for this type. *[Steven Clukey]*
+* Deleting items in file browser will select the succeeding item (rather than leave you with no selection).
+* Going to SCM status will now have the _Uncommitted Changes_ and _Untracked Items_ groups expanded by default.
+* When toggling the QuickLook preview panel (using space when focus is in file browser) will now do a zoom in/out transition.
+* When using _Go → Current Document_ (⌃⌘R) we drop other (non-visible) expanded folders.
+* No longer plays sounds on file renames.
+* Fix “Go to Favorites” (it went to a wrong location).
+
+### File chooser (⌘T)
+
+* Improve extension filtering when dealing with multiple extensions. We now only require that the extension entered (e.g. `.js`) be a subset of the file’s (e.g. `foo.js.erb`). This subset must however match the entire sub-extension. E.g. `.m` as filter string will still have `.md` files excluded.
+* Enable focus ring when 'Full Keyboard Access' is enabled. *[Michael Sheets]*
+* Add inactive state coloring for dividers. *[Michael Sheets]*
+* Tweak how we position the file chooser: Now it’s relative to the text view rather than the entire window.
+* Fix display string for untitled documents when filter string contained a slash.
+* Fix lack of clearing filter string.
+
+### Text editing
+
+* Incremental search (⌃S) now remember last string used.
+* Dropping files on the text view, which caused a command execution, would not update the buffer (until text view was activated).
+* Fix crash related to using undo while a snippet was active. Presently the snippet is dropped if you use undo. Long-term it should be improved.
+* Improve autoscroll when using mouse to select text.
+
+### Other
+
+* Sections in `.tm_properties` now also match folders (e.g. file browser looks up settings with just a folder rather than file, as “key”).
+* Folders you open are once again added to the _File → Open Recent_ submenu.
+* The HTML output window would have a blank title, if the command didn’t output one.
+* The code signature on `TextMate.app` for r9351 wasn’t timestamped. This may have been the reason some users had Finder report that the program was broken. I have re-enabled timestamps.
+
 ## 2013-01-23 (r9351)
 
 * Actions performed in the file browser now support undo. The context menu of the file browser contains undo/redo menu items, alternatively the Edit menu’s Undo and Redo actions work on the file browser, when it has focus.
