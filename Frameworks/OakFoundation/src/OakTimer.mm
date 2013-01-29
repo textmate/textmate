@@ -40,7 +40,7 @@ OAK_DEBUG_VAR(OakTimer);
 
 + (id)scheduledTimerWithTimeInterval:(NSTimeInterval)seconds target:(id)target selector:(SEL)aSelector userInfo:(id)userInfo repeats:(BOOL)repeats
 {
-	D(DBF_OakTimer, bug("%f %s (%p), %s\n", seconds, [[target description] UTF8String], target, (char const*)aSelector););
+	D(DBF_OakTimer, bug("%f %s (%p), %s\n", seconds, [[target description] UTF8String], target, sel_getName(aSelector)););
 	OakTimer* timer = [[self alloc] initWithTimeInterval:seconds repeats:repeats];
 	timer.target   = target;
 	timer.selector = aSelector;
@@ -50,7 +50,7 @@ OAK_DEBUG_VAR(OakTimer);
 
 + (id)scheduledTimerWithTimeInterval:(NSTimeInterval)seconds target:(id)target selector:(SEL)aSelector repeats:(BOOL)repeats
 {
-	D(DBF_OakTimer, bug("%f %s (%p), %s\n", seconds, [[target description] UTF8String], target, (char const*)aSelector););
+	D(DBF_OakTimer, bug("%f %s (%p), %s\n", seconds, [[target description] UTF8String], target, sel_getName(aSelector)););
 	return [self scheduledTimerWithTimeInterval:seconds target:target selector:aSelector userInfo:NULL repeats:repeats];
 }
 

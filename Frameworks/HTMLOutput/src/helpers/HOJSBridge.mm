@@ -369,7 +369,7 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector
 {
-	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", (char const*)aSelector););
+	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", sel_getName(aSelector)););
 	static std::set<SEL> const PublicMethods = { @selector(cancelCommand), @selector(writeToInput:), @selector(closeInput) };
 	return PublicMethods.find(aSelector) == PublicMethods.end();
 }
