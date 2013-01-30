@@ -1,5 +1,6 @@
 #import "OakControl Private.h"
 #import "NSView Additions.h"
+#import <OakAppKit/NSColor Additions.h>
 #import <oak/oak.h>
 
 // The lineBreakMode parameter is here to work around a crash in CoreText <rdar://6940427> — fixed in 10.6
@@ -11,15 +12,6 @@ static CFAttributedStringRef AttributedStringWithOptions (NSString* string, uint
 	NSMutableParagraphStyle* paragraph = [[NSMutableParagraphStyle new] autorelease];
 	[paragraph setLineBreakMode:lineBreakMode];
 	attr[NSParagraphStyleAttributeName] = paragraph;
-
-	if(options & layer_t::shadow)
-	{
-		NSShadow* shadow = [[[NSShadow alloc] init] autorelease];
-		[shadow setShadowOffset:NSMakeSize(0, -1)];
-		[shadow setShadowBlurRadius:1.0];
-		[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1.0 alpha:0.8]];
-		attr[NSShadowAttributeName] = shadow;
-	}
 
 	NSAttributedString* res = [[[NSAttributedString alloc] initWithString:string attributes:attr] autorelease];
 	return (CFAttributedStringRef)res;
@@ -53,6 +45,9 @@ static void DrawTextWithOptions (NSString* string, NSRect bounds, uint32_t textO
 	CFRelease(framesetter);
 	if(!frame)
 		return;
+
+	if(textOptions & layer_t::shadow)
+		CGContextSetShadowWithColor(context, NSMakeSize(0, -1), 1, [[NSColor colorWithCalibratedWhite:1 alpha:0.6] tmCGColor]);
 
 	CTFrameDraw(frame, context);
 
