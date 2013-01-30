@@ -7,11 +7,10 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
-	[res setBezelStyle:NSSmallSquareBezelStyle];
+	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
 
 	NSImage* image = [[NSImage imageNamed:imageName] copy];
-	[image setSize:NSMakeSize(9, 9)];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
 
@@ -40,8 +39,8 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 		NSDictionary* views = @{
 			@"folder"   : self.folderPopUpButton,
-			@"shadow"   : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.551 alpha:1], [NSColor colorWithCalibratedWhite:0.801 alpha:1]),
-			@"divider"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
+			@"divider"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.551 alpha:1], [NSColor colorWithCalibratedWhite:0.801 alpha:1]),
+			@"shading"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
 			@"back"     : self.goBackButton,
 			@"forward"  : self.goForwardButton,
 		};
@@ -52,13 +51,14 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[shadow][divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[folder(==26)]-(0)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[shadow]|"                  options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[divider(==shadow)]"        options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[back(==25)]"         options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[forward(==back)]"    options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider][shading]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[folder(==divider,==shading,==back,==forward)]|"                                          options:0 metrics:nil views:views]];
 	}
 	return self;
+}
+
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
 }
 @end
