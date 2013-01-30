@@ -12,53 +12,51 @@
    background = (
       { rect = (   0, W-1,   0,   0 ); color = '#3F3F3F'; requisite = window_main_or_key; },
       { rect = (   0, W-1,   1,   1 ); color = '#999999'; requisite = window_main_or_key; },
-      { rect = (   0, W-1,   2, H-3 ); color = '#777777'; requisite = window_main_or_key; },
-      { rect = (   0, W-1, H-2, H-2 ); color = '#3F3F3F'; requisite = window_main_or_key; },
-      { rect = (   0, W-1, H-1, H-1 ); color = '#AEAEAE'; requisite = window_main_or_key; },
+      { rect = (   0, W-1,   2, H-2 ); color = '#777777'; requisite = window_main_or_key; },
+      { rect = (   0, W-1, H-1, H-1 ); color = '#3F3F3F'; requisite = window_main_or_key; },
 
       { rect = (   0, W-1,   0,   0 ); color = '#878787'; requisiteMask = window_main_or_key; },
       { rect = (   0, W-1,   1,   1 ); color = '#BBBBBB'; requisiteMask = window_main_or_key; },
-      { rect = (   0, W-1,   2, H-3 ); color = '#A5A5A5'; requisiteMask = window_main_or_key; },
-      { rect = (   0, W-1, H-2, H-2 ); color = '#878787'; requisiteMask = window_main_or_key; },
-      { rect = (   0, W-1, H-1, H-1 ); color = '#C9C9C9'; requisiteMask = window_main_or_key; },
+      { rect = (   0, W-1,   2, H-2 ); color = '#A5A5A5'; requisiteMask = window_main_or_key; },
+      { rect = (   0, W-1, H-1, H-1 ); color = '#878787'; requisiteMask = window_main_or_key; },
 
-      { rect = (   0,   W,   2, H-3 ); action = 'didDoubleClickTabBar:'; requisite = mouse_double_clicked; },
+      { rect = (   0,   W,   2, H-2 ); action = 'didDoubleClickTabBar:'; requisite = mouse_double_clicked; },
    );
 
    tab = (
       // Right border
-      { rect = ( W-1, W-1,   2, H-3 ); color = '#8C8C8C'; requisite = window_main_or_key; },
+      { rect = ( W-1, W-1,   2, H-2 ); color = '#8C8C8C'; requisite = window_main_or_key; },
       { rect = ( W-1, W-1,   1,   1 ); color = '#A8A8A8'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|dragged'; },
-      { rect = ( W-1, W-1,   2, H-3 ); color = '#B2B2B2'; requisiteMask = 'window_main_or_key'; },
+      { rect = ( W-1, W-1,   2, H-2 ); color = '#B2B2B2'; requisiteMask = 'window_main_or_key'; },
       { rect = ( W-1, W-1,   1,   1 ); color = '#C5C5C5'; requisiteMask = 'window_main_or_key|dragged'; },
 
       // Splitter between tabs (1 px to the right of our current)
-      { rect = (   W,   W,   2, H-3 ); color = '#3B3B3B'; requisite = window_main_or_key; },
+      { rect = (   W,   W,   2, H-2 ); color = '#3B3B3B'; requisite = window_main_or_key; },
       { rect = (   W,   W,   1,   1 ); color = '#4B4B4B'; requisite = window_main_or_key; },
-      { rect = (   W,   W,   2, H-3 ); color = '#525252'; requisiteMask = window_main_or_key; },
+      { rect = (   W,   W,   2, H-2 ); color = '#525252'; requisiteMask = window_main_or_key; },
       { rect = (   W,   W,   1,   1 ); color = '#5D5D5D'; requisiteMask = window_main_or_key; },
 
       // Background – first tab
-      { rect = ("-${firstTabOffset}", W-2,   2, H-3 ); color = '#777777'; requisite = 'window_main_or_key|first'; requisiteMask = 'window_main_or_key|first'; },
-      { rect = ("-${firstTabOffset}", W-2,   2, H-3 ); color = '#A5A5A5'; requisite = 'first'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
-      { rect = ("-${firstTabOffset}", W-2,   2, H-3 ); color = '#6E6E6E'; requisite = 'window_main_or_key|mouse_inside|first'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
-      { rect = ("-${firstTabOffset}", W-2,   2, H-3 ); color = '#979797'; requisite = 'mouse_inside|first'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
+      { rect = ("-${firstTabOffset}", W-2,   2, H-2 ); color = '#777777'; requisite = 'window_main_or_key|first'; requisiteMask = 'window_main_or_key|first'; },
+      { rect = ("-${firstTabOffset}", W-2,   2, H-2 ); color = '#A5A5A5'; requisite = 'first'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
+      { rect = ("-${firstTabOffset}", W-2,   2, H-2 ); color = '#6E6E6E'; requisite = 'window_main_or_key|mouse_inside|first'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
+      { rect = ("-${firstTabOffset}", W-2,   2, H-2 ); color = '#979797'; requisite = 'mouse_inside|first'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
       // Background – other tabs
-      { rect = ("1", W-2,   2, H-3 ); color = '#777777'; requisite = 'window_main_or_key'; requisiteMask = 'window_main_or_key|first'; },
-      { rect = ("1", W-2,   2, H-3 ); color = '#A5A5A5'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
-      { rect = ("1", W-2,   2, H-3 ); color = '#6E6E6E'; requisite = 'window_main_or_key|mouse_inside'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
-      { rect = ("1", W-2,   2, H-3 ); color = '#979797'; requisite = 'mouse_inside'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
+      { rect = ("1", W-2,   2, H-2 ); color = '#777777'; requisite = 'window_main_or_key'; requisiteMask = 'window_main_or_key|first'; },
+      { rect = ("1", W-2,   2, H-2 ); color = '#A5A5A5'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
+      { rect = ("1", W-2,   2, H-2 ); color = '#6E6E6E'; requisite = 'window_main_or_key|mouse_inside'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
+      { rect = ("1", W-2,   2, H-2 ); color = '#979797'; requisite = 'mouse_inside'; requisiteMask = 'window_main_or_key|mouse_inside|first'; },
 
       // Left border — first tab should not have this
-      { rect = (   0,   0,   2, H-3 ); color = '#8C8C8C'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|first'; },
+      { rect = (   0,   0,   2, H-2 ); color = '#8C8C8C'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|first'; },
       { rect = (   0,   0,   1,   1 ); color = '#A8A8A8'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|first|dragged'; },
-      { rect = (   0,   0,   2, H-3 ); color = '#B2B2B2'; requisiteMask = 'window_main_or_key|first'; },
+      { rect = (   0,   0,   2, H-2 ); color = '#B2B2B2'; requisiteMask = 'window_main_or_key|first'; },
       { rect = (   0,   0,   1,   1 ); color = '#C5C5C5'; requisiteMask = 'window_main_or_key|first|dragged'; },
 
       // Splitter between tabs (1 px to the left of our current)
-      { rect = (  -1,  -1,   2, H-3 ); color = '#3B3B3B'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|first'; },
+      { rect = (  -1,  -1,   2, H-2 ); color = '#3B3B3B'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|first'; },
       { rect = (  -1,  -1,   1,   1 ); color = '#4B4B4B'; requisite = window_main_or_key; requisiteMask = 'window_main_or_key|first'; },
-      { rect = (  -1,  -1,   2, H-3 ); color = '#525252'; requisiteMask = 'window_main_or_key|first'; },
+      { rect = (  -1,  -1,   2, H-2 ); color = '#525252'; requisiteMask = 'window_main_or_key|first'; },
       { rect = (  -1,  -1,   1,   1 ); color = '#5D5D5D'; requisiteMask = 'window_main_or_key|first'; },
 
       { include = tabMain; },
@@ -69,18 +67,18 @@
       { rect = (   W, "W+1", 1,   1 ); color = '#999999'; requisite = window_main_or_key; },
       { rect = (  -2,  -1,   1,   1 ); color = '#BBBBBB'; requisiteMask = window_main_or_key; },
       { rect = (   W, "W+1", 1,   1 ); color = '#BBBBBB'; requisiteMask = window_main_or_key; },
-      { rect = (  -1,   W,   2, H-1 ); color = 'windowBackgroundColor'; requisite = window_main_or_key; },
-      { rect = (  -1,   W,   2, H-1 ); color = 'windowBackgroundColor'; requisiteMask = window_main_or_key; },
+      { rect = (  -1,   W,   2,   H ); color = 'windowBackgroundColor'; requisite = window_main_or_key; },
+      { rect = (  -1,   W,   2,   H ); color = 'windowBackgroundColor'; requisiteMask = window_main_or_key; },
 
-      { rect = (  -2,  -2,   2, H-3 ); color = '#777777'; requisite = window_main_or_key; },
-      { rect = (  -2,  -2,   2, H-3 ); color = '#A5A5A5'; requisiteMask = window_main_or_key; },
-      { rect = (  -1,  -1,   2, H-2 ); color = '#575757'; requisite = window_main_or_key; },
-      { rect = (  -1,  -1,   2, H-2 ); color = '#797979'; requisiteMask = window_main_or_key; },
+      { rect = (  -2,  -2,   2, H-2 ); color = '#777777'; requisite = window_main_or_key; },
+      { rect = (  -2,  -2,   2, H-2 ); color = '#A5A5A5'; requisiteMask = window_main_or_key; },
+      { rect = (  -1,  -1,   2, H-1 ); color = '#575757'; requisite = window_main_or_key; },
+      { rect = (  -1,  -1,   2, H-1 ); color = '#797979'; requisiteMask = window_main_or_key; },
 
-      { rect = ( "W+1", "W+1",   2, H-3 ); color = '#777777'; requisite = window_main_or_key; },
-      { rect = ( "W+1", "W+1",   2, H-3 ); color = '#A5A5A5'; requisiteMask = window_main_or_key; },
-      { rect = (   W,   W,   2, H-2 ); color = '#575757'; requisite = window_main_or_key; },
-      { rect = (   W,   W,   2, H-2 ); color = '#797979'; requisiteMask = window_main_or_key; },
+      { rect = ( "W+1", "W+1",   2, H-2 ); color = '#777777'; requisite = window_main_or_key; },
+      { rect = ( "W+1", "W+1",   2, H-2 ); color = '#A5A5A5'; requisiteMask = window_main_or_key; },
+      { rect = (   W,   W,   2, H-1 ); color = '#575757'; requisite = window_main_or_key; },
+      { rect = (   W,   W,   2, H-1 ); color = '#797979'; requisiteMask = window_main_or_key; },
 
       { rect = (   0,   W,   2,   2 ); color = '#575757'; requisite = window_main_or_key; },
       { rect = (   0,   W,   2,   2 ); color = '#797979'; requisiteMask = window_main_or_key; },
@@ -142,10 +140,10 @@
    // ============
 
    tabMain = (
-      { rect = (   1, W-2,   2, H-3 ); action = 'selectTab:'; requisite = mouse_clicked; toolTip = 1; },
-      { rect = (   1, W-2,   2, H-3 ); action = 'dragTab:'; requisite = mouse_dragged; },
-      { rect = (   1, W-2,   2, H-3 ); action = 'didDoubleClickTab:'; requisite = mouse_double_clicked; },
-      { rect = (  23, W-8,   4, H-6 ); text = { shadow = 1; }; },
+      { rect = (   1, W-2,   2, H-2 ); action = 'selectTab:'; requisite = mouse_clicked; toolTip = 1; },
+      { rect = (   1, W-2,   2, H-2 ); action = 'dragTab:'; requisite = mouse_dragged; },
+      { rect = (   1, W-2,   2, H-2 ); action = 'didDoubleClickTab:'; requisite = mouse_double_clicked; },
+      { rect = (  23, W-8,   4, H-5 ); text = { shadow = 1; }; },
 
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified';               requisite = '';                                    image = "TabClose";                  },
       { rect = (   3,  14,   4,  16 ); requisiteMask = 'mouse_inside|modified';               requisite = 'modified';                            image = "TabClose_Modified";         },

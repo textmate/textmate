@@ -11,8 +11,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 @interface ProjectLayoutView ()
 @property (nonatomic, retain) NSView* fileBrowserDivider;
 @property (nonatomic, retain) NSView* htmlOutputDivider;
-@property (nonatomic, retain) NSView* fileBrowserTopLightDivider;
-@property (nonatomic, retain) NSView* fileBrowserTopDarkDivider;
+@property (nonatomic, retain) NSView* fileBrowserTopDivider;
 @property (nonatomic, retain) NSLayoutConstraint* fileBrowserWidthConstraint;
 @property (nonatomic, retain) NSLayoutConstraint* htmlOutputSizeConstraint;
 @property (nonatomic, retain) NSMutableArray* myConstraints;
@@ -113,8 +112,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	if(_tabsAboveDocument != flag)
 	{
 		_tabsAboveDocument = flag;
-		_fileBrowserTopLightDivider = [self replaceView:_fileBrowserTopLightDivider withView:flag ? OakCreateHorizontalLine([NSColor colorWithString:@"#AEAEAE"], [NSColor colorWithString:@"#C9C9C9"]) : nil];
-		_fileBrowserTopDarkDivider  = [self replaceView:_fileBrowserTopDarkDivider withView:flag ? OakCreateHorizontalLine([NSColor colorWithString:@"#3F3F3F"], [NSColor colorWithString:@"#878787"]) : nil];
+		_fileBrowserTopDivider = [self replaceView:_fileBrowserTopDivider withView:flag ? OakCreateHorizontalLine([NSColor colorWithString:@"#3F3F3F"], [NSColor colorWithString:@"#878787"]) : nil];
 		[self setNeedsUpdateConstraints:YES];
 	}
 }
@@ -134,8 +132,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		@"documentView"               : _documentView,
 		@"fileBrowserView"            : _fileBrowserView            ?: [NSNull null],
 		@"fileBrowserDivider"         : _fileBrowserDivider         ?: [NSNull null],
-		@"fileBrowserTopDarkDivider"  : _fileBrowserTopDarkDivider  ?: [NSNull null],
-		@"fileBrowserTopLightDivider" : _fileBrowserTopLightDivider ?: [NSNull null],
+		@"fileBrowserTopDivider"      : _fileBrowserTopDivider      ?: [NSNull null],
 		@"htmlOutputView"             : _htmlOutputView             ?: [NSNull null],
 		@"htmlOutputDivider"          : _htmlOutputDivider          ?: [NSNull null],
 	};
@@ -196,34 +193,31 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 		// top
 		if(_tabsAboveDocument)
 		{
-			CONSTRAINT(@"V:|[fileBrowserTopLightDivider][fileBrowserTopDarkDivider][fileBrowserView]", 0);
-			CONSTRAINT(@"V:|[fileBrowserTopLightDivider][fileBrowserTopDarkDivider][fileBrowserDivider]", 0);
+			CONSTRAINT(@"V:|[fileBrowserTopDivider][fileBrowserView]", 0);
+			CONSTRAINT(@"V:|[fileBrowserTopDivider][fileBrowserDivider]", 0);
 
 			// left
 			if(_fileBrowserOnRight && _htmlOutputView && _htmlOutputOnRight)
 			{
-				CONSTRAINT(@"H:[htmlOutputView][fileBrowserTopLightDivider]", 0);
-				CONSTRAINT(@"H:[htmlOutputView][fileBrowserTopDarkDivider]", 0);
+				CONSTRAINT(@"H:[htmlOutputView][fileBrowserTopDivider]", 0);
 			}
 			else if(_fileBrowserOnRight)
 			{
-				CONSTRAINT(@"H:[documentView][fileBrowserTopLightDivider]", 0);
-				CONSTRAINT(@"H:[documentView][fileBrowserTopDarkDivider]", 0);
+				CONSTRAINT(@"H:[documentView][fileBrowserTopDivider]", 0);
 			}
 			else
 			{
-				CONSTRAINT(@"H:|[fileBrowserTopLightDivider]", 0);
-				CONSTRAINT(@"H:|[fileBrowserTopDarkDivider]", 0);
+				CONSTRAINT(@"H:|[fileBrowserTopDivider]", 0);
 			}
 
 			// right
 			if(_fileBrowserOnRight)
 			{
-				CONSTRAINT(@"H:[fileBrowserTopLightDivider(==fileBrowserTopDarkDivider)]|", 0);
+				CONSTRAINT(@"H:[fileBrowserTopDivider]|", 0);
 			}
 			else
 			{
-				CONSTRAINT(@"H:[fileBrowserTopLightDivider(==fileBrowserTopDarkDivider)][documentView]", 0);
+				CONSTRAINT(@"H:[fileBrowserTopDivider][documentView]", 0);
 			}
 		}
 		else
