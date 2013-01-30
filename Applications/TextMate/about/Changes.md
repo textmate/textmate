@@ -1,5 +1,14 @@
 # Changes
 
+## 2013-01-30 (r9359)
+
+* A (square) column selection is now broken into multiple carets (discontinuous selections) when selecting to begin/end of typing pairs (⌃⇧↑/⌃⇧↓) or to end of line/paragraph. Previously only left/right movement or “unit selection” would show this behavior.
+* The “Go to Symbol…” panel now open with the current symbol selected and will reflect movement in the document or switching to another document (if you keep the panel open). *[Steven Clukey]*
+* Fix crash when pasting in file browser (introduced in last build).
+* Tab bar labels now have a shadow. *[Adam Strzelecki]*
+* Fix occasional “too light” title bar gradient. *[Adam Strzelecki]*
+* Fix issue where click-dragging scrollbars would cause entire window to be dragged.
+
 ## 2013-01-29 (r9353)
 
 ### Settings
