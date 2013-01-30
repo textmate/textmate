@@ -27,14 +27,10 @@ static NSPopUpButton* OakCreatePopUpButton ()
 	return res;
 }
 
-@interface OFBHeaderView ()
-@property (nonatomic) BOOL renderEnabled;
-@end
-
 @implementation OFBHeaderView
 - (id)initWithFrame:(NSRect)aRect
 {
-	if(self = [super initWithTopColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] bottomColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1] inactiveTopColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] inactiveBottomColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]])
+	if(self = [super initWithGradient:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]] inactiveGradient:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]]])
 	{
 		self.folderPopUpButton       = OakCreatePopUpButton();
 		self.goBackButton            = OakCreateImageButton(NSImageNameGoLeftTemplate);
@@ -64,56 +60,5 @@ static NSPopUpButton* OakCreatePopUpButton ()
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(-1)-[forward(==back)]"    options:0 metrics:nil views:views]];
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
-- (void)viewWillMoveToWindow:(NSWindow*)newWindow
-{
-	if(self.window)
-	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.window];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:self.window];
-	}
-
-	if(newWindow)
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMain:) name:NSWindowDidBecomeMainNotification object:newWindow];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeMain:) name:NSWindowDidResignMainNotification object:newWindow];
-	}
-}
-
-- (void)viewDidMoveToWindow
-{
-	self.renderEnabled = [self.window isMainWindow];
-}
-
-- (void)windowDidChangeMain:(NSNotification*)aNotification
-{
-	self.renderEnabled = [self.window isMainWindow];
-}
-
-- (void)setRenderEnabled:(BOOL)flag
-{
-	if(_renderEnabled != flag)
-	{
-		_renderEnabled = flag;
-		[self setNeedsDisplay:YES];
-	}
-}
-
-- (void)drawRect:(NSRect)aRect
-{
-	NSColor* topColor    = self.renderEnabled ? [NSColor colorWithCalibratedWhite:0.915 alpha:1.000] : [NSColor colorWithCalibratedWhite:0.915 alpha:1.000];
-	NSColor* bottomColor = self.renderEnabled ? [NSColor colorWithCalibratedWhite:0.760 alpha:1.000] : [NSColor colorWithCalibratedWhite:0.915 alpha:1.000];
-	[[[NSGradient alloc] initWithStartingColor:bottomColor endingColor:topColor] drawInRect:self.bounds angle:90];
 }
 @end
