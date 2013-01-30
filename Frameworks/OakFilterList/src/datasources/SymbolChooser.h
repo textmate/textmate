@@ -3,21 +3,11 @@
 #else
 #import "../OakFilterList.h"
 #endif
-#import <OakTextView/OakDocumentView.h>
 #import <document/document.h>
 #import <oak/misc.h>
 
-@class SymbolChooserViewController;
-
 PUBLIC @interface SymbolChooser : NSObject <FilterListDataSource>
-{
-	OBJC_WATCH_LEAKS(SymbolChooser);
-	document::document_ptr document;
-	OakDocumentView* documentView;
-	std::string filterString;
-	SymbolChooserViewController* viewController;
-	NSArray* _items;
-}
-+ (id)symbolChooserForDocumentView:(OakDocumentView *)aDocumentView;
-@property (nonatomic, readonly) NSString* filterString;
+@property (nonatomic) document::document_ptr const& document;
+@property (nonatomic) NSString* selectionString;
++ (id)symbolChooserForDocument:(document::document_ptr)aDocument;
 @end

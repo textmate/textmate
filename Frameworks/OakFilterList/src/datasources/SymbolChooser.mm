@@ -1,10 +1,10 @@
 #import "SymbolChooser.h"
 #import "SymbolList.h"
 #import <OakFoundation/NSString Additions.h>
-#import <OakTextView/OakDocumentView.h>
 #import <text/ranker.h>
 #import <text/case.h>
 #import "../highlight_ranges.h"
+#import <ns/ns.h>
 
 OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
@@ -48,83 +48,115 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 @end
 
 @interface SymbolChooser ()
-- (void)updateSymbols;
+{
+	OBJC_WATCH_LEAKS(SymbolChooser);
+	document::document_ptr _document;
+	SymbolChooserViewController* _viewController;
+}
+@property (nonatomic) NSArray* items;
+@property (nonatomic) NSArray* selectedItems;
+@property (nonatomic) NSString* filterString;
+@property (nonatomic) BOOL needsReload;
 @end
 
 @implementation SymbolChooser
-- (NSViewController*)viewController
++ (id)symbolChooserForDocument:(document::document_ptr)aDocument
 {
-	if(!viewController)
-		viewController = [[SymbolChooserViewController alloc] initWithSymbolChooser:self];
-	return viewController;
+	SymbolChooser* res = [SymbolChooser new];
+	res.document = aDocument;
+	return res;
 }
 
-- (id)initWithDocumentView:(OakDocumentView *)aDocumentView
+- (void)dealloc
 {
-	if(self = [super init])
+	self.document = document::document_ptr();
+}
+
+- (void)updateItemsArray
+{
+	self.selectedItems = nil;
+	self.items = SymbolListForDocument(_document, to_s(_filterString));
+	[self updateSelectedItemsArray];
+}
+
+- (void)updateSelectedItemsArray
+{
+	if(!_selectionString || [_selectionString isEqualToString:@""])
 	{
-		struct callback_t : document::open_callback_t
-		{
-			callback_t (SymbolChooser* self) : _self(self) { }
-
-			void show_error (std::string const& path, document::document_ptr document, std::string const& message, oak::uuid_t const& filter)
-			{
-				fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str());
-			}
-
-			void show_document (std::string const& path, document::document_ptr document)
-			{
-				[_self updateSymbols];
-			}
-
-		private:
-			SymbolChooser* _self;
-		};
-
-		document = [aDocumentView document];
-		documentView = aDocumentView;
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateSymbols) name:FLDataSourceItemsDidChangeNotification object:documentView];
-		if(document->try_open(document::open_callback_ptr((document::open_callback_t*)new callback_t(self))))
-			[self updateSymbols];
+		self.selectedItems = nil;
+		return;
 	}
-	return self;
+
+	NSMutableArray* res = [NSMutableArray array];
+
+	std::map<text::pos_t, FileChooserSymbolItem*> symbolItems;
+	for(FileChooserSymbolItem* item in _items)
+	{
+		text::selection_t sel(to_s(item.selectionString));
+		text::pos_t pos = sel.last().min();
+		symbolItems.insert(std::make_pair(pos, item));
+	}
+
+	for(text::range_t const& range : text::selection_t(to_s(_selectionString)))
+	{
+		auto it = symbolItems.upper_bound(range.min());
+		if(it != symbolItems.begin())
+			[res addObject:(--it)->second];
+	}
+
+	self.selectedItems = res;
 }
 
-+ (id)symbolChooserForDocumentView:(OakDocumentView *)aDocumentView
+- (void)delayedReload:(id)sender
 {
-	return [[SymbolChooser alloc] initWithDocumentView:aDocumentView];
+	[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
+	self.needsReload = NO;
 }
+
+- (void)setNeedsReload:(BOOL)flag
+{
+	if(_needsReload == flag)
+		return;
+	if(_needsReload = flag)
+		[self performSelector:@selector(delayedReload:) withObject:self afterDelay:0];
+}
+
+- (void)setItems:(NSArray*)anArray
+{
+	_items = anArray;
+	self.needsReload = YES;
+}
+
+- (void)setSelectedItems:(NSArray*)anArray
+{
+	_selectedItems = anArray;
+	self.needsReload = YES;
+}
+
+// ==================
+// = Action methods =
+// ==================
+
+- (IBAction)search:(id)sender
+{
+	ASSERT([sender respondsToSelector:@selector(stringValue)]);
+	self.filterString = [[sender stringValue] lowercaseString];
+}
+
+// ========================
+// = FilterListDataSource =
+// ========================
 
 - (NSString*)title
 {
 	return @"Go to Symbol";
 }
 
-- (NSString*)filterString
+- (NSViewController*)viewController
 {
-	return [NSString stringWithCxxString:filterString];
-}
-
-- (void)updateSymbols
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
-}
-
-- (IBAction)search:(id)sender
-{
-	ASSERT([sender respondsToSelector:@selector(stringValue)]);
-	std::string const& newFilterString = [[[sender stringValue] lowercaseString] UTF8String];
-	if(newFilterString != filterString)
-	{
-		filterString = newFilterString;
-		[[NSNotificationCenter defaultCenter] postNotificationName:FLDataSourceItemsDidChangeNotification object:self];
-	}
-}
-
-- (NSArray*)items
-{
-	_items = SymbolListForDocument(document, filterString);
-	return _items;
+	if(!_viewController)
+		_viewController = [[SymbolChooserViewController alloc] initWithSymbolChooser:self];
+	return _viewController;
 }
 
 - (NSAttributedString*)displayStringForItem:(id)item
@@ -137,43 +169,55 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 	return [item infoString];
 }
 
-- (NSArray*)selectedItems
+// =======
+// = API =
+// =======
+
+- (void)setDocument:(document::document_ptr const&)aDocument
 {
-	text::selection_t sel([[documentView textView].selectionString UTF8String]);
-	ng::buffer_t const& buf = document->buffer();
-	size_t min = buf.convert(sel.last().min());
-	size_t max = buf.convert(sel.last().max());
-	BOOL past_selection = NO;
-	NSUInteger last_index;
-	NSUInteger index = 0;
-	NSMutableIndexSet* indexesToSelect = [NSMutableIndexSet indexSet];
-	for (id item in _items)
+	struct callback_t : document::open_callback_t
 	{
-		text::selection_t pos([[item selectionString] UTF8String]);
-		size_t start = buf.convert(pos.last().min());
-		size_t end = buf.convert(pos.last().max());
-		last_index = index;
-		index = [_items indexOfObject:item];
-		if (start > min)
+		callback_t (SymbolChooser* self) : _self(self) { }
+
+		void show_error (std::string const& path, document::document_ptr document, std::string const& message, oak::uuid_t const& filter)
 		{
-			if (!past_selection && last_index != NSNotFound)
-				[indexesToSelect addIndex:last_index];
-			past_selection = YES;
-			if (end <= max)
-			{
-				if(index != NSNotFound)
-					[indexesToSelect addIndex:index];
-			}
+			fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str());
 		}
+
+		void show_document (std::string const& path, document::document_ptr document)
+		{
+			[_self updateItemsArray];
+		}
+
+	private:
+		SymbolChooser* _self;
+	};
+
+	if(_document)
+		_document->close();
+
+	if(_document = aDocument)
+	{
+		if(_document->try_open(document::open_callback_ptr((document::open_callback_t*)new callback_t(self))))
+			[self updateItemsArray];
 	}
-	if (!past_selection)
-		[indexesToSelect addIndex:index];
-	return [_items objectsAtIndexes:indexesToSelect];
 }
 
-- (void)dealloc
+- (void)setSelectionString:(NSString*)aString
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:FLDataSourceItemsDidChangeNotification object:documentView];
-	document->close();
+	if(_selectionString != aString && ![_selectionString isEqualToString:aString])
+	{
+		_selectionString = aString;
+		[self updateSelectedItemsArray];
+	}
+}
+
+- (void)setFilterString:(NSString*)aString
+{
+	if(_filterString != aString && ![_filterString isEqualToString:aString])
+	{
+		_filterString = aString;
+		[self updateItemsArray];
+	}
 }
 @end

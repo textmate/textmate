@@ -7,6 +7,7 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 #import <bundles/bundles.h>
+#import <OakFilterList/SymbolChooser.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSColor Additions.h>
@@ -36,6 +37,8 @@ static NSString* const kFoldingsColumnIdentifier  = @"foldings";
 @property (nonatomic, retain) NSDictionary* gutterImages;
 @property (nonatomic, retain) NSDictionary* gutterHoverImages;
 @property (nonatomic, retain) NSDictionary* gutterPressedImages;
+@property (nonatomic) OakFilterWindowController* filterWindowController;
+@property (nonatomic) SymbolChooser*             symbolChooser;
 - (void)updateStyle;
 @end
 
@@ -231,12 +234,12 @@ private:
 		char const* str = [[textView valueForKey:@"selectionString"] UTF8String] ?: "1";
 		[gutterView setHighlightedRange:str];
 		[statusBar setCaretPosition:str];
+		_symbolChooser.selectionString = textView.selectionString;
 
 		ng::buffer_t const& buf = document->buffer();
 		text::selection_t sel([textView.selectionString UTF8String]);
 		size_t i = buf.convert(sel.last().max());
 		statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
-		[[NSNotificationCenter defaultCenter] postNotificationName:@"FLDataSourceItemsDidChangeNotification" object:self];
 	}
 	else if([aKeyPath isEqualToString:@"tabSize"])
 	{
@@ -264,6 +267,9 @@ private:
 
 	[self setDocument:document::document_ptr()];
 	delete callback;
+
+	self.filterWindowController = nil;
+	self.symbolChooser          = nil;
 
 	[gutterScrollView release];
 	[gutterView release];
@@ -310,6 +316,9 @@ private:
 	[textView setDocument:document];
 	[gutterView reloadData:self];
 	[self updateStyle];
+
+	if(_symbolChooser)
+		_symbolChooser.document = document;
 
 	if(oldDocument)
 	{
@@ -455,6 +464,56 @@ private:
 - (void)showFindHistory:(id)sender
 {
 	[[OakPasteboard pasteboardWithName:NSFindPboard] selectItemAtPosition:[textView positionForWindowUnderCaret] andCall:@selector(findNext:)];
+}
+
+// ==================
+// = Symbol Chooser =
+// ==================
+
+- (void)setFilterWindowController:(OakFilterWindowController*)controller
+{
+	if(_filterWindowController == controller)
+		return;
+
+	if(_filterWindowController)
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
+		_filterWindowController.target = nil;
+		[_filterWindowController close];
+	}
+
+	if(_filterWindowController = controller)
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:_filterWindowController.window];
+}
+
+- (void)filterWindowWillClose:(NSNotification*)notification
+{
+	self.filterWindowController = nil;
+	self.symbolChooser = nil;
+}
+
+- (IBAction)showSymbolChooser:(id)sender
+{
+	if(self.filterWindowController)
+	{
+		[self.filterWindowController.window makeKeyAndOrderFront:self];
+		return;
+	}
+
+	self.symbolChooser = [SymbolChooser symbolChooserForDocument:document];
+	self.symbolChooser.selectionString = textView.selectionString;
+
+	self.filterWindowController                         = [OakFilterWindowController new];
+	self.filterWindowController.dataSource              = self.symbolChooser;
+	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
+	self.filterWindowController.sendActionOnSingleClick = YES;
+	[self.filterWindowController showWindowRelativeToWindow:self.window];
+}
+
+- (void)symbolChooserDidSelectItems:(id)sender
+{
+	for(id item in [sender selectedItems])
+		[textView setSelectionString:[item selectionString]];
 }
 
 // =======================
