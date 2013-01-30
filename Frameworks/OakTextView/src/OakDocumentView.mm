@@ -236,6 +236,7 @@ private:
 		text::selection_t sel([textView.selectionString UTF8String]);
 		size_t i = buf.convert(sel.last().max());
 		statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
+		[[NSNotificationCenter defaultCenter] postNotificationName:@"FLDataSourceItemsDidChangeNotification" object:self];
 	}
 	else if([aKeyPath isEqualToString:@"tabSize"])
 	{

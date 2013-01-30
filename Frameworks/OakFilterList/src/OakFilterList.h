@@ -42,6 +42,9 @@ extern PUBLIC NSString* const FLDataSourceItemsShouldAscendNotification;
 // If implemented the returned string will be displayed in the status bar when the item is selected
 - (NSAttributedString*)infoStringForItem:(id)anItem;
 
+// If implemented the returned array is and array of the items that should be selected in the view
+- (NSArray*)selectedItems;
+
 // Return YES if there may be more items to come
 - (BOOL)moreItemsToCome;
 
