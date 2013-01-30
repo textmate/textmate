@@ -1,22 +1,18 @@
 #import "OakGradientView.h"
 
 @interface OakGradientView ()
-@property (nonatomic, retain) NSColor* activeTopColor;
-@property (nonatomic, retain) NSColor* activeBottomColor;
-@property (nonatomic, retain) NSColor* inactiveTopColor;
-@property (nonatomic, retain) NSColor* inactiveBottomColor;
+@property (nonatomic, retain) NSGradient* activeGradient;
+@property (nonatomic, retain) NSGradient* inactiveGradient;
 @property (nonatomic) BOOL renderInactive;
 @end
 
 @implementation OakGradientView
-- (id)initWithTopColor:(NSColor*)topColor bottomColor:(NSColor*)bottomColor inactiveTopColor:(NSColor*)inactiveTopColor inactiveBottomColor:(NSColor*)inactiveBottomColor
+- (id)initWithGradient:(NSGradient*)activeGradient inactiveGradient:(NSGradient*)inactiveGradient
 {
-	if(self = [self initWithFrame:NSZeroRect])
+	if(self = [super initWithFrame:NSZeroRect])
 	{
-		self.activeTopColor      = topColor;
-		self.activeBottomColor   = bottomColor;
-		self.inactiveTopColor    = inactiveTopColor;
-		self.inactiveBottomColor = inactiveBottomColor;
+		self.activeGradient   = activeGradient;
+		self.inactiveGradient = inactiveGradient;
 	}
 	return self;
 }
@@ -67,8 +63,7 @@
 - (void)drawRect:(NSRect)aRect
 {
 	// Although we draw the full background this view, nor any of its parents, are allowed to return YES from isOpaque <rdar://13161778>
-	NSColor* topColor    = self.renderInactive ? self.inactiveTopColor    : self.activeTopColor;
-	NSColor* bottomColor = self.renderInactive ? self.inactiveBottomColor : self.activeBottomColor;
-	[[[NSGradient alloc] initWithStartingColor:bottomColor endingColor:topColor] drawInRect:self.bounds angle:90];
+	NSGradient* gradient = self.renderInactive ? self.inactiveGradient : self.activeGradient;
+	[gradient drawInRect:self.bounds angle:270];
 }
 @end
