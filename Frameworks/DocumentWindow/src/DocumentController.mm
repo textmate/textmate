@@ -18,7 +18,6 @@
 #import <OakFileBrowser/OakFileBrowser.h>
 #import <HTMLOutputWindow/HTMLOutputWindow.h>
 #import <OakFilterList/FileChooser.h>
-#import <OakFilterList/SymbolChooser.h>
 #import <OakSystem/application.h>
 #import <Find/Find.h>
 #import <file/path_info.h>
@@ -67,8 +66,6 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 
 @property (nonatomic) NSString*                   pathAttributes;
 @property (nonatomic) NSString*                   projectPath;
-
-@property (nonatomic) OakFilterWindowController*  filterWindowController;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 
@@ -267,7 +264,6 @@ namespace
 	self.tabBarView.dataSource  = nil;
 	self.tabBarView.delegate    = nil;
 	self.textView.delegate      = nil;
-	self.filterWindowController = nil; // ensures we removeObserver: and set target to nil
 }
 
 - (void)windowWillClose:(NSNotification*)aNotification
@@ -1384,27 +1380,6 @@ namespace
 // = Opening Auxiliary Windows =
 // =============================
 
-- (void)setFilterWindowController:(OakFilterWindowController*)controller
-{
-	if(_filterWindowController != controller)
-	{
-		if(_filterWindowController)
-		{
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_filterWindowController.window];
-			_filterWindowController.target = nil;
-			[_filterWindowController close];
-		}
-
-		if(_filterWindowController = controller)
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterWindowWillClose:) name:NSWindowWillCloseNotification object:_filterWindowController.window];
-	}
-}
-
-- (void)filterWindowWillClose:(NSNotification*)notification
-{
-	self.filterWindowController = nil;
-}
-
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	Find* find              = [Find sharedInstance];
@@ -1452,20 +1427,6 @@ namespace
 	find.searchFolder       = self.untitledSavePath;
 	find.searchScope        = find::in::folder;
 	[find showFindPanel:self];
-}
-
-- (IBAction)showSymbolChooser:(id)sender
-{
-	self.filterWindowController                         = [OakFilterWindowController new];
-	self.filterWindowController.dataSource              = [SymbolChooser symbolChooserForDocumentView:[self documentView]];
-	self.filterWindowController.action                  = @selector(symbolChooserDidSelectItems:);
-	self.filterWindowController.sendActionOnSingleClick = YES;
-	[self.filterWindowController showWindowRelativeToWindow:self.window];
-}
-
-- (void)symbolChooserDidSelectItems:(id)sender
-{
-	[self openItems:[sender selectedItems] closingOtherTabs:NO];
 }
 
 // ==================

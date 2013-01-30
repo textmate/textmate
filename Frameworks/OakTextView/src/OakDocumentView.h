@@ -38,4 +38,6 @@ PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumn
 
 - (void)addAuxiliaryView:(NSView*)aView atEdge:(NSRectEdge)anEdge;
 - (void)removeAuxiliaryView:(NSView*)aView;
+
+- (IBAction)showSymbolChooser:(id)sender;
 @end

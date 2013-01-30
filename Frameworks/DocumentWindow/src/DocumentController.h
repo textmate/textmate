@@ -58,7 +58,6 @@ PUBLIC @interface DocumentController : NSObject
 // =============================
 
 - (IBAction)orderFrontFindPanel:(id)sender;
-- (IBAction)showSymbolChooser:(id)sender;
 - (IBAction)goToFile:(id)sender;
 
 // ==================
