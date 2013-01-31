@@ -685,7 +685,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, self.isExpanded ? 22 : 1);
+	return NSMakeSize(NSViewNoInstrinsicMetric, self.isExpanded ? 23 : 1);
 }
 
 - (void)viewFrameChanged:(NSNotification*)aNotification
