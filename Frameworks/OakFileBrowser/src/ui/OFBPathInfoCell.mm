@@ -56,7 +56,7 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 	ASSERT(labelColorIndex < 8)
 
 	// color names: Gray, Green, Purple, Blue, Yellow, Red, Orange
-	static NSString* const startCol[] = { @"#CFCFCF", @"#D4EE9C", @"#DDBDEA", @"#ACD0FE", @"#F8F79C", @"#B2B2B2", @"#F9D194" };
+	static NSString* const startCol[] = { @"#CFCFCF", @"#D4EE9C", @"#DDBDEA", @"#ACD0FE", @"#F8F79C", @"#FC999A", @"#F9D194" };
 	static NSString* const stopCol[]  = { @"#A8A8A8", @"#AFDC49", @"#C186D7", @"#5B9CFE", @"#ECDF4A", @"#FC605C", @"#F6AC46" };
 
 	NSRect r = NSIntegralRect(NSInsetRect(cellFrame, 2, 0));
