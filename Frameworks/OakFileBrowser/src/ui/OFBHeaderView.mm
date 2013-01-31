@@ -1,5 +1,6 @@
 #import "OFBHeaderView.h"
 #import <OakAppKit/OakAppKit.h>
+#import <Preferences/Keys.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)
 {
@@ -25,6 +26,10 @@ static NSPopUpButton* OakCreatePopUpButton ()
 	[res setBordered:NO];
 	return res;
 }
+
+@interface OFBHeaderView ()
+@property (nonatomic) BOOL matchTabBarHeight;
+@end
 
 @implementation OFBHeaderView
 - (id)initWithFrame:(NSRect)aRect
@@ -53,12 +58,34 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider][shading]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[folder(==divider,==shading,==back,==forward)]|"                                          options:0 metrics:nil views:views]];
+
+		[self userDefaultsDidChange:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
 }
 
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)userDefaultsDidChange:(NSNotification*)aNotification
+{
+	self.matchTabBarHeight = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsTabsAboveDocumentKey];
+}
+
+- (void)setMatchTabBarHeight:(BOOL)flag
+{
+	if(_matchTabBarHeight != flag)
+	{
+		_matchTabBarHeight = flag;
+		[self invalidateIntrinsicContentSize];
+	}
+}
+
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 20 : 24);
 }
 @end
