@@ -50,9 +50,9 @@ static NSData* Digest (NSString* someString)
 // ============================
 
 @interface AboutWindowController ()
-- (void)didClickToolbarItem:(id)sender;
 @property (nonatomic, strong) NSToolbar* toolbar;
 @property (nonatomic, strong) WebView* webView;
+@property (nonatomic) NSString* selectedPage;
 @end
 
 @implementation AboutWindowController
@@ -121,19 +121,55 @@ static NSData* Digest (NSString* someString)
 
 - (void)showAboutWindow:(id)sender
 {
-	[self didClickToolbarItem:@"About"];
+	self.selectedPage = @"About";
 	[self showWindow:self];
 }
 
 - (void)showChangesWindow:(id)sender
 {
-	[self didClickToolbarItem:@"Changes"];
+	self.selectedPage = @"Changes";
 	[self showWindow:self];
 
 	NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"];
 	if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
 		[[NSUserDefaults standardUserDefaults] setObject:Digest(releaseNotes) forKey:kUserDefaultsReleaseNotesDigestKey];
 }
+
+- (void)setSelectedPage:(NSString*)pageName
+{
+	if(_selectedPage == pageName || [_selectedPage isEqualToString:pageName])
+		return;
+	_selectedPage = pageName;
+
+	NSDictionary* pages = @{
+		@"About"         : @"About",
+		@"Changes"       : @"Changes",
+		@"Bundles"       : @"Bundles",
+		@"Registration"  : @"Registration",
+		@"Legal"         : @"Legal",
+		@"Contributions" : @"Contributions"
+	};
+
+	if(NSString* file = pages[pageName])
+	{
+		if(NSURL* url = [[NSBundle mainBundle] URLForResource:file withExtension:@"html"])
+			[[self.webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
+
+		[self.window setTitle:pageName];
+		[self.toolbar setSelectedItemIdentifier:pageName];
+	}
+}
+
+- (void)selectPageAtRelativeOffset:(NSInteger)offset
+{
+	NSArray* allPages = [self toolbarSelectableItemIdentifiers:nil];
+	NSUInteger index = [allPages indexOfObject:self.selectedPage];
+	if(index != NSNotFound)
+		self.selectedPage = allPages[(index + allPages.count + offset) % allPages.count];
+}
+
+- (IBAction)selectNextTab:(id)sender     { [self selectPageAtRelativeOffset:+1]; }
+- (IBAction)selectPreviousTab:(id)sender { [self selectPageAtRelativeOffset:-1]; }
 
 // ====================
 // = Toolbar Delegate =
@@ -146,30 +182,9 @@ static NSData* Digest (NSString* someString)
 		identifier = [sender itemIdentifier];
 	else if([sender respondsToSelector:@selector(representedObject)])
 		identifier = [sender representedObject];
-	else if([sender respondsToSelector:@selector(description)])
-		identifier = [sender description];
 
 	if(identifier)
-	{
-		NSDictionary* items = @{
-			@"About"         : @"About",
-			@"Changes"       : @"Changes",
-			@"Bundles"       : @"Bundles",
-			@"Registration"  : @"Registration",
-			@"Legal"         : @"Legal",
-			@"Contributions" : @"Contributions"
-		};
-
-		if(NSString* name = items[identifier])
-		{
-			if(NSURL* url = [[NSBundle mainBundle] URLForResource:name withExtension:@"html"])
-				[[self.webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]];
-
-			[self.window setTitle:identifier];
-			if(![sender isKindOfClass:[NSToolbarItem class]])
-				[self.toolbar setSelectedItemIdentifier:identifier];
-		}
-	}
+		self.selectedPage = identifier;
 }
 
 - (NSToolbarItem*)toolbar:(NSToolbar*)aToolbar itemForItemIdentifier:(NSString*)anIdentifier willBeInsertedIntoToolbar:(BOOL)flag
