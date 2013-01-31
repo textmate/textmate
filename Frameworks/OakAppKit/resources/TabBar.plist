@@ -143,7 +143,7 @@
       { rect = (   1, W-2,   2, H-2 ); action = 'selectTab:'; requisite = mouse_clicked; toolTip = 1; },
       { rect = (   1, W-2,   2, H-2 ); action = 'dragTab:'; requisite = mouse_dragged; },
       { rect = (   1, W-2,   2, H-2 ); action = 'didDoubleClickTab:'; requisite = mouse_double_clicked; },
-      { rect = (  23, W-8,   4, H-7 ); text = { shadow = 1; }; },
+      { rect = (  23, W-8,   4, H-7 ); text = { shadow = 1; bold = 1; }; },
 
       { rect = (   5,  16,   6,  18 ); requisiteMask = 'mouse_inside|modified';               requisite = '';                                    image = "TabClose";                  },
       { rect = (   5,  16,   6,  18 ); requisiteMask = 'mouse_inside|modified';               requisite = 'modified';                            image = "TabClose_Modified";         },

@@ -7,7 +7,7 @@
 static CFAttributedStringRef AttributedStringWithOptions (NSString* string, uint32_t options, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingTail)
 {
 	NSMutableDictionary* attr = [NSMutableDictionary dictionary];
-	attr[NSFontAttributeName] = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+	attr[NSFontAttributeName] = (options & layer_t::bold) ? [NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]] : [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
 
 	NSMutableParagraphStyle* paragraph = [[NSMutableParagraphStyle new] autorelease];
 	[paragraph setLineBreakMode:lineBreakMode];
@@ -17,11 +17,11 @@ static CFAttributedStringRef AttributedStringWithOptions (NSString* string, uint
 	return (CFAttributedStringRef)res;
 }
 
-double WidthOfText (NSString* string)
+double WidthOfText (NSString* string, bool bold)
 {
 	double width = 0;
 
-	CTLineRef line = CTLineCreateWithAttributedString(AttributedStringWithOptions(string, 0));
+	CTLineRef line = CTLineCreateWithAttributedString(AttributedStringWithOptions(string, bold ? layer_t::bold : 0));
 	width          = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
 	CFRelease(line);
 

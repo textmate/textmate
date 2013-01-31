@@ -283,7 +283,9 @@ layout_metrics_t::raw_layer_t layout_metrics_t::parse_layer (NSDictionary* item)
 	{
 		res.has_label = true;
 		if([[textOptions objectForKey:@"shadow"] boolValue])
-			res.layer.text_options = res.layer.text_options | layer_t::shadow;
+			res.layer.text_options |= layer_t::shadow;
+		if([[textOptions objectForKey:@"bold"] boolValue])
+			res.layer.text_options |= layer_t::bold;
 	}
 	if([[item objectForKey:@"toolTip"] boolValue])
 		res.has_tool_tip = true;
@@ -587,7 +589,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	double totalWidth = 0;
 	for(NSUInteger tabIndex = 0; tabIndex < tabTitles.count; ++tabIndex)
 	{
-		double width = WidthOfText(SafeObjectAtIndex(tabTitles, tabIndex));
+		double width = WidthOfText(SafeObjectAtIndex(tabTitles, tabIndex), true); // FIXME: remove hardcoded bold
 		citerate(it, metrics->layers_for([self layerNameForTabIndex:tabIndex], CGRectZero, tabIndex, @"LabelPlaceholder"))
 		{
 			if(it->text)

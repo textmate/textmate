@@ -54,7 +54,12 @@ struct layer_t
 	objc_ptr<NSImage*> image;
 	objc_ptr<NSString*> tool_tip;
 	objc_ptr<NSView*> view;
-	enum text_options_t { none, shadow };
+	enum text_options_t
+	{
+		none   = (      0),
+		shadow = (1 <<  1),
+		bold   = (1 <<  2),
+	};
 	uint32_t text_options;
 	enum image_options_t { no_repeat, stretch, /* repeat_x, repeat_y, repeat_xy */ };
 	uint32_t image_options;
@@ -81,4 +86,4 @@ struct layer_t
 - (void)sendAction:(SEL)action fromLayer:(layer_t const&)aLayer;
 @end
 
-double WidthOfText (NSString* string);
+double WidthOfText (NSString* string, bool bold = false);
