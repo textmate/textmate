@@ -3,6 +3,7 @@
 #include <text/case.h>
 #include <text/format.h>
 #include <text/tokenize.h>
+#include <io/path.h>
 #include <oak/oak.h>
 
 static std::string find_executable (std::string const& name, std::string const& variable)
@@ -45,6 +46,24 @@ namespace scm
 	{
 	}
 
+	bool driver_t::has_info_for_directory (std::string const& path)
+	{
+		bool res = path::exists(text::format(_wc_root_format_string.c_str(), path.c_str()));
+		if(res)
+			setup();
+		return res;
+	}
+
+	void driver_t::setup ()
+	{
+		if(_resolved_executable == NULL_STR && _required_executable != NULL_STR)
+		{
+			_resolved_executable = find_executable(_required_executable, "TM_" + text::uppercase(_name));
+			if(_resolved_executable == NULL_STR)
+				fprintf(stderr, "scm: unable to find ‘%s’ executable (set %s or PATH in ~/.tm_properties)\n", _required_executable.c_str(), ("TM_" + text::uppercase(_name)).c_str());
+		}
+	}
+
 	driver_t* git_driver ();
 	driver_t* hg_driver ();
 	driver_t* p4_driver ();
@@ -60,16 +79,10 @@ namespace scm
 		{
 			iterate(driver, drivers)
 			{
-				if(*driver && path::exists(text::format((*driver)->_wc_root_format_string.c_str(), cwd.c_str())))
+				if(*driver && (*driver)->has_info_for_directory(cwd))
 				{
 					if(wcPath)
 						*wcPath = cwd;
-					if((*driver)->_resolved_executable == NULL_STR && (*driver)->_required_executable != NULL_STR)
-					{
-						(*driver)->_resolved_executable = find_executable((*driver)->_required_executable, "TM_" + text::uppercase((*driver)->_name));
-						if((*driver)->_resolved_executable == NULL_STR)
-							fprintf(stderr, "scm: unable to find ‘%s’ executable (set %s or PATH in ~/.tm_properties)\n", (*driver)->_required_executable.c_str(), ("TM_" + text::uppercase((*driver)->_name)).c_str());
-					}
 					return *driver;
 				}
 			}

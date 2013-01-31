@@ -17,12 +17,13 @@ namespace scm
 		virtual bool tracks_directories () const   { return false; }
 		virtual bool may_touch_filesystem () const { return false; }
 
+		bool has_info_for_directory (std::string const& path);
+
 	protected:
 		std::string const& executable () const { return _resolved_executable; }
+		void setup ();
 
 	private:
-		friend driver_t const* driver_for_path (std::string const& path, std::string* wcPath);
-
 		std::string _name;
 		std::string _wc_root_format_string;
 		std::string _required_executable;
