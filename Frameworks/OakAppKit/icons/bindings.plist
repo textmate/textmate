@@ -10,7 +10,7 @@
 	angle_brackets_brown = ( dist, xml, tld, pt, cpt, dtml, rss, opml, xsl, xslt );
 	brackets             = ( m, mm, M );
 	list                 = ( gtd, gtdlog, properties, json, strings, plist, dict, scriptsuite, scriptterminology, savedsearch, defs.rem, reminders, TODO, tasks, todolist, yaml, yml );
-	grid                 = ( css, css.erb, scss, sass );
+	grid                 = ( css, css.erb, scss, sass, less );
 	tree_structure       = ( dot );
 	config_file          = ( conf, htaccess, config, gitconfig, gitignore, gitmodules, ini, cfg, capfile, ssh_config, sshd_config, tm_properties, tmproperties, ant.xml, build.xml, pro, pri, cmake, cmakelists.txt, Makefile, gnumakefile, ocamlmakefile, pom.xml, cm, Rakefile, rake, target, portfile, gemspec, gemfile );
 	
