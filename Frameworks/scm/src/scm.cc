@@ -1,5 +1,6 @@
 #include "drivers/api.h"
 #include "scm.h"
+#include "fs_events.h"
 #include <io/path.h>
 #include <cf/cf.h>
 #include <oak/oak.h>
@@ -7,73 +8,6 @@
 #include <settings/settings.h>
 
 OAK_DEBUG_VAR(SCM);
-
-namespace scm
-{
-	static void callback_function (ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents, void* eventPaths, FSEventStreamEventFlags const eventFlags[], FSEventStreamEventId const eventIds[]);
-
-	struct watcher_t
-	{
-		watcher_t (std::string const& path, info_t* info) : path(path), info(info), stream(NULL)
-		{
-			struct statfs buf;
-			if(statfs(path.c_str(), &buf) != 0)
-				return;
-
-			mount_point            = buf.f_mntonname;
-			dev_t device           = buf.f_fsid.val[0];
-			std::string devicePath = path::relative_to(path, mount_point);
-
-			FSEventStreamContext contextInfo = { 0, this, NULL, NULL, NULL };
-			if(stream = FSEventStreamCreateRelativeToDevice(kCFAllocatorDefault, &callback_function, &contextInfo, device, cf::wrap(std::vector<std::string>(1, devicePath)), kFSEventStreamEventIdSinceNow, 1.0, kFSEventStreamCreateFlagNone))
-			{
-				FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-				FSEventStreamStart(stream);
-				FSEventStreamFlushSync(stream);
-			}
-			else
-			{
-				fprintf(stderr, "can’t observe ‘%s’\n", path.c_str());
-			}
-		}
-
-		void callback (std::set<std::string> const& changedPaths)
-		{
-			info->callback(changedPaths);
-		}
-
-		~watcher_t ()
-		{
-			if(!stream)
-				return;
-
-			FSEventStreamStop(stream);
-			FSEventStreamInvalidate(stream);
-			FSEventStreamRelease(stream);
-		}
-
-		std::string path;
-		info_t* info;
-
-		std::string mount_point;
-		FSEventStreamRef stream;
-	};
-
-	static void callback_function (ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents, void* eventPaths, FSEventStreamEventFlags const eventFlags[], FSEventStreamEventId const eventIds[])
-	{
-		watcher_t& watcher = *(watcher_t*)clientCallBackInfo;
-
-		std::set<std::string> changedPaths;
-
-		for(size_t i = 0; i < numEvents; ++i)
-		{
-			std::string const& file = ((char const* const*)eventPaths)[i];
-			std::string const& path = path::join(watcher.mount_point, "./" + file);
-			changedPaths.insert(path);
-		}
-		watcher.callback(changedPaths);
-	}
-}
 
 namespace scm
 {
