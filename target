@@ -20,7 +20,6 @@ OBJCXX_FLAGS += -fobjc-arc -Xclang -fobjc-default-synthesize-properties -fobjc-c
 LIBS         += c++
 
 LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
-LN_FLAGS += -fobjc-arc-cxxlib=libc++
 LN_FLAGS += -fvisibility=hidden
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
