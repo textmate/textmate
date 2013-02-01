@@ -3,19 +3,17 @@
 
 namespace scm
 {
-	struct info_t;
-
 	struct watcher_t
 	{
-		watcher_t (std::string const& path, info_t* info);
+		watcher_t (std::string const& path, std::function<void(std::set<std::string> const&)> const& callback);
 		~watcher_t ();
 
 	private:
 		static void callback_function (ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents, void* eventPaths, FSEventStreamEventFlags const eventFlags[], FSEventStreamEventId const eventIds[]);
-		void callback (std::set<std::string> const& changedPaths);
+		void invoke_callback (std::set<std::string> const& changedPaths);
 
 		std::string path;
-		info_t* info;
+		std::function<void(std::set<std::string> const&)> callback;
 
 		std::string mount_point;
 		FSEventStreamRef stream;

@@ -37,7 +37,7 @@ namespace scm
 			{ "TM_SCM_NAME",   _driver->name() },
 			{ "TM_SCM_BRANCH", _driver->branch_name(_wc_path) }
 		};
-		_watcher.reset(new scm::watcher_t(_wc_path, this));
+		_watcher.reset(new scm::watcher_t(_wc_path, std::bind(&info_t::callback, this, std::placeholders::_1)));
 		_did_setup = true;
 	}
 

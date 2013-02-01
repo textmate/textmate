@@ -49,7 +49,6 @@ namespace scm
 		oak::date_t _updated;
 		fs::snapshot_t _snapshot;
 
-		friend struct scm::watcher_t;
 		std::shared_ptr<scm::watcher_t> _watcher;
 		void callback (std::set<std::string> const& pathsChangedOnDisk);
 		oak::callbacks_t<callback_t> _callbacks;

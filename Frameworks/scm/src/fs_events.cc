@@ -1,5 +1,4 @@
 #include "fs_events.h"
-#include "scm.h"
 #include <io/path.h>
 #include <cf/cf.h>
 
@@ -9,7 +8,7 @@ namespace scm
 	// = watcher_t =
 	// =============
 
-	watcher_t::watcher_t (std::string const& path, info_t* info) : path(path), info(info), stream(NULL)
+	watcher_t::watcher_t (std::string const& path, std::function<void(std::set<std::string> const&)> const& callback) : path(path), callback(callback), stream(NULL)
 	{
 		struct statfs buf;
 		if(statfs(path.c_str(), &buf) != 0)
@@ -42,9 +41,9 @@ namespace scm
 		FSEventStreamRelease(stream);
 	}
 
-	void watcher_t::callback (std::set<std::string> const& changedPaths)
+	void watcher_t::invoke_callback (std::set<std::string> const& changedPaths)
 	{
-		info->callback(changedPaths);
+		callback(changedPaths);
 	}
 
 	void watcher_t::callback_function (ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents, void* eventPaths, FSEventStreamEventFlags const eventFlags[], FSEventStreamEventId const eventIds[])
@@ -59,6 +58,6 @@ namespace scm
 			std::string const& path = path::join(watcher.mount_point, "./" + file);
 			changedPaths.insert(path);
 		}
-		watcher.callback(changedPaths);
+		watcher.invoke_callback(changedPaths);
 	}
 }
