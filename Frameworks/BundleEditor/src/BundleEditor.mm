@@ -38,7 +38,12 @@ static BundleEditor* SharedInstance;
 namespace
 {
 	static bundles::kind_t const PlistItemKinds[] = { bundles::kItemTypeSettings, bundles::kItemTypeMacro, bundles::kItemTypeTheme };
-	static std::vector<std::string> const PlistKeySortOrder { "shellVariables", "disabled", "name", "value", "comment", "match", "begin", "while", "end", "applyEndPatternLast", "captures", "beginCaptures", "whileCaptures", "endCaptures", "contentName", "injections", "patterns", "repository", "include", "increaseIndentPattern", "decreaseIndentPattern", "indentNextLinePattern", "unIndentedLinePattern", "disableIndentCorrections", "indentOnPaste", "indentedSoftWrap", "format", "foldingStartMarker", "foldingStopMarker", "foldingIndentedBlockStart", "foldingIndentedBlockIgnore", "characterClass", "smartTypingPairs", "highlightPairs", "showInSymbolList", "symbolTransformation", "disableDefaultCompletion", "completions", "completionCommand", "spellChecking", "softWrap", "fontName", "fontStyle", "fontSize", "foreground", "background", "bold", "caret", "invisibles", "italic", "misspelled", "selection", "underline" };
+
+	static std::vector<std::string> const& PlistKeySortOrder ()
+	{
+		static auto const res = new std::vector<std::string>{ "shellVariables", "disabled", "name", "value", "comment", "match", "begin", "while", "end", "applyEndPatternLast", "captures", "beginCaptures", "whileCaptures", "endCaptures", "contentName", "injections", "patterns", "repository", "include", "increaseIndentPattern", "decreaseIndentPattern", "indentNextLinePattern", "unIndentedLinePattern", "disableIndentCorrections", "indentOnPaste", "indentedSoftWrap", "format", "foldingStartMarker", "foldingStopMarker", "foldingIndentedBlockStart", "foldingIndentedBlockIgnore", "characterClass", "smartTypingPairs", "highlightPairs", "showInSymbolList", "symbolTransformation", "disableDefaultCompletion", "completions", "completionCommand", "spellChecking", "softWrap", "fontName", "fontStyle", "fontSize", "foreground", "background", "bold", "caret", "invisibles", "italic", "misspelled", "selection", "underline" };
+		return *res;
+	}
 
 	static struct item_info_t { bundles::kind_t kind; std::string plist_key; std::string grammar; std::string file_type; std::string kind_string; NSString* view_controller; NSString* file; } item_infos[] =
 	{
@@ -627,12 +632,12 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 			if(plist.find(*key) != plist.end())
 				plistSubset[*key] = plist.find(*key)->second;
 		}
-		bundleItemContent = document::from_content(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
+		bundleItemContent = document::from_content(to_s(plistSubset, plist::kPreferSingleQuotedStrings, PlistKeySortOrder()), info.grammar);
 	}
 	else if(oak::contains(std::begin(PlistItemKinds), std::end(PlistItemKinds), info.kind))
 	{
 		if(plist.find(info.plist_key) != plist.end())
-			bundleItemContent = document::from_content(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings, PlistKeySortOrder), info.grammar);
+			bundleItemContent = document::from_content(to_s(plist.find(info.plist_key)->second, plist::kPreferSingleQuotedStrings, PlistKeySortOrder()), info.grammar);
 	}
 	else
 	{

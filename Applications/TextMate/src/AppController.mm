@@ -29,9 +29,9 @@ void OakOpenDocuments (NSArray* paths)
 	BOOL enableInstallHandler = ([NSEvent modifierFlags] & NSAlternateKeyMask) == 0;
 	for(NSString* path in paths)
 	{
-		static std::set<std::string> const tmItemExtensions = { "tmbundle", "tmcommand", "tmdragcommand", "tmlanguage", "tmmacro", "tmpreferences", "tmsnippet", "tmtheme" };
+		static auto const tmItemExtensions = new std::set<std::string>{ "tmbundle", "tmcommand", "tmdragcommand", "tmlanguage", "tmmacro", "tmpreferences", "tmsnippet", "tmtheme" };
 		std::string const pathExt = to_s([[path pathExtension] lowercaseString]);
-		if(enableInstallHandler && tmItemExtensions.find(pathExt) != tmItemExtensions.end())
+		if(enableInstallHandler && tmItemExtensions->find(pathExt) != tmItemExtensions->end())
 		{
 			[itemsToInstall addObject:path];
 		}

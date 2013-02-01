@@ -358,8 +358,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 + (BOOL)isKeyExcludedFromWebScript:(char const*)name
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", name););
-	static std::set<std::string> const PublicProperties = { "outputString", "errorString", "onreadoutput", "onreaderror" };
-	return PublicProperties.find(name) == PublicProperties.end();
+	static auto const PublicProperties = new std::set<std::string>{ "outputString", "errorString", "onreadoutput", "onreaderror" };
+	return PublicProperties->find(name) == PublicProperties->end();
 }
 
 + (NSString*)webScriptNameForKey:(char const*)name
@@ -370,8 +370,8 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 + (BOOL)isSelectorExcludedFromWebScript:(SEL)aSelector
 {
 	D(DBF_HTMLOutput_JSShellCommand, bug("%s\n", sel_getName(aSelector)););
-	static std::set<SEL> const PublicMethods = { @selector(cancelCommand), @selector(writeToInput:), @selector(closeInput) };
-	return PublicMethods.find(aSelector) == PublicMethods.end();
+	static auto const PublicMethods = new std::set<SEL>{ @selector(cancelCommand), @selector(writeToInput:), @selector(closeInput) };
+	return PublicMethods->find(aSelector) == PublicMethods->end();
 }
 
 + (NSString*)webScriptNameForSelector:(SEL)aSelector

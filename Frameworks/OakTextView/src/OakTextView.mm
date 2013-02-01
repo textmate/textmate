@@ -1890,8 +1890,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
-	static std::set<SEL> const RequiresSelection = { @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
-	if(RequiresSelection.find([aMenuItem action]) != RequiresSelection.end())
+	static auto const RequiresSelection = new std::set<SEL>{ @selector(cut:), @selector(copy:), @selector(delete:), @selector(copySelectionToFindPboard:) };
+	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
 		return [self hasSelection];
 	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
 		[aMenuItem setState:[self showInvisibles] ? NSOnState : NSOffState];
