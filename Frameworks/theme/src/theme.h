@@ -46,13 +46,14 @@ struct PUBLIC gutter_styles_t
 	cf::color_t selectionIconsHover;
 	cf::color_t selectionIconsPressed;
 };
+struct theme_t;
+typedef std::shared_ptr<theme_t> theme_ptr;
 
 struct PUBLIC theme_t
 {
 	theme_t (bundles::item_ptr const& themeItem, std::string const& fontName = "Menlo-Regular", CGFloat fontSize = 12);
-	~theme_t ();
 
-	void set_font_name_and_size (std::string const& fontName, CGFloat fontSize);
+	theme_ptr copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize);
 
 	oak::uuid_t const& uuid () const;
 	std::string const& font_name () const;
@@ -99,35 +100,41 @@ private:
 		bool_t underlined;
 		bool_t misspelled;
 	};
-
-	struct callback_t : bundles::callback_t
-	{
-		callback_t (theme_t& theme) : _theme(theme) { }
-		void bundles_did_change ()                  { _theme.setup_styles(); }
-	private:
-		theme_t& _theme;
-	};
-
-	void setup_styles ();
-
-	static decomposed_style_t parse_styles (plist::dictionary_t const& plist);
 	static std::vector<decomposed_style_t> global_styles (scope::scope_t const& scope);
 
+	struct shared_styles_t
+	{
+		struct callback_t : bundles::callback_t
+		{
+			callback_t (shared_styles_t& theme) : _styles(theme) { }
+			void bundles_did_change ()                  { _styles.setup_styles(); }
+		private:
+			shared_styles_t& _styles;
+		};
+		shared_styles_t (bundles::item_ptr const& themeItem);
+		~shared_styles_t ();
+		void setup_styles ();
+		static decomposed_style_t parse_styles (plist::dictionary_t const& plist);
+
+		bundles::item_ptr _item;
+		std::vector<decomposed_style_t> _styles;
+		gutter_styles_t _gutter_styles;
+		cf::color_t _foreground;
+		cf::color_t _background;
+		bool _is_dark;
+		bool _is_transparent;
+		callback_t _callback;
+	};
+	typedef std::shared_ptr<shared_styles_t> shared_styles_ptr;
+	shared_styles_ptr find_shared_styles (bundles::item_ptr const& themeItem);
+	shared_styles_ptr _styles;
 	bundles::item_ptr _item;
 	std::string _font_name;
 	CGFloat _font_size;
-	std::vector<decomposed_style_t> _styles;
-	gutter_styles_t _gutter_styles;
-	cf::color_t _foreground;
-	cf::color_t _background;
-	bool _is_dark;
-	bool _is_transparent;
-	callback_t _callback;
 
 	mutable std::map<scope::scope_t, styles_t> _cache;
 };
 
-typedef std::shared_ptr<theme_t> theme_ptr;
 PUBLIC theme_ptr parse_theme (bundles::item_ptr const& themeItem);
 
 #endif /* end of include guard: THEME_H_T0VVCP8F */
