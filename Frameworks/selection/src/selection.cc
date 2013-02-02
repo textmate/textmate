@@ -875,7 +875,8 @@ namespace ng
 	ranges_t extend (buffer_t const& buffer, ranges_t const& selection, select_unit_type const unit, layout_movement_t const* layout)
 	{
 		static std::set<select_unit_type> const splittingUnits = { kSelectionExtendToWord, kSelectionExtendToTypingPair, kSelectionExtendToScope, kSelectionExtendToEndOfSoftLine, kSelectionExtendToEndOfIndentedLine, kSelectionExtendToEndOfLine, kSelectionExtendToEndOfParagraph, kSelectionExtendToBeginOfTypingPair, kSelectionExtendToEndOfTypingPair };
-		bool shouldDissect = splittingUnits.find(unit) != splittingUnits.end();
+		bool isColumnar    = selection.size() == 1 && selection.last().columnar;
+		bool shouldDissect = isColumnar && splittingUnits.find(unit) != splittingUnits.end();
 
 		ranges_t res;
 		citerate(range, shouldDissect ? dissect_columnar(buffer, selection) : selection)
