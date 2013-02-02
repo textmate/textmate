@@ -1,10 +1,12 @@
 #import "FSSCMDataSource.h"
 #import "FSItem.h"
+#import <scm/scm.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <io/path.h>
 #import <text/encode.h>
 #import <text/ctype.h>
+#import <text/format.h>
 #import <oak/oak.h>
 
 static NSImage* SCMFolderIcon ()
@@ -61,7 +63,13 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	return out;
 }
 
-@implementation FSSCMDataSource { OBJC_WATCH_LEAKS(FSSCMDataSource); }
+@implementation FSSCMDataSource
+{
+	OBJC_WATCH_LEAKS(FSSCMDataSource);
+	NSUInteger options;
+	scm::ng::info_ptr scmInfo;
+}
+
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
 	if(scm::info_ptr info = scm::info([aPath fileSystemRepresentation]))
@@ -72,11 +80,15 @@ _Iter prune_path_children (_Iter it, _Iter last)
 - (NSArray*)repositoryStatus
 {
 	std::vector<std::string> unstagedPaths, untrackedPaths;
-	citerate(pair, scm::tracked_files(scmInfo->path(), scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
+
+	for(auto pair : scmInfo->status())
 	{
-		if(pair->second & scm::status::unversioned)
-				untrackedPaths.push_back(pair->first);
-		else	unstagedPaths.push_back(pair->first);
+		if(pair.second & (scm::status::modified|scm::status::added|scm::status::deleted|scm::status::conflicted|scm::status::unversioned))
+		{
+			if(pair.second & scm::status::unversioned)
+					untrackedPaths.push_back(pair.first);
+			else	unstagedPaths.push_back(pair.first);
+		}
 	}
 
 	if(!scmInfo->tracks_directories())
@@ -92,13 +104,13 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	unstagedItem.icon     = SCMFolderIcon();
 	unstagedItem.name     = @"Uncommitted Changes";
 	unstagedItem.group    = YES;
-	unstagedItem.children = convert(unstagedPaths, scmInfo->path(), options);
+	unstagedItem.children = convert(unstagedPaths, scmInfo->root_path(), options);
 
 	FSItem* untrackedItem  = [FSItem itemWithURL:URLAppend(self.rootItem.url, @".untracked/")];
 	untrackedItem.icon     = SCMFolderIcon();
 	untrackedItem.name     = @"Untracked Items";
 	untrackedItem.group    = YES;
-	untrackedItem.children = convert(untrackedPaths, scmInfo->path(), options);
+	untrackedItem.children = convert(untrackedPaths, scmInfo->root_path(), options);
 
 	NSMutableArray* children = [NSMutableArray array];
 	[children addObject:unstagedItem];
@@ -117,32 +129,27 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	{
 		options = someOptions;
 
-		if(scmInfo = scm::info([[anURL path] fileSystemRepresentation]))
+		std::string const rootPath = [[anURL path] fileSystemRepresentation];
+		if(scmInfo = scm::ng::info(rootPath))
 		{
-			struct scm_callback_t : scm::callback_t
+			std::string name = path::display_name(rootPath);
+			if(!scmInfo->dry())
 			{
-				scm_callback_t (FSSCMDataSource* self) : _self(self) { }
-
-				void status_changed (scm::info_t const& info, std::set<std::string> const& changedPaths)
-				{
-					[_self postReloadNotification];
-				}
-
-			private:
-				__weak FSSCMDataSource* _self;
-			};
-
-			std::string name = path::display_name(scmInfo->path());
-			if(scmInfo->branch() != NULL_STR)
-				name += " (" + scmInfo->branch() + ")";
+				auto const& vars = scmInfo->variables();
+				auto const branch = vars.find("TM_SCM_BRANCH");
+				if(branch != vars.end())
+					name = text::format("%s (%s)", path::display_name(scmInfo->root_path()).c_str(), branch->second.c_str());
+			}
 
 			self.rootItem          = [FSItem itemWithURL:anURL];
 			self.rootItem.icon     = [NSImage imageNamed:NSImageNameFolderSmart];
 			self.rootItem.name     = [NSString stringWithCxxString:name];
 			self.rootItem.children = [self repositoryStatus];
 
-			scmCallback = new scm_callback_t(self);
-			scmInfo->add_callback(scmCallback);
+			__weak FSSCMDataSource* weakSelf = self;
+			scmInfo->add_callback(^(scm::ng::info_t const&){
+				[weakSelf postReloadNotification];
+			});
 		}
 	}
 	return self;
@@ -151,14 +158,5 @@ _Iter prune_path_children (_Iter it, _Iter last)
 - (NSArray*)expandedURLs
 {
 	return @[ URLAppend(self.rootItem.url, @".unstaged/"), URLAppend(self.rootItem.url, @".untracked/") ];
-}
-
-- (void)dealloc
-{
-	if(scmInfo && scmCallback)
-	{
-		scmInfo->remove_callback(scmCallback);
-		delete scmCallback;
-	}
 }
 @end
