@@ -495,12 +495,6 @@ namespace document
 			map["TM_FILENAME"]  = path::name(path());
 			map["TM_DIRECTORY"] = path::parent(path());
 			map["PWD"]          = path::parent(path());
-
-			if(scm::info_ptr info = scm::info(path::parent(path())))
-			{
-				for(auto pair : info->variables())
-					map.insert(pair);
-			}
 		}
 
 		return sourceFileSystem ? variables_for_path(path(), scope(), map) : map;
