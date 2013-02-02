@@ -189,6 +189,10 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	for(NSURL* currentURL = _url; currentURL; currentURL = ParentForURL(currentURL))
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
+
+		if(currentURL == _url && _outlineViewDelegate.dataSource)
+			menuItem.title = _outlineViewDelegate.dataSource.rootItem.name;
+
 		[menuItem setTarget:self];
 		[menuItem setRepresentedObject:currentURL];
 		[menuItem setImage:IconImage(currentURL)];
