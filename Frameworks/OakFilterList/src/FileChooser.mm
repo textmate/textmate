@@ -179,7 +179,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 @interface FileChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
-	scm::info_ptr                                 _scmInfo;
+	scm::ng::info_ptr                             _scmInfo;
 	std::vector<document::document_ptr>           _openDocuments;
 	std::map<oak::uuid_t, document::document_ptr> _openDocumentsMap;
 	oak::uuid_t                                   _currentDocument;
@@ -363,9 +363,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 - (BOOL)allowsMultipleSelection                             { return _tableView.allowsMultipleSelection; }
 - (void)setAllowsMultipleSelection:(BOOL)flag               { _tableView.allowsMultipleSelection = flag; }
-
-- (scm::info_ptr const&)scmInfo                             { return _scmInfo; }
-- (void)setScmInfo:(scm::info_ptr const&)scmInfo            { _scmInfo = scmInfo; [self reload]; }
 
 - (oak::uuid_t const&)currentDocument                       { return _currentDocument; }
 - (void)setCurrentDocument:(oak::uuid_t const&)newDocument  { _currentDocument = newDocument; [self reload]; }
@@ -588,6 +585,25 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	_itemCountTextField.stringValue = count;
 }
 
+- (void)updateSCMStatus
+{
+	NSRange visibleRange = [_tableView rowsInRect:[_tableView visibleRect]];
+	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
+	{
+		NSNumber* index = _items[row];
+		document_record_t const& record = _records[index.unsignedIntValue];
+		if(record.full_path != NULL_STR)
+		{
+			scm::status::type scmStatus = _scmInfo->status(record.full_path);
+			if(record.image.scmStatus != scmStatus)
+			{
+				record.image.scmStatus = scmStatus;
+				[_tableView setNeedsDisplayInRect:[_tableView rectOfRow:row]];
+			}
+		}
+	}
+}
+
 // ========
 // = Path =
 // ========
@@ -608,6 +624,13 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	_records.clear();
 	[self addRecordsForDocuments:_openDocuments];
 	_scanner.reset(new document::scanner_t(to_s(_path), globs_for_path(to_s(_path)), false, false, false));
+	_scmInfo = scm::ng::info(to_s(_path));
+	if(_scmInfo)
+	{
+		_scmInfo->add_callback(^(scm::ng::info_t const& info){
+			[self updateSCMStatus];
+		});
+	}
 
 	_pollInterval = 0.01;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
