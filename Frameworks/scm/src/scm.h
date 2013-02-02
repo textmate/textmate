@@ -1,6 +1,7 @@
 #ifndef OAKSCM_H_SUWJ53QQ
 #define OAKSCM_H_SUWJ53QQ
 
+#include "scm_ng.h"
 #include "status.h"
 #include "snapshot.h"
 #include <plist/date.h>
