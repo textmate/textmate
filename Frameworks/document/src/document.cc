@@ -602,8 +602,13 @@ namespace document
 	{
 		if(success)
 		{
-			_key        = documents.update_path(shared_from_this(), _key, path::identifier_t(_path));
-			_is_on_disk = true;
+			_key = documents.update_path(shared_from_this(), _key, path::identifier_t(_path));
+
+			if(!_is_on_disk)
+			{
+				_is_on_disk = true;
+				broadcast(callback_t::did_change_on_disk_status);
+			}
 
 			_path_attributes = pathAttributes;
 
