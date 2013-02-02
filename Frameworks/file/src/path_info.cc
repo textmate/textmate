@@ -142,9 +142,6 @@ namespace file
 		std::map<std::string, std::string> map;
 		if(path != NULL_STR)
 		{
-			if(scm::info_ptr info = scm::info(path::parent(path)))
-				map = info->variables();
-
 			map["TM_DISPLAYNAME"] = path::display_name(path);
 			map["TM_FILEPATH"]    = path;
 			map["TM_FILENAME"]    = path::name(path);
