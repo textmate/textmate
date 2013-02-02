@@ -23,6 +23,7 @@
 #import <file/path_info.h>
 #import <io/entries.h>
 #import <scm/scm.h>
+#import <text/tokenize.h>
 #import <text/utf8.h>
 #import <ns/ns.h>
 
@@ -60,21 +61,20 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) OakHTMLOutputView*          htmlOutputView;
 @property (nonatomic) BOOL                        htmlOutputInWindow;
 
-@property (nonatomic) NSString*                   windowTitle;
-@property (nonatomic) NSString*                   representedFile;
-@property (nonatomic) BOOL                        isDocumentEdited;
-
-@property (nonatomic) NSString*                   pathAttributes;
 @property (nonatomic) NSString*                   projectPath;
+
+@property (nonatomic) NSString*                   documentPath;
+@property (nonatomic) NSString*                   documentDisplayName;
+@property (nonatomic) BOOL                        documentIsModified;
+@property (nonatomic) BOOL                        documentIsOnDisk;
+@property (nonatomic) scm::status::type           documentSCMStatus;
 
 @property (nonatomic) NSArray*                    urlArrayForQuickLook;
 
 + (void)scheduleSessionBackup:(id)sender;
 
 - (void)makeTextViewFirstResponder:(id)sender;
-- (void)updatePathDependentProperties;
 - (void)updateFileBrowserStatus:(id)sender;
-- (void)documentDidChange:(document::document_ptr const&)aDocument;
 
 - (void)fileBrowser:(OakFileBrowser*)aFileBrowser openURLs:(NSArray*)someURLs;
 - (void)fileBrowser:(OakFileBrowser*)aFileBrowser closeURL:(NSURL*)anURL;
@@ -152,12 +152,27 @@ namespace
 
 		void handle_document_event (document::document_ptr document, event_t event)
 		{
+			if(document && _self.selectedDocument && *document == *_self.selectedDocument)
+			{
+				switch(event)
+				{
+					case did_change_path:
+						[_self setDocumentPath:[NSString stringWithCxxString:document->path()]];
+						[_self setDocumentDisplayName:[NSString stringWithCxxString:document->display_name()]];
+					break;
+
+					case did_change_on_disk_status:  [_self setDocumentIsOnDisk:document->is_on_disk()];                      break;
+					case did_change_modified_status: [_self setDocumentIsModified:document->is_modified()];                   break;
+				}
+			}
+
 			switch(event)
 			{
-				case did_change_path:
-				case did_change_on_disk_status:
 				case did_change_modified_status:
-					[_self documentDidChange:document];
+					[_self updateFileBrowserStatus:nil];
+				case did_change_path:
+					[_self.tabBarView reloadData];
+					[[_self class] scheduleSessionBackup:nil];
 				break;
 			}
 		}
@@ -207,8 +222,13 @@ namespace
 	document::document_ptr                 _selectedDocument;
 	command::runner_ptr                    _runner;
 
-	scm::info_ptr                          _scmInfo;
-	scm::callback_t*                       _scmCallback;
+	scm::ng::info_ptr                      _projectSCMInfo;
+	std::map<std::string, std::string>     _projectSCMVariables;
+	std::vector<std::string>               _projectScopeAttributes;
+
+	scm::ng::info_ptr                      _documentSCMInfo;
+	std::map<std::string, std::string>     _documentSCMVariables;
+	std::vector<std::string>               _documentScopeAttributes;
 }
 
 - (id)init
@@ -216,7 +236,6 @@ namespace
 	if((self = [super init]))
 	{
 		self.identifier  = [NSString stringWithCxxString:oak::uuid_t().generate()];
-		self.windowTitle = @"untitled";
 		self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
@@ -241,8 +260,6 @@ namespace
 		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
-		[self.window bind:@"title" toObject:self withKeyPath:@"windowTitle" options:nil];
-		[self.window bind:@"documentEdited" toObject:self withKeyPath:@"isDocumentEdited" options:nil];
 
 		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
 
@@ -257,10 +274,6 @@ namespace
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	if(_scmInfo)
-		_scmInfo->remove_callback(_scmCallback);
-	delete _scmCallback;
-
 	self.tabBarView.dataSource  = nil;
 	self.tabBarView.delegate    = nil;
 	self.textView.delegate      = nil;
@@ -270,12 +283,8 @@ namespace
 {
 	self.documents        = std::vector<document::document_ptr>();
 	self.selectedDocument = document::document_ptr();
-
-	[self.window unbind:@"title"];
-	[self.window unbind:@"documentEdited"];
-	self.window.delegate = nil;
-
-	self.identifier = nil; // This removes us from AllControllers and causes a release
+	self.window.delegate  = nil;
+	self.identifier       = nil; // This removes us from AllControllers and causes a release
 }
 
 - (void)showWindow:(id)sender
@@ -318,7 +327,6 @@ namespace
 {
 	if(!self.documents.empty())
 		[self.textView performSelector:@selector(applicationDidBecomeActiveNotification:) withObject:aNotification];
-	[self updatePathDependentProperties];
 }
 
 - (void)applicationDidResignActiveNotification:(NSNotification*)aNotification
@@ -606,14 +614,6 @@ namespace
 	}
 }
 
-- (void)documentDidChange:(document::document_ptr const&)aDocument
-{
-	[self updatePathDependentProperties];
-	[self updateFileBrowserStatus:self];
-	[self.tabBarView reloadData];
-	[[self class] scheduleSessionBackup:self];
-}
-
 // ====================
 // = Create Documents =
 // ====================
@@ -761,31 +761,11 @@ namespace
 	}];
 }
 
-namespace
-{
-	struct save_callback_t : document_save_callback_t
-	{
-		save_callback_t (DocumentController* self, size_t count) : _self(self), _count(count) { }
-
-		void did_save_document (document::document_ptr document, bool flag, std::string const& message, oak::uuid_t const& filter)
-		{
-			if(flag)
-				[_self documentDidChange:document];
-			if(--_count == 0 || !flag)
-				delete this;
-		}
-
-	private:
-		__weak DocumentController* _self;
-		size_t _count;
-	};
-}
-
 - (IBAction)saveDocument:(id)sender
 {
 	if([self selectedDocument]->path() != NULL_STR)
 	{
-		[DocumentSaveHelper trySaveDocument:[self selectedDocument] forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self, 1)];
+		[DocumentSaveHelper trySaveDocument:[self selectedDocument] forWindow:self.window defaultDirectory:nil andCallback:NULL];
 	}
 	else
 	{
@@ -820,8 +800,7 @@ namespace
 				self.documents = newDocuments;
 			}
 
-			[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self, 1)];
-			[self updatePathDependentProperties];
+			[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
 		}];
 	}
 }
@@ -837,8 +816,7 @@ namespace
 			return;
 		[self selectedDocument]->set_path(to_s(path));
 		[self selectedDocument]->set_disk_encoding(encoding);
-		[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:new save_callback_t(self, 1)];
-		[self updatePathDependentProperties];
+		[DocumentSaveHelper trySaveDocument:self.selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
 	}];
 }
 
@@ -850,7 +828,7 @@ namespace
 		if(document->is_modified())
 			documentsToSave.push_back(document);
 	}
-	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:new save_callback_t(self, documentsToSave.size())];
+	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:NULL];
 }
 
 // ================
@@ -859,78 +837,192 @@ namespace
 
 - (void)updateProxyIcon
 {
-	self.window.representedFilename = self.representedFile ?: @"";
-	[self.window standardWindowButton:NSWindowDocumentIconButton].image = self.representedFile ? [OakFileIconImage fileIconImageWithPath:self.representedFile isModified:NO] : nil;
+	if(self.documentPath && self.documentIsOnDisk)
+	{
+		OakFileIconImage* icon = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+		icon.path      = self.documentPath;
+		icon.exists    = YES;
+		icon.scmStatus = self.documentSCMStatus;
+
+		self.window.representedFilename = icon.path;
+		[self.window standardWindowButton:NSWindowDocumentIconButton].image = icon;
+	}
+	else
+	{
+		self.window.representedFilename = @"";
+		[self.window standardWindowButton:NSWindowDocumentIconButton].image = nil;
+	}
 }
 
-- (void)setRepresentedFile:(NSString*)aPath
+- (void)updateWindowTitle
 {
-	if(![_representedFile isEqualToString:aPath])
+	if(_selectedDocument)
 	{
-		struct scm_callback_t : scm::callback_t
+		std::map<std::string, std::string> map = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+		if(self.projectPath)
+			map["projectDirectory"] = to_s(self.projectPath);
+
+		std::string docDirectory = _selectedDocument->path() != NULL_STR ? path::parent(_selectedDocument->path()) : to_s(self.untitledSavePath);
+		settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, _selectedDocument->variables(map, false));
+		self.window.title = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName))];
+	}
+	else
+	{
+		self.window.title = @"«no documents»";
+	}
+}
+
+- (void)setProjectPath:(NSString*)newProjectPath
+{
+	if(_projectPath != newProjectPath && ![_projectPath isEqualToString:newProjectPath])
+	{
+		_projectPath = newProjectPath;
+		if(_projectSCMInfo = scm::ng::info(to_s(_projectPath)))
 		{
-			scm_callback_t (DocumentController* self) : _self(self) { }
-	
-			void status_changed (scm::info_t const& info, std::set<std::string> const& changedPaths)
+			__weak DocumentController* weakSelf = self;
+			_projectSCMInfo->add_callback(^(scm::ng::info_t const& info){
+				weakSelf.projectSCMVariables = info.variables();
+			});
+		}
+		else
+		{
+			self.projectSCMVariables = std::map<std::string, std::string>();
+		}
+
+		_projectScopeAttributes.clear();
+		SInt32 major, minor, bugFix;
+		Gestalt(gestaltSystemVersionMajor,  &major);
+		Gestalt(gestaltSystemVersionMinor,  &minor);
+		Gestalt(gestaltSystemVersionBugFix, &bugFix);
+		_projectScopeAttributes.push_back(text::format("attr.os-version.%zd.%zd.%zd", (ssize_t)major, (ssize_t)minor, (ssize_t)bugFix));
+
+		std::string const customAttributes = settings_for_path(NULL_STR, text::join(_projectScopeAttributes, " "), to_s(_projectPath)).get(kSettingsScopeAttributesKey, NULL_STR);
+		if(customAttributes != NULL_STR)
+			_projectScopeAttributes.push_back(customAttributes);
+
+		[self updateWindowTitle];
+	}
+}
+
+- (void)setDocumentPath:(NSString*)newDocumentPath
+{
+	if(_documentPath != newDocumentPath && ![_documentPath isEqualToString:newDocumentPath])
+	{
+		_documentPath = newDocumentPath;
+
+		std::string docDirectory = _documentPath ? path::parent(to_s(_documentPath)) : to_s(self.projectPath);
+
+		_documentScopeAttributes.clear();
+		if(_documentPath)
+		{
+			std::string const path = to_s(_documentPath);
+			std::vector<std::string> revPath;
+			citerate(token, text::tokenize(path.begin(), path.end(), '/'))
 			{
-				if(changedPaths.find(to_s(_self.representedFile)) != changedPaths.end())
-					[_self updateProxyIcon];
+				std::string tmp = *token;
+				citerate(subtoken, text::tokenize(tmp.begin(), tmp.end(), '.'))
+				{
+					if((*subtoken).empty())
+						continue;
+					revPath.push_back(*subtoken);
+					std::replace(revPath.back().begin(), revPath.back().end(), ' ', '_');
+				}
 			}
-	
-		private:
-			__weak DocumentController* _self;
-		};
-
-		if(_scmInfo)
+			revPath.push_back("rev-path");
+			revPath.push_back("attr");
+			std::reverse(revPath.begin(), revPath.end());
+			_documentScopeAttributes.push_back(text::join(revPath, "."));
+		}
+		else
 		{
-			_scmInfo->remove_callback(_scmCallback);
-			_scmInfo.reset();
+			_documentScopeAttributes.push_back("attr.untitled");
 		}
 
-		if(aPath)
-		{
-			if(!_scmCallback)
-				_scmCallback = new scm_callback_t(self);
+		std::string const customAttributes = settings_for_path(to_s(_documentPath), text::join(_documentScopeAttributes, " "), docDirectory).get(kSettingsScopeAttributesKey, NULL_STR);
+		if(customAttributes != NULL_STR)
+			_documentScopeAttributes.push_back(customAttributes);
 
-			if(_scmInfo = scm::info(path::parent(to_s(aPath))))
-				_scmInfo->add_callback(_scmCallback);
+		if(_documentSCMInfo = scm::ng::info(docDirectory))
+		{
+			__weak DocumentController* weakSelf = self;
+			_documentSCMInfo->add_callback(^(scm::ng::info_t const& info){
+				weakSelf.documentSCMStatus    = info.status(to_s(self.documentPath));
+				weakSelf.documentSCMVariables = info.variables();
+			});
+		}
+		else
+		{
+			self.documentSCMStatus    = scm::status::unknown;
+			self.documentSCMVariables = std::map<std::string, std::string>();
 		}
 
-		_representedFile = aPath;
+		[self updateProxyIcon];
+		[self updateWindowTitle];
+	}
+}
+
+- (void)setDocumentDisplayName:(NSString*)newDisplayName
+{
+	if(_documentDisplayName != newDisplayName && ![_documentDisplayName isEqualToString:newDisplayName])
+	{
+		_documentDisplayName = newDisplayName;
+		[self updateWindowTitle];
+	}
+}
+
+- (void)setDocumentIsModified:(BOOL)newDocumentIsModified
+{
+	if(_documentIsModified != newDocumentIsModified)
+	{
+		_documentIsModified = newDocumentIsModified;
+		self.window.documentEdited = _documentIsModified;
+	}
+}
+
+- (void)setDocumentIsOnDisk:(BOOL)newDocumentIsOnDisk
+{
+	if(_documentIsOnDisk != newDocumentIsOnDisk)
+	{
+		_documentIsOnDisk = newDocumentIsOnDisk;
 		[self updateProxyIcon];
 	}
 }
 
-- (void)updatePathDependentProperties
+- (void)setDocumentSCMStatus:(scm::status::type)newDocumentSCMStatus
 {
-	document::document_ptr doc = self.selectedDocument;
-	if(!doc)
+	if(_documentSCMStatus != newDocumentSCMStatus)
 	{
-		self.windowTitle      = @"«no documents»";
-		self.representedFile  = nil;
-		self.isDocumentEdited = NO;
-		return;
+		_documentSCMStatus = newDocumentSCMStatus;
+		[self updateProxyIcon];
 	}
+}
 
-	std::string docDirectory = doc->path() != NULL_STR ? path::parent(doc->path()) : to_s(self.untitledSavePath);
-	self.pathAttributes = [NSString stringWithCxxString:file::path_attributes(doc->path(), docDirectory)];
-
-	std::map<std::string, std::string> map;
-	if(doc->path() == NULL_STR)
+- (void)setProjectSCMVariables:(std::map<std::string, std::string> const&)newVariables
+{
+	if(_projectSCMVariables != newVariables)
 	{
-		if(scm::info_ptr info = scm::info(docDirectory))
-			map = info->variables();
+		_projectSCMVariables = newVariables;
+		[self updateWindowTitle];
 	}
+}
 
-	if(NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(doc->path())])
-		map["projectDirectory"] = to_s(projectPath);
+- (void)setDocumentSCMVariables:(std::map<std::string, std::string> const&)newVariables
+{
+	if(_documentSCMVariables != newVariables)
+	{
+		_documentSCMVariables = newVariables;
+		[self updateWindowTitle];
+	}
+}
 
-	settings_t const settings = settings_for_path(doc->virtual_path(), doc->file_type() + " " + to_s(self.scopeAttributes), docDirectory, doc->variables(map, false));
+- (std::map<std::string, std::string> const&)projectSCMVariables
+{
+	return _projectSCMVariables;
+}
 
-	self.projectPath      = [NSString stringWithCxxString:settings.get(kSettingsProjectDirectoryKey, NULL_STR)];
-	self.windowTitle      = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, doc->display_name())];
-	self.representedFile  = doc->is_on_disk() ? [NSString stringWithCxxString:doc->path()] : nil;
-	self.isDocumentEdited = doc->is_modified();
+- (std::map<std::string, std::string> const&)documentSCMVariables
+{
+	return _documentSCMVariables;
 }
 
 // ========================
@@ -939,24 +1031,23 @@ namespace
 
 - (NSString*)scopeAttributes
 {
-	if(!_scmInfo)
-		return self.pathAttributes;
+	std::set<std::string> attributes;
 
-	NSMutableString* res = [self.pathAttributes mutableCopy];
+	auto const& vars = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+	auto scmName = vars.find("TM_SCM_NAME");
+	if(scmName != vars.end())
+		attributes.insert("attr.scm." + scmName->second);
+	auto branch = vars.find("TM_SCM_BRANCH");
+	if(branch != vars.end())
+		attributes.insert("attr.scm.branch." + branch->second);
 
-	auto vars = _scmInfo->variables();
-	auto iter = vars.find("TM_SCM_BRANCH");
-	if(iter != vars.end())
-		[res appendFormat:@" attr.scm.branch.%s", iter->second.c_str()];
+	if(self.documentSCMStatus != scm::status::unknown)
+		attributes.insert("attr.scm.status." + to_s(self.documentSCMStatus));
 
-	if(self.representedFile)
-	{
-		scm::status::type status = _scmInfo->status(to_s(self.representedFile));
-		if(status != scm::status::unknown)
-			[res appendFormat:@" attr.scm.status.%s", to_s(status).c_str()];
-	}
+	attributes.insert(_documentScopeAttributes.begin(), _documentScopeAttributes.end());
+	attributes.insert(_projectScopeAttributes.begin(), _projectScopeAttributes.end());
 
-	return res;
+	return [NSString stringWithCxxString:text::join(attributes, " ")];
 }
 
 // ==============
@@ -992,10 +1083,34 @@ namespace
 	[self untrackDocument:_selectedDocument];
 
 	if(_selectedDocument = newSelectedDocument)
-		[self.documentView setDocument:_selectedDocument];
+	{
+		if(NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(_selectedDocument->path())])
+		{
+			std::map<std::string, std::string> const map = { { "projectDirectory", to_s(projectPath) } };
+			settings_t const settings = settings_for_path(NULL_STR, NULL_STR, to_s(projectPath), map);
+			self.projectPath = [NSString stringWithCxxString:settings.get(kSettingsProjectDirectoryKey, NULL_STR)];
+		}
+		else
+		{
+			self.projectPath = nil;
+		}
 
-	[self updatePathDependentProperties];
-	[[self class] scheduleSessionBackup:self];
+		self.documentPath        = [NSString stringWithCxxString:_selectedDocument->path()];
+		self.documentDisplayName = [NSString stringWithCxxString:_selectedDocument->display_name()];
+		self.documentIsModified  = _selectedDocument->is_modified();
+		self.documentIsOnDisk    = _selectedDocument->is_on_disk();
+
+		[self.documentView setDocument:_selectedDocument];
+		[[self class] scheduleSessionBackup:self];
+	}
+	else
+	{
+		self.projectPath         = nil;
+		self.documentPath        = nil;
+		self.documentDisplayName = nil;
+		self.documentIsModified  = NO;
+		self.documentIsOnDisk    = NO;
+	}
 }
 
 - (void)setSelectedTabIndex:(NSUInteger)newSelectedTabIndex
