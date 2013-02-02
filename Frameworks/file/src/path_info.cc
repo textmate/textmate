@@ -7,93 +7,6 @@
 #include <text/tokenize.h>
 #include <oak/oak.h>
 
-namespace
-{
-	struct attribute_rule_t
-	{
-		attribute_rule_t (std::string const& attribute, path::glob_t const& glob, std::string const& group) : attribute(attribute), glob(glob), group(group) { }
-
-		std::string attribute;
-		path::glob_t glob;
-		std::string group;
-	};
-
-	template <typename _OutputIter>
-	_OutputIter parse_rules (plist::any_t const& plist, _OutputIter out)
-	{
-		plist::array_t rules;
-		if(plist::get_key_path(plist, "rules", rules))
-		{
-			iterate(dict, rules)
-			{
-				std::string attr, glob, group = NULL_STR;
-				if(plist::get_key_path(*dict, "attribute", attr) && plist::get_key_path(*dict, "glob", glob))
-				{
-					plist::get_key_path(*dict, "group", group);
-					*out++ = attribute_rule_t(attr, glob, group);
-				}
-			}
-		}
-		return out;
-	}
-
-	static std::vector<attribute_rule_t> attribute_specifiers ()
-	{
-		static std::string const DefaultScopeAttributes =
-			"{ rules = ("
-			"	{ attribute = 'attr.scm.svn';       glob = '.svn';           group = 'scm';   },"
-			"	{ attribute = 'attr.scm.hg';        glob = '.hg';            group = 'scm';   },"
-			"	{ attribute = 'attr.scm.git';       glob = '.git';           group = 'scm';   },"
-			"	{ attribute = 'attr.scm.p4';        glob = '.p4config';      group = 'scm';   },"
-			"	{ attribute = 'attr.project.ninja'; glob = 'build.ninja';    group = 'build'; },"
-			"	{ attribute = 'attr.project.make';  glob = 'Makefile';       group = 'build'; },"
-			"	{ attribute = 'attr.project.xcode'; glob = '*.xcodeproj';    group = 'build'; },"
-			"	{ attribute = 'attr.project.rake';  glob = 'Rakefile';       group = 'build'; },"
-			"	{ attribute = 'attr.project.ant';   glob = 'build.xml';      group = 'build'; },"
-			"	{ attribute = 'attr.project.cmake'; glob = 'CMakeLists.txt'; group = 'build'; },"
-			"	{ attribute = 'attr.project.maven'; glob = 'pom.xml';        group = 'build'; },"
-			"	{ attribute = 'attr.project.scons'; glob = 'SConstruct';     group = 'build'; },"
-			"); }";
-
-		std::vector<attribute_rule_t> res;
-		parse_rules(plist::load(path::join(path::home(), "Library/Application Support/TextMate/ScopeAttributes.plist")), back_inserter(res));
-		parse_rules(plist::parse_ascii(DefaultScopeAttributes), back_inserter(res));
-		return res;
-	}
-
-	static void directory_attributes (std::string const& dir, std::vector<std::string>& res)
-	{
-		if(dir == NULL_STR || dir == "" || dir[0] != '/')
-			return;
-
-		std::set<std::string> groups;
-		for(std::string cwd = dir; cwd != "/"; cwd = path::parent(cwd))
-		{
-			auto entries = path::entries(cwd);
-
-			static std::vector<attribute_rule_t> const specifiers = attribute_specifiers();
-			iterate(specifier, specifiers)
-			{
-				if(groups.find(specifier->group) != groups.end())
-					continue;
-
-				iterate(entry, entries)
-				{
-					if(specifier->glob.does_match((*entry)->d_name))
-					{
-						res.push_back(specifier->attribute);
-						if(specifier->group != NULL_STR)
-						{
-							groups.insert(specifier->group);
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
 namespace file
 {
 	std::string path_attributes (std::string const& path, std::string const& dir)
@@ -130,8 +43,6 @@ namespace file
 		res.push_back(text::format("attr.os-version.%zd.%zd.%zd", (ssize_t)major, (ssize_t)minor, (ssize_t)bugFix));
 
 		std::string const parentDir = dir == NULL_STR ? path::parent(path) : dir;
-		directory_attributes(parentDir, res);
-
 		res.push_back(settings_for_path(path, text::join(res, " "), parentDir).get(kSettingsScopeAttributesKey, ""));
 		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
 		return text::join(res, " ");

@@ -225,6 +225,7 @@ namespace
 	scm::ng::info_ptr                      _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
 	std::vector<std::string>               _projectScopeAttributes;
+	std::vector<std::string>               _externalScopeAttributes;
 
 	scm::ng::info_ptr                      _documentSCMInfo;
 	std::map<std::string, std::string>     _documentSCMVariables;
@@ -872,6 +873,73 @@ namespace
 	}
 }
 
+- (void)updateExternalAttributes
+{
+	struct attribute_rule_t { std::string attribute; path::glob_t glob; std::string group; };
+	static attribute_rule_t const rules[] =
+	{
+		{ "attr.scm.svn",       ".svn",           "scm",   },
+		{ "attr.scm.hg",        ".hg",            "scm",   },
+		{ "attr.scm.git",       ".git",           "scm",   },
+		{ "attr.scm.p4",        ".p4config",      "scm",   },
+		{ "attr.project.ninja", "build.ninja",    "build", },
+		{ "attr.project.make",  "Makefile",       "build", },
+		{ "attr.project.xcode", "*.xcodeproj",    "build", },
+		{ "attr.project.rake",  "Rakefile",       "build", },
+		{ "attr.project.ant",   "build.xml",      "build", },
+		{ "attr.project.cmake", "CMakeLists.txt", "build", },
+		{ "attr.project.maven", "pom.xml",        "build", },
+		{ "attr.project.scons", "SConstruct",     "build", },
+	};
+
+	_externalScopeAttributes.clear();
+	if(!_documentPath && !_projectPath)
+		return;
+
+	std::string const projectDir  = to_s(_projectPath ?: @"/");
+	std::string const documentDir = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
+
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+
+		std::vector<std::string> res;
+		std::set<std::string> groups;
+		std::string dir = documentDir;
+		do {
+
+			dir = path::parent(dir);
+			auto entries = path::entries(dir);
+
+			for(auto rule : rules)
+			{
+				if(groups.find(rule.group) != groups.end())
+					continue;
+
+				for(auto entry : entries)
+				{
+					if(rule.glob.does_match(entry->d_name))
+					{
+						res.push_back(rule.attribute);
+						if(rule.group != NULL_STR)
+						{
+							groups.insert(rule.group);
+							break;
+						}
+					}
+				}
+			}
+
+		} while(dir != projectDir);
+
+		dispatch_async(dispatch_get_main_queue(), ^{
+			std::string const currentProjectDir  = to_s(_projectPath ?: @"/");
+			std::string const currentDocumentDir = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
+			if(projectDir == currentProjectDir && documentDir == currentDocumentDir)
+				_externalScopeAttributes = res;
+		});
+
+	});
+}
+
 - (void)setProjectPath:(NSString*)newProjectPath
 {
 	if(_projectPath != newProjectPath && ![_projectPath isEqualToString:newProjectPath])
@@ -900,6 +968,7 @@ namespace
 		if(customAttributes != NULL_STR)
 			_projectScopeAttributes.push_back(customAttributes);
 
+		[self updateExternalAttributes];
 		[self updateWindowTitle];
 	}
 }
@@ -956,6 +1025,7 @@ namespace
 			self.documentSCMVariables = std::map<std::string, std::string>();
 		}
 
+		[self updateExternalAttributes];
 		[self updateProxyIcon];
 		[self updateWindowTitle];
 	}
@@ -1046,6 +1116,7 @@ namespace
 
 	attributes.insert(_documentScopeAttributes.begin(), _documentScopeAttributes.end());
 	attributes.insert(_projectScopeAttributes.begin(), _projectScopeAttributes.end());
+	attributes.insert(_externalScopeAttributes.begin(), _externalScopeAttributes.end());
 
 	return [NSString stringWithCxxString:text::join(attributes, " ")];
 }
