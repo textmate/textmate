@@ -380,6 +380,9 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView shouldSelectItem:(id)item
 {
+	if([self outlineView:anOutlineView isGroupItem:item])
+		return NO;
+
 	NSInteger col = [anOutlineView clickedColumn];
 	NSInteger row = [anOutlineView clickedRow];
 	if(col != -1 && row != -1)
