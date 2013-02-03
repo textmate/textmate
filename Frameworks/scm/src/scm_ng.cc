@@ -17,11 +17,14 @@ namespace scm
 
 namespace scm { namespace ng
 {
+	static bool Disabled = true;
+	static std::map<std::string, shared_info_weak_ptr> PendingUpdates;
+
 	// =================
 	// = shared_info_t =
 	// =================
 
-	struct shared_info_t
+	struct shared_info_t : std::enable_shared_from_this<shared_info_t>
 	{
 		shared_info_t (std::string const& rootPath, scm::driver_t const* driver);
 		~shared_info_t ();
@@ -35,6 +38,8 @@ namespace scm { namespace ng
 		void remove_client (info_t* client);
 
 	private:
+		friend void enable ();
+
 		void background_update ();
 		void fs_did_change (std::set<std::string> const& changedPaths);
 
@@ -177,6 +182,12 @@ namespace scm { namespace ng
 
 	void shared_info_t::background_update ()
 	{
+		if(Disabled)
+		{
+			PendingUpdates[_root_path] = shared_from_this();
+			return;
+		}
+
 		if(_pending_update)
 			return;
 		_pending_update = true;
@@ -260,6 +271,22 @@ namespace scm { namespace ng
 			}
 		}
 		return shared_info_ptr();
+	}
+
+	void disable ()
+	{
+		Disabled = true;
+	}
+
+	void enable ()
+	{
+		Disabled = false;
+		for(auto pair : PendingUpdates)
+		{
+			if(shared_info_ptr info = pair.second.lock())
+				info->background_update();
+		}
+		PendingUpdates.clear();
 	}
 
 	std::string root_for_path (std::string const& path)

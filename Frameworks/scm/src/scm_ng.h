@@ -36,6 +36,8 @@ namespace scm { namespace ng
 		shared_info_ptr _shared_info;
 	};
 
+	PUBLIC void disable ();
+	PUBLIC void enable ();
 	PUBLIC std::string root_for_path (std::string const& path);
 	PUBLIC info_ptr info (std::string path);
 
