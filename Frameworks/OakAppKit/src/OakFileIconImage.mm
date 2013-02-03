@@ -197,6 +197,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	{
 		_fileIconImageRep = [OakFileIconImageRep new];
 		[self addRepresentation:_fileIconImageRep];
+		self.exists = YES;
 	}
 	return self;
 }
@@ -212,6 +213,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	{
 		self.path     = aPath;
 		self.modified = modifiedFlag;
+		self.exists   = NO;
 
 		if(aPath)
 		{

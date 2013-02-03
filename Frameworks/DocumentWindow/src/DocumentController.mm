@@ -842,7 +842,6 @@ namespace
 	{
 		OakFileIconImage* icon = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
 		icon.path      = self.documentPath;
-		icon.exists    = YES;
 		icon.scmStatus = self.documentSCMStatus;
 
 		self.window.representedFilename = icon.path;
