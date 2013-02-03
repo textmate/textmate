@@ -875,7 +875,7 @@ namespace
 - (void)updateExternalAttributes
 {
 	struct attribute_rule_t { std::string attribute; path::glob_t glob; std::string group; };
-	static attribute_rule_t const rules[] =
+	static auto const rules = new std::vector<attribute_rule_t>
 	{
 		{ "attr.scm.svn",       ".svn",           "scm",   },
 		{ "attr.scm.hg",        ".hg",            "scm",   },
@@ -908,7 +908,7 @@ namespace
 			dir = path::parent(dir);
 			auto entries = path::entries(dir);
 
-			for(auto rule : rules)
+			for(auto rule : *rules)
 			{
 				if(groups.find(rule.group) != groups.end())
 					continue;
