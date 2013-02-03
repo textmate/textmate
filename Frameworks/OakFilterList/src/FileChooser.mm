@@ -290,7 +290,6 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_window.delegate                    = self;
 		_window.level                       = NSFloatingWindowLevel;
 		_window.releasedWhenClosed          = NO;
-		_window.title                       = @"Go to File…";
 
 		NSDictionary* views = @{
 			@"searchField"        : _searchField,
@@ -327,6 +326,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey])
 			self.sourceIndex = 1;
+
+		[self updateWindowTitle];
 
 		_retainedSelf = self;
 	}
@@ -375,6 +376,18 @@ static path::glob_list_t globs_for_path (std::string const& path)
 	_retainedSelf = nil;
 }
 
+- (void)updateWindowTitle
+{
+	NSString* src = nil;
+	switch(self.sourceIndex)
+	{
+		case 0: src = [self.path stringByAbbreviatingWithTildeInPath]; break;
+		case 1: src = @"Open Documents";                               break;
+		case 2: src = @"Uncommitted Documents";                        break;
+	}
+	_window.title = [NSString stringWithFormat:@"Go to File… — %@", src];
+}
+
 - (BOOL)allowsMultipleSelection                             { return _tableView.allowsMultipleSelection; }
 - (void)setAllowsMultipleSelection:(BOOL)flag               { _tableView.allowsMultipleSelection = flag; }
 
@@ -412,6 +425,8 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 	for(NSButton* button in @[ _allButton, _openDocumentsButton, _scmChangesButton ])
 		[button setState:[button tag] == _sourceIndex ? NSOnState : NSOffState];
+
+	[self updateWindowTitle];
 }
 
 // =================
@@ -649,6 +664,8 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	_pollInterval = 0.01;
 	_pollTimer = [NSTimer scheduledTimerWithTimeInterval:_pollInterval target:self selector:@selector(fetchScannerResults:) userInfo:nil repeats:NO];
 	[_progressIndicator startAnimation:self];
+
+	[self updateWindowTitle];
 }
 
 - (void)setOnlyShowOpenDocuments:(BOOL)flag
