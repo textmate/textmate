@@ -108,9 +108,6 @@
 {
 	static struct key_action_t { std::string key; SEL action; } const KeyActions[] =
 	{
-		{ "@C",                                      @selector(goToComputer:)             },
-		{ "@H",                                      @selector(goToHome:)                 },
-		{ "@D",                                      @selector(goToDesktop:)              },
 		{ "@[",                                      @selector(goBack:)                   },
 		{ "@]",                                      @selector(goForward:)                },
 		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
