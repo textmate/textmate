@@ -234,7 +234,7 @@
 		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:imageFrame options:NSTrackingCursorUpdate|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
 	}
 
-	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
+	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseEnteredAndExited|NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:NULL]];
 }
 
 // ===============
@@ -261,6 +261,16 @@
 		[self setNeedsDisplayInRect:newHoverRect];
 		mouseHoverRect = newHoverRect;
 	}
+}
+
+- (void)mouseExited:(NSEvent*)anEvent
+{
+	if(!NSEqualRects(mouseHoverRect,  NSZeroRect))
+	{
+		[self setNeedsDisplayInRect:mouseHoverRect];
+		mouseHoverRect =  NSZeroRect;
+	}
+	[super mouseExited:anEvent];
 }
 
 // ========================
