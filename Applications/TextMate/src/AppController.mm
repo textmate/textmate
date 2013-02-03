@@ -79,7 +79,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 @interface AppController ()
 @property (nonatomic) OakFilterWindowController* filterWindowController;
-@property (nonatomic) AboutWindowController* aboutWindowController;
 @property (nonatomic) BOOL didFinishLaunching;
 @end
 
@@ -179,8 +178,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 		[NSURL URLWithString:REST_API @"/releases/nightly"],  kSoftwareUpdateChannelNightly,
 		nil]];
 
-	[TerminalPreferences updateMateIfRequired];
-
 	[self userDefaultsDidChange:nil]; // setup mate/rmate server
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 
@@ -188,11 +185,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	themesMenu.delegate   = self;
 	spellingMenu.delegate = self;
 
-	if([AboutWindowController shouldShowChangesWindow])
-	{
-		self.aboutWindowController = [[AboutWindowController alloc] init];
-		[self.aboutWindowController performSelector:@selector(showChangesWindow:) withObject:self afterDelay:0];
-	}
+	[TerminalPreferences updateMateIfRequired];
+	[AboutWindowController showChangesIfUpdated];
 
 	self.didFinishLaunching = YES;
 }
@@ -225,9 +219,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (IBAction)orderFrontAboutPanel:(id)sender
 {
-	if(!self.aboutWindowController)
-		self.aboutWindowController = [[AboutWindowController alloc] init];
-	[self.aboutWindowController showAboutWindow:self];
+	[[AboutWindowController sharedInstance] showAboutWindow:self];
 }
 
 - (IBAction)orderFrontFindPanel:(id)sender

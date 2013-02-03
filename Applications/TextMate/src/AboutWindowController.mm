@@ -49,28 +49,36 @@ static NSData* Digest (NSString* someString)
 
 // ============================
 
-@interface AboutWindowController ()
+@interface AboutWindowController () <NSWindowDelegate, NSToolbarDelegate>
 @property (nonatomic, strong) NSToolbar* toolbar;
 @property (nonatomic, strong) WebView* webView;
 @property (nonatomic) NSString* selectedPage;
 @end
 
 @implementation AboutWindowController
-+ (BOOL)shouldShowChangesWindow
++ (AboutWindowController*)sharedInstance
+{
+	static AboutWindowController* instance = [AboutWindowController new];
+	return instance;
+}
+
++ (void)showChangesIfUpdated
 {
 	NSURL* url = [[NSBundle mainBundle] URLForResource:@"Changes" withExtension:@"html"];
-	if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
-	{
-		NSData* lastDigest    = [[NSUserDefaults standardUserDefaults] dataForKey:kUserDefaultsReleaseNotesDigestKey];
-		NSData* currentDigest = Digest(releaseNotes);
-		if(lastDigest)
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		if(NSString* releaseNotes = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:NULL])
 		{
-			if(![lastDigest isEqualToData:currentDigest])
-				return YES;
+			NSData* lastDigest    = [[NSUserDefaults standardUserDefaults] dataForKey:kUserDefaultsReleaseNotesDigestKey];
+			NSData* currentDigest = Digest(releaseNotes);
+			if(lastDigest && ![lastDigest isEqualToData:currentDigest])
+			{
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[[AboutWindowController sharedInstance] showChangesWindow:self];
+				});
+			}
+			[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
 		}
-		[[NSUserDefaults standardUserDefaults] setObject:currentDigest forKey:kUserDefaultsReleaseNotesDigestKey];
-	}
-	return NO;
+	});
 }
 
 - (id)init
