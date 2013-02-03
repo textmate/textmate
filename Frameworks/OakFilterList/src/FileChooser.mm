@@ -346,6 +346,10 @@ static path::glob_list_t globs_for_path (std::string const& path)
 {
 	_retainedSelf = self;
 
+	_tableView.target     = self;
+	_tableView.dataSource = self;
+	_tableView.delegate   = self;
+
 	[_window makeKeyAndOrderFront:self];
 	[_window makeFirstResponder:_searchField];
 }
@@ -358,6 +362,16 @@ static path::glob_list_t globs_for_path (std::string const& path)
 - (void)windowWillClose:(NSNotification*)aNotification
 {
 	[self shutdownScanner];
+
+	_tableView.target     = nil;
+	_tableView.dataSource = nil;
+	_tableView.delegate   = nil;
+
+	_scmInfo.reset();
+	_openDocuments.clear();
+	_openDocumentsMap.clear();
+	_records.clear();
+
 	_retainedSelf = nil;
 }
 
