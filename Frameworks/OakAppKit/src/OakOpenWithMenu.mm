@@ -1,5 +1,4 @@
 #import "OakOpenWithMenu.h"
-#import "NSMenuItem Additions.h"
 #import "NSMenu Additions.h"
 #import <OakFoundation/NSString Additions.h>
 #import <oak/oak.h>
@@ -103,9 +102,16 @@ static OakOpenWithMenu* SharedInstance;
 	iterate(app, appURLs)
 	{
 		NSMenuItem* menuItem = [menu addItemWithTitle:app->first action:@selector(openWith:) keyEquivalent:@""];
-		[menuItem setIconForFile:[app->second path]];
 		[menuItem setTarget:self];
 		[menuItem setRepresentedObject:app->second];
+
+		NSImage* image = nil;
+		if([app->second getResourceValue:&image forKey:NSURLEffectiveIconKey error:NULL] || (image = [[NSWorkspace sharedWorkspace] iconForFile:[app->second path]]))
+		{
+			image = [image copy];
+			image.size = NSMakeSize(16, 16);
+			[menuItem setImage:image];
+		}
 	}
 
 	if(appURLs.size() > 1)
