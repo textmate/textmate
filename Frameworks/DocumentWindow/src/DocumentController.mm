@@ -1787,6 +1787,10 @@ namespace
 	}
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = self.documents.size() > 1;
+	else if([menuItem action] == @selector(goBack:))
+		active = self.fileBrowser.canGoBack;
+	else if([menuItem action] == @selector(goForward:))
+		active = self.fileBrowser.canGoForward;
 	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
 		active = [self selectedDocument]->path() != NULL_STR;
 	else if([menuItem action] == @selector(goToProjectFolder:))
