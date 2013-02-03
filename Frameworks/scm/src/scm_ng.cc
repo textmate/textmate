@@ -192,10 +192,10 @@ namespace scm { namespace ng
 
 			if(!_driver->may_touch_filesystem() || _fs_snapshot != fs::snapshot_t(_root_path))
 			{
-				std::map<std::string, std::string> const variables{
-					{ "TM_SCM_NAME",   _driver->name() },
-					{ "TM_SCM_BRANCH", _driver->branch_name(_root_path) }
-				};
+				std::map<std::string, std::string> variables{ { "TM_SCM_NAME", _driver->name() } };
+				std::string const branch = _driver->branch_name(_root_path);
+				if(branch != NULL_STR)
+					variables.insert(std::make_pair("TM_SCM_BRANCH", branch));
 				scm::status_map_t const status = _driver->status(_root_path);
 				fs::snapshot_t const snapshot = _driver->may_touch_filesystem() ? fs::snapshot_t(_root_path) : fs::snapshot_t();
 				dispatch_async(dispatch_get_main_queue(), ^{
