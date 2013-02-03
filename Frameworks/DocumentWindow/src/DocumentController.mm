@@ -1666,10 +1666,15 @@ namespace
 	if(self.fileBrowserVisible)
 	{
 		NSArray* selectedURLs = self.fileBrowser.selectedURLs;
-		if([selectedURLs count] == 1 && [[selectedURLs lastObject] isFileURL] && path::is_directory([[[selectedURLs lastObject] path] fileSystemRepresentation]))
-			res = [[selectedURLs lastObject] path];
+		if([selectedURLs count] == 1 && [[selectedURLs lastObject] isFileURL])
+		{
+			NSString* path = [[selectedURLs lastObject] path];
+			res = path::is_directory(to_s(path)) ? path : [path stringByDeletingLastPathComponent];
+		}
 		else if(NSString* folder = self.fileBrowser.path)
+		{
 			res = folder;
+		}
 	}
 	return res;
 }
