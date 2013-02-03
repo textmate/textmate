@@ -165,10 +165,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 	D(DBF_AppController, bug("\n"););
 
 	BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
-	disableUntitledAtStartupPrefs = disableUntitledAtStartupPrefs || getenv("OAK_DISABLE_UNTITLED_FILE") != NULL;
 	if(!disableUntitledAtStartupPrefs && !HasDocumentWindow([NSApp orderedWindows]))
 		[self newDocument:self];
-	unsetenv("OAK_DISABLE_UNTITLED_FILE");
 
 	OakSubmitNewCrashReportsInBackground(REST_API @"/crashes");
 	[BundlesManager sharedInstance]; // trigger periodic polling of remote bundle index

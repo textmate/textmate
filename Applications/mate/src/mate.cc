@@ -82,11 +82,9 @@ static void launch_app ()
 	if(!find_app(&appFSRef, NULL))
 		abort();
 
-	std::map<std::string, std::string> tmp;
-	tmp["OAK_DISABLE_UNTITLED_FILE"] = "YES";
-	cf::dictionary_t environment(tmp);
+	cf::array_t args(std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" });
 
-	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, NULL, environment, NULL, NULL };
+	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, NULL, NULL, args, NULL };
 	OSStatus err = LSOpenApplication(&appParams, NULL);
 	if(err != noErr)
 	{
