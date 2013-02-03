@@ -5,7 +5,7 @@
 #include <cf/cf.h>
 #include <io/path.h>
 
-static double const AppVersion  = 2.3;
+static double const AppVersion  = 2.4;
 static size_t const AppRevision = APP_REVISION;
 
 static char const* socket_path ()
@@ -74,7 +74,7 @@ static bool find_app (FSRef* outAppRef, std::string* outAppStr)
 	return err == noErr;
 }
 
-static void launch_app ()
+static void launch_app (bool disableUntitled)
 {
 	disable_sudo_helper_t helper;
 
@@ -82,7 +82,7 @@ static void launch_app ()
 	if(!find_app(&appFSRef, NULL))
 		abort();
 
-	cf::array_t args(std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" });
+	cf::array_t args(disableUntitled ? std::vector<std::string>{ "-disableNewDocumentAtStartup", "1" } : std::vector<std::string>{ });
 
 	struct LSApplicationParameters const appParams = { 0, kLSLaunchDontAddToRecents|kLSLaunchDontSwitch|kLSLaunchAndDisplayErrors, &appFSRef, NULL, NULL, args, NULL };
 	OSStatus err = LSOpenApplication(&appParams, NULL);
@@ -275,7 +275,7 @@ int main (int argc, char* argv[])
 	while(-1 == connect(fd, (sockaddr*)&addr, sizeof(addr)))
 	{
 		if(!didLaunch)
-			launch_app();
+			launch_app(!files.empty());
 		didLaunch = true;
 		usleep(500000);
 	}
