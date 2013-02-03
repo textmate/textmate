@@ -220,32 +220,76 @@ namespace scm { namespace ng
 	// = Other =
 	// =========
 
-	static std::map<std::string, shared_info_weak_ptr> cache;
-
-	shared_info_ptr find_shared_info_for (std::string const& path)
+	static std::map<std::string, shared_info_weak_ptr>& cache ()
 	{
-		static scm::driver_t* const drivers[] = { scm::git_driver(), scm::hg_driver(), scm::p4_driver(), scm::svn_driver() };
+		static auto res = new std::map<std::string, shared_info_weak_ptr>;
+		return *res;
+	}
 
+	static dispatch_queue_t cache_access_queue ()
+	{
+		static dispatch_queue_t res = dispatch_queue_create("org.textmate.scm.info-cache", DISPATCH_QUEUE_SERIAL);
+		return res;
+	}
+
+	static std::vector<driver_t*> const& drivers ()
+	{
+		static auto const res = new std::vector<driver_t*>{ scm::git_driver(), scm::hg_driver(), scm::p4_driver(), scm::svn_driver() };
+		return *res;
+	}
+
+	static shared_info_ptr find_shared_info_for (std::string const& path)
+	{
 		for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
 		{
-			auto it = cache.find(cwd);
-			if(it != cache.end())
+			auto it = cache().find(cwd);
+			if(it != cache().end())
 			{
 				if(shared_info_ptr res = it->second.lock())
 					return res;
 			}
 
-			for(driver_t* driver : drivers)
+			for(driver_t* driver : drivers())
 			{
 				if(driver && driver->has_info_for_directory(cwd))
 				{
 					shared_info_ptr res(new shared_info_t(cwd, driver));
-					cache[cwd] = res;
+					cache()[cwd] = res;
 					return res;
 				}
 			}
 		}
 		return shared_info_ptr();
+	}
+
+	std::string root_for_path (std::string const& path)
+	{
+		if(path == NULL_STR || path == "" || path[0] != '/')
+			return NULL_STR;
+
+		__block std::string res = NULL_STR;
+		dispatch_sync(cache_access_queue(), ^{
+			for(std::string cwd = path; res == NULL_STR && cwd != "/"; cwd = path::parent(cwd))
+			{
+				auto it = cache().find(cwd);
+				if(it != cache().end())
+				{
+					res = cwd;
+				}
+				else
+				{
+					for(driver_t* driver : drivers())
+					{
+						if(driver && driver->has_info_for_directory(cwd))
+						{
+							res = cwd;
+							break;
+						}
+					}
+				}
+			}
+		});
+		return res;
 	}
 
 	info_ptr info (std::string path)
@@ -255,11 +299,9 @@ namespace scm { namespace ng
 
 		info_ptr res(new info_t(path));
 
-		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.info-cache", DISPATCH_QUEUE_SERIAL);
-
-		dispatch_sync(queue, ^{
-			auto it = cache.find(path);
-			if(it != cache.end())
+		dispatch_sync(cache_access_queue(), ^{
+			auto it = cache().find(path);
+			if(it != cache().end())
 			{
 				if(shared_info_ptr sharedInfo = it->second.lock())
 					res->set_shared_info(sharedInfo);
@@ -268,7 +310,7 @@ namespace scm { namespace ng
 
 		if(res->dry())
 		{
-			dispatch_async(queue, ^{
+			dispatch_async(cache_access_queue(), ^{
 				if(shared_info_ptr info = find_shared_info_for(path))
 				{
 					dispatch_async(dispatch_get_main_queue(), ^{

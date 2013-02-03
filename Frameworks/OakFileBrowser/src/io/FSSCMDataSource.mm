@@ -72,8 +72,9 @@ _Iter prune_path_children (_Iter it, _Iter last)
 
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
-	if(scm::info_ptr info = scm::info([aPath fileSystemRepresentation]))
-		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(info->path(), "/") + "/"]];
+	std::string root = scm::ng::root_for_path([aPath fileSystemRepresentation]);
+	if(root != NULL_STR)
+		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
 	return [NSURL fileURLWithPath:aPath];
 }
 
