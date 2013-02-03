@@ -3,21 +3,29 @@
 #import "AboutWindowController.h"
 #import "InstallBundleItems.h"
 #import "TMPlugInController.h"
-#import <oak/oak.h>
-#import <oak/debug.h>
-#import <Find/Find.h>
-#import <io/path.h>
-#import <OakFoundation/NSString Additions.h>
+#import "RMateServer.h"
 #import <BundleEditor/BundleEditor.h>
+#import <BundlesManager/BundlesManager.h>
+#import <CrashReporter/CrashReporter.h>
+#import <DocumentWindow/DocumentController.h>
+#import <Find/Find.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
-#import <OakFilterList/OakFilterList.h>
 #import <OakFilterList/BundleItemChooser.h>
+#import <OakFilterList/OakFilterList.h>
+#import <OakFoundation/NSString Additions.h>
 #import <OakTextView/OakDocumentView.h>
+#import <Preferences/Keys.h>
 #import <Preferences/Preferences.h>
-#import <text/types.h>
+#import <Preferences/TerminalPreferences.h>
+#import <SoftwareUpdate/SoftwareUpdate.h>
 #import <document/collection.h>
+#import <io/path.h>
+#import <network/tbz.h>
 #import <ns/ns.h>
+#import <oak/debug.h>
+#import <oak/oak.h>
+#import <text/types.h>
 
 OAK_DEBUG_VAR(AppController);
 
@@ -58,26 +66,141 @@ void OakOpenDocuments (NSArray* paths)
 	document::show(documents);
 }
 
+BOOL HasDocumentWindow (NSArray* windows)
+{
+	for(NSWindow* window in windows)
+	{
+		if([window.delegate isKindOfClass:[DocumentController class]])
+			return YES;
+	}
+	return NO;
+}
+
 @interface AppController ()
-@property (nonatomic, retain) OakFilterWindowController* filterWindowController;
-@property (nonatomic, retain) AboutWindowController* aboutWindowController;
+@property (nonatomic) OakFilterWindowController* filterWindowController;
+@property (nonatomic) AboutWindowController* aboutWindowController;
+@property (nonatomic) BOOL didFinishLaunching;
 @end
 
 @implementation AppController
-- (void)setup
+- (void)userDefaultsDidChange:(id)sender
 {
+	BOOL disableRmate        = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableRMateServerKey];
+	NSString* rmateInterface = [[NSUserDefaults standardUserDefaults] stringForKey:kUserDefaultsRMateServerListenKey];
+	int rmatePort            = [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsRMateServerPortKey];
+	setup_rmate_server(!disableRmate, [rmateInterface isEqualToString:kRMateServerListenRemote] ? INADDR_ANY : INADDR_LOOPBACK, rmatePort);
+}
+
+- (void)applicationWillFinishLaunching:(NSNotification*)aNotification
+{
+	D(DBF_AppController, bug("\n"););
+	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
+	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
+
+	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
+		@NO, @"ApplePressAndHoldEnabled",
+		@25, @"NSRecentDocumentsLimit",
+		nil]];
+	RegisterDefaults();
+	[[NSUserDefaults standardUserDefaults] setObject:@NO forKey:@"NSQuitAlwaysKeepsWindows"];
+
+	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
+	if(!path::exists(dest))
+	{
+		if(NSString* archive = [[NSBundle mainBundle] pathForResource:@"DefaultBundles" ofType:@"tbz"])
+		{
+			int input, output;
+			std::string error;
+
+			path::make_dir(dest);
+
+			pid_t pid = network::launch_tbz(dest, input, output, error);
+			if(pid != -1)
+			{
+				int fd = open([archive fileSystemRepresentation], O_RDONLY);
+				if(fd != -1)
+				{
+					char buf[4096];
+					ssize_t len;
+					while((len = read(fd, buf, sizeof(buf))) > 0)
+					{
+						if(write(input, buf, len) != len)
+						{
+							fprintf(stderr, "*** error wrting bytes to tar\n");
+							break;
+						}
+					}
+					close(fd);
+				}
+
+				if(!network::finish_tbz(pid, input, output, error))
+					fprintf(stderr, "%s\n", error.c_str());
+			}
+			else
+			{
+				fprintf(stderr, "%s\n", error.c_str());
+			}
+		}
+	}
+
+	bundles::build_index(path::join(path::home(), "Library/Application Support/TextMate/Cache"));
+
+	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
+
+	BOOL disableSessionRestoreKeyDown  = ([NSEvent modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;
+	BOOL disableSessionRestorePrefs    = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+	if(!disableSessionRestoreKeyDown && !disableSessionRestorePrefs)
+		[DocumentController restoreSession];
+}
+
+- (BOOL)applicationShouldOpenUntitledFile:(NSApplication*)anApplication
+{
+	D(DBF_AppController, bug("\n"););
+	return self.didFinishLaunching;
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification*)aNotification
+{
+	D(DBF_AppController, bug("\n"););
+
+	BOOL disableUntitledAtStartupPrefs = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableNewDocumentAtStartupKey];
+	disableUntitledAtStartupPrefs = disableUntitledAtStartupPrefs || getenv("OAK_DISABLE_UNTITLED_FILE") != NULL;
+	if(!disableUntitledAtStartupPrefs && !HasDocumentWindow([NSApp orderedWindows]))
+		[self newDocument:self];
+	unsetenv("OAK_DISABLE_UNTITLED_FILE");
+
+	OakSubmitNewCrashReportsInBackground(REST_API @"/crashes");
+	[BundlesManager sharedInstance]; // trigger periodic polling of remote bundle index
+
+	SoftwareUpdate* swUpdate = [SoftwareUpdate sharedInstance];
+	[swUpdate setSignee:key_chain_t::key_t("org.textmate.duff", "Allan Odgaard", "-----BEGIN PUBLIC KEY-----\nMIIBtjCCASsGByqGSM44BAEwggEeAoGBAPIE9PpXPK3y2eBDJ0dnR/D8xR1TiT9m\n8DnPXYqkxwlqmjSShmJEmxYycnbliv2JpojYF4ikBUPJPuerlZfOvUBC99ERAgz7\nN1HYHfzFIxVo1oTKWurFJ1OOOsfg8AQDBDHnKpS1VnwVoDuvO05gK8jjQs9E5LcH\ne/opThzSrI7/AhUAy02E9H7EOwRyRNLofdtPxpa10o0CgYBKDfcBscidAoH4pkHR\nIOEGTCYl3G2Pd1yrblCp0nCCUEBCnvmrWVSXUTVa2/AyOZUTN9uZSC/Kq9XYgqwj\nhgzqa8h/a8yD+ao4q8WovwGeb6Iso3WlPl8waz6EAPR/nlUTnJ4jzr9t6iSH9owS\nvAmWrgeboia0CI2AH++liCDvigOBhAACgYAFWO66xFvmF2tVIB+4E7CwhrSi2uIk\ndeBrpmNcZZ+AVFy1RXJelNe/cZ1aXBYskn/57xigklpkfHR6DGqpEbm6KC/47Jfy\ny5GEx+F/eBWEePi90XnLinytjmXRmS2FNqX6D15XNG1xJfjociA8bzC7s4gfeTUd\nlpQkBq2z71yitA==\n-----END PUBLIC KEY-----\n")];
+	[swUpdate setChannels:[NSDictionary dictionaryWithObjectsAndKeys:
+		[NSURL URLWithString:REST_API @"/releases/release"],  kSoftwareUpdateChannelRelease,
+		[NSURL URLWithString:REST_API @"/releases/beta"],     kSoftwareUpdateChannelBeta,
+		[NSURL URLWithString:REST_API @"/releases/nightly"],  kSoftwareUpdateChannelNightly,
+		nil]];
+
+	[TerminalPreferences updateMateIfRequired];
+
+	[self userDefaultsDidChange:nil]; // setup mate/rmate server
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
+
 	bundlesMenu.delegate  = self;
 	themesMenu.delegate   = self;
 	spellingMenu.delegate = self;
-
-	[NSApp setDelegate:self];
 
 	if([AboutWindowController shouldShowChangesWindow])
 	{
 		self.aboutWindowController = [[AboutWindowController alloc] init];
 		[self.aboutWindowController performSelector:@selector(showChangesWindow:) withObject:self afterDelay:0];
 	}
+
+	self.didFinishLaunching = YES;
 }
+
+// =========================
+// = Past Startup Delegate =
+// =========================
 
 - (IBAction)newDocumentAndActivate:(id)sender
 {

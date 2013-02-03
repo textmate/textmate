@@ -1,7 +1,3 @@
-extern NSString* const OakSessionDidChangeNotification;
-
-@class OakFilterWindowController;
-
 namespace find_tags
 {
 	enum
@@ -43,8 +39,6 @@ namespace find_tags
 
 - (IBAction)newDocumentAndActivate:(id)sender;
 - (IBAction)openDocumentAndActivate:(id)sender;
-
-- (void)setup;
 @end
 
 @interface AppController (Documents)

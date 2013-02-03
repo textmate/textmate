@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1070</int>
 		<string key="IBDocument.SystemVersion">12C60</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2844</string>
+		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
 		<string key="IBDocument.AppKitVersion">1187.34</string>
 		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2844</string>
+			<string key="NS.object.0">3084</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2393,9 +2393,6 @@
 			<object class="NSCustomObject" id="872900754">
 				<string key="NSClassName">OakSubmenuController</string>
 			</object>
-			<object class="NSCustomObject" id="647725506">
-				<string key="NSClassName">AppStartupController</string>
-			</object>
 			<object class="NSCustomObject" id="681130894">
 				<string key="NSClassName">NSFontManager</string>
 			</object>
@@ -2451,19 +2448,19 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">delegate</string>
-						<reference key="source" ref="25255706"/>
-						<reference key="destination" ref="647725506"/>
-					</object>
-					<int key="connectionID">615</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">dockMenu</string>
 						<reference key="source" ref="25255706"/>
 						<reference key="destination" ref="841210969"/>
 					</object>
 					<int key="connectionID">787</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="25255706"/>
+						<reference key="destination" ref="585298010"/>
+					</object>
+					<int key="connectionID">806</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -3720,14 +3717,6 @@
 						<reference key="destination" ref="219253174"/>
 					</object>
 					<int key="connectionID">597</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">appController</string>
-						<reference key="source" ref="647725506"/>
-						<reference key="destination" ref="585298010"/>
-					</object>
-					<int key="connectionID">612</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -5258,11 +5247,6 @@
 						<reference key="parent" ref="276589048"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">611</int>
-						<reference key="object" ref="647725506"/>
-						<reference key="parent" ref="0"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">616</int>
 						<reference key="object" ref="692385893"/>
 						<reference key="parent" ref="377204242"/>
@@ -5712,7 +5696,6 @@
 					<string>594.IBPluginDependency</string>
 					<string>595.IBPluginDependency</string>
 					<string>609.IBPluginDependency</string>
-					<string>611.IBPluginDependency</string>
 					<string>616.IBPluginDependency</string>
 					<string>618.IBPluginDependency</string>
 					<string>621.IBPluginDependency</string>
@@ -6012,7 +5995,6 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
@@ -6062,7 +6044,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">805</int>
+			<int key="maxID">806</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6200,25 +6182,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/AppController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">AppStartupController</string>
-					<string key="superclassName">NSObject</string>
-					<object class="NSMutableDictionary" key="outlets">
-						<string key="NS.key.0">appController</string>
-						<string key="NS.object.0">AppController</string>
-					</object>
-					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<string key="NS.key.0">appController</string>
-						<object class="IBToOneOutletInfo" key="NS.object.0">
-							<string key="name">appController</string>
-							<string key="candidateClassName">AppController</string>
-						</object>
-					</object>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/AppStartupController.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

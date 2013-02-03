@@ -10,8 +10,6 @@
 
 OAK_DEBUG_VAR(AppController_Documents);
 
-static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
-
 @implementation AppController (Documents)
 - (void)newDocument:(id)sender
 {
@@ -201,18 +199,6 @@ static NSString* const OakGlobalSessionInfo = @"OakGlobalSessionInfo";
 // ===========================
 // = Application Termination =
 // ===========================
-
-- (void)closeAllWindows:(id)sender
-{
-	D(DBF_AppController_Documents, bug("\n"););
-	@autoreleasepool {
-		for(NSWindow* window in [NSApp windows])
-		{
-			if(window.isVisible)
-				[window close];
-		}
-	}
-}
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
 {
