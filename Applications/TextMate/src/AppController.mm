@@ -25,6 +25,7 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 #import <oak/oak.h>
+#import <scm/scm.h>
 #import <text/types.h>
 
 OAK_DEBUG_VAR(AppController);
@@ -196,6 +197,16 @@ BOOL HasDocumentWindow (NSArray* windows)
 	}
 
 	self.didFinishLaunching = YES;
+}
+
+- (void)applicationWillResignActive:(NSNotification*)aNotification
+{
+	scm::ng::disable();
+}
+
+- (void)applicationWillBecomeActive:(NSNotification*)aNotification
+{
+	scm::ng::enable();
 }
 
 // =========================
