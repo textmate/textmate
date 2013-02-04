@@ -5,10 +5,11 @@
 */
 
 #import "OakPasteboardSelector.h"
+#import <ns/ns.h>
 #import <oak/oak.h>
 #import <oak/debug.h>
 
-static size_t line_count (std::string text)
+static size_t line_count (std::string const& text)
 {
 	size_t line_count = std::count(text.begin(), text.end(), '\n') + 1;
 	if(text.size() > 0 && text[text.size() - 1] == '\n')
@@ -83,7 +84,7 @@ static size_t line_count (std::string text)
 
 - (size_t)lineCountForText:(NSString*)text
 {
-	return oak::cap((size_t)1, line_count([text UTF8String]), maxLines);
+	return oak::cap<size_t>(1, line_count(to_s(text)), maxLines);
 }
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView*)controlView
