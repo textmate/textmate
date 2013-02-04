@@ -1,5 +1,14 @@
 # Changes
 
+## 2013-02-04 (r9361)
+
+* Files missing on disk but tracked by your version control system (with status as deleted) will now show in the file browser (with appropriate badge).
+* Improve performance relating to disk access. If you had SCM badges disabled I encourage you to enable them and speak up if there are still performance issues. Additionally TextMate should also perform better on (high-latency) network file systems.
+* The default save folder now use parent of selected file in the file browser (if any).
+* Use the custom (grid) icon for `.less` files. *[Bob Rockefeller]*
+* Fix wrong color used in red file labels. *[michael starke]*
+* Fix wrong behavior when selecting to end of line (problem introduced in last build).
+
 ## 2013-01-30 (r9359)
 
 * A (square) column selection is now broken into multiple carets (discontinuous selections) when selecting to begin/end of typing pairs (⌃⇧↑/⌃⇧↓) or to end of line/paragraph. Previously only left/right movement or “unit selection” would show this behavior.
