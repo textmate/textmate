@@ -14,7 +14,7 @@ static BOOL IsGUITestsEnabled (std::string const& testName)
 	return tests.find("all") != tests.end() || tests.find(testName) != tests.end();
 }
 
-static void OakSetupApplicationWithView (NSView* aView, std::string testName = NULL_STR)
+static void OakSetupApplicationWithView (NSResponder* aView, std::string testName = NULL_STR)
 {
 	if(testName == NULL_STR)
 	{
@@ -43,11 +43,20 @@ static void OakSetupApplicationWithView (NSView* aView, std::string testName = N
 	[mainMenu addItem:appMenuItem];
 	[NSApp setMainMenu:mainMenu];
 
-	NSRect winRect = [NSWindow frameRectForContentRect:NSInsetRect([aView bounds], -10, -10) styleMask:NSTitledWindowMask|NSResizableWindowMask];
-	NSWindow* window = [[NSWindow alloc] initWithContentRect:winRect styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
-	[aView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-	[aView setFrame:NSInsetRect([[window contentView] bounds], 10, 10)];
-	[[window contentView] addSubview:aView];
+	NSWindow* window = nil;
+	if([aView isKindOfClass:[NSWindow class]])
+	{
+		window = (NSWindow*)aView;
+	}
+	else if([aView isKindOfClass:[NSView class]])
+	{
+		NSView* view = (NSView*)aView;
+		NSRect winRect = [NSWindow frameRectForContentRect:NSInsetRect([view bounds], -10, -10) styleMask:NSTitledWindowMask|NSResizableWindowMask];
+		window = [[NSWindow alloc] initWithContentRect:winRect styleMask:NSTitledWindowMask|NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+		[view setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+		[view setFrame:NSInsetRect([[window contentView] bounds], 10, 10)];
+		[[window contentView] addSubview:view];
+	}
 
 	[window cascadeTopLeftFromPoint:NSMakePoint(20, 20)];
 	[window setTitle:appName];
