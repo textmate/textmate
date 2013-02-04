@@ -1,4 +1,4 @@
-#define FFString(msg, description) NSLocalizedStringFromTableInBundle(msg, @"Find", [NSBundle bundleForClass:[FFWindowController class]], description)
+#define FFString(msg, description) NSLocalizedStringFromTableInBundle(msg, @"Find", [NSBundle bundleForClass:NSClassFromString(@"Find")], description)
 
 // ===========================
 // = Find all/find in folder =
