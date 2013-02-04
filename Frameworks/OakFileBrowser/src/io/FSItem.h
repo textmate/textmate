@@ -17,6 +17,5 @@ enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeF
 
 @property (nonatomic, readonly) NSString* path; // legacy
 
-- (FSItem*)initWithURL:(NSURL*)anURL;
 + (FSItem*)itemWithURL:(NSURL*)anURL;
 @end
