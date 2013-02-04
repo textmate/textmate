@@ -78,8 +78,10 @@ namespace scm { namespace ng
 
 	void info_t::set_shared_info (shared_info_ptr sharedInfo)
 	{
+		if(_shared_info)
+			_shared_info->remove_client(this);
 		if(_shared_info = sharedInfo)
-			sharedInfo->add_client(this);
+			_shared_info->add_client(this);
 	}
 
 	bool info_t::dry () const
@@ -326,16 +328,24 @@ namespace scm { namespace ng
 
 		info_ptr res(new info_t(path));
 
+		__block bool performBackgroundDriverSearch = true;
 		dispatch_sync(cache_access_queue(), ^{
-			auto it = cache().find(path);
-			if(it != cache().end())
+			for(std::string cwd = path; cwd != "/"; cwd = path::parent(cwd))
 			{
-				if(shared_info_ptr sharedInfo = it->second.lock())
-					res->set_shared_info(sharedInfo);
+				auto it = cache().find(cwd);
+				if(it != cache().end())
+				{
+					if(shared_info_ptr sharedInfo = it->second.lock())
+					{
+						res->set_shared_info(sharedInfo);
+						performBackgroundDriverSearch = cwd != path;
+					}
+					break;
+				}
 			}
 		});
 
-		if(res->dry())
+		if(performBackgroundDriverSearch)
 		{
 			dispatch_async(cache_access_queue(), ^{
 				if(shared_info_ptr info = find_shared_info_for(path))
