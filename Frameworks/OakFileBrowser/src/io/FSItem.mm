@@ -6,8 +6,6 @@
 #import <oak/debug.h>
 
 @implementation FSItem { OBJC_WATCH_LEAKS(FSItem); }
-@synthesize icon, name, toolTip, labelIndex, url, urlType, target, children, leaf, group, sortAsFolder;
-
 - (FSItem*)initWithURL:(NSURL*)anURL
 {
 	if((self = [super init]))
@@ -37,12 +35,12 @@
 
 - (BOOL)isEqual:(id)otherObject
 {
-	return [otherObject isKindOfClass:[self class]] && [url isEqual:[otherObject url]];
+	return [otherObject isKindOfClass:[self class]] && [self.url isEqual:[otherObject url]];
 }
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"FSItem: %@", [url absoluteString]];
+	return [NSString stringWithFormat:@"FSItem: %@", [self.url absoluteString]];
 }
 
 - (NSString*)path
@@ -52,20 +50,20 @@
 
 - (FSItemURLType)urlType
 {
-	if(urlType == FSItemURLTypeUnknown && [(target ?: url) isFileURL])
+	if(_urlType == FSItemURLTypeUnknown && [(self.target ?: self.url) isFileURL])
 	{
-		uint32_t flags = path::info([[(target ?: url) path] fileSystemRepresentation]);
-		if(!path::exists([[(target ?: url) path] fileSystemRepresentation]))
-			urlType = FSItemURLTypeMissing;
+		uint32_t flags = path::info([[(self.target ?: self.url) path] fileSystemRepresentation]);
+		if(!path::exists([[(self.target ?: self.url) path] fileSystemRepresentation]))
+			_urlType = FSItemURLTypeMissing;
 		else if(flags & path::flag::alias)
-			urlType = FSItemURLTypeAlias;
+			_urlType = FSItemURLTypeAlias;
 		else if(flags & path::flag::package)
-			urlType = FSItemURLTypePackage;
+			_urlType = FSItemURLTypePackage;
 		else if(flags & path::flag::directory)
-			urlType = FSItemURLTypeFolder;
+			_urlType = FSItemURLTypeFolder;
 		else if(flags & path::flag::file)
-			urlType = FSItemURLTypeFile;
+			_urlType = FSItemURLTypeFile;
 	}
-	return urlType;
+	return _urlType;
 }
 @end

@@ -5,6 +5,7 @@
 #import <OakAppKit/OakFileIconImage.h>
 #import <oak/server.h>
 #import <io/entries.h>
+#import <io/events.h>
 #import <io/path.h>
 #import <regexp/glob.h>
 #import <regexp/format_string.h>
@@ -16,7 +17,18 @@
 
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 
-@interface FSDirectoryDataSource () { OBJC_WATCH_LEAKS(FSDirectoryDataSource); }
+@interface FSDirectoryDataSource ()
+{
+	OBJC_WATCH_LEAKS(FSDirectoryDataSource);
+
+	NSUInteger dataSourceOptions;
+
+	fs::event_callback_t* callback;
+
+	scm::callback_t* scmCallback;
+	std::map<std::string, scm::info_ptr> scmDrivers;
+	std::map<std::string, size_t> scmReferenceCounts;
+}
 @property (nonatomic, retain) NSMutableDictionary* visible;
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag;
 - (void)lostItems:(NSArray*)someItems;

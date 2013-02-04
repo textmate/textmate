@@ -3,19 +3,6 @@
 enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeFolder, FSItemURLTypePackage, FSItemURLTypeAlias, FSItemURLTypeMissing };
 
 @interface FSItem : NSObject
-{
-	NSImage* icon;
-	NSString* name;
-	NSString* toolTip;
-	NSInteger labelIndex;
-	NSURL* url;
-	NSURL* target;
-	FSItemURLType urlType;
-	NSArray* children;
-	BOOL leaf;
-	BOOL group;
-	BOOL sortAsFolder;
-}
 @property (nonatomic, retain) NSImage* icon;
 @property (nonatomic, retain) NSString* name;
 @property (nonatomic, retain) NSString* toolTip;

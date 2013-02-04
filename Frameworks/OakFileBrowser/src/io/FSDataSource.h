@@ -3,9 +3,6 @@ extern NSString* const FSItemDidReloadNotification;
 @class FSItem;
 
 @interface FSDataSource : NSObject <NSOutlineViewDataSource>
-{
-	FSItem* rootItem;
-}
 + (NSArray*)sortArray:(NSArray*)anArray usingOptions:(NSUInteger)someOptions;
 
 @property (nonatomic, retain) FSItem* rootItem;

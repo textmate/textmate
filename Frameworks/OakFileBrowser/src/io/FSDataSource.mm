@@ -37,8 +37,6 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 }
 
 @implementation FSDataSource { OBJC_WATCH_LEAKS(FSDataSource); }
-@synthesize rootItem;
-
 + (NSArray*)sortArray:(NSArray*)anArray usingOptions:(NSUInteger)someOptions
 {
 	NSMutableArray* descriptors = [NSMutableArray array];
@@ -71,7 +69,7 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 
 - (NSInteger)outlineView:(NSOutlineView*)anOutlineView numberOfChildrenOfItem:(FSItem*)item
 {
-	return [(item ?: rootItem).children count];
+	return [(item ?: self.rootItem).children count];
 }
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView isItemExpandable:(FSItem*)item
@@ -81,7 +79,7 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 
 - (id)outlineView:(NSOutlineView*)anOutlineView child:(NSInteger)childIndex ofItem:(FSItem*)item
 {
-	return [(item ?: rootItem).children objectAtIndex:childIndex];
+	return [(item ?: self.rootItem).children objectAtIndex:childIndex];
 }
 
 - (id)outlineView:(NSOutlineView*)anOutlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
@@ -200,14 +198,14 @@ static ino_t inode (std::string const& path)
 
 - (NSDragOperation)outlineView:(NSOutlineView*)anOutlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(FSItem*)item proposedChildIndex:(NSInteger)childIndex
 {
-	if(item.leaf || ![(item ?: rootItem).url isFileURL])
+	if(item.leaf || ![(item ?: self.rootItem).url isFileURL])
 		return NSDragOperationNone;
 
 	[anOutlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
 
 	NSPasteboard* pboard  = [info draggingPasteboard];
 	NSArray* draggedPaths = [pboard propertyListForType:NSFilenamesPboardType];
-	NSString* dropPath    = [(item ?: rootItem).url path];
+	NSString* dropPath    = [(item ?: self.rootItem).url path];
 
 	dev_t targetDevice = path::device([dropPath fileSystemRepresentation]);
 	BOOL linkOperation = ([[NSApp currentEvent] modifierFlags] & NSControlKeyMask) == NSControlKeyMask;
@@ -240,10 +238,10 @@ static NSDragOperation filter (NSDragOperation mask)
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView acceptDrop:(id <NSDraggingInfo>)info item:(FSItem*)item childIndex:(NSInteger)childIndex
 {
-	if(item.leaf || ![(item ?: rootItem).url isFileURL])
+	if(item.leaf || ![(item ?: self.rootItem).url isFileURL])
 		return NO;
 
-	std::string const dropPath = [[(item ?: rootItem).url path] fileSystemRepresentation];
+	std::string const dropPath = [[(item ?: self.rootItem).url path] fileSystemRepresentation];
 	NSDragOperation const op = filter([info draggingSourceOperationMask]);
 	if(op == 0)
 		return fprintf(stderr, "Unsupported drag operation %02lx for %s\n", [info draggingSourceOperationMask], dropPath.c_str()), NO;
