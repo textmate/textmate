@@ -457,10 +457,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		theme          = parse_theme(bundles::lookup(settings.get(kSettingsThemeKey, NULL_STR)));
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
 		fontSize       = settings.get(kSettingsFontSizeKey, 11);
+		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
-
-		theme->set_font_name_and_size(fontName, fontSize);
 
 		spellingDotImage = [[NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]] retain];
 		foldingDotsImage = [[NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]] retain];

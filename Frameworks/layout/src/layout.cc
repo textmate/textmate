@@ -91,7 +91,7 @@ namespace ng
 	{
 		if(fontName == _theme->font_name() && fontSize == _theme->font_size())
 			return;
-		_theme->set_font_name_and_size(fontName, fontSize);
+		_theme = _theme->copy_with_font_name_and_size(fontName, fontSize);
 		setup_font_metrics();
 		clear_text_widths();
 	}

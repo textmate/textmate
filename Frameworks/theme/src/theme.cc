@@ -26,7 +26,7 @@ static void get_key_path (plist::dictionary_t const& plist, std::string const& s
 		color = read_color(temp_str);
 }
 
-theme_t::decomposed_style_t theme_t::parse_styles (plist::dictionary_t const& plist)
+theme_t::decomposed_style_t theme_t::shared_styles_t::parse_styles (plist::dictionary_t const& plist)
 {
 	decomposed_style_t res;
 
@@ -130,24 +130,16 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 // = theme_t =
 // ===========
 
-theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) : _item(themeItem), _font_name(fontName), _font_size(fontSize), _callback(*this)
-{
-	setup_styles();
-	bundles::add_callback(&_callback);
-}
-
-theme_t::~theme_t ()
-{
-	bundles::remove_callback(&_callback);
-}
-
-void theme_t::set_font_name_and_size (std::string const& fontName, CGFloat fontSize)
+theme_ptr theme_t::copy_with_font_name_and_size (std::string const& fontName, CGFloat fontSize)
 {
 	if(_font_name == fontName && _font_size == fontSize)
-		return;
-	_font_name = fontName;
-	_font_size = fontSize;
-	_cache.clear();
+		return theme_ptr(new theme_t::theme_t(*this));
+	return theme_ptr(new theme_t::theme_t(this->_item, fontName, fontSize));
+}
+
+theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontName, CGFloat fontSize) :_item(themeItem), _font_name(fontName), _font_size(fontSize)
+{
+	_styles = find_shared_styles(themeItem);
 }
 
 static cf::color_t soften (cf::color_t color, CGFloat factor)
@@ -170,10 +162,19 @@ static cf::color_t soften (cf::color_t color, CGFloat factor)
 	return cf::color_t(r, g, b, a);
 }
 
-void theme_t::setup_styles ()
+theme_t::shared_styles_t::shared_styles_t (bundles::item_ptr const& themeItem): _item(themeItem), _callback(*this)
+{
+	setup_styles();
+	bundles::add_callback(&_callback);
+}
+
+theme_t::shared_styles_t::~shared_styles_t ()
+{
+	bundles::remove_callback(&_callback);
+}
+void theme_t::shared_styles_t::setup_styles ()
 {
 	_styles.clear();
-	_cache.clear();
 
 	if(_item)
 	{
@@ -190,9 +191,9 @@ void theme_t::setup_styles ()
 					_styles.push_back(parse_styles(*styles));
 					if(!_styles.back().invisibles.is_blank())
 					{
-						decomposed_style_t invisbleStyle("deco.invisible");
-						invisbleStyle.foreground = _styles.back().invisibles;
-						_styles.push_back(invisbleStyle);
+						decomposed_style_t invisibleStyle("deco.invisible");
+						invisibleStyle.foreground = _styles.back().invisibles;
+						_styles.push_back(invisibleStyle);
 					}
 				}
 			}
@@ -269,29 +270,29 @@ CGFloat theme_t::font_size () const
 
 CGColorRef theme_t::foreground () const
 {
-	return _foreground;
+	return _styles->_foreground;
 }
 
 CGColorRef theme_t::background (std::string const& fileType) const
 {
 	if(fileType != NULL_STR)
 		return styles_for_scope(fileType).background();
-	return _background;
+	return _styles->_background;
 }
 
 bool theme_t::is_dark () const
 {
-	return _is_dark;
+	return _styles->_is_dark;
 }
 
 bool theme_t::is_transparent () const
 {
-	return _is_transparent;
+	return _styles->_is_transparent;
 }
 
 gutter_styles_t const& theme_t::gutter_styles () const
 {
-	return _gutter_styles;
+	return _styles->_gutter_styles;
 }
 
 styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
@@ -309,7 +310,7 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 				ordering.insert(std::make_pair(rank, *it));
 		}
 
-		iterate(it, _styles)
+		iterate(it, _styles->_styles)
 		{
 			double rank = 0;
 			if(it->scope_selector.does_match(scope, &rank))
@@ -418,6 +419,18 @@ theme_t::decomposed_style_t& theme_t::decomposed_style_t::operator+= (theme_t::d
 	return *this;
 }
 
+theme_t::shared_styles_ptr theme_t::find_shared_styles (bundles::item_ptr const& themeItem)
+{
+	static oak::uuid_t const kEmptyThemeUUID = oak::uuid_t().generate();
+	static std::map<oak::uuid_t, theme_t::shared_styles_ptr> Cache;
+
+	oak::uuid_t const& uuid = themeItem ? themeItem->uuid() : kEmptyThemeUUID;
+	auto theme = Cache.find(uuid);
+	if(theme == Cache.end())
+		theme = Cache.insert(std::make_pair(uuid, shared_styles_ptr(new shared_styles_t(themeItem)))).first;
+	return theme->second;
+}
+
 // ==============
 // = Public API =
 // ==============
@@ -428,7 +441,7 @@ theme_ptr parse_theme (bundles::item_ptr const& themeItem)
 	static std::map<oak::uuid_t, theme_ptr> Cache;
 
 	oak::uuid_t const& uuid = themeItem ? themeItem->uuid() : kEmptyThemeUUID;
-	std::map<oak::uuid_t, theme_ptr>::iterator theme = Cache.find(uuid);
+	auto theme = Cache.find(uuid);
 	if(theme == Cache.end())
 		theme = Cache.insert(std::make_pair(uuid, theme_ptr(new theme_t(themeItem)))).first;
 	return theme->second;
