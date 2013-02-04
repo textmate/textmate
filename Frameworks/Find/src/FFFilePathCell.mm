@@ -73,6 +73,16 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		<< (path.empty() || path[0] != '/' ? path : path::display_name(path));
 }
 
+@interface FFFilePathCell ()
+{
+	NSImage* icon;
+	NSString* path;
+	NSString* base;
+	NSUInteger count;
+	BOOL mouseDownInIcon;
+}
+@end
+
 @implementation FFFilePathCell
 @synthesize icon, path, base, count;
 

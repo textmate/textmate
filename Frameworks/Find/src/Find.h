@@ -1,6 +1,5 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import "scan_path.h" // for find::folder_scan_settings_t used in std::map
-@class FFWindowController;
 
 namespace find
 {
@@ -8,19 +7,6 @@ namespace find
 }
 
 PUBLIC @interface Find : NSResponder <OakFindServerProtocol>
-{
-	FFWindowController* windowController;
-
-	NSString* projectIdentifier;
-	NSString* documentIdentifier;
-
-	std::map<std::string, find::folder_scan_settings_t> folderSettings;
-
-	// OakFindProtocolServer
-	find_operation_t findOperation;
-	find::options_t  findOptions;
-	BOOL closeWindowOnSuccess;
-}
 @property (nonatomic, copy) NSString* projectFolder;
 @property (nonatomic, copy) NSString* searchFolder;
 @property (nonatomic, copy) NSString* projectIdentifier;

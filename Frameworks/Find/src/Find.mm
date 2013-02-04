@@ -14,6 +14,19 @@
 OAK_DEBUG_VAR(Find_Base);
 
 @interface Find ()
+{
+	FFWindowController* windowController;
+
+	NSString* projectIdentifier;
+	NSString* documentIdentifier;
+
+	std::map<std::string, find::folder_scan_settings_t> folderSettings;
+
+	// OakFindProtocolServer
+	find_operation_t findOperation;
+	find::options_t  findOptions;
+	BOOL closeWindowOnSuccess;
+}
 @property (nonatomic, retain) FFWindowController* windowController;
 - (void)findClipboardDidChange:(NSNotification*)aNotification;
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification;

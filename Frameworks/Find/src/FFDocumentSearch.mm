@@ -38,6 +38,14 @@ static std::string range_from_document (document::document_ptr const& document, 
 }
 
 @interface FFMatch ()
+{
+	OBJC_WATCH_LEAKS(FFMatch);
+
+	std::string matchText;
+	find::match_t match;
+	document::document_t::callback_t* callback;
+	NSImage* icon;
+}
 - (void)updateIcon;
 @property (nonatomic, retain, readwrite) NSImage* icon;
 @end
@@ -128,6 +136,28 @@ private:
 @end
 
 @interface FFDocumentSearch ()
+{
+	OBJC_WATCH_LEAKS(FFDocumentSearch);
+
+	std::string searchString;
+	find::options_t options;
+	find::folder_scan_settings_t folderOptions;
+	NSString* projectIdentifier;
+	NSString* documentIdentifier;
+
+	NSMutableArray* matchingDocuments; // FFMatches in order of searching, containing document
+	NSMutableDictionary* matchInfo;    // Document identifier → array of FFMatch instances
+	NSMutableSet* replacementMatchesToSkip;
+
+	BOOL hasPerformedReplacement;
+	BOOL hasPerformedSave;
+
+	scan_path_ptr scanner;
+	OakTimer* scannerProbeTimer;
+	oak::duration_t timer;
+
+	NSString* currentPath;
+}
 @property (nonatomic, retain) OakTimer* scannerProbeTimer;
 @property (nonatomic, retain, readwrite) NSString* currentPath;
 @end
