@@ -116,11 +116,11 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 {
 	if(!_imageStack)
 	{
+		NSMutableArray* res = [NSMutableArray array];
+		_imageStack = [res retain];
+
 		if(_path && _exists)
 		{
-			NSMutableArray* res = [NSMutableArray array];
-			_imageStack = [res retain];
-
 			if(!_directory)
 			{
 				if(NSImage* customImage = CustomIconForPath(_path))
@@ -143,15 +143,14 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 				if(image)
 					[res addObject:image];
 			}
-
-			if(NSImage* scmStatusImage = BadgeForSCMStatus(_scmStatus))
-				[res addObject:scmStatusImage];
 		}
 		else
 		{
-			NSArray* res = @[ SystemIconForHFSType(kUnknownFSObjectIcon) ];
-			_imageStack = [res retain];
+			[res addObject:SystemIconForHFSType(kUnknownFSObjectIcon)];
 		}
+
+		if(NSImage* scmStatusImage = BadgeForSCMStatus(_scmStatus))
+			[res addObject:scmStatusImage];
 	}
 	return _imageStack;
 }
@@ -225,10 +224,10 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 				self.exists    = YES;
 				self.directory = S_ISDIR(buf.st_mode);
 				self.alias     = S_ISLNK(buf.st_mode);
-
-				if(auto scmDriver = scm::ng::info(path::parent(path)))
-					self.scmStatus = scmDriver->status(path);
 			}
+
+			if(auto scmDriver = scm::ng::info(path::parent(path)))
+				self.scmStatus = scmDriver->status(path);
 		}
 	}
 	return self;
