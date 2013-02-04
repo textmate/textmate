@@ -15,8 +15,6 @@
 #import <ns/ns.h>
 #import <oak/debug.h>
 
-// TODO ask SCM about missing items
-
 OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 
 @interface FSFileItem : FSItem
@@ -50,15 +48,41 @@ struct item_record_t : fs::event_callback_t
 		_scm_info    = scm::ng::info(_path);
 
 		_scm_info->add_callback(^(scm::ng::info_t const& info){
+
+			if(!_item.children)
+				return;
+
+			std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 			for(FSFileItem* item in _item.children)
 			{
-				scm::status::type newStatus = info.status(to_s([item.url path]));
 				OakFileIconImage* image = (OakFileIconImage*)item.icon;
-				if(newStatus != image.scmStatus)
+				if(!image.exists)
+					pathsMissingOnDisk.insert(to_s(image.path));
+				pathsShown.insert(to_s(image.path));
+			}
+
+			for(auto pair : info.status())
+			{
+				if(pair.second == scm::status::deleted && _path == path::parent(pair.first))
+					pathsDeleted.insert(pair.first);
+			}
+
+			if(std::includes(pathsShown.begin(), pathsShown.end(), pathsDeleted.begin(), pathsDeleted.end()) && std::includes(pathsDeleted.begin(), pathsDeleted.end(), pathsMissingOnDisk.begin(), pathsMissingOnDisk.end()))
+			{
+				for(FSFileItem* item in _item.children)
 				{
-					image.scmStatus = newStatus;
-					[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : item }];
+					scm::status::type newStatus = info.status(to_s([item.url path]));
+					OakFileIconImage* image = (OakFileIconImage*)item.icon;
+					if(newStatus != image.scmStatus)
+					{
+						image.scmStatus = newStatus;
+						[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : item }];
+					}
 				}
+			}
+			else
+			{
+				reload(false);
 			}
 		});
 
@@ -179,6 +203,8 @@ private:
 					for(FSFileItem* item in rootItem.children)
 						existingItems.insert(std::make_pair(std::make_pair(item.device, item.inode), item));
 
+					std::set<std::string> pathsOnDisk;
+
 					NSMutableArray* array = [NSMutableArray array];
 					for(auto const& fsItem : newItems)
 					{
@@ -210,6 +236,26 @@ private:
 						item.sortAsFolder = fsItem.sort_as_directory;
 						item.leaf         = !fsItem.treat_as_directory;
 						item.target       = fsItem.target != NULL_STR ? [NSURL URLWithString:[NSString stringWithCxxString:fsItem.target]] : nil;
+
+						[array addObject:item];
+						pathsOnDisk.insert(fsItem.path);
+					}
+
+					for(auto pair : scmInfo->status())
+					{
+						if(!(pair.second & scm::status::deleted) || dir != path::parent(pair.first) || pathsOnDisk.find(pair.first) != pathsOnDisk.end())
+							continue;
+
+						OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+						image.path      = [NSString stringWithCxxString:pair.first];
+						image.exists    = NO;
+						image.scmStatus = pair.second;
+
+						FSFileItem* item = [FSFileItem new];
+						item.url  = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
+						item.name = [NSString stringWithCxxString:path::name(pair.first)];
+						item.icon = image;
+						item.leaf = YES;
 
 						[array addObject:item];
 					}
