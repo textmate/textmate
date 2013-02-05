@@ -2,17 +2,17 @@
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
 
-static NSButton* OakCreateImageButton (NSImage* image, NSSize imageSize = NSMakeSize(16, 16))
+static NSButton* OakCreateImageButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
 
-	// [[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
-	[res setBezelStyle:NSSmallSquareBezelStyle];
+	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
 
-	// image = [image copy];
-	// [image setSize:imageSize];
+	image = [image copy];
+	[image setTemplate:YES];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
 
@@ -27,15 +27,23 @@ static NSPopUpButton* OakCreatePopUpButton ()
 	NSPopUpButton* res = [NSPopUpButton new];
 	res.bordered  = NO;
 	res.pullsDown = YES;
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 
 	NSMenuItem* item = [NSMenuItem new];
 	item.title = @"";
 	item.image = [NSImage imageNamed:NSImageNameActionTemplate];
-	[item.image setSize:NSMakeSize(12, 12)];
+	[item.image setSize:NSMakeSize(14, 14)];
 
 	[[res cell] setUsesItemFromMenu:NO];
 	[[res cell] setMenuItem:item];
 
+	return res;
+}
+
+static NSImageView* OakCreateImageView (NSImage* image)
+{
+	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
+	[res setImage:image];
 	return res;
 }
 
@@ -47,15 +55,15 @@ static NSPopUpButton* OakCreatePopUpButton ()
 		self.createButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameAddTemplate]);
 		self.actionsPopUpButton = OakCreatePopUpButton();
 		self.reloadButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameRefreshTemplate]);
-		self.searchButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameRevealFreestandingTemplate]);
+		self.searchButton       = OakCreateImageButton([NSImage imageNamed:@"Search" inSameBundleAsClass:[self class]]);
 		self.favoritesButton    = OakCreateImageButton([NSImage imageNamed:@"Favorites" inSameBundleAsClass:[self class]]);
-		self.scmButton          = OakCreateImageButton([NSImage imageNamed:@"SmartFolder" inSameBundleAsClass:[self class]]);
-
-		self.createButton.toolTip    = @"Create new file";
-		self.reloadButton.toolTip    = @"Reload ";
-		self.searchButton.toolTip    = @"";
-		self.favoritesButton.toolTip = @"Show favorites";
-		self.scmButton.toolTip       = @"Show source control management status";
+		self.scmButton          = OakCreateImageButton([NSImage imageNamed:@"SCM" inSameBundleAsClass:[self class]]);
+		
+		self.createButton.toolTip       = @"Create new file";
+		self.reloadButton.toolTip       = @"Reload file browser";
+		self.searchButton.toolTip       = @"Search current folder";
+		self.favoritesButton.toolTip    = @"Show favorites";
+		self.scmButton.toolTip          = @"Show source control management status";
 
 		NSMenu* menu = [NSMenu new];
 		[menu addItemWithTitle:@"Unused" action:@selector(nop:) keyEquivalent:@""];
@@ -70,8 +78,7 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 		NSDictionary* views = @{
 			@"create"    : self.createButton,
-			@"leftDivider" : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.551 alpha:1], [NSColor colorWithCalibratedWhite:0.801 alpha:1]),
-			@"leftShading" : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
+			@"divider"   : OakCreateImageView([NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]]),
 			@"actions"   : wrappedActionsPopUpButton,
 			@"reload"    : self.reloadButton,
 			@"search"    : self.searchButton,
@@ -85,8 +92,8 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[create(==22)][leftDivider][leftShading][actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search][favorites][scm]-(24)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[create(==leftDivider,==leftShading,==actions,==reload,==search,==favorites,==scm)]|"                                                         options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-9-[create(==22)]-1-[divider]-5-[actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search]-1-[favorites]-2-[scm]-(12)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[create(==divider,==actions,==reload,==search,==favorites,==scm)]|"                                                                   options:0 metrics:nil views:views]];
 	}
 	return self;
 }
