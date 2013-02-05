@@ -40,7 +40,8 @@ namespace scm { namespace ng
 	private:
 		friend void enable ();
 
-		void background_update ();
+		void schedule_update ();
+		static void async_update (shared_info_weak_ptr weakThis);
 		void fs_did_change (std::set<std::string> const& changedPaths);
 
 		void update (std::map<std::string, std::string> const& variables, std::map<std::string, scm::status::type> const& status, fs::snapshot_t const& fsSnapshot);
@@ -148,7 +149,7 @@ namespace scm { namespace ng
 		if(_clients.size() == 1)
 		{
 			_watcher.reset(new scm::watcher_t(_root_path, std::bind(&shared_info_t::fs_did_change, this, std::placeholders::_1)));
-			background_update();
+			schedule_update();
 		}
 		else
 		{
@@ -182,7 +183,31 @@ namespace scm { namespace ng
 	// = Update Status =
 	// =================
 
-	void shared_info_t::background_update ()
+	void shared_info_t::async_update (shared_info_weak_ptr weakThis)
+	{
+		if(shared_info_ptr info = weakThis.lock())
+		{
+			if(!info->_driver->may_touch_filesystem() || info->_fs_snapshot != fs::snapshot_t(info->_root_path))
+			{
+				std::map<std::string, std::string> variables{ { "TM_SCM_NAME", info->_driver->name() } };
+				std::string const branch = info->_driver->branch_name(info->_root_path);
+				if(branch != NULL_STR)
+					variables.insert(std::make_pair("TM_SCM_BRANCH", branch));
+				scm::status_map_t const status = info->_driver->status(info->_root_path);
+				fs::snapshot_t const snapshot = info->_driver->may_touch_filesystem() ? fs::snapshot_t(info->_root_path) : fs::snapshot_t();
+				dispatch_async(dispatch_get_main_queue(), ^{
+					info->update(variables, status, snapshot);
+				});
+			}
+
+			dispatch_async(dispatch_get_main_queue(), ^{
+				info->_pending_update = false;
+				info->_last_check     = oak::date_t::now();
+			});
+		}
+	}
+
+	void shared_info_t::schedule_update ()
 	{
 		if(Disabled)
 		{
@@ -200,33 +225,16 @@ namespace scm { namespace ng
 		if(_last_check && elapsed < 3)
 			delay = dispatch_time(DISPATCH_TIME_NOW, (3 - elapsed) * NSEC_PER_SEC);
 
+		shared_info_weak_ptr weakThis = shared_from_this();
 		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
 		dispatch_after(delay, queue, ^{
-
-			if(!_driver->may_touch_filesystem() || _fs_snapshot != fs::snapshot_t(_root_path))
-			{
-				std::map<std::string, std::string> variables{ { "TM_SCM_NAME", _driver->name() } };
-				std::string const branch = _driver->branch_name(_root_path);
-				if(branch != NULL_STR)
-					variables.insert(std::make_pair("TM_SCM_BRANCH", branch));
-				scm::status_map_t const status = _driver->status(_root_path);
-				fs::snapshot_t const snapshot = _driver->may_touch_filesystem() ? fs::snapshot_t(_root_path) : fs::snapshot_t();
-				dispatch_async(dispatch_get_main_queue(), ^{
-					update(variables, status, snapshot);
-				});
-			}
-
-			dispatch_async(dispatch_get_main_queue(), ^{
-				_pending_update = false;
-				_last_check     = oak::date_t();
-			});
-
+			async_update(weakThis);
 		});
 	}
 
 	void shared_info_t::fs_did_change (std::set<std::string> const& changedPaths)
 	{
-		background_update();
+		schedule_update();
 	}
 
 	// =========
@@ -286,7 +294,7 @@ namespace scm { namespace ng
 		for(auto pair : PendingUpdates)
 		{
 			if(shared_info_ptr info = pair.second.lock())
-				info->background_update();
+				info->schedule_update();
 		}
 		PendingUpdates.clear();
 	}
