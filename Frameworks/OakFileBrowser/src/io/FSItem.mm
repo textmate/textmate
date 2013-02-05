@@ -40,7 +40,7 @@
 
 - (NSString*)description
 {
-	return [NSString stringWithFormat:@"FSItem: %@", [self.url absoluteString]];
+	return [NSString stringWithFormat:@"FSItem (%p): %@", self, [self.url absoluteString]];
 }
 
 - (NSString*)path
