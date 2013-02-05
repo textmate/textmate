@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-02-05 (r9363)
+
+* Fix crash introduced in last build. For the records, if you update to an unstable nightly build you can switch back to “Normal Releases” in _Preferences → Software Update_. When you then do _Check Now_ it’ll allow you to downgrade. Also, if a build gets pulled again, as was the case with r9361, staying on nightly builds also offer the downgrade option when you _Check Now_ — I may make it automatically downgrade in the future, when builds are pulled, seeing how many users prefer to use the nightly builds.
+
 ## 2013-02-04 (r9361)
 
 * Files missing on disk but tracked by your version control system (with status as deleted) will now show in the file browser (with appropriate badge).
