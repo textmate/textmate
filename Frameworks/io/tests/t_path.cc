@@ -113,6 +113,14 @@ public:
 		TS_ASSERT_EQUALS(path::is_absolute("foo"),         false);
 	}
 
+	void test_is_parent ()
+	{
+		TS_ASSERT_EQUALS(path::is_child("/foo/bar",     "/foo/bar"),    true);
+		TS_ASSERT_EQUALS(path::is_child("/foo/bar/fud", "/foo/bar"),    true);
+		TS_ASSERT_EQUALS(path::is_child("/foo/barry",   "/foo/bar"),   false);
+		TS_ASSERT_EQUALS(path::is_child("/foo/bar",     "/foo/barry"), false);
+	}
+
 	void test_with_tilde ()
 	{
 		using namespace path;

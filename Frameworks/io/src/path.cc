@@ -189,6 +189,13 @@ namespace path
 		return false;
 	}
 
+	bool is_child (std::string const& nonNormalizedChild, std::string const& nonNormalizedParent)
+	{
+		std::string const child  = normalize(nonNormalizedChild);
+		std::string const parent = normalize(nonNormalizedParent);
+		return child.find(parent) == 0 && (parent.size() == child.size() || child[parent.size()] == '/');
+	}
+
 	std::string with_tilde (std::string const& p)
 	{
 		std::string const& base = home();

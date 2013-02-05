@@ -22,6 +22,7 @@ namespace path
 	PUBLIC std::string join (std::string const& base, std::string const& path); // this will normalize the (resulting) path
 
 	PUBLIC bool is_absolute (std::string const& path);
+	PUBLIC bool is_child (std::string const& nonNormalizedChild, std::string const& nonNormalizedParent);
 	PUBLIC std::string with_tilde (std::string const& path);        // /Users/me/foo.html.erb → ~/foo.html.erb
 	PUBLIC std::string relative_to (std::string const& path, std::string const& base); // /Users/me/foo.html.erb (arg: ~/Desktop) → ../foo.html.erb
 
