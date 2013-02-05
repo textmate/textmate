@@ -1,5 +1,12 @@
 # Changes
 
+## 2013-02-05 (r9367)
+
+* When re-activating TextMate, the file browser will reload modified folders (based on stat’ing them and looking at the modification date). This is to support file systems which do not support fs-events.
+* Fix high CPU load when opening documents from outside the window’s project folder.
+* Fix missing items when collapsing and then expanding in file browser.
+* Use proper cursor image for resizing the command output view when it’s placed to the right of text (arrow left/right instead of up/down).
+
 ## 2013-02-05 (r9363)
 
 * Fix crash introduced in last build. For the records, if you update to an unstable nightly build you can switch back to “Normal Releases” in _Preferences → Software Update_. When you then do _Check Now_ it’ll allow you to downgrade. Also, if a build gets pulled again, as was the case with r9361, staying on nightly builds also offer the downgrade option when you _Check Now_ — I may make it automatically downgrade in the future, when builds are pulled, seeing how many users prefer to use the nightly builds.
