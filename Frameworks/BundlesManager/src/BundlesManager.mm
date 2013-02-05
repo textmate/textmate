@@ -136,7 +136,7 @@ static BundlesManager* SharedInstance;
 		bundlesIndex = bundles_db::index(kInstallDirectory);
 
 		[self updateSources:nil];
-		[NSTimer scheduledTimerWithTimeInterval:60*60 target:self selector:@selector(updateSources:) userInfo:nil repeats:YES];
+		[NSTimer scheduledTimerWithTimeInterval:4*60*60 target:self selector:@selector(updateSources:) userInfo:nil repeats:YES];
 	}
 	return SharedInstance;
 }
