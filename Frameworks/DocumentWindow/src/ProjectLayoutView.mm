@@ -76,7 +76,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 
 - (void)setHtmlOutputView:(NSView*)aHtmlOutputView
 {
-	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine([NSColor controlShadowColor]) : OakCreateHorizontalLine([NSColor controlShadowColor])) : nil)];
+	_htmlOutputDivider = [self replaceView:_htmlOutputDivider withView:(aHtmlOutputView ? (_htmlOutputOnRight ? OakCreateVerticalLine([NSColor controlShadowColor]) : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1])) : nil)];
 	_htmlOutputView    = [self replaceView:_htmlOutputView withView:aHtmlOutputView];
 }
 
