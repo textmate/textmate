@@ -895,17 +895,14 @@ namespace
 	if(!_documentPath && !_projectPath)
 		return;
 
-	std::string projectDir        = to_s(_projectPath ?: NSHomeDirectory());
-	std::string const documentDir = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
-
-	if(!path::is_child(documentDir, projectDir))
-		projectDir = documentDir;
+	std::string const projectDir   = to_s(_projectPath ?: NSHomeDirectory());
+	std::string const documentPath = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 
 		std::vector<std::string> res;
 		std::set<std::string> groups;
-		std::string dir = documentDir;
+		std::string dir = documentPath;
 		do {
 
 			dir = path::parent(dir);
@@ -930,12 +927,12 @@ namespace
 				}
 			}
 
-		} while(dir != projectDir);
+		} while(path::is_child(dir, projectDir) && dir != projectDir);
 
 		dispatch_async(dispatch_get_main_queue(), ^{
-			std::string const currentProjectDir  = to_s(_projectPath ?: @"/");
-			std::string const currentDocumentDir = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
-			if(projectDir == currentProjectDir && documentDir == currentDocumentDir)
+			std::string const currentProjectDir   = to_s(_projectPath ?: NSHomeDirectory());
+			std::string const currentDocumentPath = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
+			if(projectDir == currentProjectDir && currentDocumentPath == currentDocumentPath)
 				_externalScopeAttributes = res;
 		});
 
