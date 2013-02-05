@@ -34,6 +34,7 @@ typedef std::shared_ptr<item_record_t> item_record_ptr;
 	std::map<std::string, item_record_ptr> visibleItems;
 }
 @property (nonatomic) NSUInteger dataSourceOptions;
+- (void)setLastModified:(struct timespec)lastModified forPath:(std::string const&)aPath;
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag;
 - (void)lostItems:(NSArray*)someItems;
 @end
@@ -101,6 +102,9 @@ struct item_record_t : fs::event_callback_t
 	{
 		internal_reload(reloadWasRequested);
 	}
+
+	void set_last_modified (struct timespec lastModified) { _last_modified = lastModified; }
+	struct timespec last_modified () const                { return _last_modified; }
 
 private:
 	void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
@@ -270,6 +274,7 @@ private:
 					iterate(pair, existingItems)
 						add_item_and_children(pair->second, lostItems);
 					[dataSource lostItems:lostItems];
+					[dataSource setLastModified:buf.st_mtimespec forPath:dir];
 
 					[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:dataSource userInfo:@{ @"item" : rootItem, @"children" : [FSDataSource sortArray:array usingOptions:dataSource.dataSourceOptions], @"recursive" : @YES, @"requested" : @(reloadWasRequested) }];
 				});
@@ -285,6 +290,7 @@ private:
 	__weak FSDirectoryDataSource* _data_source;
 	FSFileItem* _item;
 	std::string _path;
+	struct timespec _last_modified;
 	scm::ng::info_ptr _scm_info;
 };
 
@@ -297,14 +303,55 @@ private:
 		self.rootItem = [FSFileItem itemWithURL:anURL];
 
 		[self internalReloadItem:self.rootItem requested:NO];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification*)aNotification
+{
+	std::vector<std::pair<std::string, struct timespec>> paths;
+	std::transform(visibleItems.begin(), visibleItems.end(), back_inserter(paths), [](std::pair<std::string, item_record_ptr> const& p){ return std::make_pair(p.first, p.second->last_modified()); });
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		std::vector<std::string> modified;
+		for(auto pair : paths)
+		{
+			struct stat buf;
+			if(stat(pair.first.c_str(), &buf) == 0 && (buf.st_mtimespec.tv_sec != pair.second.tv_sec || buf.st_mtimespec.tv_nsec != pair.second.tv_nsec))
+				modified.push_back(pair.first);
+		}
+
+		if(!modified.empty())
+		{
+			dispatch_async(dispatch_get_main_queue(), ^{
+				for(auto path : modified)
+				{
+					auto it = visibleItems.find(path);
+					if(it != visibleItems.end())
+						it->second->reload(false);
+				}
+			});
+		}
+	});
 }
 
 - (void)lostItems:(NSArray*)someItems
 {
 	for(FSItem* item in someItems)
 		visibleItems.erase(to_s([item.url path]));
+}
+
+- (void)setLastModified:(struct timespec)lastModified forPath:(std::string const&)aPath
+{
+	auto it = visibleItems.find(aPath);
+	if(it != visibleItems.end())
+		it->second->set_last_modified(lastModified);
 }
 
 - (void)internalReloadItem:(FSItem*)anItem requested:(BOOL)flag
