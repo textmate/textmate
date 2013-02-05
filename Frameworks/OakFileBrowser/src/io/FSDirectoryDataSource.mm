@@ -47,44 +47,47 @@ struct item_record_t : fs::event_callback_t
 		_path        = to_s([item.url path]);
 		_scm_info    = scm::ng::info(_path);
 
-		_scm_info->add_callback(^(scm::ng::info_t const& info){
+		if(_scm_info)
+		{
+			_scm_info->add_callback(^(scm::ng::info_t const& info){
 
-			if(!_item.children)
-				return;
+				if(!_item.children)
+					return;
 
-			std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
-			for(FSFileItem* item in _item.children)
-			{
-				OakFileIconImage* image = (OakFileIconImage*)item.icon;
-				if(!image.exists)
-					pathsMissingOnDisk.insert(to_s(image.path));
-				pathsShown.insert(to_s(image.path));
-			}
-
-			for(auto pair : info.status())
-			{
-				if(pair.second == scm::status::deleted && _path == path::parent(pair.first))
-					pathsDeleted.insert(pair.first);
-			}
-
-			if(std::includes(pathsShown.begin(), pathsShown.end(), pathsDeleted.begin(), pathsDeleted.end()) && std::includes(pathsDeleted.begin(), pathsDeleted.end(), pathsMissingOnDisk.begin(), pathsMissingOnDisk.end()))
-			{
+				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 				for(FSFileItem* item in _item.children)
 				{
-					scm::status::type newStatus = info.status(to_s([item.url path]));
 					OakFileIconImage* image = (OakFileIconImage*)item.icon;
-					if(newStatus != image.scmStatus)
+					if(!image.exists)
+						pathsMissingOnDisk.insert(to_s(image.path));
+					pathsShown.insert(to_s(image.path));
+				}
+
+				for(auto pair : info.status())
+				{
+					if(pair.second == scm::status::deleted && _path == path::parent(pair.first))
+						pathsDeleted.insert(pair.first);
+				}
+
+				if(std::includes(pathsShown.begin(), pathsShown.end(), pathsDeleted.begin(), pathsDeleted.end()) && std::includes(pathsDeleted.begin(), pathsDeleted.end(), pathsMissingOnDisk.begin(), pathsMissingOnDisk.end()))
+				{
+					for(FSFileItem* item in _item.children)
 					{
-						image.scmStatus = newStatus;
-						[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : item }];
+						scm::status::type newStatus = info.status(to_s([item.url path]));
+						OakFileIconImage* image = (OakFileIconImage*)item.icon;
+						if(newStatus != image.scmStatus)
+						{
+							image.scmStatus = newStatus;
+							[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : item }];
+						}
 					}
 				}
-			}
-			else
-			{
-				reload(false);
-			}
-		});
+				else
+				{
+					reload(false);
+				}
+			});
+		}
 
 		fs::watch(_path, this);
 	}
@@ -241,23 +244,26 @@ private:
 						pathsOnDisk.insert(fsItem.path);
 					}
 
-					for(auto pair : scmInfo->status())
+					if(scmInfo)
 					{
-						if(!(pair.second & scm::status::deleted) || dir != path::parent(pair.first) || pathsOnDisk.find(pair.first) != pathsOnDisk.end())
-							continue;
+						for(auto pair : scmInfo->status())
+						{
+							if(!(pair.second & scm::status::deleted) || dir != path::parent(pair.first) || pathsOnDisk.find(pair.first) != pathsOnDisk.end())
+								continue;
 
-						OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
-						image.path      = [NSString stringWithCxxString:pair.first];
-						image.exists    = NO;
-						image.scmStatus = pair.second;
+							OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
+							image.path      = [NSString stringWithCxxString:pair.first];
+							image.exists    = NO;
+							image.scmStatus = pair.second;
 
-						FSFileItem* item = [FSFileItem new];
-						item.url  = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
-						item.name = [NSString stringWithCxxString:path::name(pair.first)];
-						item.icon = image;
-						item.leaf = YES;
+							FSFileItem* item = [FSFileItem new];
+							item.url  = [NSURL fileURLWithPath:[NSString stringWithCxxString:pair.first] isDirectory:NO];
+							item.name = [NSString stringWithCxxString:path::name(pair.first)];
+							item.icon = image;
+							item.leaf = YES;
 
-						[array addObject:item];
+							[array addObject:item];
+						}
 					}
 
 					NSMutableArray* lostItems = [NSMutableArray array];
