@@ -895,8 +895,11 @@ namespace
 	if(!_documentPath && !_projectPath)
 		return;
 
-	std::string const projectDir  = to_s(_projectPath ?: @"/");
+	std::string projectDir        = to_s(_projectPath ?: NSHomeDirectory());
 	std::string const documentDir = _documentPath ? to_s(_documentPath) : path::join(projectDir, "dummy");
+
+	if(!path::is_child(documentDir, projectDir))
+		projectDir = documentDir;
 
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 
