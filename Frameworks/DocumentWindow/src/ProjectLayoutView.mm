@@ -311,7 +311,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 - (void)resetCursorRects
 {
 	[self addCursorRect:[self fileBrowserResizeRect] cursor:[NSCursor resizeLeftRightCursor]];
-	[self addCursorRect:[self htmlOutputResizeRect]  cursor:[NSCursor resizeUpDownCursor]];
+	[self addCursorRect:[self htmlOutputResizeRect]  cursor:_htmlOutputOnRight ? [NSCursor resizeLeftRightCursor] : [NSCursor resizeUpDownCursor]];
 }
 
 - (BOOL)isOpaque
