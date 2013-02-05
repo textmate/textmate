@@ -5,6 +5,7 @@
 #include <io/path.h>
 #include <text/format.h>
 #include <plist/date.h>
+#include <settings/settings.h>
 
 namespace scm
 {
@@ -283,6 +284,11 @@ namespace scm { namespace ng
 		return shared_info_ptr();
 	}
 
+	static bool scm_enabled_for_path (std::string const& path)
+	{
+		return path != "" && path != "/" && path[0] == '/' && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
+	}
+
 	void disable ()
 	{
 		Disabled = true;
@@ -301,7 +307,7 @@ namespace scm { namespace ng
 
 	std::string root_for_path (std::string const& path)
 	{
-		if(path == NULL_STR || path == "" || path[0] != '/')
+		if(!scm_enabled_for_path(path))
 			return NULL_STR;
 
 		__block std::string res = NULL_STR;
@@ -331,7 +337,7 @@ namespace scm { namespace ng
 
 	info_ptr info (std::string path)
 	{
-		if(path == NULL_STR || path == "" || path[0] != '/')
+		if(!scm_enabled_for_path(path))
 			return info_ptr();
 
 		info_ptr res(new info_t(path));
