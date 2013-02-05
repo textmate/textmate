@@ -330,7 +330,17 @@ private:
 	if(visibleItems.find(to_s([anItem.url path])) == visibleItems.end())
 		NSLog(@"%s %@, item not loaded", sel_getName(_cmd), anItem);
 
-	visibleItems.erase(to_s([anItem.url path]));
+	NSMutableArray* children = [NSMutableArray arrayWithObject:anItem];
+	for(NSUInteger i = 0; i < children.count; ++i)
+	{
+		for(FSItem* item in [children[i] children])
+		{
+			if(item.children)
+				[children addObject:item];
+		}
+	}
+
+	[self lostItems:children];
 	anItem.children = nil;
 	return YES;
 }
