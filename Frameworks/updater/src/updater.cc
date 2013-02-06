@@ -77,12 +77,9 @@ namespace bundles_db
 	std::vector<source_ptr> sources (std::string const& installDir)
 	{
 		plist::any_t default_index = plist::parse_ascii(
-			"{	version = 3;"
+			"{	version = 4;"
 			"	sources = {"
-			"		org.textmate.updates.themes   = { rank =  0; name = 'Themes';           url = '" REST_API "/bundles/themes'; };"
 			"		org.textmate.updates.default  = { rank =  0; name = 'TextMate Bundles'; url = '" REST_API "/bundles/default'; };"
-			"		org.textmate.updates.review   = { rank = -1; name = 'Review Bundles';   url = '" REST_API "/bundles/review'; disabled = :false; };"
-			"		org.textmate.updates.universe = { rank = -2; name = 'Untested Bundles'; url = '" REST_API "/bundles/universe'; };"
 			"	};"
 			"}"
 			"");
