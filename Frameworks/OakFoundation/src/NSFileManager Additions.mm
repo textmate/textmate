@@ -1,7 +1,6 @@
 #import "NSFileManager Additions.h"
 #import "NSString Additions.h"
 #import <io/path.h>
-#import <ns/ns.h>
 #import <oak/debug.h>
 
 static std::pair<dev_t, ino_t> inode (std::string const& path)
