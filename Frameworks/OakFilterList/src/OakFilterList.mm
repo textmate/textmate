@@ -238,9 +238,10 @@
 
 - (IBAction)accept:(id)sender
 {
-	[[self window] orderOut:self];
-	[self sendAction:nil];
-	[[self window] close];
+	OakFilterWindowController* retainedSelf = self;
+	[retainedSelf.window orderOut:self];
+	[retainedSelf sendAction:nil];
+	[retainedSelf.window close];
 }
 
 - (IBAction)singleClick:(id)sender
