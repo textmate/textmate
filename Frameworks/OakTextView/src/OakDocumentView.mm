@@ -371,11 +371,6 @@ private:
 	}
 }
 
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
 - (IBAction)toggleLineNumbers:(id)sender
 {
 	D(DBF_OakDocumentView, bug("show line numbers %s\n", BSTR([gutterView visibilityForColumnWithIdentifier:GVLineNumbersColumnIdentifier])););
