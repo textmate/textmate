@@ -1115,7 +1115,7 @@ namespace ng
 		std::map< range_t, std::map<std::string, std::string> > res;
 
 		OnigOptionType ptrnOptions = ONIG_OPTION_NONE;
-		if(options && find::ignore_case)
+		if(options & find::ignore_case)
 			ptrnOptions |= ONIG_OPTION_IGNORECASE;
 
 		std::string str = buffer.substr(0, buffer.size());
