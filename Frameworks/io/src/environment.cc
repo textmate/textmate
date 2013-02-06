@@ -1,18 +1,47 @@
 #include "environment.h"
 #include "path.h"
+#include <cf/cf.h>
+#include <regexp/format_string.h>
+#include <regexp/glob.h>
+#include <text/parse.h>
 #include <oak/oak.h>
 #include <crt_externs.h>
 
 namespace oak
 {
-	static bool include_variable (std::string const& variable)
-	{
-		static std::set<std::string> const WhiteListedVariables = { "COMMAND_MODE", "SHELL", "SHLVL", "SSH_AUTH_SOCK", "__CF_USER_TEXT_ENCODING" };
-		return variable.find("Apple") == 0 || WhiteListedVariables.find(variable) != WhiteListedVariables.end();
-	}
-
 	std::map<std::string, std::string> setup_basic_environment ()
 	{
+		std::string whitelistStr = "Apple_*:COMMAND_MODE:SHELL:SHLVL:SSH_AUTH_SOCK:__CF_USER_TEXT_ENCODING";
+		if(CFStringRef userWhitelist = (CFStringRef)CFPreferencesCopyAppValue(CFSTR("environmentWhitelist"), kCFPreferencesCurrentApplication))
+		{
+			if(CFGetTypeID(userWhitelist) == CFStringGetTypeID())
+				whitelistStr = format_string::expand(cf::to_s(userWhitelist), std::map<std::string, std::string>{ { "default", whitelistStr } });
+			CFRelease(userWhitelist);
+		}
+
+		std::set<std::string> whitelistSet;
+		std::vector<path::glob_t> whitelistGlobs;
+		for(auto str : text::split(whitelistStr, ":"))
+		{
+			if(str.find("*") != std::string::npos)
+					whitelistGlobs.push_back(str);
+			else	whitelistSet.insert(str);
+		}
+
+		std::map<std::string, std::string> res;
+
+		char*** envPtr = _NSGetEnviron();
+		for(char** pair = *envPtr; pair && *pair; ++pair)
+		{
+			char* value = strchr(*pair, '=');
+			if(value && *value == '=')
+			{
+				std::string const key = std::string(*pair, value);
+				if(whitelistSet.find(key) != whitelistSet.end() || std::any_of(whitelistGlobs.begin(), whitelistGlobs.end(), [&key](path::glob_t const& glob){ return glob.does_match(key); }))
+					res[key] = value + 1;
+			}
+		}
+
 		passwd* entry = path::passwd_entry();
 
 		int mib[2] = { CTL_USER, USER_CS_PATH };
@@ -21,21 +50,11 @@ namespace oak
 		char* path = new char[len];
 		sysctl(mib, 2, path, &len, NULL, 0);
 
-		std::map<std::string, std::string> res;
-
-		char*** envPtr = _NSGetEnviron();
-		for(char** pair = *envPtr; pair && *pair; ++pair)
-		{
-			char* value = strchr(*pair, '=');
-			if(value && *value == '=' && include_variable(std::string(*pair, value)))
-				res[std::string(*pair, value)] = value + 1;
-		}
-
-		res["HOME"]     = entry->pw_dir;
-		res["PATH"]     = path;
-		res["TMPDIR"]   = path::temp();
-		res["LOGNAME"]  = entry->pw_name;
-		res["USER"]     = entry->pw_name;
+		res.insert(std::make_pair("HOME",    entry->pw_dir));
+		res.insert(std::make_pair("PATH",    path));
+		res.insert(std::make_pair("TMPDIR",  path::temp()));
+		res.insert(std::make_pair("LOGNAME", entry->pw_name));
+		res.insert(std::make_pair("USER",    entry->pw_name));
 
 		return res;
 	}
