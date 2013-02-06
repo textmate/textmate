@@ -1,5 +1,12 @@
 # Changes
 
+## 2013-02-06 (r9371)
+
+* Performing file operations in the file browser now instantly reload rather than wait for fs-events. This not only give a better experience (instant feedback) but also makes the file browser update properly when using file systems that doesn’t support fs-events.
+* It’s (again) possible to make renames that only change case (on case-insensitive file systems).
+* The text view scroll bars now auto-hide when the content fits the viewport (for users who have opted to have them always visible).
+* Stability improvements.
+
 ## 2013-02-05 (r9367)
 
 * When re-activating TextMate, the file browser will reload modified folders (based on stat’ing them and looking at the modification date). This is to support file systems which do not support fs-events.
