@@ -3,6 +3,7 @@
 #import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakFileManager.h>
 #import <oak/server.h>
 #import <io/entries.h>
 #import <io/events.h>
@@ -305,6 +306,7 @@ private:
 		[self internalReloadItem:self.rootItem requested:NO];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileManagerDidChangeContentsOfDirectory:) name:OakFileManagerDidChangeContentsOfDirectory object:nil];
 	}
 	return self;
 }
@@ -339,6 +341,15 @@ private:
 			});
 		}
 	});
+}
+
+- (void)fileManagerDidChangeContentsOfDirectory:(NSNotification*)aNotification
+{
+	NSDictionary* userInfo = [aNotification userInfo];
+	NSString* dir = userInfo[OakFileManagerDirectoryKey];
+	auto it = visibleItems.find(to_s(dir));
+	if(it != visibleItems.end())
+		it->second->reload(false);
 }
 
 - (void)lostItems:(NSArray*)someItems
