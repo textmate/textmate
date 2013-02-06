@@ -27,11 +27,6 @@
 	[super dealloc];
 }
 
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
 - (void)viewWillMoveToWindow:(NSWindow*)newWindow
 {
 	if(self.window)
@@ -71,6 +66,7 @@
 
 - (void)drawRect:(NSRect)aRect
 {
+	// Although we draw the full background this view, nor any of its parents, are allowed to return YES from isOpaque <rdar://13161778>
 	NSColor* topColor    = self.renderInactive ? self.inactiveTopColor    : self.activeTopColor;
 	NSColor* bottomColor = self.renderInactive ? self.inactiveBottomColor : self.activeBottomColor;
 	[[[NSGradient alloc] initWithStartingColor:bottomColor endingColor:topColor] drawInRect:self.bounds angle:90];
