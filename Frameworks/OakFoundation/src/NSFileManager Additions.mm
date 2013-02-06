@@ -5,8 +5,8 @@
 @implementation NSFileManager (TMFileManagerAdditions)
 - (BOOL)tmTrashItemAtURL:(NSURL*)trashURL resultingItemURL:(NSURL**)resultingURL error:(NSError**)error
 {
-	if([[NSFileManager defaultManager] respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)])
-		return [[NSFileManager defaultManager] trashItemAtURL:trashURL resultingItemURL:resultingURL error:error];
+	if([self respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)])
+		return [self trashItemAtURL:trashURL resultingItemURL:resultingURL error:error];
 
 	std::string const res = path::move_to_trash([[trashURL path] fileSystemRepresentation]);
 	if(res != NULL_STR && resultingURL)
