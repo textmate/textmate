@@ -254,13 +254,17 @@ namespace
 		self.window = [[NSWindow alloc] initWithContentRect:NSZeroRect styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask) backing:NSBackingStoreBuffered defer:NO];
 		self.window.autorecalculatesKeyViewLoop = YES;
 		self.window.collectionBehavior          = NSWindowCollectionBehaviorFullScreenPrimary;
-		self.window.contentView                 = self.layoutView;
 		self.window.delegate                    = self;
 		self.window.releasedWhenClosed          = NO;
 		[self.window setContentBorderThickness:0 forEdge:NSMaxYEdge]; // top border
 		[self.window setContentBorderThickness:0 forEdge:NSMinYEdge]; // bottom border
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMaxYEdge];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
+
+		[self.layoutView setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[self.window.contentView addSubview:self.layoutView];
+		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
+		[self.window.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|" options:0 metrics:nil views:@{ @"view" : self.layoutView }]];
 
 		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
 
