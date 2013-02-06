@@ -530,8 +530,12 @@ namespace
 {
 	NSUInteger tabIndex = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
 
-	NSMutableIndexSet* otherTabs = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _documents.size())];
-	[otherTabs removeIndex:tabIndex];
+	NSMutableIndexSet* otherTabs = [NSMutableIndexSet indexSet];
+	for(size_t i = 0; i < _documents.size(); ++i)
+	{
+		if(i != tabIndex && (!_documents[i]->is_modified() || _documents[i]->path() != NULL_STR))
+			[otherTabs addIndex:i];
+	}
 	[self closeTabsAtIndexes:otherTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
 }
 
