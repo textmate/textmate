@@ -138,7 +138,7 @@ NSString* const OakFileManagerDirectoryKey                 = @"directory";
 {
 	BOOL res;
 	NSError* error;
-	if(res = [[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
+	if(res = [[NSFileManager defaultManager] tmMoveItemAtURL:srcURL toURL:dstURL error:&error])
 	{
 		[[[window undoManager] prepareWithInvocationTarget:self] doMove:dstURL toURL:srcURL withSound:playSoundFlag window:window];
 		if(playSoundFlag)
