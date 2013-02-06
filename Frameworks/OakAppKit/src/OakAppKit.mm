@@ -47,6 +47,11 @@ NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 		self.borderColor = flag ? self.primaryColor : self.secondaryColor;
 	}
 }
+
+- (BOOL)isOpaque
+{
+	return YES;
+}
 @end
 
 static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColor* secondaryColor)
