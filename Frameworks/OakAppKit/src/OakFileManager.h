@@ -1,5 +1,8 @@
 #import <oak/misc.h>
 
+PUBLIC extern NSString* const OakFileManagerDidChangeContentsOfDirectory;
+PUBLIC extern NSString* const OakFileManagerDirectoryKey;
+
 PUBLIC @interface OakFileManager : NSObject
 + (OakFileManager*)sharedInstance;
 - (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL window:(NSWindow*)window;
