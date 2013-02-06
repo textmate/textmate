@@ -764,6 +764,9 @@ namespace
 
 - (IBAction)saveDocument:(id)sender
 {
+	if(!_selectedDocument)
+		return;
+
 	if(_selectedDocument->path() != NULL_STR)
 	{
 		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
@@ -808,6 +811,9 @@ namespace
 
 - (IBAction)saveDocumentAs:(id)sender
 {
+	if(!_selectedDocument)
+		return;
+
 	std::string const documentPath   = _selectedDocument->path();
 	NSString* const suggestedFolder  = [NSString stringWithCxxString:path::parent(documentPath)] ?: self.untitledSavePath;
 	NSString* const suggestedName    = [NSString stringWithCxxString:path::name(documentPath)]   ?: DefaultSaveNameForDocument(_selectedDocument);
@@ -1362,10 +1368,13 @@ namespace
 	merge_documents_splitting_at(_documents, make_vector(document::find(docId)), droppedIndex, newDocuments);
 	self.documents = newDocuments;
 
-	oak::uuid_t selectedUUID = _selectedDocument->identifier();
-	auto iter = std::find_if(newDocuments.begin(), newDocuments.end(), [&selectedUUID](document::document_ptr const& doc){ return doc->identifier() == selectedUUID; });
-	if(iter != newDocuments.end())
-		self.selectedTabIndex = iter - newDocuments.begin();
+	if(_selectedDocument)
+	{
+		oak::uuid_t selectedUUID = _selectedDocument->identifier();
+		auto iter = std::find_if(newDocuments.begin(), newDocuments.end(), [&selectedUUID](document::document_ptr const& doc){ return doc->identifier() == selectedUUID; });
+		if(iter != newDocuments.end())
+			self.selectedTabIndex = iter - newDocuments.begin();
+	}
 
 	oak::uuid_t srcProjectId = to_s((NSString*)plist[@"collection"]);
 	if(operation == NSDragOperationMove && srcProjectId != to_s(self.identifier))
@@ -1463,7 +1472,7 @@ namespace
 
 - (IBAction)reload:(id)sender               { [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 
-- (IBAction)revealFileInProject:(id)sender  { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:_selectedDocument->path()]] withParentURL:[NSURL fileURLWithPath:self.projectPath]]; }
+- (IBAction)revealFileInProject:(id)sender  { if(_selectedDocument) { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:_selectedDocument->path()]] withParentURL:[NSURL fileURLWithPath:self.projectPath]]; } }
 - (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
 
 - (IBAction)goBack:(id)sender               { self.fileBrowserVisible = YES; [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
@@ -1568,10 +1577,15 @@ namespace
 // = Opening Auxiliary Windows =
 // =============================
 
+- (NSString*)selectedDocumentUUID
+{
+	return _selectedDocument ? [NSString stringWithCxxString:_selectedDocument->identifier()] : nil;
+}
+
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	Find* find              = [Find sharedInstance];
-	find.documentIdentifier = [NSString stringWithCxxString:_selectedDocument->identifier()];
+	find.documentIdentifier = self.selectedDocumentUUID;
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 	find.projectIdentifier  = self.identifier;
 
@@ -1609,7 +1623,7 @@ namespace
 - (IBAction)orderFrontFindPanelForFileBrowser:(id)sender
 {
 	Find* find              = [Find sharedInstance];
-	find.documentIdentifier = [NSString stringWithCxxString:_selectedDocument->identifier()];
+	find.documentIdentifier = self.selectedDocumentUUID;
 	find.projectIdentifier  = self.identifier;
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath;
 	find.searchFolder       = self.untitledSavePath;
@@ -1702,6 +1716,9 @@ namespace
 
 - (IBAction)goToFileCounterpart:(id)sender
 {
+	if(!_selectedDocument)
+		return;
+
 	std::string const documentPath = _selectedDocument->path();
 	if(documentPath == NULL_STR)
 		return (void)NSBeep();
@@ -1799,7 +1816,7 @@ namespace
 	else if([menuItem action] == @selector(goForward:))
 		active = self.fileBrowser.canGoForward;
 	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
-		active = _selectedDocument->path() != NULL_STR;
+		active = _selectedDocument && _selectedDocument->path() != NULL_STR;
 	else if([menuItem action] == @selector(goToProjectFolder:))
 		active = self.projectPath != nil;
 	else if([menuItem action] == @selector(goToParentFolder:))
