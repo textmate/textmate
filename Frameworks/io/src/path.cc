@@ -690,7 +690,7 @@ namespace path
 		std::string base = name(strip_extension(requestedPath));
 		std::string ext  = extension(requestedPath);
 
-		if(regexp::match_t const& m = regexp::search(" \\d+$", base.data(), base.data() + base.size()))
+		if(regexp::match_t const& m = regexp::search(" \\d+$", base))
 			base.erase(m.begin());
 		if(suffix != "" && base.size() > suffix.size() && base.find(suffix) == base.size() - suffix.size())
 			base.erase(base.size() - suffix.size());

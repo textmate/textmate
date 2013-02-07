@@ -109,7 +109,7 @@ static void pac_proxy_callback (void* client, CFArrayRef proxyList, CFErrorRef e
 proxy_settings_t get_proxy_settings (std::string const& url)
 {
 	proxy_settings_t res(false);
-	if(regexp::search("^https?://localhost[:/]", url.data(), url.data() + url.size()))
+	if(regexp::search("^https?://localhost[:/]", url))
 		return res;
 
 	CFDictionaryRef tmp = SCDynamicStoreCopyProxies(NULL);

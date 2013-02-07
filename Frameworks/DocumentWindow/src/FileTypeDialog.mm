@@ -99,7 +99,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 				grammar_info_t info((*grammar)->name(), (*grammar)->scope(), (*grammar)->uuid(), (*bundle)->uuid());
 				all.insert(info);
 
-				if((*grammar)->mode_line() != NULL_STR && regexp::search((*grammar)->mode_line(), firstLine.data(), firstLine.data() + firstLine.size()))
+				if((*grammar)->mode_line() != NULL_STR && regexp::search((*grammar)->mode_line(), firstLine))
 				{
 					recommended.insert(info);
 				}

@@ -136,7 +136,7 @@ namespace transform
 
 	static std::string fill_string (std::string const& src)
 	{
-		if(regexp::match_t const& m = regexp::search("\\A( *([*o•·-]) (?=\\S)|\\s{2,})", src.data(), src.data() + src.size()))
+		if(regexp::match_t const& m = regexp::search("\\A( *([*o•·-]) (?=\\S)|\\s{2,})", src))
 			return format_string::replace(src.substr(0, m.end()), "\\S", " ");
 		return "";
 	}

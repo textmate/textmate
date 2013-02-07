@@ -350,7 +350,7 @@ namespace ng
 				std::string pattern, format;
 				if(plist::get_key_path(indentedSoftWrapValue, "match", pattern) && plist::get_key_path(indentedSoftWrapValue, "format", format))
 				{
-					if(regexp::match_t const& m = regexp::search(pattern, str.data(), str.data() + str.size()))
+					if(regexp::match_t const& m = regexp::search(pattern, str))
 					{
 						std::string tmp = format_string::expand(format, m.captures());
 						citerate(ch, diacritics::make_range(tmp.data(), tmp.data() + tmp.size()))

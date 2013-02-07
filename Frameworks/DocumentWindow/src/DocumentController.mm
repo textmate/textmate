@@ -1654,7 +1654,7 @@ namespace
 	if(OakPasteboardEntry* entry = [[OakPasteboard pasteboardWithName:NSFindPboard] current])
 	{
 		std::string str = to_s(entry.string);
-		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str.data(), str.data() + str.size()))
+		if(regexp::search("\\A.*?(\\.|/).*?:\\d+\\z", str))
 			fc.filterString = entry.string;
 	}
 

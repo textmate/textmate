@@ -406,11 +406,11 @@ namespace ng
 			setup_patterns(_buffer, n, startPattern, stopPattern, indentPattern, ignorePattern);
 
 			std::string const line = _buffer.substr(_buffer.begin(n), _buffer.eol(n));
-			size_t res = text::is_blank(line.data(), line.data() + line.size())          ?  1 : 0;
-			res += regexp::search(startPattern,  line.data(), line.data() + line.size()) ?  2 : 0;
-			res += regexp::search(stopPattern,   line.data(), line.data() + line.size()) ?  4 : 0;
-			res += regexp::search(indentPattern, line.data(), line.data() + line.size()) ?  8 : 0;
-			res += regexp::search(ignorePattern, line.data(), line.data() + line.size()) ? 16 : 0;
+			size_t res = text::is_blank(line.data(), line.data() + line.size()) ?  1 : 0;
+			res += regexp::search(startPattern,  line) ?  2 : 0;
+			res += regexp::search(stopPattern,   line) ?  4 : 0;
+			res += regexp::search(indentPattern, line) ?  8 : 0;
+			res += regexp::search(ignorePattern, line) ? 16 : 0;
 
 			if(res & 6) // if start/stop marker we ignore indent patterns
 				res &= ~24;

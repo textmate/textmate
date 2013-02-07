@@ -52,7 +52,7 @@ namespace path
 
 	bool glob_t::does_match (std::string const& filename) const
 	{
-		bool res = _negate ^ (bool)regexp::search(_compiled, filename.data(), filename.data() + filename.size());
+		bool res = _negate ^ (bool)regexp::search(_compiled, filename);
 		D(DBF_Glob, bug("%s → %s\n", filename.c_str(), BSTR(res)););
 		return res;
 	}
