@@ -124,6 +124,11 @@ namespace regexp
 		return match_t();
 	}
 
+	match_t search (pattern_t const& ptrn, std::string const& str)
+	{
+		return search(ptrn, str.data(), str.data() + str.size());
+	}
+
 	// =====================
 	// = Syntax validation =
 	// =====================

@@ -76,6 +76,7 @@ namespace regexp
 
 	PUBLIC std::string validate (std::string const& ptrn);
 	PUBLIC match_t search (pattern_t const& ptrn, char const* first, char const* last, char const* from = NULL, char const* to = NULL, OnigOptionType options = ONIG_OPTION_NONE);
+	PUBLIC match_t search (pattern_t const& ptrn, std::string const& str);
 
 } /* regexp */
 
