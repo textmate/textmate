@@ -14,7 +14,7 @@ static std::string hardware_info (int field, bool integer = false)
 	if(sysctl(request, sizeofA(request), buf, &bufSize, NULL, 0) != -1)
 	{
 		if(integer && bufSize == 4)
-			return text::format("%d", *(int*)buf);
+			return std::to_string(*(int*)buf);
 		return std::string(buf, buf + bufSize - 1);
 	}
 

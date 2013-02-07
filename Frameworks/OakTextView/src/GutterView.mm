@@ -302,7 +302,7 @@ static CTLineRef CreateCTLineFromText (std::string const& text, NSFont* font, NS
 
 static CGFloat WidthOfLineNumbers (NSUInteger lineNumber, NSFont* font)
 {
-	CTLineRef line = CreateCTLineFromText(text::format("%ld", std::max<NSUInteger>(10, lineNumber)), font);
+	CTLineRef line = CreateCTLineFromText(std::to_string(std::max<NSUInteger>(10, lineNumber)), font);
 	CGFloat width  = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
 	CFRelease(line);
 	return ceil(width);
@@ -356,7 +356,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 			if(dataSource->identifier == GVLineNumbersColumnIdentifier.UTF8String)
 			{
 				NSColor* textColor = selectedRow ? self.selectionForegroundColor : self.foregroundColor;
-				DrawText(record.softlineOffset == 0 ? text::format("%ld", record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
+				DrawText(record.softlineOffset == 0 ? std::to_string(record.lineNumber + 1) : "·", columnRect, NSMinY(columnRect) + record.baseline, self.lineNumberFont, textColor);
 			}
 			else if(record.softlineOffset == 0)
 			{

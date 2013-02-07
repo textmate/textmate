@@ -114,7 +114,7 @@ namespace oak
 
 	void application_t::create_pid_file ()
 	{
-		if(path::set_content(_pid_path, text::format("%d", getpid())))
+		if(path::set_content(_pid_path, std::to_string(getpid())))
 		{
 			atexit(&remove_pid_file);
 		}

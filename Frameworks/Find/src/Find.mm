@@ -336,10 +336,10 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	};
 
 	format_string::string_map_t variables;
-	variables["count"]  = text::format("%lu", aNumber);
+	variables["count"]  = std::to_string(aNumber);
 	variables["found"]  = to_s(aFindString);
-	variables["line"]   = aPosition ? text::format("%zu", aPosition.line + 1)   : NULL_STR;
-	variables["column"] = aPosition ? text::format("%zu", aPosition.column + 1) : NULL_STR;
+	variables["line"]   = aPosition ? std::to_string(aPosition.line + 1)   : NULL_STR;
+	variables["column"] = aPosition ? std::to_string(aPosition.column + 1) : NULL_STR;
 	windowController.statusMessage = [NSString stringWithCxxString:format_string::expand(formatStrings[(findOptions & find::regular_expression) ? 1 : 0][std::min<size_t>(aNumber, 2)], variables)];
 
 	if(closeWindowOnSuccess && aNumber != 0)

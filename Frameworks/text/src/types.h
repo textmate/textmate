@@ -34,7 +34,7 @@ namespace text
 		pos_t operator+ (ssize_t dist) const         { return pos_t(line, column + dist); }
 		pos_t operator- (ssize_t dist) const         { ASSERT(column >= dist); return pos_t(line, column - dist); }
 
-		operator std::string () const                { return text::format("%zu", line+1) + column_str() + offset_str(); }
+		operator std::string () const                { return std::to_string(line+1) + column_str() + offset_str(); }
 		explicit operator bool () const              { return *this != undefined; }
 
 		static pos_t zero;

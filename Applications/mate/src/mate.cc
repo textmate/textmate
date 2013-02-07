@@ -299,7 +299,7 @@ int main (int argc, char* argv[])
 			{
 				if(len == -1)
 					break;
-				write_key_pair(fd, "data", text::format("%zu", len));
+				write_key_pair(fd, "data", std::to_string(len));
 				write(fd, buf, len);
 			}
 

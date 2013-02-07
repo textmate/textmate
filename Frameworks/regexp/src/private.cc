@@ -37,7 +37,7 @@ std::map<std::string, std::string> extract_captures (UChar const* buffer, OnigRe
 	for(size_t i = 0; i < match->num_regs; ++i)
 	{
 		if(match->beg[i] != -1)
-			res.insert(std::make_pair(text::format("%zu", i), std::string(buffer + match->beg[i], buffer + match->end[i])));
+			res.insert(std::make_pair(std::to_string(i), std::string(buffer + match->beg[i], buffer + match->end[i])));
 	}
 	udata_t udata = { buffer, match, res };
 	onig_foreach_name(regexp, &copy_matches_for_name, (void*)&udata);

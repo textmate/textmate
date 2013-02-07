@@ -186,8 +186,8 @@ namespace
 
 		std::string indent_string () const                           { return std::string(indent, '\t'); }
 		std::string operator() (bool flag) const                     { return flag ? ":true" : ":false"; }
-		std::string operator() (int32_t i) const                     { return text::format("%d", i); }
-		std::string operator() (uint64_t i) const                    { return text::format("%llu", i); }
+		std::string operator() (int32_t i) const                     { return std::to_string(i); }
+		std::string operator() (uint64_t i) const                    { return std::to_string(i); }
 		std::string operator() (std::string const& str) const        { return pretty_string(str, flags); }
 		std::string operator() (std::vector<char> const& data) const { return pretty_data(data); }
 		std::string operator() (oak::date_t const& date) const       { return "@" + to_s(date); }

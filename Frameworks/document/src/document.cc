@@ -741,7 +741,7 @@ namespace document
 			path::set_attr(dst, "com.macromates.backup.encoding",       _disk_encoding);
 			path::set_attr(dst, "com.macromates.backup.bom",            _disk_bom ? "YES" : "NO");
 			path::set_attr(dst, "com.macromates.backup.newlines",       _disk_newlines);
-			path::set_attr(dst, "com.macromates.backup.untitled-count", text::format("%zu", _untitled_count));
+			path::set_attr(dst, "com.macromates.backup.untitled-count", std::to_string(_untitled_count));
 			path::set_attr(dst, "com.macromates.backup.custom-name",    _custom_name);
 			path::set_attr(dst, "com.macromates.bookmarks",             marks_as_string());
 			path::set_attr(dst, "com.macromates.folded",                NULL_STR);

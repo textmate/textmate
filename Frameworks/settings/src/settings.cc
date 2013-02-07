@@ -39,7 +39,7 @@ namespace
 				res.push_back(std::make_pair(*key, value));
 		}
 
-		res.push_back(std::make_pair("TM_PID", text::format("%d", getpid())));
+		res.push_back(std::make_pair("TM_PID", std::to_string(getpid())));
 		res.push_back(std::make_pair("TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe"));
 		res.push_back(std::make_pair("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle()))));
 		citerate(pair, oak::basic_environment())

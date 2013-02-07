@@ -184,7 +184,7 @@ bool parse_context_t::parse_variable (bool(parse_context_t::*parse_content)(char
 		{
 			size_t index;
 			if(parse_int(index))
-				return nodes.push_back((variable_t){ text::format("%zu", index) }), true;
+				return nodes.push_back((variable_t){ std::to_string(index) }), true;
 			
 			std::string variable;
 			if(parse_chars("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_abcdefghijklmnopqrstuvwxyz", variable))
@@ -201,7 +201,7 @@ bool parse_context_t::parse_condition (nodes_t& nodes)
 	if(parse_char("(") && parse_char("?") && parse_int(captureRegister) && parse_char(":"))
 	{
 		variable_condition_t res;
-		res.name = text::format("%zu", captureRegister);
+		res.name = std::to_string(captureRegister);
 		if(parse_format_string(":)", res.if_set) && (it[-1] == ')' || it[-1] == ':' && parse_format_string(")", res.if_not_set) && it[-1] == ')'))
 			return nodes.push_back(res), true;
 	}

@@ -270,11 +270,11 @@ namespace plist
 
 	static bool convert_to (int32_t from, bool& to)                          { to = from ? true : false;        return true; }
 	static bool convert_to (int32_t from, uint64_t& to)                      { to = from;                       return from >= 0; }
-	static bool convert_to (int32_t from, std::string& to)                   { to = text::format("%d", from);   return true; }
+	static bool convert_to (int32_t from, std::string& to)                   { to = std::to_string(from);       return true; }
 
 	static bool convert_to (uint64_t from, bool& to)                         { to = from ? true : false;        return true; }
 	static bool convert_to (uint64_t from, int32_t& to)                      { to = from;                       return from <= INT32_MAX; }
-	static bool convert_to (uint64_t from, std::string& to)                  { to = text::format("%llu", from); return true; }
+	static bool convert_to (uint64_t from, std::string& to)                  { to = std::to_string(from);       return true; }
 
 	static bool convert_to (std::string const& from, bool& to)               { to = from != "0" ? true : false;      return true; }
 	static bool convert_to (std::string const& from, int32_t& to)            { to = strtol(from.c_str(), NULL, 0);   return true; }

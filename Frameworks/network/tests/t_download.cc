@@ -75,7 +75,7 @@ public:
 			{
 				TS_ASSERT_EQUALS(status, "HTTP/1.0 200 OK");
 				TS_ASSERT(headers.find("content-length") != headers.end());
-				TS_ASSERT_EQUALS(headers.find("content-length")->second, text::format("%zu", fileSize));
+				TS_ASSERT_EQUALS(headers.find("content-length")->second, std::to_string(fileSize));
 				TS_ASSERT_EQUALS(body, std::string(fileContent, fileContent + fileSize));
 			}
 			close(fd);

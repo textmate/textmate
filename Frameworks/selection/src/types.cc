@@ -5,7 +5,7 @@ namespace ng
 {
 	std::string to_s (index_t const& index)
 	{
-		return index ? (index.carry ? text::format("%zu:%zu", index.index, index.carry) : text::format("%zu", index.index)) : "«undefined»";
+		return index ? std::to_string(index.index) + (index.carry ? text::format(":%zu", index.carry) : "") : "«undefined»";
 	}
 
 	std::string to_s (range_t const& range)

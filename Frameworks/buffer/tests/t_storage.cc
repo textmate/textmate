@@ -16,7 +16,7 @@ class StorageTests : public CxxTest::TestSuite
 {
 	static std::string format_number (size_t i)
 	{
-		return format_string::replace(text::format("%zu", i), "\\d{1,3}(?=\\d{3}+(?!\\d))", "$0,");
+		return format_string::replace(std::to_string(i), "\\d{1,3}(?=\\d{3}+(?!\\d))", "$0,");
 	}
 
 	struct key_t

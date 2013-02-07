@@ -27,7 +27,7 @@ namespace text
 		std::string res = "";
 		for(size_t i = 0; i < std::max(minDigits, actualDigits) - actualDigits; ++i)
 			res += "\u2007"; // Figure Space
-		return res + text::format("%zu", number);
+		return res + std::to_string(number);
 	}
 
 	template <typename T>

@@ -96,7 +96,7 @@ namespace regexp
 			for(size_t i = 0; i < size(); ++i)
 			{
 				if(did_match(i))
-					captured_indices->insert(std::make_pair(text::format("%zu", i), std::make_pair(begin(i), end(i))));
+					captured_indices->insert(std::make_pair(std::to_string(i), std::make_pair(begin(i), end(i))));
 			}
 			onig_foreach_name(compiled_pattern.get(), &helper_t::main, (void*)this);
 		}

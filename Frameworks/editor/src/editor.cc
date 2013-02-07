@@ -306,7 +306,7 @@ namespace ng
 		{
 			if(indent != NULL_STR) _options["indent"]    = indent;
 			if(complete)           _options["complete"]  = "1";
-			if(fragments > 1)      _options["fragments"] = text::format("%zu", fragments);
+			if(fragments > 1)      _options["fragments"] = std::to_string(fragments);
 			if(columnar)           _options["columnar"]  = "1";
 		}
 		std::map<std::string, std::string> const& options () const { return _options; }
@@ -1360,7 +1360,7 @@ namespace ng
 				map = _document->variables(map);
 		else	map = variables_for_path(NULL_STR, "", map);
 
-		map.insert(std::make_pair("TM_TAB_SIZE", text::format("%zu", _buffer.indent().tab_size())));
+		map.insert(std::make_pair("TM_TAB_SIZE", std::to_string(_buffer.indent().tab_size())));
 		map.insert(std::make_pair("TM_SOFT_TABS", _buffer.indent().soft_tabs() ? "YES" : "NO"));
 		map.insert(std::make_pair("TM_SELECTION", to_s(_buffer, _selections)));
 
@@ -1372,9 +1372,9 @@ namespace ng
 				size_t const caret = range.last.index;
 				text::pos_t const& pos = _buffer.convert(caret);
 
-				map.insert(std::make_pair("TM_LINE_INDEX",    text::format("%zu", pos.column)));
-				map.insert(std::make_pair("TM_LINE_NUMBER",   text::format("%zu", pos.line+1)));
-				map.insert(std::make_pair("TM_COLUMN_NUMBER", text::format("%zu", visual_distance(_buffer, _buffer.begin(pos.line), caret)+1)));
+				map.insert(std::make_pair("TM_LINE_INDEX",    std::to_string(pos.column)));
+				map.insert(std::make_pair("TM_LINE_NUMBER",   std::to_string(pos.line+1)));
+				map.insert(std::make_pair("TM_COLUMN_NUMBER", std::to_string(visual_distance(_buffer, _buffer.begin(pos.line), caret)+1)));
 
 				range_t wordRange = ng::extend(_buffer, _selections, kSelectionExtendToWord).last();
 				map.insert(std::make_pair("TM_CURRENT_WORD",  _buffer.substr(wordRange.min().index, wordRange.max().index)));
