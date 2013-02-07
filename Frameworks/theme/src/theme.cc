@@ -91,7 +91,7 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 		plist::any_t const& value = bundles::value_for_setting(colorKeys[i].name, scope, &item);
 		if(item)
 		{
-			res.push_back(decomposed_style_t(item->scope_selector()));
+			res.emplace_back(item->scope_selector());
 			res.back().*(colorKeys[i].field) = read_color(plist::get<std::string>(value));
 		}
 	}
@@ -102,7 +102,7 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 		plist::any_t const& value = bundles::value_for_setting(booleanKeys[i].name, scope, &item);
 		if(item)
 		{
-			res.push_back(decomposed_style_t(item->scope_selector()));
+			res.emplace_back(item->scope_selector());
 			res.back().*(booleanKeys[i].field) = plist::is_true(value) ? bool_true : bool_false;
 		}
 	}
@@ -111,7 +111,7 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 	plist::any_t const& fontNameValue = bundles::value_for_setting("fontName", scope, &fontNameItem);
 	if(fontNameItem)
 	{
-		res.push_back(decomposed_style_t(fontNameItem->scope_selector()));
+		res.emplace_back(fontNameItem->scope_selector());
 		res.back().font_name = plist::get<std::string>(fontNameValue);
 	}
 
@@ -119,7 +119,7 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 	plist::any_t const& fontSizeValue = bundles::value_for_setting("fontSize", scope, &fontSizeItem);
 	if(fontSizeItem)
 	{
-		res.push_back(decomposed_style_t(fontSizeItem->scope_selector()));
+		res.emplace_back(fontSizeItem->scope_selector());
 		res.back().font_size = read_font_size(plist::get<std::string>(fontSizeValue));
 	}
 

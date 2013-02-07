@@ -62,7 +62,7 @@ namespace scope
 			bool rc = false;
 			res.anchor_to_previous = parse_char(">") && ws();
 			do {
-				res.atoms.push_back(atom_t());
+				res.atoms.emplace_back();
 				if(!parse_atom(res.atoms.back()))
 				{
 					res.atoms.pop_back();

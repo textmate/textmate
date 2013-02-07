@@ -37,7 +37,7 @@ namespace // encoding_list
 			{
 				std::string name, code;
 				if(plist::get_key_path(*item, "name", name) && plist::get_key_path(*item, "code", code))
-					res.push_back(charset_t(name, code));
+					res.emplace_back(name, code);
 			}
 		}
 

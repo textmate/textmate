@@ -205,7 +205,7 @@ private:
 					std::string const path = path::join(dir, entry->d_name);
 					if(!includeHidden && (globs.exclude(path, entry->d_type == DT_DIR ? path::kPathItemDirectory : path::kPathItemFile) || (path::info(path) & path::flag::hidden)))
 						continue;
-					newItems.push_back(fs_item_t(buf.st_dev, entry, path));
+					newItems.emplace_back(buf.st_dev, entry, path);
 				}
 
 				dispatch_async(dispatch_get_main_queue(), ^{

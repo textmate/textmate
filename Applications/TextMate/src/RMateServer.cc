@@ -468,7 +468,7 @@ struct socket_observer_t
 				}
 				else
 				{
-					records.push_back(record_t(str));
+					records.emplace_back(str);
 					state = arguments;
 				}
 				D(DBF_RMateServer, bug("Got command ‘%s’\n", str.c_str()););

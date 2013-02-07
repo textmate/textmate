@@ -127,7 +127,7 @@ namespace bundles
 				std::string name;
 				oak::uuid_t uuid;
 				if(plist::get_key_path(*it, kFieldName, name) && plist::get_key_path(*it, kFieldUUID, uuid))
-					_required_bundles.push_back(required_bundle_t(name, uuid));
+					_required_bundles.emplace_back(name, uuid);
 			}
 		}
 

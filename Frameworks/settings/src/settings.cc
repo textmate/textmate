@@ -129,15 +129,15 @@ namespace
 
 			if(section->names.empty())
 			{
-				res.push_back(section_t(variables));
+				res.emplace_back(variables);
 			}
 			else
 			{
 				iterate(name, section->names)
 				{
 					if(is_scope_selector(*name))
-							res.push_back(section_t(scope::selector_t(*name), variables));
-					else	res.push_back(section_t(path::glob_t(*name), variables));
+							res.emplace_back(scope::selector_t(*name), variables);
+					else	res.emplace_back(path::glob_t(*name), variables);
 				}
 			}
 		}

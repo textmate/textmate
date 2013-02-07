@@ -399,7 +399,7 @@ namespace ng
 			auto node = _nodes.begin() + i;
 			if(node->type() == kNodeTypeSoftBreak)
 			{
-				softlines.push_back(softline_t(firstOffset, x, y, metrics.baseline(ascent), metrics.line_height(ascent, descent, leading), first, i + (softBreaksOnNewline ? 0 : 1)));
+				softlines.emplace_back(firstOffset, x, y, metrics.baseline(ascent), metrics.line_height(ascent, descent, leading), first, i + (softBreaksOnNewline ? 0 : 1));
 				firstOffset = offset;
 				x = (softBreaksOnNewline ? 0 : node->width());
 				y += metrics.line_height(ascent, descent, leading);
@@ -421,7 +421,7 @@ namespace ng
 			offset += node->length();
 		}
 
-		softlines.push_back(softline_t(firstOffset, x, y, metrics.baseline(ascent), metrics.line_height(ascent, descent, leading), first, _nodes.size()));
+		softlines.emplace_back(firstOffset, x, y, metrics.baseline(ascent), metrics.line_height(ascent, descent, leading), first, _nodes.size());
 		return softlines;
 	}
 

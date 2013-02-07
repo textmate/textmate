@@ -102,7 +102,7 @@ namespace ng
 	void undo_manager_t::will_replace (size_t from, size_t to, std::string const& str)
 	{
 		_records.erase(_records.begin() + _index, _records.end());
-		_records.push_back(record_t(from, _buffer.substr(from, to), str, _pre_selection, _pre_revision));
+		_records.emplace_back(from, _buffer.substr(from, to), str, _pre_selection, _pre_revision);
 		_pre_selection = ranges_t();
 		++_changes;
 		++_index;

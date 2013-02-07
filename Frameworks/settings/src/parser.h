@@ -21,7 +21,7 @@ struct ini_file_t
 
 	void new_section (std::vector<std::string> const& names)
 	{
-		sections.push_back(section_t(names));
+		sections.emplace_back(names);
 	}
 
 	void insert_value (std::string const& name, std::string const& value)

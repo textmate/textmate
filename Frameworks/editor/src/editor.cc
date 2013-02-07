@@ -136,14 +136,14 @@ namespace ng
 			{
 				if(range->empty())
 				{
-					_marks.push_back(mark_t(range->first, mark_t::kUnpairedMark));
-					_marks.push_back(mark_t(range->first, mark_t::kEndMark));
+					_marks.emplace_back(range->first, mark_t::kUnpairedMark);
+					_marks.emplace_back(range->first, mark_t::kEndMark);
 				}
 				else
 				{
 					size_t userInfo = (range->columnar ? kColumnar : 0) | (range->last < range->first ? kReversed : 0);
-					_marks.push_back(mark_t(range->min(), mark_t::kBeginMark, userInfo));
-					_marks.push_back(mark_t(range->max(), mark_t::kEndMark, userInfo));
+					_marks.emplace_back(range->min(), mark_t::kBeginMark, userInfo);
+					_marks.emplace_back(range->max(), mark_t::kEndMark, userInfo);
 				}
 			}
 

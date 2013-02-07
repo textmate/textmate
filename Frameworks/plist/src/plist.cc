@@ -47,7 +47,7 @@ namespace plist
 		std::vector<any_t>& ref = boost::get< std::vector<any_t> >(res = std::vector<any_t>());
 		for(CFIndex i = 0; i < CFArrayGetCount(array); ++i)
 		{
-			ref.push_back(any_t());
+			ref.emplace_back();
 			convert_any(CFArrayGetValueAtIndex(array, i), ref.back());
 		}
 	}

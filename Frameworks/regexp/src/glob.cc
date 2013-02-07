@@ -225,13 +225,13 @@ namespace path
 	void glob_list_t::add_include_glob (std::string const& glob, kPathItemType itemType)
 	{
 		if(glob != NULL_STR)
-			_globs.push_back(record_t(false, glob_t(glob, false), itemType));
+			_globs.emplace_back(false, glob_t(glob, false), itemType);
 	}
 
 	void glob_list_t::add_exclude_glob (std::string const& glob, kPathItemType itemType)
 	{
 		if(glob != NULL_STR)
-			_globs.push_back(record_t(true, glob_t(glob, true), itemType));
+			_globs.emplace_back(true, glob_t(glob, true), itemType);
 	}
 
 	bool glob_list_t::include (std::string const& path, kPathItemType itemType, bool defaultResult) const
