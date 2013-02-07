@@ -101,11 +101,11 @@ namespace
 			{
 				_initialized = true;
 
-				path      = !m.did_match(1) ? NULL_STR : std::string(m.buffer() + m.begin(1), m.buffer() + m.end(1));
-				name      = !m.did_match(2) ? ""       : std::string(m.buffer() + m.begin(2), m.buffer() + m.end(2));
-				extension = !m.did_match(3) ? NULL_STR : std::string(m.buffer() + m.begin(3), m.buffer() + m.end(3));
-				selection = !m.did_match(4) ? NULL_STR : std::string(m.buffer() + m.begin(4), m.buffer() + m.end(4));
-				symbol    = !m.did_match(5) ? NULL_STR : std::string(m.buffer() + m.begin(5), m.buffer() + m.end(5));
+				path      = m[1];
+				name      = m.did_match(2) ? m[2] : "";
+				extension = m[3];
+				selection = m[4];
+				symbol    = m[5];
 
 				raw_path = full_path();
 

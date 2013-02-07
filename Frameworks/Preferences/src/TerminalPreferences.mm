@@ -256,7 +256,7 @@ static bool uninstall_mate (std::string const& path)
 			[self setMateInstallPath:dstPath];
 			std::string res = io::exec(to_s(srcPath), "--version", NULL);
 			if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res))
-				[[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithUTF8String:res.data() + m.begin(1) length:m.end(1) - m.begin(1)] forKey:kUserDefaultsMateInstallVersionKey];
+				[[NSUserDefaults standardUserDefaults] setDouble:std::stod(m[1]) forKey:kUserDefaultsMateInstallVersionKey];
 		}
 	}
 	else
@@ -320,11 +320,11 @@ static bool uninstall_mate (std::string const& path)
 			std::string res = io::exec(to_s(newMate), "--version", NULL);
 			if(regexp::match_t const& m = regexp::search("\\Amate ([\\d.]+)", res))
 			{
-				NSString* newVersion = [NSString stringWithUTF8String:res.data() + m.begin(1) length:m.end(1) - m.begin(1)];
-				if(oldVersion < [newVersion doubleValue])
+				double newVersion = std::stod(m[1]);
+				if(oldVersion < newVersion)
 				{
 					if(install_mate(to_s(newMate), to_s(oldMate)))
-						[[NSUserDefaults standardUserDefaults] setObject:newVersion forKey:kUserDefaultsMateInstallVersionKey];
+						[[NSUserDefaults standardUserDefaults] setDouble:newVersion forKey:kUserDefaultsMateInstallVersionKey];
 				}
 			}
 		});

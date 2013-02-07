@@ -40,7 +40,7 @@ static double version_of_tool (std::string const& toolPath)
 {
 	std::string res = io::exec(toolPath, "--version", NULL);
 	if(regexp::match_t const& m = regexp::search("\\A[^\\s]+ ([\\d.]+)", res))
-		return strtod(res.c_str() + m.begin(1), NULL);
+		return std::stod(m[1]);
 	return 0;
 }
 
