@@ -23,8 +23,8 @@ namespace osx
 			helper_t (std::string const& hex) : _valid(false)
 			{
 				std::vector<char> v;
-				for(size_t i = 0; i+1 < hex.size(); i += 2)
-					v.push_back(strtol(hex.substr(i, 2).c_str(), NULL, 16));
+				for(size_t i = 0; i+1 < hex.size() && isxdigit(hex[i]) && isxdigit(hex[i+1]); i += 2)
+					v.push_back(std::stol(hex.substr(i, 2), NULL, 16));
 
 				if(v.size() == sizeof(AuthorizationExternalForm))
 				{

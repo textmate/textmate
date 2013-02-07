@@ -360,7 +360,7 @@ namespace decode
 		{
 			if(src[i] == '%' && i + 2 < src.size() && isxdigit(src[i+1]) && isxdigit(src[i+2]))
 			{
-				res.append(1, strtol(src.substr(i+1, 2).c_str(), NULL, 16));
+				res.append(1, std::stoi(src.substr(i+1, 2), NULL, 16));
 				i += 2;
 			}
 			else
