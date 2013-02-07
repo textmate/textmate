@@ -103,6 +103,11 @@ namespace regexp
 		return *captured_indices;
 	}
 
+	std::string match_t::operator[] (size_t i) const
+	{
+		return did_match(i) ? std::string(buffer() + begin(i), buffer() + end(i)) : NULL_STR;
+	}
+
 	// ============
 	// = Matching =
 	// ============

@@ -45,6 +45,7 @@ namespace regexp
 
 		std::map<std::string, std::string> const& captures () const;
 		std::multimap<std::string, std::pair<size_t, size_t> > const& capture_indices () const;
+		std::string operator[] (size_t i) const;
 	};
 
 	struct PUBLIC pattern_t
