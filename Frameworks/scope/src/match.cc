@@ -71,7 +71,7 @@ namespace scope
 				if(prefix_match(scopes[j-1].atoms, path.scopes[i-1].atoms))
 				{
 					for(size_t k = 0; k < scopes[j-1].atoms.size(); ++k)
-						score += 1 / pow(2, power - k);
+						score += 1 / exp2(power - k);
 					--j;
 					check_next = anchor_to_previous;
 				}
