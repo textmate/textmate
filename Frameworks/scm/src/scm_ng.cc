@@ -4,7 +4,6 @@
 #include "fs_events.h"
 #include <io/path.h>
 #include <text/format.h>
-#include <plist/date.h>
 #include <settings/settings.h>
 
 namespace scm
@@ -55,8 +54,7 @@ namespace scm { namespace ng
 		fs::snapshot_t _fs_snapshot;
 
 		bool _pending_update = false;
-		oak::date_t _last_check;
-
+		std::chrono::steady_clock::time_point _no_check_before = std::chrono::steady_clock::now();
 		std::shared_ptr<watcher_t> _watcher;
 		std::set<info_t*> _clients;
 	};
@@ -202,8 +200,8 @@ namespace scm { namespace ng
 			}
 
 			dispatch_async(dispatch_get_main_queue(), ^{
-				info->_pending_update = false;
-				info->_last_check     = oak::date_t::now();
+				info->_pending_update  = false;
+				info->_no_check_before = std::chrono::steady_clock::now() + std::chrono::seconds(3);
 			});
 		}
 	}
@@ -220,11 +218,8 @@ namespace scm { namespace ng
 			return;
 		_pending_update = true;
 
-	   dispatch_time_t delay = DISPATCH_TIME_NOW;
-
-		double elapsed = oak::date_t::now() - _last_check;
-		if(_last_check && elapsed < 3)
-			delay = dispatch_time(DISPATCH_TIME_NOW, (3 - elapsed) * NSEC_PER_SEC);
+		auto now = std::chrono::steady_clock::now();
+		dispatch_time_t delay = now < _no_check_before ? dispatch_time(DISPATCH_TIME_NOW, std::chrono::duration_cast<std::chrono::duration<int64_t, std::nano>>(_no_check_before - now).count()) : DISPATCH_TIME_NOW;
 
 		shared_info_weak_ptr weakThis = shared_from_this();
 		static dispatch_queue_t queue = dispatch_queue_create("org.textmate.scm.status", DISPATCH_QUEUE_SERIAL);
