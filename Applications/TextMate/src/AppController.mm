@@ -167,7 +167,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 	if(!disableUntitledAtStartupPrefs && !HasDocumentWindow([NSApp orderedWindows]))
 		[self newDocument:self];
 
-	OakSubmitNewCrashReportsInBackground(REST_API @"/crashes");
 	[BundlesManager sharedInstance]; // trigger periodic polling of remote bundle index
 
 	SoftwareUpdate* swUpdate = [SoftwareUpdate sharedInstance];
@@ -187,6 +186,9 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	[TerminalPreferences updateMateIfRequired];
 	[AboutWindowController showChangesIfUpdated];
+
+	[[CrashReporter sharedInstance] applicationDidFinishLaunching:aNotification];
+	[[CrashReporter sharedInstance] postNewCrashReportsToURLString:REST_API @"/crashes"];
 
 	self.didFinishLaunching = YES;
 }
