@@ -48,5 +48,5 @@ PUBLIC @interface OakFileBrowser : NSResponder
 @end
 
 @interface OakFileBrowser (ForQuickLookKeyEventForwardingAndMoveFocus)
-@property (nonatomic, readonly) NSView* outlineView;
+@property (nonatomic, readonly) NSOutlineView* outlineView;
 @end
