@@ -175,7 +175,8 @@ static BundlesManager* SharedInstance;
 	if(!someSources.empty())
 	{
 		bundlesIndex = bundles_db::index(kInstallDirectory);
-		[self updateBundles:nil];
+		if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
+			[self updateBundles:nil];
 	}
 	else if(!someBundles.empty())
 	{
