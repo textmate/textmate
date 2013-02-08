@@ -259,8 +259,8 @@ namespace ng
 		// = Snippets =
 		// ============
 
-		void snippet (std::string const& str, std::map<std::string, std::string> const& variables);
-		ranges_t snippet (size_t from, size_t to, std::string const& str, std::map<std::string, std::string> const& variables);
+		void snippet (std::string const& str, std::map<std::string, std::string> const& variables, bool disableIndent = false);
+		ranges_t snippet (size_t from, size_t to, std::string const& str, std::map<std::string, std::string> const& variables, bool disableIndent);
 
 		void find (std::string const& searchFor, find::options_t options = find::none, bool searchOnlySelection = false);
 		ranges_t replace (std::multimap<range_t, std::string> const& replacements, bool selectInsertions = false);

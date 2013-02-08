@@ -157,6 +157,7 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 		res.requirements = convert_requirements(requiredCommands);
 
 	plist::get_key_path(plist, "autoScrollOutput", res.auto_scroll_output);
+	plist::get_key_path(plist, "disableOutputAutoIndent", res.disable_output_auto_indent);
 }
 
 bundle_command_t parse_command (plist::dictionary_t const& plist)

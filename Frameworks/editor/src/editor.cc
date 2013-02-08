@@ -368,7 +368,7 @@ namespace ng
 		return selectInsertions ? res : ng::move(_buffer, res, kSelectionMoveToEndOfSelection);
 	}
 
-	ranges_t editor_t::snippet (size_t from, size_t to, std::string const& str, std::map<std::string, std::string> const& variables)
+	ranges_t editor_t::snippet (size_t from, size_t to, std::string const& str, std::map<std::string, std::string> const& variables, bool disableIndent)
 	{
 		struct callback_t : snippet::run_command_callback_t
 		{
@@ -399,7 +399,7 @@ namespace ng
 
 		} callback;
 
-		std::string indent = _buffer.substr(_buffer.begin(_buffer.convert(from).line), from);
+		std::string indent = disableIndent ? "" : _buffer.substr(_buffer.begin(_buffer.convert(from).line), from);
 		size_t i = 0;
 		while(i < indent.size() && text::is_space(indent[i]))
 			++i;
@@ -741,11 +741,11 @@ namespace ng
 		_selections = tmp.empty() ? tmp : sel;
 	}
 
-	void editor_t::snippet (std::string const& str, std::map<std::string, std::string> const& variables)
+	void editor_t::snippet (std::string const& str, std::map<std::string, std::string> const& variables, bool disableIndent)
 	{
 		size_t from = _selections.last().min().index;
 		size_t to   = _selections.last().max().index;
-		_selections = this->snippet(from, to, str, variables);
+		_selections = this->snippet(from, to, str, variables, disableIndent);
 	}
 
 	void editor_t::perform (action_t action, layout_t const* layout, bool indentCorrections, std::string const& scopeAttributes)
@@ -1299,10 +1299,11 @@ namespace ng
 		switch(format)
 		{
 			case output_format::snippet:
+			case output_format::snippet_no_auto_indent:
 			{
 				if(range)
 					_selections = range;
-				snippet(out, environment);
+				snippet(out, environment, format == output_format::snippet_no_auto_indent);
 			}
 			break;
 

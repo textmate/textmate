@@ -197,6 +197,9 @@ namespace command
 				}
 			}
 
+			if(format == output_format::snippet && _command.disable_output_auto_indent)
+				format = output_format::snippet_no_auto_indent;
+
 			_delegate->accept_result(_out, placement, format, outputCaret, _input_range, _environment);
 		}
 		else if(_did_send_html)

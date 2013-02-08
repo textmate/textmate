@@ -200,9 +200,12 @@ namespace ng
 	void editor_t::snippet_dispatch (plist::dictionary_t const& plist, std::map<std::string, std::string> const& variables)
 	{
 		std::string str;
-		// TODO handle ‘disableAutoIndent’ key
 		if(plist::get_key_path(plist, "content", str))
-			snippet(str, variables);
+		{
+			bool disableAutoIndent = false;
+			plist::get_key_path(plist, "disableAutoIndent", disableAutoIndent);
+			snippet(str, variables, disableAutoIndent);
+		}
 	}
 
 	void editor_t::execute_dispatch (plist::dictionary_t const& plist, std::map<std::string, std::string> const& variables)
