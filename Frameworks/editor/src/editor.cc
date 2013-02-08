@@ -709,9 +709,9 @@ namespace ng
 		{
 			if(str == autoInsert && str.size() == 1)
 			{
-				size_t const caret = _selections.last().last.index;
-				std::string leftOfCaret = _buffer.substr(_buffer.begin(_buffer.convert(caret).line), caret);
-				if(std::count(leftOfCaret.begin(), leftOfCaret.end(), str[0]) % 2 == 1)
+				size_t const lineNo = _buffer.convert(_selections.last().last.index).line;
+				std::string line = _buffer.substr(_buffer.begin(lineNo), _buffer.eol(lineNo));
+				if(std::count(line.begin(), line.end(), str[0]) % 2 == 1)
 					return insert(str);
 			}
 
