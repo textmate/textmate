@@ -311,7 +311,18 @@ namespace
 	if([self.window firstResponder] == self.textView)
 	{
 		self.fileBrowserVisible = YES;
-		[self.window makeFirstResponder:self.fileBrowser.outlineView];
+		NSOutlineView* outlineView = self.fileBrowser.outlineView;
+		[self.window makeFirstResponder:outlineView];
+		if([outlineView numberOfSelectedRows] == 0)
+		{
+			for(NSUInteger row = 0; row < [outlineView numberOfRows]; ++row)
+			{
+				if([[outlineView delegate] respondsToSelector:@selector(outlineView:isGroupItem:)] && [[outlineView delegate] outlineView:outlineView isGroupItem:[outlineView itemAtRow:row]])
+					continue;
+				[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+				break;
+			}
+		}
 	}
 	else
 	{
