@@ -524,7 +524,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 		size_t bindingIndex = std::find(bindings.begin(), bindings.end(), record.full_path) - bindings.begin();
 		if((filter.selection != NULL_STR || filter.symbol != NULL_STR) && record.place_last && filter.full_path().empty())
 			record.rank = 0;
-		else if(!filter.raw_path.empty() && record.full_path.rfind(filter.raw_path) == record.full_path.size() - filter.raw_path.size())
+		else if(!filter.raw_path.empty() && path::is_child(filter.raw_path, record.full_path))
 			record.rank = 0;
 		else if(record.place_last)
 			record.rank = 1;
