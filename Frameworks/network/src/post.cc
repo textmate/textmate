@@ -1,17 +1,26 @@
 #include "post.h"
 #include "proxy.h"
 #include "user_agent.h"
+#include <text/case.h>
 #include <text/encode.h>
 #include <oak/oak.h>
 
-// size_t receive_data (void* ptr, size_t size, size_t nmemb, void* udata)
-// {
-// 	std::string& buf = *(std::string*)udata;
-// 	buf.insert(buf.size(), (const char*)ptr, size * nmemb);
-// 	return size * nmemb;
-// }
+static size_t receive_data (void* ptr, size_t size, size_t nmemb, void* udata)
+{
+	std::map<std::string, std::string>* map = (std::map<std::string, std::string>*)udata;
 
-long post_to_server (std::string const& url, std::map<std::string, std::string> const& payload)
+	std::string line((char*)ptr, ((char*)ptr) + nmemb * size);
+	while(line.size() > 1 && line.rfind("\r\n") == line.size()-2)
+		line.resize(line.size()-2);
+
+	auto sep = line.find(':');
+	if(sep != std::string::npos)
+		map->emplace(std::make_pair(text::lowercase(line.substr(0, sep)), line.substr(line.find_first_not_of(" \t", sep+1))));
+
+	return size * nmemb;
+}
+
+long post_to_server (std::string const& url, std::map<std::string, std::string> const& payload, std::map<std::string, std::string>* headersOut)
 {
 	struct curl_httppost* formpost = NULL;
 	struct curl_httppost* lastptr = NULL;
@@ -41,9 +50,7 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 	if(CURL* handle = curl_easy_init())
 	{
 		std::string const userAgent = create_agent_info_string();
-
 		char errorbuf[CURL_ERROR_SIZE];
-		// std::string head = "", body = "";
 
 		curl_easy_setopt(handle, CURLOPT_URL,              url.c_str());
 		curl_easy_setopt(handle, CURLOPT_HTTPPOST,         formpost);
@@ -51,12 +58,12 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 
 		curl_easy_setopt(handle, CURLOPT_ERRORBUFFER,      errorbuf);
 		curl_easy_setopt(handle, CURLOPT_FAILONERROR,      true);
-		
-		// curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION,   &receive_data);
-		// curl_easy_setopt(handle, CURLOPT_HEADERDATA,       &head);
-		// 
-		// curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION,    &receive_data);
-		// curl_easy_setopt(handle, CURLOPT_WRITEDATA,        &body);
+
+		if(headersOut)
+		{
+			curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION,   &receive_data);
+			curl_easy_setopt(handle, CURLOPT_HEADERDATA,       headersOut);
+		}
 
 		if(proxy_settings_t const& proxySettings = get_proxy_settings(url))
 		{
@@ -70,9 +77,6 @@ long post_to_server (std::string const& url, std::map<std::string, std::string> 
 		if(rc == 0)
 				curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &serverReply);
 		else	fprintf(stderr, "curl error (%d): %s\n", rc, errorbuf);
-
-		// fprintf(stderr, "HEAD:\n%s\n", head.c_str());
-		// fprintf(stderr, "BODY:\n%s\n", body.c_str());
 
 		curl_easy_cleanup(handle);
 	}
