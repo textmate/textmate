@@ -1,5 +1,6 @@
 #import "SoftwareUpdatePreferences.h"
 #import "Keys.h"
+#import <BundlesManager/BundlesManager.h>
 #import <CrashReporter/CrashReporter.h>
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/NSDate Additions.h>

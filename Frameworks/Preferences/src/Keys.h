@@ -35,13 +35,6 @@ PUBLIC extern NSString* const kUserDefaultsTabsAboveDocumentKey;
 
 PUBLIC extern NSString* const kUserDefaultsEnvironmentVariablesKey;
 
-// ===================
-// = Software Update =
-// ===================
-
-PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
-PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
-
 // ============
 // = Terminal =
 // ============

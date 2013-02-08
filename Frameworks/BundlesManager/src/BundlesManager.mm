@@ -3,7 +3,10 @@
 #import <network/network.h>
 #import <oak/server.h>
 
+NSString* const kUserDefaultsDisableBundleUpdatesKey       = @"disableBundleUpdates";
+NSString* const kUserDefaultsLastBundleUpdateCheckKey      = @"lastBundleUpdateCheck";
 NSString* const BundlesManagerBundlesDidChangeNotification = @"BundlesManagerBundlesDidChangeNotification";
+
 static std::string const kInstallDirectory = NULL_STR;
 
 @interface BundlesManager ()

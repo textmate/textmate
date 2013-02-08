@@ -1,5 +1,6 @@
 #import "Keys.h"
 #import <OakAppKit/OakTabBarView.h>
+#import <BundlesManager/BundlesManager.h>
 
 static NSArray* default_environment ()
 {
@@ -75,13 +76,6 @@ NSString* const kUserDefaultsTabsAboveDocumentKey       = @"tabsAboveDocument";
 // =============
 
 NSString* const kUserDefaultsEnvironmentVariablesKey    = @"environmentVariables";
-
-// ===================
-// = Software Update =
-// ===================
-
-NSString* const kUserDefaultsDisableBundleUpdatesKey    = @"disableBundleUpdates";
-NSString* const kUserDefaultsLastBundleUpdateCheckKey   = @"lastBundleUpdateCheck";
 
 // ============
 // = Terminal =

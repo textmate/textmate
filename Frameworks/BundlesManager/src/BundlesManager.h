@@ -1,6 +1,8 @@
 #import <updater/updater.h>
 
-extern PUBLIC NSString* const BundlesManagerBundlesDidChangeNotification;
+PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
+PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
+PUBLIC extern NSString* const BundlesManagerBundlesDidChangeNotification;
 
 PUBLIC @interface BundlesManager : NSObject
 @property (nonatomic, readonly)         BOOL      isBusy;
