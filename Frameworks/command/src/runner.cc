@@ -8,7 +8,7 @@ OAK_DEBUG_VAR(Command_Runner);
 static std::string trim_right (std::string const& str, std::string const& trimChars = " \t\n")
 {
 	std::string::size_type len = str.find_last_not_of(trimChars);
-	return len == std::string::npos ? str : str.substr(0, len+1);
+	return len == std::string::npos ? "" : str.substr(0, len+1);
 }
 
 namespace command
