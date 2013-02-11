@@ -103,11 +103,10 @@ namespace oak
 
 		create_pid_file();
 
-		if(getenv("OAK_ACTIVATE") || getenv("OAK_RELAUNCH"))
+		if(getenv("OAK_RELAUNCH"))
 		{
 			D(DBF_Application, bug("bring new instance to front\n"););
 			SetFrontProcess(&(ProcessSerialNumber){ 0, kCurrentProcess });
-			unsetenv("OAK_ACTIVATE");
 			unsetenv("OAK_RELAUNCH");
 		}
 	}
