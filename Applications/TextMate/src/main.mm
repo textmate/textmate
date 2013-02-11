@@ -5,6 +5,12 @@
 #import <DocumentWindow/DocumentController.h>
 #import <io/path.h>
 
+static void sig_usr1_handler (void* unused)
+{
+	fprintf(stderr, "%s received SIGUSR1: Relaunch.\n", getprogname());
+	oak::application_t::relaunch();
+}
+
 static void sig_int_handler (void* unused)
 {
 	fprintf(stderr, "%s received SIGINT: Regular shutdown.\n", getprogname());
@@ -28,6 +34,7 @@ int main (int argc, char const* argv[])
 	oak::application_t::set_support(path::join(path::home(), "Library/Application Support/TextMate"));
 	oak::application_t app(argc, argv);
 
+	signal(SIGUSR1, SIG_IGN);
 	signal(SIGINT,  SIG_IGN);
 	signal(SIGTERM, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
@@ -39,6 +46,10 @@ int main (int argc, char const* argv[])
 	dispatch_source_t sigIntSrc = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGINT, 0, dispatch_get_main_queue());
 	dispatch_source_set_event_handler_f(sigIntSrc, &sig_int_handler);
 	dispatch_resume(sigIntSrc);
+
+	dispatch_source_t sigUsr1Src = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGUSR1, 0, dispatch_get_main_queue());
+	dispatch_source_set_event_handler_f(sigUsr1Src, &sig_usr1_handler);
+	dispatch_resume(sigUsr1Src);
 
 	@autoreleasepool {
 		for(NSString* variable in [[[NSProcessInfo processInfo] environment] allKeys])
