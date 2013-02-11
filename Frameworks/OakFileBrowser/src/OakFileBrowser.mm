@@ -597,6 +597,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:urls];
 }
 
+- (void)toggleQuickLookPreview:(id)sender
+{
+	if([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
+			[[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
+	else	[[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
+}
+
 - (NSString*)parentForNewFolder
 {
 	NSMutableSet* folders = [NSMutableSet set];
@@ -1053,11 +1060,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	else if([item action] == @selector(toggleShowInvisibles:))
 		[item setState:self.showExcludedItems ? NSOnState : NSOffState];
 
-	static struct { NSString* format; SEL action; } const menuTitles[] =
+	NSString* quickLookTitle = [QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible] ? @"Close Quick Look" : @"Quick Look%@";
+
+	struct { NSString* format; SEL action; } const menuTitles[] =
 	{
 		{ @"Cut%@",              @selector(cut:)                           },
 		{ @"Copy%@",             @selector(copy:)                          },
-		{ @"Quick Look%@",       @selector(toggleQuickLookPreview:)        },
+		{ quickLookTitle,        @selector(toggleQuickLookPreview:)        },
 		{ @"Show%@ in Finder",   @selector(showSelectedEntriesInFinder:)   },
 		{ @"Add%@ to Favorites", @selector(addSelectedEntriesToFavorites:) },
 	};

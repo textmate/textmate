@@ -1849,13 +1849,6 @@ namespace
 // = QuickLook =
 // =============
 
-- (void)toggleQuickLookPreview:(id)sender
-{
-	if([QLPreviewPanel sharedPreviewPanelExists] && [[QLPreviewPanel sharedPreviewPanel] isVisible])
-			[[QLPreviewPanel sharedPreviewPanel] orderOut:nil];
-	else	[[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
-}
-
 // QLPreviewPanelController
 
 - (BOOL)acceptsPreviewPanelControl:(QLPreviewPanel*)panel
