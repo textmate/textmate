@@ -2137,7 +2137,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	NSString* lang = (NSString*)[sender representedObject];
 	[[NSSpellChecker sharedSpellChecker] setLanguage:lang];
 	document->buffer().set_spelling_language(to_s(lang));
-	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), document->file_type(), document->path());
+	settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), "", document->path());
+	if(document->path() != NULL_STR)
+		settings_t::set(kSettingsSpellingLanguageKey, to_s(lang), NULL_STR, path::join(path::parent(document->path()), "**"));
 
 	[self setNeedsDisplay:YES];
 }
