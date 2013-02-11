@@ -35,6 +35,7 @@
 
 - (void)dealloc
 {
+	self.divider   = nil;
 	self.textField = nil;
 	[super dealloc];
 }
@@ -55,10 +56,10 @@
 	NSColor* middleColor = [NSColor colorWithDeviceWhite:223/255.0 alpha:1];
 	int angle = 270;
 
-	NSGradient* aGradient = [[NSGradient alloc] initWithColorsAndLocations:
+	NSGradient* aGradient = [[[NSGradient alloc] initWithColorsAndLocations:
 		cornerColor, 0.0,
 		middleColor, 0.5,
-		cornerColor, 1.0, nil];
+		cornerColor, 1.0, nil] autorelease];
 
 	NSRect bounds = NSMakeRect(self.bounds.origin.x, self.bounds.origin.y+1, self.bounds.size.width, self.bounds.size.height-1);
 	[aGradient drawInRect:bounds angle:angle];
