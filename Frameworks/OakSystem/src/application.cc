@@ -26,24 +26,8 @@ namespace oak
 		return NULL_STR;
 	}
 
-	static void disable_interactive_input ()
-	{
-		if(int fd = strtol(getenv("TM_INTERACTIVE_INPUT_ECHO_FD") ?: "0", NULL, 10))
-		{
-			close(fd);
-			unsetenv("TM_INTERACTIVE_INPUT_ECHO_FD");
-		}
-		if(int fd = strtol(getenv("TM_ERROR_FD") ?: "0", NULL, 10))
-		{
-			close(fd);
-			unsetenv("TM_ERROR_FD");
-		}
-	}
-
 	application_t::application_t (int argc, char const* argv[])
 	{
-		disable_interactive_input(); // this is only relevant when we launch TM from a TM command that uses interactive input (like make) — each relaunch will allocate two new file descriptors, so eventually we’ll run out of them
-
 		_app_name      = getenv("OAK_APP_NAME") ?: path::name(argv[0]);
 		_full_app_path = path::join(path::cwd(), argv[0]);
 		_app_path      = _full_app_path;
