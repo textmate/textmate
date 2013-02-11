@@ -1958,6 +1958,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)toggleCaretVisibility:(id)sender
 {
+	if(!layout)
+		return;
+
 	AUTO_REFRESH;
 	layout->set_draw_caret(hideCaret);
 	hideCaret = !hideCaret;
