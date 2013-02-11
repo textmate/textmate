@@ -5,6 +5,8 @@
 #import <OakFoundation/OakTimer.h>
 #import <oak/debug.h>
 
+static CGFloat kCloseButtonRightMargin = 5;
+
 static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, double value)
 {
 	static const CGFloat deg2rad = 0.017453292519943295;
@@ -77,7 +79,7 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 {
 	if(!self.isOpen)
 		return NSZeroRect;
-	return NSMakeRect(NSMaxX(cellFrame) - self.closeIcon.size.width, NSMaxY(cellFrame) - (cellFrame.size.height + self.closeIcon.size.height) / 2, self.closeIcon.size.width, self.closeIcon.size.height);
+	return NSMakeRect(NSMaxX(cellFrame) - kCloseButtonRightMargin - self.closeIcon.size.width, NSMaxY(cellFrame) - (cellFrame.size.height + self.closeIcon.size.height) / 2, self.closeIcon.size.width, self.closeIcon.size.height);
 }
 
 - (void)redrawFrame:(OakTimer*)timer
@@ -130,8 +132,10 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 			closeIcon = [NSImage imageNamed:@"CloseFilePressed" inSameBundleAsClass:[OFBPathInfoCell class]];
 		else if([self isMouseInCloseButtonInFrame:cellFrame controlView:controlView] && [[controlView window] isKeyWindow])
 			closeIcon = [NSImage imageNamed:@"CloseFileOver" inSameBundleAsClass:[OFBPathInfoCell class]];
-		[closeIcon drawInRect:[self closeButtonRectInFrame:cellFrame] fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
-		cellFrame.size.width -= self.closeIcon.size.width;
+
+		NSRect closeButtonRect = [self closeButtonRectInFrame:cellFrame];
+		[closeIcon drawInRect:closeButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
+		cellFrame.size.width -= NSMaxX(cellFrame) - NSMinX(closeButtonRect);
 	}
 
 	NSFont* unboldFont = self.font;
