@@ -647,7 +647,10 @@ namespace document
 	{
 		struct save_callback_wrapper_t : file::save_callback_t
 		{
-			save_callback_wrapper_t (document::document_ptr doc, document::save_callback_ptr callback, bool close) : _document(doc), _callback(callback), _close(close) { }
+			save_callback_wrapper_t (document::document_ptr doc, document::save_callback_ptr callback) : _document(doc), _callback(callback)
+			{
+				_document->open();
+			}
 
 			void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                                     { _callback->select_path(path, content, context); }
 			void select_make_writable (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)                            { _callback->select_make_writable(path, content, context); }
@@ -658,30 +661,23 @@ namespace document
 			{
 				_document->post_save(path, content, pathAttributes, encoding, success);
 				_callback->did_save_document(_document, path, success, message, filter);
-				if(_close)
-					_document->close();
+				_document->close();
 			}
 
 		private:
 			document::document_ptr _document;
 			document::save_callback_ptr _callback;
-			bool _close;
 		};
 
 		D(DBF_Document, bug("save ‘%s’\n", _path.c_str()););
 
-		bool closeAfterSave = false;
 		if(!is_open())
 		{
 			if(!_content && _backup_path == NULL_STR)
 				return callback->did_save(_path, io::bytes_ptr(), _path_attributes, encoding::type(_disk_newlines, _disk_encoding, _disk_bom), false, NULL_STR, oak::uuid_t());
-			open();
-			closeAfterSave = true;
 		}
 
 		_file_watcher.reset();
-
-		io::bytes_ptr bytes(new io::bytes_t(content()));
 
 		std::map<std::string, std::string> attributes;
 		if(volume::settings(_path).extended_attributes())
@@ -692,8 +688,10 @@ namespace document
 			attributes["com.macromates.folded"]         = _folded;
 		}
 
-		save_callback_wrapper_t* cb = new save_callback_wrapper_t(shared_from_this(), callback, closeAfterSave);
+		save_callback_wrapper_t* cb = new save_callback_wrapper_t(shared_from_this(), callback);
 		save_callback_ptr sharedPtr((save_callback_t*)cb);
+
+		io::bytes_ptr bytes(new io::bytes_t(content()));
 
 		encoding::type const encoding = encoding_for_save_as_path(_path);
 		file::save(_path, sharedPtr, _authorization, bytes, attributes, _file_type, encoding, std::vector<oak::uuid_t>() /* binary import filters */, std::vector<oak::uuid_t>() /* text import filters */);
