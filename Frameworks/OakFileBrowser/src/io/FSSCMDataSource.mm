@@ -20,7 +20,7 @@ static NSURL* URLAppend (NSURL* base, NSString* relativePath)
 	return [NSURL URLWithString:[[NSURL URLWithString:relativePath relativeToURL:base] absoluteString]];
 }
 
-static NSArray* convert (std::vector<std::string> const& paths, std::string const& wcPath, NSUInteger options)
+static NSArray* convert (std::vector<std::string> const& paths, std::string const& wcPath, NSUInteger options, bool hideSCMBadge = false)
 {
 	NSMutableArray* res = [NSMutableArray array];
 	iterate(path, paths)
@@ -30,6 +30,10 @@ static NSArray* convert (std::vector<std::string> const& paths, std::string cons
 		item.labelIndex = path::label_index(*path);
 		item.toolTip    = [NSString stringWithCxxString:path::relative_to(*path, wcPath)];
 		item.leaf       = YES;
+
+		if(hideSCMBadge)
+			item.icon.scmStatus = scm::status::none;
+
 		[res addObject:item];
 	}
 	return [FSDataSource sortArray:res usingOptions:options];
@@ -110,7 +114,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	untrackedItem.icon     = SCMFolderIcon();
 	untrackedItem.name     = @"Untracked Items";
 	untrackedItem.group    = YES;
-	untrackedItem.children = convert(untrackedPaths, scmInfo->root_path(), options);
+	untrackedItem.children = convert(untrackedPaths, scmInfo->root_path(), options, true);
 
 	NSMutableArray* children = [NSMutableArray array];
 	[children addObject:unstagedItem];
