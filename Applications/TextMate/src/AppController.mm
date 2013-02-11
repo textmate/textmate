@@ -80,9 +80,56 @@ BOOL HasDocumentWindow (NSArray* windows)
 @interface AppController ()
 @property (nonatomic) OakFilterWindowController* filterWindowController;
 @property (nonatomic) BOOL didFinishLaunching;
+@property (nonatomic) BOOL currentResponderIsOakTextView;
 @end
 
 @implementation AppController
+- (void)setCurrentResponderIsOakTextView:(BOOL)flag
+{
+	if(_currentResponderIsOakTextView != flag)
+	{
+		_currentResponderIsOakTextView = flag;
+
+		NSMenu* mainMenu = [NSApp mainMenu];
+		NSMenu* goMenu   = [[mainMenu itemWithTitle:@"Go"] submenu];
+		NSMenu* textMenu = [[mainMenu itemWithTitle:@"Text"] submenu];
+
+		NSMenuItem* backMenuItem       = [goMenu itemWithTitle:@"Back"];
+		NSMenuItem* forwardMenuItem    = [goMenu itemWithTitle:@"Forward"];
+		NSMenuItem* shiftLeftMenuItem  = [textMenu itemWithTitle:@"Shift Left"];
+		NSMenuItem* shiftRightMenuItem = [textMenu itemWithTitle:@"Shift Right"];
+
+		if(!backMenuItem || !forwardMenuItem || !shiftLeftMenuItem || !shiftRightMenuItem)
+			return;
+
+		if(_currentResponderIsOakTextView)
+		{
+			backMenuItem.keyEquivalent                   = @"";
+			forwardMenuItem.keyEquivalent                = @"";
+
+			shiftLeftMenuItem.keyEquivalent              = @"[";
+			shiftLeftMenuItem.keyEquivalentModifierMask  = NSCommandKeyMask;
+			shiftRightMenuItem.keyEquivalent             = @"]";
+			shiftRightMenuItem.keyEquivalentModifierMask = NSCommandKeyMask;
+		}
+		else
+		{
+			shiftLeftMenuItem.keyEquivalent           = @"";
+			shiftRightMenuItem.keyEquivalent          = @"";
+
+			backMenuItem.keyEquivalent                = @"[";
+			backMenuItem.keyEquivalentModifierMask    = NSCommandKeyMask;
+			forwardMenuItem.keyEquivalent             = @"]";
+			forwardMenuItem.keyEquivalentModifierMask = NSCommandKeyMask;
+		}
+	}
+}
+
+- (void)applicationDidUpdate:(NSNotification*)aNotification
+{
+	self.currentResponderIsOakTextView = [NSApp targetForAction:@selector(shiftLeft:) to:nil from:self] != nil;
+}
+
 - (void)userDefaultsDidChange:(id)sender
 {
 	BOOL disableRmate        = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableRMateServerKey];

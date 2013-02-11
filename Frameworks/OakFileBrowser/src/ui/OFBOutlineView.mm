@@ -108,8 +108,6 @@
 {
 	static struct key_action_t { std::string key; SEL action; } const KeyActions[] =
 	{
-		{ "@[",                                      @selector(goBack:)                   },
-		{ "@]",                                      @selector(goForward:)                },
 		{ "@" + utf8::to_s(NSLeftArrowFunctionKey),  @selector(goBack:)                   },
 		{ "@" + utf8::to_s(NSRightArrowFunctionKey), @selector(goForward:)                },
 		{ utf8::to_s(NSCarriageReturnCharacter),     @selector(performEditSelectedRow:)   },
