@@ -1487,6 +1487,7 @@ namespace
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
 - (IBAction)reload:(id)sender               { [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+- (IBAction)deselectAll:(id)sender          { [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 
 - (IBAction)revealFileInProject:(id)sender  { if(_selectedDocument) { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:_selectedDocument->path()]] withParentURL:[NSURL fileURLWithPath:self.projectPath]]; } }
 - (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
