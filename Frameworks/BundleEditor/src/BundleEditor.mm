@@ -367,7 +367,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 - (BOOL)commitEditing
 {
-	if(!bundleItem)
+	if(!bundleItem || !bundleItemContent)
 		return YES;
 
 	[sharedPropertiesViewController commitEditing];
