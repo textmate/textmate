@@ -1,5 +1,42 @@
 # Changes
 
+## 2013-02-11 ([r9377](https://github.com/textmate/textmate/compare/r9375...r9377))
+
+  * Starting with this build, the summary for each update is going to be shorter so if you want all the details visit GitHub by clicking the link in the heading above.
+
+  * When you change the spelling language via _Edit → Spelling_ then we record your preference as:
+
+    1. The new default for documents without a more specific setting.
+    2. The current document (based on its path).
+    3. All documents with same path prefix as the current document (**new!**).
+
+    We no longer store the preference for documents with same type (e.g. `text.html`) as that wasn’t useful.
+
+  * Add bottom tool bar to file browser. The current _“New Document”_ action is likely to change.
+
+  * Relaunching as part of an software update will restore your open documents even if you disabled that option in preferences.
+
+## 2013-02-08 (r9375)
+
+  * When moving focus to file browser via _Navigate → Move Focus to File Browser_ (⌥⌘⇥) and there is no selection, we now select the first item (mainly to give an indication of successfully having moved focus, as there is no focus ring for this view).
+  * On 10.8 TextMate will now show a notification when posting a crash report to `macromates.com`. This way the notification center provides a list of recent crashes that can be clicked to view the online version.
+  * When closing other tabs (either right-clicking a tab and selecting that action or option-clicking a tab’s close button) documents which are modified but untitled are left open (rather than asking you about what to do).
+  * When TextMate run commands it creates a “clean” environment, only inheriting a select few variables from its parent process. You can now alter the whitelist via the `environmentWhitelist` defaults key. This is a colon-separated list of variables to inherit. If an item in the list contains an asterisk, then it is treated as a glob.
+
+    Example:
+
+        defaults write com.macromates.TextMate.preview environmentWhitelist '$default:MANPATH:*EDITOR'
+
+    Here ‘$default’ will expand to TextMate’s default whitelist.
+
+    Normally TextMate will setup `HOME`, `PATH`, `TMPDIR`, `LOGNAME`, and `USER`. If you whitelist any of these, then the variable (if set) will instead be inherited from the parent process.
+
+  * TextMate now respect setting `disableAutoIndent` and `disableOutputAutoIndent` in snippet and command bundle items.
+  * When inserting identical paired characters (like straight quotes), we now check the entire line to see if it’s unbalanced, rather than only what’s to the left of the caret.
+  * If you check “keep bundles updated” in _Preferences → Software Update_ then we no longer update the installed bundles. The index is however still kept up-to-date and it’s not recommended to disable bundle updates.
+  * Fix issue where entering a file suffix in the file chooser (⌘T) would get a too high rank.
+  * Fix searching for case-sensitive regular expressions. Previously the search would always be case insensitive.
+
 ## 2013-02-06 (r9371)
 
 * Performing file operations in the file browser now instantly reload rather than wait for fs-events. This not only give a better experience (instant feedback) but also makes the file browser update properly when using file systems that doesn’t support fs-events.
