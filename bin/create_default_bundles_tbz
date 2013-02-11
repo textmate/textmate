@@ -1,20 +1,21 @@
 #!/bin/sh
 set -u
 
-builddir="${builddir:-$HOME/build/TextMate}"
-bl="$builddir/Applications/bl/bl"
 TBZ_DST=$1
-BUNDLES_DST="$(mktemp -dt bundles)"
-BZIP2_FLAG="-j"
 
+BZIP2_FLAG="-j"
 if which -s pbzip2; then
 	BZIP2_FLAG="--use-compress-prog=pbzip2"
 fi
+
+BUNDLES_DST="$(mktemp -dt bundles)"
+trap 'rm -rf "$BUNDLES_DST"' EXIT
+
+builddir="${builddir:-$HOME/build/TextMate}"
+bl="$builddir/Applications/bl/bl"
 
 { [ -x "$bl" ] || ninja "$bl"; } && \
 	mkdir -p "$BUNDLES_DST/Managed" && \
 	"$bl" -C "$BUNDLES_DST/Managed" install Apache Bundle\ Development Bundle\ Support C CSS Diff Git HTML Hyperlink\ Helper JavaScript JSON Mail Make Markdown Math Mercurial Objective-C PHP Property\ List Python Ruby SCM Shell\ Script Source SQL Subversion Text TextMate Themes TODO XML && \
 	gnutar -cf "$TBZ_DST~" "$BZIP2_FLAG" -C "$BUNDLES_DST" "Managed" && \
 	mv "$TBZ_DST~" "$TBZ_DST"
-
-rm -rf "$BUNDLES_DST"
