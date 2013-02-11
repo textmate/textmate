@@ -144,6 +144,11 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 					[res addObject:image];
 			}
 		}
+		else if(_exists)
+		{
+			if(NSImage* image = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(_directory ? kGenericFolderIcon : kGenericDocumentIcon)])
+				[res addObject:image];
+		}
 		else
 		{
 			[res addObject:SystemIconForHFSType(kUnknownFSObjectIcon)];
