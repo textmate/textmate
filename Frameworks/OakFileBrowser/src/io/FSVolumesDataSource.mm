@@ -34,7 +34,7 @@
 		[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(workspaceDidChangeVolumeList:) name:NSWorkspaceDidRenameVolumeNotification object:[NSWorkspace sharedWorkspace]];
 
 		self.rootItem = [FSItem itemWithURL:anURL];
-		self.rootItem.icon     = [NSImage imageNamed:NSImageNameComputer];
+		self.rootItem.icon     = [NSImage imageNamed:NSImageNameComputer]; // FIXME Assigning to property of type OakFileIconImage
 		self.rootItem.name     = CFBridgingRelease(SCDynamicStoreCopyComputerName(NULL, NULL));
 		self.rootItem.children = [self volumeList];
 	}

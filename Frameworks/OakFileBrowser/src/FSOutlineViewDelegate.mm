@@ -375,16 +375,9 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 {
 	if([cell respondsToSelector:@selector(setImage:)])
 	{
-		NSImage* icon = item.icon;
-		if([modifiedURLs containsObject:item.url])
-		{
-			NSImage* tmp = [[NSImage alloc] initWithSize:[icon size]];
-			[tmp lockFocus];
-			[icon drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.4];
-			[tmp unlockFocus];
-			icon = tmp;
-		}
-		[cell setImage:icon];
+		if([item.icon respondsToSelector:@selector(setModified:)])
+			item.icon.modified = [modifiedURLs containsObject:item.url];
+		[cell setImage:item.icon];
 	}
 	cell.stringValue       = item.name;
 	// cell.textColor         = lstat([[item.url path] fileSystemRepresentation], &(struct stat){ 0 }) == 0 ? [NSColor textColor] : [NSColor redColor];

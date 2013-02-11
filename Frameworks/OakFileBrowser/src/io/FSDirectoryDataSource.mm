@@ -61,10 +61,9 @@ struct item_record_t : fs::event_callback_t
 				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
 				for(FSFileItem* item in _item.children)
 				{
-					OakFileIconImage* image = (OakFileIconImage*)item.icon;
-					if(!image.exists)
-						pathsMissingOnDisk.insert(to_s(image.path));
-					pathsShown.insert(to_s(image.path));
+					if(!item.icon.exists)
+						pathsMissingOnDisk.insert(to_s(item.icon.path));
+					pathsShown.insert(to_s(item.icon.path));
 				}
 
 				for(auto pair : info.status())
@@ -78,10 +77,9 @@ struct item_record_t : fs::event_callback_t
 					for(FSFileItem* item in _item.children)
 					{
 						scm::status::type newStatus = info.status(to_s([item.url path]));
-						OakFileIconImage* image = (OakFileIconImage*)item.icon;
-						if(newStatus != image.scmStatus)
+						if(newStatus != item.icon.scmStatus)
 						{
-							image.scmStatus = newStatus;
+							item.icon.scmStatus = newStatus;
 							[[NSNotificationCenter defaultCenter] postNotificationName:FSItemDidReloadNotification object:_data_source userInfo:@{ @"item" : item }];
 						}
 					}

@@ -1,9 +1,11 @@
+#import <OakAppKit/OakFileIconImage.h>
+
 @class FSDataSource;
 
 enum FSItemURLType { FSItemURLTypeUnknown = 0, FSItemURLTypeFile, FSItemURLTypeFolder, FSItemURLTypePackage, FSItemURLTypeAlias, FSItemURLTypeMissing };
 
 @interface FSItem : NSObject
-@property (nonatomic, retain) NSImage* icon;
+@property (nonatomic, retain) OakFileIconImage* icon;
 @property (nonatomic, retain) NSString* name;
 @property (nonatomic, retain) NSString* toolTip;
 @property (nonatomic, assign) NSInteger labelIndex;
