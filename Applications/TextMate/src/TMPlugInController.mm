@@ -1,6 +1,5 @@
 #import "TMPlugInController.h"
 #import <OakSystem/application.h>
-#import <Preferences/Keys.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(PlugInController);
@@ -155,11 +154,7 @@ static id CreateInstanceOfPlugInClass (Class cl, TMPlugInController* controller)
 		{
 			NSInteger choice = NSRunAlertPanel(@"Plug-in Installed", @"To activate “%@” you will need to relaunch TextMate.", @"Relaunch", @"Cancel", nil, plugInName);
 			if(choice == NSAlertDefaultReturn) // "Relaunch"
-			{
-				BOOL isSessionRestoreDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
-				BOOL skipUserInteraction      = isSessionRestoreDisabled == NO;
-				oak::application_t::relaunch(skipUserInteraction);
-			}
+				oak::application_t::relaunch();
 		}
 		else
 		{

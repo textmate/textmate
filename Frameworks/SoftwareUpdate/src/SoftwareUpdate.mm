@@ -312,14 +312,8 @@ static SoftwareUpdate* SharedInstance;
 	std::string err = sw_update::install_update(to_s(self.archive));
 	if(err == NULL_STR)
 	{
-		// FIXME Copy/paste from <Preferences/Keys.h>
-		static NSString* const kUserDefaultsDisableSessionRestoreKey = @"disableSessionRestore";
-
-		BOOL isSessionRestoreDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
-		BOOL skipUserInteraction      = isSessionRestoreDisabled == NO;
-
 		self.downloadWindow.activityText = @"Relaunching…";
-		oak::application_t::relaunch(skipUserInteraction);
+		oak::application_t::relaunch();
 	}
 	else
 	{
