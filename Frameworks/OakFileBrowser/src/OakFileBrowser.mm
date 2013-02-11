@@ -984,7 +984,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (IBAction)goToComputer:(id)sender       { [self goToURL:kURLLocationComputer];  }
 - (IBAction)goToHome:(id)sender           { [self goToURL:kURLLocationHome];      }
 - (IBAction)goToDesktop:(id)sender        { [self goToURL:kURLLocationDesktop];   }
-- (IBAction)goToFavorites:(id)sender      { [self goToURL:kURLLocationFavorites]; }
+
+- (IBAction)goToFavorites:(id)sender
+{
+	if([_url isEqualTo:kURLLocationFavorites] && self.canGoBack)
+			[self goBack:sender];
+	else	[self goToURL:kURLLocationFavorites];
+}
 
 - (IBAction)goToSCMDataSource:(id)sender
 {
