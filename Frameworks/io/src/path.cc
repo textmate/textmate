@@ -494,6 +494,8 @@ namespace path
 	uint32_t info (std::string const& path, uint32_t mask)
 	{
 		uint32_t res = 0;
+		if(path == NULL_STR)
+			return res;
 
 		std::string const& name = path::name(path);
 		if(name == ".")
