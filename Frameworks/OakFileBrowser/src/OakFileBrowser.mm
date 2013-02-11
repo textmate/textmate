@@ -620,6 +620,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	}
 }
 
+- (BOOL)canSelectRow:(NSUInteger)row
+{
+	return ![[_outlineView delegate] respondsToSelector:@selector(outlineView:isGroupItem:)] || ![[_outlineView delegate] outlineView:_outlineView isGroupItem:[_outlineView itemAtRow:row]];
+}
+
 - (void)delete:(id)anArgument
 {
 	NSIndexSet* indexSet = [_outlineView selectedRowIndexes];
@@ -627,11 +632,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		return;
 
 	NSUInteger rowToSelect = [indexSet lastIndex];
-	while(rowToSelect < [_outlineView numberOfRows] && [indexSet containsIndex:rowToSelect])
+	while(rowToSelect < [_outlineView numberOfRows] && ([indexSet containsIndex:rowToSelect] || ![self canSelectRow:rowToSelect]))
 		++rowToSelect;
 
 	if(rowToSelect == [_outlineView numberOfRows])
-		do { --rowToSelect; } while(rowToSelect > 0 && [indexSet containsIndex:rowToSelect]);
+		do { --rowToSelect; } while(rowToSelect > 0 && [indexSet containsIndex:rowToSelect] && ![self canSelectRow:rowToSelect]);
 
 	FSItem* itemToSelect = [indexSet containsIndex:rowToSelect] ? nil : [_outlineView itemAtRow:rowToSelect];
 
