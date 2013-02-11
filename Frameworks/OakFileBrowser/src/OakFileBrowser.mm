@@ -1029,26 +1029,56 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (BOOL)validateMenuItem:(NSMenuItem*)item
 {
-	std::set<SEL> requireSelection{ @selector(didDoubleClickOutlineView:), @selector(editSelectedEntries:), @selector(duplicateSelectedEntries:), @selector(delete:) };
+	BOOL res = YES;
+	static std::set<SEL> const requireSelection{ @selector(didDoubleClickOutlineView:), @selector(editSelectedEntries:), @selector(duplicateSelectedEntries:), @selector(cut:), @selector(copy:), @selector(delete:) };
 
 	NSUInteger selectedFiles = 0;
 	for(FSItem* item in self.selectedItems)
 		selectedFiles += [item.url isFileURL] && path::exists([[item.url path] fileSystemRepresentation]) ? 1 : 0;
 
 	if([item action] == @selector(goToParentFolder:))
-		return ParentForURL(_url) != nil;
+		res = ParentForURL(_url) != nil;
 	else if([item action] == @selector(goBack:))
-		return self.canGoBack;
+		res = self.canGoBack;
 	else if([item action] == @selector(goForward:))
-		return self.canGoForward;
+		res = self.canGoForward;
 	else if([item action] == @selector(newFolderInSelectedFolder:))
-		return [self parentForNewFolder] != nil;
+		res = [self parentForNewFolder] != nil;
 	else if(selectedFiles == 0 && requireSelection.find([item action]) != requireSelection.end())
-		return NO;
+		res = NO;
+	else if([item action] == @selector(paste:))
+		res = self.canPaste;
 	else if([item action] == @selector(editSelectedEntries:))
-		return selectedFiles == 1;
+		res = selectedFiles == 1;
 	else if([item action] == @selector(toggleShowInvisibles:))
 		[item setState:self.showExcludedItems ? NSOnState : NSOffState];
+
+	static struct { NSString* format; SEL action; } const menuTitles[] =
+	{
+		{ @"Cut%@",              @selector(cut:)                           },
+		{ @"Copy%@",             @selector(copy:)                          },
+		{ @"Quick Look%@",       @selector(toggleQuickLookPreview:)        },
+		{ @"Show%@ in Finder",   @selector(showSelectedEntriesInFinder:)   },
+		{ @"Add%@ to Favorites", @selector(addSelectedEntriesToFavorites:) },
+	};
+
+	for(auto info : menuTitles)
+	{
+		if(info.action == [item action])
+		{
+			NSString* items = @"";
+			if(res)
+			{
+				switch(selectedFiles)
+				{
+					case 0:  items = [NSString stringWithFormat:@" “%@”", DisplayName(_url)]; break;
+					case 1:  items = [NSString stringWithFormat:@" “%@”", ((FSItem*)[self.selectedItems lastObject]).name]; break;
+					default: items = [NSString stringWithFormat:@" %ld Items", selectedFiles]; break;
+				}
+			}
+			[item setTitle:[NSString stringWithFormat:info.format, items]];
+		}
+	}
 
 	return YES;
 }
