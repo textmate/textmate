@@ -616,6 +616,9 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 - (void)updateSCMStatus
 {
+	if(!_scmInfo)
+		return;
+
 	NSRange visibleRange = [_tableView rowsInRect:[_tableView visibleRect]];
 	for(NSUInteger row = visibleRange.location; row < NSMaxRange(visibleRange); ++row)
 	{
