@@ -32,7 +32,7 @@
 
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
-@interface OakFileBrowser () <OFBOutlineViewMenuDelegate>
+@interface OakFileBrowser () <OFBOutlineViewMenuDelegate, NSMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
 	NSUInteger _historyIndex;
@@ -152,6 +152,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_actionsView.favoritesButton.action = @selector(goToFavorites:);
 	_actionsView.scmButton.target       = self;
 	_actionsView.scmButton.action       = @selector(goToSCMDataSource:);
+
+	_actionsView.actionsPopUpButton.menu.delegate = self;
 
 	_view = [NSView new];
 
@@ -694,6 +696,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[self writeSelectionToPasteboard:[NSPasteboard generalPasteboard] types:nil];
 }
 
+- (BOOL)canPaste
+{
+	return [_url isFileURL] && [[[NSPasteboard generalPasteboard] availableTypeFromArray:@[ NSFilenamesPboardType ]] isEqualToString:NSFilenamesPboardType];
+}
+
 - (IBAction)paste:(id)sender
 {
 	NSMutableArray* created = [NSMutableArray array];
@@ -725,108 +732,153 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), [self.selectedPaths count] == 1 ? document::create(map["TM_SELECTED_FILE"]) : document::document_ptr(), map);
 }
 
-- (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
-{
-	NSMenu* menu = [NSMenu new];
+// ======================
+// = Create Action Menu =
+// ======================
 
-	NSInteger numberOfSelectedRows = [anOutlineView numberOfSelectedRows];
-	if(numberOfSelectedRows == 0)
+- (void)updateMenu:(NSMenu*)aMenu
+{
+	NSUInteger countOfExistingItems = [aMenu numberOfItems];
+	NSString* rootPath = [_url isFileURL] ? [_url path] : nil;
+
+	NSArray* selectedItems = self.selectedItems;
+	bool hasFileSelected = false;
+	for(FSItem* item in selectedItems)
+		hasFileSelected = hasFileSelected || [(item.url ?: item.target) isFileURL];
+
+	if(hasFileSelected)
 	{
-		if([_url isFileURL])
+		FSItem* selectedItem   = [selectedItems count] == 1 ? [selectedItems lastObject] : nil;
+		NSString* selectedPath = [selectedItem.url isFileURL] ? selectedItem.path : nil;
+
+		uint32_t flags = path::info(to_s(selectedPath));
+		bool isSymlink     = (flags & (path::flag::symlink|path::flag::alias)) != 0;
+		bool isPackage     = (flags & path::flag::package) != 0;
+		bool isApplication = ((isSymlink && [selectedItem.target isFileURL] ? path::info(to_s(selectedItem.target.path)) : flags) & path::flag::application) != 0;
+
+		[aMenu addItemWithTitle:@"Open" action:@selector(didDoubleClickOutlineView:) keyEquivalent:@""];
+		if(!isApplication)
 		{
-			[menu addItemWithTitle:[NSString stringWithFormat:@"Show “%@” in Finder", DisplayName(_url)] action:@selector(showSelectedEntriesInFinder:) keyEquivalent:@""];
-			[menu addItem:[NSMenuItem separatorItem]];
-			[menu addItemWithTitle:@"New Folder" action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
-			[menu addItemWithTitle:[NSString stringWithFormat:@"Add “%@” to Favorites", DisplayName(_url)] action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
-			[menu addItem:[NSMenuItem separatorItem]];
+			NSMenuItem* openWithMenuItem = [aMenu addItemWithTitle:@"Open With" action:@selector(revealSelectedItem:) keyEquivalent:@""];
+			[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:self.selectedPaths] toMenuItem:openWithMenuItem];
+		}
+
+		[aMenu addItem:[NSMenuItem separatorItem]];
+
+		if(isSymlink)
+		{
+			[aMenu addItemWithTitle:@"Show Original" action:@selector(revealSelectedItem:) keyEquivalent:@""];
+		}
+		else
+		{
+			if(isPackage)
+				[aMenu addItemWithTitle:@"Show Package Contents" action:@selector(showPackageContents:) keyEquivalent:@""];
+			if(!rootPath && selectedPath)
+				[aMenu addItemWithTitle:@"Show Enclosing Folder" action:@selector(revealSelectedItem:) keyEquivalent:@""];
 		}
 	}
-	else
+
+	if(rootPath || hasFileSelected)
+		[aMenu addItemWithTitle:@"Show in Finder" action:@selector(showSelectedEntriesInFinder:) keyEquivalent:@""];
+
+	if(rootPath)
 	{
-		BOOL showOpenWith = YES;
-		for(FSItem* item in self.selectedItems)
-			showOpenWith = showOpenWith && !([(item.target ?: item.url) isFileURL] && (path::info([[(item.target ?: item.url) path] fileSystemRepresentation]) & path::flag::application));
+		[aMenu addItem:[NSMenuItem separatorItem]];
+		[aMenu addItemWithTitle:@"New Document" action:@selector(newDocumentInTab:)          keyEquivalent:@""];
+		[aMenu addItemWithTitle:@"New Folder"   action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
+	}
 
-		FSItem* item = [self.selectedItems count] == 1 ? [self.selectedItems lastObject] : nil;
+	if(rootPath || hasFileSelected)
+	{
+		[aMenu addItem:[NSMenuItem separatorItem]];
 
-		BOOL showEnclosingFolder = item && [item.url isFileURL] && [@[ @"search", @"scm" ] containsObject:[_url scheme]];
-		BOOL showPackageContents = item && [item.url isFileURL] && (path::info([item.path fileSystemRepresentation]) & path::flag::package);
-		BOOL showOriginal        = item && [item.url isFileURL] && (path::info([item.path fileSystemRepresentation]) & (path::flag::symlink|path::flag::alias));
-
-		struct { NSString* label; SEL action; BOOL include; } const menuLabels[] =
+		if(hasFileSelected)
 		{
-			{ @"Open",                    @selector(didDoubleClickOutlineView:),     YES },
-			{ @"Open With",               NULL,                                      showOpenWith },
-			{ @"Show Preview",            @selector(toggleQuickLookPreview:),        YES },
-			{ nil,                        NULL,                                      YES },
-			{ @"Open Enclosing Folder",   @selector(revealSelectedItem:),            showEnclosingFolder }, // scm://, search://
-			{ @"Show Package Contents",   @selector(showPackageContents:),           showPackageContents }, // .app, .tmBundle, …
-			{ @"Show Original",           @selector(revealSelectedItem:),            showOriginal        }, // symbolic links, aliases
-			{ @"Show in Finder",          @selector(showSelectedEntriesInFinder:),   YES },
-			{ nil,                        NULL,                                      YES },
-			{ @"Rename",                  @selector(editSelectedEntries:),           YES },
-			{ @"Duplicate",               @selector(duplicateSelectedEntries:),      YES },
-			{ @"New Folder",              @selector(newFolderInSelectedFolder:),     YES },
-			{ nil,                        NULL,                                      YES },
-			{ @"Move to Trash",           @selector(delete:),                        YES },
-			{ nil,                        NULL,                                      YES },
-			{ @"Copy",                    @selector(copy:),                          YES },
-			{ nil,                        NULL,                                      YES },
-			{ @"Color Label",             NULL,                                      YES },
-			{ @"Add to Favorites",        @selector(addSelectedEntriesToFavorites:), YES },
-		};
-
-		for(size_t i = 0; i < sizeofA(menuLabels); i++)
-		{
-			if(!menuLabels[i].include)
-				continue;
-
-			if(NSString* label = menuLabels[i].label)
-			{
-				NSMenuItem* menuItem = [menu addItemWithTitle:label action:menuLabels[i].action keyEquivalent:@""];
-				if([self respondsToSelector:menuLabels[i].action])
-					[menuItem setTarget:self];
-			}
-			else
-			{
-				[menu addItem:[NSMenuItem separatorItem]];
-			}
+			[aMenu addItemWithTitle:@"Rename"     action:@selector(editSelectedEntries:)      keyEquivalent:@""];
+			[aMenu addItemWithTitle:@"Duplicate"  action:@selector(duplicateSelectedEntries:) keyEquivalent:@""];
+			[aMenu addItemWithTitle:@"Quick Look" action:@selector(toggleQuickLookPreview:)   keyEquivalent:@""];
 		}
+
+		[aMenu addItemWithTitle:@"Add to Favorites" action:@selector(addSelectedEntriesToFavorites:) keyEquivalent:@""];
+	}
+
+	if(hasFileSelected)
+	{
+		[aMenu addItem:[NSMenuItem separatorItem]];
+		[aMenu addItemWithTitle:@"Move to Trash" action:@selector(delete:) keyEquivalent:@""];
 
 		std::vector<bundles::item_ptr> const& items = bundles::query(bundles::kFieldSemanticClass, "callback.file-browser.action-menu");
 		if(!items.empty())
 		{
-			NSInteger i = [menu indexOfItemWithTitle:@"Move to Trash"];
-			[menu insertItem:[NSMenuItem separatorItem] atIndex:++i];
+			[aMenu addItem:[NSMenuItem separatorItem]];
 
 			std::multimap<std::string, bundles::item_ptr, text::less_t> sorted;
 			iterate(item, items)
 				sorted.insert(std::make_pair((*item)->name(), *item));
 
-			iterate(pair, sorted)
-			{
-				NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithCxxString:pair->first] action:@selector(executeBundleCommand:) keyEquivalent:@""];
-				item.representedObject = [NSString stringWithCxxString:pair->second->uuid()];
-				item.target            = self;
-				[menu insertItem:item atIndex:++i];
-			}
+			for(auto pair : sorted)
+				[[aMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:@selector(executeBundleCommand:) keyEquivalent:@""] setRepresentedObject:[NSString stringWithCxxString:pair.second->uuid()]];
 		}
-
-		OakFinderLabelChooser* swatch = [[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 37)];
-		swatch.selectedIndex          = numberOfSelectedRows == 1 ? [[self.selectedItems lastObject] labelIndex] : 0;
-		swatch.target                 = self;
-		swatch.action                 = @selector(changeColor:);
-		[[menu itemWithTitle:@"Color Label"] setView:swatch];
-
-		if(NSMenuItem* openWithMenuItem = [menu itemWithTitle:@"Open With"])
-			[OakOpenWithMenu addOpenWithMenuForPaths:[NSSet setWithArray:self.selectedPaths] toMenuItem:openWithMenuItem];
-
-		[menu addItem:[NSMenuItem separatorItem]];
 	}
 
-	[[menu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@""] setTarget:_view.window];
-	[[menu addItemWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:@""] setTarget:_view.window];
+	if(hasFileSelected || self.canPaste)
+	{
+		[aMenu addItem:[NSMenuItem separatorItem]];
+
+		if(hasFileSelected)
+		{
+			[aMenu addItemWithTitle:@"Cut"  action:@selector(cut:)  keyEquivalent:@""];
+			[aMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@""];
+		}
+
+		if(self.canPaste)
+			[aMenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@""];
+	}
+
+	if(hasFileSelected)
+	{
+		OakFinderLabelChooser* swatch = [[OakFinderLabelChooser alloc] initWithFrame:NSMakeRect(0, 0, 166, 37)];
+		swatch.selectedIndex = [[selectedItems lastObject] labelIndex];
+		swatch.action        = @selector(changeColor:);
+		swatch.target        = self;
+
+		[aMenu addItem:[NSMenuItem separatorItem]];
+		[aMenu addItemWithTitle:@"Label:" action:@selector(nop:) keyEquivalent:@""];
+		[[aMenu addItemWithTitle:@"Color Swatch" action:@selector(nop:) keyEquivalent:@""] setView:swatch];
+	}
+
+	for(NSUInteger i = countOfExistingItems; i < [aMenu numberOfItems]; ++i)
+	{
+		NSMenuItem* item = [aMenu itemAtIndex:i];
+		if(!item.target && [self respondsToSelector:item.action])
+			[item setTarget:self];
+	}
+
+	if([_view.window.undoManager canUndo] || [_view.window.undoManager canRedo])
+	{
+		if(countOfExistingItems != [aMenu numberOfItems])
+			[aMenu addItem:[NSMenuItem separatorItem]];
+
+		[[aMenu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@""] setTarget:_view.window];
+		[[aMenu addItemWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:@""] setTarget:_view.window];
+	}
+
+	if(countOfExistingItems == [aMenu numberOfItems])
+		[aMenu addItemWithTitle:@"No available actions" action:@selector(nop:) keyEquivalent:@""];
+}
+
+- (NSMenu*)menuForOutlineView:(NSOutlineView*)anOutlineView
+{
+	NSMenu* menu = [NSMenu new];
+	[self updateMenu:menu];
 	return menu;
+}
+
+- (void)menuNeedsUpdate:(NSMenu*)aMenu
+{
+	[aMenu removeAllItems];
+	[aMenu addItemWithTitle:@"Dummy" action:@selector(nop:) keyEquivalent:@""];
+	[self updateMenu:aMenu];
 }
 
 // ==================
