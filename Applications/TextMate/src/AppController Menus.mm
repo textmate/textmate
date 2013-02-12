@@ -36,9 +36,6 @@ OAK_DEBUG_VAR(AppController_Menus);
 		[aMenu removeItemAtIndex:i];
 	}
 
-	static NSMutableArray* bundleItemDelegates = [NSMutableArray new];
-	[bundleItemDelegates removeAllObjects];
-
 	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
 		ordered.insert(std::make_pair((*item)->name(), *item));
@@ -48,12 +45,9 @@ OAK_DEBUG_VAR(AppController_Menus);
 		if(pair->second->menu().empty())
 			continue;
 
-		BundleMenuDelegate* delegate = [[BundleMenuDelegate alloc] initWithBundleItem:pair->second];
-		[bundleItemDelegates addObject:delegate];
-
 		NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
-		menuItem.submenu = [NSMenu new];
-		menuItem.submenu.delegate = delegate;
+		menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair->second->uuid()]];
+		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
 	}
 
 	if(ordered.empty())

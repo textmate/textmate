@@ -2,6 +2,7 @@
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <ns/ns.h>
 #import <oak/debug.h>
 
 OAK_DEBUG_VAR(BundleMenu);
@@ -11,23 +12,11 @@ OAK_DEBUG_VAR(BundleMenu);
 - (scope::context_t const&)scopeContext;
 @end
 
-@interface BundleMenuDelegate ()
-@property (nonatomic, retain) NSMutableArray* subdelegates;
-@end
-
 @implementation BundleMenuDelegate
++ (BundleMenuDelegate*)sharedInstance
 {
-	bundles::item_ptr umbrellaItem;
-}
-
-- (id)initWithBundleItem:(bundles::item_ptr const&)aBundleItem
-{
-	if(self = [super init])
-	{
-		umbrellaItem = aBundleItem;
-		self.subdelegates = [NSMutableArray new];
-	}
-	return self;
+	static BundleMenuDelegate* instance = [BundleMenuDelegate new];
+	return instance;
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)theEvent target:(id*)aTarget action:(SEL*)anAction
@@ -39,7 +28,6 @@ OAK_DEBUG_VAR(BundleMenu);
 {
 	D(DBF_BundleMenu, bug("\n"););
 	[aMenu removeAllItems];
-	[self.subdelegates removeAllObjects];
 
 	BOOL hasSelection = NO;
 	if(id textView = [NSApp targetForAction:@selector(hasSelection)])
@@ -49,6 +37,10 @@ OAK_DEBUG_VAR(BundleMenu);
 	if(id textView = [NSApp targetForAction:@selector(scopeContext)])
 		scope = [textView scopeContext];
 
+	bundles::item_ptr umbrellaItem = bundles::lookup(to_s(aMenu.title));
+	if(!umbrellaItem)
+		return;
+
 	citerate(item, umbrellaItem->menu())
 	{
 		switch((*item)->kind())
@@ -57,10 +49,8 @@ OAK_DEBUG_VAR(BundleMenu);
 			{
 				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:NULL keyEquivalent:@""];
 
-				menuItem.submenu = [NSMenu new];
-				BundleMenuDelegate* delegate = [[BundleMenuDelegate alloc] initWithBundleItem:*item];
-				menuItem.submenu.delegate = delegate;
-				[self.subdelegates addObject:delegate];
+				menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:(*item)->uuid()]];
+				menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
 			}
 			break;
 

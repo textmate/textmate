@@ -593,7 +593,7 @@ private:
 	citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
 		ordered.insert(std::make_pair((*item)->name(), *item));
 	
-	NSMenu* menu = [NSMenu new];
+	NSMenu* menu = [[NSMenu new] autorelease];
 	iterate(pair, ordered)
 	{
 		bool selectedGrammar = false;
@@ -603,8 +603,8 @@ private:
 			continue;
 
 		NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
-		menuItem.submenu = [[NSMenu new] autorelease];
-		menuItem.submenu.delegate = [[[BundleMenuDelegate alloc] initWithBundleItem:pair->second] autorelease];
+		menuItem.submenu = [[[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair->second->uuid()]] autorelease];
+		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
 
 		if(selectedGrammar)
 			[menuItem setState:NSOnState];
@@ -614,7 +614,6 @@ private:
 		[menu addItemWithTitle:@"No Bundles Loaded" action:@selector(nop:) keyEquivalent:@""];
 
 	[statusBar showMenu:menu withSelectedIndex:-1 forCellWithTag:sender ? [sender tag] : 1 font:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]] popup:YES];
-	[menu release];
 }
 
 - (void)showTabSizeSelector:(id)sender
