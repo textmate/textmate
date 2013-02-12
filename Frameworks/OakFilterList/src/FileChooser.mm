@@ -33,8 +33,6 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 @end
 
 @implementation OakNonActivatingTableView
-- (BOOL)acceptsFirstResponder { return NO; }
-
 - (NSCell*)preparedCellAtColumn:(NSInteger)column row:(NSInteger)row
 {
 	OFBPathInfoCell* res = (OFBPathInfoCell*)[super preparedCellAtColumn:column row:row];
@@ -244,6 +242,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_tableView.focusRingType           = NSFocusRingTypeNone;
 		_tableView.allowsEmptySelection    = NO;
 		_tableView.allowsMultipleSelection = YES;
+		_tableView.refusesFirstResponder   = YES;
 		_tableView.doubleAction            = @selector(accept:);
 		_tableView.target                  = self;
 		_tableView.dataSource              = self;
