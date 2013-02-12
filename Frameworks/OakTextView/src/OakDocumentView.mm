@@ -111,10 +111,10 @@ private:
 		if([[NSUserDefaults standardUserDefaults] boolForKey:@"DocumentView Disable Line Numbers"])
 			[gutterView setVisibility:NO forColumnWithIdentifier:GVLineNumbersColumnIdentifier];
 
-		gutterDividerView = [OakCreateViewWithColor() retain];
+		gutterDividerView = OakCreateViewWithColor();
 		[self addSubview:gutterDividerView];
 
-		statusDividerView = [OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]) retain];
+		statusDividerView = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
 		[self addSubview:statusDividerView];
 
 		statusBar = [[OTVStatusBar alloc] initWithFrame:NSZeroRect];
@@ -169,7 +169,7 @@ private:
 
 - (NSImage*)gutterImage:(NSString*)aName
 {
-	if(NSImage* res = [[[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy] autorelease])
+	if(NSImage* res = [[NSImage imageNamed:aName inSameBundleAsClass:[self class]] copy])
 	{
 		// We use capHeight instead of x-height since most fonts have the numbers
 		// extend to this height, so centering around the x-height would look off
@@ -274,19 +274,6 @@ private:
 
 	self.filterWindowController = nil;
 	self.symbolChooser          = nil;
-
-	[gutterScrollView release];
-	[gutterView release];
-	[gutterDividerView release];
-	[gutterImages release];
-	[gutterHoverImages release];
-	[gutterPressedImages release];
-	[textScrollView release];
-	[textView release];
-	[statusBar release];
-	[topAuxiliaryViews release];
-	[bottomAuxiliaryViews release];
-	[super dealloc];
 }
 
 - (document::document_ptr const&)document
@@ -344,7 +331,7 @@ private:
 		{
 			NSImage* whiteIBeamImage = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
 			[whiteIBeamImage setSize:[[[NSCursor IBeamCursor] image] size]];
-			[textView setIbeamCursor:[[[NSCursor alloc] initWithImage:whiteIBeamImage hotSpot:NSMakePoint(4, 9)] autorelease]];
+			[textView setIbeamCursor:[[NSCursor alloc] initWithImage:whiteIBeamImage hotSpot:NSMakePoint(4, 9)]];
 			[textScrollView setScrollerKnobStyle:NSScrollerKnobStyleLight];
 		}
 		else
@@ -590,7 +577,7 @@ private:
 			continue;
 
 		NSMenuItem* menuItem = [bundleItemsMenu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
-		menuItem.submenu = [[[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair.second->uuid()]] autorelease];
+		menuItem.submenu = [[NSMenu alloc] initWithTitle:[NSString stringWithCxxString:pair.second->uuid()]];
 		menuItem.submenu.delegate = [BundleMenuDelegate sharedInstance];
 
 		if(selectedGrammar)

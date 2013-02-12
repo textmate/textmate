@@ -31,7 +31,7 @@ static NSPopUpButton* OakCreatePopUpButton (NSString* initialItem = nil)
 	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
 
 	if(initialItem)
-		[[res cell] setMenuItem:[[[NSMenuItem alloc] initWithTitle:initialItem action:@selector(nop:) keyEquivalent:@""] autorelease]];
+		[[res cell] setMenuItem:[[NSMenuItem alloc] initWithTitle:initialItem action:@selector(nop:) keyEquivalent:@""]];
 
 	return res;
 }
@@ -63,14 +63,14 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	text::range_t caretPosition;
 }
 @property (nonatomic) CGFloat recordingTime;
-@property (nonatomic, retain) NSTimer* recordingTimer;
+@property (nonatomic) NSTimer* recordingTimer;
 
-@property (nonatomic, retain) NSTextField*   selectionField;
-@property (nonatomic, retain) NSPopUpButton* grammarPopUp;
-@property (nonatomic, retain) NSPopUpButton* tabSizePopUp;
-@property (nonatomic, retain) NSPopUpButton* bundleItemsPopUp;
-@property (nonatomic, retain) NSPopUpButton* symbolPopUp;
-@property (nonatomic, retain) NSButton*      macroRecordingButton;
+@property (nonatomic) NSTextField*   selectionField;
+@property (nonatomic) NSPopUpButton* grammarPopUp;
+@property (nonatomic) NSPopUpButton* tabSizePopUp;
+@property (nonatomic) NSPopUpButton* bundleItemsPopUp;
+@property (nonatomic) NSPopUpButton* symbolPopUp;
+@property (nonatomic) NSButton*      macroRecordingButton;
 @end
 
 @implementation OTVStatusBar
@@ -92,7 +92,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		// = Wrap/Clip Bundles PopUp =
 		// ===========================
 
-		NSMenuItem* item = [[[NSMenuItem alloc] initWithTitle:@"" action:@selector(nop:) keyEquivalent:@""] autorelease];
+		NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(nop:) keyEquivalent:@""];
 		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
 		[[self.bundleItemsPopUp cell] setUsesItemFromMenu:NO];
 		[[self.bundleItemsPopUp cell] setMenuItem:item];
@@ -232,15 +232,13 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 - (void)setGrammarName:(NSString*)newGrammarName
 {
-	[_grammarName release];
-	_grammarName = [newGrammarName copy];
+	_grammarName = newGrammarName;
 	self.grammarPopUp.title = newGrammarName ?: @"(no grammar)";
 }
 
 - (void)setSymbolName:(NSString*)newSymbolName
 {
-	[_symbolName release];
-	_symbolName = [newSymbolName copy];
+	_symbolName = newSymbolName;
 	self.symbolPopUp.title = newSymbolName ?: @"Symbols";;
 }
 
@@ -249,8 +247,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(_recordingTimer != aTimer)
 	{
 		[_recordingTimer invalidate];
-		[_recordingTimer release];
-		_recordingTimer = [aTimer retain];
+		_recordingTimer = aTimer;
 	}
 }
 
@@ -295,18 +292,6 @@ static NSImageView* OakCreateImageView (NSImage* image)
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
-	self.selectionField       = nil;
-	self.grammarPopUp         = nil;
-	self.tabSizePopUp         = nil;
-	self.bundleItemsPopUp     = nil;
-	self.symbolPopUp          = nil;
-	self.macroRecordingButton = nil;
-
-	self.grammarName = nil;
-	self.symbolName = nil;
 	self.recordingTimer = nil;
-
-	[super dealloc];
 }
 @end

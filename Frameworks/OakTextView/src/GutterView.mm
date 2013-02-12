@@ -94,27 +94,12 @@ struct data_source_t
 - (void)dealloc
 {
 	D(DBF_GutterView, bug("\n"););
-	self.partnerView               = nil;
-	self.lineNumberFont            = nil;
-	self.foregroundColor           = nil;
-	self.backgroundColor           = nil;
-	self.iconColor                 = nil;
-	self.iconHoverColor            = nil;
-	self.iconPressedColor          = nil;
-	self.selectionForegroundColor  = nil;
-	self.selectionBackgroundColor  = nil;
-	self.selectionIconColor        = nil;
-	self.selectionIconHoverColor   = nil;
-	self.selectionIconPressedColor = nil;
-	self.selectionBorderColor      = nil;
 	iterate(it, columnDataSources)
 	{
 		if(it->datasource)
 			[[NSNotificationCenter defaultCenter] removeObserver:self name:GVColumnDataSourceDidChange object:it->datasource];
 	}
-	[hiddenColumns release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 - (void)setupSelectionRects
@@ -161,12 +146,8 @@ struct data_source_t
 	D(DBF_GutterView, bug("%s (%p)\n", [[[aView class] description] UTF8String], aView););
 
 	if(_partnerView)
-	{
 		[[NSNotificationCenter defaultCenter] removeObserver:self];
-		[_partnerView release];
-	}
-
-	if(_partnerView = [aView retain])
+	if(_partnerView = aView)
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(boundsDidChange:) name:NSViewBoundsDidChangeNotification object:[[_partnerView enclosingScrollView] contentView]];
 }
 
@@ -280,13 +261,14 @@ static CTLineRef CreateCTLineFromText (std::string const& text, NSFont* font, NS
 		if(CGColorRef cgColor = [color tmCGColor])
 			CFDictionaryAddValue(dict, kCTForegroundColorAttributeName, cgColor);
 
-		if(CFStringRef fontName = (CFStringRef)[font fontName])
+		if(CFStringRef fontName = (CFStringRef)CFBridgingRetain([font fontName]))
 		{
 			if(CTFontRef ctFont = CTFontCreateWithName(fontName, [font pointSize], NULL))
 			{
 				CFDictionaryAddValue(dict, kCTFontAttributeName, ctFont);
 				CFRelease(ctFont);
 			}
+			CFRelease(fontName);
 		}
 
 		if(CFAttributedStringRef str = CFAttributedStringCreate(kCFAllocatorDefault, cf::wrap(text), dict))
@@ -532,10 +514,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 {
 	D(DBF_GutterView, bug("\n"););
 	[self clearTrackingRects];
-
-	NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseEnteredAndExited|NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:nil];
-	[self addTrackingArea:trackingArea];
-	[trackingArea release];
+	[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self visibleRect] options:NSTrackingMouseEnteredAndExited|NSTrackingMouseMoved|NSTrackingActiveInKeyWindow owner:self userInfo:nil]];
 }
 
 - (void)scrollWheel:(NSEvent*)event

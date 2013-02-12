@@ -95,22 +95,22 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 }
 - (void)setDocument:(document::document_ptr const&)aDocument;
 
-@property (nonatomic, assign) id <OakTextViewDelegate>      delegate;
-@property (nonatomic, assign) theme_ptr const&              theme;
-@property (nonatomic, retain) NSCursor*                     ibeamCursor;
-@property (nonatomic, retain) NSFont*                       font;
-@property (nonatomic, assign) BOOL                          antiAlias;
-@property (nonatomic, assign) size_t                        tabSize;
-@property (nonatomic, assign) BOOL                          showInvisibles;
-@property (nonatomic, assign) BOOL                          softWrap;
-@property (nonatomic, assign) BOOL                          softTabs;
+@property (nonatomic, weak) id <OakTextViewDelegate>        delegate;
+@property (nonatomic) theme_ptr const&                      theme;
+@property (nonatomic) NSCursor*                             ibeamCursor;
+@property (nonatomic) NSFont*                               font;
+@property (nonatomic) BOOL                                  antiAlias;
+@property (nonatomic) size_t                                tabSize;
+@property (nonatomic) BOOL                                  showInvisibles;
+@property (nonatomic) BOOL                                  softWrap;
+@property (nonatomic) BOOL                                  softTabs;
 @property (nonatomic, readonly) BOOL                        continuousIndentCorrections;
 
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
-@property (nonatomic, retain) NSString*                     selectionString;
+@property (nonatomic) NSString*                             selectionString;
 
-@property (nonatomic, assign) BOOL                          isMacroRecording;
+@property (nonatomic) BOOL                                  isMacroRecording;
 
 - (GVLineRecord const&)lineRecordForPosition:(CGFloat)yPos;
 - (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;

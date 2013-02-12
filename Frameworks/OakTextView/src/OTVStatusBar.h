@@ -8,11 +8,11 @@
 @interface OTVStatusBar : OakGradientView
 - (void)showBundlesMenu:(id)sender;
 - (void)setCaretPosition:(std::string const&)range;
-@property (nonatomic, copy)   NSString* grammarName;
-@property (nonatomic, copy)   NSString* symbolName;
-@property (nonatomic, assign) BOOL isMacroRecording;
-@property (nonatomic, assign) BOOL softTabs;
-@property (nonatomic, assign) int32_t tabSize;
+@property (nonatomic) NSString* grammarName;
+@property (nonatomic) NSString* symbolName;
+@property (nonatomic) BOOL isMacroRecording;
+@property (nonatomic) BOOL softTabs;
+@property (nonatomic) int32_t tabSize;
 
-@property (nonatomic, assign) id <OTVStatusBarDelegate> delegate;
+@property (nonatomic, weak) id <OTVStatusBarDelegate> delegate;
 @end

@@ -13,8 +13,8 @@ extern NSUInteger const OakChoiceMenuKeyMovement;
 	NSUInteger keyAction;
 	NSPoint topLeftPosition;
 }
-@property (nonatomic, retain) NSArray* choices;
-@property (nonatomic, assign) NSUInteger choiceIndex;
+@property (nonatomic) NSArray* choices;
+@property (nonatomic) NSUInteger choiceIndex;
 @property (nonatomic, readonly) NSString* selectedChoice;
 - (void)showAtTopLeftPoint:(NSPoint)aPoint forView:(NSView*)aView;
 - (BOOL)isVisible;

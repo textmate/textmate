@@ -2,7 +2,7 @@
 #import <OakAppKit/OakAppKit.h>
 
 @interface LiveSearchView ()
-@property (nonatomic, retain) NSView* divider;
+@property (nonatomic) NSView* divider;
 @end
 
 @implementation LiveSearchView
@@ -12,7 +12,7 @@
 	{
 		self.divider = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]);
 
-		self.textField = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+		self.textField = [[NSTextField alloc] initWithFrame:NSZeroRect];
 		self.textField.focusRingType = NSFocusRingTypeNone;
 
 		NSDictionary* views = @{
@@ -33,13 +33,6 @@
 	return self;
 }
 
-- (void)dealloc
-{
-	self.divider   = nil;
-	self.textField = nil;
-	[super dealloc];
-}
-
 - (BOOL)isFlipped
 {
 	return YES;
@@ -56,10 +49,10 @@
 	NSColor* middleColor = [NSColor colorWithDeviceWhite:223/255.0 alpha:1];
 	int angle = 270;
 
-	NSGradient* aGradient = [[[NSGradient alloc] initWithColorsAndLocations:
+	NSGradient* aGradient = [[NSGradient alloc] initWithColorsAndLocations:
 		cornerColor, 0.0,
 		middleColor, 0.5,
-		cornerColor, 1.0, nil] autorelease];
+		cornerColor, 1.0, nil];
 
 	NSRect bounds = NSMakeRect(self.bounds.origin.x, self.bounds.origin.y+1, self.bounds.size.width, self.bounds.size.height-1);
 	[aGradient drawInRect:bounds angle:angle];

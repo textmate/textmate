@@ -62,16 +62,16 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 - (NSRange)nsRangeForRange:(ng::range_t const&)range;
 - (ng::range_t const&)rangeForNSRange:(NSRange)nsRange;
 @property (nonatomic, readonly) ng::ranges_t const& markedRanges;
-@property (nonatomic, retain) NSDate* optionDownDate;
-@property (nonatomic, retain) OakTimer* initiateDragTimer;
-@property (nonatomic, retain) OakTimer* dragScrollTimer;
-@property (nonatomic, assign) BOOL showDragCursor;
-@property (nonatomic, assign) BOOL showColumnSelectionCursor;
-@property (nonatomic, retain) OakChoiceMenu* choiceMenu;
-@property (nonatomic, assign) NSUInteger refreshNestCount;
-@property (nonatomic, retain) LiveSearchView* liveSearchView;
-@property (nonatomic, copy) NSString* liveSearchString;
-@property (nonatomic, assign) ng::ranges_t const& liveSearchRanges;
+@property (nonatomic) NSDate* optionDownDate;
+@property (nonatomic) OakTimer* initiateDragTimer;
+@property (nonatomic) OakTimer* dragScrollTimer;
+@property (nonatomic) BOOL showDragCursor;
+@property (nonatomic) BOOL showColumnSelectionCursor;
+@property (nonatomic) OakChoiceMenu* choiceMenu;
+@property (nonatomic) NSUInteger refreshNestCount;
+@property (nonatomic) LiveSearchView* liveSearchView;
+@property (nonatomic) NSString* liveSearchString;
+@property (nonatomic) ng::ranges_t const& liveSearchRanges;
 @end
 
 static std::vector<bundles::item_ptr> items_for_tab_expansion (ng::buffer_t const& buffer, ng::ranges_t const& ranges, std::string const& scopeAttributes, ng::range_t* range)
@@ -252,7 +252,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	find_operation_t findOperation;
 	find::options_t  findOptions;
 }
-@property (nonatomic, retain)   OakTextView*     textView;
+@property (nonatomic) OakTextView*               textView;
 @property (nonatomic, readonly) find_operation_t findOperation;
 @property (nonatomic, readonly) find::options_t  findOptions;
 @end
@@ -271,15 +271,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 	return self;
 }
 
-- (void)dealloc
-{
-	[textView release];
-	[super dealloc];
-}
-
 + (id)findServerWithTextView:(OakTextView*)aTextView operation:(find_operation_t)anOperation options:(find::options_t)someOptions
 {
-	return [[[self alloc] initWithTextView:aTextView operation:anOperation options:someOptions] autorelease];
+	return [[self alloc] initWithTextView:aTextView operation:anOperation options:someOptions];
 }
 
 - (NSString*)findString      { return [[OakPasteboard pasteboardWithName:NSFindPboard] current].string;    }
@@ -336,7 +330,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 	citerate(rect, layout->rects_for_ranges(ranges))
 		[clip appendBezierPath:[NSBezierPath bezierPathWithRect:NSOffsetRect(*rect, -NSMinX(srcRect), -NSMinY(srcRect))]];
 
-	NSImage* image = [[[NSImage alloc] initWithSize:NSMakeSize(std::max<CGFloat>(NSWidth(srcRect), 1), std::max<CGFloat>(NSHeight(srcRect), 1))] autorelease];
+	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize(std::max<CGFloat>(NSWidth(srcRect), 1), std::max<CGFloat>(NSHeight(srcRect), 1))];
 	[image setFlipped:[self isFlipped]];
 	[image lockFocus];
 	[clip addClip];
@@ -461,8 +455,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
-		spellingDotImage = [[NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]] retain];
-		foldingDotsImage = [[NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]] retain];
+		spellingDotImage = [NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]];
+		foldingDotsImage = [NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]];
 
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
@@ -475,11 +469,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[liveSearchString release];
 	[self setDocument:document::document_ptr()];
-	[spellingDotImage release];
-	[foldingDotsImage release];
-	[super dealloc];
 }
 
 - (void)documentWillSave:(NSNotification*)aNotification
@@ -609,7 +599,7 @@ doScroll:
 	if(!choiceVector.empty())
 	{
 		choiceMenu = [OakChoiceMenu new];
-		choiceMenu.choices = (NSArray*)((CFArrayRef)cf::wrap(choiceVector));
+		choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(choiceVector));
 
 		std::string const& currentChoice = editor->placeholder_content();
 		for(size_t i = choiceVector.size(); i-- > 0; )
@@ -816,7 +806,7 @@ doScroll:
 		CFRelease(str);
 	}
 
-	return [(NSAttributedString*)res autorelease];
+	return (NSAttributedString*)CFBridgingRelease(res);
 }
 
 - (NSRect)firstRectForCharacterRange:(NSRange)theRange
@@ -866,8 +856,7 @@ doScroll:
 			// ATTR(VisibleCharacterRange),
 		]];
 
-		set = [set setByAddingObjectsFromArray:[super accessibilityAttributeNames]];
-		attributes = [[set allObjects] retain];
+		attributes = [[set setByAddingObjectsFromArray:[super accessibilityAttributeNames]] allObjects];
 	}
 	return attributes;
 }
@@ -955,8 +944,7 @@ doScroll:
 			// PATTR(AttributedStringForRange),
 		]];
 
-		set = [set setByAddingObjectsFromArray:[super accessibilityParameterizedAttributeNames]];
-		attributes = [[set allObjects] retain];
+		attributes = [[set setByAddingObjectsFromArray:[super accessibilityParameterizedAttributeNames]] allObjects];
 	}
 	return attributes;
 }
@@ -1320,7 +1308,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 		std::vector<std::string> newChoices = editor->choices();
 		newChoices.erase(std::remove_if(newChoices.begin(), newChoices.end(), [&newPrefix](std::string const& str) { return str.find(newPrefix) != 0; }), newChoices.end());
-		choiceMenu.choices = (NSArray*)((CFArrayRef)cf::wrap(newChoices));
+		choiceMenu.choices = (__bridge NSArray*)((CFArrayRef)cf::wrap(newChoices));
 
 		bool didEdit   = oldPrefix != newPrefix;
 		bool didDelete = didEdit && oldPrefix.find(newPrefix) == 0;
@@ -1497,7 +1485,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (NSMenu*)contextMenuWithMisspelledWord:(NSString*)aWord
 {
-	NSMenu* menu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
+	NSMenu* menu = [[NSMenu alloc] initWithTitle:@""];
 	NSMenuItem* item = nil;
 
 	if(aWord)
@@ -1703,7 +1691,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 		if(!self.liveSearchView)
 		{
-			self.liveSearchView = [[[LiveSearchView alloc] initWithFrame:NSZeroRect] autorelease];
+			self.liveSearchView = [[LiveSearchView alloc] initWithFrame:NSZeroRect];
 			[documentView addAuxiliaryView:self.liveSearchView atEdge:NSMinYEdge];
 			self.liveSearchView.nextResponder = self;
 		}
@@ -1826,14 +1814,14 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	AUTO_REFRESH;
 	[self recordSelector:_cmd withArgument:someOptions];
-	editor->find_dispatch(plist::convert(someOptions));
+	editor->find_dispatch(plist::convert((__bridge CFDictionaryRef)someOptions));
 }
 
 - (void)insertSnippetWithOptions:(NSDictionary*)someOptions // For Dialog popup
 {
 	AUTO_REFRESH;
 	[self recordSelector:_cmd withArgument:someOptions];
-	editor->snippet_dispatch(plist::convert(someOptions), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
+	editor->snippet_dispatch(plist::convert((__bridge CFDictionaryRef)someOptions), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 }
 
 - (void)undo:(id)anArgument // MACRO?
@@ -1936,10 +1924,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)setBlinkCaretTimer:(NSTimer*)aValue
 {
-	NSTimer* oldBlinkCaretTimer = blinkCaretTimer;
-	blinkCaretTimer = [aValue retain];
-	[oldBlinkCaretTimer invalidate];
-	[oldBlinkCaretTimer release];
+	[blinkCaretTimer invalidate];
+	blinkCaretTimer = aValue;
 }
 
 - (void)resetBlinkCaretTimer
@@ -2059,16 +2045,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 }
 
-- (void)setWrapColumnSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(void*)info
-{
-	if(returnCode == NSAlertDefaultReturn)
-	{
-		NSTextField* textField = (NSTextField*)[alert accessoryView];
-		[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
-	}
-	[alert release];
-}
-
 - (void)takeWrapColumnFrom:(id)sender
 {
 	ASSERT([sender respondsToSelector:@selector(tag)]);
@@ -2077,14 +2053,17 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	if([sender tag] == NSWrapColumnAskUser)
 	{
-		NSTextField* textField = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+		NSTextField* textField = [[NSTextField alloc] initWithFrame:NSZeroRect];
 		[textField setIntegerValue:wrapColumn == NSWrapColumnWindowWidth ? 80 : wrapColumn];
 		[textField sizeToFit];
 		[textField setFrameSize:NSMakeSize(200, NSHeight([textField frame]))];
 
-		NSAlert* alert = [[NSAlert alertWithMessageText:@"Set Wrap Column" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Specify what column text should wrap at:"] retain];
+		NSAlert* alert = [NSAlert alertWithMessageText:@"Set Wrap Column" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Specify what column text should wrap at:"];
 		[alert setAccessoryView:textField];
-		[alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:@selector(setWrapColumnSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+		OakShowAlertForWindow(alert, [self window], ^(NSInteger returnCode){
+			if(returnCode == NSAlertDefaultReturn)
+				[self setWrapColumn:std::max<NSInteger>([textField integerValue], 10)];
+		});
 	}
 	else
 	{
@@ -2149,7 +2128,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if([aSelectionString isEqualToString:selectionString])
 		return;
 
-	[selectionString release];
 	selectionString = [aSelectionString copy];
 	NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
 	if(UAZoomEnabled())
@@ -2245,8 +2223,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	if(macroRecordingArray)
 	{
 		D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert(macroRecordingArray)).c_str()););
-		[[NSUserDefaults standardUserDefaults] setObject:[[macroRecordingArray copy] autorelease] forKey:@"OakMacroManagerScratchMacro"];
-		[macroRecordingArray release];
+		[[NSUserDefaults standardUserDefaults] setObject:[macroRecordingArray copy] forKey:@"OakMacroManagerScratchMacro"];
 		macroRecordingArray = nil;
 	}
 	else
@@ -2260,7 +2237,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert([[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
-			editor->macro_dispatch(plist::convert(@{ @"commands" : scratchMacro }), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
+			editor->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro }), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 	else	NSBeep();
 }
 
@@ -2521,8 +2498,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	if(ibeamCursor != aCursor)
 	{
-		[ibeamCursor release];
-		ibeamCursor = [aCursor retain];
+		ibeamCursor = aCursor;
 		[[self window] invalidateCursorRectsForView:self];
 	}
 }
@@ -2636,7 +2612,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	ng::ranges_t const ranges = ng::dissect_columnar(document->buffer(), editor->ranges());
 	NSImage* srcImage = [self imageForRanges:ranges imageRect:&srcRect];
 
-	NSImage* image = [[[NSImage alloc] initWithSize:srcImage.size] autorelease];
+	NSImage* image = [[NSImage alloc] initWithSize:srcImage.size];
 	[image lockFocus];
 	[srcImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.5];
 	[image unlockFocus];
