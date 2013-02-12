@@ -1,18 +1,23 @@
 #import "HOStatusBar.h"
 #import <OakAppKit/NSImage Additions.h>
 
-static NSButton* OakCreateImageButton (NSString* imageName)
+static NSButton* OakCreateImageButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
+
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[res setButtonType:NSMomentaryChangeButton];
-	[res setBezelStyle:NSSmallSquareBezelStyle];
+	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
 
-	NSImage* image = [[NSImage imageNamed:imageName] copy];
-	[image setSize:NSMakeSize(13, 13)];
+	image = [image copy];
+	[image setTemplate:YES];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
 
+	// [res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	// [res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
+	// 
 	return res;
 }
 
@@ -25,6 +30,7 @@ static NSTextField* OakCreateTextField ()
 	[res setBezeled:NO];
 	[res setDrawsBackground:NO];
 	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	return res;
 }
 
@@ -36,9 +42,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 }
 
 @interface HOStatusBar ()
-@property (nonatomic) NSImage*             backgroundImage;
-@property (nonatomic) NSImageView*         firstSeparatorImageView;
-@property (nonatomic) NSImageView*         secondSeparatorImageView;
+@property (nonatomic) NSImageView*         divider;
 @property (nonatomic) NSButton*            goBackButton;
 @property (nonatomic) NSButton*            goForwardButton;
 @property (nonatomic) NSTextField*         statusTextField;
@@ -51,21 +55,19 @@ static NSImageView* OakCreateImageView (NSImage* image)
 @implementation HOStatusBar
 - (id)initWithFrame:(NSRect)frame
 {
-	if(self = [super initWithFrame:frame])
+	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil]])
 	{
 		_indeterminateProgress = YES;
 
-		_backgroundImage          = [NSImage imageNamed:@"Statusbar Background" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")];
-		_firstSeparatorImageView  = OakCreateImageView([NSImage imageNamed:@"Statusbar Separator" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")]);
-		_secondSeparatorImageView = OakCreateImageView([NSImage imageNamed:@"Statusbar Separator" inSameBundleAsClass:NSClassFromString(@"OakStatusBar")]);
+		_divider                  = OakCreateImageView([NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]]);
 
-		_goBackButton             = OakCreateImageButton(NSImageNameGoLeftTemplate);
+		_goBackButton             = OakCreateImageButton([NSImage imageNamed:NSImageNameGoLeftTemplate]);
 		_goBackButton.toolTip     = @"Show the previous page";
 		_goBackButton.enabled     = NO;
 		_goBackButton.target      = self;
 		_goBackButton.action      = @selector(goBack:);
 
-		_goForwardButton          = OakCreateImageButton(NSImageNameGoRightTemplate);
+		_goForwardButton          = OakCreateImageButton([NSImage imageNamed:NSImageNameGoRightTemplate]);
 		_goForwardButton.toolTip  = @"Show the next page";
 		_goForwardButton.enabled  = NO;
 		_goForwardButton.target   = self;
@@ -87,7 +89,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		_spinner.style                = NSProgressIndicatorSpinningStyle;
 		_spinner.displayedWhenStopped = NO;
 
-		NSArray* views = @[ _firstSeparatorImageView, _secondSeparatorImageView, _goBackButton, _goForwardButton, _statusTextField, _spinner ];
+		NSArray* views = @[ _divider, _goBackButton, _goForwardButton, _statusTextField, _spinner ];
 		for(NSView* view in views)
 		{
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -101,7 +103,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, _backgroundImage.size.height);
+	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
 }
 
 - (void)updateConstraints
@@ -114,33 +116,40 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 	NSDictionary* views = @{
 		@"back"     : _goBackButton,
-		@"divider1" : _firstSeparatorImageView,
 		@"forward"  : _goForwardButton,
-		@"divider2" : _secondSeparatorImageView,
+		@"divider"  : _divider,
 		@"status"   : _statusTextField,
 		@"spinner"  : _indeterminateProgress ? _spinner : _progressIndicator,
 	};
 
 	NSArray* layout = @[
-		@"H:|-(4)-[back(==9)]-(3)-[divider1(==1)]-(3)-[forward(==back)]-(4)-[divider2(==1)]",
-		@"V:|[back(==forward)]",
-		@"V:|[forward]",
-		@"V:|[divider1(==15,==divider2)]",
+		@"H:|-(8)-[back(==22)]-(2)-[forward(==back)]-(2)-[divider(==1)]",
+		@"V:|[back(==forward,==divider)]|",
+		@"V:[status]-5-|",
 	];
 
 	for(NSString* str in layout)
 		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:str options:0 metrics:nil views:views]];
-	[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider2]-[status(>=100)]-[spinner]-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 
 	if(!_indeterminateProgress)
-		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[spinner(>=50,<=150)]" options:0 metrics:nil views:views]];
+	{
+		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider(==1)]-[status(>=100)]-[spinner(>=50,<=150)]-|" options:0 metrics:nil views:views]];
+		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[spinner]-6-|" options:0 metrics:nil views:views]];
+	}
+	else
+	{		
+		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider(==1)]-[status(>=100)]-[spinner]-|" options:0 metrics:nil views:views]];
+		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[spinner]-5-|" options:0 metrics:nil views:views]];
+	}
 
 	[self addConstraints:_layoutConstraints];
 }
 
 - (void)drawRect:(NSRect)aRect
 {
-	[_backgroundImage drawInRect:self.bounds fromRect:NSZeroRect operation:NSCompositeCopy fraction:1];
+	[[NSColor windowBackgroundColor] set]; NSRectFill(aRect);
+	
+	[super drawRect:aRect];
 }
 
 - (void)setIndeterminateProgress:(BOOL)newIndeterminateProgress

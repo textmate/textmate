@@ -1,9 +1,11 @@
+#import <OakAppKit/OakGradientView.h>
+
 @protocol HOStatusBarDelegate
 - (void)goBack:(id)sender;
 - (void)goForward:(id)sender;
 @end
 
-@interface HOStatusBar : NSView
+@interface HOStatusBar : OakGradientView
 @property (nonatomic, weak) id  delegate;
 
 @property (nonatomic) NSString* statusText;
