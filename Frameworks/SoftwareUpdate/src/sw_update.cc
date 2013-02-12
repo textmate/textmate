@@ -132,7 +132,7 @@ namespace sw_update
 	std::string download_update (std::string const& url, key_chain_t const& keyChain, std::string* error, double* progress, bool const* stopFlag)
 	{
 		std::string dummy;
-		std::string const path = path::join(path::join(path::home(), "Library/Caches/com.macromates.TextMate"), path::name(url));
+		std::string const path = path::join({ path::home(), "Library/Caches/com.macromates.TextMate", path::name(url) });
 		return network::download_tbz(url, keyChain, path, error ? *error : dummy, progress, 0, 1, stopFlag);
 	}
 

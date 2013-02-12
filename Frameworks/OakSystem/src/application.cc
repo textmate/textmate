@@ -177,7 +177,7 @@ namespace oak
 	std::string application_t::support (std::string const& relativePath)
 	{
 		if(_support_path == NULL_STR)
-			_support_path = path::join(path::join(path::home(), "Library/Application Support"), name());
+			_support_path = path::join({ path::home(), "Library/Application Support", name() });
 		return path::join(_support_path, relativePath);
 	}
 
