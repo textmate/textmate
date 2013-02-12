@@ -178,6 +178,11 @@ namespace path
 		return !path.empty() && path[0] == '/' ? normalize(path) : normalize(base + "/" + path);
 	}
 
+	std::string join (std::initializer_list<std::string> const& components)
+	{
+		return normalize(text::join(components, "/"));
+	}
+
 	bool is_absolute (std::string const& path)
 	{
 		if(!path.empty() && path[0] == '/')
