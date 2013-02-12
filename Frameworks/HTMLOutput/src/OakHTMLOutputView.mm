@@ -25,11 +25,6 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 	return self;
 }
 
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
 - (void)setEnvironment:(std::map<std::string, std::string> const&)anEnvironment
 {
 	environment = anEnvironment;

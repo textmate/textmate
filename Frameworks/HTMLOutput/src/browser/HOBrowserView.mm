@@ -71,11 +71,6 @@
 	[[_webView mainFrame] stopLoading];
 }
 
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
 - (void)swipeWithEvent:(NSEvent*)anEvent
 {
 	if([anEvent deltaX] == +1 && _webView.canGoBack)
