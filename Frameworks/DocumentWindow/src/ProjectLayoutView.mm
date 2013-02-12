@@ -68,8 +68,6 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	}
 
 	[self setNeedsUpdateConstraints:YES];
-	[[self window] invalidateCursorRectsForView:self];
-
 	return newView;
 }
 
@@ -288,6 +286,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 	}
 
 	[self addConstraints:_myConstraints];
+	[[self window] invalidateCursorRectsForView:self];
 }
 
 #undef CONSTRAINT
@@ -398,6 +397,7 @@ NSString* const kUserDefaultsHTMLOutputSizeKey   = @"htmlOutputSize";
 				[[NSUserDefaults standardUserDefaults] setInteger:_fileBrowserWidth forKey:kUserDefaultsFileBrowserWidthKey];
 			}
 
+			[[self window] invalidateCursorRectsForView:self];
 			didDrag = YES;
 		}
 
