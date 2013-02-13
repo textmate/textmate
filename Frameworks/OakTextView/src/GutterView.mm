@@ -28,6 +28,7 @@ struct data_source_t
 };
 
 @interface GutterView ()
+@property (nonatomic) NSSize size;
 - (CGFloat)widthForColumnWithIdentifier:(std::string const&)identifier;
 - (data_source_t*)columnWithIdentifier:(std::string const&)identifier;
 
@@ -248,9 +249,16 @@ struct data_source_t
 
 - (void)boundsDidChange:(NSNotification*)aNotification
 {
+	[self updateSize];
 	[self.enclosingScrollView.contentView scrollToPoint:NSMakePoint(0, NSMinY(_partnerView.enclosingScrollView.contentView.bounds))];
-	if([self updateWidth] != NSWidth(self.frame))
-		[self invalidateIntrinsicContentSize];
+}
+
+- (void)setSize:(NSSize)newSize
+{
+	if(NSEqualSizes(_size, newSize))
+		return;
+	_size = newSize;
+	[self invalidateIntrinsicContentSize];
 }
 
 static CTLineRef CreateCTLineFromText (std::string const& text, NSFont* font, NSColor* color = nil)
@@ -384,7 +392,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	}
 }
 
-- (CGFloat)updateWidth
+- (void)updateSize
 {
 	static const CGFloat columnPadding = 1;
 
@@ -404,20 +412,21 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 		}
 	}
 
-	return totalWidth;
+	NSPoint origin = NSMakePoint(0, NSMinY(_partnerView.enclosingScrollView.contentView.bounds));
+	CGFloat height = std::max(NSHeight(_partnerView.frame), origin.y + NSHeight([self visibleRect]));
+	[self setSize:NSMakeSize(totalWidth, height)];
 }
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize([self updateWidth], NSViewNoInstrinsicMetric);
+	return self.size;
 }
 
 - (void)reloadData:(id)sender
 {
 	D(DBF_GutterView, bug("\n"););
+	[self updateSize];
 	[self setNeedsDisplay:YES];
-	if([self updateWidth] != NSWidth(self.frame))
-		[self invalidateIntrinsicContentSize];
 }
 
 - (NSRect)columnRectForPoint:(NSPoint)aPoint
@@ -496,7 +505,7 @@ static void DrawText (std::string const& text, CGRect const& rect, CGFloat basel
 	if(visible)
 			[hiddenColumns removeObject:columnIdentifier];
 	else	[hiddenColumns addObject:columnIdentifier];
-	[self invalidateIntrinsicContentSize];
+	[self updateSize];
 }
 
 // ==================
