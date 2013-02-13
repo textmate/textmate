@@ -144,8 +144,10 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		}
 
 		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
-
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[line]-[selection(>=32)]-8-[dividerOne(==1)]-(-2)-[grammar(==115)]-5-[dividerTwo(==1)]-(-2)-[tabSize]-4-[dividerThree(==1)]-5-[items(==30)]-4-[dividerFour(==1)]-(-2)-[symbol]-5-[dividerFive(==1)]-6-[recording]-14-|" options:0 metrics:nil views:views]];
+		[self.selectionField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[[self.selectionField cell] setLineBreakMode:NSLineBreakByTruncatingTail];
+		
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[line]-[selection(>=32,<=225)]-8-[dividerOne(==1)]-(-2)-[grammar(==115)]-5-[dividerTwo(==1)]-(-2)-[tabSize]-4-[dividerThree(==1)]-5-[items(==30)]-4-[dividerFour(==1)]-(-2)-[symbol(>=125)]-5-[dividerFive(==1)]-6-[recording]-14-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[line]-5-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[selection]-5-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[grammar(==dividerOne,==items,==tabSize,==symbol,==recording)]|" options:0 metrics:nil views:views]];
