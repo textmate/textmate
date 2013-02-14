@@ -138,10 +138,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	scrollView.documentView          = _outlineView;
 
 	_headerView = [[OFBHeaderView alloc] initWithFrame:NSZeroRect];
-	_headerView.goBackButton.target = self;
-	_headerView.goBackButton.action = @selector(goBack:);
-	_headerView.goForwardButton.target = self;
-	_headerView.goForwardButton.action = @selector(goForward:);
+	_headerView.goBackButton.target  = self;
+	_headerView.goBackButton.action  = @selector(goBack:);
+	_headerView.goBackButton.enabled = NO;
+	_headerView.goForwardButton.target  = self;
+	_headerView.goForwardButton.action  = @selector(goForward:);
+	_headerView.goForwardButton.enabled = NO;
+
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:_headerView.folderPopUpButton];
 
 	_actionsView = [[OFBActionsView alloc] initWithFrame:NSZeroRect];
 	_actionsView.createButton.action    = @selector(newDocumentInTab:);
@@ -195,29 +199,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	self.url = _url;
 }
 
-- (void)updateHeaderView
-{
-	_headerView.goBackButton.enabled    = self.canGoBack;
-	_headerView.goForwardButton.enabled = self.canGoForward;
-
-	NSMenu* menu = [NSMenu new];
-	for(NSURL* currentURL = _url; currentURL; currentURL = ParentForURL(currentURL))
-	{
-		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
-
-		if(currentURL == _url && _outlineViewDelegate.dataSource)
-			menuItem.title = _outlineViewDelegate.dataSource.rootItem.name;
-
-		[menuItem setTarget:self];
-		[menuItem setRepresentedObject:currentURL];
-		[menuItem setImage:IconImage(currentURL)];
-	}
-	[menu addItem:[NSMenuItem separatorItem]];
-	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
-
-	_headerView.folderPopUpButton.menu = menu;
-}
-
 - (NSRect)iconFrameForEntry:(id)anEntry
 {
 	NSInteger rowIndex = [_outlineView rowForItem:anEntry];
@@ -255,7 +236,35 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	_url = aURL;
 	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
-	[self updateHeaderView];
+
+	NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:_outlineViewDelegate.dataSource.rootItem.name action:@selector(takeURLFrom:) keyEquivalent:@""];
+	menuItem.image = _outlineViewDelegate.dataSource.rootItem.icon;
+	menuItem.image.size = NSMakeSize(16, 16);
+	menuItem.target = self;
+	menuItem.representedObject = _url;
+	[[_headerView.folderPopUpButton cell] setMenuItem:menuItem];
+}
+
+- (void)folderPopUpButtonWillPopUp:(NSNotification*)aNotification
+{
+	NSMenu* menu = _headerView.folderPopUpButton.menu;
+
+	NSMenuItem* firstItem = [[_headerView.folderPopUpButton cell] menuItem];
+	[menu removeAllItems];
+	[menu addItem:firstItem];
+
+	for(NSURL* currentURL = ParentForURL(_url); currentURL; currentURL = ParentForURL(currentURL))
+	{
+		NSMenuItem* menuItem = [menu addItemWithTitle:DisplayName(currentURL) action:@selector(takeURLFrom:) keyEquivalent:@""];
+		menuItem.representedObject = currentURL;
+		menuItem.image             = IconImage(currentURL);
+		menuItem.target            = self;
+	}
+
+	[menu addItem:[NSMenuItem separatorItem]];
+	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
+
+	[_headerView.folderPopUpButton selectItem:firstItem];
 }
 
 - (void)goToURL:(NSURL*)aURL
@@ -340,6 +349,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	_history      = [newHistory mutableCopy];
 	_historyIndex = NSNotFound;
+
+	_headerView.goBackButton.enabled    = NO;
+	_headerView.goForwardButton.enabled = NO;
 }
 
 - (NSUInteger)historyIndex
@@ -360,6 +372,9 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSDictionary* entry = _history[newIndex];
 	[self setUrl:entry[@"url"]];
 	[_outlineViewDelegate scrollToOffset:[entry[@"scrollOffset"] floatValue]];
+
+	_headerView.goBackButton.enabled    = self.canGoBack;
+	_headerView.goForwardButton.enabled = self.canGoForward;
 }
 
 - (void)syncHistoryState
