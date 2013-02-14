@@ -166,9 +166,12 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 - (void)drawRect:(NSRect)aRect
 {
-	[[NSColor windowBackgroundColor] set];
-	NSRectFill(aRect);
-	[super drawRect:aRect];
+	if([self.window contentBorderThicknessForEdge:NSMinYEdge] < NSMaxY(self.frame))
+	{
+		[[NSColor windowBackgroundColor] set];
+		NSRectFill(aRect);
+		[super drawRect:aRect];
+	}
 }
 
 - (void)updateMacroRecordingAnimation:(NSTimer*)aTimer
