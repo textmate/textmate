@@ -237,12 +237,16 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 - (void)setGrammarName:(NSString*)newGrammarName
 {
+	if(_grammarName == newGrammarName || [_grammarName isEqualToString:newGrammarName])
+		return;
 	_grammarName = newGrammarName;
 	self.grammarPopUp.title = newGrammarName ?: @"(no grammar)";
 }
 
 - (void)setSymbolName:(NSString*)newSymbolName
 {
+	if(_symbolName == newSymbolName || [_symbolName isEqualToString:newSymbolName])
+		return;
 	_symbolName = newSymbolName;
 	self.symbolPopUp.title = newSymbolName ?: @"Symbols";;
 }
