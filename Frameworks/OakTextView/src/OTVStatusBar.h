@@ -7,7 +7,7 @@
 
 @interface OTVStatusBar : OakGradientView
 - (void)showBundlesMenu:(id)sender;
-- (void)setCaretPosition:(std::string const&)range;
+@property (nonatomic) NSString* selectionString;
 @property (nonatomic) NSString* grammarName;
 @property (nonatomic) NSString* symbolName;
 @property (nonatomic) BOOL isMacroRecording;

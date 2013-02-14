@@ -234,13 +234,13 @@ private:
 
 	if([aKeyPath isEqualToString:@"selectionString"])
 	{
-		char const* str = [[textView valueForKey:@"selectionString"] UTF8String] ?: "1";
-		[gutterView setHighlightedRange:str];
-		[statusBar setCaretPosition:str];
-		_symbolChooser.selectionString = textView.selectionString;
+		NSString* str = [textView valueForKey:@"selectionString"];
+		[gutterView setHighlightedRange:to_s(str ?: @"1")];
+		[statusBar setSelectionString:str];
+		_symbolChooser.selectionString = str;
 
 		ng::buffer_t const& buf = document->buffer();
-		text::selection_t sel([textView.selectionString UTF8String]);
+		text::selection_t sel(to_s(str));
 		size_t i = buf.convert(sel.last().max());
 		statusBar.symbolName = [NSString stringWithCxxString:buf.symbol_at(i)];
 	}

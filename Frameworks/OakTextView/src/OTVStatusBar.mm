@@ -6,7 +6,6 @@
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
-#import <text/types.h>
 
 static NSTextField* OakCreateTextField (NSString* label)
 {
@@ -59,9 +58,6 @@ static NSImageView* OakCreateImageView (NSImage* image)
 }
 
 @interface OTVStatusBar () <NSMenuDelegate>
-{
-	text::range_t caretPosition;
-}
 @property (nonatomic) CGFloat recordingTime;
 @property (nonatomic) NSTimer* recordingTimer;
 
@@ -235,6 +231,14 @@ static NSImageView* OakCreateImageView (NSImage* image)
 // = Properties =
 // ==============
 
+- (void)setSelectionString:(NSString*)newSelectionString
+{
+	if(_selectionString == newSelectionString || [_selectionString isEqualToString:newSelectionString])
+		return;
+	_selectionString = newSelectionString;
+	self.selectionField.stringValue = newSelectionString;
+}
+
 - (void)setGrammarName:(NSString*)newGrammarName
 {
 	if(_grammarName == newGrammarName || [_grammarName isEqualToString:newGrammarName])
@@ -273,12 +277,6 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		_recordingTime = 0;
 		[self updateMacroRecordingAnimation:nil];
 	}
-}
-
-- (void)setCaretPosition:(std::string const&)range
-{
-	caretPosition = range;
-	self.selectionField.stringValue = [NSString stringWithCxxString:range];
 }
 
 - (void)updateTabSettings
