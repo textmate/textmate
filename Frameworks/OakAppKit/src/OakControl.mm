@@ -442,6 +442,7 @@ struct rect_cmp_t
 	[self clearTrackingRects];
 	if(newWindow)
 		[self setupTrackingRects];
+	[super viewWillMoveToWindow:newWindow];
 }
 
 - (void)setKeyState:(NSUInteger)newState
