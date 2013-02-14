@@ -1062,7 +1062,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[panel setCanChooseFiles:NO];
 	[panel setCanChooseDirectories:YES];
 	[panel setAllowsMultipleSelection:NO];
-	[panel setDirectoryURL:[NSURL fileURLWithPath:self.path]];
+	[panel setDirectoryURL:[_url isFileURL] ? _url : nil];
 	[panel beginSheetModalForWindow:_view.window completionHandler:^(NSInteger result) {
 		if(result == NSOKButton)
 			[self goToURL:[[panel URLs] lastObject]];
