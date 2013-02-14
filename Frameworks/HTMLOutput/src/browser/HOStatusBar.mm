@@ -15,9 +15,6 @@ static NSButton* OakCreateImageButton (NSImage* image)
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
 
-	// [res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
-	// [res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
-	// 
 	return res;
 }
 
