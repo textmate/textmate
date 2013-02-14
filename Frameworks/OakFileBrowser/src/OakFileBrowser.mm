@@ -32,6 +32,34 @@
 
 OAK_DEBUG_VAR(FileBrowser_Controller);
 
+static NSString* DisplayName (NSURL* url, size_t numberOfParents = 0)
+{
+	NSString* res = nil;
+	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
+		res = CFBridgingRelease(SCDynamicStoreCopyComputerName(NULL, NULL));
+	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
+		res = @"Bundles";
+	else // if([url isFileURL])
+		res = [NSString stringWithCxxString:path::display_name([[url path] fileSystemRepresentation], numberOfParents)];
+	return res ?: [url absoluteString] ?: @"«nil»";
+}
+
+static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
+{
+	NSImage* iconImage = nil;
+	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
+		iconImage = [NSImage imageNamed:NSImageNameComputer];
+	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
+		iconImage = [NSImage imageNamed:NSImageNameFolderSmart];
+	else if([[url scheme] isEqualToString:@"scm"])
+		iconImage = [NSImage imageNamed:NSImageNameFolderSmart];
+	else // if([url isFileURL])
+		iconImage = [OakFileIconImage fileIconImageWithPath:[url path] size:size];
+
+	[iconImage setSize:size];
+	return iconImage;
+}
+
 @interface OakFileBrowser () <OFBOutlineViewMenuDelegate, NSMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
