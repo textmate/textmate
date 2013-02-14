@@ -192,9 +192,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	[self createViews];
 	self.sessionState = fileBrowserState;
-	[self updateHeaderView];
-	if(!_outlineViewDelegate.dataSource)
-		_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
+	self.url = _url;
 }
 
 - (void)updateHeaderView
@@ -419,8 +417,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		for(NSString* urlString in newState[@"selection"])
 			[selection addObject:[NSURL URLWithString:urlString]];
 		[_outlineViewDelegate selectURLs:selection expandChildren:NO];
-
-		[self updateHeaderView];
 	}
 }
 
