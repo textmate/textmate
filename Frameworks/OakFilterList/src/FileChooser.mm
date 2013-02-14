@@ -293,7 +293,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		NSDictionary* views = @{
 			@"searchField"        : _searchField,
 			@"aboveScopeBarDark"  : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
-			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:1.000 alpha:0.300]),
+			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1.000], [NSColor colorWithCalibratedWhite:0.912 alpha:1.000]),
 			@"allButton"          : _allButton,
 			@"openFilesButton"    : _openDocumentsButton,
 			@"scmChangesButton"   : _scmChangesButton,
