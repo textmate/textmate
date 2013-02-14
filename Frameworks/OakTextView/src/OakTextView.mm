@@ -2778,21 +2778,20 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 
 - (void)setKeyState:(NSUInteger)newState
 {
-	NSUInteger oldState = self.keyState;
+	BOOL didHaveFocus  = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 	[super setKeyState:newState];
-
 	BOOL doesHaveFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
-	BOOL didHaveFocus = (oldState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 
-	if(!didHaveFocus && doesHaveFocus)
+	if(didHaveFocus == doesHaveFocus)
+		return;
+
+	if(doesHaveFocus)
 	{
 		[[NSFontManager sharedFontManager] setSelectedFont:self.font isMultiple:NO];
-		self.blinkCaretTimer = [NSTimer scheduledTimerWithTimeInterval:[NSEvent caretBlinkInterval] target:self selector:@selector(toggleCaretVisibility:) userInfo:nil repeats:YES];
 		[self setShowLiveSearch:NO];
 	}
-	else if(didHaveFocus && !doesHaveFocus)
+	else
 	{
-		self.blinkCaretTimer = nil;
 		self.showColumnSelectionCursor = showDragCursor = NO;
 		[[self window] invalidateCursorRectsForView:self];
 	}
@@ -2804,6 +2803,8 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 		layout->set_is_key(doesHaveFocus);
 		hideCaret = !doesHaveFocus;
 	}
+
+	self.blinkCaretTimer = doesHaveFocus ? [NSTimer scheduledTimerWithTimeInterval:[NSEvent caretBlinkInterval] target:self selector:@selector(toggleCaretVisibility:) userInfo:nil repeats:YES] : nil;
 }
 
 // ===========
