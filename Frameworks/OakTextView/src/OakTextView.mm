@@ -2159,19 +2159,23 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)updateSelection
 {
-	text::selection_t ranges;
+	text::selection_t ranges, withoutCarry;
 	citerate(range, editor->ranges())
 	{
 		text::pos_t from = document->buffer().convert(range->first.index);
 		text::pos_t to   = document->buffer().convert(range->last.index);
+		if(!range->freehanded && !range->columnar)
+			withoutCarry.push_back(text::range_t(from, to, range->columnar));
 		from.offset = range->first.carry;
 		to.offset   = range->last.carry;
+		if(range->freehanded || range->columnar)
+			withoutCarry.push_back(text::range_t(from, to, range->columnar));
 		ranges.push_back(text::range_t(from, to, range->columnar));
 	}
 	document->set_selection(ranges);
 
 	isUpdatingSelection = YES;
-	[self setSelectionString:[NSString stringWithCxxString:ranges]];
+	[self setSelectionString:[NSString stringWithCxxString:withoutCarry]];
 	isUpdatingSelection = NO;
 }
 
