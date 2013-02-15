@@ -4,6 +4,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <io/path.h>
 
+NSString* const OakFileManagerWillDeleteItemAtPath         = @"OakFileManagerWillDeleteItemAtPath";
 NSString* const OakFileManagerDidChangeContentsOfDirectory = @"OakFileManagerDidChangeContentsOfDirectory";
 NSString* const OakFileManagerPathKey                      = @"directory";
 
@@ -92,6 +93,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 - (void)doRemoveCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL window:(NSWindow*)window
 {
 	NSError* error;
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[dstURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] removeItemAtURL:dstURL error:&error])
 	{
 		[[[window undoManager] prepareWithInvocationTarget:self] doCreateCopy:dstURL ofURL:srcURL window:window];
@@ -158,6 +160,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	NSError* error = nil;
 	NSURL* inTrashURL;
 
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[trashURL filePathURL] path] }];
 	if([[NSFileManager defaultManager] tmTrashItemAtURL:trashURL resultingItemURL:&inTrashURL error:&error])
 	{
 		[[[window undoManager] prepareWithInvocationTarget:self] doRestoreItem:inTrashURL toURL:trashURL window:window];
