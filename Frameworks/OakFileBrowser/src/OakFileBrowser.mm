@@ -645,7 +645,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	else	[[QLPreviewPanel sharedPreviewPanel] makeKeyAndOrderFront:nil];
 }
 
-- (NSString*)parentForNewFolder
+- (NSString*)directoryForNewItems
 {
 	NSMutableSet* folders = [NSMutableSet set];
 	for(FSItem* item in self.selectedItems)
@@ -658,12 +658,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		else if([_url isFileURL]) // TODO Test if parent folder is actually shown by current data source
 			[folders addObject:[item.path stringByDeletingLastPathComponent]];
 	}
-	return [folders count] == 1 ? [folders anyObject] : ([_url isFileURL] ? [_url path] : nil);
+	return [folders count] == 1 ? [folders anyObject] : [[_url filePathURL] path];
 }
 
 - (void)newFolderInSelectedFolder:(id)sender
 {
-	if(NSString* folder = [self parentForNewFolder])
+	if(NSString* folder = [self directoryForNewItems])
 	{
 		if(NSURL* res = [[OakFileManager sharedInstance] createUntitledDirectoryAtURL:[NSURL fileURLWithPath:folder] window:_view.window])
 			[_outlineViewDelegate editURL:res];
@@ -753,7 +753,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 - (IBAction)paste:(id)sender
 {
 	NSMutableArray* created = [NSMutableArray array];
-	if(NSString* folder = [self parentForNewFolder])
+	if(NSString* folder = [self directoryForNewItems])
 	{
 		NSPasteboard* pboard = [NSPasteboard generalPasteboard];
 		BOOL cut = [[pboard availableTypeFromArray:@[ @"OakFileBrowserOperation" ]] isEqualToString:@"OakFileBrowserOperation"] && [[pboard stringForType:@"OakFileBrowserOperation"] isEqualToString:@"cut"];
@@ -1136,7 +1136,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	else if([item action] == @selector(goForward:))
 		res = self.canGoForward;
 	else if([item action] == @selector(newFolderInSelectedFolder:))
-		res = [self parentForNewFolder] != nil;
+		res = [self directoryForNewItems] != nil;
 	else if(selectedFiles == 0 && requireSelection.find([item action]) != requireSelection.end())
 		res = NO;
 	else if([item action] == @selector(paste:))

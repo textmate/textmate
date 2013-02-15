@@ -12,6 +12,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 
 @property (nonatomic)           NSURL*        url;
 @property (nonatomic, readonly) NSString*     path;
+@property (nonatomic, readonly) NSString*     directoryForNewItems;
 
 @property (nonatomic)           NSArray*      openURLs;
 @property (nonatomic)           NSArray*      modifiedURLs;
