@@ -139,11 +139,16 @@ static NSImageView* OakCreateImageView (NSImage* image)
 			[self addSubview:view];
 		}
 
-		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
-		[self.selectionField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[self.selectionField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[self.selectionField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow+2 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[[self.selectionField cell] setLineBreakMode:NSLineBreakByTruncatingTail];
+
+		[self.grammarPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow+1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[self.symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[line]-[selection(>=32,<=225)]-8-[dividerOne(==1)]-(-2)-[grammar(==115)]-5-[dividerTwo(==1)]-(-2)-[tabSize]-4-[dividerThree(==1)]-5-[items(==30)]-4-[dividerFour(==1)]-(-2)-[symbol(>=125)]-5-[dividerFive(==1)]-6-[recording]-14-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-(-2)-[grammar(>=125,<=225)]-5-[dividerTwo(==1)]-(-2)-[tabSize(<=102)]-4-[dividerThree(==1)]-5-[items(==30)]-4-[dividerFour(==1)]-(-2)-[symbol(>=125)]-5-[dividerFive(==1)]-6-[recording]-14-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[line]-5-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[selection]-5-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[grammar(==dividerOne,==items,==tabSize,==symbol,==recording)]|" options:0 metrics:nil views:views]];
@@ -244,7 +249,8 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(_grammarName == newGrammarName || [_grammarName isEqualToString:newGrammarName])
 		return;
 	_grammarName = newGrammarName;
-	self.grammarPopUp.title = newGrammarName ?: @"(no grammar)";
+	[self.grammarPopUp.menu removeAllItems];
+	[self.grammarPopUp addItemWithTitle:newGrammarName ?: @"(no grammar)"];
 }
 
 - (void)setSymbolName:(NSString*)newSymbolName
