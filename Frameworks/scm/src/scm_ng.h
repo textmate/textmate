@@ -7,6 +7,7 @@ namespace scm { namespace ng
 {
 	struct info_t;
 	typedef std::shared_ptr<info_t> info_ptr;
+	typedef std::weak_ptr<info_t> weak_info_ptr;
 
 	struct shared_info_t;
 	typedef std::shared_ptr<shared_info_t> shared_info_ptr;

@@ -356,11 +356,13 @@ namespace scm { namespace ng
 
 		if(performBackgroundDriverSearch)
 		{
+			weak_info_ptr weakInfo = res;
 			dispatch_async(cache_access_queue(), ^{
-				if(shared_info_ptr info = find_shared_info_for(path))
+				if(shared_info_ptr sharedInfo = find_shared_info_for(path))
 				{
 					dispatch_async(dispatch_get_main_queue(), ^{
-						res->set_shared_info(info);
+						if(info_ptr info = weakInfo.lock())
+							info->set_shared_info(sharedInfo);
 					});
 				}
 			});
