@@ -8,6 +8,7 @@
 @property (nonatomic, readwrite) WebView* webView;
 @property (nonatomic, readwrite) HOStatusBar* statusBar;
 @property (nonatomic, retain) HOWebViewDelegateHelper* webViewDelegateHelper;
+@property (nonatomic, copy) NSEvent* gestureBeginEvent;
 @end
 
 @implementation HOBrowserView
@@ -71,14 +72,6 @@
 	[[_webView mainFrame] stopLoading];
 }
 
-- (void)swipeWithEvent:(NSEvent*)anEvent
-{
-	if([anEvent deltaX] == +1 && _webView.canGoBack)
-		[_webView goBack:self];
-	else if([anEvent deltaX] == -1 && _webView.canGoForward)
-		[_webView goForward:self];
-}
-
 - (void)setUpdatesProgress:(BOOL)flag
 {
 	if(flag)
@@ -93,6 +86,44 @@
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:WebViewProgressEstimateChangedNotification object:_webView];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:WebViewProgressFinishedNotification object:_webView];
 	}
+}
+
+// =========
+// = Swipe =
+// =========
+
+- (void)swipeWithEvent:(NSEvent*)anEvent
+{
+	if([anEvent deltaX] == +1 && _webView.canGoBack)
+		[_webView goBack:self];
+	else if([anEvent deltaX] == -1 && _webView.canGoForward)
+		[_webView goForward:self];
+}
+
+- (void)beginGestureWithEvent:(NSEvent*)anEvent
+{
+	self.gestureBeginEvent = anEvent;
+}
+
+- (void)endGestureWithEvent:(NSEvent*)anEvent
+{
+	NSMutableDictionary* map = [NSMutableDictionary dictionary];
+	for(NSTouch* touch in [self.gestureBeginEvent touchesMatchingPhase:NSTouchPhaseBegan inView:nil])
+		map[touch.identity] = touch;
+	self.gestureBeginEvent = nil;
+
+	NSInteger direction = 0;
+	for(NSTouch* touch in [anEvent touchesMatchingPhase:NSTouchPhaseAny inView:nil])
+	{
+		NSTouch* initialTouch = map[touch.identity];
+		CGFloat distance = touch.normalizedPosition.x - initialTouch.normalizedPosition.x;
+		direction += distance <= -0.1 ? +1 : (distance >= 0.1 ? -1 : 0);
+	}
+
+	if(direction == -2 && _webView.canGoBack)
+		[_webView goBack:self];
+	else if(direction == +2 && _webView.canGoForward)
+		[_webView goForward:self];
 }
 
 // =======================

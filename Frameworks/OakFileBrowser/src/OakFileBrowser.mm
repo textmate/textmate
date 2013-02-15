@@ -78,6 +78,8 @@ static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
 
 @property (nonatomic)                    NSMutableArray* history;
 @property (nonatomic)                    NSUInteger historyIndex;
+
+@property (nonatomic, copy)              NSEvent* gestureBeginEvent;
 @end
 
 static bool is_binary (std::string const& path)
@@ -1074,6 +1076,44 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 {
 	if(NSURL* url = [sender representedObject])
 		[self goToURL:url];
+}
+
+// =========
+// = Swipe =
+// =========
+
+- (void)swipeWithEvent:(NSEvent*)anEvent
+{
+	if([anEvent deltaX] == +1 && self.canGoBack)
+		[self goBack:self];
+	else if([anEvent deltaX] == -1 && self.canGoForward)
+		[self goForward:self];
+}
+
+- (void)beginGestureWithEvent:(NSEvent*)anEvent
+{
+	self.gestureBeginEvent = anEvent;
+}
+
+- (void)endGestureWithEvent:(NSEvent*)anEvent
+{
+	NSMutableDictionary* map = [NSMutableDictionary dictionary];
+	for(NSTouch* touch in [self.gestureBeginEvent touchesMatchingPhase:NSTouchPhaseBegan inView:nil])
+		map[touch.identity] = touch;
+	self.gestureBeginEvent = nil;
+
+	NSInteger direction = 0;
+	for(NSTouch* touch in [anEvent touchesMatchingPhase:NSTouchPhaseAny inView:nil])
+	{
+		NSTouch* initialTouch = map[touch.identity];
+		CGFloat distance = touch.normalizedPosition.x - initialTouch.normalizedPosition.x;
+		direction += distance < -0.1 ? +1 : (distance > 0.1 ? -1 : 0);
+	}
+
+	if(direction == -2 && self.canGoBack)
+		[self goBack:self];
+	else if(direction == +2 && self.canGoForward)
+		[self goForward:self];
 }
 
 // ===================
