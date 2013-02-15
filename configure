@@ -15,7 +15,7 @@ function error () { printf >&2 "%s\n\nPlease see README.md for build instruction
 # ========================================================
 
 name=TextMate
-ver=2.0.0-alpha.\$APP_REVISION${tag:-+git.$(git rev-parse --short HEAD)}
+ver=2.0-alpha.\$APP_REVISION${tag:-+git.$(git rev-parse --short HEAD)}
 rev=$(( $(curl -sf "${rest_api}/releases/nightly/revision")+1 ))
 min_os=10.7
 
