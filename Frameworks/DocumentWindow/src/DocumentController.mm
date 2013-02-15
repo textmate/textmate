@@ -664,6 +664,43 @@ namespace
 	[self takeNewTabIndexFrom:[NSIndexSet indexSetWithIndex:_selectedTabIndex + 1]];
 }
 
+- (IBAction)newDocumentInDirectory:(id)sender
+{
+	if(!self.fileBrowserVisible)
+		return;
+
+	if(NSString* folder = [self.fileBrowser directoryForNewItems])
+	{
+		std::string path = "untitled";
+		for(auto item : bundles::query(bundles::kFieldGrammarScope, settings_for_path(NULL_STR, "attr.untitled", to_s(folder)).get(kSettingsFileTypeKey, "text.plain")))
+		{
+			std::string const& ext = item->value_for_field(bundles::kFieldGrammarExtension);
+			if(ext != NULL_STR)
+				path = "untitled." + ext;
+		}
+
+		NSURL* url = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique(path::join([folder fileSystemRepresentation], path))]];
+		if([[OakFileManager sharedInstance] createFileAtURL:url window:self.window])
+		{
+			document::document_ptr doc = document::create(to_s([url path]));
+			doc->open();
+			[self setSelectedDocument:doc];
+			doc->close();
+
+			size_t selectedIndex = _selectedTabIndex;
+			std::vector<document::document_ptr> documents = _documents;
+			if(is_disposable(documents[selectedIndex]))
+					documents[selectedIndex] = doc;
+			else	documents.insert(documents.begin() + ++selectedIndex, doc);
+
+			self.documents        = documents;
+			self.selectedTabIndex = selectedIndex;
+
+			[self.fileBrowser editURL:url];
+		}
+	}
+}
+
 - (IBAction)moveDocumentToNewWindow:(id)sender
 {
 	if(_documents.size() > 1)
@@ -1848,6 +1885,8 @@ namespace
 		[menuItem setTitle:self.htmlOutputVisible ? @"Hide HTML Output" : @"Show HTML Output"];
 		active = !self.htmlOutputInWindow || self.htmlOutputWindowController;
 	}
+	else if([menuItem action] == @selector(newDocumentInDirectory:))
+		active = self.fileBrowserVisible && [self.fileBrowser directoryForNewItems] != nil;
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = _documents.size() > 1;
 	else if([menuItem action] == @selector(goBack:))

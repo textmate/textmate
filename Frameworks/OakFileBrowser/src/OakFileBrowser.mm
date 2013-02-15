@@ -178,7 +178,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:_headerView.folderPopUpButton];
 
 	_actionsView = [[OFBActionsView alloc] initWithFrame:NSZeroRect];
-	_actionsView.createButton.action    = @selector(newDocumentInTab:);
+	_actionsView.createButton.action    = @selector(newDocumentInDirectory:);
 	_actionsView.reloadButton.target    = self;
 	_actionsView.reloadButton.action    = @selector(reload:);
 	_actionsView.searchButton.action    = @selector(orderFrontFindPanelForFileBrowser:);
@@ -839,7 +839,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(rootPath)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[aMenu addItemWithTitle:@"New Document" action:@selector(newDocumentInTab:)          keyEquivalent:@""];
+		[aMenu addItemWithTitle:@"New Document" action:@selector(newDocumentInDirectory:)    keyEquivalent:@""];
 		[aMenu addItemWithTitle:@"New Folder"   action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
 	}
 
