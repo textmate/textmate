@@ -42,7 +42,6 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 - (void)scheduleVersionCheck:(id)sender;
 - (void)checkVersionAtURL:(NSURL*)anURL inBackground:(BOOL)backgroundFlag allowRedownload:(BOOL)redownloadFlag;
-- (void)downloadVersion:(long)version atURL:(NSString*)downloadURL interactively:(BOOL)interactive;
 @end
 
 static SoftwareUpdate* SharedInstance;
@@ -152,29 +151,31 @@ static SoftwareUpdate* SharedInstance;
 				if(!backgroundFlag)
 					NSRunInformationalAlertPanel(@"Error checking for new version", @"%@", @"Continue", nil, nil, self.errorString);
 			}
-			else if(info.version && info.url != NULL_STR)
+			else if(info.revision && info.url != NULL_STR)
 			{
-				NSInteger thisVersion = strtol(oak::application_t::revision().c_str(), NULL, 10);
+				NSString* version    = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+				NSInteger revision   = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"] intValue];
+				NSString* newVersion = [NSString stringWithFormat:@"%@ %@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"], [NSString stringWithCxxString:info.version]];
+
 				BOOL downloadAndInstall = NO;
 
-				NSString* appName = [[NSRunningApplication currentApplication] localizedName];
-				if(info.version == thisVersion && !backgroundFlag)
+				if(info.revision == revision && !backgroundFlag)
 				{
-					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ %ld is the latest version available—you have %ld.", @"Continue", nil, redownloadFlag ? @"Redownload" : nil, appName, info.version, thisVersion);
+					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, redownloadFlag ? @"Redownload" : nil, newVersion, version);
 					if(choice == NSAlertOtherReturn) // “Redownload”
 						downloadAndInstall = YES;
 				}
-				else if(info.version < thisVersion && !backgroundFlag)
+				else if(info.revision < revision && !backgroundFlag)
 				{
-					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ %ld is the latest version available—you have %ld.", @"Continue", nil, @"Downgrade", appName, info.version, thisVersion);
+					NSInteger choice = NSRunInformationalAlertPanel(@"Up To Date", @"%@ is the latest version available—you have version %@.", @"Continue", nil, @"Downgrade", newVersion, version);
 					if(choice == NSAlertOtherReturn) // “Downgrade”
 						downloadAndInstall = YES;
 				}
-				else if(info.version > thisVersion)
+				else if(info.revision > revision)
 				{
 					if(!backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey])
 					{
-						NSInteger choice = NSRunInformationalAlertPanel(@"New Version Available", @"%@ %ld is now available—you have %ld. Would you like to download it now?", @"Download & Install", nil, @"Later", appName, info.version, thisVersion);
+						NSInteger choice = NSRunInformationalAlertPanel(@"New Version Available", @"%@ is now available—you have version %@. Would you like to download it now?", @"Download & Install", nil, @"Later", newVersion, version);
 						if(choice == NSAlertDefaultReturn) // “Download & Install”
 							downloadAndInstall = YES;
 						else if(choice == NSAlertOtherReturn) // “Later”
@@ -189,7 +190,7 @@ static SoftwareUpdate* SharedInstance;
 				if(downloadAndInstall)
 				{
 					BOOL interactive = !backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey];
-					[self downloadVersion:info.version atURL:[NSString stringWithCxxString:info.url] interactively:interactive];
+					[self downloadVersion:newVersion atURL:[NSString stringWithCxxString:info.url] interactively:interactive];
 				}
 			}
 		});
@@ -200,16 +201,14 @@ static SoftwareUpdate* SharedInstance;
 // = Download Update =
 // ===================
 
-- (void)downloadVersion:(long)version atURL:(NSString*)downloadURL interactively:(BOOL)interactive
+- (void)downloadVersion:(NSString*)versionName atURL:(NSString*)downloadURL interactively:(BOOL)interactive
 {
-	NSString* appName = [[NSRunningApplication currentApplication] localizedName];
-
 	sharedState.reset(new shared_state_t);
 	secondsLeft = CGFLOAT_MAX;
 
 	self.downloadWindow = [DownloadWindowController new];
 	self.downloadWindow.delegate     = self;
-	self.downloadWindow.activityText = [NSString stringWithFormat:@"Downloading %@ %ld…", appName, version];
+	self.downloadWindow.activityText = [NSString stringWithFormat:@"Downloading %@…", versionName];
 	self.downloadWindow.statusText   = @"Estimating time remaining";
 
 	self.downloadWindow.isIndeterminate = NO;
@@ -244,7 +243,7 @@ static SoftwareUpdate* SharedInstance;
 			{
 				self.archive = [NSString stringWithCxxString:path];
 
-				self.downloadWindow.activityText    = @"Download Completed";
+				self.downloadWindow.activityText    = [NSString stringWithFormat:@"Downloaded %@", versionName];
 				self.downloadWindow.canInstall      = YES;
 				self.downloadWindow.showUpdateBadge = YES;
 
