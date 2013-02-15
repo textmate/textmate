@@ -2,6 +2,7 @@
 #import "HOBrowserView.h"
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakFoundation/NSString Additions.h>
+#import <io/path.h>
 
 @implementation HOWebViewDelegateHelper
 // =====================
@@ -111,8 +112,35 @@
 		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@%s%@", [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], fragment ? "#" : "", fragment ?: @""]]];
 	}
 
-	if([[request URL] isFileURL] && ![[[request URL] path] existsAsPath])
-		request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@?path=%@&error=1", [[[NSBundle bundleForClass:[self class]] pathForResource:@"error_not_found" ofType:@"html"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]]];
+	if([[request URL] isFileURL])
+	{
+		NSURL* redirectURL = [NSURL URLWithString:[NSString stringWithFormat:@"file://localhost%@?path=%@&error=1", [[[NSBundle bundleForClass:[self class]] pathForResource:@"error_not_found" ofType:@"html"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [[[request URL] path] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+		std::string const path = [[[request URL] path] fileSystemRepresentation];
+
+		struct stat buf;
+		if(stat(path.c_str(), &buf) == 0)
+		{
+			if(S_ISREG(buf.st_mode) || S_ISLNK(buf.st_mode))
+			{
+				redirectURL = nil;
+			}
+			else if(S_ISDIR(buf.st_mode))
+			{
+				if(path::exists(path::join(path, "index.html")))
+				{
+					NSString* urlString = [[NSURL URLWithString:@"index.html" relativeToURL:[request URL]] absoluteString];
+					if(NSString* query = [[request URL] query])
+						urlString = [urlString stringByAppendingFormat:@"?%@", query];
+					if(NSString* fragment = [[request URL] fragment])
+						urlString = [urlString stringByAppendingFormat:@"#%@", fragment];
+					redirectURL = [NSURL URLWithString:urlString];
+				}
+			}
+		}
+
+		if(redirectURL)
+			request = [NSURLRequest requestWithURL:redirectURL];
+	}
 
 	return request;
 }
