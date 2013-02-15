@@ -1,5 +1,17 @@
 # Changes
 
+## 2013-02-15 ([r9379](https://github.com/textmate/textmate/compare/9377...9379))
+
+  * The ‘New Document’ file browser action will now create a document on disk in addition to a new tab. The type of this document (and thereby the file extension) is taken from _Preferences → Files → New document type_ but you can set it per-folder via `.tm_properties`, e.g.:
+
+        [ attr.untitled ]
+        fileType = 'source.objc++'
+
+  * The _Edit → Select → None_ action bound to ⇧⌘A can now be used to deselect all in the file browser. It does not require focus to be in the file browser.
+  * When focus is not in the text view then the _Go → Back/Forward_ menu items get ⌘[ and ⌘] as key equivalents. Additionally 10.8 users should now (also) be able to use the two-finger swipe gesture for back/forward in file browser and command output (HTML).
+  * `file` links in HTML output that link to directories will now open the potentially contained `index.html` (this is mainly for documentation commands).
+  * Introduce `TM_PROPERTIES_PATH`. This variable contains a colon-separated list of `.tm_properties` files that have been read (to create the current “environment”). This is mainly meant as a debug aid.
+
 ## 2013-02-11 ([r9377](https://github.com/textmate/textmate/compare/r9375...r9377))
 
   * Starting with this build, the summary for each update is going to be shorter so if you want all the details visit GitHub by clicking the link in the heading above.
