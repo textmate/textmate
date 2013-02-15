@@ -170,8 +170,8 @@ namespace
 			switch(event)
 			{
 				case did_change_modified_status:
-					[_self updateFileBrowserStatus:nil];
 				case did_change_path:
+					[_self updateFileBrowserStatus:nil];
 					[_self.tabBarView reloadData];
 					[[_self class] scheduleSessionBackup:nil];
 				break;
