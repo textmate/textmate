@@ -343,7 +343,7 @@ private:
 - (void)fileManagerDidChangeContentsOfDirectory:(NSNotification*)aNotification
 {
 	NSDictionary* userInfo = [aNotification userInfo];
-	NSString* dir = userInfo[OakFileManagerDirectoryKey];
+	NSString* dir = userInfo[OakFileManagerPathKey];
 	auto it = visibleItems.find(to_s(dir));
 	if(it != visibleItems.end())
 		it->second->reload(false);

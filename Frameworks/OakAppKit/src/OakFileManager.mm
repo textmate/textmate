@@ -5,7 +5,7 @@
 #import <io/path.h>
 
 NSString* const OakFileManagerDidChangeContentsOfDirectory = @"OakFileManagerDidChangeContentsOfDirectory";
-NSString* const OakFileManagerDirectoryKey                 = @"directory";
+NSString* const OakFileManagerPathKey                      = @"directory";
 
 @interface OakFileManager ()
 @property (nonatomic) BOOL hasUISoundToPlay;
@@ -35,7 +35,7 @@ NSString* const OakFileManagerDirectoryKey                 = @"directory";
 
 - (void)postDidChangeContentsOfDirectory:(NSString*)aDirectory
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerDidChangeContentsOfDirectory object:self userInfo:@{ OakFileManagerDirectoryKey : aDirectory }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerDidChangeContentsOfDirectory object:self userInfo:@{ OakFileManagerPathKey : aDirectory }];
 }
 
 // ===================
