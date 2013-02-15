@@ -7,6 +7,7 @@
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakFileManager.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakSavePanel.h>
 #import <OakAppKit/OakTabBarView.h>
@@ -271,6 +272,7 @@ namespace
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileManagerWillDeleteItemAtPath:) name:OakFileManagerWillDeleteItemAtPath object:nil];
 	}
 	return self;
 }
@@ -566,6 +568,25 @@ namespace
 	}];
 
 	return NO;
+}
+
+- (void)fileManagerWillDeleteItemAtPath:(NSNotification*)aNotification
+{
+	NSDictionary* userInfo = [aNotification userInfo];
+	NSString* path = userInfo[OakFileManagerPathKey];
+
+	NSMutableIndexSet* indexSet = [NSMutableIndexSet indexSet];
+	for(size_t i = 0; i < _documents.size(); ++i)
+	{
+		document::document_ptr doc = _documents[i];
+		if(!doc->is_modified() && path::is_child(doc->path(), to_s(path)))
+			[indexSet addIndex:i];
+	}
+
+	id oldFirstResponder = self.window.firstResponder;
+	[self closeTabsAtIndexes:indexSet askToSaveChanges:NO createDocumentIfEmpty:YES];
+	if(oldFirstResponder && oldFirstResponder != self.window.firstResponder)
+		[self.window makeFirstResponder:oldFirstResponder];
 }
 
 + (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
