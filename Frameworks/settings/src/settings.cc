@@ -124,7 +124,10 @@ namespace
 		{
 			std::vector< std::pair<std::string, std::string> > variables;
 			if(section->names.empty())
+			{
 				variables.push_back(std::make_pair("CWD", path::parent(path)));
+				variables.push_back(std::make_pair("TM_PROPERTIES_PATH", text::format("%s${TM_PROPERTIES_PATH:+:$TM_PROPERTIES_PATH}", path.c_str())));
+			}
 
 			iterate(pair, section->values)
 				variables.push_back(std::make_pair(pair->name, pair->value));
