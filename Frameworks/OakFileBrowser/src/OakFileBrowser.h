@@ -26,6 +26,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 
 - (void)goToURL:(NSURL*)aURL;
 - (void)selectURL:(NSURL*)aURL withParentURL:(NSURL*)parentURL;
+- (void)editURL:(NSURL*)aURL;
 
 - (NSRect)iconFrameForURL:(NSURL*)aURL;
 

@@ -329,6 +329,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	[_outlineViewDelegate selectURLs:@[ aURL ] expandChildren:YES];
 }
 
+- (void)editURL:(NSURL*)aURL
+{
+	[_outlineView.window makeFirstResponder:_outlineView];
+	[_outlineViewDelegate editURL:aURL];
+}
+
 - (NSString*)path
 {
 	NSURL* tmp = [[_url scheme] isEqualToString:@"scm"] ? ParentForURL(_url) : _url;
@@ -666,7 +672,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(NSString* folder = [self directoryForNewItems])
 	{
 		if(NSURL* res = [[OakFileManager sharedInstance] createUntitledDirectoryAtURL:[NSURL fileURLWithPath:folder] window:_view.window])
-			[_outlineViewDelegate editURL:res];
+			[self editURL:res];
 	}
 }
 
