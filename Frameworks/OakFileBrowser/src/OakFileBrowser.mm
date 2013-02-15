@@ -684,7 +684,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		++rowToSelect;
 
 	if(rowToSelect == [_outlineView numberOfRows])
-		do { --rowToSelect; } while(rowToSelect > 0 && [indexSet containsIndex:rowToSelect] && ![self canSelectRow:rowToSelect]);
+		do { --rowToSelect; } while(rowToSelect > 0 && ([indexSet containsIndex:rowToSelect]) || ![self canSelectRow:rowToSelect]);
 
 	FSItem* itemToSelect = [indexSet containsIndex:rowToSelect] ? nil : [_outlineView itemAtRow:rowToSelect];
 
@@ -694,7 +694,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 			[[OakFileManager sharedInstance] trashItemAtURL:url window:_view.window];
 	}
 
-	[_outlineViewDelegate selectURLs:@[ itemToSelect.url ] expandChildren:NO];
+	if(itemToSelect)
+		[_outlineViewDelegate selectURLs:@[ itemToSelect.url ] expandChildren:NO];
 }
 
 - (void)changeColor:(OakFinderLabelChooser*)labelChooser
