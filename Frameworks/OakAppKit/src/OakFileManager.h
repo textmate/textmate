@@ -7,6 +7,7 @@ PUBLIC extern NSString* const OakFileManagerPathKey;
 PUBLIC @interface OakFileManager : NSObject
 + (OakFileManager*)sharedInstance;
 - (NSURL*)createUntitledDirectoryAtURL:(NSURL*)anURL window:(NSWindow*)window;
+- (BOOL)createFileAtURL:(NSURL*)anURL window:(NSWindow*)window;
 - (NSURL*)createDuplicateOfURL:(NSURL*)srcURL window:(NSWindow*)window;
 - (void)createSymbolicLinkAtURL:(NSURL*)anURL withDestinationURL:(NSURL*)dstURL window:(NSWindow*)window;
 - (BOOL)renameItemAtURL:(NSURL*)srcURL toURL:(NSURL*)dstURL window:(NSWindow*)window;

@@ -73,6 +73,33 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 	}
 }
 
+- (BOOL)doCreateFile:(NSURL*)fileURL window:(NSWindow*)window
+{
+	int fd = open([[fileURL path] fileSystemRepresentation], O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+	if(fd != -1)
+	{
+		close(fd);
+		[[[window undoManager] prepareWithInvocationTarget:self] doRemoveFile:fileURL window:window];
+		[self postDidChangeContentsOfDirectory:[[fileURL path] stringByDeletingLastPathComponent]];
+	}
+	return fd != -1;
+}
+
+- (void)doRemoveFile:(NSURL*)fileURL window:(NSWindow*)window
+{
+	NSError* error;
+	[[NSNotificationCenter defaultCenter] postNotificationName:OakFileManagerWillDeleteItemAtPath object:self userInfo:@{ OakFileManagerPathKey : [[fileURL filePathURL] path] }];
+	if([[NSFileManager defaultManager] removeItemAtURL:fileURL error:&error])
+	{
+		[[[window undoManager] prepareWithInvocationTarget:self] doCreateFile:fileURL window:window];
+		[self postDidChangeContentsOfDirectory:[[fileURL path] stringByDeletingLastPathComponent]];
+	}
+	else
+	{
+		[window presentError:error];
+	}
+}
+
 - (BOOL)doCreateCopy:(NSURL*)dstURL ofURL:(NSURL*)srcURL window:(NSWindow*)window
 {
 	BOOL res;
@@ -227,6 +254,16 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 		return dst;
 	}
 	return nil;
+}
+
+- (BOOL)createFileAtURL:(NSURL*)anURL window:(NSWindow*)window
+{
+	if([self doCreateFile:anURL window:window])
+	{
+		[[window undoManager] setActionName:@"New Document"];
+		return YES;
+	}
+	return NO;
 }
 
 - (NSURL*)createDuplicateOfURL:(NSURL*)srcURL window:(NSWindow*)window
