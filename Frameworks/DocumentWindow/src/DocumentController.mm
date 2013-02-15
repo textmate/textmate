@@ -1200,17 +1200,17 @@ namespace
 
 	if(_selectedDocument = newSelectedDocument)
 	{
-		if(NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(_selectedDocument->path())])
+		NSString* projectPath = self.defaultProjectPath ?: self.fileBrowser.path ?: [NSString stringWithCxxString:path::parent(_selectedDocument->path())];
+		if(projectPath)
 		{
 			std::map<std::string, std::string> const map = { { "projectDirectory", to_s(projectPath) } };
 			settings_t const settings = settings_for_path(NULL_STR, NULL_STR, to_s(projectPath), map);
-			self.projectPath = [NSString stringWithCxxString:settings.get(kSettingsProjectDirectoryKey, NULL_STR)];
-		}
-		else
-		{
-			self.projectPath = nil;
+			std::string const userProjectDirectory = settings.get(kSettingsProjectDirectoryKey, NULL_STR);
+			if(path::is_absolute(userProjectDirectory))
+				projectPath = [NSString stringWithCxxString:path::normalize(userProjectDirectory)];
 		}
 
+		self.projectPath         = projectPath;
 		self.documentPath        = [NSString stringWithCxxString:_selectedDocument->path()];
 		self.documentDisplayName = [NSString stringWithCxxString:_selectedDocument->display_name()];
 		self.documentIsModified  = _selectedDocument->is_modified();
