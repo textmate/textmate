@@ -123,7 +123,9 @@ namespace
 		iterate(section, iniFile.sections)
 		{
 			std::vector< std::pair<std::string, std::string> > variables;
-			variables.push_back(std::make_pair("CWD", path::parent(path)));
+			if(section->names.empty())
+				variables.push_back(std::make_pair("CWD", path::parent(path)));
+
 			iterate(pair, section->values)
 				variables.push_back(std::make_pair(pair->name, pair->value));
 
