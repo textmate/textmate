@@ -13,7 +13,7 @@ namespace scm { namespace ng
 	typedef std::shared_ptr<shared_info_t> shared_info_ptr;
 	typedef std::weak_ptr<shared_info_t> shared_info_weak_ptr;
 
-	struct PUBLIC info_t : std::enable_shared_from_this<info_t>
+	struct PUBLIC info_t
 	{
 		info_t (std::string const& path);
 		~info_t ();
@@ -26,13 +26,15 @@ namespace scm { namespace ng
 		scm::status::type status (std::string const& path) const;
 
 		bool tracks_directories () const;
-
 		void add_callback (void (^block)(info_t const&));
 
+	private:
+		friend info_ptr info (std::string path);
 		void set_shared_info (shared_info_ptr info);
+
+		friend shared_info_t;
 		void did_update_shared_info ();
 
-	private:
 		std::vector<void(^)(info_t const&)> _callbacks;
 		shared_info_ptr _shared_info;
 	};
