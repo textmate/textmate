@@ -51,11 +51,8 @@ struct item_record_t : fs::event_callback_t
 
 		if(_scm_info)
 		{
-			_live.reset(new bool{true});
-			std::weak_ptr<bool> isAlive = _live;
-
 			_scm_info->add_callback(^(scm::ng::info_t const& info){
-				if(!isAlive.lock() || !_item.children)
+				if(!_item.children)
 					return;
 
 				std::set<std::string> pathsShown, pathsDeleted, pathsMissingOnDisk;
@@ -293,7 +290,6 @@ private:
 	std::string _path;
 	struct timespec _last_modified;
 	scm::ng::info_ptr _scm_info;
-	std::shared_ptr<bool> _live;
 };
 
 @implementation FSDirectoryDataSource
