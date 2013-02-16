@@ -4,6 +4,7 @@
 #import <buffer/buffer.h>
 #import <theme/theme.h>
 #import <document/document.h>
+#import <oak/debug.h>
 
 extern int32_t const NSWrapColumnWindowWidth;
 extern int32_t const NSWrapColumnAskUser;
@@ -27,6 +28,8 @@ enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBot
 
 PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 {
+	OBJC_WATCH_LEAKS(OakTextView);
+
 	document::document_ptr document;
 	theme_ptr theme;
 	std::string fontName;
