@@ -1,5 +1,10 @@
 # Changes
 
+## 2013-02-16 ([r9381](https://github.com/textmate/textmate/compare/r9379...r9381))
+
+* Fix: Calling `mate -w` would hang forever.
+* Fix: _Edit → Select → None_ would crash if the file browser wasn’t visible.
+
 ## 2013-02-11 ([r9377](https://github.com/textmate/textmate/compare/r9375...r9377))
 
   * Starting with this build, the summary for each update is going to be shorter so if you want all the details visit GitHub by clicking the link in the heading above.
