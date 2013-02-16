@@ -854,7 +854,6 @@ rule bump_revision
 build $builddir/revision.next: bump_revision $builddir/build.ninja
 build bump: phony $builddir/revision.next
 build $builddir/revision.$APP_REVISION: touch
-build after_bump: phony $builddir/revision.$APP_REVISION
 
 rule clean
   command = rm -r '$path'
