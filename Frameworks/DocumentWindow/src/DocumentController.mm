@@ -1544,8 +1544,8 @@ namespace
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
-- (IBAction)reload:(id)sender               { [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
-- (IBAction)deselectAll:(id)sender          { [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+- (IBAction)reload:(id)sender               { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
+- (IBAction)deselectAll:(id)sender          { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 
 - (IBAction)revealFileInProject:(id)sender  { if(_selectedDocument) { self.fileBrowserVisible = YES; [self.fileBrowser selectURL:[NSURL fileURLWithPath:[NSString stringWithCxxString:_selectedDocument->path()]] withParentURL:[NSURL fileURLWithPath:self.projectPath]]; } }
 - (IBAction)goToProjectFolder:(id)sender    { self.fileBrowserVisible = YES; [self.fileBrowser goToURL:[NSURL fileURLWithPath:self.projectPath]]; }
@@ -1899,7 +1899,7 @@ namespace
 		active = self.projectPath != nil;
 	else if([menuItem action] == @selector(goToParentFolder:))
 		active = [self.window firstResponder] != self.textView;
-	else if([menuItem action] == @selector(reload:))
+	else if([menuItem action] == @selector(reload:) || [menuItem action] == @selector(deselectAll:))
 		active = self.fileBrowserVisible;
 	else if([menuItem action] == @selector(moveFocus:))
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
