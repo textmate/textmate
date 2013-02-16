@@ -21,8 +21,8 @@ struct data_source_t
 	data_source_t (std::string const& identifier, id datasource, id delegate) : identifier(identifier), datasource(datasource), delegate(delegate) { }
 
 	std::string identifier;
-	id datasource;
-	id delegate;
+	__weak id datasource;
+	__weak id delegate;
 	CGFloat x0;
 	CGFloat width;
 };
