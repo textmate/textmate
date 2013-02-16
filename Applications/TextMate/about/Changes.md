@@ -1,5 +1,10 @@
 # Changes
 
+## 2013-02-16 ([r9381](https://github.com/textmate/textmate/compare/r9379...r9381))
+
+* Fix: Calling `mate -w` would hang forever.
+* Fix: _Edit → Select → None_ would crash if the file browser wasn’t visible.
+
 ## 2013-02-15 ([r9379](https://github.com/textmate/textmate/compare/r9377...r9379))
 
   * The ‘New Document’ file browser action will now create a document on disk in addition to a new tab. The type of this document (and thereby the file extension) is taken from _Preferences → Files → New document type_ but you can set it per-folder via `.tm_properties`, e.g.:
