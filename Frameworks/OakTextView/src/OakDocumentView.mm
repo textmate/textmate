@@ -72,7 +72,7 @@ struct document_view_callback_t : document::document_t::callback_t
 		}
 	}
 private:
-	OakDocumentView* self;
+	__weak OakDocumentView* self;
 };
 
 @implementation OakDocumentView

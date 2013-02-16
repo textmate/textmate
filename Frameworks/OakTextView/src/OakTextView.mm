@@ -222,7 +222,7 @@ struct buffer_refresh_callback_t : ng::callback_t
 	void did_parse (size_t from, size_t to);
 	void did_replace (size_t from, size_t to, std::string const& str);
 private:
-	OakTextView* textView;
+	__weak OakTextView* textView;
 };
 
 void buffer_refresh_callback_t::did_parse (size_t from, size_t to)
