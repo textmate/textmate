@@ -1889,6 +1889,8 @@ namespace
 		active = self.fileBrowserVisible && [self.fileBrowser directoryForNewItems] != nil;
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = _documents.size() > 1;
+	else if([menuItem action] == @selector(selectNextTab:) || [menuItem action] == @selector(selectPreviousTab:))
+		active = _documents.size() > 1;
 	else if([menuItem action] == @selector(goBack:))
 		active = self.fileBrowser.canGoBack;
 	else if([menuItem action] == @selector(goForward:))
