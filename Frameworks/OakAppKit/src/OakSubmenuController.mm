@@ -51,6 +51,8 @@ OAK_DEBUG_VAR(OakSubmenuController);
 		return NO;
 
 	std::string const eventString = to_s(anEvent);
+	if(eventString < "@1" || "@9" < eventString)
+		return NO;
 
 	NSMenu* dummy = [[NSMenu new] autorelease];
 	[self updateMenu:dummy withSelector:@selector(updateGoToMenu:)];
