@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby -wKU
 # == Synopsis
 #
-# upload [-k «keyfile»] [-d «destination»] «file»
+# upload [-k «keyfile»] [-d «destination»] [-m «json»] «file»
 #
 # == Usage
 #
@@ -13,6 +13,12 @@
 #
 # --destination/-d:
 #    Which GitHub ‘«user»/«repository»’ we should upload to.
+#
+# --merge/-m:
+#    JSON that should be placed in the result dictionary.
+#
+# --description/-s:
+#    Optional description.
 #
 require 'getoptlong'
 require "rubygems"
@@ -47,8 +53,8 @@ def aws_upload(path, url, key, acl, filename, content_type, access_key, policy, 
   abort "aws error: #{rc}" unless rc == '201'
 end
 
-def create_download(path, repository, name, description, content_type)
-  payload = { 'name' => name || File::basename(path), 'size' => File::size(path), 'content_type' => content_type || 'application/octet-stream' }
+def create_download(path, repository, description, content_type)
+  payload = { 'name' => File::basename(path), 'size' => File::size(path), 'content_type' => content_type || 'application/octet-stream' }
   payload['description'] = description unless description.nil?
 
   open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/downloads") do |io|
@@ -65,11 +71,15 @@ if __FILE__ == $PROGRAM_NAME
   opts = GetoptLong.new(
     [ '--help',        '-h', GetoptLong::NO_ARGUMENT       ],
     [ '--keyfile',     '-k', GetoptLong::REQUIRED_ARGUMENT ],
-    [ '--destination', '-d', GetoptLong::REQUIRED_ARGUMENT ]
+    [ '--destination', '-d', GetoptLong::REQUIRED_ARGUMENT ],
+    [ '--merge',       '-m', GetoptLong::REQUIRED_ARGUMENT ],
+    [ '--description', '-s', GetoptLong::REQUIRED_ARGUMENT ]
   )
 
   keyfile     = nil
   destination = 'textmate/textmate'
+  base_info   = { }
+  description = nil
   netinfo     = Net::Netrc.locate("sign.textmate.org") or abort "*** missing passphrase in ~/.netrc."
 
   opts.each do |opt, arg|
@@ -77,24 +87,19 @@ if __FILE__ == $PROGRAM_NAME
       when '--help'        then RDoc::usage
       when '--keyfile'     then keyfile     = arg
       when '--destination' then destination = arg
+      when '--merge'       then base_info   = JSON.parse(arg)
+      when '--description' then description = arg
     end
   end
 
   abort 'No signing key provided' if keyfile.nil?
 
   if path = ARGV.shift
-    if File.basename(path) =~ /(.+)_r(\d+)\.tbz$/
-      base, name, version = $&, $1, $2
-      description = ''
-
-      info = {
-        'url'       => create_download(path, destination, base, description, 'application/x-bzip2'),
-        'version'   => version,
-        'signature' => sign_file(path, keyfile, netinfo.password),
-        'signee'    => netinfo.login
-      }
-
-      STDOUT << info.to_json
-    end
+    info = base_info.merge({
+      'url'       => create_download(path, destination, description, 'application/x-bzip2'),
+      'signature' => sign_file(path, keyfile, netinfo.password),
+      'signee'    => netinfo.login
+    })
+    STDOUT << info.to_json
   end
 end
