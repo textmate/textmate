@@ -389,7 +389,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 			if(info.kind == bundles::kItemTypeGrammar)
 				keys = { "comment", "patterns", "repository", "injections" };
 			else if(info.kind == bundles::kItemTypeTheme)
-				keys = { "gutterSettings", "settings" };
+				keys = { "gutterSettings", "settings", "colorSpaceName" };
 
 			iterate(key, keys)
 			{
@@ -624,7 +624,7 @@ static NSMutableDictionary* DictionaryForPropertyList (plist::dictionary_t const
 		if(info.kind == bundles::kItemTypeGrammar)
 			keys = { "comment", "patterns", "repository", "injections" };
 		else if(info.kind == bundles::kItemTypeTheme)
-			keys = { "gutterSettings", "settings" };
+			keys = { "gutterSettings", "settings", "colorSpaceName" };
 
 		plist::dictionary_t plistSubset;
 		iterate(key, keys)

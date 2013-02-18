@@ -1,4 +1,6 @@
 {	author = "$TM_FULLNAME";
+	colorSpaceName = "sRGB";
+	semanticClass = "theme.dark.untitled";
 	settings = (
 		{	settings = {
 				foreground    = "#000000";
