@@ -1,5 +1,16 @@
 # Changes
 
+## 2013-02-18 ([r9383](https://github.com/textmate/textmate/compare/r9381...r9383))
+
+* Themes can now specify they want to use the [sRGB color profile](http://en.wikipedia.org/wiki/SRGB). This is done by adding the following to the theme:
+
+		colorSpaceName = sRGB;
+
+	This color profile is a better choice for interoperability so new themes should use it (and we will likely convert the old themes).
+
+* The `menu` dialog command would return wrong items for menus with separators or headings.
+* Add line, type, and display name flags to `rmate`. *[Toby Butzon]*
+
 ## 2013-02-16 ([r9381](https://github.com/textmate/textmate/compare/r9379...r9381))
 
 * Fix: Calling `mate -w` would hang forever.
