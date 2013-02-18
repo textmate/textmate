@@ -1068,13 +1068,15 @@ namespace ng
 				{
 					size_t bol = _buffer.begin(n);
 					size_t eos = bol;
-					if(fsm.is_ignored(_buffer.substr(bol, _buffer.eol(n))))
+
+					std::string const line = _buffer.substr(bol, _buffer.eol(n));
+					if(text::is_blank(line.data(), line.data() + line.size()))
 						continue;
 
 					while(eos != _buffer.size() && text::is_whitespace(_buffer[eos]))
 						eos += _buffer[eos].size();
 
-					replacements.insert(std::make_pair(range_t(bol, eos), indent::create(fsm.scan_line(_buffer.substr(bol, _buffer.eol(n))), _buffer.indent().tab_size(), _buffer.indent().soft_tabs())));
+					replacements.insert(std::make_pair(range_t(bol, eos), indent::create(fsm.scan_line(line), _buffer.indent().tab_size(), _buffer.indent().soft_tabs())));
 				}
 
 				if(!replacements.empty())
