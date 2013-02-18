@@ -4,11 +4,15 @@
 static theme_t::color_info_t read_color (std::string const& str_color);
 static CGFloat read_font_size (std::string const& str_font_size);
 
-static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, theme_t::color_info_t& color)
+static bool get_key_path (plist::dictionary_t const& plist, std::string const& setting, theme_t::color_info_t& color)
 {
 	std::string temp_str;
-	plist::get_key_path(plist, setting, temp_str);
-	color = read_color(temp_str);
+	if(plist::get_key_path(plist, setting, temp_str))
+	{
+		color = read_color(temp_str);
+		return true;
+	}
+	return false;
 }
 
 static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, CGFloat& font_size)
@@ -16,13 +20,6 @@ static void get_key_path (plist::dictionary_t const& plist, std::string const& s
 	std::string temp_str = NULL_STR;
 	plist::get_key_path(plist, setting, temp_str);
 	font_size = read_font_size(temp_str);
-}
-
-static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, cf::color_t& color)
-{
-	std::string temp_str;
-	if(plist::get_key_path(plist, setting, temp_str))
-		color = read_color(temp_str);
 }
 
 static CGColorPtr OakColorCreateFromThemeColor (theme_t::color_info_t const& color, CGColorSpaceRef colorspace)
@@ -130,6 +127,16 @@ std::vector<theme_t::decomposed_style_t> theme_t::global_styles (scope::scope_t 
 	return res;
 }
 
+gutter_styles_t::~gutter_styles_t ()
+{
+	CGColorRef colors[] = { divider, selectionBorder, foreground, background, icons, iconsHover, iconsPressed, selectionForeground, selectionBackground, selectionIcons, selectionIconsHover, selectionIconsPressed };
+	for(auto color : colors)
+	{
+		if(color)
+			CGColorRelease(color);
+	}
+}
+
 // ===========
 // = theme_t =
 // ===========
@@ -146,34 +153,34 @@ theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontNam
 	_styles = find_shared_styles(themeItem);
 }
 
-static cf::color_t soften (CGColorPtr cgColor, CGFloat factor)
+static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)
 {
 	CGFloat r = 0, g = 0, b = 0, a = 1;
 
 	size_t componentsCount = CGColorGetNumberOfComponents(cgColor.get());
-	if(componentsCount == 4)
-	{
-		CGFloat const* components = CGColorGetComponents(cgColor.get());
-		r = components[0];
-		g = components[1];
-		b = components[2];
-		a = components[3];
+	if(componentsCount != 4)
+		return CGColorRetain(cgColor.get());
 
-		if(cf::color_is_dark(cgColor.get()))
-		{
-			r = 1 - factor*(1 - r);
-			g = 1 - factor*(1 - g);
-			b = 1 - factor*(1 - b);
-		}
-		else
-		{
-			r *= factor;
-			g *= factor;
-			b *= factor;
-		}
+	CGFloat const* components = CGColorGetComponents(cgColor.get());
+	r = components[0];
+	g = components[1];
+	b = components[2];
+	a = components[3];
+
+	if(cf::color_is_dark(cgColor.get()))
+	{
+		r = 1 - factor*(1 - r);
+		g = 1 - factor*(1 - g);
+		b = 1 - factor*(1 - b);
+	}
+	else
+	{
+		r *= factor;
+		g *= factor;
+		b *= factor;
 	}
 
-	return cf::color_t(r, g, b, a);
+	return CGColorCreate(CGColorGetColorSpace(cgColor.get()), (CGFloat[4]){ r, g, b, a });
 }
 
 theme_t::shared_styles_t::shared_styles_t (bundles::item_ptr const& themeItem): _item(themeItem), _callback(*this)
@@ -232,16 +239,16 @@ void theme_t::shared_styles_t::setup_styles ()
 	// = Default Gutter Styles =
 	// =========================
 
-	_gutter_styles.divider             = soften(_foreground, 0.4);
-	_gutter_styles.foreground          = soften(_foreground, 0.5);
-	_gutter_styles.background          = soften(_background, 0.87);
-	_gutter_styles.selectionForeground = soften(_foreground, 0.95);
-	_gutter_styles.selectionBackground = soften(_background, 0.95);
+	_gutter_styles.divider             = OakColorCreateCopySoften(_foreground, 0.4);
+	_gutter_styles.foreground          = OakColorCreateCopySoften(_foreground, 0.5);
+	_gutter_styles.background          = OakColorCreateCopySoften(_background, 0.87);
+	_gutter_styles.selectionForeground = OakColorCreateCopySoften(_foreground, 0.95);
+	_gutter_styles.selectionBackground = OakColorCreateCopySoften(_background, 0.95);
 
 	plist::dictionary_t gutterSettings;
 	if(_item && plist::get_key_path(_item->plist(), "gutterSettings", gutterSettings))
 	{
-		static struct { std::string const key; cf::color_t gutter_styles_t::*field; } const gutterKeys[] =
+		static struct { std::string const key; CGColorRef gutter_styles_t::*field; } const gutterKeys[] =
 		{
 			{ "divider",               &gutter_styles_t::divider               },
 			{ "selectionBorder",       &gutter_styles_t::selectionBorder       },
@@ -258,16 +265,24 @@ void theme_t::shared_styles_t::setup_styles ()
 		};
 
 		iterate(gutterKey, gutterKeys)
-			get_key_path(gutterSettings, gutterKey->key, _gutter_styles.*(gutterKey->field));
+		{
+			theme_t::color_info_t color;
+			if(get_key_path(gutterSettings, gutterKey->key, color))
+			{
+				if(_gutter_styles.*(gutterKey->field))
+					CGColorRelease(_gutter_styles.*(gutterKey->field));
+				_gutter_styles.*(gutterKey->field) = CGColorRetain(OakColorCreateFromThemeColor(color, _color_space).get());
+			}
+		}
 	}
 
-	_gutter_styles.selectionBorder       = _gutter_styles.selectionBorder       ? _gutter_styles.selectionBorder       : _gutter_styles.divider;
-	_gutter_styles.icons                 = _gutter_styles.icons                 ? _gutter_styles.icons                 : _gutter_styles.foreground;
-	_gutter_styles.iconsHover            = _gutter_styles.iconsHover            ? _gutter_styles.iconsHover            : _gutter_styles.icons;
-	_gutter_styles.iconsPressed          = _gutter_styles.iconsPressed          ? _gutter_styles.iconsPressed          : _gutter_styles.icons;
-	_gutter_styles.selectionIcons        = _gutter_styles.selectionIcons        ? _gutter_styles.selectionIcons        : _gutter_styles.selectionForeground;
-	_gutter_styles.selectionIconsHover   = _gutter_styles.selectionIconsHover   ? _gutter_styles.selectionIconsHover   : _gutter_styles.selectionIcons;
-	_gutter_styles.selectionIconsPressed = _gutter_styles.selectionIconsPressed ? _gutter_styles.selectionIconsPressed : _gutter_styles.selectionIcons;
+	_gutter_styles.selectionBorder       = _gutter_styles.selectionBorder       ?: CGColorRetain(_gutter_styles.divider);
+	_gutter_styles.icons                 = _gutter_styles.icons                 ?: CGColorRetain(_gutter_styles.foreground);
+	_gutter_styles.iconsHover            = _gutter_styles.iconsHover            ?: CGColorRetain(_gutter_styles.icons);
+	_gutter_styles.iconsPressed          = _gutter_styles.iconsPressed          ?: CGColorRetain(_gutter_styles.icons);
+	_gutter_styles.selectionIcons        = _gutter_styles.selectionIcons        ?: CGColorRetain(_gutter_styles.selectionForeground);
+	_gutter_styles.selectionIconsHover   = _gutter_styles.selectionIconsHover   ?: CGColorRetain(_gutter_styles.selectionIcons);
+	_gutter_styles.selectionIconsPressed = _gutter_styles.selectionIconsPressed ?: CGColorRetain(_gutter_styles.selectionIcons);
 }
 
 oak::uuid_t const& theme_t::uuid () const

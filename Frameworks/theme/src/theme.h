@@ -3,7 +3,6 @@
 
 #include <bundles/bundles.h>
 #include <scope/scope.h>
-#include <cf/color.h>
 
 typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
 typedef std::shared_ptr<struct CGColor> CGColorPtr;
@@ -32,21 +31,27 @@ private:
 
 struct PUBLIC gutter_styles_t
 {
-	cf::color_t divider;
-	cf::color_t selectionBorder;
+	gutter_styles_t () { }
+	gutter_styles_t (gutter_styles_t const& rhs) = delete;
+	gutter_styles_t& operator= (gutter_styles_t const& rhs) = delete;
+	~gutter_styles_t ();
 
-	cf::color_t foreground;
-	cf::color_t background;
-	cf::color_t icons;
-	cf::color_t iconsHover;
-	cf::color_t iconsPressed;
+	CGColorRef divider               = NULL;
+	CGColorRef selectionBorder       = NULL;
 
-	cf::color_t selectionForeground;
-	cf::color_t selectionBackground;
-	cf::color_t selectionIcons;
-	cf::color_t selectionIconsHover;
-	cf::color_t selectionIconsPressed;
+	CGColorRef foreground            = NULL;
+	CGColorRef background            = NULL;
+	CGColorRef icons                 = NULL;
+	CGColorRef iconsHover            = NULL;
+	CGColorRef iconsPressed          = NULL;
+
+	CGColorRef selectionForeground   = NULL;
+	CGColorRef selectionBackground   = NULL;
+	CGColorRef selectionIcons        = NULL;
+	CGColorRef selectionIconsHover   = NULL;
+	CGColorRef selectionIconsPressed = NULL;
 };
+
 struct theme_t;
 typedef std::shared_ptr<theme_t> theme_ptr;
 
@@ -73,8 +78,6 @@ struct PUBLIC theme_t
 
 		bool is_blank () const  { return red < 0; }
 		bool is_opaque () const { return alpha == 1; };
-
-		operator cf::color_t () { ASSERT(!is_blank()); return cf::color_t(red, green, blue, alpha); }
 
 		double red, green, blue, alpha;
 	};
