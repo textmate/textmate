@@ -121,7 +121,7 @@ private:
 		static decomposed_style_t parse_styles (plist::dictionary_t const& plist);
 
 		bundles::item_ptr _item;
-		CGColorSpaceRef _color_space;
+		CGColorSpaceRef _color_space = NULL;
 		std::vector<decomposed_style_t> _styles;
 		gutter_styles_t _gutter_styles;
 		CGColorPtr _foreground;

@@ -185,7 +185,6 @@ static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)
 
 theme_t::shared_styles_t::shared_styles_t (bundles::item_ptr const& themeItem): _item(themeItem), _callback(*this)
 {
-	_color_space = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	setup_styles();
 	bundles::add_callback(&_callback);
 }
@@ -193,17 +192,32 @@ theme_t::shared_styles_t::shared_styles_t (bundles::item_ptr const& themeItem): 
 theme_t::shared_styles_t::~shared_styles_t ()
 {
 	bundles::remove_callback(&_callback);
-	CGColorSpaceRelease(_color_space);
+	if(_color_space)
+		CGColorSpaceRelease(_color_space);
 }
 
 void theme_t::shared_styles_t::setup_styles ()
 {
 	_styles.clear();
 
+	if(_color_space)
+	{
+		CGColorSpaceRelease(_color_space);
+		_color_space = NULL;
+	}
+
 	if(_item)
 	{
 		if(bundles::item_ptr newItem = bundles::lookup(_item->uuid()))
 			_item = newItem;
+
+		std::string colorSpaceName;
+		if(plist::get_key_path(_item->plist(), "colorSpaceName", colorSpaceName) && colorSpaceName == "sRGB")
+		{
+			if(_color_space)
+				CGColorSpaceRelease(_color_space);
+			_color_space = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+		}
 
 		plist::array_t items;
 		if(plist::get_key_path(_item->plist(), "settings", items))
@@ -223,6 +237,9 @@ void theme_t::shared_styles_t::setup_styles ()
 			}
 		}
 	}
+
+	if(!_color_space)
+		_color_space = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 
 	// =======================================
 	// = Find “global” foreground/background =
