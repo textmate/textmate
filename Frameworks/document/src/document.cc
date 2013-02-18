@@ -874,6 +874,10 @@ namespace document
 		_backup_path = NULL_STR;
 
 		check_modified(-1, -1);
+
+		if(_grammar)
+			_grammar->remove_callback(&_grammar_callback);
+		_grammar.reset();
 		_undo_manager.reset();
 		_buffer.reset();
 		_pristine_buffer = NULL_STR;
