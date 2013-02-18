@@ -289,7 +289,7 @@ struct operation_t
 			std::string const& title   = doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), [[self rootPath] UTF8String]);
 			NSString* shortcut         = key < 11 ? [NSString stringWithFormat:@"%lu", (key++ % 10)] : @"";
 			NSMenuItem* item           = [menu addItemWithTitle:[NSString stringWithCxxString:title] action:@selector(selectMatchingPath:) keyEquivalent:shortcut];
-			[item setIconForFile:match.path];
+			[item setImage:match.icon];
 			[item setRepresentedObject:match.path];
 		}
 	}
