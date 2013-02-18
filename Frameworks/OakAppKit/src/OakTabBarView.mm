@@ -509,17 +509,6 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 }
 @synthesize delegate, dataSource, slideAroundAnimationTimer, layoutNeedsUpdate;
 
-- (BOOL)performKeyEquivalent:(NSEvent*)anEvent
-{
-	// this should be in the window controller, but there we need subclassing mojo to get key events
-	std::string const keyStr = to_s(anEvent);
-	if(keyStr == "~@\uF702") // ⌥⌘⇠
-		return [NSApp sendAction:@selector(selectPreviousTab:) to:nil from:self];
-	else if(keyStr == "~@\uF703") // ⌥⌘⇢
-		return [NSApp sendAction:@selector(selectNextTab:) to:nil from:self];
-	return NO;
-}
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	if(self = [super initWithFrame:aRect])

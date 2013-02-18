@@ -52,6 +52,21 @@ static CGPoint MenuPosition ()
 @end
 
 @implementation OakMainMenu
+- (BOOL)performWindowMenuAction:(SEL)anAction
+{
+	NSMenu* windowMenu = [[self itemWithTitle:@"Window"] submenu];
+	NSInteger index = [windowMenu indexOfItemWithTarget:nil andAction:anAction];
+	if(!windowMenu || index == -1)
+		return [NSApp sendAction:anAction to:nil from:self];
+
+	[windowMenu update];
+	if(![[windowMenu itemAtIndex:index] isEnabled])
+		return NO;
+
+	[windowMenu performActionForItemAtIndex:index];
+	return YES;
+}
+
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
 	std::string const keyString = to_s(anEvent);
@@ -74,6 +89,11 @@ static CGPoint MenuPosition ()
 			return YES;
 		}
 	}
+
+	if(keyString == "~@\uF702") // ⌥⌘⇠
+		return [self performWindowMenuAction:@selector(selectPreviousTab:)];
+	else if(keyString == "~@\uF703") // ⌥⌘⇢
+		return [self performWindowMenuAction:@selector(selectNextTab:)];
 
 	return [super performKeyEquivalent:anEvent];
 }
