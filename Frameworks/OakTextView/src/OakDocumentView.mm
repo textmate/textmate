@@ -340,7 +340,7 @@ private:
 		}
 
 		[self setFont:textView.font]; // trigger update of gutter view’s line number font
-		auto styles = theme->gutter_styles();
+		auto const& styles = theme->gutter_styles();
 
 		gutterView.foregroundColor           = [NSColor tmColorWithCGColor:styles.foreground];
 		gutterView.backgroundColor           = [NSColor tmColorWithCGColor:styles.background];
