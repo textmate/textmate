@@ -4,7 +4,6 @@
 #include "folds.h"
 #include "paragraph.h"
 #include <cf/cf.h>
-#include <cf/color.h>
 #include <cf/cgrect.h>
 #include <text/parse.h>
 #include <text/utf8.h>
@@ -720,32 +719,35 @@ namespace ng
 	{
 		struct base_colors_t
 		{
-			base_colors_t (bool darkTheme)
-			{
-				if(darkTheme)
-				{
-					marked_text_foreground = cf::color_t("#FFFFFF");
-					marked_text_background = cf::color_t("#000000");
-					marked_text_border     = cf::color_t("#FFFFFF");
-					margin_indicator       = cf::color_t("#80808080");
-					drop_marker            = cf::color_t("#80808080");
-				}
-				else
-				{
-					marked_text_foreground = cf::color_t("#000000");
-					marked_text_background = cf::color_t("#FFFFFF");
-					marked_text_border     = cf::color_t("#000000");
-					margin_indicator       = cf::color_t("#40404080");
-					drop_marker            = cf::color_t("#40404080");
-				}
-			}
-
-			cf::color_t marked_text_foreground;
-			cf::color_t marked_text_background;
-			cf::color_t marked_text_border;
-			cf::color_t margin_indicator;
-			cf::color_t drop_marker;
+			CGColorRef marked_text_foreground = nil;
+			CGColorRef marked_text_background = nil;
+			CGColorRef marked_text_border     = nil;
+			CGColorRef margin_indicator       = nil;
+			CGColorRef drop_marker            = nil;
 		};
+
+		base_colors_t const& get_base_colors (bool darkTheme)
+		{
+			static base_colors_t bright, dark;
+
+			static dispatch_once_t onceToken = 0;
+			dispatch_once(&onceToken, ^{
+				dark.marked_text_foreground   = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
+				dark.marked_text_background   = CGColorRetain(CGColorGetConstantColor(kCGColorBlack));
+				dark.marked_text_border       = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
+				dark.margin_indicator         = CGColorCreateGenericGray(0.50, 0.50);
+				dark.drop_marker              = CGColorCreateGenericGray(0.50, 0.50);
+
+				bright.marked_text_foreground = CGColorRetain(CGColorGetConstantColor(kCGColorBlack));
+				bright.marked_text_background = CGColorRetain(CGColorGetConstantColor(kCGColorWhite));
+				bright.marked_text_border     = CGColorRetain(CGColorGetConstantColor(kCGColorBlack));
+				bright.margin_indicator       = CGColorCreateGenericGray(0.25, 0.50);
+				bright.drop_marker            = CGColorCreateGenericGray(0.25, 0.50);
+			});
+
+			return darkTheme ? dark : bright;
+		}
+
 	}
 
 	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawBackground)
@@ -771,7 +773,7 @@ namespace ng
 				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, showInvisibles, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));
 		}
 
-		base_colors_t baseColors(_theme->is_dark());
+		base_colors_t const& baseColors = get_base_colors(_theme->is_dark());
 		if(_draw_wrap_column)
 			render::fill_rect(context, baseColors.margin_indicator, OakRectMake(_margin.left + _metrics->column_width() * effective_wrap_column(), CGRectGetMinY(visibleRect), 1, CGRectGetHeight(visibleRect)));
 
