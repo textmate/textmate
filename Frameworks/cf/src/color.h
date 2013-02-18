@@ -32,6 +32,8 @@ namespace cf
 	};
 
 	PUBLIC std::string to_s (color_t const& c);
+	PUBLIC std::string to_s (CGColorRef color);
+
 	PUBLIC bool color_is_dark (color_t const& color);
 	PUBLIC bool color_is_dark (CGColorRef const color);
 
