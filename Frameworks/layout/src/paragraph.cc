@@ -683,9 +683,6 @@ namespace ng
 
 	void paragraph_t::draw_background (theme_ptr const& theme, ct::metrics_t const& metrics, ng::context_t const& context, bool isFlipped, CGRect visibleRect, bool showInvisibles, CGColorRef backgroundColor, ng::buffer_t const& buffer, size_t bufferOffset, CGPoint anchor) const
 	{
-		// render::fill_rect(context, cf::color_t("#FFAAAA"), CGRectInset(CGRectMake(anchor.x, anchor.y, width(), height(metrics)), -1, 0));
-		// render::fill_rect(context, backgroundColor, CGRectMake(anchor.x, anchor.y, width(), height(metrics)));
-
 		auto lines = softlines(metrics);
 		for(size_t i = 0; i < lines.size(); ++i)
 		{
