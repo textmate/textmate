@@ -40,7 +40,7 @@
 
 		NSDictionary* views = @{
 			@"webView"   : _webView, 
-			@"divider"   : OakCreateViewWithColor([NSColor colorWithString:@"#9d9d9d"]),
+			@"divider"   : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
 			@"statusBar" : _statusBar	
 		};
 
@@ -50,8 +50,8 @@
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar,==divider)]|"   options:NSLayoutFormatAlignAllTop           metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=10)][divider(==1)][statusBar]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[webView(==statusBar,==divider)]|"    options:NSLayoutFormatAlignAllTop           metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[webView(>=10)][divider][statusBar]|" options:NSLayoutFormatAlignAllLeading metrics:nil views:views]];
 	}
 	return self;
 }
