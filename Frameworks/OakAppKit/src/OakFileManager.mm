@@ -268,7 +268,9 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 
 - (NSURL*)createDuplicateOfURL:(NSURL*)srcURL window:(NSWindow*)window
 {
-	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([[srcURL path] fileSystemRepresentation], " copy")]];
+	NSNumber* isDirectory = @NO;
+	[srcURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
+	NSURL* dst = [NSURL fileURLWithPath:[NSString stringWithCxxString:path::unique([[srcURL path] fileSystemRepresentation], " copy")] isDirectory:[isDirectory boolValue]];
 	if([self doCreateCopy:dst ofURL:srcURL window:window])
 	{
 		[[window undoManager] setActionName:[self expandFormat:@"Duplicate of “%@”" withURL:srcURL]];
