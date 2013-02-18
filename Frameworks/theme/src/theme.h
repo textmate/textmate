@@ -6,24 +6,25 @@
 #include <cf/color.h>
 
 typedef std::shared_ptr<struct __CTFont const> CTFontPtr;
+typedef std::shared_ptr<struct CGColor> CGColorPtr;
 
 struct PUBLIC styles_t
 {
-	styles_t (cf::color_t const& foreground, cf::color_t const& background, cf::color_t const& caret, cf::color_t const& selection, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _misspelled(misspelled) { }
+	styles_t (CGColorPtr foreground, CGColorPtr background, CGColorPtr caret, CGColorPtr selection, CTFontPtr font, bool underlined, bool misspelled) : _foreground(foreground), _background(background), _caret(caret), _selection(selection), _font(font), _underlined(underlined), _misspelled(misspelled) { }
 
-	CGColorRef foreground () const { return _foreground; }
-	CGColorRef background () const { return _background; }
-	CGColorRef caret () const      { return _caret; }
-	CGColorRef selection () const  { return _selection; }
+	CGColorRef foreground () const { return _foreground.get(); }
+	CGColorRef background () const { return _background.get(); }
+	CGColorRef caret () const      { return _caret.get(); }
+	CGColorRef selection () const  { return _selection.get(); }
 	CTFontRef font () const        { return _font.get(); }
 	bool underlined () const       { return _underlined; }
 	bool misspelled () const       { return _misspelled; }
 
 private:
-	cf::color_t _foreground;
-	cf::color_t _background;
-	cf::color_t _caret;
-	cf::color_t _selection;
+	CGColorPtr _foreground;
+	CGColorPtr _background;
+	CGColorPtr _caret;
+	CGColorPtr _selection;
 	CTFontPtr _font;
 	bool _underlined;
 	bool _misspelled;
@@ -117,10 +118,11 @@ private:
 		static decomposed_style_t parse_styles (plist::dictionary_t const& plist);
 
 		bundles::item_ptr _item;
+		CGColorSpaceRef _color_space;
 		std::vector<decomposed_style_t> _styles;
 		gutter_styles_t _gutter_styles;
-		cf::color_t _foreground;
-		cf::color_t _background;
+		CGColorPtr _foreground;
+		CGColorPtr _background;
 		bool _is_dark;
 		bool _is_transparent;
 		callback_t _callback;

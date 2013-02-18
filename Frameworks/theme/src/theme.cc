@@ -2,7 +2,6 @@
 #include <cf/cf.h>
 
 static theme_t::color_info_t read_color (std::string const& str_color);
-static cf::color_t soften (cf::color_t color, CGFloat factor = 0.5);
 static CGFloat read_font_size (std::string const& str_font_size);
 
 static void get_key_path (plist::dictionary_t const& plist, std::string const& setting, theme_t::color_info_t& color)
@@ -24,6 +23,11 @@ static void get_key_path (plist::dictionary_t const& plist, std::string const& s
 	std::string temp_str;
 	if(plist::get_key_path(plist, setting, temp_str))
 		color = read_color(temp_str);
+}
+
+static CGColorPtr OakColorCreateFromThemeColor (theme_t::color_info_t const& color, CGColorSpaceRef colorspace)
+{
+	return color.is_blank() ? CGColorPtr() : CGColorPtr(CGColorCreate(colorspace, (CGFloat[4]){ color.red, color.green, color.blue, color.alpha }), CGColorRelease);
 }
 
 theme_t::decomposed_style_t theme_t::shared_styles_t::parse_styles (plist::dictionary_t const& plist)
@@ -142,28 +146,39 @@ theme_t::theme_t (bundles::item_ptr const& themeItem, std::string const& fontNam
 	_styles = find_shared_styles(themeItem);
 }
 
-static cf::color_t soften (cf::color_t color, CGFloat factor)
+static cf::color_t soften (CGColorPtr cgColor, CGFloat factor)
 {
-	CGFloat r = color.red(), g = color.green(), b = color.blue(), a = color.alpha();
-	
-	if(color_is_dark(color))
+	CGFloat r = 0, g = 0, b = 0, a = 1;
+
+	size_t componentsCount = CGColorGetNumberOfComponents(cgColor.get());
+	if(componentsCount == 4)
 	{
-		r = 1 - factor*(1 - r);
-		g = 1 - factor*(1 - g);
-		b = 1 - factor*(1 - b);
+		CGFloat const* components = CGColorGetComponents(cgColor.get());
+		r = components[0];
+		g = components[1];
+		b = components[2];
+		a = components[3];
+
+		if(cf::color_is_dark(cgColor.get()))
+		{
+			r = 1 - factor*(1 - r);
+			g = 1 - factor*(1 - g);
+			b = 1 - factor*(1 - b);
+		}
+		else
+		{
+			r *= factor;
+			g *= factor;
+			b *= factor;
+		}
 	}
-	else
-	{
-		r *= factor;
-		g *= factor;
-		b *= factor;
-	}
-	
+
 	return cf::color_t(r, g, b, a);
 }
 
 theme_t::shared_styles_t::shared_styles_t (bundles::item_ptr const& themeItem): _item(themeItem), _callback(*this)
 {
+	_color_space = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	setup_styles();
 	bundles::add_callback(&_callback);
 }
@@ -171,7 +186,9 @@ theme_t::shared_styles_t::shared_styles_t (bundles::item_ptr const& themeItem): 
 theme_t::shared_styles_t::~shared_styles_t ()
 {
 	bundles::remove_callback(&_callback);
+	CGColorSpaceRelease(_color_space);
 }
+
 void theme_t::shared_styles_t::setup_styles ()
 {
 	_styles.clear();
@@ -205,10 +222,11 @@ void theme_t::shared_styles_t::setup_styles ()
 	// =======================================
 
 	// We assume that the first style is the unscoped root style
-	_foreground     = _styles.empty() ? cf::color_t("#FFFFFF") : _styles[0].foreground;
-	_background     = _styles.empty() ? cf::color_t("#000000") : _styles[0].background;
-	_is_dark        = color_is_dark(_background);
-	_is_transparent = _background.alpha() < 1;
+
+	_foreground     = _styles.empty() ? CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease) : OakColorCreateFromThemeColor(_styles[0].foreground, _color_space);
+	_background     = _styles.empty() ? CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease) : OakColorCreateFromThemeColor(_styles[0].background, _color_space);
+	_is_dark        = cf::color_is_dark(_background.get());
+	_is_transparent = CGColorGetAlpha(_background.get()) < 1;
 
 	// =========================
 	// = Default Gutter Styles =
@@ -270,14 +288,14 @@ CGFloat theme_t::font_size () const
 
 CGColorRef theme_t::foreground () const
 {
-	return _styles->_foreground;
+	return _styles->_foreground.get();
 }
 
 CGColorRef theme_t::background (std::string const& fileType) const
 {
 	if(fileType != NULL_STR)
 		return styles_for_scope(fileType).background();
-	return _styles->_background;
+	return _styles->_background.get();
 }
 
 bool theme_t::is_dark () const
@@ -328,10 +346,10 @@ styles_t const& theme_t::styles_for_scope (scope::scope_t const& scope) const
 				font.reset(newFont, CFRelease);
 		}
 
-		cf::color_t foreground = base.foreground.is_blank()                  ? cf::color_t("#000000")   : base.foreground;
-		cf::color_t background = base.background.is_blank()                  ? cf::color_t("#FFFFFF")   : base.background;
-		cf::color_t caret      = base.caret.is_blank()                       ? cf::color_t("#000000")   : base.caret;
-		cf::color_t selection  = base.selection.is_blank()                   ? cf::color_t("#4D97FF54") : base.selection;
+		CGColorPtr foreground = OakColorCreateFromThemeColor(base.foreground, _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   0,   0,   0,   1 }), CGColorRelease);
+		CGColorPtr background = OakColorCreateFromThemeColor(base.background, _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   1,   1,   1,   1 }), CGColorRelease);
+		CGColorPtr caret      = OakColorCreateFromThemeColor(base.caret,      _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){   0,   0,   0,   1 }), CGColorRelease);
+		CGColorPtr selection  = OakColorCreateFromThemeColor(base.selection,  _styles->_color_space) ?: CGColorPtr(CGColorCreate(_styles->_color_space, (CGFloat[4]){ 0.5, 0.5, 0.5,   1 }), CGColorRelease);
 
 		styles_t res(foreground, background, caret, selection, font, base.underlined == bool_true, base.misspelled == bool_true);
 		styles = _cache.insert(std::make_pair(scope, res)).first;
