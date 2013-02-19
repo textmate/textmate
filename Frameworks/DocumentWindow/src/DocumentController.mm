@@ -58,6 +58,8 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) OakTextView*                textView;
 @property (nonatomic) OakFileBrowser*             fileBrowser;
 
+@property (nonatomic) BOOL                        disableFileBrowserWindowResize;
+
 @property (nonatomic) HTMLOutputWindowController* htmlOutputWindowController;
 @property (nonatomic) OakHTMLOutputView*          htmlOutputView;
 @property (nonatomic) BOOL                        htmlOutputInWindow;
@@ -238,7 +240,6 @@ namespace
 	if((self = [super init]))
 	{
 		self.identifier  = [NSString stringWithCxxString:oak::uuid_t().generate()];
-		self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
 
 		self.tabBarView = [[OakTabBarView alloc] initWithFrame:NSZeroRect];
 		self.tabBarView.dataSource = self;
@@ -273,6 +274,8 @@ namespace
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotification:) name:NSApplicationDidBecomeActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidResignActiveNotification:) name:NSApplicationDidResignActiveNotification object:NSApp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileManagerWillDeleteItemAtPath:) name:OakFileManagerWillDeleteItemAtPath object:nil];
+
+		[self userDefaultsDidChange:nil];
 	}
 	return self;
 }
@@ -339,6 +342,7 @@ namespace
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
 {
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
+	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
 }
 
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
@@ -1518,6 +1522,22 @@ namespace
 		{
 			self.fileBrowser.nextResponder = self.fileBrowser.view.nextResponder;
 			self.fileBrowser.view.nextResponder = self.fileBrowser;
+		}
+
+		if(!self.disableFileBrowserWindowResize && [self.window isVisible] && ([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
+		{
+			NSRect windowFrame = self.window.frame;
+			if(makeVisibleFlag)
+			{
+				NSRect screenFrame = [[self.window screen] visibleFrame];
+				windowFrame.size.width = MIN(NSWidth(windowFrame) + self.fileBrowserWidth, NSWidth(screenFrame));
+				windowFrame.origin.x   = MIN(NSMinX(windowFrame), NSMaxX(screenFrame) - NSWidth(windowFrame));
+			}
+			else
+			{
+				windowFrame.size.width -= self.fileBrowserWidth;
+			}
+			[self.window setFrame:windowFrame display:YES];
 		}
 	}
 	[[self class] scheduleSessionBackup:self];

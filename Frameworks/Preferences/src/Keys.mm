@@ -66,6 +66,7 @@ NSString* const kUserDefaultsInitialFileBrowserURLKey   = @"initialFileBrowserUR
 NSString* const kUserDefaultsFileBrowserPlacementKey    = @"fileBrowserPlacement";
 NSString* const kUserDefaultsHTMLOutputPlacementKey     = @"htmlOutputPlacement";
 NSString* const kUserDefaultsTabsAboveDocumentKey       = @"tabsAboveDocument";
+NSString* const kUserDefaultsDisableFileBrowserWindowResizeKey = @"disableFileBrowserWindowResize";
 
 // ===========
 // = Bundles =
