@@ -86,6 +86,6 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 20 : 24);
+	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 21 : 24);
 }
 @end
