@@ -51,7 +51,7 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 }
 @end
 
-@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, OakWindowFrameHelperDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -291,10 +291,11 @@ namespace
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	self.documents        = std::vector<document::document_ptr>();
-	self.selectedDocument = document::document_ptr();
-	self.window.delegate  = nil;
-	self.identifier       = nil; // This removes us from AllControllers and causes a release
+	self.documents          = std::vector<document::document_ptr>();
+	self.selectedDocument   = document::document_ptr();
+	self.window.delegate    = nil;
+	self.fileBrowserVisible = NO; // Make window frame small as we no longer respond to savableWindowFrame
+	self.identifier         = nil; // This removes us from AllControllers and causes a release
 }
 
 - (void)showWindow:(id)sender
@@ -1524,7 +1525,7 @@ namespace
 			self.fileBrowser.view.nextResponder = self.fileBrowser;
 		}
 
-		if(!self.disableFileBrowserWindowResize && [self.window isVisible] && ([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
+		if(!self.disableFileBrowserWindowResize && ([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
 		{
 			NSRect windowFrame = self.window.frame;
 			if(makeVisibleFlag)
@@ -2028,8 +2029,6 @@ static NSUInteger DisableSessionSavingCount = 0;
 	{
 		DocumentController* controller = [DocumentController new];
 
-		if(NSString* windowFrame = project[@"windowFrame"])
-			[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
 		if(NSString* fileBrowserWidth = project[@"fileBrowserWidth"])
 			controller.fileBrowserWidth = [fileBrowserWidth floatValue];
 		if(NSString* htmlOutputSize = project[@"htmlOutputSize"])
@@ -2038,6 +2037,9 @@ static NSUInteger DisableSessionSavingCount = 0;
 		controller.defaultProjectPath = project[@"projectPath"];
 		controller.fileBrowserHistory = project[@"fileBrowserState"];
 		controller.fileBrowserVisible = [project[@"fileBrowserVisible"] boolValue];
+
+		if(NSString* windowFrame = project[@"windowFrame"])
+			[controller.window setFrame:NSRectFromString(windowFrame) display:NO];
 
 		std::vector<document::document_ptr> documents;
 		NSInteger selectedTabIndex = 0;
@@ -2133,6 +2135,18 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 	NSDictionary* session = @{ @"projects" : projects };
 	return [session writeToFile:[self sessionPath] atomically:YES];
+}
+
+// ================================
+// = OakWindowFrameHelperDelegate =
+// ================================
+
+- (NSRect)savableWindowFrame
+{
+	NSRect res = [self.window frame];
+	if(self.fileBrowserVisible)
+		res.size.width -= self.fileBrowserWidth;
+	return res;
 }
 
 // ==========
