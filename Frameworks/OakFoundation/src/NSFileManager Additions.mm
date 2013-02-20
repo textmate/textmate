@@ -39,7 +39,11 @@ static std::pair<dev_t, ino_t> inode (std::string const& path)
 - (BOOL)tmTrashItemAtURL:(NSURL*)trashURL resultingItemURL:(NSURL**)resultingURL error:(NSError**)error
 {
 	if([self respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)])
-		return [self trashItemAtURL:trashURL resultingItemURL:resultingURL error:error];
+	{
+		struct stat buf;
+		if(lstat([[trashURL path] fileSystemRepresentation], &buf) != 0 || !S_ISLNK(buf.st_mode))
+			return [self trashItemAtURL:trashURL resultingItemURL:resultingURL error:error];
+	}
 
 	std::string const res = path::move_to_trash([[trashURL path] fileSystemRepresentation]);
 	if(res != NULL_STR && resultingURL)
