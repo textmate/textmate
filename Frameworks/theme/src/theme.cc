@@ -27,6 +27,22 @@ static CGColorPtr OakColorCreateFromThemeColor (theme_t::color_info_t const& col
 	return color.is_blank() ? CGColorPtr() : CGColorPtr(CGColorCreate(colorspace, (CGFloat[4]){ color.red, color.green, color.blue, color.alpha }), CGColorRelease);
 }
 
+static bool color_is_dark (CGColorRef const color)
+{
+	size_t componentsCount = CGColorGetNumberOfComponents(color);
+	if(componentsCount == 4)
+	{
+		CGFloat const* components = CGColorGetComponents(color);
+
+		CGFloat const& red   = components[0];
+		CGFloat const& green = components[1];
+		CGFloat const& blue  = components[2];
+
+		return 0.30*red + 0.59*green + 0.11*blue < 0.5;
+	}
+	return false;
+}
+
 theme_t::decomposed_style_t theme_t::shared_styles_t::parse_styles (plist::dictionary_t const& plist)
 {
 	decomposed_style_t res;
@@ -167,7 +183,7 @@ static CGColorRef OakColorCreateCopySoften (CGColorPtr cgColor, CGFloat factor)
 	b = components[2];
 	a = components[3];
 
-	if(cf::color_is_dark(cgColor.get()))
+	if(color_is_dark(cgColor.get()))
 	{
 		r = 1 - factor*(1 - r);
 		g = 1 - factor*(1 - g);
@@ -249,7 +265,7 @@ void theme_t::shared_styles_t::setup_styles ()
 
 	_foreground     = _styles.empty() ? CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 1, 1, 1, 1 }), CGColorRelease) : OakColorCreateFromThemeColor(_styles[0].foreground, _color_space);
 	_background     = _styles.empty() ? CGColorPtr(CGColorCreate(_color_space, (CGFloat[4]){ 0, 0, 0, 1 }), CGColorRelease) : OakColorCreateFromThemeColor(_styles[0].background, _color_space);
-	_is_dark        = cf::color_is_dark(_background.get());
+	_is_dark        = color_is_dark(_background.get());
 	_is_transparent = CGColorGetAlpha(_background.get()) < 1;
 
 	// =========================

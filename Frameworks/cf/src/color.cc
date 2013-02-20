@@ -33,36 +33,9 @@ namespace cf
 		return text::format("#%02lX%02lX%02lX%02lX", lround(c._red*0xFF), lround(c._green*0xFF), lround(c._blue*0xFF), lround(c._alpha*0xFF));
 	}
 
-	std::string to_s (CGColorRef color)
-	{
-		size_t componentsCount = CGColorGetNumberOfComponents(color);
-		if(componentsCount == 4)
-		{
-			CGFloat const* rgba = CGColorGetComponents(color);
-			return text::format("#%02lX%02lX%02lX%02lX", lround(0xFF*rgba[0]), lround(0xFF*rgba[1]), lround(0xFF*rgba[2]), lround(0xFF*rgba[3]));
-		}
-		return NULL_STR;
-	}
-
 	bool color_is_dark (color_t const& color)
 	{
 		return 0.30*color._red + 0.59*color._green + 0.11*color._blue < 0.5;
-	}
-
-	bool color_is_dark (CGColorRef const color)
-	{
-		size_t componentsCount = CGColorGetNumberOfComponents(color);
-		if(componentsCount == 4)
-		{
-			CGFloat const* components = CGColorGetComponents(color);
-
-			CGFloat const& red   = components[0];
-			CGFloat const& green = components[1];
-			CGFloat const& blue  = components[2];
-
-			return 0.30*red + 0.59*green + 0.11*blue < 0.5;
-		}
-		return false;
 	}
 
 } /* cf */
