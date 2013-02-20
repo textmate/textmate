@@ -537,7 +537,14 @@ private:
 		}
 		else
 		{
-			NSMenuItem* item = [symbolMenu addItemWithTitle:[NSString stringWithCxxString:pair.second] action:@selector(goToSymbol:) keyEquivalent:@""];
+			std::string const emSpace = " ";
+
+			std::string::size_type offset = 0;
+			while(pair.second.find(emSpace, offset) == offset)
+				offset += emSpace.size();
+
+			NSMenuItem* item = [symbolMenu addItemWithTitle:[NSString stringWithCxxString:pair.second.substr(offset)] action:@selector(goToSymbol:) keyEquivalent:@""];
+			[item setIndentationLevel:offset / emSpace.size()];
 			[item setTarget:self];
 			[item setRepresentedObject:[NSString stringWithCxxString:buf.convert(pair.first)]];
 		}
