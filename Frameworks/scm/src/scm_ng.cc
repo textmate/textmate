@@ -371,4 +371,15 @@ namespace scm { namespace ng
 		return res;
 	}
 
+	void wait_for_status (info_ptr info)
+	{
+		dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+		info->add_callback(^(scm::ng::info_t const& unused){
+			dispatch_semaphore_signal(semaphore);
+		});
+		dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+		// FIXME remove_callback
+		dispatch_release(semaphore);
+	}
+
 } /* ng */ } /* scm */
