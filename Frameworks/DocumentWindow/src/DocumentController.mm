@@ -1576,6 +1576,7 @@ namespace
 - (CGFloat)fileBrowserWidth                 { return self.layoutView.fileBrowserWidth;   }
 - (void)setFileBrowserWidth:(CGFloat)aWidth { self.layoutView.fileBrowserWidth = aWidth; }
 
+- (IBAction)newFolder:(id)sender            { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 - (IBAction)reload:(id)sender               { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 - (IBAction)deselectAll:(id)sender          { if(self.fileBrowser) [NSApp sendAction:_cmd to:self.fileBrowser from:sender]; }
 
@@ -1907,7 +1908,7 @@ namespace
 // = NSMenuValidation =
 // ====================
 
-- (BOOL)validateMenuItem:(NSMenuItem*)menuItem;
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
 	BOOL active = YES;
 	if([menuItem action] == @selector(toggleFileBrowser:))
@@ -1919,14 +1920,12 @@ namespace
 	}
 	else if([menuItem action] == @selector(newDocumentInDirectory:))
 		active = self.fileBrowserVisible && [self.fileBrowser directoryForNewItems] != nil;
+	else if([menuItem action] == @selector(newFolder:) || [menuItem action] == @selector(goBack:) || [menuItem action] == @selector(goForward:))
+		active = self.fileBrowserVisible && [self.fileBrowser validateMenuItem:menuItem];
 	else if([menuItem action] == @selector(moveDocumentToNewWindow:))
 		active = _documents.size() > 1;
 	else if([menuItem action] == @selector(selectNextTab:) || [menuItem action] == @selector(selectPreviousTab:))
 		active = _documents.size() > 1;
-	else if([menuItem action] == @selector(goBack:))
-		active = self.fileBrowser.canGoBack;
-	else if([menuItem action] == @selector(goForward:))
-		active = self.fileBrowser.canGoForward;
 	else if([menuItem action] == @selector(revealFileInProject:) || [menuItem action] == @selector(revealFileInProjectByExpandingAncestors:))
 		active = _selectedDocument && _selectedDocument->path() != NULL_STR;
 	else if([menuItem action] == @selector(goToProjectFolder:))

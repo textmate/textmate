@@ -27,7 +27,9 @@ PUBLIC @interface DocumentController : NSObject
 - (void)openAndSelectDocument:(document::document_ptr const&)aDocument;
 - (void)close;
 
+- (IBAction)newFolder:(id)sender;
 - (IBAction)newDocumentInTab:(id)sender;
+- (IBAction)newDocumentInDirectory:(id)sender;
 - (IBAction)moveDocumentToNewWindow:(id)sender; // TODO Move to AppController
 - (IBAction)mergeAllWindows:(id)sender;         // TODO Move to AppController
 
