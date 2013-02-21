@@ -1,0 +1,159 @@
+#!/usr/bin/env ruby -wKU
+require 'pathname'
+require 'erb'
+
+user_code = ""
+functions = [ ]
+
+ARGV.each do |file|
+  if p = Pathname.new(file)
+    ns = p.basename.sub(/\.[^.]+$/, '')
+    lineno, includes, body = 1, [ ], [ ]
+
+    p.each_line do |line|
+      if line =~ /^\s*#(include|import)\b/
+        includes << "#line #{lineno} \"#{p.realpath}\"\n"
+        includes << line
+      else
+        body << "#line #{lineno} \"#{p.realpath}\"\n"
+        body << line
+        functions << "#{ns}::#$1" if line =~ /^\s*void ((?:async_)?test_\w+) \(\)/
+      end
+      lineno += 1
+    end
+
+    user_code << "#{includes}namespace #{ns} {\n#{body}} /* #{ns} */\n"
+  end
+end
+
+STDOUT << ERB.new(DATA.read, 0, '-<>').result(binding)
+
+__END__
+#line 33 "<%= $PROGRAM_NAME %>"
+static std::string oak_format (char const* format, ...) __attribute__ ((format (printf, 1, 2)));
+static std::string oak_format (char const* format, ...)
+{
+  char* tmp = NULL;
+
+  va_list ap;
+  va_start(ap, format);
+  vasprintf(&tmp, format, ap);
+  va_end(ap);
+
+  std::string res(tmp);
+  free(tmp);
+  return res;
+}
+
+std::string to_s (bool value)               { return value ? "YES" : "NO"; }
+std::string to_s (char value)               { return oak_format("%c", value); }
+std::string to_s (size_t value)             { return oak_format("%zu", value); }
+std::string to_s (ssize_t value)            { return oak_format("%zd", value); }
+std::string to_s (int value)                { return oak_format("%d", value); }
+std::string to_s (double value)             { return oak_format("%g", value); }
+std::string to_s (char const* value)        { return value == NULL     ? "«NULL»"     : oak_format("\"%s\"", value); }
+std::string to_s (std::string const& value) { return value == NULL_STR ? "«NULL_STR»" : "\"" + value + "\""; }
+
+template <typename _X, typename _Y>
+std::string to_s (std::pair<_X, _Y> const& pair)
+{
+  return "pair<" + to_s(pair.first) + ", " + to_s(pair.second) + ">";
+}
+
+template <typename _T>
+std::string to_s (_T const& container)
+{
+  std::string res = "( ";
+  for(auto element : container)
+    res += to_s(element) + ", ";
+  res += ")";
+  return res;
+}
+
+void oak_warning (std::string const& message, char const* file, int line)
+{
+  fprintf(stderr, "%s:%d: %s\n", file, line, message.c_str());
+}
+
+struct oak_exception : std::exception
+{
+  oak_exception (std::string const& message) : _message(message) { }
+  virtual char const* what () const throw() { return _message.c_str(); }
+private:
+  std::string _message;
+};
+
+void oak_assertion_error (std::string const& message, char const* file, int line)
+{
+  throw oak_exception(oak_format("%s:%d: ", file, line) + message);
+}
+
+std::string oak_format_bad_relation (char const* lhs, char const* op, char const* rhs, std::string const& realLHS, char const* realOp, std::string const& realRHS)
+{
+  return oak_format("Expected (%s %s %s), found (%s %s %s)", lhs, op, rhs, realLHS.c_str(), realOp, realRHS.c_str());
+}
+
+#define OAK_WARN(msg)                                       oak_warning(msg, __FILE__, __LINE__)
+#define OAK_FAIL(msg)                                       oak_assertion_error(msg, __FILE__, __LINE__)
+
+#define OAK_ASSERT(expr)        if(!(expr))                 oak_assertion_error(oak_format("Assertion failed: %s", #expr), __FILE__, __LINE__)
+#define OAK_ASSERT_LT(lhs, rhs) if(!((lhs) <  (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "<",  #rhs, to_s(lhs), ">=", to_s(rhs)), __FILE__, __LINE__)
+#define OAK_ASSERT_LE(lhs, rhs) if(!((lhs) <= (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "<=", #rhs, to_s(lhs), ">",  to_s(rhs)), __FILE__, __LINE__)
+#define OAK_ASSERT_GT(lhs, rhs) if(!((lhs) >  (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, ">",  #rhs, to_s(lhs), "<=", to_s(rhs)), __FILE__, __LINE__)
+#define OAK_ASSERT_GE(lhs, rhs) if(!((lhs) >= (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, ">=", #rhs, to_s(lhs), "<",  to_s(rhs)), __FILE__, __LINE__)
+#define OAK_ASSERT_EQ(lhs, rhs) if(!((lhs) == (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "==", #rhs, to_s(lhs), "!=", to_s(rhs)), __FILE__, __LINE__)
+#define OAK_ASSERT_NE(lhs, rhs) if(!((lhs) != (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "!=", #rhs, to_s(lhs), "==", to_s(rhs)), __FILE__, __LINE__)
+
+#define OAK_MASSERT(msg, expr)        if(!(expr))           oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_MASSERT_LT(msg, lhs, rhs) if(!((lhs) <  (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_MASSERT_LE(msg, lhs, rhs) if(!((lhs) <= (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_MASSERT_GT(msg, lhs, rhs) if(!((lhs) >  (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_MASSERT_GE(msg, lhs, rhs) if(!((lhs) >= (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_MASSERT_EQ(msg, lhs, rhs) if(!((lhs) == (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_MASSERT_NE(msg, lhs, rhs) if(!((lhs) != (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
+
+<%= user_code %>
+#line 117 "<%= $PROGRAM_NAME %>"
+
+int main (int argc, char const* argv[])
+{
+  struct test_t
+  {
+    test_t (void (*f)()) : run(f) { }
+    void (*run)();
+    std::string message;
+  };
+
+  __block std::vector<test_t> tests;
+  <%= functions.map { |fun| "\ttests.emplace_back(&#{fun});" }.join("\n") %>
+
+  dispatch_group_t group = dispatch_group_create();
+
+  dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_apply(tests.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
+      try {
+        tests[n].run();
+      }
+      catch(std::exception const& e) {
+        tests[n].message = e.what();
+      }
+    });
+  });
+
+  dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+    std::vector<test_t> failed;
+    std::copy_if(tests.begin(), tests.end(), back_inserter(failed), [](test_t const& t){ return !t.message.empty(); });
+
+    if(failed.empty())
+      exit(0);
+
+    fprintf(stderr, "%s: %zu of %zu %s failed:\n", getprogname(), failed.size(), tests.size(), tests.size() == 1 ? "test" : "tests");
+    for(auto test : failed)
+      fprintf(stderr, "%s\n", test.message.c_str());
+
+    exit(1);
+  });
+
+  dispatch_main();
+  return 0;
+}
