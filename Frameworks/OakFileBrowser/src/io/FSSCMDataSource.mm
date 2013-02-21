@@ -70,12 +70,12 @@ _Iter prune_path_children (_Iter it, _Iter last)
 {
 	OBJC_WATCH_LEAKS(FSSCMDataSource);
 	NSUInteger options;
-	scm::ng::info_ptr scmInfo;
+	scm::info_ptr scmInfo;
 }
 
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
-	std::string root = scm::ng::root_for_path([aPath fileSystemRepresentation]);
+	std::string root = scm::root_for_path([aPath fileSystemRepresentation]);
 	if(root != NULL_STR)
 		return [NSURL URLWithString:[NSString stringWithCxxString:"scm://localhost" + encode::url_part(root, "/") + "/"]];
 	return [NSURL fileURLWithPath:aPath];
@@ -134,7 +134,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 		options = someOptions;
 
 		std::string const rootPath = [[anURL path] fileSystemRepresentation];
-		if(scmInfo = scm::ng::info(rootPath))
+		if(scmInfo = scm::info(rootPath))
 		{
 			std::string name = path::display_name(rootPath);
 			if(!scmInfo->dry())
@@ -151,7 +151,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 			self.rootItem.children = [self repositoryStatus];
 
 			__weak FSSCMDataSource* weakSelf = self;
-			scmInfo->add_callback(^(scm::ng::info_t const&){
+			scmInfo->add_callback(^(scm::info_t const&){
 				[weakSelf postReloadNotification];
 			});
 		}

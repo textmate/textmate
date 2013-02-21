@@ -47,11 +47,11 @@ struct item_record_t : fs::event_callback_t
 		_data_source = dataSource;
 		_item        = (FSFileItem*)item;
 		_path        = to_s([item.url path]);
-		_scm_info    = scm::ng::info(_path);
+		_scm_info    = scm::info(_path);
 
 		if(_scm_info)
 		{
-			_scm_info->add_callback(^(scm::ng::info_t const& info){
+			_scm_info->add_callback(^(scm::info_t const& info){
 				if(!_item.children)
 					return;
 
@@ -165,7 +165,7 @@ private:
 			add_item_and_children(child, array);
 	}
 
-	static void async_reload (FSDirectoryDataSource* dataSource, FSItem* rootItem, scm::ng::weak_info_ptr weakSCMInfo, bool reloadWasRequested)
+	static void async_reload (FSDirectoryDataSource* dataSource, FSItem* rootItem, scm::weak_info_ptr weakSCMInfo, bool reloadWasRequested)
 	{
 		std::string const dir = to_s([rootItem.url path]);
 		bool includeHidden = (dataSource.dataSourceOptions & kFSDataSourceOptionIncludeHidden) == kFSDataSourceOptionIncludeHidden;
@@ -209,7 +209,7 @@ private:
 						existingItems.insert(std::make_pair(std::make_pair(item.device, item.inode), item));
 
 					std::set<std::string> pathsOnDisk;
-					scm::ng::info_ptr scmInfo = weakSCMInfo.lock();
+					scm::info_ptr scmInfo = weakSCMInfo.lock();
 
 					NSMutableArray* array = [NSMutableArray array];
 					for(auto const& fsItem : newItems)
@@ -290,7 +290,7 @@ private:
 	FSFileItem* _item;
 	std::string _path;
 	struct timespec _last_modified;
-	scm::ng::info_ptr _scm_info;
+	scm::info_ptr _scm_info;
 };
 
 @implementation FSDirectoryDataSource

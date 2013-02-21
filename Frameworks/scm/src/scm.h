@@ -3,7 +3,7 @@
 
 #include "status.h"
 
-namespace scm { namespace ng
+namespace scm
 {
 	struct info_t;
 	typedef std::shared_ptr<info_t> info_ptr;
@@ -45,6 +45,6 @@ namespace scm { namespace ng
 	PUBLIC info_ptr info (std::string path);
 	PUBLIC void wait_for_status (info_ptr info);
 
-} /* ng */ } /* scm */
+} /* scm */
 
 #endif /* end of include guard: SCM_NG_H_FXJGXN9B */

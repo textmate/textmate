@@ -27,7 +27,7 @@ void test_basic_status ()
 	if(system(script.c_str()) != 0)
 		OAK_FAIL("error in setup: " + script);
 
-	if(auto info = scm::ng::info(jail.path(wcName)))
+	if(auto info = scm::info(jail.path(wcName)))
 	{
 		wait_for_status(info);
 

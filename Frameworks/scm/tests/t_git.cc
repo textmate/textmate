@@ -10,7 +10,7 @@ struct setup_t
 		std::string const script = text::format("{ cd '%1$s' && git init && git config user.email 'test@example.com' && git config user.name 'Test Test' && touch .dummy && git add .dummy && git commit .dummy -mGetHead && %2$s ; } >/dev/null", jail.path().c_str(), cmd.c_str());
 		if(system(script.c_str()) == 0)
 		{
-			if(info = scm::ng::info(jail.path()))
+			if(info = scm::info(jail.path()))
 			{
 				wait_for_status(info);
 			}
@@ -38,7 +38,7 @@ struct setup_t
 
 private:
 	test::jail_t jail;
-	scm::ng::info_ptr info;
+	scm::info_ptr info;
 };
 
 // =================

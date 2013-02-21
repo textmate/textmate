@@ -177,7 +177,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 @interface FileChooser () <NSWindowDelegate, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate>
 {
-	scm::ng::info_ptr                             _scmInfo;
+	scm::info_ptr                                 _scmInfo;
 	std::vector<document::document_ptr>           _openDocuments;
 	std::map<oak::uuid_t, document::document_ptr> _openDocumentsMap;
 	oak::uuid_t                                   _currentDocument;
@@ -655,10 +655,10 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 	_records.clear();
 	[self addRecordsForDocuments:_openDocuments];
 	_scanner.reset(new document::scanner_t(to_s(_path), globs_for_path(to_s(_path)), false, false, false));
-	_scmInfo = scm::ng::info(to_s(_path));
+	_scmInfo = scm::info(to_s(_path));
 	if(_scmInfo)
 	{
-		_scmInfo->add_callback(^(scm::ng::info_t const& info){
+		_scmInfo->add_callback(^(scm::info_t const& info){
 			[self updateSCMStatus];
 		});
 	}

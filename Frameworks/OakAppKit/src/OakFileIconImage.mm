@@ -231,7 +231,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 				self.alias     = S_ISLNK(buf.st_mode);
 			}
 
-			if(auto scmDriver = scm::ng::info(path::parent(path)))
+			if(auto scmDriver = scm::info(path::parent(path)))
 				self.scmStatus = scmDriver->status(path);
 		}
 	}

@@ -13,10 +13,6 @@ namespace scm
 	driver_t* p4_driver ();
 	driver_t* svn_driver ();
 
-} /* scm */
-
-namespace scm { namespace ng
-{
 	static bool Disabled = false;
 	static std::map<std::string, shared_info_weak_ptr> PendingUpdates;
 
@@ -374,7 +370,7 @@ namespace scm { namespace ng
 	void wait_for_status (info_ptr info)
 	{
 		dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-		info->add_callback(^(scm::ng::info_t const& unused){
+		info->add_callback(^(scm::info_t const& unused){
 			dispatch_semaphore_signal(semaphore);
 		});
 		dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
@@ -382,4 +378,4 @@ namespace scm { namespace ng
 		dispatch_release(semaphore);
 	}
 
-} /* ng */ } /* scm */
+} /* scm */

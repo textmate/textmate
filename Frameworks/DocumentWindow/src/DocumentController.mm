@@ -225,12 +225,12 @@ namespace
 	document::document_ptr                 _selectedDocument;
 	command::runner_ptr                    _runner;
 
-	scm::ng::info_ptr                      _projectSCMInfo;
+	scm::info_ptr                          _projectSCMInfo;
 	std::map<std::string, std::string>     _projectSCMVariables;
 	std::vector<std::string>               _projectScopeAttributes;
 	std::vector<std::string>               _externalScopeAttributes;
 
-	scm::ng::info_ptr                      _documentSCMInfo;
+	scm::info_ptr                          _documentSCMInfo;
 	std::map<std::string, std::string>     _documentSCMVariables;
 	std::vector<std::string>               _documentScopeAttributes;
 }
@@ -1032,10 +1032,10 @@ namespace
 	if(_projectPath != newProjectPath && ![_projectPath isEqualToString:newProjectPath])
 	{
 		_projectPath = newProjectPath;
-		if(_projectSCMInfo = scm::ng::info(to_s(_projectPath)))
+		if(_projectSCMInfo = scm::info(to_s(_projectPath)))
 		{
 			__weak DocumentController* weakSelf = self;
-			_projectSCMInfo->add_callback(^(scm::ng::info_t const& info){
+			_projectSCMInfo->add_callback(^(scm::info_t const& info){
 				weakSelf.projectSCMVariables = info.variables();
 			});
 		}
@@ -1098,10 +1098,10 @@ namespace
 		if(customAttributes != NULL_STR)
 			_documentScopeAttributes.push_back(customAttributes);
 
-		if(_documentSCMInfo = scm::ng::info(docDirectory))
+		if(_documentSCMInfo = scm::info(docDirectory))
 		{
 			__weak DocumentController* weakSelf = self;
-			_documentSCMInfo->add_callback(^(scm::ng::info_t const& info){
+			_documentSCMInfo->add_callback(^(scm::info_t const& info){
 				weakSelf.documentSCMStatus    = info.status(to_s(self.documentPath));
 				weakSelf.documentSCMVariables = info.variables();
 			});

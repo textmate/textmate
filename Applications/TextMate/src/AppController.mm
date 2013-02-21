@@ -242,12 +242,12 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 - (void)applicationWillResignActive:(NSNotification*)aNotification
 {
-	scm::ng::disable();
+	scm::disable();
 }
 
 - (void)applicationWillBecomeActive:(NSNotification*)aNotification
 {
-	scm::ng::enable();
+	scm::enable();
 }
 
 // =========================
