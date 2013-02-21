@@ -46,6 +46,7 @@ PUBLIC @interface DocumentController : NSObject
 - (IBAction)performCloseTab:(id)sender;
 - (IBAction)performCloseSplit:(id)sender;
 - (IBAction)performCloseWindow:(id)sender;
+- (IBAction)performCloseAllTabs:(id)sender;
 - (IBAction)performCloseOtherTabs:(id)sender;
 
 - (IBAction)saveDocument:(id)sender;

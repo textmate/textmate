@@ -544,6 +544,17 @@ namespace
 	[self.window performClose:self];
 }
 
+- (IBAction)performCloseAllTabs:(id)sender
+{
+	NSMutableIndexSet* allTabs = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _documents.size())];
+	for(size_t i = 0; i < _documents.size(); ++i)
+	{
+		if(_documents[i]->is_modified() && _documents[i]->path() == NULL_STR)
+			[allTabs removeIndex:i];
+	}
+	[self closeTabsAtIndexes:allTabs askToSaveChanges:YES createDocumentIfEmpty:YES];
+}
+
 - (IBAction)performCloseOtherTabs:(id)sender
 {
 	NSUInteger tabIndex = [sender isKindOfClass:[OakTabBarView class]] ? [sender tag] : _selectedTabIndex;
