@@ -1,65 +1,50 @@
-#ifndef OAKSCM_H_SUWJ53QQ
-#define OAKSCM_H_SUWJ53QQ
+#ifndef SCM_NG_H_FXJGXN9B
+#define SCM_NG_H_FXJGXN9B
 
-#include "scm_ng.h"
 #include "status.h"
-#include "snapshot.h"
-#include <plist/date.h>
-#include <oak/debug.h>
-#include <oak/callbacks.h>
-#include <oak/duration.h>
 
-namespace scm
+namespace scm { namespace ng
 {
-	struct driver_t;
-
 	struct info_t;
 	typedef std::shared_ptr<info_t> info_ptr;
+	typedef std::weak_ptr<info_t> weak_info_ptr;
 
-	struct PUBLIC callback_t
-	{
-		virtual void status_changed (scm::info_t const& info, std::set<std::string> const& changedPaths) = 0;
-		virtual ~callback_t () { }
-	};
-
-	struct watcher_t;
+	struct shared_info_t;
+	typedef std::shared_ptr<shared_info_t> shared_info_ptr;
+	typedef std::weak_ptr<shared_info_t> shared_info_weak_ptr;
 
 	struct PUBLIC info_t
 	{
-		info_t (std::string const& wcPath, driver_t const* driver);
+		info_t (std::string const& path);
+		~info_t ();
 
-		std::string scm_name () const;
-		std::string path () const;
-		std::string branch () const;
-		bool tracks_directories () const;
-		status::type status (std::string const& path);
+		bool dry () const;
+
+		std::string root_path () const;
 		std::map<std::string, std::string> variables () const;
-		status_map_t files_with_status (int mask);
+		std::map<std::string, scm::status::type> const& status () const;
+		scm::status::type status (std::string const& path) const;
 
-		void add_callback (callback_t* cb);
-		void remove_callback (callback_t* cb);
+		bool tracks_directories () const;
+		void add_callback (void (^block)(info_t const&));
 
 	private:
-		void setup ();
-		bool _did_setup = false;
+		friend info_ptr info (std::string path);
+		void set_shared_info (shared_info_ptr info);
 
-		std::string _wc_path;
-		driver_t const* _driver;
-		status_map_t _file_status;
-		std::map<std::string, std::string> _variables;
-		oak::date_t _updated;
-		fs::snapshot_t _snapshot;
+		friend shared_info_t;
+		void did_update_shared_info ();
 
-		std::shared_ptr<scm::watcher_t> _watcher;
-		void callback (std::set<std::string> const& pathsChangedOnDisk);
-		oak::callbacks_t<callback_t> _callbacks;
-
-		static void update_status (std::string const& path, fs::snapshot_t const& snapshot, scm::status_map_t const& status, std::map<std::string, std::string> const& variables);
+		std::vector<void(^)(info_t const&)> _callbacks;
+		shared_info_ptr _shared_info;
 	};
 
-	PUBLIC info_ptr info (std::string const& dir);
-	PUBLIC status_map_t tracked_files (std::string const& dir, int mask);
+	PUBLIC void disable ();
+	PUBLIC void enable ();
+	PUBLIC std::string root_for_path (std::string const& path);
+	PUBLIC info_ptr info (std::string path);
+	PUBLIC void wait_for_status (info_ptr info);
 
-} /* scm */
+} /* ng */ } /* scm */
 
-#endif /* end of include guard: OAKSCM_H_SUWJ53QQ */
+#endif /* end of include guard: SCM_NG_H_FXJGXN9B */
