@@ -839,8 +839,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(rootPath)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[aMenu addItemWithTitle:@"New Document" action:@selector(newDocumentInDirectory:) keyEquivalent:@""];
-		[aMenu addItemWithTitle:@"New Folder"   action:@selector(newFolder:)              keyEquivalent:@""];
+		[[aMenu addItemWithTitle:@"New File"   action:@selector(newDocumentInDirectory:) keyEquivalent:@"n"] setKeyEquivalentModifierMask:NSCommandKeyMask|NSShiftKeyMask];
+		[[aMenu addItemWithTitle:@"New Folder" action:@selector(newFolder:)              keyEquivalent:@"n"] setKeyEquivalentModifierMask:NSCommandKeyMask|NSControlKeyMask];
 	}
 
 	if(rootPath || hasFileSelected)
@@ -927,6 +927,11 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	NSMenu* menu = [NSMenu new];
 	[self updateMenu:menu];
 	return menu;
+}
+
+- (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
+{
+	return NO;
 }
 
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
