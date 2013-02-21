@@ -9,6 +9,8 @@
 @property (nonatomic, readwrite) HOStatusBar* statusBar;
 @property (nonatomic, retain) HOWebViewDelegateHelper* webViewDelegateHelper;
 @property (nonatomic, copy) NSEvent* gestureBeginEvent;
+@property (nonatomic) BOOL canSwipeBack;
+@property (nonatomic) BOOL canSwipeForward;
 @end
 
 @implementation HOBrowserView
@@ -103,6 +105,18 @@
 - (void)beginGestureWithEvent:(NSEvent*)anEvent
 {
 	self.gestureBeginEvent = anEvent;
+	self.canSwipeBack      = YES;
+	self.canSwipeForward   = YES;
+
+	NSView* responder = (NSView*)[self.window firstResponder];
+	if([responder isKindOfClass:[NSView class]])
+	{
+		NSRect bounds  = [responder bounds];
+		NSRect visible = [responder visibleRect];
+
+		self.canSwipeBack    = NSMinX(bounds) == NSMinX(visible);
+		self.canSwipeForward = NSMaxX(bounds) == NSMaxX(visible);
+	}
 }
 
 - (void)endGestureWithEvent:(NSEvent*)anEvent
@@ -120,9 +134,9 @@
 		direction += distance <= -0.1 ? +1 : (distance >= 0.1 ? -1 : 0);
 	}
 
-	if(direction == -2 && _webView.canGoBack)
+	if(direction == -2 && _webView.canGoBack && self.canSwipeBack)
 		[_webView goBack:self];
-	else if(direction == +2 && _webView.canGoForward)
+	else if(direction == +2 && _webView.canGoForward && self.canSwipeForward)
 		[_webView goForward:self];
 }
 
