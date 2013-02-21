@@ -36,29 +36,31 @@ namespace fs
 		return res;
 	}
 
-	void snapshot_t::node_t::to_s (size_t indent) const
+	std::string snapshot_t::node_t::to_s (size_t indent) const
 	{
-		char const* typeStr = "OTR";
+		char const* typeStr = "[OTR]";
 		switch(type())
 		{
-			case node_t::kNodeTypeDirectory: typeStr = "DIR"; break;
-			case node_t::kNodeTypeLink:      typeStr = "LNK"; break;
-			case node_t::kNodeTypeFile:      typeStr = "REG"; break;
+			case node_t::kNodeTypeDirectory: typeStr = "[DIR]"; break;
+			case node_t::kNodeTypeLink:      typeStr = "[LNK]"; break;
+			case node_t::kNodeTypeFile:      typeStr = "[REG]"; break;
 		}
 
-		fprintf(stderr, "%s[%s] %s\n", std::string(indent, ' ').c_str(), typeStr, name().c_str());
-
+		std::string res = std::string(indent, ' ') + typeStr + " " + name() + "\n";
 		if(type() == node_t::kNodeTypeDirectory)
 		{
-			citerate(pair, *entries())
-				pair->second.to_s(indent + 6);
+			for(auto pair : *entries())
+				res += pair.second.to_s(indent + 6);
 		}
+		return res;
 	}
 
-	void to_s (snapshot_t const& snapshot)
+	std::string to_s (snapshot_t const& snapshot)
 	{
-		iterate(pair, *snapshot._entries)
-			pair->second.to_s();
+		std::string res = "";
+		for(auto pair : *snapshot._entries)
+			res += pair.second.to_s();
+		return res;
 	}
 
 } /* fs */

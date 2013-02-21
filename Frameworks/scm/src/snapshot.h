@@ -14,7 +14,7 @@ namespace fs
 		bool operator!= (snapshot_t const& rhs) const { return _entries && rhs._entries ? *_entries != *rhs._entries : _entries != rhs._entries; }
 
 	private:
-		friend void to_s (snapshot_t const& snapshot);
+		friend std::string to_s (fs::snapshot_t const& snapshot);
 
 		struct node_t;
 		typedef std::shared_ptr< std::map<ino_t, node_t> > nodes_ptr;
@@ -32,7 +32,7 @@ namespace fs
 			bool operator== (node_t const& rhs) const            { return _name == rhs._name && _type == rhs._type && _modified == rhs._modified && (!_entries && !rhs._entries || _entries && rhs._entries && *_entries == *rhs._entries); }
 			bool operator!= (node_t const& rhs) const            { return !(*this == rhs); }
 
-			void to_s (size_t indent = 0) const;
+			std::string to_s (size_t indent = 0) const;
 
 		private:
 			std::string _name;
@@ -47,7 +47,7 @@ namespace fs
 		nodes_ptr _entries;
 	};
 
-	PUBLIC void to_s (snapshot_t const& snapshot);
+	PUBLIC std::string to_s (snapshot_t const& snapshot);
 	
 } /* fs */
 
