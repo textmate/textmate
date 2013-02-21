@@ -667,7 +667,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	return [folders count] == 1 ? [folders anyObject] : [[_url filePathURL] path];
 }
 
-- (void)newFolderInSelectedFolder:(id)sender
+- (void)newFolder:(id)sender
 {
 	if(NSString* folder = [self directoryForNewItems])
 	{
@@ -839,8 +839,8 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	if(rootPath)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];
-		[aMenu addItemWithTitle:@"New Document" action:@selector(newDocumentInDirectory:)    keyEquivalent:@""];
-		[aMenu addItemWithTitle:@"New Folder"   action:@selector(newFolderInSelectedFolder:) keyEquivalent:@""];
+		[aMenu addItemWithTitle:@"New Document" action:@selector(newDocumentInDirectory:) keyEquivalent:@""];
+		[aMenu addItemWithTitle:@"New Folder"   action:@selector(newFolder:)              keyEquivalent:@""];
 	}
 
 	if(rootPath || hasFileSelected)
@@ -1141,7 +1141,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		res = self.canGoBack;
 	else if([item action] == @selector(goForward:))
 		res = self.canGoForward;
-	else if([item action] == @selector(newFolderInSelectedFolder:))
+	else if([item action] == @selector(newFolder:))
 		res = [self directoryForNewItems] != nil;
 	else if(selectedFiles == 0 && requireSelection.find([item action]) != requireSelection.end())
 		res = NO;

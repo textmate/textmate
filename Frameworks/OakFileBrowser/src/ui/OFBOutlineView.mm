@@ -114,7 +114,7 @@
 		{ utf8::to_s(NSEnterCharacter),              @selector(performEditSelectedRow:)   },
 		{ "@" + utf8::to_s(NSDownArrowFunctionKey),  @selector(performDoubleClick:)       },
 		{ "@o",                                      @selector(performDoubleClick:)       },
-		{ "@N",                                      @selector(newFolderInSelectedFolder:)},
+		{ "@N",                                      @selector(newFolder:)                },
 		{ "@d",                                      @selector(duplicateSelectedEntries:) },
 		{ "@G",                                      @selector(orderFrontGoToFolder:)     },
 		{ " ",                                       @selector(toggleQuickLookPreview:)   },
