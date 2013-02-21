@@ -1,5 +1,5 @@
 SOURCES      = src/**/*.cc
-TEST_SOURCES = tests/t_*.cc
+TESTS        = tests/t_*.cc
 CP_Resources = resources/*
 EXPORT       = src/{scm{,_ng},status,snapshot}.h
 LINK        += text cf io settings
