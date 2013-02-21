@@ -17,7 +17,7 @@ namespace scm
 
 namespace scm { namespace ng
 {
-	static bool Disabled = true;
+	static bool Disabled = false;
 	static std::map<std::string, shared_info_weak_ptr> PendingUpdates;
 
 	// =================
