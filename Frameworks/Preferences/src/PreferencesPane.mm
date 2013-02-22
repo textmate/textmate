@@ -31,6 +31,7 @@
 	}
 	else if(NSString* key = [tmProperties objectForKey:aKey])
 	{
+		newValue = newValue ?: @"";
 		if([newValue isKindOfClass:[NSString class]])
 			return settings_t::set(to_s(key), to_s((NSString*)newValue));
 		NSLog(@"%s wrong type for %@: ‘%@’", sel_getName(_cmd), aKey, newValue);
