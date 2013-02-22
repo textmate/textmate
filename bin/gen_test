@@ -49,7 +49,12 @@ std::string to_s (bool value)               { return value ? "YES" : "NO"; }
 std::string to_s (char value)               { return oak_format("%c", value); }
 std::string to_s (size_t value)             { return oak_format("%zu", value); }
 std::string to_s (ssize_t value)            { return oak_format("%zd", value); }
-std::string to_s (int value)                { return oak_format("%d", value); }
+std::string to_s (int16_t value)            { return oak_format("%d", value); }
+std::string to_s (uint16_t value)           { return oak_format("%u", value); }
+std::string to_s (int32_t value)            { return oak_format("%d", value); }
+std::string to_s (uint32_t value)           { return oak_format("%u", value); }
+std::string to_s (int64_t value)            { return oak_format("%lld", value); }
+std::string to_s (uint64_t value)           { return oak_format("%llu", value); }
 std::string to_s (double value)             { return oak_format("%g", value); }
 std::string to_s (char const* value)        { return value == NULL     ? "«NULL»"     : oak_format("\"%s\"", value); }
 std::string to_s (std::string const& value) { return value == NULL_STR ? "«NULL_STR»" : "\"" + value + "\""; }
@@ -113,7 +118,7 @@ std::string oak_format_bad_relation (char const* lhs, char const* op, char const
 #define OAK_MASSERT_NE(msg, lhs, rhs) if(!((lhs) != (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
 
 <%= user_code %>
-#line 117 "<%= $PROGRAM_NAME %>"
+#line 122 "<%= $PROGRAM_NAME %>"
 
 int main (int argc, char const* argv[])
 {
