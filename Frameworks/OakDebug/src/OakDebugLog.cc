@@ -2,6 +2,8 @@
 #ifndef NDEBUG
 #include <oak/oak.h>
 
+static std::mutex RegistryMutex;
+
 std::map<std::string, bool>& OakDebugBaseClass::registry ()
 {
 	static std::map<std::string, bool>* Registry = NULL;
@@ -39,20 +41,23 @@ std::string OakDebugBaseClass::sectionName (std::string const& title)
 std::vector<std::string> OakDebugBaseClass::sectionNames ()
 {
 	std::map<std::string, size_t> sectionNames;
-	iterate(it, registry())
-		sectionNames[sectionName(it->first)]++;
+
+	std::lock_guard<std::mutex> lock(RegistryMutex);
+	for(auto pair : registry())
+		sectionNames[sectionName(pair.first)]++;
 
 	std::vector<std::string> res;
-	iterate(it, sectionNames)
+	for(auto pair : sectionNames)
 	{
-		if(it->second > 1)
-			res.push_back(it->first);
+		if(pair.second > 1)
+			res.push_back(pair.first);
 	}
 	return res;
 }
 
 bool OakDebugBaseClass::checkForDebugVar (const char *name)
 {
+	std::lock_guard<std::mutex> lock(RegistryMutex);
 	return registry()["All"] || registry()[name];
 }
 
