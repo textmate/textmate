@@ -1,5 +1,5 @@
 SOURCES      = src/*.cc
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 LINK        += text
 FRAMEWORKS   = CoreFoundation ApplicationServices
 EXPORT       = src/*.h
