@@ -9,7 +9,7 @@ OAK_DEBUG_VAR(SCM_Git);
 
 static scm::status::type parse_status_flag (std::string const& str)
 {
-	static std::map<std::string, scm::status::type> const StatusLetterConversionMap
+	static auto const StatusLetterConversionMap = new std::map<std::string, scm::status::type>
 	{
 		{ "?", scm::status::unversioned },
 		{ "I", scm::status::ignored     },
@@ -21,8 +21,8 @@ static scm::status::type parse_status_flag (std::string const& str)
 		{ "T", scm::status::modified    }  // type change, e.g. symbolic link → regular file
 	};
 
-	auto it = StatusLetterConversionMap.find(str);
-	if(it != StatusLetterConversionMap.end())
+	auto it = StatusLetterConversionMap->find(str);
+	if(it != StatusLetterConversionMap->end())
 		return it->second;
 
 	ASSERT_EQ(str, NULL_STR); // we use ‘str’ in the assertion to output the unrecognized status flag

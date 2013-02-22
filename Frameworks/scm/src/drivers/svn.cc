@@ -13,7 +13,7 @@ OAK_DEBUG_VAR(SCM_Svn);
 static scm::status::type parse_status_string (std::string const& status)
 {
 	// Based on subversion/svn/status.c (generate_status_desc)
-	static std::map<std::string, scm::status::type> const StatusMap
+	static auto const StatusMap = new std::map<std::string, scm::status::type>
 	{
 		{ "none",        scm::status::none        },
 		{ "normal",      scm::status::none        },
@@ -30,8 +30,8 @@ static scm::status::type parse_status_string (std::string const& status)
 		{ "unversioned", scm::status::unversioned },
 	};
 
-	auto it = StatusMap.find(status);
-	return it != StatusMap.end() ? it->second : scm::status::unknown;
+	auto it = StatusMap->find(status);
+	return it != StatusMap->end() ? it->second : scm::status::unknown;
 }
 
 static void parse_status_output (scm::status_map_t& entries, std::string const& output)
