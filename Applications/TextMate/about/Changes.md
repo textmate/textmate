@@ -1,5 +1,13 @@
 # Changes
 
+## 2013-02-22 ([r9385](https://github.com/textmate/textmate/compare/r9383...r9385))
+
+* When toggling the file browser, the window will adjust its width. Likewise the width of new windows depend on wether or not the file browser is initially visible.
+* Updated key equivalents for the _File_ menu. Also added 3 new items: _New File_, _New Folder_, and _Close All Tabs_. The first two actions were previously only available through the file browsers action menu.
+* For HTML views we now only treat two-finger left/right scroll as a swipe gesture if no scroll can be performed (i.e. the content is at its leftmost or rightmost position).
+* Deleting symbolic links in the file browser would trash the item that the link pointed to, instead of the link itself.
+* Commands which use the `requiredCommands` key (in the `tmCommand` property list) and specify a variable will now always have that variable set. Previously it was only set if the required executable was not found via `PATH`.
+
 ## 2013-02-18 ([r9383](https://github.com/textmate/textmate/compare/r9381...r9383))
 
 * Themes can now specify they want to use the [sRGB color profile](http://en.wikipedia.org/wiki/SRGB). This is done by adding the following to the theme:
