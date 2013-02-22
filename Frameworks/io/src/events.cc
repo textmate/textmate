@@ -224,6 +224,8 @@ namespace
 
 namespace fs
 {
+	std::mutex EventsMutex;
+
 	static events_t& events ()
 	{
 		static events_t events;
@@ -233,12 +235,14 @@ namespace fs
 	void watch (std::string const& path, event_callback_t* callback, uint64_t eventId, CFTimeInterval latency)
 	{
 		D(DBF_FS_Events, bug("%s, %p\n", path.c_str(), callback););
+		std::lock_guard<std::mutex> lock(EventsMutex);
 		events().watch(path, callback, eventId, latency);
 	}
 
 	void unwatch (std::string const& path, event_callback_t* callback)
 	{
 		D(DBF_FS_Events, bug("%s, %p\n", path.c_str(), callback););
+		std::lock_guard<std::mutex> lock(EventsMutex);
 		events().unwatch(path, callback);
 	}
 
