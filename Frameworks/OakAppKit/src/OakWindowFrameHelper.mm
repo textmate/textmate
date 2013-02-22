@@ -122,7 +122,7 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 		if([self ignoreWindow:win])
 			continue;
 
-		D(DBF_WindowFrameHelper, bug("window @ %s (%s)\n", [NSStringFromRect([self windowFrame:win) UTF8String], [[[[win delegate] class] description] UTF8String]););
+		D(DBF_WindowFrameHelper, bug("window @ %s (%s)\n", [NSStringFromRect([self windowFrame:win]) UTF8String], [[[[win delegate] class] description] UTF8String]););
 		if(NSMaxY([self windowFrame:win]) < winYPos)
 		{
 			winYPos = NSMaxY([self windowFrame:win]);
