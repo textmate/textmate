@@ -1113,7 +1113,7 @@ namespace
 		{
 			__weak DocumentController* weakSelf = self;
 			_documentSCMInfo->add_callback(^(scm::info_t const& info){
-				weakSelf.documentSCMStatus    = info.status(to_s(self.documentPath));
+				weakSelf.documentSCMStatus    = info.status(to_s(weakSelf.documentPath));
 				weakSelf.documentSCMVariables = info.variables();
 			});
 		}
