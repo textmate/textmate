@@ -1,3 +1,4 @@
+#include "../src/drivers/api.h"
 #include <scm/scm.h>
 #include <settings/settings.h>
 #include <test/jail.h>
@@ -7,22 +8,13 @@ void test_basic_status ()
 {
 	test::jail_t jail;
 
-	auto tmEnv = variables_for_path();
-
-	auto pathVar = tmEnv.find("PATH");
-	if(pathVar != tmEnv.end())
-		setenv("PATH", pathVar->second.c_str(), 1);
-
-	auto svnExe = tmEnv.find("TM_SVN");
-	if(svnExe != tmEnv.end())
-		setenv("TM_SVN", svnExe->second.c_str(), 1);
-
-	OAK_MASSERT_EQ("\n\n  Unable to test subversion driver (svn executable not found).\n\n  To skip this test:\n    ninja scm/coerce\n\n  To install required executable (via MacPorts):\n    sudo port install subversion\n", system("which -s svn"), 0);
+	std::string const svn = scm::find_executable("svn", "TM_SVN");
+	OAK_MASSERT("\n\n  Unable to test subversion driver (svn executable not found).\n\n  To skip this test:\n    ninja scm/coerce\n\n  To install required executable (via MacPorts):\n    sudo port install subversion\n", svn != NULL_STR);
 
 	std::string const repoName = "tm-test-repo";
 	std::string const wcName = "tm-test-wc";
 	std::string const jailPath = jail.path();
-	std::string const script = text::format("{ cd '%s' && \"${TM_SVN:-svn}admin\" create '%s' && \"${TM_SVN:-svn}\" co 'file://%s/%s' %s && cd '%s' && touch {clean,ignored,modified,added,missing,untracked}.txt && \"${TM_SVN:-svn}\" propset svn:ignore 'ignored.txt' . && \"${TM_SVN:-svn}\" add {clean,modified,missing}.txt && \"${TM_SVN:-svn}\" commit -m 'Initial commit' && \"${TM_SVN:-svn}\" add added.txt && \"${TM_SVN:-svn}\" rm missing.txt && echo foo > modified.txt; } >/dev/null", jailPath.c_str(), repoName.c_str(), jailPath.c_str(), repoName.c_str(), wcName.c_str(), wcName.c_str());
+	std::string const script = text::format("{ cd '%1$s' && '%2$sadmin' create '%3$s' && '%2$s' co 'file://%1$s/%3$s' %4$s && cd '%4$s' && touch {clean,ignored,modified,added,missing,untracked}.txt && '%2$s' propset svn:ignore 'ignored.txt' . && '%2$s' add {clean,modified,missing}.txt && '%2$s' commit -m 'Initial commit' && '%2$s' add added.txt && '%2$s' rm missing.txt && echo foo > modified.txt; } >/dev/null", jailPath.c_str(), svn.c_str(), repoName.c_str(), wcName.c_str());
 
 	if(system(script.c_str()) != 0)
 		OAK_FAIL("error in setup: " + script);

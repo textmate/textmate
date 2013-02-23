@@ -1,3 +1,4 @@
+#include "../src/drivers/api.h"
 #include <scm/scm.h>
 #include <text/format.h>
 #include <io/io.h>
@@ -7,7 +8,8 @@ struct setup_t
 {
 	setup_t (std::string const& cmd)
 	{
-		std::string const script = text::format("{ cd '%1$s' && git init && git config user.email 'test@example.com' && git config user.name 'Test Test' && touch .dummy && git add .dummy && git commit .dummy -mGetHead && %2$s ; } >/dev/null", jail.path().c_str(), cmd.c_str());
+		static std::string const git = scm::find_executable("git", "TM_GIT");
+		std::string const script = text::format("{ cd '%1$s' && '%2$s' init && '%2$s' config user.email 'test@example.com' && '%2$s' config user.name 'Test Test' && touch .dummy && '%2$s' add .dummy && '%2$s' commit .dummy -mGetHead && %3$s ; } >/dev/null", jail.path().c_str(), git.c_str(), cmd.c_str());
 		if(system(script.c_str()) == 0)
 		{
 			if(info = scm::info(jail.path()))
