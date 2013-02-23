@@ -1,11 +1,9 @@
 #ifndef SNAPSHOT_H_UOFPK7X7
 #define SNAPSHOT_H_UOFPK7X7
 
-#include <oak/misc.h>
-
 namespace fs
 {
-	struct PUBLIC snapshot_t
+	struct snapshot_t
 	{
 		snapshot_t ();
 		snapshot_t (std::string const& path);
@@ -47,7 +45,7 @@ namespace fs
 		nodes_ptr _entries;
 	};
 
-	PUBLIC std::string to_s (snapshot_t const& snapshot);
+	std::string to_s (snapshot_t const& snapshot);
 	
 } /* fs */
 

@@ -1,4 +1,4 @@
-#include <scm/snapshot.h>
+#include "../src/snapshot.h"
 #include <test/jail.h>
 
 void test_fs_tree ()

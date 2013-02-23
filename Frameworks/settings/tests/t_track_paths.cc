@@ -1,4 +1,4 @@
-#include <settings/track_paths.h>
+#include "../src/track_paths.h"
 #include <io/path.h>
 #include <text/format.h>
 #include <test/jail.h>
