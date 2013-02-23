@@ -6,42 +6,42 @@
 #include <io/path.h>
 #include <oak/oak.h>
 
-static std::string find_executable (std::string const& name, std::string const& variable)
-{
-	std::map<std::string, std::string> const& variables = variables_for_path();
-	std::vector<std::string> candidates;
-
-	std::map<std::string, std::string>::const_iterator exe = variables.find(variable);
-	if(exe != variables.end())
-		candidates.push_back(exe->second);
-
-	if(char const* exe = getenv(variable.c_str()))
-		candidates.push_back(exe);
-
-	std::map<std::string, std::string>::const_iterator pathList = variables.find("PATH");
-	if(pathList != variables.end())
-	{
-		citerate(path, text::tokenize(pathList->second.begin(), pathList->second.end(), ':'))
-			candidates.push_back(path::join(*path, name));
-	}
-
-	if(char const* pathList = getenv("PATH"))
-	{
-		citerate(path, text::tokenize(pathList, pathList + strlen(pathList), ':'))
-			candidates.push_back(path::join(*path, name));
-	}
-
-	iterate(path, candidates)
-	{
-		if(path::is_executable(*path))
-			return *path;
-	}
-
-	return NULL_STR;
-}
-
 namespace scm
 {
+	std::string find_executable (std::string const& name, std::string const& variable)
+	{
+		std::map<std::string, std::string> const& variables = variables_for_path();
+		std::vector<std::string> candidates;
+
+		std::map<std::string, std::string>::const_iterator exe = variables.find(variable);
+		if(exe != variables.end())
+			candidates.push_back(exe->second);
+
+		if(char const* exe = getenv(variable.c_str()))
+			candidates.push_back(exe);
+
+		std::map<std::string, std::string>::const_iterator pathList = variables.find("PATH");
+		if(pathList != variables.end())
+		{
+			citerate(path, text::tokenize(pathList->second.begin(), pathList->second.end(), ':'))
+				candidates.push_back(path::join(*path, name));
+		}
+
+		if(char const* pathList = getenv("PATH"))
+		{
+			citerate(path, text::tokenize(pathList, pathList + strlen(pathList), ':'))
+				candidates.push_back(path::join(*path, name));
+		}
+
+		iterate(path, candidates)
+		{
+			if(path::is_executable(*path))
+				return *path;
+		}
+
+		return NULL_STR;
+	}
+
 	driver_t::driver_t (std::string const& name, std::string const& wcRootFormatString, std::string const& requiredExecutable) : _name(name), _wc_root_format_string(wcRootFormatString), _required_executable(requiredExecutable), _resolved_executable(NULL_STR)
 	{
 	}

@@ -30,6 +30,7 @@ namespace scm
 		std::string _resolved_executable;
 	};
 
+	std::string find_executable (std::string const& name, std::string const& variable);
 	driver_t const* driver_for_path (std::string const& path, std::string* wcPath);
 
 } /* scm */
