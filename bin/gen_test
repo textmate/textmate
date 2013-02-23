@@ -13,7 +13,7 @@ ARGV.each do |file|
     p.each_line do |line|
       if line =~ /^\s*#(include|import)\b/
         includes << "#line #{lineno} \"#{p.realpath}\"\n"
-        includes << line
+        includes << line.sub(/"(.*?)"/) { '"' + File.expand_path($1, p.parent) + '"' }
       else
         body << "#line #{lineno} \"#{p.realpath}\"\n"
         body << line
