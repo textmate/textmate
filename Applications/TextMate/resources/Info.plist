@@ -1,22 +1,23 @@
 {
-	CFBundleName                  = "${APP_NAME}";
-	CFBundleShortVersionString    = "${APP_VERSION}";                   // shown in About window
-	CFBundleVersion               = "${APP_REVISION}";                  // shown in About window in parenthesis (but this format is not well-formed)
-	CFBundleIdentifier            = "com.macromates.${APP_NAME}.preview";
+	CFBundleName                         = "${APP_NAME}";
+	CFBundleShortVersionString           = "${APP_VERSION}";                   // shown in About window
+	CFBundleVersion                      = "${APP_REVISION}";                  // shown in About window in parenthesis (but this format is not well-formed)
+	CFBundleIdentifier                   = "com.macromates.${APP_NAME}.preview";
 
-	CFBundleDevelopmentRegion     = English;
-	CFBundleExecutable            = "${TARGET_NAME}";
-	CFBundleHelpBookFolder        = "${APP_NAME} Help";
-	CFBundleHelpBookName          = "${APP_NAME} 2 Help";
-	CFBundleIconFile              = "TextMate";
-	CFBundleInfoDictionaryVersion = "6.0";
-	CFBundlePackageType           = APPL;
-	CFBundleSignature             = avin; // we didn’t register this code with Apple
-	LSMinimumSystemVersion        = "${APP_MIN_OS}";
-	NSAppleScriptEnabled          = YES;
-	NSMainNibFile                 = MainMenu;
-	NSPrincipalClass              = NSApplication;
-	NSContactsUsageDescription    = 'Your email address is used as identifier for crash report submission. It can be changed in Preferences.\n\nIt is also used as a default contact address if you create your own bundle. This can be changed in the bundle editor after you create a bundle.';
+	CFBundleDevelopmentRegion            = English;
+	CFBundleExecutable                   = "${TARGET_NAME}";
+	CFBundleHelpBookFolder               = "${APP_NAME} Help";
+	CFBundleHelpBookName                 = "${APP_NAME} 2 Help";
+	CFBundleIconFile                     = "TextMate";
+	CFBundleInfoDictionaryVersion        = "6.0";
+	CFBundlePackageType                  = APPL;
+	CFBundleSignature                    = avin; // we didn’t register this code with Apple
+	LSMinimumSystemVersion               = "${APP_MIN_OS}";
+	NSAppleScriptEnabled                 = YES;
+	NSMainNibFile                        = MainMenu;
+	NSPrincipalClass                     = NSApplication;
+	NSContactsUsageDescription           = 'Your email address is used as identifier for crash report submission. It can be changed in Preferences.\n\nIt is also used as a default contact address if you create your own bundle. This can be changed in the bundle editor after you create a bundle.';
+	NSSupportsAutomaticGraphicsSwitching = YES;
 
 	CFBundleURLTypes = (
 		{	CFBundleURLName    = "TextMate URL";
