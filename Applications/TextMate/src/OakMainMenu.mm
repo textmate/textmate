@@ -79,13 +79,20 @@ static CGPoint MenuPosition ()
 		return YES;
 	}
 
-	NSArray* bundleMenuItems = [[bundlesMenuItem submenu] itemArray];
-	for(NSUInteger i = 0; i < [bundleMenuItems count]; ++i)
+	for(NSMenuItem* menuItem in [[self itemArray] reverseObjectEnumerator])
 	{
-		NSMenuItem* menuItem = [bundleMenuItems objectAtIndex:i];
-		if(keyString == ns::create_event_string(menuItem.keyEquivalent, menuItem.keyEquivalentModifierMask))
+		if(menuItem == bundlesMenuItem)
 		{
-			[[bundlesMenuItem submenu] performActionForItemAtIndex:i];
+			NSArray* bundleMenuItems = [[bundlesMenuItem submenu] itemArray];
+			for(NSUInteger i = 0; i < [bundleMenuItems count]; ++i)
+			{
+				NSMenuItem* subMenuItem = bundleMenuItems[i];
+				if(keyString == ns::create_event_string(subMenuItem.keyEquivalent, subMenuItem.keyEquivalentModifierMask))
+ 					return [[bundlesMenuItem submenu] performActionForItemAtIndex:i], YES;
+			}
+		}
+		else if([[menuItem submenu] performKeyEquivalent:anEvent])
+		{
 			return YES;
 		}
 	}
@@ -95,6 +102,6 @@ static CGPoint MenuPosition ()
 	else if(keyString == "~@\uF703") // ⌥⌘⇢
 		return [self performWindowMenuAction:@selector(selectNextTab:)];
 
-	return [super performKeyEquivalent:anEvent];
+	return NO;
 }
 @end
