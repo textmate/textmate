@@ -10,7 +10,7 @@ class SaveTests : public CxxTest::TestSuite
 {
 	struct stall_t : file::save_callback_t
 	{
-		stall_t (bool* success = NULL, std::string const& path = NULL_STR, std::string const& encoding = NULL_STR, bool bom = false) : _success(success), _path(path), _encoding(encoding), _bom(bom), _run_loop(CFSTR("OakThreadSignalsRunLoopMode")) { }
+		stall_t (bool* success = NULL, std::string const& path = NULL_STR, std::string const& encoding = NULL_STR) : _success(success), _path(path), _encoding(encoding), _run_loop(CFSTR("OakThreadSignalsRunLoopMode")) { }
 
 		void select_path (std::string const& path, io::bytes_ptr content, file::save_context_ptr context)
 		{
@@ -37,7 +37,6 @@ class SaveTests : public CxxTest::TestSuite
 		bool* _success;
 		std::string _path;
 		std::string _encoding;
-		bool _bom;
 		cf::run_loop_t _run_loop;
 	};
 
