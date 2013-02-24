@@ -36,6 +36,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	CGFloat fontSize;
 	BOOL antiAlias;
 	BOOL showInvisibles;
+	BOOL scrollPastEnd;
 	ng::editor_ptr editor;
 	std::shared_ptr<ng::layout_t> layout;
 	NSUInteger refreshNestCount;
@@ -106,6 +107,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic) size_t                                tabSize;
 @property (nonatomic) BOOL                                  showInvisibles;
 @property (nonatomic) BOOL                                  softWrap;
+@property (nonatomic) BOOL                                  scrollPastEnd;
 @property (nonatomic) BOOL                                  softTabs;
 @property (nonatomic, readonly) BOOL                        continuousIndentCorrections;
 
@@ -125,6 +127,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 - (IBAction)toggleMacroRecording:(id)sender;
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;
 - (IBAction)toggleShowInvisibles:(id)sender;
+- (IBAction)toggleScrollPastEnd:(id)sender;
 
 - (void)performBundleItem:(bundles::item_ptr const&)anItem;
 @end

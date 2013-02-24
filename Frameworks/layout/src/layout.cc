@@ -34,7 +34,7 @@ namespace ng
 	// = layout_t =
 	// ============
 
-	layout_t::layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap, size_t wrapColumn, std::string const& folded, ng::layout_t::margin_t const& margin) : _folds(new folds_t(buffer)), _buffer(buffer), _theme(theme), _tab_size(buffer.indent().tab_size()), _wrapping(softWrap), _wrap_column(wrapColumn), _margin(margin)
+	layout_t::layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap, bool scrollPastEnd, size_t wrapColumn, std::string const& folded, ng::layout_t::margin_t const& margin) : _folds(new folds_t(buffer)), _buffer(buffer), _theme(theme), _tab_size(buffer.indent().tab_size()), _wrapping(softWrap), _scroll_past_end(scrollPastEnd), _wrap_column(wrapColumn), _margin(margin)
 	{
 		struct parser_callback_t : ng::callback_t
 		{
@@ -131,6 +131,12 @@ namespace ng
 
 		_dirty_rects.push_back(OakRectMake(0, 0, width(), height()));
 	}
+	
+	void layout_t::set_scroll_past_end (bool scrollPastEnd)
+	{
+		_scroll_past_end = scrollPastEnd;
+	}
+
 
 	// ======================
 	// = Display Attributes =
@@ -356,7 +362,7 @@ namespace ng
 	}
 
 	CGFloat layout_t::width () const  { return _margin.left + content_width() + _margin.right; }
-	CGFloat layout_t::height () const { return _margin.top + content_height() + _margin.bottom; }
+	CGFloat layout_t::height () const { return _margin.top + content_height() + _margin.bottom + (_scroll_past_end ? std::min(_rows.aggregated()._height, _viewport_size.height) - row_for_offset(_buffer.lines()-1)->key._height * 2 : 0); }
 
 	// ===================
 	// = Updating Layout =

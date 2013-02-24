@@ -43,6 +43,7 @@ int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
 NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
+NSString* const kUserDefaultsScrollPastEndKey    = @"scrollPastEnd";
 
 @interface OakTextView ()
 + (NSArray*)dropTypes;
@@ -405,7 +406,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
-		layout.reset(new ng::layout_t(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), wrapColumn, document->folded()));
+		layout.reset(new ng::layout_t(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), scrollPastEnd, wrapColumn, document->folded()));
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
@@ -453,6 +454,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		fontSize       = settings.get(kSettingsFontSizeKey, 11);
 		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
 		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
+		scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
 		spellingDotImage = [NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]];
@@ -1883,6 +1885,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		[aMenuItem setState:[self showInvisibles] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleSoftWrap:))
 		[aMenuItem setState:[self softWrap] ? NSOnState : NSOffState];
+	else if([aMenuItem action] == @selector(toggleScrollPastEnd:))
+		[aMenuItem setState:[self scrollPastEnd] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
 		[aMenuItem setState:(layout && layout->draw_wrap_column()) ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
@@ -1974,6 +1978,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 - (size_t)tabSize             { return document ? document->buffer().indent().tab_size() : 2; }
 - (BOOL)softTabs              { return document ? document->buffer().indent().soft_tabs() : NO; }
 - (BOOL)showInvisibles        { return showInvisibles; }
+- (BOOL)scrollPastEnd         { return scrollPastEnd; }
 - (BOOL)softWrap              { return layout && layout->wrapping(); }
 
 - (BOOL)continuousIndentCorrections
@@ -2014,6 +2019,19 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	showInvisibles = flag;
 	[self setNeedsDisplay:YES];
+}
+
+- (void)setScrollPastEnd:(BOOL)flag
+{
+	if(scrollPastEnd == flag)
+		return;
+	scrollPastEnd = flag;
+	[[NSUserDefaults standardUserDefaults] setBool:self.scrollPastEnd forKey:kUserDefaultsScrollPastEndKey];
+	if(layout)
+	{
+		AUTO_REFRESH;
+		layout->set_scroll_past_end(scrollPastEnd);
+	}
 }
 
 - (void)setSoftWrap:(BOOL)flag
@@ -2077,6 +2095,11 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	self.showInvisibles = !self.showInvisibles;
 	settings_t::set(kSettingsShowInvisiblesKey, (bool)self.showInvisibles, document->file_type());
+}
+
+- (IBAction)toggleScrollPastEnd:(id)sender
+{
+	self.scrollPastEnd = !self.scrollPastEnd;
 }
 
 - (IBAction)toggleSoftWrap:(id)sender
