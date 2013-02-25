@@ -198,13 +198,17 @@ namespace scm
 				scm::status_map_t const status = info->_driver->status(info->_root_path);
 				fs::snapshot_t const snapshot = info->_driver->may_touch_filesystem() ? fs::snapshot_t(info->_root_path) : fs::snapshot_t();
 				dispatch_async(dispatch_get_main_queue(), ^{
-					info->update(variables, status, snapshot);
+					if(shared_info_ptr info = weakThis.lock())
+						info->update(variables, status, snapshot);
 				});
 			}
 
 			dispatch_async(dispatch_get_main_queue(), ^{
-				info->_pending_update  = false;
-				info->_no_check_before = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+				if(shared_info_ptr info = weakThis.lock())
+				{
+					info->_pending_update  = false;
+					info->_no_check_before = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+				}
 			});
 		}
 	}
