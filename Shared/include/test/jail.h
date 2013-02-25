@@ -18,6 +18,9 @@ namespace test
 			path::remove(root);
 		}
 
+		jail_t (jail_t const& rhs) = delete;
+		jail_t& operator= (jail_t const& rhs) = delete;
+
 		void mkdir (std::string const& relativeToRoot)
 		{
 			path::make_dir(path(relativeToRoot));
