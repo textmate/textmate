@@ -277,7 +277,7 @@ namespace scm
 
 	static bool scm_enabled_for_path (std::string const& path)
 	{
-		return path != "" && path != "/" && path[0] == '/' && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
+		return path::is_absolute(path) && path != "/" && path != path::home() && path::is_local(path) && settings_for_path(NULL_STR, "", path).get(kSettingsSCMStatusKey, true);
 	}
 
 	void disable ()

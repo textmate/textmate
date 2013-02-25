@@ -70,7 +70,7 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 		<< text::join(std::vector<std::string>(components.begin(), components.end()), " ▸ ")
 		<< [NSFont boldSystemFontOfSize:11]
 		<< [NSColor blackColor]
-		<< (path.empty() || path[0] != '/' ? path : path::display_name(path));
+		<< (path::is_absolute(path) ? path::display_name(path) : path);
 }
 
 @interface FFFilePathCell ()

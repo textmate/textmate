@@ -71,7 +71,7 @@ namespace scm
 
 	driver_t const* driver_for_path (std::string const& path, std::string* wcPath)
 	{
-		if(path == NULL_STR || path == "" || path[0] != '/')
+		if(!path::is_absolute(path))
 			return NULL;
 
 		static driver_t* const drivers[] = { git_driver(), hg_driver(), p4_driver(), svn_driver() };

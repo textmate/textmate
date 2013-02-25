@@ -88,7 +88,7 @@ static void add_policy ()
 
 int install_tool (std::string const& toolPath)
 {
-	if(toolPath.empty() || toolPath[0] != '/')
+	if(!path::is_absolute(toolPath))
 	{
 		fprintf(stderr, "need to be run with absolute path\n");
 		abort();
