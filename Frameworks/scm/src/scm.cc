@@ -68,8 +68,8 @@ namespace scm
 		if(_shared_info)
 			_shared_info->remove_client(this);
 
-		for(auto block : _callbacks)
-			Block_release(block);
+		while(!_callbacks.empty())
+			pop_callback();
 	}
 
 	void info_t::set_shared_info (shared_info_ptr sharedInfo)
@@ -118,6 +118,13 @@ namespace scm
 		_callbacks.push_back(Block_copy(block));
 		if(!dry())
 			did_update_shared_info();
+	}
+
+	void info_t::pop_callback ()
+	{
+		ASSERT(!_callbacks.empty())
+		Block_release(_callbacks.back());
+		_callbacks.pop_back();
 	}
 
 	void info_t::did_update_shared_info ()
@@ -374,8 +381,8 @@ namespace scm
 			dispatch_semaphore_signal(semaphore);
 		});
 		dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-		// FIXME remove_callback
 		dispatch_release(semaphore);
+		info->pop_callback();
 	}
 
 } /* scm */

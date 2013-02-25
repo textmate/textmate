@@ -27,6 +27,7 @@ namespace scm
 
 		bool tracks_directories () const;
 		void add_callback (void (^block)(info_t const&));
+		void pop_callback ();
 
 	private:
 		friend info_ptr info (std::string path);
