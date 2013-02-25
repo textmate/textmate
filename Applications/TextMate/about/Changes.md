@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-02-25 ([r9387](https://github.com/textmate/textmate/compare/r9385...r9387))
+
+* After using the open dialog, TextMate would not switch back to internal GPU.
+
 ## 2013-02-22 ([r9385](https://github.com/textmate/textmate/compare/r9383...r9385))
 
 * When toggling the file browser, the window will adjust its width. Likewise the width of new windows depend on wether or not the file browser is initially visible.
