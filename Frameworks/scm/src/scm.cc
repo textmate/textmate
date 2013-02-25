@@ -42,8 +42,8 @@ namespace scm
 
 		void update (std::map<std::string, std::string> const& variables, std::map<std::string, scm::status::type> const& status, fs::snapshot_t const& fsSnapshot);
 
-		std::string _root_path;
-		scm::driver_t const* _driver;
+		std::string const _root_path;
+		scm::driver_t const* const _driver;
 
 		std::map<std::string, std::string> _variables;
 		std::map<std::string, scm::status::type> _status;
