@@ -18,6 +18,9 @@ namespace scm
 		info_t (std::string const& path);
 		~info_t ();
 
+		info_t (info_t const& rhs) = delete;
+		info_t& operator= (info_t const& rhs) = delete;
+
 		bool dry () const;
 
 		std::string root_path () const;
