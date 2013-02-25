@@ -2273,7 +2273,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 					std::string const projectPath = to_s(candidate.projectPath);
 					iterate(parent, parents)
 					{
-						if(parent->find(projectPath) == 0 && (parent->size() == projectPath.size() || (*parent)[projectPath.size()] == '/'))
+						if(path::is_child(*parent, projectPath))
 							candidates.insert(std::make_pair(parent->size() - projectPath.size(), candidate));
 					}
 				}

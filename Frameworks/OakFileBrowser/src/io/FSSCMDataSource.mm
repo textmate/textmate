@@ -47,7 +47,7 @@ _Iter prune_path_parents (_Iter it, _Iter last)
 	std::reverse(it, last);
 	for(std::string child = NULL_STR; it != last; child = *it++)
 	{
-		if(child.size() <= it->size() || child.at(it->size()) != '/' || child.find(*it) != 0)
+		if(!path::is_child(child, *it))
 			*out++ = *it;
 	}
 	return out;
@@ -60,7 +60,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 	std::sort(it, last);
 	for(std::string parent = NULL_STR; it != last; ++it)
 	{
-		if(it->size() <= parent.size() || it->at(parent.size()) != '/' || it->find(parent) != 0)
+		if(!path::is_child(*it, parent))
 			*out++ = parent = *it;
 	}
 	return out;
