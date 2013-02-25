@@ -1,3 +1,5 @@
+title: Bundle Dependencies
+
 # Bundle Dependencies
 
 ## Description

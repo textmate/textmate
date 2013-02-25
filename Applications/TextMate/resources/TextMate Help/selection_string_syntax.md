@@ -1,3 +1,5 @@
+title: Selection String Syntax
+
 # Selection String Syntax
 
 	selection    = «range» ('&' «range»)*

@@ -1,4 +1,6 @@
-# <a name="load_encoding">Encodings</a>
+title: Detecting File Encoding
+
+# Encodings
 
 TextMate will do a few tests against your file:
 

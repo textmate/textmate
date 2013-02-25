@@ -1,3 +1,5 @@
+title: Commands: JavaScript API for HTML Output
+
 # TextMate JavaScript Object API
 
 The object has the following methods available:

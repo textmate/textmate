@@ -1,3 +1,5 @@
+title: Format string syntax
+
 # Format String Syntax
 
 ## In Snippets

@@ -1,3 +1,5 @@
+title: Glob String Syntax
+
 # Glob String Syntax
 
 	\«char»         -- Literal «char»

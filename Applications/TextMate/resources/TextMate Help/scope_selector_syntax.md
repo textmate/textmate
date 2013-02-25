@@ -1,3 +1,5 @@
+title: Scope Selector Syntax
+
 # Scope Selector Syntax
 
 	atom:         «string» | '*'

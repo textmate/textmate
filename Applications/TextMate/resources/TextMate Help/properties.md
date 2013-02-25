@@ -1,3 +1,5 @@
+title: File and Folder Targeted Settings
+
 # Properties
 
 For many settings TextMate will look for a `.tm_properties` file in the current folder and in any parent folders (up to the user’s home folder).

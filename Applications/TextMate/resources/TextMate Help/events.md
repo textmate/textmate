@@ -1,3 +1,5 @@
+title: Semantic Classes
+
 # Events / Filters
 
 ## Events
