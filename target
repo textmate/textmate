@@ -23,7 +23,6 @@ LN_FLAGS += -m64 -mmacosx-version-min=$APP_MIN_OS -isysroot "$sdk"
 LN_FLAGS += -fvisibility=hidden
 LN_FLAGS += -Wl,-dead_strip
 LN_FLAGS += -Wl,-dead_strip_dylibs
-LN_FLAGS += -fobjc-link-runtime
 
 PRELUDE = Shared/PCH/prelude.*
 
