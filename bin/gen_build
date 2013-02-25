@@ -272,22 +272,24 @@ def tests(target)
   if !target['TESTS'].to_s.empty?
     src = target['TESTS'].map { |path| esc_path(File.join(target[:path], path)) }.join(' ')
     ext = target['TESTS'].any? { |path| path =~ /\.mm$/ } ? 'mm' : 'cc'
+    test_src = "#{dst}.#{ext}"
 
-    res << "build #{dst}.#{ext}: gen_oak_test #{src} | bin/gen_test\n"
-    res << "build #{dst}.o: #{compiler_for("#{dst}.#{ext}")} #{dst}.#{ext} | #{pch_for(src, target)}.gch || #{target[:name]}/headers\n"
+    res << "build #{test_src}: gen_oak_test #{src} | bin/gen_test\n"
+    res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
     res << "  depfile = #{dst}.o.d\n"
-    res << "  RAVE_FLAGS = -include #{pch_for(src, target)}\n"
+    res << "  RAVE_FLAGS = -include #{pch_for(test_src, target)}\n"
     res << flags_for_target(target)
     res << "build #{dst}: link_oak_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
     res << flags_for_target(target)
   else
     src = target['TEST_SOURCES'].map { |path| esc_path(File.join(target[:path], path)) }.join(' ')
     ext = target['TEST_SOURCES'].any? { |path| path =~ /\.mm$/ } ? 'mm' : 'cc'
+    test_src = "#{dst}.#{ext}"
 
-    res << "build #{dst}.#{ext}: gen_test #{src}\n"
-    res << "build #{dst}.o: #{compiler_for("#{dst}.#{ext}")} #{dst}.#{ext} | #{pch_for(src, target)}.gch || #{target[:name]}/headers\n"
+    res << "build #{test_src}: gen_test #{src}\n"
+    res << "build #{dst}.o: #{compiler_for(test_src)} #{test_src} | #{pch_for(test_src, target)}.gch || #{target[:name]}/headers\n"
     res << "  depfile = #{dst}.o.d\n"
-    res << "  RAVE_FLAGS = -Ibin/CxxTest -include #{pch_for(src, target)}\n"
+    res << "  RAVE_FLAGS = -Ibin/CxxTest -include #{pch_for(test_src, target)}\n"
     res << flags_for_target(target)
     res << "build #{dst}: link_test #{all_values_for_key(target, :objects).join(' ')} #{dst}.o\n"
     res << flags_for_target(target)
