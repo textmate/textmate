@@ -484,7 +484,7 @@ namespace bundles
 				plist::dictionary_t res;
 				citerate(pair, plist)
 				{
-					if(DesiredKeys.find(pair->first) == DesiredKeys.end())
+					if(DesiredKeys.find(pair->first) == DesiredKeys.end() && pair->first.find(kFieldSettingName) != 0)
 						continue;
 
 					if(pair->first == kFieldSettingName)
