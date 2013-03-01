@@ -885,7 +885,7 @@ rule clean
 
 rule dsym
   command = $
-    DST=$$(mktemp -dt dsym); $
+    DST=$$(/usr/bin/mktemp -dt dsym); $
     find $in -name rmate -or -type f -perm +0111 -print|while read line; $
     do dsymutil --flat --out "$$DST/$$(basename "$$line" .dylib).dSYM" "$$line"; $
     done && tar $bzip2_flag -cf $out -C "$$DST" . && rm -rf "$$DST"

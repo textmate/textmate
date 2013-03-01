@@ -8,7 +8,7 @@ if which -s pbzip2; then
 	BZIP2_FLAG="--use-compress-prog=pbzip2"
 fi
 
-BUNDLES_DST="$(mktemp -dt bundles)"
+BUNDLES_DST="$(/usr/bin/mktemp -dt bundles)"
 trap 'rm -rf "$BUNDLES_DST"' EXIT
 
 builddir="${builddir:-$HOME/build/TextMate}"
