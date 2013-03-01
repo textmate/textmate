@@ -3,6 +3,24 @@
 #include <OakFoundation/NSString Additions.h>
 #include <BundleMenu/BundleMenu.h>
 
+/* CrashReporter info */
+char const* __crashreporter_info__ = NULL;
+asm(".desc ___crashreporter_info__, 0x10");
+
+struct crash_reporter_info_t
+{
+	crash_reporter_info_t (std::string const& string) : _string(string)
+	{
+		__crashreporter_info__ = _string.c_str();
+	}
+
+	~crash_reporter_info_t ()
+	{
+		__crashreporter_info__ = NULL;
+	}
+private:
+	std::string _string;
+};
 /*
 
 The route of an event seems to be:
@@ -70,6 +88,7 @@ static CGPoint MenuPosition ()
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
 	std::string const keyString = to_s(anEvent);
+	crash_reporter_info_t crashInfo(text::format("Key equivalent ‘%s’.", keyString.c_str()));
 
 	auto const bundleItems = bundles::query(bundles::kFieldKeyEquivalent, keyString, "", bundles::kItemTypeCommand|bundles::kItemTypeGrammar|bundles::kItemTypeSnippet);
 	if(!bundleItems.empty())
