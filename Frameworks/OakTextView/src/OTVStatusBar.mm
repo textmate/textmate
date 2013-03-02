@@ -263,7 +263,8 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(_symbolName == newSymbolName || [_symbolName isEqualToString:newSymbolName])
 		return;
 	_symbolName = newSymbolName;
-	self.symbolPopUp.title = newSymbolName ?: @"Symbols";;
+	[self.symbolPopUp.menu removeAllItems];
+	[self.symbolPopUp addItemWithTitle:newSymbolName ?: @"Symbols"];
 }
 
 - (void)setRecordingTimer:(NSTimer*)aTimer
