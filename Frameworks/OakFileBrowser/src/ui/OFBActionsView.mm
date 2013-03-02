@@ -65,6 +65,14 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		self.favoritesButton.toolTip    = @"Show favorites";
 		self.scmButton.toolTip          = @"Show source control management status";
 
+		[self.createButton.cell    accessibilitySetOverrideValue:self.createButton.toolTip    forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.reloadButton.cell    accessibilitySetOverrideValue:self.reloadButton.toolTip    forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.searchButton.cell    accessibilitySetOverrideValue:self.searchButton.toolTip    forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.favoritesButton.cell accessibilitySetOverrideValue:self.favoritesButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.scmButton.cell       accessibilitySetOverrideValue:self.scmButton.toolTip       forAttribute:NSAccessibilityDescriptionAttribute];
+
+		[self.actionsPopUpButton.cell accessibilitySetOverrideValue:@"Actions" forAttribute:NSAccessibilityDescriptionAttribute];
+
 		NSMenu* menu = [NSMenu new];
 		[menu addItemWithTitle:@"Unused" action:@selector(nop:) keyEquivalent:@""];
 		[menu addItemWithTitle:@"Create Folder" action:@selector(nop:) keyEquivalent:@""];

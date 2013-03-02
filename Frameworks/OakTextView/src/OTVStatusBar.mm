@@ -35,12 +35,12 @@ static NSPopUpButton* OakCreatePopUpButton (NSString* initialItem = nil)
 	return res;
 }
 
-static NSButton* OakCreateImageButton (NSImage* image)
+static NSButton* OakCreateImageToggleButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
 
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	[res setButtonType:NSMomentaryChangeButton];
+	[res setButtonType:NSToggleButton];
 	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
 
@@ -80,9 +80,13 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		self.tabSizePopUp.pullsDown       = YES;
 		self.bundleItemsPopUp             = OakCreatePopUpButton();
 		self.symbolPopUp                  = OakCreatePopUpButton(@"");
-		self.macroRecordingButton         = OakCreateImageButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]]);
+		self.macroRecordingButton         = OakCreateImageToggleButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]]);
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
+
+		[self.grammarPopUp.cell         accessibilitySetOverrideValue:@"Grammar"                 forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.symbolPopUp.cell          accessibilitySetOverrideValue:@"Symbol"                  forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.macroRecordingButton.cell accessibilitySetOverrideValue:@"Record a macro"       forAttribute:NSAccessibilityDescriptionAttribute];
 
 		// ===========================
 		// = Wrap/Clip Bundles PopUp =
@@ -92,6 +96,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
 		[[self.bundleItemsPopUp cell] setUsesItemFromMenu:NO];
 		[[self.bundleItemsPopUp cell] setMenuItem:item];
+		[[self.bundleItemsPopUp cell] accessibilitySetOverrideValue:@"Bundle Item" forAttribute:NSAccessibilityDescriptionAttribute];
 
 		NSView* wrappedBundleItemsPopUpButton = [NSView new];
 		[wrappedBundleItemsPopUpButton addSubview:self.bundleItemsPopUp];
@@ -258,7 +263,8 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(_symbolName == newSymbolName || [_symbolName isEqualToString:newSymbolName])
 		return;
 	_symbolName = newSymbolName;
-	self.symbolPopUp.title = newSymbolName ?: @"Symbols";;
+	[self.symbolPopUp.menu removeAllItems];
+	[self.symbolPopUp addItemWithTitle:newSymbolName ?: @"Symbols"];
 }
 
 - (void)setRecordingTimer:(NSTimer*)aTimer
