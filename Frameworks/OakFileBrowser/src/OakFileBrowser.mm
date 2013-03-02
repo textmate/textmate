@@ -60,12 +60,47 @@ static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
 	return iconImage;
 }
 
+@interface OakFileBrowserView : NSView
+@end
+
+@implementation OakFileBrowserView
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray* attributes = nil;
+	if(!attributes)
+	{
+		NSSet* set = [NSSet setWithArray:[super accessibilityAttributeNames]];
+		set = [set setByAddingObjectsFromArray:@[
+			NSAccessibilityRoleAttribute,
+			NSAccessibilityDescriptionAttribute,
+		]];
+		attributes = [set allObjects];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+		return NSAccessibilityGroupRole;
+	else if([attribute isEqualToString:NSAccessibilityDescriptionAttribute])
+		return @"File Browser";
+	else
+		return [super accessibilityAttributeValue:attribute];
+}
+@end
+
 @interface OakFileBrowser () <OFBOutlineViewMenuDelegate, NSMenuDelegate>
 {
 	OBJC_WATCH_LEAKS(OakFileBrowser);
 	NSUInteger _historyIndex;
 }
-@property (nonatomic, readwrite)         NSView* view;
+@property (nonatomic, readwrite)         OakFileBrowserView* view;
 @property (nonatomic)                    OFBHeaderView* headerView;
 @property (nonatomic)                    OFBOutlineView* outlineView;
 @property (nonatomic)                    OFBActionsView* actionsView;
@@ -189,7 +224,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	_actionsView.actionsPopUpButton.menu.delegate = self;
 
-	_view = [NSView new];
+	_view = [OakFileBrowserView new];
 
 	NSCell* cell = [OFBPathInfoCell new];
 	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
