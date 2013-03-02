@@ -814,4 +814,38 @@ static std::string const kBookmarkType = "bookmark";
 	document->buffer().remove_all_marks(kBookmarkType);
 	[[NSNotificationCenter defaultCenter] postNotificationName:GVColumnDataSourceDidChange object:self];
 }
+
+// =================
+// = Accessibility =
+// =================
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
+}
+
+- (NSArray*)accessibilityAttributeNames
+{
+	static NSArray *attributes = nil;
+	if (!attributes)
+	{
+		NSSet *set = [NSSet setWithArray:[super accessibilityAttributeNames]];
+		set = [set setByAddingObjectsFromArray:@[
+			NSAccessibilityRoleAttribute,
+			NSAccessibilityDescriptionAttribute,
+		]];
+		attributes = [set allObjects];
+	}
+	return attributes;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+		return NSAccessibilityGroupRole;
+	else if ([attribute isEqualToString:NSAccessibilityDescriptionAttribute])
+		return @"Editor";
+	else
+		return [super accessibilityAttributeValue:attribute];
+}
 @end
