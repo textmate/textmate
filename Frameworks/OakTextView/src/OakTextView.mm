@@ -70,7 +70,7 @@ NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
 @property (nonatomic) OakChoiceMenu* choiceMenu;
 @property (nonatomic) NSUInteger refreshNestCount;
 @property (nonatomic) LiveSearchView* liveSearchView;
-@property (nonatomic) NSString* liveSearchString;
+@property (nonatomic, copy) NSString* liveSearchString;
 @property (nonatomic) ng::ranges_t const& liveSearchRanges;
 @end
 
