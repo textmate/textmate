@@ -84,6 +84,8 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
 
+		[self.macroRecordingButton.cell accessibilitySetOverrideValue:@"Record a macro" forAttribute:NSAccessibilityDescriptionAttribute];
+
 		// ===========================
 		// = Wrap/Clip Bundles PopUp =
 		// ===========================
@@ -92,6 +94,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
 		[[self.bundleItemsPopUp cell] setUsesItemFromMenu:NO];
 		[[self.bundleItemsPopUp cell] setMenuItem:item];
+		[[self.bundleItemsPopUp cell] accessibilitySetOverrideValue:@"Bundle Item" forAttribute:NSAccessibilityDescriptionAttribute];
 
 		NSView* wrappedBundleItemsPopUpButton = [NSView new];
 		[wrappedBundleItemsPopUpButton addSubview:self.bundleItemsPopUp];
