@@ -9,8 +9,7 @@
 @property (nonatomic, readwrite) HOStatusBar* statusBar;
 @property (nonatomic, retain) HOWebViewDelegateHelper* webViewDelegateHelper;
 @property (nonatomic, copy) NSEvent* gestureBeginEvent;
-@property (nonatomic) BOOL canSwipeBack;
-@property (nonatomic) BOOL canSwipeForward;
+@property (nonatomic) NSRect visibleRectBeforeGesture;
 @end
 
 @implementation HOBrowserView
@@ -102,29 +101,42 @@
 		[_webView goForward:self];
 }
 
+- (NSView*)scrollableViewForPoint:(NSPoint)aPoint inWebFrame:(WebFrame*)parentFrame
+{
+	for(WebFrame* webFrame in [parentFrame childFrames])
+	{
+		if(NSView* res = [self scrollableViewForPoint:aPoint inWebFrame:webFrame])
+			return res;
+	}
+
+	NSView <WebDocumentView>* documentView = [[parentFrame frameView] documentView];
+	NSRect visible = [documentView convertRect:[documentView visibleRect] toView:nil];
+	NSRect actual = [documentView convertRect:[documentView bounds] toView:nil];
+	if(NSMouseInRect(aPoint, visible, [documentView isFlipped]) && !NSEqualRects(visible, actual))
+		return documentView;
+
+	return nil;
+}
+
 - (void)beginGestureWithEvent:(NSEvent*)anEvent
 {
 	self.gestureBeginEvent = anEvent;
-	self.canSwipeBack      = YES;
-	self.canSwipeForward   = YES;
 
-	NSView* responder = (NSView*)[self.window firstResponder];
-	if([responder isKindOfClass:[NSView class]])
-	{
-		NSRect bounds  = [responder bounds];
-		NSRect visible = [responder visibleRect];
-
-		self.canSwipeBack    = NSMinX(bounds) == NSMinX(visible);
-		self.canSwipeForward = NSMaxX(bounds) == NSMaxX(visible);
-	}
+	NSView* view = [self scrollableViewForPoint:[anEvent locationInWindow] inWebFrame:[_webView mainFrame]];
+	self.visibleRectBeforeGesture = view ? [view visibleRect] : NSZeroRect;
 }
 
 - (void)endGestureWithEvent:(NSEvent*)anEvent
 {
+	NSTimeInterval duration = [anEvent timestamp] - [self.gestureBeginEvent timestamp];
 	NSMutableDictionary* map = [NSMutableDictionary dictionary];
 	for(NSTouch* touch in [self.gestureBeginEvent touchesMatchingPhase:NSTouchPhaseBegan inView:nil])
 		map[touch.identity] = touch;
 	self.gestureBeginEvent = nil;
+
+	NSView* view = [self scrollableViewForPoint:[anEvent locationInWindow] inWebFrame:[_webView mainFrame]];
+	if(duration > 0.2 || view && !NSEqualRects(self.visibleRectBeforeGesture, [view visibleRect]))
+		return;
 
 	NSInteger direction = 0;
 	for(NSTouch* touch in [anEvent touchesMatchingPhase:NSTouchPhaseAny inView:nil])
@@ -134,9 +146,9 @@
 		direction += distance <= -0.1 ? +1 : (distance >= 0.1 ? -1 : 0);
 	}
 
-	if(direction == -2 && _webView.canGoBack && self.canSwipeBack)
+	if(direction == -2 && _webView.canGoBack)
 		[_webView goBack:self];
-	else if(direction == +2 && _webView.canGoForward && self.canSwipeForward)
+	else if(direction == +2 && _webView.canGoForward)
 		[_webView goForward:self];
 }
 
