@@ -24,7 +24,7 @@ namespace ng
 			size_t left, top, right, bottom;
 		};
 
-		layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap = false, size_t wrapColumn = 0, std::string const& folded = NULL_STR, margin_t const& margin = margin_t(8));
+		layout_t (ng::buffer_t& buffer, theme_ptr const& theme, bool softWrap = false, bool scrollPastEnd = false, size_t wrapColumn = 0, std::string const& folded = NULL_STR, margin_t const& margin = margin_t(8));
 		~layout_t ();
 
 		// _buffer_callback is managed with new/delete so can’t be copied
@@ -39,6 +39,7 @@ namespace ng
 		void set_font (std::string const& fontName, CGFloat fontSize);
 		void set_margin (margin_t const& margin);
 		void set_wrapping (bool softWrap, size_t wrapColumn);
+		void set_scroll_past_end (bool scrollPastEnd);
 
 		theme_ptr const& theme () const         { return _theme; }
 		std::string const& font_name () const   { return _theme->font_name(); }
@@ -59,6 +60,7 @@ namespace ng
 		void set_viewport_size (CGSize size);
 
 		bool draw_wrap_column () const          { return _draw_wrap_column; }
+		bool scroll_past_end () const           { return _scrollPastEnd; }
 
 		// ======================
 
@@ -164,6 +166,7 @@ namespace ng
 		theme_ptr          _theme;
 		size_t             _tab_size;
 		bool               _wrapping;
+		bool               _scrollPastEnd;
 		bool               _draw_wrap_column = false;
 		size_t             _wrap_column;
 		margin_t           _margin;

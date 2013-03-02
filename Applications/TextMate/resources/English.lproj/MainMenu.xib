@@ -1534,6 +1534,24 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
+								<object class="NSMenuItem" id="909812697">
+									<reference key="NSMenu" ref="377204242"/>
+									<string key="NSTitle">Scroll Past End</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
+								<object class="NSMenuItem" id="284546527">
+									<reference key="NSMenu" ref="377204242"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
 								<object class="NSMenuItem" id="564980712">
 									<reference key="NSMenu" ref="377204242"/>
 									<string key="NSTitle">View Source</string>
@@ -2452,7 +2470,7 @@
 					<string key="NSFrameSize">{269, 102}</string>
 					<reference key="NSNextKeyView" ref="240907648"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{269, 124}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<string key="NSFrameAutosaveName">Go to Line</string>
@@ -3724,6 +3742,14 @@
 					<int key="connectionID">828</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleScrollPastEnd:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="909812697"/>
+					</object>
+					<int key="connectionID">835</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">bundlesMenuItem</string>
 						<reference key="source" ref="261397727"/>
@@ -4430,6 +4456,8 @@
 							<reference ref="53103184"/>
 							<reference ref="701544362"/>
 							<reference ref="613273090"/>
+							<reference ref="284546527"/>
+							<reference ref="909812697"/>
 						</object>
 						<reference key="parent" ref="412091230"/>
 					</object>
@@ -5622,6 +5650,16 @@
 						<reference key="object" ref="318577453"/>
 						<reference key="parent" ref="276589048"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">832</int>
+						<reference key="object" ref="284546527"/>
+						<reference key="parent" ref="377204242"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">833</int>
+						<reference key="object" ref="909812697"/>
+						<reference key="parent" ref="377204242"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5906,6 +5944,8 @@
 					<string>826.IBPluginDependency</string>
 					<string>829.IBPluginDependency</string>
 					<string>83.IBPluginDependency</string>
+					<string>832.IBPluginDependency</string>
+					<string>833.IBPluginDependency</string>
 				</object>
 				<object class="NSArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -6187,6 +6227,8 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6201,7 +6243,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">829</int>
+			<int key="maxID">835</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6689,6 +6731,7 @@
 							<string>toggleLineNumbers:</string>
 							<string>toggleMacroRecording:</string>
 							<string>toggleOverwriteMode:</string>
+							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
 							<string>toggleShowWrapColumn:</string>
 							<string>toggleSoftTabs:</string>
@@ -6697,6 +6740,7 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -6864,6 +6908,7 @@
 							<string>toggleLineNumbers:</string>
 							<string>toggleMacroRecording:</string>
 							<string>toggleOverwriteMode:</string>
+							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
 							<string>toggleShowWrapColumn:</string>
 							<string>toggleSoftTabs:</string>
@@ -7182,6 +7227,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">toggleOverwriteMode:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">toggleScrollPastEnd:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
