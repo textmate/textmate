@@ -84,6 +84,8 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
 
+		[self.grammarPopUp.cell         accessibilitySetOverrideValue:@"Grammar"        forAttribute:NSAccessibilityDescriptionAttribute];
+		[self.symbolPopUp.cell          accessibilitySetOverrideValue:@"Symbol"         forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.macroRecordingButton.cell accessibilitySetOverrideValue:@"Record a macro" forAttribute:NSAccessibilityDescriptionAttribute];
 
 		// ===========================
