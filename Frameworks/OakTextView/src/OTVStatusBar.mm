@@ -35,12 +35,12 @@ static NSPopUpButton* OakCreatePopUpButton (NSString* initialItem = nil)
 	return res;
 }
 
-static NSButton* OakCreateImageButton (NSImage* image)
+static NSButton* OakCreateImageToggleButton (NSImage* image)
 {
 	NSButton* res = [NSButton new];
 
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	[res setButtonType:NSMomentaryChangeButton];
+	[res setButtonType:NSToggleButton];
 	[res setBezelStyle:NSRecessedBezelStyle];
 	[res setBordered:NO];
 
@@ -80,7 +80,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		self.tabSizePopUp.pullsDown       = YES;
 		self.bundleItemsPopUp             = OakCreatePopUpButton();
 		self.symbolPopUp                  = OakCreatePopUpButton(@"");
-		self.macroRecordingButton         = OakCreateImageButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]]);
+		self.macroRecordingButton         = OakCreateImageToggleButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]]);
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";
 
