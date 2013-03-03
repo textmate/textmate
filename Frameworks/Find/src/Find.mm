@@ -293,8 +293,16 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 					if(document::document_ptr doc = [fileMatch match].document)
 					{
 						if(doc->is_open())
-								ng::editor_for_document(doc)->perform_replacements(replacements);
-						else	doc->replace(replacements);
+						{
+							ng::editor_ptr editor = ng::editor_for_document(doc);
+							doc->undo_manager().begin_undo_group(editor->ranges());
+							editor->perform_replacements(replacements);
+							doc->undo_manager().end_undo_group(editor->ranges());
+						}
+						else
+						{
+							doc->replace(replacements);
+						}
 					}
 
 					++fileCount;
