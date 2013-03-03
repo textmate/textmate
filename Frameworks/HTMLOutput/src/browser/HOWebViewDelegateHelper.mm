@@ -54,7 +54,7 @@
 																  styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask)
 																	 backing:NSBackingStoreBuffered
 																		defer:NO];
-	[window bind:@"title" toObject:view.webView withKeyPath:@"mainFrameTitle" options:nil];
+	[window bind:NSTitleBinding toObject:view.webView withKeyPath:@"mainFrameTitle" options:nil];
 	[window setReleasedWhenClosed:YES];
 	[window setContentView:view];
 	[[view.webView mainFrame] loadRequest:request];

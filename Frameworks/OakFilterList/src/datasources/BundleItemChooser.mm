@@ -156,7 +156,7 @@ static NSString* const AllScopes    = @"AllScopes";
 		else	searchField.stringValue = filterString;
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewFrameDidChange:) name:NSViewFrameDidChangeNotification object:self.view];
-		[keyEquivField bind:@"value" toObject:chooser withKeyPath:@"filterString" options:nil];
+		[keyEquivField bind:NSValueBinding toObject:chooser withKeyPath:@"filterString" options:nil];
 	}
 	return self;
 }
@@ -165,7 +165,7 @@ static NSString* const AllScopes    = @"AllScopes";
 {
 	searchField.target = nil;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[keyEquivField unbind:@"value"];
+	[keyEquivField unbind:NSValueBinding];
 }
 
 - (int)numberOfGroupsInScopeBar:(MGScopeBar*)theScopeBar

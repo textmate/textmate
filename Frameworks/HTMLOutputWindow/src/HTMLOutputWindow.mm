@@ -26,8 +26,8 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		self.htmlOutputView = [[OakHTMLOutputView alloc] init];
 
 		[self.window setFrameAutosaveName:@"Command Output (HTML)"];
-		[self.window bind:@"title" toObject:self.htmlOutputView.webView withKeyPath:@"mainFrameTitle" options:nil];
-		[self.window bind:@"documentEdited" toObject:self.htmlOutputView withKeyPath:@"runningCommand" options:nil];
+		[self.window bind:NSTitleBinding toObject:self.htmlOutputView.webView withKeyPath:@"mainFrameTitle" options:nil];
+		[self.window bind:NSDocumentEditedBinding toObject:self.htmlOutputView withKeyPath:@"runningCommand" options:nil];
 		[self.window setContentView:self.htmlOutputView];
 		[self.window setDelegate:self];
 		[self.window setReleasedWhenClosed:NO];

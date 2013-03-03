@@ -207,8 +207,8 @@ static bool is_installed (oak::uuid_t const& uuid)
 			{
 				[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(checkIfBundleIsInstalled:) userInfo:[grammar objectForKey:@"uuid"] repeats:YES];
 				[[BundlesManager sharedInstance] installBundle:*bundle];
-				[installingBundleActivityTextField bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
-				[installingBundleProgressIndicator bind:@"value" toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
+				[installingBundleActivityTextField bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
+				[installingBundleProgressIndicator bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
 				[installingBundleProgressIndicator startAnimation:self];
 				OakShowSheetForWindow(installingBundleWindow, aWindow, ^(NSInteger returnCode){
 					aCompletionHandler(self.fileType);
@@ -229,8 +229,8 @@ static bool is_installed (oak::uuid_t const& uuid)
 		[aTimer invalidate];
 
 		[installingBundleProgressIndicator stopAnimation:self];
-		[installingBundleProgressIndicator unbind:@"value"];
-		[installingBundleActivityTextField unbind:@"value"];
+		[installingBundleProgressIndicator unbind:NSValueBinding];
+		[installingBundleActivityTextField unbind:NSValueBinding];
 		[NSApp endSheet:installingBundleWindow];
 		[installingBundleWindow orderOut:self];
 	}
