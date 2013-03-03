@@ -302,21 +302,23 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_url = aURL;
 	_outlineViewDelegate.dataSource = DataSourceForURL(_url, _dataSourceOptions);
 
-	NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:_outlineViewDelegate.dataSource.rootItem.name action:@selector(takeURLFrom:) keyEquivalent:@""];
+	NSMenu* folderPopUpMenu = _headerView.folderPopUpButton.menu;
+	[folderPopUpMenu removeAllItems];
+
+	NSMenuItem* menuItem = [folderPopUpMenu addItemWithTitle:_outlineViewDelegate.dataSource.rootItem.name action:@selector(takeURLFrom:) keyEquivalent:@""];
 	menuItem.image = _outlineViewDelegate.dataSource.rootItem.icon;
 	menuItem.image.size = NSMakeSize(16, 16);
 	menuItem.target = self;
 	menuItem.representedObject = _url;
-	[[_headerView.folderPopUpButton cell] setMenuItem:menuItem];
+
+	[_headerView.folderPopUpButton selectItem:menuItem];
 }
 
 - (void)folderPopUpButtonWillPopUp:(NSNotification*)aNotification
 {
 	NSMenu* menu = _headerView.folderPopUpButton.menu;
-
-	NSMenuItem* firstItem = [[_headerView.folderPopUpButton cell] menuItem];
-	[menu removeAllItems];
-	[menu addItem:firstItem];
+	while([menu numberOfItems] > 1)
+		[menu removeItemAtIndex:[menu numberOfItems]-1];
 
 	for(NSURL* currentURL = ParentForURL(_url); currentURL; currentURL = ParentForURL(currentURL))
 	{
@@ -328,8 +330,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	[menu addItem:[NSMenuItem separatorItem]];
 	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
-
-	[_headerView.folderPopUpButton selectItem:firstItem];
 }
 
 - (void)goToURL:(NSURL*)aURL

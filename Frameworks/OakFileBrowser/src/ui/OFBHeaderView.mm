@@ -42,6 +42,7 @@ static NSPopUpButton* OakCreatePopUpButton ()
 		self.goForwardButton         = OakCreateImageButton(NSImageNameGoRightTemplate);
 		self.goForwardButton.toolTip = @"Go Forward";
 
+		[self.folderPopUpButton.cell accessibilitySetOverrideValue:@"Folder" forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.goBackButton.cell accessibilitySetOverrideValue:self.goBackButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.goForwardButton.cell accessibilitySetOverrideValue:self.goForwardButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 
