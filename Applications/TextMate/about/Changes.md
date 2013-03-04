@@ -1,5 +1,11 @@
 # Changes
 
+## 2013-03-04 ([r9389](https://github.com/textmate/textmate/compare/r9387...r9389))
+
+* Add “scroll past end” option to the View menu. Enabling this means that the last line of the document is no longer anchored to the bottom but can e.g. be centered in the view port. *[Steven Clukey]*
+* Improve voice over / accessibility support: The editor (with status bar) and file browser are now two distinct groups and all image buttons have descriptive accessibility attributes. *[Boris Dušek]*
+* Improve heuristic for swipe gestures in HTML views.
+
 ## 2013-02-25 ([r9387](https://github.com/textmate/textmate/compare/r9385...r9387))
 
 * After using the open dialog, TextMate would not switch back to internal GPU.
