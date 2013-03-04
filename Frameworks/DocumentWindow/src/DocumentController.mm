@@ -1528,6 +1528,10 @@ namespace
 				self.fileBrowser.url = [NSURL fileURLWithPath:self.projectPath];
 			[self updateFileBrowserStatus:self];
 		}
+
+		if(!makeVisibleFlag && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.fileBrowserView])
+			[self makeTextViewFirstResponder:self];
+
 		self.layoutView.fileBrowserView = makeVisibleFlag ? self.fileBrowser.view : nil;
 
 		if(makeVisibleFlag)
@@ -1626,6 +1630,9 @@ namespace
 	}
 	else
 	{
+		if(self.layoutView.htmlOutputView && [[self.window firstResponder] isKindOfClass:[NSView class]] && [(NSView*)[self.window firstResponder] isDescendantOf:self.layoutView.htmlOutputView])
+			[self makeTextViewFirstResponder:self];
+
 		[self.htmlOutputWindowController.window orderOut:self];
 		self.layoutView.htmlOutputView = nil;
 	}
