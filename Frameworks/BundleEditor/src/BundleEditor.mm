@@ -200,8 +200,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	[browser setDelegate:self];
 	[browser loadColumnZero];
-	if([browser respondsToSelector:@selector(setAutohidesScroller:)])
-		[browser setAutohidesScroller:YES];
+	[browser setAutohidesScroller:YES];
 
 	[[self window] makeFirstResponder:browser];
 }
