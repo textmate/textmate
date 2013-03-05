@@ -29,6 +29,8 @@ namespace ng
 		plist::any_t value = plist::parse_ascii(str);
 		if(plist::array_t const* array = boost::get<plist::array_t>(&value))
 		{
+			bool validRanges = true;
+
 			std::vector< std::pair<size_t, size_t> > newFoldings;
 			iterate(pair, *array)
 			{
@@ -36,11 +38,14 @@ namespace ng
 				{
 					int32_t const* from = value->size() == 2 ? boost::get<int32_t>(&(*value)[0]) : NULL;
 					int32_t const* to   = value->size() == 2 ? boost::get<int32_t>(&(*value)[1]) : NULL;
-					if(from && to)
-						newFoldings.push_back(std::make_pair(*from, *to));
+					if(from && *from < _buffer.size() && to && *to < _buffer.size())
+							newFoldings.push_back(std::make_pair(*from, *to));
+					else	validRanges = false;
 				}
 			}
-			set_folded(newFoldings);
+
+			if(validRanges)
+				set_folded(newFoldings);
 		}
 	}
 
