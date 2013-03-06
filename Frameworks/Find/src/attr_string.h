@@ -65,7 +65,7 @@ namespace ns
 		{
 			// FIXME here we create a new paragraph style, but there may be one already in effect
 			// we should instead copy and mutate the current style if there is one
-			NSMutableParagraphStyle* paragraph = [[NSMutableParagraphStyle new] autorelease];
+			NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
 			[paragraph setLineBreakMode:value.mode];
 			return add(paragraph);
 		}
@@ -73,10 +73,10 @@ namespace ns
 		{
 			if(image)
 			{
-				NSFileWrapper* fileWrapper = [[NSFileWrapper new] autorelease];
+				NSFileWrapper* fileWrapper = [NSFileWrapper new];
 				[fileWrapper setIcon:image];
 
-				NSTextAttachment* textAttachment = [[[NSTextAttachment alloc] initWithFileWrapper:fileWrapper] autorelease];
+				NSTextAttachment* textAttachment = [[NSTextAttachment alloc] initWithFileWrapper:fileWrapper];
 				set_attribute(NSAttachmentAttributeName, textAttachment);
 				add("\uFFFC"); // This is the object replacement character for the text attachment
 				set_attribute(NSAttachmentAttributeName, NULL);
@@ -119,15 +119,14 @@ namespace ns
 		NSAttributedString* get () const
 		{
 			std::stack<NSDictionary*> attribute_stack;
-			NSMutableDictionary* attributes   = [[NSMutableDictionary new] autorelease];
-			NSMutableAttributedString* result = [[NSMutableAttributedString new] autorelease];
+			NSMutableDictionary* attributes   = [NSMutableDictionary new];
+			NSMutableAttributedString* result = [NSMutableAttributedString new];
 			size_t last_pos = 0;
 
 			for(std::vector<attr_t>::const_iterator it = _attributes.begin(); it != _attributes.end(); ++it)
 			{
 				if(last_pos < it->pos)
-					[result appendAttributedString:[[[NSAttributedString alloc] initWithString:@(_string.substr(last_pos, it->pos - last_pos).c_str())
-	                                                                            attributes:attributes] autorelease]];
+					[result appendAttributedString:[[NSAttributedString alloc] initWithString:@(_string.substr(last_pos, it->pos - last_pos).c_str()) attributes:attributes]];
 				last_pos = it->pos;
 
 				NSString* attr = it->attr;
@@ -171,7 +170,7 @@ namespace ns
 								break;
 							case style::emboss:
 							{
-								NSShadow* shadow = [[NSShadow new] autorelease];
+								NSShadow* shadow = [NSShadow new];
 								[shadow setShadowColor:[NSColor colorWithCalibratedWhite:1 alpha:0.7]];
 								[shadow setShadowOffset:NSMakeSize(0,-1)];
 								[shadow setShadowBlurRadius:1];
@@ -184,7 +183,7 @@ namespace ns
 								value = nil;
 								break;
 							case style::push:
-								attribute_stack.push([[attributes copy] autorelease]);
+								attribute_stack.push([attributes copy]);
 								[attributes removeAllObjects];
 								value = attr = nil;
 								break;
@@ -206,14 +205,12 @@ namespace ns
 			}
 
 			if(last_pos < _string.length())
-				[result appendAttributedString:[[[NSAttributedString alloc] initWithString:@(_string.substr(last_pos, _string.length() - last_pos).c_str())
-	                                                                         attributes:attributes] autorelease]];
+				[result appendAttributedString:[[NSAttributedString alloc] initWithString:@(_string.substr(last_pos, _string.length() - last_pos).c_str()) attributes:attributes]];
 
 			return result;
 		}
 
-		operator NSAttributedString* () const   { return get(); }
-		operator CFAttributedStringRef () const { return (CFAttributedStringRef)get(); }
+		operator NSAttributedString* () const { return get(); }
 
 		explicit operator bool () const { return !is_empty(); };
 		bool is_empty () const { return _string.size() == 0; };

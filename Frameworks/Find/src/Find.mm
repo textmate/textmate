@@ -50,7 +50,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if(self = [super init])
 	{
 		D(DBF_Find_Base, bug("\n"););
-		self.windowController = [[FindWindowController new] autorelease];
+		self.windowController = [FindWindowController new];
 		self.windowController.nextResponder = self;
 		self.windowController.resultsOutlineView.action       = @selector(didSingleClickResultsOutlineView:);
 		self.windowController.resultsOutlineView.doubleAction = @selector(didDoubleClickResultsOutlineView:);
@@ -158,7 +158,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{
 			case FindActionFindAll:
 			{
-				FFDocumentSearch* folderSearch = [[FFDocumentSearch new] autorelease];
+				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
 				folderSearch.searchString      = controller.findString;
 				folderSearch.options           = _findOptions;
 				folderSearch.projectIdentifier = self.projectIdentifier;
@@ -375,7 +375,6 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 				doc->remove_all_marks("search");
 		}
 
-		[_documentSearch release];
 		_documentSearch = nil;
 	}
 
@@ -383,7 +382,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	[self.windowController.resultsOutlineView deselectAll:nil];
 	self.windowController.showResultsCollapsed = NO;
 
-	if(_documentSearch = [newSearcher retain])
+	if(_documentSearch = newSearcher)
 	{
 		self.windowController.busy                     = YES;
 		self.windowController.statusString             = MSG_SEARCHING_FMT;
@@ -447,7 +446,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		default: fmt = MSG_MULTIPLE_MATCHES_FMT; break;
 	}
 
-	NSNumberFormatter* formatter = [[NSNumberFormatter new] autorelease]; // FIXME we want to cache this as it is expensive
+	NSNumberFormatter* formatter = [NSNumberFormatter new]; // FIXME we want to cache this as it is expensive
 	[formatter setPositiveFormat:@"#,##0"];
 	[formatter setLocalizesFormat:YES];
 
@@ -668,7 +667,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		id obj = [cell objectValue];
 		if([obj isKindOfClass:[NSAttributedString class]])
 		{
-			NSMutableAttributedString* str = [[obj mutableCopy] autorelease];
+			NSMutableAttributedString* str = [obj mutableCopy];
 			[str addAttribute:NSForegroundColorAttributeName value:[NSColor selectedTextColor] range:NSMakeRange(0, [str length])];
 			[cell setAttributedStringValue:str];
 		}
@@ -703,7 +702,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 - (NSCell*)outlineView:(NSOutlineView*)outlineView dataCellForTableColumn:(NSTableColumn*)tableColumn item:(id)item
 {
 	if(tableColumn == nil && [self outlineView:outlineView isGroupItem:item])
-		return [[FFFilePathCell new] autorelease];
+		return [FFFilePathCell new];
 	return [tableColumn dataCell];
 }
 

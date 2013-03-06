@@ -32,7 +32,7 @@ NSString* const kUserDefaultsFolderOptionsKey = @"Folder Search Options";
 
 - (void)updateIntrinsicContentSizeToEncompassString:(NSString*)aString
 {
-	NSTextFieldCell* cell = [[self.cell copy] autorelease];
+	NSTextFieldCell* cell = [self.cell copy];
 	cell.stringValue = aString;
 
 	self.myIntrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, [cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height);
@@ -42,7 +42,7 @@ NSString* const kUserDefaultsFolderOptionsKey = @"Folder Search Options";
 
 static NSTextField* OakCreateLabel (NSString* label)
 {
-	NSTextField* res = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
 	[[res cell] setWraps:NO];
 	res.font            = [NSFont controlContentFontOfSize:[NSFont labelFontSize]];
 	res.stringValue     = label;
@@ -56,7 +56,7 @@ static NSTextField* OakCreateLabel (NSString* label)
 
 static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate)
 {
-	OakAutoSizingTextField* res = [[[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect] autorelease];
+	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
 	res.font = [NSFont controlContentFontOfSize:0];
 	[[res cell] setWraps:YES];
 	res.delegate = delegate;
@@ -65,7 +65,7 @@ static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> dele
 
 static NSButton* OakCreateHistoryButton ()
 {
-	NSButton* res = [[[NSButton alloc] initWithFrame:NSZeroRect] autorelease];
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.bezelStyle = NSRoundedDisclosureBezelStyle;
 	res.buttonType = NSMomentaryLightButton;
 	res.title      = @"";
@@ -74,7 +74,7 @@ static NSButton* OakCreateHistoryButton ()
 
 static NSButton* OakCreateCheckBox (NSString* label)
 {
-	NSButton* res = [[[NSButton alloc] initWithFrame:NSZeroRect] autorelease];
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 	res.buttonType = NSSwitchButton;
 	res.font       = [NSFont controlContentFontOfSize:0];
@@ -84,7 +84,7 @@ static NSButton* OakCreateCheckBox (NSString* label)
 
 static NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO)
 {
-	NSPopUpButton* res = [[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO] autorelease];
+	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
 	res.font = [NSFont controlContentFontOfSize:0];
 	res.pullsDown = pullsDown;
 	return res;
@@ -92,22 +92,22 @@ static NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO)
 
 static NSComboBox* OakCreateComboBox ()
 {
-	NSComboBox* res = [[[NSComboBox alloc] initWithFrame:NSZeroRect] autorelease];
+	NSComboBox* res = [[NSComboBox alloc] initWithFrame:NSZeroRect];
 	res.font = [NSFont controlContentFontOfSize:0];
 	return res;
 }
 
 static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
 {
-	NSOutlineView* res = [[[NSOutlineView alloc] initWithFrame:NSZeroRect] autorelease];
+	NSOutlineView* res = [[NSOutlineView alloc] initWithFrame:NSZeroRect];
 	res.focusRingType                      = NSFocusRingTypeNone;
 	res.allowsMultipleSelection            = YES;
 	res.autoresizesOutlineColumn           = NO;
 	res.usesAlternatingRowBackgroundColors = YES;
 	res.headerView                         = nil;
 
-	NSTableColumn* tableColumn = [[[NSTableColumn alloc] initWithIdentifier:@"checkbox"] autorelease];
-	NSButtonCell* dataCell = [[[NSButtonCell alloc] init] autorelease];
+	NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"checkbox"];
+	NSButtonCell* dataCell = [NSButtonCell new];
 	dataCell.buttonType    = NSSwitchButton;
 	dataCell.controlSize   = NSSmallControlSize;
 	dataCell.imagePosition = NSImageOnly;
@@ -117,7 +117,7 @@ static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
 	[res addTableColumn:tableColumn];
 	[res setOutlineTableColumn:tableColumn];
 
-	tableColumn = [[[NSTableColumn alloc] initWithIdentifier:@"match"] autorelease];
+	tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"match"];
 	[tableColumn setEditable:NO];
 	NSTextFieldCell* cell = tableColumn.dataCell;
 	cell.font = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
@@ -125,7 +125,7 @@ static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
 
 	res.rowHeight = 14;
 
-	NSScrollView* scrollView = [[[NSScrollView alloc] initWithFrame:NSZeroRect] autorelease];
+	NSScrollView* scrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 	scrollView.hasVerticalScroller   = YES;
 	scrollView.hasHorizontalScroller = NO;
 	scrollView.borderType            = NSNoBorder;
@@ -139,7 +139,7 @@ static NSOutlineView* OakCreateOutlineView (NSScrollView** scrollViewOut)
 
 static NSProgressIndicator* OakCreateProgressIndicator ()
 {
-	NSProgressIndicator* res = [[[NSProgressIndicator alloc] initWithFrame:NSZeroRect] autorelease];
+	NSProgressIndicator* res = [[NSProgressIndicator alloc] initWithFrame:NSZeroRect];
 	res.style                = NSProgressIndicatorSpinningStyle;
 	res.controlSize          = NSSmallControlSize;
 	res.displayedWhenStopped = NO;
@@ -148,7 +148,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 
 static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRoundedBezelStyle)
 {
-	NSButton* res = [[[NSButton alloc] initWithFrame:NSZeroRect] autorelease];
+	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	res.buttonType = NSMomentaryPushInButton;
 	res.bezelStyle = bezel;
 	res.title      = label;
@@ -161,51 +161,51 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	BOOL _wrapAround;
 	BOOL _ignoreCase;
 }
-@property (nonatomic, retain) NSTextField*              findLabel;
-@property (nonatomic, retain) OakAutoSizingTextField*   findTextField;
-@property (nonatomic, retain) NSButton*                 findHistoryButton;
+@property (nonatomic) NSTextField*              findLabel;
+@property (nonatomic) OakAutoSizingTextField*   findTextField;
+@property (nonatomic) NSButton*                 findHistoryButton;
 
-@property (nonatomic, retain) NSButton*                 countButton;
+@property (nonatomic) NSButton*                 countButton;
 
-@property (nonatomic, retain) NSTextField*              replaceLabel;
-@property (nonatomic, retain) OakAutoSizingTextField*   replaceTextField;
-@property (nonatomic, retain) NSButton*                 replaceHistoryButton;
+@property (nonatomic) NSTextField*              replaceLabel;
+@property (nonatomic) OakAutoSizingTextField*   replaceTextField;
+@property (nonatomic) NSButton*                 replaceHistoryButton;
 
-@property (nonatomic, retain) NSTextField*              optionsLabel;
-@property (nonatomic, retain) NSButton*                 ignoreCaseCheckBox;
-@property (nonatomic, retain) NSButton*                 ignoreWhitespaceCheckBox;
-@property (nonatomic, retain) NSButton*                 regularExpressionCheckBox;
-@property (nonatomic, retain) NSButton*                 wrapAroundCheckBox;
+@property (nonatomic) NSTextField*              optionsLabel;
+@property (nonatomic) NSButton*                 ignoreCaseCheckBox;
+@property (nonatomic) NSButton*                 ignoreWhitespaceCheckBox;
+@property (nonatomic) NSButton*                 regularExpressionCheckBox;
+@property (nonatomic) NSButton*                 wrapAroundCheckBox;
 
-@property (nonatomic, retain) NSTextField*              whereLabel;
-@property (nonatomic, retain) NSPopUpButton*            wherePopUpButton;
-@property (nonatomic, retain) NSTextField*              matchingLabel;
-@property (nonatomic, retain) NSComboBox*               globTextField;
-@property (nonatomic, retain) NSPopUpButton*            actionsPopUpButton;
+@property (nonatomic) NSTextField*              whereLabel;
+@property (nonatomic) NSPopUpButton*            wherePopUpButton;
+@property (nonatomic) NSTextField*              matchingLabel;
+@property (nonatomic) NSComboBox*               globTextField;
+@property (nonatomic) NSPopUpButton*            actionsPopUpButton;
 
-@property (nonatomic, retain) NSView*                   resultsTopDivider;
-@property (nonatomic, retain) NSScrollView*             resultsScrollView;
-@property (nonatomic, retain, readwrite) NSOutlineView* resultsOutlineView;
-@property (nonatomic, retain) NSView*                   resultsBottomDivider;
+@property (nonatomic) NSView*                   resultsTopDivider;
+@property (nonatomic) NSScrollView*             resultsScrollView;
+@property (nonatomic, readwrite) NSOutlineView* resultsOutlineView;
+@property (nonatomic) NSView*                   resultsBottomDivider;
 
-@property (nonatomic, retain) NSProgressIndicator*      progressIndicator;
-@property (nonatomic, retain) NSTextField*              statusTextField;
+@property (nonatomic) NSProgressIndicator*      progressIndicator;
+@property (nonatomic) NSTextField*              statusTextField;
 
-@property (nonatomic, retain, readwrite) NSButton*      findAllButton;
-@property (nonatomic, retain, readwrite) NSButton*      replaceAllButton;
-@property (nonatomic, retain, readwrite) NSButton*      replaceAndFindButton;
-@property (nonatomic, retain, readwrite) NSButton*      findPreviousButton;
-@property (nonatomic, retain, readwrite) NSButton*      findNextButton;
+@property (nonatomic, readwrite) NSButton*      findAllButton;
+@property (nonatomic, readwrite) NSButton*      replaceAllButton;
+@property (nonatomic, readwrite) NSButton*      replaceAndFindButton;
+@property (nonatomic, readwrite) NSButton*      findPreviousButton;
+@property (nonatomic, readwrite) NSButton*      findNextButton;
 
-@property (nonatomic, retain) NSPopover*                findStringPopver;
+@property (nonatomic) NSPopover*                findStringPopver;
 
-@property (nonatomic, retain) NSObjectController*       objectController;
-@property (nonatomic, retain) OakHistoryList*           globHistoryList;
-@property (nonatomic, retain) OakHistoryList*           recentFolders;
-@property (nonatomic, retain) NSMutableArray*           myConstraints;
+@property (nonatomic) NSObjectController*       objectController;
+@property (nonatomic) OakHistoryList*           globHistoryList;
+@property (nonatomic) OakHistoryList*           recentFolders;
+@property (nonatomic) NSMutableArray*           myConstraints;
 
-@property (nonatomic, assign)   BOOL                    folderSearch;
-@property (nonatomic, readonly) BOOL                    canIgnoreWhitespace;
+@property (nonatomic) BOOL                      folderSearch;
+@property (nonatomic, readonly) BOOL            canIgnoreWhitespace;
 @end
 
 @implementation FindWindowController
@@ -284,7 +284,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		collapseExpandItem.tag = -1;
 
 		NSMenuItem* selectResultItem = [actionMenu addItemWithTitle:@"Select Result" action:NULL keyEquivalent:@""];
-		selectResultItem.submenu = [[NSMenu new] autorelease];
+		selectResultItem.submenu = [NSMenu new];
 		selectResultItem.submenu.delegate = self;
 
 		[actionMenu addItem:[NSMenuItem separatorItem]];
@@ -305,8 +305,8 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		self.findPreviousButton.action    = @selector(findPrevious:);
 		self.findNextButton.action        = @selector(findNext:);
 
-		self.objectController = [[[NSObjectController alloc] initWithContent:self] autorelease];
-		self.globHistoryList  = [[[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil] autorelease];
+		self.objectController = [[NSObjectController alloc] initWithContent:self];
+		self.globHistoryList  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
 		self.recentFolders    = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:6];
 
 		[self.findTextField             bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.findString"           options:@{ NSContinuouslyUpdatesValueBindingOption: @YES }];
@@ -354,7 +354,6 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 {
 	[self.window removeObserver:self forKeyPath:@"firstResponder"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
@@ -717,17 +716,14 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	if(_findErrorString == aString || [_findErrorString isEqualToString:aString])
 		return;
 
-	[_findErrorString autorelease];
-	_findErrorString = [aString retain];
-
-	if(_findErrorString)
+	if(_findErrorString = aString)
 	{
 		if(!self.findStringPopver)
 		{
-			NSViewController* viewController = [[[NSViewController alloc] init] autorelease];
+			NSViewController* viewController = [NSViewController new];
 			viewController.view = OakCreateLabel(@"");
 
-			self.findStringPopver = [[[NSPopover alloc] init] autorelease];
+			self.findStringPopver = [NSPopover new];
 			self.findStringPopver.behavior = NSPopoverBehaviorApplicationDefined;
 			self.findStringPopver.contentViewController = viewController;
 		}
@@ -836,8 +832,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		return;
 	}
 
-	[_searchIn autorelease];
-	_searchIn = [aString retain];
+	_searchIn = aString;
 	self.folderSearch = self.searchFolder != nil;
 	self.window.title = self.searchFolder ? [NSString localizedStringWithFormat:MSG_FIND_IN_FOLDER_WINDOW_TITLE, [self.searchFolder stringByAbbreviatingWithTildeInPath]] : MSG_WINDOW_TITLE;
 	if(NSString* folder = self.searchFolder)
@@ -865,8 +860,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	if(_findString == aString || [_findString isEqualToString:aString])
 		return;
 
-	[_findString autorelease];
-	_findString = [(aString ?: @"") retain];
+	_findString = aString ?: @"";
 	[self.findTextField updateIntrinsicContentSizeToEncompassString:_findString];
 
 	if(self.findErrorString)
@@ -878,8 +872,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	if(_replaceString == aString || [_replaceString isEqualToString:aString])
 		return;
 
-	[_replaceString autorelease];
-	_replaceString = [(aString ?: @"") retain];
+	_replaceString = aString ?: @"";
 	[self.replaceTextField updateIntrinsicContentSizeToEncompassString:_replaceString];
 }
 
@@ -895,9 +888,8 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 {
 	if(_projectFolder != aFolder && ![_projectFolder isEqualToString:aFolder])
 	{
-		[_projectFolder release];
-		_projectFolder = [(aFolder ?: @"") retain];
-		self.globHistoryList = [[[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", _projectFolder] stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil] autorelease];
+		_projectFolder = aFolder ?: @"";
+		self.globHistoryList = [[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", _projectFolder] stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
 		[self updateSearchInPopUpMenu];
 	}
 }

@@ -12,7 +12,7 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 - (find::match_t const&)match;
 @property (nonatomic, readonly) NSString*            path;
 @property (nonatomic, readonly) NSString*            identifier;
-@property (nonatomic, readonly, retain) NSImage*     icon;
+@property (nonatomic, readonly) NSImage*             icon;
 - (std::string const&)matchText;
 @end
 
@@ -25,13 +25,13 @@ extern NSString* const FFDocumentSearchDidFinishNotification;
 // If a documentIdentifier is set only that document will be searched.
 - (find::folder_scan_settings_t const&)folderOptions;
 - (void)setFolderOptions:(find::folder_scan_settings_t const&)newFolderOptions;
-@property (nonatomic, retain) NSString* documentIdentifier;
+@property (nonatomic) NSString* documentIdentifier;
 
-@property (nonatomic, retain) NSString* projectIdentifier;
+@property (nonatomic) NSString* projectIdentifier;
 
 // Start the search, observing the currentPath, and prematurely stop it if desired.
 - (void)start;
-@property (nonatomic, retain, readonly) NSString* currentPath;
+@property (nonatomic, readonly) NSString* currentPath;
 - (void)stop;
 
 // Attain matches during/after the search

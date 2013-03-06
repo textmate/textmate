@@ -83,7 +83,7 @@ private:
 
 - (id)copyWithZone:(NSZone*)zone
 {
-	return [self retain];
+	return self;
 }
 
 - (void)dealloc
@@ -94,8 +94,6 @@ private:
 		delete callback;
 		callback = NULL;
 	}
-	self.icon = nil;
-	[super dealloc];
 }
 
 - (find::match_t const&)match
@@ -331,9 +329,9 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 			if(![matchInfo objectForKey:uuid])
 			{
 				[matchInfo setObject:[NSMutableArray array] forKey:uuid];
-				[matchingDocuments addObject:[[[FFMatch alloc] initWithDocument:pair->first] autorelease]];
+				[matchingDocuments addObject:[[FFMatch alloc] initWithDocument:pair->first]];
 			}
-			FFMatch* match = [[[FFMatch alloc] initWithMatch:pair->second] autorelease];
+			FFMatch* match = [[FFMatch alloc] initWithMatch:pair->second];
 			[[matchInfo objectForKey:uuid] addObject:match];
 			if(match.match.binary)
 				[replacementMatchesToSkip addObject:match];
@@ -383,11 +381,5 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
 	[self stop];
-	self.currentPath = nil;
-	self.projectIdentifier = nil;
-	[replacementMatchesToSkip release];
-	[matchingDocuments release];
-	[matchInfo release];
-	[super dealloc];
 }
 @end

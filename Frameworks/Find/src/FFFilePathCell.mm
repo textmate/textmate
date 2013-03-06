@@ -39,7 +39,7 @@ static NSImage* ImageForBadgeCounter (NSInteger count)
 		badgeNumX += BADGE_BUFFER_LEFT_SMALL;
 	NSRect badgeRect = NSMakeRect(badgeX, 0, badgeWidth, BADGE_TEXT_HEIGHT);
 
-	NSImage* badge = [[[NSImage alloc] initWithSize:NSMakeSize(badgeRect.size.width + BADGE_X_RADIUS, badgeRect.size.height)] autorelease];
+	NSImage* badge = [[NSImage alloc] initWithSize:NSMakeSize(badgeRect.size.width + BADGE_X_RADIUS, badgeRect.size.height)];
 
 	[badge lockFocus];
 
@@ -75,17 +75,11 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 
 @interface FFFilePathCell ()
 {
-	NSImage* icon;
-	NSString* path;
-	NSString* base;
-	NSUInteger count;
 	BOOL mouseDownInIcon;
 }
 @end
 
 @implementation FFFilePathCell
-@synthesize icon, path, base, count;
-
 - (NSRect)iconFrameInCellFrame:(NSRect)cellFrame
 {
 	NSRect iconRect, pathRect;
@@ -97,19 +91,19 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 
 - (void)drawWithFrame:(NSRect)frame inView:(NSView*)view
 {
-	NSAttributedString* fileString = PathComponentString(to_s(path), to_s(base));
+	NSAttributedString* fileString = PathComponentString(to_s(self.path), to_s(self.base));
 
 	NSPoint iconOrigin = frame.origin;
 	iconOrigin.x += 5;
-	iconOrigin.y  = frame.origin.y + (frame.size.height - icon.size.height) / 2;
-	[icon drawAdjustedAtPoint:iconOrigin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:mouseDownInIcon ? 0.5 : 1.0];
+	iconOrigin.y  = frame.origin.y + (frame.size.height - self.icon.size.height) / 2;
+	[self.icon drawAdjustedAtPoint:iconOrigin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:mouseDownInIcon ? 0.5 : 1.0];
 
 	NSRect textFrame      = NSInsetRect(frame, 5, 0);
 	textFrame.origin.y   += (textFrame.size.height - fileString.size.height) / 2;
 	textFrame.origin.x   += 20;
 	textFrame.size.width -= 21;
 
-	if(NSImage* badge = ImageForBadgeCounter(count))
+	if(NSImage* badge = ImageForBadgeCounter(self.count))
 	{
 		NSPoint badgeOrigin = textFrame.origin;
 		badgeOrigin.x += (([fileString size].width < textFrame.size.width) ? [fileString size].width : textFrame.size.width) + 5;
@@ -135,7 +129,7 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 	[controlView setNeedsDisplayInRect:cellFrame];
 
 	if([theEvent type] == NSLeftMouseDragged)
-		[controlView dragFile:path fromRect:[self iconFrameInCellFrame:cellFrame] slideBack:YES event:theEvent];
+		[controlView dragFile:self.path fromRect:[self iconFrameInCellFrame:cellFrame] slideBack:YES event:theEvent];
 
 	return YES;
 }

@@ -29,8 +29,8 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 		}
 	}
 
-	NSSortDescriptor* displayNameSort = [[[NSSortDescriptor alloc] initWithKey:@"stringByDeletingPathExtension" ascending:YES selector:@selector(displayNameCompare:)] autorelease];
-	NSSortDescriptor* extensionSort   = [[[NSSortDescriptor alloc] initWithKey:@"pathExtension" ascending:YES selector:@selector(displayNameCompare:)] autorelease];
+	NSSortDescriptor* displayNameSort = [[NSSortDescriptor alloc] initWithKey:@"stringByDeletingPathExtension" ascending:YES selector:@selector(displayNameCompare:)];
+	NSSortDescriptor* extensionSort   = [[NSSortDescriptor alloc] initWithKey:@"pathExtension" ascending:YES selector:@selector(displayNameCompare:)];
 	[res sortUsingDescriptors:@[ displayNameSort, extensionSort ]];
 	return res;
 }
@@ -49,7 +49,7 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 
 - (void)addFolderSubmenuToMenuItem:(NSMenuItem*)aMenuItem
 {
-	aMenuItem.submenu = [[NSMenu new] autorelease];
+	aMenuItem.submenu = [NSMenu new];
 	aMenuItem.submenu.delegate = self;
 }
 
