@@ -248,33 +248,19 @@ static std::string shell_quote (std::vector<std::string> paths)
 // =============================
 
 @interface OakTextViewFindServer : NSObject <OakFindServerProtocol>
-{
-	OakTextView*     textView;
-	find_operation_t findOperation;
-	find::options_t  findOptions;
-}
-@property (nonatomic) OakTextView*               textView;
-@property (nonatomic, readonly) find_operation_t findOperation;
-@property (nonatomic, readonly) find::options_t  findOptions;
+@property (nonatomic) OakTextView*     textView;
+@property (nonatomic) find_operation_t findOperation;
+@property (nonatomic) find::options_t  findOptions;
 @end
 
 @implementation OakTextViewFindServer
-@synthesize textView, findOperation, findOptions;
-
-- (id)initWithTextView:(OakTextView*)aTextView operation:(find_operation_t)anOperation options:(find::options_t)someOptions
-{
-	if((self = [super init]))
-	{
-		self.textView = aTextView;
-		findOperation = anOperation;
-		findOptions   = someOptions;
-	}
-	return self;
-}
-
 + (id)findServerWithTextView:(OakTextView*)aTextView operation:(find_operation_t)anOperation options:(find::options_t)someOptions
 {
-	return [[self alloc] initWithTextView:aTextView operation:anOperation options:someOptions];
+	OakTextViewFindServer* res = [OakTextViewFindServer new];
+	res.textView      = aTextView;
+	res.findOperation = anOperation;
+	res.findOptions   = someOptions;
+	return res;
 }
 
 - (NSString*)findString      { return [[OakPasteboard pasteboardWithName:NSFindPboard] current].string;    }
@@ -286,8 +272,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		{ @"No more occurrences of “%@”.", nil, @"%2$ld occurrences of “%@”." },
 		{ @"No more matches for “%@”.",    nil, @"%2$ld matches for “%@”."    },
 	};
-	if(NSString* format = formatStrings[(findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber])
-		OakShowToolTip([NSString stringWithFormat:format, aFindString, aNumber], [textView positionForWindowUnderCaret]);
+	if(NSString* format = formatStrings[(self.findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber])
+		OakShowToolTip([NSString stringWithFormat:format, aFindString, aNumber], [self.textView positionForWindowUnderCaret]);
 }
 
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString
@@ -296,8 +282,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 		{ @"Nothing replaced (no occurrences of “%@”).", @"Replaced one occurrence of “%@”.", @"Replaced %2$ld occurrences of “%@”." },
 		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$ld matches of “%@”."     }
 	};
-	NSString* format = formatStrings[(findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
-	OakShowToolTip([NSString stringWithFormat:format, aFindString, aNumber], [textView positionForWindowUnderCaret]);
+	NSString* format = formatStrings[(self.findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
+	OakShowToolTip([NSString stringWithFormat:format, aFindString, aNumber], [self.textView positionForWindowUnderCaret]);
 }
 @end
 
