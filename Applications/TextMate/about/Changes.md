@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-03-07 ([r9393](https://github.com/textmate/textmate/compare/r9391...r9393))
+
+* Fix potential deadlock when opening find dialog (introduced in r9391).
+
 ## 2013-03-07 ([r9391](https://github.com/textmate/textmate/compare/r9389...r9391))
 
   * Assign ⌃⌘↩ to View → Enter / Exit Full Screen.
