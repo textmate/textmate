@@ -1,5 +1,20 @@
 # Changes
 
+## 2013-03-07 ([r9391](https://github.com/textmate/textmate/compare/r9389...r9391))
+
+  * Assign ⌃⌘↩ to View → Enter / Exit Full Screen.
+
+  * Rework find dialog: This is work in progress but I don’t think any functionality is missing compared to previous build, although some functionality might be less polished, e.g. the action buttons don’t properly enable/disable and the height of the results list gets lost when hiding it.
+
+    Some of the stuff that has changed / improved:
+
+      * The find/replace text fields adjust their height to encompass the content. Presently though the initial height of the controls is one line regardless of content (but they should adjust on first edit).
+      * You can use Save All (⌥⌘S) to save affected files after Replace All.
+      * The key equivalents / actions available in the Find dialog is now easier to find via the action pop-up, which also improves accessibility.
+      * Using Find Next (⌘G) or Previous (⇧⌘G) with search results will move selection up/down.
+      * Using Find All with ‘in’ set to ‘Selection’ will find and select all matches in the current document, though it might be more desirable to show the results in the find dialog (like Find All does for a document or folder).
+	  * Replace and Find has been implemented and is bound to ⌥⌘G.
+
 ## 2013-03-04 ([r9389](https://github.com/textmate/textmate/compare/r9387...r9389))
 
 * Add “scroll past end” option to the View menu. Enabling this means that the last line of the document is no longer anchored to the bottom but can e.g. be centered in the view port. *[Steven Clukey]*
