@@ -362,7 +362,7 @@ namespace ng
 	}
 
 	CGFloat layout_t::width () const  { return _margin.left + content_width() + _margin.right; }
-	CGFloat layout_t::height () const { return _margin.top + content_height() + _margin.bottom + (_scroll_past_end ? std::min(_rows.aggregated()._height, _viewport_size.height) - row_for_offset(_buffer.lines()-1)->key._height * 2 : 0); }
+	CGFloat layout_t::height () const { return _margin.top + content_height() + _margin.bottom + (_scroll_past_end ? std::min(_rows.aggregated()._height, _viewport_size.height) - default_line_height() * 1.5 : 0); }
 
 	// ===================
 	// = Updating Layout =
