@@ -1575,15 +1575,34 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 	// TODO If aFindServer != self then we should record findWithOptions: instead of find{Next,Previous,All,…}:
 
+	find_operation_t findOperation = aFindServer.findOperation;
+	if(findOperation == kFindOperationReplace || findOperation == kFindOperationReplaceAndFind)
+	{
+		std::string replacement = to_s(aFindServer.replaceString);
+		if(NSDictionary* captures = [OakPasteboard pasteboardWithName:NSReplacePboard].auxiliaryOptionsForCurrent)
+		{
+			std::map<std::string, std::string> variables;
+			for(NSString* key in [captures allKeys])
+				variables.insert(std::make_pair(to_s(key), to_s((NSString*)captures[key])));
+			replacement = format_string::expand(replacement, variables);
+		}
+		editor->insert(replacement, true);
+
+		[self recordSelector:@selector(replace:) withArgument:nil];
+		if(findOperation == kFindOperationReplaceAndFind)
+			findOperation = kFindOperationFind;
+	}
+
 	bool onlyInSelection = false;
-	switch(aFindServer.findOperation)
+	switch(findOperation)
 	{
 		case kFindOperationFindInSelection:
 		case kFindOperationCountInSelection: onlyInSelection = editor->has_selection();
 		case kFindOperationFind:
 		case kFindOperationCount:
 		{
-			bool isCounting = aFindServer.findOperation == kFindOperationCount || aFindServer.findOperation == kFindOperationCountInSelection;
+			[OakPasteboard pasteboardWithName:NSReplacePboard].auxiliaryOptionsForCurrent = nil;
+			bool isCounting = findOperation == kFindOperationCount || findOperation == kFindOperationCountInSelection;
 
 			std::string const findStr = to_s(aFindServer.findString);
 			find::options_t options   = aFindServer.findOptions;
@@ -1592,15 +1611,15 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			if(documents && [documents count] > 1)
 				options &= ~find::wrap_around;
 
-			ng::ranges_t res;
-			citerate(pair, ng::find(document->buffer(), editor->ranges(), findStr, options, onlyInSelection ? editor->ranges() : ng::ranges_t()))
-				res.push_back(pair->first);
+			auto allMatches = ng::find(document->buffer(), editor->ranges(), findStr, options, onlyInSelection ? editor->ranges() : ng::ranges_t());
 
+			ng::ranges_t res;
+			std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](decltype(allMatches)::value_type const& p){ return p.first; });
 			if(onlyInSelection && res.sorted() == editor->ranges().sorted())
 			{
 				res = ng::ranges_t();
-				citerate(pair, ng::find(document->buffer(), editor->ranges(), findStr, options, ng::ranges_t()))
-					res.push_back(pair->first);
+				allMatches = ng::find(document->buffer(), editor->ranges(), findStr, options, ng::ranges_t());
+				std::transform(allMatches.begin(), allMatches.end(), std::back_inserter(res), [](decltype(allMatches)::value_type const& p){ return p.first; });
 			}
 
 			if(res.empty() && !isCounting && documents && [documents count] > 1)
@@ -1633,30 +1652,35 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			}
 			else
 			{
-				[self recordSelector:(options & find::all_matches) ? (aFindServer.findOperation == kFindOperationFind ? @selector(findAll:) : @selector(findAllInSelection:)) : ((options & find::backwards) ? @selector(findPrevious:) : @selector(findNext:)) withArgument:nil];
+				[self recordSelector:(options & find::all_matches) ? (findOperation == kFindOperationFind ? @selector(findAll:) : @selector(findAllInSelection:)) : ((options & find::backwards) ? @selector(findPrevious:) : @selector(findNext:)) withArgument:nil];
 
 				std::set<ng::range_t> alreadySelected;
 				citerate(range, editor->ranges())
 					alreadySelected.insert(*range);
 
 				ng::ranges_t newSelection;
-				iterate(range, res)
+				for(auto range : res)
 				{
-					if(alreadySelected.find(range->sorted()) == alreadySelected.end())
-						newSelection.push_back(range->sorted());
+					if(alreadySelected.find(range.sorted()) == alreadySelected.end())
+						newSelection.push_back(range.sorted());
 				}
 
 				if(!res.empty())
+				{
 					editor->set_selections(res);
+					if(res.size() == 1 && (options & find::regular_expression))
+					{
+						NSMutableDictionary* captures = [NSMutableDictionary dictionary];
+						for(auto pair : allMatches[res.last()])
+							captures[[NSString stringWithCxxString:pair.first]] = [NSString stringWithCxxString:pair.second];
+						[OakPasteboard pasteboardWithName:NSReplacePboard].auxiliaryOptionsForCurrent = captures;
+					}
+				}
 
 				[self highlightRanges:newSelection];
 				[aFindServer didFind:newSelection.size() occurrencesOf:aFindServer.findString atPosition:res.size() == 1 ? document->buffer().convert(res.last().min().index) : text::pos_t::undefined];
 			}
 		}
-		break;
-
-		case kFindOperationReplace:
-		case kFindOperationReplaceAndFind:
 		break;
 
 		case kFindOperationReplaceAll:
@@ -1665,9 +1689,9 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			std::string const findStr    = to_s(aFindServer.findString);
 			std::string const replaceStr = to_s(aFindServer.replaceString);
 			find::options_t options      = aFindServer.findOptions;
-			[self recordSelector:(options & find::all_matches) ? (aFindServer.findOperation == kFindOperationReplaceAll ? @selector(replaceAll:) : @selector(replaceAllInSelection:)) : @selector(replace:) withArgument:nil];
+			[self recordSelector:(options & find::all_matches) ? (findOperation == kFindOperationReplaceAll ? @selector(replaceAll:) : @selector(replaceAllInSelection:)) : @selector(replace:) withArgument:nil];
 
-			ng::ranges_t const res = editor->replace_all(findStr, replaceStr, options, aFindServer.findOperation == kFindOperationReplaceAllInSelection);
+			ng::ranges_t const res = editor->replace_all(findStr, replaceStr, options, findOperation == kFindOperationReplaceAllInSelection);
 			[aFindServer didReplace:res.size() occurrencesOf:aFindServer.findString with:aFindServer.replaceString];
 		}
 		break;

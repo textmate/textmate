@@ -948,7 +948,7 @@
 											<object class="NSMenuItem" id="446919429">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Replace &amp; Find</string>
-												<string key="NSKeyEquiv">f</string>
+												<string key="NSKeyEquiv">g</string>
 												<int key="NSKeyEquivModMask">1572864</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
@@ -2471,7 +2471,7 @@
 					<string key="NSFrameSize">{269, 102}</string>
 					<reference key="NSNextKeyView" ref="240907648"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
+				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
 				<string key="NSMinSize">{269, 124}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<string key="NSFrameAutosaveName">Go to Line</string>

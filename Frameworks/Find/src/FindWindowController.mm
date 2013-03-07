@@ -301,7 +301,6 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		self.findAllButton.action         = @selector(findAll:);
 		self.replaceAllButton.action      = @selector(replaceAll:);
 		self.replaceAndFindButton.action  = @selector(replaceAndFind:);
-		self.replaceAndFindButton.enabled = NO;
 		self.findPreviousButton.action    = @selector(findPrevious:);
 		self.findNextButton.action        = @selector(findNext:);
 
@@ -321,6 +320,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		[self.wrapAroundCheckBox        bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.wrapAround"           options:nil];
 		[self.ignoreWhitespaceCheckBox  bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.canIgnoreWhitespace"  options:nil];
 		[self.statusTextField           bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.statusString"         options:nil];
+		[self.replaceAndFindButton      bind:NSEnabledBinding       toObject:_objectController withKeyPath:@"content.folderSearch"         options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
 
 		NSView* contentView = self.window.contentView;
 		for(NSView* view in [self.allViews allValues])
