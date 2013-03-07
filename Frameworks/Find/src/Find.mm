@@ -45,11 +45,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	return instance;
 }
 
-- (id)init
+- (FindWindowController*)windowController
 {
-	if(self = [super init])
+	if(!_windowController)
 	{
-		D(DBF_Find_Base, bug("\n"););
 		self.windowController = [FindWindowController new];
 		self.windowController.nextResponder = self;
 		self.windowController.resultsOutlineView.action       = @selector(didSingleClickResultsOutlineView:);
@@ -60,7 +59,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 		[self.windowController.window addObserver:self forKeyPath:@"firstResponder" options:0 context:NULL];
 	}
-	return self;
+	return _windowController;
 }
 
 // ====================================
