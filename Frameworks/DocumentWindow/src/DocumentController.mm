@@ -1723,8 +1723,7 @@ namespace
 
 		case find_tags::in_project:
 		{
-			find.searchScope = find::in::folder;
-			if(!find.isVisible)
+			if(!find.isVisible || !find.searchFolder)
 			{
 				BOOL fileBrowserHasFocus = [self.window.firstResponder respondsToSelector:@selector(isDescendantOf:)] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.view];
 				find.searchFolder = fileBrowserHasFocus ? self.untitledSavePath : find.projectFolder;
@@ -1742,7 +1741,6 @@ namespace
 	find.projectIdentifier  = self.identifier;
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath;
 	find.searchFolder       = self.untitledSavePath;
-	find.searchScope        = find::in::folder;
 	[find showFindPanel:self];
 }
 

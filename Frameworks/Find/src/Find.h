@@ -1,9 +1,8 @@
 #import <OakFoundation/OakFindProtocol.h>
-#import "scan_path.h" // for find::folder_scan_settings_t used in std::map
 
 namespace find
 {
-	namespace in { enum { document, selection, folder, open_files }; }
+	namespace in { enum { document, selection, open_files }; }
 }
 
 PUBLIC @interface Find : NSResponder <OakFindServerProtocol>

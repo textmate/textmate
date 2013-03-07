@@ -290,7 +290,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 			break;
 		case find_tags::in_project:
 			find.searchFolder = find.projectFolder;
-			find.searchScope  = find::in::folder;
 			break;
 	}
 	[find showFindPanel:self];
