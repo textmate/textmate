@@ -238,9 +238,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{
 			case FindActionFindNext:
 			case FindActionFindPrevious:
-			case FindActionFindAll:       _findOperation = onlySelection ? kFindOperationFindInSelection    : kFindOperationFind;    break;
-			case FindActionCountMatches:  _findOperation = onlySelection ? kFindOperationCountInSelection   : kFindOperationCount;   break;
-			case FindActionReplaceAll:    _findOperation = onlySelection ? kFindOperationReplaceInSelection : kFindOperationReplace; break;
+			case FindActionFindAll:        _findOperation = onlySelection ? kFindOperationFindInSelection       : kFindOperationFind;       break;
+			case FindActionCountMatches:   _findOperation = onlySelection ? kFindOperationCountInSelection      : kFindOperationCount;      break;
+			case FindActionReplaceAll:     _findOperation = onlySelection ? kFindOperationReplaceAllInSelection : kFindOperationReplaceAll; break;
+			case FindActionReplaceAndFind: _findOperation = kFindOperationReplaceAndFind;                                                   break;
 		}
 
 		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);

@@ -165,7 +165,7 @@ namespace ng
 		void insert (std::string const& str, bool selectInsertion = false);
 		void insert_with_pairing (std::string const& str, bool indentCorrections = false, std::string const& scopeAttributes = NULL_STR);
 		void move_selection_to (ng::index_t const& index, bool selectInsertion = true);
-		ranges_t replace (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false);
+		ranges_t replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options = find::none, bool searchOnlySelection = false);
 		void delete_tab_trigger (std::string const& str);
 
 		void macro_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables);

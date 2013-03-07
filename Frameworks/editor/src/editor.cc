@@ -899,7 +899,6 @@ namespace ng
 			}
 			break;
 
-			case kReplace:
 			case kReplaceAll:
 			case kReplaceAllInSelection:
 			{
@@ -911,14 +910,18 @@ namespace ng
 					if(action == kReplaceAll || action == kReplaceAllInSelection)
 						options = options | find::all_matches;
 
-					replace(findEntry->content(), replaceEntry->content(), options, action == kReplaceAllInSelection);
+					replace_all(findEntry->content(), replaceEntry->content(), options, action == kReplaceAllInSelection);
 				}
 			}
 			break;
 
+			case kReplace:
 			case kReplaceAndFind:
 			{
-				perform(kReplace, layout, indentCorrections, scopeAttributes);
+				if(action == kReplace)
+				{
+					/* TODO Implement ‘Replace’ (after find) action */
+				}
 				perform(kFindNext, layout, indentCorrections, scopeAttributes);
 			}
 			break;
@@ -1440,7 +1443,7 @@ namespace ng
 			_selections = res;
 	}
 
-	ranges_t editor_t::replace (std::string const& searchFor, std::string const& replaceWith, find::options_t options, bool searchOnlySelection)
+	ranges_t editor_t::replace_all (std::string const& searchFor, std::string const& replaceWith, find::options_t options, bool searchOnlySelection)
 	{
 		ranges_t res;
 		if(options & find::all_matches)
@@ -1451,9 +1454,6 @@ namespace ng
 				replacements.insert(std::make_pair(pair->first, options & find::regular_expression ? format_string::expand(replaceWith, pair->second) : replaceWith));
 			res = this->replace(replacements, true);
 			_selections = helper.get(false);
-		}
-		else
-		{
 		}
 		return res;
 	}

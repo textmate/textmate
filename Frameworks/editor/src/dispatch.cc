@@ -178,18 +178,18 @@ namespace ng
 		std::string where;
 		bool searchOnlySelection = plist::get_key_path(args, "replaceAllScope", where) && where == "selection";
 
-		if(action == "replaceAndFind")
+		if(action == "replace")
+		{
+			perform(kReplace);
+		}
+		else if(action == "replaceAndFind")
 		{
 			perform(kReplace);
 			find(searchFor, options, searchOnlySelection);
 		}
-		else if(action == "replace")
-		{
-			replace(searchFor, replaceWith, options, searchOnlySelection);
-		}
 		else if(action == "replaceAll")
 		{
-			replace(searchFor, replaceWith, options|find::all_matches, searchOnlySelection);
+			replace_all(searchFor, replaceWith, options|find::all_matches, searchOnlySelection);
 		}
 		else // findNext, findPrevious, and findAll
 		{

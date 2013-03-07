@@ -7,7 +7,9 @@ enum find_operation_t {
 	kFindOperationFind,
 	kFindOperationFindInSelection,
 	kFindOperationReplace,
-	kFindOperationReplaceInSelection,
+	kFindOperationReplaceAndFind,
+	kFindOperationReplaceAll,
+	kFindOperationReplaceAllInSelection,
 };
 
 @protocol OakFindServerProtocol
