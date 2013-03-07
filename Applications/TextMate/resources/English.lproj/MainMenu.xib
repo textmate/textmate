@@ -830,15 +830,6 @@
 												<reference key="NSMixedImage" ref="596846250"/>
 												<int key="NSTag">8</int>
 											</object>
-											<object class="NSMenuItem" id="163656000">
-												<reference key="NSMenu" ref="558062756"/>
-												<string key="NSTitle">Full Words Only</string>
-												<string key="NSKeyEquiv"/>
-												<int key="NSMnemonicLoc">2147483647</int>
-												<reference key="NSOnImage" ref="944637517"/>
-												<reference key="NSMixedImage" ref="596846250"/>
-												<int key="NSTag">1</int>
-											</object>
 											<object class="NSMenuItem" id="14882699">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Ignore Whitespace</string>
@@ -3282,14 +3273,6 @@
 					<object class="IBActionConnection" key="connection">
 						<string key="label">toggleFindOption:</string>
 						<reference key="source" ref="51167417"/>
-						<reference key="destination" ref="163656000"/>
-					</object>
-					<int key="connectionID">532</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">toggleFindOption:</string>
-						<reference key="source" ref="51167417"/>
 						<reference key="destination" ref="14882699"/>
 					</object>
 					<int key="connectionID">533</int>
@@ -4286,7 +4269,6 @@
 							<reference ref="116319340"/>
 							<reference ref="729032971"/>
 							<reference ref="426670312"/>
-							<reference ref="163656000"/>
 							<reference ref="14882699"/>
 							<reference ref="689894056"/>
 							<reference ref="577049944"/>
@@ -5194,11 +5176,6 @@
 						<reference key="parent" ref="558062756"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">529</int>
-						<reference key="object" ref="163656000"/>
-						<reference key="parent" ref="558062756"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">530</int>
 						<reference key="object" ref="14882699"/>
 						<reference key="parent" ref="558062756"/>
@@ -5850,7 +5827,6 @@
 					<string>524.IBPluginDependency</string>
 					<string>525.IBPluginDependency</string>
 					<string>527.IBPluginDependency</string>
-					<string>529.IBPluginDependency</string>
 					<string>530.IBPluginDependency</string>
 					<string>531.IBPluginDependency</string>
 					<string>536.IBPluginDependency</string>
@@ -6090,7 +6066,6 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
