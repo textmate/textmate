@@ -28,22 +28,22 @@
 	CFBundleDocumentTypes = (
 		{	CFBundleTypeName       = "ADA source";
 			CFBundleTypeExtensions = (adb, ads);
-			CFBundleTypeIconFile   = ADA;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Compiled AppleScript";
 			CFBundleTypeExtensions = (scpt);
-			CFBundleTypeIconFile   = AppleScript;
+			CFBundleTypeIconFile   = AS;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "AppleScript source";
 			CFBundleTypeExtensions = (applescript);
-			CFBundleTypeIconFile   = AppleScript;
+			CFBundleTypeIconFile   = AS;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "ActionScript source";
 			CFBundleTypeExtensions = (as);
-			CFBundleTypeIconFile   = ActionScript;
+			CFBundleTypeIconFile   = AS;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "ASP document";
@@ -53,7 +53,7 @@
 		},
 		{	CFBundleTypeName       = "ASP.NET document";
 			CFBundleTypeExtensions = (aspx, ascx, asmx, ashx);
-			CFBundleTypeIconFile   = ASPNET;
+			CFBundleTypeIconFile   = ASP;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "BibTeX bibliography";
@@ -83,7 +83,7 @@
 		},
 		{	CFBundleTypeName       = "Context Free Design Grammar";
 			CFBundleTypeExtensions = (cfdg);
-			CFBundleTypeIconFile   = CFDG;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Comma separated values";
@@ -98,12 +98,12 @@
 		},
 		{	CFBundleTypeName       = "CGI script";
 			CFBundleTypeExtensions = (cgi, fcgi);
-			CFBundleTypeIconFile   = CGI;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Configuration file";
 			CFBundleTypeExtensions = (cfg, conf, config, htaccess);
-			CFBundleTypeIconFile   = Config;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Cascading style sheet";
@@ -118,12 +118,12 @@
 		},
 		{	CFBundleTypeName       = "Document Type Definition";
 			CFBundleTypeExtensions = (dtd);
-			CFBundleTypeIconFile   = DTD;
+			CFBundleTypeIconFile   = XML;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Dylan source";
 			CFBundleTypeExtensions = (dylan);
-			CFBundleTypeIconFile   = Dylan;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Erlang source";
@@ -133,7 +133,7 @@
 		},
 		{	CFBundleTypeName       = "F-Script source";
 			CFBundleTypeExtensions = (fscript);
-			CFBundleTypeIconFile   = "F-Script";
+			CFBundleTypeIconFile   = "Blank";
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Fortran source";
@@ -168,12 +168,12 @@
 		},
 		{	CFBundleTypeName       = "Include file";
 			CFBundleTypeExtensions = (inc);
-			CFBundleTypeIconFile   = Inc;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "iCalendar schedule";
 			CFBundleTypeExtensions = (ics);
-			CFBundleTypeIconFile   = iCal;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "MS Windows initialization file";
@@ -183,7 +183,7 @@
 		},
 		{	CFBundleTypeName       = "Io source";
 			CFBundleTypeExtensions = (io);
-			CFBundleTypeIconFile   = Io;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Java source";
@@ -208,7 +208,7 @@
 		},
 		{	CFBundleTypeName       = "Java Server Page";
 			CFBundleTypeExtensions = (jsp);
-			CFBundleTypeIconFile   = JSP;
+			CFBundleTypeIconFile   = Java;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "JSON file";
@@ -228,12 +228,12 @@
 		},
 		{	CFBundleTypeName       = "Log file";
 			CFBundleTypeExtensions = (log);
-			CFBundleTypeIconFile   = Log;
+			CFBundleTypeIconFile   = Text;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Logo source";
 			CFBundleTypeExtensions = (logo);
-			CFBundleTypeIconFile   = Logo;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Lua source";
@@ -248,22 +248,22 @@
 		},
 		{	CFBundleTypeName       = "Mediawiki document";
 			CFBundleTypeExtensions = (wiki, wikipedia, mediawiki);
-			CFBundleTypeIconFile   = Wiki;
+			CFBundleTypeIconFile   = Text;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "MIPS assembler source";
 			CFBundleTypeExtensions = (s, mips, spim, asm);
-			CFBundleTypeIconFile   = ASM;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Modula-3 source";
 			CFBundleTypeExtensions = (m3, cm3);
-			CFBundleTypeIconFile   = Modula;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "MoinMoin document";
 			CFBundleTypeExtensions = (moinmoin);
-			CFBundleTypeIconFile   = Wiki;
+			CFBundleTypeIconFile   = Text;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Objective-C source";
@@ -278,7 +278,7 @@
 		},
 		{	CFBundleTypeName       = "OCaml source";
 			CFBundleTypeExtensions = (ml, mli, mll, mly);
-			CFBundleTypeIconFile   = OCaml;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Pascal source";
@@ -298,7 +298,7 @@
 		},
 		{	CFBundleTypeName       = "Perl module";
 			CFBundleTypeExtensions = (pm);
-			CFBundleTypeIconFile   = PERL;
+			CFBundleTypeIconFile   = Perl;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "PHP source";
@@ -308,7 +308,7 @@
 		},
 		{	CFBundleTypeName       = "PostScript source";
 			CFBundleTypeExtensions = (ps, eps);
-			CFBundleTypeIconFile   = PostScript;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Property list";
@@ -358,12 +358,12 @@
 		},
 		{	CFBundleTypeName       = "Scheme source";
 			CFBundleTypeExtensions = (scm, sch);
-			CFBundleTypeIconFile   = Scheme;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Setext document";
 			CFBundleTypeExtensions = (ext);
-			CFBundleTypeIconFile   = Blank;
+			CFBundleTypeIconFile   = Text;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Shell script";
@@ -373,7 +373,7 @@
 		},
 		{	CFBundleTypeName       = "Slate source";
 			CFBundleTypeExtensions = (slate);
-			CFBundleTypeIconFile   = Slate;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "SQL source";
@@ -383,7 +383,7 @@
 		},
 		{	CFBundleTypeName       = "Standard ML source";
 			CFBundleTypeExtensions = (sml);
-			CFBundleTypeIconFile   = SML;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Strings document";
@@ -393,7 +393,7 @@
 		},
 		{	CFBundleTypeName       = "Scalable vector graphics";
 			CFBundleTypeExtensions = (svg);
-			CFBundleTypeIconFile   = SVG;
+			CFBundleTypeIconFile   = XML;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "SWIG source";
@@ -403,7 +403,7 @@
 		},
 		{	CFBundleTypeName       = "Tcl source";
 			CFBundleTypeExtensions = (tcl);
-			CFBundleTypeIconFile   = Tcl;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "TeX document";
@@ -420,12 +420,12 @@
 		},
 		{	CFBundleTypeName       = "Textile document";
 			CFBundleTypeExtensions = (textile);
-			CFBundleTypeIconFile   = Textile;
+			CFBundleTypeIconFile   = Text;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "XHTML document";
 			CFBundleTypeExtensions = (xhtml);
-			CFBundleTypeIconFile   = XHTML;
+			CFBundleTypeIconFile   = XML;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "XML document";
@@ -435,7 +435,7 @@
 		},
 		{	CFBundleTypeName       = "XSL stylesheet";
 			CFBundleTypeExtensions = (xsl, xslt);
-			CFBundleTypeIconFile   = XSL;
+			CFBundleTypeIconFile   = XML;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "Electronic business card";
@@ -445,7 +445,7 @@
 		},
 		{	CFBundleTypeName       = "Visual Basic source";
 			CFBundleTypeExtensions = (vb);
-			CFBundleTypeIconFile   = VisualBasic;
+			CFBundleTypeIconFile   = Blank;
 			CFBundleTypeRole       = Editor;
 		},
 		{	CFBundleTypeName       = "YAML document";
