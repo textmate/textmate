@@ -98,16 +98,16 @@ std::string oak_format_bad_relation (char const* lhs, char const* op, char const
   return oak_format("Expected (%s %s %s), found (%s %s %s)", lhs, op, rhs, realLHS.c_str(), realOp, realRHS.c_str());
 }
 
-#define OAK_WARN(msg)                                       oak_warning(msg, __FILE__, __LINE__)
-#define OAK_FAIL(msg)                                       oak_assertion_error(msg, __FILE__, __LINE__)
+#define OAK_WARN(msg)           oak_warning(msg, __FILE__, __LINE__)
+#define OAK_FAIL(msg)           oak_assertion_error(msg, __FILE__, __LINE__)
 
 #define OAK_ASSERT(expr)        if(!(expr))                 oak_assertion_error(oak_format("Assertion failed: %s", #expr), __FILE__, __LINE__)
-#define OAK_ASSERT_LT(lhs, rhs) if(!((lhs) <  (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "<",  #rhs, to_s(lhs), ">=", to_s(rhs)), __FILE__, __LINE__)
-#define OAK_ASSERT_LE(lhs, rhs) if(!((lhs) <= (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "<=", #rhs, to_s(lhs), ">",  to_s(rhs)), __FILE__, __LINE__)
-#define OAK_ASSERT_GT(lhs, rhs) if(!((lhs) >  (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, ">",  #rhs, to_s(lhs), "<=", to_s(rhs)), __FILE__, __LINE__)
-#define OAK_ASSERT_GE(lhs, rhs) if(!((lhs) >= (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, ">=", #rhs, to_s(lhs), "<",  to_s(rhs)), __FILE__, __LINE__)
-#define OAK_ASSERT_EQ(lhs, rhs) if(!((lhs) == (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "==", #rhs, to_s(lhs), "!=", to_s(rhs)), __FILE__, __LINE__)
-#define OAK_ASSERT_NE(lhs, rhs) if(!((lhs) != (rhs)))       oak_assertion_error(oak_format_bad_relation(#lhs, "!=", #rhs, to_s(lhs), "==", to_s(rhs)), __FILE__, __LINE__)
+#define OAK_ASSERT_LT(lhs, rhs) do { decltype(lhs) _lhs = (lhs); decltype(rhs) _rhs = (rhs); if(!(_lhs <  _rhs)) oak_assertion_error(oak_format_bad_relation(#lhs, "<",  #rhs, to_s(_lhs), ">=", to_s(_rhs)), __FILE__, __LINE__); } while(false)
+#define OAK_ASSERT_LE(lhs, rhs) do { decltype(lhs) _lhs = (lhs); decltype(rhs) _rhs = (rhs); if(!(_lhs <= _rhs)) oak_assertion_error(oak_format_bad_relation(#lhs, "<=", #rhs, to_s(_lhs), ">",  to_s(_rhs)), __FILE__, __LINE__); } while(false)
+#define OAK_ASSERT_GT(lhs, rhs) do { decltype(lhs) _lhs = (lhs); decltype(rhs) _rhs = (rhs); if(!(_lhs >  _rhs)) oak_assertion_error(oak_format_bad_relation(#lhs, ">",  #rhs, to_s(_lhs), "<=", to_s(_rhs)), __FILE__, __LINE__); } while(false)
+#define OAK_ASSERT_GE(lhs, rhs) do { decltype(lhs) _lhs = (lhs); decltype(rhs) _rhs = (rhs); if(!(_lhs >= _rhs)) oak_assertion_error(oak_format_bad_relation(#lhs, ">=", #rhs, to_s(_lhs), "<",  to_s(_rhs)), __FILE__, __LINE__); } while(false)
+#define OAK_ASSERT_EQ(lhs, rhs) do { decltype(lhs) _lhs = (lhs); decltype(rhs) _rhs = (rhs); if(!(_lhs == _rhs)) oak_assertion_error(oak_format_bad_relation(#lhs, "==", #rhs, to_s(_lhs), "!=", to_s(_rhs)), __FILE__, __LINE__); } while(false)
+#define OAK_ASSERT_NE(lhs, rhs) do { decltype(lhs) _lhs = (lhs); decltype(rhs) _rhs = (rhs); if(!(_lhs != _rhs)) oak_assertion_error(oak_format_bad_relation(#lhs, "!=", #rhs, to_s(_lhs), "==", to_s(_rhs)), __FILE__, __LINE__); } while(false)
 
 #define OAK_MASSERT(msg, expr)        if(!(expr))           oak_assertion_error(msg, __FILE__, __LINE__)
 #define OAK_MASSERT_LT(msg, lhs, rhs) if(!((lhs) <  (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
