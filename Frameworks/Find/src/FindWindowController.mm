@@ -356,11 +356,6 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
-{
-	return NO;
-}
-
 - (void)menuNeedsUpdate:(NSMenu*)aMenu
 {
 	[aMenu removeAllItems];
