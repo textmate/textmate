@@ -1,7 +1,6 @@
 #import "OFBPathInfoCell.h"
 #import <OakAppKit/NSColor Additions.h>
 #import <OakAppKit/NSImage Additions.h>
-#import <OakAppKit/OakImage.h>
 #import <OakFoundation/OakTimer.h>
 #import <oak/debug.h>
 
