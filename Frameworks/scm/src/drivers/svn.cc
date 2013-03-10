@@ -4,6 +4,7 @@
 #include <text/parse.h>
 #include <text/trim.h>
 #include <text/tokenize.h>
+#include <regexp/format_string.h>
 #include <io/io.h>
 #include <cf/cf.h>
 #include <oak/debug.h>
@@ -70,15 +71,16 @@ static std::map<std::string, std::string> parse_info_output (std::string const& 
 	return res;
 }
 
+static std::string shell_quote (std::string const& str)
+{
+	return format_string::replace(str, ".+", "'${0/'/'\\''/g}'");
+}
+
 static void collect_all_paths (std::string const& svn, std::string const& xsltPath, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(svn, NULL_STR); ASSERT_NE(xsltPath, NULL_STR);
-
-	std::map<std::string, std::string> env = oak::basic_environment();
-	env["PWD"] = dir;
-
-	std::string const cmd = text::format("'%s' status --no-ignore --xml|/usr/bin/xsltproc '%s' -", svn.c_str(), xsltPath.c_str());
-	parse_status_output(entries, io::exec(env, "/bin/sh", "-c", cmd.c_str(), NULL));
+	std::string const cmd = text::format("%s status --no-ignore --xml %s|/usr/bin/xsltproc %s -", shell_quote(svn).c_str(), shell_quote(dir).c_str(), shell_quote(xsltPath).c_str());
+	parse_status_output(entries, io::exec("/bin/sh", "-c", cmd.c_str(), NULL));
 }
 
 namespace scm
@@ -114,10 +116,7 @@ namespace scm
 			if(executable() == NULL_STR)
 				return NULL_STR;
 
-			std::map<std::string, std::string> env = oak::basic_environment();
-			env["PWD"] = wcPath;
-
-			auto info = parse_info_output(io::exec(env, executable(), "info", NULL));
+			auto info = parse_info_output(io::exec(executable(), "info", wcPath.c_str(), NULL));
 			auto urlInfo = info.find("URL");
 			return urlInfo != info.end() ? urlInfo->second : NULL_STR;
 		}
