@@ -164,7 +164,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 			pid_t pid = network::launch_tbz(dest, input, output, error);
 			if(pid != -1)
 			{
-				int fd = open([archive fileSystemRepresentation], O_RDONLY);
+				int fd = open([archive fileSystemRepresentation], O_RDONLY|O_CLOEXEC);
 				if(fd != -1)
 				{
 					char buf[4096];

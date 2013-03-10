@@ -161,7 +161,7 @@ namespace file
 		result_t result;
 		result.error_code = 0;
 
-		int fd = ::open(request.path.c_str(), O_RDONLY);
+		int fd = ::open(request.path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd != -1)
 		{
 			struct stat sbuf;

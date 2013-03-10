@@ -157,7 +157,7 @@ namespace file
 
 			path::intermediate_t dest(request.path);
 
-			int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+			int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 			if(fd == -1)
 				error = text::format("open(\"%s\"): %s", (char const*)dest, strerror(errno));
 			else if(write(fd, request.bytes->get(), request.bytes->size()) != request.bytes->size())

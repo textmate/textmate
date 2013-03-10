@@ -782,7 +782,7 @@ namespace path
 
 	std::string content (std::string const& path)
 	{
-		int fd = open(path.c_str(), O_RDONLY);
+		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd == -1)
 			return NULL_STR;
 
@@ -801,7 +801,7 @@ namespace path
 	{
 		intermediate_t dest(path);
 
-		int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+		int fd = open(dest, O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 		if(fd == -1)
 			return false;
 
@@ -837,7 +837,7 @@ namespace path
 	{
 		std::map<std::string, std::string> res;
 
-		int fd = open(path.c_str(), O_RDONLY);
+		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd != -1)
 		{
 			ssize_t listSize = flistxattr(fd, NULL, 0, 0);
@@ -885,7 +885,7 @@ namespace path
 		if(attributes.empty())
 			return true;
 
-		int fd = open(path.c_str(), O_RDONLY);
+		int fd = open(path.c_str(), O_RDONLY|O_CLOEXEC);
 		if(fd != -1)
 		{
 			res = true;

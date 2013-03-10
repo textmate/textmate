@@ -11,7 +11,7 @@ namespace reader
 
 	async_t::async_t (std::string const& path)
 	{
-		if((fd = open(path.c_str(), O_RDONLY)) != -1)
+		if((fd = open(path.c_str(), O_RDONLY|O_CLOEXEC)) != -1)
 		{
 			fcntl(fd, F_NOCACHE, 1);
 
@@ -75,7 +75,7 @@ namespace reader
 	{
 		offset = 0;
 		mapped_size = 0;
-		if((fd = open(path.c_str(), O_RDONLY)) != -1)
+		if((fd = open(path.c_str(), O_RDONLY|O_CLOEXEC)) != -1)
 		{
 			fcntl(fd, F_NOCACHE, 1);
 
@@ -152,7 +152,7 @@ namespace reader
 
 	open_t::open_t (std::string const& path)
 	{
-		if((fd = open(path.c_str(), O_RDONLY)) != -1)
+		if((fd = open(path.c_str(), O_RDONLY|O_CLOEXEC)) != -1)
 			fcntl(fd, F_NOCACHE, 1);
 	}
 

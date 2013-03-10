@@ -18,6 +18,7 @@ static int create_socket (int port)
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	if(sock != -1)
 	{
+		fcntl(sock, F_SETFD, FD_CLOEXEC);
 		static int const on = 1;
 		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 

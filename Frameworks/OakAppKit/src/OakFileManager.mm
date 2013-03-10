@@ -75,7 +75,7 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 
 - (BOOL)doCreateFile:(NSURL*)fileURL window:(NSWindow*)window
 {
-	int fd = open([[fileURL path] fileSystemRepresentation], O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
+	int fd = open([[fileURL path] fileSystemRepresentation], O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 	if(fd != -1)
 	{
 		close(fd);
