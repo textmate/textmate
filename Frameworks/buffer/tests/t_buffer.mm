@@ -5,35 +5,25 @@
 
 static bundles::item_ptr TestGrammarItem;
 
-static class GrammarFixture
+__attribute__((constructor)) static void setup_fixtures ()
 {
-public:
-	GrammarFixture ()
-	{
-		static std::string TestLanguageGrammar =
-			"{	fileTypes      = ( txt );\n"
-			"	name           = 'Test';\n"
-			"	patterns       = (\n"
-			"    { name = 'foo'; match = 'foo'; },\n"
-			"    { name = 'bar'; match = 'bar'; },\n"
-			"  );\n"
-			"	scopeName      = 'test';\n"
-			"	uuid           = '978BF73C-B36D-490F-AEBF-74EF2C6EA7D1';\n"
-			"}\n";
+	static std::string TestLanguageGrammar =
+		"{	fileTypes      = ( txt );\n"
+		"	name           = 'Test';\n"
+		"	patterns       = (\n"
+		"    { name = 'foo'; match = 'foo'; },\n"
+		"    { name = 'bar'; match = 'bar'; },\n"
+		"  );\n"
+		"	scopeName      = 'test';\n"
+		"	uuid           = '978BF73C-B36D-490F-AEBF-74EF2C6EA7D1';\n"
+		"}\n";
 
-		test::bundle_index_t bundleIndex;
-		TestGrammarItem = bundleIndex.add(bundles::kItemTypeGrammar, TestLanguageGrammar);
-		bundleIndex.commit();
-	}
+	test::bundle_index_t bundleIndex;
+	TestGrammarItem = bundleIndex.add(bundles::kItemTypeGrammar, TestLanguageGrammar);
+	bundleIndex.commit();
 
-} grammar_fixture;
-
-static class AppKitFixture
-{
-public:
-	AppKitFixture () { NSApplicationLoad(); }
-
-} fixture;
+	NSApplicationLoad();
+}
 
 // void test_copy_constructor ()
 // {
