@@ -239,7 +239,7 @@ void buffer_refresh_callback_t::did_replace (size_t, size_t, std::string const&)
 static std::string shell_quote (std::vector<std::string> paths)
 {
 	iterate(it, paths)
-		*it = format_string::replace(*it, ".*", "'${0/'/'\\''/g}'");
+		*it = format_string::replace(*it, ".+", "'${0/'/'\\''/g}'");
 	return text::join(paths, " ");
 }
 
