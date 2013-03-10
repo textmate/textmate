@@ -1,4 +1,4 @@
-TEST_SOURCES = tests/*.cc
+TESTS        = tests/*.cc
 SOURCES      = src/*.{cc,mm}
 EXPORT       = src/*.h
 CP_Resources = resources/*
