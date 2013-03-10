@@ -1,5 +1,4 @@
 #import "OakControl.h"
-#import "objc_ptr.h"
 #import <oak/debug.h>
 
 struct layer_t
@@ -49,11 +48,11 @@ struct layer_t
 	SEL action;
 	SEL menuAction;
 
-	objc_ptr<NSColor*> color;
-	objc_ptr<NSString*> text;
-	objc_ptr<NSImage*> image;
-	objc_ptr<NSString*> tool_tip;
-	objc_ptr<NSView*> view;
+	NSColor* color;
+	NSString* text;
+	NSImage* image;
+	NSString* tool_tip;
+	NSView* view;
 	enum text_options_t { none, shadow };
 	uint32_t text_options;
 	enum image_options_t { no_repeat, stretch, /* repeat_x, repeat_y, repeat_xy */ };

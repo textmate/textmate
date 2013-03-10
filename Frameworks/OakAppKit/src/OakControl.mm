@@ -103,14 +103,14 @@ OAK_DEBUG_VAR(OakControl);
 			BOOL found = NO;
 			iterate(newLayer, aLayout)
 			{
-				if(newLayer->view.get() == oldLayer->view.get())
+				if(newLayer->view == oldLayer->view)
 				{
 					found = YES;
 					break;
 				}
 			}
 			if(!found)
-				[oldLayer->view.get() removeFromSuperview];
+				[oldLayer->view removeFromSuperview];
 		}
 	}
 
@@ -121,7 +121,7 @@ OAK_DEBUG_VAR(OakControl);
 	{
 		if(layer->color || layer->image && layer->requisite == layer_t::no_requisite)
 			coveredRect = NSUnionRect(coveredRect, layer->rect);
-		if(NSView* view = layer->view.get())
+		if(NSView* view = layer->view)
 		{
 			if([view superview] != self)
 				[view removeFromSuperview];
@@ -214,7 +214,7 @@ OAK_DEBUG_VAR(OakControl);
 {
 	if(aLayer.color)
 	{
-		[aLayer.color.get() set];
+		[aLayer.color set];
 		NSRectFill(aLayer.rect);
 	}
 
@@ -222,12 +222,12 @@ OAK_DEBUG_VAR(OakControl);
 	{
 		if(aLayer.image_options & layer_t::stretch)
 		{
-			[aLayer.image.get() drawInRect:aLayer.rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+			[aLayer.image drawInRect:aLayer.rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
 		}
 		else
 		{
 			NSPoint origin = NSMakePoint(aLayer.rect.origin.x + aLayer.content_offset.x, aLayer.rect.origin.y + aLayer.content_offset.y);
-			[aLayer.image.get() drawAtPoint:origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[aLayer.image drawAtPoint:origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 		}
 	}
 
@@ -402,7 +402,7 @@ struct rect_cmp_t
 			trackedLayers[it->rect].push_back(*it);
 
 		if(it->tool_tip)
-			[self addToolTipRect:it->rect owner:it->tool_tip.get() userData:NULL];
+			[self addToolTipRect:it->rect owner:it->tool_tip userData:NULL];
 	}
 
 	iterate(it, trackedLayers)
