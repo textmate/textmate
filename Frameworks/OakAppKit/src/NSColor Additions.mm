@@ -37,14 +37,4 @@
 	CGColorSpaceRelease(colorSpace);
 	return (CGColorRef)[(id)res autorelease];
 }
-
-- (BOOL)isDark
-{
-	uint32_t r(lroundf(255 * [self redComponent]));
-	uint32_t g(lroundf(255 * [self greenComponent]));
-	uint32_t b(lroundf(255 * [self blueComponent])); 
-
-	uint32_t intensity = r*r*30 + g*g*59 + b*b*11;
-	return intensity < 50*255*255;
-}
 @end
