@@ -47,11 +47,7 @@ static void parse_status_output (scm::status_map_t& entries, std::string const& 
 static void collect_all_paths (std::string const& hg, scm::status_map_t& entries, std::string const& dir)
 {
 	ASSERT_NE(hg, NULL_STR);
-
-	std::map<std::string, std::string> env = oak::basic_environment();
-	env["PWD"] = dir;
-
-	parse_status_output(entries, io::exec(env, hg, "status", "--all", "-0", NULL));
+	parse_status_output(entries, io::exec(hg, "status", "--cwd", dir.c_str(), "--all", "-0", NULL));
 }
 
 namespace scm
@@ -67,10 +63,7 @@ namespace scm
 			if(executable() == NULL_STR)
 				return NULL_STR;
 
-			std::map<std::string, std::string> env = oak::basic_environment();
-			env["PWD"] = wcPath;
-
-			std::string branchName = io::exec(env, executable(), "branch", NULL);
+			std::string branchName = io::exec(executable(), "branch", "--cwd", wcPath.c_str(), NULL);
 			return branchName.substr(0, branchName.find("\n"));
 		}
 
