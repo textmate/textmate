@@ -19,7 +19,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 @end
 
 @interface OakSubmenuController ()
-@property (nonatomic, retain) OakProxyMenuItem* proxyMenuItem;
+@property (nonatomic) OakProxyMenuItem* proxyMenuItem;
 @end
 
 @implementation OakSubmenuController
@@ -33,7 +33,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 {
 	[aMenu removeAllItems];
 	if(id delegate = [NSApp targetForAction:aSelector])
-			[delegate performSelector:aSelector withObject:aMenu];
+			[NSApp sendAction:aSelector to:delegate from:aMenu];
 	else	[aMenu addItemWithTitle:@"no items" action:NULL keyEquivalent:@""];
 	D(DBF_OakSubmenuController, bug("%s\n", [[aMenu description] UTF8String]););
 }
@@ -54,7 +54,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 	if(eventString < "@0" || "@9" < eventString)
 		return NO;
 
-	NSMenu* dummy = [[NSMenu new] autorelease];
+	NSMenu* dummy = [NSMenu new];
 	[self updateMenu:dummy withSelector:@selector(updateGoToMenu:)];
 	for(NSMenuItem* item in [dummy itemArray])
 	{
@@ -62,7 +62,7 @@ OAK_DEBUG_VAR(OakSubmenuController);
 		{
 			D(DBF_OakSubmenuController, bug("%s%ld\n", sel_getName(item.action), item.tag););
 			if(!self.proxyMenuItem)
-				self.proxyMenuItem = [[OakProxyMenuItem new] autorelease];
+				self.proxyMenuItem = [OakProxyMenuItem new];
 
 			self.proxyMenuItem.action            = item.action;
 			self.proxyMenuItem.target            = item.target;

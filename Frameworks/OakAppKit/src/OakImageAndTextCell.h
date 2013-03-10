@@ -6,10 +6,7 @@ enum {
 };
 
 PUBLIC @interface OakImageAndTextCell : NSTextFieldCell
-{
-	NSImage* image;
-}
-@property (nonatomic, retain) NSImage* image;
+@property (nonatomic) NSImage* image;
 - (NSRect)imageFrameWithFrame:(NSRect)aRect inControlView:(NSView*)aView;
 - (NSRect)textFrameWithFrame:(NSRect)aRect inControlView:(NSView*)aView;
 @end

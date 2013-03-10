@@ -13,18 +13,20 @@ static std::vector< std::pair<NSString*, NSURL*> > ApplicationURLsForPaths (NSSe
 
 	for(NSString* path in paths)
 	{
-		NSURL* fileURL = [NSURL fileURLWithPath:path];
-		NSArray* applicationURLs = [(NSArray*)LSCopyApplicationURLsForURL((CFURLRef)fileURL, kLSRolesAll) autorelease];
-		NSURL* defaultApplicationURL = nil;
-		if(noErr == LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, (CFURLRef*)&defaultApplicationURL))
+		CFURLRef fileURL = (CFURLRef)CFBridgingRetain([NSURL fileURLWithPath:path]);
+		NSArray* applicationURLs = (NSArray*)CFBridgingRelease(LSCopyApplicationURLsForURL(fileURL, kLSRolesAll));
+		CFURLRef defaultApplicationURL = nil;
+		if(noErr == LSGetApplicationForURL(fileURL, kLSRolesAll, NULL, &defaultApplicationURL))
 		{
-			if(![applicationURLs containsObject:defaultApplicationURL])
-				applicationURLs = [applicationURLs arrayByAddingObject:defaultApplicationURL];
-			[defaultApplicationURLs addObject:defaultApplicationURL];
+			NSURL* defaultAppURL = (NSURL*)CFBridgingRelease(defaultApplicationURL);
+			if(![applicationURLs containsObject:defaultAppURL])
+				applicationURLs = [applicationURLs arrayByAddingObject:defaultAppURL];
+			[defaultApplicationURLs addObject:defaultAppURL];
 		}
 		if(allApplicationURLs.count == 0)
 				[allApplicationURLs setSet:[NSSet setWithArray:applicationURLs]];
 		else	[allApplicationURLs intersectSet:[NSSet setWithArray:applicationURLs]];
+		CFRelease(fileURL);
 	}
 
 	if(allApplicationURLs.count == 0)
@@ -59,26 +61,16 @@ static std::vector< std::pair<NSString*, NSURL*> > ApplicationURLsForPaths (NSSe
 	return res;
 }
 
-static OakOpenWithMenu* SharedInstance;
-
 @implementation OakOpenWithMenu
 + (id)sharedInstance
 {
-	return SharedInstance ?: [[self new] autorelease];
-}
-
-- (id)init
-{
-	if(SharedInstance)
-			[self release];
-	else	self = SharedInstance = [[super init] retain];
-	return SharedInstance;
+	static OakOpenWithMenu* instance = [OakOpenWithMenu new];
+	return instance;
 }
 
 + (void)addOpenWithMenuForPaths:(NSSet*)paths toMenuItem:(NSMenuItem*)item
 {
-	NSMenu* submenu = [[NSMenu new] autorelease];
-	[submenu setAutoenablesItems:NO];
+	NSMenu* submenu = [NSMenu new];
 	[submenu setDelegate:[OakOpenWithMenu sharedInstance]];
 
 	[item setRepresentedObject:paths];
@@ -95,7 +87,7 @@ static OakOpenWithMenu* SharedInstance;
 
 	if(appURLs.empty())
 	{
-		[[menu addItemWithTitle:@"No Suitable Applications Found" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
+		[menu addItemWithTitle:@"No Suitable Applications Found" action:@selector(nop:) keyEquivalent:@""];
 		return;
 	}
 
@@ -120,7 +112,7 @@ static OakOpenWithMenu* SharedInstance;
 
 - (void)openWith:(id)sender
 {
-	NSURL* applicationURL   = [sender representedObject];
+	NSURL* applicationURL = [sender representedObject];
 	NSSet* filePaths = [[[sender menu] parentMenuItem] representedObject];
 
 	NSMutableArray* fileURLs = [NSMutableArray arrayWithCapacity:filePaths.count];

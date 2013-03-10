@@ -1,14 +1,9 @@
 #import <oak/misc.h>
 
 PUBLIC @interface OakImage : NSImage
-{
-	NSImage* base;
-	NSImage* badge;
-	CGRectEdge edge;
-}
-@property (nonatomic, retain) NSImage* base;
-@property (nonatomic, retain) NSImage* badge;
-@property (nonatomic, assign) CGRectEdge edge;
+@property (nonatomic) NSImage* base;
+@property (nonatomic) NSImage* badge;
+@property (nonatomic) CGRectEdge edge;
 
 + (OakImage*)imageWithBase:(NSImage*)imageBase;
 + (OakImage*)imageWithBase:(NSImage*)imageBase badge:(NSImage*)badgeImage;

@@ -51,7 +51,7 @@ static NSImage* IconBadgeForAlias ()
 	IconRef iconRef;
 	if(GetIconRef(kOnSystemDisk, kSystemIconsCreator, kAliasBadgeIcon, &iconRef) == noErr)
 	{
-		NSImage* badge = [[[NSImage alloc] initWithIconRef:iconRef] autorelease];
+		NSImage* badge = [[NSImage alloc] initWithIconRef:iconRef];
 		ReleaseIconRef(iconRef);
 		return badge;
 	}
@@ -82,34 +82,27 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 // ===============================
 
 @interface OakFileIconImageRep : NSImageRep
-@property (nonatomic, retain)               NSString*         path;
+@property (nonatomic)                       NSString*         path;
 @property (nonatomic)                       BOOL              exists;
 @property (nonatomic, getter = isDirectory) BOOL              directory;
 @property (nonatomic, getter = isAlias)     BOOL              alias;
 @property (nonatomic)                       scm::status::type scmStatus;
 @property (nonatomic, getter = isModified)  BOOL              modified;
-@property (nonatomic, retain)               NSArray*          imageStack;
+@property (nonatomic)                       NSArray*          imageStack;
 @end
 
 @implementation OakFileIconImageRep
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakFileIconImageRep* copy = [super copyWithZone:zone];
-	copy->_path       = [_path retain];
+	copy->_path       = _path;
 	copy->_exists     = _exists;
 	copy->_directory  = _directory;
 	copy->_alias      = _alias;
 	copy->_scmStatus  = _scmStatus;
 	copy->_modified   = _modified;
-	copy->_imageStack = [_imageStack retain];
+	copy->_imageStack = _imageStack;
 	return copy;
-}
-
-- (void)dealloc
-{
-	self.path       = nil;
-	self.imageStack = nil;
-	[super dealloc];
 }
 
 - (NSArray*)imageStack
@@ -117,7 +110,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	if(!_imageStack)
 	{
 		NSMutableArray* res = [NSMutableArray array];
-		_imageStack = [res retain];
+		_imageStack = res;
 
 		if(_path && _exists)
 		{
@@ -165,7 +158,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	NSImage* buffer = nil;
 	if(self.isModified)
 	{
-		buffer = [[[NSImage alloc] initWithSize:[self size]] autorelease];
+		buffer = [[NSImage alloc] initWithSize:[self size]];
 		[buffer lockFocus];
 	}
 
@@ -191,7 +184,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 // ====================
 
 @interface OakFileIconImage ()
-@property (nonatomic, retain) OakFileIconImageRep* fileIconImageRep;
+@property (nonatomic) OakFileIconImageRep* fileIconImageRep;
 @end
 
 @implementation OakFileIconImage
@@ -241,14 +234,8 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakFileIconImage* copy = [super copyWithZone:zone];
-	copy->_fileIconImageRep = [_fileIconImageRep retain];
+	copy->_fileIconImageRep = _fileIconImageRep;
 	return copy;
-}
-
-- (void)dealloc
-{
-	self.fileIconImageRep = nil;
-	[super dealloc];
 }
 
 - (NSString*)path              { return _fileIconImageRep.path;        }
@@ -318,7 +305,7 @@ static NSImage* BadgeForSCMStatus (scm::status::type scmStatus)
 	}
 }
 
-+ (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag size:(NSSize)aSize { return [[[self alloc] initWithWithPath:aPath isModified:flag size:aSize] autorelease]; }
++ (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag size:(NSSize)aSize { return [[self alloc] initWithWithPath:aPath isModified:flag size:aSize]; }
 + (id)fileIconImageWithPath:(NSString*)aPath isModified:(BOOL)flag                    { return [self fileIconImageWithPath:aPath isModified:flag size:NSMakeSize(16, 16)]; }
 + (id)fileIconImageWithPath:(NSString*)aPath size:(NSSize)aSize                       { return [self fileIconImageWithPath:aPath isModified:NO size:aSize]; }
 @end

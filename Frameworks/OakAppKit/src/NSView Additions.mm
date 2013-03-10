@@ -3,7 +3,7 @@
 @implementation NSView (PopupAddition)
 - (void)showMenu:(NSMenu*)menu inRect:(NSRect)rect withSelectedIndex:(NSInteger)index font:(NSFont*)font popup:(BOOL)isPopup
 {
-	NSPopUpButtonCell* cell = [[[NSPopUpButtonCell alloc] init] autorelease];
+	NSPopUpButtonCell* cell = [NSPopUpButtonCell new];
 	[cell setPullsDown:!isPopup];
 	if(!isPopup)
 		[menu insertItemWithTitle:@"dummy title item" action:NULL keyEquivalent:@"" atIndex:0];

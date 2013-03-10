@@ -1,4 +1,4 @@
-#include <file/encoding.h>
+#import <file/encoding.h>
 #import <oak/misc.h>
 
 PUBLIC @interface OakSavePanel : NSObject

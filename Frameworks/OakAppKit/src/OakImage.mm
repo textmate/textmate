@@ -5,9 +5,7 @@
 // ===============================
 
 @interface OakCustomImageRep : NSImageRep
-{
-	OakImage* image;
-}
+@property (nonatomic) OakImage* image;
 - (id)initWithImage:(OakImage*)anImage;
 @end
 
@@ -16,8 +14,8 @@
 {
 	if((self = [super init]))
 	{
-		self.size = anImage.size;
-		image = anImage;
+		self.size  = anImage.size;
+		self.image = anImage;
 	}
 	return self;
 }
@@ -25,25 +23,20 @@
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakCustomImageRep* copy = [super copyWithZone:zone];
-	copy->image = image;
+	copy.image = self.image;
 	return copy;
-}
-
-- (void)dealloc
-{
-	[super dealloc];
 }
 
 - (BOOL)draw
 {
-	NSSize imageSize = image.size;
-	NSSize badgeSize = image.badge.size;
+	NSSize imageSize = self.image.size;
+	NSSize badgeSize = self.image.badge.size;
 
-	CGFloat x = image.edge == CGRectMinXEdge || image.edge == CGRectMaxYEdge ? 0 : imageSize.width  - badgeSize.width;
-	CGFloat y = image.edge == CGRectMinXEdge || image.edge == CGRectMinYEdge ? 0 : imageSize.height - badgeSize.height;
+	CGFloat x = self.image.edge == CGRectMinXEdge || self.image.edge == CGRectMaxYEdge ? 0 : imageSize.width  - badgeSize.width;
+	CGFloat y = self.image.edge == CGRectMinXEdge || self.image.edge == CGRectMinYEdge ? 0 : imageSize.height - badgeSize.height;
 
-	[image.base drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1];
-	[image.badge drawAtPoint:NSMakePoint(x, y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
+	[self.image.base drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1];
+	[self.image.badge drawAtPoint:NSMakePoint(x, y) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
 	return YES;
 }
 @end
@@ -53,8 +46,6 @@
 // ============
 
 @implementation OakImage
-@synthesize base, badge, edge;
-
 + (OakImage*)imageWithBase:(NSImage*)imageBase
 {
 	return [self imageWithBase:imageBase badge:nil edge:CGRectMinXEdge];
@@ -67,7 +58,7 @@
 
 + (OakImage*)imageWithBase:(NSImage*)imageBase badge:(NSImage*)badgeImage edge:(CGRectEdge)badgeEdge
 {
-	OakImage* res = [[[self alloc] initWithSize:[imageBase size]] autorelease];
+	OakImage* res = [[self alloc] initWithSize:[imageBase size]];
 	res.base  = imageBase;
 	res.badge = badgeImage;
 	res.edge  = badgeEdge;
@@ -82,7 +73,7 @@
 - (id)initWithSize:(NSSize)aSize
 {
 	if((self = [super initWithSize:aSize]))
-		[self addRepresentation:[[[OakCustomImageRep alloc] initWithImage:self] autorelease]];
+		[self addRepresentation:[[OakCustomImageRep alloc] initWithImage:self]];
 	return self;
 }
 
@@ -91,12 +82,5 @@
 	for(NSImageRep* imageRep in [self representations])
 		[imageRep setSize:aSize];
 	[super setSize:aSize];
-}
-
-- (void)dealloc
-{
-	[base release];
-	[badge release];
-	[super dealloc];
 }
 @end

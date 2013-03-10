@@ -1,8 +1,8 @@
 #import "OakGradientView.h"
 
 @interface OakGradientView ()
-@property (nonatomic, retain) NSGradient* activeGradient;
-@property (nonatomic, retain) NSGradient* inactiveGradient;
+@property (nonatomic) NSGradient* activeGradient;
+@property (nonatomic) NSGradient* inactiveGradient;
 @property (nonatomic) BOOL renderInactive;
 @end
 
@@ -20,7 +20,6 @@
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 - (void)viewWillMoveToWindow:(NSWindow*)newWindow

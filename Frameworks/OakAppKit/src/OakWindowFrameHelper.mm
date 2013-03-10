@@ -4,19 +4,22 @@
 OAK_DEBUG_VAR(WindowFrameHelper);
 
 @interface OakWindowFrameHelper ()
+{
+	OBJC_WATCH_LEAKS(OakWindowFrameHelper);
+	Class windowDelegateClass;
+}
 - (id)initWithWindow:(NSWindow*)aWindow;
 - (void)placeAndSizeWindow:(NSWindow*)aWindow;
 - (void)snapshotWindowFrame;
-@property (nonatomic, retain) NSWindow* window;
-@property (nonatomic, retain) NSString* autosaveName;
+@property (nonatomic) NSWindow* window;
+@property (nonatomic) NSString* autosaveName;
+@property (nonatomic) OakWindowFrameHelper* retainedSelf;
 @end
 
 @implementation OakWindowFrameHelper
-@synthesize window, autosaveName;
-
 + (OakWindowFrameHelper*)windowFrameHelperWithWindow:(NSWindow*)aWindow
 {
-	return [[[self alloc] initWithWindow:aWindow] autorelease];
+	return [[self alloc] initWithWindow:aWindow];
 }
 
 - (id)initWithWindow:(NSWindow*)aWindow
@@ -26,7 +29,7 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 		windowDelegateClass = [[aWindow delegate] class];
 		self.autosaveName   = [NSString stringWithFormat:@"%@WindowFrame", NSStringFromClass(windowDelegateClass)];
 
-		D(DBF_WindowFrameHelper, bug("Auto-save name: %s\n", [autosaveName UTF8String]););
+		D(DBF_WindowFrameHelper, bug("Auto-save name: %s\n", [self.autosaveName UTF8String]););
 
 		if([[aWindow delegate] isKindOfClass:[NSWindowController class]])
 			[(NSWindowController*)[aWindow delegate] setShouldCascadeWindows:NO];
@@ -37,35 +40,26 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 	return self;
 }
 
-- (void)dealloc
-{
-	self.window       = nil;
-	self.autosaveName = nil;
-	[super dealloc];
-}
-
 - (void)setWindow:(NSWindow*)newWindow
 {
-	NSWindow* oldWindow = window;
-	if(oldWindow == newWindow)
+	if(_window == newWindow)
 		return;
 
-	if(window = [newWindow retain])
+	if(_window)
 	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidMoveOrResize:) name:NSWindowDidMoveNotification object:window];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidMoveOrResize:) name:NSWindowDidResizeNotification object:window];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:window];
-		[self retain]; // as long as we are observing the window, we want to be retained
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidMoveNotification object:_window];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResizeNotification object:_window];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:_window];
 	}
 
-	if(oldWindow)
+	if(_window = newWindow)
 	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidMoveNotification object:oldWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResizeNotification object:oldWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:oldWindow];
-		[oldWindow release];
-		[self release];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidMoveOrResize:) name:NSWindowDidMoveNotification object:_window];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidMoveOrResize:) name:NSWindowDidResizeNotification object:_window];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowWillClose:) name:NSWindowWillCloseNotification object:_window];
 	}
+
+	self.retainedSelf = _window ? self : nil;
 }
 
 - (void)windowDidMoveOrResize:(NSNotification*)aNotification
@@ -94,8 +88,8 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 
 - (void)snapshotWindowFrame
 {
-	if((([window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask))
-		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame:window]) forKey:self.autosaveName];
+	if((([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask))
+		[[NSUserDefaults standardUserDefaults] setObject:NSStringFromRect([self windowFrame:self.window]) forKey:self.autosaveName];
 }
 
 - (BOOL)ignoreWindow:(NSWindow*)aWindow

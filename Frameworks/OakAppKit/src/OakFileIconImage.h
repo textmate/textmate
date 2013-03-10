@@ -2,7 +2,7 @@
 #import <scm/status.h>
 
 PUBLIC @interface OakFileIconImage : NSImage
-@property (nonatomic, retain)               NSString*         path;
+@property (nonatomic)                       NSString*         path;
 @property (nonatomic)                       BOOL              exists;
 @property (nonatomic, getter = isDirectory) BOOL              directory;
 @property (nonatomic, getter = isAlias)     BOOL              alias;

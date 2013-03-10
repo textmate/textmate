@@ -5,13 +5,14 @@ static const CGFloat SwatchMargin    = 4;
 static const CGFloat LabelNameHeight = 15;
 
 @interface OakFinderLabelChooser ()
-@property (nonatomic, assign) NSInteger highlightedIndex;
+{
+	OBJC_WATCH_LEAKS(OakFinderLabelChooser);
+}
+@property (nonatomic) NSMutableArray* labelNames;
+@property (nonatomic) NSInteger highlightedIndex;
 @end
 
 @implementation OakFinderLabelChooser
-@synthesize selectedIndex, highlightedIndex;
-@synthesize enabled, target, action;
-
 // ==================
 // = Setup/Teardown =
 // ==================
@@ -20,16 +21,10 @@ static const CGFloat LabelNameHeight = 15;
 {
 	if(self = [super initWithFrame:rect])
 	{
-		enabled          = YES;
-		highlightedIndex = -1;
+		self.enabled          = YES;
+		self.highlightedIndex = -1;
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	[labelNames release];
-	[super dealloc];
 }
 
 // =============
@@ -38,38 +33,36 @@ static const CGFloat LabelNameHeight = 15;
 
 - (void)setSelectedIndex:(NSInteger)index
 {
-	selectedIndex = index;
+	_selectedIndex = index;
 	[self setNeedsDisplay:YES];
 }
 
 - (void)setHighlightedIndex:(NSInteger)index
 {
-	highlightedIndex = index;
+	_highlightedIndex = index;
 	[self setNeedsDisplay:YES];
 }
 
 - (NSArray*)labelNames
 {
 	// GetLabel is deprecated and fails for non-MacRoman, but there is no replacement: <rdar://4772578>
-	if(!labelNames)
+	if(!_labelNames)
 	{
 		NSMutableDictionary* customLabels = [NSMutableDictionary dictionary];
 		for(NSString* path in [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask, YES) reverseObjectEnumerator])
 		{
-			path = [path stringByAppendingPathComponent:@"Preferences/com.apple.Labels.plist"];
-			if(NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:path])
+			if(NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Preferences/com.apple.Labels.plist"]])
 				[customLabels addEntriesFromDictionary:dict];
 		}
 
-		labelNames = [[NSMutableArray alloc] initWithObjects:@"None", @"Gray", @"Green", @"Purple", @"Blue", @"Yellow", @"Red", @"Orange", nil];
-		for(NSUInteger i = 1; i <= labelNames.count; ++i)
+		_labelNames = [[NSMutableArray alloc] initWithObjects:@"None", @"Gray", @"Green", @"Purple", @"Blue", @"Yellow", @"Red", @"Orange", nil];
+		for(NSUInteger i = 1; i <= self.labelNames.count; ++i)
 		{
 			if(NSString* label = [customLabels objectForKey:[NSString stringWithFormat:@"Label_Name_%lu", i]])
-				[labelNames replaceObjectAtIndex:i withObject:label];
+				[_labelNames replaceObjectAtIndex:i withObject:label];
 		}
 	}
-
-	return labelNames;
+	return _labelNames;
 }
 
 // ===========
@@ -78,8 +71,8 @@ static const CGFloat LabelNameHeight = 15;
 
 - (NSRect)rectForSwatchAtIndex:(NSInteger)index
 {
-	static const int LabelIndexMap[] = {0, 6, 7, 5, 2, 4, 3, 1};
-	index = std::distance(LabelIndexMap, std::find(&LabelIndexMap[0], &LabelIndexMap[0] + (sizeof(LabelIndexMap) / sizeof(LabelIndexMap[0])), index));
+	static int const LabelIndexMap[] = { 0, 6, 7, 5, 2, 4, 3, 1 };
+	index = std::distance(std::begin(LabelIndexMap), std::find(std::begin(LabelIndexMap), std::end(LabelIndexMap), index));
 	return (index < 8) ? NSMakeRect(22 + index*(SwatchDiameter + SwatchMargin*2), LabelNameHeight + 5, SwatchDiameter, SwatchDiameter) : NSZeroRect;
 }
 
@@ -87,25 +80,25 @@ static const CGFloat LabelNameHeight = 15;
 {
 	static struct swatch_t { struct { CGFloat red, green, blue; } from, to; } const swatches[] =
 	{
-		{{   0,   0,   0}, {   0,   0,   0}},
-		{{ 205, 205, 206}, { 169, 169, 169}}, // Gray
-		{{ 212, 233, 151}, { 180, 214,  71}}, // Green
-		{{ 224, 190, 234}, { 192, 142, 217}}, // Purple
-		{{ 167, 208, 255}, {  90, 162, 255}}, // Blue
-		{{ 249, 242, 151}, { 239, 219,  71}}, // Yellow
-		{{ 252, 162, 154}, { 251, 100,  91}}, // Red
-		{{ 249, 206, 143}, { 246, 170,  68}}, // Orange
+		{ {   0,   0,   0}, {   0,   0,   0} },
+		{ { 205, 205, 206}, { 169, 169, 169} }, // Gray
+		{ { 212, 233, 151}, { 180, 214,  71} }, // Green
+		{ { 224, 190, 234}, { 192, 142, 217} }, // Purple
+		{ { 167, 208, 255}, {  90, 162, 255} }, // Blue
+		{ { 249, 242, 151}, { 239, 219,  71} }, // Yellow
+		{ { 252, 162, 154}, { 251, 100,  91} }, // Red
+		{ { 249, 206, 143}, { 246, 170,  68} }, // Orange
 	};
 
-	for(NSInteger i = 0; i < 8; i++)
+	for(NSInteger i = 0; i < 8; ++i)
 	{
 		NSRect swatchRect = [self rectForSwatchAtIndex:i];
 
-		if((i == highlightedIndex || (i == selectedIndex && selectedIndex != 0)) && enabled)
+		if((i == self.highlightedIndex || (i == self.selectedIndex && self.selectedIndex != 0)) && self.enabled)
 		{
 			NSRect outerRect = NSInsetRect(swatchRect, -SwatchMargin, -SwatchMargin);
-			NSBezierPath *path = [NSBezierPath bezierPathWithRoundedRect:outerRect xRadius:2 yRadius:2];
-			if(i == highlightedIndex)
+			NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:outerRect xRadius:2 yRadius:2];
+			if(i == self.highlightedIndex)
 			{
 				[[NSColor colorWithCalibratedWhite:0.8 alpha:1] set];
 				[path fill];
@@ -118,11 +111,11 @@ static const CGFloat LabelNameHeight = 15;
 		{
 			[NSGraphicsContext saveGraphicsState];
 
-			if(enabled)
+			if(self.enabled)
 			{
-				NSShadow* shadow = [[[NSShadow alloc] init] autorelease];
+				NSShadow* shadow = [NSShadow new];
 				[shadow setShadowColor:[NSColor colorWithCalibratedWhite:0 alpha:0.75]];
-				[shadow setShadowOffset:NSMakeSize(0,-1)];
+				[shadow setShadowOffset:NSMakeSize(0, -1)];
 				[shadow setShadowBlurRadius:2];
 				[shadow set];
 			}
@@ -133,19 +126,19 @@ static const CGFloat LabelNameHeight = 15;
 			swatch_t const& swatch = swatches[i];
 			NSColor* startColor = [NSColor colorWithCalibratedRed:swatch.from.red/255.0 green:swatch.from.green/255.0 blue:swatch.from.blue/255.0 alpha:1];
 			NSColor* endColor   = [NSColor colorWithCalibratedRed:swatch.to.red/255.0 green:swatch.to.green/255.0 blue:swatch.to.blue/255.0 alpha:1];
-			if(!enabled)
+			if(!self.enabled)
 			{
 				startColor = [startColor blendedColorWithFraction:0.3 ofColor:[NSColor grayColor]];
 				endColor   = [startColor blendedColorWithFraction:0.5 ofColor:[NSColor grayColor]];
 			}
-			NSGradient *gradient = [[[NSGradient alloc] initWithStartingColor:startColor endingColor:endColor] autorelease];
+			NSGradient* gradient = [[NSGradient alloc] initWithStartingColor:startColor endingColor:endColor];
 			[gradient drawInRect:swatchRect angle:-90];
 
 			[NSGraphicsContext restoreGraphicsState];
 		}
 		else
 		{
-			if(enabled)
+			if(self.enabled)
 					[[NSColor colorWithCalibratedWhite:0.4 alpha:1] set];
 			else	[[NSColor colorWithCalibratedWhite:0.7 alpha:1] set];
 
@@ -165,16 +158,16 @@ static const CGFloat LabelNameHeight = 15;
 		}
 	}
 
-	if(highlightedIndex != -1)
+	if(self.highlightedIndex != -1)
 	{
-		NSFont* font   = [[NSFontManager sharedFontManager] convertFont:[NSFont menuFontOfSize:12] toHaveTrait:NSBoldFontMask];
-		NSString* name = [[self labelNames] objectAtIndex:highlightedIndex];
-		NSMutableParagraphStyle *style = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+		NSMutableParagraphStyle* style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[style setAlignment:NSCenterTextAlignment];
-		NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName,
-																									 [NSColor grayColor], NSForegroundColorAttributeName,
-																									 style, NSParagraphStyleAttributeName,
-																									 nil];
+		NSDictionary* attributes = @{
+			NSFontAttributeName            : [[NSFontManager sharedFontManager] convertFont:[NSFont menuFontOfSize:12] toHaveTrait:NSBoldFontMask],
+			NSForegroundColorAttributeName : [NSColor grayColor],
+			NSParagraphStyleAttributeName  : style,
+		};
+		NSString* name = [[self labelNames] objectAtIndex:self.highlightedIndex];
 		[[NSString stringWithFormat:@"“%@”", name] drawInRect:NSMakeRect(0, 0, [self bounds].size.width, LabelNameHeight) withAttributes:attributes];
 	}
 }
@@ -185,7 +178,7 @@ static const CGFloat LabelNameHeight = 15;
 
 - (void)mouseDown:(NSEvent*)theEvent
 {
-	if(!enabled)
+	if(!self.enabled)
 		return;
 
 	NSPoint localPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
@@ -214,10 +207,10 @@ static const CGFloat LabelNameHeight = 15;
 
 	for(NSInteger i = 0; i < 8; i++)
 	{
-		NSTrackingArea* trackingArea = [[[NSTrackingArea alloc] initWithRect:NSInsetRect([self rectForSwatchAtIndex:i], -SwatchMargin, -SwatchMargin)
-                                                                   options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow
-                                                                     owner:self
-                                                                  userInfo:@{ @"index" : @(i) }] autorelease];
+		NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:NSInsetRect([self rectForSwatchAtIndex:i], -SwatchMargin, -SwatchMargin)
+                                                                  options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow
+                                                                    owner:self
+                                                                 userInfo:@{ @"index" : @(i) }];
 		[self addTrackingArea:trackingArea];
 	}
 }

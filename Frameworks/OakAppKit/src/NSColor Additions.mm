@@ -21,7 +21,7 @@
 {
 	if([self respondsToSelector:@selector(colorWithCGColor:)])
 		return [self colorWithCGColor:aColor];
-	return [NSColor colorWithColorSpace:[[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] autorelease] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
+	return [NSColor colorWithColorSpace:[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
 }
 
 - (CGColorRef)tmCGColor
@@ -35,6 +35,7 @@
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	CGColorRef res = CGColorCreate(colorSpace, rgba);
 	CGColorSpaceRelease(colorSpace);
-	return (CGColorRef)[(id)res autorelease];
+	__autoreleasing __attribute__ ((unused)) id dummy = CFBridgingRelease(res);
+	return res;
 }
 @end

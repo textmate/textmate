@@ -58,12 +58,6 @@
 	return copy;
 }
 
-- (void)dealloc
-{
-	[contents release];
-	[super dealloc];
-}
-
 // NOTE: AppKit additions produce invalid values here, provide our own implementation
 
 - (NSRect)boundingRectWithSize:(NSSize)aSize options:(NSStringDrawingOptions)options
@@ -77,20 +71,20 @@
 {
 	CGSize stringSize = [string sizeWithAttributes:@{ NSFontAttributeName : font }];
 
-	NSTextTableBlock* block = [[[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1] autorelease];
+	NSTextTableBlock* block = [[NSTextTableBlock alloc] initWithTable:table startingRow:row rowSpan:1 startingColumn:column columnSpan:1];
 
 	if(column > 0)
 		[block setContentWidth:stringSize.width type:NSTextBlockAbsoluteValueType];
 
 	block.verticalAlignment = verticalAlignment;
 
-	NSMutableParagraphStyle* paragraphStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
+	NSMutableParagraphStyle* paragraphStyle = [NSMutableParagraphStyle new];
 	[paragraphStyle setTextBlocks:@[ block ]];
 	[paragraphStyle setAlignment:textAlignment];
 
 	string = [string stringByAppendingString:@"\n"];
 
-	NSMutableAttributedString* cellString = [[[NSMutableAttributedString alloc] initWithString:string] autorelease];
+	NSMutableAttributedString* cellString = [[NSMutableAttributedString alloc] initWithString:string];
 	[cellString addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, [cellString length])];
 	[cellString addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [cellString length])];
 
@@ -162,8 +156,8 @@
 	if(aTabTrigger == NULL_STR)
 		return;
 
-	MenuMutableAttributedString* attributedTitle = [[[MenuMutableAttributedString alloc] init] autorelease];
-	NSTextTable* table = [[[NSTextTable alloc] init] autorelease];
+	MenuMutableAttributedString* attributedTitle = [MenuMutableAttributedString new];
+	NSTextTable* table = [NSTextTable new];
 	[table setNumberOfColumns:2];
 
 	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];

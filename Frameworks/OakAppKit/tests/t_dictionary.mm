@@ -11,7 +11,7 @@
 {
 	if((self = [super initWithFrame:aRect]))
 	{
-		myTextStorage = [@"This is a test. Try press ⌃⌘D on one of these words." retain];
+		myTextStorage = @"This is a test. Try press ⌃⌘D on one of these words.";
 	}
 	return self;
 }
@@ -23,10 +23,10 @@
 
 - (NSDictionary*)stringAttributes
 {
-	static NSDictionary* attrs = [[NSDictionary dictionaryWithObjectsAndKeys:
-		[NSColor blackColor],                 NSForegroundColorAttributeName,
-		[NSFont userFixedPitchFontOfSize:12], NSFontAttributeName,
-		nil] retain];
+	static NSDictionary* attrs = @{
+		NSForegroundColorAttributeName : [NSColor blackColor],
+		NSFontAttributeName            : [NSFont userFixedPitchFontOfSize:12]
+	};
 	return attrs;
 }
 
@@ -54,7 +54,7 @@
 
 - (NSTextStorage *)textStorage
 {
-	return [[[NSTextStorage alloc] initWithString:myTextStorage attributes:[self stringAttributes]] autorelease];
+	return [[NSTextStorage alloc] initWithString:myTextStorage attributes:[self stringAttributes]];
 }
 
 // ===============
@@ -95,7 +95,7 @@
 
 - (NSAttributedString*)attributedSubstringFromRange:(NSRange)theRange
 {
-	NSAttributedString* res = [[[NSAttributedString alloc] initWithString:[myTextStorage substringWithRange:theRange] attributes:[self stringAttributes]] autorelease];
+	NSAttributedString* res = [[NSAttributedString alloc] initWithString:[myTextStorage substringWithRange:theRange] attributes:[self stringAttributes]];
 	NSLog(@"%s %@ %@", sel_getName(_cmd), NSStringFromRange(theRange), res);
 	return res;
 }
@@ -140,7 +140,7 @@ public:
 	void test_dictionary ()
 	{
 		@autoreleasepool {
-			OakSetupApplicationWithView([[[MyTextView alloc] initWithFrame:NSMakeRect(0, 0, 400, 60)] autorelease], "dictionary");
+			OakSetupApplicationWithView([[MyTextView alloc] initWithFrame:NSMakeRect(0, 0, 400, 60)], "dictionary");
 		}
 	}
 };

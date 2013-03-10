@@ -4,27 +4,31 @@
 #import <oak/oak.h>
 
 // The lineBreakMode parameter is here to work around a crash in CoreText <rdar://6940427> — fixed in 10.6
-static CFAttributedStringRef AttributedStringWithOptions (NSString* string, uint32_t options, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingTail)
+static NSAttributedString* AttributedStringWithOptions (NSString* string, uint32_t options, NSLineBreakMode lineBreakMode = NSLineBreakByTruncatingTail)
 {
-	NSMutableDictionary* attr = [NSMutableDictionary dictionary];
-	attr[NSFontAttributeName] = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
-
-	NSMutableParagraphStyle* paragraph = [[NSMutableParagraphStyle new] autorelease];
+	NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
 	[paragraph setLineBreakMode:lineBreakMode];
-	attr[NSParagraphStyleAttributeName] = paragraph;
 
-	NSAttributedString* res = [[[NSAttributedString alloc] initWithString:string attributes:attr] autorelease];
-	return (CFAttributedStringRef)res;
+	NSDictionary* attr = @{
+		NSParagraphStyleAttributeName : paragraph,
+		NSFontAttributeName           : [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]
+	};
+
+	return [[NSAttributedString alloc] initWithString:string attributes:attr];
 }
 
 double WidthOfText (NSString* string)
 {
 	double width = 0;
-
-	CTLineRef line = CTLineCreateWithAttributedString(AttributedStringWithOptions(string, 0));
-	width          = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
-	CFRelease(line);
-
+	if(CFAttributedStringRef attrStr = (CFAttributedStringRef)CFBridgingRetain(AttributedStringWithOptions(string, 0)))
+	{
+		if(CTLineRef line = CTLineCreateWithAttributedString(attrStr))
+		{
+			width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+			CFRelease(line);
+		}
+		CFRelease(attrStr);
+	}
 	return ceil(width);
 }
 
@@ -38,7 +42,11 @@ static void DrawTextWithOptions (NSString* string, NSRect bounds, uint32_t textO
 	CGMutablePathRef path = CGPathCreateMutable();
 	CGPathAddRect(path, NULL, bounds);
 
-	CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(AttributedStringWithOptions(string, textOptions, bounds.size.width < 12 ? NSLineBreakByClipping : NSLineBreakByTruncatingTail));
+	CFAttributedStringRef attrStr = (CFAttributedStringRef)CFBridgingRetain(AttributedStringWithOptions(string, textOptions, bounds.size.width < 12 ? NSLineBreakByClipping : NSLineBreakByTruncatingTail));
+	if(!attrStr)
+		return;
+	CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attrStr);
+	CFRelease(attrStr);
 	if(!framesetter)
 		return;
 	CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
@@ -265,9 +273,9 @@ OAK_DEBUG_VAR(OakControl);
 	while(candidate)
 	{
 		if([candidate respondsToSelector:action])
-			return (void)[candidate performSelector:action withObject:self];
+			return (void)[NSApp sendAction:action to:candidate from:self];
 		else if([candidate respondsToSelector:@selector(delegate)] && [[candidate performSelector:@selector(delegate)] respondsToSelector:action])
-			return (void)[[candidate performSelector:@selector(delegate)] performSelector:action withObject:self];
+			return (void)[NSApp sendAction:action to:[candidate performSelector:@selector(delegate)] from:self];
 		candidate = [candidate nextResponder];
 	}
 }
@@ -409,12 +417,11 @@ struct rect_cmp_t
 				break;
 			}
 		}
+
 		if(!(trackingOptions & NSTrackingActiveAlways))
 			trackingOptions |= NSTrackingActiveInKeyWindow;
 
-		NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:it->first options:trackingOptions owner:self userInfo:nil];
-		[self addTrackingArea:trackingArea];
-		[trackingArea release];
+		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:it->first options:trackingOptions owner:self userInfo:nil]];
 	}
 }
 

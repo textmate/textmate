@@ -22,11 +22,7 @@ struct objc_ptr
 
 	void reset (T object)
 	{
-		if(M_object != object)
-		{
-			[M_object release];
-			M_object = object ? [object retain] : nil;
-		}
+		M_object = object;
 	}
 };
 

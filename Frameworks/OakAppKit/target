@@ -4,5 +4,3 @@ TEST_SOURCES = tests/*.{cc,mm}
 LINK        += text ns io OakFoundation regexp scm file
 EXPORT       = src/*.h
 FRAMEWORKS   = Carbon Cocoa AudioToolbox Quartz
-
-OBJCXX_FLAGS += -fno-objc-arc

@@ -304,11 +304,27 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 }
 
 @interface OakTabBarView ()
+{
+	OBJC_WATCH_LEAKS(OakTabBarView);
+
+	NSMutableArray* tabTitles;
+	NSMutableArray* tabToolTips;
+	NSMutableArray* tabModifiedStates;
+
+	BOOL layoutNeedsUpdate;
+	NSUInteger selectedTab;
+	NSUInteger hiddenTab;
+
+	layout_metrics_ptr metrics;
+	std::vector<NSRect> tabRects;
+	std::map<NSUInteger, value_t> tabDropSpacing;
+	OakTimer* slideAroundAnimationTimer;
+}
 - (void)updateLayout;
 - (void)selectTab:(id)sender;
-@property (nonatomic, retain) OakTimer* slideAroundAnimationTimer;
-@property (nonatomic, assign) BOOL layoutNeedsUpdate;
-@property (nonatomic, assign) BOOL shouldCollapse;
+@property (nonatomic) OakTimer* slideAroundAnimationTimer;
+@property (nonatomic) BOOL layoutNeedsUpdate;
+@property (nonatomic) BOOL shouldCollapse;
 @end
 
 // =================
@@ -316,14 +332,17 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 // =================
 
 @interface OakTabFauxUIElement : NSObject
+{
+	OBJC_WATCH_LEAKS(OakTabFauxUIElement);
+}
 - (id)initWithTabBarView:(OakTabBarView*)tabBarView index:(NSUInteger)index rect:(NSRect)rect title:(NSString*)title toolTip:(NSString*)toolTip modified:(BOOL)modified selected:(BOOL)selected;
-@property (nonatomic, assign) OakTabBarView* tabBarView;
-@property (nonatomic, assign) NSUInteger index;
-@property (nonatomic, assign) NSRect rect;
-@property (nonatomic, retain) NSString* title;
-@property (nonatomic, retain) NSString* toolTip;
-@property (nonatomic, assign) BOOL modified;
-@property (nonatomic, assign) BOOL selected;
+@property (nonatomic, weak) OakTabBarView* tabBarView;
+@property (nonatomic) NSUInteger index;
+@property (nonatomic) NSRect rect;
+@property (nonatomic) NSString* title;
+@property (nonatomic) NSString* toolTip;
+@property (nonatomic) BOOL modified;
+@property (nonatomic) BOOL selected;
 @end
 
 @implementation OakTabFauxUIElement
@@ -334,19 +353,12 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 		_tabBarView = tabBarView;
 		_index = index;
 		_rect = rect;
-		_title = [title retain];
-		_toolTip = [toolTip retain];
+		_title = title;
+		_toolTip = toolTip;
 		_modified = modified;
 		_selected = selected;
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-	self.title = nil;
-	self.toolTip = nil;
-	[super dealloc];
 }
 
 - (NSString*)description
@@ -380,7 +392,6 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 			NSAccessibilityValueAttribute,
 			NSAccessibilityHelpAttribute,
 		];
-		[attributes retain];
 	}
 	return attributes;
 }
@@ -445,7 +456,6 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 			NSAccessibilityPressAction,
 			NSAccessibilityShowMenuAction,
 		];
-		[actions retain];
 	}
 	return actions;
 }
@@ -488,26 +498,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 // ==========================
 
 @implementation OakTabBarView
-{
-	OBJC_WATCH_LEAKS(OakTabBarView);
-
-	NSMutableArray* tabTitles;
-	NSMutableArray* tabToolTips;
-	NSMutableArray* tabModifiedStates;
-
-	BOOL layoutNeedsUpdate;
-	NSUInteger selectedTab;
-	NSUInteger hiddenTab;
-
-	layout_metrics_ptr metrics;
-	std::vector<NSRect> tabRects;
-	std::map<NSUInteger, value_t> tabDropSpacing;
-	OakTimer* slideAroundAnimationTimer;
-
-	id <OakTabBarViewDelegate> delegate;
-	id <OakTabBarViewDataSource> dataSource;
-}
-@synthesize delegate, dataSource, slideAroundAnimationTimer, layoutNeedsUpdate;
+@synthesize slideAroundAnimationTimer, layoutNeedsUpdate;
 
 - (id)initWithFrame:(NSRect)aRect
 {
@@ -530,14 +521,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 - (void)dealloc
 {
-	self.slideAroundAnimationTimer = nil;
-
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
-	[tabTitles release];
-	[tabToolTips release];
-	[tabModifiedStates release];
-	[super dealloc];
 }
 
 - (void)userDefaultsDidChange:(NSNotification*)aNotification
@@ -696,7 +680,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 {
 	if(self.tag != selectedTab)
 	{
-		if(delegate && [delegate respondsToSelector:@selector(tabBarView:shouldSelectIndex:)] && ![delegate tabBarView:self shouldSelectIndex:self.tag])
+		if(self.delegate && [self.delegate respondsToSelector:@selector(tabBarView:shouldSelectIndex:)] && ![self.delegate tabBarView:self shouldSelectIndex:self.tag])
 			return;
 
 		selectedTab = self.tag;
@@ -706,14 +690,14 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 - (void)didDoubleClickTab:(id)sender
 {
-	if([delegate respondsToSelector:@selector(tabBarView:didDoubleClickIndex:)])
-		[delegate tabBarView:self didDoubleClickIndex:selectedTab];
+	if([self.delegate respondsToSelector:@selector(tabBarView:didDoubleClickIndex:)])
+		[self.delegate tabBarView:self didDoubleClickIndex:selectedTab];
 }
 
 - (void)didDoubleClickTabBar:(id)sender
 {
-	if([delegate respondsToSelector:@selector(tabBarViewDidDoubleClick:)])
-		[delegate tabBarViewDidDoubleClick:self];
+	if([self.delegate respondsToSelector:@selector(tabBarViewDidDoubleClick:)])
+		[self.delegate tabBarViewDidDoubleClick:self];
 }
 
 - (void)performClose:(id)sender
@@ -727,8 +711,8 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 {
 	NSPoint pos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
 	self.tag = [self tagForLayerContainingPoint:pos];
-	if(self.tag != NSNotFound && [delegate respondsToSelector:@selector(menuForTabBarView:)])
-		return [delegate menuForTabBarView:self];
+	if(self.tag != NSNotFound && [self.delegate respondsToSelector:@selector(menuForTabBarView:)])
+		return [self.delegate menuForTabBarView:self];
 	return [super menuForEvent:anEvent];
 }
 
@@ -742,19 +726,19 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 - (void)reloadData
 {
-	if(!dataSource)
+	if(!self.dataSource)
 		return;
 
 	NSMutableArray* titles         = [NSMutableArray array];
 	NSMutableArray* toolTips       = [NSMutableArray array];
 	NSMutableArray* modifiedStates = [NSMutableArray array];
 
-	NSUInteger count = [dataSource numberOfRowsInTabBarView:self];
+	NSUInteger count = [self.dataSource numberOfRowsInTabBarView:self];
 	for(NSUInteger i = 0; i < count; ++i)
 	{
-		[titles addObject:[dataSource tabBarView:self titleForIndex:i]];
-		[toolTips addObject:[dataSource tabBarView:self toolTipForIndex:i]];
-		[modifiedStates addObject:@([dataSource tabBarView:self isEditedAtIndex:i])];
+		[titles addObject:[self.dataSource tabBarView:self titleForIndex:i]];
+		[toolTips addObject:[self.dataSource tabBarView:self toolTipForIndex:i]];
+		[modifiedStates addObject:@([self.dataSource tabBarView:self isEditedAtIndex:i])];
 	}
 
 	[tabTitles setArray:titles];
@@ -838,7 +822,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	NSUInteger draggedTab = self.tag;
 	NSRect tabRect = tabRects[draggedTab];
 
-	NSImage* image = [[[NSImage alloc] initWithSize:tabRect.size] autorelease];
+	NSImage* image = [[NSImage alloc] initWithSize:tabRect.size];
 	[image lockFocus];
 
 	uint32_t state = [self currentState] | layer_t::mouse_inside | layer_t::mouse_down;
@@ -849,7 +833,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	}
 	[image unlockFocus];
 
-	NSImage* dragImage = [[[NSImage alloc] initWithSize:image.size] autorelease];
+	NSImage* dragImage = [[NSImage alloc] initWithSize:image.size];
 	[dragImage lockFocus];
 	[image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:0.8];
 	[dragImage unlockFocus];
@@ -857,7 +841,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	NSPasteboard* pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
 	[pboard declareTypes:@[ OakTabBarViewTabType ] owner:self];
 	[pboard setString:[NSString stringWithFormat:@"%lu", draggedTab] forType:OakTabBarViewTabType];
-	[delegate setupPasteboard:pboard forTabAtIndex:draggedTab];
+	[self.delegate setupPasteboard:pboard forTabAtIndex:draggedTab];
 
 	[self hideTabAtIndex:draggedTab];
 	[self setDropAreaWidth:[dragImage size].width beforeTabAtIndex:draggedTab animate:NO];
@@ -891,10 +875,10 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 
 	NSDragOperation mask = [sender draggingSourceOperationMask];
 	NSPoint mousePos = [self convertPoint:[sender draggingLocation] fromView:nil];
-	BOOL success = [delegate performTabDropFromTabBar:[sender draggingSource]
-                                             atIndex:[self dropIndexForMouse:mousePos]
-                                      fromPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]
-                                           operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
+	BOOL success = [self.delegate performTabDropFromTabBar:[sender draggingSource]
+                                                  atIndex:[self dropIndexForMouse:mousePos]
+                                           fromPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]
+                                                operation:(mask & NSDragOperationMove) ?: (mask & NSDragOperationCopy)];
 	return success;
 }
 
@@ -944,7 +928,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 			NSAccessibilityTabsAttribute,
 			NSAccessibilityValueAttribute,
 		]];
-		attributes = [[set allObjects] retain];
+		attributes = [set allObjects];
 	}
 	return attributes;
 }
@@ -968,9 +952,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 - (NSUInteger)accessibilityArrayAttributeCount:(NSString*)attribute
 {
 	if([attribute isEqualToString:NSAccessibilityChildrenAttribute] || [attribute isEqualToString:NSAccessibilityContentsAttribute] || [attribute isEqualToString:NSAccessibilityTabsAttribute])
-	{
 		return [self.dataSource numberOfRowsInTabBarView:self];
-	}
 	else
 		return [super accessibilityArrayAttributeCount:attribute];
 }
@@ -984,19 +966,19 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 			count = index + maxCount;
 		NSMutableArray *children = [NSMutableArray arrayWithCapacity:count - index];
 		for(; index < count; ++index)
-		{
 			[children addObject:[self accessibilityChildAtIndex:index]];
-		}
 		return children;
 	}
 	else
+	{
 		return [super accessibilityArrayAttributeValues:attribute index:index maxCount:maxCount];
+	}
 }
 
 - (NSUInteger)accessibilityIndexOfChild:(id)child
 {
 	OakTabFauxUIElement *element = (OakTabFauxUIElement*)child;
-	if ([child isMemberOfClass:[OakTabFauxUIElement class]] && element.tabBarView == self)
+	if([child isMemberOfClass:[OakTabFauxUIElement class]] && element.tabBarView == self)
 		return element.index;
 	return NSNotFound;
 }
@@ -1007,7 +989,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	NSString* title = SafeObjectAtIndex(tabTitles, index);
 	NSString* toolTip = SafeObjectAtIndex(tabToolTips, index);
 	BOOL modified = [((NSNumber*)SafeObjectAtIndex(tabModifiedStates, index)) boolValue];
-	return [[[OakTabFauxUIElement alloc] initWithTabBarView:self index:index rect:rect title:title toolTip:toolTip modified:modified selected:selectedTab==index] autorelease];
+	return [[OakTabFauxUIElement alloc] initWithTabBarView:self index:index rect:rect title:title toolTip:toolTip modified:modified selected:selectedTab==index];
 }
 
 - (id)accessibilityHitTest:(NSPoint)point
@@ -1018,10 +1000,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	iterate(rect, tabRects)
 	{
 		if(NSPointInRect(point, *rect))
-		{
-			NSUInteger index = rect - tabRects.begin();
-			return [self accessibilityChildAtIndex:index];
-		};
+			return [self accessibilityChildAtIndex:rect - tabRects.begin()];
 	}
 	return self;
 }

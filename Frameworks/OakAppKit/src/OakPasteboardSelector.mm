@@ -31,7 +31,7 @@ static size_t line_count (std::string const& text)
 
 + (id)cellWithMaxLines:(size_t)maxLines;
 {
-	OakPasteboardSelectorMultiLineCell* cell = [[[self class] new] autorelease];
+	OakPasteboardSelectorMultiLineCell* cell = [[self class] new];
 	cell.maxLines = maxLines;
 	return cell;
 }
@@ -65,7 +65,7 @@ static size_t line_count (std::string const& text)
 			NSAccessibilityRoleAttribute,
 			NSAccessibilityValueAttribute,
 		]];
-		attributes = [[set allObjects] retain];
+		attributes = [set allObjects];
 	}
 	return attributes;
 }
@@ -99,8 +99,7 @@ static size_t line_count (std::string const& text)
 		{
 			NSString* moreLinesText           = [NSString stringWithFormat:@"%lu more line%s", [lines count] - [clippedLines count], ([lines count] - [clippedLines count]) != 1 ? "s" : ""];
 			NSDictionary* moreLinesAttributes = @{ NSForegroundColorAttributeName : ([self isHighlighted] ? [NSColor darkGrayColor] : [NSColor lightGrayColor]) };
-			NSAttributedString* moreLines     = [[[NSAttributedString alloc] initWithString:moreLinesText
-                                                                              attributes:moreLinesAttributes] autorelease];
+			NSAttributedString* moreLines     = [[NSAttributedString alloc] initWithString:moreLinesText attributes:moreLinesAttributes];
 			NSSize size             = [moreLines size];
 			NSRect moreLinesRect    = rowFrame;
 			moreLinesRect.origin.x += frame.size.width - size.width;
@@ -146,8 +145,6 @@ static size_t line_count (std::string const& text)
 - (void)dealloc
 {
 	[self setTableView:nil];
-	[entries release];
-	[super dealloc];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView*)aTableView
@@ -177,13 +174,10 @@ static size_t line_count (std::string const& text)
 		[tableView setTarget:nil];
 		[tableView setDataSource:nil];
 		[tableView setNextResponder:[self nextResponder]];
-		[tableView release];
 	}
 
-	if(aTableView)
+	if(tableView = aTableView)
 	{
-		tableView = [aTableView retain];
-
 		[tableView setDataSource:self];
 		[tableView setDelegate:self];
 		[tableView reloadData];
@@ -288,32 +282,21 @@ static size_t line_count (std::string const& text)
 }
 @end
 
-static OakPasteboardSelector* SharedInstance;
-
 @implementation OakPasteboardSelector
 + (OakPasteboardSelector*)sharedInstance
 {
-	return SharedInstance ?: [[OakPasteboardSelector new] autorelease];
+	static OakPasteboardSelector* instance = [OakPasteboardSelector new];
+	return instance;
 }
 
 - (id)init
 {
-	if(SharedInstance)
-	{
-		[self release];
-	}
-	else if(self = SharedInstance = [[super initWithWindowNibName:@"Pasteboard Selector"] retain])
+	if(self = [super initWithWindowNibName:@"Pasteboard Selector"])
 	{
 		[self setShouldCascadeWindows:NO];
 		[self window];
 	}
-	return SharedInstance;
-}
-
-- (void)dealloc
-{
-	[tableViewHelper release];
-	[super dealloc];
+	return self;
 }
 
 - (void)setIndex:(unsigned)index
@@ -324,7 +307,6 @@ static OakPasteboardSelector* SharedInstance;
 - (void)setEntries:(NSArray*)entries
 {
 	[self setIndex:0];
-	[tableViewHelper release];
 	tableViewHelper = [[OakPasteboardSelectorTableViewHelper alloc] initWithEntries:entries];
 	[tableViewHelper setTableView:tableView];
 }

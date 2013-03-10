@@ -6,7 +6,9 @@ NSUInteger const OakViewWindowIsKeyMask          = 1 << 2;
 NSUInteger const OakViewViewIsFirstResponderMask = 1 << 3;
 
 @implementation OakView
-@synthesize keyState;
+{
+	BOOL isFirstResponder;
+}
 
 - (id)initWithFrame:(NSRect)aFrame
 {
@@ -25,7 +27,6 @@ NSUInteger const OakViewViewIsFirstResponderMask = 1 << 3;
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 - (void)updateKeyState:(NSNotification*)aNotification

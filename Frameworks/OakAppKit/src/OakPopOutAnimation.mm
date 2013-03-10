@@ -1,6 +1,7 @@
 #import "OakPopOutAnimation.h"
 #import "NSImage Additions.h"
 #import <oak/algorithm.h>
+#import <oak/debug.h>
 
 static CGFloat const kExtendWidth  = 6;
 static CGFloat const kExtendHeight = 1;
@@ -11,15 +12,15 @@ static double const  kFadeDuration = 0.60;
 
 @interface OakPopOutView : NSView
 {
-	NSRect baseFrame;
-	NSImage* contentImage;
-	NSDate* animationStartTime;
+	OBJC_WATCH_LEAKS(OakPopOutView);
 
+	NSRect baseFrame;
 	double growDuration;
 	double fadeDuration;
 }
-@property (nonatomic, retain) NSDate* animationStartTime;
-@property (nonatomic, retain) NSImage* contentImage;
+@property (nonatomic) NSDate*   animationStartTime;
+@property (nonatomic) NSImage*  contentImage;
+@property (nonatomic) NSWindow* retainedWindow;
 - (void)startAnimation:(id)sender;
 @end
 
@@ -38,9 +39,10 @@ void OakShowPopOutAnimation (NSRect aRect, NSImage* anImage)
 	[window setReleasedWhenClosed:NO];
 	[window useOptimizedDrawing:YES];
 
-	OakPopOutView* aView = [[[OakPopOutView alloc] initWithFrame:contentRect] autorelease];
+	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:contentRect];
 	[aView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 	aView.contentImage = anImage;
+	aView.retainedWindow = window;
 	[[window contentView] addSubview:aView];
 
 	[window setFrame:aRect display:YES];
@@ -56,8 +58,6 @@ static double bounce_curve (double t)
 }
 
 @implementation OakPopOutView
-@synthesize animationStartTime, contentImage;
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	if(self = [super initWithFrame:aRect])
@@ -69,16 +69,10 @@ static double bounce_curve (double t)
 	return self;
 }
 
-- (void)dealloc
-{
-	[animationStartTime release];
-	[super dealloc];
-}
-
 - (void)startAnimation:(id)sender
 {
 	baseFrame = [[self window] frame];
-	self.animationStartTime = [[NSDate date] retain];
+	self.animationStartTime = [NSDate date];
 	[NSTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(animationTick:) userInfo:nil repeats:YES];
 }
 
@@ -89,12 +83,12 @@ static double bounce_curve (double t)
 	CGFloat alpha = 1.0;
 	CGFloat grow  = 0.0;
 
-	double t = -[animationStartTime timeIntervalSinceNow];
+	double t = -[self.animationStartTime timeIntervalSinceNow];
 	if(t > totalDuration)
 	{
 		[aTimer invalidate];
 		[[self window] orderOut:self];
-		[[self window] release];
+		self.retainedWindow = nil;
 		return;
 	}
 	else if(t > 2*growDuration)
@@ -131,7 +125,7 @@ static double bounce_curve (double t)
 	[[NSColor whiteColor] set];
 	[roundedRect stroke];
 
-	[contentImage drawAdjustedInRect:NSInsetRect([self bounds], kExtendWidth, kExtendHeight) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
+	[self.contentImage drawAdjustedInRect:NSInsetRect([self bounds], kExtendWidth, kExtendHeight) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1];
 
 	[super drawRect:aRect];
 }

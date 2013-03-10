@@ -3,10 +3,10 @@
 NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 
 @interface OakDividerLineView : NSBox
-@property (nonatomic, retain) NSColor* primaryColor;
-@property (nonatomic, retain) NSColor* secondaryColor;
-@property (nonatomic)         BOOL     usePrimaryColor;
-@property (nonatomic)         NSSize   intrinsicContentSize;
+@property (nonatomic) NSColor* primaryColor;
+@property (nonatomic) NSColor* secondaryColor;
+@property (nonatomic) BOOL     usePrimaryColor;
+@property (nonatomic) NSSize   intrinsicContentSize;
 @end
 
 @implementation OakDividerLineView
@@ -56,7 +56,7 @@ NSString* const OakCursorDidHideNotification = @"OakCursorDidHideNotification";
 
 static OakDividerLineView* OakCreateDividerLineWithColor (NSColor* color, NSColor* secondaryColor)
 {
-	OakDividerLineView* box = [[[OakDividerLineView alloc] initWithFrame:NSZeroRect] autorelease];
+	OakDividerLineView* box = [[OakDividerLineView alloc] initWithFrame:NSZeroRect];
 	box.boxType         = NSBoxCustom;
 	box.borderType      = NSLineBorder;
 	box.borderColor     = color;
@@ -106,8 +106,8 @@ BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 }
 
 @interface OakSheetCallbackDelegate : NSObject
-@property (nonatomic, copy)   void(^callback)(NSInteger);
-@property (nonatomic, retain) id retainedSelf;
+@property (nonatomic, copy) void(^callback)(NSInteger);
+@property (nonatomic)       id retainedSelf;
 @end
 
 @implementation OakSheetCallbackDelegate
@@ -126,23 +126,17 @@ BOOL OakIsAlternateKeyOrMouseEvent (NSUInteger flags, NSEvent* anEvent)
 	self.callback(returnCode);
 	self.retainedSelf = nil;
 }
-
-- (void)dealloc
-{
-	self.callback = nil;
-	[super dealloc];
-}
 @end
 
 void OakShowSheetForWindow (NSWindow* sheet, NSWindow* window, void(^callback)(NSInteger))
 {
-	OakSheetCallbackDelegate* delegate = [[[OakSheetCallbackDelegate alloc] initWithBlock:callback] autorelease];
+	OakSheetCallbackDelegate* delegate = [[OakSheetCallbackDelegate alloc] initWithBlock:callback];
 	[NSApp beginSheet:sheet modalForWindow:window modalDelegate:delegate didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
 void OakShowAlertForWindow (NSAlert* alert, NSWindow* window, void(^callback)(NSInteger))
 {
-	OakSheetCallbackDelegate* delegate = [[[OakSheetCallbackDelegate alloc] initWithBlock:callback] autorelease];
+	OakSheetCallbackDelegate* delegate = [[OakSheetCallbackDelegate alloc] initWithBlock:callback];
 	if(window)
 			[alert beginSheetModalForWindow:window modalDelegate:delegate didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 	else	[delegate sheetDidEnd:alert returnCode:[alert runModal] contextInfo:NULL];

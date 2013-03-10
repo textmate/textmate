@@ -22,9 +22,13 @@ NSString* const OakFindRegularExpressionOption     = @"regularExpression";
 
 NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersistentClipboardHistory";
 
-@implementation OakPasteboardEntry
-@synthesize string, options;
+@interface OakPasteboardEntry ()
+{
+	NSMutableDictionary* _options;
+}
+@end
 
+@implementation OakPasteboardEntry
 - (id)initWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
 {
 	D(DBF_Pasteboard, bug("%s, %s\n", aString.UTF8String, someOptions.description.UTF8String););
@@ -32,21 +36,14 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 	if(self = [super init])
 	{
 		self.string = aString;
-		options = [[NSMutableDictionary alloc] initWithDictionary:someOptions];
+		self.options = [[NSMutableDictionary alloc] initWithDictionary:someOptions];
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-	[string release];
-	[options release];
-	[super dealloc];
-}
-
 + (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
 {
-	return [[[self alloc] initWithString:aString andOptions:someOptions] autorelease];
+	return [[self alloc] initWithString:aString andOptions:someOptions];
 }
 
 + (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString
@@ -56,32 +53,31 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 
 - (void)setOptions:(NSDictionary*)aDictionary
 {
-	if(options == aDictionary)
+	if(_options == aDictionary)
 		return;
-	[options release];
-	options = [[NSMutableDictionary dictionaryWithDictionary:aDictionary] retain];
+	_options = [NSMutableDictionary dictionaryWithDictionary:aDictionary];
 }
 
-- (BOOL)isEqual:(id)otherEntry
+- (BOOL)isEqual:(OakPasteboardEntry*)otherEntry
 {
-	return [otherEntry isKindOfClass:[self class]] && [string isEqual:[otherEntry string]];
+	return [otherEntry isKindOfClass:[self class]] && [self.string isEqual:otherEntry.string];
 }
 
-- (BOOL)fullWordMatch       { return [[options objectForKey:OakFindFullWordsOption] boolValue]; };
-- (BOOL)ignoreWhitespace    { return [[options objectForKey:OakFindIgnoreWhitespaceOption] boolValue]; };
-- (BOOL)regularExpression   { return [[options objectForKey:OakFindRegularExpressionOption] boolValue]; };
+- (BOOL)fullWordMatch       { return [_options[OakFindFullWordsOption] boolValue]; };
+- (BOOL)ignoreWhitespace    { return [_options[OakFindIgnoreWhitespaceOption] boolValue]; };
+- (BOOL)regularExpression   { return [_options[OakFindRegularExpressionOption] boolValue]; };
 
 - (void)setOption:(NSString*)aKey toBoolean:(BOOL)flag
 {
 	if(!flag)
 	{
-		[options removeObjectForKey:aKey];
+		[_options removeObjectForKey:aKey];
 		return;
 	}
 
-	if(!options)
-		options = [[NSMutableDictionary alloc] init];
-	[options setObject:@YES forKey:aKey];
+	if(!_options)
+		_options = [NSMutableDictionary new];
+	_options[aKey] = @YES;
 }
 
 - (void)setFullWordMatch:(BOOL)flag       { return [self setOption:OakFindFullWordsOption toBoolean:flag]; };
@@ -107,14 +103,21 @@ NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersis
 
 - (NSDictionary*)asDictionary
 {
-	NSMutableDictionary* res = [NSMutableDictionary dictionaryWithDictionary:options];
-	if(string) // FIXME, how can this happen? Seems to happen when deleting preferences and exiting, likely bringing up the Find window first
-		[res setObject:string forKey:@"string"];
+	NSMutableDictionary* res = [NSMutableDictionary dictionaryWithDictionary:_options];
+	res[@"string"] = self.string ?: @"";
 	return res;
 }
 @end
 
-@interface OakPasteboard (Private)
+@interface OakPasteboard ()
+{
+	NSString* pasteboardName;
+	NSMutableArray* entries;
+	NSDictionary* auxiliaryOptionsForCurrent;
+	NSUInteger index;
+	NSInteger changeCount;
+	BOOL avoidsDuplicates;
+}
 - (void)checkForExternalPasteboardChanges;
 @end
 
@@ -242,7 +245,7 @@ namespace
 {
 	if(self = [super init])
 	{
-		pasteboardName = [aName retain];
+		pasteboardName = aName;
 
 		entries = [NSMutableArray new];
 		if(![[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisablePersistentClipboardHistory] boolValue])
@@ -281,10 +284,6 @@ namespace
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationDidBecomeActiveNotification object:NSApp];
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationDidResignActiveNotification object:NSApp];
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationWillTerminateNotification object:NSApp];
-	[pasteboardName release];
-	[entries release];
-	[auxiliaryOptionsForCurrent release];
-	[super dealloc];
 }
 
 + (OakPasteboard*)pasteboardWithName:(NSString*)aName
@@ -292,7 +291,7 @@ namespace
 	static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];
 	if(![SharedInstances objectForKey:aName])
 	{
-		[SharedInstances setObject:[[[OakPasteboard alloc] initWithName:aName] autorelease] forKey:aName];
+		[SharedInstances setObject:[[OakPasteboard alloc] initWithName:aName] forKey:aName];
 		if(![aName isEqualToString:NSGeneralPboard])
 			[[SharedInstances objectForKey:aName] setAvoidsDuplicates:YES];
 	}
@@ -346,7 +345,6 @@ namespace
 {
 	if(![newEntries isEqual:entries])
 	{
-		[entries release];
 		entries = [newEntries mutableCopy];
 		index = [entries count]-1;
 		self.auxiliaryOptionsForCurrent = nil;

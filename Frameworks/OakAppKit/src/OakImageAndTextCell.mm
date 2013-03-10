@@ -2,18 +2,10 @@
 #import "NSImage Additions.h"
 
 @implementation OakImageAndTextCell
-@synthesize image;
-
-- (void)dealloc
-{
-	[self setImage:nil];
-	[super dealloc];
-}
-
 - (id)copyWithZone:(NSZone*)zone
 {
 	OakImageAndTextCell* cell = [super copyWithZone:zone];
-	cell->image = [image retain];
+	cell.image = self.image;
 	return cell;
 }
 
@@ -49,13 +41,13 @@
 - (NSRect)expansionFrameWithFrame:(NSRect)cellFrame inView:(NSView*)view
 {
 	NSRect frame = [super expansionFrameWithFrame:[self textFrameWithFrame:cellFrame inControlView:view] inView:view];
-	frame.size.width -= image ? [image size].width + 3.0 : 0.0;
+	frame.size.width -= self.image ? [self.image size].width + 3.0 : 0.0;
 	return frame;
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView*)controlView
 {
-	if(image)
+	if(self.image)
 	{
 		NSRect imageRect = [self imageFrameWithFrame:cellFrame inControlView:controlView];
 		if([self drawsBackground])
@@ -63,7 +55,7 @@
 			[[self backgroundColor] set];
 			NSRectFill(imageRect);
 		}
-		[image drawAdjustedInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+		[self.image drawAdjustedInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 	}
 
 	[super drawWithFrame:[self textFrameWithFrame:cellFrame inControlView:controlView] inView:controlView];
@@ -72,7 +64,7 @@
 - (NSSize)cellSize
 {
 	NSSize cellSize = [super cellSize];
-	cellSize.width += image ? [image size].width + 3.0 : 0.0;
+	cellSize.width += self.image ? [self.image size].width + 3.0 : 0.0;
 	return cellSize;
 }
 

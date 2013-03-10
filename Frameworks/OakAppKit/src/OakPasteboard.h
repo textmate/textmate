@@ -12,44 +12,31 @@ extern PUBLIC NSString* const OakFindFullWordsOption;
 extern PUBLIC NSString* const OakFindRegularExpressionOption;
 
 PUBLIC @interface OakPasteboardEntry : NSObject
-{
-	NSString* string;
-	NSMutableDictionary* options;
-}
 + (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString;
 + (OakPasteboardEntry*)pasteboardEntryWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions;
 
 @property (nonatomic, copy) NSString* string;
 @property (nonatomic, copy) NSDictionary* options;
 
-@property (nonatomic, assign) BOOL fullWordMatch;
-@property (nonatomic, assign) BOOL ignoreWhitespace;
-@property (nonatomic, assign) BOOL regularExpression;
+@property (nonatomic) BOOL fullWordMatch;
+@property (nonatomic) BOOL ignoreWhitespace;
+@property (nonatomic) BOOL regularExpression;
 
 - (find::options_t)findOptions;
 - (void)setFindOptions:(find::options_t)findOptions;
 @end
 
 PUBLIC @interface OakPasteboard : NSObject
-{
-@private
-	NSString* pasteboardName;
-	NSMutableArray* entries;
-	NSDictionary* auxiliaryOptionsForCurrent;
-	NSUInteger index;
-	NSInteger changeCount;
-	BOOL avoidsDuplicates;
-}
 + (OakPasteboard*)pasteboardWithName:(NSString*)aName;
 - (void)addEntry:(OakPasteboardEntry*)anEntry;
 
-@property (nonatomic, assign) BOOL avoidsDuplicates;
+@property (nonatomic) BOOL avoidsDuplicates;
 
 - (OakPasteboardEntry*)previous;
 - (OakPasteboardEntry*)current;
 - (OakPasteboardEntry*)next;
 
-@property (nonatomic, retain) NSDictionary* auxiliaryOptionsForCurrent;
+@property (nonatomic) NSDictionary* auxiliaryOptionsForCurrent;
 
 - (void)selectItemAtPosition:(NSPoint)aLocation andCall:(SEL)aSelector;
 - (void)selectItemForControl:(NSView*)controlView;

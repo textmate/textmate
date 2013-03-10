@@ -18,7 +18,7 @@
 
 + (NSAlert*)tmAlertWithMessageText:(NSString*)messageText informativeText:(NSString*)informativeText buttons:(NSString*)firstTitle, ...
 {
-	NSAlert* alert = [[[NSAlert alloc] init] autorelease];
+	NSAlert* alert = [NSAlert new];
 
 	alert.messageText     = messageText;
 	alert.informativeText = informativeText;

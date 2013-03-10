@@ -8,24 +8,34 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 {
 	if(msg)
 	{
-		OakToolTip* toolTip = [[OakToolTip new] autorelease];
+		OakToolTip* toolTip = [OakToolTip new];
 		[toolTip setStringValue:msg];
 		[toolTip showAtLocation:location forScreen:nil];
 	}
 }
 
-@interface OakToolTip (Private)
+@interface OakToolTip ()
+{
+	OBJC_WATCH_LEAKS(OakToolTip);
+
+	NSTextField* field;
+
+	NSDate* didOpenAtDate; // ignore mouse moves for the next second
+	NSPoint mousePositionWhenOpened;
+	BOOL enforceMouseThreshold;
+}
+@property (nonatomic) NSTimer* animationTimer;
+@property (nonatomic) NSDate* animationStart;
 - (void)stopAnimation:(id)anArgument;
 @end
 
 @implementation OakToolTip
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:
-		[NSDictionary dictionaryWithObjectsAndKeys:
-			@1, @"OakToolTipMouseMoveIgnorePeriod",
-			@5, @"OakToolTipMouseDistanceThreshold",
-			nil]];
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		@"OakToolTipMouseMoveIgnorePeriod"  : @1,
+		@"OakToolTipMouseDistanceThreshold" : @5,
+	}];
 }
 
 - (id)init
@@ -42,7 +52,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 		[self setHidesOnDeactivate:YES];
 		[self setIgnoresMouseEvents:YES];
 
-		field = [[[NSTextField alloc] initWithFrame:NSZeroRect] autorelease];
+		field = [[NSTextField alloc] initWithFrame:NSZeroRect];
 		[field setEditable:NO];
 		[field setSelectable:NO];
 		[field setBezeled:NO];
@@ -62,9 +72,6 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 - (void)dealloc
 {
 	D(DBF_OakToolTip, bug("\n"););
-	[self stopAnimation:self];
-	[didOpenAtDate release];
-	[super dealloc];
 }
 
 - (void)setFont:(NSFont*)aFont
@@ -123,15 +130,16 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (void)showUntilUserActivityDelayed:(id)sender
 {
+	OakToolTip* retainedSelf = self;
 	[self orderFront:self];
 
-	[self setValue:[NSDate date] forKey:@"didOpenAtDate"];
+	didOpenAtDate = [NSDate date];
 	mousePositionWhenOpened = NSZeroPoint;
 
-	NSWindow* keyWindow = [[NSApp keyWindow] retain];
+	NSWindow* keyWindow = [NSApp keyWindow];
 	if(!keyWindow)
 	{
-		keyWindow = [self retain];
+		keyWindow = self;
 		[self makeKeyWindow];
 	}
 
@@ -163,9 +171,7 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	}
 
 	[keyWindow setAcceptsMouseMovedEvents:didAcceptMouseMovedEvents];
-	[keyWindow release];
-
-	[self orderOut:nil];
+	[retainedSelf orderOut:nil];
 }
 
 - (void)showAtLocation:(NSPoint)aPoint forScreen:(NSScreen*)aScreen
@@ -191,17 +197,17 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (void)orderOut:(id)sender
 {
-	if(![self isVisible] || animationTimer)
+	if(![self isVisible] || self.animationTimer)
 		return;
 
 	[self stopAnimation:self];
-	[self setValue:[NSDate date] forKey:@"animationStart"];
-	[self setValue:[NSTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(animationTick:) userInfo:nil repeats:YES] forKey:@"animationTimer"];
+	self.animationStart = [NSDate date];
+	self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(animationTick:) userInfo:nil repeats:YES];
 }
 
 - (void)animationTick:(id)sender
 {
-	CGFloat alpha = 0.97 * (1 - oak::slow_in_out(-1.5 * [animationStart timeIntervalSinceNow]));
+	CGFloat alpha = 0.97 * (1 - oak::slow_in_out(-1.5 * [self.animationStart timeIntervalSinceNow]));
 	if(alpha > 0)
 	{
 		[self setAlphaValue:alpha];
@@ -215,13 +221,12 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 
 - (void)stopAnimation:(id)sender
 {
-	if(animationTimer)
+	if(self.animationTimer)
 	{
-		[[self retain] autorelease];
-		[animationTimer invalidate];
-		[self setValue:nil forKey:@"animationTimer"];
-		[self setValue:nil forKey:@"animationStart"];
-		[self setAlphaValue:0.97];
+		OakToolTip* retainedSelf = self;
+		[retainedSelf setAlphaValue:0.97];
+		[retainedSelf.animationTimer invalidate];
+		retainedSelf.animationTimer = nil;
 	}
 }
 @end

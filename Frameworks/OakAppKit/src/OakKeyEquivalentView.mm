@@ -12,82 +12,78 @@ static NSString* const kBindingInfoKeyPathKey      = @"keyPath";
 static NSString* const kRecordingPlaceholderString = @"…";
 
 @interface OakKeyEquivalentView ()
-@property (nonatomic, retain) NSString* displayString;
-@property (nonatomic, assign) BOOL showClearButton;
-@property (nonatomic, assign) BOOL mouseInClearButton;
+{
+	NSMutableArray* _observers;
+	NSRect _clearButtonRect;
+	void* _hotkeyToken;
+	BOOL _mouseDown;
+}
+@property (nonatomic) NSString* displayString;
+@property (nonatomic) BOOL showClearButton;
+@property (nonatomic) BOOL mouseInClearButton;
 @end
 
 @implementation OakKeyEquivalentView
-@synthesize eventString, disableGlobalHotkeys, displayString, showClearButton, mouseInClearButton, recording;
-
 - (id)initWithFrame:(NSRect)aRect
 {
 	if(self = [super initWithFrame:aRect])
-		disableGlobalHotkeys = YES;
+		self.disableGlobalHotkeys = YES;
 	return self;
 }
 
 - (void)dealloc
 {
-	for(NSDictionary* info in observers)
-		[[info objectForKey:kBindingInfoControllerKey] removeObserver:self forKeyPath:[info objectForKey:kBindingInfoKeyPathKey]];
-
-	[eventString release];
-	[displayString release];
-	[observers release];
-	[super dealloc];
+	for(NSDictionary* info in _observers)
+		[info[kBindingInfoControllerKey] removeObserver:self forKeyPath:info[kBindingInfoKeyPathKey]];
 }
 
 - (void)setEventString:(NSString*)aString
 {
-	if(aString == eventString || [aString isEqualToString:eventString])
+	if(_eventString == aString || [_eventString isEqualToString:aString])
 		return;
-	[eventString release];
-	eventString = [aString retain];
 
-	self.showClearButton = NSNotEmptyString(eventString) && !recording;
-	self.displayString = recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(eventString))];
+	_eventString = aString;
 
-	for(NSDictionary* info in observers)
+	self.showClearButton = NSNotEmptyString(self.eventString) && !self.recording;
+	self.displayString = self.recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(_eventString))];
+
+	for(NSDictionary* info in _observers)
 	{
-		if([[info objectForKey:kBindingInfoBindingKey] isEqualToString:@"value"])
+		if([info[kBindingInfoBindingKey] isEqualToString:NSValueBinding])
 		{
-			id controller = [info objectForKey:kBindingInfoControllerKey];
-			NSString* keyPath = [info objectForKey:kBindingInfoKeyPathKey];
+			id controller = info[kBindingInfoControllerKey];
+			NSString* keyPath = info[kBindingInfoKeyPathKey];
 			NSString* oldValue = [controller valueForKeyPath:keyPath];
-			if(!oldValue || ![oldValue isEqualToString:eventString])
-				[controller setValue:eventString forKeyPath:keyPath];
+			if(!oldValue || ![oldValue isEqualToString:_eventString])
+				[controller setValue:_eventString forKeyPath:keyPath];
 		}
 	}
 }
 
 - (void)setDisplayString:(NSString*)aString
 {
-	if(aString == displayString || [aString isEqualToString:displayString])
+	if(_displayString == aString || [_displayString isEqualToString:aString])
 		return;
-	[displayString release];
-	displayString = [aString retain];
+	_displayString = aString;
 	[self setNeedsDisplay:YES];
 }
 
 - (void)setShowClearButton:(BOOL)flag
 {
-	if(flag == showClearButton)
+	if(_showClearButton == flag)
 		return;
-	showClearButton = flag;
 
-	if(flag)
+	if(_showClearButton = flag)
 	{
 		Class cl = NSClassFromString(@"OFBPathInfoCell");
 		NSImage* imgNormal = [NSImage imageNamed:@"CloseFile" inSameBundleAsClass:cl];
 
 		NSSize imgSize = imgNormal.size;
 		CGFloat imgMargin = floor((NSHeight([self bounds]) - imgSize.height) / 2);
-		clearButtonRect = NSMakeRect(NSWidth([self bounds]) - imgSize.width - imgMargin, imgMargin, imgSize.width, imgSize.height);
-		[self setNeedsDisplayInRect:clearButtonRect];
+		_clearButtonRect = NSMakeRect(NSWidth([self bounds]) - imgSize.width - imgMargin, imgMargin, imgSize.width, imgSize.height);
+		[self setNeedsDisplayInRect:_clearButtonRect];
 
-		NSTrackingArea* trackingArea = [[[NSTrackingArea alloc] initWithRect:clearButtonRect options:NSTrackingMouseEnteredAndExited|NSTrackingActiveAlways owner:self userInfo:nil] autorelease];
-		[self addTrackingArea:trackingArea];
+		[self addTrackingArea:[[NSTrackingArea alloc] initWithRect:_clearButtonRect options:NSTrackingMouseEnteredAndExited|NSTrackingActiveAlways owner:self userInfo:nil]];
 	}
 	else
 	{
@@ -95,34 +91,34 @@ static NSString* const kRecordingPlaceholderString = @"…";
 			[self removeTrackingArea:trackingArea];
 
 		self.mouseInClearButton = NO;
-		[self setNeedsDisplayInRect:clearButtonRect];
-		clearButtonRect = NSZeroRect;
+		[self setNeedsDisplayInRect:_clearButtonRect];
+		_clearButtonRect = NSZeroRect;
 	}
 }
 
 - (void)setRecording:(BOOL)flag
 {
-	if(flag == recording)
+	if(_recording == flag)
 		return;
 
-	recording = flag;
-	self.showClearButton = NSNotEmptyString(eventString) && !recording;
-	self.displayString = recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(eventString))];
+	_recording = flag;
+	self.showClearButton = NSNotEmptyString(self.eventString) && !self.recording;
+	self.displayString = _recording ? kRecordingPlaceholderString : [NSString stringWithCxxString:ns::glyphs_for_event_string(to_s(self.eventString))];
 
-	if(disableGlobalHotkeys)
+	if(self.disableGlobalHotkeys)
 	{
-		if(recording)
-				hotkeyToken = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
-		else	PopSymbolicHotKeyMode(hotkeyToken);
+		if(self.recording)
+				_hotkeyToken = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
+		else	PopSymbolicHotKeyMode(_hotkeyToken);
 	}
 }
 
 - (void)setMouseInClearButton:(BOOL)flag
 {
-	if(flag == mouseInClearButton)
+	if(_mouseInClearButton == flag)
 		return;
-	mouseInClearButton = flag;
-	[self setNeedsDisplayInRect:clearButtonRect];
+	_mouseInClearButton = flag;
+	[self setNeedsDisplayInRect:_clearButtonRect];
 }
 
 - (void)setKeyState:(NSUInteger)newState
@@ -150,7 +146,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (BOOL)isMouseDownInCloseButton:(NSEvent*)anEvent
 {
-	return showClearButton && [anEvent type] == NSLeftMouseDown && NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], clearButtonRect, [self isFlipped]);
+	return self.showClearButton && [anEvent type] == NSLeftMouseDown && NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
 }
 
 - (BOOL)acceptsFirstMouse:(NSEvent*)anEvent
@@ -174,23 +170,23 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	{
 		[NSApp preventWindowOrdering];
 
-		mouseDown = YES;
-		[self setNeedsDisplayInRect:clearButtonRect];
+		_mouseDown = YES;
+		[self setNeedsDisplayInRect:_clearButtonRect];
 
 		while(true)
 		{
 			NSPoint mousePos = [self convertPoint:[anEvent locationInWindow] fromView:nil];
-			self.mouseInClearButton = NSMouseInRect(mousePos, clearButtonRect, [self isFlipped]);
+			self.mouseInClearButton = NSMouseInRect(mousePos, _clearButtonRect, [self isFlipped]);
 			if([anEvent type] == NSLeftMouseUp)
 				break;
 			anEvent = [NSApp nextEventMatchingMask:(NSLeftMouseUpMask|NSLeftMouseDraggedMask|NSRightMouseDownMask) untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES];
 		}
 
-		if(mouseInClearButton)
+		if(self.mouseInClearButton)
 			[self clearKeyEquivalent:self];
 
-		mouseDown = NO;
-		[self setNeedsDisplayInRect:clearButtonRect];
+		_mouseDown = NO;
+		[self setNeedsDisplayInRect:_clearButtonRect];
 	}
 	else
 	{
@@ -201,17 +197,17 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (void)mouseEntered:(NSEvent*)anEvent
 {
-	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], clearButtonRect, [self isFlipped]);
+	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
 }
 
 - (void)mouseExited:(NSEvent*)anEvent
 {
-	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], clearButtonRect, [self isFlipped]);
+	self.mouseInClearButton = NSMouseInRect([self convertPoint:[anEvent locationInWindow] fromView:nil], _clearButtonRect, [self isFlipped]);
 }
 
 - (void)flagsChanged:(NSEvent*)anEvent
 {
-	if(recording)
+	if(self.recording)
 	{
 		std::string const str = ns::glyphs_for_flags([anEvent modifierFlags]);
 		self.displayString = str == "" ? kRecordingPlaceholderString : [NSString stringWithCxxString:str];
@@ -220,7 +216,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent
 {
-	if(!recording)
+	if(!self.recording)
 		return NO;
 
 	self.eventString = [NSString stringWithCxxString:to_s(anEvent)];
@@ -230,7 +226,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (void)keyDown:(NSEvent*)anEvent
 {
-	if(recording)
+	if(self.recording)
 	{
 		[self performKeyEquivalent:anEvent];
 	}
@@ -269,21 +265,21 @@ static NSString* const kRecordingPlaceholderString = @"…";
 	NSEraseRect(NSIntersectionRect(aRect, NSInsetRect(frame, 1, 1)));
 
 	NSDictionary* stringAttributes = @{
-		NSForegroundColorAttributeName : recording ? [NSColor grayColor] : [NSColor blackColor],
+		NSForegroundColorAttributeName : self.recording ? [NSColor grayColor] : [NSColor blackColor],
 		NSFontAttributeName            : [NSFont controlContentFontOfSize:0]
 	};
 
-	NSSize size = [displayString sizeWithAttributes:stringAttributes];
-	[displayString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height /2 ) withAttributes:stringAttributes];
+	NSSize size = [self.displayString sizeWithAttributes:stringAttributes];
+	[self.displayString drawAtPoint:NSMakePoint(NSMidX([self visibleRect]) - size.width / 2, NSMidY([self visibleRect]) - size.height /2 ) withAttributes:stringAttributes];
 
-	if(showClearButton)
+	if(self.showClearButton)
 	{
 		Class cl = NSClassFromString(@"OFBPathInfoCell");
 		NSImage* imgNormal = [NSImage imageNamed:@"CloseFile"        inSameBundleAsClass:cl];
 		NSImage* imgHover  = [NSImage imageNamed:@"CloseFileOver"    inSameBundleAsClass:cl];
 		NSImage* imgDown   = [NSImage imageNamed:@"CloseFilePressed" inSameBundleAsClass:cl];
-		NSImage* image = mouseInClearButton ? (mouseDown ? imgDown : imgHover) : imgNormal;
-		[image drawAdjustedInRect:clearButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+		NSImage* image = self.mouseInClearButton ? (_mouseDown ? imgDown : imgHover) : imgNormal;
+		[image drawAdjustedInRect:_clearButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 	}
 
 	BOOL doesHaveFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
@@ -302,36 +298,35 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (void)bind:(NSString*)aBinding toObject:(id)observableController withKeyPath:(NSString*)aKeyPath options:(NSDictionary*)someOptions
 {
-	observers = observers ?: [NSMutableArray new];
-	[observers addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-		aBinding,             kBindingInfoBindingKey,
-		observableController, kBindingInfoControllerKey,
-		aKeyPath,             kBindingInfoKeyPathKey,
-		nil]];
-
+	_observers = _observers ?: [NSMutableArray new];
+	[_observers addObject:@{
+		kBindingInfoBindingKey    : aBinding,
+		kBindingInfoControllerKey : observableController,
+		kBindingInfoKeyPathKey    : aKeyPath,
+	}];
 	[observableController addObserver:self forKeyPath:aKeyPath options:NSKeyValueObservingOptionInitial context:NULL];
 }
 
 - (void)unbind:(NSString*)aBinding
 {
-	for(NSUInteger i = [observers count]; i > 0; --i)
+	for(NSUInteger i = [_observers count]; i > 0; --i)
 	{
-		NSDictionary* info = [observers objectAtIndex:i-1];
-		if([aBinding isEqualToString:[info objectForKey:kBindingInfoBindingKey]])
+		NSDictionary* info = _observers[i-1];
+		if([aBinding isEqualToString:info[kBindingInfoBindingKey]])
 		{
-			[[info objectForKey:kBindingInfoControllerKey] removeObserver:self forKeyPath:[info objectForKey:kBindingInfoKeyPathKey]];
-			[observers removeObjectAtIndex:i-i];
+			[info[kBindingInfoControllerKey] removeObserver:self forKeyPath:info[kBindingInfoKeyPathKey]];
+			[_observers removeObjectAtIndex:i-i];
 		}
 	}
 }
 
 - (void)observeValueForKeyPath:(NSString*)aKeyPath ofObject:(id)observableController change:(NSDictionary*)changeDictionary context:(void*)userData
 {
-	for(NSDictionary* info in observers)
+	for(NSDictionary* info in _observers)
 	{
-		if(observableController == [info objectForKey:kBindingInfoControllerKey] && [aKeyPath isEqualToString:[info objectForKey:kBindingInfoKeyPathKey]])
+		if(observableController == info[kBindingInfoControllerKey] && [aKeyPath isEqualToString:info[kBindingInfoKeyPathKey]])
 		{
-			if([[info objectForKey:kBindingInfoBindingKey] isEqualToString:@"value"])
+			if([info[kBindingInfoBindingKey] isEqualToString:NSValueBinding])
 				self.eventString = [observableController valueForKeyPath:aKeyPath];
 		}
 	}
