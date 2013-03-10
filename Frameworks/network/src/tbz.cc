@@ -10,44 +10,38 @@ namespace network
 	{
 		signal(SIGPIPE, SIG_IGN);
 
-		int in[2], out[2];
-		pipe(&in[0]);
-		pipe(&out[0]);
-		fcntl(in[1],  F_SETFD, FD_CLOEXEC);
-		fcntl(out[0], F_SETFD, FD_CLOEXEC);
-
-		char const* argv[] = { "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1", NULL };
+		char const* const argv[] = { "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1", NULL };
 		oak::c_array env(oak::basic_environment());
-		pid_t pid = vfork();
-		if(pid == 0)
+
+		int in[2], out[2];
+		posix_spawn_file_actions_t fileActions;
+		posix_spawnattr_t flags;
+		pid_t pid = -1;
+
+		bool ok = true;
+		ok = ok && pipe(&in[0])  == 0;
+		ok = ok && pipe(&out[0]) == 0;
+		ok = ok && posix_spawn_file_actions_init(&fileActions) == 0;
+		ok = ok && posix_spawn_file_actions_adddup2(&fileActions, in[0],  0) == 0;
+		ok = ok && posix_spawn_file_actions_adddup2(&fileActions, out[1], 1) == 0;
+		ok = ok && posix_spawn_file_actions_adddup2(&fileActions, out[1], 2) == 0;
+		ok = ok && posix_spawnattr_init(&flags) == 0;
+		ok = ok && posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT) == 0;
+		ok = ok && posix_spawn(&pid, "/usr/bin/tar", &fileActions, &flags, (char* const*)argv, env) == 0;
+		ok = ok && posix_spawnattr_destroy(&flags) == 0;
+		ok = ok && posix_spawn_file_actions_destroy(&fileActions) == 0;
+		ok = ok && close(in[0])  == 0;
+		ok = ok && close(out[1]) == 0;
+
+		if(!ok)
 		{
-			close(0); close(1); close(2);
-			dup(in[0]); dup(out[1]); dup(out[1]);
-			close(in[0]); close(out[1]);
-
-			signal(SIGPIPE, SIG_DFL);
-
-			execve(argv[0], (char* const*)argv, env);
-			_exit(-1);
+			perror("launch_tbz");
+			return -1;
 		}
-		else
-		{
-			close(in[0]);
-			close(out[1]);
 
-			if(pid == -1)
-			{
-				close(in[1]);
-				close(out[0]);
+		input  = in[1];
+		output = out[0];
 
-				error = text::format("Error launching tar: %s", strerror(errno));
-			}
-			else
-			{
-				input  = in[1];
-				output = out[0];
-			}
-		}
 		return pid;
 	}
 
@@ -68,7 +62,7 @@ namespace network
 			if(WEXITSTATUS(status) == 0 && tbzOut.empty())
 				return true;
 			error = "Extracting archive.";
-			fprintf(stderr, "TextMate: Unexpected exit code from tar %d: %s\n", WEXITSTATUS(status), text::trim(tbzOut).c_str());
+			// fprintf(stderr, "%s: unexpected exit code from tar %d: %s\n", getprogname(), WEXITSTATUS(status), text::trim(tbzOut).c_str());
 		}
 		else
 		{

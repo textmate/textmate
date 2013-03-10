@@ -26,6 +26,7 @@
 #import <pthread.h>
 #import <pwd.h>
 #import <signal.h>
+#import <spawn.h>
 #import <stdarg.h>
 #import <stdio.h>
 #import <stdlib.h>
