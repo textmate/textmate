@@ -3,7 +3,7 @@ require 'pathname'
 require 'erb'
 
 user_code = ""
-functions = [ ]
+tests, benchmarks = [ ], [ ]
 
 ARGV.each do |file|
   if p = Pathname.new(file)
@@ -17,7 +17,10 @@ ARGV.each do |file|
       else
         body << "#line #{lineno} \"#{p.realpath}\"\n"
         body << line
-        functions << "#{ns}::#$1" if line =~ /^\s*void ((?:async_)?test_\w+) \(\)/
+        case line
+          when /^\s*void (test_\w+) \(\)/      then tests      << "#{ns}::#$1"
+          when /^\s*void (benchmark_\w+) \(\)/ then benchmarks << "#{ns}::#$1"
+        end
       end
       lineno += 1
     end
@@ -29,7 +32,7 @@ end
 STDOUT << ERB.new(DATA.read, 0, '-<>').result(binding)
 
 __END__
-#line 33 "<%= $PROGRAM_NAME %>"
+#line 36 "<%= $PROGRAM_NAME %>"
 static std::string oak_format (char const* format, ...) __attribute__ ((format (printf, 1, 2)));
 static std::string oak_format (char const* format, ...)
 {
@@ -118,45 +121,147 @@ std::string oak_format_bad_relation (char const* lhs, char const* op, char const
 #define OAK_MASSERT_NE(msg, lhs, rhs) if(!((lhs) != (rhs))) oak_assertion_error(msg, __FILE__, __LINE__)
 
 <%= user_code %>
-#line 122 "<%= $PROGRAM_NAME %>"
+#line 125 "<%= $PROGRAM_NAME %>"
+
+static double const AppVersion = 1.0;
+
+static void write_version (FILE* io)
+{
+  fprintf(io, "%s %.1f (<%= Time.now %>)\n", getprogname(), AppVersion);
+}
+
+static void write_usage (FILE* io)
+{
+  write_version(io);
+  fprintf(io, "Usage: %s [-b|--benchmark] [-m|--measure] [-r|--repeat] [-v|--verbose] [-h|--help] [-V|--version]\n", getprogname());
+  fprintf(io, "Options:\n");
+  fprintf(io, " -b/--benchmark   Run benchmarks instead of tests.\n");
+  fprintf(io, " -m/--measure     Measure time of each test. This disables concurrency.\n");
+  fprintf(io, " -r/--repeat <n>  Number of times to repeat each test/benchmark.\n");
+  fprintf(io, " -v/--verbose     Be verbose.\n");
+  fprintf(io, " -h/--help        Show this help.\n");
+  fprintf(io, " -V/--version     Show version number.\n");
+}
 
 int main (int argc, char const* argv[])
 {
-  struct test_t
+  static struct option const options[] =
   {
-    test_t (void (*f)()) : run(f) { }
+    { "benchmark", no_argument,       0, 'b' },
+    { "measure",   no_argument,       0, 'm' },
+    { "repeat",    required_argument, 0, 'r' },
+    { "verbose",   no_argument,       0, 'v' },
+    { "help",      no_argument,       0, 'h' },
+    { "version",   no_argument,       0, 'V' },
+    { 0,           0,                 0,   0 }
+  };
+
+  bool measure        = false;
+  bool run_benchmarks = false;
+  bool verbose        = false;
+  size_t repeat       = 1;
+
+  unsigned int ch;
+  while((ch = getopt_long(argc, (char* const*)argv, "bmr:vhV", options, NULL)) != -1)
+  {
+    extern char* optarg;
+    switch(ch)
+    {
+      case 'b': run_benchmarks = true;         break;
+      case 'm': measure        = true;         break;
+      case 'r': repeat         = atoi(optarg); break;
+      case 'v': verbose        = true;         break;
+      case 'h': write_usage(stdout);           return 0;
+      case 'V': write_version(stdout);         return 0;
+      case '?': /* unknown option */           return 1;
+      case ':': /* missing option */           return 1;
+      default:  write_usage(stderr);           return 1;
+    }
+  }
+
+  struct function_t
+  {
+    function_t (void (*f)(), std::string const& n) : run(f), name(n) { }
+
+    void execute (bool measure, size_t repeat)
+    {
+      try {
+        auto start = std::chrono::high_resolution_clock::now();
+        for(size_t i = 0; i < repeat; ++i)
+          run();
+
+        if(measure)
+        {
+          auto end = std::chrono::high_resolution_clock::now();
+          double duration = std::chrono::duration_cast<std::chrono::duration<double, std::nano>>(end-start).count() / std::chrono::duration_cast<std::chrono::duration<double, std::nano>>(std::chrono::seconds(1)).count();
+          fprintf(stdout, "%.3fs %s\n", duration, name.c_str());
+        }
+      }
+      catch(std::exception const& e) {
+        message = e.what();
+      }
+    }
+
     void (*run)();
+    std::string name;
     std::string message;
   };
 
-  __block std::vector<test_t> tests;
-  <%= functions.map { |fun| "\ttests.emplace_back(&#{fun});" }.join("\n") %>
+  __block std::vector<function_t> benchmarks, tests;
+  <%= benchmarks.map { |fun| "benchmarks.emplace_back(&#{fun}, \"#{fun}\");" }.join("\n  ") %>
+  <%= tests.map      { |fun| "tests.emplace_back(&#{fun}, \"#{fun}\");" }.join("\n  ") %>
 
   dispatch_group_t group = dispatch_group_create();
 
-  dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    dispatch_apply(tests.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
-      try {
-        tests[n].run();
+  if(!run_benchmarks)
+  {
+    dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      if(measure)
+      {
+        for(auto test : tests)
+          test.execute(measure, repeat);
       }
-      catch(std::exception const& e) {
-        tests[n].message = e.what();
+      else
+      {
+        dispatch_apply(tests.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t n){
+          tests[n].execute(measure, repeat);
+        });
       }
     });
-  });
+  }
 
   dispatch_group_notify(group, dispatch_get_main_queue(), ^{
-    std::vector<test_t> failed;
-    std::copy_if(tests.begin(), tests.end(), back_inserter(failed), [](test_t const& t){ return !t.message.empty(); });
+    std::vector<function_t> failed;
+    std::copy_if(tests.begin(), tests.end(), back_inserter(failed), [](function_t const& t){ return !t.message.empty(); });
 
-    if(failed.empty())
-      exit(0);
+    if(!failed.empty())
+    {
+      fprintf(stderr, "%s: %zu of %zu %s failed:\n", getprogname(), failed.size(), tests.size(), tests.size() == 1 ? "test" : "tests");
+      for(auto test : failed)
+        fprintf(stderr, "%s\n", test.message.c_str());
+      exit(1);
+    }
 
-    fprintf(stderr, "%s: %zu of %zu %s failed:\n", getprogname(), failed.size(), tests.size(), tests.size() == 1 ? "test" : "tests");
-    for(auto test : failed)
-      fprintf(stderr, "%s\n", test.message.c_str());
+    if(run_benchmarks)
+    {
+      for(auto benchmark : benchmarks)
+      {
+        benchmark.execute(true, repeat);
+        if(!benchmark.message.empty())
+        {
+          fprintf(stderr, "%s\n", benchmark.message.c_str());
+          exit(1);
+        }
+      }
 
-    exit(1);
+      if(benchmarks.empty())
+        fprintf(stderr, "%s: warning: no benchmarks found\n", getprogname());
+    }
+    else if(verbose)
+    {
+      fprintf(stdout, "%s: %zu %s passed\n", getprogname(), tests.size(), tests.size() == 1 ? "test" : "tests");
+    }
+    exit(0);
   });
 
   dispatch_main();
