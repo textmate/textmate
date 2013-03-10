@@ -13,6 +13,8 @@ namespace network
 		int in[2], out[2];
 		pipe(&in[0]);
 		pipe(&out[0]);
+		fcntl(in[1],  F_SETFD, FD_CLOEXEC);
+		fcntl(out[0], F_SETFD, FD_CLOEXEC);
 
 		char const* argv[] = { "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1", NULL };
 		oak::c_array env(oak::basic_environment());
@@ -21,7 +23,7 @@ namespace network
 		{
 			close(0); close(1); close(2);
 			dup(in[0]); dup(out[1]); dup(out[1]);
-			close(in[0]); close(in[1]); close(out[0]); close(out[1]);
+			close(in[0]); close(out[1]);
 
 			signal(SIGPIPE, SIG_DFL);
 
@@ -42,8 +44,8 @@ namespace network
 			}
 			else
 			{
-				fcntl(input  = in[1],  F_SETFD, FD_CLOEXEC);
-				fcntl(output = out[0], F_SETFD, FD_CLOEXEC);
+				input  = in[1];
+				output = out[0];
 			}
 		}
 		return pid;

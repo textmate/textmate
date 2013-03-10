@@ -27,6 +27,9 @@ namespace io
 		int outputPipe[2], errorPipe[2];
 		pipe(outputPipe);
 		pipe(errorPipe);
+		fcntl(outputPipe[0], F_SETFD, FD_CLOEXEC);
+		fcntl(errorPipe[0],  F_SETFD, FD_CLOEXEC);
+
 		int output_fd = outputPipe[0], error_fd = errorPipe[0];
 
 		std::map<std::string, std::string>::const_iterator it = environment.find("PWD");
@@ -38,7 +41,7 @@ namespace io
 		{
 			setpgid(0, getpid());
 
-			int const oldOutErr[] = { 0, 1, 2, output_fd };
+			int const oldOutErr[] = { 0, 1, 2 };
 			for(int fd : oldOutErr) close(fd);
 
 			open("/dev/null", O_RDONLY); // stdin

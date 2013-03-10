@@ -154,10 +154,19 @@ namespace oak
 		
 		int inputPipe[2], outputPipe[2], errorPipe[2];
 		if(input_fd == -1)
-				pipe(inputPipe);
-		else	inputPipe[0] = input_fd;
+		{
+			pipe(inputPipe);
+			fcntl(inputPipe[1], F_SETFD, FD_CLOEXEC);
+		}
+		else
+		{
+			inputPipe[0] = input_fd;
+		}
+
 		pipe(outputPipe);
 		pipe(errorPipe);
+		fcntl(outputPipe[0], F_SETFD, FD_CLOEXEC);
+		fcntl(errorPipe[0],  F_SETFD, FD_CLOEXEC);
 		output_fd = outputPipe[0];
 		error_fd = errorPipe[0];
 
@@ -171,11 +180,9 @@ namespace oak
 			signal(SIGPIPE, SIG_DFL);
 			setpgid(0, getpid());
 
-			int const oldOutErr[] = { 0, 1, 2, outputPipe[0], errorPipe[0] };
+			int const oldOutErr[] = { 0, 1, 2 };
 			int const newOutErr[] = { inputPipe[0], outputPipe[1], errorPipe[1] };
 			for(int fd : oldOutErr) close(fd);
-			if(input_fd == -1)
-				close(inputPipe[1]);
 			for(int fd : newOutErr) dup(fd);
 			for(int fd : newOutErr) close(fd);
 
