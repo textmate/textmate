@@ -91,7 +91,8 @@ static void collect_all_paths (std::string const& git, std::map<std::string, scm
 	ASSERT_NE(git, NULL_STR);
 
 	std::map<std::string, std::string> env = oak::basic_environment();
-	env["PWD"] = dir;
+	env["GIT_WORK_TREE"] = dir;
+	env["GIT_DIR"]       = path::join(dir, ".git");
 
 	bool haveHead = io::exec(env, git, "show-ref", "-qh", NULL) != NULL_STR;
 
@@ -224,7 +225,8 @@ namespace scm
 				return NULL_STR;
 
 			std::map<std::string, std::string> env = oak::basic_environment();
-			env["PWD"] = wcPath;
+			env["GIT_WORK_TREE"] = wcPath;
+			env["GIT_DIR"]       = path::join(wcPath, ".git");
 
 			bool haveHead = io::exec(env, executable(), "show-ref", "-qh", NULL) != NULL_STR;
 			if(!haveHead)
