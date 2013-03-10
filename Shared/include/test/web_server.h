@@ -24,7 +24,7 @@ static int create_socket (int port)
 		struct sockaddr_in addr = { sizeof(sockaddr_in), AF_INET, htons(port), { htonl(INADDR_LOOPBACK) } };
 		if(bind(sock, (sockaddr*)&addr, sizeof(addr)) != -1)
 		{
-			if(listen(sock, 1) != -1)
+			if(listen(sock, 256) != -1)
 				return sock;
 		}
 		close(sock);
