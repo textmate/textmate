@@ -25,6 +25,19 @@ __attribute__((constructor)) static void setup_fixtures ()
 	NSApplicationLoad();
 }
 
+void benchmark_insert_50_mb ()
+{
+	std::string tmp(32*1024, '\0');
+	for(size_t i = 0; i < tmp.size(); ++i)
+		tmp[i] = (i % 0x61) == 0x60 ? '\n' : 0x20 + (i % 0x61);
+	std::random_shuffle(tmp.begin(), tmp.end());
+
+	ng::buffer_t buf;
+	size_t cnt = 50*1024*1024 / tmp.size();
+	for(size_t i = 0; i < cnt; ++i)
+		buf.insert(buf.size(), tmp);
+}
+
 // void test_copy_constructor ()
 // {
 // 	ng::buffer_t org, dup;
@@ -191,21 +204,4 @@ void test_sanitize_index ()
 	OAK_ASSERT_EQ(ng::buffer_t("c̄̌𠻵").sanitize_index( 9),  9);
 	OAK_ASSERT_EQ(ng::buffer_t("c̄̌𠻵").sanitize_index(10),  9);
 	OAK_ASSERT_EQ(ng::buffer_t("c̄̌𠻵").size(), 9);
-}
-
-void test_speed ()
-{
-	std::string tmp = std::string(0x7F - 0x20, '\0');
-	std::iota(tmp.begin(), tmp.end(), 0x20);
-	tmp.append("\n");
-	while(tmp.size() < 32*1024)
-		tmp.insert(tmp.end(), tmp.begin(), tmp.end());
-	std::random_shuffle(tmp.begin(), tmp.end());
-
-	oak::duration_t timer;
-	ng::buffer_t buf;
-	size_t cnt = 50*1024*1024 / tmp.size();
-	for(size_t i = 0; i < cnt; ++i)
-		buf.insert(buf.size(), tmp);
-	printf("%.1f seconds to insert %zu chunks of %s (total %s, %zu lines)\n", timer.duration(), cnt, text::format_size(tmp.size()).c_str(), text::format_size(buf.size()).c_str(), buf.lines());
 }

@@ -4,18 +4,6 @@
 #include <text/format.h>
 #include <regexp/format_string.h>
 
-// #define ENABLE_BM 1
-
-#ifdef ENABLE_BM
-#define BM_OUT(...) fprintf(stderr, __VA_ARGS__)
-static std::string format_number (size_t i)
-{
-	return format_string::replace(std::to_string(i), "\\d{1,3}(?=\\d{3}+(?!\\d))", "$0,");
-}
-#else
-#define BM_OUT(...)
-#endif
-
 struct key_t
 {
 	key_t () : length(0), children(0) { }
@@ -50,80 +38,73 @@ static std::vector<fragment_t> random_ranges (size_t len)
 	return res;
 }
 
-static std::string create_buffer ()
+static std::vector<fragment_t> reverse (std::vector<fragment_t> ranges)
 {
-	std::string buffer;
-#ifdef ENABLE_BM
-	buffer = std::string(0x7F - 0x20, '\0');
-	std::iota(buffer.begin(), buffer.end(), 0x20);
-	while(buffer.size() < 32 * 1024*1024)
-		buffer.insert(buffer.end(), buffer.begin(), buffer.end());
+	std::reverse(ranges.begin(), ranges.end());
+	return ranges;
+}
+
+static std::string create_buffer (size_t size = 50 * 1024)
+{
+	std::string buffer(size, '\0');
+	for(size_t i = 0; i < buffer.size(); ++i)
+		buffer[i] = 0x20 + (i % 0x60);
 	std::random_shuffle(buffer.begin(), buffer.end());
-#else
-	buffer = path::content(__FILE__);
-#endif
 	return buffer;
 }
 
-// void test_cfstring_insert ()
-// {
-// 	std::string const buffer = create_buffer();
-// 	CFMutableStringRef storage = CFStringCreateMutable(kCFAllocatorDefault, 0);
-// 	std::vector<fragment_t> insertRanges = random_ranges(buffer.size());
-// 
-// 	oak::duration_t timer;
-// 	riterate(range, insertRanges)
-// 	{
-// 		CFStringRef substr = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8 const*)buffer.data() + range->src, range->len, kCFStringEncodingASCII, false);
-// 		CFStringInsert(storage, range->dst, substr);
-// 		CFRelease(substr);
-// 	}
-// 	BM_OUT("%.1f seconds to insert %s substrings in CFString (%s)\n", timer.duration(), format_number(insertRanges.size()).c_str(), text::format_size(CFStringGetLength(storage)).c_str());
-// 
-// 	std::string c(CFStringGetLength(storage) + 1, '\0');
-// 	OAK_ASSERT(CFStringGetCString(storage, &c[0], c.size(), kCFStringEncodingASCII));
-// 	OAK_ASSERT_EQ(buffer, c.substr(0, c.size()-1));
-// }
-// 
-// void test_cxxstring_insert ()
-// {
-// 	std::string const buffer = create_buffer();
-// 	std::string storage;
-// 	std::vector<fragment_t> insertRanges = random_ranges(buffer.size());
-// 
-// 	oak::duration_t timer;
-// 	riterate(range, insertRanges)
-// 		storage.insert(range->dst, buffer.substr(range->src, range->len));
-// 	BM_OUT("%.1f seconds to insert %s substrings in std::string (%s)\n", timer.duration(), format_number(insertRanges.size()).c_str(), text::format_size(storage.size()).c_str());
-// 
-// 	OAK_ASSERT_EQ(buffer, storage);
-// }
-
-void test_bracket_operator ()
+void benchmark_cfstring_random_insert_1_mb ()
 {
-	std::string const buffer = create_buffer();
-	ng::detail::storage_t storage;
-	auto v = random_ranges(buffer.size());
-	riterate(range, v)
-		storage.insert(range->dst, buffer.data() + range->src, range->len);
+	std::string const buffer = create_buffer(1 * 1024*1024);
+	CFMutableStringRef storage = CFStringCreateMutable(kCFAllocatorDefault, 0);
 
-	oak::duration_t timer;
-	for(size_t i = 0; i < storage.size(); ++i)
+	for(auto range : reverse(random_ranges(buffer.size())))
 	{
-		OAK_ASSERT_EQ(storage[i], buffer[i]);
+		CFStringRef substr = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8 const*)buffer.data() + range.src, range.len, kCFStringEncodingASCII, false);
+		CFStringInsert(storage, range.dst, substr);
+		CFRelease(substr);
 	}
 
-	BM_OUT("%.1f seconds to scan %s\n", timer.duration(), text::format_size(storage.size()).c_str());
+	std::string c(CFStringGetLength(storage) + 1, '\0');
+	OAK_ASSERT(CFStringGetCString(storage, &c[0], c.size(), kCFStringEncodingASCII));
+	OAK_ASSERT_EQ(buffer, c.substr(0, c.size()-1));
 }
 
-void test_replace ()
+void benchmark_cxxstring_random_insert_1_mb ()
 {
-	std::string const buffer = create_buffer();
+	std::string const buffer = create_buffer(1 * 1024*1024);
+	std::string storage;
+
+	for(auto range : reverse(random_ranges(buffer.size())))
+		storage.insert(range.dst, buffer.substr(range.src, range.len));
+
+	OAK_ASSERT_EQ(buffer, storage);
+}
+
+void benchmark_ng_storage_random_insert_5_mb_overhead ()
+{
+	std::string const buffer = create_buffer(5 * 1024*1024);
+	reverse(random_ranges(buffer.size()));
+}
+
+void benchmark_ng_storage_random_insert_5_mb ()
+{
+	std::string const buffer = create_buffer(5 * 1024*1024);
+	ng::detail::storage_t storage;
+
+	for(auto range : reverse(random_ranges(buffer.size())))
+		storage.insert(range.dst, buffer.data() + range.src, range.len);
+
+	OAK_ASSERT_EQ(storage.substr(0, storage.size()), buffer);
+}
+
+void benchmark_erase_and_insert_in_5_mb ()
+{
+	std::string const buffer = create_buffer(5 * 1024*1024);
 	ng::detail::storage_t storage;
 	storage.insert(0, buffer.data(), buffer.size());
-	size_t total = 0;
 
-	oak::duration_t timer;
+	size_t total = 0;
 	for(size_t i = 0; i < storage.size(); ++i)
 	{
 		if(storage[i] == '=')
@@ -133,68 +114,64 @@ void test_replace ()
 			++total;
 		}
 	}
-
-	BM_OUT("%.1f seconds to replace %s substrings (%s)\n", timer.duration(), format_number(total).c_str(), text::format_size(storage.size()).c_str());
 }
 
-void test_insert ()
+void test_bracket_operator ()
 {
 	std::string const buffer = create_buffer();
 	ng::detail::storage_t storage;
-	std::vector<fragment_t> insertRanges = random_ranges(buffer.size());
 
-	oak::duration_t timer;
-	riterate(range, insertRanges)
-		storage.insert(range->dst, buffer.data() + range->src, range->len);
-	BM_OUT("%.1f seconds to insert %s substrings (%s)\n", timer.duration(), format_number(insertRanges.size()).c_str(), text::format_size(storage.size()).c_str());
+	for(auto range : reverse(random_ranges(buffer.size())))
+		storage.insert(range.dst, buffer.data() + range.src, range.len);
 
-	timer.reset();
-	std::string str = storage.substr(0, storage.size());
-	BM_OUT("%.1f seconds to create %s large substring\n", timer.duration(), text::format_size(str.size()).c_str());
-
-	OAK_ASSERT_EQ(str, buffer);
+	for(size_t i = 0; i < storage.size(); ++i)
+		OAK_ASSERT_EQ(storage[i], buffer[i]);
 }
 
-void test_erase ()
+void test_random_insert ()
+{
+	std::string const buffer = create_buffer();
+	ng::detail::storage_t storage;
+
+	for(auto range : reverse(random_ranges(buffer.size())))
+		storage.insert(range.dst, buffer.data() + range.src, range.len);
+
+	OAK_ASSERT_EQ(storage.substr(0, storage.size()), buffer);
+}
+
+void test_random_erase ()
 {
 	std::string const buffer = create_buffer();
 	ng::detail::storage_t storage;
 	storage.insert(0, buffer.data(), buffer.size());
-	std::vector<fragment_t> eraseRanges = random_ranges(storage.size());
 
-	oak::duration_t timer;
-	for(auto const& range : eraseRanges)
+	for(auto const& range : random_ranges(storage.size()))
 		storage.erase(range.dst, range.dst + range.len);
-	BM_OUT("%.1f seconds to erase %s substrings\n", timer.duration(), format_number(eraseRanges.size()).c_str());
 
 	OAK_ASSERT_EQ(storage.size(), 0);
 }
 
-void test_iteration ()
+void test_buffer_chunk_iterator ()
 {
 	std::string const buffer = create_buffer();
 	ng::detail::storage_t storage;
-	std::vector<fragment_t> insertRanges = random_ranges(buffer.size());
 
-	riterate(range, insertRanges)
-		storage.insert(range->dst, buffer.data() + range->src, range->len);
+	for(auto range : reverse(random_ranges(buffer.size())))
+		storage.insert(range.dst, buffer.data() + range.src, range.len);
 
 	std::string str;
-	citerate(node, storage)
-		str.append((*node).data(), (*node).size());
+	for(auto node : storage)
+		str.append(node.data(), node.size());
 
 	OAK_ASSERT_EQ(str, buffer);
 }
 
-void test_access ()
+void test_random_substr_access ()
 {
 	std::string const buffer = create_buffer();
 	ng::detail::storage_t storage;
 	storage.insert(0, buffer.data(), buffer.size());
-	std::vector<fragment_t> accessRanges = random_ranges(storage.size());
 
-	oak::duration_t timer;
-	for(auto const& range : accessRanges)
+	for(auto range : random_ranges(storage.size()))
 		OAK_ASSERT_EQ(storage.substr(range.src, range.src + range.len), buffer.substr(range.src, range.len));
-	BM_OUT("%.1f seconds to create %s substrings\n", timer.duration(), format_number(accessRanges.size()).c_str());
 }
