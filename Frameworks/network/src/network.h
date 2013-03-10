@@ -4,7 +4,6 @@
 #include "constants.h"
 #include "download.h"
 #include "filter_save.h"
-#include "filter_tbz.h"
 #include "filter_check_signature.h"
 #include "filter_etag.h"
 #include <oak/misc.h>
