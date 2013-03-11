@@ -108,7 +108,7 @@ namespace scm
 				_xslt_path = SourceTreePath;
 
 			if(_xslt_path == NULL_STR)
-				fprintf(stderr, "TextMate/svn: Unable to locate ‘svn_status.xslt’.\n");
+				fprintf(stderr, "%s: Unable to locate ‘svn_status.xslt’.\n", getprogname());
 		}
 
 		std::string branch_name (std::string const& wcPath) const
