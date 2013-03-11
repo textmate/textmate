@@ -20,6 +20,7 @@
 			@"tabsAboveDocument"       : kUserDefaultsTabsAboveDocumentKey,
 			@"showFileExtensions"      : kUserDefaultsShowFileExtensionsKey,
 			@"disableTabBarCollapsing" : kUserDefaultsDisableTabBarCollapsingKey,
+			@"disableAutoResize"       : kUserDefaultsDisableFileBrowserWindowResizeKey,
 			@"fileBrowserPlacement"    : kUserDefaultsFileBrowserPlacementKey,
 			@"htmlOutputPlacement"     : kUserDefaultsHTMLOutputPlacementKey,
 		};
