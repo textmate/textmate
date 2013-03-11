@@ -59,6 +59,8 @@ static BOOL IsInShouldTerminateEventLoop = NO;
 @property (nonatomic) OakFileBrowser*             fileBrowser;
 
 @property (nonatomic) BOOL                        disableFileBrowserWindowResize;
+@property (nonatomic) NSRect                      oldWindowFrame;
+@property (nonatomic) NSRect                      newWindowFrame;
 
 @property (nonatomic) HTMLOutputWindowController* htmlOutputWindowController;
 @property (nonatomic) OakHTMLOutputView*          htmlOutputView;
@@ -1543,17 +1545,42 @@ namespace
 		if(!self.disableFileBrowserWindowResize && ([self.window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
 		{
 			NSRect windowFrame = self.window.frame;
-			if(makeVisibleFlag)
+
+			if(NSEqualRects(windowFrame, self.newWindowFrame))
+			{
+				windowFrame = self.oldWindowFrame;
+			}
+			else if(makeVisibleFlag)
 			{
 				NSRect screenFrame = [[self.window screen] visibleFrame];
-				windowFrame.size.width = MIN(NSWidth(windowFrame) + self.fileBrowserWidth, NSWidth(screenFrame));
-				windowFrame.origin.x   = MIN(NSMinX(windowFrame), NSMaxX(screenFrame) - NSWidth(windowFrame));
+				CGFloat minX = NSMinX(windowFrame);
+				CGFloat maxX = NSMaxX(windowFrame);
+
+				if(self.layoutView.fileBrowserOnRight)
+						maxX += self.fileBrowserWidth + 1;
+				else	minX -= self.fileBrowserWidth + 1;
+
+				if(minX < NSMinX(screenFrame))
+					maxX += NSMinX(screenFrame) - minX;
+				if(maxX > NSMaxX(screenFrame))
+					minX -= maxX - NSMaxX(screenFrame);
+
+				minX = MAX(minX, NSMinX(screenFrame));
+				maxX = MIN(maxX, NSMaxX(screenFrame));
+
+				windowFrame.origin.x   = minX;
+				windowFrame.size.width = maxX - minX;
 			}
 			else
 			{
-				windowFrame.size.width -= self.fileBrowserWidth;
+				windowFrame.size.width -= self.fileBrowserWidth + 1;
+				if(!self.layoutView.fileBrowserOnRight)
+					windowFrame.origin.x += self.fileBrowserWidth + 1;
 			}
+
+			self.oldWindowFrame = self.window.frame;
 			[self.window setFrame:windowFrame display:YES];
+			self.newWindowFrame = self.window.frame;
 		}
 	}
 	[[self class] scheduleSessionBackup:self];
