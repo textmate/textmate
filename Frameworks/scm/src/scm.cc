@@ -191,12 +191,9 @@ namespace scm
 		{
 			if(!info->_driver->may_touch_filesystem() || info->_fs_snapshot != fs::snapshot_t(info->_root_path))
 			{
-				std::map<std::string, std::string> variables{ { "TM_SCM_NAME", info->_driver->name() } };
-				std::string const branch = info->_driver->branch_name(info->_root_path);
-				if(branch != NULL_STR)
-					variables.insert(std::make_pair("TM_SCM_BRANCH", branch));
-				scm::status_map_t const status = info->_driver->status(info->_root_path);
-				fs::snapshot_t const snapshot = info->_driver->may_touch_filesystem() ? fs::snapshot_t(info->_root_path) : fs::snapshot_t();
+				auto const status    = info->_driver->status(info->_root_path);
+				auto const variables = info->_driver->variables(info->_root_path);
+				auto const snapshot  = info->_driver->may_touch_filesystem() ? fs::snapshot_t(info->_root_path) : fs::snapshot_t();
 				dispatch_async(dispatch_get_main_queue(), ^{
 					if(shared_info_ptr info = weakThis.lock())
 						info->update(variables, status, snapshot);

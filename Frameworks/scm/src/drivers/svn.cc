@@ -111,14 +111,18 @@ namespace scm
 				fprintf(stderr, "%s: Unable to locate ‘svn_status.xslt’.\n", getprogname());
 		}
 
-		std::string branch_name (std::string const& wcPath) const
+		std::map<std::string, std::string> variables (std::string const& wcPath) const
 		{
-			if(executable() == NULL_STR)
-				return NULL_STR;
-
-			auto info = parse_info_output(io::exec(executable(), "info", wcPath.c_str(), NULL));
-			auto urlInfo = info.find("URL");
-			return urlInfo != info.end() ? urlInfo->second : NULL_STR;
+			D(DBF_SCM_Svn, bug("%s\n", wcPath.c_str()););
+			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
+			if(executable() != NULL_STR)
+			{
+				auto info = parse_info_output(io::exec(executable(), "info", wcPath.c_str(), NULL));
+				auto urlInfo = info.find("URL");
+				if(urlInfo != info.end())
+					res.insert(std::make_pair("TM_SCM_BRANCH", urlInfo->second));
+			}
+			return res;
 		}
 
 		status_map_t status (std::string const& wcPath) const

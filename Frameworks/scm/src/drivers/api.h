@@ -10,7 +10,7 @@ namespace scm
 	{
 		driver_t (std::string const& name, std::string const& wcRootFormatString, std::string const& requiredExecutable = NULL_STR);
 
-		virtual std::string branch_name (std::string const& wcPath) const = 0;
+		virtual std::map<std::string, std::string> variables (std::string const& wcPath) const = 0;
 		virtual status_map_t status (std::string const& wcPath) const = 0;
 
 		std::string const& name () const           { return _name; }

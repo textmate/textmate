@@ -219,24 +219,27 @@ namespace scm
 	{
 		git_driver_t () : driver_t("git", "%s/.git", "git") { }
 
-		std::string branch_name (std::string const& wcPath) const
+		std::map<std::string, std::string> variables (std::string const& wcPath) const
 		{
-			if(executable() == NULL_STR)
-				return NULL_STR;
+			D(DBF_SCM_Git, bug("%s\n", wcPath.c_str()););
+			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
+			if(executable() != NULL_STR)
+			{
+				std::map<std::string, std::string> env = oak::basic_environment();
+				env["GIT_WORK_TREE"] = wcPath;
+				env["GIT_DIR"]       = path::join(wcPath, ".git");
 
-			std::map<std::string, std::string> env = oak::basic_environment();
-			env["GIT_WORK_TREE"] = wcPath;
-			env["GIT_DIR"]       = path::join(wcPath, ".git");
-
-			bool haveHead = io::exec(env, executable(), "show-ref", "-qh", NULL) != NULL_STR;
-			if(!haveHead)
-				return NULL_STR;
-
-			std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
-			branchName = branchName.substr(0, branchName.find("\n"));
-			if(branchName.find("refs/heads/") == 0)
-				branchName = branchName.substr(11);
-			return branchName;
+				bool haveHead = io::exec(env, executable(), "show-ref", "-qh", NULL) != NULL_STR;
+				if(haveHead)
+				{
+					std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
+					branchName = branchName.substr(0, branchName.find("\n"));
+					if(branchName.find("refs/heads/") == 0)
+						branchName = branchName.substr(11);
+					res.insert(std::make_pair("TM_SCM_BRANCH", branchName));
+				}
+			}
+			return res;
 		}
 
 		status_map_t status (std::string const& wcPath) const

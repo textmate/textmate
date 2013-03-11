@@ -58,13 +58,15 @@ namespace scm
 
 		bool may_touch_filesystem () const { return true; }
 
-		std::string branch_name (std::string const& wcPath) const
+		std::map<std::string, std::string> variables (std::string const& wcPath) const
 		{
-			if(executable() == NULL_STR)
-				return NULL_STR;
-
-			std::string branchName = io::exec(executable(), "branch", "--cwd", wcPath.c_str(), NULL);
-			return branchName.substr(0, branchName.find("\n"));
+			std::map<std::string, std::string> res = { { "TM_SCM_NAME", name() } };
+			if(executable() != NULL_STR)
+			{
+				std::string branchName = io::exec(executable(), "branch", "--cwd", wcPath.c_str(), NULL);
+				res.insert(std::make_pair("TM_SCM_BRANCH", branchName.substr(0, branchName.find("\n"))));
+			}
+			return res;
 		}
 
 		status_map_t status (std::string const& wcPath) const
