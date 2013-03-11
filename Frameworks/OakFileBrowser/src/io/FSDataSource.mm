@@ -97,7 +97,7 @@ static ino_t inode (std::string const& path)
 
 - (void)outlineView:(NSOutlineView*)anOutlineView setObjectValue:(id)objectValue forTableColumn:(NSTableColumn*)tableColumn byItem:(FSItem*)item
 {
-	if(![item.url isFileURL] || [item.name isEqualToString:objectValue])
+	if(![item.url isFileURL] || [item.name isEqualToString:objectValue] || [objectValue length] == 0)
 		return;
 
 	std::string src = [[item.url path] fileSystemRepresentation];
