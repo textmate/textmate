@@ -346,6 +346,12 @@ namespace
 {
 	self.htmlOutputInWindow = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsHTMLOutputPlacementKey] isEqualToString:@"window"];
 	self.disableFileBrowserWindowResize = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableFileBrowserWindowResizeKey];
+
+	if(self.layoutView.fileBrowserOnRight != [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsFileBrowserPlacementKey] isEqualToString:@"right"])
+	{
+		self.oldWindowFrame = self.newWindowFrame = NSZeroRect;
+		self.layoutView.fileBrowserOnRight = !self.layoutView.fileBrowserOnRight;
+	}
 }
 
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
