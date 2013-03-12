@@ -18,7 +18,8 @@ NSString* const FFSearchInDocument  = @"FFSearchInDocument";
 NSString* const FFSearchInSelection = @"FFSearchInSelection";
 NSString* const FFSearchInOpenFiles = @"FFSearchInOpenFiles";
 
-NSString* const kUserDefaultsFolderOptionsKey = @"Folder Search Options";
+NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
+NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 
 @interface OakAutoSizingTextField : NSTextField
 @property (nonatomic) NSSize myIntrinsicContentSize;
@@ -206,6 +207,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 
 @property (nonatomic) BOOL                      folderSearch;
 @property (nonatomic, readonly) BOOL            canIgnoreWhitespace;
+@property (nonatomic) CGFloat                   findResultsHeight;
 @end
 
 @implementation FindWindowController
@@ -453,7 +455,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	if(self.showsResultsOutlineView)
 	{
 		CONSTRAINT(@"H:|[results(==resultsTopDivider,==resultsBottomDivider)]|", 0);
-		CONSTRAINT(@"V:[where]-[resultsTopDivider][results(>=200)][resultsBottomDivider]-[status]", 0);
+		[_myConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[where]-[resultsTopDivider][results(>=50,==height@490)][resultsBottomDivider]-[status]" options:0 metrics:@{ @"height" : @(self.findResultsHeight) } views:views]];
 	}
 	else
 	{
@@ -568,6 +570,12 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	}
 
 	return res;
+}
+
+- (void)windowDidResize:(NSNotification*)aNotification
+{
+	if(self.showsResultsOutlineView)
+		self.findResultsHeight = NSHeight(self.resultsScrollView.frame);
 }
 
 - (void)windowDidResignKey:(NSNotification*)aNotification
@@ -753,13 +761,44 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	if(_showsResultsOutlineView == flag)
 		return;
 
+	BOOL isWindowLoaded = [self isWindowLoaded];
+	CGFloat desiredHeight = self.findResultsHeight;
+
 	for(NSView* view in @[ self.resultsTopDivider, self.resultsScrollView, self.resultsBottomDivider ])
 	{
 		if(_showsResultsOutlineView = flag)
 				[self.window.contentView addSubview:view];
 		else	[view removeFromSuperview];
 	}
+
 	[self updateConstraints];
+
+	if(flag && isWindowLoaded)
+	{
+		// we can’t resize window as long as it needs layout
+		dispatch_async(dispatch_get_main_queue(), ^{
+			NSRect screenFrame = [[self.window screen] visibleFrame];
+			NSRect windowFrame = self.window.frame;
+			CGFloat minY = NSMinY(windowFrame);
+			CGFloat maxY = NSMaxY(windowFrame);
+
+			CGFloat currentHeight = NSHeight(self.resultsScrollView.frame);
+			minY -= desiredHeight - currentHeight;
+
+			if(minY < NSMinY(screenFrame))
+				maxY += NSMinY(screenFrame) - minY;
+			if(maxY > NSMaxY(screenFrame))
+				minY -= maxY - NSMaxY(screenFrame);
+
+			minY = MAX(minY, NSMinY(screenFrame));
+			maxY = MIN(maxY, NSMaxY(screenFrame));
+
+			windowFrame.origin.y    = minY;
+			windowFrame.size.height = maxY - minY;
+
+			[self.window setFrame:windowFrame display:YES];
+		});
+	}
 
 	self.findAllButton.keyEquivalent  = flag ? @"\r" : @"";
 	self.findNextButton.keyEquivalent = flag ? @"" : @"\r";
@@ -870,6 +909,9 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 	_replaceString = aString ?: @"";
 	[self.replaceTextField updateIntrinsicContentSizeToEncompassString:_replaceString];
 }
+
+- (void)setFindResultsHeight:(CGFloat)height { [[NSUserDefaults standardUserDefaults] setInteger:height forKey:kUserDefaultsFindResultsHeightKey]; }
+- (CGFloat)findResultsHeight                 { return [[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFindResultsHeightKey] ?: 200; }
 
 - (void)setRegularExpression:(BOOL)flag { _regularExpression = flag; if(self.findErrorString) [self updateFindErrorString]; }
 - (void)setIgnoreCase:(BOOL)flag        { if(_ignoreCase != flag) [[NSUserDefaults standardUserDefaults] setObject:@(_ignoreCase = flag) forKey:kUserDefaultsFindIgnoreCase]; }
