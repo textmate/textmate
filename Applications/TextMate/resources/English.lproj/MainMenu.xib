@@ -1901,6 +1901,14 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
+								<object class="NSMenuItem" id="837680731">
+									<reference key="NSMenu" ref="564325342"/>
+									<string key="NSTitle">Unwrap Paragraph</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
 								<object class="NSMenuItem" id="788847861">
 									<reference key="NSMenu" ref="564325342"/>
 									<bool key="NSIsDisabled">YES</bool>
@@ -1912,10 +1920,11 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
-								<object class="NSMenuItem" id="837680731">
+								<object class="NSMenuItem" id="174583409">
 									<reference key="NSMenu" ref="564325342"/>
-									<string key="NSTitle">Unwrap Paragraph</string>
-									<string key="NSKeyEquiv"/>
+									<string key="NSTitle">Filter Through Command…</string>
+									<string key="NSKeyEquiv">|</string>
+									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
@@ -3699,6 +3708,14 @@
 					<int key="connectionID">835</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">orderFrontRunCommandWindow:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="174583409"/>
+					</object>
+					<int key="connectionID">838</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">bundlesMenuItem</string>
 						<reference key="source" ref="261397727"/>
@@ -4510,7 +4527,6 @@
 							<reference ref="655643905"/>
 							<reference ref="829740363"/>
 							<reference ref="716147539"/>
-							<reference ref="837680731"/>
 							<reference ref="535081544"/>
 							<reference ref="41406662"/>
 							<reference ref="973710509"/>
@@ -4518,7 +4534,9 @@
 							<reference ref="1050316824"/>
 							<reference ref="788847861"/>
 							<reference ref="295585713"/>
+							<reference ref="837680731"/>
 							<reference ref="429239126"/>
+							<reference ref="174583409"/>
 						</object>
 						<reference key="parent" ref="929665713"/>
 					</object>
@@ -5591,6 +5609,11 @@
 						<reference key="object" ref="909812697"/>
 						<reference key="parent" ref="377204242"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">836</int>
+						<reference key="object" ref="174583409"/>
+						<reference key="parent" ref="564325342"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5874,6 +5897,7 @@
 					<string>83.IBPluginDependency</string>
 					<string>832.IBPluginDependency</string>
 					<string>833.IBPluginDependency</string>
+					<string>836.IBPluginDependency</string>
 				</object>
 				<object class="NSArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -6154,6 +6178,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6168,7 +6193,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">835</int>
+			<int key="maxID">838</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6334,6 +6359,7 @@
 							<string>newFolder:</string>
 							<string>orderFrontFindPanel:</string>
 							<string>orderFrontGoToFolder:</string>
+							<string>orderFrontRunCommandWindow:</string>
 							<string>performCloseAllTabs:</string>
 							<string>performCloseOtherTabs:</string>
 							<string>performCloseSplit:</string>
@@ -6352,6 +6378,7 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -6411,6 +6438,7 @@
 							<string>newFolder:</string>
 							<string>orderFrontFindPanel:</string>
 							<string>orderFrontGoToFolder:</string>
+							<string>orderFrontRunCommandWindow:</string>
 							<string>performCloseAllTabs:</string>
 							<string>performCloseOtherTabs:</string>
 							<string>performCloseSplit:</string>
@@ -6503,6 +6531,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">orderFrontGoToFolder:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">orderFrontRunCommandWindow:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

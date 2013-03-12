@@ -3,6 +3,7 @@
 #import "DocumentOpenHelper.h"
 #import "DocumentSaveHelper.h"
 #import "DocumentCommand.h" // show_command_error
+#import "OakRunCommandWindowController.h"
 #import <OakAppKit/NSAlert Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
@@ -1788,6 +1789,13 @@ namespace
 	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 	find.projectIdentifier  = self.identifier;
 	[find showFindWindowFor:self.untitledSavePath];
+}
+
+- (IBAction)orderFrontRunCommandWindow:(id)sender
+{
+	OakRunCommandWindowController* runCommand = [OakRunCommandWindowController sharedInstance];
+	[self positionWindow:runCommand.window];
+	[runCommand showWindow:nil];
 }
 
 // ==================

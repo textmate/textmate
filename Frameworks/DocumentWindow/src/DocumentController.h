@@ -61,6 +61,7 @@ PUBLIC @interface DocumentController : NSObject
 // =============================
 
 - (IBAction)orderFrontFindPanel:(id)sender;
+- (IBAction)orderFrontRunCommandWindow:(id)sender;
 - (IBAction)goToFile:(id)sender;
 
 // ==================
