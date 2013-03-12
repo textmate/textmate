@@ -911,6 +911,12 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		}
 	}
 
+	if([selectedItems count])
+	{
+		[aMenu addItem:[NSMenuItem separatorItem]];
+		[aMenu addItemWithTitle:@"Select None" action:@selector(deselectAll:) keyEquivalent:@"A"];
+	}
+
 	if(hasFileSelected || self.canPaste)
 	{
 		[aMenu addItem:[NSMenuItem separatorItem]];
@@ -966,6 +972,25 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (BOOL)menuHasKeyEquivalent:(NSMenu*)aMenu forEvent:(NSEvent*)anEvent target:(id*)anId action:(SEL*)aSEL
 {
+	static std::string const keys[] = { "@N", "^@n", "@A" };
+	std::string const eventString = to_s(anEvent);
+	if(!oak::contains(std::begin(keys), std::end(keys), eventString))
+		return NO;
+
+	[self updateMenu:aMenu];
+	for(NSMenuItem* item in [aMenu itemArray])
+	{
+		if(eventString == ns::create_event_string(item.keyEquivalent, item.keyEquivalentModifierMask))
+		{
+			if(id target = [NSApp targetForAction:item.action])
+			{
+				*anId = target;
+				*aSEL = item.action;
+				return YES;
+			}
+		}
+	}
+
 	return NO;
 }
 
