@@ -14,10 +14,6 @@
 #import <io/path.h>
 #import <regexp/regexp.h>
 
-NSString* const FFSearchInDocument  = @"FFSearchInDocument";
-NSString* const FFSearchInSelection = @"FFSearchInSelection";
-NSString* const FFSearchInOpenFiles = @"FFSearchInOpenFiles";
-
 NSString* const kUserDefaultsFolderOptionsKey     = @"Folder Search Options";
 NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 
@@ -618,15 +614,6 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 // ==============================
 // = Create “where” pop-up menu =
 // ==============================
-
-- (IBAction)orderFrontFindPanel:(id)sender
-{
-	NSInteger tag = [sender respondsToSelector:@selector(tag)] ? [sender tag] : 0;
-	if(tag == 1) /* find_tags::in_document */
-		self.searchIn = FFSearchInDocument;
-	else if(tag == 3) /* find_tags::in_project */
-		self.searchIn = self.projectFolder;
-}
 
 - (NSString*)displayNameForFolder:(NSString*)path
 {

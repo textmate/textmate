@@ -274,25 +274,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (IBAction)orderFrontFindPanel:(id)sender
 {
 	D(DBF_AppController, bug("\n"););
-	Find* find = [Find sharedInstance];
-
-	int mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
-	if(mode == find_tags::in_folder)
-		return [find showFolderSelectionPanel:self];
-
+	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
 	switch(mode)
 	{
-		case find_tags::in_document:
-			find.searchScope = find::in::document;
-			break;
-		case find_tags::in_selection:
-			find.searchScope = find::in::selection;
-			break;
-		case find_tags::in_project:
-			find.searchFolder = find.projectFolder;
-			break;
+		case find_tags::in_document:  return [[Find sharedInstance] showFindWindowFor:FFSearchInDocument];
+		case find_tags::in_selection: return [[Find sharedInstance] showFindWindowFor:FFSearchInSelection];
+		case find_tags::in_project:   return [[Find sharedInstance] showFindWindowFor:NSHomeDirectory()];
+		case find_tags::in_folder:    return [[Find sharedInstance] showFolderSelectionPanel:self];
 	}
-	[find showFindPanel:self];
 }
 
 - (IBAction)orderFrontGoToLinePanel:(id)sender;

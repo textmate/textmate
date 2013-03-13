@@ -1,23 +1,20 @@
 #import <OakFoundation/OakFindProtocol.h>
 
-namespace find
-{
-	namespace in { enum { document, selection, open_files }; }
-}
+PUBLIC extern NSString* const FFSearchInDocument;
+PUBLIC extern NSString* const FFSearchInSelection;
+extern NSString* const FFSearchInOpenFiles;
 
 PUBLIC @interface Find : NSResponder <OakFindServerProtocol>
 @property (nonatomic, copy) NSString* projectFolder;
-@property (nonatomic, copy) NSString* searchFolder;
 @property (nonatomic, copy) NSString* projectIdentifier;
 @property (nonatomic, copy) NSString* documentIdentifier;
 
-@property (nonatomic, readonly) BOOL isVisible;
-
-@property (nonatomic, assign) int searchScope;
+@property (nonatomic, readonly) BOOL      isVisible;
+@property (nonatomic, readonly) NSString* searchFolder;
 
 + (Find*)sharedInstance;
 
-- (IBAction)showFindPanel:(id)sender;
+- (void)showFindWindowFor:(NSString*)searchScope;
 - (IBAction)showFolderSelectionPanel:(id)sender;
 - (IBAction)takeFindOptionToToggleFrom:(id)sender;
 

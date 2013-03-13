@@ -1738,43 +1738,34 @@ namespace
 	find.projectIdentifier  = self.identifier;
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
-	if(mode == find_tags::in_folder)
-		return [find showFolderSelectionPanel:self];
-
 	if(mode == find_tags::in_document && self.textView.hasMultiLineSelection)
 		mode = find_tags::in_selection;
 
 	switch(mode)
 	{
-		case find_tags::in_document:
-			find.searchScope = find::in::document;
-		break;
-
-		case find_tags::in_selection:
-			find.searchScope = find::in::selection;
-		break;
+		case find_tags::in_document:  return [find showFindWindowFor:FFSearchInDocument];
+		case find_tags::in_selection: return [find showFindWindowFor:FFSearchInSelection];
+		case find_tags::in_folder:    return [find showFolderSelectionPanel:self];
 
 		case find_tags::in_project:
 		{
-			if(!find.isVisible || !find.searchFolder)
-			{
-				BOOL fileBrowserHasFocus = [self.window.firstResponder respondsToSelector:@selector(isDescendantOf:)] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.view];
-				find.searchFolder = fileBrowserHasFocus ? self.untitledSavePath : find.projectFolder;
-			}
+			BOOL fileBrowserHasFocus = [self.window.firstResponder respondsToSelector:@selector(isDescendantOf:)] && [(NSView*)self.window.firstResponder isDescendantOf:self.fileBrowser.view];
+			NSString* searchFolder = fileBrowserHasFocus ? self.untitledSavePath : find.projectFolder;
+			if(find.isVisible && find.searchFolder)
+				searchFolder = find.searchFolder;
+			[find showFindWindowFor:searchFolder];
 		}
 		break;
 	}
-	[find showFindPanel:self];
 }
 
 - (IBAction)orderFrontFindPanelForFileBrowser:(id)sender
 {
 	Find* find              = [Find sharedInstance];
 	find.documentIdentifier = self.selectedDocumentUUID;
+	find.projectFolder      = self.projectPath ?: self.untitledSavePath ?: NSHomeDirectory();
 	find.projectIdentifier  = self.identifier;
-	find.projectFolder      = self.projectPath ?: self.untitledSavePath;
-	find.searchFolder       = self.untitledSavePath;
-	[find showFindPanel:self];
+	[find showFindWindowFor:self.untitledSavePath];
 }
 
 // ==================

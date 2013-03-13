@@ -19,6 +19,10 @@
 
 OAK_DEBUG_VAR(Find_Base);
 
+NSString* const FFSearchInDocument  = @"FFSearchInDocument";
+NSString* const FFSearchInSelection = @"FFSearchInSelection";
+NSString* const FFSearchInOpenFiles = @"FFSearchInOpenFiles";
+
 enum FindActionTag
 {
 	FindActionFindNext = 1,
@@ -66,8 +70,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Actions for displaying the panel =
 // ====================================
 
-- (IBAction)showFindPanel:(id)sender
+- (void)showFindWindowFor:(NSString*)searchScope
 {
+	self.windowController.searchIn = searchScope;
 	[self.windowController showWindow:self];
 }
 
@@ -82,25 +87,18 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 	if([self.windowController isWindowLoaded] && [self.windowController.window isVisible])
 	{
 		[openPanel beginSheetModalForWindow:self.windowController.window completionHandler:^(NSInteger result) {
-			[self openPanelDidEnd:openPanel returnCode:result];
-			if(result != NSOKButton) // Reset selected item in pop-up button
+			if(result == NSOKButton)
+				[self showFindWindowFor:[[[[openPanel URLs] lastObject] filePathURL] path]];
+			else if([self isVisible]) // Reset selected item in pop-up button
 				self.windowController.searchIn = self.windowController.searchIn;
 		}];
 	}
 	else
 	{
 		[openPanel beginWithCompletionHandler:^(NSInteger result) {
-			[self openPanelDidEnd:openPanel returnCode:result];
+			if(result == NSOKButton)
+				[self showFindWindowFor:[[[[openPanel URLs] lastObject] filePathURL] path]];
 		}];
-	}
-}
-
-- (void)openPanelDidEnd:(NSOpenPanel*)panel returnCode:(NSInteger)returnCode
-{
-	if(returnCode == NSOKButton)
-	{
-		self.windowController.searchIn = [[[[panel URLs] lastObject] filePathURL] path];
-		[self showFindPanel:self];
 	}
 }
 
@@ -283,54 +281,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 // = Accessors =
 // =============
 
-- (NSString*)projectFolder
-{
-	return self.windowController.projectFolder;
-}
-
-- (void)setProjectFolder:(NSString*)folder
-{
-	self.windowController.projectFolder = folder;
-}
-
-- (NSString*)searchFolder
-{
-	return [@[ FFSearchInDocument, FFSearchInSelection, FFSearchInOpenFiles ] containsObject:self.windowController.searchIn] ? nil : self.windowController.searchIn;
-}
-
-- (void)setSearchFolder:(NSString*)folder
-{
-	self.windowController.searchIn = folder;
-}
-
-- (int)searchScope
-{
-	if([self.windowController.searchIn isEqualToString:FFSearchInSelection])
-		return find::in::selection;
-	else if([self.windowController.searchIn isEqualToString:FFSearchInDocument])
-		return find::in::document;
-	else if([self.windowController.searchIn isEqualToString:FFSearchInOpenFiles])
-		return find::in::open_files;
-	return find::in::document;
-}
-
-- (void)setSearchScope:(int)newSearchScope
-{
-	switch(newSearchScope)
-	{
-		case find::in::document:   self.windowController.searchIn = FFSearchInDocument;  break;
-		case find::in::selection:  self.windowController.searchIn = FFSearchInSelection; break;
-		case find::in::open_files: self.windowController.searchIn = FFSearchInOpenFiles; break;
-		default:
-			ASSERTF(false, "Unknown search scope tag %d\n", newSearchScope);
-	}
-	self.windowController.showsResultsOutlineView = NO;
-}
-
-- (BOOL)isVisible
-{
-	return self.windowController.window.isVisible;
-}
+- (void)setProjectFolder:(NSString*)folder { self.windowController.projectFolder = folder; }
+- (NSString*)projectFolder                 { return self.windowController.projectFolder; }
+- (NSString*)searchFolder                  { return self.windowController.searchFolder; }
+- (BOOL)isVisible                          { return self.windowController.window.isVisible; }
 
 // ===========
 // = Options =
