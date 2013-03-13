@@ -429,26 +429,30 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 
 	NSDictionary* views = self.allViews;
 
-	CONSTRAINT(@"H:|-(>=10)-[findLabel]-[find(>=100)]",                0);
+	CONSTRAINT(@"H:|-(>=20,==20@75)-[findLabel]-[find(>=100)]",        0);
 	CONSTRAINT(@"H:[find]-(5)-[findHistory]-[count(==findHistory)]-|", NSLayoutFormatAlignAllTop);
 	CONSTRAINT(@"V:[count(==21)]",                                     NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
-	CONSTRAINT(@"H:|-(>=10)-[replaceLabel]-[replace]",                 0);
+	CONSTRAINT(@"H:|-(>=20,==20@75)-[replaceLabel]-[replace]",         0);
 	CONSTRAINT(@"H:[replace]-(5)-[replaceHistory]",                    NSLayoutFormatAlignAllTop);
 	CONSTRAINT(@"V:|-[find]-[replace]",                                NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
 
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findTextField attribute:NSLayoutAttributeTop multiplier:1 constant:6]];
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceTextField attribute:NSLayoutAttributeTop multiplier:1 constant:6]];
 
-	CONSTRAINT(@"H:|-(==20@100)-[optionsLabel]-[regularExpression]-[ignoreWhitespace]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
-	CONSTRAINT(@"H:[ignoreCase(==regularExpression)]-[wrapAround(==ignoreWhitespace)]",          NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom);
-	CONSTRAINT(@"V:[replace]-[regularExpression]-[ignoreCase]",                                  NSLayoutFormatAlignAllLeft);
-	CONSTRAINT(@"V:[replace]-[ignoreWhitespace]-[wrapAround]",                                   0);
+	CONSTRAINT(@"H:|-(>=20,==20@75)-[optionsLabel]-[regularExpression]-[ignoreWhitespace]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
+	CONSTRAINT(@"H:[ignoreCase(==regularExpression)]-[wrapAround(==ignoreWhitespace)]",              NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom);
+	CONSTRAINT(@"V:[replace]-[regularExpression]-[ignoreCase]",                                      NSLayoutFormatAlignAllLeft);
+	CONSTRAINT(@"V:[replace]-[ignoreWhitespace]-[wrapAround]",                                       0);
 
-	CONSTRAINT(@"H:|-(>=10)-[whereLabel]-[where(<=180)]-[matching]", NSLayoutFormatAlignAllBaseline);
-	CONSTRAINT(@"H:[matching]-[glob]",                               0);
-	CONSTRAINT(@"H:[where]-(>=8)-[glob]-[actions]",                  NSLayoutFormatAlignAllTop);
-	CONSTRAINT(@"V:[ignoreCase]-[where]",                            NSLayoutFormatAlignAllLeft);
+	CONSTRAINT(@"H:|-(>=20,==20@75)-[whereLabel]-[where(<=180)]-[matching]", NSLayoutFormatAlignAllBaseline);
+	CONSTRAINT(@"H:[matching]-[glob]",                                       0);
+	CONSTRAINT(@"H:[where]-(>=8)-[glob]-[actions]",                          NSLayoutFormatAlignAllTop);
+	CONSTRAINT(@"V:[ignoreCase]-[where]",                                    NSLayoutFormatAlignAllLeft);
 	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceTextField attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.globTextField attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
+
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.replaceLabel attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.optionsLabel attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.whereLabel   attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
 
 	if(self.showsResultsOutlineView)
 	{
