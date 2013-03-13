@@ -1,5 +1,13 @@
 # Changes
 
+## 2013-03-13 ([r9395](https://github.com/textmate/textmate/compare/r9393...r9395))
+
+* When estimating indent we now use per-line indent patterns to avoid having multi-line block comments above the caret affect the estimated indent level.
+* New scoped setting: `zeroIndentPattern`. Lines matches by this pattern get zero indent but does not affect the indent of following lines. Probably only useful for C preprocessor lines, maybe also code lines in template languages that support a “begin of line” character as an alternative to wrapping the code in special syntax.
+* Window resize when toggling file browser can now be disabled in _Preferences → Projects_. The behavior has however seen a few improvements (accounting for browser on left side of window and reusing old frame on second toggle, instead of calculating a new frame).
+* Introduce `TM_MATE` environment variable which bundle commands should use when they wish to call `mate` (previously the convention was to use `"$TM_SUPPORT_PATH/bin/mate"`).
+* The _Edit → Select → None_ (⇧⌘A) menu item has been moved to the file browser’s action menu, as the key is always sent to the file browser.
+
 ## 2013-03-07 ([r9393](https://github.com/textmate/textmate/compare/r9391...r9393))
 
 * Fix potential deadlock when opening find dialog (introduced in r9391).
