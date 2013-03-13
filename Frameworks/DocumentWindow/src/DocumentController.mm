@@ -1725,6 +1725,20 @@ namespace
 // = Opening Auxiliary Windows =
 // =============================
 
+- (void)positionWindow:(NSWindow*)aWindow
+{
+	if(![aWindow isVisible])
+	{
+		[aWindow layoutIfNeeded];
+		NSRect frame  = [aWindow frame];
+		NSRect parent = [_window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]];
+
+		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
+		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
+		[aWindow setFrame:frame display:NO];
+	}
+}
+
 - (NSString*)selectedDocumentUUID
 {
 	return _selectedDocument ? [NSString stringWithCxxString:_selectedDocument->identifier()] : nil;
@@ -1790,17 +1804,8 @@ namespace
 			fc.filterString = entry.string;
 	}
 
-	if(![fc.window isVisible])
-	{
-		NSRect frame  = [fc.window frame];
-		NSRect parent = [_window convertRectToScreen:[_textView convertRect:[_textView visibleRect] toView:nil]];
-
-		frame.origin.x = NSMinX(parent) + round((NSWidth(parent)  - NSWidth(frame))  * 1 / 4);
-		frame.origin.y = NSMinY(parent) + round((NSHeight(parent) - NSHeight(frame)) * 3 / 4);
-		[fc.window setFrame:frame display:NO];
-	}
-
-	[fc showWindow:self];
+	[self positionWindow:fc.window];
+	[fc showWindow:nil];
 }
 
 - (void)fileChooserDidSelectItems:(FileChooser*)sender
