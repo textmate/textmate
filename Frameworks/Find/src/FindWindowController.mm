@@ -525,9 +525,9 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 
 - (void)showWindow:(id)sender
 {
-	BOOL isVisible = [self isWindowLoaded] && [self.window isVisible];
+	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
 	[super showWindow:sender];
-	if(!isVisible)
+	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
 		[self.window makeFirstResponder:self.findTextField];
 }
 
