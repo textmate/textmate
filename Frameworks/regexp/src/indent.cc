@@ -8,15 +8,8 @@ OAK_DEBUG_VAR(Indent);
 
 namespace indent
 {
-	enum type_t
-	{
-		kIncrease     = 1 << 0,
-		kDecrease     = 1 << 1,
-		kIncreaseNext = 1 << 2,
-		kIgnore       = 1 << 3,
-	};
 #ifndef NDEBUG
-	static std::string to_s (type_t type)
+	static std::string to_s (pattern_type type)
 	{
 		std::vector<std::string> v;
 		if(type & kIgnore)       v.push_back("kIgnore");
@@ -39,13 +32,13 @@ namespace indent
 		return res;
 	}
 
-	static size_t classify (std::string const& line, regexp::pattern_t const (&patterns)[4])
+	static size_t classify (std::string const& line, std::map<pattern_type, regexp::pattern_t> const& patterns)
 	{
 		size_t res = 0;
-		for(size_t i = 0; i < sizeofA(patterns); ++i)
+		for(auto pair : patterns)
 		{
-			if(search(patterns[i], line.data(), line.data() + line.size()))
-				res |= 1 << i;
+			if(search(pair.second, line.data(), line.data() + line.size()))
+				res |= pair.first;
 		}
 
 		if(res & kIgnore)
@@ -53,7 +46,7 @@ namespace indent
 		else if(res & kIncrease)
 			res &= ~kIncreaseNext;
 
-		D(DBF_Indent, bug("%s\n", to_s((type_t)res).c_str()););
+		D(DBF_Indent, bug("%s\n", to_s((pattern_type)res).c_str()););
 		return res;
 	}
 
@@ -64,12 +57,12 @@ namespace indent
 	// = fsm_t =
 	// =========
 
-	bool fsm_t::is_seeded (std::string const& line)
+	bool fsm_t::is_seeded (std::string const& line, std::map<pattern_type, regexp::pattern_t> const& patterns)
 	{
 		D(DBF_Indent, bug("%s\n", line.c_str()););
 
 		bool res = true;
-		size_t type = classify(line, _patterns);
+		size_t type = classify(line, patterns);
 		if(is_blank(line) || (type & kIgnore))
 		{
 			res = false;
@@ -102,15 +95,15 @@ namespace indent
 		return res;
 	}
 
-	bool fsm_t::is_ignored (std::string const& line) const
+	bool fsm_t::is_ignored (std::string const& line, std::map<pattern_type, regexp::pattern_t> const& patterns) const
 	{
-		return is_blank(line) || (classify(line, _patterns) & kIgnore);
+		return is_blank(line) || (classify(line, patterns) & kIgnore);
 	}
 
-	size_t fsm_t::scan_line (std::string const& line)
+	size_t fsm_t::scan_line (std::string const& line, std::map<pattern_type, regexp::pattern_t> const& patterns)
 	{
 		D(DBF_Indent, bug("%s\n", line.c_str()););
-		int type = classify(line, _patterns);
+		int type = classify(line, patterns);
 		ssize_t res = _level + _carry;
 		if(!(type & kIgnore))
 		{

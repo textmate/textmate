@@ -5,19 +5,26 @@ OAK_DEBUG_VAR(Indent);
 
 namespace indent
 {
-	patterns_t patterns_for_scope (scope::context_t const& scope)
+	std::map<indent::pattern_type, regexp::pattern_t> patterns_for_scope (scope::context_t const& scope)
 	{
 		D(DBF_Indent, bug("scope: %s\n", to_s(scope).c_str()););
+		std::map<indent::pattern_type, regexp::pattern_t> res;
 
-		static std::string const settings[] = { "increaseIndentPattern", "decreaseIndentPattern", "indentNextLinePattern", "unIndentedLinePattern" };
-		patterns_t res;
-		iterate(it, settings)
+		static std::map<std::string, indent::pattern_type> const map =
 		{
-			plist::any_t const& plist = bundles::value_for_setting(*it, scope);
+			{ "increaseIndentPattern", indent::pattern_type::kIncrease     },
+			{ "decreaseIndentPattern", indent::pattern_type::kDecrease     },
+			{ "indentNextLinePattern", indent::pattern_type::kIncreaseNext },
+			{ "unIndentedLinePattern", indent::pattern_type::kIgnore       },
+		};
+
+		for(auto pair : map)
+		{
+			plist::any_t const& plist = bundles::value_for_setting(pair.first, scope);
 			if(std::string const* value = boost::get<std::string>(&plist))
 			{
-				D(DBF_Indent, bug("%s = %s\n", it->c_str(), value->c_str()););
-				res.array[it - settings] = *value;
+				D(DBF_Indent, bug("%s = %s\n", pair.first.c_str(), value->c_str()););
+				res.insert(std::make_pair(pair.second, *value));
 			}
 		}
 		return res;

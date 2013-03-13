@@ -77,14 +77,20 @@ int main (int argc, char const* argv[])
 		files.push_back("/Users/duff/Desktop/indent-test.html");
 
 	plist::dictionary_t plist = plist::load(patterns);
+	static std::map<indent::pattern_type, std::string> const map =
+	{
+		{ "increaseIndentPattern", indent::pattern_type::kIncrease     },
+		{ "decreaseIndentPattern", indent::pattern_type::kDecrease     },
+		{ "indentNextLinePattern", indent::pattern_type::kIncreaseNext },
+		{ "unIndentedLinePattern", indent::pattern_type::kIgnore       },
+	};
 
-	regexp::pattern_t array[4];
-	static std::string const keys[] = { "increaseIndentPattern", "decreaseIndentPattern", "indentNextLinePattern", "unIndentedLinePattern" };
-	iterate(key, keys)
+	std::map<indent::pattern_type, regexp::pattern_t> array;
+	for(auto pair : map)
 	{
 		std::string tmp;
-		if(plist::get_key_path(plist, "settings." + *key, tmp))
-			array[key - keys] = tmp;
+		if(plist::get_key_path(plist, "settings." + pair.first, tmp))
+			array.insert(std::make_pair(pair.second, tmp));
 	}
 	
 	// ==========
@@ -94,7 +100,7 @@ int main (int argc, char const* argv[])
 	text::indent_t indent(tabSize, indentSize, softTabs);
 	iterate(file, files)
 	{
-		indent::fsm_t fsm(array, 1, 1);
+		indent::fsm_t fsm(1, 1);
 
 		std::string const str = path::content(*file);
 		std::string::size_type n = 0;
@@ -108,7 +114,7 @@ int main (int argc, char const* argv[])
 				++eol;
 
 			std::string line = str.substr(n, eol - n);
-			fprintf(stdout, "%s%s", indent.create(0, fsm.scan_line(line)).c_str(), line.c_str());
+			fprintf(stdout, "%s%s", indent.create(0, fsm.scan_line(line, array)).c_str(), line.c_str());
 
 			n = eol;
 		}

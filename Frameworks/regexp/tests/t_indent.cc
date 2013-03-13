@@ -9,33 +9,34 @@ struct line_t
 
 class IndentTests : public CxxTest::TestSuite
 {
-	static regexp::pattern_t const (&patterns ())[4]
+	static std::map<indent::pattern_type, regexp::pattern_t> const& patterns ()
 	{
-		static regexp::pattern_t const res[4] =
+		static std::map<indent::pattern_type, regexp::pattern_t> const res =
 		{
-			// increase
-			"(?x)"
-			"    ^ .* \\{ [^}\"']* $"
-			"|   ^ \\s* (public|private|protected): \\s* $"
-			"|   ^ \\s* @(public|private|protected) \\s* $",
-
-			// decrease
-			"(?x)"
-			"	    ^ (.*\\*/)? \\s* \\} ( [^}{\"']* \\{ | \\s* while \\s* \\( .* )? [;\\s]* (//.*|/\\*.*\\*/\\s*)? $"
-			"	|   ^ \\s* (public|private|protected): \\s* $"
-			"	|   ^ \\s* @(public|private|protected) \\s* $",
-
-			// increase next
-			"(?x)^"
-			"	 (?! .* [;:{}]                   # do not indent when line ends with ;, :, {, or }\n"
-			"	   \\s* (//|/[*] .* [*]/ \\s* $) #  …account for potential trailing comment\n"
-			"	 |   @(public|private|protected) # do not indent after obj-c data access keywords\n"
-			"	 )"
-			"	 .* [^\\s;:{}] \\s* $            # indent next if this one isn’t\n"
-			"	                                 #  terminated with ;, :, {, or }\n",
-
-			// ignore
-			"^\\s*((/\\*|\\*/|//|#|template\\b.*?>(?!\\(.*\\))|@protocol|@optional|@interface(?!.*\\{)|@implementation|@end).*)?$"
+			{ indent::pattern_type::kIncrease,
+				"(?x)"
+				"    ^ .* \\{ [^}\"']* $"
+				"|   ^ \\s* (public|private|protected): \\s* $"
+				"|   ^ \\s* @(public|private|protected) \\s* $",
+			},
+			{ indent::pattern_type::kDecrease,
+				"(?x)"
+				"	    ^ (.*\\*/)? \\s* \\} ( [^}{\"']* \\{ | \\s* while \\s* \\( .* )? [;\\s]* (//.*|/\\*.*\\*/\\s*)? $"
+				"	|   ^ \\s* (public|private|protected): \\s* $"
+				"	|   ^ \\s* @(public|private|protected) \\s* $",
+			},
+			{ indent::pattern_type::kIncreaseNext,
+				"(?x)^"
+				"	 (?! .* [;:{}]                   # do not indent when line ends with ;, :, {, or }\n"
+				"	   \\s* (//|/[*] .* [*]/ \\s* $) #  …account for potential trailing comment\n"
+				"	 |   @(public|private|protected) # do not indent after obj-c data access keywords\n"
+				"	 )"
+				"	 .* [^\\s;:{}] \\s* $            # indent next if this one isn’t\n"
+				"	                                 #  terminated with ;, :, {, or }\n",
+			},
+			{ indent::pattern_type::kIgnore,
+				"^\\s*((/\\*|\\*/|//|#|template\\b.*?>(?!\\(.*\\))|@protocol|@optional|@interface(?!.*\\{)|@implementation|@end).*)?$"
+			}
 		};
 		return res;
 	}
@@ -69,10 +70,10 @@ public:
 			{ 0, "}"              },
 		};
 
-		indent::fsm_t fsm(patterns(), indentSize, tabSize);
+		indent::fsm_t fsm(indentSize, tabSize);
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content, patterns()), indentSize * line->indent);
 		}
 	}
 
@@ -87,8 +88,8 @@ public:
 			"			if(true)",
 		};
 
-		indent::fsm_t fsm(patterns(), indentSize, tabSize);
-		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i]); )
+		indent::fsm_t fsm(indentSize, tabSize);
+		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i], patterns()); )
 			continue;
 
 		static line_t const lines[] =
@@ -100,7 +101,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content, patterns()), indentSize * line->indent);
 		}
 	}
 
@@ -116,8 +117,8 @@ public:
 			"				continue;",
 		};
 
-		indent::fsm_t fsm(patterns(), indentSize, tabSize);
-		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i]); )
+		indent::fsm_t fsm(indentSize, tabSize);
+		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i], patterns()); )
 			continue;
 
 		static line_t const lines[] =
@@ -128,7 +129,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content, patterns()), indentSize * line->indent);
 		}
 	}
 
@@ -143,8 +144,8 @@ public:
 			"	if(true)",
 		};
 
-		indent::fsm_t fsm(patterns(), indentSize, tabSize);
-		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i]); )
+		indent::fsm_t fsm(indentSize, tabSize);
+		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i], patterns()); )
 			continue;
 
 		static line_t const lines[] =
@@ -156,7 +157,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content, patterns()), indentSize * line->indent);
 		}
 	}
 
@@ -170,8 +171,8 @@ public:
 			"            42);",
 		};
 
-		indent::fsm_t fsm(patterns(), indentSize, tabSize);
-		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i]); )
+		indent::fsm_t fsm(indentSize, tabSize);
+		for(size_t i = sizeofA(seed_lines); i-- && !fsm.is_seeded(seed_lines[i], patterns()); )
 			continue;
 
 		static line_t const lines[] =
@@ -182,7 +183,7 @@ public:
 
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content, patterns()), indentSize * line->indent);
 		}
 	}
 
@@ -197,10 +198,10 @@ public:
 			{ 1, "}"            },
 		};
 
-		indent::fsm_t fsm(patterns(), indentSize, tabSize);
+		indent::fsm_t fsm(indentSize, tabSize);
 		iterate(line, lines)
 		{
-			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content), indentSize * line->indent);
+			TSM_ASSERT_EQUALS(text::format("%td: %s", line - std::begin(lines), line->content.c_str()), fsm.scan_line(line->content, patterns()), indentSize * line->indent);
 		}
 	}
 };

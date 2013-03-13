@@ -6,14 +6,7 @@
 
 namespace indent
 {
-	struct patterns_t
-	{
-		typedef regexp::pattern_t const (&array_type)[4];
-		operator array_type () const { return array; }
-		regexp::pattern_t array[4];
-	};
-
-	patterns_t patterns_for_scope (scope::context_t const& scope);
+	std::map<indent::pattern_type, regexp::pattern_t> patterns_for_scope (scope::context_t const& scope);
 
 	template <typename T>
 	std::string line (T const& buf, size_t n)
@@ -22,10 +15,16 @@ namespace indent
 	}
 
 	template <typename T>
-	fsm_t create_fsm (T const& buf, regexp::pattern_t const (&patterns)[4], size_t from, size_t indentSize, size_t tabSize)
+	std::map<indent::pattern_type, regexp::pattern_t> patterns_for_line (T const& buf, size_t n)
 	{
-		fsm_t fsm(patterns, indentSize, tabSize);
-		while(from > 0 && !fsm.is_seeded(line(buf, --from)))
+		return patterns_for_scope(scope::context_t(buf.scope(buf.end(n), false).left, buf.scope(buf.begin(n), false).right));
+	}
+
+	template <typename T>
+	fsm_t create_fsm (T const& buf, size_t from, size_t indentSize, size_t tabSize)
+	{
+		fsm_t fsm(indentSize, tabSize);
+		while(from-- > 0 && !fsm.is_seeded(line(buf, from), patterns_for_line(buf, from)))
 			continue;
 		return fsm;
 	}

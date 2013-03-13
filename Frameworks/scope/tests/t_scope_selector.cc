@@ -63,4 +63,19 @@ public:
 			lastRank = rank;
 		}
 	}
+
+	void test_rank ()
+	{
+		scope::scope_t const leftScope  = "text.html.php meta.embedded.block.php source.php comment.block.php";
+		scope::scope_t const rightScope = "text.html.php meta.embedded.block.php source.php";
+		scope::context_t const scope(leftScope, rightScope);
+
+		scope::selector_t const globalSelector = "comment.block | L:comment.block";
+		scope::selector_t const phpSelector    = "L:source.php - string";
+
+		double globalRank, phpRank;
+		TS_ASSERT(globalSelector.does_match(scope, &globalRank));
+		TS_ASSERT(phpSelector.does_match(scope, &phpRank));
+		TS_ASSERT_LESS_THAN(phpRank, globalRank);
+	}
 };

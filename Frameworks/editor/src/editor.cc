@@ -565,12 +565,13 @@ namespace ng
 				} 
 				else if(!pasteBehavior || *pasteBehavior != "disable")
 				{
-					indent::fsm_t fsm = indent::create_fsm(buffer, indent::patterns_for_scope(buffer.scope(index)), line, indentSize, tabSize);
+					indent::fsm_t fsm = indent::create_fsm(buffer, line, indentSize, tabSize);
+					auto const patterns = indent::patterns_for_scope(buffer.scope(index));
 					iterate(it, v)
 					{
-						if(fsm.is_ignored(std::string(it->first, it->second)))
+						if(fsm.is_ignored(std::string(it->first, it->second), patterns))
 							continue;
-						size_t indent = fsm.scan_line(std::string(it->first, it->second));
+						size_t indent = fsm.scan_line(std::string(it->first, it->second), patterns);
 						int oldIndent = indent::leading_whitespace(it->first, it->second, tabSize);
 						transform::shift shifter(std::max(((int)indent)-oldIndent, -minIndent), buffer.indent());
 						str = shifter(str);
@@ -607,11 +608,11 @@ namespace ng
 		{
 			text::pos_t pos = _buffer.convert(from);
 
-			indent::fsm_t fsm = indent::create_fsm(_buffer, indent::patterns_for_scope(_buffer.scope(from)), pos.line, _buffer.indent().indent_size(), _buffer.indent().tab_size());
+			indent::fsm_t fsm = indent::create_fsm(_buffer, pos.line, _buffer.indent().indent_size(), _buffer.indent().tab_size());
 			std::string const line = _buffer.substr(_buffer.begin(pos.line), _buffer.eol(pos.line));
-			bool ignored = fsm.is_ignored(line);
+			bool ignored = fsm.is_ignored(line, indent::patterns_for_line(_buffer, pos.line));
 			int actual = indent::leading_whitespace(line.data(), line.data() + line.size(), _buffer.indent().tab_size());
-			size_t desired = fsm.scan_line(line);
+			size_t desired = fsm.scan_line(line, indent::patterns_for_line(_buffer, pos.line));
 			if(ignored || actual == desired)
 				_lines.insert(std::make_pair(pos.line, actual));
 		}
@@ -635,9 +636,10 @@ namespace ng
 				if(actual != pair->second)
 					continue;
 
-				indent::fsm_t fsm = indent::create_fsm(_buffer, indent::patterns_for_scope(_buffer.scope(bol)), n, _buffer.indent().indent_size(), _buffer.indent().tab_size());
-				size_t desired = fsm.scan_line(line);
-				if(!fsm.is_ignored(line) && desired != actual)
+				indent::fsm_t fsm = indent::create_fsm(_buffer, n, _buffer.indent().indent_size(), _buffer.indent().tab_size());
+				auto const patterns = indent::patterns_for_line(_buffer, n);
+				size_t desired = fsm.scan_line(line, patterns);
+				if(!fsm.is_ignored(line, patterns) && desired != actual)
 				{
 					while(eos != _buffer.size() && text::is_whitespace(_buffer[eos]))
 						eos += _buffer[eos].size();
@@ -1064,7 +1066,7 @@ namespace ng
 				size_t from = p0.line;
 				size_t to   = p1.line + (p1.column != 0 || p0.line == p1.line ? 1 : 0);
 
-				indent::fsm_t fsm = indent::create_fsm(_buffer, indent::patterns_for_scope(_buffer.scope(r.min().index)), from, _buffer.indent().indent_size(), _buffer.indent().tab_size());
+				indent::fsm_t fsm = indent::create_fsm(_buffer, from, _buffer.indent().indent_size(), _buffer.indent().tab_size());
 
 				std::multimap<range_t, std::string> replacements;
 				for(size_t n = from; n < to; ++n)
@@ -1079,7 +1081,7 @@ namespace ng
 					while(eos != _buffer.size() && text::is_whitespace(_buffer[eos]))
 						eos += _buffer[eos].size();
 
-					replacements.insert(std::make_pair(range_t(bol, eos), indent::create(fsm.scan_line(line), _buffer.indent().tab_size(), _buffer.indent().soft_tabs())));
+					replacements.insert(std::make_pair(range_t(bol, eos), indent::create(fsm.scan_line(line, indent::patterns_for_line(_buffer, n)), _buffer.indent().tab_size(), _buffer.indent().soft_tabs())));
 				}
 
 				if(!replacements.empty())
@@ -1197,10 +1199,10 @@ namespace ng
 					size_t const lastLine           = buffer.convert(to).line;
 					std::string const& rightOfCaret = buffer.substr(to, buffer.end(lastLine));
 
-					indent::fsm_t fsm       = indent::create_fsm(buffer, indent::patterns_for_scope(buffer.scope(from)), firstLine, buffer.indent().indent_size(), buffer.indent().tab_size());
+					indent::fsm_t fsm       = indent::create_fsm(buffer, firstLine, buffer.indent().indent_size(), buffer.indent().tab_size());
 					std::string const& line = leftOfCaret + rightOfCaret;
 					size_t existingIndent   = indent::leading_whitespace(line.data(), line.data() + line.size(), buffer.indent().tab_size());
-					size_t newIndent        = std::max(fsm.scan_line(line), existingIndent + buffer.indent().indent_size());
+					size_t newIndent        = std::max(fsm.scan_line(line, indent::patterns_for_line(buffer, firstLine)), existingIndent + buffer.indent().indent_size());
 
 					estimatedIndent = indent::create(newIndent - indent::leading_whitespace(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size(), buffer.indent().tab_size()), buffer.indent().tab_size(), buffer.indent().soft_tabs());
 				}
@@ -1219,24 +1221,25 @@ namespace ng
 		std::multimap<range_t, std::string> insertions;
 		citerate(range, dissect_columnar(buffer, selections))
 		{
-			size_t const from               = range->min().index;
-			size_t const firstLine          = buffer.convert(from).line;
-			std::string const& leftOfCaret  = buffer.substr(buffer.begin(firstLine), from);
+			size_t const from              = range->min().index;
+			size_t const firstLine         = buffer.convert(from).line;
+			std::string const& leftOfCaret = buffer.substr(buffer.begin(firstLine), from);
+			auto const patterns            = indent::patterns_for_line(buffer, firstLine);
 
 			size_t to                       = range->max().index;
 			size_t const lastLine           = buffer.convert(to).line;
 			std::string const& rightOfCaret = buffer.substr(to, buffer.end(lastLine));
 
-			indent::fsm_t fsm(indent::patterns_for_scope(buffer.scope(from)), buffer.indent().indent_size(), buffer.indent().tab_size());
-			if(!fsm.is_seeded(leftOfCaret))
+			indent::fsm_t fsm(buffer.indent().indent_size(), buffer.indent().tab_size());
+			if(!fsm.is_seeded(leftOfCaret, patterns))
 			{
 				size_t n = firstLine;
-				while(n > 0 && !fsm.is_seeded(indent::line(buffer, --n)))
+				while(n-- > 0 && !fsm.is_seeded(indent::line(buffer, n), indent::patterns_for_line(buffer, n)))
 					continue;
 			}
 
 			size_t existingIndent = indent::leading_whitespace(rightOfCaret.data(), rightOfCaret.data() + rightOfCaret.size(), buffer.indent().tab_size());
-			size_t newIndent      = fsm.scan_line(rightOfCaret);
+			size_t newIndent      = fsm.scan_line(rightOfCaret, patterns);
 
 			if(text::is_blank(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size()))
 					newIndent = indent::leading_whitespace(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size(), buffer.indent().tab_size()) + existingIndent;
