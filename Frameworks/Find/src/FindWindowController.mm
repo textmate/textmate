@@ -261,7 +261,6 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		self.findPreviousButton        = OakCreateButton(@"Previous");
 		self.findNextButton            = OakCreateButton(@"Next");
 
-		self.findNextButton.keyEquivalent = @"\r";
 		[self updateSearchInPopUpMenu];
 
 		// =============================
@@ -331,6 +330,9 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
 		[self updateConstraints];
+
+		self.window.initialFirstResponder = self.findTextField;
+		self.window.defaultButtonCell     = self.findNextButton.cell;
 
 		self.searchIn = FFSearchInDocument;
 
@@ -472,7 +474,6 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 
 	[self.window.contentView addConstraints:_myConstraints];
 
-	self.window.initialFirstResponder = self.findTextField;
 	if(self.showsResultsOutlineView)
 	{
 		NSView* keyViewLoop[] = { self.findTextField, self.replaceTextField, self.globTextField, self.actionsPopUpButton, self.countButton, self.regularExpressionCheckBox, self.ignoreWhitespaceCheckBox, self.ignoreCaseCheckBox, self.wrapAroundCheckBox, self.wherePopUpButton, self.resultsOutlineView, self.findAllButton, self.replaceAllButton, self.replaceAndFindButton, self.findPreviousButton, self.findNextButton };
@@ -786,8 +787,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		[self.window setFrame:windowFrame display:YES];
 	}
 
-	self.findAllButton.keyEquivalent  = flag ? @"\r" : @"";
-	self.findNextButton.keyEquivalent = flag ? @"" : @"\r";
+	self.window.defaultButtonCell = flag ? self.findAllButton.cell : self.findNextButton.cell;
 }
 
 - (void)setDisableResultsCheckBoxes:(BOOL)flag
