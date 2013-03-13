@@ -16,6 +16,7 @@ namespace indent
 			{ "decreaseIndentPattern", indent::pattern_type::kDecrease     },
 			{ "indentNextLinePattern", indent::pattern_type::kIncreaseNext },
 			{ "unIndentedLinePattern", indent::pattern_type::kIgnore       },
+			{ "zeroIndentPattern",     indent::pattern_type::kZeroIndent   },
 		};
 
 		for(auto pair : map)

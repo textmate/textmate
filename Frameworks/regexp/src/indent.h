@@ -11,7 +11,7 @@ namespace indent
 
 	enum pattern_type
 	{
-		kIncrease = 1, kDecrease = 2, kIncreaseNext = 4, kIgnore = 8
+		kIncrease = 1, kDecrease = 2, kIncreaseNext = 4, kIgnore = 8, kZeroIndent = 16
 	};
 
 	// ================

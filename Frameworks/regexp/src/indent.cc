@@ -16,6 +16,7 @@ namespace indent
 		if(type & kDecrease)     v.push_back("kDecrease");
 		if(type & kIncrease)     v.push_back("kIncrease");
 		if(type & kIncreaseNext) v.push_back("kIncreaseNext");
+		if(type & kZeroIndent)   v.push_back("kZeroIndent");
 		return text::join(v, "|");
 	}
 #endif
@@ -43,6 +44,8 @@ namespace indent
 
 		if(res & kIgnore)
 			res = kIgnore;
+		else if(res & kZeroIndent)
+			res = kZeroIndent;
 		else if(res & kIncrease)
 			res &= ~kIncreaseNext;
 
@@ -63,7 +66,7 @@ namespace indent
 
 		bool res = true;
 		size_t type = classify(line, patterns);
-		if(is_blank(line) || (type & kIgnore))
+		if(is_blank(line) || (type & (kIgnore|kZeroIndent)))
 		{
 			res = false;
 		}
@@ -105,7 +108,11 @@ namespace indent
 		D(DBF_Indent, bug("%s\n", line.c_str()););
 		int type = classify(line, patterns);
 		ssize_t res = _level + _carry;
-		if(!(type & kIgnore))
+		if(type & kZeroIndent)
+		{
+			res = 0;
+		}
+		else if(!(type & kIgnore))
 		{
 			if(type & (kIncrease | kDecrease))
 				_carry = 0;
