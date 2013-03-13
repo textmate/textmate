@@ -1,7 +1,6 @@
 #import "HTMLOutput.h"
 #import <OakSystem/process.h>
 #import <command/runner.h>
-#import <oak/lock.h>
 #import <oak/server.h>
 #import <oak/debug.h>
 
@@ -15,7 +14,7 @@ namespace
 
 		int add_process (pid_t processId)
 		{
-			oak::lock_t lock = _lock();
+			std::lock_guard<std::mutex> lock(_lock);
 
 			std::vector<int> toDelete;
 			iterate(record, _records)
@@ -32,7 +31,7 @@ namespace
 
 		void output (int key, char const* data, size_t len)
 		{
-			oak::lock_t lock = _lock();
+			std::lock_guard<std::mutex> lock(_lock);
 			if(record_t* record = find(key))
 			{
 				if(record->protocol)
@@ -43,7 +42,7 @@ namespace
 
 		void done (int key)
 		{
-			oak::lock_t lock = _lock();
+			std::lock_guard<std::mutex> lock(_lock);
 			if(record_t* record = find(key))
 			{
 				record->process_id = 0;
@@ -56,7 +55,7 @@ namespace
 
 		void start (int key, NSURLProtocol* protocol)
 		{
-			oak::lock_t lock = _lock();
+			std::lock_guard<std::mutex> lock(_lock);
 
 			if(record_t* record = find(key))
 			{
@@ -74,7 +73,7 @@ namespace
 
 		void stop (int key)
 		{
-			oak::lock_t lock = _lock();
+			std::lock_guard<std::mutex> lock(_lock);
 			if(record_t* record = find(key))
 			{
 				record->protocol = NULL;
@@ -103,7 +102,7 @@ namespace
 
 		int _next_key;
 		std::map<int, record_t> _records;
-		oak::mutex_t _lock;
+		std::mutex _lock;
 	};
 
 	runners_t& runners ()
