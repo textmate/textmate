@@ -762,29 +762,28 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 
 	if(flag && isWindowLoaded)
 	{
-		// we can’t resize window as long as it needs layout
-		dispatch_async(dispatch_get_main_queue(), ^{
-			NSRect screenFrame = [[self.window screen] visibleFrame];
-			NSRect windowFrame = self.window.frame;
-			CGFloat minY = NSMinY(windowFrame);
-			CGFloat maxY = NSMaxY(windowFrame);
+		[self.window layoutIfNeeded];
 
-			CGFloat currentHeight = NSHeight(self.resultsScrollView.frame);
-			minY -= desiredHeight - currentHeight;
+		NSRect screenFrame = [[self.window screen] visibleFrame];
+		NSRect windowFrame = self.window.frame;
+		CGFloat minY = NSMinY(windowFrame);
+		CGFloat maxY = NSMaxY(windowFrame);
 
-			if(minY < NSMinY(screenFrame))
-				maxY += NSMinY(screenFrame) - minY;
-			if(maxY > NSMaxY(screenFrame))
-				minY -= maxY - NSMaxY(screenFrame);
+		CGFloat currentHeight = NSHeight(self.resultsScrollView.frame);
+		minY -= desiredHeight - currentHeight;
 
-			minY = MAX(minY, NSMinY(screenFrame));
-			maxY = MIN(maxY, NSMaxY(screenFrame));
+		if(minY < NSMinY(screenFrame))
+			maxY += NSMinY(screenFrame) - minY;
+		if(maxY > NSMaxY(screenFrame))
+			minY -= maxY - NSMaxY(screenFrame);
 
-			windowFrame.origin.y    = minY;
-			windowFrame.size.height = maxY - minY;
+		minY = MAX(minY, NSMinY(screenFrame));
+		maxY = MIN(maxY, NSMaxY(screenFrame));
 
-			[self.window setFrame:windowFrame display:YES];
-		});
+		windowFrame.origin.y    = minY;
+		windowFrame.size.height = maxY - minY;
+
+		[self.window setFrame:windowFrame display:YES];
 	}
 
 	self.findAllButton.keyEquivalent  = flag ? @"\r" : @"";
