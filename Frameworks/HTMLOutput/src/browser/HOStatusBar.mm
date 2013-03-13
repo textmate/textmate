@@ -1,5 +1,6 @@
 #import "HOStatusBar.h"
 #import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 
 static NSButton* OakCreateImageButton (NSImage* image)
 {
@@ -26,7 +27,7 @@ static NSTextField* OakCreateTextField ()
 	[res setSelectable:NO];
 	[res setBezeled:NO];
 	[res setDrawsBackground:NO];
-	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
+	[res setFont:OakStatusBarFont()];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	return res;
 }

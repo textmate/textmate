@@ -3,6 +3,7 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakAppKit/NSMenu Additions.h>
 #import <OakAppKit/NSMenuItem Additions.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
@@ -15,23 +16,10 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[res setSelectable:NO];
 	[res setBezeled:NO];
 	[res setDrawsBackground:NO];
-	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
+	[res setFont:OakStatusBarFont()];
 	[res setStringValue:label];
 	[res setAlignment:NSRightTextAlignment];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	return res;
-}
-
-static NSPopUpButton* OakCreatePopUpButton (NSString* initialItem = nil)
-{
-	NSPopUpButton* res = [NSPopUpButton new];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
-	[res setBordered:NO];
-	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
-
-	if(initialItem)
-		[[res cell] setMenuItem:[[NSMenuItem alloc] initWithTitle:initialItem action:@selector(nop:) keyEquivalent:@""]];
-
 	return res;
 }
 
@@ -75,11 +63,11 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil]])
 	{
 		self.selectionField               = OakCreateTextField(@"1:1");
-		self.grammarPopUp                 = OakCreatePopUpButton(@"");
-		self.tabSizePopUp                 = OakCreatePopUpButton();
+		self.grammarPopUp                 = OakCreateStatusBarPopUpButton(@"");
+		self.tabSizePopUp                 = OakCreateStatusBarPopUpButton();
 		self.tabSizePopUp.pullsDown       = YES;
-		self.bundleItemsPopUp             = OakCreatePopUpButton();
-		self.symbolPopUp                  = OakCreatePopUpButton(@"");
+		self.bundleItemsPopUp             = OakCreateStatusBarPopUpButton();
+		self.symbolPopUp                  = OakCreateStatusBarPopUpButton(@"");
 		self.macroRecordingButton         = OakCreateImageToggleButton([NSImage imageNamed:@"Recording" inSameBundleAsClass:[self class]]);
 		self.macroRecordingButton.action  = @selector(toggleMacroRecording:);
 		self.macroRecordingButton.toolTip = @"Click to start recording a macro";

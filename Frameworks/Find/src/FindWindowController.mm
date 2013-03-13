@@ -6,6 +6,7 @@
 #import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakAppKit/OakPasteboardSelector.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFoundation/OakHistoryList.h>
 #import <OakFoundation/OakFoundation.h>
@@ -37,24 +38,10 @@ NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 }
 @end
 
-static NSTextField* OakCreateLabel (NSString* label)
-{
-	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
-	[[res cell] setWraps:NO];
-	res.font            = [NSFont controlContentFontOfSize:[NSFont labelFontSize]];
-	res.stringValue     = label;
-	res.bordered        = NO;
-	res.editable        = NO;
-	res.selectable      = NO;
-	res.bezeled         = NO;
-	res.drawsBackground = NO;
-	return res;
-}
-
 static OakAutoSizingTextField* OakCreateTextField (id <NSTextFieldDelegate> delegate)
 {
 	OakAutoSizingTextField* res = [[OakAutoSizingTextField alloc] initWithFrame:NSZeroRect];
-	res.font = [NSFont controlContentFontOfSize:0];
+	res.font = OakControlFont();
 	[[res cell] setWraps:YES];
 	res.delegate = delegate;
 	return res;
@@ -74,23 +61,8 @@ static NSButton* OakCreateCheckBox (NSString* label)
 	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
 	[res setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 	res.buttonType = NSSwitchButton;
-	res.font       = [NSFont controlContentFontOfSize:0];
+	res.font       = OakControlFont();
 	res.title      = label;
-	return res;
-}
-
-static NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO)
-{
-	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
-	res.font = [NSFont controlContentFontOfSize:0];
-	res.pullsDown = pullsDown;
-	return res;
-}
-
-static NSComboBox* OakCreateComboBox ()
-{
-	NSComboBox* res = [[NSComboBox alloc] initWithFrame:NSZeroRect];
-	res.font = [NSFont controlContentFontOfSize:0];
 	return res;
 }
 
@@ -140,16 +112,6 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 	res.style                = NSProgressIndicatorSpinningStyle;
 	res.controlSize          = NSSmallControlSize;
 	res.displayedWhenStopped = NO;
-	return res;
-}
-
-static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRoundedBezelStyle)
-{
-	NSButton* res = [[NSButton alloc] initWithFrame:NSZeroRect];
-	res.buttonType = NSMomentaryPushInButton;
-	res.bezelStyle = bezel;
-	res.title      = label;
-	res.font       = [NSFont controlContentFontOfSize:13];
 	return res;
 }
 
@@ -249,8 +211,7 @@ static NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 		self.resultsBottomDivider      = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
 		self.progressIndicator         = OakCreateProgressIndicator();
-		self.statusTextField           = OakCreateLabel(@"Found 1,234 results.");
-		self.statusTextField.font      = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+		self.statusTextField           = OakCreateLabel();
 
 		[self.statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingTail];

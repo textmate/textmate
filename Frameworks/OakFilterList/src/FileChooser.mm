@@ -2,6 +2,7 @@
 #import "OakAbbreviations.h"
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakFileBrowser/OFBPathInfoCell.h>
 #import <ns/ns.h>
@@ -260,7 +261,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_statusTextField.bordered        = NO;
 		_statusTextField.drawsBackground = NO;
 		_statusTextField.editable        = NO;
-		_statusTextField.font            = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+		_statusTextField.font            = OakStatusBarFont();
 		_statusTextField.selectable      = NO;
 		[[_statusTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 
@@ -269,7 +270,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_itemCountTextField.bordered        = NO;
 		_itemCountTextField.drawsBackground = NO;
 		_itemCountTextField.editable        = NO;
-		_itemCountTextField.font            = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
+		_itemCountTextField.font            = OakStatusBarFont();
 		_itemCountTextField.selectable      = NO;
 		[[_itemCountTextField cell] setBackgroundStyle:NSBackgroundStyleRaised];
 
@@ -790,7 +791,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 			matchedTextColor = [NSColor alternateSelectedControlTextColor];
 		}
 
-		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(_tableView.font ?: [NSFont controlContentFontOfSize:13], textColor, matchedTextColor, path, record.cover);
+		NSMutableAttributedString* str = CreateAttributedStringWithMarkedUpRanges(OakControlFont(), textColor, matchedTextColor, path, record.cover);
 		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[pStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 		[str addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, str.length)];

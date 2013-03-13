@@ -1,4 +1,5 @@
 #import "OakKeyEquivalentView.h"
+#import "OakUIConstructionFunctions.h"
 #import "NSImage Additions.h"
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
@@ -266,7 +267,7 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 	NSDictionary* stringAttributes = @{
 		NSForegroundColorAttributeName : self.recording ? [NSColor grayColor] : [NSColor blackColor],
-		NSFontAttributeName            : [NSFont controlContentFontOfSize:0]
+		NSFontAttributeName            : OakControlFont()
 	};
 
 	NSSize size = [self.displayString sizeWithAttributes:stringAttributes];

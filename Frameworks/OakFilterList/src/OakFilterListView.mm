@@ -1,6 +1,7 @@
 #import "OakFilterList.h"
 #import "OakFilterListView.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <oak/oak.h>
 #import "highlight_ranges.h"
 
@@ -146,7 +147,7 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 		[style setAlignment:NSCenterTextAlignment];
 		NSAttributedString* text = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%lu items", self.items.count] attributes:@{
 			NSForegroundColorAttributeName    : [NSColor darkGrayColor],
-			NSFontAttributeName               : [NSFont controlContentFontOfSize:11],
+			NSFontAttributeName               : OakStatusBarFont(),
 			NSParagraphStyleAttributeName     : style
 		}];
 		self.infoString = text;
@@ -186,7 +187,7 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 		NSMutableParagraphStyle* pStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 		[pStyle setLineBreakMode:NSLineBreakByTruncatingMiddle];
 
-		NSFont* baseFont = [NSFont controlContentFontOfSize:13];
+		NSFont* baseFont = OakControlFont();
 		NSFont* boldFont = [[NSFontManager sharedFontManager] convertFont:baseFont toHaveTrait:NSBoldFontMask];
 
 		NSDictionary* baseAttributes      = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor], NSFontAttributeName : baseFont, NSParagraphStyleAttributeName : pStyle };
