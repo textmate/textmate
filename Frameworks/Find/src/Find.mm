@@ -73,6 +73,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 - (void)showFindWindowFor:(NSString*)searchScope
 {
 	self.windowController.searchIn = searchScope;
+	[self updateActionButtons:self];
 	[self.windowController showWindow:self];
 }
 
@@ -108,8 +109,19 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 
 - (void)updateActionButtons:(id)sender
 {
-	BOOL replaceSelected = _documentSearch.countOfSelectedMatches < _documentSearch.countOfMatches;
-	self.windowController.replaceAllButton.title = replaceSelected ? @"Replace Selected" : @"Replace All";
+	NSString* replaceAllTitle = @"Replace All";
+	BOOL replaceAllEnabled = YES;
+
+	if(self.windowController.showsResultsOutlineView)
+	{
+		if(_documentSearch.countOfSelectedMatches < _documentSearch.countOfMatches)
+			replaceAllTitle = @"Replace Selected";
+		if(_documentSearch.hasPerformedReplacement)
+			replaceAllEnabled = NO;
+	}
+
+	self.windowController.replaceAllButton.title   = replaceAllTitle;
+	self.windowController.replaceAllButton.enabled = replaceAllEnabled;
 }
 
 - (IBAction)countOccurrences:(id)sender { [self performFindAction:FindActionCountMatches   withWindowController:self.windowController]; }
@@ -244,6 +256,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		self.closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);
 		[NSApp sendAction:@selector(performFindOperation:) to:nil from:self];
 	}
+	[self updateActionButtons:self];
 }
 
 - (NSString*)findString    { return self.windowController.findString    ?: @""; }
@@ -349,6 +362,8 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		[_documentSearch addObserver:self forKeyPath:@"hasPerformedReplacement" options:0 context:NULL];
 		[_documentSearch start];
 	}
+
+	[self updateActionButtons:self];
 }
 
 - (void)folderSearchDidReceiveResults:(NSNotification*)aNotification
