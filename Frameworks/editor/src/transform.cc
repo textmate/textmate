@@ -116,17 +116,14 @@ namespace transform
 			char const* from = it->first;
 			char const* to   = it->second;
 
-			if(!text::is_blank(from, to))
+			if(amount > 0 && !text::is_blank(from, to))
 			{
-				if(amount > 0)
-				{
-					res += indent::create(amount, indent.tab_size(), indent.soft_tabs());
-				}
-				else if(amount < 0)
-				{
-					for(int col = 0; from != to && col < -amount && text::is_space(*from); ++from)
-						col += *from == '\t' ? indent.tab_size() - (col % indent.tab_size()) : 1;
-				}
+				res += indent::create(amount, indent.tab_size(), indent.soft_tabs());
+			}
+			else if(amount < 0)
+			{
+				for(int col = 0; from != to && col < -amount && text::is_space(*from); ++from)
+					col += *from == '\t' ? indent.tab_size() - (col % indent.tab_size()) : 1;
 			}
 
 			std::copy(from, to, back_inserter(res));
