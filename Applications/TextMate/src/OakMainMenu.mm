@@ -98,29 +98,12 @@ static CGPoint MenuPosition ()
 		return YES;
 	}
 
-	for(NSMenuItem* menuItem in [[self itemArray] reverseObjectEnumerator])
-	{
-		if(menuItem == bundlesMenuItem)
-		{
-			NSArray* bundleMenuItems = [[bundlesMenuItem submenu] itemArray];
-			for(NSUInteger i = 0; i < [bundleMenuItems count]; ++i)
-			{
-				NSMenuItem* subMenuItem = bundleMenuItems[i];
-				if(keyString == ns::create_event_string(subMenuItem.keyEquivalent, subMenuItem.keyEquivalentModifierMask))
- 					return [[bundlesMenuItem submenu] performActionForItemAtIndex:i], YES;
-			}
-		}
-		else if([[menuItem submenu] performKeyEquivalent:anEvent])
-		{
-			return YES;
-		}
-	}
-
-	if(keyString == "~@\uF702") // ⌥⌘⇠
+	if([super performKeyEquivalent:anEvent])
+		return YES;
+	else if(keyString == "~@\uF702") // ⌥⌘⇠
 		return [self performWindowMenuAction:@selector(selectPreviousTab:)];
 	else if(keyString == "~@\uF703") // ⌥⌘⇢
 		return [self performWindowMenuAction:@selector(selectNextTab:)];
-
 	return NO;
 }
 @end
