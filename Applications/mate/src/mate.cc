@@ -243,7 +243,7 @@ int main (int argc, char* argv[])
 		if(path[0] == 0)
 			continue;
 
-		if(strcmp(path, "-") != 0 && path[0] != '/') // relative path, make absolute
+		if(strcmp(path, "-") != 0 && !path::is_absolute(path)) // relative path, make absolute
 		{
 			if(char* cwd = getcwd(NULL, (size_t)-1))
 			{
