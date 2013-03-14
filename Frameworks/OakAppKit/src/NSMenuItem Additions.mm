@@ -4,6 +4,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <text/case.h>
 #import <text/utf8.h>
+#import <ns/event.h>
 
 @interface MenuMutableAttributedString : NSMutableAttributedString
 {
@@ -149,6 +150,26 @@
 
 	[self setKeyEquivalent:[NSString stringWithCxxString:aKeyEquivalent.substr(i)]];
 	[self setKeyEquivalentModifierMask:modifiers];
+}
+
+- (void)setInactiveKeyEquivalentCxxString:(std::string const&)aKeyEquivalent
+{
+	if(aKeyEquivalent == NULL_STR || aKeyEquivalent.empty())
+		return;
+
+	MenuMutableAttributedString* attributedTitle = [MenuMutableAttributedString new];
+	NSTextTable* table = [NSTextTable new];
+	[table setNumberOfColumns:2];
+
+	NSFont* font = self.menu.font ?: [NSFont menuFontOfSize:0];
+	[attributedTitle appendTableCellWithString:self.title table:table textAlignment:NSLeftTextAlignment  verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:0];
+
+	NSString* keyString = [NSString stringWithCxxString:" " + ns::glyphs_for_event_string(aKeyEquivalent)];
+	[attributedTitle appendTableCellWithString:keyString table:table textAlignment:NSRightTextAlignment verticalAlignment:NSTextBlockMiddleAlignment font:font row:0 column:1];
+
+	NSString* plainTitle = self.title;
+	self.attributedTitle = attributedTitle;
+	self.title = plainTitle;
 }
 
 - (void)setTabTriggerCxxString:(std::string const&)aTabTrigger

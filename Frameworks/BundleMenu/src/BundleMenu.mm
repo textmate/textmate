@@ -68,7 +68,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasS
 
 			if(setKeys)
 			{
-				[menuItem setKeyEquivalentCxxString:key_equivalent(pair->second)];
+				[menuItem setInactiveKeyEquivalentCxxString:key_equivalent(pair->second)];
 				[menuItem setTabTriggerCxxString:pair->second->value_for_field(bundles::kFieldTabTrigger)];
 			}
 		}
@@ -125,7 +125,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasS
 
 					if(setKeys)
 					{
-						[menuItem setKeyEquivalentCxxString:key_equivalent(*item)];
+						[menuItem setInactiveKeyEquivalentCxxString:key_equivalent(*item)];
 						[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 					}
 
