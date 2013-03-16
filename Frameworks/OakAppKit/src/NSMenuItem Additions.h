@@ -1,4 +1,5 @@
 @interface NSMenuItem (FileIcon)
+- (void)updateTitle:(NSString*)newTitle;
 - (void)setIconForFile:(NSString*)path;
 - (void)setKeyEquivalentCxxString:(std::string const&)aKeyEquivalent;
 - (void)setInactiveKeyEquivalentCxxString:(std::string const&)aKeyEquivalent;

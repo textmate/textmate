@@ -4,7 +4,7 @@
 #import <OakFoundation/NSString Additions.h>
 #import <text/case.h>
 #import <text/utf8.h>
-#import <ns/event.h>
+#import <ns/ns.h>
 
 @interface MenuMutableAttributedString : NSMutableAttributedString
 {
@@ -103,6 +103,9 @@
 
 @end
 
+static char const* kOakMenuItemKeyEquivalent = "OakMenuItemKeyEquivalent";
+static char const* kOakMenuItemTabTrigger    = "OakMenuItemTabTrigger";
+
 @implementation NSMenuItem (FileIcon)
 - (void)setIconForFile:(NSString*)path;
 {
@@ -119,6 +122,18 @@
 		[icon setSize:NSMakeSize(16, 16)];
 		[self setImage:icon];
 	}
+}
+
+- (void)updateTitle:(NSString*)newTitle
+{
+	if([self.title isEqualToString:newTitle])
+		return;
+
+	self.title = newTitle;
+	if(NSString* keyEquivalent = objc_getAssociatedObject(self, kOakMenuItemKeyEquivalent))
+		[self setInactiveKeyEquivalentCxxString:to_s(keyEquivalent)];
+	if(NSString* tabTrigger = objc_getAssociatedObject(self, kOakMenuItemTabTrigger))
+		[self setTabTriggerCxxString:to_s(tabTrigger)];
 }
 
 - (void)setKeyEquivalentCxxString:(std::string const&)aKeyEquivalent
@@ -154,6 +169,7 @@
 
 - (void)setInactiveKeyEquivalentCxxString:(std::string const&)aKeyEquivalent
 {
+	objc_setAssociatedObject(self, kOakMenuItemKeyEquivalent, [NSString stringWithCxxString:aKeyEquivalent], OBJC_ASSOCIATION_RETAIN);
 	if(aKeyEquivalent == NULL_STR || aKeyEquivalent.empty())
 		return;
 
@@ -174,6 +190,7 @@
 
 - (void)setTabTriggerCxxString:(std::string const&)aTabTrigger
 {
+	objc_setAssociatedObject(self, kOakMenuItemTabTrigger, [NSString stringWithCxxString:aTabTrigger], OBJC_ASSOCIATION_RETAIN);
 	if(aTabTrigger == NULL_STR)
 		return;
 
