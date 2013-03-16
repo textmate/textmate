@@ -230,7 +230,7 @@ static bool uninstall_mate (std::string const& path)
 	[self updatePopUp:self.mateInstallPath];
 	[self updateUI:self];
 
-	CreateHyperLink(rmateSummaryText, @"rmate", [NSString stringWithFormat:@"txmt://open?url=%@", [[NSURL fileURLWithPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"rmate" ofType:@""]] absoluteString]]);
+	CreateHyperLink(rmateSummaryText, @"rmate", @"https://github.com/textmate/rmate/");
 	LSSetDefaultHandlerForURLScheme(CFSTR("txmt"), CFBundleGetIdentifier(CFBundleGetMainBundle()));
 }
 
