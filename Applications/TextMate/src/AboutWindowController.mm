@@ -241,6 +241,25 @@ static NSData* Digest (NSString* someString)
 
 // ====================
 
+static NSDictionary* RemoveOldCommits (NSDictionary* src)
+{
+	NSMutableDictionary* res = [src mutableCopy];
+	NSMutableArray* commits = [NSMutableArray array];
+
+	for(NSDictionary* commit in src[@"commits"])
+	{
+		NSString* dateString = commit[@"date"];
+		for(NSString* prefix in @[ @"2012-", @"2013-" ])
+		{
+			if([dateString hasPrefix:prefix]) // this is significantly faster than having to parse the date
+				[commits addObject:commit];
+		}
+	}
+
+	res[@"commits"] = commits;
+	return res;
+}
+
 - (void)webView:(WebView*)aWebView didFinishLoadForFrame:(WebFrame*)aFrame
 {
 	if(![[self.toolbar selectedItemIdentifier] isEqualToString:@"Bundles"])
@@ -250,20 +269,23 @@ static NSData* Digest (NSString* someString)
 	NSMutableString* str = [NSMutableString stringWithString:@"{\"bundles\":["];
 	for(std::string path : bundles_db::release_notes())
 	{
-		if(NSString* content = [NSString stringWithContentsOfFile:[NSString stringWithCxxString:path] encoding:NSUTF8StringEncoding error:NULL])
+		NSError* err = NULL;
+		if(NSString* content = [NSString stringWithContentsOfFile:[NSString stringWithCxxString:path] encoding:NSUTF8StringEncoding error:&err])
 		{
-			NSError* err = NULL;
-			if(![NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&err])
+			if(NSDictionary* obj = [NSJSONSerialization JSONObjectWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&err])
 			{
-				NSLog(@"%s: %@", path.c_str(), err.localizedDescription);
-				continue;
-			}
+				if(NSData* data = [NSJSONSerialization dataWithJSONObject:RemoveOldCommits(obj) options:0 error:&err])
+				{
+					if(!first)
+						[str appendString:@","];
+					first = false;
 
-			if(!first)
-				[str appendString:@","];
-			first = false;
-			[str appendString:content];
+					[str appendString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
+					continue;
+				}
+			}
 		}
+		NSLog(@"%s: %@", path.c_str(), err.localizedDescription);
 	}
 	[str appendString:@"]}"];
 
