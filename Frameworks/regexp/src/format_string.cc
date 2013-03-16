@@ -268,7 +268,7 @@ namespace format_string
 		nodes.reset(new parser::nodes_t(n));
 	}
 	
-	std::string format_string_t::expand (string_map_t const& variables) const
+	std::string format_string_t::expand (std::map<std::string, std::string> const& variables) const
 	{
 		expand_visitor v(variables, NULL);
 		v.traverse(*nodes);
@@ -280,7 +280,7 @@ namespace format_string
 	// = API =
 	// =======
 	
-	std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat, string_map_t const& variables)
+	std::string replace (std::string const& src, regexp::pattern_t const& ptrn, format_string_t const& format, bool repeat, std::map<std::string, std::string> const& variables)
 	{
 		D(DBF_FormatString, bug("%s\n", src.c_str()););
 		
@@ -291,7 +291,7 @@ namespace format_string
 		
 	}
 
-	std::string expand (std::string const& format, string_map_t const& variables)
+	std::string expand (std::string const& format, std::map<std::string, std::string> const& variables)
 	{
 		return format_string_t(format).expand(variables);
 	}

@@ -269,7 +269,7 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		{ "No more matches for “${found}”.",    "Found one match for “${found}”${line:+ at line ${line}, column ${column}}.", "${count} matches for “${found}”."    },
 	};
 
-	format_string::string_map_t variables;
+	std::map<std::string, std::string> variables;
 	variables["count"]  = std::to_string(aNumber);
 	variables["found"]  = to_s(aFindString);
 	variables["line"]   = aPosition ? std::to_string(aPosition.line + 1)   : NULL_STR;
