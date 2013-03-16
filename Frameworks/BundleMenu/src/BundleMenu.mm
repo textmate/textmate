@@ -43,7 +43,7 @@ static std::vector<bundles::item_ptr> filtered_menu (bundles::item_ptr menuItem,
 	return res;
 }
 
-void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasSelection, bool setKeys, NSMenu* menu, SEL menuAction)
+void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool setKeys, NSMenu* menu, SEL menuAction)
 {
 	bool onlyGrammars = true;
 	iterate(item, items)
@@ -86,7 +86,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasS
 
 			std::multimap<std::string, bundles::item_ptr, text::less_t> ordering;
 			iterate(item, includedItems)
-				ordering.insert(std::make_pair(name_with_selection(*item, hasSelection), *item));
+				ordering.insert(std::make_pair((*item)->name(), *item));
 			std::transform(ordering.begin(), ordering.end(), back_inserter(menuItems), [](std::pair<std::string, bundles::item_ptr> const& p){ return p.second; });
 
 			menus.insert(std::make_pair(bundle->name(), menuItems));
@@ -113,7 +113,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasS
 						[menu addItem:[NSMenuItem separatorItem]];
 					pendingSeparator = false;
 
-					NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:menuAction keyEquivalent:@""];
+					NSMenuItem* menuItem = [menu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:menuAction keyEquivalent:@""];
 					[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];
 
 					if(setKeys)
@@ -132,7 +132,7 @@ void OakAddBundlesToMenu (std::vector<bundles::item_ptr> const& items, bool hasS
 	}
 }
 
-bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> const& items, CGPoint const& pos, bool hasSelection)
+bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> const& items, CGPoint const& pos)
 {
 	if(items.empty())
 		return bundles::item_ptr();
@@ -141,7 +141,7 @@ bundles::item_ptr OakShowMenuForBundleItems (std::vector<bundles::item_ptr> cons
 
 	NSMenu* menu = [NSMenu new];
 	[menu setFont:[NSFont menuFontOfSize:[NSFont smallSystemFontSize]]];
-	OakAddBundlesToMenu(items, hasSelection, false, menu, @selector(performBundleItemWithUUIDStringFrom:));
+	OakAddBundlesToMenu(items, false, menu, @selector(performBundleItemWithUUIDStringFrom:));
 	[menu update];
 
 	char key = 0;

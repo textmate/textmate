@@ -29,10 +29,6 @@ OAK_DEBUG_VAR(BundleMenu);
 	D(DBF_BundleMenu, bug("\n"););
 	[aMenu removeAllItems];
 
-	BOOL hasSelection = NO;
-	if(id textView = [NSApp targetForAction:@selector(hasSelection)])
-		hasSelection = [textView hasSelection];
-
 	scope::context_t scope = "";
 	if(id textView = [NSApp targetForAction:@selector(scopeContext)])
 		scope = [textView scopeContext];
@@ -61,11 +57,11 @@ OAK_DEBUG_VAR(BundleMenu);
 			case bundles::kItemTypeProxy:
 			{
 				auto const items = bundles::items_for_proxy(*item, scope);
-				OakAddBundlesToMenu(items, hasSelection, true, aMenu, @selector(performBundleItemWithUUIDStringFrom:));
+				OakAddBundlesToMenu(items, true, aMenu, @selector(performBundleItemWithUUIDStringFrom:));
 
 				if(items.empty())
 				{
-					NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(nop:) keyEquivalent:@""];
+					NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(nop:) keyEquivalent:@""];
 					[menuItem setInactiveKeyEquivalentCxxString:key_equivalent(*item)];
 					[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 				}
@@ -74,7 +70,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 			default:
 			{
-				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:name_with_selection(*item, hasSelection)] action:@selector(performBundleItemWithUUIDStringFrom:) keyEquivalent:@""];
+				NSMenuItem* menuItem = [aMenu addItemWithTitle:[NSString stringWithCxxString:(*item)->name()] action:@selector(performBundleItemWithUUIDStringFrom:) keyEquivalent:@""];
 				[menuItem setInactiveKeyEquivalentCxxString:key_equivalent(*item)];
 				[menuItem setTabTriggerCxxString:(*item)->value_for_field(bundles::kFieldTabTrigger)];
 				[menuItem setRepresentedObject:[NSString stringWithCxxString:(*item)->uuid()]];

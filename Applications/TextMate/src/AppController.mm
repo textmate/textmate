@@ -9,6 +9,7 @@
 #import <CrashReporter/CrashReporter.h>
 #import <DocumentWindow/DocumentController.h>
 #import <Find/Find.h>
+#import <OakAppKit/NSMenuItem Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakPasteboard.h>
 #import <OakFilterList/BundleItemChooser.h>
@@ -20,6 +21,7 @@
 #import <Preferences/TerminalPreferences.h>
 #import <SoftwareUpdate/SoftwareUpdate.h>
 #import <document/collection.h>
+#import <bundles/query.h>
 #import <io/path.h>
 #import <network/tbz.h>
 #import <ns/ns.h>
@@ -419,6 +421,14 @@ BOOL HasDocumentWindow (NSArray* windows)
 	else if([item action] == @selector(orderFrontGoToLinePanel:))
 	{
 		enabled = [NSApp targetForAction:@selector(setSelectionString:)] != nil;
+	}
+	else if([item action] == @selector(performBundleItemWithUUIDStringFrom:))
+	{
+		if(bundles::item_ptr bundleItem = bundles::lookup(to_s((NSString*)item.representedObject)))
+		{
+			if(id textView = [NSApp targetForAction:@selector(hasSelection)])
+				[item updateTitle:[NSString stringWithCxxString:name_with_selection(bundleItem, [textView hasSelection])]];
+		}
 	}
 	return enabled;
 }
