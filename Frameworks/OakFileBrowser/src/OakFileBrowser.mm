@@ -330,6 +330,13 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 	[menu addItem:[NSMenuItem separatorItem]];
 	[[menu addItemWithTitle:@"Other…" action:@selector(orderFrontGoToFolder:) keyEquivalent:@""] setTarget:self];
+
+	if(NSString* path = [[_url filePathURL] path])
+	{
+		[menu addItem:[NSMenuItem separatorItem]];
+		[[menu addItemWithTitle:[NSString stringWithFormat:@"Use “%@” as Project Folder", DisplayName(_url)] action:@selector(takeProjectPathFrom:) keyEquivalent:@""] setRepresentedObject:path];
+	}
+
 }
 
 - (void)goToURL:(NSURL*)aURL

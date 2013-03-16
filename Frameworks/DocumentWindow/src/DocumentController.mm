@@ -1201,6 +1201,12 @@ namespace
 	return _documentSCMVariables;
 }
 
+- (void)takeProjectPathFrom:(NSMenuItem*)aMenuItem
+{
+	if(NSString* path = [aMenuItem respondsToSelector:@selector(representedObject)] ? [aMenuItem representedObject] : nil)
+		self.projectPath = self.defaultProjectPath = path;
+}
+
 // ========================
 // = OakTextView Delegate =
 // ========================
@@ -1970,6 +1976,8 @@ namespace
 		active = self.fileBrowserVisible;
 	else if([menuItem action] == @selector(moveFocus:))
 		[menuItem setTitle:self.window.firstResponder == self.textView ? @"Move Focus to File Browser" : @"Move Focus to Document"];
+	else if([menuItem action] == @selector(takeProjectPathFrom:))
+		[menuItem setState:[self.defaultProjectPath isEqualToString:[menuItem representedObject]] ? NSOnState : NSOffState];
 	return active;
 }
 
