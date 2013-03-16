@@ -30,7 +30,7 @@ static NSDictionary* default_settings ()
 		kUserDefaultsLastBundleUpdateCheckKey   : [NSDate distantPast],
 		kUserDefaultsDisableRMateServerKey      : @NO,
 		kUserDefaultsRMateServerListenKey       : kRMateServerListenLocalhost,
-		kUserDefaultsRMateServerPortKey         : @52698,
+		kUserDefaultsRMateServerPortKey         : @"52698",
 		kUserDefaultsLicenseOwnerKey            : NSFullUserName(),
 		kUserDefaultsAntiAliasKey               : @YES,
 		kUserDefaultsLineNumbersKey             : @YES,
