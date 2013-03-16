@@ -20,7 +20,7 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 
 static NSPopUpButton* OakCreatePopUpButton ()
 {
-	NSPopUpButton* res = [NSPopUpButton new];
+	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setBordered:NO];
