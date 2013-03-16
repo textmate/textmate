@@ -1886,8 +1886,33 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 }
 
+// FIXME copy/paste from bundles/src/query.cc
+static std::string format_bundle_item_title (std::string title, bool hasSelection)
+{
+	static std::string const kSelectionSubString = " / Selection";
+
+	std::string::size_type pos = title.find(kSelectionSubString);
+	if(pos == 0 || pos == std::string::npos)
+		return title;
+
+	if(hasSelection)
+	{
+		std::string::size_type from = title.rfind(' ', pos - 1);
+		if(from == std::string::npos)
+			return title.erase(0, pos + 3);
+		return title.erase(from + 1, pos + 3 - from - 1);
+	}
+	return title.erase(pos, kSelectionSubString.size());
+}
+
+static char const* kOakMenuItemTitle = "OakMenuItemTitle";
+
 - (BOOL)validateMenuItem:(NSMenuItem*)aMenuItem
 {
+	NSString* title = objc_getAssociatedObject(aMenuItem, kOakMenuItemTitle) ?: aMenuItem.title;
+	objc_setAssociatedObject(aMenuItem, kOakMenuItemTitle, title, OBJC_ASSOCIATION_RETAIN);
+	[aMenuItem updateTitle:[NSString stringWithCxxString:format_bundle_item_title(to_s(title), [self hasSelection])]];
+
 	if([aMenuItem action] == @selector(cut:))
 		[aMenuItem setTitle:@"Cut"];
 	else if([aMenuItem action] == @selector(copy:))
