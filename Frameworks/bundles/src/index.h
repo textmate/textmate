@@ -74,14 +74,12 @@ namespace bundles
 
 		item_t (oak::uuid_t const& uuid, item_ptr bundleItem, kind_t kind, bool local = false);
 		static item_ptr menu_item_separator ();
-		static void traverse (std::map<std::string, fs::node_t> const& heads, std::string const& cacheFile);
+		void add_path (std::string const& path);
 		bool initialize (plist::dictionary_t const& plist);
 		void set_plist (plist::dictionary_t const& plist, bool shouldInitialize = true);
 		bool does_match (std::string const& field, std::string const& value, scope::context_t const& scope, int kind, oak::uuid_t const& bundle, double* rank);
 
 	private:
-		void add_path (std::string const& path);
-
 		struct required_bundle_t
 		{
 			required_bundle_t (std::string const& name, oak::uuid_t const& uuid) : _name(name), _uuid(uuid) { }

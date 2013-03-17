@@ -141,7 +141,7 @@ namespace bundles
 		};
 	}
 
-	void item_t::traverse (std::map<std::string, fs::node_t> const& heads, std::string const& cacheFile)
+	static void traverse (std::map<std::string, fs::node_t> const& heads, std::string const& cacheFile)
 	{
 		property_cache_t plistCache(cacheFile);
 
@@ -393,7 +393,7 @@ namespace bundles
 			callback_t (std::string const& cacheFile) : _cache_file(cacheFile) { }
 			void did_change (std::map<std::string, fs::node_t> const& heads, std::map< std::string, std::vector<std::string> > const& changes)
 			{
-				item_t::traverse(heads, _cache_file);
+				traverse(heads, _cache_file);
 			}
 
 		private:
