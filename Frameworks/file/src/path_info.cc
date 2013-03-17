@@ -6,6 +6,7 @@
 #include <plist/ascii.h>
 #include <text/tokenize.h>
 #include <oak/oak.h>
+#include <oak/compat.h>
 
 namespace file
 {
@@ -36,11 +37,7 @@ namespace file
 			res.push_back("attr.untitled");
 		}
 
-		SInt32 major, minor, bugFix;
-		Gestalt(gestaltSystemVersionMajor,  &major);
-		Gestalt(gestaltSystemVersionMinor,  &minor);
-		Gestalt(gestaltSystemVersionBugFix, &bugFix);
-		res.push_back(text::format("attr.os-version.%zd.%zd.%zd", (ssize_t)major, (ssize_t)minor, (ssize_t)bugFix));
+		res.push_back(text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()));
 
 		std::string const parentDir = dir == NULL_STR ? path::parent(path) : dir;
 		res.push_back(settings_for_path(path, text::join(res, " "), parentDir).get(kSettingsScopeAttributesKey, ""));

@@ -27,6 +27,7 @@
 #import <text/tokenize.h>
 #import <text/utf8.h>
 #import <ns/ns.h>
+#import <oak/compat.h>
 
 namespace find_tags { enum { in_document = 1, in_selection, in_project, in_folder }; } // From AppController.h
 
@@ -1064,11 +1065,7 @@ namespace
 		}
 
 		_projectScopeAttributes.clear();
-		SInt32 major, minor, bugFix;
-		Gestalt(gestaltSystemVersionMajor,  &major);
-		Gestalt(gestaltSystemVersionMinor,  &minor);
-		Gestalt(gestaltSystemVersionBugFix, &bugFix);
-		_projectScopeAttributes.push_back(text::format("attr.os-version.%zd.%zd.%zd", (ssize_t)major, (ssize_t)minor, (ssize_t)bugFix));
+		_projectScopeAttributes.push_back(text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()));
 
 		std::string const customAttributes = settings_for_path(NULL_STR, text::join(_projectScopeAttributes, " "), to_s(_projectPath)).get(kSettingsScopeAttributesKey, NULL_STR);
 		if(customAttributes != NULL_STR)
