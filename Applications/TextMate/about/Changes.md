@@ -1,6 +1,16 @@
 # Changes
 
-## 2013-03-13 ([r9395](https://github.com/textmate/textmate/compare/r9393...r9395))
+## 2013-03-17 ([a9397](https://github.com/textmate/textmate/compare/r9395...a9397))
+
+* You can now set the current window’s project folder via the file browser. Click the folder in the top bar and there should be an option to use the current folder as project folder. Project folder is the default location for project searches (⇧⌘F), file chooser (⌘T), and many commands will fallback on project folder (e.g. build commands).
+* The file chooser (⌘T) will now treat space the same as slash, i.e. enable full path filtering.
+* `rmate` has been turned into a ruby gem and can be installed with `gem install rmate` on servers that have `gem` available.
+* The bundle history in this window (which you can get to by pressing ⌘3, ⌘}, or ⌥⌘→) now only list history for 2012 and 2013, which should make showing the history much faster.
+* Don’t use `POSIX_SPAWN_CLOEXEC_DEFAULT` on 10.7 to avoid kernel panic. Thanks to [squatch](https://github.com/squatch) for debugging this.
+* Fix type of `rmate` listen port in _Preferences → Terminal_. If this value shows with a thousand separator you need to manually remove the separator character and press return to get rid of the old (bad) value.
+* I changed the `r` prefix on the build number to `a`. Previously it was short for “revision”, but since I may reset the counter once we go from alpha → beta → release, it should use the build’s status as prefix.
+
+## 2013-03-13 ([a9395](https://github.com/textmate/textmate/compare/r9393...r9395))
 
 * When estimating indent we now use per-line indent patterns to avoid having multi-line block comments above the caret affect the estimated indent level.
 * New scoped setting: `zeroIndentPattern`. Lines matches by this pattern get zero indent but does not affect the indent of following lines. Probably only useful for C preprocessor lines, maybe also code lines in template languages that support a “begin of line” character as an alternative to wrapping the code in special syntax.
@@ -8,11 +18,11 @@
 * Introduce `TM_MATE` environment variable which bundle commands should use when they wish to call `mate` (previously the convention was to use `"$TM_SUPPORT_PATH/bin/mate"`).
 * The _Edit → Select → None_ (⇧⌘A) menu item has been moved to the file browser’s action menu, as the key is always sent to the file browser.
 
-## 2013-03-07 ([r9393](https://github.com/textmate/textmate/compare/r9391...r9393))
+## 2013-03-07 ([a9393](https://github.com/textmate/textmate/compare/r9391...r9393))
 
 * Fix potential deadlock when opening find dialog (introduced in r9391).
 
-## 2013-03-07 ([r9391](https://github.com/textmate/textmate/compare/r9389...r9391))
+## 2013-03-07 ([a9391](https://github.com/textmate/textmate/compare/r9389...r9391))
 
   * Assign ⌃⌘↩ to View → Enter / Exit Full Screen.
 
@@ -27,17 +37,17 @@
       * Using Find All with ‘in’ set to ‘Selection’ will find and select all matches in the current document, though it might be more desirable to show the results in the find dialog (like Find All does for a document or folder).
 	  * Replace and Find has been implemented and is bound to ⌥⌘G.
 
-## 2013-03-04 ([r9389](https://github.com/textmate/textmate/compare/r9387...r9389))
+## 2013-03-04 ([a9389](https://github.com/textmate/textmate/compare/r9387...r9389))
 
 * Add “scroll past end” option to the View menu. Enabling this means that the last line of the document is no longer anchored to the bottom but can e.g. be centered in the view port. *[Steven Clukey]*
 * Improve voice over / accessibility support: The editor (with status bar) and file browser are now two distinct groups and all image buttons have descriptive accessibility attributes. *[Boris Dušek]*
 * Improve heuristic for swipe gestures in HTML views.
 
-## 2013-02-25 ([r9387](https://github.com/textmate/textmate/compare/r9385...r9387))
+## 2013-02-25 ([a9387](https://github.com/textmate/textmate/compare/r9385...r9387))
 
 * After using the open dialog, TextMate would not switch back to internal GPU.
 
-## 2013-02-22 ([r9385](https://github.com/textmate/textmate/compare/r9383...r9385))
+## 2013-02-22 ([a9385](https://github.com/textmate/textmate/compare/r9383...r9385))
 
 * When toggling the file browser, the window will adjust its width. Likewise the width of new windows depend on wether or not the file browser is initially visible.
 * Updated key equivalents for the _File_ menu. Also added 3 new items: _New File_, _New Folder_, and _Close All Tabs_. The first two actions were previously only available through the file browsers action menu.
@@ -45,7 +55,7 @@
 * Deleting symbolic links in the file browser would trash the item that the link pointed to, instead of the link itself.
 * Commands which use the `requiredCommands` key (in the `tmCommand` property list) and specify a variable will now always have that variable set. Previously it was only set if the required executable was not found via `PATH`.
 
-## 2013-02-18 ([r9383](https://github.com/textmate/textmate/compare/r9381...r9383))
+## 2013-02-18 ([a9383](https://github.com/textmate/textmate/compare/r9381...r9383))
 
 * Themes can now specify they want to use the [sRGB color profile](http://en.wikipedia.org/wiki/SRGB). This is done by adding the following to the theme:
 
@@ -56,12 +66,12 @@
 * The `menu` dialog command would return wrong items for menus with separators or headings.
 * Add line, type, and display name flags to `rmate`. *[Toby Butzon]*
 
-## 2013-02-16 ([r9381](https://github.com/textmate/textmate/compare/r9379...r9381))
+## 2013-02-16 ([a9381](https://github.com/textmate/textmate/compare/r9379...r9381))
 
 * Fix: Calling `mate -w` would hang forever.
 * Fix: _Edit → Select → None_ would crash if the file browser wasn’t visible.
 
-## 2013-02-15 ([r9379](https://github.com/textmate/textmate/compare/r9377...r9379))
+## 2013-02-15 ([a9379](https://github.com/textmate/textmate/compare/r9377...r9379))
 
   * The ‘New Document’ file browser action will now create a document on disk in addition to a new tab. The type of this document (and thereby the file extension) is taken from _Preferences → Files → New document type_ but you can set it per-folder via `.tm_properties`, e.g.:
 
@@ -73,7 +83,7 @@
   * `file` links in HTML output that link to directories will now open the potentially contained `index.html` (this is mainly for documentation commands).
   * Introduce `TM_PROPERTIES_PATH`. This variable contains a colon-separated list of `.tm_properties` files that have been read (to create the current “environment”). This is mainly meant as a debug aid.
 
-## 2013-02-11 ([r9377](https://github.com/textmate/textmate/compare/r9375...r9377))
+## 2013-02-11 ([a9377](https://github.com/textmate/textmate/compare/r9375...r9377))
 
   * Starting with this build, the summary for each update is going to be shorter so if you want all the details visit GitHub by clicking the link in the heading above.
 
@@ -89,7 +99,7 @@
 
   * Relaunching as part of an software update will restore your open documents even if you disabled that option in preferences.
 
-## 2013-02-08 (r9375)
+## 2013-02-08 (a9375)
 
   * When moving focus to file browser via _Navigate → Move Focus to File Browser_ (⌥⌘⇥) and there is no selection, we now select the first item (mainly to give an indication of successfully having moved focus, as there is no focus ring for this view).
   * On 10.8 TextMate will now show a notification when posting a crash report to `macromates.com`. This way the notification center provides a list of recent crashes that can be clicked to view the online version.
@@ -110,25 +120,25 @@
   * Fix issue where entering a file suffix in the file chooser (⌘T) would get a too high rank.
   * Fix searching for case-sensitive regular expressions. Previously the search would always be case insensitive.
 
-## 2013-02-06 (r9371)
+## 2013-02-06 (a9371)
 
 * Performing file operations in the file browser now instantly reload rather than wait for fs-events. This not only give a better experience (instant feedback) but also makes the file browser update properly when using file systems that doesn’t support fs-events.
 * It’s (again) possible to make renames that only change case (on case-insensitive file systems).
 * The text view scroll bars now auto-hide when the content fits the viewport (for users who have opted to have them always visible).
 * Stability improvements.
 
-## 2013-02-05 (r9367)
+## 2013-02-05 (a9367)
 
 * When re-activating TextMate, the file browser will reload modified folders (based on stat’ing them and looking at the modification date). This is to support file systems which do not support fs-events.
 * Fix high CPU load when opening documents from outside the window’s project folder.
 * Fix missing items when collapsing and then expanding in file browser.
 * Use proper cursor image for resizing the command output view when it’s placed to the right of text (arrow left/right instead of up/down).
 
-## 2013-02-05 (r9363)
+## 2013-02-05 (a9363)
 
 * Fix crash introduced in last build. For the records, if you update to an unstable nightly build you can switch back to “Normal Releases” in _Preferences → Software Update_. When you then do _Check Now_ it’ll allow you to downgrade. Also, if a build gets pulled again, as was the case with r9361, staying on nightly builds also offer the downgrade option when you _Check Now_ — I may make it automatically downgrade in the future, when builds are pulled, seeing how many users prefer to use the nightly builds.
 
-## 2013-02-04 (r9361)
+## 2013-02-04 (a9361)
 
 * Files missing on disk but tracked by your version control system (with status as deleted) will now show in the file browser (with appropriate badge).
 * Improve performance relating to disk access. If you had SCM badges disabled I encourage you to enable them and speak up if there are still performance issues. Additionally TextMate should also perform better on (high-latency) network file systems.
@@ -137,7 +147,7 @@
 * Fix wrong color used in red file labels. *[michael starke]*
 * Fix wrong behavior when selecting to end of line (problem introduced in last build).
 
-## 2013-01-30 (r9359)
+## 2013-01-30 (a9359)
 
 * A (square) column selection is now broken into multiple carets (discontinuous selections) when selecting to begin/end of typing pairs (⌃⇧↑/⌃⇧↓) or to end of line/paragraph. Previously only left/right movement or “unit selection” would show this behavior.
 * The “Go to Symbol…” panel now open with the current symbol selected and will reflect movement in the document or switching to another document (if you keep the panel open). *[Steven Clukey]*
@@ -146,7 +156,7 @@
 * Fix occasional “too light” title bar gradient. *[Adam Strzelecki]*
 * Fix issue where click-dragging scrollbars would cause entire window to be dragged.
 
-## 2013-01-29 (r9353)
+## 2013-01-29 (a9353)
 
 ### Settings
 
@@ -189,7 +199,7 @@
 * The HTML output window would have a blank title, if the command didn’t output one.
 * The code signature on `TextMate.app` for r9351 wasn’t timestamped. This may have been the reason some users had Finder report that the program was broken. I have re-enabled timestamps.
 
-## 2013-01-23 (r9351)
+## 2013-01-23 (a9351)
 
 * Actions performed in the file browser now support undo. The context menu of the file browser contains undo/redo menu items, alternatively the Edit menu’s Undo and Redo actions work on the file browser, when it has focus.
 * You can now delete items on network drives but will get a warning dialog informing you that the items will be permanently deleted.
@@ -200,7 +210,7 @@
 * If your clipboard data contains `<NUL>` characters then these can now be pasted into TextMate.
 * Default theme has been changed to Twilight, default location for (HTML) command output is set to new window, and the position of the file browser now defaults to the right side. As for the latter, it takes some getting used to, but give it a chance, as it means your text doesn’t “move” depending on wether or not the file browser is visible.
 
-## 2013-01-21 (r9349)
+## 2013-01-21 (a9349)
 
  *	Rework file chooser (⌘T):
 	It now show document icons (with potential SCM status) and close buttons for open documents. Filtering has also seen some minor improvements, mainly related to “full path” filtering (which you activate by putting a slash in the filter string). Performance should be better when dealing with large directories (try e.g. ⌘↑ to move to the parent of your current folder), this mainly relates to not stalling the application (the scanning itself could likely be a little faster).
@@ -224,7 +234,7 @@
 
  *	Fix crash introduced in r9345.
 
-## 2013-01-17 (r9347)
+## 2013-01-17 (a9347)
 
 * If you have “open documents from last session” enabled in preferences then TextMate will no longer ask you to save untitled documents when you quit, as these will be restored next time you launch it, and as they are untitled, no other program can edit them (causing a conflict, as would be the case if the document had a location on disk).
 * If the ‘inode’ of an open file changed (e.g. because of `git stash`/`rebase`) and you opened the file again (e.g. via `mate`) then TextMate would open a new tab, even though the file was already open.
@@ -234,7 +244,7 @@
 * The _Go → Reload_ menu item was disabled unless file browser was active.
 * Other minor fixes and improvements.
 
-## 2013-01-13 (r9345)
+## 2013-01-13 (a9345)
 
 * File browser has a new navigation bar. This is work in progress. You can find most actions of the old bar in the Go menu (where you can also see the key equivalents). Presently missing is “Show Hidden Items”, a toolbar below the file browser will soon appear.
 
@@ -260,12 +270,12 @@
 
 * Various fixes to improve stability.
 
-## 2013-01-10 (r9343)
+## 2013-01-10 (a9343)
 
 * Save All with more than one modified document would crash (r9341).
 * Merge All windows would double the current window’s tabs (r9341).
 
-## 2013-01-10 (r9341)
+## 2013-01-10 (a9341)
 
 * When you open a folder or some document(s), a default project folder will be based on the path(s) opened. This means that as long as you always open the root of your project (via `mate`, `open -a TextMate`, dragging the folder to TextMate, using the favorites (⇧⌘O), open dialog, `txmt:` URL scheme, or what have you), your project no longer requires a `.tm_properties` file setting `projectDirectory` for Find in Folder (⇧⌘F), Go to File (⌘T), and similar to work as desired. Additionally the default properties now set a window title that includes the project folder’s name (and SCM branch when available), so most projects can now also drop setting `windowTitle`. Note that windows restored from a session created prior to r9339 will not have a default project folder, so you should close and re-open the project folder, after this, the project folder will be preserved in the session save data.
 * The file browser now defaults to the project folder rather than the folder set in Preferences (the latter is still used if there is no document, e.g. after ⌘N or ⌃⌘N).
@@ -280,11 +290,11 @@
 * Fix potential crash when activating the OS dictionary on an empty document.
 * The file chooser window (⌘T) was leaking in r9337 and wouldn’t terminate its scanner thread if the window was closed w/o making a selection (although it would terminate when scanning had finished). It would also throw an exception about a key/value observer not having been removed.
 
-## 2013-01-03 (r9337)
+## 2013-01-03 (a9337)
 
 * Restore 10.7 compatibility.
 
-## 2013-01-03 (r9335)
+## 2013-01-03 (a9335)
 
 * Assign ⇧⌘P to the _Go → Project Folder_ menu item.
 * Support HTML output placed on right side (again). This can be set in Preferences → Project.
@@ -295,13 +305,13 @@
 * Remove the _Edit → Mode_ submenu as the menu item wasn’t hooked up. Currently you can use the tab size pop-up in the status bar to select between tabs and soft tabs.
 * Improve stability.
 
-## 2012-12-24 (r9331)
+## 2012-12-24 (a9331)
 
 * When syntax-highlighting a file, do batch redraw instead of line-by-line (should improve perceived performance). *[Joachim Mårtensson]*
 * The “Edit Command…” button in error dialogs would often cause a crash.
 * Fix another potential crash, memory leak, and restore 10.7 compatibility.
 
-## 2012-12-20 (r9327)
+## 2012-12-20 (a9327)
 
 * Commands which fail due to unsatisfied requirements will no longer show “Edit Command” but instead will optionally show a “More Info…” button when the command includes a URL for more info.
 * When manually checking for updates and your version is newer than what’s found on the server (e.g. you’re running a nightly build but checking for regular builds), you’ll be offered to downgrade (generally though the nightly builds are safe to run as they contain more fixes than the regular builds :) ).
@@ -311,18 +321,18 @@
 * Fix potential crash when closing document window.
 * When a snippet pop-up menu was showing, and TextMate was not the active application, the window would be hidden.
 
-## 2012-12-14 (r9325)
+## 2012-12-14 (a9325)
 
 * Add support for VoiceOver/accessibility. *[Boris Dušek]*
 * Add support for “Zoom follows the keyboard focus”. *[Boris Dušek]*
 * Always set the `TM_SOFT_TABS` variable. *[Michael Sheets]*
 * Limit file browser refresh. *[Joachim Mårtensson]*
 
-## 2012-11-14 (r9323)
+## 2012-11-14 (a9323)
 
 * Fix crash bug introduced in last build.
 
-## 2012-11-12 (r9321)
+## 2012-11-12 (a9321)
 
 * Add `filepanel` dialog command. For details use ⌃R (execute current line) on a line containing: `"$DIALOG" help filepanel`. *[Hans-Jörg Bibiko]*
 
@@ -340,7 +350,7 @@
 
 * The command properties drawer in the bundle editor has been made less wide by wrapping a few lines. *[Adam Strzelecki]*
 
-## 2012-10-01 (r9319)
+## 2012-10-01 (a9319)
 
 * Using “Transpose” (⌃T) with a discontinuous selection will now swap the selected strings. If pressed repeatedly, and more than two strings are selected, it will cycle through all possible permutations.
 
@@ -356,14 +366,14 @@
 
 * `rmate`: Overwriting an existing file now preserve the existing file’s group and owner.
 
-## 2012-09-29 (r9317)
+## 2012-09-29 (a9317)
 
 * New semantic class: `callback.document.will-save`. This can be used to have a command called prior to saving a document, the command could e.g. strip trailing whitespace or ensure the document has a `LF` character on last line. Two minor issues is that selection is currently lost after running a “did save” command (when it replaces entire document) and caret is scrolled into the visible area.
 * The about window has been combined with credits, release notes, and a new option allows you to see changes for installed bundles, although presently not much is showing, as you’ll need updated bundles before version information is available (so a lot of info should show in a few days when the various bundles have auto-updated). *[Rasmus Abrahamsen]*
 * If the file browser was showing a lot of items, editor speed would be affected. There still is an issue opening/closing files or when a document goes from modified to non-modified or vice versa.
 * Fix issues with lack of resizing the gutter.
 
-## 2012-09-24 (r9315)
+## 2012-09-24 (a9315)
 
 * Files which use CRLF no longer cause problems for Find in Folder. *[Rasmus Abrahamsen]*
 * One can now use ⌃S and ⌃⇧S for Find Next/Previous when incremental search is active. Also improved the look of the incremental search control. *[Mads Hartmann Jensen]*
@@ -375,7 +385,7 @@
 
 	If no `--setting` is given then all settings are returned. *[Ole Gammelgaard Poulsen]*
 
-## 2012-09-21 (r9313)
+## 2012-09-21 (a9313)
 
 * Add indent aware begin/end of line action methods.
 
@@ -415,7 +425,7 @@
 * Fix crash when clicking exactly on the split view dividers.
 * Fix potential crash when quitting TextMate (in `network::launch_tbz`).
 
-## 2012-09-18 (r9311)
+## 2012-09-18 (a9311)
 
 * Untitled documents now base their scope attributes on the file browser’s location. This mean things like ⌘B or ⌘Y will call the proper build / SCM action(s) when used in untitled documents (e.g. the initial document showing after opening a project folder via ⇧⌘O or `mate .`).
 * Previous build changed the semantics of the include/exclude patterns for the file browser: Now a file **must** be matched by the include pattern in order to be shown. The default patterns have been updated, but if you have edited them, or have your own include pattern in a `.tm_properties` file, then you should add the asterisk to your set of included files, e.g. `{*,.tm_properties,.htaccess,.gitignore}`.
@@ -428,7 +438,7 @@
 * Fix `x-insert` dialog command to work even when the text view doesn’t have focus. *[Hans-Jörg Bibiko]*
 * Fix missing curly quotes in a few dialog texts. *[Ryan Maxwell]*
 
-## 2012-09-16 (r9309)
+## 2012-09-16 (a9309)
 
 * Minimum dimensions are enforced when resizing the file browser or HTML output. The explicit resize buttons have been removed but dragging the dividers should now be easier, as the hot zone has been increased.
 
@@ -490,27 +500,27 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 [facebook event]: http://www.facebook.com/events/399041873494929
 [SHAPE]: http://shapehq.com/
 
-## 2012-09-10 (r9307)
+## 2012-09-10 (a9307)
 
 * If an open file is renamed on disk, TextMate will wait up to one second for a new file to appear before updating the document’s path. This is to work with programs that renames the existing file and saves a new in its place, instead of saving a new file and using [exchangedata(2)](x-man-page:///exchangedata/2).
 * When a file was externally modified, using undo followed by redo would freeze TextMate.
 * The undo/redo menu items are now disabled when the action is unavailable.
 
-## 2012-09-10 (r9306)
+## 2012-09-10 (a9306)
 
 * Spelling dot was drawn upside down.
 * Gutter and folded text images were drawn using wrong dimensions on retina Macs.
 
-## 2012-09-10 (r9305)
+## 2012-09-10 (a9305)
 
 * Fix crash introduced in r9303.
 
-## 2012-09-09 (r9304)
+## 2012-09-09 (a9304)
 
 * Escape PAC URL strings when they are invalid. Using “Choose File” in network settings could lead to a file URL with spaces which would cause a crash when TextMate needed to do network requests (for software update and crash report submissions).
 * Default host for rmate is now ‘auto’ (when using ssh).
 
-## 2012-09-09 (r9303)
+## 2012-09-09 (a9303)
 
 * When toggling _Check Spelling as You Type_ (⌥⌘;) or changing spelling language, we now recheck/refresh the document.
 * Remove overwrite and freehanded toggles from the UI (_Edit_ → _Mode_ and status bar). If you wish to edit “freehanded” you can ⌥-click to get a caret that moves unrestrained.
@@ -537,7 +547,7 @@ We also welcome people who just want to drop by and say hello, share a pizza, or
 
 	If unset, the icon colors default to the colors used for text and selection border defaults to the divider color.
 
-## 2012-09-07 (r9302)
+## 2012-09-07 (a9302)
 
 ### Proxy Items
 
@@ -581,19 +591,19 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Jumping files with ⌘G (after a Find in Folder) would lead to an anchored selection, a few other cases would also cause the selection to be anchored. This is no longer the case (the subtle difference here is that unanchored selections will always extend for the initial shift (⇧) + movement action).
 * Add revision numbers to release notes. *[Elia Schito]*
 
-## 2012-09-05 (r9301)
+## 2012-09-05 (a9301)
 
 * Fix crash for when one of the `Bundles` folders (under `Library/Application Support`) was a symbolic link.
 * Fix crash related to trying to use a grammar that no-longer exists on disk, i.e. before the bundle index had a chance to catch up with disk changes.
 
-## 2012-09-04 (r9300)
+## 2012-09-04 (a9300)
 
 * The underline drawn for misspelled words now use high-DPI artwork on retina macs.
 * Bundle item names using “«unit» / Selection” in their title now display either “«unit»” or “Selection” depending on whether or not there is a selection.
 * The pop-up menu used for multiple choices (in snippets) now filter items based on the prefix typed (rather than just changing selection). It also no longer pin the selected item at the first visible row.
 * The various filter lists (⌘T, ⇧⌘T, and ⌃⌘T) are now positioned relative to the current document window.
 
-## 2012-09-03 (r9298)
+## 2012-09-03 (a9298)
 
 * Wrap Column → Other… now show a sheet where you can enter wrap column.
 * We now search the menus “right to left” when searching for a key equivalent. The problem is that on some key maps the keys used to Toggle Foldings at Level (⌥⌘1-n) clash with modifier + bracket used in the Text menu for shift left/right.
@@ -604,7 +614,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * When showing SCM Status for subversion repositories in the file browser, we no longer remove parent folders for uncommitted items nor child items (reported by `svn status`) for untracked folders.
 * It is now possible to “open” an Xcode project file inside TextMate. This “descends” into the project descriebed by the project file. *[Zach Drayer]*
 
-## 2012-09-02 (r9296)
+## 2012-09-02 (a9296)
 
 * You can now disable SCM badges by adding this to `.tm_properties`:
 
@@ -616,7 +626,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 
 * Fix issue with bundle item key equivalents sometimes eclipsing regular menu items even when the bundle item in question should not be enabled (due to scope selector).
 
-## 2012-08-31 (r9294)
+## 2012-08-31 (a9294)
 
 * Doing authenticated saves would fail (out of memory) if you had an older (32 bit) version of the “auth server” installed. TextMate now ensures the installed version is up-to-date.
 * Running `sudo mate` would fail to establish connection with TextMate (bug introduced when socket name was changed to include user ID).
@@ -627,7 +637,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Running commands from TextMate wouldn’t always set the working directory to that of the current document (introduced in r9292 / 2012-08-28).
 * Gutter line numbers wouldn’t always update (introduced in last nightly).
 
-## 2012-08-30 (r9293)
+## 2012-08-30 (a9293)
 
 * Fix random crash mainly when bringing focus back to TextMate or opening a new window.
 * If TextMate fails to read a link (`readlink`) it will show an alert with some diagnostics that you should submit to us (more info in the dialog). This is an attempt to track down another random crash that has been frequent (but has been in decline in recent versions, though not because it is fixed).
@@ -636,7 +646,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Fix missing svn status for long committer names. *[Jeremy Whitlock]*
 * WIP: Updated gutter images, presently not aligned/sized optimally. *[Dennis Vennink]*
 
-## 2012-08-28 (r9292)
+## 2012-08-28 (a9292)
 
 * TextMate is now built with [`libc++`](http://libcxx.llvm.org/index.html) and as a 64 bit application using the new Objective-C run-time. Ideally no changes affecting the user, but a lot has changed under the hood. *[Jacob Bandes-Storch]*
 * New `TM_SCM_NAME` variable giving the name of the SCM system used for the current file (git, svn, or hg) which can be used when setting `windowTitle`. *[Adam Strzelecki]*
@@ -645,7 +655,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Update look of release notes and make it a normal window (instead of floating). *[Dustin Wilson]*
 * Fix crash when using Find All in the Find dialog for an untitled file (introduced in last release).
 
-## 2012-08-27 (r9291)
+## 2012-08-27 (a9291)
 
 * While recording a macro, several actions would cause TM to misbehave/freeze (uncaught exception).
 * Using projects outside user’s home folder with symbolic links into the user’s home folder could cause a crash from the file chooser (⌘T) if doing full path search.
@@ -655,7 +665,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * ⌘-clicking file browser icons (to show in Finder) now only acts on actual files *[Jacob Bandes-Storch]*
 * Add New File and Open… actions to the dock menu *[Jacob Bandes-Storch]*
 
-## 2012-08-26 (r9290)
+## 2012-08-26 (a9290)
 
 * Add context menu to tab bar. Actions include creating new tab (can also be done by double-clicking empty space in a tab bar), tearing off tabs (can also be done by double-clicking a tab), closing other tabs (can be done by option-clicking the tab’s close button), and closing tabs to the right.
 
@@ -694,7 +704,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 
 * Add scope attributes for Ant, CMake, Maven and Scons projects. *[Michael Sheets]*
 
-## 2012-08-22 (r9289)
+## 2012-08-22 (a9289)
 
 * You can now ⌘-click icons in the file browser for “Show in Finder” *[Jacob Bandes-Storch]*
 * Bundle editor now remember column widths and item titles are truncated with ellipsis *[Gerd Knops]*
@@ -705,7 +715,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Fix issue with gutter’s border being drawn behind incremental search (and disappearing).
 * Yesterday’s build was missing “double-click bundles and bundle items to install” functionality.
 
-## 2012-08-21 (r9287)
+## 2012-08-21 (a9287)
 
 * Save dialogs now have controls for setting encoding, line endings, and whether or not to use a byte order mark (for unicode encodings).
 
@@ -729,7 +739,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 
 * TextMate will now update the installed version of `mate` if TextMate.app includes a newer version. This might result in prompting for admin password after updating TextMate.
 
-## 2012-08-19 (r9286)
+## 2012-08-19 (a9286)
 
 * Various improvements in paragraph definition and wrapping:
 
@@ -765,7 +775,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 
 [1]: https://github.com/textmate/textmate/issues/183
 
-## 2012-08-15 (r9283)
+## 2012-08-15 (a9283)
 
 * Minor tweak to how pasting works. Previously if you did a multiline selection and on the last line selected to the end of the line but excluded the actual newline, copy and pasted that somewhere else, it would treat it as you had also copied the newline. This is now only the case when you are pasting on a line that is not empty.
 
@@ -792,7 +802,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 	2. `disable` — the text is inserted as-is without indenting it.
 	3. «unset» — indent the paste based on the indent patterns of the current scope.
 
-## 2012-08-14 (r9281)
+## 2012-08-14 (a9281)
 
 * Pressing ⌥F2 with focus in the file browser now show the context menu.
 * The `TM_DROPPED_FILE` variable had a path relative to project directory instead of current file. This would make some drop commands insert wrong path.
@@ -803,7 +813,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * The bundle menu in the status bar can now be opened via ⌥F1 and will default to select the bundle for the current language. *[Adam Strzelecki]*
 * Further fixes to handling of txmt: URLs without a file argument.
 
-## 2012-08-13 (r9278)
+## 2012-08-13 (a9278)
 
 * Consecutive deletes extend the yank clipboard.
 * Tab triggers are once again rendered in the menu (though presently without the rounded rectangle) and all key equivalents are now shown menu (e.g. `⌃!` would previously not show). Also several legacy APis have been updated to the latest from Apple *[Jacob Bandes-Storch]*
@@ -818,7 +828,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * Add bundle menu to the status bar. *[Elia Schito]*
 * Changed Find/Replace combobox height to 21, to be aligned with other controls. *[Bo Xiao]*
 
-## 2012-08-11 (r9270)
+## 2012-08-11 (a9270)
 
 * Implement ⌃Y for yanking last deletion. *[Nathaniel Tagg]*
 * Added fullscreen behavior to document window and View → Enter/Exit Full Screen menu item. *[Jesse B. Hannah]*
@@ -826,7 +836,7 @@ If you have any comments on the above, please share on the [mailing list](http:/
 * If TextMate was launched via `git commit` then the Git bundle would have issues (since it would inherit a wrong `GIT_DIR` environment variables)
 * Preliminary support for installing bundles and bundle items (including themes) via double-click (from Finder). You can hold down option (⌥) if you wish to open them as folders/property lists.
 
-## 2012-08-10 (r9269)
+## 2012-08-10 (a9269)
 
 The source for TextMate 2 is now [available at GitHub][1] under a GPL 3 license. There is an [interview at Ars Technica][2] that gives some background about what motivated this decision.
 
