@@ -33,6 +33,11 @@ namespace bundles
 
 	PUBLIC extern std::string const kFieldAny;
 
+	PUBLIC extern std::string const kFieldIsDelta;
+	PUBLIC extern std::string const kFieldIsDeleted;
+	PUBLIC extern std::string const kFieldRequiredItems;
+	PUBLIC extern oak::uuid_t const kSeparatorUUID;
+
 	struct item_t;
 	typedef std::shared_ptr<item_t> item_ptr;
 
