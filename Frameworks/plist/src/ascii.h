@@ -5,7 +5,7 @@
 
 namespace plist
 {
-	PUBLIC plist::any_t parse_ascii (std::string const& str);
+	PUBLIC plist::any_t parse_ascii (std::string const& str, bool* success = NULL);
 }
 
 #endif /* end of include guard: ASCII_PARSER_H_D3YVICTX */

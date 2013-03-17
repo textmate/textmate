@@ -154,12 +154,15 @@ static bool parse_element (char const*& p, char const* pe, plist::any_t& res)
 
 namespace plist
 {
-	plist::any_t parse_ascii (std::string const& str)
+	plist::any_t parse_ascii (std::string const& str, bool* success)
 	{
 		plist::any_t res;
 		char const* p  = str.data();
 		char const* pe = p + str.size();
-		return parse_element(p, pe, res) && parse_ws(p, pe) && p == pe ? res : plist::any_t();
+		bool didParse = parse_element(p, pe, res) && parse_ws(p, pe) && p == pe;
+		if(success)
+			*success = didParse;
+		return didParse ? res : plist::any_t();
 	}
 
 } /* plist */
