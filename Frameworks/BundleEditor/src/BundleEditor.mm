@@ -430,12 +430,27 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 - (void)saveDocument:(id)sender
 {
 	[self commitEditing];
+	std::map<bundles::item_ptr, plist::dictionary_t> failedToSave;
 	iterate(pair, changes)
 	{
 		pair->first->set_plist(pair->second);
-		pair->first->save();
+		if(!pair->first->save())
+			failedToSave.insert(*pair);
 	}
-	changes.clear();
+	changes.swap(failedToSave);
+
+	if(!changes.empty())
+	{
+		NSAlert* alert = [NSAlert alertWithMessageText:@"Error Saving Bundle Item" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Sorry, but something went wrong while trying to save your changes. More info may be available via the console."];
+		OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){
+			if(returnCode == NSAlertSecondButtonReturn) // Discard Changes
+			{
+				changes.clear();
+				[self didChangeModifiedState];
+			}
+		});
+	}
+
 	[self didChangeModifiedState];
 }
 
