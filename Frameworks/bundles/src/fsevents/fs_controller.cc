@@ -89,7 +89,7 @@ namespace fs
 					}
 
 					_event_ids.insert(std::make_pair(*path, dirInfo));
-					newHeads.insert(std::make_pair(*path, node_t(*path, false).rescan(path::parent(*path), _dir_glob, _file_glob, NULL)));
+					newHeads.insert(std::make_pair(*path, node_t(*path).rescan(path::parent(*path), _dir_glob, _file_glob)));
 				}
 				rootPaths.clear();
 
@@ -156,7 +156,7 @@ namespace fs
 
 				directory_info_t dirInfo(*link, FSEventsGetCurrentEventId());
 				_event_ids.insert(std::make_pair(*link, dirInfo));
-				_heads.insert(std::make_pair(*link, node_t(*link, false).rescan(path::parent(*link), _dir_glob, _file_glob, NULL)));
+				_heads.insert(std::make_pair(*link, node_t(*link).rescan(path::parent(*link), _dir_glob, _file_glob)));
 				fs::watch(*link, this, dirInfo._event_id);
 			}
 
@@ -233,7 +233,7 @@ namespace fs
 			cwd = node.path(cwd);
 			if(cwd == path)
 			{
-				fs::node_t newNode(cwd, false);
+				fs::node_t newNode(cwd);
 				if(node._type != newNode._type || node._modified != newNode._modified)
 				{
 					if(node._type == fs::node_t::kNodeTypeMissing)         _changes["created"].push_back(cwd);

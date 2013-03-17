@@ -15,7 +15,7 @@ namespace fs
 	{
 		enum node_type_t { kNodeTypeDirectory, kNodeTypeLink, kNodeTypeFile, kNodeTypeMissing };
 
-		explicit node_t (std::string const& path, bool scan = true);
+		explicit node_t (std::string const& path);
 
 		std::string name () const                            { return _name; }
 		std::string path (std::string const& cwd) const      { return path::join(cwd, _name); }
@@ -27,7 +27,7 @@ namespace fs
 		bool operator!= (node_t const& rhs) const            { return !(*this == rhs); }
 
 		node_t (std::string const& name, std::string const& resolved, node_type_t type, time_t modified = 0, nodes_ptr const& entries = nodes_ptr()) : _name(name), _resolved(resolved), _type(type), _modified(modified), _entries(entries) { }
-		node_t& rescan (std::string const& cwd, path::glob_t const& dirGlob, path::glob_t const& fileGlob, std::map< std::string, std::vector<std::string> >* changes);
+		node_t& rescan (std::string const& cwd, path::glob_t const& dirGlob, path::glob_t const& fileGlob, std::map< std::string, std::vector<std::string> >* changes = NULL);
 
 		std::string _name;
 		std::string _resolved;

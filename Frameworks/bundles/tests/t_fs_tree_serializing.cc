@@ -22,10 +22,13 @@ public:
 	void test_fs_tree_serializing ()
 	{
 		test::jail_t jail;
-		setup_test_folder(jail.path());
+		std::string const path = jail.path();
 
-		fs::node_t lhs(jail.path());
-		TS_ASSERT_EQUALS(lhs, fs::node_t(jail.path()));
+		setup_test_folder(path);
+
+		fs::node_t lhs(path);
+		fs::node_t rhs(path);
+		TS_ASSERT_EQUALS(lhs.rescan(path, "*", "*"), rhs.rescan(path, "*", "*"));
 
 		std::string const& plistFile = jail.path("tree.plist");
 		plist::save(plistFile, to_plist(lhs));

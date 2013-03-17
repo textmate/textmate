@@ -7,7 +7,7 @@ OAK_DEBUG_VAR(FS_Tree);
 
 namespace fs
 {
-	node_t::node_t (std::string const& path, bool scan) : _name(path::name(path)), _resolved(NULL_STR), _modified(0)
+	node_t::node_t (std::string const& path) : _name(path::name(path)), _resolved(NULL_STR), _modified(0)
 	{
 		struct stat buf;
 		if(lstat(path.c_str(), &buf) == 0)
@@ -17,9 +17,6 @@ namespace fs
 			{
 				_type = kNodeTypeDirectory;
 				_entries.reset(new std::vector<node_t>);
-
-				if(scan)
-					rescan(path::parent(path), "*", "*", NULL);
 			}
 			else if(S_ISREG(buf.st_mode))
 			{
@@ -71,7 +68,7 @@ namespace fs
 			int type = (*entry)->d_type;
 			if(type == DT_DIR && dirGlob.does_match(path) || type == DT_REG && fileGlob.does_match(path) || type == DT_LNK)
 			{
-				node_t node(path, false);
+				node_t node(path);
 				key_t key(node._name, node._resolved, node._type);
 				std::map<key_t, value_t>::iterator it = entries.find(key);
 				if(it != entries.end())
