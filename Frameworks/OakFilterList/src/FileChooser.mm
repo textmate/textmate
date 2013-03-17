@@ -20,6 +20,9 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 	NSButton* res = [NSButton new];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
 	[[res cell] setControlSize:NSSmallControlSize];
+	NSString* accessibilityRole = NSAccessibilityRadioButtonRole;
+	[[res cell] accessibilitySetOverrideValue:accessibilityRole forAttribute:NSAccessibilityRoleAttribute];
+	[[res cell] accessibilitySetOverrideValue:NSAccessibilityRoleDescription(accessibilityRole, nil) forAttribute:NSAccessibilityRoleDescriptionAttribute];
 	res.bezelStyle                      = NSRecessedBezelStyle;
 	res.buttonType                      = NSPushOnPushOffButton;
 	res.title                           = label;
@@ -29,6 +32,20 @@ static NSButton* OakCreateScopeButton (NSString* label, SEL action, NSUInteger t
 
 	return res;
 }
+
+@interface OakScopeBarView : NSView
+@end
+
+@implementation OakScopeBarView
+- (BOOL)accessibilityIsIgnored { return NO; }
+- (id)accessibilityAttributeValue:(NSString *)attribute
+{
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
+		return NSAccessibilityRadioGroupRole;
+	else
+		return [super accessibilityAttributeValue:attribute];
+}
+@end
 
 @interface OakNonActivatingTableView : NSTableView
 @end
@@ -230,6 +247,19 @@ static path::glob_list_t globs_for_path (std::string const& path)
 		_scmChangesButton    = OakCreateScopeButton(@"Uncommitted Documents", @selector(takeSourceIndexFrom:), 2);
 		[_allButton setState:NSOnState];
 		[_scmChangesButton setEnabled:NO];
+		OakScopeBarView *scopeBar = [OakScopeBarView new];
+		NSDictionary *scopeButtons = @{
+			@"allButton": _allButton,
+			@"openDocumentsButton": _openDocumentsButton,
+			@"scmChangesButton": _scmChangesButton,
+		};
+		for(NSView* scopeButton in @[_allButton, _openDocumentsButton, _scmChangesButton])
+		{
+			[scopeButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[scopeBar addSubview:scopeButton];
+		}
+		[scopeBar addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[allButton]-[openDocumentsButton]-[scmChangesButton]|" options:0 metrics:nil views:scopeButtons]];
+		[scopeBar addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[allButton]|" options:0 metrics:0 views:scopeButtons]];
 
 		NSCell* cell = [OFBPathInfoCell new];
 		cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
@@ -295,9 +325,7 @@ static path::glob_list_t globs_for_path (std::string const& path)
 			@"searchField"        : _searchField,
 			@"aboveScopeBarDark"  : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
 			@"aboveScopeBarLight" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.797 alpha:1.000], [NSColor colorWithCalibratedWhite:0.912 alpha:1.000]),
-			@"allButton"          : _allButton,
-			@"openFilesButton"    : _openDocumentsButton,
-			@"scmChangesButton"   : _scmChangesButton,
+			@"scopeBar"           : scopeBar,
 			@"topDivider"         : OakCreateHorizontalLine([NSColor darkGrayColor], [NSColor colorWithCalibratedWhite:0.551 alpha:1.000]),
 			@"scrollView"         : scrollView,
 			@"bottomDivider"      : OakCreateHorizontalLine([NSColor grayColor], [NSColor lightGrayColor]),
@@ -319,10 +347,10 @@ static path::glob_list_t globs_for_path (std::string const& path)
 
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[searchField(>=50)]-(8)-|"                      options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[aboveScopeBarDark(==aboveScopeBarLight)]|"          options:0 metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[allButton]-[openFilesButton]-[scmChangesButton]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(8)-[scopeBar]-(>=8)-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[scrollView(==topDivider,==bottomDivider)]|"         options:0 metrics:nil views:views]];
 		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[statusTextField]-[itemCountTextField]-(4)-[progressIndicator]-(4)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[allButton]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
+		[contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(2)-[searchField]-(8)-[aboveScopeBarDark][aboveScopeBarLight]-(3)-[scopeBar]-(4)-[topDivider][scrollView(>=50)][bottomDivider]-(4)-[statusTextField]-(5)-|" options:0 metrics:nil views:views]];
 
 		if([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsShowOpenFilesInFileChooserKey])
 			self.sourceIndex = 1;
