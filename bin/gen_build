@@ -572,7 +572,7 @@ end
 def upload(target)
   res = ''
   exe = target[:static_executable]
-  base = "#{exe}_r${APP_REVISION}"
+  base = "#{exe}_alpha-${APP_REVISION}"
 
   res << "build #{exe}.sign:    sign_executable #{exe}\n"
   res << "build #{base}.tbz:    tbz_archive #{exe} | #{exe}.sign\n"
@@ -583,7 +583,7 @@ end
 
 def deploy(target)
   res = ''
-  base = target[:bundle].sub(/\.[^.]+$/, '_r${APP_REVISION}')
+  base = target[:bundle].sub(/\.[^.]+$/, '_alpha-${APP_REVISION}')
 
   res << "build #{base}-dSYM.tbz: dsym #{target[:bundle]}\n"
   res << "build #{base}.tbz:      tbz_archive #{target[:bundle]} | #{target[:bundle]}.sign\n"
