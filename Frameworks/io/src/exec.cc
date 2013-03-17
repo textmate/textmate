@@ -46,7 +46,6 @@ namespace io
 		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, err[1]));
 		OAK_CHECK(posix_spawnattr_init(&flags));
 		OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
-		OAK_CHECK(posix_spawnattr_setpgroup(&flags, getpid()));
 		OAK_CHECK(posix_spawn(&pid, argv[0], &fileActions, &flags, argv, env));
 		OAK_CHECK(posix_spawnattr_destroy(&flags));
 		OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
