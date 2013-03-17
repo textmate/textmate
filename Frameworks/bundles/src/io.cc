@@ -55,6 +55,10 @@ namespace bundles
 			property_cache_t (std::string const& cacheFile) : _cache_file(cacheFile), _dirty(false)
 			{
 				_cache = plist::load(_cache_file);
+
+				int32_t version;
+				if(!plist::get_key_path(_cache, "version", version) || version != 1)
+					_cache = plist::dictionary_t();
 			}
 
 			~property_cache_t ()
@@ -70,7 +74,10 @@ namespace bundles
 				}
 
 				if(_dirty)
+				{
+					_cache["version"] = 1;
 					plist::save(_cache_file, _cache);
+				}
 			}
 
 			plist::dictionary_t const& get (std::string const& path, time_t modified)
