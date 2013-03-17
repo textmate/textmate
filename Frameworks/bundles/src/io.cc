@@ -9,7 +9,6 @@
 namespace bundles
 {
 	static std::string const kFieldChangedItems = "changed";
-	static std::string const kFieldDeletedItems = "deleted";
 	static std::string const kFieldMainMenu     = "mainMenu";
 	static std::string const kSeparatorString   = "------------------------------------";
 
@@ -104,7 +103,7 @@ namespace bundles
 		private:
 			static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist)
 			{
-				static std::set<std::string> const DesiredKeys = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldDeletedItems, kFieldChangedItems };
+				static std::set<std::string> const DesiredKeys = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldChangedItems };
 
 				plist::dictionary_t res;
 				citerate(pair, plist)
@@ -150,7 +149,7 @@ namespace bundles
 		std::map< oak::uuid_t, std::vector<oak::uuid_t> > menus;
 
 		std::map<oak::uuid_t, delta_item_t> deltaItems;
-		std::set< std::pair<oak::uuid_t, oak::uuid_t> > hiddenItems, deletedItems;
+		std::set< std::pair<oak::uuid_t, oak::uuid_t> > hiddenItems;
 		std::set<oak::uuid_t> loadedItems;
 
 		bool local = true;
@@ -234,14 +233,6 @@ namespace bundles
 					bundle->initialize(plist);
 					items.push_back(bundle);
 
-					plist::array_t uuids;
-					plist::get_key_path(plist, kFieldDeletedItems, uuids);
-					iterate(uuid, uuids)
-					{
-						if(std::string const* str = boost::get<std::string>(&*uuid))
-							deletedItems.insert(std::make_pair(*str, bundleUUID));
-					}
-
 					// ====================
 					// = Load Bundle Menu =
 					// ====================
@@ -266,6 +257,7 @@ namespace bundles
 						}
 					}
 
+					plist::array_t uuids;
 					plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
 					iterate(uuid, uuids)
 					{
@@ -387,7 +379,6 @@ namespace bundles
 			else
 			{
 				item->_hidden_from_user = hiddenItems.find(std::make_pair(item->uuid(), item->bundle_uuid())) != hiddenItems.end() ?: item->_hidden_from_user;
-				item->_deleted          = deletedItems.find(std::make_pair(item->uuid(), item->bundle_uuid())) != deletedItems.end() ?: item->_deleted;
 			}
 		}
 
