@@ -149,7 +149,6 @@ namespace bundles
 		std::map< oak::uuid_t, std::vector<oak::uuid_t> > menus;
 
 		std::map<oak::uuid_t, delta_item_t> deltaItems;
-		std::set< std::pair<oak::uuid_t, oak::uuid_t> > hiddenItems;
 		std::set<oak::uuid_t> loadedItems;
 
 		bool local = true;
@@ -187,6 +186,7 @@ namespace bundles
 				}
 
 				item_ptr bundle;
+				std::set<oak::uuid_t> hiddenItems;
 				citerate(infoPlist, *bundleNode.entries())
 				{
 					if(infoPlist->name() != "info.plist")
@@ -250,8 +250,7 @@ namespace bundles
 						if(plist::get_key_path(submenuIter->second, kFieldName, name) && plist::get_key_path(submenuIter->second, "items", uuids))
 						{
 							item_ptr item(new item_t(submenuIter->first, bundle, kItemTypeMenu));
-							item->_uuid = submenuIter->first;
-							item->_fields.insert(std::make_pair(kFieldName, name));
+							item->set_name(name);
 							items.push_back(item);
 							menus.insert(std::make_pair(submenuIter->first, to_menu(uuids)));
 						}
@@ -262,7 +261,7 @@ namespace bundles
 					iterate(uuid, uuids)
 					{
 						if(std::string const* str = boost::get<std::string>(&*uuid))
-							hiddenItems.insert(std::make_pair(*str, bundleUUID));
+							hiddenItems.insert(*str);
 					}
 
 					break;
@@ -351,6 +350,9 @@ namespace bundles
 								continue;
 							}
 
+							if(hiddenItems.find(item->uuid()) != hiddenItems.end())
+								plist.insert(std::make_pair(kFieldHideFromUser, true));
+
 							item->initialize(plist);
 							items.push_back(item);
 
@@ -375,10 +377,6 @@ namespace bundles
 			{
 				fprintf(stderr, "Warning: Bundle item ‘%s’ at path %s has no (non-delta) parent\n", item->name().c_str(), text::join(item->paths(), ", ").c_str());
 				items.erase(items.begin() + i);
-			}
-			else
-			{
-				item->_hidden_from_user = hiddenItems.find(std::make_pair(item->uuid(), item->bundle_uuid())) != hiddenItems.end() ?: item->_hidden_from_user;
 			}
 		}
 
