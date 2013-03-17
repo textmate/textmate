@@ -2,6 +2,7 @@
 #include <text/format.h>
 #include <text/trim.h>
 #include <oak/datatypes.h>
+#include <oak/compat.h>
 #include <io/environment.h>
 
 namespace network
@@ -18,15 +19,21 @@ namespace network
 		posix_spawnattr_t flags;
 		pid_t pid = -1;
 
+		short closeOnExecFlag = (oak::os_major() == 10 && oak::os_minor() == 7) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
+
 		bool ok = true;
 		ok = ok && pipe(&in[0])  == 0;
 		ok = ok && pipe(&out[0]) == 0;
+		ok = ok && fcntl(in[1],  F_SETFD, FD_CLOEXEC) == 0;
+		ok = ok && fcntl(out[0], F_SETFD, FD_CLOEXEC) == 0;
 		ok = ok && posix_spawn_file_actions_init(&fileActions) == 0;
 		ok = ok && posix_spawn_file_actions_adddup2(&fileActions, in[0],  0) == 0;
 		ok = ok && posix_spawn_file_actions_adddup2(&fileActions, out[1], 1) == 0;
 		ok = ok && posix_spawn_file_actions_adddup2(&fileActions, out[1], 2) == 0;
+		ok = ok && posix_spawn_file_actions_addclose(&fileActions, in[0])  == 0;
+		ok = ok && posix_spawn_file_actions_addclose(&fileActions, out[1]) == 0;
 		ok = ok && posix_spawnattr_init(&flags) == 0;
-		ok = ok && posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT) == 0;
+		ok = ok && posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag) == 0;
 		ok = ok && posix_spawn(&pid, "/usr/bin/tar", &fileActions, &flags, (char* const*)argv, env) == 0;
 		ok = ok && posix_spawnattr_destroy(&flags) == 0;
 		ok = ok && posix_spawn_file_actions_destroy(&fileActions) == 0;

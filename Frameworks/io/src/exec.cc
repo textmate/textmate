@@ -3,6 +3,7 @@
 #include <text/format.h>
 #include <oak/datatypes.h>
 #include <oak/debug/OakDebugLog.h>
+#include <oak/compat.h>
 
 OAK_DEBUG_VAR(IO_Exec);
 
@@ -30,15 +31,21 @@ namespace io
 		posix_spawnattr_t flags;
 		pid_t pid = -1;
 
+		short closeOnExecFlag = (oak::os_major() == 10 && oak::os_minor() == 7) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
+
 		OAK_CHECK(pipe(&out[0]));
 		OAK_CHECK(pipe(&err[0]));
+		OAK_CHECK(fcntl(out[0], F_SETFD, FD_CLOEXEC));
+		OAK_CHECK(fcntl(err[0], F_SETFD, FD_CLOEXEC));
 		OAK_CHECK(posix_spawn_file_actions_init(&fileActions));
 		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, 0));
 		OAK_CHECK(posix_spawn_file_actions_addopen(&fileActions, 0, "/dev/null", O_RDONLY, 0));
 		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out[1], 1));
 		OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, err[1], 2));
+		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, out[1]));
+		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, err[1]));
 		OAK_CHECK(posix_spawnattr_init(&flags));
-		OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_CLOEXEC_DEFAULT));
+		OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
 		OAK_CHECK(posix_spawnattr_setpgroup(&flags, getpid()));
 		OAK_CHECK(posix_spawn(&pid, argv[0], &fileActions, &flags, argv, env));
 		OAK_CHECK(posix_spawnattr_destroy(&flags));
