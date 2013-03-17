@@ -379,10 +379,23 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	std::string const& content = bundleItemContent->buffer().substr(0, bundleItemContent->buffer().size());
 	item_info_t const& info = info_for(bundleItem->kind());
+
+	plist::any_t parsedContent;
+	if(info.plist_key == NULL_STR || oak::contains(std::begin(PlistItemKinds), std::end(PlistItemKinds), info.kind))
+	{
+		bool success = false;
+		parsedContent = plist::parse_ascii(content, &success);
+		if(!success)
+		{
+			NSAlert* alert = [NSAlert alertWithMessageText:@"Error Parsing Property List" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The property list is not valid.\n\nUnfortunately I am presently unable to point to where the parser failed."];
+			OakShowAlertForWindow(alert, self.window, ^(NSInteger returnCode){ });
+			return NO;
+		}
+	}
+
 	if(info.plist_key == NULL_STR)
 	{
-		plist::any_t any = plist::parse_ascii(content);
-		if(plist::dictionary_t const* plistSubset = boost::get<plist::dictionary_t>(&any))
+		if(plist::dictionary_t const* plistSubset = boost::get<plist::dictionary_t>(&parsedContent))
 		{
 			std::vector<std::string> keys;
 			if(info.kind == bundles::kItemTypeGrammar)
@@ -401,7 +414,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	else
 	{
 		if(oak::contains(std::begin(PlistItemKinds), std::end(PlistItemKinds), info.kind))
-				plist[info.plist_key] = plist::parse_ascii(content);
+				plist[info.plist_key] = parsedContent;
 		else	plist[info.plist_key] = content;
 	}
 
