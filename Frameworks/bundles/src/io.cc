@@ -9,6 +9,7 @@
 namespace bundles
 {
 	static std::string const kFieldChangedItems = "changed";
+	static std::string const kFieldDeletedItems = "deleted";
 	static std::string const kFieldMainMenu     = "mainMenu";
 	static std::string const kSeparatorString   = "------------------------------------";
 
@@ -117,7 +118,7 @@ namespace bundles
 
 			static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist)
 			{
-				static std::set<std::string> const DesiredKeys = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldChangedItems };
+				static std::set<std::string> const DesiredKeys = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldDeletedItems, kFieldChangedItems };
 
 				plist::dictionary_t res;
 				citerate(pair, plist)
@@ -155,7 +156,7 @@ namespace bundles
 		};
 	}
 
-	int32_t const property_cache_t::kPropertyCacheFormatVersion = 2;
+	int32_t const property_cache_t::kPropertyCacheFormatVersion = 3;
 
 	static void traverse (std::map<std::string, fs::node_t> const& heads, property_cache_t& plistCache)
 	{
