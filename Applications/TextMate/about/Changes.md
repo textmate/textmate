@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-03-18 ([a9399](https://github.com/textmate/textmate/compare/a9397...a9399))
+
+* Fix (cache) issue with locally deleted bundle item fields not actually being deleted.
+
 ## 2013-03-17 ([a9397](https://github.com/textmate/textmate/compare/r9395...a9397))
 
 * You can now set the current window’s project folder via the file browser. Click the folder in the top bar and there should be an option to use the current folder as project folder. Project folder is the default location for project searches (⇧⌘F), file chooser (⌘T), and many commands will fallback on project folder (e.g. build commands).
