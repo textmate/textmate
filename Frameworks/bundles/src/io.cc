@@ -57,7 +57,7 @@ namespace bundles
 				_cache = plist::load(_cache_file);
 
 				int32_t version;
-				if(!plist::get_key_path(_cache, "version", version) || version != 2)
+				if(!plist::get_key_path(_cache, "version", version) || version != kPropertyCacheFormatVersion)
 					_cache = plist::dictionary_t();
 			}
 
@@ -75,7 +75,7 @@ namespace bundles
 
 				if(_dirty)
 				{
-					_cache["version"] = 2;
+					_cache["version"] = kPropertyCacheFormatVersion;
 					plist::save(_cache_file, _cache);
 				}
 			}
@@ -113,6 +113,8 @@ namespace bundles
 			}
 
 		private:
+			static int32_t const kPropertyCacheFormatVersion;
+
 			static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist)
 			{
 				static std::set<std::string> const DesiredKeys = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector, kFieldDropExtension, kFieldGrammarExtension, kFieldSettingName, kFieldHideFromUser, kFieldIsDeleted, kFieldIsDisabled, kFieldRequiredItems, kFieldUUID, kFieldMainMenu, kFieldIsDelta, kFieldChangedItems };
@@ -152,6 +154,8 @@ namespace bundles
 			bool _dirty;
 		};
 	}
+
+	int32_t const property_cache_t::kPropertyCacheFormatVersion = 2;
 
 	static void traverse (std::map<std::string, fs::node_t> const& heads, property_cache_t& plistCache)
 	{
