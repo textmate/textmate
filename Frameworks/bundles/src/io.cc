@@ -107,6 +107,11 @@ namespace bundles
 				return get(path, modified);
 			}
 
+			void erase (std::string const& path)
+			{
+				_cache.erase(path);
+			}
+
 		private:
 			static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist)
 			{
@@ -148,10 +153,8 @@ namespace bundles
 		};
 	}
 
-	static void traverse (std::map<std::string, fs::node_t> const& heads, std::string const& cacheFile)
+	static void traverse (std::map<std::string, fs::node_t> const& heads, property_cache_t& plistCache)
 	{
-		property_cache_t plistCache(cacheFile);
-
 		std::vector<item_ptr> items(1, item_t::menu_item_separator());
 		std::map< oak::uuid_t, std::vector<oak::uuid_t> > menus;
 
@@ -400,7 +403,14 @@ namespace bundles
 			callback_t (std::string const& cacheFile) : _cache_file(cacheFile) { }
 			void did_change (std::map<std::string, fs::node_t> const& heads, std::map< std::string, std::vector<std::string> > const& changes)
 			{
-				traverse(heads, _cache_file);
+				property_cache_t plistCache(_cache_file);
+				for(auto pair : changes)
+				{
+					for(auto path : pair.second)
+						plistCache.erase(path);
+				}
+
+				traverse(heads, plistCache);
 			}
 
 		private:
