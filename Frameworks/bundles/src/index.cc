@@ -80,7 +80,6 @@ namespace bundles
 		{
 			static std::set<std::string> const stringKeys     = { kFieldName, kFieldKeyEquivalent, kFieldTabTrigger, kFieldScopeSelector, kFieldSemanticClass, kFieldContentMatch, kFieldGrammarFirstLineMatch, kFieldGrammarScope, kFieldGrammarInjectionSelector };
 			static std::set<std::string> const arrayKeys      = { kFieldDropExtension, kFieldGrammarExtension };
-			static std::set<std::string> const dictionaryKeys = { kFieldSettingName };
 
 			if(pair->first == kFieldScopeSelector)
 			{
@@ -103,12 +102,21 @@ namespace bundles
 					}
 				}
 			}
-			else if(dictionaryKeys.find(pair->first) != dictionaryKeys.end())
+			else if(pair->first == kFieldSettingName)
 			{
+				// initialize from a tmSettings file
 				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair->second))
 				{
 					iterate(dictPair, *dictionary)
 						_fields.insert(std::make_pair(pair->first, dictPair->first));
+				}
+				else if(plist::array_t const* array = boost::get<plist::array_t>(&pair->second))
+				{
+					iterate(any, *array) // initialize from cache
+					{
+						if(std::string const* str = boost::get<std::string>(&*any))
+							_fields.insert(std::make_pair(pair->first, *str));
+					}
 				}
 			}
 		}

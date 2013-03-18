@@ -57,7 +57,7 @@ namespace bundles
 				_cache = plist::load(_cache_file);
 
 				int32_t version;
-				if(!plist::get_key_path(_cache, "version", version) || version != 1)
+				if(!plist::get_key_path(_cache, "version", version) || version != 2)
 					_cache = plist::dictionary_t();
 			}
 
@@ -75,7 +75,7 @@ namespace bundles
 
 				if(_dirty)
 				{
-					_cache["version"] = 1;
+					_cache["version"] = 2;
 					plist::save(_cache_file, _cache);
 				}
 			}
@@ -127,10 +127,10 @@ namespace bundles
 					{
 						if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair->second))
 						{
-							plist::dictionary_t prunedDict;
+							plist::array_t settings;
 							iterate(settingsPair, *dictionary)
-								prunedDict.insert(std::make_pair(settingsPair->first, true));
-							res.insert(std::make_pair(pair->first, prunedDict));
+								settings.push_back(settingsPair->first);
+							res.insert(std::make_pair(pair->first, settings));
 						}
 					}
 					else if(pair->first == kFieldChangedItems)
