@@ -15,6 +15,7 @@
 #import <OakFoundation/OakFindProtocol.h>
 #import <OakFoundation/OakTimer.h>
 #import <OakSystem/application.h>
+#import <CrashReporter/utility.h>
 #import <BundleMenu/BundleMenu.h>
 #import <bundles/bundles.h>
 #import <cf/cf.h>
@@ -2882,7 +2883,13 @@ static scope::context_t add_modifiers_to_scope (scope::context_t scope, NSUInteg
 {
 	AUTO_REFRESH;
 	[self recordSelector:aSelector withArgument:nil];
-	editor->perform(anAction, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
+	try {
+		editor->perform(anAction, layout.get(), [self continuousIndentCorrections], to_s([self scopeAttributes]));
+	}
+	catch(std::exception const& e) {
+		crash_reporter_info_t info(text::format("%s %s", sel_getName(aSelector), e.what()));
+		abort();
+	}
 }
 
 #define ACTION(NAME)      (void)NAME:(id)sender { [self handleAction:ng::to_action(#NAME ":") forSelector:@selector(NAME:)]; }
