@@ -234,14 +234,14 @@ namespace fs
 			if(cwd == path)
 			{
 				fs::node_t newNode(cwd);
-				if(node._type != newNode._type || node._modified != newNode._modified)
+				if(node.type() != newNode.type() || node.modified() != newNode.modified())
 				{
-					if(node._type == fs::node_t::kNodeTypeMissing)         _changes["created"].push_back(cwd);
-					else if(newNode._type == fs::node_t::kNodeTypeMissing) _changes["deleted"].push_back(cwd);
-					else                                                   _changes["changes"].push_back(cwd);
+					if(node.type() == fs::node_t::kNodeTypeMissing)         _changes["created"].push_back(cwd);
+					else if(newNode.type() == fs::node_t::kNodeTypeMissing) _changes["deleted"].push_back(cwd);
+					else                                                    _changes["changes"].push_back(cwd);
 
-					if(node._type == newNode._type && node._type == fs::node_t::kNodeTypeDirectory)
-						node._entries.swap(newNode._entries);
+					if(node.type() == newNode.type() && node.type() == fs::node_t::kNodeTypeDirectory)
+						newNode.set_entries(node.entries());
 					node = newNode;
 				}
 				node.rescan(path::parent(cwd), _dir_glob, _file_glob, &_changes);
