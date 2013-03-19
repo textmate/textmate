@@ -151,7 +151,6 @@ BOOL HasDocumentWindow (NSArray* windows)
 		@"NSRecentDocumentsLimit"   : @25,
 	}];
 	RegisterDefaults();
-	[[NSUserDefaults standardUserDefaults] setObject:@NO forKey:@"NSQuitAlwaysKeepsWindows"];
 
 	std::string dest = path::join(path::home(), "Library/Application Support/TextMate/Managed");
 	if(!path::exists(dest))
