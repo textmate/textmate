@@ -320,7 +320,7 @@ namespace path
 
 	bool is_executable (std::string const& path)
 	{
-		return path != NULL_STR && access(path.c_str(), X_OK) == 0;
+		return path != NULL_STR && access(path.c_str(), X_OK) == 0 && !path::is_directory(path);
 	}
 
 	bool exists (std::string const& path)
