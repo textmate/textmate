@@ -1483,7 +1483,12 @@ namespace
 		for(DocumentController* delegate in SortedControllers())
 		{
 			if(srcProjectId == oak::uuid_t(to_s(delegate.identifier)))
-				return [delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[plist[@"index"] unsignedIntValue]] askToSaveChanges:NO createDocumentIfEmpty:YES], YES;
+			{
+				if(delegate.fileBrowserVisible || [delegate documents].size() > 1)
+						[delegate closeTabsAtIndexes:[NSIndexSet indexSetWithIndex:[plist[@"index"] unsignedIntValue]] askToSaveChanges:NO createDocumentIfEmpty:YES];
+				else	[delegate close];
+				return YES;
+			}
 		}
 	}
 
