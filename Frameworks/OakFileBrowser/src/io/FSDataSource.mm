@@ -122,8 +122,6 @@ static ino_t inode (std::string const& path)
 			}
 		}
 	}
-
-	// TODO post notification or add to undo stack
 }
 
 - (BOOL)outlineView:(NSOutlineView*)anOutlineView writeItems:(NSArray*)items toPasteboard:(NSPasteboard*)pboard
