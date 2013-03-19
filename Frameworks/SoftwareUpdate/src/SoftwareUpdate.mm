@@ -62,10 +62,9 @@ static SoftwareUpdate* SharedInstance;
 
 + (void)initialize
 {
-	[[NSUserDefaults standardUserDefaults] registerDefaults:
-		[NSDictionary dictionaryWithObjectsAndKeys:
-			kSoftwareUpdateChannelRelease, kUserDefaultsSoftwareUpdateChannelKey,
-			nil]];
+	[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+		kUserDefaultsSoftwareUpdateChannelKey : kSoftwareUpdateChannelRelease
+	}];
 }
 
 - (id)init
