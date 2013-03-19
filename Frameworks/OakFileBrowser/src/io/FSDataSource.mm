@@ -10,6 +10,7 @@
 #import <OakAppKit/OakFileManager.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakFoundation/NSString Additions.h>
+#import <ns/ns.h>
 #import <io/path.h>
 #import <io/move_path.h>
 #import <io/resource.h>
@@ -102,8 +103,24 @@ static ino_t inode (std::string const& path)
 
 	std::string src = [[item.url path] fileSystemRepresentation];
 	std::string dst = path::join(path::parent(src), [[objectValue stringByReplacingOccurrencesOfString:@"/" withString:@":"] fileSystemRepresentation]);
-	if(path::info(src) & path::flag::hidden_extension) // FIXME files with multiple extenions have the “hidden_extension” flag ignored
-		dst += path::extension(src); // TODO replicate Finder’s heuristic for toggling “extension hidden” flag
+
+	// “hidden extension” is ignored if Finder is set to show all file extensions, if there are multiple extensions, or if no application is assigned to the extension.
+	std::string const baseName    = path::name(src);
+	std::string const displayName = to_s(item.name);
+	bool hiddenExtension = baseName != displayName && (path::info(src) & path::flag::hidden_extension);
+
+	if(src == dst && hiddenExtension)
+	{
+		NSURL* dstURL = [NSURL fileURLWithPath:[NSString stringWithCxxString:dst]];
+		NSError* error;
+		if(![dstURL setResourceValue:@NO forKey:NSURLHasHiddenExtensionKey error:&error])
+			NSLog(@"%s %@", sel_getName(_cmd), error);
+
+		return;
+	}
+
+	if(hiddenExtension)
+		dst += path::extension(src);
 
 	if(src != dst)
 	{
