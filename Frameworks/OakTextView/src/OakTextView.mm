@@ -27,9 +27,12 @@
 #import <ns/spellcheck.h>
 #import <text/classification.h>
 #import <text/format.h>
+#import <text/trim.h>
 #import <text/utf16.h>
 #import <text/utf8.h>
 #import <oak/debug.h>
+#import <editor/write.h>
+#import <io/exec.h>
 
 OAK_DEBUG_VAR(OakTextView_TextInput);
 OAK_DEBUG_VAR(OakTextView_Accessibility);
@@ -2273,6 +2276,68 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return res = GVLineRecord();
 	auto record = layout->line_record_for(text::pos_t(aLine, aColumn));
 	return res = GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
+}
+
+- (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit
+{
+	auto environment = editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes]));
+	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
+	{
+		bool inputWasSelection = false;
+		text::range_t inputRange = ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
+		close(process.in);
+
+		__block std::string output, error;
+		__block bool success = false;
+
+		dispatch_group_t group = dispatch_group_create();
+
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			io::exhaust_fd(process.out, &output);
+		});
+
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			io::exhaust_fd(process.err, &error);
+		});
+
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			int status = 0;
+			if(waitpid(process.pid, &status, 0) != process.pid)
+				perror("waitpid");
+			else if(!WIFEXITED(status))
+				NSLog(@"*** abnormal exit (%d) from ‘%@’\n", status, commandString);
+			else if(WEXITSTATUS(status) != 0)
+				NSLog(@"*** exit code %d from ‘%@’\n", WEXITSTATUS(status), commandString);
+			else
+				success = true;
+		});
+
+		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+		dispatch_release(group);
+
+		error = text::trim(error);
+		if(!error.empty())
+		{
+			OakShowToolTip([NSString stringWithCxxString:error], [self positionForWindowUnderCaret]);
+			if(success && output.empty())
+				return YES;
+		}
+
+		if(success)
+		{
+			if(outputUnit == output::tool_tip)
+			{
+				OakShowToolTip([NSString stringWithCxxString:text::trim(output)], [self positionForWindowUnderCaret]);
+			}
+			else
+			{
+				AUTO_REFRESH;
+				editor->handle_result(output, outputUnit, output_format::text, output_caret::after_output, inputRange, environment);
+			}
+			return YES;
+		}
+	}
+	return NO;
 }
 
 // ===================
