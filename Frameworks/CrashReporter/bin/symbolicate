@@ -10,10 +10,13 @@ DSYM_CACHE_DIR   = "#{ENV['HOME']}/Library/Caches/com.macromates.TextMate-dsym"
 BinaryImage = Struct.new(:first, :last, :name, :file)
 
 def find_dsym(process, version)
-  path = File.expand_path("#{process}_r#{version}", DSYM_CACHE_DIR)
+  path = File.expand_path("#{process}_#{version}", DSYM_CACHE_DIR)
   return path if File.directory?(path)
 
-  archive = File.expand_path("#{process}_r#{version}-dSYM.tbz", DSYM_ARCHIVE_DIR)
+  archive = File.expand_path("#{process}_#{version}-dSYM.tbz", DSYM_ARCHIVE_DIR)
+  if !File.file?(archive) && version =~ /(\d+)$/
+    archive = File.expand_path("#{process}_r#$1-dSYM.tbz", DSYM_ARCHIVE_DIR) 
+  end
   return nil unless File.file?(archive)
 
   FileUtils.mkdir_p(path)
@@ -57,7 +60,8 @@ end
 report = STDIN.read
 
 process = $1 if report =~ /^Process:\s+(\w+)\s+\[\d+\]$/
-version = $1 if report =~ /^Version:.*\((.*?)\)$/
+version = "#$1-#$2" if report =~ /^Version:.*\b(?:\d+\.?)+-(\w+)\.(\d+) \(.*?\)$/
+
 dsym_dir = find_dsym(process, version)
 abort "No dsym information for version #{version} of #{process}." if dsym_dir.nil?
 
