@@ -35,6 +35,7 @@ typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 @interface SoftwareUpdate ()
 @property (nonatomic, retain) NSDate* lastPoll;
 @property (nonatomic, assign) BOOL isChecking;
+@property (nonatomic, assign) NSInteger lastVersionDownloaded;
 @property (nonatomic, retain) NSString* errorString;
 @property (nonatomic, retain) NSTimer* pollTimer;
 @property (nonatomic, retain) DownloadWindowController* downloadWindow;
@@ -116,6 +117,8 @@ static SoftwareUpdate* SharedInstance;
 - (void)performVersionCheck:(NSTimer*)aTimer
 {
 	D(DBF_SoftwareUpdate_Check, bug("last check was %.1f hours ago\n", -[self.lastPoll timeIntervalSinceNow] / (60*60)););
+	if(_downloadWindow.isWorking)
+		return;
 
 	NSURL* url = [self.channels objectForKey:[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateChannelKey]];
 	[self checkVersionAtURL:url inBackground:YES allowRedownload:NO];
@@ -180,7 +183,7 @@ static SoftwareUpdate* SharedInstance;
 						else if(choice == NSAlertOtherReturn) // “Later”
 							[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] addTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
 					}
-					else
+					else if(info.revision > self.lastVersionDownloaded)
 					{
 						downloadAndInstall = YES;
 					}
@@ -189,6 +192,7 @@ static SoftwareUpdate* SharedInstance;
 				if(downloadAndInstall)
 				{
 					BOOL interactive = !backgroundFlag || [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsAskBeforeUpdatingKey];
+					self.lastVersionDownloaded = info.revision;
 					[self downloadVersion:newVersion atURL:[NSString stringWithCxxString:info.url] interactively:interactive];
 				}
 			}
@@ -200,12 +204,16 @@ static SoftwareUpdate* SharedInstance;
 // = Download Update =
 // ===================
 
+- (DownloadWindowController*)downloadWindow
+{
+	return _downloadWindow = _downloadWindow ?: [DownloadWindowController new];
+}
+
 - (void)downloadVersion:(NSString*)versionName atURL:(NSString*)downloadURL interactively:(BOOL)interactive
 {
 	sharedState.reset(new shared_state_t);
 	secondsLeft = CGFLOAT_MAX;
 
-	self.downloadWindow = [DownloadWindowController new];
 	self.downloadWindow.delegate     = self;
 	self.downloadWindow.activityText = [NSString stringWithFormat:@"Downloading %@…", versionName];
 	self.downloadWindow.statusText   = @"Estimating time remaining";
