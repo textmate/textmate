@@ -46,11 +46,22 @@ namespace io
 		OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, err[1]));
 		OAK_CHECK(posix_spawnattr_init(&flags));
 		OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
-		OAK_CHECK(posix_spawn(&pid, argv[0], &fileActions, &flags, argv, env));
+
+		int rc = posix_spawn(&pid, argv[0], &fileActions, &flags, argv, env);
+		if(rc != 0)
+			perror(text::format("posix_spawn(\"%s\")", cmd.c_str()).c_str());
+
 		OAK_CHECK(posix_spawnattr_destroy(&flags));
 		OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
 		OAK_CHECK(close(out[1]));
 		OAK_CHECK(close(err[1]));
+
+		if(rc != 0)
+		{
+			close(out[0]);
+			close(err[0]);
+			return NULL_STR;
+		}
 
 		std::string output, error;
 
