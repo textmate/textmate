@@ -1,5 +1,6 @@
 #import "OFBHeaderView.h"
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/NSImage Additions.h>
 #import <Preferences/Keys.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)
@@ -21,9 +22,17 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 static NSPopUpButton* OakCreatePopUpButton ()
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[[res cell] setFont:[NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setBordered:NO];
+	return res;
+}
+
+static NSImageView* OakCreateImageView (NSImage* image)
+{
+	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
+	[res setImage:image];
 	return res;
 }
 
@@ -46,10 +55,12 @@ static NSPopUpButton* OakCreatePopUpButton ()
 		[self.goBackButton.cell accessibilitySetOverrideValue:self.goBackButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.goForwardButton.cell accessibilitySetOverrideValue:self.goForwardButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 
+		NSImageView* divider = OakCreateImageView([NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]]);
+		[divider setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
+
 		NSDictionary* views = @{
 			@"folder"   : self.folderPopUpButton,
-			@"divider"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.551 alpha:1], [NSColor colorWithCalibratedWhite:0.801 alpha:1]),
-			@"shading"  : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
+			@"divider"  : divider,
 			@"back"     : self.goBackButton,
 			@"forward"  : self.goForwardButton,
 		};
@@ -60,8 +71,8 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider][shading]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[folder(==divider,==shading,==back,==forward)]|"                                          options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(-3)-[folder(>=75)]-(3)-[divider]-(2)-[back(==22)]-(2)-[forward(==back)]-(3)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[folder(==divider,==back,==forward)]|"                                          options:0 metrics:nil views:views]];
 
 		[self userDefaultsDidChange:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
@@ -90,6 +101,6 @@ static NSPopUpButton* OakCreatePopUpButton ()
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 21 : 24);
+	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 21 : 21);
 }
 @end

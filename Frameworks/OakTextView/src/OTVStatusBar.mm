@@ -20,6 +20,7 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[res setStringValue:label];
 	[res setAlignment:NSRightTextAlignment];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 	return res;
 }
 
@@ -141,10 +142,10 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		[self.symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 		
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-16-[line]-[selection(>=50,<=225)]-8-[dividerOne(==1)]-(-2)-[grammar(>=125,<=225)]-5-[dividerTwo(==1)]-(-2)-[tabSize(<=102)]-4-[dividerThree(==1)]-5-[items(==30)]-4-[dividerFour(==1)]-(-2)-[symbol(>=125)]-5-[dividerFive(==1)]-6-[recording]-14-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[line]-[selection(>=50,<=225)]-8-[dividerOne]-(-2)-[grammar(>=125,<=225)]-5-[dividerTwo]-(-2)-[tabSize(<=102)]-4-[dividerThree]-5-[items(==30)]-4-[dividerFour]-(-2)-[symbol(>=125)]-5-[dividerFive]-6-[recording]-7-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[line]-5-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[selection]-5-|" options:0 metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[grammar(==dividerOne,==items,==tabSize,==symbol,==recording)]|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[grammar(==dividerOne,==dividerTwo,==dividerThree,==dividerFour,==dividerFive,==items,==tabSize,==symbol,==recording)]|" options:0 metrics:nil views:views]];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(grammarPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.grammarPopUp];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bundleItemsPopUpButtonWillPopUp:) name:NSPopUpButtonWillPopUpNotification object:self.bundleItemsPopUp];
@@ -234,6 +235,9 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(_selectionString == newSelectionString || [_selectionString isEqualToString:newSelectionString])
 		return;
 	_selectionString = newSelectionString;
+
+	newSelectionString = [newSelectionString stringByReplacingOccurrencesOfString:@"&" withString:@", "];
+	newSelectionString = [newSelectionString stringByReplacingOccurrencesOfString:@"x" withString:@"×"];
 	self.selectionField.stringValue = newSelectionString;
 }
 
