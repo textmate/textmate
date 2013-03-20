@@ -31,57 +31,72 @@ namespace
 
 		void output (int key, char const* data, size_t len)
 		{
-			std::lock_guard<std::mutex> lock(_lock);
+			NSURLProtocol* protocol;
+
+			_lock.lock();
 			if(record_t* record = find(key))
 			{
-				if(record->protocol)
-						[[record->protocol client] URLProtocol:record->protocol didLoadData:[NSData dataWithBytes:data length:len]];
-				else	record->buffer.insert(record->buffer.end(), data, data + len);
+				if(!(protocol = record->protocol))
+					record->buffer.insert(record->buffer.end(), data, data + len);
 			}
+			_lock.unlock();
+
+			[[protocol client] URLProtocol:protocol didLoadData:[NSData dataWithBytes:data length:len]];
 		}
 
 		void done (int key)
 		{
-			std::lock_guard<std::mutex> lock(_lock);
+			NSURLProtocol* protocol;
+
+			_lock.lock();
 			if(record_t* record = find(key))
 			{
 				record->process_id = 0;
 				record->done       = true;
-
-				if(record->protocol)
-					[[record->protocol client] URLProtocolDidFinishLoading:record->protocol];
+				protocol = record->protocol;
 			}
+			_lock.unlock();
+
+			[[protocol client] URLProtocolDidFinishLoading:protocol];
 		}
 
 		void start (int key, NSURLProtocol* protocol)
 		{
-			std::lock_guard<std::mutex> lock(_lock);
+			NSData* data;
+			bool done = false;
 
+			_lock.lock();
 			if(record_t* record = find(key))
 			{
 				record->protocol = protocol;
 				if(!record->buffer.empty())
-				{
-					[[record->protocol client] URLProtocol:record->protocol didLoadData:[NSData dataWithBytes:record->buffer.data() length:record->buffer.size()]];
-					record->buffer.clear();
-				}
-
-				if(record->done)
-					[[record->protocol client] URLProtocolDidFinishLoading:record->protocol];
+					data = [NSData dataWithBytes:record->buffer.data() length:record->buffer.size()];
+				record->buffer.clear();
+				done = record->done;
 			}
+			_lock.unlock();
+
+			if(data)
+				[[protocol client] URLProtocol:protocol didLoadData:data];
+			if(done)
+				[[protocol client] URLProtocolDidFinishLoading:protocol];
 		}
 
 		void stop (int key)
 		{
-			std::lock_guard<std::mutex> lock(_lock);
+			pid_t processId = 0;
+
+			_lock.lock();
 			if(record_t* record = find(key))
 			{
 				record->protocol = NULL;
 				record->stop     = true;
-
-				if(record->process_id)
-					oak::kill_process_group_in_background(record->process_id);
+				processId = record->process_id;
 			}
+			_lock.unlock();
+
+			if(processId)
+				oak::kill_process_group_in_background(processId);
 		}
 
 	private:
