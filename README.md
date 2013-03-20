@@ -1,20 +1,22 @@
 # TextMate
 
-This repository contains the source code for TextMate 2, a text editor for OS X 10.7+.
+## Download
+
+You can [download TextMate from here](http://macromates.com/download).
+
+## Feedback
+
+You can use [the TextMate mailing list](http://lists.macromates.com/listinfo/textmate) or [#textmate][] IRC channel on [freenode.net][] for questions, comments, and bug reports.
+
+You can also [contact MacroMates](http://macromates.com/contact).
+
+Before you submit a bug report please read the [writing bug reports](http://kb.textmate.org/writing_bug_reports) instructions.
+
+## Screenshot
 
 ![textmate](https://raw.github.com/textmate/textmate/gh-pages/images/screenshot.png)
 
 # Building
-
-## Important
-
-If you just want to run TextMate 2 then use [this link to download a prebuilt binary][prebuilt binary]. For 10.6 support you can try a [10.6 build][] (from the [10.6 fork][]) but it comes with no guarantee of actually working!
-
-If you have problems building please **don’t** open an issue! Instead write the [textmate-dev][] mailing list or use the [#textmate][] IRC channel on [freenode.net][] where people might be able to help you.
-
-[prebuilt binary]: https://api.textmate.org/downloads/beta
-[10.6 build]: https://github.com/nanoant/textmate/downloads
-[10.6 fork]: https://github.com/nanoant/textmate/tree/10.6_32bit
 
 ## Bootstrap
 
@@ -139,6 +141,5 @@ TextMate is a trademark of Allan Odgaard.
 [homebrew]:      http://mxcl.github.com/homebrew/
 [NinjaBundle]:   https://github.com/textmate/ninja.tmbundle
 [CxxTest]:       https://github.com/textmate/cxxtest.tmbundle
-[textmate-dev]:  http://lists.macromates.com/listinfo/textmate-dev
 [#textmate]:     irc://irc.freenode.net/#textmate
 [freenode.net]:  http://freenode.net/

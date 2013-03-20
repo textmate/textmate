@@ -1,9 +1,3 @@
-# GitHub Issues
-
-If you have problems building TextMate then consider downloading a prebuilt binary or use the [textmate-dev][] mailing list or [#textmate][] IRC channel at [freenode.net][]. **Do not open an issue** with your build problems!
-
-For general questions or problems you can use the [#textmate][] IRC channel or the [textmate users][] mailing list. The issue tracker is **not for user support!**
-
 # Contributing
 
 You can send pull requests via GitHub. Patches should:
