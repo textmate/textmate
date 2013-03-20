@@ -20,6 +20,7 @@ static NSTextField* OakCreateTextField (NSString* label)
 	[res setStringValue:label];
 	[res setAlignment:NSRightTextAlignment];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[[res cell] setLineBreakMode:NSLineBreakByTruncatingMiddle];
 	return res;
 }
 
@@ -234,6 +235,9 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(_selectionString == newSelectionString || [_selectionString isEqualToString:newSelectionString])
 		return;
 	_selectionString = newSelectionString;
+
+	newSelectionString = [newSelectionString stringByReplacingOccurrencesOfString:@"&" withString:@", "];
+	newSelectionString = [newSelectionString stringByReplacingOccurrencesOfString:@"x" withString:@"×"];
 	self.selectionField.stringValue = newSelectionString;
 }
 
