@@ -233,10 +233,12 @@ namespace scm
 				if(haveHead)
 				{
 					std::string branchName = io::exec(env, executable(), "symbolic-ref", "HEAD", NULL);
-					branchName = branchName.substr(0, branchName.find("\n"));
 					if(branchName.find("refs/heads/") == 0)
+					{
 						branchName = branchName.substr(11);
-					res.insert(std::make_pair("TM_SCM_BRANCH", branchName));
+						branchName = branchName.substr(0, branchName.find("\n"));
+						res.insert(std::make_pair("TM_SCM_BRANCH", branchName));
+					}
 				}
 			}
 			return res;
