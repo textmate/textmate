@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-03-20 ([a9401](https://github.com/textmate/textmate/compare/a9399...a9401))
+
+* Tweaks and improvements.
+
 ## 2013-03-18 ([a9399](https://github.com/textmate/textmate/compare/a9397...a9399))
 
 * Fix (cache) issue with locally deleted bundle item fields not actually being deleted.
