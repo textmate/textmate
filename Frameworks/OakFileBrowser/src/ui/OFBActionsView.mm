@@ -94,7 +94,7 @@ static NSPopUpButton* OakCreateActionPopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-9-[create(==22)]-1-[divider]-4-[actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search]-1-[favorites]-2-[scm]-(12)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-3-[create(==24)]-1-[divider]-5-[actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search]-1-[favorites]-2-[scm]-(12)-|" options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[create(==divider,==actions,==reload,==search,==favorites,==scm)]|"                                                                   options:0 metrics:nil views:views]];
 	}
 	return self;
