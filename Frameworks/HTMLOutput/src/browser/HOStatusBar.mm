@@ -121,7 +121,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	};
 
 	NSArray* layout = @[
-		@"H:|-(8)-[back(==22)]-(2)-[forward(==back)]-(2)-[divider(==1)]",
+		@"H:|-(8)-[back(==22)]-(2)-[forward(==back)]-(7)-[divider]",
 		@"V:|[back(==forward,==divider)]|",
 		@"V:[status]-5-|",
 	];
@@ -131,12 +131,12 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 	if(!_indeterminateProgress)
 	{
-		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider(==1)]-[status(>=100)]-[spinner(>=50,<=150)]-|" options:0 metrics:nil views:views]];
+		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider]-[status(>=100)]-[spinner(>=50,<=150)]-|" options:0 metrics:nil views:views]];
 		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[spinner]-6-|" options:0 metrics:nil views:views]];
 	}
 	else
 	{		
-		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider(==1)]-[status(>=100)]-[spinner]-|" options:0 metrics:nil views:views]];
+		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[divider]-[status(>=100)]-[spinner]-|" options:0 metrics:nil views:views]];
 		[_layoutConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[spinner]-5-|" options:0 metrics:nil views:views]];
 	}
 
