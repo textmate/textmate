@@ -22,7 +22,8 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 static NSPopUpButton* OakCreatePopUpButton ()
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
-	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[[res cell] setFont:[NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
 	[res setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 	[res setBordered:NO];
 	return res;
@@ -100,6 +101,6 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 - (NSSize)intrinsicContentSize
 {
-	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 21 : 24);
+	return NSMakeSize(NSViewNoInstrinsicMetric, self.matchTabBarHeight ? 21 : 21);
 }
 @end
