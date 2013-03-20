@@ -42,21 +42,21 @@ namespace fs
 		}
 	}
 
-	struct value_t // helper type for rescan()
-	{
-		value_t (time_t old_date, nodes_ptr const& entries, time_t new_date = 0) : old_date(old_date), entries(entries), new_date(new_date) { }
-
-		time_t old_date;
-		nodes_ptr entries;
-		time_t new_date;
-	};
-
 	node_t& node_t::rescan (std::string const& cwd, path::glob_t const& dirGlob, path::glob_t const& fileGlob, std::map< std::string, std::vector<std::string> >* changes)
 	{
 		if(_type != kNodeTypeDirectory)
 			return *this;
 
 		typedef std::tuple<std::string, std::string, node_type_t> key_t;
+		struct value_t // helper type for rescan()
+		{
+			value_t (time_t old_date, nodes_ptr const& entries, time_t new_date = 0) : old_date(old_date), entries(entries), new_date(new_date) { }
+
+			time_t old_date;
+			nodes_ptr entries;
+			time_t new_date;
+		};
+
 		std::map<key_t, value_t> entries;
 		iterate(entry, *_entries)
 			entries.insert(std::make_pair(key_t(entry->_name, entry->_resolved, entry->_type), value_t(entry->_modified, entry->_entries)));
