@@ -10,7 +10,19 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 	{
 		OakToolTip* toolTip = [OakToolTip new];
 		[toolTip setStringValue:msg];
-		[toolTip showAtLocation:location forScreen:nil];
+
+		// Find the screen which we are displaying on
+		NSScreen* screen = nil;
+		for(NSScreen* candidate in [NSScreen screens])
+		{
+			if(NSPointInRect(location, [candidate frame]))
+			{
+				screen = candidate;
+				break;
+			}
+		}
+
+		[toolTip showAtLocation:location forScreen:screen];
 	}
 }
 
