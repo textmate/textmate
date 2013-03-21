@@ -1,5 +1,11 @@
 # Changes
 
+## 2013-03-21 ([a9403](https://github.com/textmate/textmate/compare/a9401...a9403))
+
+  * Add _Filter Through Command_ bound to ⌘|. I am aware that this keybinding might not work for all users. For now you will have to rebind manually via _System Preferences → Keyboard → Keyboard Shortcuts_.
+
+    The dialog doesn’t include all the options of 1.x, but I think most of that wasn’t being used, and by keeping the choices limited, we can improve keyboard usability. A few options are however likely going to appear, like indication of the input unit (which presently is selection and falling back on document) and outputting to a new window. *[Jacob Bandes-Storch + Allan Odgaard]*
+
 ## 2013-03-20 ([a9401](https://github.com/textmate/textmate/compare/a9399...a9401))
 
 * Tweaks and improvements.
