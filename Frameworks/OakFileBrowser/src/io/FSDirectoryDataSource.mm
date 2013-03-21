@@ -230,7 +230,7 @@ private:
 
 						OakFileIconImage* image = [[OakFileIconImage alloc] initWithSize:NSMakeSize(16, 16)];
 						image.path      = [NSString stringWithCxxString:fsItem.path];
-						image.directory = fsItem.is_directory;
+						image.directory = fsItem.is_directory || (fsItem.is_link && fsItem.sort_as_directory);
 						image.alias     = fsItem.is_link;
 						if(scmInfo)
 							image.scmStatus = scmInfo->status(fsItem.path);
