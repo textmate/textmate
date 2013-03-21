@@ -13,8 +13,6 @@ namespace network
 	{
 		if(io::process_t process = io::spawn(std::vector<std::string>{ "/usr/bin/tar", "-jxmkC", dest.c_str(), "--strip-components", "1" }))
 		{
-			signal(SIGPIPE, SIG_IGN);
-
 			input  = process.in;
 			output = process.out;
 

@@ -225,7 +225,6 @@ namespace document
 	{
 		oak::set_thread_name("document::watch_server_t");
 
-		signal(SIGPIPE, SIG_IGN);
 		event_queue = kqueue();
 
 		struct kevent changeList;
