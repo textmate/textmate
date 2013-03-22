@@ -1761,7 +1761,7 @@ namespace
 	find.projectIdentifier  = self.identifier;
 
 	NSInteger mode = [sender respondsToSelector:@selector(tag)] ? [sender tag] : find_tags::in_document;
-	if(mode == find_tags::in_document && self.textView.hasMultiLineSelection)
+	if(mode == find_tags::in_document && [self.window isKeyWindow] && self.textView.hasMultiLineSelection)
 		mode = find_tags::in_selection;
 
 	switch(mode)
