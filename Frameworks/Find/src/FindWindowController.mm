@@ -211,7 +211,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 		self.resultsBottomDivider      = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
 		self.progressIndicator         = OakCreateProgressIndicator();
-		self.statusTextField           = OakCreateLabel();
+		self.statusTextField           = OakCreateSmallLabel();
 
 		[self.statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingTail];
