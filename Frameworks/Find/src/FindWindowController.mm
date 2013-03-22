@@ -211,7 +211,7 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 		self.resultsBottomDivider      = OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1]);
 
 		self.progressIndicator         = OakCreateProgressIndicator();
-		self.statusTextField           = OakCreateLabel();
+		self.statusTextField           = OakCreateSmallLabel();
 
 		[self.statusTextField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
 		[self.statusTextField.cell setLineBreakMode:NSLineBreakByTruncatingTail];
@@ -397,8 +397,8 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 	CONSTRAINT(@"H:[replace]-(5)-[replaceHistory]",                    NSLayoutFormatAlignAllTop);
 	CONSTRAINT(@"V:|-[find]-[replace]",                                NSLayoutFormatAlignAllLeft|NSLayoutFormatAlignAllRight);
 
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findTextField attribute:NSLayoutAttributeTop multiplier:1 constant:6]];
-	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceTextField attribute:NSLayoutAttributeTop multiplier:1 constant:6]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.findLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.findTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
+	[_myConstraints addObject:[NSLayoutConstraint constraintWithItem:self.replaceLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.replaceTextField attribute:NSLayoutAttributeTop multiplier:1 constant:3]];
 
 	CONSTRAINT(@"H:|-(>=20,==20@75)-[optionsLabel]-[regularExpression]-[ignoreWhitespace]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
 	CONSTRAINT(@"H:[ignoreCase(==regularExpression)]-[wrapAround(==ignoreWhitespace)]",              NSLayoutFormatAlignAllTop|NSLayoutFormatAlignAllBottom);
