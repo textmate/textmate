@@ -18,7 +18,21 @@ NSTextField* OakCreateLabel (NSString* label)
 	res.bordered        = NO;
 	res.drawsBackground = NO;
 	res.editable        = NO;
-	res.font            = [NSFont controlContentFontOfSize:[NSFont labelFontSize]];
+	res.font            = [NSFont controlContentFontOfSize:[NSFont systemFontSize]];
+	res.selectable      = NO;
+	res.stringValue     = label;
+	return res;
+}
+
+NSTextField* OakCreateSmallLabel (NSString* label)
+{
+	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
+	[[res cell] setWraps:NO];
+	res.bezeled         = NO;
+	res.bordered        = NO;
+	res.drawsBackground = NO;
+	res.editable        = NO;
+	res.font            = [NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]];
 	res.selectable      = NO;
 	res.stringValue     = label;
 	return res;
