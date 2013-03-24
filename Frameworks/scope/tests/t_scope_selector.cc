@@ -27,6 +27,14 @@ public:
 				
 	}
 
+	void test_dollar ()
+	{
+		scope::scope_t scope("foo bar");
+		scope::scope_t dyn = scope.append("dyn");
+		TS_ASSERT_EQUALS(scope::selector_t("foo bar$").does_match(dyn), true);
+		TS_ASSERT_EQUALS(scope::selector_t("foo bar dyn$").does_match(dyn), false);
+		TS_ASSERT_EQUALS(scope::selector_t("foo bar dyn").does_match(dyn), true);
+	}
 	void test_anchor ()
 	{
 		TS_ASSERT_EQUALS(scope::selector_t("^ foo").does_match("foo bar"), true);

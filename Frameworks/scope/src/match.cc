@@ -38,14 +38,18 @@ namespace scope
 			ENTER;
 			//printf("scope selector:%s\n", this->to_s().c_str());
 			size_t i = path.scopes.size(); // “source.ruby string.quoted.double constant.character”
+			bool anchor_to_bol = this->anchor_to_bol;
+			if( anchor_to_eol)
+			{
+				while(i && !path.scopes[i-1].document_scope) --i;
+			}
 			const size_t size_i = i;
 			size_t j = scopes.size();      // “string > constant $”
 			const size_t size_j = j;
 			
-			bool anchor_to_bol = this->anchor_to_bol;
 			bool anchor_to_eol = this->anchor_to_eol;
 			//printf("scope selector: anchor_to_bol:%s anchor_to_eol:%s\n", anchor_to_bol?"yes":"no", anchor_to_eol?"yes":"no");
-			
+
 			bool check_next = false;
 			size_t reset_i, reset_j;
 			double reset_score = 0;

@@ -25,7 +25,7 @@ namespace scope
 
 		bool has_prefix (scope_t const& rhs) const;
 
-		scope_t append (std::string const& atom) const;
+		scope_t append (std::string const& atom, bool document_scope = false) const;
 		scope_t parent () const;
 
 		bool operator== (scope_t const& rhs) const;
