@@ -36,11 +36,12 @@ namespace scope
 		return i == rhsScopes.size();
 	}
 
-	scope_t scope_t::append (std::string const& atom) const
+	scope_t scope_t::append (std::string const& atom, bool document_scope) const
 	{
 		scope_t res;
 		res.path.reset(new types::path_t(path ? *path : types::path_t()));
 		types::scope_t scope;
+		scope.document_scope = document_scope;
 		parse::scope(atom.data(), atom.data() + atom.size(), scope);
 		res.path->scopes.push_back(scope);
 		return res;
