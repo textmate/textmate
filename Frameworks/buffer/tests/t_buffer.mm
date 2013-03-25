@@ -115,7 +115,7 @@ void test_spelling ()
 
 	std::map<size_t, bool> bad = buf.misspellings(9, 23);
 	OAK_ASSERT_EQ(bad.size(), 2);
-	static std::map<size_t, bool> const expected = { { 5, true }, { 8, false } };
+	std::map<size_t, bool> const expected = { { 5, true }, { 8, false } };
 	OAK_ASSERT(bad == expected);
 }
 
@@ -130,7 +130,7 @@ void test_spelling_2 ()
 
 	std::map<size_t, bool> bad = buf.misspellings(0, buf.size());
 	OAK_ASSERT_EQ(bad.size(), 3);
-	static std::map<size_t, bool> const expected = { { 3, true }, { 5, false }, { 6, true } };
+	std::map<size_t, bool> const expected = { { 3, true }, { 5, false }, { 6, true } };
 	OAK_ASSERT(bad == expected);
 }
 
@@ -145,7 +145,7 @@ void test_spelling_3 ()
 
 	std::map<size_t, bool> bad = buf.misspellings(4, 7);
 	OAK_ASSERT_EQ(bad.size(), 3);
-	static std::map<size_t, bool> const expected = { { 0, true }, { 1, false }, { 2, true } };
+	std::map<size_t, bool> const expected = { { 0, true }, { 1, false }, { 2, true } };
 	OAK_ASSERT(bad == expected);
 }
 
