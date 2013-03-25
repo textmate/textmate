@@ -288,6 +288,8 @@ BOOL HasDocumentWindow (NSArray* windows)
 - (IBAction)orderFrontGoToLinePanel:(id)sender;
 {
 	D(DBF_AppController, bug("\n"););
+	if(id textView = [NSApp targetForAction:@selector(selectionString)])
+		[goToLineTextField setStringValue:[textView selectionString]];
 	[goToLinePanel makeKeyAndOrderFront:self];
 }
 
