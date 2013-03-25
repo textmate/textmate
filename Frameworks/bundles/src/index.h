@@ -124,7 +124,6 @@ namespace bundles
 
 	PUBLIC void add_callback (callback_t* cb);
 	PUBLIC void remove_callback (callback_t* cb);
-	PUBLIC void build_index (std::string const& cacheDir = NULL_STR);
 	PUBLIC void add_item (item_ptr item);
 	PUBLIC void remove_item (item_ptr item);
 
