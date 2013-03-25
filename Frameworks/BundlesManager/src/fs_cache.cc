@@ -27,10 +27,12 @@ namespace fs
 {
 	int32_t const cache_t::kPropertyCacheFormatVersion = 1;
 
-	cache_t::cache_t (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&)) : _path(path), _prune_dictionary(prune_dictionary)
+	void cache_t::load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&))
 	{
+		_prune_dictionary = prune_dictionary;
+
 		int32_t version;
-		auto plist = plist::load(_path);
+		auto plist = plist::load(path);
 		if(plist::get_key_path(plist, "version", version) && version == kPropertyCacheFormatVersion)
 		{
 			for(auto pair : plist)
@@ -75,9 +77,9 @@ namespace fs
 		}
 	}
 
-	void cache_t::save () const
+	void cache_t::save (std::string const& path) const
 	{
-		D(DBF_Bundles_Cache, bug("%s\n", _path.c_str()););
+		D(DBF_Bundles_Cache, bug("%s\n", path.c_str()););
 
 		plist::dictionary_t plist;
 		for(auto pair : _cache)
@@ -108,7 +110,7 @@ namespace fs
 			plist.emplace(pair.first, node);
 		}
 		plist["version"] = kPropertyCacheFormatVersion;
-		plist::save(_path, plist);
+		plist::save(path, plist);
 	}
 
 	uint64_t cache_t::event_id_for_path (std::string const& path) const

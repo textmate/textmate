@@ -20,4 +20,5 @@ PUBLIC @interface BundlesManager : NSObject
 - (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle;
 
 + (BundlesManager*)sharedInstance;
+- (void)loadBundlesIndex;
 @end

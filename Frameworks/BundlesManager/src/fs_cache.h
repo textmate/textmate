@@ -8,8 +8,8 @@ namespace fs
 {
 	struct cache_t
 	{
-		cache_t (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&));
-		void save () const;
+		void load (std::string const& path, plist::dictionary_t (*prune_dictionary)(plist::dictionary_t const&));
+		void save (std::string const& path) const;
 
 		bool dirty () const        { return _dirty; }
 		void set_dirty (bool flag) { _dirty = flag; }
@@ -72,7 +72,6 @@ namespace fs
 			std::vector<std::string> _entries;
 		};
 
-		std::string _path;
 		plist::dictionary_t (*_prune_dictionary)(plist::dictionary_t const&);
 		std::map<std::string, entry_t> _cache;
 		bool _dirty = false;

@@ -190,8 +190,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 			}
 		}
 	}
-	[BundlesManager sharedInstance];
-
+	[[BundlesManager sharedInstance] loadBundlesIndex];
 	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
 
 	BOOL disableSessionRestoreKeyDown  = ([NSEvent modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;

@@ -1,388 +1,231 @@
 #include "load_bundles.h"
-#include "fs_cache.h"
-#include <bundles/locations.h>
-#include <bundles/index.h>
-#include <bundles/query.h> // set_index
 #include <plist/delta.h>
 #include <regexp/glob.h>
 #include <text/format.h>
-#include <io/events.h>
 #include <oak/debug.h>
 
 OAK_DEBUG_VAR(Bundles_Load);
-OAK_DEBUG_VAR(Bundles_FSEvents);
 
-namespace
+static std::string const kSeparatorString = "------------------------------------";
+
+static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::string const& path)
 {
-	static std::string const kFieldChangedItems = "changed";
-	static std::string const kFieldDeletedItems = "deleted";
-	static std::string const kFieldMainMenu     = "mainMenu";
-	static std::string const kSeparatorString   = "------------------------------------";
-
-	static plist::dictionary_t prune_dictionary (plist::dictionary_t const& plist)
+	std::vector<oak::uuid_t> res;
+	for(auto uuid : uuids)
 	{
-		static auto const DesiredKeys = new std::set<std::string>{ bundles::kFieldName, bundles::kFieldKeyEquivalent, bundles::kFieldTabTrigger, bundles::kFieldScopeSelector, bundles::kFieldSemanticClass, bundles::kFieldContentMatch, bundles::kFieldGrammarFirstLineMatch, bundles::kFieldGrammarScope, bundles::kFieldGrammarInjectionSelector, bundles::kFieldDropExtension, bundles::kFieldGrammarExtension, bundles::kFieldSettingName, bundles::kFieldHideFromUser, bundles::kFieldIsDeleted, bundles::kFieldIsDisabled, bundles::kFieldRequiredItems, bundles::kFieldUUID, bundles::kFieldIsDelta, kFieldMainMenu, kFieldDeletedItems, kFieldChangedItems };
+		std::string const* str = boost::get<std::string>(&uuid);
+		if(str && oak::uuid_t::is_valid(*str))
+				res.push_back(*str == kSeparatorString ? bundles::kSeparatorUUID : oak::uuid_t(*str));
+		else	fprintf(stderr, "*** invalid uuid (%s) in ‘%s’\n", to_s(uuid).c_str(), path.c_str());
+	}
+	return res;
+}
 
-		plist::dictionary_t res;
-		for(auto pair : plist)
+std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak::uuid_t>>> create_bundle_index (std::vector<std::string> const& bundlesPaths, fs::cache_t& cache)
+{
+	struct delta_item_t
+	{
+		delta_item_t (bundles::item_ptr item, plist::dictionary_t const& plist) : item(item), plist(plist) { }
+
+		bundles::item_ptr item;
+		plist::dictionary_t plist;
+	};
+
+	std::vector<bundles::item_ptr> items(1, bundles::item_t::menu_item_separator());
+	std::map< oak::uuid_t, std::vector<oak::uuid_t> > menus;
+
+	std::map<oak::uuid_t, delta_item_t> deltaItems;
+	std::set<oak::uuid_t> loadedItems;
+
+	bool local = true;
+	for(auto bundlesPath : bundlesPaths)
+	{
+		for(auto bundlePath : cache.entries(bundlesPath, "*.tm[Bb]undle"))
 		{
-			if(DesiredKeys->find(pair.first) == DesiredKeys->end() && pair.first.find(bundles::kFieldSettingName) != 0)
-				continue;
+			bundles::item_ptr bundle;
+			std::set<oak::uuid_t> hiddenItems;
+			bool skipEclipsedBundle = false;
 
-			if(pair.first == bundles::kFieldSettingName)
+			auto entries = cache.entries(bundlePath, "{info.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
+			for(auto infoPlistPath : entries)
 			{
-				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
+				if(path::name(infoPlistPath) != "info.plist")
+					continue;
+
+				oak::uuid_t bundleUUID;
+				plist::dictionary_t plist = cache.content(infoPlistPath);
+				if(!plist::get_key_path(plist, bundles::kFieldUUID, bundleUUID))
 				{
-					plist::array_t settings;
-					iterate(settingsPair, *dictionary)
-						settings.push_back(settingsPair->first);
-					res.insert(std::make_pair(pair.first, settings));
+					fprintf(stderr, "*** skip ‘%s’ (no valid UUID)\n", infoPlistPath.c_str());
+					break;
 				}
-			}
-			else if(pair.first == kFieldChangedItems)
-			{
-				if(plist::dictionary_t const* dictionary = boost::get<plist::dictionary_t>(&pair.second))
-					res.insert(std::make_pair(pair.first, prune_dictionary(*dictionary)));
-			}
-			else
-			{
-				res.insert(pair);
-			}
-		}
-		return res;
-	}
 
-	// ===================
-	// = Index Functions =
-	// ===================
+				bundle.reset(new bundles::item_t(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle, local));
+				bundle->add_path(infoPlistPath);
 
-	static std::vector<oak::uuid_t> to_menu (plist::array_t const& uuids, std::string const& path)
-	{
-		std::vector<oak::uuid_t> res;
-		for(auto uuid : uuids)
-		{
-			std::string const* str = boost::get<std::string>(&uuid);
-			if(str && oak::uuid_t::is_valid(*str))
-					res.push_back(*str == kSeparatorString ? bundles::kSeparatorUUID : oak::uuid_t(*str));
-			else	fprintf(stderr, "*** invalid uuid (%s) in ‘%s’\n", to_s(uuid).c_str(), path.c_str());
-		}
-		return res;
-	}
-
-	static void traverse (std::vector<std::string> const& bundlesPaths, fs::cache_t& cache)
-	{
-		struct delta_item_t
-		{
-			delta_item_t (bundles::item_ptr item, plist::dictionary_t const& plist) : item(item), plist(plist) { }
-
-			bundles::item_ptr item;
-			plist::dictionary_t plist;
-		};
-
-		std::vector<bundles::item_ptr> items(1, bundles::item_t::menu_item_separator());
-		std::map< oak::uuid_t, std::vector<oak::uuid_t> > menus;
-
-		std::map<oak::uuid_t, delta_item_t> deltaItems;
-		std::set<oak::uuid_t> loadedItems;
-
-		bool local = true;
-		for(auto bundlesPath : bundlesPaths)
-		{
-			for(auto bundlePath : cache.entries(bundlesPath, "*.tm[Bb]undle"))
-			{
-				bundles::item_ptr bundle;
-				std::set<oak::uuid_t> hiddenItems;
-				bool skipEclipsedBundle = false;
-
-				auto entries = cache.entries(bundlePath, "{info.plist,Commands,DragCommands,Macros,Preferences,Proxies,Snippets,Syntaxes,Themes}");
-				for(auto infoPlistPath : entries)
+				bool isDelta = false;
+				if(plist::get_key_path(plist, bundles::kFieldIsDelta, isDelta) && isDelta)
 				{
-					if(path::name(infoPlistPath) != "info.plist")
-						continue;
+					deltaItems.insert(std::make_pair(bundleUUID, delta_item_t(bundle, plist)));
+					break;
+				}
 
-					oak::uuid_t bundleUUID;
-					plist::dictionary_t plist = cache.content(infoPlistPath);
-					if(!plist::get_key_path(plist, bundles::kFieldUUID, bundleUUID))
-					{
-						fprintf(stderr, "*** skip ‘%s’ (no valid UUID)\n", infoPlistPath.c_str());
-						break;
-					}
-
-					bundle.reset(new bundles::item_t(bundleUUID, bundles::item_ptr(), bundles::kItemTypeBundle, local));
+				std::map<oak::uuid_t, delta_item_t>::iterator deltaItem = deltaItems.find(bundleUUID);
+				if(deltaItem != deltaItems.end())
+				{
+					bundle = deltaItem->second.item;
 					bundle->add_path(infoPlistPath);
 
-					bool isDelta = false;
-					if(plist::get_key_path(plist, bundles::kFieldIsDelta, isDelta) && isDelta)
-					{
-						deltaItems.insert(std::make_pair(bundleUUID, delta_item_t(bundle, plist)));
-						break;
-					}
+					std::vector<plist::dictionary_t> plists;
+					plists.push_back(deltaItem->second.plist);
+					plists.push_back(plist);
+					plist = plist::merge_delta(plists);
+					deltaItems.erase(deltaItem);
+				}
+				else if(loadedItems.find(bundleUUID) != loadedItems.end())
+				{
+					D(DBF_Bundles_Load, bug("skip ‘%s’ (eclipsed by local bundle)\n", infoPlistPath.c_str()););
+					bundle.reset();
+					skipEclipsedBundle = true;
+					break;
+				}
 
-					std::map<oak::uuid_t, delta_item_t>::iterator deltaItem = deltaItems.find(bundleUUID);
-					if(deltaItem != deltaItems.end())
-					{
-						bundle = deltaItem->second.item;
-						bundle->add_path(infoPlistPath);
+				bundle->initialize(plist);
+				items.push_back(bundle);
 
-						std::vector<plist::dictionary_t> plists;
-						plists.push_back(deltaItem->second.plist);
-						plists.push_back(plist);
-						plist = plist::merge_delta(plists);
-						deltaItems.erase(deltaItem);
-					}
-					else if(loadedItems.find(bundleUUID) != loadedItems.end())
-					{
-						D(DBF_Bundles_Load, bug("skip ‘%s’ (eclipsed by local bundle)\n", infoPlistPath.c_str()););
-						bundle.reset();
-						skipEclipsedBundle = true;
-						break;
-					}
+				// ====================
+				// = Load Bundle Menu =
+				// ====================
 
-					bundle->initialize(plist);
-					items.push_back(bundle);
+				plist::array_t mainMenu;
+				plist::get_key_path(plist, "mainMenu.items", mainMenu);
+				menus.insert(std::make_pair(bundleUUID, to_menu(mainMenu, infoPlistPath)));
 
-					// ====================
-					// = Load Bundle Menu =
-					// ====================
-
-					plist::array_t mainMenu;
-					plist::get_key_path(plist, "mainMenu.items", mainMenu);
-					menus.insert(std::make_pair(bundleUUID, to_menu(mainMenu, infoPlistPath)));
-
-					plist::dictionary_t subMenus;
-					plist::get_key_path(plist, "mainMenu.submenus", subMenus);
-					for(auto submenuIter : subMenus)
-					{
-						std::string name;
-						plist::array_t uuids;
-						if(oak::uuid_t::is_valid(submenuIter.first) && plist::get_key_path(submenuIter.second, bundles::kFieldName, name) && plist::get_key_path(submenuIter.second, "items", uuids))
-						{
-							bundles::item_ptr item(new bundles::item_t(submenuIter.first, bundle, bundles::kItemTypeMenu));
-							item->set_name(name);
-							items.push_back(item);
-							menus.insert(std::make_pair(submenuIter.first, to_menu(uuids, infoPlistPath)));
-						}
-						else
-						{
-							fprintf(stderr, "*** invalid uuid (\"%s\") in ‘%s’\n", submenuIter.first.c_str(), infoPlistPath.c_str());
-						}
-					}
-
+				plist::dictionary_t subMenus;
+				plist::get_key_path(plist, "mainMenu.submenus", subMenus);
+				for(auto submenuIter : subMenus)
+				{
+					std::string name;
 					plist::array_t uuids;
-					plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
-					for(auto uuid : uuids)
+					if(oak::uuid_t::is_valid(submenuIter.first) && plist::get_key_path(submenuIter.second, bundles::kFieldName, name) && plist::get_key_path(submenuIter.second, "items", uuids))
 					{
-						std::string const* str = boost::get<std::string>(&uuid);
-						if(str && oak::uuid_t::is_valid(*str))
-							hiddenItems.insert(*str);
+						bundles::item_ptr item(new bundles::item_t(submenuIter.first, bundle, bundles::kItemTypeMenu));
+						item->set_name(name);
+						items.push_back(item);
+						menus.insert(std::make_pair(submenuIter.first, to_menu(uuids, infoPlistPath)));
+					}
+					else
+					{
+						fprintf(stderr, "*** invalid uuid (\"%s\") in ‘%s’\n", submenuIter.first.c_str(), infoPlistPath.c_str());
+					}
+				}
+
+				plist::array_t uuids;
+				plist::get_key_path(plist, "mainMenu.excludedItems", uuids);
+				for(auto uuid : uuids)
+				{
+					std::string const* str = boost::get<std::string>(&uuid);
+					if(str && oak::uuid_t::is_valid(*str))
+						hiddenItems.insert(*str);
+				}
+
+				break;
+			}
+
+			if(!bundle)
+			{
+				if(!skipEclipsedBundle)
+					fprintf(stderr, "*** not a bundle at ‘%s’\n", bundlePath.c_str());
+				continue;
+			}
+
+			for(auto dirPath : entries)
+			{
+				static struct { std::string name; std::string glob; bundles::kind_t kind; } const dirs[] =
+				{
+					{ "Commands",     "*.{plist,tmDelta,tmCommand}",     bundles::kItemTypeCommand     },
+					{ "DragCommands", "*.{plist,tmDelta,tmDragCommand}", bundles::kItemTypeDragCommand },
+					{ "Macros",       "*.{plist,tmDelta,tmMacro}",       bundles::kItemTypeMacro       },
+					{ "Preferences",  "*.{plist,tmDelta,tmPreferences}", bundles::kItemTypeSettings    },
+					{ "Snippets",     "*.{plist,tmDelta,tmSnippet}",     bundles::kItemTypeSnippet     },
+					{ "Syntaxes",     "*.{plist,tmDelta,tmLanguage}",    bundles::kItemTypeGrammar     },
+					{ "Proxies",      "*.{plist,tmDelta,tmProxy}",       bundles::kItemTypeProxy       },
+					{ "Themes",       "*.{plist,tmDelta,tmTheme}",       bundles::kItemTypeTheme       },
+				};
+
+				for(size_t i = 0; i < sizeofA(dirs); ++i)
+				{
+					if(path::name(dirPath) != dirs[i].name)
+						continue;
+
+					for(auto itemPath : cache.entries(dirPath, dirs[i].glob))
+					{
+						oak::uuid_t uuid;
+						plist::dictionary_t plist = cache.content(itemPath);
+						if(!plist::get_key_path(plist, bundles::kFieldUUID, uuid))
+						{
+							fprintf(stderr, "*** skip ‘%s’ (no valid UUID)\n", itemPath.c_str());
+							continue;
+						}
+
+						if(loadedItems.find(uuid) != loadedItems.end())
+						{
+							fprintf(stderr, "*** skip ‘%s’ (item with same UUID already loaded)\n", itemPath.c_str());
+							continue;
+						}
+
+						bundles::item_ptr item(new bundles::item_t(uuid, bundle, dirs[i].kind, local));
+						item->add_path(itemPath);
+
+						bool isDelta = false;
+						if(plist::get_key_path(plist, bundles::kFieldIsDelta, isDelta) && isDelta)
+						{
+							deltaItems.insert(std::make_pair(uuid, delta_item_t(item, plist)));
+							continue;
+						}
+
+						std::map<oak::uuid_t, delta_item_t>::iterator deltaItem = deltaItems.find(uuid);
+						if(deltaItem != deltaItems.end())
+						{
+							item = deltaItem->second.item;
+							item->add_path(itemPath);
+
+							std::vector<plist::dictionary_t> plists;
+							plists.push_back(deltaItem->second.plist);
+							plists.push_back(plist);
+							plist = plist::merge_delta(plists);
+							deltaItems.erase(deltaItem);
+						}
+
+						if(hiddenItems.find(item->uuid()) != hiddenItems.end())
+							plist.insert(std::make_pair(bundles::kFieldHideFromUser, true));
+
+						item->initialize(plist);
+						items.push_back(item);
+
+						loadedItems.insert(uuid);
 					}
 
 					break;
 				}
-
-				if(!bundle)
-				{
-					if(!skipEclipsedBundle)
-						fprintf(stderr, "*** not a bundle at ‘%s’\n", bundlePath.c_str());
-					continue;
-				}
-
-				for(auto dirPath : entries)
-				{
-					static struct { std::string name; std::string glob; bundles::kind_t kind; } const dirs[] =
-					{
-						{ "Commands",     "*.{plist,tmDelta,tmCommand}",     bundles::kItemTypeCommand     },
-						{ "DragCommands", "*.{plist,tmDelta,tmDragCommand}", bundles::kItemTypeDragCommand },
-						{ "Macros",       "*.{plist,tmDelta,tmMacro}",       bundles::kItemTypeMacro       },
-						{ "Preferences",  "*.{plist,tmDelta,tmPreferences}", bundles::kItemTypeSettings    },
-						{ "Snippets",     "*.{plist,tmDelta,tmSnippet}",     bundles::kItemTypeSnippet     },
-						{ "Syntaxes",     "*.{plist,tmDelta,tmLanguage}",    bundles::kItemTypeGrammar     },
-						{ "Proxies",      "*.{plist,tmDelta,tmProxy}",       bundles::kItemTypeProxy       },
-						{ "Themes",       "*.{plist,tmDelta,tmTheme}",       bundles::kItemTypeTheme       },
-					};
-
-					for(size_t i = 0; i < sizeofA(dirs); ++i)
-					{
-						if(path::name(dirPath) != dirs[i].name)
-							continue;
-
-						for(auto itemPath : cache.entries(dirPath, dirs[i].glob))
-						{
-							oak::uuid_t uuid;
-							plist::dictionary_t plist = cache.content(itemPath);
-							if(!plist::get_key_path(plist, bundles::kFieldUUID, uuid))
-							{
-								fprintf(stderr, "*** skip ‘%s’ (no valid UUID)\n", itemPath.c_str());
-								continue;
-							}
-
-							if(loadedItems.find(uuid) != loadedItems.end())
-							{
-								fprintf(stderr, "*** skip ‘%s’ (item with same UUID already loaded)\n", itemPath.c_str());
-								continue;
-							}
-
-							bundles::item_ptr item(new bundles::item_t(uuid, bundle, dirs[i].kind, local));
-							item->add_path(itemPath);
-
-							bool isDelta = false;
-							if(plist::get_key_path(plist, bundles::kFieldIsDelta, isDelta) && isDelta)
-							{
-								deltaItems.insert(std::make_pair(uuid, delta_item_t(item, plist)));
-								continue;
-							}
-
-							std::map<oak::uuid_t, delta_item_t>::iterator deltaItem = deltaItems.find(uuid);
-							if(deltaItem != deltaItems.end())
-							{
-								item = deltaItem->second.item;
-								item->add_path(itemPath);
-
-								std::vector<plist::dictionary_t> plists;
-								plists.push_back(deltaItem->second.plist);
-								plists.push_back(plist);
-								plist = plist::merge_delta(plists);
-								deltaItems.erase(deltaItem);
-							}
-
-							if(hiddenItems.find(item->uuid()) != hiddenItems.end())
-								plist.insert(std::make_pair(bundles::kFieldHideFromUser, true));
-
-							item->initialize(plist);
-							items.push_back(item);
-
-							loadedItems.insert(uuid);
-						}
-
-						break;
-					}
-				}
-
-				if(deltaItems.find(bundle->uuid()) == deltaItems.end())
-					loadedItems.insert(bundle->uuid());
 			}
 
-			local = false;
+			if(deltaItems.find(bundle->uuid()) == deltaItems.end())
+				loadedItems.insert(bundle->uuid());
 		}
 
-		for(ssize_t i = items.size(); i-- > 0; )
-		{
-			bundles::item_ptr item = items[i];
-			if(deltaItems.find(item->bundle_uuid()) != deltaItems.end())
-			{
-				fprintf(stderr, "*** orphaned delta (‘%s’) at: %s\n", item->name().c_str(), text::join(item->paths(), ", ").c_str());
-				items.erase(items.begin() + i);
-			}
-		}
-
-		set_index(items, menus);
+		local = false;
 	}
-}
 
-namespace
-{
-	struct callback_t : fs::event_callback_t
+	for(ssize_t i = items.size(); i-- > 0; )
 	{
-		fs::cache_t cache;
-		std::vector<std::string> bundles_paths;
-		std::set<std::string> watch_list;
-
-		callback_t (std::string const& cacheFile) : cache(cacheFile, &prune_dictionary)
+		bundles::item_ptr item = items[i];
+		if(deltaItems.find(item->bundle_uuid()) != deltaItems.end())
 		{
-			for(auto path : bundles::locations())
-				bundles_paths.push_back(path::join(path, "Bundles"));
+			fprintf(stderr, "*** orphaned delta (‘%s’) at: %s\n", item->name().c_str(), text::join(item->paths(), ", ").c_str());
+			items.erase(items.begin() + i);
 		}
-
-		void set_replaying_history (bool flag, std::string const& observedPath, uint64_t eventId)
-		{
-			D(DBF_Bundles_FSEvents, bug("%s (observing ‘%s’)\n", BSTR(flag), observedPath.c_str()););
-			cache.set_event_id_for_path(eventId, observedPath);
-		}
-
-		void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
-		{
-			D(DBF_Bundles_FSEvents, bug("%s (observing ‘%s’)\n", path.c_str(), observedPath.c_str()););
-			reload_path(path);
-			cache.set_event_id_for_path(eventId, observedPath);
-			save_cache();
-		}
-
-		void reload_path (std::string const& path)
-		{
-			D(DBF_Bundles_FSEvents, bug("%s\n", path.c_str()););
-
-			if(cache.reload(path))
-					traverse(bundles_paths, cache);
-			else	D(DBF_Bundles_FSEvents, bug("no changes\n"););
-
-			// =====================
-			// = Update watch list =
-			// =====================
-
-			std::set<std::string> newWatchlist;
-			for(auto path : bundles_paths)
-				cache.copy_heads_for_path(path, std::inserter(newWatchlist, newWatchlist.end()));
-
-			std::vector<std::string> pathsAdded, pathsRemoved;
-			std::set_difference(watch_list.begin(), watch_list.end(), newWatchlist.begin(), newWatchlist.end(), back_inserter(pathsRemoved));
-			std::set_difference(newWatchlist.begin(), newWatchlist.end(), watch_list.begin(), watch_list.end(), back_inserter(pathsAdded));
-
-			watch_list.swap(newWatchlist);
-
-			for(auto path : pathsRemoved)
-			{
-				D(DBF_Bundles_FSEvents, bug("unwatch ‘%s’\n", path.c_str()););
-				fs::unwatch(path, this);
-			}
-
-			for(auto path : pathsAdded)
-			{
-				D(DBF_Bundles_FSEvents, bug("watch ‘%s’\n", path.c_str()););
-				fs::watch(path, this, cache.event_id_for_path(path) ?: FSEventsGetCurrentEventId(), 1);
-			}
-		}
-
-		void load_bundles ()
-		{
-			traverse(bundles_paths, cache);
-
-			for(auto path : bundles_paths)
-				cache.copy_heads_for_path(path, std::inserter(watch_list, watch_list.end()));
-
-			D(DBF_Bundles_FSEvents, bug("watch:\n - %s\n", text::join(watch_list, "\n - ").c_str()););
-
-			auto tmp = watch_list;
-			for(auto path : tmp)
-				fs::watch(path, this, cache.event_id_for_path(path) ?: FSEventsGetCurrentEventId(), 1);
-
-			save_cache();
-		}
-
-		void save_cache ()
-		{
-			cache.cleanup(bundles_paths);
-			if(cache.dirty())
-			{
-				cache.save();
-				cache.set_dirty(false);
-			}
-		}
-	};
-
-	static callback_t* cb;
-}
-
-void load_bundles (std::string const& cacheDir)
-{
-	if(!cb)
-	{
-		cb = new callback_t(path::join(cacheDir, "BundlesIndex.plist"));
-		cb->load_bundles();
 	}
-}
 
-void reload_bundles (std::string const& path)
-{
-	if(cb)
-		cb->reload_path(path);
+	return std::make_pair(items, menus);
 }
