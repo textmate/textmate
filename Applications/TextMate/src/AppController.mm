@@ -231,6 +231,7 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	[TerminalPreferences updateMateIfRequired];
 	[AboutWindowController showChangesIfUpdated];
+	[[BundlesManager sharedInstance] setAutoUpdateBundles:YES];
 
 	[[CrashReporter sharedInstance] applicationDidFinishLaunching:aNotification];
 	[[CrashReporter sharedInstance] postNewCrashReportsToURLString:REST_API @"/crashes"];

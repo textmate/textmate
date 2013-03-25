@@ -18,6 +18,7 @@ static std::string const kInstallDirectory = NULL_STR;
 	NSUInteger scheduledTasks;
 	std::set<oak::uuid_t> installing;
 }
+@property (nonatomic) NSTimer*  updateTimer;
 @property (nonatomic) BOOL      isBusy;
 @property (nonatomic) NSString* activityText;
 @property (nonatomic) double    progress;
@@ -135,11 +136,25 @@ namespace
 		bundlesIndex = bundles_db::index(kInstallDirectory);
 
 		load_bundles(path::join(path::home(), "Library/Application Support/TextMate/Cache"));
-
-		[self updateSources:nil];
-		[NSTimer scheduledTimerWithTimeInterval:4*60*60 target:self selector:@selector(updateSources:) userInfo:nil repeats:YES];
 	}
 	return self;
+}
+
+- (void)setAutoUpdateBundles:(BOOL)flag
+{
+	if(_autoUpdateBundles == flag)
+		return;
+
+	if(_autoUpdateBundles = flag)
+	{
+		[self updateSources:nil];
+		self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:4*60*60 target:self selector:@selector(updateSources:) userInfo:nil repeats:YES];
+	}
+	else
+	{
+		[self.updateTimer invalidate];
+		self.updateTimer = nil;
+	}
 }
 
 - (void)updateProgress:(NSTimer*)aTimer
