@@ -279,7 +279,7 @@ namespace
 	}
 }
 
-void load_bundles (std::string const& cacheDir)
+namespace
 {
 	struct callback_t : fs::event_callback_t
 	{
@@ -302,13 +302,18 @@ void load_bundles (std::string const& cacheDir)
 		void did_change (std::string const& path, std::string const& observedPath, uint64_t eventId, bool recursive)
 		{
 			D(DBF_Bundles_FSEvents, bug("%s (observing ‘%s’)\n", path.c_str(), observedPath.c_str()););
+			reload_path(path);
+			cache.set_event_id_for_path(eventId, observedPath);
+			save_cache();
+		}
+
+		void reload_path (std::string const& path)
+		{
+			D(DBF_Bundles_FSEvents, bug("%s\n", path.c_str()););
 
 			if(cache.reload(path))
 					traverse(bundles_paths, cache);
 			else	D(DBF_Bundles_FSEvents, bug("no changes\n"););
-
-			cache.set_event_id_for_path(eventId, observedPath);
-			save_cache();
 
 			// =====================
 			// = Update watch list =
@@ -364,6 +369,20 @@ void load_bundles (std::string const& cacheDir)
 		}
 	};
 
-	callback_t* cb = new callback_t(path::join(cacheDir, "BundlesIndex.plist"));
-	cb->load_bundles();
+	static callback_t* cb;
+}
+
+void load_bundles (std::string const& cacheDir)
+{
+	if(!cb)
+	{
+		cb = new callback_t(path::join(cacheDir, "BundlesIndex.plist"));
+		cb->load_bundles();
+	}
+}
+
+void reload_bundles (std::string const& path)
+{
+	if(cb)
+		cb->reload_path(path);
 }
