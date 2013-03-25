@@ -5,9 +5,9 @@ PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
 PUBLIC extern NSString* const BundlesManagerBundlesDidChangeNotification;
 
 PUBLIC @interface BundlesManager : NSObject
-@property (nonatomic, readonly)         BOOL      isBusy;
-@property (nonatomic, retain, readonly) NSString* activityText;
-@property (nonatomic, readonly)         double    progress;
+@property (nonatomic, readonly) BOOL      isBusy;
+@property (nonatomic, readonly) NSString* activityText;
+@property (nonatomic, readonly) double    progress;
 
 - (NSUInteger)numberOfBundles;
 - (bundles_db::bundle_ptr const&)bundleAtIndex:(NSUInteger)anIndex;
@@ -18,4 +18,3 @@ PUBLIC @interface BundlesManager : NSObject
 
 + (BundlesManager*)sharedInstance;
 @end
-

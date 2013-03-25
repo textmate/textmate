@@ -11,12 +11,19 @@ NSString* const BundlesManagerBundlesDidChangeNotification = @"BundlesManagerBun
 static std::string const kInstallDirectory = NULL_STR;
 
 @interface BundlesManager ()
-@property (nonatomic, assign) BOOL      isBusy;
-@property (nonatomic, retain) NSString* activityText;
-@property (nonatomic, assign) double    progress;
-@property (atomic, retain)    NSString* threadActivityText;
-@property (nonatomic, assign) double    threadProgress;
-@property (nonatomic, retain) NSTimer*  progressTimer;
+{
+	std::vector<bundles_db::source_ptr> sourceList;
+	std::vector<bundles_db::bundle_ptr> bundlesIndex;
+
+	NSUInteger scheduledTasks;
+	std::set<oak::uuid_t> installing;
+}
+@property (nonatomic) BOOL      isBusy;
+@property (nonatomic) NSString* activityText;
+@property (nonatomic) double    progress;
+@property (atomic)    NSString* threadActivityText;
+@property (nonatomic) double    threadProgress;
+@property (nonatomic) NSTimer*  progressTimer;
 
 - (void)didStartThreadActivity:(id)sender;
 - (void)didFinishActivityForSources:(std::vector<bundles_db::source_ptr> const&)someSources bundles:(std::vector<bundles_db::bundle_ptr> const&)someBundles;
@@ -113,28 +120,16 @@ namespace
 	}
 }
 
-static BundlesManager* SharedInstance;
-
 @implementation BundlesManager
-{
-	std::vector<bundles_db::source_ptr> sourceList;
-	std::vector<bundles_db::bundle_ptr> bundlesIndex;
-
-	NSUInteger scheduledTasks;
-	std::set<oak::uuid_t> installing;
-}
-
 + (BundlesManager*)sharedInstance
 {
-	return SharedInstance ?: [self new];
+	static BundlesManager* instance = [BundlesManager new];
+	return instance;
 }
 
 - (id)init
 {
-	if(SharedInstance)
-	{
-	}
-	else if(self = SharedInstance = [super init])
+	if(self = [super init])
 	{
 		sourceList   = bundles_db::sources();
 		bundlesIndex = bundles_db::index(kInstallDirectory);
@@ -144,7 +139,7 @@ static BundlesManager* SharedInstance;
 		[self updateSources:nil];
 		[NSTimer scheduledTimerWithTimeInterval:4*60*60 target:self selector:@selector(updateSources:) userInfo:nil repeats:YES];
 	}
-	return SharedInstance;
+	return self;
 }
 
 - (void)updateProgress:(NSTimer*)aTimer
