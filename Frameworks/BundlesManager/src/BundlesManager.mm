@@ -91,8 +91,17 @@ static double const kPollInterval = 3*60*60;
 		dispatch_async(dispatch_get_main_queue(), ^{
 			for(auto bundle : failedBundles)
 				fprintf(stderr, "*** error downloading ‘%s’\n", bundle->url().c_str());
+
+			std::set<std::string> paths;
 			for(auto bundle : bundles)
+			{
 				installing.erase(bundle->uuid());
+				paths.insert(path::parent(bundle->path()));
+			}
+
+			for(auto path : paths)
+				reload_bundles(path);
+
 			callback(failedBundles);
 			[[NSNotificationCenter defaultCenter] postNotificationName:BundlesManagerBundlesDidChangeNotification object:self];
 			bundles_db::save_index(bundlesIndex, kInstallDirectory);
@@ -203,7 +212,9 @@ static double const kPollInterval = 3*60*60;
 
 - (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle
 {
+	auto path = path::parent(aBundle->path());
 	bundles_db::uninstall(aBundle);
+	reload_bundles(path);
 	bundles_db::save_index(bundlesIndex, kInstallDirectory);
 	self.activityText = [NSString stringWithFormat:@"Uninstalled ‘%@’.", [NSString stringWithCxxString:aBundle->name()]];
 }
