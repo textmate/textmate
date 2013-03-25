@@ -2,13 +2,13 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1070</int>
-		<string key="IBDocument.SystemVersion">12A269</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2549</string>
-		<string key="IBDocument.AppKitVersion">1187</string>
-		<string key="IBDocument.HIToolboxVersion">624.00</string>
+		<string key="IBDocument.SystemVersion">12D78</string>
+		<string key="IBDocument.InterfaceBuilderVersion">3084</string>
+		<string key="IBDocument.AppKitVersion">1187.37</string>
+		<string key="IBDocument.HIToolboxVersion">626.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2549</string>
+			<string key="NS.object.0">3084</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -54,7 +54,8 @@
 						<string key="NSFrame">{{262, 16}, {200, 20}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
-						<int key="NSpiFlags">24584</int>
+						<reference key="NSNextKeyView"/>
+						<int key="NSpiFlags">16394</int>
 						<double key="NSMaxValue">1</double>
 					</object>
 					<object class="NSTextField" id="593847072">
@@ -63,6 +64,7 @@
 						<string key="NSFrame">{{17, 20}, {242, 17}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="221873559"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="293352893">
 							<int key="NSCellFlags">68157504</int>
@@ -111,6 +113,7 @@
 										<string key="NSFrameSize">{438, 165}</string>
 										<reference key="NSSuperview" ref="1070777099"/>
 										<reference key="NSWindow"/>
+										<reference key="NSNextKeyView" ref="194902321"/>
 										<bool key="NSEnabled">YES</bool>
 										<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 										<bool key="NSControlAllowsExpansionToolTips">YES</bool>
@@ -120,6 +123,7 @@
 											<string key="NSFrameSize">{438, 17}</string>
 											<reference key="NSSuperview" ref="58869742"/>
 											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView" ref="1070777099"/>
 											<reference key="NSTableView" ref="872489274"/>
 										</object>
 										<object class="_NSCornerView" key="NSCornerView">
@@ -309,6 +313,7 @@
 								<string key="NSFrame">{{424, 17}, {15, 175}}</string>
 								<reference key="NSSuperview" ref="10756270"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="509710393"/>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<reference key="NSTarget" ref="10756270"/>
 								<string key="NSAction">_doScroller:</string>
@@ -320,6 +325,7 @@
 								<string key="NSFrame">{{1, 192}, {438, 15}}</string>
 								<reference key="NSSuperview" ref="10756270"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="593847072"/>
 								<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 								<int key="NSsFlags">1</int>
 								<reference key="NSTarget" ref="10756270"/>
@@ -345,7 +351,7 @@
 						<string key="NSFrame">{{20, 44}, {440, 183}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1070777099"/>
+						<reference key="NSNextKeyView" ref="58869742"/>
 						<int key="NSsFlags">133682</int>
 						<reference key="NSVScroller" ref="194902321"/>
 						<reference key="NSHScroller" ref="509710393"/>
@@ -362,12 +368,14 @@
 						<string key="NSFrame">{{0, 247}, {480, 25}}</string>
 						<reference key="NSSuperview" ref="1005"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="10756270"/>
 						<string key="NSClassName">MGScopeBar</string>
 					</object>
 				</object>
 				<string key="NSFrameSize">{480, 272}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
+				<reference key="NSNextKeyView" ref="678243497"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 		</object>
@@ -459,7 +467,7 @@
 						<string key="label">animate: bundlesManager.isBusy</string>
 						<reference key="source" ref="221873559"/>
 						<reference key="destination" ref="1001"/>
-						<object class="NSNibBindingConnector" key="connector">
+						<object class="NSNibBindingConnector" key="connector" id="463114568">
 							<reference key="NSSource" ref="221873559"/>
 							<reference key="NSDestination" ref="1001"/>
 							<string key="NSLabel">animate: bundlesManager.isBusy</string>
@@ -469,6 +477,47 @@
 						</object>
 					</object>
 					<int key="connectionID">27</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">hidden: bundlesManager.isBusy</string>
+						<reference key="source" ref="221873559"/>
+						<reference key="destination" ref="1001"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="221873559"/>
+							<reference key="NSDestination" ref="1001"/>
+							<string key="NSLabel">hidden: bundlesManager.isBusy</string>
+							<string key="NSBinding">hidden</string>
+							<string key="NSKeyPath">bundlesManager.isBusy</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">42</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">isIndeterminate: bundlesManager.determinateProgress</string>
+						<reference key="source" ref="221873559"/>
+						<reference key="destination" ref="1001"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="221873559"/>
+							<reference key="NSDestination" ref="1001"/>
+							<string key="NSLabel">isIndeterminate: bundlesManager.determinateProgress</string>
+							<string key="NSBinding">isIndeterminate</string>
+							<string key="NSKeyPath">bundlesManager.determinateProgress</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<reference key="NSPreviousConnector" ref="463114568"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">47</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -706,7 +755,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">35</int>
+			<int key="maxID">47</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

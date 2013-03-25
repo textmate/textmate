@@ -209,6 +209,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 				[[BundlesManager sharedInstance] installBundle:*bundle];
 				[installingBundleActivityTextField bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
 				[installingBundleProgressIndicator bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
+				[installingBundleProgressIndicator bind:NSIsIndeterminateBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"determinateProgress" options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];
 				[installingBundleProgressIndicator startAnimation:self];
 				OakShowSheetForWindow(installingBundleWindow, aWindow, ^(NSInteger returnCode){
 					aCompletionHandler(self.fileType);
