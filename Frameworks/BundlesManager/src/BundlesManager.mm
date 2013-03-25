@@ -1,4 +1,5 @@
 #import "BundlesManager.h"
+#import "load_bundles.h"
 #import <OakFoundation/NSDate Additions.h>
 #import <network/network.h>
 #import <oak/server.h>
@@ -137,6 +138,8 @@ static BundlesManager* SharedInstance;
 	{
 		sourceList   = bundles_db::sources();
 		bundlesIndex = bundles_db::index(kInstallDirectory);
+
+		load_bundles(path::join(path::home(), "Library/Application Support/TextMate/Cache"));
 
 		[self updateSources:nil];
 		[NSTimer scheduledTimerWithTimeInterval:4*60*60 target:self selector:@selector(updateSources:) userInfo:nil repeats:YES];
