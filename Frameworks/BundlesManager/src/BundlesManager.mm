@@ -20,9 +20,10 @@ static double const kPollInterval = 3*60*60;
 	std::vector<bundles_db::bundle_ptr> bundlesIndex;
 	std::set<oak::uuid_t> installing;
 }
-@property (nonatomic) BOOL      isBusy;
 @property (nonatomic) NSString* activityText;
-@property (nonatomic) double    progress;
+@property (nonatomic) BOOL      isBusy;
+@property (nonatomic) BOOL      determinateProgress;
+@property (nonatomic) CGFloat   progress;
 @property (nonatomic) NSTimer*  updateTimer;
 @end
 
