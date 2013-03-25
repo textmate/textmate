@@ -415,7 +415,7 @@ static class LayoutFixture : public CxxTest::GlobalFixture
 public:
 	bool setUpWorld()
 	{
-		bundles::build_index();
+		// [BundlesManager sharedInstance]; // load bundles
 		return true;
 	}
 
