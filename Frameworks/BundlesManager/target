@@ -1,4 +1,4 @@
-SOURCES      = src/*.mm
-LINK        += updater network OakFoundation
+SOURCES      = src/*.{cc,mm}
+LINK        += io text plist regexp bundles updater network OakFoundation
 EXPORT       = src/BundlesManager.h
 FRAMEWORKS   = Foundation
