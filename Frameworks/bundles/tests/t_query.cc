@@ -1,5 +1,6 @@
 #include <bundles/bundles.h>
 #include <test/bundle_index.h>
+#include <test/jail.h>
 
 class QueryTests : public CxxTest::TestSuite
 {
