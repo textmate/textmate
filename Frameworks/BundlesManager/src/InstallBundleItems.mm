@@ -1,5 +1,4 @@
 #import "InstallBundleItems.h"
-#import <BundleEditor/BundleEditor.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
@@ -88,7 +87,7 @@ void InstallBundleItems (NSArray* itemPaths)
 		std::string const title = text::format("The %s “%s” is already installed.", type, name.c_str());
 		int choice = NSRunAlertPanel([NSString stringWithCxxString:title], @"You can edit the installed %s to inspect it.", @"OK", @"Edit", nil, type);
 		if(choice == NSAlertAlternateReturn) // "Edit"
-			[[BundleEditor sharedInstance] revealBundleItem:info->installed];
+			[NSApp sendAction:@selector(editBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:info->uuid]];
 	}
 
 	iterate(info, toInstall)

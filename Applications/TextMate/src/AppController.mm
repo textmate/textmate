@@ -1,7 +1,6 @@
 #import "AppController.h"
 #import "Favorites.h"
 #import "AboutWindowController.h"
-#import "InstallBundleItems.h"
 #import "TMPlugInController.h"
 #import "RMateServer.h"
 #import <BundleEditor/BundleEditor.h>
@@ -61,7 +60,7 @@ void OakOpenDocuments (NSArray* paths)
 	}
 
 	if([itemsToInstall count])
-		InstallBundleItems(itemsToInstall);
+		[[BundlesManager sharedInstance] installBundleItemsAtPaths:itemsToInstall];
 
 	for(NSString* path in plugInsToInstall)
 		[[TMPlugInController sharedInstance] installPlugInAtPath:path];
@@ -440,5 +439,10 @@ BOOL HasDocumentWindow (NSArray* windows)
 
 	if(NSString* uuid = [[[sender selectedItems] lastObject] objectForKey:@"uuid"])
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
+}
+
+- (void)editBundleItemWithUUIDString:(NSString*)uuidString
+{
+	[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuidString))];
 }
 @end

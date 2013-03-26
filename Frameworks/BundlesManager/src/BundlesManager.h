@@ -21,4 +21,5 @@ PUBLIC @interface BundlesManager : NSObject
 
 + (BundlesManager*)sharedInstance;
 - (void)loadBundlesIndex;
+- (void)installBundleItemsAtPaths:(NSArray*)somePaths;
 @end

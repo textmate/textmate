@@ -1,5 +1,6 @@
 #import "BundlesManager.h"
 #import "load_bundles.h"
+#import "InstallBundleItems.h"
 #import <OakFoundation/NSDate Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/locations.h>
@@ -76,6 +77,11 @@ static double const kPollInterval = 3*60*60;
 		[self.updateTimer invalidate];
 		self.updateTimer = nil;
 	}
+}
+
+- (void)installBundleItemsAtPaths:(NSArray*)somePaths
+{
+	InstallBundleItems(somePaths);
 }
 
 - (void)installBundles:(std::vector<bundles_db::bundle_ptr> const&)bundlesReference completionHandler:(void(^)(std::vector<bundles_db::bundle_ptr> const& failedBundles))callback
