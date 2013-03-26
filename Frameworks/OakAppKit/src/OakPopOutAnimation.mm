@@ -26,6 +26,9 @@ static double const  kFadeDuration = 0.60;
 
 void OakShowPopOutAnimation (NSRect aRect, NSImage* anImage)
 {
+	if(aRect.size.width == 0 || aRect.size.height == 0)
+		return;
+
 	aRect = NSInsetRect(aRect, -kExtendWidth, -kExtendHeight);
 	NSRect contentRect = NSMakeRect(0, 0, NSWidth(aRect), NSHeight(aRect));
 	NSWindow* window = [[NSWindow alloc] initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
