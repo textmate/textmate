@@ -3,7 +3,7 @@
 ## 2013-03-26 ([a9405](https://github.com/textmate/textmate/compare/a9403...a9405))
 
 * When using `$` in a scope selector we anchor the match to the content scope’s end. For example `string $` will match `source string attr.scm.git` because the last part (`attr.scm.git`) is not part of the content scope. *[Joachim Mårtensson]*
-* Installing bundles from within TextMate should no longer stall/fail on volumes where file system events are not generated. Installing from outside TextMate still require proper events to be generated. If your bundles are stored on a volume that does not generate these events then you will need to delete `~/Library/Caches/BundlesIndex.plist` and relaunch TextMate to have it re-index your `Bundles` folders. Normally local file systems do generate file system events but [problems appear to exist](https://github.com/andreyvit/find-fsevents-bugs).
+* Installing bundles from within TextMate should no longer stall/fail on volumes where file system events are not generated. Installing from outside TextMate still require proper events to be generated. If your bundles are stored on a volume that does not generate these events then you will need to delete `~/Library/Caches/com.macromates.TextMate/BundlesIndex.plist` and relaunch TextMate to have it re-index your `Bundles` folders. Normally local file systems do generate file system events but [problems appear to exist](https://github.com/andreyvit/find-fsevents-bugs).
 
 ## 2013-03-21 ([a9403](https://github.com/textmate/textmate/compare/a9401...a9403))
 
