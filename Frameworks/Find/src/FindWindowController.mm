@@ -491,6 +491,12 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 
 - (void)showWindow:(id)sender
 {
+	if([self isWindowLoaded] && ![self.window isVisible])
+	{
+		self.showsResultsOutlineView = self.folderSearch;
+		self.statusString = @"";
+	}
+
 	BOOL isVisibleAndKey = [self isWindowLoaded] && [self.window isVisible] && [self.window isKeyWindow];
 	[super showWindow:sender];
 	if(!isVisibleAndKey || ![[self.window firstResponder] isKindOfClass:[NSTextView class]])
