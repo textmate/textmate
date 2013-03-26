@@ -1,4 +1,5 @@
 #import "InstallBundleItems.h"
+#import "BundlesManager.h"
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/bundles.h>
 #import <text/ctype.h>
@@ -90,6 +91,7 @@ void InstallBundleItems (NSArray* itemPaths)
 			[NSApp sendAction:@selector(editBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:info->uuid]];
 	}
 
+	std::set<std::string> pathsToReload;
 	iterate(info, toInstall)
 	{
 		if(info->is_bundle)
@@ -103,6 +105,7 @@ void InstallBundleItems (NSArray* itemPaths)
 					std::string const installPath = path::unique(path::join(installDir, path::name(info->path)));
 					if(path::copy(info->path, installPath))
 					{
+						pathsToReload.insert(installDir);
 						fprintf(stderr, "installed bundle at: %s\n", installPath.c_str());
 						continue;
 					}
@@ -184,6 +187,7 @@ void InstallBundleItems (NSArray* itemPaths)
 									if(path::make_dir(dest))
 									{
 										dest = path::join(dest, path::name(info->path));
+										pathsToReload.insert(dest);
 										dest = path::unique(dest);
 										if(path::copy(info->path, dest))
 												break;
@@ -206,4 +210,7 @@ void InstallBundleItems (NSArray* itemPaths)
 			}
 		}
 	}
+
+	for(auto path : pathsToReload)
+		[[BundlesManager sharedInstance] reloadPath:[NSString stringWithCxxString:path]];
 }
