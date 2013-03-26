@@ -62,6 +62,15 @@ NSString* const OakFileManagerPathKey                      = @"directory";
 - (void)doRemoveDirectory:(NSURL*)dirURL window:(NSWindow*)window
 {
 	NSError* error;
+
+	NSArray* contents = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:dirURL includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:&error];
+	if([contents count] != 0)
+	{
+		NSInteger choice = NSRunCriticalAlertPanel(@"Folder Not Empty!", [self expandFormat:@"Do you wish to delete “%@” and all the contained items?" withURL:dirURL], @"Delete Folder", @"Cancel", nil);
+		if(choice == NSAlertAlternateReturn) // "Cancel"
+			return;
+	}
+
 	if([[NSFileManager defaultManager] removeItemAtURL:dirURL error:&error])
 	{
 		[[[window undoManager] prepareWithInvocationTarget:self] doCreateDirectory:dirURL window:window];
