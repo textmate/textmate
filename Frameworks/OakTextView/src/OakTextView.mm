@@ -2280,6 +2280,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit
 {
+	BOOL res = NO;
+
 	auto environment = editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes]));
 	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
 	{
@@ -2287,43 +2289,24 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		text::range_t inputRange = ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), process.in, inputUnit, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
 		close(process.in);
 
+		__block int status = 0;
 		__block std::string output, error;
-		__block bool success = false;
 
 		dispatch_group_t group = dispatch_group_create();
-
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			if(waitpid(process.pid, &status, 0) != process.pid)
+				perror("waitpid");
+		});
 		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			io::exhaust_fd(process.out, &output);
 		});
-
 		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			io::exhaust_fd(process.err, &error);
 		});
-
-		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			int status = 0;
-			if(waitpid(process.pid, &status, 0) != process.pid)
-				perror("waitpid");
-			else if(!WIFEXITED(status))
-				NSLog(@"*** abnormal exit (%d) from ‘%@’\n", status, commandString);
-			else if(WEXITSTATUS(status) != 0)
-				NSLog(@"*** exit code %d from ‘%@’\n", WEXITSTATUS(status), commandString);
-			else
-				success = true;
-		});
-
 		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 		dispatch_release(group);
 
-		error = text::trim(error);
-		if(!error.empty())
-		{
-			OakShowToolTip([NSString stringWithCxxString:error], [self positionForWindowUnderCaret]);
-			if(success && output.empty())
-				return YES;
-		}
-
-		if(success)
+		if(res = WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		{
 			if(outputUnit == output::tool_tip)
 			{
@@ -2334,10 +2317,21 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 				AUTO_REFRESH;
 				editor->handle_result(output, outputUnit, output_format::text, output_caret::after_output, inputRange, environment);
 			}
-			return YES;
 		}
+
+		error = text::trim(error);
+		if(error.empty() && !res)
+		{
+			if(WIFEXITED(status))
+				error = text::format("Failed executing ‘%s’.\nCommand returned non-zero status code: %d.", [commandString UTF8String], WEXITSTATUS(status));
+			else
+				error = text::format("Failed executing ‘%s’.\nAbnormal exit: %d.", [commandString UTF8String], status);
+		}
+
+		if(!error.empty())
+			OakShowToolTip([NSString stringWithCxxString:error], [self positionForWindowUnderCaret]);
 	}
-	return NO;
+	return res;
 }
 
 // ===================
