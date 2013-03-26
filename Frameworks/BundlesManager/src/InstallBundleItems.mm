@@ -205,7 +205,7 @@ void InstallBundleItems (NSArray* itemPaths)
 				}
 				else
 				{
-					fprintf(stderr, "Create new bundle for item\n");
+					NSRunAlertPanel(@"Creating bundles as part of installing bundle items is not yet supported.", @"You can create a new bundle in the bundle editor via File → New (⌘N) and then install this item again, selecting your newly created bundle.", @"OK", nil, nil);
 				}
 			}
 		}
