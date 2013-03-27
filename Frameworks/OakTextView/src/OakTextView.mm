@@ -1576,9 +1576,55 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 
 - (void)performFindOperation:(id <OakFindServerProtocol>)aFindServer
 {
-	AUTO_REFRESH;
+	if(![aFindServer isKindOfClass:[OakTextViewFindServer class]])
+	{
+		NSMutableDictionary* dict = [NSMutableDictionary dictionary];
 
-	// TODO If aFindServer != self then we should record findWithOptions: instead of find{Next,Previous,All,…}:
+		dict[@"findString"] = aFindServer.findString;
+
+		static find_operation_t const replaceActions[] = { kFindOperationReplaceAll, kFindOperationReplaceAllInSelection, kFindOperationReplace, kFindOperationReplaceAndFind };
+		if(oak::contains(std::begin(replaceActions), std::end(replaceActions), aFindServer.findOperation))
+			dict[@"replaceString"] = aFindServer.replaceString;
+		static find_operation_t const inSelectionActions[] = { kFindOperationFindInSelection, kFindOperationReplaceAllInSelection };
+		if(oak::contains(std::begin(inSelectionActions), std::end(inSelectionActions), aFindServer.findOperation))
+			dict[@"replaceAllScope"] = @"selection";
+
+		find::options_t options = aFindServer.findOptions;
+
+		if(options & find::ignore_case)
+			dict[@"ignoreCase"]        = @YES;
+		if(options & find::ignore_whitespace)
+			dict[@"ignoreWhitespace"]  = @YES;
+		if(options & find::regular_expression)
+			dict[@"regularExpression"] = @YES;
+		if(options & find::wrap_around)
+			dict[@"wrapAround"]        = @YES;
+
+		switch(aFindServer.findOperation)
+		{
+			case kFindOperationFind:
+			case kFindOperationFindInSelection:
+			{
+				if(options & find::all_matches)
+					dict[@"action"] = @"findAll";
+				else if(options & find::backwards)
+					dict[@"action"] = @"findPrevious";
+				else
+					dict[@"action"] = @"findNext";
+			}
+			break;
+
+			case kFindOperationReplaceAll:
+			case kFindOperationReplaceAllInSelection: dict[@"action"] = @"replaceAll";     break;
+			case kFindOperationReplace:               dict[@"action"] = @"replace";        break;
+			case kFindOperationReplaceAndFind:        dict[@"action"] = @"replaceAndFind"; break;
+		}
+
+		if(dict[@"action"])
+			[self recordSelector:@selector(findWithOptions:) withArgument:dict];
+	}
+
+	AUTO_REFRESH;
 
 	find_operation_t findOperation = aFindServer.findOperation;
 	if(findOperation == kFindOperationReplace || findOperation == kFindOperationReplaceAndFind)
