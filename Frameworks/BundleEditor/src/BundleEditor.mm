@@ -337,6 +337,12 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	[self showWindow:self];
 	[self setBundleItem:anItem];
 
+	if(anItem->paths().empty())
+	{
+		changes.insert(std::make_pair(anItem, anItem->plist()));
+		[self didChangeModifiedState];
+	}
+
 	std::vector<be::entry_ptr> const& allBundles = bundles->children();
 	iterate(bundle, allBundles)
 	{
