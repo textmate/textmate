@@ -1593,7 +1593,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		}
 		editor->insert(replacement, true);
 
-		[self recordSelector:@selector(replace:) withArgument:nil];
 		if(findOperation == kFindOperationReplaceAndFind)
 			findOperation = kFindOperationFind;
 	}
@@ -1657,8 +1656,6 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			}
 			else
 			{
-				[self recordSelector:(options & find::all_matches) ? (findOperation == kFindOperationFind ? @selector(findAll:) : @selector(findAllInSelection:)) : ((options & find::backwards) ? @selector(findPrevious:) : @selector(findNext:)) withArgument:nil];
-
 				std::set<ng::range_t> alreadySelected;
 				citerate(range, editor->ranges())
 					alreadySelected.insert(*range);
@@ -1694,13 +1691,18 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 			std::string const findStr    = to_s(aFindServer.findString);
 			std::string const replaceStr = to_s(aFindServer.replaceString);
 			find::options_t options      = aFindServer.findOptions;
-			[self recordSelector:(options & find::all_matches) ? (findOperation == kFindOperationReplaceAll ? @selector(replaceAll:) : @selector(replaceAllInSelection:)) : @selector(replace:) withArgument:nil];
 
 			ng::ranges_t const res = editor->replace_all(findStr, replaceStr, options, findOperation == kFindOperationReplaceAllInSelection);
 			[aFindServer didReplace:res.size() occurrencesOf:aFindServer.findString with:aFindServer.replaceString];
 		}
 		break;
 	}
+}
+
+- (void)recordSelector:(SEL)aSelector andPerform:(find_operation_t)findOperation withOptions:(find::options_t)extraOptions
+{
+	[self recordSelector:aSelector withArgument:nil];
+	[self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:findOperation options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | extraOptions]];
 }
 
 - (void)setShowLiveSearch:(BOOL)flag
@@ -1799,7 +1801,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 	else
 	{
-		[self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions]];
+		[self recordSelector:_cmd andPerform:kFindOperationFind withOptions:find::none];
 	}
 }
 
@@ -1816,28 +1818,21 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 	else
 	{
-		[self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::backwards]];
+		[self recordSelector:_cmd andPerform:kFindOperationFind withOptions:find::backwards];
 	}
 }
 
-- (IBAction)findNextAndModifySelection:(id)sender     { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::extend_selection]]; }
-- (IBAction)findPreviousAndModifySelection:(id)sender { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::extend_selection | find::backwards]]; }
+- (IBAction)findNextAndModifySelection:(id)sender     { [self recordSelector:_cmd andPerform:kFindOperationFind                  withOptions:find::extend_selection]; }
+- (IBAction)findPreviousAndModifySelection:(id)sender { [self recordSelector:_cmd andPerform:kFindOperationFind                  withOptions:find::extend_selection | find::backwards]; }
 
-- (IBAction)findAll:(id)sender               { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFind            options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
-- (IBAction)findAllInSelection:(id)sender    { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationFindInSelection options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
+- (IBAction)findAll:(id)sender                        { [self recordSelector:_cmd andPerform:kFindOperationFind                  withOptions:find::all_matches]; }
+- (IBAction)findAllInSelection:(id)sender             { [self recordSelector:_cmd andPerform:kFindOperationFindInSelection       withOptions:find::all_matches]; }
 
-- (IBAction)replace:(id)sender               { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplace        options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions]]; }
-- (IBAction)replaceAndFind:(id)sender        { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplaceAndFind options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions]]; }
+- (IBAction)replace:(id)sender                        { [self recordSelector:_cmd andPerform:kFindOperationReplace               withOptions:find::none]; }
+- (IBAction)replaceAndFind:(id)sender                 { [self recordSelector:_cmd andPerform:kFindOperationReplaceAndFind        withOptions:find::none]; }
 
-- (IBAction)replaceAll:(id)sender            { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplaceAll            options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
-- (IBAction)replaceAllInSelection:(id)sender { [self performFindOperation:[OakTextViewFindServer findServerWithTextView:self operation:kFindOperationReplaceAllInSelection options:[[OakPasteboard pasteboardWithName:NSFindPboard] current].findOptions | find::all_matches]]; }
-
-- (void)findWithOptions:(NSDictionary*)someOptions
-{
-	AUTO_REFRESH;
-	[self recordSelector:_cmd withArgument:someOptions];
-	editor->find_dispatch(plist::convert((__bridge CFDictionaryRef)someOptions));
-}
+- (IBAction)replaceAll:(id)sender                     { [self recordSelector:_cmd andPerform:kFindOperationReplaceAll            withOptions:find::all_matches]; }
+- (IBAction)replaceAllInSelection:(id)sender          { [self recordSelector:_cmd andPerform:kFindOperationReplaceAllInSelection withOptions:find::all_matches]; }
 
 - (void)insertSnippetWithOptions:(NSDictionary*)someOptions // For Dialog popup
 {
