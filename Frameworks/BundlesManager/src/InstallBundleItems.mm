@@ -122,10 +122,7 @@ void InstallBundleItems (NSArray* itemPaths)
 					defaultBundle = (*item)->uuid();
 			}
 
-			std::map<std::string, std::string> vars;
-			vars.insert(std::make_pair("TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe"));
-			std::string personalBundleName = format_string::expand("${TM_FULLNAME/^(\\S+).*$/$1/}’s Bundle", vars);
-			// std::string personalBundleName = format_string::expand("${TM_FULLNAME/^(\\S+).*$/$1/}’s Bundle", std::map<std::string, std::string>{ { "TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe" } });
+			std::string personalBundleName = format_string::expand("${TM_FULLNAME/^(\\S+).*$/$1/}’s Bundle", std::map<std::string, std::string>{ { "TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe" } });
 			if(!defaultBundle)
 			{
 				citerate(item, bundles::query(bundles::kFieldName, personalBundleName, scope::wildcard, bundles::kItemTypeBundle))
