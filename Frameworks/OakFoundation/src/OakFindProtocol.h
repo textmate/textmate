@@ -12,7 +12,7 @@ enum find_operation_t {
 	kFindOperationReplaceAllInSelection,
 };
 
-@protocol OakFindServerProtocol
+@protocol OakFindServerProtocol <NSObject>
 @property (nonatomic, readonly) find_operation_t findOperation;
 @property (nonatomic, readonly) NSString* findString;
 @property (nonatomic, readonly) NSString* replaceString;
