@@ -1,4 +1,5 @@
 #import <updater/updater.h>
+#import <bundles/index.h>
 
 PUBLIC extern NSString* const kUserDefaultsDisableBundleUpdatesKey;
 PUBLIC extern NSString* const kUserDefaultsLastBundleUpdateCheckKey;
@@ -22,5 +23,6 @@ PUBLIC @interface BundlesManager : NSObject
 + (BundlesManager*)sharedInstance;
 - (void)loadBundlesIndex;
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths;
+- (BOOL)findBundleForInstall:(bundles::item_ptr*)res;
 - (void)reloadPath:(NSString*)aPath;
 @end

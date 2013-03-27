@@ -115,47 +115,8 @@ void InstallBundleItems (NSArray* itemPaths)
 		}
 		else
 		{
-			oak::uuid_t defaultBundle;
-			if(path::extension(info->path) == ".tmTheme")
-			{
-				citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle, "A4380B27-F366-4C70-A542-B00D26ED997E"))
-					defaultBundle = (*item)->uuid();
-			}
-
-			std::string personalBundleName = format_string::expand("${TM_FULLNAME/^(\\S+).*$/$1/}’s Bundle", std::map<std::string, std::string>{ { "TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe" } });
-			if(!defaultBundle)
-			{
-				citerate(item, bundles::query(bundles::kFieldName, personalBundleName, scope::wildcard, bundles::kItemTypeBundle))
-					defaultBundle = (*item)->uuid();
-			}
-
-			NSPopUpButton* bundleChooser = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
-			[bundleChooser.menu removeAllItems];
-			[bundleChooser.menu addItemWithTitle:@"Create new bundle…" action:NULL keyEquivalent:@""];
-			[bundleChooser.menu addItem:[NSMenuItem separatorItem]];
-
-			std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
-			citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
-				ordered.insert(std::make_pair((*item)->name(), *item));
-			NSMenuItem* selectedItem = nil;
-			iterate(pair, ordered)
-			{
-				NSMenuItem* menuItem = [bundleChooser.menu addItemWithTitle:[NSString stringWithCxxString:pair->first] action:NULL keyEquivalent:@""];
-				[menuItem setRepresentedObject:[NSString stringWithCxxString:to_s(pair->second->uuid())]];
-				if(defaultBundle && defaultBundle == pair->second->uuid())
-					selectedItem = menuItem;
-			}
-			if(selectedItem)
-				[bundleChooser selectItem:selectedItem];
-
-			[bundleChooser sizeToFit];
-			NSRect frame = [bundleChooser frame];
-			if(NSWidth(frame) > 200)
-				[bundleChooser setFrameSize:NSMakeSize(200, NSHeight(frame))];
-
-			NSAlert* alert = [NSAlert alertWithMessageText:[NSString stringWithFormat:@"Would you like to install the “%@” bundle item?", [NSString stringWithCxxString:info->name]] defaultButton:@"Install" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Installing a bundle item adds new functionality to TextMate."];
-			[alert setAccessoryView:bundleChooser];
-			if([alert runModal] == NSAlertDefaultReturn) // "Install"
+			bundles::item_ptr bundle;
+			if([[BundlesManager sharedInstance] findBundleForInstall:&bundle])
 			{
 				static struct { std::string extension; std::string directory; } DirectoryMap[] =
 				{
@@ -169,40 +130,29 @@ void InstallBundleItems (NSArray* itemPaths)
 					{ ".tmTheme",       "Themes"       },
 				};
 
-				if(NSString* bundleUUID = [[bundleChooser selectedItem] representedObject])
+				if(bundle->local() || bundle->save())
 				{
-					citerate(item, bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle, to_s(bundleUUID)))
+					std::string dest = path::parent(bundle->paths().front());
+					iterate(iter, DirectoryMap)
 					{
-						if((*item)->local() || (*item)->save())
+						if(path::extension(info->path) == iter->extension)
 						{
-							std::string dest = path::parent((*item)->paths().front());
-							iterate(iter, DirectoryMap)
+							dest = path::join(dest, iter->directory);
+							if(path::make_dir(dest))
 							{
-								if(path::extension(info->path) == iter->extension)
-								{
-									dest = path::join(dest, iter->directory);
-									if(path::make_dir(dest))
-									{
-										dest = path::join(dest, path::name(info->path));
-										pathsToReload.insert(dest);
-										dest = path::unique(dest);
-										if(path::copy(info->path, dest))
-												break;
-										else	fprintf(stderr, "error: copy(‘%s’, ‘%s’)\n", info->path.c_str(), dest.c_str());
-									}
-									else
-									{
-										fprintf(stderr, "error: makedir(‘%s’)\n", dest.c_str());
-									}
-								}
+								dest = path::join(dest, path::name(info->path));
+								pathsToReload.insert(dest);
+								dest = path::unique(dest);
+								if(path::copy(info->path, dest))
+										break;
+								else	fprintf(stderr, "error: copy(‘%s’, ‘%s’)\n", info->path.c_str(), dest.c_str());
 							}
-
+							else
+							{
+								fprintf(stderr, "error: makedir(‘%s’)\n", dest.c_str());
+							}
 						}
 					}
-				}
-				else
-				{
-					NSRunAlertPanel(@"Creating bundles as part of installing bundle items is not yet supported.", @"You can create a new bundle in the bundle editor via File → New (⌘N) and then install this item again, selecting your newly created bundle.", @"OK", nil, nil);
 				}
 			}
 		}

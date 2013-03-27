@@ -5,6 +5,8 @@
 #import <OakFoundation/NSString Additions.h>
 #import <bundles/locations.h>
 #import <bundles/query.h> // set_index
+#import <regexp/format_string.h>
+#import <text/ctype.h>
 #import <ns/ns.h>
 #import <io/path.h>
 #import <io/events.h>
@@ -82,6 +84,56 @@ static double const kPollInterval = 3*60*60;
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths
 {
 	InstallBundleItems(somePaths);
+}
+
+- (BOOL)findBundleForInstall:(bundles::item_ptr*)res
+{
+	oak::uuid_t defaultBundle;
+
+	std::string const personalBundleName = format_string::expand("${TM_FULLNAME/^(\\S+).*$/$1/}’s Bundle", std::map<std::string, std::string>{ { "TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe" } });
+	for(auto item : bundles::query(bundles::kFieldName, personalBundleName, scope::wildcard, bundles::kItemTypeBundle))
+		defaultBundle = item->uuid();
+
+	NSPopUpButton* bundleChooser = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+	[bundleChooser.menu removeAllItems];
+	[bundleChooser.menu addItemWithTitle:@"Create new bundle…" action:NULL keyEquivalent:@""];
+	[bundleChooser.menu addItem:[NSMenuItem separatorItem]];
+
+	std::multimap<std::string, bundles::item_ptr, text::less_t> ordered;
+	for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle))
+		ordered.insert(std::make_pair(item->name(), item));
+
+	for(auto pair : ordered)
+	{
+		NSMenuItem* menuItem = [bundleChooser.menu addItemWithTitle:[NSString stringWithCxxString:pair.first] action:NULL keyEquivalent:@""];
+		[menuItem setRepresentedObject:[NSString stringWithCxxString:to_s(pair.second->uuid())]];
+		if(defaultBundle && defaultBundle == pair.second->uuid())
+			[bundleChooser selectItem:menuItem];
+	}
+
+	[bundleChooser sizeToFit];
+	NSRect frame = [bundleChooser frame];
+	if(NSWidth(frame) > 200)
+		[bundleChooser setFrameSize:NSMakeSize(200, NSHeight(frame))];
+
+	NSAlert* alert = [NSAlert alertWithMessageText:@"Select Bundle" defaultButton:@"OK" alternateButton:@"Cancel" otherButton:nil informativeTextWithFormat:@"Select the bundle which should be used for the new item(s)."];
+	[alert setAccessoryView:bundleChooser];
+	if([alert runModal] == NSAlertDefaultReturn) // "OK"
+	{
+		if(NSString* bundleUUID = [[bundleChooser selectedItem] representedObject])
+		{
+			for(auto item : bundles::query(bundles::kFieldAny, NULL_STR, scope::wildcard, bundles::kItemTypeBundle, to_s(bundleUUID)))
+			{
+				*res = item;
+				return YES;
+			}
+		}
+		else
+		{
+			NSRunAlertPanel(@"Creating bundles is not yet supported.", @"You can create a new bundle in the bundle editor via File → New (⌘N) and then repeat the previous action.", @"OK", nil, nil);
+		}
+	}
+	return NO;
 }
 
 - (void)installBundles:(std::vector<bundles_db::bundle_ptr> const&)bundlesReference completionHandler:(void(^)(std::vector<bundles_db::bundle_ptr> const& failedBundles))callback
