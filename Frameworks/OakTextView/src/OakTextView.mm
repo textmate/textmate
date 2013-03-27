@@ -17,6 +17,7 @@
 #import <OakSystem/application.h>
 #import <CrashReporter/utility.h>
 #import <BundleMenu/BundleMenu.h>
+#import <BundlesManager/BundlesManager.h>
 #import <bundles/bundles.h>
 #import <cf/cf.h>
 #import <command/runner.h>
@@ -2366,6 +2367,28 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
 			editor->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro }), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 	else	NSBeep();
+}
+
+- (IBAction)saveScratchMacro:(id)sender
+{
+	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
+	{
+		bundles::item_ptr bundle;
+		if([[BundlesManager sharedInstance] findBundleForInstall:&bundle])
+		{
+			oak::uuid_t uuid = oak::uuid_t().generate();
+
+			plist::dictionary_t plist = plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro });
+			plist[bundles::kFieldUUID] = to_s(uuid);
+			plist[bundles::kFieldName] = std::string("untitled");
+
+			bundles::item_ptr item(new bundles::item_t(uuid, bundle, bundles::kItemTypeMacro));
+			item->set_plist(plist);
+			bundles::add_item(item);
+
+			[NSApp sendAction:@selector(editBundleItemWithUUIDString:) to:nil from:[NSString stringWithCxxString:uuid]];
+		}
+	}
 }
 
 - (void)recordSelector:(SEL)aSelector withArgument:(id)anArgument

@@ -114,6 +114,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
 @property (nonatomic) NSString*                             selectionString;
+- (IBAction)saveScratchMacro:(id)sender;
 
 @property (nonatomic) BOOL                                  isMacroRecording;
 
@@ -130,6 +131,8 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;
 - (IBAction)toggleShowInvisibles:(id)sender;
 - (IBAction)toggleScrollPastEnd:(id)sender;
+
+- (IBAction)saveScratchMacro:(id)sender;
 
 - (void)performBundleItem:(bundles::item_ptr const&)anItem;
 @end
