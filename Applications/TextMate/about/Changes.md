@@ -1,5 +1,10 @@
 # Changes
 
+## 2013-03-27 ([a9407](https://github.com/textmate/textmate/compare/a9405...a9407))
+
+* Macros can now be saved via Edit → Macros → Save Macro… (⌃⌘M). Actions invoked via Find dialog are also correctly recorded, though replaying “Replace and Find” is still unimplemented (although the action itself works when called outside macros).
+* Revert "Space can be used instead of slash in file chooser (⌘T)". See [issue #893](https://github.com/textmate/textmate/issues/893) for discussion.
+
 ## 2013-03-26 ([a9405](https://github.com/textmate/textmate/compare/a9403...a9405))
 
 * When using `$` in a scope selector we anchor the match to the content scope’s end. For example `string $` will match `source string attr.scm.git` because the last part (`attr.scm.git`) is not part of the content scope. *[Joachim Mårtensson]*
