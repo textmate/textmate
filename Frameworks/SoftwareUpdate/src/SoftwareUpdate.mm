@@ -94,7 +94,7 @@ static SoftwareUpdate* SharedInstance;
 	BOOL readOnlyFileSystem = statfs(oak::application_t::path().c_str(), &sfsb) != 0 || (sfsb.f_flags & MNT_RDONLY);
 	BOOL disablePolling = [[[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsDisableSoftwareUpdatesKey] boolValue];
 	D(DBF_SoftwareUpdate_Check, bug("download visible %s, disable polling %s, read only file system %s → %s\n", BSTR(self.downloadWindow), BSTR(disablePolling), BSTR(readOnlyFileSystem), BSTR(!self.downloadWindow && !disablePolling && !readOnlyFileSystem)););
-	if(self.downloadWindow || disablePolling || readOnlyFileSystem)
+	if(_downloadWindow.isWorking || disablePolling || readOnlyFileSystem)
 		return;
 
 	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) addTimeInterval:pollInterval];
