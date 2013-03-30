@@ -3,6 +3,8 @@
 #import <OakAppKit/NSImage Additions.h>
 #import <OakFoundation/OakTimer.h>
 #import <oak/debug.h>
+#import "../io/FSItem.h"
+#import <OakFoundation/NSString Additions.h>
 
 static CGFloat kCloseButtonRightMargin = 5;
 
@@ -196,4 +198,70 @@ static void DrawSpinner (NSRect cellFrame, BOOL isFlipped, NSColor* color, doubl
 	[controlView setNeedsDisplayInRect:[self closeButtonRectInFrame:cellFrame]];
 	return YES;
 }
+
+// =================
+// = Accessibility =
+// =================
+
+- (NSArray*)accessibilityAttributeNames
+{
+	if(self.representedObject && [self.representedObject isKindOfClass:[FSItem class]])
+	{
+		static NSArray *attributes = nil;
+		if(!attributes)
+		{
+			NSSet *set = [NSSet setWithArray:[super accessibilityAttributeNames]];
+			set = [set setByAddingObjectsFromArray:@[
+				NSAccessibilityDescriptionAttribute,
+				NSAccessibilityHelpAttribute,
+				NSAccessibilityURLAttribute,
+				NSAccessibilityFilenameAttribute,
+			]];
+			attributes = [set allObjects];
+		}
+		return attributes;
+	}
+	return [super accessibilityAttributeNames];
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attribute
+{
+	if(self.representedObject && [self.representedObject isKindOfClass:[FSItem class]])
+	{
+		FSItem *item = (FSItem*)self.representedObject;
+		if([attribute isEqualToString:NSAccessibilityDescriptionAttribute])
+		{
+			NSMutableArray *descriptions = [NSMutableArray arrayWithCapacity:0];
+			NSString *type = [@{
+				@(FSItemURLTypeUnknown): @"unknown type",
+				@(FSItemURLTypeFile):    @"file",
+				@(FSItemURLTypeFolder):  @"folder",
+				@(FSItemURLTypePackage): @"package",
+				@(FSItemURLTypeAlias):   @"alias",
+				@(FSItemURLTypeMissing): @"missing",
+			} objectForKey:@(item.urlType)];
+
+			NSString *scmStatus = [NSString stringWithCxxString:scm::status::to_s(item.icon.scmStatus)];
+			if(item.icon.scmStatus==scm::status::unknown)
+				scmStatus = @"not versioned";
+
+			if(type)
+				[descriptions addObject:type];
+			if(scmStatus)
+				[descriptions addObject:scmStatus];
+			if(self.isOpen)
+				[descriptions addObject:@"open"];
+
+			return [descriptions componentsJoinedByString:@", "];
+		}
+		else if([attribute isEqualToString:NSAccessibilityHelpAttribute])
+			return item.toolTip;
+		else if([attribute isEqualToString:NSAccessibilityURLAttribute])
+			return item.url;
+		else if([attribute isEqualToString:NSAccessibilityFilenameAttribute])
+			return item.name;
+	}
+	return [super accessibilityAttributeValue:attribute];
+}
+
 @end
