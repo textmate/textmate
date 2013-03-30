@@ -382,7 +382,7 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	cell.stringValue       = item.name;
 	// cell.textColor         = lstat([[item.url path] fileSystemRepresentation], &(struct stat){ 0 }) == 0 ? [NSColor textColor] : [NSColor redColor];
 	// cell.target            = delegate;
-	// cell.representedObject = item;
+	cell.representedObject = item;
 	if([cell respondsToSelector:@selector(setLabelIndex:)])
 		[cell setLabelIndex:item.labelIndex];
 	if([cell respondsToSelector:@selector(setIsOpen:)])
