@@ -38,7 +38,7 @@ namespace ng
 				{
 					int32_t const* from = value->size() == 2 ? boost::get<int32_t>(&(*value)[0]) : NULL;
 					int32_t const* to   = value->size() == 2 ? boost::get<int32_t>(&(*value)[1]) : NULL;
-					if(from && *from < _buffer.size() && to && *to < _buffer.size())
+					if(from && *from < _buffer.size() && to && *to <= _buffer.size())
 							newFoldings.push_back(std::make_pair(*from, *to));
 					else	validRanges = false;
 				}
