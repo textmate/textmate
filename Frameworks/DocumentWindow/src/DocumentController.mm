@@ -1066,7 +1066,6 @@ namespace
 		}
 
 		_projectScopeAttributes.clear();
-		_projectScopeAttributes.push_back(text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()));
 
 		std::string const customAttributes = settings_for_path(NULL_STR, text::join(_projectScopeAttributes, " "), to_s(_projectPath)).get(kSettingsScopeAttributesKey, NULL_STR);
 		if(customAttributes != NULL_STR)
@@ -1085,7 +1084,7 @@ namespace
 
 		std::string docDirectory = _documentPath ? path::parent(to_s(_documentPath)) : to_s(self.projectPath);
 
-		_documentScopeAttributes.clear();
+		_documentScopeAttributes = { text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()) };
 		if(_documentPath)
 		{
 			std::string const path = to_s(_documentPath);
