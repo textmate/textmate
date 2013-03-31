@@ -721,6 +721,7 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 	if(selectedTab == anIndex)
 		return;
 	selectedTab = anIndex;
+	NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
 	self.layoutNeedsUpdate = YES;
 }
 
