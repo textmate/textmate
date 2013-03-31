@@ -1078,7 +1078,7 @@ namespace
 
 - (void)setDocumentPath:(NSString*)newDocumentPath
 {
-	if(_documentPath != newDocumentPath && ![_documentPath isEqualToString:newDocumentPath])
+	if(_documentPath != newDocumentPath && !([_documentPath isEqualToString:newDocumentPath]) || _documentScopeAttributes.empty())
 	{
 		_documentPath = newDocumentPath;
 
