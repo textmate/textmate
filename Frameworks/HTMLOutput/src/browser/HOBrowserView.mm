@@ -1,7 +1,7 @@
 #import "HOBrowserView.h"
 #import "HOWebViewDelegateHelper.h"
 #import "HOStatusBar.h"
-#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSColor Additions.h>
 
 @interface HOBrowserView ()

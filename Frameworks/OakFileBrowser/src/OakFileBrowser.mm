@@ -18,6 +18,7 @@
 #import <OakAppKit/OakFileManager.h>
 #import <OakAppKit/OakFinderLabelChooser.h>
 #import <OakAppKit/OakOpenWithMenu.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/OakZoomingIcon.h>
 #import <OakAppKit/NSView Additions.h>
 #import <OakSystem/application.h>

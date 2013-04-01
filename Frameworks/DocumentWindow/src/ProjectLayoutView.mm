@@ -1,5 +1,5 @@
 #import "ProjectLayoutView.h"
-#import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSColor Additions.h>
 #import <Preferences/Keys.h>
 #import <oak/misc.h>
