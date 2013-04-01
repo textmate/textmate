@@ -22,7 +22,7 @@ static NSButton* OakCreateImageButton (NSImage* image)
 	return res;
 }
 
-static NSPopUpButton* OakCreatePopUpButton ()
+static NSPopUpButton* OakCreateActionPopUpButton ()
 {
 	NSPopUpButton* res = [NSPopUpButton new];
 	res.bordered  = NO;
@@ -53,7 +53,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil]])
 	{
 		self.createButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameAddTemplate]);
-		self.actionsPopUpButton = OakCreatePopUpButton();
+		self.actionsPopUpButton = OakCreateActionPopUpButton();
 		self.reloadButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameRefreshTemplate]);
 		self.searchButton       = OakCreateImageButton([NSImage imageNamed:@"Search" inSameBundleAsClass:[self class]]);
 		self.favoritesButton    = OakCreateImageButton([NSImage imageNamed:@"Favorites" inSameBundleAsClass:[self class]]);

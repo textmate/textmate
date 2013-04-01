@@ -19,7 +19,7 @@ static NSButton* OakCreateImageButton (NSString* imageName)
 	return res;
 }
 
-static NSPopUpButton* OakCreatePopUpButton ()
+static NSPopUpButton* OakCreateFolderPopUpButton ()
 {
 	NSPopUpButton* res = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES];
 	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
@@ -44,7 +44,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 {
 	if(self = [super initWithGradient:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1]] inactiveGradient:[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] endingColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]]])
 	{
-		self.folderPopUpButton       = OakCreatePopUpButton();
+		self.folderPopUpButton       = OakCreateFolderPopUpButton();
 		self.goBackButton            = OakCreateImageButton(NSImageNameGoLeftTemplate);
 		self.goBackButton.toolTip    = @"Go Back";
 		self.goForwardButton         = OakCreateImageButton(NSImageNameGoRightTemplate);
