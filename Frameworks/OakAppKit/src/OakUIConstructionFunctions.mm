@@ -1,4 +1,5 @@
 #import "OakUIConstructionFunctions.h"
+#import "NSImage Additions.h"
 
 NSFont* OakStatusBarFont ()
 {
@@ -63,5 +64,12 @@ NSComboBox* OakCreateComboBox ()
 {
 	NSComboBox* res = [[NSComboBox alloc] initWithFrame:NSZeroRect];
 	res.font = OakControlFont();
+	return res;
+}
+
+NSImageView* OakCreateDividerImageView ()
+{
+	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
+	[res setImage:[NSImage imageNamed:@"Divider" inSameBundleAsClass:[NSClassFromString(@"OakDividerLineView") class]]];
 	return res;
 }

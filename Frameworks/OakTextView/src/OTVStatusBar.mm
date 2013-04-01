@@ -39,13 +39,6 @@ static NSButton* OakCreateImageToggleButton (NSImage* image)
 	return res;
 }
 
-static NSImageView* OakCreateImageView (NSImage* image)
-{
-	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
-	[res setImage:image];
-	return res;
-}
-
 @interface OTVStatusBar () <NSMenuDelegate>
 @property (nonatomic) CGFloat recordingTime;
 @property (nonatomic) NSTimer* recordingTimer;
@@ -111,19 +104,18 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 		// =======================
 
-		NSImage* dividerImage = [NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]];
 		NSDictionary* views = @{
 			@"line"         : OakCreateTextField(@"Line:"),
 			@"selection"    : self.selectionField,
-			@"dividerOne"   : OakCreateImageView(dividerImage),
+			@"dividerOne"   : OakCreateDividerImageView(),
 			@"grammar"      : self.grammarPopUp,
-			@"dividerTwo"   : OakCreateImageView(dividerImage),
+			@"dividerTwo"   : OakCreateDividerImageView(),
 			@"items"        : wrappedBundleItemsPopUpButton,
-			@"dividerThree" : OakCreateImageView(dividerImage),
+			@"dividerThree" : OakCreateDividerImageView(),
 			@"tabSize"      : self.tabSizePopUp,
-			@"dividerFour"  : OakCreateImageView(dividerImage),
+			@"dividerFour"  : OakCreateDividerImageView(),
 			@"symbol"       : self.symbolPopUp,
-			@"dividerFive"  : OakCreateImageView(dividerImage),
+			@"dividerFive"  : OakCreateDividerImageView(),
 			@"recording"    : self.macroRecordingButton,
 		};
 

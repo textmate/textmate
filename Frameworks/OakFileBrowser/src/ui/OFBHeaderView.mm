@@ -1,6 +1,6 @@
 #import "OFBHeaderView.h"
 #import <OakAppKit/OakAppKit.h>
-#import <OakAppKit/NSImage Additions.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <Preferences/Keys.h>
 
 static NSButton* OakCreateImageButton (NSString* imageName)
@@ -28,13 +28,6 @@ static NSPopUpButton* OakCreateFolderPopUpButton ()
 	return res;
 }
 
-static NSImageView* OakCreateImageView (NSImage* image)
-{
-	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
-	[res setImage:image];
-	return res;
-}
-
 @interface OFBHeaderView ()
 @property (nonatomic) BOOL matchTabBarHeight;
 @end
@@ -54,7 +47,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 		[self.goBackButton.cell accessibilitySetOverrideValue:self.goBackButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 		[self.goForwardButton.cell accessibilitySetOverrideValue:self.goForwardButton.toolTip forAttribute:NSAccessibilityDescriptionAttribute];
 
-		NSImageView* divider = OakCreateImageView([NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]]);
+		NSImageView* divider = OakCreateDividerImageView();
 		[divider setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
 
 		NSDictionary* views = @{

@@ -32,13 +32,6 @@ static NSTextField* OakCreateTextField ()
 	return res;
 }
 
-static NSImageView* OakCreateImageView (NSImage* image)
-{
-	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
-	[res setImage:image];
-	return res;
-}
-
 @interface HOStatusBar ()
 @property (nonatomic) NSImageView*         divider;
 @property (nonatomic) NSButton*            goBackButton;
@@ -57,7 +50,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 	{
 		_indeterminateProgress = YES;
 
-		_divider                  = OakCreateImageView([NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]]);
+		_divider                  = OakCreateDividerImageView();
 
 		_goBackButton             = OakCreateImageButton([NSImage imageNamed:NSImageNameGoLeftTemplate]);
 		_goBackButton.toolTip     = @"Show the previous page";

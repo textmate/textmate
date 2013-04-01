@@ -9,3 +9,4 @@ PUBLIC NSButton* OakCreateButton (NSString* label, NSBezelStyle bezel = NSRounde
 PUBLIC NSPopUpButton* OakCreatePopUpButton (BOOL pullsDown = NO, NSString* initialItemTitle = nil);
 PUBLIC NSPopUpButton* OakCreateStatusBarPopUpButton (NSString* initialItemTitle = nil);
 PUBLIC NSComboBox* OakCreateComboBox ();
+PUBLIC NSImageView* OakCreateDividerImageView ();

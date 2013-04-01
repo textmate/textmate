@@ -1,5 +1,6 @@
 #import "OFBActionsView.h"
 #import <OakAppKit/OakAppKit.h>
+#import <OakAppKit/OakUIConstructionFunctions.h>
 #import <OakAppKit/NSImage Additions.h>
 
 static NSButton* OakCreateImageButton (NSImage* image)
@@ -37,13 +38,6 @@ static NSPopUpButton* OakCreateActionPopUpButton ()
 	[[res cell] setUsesItemFromMenu:NO];
 	[[res cell] setMenuItem:item];
 
-	return res;
-}
-
-static NSImageView* OakCreateImageView (NSImage* image)
-{
-	NSImageView* res = [[NSImageView alloc] initWithFrame:NSZeroRect];
-	[res setImage:image];
 	return res;
 }
 
@@ -86,7 +80,7 @@ static NSImageView* OakCreateImageView (NSImage* image)
 
 		NSDictionary* views = @{
 			@"create"    : self.createButton,
-			@"divider"   : OakCreateImageView([NSImage imageNamed:@"Divider" inSameBundleAsClass:[self class]]),
+			@"divider"   : OakCreateDividerImageView(),
 			@"actions"   : wrappedActionsPopUpButton,
 			@"reload"    : self.reloadButton,
 			@"search"    : self.searchButton,
