@@ -998,6 +998,7 @@ namespace
 		{ "attr.project.cmake", "CMakeLists.txt", "build", },
 		{ "attr.project.maven", "pom.xml",        "build", },
 		{ "attr.project.scons", "SConstruct",     "build", },
+		{ "attr.project.lein",  "project.clj",    "build", },
 	};
 
 	_externalScopeAttributes.clear();
