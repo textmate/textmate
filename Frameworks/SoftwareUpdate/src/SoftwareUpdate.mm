@@ -97,7 +97,7 @@ static SoftwareUpdate* SharedInstance;
 	if(_downloadWindow.isWorking || disablePolling || readOnlyFileSystem)
 		return;
 
-	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) addTimeInterval:pollInterval];
+	NSDate* nextCheck = [(self.lastPoll ?: [NSDate distantPast]) dateByAddingTimeInterval:pollInterval];
 	if(NSDate* suspendUntil = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsSoftwareUpdateSuspendUntilKey])
 		nextCheck = [nextCheck laterDate:suspendUntil];
 
@@ -181,7 +181,7 @@ static SoftwareUpdate* SharedInstance;
 						if(choice == NSAlertDefaultReturn) // “Download & Install”
 							downloadAndInstall = YES;
 						else if(choice == NSAlertOtherReturn) // “Later”
-							[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] addTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
+							[[NSUserDefaults standardUserDefaults] setObject:[[NSDate date] dateByAddingTimeInterval:24*60*60] forKey:kUserDefaultsSoftwareUpdateSuspendUntilKey];
 					}
 					else if(info.revision > self.lastVersionDownloaded)
 					{
