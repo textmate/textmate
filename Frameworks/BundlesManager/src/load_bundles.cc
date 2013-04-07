@@ -170,7 +170,7 @@ std::pair<std::vector<bundles::item_ptr>, std::map< oak::uuid_t, std::vector<oak
 
 						if(loadedItems.find(uuid) != loadedItems.end())
 						{
-							fprintf(stderr, "*** skip ‘%s’ (item with same UUID already loaded)\n", itemPath.c_str());
+							fprintf(stderr, "*** skip ‘%s’, item with same UUID loaded from ‘%s’\n", itemPath.c_str(), text::join((*std::find_if(items.begin(), items.end(), [&uuid](bundles::item_ptr const& item){ return item->uuid() == uuid; }))->paths(), "’, ‘").c_str());
 							continue;
 						}
 
