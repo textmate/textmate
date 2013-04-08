@@ -37,6 +37,7 @@ static double const kPollInterval = 3*60*60;
 @property (nonatomic) BOOL      isBusy;
 @property (nonatomic) BOOL      determinateProgress;
 @property (nonatomic) CGFloat   progress;
+@property (nonatomic) NSDate*   lastUpdateCheck;
 @property (nonatomic) NSTimer*  updateTimer;
 
 @property (nonatomic) BOOL      needsCreateBundlesIndex;
@@ -70,15 +71,77 @@ static double const kPollInterval = 3*60*60;
 	if(_autoUpdateBundles == flag)
 		return;
 
-	if(_autoUpdateBundles = flag)
+	_autoUpdateBundles = flag;
+	[self setupUpdateTimer];
+}
+
+- (void)setupUpdateTimer
+{
+	[self.updateTimer invalidate];
+	self.updateTimer = nil;
+	if(!_autoUpdateBundles)
+		return;
+
+	NSDate* lastCheck = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefaultsLastBundleUpdateCheckKey] ?: [NSDate distantPast];
+	NSDate* nextCheck = [lastCheck dateByAddingTimeInterval:kPollInterval];
+	NSTimeInterval checkAfterSeconds = std::max<NSTimeInterval>(1, [nextCheck timeIntervalSinceNow]);
+	D(DBF_BundlesManager, bug("perform next check in %.1f hours\n", checkAfterSeconds/60/60););
+	self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:checkAfterSeconds target:self selector:@selector(didFireUpdateTimer:) userInfo:nil repeats:NO];
+}
+
+- (void)didFireUpdateTimer:(NSTimer*)aTimer
+{
+	self.isBusy = YES;
+
+	std::vector<bundles_db::source_ptr> sources;
+	for(auto source : sourceList)
 	{
-		[self updateSources:nil];
+		if(!source->disabled())
+			sources.push_back(source);
 	}
-	else
-	{
-		[self.updateTimer invalidate];
-		self.updateTimer = nil;
-	}
+
+	self.activityText = @"Updating sources…";
+	[self updateSources:sources completionHandler:^(std::vector<bundles_db::source_ptr> const& failedSources){
+		std::vector<bundles_db::bundle_ptr> outdatedBundles;
+		if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
+		{
+			for(auto installedBundle : bundlesIndex)
+			{
+				if(!installedBundle->has_update())
+					continue;
+
+				for(auto bundle : bundles_db::dependencies(bundlesIndex, installedBundle, false, false))
+				{
+					if((bundle->has_update() || !bundle->installed()) && installing.find(bundle->uuid()) == installing.end())
+						outdatedBundles.push_back(bundle);
+				}
+			}
+		}
+
+		self.activityText = @"Updating bundles…";
+		[self installBundles:outdatedBundles completionHandler:^(std::vector<bundles_db::bundle_ptr> const& failedBundles){
+			NSDate* lastCheck = [NSDate date];
+			if(failedSources.empty() && failedBundles.empty())
+			{
+				self.activityText = nil;
+			}
+			else
+			{
+				self.activityText = @"Error updating bundles, will retry later.";
+				lastCheck = [lastCheck dateByAddingTimeInterval:-(kPollInterval - 30*60)]; // retry in 30 minutes
+
+				for(auto source : failedSources)
+					fprintf(stderr, "*** error downloading ‘%s’\n", source->url().c_str());
+				for(auto bundle : failedBundles)
+					fprintf(stderr, "*** error downloading ‘%s’\n", bundle->url().c_str());
+			}
+
+			self.isBusy = NO;
+
+			[[NSUserDefaults standardUserDefaults] setObject:lastCheck forKey:kUserDefaultsLastBundleUpdateCheckKey];
+			[self setupUpdateTimer];
+		}];
+	}];
 }
 
 - (void)installBundleItemsAtPaths:(NSArray*)somePaths
@@ -177,60 +240,18 @@ static double const kPollInterval = 3*60*60;
 	});
 }
 
-- (void)updateInstalledBundles
+- (void)updateSources:(std::vector<bundles_db::source_ptr> const&)sourcesReference completionHandler:(void(^)(std::vector<bundles_db::source_ptr> const& ))callback
 {
-	std::vector<bundles_db::bundle_ptr> bundles;
-	for(auto installedBundle : bundlesIndex)
+	D(DBF_BundlesManager, bug("\n"););
+	__block std::vector<bundles_db::source_ptr> failedSources;
+	if(sourcesReference.empty())
 	{
-		if(!installedBundle->has_update())
-			continue;
-
-		for(auto bundle : bundles_db::dependencies(bundlesIndex, installedBundle, false, false))
-		{
-			if((bundle->has_update() || !bundle->installed()) && installing.find(bundle->uuid()) == installing.end())
-				bundles.push_back(bundle);
-		}
-	}
-
-	if(!bundles.empty())
-	{
-		self.activityText = @"Updating bundles…";
-		self.isBusy       = YES;
-		[self installBundles:bundles completionHandler:^(std::vector<bundles_db::bundle_ptr> const& failedBundles){
-			self.activityText = @"Bundles updated";
-			self.isBusy       = NO;
-		}];
-	}
-}
-
-- (void)updateSources:(id)sender
-{
-	D(DBF_BundlesManager, bug("busy %s\n", BSTR(self.isBusy)););
-	if(self.isBusy || sourceList.empty())
-		return;
-
-	std::vector<bundles_db::source_ptr> sources;
-	NSDate* earliest = [NSDate distantFuture];
-	for(auto source : sourceList)
-	{
-		if(!source->disabled() && source->needs_update(kPollInterval))
-			sources.push_back(source);
-		earliest = [earliest earlierDate:CFBridgingRelease(CFDateCreate(kCFAllocatorDefault, source->last_check().value()))];
-	}
-
-	if(sources.empty())
-	{
-		[self.updateTimer invalidate];
-		self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:MIN(kPollInterval + [earliest timeIntervalSinceNow], kPollInterval) target:self selector:@selector(updateSources:) userInfo:nil repeats:NO];
-		self.activityText = [NSString stringWithFormat:@"Last check: %@", [earliest humanReadableTimeElapsed]];
+		callback(failedSources);
 		return;
 	}
 
-	self.activityText = @"Updating sources…";
-	self.isBusy       = YES;
-
+	auto sources = sourcesReference;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-		__block std::vector<bundles_db::source_ptr> failedSources;
 		dispatch_apply(sources.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^(size_t i){
 			D(DBF_BundlesManager, bug("Updating ‘%s’…\n", sources[i]->url().c_str()););
 			if(!bundles_db::update(sources[i]))
@@ -238,21 +259,10 @@ static double const kPollInterval = 3*60*60;
 		});
 
 		dispatch_async(dispatch_get_main_queue(), ^{
-			for(auto source : failedSources)
-				fprintf(stderr, "*** error downloading ‘%s’\n", source->url().c_str());
-
 			bundlesIndex = bundles_db::index(kInstallDirectory);
 			// trigger reload for table view in Preferences → Bundles
 			[[NSNotificationCenter defaultCenter] postNotificationName:BundlesManagerBundlesDidChangeNotification object:self];
-
-			self.activityText = @"Sources updated";
-			self.isBusy       = NO;
-
-			if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
-				[self updateInstalledBundles];
-
-			[self.updateTimer invalidate];
-			self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:(failedSources.empty() ? kPollInterval : 20*60*60) target:self selector:@selector(updateSources:) userInfo:nil repeats:NO];
+			callback(failedSources);
 		});
 	});
 }

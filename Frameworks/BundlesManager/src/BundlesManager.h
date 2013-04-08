@@ -12,6 +12,7 @@ PUBLIC @interface BundlesManager : NSObject
 @property (nonatomic, readonly) BOOL      isBusy;
 @property (nonatomic, readonly) BOOL      determinateProgress;
 @property (nonatomic, readonly) CGFloat   progress;
+@property (nonatomic, readonly) NSDate*   lastUpdateCheck;
 
 - (NSUInteger)numberOfBundles;
 - (bundles_db::bundle_ptr const&)bundleAtIndex:(NSUInteger)anIndex;
