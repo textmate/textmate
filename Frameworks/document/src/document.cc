@@ -1015,9 +1015,20 @@ namespace document
 		struct file_reader_t : reader::open_t
 		{
 			WATCH_LEAKS(file_reader_t);
-			file_reader_t (document_const_ptr const& document) : reader::open_t(document->path()), document(document) { }
+			file_reader_t (document_const_ptr const& document) : reader::open_t(document->path()), document(document), charset(settings_for_path(document->path(), "attr.file.unknown-encoding " + file::path_attributes(document->path())).get(kSettingsEncodingKey, kCharsetUnknown)) { }
 		private:
 			document_const_ptr document;
+			std::string const charset;
+
+			io::bytes_ptr next ()
+			{
+				io::bytes_ptr content = reader::open_t::next();
+				if (!content || content->size() == 0)
+					return content;
+				if(charset != kCharsetUTF8 && charset != kCharsetUnknown && charset != kCharsetNoEncoding)
+					content = encoding::convert(content, charset, kCharsetUTF8);
+				return content;
+			}
 		};
 
 		struct buffer_reader_t : document::document_t::reader_t
