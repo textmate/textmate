@@ -47,8 +47,9 @@ OAK_DEBUG_VAR(OakTextView_Macros);
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
-NSString* const kUserDefaultsDisableAntiAliasKey = @"disableAntiAlias";
-NSString* const kUserDefaultsScrollPastEndKey    = @"scrollPastEnd";
+NSString* const kUserDefaultsDisableAntiAliasKey   = @"disableAntiAlias";
+NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
+NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
 @interface OakTextView ()
 + (NSArray*)dropTypes;
@@ -1405,7 +1406,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 
 	[self recordSelector:_cmd withArgument:[aString copy]];
-	bool autoPairing = !macroRecordingArray;
+	bool autoPairing = !macroRecordingArray && ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableTypingPairsKey];
 	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections], autoPairing, to_s([self scopeAttributes]));
 }
 
