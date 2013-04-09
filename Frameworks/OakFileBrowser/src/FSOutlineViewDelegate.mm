@@ -343,7 +343,10 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 		--itemsReloading;
 
 	if([outlineView editedRow] != -1)
-		return; // FIXME Queue reload while editing a cell
+	{
+		self.pendingEditURL = [[outlineView itemAtRow:[outlineView editedRow]] url];
+		[outlineView cancelOperation:self]; // TODO Grab the field editor’s string value and restore later
+	}
 
 	if(recursive)
 	{
