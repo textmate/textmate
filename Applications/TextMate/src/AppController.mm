@@ -192,9 +192,15 @@ BOOL HasDocumentWindow (NSArray* windows)
 	[[BundlesManager sharedInstance] loadBundlesIndex];
 	[[TMPlugInController sharedInstance] loadAllPlugIns:nil];
 
-	BOOL disableSessionRestoreKeyDown  = ([NSEvent modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask;
-	BOOL disableSessionRestorePrefs    = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
-	if(!disableSessionRestoreKeyDown && !disableSessionRestorePrefs)
+	BOOL restoreSession = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableSessionRestoreKey];
+	if(restoreSession && ([NSEvent modifierFlags] & NSShiftKeyMask))
+	{
+		NSInteger choice = NSRunAlertPanel(@"Disable Session Restore?", @"By holding down shift (⇧) you have indicated that you wish to disable restoring the documents which were open in last session.", @"Disable", @"Restore Documents", nil);
+		if(choice == NSAlertDefaultReturn) // "Disable"
+			restoreSession = NO;
+	}
+
+	if(restoreSession)
 		[DocumentController restoreSession];
 }
 
