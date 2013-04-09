@@ -1405,7 +1405,8 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 	}
 
 	[self recordSelector:_cmd withArgument:[aString copy]];
-	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections], to_s([self scopeAttributes]));
+	bool autoPairing = !macroRecordingArray;
+	editor->insert_with_pairing([aString UTF8String], [self continuousIndentCorrections], autoPairing, to_s([self scopeAttributes]));
 }
 
 - (IBAction)toggleCurrentFolding:(id)sender

@@ -684,9 +684,9 @@ namespace ng
 		return NULL_STR;
 	}
 
-	void editor_t::insert_with_pairing (std::string const& str, bool indentCorrections, std::string const& scopeAttributes)
+	void editor_t::insert_with_pairing (std::string const& str, bool indentCorrections, bool autoPairing, std::string const& scopeAttributes)
 	{
-		if(!has_selection())
+		if(autoPairing && !has_selection())
 		{
 			size_t const caret = _selections.last().last.index;
 			if(_buffer.pairs().is_last(caret) && caret + str.size() <= _buffer.size() && str == _buffer.substr(caret, caret + str.size()))
@@ -698,7 +698,7 @@ namespace ng
 		}
 
 		indent_helper_t indent_helper(*this, _buffer, indentCorrections);
-		std::string const autoInsert = find_paired(str, scope(scopeAttributes));
+		std::string const autoInsert = autoPairing ? find_paired(str, scope(scopeAttributes)) : NULL_STR;
 		if(autoInsert != NULL_STR && has_selection())
 		{
 			_selections = replace_helper(_buffer, _snippets, map(_buffer, _selections, transform::surround(str, autoInsert)));
