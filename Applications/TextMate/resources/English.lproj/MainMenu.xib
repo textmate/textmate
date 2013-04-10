@@ -1154,6 +1154,14 @@
 									<reference key="NSOnImage" ref="944637517"/>
 									<reference key="NSMixedImage" ref="596846250"/>
 								</object>
+								<object class="NSMenuItem" id="911461690">
+									<reference key="NSMenu" ref="377204242"/>
+									<string key="NSTitle">Show Indent Guides</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="944637517"/>
+									<reference key="NSMixedImage" ref="596846250"/>
+								</object>
 								<object class="NSMenuItem" id="1030640146">
 									<reference key="NSMenu" ref="377204242"/>
 									<bool key="NSIsDisabled">YES</bool>
@@ -2461,7 +2469,7 @@
 					<string key="NSFrameSize">{269, 102}</string>
 					<reference key="NSNextKeyView" ref="240907648"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMinSize">{269, 124}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<string key="NSFrameAutosaveName">Go to Line</string>
@@ -3733,6 +3741,14 @@
 					<int key="connectionID">841</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleShowIndentGuides:</string>
+						<reference key="source" ref="51167417"/>
+						<reference key="destination" ref="911461690"/>
+					</object>
+					<int key="connectionID">843</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">bundlesMenuItem</string>
 						<reference key="source" ref="261397727"/>
@@ -4439,6 +4455,7 @@
 							<reference ref="613273090"/>
 							<reference ref="284546527"/>
 							<reference ref="909812697"/>
+							<reference ref="911461690"/>
 						</object>
 						<reference key="parent" ref="412091230"/>
 					</object>
@@ -5637,6 +5654,11 @@
 						<reference key="object" ref="295203618"/>
 						<reference key="parent" ref="1104"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">842</int>
+						<reference key="object" ref="911461690"/>
+						<reference key="parent" ref="377204242"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -5922,6 +5944,7 @@
 					<string>833.IBPluginDependency</string>
 					<string>836.IBPluginDependency</string>
 					<string>839.IBPluginDependency</string>
+					<string>842.IBPluginDependency</string>
 				</object>
 				<object class="NSArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -6204,6 +6227,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -6218,7 +6242,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">841</int>
+			<int key="maxID">843</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6715,6 +6739,7 @@
 							<string>toggleOverwriteMode:</string>
 							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
+							<string>toggleShowIndentGuides:</string>
 							<string>toggleShowWrapColumn:</string>
 							<string>toggleSoftTabs:</string>
 							<string>toggleSoftWrap:</string>
@@ -6722,6 +6747,7 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -6892,6 +6918,7 @@
 							<string>toggleOverwriteMode:</string>
 							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
+							<string>toggleShowIndentGuides:</string>
 							<string>toggleShowWrapColumn:</string>
 							<string>toggleSoftTabs:</string>
 							<string>toggleSoftWrap:</string>
@@ -7220,6 +7247,10 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">toggleShowIndentGuides:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">toggleShowWrapColumn:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -7397,9 +7428,11 @@
 							<string>toggleMacroRecording:</string>
 							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
+							<string>toggleShowIndentGuides:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -7414,6 +7447,7 @@
 							<string>toggleMacroRecording:</string>
 							<string>toggleScrollPastEnd:</string>
 							<string>toggleShowInvisibles:</string>
+							<string>toggleShowIndentGuides:</string>
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -7431,6 +7465,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">toggleShowInvisibles:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">toggleShowIndentGuides:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
