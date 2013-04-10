@@ -101,7 +101,7 @@ static double const kPollInterval = 3*60*60;
 	}
 
 	self.activityText = @"Updating sources…";
-	[self updateSources:sources completionHandler:^(std::vector<bundles_db::source_ptr> const& failedSources){
+	[self updateSources:sources completionHandler:^(std::vector<bundles_db::source_ptr> failedSources){
 		std::vector<bundles_db::bundle_ptr> outdatedBundles;
 		if(![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableBundleUpdatesKey])
 		{
@@ -119,7 +119,7 @@ static double const kPollInterval = 3*60*60;
 		}
 
 		self.activityText = @"Updating bundles…";
-		[self installBundles:outdatedBundles completionHandler:^(std::vector<bundles_db::bundle_ptr> const& failedBundles){
+		[self installBundles:outdatedBundles completionHandler:^(std::vector<bundles_db::bundle_ptr> failedBundles){
 			NSDate* lastCheck = [NSDate date];
 			if(failedSources.empty() && failedBundles.empty())
 			{
@@ -199,7 +199,7 @@ static double const kPollInterval = 3*60*60;
 	return NO;
 }
 
-- (void)installBundles:(std::vector<bundles_db::bundle_ptr> const&)bundlesReference completionHandler:(void(^)(std::vector<bundles_db::bundle_ptr> const& failedBundles))callback
+- (void)installBundles:(std::vector<bundles_db::bundle_ptr> const&)bundlesReference completionHandler:(void(^)(std::vector<bundles_db::bundle_ptr> failedBundles))callback
 {
 	__block std::vector<bundles_db::bundle_ptr> failedBundles;
 	if(bundlesReference.empty())
@@ -240,7 +240,7 @@ static double const kPollInterval = 3*60*60;
 	});
 }
 
-- (void)updateSources:(std::vector<bundles_db::source_ptr> const&)sourcesReference completionHandler:(void(^)(std::vector<bundles_db::source_ptr> const& ))callback
+- (void)updateSources:(std::vector<bundles_db::source_ptr> const&)sourcesReference completionHandler:(void(^)(std::vector<bundles_db::source_ptr> failedSources))callback
 {
 	D(DBF_BundlesManager, bug("\n"););
 	__block std::vector<bundles_db::source_ptr> failedSources;
@@ -282,7 +282,7 @@ static double const kPollInterval = 3*60*60;
 	NSString* bundleName = [NSString stringWithCxxString:aBundle->name()];
 	self.activityText = [NSString stringWithFormat:@"Installing ‘%@’…", bundleName];
 	self.isBusy       = YES;
-	[self installBundles:bundles completionHandler:^(std::vector<bundles_db::bundle_ptr> const& failedBundles){
+	[self installBundles:bundles completionHandler:^(std::vector<bundles_db::bundle_ptr> failedBundles){
 		self.activityText = [NSString stringWithFormat:@"Installed ‘%@’.", bundleName];
 		self.isBusy       = NO;
 	}];
