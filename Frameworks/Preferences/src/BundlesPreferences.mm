@@ -50,6 +50,9 @@ static std::string textify (std::string str)
 		if(enabledCategories.empty() || enabledCategories.find(bundle->category()) != enabledCategories.end())
 			bundles.push_back(bundle);
 	}
+	for(NSTableColumn* tableColumn in [bundlesTableView tableColumns])
+		[bundlesTableView setIndicatorImage:nil inTableColumn:tableColumn];
+	[bundlesTableView setIndicatorImage:[NSImage imageNamed:@"NSAscendingSortIndicator"] inTableColumn:[bundlesTableView tableColumnWithIdentifier:@"name"]];
 	[bundlesTableView reloadData];
 }
 
@@ -62,6 +65,11 @@ static std::string textify (std::string str)
 		[self bundlesDidChange:self];
 	}
 	return self;
+}
+
+- (void)awakeFromNib
+{
+	[bundlesTableView setIndicatorImage:[NSImage imageNamed:@"NSAscendingSortIndicator"] inTableColumn:[bundlesTableView tableColumnWithIdentifier:@"name"]];
 }
 
 - (void)dealloc
@@ -115,6 +123,28 @@ static std::string textify (std::string str)
 // ========================
 // = NSTableView Delegate =
 // ========================
+
+- (void)tableView:(NSTableView*)aTableView didClickTableColumn:(NSTableColumn*)aTableColumn
+{
+	text::less_t lessThan;
+
+	if([[aTableColumn identifier] isEqualToString:@"name"])
+		std::sort(bundles.begin(), bundles.end(), [&lessThan](bundles_db::bundle_ptr lhs, bundles_db::bundle_ptr rhs){ return lessThan(lhs.get()->name(), rhs.get()->name()); });
+	else if([[aTableColumn identifier] isEqualToString:@"date"])
+		std::sort(bundles.begin(), bundles.end(), [](bundles_db::bundle_ptr lhs, bundles_db::bundle_ptr rhs){ return (rhs.get()->installed() ? rhs.get()->path_updated() : rhs.get()->url_updated()) < (lhs.get()->installed() ? lhs.get()->path_updated() : lhs.get()->url_updated()); });
+	else if([[aTableColumn identifier] isEqualToString:@"description"])
+		std::sort(bundles.begin(), bundles.end(), [&lessThan](bundles_db::bundle_ptr lhs, bundles_db::bundle_ptr rhs){ return lessThan(textify(lhs.get()->description()), textify(rhs.get()->description())); });
+
+	BOOL sortDescending = [aTableView indicatorImageInTableColumn:aTableColumn] == [NSImage imageNamed:@"NSAscendingSortIndicator"];
+	if(sortDescending)
+		std::reverse(bundles.begin(), bundles.end());
+
+	for(NSTableColumn* tableColumn in [aTableView tableColumns])
+		[aTableView setIndicatorImage:nil inTableColumn:tableColumn];
+	[aTableView setIndicatorImage:[NSImage imageNamed:(sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")] inTableColumn:aTableColumn];
+
+	[aTableView reloadData];
+}
 
 - (BOOL)tableView:(NSTableView*)aTableView shouldEditTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
