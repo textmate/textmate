@@ -1,5 +1,13 @@
 # Changes
 
+## 2013-04-10 ([a9411](https://github.com/textmate/textmate/compare/a9407...a9411))
+
+* Improve accessibility of various aspects of TextMate. *[Boris Dušek]*
+* Setup document scope `attr.project.lein` for [Leiningen](https://github.com/technomancy/leiningen) projects. *[Dirk Geurs]*
+* Auto-paired characters can now be globally disabled using:
+
+		defaults write com.macromates.TextMate.preview disableTypingPairs -bool YES
+
 ## 2013-03-27 ([a9407](https://github.com/textmate/textmate/compare/a9405...a9407))
 
 * Macros can now be saved via Edit → Macros → Save Macro… (⌃⌘M). Actions invoked via Find dialog are also correctly recorded, though replaying “Replace and Find” is still unimplemented (although the action itself works when called outside macros).
