@@ -16,6 +16,7 @@ namespace oak
 		bool operator== (date_t const& rhs) const  { return at == rhs.at; }
 		bool operator!= (date_t const& rhs) const  { return at != rhs.at; }
 		bool operator< (date_t const& rhs) const   { return at < rhs.at; }
+		bool operator> (date_t const& rhs) const   { return at > rhs.at; }
 		double operator- (date_t const& rhs) const { return at - rhs.at; }
 		date_t operator+ (double rhs) const        { return date_t(at + rhs); }
 		date_t operator- (double rhs) const        { return date_t(at - rhs); }
