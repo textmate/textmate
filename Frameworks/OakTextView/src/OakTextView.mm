@@ -1042,6 +1042,25 @@ doScroll:
 	}
 }
 
+- (NSString *)scope
+{
+	if (document) {
+		scope::context_t const& s = [self scopeContext];
+		return [NSString stringWithUTF8String:to_s(s.right).c_str()];
+	}
+
+	return nil;
+}
+
+- (NSString *)filePath
+{
+	if (document && document->path() != NULL_STR) {
+		return [NSString stringWithUTF8String:document->path().c_str()];
+	}
+
+	return nil;
+}
+
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
 {
 	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-activate", editor->scope(to_s([self scopeAttributes]))))
