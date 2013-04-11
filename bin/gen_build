@@ -668,7 +668,7 @@ open("#{builddir}/build.ninja", "w") do |io|
   io << user_variables.map { |arr| format("%-#{width}s = %s\n", *arr) }
   io << "\n"
 
-  args = variables.map { |key, value| "-d'#{key}=#{key =~ /APP_\w+/ ? "$#$&" : value.gsub(/\$/, '$\&')}'" }.join(' ')
+  args = variables.map { |key, value| "-d'#{key}=#{value =~ /\$/ ? value.gsub(/\$/, '$$') :  "$#{key}"}'" }.join(' ')
   io << "rule configure\n"
   io << "  command = bin/gen_build -C \"$builddir\" #{args} -o $out $in\n"
   io << "  depfile = $builddir/$out.d\n"
