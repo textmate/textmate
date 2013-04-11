@@ -64,7 +64,7 @@ namespace ng
 
 		// ======================
 
-		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, bool showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
+		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, char showInvisibles, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
 		ng::index_t index_at_point (CGPoint point) const;
 		CGRect rect_at_index (ng::index_t const& index) const;
 		CGRect rect_for_range (size_t first, size_t last) const;

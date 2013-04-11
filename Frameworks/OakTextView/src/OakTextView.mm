@@ -445,7 +445,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
 		fontSize       = settings.get(kSettingsFontSizeKey, 11);
 		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
-		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
+		showInvisibles = settings.get(kSettingsShowInvisiblesKey, 0);
 		scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
@@ -1970,7 +1970,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
 		return [self hasSelection];
 	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
-		[aMenuItem setState:[self showInvisibles] ? NSOnState : NSOffState];
+		[aMenuItem setState:[self showInvisibles] & TextInvisiblesShow ? NSOnState : NSOffState];
+	else if([aMenuItem action] == @selector(toggleShowIndentGuides:))
+		[aMenuItem setState:[self showInvisibles] & TextInvisiblesIndentGuide ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleSoftWrap:))
 		[aMenuItem setState:[self softWrap] ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleScrollPastEnd:))
@@ -2065,7 +2067,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (NSFont*)font               { return [NSFont fontWithName:[NSString stringWithCxxString:fontName] size:fontSize]; }
 - (size_t)tabSize             { return document ? document->buffer().indent().tab_size() : 2; }
 - (BOOL)softTabs              { return document ? document->buffer().indent().soft_tabs() : NO; }
-- (BOOL)showInvisibles        { return showInvisibles; }
+- (char)showInvisibles        { return showInvisibles; }
 - (BOOL)scrollPastEnd         { return scrollPastEnd; }
 - (BOOL)softWrap              { return layout && layout->wrapping(); }
 
@@ -2103,9 +2105,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		document->buffer().indent().set_tab_size(newTabSize);
 }
 
-- (void)setShowInvisibles:(BOOL)flag
+- (void)setShowInvisibles:(char)flag
 {
 	showInvisibles = flag;
+	settings_t::set(kSettingsShowInvisiblesKey, (char)self.showInvisibles, document->file_type());
 	[self setNeedsDisplay:YES];
 }
 
@@ -2181,8 +2184,12 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (IBAction)toggleShowInvisibles:(id)sender
 {
-	self.showInvisibles = !self.showInvisibles;
-	settings_t::set(kSettingsShowInvisiblesKey, (bool)self.showInvisibles, document->file_type());
+	self.showInvisibles ^= TextInvisiblesShow;
+}
+
+- (IBAction)toggleShowIndentGuides:(id)sender
+{
+	self.showInvisibles ^= TextInvisiblesIndentGuide;
 }
 
 - (IBAction)toggleScrollPastEnd:(id)sender

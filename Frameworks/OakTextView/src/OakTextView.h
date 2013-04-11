@@ -35,7 +35,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 	std::string fontName;
 	CGFloat fontSize;
 	BOOL antiAlias;
-	BOOL showInvisibles;
+	char showInvisibles;
 	BOOL scrollPastEnd;
 	ng::editor_ptr editor;
 	std::shared_ptr<ng::layout_t> layout;
@@ -105,7 +105,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic) NSFont*                               font;
 @property (nonatomic) BOOL                                  antiAlias;
 @property (nonatomic) size_t                                tabSize;
-@property (nonatomic) BOOL                                  showInvisibles;
+@property (nonatomic) char                                  showInvisibles;
 @property (nonatomic) BOOL                                  softWrap;
 @property (nonatomic) BOOL                                  scrollPastEnd;
 @property (nonatomic) BOOL                                  softTabs;
@@ -130,6 +130,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 - (IBAction)toggleMacroRecording:(id)sender;
 - (IBAction)toggleFoldingAtLine:(NSUInteger)lineNumber recursive:(BOOL)flag;
 - (IBAction)toggleShowInvisibles:(id)sender;
+- (IBAction)toggleShowIndentGuides:(id)sender;
 - (IBAction)toggleScrollPastEnd:(id)sender;
 
 - (IBAction)saveScratchMacro:(id)sender;
