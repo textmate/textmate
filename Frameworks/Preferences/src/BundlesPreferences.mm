@@ -16,6 +16,34 @@ static std::string textify (std::string str)
 	return str;
 }
 
+static bool sortDescending;
+
+static bool sortBundlesByName(bundles_db::bundle_ptr a, bundles_db::bundle_ptr b)
+{
+	if (sortDescending)
+		return a.get()->name() < b.get()->name();
+	else
+		return a.get()->name() > b.get()->name();
+}
+
+static bool sortBundlesByDescription(bundles_db::bundle_ptr a, bundles_db::bundle_ptr b)
+{
+	if (sortDescending)
+		return a.get()->description() < b.get()->description();
+	else
+		return a.get()->description() > b.get()->description();
+}
+
+static bool sortBundlesByDate(bundles_db::bundle_ptr a, bundles_db::bundle_ptr b)
+{
+	oak::date_t a_up = a->installed() ? a->path_updated() : a->url_updated();
+	oak::date_t b_up = b->installed() ? b->path_updated() : b->url_updated();
+	if (sortDescending)
+		return a_up < b_up;
+	else
+		return a_up > b_up;
+}
+
 @interface BundlesPreferences ()
 @property (nonatomic, retain) BundlesManager* bundlesManager;
 @end
@@ -50,6 +78,8 @@ static std::string textify (std::string str)
 		if(enabledCategories.empty() || enabledCategories.find(bundle->category()) != enabledCategories.end())
 			bundles.push_back(bundle);
 	}
+	for (int i=0; i<[bundlesTableView numberOfColumns]; i++) 
+		[bundlesTableView setIndicatorImage:nil inTableColumn:[[bundlesTableView tableColumns] objectAtIndex:i]];
 	[bundlesTableView reloadData];
 }
 
@@ -115,6 +145,21 @@ static std::string textify (std::string str)
 // ========================
 // = NSTableView Delegate =
 // ========================
+
+- (void)tableView:(NSTableView*)aTableView didClickTableColumn:(NSTableColumn*)aTableColumn
+{
+	sortDescending = [aTableView indicatorImageInTableColumn:aTableColumn] == [NSImage imageNamed:@"NSAscendingSortIndicator"];
+	for (int i=0; i<[aTableView numberOfColumns]; i++) 
+		[aTableView setIndicatorImage:nil inTableColumn:[[aTableView tableColumns] objectAtIndex:i]];
+	[aTableView setIndicatorImage:[NSImage imageNamed:(sortDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator")] inTableColumn:aTableColumn];
+	if([[aTableColumn identifier] isEqualToString:@"name"])
+		std::sort(bundles.begin(), bundles.end(), sortBundlesByName);
+	else if([[aTableColumn identifier] isEqualToString:@"date"])
+		std::sort(bundles.begin(), bundles.end(), sortBundlesByDate);
+	else if([[aTableColumn identifier] isEqualToString:@"description"])
+		std::sort(bundles.begin(), bundles.end(), sortBundlesByDescription);
+	[aTableView reloadData];
+}
 
 - (BOOL)tableView:(NSTableView*)aTableView shouldEditTableColumn:(NSTableColumn*)aTableColumn row:(NSInteger)rowIndex
 {
