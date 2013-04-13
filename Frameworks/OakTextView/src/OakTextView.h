@@ -135,4 +135,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 - (IBAction)saveScratchMacro:(id)sender;
 
 - (void)performBundleItem:(bundles::item_ptr const&)anItem;
+
+- (NSString *)scope;
+- (NSString *)filePath;
 @end
