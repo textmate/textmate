@@ -254,8 +254,7 @@ static double const kPollInterval = 3*60*60;
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
 		dispatch_apply(sources.size(), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^(size_t i){
 			D(DBF_BundlesManager, bug("Updating ‘%s’…\n", sources[i]->url().c_str()););
-			if(!bundles_db::update(sources[i]))
-				failedSources.push_back(sources[i]);
+			bundles_db::update(sources[i]);
 		});
 
 		dispatch_async(dispatch_get_main_queue(), ^{
