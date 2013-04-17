@@ -26,11 +26,3 @@
 	return [[NSFileManager defaultManager] fileExistsAtPath:self isDirectory:&isDir] && isDir;
 }
 @end
-
-@implementation NSString (FinderSorting)
-- (NSComparisonResult)displayNameCompare:(NSString*)otherString
-{
-	static NSStringCompareOptions comparisonOptions = NSCaseInsensitiveSearch|NSNumericSearch|NSWidthInsensitiveSearch|NSForcedOrderingSearch;
-	return [self compare:otherString options:comparisonOptions range:NSMakeRange(0, self.length) locale:[NSLocale currentLocale]];
-}
-@end

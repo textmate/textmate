@@ -29,8 +29,8 @@ static NSMutableArray* FoldersAtPath (NSString* folder)
 		}
 	}
 
-	NSSortDescriptor* displayNameSort = [[NSSortDescriptor alloc] initWithKey:@"stringByDeletingPathExtension" ascending:YES selector:@selector(displayNameCompare:)];
-	NSSortDescriptor* extensionSort   = [[NSSortDescriptor alloc] initWithKey:@"pathExtension" ascending:YES selector:@selector(displayNameCompare:)];
+	NSSortDescriptor* displayNameSort = [[NSSortDescriptor alloc] initWithKey:@"stringByDeletingPathExtension" ascending:YES selector:@selector(localizedStandardCompare:)];
+	NSSortDescriptor* extensionSort   = [[NSSortDescriptor alloc] initWithKey:@"pathExtension" ascending:YES selector:@selector(compare:)];
 	[res sortUsingDescriptors:@[ displayNameSort, extensionSort ]];
 	return res;
 }

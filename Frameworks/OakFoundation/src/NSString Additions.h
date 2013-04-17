@@ -4,7 +4,3 @@
 - (BOOL)existsAsPath;
 - (BOOL)isDirectory;
 @end
-
-@interface NSString (FinderSorting)
-- (NSComparisonResult)displayNameCompare:(NSString*)otherString;
-@end

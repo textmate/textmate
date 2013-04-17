@@ -44,8 +44,8 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 	if(someOptions & kFSDataSourceOptionGroupsFirst)
 		[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"sortAsFolder" ascending:NO]];
 	if(someOptions & kFSDataSourceOptionSortByType)
-		[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name.pathExtensions" ascending:YES selector:@selector(displayNameCompare:)]];
-	[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(displayNameCompare:)]];
+		[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name.pathExtensions" ascending:YES selector:@selector(compare:)]];
+	[descriptors addObject:[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedStandardCompare:)]];
 	return [anArray sortedArrayUsingDescriptors:descriptors];
 }
 
