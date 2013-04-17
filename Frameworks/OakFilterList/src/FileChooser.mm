@@ -631,15 +631,7 @@ inline void rank_record (document_record_t& record, filter_string_t const& filte
 
 	[self updateStatusText:self];
 
-	NSNumberFormatter* formatter = [NSNumberFormatter new];
-	[formatter setPositiveFormat:@"#,##0"];
-	[formatter setLocalizesFormat:YES];
-
-	NSString* count = [formatter stringFromNumber:@(_items.count)];
-	if(_items.count == 1)
-			count = [count stringByAppendingString:@" item"];
-	else	count = [count stringByAppendingString:@" items"];
-	_itemCountTextField.stringValue = count;
+	_itemCountTextField.stringValue = [NSString stringWithFormat:@"%@ item%s", [NSNumberFormatter localizedStringFromNumber:@(_items.count) numberStyle:NSNumberFormatterDecimalStyle], _items.count == 1 ? "" : "s"];
 }
 
 - (void)updateSCMStatus

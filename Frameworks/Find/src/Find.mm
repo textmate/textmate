@@ -415,13 +415,9 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 		default: fmt = MSG_MULTIPLE_MATCHES_FMT; break;
 	}
 
-	NSNumberFormatter* formatter = [NSNumberFormatter new]; // FIXME we want to cache this as it is expensive
-	[formatter setPositiveFormat:@"#,##0"];
-	[formatter setLocalizesFormat:YES];
-
-	NSString* msg = [NSString localizedStringWithFormat:fmt, [_documentSearch searchString], [formatter stringFromNumber:@(totalMatches)]];
+	NSString* msg = [NSString stringWithFormat:fmt, [_documentSearch searchString], [NSNumberFormatter localizedStringFromNumber:@(totalMatches) numberStyle:NSNumberFormatterDecimalStyle]];
 	if(!_documentSearch.documentIdentifier)
-		msg = [msg stringByAppendingFormat:([_documentSearch scannedFileCount] == 1 ? MSG_SEARCHED_FILES_ONE : MSG_SEARCHED_FILES_MULTIPLE), [formatter stringFromNumber:@([_documentSearch scannedFileCount])], [_documentSearch searchDuration]];
+		msg = [msg stringByAppendingFormat:([_documentSearch scannedFileCount] == 1 ? MSG_SEARCHED_FILES_ONE : MSG_SEARCHED_FILES_MULTIPLE), [NSNumberFormatter localizedStringFromNumber:@([_documentSearch scannedFileCount]) numberStyle:NSNumberFormatterDecimalStyle], [_documentSearch searchDuration]];
 
 	self.windowController.statusString = msg;
 }
