@@ -35,7 +35,7 @@
 
 		self.rootItem = [FSItem itemWithURL:anURL];
 		self.rootItem.icon     = [NSImage imageNamed:NSImageNameComputer]; // FIXME Assigning to property of type OakFileIconImage
-		self.rootItem.name     = CFBridgingRelease(SCDynamicStoreCopyComputerName(NULL, NULL));
+		self.rootItem.name     = [[NSHost currentHost] localizedName];
 		self.rootItem.children = [self volumeList];
 	}
 	return self;

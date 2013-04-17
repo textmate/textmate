@@ -37,7 +37,7 @@ static NSString* DisplayName (NSURL* url, size_t numberOfParents = 0)
 {
 	NSString* res = nil;
 	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
-		res = CFBridgingRelease(SCDynamicStoreCopyComputerName(NULL, NULL));
+		res = [[NSHost currentHost] localizedName];
 	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
 		res = @"Bundles";
 	else // if([url isFileURL])
