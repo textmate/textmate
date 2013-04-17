@@ -124,18 +124,13 @@ static NSString* const kRecordingPlaceholderString = @"…";
 
 - (void)setKeyState:(NSUInteger)newState
 {
-	NSUInteger oldState = self.keyState;
 	[super setKeyState:newState];
-
-	BOOL didHaveFocus = (oldState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
-	BOOL doesHaveFocus = (newState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
-	if(didHaveFocus != doesHaveFocus)
-		[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 
 	BOOL doesHaveResponder = (newState & (OakViewViewIsFirstResponderMask)) == (OakViewViewIsFirstResponderMask);
 	if(!doesHaveResponder)
 		self.recording = NO;
 
+	BOOL doesHaveFocus = (newState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
 	if(!doesHaveFocus && self.recording)
 		self.displayString = kRecordingPlaceholderString; // reset potential display string from flagsChanged:
 }
@@ -282,15 +277,16 @@ static NSString* const kRecordingPlaceholderString = @"…";
 		NSImage* image = self.mouseInClearButton ? (_mouseDown ? imgDown : imgHover) : imgNormal;
 		[image drawAdjustedInRect:_clearButtonRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 	}
+}
 
-	BOOL doesHaveFocus = (self.keyState & (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask)) == (OakViewViewIsFirstResponderMask|OakViewWindowIsKeyMask|OakViewApplicationIsActiveMask);
-	if(doesHaveFocus)
-	{
-		[NSGraphicsContext saveGraphicsState];
-		NSSetFocusRingStyle(NSFocusRingOnly);
-		NSRectFill(frame);
-		[NSGraphicsContext restoreGraphicsState];
-	}
+- (void)drawFocusRingMask
+{
+	NSRectFill([self bounds]);
+}
+
+- (NSRect)focusRingMaskBounds
+{
+	return [self bounds];
 }
 
 // ============
