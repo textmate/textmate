@@ -2234,6 +2234,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	return res = editor->scope(to_s([self scopeAttributes]));
 }
 
+- (NSString*)scopeAsString // Used by https://github.com/emmetio/Emmet.tmplugin
+{
+	return [NSString stringWithCxxString:to_s([self scopeContext].right)];
+}
+
 - (void)setSelectionString:(NSString*)aSelectionString
 {
 	if([aSelectionString isEqualToString:selectionString])
