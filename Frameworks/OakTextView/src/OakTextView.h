@@ -14,6 +14,13 @@ namespace bundles { struct item_t; typedef std::shared_ptr<item_t> item_ptr; }
 
 enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBottom };
 
+enum OTVFontSmoothing : NSUInteger
+{
+	OTVFontSmoothingDisabled = 0,
+	OTVFontSmoothingEnabled  = 1,
+	OTVFontSmoothingAuto     = 2,
+};
+
 @protocol OakTextViewDelegate <NSObject>
 @optional
 - (NSString*)scopeAttributes;
@@ -27,6 +34,7 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic) NSCursor*                             ibeamCursor;
 @property (nonatomic) NSFont*                               font;
 @property (nonatomic) BOOL                                  antiAlias;
+@property (nonatomic) OTVFontSmoothing                      fontSmoothing;
 @property (nonatomic) size_t                                tabSize;
 @property (nonatomic) BOOL                                  showInvisibles;
 @property (nonatomic) BOOL                                  softWrap;

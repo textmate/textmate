@@ -47,6 +47,7 @@ OAK_DEBUG_VAR(OakTextView_Macros);
 int32_t const NSWrapColumnWindowWidth =  0;
 int32_t const NSWrapColumnAskUser     = -1;
 
+NSString* const kUserDefaultsFontSmoothingKey      = @"fontSmoothing";
 NSString* const kUserDefaultsDisableAntiAliasKey   = @"disableAntiAlias";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
@@ -517,6 +518,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
 		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 		_antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+		_fontSmoothing  = (OTVFontSmoothing)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFontSmoothingKey];
 
 		spellingDotImage = [NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]];
 		foldingDotsImage = [NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]];
@@ -700,6 +702,8 @@ doScroll:
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!self.antiAlias)
 		CGContextSetShouldAntialias(context, false);
+	if(self.fontSmoothing == OTVFontSmoothingAuto && theme->is_dark() || self.fontSmoothing == OTVFontSmoothingDisabled)
+		CGContextSetShouldSmoothFonts(context, false);
 
 	NSImage* pdfImage = foldingDotsImage;
 	auto foldingDotsFactory = [&pdfImage](double width, double height) -> CGImageRef
@@ -1187,6 +1191,10 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		}
 
 		update_menu_key_equivalents([NSApp mainMenu], actionToKey);
+
+		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
+			kUserDefaultsFontSmoothingKey : @(OTVFontSmoothingAuto),
+		}];
 	}
 
 	[NSApp registerServicesMenuSendTypes:@[ NSStringPboardType ] returnTypes:@[ NSStringPboardType ]];
@@ -2792,6 +2800,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (void)userDefaultsDidChange:(id)sender
 {
 	self.antiAlias     = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+	self.fontSmoothing = (OTVFontSmoothing)[[NSUserDefaults standardUserDefaults] integerForKey:kUserDefaultsFontSmoothingKey];
 	self.scrollPastEnd = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 }
 
