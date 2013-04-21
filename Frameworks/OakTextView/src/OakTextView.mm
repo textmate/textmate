@@ -1042,6 +1042,11 @@ doScroll:
 	}
 }
 
+- (NSString*)scopeAsString
+{
+	return [NSString stringWithCxxString:to_s([self scopeContext].right)];
+}
+
 - (void)applicationDidBecomeActiveNotification:(NSNotification*)aNotification
 {
 	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.application.did-activate", editor->scope(to_s([self scopeAttributes]))))
