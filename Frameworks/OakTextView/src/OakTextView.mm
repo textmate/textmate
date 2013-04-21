@@ -51,7 +51,79 @@ NSString* const kUserDefaultsDisableAntiAliasKey   = @"disableAntiAlias";
 NSString* const kUserDefaultsDisableTypingPairsKey = @"disableTypingPairs";
 NSString* const kUserDefaultsScrollPastEndKey      = @"scrollPastEnd";
 
+struct buffer_refresh_callback_t;
+
 @interface OakTextView ()
+{
+	OBJC_WATCH_LEAKS(OakTextView);
+
+	document::document_ptr document;
+	theme_ptr theme;
+	std::string fontName;
+	CGFloat fontSize;
+	BOOL antiAlias;
+	BOOL showInvisibles;
+	BOOL scrollPastEnd;
+	ng::editor_ptr editor;
+	std::shared_ptr<ng::layout_t> layout;
+	NSUInteger refreshNestCount;
+	buffer_refresh_callback_t* callback;
+
+	int32_t wrapColumn;
+
+	BOOL hideCaret;
+	NSTimer* blinkCaretTimer;
+
+	NSImage* spellingDotImage;
+	NSImage* foldingDotsImage;
+
+	// =================
+	// = Mouse Support =
+	// =================
+
+	NSCursor* ibeamCursor;
+
+	NSPoint mouseDownPos;
+	ng::index_t mouseDownIndex;
+	NSInteger mouseDownModifierFlags;
+	NSInteger mouseDownClickCount;
+
+	OakTimer* initiateDragTimer;
+	OakTimer* dragScrollTimer;
+	NSDate* optionDownDate;
+	BOOL showDragCursor;
+	BOOL showColumnSelectionCursor;
+	BOOL ignoreMouseDown;  // set when the mouse down is the same event which caused becomeFirstResponder:
+	BOOL delayMouseDown; // set when mouseUp: should process lastMouseDownEvent
+
+	// ===============
+	// = Drag’n’drop =
+	// ===============
+
+	ng::index_t dropPosition;
+	ng::ranges_t markedRanges;
+	ng::ranges_t pendingMarkedRanges;
+
+	NSString* selectionString;
+	BOOL isUpdatingSelection;
+
+	NSMutableArray* macroRecordingArray;
+
+	// ======================
+	// = Incremental Search =
+	// ======================
+
+	NSString* liveSearchString;
+	ng::ranges_t liveSearchAnchor;
+	ng::ranges_t liveSearchRanges;
+
+	// ===================
+	// = Snippet Choices =
+	// ===================
+
+	OakChoiceMenu* choiceMenu;
+	std::vector<std::string> choiceVector;
+}
 + (NSArray*)dropTypes;
 - (void)ensureSelectionIsInVisibleArea:(id)sender;
 - (NSPoint)positionForWindowUnderCaret;
