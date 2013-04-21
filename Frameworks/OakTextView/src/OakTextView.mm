@@ -61,9 +61,6 @@ struct buffer_refresh_callback_t;
 	theme_ptr theme;
 	std::string fontName;
 	CGFloat fontSize;
-	BOOL antiAlias;
-	BOOL showInvisibles;
-	BOOL scrollPastEnd;
 	ng::editor_ptr editor;
 	std::shared_ptr<ng::layout_t> layout;
 	NSUInteger refreshNestCount;
@@ -366,7 +363,6 @@ static std::string shell_quote (std::vector<std::string> paths)
 @end
 
 @implementation OakTextView
-@synthesize antiAlias;
 @synthesize initiateDragTimer, dragScrollTimer, optionDownDate, showColumnSelectionCursor, showDragCursor, choiceMenu;
 @synthesize markedRanges;
 @synthesize refreshNestCount;
@@ -470,7 +466,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
-		layout.reset(new ng::layout_t(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), scrollPastEnd, wrapColumn, document->folded()));
+		layout.reset(new ng::layout_t(document->buffer(), theme, settings.get(kSettingsSoftWrapKey, false), self.scrollPastEnd, wrapColumn, document->folded()));
 		if(settings.get(kSettingsShowWrapColumnKey, false))
 			layout->set_draw_wrap_column(true);
 
@@ -517,9 +513,10 @@ static std::string shell_quote (std::vector<std::string> paths)
 		fontName       = settings.get(kSettingsFontNameKey, NULL_STR);
 		fontSize       = settings.get(kSettingsFontSizeKey, 11);
 		theme          = theme->copy_with_font_name_and_size(fontName, fontSize);
-		showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
-		scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
-		antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+
+		_showInvisibles = settings.get(kSettingsShowInvisiblesKey, false);
+		_scrollPastEnd  = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
+		_antiAlias      = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
 
 		spellingDotImage = [NSImage imageNamed:@"SpellingDot" inSameBundleAsClass:[self class]];
 		foldingDotsImage = [NSImage imageNamed:@"FoldingDots" inSameBundleAsClass:[self class]];
@@ -701,7 +698,7 @@ doScroll:
 	}
 
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
-	if(!antiAlias)
+	if(!self.antiAlias)
 		CGContextSetShouldAntialias(context, false);
 
 	NSImage* pdfImage = foldingDotsImage;
@@ -712,7 +709,7 @@ doScroll:
 		return CGImageMaskCreate(CGImageGetWidth(img), CGImageGetHeight(img), CGImageGetBitsPerComponent(img), CGImageGetBitsPerPixel(img), CGImageGetBytesPerRow(img), CGImageGetDataProvider(img), NULL, false);
 	};
 
-	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
+	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], self.showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);
 }
 
 // ===============
@@ -2042,11 +2039,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	if(RequiresSelection->find([aMenuItem action]) != RequiresSelection->end())
 		return [self hasSelection];
 	else if([aMenuItem action] == @selector(toggleShowInvisibles:))
-		[aMenuItem setState:[self showInvisibles] ? NSOnState : NSOffState];
+		[aMenuItem setState:self.showInvisibles ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleSoftWrap:))
-		[aMenuItem setState:[self softWrap] ? NSOnState : NSOffState];
+		[aMenuItem setState:self.softWrap ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleScrollPastEnd:))
-		[aMenuItem setState:[self scrollPastEnd] ? NSOnState : NSOffState];
+		[aMenuItem setState:self.scrollPastEnd ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleShowWrapColumn:))
 		[aMenuItem setState:(layout && layout->draw_wrap_column()) ? NSOnState : NSOffState];
 	else if([aMenuItem action] == @selector(toggleContinuousSpellChecking:))
@@ -2137,8 +2134,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (NSFont*)font               { return [NSFont fontWithName:[NSString stringWithCxxString:fontName] size:fontSize]; }
 - (size_t)tabSize             { return document ? document->buffer().indent().tab_size() : 2; }
 - (BOOL)softTabs              { return document ? document->buffer().indent().soft_tabs() : NO; }
-- (BOOL)showInvisibles        { return showInvisibles; }
-- (BOOL)scrollPastEnd         { return scrollPastEnd; }
 - (BOOL)softWrap              { return layout && layout->wrapping(); }
 
 - (BOOL)continuousIndentCorrections
@@ -2177,30 +2172,34 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)setShowInvisibles:(BOOL)flag
 {
-	showInvisibles = flag;
+	if(_showInvisibles == flag)
+		return;
+	_showInvisibles = flag;
+	settings_t::set(kSettingsShowInvisiblesKey, (bool)flag, document->file_type());
 	[self setNeedsDisplay:YES];
 }
 
 - (void)setScrollPastEnd:(BOOL)flag
 {
-	if(scrollPastEnd == flag)
+	if(_scrollPastEnd == flag)
 		return;
-	scrollPastEnd = flag;
-	[[NSUserDefaults standardUserDefaults] setBool:self.scrollPastEnd forKey:kUserDefaultsScrollPastEndKey];
+	_scrollPastEnd = flag;
+	[[NSUserDefaults standardUserDefaults] setBool:flag forKey:kUserDefaultsScrollPastEndKey];
 	if(layout)
 	{
 		AUTO_REFRESH;
-		layout->set_scroll_past_end(scrollPastEnd);
+		layout->set_scroll_past_end(flag);
 	}
 }
 
 - (void)setSoftWrap:(BOOL)flag
 {
-	if(layout)
-	{
-		AUTO_REFRESH;
-		layout->set_wrapping(flag, wrapColumn);
-	}
+	if(!layout || layout->wrapping() == flag)
+		return;
+
+	AUTO_REFRESH;
+	layout->set_wrapping(flag, wrapColumn);
+	settings_t::set(kSettingsSoftWrapKey, (bool)flag, document->file_type());
 }
 
 - (void)setSoftTabs:(BOOL)flag
@@ -2254,7 +2253,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (IBAction)toggleShowInvisibles:(id)sender
 {
 	self.showInvisibles = !self.showInvisibles;
-	settings_t::set(kSettingsShowInvisiblesKey, (bool)self.showInvisibles, document->file_type());
 }
 
 - (IBAction)toggleScrollPastEnd:(id)sender
@@ -2265,7 +2263,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 - (IBAction)toggleSoftWrap:(id)sender
 {
 	self.softWrap = !self.softWrap;
-	settings_t::set(kSettingsSoftWrapKey, (bool)self.softWrap, document->file_type());
 }
 
 - (IBAction)toggleShowWrapColumn:(id)sender
@@ -2794,7 +2791,8 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 - (void)userDefaultsDidChange:(id)sender
 {
-	self.antiAlias = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+	self.antiAlias     = ![[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsDisableAntiAliasKey];
+	self.scrollPastEnd = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsScrollPastEndKey];
 }
 
 // =================
