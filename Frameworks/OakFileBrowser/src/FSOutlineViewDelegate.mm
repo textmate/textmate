@@ -328,6 +328,21 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	[self checkPendingSelectAndEditURLs];
 }
 
+- (void)setFieldEditorString:(NSString*)aString selectedRanges:(NSArray*)someRanges
+{
+	if(aString && [outlineView editedRow] != -1 && [[[outlineView window] firstResponder] isKindOfClass:[NSTextView class]])
+	{
+		NSTextView* textView = (NSTextView*)[[outlineView window] firstResponder];
+		if(![[[textView textStorage] string] isEqualToString:aString])
+		{
+			// We go via NSResponder for undo support
+			[textView selectAll:self];
+			[textView insertText:aString];
+		}
+		[textView setSelectedRanges:someRanges];
+	}
+}
+
 - (void)itemDidReload:(NSNotification*)aNotification
 {
 	FSDataSource* aDataSource = [aNotification object];
@@ -342,10 +357,18 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	if(requested)
 		--itemsReloading;
 
+	NSString* editedValue = nil;
+	NSArray* selectedRanges = nil;
 	if([outlineView editedRow] != -1)
 	{
+		if([[[outlineView window] firstResponder] isKindOfClass:[NSTextView class]])
+		{
+			NSTextView* textView = (NSTextView*)[[outlineView window] firstResponder];
+			editedValue = [[[textView textStorage] string] copy];
+			selectedRanges = [[textView selectedRanges] copy];
+		}
 		self.pendingEditURL = [[outlineView itemAtRow:[outlineView editedRow]] url];
-		[outlineView cancelOperation:self]; // TODO Grab the field editor’s string value and restore later
+		[outlineView cancelOperation:self];
 	}
 
 	if(recursive)
@@ -361,13 +384,18 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 	suppressAutoExpansion = NO;
 
 	if(!recursive)
-		return [self checkPendingSelectAndEditURLs];
+	{
+		[self checkPendingSelectAndEditURLs];
+		[self setFieldEditorString:editedValue selectedRanges:selectedRanges];
+		return;
+	}
 
 	BOOL recursiveExpand = [recursiveExpandPaths containsObject:item.url];
 	[recursiveExpandPaths removeObject:item.url];
 
 	[self expandAndSelectChildren:item expandAll:recursiveExpand];
 	[self checkPendingSelectAndEditURLs];
+	[self setFieldEditorString:editedValue selectedRanges:selectedRanges];
 }
 
 // =================================
