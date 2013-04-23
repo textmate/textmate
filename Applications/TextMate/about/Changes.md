@@ -1,5 +1,14 @@
 # Changes
 
+## 2013-04-23 ([a9415](https://github.com/textmate/textmate/compare/a9411...a9415))
+
+* By default “font smoothing” is now disabled for dark themes. Font smoothing often makes light text on dark backgrounds look bolder than desired, should you however wish to have font smoothing enabled (for dark themes) you can run:
+
+		defaults write com.macromates.TextMate.preview fontSmoothing 1
+
+* The table showing bundles in preferences now use sortable columns. *[Steven Clukey]*
+* Added API to OakTextView to support the [Emmet plug-in](https://github.com/emmetio/Emmet.tmplugin). *[Sergey Chikuyonok]*
+
 ## 2013-04-10 ([a9411](https://github.com/textmate/textmate/compare/a9407...a9411))
 
 * Improve accessibility of various aspects of TextMate. *[Boris Dušek]*
