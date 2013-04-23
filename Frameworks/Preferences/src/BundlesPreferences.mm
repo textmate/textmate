@@ -199,7 +199,7 @@ static std::string textify (std::string str)
 	{
 		bundles_db::bundle_ptr bundle = bundles[rowIndex];
 		if([anObject boolValue])
-				[_bundlesManager installBundle:bundle];
+				[_bundlesManager installBundle:bundle completionHandler:nil];
 		else	[_bundlesManager uninstallBundle:bundle];
 	}
 }

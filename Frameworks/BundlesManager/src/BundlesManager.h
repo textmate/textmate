@@ -18,7 +18,7 @@ PUBLIC @interface BundlesManager : NSObject
 - (bundles_db::bundle_ptr const&)bundleAtIndex:(NSUInteger)anIndex;
 - (NSCellStateValue)installStateForBundle:(bundles_db::bundle_ptr const&)aBundle;
 
-- (void)installBundle:(bundles_db::bundle_ptr const&)aBundle;
+- (void)installBundle:(bundles_db::bundle_ptr const&)aBundle completionHandler:(void(^)(BOOL))callback;
 - (void)uninstallBundle:(bundles_db::bundle_ptr const&)aBundle;
 
 + (BundlesManager*)sharedInstance;

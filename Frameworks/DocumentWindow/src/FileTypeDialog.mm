@@ -206,7 +206,7 @@ static bool is_installed (oak::uuid_t const& uuid)
 			if(bundleUUID == (*bundle)->uuid())
 			{
 				[NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(checkIfBundleIsInstalled:) userInfo:[grammar objectForKey:@"uuid"] repeats:YES];
-				[[BundlesManager sharedInstance] installBundle:*bundle];
+				[[BundlesManager sharedInstance] installBundle:*bundle completionHandler:nil];
 				[installingBundleActivityTextField bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"activityText" options:nil];
 				[installingBundleProgressIndicator bind:NSValueBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"progress" options:nil];
 				[installingBundleProgressIndicator bind:NSIsIndeterminateBinding toObject:[BundlesManager sharedInstance] withKeyPath:@"determinateProgress" options:@{ NSValueTransformerNameBindingOption: @"NSNegateBoolean" }];

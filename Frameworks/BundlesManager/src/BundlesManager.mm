@@ -266,7 +266,7 @@ static double const kPollInterval = 3*60*60;
 	});
 }
 
-- (void)installBundle:(bundles_db::bundle_ptr const&)aBundle
+- (void)installBundle:(bundles_db::bundle_ptr const&)aBundle completionHandler:(void(^)(BOOL))callback
 {
 	std::vector<bundles_db::bundle_ptr> bundles;
 	for(auto bundle : bundles_db::dependencies(bundlesIndex, aBundle, true, false))
@@ -284,6 +284,11 @@ static double const kPollInterval = 3*60*60;
 	[self installBundles:bundles completionHandler:^(std::vector<bundles_db::bundle_ptr> failedBundles){
 		self.activityText = [NSString stringWithFormat:@"Installed ‘%@’.", bundleName];
 		self.isBusy       = NO;
+		if(callback)
+		{
+			[self createBundlesIndex:self];
+			callback(failedBundles.empty());
+		}
 	}];
 }
 
@@ -321,7 +326,9 @@ static double const kPollInterval = 3*60*60;
 
 - (void)createBundlesIndex:(id)sender
 {
-	D(DBF_BundlesManager, bug("\n"););
+	D(DBF_BundlesManager, bug("%s\n", BSTR(_needsCreateBundlesIndex)););
+	if(_needsCreateBundlesIndex == NO)
+		return;
 
 	auto pair = create_bundle_index(bundlesPaths, cache);
 	bundles::set_index(pair.first, pair.second);
@@ -465,6 +472,7 @@ namespace
 		bundlesPaths.push_back(path::join(path, "Bundles"));
 	bundlesIndexPath = path::join(path::home(), "Library/Caches/com.macromates.TextMate/BundlesIndex.plist");
 	cache.load(bundlesIndexPath, &prune_dictionary);
+	_needsCreateBundlesIndex = YES;
 	[self createBundlesIndex:self];
 }
 @end
