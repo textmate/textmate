@@ -16,9 +16,10 @@ enum folding_state_t { kFoldingNone, kFoldingTop, kFoldingCollapsed, kFoldingBot
 
 enum OTVFontSmoothing : NSUInteger
 {
-	OTVFontSmoothingDisabled = 0,
-	OTVFontSmoothingEnabled  = 1,
-	OTVFontSmoothingAuto     = 2,
+	OTVFontSmoothingDisabled             = 0,
+	OTVFontSmoothingEnabled              = 1,
+	OTVFontSmoothingDisabledForDark      = 2,
+	OTVFontSmoothingDisabledForDarkHiDPI = 3,
 };
 
 @protocol OakTextViewDelegate <NSObject>

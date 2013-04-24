@@ -702,7 +702,16 @@ doScroll:
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!self.antiAlias)
 		CGContextSetShouldAntialias(context, false);
-	if(self.fontSmoothing == OTVFontSmoothingAuto && theme->is_dark() || self.fontSmoothing == OTVFontSmoothingDisabled)
+
+	BOOL disableFontSmoothing = NO;
+	switch(self.fontSmoothing)
+	{
+		case OTVFontSmoothingDisabled:             disableFontSmoothing = YES;                                                         break;
+		case OTVFontSmoothingDisabledForDark:      disableFontSmoothing = theme->is_dark();                                            break;
+		case OTVFontSmoothingDisabledForDarkHiDPI: disableFontSmoothing = theme->is_dark() && [[self window] backingScaleFactor] == 2; break;
+	}
+
+	if(disableFontSmoothing)
 		CGContextSetShouldSmoothFonts(context, false);
 
 	NSImage* pdfImage = foldingDotsImage;
@@ -1193,7 +1202,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 		update_menu_key_equivalents([NSApp mainMenu], actionToKey);
 
 		[[NSUserDefaults standardUserDefaults] registerDefaults:@{
-			kUserDefaultsFontSmoothingKey : @(OTVFontSmoothingAuto),
+			kUserDefaultsFontSmoothingKey : @(OTVFontSmoothingDisabledForDarkHiDPI),
 		}];
 	}
 
