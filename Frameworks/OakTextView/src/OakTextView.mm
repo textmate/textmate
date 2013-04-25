@@ -1104,7 +1104,23 @@ doScroll:
 		case bundles::kItemTypeCommand:
 		{
 			[self recordSelector:@selector(executeCommandWithOptions:) withArgument:ns::to_dictionary(item->plist())];
-			document::run(parse_command(item), document->buffer(), editor->ranges(), document);
+
+			auto command = parse_command(item);
+			if([self.delegate respondsToSelector:@selector(bundleItemPreExec:completionHandler:)])
+			{
+				[self.delegate bundleItemPreExec:command.pre_exec completionHandler:^(BOOL success){
+					if(success)
+					{
+						AUTO_REFRESH;
+						document::run(command, document->buffer(), editor->ranges(), document);
+					}
+				}];
+			}
+			else
+			{
+				command.pre_exec = pre_exec::nop;
+				document::run(command, document->buffer(), editor->ranges(), document);
+			}
 		}
 		break;
 

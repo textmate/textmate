@@ -925,6 +925,41 @@ namespace
 	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:nil];
 }
 
+- (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback
+{
+	std::vector<document::document_ptr> documentsToSave;
+	switch(preExec)
+	{
+		case pre_exec::save_document:
+		{
+			if(_selectedDocument && (_selectedDocument->is_modified() || !_selectedDocument->is_on_disk()))
+				documentsToSave.push_back(_selectedDocument);
+		}
+		break;
+
+		case pre_exec::save_project:
+		{
+			for(auto document : _documents)
+			{
+				if(document->is_modified() && document->path() != NULL_STR)
+					documentsToSave.push_back(document);
+			}
+		}
+		break;
+	}
+
+	if(!documentsToSave.empty())
+	{
+		[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:^(BOOL success){
+			callback(success);
+		}];
+	}
+	else
+	{
+		callback(YES);
+	}
+}
+
 // ================
 // = Window Title =
 // ================

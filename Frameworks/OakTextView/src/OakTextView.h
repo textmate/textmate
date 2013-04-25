@@ -24,6 +24,7 @@ enum OTVFontSmoothing : NSUInteger
 
 @protocol OakTextViewDelegate <NSObject>
 @optional
+- (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback;
 - (NSString*)scopeAttributes;
 @end
 
