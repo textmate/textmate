@@ -192,30 +192,11 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 
 	if(!documentsToSave.empty())
 	{
-		struct callback_t : document_save_callback_t
-		{
-			callback_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& environment, document::run_callback_ptr callback, size_t count) : _command(command), _buffer(buffer), _selection(selection), _document(document), _environment(environment), _callback(callback), _count(count) {  }
-
-			void did_save_document (document::document_ptr document, bool flag, std::string const& message, oak::uuid_t const& filter)
-			{
-				if(--_count == 0 && flag)
-					::run(_command, _buffer, _selection, _document, _environment, _callback);
-
-				if(_count == 0 || !flag)
-					delete this;
-			}
-
-		private:
-			bundle_command_t                   _command;
-			ng::buffer_t const&                _buffer;
-			ng::ranges_t const&                _selection;
-			document::document_ptr             _document;
-			std::map<std::string, std::string> _environment;
-			document::run_callback_ptr         _callback;
-			size_t                             _count;
-		};
-
-		[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:controller.window defaultDirectory:controller.untitledSavePath andCallback:new callback_t(command, buffer, selection, document, baseEnv, callback, documentsToSave.size())];
+		bundle_command_t commandNonRef = command;
+		[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:controller.window defaultDirectory:controller.untitledSavePath completionHandler:^(BOOL success){
+			if(success)
+				::run(commandNonRef, buffer, selection, document, baseEnv, callback);
+		}];
 	}
 	else
 	{

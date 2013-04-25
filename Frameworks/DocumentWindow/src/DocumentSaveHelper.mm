@@ -11,6 +11,7 @@
 #import <authorization/constants.h>
 #import <document/collection.h>
 #import <file/encoding.h>
+#import <file/save.h>
 #import <bundles/bundles.h>
 
 OAK_DEBUG_VAR(DocumentController_SaveHelper);
@@ -27,12 +28,18 @@ NSString* DefaultSaveNameForDocument (document::document_ptr const& aDocument)
 }
 
 @interface DocumentSaveHelper ()
-- (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback;
+{
+	std::vector<document::document_ptr> documents;
+	file::save_context_ptr context;
+}
 - (void)didSaveDocument:(document::document_ptr const&)aDocument success:(BOOL)flag error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)aFilter;
 - (file::save_context_ptr const&)context;
 - (void)setContext:(file::save_context_ptr const&)newContext;
-@property (nonatomic, retain) NSString* saveFolder;
-@property (nonatomic, assign) BOOL userAbort;
+@property (nonatomic) NSWindow* window;
+@property (nonatomic) NSString* saveFolder;
+@property (nonatomic) BOOL userAbort;
+@property (nonatomic) BOOL failed;
+@property (nonatomic, copy) void (^callback)(BOOL);
 @end
 
 namespace
@@ -140,8 +147,6 @@ namespace
 }
 
 @implementation DocumentSaveHelper
-@synthesize saveFolder, userAbort;
-
 - (id)init
 {
 	D(DBF_DocumentController_SaveHelper, bug("\n"););
@@ -151,14 +156,14 @@ namespace
 	return self;
 }
 
-+ (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback
++ (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder completionHandler:(void(^)(BOOL success))callback
 {
-	[[[DocumentSaveHelper alloc] init] trySaveDocuments:someDocuments forWindow:aWindow defaultDirectory:aFolder andCallback:aCallback];
+	[[[DocumentSaveHelper alloc] init] trySaveDocuments:someDocuments forWindow:aWindow defaultDirectory:aFolder completionHandler:callback];
 }
 
-+ (void)trySaveDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback
++ (void)trySaveDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder completionHandler:(void(^)(BOOL success))callback
 {
-	[DocumentSaveHelper trySaveDocuments:std::vector<document::document_ptr>(1, aDocument) forWindow:aWindow defaultDirectory:aFolder andCallback:aCallback];
+	[DocumentSaveHelper trySaveDocuments:std::vector<document::document_ptr>(1, aDocument) forWindow:aWindow defaultDirectory:aFolder completionHandler:callback];
 }
 
 - (void)dealloc
@@ -171,40 +176,44 @@ namespace
 
 - (void)saveNextDocument
 {
-	if(documents.empty())
+	if(documents.empty() || self.failed)
+	{
+		if(self.callback)
+			self.callback(!self.failed);
+		documents.clear();
 		return;
+	}
 
 	document::document_ptr document = documents.back();
 	D(DBF_DocumentController_SaveHelper, bug("%s (%zu total)\n", document->display_name().c_str(), documents.size()););
-	document->try_save(document::save_callback_ptr((document::save_callback_t*)new save_callback_t(document, self, window)));
+	document->try_save(document::save_callback_ptr((document::save_callback_t*)new save_callback_t(document, self, self.window)));
 }
 
-- (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback
+- (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder completionHandler:(void(^)(BOOL success))callback
 {
-	documents  = someDocuments;
-	window     = aWindow;
-	saveFolder = aFolder;
-	callback   = aCallback;
+	documents       = someDocuments;
+	self.window     = aWindow;
+	self.saveFolder = aFolder;
+	self.callback   = callback;
+
 	std::reverse(documents.begin(), documents.end());
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationWillSave" object:self userInfo:@{ @"window" : window }];
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationWillSave" object:self userInfo:@{ @"window" : self.window }];
 	[self saveNextDocument];
 }
 
 - (void)didSaveDocument:(document::document_ptr const&)aDocument success:(BOOL)flag error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)aFilter
 {
-	D(DBF_DocumentController_SaveHelper, bug("‘%s’, success %s, user abort %s\n", aDocument->path().c_str(), BSTR(flag), BSTR(userAbort)););
-	if(!flag && !userAbort)
+	D(DBF_DocumentController_SaveHelper, bug("‘%s’, success %s, user abort %s\n", aDocument->path().c_str(), BSTR(flag), BSTR(self.userAbort)););
+	if(!flag && !self.userAbort)
 	{
-		[window.attachedSheet orderOut:self];
+		[self.window.attachedSheet orderOut:self];
 		if(aFilter)
-				show_command_error(aMessage, aFilter, window);
-		else	[[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The document “%s” could not be saved.", aDocument->display_name().c_str())] informativeText:([NSString stringWithCxxString:aMessage] ?: @"Please check Console output for reason.") buttons:@"OK", nil] beginSheetModalForWindow:window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
+				show_command_error(aMessage, aFilter, self.window);
+		else	[[NSAlert tmAlertWithMessageText:[NSString stringWithCxxString:text::format("The document “%s” could not be saved.", aDocument->display_name().c_str())] informativeText:([NSString stringWithCxxString:aMessage] ?: @"Please check Console output for reason.") buttons:@"OK", nil] beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
 	}
 
-	if(callback)
-		callback->did_save_document(aDocument, flag, aMessage, aFilter);
 	documents.pop_back();
-	if(flag)
-		[self saveNextDocument];
+	self.failed = self.failed || !flag || self.userAbort;
+	[self saveNextDocument];
 }
 @end

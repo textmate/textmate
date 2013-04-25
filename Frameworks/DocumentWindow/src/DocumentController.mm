@@ -430,31 +430,15 @@ namespace
 		{
 			case NSAlertFirstButtonReturn: /* "Save" */
 			{
-				struct callback_t : document_save_callback_t
-				{
-					callback_t (void(^callback)(BOOL), size_t count) : _callback([callback copy]), _count(count) { }
-
-					void did_save_document (document::document_ptr document, bool flag, std::string const& message, oak::uuid_t const& filter)
-					{
-						if(_callback && (_count == 1 || !flag))
-							_callback(flag);
-
-						if(--_count == 0 || !flag)
-							delete this;
-					}
-
-				private:
-					void(^_callback)(BOOL);
-					size_t _count;
-				};
-
 				if(IsInShouldTerminateEventLoop)
 				{
 					IsInShouldTerminateEventLoop = NO;
 					[NSApp replyToApplicationShouldTerminate:NO];
 				}
 
-				[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:new callback_t(callback, documentsToSave.size())];
+				[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:^(BOOL success){
+					callback(success);
+				}];
 			}
 			break;
 
@@ -872,7 +856,7 @@ namespace
 
 	if(_selectedDocument->path() != NULL_STR)
 	{
-		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
+		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
 	}
 	else
 	{
@@ -907,7 +891,7 @@ namespace
 				self.documents = newDocuments;
 			}
 
-			[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
+			[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
 		}];
 	}
 }
@@ -926,7 +910,7 @@ namespace
 			return;
 		_selectedDocument->set_path(to_s(path));
 		_selectedDocument->set_disk_encoding(encoding);
-		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil andCallback:NULL];
+		[DocumentSaveHelper trySaveDocument:_selectedDocument forWindow:self.window defaultDirectory:nil completionHandler:nil];
 	}];
 }
 
@@ -938,7 +922,7 @@ namespace
 		if(document->is_modified())
 			documentsToSave.push_back(document);
 	}
-	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath andCallback:NULL];
+	[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:self.window defaultDirectory:self.untitledSavePath completionHandler:nil];
 }
 
 // ================
