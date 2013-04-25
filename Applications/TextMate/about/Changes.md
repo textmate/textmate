@@ -1,5 +1,9 @@
 # Changes
 
+## 2013-04-25 ([a9417](https://github.com/textmate/textmate/compare/a9415...a9417))
+
+* By default, font smoothing is now only disabled (for dark themes) on high-DPI displays. See [wiki for how to control font smoothing](https://github.com/textmate/textmate/wiki/Hidden-Settings#controlling-font-smoothing).
+
 ## 2013-04-23 ([a9415](https://github.com/textmate/textmate/compare/a9411...a9415))
 
 * By default “font smoothing” is now disabled for dark themes. Font smoothing often makes light text on dark backgrounds look bolder than desired, should you however wish to have font smoothing enabled (for dark themes) you can run:
