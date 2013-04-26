@@ -911,7 +911,7 @@
 											<object class="NSMenuItem" id="1034373499">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Replace All</string>
-												<string key="NSKeyEquiv">f</string>
+												<string key="NSKeyEquiv">g</string>
 												<int key="NSKeyEquivModMask">1310720</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
@@ -920,7 +920,7 @@
 											<object class="NSMenuItem" id="565973547">
 												<reference key="NSMenu" ref="558062756"/>
 												<string key="NSTitle">Replace All in Selection</string>
-												<string key="NSKeyEquiv">F</string>
+												<string key="NSKeyEquiv">G</string>
 												<int key="NSKeyEquivModMask">1310720</int>
 												<int key="NSMnemonicLoc">2147483647</int>
 												<reference key="NSOnImage" ref="944637517"/>
@@ -1545,7 +1545,7 @@
 								<object class="NSMenuItem" id="613273090">
 									<reference key="NSMenu" ref="377204242"/>
 									<string key="NSTitle">Enter Full Screen</string>
-									<string type="base64-UTF8" key="NSKeyEquiv">DQ</string>
+									<string key="NSKeyEquiv">f</string>
 									<int key="NSKeyEquivModMask">1310720</int>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="944637517"/>
@@ -2461,7 +2461,7 @@
 					<string key="NSFrameSize">{269, 102}</string>
 					<reference key="NSNextKeyView" ref="240907648"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {2560, 1578}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1920, 1178}}</string>
 				<string key="NSMinSize">{269, 124}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<string key="NSFrameAutosaveName">Go to Line</string>
