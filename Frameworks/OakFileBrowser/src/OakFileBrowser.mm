@@ -114,8 +114,6 @@ static NSImage* IconImage (NSURL* url, NSSize size = NSMakeSize(16, 16))
 
 @property (nonatomic)                    NSMutableArray* history;
 @property (nonatomic)                    NSUInteger historyIndex;
-
-@property (nonatomic, copy)              NSEvent* gestureBeginEvent;
 @end
 
 static bool is_binary (std::string const& path)
@@ -1152,38 +1150,37 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 // = Swipe =
 // =========
 
-- (void)swipeWithEvent:(NSEvent*)anEvent
+- (BOOL)wantsScrollEventsForSwipeTrackingOnAxis:(NSEventGestureAxis)axis
 {
-	if([anEvent deltaX] == +1 && self.canGoBack)
-		[self goBack:self];
-	else if([anEvent deltaX] == -1 && self.canGoForward)
-		[self goForward:self];
+	return axis == NSEventGestureAxisHorizontal;
 }
 
-- (void)beginGestureWithEvent:(NSEvent*)anEvent
+- (void)scrollWheel:(NSEvent*)anEvent
 {
-	self.gestureBeginEvent = anEvent;
-}
+	if(![NSEvent isSwipeTrackingFromScrollEventsEnabled] || [anEvent phase] == NSEventPhaseNone || fabsf([anEvent scrollingDeltaX]) <= fabsf([anEvent scrollingDeltaY]))
+		return;
 
-- (void)endGestureWithEvent:(NSEvent*)anEvent
-{
-	NSMutableDictionary* map = [NSMutableDictionary dictionary];
-	for(NSTouch* touch in [self.gestureBeginEvent touchesMatchingPhase:NSTouchPhaseBegan inView:nil])
-		map[touch.identity] = touch;
-	self.gestureBeginEvent = nil;
+	[anEvent trackSwipeEventWithOptions:0 dampenAmountThresholdMin:(self.canGoForward ? -1 : 0) max:(self.canGoBack ? +1 : 0) usingHandler:^(CGFloat gestureAmount, NSEventPhase phase, BOOL isComplete, BOOL* stop) {
+		if(phase == NSEventPhaseBegan)
+		{
+			// Setup animation overlay layers
+		}
 
-	NSInteger direction = 0;
-	for(NSTouch* touch in [anEvent touchesMatchingPhase:NSTouchPhaseAny inView:nil])
-	{
-		NSTouch* initialTouch = map[touch.identity];
-		CGFloat distance = touch.normalizedPosition.x - initialTouch.normalizedPosition.x;
-		direction += distance < -0.1 ? +1 : (distance > 0.1 ? -1 : 0);
-	}
+		// Update animation overlay to match gestureAmount
 
-	if(direction == -2 && self.canGoBack)
-		[self goBack:self];
-	else if(direction == +2 && self.canGoForward)
-		[self goForward:self];
+		if(phase == NSEventPhaseEnded)
+		{
+			if(gestureAmount > 0 && self.canGoBack)
+				[self goBack:self];
+			else if(gestureAmount < 0 && self.canGoForward)
+				[self goForward:self];
+		}
+
+		if(isComplete)
+		{
+			// Tear down animation overlay here
+		}
+	}];
 }
 
 // ===================

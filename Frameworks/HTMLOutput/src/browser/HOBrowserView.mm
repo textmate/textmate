@@ -8,8 +8,6 @@
 @property (nonatomic, readwrite) WebView* webView;
 @property (nonatomic, readwrite) HOStatusBar* statusBar;
 @property (nonatomic, retain) HOWebViewDelegateHelper* webViewDelegateHelper;
-@property (nonatomic, copy) NSEvent* gestureBeginEvent;
-@property (nonatomic) NSRect visibleRectBeforeGesture;
 @end
 
 @implementation HOBrowserView
@@ -93,63 +91,37 @@
 // = Swipe =
 // =========
 
-- (void)swipeWithEvent:(NSEvent*)anEvent
+- (BOOL)wantsScrollEventsForSwipeTrackingOnAxis:(NSEventGestureAxis)axis
 {
-	if([anEvent deltaX] == +1 && _webView.canGoBack)
-		[_webView goBack:self];
-	else if([anEvent deltaX] == -1 && _webView.canGoForward)
-		[_webView goForward:self];
+	return axis == NSEventGestureAxisHorizontal;
 }
 
-- (NSView*)scrollableViewForPoint:(NSPoint)aPoint inWebFrame:(WebFrame*)parentFrame
+- (void)scrollWheel:(NSEvent*)anEvent
 {
-	for(WebFrame* webFrame in [parentFrame childFrames])
-	{
-		if(NSView* res = [self scrollableViewForPoint:aPoint inWebFrame:webFrame])
-			return res;
-	}
-
-	NSView <WebDocumentView>* documentView = [[parentFrame frameView] documentView];
-	NSRect visible = [documentView convertRect:[documentView visibleRect] toView:nil];
-	NSRect actual = [documentView convertRect:[documentView bounds] toView:nil];
-	if(NSMouseInRect(aPoint, visible, [documentView isFlipped]) && !NSEqualRects(visible, actual))
-		return documentView;
-
-	return nil;
-}
-
-- (void)beginGestureWithEvent:(NSEvent*)anEvent
-{
-	self.gestureBeginEvent = anEvent;
-
-	NSView* view = [self scrollableViewForPoint:[anEvent locationInWindow] inWebFrame:[_webView mainFrame]];
-	self.visibleRectBeforeGesture = view ? [view visibleRect] : NSZeroRect;
-}
-
-- (void)endGestureWithEvent:(NSEvent*)anEvent
-{
-	NSTimeInterval duration = [anEvent timestamp] - [self.gestureBeginEvent timestamp];
-	NSMutableDictionary* map = [NSMutableDictionary dictionary];
-	for(NSTouch* touch in [self.gestureBeginEvent touchesMatchingPhase:NSTouchPhaseBegan inView:nil])
-		map[touch.identity] = touch;
-	self.gestureBeginEvent = nil;
-
-	NSView* view = [self scrollableViewForPoint:[anEvent locationInWindow] inWebFrame:[_webView mainFrame]];
-	if(duration > 0.2 || view && !NSEqualRects(self.visibleRectBeforeGesture, [view visibleRect]))
+	if(![NSEvent isSwipeTrackingFromScrollEventsEnabled] || [anEvent phase] == NSEventPhaseNone || fabsf([anEvent scrollingDeltaX]) <= fabsf([anEvent scrollingDeltaY]))
 		return;
 
-	NSInteger direction = 0;
-	for(NSTouch* touch in [anEvent touchesMatchingPhase:NSTouchPhaseAny inView:nil])
-	{
-		NSTouch* initialTouch = map[touch.identity];
-		CGFloat distance = touch.normalizedPosition.x - initialTouch.normalizedPosition.x;
-		direction += distance <= -0.1 ? +1 : (distance >= 0.1 ? -1 : 0);
-	}
+	[anEvent trackSwipeEventWithOptions:0 dampenAmountThresholdMin:(_webView.canGoForward ? -1 : 0) max:(_webView.canGoBack ? +1 : 0) usingHandler:^(CGFloat gestureAmount, NSEventPhase phase, BOOL isComplete, BOOL* stop) {
+		if(phase == NSEventPhaseBegan)
+		{
+			// Setup animation overlay layers
+		}
 
-	if(direction == -2 && _webView.canGoBack)
-		[_webView goBack:self];
-	else if(direction == +2 && _webView.canGoForward)
-		[_webView goForward:self];
+		// Update animation overlay to match gestureAmount
+
+		if(phase == NSEventPhaseEnded)
+		{
+			if(gestureAmount > 0 && _webView.canGoBack)
+				[_webView goBack:self];
+			else if(gestureAmount < 0 && _webView.canGoForward)
+				[_webView goForward:self];
+		}
+
+		if(isComplete)
+		{
+			// Tear down animation overlay here
+		}
+	}];
 }
 
 // =======================
