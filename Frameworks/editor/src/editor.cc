@@ -1177,6 +1177,8 @@ namespace ng
 
 	ng::ranges_t editor_t::insert_tab_with_indent (ng::buffer_t& buffer, ng::ranges_t const& selections, snippet_controller_t& snippets)
 	{
+		bool smartTabEnabled = selections.size() == 1 && !selections.last().columnar;
+
 		std::string estimatedIndent = NULL_STR;
 		std::multimap<range_t, std::string> insertions;
 		citerate(range, dissect_columnar(buffer, selections))
@@ -1185,12 +1187,7 @@ namespace ng
 			size_t const firstLine          = buffer.convert(from).line;
 			std::string const& leftOfCaret  = buffer.substr(buffer.begin(firstLine), from);
 
-			if(!text::is_blank(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size()))
-			{
-				size_t col = visual_distance(buffer, buffer.begin(firstLine), from);
-				insertions.insert(std::make_pair(*range, buffer.indent().create(col)));
-			}
-			else
+			if(smartTabEnabled && text::is_blank(leftOfCaret.data(), leftOfCaret.data() + leftOfCaret.size()))
 			{
 				size_t to = range->max().index;
 
@@ -1211,6 +1208,11 @@ namespace ng
 					to += buffer[to].size();
 
 				insertions.insert(std::make_pair(ng::range_t(from, to), estimatedIndent));
+			}
+			else
+			{
+				size_t col = visual_distance(buffer, buffer.begin(firstLine), from);
+				insertions.insert(std::make_pair(*range, buffer.indent().create(col)));
 			}
 		}
 		return ng::move(buffer, replace_helper(buffer, snippets, insertions), kSelectionMoveToEndOfSelection);
