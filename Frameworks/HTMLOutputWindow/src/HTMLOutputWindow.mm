@@ -33,6 +33,7 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 		[self.window setReleasedWhenClosed:NO];
 		[self.window setAutorecalculatesContentBorderThickness:NO forEdge:NSMinYEdge];
 		[self.window setContentBorderThickness:25 forEdge:NSMinYEdge];
+		[self.window setCollectionBehavior:[self.window collectionBehavior] | NSWindowCollectionBehaviorMoveToActiveSpace];
 
 		[OakWindowFrameHelper windowFrameHelperWithWindow:self.window];
 

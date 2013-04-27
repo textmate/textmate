@@ -177,10 +177,11 @@ static NSProgressIndicator* OakCreateProgressIndicator ()
 	NSRect r = [[NSScreen mainScreen] visibleFrame];
 	if((self = [super initWithWindow:[[NSPanel alloc] initWithContentRect:NSMakeRect(NSMidX(r)-100, NSMidY(r)+100, 200, 200) styleMask:(NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask) backing:NSBackingStoreBuffered defer:NO]]))
 	{
-		self.window.title             = @"Find";
-		self.window.frameAutosaveName = @"Find";
-		self.window.hidesOnDeactivate = NO;
-		self.window.delegate          = self;
+		self.window.title              = @"Find";
+		self.window.frameAutosaveName  = @"Find";
+		self.window.hidesOnDeactivate  = NO;
+		self.window.collectionBehavior = self.window.collectionBehavior | NSWindowCollectionBehaviorMoveToActiveSpace;
+		self.window.delegate           = self;
 
 		self.findLabel                 = OakCreateLabel(@"Find:");
 		self.findTextField             = OakCreateTextField(self);
