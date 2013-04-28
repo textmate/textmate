@@ -718,8 +718,17 @@ doScroll:
 	auto foldingDotsFactory = [&pdfImage](double width, double height) -> CGImageRef
 	{
 		NSRect rect = NSMakeRect(0, 0, width, height);
-		CGImageRef img = [pdfImage CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:nil];
-		return CGImageMaskCreate(CGImageGetWidth(img), CGImageGetHeight(img), CGImageGetBitsPerComponent(img), CGImageGetBitsPerPixel(img), CGImageGetBytesPerRow(img), CGImageGetDataProvider(img), NULL, false);
+		if(CGImageRef img = [pdfImage CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:nil])
+		{
+			if(CGImageRef res = CGImageMaskCreate(CGImageGetWidth(img), CGImageGetHeight(img), CGImageGetBitsPerComponent(img), CGImageGetBitsPerPixel(img), CGImageGetBytesPerRow(img), CGImageGetDataProvider(img), NULL, false))
+				return res;
+			NSLog(@"Unable to create CGImageMask (%zu × %zu) from CGImage", CGImageGetWidth(img), CGImageGetHeight(img));
+		}
+		else
+		{
+			NSLog(@"Unable to create CGImage (%.1f × %.1f) from %@", width, height, pdfImage);
+		}
+		return NULL;
 	};
 
 	layout->draw(ng::context_t(context, [spellingDotImage CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:nil], foldingDotsFactory), aRect, [self isFlipped], self.showInvisibles, merge(editor->ranges(), [self markedRanges]), liveSearchRanges);

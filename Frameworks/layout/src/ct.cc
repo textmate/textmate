@@ -20,8 +20,12 @@ namespace ng
 	{
 		if(_spelling_dot)
 			CFRelease(_spelling_dot);
+
 		iterate(pair, _folding_dots_cache)
-			CFRelease(pair->second);
+		{
+			if(pair->second)
+				CFRelease(pair->second);
+		}
 	}
 
 	CGImageRef context_t::folding_dots (double width, double height) const
