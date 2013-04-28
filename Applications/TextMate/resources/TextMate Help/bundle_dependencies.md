@@ -4,7 +4,7 @@ title: Bundle Dependencies
 
 ## Description
 
-The following can be added to a bundle item (setting it for a bundle’s `info.plist` is equivalent of setting it for each item in that bundle):
+The following can be added to a bundle item (setting it for a bundle’s `info.plist` is equivalent to setting it for each item in that bundle):
 
 	require = ( { name = «name»; uuid = «uuid»; }, … );
 
@@ -16,7 +16,7 @@ If the UUID is that of a bundle, TextMate ensures that the bundle is available a
 
 ## Examples
 
-To be able to use `include = 'source.c';` in the Objective-C grammar, it should have the followung requirement:
+To be able to use `include = 'source.c';` in the Objective-C grammar, it should have the following requirement:
 
 	require = (
 	   {  name = 'source.c';
