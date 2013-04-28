@@ -18,6 +18,6 @@ The SCM system used is available as `scm.attr.«name»`. A few more SCM scopes a
 
 ## Other
 
-The path is available (reversed) as `attr.rev-path.«path»`. This is so that we can bind to e.g. `attr.rev-path.erb` to target all files with an ERb extension. This is more relevent for events or injection than key bindings.
+The path is available (reversed) as `attr.rev-path.«path»`. This is so that we can bind to e.g. `attr.rev-path.erb` to target all files with an ERb extension. This is more relevant for events or injection than key bindings.
 
 OS version is available. This allows us to have different versions of the same command for different OS versions (sometimes easier than testing for the OS version in the command when there is little code sharing between the two versions).

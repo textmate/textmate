@@ -11,13 +11,13 @@ Some non-visible stuff.
  * ⌥-click close buttons to close other tabs.
  * Hold ⌃ when dropping file to text view to insert its path.
 
-Holding ⌥ to “close other” also works in file browser or when using ⌘T (and ⌘T now does multi-select).
+Holding ⌥ to “close other” also works in the file browser or when using ⌘T (and ⌘T now does multi-select).
 
 One exception to “⌥ closes other” is when single-clicking the icon of a bundle (e.g. `.app`) in the file browser. In this case the single-click works as “Show Package Contents”.
 
 ## Completion (⎋)
 
-The current word suffix is taken into considuration when hiting escape.
+The current word suffix is taken into consideration when hitting escape.
 
 For example in this case:
 
