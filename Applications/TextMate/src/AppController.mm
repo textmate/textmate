@@ -139,9 +139,37 @@ BOOL HasDocumentWindow (NSArray* windows)
 	setup_rmate_server(!disableRmate, [rmateInterface isEqualToString:kRMateServerListenRemote] ? INADDR_ANY : INADDR_LOOPBACK, rmatePort);
 }
 
+- (void)checkExpirationDate:(id)sender
+{
+	NSTimeInterval const kSecondsPerDay = 24*60*60;
+
+	NSDate* currentDate    = [NSDate date];
+	NSDate* compileDate    = [NSDate dateWithString:@COMPILE_DATE @" 00:00:00 +0000"];
+	NSDate* warningDate    = [compileDate dateByAddingTimeInterval:30*kSecondsPerDay];
+	NSDate* expirationDate = [compileDate dateByAddingTimeInterval:60*kSecondsPerDay];
+
+	if([currentDate laterDate:expirationDate] == currentDate)
+	{
+		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You can get a new version from https://macromates.com/download.", @"Visit Website", nil, nil);
+		if(choice == NSAlertDefaultReturn) // "Visit Website"
+			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
+		[NSApp terminate:self];
+	}
+	else if([currentDate laterDate:warningDate] == currentDate)
+	{
+		NSInteger daysUntilExpiration = floor([expirationDate timeIntervalSinceNow] / kSecondsPerDay);
+		NSInteger choice = NSRunAlertPanel(@"TextMate is Outdated!", @"You are using a preview of TextMate 2 which is more than a month old. It will stop working in %ld day%s.", @"Visit Website", @"Cancel", nil, daysUntilExpiration, daysUntilExpiration == 1 ? "" : "s");
+		if(choice == NSAlertDefaultReturn) // "Visit Website"
+			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://macromates.com/download"]];
+	}
+	[NSTimer scheduledTimerWithTimeInterval:kSecondsPerDay target:self selector:@selector(checkExpirationDate:) userInfo:nil repeats:NO];
+}
+
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification
 {
 	D(DBF_AppController, bug("\n"););
+	[self checkExpirationDate:self];
+
 	settings_t::set_default_settings_path([[[NSBundle mainBundle] pathForResource:@"Default" ofType:@"tmProperties"] fileSystemRepresentation]);
 	settings_t::set_global_settings_path(path::join(path::home(), "Library/Application Support/TextMate/Global.tmProperties"));
 
