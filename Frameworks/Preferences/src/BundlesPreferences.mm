@@ -205,4 +205,12 @@ static std::string textify (std::string str)
 		else	[_bundlesManager uninstallBundle:bundle];
 	}
 }
+
+- (IBAction)didClickBundleLink:(NSTableView*)aTableView
+{
+	NSInteger rowIndex = [aTableView clickedRow];
+	bundles_db::bundle_ptr bundle = bundles[rowIndex];
+	if(bundle->html_url() != NULL_STR)
+		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithCxxString:bundle->html_url()]]];
+}
 @end

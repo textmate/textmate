@@ -17,4 +17,5 @@
 @property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, readonly) NSImage*  toolbarItemImage;
 @property (nonatomic, readonly) NSString* toolbarItemLabel;
+- (IBAction)didClickBundleLink:(id)sender;
 @end
