@@ -134,6 +134,8 @@ static std::string textify (std::string str)
 		std::sort(bundles.begin(), bundles.end(), [](bundles_db::bundle_ptr lhs, bundles_db::bundle_ptr rhs){ return (rhs.get()->installed() ? rhs.get()->path_updated() : rhs.get()->url_updated()) < (lhs.get()->installed() ? lhs.get()->path_updated() : lhs.get()->url_updated()); });
 	else if([[aTableColumn identifier] isEqualToString:@"description"])
 		std::sort(bundles.begin(), bundles.end(), [&lessThan](bundles_db::bundle_ptr lhs, bundles_db::bundle_ptr rhs){ return lessThan(textify(lhs.get()->description()), textify(rhs.get()->description())); });
+	else
+		return;
 
 	BOOL sortDescending = [aTableView indicatorImageInTableColumn:aTableColumn] == [NSImage imageNamed:@"NSAscendingSortIndicator"];
 	if(sortDescending)
