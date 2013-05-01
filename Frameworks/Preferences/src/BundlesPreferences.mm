@@ -158,9 +158,10 @@ static std::string textify (std::string str)
 	return NO;
 }
 
-- (BOOL)tableView:(NSTableView*)aTableView shouldSelectRow:(int)anInt
+- (BOOL)tableView:(NSTableView*)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
-	return [aTableView clickedColumn] != 0;
+	NSInteger clickedColumn = [aTableView clickedColumn];
+	return clickedColumn != [aTableView columnWithIdentifier:@"installed"] && clickedColumn != [aTableView columnWithIdentifier:@"link"];
 }
 
 // ==========================
