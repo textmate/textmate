@@ -469,10 +469,10 @@ BOOL HasDocumentWindow (NSArray* windows)
 	ASSERT([sender respondsToSelector:@selector(selectedItems)]);
 	ASSERT([[sender selectedItems] count] == 1);
 
-	self.filterWindowController = nil;
-
 	if(NSString* uuid = [[[sender selectedItems] lastObject] objectForKey:@"uuid"])
 		[[BundleEditor sharedInstance] revealBundleItem:bundles::lookup(to_s(uuid))];
+
+	self.filterWindowController = nil;
 }
 
 - (void)editBundleItemWithUUIDString:(NSString*)uuidString
