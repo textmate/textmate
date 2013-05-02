@@ -1,5 +1,12 @@
 # Changes
 
+## 2013-05-02 ([a9419](https://github.com/textmate/textmate/compare/a9417...a9419))
+
+* _Full Screen_ is now assigned to ⌃⌘F to follow Apple’s recommendations. Previously this key was used for _Replace All_ which is now instead ⌃⌘G and _Replace All in Selection_ is ⌃⇧⌘G. This is somewhat consistent with _Replace & Find_ bound to ⌥⌘G.
+* The scope selector used to inject grammar rules can now match against the left scope to make the injected rule rank higher than the rules from the context it gets injected into. *[Joachim Mårtensson]*
+* Swipe gestures (in file browser and HTML windows) to go back/forward in history is now detected differently. Some users have reported that scrolling up/down in the file browser was sometimes triggering an undesired swipe action, hopefully the new code works better. If not, you can let me know via IRC or the mailing list.
+* The bundles in Preferences → Bundles now show link arrows to go to the bundle’s (GitHub) page where you can find its issue tracker, detailed version history, instructions on how to clone the bundle, and it’s the origin for which you can submit pull requests.
+
 ## 2013-04-25 ([a9417](https://github.com/textmate/textmate/compare/a9415...a9417))
 
 * By default, font smoothing is now only disabled (for dark themes) on high-DPI displays. See [wiki for how to control font smoothing](https://github.com/textmate/textmate/wiki/Hidden-Settings#controlling-font-smoothing).
