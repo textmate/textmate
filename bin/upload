@@ -50,7 +50,7 @@ def aws_upload(path, url, key, acl, filename, content_type, access_key, policy, 
      -F "file=@#{path}" \
      #{url}
   }
-  STDERR << "*** error uploading to #{url} (#{rc})\n"
+  STDERR << "*** error uploading to #{url} (#{rc})\n" unless rc == '201'
   return rc == '201'
 end
 
