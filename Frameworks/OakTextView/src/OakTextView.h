@@ -47,7 +47,6 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 @property (nonatomic, readonly) BOOL                        hasMultiLineSelection;
 @property (nonatomic, readonly) BOOL                        hasSelection;
 @property (nonatomic) NSString*                             selectionString;
-- (IBAction)saveScratchMacro:(id)sender;
 
 @property (nonatomic) BOOL                                  isMacroRecording;
 
