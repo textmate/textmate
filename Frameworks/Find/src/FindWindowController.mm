@@ -33,7 +33,7 @@ NSString* const kUserDefaultsFindResultsHeightKey = @"findResultsHeight";
 	NSTextFieldCell* cell = [self.cell copy];
 	cell.stringValue = aString;
 
-	self.myIntrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, MIN([cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height, 225));
+	self.myIntrinsicContentSize = NSMakeSize(NSViewNoInstrinsicMetric, MAX(22, MIN([cell cellSizeForBounds:NSMakeRect(0, 0, NSWidth([self bounds]), CGFLOAT_MAX)].height, 225)));
 	[self invalidateIntrinsicContentSize];
 }
 @end
