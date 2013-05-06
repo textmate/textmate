@@ -11,6 +11,7 @@
 #import <ns/ns.h>
 #import <regexp/format_string.h>
 #import <bundles/bundles.h>
+#import <oak/compat.h>
 
 static void CreateHyperLink (NSTextField* textField, NSString* text, NSString* url)
 {
@@ -47,7 +48,7 @@ static bool run_auth_command (AuthorizationRef& auth, std::string const& cmd, ..
 	args.push_back(NULL);
 
 	bool res = false;
-	if(AuthorizationExecuteWithPrivileges(auth, cmd.c_str(), kAuthorizationFlagDefaults, &args[0], NULL) == errAuthorizationSuccess)
+	if(oak::execute_with_privileges(auth, cmd, kAuthorizationFlagDefaults, &args[0], NULL) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);

@@ -5,6 +5,7 @@
 #include <regexp/regexp.h>
 #include <OakSystem/application.h>
 #include <oak/debug.h>
+#include <oak/compat.h>
 
 OAK_DEBUG_VAR(File_Auth);
 
@@ -20,7 +21,7 @@ static bool install_auth_tool (osx::authorization_t const& auth)
 	{
 		char const* arguments[] = { "--install", NULL };
 		FILE* fp = NULL;
-		if(AuthorizationExecuteWithPrivileges(auth, toolPath.c_str(), kAuthorizationFlagDefaults, (char**)arguments, &fp) == errAuthorizationSuccess)
+		if(oak::execute_with_privileges(auth, toolPath, kAuthorizationFlagDefaults, (char**)arguments, &fp) == errAuthorizationSuccess)
 		{
 			int status;
 			int pid = wait(&status);

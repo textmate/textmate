@@ -4,6 +4,7 @@
 #include <io/entries.h>
 #include <text/decode.h>
 #include <OakSystem/application.h>
+#include <oak/compat.h>
 
 static bool run_auth_command (AuthorizationRef& auth, std::string const& cmd, ...)
 {
@@ -22,7 +23,7 @@ static bool run_auth_command (AuthorizationRef& auth, std::string const& cmd, ..
 	args.push_back(NULL);
 
 	bool res = false;
-	if(AuthorizationExecuteWithPrivileges(auth, cmd.c_str(), kAuthorizationFlagDefaults, &args[0], NULL) == errAuthorizationSuccess)
+	if(oak::execute_with_privileges(auth, cmd, kAuthorizationFlagDefaults, &args[0], NULL) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);
