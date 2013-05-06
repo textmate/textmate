@@ -142,7 +142,7 @@ namespace find
 
 	struct regular_find_t : find_implementation_t
 	{
-		regular_find_t (std::string const& str, options_t options) : options(options), is_at_bow(true)
+		regular_find_t (std::string const& str, options_t options) : options(options)
 		{
 			std::vector< std::vector<std::string> > matrix;
 			iterate(it, diacritics::make_range(str.data(), str.data() + str.size()))
@@ -285,7 +285,6 @@ namespace find
 		std::vector<dfa_node_ptr> const* current_node;
 		std::vector<char> match_data;
 		options_t options;
-		bool is_at_bow;
 
 		dfa_node_ptr node_from_string (std::string const& str, std::vector<dfa_node_ptr> children) const
 		{

@@ -111,7 +111,6 @@ namespace be
 
 	private:
 		bundles::item_ptr _bundle;
-		bundles::kind_t _kind;
 	};
 
 	struct bundle_entry_t : entry_t
