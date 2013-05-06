@@ -79,8 +79,6 @@ struct buffer_refresh_callback_t;
 	// = Mouse Support =
 	// =================
 
-	NSCursor* ibeamCursor;
-
 	NSPoint mouseDownPos;
 	ng::index_t mouseDownIndex;
 	NSInteger mouseDownModifierFlags;
@@ -2798,16 +2796,11 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 // = Cursor Support =
 // ==================
 
-- (NSCursor*)ibeamCursor
-{
-	return ibeamCursor;
-}
-
 - (void)setIbeamCursor:(NSCursor*)aCursor
 {
-	if(ibeamCursor != aCursor)
+	if(_ibeamCursor != aCursor)
 	{
-		ibeamCursor = aCursor;
+		_ibeamCursor = aCursor;
 		[[self window] invalidateCursorRectsForView:self];
 	}
 }
