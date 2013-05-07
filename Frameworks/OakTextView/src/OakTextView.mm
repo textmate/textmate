@@ -461,7 +461,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document = aDocument)
 	{
-		settings_t const& settings = document->settings();
+		settings_t const& settings = document->document_settings();
 
 		editor = ng::editor_for_document(document);
 		wrapColumn = settings.get(kSettingsWrapColumnKey, wrapColumn);
@@ -1104,7 +1104,7 @@ doScroll:
 		case bundles::kItemTypeSnippet:
 		{
 			[self recordSelector:@selector(insertSnippetWithOptions:) withArgument:ns::to_dictionary(item->plist())];
-			editor->snippet_dispatch(item->plist(), editor->variables(item->environment(), to_s([self scopeAttributes])));
+			editor->snippet_dispatch(item->plist(), editor->editor_variables(item->bundle_variables(), to_s([self scopeAttributes])));
 		}
 		break;
 
@@ -1134,7 +1134,7 @@ doScroll:
 		case bundles::kItemTypeMacro:
 		{
 			[self recordSelector:@selector(playMacroWithOptions:) withArgument:ns::to_dictionary(item->plist())];
-			editor->macro_dispatch(item->plist(), editor->variables(item->environment(), to_s([self scopeAttributes])));
+			editor->macro_dispatch(item->plist(), editor->editor_variables(item->bundle_variables(), to_s([self scopeAttributes])));
 		}
 		break;
 
@@ -1995,7 +1995,7 @@ static void update_menu_key_equivalents (NSMenu* menu, action_to_key_t const& ac
 {
 	AUTO_REFRESH;
 	[self recordSelector:_cmd withArgument:someOptions];
-	editor->snippet_dispatch(plist::convert((__bridge CFDictionaryRef)someOptions), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
+	editor->snippet_dispatch(plist::convert((__bridge CFDictionaryRef)someOptions), editor->editor_variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 }
 
 - (void)undo:(id)anArgument // MACRO?
@@ -2440,7 +2440,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 {
 	BOOL res = NO;
 
-	auto environment = editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes]));
+	auto environment = editor->editor_variables(std::map<std::string, std::string>(), to_s([self scopeAttributes]));
 	if(io::process_t process = io::spawn(std::vector<std::string>{ "/bin/sh", "-c", to_s(commandString) }, environment))
 	{
 		bool inputWasSelection = false;
@@ -2522,7 +2522,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	D(DBF_OakTextView_Macros, bug("%s\n", to_s(plist::convert((__bridge CFDictionaryRef)[[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])).c_str()););
 	AUTO_REFRESH;
 	if(NSArray* scratchMacro = [[NSUserDefaults standardUserDefaults] arrayForKey:@"OakMacroManagerScratchMacro"])
-			editor->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro }), editor->variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
+			editor->macro_dispatch(plist::convert((__bridge CFDictionaryRef)@{ @"commands" : scratchMacro }), editor->editor_variables(std::map<std::string, std::string>(), to_s([self scopeAttributes])));
 	else	NSBeep();
 }
 

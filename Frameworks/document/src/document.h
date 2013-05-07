@@ -249,9 +249,9 @@ namespace document
 		bool is_open () const                 { return _open_count != 0 && !_open_callback; }
 
 		std::string file_type () const;
-		settings_t const settings () const    { return settings_for_path(virtual_path(), scope(), path::parent(_path), variables(std::map<std::string, std::string>(), false)); }
+		settings_t const document_settings () const { return settings_for_path(virtual_path(), scope(), path::parent(_path), document_variables(std::map<std::string, std::string>(), false)); }
 
-		std::map<std::string, std::string> variables (std::map<std::string, std::string> map, bool sourceFileSystem = true) const;
+		std::map<std::string, std::string> document_variables (std::map<std::string, std::string> map, bool sourceFileSystem = true) const;
 
 		bool is_modified () const;
 		bool is_on_disk () const                            { return is_open() ? _is_on_disk : path::exists(path());                }

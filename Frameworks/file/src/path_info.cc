@@ -45,7 +45,7 @@ namespace file
 		return text::join(res, " ");
 	}
 
-	std::map<std::string, std::string> variables (std::string const& path)
+	std::map<std::string, std::string> path_variables (std::string const& path)
 	{
 		std::map<std::string, std::string> map;
 		if(path != NULL_STR)

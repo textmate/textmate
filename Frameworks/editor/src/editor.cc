@@ -1365,10 +1365,10 @@ namespace ng
 		return ng::scope(_buffer, _selections, scopeAttributes);
 	}
 
-	std::map<std::string, std::string> editor_t::variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const
+	std::map<std::string, std::string> editor_t::editor_variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const
 	{
 		if(_document)
-				map = _document->variables(map);
+				map = _document->document_variables(map);
 		else	map = variables_for_path(NULL_STR, "", map);
 
 		map.insert(std::make_pair("TM_TAB_SIZE", std::to_string(_buffer.indent().tab_size())));
@@ -1416,7 +1416,7 @@ namespace ng
 
 		scope::context_t const& s = scope(scopeAttributes);
 		map.insert(std::make_pair("TM_SCOPE", to_s(s.right)));
-		return bundles::environment(s, map);
+		return bundles::scope_variables(s, map);
 	}
 
 	// ========

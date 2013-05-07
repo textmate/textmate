@@ -201,11 +201,11 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 	else
 	{
 		if(document && document->is_open())
-			baseEnv = ng::editor_for_document(document)->variables(baseEnv, to_s([controller scopeAttributes]));
+			baseEnv = ng::editor_for_document(document)->editor_variables(baseEnv, to_s([controller scopeAttributes]));
 		else if(document)
-			baseEnv = bundles::environment(document->file_type(), document->variables(baseEnv));
+			baseEnv = bundles::scope_variables(document->file_type(), document->document_variables(baseEnv));
 		else
-			baseEnv = bundles::environment(scope::scope_t(), variables_for_path(NULL_STR, "", baseEnv));
+			baseEnv = bundles::scope_variables(scope::scope_t(), variables_for_path(NULL_STR, "", baseEnv));
 
 		if(controller)
 			[controller updateVariables:baseEnv];
@@ -215,7 +215,7 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 
 		bundles::item_ptr item = bundles::lookup(command.uuid);
 		if(item)
-			baseEnv = item->environment(baseEnv);
+			baseEnv = item->bundle_variables(baseEnv);
 
 		for(auto requirement : command.requirements)
 		{

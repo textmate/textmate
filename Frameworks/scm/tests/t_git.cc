@@ -34,7 +34,7 @@ struct setup_t
 
 	std::string variable (std::string const& var) const
 	{
-		auto vars = info->variables();
+		auto vars = info->scm_variables();
 		return vars.find(var) != vars.end() ? vars[var] : NULL_STR;
 	}
 

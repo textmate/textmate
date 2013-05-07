@@ -25,7 +25,7 @@ void test_basic_status ()
 
 		std::string expectedBranch = text::format("file://%s/%s", jailPath.c_str(), repoName.c_str());
 
-		auto vars = info->variables();
+		auto vars = info->scm_variables();
 		OAK_ASSERT_EQ(vars["TM_SCM_NAME"],   "svn");
 		OAK_ASSERT_EQ(vars["TM_SCM_BRANCH"], expectedBranch);
 

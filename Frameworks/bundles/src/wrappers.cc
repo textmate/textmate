@@ -23,7 +23,7 @@ namespace bundles
 		return res;
 	}
 
-	std::map<std::string, std::string> environment (scope::context_t const& scope, std::map<std::string, std::string> const& base)
+	std::map<std::string, std::string> scope_variables (scope::context_t const& scope, std::map<std::string, std::string> const& base)
 	{
 		std::map<std::string, std::string> res = base;
 		std::vector<item_ptr> const& items = query(kFieldSettingName, "shellVariables", scope, kItemTypeSettings, oak::uuid_t(), false);
@@ -34,7 +34,7 @@ namespace bundles
 			stack.push_back(std::set<std::string>());
 			citerate(pair, parse_variables(*item))
 			{
-				std::string const value = format_string::expand(pair->second, (*item)->environment(res));
+				std::string const value = format_string::expand(pair->second, (*item)->bundle_variables(res));
 				res[pair->first] = value;
 				stack.back().insert(pair->first);
 			}

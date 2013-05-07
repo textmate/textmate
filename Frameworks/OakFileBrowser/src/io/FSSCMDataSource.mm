@@ -139,7 +139,7 @@ _Iter prune_path_children (_Iter it, _Iter last)
 			std::string name = path::display_name(rootPath);
 			if(!scmInfo->dry())
 			{
-				auto const& vars = scmInfo->variables();
+				auto const& vars = scmInfo->scm_variables();
 				auto const branch = vars.find("TM_SCM_BRANCH");
 				if(branch != vars.end())
 					name = text::format("%s (%s)", path::display_name(scmInfo->root_path()).c_str(), branch->second.c_str());

@@ -24,7 +24,7 @@ namespace scm
 		bool dry () const;
 
 		std::string root_path () const;
-		std::map<std::string, std::string> variables () const;
+		std::map<std::string, std::string> scm_variables () const;
 		std::map<std::string, scm::status::type> const& status () const;
 		scm::status::type status (std::string const& path) const;
 

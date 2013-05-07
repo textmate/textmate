@@ -991,7 +991,7 @@ namespace
 			map["projectDirectory"] = to_s(self.projectPath);
 
 		std::string docDirectory = _selectedDocument->path() != NULL_STR ? path::parent(_selectedDocument->path()) : to_s(self.untitledSavePath);
-		settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, _selectedDocument->variables(map, false));
+		settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, _selectedDocument->document_variables(map, false));
 		self.window.title = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName))];
 	}
 	else
@@ -1077,7 +1077,7 @@ namespace
 		{
 			__weak DocumentController* weakSelf = self;
 			_projectSCMInfo->add_callback(^(scm::info_t const& info){
-				weakSelf.projectSCMVariables = info.variables();
+				weakSelf.projectSCMVariables = info.scm_variables();
 			});
 		}
 		else
@@ -1139,7 +1139,7 @@ namespace
 			__weak DocumentController* weakSelf = self;
 			_documentSCMInfo->add_callback(^(scm::info_t const& info){
 				weakSelf.documentSCMStatus    = info.status(to_s(weakSelf.documentPath));
-				weakSelf.documentSCMVariables = info.variables();
+				weakSelf.documentSCMVariables = info.scm_variables();
 			});
 		}
 		else
@@ -1922,7 +1922,7 @@ namespace
 		}
 	}
 
-	settings_t const settings = _selectedDocument->settings();
+	settings_t const settings = _selectedDocument->document_settings();
 	path::glob_t const excludeGlob(settings.get(kSettingsExcludeKey, ""));
 	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 

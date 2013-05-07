@@ -19,7 +19,7 @@ void test_basic_status ()
 	{
 		wait_for_status(info);
 
-		auto vars = info->variables();
+		auto vars = info->scm_variables();
 		OAK_ASSERT_EQ(vars["TM_SCM_NAME"],   "hg");
 		OAK_ASSERT_EQ(vars["TM_SCM_BRANCH"], "default");
 

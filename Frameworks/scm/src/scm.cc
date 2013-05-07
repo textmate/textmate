@@ -90,7 +90,7 @@ namespace scm
 		return dry() ? NULL_STR : _shared_info->root_path();
 	}
 
-	std::map<std::string, std::string> info_t::variables () const
+	std::map<std::string, std::string> info_t::scm_variables () const
 	{
 		return dry() ? std::map<std::string, std::string>() : _shared_info->variables();
 	}

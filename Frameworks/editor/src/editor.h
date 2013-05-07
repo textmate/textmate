@@ -174,7 +174,7 @@ namespace ng
 		void execute_dispatch (plist::dictionary_t const& args, std::map<std::string, std::string> const& variables);
 
 		scope::context_t scope (std::string const& scopeAttributes) const;
-		std::map<std::string, std::string> variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const;
+		std::map<std::string, std::string> editor_variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const;
 
 		std::vector<std::string> const& choices () const;
 		std::string placeholder_content (ng::range_t* placeholderSelection = NULL) const;

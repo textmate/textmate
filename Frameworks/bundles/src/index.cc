@@ -205,11 +205,11 @@ namespace bundles
 		return NULL_STR;
 	}
 
-	std::map<std::string, std::string> item_t::environment (std::map<std::string, std::string> base) const
+	std::map<std::string, std::string> item_t::bundle_variables (std::map<std::string, std::string> base) const
 	{
 		if(_kind != kItemTypeBundle)
 		{
-			base = bundle()->environment(base);
+			base = bundle()->bundle_variables(base);
 
 			base["TM_BUNDLE_ITEM_NAME"] = name();
 			base["TM_BUNDLE_ITEM_UUID"] = to_s(uuid());

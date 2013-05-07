@@ -484,7 +484,7 @@ namespace document
 		return _file_type;
 	}
 
-	std::map<std::string, std::string> document_t::variables (std::map<std::string, std::string> map, bool sourceFileSystem) const
+	std::map<std::string, std::string> document_t::document_variables (std::map<std::string, std::string> map, bool sourceFileSystem) const
 	{
 		map["TM_DISPLAYNAME"]   = display_name();
 		map["TM_DOCUMENT_UUID"] = to_s(identifier());
@@ -522,7 +522,7 @@ namespace document
 			}
 		}
 
-		settings_t const& settings = this->settings();
+		settings_t const& settings = this->document_settings();
 		_buffer->indent() = text::indent_t(settings.get(kSettingsTabSizeKey, 4), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false));
 		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, "en"));
 		_buffer->set_live_spelling(settings.get(kSettingsSpellCheckingKey, false));
