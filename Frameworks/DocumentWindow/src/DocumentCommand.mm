@@ -49,31 +49,6 @@ namespace
 	};
 }
 
-// =========================
-// = Checking requirements =
-// =========================
-
-static std::vector<std::string> search_paths (std::map<std::string, std::string> const& environment)
-{
-	std::vector<std::string> res;
-	auto searchPath = environment.find("PATH");
-	if(searchPath != environment.end())
-	{
-		citerate(it, text::tokenize(searchPath->second.begin(), searchPath->second.end(), ':'))
-		{
-			if(*it != "")
-				res.push_back(*it);
-		}
-	}
-	else
-	{
-		fprintf(stderr, "no PATH!!!\n");
-		iterate(pair, environment)
-			fprintf(stderr, "%s = %s\n", pair->first.c_str(), pair->second.c_str());
-	}
-	return res;
-}
-
 // =======================
 // = Init, Saving, Input =
 // =======================
@@ -213,53 +188,37 @@ void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::range
 		if(callback)
 			callback->update_environment(baseEnv);
 
-		bundles::item_ptr item = bundles::lookup(command.uuid);
-		if(item)
+		if(bundles::item_ptr item = bundles::lookup(command.uuid))
+		{
 			baseEnv = item->bundle_variables(baseEnv);
 
-		for(auto requirement : command.requirements)
-		{
-			std::vector<std::string> candidates;
-
-			if(baseEnv.find(requirement.variable) != baseEnv.end())
-				candidates.push_back(baseEnv[requirement.variable]);
-
-			for(auto path : search_paths(baseEnv))
-				candidates.push_back(path::join(path, requirement.command));
-
-			for(auto path : requirement.locations)
-				candidates.push_back(format_string::expand(path, baseEnv));
-
-			auto exe = std::find_if(candidates.begin(), candidates.end(), [](std::string const& path){ return path::is_executable(path); });
-			if(exe != candidates.end())
-			{
-				if(requirement.variable != NULL_STR)
-						baseEnv[requirement.variable] = *exe;
-				else	baseEnv["PATH"] += ":" + path::parent(*exe);
-			}
-			else
+			bundles::required_command_t failedRequirement;
+			if(missing_requirement(item, baseEnv, &failedRequirement))
 			{
 				std::vector<std::string> paths;
-				for(auto path : search_paths(baseEnv))
-					paths.push_back(path::with_tilde(path));
+				std::string const tmp = baseEnv["PATH"];
+				for(auto path : text::tokenize(tmp.begin(), tmp.end(), ':'))
+				{
+					if(path != "")
+						paths.push_back(path::with_tilde(path));
+				}
 
 				std::string const title = text::format("Unable to run “%.*s”.", (int)command.name.size(), command.name.data());
-				std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", requirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), requirement.variable.c_str());
+				std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), failedRequirement.variable.c_str());
 
 				NSAlert* alert = [[NSAlert alloc] init];
 				[alert setAlertStyle:NSCriticalAlertStyle];
 				[alert setMessageText:[NSString stringWithCxxString:title]];
 				[alert setInformativeText:[NSString stringWithCxxString:message]];
 				[alert addButtonWithTitle:@"OK"];
-				if(requirement.more_info_url != NULL_STR)
+				if(failedRequirement.more_info_url != NULL_STR)
 					[alert addButtonWithTitle:@"More Info…"];
 
-				NSString* moreInfo = [NSString stringWithCxxString:requirement.more_info_url];
+				NSString* moreInfo = [NSString stringWithCxxString:failedRequirement.more_info_url];
 				OakShowAlertForWindow(alert, [controller window], ^(NSInteger button){
 					if(button == NSAlertSecondButtonReturn)
 						[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:moreInfo]];
 				});
-
 				return;
 			}
 		}

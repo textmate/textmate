@@ -44,22 +44,11 @@ inline char const* to_s (output_caret::type const& caret)
 
 struct PUBLIC bundle_command_t
 {
-	struct shell_command_t
-	{
-		shell_command_t (std::string const& command, std::string moreInfoUrl = NULL_STR, std::string const& variable = NULL_STR, std::vector<std::string> const& locations = std::vector<std::string>()) : command(command), more_info_url(moreInfoUrl), variable(variable), locations(locations) { }
-
-		std::string command;
-		std::string more_info_url;
-		std::string variable;
-		std::vector<std::string> locations;
-	};
-
 	std::string name;
 	oak::uuid_t uuid;
 	scope::selector_t scope_selector;
 	std::string command;
 
-	std::vector<shell_command_t> requirements;
 	pre_exec::type pre_exec;
 
 	input::type input;

@@ -92,35 +92,6 @@ plist::dictionary_t convert_command_from_v1 (plist::dictionary_t plist)
 	return plist;
 }
 
-static std::vector<std::string> convert_locations (plist::array_t const& array)
-{
-	std::vector<std::string> res;
-	iterate(it, array)
-	{
-		if(std::string const* str = boost::get<std::string>(&*it))
-			res.push_back(*str);
-	}
-	return res;
-}
-
-static std::vector<bundle_command_t::shell_command_t> convert_requirements (plist::array_t const& array)
-{
-	std::vector<bundle_command_t::shell_command_t> res;
-	iterate(info, array)
-	{
-		std::string command, moreInfoURL = NULL_STR, variable = NULL_STR; plist::array_t locations;
-		if(plist::get_key_path(*info, "command", command))
-		{
-			plist::get_key_path(*info, "moreInfoURL", moreInfoURL);
-			plist::get_key_path(*info, "variable", variable);
-			if(plist::get_key_path(*info, "locations", locations))
-					res.push_back(bundle_command_t::shell_command_t(command, moreInfoURL, variable, convert_locations(locations)));
-			else	res.push_back(bundle_command_t::shell_command_t(command, moreInfoURL));
-		}
-	}
-	return res;
-}
-
 static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& res)
 {
 	std::string scopeSelectorString, preExecString, inputString, inputFormatString, inputFallbackString, outputFormatString, outputLocationString, outputCaretString;
@@ -151,10 +122,6 @@ static void setup_fields (plist::dictionary_t const& plist, bundle_command_t& re
 
 	if(plist::get_key_path(plist, "outputCaret", outputCaretString))
 		res.output_caret = pick<output_caret::type>(outputCaretString, "afterOutput", "selectOutput", "interpolateByChar", "interpolateByLine", "heuristic", NULL);
-
-	plist::array_t requiredCommands;
-	if(plist::get_key_path(plist, "requiredCommands", requiredCommands))
-		res.requirements = convert_requirements(requiredCommands);
 
 	plist::get_key_path(plist, "autoScrollOutput", res.auto_scroll_output);
 	plist::get_key_path(plist, "disableOutputAutoIndent", res.disable_output_auto_indent);
