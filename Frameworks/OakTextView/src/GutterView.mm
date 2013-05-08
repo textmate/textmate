@@ -212,11 +212,9 @@ struct data_source_t
 	return NULL;
 }
 
-- (std::vector<data_source_t> const&)visibleColumnDataSources
+- (std::vector<data_source_t>)visibleColumnDataSources
 {
-	static std::vector<data_source_t> visibleColumnDataSources;
-	visibleColumnDataSources.clear();
-
+	std::vector<data_source_t> visibleColumnDataSources;
 	iterate(it, columnDataSources)
 	{
 		if([self visibilityForColumnWithIdentifier:[NSString stringWithCxxString:it->identifier]])

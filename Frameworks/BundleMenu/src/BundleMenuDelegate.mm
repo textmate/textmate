@@ -9,7 +9,7 @@ OAK_DEBUG_VAR(BundleMenu);
 
 @interface NSObject (HasSelection)
 - (BOOL)hasSelection;
-- (scope::context_t const&)scopeContext;
+- (scope::context_t)scopeContext;
 @end
 
 @implementation BundleMenuDelegate

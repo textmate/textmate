@@ -135,7 +135,7 @@ struct buffer_refresh_callback_t;
 - (NSImage*)imageForRanges:(ng::ranges_t const&)ranges imageRect:(NSRect*)outRect;
 - (void)highlightRanges:(ng::ranges_t const&)ranges;
 - (NSRange)nsRangeForRange:(ng::range_t const&)range;
-- (ng::range_t const&)rangeForNSRange:(NSRange)nsRange;
+- (ng::range_t)rangeForNSRange:(NSRange)nsRange;
 @property (nonatomic, readonly) ng::ranges_t const& markedRanges;
 @property (nonatomic) NSDate* optionDownDate;
 @property (nonatomic) OakTimer* initiateDragTimer;
@@ -758,14 +758,13 @@ doScroll:
 	return NSMakeRange(location, length);
 }
 
-- (ng::range_t const&)rangeForNSRange:(NSRange)nsRange
+- (ng::range_t)rangeForNSRange:(NSRange)nsRange
 {
 	std::string const text = editor->as_string();
 	char const* base = text.data();
 	ng::index_t from = utf16::advance(base, nsRange.location, base + text.size()) - base;
 	ng::index_t to   = utf16::advance(base + from.index, nsRange.length, base + text.size()) - base;
-	static ng::range_t res;
-	return res = ng::range_t(from, to);
+	return ng::range_t(from, to);
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)aRange
@@ -2337,10 +2336,9 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	[self setNeedsDisplay:YES];
 }
 
-- (scope::context_t const&)scopeContext
+- (scope::context_t)scopeContext
 {
-	static scope::context_t res;
-	return res = editor->scope(to_s([self scopeAttributes]));
+	return editor->scope(to_s([self scopeAttributes]));
 }
 
 - (NSString*)scopeAsString // Used by https://github.com/emmetio/Emmet.tmplugin
@@ -2418,22 +2416,20 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	return kFoldingNone;
 }
 
-- (GVLineRecord const&)lineRecordForPosition:(CGFloat)yPos
+- (GVLineRecord)lineRecordForPosition:(CGFloat)yPos
 {
-	static GVLineRecord res;
 	if(!layout)
-		return res = GVLineRecord();
+		return GVLineRecord();
 	auto record = layout->line_record_for(yPos);
-	return res = GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
+	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
 }
 
-- (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn
+- (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn
 {
-	static GVLineRecord res;
 	if(!layout)
-		return res = GVLineRecord();
+		return GVLineRecord();
 	auto record = layout->line_record_for(text::pos_t(aLine, aColumn));
-	return res = GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
+	return GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
 }
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit

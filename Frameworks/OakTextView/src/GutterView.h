@@ -13,8 +13,8 @@ struct GVLineRecord
 };
 
 @protocol GutterViewDelegate
-- (GVLineRecord const&)lineRecordForPosition:(CGFloat)yPos;
-- (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
+- (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
+- (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
 @end
 
 @protocol GutterViewColumnDataSource

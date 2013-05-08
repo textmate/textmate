@@ -50,13 +50,13 @@ PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>
 
 @property (nonatomic) BOOL                                  isMacroRecording;
 
-- (GVLineRecord const&)lineRecordForPosition:(CGFloat)yPos;
-- (GVLineRecord const&)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
+- (GVLineRecord)lineRecordForPosition:(CGFloat)yPos;
+- (GVLineRecord)lineFragmentForLine:(NSUInteger)aLine column:(NSUInteger)aColumn;
 
 - (BOOL)filterDocumentThroughCommand:(NSString*)commandString input:(input::type)inputUnit output:(output::type)outputUnit;
 
 - (NSPoint)positionForWindowUnderCaret;
-- (scope::context_t const&)scopeContext;
+- (scope::context_t)scopeContext;
 - (folding_state_t)foldingStateForLine:(NSUInteger)lineNumber;
 
 - (IBAction)toggleMacroRecording:(id)sender;
