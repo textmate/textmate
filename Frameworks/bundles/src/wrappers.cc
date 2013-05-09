@@ -132,11 +132,11 @@ namespace bundles
 		riterate(item, items)
 		{
 			stack.push_back(std::set<std::string>());
-			citerate(pair, parse_variables(*item))
+			for(auto pair : parse_variables(*item))
 			{
-				std::string const value = format_string::expand(pair->second, (*item)->bundle_variables(res));
-				res[pair->first] = value;
-				stack.back().insert(pair->first);
+				auto tmp = (*item)->bundle_variables();
+				res[pair.first] = format_string::expand(pair.second, tmp << res);
+				stack.back().insert(pair.first);
 			}
 		}
 

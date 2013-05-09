@@ -205,11 +205,12 @@ namespace bundles
 		return NULL_STR;
 	}
 
-	std::map<std::string, std::string> item_t::bundle_variables (std::map<std::string, std::string> base) const
+	std::map<std::string, std::string> item_t::bundle_variables () const
 	{
+		std::map<std::string, std::string> base;
 		if(_kind != kItemTypeBundle)
 		{
-			base = bundle()->bundle_variables(base);
+			base << bundle()->bundle_variables();
 
 			base["TM_BUNDLE_ITEM_NAME"] = name();
 			base["TM_BUNDLE_ITEM_UUID"] = to_s(uuid());
@@ -221,19 +222,12 @@ namespace bundles
 				base["TM_BUNDLE_SUPPORT"] = bundleSupportPath;
 		}
 
-		iterate(require, _required_bundles)
+		for(auto require : _required_bundles)
 		{
-			auto bundles = query(kFieldName, require->_name, scope::wildcard, kItemTypeBundle, require->_uuid);
+			auto bundles = query(kFieldName, require._name, scope::wildcard, kItemTypeBundle, require._uuid);
 			if(bundles.size() == 1)
-			{
-				std::map<std::string, std::string> vars;
-				vars.insert(std::make_pair("name", require->_name));
-				base[format_string::expand("TM_${name/.*/\\U${0/[^a-zA-Z]+/_/g}/}_BUNDLE_SUPPORT", vars)] = (bundles.back())->support_path();
-			}
-			else
-			{
-				fprintf(stderr, "*** %s: unable to find required bundle: %s / %s\n", full_name().c_str(), require->_name.c_str(), to_s(require->_uuid).c_str());
-			}
+					base[format_string::expand("TM_${name/.*/\\U${0/[^a-zA-Z]+/_/g}/}_BUNDLE_SUPPORT", std::map<std::string, std::string>{ { "name", require._name } })] = (bundles.back())->support_path();
+			else	fprintf(stderr, "*** %s: unable to find required bundle: %s / %s\n", full_name().c_str(), require._name.c_str(), to_s(require._uuid).c_str());
 		}
 
 		return base;

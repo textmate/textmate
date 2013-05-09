@@ -187,7 +187,7 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 
 		if(bundles::item_ptr item = bundles::lookup(command.uuid))
 		{
-			baseEnv = item->bundle_variables(baseEnv);
+			baseEnv << item->bundle_variables();
 
 			bundles::required_command_t failedRequirement;
 			if(missing_requirement(item, baseEnv, &failedRequirement))

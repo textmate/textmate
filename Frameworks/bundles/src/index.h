@@ -52,7 +52,7 @@ namespace bundles
 		oak::uuid_t const& uuid () const;
 		oak::uuid_t bundle_uuid () const;
 		scope::selector_t const& scope_selector () const;
-		std::map<std::string, std::string> bundle_variables (std::map<std::string, std::string> base = string_map_t()) const;
+		std::map<std::string, std::string> bundle_variables () const;
 		plist::dictionary_t const& plist () const;
 		kind_t kind () const;
 
