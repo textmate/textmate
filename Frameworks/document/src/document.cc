@@ -484,20 +484,28 @@ namespace document
 		return _file_type;
 	}
 
-	std::map<std::string, std::string> document_t::document_variables (std::map<std::string, std::string> map, bool sourceFileSystem) const
+	std::map<std::string, std::string> document_t::document_variables () const
 	{
-		map["TM_DISPLAYNAME"]   = display_name();
-		map["TM_DOCUMENT_UUID"] = to_s(identifier());
+		std::map<std::string, std::string> map = {
+			{ "TM_DISPLAYNAME",    display_name()     },
+			{ "TM_DOCUMENT_UUID",  to_s(identifier()) },
+		};
 
 		if(path() != NULL_STR)
 		{
 			map["TM_FILEPATH"]  = path();
 			map["TM_FILENAME"]  = path::name(path());
 			map["TM_DIRECTORY"] = path::parent(path());
-			map["PWD"]          = path::parent(path());
 		}
+		return map;
+	}
 
-		return sourceFileSystem ? variables_for_path(path(), scope(), map) : map;
+	std::map<std::string, std::string> document_t::legacy_variables (std::map<std::string, std::string> map) const
+	{
+		auto core = document_variables();
+		map.insert(core.begin(), core.end());
+		map["PWD"] = path::parent(path());
+		return variables_for_path(path(), scope(), map);
 	}
 
 	void document_t::setup_buffer ()

@@ -1111,7 +1111,7 @@ doScroll:
 
 - (std::map<std::string, std::string>)variablesForBundleItem:(bundles::item_ptr const&)item
 {
-	return editor->editor_variables(item ? item->bundle_variables() : std::map<std::string, std::string>(), to_s([self scopeAttributes]));
+	return editor->legacy_variables(item ? item->bundle_variables() : std::map<std::string, std::string>(), to_s([self scopeAttributes]));
 }
 
 - (std::map<std::string, std::string>)variables

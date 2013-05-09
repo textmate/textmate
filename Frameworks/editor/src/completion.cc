@@ -76,7 +76,7 @@ namespace ng
 			cmd.output        = output::replace_selection;
 			cmd.output_format = output_format::completion_list;
 
-			std::map<std::string, std::string> env = editor_variables(item->bundle_variables(), scopeAttributes);
+			std::map<std::string, std::string> env = legacy_variables(item->bundle_variables(), scopeAttributes);
 			env["TM_CURRENT_WORD"] = prefix;
 			completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));
 			command::runner_ptr runner = command::runner(cmd, _buffer, _selections, env, delegate);

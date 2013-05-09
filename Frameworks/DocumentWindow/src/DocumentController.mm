@@ -986,12 +986,14 @@ namespace
 {
 	if(_selectedDocument)
 	{
-		std::map<std::string, std::string> map = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+		auto map = _selectedDocument->document_variables();
+		auto const& scm = _documentSCMVariables.empty() ? _projectSCMVariables : _documentSCMVariables;
+		map.insert(scm.begin(), scm.end());
 		if(self.projectPath)
 			map["projectDirectory"] = to_s(self.projectPath);
 
 		std::string docDirectory = _selectedDocument->path() != NULL_STR ? path::parent(_selectedDocument->path()) : to_s(self.untitledSavePath);
-		settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, _selectedDocument->document_variables(map, false));
+		settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), docDirectory, map);
 		self.window.title = [NSString stringWithCxxString:settings.get(kSettingsWindowTitleKey, to_s(self.documentDisplayName))];
 	}
 	else

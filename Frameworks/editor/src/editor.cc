@@ -1365,15 +1365,16 @@ namespace ng
 		return ng::scope(_buffer, _selections, scopeAttributes);
 	}
 
-	std::map<std::string, std::string> editor_t::editor_variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const
+	std::map<std::string, std::string> editor_t::editor_variables (std::string const& scopeAttributes) const
 	{
-		if(_document)
-				map = _document->document_variables(map);
-		else	map = variables_for_path(NULL_STR, "", map);
+		std::map<std::string, std::string> map = {
+			{ "TM_TAB_SIZE",  std::to_string(_buffer.indent().tab_size()) },
+			{ "TM_SOFT_TABS", _buffer.indent().soft_tabs() ? "YES" : "NO" },
+			{ "TM_SELECTION", to_s(_buffer, _selections)                  },
+		};
 
-		map.insert(std::make_pair("TM_TAB_SIZE", std::to_string(_buffer.indent().tab_size())));
-		map.insert(std::make_pair("TM_SOFT_TABS", _buffer.indent().soft_tabs() ? "YES" : "NO"));
-		map.insert(std::make_pair("TM_SELECTION", to_s(_buffer, _selections)));
+		scope::context_t const& s = scope(scopeAttributes);
+		map.insert(std::make_pair("TM_SCOPE", to_s(s.right)));
 
 		if(_selections.size() == 1)
 		{
@@ -1391,7 +1392,7 @@ namespace ng
 				map.insert(std::make_pair("TM_CURRENT_WORD",  _buffer.substr(wordRange.min().index, wordRange.max().index)));
 				map.insert(std::make_pair("TM_CURRENT_LINE",  _buffer.substr(_buffer.begin(pos.line), _buffer.eol(pos.line))));
 
-				map.insert(std::make_pair("TM_SCOPE_LEFT",    to_s(_buffer.scope(caret).left)));
+				map.insert(std::make_pair("TM_SCOPE_LEFT",    to_s(s.left)));
 			}
 			else
 			{
@@ -1413,10 +1414,19 @@ namespace ng
 				}
 			}
 		}
+		return map;
+	}
 
-		scope::context_t const& s = scope(scopeAttributes);
-		map.insert(std::make_pair("TM_SCOPE", to_s(s.right)));
-		return bundles::scope_variables(s, map);
+	std::map<std::string, std::string> editor_t::legacy_variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const
+	{
+		auto core = editor_variables(scopeAttributes);
+		map.insert(core.begin(), core.end());
+
+		if(_document)
+				map = _document->legacy_variables(map);
+		else	map = variables_for_path(NULL_STR, "", map);
+
+		return bundles::scope_variables(scope(scopeAttributes), map);
 	}
 
 	// ========
