@@ -1122,7 +1122,7 @@ doScroll:
 	return [self variablesForBundleItem:bundles::item_ptr()];
 }
 
-- (void)performBundleItem:(bundles::item_ptr const&)item
+- (void)performBundleItem:(bundles::item_ptr)item
 {
 	// D(DBF_OakTextView_BundleItems, bug("%s\n", anItem->full_name().c_str()););
 	AUTO_REFRESH;
@@ -1146,14 +1146,14 @@ doScroll:
 					if(success)
 					{
 						AUTO_REFRESH;
-						document::run(command, document->buffer(), editor->ranges(), document);
+						document::run(command, document->buffer(), editor->ranges(), document, [self variablesForBundleItem:item]);
 					}
 				}];
 			}
 			else
 			{
 				command.pre_exec = pre_exec::nop;
-				document::run(command, document->buffer(), editor->ranges(), document);
+				document::run(command, document->buffer(), editor->ranges(), document, [self variablesForBundleItem:item]);
 			}
 		}
 		break;
