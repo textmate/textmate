@@ -15,7 +15,7 @@ public:
 			void show_documents (std::vector<document::document_ptr> const& documents) const { }
 			void show_document (oak::uuid_t const& collection, document::document_ptr document, text::range_t const& range, bool bringToFront) const { }
 
-			void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& baseEnv, std::string const& pwd, document::run_callback_ptr callback)
+			void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& baseEnv, std::string const& pwd)
 			{
 				struct delegate_t : command::delegate_t
 				{

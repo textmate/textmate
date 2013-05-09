@@ -29,9 +29,9 @@ namespace document
 		ui_proxy()->show_browser(path);
 	}
 
-	void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env, std::string const& pwd, run_callback_ptr callback)
+	void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env, std::string const& pwd)
 	{
-		ui_proxy()->run(command, buffer, selection, document, env, pwd, callback);
+		ui_proxy()->run(command, buffer, selection, document, env, pwd);
 	}
 
 	// ============

@@ -137,7 +137,7 @@ void delegate_t::show_error (bundle_command_t const& command, int rc, std::strin
 // = Public API =
 // ==============
 
-void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> baseEnv, std::string const& pwd, document::run_callback_ptr callback)
+void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> baseEnv, std::string const& pwd)
 {
 	DocumentController* controller = [DocumentController controllerForDocument:document];
 
@@ -170,7 +170,7 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 		bundle_command_t commandNonRef = command;
 		[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:controller.window defaultDirectory:controller.untitledSavePath completionHandler:^(BOOL success){
 			if(success)
-				run_impl(commandNonRef, buffer, selection, document, baseEnv, pwd, callback);
+				run_impl(commandNonRef, buffer, selection, document, baseEnv, pwd);
 		}];
 	}
 	else
@@ -184,9 +184,6 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 
 		if(controller)
 			[controller updateVariables:baseEnv];
-
-		if(callback)
-			callback->update_environment(baseEnv);
 
 		if(bundles::item_ptr item = bundles::lookup(command.uuid))
 		{

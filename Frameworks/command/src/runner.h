@@ -24,8 +24,6 @@ namespace command
 	{
 		virtual ~delegate_t () { }
 
-		virtual void update_environment (std::map<std::string, std::string>& env) { }
-
 		virtual text::range_t write_unit_to_fd (int fd, input::type unit, input::type fallbackUnit, input_format::type format, scope::selector_t const& scopeSelector, std::map<std::string, std::string>& variables, bool* inputWasSelection) = 0;
 
 		virtual bool accept_html_data (runner_ptr runner, char const* data, size_t len) { return true; }
