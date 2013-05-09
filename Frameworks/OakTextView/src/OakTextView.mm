@@ -2645,34 +2645,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	}
 	else if(bundles::item_ptr handler = OakShowMenuForBundleItems(std::vector<bundles::item_ptr>(allHandlers.begin(), allHandlers.end()), [self positionForWindowUnderCaret]))
 	{
-		struct callback_t : document::run_callback_t
-		{
-			callback_t (std::vector<std::string> const& paths, std::string const& modifierFlags) : _paths(paths), _modifier_flags(modifierFlags) { }
-
-			void update_environment (std::map<std::string, std::string>& env)
-			{
-				env["PWD"] = format_string::expand("${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$TMPDIR}}", env);
-				env["TM_MODIFIER_FLAGS"] = _modifier_flags;
-
-				std::vector<std::string> files;
-				iterate(path, _paths)
-					files.push_back(path::relative_to(*path, env["PWD"]));
-
-				env["TM_DROPPED_FILE"]     = files.front();
-				env["TM_DROPPED_FILEPATH"] = _paths.front();
-
-				if(files.size() > 1)
-				{
-					env["TM_DROPPED_FILES"]     = shell_quote(files);
-					env["TM_DROPPED_FILEPATHS"] = shell_quote(_paths);
-				}
-			}
-
-		private:
-			std::vector<std::string> _paths;
-			std::string _modifier_flags;
-		};
-
 		D(DBF_OakTextView_DragNDrop, bug("execute %s\n", handler->full_name().c_str()););
 
 		static struct { NSUInteger qual; std::string name; } const qualNames[] =
@@ -2683,6 +2655,21 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			{ NSCommandKeyMask,   "COMMAND"  }
 		};
 
+		auto env = [self variablesForBundleItem:handler];
+		auto const pwd = format_string::expand("${TM_DIRECTORY:-${TM_PROJECT_DIRECTORY:-$TMPDIR}}", env);
+
+		std::vector<std::string> files, paths = handlerToFiles[handler->uuid()];
+		std::transform(paths.begin(), paths.end(), back_inserter(files), [&pwd](std::string const& path){ return path::relative_to(path, pwd); });
+
+		env["TM_DROPPED_FILE"]     = files.front();
+		env["TM_DROPPED_FILEPATH"] = paths.front();
+
+		if(files.size() > 1)
+		{
+			env["TM_DROPPED_FILES"]     = shell_quote(files);
+			env["TM_DROPPED_FILEPATHS"] = shell_quote(paths);
+		}
+
 		NSUInteger state = [NSEvent modifierFlags];
 		std::vector<std::string> flagNames;
 		for(size_t i = 0; i != sizeofA(qualNames); ++i)
@@ -2690,9 +2677,10 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 			if(state & qualNames[i].qual)
 				flagNames.push_back(qualNames[i].name);
 		}
+		env["TM_MODIFIER_FLAGS"] = text::join(flagNames, "|");
 
 		AUTO_REFRESH;
-		document::run(parse_drag_command(handler), document->buffer(), editor->ranges(), document, std::map<std::string, std::string>(), NULL_STR, document::run_callback_ptr((document::run_callback_t*)new callback_t(handlerToFiles[handler->uuid()], text::join(flagNames, "|"))));
+		document::run(parse_drag_command(handler), document->buffer(), editor->ranges(), document, env, pwd);
 	}
 }
 
