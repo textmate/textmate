@@ -2463,7 +2463,7 @@ static NSUInteger DisableSessionSavingCount = 0;
 
 		void run (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> const& env, document::run_callback_ptr callback)
 		{
-			::run(command, buffer, selection, document, env, callback);
+			run_impl(command, buffer, selection, document, env, callback);
 		}
 
 	} proxy;
