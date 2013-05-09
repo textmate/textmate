@@ -170,7 +170,7 @@ namespace oak
 		output_fd = outputPipe[0];
 		error_fd = errorPipe[0];
 
-		std::string const wdString = environment.find("PWD") != environment.end() ? environment["PWD"] : path::temp();
+		std::string const wdString = directory != NULL_STR ? directory : (environment.find("PWD") != environment.end() ? environment["PWD"] : path::temp());
 		char const* workingDir = wdString.c_str();
 		oak::c_array env(environment);
 

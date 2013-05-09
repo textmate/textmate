@@ -34,14 +34,14 @@ namespace command
 	// = Command Runner =
 	// ==================
 
-	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate) : _command(command), _environment(environment), _delegate(delegate), _input_range(text::range_t::undefined), _input_was_selection(false), _output_is_html(false), _did_detach(false), _retain_count(3), _process(this), _return_code(-2)
+	runner_t::runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate) : _command(command), _environment(environment), _directory(pwd), _delegate(delegate), _input_range(text::range_t::undefined), _input_was_selection(false), _output_is_html(false), _did_detach(false), _retain_count(3), _process(this), _return_code(-2)
 	{
 		fix_shebang(&_command.command);
 	}
 
-	runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate)
+	runner_ptr runner (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, delegate_ptr delegate, std::string const& pwd)
 	{
-		return runner_ptr(new runner_t(command, buffer, selection, environment, delegate));
+		return runner_ptr(new runner_t(command, buffer, selection, environment, pwd, delegate));
 	}
 
 	void runner_t::release ()
@@ -69,6 +69,7 @@ namespace command
 		_process.command     = _command.command;
 		_process.input_fd    = inputPipe[0];
 		_process.environment = _environment;
+		_process.directory   = _directory;
 
 		_process.launch();
 

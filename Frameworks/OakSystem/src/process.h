@@ -26,6 +26,7 @@ namespace oak
 
 		std::string command;
 		std::map<std::string, std::string> environment;
+		std::string directory = NULL_STR;
 
 		pid_t process_id;
 		int input_fd, output_fd, error_fd;
