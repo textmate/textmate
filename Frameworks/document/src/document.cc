@@ -613,13 +613,6 @@ namespace document
 			check_modified(revision(), revision());
 			mark_pristine();
 			broadcast(callback_t::did_save);
-
-			D(DBF_Document, bug("search for ‘did save’ hooks in scope ‘%s’\n", to_s(scope()).c_str()););
-			citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", scope()))
-			{
-				D(DBF_Document, bug("%s\n", (*item)->name().c_str()););
-				document::run(parse_command(*item), buffer(), ng::ranges_t(), shared_from_this());
-			}
 		}
 
 		if(_is_on_disk)

@@ -204,7 +204,11 @@ namespace
 - (void)didSaveDocument:(document::document_ptr const&)aDocument success:(BOOL)flag error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)aFilter
 {
 	D(DBF_DocumentController_SaveHelper, bug("‘%s’, success %s, user abort %s\n", aDocument->path().c_str(), BSTR(flag), BSTR(self.userAbort)););
-	if(!flag && !self.userAbort)
+	if(flag)
+	{
+		[[NSNotificationCenter defaultCenter] postNotificationName:@"OakDocumentNotificationDidSave" object:self userInfo:@{ @"window" : self.window }];
+	}
+	else if(!self.userAbort)
 	{
 		[self.window.attachedSheet orderOut:self];
 		if(aFilter)

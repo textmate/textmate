@@ -524,6 +524,7 @@ static std::string shell_quote (std::vector<std::string> paths)
 		[self registerForDraggedTypes:[[self class] dropTypes]];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentWillSave:) name:@"OakDocumentNotificationWillSave" object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentDidSave:) name:@"OakDocumentNotificationDidSave" object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:[NSUserDefaults standardUserDefaults]];
 	}
 	return self;
@@ -546,6 +547,20 @@ static std::string shell_quote (std::vector<std::string> paths)
 
 	if(document && layout)
 		document->set_folded(layout->folded_as_string());
+}
+
+- (void)documentDidSave:(NSNotification*)aNotification
+{
+	NSWindow* window = [[aNotification userInfo] objectForKey:@"window"];
+	if(window != self.window)
+		return;
+
+	D(DBF_Document, bug("search for ‘did save’ hooks in scope ‘%s’\n", to_s(editor->scope(to_s([self scopeAttributes]))).c_str()););
+	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", editor->scope(to_s([self scopeAttributes]))))
+	{
+		D(DBF_Document, bug("%s\n", (*item)->name().c_str()););
+		[self performBundleItem:*item];
+	}
 }
 
 - (void)reflectDocumentSize
