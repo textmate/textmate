@@ -1111,9 +1111,16 @@ doScroll:
 
 - (std::map<std::string, std::string>)variablesForBundleItem:(bundles::item_ptr const&)item
 {
-	std::map<std::string, std::string> res = editor->legacy_variables(item ? item->bundle_variables() : std::map<std::string, std::string>(), to_s([self scopeAttributes]));
+	std::map<std::string, std::string> res = oak::basic_environment();
+	res << document->document_variables() << editor->editor_variables(to_s([self scopeAttributes]));
+	if(item)
+		res << item->bundle_variables();
+
 	if([self.delegate respondsToSelector:@selector(updateVariables:)])
 		[self.delegate updateVariables:res];
+
+	res = bundles::scope_variables([self scopeContext], res);
+	res = variables_for_path(document->path(), [self scopeContext].right, res);
 	return res;
 }
 
