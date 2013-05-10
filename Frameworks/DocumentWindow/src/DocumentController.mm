@@ -2245,15 +2245,6 @@ static NSUInteger DisableSessionSavingCount = 0;
 		env["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
 		env["TM_PROJECT_UUID"]      = to_s(self.identifier);
 	}
-
-	if(auto theme = self.textView.theme)
-	{
-		if(auto themeItem = bundles::lookup(theme->uuid()))
-		{
-			if(!themeItem->paths().empty())
-				env["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
-		}
-	}
 }
 
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument

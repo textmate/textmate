@@ -1116,6 +1116,12 @@ doScroll:
 	if(item)
 		res << item->bundle_variables();
 
+	if(auto themeItem = (theme ? bundles::lookup(theme->uuid()) : bundles::item_ptr()))
+	{
+		if(!themeItem->paths().empty())
+			res["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
+	}
+
 	if([self.delegate respondsToSelector:@selector(updateVariables:)])
 		[self.delegate updateVariables:res];
 
