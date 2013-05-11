@@ -11,7 +11,7 @@ namespace oak
 {
 	std::map<std::string, std::string> setup_basic_environment ()
 	{
-		std::string whitelistStr = "Apple_*:COMMAND_MODE:SHELL:SHLVL:SSH_AUTH_SOCK:__CF_USER_TEXT_ENCODING";
+		std::string whitelistStr = "Apple_*:COMMAND_MODE:DIALOG*:SHELL:SHLVL:SSH_AUTH_SOCK:__CF_USER_TEXT_ENCODING";
 		if(CFStringRef userWhitelist = (CFStringRef)CFPreferencesCopyAppValue(CFSTR("environmentWhitelist"), kCFPreferencesCurrentApplication))
 		{
 			if(CFGetTypeID(userWhitelist) == CFStringGetTypeID())

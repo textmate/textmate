@@ -32,13 +32,6 @@ namespace
 	{
 		std::vector< std::pair<std::string, std::string> > res;
 
-		static char const* const preserve[] = { "DIALOG", "DIALOG_1", "DIALOG_PORT_NAME", "DIALOG_1_PORT_NAME" };
-		iterate(key, preserve)
-		{
-			if(char const* value = getenv(*key))
-				res.push_back(std::make_pair(*key, value));
-		}
-
 		res.push_back(std::make_pair("TM_PID", std::to_string(getpid())));
 		res.push_back(std::make_pair("TM_FULLNAME", path::passwd_entry()->pw_gecos ?: "John Doe"));
 		res.push_back(std::make_pair("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle()))));
