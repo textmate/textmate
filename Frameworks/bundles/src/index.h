@@ -43,8 +43,6 @@ namespace bundles
 
 	struct PUBLIC item_t
 	{
-		typedef std::map<std::string, std::string> string_map_t; // kludge to support empty map as a default argument
-
 		std::string const& name () const;
 		void set_name (std::string const& newName);
 		std::string const& full_name () const;
