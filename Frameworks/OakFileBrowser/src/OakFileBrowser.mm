@@ -12,6 +12,7 @@
 #import <io/io.h>
 #import <oak/oak.h>
 #import <io/entries.h>
+#import <OakFoundation/NSArray Additions.h>
 #import <OakFoundation/NSString Additions.h>
 #import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/OakFileIconImage.h>
@@ -815,11 +816,15 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 
 - (void)executeBundleCommand:(id)sender
 {
-	std::map<std::string, std::string> map;
-	[self updateVariables:map];
-
 	if(bundles::item_ptr item = bundles::lookup(to_s((NSString*)[sender representedObject])))
+	{
+		std::map<std::string, std::string> map = oak::basic_environment();
+		[self updateVariables:map];
+		map << item->bundle_variables();
+		map = bundles::scope_variables(scope::context_t(), map);
+		map = variables_for_path(to_s((NSString*)[self.selectedPaths firstObject]), scope::scope_t(), map);
 		document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), [self.selectedPaths count] == 1 ? document::create(map["TM_SELECTED_FILE"]) : document::document_ptr(), map);
+	}
 }
 
 // ======================
