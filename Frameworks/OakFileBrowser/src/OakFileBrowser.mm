@@ -400,9 +400,6 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		env["TM_SELECTED_FILES"] = text::join(quoted, " ");
 	}
 
-	if(NSString* dir = self.path)
-		env["PWD"] = [dir fileSystemRepresentation];
-
 	return env;
 }
 

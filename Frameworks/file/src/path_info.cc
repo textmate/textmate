@@ -54,7 +54,6 @@ namespace file
 			map["TM_FILEPATH"]    = path;
 			map["TM_FILENAME"]    = path::name(path);
 			map["TM_DIRECTORY"]   = path::parent(path);
-			map["PWD"]            = path::parent(path);
 		}
 		else
 		{
