@@ -56,6 +56,10 @@ namespace oak
 		res.insert(std::make_pair("LOGNAME", entry->pw_name));
 		res.insert(std::make_pair("USER",    entry->pw_name));
 
+		res.insert(std::make_pair("TM_APP_IDENTIFIER", cf::to_s(CFBundleGetIdentifier(CFBundleGetMainBundle()))));
+		res.insert(std::make_pair("TM_FULLNAME",       entry->pw_gecos ?: "John Doe"));
+		res.insert(std::make_pair("TM_PID",            std::to_string(getpid())));
+
 		return res;
 	}
 
