@@ -228,9 +228,9 @@ settings_t settings_for_path (std::string const& path, scope::scope_t const& sco
 	return expanded_variables_for(directory != NULL_STR ? directory : (path != NULL_STR ? path::parent(path) : path::home()), path, scope, variables);
 }
 
-std::map<std::string, std::string> variables_for_path (std::string const& path, scope::scope_t const& scope, std::map<std::string, std::string> variables)
+std::map<std::string, std::string> variables_for_path (std::map<std::string, std::string> const& base, std::string const& path, scope::scope_t const& scope, std::string const& directory)
 {
-	variables = expanded_variables_for(path == NULL_STR ? path::home() : path::parent(path), path, scope, variables);
+	auto variables = expanded_variables_for(directory != NULL_STR ? directory : (path != NULL_STR ? path::parent(path) : path::home()), path, scope, base);
 
 	auto it = variables.begin();
 	while(it != variables.end())

@@ -255,7 +255,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 	bundles::item_ptr bundle = row != -1 ? bundles->children()[row]->represented_item() : bundles::item_ptr();
 	if(aType == bundles::kItemTypeBundle || bundle)
 	{
-		std::map<std::string, std::string> environment = variables_for_path();
+		std::map<std::string, std::string> environment = variables_for_path(oak::basic_environment());
 		ABMutableMultiValue* value = [[[ABAddressBook sharedAddressBook] me] valueForProperty:kABEmailProperty];
 		if(NSString* email = [value valueAtIndex:[value indexForIdentifier:[value primaryIdentifier]]])
 			environment.insert(std::make_pair("TM_ROT13_EMAIL", decode::rot13(to_s(email))));

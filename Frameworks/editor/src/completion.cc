@@ -81,7 +81,7 @@ namespace ng
 			if(_document)
 				env << _document->document_variables();
 			env = bundles::scope_variables(env, this->scope(scopeAttributes));
-			env = variables_for_path(_document ? _document->path() : path::home(), this->scope(scopeAttributes).right, env);
+			env = variables_for_path(env, _document ? _document->virtual_path() : NULL_STR, this->scope(scopeAttributes).right, _document ? path::parent(_document->path()) : NULL_STR);
 			env["TM_CURRENT_WORD"] = prefix;
 
 			completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));

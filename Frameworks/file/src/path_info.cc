@@ -59,7 +59,7 @@ namespace file
 		{
 			map["TM_DISPLAYNAME"] = "untitled";
 		}
-		return variables_for_path(path, "", map);
+		return variables_for_path(map, path);
 	}
 	
 } /* file */

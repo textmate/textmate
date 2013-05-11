@@ -10,7 +10,7 @@ namespace scm
 {
 	std::string find_executable (std::string const& name, std::string const& variable)
 	{
-		std::map<std::string, std::string> const& variables = variables_for_path();
+		std::map<std::string, std::string> const& variables = variables_for_path(oak::basic_environment());
 		std::vector<std::string> candidates;
 
 		std::map<std::string, std::string>::const_iterator exe = variables.find(variable);

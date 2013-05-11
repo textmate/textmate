@@ -62,6 +62,6 @@ private:
 };
 
 PUBLIC settings_t settings_for_path (std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR, std::map<std::string, std::string> variables = std::map<std::string, std::string>());
-PUBLIC std::map<std::string, std::string> variables_for_path (std::string const& documentPath = NULL_STR, scope::scope_t const& scope = "", std::map<std::string, std::string> existingVariables = std::map<std::string, std::string>());
+PUBLIC std::map<std::string, std::string> variables_for_path (std::map<std::string, std::string> const& base = std::map<std::string, std::string>(), std::string const& path = NULL_STR, scope::scope_t const& scope = "", std::string const& directory = NULL_STR);
 
 #endif /* end of include guard: SETTINGS_H_F99MMG5F */

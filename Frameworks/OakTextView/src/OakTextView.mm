@@ -1126,7 +1126,7 @@ doScroll:
 		res << [self.delegate variables];
 
 	res = bundles::scope_variables(res, [self scopeContext]);
-	res = variables_for_path(document->path(), [self scopeContext].right, res);
+	res = variables_for_path(res, document->virtual_path(), [self scopeContext].right, path::parent(document->path()));
 	return res;
 }
 
