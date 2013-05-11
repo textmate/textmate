@@ -26,7 +26,7 @@ enum OTVFontSmoothing : NSUInteger
 @optional
 - (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback;
 - (NSString*)scopeAttributes;
-- (void)updateVariables:(std::map<std::string, std::string>&)map;
+- (std::map<std::string, std::string>)variables;
 @end
 
 PUBLIC @interface OakTextView : OakView <NSTextInput, NSTextFieldDelegate>

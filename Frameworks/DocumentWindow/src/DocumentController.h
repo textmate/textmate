@@ -87,7 +87,6 @@ PUBLIC @interface DocumentController : NSObject
 // ==============
 
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
-- (void)updateVariables:(std::map<std::string, std::string>&)env;
 
 // Private (used by DocumentCommand.mm)
 @property (nonatomic, readonly) NSString* scopeAttributes;

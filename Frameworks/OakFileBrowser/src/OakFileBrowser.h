@@ -22,7 +22,7 @@ PUBLIC @interface OakFileBrowser : NSResponder
 @property (nonatomic)           NSDictionary* sessionState;
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState;
-- (void)updateVariables:(std::map<std::string, std::string>&)env;
+- (std::map<std::string, std::string>)variables;
 
 - (void)goToURL:(NSURL*)aURL;
 - (void)selectURL:(NSURL*)aURL withParentURL:(NSURL*)parentURL;

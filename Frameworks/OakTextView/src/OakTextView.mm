@@ -1122,8 +1122,8 @@ doScroll:
 			res["TM_CURRENT_THEME_PATH"] = themeItem->paths().back();
 	}
 
-	if([self.delegate respondsToSelector:@selector(updateVariables:)])
-		[self.delegate updateVariables:res];
+	if([self.delegate respondsToSelector:@selector(variables)])
+		res << [self.delegate variables];
 
 	res = bundles::scope_variables([self scopeContext], res);
 	res = variables_for_path(document->path(), [self scopeContext].right, res);

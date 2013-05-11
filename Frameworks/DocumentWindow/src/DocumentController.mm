@@ -2236,15 +2236,19 @@ static NSUInteger DisableSessionSavingCount = 0;
 // = Legacy =
 // ==========
 
-- (void)updateVariables:(std::map<std::string, std::string>&)env
+- (std::map<std::string, std::string>)variables
 {
-	[self.fileBrowser updateVariables:env];
+	std::map<std::string, std::string> res;
+	if(self.fileBrowser)
+		res = [self.fileBrowser variables];
 
 	if(NSString* projectDir = self.projectPath)
 	{
-		env["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
-		env["TM_PROJECT_UUID"]      = to_s(self.identifier);
+		res["TM_PROJECT_DIRECTORY"] = [projectDir fileSystemRepresentation];
+		res["TM_PROJECT_UUID"]      = to_s(self.identifier);
 	}
+
+	return res;
 }
 
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument
