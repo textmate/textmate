@@ -249,7 +249,6 @@ namespace document
 		bool is_open () const                 { return _open_count != 0 && !_open_callback; }
 
 		std::string file_type () const;
-		settings_t const document_settings () const { return settings_for_path(virtual_path(), scope(), path::parent(_path), document_variables()); }
 
 		std::map<std::string, std::string> document_variables () const;
 
@@ -267,8 +266,6 @@ namespace document
 		void set_authorization (osx::authorization_t const& auth) { _authorization = auth; }
 
 	private:
-		scope::scope_t scope () const { return file_type() + " " + _path_attributes; }
-
 		void setup_buffer ();
 		void grammar_did_change ();
 

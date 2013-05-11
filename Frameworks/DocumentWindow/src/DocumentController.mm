@@ -1924,7 +1924,7 @@ namespace
 		}
 	}
 
-	settings_t const settings = _selectedDocument->document_settings();
+	settings_t const settings = settings_for_path(_selectedDocument->virtual_path(), _selectedDocument->file_type() + " " + to_s(self.scopeAttributes), _selectedDocument->path() != NULL_STR ? path::parent(_selectedDocument->path()) : to_s(self.untitledSavePath));
 	path::glob_t const excludeGlob(settings.get(kSettingsExcludeKey, ""));
 	path::glob_t const binaryGlob(settings.get(kSettingsBinaryKey, ""));
 
