@@ -31,9 +31,6 @@ namespace
 	static std::vector< std::pair<std::string, std::string> > global_variables ()
 	{
 		std::vector< std::pair<std::string, std::string> > res;
-		citerate(pair, oak::basic_environment())
-			res.push_back(*pair);
-
 		if(CFPropertyListRef cfPlist = CFPreferencesCopyAppValue(CFSTR("environmentVariables"), kCFPreferencesCurrentApplication))
 		{
 			if(CFGetTypeID(cfPlist) == CFArrayGetTypeID())
@@ -214,6 +211,8 @@ void settings_t::set_global_settings_path (std::string const& path)
 
 settings_t settings_for_path (std::string const& path, scope::scope_t const& scope, std::string const& directory, std::map<std::string, std::string> variables)
 {
+	for(auto pair : oak::basic_environment())
+		variables.insert(pair);
 	return expanded_variables_for(directory != NULL_STR ? directory : (path != NULL_STR ? path::parent(path) : path::home()), path, scope, variables);
 }
 
