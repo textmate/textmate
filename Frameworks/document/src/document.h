@@ -252,7 +252,6 @@ namespace document
 		settings_t const document_settings () const { return settings_for_path(virtual_path(), scope(), path::parent(_path), document_variables()); }
 
 		std::map<std::string, std::string> document_variables () const;
-		std::map<std::string, std::string> legacy_variables (std::map<std::string, std::string> map) const;
 
 		bool is_modified () const;
 		bool is_on_disk () const                            { return is_open() ? _is_on_disk : path::exists(path());                }

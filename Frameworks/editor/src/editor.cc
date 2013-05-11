@@ -1417,18 +1417,6 @@ namespace ng
 		return map;
 	}
 
-	std::map<std::string, std::string> editor_t::legacy_variables (std::map<std::string, std::string> map, std::string const& scopeAttributes) const
-	{
-		auto core = editor_variables(scopeAttributes);
-		map.insert(core.begin(), core.end());
-
-		if(_document)
-				map = _document->legacy_variables(map);
-		else	map = variables_for_path(NULL_STR, "", map);
-
-		return bundles::scope_variables(scope(scopeAttributes), map);
-	}
-
 	// ========
 	// = Find =
 	// ========

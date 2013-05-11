@@ -500,14 +500,6 @@ namespace document
 		return map;
 	}
 
-	std::map<std::string, std::string> document_t::legacy_variables (std::map<std::string, std::string> map) const
-	{
-		auto core = document_variables();
-		map.insert(core.begin(), core.end());
-		map["PWD"] = path::parent(path());
-		return variables_for_path(path(), scope(), map);
-	}
-
 	void document_t::setup_buffer ()
 	{
 		D(DBF_Document, bug("%s, %s\n", display_name().c_str(), _file_type.c_str()););
