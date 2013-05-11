@@ -87,6 +87,7 @@ PUBLIC @interface DocumentController : NSObject
 // ==============
 
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
+- (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback;
 
 // Private (used by DocumentCommand.mm)
 @property (nonatomic, readonly) NSString* scopeAttributes;

@@ -140,78 +140,57 @@ void delegate_t::show_error (bundle_command_t const& command, int rc, std::strin
 void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, document::document_ptr document, std::map<std::string, std::string> baseEnv, std::string const& pwd)
 {
 	DocumentController* controller = [DocumentController controllerForDocument:document];
-
-	std::vector<document::document_ptr> documentsToSave;
-	switch(command.pre_exec)
+	if(controller && command.pre_exec != pre_exec::nop)
 	{
-		case pre_exec::save_document:
-		{
-			if(document && (document->is_modified() || !document->is_on_disk()))
-				documentsToSave.push_back(document);
-		}
-		break;
+		bundle_command_t cmd = command;
+		cmd.pre_exec = pre_exec::nop;
 
-		case pre_exec::save_project:
-		{
-			if(controller)
-			{
-				citerate(document, controller.documents)
-				{
-					if((*document)->is_modified() && (*document)->path() != NULL_STR)
-						documentsToSave.push_back((*document));
-				}
-			}
-		}
-		break;
-	}
+		ng::ranges_t sel = selection;
+		std::string dir  = pwd;
 
-	if(!documentsToSave.empty())
-	{
-		bundle_command_t commandNonRef = command;
-		[DocumentSaveHelper trySaveDocuments:documentsToSave forWindow:controller.window defaultDirectory:controller.untitledSavePath completionHandler:^(BOOL success){
-			if(success)
-				run_impl(commandNonRef, buffer, selection, document, baseEnv, pwd);
+		[controller bundleItemPreExec:command.pre_exec completionHandler:^(BOOL success){
+			run_impl(cmd, buffer, sel, document, baseEnv, dir);
 		}];
+
+		return;
 	}
-	else
+
+	if(bundles::item_ptr item = bundles::lookup(command.uuid))
 	{
-		if(bundles::item_ptr item = bundles::lookup(command.uuid))
+		bundles::required_command_t failedRequirement;
+		if(missing_requirement(item, baseEnv, &failedRequirement))
 		{
-			bundles::required_command_t failedRequirement;
-			if(missing_requirement(item, baseEnv, &failedRequirement))
+			std::vector<std::string> paths;
+			std::string const tmp = baseEnv["PATH"];
+			for(auto path : text::tokenize(tmp.begin(), tmp.end(), ':'))
 			{
-				std::vector<std::string> paths;
-				std::string const tmp = baseEnv["PATH"];
-				for(auto path : text::tokenize(tmp.begin(), tmp.end(), ':'))
-				{
-					if(path != "")
-						paths.push_back(path::with_tilde(path));
-				}
-
-				std::string const title = text::format("Unable to run “%.*s”.", (int)command.name.size(), command.name.data());
-				std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), failedRequirement.variable.c_str());
-
-				NSAlert* alert = [[NSAlert alloc] init];
-				[alert setAlertStyle:NSCriticalAlertStyle];
-				[alert setMessageText:[NSString stringWithCxxString:title]];
-				[alert setInformativeText:[NSString stringWithCxxString:message]];
-				[alert addButtonWithTitle:@"OK"];
-				if(failedRequirement.more_info_url != NULL_STR)
-					[alert addButtonWithTitle:@"More Info…"];
-
-				NSString* moreInfo = [NSString stringWithCxxString:failedRequirement.more_info_url];
-				OakShowAlertForWindow(alert, [controller window], ^(NSInteger button){
-					if(button == NSAlertSecondButtonReturn)
-						[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:moreInfo]];
-				});
-				return;
+				if(path != "")
+					paths.push_back(path::with_tilde(path));
 			}
-		}
 
-		command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(controller, document)), pwd);
-		runner->launch();
-		runner->wait();
+			std::string const title = text::format("Unable to run “%.*s”.", (int)command.name.size(), command.name.data());
+			std::string const message = text::format("This command requires ‘%1$s’ which wasn’t found on your system.\n\nThe following locations were searched:%2$s\n\nIf ‘%1$s’ is installed elsewhere then you need to set %3$s in Preferences → Variables to the full path of where you installed it.", failedRequirement.command.c_str(), ("\n\u2003• " + text::join(paths, "\n\u2003• ")).c_str(), failedRequirement.variable.c_str());
+
+			NSAlert* alert = [[NSAlert alloc] init];
+			[alert setAlertStyle:NSCriticalAlertStyle];
+			[alert setMessageText:[NSString stringWithCxxString:title]];
+			[alert setInformativeText:[NSString stringWithCxxString:message]];
+			[alert addButtonWithTitle:@"OK"];
+			if(failedRequirement.more_info_url != NULL_STR)
+				[alert addButtonWithTitle:@"More Info…"];
+
+			NSString* moreInfo = [NSString stringWithCxxString:failedRequirement.more_info_url];
+			OakShowAlertForWindow(alert, [controller window], ^(NSInteger button){
+				if(button == NSAlertSecondButtonReturn)
+					[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:moreInfo]];
+			});
+			return;
+		}
 	}
+
+	command::runner_ptr runner = command::runner(command, buffer, selection, baseEnv, command::delegate_ptr((command::delegate_t*)new delegate_t(controller, document)), pwd);
+	runner->launch();
+	runner->wait();
 }
 
 void show_command_error (std::string const& message, oak::uuid_t const& uuid, NSWindow* window)
