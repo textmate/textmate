@@ -76,8 +76,14 @@ namespace ng
 			cmd.output        = output::replace_selection;
 			cmd.output_format = output_format::completion_list;
 
-			std::map<std::string, std::string> env = legacy_variables(item->bundle_variables(), scopeAttributes);
+			std::map<std::string, std::string> env = oak::basic_environment();
+			env << editor_variables(scopeAttributes) << item->bundle_variables();
+			if(_document)
+				env << _document->document_variables();
+			env = bundles::scope_variables(this->scope(scopeAttributes), env);
+			env = variables_for_path(_document ? _document->path() : path::home(), this->scope(scopeAttributes).right, env);
 			env["TM_CURRENT_WORD"] = prefix;
+
 			completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));
 			command::runner_ptr runner = command::runner(cmd, _buffer, _selections, env, delegate);
 			runner->launch();
