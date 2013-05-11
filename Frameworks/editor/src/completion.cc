@@ -80,7 +80,7 @@ namespace ng
 			env << editor_variables(scopeAttributes) << item->bundle_variables();
 			if(_document)
 				env << _document->document_variables();
-			env = bundles::scope_variables(this->scope(scopeAttributes), env);
+			env = bundles::scope_variables(env, this->scope(scopeAttributes));
 			env = variables_for_path(_document ? _document->path() : path::home(), this->scope(scopeAttributes).right, env);
 			env["TM_CURRENT_WORD"] = prefix;
 

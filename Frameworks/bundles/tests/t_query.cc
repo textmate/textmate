@@ -131,24 +131,26 @@ public:
 
 	void test_environment_format_strings ()
 	{
-		TS_ASSERT_EQUALS(bundles::scope_variables("")["TEST"],                        "foo");
-		TS_ASSERT_EQUALS(bundles::scope_variables("source.c++")["TEST"],              "foo:bar");
-		TS_ASSERT_EQUALS(bundles::scope_variables("source.any")["TM_COMMENT_STYLE"],  "Base Environment");
-		TS_ASSERT_EQUALS(bundles::scope_variables("source.ruby")["TM_COMMENT_STYLE"], "Ruby Environment");
+		std::map<std::string, std::string> base;
 
-		TS_ASSERT_EQUALS(bundles::scope_variables("text.plain")["PATH"], "/usr/bin:/bin:/sbin");
-		TS_ASSERT_EQUALS(bundles::scope_variables("text.tex")["PATH"],   "/usr/bin:/bin:/sbin:/usr/texbin");
+		TS_ASSERT_EQUALS(bundles::scope_variables(base, "")["TEST"],                        "foo");
+		TS_ASSERT_EQUALS(bundles::scope_variables(base, "source.c++")["TEST"],              "foo:bar");
+		TS_ASSERT_EQUALS(bundles::scope_variables(base, "source.any")["TM_COMMENT_STYLE"],  "Base Environment");
+		TS_ASSERT_EQUALS(bundles::scope_variables(base, "source.ruby")["TM_COMMENT_STYLE"], "Ruby Environment");
+
+		TS_ASSERT_EQUALS(bundles::scope_variables(base, "text.plain")["PATH"], "/usr/bin:/bin:/sbin");
+		TS_ASSERT_EQUALS(bundles::scope_variables(base, "text.tex")["PATH"],   "/usr/bin:/bin:/sbin:/usr/texbin");
 	}
 
 	void test_v1_variable_shadowing ()
 	{
-		std::map<std::string, std::string> baseEnv = bundles::scope_variables("");
+		auto baseEnv = bundles::scope_variables(std::map<std::string, std::string>(), "");
 		TS_ASSERT_EQUALS(baseEnv["TM_COMMENT_START"],   "/*");
 		TS_ASSERT_EQUALS(baseEnv["TM_COMMENT_STOP"],    "*/");
 		TS_ASSERT_EQUALS(baseEnv["TM_COMMENT_START_2"], "//");
 		TS_ASSERT(baseEnv.find("TM_COMMENT_STOP_2") == baseEnv.end());
 
-		std::map<std::string, std::string> rubyEnv = bundles::scope_variables("source.ruby");
+		std::map<std::string, std::string> rubyEnv = bundles::scope_variables(std::map<std::string, std::string>(), "source.ruby");
 		TS_ASSERT_EQUALS(rubyEnv["TM_COMMENT_START"],   "# ");
 		TS_ASSERT(rubyEnv.find("TM_COMMENT_STOP") == rubyEnv.end());
 		TS_ASSERT_EQUALS(rubyEnv["TM_COMMENT_START_2"], "==begin");
@@ -173,7 +175,7 @@ public:
 
 	void test_require ()
 	{
-		TS_ASSERT_EQUALS(bundles::scope_variables("text")["DialogPath"], jail.path("Bundles/Dialog.tmbundle/Support/bin"));
+		TS_ASSERT_EQUALS(bundles::scope_variables(std::map<std::string, std::string>(), "text")["DialogPath"], jail.path("Bundles/Dialog.tmbundle/Support/bin"));
 	}
 
 	void test_wrappers ()

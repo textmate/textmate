@@ -123,7 +123,7 @@ namespace bundles
 		return res;
 	}
 
-	std::map<std::string, std::string> scope_variables (scope::context_t const& scope, std::map<std::string, std::string> const& base)
+	std::map<std::string, std::string> scope_variables (std::map<std::string, std::string> const& base, scope::context_t const& scope)
 	{
 		std::map<std::string, std::string> res = base;
 		std::vector<item_ptr> const& items = query(kFieldSettingName, "shellVariables", scope, kItemTypeSettings, oak::uuid_t(), false);

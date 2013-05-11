@@ -43,7 +43,7 @@ OAK_DEBUG_VAR(AppController_Commands);
 			{
 				std::map<std::string, std::string> map = oak::basic_environment();
 				map << item->bundle_variables();
-				map = bundles::scope_variables(scope::context_t(), map);
+				map = bundles::scope_variables(map);
 				map = variables_for_path(NULL_STR, scope::scope_t(), map);
 				document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), document::document_ptr(), map);
 			}

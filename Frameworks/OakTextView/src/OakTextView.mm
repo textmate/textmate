@@ -1125,7 +1125,7 @@ doScroll:
 	if([self.delegate respondsToSelector:@selector(variables)])
 		res << [self.delegate variables];
 
-	res = bundles::scope_variables([self scopeContext], res);
+	res = bundles::scope_variables(res, [self scopeContext]);
 	res = variables_for_path(document->path(), [self scopeContext].right, res);
 	return res;
 }

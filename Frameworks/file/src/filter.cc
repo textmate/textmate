@@ -151,7 +151,7 @@ namespace filter
 	void run (bundles::item_ptr filter, std::string const& path, io::bytes_ptr content, callback_ptr context)
 	{
 		std::map<std::string, std::string> variables = file::path_variables(path);
-		command::runner_ptr runner = command::runner(parse_command(filter), ng::buffer_t(), ng::ranges_t(), bundles::scope_variables(file::path_attributes(path), variables << filter->bundle_variables()), command::delegate_ptr(new event_delegate_t(content, context)));
+		command::runner_ptr runner = command::runner(parse_command(filter), ng::buffer_t(), ng::ranges_t(), bundles::scope_variables(variables << filter->bundle_variables(), file::path_attributes(path)), command::delegate_ptr(new event_delegate_t(content, context)));
 		runner->launch();
 	}
 

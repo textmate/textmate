@@ -821,7 +821,7 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	{
 		std::map<std::string, std::string> map = oak::basic_environment();
 		map << [self variables] << item->bundle_variables();
-		map = bundles::scope_variables(scope::context_t(), map);
+		map = bundles::scope_variables(map);
 		map = variables_for_path(to_s((NSString*)[self.selectedPaths firstObject]), scope::scope_t(), map);
 		document::run(parse_command(item), ng::buffer_t(), ng::ranges_t(), [self.selectedPaths count] == 1 ? document::create(map["TM_SELECTED_FILE"]) : document::document_ptr(), map);
 	}
