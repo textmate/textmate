@@ -175,20 +175,8 @@ void run_impl (bundle_command_t const& command, ng::buffer_t const& buffer, ng::
 	}
 	else
 	{
-		if(document && document->is_open())
-			baseEnv = ng::editor_for_document(document)->legacy_variables(baseEnv, to_s([controller scopeAttributes]));
-		else if(document)
-			baseEnv = bundles::scope_variables(document->file_type(), document->legacy_variables(baseEnv));
-		else
-			baseEnv = bundles::scope_variables(scope::scope_t(), variables_for_path(NULL_STR, "", baseEnv));
-
-		if(controller)
-			[controller updateVariables:baseEnv];
-
 		if(bundles::item_ptr item = bundles::lookup(command.uuid))
 		{
-			baseEnv << item->bundle_variables();
-
 			bundles::required_command_t failedRequirement;
 			if(missing_requirement(item, baseEnv, &failedRequirement))
 			{
