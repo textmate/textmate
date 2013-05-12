@@ -555,12 +555,8 @@ static std::string shell_quote (std::vector<std::string> paths)
 	if(window != self.window)
 		return;
 
-	D(DBF_Document, bug("search for ‘did save’ hooks in scope ‘%s’\n", to_s([self scopeContext]).c_str()););
 	citerate(item, bundles::query(bundles::kFieldSemanticClass, "callback.document.did-save", [self scopeContext]))
-	{
-		D(DBF_Document, bug("%s\n", (*item)->name().c_str()););
 		[self performBundleItem:*item];
-	}
 }
 
 - (void)reflectDocumentSize
