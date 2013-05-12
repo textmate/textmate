@@ -31,7 +31,7 @@ namespace file
 		virtual void select_line_feeds (std::string const& path, io::bytes_ptr content, open_context_ptr context);
 		virtual void select_file_type (std::string const& path, io::bytes_ptr content, open_context_ptr context);
 		virtual void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter) = 0;
-		virtual void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) = 0;
+		virtual void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters) = 0;
 	};
 
 	typedef std::shared_ptr<open_callback_t> open_callback_ptr;

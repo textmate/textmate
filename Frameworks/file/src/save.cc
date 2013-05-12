@@ -29,7 +29,7 @@ namespace
 			if(_state != kStateDone)
 			{
 				ASSERT(!_saved);
-				_callback->did_save(_path, _content, _path_attributes, _encoding, _saved, _error, _filter);
+				_callback->did_save(_path, _content, _encoding, _saved, _error, _filter);
 			}
 		}
 
@@ -394,7 +394,7 @@ namespace
 					_state      = kStateIdle;
 					_next_state = kStateDone;
 
-					_callback->did_save(_path, _content, file::path_attributes(_path), _encoding, _saved, _error, _filter);
+					_callback->did_save(_path, _content, _encoding, _saved, _error, _filter);
 					proceed();
 				}
 				break;

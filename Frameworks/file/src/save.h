@@ -30,7 +30,7 @@ namespace file
 		virtual void select_make_writable (std::string const& path, io::bytes_ptr content, save_context_ptr context);
 		virtual void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, save_context_ptr context);
 		virtual void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, save_context_ptr context);
-		virtual void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) = 0;
+		virtual void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter) = 0;
 	};
 
 	typedef std::shared_ptr<save_callback_t> save_callback_ptr;

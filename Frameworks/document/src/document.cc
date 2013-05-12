@@ -522,7 +522,7 @@ namespace document
 			}
 		}
 
-		settings_t const settings = settings_for_path(virtual_path(), file_type() + " " + _path_attributes, path::parent(_path), document_variables());
+		settings_t const settings = settings_for_path(virtual_path(), file_type(), path::parent(_path), document_variables());
 		_buffer->indent() = text::indent_t(settings.get(kSettingsTabSizeKey, 4), SIZE_T_MAX, settings.get(kSettingsSoftTabsKey, false));
 		_buffer->set_spelling_language(settings.get(kSettingsSpellingLanguageKey, "en"));
 		_buffer->set_live_spelling(settings.get(kSettingsSpellCheckingKey, false));
@@ -543,7 +543,7 @@ namespace document
 		_pristine_buffer = _buffer->substr(0, _buffer->size()); // TODO We should use a cheap ng::detail::storage_t copy
 	}
 
-	void document_t::post_load (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding)
+	void document_t::post_load (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding)
 	{
 		_open_callback.reset();
 		if(!content)
@@ -551,8 +551,6 @@ namespace document
 			_open_count = 0;
 			return;
 		}
-
-		_path_attributes = pathAttributes;
 
 		_disk_encoding = encoding.charset();
 		_disk_newlines = encoding.newlines();
@@ -592,7 +590,7 @@ namespace document
 		broadcast(callback_t::did_change_open_status);
 	}
 
-	void document_t::post_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success)
+	void document_t::post_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success)
 	{
 		if(success)
 		{
@@ -603,8 +601,6 @@ namespace document
 				_is_on_disk = true;
 				broadcast(callback_t::did_change_on_disk_status);
 			}
-
-			_path_attributes = pathAttributes;
 
 			_disk_encoding = encoding.charset();
 			_disk_bom      = encoding.byte_order_mark();
@@ -650,9 +646,9 @@ namespace document
 			void obtain_authorization (std::string const& path, io::bytes_ptr content, osx::authorization_t auth, file::save_context_ptr context) { _callback->obtain_authorization(path, content, auth, context); }
 			void select_charset (std::string const& path, io::bytes_ptr content, std::string const& charset, file::save_context_ptr context)      { _callback->select_charset(path, content, charset, context); }
 
-			void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
+			void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
 			{
-				_document->post_save(path, content, pathAttributes, encoding, success);
+				_document->post_save(path, content, encoding, success);
 				_callback->did_save_document(_document, path, success, message, filter);
 				_document->close();
 			}
@@ -667,7 +663,7 @@ namespace document
 		if(!is_open())
 		{
 			if(!_content && _backup_path == NULL_STR)
-				return callback->did_save(_path, io::bytes_ptr(), _path_attributes, encoding::type(_disk_newlines, _disk_encoding, _disk_bom), false, NULL_STR, oak::uuid_t());
+				return callback->did_save(_path, io::bytes_ptr(), encoding::type(_disk_newlines, _disk_encoding, _disk_bom), false, NULL_STR, oak::uuid_t());
 		}
 
 		_file_watcher.reset();
@@ -804,7 +800,7 @@ namespace document
 			if(_backup_path != NULL_STR)
 			{
 				bool modified = _modified;
-				post_load(_path, io::bytes_ptr(new io::bytes_t(path::content(_backup_path))), path::attributes(_backup_path), _file_type, file::path_attributes(_path), encoding::type(_disk_newlines, _disk_encoding, _disk_bom));
+				post_load(_path, io::bytes_ptr(new io::bytes_t(path::content(_backup_path))), path::attributes(_backup_path), _file_type, encoding::type(_disk_newlines, _disk_encoding, _disk_bom));
 				if(modified)
 					set_revision(buffer().bump_revision());
 				return true;
@@ -925,7 +921,7 @@ namespace document
 				void select_file_type (std::string const& path, io::bytes_ptr content, file::open_context_ptr context)  { context->set_file_type(_document->_file_type); }
 				void show_error (std::string const& path, std::string const& message, oak::uuid_t const& filter)        { fprintf(stderr, "%s: %s\n", path.c_str(), message.c_str()); }
 
-				void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, std::string const& pathAttributes, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
+				void show_content (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding, std::vector<oak::uuid_t> const& binaryImportFilters, std::vector<oak::uuid_t> const& textImportFilters)
 				{
 					if(!_document->is_open())
 						return;

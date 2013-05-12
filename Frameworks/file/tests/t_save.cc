@@ -24,7 +24,7 @@ class SaveTests : public CxxTest::TestSuite
 				context->set_charset(_encoding);
 		}
 
-		void did_save (std::string const& path, io::bytes_ptr content, std::string const& pathAttributes, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
+		void did_save (std::string const& path, io::bytes_ptr content, encoding::type const& encoding, bool success, std::string const& message, oak::uuid_t const& filter)
 		{
 			if(_success)
 				*_success = success;

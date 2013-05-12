@@ -437,7 +437,7 @@ namespace
 						break;
 
 						case kEstimateEncodingStatePathSettings:
-							_encoding.set_charset(settings_for_path(_path, "attr.file.unknown-encoding " + file::path_attributes(_path)).get(kSettingsEncodingKey, kCharsetUnknown));
+							_encoding.set_charset(settings_for_path(_path, "attr.file.unknown-encoding " + _path_attributes).get(kSettingsEncodingKey, kCharsetUnknown));
 						break;
 
 						case kEstimateEncodingStateAskUser:
@@ -544,7 +544,7 @@ namespace
 				case kStateShowContent:
 				{
 					_state = kStateDone;
-					_callback->show_content(_path, _content, _attributes, _file_type, _path_attributes, _encoding, _binary_import_filters, _text_import_filters);
+					_callback->show_content(_path, _content, _attributes, _file_type, _encoding, _binary_import_filters, _text_import_filters);
 				}
 				break;
 			}
