@@ -7,13 +7,9 @@
 
 OAK_DEBUG_VAR(Proxy);
 
-static proxy_settings_t user_pw_settings (std::string const& server, UInt32 port)
+static proxy_settings_t user_pw_settings (CFStringRef server, CFNumberRef portNumber)
 {
-	D(DBF_Proxy, bug("%s:%zu\n", server.c_str(), (size_t)port););
 	std::string user = NULL_STR, pw = NULL_STR;
-
-	cf::string_t cfServer = cf::wrap(server);
-	cf::number_t cfPort   = cf::wrap(port);
 
 	CFTypeRef keys[] = {
 		kSecMatchLimit, kSecReturnRef,
@@ -26,8 +22,8 @@ static proxy_settings_t user_pw_settings (std::string const& server, UInt32 port
 		kSecMatchLimitAll, kCFBooleanTrue,
 		kSecClassInternetPassword,
 		kSecAttrProtocolHTTPProxy,
-		cfPort,
-		cfServer
+		portNumber,
+		server
 	};
 	CFDictionaryRef query = CFDictionaryCreate(NULL, keys, vals, sizeofA(keys), NULL, NULL);
 	
@@ -65,116 +61,155 @@ static proxy_settings_t user_pw_settings (std::string const& server, UInt32 port
 	else
 	{
 		CFStringRef message = SecCopyErrorMessageString(err, NULL);
-		D(DBF_Proxy, bug("failed to copy matching items from keychain: ‘%s’\n", cf::to_s(message).c_str()););
+		fprintf(stderr, "TextMate/proxy: SecItemCopyMatching() failed with error ‘%s’\n", cf::to_s(message).c_str());
 		CFRelease(message);
 	}
 
 	if(query)
 		CFRelease(query);
 
-	return proxy_settings_t(true, server, port, user, pw);
+	int32_t port = 0;
+	CFNumberGetValue(portNumber, kCFNumberSInt32Type, &port);
+
+	return proxy_settings_t(true, cf::to_s(server), port, user, pw);
 }
 
-static void pac_proxy_callback (void* client, CFArrayRef proxyList, CFErrorRef error)
+struct pac_proxy_callback_result_t
 {
-	proxy_settings_t& settings = *(proxy_settings_t*)client;
-	settings.enabled = true;
+	bool has_result    = false;
+	CFArrayRef proxies = NULL;
+	CFErrorRef error   = NULL;
+};
 
-	if(error)
+static void pac_proxy_callback (void* client, CFArrayRef proxies, CFErrorRef error)
+{
+	pac_proxy_callback_result_t* res = (pac_proxy_callback_result_t*)client;
+	res->proxies    = proxies ? (CFArrayRef)CFRetain(proxies) : NULL;
+	res->error      = error   ? (CFErrorRef)CFRetain(error)   : NULL;
+	res->has_result = true;
+}
+
+proxy_settings_t first_proxy_from_array (CFArrayRef proxies, CFURLRef targetURL)
+{
+	for(CFIndex i = 0; i < CFArrayGetCount(proxies); ++i)
 	{
-		CFStringRef str = CFErrorCopyDescription(error);
-		fprintf(stderr, "proxy error: %s\n", cf::to_s(str).c_str());
-		CFRelease(str);
-		return;
-	}
-
-	if(!proxyList)
-		return;
-
-	for(CFIndex i = 0; i < CFArrayGetCount(proxyList); ++i)
-	{
-		plist::dictionary_t dict = plist::convert((CFDictionaryRef)CFArrayGetValueAtIndex(proxyList, i));
-		D(DBF_Proxy, bug("%s\n", to_s(dict).c_str()););
-
-		int32_t port;
-		std::string type;
-		if(plist::get_key_path(dict, cf::to_s(kCFProxyTypeKey), type) && type == cf::to_s(kCFProxyTypeHTTP) && plist::get_key_path(dict, cf::to_s(kCFProxyHostNameKey), settings.server) && plist::get_key_path(dict, cf::to_s(kCFProxyPortNumberKey), port))
+		CFDictionaryRef proxy = (CFDictionaryRef)CFArrayGetValueAtIndex(proxies, i);
+		if(!proxy || CFGetTypeID(proxy) != CFDictionaryGetTypeID())
 		{
-			settings.port = port;
+			fprintf(stderr, "TextMate/proxy: Expected proxy info to be a CFDictionaryRef\n");
+			continue;
+		}
+
+		CFStringRef type = (CFStringRef)CFDictionaryGetValue(proxy, kCFProxyTypeKey);
+		if(!type || CFGetTypeID(type) != CFStringGetTypeID())
+		{
+			fprintf(stderr, "TextMate/proxy: Expected kCFProxyTypeKey to be a CFStringRef\n");
+			continue;
+		}
+
+		if(CFEqual(type, kCFProxyTypeNone))
+		{
 			break;
 		}
+		else if(CFEqual(type, kCFProxyTypeAutoConfigurationURL))
+		{
+			CFURLRef pacURL = (CFURLRef)CFDictionaryGetValue(proxy, kCFProxyAutoConfigurationURLKey);
+			if(pacURL && CFGetTypeID(pacURL) == CFURLGetTypeID())
+			{
+				fprintf(stderr, "TextMate DEBUG: Resolving PAC URL ‘%s’\n", cf::to_s(CFURLGetString(pacURL)).c_str());
+
+				pac_proxy_callback_result_t result;
+
+				CFStreamClientContext context = { 0, &result, NULL, NULL, NULL };
+				CFRunLoopSourceRef runLoopSource = CFNetworkExecuteProxyAutoConfigurationURL(pacURL, targetURL, &pac_proxy_callback, &context);
+
+				CFStringRef runLoopMode = CFSTR("OakRunPACScriptRunLoopMode");
+				CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, runLoopMode);
+				while(!result.has_result)
+					CFRunLoopRunInMode(runLoopMode, 0.1, TRUE);
+
+				if(CFRunLoopSourceIsValid(runLoopSource))
+					CFRunLoopSourceInvalidate(runLoopSource);
+				CFRelease(runLoopSource);
+
+				proxy_settings_t res;
+
+				if(result.error)
+				{
+					CFStringRef str = CFErrorCopyDescription(result.error);
+					fprintf(stderr, "TextMate/proxy: PAC error ‘%s’ for ‘%s’\n", cf::to_s(str).c_str(), cf::to_s(CFURLGetString(pacURL)).c_str());
+					CFRelease(str);
+				}
+				else if(result.proxies)
+				{
+					res = first_proxy_from_array(result.proxies, targetURL);
+				}
+				else
+				{
+					fprintf(stderr, "TextMate/proxy: No proxies returned from ‘%s’\n", cf::to_s(CFURLGetString(pacURL)).c_str());
+				}
+
+				if(result.proxies)
+					CFRelease(result.proxies);
+				if(result.error)
+					CFRelease(result.error);
+
+				if(res)
+				{
+					fprintf(stderr, "return PAC proxy\n");
+					return res;
+				}
+			}
+			else
+			{
+				fprintf(stderr, "TextMate/proxy: Expected kCFProxyAutoConfigurationURLKey to be a CFURLRef\n");
+			}
+		}
+		else // kCFProxyTypeHTTP or kCFProxyTypeHTTPS
+		{
+			CFStringRef hostName   = (CFStringRef)CFDictionaryGetValue(proxy, kCFProxyHostNameKey);
+			CFNumberRef portNumber = (CFNumberRef)CFDictionaryGetValue(proxy, kCFProxyPortNumberKey);
+
+			if(CFGetTypeID(hostName) == CFStringGetTypeID() && CFGetTypeID(portNumber) == CFNumberGetTypeID())
+				return user_pw_settings(hostName, portNumber);
+
+			fprintf(stderr, "TextMate/proxy: Expected kCFProxyHostNameKey/kCFProxyPortNumberKey to be CFStringRef/CFNumberRef\n");
+		}
 	}
+	return proxy_settings_t();
 }
 
 proxy_settings_t get_proxy_settings (std::string const& url)
 {
 	proxy_settings_t res(false);
-	if(regexp::search("^https?://localhost[:/]", url))
+	if(regexp::search("^https?:/{2}localhost[:/]", url))
 		return res;
 
-	CFDictionaryRef tmp = SCDynamicStoreCopyProxies(NULL);
-	plist::dictionary_t const& plist = plist::convert(tmp);
-	D(DBF_Proxy, bug("%s\n", to_s(plist).c_str()););
-
-	bool enabled = false;
-	if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesHTTPEnable), enabled) && enabled)
+	if(CFURLRef targetURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), NULL))
 	{
-		D(DBF_Proxy, bug("proxy enabled: %s\n", BSTR(enabled)););
-		std::string host; int32_t port;
-		if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesHTTPProxy), host) && plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesHTTPPort), port))
-			res = user_pw_settings(host, port);
-	}
-	else if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoConfigEnable), enabled) && enabled)
-	{
-		D(DBF_Proxy, bug("pac enabled: %s\n", BSTR(enabled)););
-
-		std::string pacString;
-		if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoConfigURLString), pacString))
+		if(CFDictionaryRef proxySettings = SCDynamicStoreCopyProxies(NULL))
 		{
-			D(DBF_Proxy, bug("pac script: %s\n", pacString.c_str()););
-
-			CFURLRef pacURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(pacString), NULL);
-			if(!pacURL)
-				pacURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(encode::url_part(pacString, ":/")), NULL);
-
-			if(pacURL)
+			if(CFArrayRef proxies = CFNetworkCopyProxiesForURL(targetURL, proxySettings))
 			{
-				if(CFURLRef targetURL = CFURLCreateWithString(kCFAllocatorDefault, cf::wrap(url), NULL))
-				{
-					CFStreamClientContext context = { 0, &res, NULL, NULL, NULL };
-					CFRunLoopSourceRef runLoopSource = CFNetworkExecuteProxyAutoConfigurationURL(pacURL, targetURL, &pac_proxy_callback, &context);
-					CFRelease(targetURL);
-
-					CFStringRef runLoopMode = CFSTR("OakRunPACScriptRunLoopMode");
-					CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, runLoopMode);
-					while(!res.enabled)
-						CFRunLoopRunInMode(runLoopMode, 0.1, TRUE);
-
-					if(CFRunLoopSourceIsValid(runLoopSource))
-						CFRunLoopSourceInvalidate(runLoopSource);
-					CFRelease(runLoopSource);
-				}
-				else
-				{
-					fprintf(stderr, "*** invalid target URL: ‘%s’\n", url.c_str());
-				}
-
-				CFRelease(pacURL);
+				res = first_proxy_from_array(proxies, targetURL);
+				CFRelease(proxies);
 			}
 			else
 			{
-				fprintf(stderr, "*** unable to create URL for PAC script: ‘%s’\n", pacString.c_str());
+				fprintf(stderr, "TextMate/proxy: NULL returned from CFNetworkCopyProxiesForURL(‘%s’)\n", url.c_str());
 			}
-
-			if(res.server == NULL_STR)
-				res.enabled = false;
+			CFRelease(proxySettings);
 		}
+		else
+		{
+			fprintf(stderr, "TextMate/proxy: NULL returned from SCDynamicStoreCopyProxies()\n");
+		}
+		CFRelease(targetURL);
 	}
-	else if(plist::get_key_path(plist, cf::to_s(kSCPropNetProxiesProxyAutoDiscoveryEnable), enabled) && enabled)
+	else
 	{
-		D(DBF_Proxy, bug("auto discovery enabled: %s\n", BSTR(enabled)););
+		fprintf(stderr, "TextMate/proxy: Unable to create CFURLRef from ‘%s’\n", url.c_str());
 	}
-	CFRelease(tmp);
 
 	return res;
 }
