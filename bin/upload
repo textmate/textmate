@@ -27,6 +27,7 @@ require "json"
 require 'base64'
 require 'openssl'
 require 'digest/sha1'
+require 'shellwords'
 
 def sign_file(path, keyfile, password)
   # %x{openssl dgst -dss1 -sign '#{keyfile}' -passin 'pass:#{password}' '#{path}'|openssl enc -base64}.chomp
@@ -37,36 +38,10 @@ def sign_file(path, keyfile, password)
   Base64.encode64(signature).gsub("\n", '')
 end
 
-def aws_upload(path, url, key, acl, filename, content_type, access_key, policy, signature)
-  rc = %x{curl -sw'%{http_code}' --show-error -o/dev/null \
-     -F "key=#{key}" \
-     -F "acl=#{acl}" \
-     -F "success_action_status=201" \
-     -F "Filename=#{filename}" \
-     -F "Content-Type=#{content_type}" \
-     -F "AWSAccessKeyId=#{access_key}" \
-     -F "Policy=#{policy}" \
-     -F "Signature=#{signature}" \
-     -F "file=@#{path}" \
-     #{url}
-  }
-  STDERR << "*** error uploading to #{url} (#{rc})\n" unless rc == '201'
-  return rc == '201'
-end
-
 def create_download(path, repository, description, content_type)
-  payload = { 'name' => File::basename(path), 'size' => File::size(path), 'content_type' => content_type || 'application/octet-stream' }
-  payload['description'] = description unless description.nil?
-
-  open("|curl -snd '#{payload.to_json}' https://api.github.com/repos/#{repository}/downloads") do |io|
-    github = JSON.parse(io.read)
-    abort "github error: #{github['errors'].inspect} for #{repository}"     if github.include?('errors')
-    abort "github unexpected response: #{github.inspect} for #{repository}" unless github.include?('html_url')
-    return github['html_url'] if aws_upload(path, github['s3_url'], github['path'], github['acl'], payload['name'], payload['content_type'], github['accesskeyid'], github['policy'], github['signature'])
-    open("|curl -snX DELETE https://api.github.com/repos/#{repository}/downloads/#{github['id']}") { |io| STDERR << "Removing partial upload\n" }
-    abort
-  end
-  nil
+  %x{ scp #{Shellwords.escape(path)} tm:html/archive/ }
+  return nil unless $? == 0
+  return "http://archive.textmate.org/#{File::basename(path)}"
 end
 
 if __FILE__ == $PROGRAM_NAME
