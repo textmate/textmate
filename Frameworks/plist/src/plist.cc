@@ -28,6 +28,11 @@ namespace plist
 		res = cf::to_s(str);
 	}
 
+	static void convert_url (CFURLRef url, any_t& res)
+	{
+		res = cf::to_s(CFURLGetString(url));
+	}
+
 	static void convert_data (CFDataRef data, any_t& res)
 	{
 		UInt8 const* bytes = CFDataGetBytePtr(data);
@@ -75,6 +80,8 @@ namespace plist
 			return convert_boolean((CFBooleanRef)plist, res);
 		else if(CFGetTypeID(plist) == CFStringGetTypeID())
 			return convert_string((CFStringRef)plist, res);
+		else if(CFGetTypeID(plist) == CFURLGetTypeID())
+			return convert_url((CFURLRef)plist, res);
 		else if(CFGetTypeID(plist) == CFDataGetTypeID())
 			return convert_data((CFDataRef)plist, res);
 		else if(CFGetTypeID(plist) == CFDateGetTypeID())
