@@ -4,6 +4,8 @@
 #include <command/runner.h>
 #include <text/utf8.h>
 #include <regexp/regexp.h>
+#include <settings/settings.h>
+#include <io/path.h>
 #include <oak/server.h>
 #include <oak/debug.h>
 
@@ -148,9 +150,26 @@ namespace filter
 		return std::vector<bundles::item_ptr>();
 	}
 
+	static std::map<std::string, std::string> path_variables (std::string const& path)
+	{
+		std::map<std::string, std::string> map;
+		if(path != NULL_STR)
+		{
+			map["TM_DISPLAYNAME"] = path::display_name(path);
+			map["TM_FILEPATH"]    = path;
+			map["TM_FILENAME"]    = path::name(path);
+			map["TM_DIRECTORY"]   = path::parent(path);
+		}
+		else
+		{
+			map["TM_DISPLAYNAME"] = "untitled";
+		}
+		return variables_for_path(map, path);
+	}
+
 	void run (bundles::item_ptr filter, std::string const& path, io::bytes_ptr content, callback_ptr context)
 	{
-		std::map<std::string, std::string> variables = file::path_variables(path);
+		std::map<std::string, std::string> variables = path_variables(path);
 		command::runner_ptr runner = command::runner(parse_command(filter), ng::buffer_t(), ng::ranges_t(), bundles::scope_variables(variables << filter->bundle_variables(), file::path_attributes(path)), command::delegate_ptr(new event_delegate_t(content, context)));
 		runner->launch();
 	}

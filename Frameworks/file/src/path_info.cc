@@ -45,21 +45,4 @@ namespace file
 		return text::join(res, " ");
 	}
 
-	std::map<std::string, std::string> path_variables (std::string const& path)
-	{
-		std::map<std::string, std::string> map;
-		if(path != NULL_STR)
-		{
-			map["TM_DISPLAYNAME"] = path::display_name(path);
-			map["TM_FILEPATH"]    = path;
-			map["TM_FILENAME"]    = path::name(path);
-			map["TM_DIRECTORY"]   = path::parent(path);
-		}
-		else
-		{
-			map["TM_DISPLAYNAME"] = "untitled";
-		}
-		return variables_for_path(map, path);
-	}
-	
 } /* file */
