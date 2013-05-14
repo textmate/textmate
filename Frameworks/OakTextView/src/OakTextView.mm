@@ -1002,7 +1002,7 @@ doScroll:
 	if(false) {
 	} HANDLE_ATTR(Value) {
 		AUTO_REFRESH;
-		document->buffer().replace(0, document->buffer().size(), to_s((NSString*)value));
+		document->set_content(to_s((NSString*)value));
 	} HANDLE_ATTR(SelectedText) {
 		AUTO_REFRESH;
 		editor->insert(to_s((NSString*)value));

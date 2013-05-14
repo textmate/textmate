@@ -12,7 +12,7 @@ public:
 		replacements.insert(std::make_pair(text::range_t("1:29-1:40"), "abetarda"));
 		doc->replace(replacements);
 		doc->open();
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), "Lorem ipsum charum sit amet, abetarda adipisicing elit.");
+		TS_ASSERT_EQUALS(doc->content(), "Lorem ipsum charum sit amet, abetarda adipisicing elit.");
 		doc->close();
 	}
 
@@ -26,7 +26,7 @@ public:
 		replacements.insert(std::make_pair(text::range_t("2:1-2:4"), "Jazz"));
 		doc->replace(replacements);
 		doc->open();
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), "Foo\nJazz\nFud\n");
+		TS_ASSERT_EQUALS(doc->content(), "Foo\nJazz\nFud\n");
 		doc->close();
 	}
 

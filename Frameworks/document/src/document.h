@@ -239,6 +239,9 @@ namespace document
 		ng::undo_manager_t& undo_manager ()               { ASSERT(_undo_manager); return *_undo_manager; }
 		ng::undo_manager_t const& undo_manager () const   { ASSERT(_undo_manager); return *_undo_manager; }
 
+		std::string content () const;
+		void set_content (std::string const& str);
+
 		// =============
 		// = Accessors =
 		// =============
@@ -268,9 +271,6 @@ namespace document
 	private:
 		void setup_buffer ();
 		void grammar_did_change ();
-
-		void set_content (io::bytes_ptr const& bytes);
-		std::string content () const                        { ASSERT(_buffer); return _buffer->substr(0, _buffer->size()); }
 
 		void set_modified (bool flag);
 

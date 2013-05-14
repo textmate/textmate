@@ -330,7 +330,7 @@ namespace document
 		document_ptr doc = create();
 		if(fileType != NULL_STR)
 			doc->set_file_type(fileType);
-		doc->set_content(io::bytes_ptr(new io::bytes_t(content)));
+		doc->set_content(content);
 		return doc;
 	}
 
@@ -540,7 +540,7 @@ namespace document
 	void document_t::mark_pristine ()
 	{
 		ASSERT(_buffer);
-		_pristine_buffer = _buffer->substr(0, _buffer->size()); // TODO We should use a cheap ng::detail::storage_t copy
+		_pristine_buffer = content(); // TODO We should use a cheap ng::detail::storage_t copy
 	}
 
 	void document_t::post_load (std::string const& path, io::bytes_ptr content, std::map<std::string, std::string> const& attributes, std::string const& fileType, encoding::type const& encoding)
@@ -992,12 +992,23 @@ namespace document
 		}
 	}
 
-	void document_t::set_content (io::bytes_ptr const& bytes)
+	void document_t::set_content (std::string const& str)
 	{
-		D(DBF_Document, bug("%.*s… (%zu bytes), file type %s\n", std::min<int>(32, bytes->size()), bytes->get(), bytes->size(), _file_type.c_str()););
-		ASSERT(!_buffer);
-		_content = bytes;
+		D(DBF_Document, bug("%.*s… (%zu bytes), file type %s\n", std::min<int>(32, str.size()), str.data(), str.size(), _file_type.c_str()););
+		if(_buffer)
+				_buffer->replace(0, _buffer->size(), str); 
+		else	_content.reset(new io::bytes_t(str));
 	}
+
+	std::string document_t::content () const
+	{
+		if(_buffer)
+			return _buffer->substr(0, _buffer->size());
+		else if(_content)
+			return std::string(_content->begin(), _content->end());
+		return NULL_STR;
+	}
+
 
 	namespace
 	{

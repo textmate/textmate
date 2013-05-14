@@ -383,7 +383,7 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 
 	plist::dictionary_t plist = plist::convert((__bridge CFPropertyListRef)bundleItemProperties);
 
-	std::string const& content = bundleItemContent->buffer().substr(0, bundleItemContent->buffer().size());
+	std::string const& content = bundleItemContent->content();
 	item_info_t const& info = info_for(bundleItem->kind());
 
 	plist::any_t parsedContent;

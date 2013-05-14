@@ -31,8 +31,8 @@ class document_tests : public CxxTest::TestSuite
 		document::document_ptr doc = document::create(path);
 		doc->open();
 		TS_ASSERT_EQUALS(doc->is_open(), true);
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), content);
-		doc->buffer().replace(0, content.size(), "world");
+		TS_ASSERT_EQUALS(doc->content(), content);
+		doc->set_content("world");
 		doc->save();
 		doc->close();
 	}
@@ -78,7 +78,7 @@ public:
 		document::document_ptr doc = document::create(jail.path("mac-roman.txt"));
 		jail.set_content("mac-roman.txt", std::string("\xAE\x62\x6C\x65\x67\x72\xBF\x64", 8));
 		open(doc, "MacRoman");
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), "Æblegrød");
+		TS_ASSERT_EQUALS(doc->content(), "Æblegrød");
 		doc->close();
 	}
 
@@ -88,7 +88,7 @@ public:
 
 		document::document_ptr doc = document::from_content(std::string("\xAE\x62\x6C\x65\x67\x72\xBF\x64", 8));
 		open(doc, "MacRoman");
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), "Æblegrød");
+		TS_ASSERT_EQUALS(doc->content(), "Æblegrød");
 		doc->close();
 	}
 
@@ -99,7 +99,7 @@ public:
 		document::document_ptr doc = document::create(jail.path("cp-1252.txt"));
 		jail.set_content("cp-1252.txt", std::string("\xC6\x62\x6C\x65\x67\x72\xF8\x64", 8));
 		open(doc, "CP1252");
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), "Æblegrød");
+		TS_ASSERT_EQUALS(doc->content(), "Æblegrød");
 		doc->close();
 	}
 
@@ -143,7 +143,7 @@ public:
 		setxattr(jail.path("cp-1252.txt").c_str(), "com.apple.TextEncoding", "UTF-8", 5, 0, 0);
 		bool err = open(doc, "CP1252");
 		TS_ASSERT_EQUALS(err, false);
-		TS_ASSERT_EQUALS(doc->buffer().substr(0, doc->buffer().size()), "Æblegrød");
+		TS_ASSERT_EQUALS(doc->content(), "Æblegrød");
 		doc->close();
 	}
 };

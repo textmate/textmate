@@ -13,7 +13,7 @@ void notify (document::document_ptr doc, int flags, std::string const& path = NU
 
 std::string content (document::document_ptr doc)
 {
-	return doc->buffer().substr(0, doc->buffer().size());
+	return doc->content();
 }
 
 class FileWatchTests : public CxxTest::TestSuite
@@ -60,7 +60,7 @@ public:
 		document::document_ptr doc = document::create(jail.path("file.txt"));
 		doc->open();
 
-		doc->buffer().replace(0, doc->buffer().size(), buffer);
+		doc->set_content(buffer);
 		doc->set_revision(doc->buffer().bump_revision());
 		TS_ASSERT_EQUALS(content(doc), buffer);
 		TS_ASSERT_EQUALS(doc->is_modified(), true);
