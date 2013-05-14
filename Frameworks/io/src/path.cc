@@ -712,73 +712,9 @@ namespace path
 		return NULL_STR;
 	}
 
-	// ==========
-	// = Walker =
-	// ==========
-
-	void walker_t::rebalance () const
-	{
-		while(files.empty() && !paths.empty())
-		{
-			struct dirent** entries;
-			int size = scandir(paths.front().c_str(), &entries, NULL, NULL);
-			if(size != -1)
-			{
-				for(int i = 0; i < size; ++i)
-				{
-					std::string const& name = entries[i]->d_name;
-					if(name != "." && name != "..")
-					{
-						std::string const& path = join(paths.front(), name);
-						if(seen.insert(identifier(path)).second)
-							files.push_back(path);
-					}
-					free(entries[i]);
-				}
-				free(entries);
-			}
-			paths.erase(paths.begin());
-		}
-	}
-
-	void walker_t::push_back (std::string const& dir)
-	{
-		paths.push_back(dir);
-		rebalance();
-	}
-
-	bool walker_t::equal (size_t lhs, size_t rhs) const
-	{
-		if(paths.empty())
-				return std::min(lhs, files.size()) == std::min(rhs, files.size());
-		else	return lhs == rhs;
-	}
-
-	std::string const& walker_t::at (size_t index) const
-	{
-		ASSERT_LT(index, files.size());
-		return files[index];
-	}
-
-	size_t walker_t::advance_from (size_t index) const
-	{
-		if(index + 1 == files.size())
-		{
-			files.clear();
-			rebalance();
-			return 0;
-		}
-		return index + 1;
-	}
-
 	// ===========
 	// = Actions =
 	// ===========
-
-	walker_ptr open_for_walk (std::string const& path, std::string const& glob)
-	{
-		return walker_ptr(new walker_t(path, glob));
-	}
 
 	std::string content (std::string const& path)
 	{

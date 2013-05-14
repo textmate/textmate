@@ -210,26 +210,26 @@ namespace document
 				}
 			}
 
-			path::walker_ptr walker = path::open_for_walk(session_dir());
-			iterate(path, *walker)
+			for(auto dirEntry : path::entries(session_dir()))
 			{
-				std::string const& attr = path::get_attr(*path, "com.macromates.backup.identifier");
+				std::string const path = path::join(session_dir(), dirEntry->d_name);
+				std::string const attr = path::get_attr(path, "com.macromates.backup.identifier");
 				if(attr != NULL_STR && uuid == oak::uuid_t(attr))
 				{
 					document_ptr res = document_ptr(new document_t);
 
 					res->_identifier     = uuid;
-					res->_backup_path    = *path;
+					res->_backup_path    = path;
 
-					res->_path           = path::get_attr(*path, "com.macromates.backup.path");
+					res->_path           = path::get_attr(path, "com.macromates.backup.path");
 					res->_key            = path::identifier_t(res->_path);
-					res->_file_type      = path::get_attr(*path, "com.macromates.backup.file-type");
-					res->_disk_encoding  = path::get_attr(*path, "com.macromates.backup.encoding");
-					res->_disk_bom       = path::get_attr(*path, "com.macromates.backup.bom") == "YES";
-					res->_disk_newlines  = path::get_attr(*path, "com.macromates.backup.newlines");
-					res->_untitled_count = atoi(path::get_attr(*path, "com.macromates.backup.untitled-count").c_str());
-					res->_custom_name    = path::get_attr(*path, "com.macromates.backup.custom-name");
-					res->_modified       = path::get_attr(*path, "com.macromates.backup.modified") == "YES";
+					res->_file_type      = path::get_attr(path, "com.macromates.backup.file-type");
+					res->_disk_encoding  = path::get_attr(path, "com.macromates.backup.encoding");
+					res->_disk_bom       = path::get_attr(path, "com.macromates.backup.bom") == "YES";
+					res->_disk_newlines  = path::get_attr(path, "com.macromates.backup.newlines");
+					res->_untitled_count = atoi(path::get_attr(path, "com.macromates.backup.untitled-count").c_str());
+					res->_custom_name    = path::get_attr(path, "com.macromates.backup.custom-name");
+					res->_modified       = path::get_attr(path, "com.macromates.backup.modified") == "YES";
 
 					add(res);
 					return res;
