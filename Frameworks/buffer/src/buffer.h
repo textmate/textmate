@@ -8,6 +8,7 @@
 #include <text/indent.h>
 #include <scope/scope.h>
 #include <parse/parse.h>
+#include <parse/grammar.h>
 #include <bundles/bundles.h>
 #include <regexp/regexp.h>
 #include <oak/debug.h>
@@ -69,6 +70,7 @@ namespace ng
 		buffer_t (char const* str = NULL);
 		buffer_t (buffer_t const& rhs) = delete;
 		buffer_t& operator= (buffer_t const& rhs) = delete;
+		~buffer_t ();
 
 		size_t size () const;
 		bool empty () const                    { return size() == 0; }
@@ -151,6 +153,23 @@ namespace ng
 
 		oak::callbacks_t<callback_t> _callbacks;
 		std::vector<meta_data_t*> _meta_data;
+
+		// ====================
+		// = Grammar Callback =
+		// ====================
+
+		void grammar_did_change ();
+
+		struct grammar_callback_t : parse::grammar_t::callback_t
+		{
+			grammar_callback_t (buffer_t& buffer) : _buffer(buffer) { }
+			void grammar_did_change ()                              { _buffer.grammar_did_change(); }
+		private:
+			buffer_t& _buffer;
+		};
+
+		parse::grammar_ptr _grammar;
+		grammar_callback_t _grammar_callback;
 
 		// ============
 

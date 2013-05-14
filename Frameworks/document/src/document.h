@@ -3,7 +3,6 @@
 
 #include <buffer/buffer.h>
 #include <undo/undo.h>
-#include <parse/grammar.h>
 #include <plist/uuid.h>
 #include <plist/date.h>
 #include <settings/settings.h>
@@ -50,7 +49,7 @@ namespace document
 	{
 		WATCH_LEAKS(document_t);
 
-		document_t () : _did_load_marks(false), _selection(NULL_STR), _folded(NULL_STR), _visible_rect(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _grammar_callback(*this), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
+		document_t () : _did_load_marks(false), _selection(NULL_STR), _folded(NULL_STR), _visible_rect(NULL_STR), _disable_callbacks(false), _revision(0), _disk_revision(0), _modified(false), _path(NULL_STR), _open_count(0), _has_lru(false), _is_on_disk(false), _recent_tracking(true), _backup_path(NULL_STR), _backup_revision(0), _virtual_path(NULL_STR), _custom_name(NULL_STR), _untitled_count(0), _file_type(NULL_STR), /*_folder(NULL_STR),*/ _disk_encoding(NULL_STR), _disk_newlines(NULL_STR), _disk_bom(false) { }
 		~document_t ();
 
 		bool operator== (document_t const& rhs) const { return _identifier == rhs._identifier; }
@@ -301,17 +300,6 @@ namespace document
 		std::string _virtual_path;
 		std::string _custom_name;
 		mutable size_t _untitled_count;       // this is ≠ 0 if the document is untitled
-
-		struct grammar_callback_t : parse::grammar_t::callback_t
-		{
-			grammar_callback_t (document_t& doc) : _document(doc) { }
-			void grammar_did_change ()                            { _document.grammar_did_change(); }
-		private:
-			document_t& _document;
-		};
-
-		parse::grammar_ptr _grammar;
-		grammar_callback_t _grammar_callback;
 
 		mutable std::string _file_type;       // this may also be in the settings
 		// oak::uuid_t _grammar_uuid;

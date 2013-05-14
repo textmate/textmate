@@ -11,7 +11,7 @@ OAK_DEBUG_VAR(Buffer_Parsing);
 
 namespace ng
 {
-	buffer_t::buffer_t (char const* str) : _revision(0), _next_revision(1), _spelling_language("en")
+	buffer_t::buffer_t (char const* str) : _grammar_callback(*this), _revision(0), _next_revision(1), _spelling_language("en")
 	{
 		_symbols.reset(new symbols_t);   _meta_data.push_back(_symbols.get());
 		_marks.reset(new marks_t);       _meta_data.push_back(_marks.get());
@@ -20,6 +20,12 @@ namespace ng
 
 		if(str)
 			insert(0, str);
+	}
+
+	buffer_t::~buffer_t ()
+	{
+		if(_grammar)
+			_grammar->remove_callback(&_grammar_callback);
 	}
 
 	size_t buffer_t::size () const
@@ -165,6 +171,10 @@ namespace ng
 
 	bool buffer_t::set_grammar (bundles::item_ptr const& grammarItem)
 	{
+		if(_grammar)
+			_grammar->remove_callback(&_grammar_callback);
+		_grammar.reset();
+
 		std::string rootScope = NULL_STR;
 		plist::get_key_path(grammarItem->plist(), bundles::kFieldGrammarScope, rootScope);
 		_scopes.clear();
@@ -172,6 +182,9 @@ namespace ng
 
 		if(parse::grammar_ptr grammar = parse::parse_grammar(grammarItem))
 		{
+			_grammar = grammar;
+			_grammar->add_callback(&_grammar_callback);
+
 			_parser_states.clear();
 			_parser_states.set(-1, grammar->seed());
 
@@ -183,6 +196,11 @@ namespace ng
 			return true;
 		}
 		return false;
+	}
+
+	void buffer_t::grammar_did_change ()
+	{
+		set_grammar(bundles::lookup(_grammar->uuid()));
 	}
 
 	scope::context_t buffer_t::scope (size_t i, bool includeDynamic) const

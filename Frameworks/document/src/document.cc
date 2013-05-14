@@ -451,8 +451,6 @@ namespace document
 	document_t::~document_t ()
 	{
 		D(DBF_Document, bug("%s\n", display_name().c_str()););
-		if(_grammar)
-			_grammar->remove_callback(&_grammar_callback);
 		if(_path != NULL_STR && _buffer)
 			document::marks.set(_path, marks());
 		documents.remove(_identifier, _key);
@@ -507,18 +505,8 @@ namespace document
 		{
 			citerate(item, bundles::query(bundles::kFieldGrammarScope, _file_type, scope::wildcard, bundles::kItemTypeGrammar))
 			{
-				if(parse::grammar_ptr grammar = parse::parse_grammar(*item))
-				{
-					if(_grammar)
-						_grammar->remove_callback(&_grammar_callback);
-
-					_grammar = grammar;
-					_grammar->add_callback(&_grammar_callback);
-
-					_buffer->set_grammar(*item);
-
-					break;
-				}
+				_buffer->set_grammar(*item);
+				break;
 			}
 		}
 
@@ -530,11 +518,6 @@ namespace document
 		const_cast<document_t*>(this)->broadcast(callback_t::did_change_indent_settings);
 
 		D(DBF_Document, bug("done\n"););
-	}
-
-	void document_t::grammar_did_change ()
-	{
-		_buffer->set_grammar(bundles::lookup(_grammar->uuid())); // Preferably we’d pass _grammar to the buffer but then the buffer couldn’t get at the root scope and folding markers. Perhaps this should be exposed by grammar_t, but ideally the buffer itself would setup a callback to be notified about grammar changes. We only moved it to document_t because with a callback, buffer_t can’t get copy constructors for free.
 	}
 
 	void document_t::mark_pristine ()
@@ -864,9 +847,6 @@ namespace document
 
 		check_modified(-1, -1);
 
-		if(_grammar)
-			_grammar->remove_callback(&_grammar_callback);
-		_grammar.reset();
 		_undo_manager.reset();
 		_buffer.reset();
 		_pristine_buffer = NULL_STR;
