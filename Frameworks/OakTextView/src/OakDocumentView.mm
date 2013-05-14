@@ -534,10 +534,7 @@ private:
 - (void)takeGrammarUUIDFrom:(id)sender
 {
 	if(bundles::item_ptr item = bundles::lookup(to_s((NSString*)[sender representedObject])))
-	{
-		document->set_file_type(item->value_for_field(bundles::kFieldGrammarScope));
-		file::set_type(document->virtual_path(), item->value_for_field(bundles::kFieldGrammarScope));
-	}
+		[textView performBundleItem:item];
 }
 
 - (void)goToSymbol:(id)sender
