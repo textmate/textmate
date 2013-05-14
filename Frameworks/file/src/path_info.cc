@@ -38,9 +38,6 @@ namespace file
 		}
 
 		res.push_back(text::format("attr.os-version.%zu.%zu.%zu", oak::os_major(), oak::os_minor(), oak::os_patch()));
-
-		std::string const parentDir = dir == NULL_STR ? path::parent(path) : dir;
-		res.push_back(settings_for_path(path, text::join(res, " "), parentDir).get(kSettingsScopeAttributesKey, ""));
 		res.erase(std::remove(res.begin(), res.end(), ""), res.end());
 		return text::join(res, " ");
 	}
