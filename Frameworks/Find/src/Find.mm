@@ -708,12 +708,7 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 	[self.windowController close];
 }
 
-- (void)didSingleClickResultsOutlineView:(id)sender
-{
-	// This is implicitly handled by outlineViewSelectionDidChange:
-}
-
-- (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
+- (void)openDocumentForSelectedRow:(id)sender
 {
 	NSOutlineView* outlineView = self.windowController.resultsOutlineView;
 	if([outlineView numberOfSelectedRows] == 1)
@@ -722,6 +717,17 @@ static NSAttributedString* AttributedStringForMatch (std::string const& text, si
 		FFMatch* selectedMatch    = [outlineView itemAtRow:selectionIndex];
 		document::show([selectedMatch match].document, _documentSearch.projectIdentifier ? oak::uuid_t(to_s(_documentSearch.projectIdentifier)) : document::kCollectionAny, [selectedMatch match].range, false);
 	}
+}
+
+- (void)didSingleClickResultsOutlineView:(id)sender
+{
+	[self openDocumentForSelectedRow:self];
+}
+
+- (void)outlineViewSelectionDidChange:(NSNotification*)aNotification
+{
+	if([[NSApp currentEvent] type] != NSLeftMouseUp)
+		[self openDocumentForSelectedRow:self];
 }
 
 // ==================
