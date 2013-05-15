@@ -397,6 +397,18 @@ namespace path
 		}
 	}
 
+	bool identifier_t::can_trust_inode () const
+	{
+		if(exists && inode == 999999999) // Zero-length files on FAT file systems share this magic value
+		{
+			struct statfs sfsb;
+			if(statfs(path.c_str(), &sfsb) == 0)
+				return strcasecmp(sfsb.f_fstypename, "msdos") == 0 && strcasecmp(sfsb.f_fstypename, "exfat") == 0;
+			perror("statfs");
+		}
+		return true;
+	}
+
 	bool identifier_t::operator< (identifier_t const& rhs) const
 	{
 		if(path == rhs.path)
@@ -405,15 +417,20 @@ namespace path
 		if(exists == rhs.exists)
 		{
 			if(exists)
-					return device == rhs.device ? inode < rhs.inode : device < rhs.device;
-			else	return path < rhs.path;
+			{
+				if(device != rhs.device)
+					return device < rhs.device;
+				else if(can_trust_inode() && rhs.can_trust_inode())
+					return inode < rhs.inode;
+			}
+			return path < rhs.path;
 		}
 		return !exists && rhs.exists;
 	}
 
 	bool identifier_t::operator== (identifier_t const& rhs) const
 	{
-		return path == rhs.path || (exists && rhs.exists && device == rhs.device && inode == rhs.inode);
+		return path == rhs.path || (exists && rhs.exists && device == rhs.device && inode == rhs.inode && can_trust_inode());
 	}
 
 	bool identifier_t::operator!= (identifier_t const& rhs) const

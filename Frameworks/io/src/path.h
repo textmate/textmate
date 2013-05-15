@@ -42,6 +42,7 @@ namespace path
 		bool operator!= (identifier_t const& rhs) const;
 		explicit operator bool () const { return exists || path != NULL_STR; }
 	private:
+		bool can_trust_inode () const;
 		bool exists;
 		dev_t device;
 		ino_t inode;
