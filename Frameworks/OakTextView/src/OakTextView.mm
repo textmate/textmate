@@ -452,6 +452,9 @@ static std::string shell_quote (std::vector<std::string> paths)
 		delete callback;
 		callback = NULL;
 
+		delete editor->delegate();
+		editor->set_delegate(NULL);
+
 		editor.reset();
 		layout.reset();
 
@@ -473,6 +476,20 @@ static std::string shell_quote (std::vector<std::string> paths)
 		layout->set_is_key(hasFocus);
 
 		callback = new buffer_refresh_callback_t(self);
+
+		struct textview_delegate_t : ng::editor_delegate_t
+		{
+			textview_delegate_t (OakTextView* textView) : _self(textView) { }
+
+			std::map<std::string, std::string> variables_for_bundle_item (bundles::item_ptr item)
+			{
+				return [_self variablesForBundleItem:item];
+			}
+
+			OakTextView* _self;
+		};
+
+		editor->set_delegate(new textview_delegate_t(self));
 
 		editor->set_clipboard(get_clipboard(NSGeneralPboard));
 		editor->set_find_clipboard(get_clipboard(NSFindPboard));
