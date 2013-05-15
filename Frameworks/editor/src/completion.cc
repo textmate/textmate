@@ -89,17 +89,25 @@ namespace ng
 			}
 			env["TM_CURRENT_WORD"] = prefix;
 
-			completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));
-			command::runner_ptr runner = command::runner(cmd, _buffer, _selections, env, delegate);
-			runner->launch();
-			runner->wait();
-
-			if(delegate->result != NULL_STR)
+			bundles::required_command_t failedRequirement;
+			if(missing_requirement(item, env, &failedRequirement))
 			{
-				citerate(line, text::tokenize(delegate->result.begin(), delegate->result.end(), '\n'))
+				fprintf(stderr, "Failed running “%s” due to missing dependency “%s”.\n", cmd.name.c_str(), failedRequirement.command.c_str());
+			}
+			else
+			{
+				completion_command_delegate_ptr delegate(new completion_command_delegate_t(_buffer, _selections));
+				command::runner_ptr runner = command::runner(cmd, _buffer, _selections, env, delegate);
+				runner->launch();
+				runner->wait();
+
+				if(delegate->result != NULL_STR)
 				{
-					if(!(*line).empty())
-						commandResult.push_back(*line);
+					citerate(line, text::tokenize(delegate->result.begin(), delegate->result.end(), '\n'))
+					{
+						if(!(*line).empty())
+							commandResult.push_back(*line);
+					}
 				}
 			}
 		}
