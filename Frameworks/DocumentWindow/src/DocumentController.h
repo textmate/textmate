@@ -82,14 +82,7 @@ PUBLIC @interface DocumentController : NSObject
 - (IBAction)goToSCMDataSource:(id)sender;
 - (IBAction)orderFrontGoToFolder:(id)sender;
 
-// ==============
-// = Legacy API =
-// ==============
-
+// Used by DocumentCommand.mm
 + (instancetype)controllerForDocument:(document::document_ptr const&)aDocument;
 - (void)bundleItemPreExec:(pre_exec::type)preExec completionHandler:(void(^)(BOOL success))callback;
-
-// Private (used by DocumentCommand.mm)
-@property (nonatomic, readonly) NSString* scopeAttributes;
-- (NSString*)untitledSavePath;
 @end
