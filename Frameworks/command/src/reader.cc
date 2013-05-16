@@ -4,7 +4,7 @@
 #include <oak/compat.h>
 #include <cf/callback.h>
 
-namespace io
+namespace command
 {
 	struct reader_server_t
 	{
@@ -184,4 +184,4 @@ namespace io
 		close(read_from_master);
 	}
 
-} /* io */ 
+} /* command */ 

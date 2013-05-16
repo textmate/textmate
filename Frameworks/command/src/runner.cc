@@ -21,7 +21,7 @@ namespace command
 
 	void runner_t::my_process_t::did_exit (int rc)
 	{
-		oak::process_t::did_exit(rc);
+		process_t::did_exit(rc);
 		_callback->did_exit(rc);
 	}
 

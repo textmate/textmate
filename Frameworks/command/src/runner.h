@@ -2,10 +2,10 @@
 #define COMMAND_RUNNER_H_MW7OSOTP
 
 #include "parser.h"
+#include "process.h"
+#include "reader.h"
 #include <buffer/buffer.h>
 #include <selection/selection.h>
-#include <OakSystem/process.h>
-#include <OakSystem/reader.h>
 #include <text/types.h>
 #include <oak/debug.h>
 #include <oak/callbacks.h>
@@ -67,7 +67,7 @@ namespace command
 	private:
 		runner_t (bundle_command_t const& command, ng::buffer_t const& buffer, ng::ranges_t const& selection, std::map<std::string, std::string> const& environment, std::string const& pwd, delegate_ptr delegate);
 
-		struct PUBLIC my_process_t : oak::process_t
+		struct my_process_t : process_t
 		{
 			WATCH_LEAKS(my_process_t);
 
@@ -77,11 +77,11 @@ namespace command
 			runner_t* _callback;
 		};
 
-		struct my_reader_t : io::reader_t
+		struct my_reader_t : reader_t
 		{
 			WATCH_LEAKS(my_reader_t);
 
-			my_reader_t (int fd, runner_ptr callback, bool is_error) : io::reader_t(fd), _callback(callback), _is_error(is_error) { }
+			my_reader_t (int fd, runner_ptr callback, bool is_error) : reader_t(fd), _callback(callback), _is_error(is_error) { }
 			void receive_data (char const* bytes, size_t len);
 		private:
 			runner_ptr _callback;

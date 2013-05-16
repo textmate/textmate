@@ -1,14 +1,14 @@
-#ifndef IO_READER_H_EX4Z6E26
-#define IO_READER_H_EX4Z6E26
+#ifndef READER_H_EX4Z6E26
+#define READER_H_EX4Z6E26
 
 #include <oak/misc.h>
 
-namespace io
+namespace command
 {
 	struct reader_server_t;
 	typedef std::shared_ptr<reader_server_t> reader_server_ptr;
 
-	struct PUBLIC reader_t
+	struct reader_t
 	{
 		reader_t (int fd = -1);
 		virtual ~reader_t ();
@@ -22,6 +22,6 @@ namespace io
 		reader_server_ptr reader_server;
 	};
 
-} /* oak */ 
+} /* command */ 
 
-#endif /* end of include guard: IO_READER_H_EX4Z6E26 */
+#endif /* end of include guard: READER_H_EX4Z6E26 */
