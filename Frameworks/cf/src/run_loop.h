@@ -8,6 +8,8 @@ namespace cf
 	struct PUBLIC run_loop_t
 	{
 		run_loop_t (CFStringRef mode = kCFRunLoopDefaultMode, double timeout = DBL_MAX);
+		run_loop_t (run_loop_t const& rhs) = delete;
+		run_loop_t& operator= (run_loop_t const& rhs) = delete;
 		~run_loop_t ();
 
 		bool start () const; // call from main thread
@@ -16,9 +18,6 @@ namespace cf
 		void set_timeout (double value) { _timeout = value; }
 
 	private:
-		run_loop_t (run_loop_t const& rhs);
-		run_loop_t& operator= (run_loop_t const& rhs);
-
 		CFStringRef _mode;
 		CFRunLoopSourceRef _source;
 		CFRunLoopRef _run_loop;
