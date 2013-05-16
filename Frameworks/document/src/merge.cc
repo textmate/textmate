@@ -1,8 +1,5 @@
 #include "merge.h"
-#include <OakSystem/command.h>
 #include <io/io.h>
-#include <cf/run_loop.h>
-#include <text/format.h>
 
 static std::string save (std::string const& buf)
 {
@@ -21,40 +18,40 @@ static std::string save (std::string const& buf)
 
 std::string merge (std::string const& oldContent, std::string const& myContent, std::string const& yourContent, bool* conflict)
 {
-	struct command_t : oak::command_t
-	{
-		int return_code;
-		cf::run_loop_t run_loop;
-		std::string result;
-
-		void did_exit (int rc, std::string const& output, std::string const& error)
-		{
-			if(rc == 0 || rc == 1)
-				result = output;
-			return_code = rc;
-			run_loop.stop();
-		}
-	};
-
 	std::string oldFile  = save(oldContent);
 	std::string myFile   = save(myContent);
 	std::string yourFile = save(yourContent);
 
 	ASSERT(oldFile != NULL_STR && myFile != NULL_STR && yourFile != NULL_STR);
 
-	command_t cmd;
-	cmd.environment = oak::basic_environment();
-	cmd.command     = text::format("#!/bin/sh\n/usr/bin/diff3 -Em -L 'Local Changes' -L 'Old File' -L 'External Changes' '%s' '%s' '%s'", myFile.c_str(), oldFile.c_str(), yourFile.c_str());
-	cmd.launch();
-	close(cmd.input_fd);
-	cmd.run_loop.start();
+	__block int status = 0;
+	__block std::string output, error;
+
+	if(io::process_t process = io::spawn(std::vector<std::string>{ "/usr/bin/diff3", "-Em", "-LLocal Changes", "-LOld File", "-LExternal Changes", myFile, oldFile, yourFile }, oak::basic_environment()))
+	{
+		close(process.in);
+
+		dispatch_group_t group = dispatch_group_create();
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			io::exhaust_fd(process.out, &output);
+		});
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			io::exhaust_fd(process.err, &error);
+		});
+		dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			if(waitpid(process.pid, &status, 0) != process.pid)
+				perror("waitpid");
+		});
+		dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+		dispatch_release(group);
+
+		if(conflict)
+			*conflict = WIFEXITED(status) && WEXITSTATUS(status) != 0;
+	}
 
 	unlink(oldFile.c_str());
 	unlink(myFile.c_str());
 	unlink(yourFile.c_str());
 
-	if(conflict)
-		*conflict = cmd.return_code != 0;
-
-	return cmd.result;
+	return WIFEXITED(status) ? output : NULL_STR;
 }
