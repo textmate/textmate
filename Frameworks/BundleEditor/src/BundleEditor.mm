@@ -10,6 +10,7 @@
 #import <OakAppKit/OakSound.h>
 #import <OakAppKit/OakFileIconImage.h>
 #import <OakTextView/OakDocumentView.h>
+#import <command/runner.h> // fix_shebang
 #import <plist/ascii.h>
 #import <plist/delta.h>
 #import <text/decode.h>
