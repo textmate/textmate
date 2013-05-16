@@ -6,6 +6,7 @@
 #include <text/ctype.h>
 #include <text/classification.h>
 #include <text/utf8.h>
+#include <text/hexdump.h>
 #include <text/parse.h>
 #include <text/tokenize.h>
 #include <text/trim.h>
@@ -406,7 +407,10 @@ namespace ng
 				if(scriptPath != NULL_STR)
 					unlink(scriptPath.c_str());
 
-				return WIFEXITED(status) && WEXITSTATUS(status) == 0 ? output : error;
+				std::string const& res = WIFEXITED(status) && WEXITSTATUS(status) == 0 ? output : error;
+				if(!utf8::is_valid(res.begin(), res.end()))
+					return text::to_hex(res.begin(), res.end());
+				return res;
 			}
 
 		} callback;
